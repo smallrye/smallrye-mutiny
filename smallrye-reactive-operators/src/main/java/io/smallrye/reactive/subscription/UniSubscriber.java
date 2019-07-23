@@ -4,13 +4,13 @@ import io.smallrye.reactive.Uni;
 
 /**
  * Will receive call to {@link #onSubscribe(UniSubscription)} once after passing an instance of this {@link UniSubscriber}
- * to {@link Uni#subscribe().withSubscriber(UniSubscriber)}. Unlike Reactive Streams Subscriber, {@link UniSubscriber}
- * does not request results.
+ * to {@link io.smallrye.reactive.groups.UniSubscribe#withSubscriber(UniSubscriber)} retrieved from {@link Uni#subscribe()}.
+ * Unlike Reactive Streams Subscriber, {@link UniSubscriber} does not request results.
  * <p>
  * After subscription, it can receive:
  * <ul>
  * <li>a <em>result</em> event triggering {@link #onResult(Object)}. The result can be {@code null}.</li>
- * <li>a <em>failure</em> event triggering {@link #onFailure​(java.lang.Throwable)} which signals an error state.</li>
+ * <li>a <em>failure</em> event triggering {@link #onFailure(Throwable)} which signals an error state.</li>
  * </ul>
  * <p>
  * Once this subscriber receives a result or failure event, no more events will be received.

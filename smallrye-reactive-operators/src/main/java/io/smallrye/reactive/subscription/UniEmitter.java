@@ -34,7 +34,7 @@ public interface UniEmitter<T> {
      * This method allow propagating the cancellation to the source and potentially cleanup resources.
      *
      * <ul>
-     *     <li>Executor: Operate on no particular executor, except if {@link Uni#cancelOn} has been called</li>
+     *     <li>Executor: Operate on no particular executor, except if {//TODO@link Uni#cancelOn} has been called</li>
      * </ul>
      *
      * @param onCancel the action to run on cancellation, must not be {@code null}

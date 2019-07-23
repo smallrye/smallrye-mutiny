@@ -112,6 +112,7 @@ public class UniCreate {
      * {@code null}, a failure event containing a {@link NullPointerException} is fired.
      *
      * @param supplier the result supplier, must not be {@code null}, can produce {@code null}
+     * @param <T> the type of result
      * @return the new {@link Uni}
      */
     public <T> Uni<T> result(Supplier<? extends T> supplier) {
@@ -134,6 +135,7 @@ public class UniCreate {
      * {@code null}) result.
      *
      * @param result the result, can be {@code null}
+     * @param <T> the type of result
      * @return the new {@link Uni}
      */
     public <T> Uni<T> result(T result) {
@@ -269,7 +271,7 @@ public class UniCreate {
      * If the supplier throws an exception, a {@code failure} event is fired with this exception.
      * If the supplier produces {@code null}, a {@code failure} event is fired with a {@link NullPointerException}.
      *
-     * @param supplier the supplier producing the failure, must not be {@code null}, must not produce {@link null}
+     * @param supplier the supplier producing the failure, must not be {@code null}, must not produce {@code null}
      * @param <T>      the virtual type of result used by the {@link Uni}, must be explicitly set as in
      *                 {@code Uni.<String>failed(exception);}
      * @return the produced {@link Uni}

@@ -37,6 +37,7 @@ public class UniZip {
      *
      * @param u1   the first uni, must not be {@code null}
      * @param u2   the second uni, must not be {@code null}
+     * @param <T1> the type of the result for the first uni
      * @param <T2> the type of the result for the second uni
      * @return an {@link UniAndGroup2} to configure the combination
      */
