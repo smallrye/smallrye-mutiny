@@ -1,0 +1,21 @@
+= SmallRye Reactive Operators
+:revnumber: {version}
+:revdate: {localdate}
+:toc: macro
+:toclevels: 4
+:toc-title: SmallRye Reactive Operators
+:doctype: book
+:icons: font
+:docinfo1:
+
+ifndef::ebook-format[:leveloffset: 1]
+
+ifdef::basebackend-html[toc::[]]
+
+:numbered:
+:sectnums:
+:sectnumlevels: 4
+
+
+include::./intro.adoc[]
+include::./types.adoc[]

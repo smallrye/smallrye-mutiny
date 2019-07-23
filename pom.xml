@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>io.smallrye</groupId>
+        <artifactId>smallrye-parent</artifactId>
+        <version>6</version>
+    </parent>
+
+    <groupId>io.smallrye.reactive</groupId>
+    <artifactId>smallrye-reactive-operators-project</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+
+    <name>SmallRye Reactive Operators Project</name>
+    <description>A library to build reactive API</description>
+
+    <inceptionYear>2019</inceptionYear>
+    <organization>
+        <name>SmallRye</name>
+        <url>https://wwww.smallrye.io</url>
+    </organization>
+
+    <licenses>
+        <license>
+            <name>Apache License, Version 2.0</name>
+            <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+            <comments>A business-friendly OSS license</comments>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <id>cescoffier</id>
+            <name>Clement Escoffier</name>
+            <email>clement[AT]apache[DOT]org</email>
+            <url>https://github.com/cescoffier</url>
+        </developer>
+    </developers>
+
+    <scm>
+        <connection>scm:git:git@github.com:smallrye/smallrye-reactive-operators.git</connection>
+        <developerConnection>scm:git:git@github.com:smallrye/smallrye-reactive-operators.git</developerConnection>
+        <url>https://github.com/smallrye/smallrye-reactive-operators</url>
+        <tag>HEAD</tag>
+    </scm>
+
+    <modules>
+        <module>smallrye-reactive-operators</module>    
+    </modules>
+
+    <properties>
+        <asciidoctorj.version>1.5.8.1</asciidoctorj.version>
+        <rxjava2.version>2.2.9</rxjava2.version>
+        <reactor-core.version>3.2.10.RELEASE</reactor-core.version>
+        <microprofile-reactive-streams.version>1.0.0</microprofile-reactive-streams.version>
+        <reactive-streams.version>1.0.2</reactive-streams.version>
+
+        <!-- Used by release plugin to define git tag -->
+        <tagNameFormat>smallrye-reactive-operators-@{project.version}</tagNameFormat>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.reactivestreams</groupId>
+                <artifactId>reactive-streams</artifactId>
+                <version>${reactive-streams.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.reactivex.rxjava2</groupId>
+                <artifactId>rxjava</artifactId>
+                <version>${rxjava2.version}</version>
+            </dependency>                    
+            <dependency>
+                <groupId>io.projectreactor</groupId>
+                <artifactId>reactor-core</artifactId>
+                <version>${reactor-core.version}</version>
+            </dependency>
+            <dependency>
+                 <groupId>org.eclipse.microprofile.reactive-streams-operators</groupId>
+                 <artifactId>microprofile-reactive-streams-operators-api</artifactId>
+            <version>${microprofile-reactive-streams.version}</version>
+        </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <dependencies>        
+        <!-- testing -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.awaitility</groupId>
+            <artifactId>awaitility</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <repositories>
+        <repository>
+            <id>sonatype-snapshots</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>microprofile-snapshots</id>
+            <url>https://repo.eclipse.org/content/repositories/microprofile-snapshots</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-failsafe-plugin</artifactId>
+                    <version>${version.surefire.plugin}</version>
+                </plugin>
+                <plugin>
+                    <groupId>biz.aQute.bnd</groupId>
+                    <artifactId>bnd-maven-plugin</artifactId>
+                    <version>4.2.0</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.jacoco</groupId>
+                    <artifactId>jacoco-maven-plugin</artifactId>
+                    <version>0.8.4</version>
+                    <executions>
+                        <execution>
+                            <id>prepare-agent</id>
+                            <goals>
+                                <goal>prepare-agent</goal>
+                            </goals>
+                            <phase>generate-test-resources</phase>
+                            <configuration>
+                                <destFile>${project.build.directory}/jacoco.exec</destFile>
+                                <propertyName>jacocoArgLine</propertyName>
+                                <append>true</append>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>default-cli</id>
+                        <goals>
+                            <goal>aggregate</goal>
+                        </goals>
+                        <configuration>
+                            <reportOutputDirectory>target/generated-docs/apidocs</reportOutputDirectory>
+                            <excludePackageNames>*.quickstart:*.snippets</excludePackageNames>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+    <profiles>
+        <profile>
+            <id>doc</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.asciidoctor</groupId>
+                        <artifactId>asciidoctor-maven-plugin</artifactId>
+                        <configuration>
+                            <backend>html</backend>
+                            <sourceHighlighter>highlightjs</sourceHighlighter>
+                            <attributes>
+                                <toc>left</toc>
+                                <version>${project.version}</version>
+                            </attributes>
+                            <sourceDirectory>doc</sourceDirectory>
+                            <imagesDir>assets/images</imagesDir>
+                        </configuration>
+                    </plugin>                
+                </plugins>
+                <defaultGoal>generate-resources asciidoctor:process-asciidoc</defaultGoal>
+            </build>
+        </profile>
+
+        <profile>
+            <id>release</id>
+            <activation>
+                <property>
+                    <name>!release.maven.bug.always.be.active</name>
+                </property>
+            </activation>
+            <modules>
+                <module>release</module>
+            </modules>
+        </profile>
+    </profiles>
+</project>

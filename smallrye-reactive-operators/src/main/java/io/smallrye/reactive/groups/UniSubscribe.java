@@ -1,0 +1,85 @@
+package io.smallrye.reactive.groups;
+
+
+import io.smallrye.reactive.Uni;
+import io.smallrye.reactive.helpers.UniCallbackSubscriber;
+import io.smallrye.reactive.operators.AbstractUni;
+import io.smallrye.reactive.operators.UniSerializedSubscriber;
+import io.smallrye.reactive.operators.UniSubscribeToCompletionStage;
+import io.smallrye.reactive.subscription.UniSubscriber;
+import io.smallrye.reactive.subscription.UniSubscription;
+
+import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
+
+import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
+
+/**
+ * Allow subscribing to a {@link Uni} to be notified of the different events coming from {@code upstream}.
+ * Two kind of events can be received:
+ * <ul>
+ * <li>{@code result} - the result of the {@link Uni}, can be {@code null}</li>
+ * <li>{@code failure} - the failure propagated by the {@link Uni}</li>
+ * </ul>
+ *
+ * @param <T> the type of result
+ */
+public class UniSubscribe<T> {
+
+    private final AbstractUni<T> upstream;
+
+    public UniSubscribe(AbstractUni<T> upstream) {
+        this.upstream = nonNull(upstream, "upstream");
+    }
+
+    /**
+     * Requests the {@link Uni} to start computing the result.
+     * <p>
+     * This is a "factory method" and can be called multiple times, each time starting a new {@link UniSubscription}.
+     * Each {@link UniSubscription} will work for only a single {@link UniSubscriber}. A {@link UniSubscriber} should
+     * only subscribe once to a single {@link Uni}.
+     * <p>
+     * If the {@link Uni} rejects the subscription attempt or otherwise fails it will fire a {@code failure} event
+     * receiving by {@link UniSubscriber#onFailure(Throwable)}.
+     *
+     * @param subscriber the subscriber, must not be {@code null}
+     * @return the passed subscriber
+     */
+    public <S extends UniSubscriber<? super T>> S withSubscriber(S subscriber) {
+        UniSerializedSubscriber.subscribe(upstream, nonNull(subscriber, "subscriber"));
+        return subscriber;
+    }
+
+    /**
+     * Like {@link #withSubscriber(UniSubscriber)} with creating an artificial {@link UniSubscriber} calling the
+     * {@code onResult} and {@code onFailure} callbacks when the events are received.
+     * <p>
+     * Unlike {@link #withSubscriber(UniSubscriber)}, this method returns the subscription that can be used to cancel
+     * the subscription.
+     *
+     * @param onResultCallback  callback invoked when the a result event is received, potentially called w
+     *                          ith {@code null} is received. The callback must not be {@code null}
+     * @param onFailureCallback callback invoked when a failure event is received, must not be {@code null}
+     * @return the subscription
+     */
+    public UniSubscription with(Consumer<? super T> onResultCallback, Consumer<? super Throwable> onFailureCallback) {
+        UniCallbackSubscriber<T> subscriber = new UniCallbackSubscriber<>(
+                nonNull(onResultCallback, "onResultCallback"),
+                nonNull(onFailureCallback, "onFailureCallback")
+        );
+        withSubscriber(subscriber);
+        return subscriber;
+    }
+
+    /**
+     * Like {@link #withSubscriber(UniSubscriber)} but provides a {@link CompletableFuture} to retrieve the completed
+     * result (potentially {@code null}) and allow chaining operations.
+     *
+     * @return a {@link CompletableFuture} to retrieve the result and chain operations on the resolved result or
+     * failure. The returned {@link CompletableFuture} can also be used to cancel the computation.
+     */
+    public CompletableFuture<T> asCompletionStage() {
+        return UniSubscribeToCompletionStage.subscribe(upstream);
+    }
+
+}

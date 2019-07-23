@@ -1,0 +1,54 @@
+== Uni and Multi
+
+SmallRye Reactive Operators proposes 2 types:
+
+* `Uni` for operations returning 1 result, potentially `null`
+* `Multi` for operations returning multiple results
+
+=== Subscription pattern
+
+Both `Uni` and `Multi` use a subscription pattern.
+It means that the computation only starts when there is a _subscriber_ interested by the result(s).
+
+[upstream, java]
+----
+Uni<String> uni = callMyHttpService();
+// The HTTP service has not been called at this point
+uni.subscribe().with(
+    result -> System.out.println(result),
+    failure -> failure.printStackTrace();
+)
+// The HTTP service has been called, when the result is available the first callback is called.
+// If something bad happens, the failure callback is called.
+----
+
+=== Event-Driven API
+
+The `Uni` and `Multi` types focus on the _event-driven_ nature of reactive.
+The types let's you describe the behavior you want _on_ the different events.
+
+For example, to attach some behavior when you receive a result, you would use: `uni.onResult().mapResultTo(i -> i++)`
+To recover from a failure, you would use: `multi.onFailure().recoverWithMulti(myFallback)`
+
+=== Events
+
+There are 6 kind of events.
+
+Three events comes from _upstream_:
+* `onResult` : a result has been received (uni (called at most once) and multi)
+* `onFailure` : a failure has been received (uni and multi, called at most once)
+* `onCompletion`: the stream has reach its end, no more result will be emitted (multi only, called at most once)
+
+These events are emitted by observed _upstream_ `uni` or `multi`.
+
+Three events follow a from _downstream_:
+
+* `onSubscription`: a subscriber is asking for result(s)
+* `onCancellation`: a subscriber is not interested anymore
+* `onRequest`: a subscriber informs that it can handle a specific amount of result (multi only)
+
+=== Relation with Reactive Streams
+
+SmallRye Reactive Operators reuse and even rely on Reactive Streams.
+Some of the events are directly mapped from Reactive Streams _signals_.
+But, only `Multi` implements the Reactive Streams `Publisher`.
