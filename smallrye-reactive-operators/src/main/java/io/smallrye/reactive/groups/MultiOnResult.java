@@ -1,8 +1,6 @@
 package io.smallrye.reactive.groups;
 
-import io.reactivex.Flowable;
 import io.smallrye.reactive.Multi;
-import io.smallrye.reactive.operators.AbstractMulti;
 import io.smallrye.reactive.operators.MultiMapOnResult;
 
 import java.util.function.Function;
@@ -26,6 +24,7 @@ public class MultiOnResult<T> {
      * <p>
      *
      * @param mapper the mapper function, must not be {@code null}
+     * @param <R>    the type of result produced by the mapper function
      * @return the new {@link Multi}
      */
     public <R> Multi<R> mapToResult(Function<? super T, ? extends R> mapper) {

@@ -122,6 +122,7 @@ public class MultiCreate {
      * If the supplier throws an exception, a failure event with the exception  is fired.
      *
      * @param supplier the result supplier, must not be {@code null}, can produce {@code null}
+     * @param <T>      the type of result emitted by the produced Multi
      * @return the new {@link Multi}
      */
     public <T> Multi<T> result(Supplier<? extends T> supplier) {
@@ -155,6 +156,7 @@ public class MultiCreate {
      * the stream is consumed sequentially.
      *
      * @param supplier the result supplier, must not be {@code null}, must not produce {@code null}
+     * @param <T>      the type of result emitted by the produced Multi
      * @return the new {@link Multi}
      */
     public <T> Multi<T> results(Supplier<? extends Stream<? extends T>> supplier) {
@@ -196,6 +198,7 @@ public class MultiCreate {
      * the completion event.
      *
      * @param result the result, can be {@code null} which would create an empty {@link Multi}
+     * @param <T>    the type of result emitted by the produced Multi
      * @return the new {@link Multi}
      */
     public <T> Multi<T> result(T result) {
@@ -212,6 +215,7 @@ public class MultiCreate {
      * When all the results have been emitted, the completion event is fired.
      *
      * @param results the results, must not be {@code null}, must not contain {@code null}
+     * @param <T>     the type of result emitted by the produced Multi
      * @return the new {@link Multi}
      */
     @SafeVarargs
@@ -229,6 +233,7 @@ public class MultiCreate {
      * When all the results have been emitted, the completion event is fired.
      *
      * @param results the results, must not be {@code null}, must not contain {@code null}
+     * @param <T>     the type of result emitted by the produced Multi
      * @return the new {@link Multi}
      */
     public <T> Multi<T> results(Iterable<T> results) {
@@ -246,6 +251,7 @@ public class MultiCreate {
      * The stream is consumed sequentially.
      *
      * @param results the results, must not be {@code null}, must not contain {@code null}
+     * @param <T>     the type of result emitted by the produced Multi
      * @return the new {@link Multi}
      */
     public <T> Multi<T> results(Stream<T> results) {
@@ -289,6 +295,10 @@ public class MultiCreate {
 
     /**
      * Like {@link #emitter(Consumer, BackPressureStrategy)} with the {@link BackPressureStrategy#BUFFER} strategy.
+     *
+     * @param consumer the consumer receiving the emitter, must not be {@code null}
+     * @param <T>      the type of result emitted by the produced Multi
+     * @return the produced {@link Multi}
      */
     public <T> Multi<T> emitter(Consumer<MultiEmitter<? super T>> consumer) {
         return emitter(consumer, BackPressureStrategy.BUFFER);
@@ -360,7 +370,7 @@ public class MultiCreate {
      * If the supplier throws an exception, a {@code failure} event is fired with this exception.
      * If the supplier produces {@code null}, a {@code failure} event is fired with a {@link NullPointerException}.
      *
-     * @param supplier the supplier producing the failure, must not be {@code null}, must not produce {@link null}
+     * @param supplier the supplier producing the failure, must not be {@code null}, must not produce {@code null}
      * @param <T>      the virtual type of result used by the {@link Multi}, must be explicitly set as in
      *                 {@code Multi.<String>failed(exception);}
      * @return the produced {@link Multi}

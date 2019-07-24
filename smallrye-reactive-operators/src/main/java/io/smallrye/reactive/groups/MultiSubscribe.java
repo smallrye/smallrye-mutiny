@@ -29,6 +29,7 @@ public class MultiSubscribe<T> {
      * receiving by {@link UniSubscriber#onFailure(Throwable)}.
      *
      * @param subscriber the subscriber, must not be {@code null}
+     * @param <S>        the subscriber type
      * @return the passed subscriber
      */
     @SuppressWarnings("SubscriberImplementation")
