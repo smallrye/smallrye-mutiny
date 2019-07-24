@@ -102,7 +102,7 @@ public class UniOrTest {
     @Test(timeout = 1000)
     public void testBlockingWithDelay() {
         Uni<Integer> uni1 = Uni.createFrom().nullValue()
-                .onResult().delayIt().onExecutor(executor).by(Duration.ofMillis(100))
+                .onResult().delayIt().onExecutor(executor).by(Duration.ofMillis(500))
                 .map(x -> 1);
         Uni<Integer> uni2 = Uni.createFrom().nullValue()
                 .onResult().delayIt().onExecutor(executor).by(Duration.ofMillis(50))
