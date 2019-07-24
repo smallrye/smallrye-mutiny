@@ -58,7 +58,7 @@ public class UniCreate {
      * created by invoking the passed {@link Supplier} <strong>lazily</strong> at subscription time.
      * <p>
      * The produced {@code Uni} emits the result of the passed  {@link CompletionStage}. If the {@link CompletionStage}
-     * never completes (or failed), the produced {@link Uni} would not emit a value or a failure.
+     * never completes (or failed), the produced {@link Uni} would not emit a result or a failure.
      * <p>
      * Cancelling the subscription on the produced {@link Uni} cancels the passed {@link CompletionStage}
      * (calling {@link CompletableFuture#cancel(boolean)} on the future retrieved using
@@ -104,7 +104,7 @@ public class UniCreate {
 
     /**
      * Creates a new {@link Uni} that completes immediately after being subscribed to with the specified (potentially
-     * {@code null}) value. The value is retrieved <strong>lazily</strong> at subscription time, using the passed
+     * {@code null}) value. The result is retrieved <strong>lazily</strong> at subscription time, using the passed
      * {@link Supplier}. Unlike {@link #deferred(Supplier)}, the supplier produces a result and not an {@link Uni}.
      * <p>
      * If the supplier produces {@code null}, {@code null} is used as result event.
@@ -242,12 +242,12 @@ public class UniCreate {
      * {@code null}, a failure event containing a {@link NullPointerException} is fired.
      *
      * @param supplier the supplier, must not be {@code null}, must not produce {@code null}
-     * @param <T>      the type of item
+     * @param <T>      the type of result
      * @return the produced {@link Uni}
      */
     public <T> Uni<T> deferred(Supplier<? extends Uni<? extends T>> supplier) {
         Supplier<? extends Uni<? extends T>> actual = nonNull(supplier, "supplier");
-        return new UniCreateFromDefferedSupplier<>(actual);
+        return new UniCreateFromDeferredSupplier<>(actual);
     }
 
     /**

@@ -35,7 +35,7 @@ public class UniOnResultDelayTest {
     @Test
     public void testDelayOnResultWithDefaultExecutor() {
         long begin = System.currentTimeMillis();
-        AssertSubscriber<Void> subscriber = AssertSubscriber.create();
+        UniAssertSubscriber<Void> subscriber = UniAssertSubscriber.create();
         Uni.createFrom().nullValue().onResult().delayIt()
                 .by(Duration.ofMillis(100)).subscribe().withSubscriber(subscriber);
         subscriber.await();
@@ -62,7 +62,7 @@ public class UniOnResultDelayTest {
     @Test
     public void testDelayOnResult() {
         long begin = System.currentTimeMillis();
-        AssertSubscriber<Void> subscriber = AssertSubscriber.create();
+        UniAssertSubscriber<Void> subscriber = UniAssertSubscriber.create();
         delayed.subscribe().withSubscriber(subscriber);
         subscriber.await();
         long end = System.currentTimeMillis();
@@ -74,7 +74,7 @@ public class UniOnResultDelayTest {
     @Test
     public void testThatDelayDoNotImpactFailures() {
         long begin = System.currentTimeMillis();
-        AssertSubscriber<Void> subscriber = AssertSubscriber.create();
+        UniAssertSubscriber<Void> subscriber = UniAssertSubscriber.create();
         Uni.createFrom().<Void>failure(new Exception("boom")).onResult().delayIt()
                 .onExecutor(executor)
                 .by(Duration.ofMillis(100)).
@@ -97,7 +97,7 @@ public class UniOnResultDelayTest {
             }
         };
 
-        AssertSubscriber<Integer> subscriber = new AssertSubscriber<>(true);
+        UniAssertSubscriber<Integer> subscriber = new UniAssertSubscriber<>(true);
         Uni.createFrom().result(1).onResult().delayIt().onExecutor(executor).by(Duration.ofMillis(100)).subscribe().withSubscriber(subscriber);
         subscriber.assertNotCompleted();
         assertThat(called).isFalse();
@@ -106,7 +106,7 @@ public class UniOnResultDelayTest {
     @Test
     public void testRejectedScheduling() {
         executor.shutdown();
-        AssertSubscriber<Integer> subscriber = new AssertSubscriber<>();
+        UniAssertSubscriber<Integer> subscriber = new UniAssertSubscriber<>();
         Uni.createFrom().result(1).onResult().delayIt()
                 .onExecutor(executor)
                 .by(Duration.ofMillis(100)).subscribe().withSubscriber(subscriber);
@@ -136,7 +136,7 @@ public class UniOnResultDelayTest {
             }
         };
 
-        AssertSubscriber<Integer> subscriber = new AssertSubscriber<>();
+        UniAssertSubscriber<Integer> subscriber = new UniAssertSubscriber<>();
         Uni.createFrom().result(1).onResult().delayIt()
                 .onExecutor(executor)
                 .by(Duration.ofMillis(100)).subscribe().withSubscriber(subscriber);

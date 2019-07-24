@@ -20,10 +20,10 @@ public class UniOnResultFail {
         AtomicInteger count = new AtomicInteger();
         Uni<Integer> uni = one.onResult().failWith(s -> new IOException(Integer.toString(s + count.getAndIncrement())));
         uni
-                .subscribe().withSubscriber(AssertSubscriber.<Number>create())
+                .subscribe().withSubscriber(UniAssertSubscriber.<Number>create())
                 .assertFailure(IOException.class, "1");
         uni
-                .subscribe().withSubscriber(AssertSubscriber.<Number>create())
+                .subscribe().withSubscriber(UniAssertSubscriber.<Number>create())
                 .assertFailure(IOException.class, "2");
     }
 

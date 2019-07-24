@@ -15,14 +15,14 @@ public class UniOnResultFlatMapTest {
 
     @Test
     public void testFlatMapWithImmediateValue() {
-        AssertSubscriber<Integer> test = AssertSubscriber.create();
+        UniAssertSubscriber<Integer> test = UniAssertSubscriber.create();
         Uni.createFrom().result(1).onResult().mapToUni(v -> Uni.createFrom().result(2)).subscribe().withSubscriber(test);
         test.assertCompletedSuccessfully().assertResult(2).assertNoFailure();
     }
 
     @Test
     public void testWithImmediateCancellation() {
-        AssertSubscriber<Integer> test = new AssertSubscriber<>(true);
+        UniAssertSubscriber<Integer> test = new UniAssertSubscriber<>(true);
         AtomicBoolean called = new AtomicBoolean();
         Uni.createFrom().result(1).onResult().mapToUni(v -> {
             called.set(true);
@@ -34,8 +34,8 @@ public class UniOnResultFlatMapTest {
 
     @Test
     public void testWithADeferredUi() {
-        AssertSubscriber<Integer> test1 = AssertSubscriber.create();
-        AssertSubscriber<Integer> test2 = AssertSubscriber.create();
+        UniAssertSubscriber<Integer> test1 = UniAssertSubscriber.create();
+        UniAssertSubscriber<Integer> test2 = UniAssertSubscriber.create();
         AtomicInteger count = new AtomicInteger(2);
         Uni<Integer> uni = Uni.createFrom().result(1).onResult().mapToUni(v -> Uni.createFrom().deferred(() -> Uni.createFrom().result(count.incrementAndGet())));
         uni.subscribe().withSubscriber(test1);
@@ -46,7 +46,7 @@ public class UniOnResultFlatMapTest {
 
     @Test
     public void testWithAnUniResolvedAsynchronously() {
-        AssertSubscriber<Integer> test = AssertSubscriber.create();
+        UniAssertSubscriber<Integer> test = UniAssertSubscriber.create();
         Uni<Integer> uni = Uni.createFrom().result(1).onResult().mapToUni(v -> Uni.createFrom().emitter(emitter -> new Thread(() -> emitter.result(42)).start()));
         uni.subscribe().withSubscriber(test);
         test.await().assertCompletedSuccessfully().assertResult(42).assertNoFailure();
@@ -54,7 +54,7 @@ public class UniOnResultFlatMapTest {
 
     @Test
     public void testWithAnUniResolvedAsynchronouslyWithAFailure() {
-        AssertSubscriber<Integer> test = AssertSubscriber.create();
+        UniAssertSubscriber<Integer> test = UniAssertSubscriber.create();
         Uni<Integer> uni = Uni.createFrom().result(1).onResult().mapToUni(v -> Uni.createFrom().emitter(emitter -> new Thread(() -> emitter.failure(new IOException("boom"))).start()));
         uni.subscribe().withSubscriber(test);
         test.await().assertCompletedWithFailure().assertFailure(IOException.class, "boom");
@@ -62,7 +62,7 @@ public class UniOnResultFlatMapTest {
 
     @Test
     public void testThatMapperIsNotCalledOnUpstreamFailure() {
-        AssertSubscriber<Integer> test = AssertSubscriber.create();
+        UniAssertSubscriber<Integer> test = UniAssertSubscriber.create();
         AtomicBoolean called = new AtomicBoolean();
         Uni.createFrom().failure(new Exception("boom")).onResult().mapToUni(v -> {
             called.set(true);
@@ -74,7 +74,7 @@ public class UniOnResultFlatMapTest {
 
     @Test
     public void testWithAMapperThrowingAnException() {
-        AssertSubscriber<Integer> test = AssertSubscriber.create();
+        UniAssertSubscriber<Integer> test = UniAssertSubscriber.create();
         AtomicBoolean called = new AtomicBoolean();
         Uni.createFrom().result(1)
             .onResult().<Integer>mapToUni(v -> {
@@ -88,7 +88,7 @@ public class UniOnResultFlatMapTest {
 
     @Test
     public void testWithAMapperReturningNull() {
-        AssertSubscriber<Integer> test = AssertSubscriber.create();
+        UniAssertSubscriber<Integer> test = UniAssertSubscriber.create();
         AtomicBoolean called = new AtomicBoolean();
         Uni.createFrom().result(1)
                 .onResult().<Integer>mapToUni(v -> {
@@ -106,7 +106,7 @@ public class UniOnResultFlatMapTest {
 
     @Test
     public void testWithCancellationBeforeEmission() {
-        AssertSubscriber<Integer> test = AssertSubscriber.create();
+        UniAssertSubscriber<Integer> test = UniAssertSubscriber.create();
         AtomicBoolean cancelled = new AtomicBoolean();
         @SuppressWarnings("unchecked")
         CompletableFuture<Integer> future = new CompletableFuture() {

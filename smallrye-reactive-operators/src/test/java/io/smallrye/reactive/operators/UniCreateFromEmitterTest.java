@@ -29,7 +29,7 @@ public class UniCreateFromEmitterTest {
             emitter.result(2);
             emitter.result(null);
         });
-        AssertSubscriber<Integer> subscriber = AssertSubscriber.create();
+        UniAssertSubscriber<Integer> subscriber = UniAssertSubscriber.create();
         uni.subscribe().withSubscriber(subscriber);
 
         subscriber.assertCompletedSuccessfully().assertResult(1);
@@ -39,7 +39,7 @@ public class UniCreateFromEmitterTest {
 
     @Test
     public void testWithOnCancellationAction() {
-        AssertSubscriber<Integer> subscriber = AssertSubscriber.create();
+        UniAssertSubscriber<Integer> subscriber = UniAssertSubscriber.create();
         AtomicInteger onCancellationCalled = new AtomicInteger();
         Uni.createFrom().<Integer>emitter(emitter ->
                 emitter.onCancellation(onCancellationCalled::incrementAndGet)).subscribe().withSubscriber(subscriber);
@@ -51,7 +51,7 @@ public class UniCreateFromEmitterTest {
 
     @Test
     public void testWithCancellation() {
-        AssertSubscriber<Integer> subscriber = AssertSubscriber.create();
+        UniAssertSubscriber<Integer> subscriber = UniAssertSubscriber.create();
         AtomicInteger onCancellationCalled = new AtomicInteger();
         Uni.createFrom().<Integer>emitter(emitter -> emitter.onCancellation(onCancellationCalled::incrementAndGet)).subscribe().withSubscriber(subscriber);
 
@@ -62,7 +62,7 @@ public class UniCreateFromEmitterTest {
 
     @Test
     public void testWithFailure() {
-        AssertSubscriber<Integer> subscriber = AssertSubscriber.create();
+        UniAssertSubscriber<Integer> subscriber = UniAssertSubscriber.create();
         Uni.createFrom().<Integer>emitter(emitter -> emitter.failure(new Exception("boom"))).subscribe().withSubscriber(subscriber);
 
         subscriber.assertFailure(Exception.class, "boom");
@@ -70,7 +70,7 @@ public class UniCreateFromEmitterTest {
 
     @Test
     public void testWhenTheCallbackThrowsAnException() {
-        AssertSubscriber<Integer> subscriber = AssertSubscriber.create();
+        UniAssertSubscriber<Integer> subscriber = UniAssertSubscriber.create();
         Uni.createFrom().<Integer>emitter(emitter -> {
             throw new NullPointerException("boom");
         }).subscribe().withSubscriber(subscriber);
@@ -81,7 +81,7 @@ public class UniCreateFromEmitterTest {
 
     @Test
     public void testThatEmitterIsDisposed() {
-        AssertSubscriber<Void> subscriber = AssertSubscriber.create();
+        UniAssertSubscriber<Void> subscriber = UniAssertSubscriber.create();
         AtomicReference<UniEmitter<? super Void>> reference = new AtomicReference<>();
         Uni.createFrom().<Void>emitter(emitter -> {
             reference.set(emitter);
@@ -94,7 +94,7 @@ public class UniCreateFromEmitterTest {
 
     @Test
     public void testThatFailuresCannotBeNull() {
-        AssertSubscriber<Integer> subscriber = AssertSubscriber.create();
+        UniAssertSubscriber<Integer> subscriber = UniAssertSubscriber.create();
         Uni.createFrom().<Integer>emitter(emitter -> emitter.failure(null)).subscribe().withSubscriber(subscriber);
 
         subscriber.assertFailure(IllegalArgumentException.class, "");

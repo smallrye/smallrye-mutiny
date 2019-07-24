@@ -23,17 +23,17 @@ public class UniAndTest {
         Uni<Integer> uni = Uni.createFrom().result(1);
         Uni<Integer> uni2 = Uni.createFrom().result(2);
 
-        AssertSubscriber<Pair<Integer, Integer>> subscriber =
-                uni.and().uni(uni2).asPair().subscribe().withSubscriber(AssertSubscriber.create());
+        UniAssertSubscriber<Pair<Integer, Integer>> subscriber =
+                uni.and().uni(uni2).asPair().subscribe().withSubscriber(UniAssertSubscriber.create());
 
         assertThat(subscriber.getResult().asList()).containsExactly(1, 2);
     }
 
     @Test
     public void testWithTwoOneFailure() {
-        AssertSubscriber<Pair<Integer, Integer>> subscriber =
+        UniAssertSubscriber<Pair<Integer, Integer>> subscriber =
                 Uni.createFrom().result(1).and().uni(Uni.createFrom().<Integer>failure(new IOException("boom"))).asPair()
-                        .subscribe().withSubscriber(AssertSubscriber.create());
+                        .subscribe().withSubscriber(UniAssertSubscriber.create());
         subscriber.assertFailure(IOException.class, "boom");
     }
 
@@ -45,13 +45,13 @@ public class UniAndTest {
 
     @Test
     public void testWithTwoFailures() {
-        AssertSubscriber<Tuple3<Integer, Integer, Integer>> subscriber =
+        UniAssertSubscriber<Tuple3<Integer, Integer, Integer>> subscriber =
                 Uni.createFrom().result(1).and().unis(
                         Uni.createFrom().<Integer>failure(new IOException("boom")),
                         Uni.createFrom().<Integer>failure(new IOException("boom 2")))
                         .awaitCompletion()
                         .asTuple()
-                        .subscribe().withSubscriber(AssertSubscriber.create());
+                        .subscribe().withSubscriber(UniAssertSubscriber.create());
         subscriber.assertCompletedWithFailure()
                 .assertFailure(CompositeException.class, "boom")
                 .assertFailure(CompositeException.class, "boom 2");
@@ -62,10 +62,10 @@ public class UniAndTest {
         Uni<Integer> uni1 = Uni.createFrom().result(1);
         Uni<Integer> uni2 = Uni.createFrom().result(2);
         Uni<Integer> uni3 = Uni.createFrom().result(3);
-        AssertSubscriber<Integer> subscriber =
+        UniAssertSubscriber<Integer> subscriber =
                 uni1.and().unis(uni2, uni3)
                         .combinedWith((i1, i2, i3) -> i1 + i2 + i3)
-                        .subscribe().withSubscriber(AssertSubscriber.create());
+                        .subscribe().withSubscriber(UniAssertSubscriber.create());
         subscriber.await().assertResult(6);
     }
 
@@ -73,7 +73,7 @@ public class UniAndTest {
     public void testTerminationJoin() {
         Uni<Void> uni = Uni.createFrom().result(1).and(Uni.createFrom().result("hello")).onResult().ignoreIt().andContinueWithNull();
 
-        uni.subscribe().withSubscriber(AssertSubscriber.create())
+        uni.subscribe().withSubscriber(UniAssertSubscriber.create())
                 .assertCompletedSuccessfully()
                 .assertResult(null);
     }
@@ -85,8 +85,8 @@ public class UniAndTest {
         Uni<Integer> uni3 = Uni.createFrom().result(3);
         Uni<Integer> uni4 = Uni.createFrom().result(4);
 
-        AssertSubscriber<Tuple5<Integer, Integer, Integer, Integer, Integer>> subscriber =
-                uni.and().unis(uni, uni2, uni3, uni4).asTuple().subscribe().withSubscriber(AssertSubscriber.create());
+        UniAssertSubscriber<Tuple5<Integer, Integer, Integer, Integer, Integer>> subscriber =
+                uni.and().unis(uni, uni2, uni3, uni4).asTuple().subscribe().withSubscriber(UniAssertSubscriber.create());
 
         assertThat(subscriber.getResult().asList()).containsExactly(1, 1, 2, 3, 4);
     }
@@ -97,8 +97,8 @@ public class UniAndTest {
         Uni<Integer> uni2 = Uni.createFrom().result(2);
         Uni<Integer> uni3 = Uni.createFrom().result(3);
 
-        AssertSubscriber<Tuple4<Integer, Integer, Integer, Integer>> subscriber =
-                uni.and().unis(uni, uni2, uni3).asTuple().subscribe().withSubscriber(AssertSubscriber.create());
+        UniAssertSubscriber<Tuple4<Integer, Integer, Integer, Integer>> subscriber =
+                uni.and().unis(uni, uni2, uni3).asTuple().subscribe().withSubscriber(UniAssertSubscriber.create());
 
         assertThat(subscriber.getResult().asList()).containsExactly(1, 1, 2, 3);
     }

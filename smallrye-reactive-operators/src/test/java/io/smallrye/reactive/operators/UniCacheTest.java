@@ -27,9 +27,9 @@ public class UniCacheTest {
         AtomicInteger counter = new AtomicInteger();
         Uni<Integer> cache = Uni.createFrom().result(counter.incrementAndGet()).cache();
 
-        AssertSubscriber<Integer> sub1 = AssertSubscriber.create();
-        AssertSubscriber<Integer> sub2 = AssertSubscriber.create();
-        AssertSubscriber<Integer> sub3 = AssertSubscriber.create();
+        UniAssertSubscriber<Integer> sub1 = UniAssertSubscriber.create();
+        UniAssertSubscriber<Integer> sub2 = UniAssertSubscriber.create();
+        UniAssertSubscriber<Integer> sub3 = UniAssertSubscriber.create();
 
         cache.subscribe().withSubscriber(sub1);
         cache.subscribe().withSubscriber(sub2);
@@ -45,9 +45,9 @@ public class UniCacheTest {
         AtomicInteger counter = new AtomicInteger();
         Uni<Object> cache = Uni.createFrom().failure(new Exception("" + counter.getAndIncrement())).cache();
 
-        AssertSubscriber<Object> sub1 = AssertSubscriber.create();
-        AssertSubscriber<Object> sub2 = AssertSubscriber.create();
-        AssertSubscriber<Object> sub3 = AssertSubscriber.create();
+        UniAssertSubscriber<Object> sub1 = UniAssertSubscriber.create();
+        UniAssertSubscriber<Object> sub2 = UniAssertSubscriber.create();
+        UniAssertSubscriber<Object> sub3 = UniAssertSubscriber.create();
 
         cache.subscribe().withSubscriber(sub1);
         cache.subscribe().withSubscriber(sub2);
@@ -63,9 +63,9 @@ public class UniCacheTest {
         CompletableFuture<Integer> cs = new CompletableFuture<>();
         Uni<Integer> cache = Uni.createFrom().completionStage(cs).cache();
 
-        AssertSubscriber<Integer> sub1 = AssertSubscriber.create();
-        AssertSubscriber<Integer> sub2 = AssertSubscriber.create();
-        AssertSubscriber<Integer> sub3 = AssertSubscriber.create();
+        UniAssertSubscriber<Integer> sub1 = UniAssertSubscriber.create();
+        UniAssertSubscriber<Integer> sub2 = UniAssertSubscriber.create();
+        UniAssertSubscriber<Integer> sub3 = UniAssertSubscriber.create();
 
         cache.subscribe().withSubscriber(sub1);
         cache.subscribe().withSubscriber(sub2);
@@ -84,9 +84,9 @@ public class UniCacheTest {
         CompletableFuture<Integer> cs = new CompletableFuture<>();
         Uni<Integer> cache = Uni.createFrom().completionStage(cs).cache();
 
-        AssertSubscriber<Integer> sub1 = AssertSubscriber.create();
-        AssertSubscriber<Integer> sub2 = AssertSubscriber.create();
-        AssertSubscriber<Integer> sub3 = AssertSubscriber.create();
+        UniAssertSubscriber<Integer> sub1 = UniAssertSubscriber.create();
+        UniAssertSubscriber<Integer> sub2 = UniAssertSubscriber.create();
+        UniAssertSubscriber<Integer> sub3 = UniAssertSubscriber.create();
 
         cache.subscribe().withSubscriber(sub1);
         cache.subscribe().withSubscriber(sub2);
@@ -107,9 +107,9 @@ public class UniCacheTest {
         CompletableFuture<Integer> cs = new CompletableFuture<>();
         Uni<Integer> cache = Uni.createFrom().completionStage(cs).cache();
 
-        AssertSubscriber<Integer> sub1 = AssertSubscriber.create();
-        AssertSubscriber<Integer> sub2 = AssertSubscriber.create();
-        AssertSubscriber<Integer> sub3 = AssertSubscriber.create();
+        UniAssertSubscriber<Integer> sub1 = UniAssertSubscriber.create();
+        UniAssertSubscriber<Integer> sub2 = UniAssertSubscriber.create();
+        UniAssertSubscriber<Integer> sub3 = UniAssertSubscriber.create();
 
         cache.subscribe().withSubscriber(sub1);
         cache.subscribe().withSubscriber(sub2);
@@ -131,8 +131,8 @@ public class UniCacheTest {
         UnicastProcessor<Integer> processor = UnicastProcessor.create();
         Uni<Integer> cached = Uni.createFrom().publisher(processor).cache();
 
-        AssertSubscriber<Integer> sub1 = new AssertSubscriber<>();
-        AssertSubscriber<Integer> sub2 = new AssertSubscriber<>();
+        UniAssertSubscriber<Integer> sub1 = new UniAssertSubscriber<>();
+        UniAssertSubscriber<Integer> sub2 = new UniAssertSubscriber<>();
 
         cached.subscribe().withSubscriber(sub1);
         cached.subscribe().withSubscriber(sub2);
@@ -153,8 +153,8 @@ public class UniCacheTest {
         UnicastProcessor<Integer> processor = UnicastProcessor.create();
         Uni<Integer> cached = Uni.createFrom().publisher(processor).cache();
 
-        AssertSubscriber<Integer> sub1 = new AssertSubscriber<>(true);
-        AssertSubscriber<Integer> sub2 = new AssertSubscriber<>(true);
+        UniAssertSubscriber<Integer> sub1 = new UniAssertSubscriber<>(true);
+        UniAssertSubscriber<Integer> sub2 = new UniAssertSubscriber<>(true);
 
         cached.subscribe().withSubscriber(sub1);
         cached.subscribe().withSubscriber(sub2);
@@ -176,14 +176,14 @@ public class UniCacheTest {
             Flowable<Integer> flowable = Flowable.just(1, 2, 3);
             Uni<Integer> cached = Uni.createFrom().publisher(flowable).cache();
 
-            AssertSubscriber<Integer> subscriber = new AssertSubscriber<>(false);
+            UniAssertSubscriber<Integer> subscriber = new UniAssertSubscriber<>(false);
 
             Runnable r1 = () -> {
                 cached.subscribe().withSubscriber(subscriber);
                 subscriber.cancel();
             };
 
-            Runnable r2 = () -> cached.subscribe().withSubscriber(new AssertSubscriber<>());
+            Runnable r2 = () -> cached.subscribe().withSubscriber(new UniAssertSubscriber<>());
 
             ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
             try {
@@ -265,7 +265,7 @@ public class UniCacheTest {
         };
         uni.subscribe().withSubscriber(subscriber);
 
-        AssertSubscriber<Integer> test = AssertSubscriber.create();
+        UniAssertSubscriber<Integer> test = UniAssertSubscriber.create();
         uni.subscribe().withSubscriber(test);
         test.assertCompletedSuccessfully().assertResult(23);
 

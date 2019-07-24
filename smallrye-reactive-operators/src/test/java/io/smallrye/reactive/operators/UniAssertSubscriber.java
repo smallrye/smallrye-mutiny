@@ -5,7 +5,7 @@ import io.smallrye.reactive.subscription.UniSubscription;
 
 import java.util.concurrent.CompletableFuture;
 
-public class AssertSubscriber<T> implements UniSubscriber<T> {
+public class UniAssertSubscriber<T> implements UniSubscriber<T> {
     private final boolean cancelImmediatelyOnSubscription;
     private UniSubscription subscription;
     private boolean gotSignal;
@@ -16,16 +16,16 @@ public class AssertSubscriber<T> implements UniSubscriber<T> {
     private String onErrorThreadName;
     private String onSubscribeThreadName;
 
-    public AssertSubscriber(boolean cancelled) {
+    public UniAssertSubscriber(boolean cancelled) {
         this.cancelImmediatelyOnSubscription = cancelled;
     }
 
-    public AssertSubscriber() {
+    public UniAssertSubscriber() {
         this(false);
     }
 
-    public static <T> AssertSubscriber<T> create() {
-        return new AssertSubscriber<>();
+    public static <T> UniAssertSubscriber<T> create() {
+        return new UniAssertSubscriber<>();
     }
 
 
@@ -63,7 +63,7 @@ public class AssertSubscriber<T> implements UniSubscriber<T> {
         this.future.completeExceptionally(failure);
     }
 
-    public AssertSubscriber<T> await() {
+    public UniAssertSubscriber<T> await() {
         CompletableFuture<T> fut;
         synchronized (this) {
             if (this.future == null) {
@@ -79,7 +79,7 @@ public class AssertSubscriber<T> implements UniSubscriber<T> {
         return this;
     }
 
-    public synchronized AssertSubscriber<T> assertCompletedSuccessfully() {
+    public synchronized UniAssertSubscriber<T> assertCompletedSuccessfully() {
         if (this.future == null) {
             throw new IllegalStateException("No subscription");
         }
@@ -96,7 +96,7 @@ public class AssertSubscriber<T> implements UniSubscriber<T> {
         return this;
     }
 
-    public synchronized AssertSubscriber<T> assertCompletedWithFailure() {
+    public synchronized UniAssertSubscriber<T> assertCompletedWithFailure() {
         if (this.future == null) {
             throw new IllegalStateException("No subscription");
         }
@@ -133,7 +133,7 @@ public class AssertSubscriber<T> implements UniSubscriber<T> {
         return failure;
     }
 
-    public AssertSubscriber<T> assertResult(T expected) {
+    public UniAssertSubscriber<T> assertResult(T expected) {
         T result = getResult();
         if (result == null && expected != null) {
             throw new AssertionError("Expected: " + expected + " but was `null`");
@@ -144,7 +144,7 @@ public class AssertSubscriber<T> implements UniSubscriber<T> {
         return this;
     }
 
-    public AssertSubscriber<T> assertFailure(Class<? extends Throwable> exceptionClass, String message) {
+    public UniAssertSubscriber<T> assertFailure(Class<? extends Throwable> exceptionClass, String message) {
         Throwable failure = getFailure();
 
         if (failure == null) {
@@ -175,7 +175,7 @@ public class AssertSubscriber<T> implements UniSubscriber<T> {
         this.subscription.cancel();
     }
 
-    public AssertSubscriber<T> assertNotCompleted() {
+    public UniAssertSubscriber<T> assertNotCompleted() {
         if (this.future == null) {
             throw new IllegalStateException("No subscription");
         }
@@ -186,14 +186,14 @@ public class AssertSubscriber<T> implements UniSubscriber<T> {
         }
     }
 
-    public AssertSubscriber<T> assertNoResult() {
+    public UniAssertSubscriber<T> assertNoResult() {
         if(gotSignal  && failure == null) {
             throw new AssertionError("The Uni got a signal");
         }
         return this;
     }
 
-    public AssertSubscriber<T> assertNoFailure() {
+    public UniAssertSubscriber<T> assertNoFailure() {
         if (failure != null) {
             throw new AssertionError("Expected to not have an error, but found " + failure);
         }
@@ -201,14 +201,14 @@ public class AssertSubscriber<T> implements UniSubscriber<T> {
     }
 
 
-    public AssertSubscriber<T> assertSubscribed() {
+    public UniAssertSubscriber<T> assertSubscribed() {
         if (subscription == null) {
             throw new AssertionError(("Expected to have a subscription"));
         }
         return this;
     }
 
-    public AssertSubscriber<T> assertNoSignals() {
+    public UniAssertSubscriber<T> assertNoSignals() {
         if (gotSignal) {
             throw new AssertionError("The Uni got a signal");
         }

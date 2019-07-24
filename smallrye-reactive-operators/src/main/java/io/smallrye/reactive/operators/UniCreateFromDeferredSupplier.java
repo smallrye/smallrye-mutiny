@@ -9,10 +9,10 @@ import static io.smallrye.reactive.helpers.EmptyUniSubscription.CANCELLED;
 import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
 
 
-public class UniCreateFromDefferedSupplier<T> extends UniOperator<Void, T> {
+public class UniCreateFromDeferredSupplier<T> extends UniOperator<Void, T> {
     private final Supplier<? extends Uni<? extends T>> supplier;
 
-    public UniCreateFromDefferedSupplier(Supplier<? extends Uni<? extends T>> supplier) {
+    public UniCreateFromDeferredSupplier(Supplier<? extends Uni<? extends T>> supplier) {
         super(null);
         this.supplier = nonNull(supplier, "supplier");
     }

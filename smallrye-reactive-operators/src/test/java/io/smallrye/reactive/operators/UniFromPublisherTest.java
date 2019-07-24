@@ -15,21 +15,21 @@ public class UniFromPublisherTest {
 
     @Test
     public void testWithPublisher() {
-        AssertSubscriber<Integer> ts = AssertSubscriber.create();
+        UniAssertSubscriber<Integer> ts = UniAssertSubscriber.create();
         Uni.createFrom().publisher(Flowable.just(1)).subscribe().withSubscriber(ts);
         ts.assertCompletedSuccessfully().assertResult(1);
     }
 
     @Test
     public void testWithPublisherBuilder() {
-        AssertSubscriber<Integer> ts = AssertSubscriber.create();
+        UniAssertSubscriber<Integer> ts = UniAssertSubscriber.create();
         Uni.createFrom().publisher(Flowable.just(1)).subscribe().withSubscriber(ts);
         ts.assertCompletedSuccessfully().assertResult(1);
     }
 
     @Test
     public void testWithMultiValuedPublisher() {
-        AssertSubscriber<Integer> ts = AssertSubscriber.create();
+        UniAssertSubscriber<Integer> ts = UniAssertSubscriber.create();
         AtomicBoolean cancelled = new AtomicBoolean();
         Uni.createFrom().publisher(Flowable.just(1, 2, 3).doOnCancel(() -> cancelled.set(true))).subscribe().withSubscriber(ts);
         ts.assertCompletedSuccessfully().assertResult(1);
@@ -39,21 +39,21 @@ public class UniFromPublisherTest {
 
     @Test
     public void testWithException() {
-        AssertSubscriber<Object> ts = AssertSubscriber.create();
+        UniAssertSubscriber<Object> ts = UniAssertSubscriber.create();
         Uni.createFrom().publisher(Flowable.error(new IOException("boom"))).subscribe().withSubscriber(ts);
         ts.assertFailure(IOException.class, "boom");
     }
 
     @Test
     public void testWithEmptyStream() {
-        AssertSubscriber<Object> ts = AssertSubscriber.create();
+        UniAssertSubscriber<Object> ts = UniAssertSubscriber.create();
         Uni.createFrom().publisher(Flowable.empty()).subscribe().withSubscriber(ts);
         ts.assertCompletedSuccessfully().assertResult(null);
     }
 
     @Test
     public void testThatValueIsNotEmittedBeforeSubscription() {
-        AssertSubscriber<Integer> ts = AssertSubscriber.create();
+        UniAssertSubscriber<Integer> ts = UniAssertSubscriber.create();
         AtomicBoolean called = new AtomicBoolean();
         Uni<Integer> uni = Uni.createFrom().publisher(Flowable.generate(emitter -> {
             called.set(true);
@@ -70,7 +70,7 @@ public class UniFromPublisherTest {
 
     @Test
     public void testThatSubscriberIsIncompleteIfThePublisherDoesNotEmit() {
-        AssertSubscriber<Integer> ts = AssertSubscriber.create();
+        UniAssertSubscriber<Integer> ts = UniAssertSubscriber.create();
         AtomicBoolean called = new AtomicBoolean();
         Uni<Integer> uni = Uni.createFrom().<Integer>publisher(Flowable.never()).map(i -> {
             called.set(true);
@@ -86,7 +86,7 @@ public class UniFromPublisherTest {
 
     @Test
     public void testThatSubscriberCanCancelBeforeEmission() {
-        AssertSubscriber<Integer> ts = AssertSubscriber.create();
+        UniAssertSubscriber<Integer> ts = UniAssertSubscriber.create();
         Uni<Integer> uni = Uni.createFrom().publisher(Flowable.<Integer>create(emitter -> {
             new Thread(() -> {
                 try {

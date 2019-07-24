@@ -29,7 +29,7 @@ public class UniOnResultMapToResult {
 
     @Test
     public void testSimpleMapping() {
-        AssertSubscriber<Integer> ts = AssertSubscriber.create();
+        UniAssertSubscriber<Integer> ts = UniAssertSubscriber.create();
 
 
         one.map(v -> v + 1).subscribe().withSubscriber(ts);
@@ -40,8 +40,8 @@ public class UniOnResultMapToResult {
 
     @Test
     public void testWithTwoSubscribers() {
-        AssertSubscriber<Integer> ts1 = AssertSubscriber.create();
-        AssertSubscriber<Integer> ts2 = AssertSubscriber.create();
+        UniAssertSubscriber<Integer> ts1 = UniAssertSubscriber.create();
+        UniAssertSubscriber<Integer> ts2 = UniAssertSubscriber.create();
 
 
         AtomicInteger count = new AtomicInteger();
@@ -57,7 +57,7 @@ public class UniOnResultMapToResult {
 
     @Test
     public void testWhenTheMapperThrowsAnException() {
-        AssertSubscriber<Object> ts = AssertSubscriber.create();
+        UniAssertSubscriber<Object> ts = UniAssertSubscriber.create();
 
         one.map(v -> {
             throw new RuntimeException("failure");
@@ -68,7 +68,7 @@ public class UniOnResultMapToResult {
 
     @Test
     public void testThatMapperCanReturnNull() {
-        AssertSubscriber<Object> ts = AssertSubscriber.create();
+        UniAssertSubscriber<Object> ts = UniAssertSubscriber.create();
 
         one.map(v -> null).subscribe().withSubscriber(ts);
 
@@ -77,14 +77,14 @@ public class UniOnResultMapToResult {
 
     @Test
     public void testThatMapperIsCalledWithNull() {
-        AssertSubscriber<String> ts = AssertSubscriber.create();
+        UniAssertSubscriber<String> ts = UniAssertSubscriber.create();
         Uni.createFrom().result((String) null).map(x -> "foo").subscribe().withSubscriber(ts);
         ts.assertCompletedSuccessfully().assertResult("foo");
     }
 
     @Test
     public void testThatMapperIsCalledOnTheRightExecutor() {
-        AssertSubscriber<Integer> ts = new AssertSubscriber<>();
+        UniAssertSubscriber<Integer> ts = new UniAssertSubscriber<>();
         ExecutorService executor = Executors.newSingleThreadExecutor();
         try {
             AtomicReference<String> threadName = new AtomicReference<>();
@@ -106,7 +106,7 @@ public class UniOnResultMapToResult {
 
     @Test
     public void testThatMapperIsNotCalledIfPreviousStageFailed() {
-        AssertSubscriber<Integer> ts = AssertSubscriber.create();
+        UniAssertSubscriber<Integer> ts = UniAssertSubscriber.create();
         AtomicBoolean called = new AtomicBoolean();
         Uni.createFrom().<Integer>failure(new Exception("boom"))
                 .map(x -> {

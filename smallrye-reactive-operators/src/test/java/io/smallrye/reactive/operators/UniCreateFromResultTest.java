@@ -12,7 +12,7 @@ public class UniCreateFromResultTest {
 
     @Test
     public void testThatNullValueAreAccepted() {
-        AssertSubscriber<Object> ts = AssertSubscriber.create();
+        UniAssertSubscriber<Object> ts = UniAssertSubscriber.create();
         Uni.createFrom().result((String)null).subscribe().withSubscriber(ts);
         ts.assertCompletedSuccessfully().assertResult(null);
     }
@@ -20,7 +20,7 @@ public class UniCreateFromResultTest {
 
     @Test
     public void testWithNonNullValue() {
-        AssertSubscriber<Integer> ts = AssertSubscriber.create();
+        UniAssertSubscriber<Integer> ts = UniAssertSubscriber.create();
         Uni.createFrom().result(1).subscribe().withSubscriber(ts);
         ts.assertCompletedSuccessfully().assertResult(1);
     }
@@ -28,7 +28,7 @@ public class UniCreateFromResultTest {
 
     @Test
     public void testThatEmptyIsAcceptedWithFromOptional() {
-        AssertSubscriber<Object> ts = AssertSubscriber.create();
+        UniAssertSubscriber<Object> ts = UniAssertSubscriber.create();
         Uni.createFrom().optional(Optional.empty()).subscribe().withSubscriber(ts);
         ts.assertCompletedSuccessfully().assertResult(null);
     }
@@ -42,7 +42,7 @@ public class UniCreateFromResultTest {
 
     @Test
     public void testThatFulfilledOptionalIsAcceptedWithFromOptional() {
-        AssertSubscriber<Integer> ts = AssertSubscriber.create();
+        UniAssertSubscriber<Integer> ts = UniAssertSubscriber.create();
         Uni.createFrom().optional(Optional.of(1)).subscribe().withSubscriber(ts);
         ts.assertCompletedSuccessfully().assertResult(1);
     }
@@ -50,7 +50,7 @@ public class UniCreateFromResultTest {
 
     @Test
     public void testThatValueIsNotEmittedBeforeSubscription() {
-        AssertSubscriber<Integer> ts = AssertSubscriber.create();
+        UniAssertSubscriber<Integer> ts = UniAssertSubscriber.create();
         AtomicBoolean called = new AtomicBoolean();
         Uni<Integer> uni = Uni.createFrom().result(1).map(i -> {
             called.set(true);
@@ -71,8 +71,8 @@ public class UniCreateFromResultTest {
 
     @Test
     public void testWithImmediateCancellation() {
-        AssertSubscriber<String> subscriber1 = new AssertSubscriber<>(true);
-        AssertSubscriber<String> subscriber2 = new AssertSubscriber<>(false);
+        UniAssertSubscriber<String> subscriber1 = new UniAssertSubscriber<>(true);
+        UniAssertSubscriber<String> subscriber2 = new UniAssertSubscriber<>(false);
         Uni<String> foo = Uni.createFrom().result("foo");
         foo.subscribe().withSubscriber(subscriber1);
         foo.subscribe().withSubscriber(subscriber2);
@@ -82,14 +82,14 @@ public class UniCreateFromResultTest {
 
     @Test
     public void testEmpty() {
-        AssertSubscriber<Void> subscriber = AssertSubscriber.create();
+        UniAssertSubscriber<Void> subscriber = UniAssertSubscriber.create();
         Uni.createFrom().nullValue().subscribe().withSubscriber(subscriber);
         subscriber.assertCompletedSuccessfully().assertResult(null);
     }
 
     @Test
     public void testEmptyWithImmediateCancellation() {
-        AssertSubscriber<Void> subscriber = new AssertSubscriber<>(true);
+        UniAssertSubscriber<Void> subscriber = new UniAssertSubscriber<>(true);
         Uni.createFrom().nullValue().subscribe().withSubscriber(subscriber);
         subscriber.assertNoFailure().assertNoResult();
     }

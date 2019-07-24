@@ -16,7 +16,7 @@ public class UniRunSubscriptionOnTest {
 
     @Test
     public void testSubscribeOnWithSupplier() {
-        AssertSubscriber<Integer> ts = AssertSubscriber.create();
+        UniAssertSubscriber<Integer> ts = UniAssertSubscriber.create();
         Uni.createFrom().result(() -> 1)
                 .callSubscribeOn(ForkJoinPool.commonPool())
                 .subscribe().withSubscriber(ts);
@@ -26,7 +26,7 @@ public class UniRunSubscriptionOnTest {
 
     @Test
     public void testWithWithImmediateValue() {
-        AssertSubscriber<Integer> ts = AssertSubscriber.create();
+        UniAssertSubscriber<Integer> ts = UniAssertSubscriber.create();
 
         Uni.createFrom().result(1)
                 .callSubscribeOn(ForkJoinPool.commonPool())
@@ -38,7 +38,7 @@ public class UniRunSubscriptionOnTest {
 
     @Test
     public void testWithTimeout() {
-        AssertSubscriber<Integer> ts = AssertSubscriber.create();
+        UniAssertSubscriber<Integer> ts = UniAssertSubscriber.create();
 
         Uni.createFrom().result(() -> {
             try {
@@ -63,7 +63,7 @@ public class UniRunSubscriptionOnTest {
                 .callSubscribeOn(ForkJoinPool.commonPool());
 
         assertThat(count).hasValue(0);
-        uni.subscribe().withSubscriber(AssertSubscriber.create()).await();
+        uni.subscribe().withSubscriber(UniAssertSubscriber.create()).await();
         assertThat(count).hasValue(1);
     }
 
@@ -71,7 +71,7 @@ public class UniRunSubscriptionOnTest {
     public void testWithFailure() {
         Uni.createFrom().<Void>failure(new IOException("boom"))
                 .callSubscribeOn(Infrastructure.getDefaultExecutor())
-                .subscribe().withSubscriber(AssertSubscriber.create())
+                .subscribe().withSubscriber(UniAssertSubscriber.create())
                 .await()
                 .assertFailure(IOException.class, "boom");
     }

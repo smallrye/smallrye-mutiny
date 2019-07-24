@@ -5,7 +5,7 @@ import io.smallrye.reactive.Uni;
 
 /**
  * An object allowing to send signals to the downstream {@link Uni}.
- * {@link Uni} propagates a single signal, once the first is propagated, the others signals have no effect.
+ * {@link Uni} propagates a single result event, once the first is propagated, the others events have no effect.
  *
  * @param <T> the expected type of result.
  */
@@ -32,10 +32,6 @@ public interface UniEmitter<T> {
     /**
      * Attaches a @{code cancellation} event handler invoked when the downstream {@link UniSubscription} is cancelled.
      * This method allow propagating the cancellation to the source and potentially cleanup resources.
-     *
-     * <ul>
-     *     <li>Executor: Operate on no particular executor, except if {@link Uni#cancelOn} has been called</li>
-     * </ul>
      *
      * @param onCancel the action to run on cancellation, must not be {@code null}
      * @return this emitter

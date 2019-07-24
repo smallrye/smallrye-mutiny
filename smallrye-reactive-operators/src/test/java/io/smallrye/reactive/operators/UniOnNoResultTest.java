@@ -14,7 +14,7 @@ public class UniOnNoResultTest {
 
     @Test
     public void testResultWhenTimeoutIsNotReached() {
-        AssertSubscriber<Integer> ts = AssertSubscriber.create();
+        UniAssertSubscriber<Integer> ts = UniAssertSubscriber.create();
 
         Uni.createFrom().result(1)
                 .onNoResult().after(Duration.ofMillis(10)).recoverWithUni(Uni.createFrom().nothing())
@@ -25,7 +25,7 @@ public class UniOnNoResultTest {
 
     @Test
     public void testTimeout() {
-        AssertSubscriber<Integer> ts = AssertSubscriber.create();
+        UniAssertSubscriber<Integer> ts = UniAssertSubscriber.create();
 
         Uni.createFrom().result(1)
                 .onResult().delayIt().by(Duration.ofMillis(10))
@@ -39,33 +39,33 @@ public class UniOnNoResultTest {
 
     @Test
     public void testRecoverWithResult() {
-        AssertSubscriber<Integer> ts = Uni.createFrom().<Integer>nothing()
+        UniAssertSubscriber<Integer> ts = Uni.createFrom().<Integer>nothing()
                 .onNoResult().after(Duration.ofMillis(10)).recoverWithResult(5)
-                .subscribe().withSubscriber(AssertSubscriber.create());
+                .subscribe().withSubscriber(UniAssertSubscriber.create());
         ts.await().assertResult(5);
     }
 
     @Test
     public void testRecoverWithResultSupplier() {
-        AssertSubscriber<Integer> ts = Uni.createFrom().<Integer>nothing()
+        UniAssertSubscriber<Integer> ts = Uni.createFrom().<Integer>nothing()
                 .onNoResult().after(Duration.ofMillis(10)).recoverWithResult(() -> 23)
-                .subscribe().withSubscriber(AssertSubscriber.create());
+                .subscribe().withSubscriber(UniAssertSubscriber.create());
         ts.await().assertResult(23);
     }
 
     @Test
     public void testRecoverWithSwitchToUni() {
-        AssertSubscriber<Integer> ts = Uni.createFrom().<Integer>nothing()
+        UniAssertSubscriber<Integer> ts = Uni.createFrom().<Integer>nothing()
                 .onNoResult().after(Duration.ofMillis(10)).recoverWithUni(() -> Uni.createFrom().result(15))
-                .subscribe().withSubscriber(AssertSubscriber.create());
+                .subscribe().withSubscriber(UniAssertSubscriber.create());
         ts.await().assertResult(15);
     }
 
     @Test
     public void testFailingWithAnotherException() {
-        AssertSubscriber<Integer> ts = Uni.createFrom().<Integer>nothing()
+        UniAssertSubscriber<Integer> ts = Uni.createFrom().<Integer>nothing()
                 .onNoResult().after(Duration.ofMillis(10)).failWith(new IOException("boom"))
-                .subscribe().withSubscriber(AssertSubscriber.create());
+                .subscribe().withSubscriber(UniAssertSubscriber.create());
         ts.await().assertFailure(IOException.class, "boom");
     }
 

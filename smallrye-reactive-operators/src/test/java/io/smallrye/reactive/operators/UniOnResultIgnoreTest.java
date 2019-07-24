@@ -26,15 +26,15 @@ public class UniOnResultIgnoreTest {
 
     @Test
     public void testIgnoreAndFail() {
-        AssertSubscriber<Integer> subscriber =
-                Uni.createFrom().result(22).onResult().ignoreIt().andFail().subscribe().withSubscriber(AssertSubscriber.create());
+        UniAssertSubscriber<Integer> subscriber =
+                Uni.createFrom().result(22).onResult().ignoreIt().andFail().subscribe().withSubscriber(UniAssertSubscriber.create());
         subscriber.assertFailure(Exception.class, "");
     }
 
     @Test
     public void testIgnoreAndFailWith() {
-        AssertSubscriber<Integer> subscriber =
-                Uni.createFrom().result(22).onResult().ignoreIt().andFail(new IOException("boom")).subscribe().withSubscriber(AssertSubscriber.create());
+        UniAssertSubscriber<Integer> subscriber =
+                Uni.createFrom().result(22).onResult().ignoreIt().andFail(new IOException("boom")).subscribe().withSubscriber(UniAssertSubscriber.create());
         subscriber.assertFailure(IOException.class, "boom");
     }
 
@@ -42,8 +42,8 @@ public class UniOnResultIgnoreTest {
     public void testIgnoreAndFailWithSupplier() {
         AtomicInteger count = new AtomicInteger();
         Uni<Integer> boom = Uni.createFrom().result(22).onResult().ignoreIt().andFail(() -> new IOException("boom " + count.incrementAndGet()));
-        AssertSubscriber<Integer> s1 = boom.subscribe().withSubscriber(AssertSubscriber.create());
-        AssertSubscriber<Integer> s2 = boom.subscribe().withSubscriber(AssertSubscriber.create());
+        UniAssertSubscriber<Integer> s1 = boom.subscribe().withSubscriber(UniAssertSubscriber.create());
+        UniAssertSubscriber<Integer> s2 = boom.subscribe().withSubscriber(UniAssertSubscriber.create());
         s1.assertFailure(IOException.class, "boom 1");
         s2.assertFailure(IOException.class, "boom 2");
     }

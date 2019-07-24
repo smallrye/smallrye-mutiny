@@ -19,12 +19,12 @@ public class UniPeekOnEventTest {
         AtomicReference<Throwable> failure = new AtomicReference<>();
         AtomicReference<UniSubscription> subscription = new AtomicReference<>();
         AtomicInteger terminate = new AtomicInteger();
-        AssertSubscriber<? super Integer> subscriber = Uni.createFrom().result(1)
+        UniAssertSubscriber<? super Integer> subscriber = Uni.createFrom().result(1)
                 .onResult().peek(result::set)
                 .onFailure().peek(failure::set)
                 .onSubscription(subscription::set)
                 .onTerminate((i, f) -> terminate.set(i))
-                .subscribe().withSubscriber(AssertSubscriber.create());
+                .subscribe().withSubscriber(UniAssertSubscriber.create());
 
         subscriber.assertResult(1);
         assertThat(result).hasValue(1);
@@ -40,12 +40,12 @@ public class UniPeekOnEventTest {
         AtomicReference<Throwable> failure = new AtomicReference<>();
         AtomicReference<UniSubscription> subscription = new AtomicReference<>();
         AtomicReference<Throwable> terminate = new AtomicReference<>();
-        AssertSubscriber<? super Integer> subscriber = Uni.createFrom().<Integer>failure(new IOException("boom"))
+        UniAssertSubscriber<? super Integer> subscriber = Uni.createFrom().<Integer>failure(new IOException("boom"))
                 .onResult().peek(result::set)
                 .onFailure().peek(failure::set)
                 .onSubscription(subscription::set)
                 .onTerminate((i, f) -> terminate.set(f))
-                .subscribe().withSubscriber(AssertSubscriber.create());
+                .subscribe().withSubscriber(UniAssertSubscriber.create());
 
         subscriber.assertCompletedWithFailure().assertFailure(IOException.class, "boom");
         assertThat(result).doesNotHaveValue(1);
@@ -61,7 +61,7 @@ public class UniPeekOnEventTest {
         AtomicReference<UniSubscription> subscription = new AtomicReference<>();
         AtomicInteger resultFromTerminate = new AtomicInteger();
         AtomicReference<Throwable> failureFromTerminate = new AtomicReference<>();
-        AssertSubscriber<? super Integer> subscriber = Uni.createFrom().result(1)
+        UniAssertSubscriber<? super Integer> subscriber = Uni.createFrom().result(1)
                 .onResult().peek(i -> {
                     throw new IllegalStateException("boom");
                 })
@@ -73,7 +73,7 @@ public class UniPeekOnEventTest {
                     }
                     failureFromTerminate.set(f);
                 })
-                .subscribe().withSubscriber(AssertSubscriber.create());
+                .subscribe().withSubscriber(UniAssertSubscriber.create());
 
         subscriber.assertCompletedWithFailure().assertFailure(IllegalStateException.class, "boom");
         assertThat(result).doesNotHaveValue(1);
@@ -89,7 +89,7 @@ public class UniPeekOnEventTest {
         AtomicReference<UniSubscription> subscription = new AtomicReference<>();
         AtomicInteger resultFromTerminate = new AtomicInteger();
         AtomicReference<Throwable> failureFromTerminate = new AtomicReference<>();
-        AssertSubscriber<? super Integer> subscriber = Uni.createFrom().<Integer>failure(new IOException("kaboom"))
+        UniAssertSubscriber<? super Integer> subscriber = Uni.createFrom().<Integer>failure(new IOException("kaboom"))
                 .onResult().peek(result::set)
                 .onFailure().peek(e -> {
                     throw new IllegalStateException("boom");
@@ -101,7 +101,7 @@ public class UniPeekOnEventTest {
                     }
                     failureFromTerminate.set(f);
                 })
-                .subscribe().withSubscriber(AssertSubscriber.create());
+                .subscribe().withSubscriber(UniAssertSubscriber.create());
 
         subscriber.assertCompletedWithFailure().assertFailure(IllegalStateException.class, "boom");
         assertThat(result).doesNotHaveValue(1);
@@ -112,9 +112,9 @@ public class UniPeekOnEventTest {
 
     @Test
     public void testWhenOnSubscriptionThrowsAnException() {
-        AssertSubscriber<? super Integer> subscriber = Uni.createFrom().result(1).onSubscription(s -> {
+        UniAssertSubscriber<? super Integer> subscriber = Uni.createFrom().result(1).onSubscription(s -> {
             throw new IllegalStateException("boom");
-        }).subscribe().withSubscriber(AssertSubscriber.create());
+        }).subscribe().withSubscriber(UniAssertSubscriber.create());
 
         subscriber.assertFailure(IllegalStateException.class, "boom");
     }
@@ -122,10 +122,10 @@ public class UniPeekOnEventTest {
     @Test
     public void testOnCancelWithImmediateCancellation() {
         AtomicBoolean called = new AtomicBoolean();
-        AssertSubscriber<? super Integer> subscriber =
+        UniAssertSubscriber<? super Integer> subscriber =
                 Uni.createFrom().result(1)
                         .onCancellation(() -> called.set(true))
-                        .subscribe().withSubscriber(new AssertSubscriber<>(true));
+                        .subscribe().withSubscriber(new UniAssertSubscriber<>(true));
 
         subscriber.assertNotCompleted();
         assertThat(called).isTrue();

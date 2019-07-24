@@ -51,48 +51,48 @@ public class UniOrTest {
 
     @Test
     public void testWithNoCandidate() {
-        AssertSubscriber<Void> subscriber = AssertSubscriber.create();
+        UniAssertSubscriber<Void> subscriber = UniAssertSubscriber.create();
         Uni.any().<Void>of().subscribe().withSubscriber(subscriber);
         subscriber.assertCompletedSuccessfully().assertResult(null);
     }
 
     @Test
     public void testWithSingleItemCompletingSuccessfully() {
-        AssertSubscriber<String> subscriber = AssertSubscriber.create();
+        UniAssertSubscriber<String> subscriber = UniAssertSubscriber.create();
         Uni.any().of(Uni.createFrom().result("foo")).subscribe().withSubscriber(subscriber);
         subscriber.assertCompletedSuccessfully().assertResult("foo");
     }
 
     @Test
     public void testWithSingleItemCompletingWithAFailure() {
-        AssertSubscriber<String> subscriber = AssertSubscriber.create();
+        UniAssertSubscriber<String> subscriber = UniAssertSubscriber.create();
         Uni.any().of(Uni.createFrom().<String>failure(new IOException("boom"))).subscribe().withSubscriber(subscriber);
         subscriber.assertCompletedWithFailure().assertFailure(IOException.class, "boom");
     }
 
     @Test
     public void testWithTwoUnisCompletingImmediately() {
-        AssertSubscriber<String> subscriber = AssertSubscriber.create();
+        UniAssertSubscriber<String> subscriber = UniAssertSubscriber.create();
         Uni.any().of(Uni.createFrom().result("foo"), Uni.createFrom().result("bar")).subscribe().withSubscriber(subscriber);
         subscriber.assertCompletedSuccessfully().assertResult("foo");
     }
 
     @Test
     public void testWithTwoUnisCompletingWithAFailure() {
-        AssertSubscriber<String> subscriber = AssertSubscriber.create();
+        UniAssertSubscriber<String> subscriber = UniAssertSubscriber.create();
         Uni.any().of(Uni.createFrom().failure(new IOException("boom")), Uni.createFrom().result("foo")).subscribe().withSubscriber(subscriber);
         subscriber.assertCompletedWithFailure().assertFailure(IOException.class, "boom");
     }
 
     @Test
     public void testWithADelayedUni() {
-        AssertSubscriber<String> subscriber1 = AssertSubscriber.create();
+        UniAssertSubscriber<String> subscriber1 = UniAssertSubscriber.create();
         Uni.any().of(Uni.createFrom().result("foo")
                 .onResult().delayIt().onExecutor(executor).by(Duration.ofMillis(10)), Uni.createFrom().result("bar"))
                 .subscribe().withSubscriber(subscriber1);
         subscriber1.assertCompletedSuccessfully().assertResult("bar");
 
-        AssertSubscriber<String> subscriber2 = AssertSubscriber.create();
+        UniAssertSubscriber<String> subscriber2 = UniAssertSubscriber.create();
         Uni.any().of(Uni.createFrom().result("foo").onResult().delayIt().onExecutor(executor).by(Duration.ofMillis(10)),
                 Uni.createFrom().result("bar").onResult().delayIt().onExecutor(executor).by(Duration.ofMillis(100)))
                 .subscribe().withSubscriber(subscriber2);
@@ -128,7 +128,7 @@ public class UniOrTest {
     public void testWithThreeImmediateChallengers() {
         Uni<Integer> any = Uni.any().of(Uni.createFrom().result(1), Uni.createFrom().result(2), Uni.createFrom().result(3));
 
-        AssertSubscriber<Integer> subscriber = AssertSubscriber.create();
+        UniAssertSubscriber<Integer> subscriber = UniAssertSubscriber.create();
         any.subscribe().withSubscriber(subscriber);
         subscriber.assertCompletedSuccessfully().assertResult(1);
     }

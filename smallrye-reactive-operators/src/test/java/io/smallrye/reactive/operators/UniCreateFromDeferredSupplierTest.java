@@ -27,7 +27,7 @@ public class UniCreateFromDeferredSupplierTest {
     @Test
     public void testWithASupplierProducingNull() {
         Uni<Integer> s =  Uni.createFrom().deferred(() -> null);
-        AssertSubscriber<Integer> subscriber = AssertSubscriber.create();
+        UniAssertSubscriber<Integer> subscriber = UniAssertSubscriber.create();
         s.subscribe().withSubscriber(subscriber);
         subscriber.assertFailure(NullPointerException.class, "");
     }
@@ -37,7 +37,7 @@ public class UniCreateFromDeferredSupplierTest {
         Uni<Integer> s =  Uni.createFrom().deferred(() -> {
             throw new IllegalStateException("boom");
         });
-        AssertSubscriber<Integer> subscriber = AssertSubscriber.create();
+        UniAssertSubscriber<Integer> subscriber = UniAssertSubscriber.create();
         s.subscribe().withSubscriber(subscriber);
         subscriber.assertFailure(IllegalStateException.class, "boom");
     }

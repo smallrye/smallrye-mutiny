@@ -157,7 +157,7 @@ public class UniOnFailureRecoveryTest {
 
     @Test
     public void testNotCalledOnResult() {
-        AssertSubscriber<Integer> ts = AssertSubscriber.create();
+        UniAssertSubscriber<Integer> ts = UniAssertSubscriber.create();
         Uni.createFrom().result(1)
                 .onFailure().recoverWithUni(v -> Uni.createFrom().result(2))
                 .subscribe().withSubscriber(ts);
@@ -167,7 +167,7 @@ public class UniOnFailureRecoveryTest {
 
     @Test
     public void testCalledOnFailure() {
-        AssertSubscriber<Integer> ts = AssertSubscriber.create();
+        UniAssertSubscriber<Integer> ts = UniAssertSubscriber.create();
 
         Uni.createFrom().<Integer>failure(new RuntimeException("boom"))
                 .onFailure().recoverWithUni(fail -> Uni.createFrom().result(2))
@@ -178,7 +178,7 @@ public class UniOnFailureRecoveryTest {
 
     @Test
     public void testCalledOnFailureWithDirectResult() {
-        AssertSubscriber<Integer> ts = AssertSubscriber.create();
+        UniAssertSubscriber<Integer> ts = UniAssertSubscriber.create();
 
         Uni.createFrom().<Integer>failure(new RuntimeException("boom"))
                 .onFailure().recoverWithResult(fail -> 2)
@@ -189,7 +189,7 @@ public class UniOnFailureRecoveryTest {
 
     @Test
     public void testWithMappingOfFailure() {
-        AssertSubscriber<Integer> ts = AssertSubscriber.create();
+        UniAssertSubscriber<Integer> ts = UniAssertSubscriber.create();
         Uni.createFrom().<Integer>failure(new Exception())
                 .onFailure().mapTo(f -> new RuntimeException("boom"))
                 .subscribe().withSubscriber(ts);
@@ -200,7 +200,7 @@ public class UniOnFailureRecoveryTest {
 
     @Test
     public void testWithMappingOfFailureAndPredicates() {
-        AssertSubscriber<Integer> ts = AssertSubscriber.create();
+        UniAssertSubscriber<Integer> ts = UniAssertSubscriber.create();
         Uni.createFrom().<Integer>failure(new IOException())
                 .onFailure().mapTo(t -> new IndexOutOfBoundsException())
                 .onFailure(IOException.class).recoverWithUni(Uni.createFrom().result(1))

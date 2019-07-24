@@ -7,7 +7,7 @@ public class UniNeverTest {
 
     @Test
     public void testTheBehaviorOfNever() {
-        AssertSubscriber<Void> subscriber = AssertSubscriber.create();
+        UniAssertSubscriber<Void> subscriber = UniAssertSubscriber.create();
         Uni.createFrom().<Void>nothing()
                 .subscribe().withSubscriber(subscriber);
         subscriber.assertNoResult().assertNoResult().assertSubscribed();

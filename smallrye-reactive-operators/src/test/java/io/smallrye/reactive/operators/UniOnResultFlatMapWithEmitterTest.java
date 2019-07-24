@@ -17,7 +17,7 @@ public class UniOnResultFlatMapWithEmitterTest {
 
     @Test
     public void testFlatMapWithImmediateValue() {
-        AssertSubscriber<Integer> test = AssertSubscriber.create();
+        UniAssertSubscriber<Integer> test = UniAssertSubscriber.create();
         Uni.createFrom().result(1).onResult().<Integer>mapToUni(
                 (v, e) -> e.result(2)
         )
@@ -27,7 +27,7 @@ public class UniOnResultFlatMapWithEmitterTest {
 
     @Test
     public void testWithImmediateCancellation() {
-        AssertSubscriber<Integer> test = new AssertSubscriber<>(true);
+        UniAssertSubscriber<Integer> test = new UniAssertSubscriber<>(true);
         AtomicBoolean called = new AtomicBoolean();
         Uni.createFrom().result(1).onResult().<Integer>mapToUni((v, e) -> {
             called.set(true);
@@ -39,8 +39,8 @@ public class UniOnResultFlatMapWithEmitterTest {
 
     @Test
     public void testWithAsyncEmitter() {
-        AssertSubscriber<Integer> test1 = AssertSubscriber.create();
-        AssertSubscriber<Integer> test2 = AssertSubscriber.create();
+        UniAssertSubscriber<Integer> test1 = UniAssertSubscriber.create();
+        UniAssertSubscriber<Integer> test2 = UniAssertSubscriber.create();
         AtomicInteger count = new AtomicInteger(2);
         Uni<Integer> uni = Uni.createFrom().result(1).onResult().mapToUni((v, e) ->
                 new Thread(() -> e.result(count.incrementAndGet())).start()
@@ -53,7 +53,7 @@ public class UniOnResultFlatMapWithEmitterTest {
 
     @Test
     public void testWithAsyncEmitterAndFailure() {
-        AssertSubscriber<Integer> test = AssertSubscriber.create();
+        UniAssertSubscriber<Integer> test = UniAssertSubscriber.create();
         Uni<Integer> uni = Uni.createFrom().result(1).onResult()
                 .mapToUni((v, e) -> new Thread(() -> e.failure(new IOException("boom"))).start());
         uni.subscribe().withSubscriber(test);
@@ -62,7 +62,7 @@ public class UniOnResultFlatMapWithEmitterTest {
 
     @Test
     public void testThatMapperIsNotCalledOnUpstreamFailure() {
-        AssertSubscriber<Integer> test = AssertSubscriber.create();
+        UniAssertSubscriber<Integer> test = UniAssertSubscriber.create();
         AtomicBoolean called = new AtomicBoolean();
         Uni.createFrom().failure(new Exception("boom")).onResult().<Integer>mapToUni((v, e) -> {
             called.set(true);
@@ -74,7 +74,7 @@ public class UniOnResultFlatMapWithEmitterTest {
 
     @Test
     public void testWithAMapperThrowingAnException() {
-        AssertSubscriber<Integer> test = AssertSubscriber.create();
+        UniAssertSubscriber<Integer> test = UniAssertSubscriber.create();
         AtomicBoolean called = new AtomicBoolean();
         Uni.createFrom().result(1).onResult().<Integer>mapToUni((v, e) -> {
             called.set(true);
@@ -86,7 +86,7 @@ public class UniOnResultFlatMapWithEmitterTest {
 
     @Test
     public void testWithAMapperThrowingAnExceptionAfterEmittingAValue() {
-        AssertSubscriber<Integer> test = AssertSubscriber.create();
+        UniAssertSubscriber<Integer> test = UniAssertSubscriber.create();
         AtomicBoolean called = new AtomicBoolean();
         Uni.createFrom().result(1).onResult().<Integer>mapToUni((v, e) -> {
             called.set(true);
@@ -104,7 +104,7 @@ public class UniOnResultFlatMapWithEmitterTest {
 
     @Test
     public void testWithCancellationBeforeEmission() {
-        AssertSubscriber<Integer> test = AssertSubscriber.create();
+        UniAssertSubscriber<Integer> test = UniAssertSubscriber.create();
         CompletableFuture<Integer> future = new CompletableFuture<>();
         Uni<Integer> uni = Uni.createFrom().result(1).onResult().mapToUni((v, e) -> future.whenComplete((x, f) -> e.result(x)));
         uni.subscribe().withSubscriber(test);
