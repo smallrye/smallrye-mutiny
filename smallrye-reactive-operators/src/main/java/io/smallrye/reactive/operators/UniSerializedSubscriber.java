@@ -4,8 +4,8 @@ import io.smallrye.reactive.subscription.UniSubscriber;
 import io.smallrye.reactive.subscription.UniSubscription;
 
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
-import static io.smallrye.reactive.helpers.EmptyUniSubscription.CANCELLED;
 import static io.smallrye.reactive.helpers.EmptyUniSubscription.propagateFailureEvent;
 import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
 
@@ -23,6 +23,7 @@ public class UniSerializedSubscriber<T> implements UniSubscriber<T>, UniSubscrip
     private final AbstractUni<T> source;
     private final UniSubscriber<? super T> downstream;
     private UniSubscription upstream;
+    private AtomicReference<Throwable> collectedFailure = new AtomicReference<>();
 
     private UniSerializedSubscriber(AbstractUni<T> source, UniSubscriber<? super T> subscriber) {
         this.source = nonNull(source, "source");
@@ -48,9 +49,15 @@ public class UniSerializedSubscriber<T> implements UniSubscriber<T>, UniSubscrip
     @Override
     public void onSubscribe(UniSubscription subscription) {
         nonNull(subscription, "subscription");
+
         if (state.compareAndSet(SUBSCRIBED, HAS_SUBSCRIPTION)) {
             this.upstream = subscription;
             this.downstream.onSubscribe(this);
+        } else if (state.get() == DONE) {
+            Throwable collected = collectedFailure.getAndSet(null);
+            if (collected != null) {
+                this.downstream.onFailure(collected);
+            }
         } else {
             propagateFailureEvent(this.downstream,
                     new IllegalStateException("Invalid transition, expected to be in the SUBSCRIBED state but was in " + state.get()));
@@ -72,6 +79,8 @@ public class UniSerializedSubscriber<T> implements UniSubscriber<T>, UniSubscrip
     public void onFailure(Throwable failure) {
         if (state.compareAndSet(HAS_SUBSCRIPTION, DONE)) {
             downstream.onFailure(failure);
+        } else if (state.compareAndSet(SUBSCRIBED, DONE)) {
+            collectedFailure.compareAndSet(null, failure);
         } else if (state.get() != DONE) { // Are we already done? In this case, drop the signal
             propagateFailureEvent(this.downstream,
                     new IllegalStateException("Invalid transition, expected to be in the HAS_SUBSCRIPTION state but was in " + state.get()));
