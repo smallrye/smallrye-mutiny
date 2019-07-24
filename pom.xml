@@ -60,9 +60,6 @@
 
         <!-- Used by release plugin to define git tag -->
         <tagNameFormat>smallrye-reactive-operators-@{project.version}</tagNameFormat>
-
-        <sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/smallrye-reactive-operators/target/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
-
     </properties>
 
     <dependencyManagement>
