@@ -18,8 +18,8 @@ public class UniOnResultDelayTest {
 
     private ScheduledExecutorService executor = Executors.newScheduledThreadPool(4);
     private Uni<Void> delayed = Uni.createFrom().nullValue().onResult().delayIt()
-        .onExecutor(executor)
-        .by(Duration.ofMillis(100));
+            .onExecutor(executor)
+            .by(Duration.ofMillis(100));
 
 
     @After
@@ -143,12 +143,12 @@ public class UniOnResultDelayTest {
         subscriber.cancel();
         latch.countDown();
 
-        await().until(() -> future.get() != null  && future.get().isCancelled());
+        await().until(() -> future.get() != null && future.get().isCancelled());
         subscriber.assertNotCompleted();
     }
 
     @Test
-    public void testWithMultipleDelays() throws InterruptedException {
+    public void testWithMultipleDelays() {
         AtomicLong counter = new AtomicLong();
         AtomicReference<Throwable> failure = new AtomicReference<>();
         Uni.createFrom().nullValue().onResult().delayIt()
@@ -168,15 +168,8 @@ public class UniOnResultDelayTest {
                 .onExecutor(executor)
                 .by(Duration.ofMillis(800)).subscribe().with(v -> counter.incrementAndGet(), failure::set);
 
-        assertThat(counter.intValue()).isEqualTo(0);
+        await().until(() -> counter.intValue() == 4);
         assertThat(failure.get()).isNull();
 
-        Thread.sleep(250);
-        assertThat(counter.intValue()).isEqualTo(2);
-        assertThat(failure.get()).isNull();
-
-        Thread.sleep(1000);
-        assertThat(counter.intValue()).isEqualTo(4);
-        assertThat(failure.get()).isNull();
     }
 }
