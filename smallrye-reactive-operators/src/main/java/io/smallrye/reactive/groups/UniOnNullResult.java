@@ -6,6 +6,7 @@ import io.smallrye.reactive.Uni;
 import java.util.NoSuchElementException;
 import java.util.function.Supplier;
 
+import static io.smallrye.reactive.helpers.ParameterValidation.SUPPLIER_PRODUCED_NULL;
 import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
 
 
@@ -52,7 +53,7 @@ public class UniOnNullResult<T> {
             }
 
             if (throwable == null) {
-                emitter.failure(new NullPointerException("The supplier returned `null`"));
+                emitter.failure(new NullPointerException(SUPPLIER_PRODUCED_NULL));
             } else {
                 emitter.failure(throwable);
             }
@@ -101,7 +102,7 @@ public class UniOnNullResult<T> {
                 }
 
                 if (produced == null) {
-                    return Uni.createFrom().failure(new NullPointerException("The supplier returned `null`"));
+                    return Uni.createFrom().failure(new NullPointerException(SUPPLIER_PRODUCED_NULL));
                 } else {
                     return produced;
                 }
@@ -136,7 +137,7 @@ public class UniOnNullResult<T> {
             }
             T outcome = supplier.get();
             if (outcome == null) {
-                throw new NullPointerException("The supplier returned `null`");
+                throw new NullPointerException(SUPPLIER_PRODUCED_NULL);
             }
             return outcome;
         });

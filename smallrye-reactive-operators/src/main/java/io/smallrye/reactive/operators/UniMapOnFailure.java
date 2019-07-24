@@ -6,6 +6,7 @@ import io.smallrye.reactive.Uni;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
+import static io.smallrye.reactive.helpers.ParameterValidation.SUPPLIER_PRODUCED_NULL;
 import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
 
 public class UniMapOnFailure<I, O> extends UniOperator<I, O> {
@@ -51,7 +52,7 @@ public class UniMapOnFailure<I, O> extends UniOperator<I, O> {
                         return;
                     }
                     if (outcome == null) {
-                        subscriber.onFailure(new NullPointerException("The supplier returned `null`"));
+                        subscriber.onFailure(new NullPointerException(SUPPLIER_PRODUCED_NULL));
                     } else {
                         subscriber.onFailure(outcome);
                     }

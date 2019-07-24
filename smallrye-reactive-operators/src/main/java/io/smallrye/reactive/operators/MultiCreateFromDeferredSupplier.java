@@ -5,6 +5,7 @@ import io.smallrye.reactive.Multi;
 
 import java.util.function.Supplier;
 
+import static io.smallrye.reactive.helpers.ParameterValidation.SUPPLIER_PRODUCED_NULL;
 import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
 
 public class MultiCreateFromDeferredSupplier<T> extends MultiOperator<Void, T> {
@@ -20,7 +21,7 @@ public class MultiCreateFromDeferredSupplier<T> extends MultiOperator<Void, T> {
         return Flowable.defer(() -> {
             Multi<? extends T> multi = supplier.get();
             if (multi == null) {
-                throw new NullPointerException("The supplier returned `null`");
+                throw new NullPointerException(SUPPLIER_PRODUCED_NULL);
             }
             if (multi instanceof AbstractMulti) {
                 //noinspection unchecked

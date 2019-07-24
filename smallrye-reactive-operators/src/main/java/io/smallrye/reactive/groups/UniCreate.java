@@ -15,8 +15,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
-import static io.smallrye.reactive.helpers.ParameterValidation.validate;
+import static io.smallrye.reactive.helpers.ParameterValidation.*;
 
 
 /**
@@ -289,7 +288,7 @@ public class UniCreate {
             }
 
             if (throwable == null) {
-                emitter.failure(new NullPointerException("The supplier returned `null`"));
+                emitter.failure(new NullPointerException(SUPPLIER_PRODUCED_NULL));
             } else {
                 emitter.failure(throwable);
             }

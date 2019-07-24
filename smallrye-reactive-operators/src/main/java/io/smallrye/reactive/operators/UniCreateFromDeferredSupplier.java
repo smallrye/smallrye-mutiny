@@ -2,6 +2,7 @@ package io.smallrye.reactive.operators;
 
 
 import io.smallrye.reactive.Uni;
+import io.smallrye.reactive.helpers.ParameterValidation;
 
 import java.util.function.Supplier;
 
@@ -31,7 +32,7 @@ public class UniCreateFromDeferredSupplier<T> extends UniOperator<Void, T> {
 
         if (uni == null) {
             subscriber.onSubscribe(CANCELLED);
-            subscriber.onFailure(new NullPointerException("The supplier produced `null`"));
+            subscriber.onFailure(new NullPointerException(ParameterValidation.SUPPLIER_PRODUCED_NULL));
         } else {
             uni.subscribe().withSubscriber(subscriber);
         }

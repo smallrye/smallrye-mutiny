@@ -4,6 +4,7 @@ package io.smallrye.reactive.operators;
 
 import io.smallrye.reactive.Uni;
 import io.smallrye.reactive.helpers.Infrastructure;
+import io.smallrye.reactive.helpers.ParameterValidation;
 import io.smallrye.reactive.subscription.UniSubscriber;
 import io.smallrye.reactive.subscription.UniSubscription;
 
@@ -102,7 +103,7 @@ public class UniFailOnTimeout<I> extends UniOperator<I, I> {
             return;
         }
         if (throwable == null) {
-            subscriber.onFailure(new NullPointerException("`supplier` produced a `null` value"));
+            subscriber.onFailure(new NullPointerException(ParameterValidation.SUPPLIER_PRODUCED_NULL));
         } else {
             subscriber.onFailure(throwable);
         }

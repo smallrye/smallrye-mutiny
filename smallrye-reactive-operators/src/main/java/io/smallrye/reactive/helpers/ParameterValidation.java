@@ -8,6 +8,10 @@ import java.time.Duration;
  */
 public class ParameterValidation {
 
+    public static final String SUPPLIER_PRODUCED_NULL = "The supplier returned `null`";
+    public static final String MAPPER_RETURNED_NULL = "The mapper returned `null`";
+
+
     private ParameterValidation() {
         // avoid direct instantiation
     }

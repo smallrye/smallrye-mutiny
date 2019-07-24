@@ -20,6 +20,7 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+import static io.smallrye.reactive.helpers.ParameterValidation.SUPPLIER_PRODUCED_NULL;
 import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
 
 
@@ -171,7 +172,7 @@ public class MultiCreate {
                 return;
             }
             if (stream == null) {
-                emitter.failure(new NullPointerException("The supplier returned `null`"));
+                emitter.failure(new NullPointerException(SUPPLIER_PRODUCED_NULL));
                 return;
             }
             AtomicBoolean failed = new AtomicBoolean();
