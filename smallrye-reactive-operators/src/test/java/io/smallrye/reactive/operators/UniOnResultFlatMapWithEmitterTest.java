@@ -47,8 +47,10 @@ public class UniOnResultFlatMapWithEmitterTest {
         );
         uni.subscribe().withSubscriber(test1);
         uni.subscribe().withSubscriber(test2);
-        test1.await().assertCompletedSuccessfully().assertResult(3).assertNoFailure();
-        test2.await().assertCompletedSuccessfully().assertResult(4).assertNoFailure();
+        test1.await().assertCompletedSuccessfully().assertNoFailure();
+        test2.await().assertCompletedSuccessfully().assertNoFailure();
+        assertThat(test1.getResult()).isBetween(3, 4);
+        assertThat(test2.getResult()).isBetween(3, 4);
     }
 
     @Test
