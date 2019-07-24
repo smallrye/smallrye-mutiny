@@ -39,6 +39,7 @@ public class UniOnResult<T> {
      * For asynchronous composition, see {@link #mapToUni(Function)}.
      *
      * @param mapper the mapper function, must not be {@code null}
+     * @param <R> the type of Uni result
      * @return the new {@link Uni}
      */
     public <R> Uni<R> mapToResult(Function<? super T, ? extends R> mapper) {

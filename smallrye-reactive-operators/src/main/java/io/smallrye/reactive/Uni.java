@@ -39,7 +39,7 @@ public interface Uni<T> {
      * {@link io.smallrye.reactive.subscription.UniEmitter}, direct values, {@link Exception}...
      *
      * <p>Examples:</p>
-     * <pre><code>
+     * <pre>{@code
      * Uni.from().value(1); // Emit 1 at subscription time
      * Uni.from().value(() -> x); // Emit x at subscription time, the supplier is invoked for each subscription
      * Uni.from().completionState(cs); // Emit the result from this completion stage
@@ -49,7 +49,7 @@ public interface Uni<T> {
      * Uni.from().nullValue(); // Emit null at subscription time
      * Uni.from().nothing(); // Create a Uni not emitting any signal
      * Uni.from().publisher(publisher); // Create a Uni from a Reactive Streams Publisher
-     * </code></pre>
+     * }</pre>
      *
      * @return the factory used to create {@link Uni} instances.
      * @see UniCreate
@@ -64,7 +64,7 @@ public interface Uni<T> {
      * configures non-blocking retrieval of the result and failure.
      *
      * <p>Examples:</p>
-     * <pre><code>
+     * <pre>{@code
      *     Uni<String> uni = ...;
      *
      *    Subscription sub = uni.subscribe().with( // The return subscription can be used to cancel the operation
@@ -77,7 +77,7 @@ public interface Uni<T> {
      *
      *    CompletableFuture future = uni.subscribe().asCompletableFuture(); // Get a CompletionStage receiving the result or failure
      *    // Cancelling the returned future cancels the subscription.
-     * </code></pre>
+     * }</pre>
      *
      * @return the object to configure the subscription.
      * @see #await() <code>uni.await() </code>for waiting (blocking the caller thread) until the resolution of the observed Uni.
@@ -90,12 +90,12 @@ public interface Uni<T> {
      * into a {@link java.util.concurrent.CompletionException}.
      *
      * <p>Examples:</p>
-     * <pre><code>
-     * Uni&lt;T&gt; uni = ...;
+     * <pre>{@code
+     * Uni<T> uni = ...;
      * T res = uni.await().indefinitely(); // Await indefinitely until it get the result.
      * T res = uni.await().atMost(Duration.ofMillis(1000)); // Awaits at most 1s. After that, a TimeoutException is thrown
      * Optional<T> res = uni.await().asOptional().indefinitely(); // Retrieves the result as an Optional, empty if the result is null
-     * </code></pre>
+     * }</pre>
      *
      * @return the object to configure the retrieval.
      */
@@ -106,11 +106,11 @@ public interface Uni<T> {
      * Configures the action to execute when the observed {@link Uni} emits the result (potentially {@code null}).
      *
      * <p>Examples:</p>
-     * <pre><code>
-     * Uni&lt;T&gt; uni = ...;
+     * <pre>{@code
+     * Uni<T> uni = ...;
      * T res = uni.onResult().mapToResult(x -> ...); // Map to another result
      * T res = uni.onResult().mapToUni(x -> ...); // Map to another Uni (flatMap)
-     * </code></pre>
+     * }</pre>
      *
      * @return the object to configure the action to execute when a result is emitted
      * @see #onNullResult()
@@ -142,6 +142,7 @@ public interface Uni<T> {
      * If {@code this} or {@code other} fails, the other resolution is cancelled.
      *
      * @param other the other {@link Uni}, must not be {@code null}
+     * @param <T2> the type to pair
      * @return the combination of the 2 results.
      * @see #and() <code>and</code> for more options on the combination of results
      * @see Uni#zip() <code>Uni.zip()</code> for the equivalent static operator

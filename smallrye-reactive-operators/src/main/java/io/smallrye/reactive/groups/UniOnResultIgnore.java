@@ -51,6 +51,7 @@ public class UniOnResultIgnore<T> {
      * Ignores the result fired by the current {@link Uni} and continue with the given {@link Uni}.
      *
      * @param other the uni to continue with, must not be {@code null}
+     * @param <O> the type of the new Uni
      * @return the new Uni
      */
     public <O> Uni<O> andSwitchTo(Uni<? extends O> other) {
@@ -62,6 +63,7 @@ public class UniOnResultIgnore<T> {
      * Ignores the result fired by the current {@link Uni} and continue with the {@link Uni} produced by the given supplier.
      *
      * @param supplier the supplier to produce the new {@link Uni}, must not be {@code null}, must not produce {@code null}
+     * @param <O> the type of the new Uni
      * @return the new Uni
      */
     public <O> Uni<O> andSwitchTo(Supplier<Uni<? extends O>> supplier) {
@@ -81,7 +83,7 @@ public class UniOnResultIgnore<T> {
     }
 
     /**
-     * Ignores the result fired by the current {@link Uni}, and continue with a {@link null} result.
+     * Ignores the result fired by the current {@link Uni}, and continue with a {@code null} result.
      *
      * @return the new {@link Uni}
      */

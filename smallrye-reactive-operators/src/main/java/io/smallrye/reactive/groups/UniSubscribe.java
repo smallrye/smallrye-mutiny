@@ -43,6 +43,7 @@ public class UniSubscribe<T> {
      * receiving by {@link UniSubscriber#onFailure(Throwable)}.
      *
      * @param subscriber the subscriber, must not be {@code null}
+     * @param <S> the type of subscriber returned
      * @return the passed subscriber
      */
     public <S extends UniSubscriber<? super T>> S withSubscriber(S subscriber) {
