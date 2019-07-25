@@ -142,7 +142,7 @@ public interface Uni<T> {
      * If {@code this} or {@code other} fails, the other resolution is cancelled.
      *
      * @param other the other {@link Uni}, must not be {@code null}
-     * @param <T2> the type to pair
+     * @param <T2>  the type to pair
      * @return the combination of the 2 results.
      * @see #and() <code>and</code> for more options on the combination of results
      * @see Uni#zip() <code>Uni.zip()</code> for the equivalent static operator
@@ -365,4 +365,23 @@ public interface Uni<T> {
 
     //TODO
     UniAdapt<T> adapt();
+
+    /**
+     * Creates an instance of {@link Multi} from this {@link Uni}.
+     * <p>
+     * When a subscriber subscribes to the returned {@link Multi} and <strong>request</strong> a result, it subscribes
+     * to this {@link Uni} and the events from this {@link Uni} are propagated to the {@link Multi}:
+     * <ul>
+     * <li>if this {@link Uni} emits a non-{@code null} result - this result is propagated to the {@link Multi}
+     * and followed with the completion event</li>
+     * <li>if this {@link Uni} emits a {@code null} result - the {@link Multi} fires the completion event</li>
+     * <li>if this {@link Uni} emits a failure, this failure event is propagated by the {@link Multi}</li>
+     * </ul>
+     * <p>
+     * It's important to note that the subscription to this {@link Uni} happens when the subscriber to the produced
+     * {@link Multi} requests results, and not at subscription time.
+     *
+     * @return the produced {@link Multi}, never {@code null}
+     */
+    Multi<T> toMulti();
 }

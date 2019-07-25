@@ -48,6 +48,8 @@ public abstract class AbstractMulti<T> implements Multi<T> {
                             }
                         }
                     });
+                } else {
+                    s.cancel();
                 }
             }
 

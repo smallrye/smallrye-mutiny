@@ -1,5 +1,6 @@
 package io.smallrye.reactive.operators;
 
+import io.smallrye.reactive.Multi;
 import io.smallrye.reactive.Uni;
 import io.smallrye.reactive.groups.*;
 import io.smallrye.reactive.subscription.UniSubscription;
@@ -113,5 +114,10 @@ public abstract class AbstractUni<T> implements Uni<T> {
     @Override
     public UniAdapt<T> adapt() {
         return new UniAdapt<>(this);
+    }
+
+    @Override
+    public Multi<T> toMulti() {
+        return Multi.createFrom().publisher(adapt().toPublisher());
     }
 }

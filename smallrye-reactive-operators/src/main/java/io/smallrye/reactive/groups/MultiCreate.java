@@ -2,6 +2,7 @@ package io.smallrye.reactive.groups;
 
 import io.reactivex.Flowable;
 import io.smallrye.reactive.Multi;
+import io.smallrye.reactive.Uni;
 import io.smallrye.reactive.operators.*;
 import io.smallrye.reactive.subscription.BackPressureStrategy;
 import io.smallrye.reactive.subscription.MultiEmitter;
@@ -130,6 +131,28 @@ public class MultiCreate {
                 return Flowable.fromPublisher(actual);
             }
         };
+    }
+
+    /**
+     * Creates an instance of {@link Multi} from the given {@link Uni}.
+     * <p>
+     * When a subscriber subscribes to the returned {@link Multi} and <strong>request</strong> a result, it subscribes
+     * to the given {@link Uni} and the events from this {@link Uni} are propagated to the {@link Multi}:
+     * <ul>
+     * <li>if the {@link Uni} emits a non-{@code null} result - this result is propagated to the {@link Multi}
+     * and followed with the completion event</li>
+     * <li>if the {@link Uni} emits a {@code null} result - the {@link Multi} fires the completion event</li>
+     * <li>if the {@link Uni} emits a failure, this failure event is propagated by the {@link Multi}</li>
+     * </ul>
+     * <p>
+     * It's important to note that the subscription to the {@link Uni} happens when the subscriber to the produced
+     * {@link Multi} requests results, and not at subscription time.
+     *
+     * @param uni the uni, must not be {@code null}
+     * @return the produced {@link Multi}, never {@code null}
+     */
+    public <T> Multi<T> uni(Uni<T> uni) {
+        return nonNull(uni, "uni").toMulti();
     }
 
     /**

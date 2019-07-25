@@ -5,9 +5,9 @@ import io.smallrye.reactive.subscription.UniSubscriber;
 import io.smallrye.reactive.subscription.UniSubscription;
 import org.reactivestreams.Publisher;
 
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
+import static io.smallrye.reactive.helpers.EmptyUniSubscription.CANCELLED;
 import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
 
 public class UniToPublisher {
@@ -28,8 +28,8 @@ public class UniToPublisher {
         // 4. If the uni result is `null` the stream is completed. If the uni result is not `null`, the stream contains
         // the result and the end of stream signal. In the case of error, the stream propagates the error.
         return subscriber -> {
-            AtomicBoolean cancelled = new AtomicBoolean();
             AtomicReference<UniSubscription> upstreamSubscription = new AtomicReference<>();
+
             UniSubscription downstreamSubscription = new UniSubscription() {
                 @Override
                 public synchronized void request(long n) {
@@ -38,7 +38,7 @@ public class UniToPublisher {
                         return;
                     }
 
-                    if (cancelled.get()) {
+                    if (upstreamSubscription.get() == CANCELLED) {
                         return;
                     }
 
@@ -53,19 +53,17 @@ public class UniToPublisher {
 
                         @Override
                         public void onResult(T result) {
-                            if (!cancelled.get()) {
-                                if (result == null) {
-                                    subscriber.onComplete();
-                                } else {
+                            if (upstreamSubscription.getAndSet(CANCELLED) != CANCELLED) {
+                                if (result != null) {
                                     subscriber.onNext(result);
-                                    subscriber.onComplete();
                                 }
+                                subscriber.onComplete();
                             }
                         }
 
                         @Override
                         public void onFailure(Throwable failure) {
-                            if (!cancelled.get()) {
+                            if (upstreamSubscription.getAndSet(CANCELLED) != CANCELLED) {
                                 subscriber.onError(failure);
                             }
                         }
@@ -76,8 +74,7 @@ public class UniToPublisher {
                 public void cancel() {
                     UniSubscription upstream;
                     synchronized (this) {
-                        cancelled.set(true);
-                        upstream = upstreamSubscription.getAndSet(null);
+                        upstream = upstreamSubscription.getAndSet(CANCELLED);
                     }
 
                     if (upstream != null) {
