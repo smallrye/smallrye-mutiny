@@ -38,10 +38,12 @@ public class Tuple3<T1, T2, T3> extends Pair<T1, T2> implements Tuple {
         }
     }
 
+    @Override
     public <T> Tuple3<T, T2, T3> mapResult1(Function<T1, T> mapper) {
         return Tuple3.of(mapper.apply(result1), result2, result3);
     }
 
+    @Override
     public <T> Tuple3<T1, T, T3> mapResult2(Function<T2, T> mapper) {
         return Tuple3.of(result1, mapper.apply(result2), result3);
     }
@@ -61,6 +63,11 @@ public class Tuple3<T1, T2, T3> extends Pair<T1, T2> implements Tuple {
     }
 
     @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), result3);
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) {
             return true;
@@ -73,11 +80,6 @@ public class Tuple3<T1, T2, T3> extends Pair<T1, T2> implements Tuple {
         }
         Tuple3<?, ?, ?> tuple3 = (Tuple3<?, ?, ?>) o;
         return result3.equals(tuple3.result3);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(super.hashCode(), result3);
     }
 
     @Override

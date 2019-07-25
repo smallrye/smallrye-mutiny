@@ -40,14 +40,17 @@ public class Tuple4<T1, T2, T3, T4> extends Tuple3<T1, T2, T3> implements Tuple 
         }
     }
 
+    @Override
     public <T> Tuple4<T, T2, T3, T4> mapResult1(Function<T1, T> mapper) {
         return Tuple4.of(mapper.apply(result1), result2, result3, result4);
     }
 
+    @Override
     public <T> Tuple4<T1, T, T3, T4> mapResult2(Function<T2, T> mapper) {
         return Tuple4.of(result1, mapper.apply(result2), result3, result4);
     }
 
+    @Override
     public <T> Tuple4<T1, T2, T, T4> mapResult3(Function<T3, T> mapper) {
         return Tuple4.of(result1, result2, mapper.apply(result3), result4);
     }

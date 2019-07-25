@@ -22,18 +22,22 @@ public class Tuple5<T1, T2, T3, T4, T5> extends Tuple4<T1, T2, T3, T4> implement
         return result5;
     }
 
+    @Override
     public <T> Tuple5<T, T2, T3, T4, T5> mapResult1(Function<T1, T> mapper) {
         return Tuple5.of(mapper.apply(result1), result2, result3, result4, result5);
     }
 
+    @Override
     public <T> Tuple5<T1, T, T3, T4, T5> mapResult2(Function<T2, T> mapper) {
         return Tuple5.of(result1, mapper.apply(result2), result3, result4, result5);
     }
 
+    @Override
     public <T> Tuple5<T1, T2, T, T4, T5> mapResult3(Function<T3, T> mapper) {
         return Tuple5.of(result1, result2, mapper.apply(result3), result4, result5);
     }
 
+    @Override
     public <T> Tuple5<T1, T2, T3, T, T5> mapResult4(Function<T4, T> mapper) {
         return Tuple5.of(result1, result2, result3, mapper.apply(result4), result5);
     }
