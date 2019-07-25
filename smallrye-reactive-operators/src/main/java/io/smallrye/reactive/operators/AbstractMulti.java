@@ -3,6 +3,7 @@ package io.smallrye.reactive.operators;
 import io.reactivex.Flowable;
 import io.reactivex.exceptions.MissingBackpressureException;
 import io.smallrye.reactive.Multi;
+import io.smallrye.reactive.Uni;
 import io.smallrye.reactive.groups.MultiOnResult;
 import io.smallrye.reactive.groups.MultiSubscribe;
 import io.smallrye.reactive.subscription.BackPressureFailure;
@@ -97,5 +98,21 @@ public abstract class AbstractMulti<T> implements Multi<T> {
     @Override
     public MultiSubscribe<T> subscribe() {
         return new MultiSubscribe<>(this);
+    }
+
+    @Override
+    public Uni<T> toUni() {
+        return Uni.createFrom().publisher(this);
+    }
+
+    @Override
+    public Multi<T> onCancellation(Runnable callback) {
+        return new AbstractMulti<T>() {
+
+            @Override
+            protected Flowable<T> flowable() {
+                return AbstractMulti.this.flowable().doOnCancel(callback::run);
+            }
+        };
     }
 }

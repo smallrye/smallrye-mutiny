@@ -1,5 +1,6 @@
 package io.smallrye.reactive.groups;
 
+import io.smallrye.reactive.Multi;
 import io.smallrye.reactive.Uni;
 import io.smallrye.reactive.adapt.UniAdaptFrom;
 import io.smallrye.reactive.operators.*;
@@ -111,7 +112,7 @@ public class UniCreate {
      * {@code null}, a failure event containing a {@link NullPointerException} is fired.
      *
      * @param supplier the result supplier, must not be {@code null}, can produce {@code null}
-     * @param <T> the type of result
+     * @param <T>      the type of result
      * @return the new {@link Uni}
      */
     public <T> Uni<T> result(Supplier<? extends T> supplier) {
@@ -134,7 +135,7 @@ public class UniCreate {
      * {@code null}) result.
      *
      * @param result the result, can be {@code null}
-     * @param <T> the type of result
+     * @param <T>    the type of result
      * @return the new {@link Uni}
      */
     public <T> Uni<T> result(T result) {
@@ -319,5 +320,30 @@ public class UniCreate {
 
     public <T, X> Uni<T> converterOf(X instance) {
         return UniAdaptFrom.adaptFrom(instance);
+    }
+
+    /**
+     * Creates a {@link Uni} from the given {@link Multi}.
+     * <p>
+     * When a subscriber subscribes to the returned {@link Uni}, it subscribes to the {@link Multi} and requests one
+     * result. The event emitted by the {@link Multi} are then forwarded to the {@link Uni}:
+     *
+     * <ul>
+     * <li>on result event, the result is fired by the produced {@link Uni}</li>
+     * <li>on failure event, the failure is fired by the produced {@link Uni}</li>
+     * <li>on completion event, a {@code null} result is fired by the produces {@link Uni}</li>
+     * <li>any result or failure events received after the first event is dropped</li>
+     * </ul>
+     * <p>
+     * If the subscription on the produced {@link Uni} is cancelled, the subscription to the passed {@link Multi} is
+     * also cancelled.
+     *
+     * @param multi the multi, must not be {@code null}
+     * @param <T>   the type of result
+     * @return the produced {@link Uni}
+     */
+    public <T> Uni<T> multi(Multi<T> multi) {
+        nonNull(multi, "multi");
+        return multi.toUni();
     }
 }
