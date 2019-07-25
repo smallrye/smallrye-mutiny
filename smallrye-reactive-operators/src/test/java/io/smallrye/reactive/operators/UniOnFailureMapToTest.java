@@ -106,7 +106,7 @@ public class UniOnFailureMapToTest {
     }
 
     @Test
-    public void testThatMapperIsNotCallOnResult() {
+    public void testThatMapperIsNotCalledOnResult() {
         UniAssertSubscriber<Integer> ts = UniAssertSubscriber.create();
         AtomicBoolean called = new AtomicBoolean();
         Uni.createFrom().result(1)
@@ -118,4 +118,36 @@ public class UniOnFailureMapToTest {
         ts.assertResult(1);
         assertThat(called).isFalse();
     }
+
+    @Test
+    public void testThatMapperIsNotCalledOnNonMatchingPredicate() {
+        UniAssertSubscriber<Integer> ts = UniAssertSubscriber.create();
+        AtomicBoolean called = new AtomicBoolean();
+        Uni.createFrom().<Integer>failure(new IllegalStateException("boom"))
+                .onFailure(IOException.class).mapTo(f -> {
+            called.set(true);
+            return new IllegalArgumentException("Karamba");
+        })
+                .subscribe().withSubscriber(ts);
+        ts.assertCompletedWithFailure().assertFailure(IllegalStateException.class, "boom");
+        assertThat(called).isFalse();
+    }
+
+    @Test
+    public void testThatMapperIsNotCalledWhenPredicateThrowsAnException() {
+        UniAssertSubscriber<Integer> ts = UniAssertSubscriber.create();
+        AtomicBoolean called = new AtomicBoolean();
+        Uni.createFrom().<Integer>failure(new IllegalStateException("boom"))
+                .onFailure(t -> {
+                    throw new IllegalArgumentException("boomboom");
+                }).mapTo(f -> {
+            called.set(true);
+            return new RuntimeException("Karamba");
+        })
+                .subscribe().withSubscriber(ts);
+        ts.assertCompletedWithFailure().assertFailure(IllegalArgumentException.class, "boomboom");
+        assertThat(called).isFalse();
+    }
+
+
 }
