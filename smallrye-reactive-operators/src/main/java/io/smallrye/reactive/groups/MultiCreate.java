@@ -86,7 +86,28 @@ public class MultiCreate {
      * @return the produced {@link Multi}
      */
     public <T> Multi<T> completionStage(Supplier<? extends CompletionStage<? extends T>> supplier) {
-        return new MultiCreateFromCompletionStage<>(nonNull(supplier, "supplier"));
+        nonNull(supplier, "supplier");
+        return emitter(emitter -> {
+            CompletionStage<? extends T> stage;
+            try {
+                stage = supplier.get();
+            } catch (Exception e) {
+                emitter.failure(e);
+                return;
+            }
+            if (stage == null) {
+                throw new NullPointerException(SUPPLIER_PRODUCED_NULL);
+            }
+            emitter.onTermination(() -> stage.toCompletableFuture().cancel(false));
+            stage.whenComplete((r, f) -> {
+                if (f != null) {
+                    emitter.failure(f);
+                } else if (r != null) {
+                    emitter.result(r);
+                }
+                emitter.complete();
+            });
+        }, BackPressureStrategy.LATEST);
     }
 
     /**
@@ -220,8 +241,8 @@ public class MultiCreate {
      * @return the new {@link Multi}
      */
     @SafeVarargs
-    public final <T> Multi<T> individualResults(T... results) {
-        return results(Arrays.asList(nonNull(results, "results")));
+    public final <T> Multi<T> results(T... results) {
+        return iterable(Arrays.asList(nonNull(results, "results")));
     }
 
     /**
@@ -233,12 +254,13 @@ public class MultiCreate {
      * {@link IllegalArgumentException}).
      * When all the results have been emitted, the completion event is fired.
      *
-     * @param results the results, must not be {@code null}, must not contain {@code null}
-     * @param <T>     the type of result emitted by the produced Multi
+     * @param iterable the iterable of results, must not be {@code null}, must not contain {@code null}
+     * @param <T>      the type of result emitted by the produced Multi
      * @return the new {@link Multi}
      */
-    public <T> Multi<T> results(Iterable<T> results) {
-        return results(() -> StreamSupport.stream(results.spliterator(), false));
+    public <T> Multi<T> iterable(Iterable<T> iterable) {
+        nonNull(iterable, "iterable");
+        return results(() -> StreamSupport.stream(iterable.spliterator(), false));
     }
 
     /**
@@ -436,7 +458,7 @@ public class MultiCreate {
         if (endExclusive <= startInclusive) {
             throw new IllegalArgumentException("end must be greater than start");
         }
-        return Multi.createFrom().results(() -> IntStream.range(startInclusive, endExclusive).iterator());
+        return Multi.createFrom().iterable(() -> IntStream.range(startInclusive, endExclusive).iterator());
     }
 
 

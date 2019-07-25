@@ -185,4 +185,17 @@ public class MultiAssertSubscriber<T> implements Subscriber<T> {
     public List<Throwable> failures() {
         return failures;
     }
+
+    public MultiAssertSubscriber<T> run(Runnable action) {
+        try {
+            action.run();
+        } catch (Throwable e) {
+            if (e instanceof AssertionError) {
+                throw e;
+            } else {
+                throw new AssertionError(e);
+            }
+        }
+        return this;
+    }
 }
