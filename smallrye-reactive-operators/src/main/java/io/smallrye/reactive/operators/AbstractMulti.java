@@ -9,6 +9,10 @@ import io.smallrye.reactive.subscription.BackPressureFailure;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
+import java.util.concurrent.atomic.AtomicReference;
+
+import static io.smallrye.reactive.helpers.EmptyUniSubscription.CANCELLED;
+
 public abstract class AbstractMulti<T> implements Multi<T> {
 
 
@@ -20,29 +24,65 @@ public abstract class AbstractMulti<T> implements Multi<T> {
         if (flowable == null) {
             throw new IllegalStateException("Invalid call to subscription, we don't have a stream");
         }
+        //noinspection SubscriberImplementation
         flowable.subscribe(new Subscriber<T>() {
+
+            AtomicReference<Subscription> reference = new AtomicReference<>();
+
             @Override
             public void onSubscribe(Subscription s) {
-                subscriber.onSubscribe(s);
+                if (reference.compareAndSet(null, s)) {
+                    subscriber.onSubscribe(new Subscription() {
+                        @Override
+                        public void request(long n) {
+                            // pass through
+                            s.request(n);
+                        }
+
+                        @Override
+                        public void cancel() {
+                            try {
+                                s.cancel();
+                            } finally {
+                                reference.set(CANCELLED);
+                            }
+                        }
+                    });
+                }
             }
 
             @Override
             public void onNext(T result) {
-                subscriber.onNext(result);
+                try {
+                    subscriber.onNext(result);
+                } catch (Exception e) {
+                    Subscription subscription = reference.getAndSet(CANCELLED);
+                    if (subscription != null) {
+                        subscription.cancel();
+                    }
+                }
             }
 
             @Override
             public void onError(Throwable failure) {
-                if (failure instanceof MissingBackpressureException) {
-                    subscriber.onError(new BackPressureFailure(failure.getMessage()));
-                } else {
-                    subscriber.onError(failure);
+                try {
+                    if (failure instanceof MissingBackpressureException) {
+                        subscriber.onError(new BackPressureFailure(failure.getMessage()));
+                    } else {
+                        subscriber.onError(failure);
+                    }
+                } finally {
+                    reference.set(CANCELLED);
                 }
             }
 
             @Override
             public void onComplete() {
-                subscriber.onComplete();
+                try {
+                    subscriber.onComplete();
+                } finally {
+                    reference.set(CANCELLED);
+                }
             }
         });
     }
