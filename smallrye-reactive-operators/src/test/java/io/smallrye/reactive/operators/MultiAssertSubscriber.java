@@ -181,4 +181,8 @@ public class MultiAssertSubscriber<T> implements Subscriber<T> {
     public List<T> results() {
         return results;
     }
+
+    public List<Throwable> failures() {
+        return failures;
+    }
 }

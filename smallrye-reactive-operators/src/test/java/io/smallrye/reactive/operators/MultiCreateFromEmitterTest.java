@@ -51,6 +51,24 @@ public class MultiCreateFromEmitterTest {
     }
 
     @Test
+    public void testWhenConsumerThrowsAnException() {
+        AtomicBoolean onTerminationCalled = new AtomicBoolean();
+        MultiAssertSubscriber<Integer> ts = MultiAssertSubscriber.create();
+        Multi<Integer> multi = Multi.createFrom().emitter(emitter -> {
+            emitter.onTermination(() -> onTerminationCalled.set(true));
+            emitter.result(1);
+            emitter.result(2);
+           throw new IllegalStateException("boom");
+        });
+        multi.subscribe(ts);
+        ts.assertSubscribed()
+                .request(Long.MAX_VALUE)
+                .assertHasFailedWith(IllegalStateException.class, "boom")
+                .assertReceived(1, 2);
+        assertThat(onTerminationCalled).isTrue();
+    }
+
+    @Test
     public void testWithRequests() {
         AtomicInteger terminated = new AtomicInteger();
         Multi.createFrom().emitter(emitter -> {
