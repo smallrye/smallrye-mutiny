@@ -21,8 +21,9 @@ public interface MultiEmitter<T> {
      * Calling this method after a failure or a completion events has no effect.
      *
      * @param result the result, must not be {@code null}
+     * @return this emitter, so firing result events can be chained.
      */
-    void result(T result);
+    MultiEmitter<T> result(T result);
 
     /**
      * Emits a {@code failure} event downstream with the given exception.
@@ -41,12 +42,14 @@ public interface MultiEmitter<T> {
     void complete();
 
     /**
-     * Attaches a @{code cancellation} event handler invoked when the downstream {@link Subscription} is cancelled.
-     * This method allow propagating the cancellation to the source and potentially cleanup resources.
+     * Attaches a @{code termination} event handler invoked when the downstream {@link Subscription} is cancelled,
+     * or when the emitter has emitted either a {@code completion} or {@code failure} event.
+     * <p>
+     * This method allows cleanup resources once the emitter can be disposed (has reached a terminal state).
      *
-     * @param onCancel the action to run on cancellation, must not be {@code null}
+     * @param onTermination the action to run on termination, must not be {@code null}
      * @return this emitter
      */
-    MultiEmitter<T> onCancellation(Runnable onCancel);
+    MultiEmitter<T> onTermination(Runnable onTermination);
 
 }

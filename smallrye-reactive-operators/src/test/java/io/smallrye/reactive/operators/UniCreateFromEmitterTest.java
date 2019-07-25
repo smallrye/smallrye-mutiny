@@ -6,6 +6,7 @@ import io.smallrye.reactive.subscription.UniSubscriber;
 import io.smallrye.reactive.subscription.UniSubscription;
 import org.junit.Test;
 
+import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
@@ -34,30 +35,62 @@ public class UniCreateFromEmitterTest {
 
         subscriber.assertCompletedSuccessfully().assertResult(1);
         // Other signals are dropped
-        assertThat(((DefaultUniEmitter) reference.get()).isCancelled()).isTrue();
+        assertThat(((DefaultUniEmitter) reference.get()).isTerminated()).isTrue();
     }
 
     @Test
-    public void testWithOnCancellationAction() {
+    public void testWithOnTerminationActionWithCancellation() {
         UniAssertSubscriber<Integer> subscriber = UniAssertSubscriber.create();
-        AtomicInteger onCancellationCalled = new AtomicInteger();
+        AtomicInteger onTerminationCalled = new AtomicInteger();
         Uni.createFrom().<Integer>emitter(emitter ->
-                emitter.onCancellation(onCancellationCalled::incrementAndGet)).subscribe().withSubscriber(subscriber);
+                emitter.onTermination(onTerminationCalled::incrementAndGet)).subscribe().withSubscriber(subscriber);
 
-        assertThat(onCancellationCalled).hasValue(0);
+        assertThat(onTerminationCalled).hasValue(0);
         subscriber.cancel();
-        assertThat(onCancellationCalled).hasValue(1);
+        assertThat(onTerminationCalled).hasValue(1);
     }
 
     @Test
-    public void testWithCancellation() {
+    public void testWithOnTerminationActionWithResult() {
         UniAssertSubscriber<Integer> subscriber = UniAssertSubscriber.create();
-        AtomicInteger onCancellationCalled = new AtomicInteger();
-        Uni.createFrom().<Integer>emitter(emitter -> emitter.onCancellation(onCancellationCalled::incrementAndGet)).subscribe().withSubscriber(subscriber);
+        AtomicInteger onTerminationCalled = new AtomicInteger();
+        Uni.createFrom().<Integer>emitter(emitter -> {
+            emitter.onTermination(onTerminationCalled::incrementAndGet);
+            emitter.result(1);
+        }).subscribe().withSubscriber(subscriber);
 
-        assertThat(onCancellationCalled).hasValue(0);
+        assertThat(onTerminationCalled).hasValue(1);
         subscriber.cancel();
-        assertThat(onCancellationCalled).hasValue(1);
+        assertThat(onTerminationCalled).hasValue(1);
+
+        subscriber.assertCompletedSuccessfully();
+    }
+
+    @Test
+    public void testWithOnTerminationActionWithFailure() {
+        UniAssertSubscriber<Integer> subscriber = UniAssertSubscriber.create();
+        AtomicInteger onTerminationCalled = new AtomicInteger();
+        Uni.createFrom().<Integer>emitter(emitter -> {
+            emitter.onTermination(onTerminationCalled::incrementAndGet);
+            emitter.failure(new IOException("boom"));
+        }).subscribe().withSubscriber(subscriber);
+
+        assertThat(onTerminationCalled).hasValue(1);
+        subscriber.cancel();
+        assertThat(onTerminationCalled).hasValue(1);
+
+        subscriber.assertFailure(IOException.class, "boom");
+    }
+
+    @Test
+    public void testWithOnTerminationCallback() {
+        UniAssertSubscriber<Integer> subscriber = UniAssertSubscriber.create();
+        AtomicInteger onTerminationCalled = new AtomicInteger();
+        Uni.createFrom().<Integer>emitter(emitter -> emitter.onTermination(onTerminationCalled::incrementAndGet)).subscribe().withSubscriber(subscriber);
+
+        assertThat(onTerminationCalled).hasValue(0);
+        subscriber.cancel();
+        assertThat(onTerminationCalled).hasValue(1);
     }
 
     @Test
@@ -89,7 +122,7 @@ public class UniCreateFromEmitterTest {
         }).subscribe().withSubscriber(subscriber);
 
         subscriber.assertCompletedSuccessfully();
-        assertThat(reference.get()).isInstanceOf(DefaultUniEmitter.class).satisfies(e -> ((DefaultUniEmitter) e).isCancelled());
+        assertThat(reference.get()).isInstanceOf(DefaultUniEmitter.class).satisfies(e -> ((DefaultUniEmitter) e).isTerminated());
     }
 
     @Test
@@ -103,9 +136,9 @@ public class UniCreateFromEmitterTest {
     @Test
     public void testFailureThrownBySubscribersOnResult() {
         AtomicBoolean called = new AtomicBoolean();
-        AtomicBoolean onCancellationCalled = new AtomicBoolean();
+        AtomicBoolean onTerminationCalled = new AtomicBoolean();
         Uni.createFrom().<Integer>emitter(emitter -> {
-            emitter.onCancellation(() -> onCancellationCalled.set(true));
+            emitter.onTermination(() -> onTerminationCalled.set(true));
             try {
                 emitter.result(1);
                 fail("Exception expected");
@@ -132,14 +165,14 @@ public class UniCreateFromEmitterTest {
         });
 
         assertThat(called).isFalse();
-        assertThat(onCancellationCalled).isFalse();
+        assertThat(onTerminationCalled).isFalse();
     }
 
     @Test
     public void testFailureThrownBySubscribersOnFailure() {
-        AtomicBoolean onCancellationCalled = new AtomicBoolean();
+        AtomicBoolean onTerminationCalled = new AtomicBoolean();
         Uni.createFrom().<Integer>emitter(emitter -> {
-            emitter.onCancellation(() -> onCancellationCalled.set(true));
+            emitter.onTermination(() -> onTerminationCalled.set(true));
             try {
                 emitter.failure(new Exception("boom"));
                 fail("Exception expected");
@@ -164,6 +197,6 @@ public class UniCreateFromEmitterTest {
             }
         });
 
-        assertThat(onCancellationCalled).isFalse();
+        assertThat(onTerminationCalled).isFalse();
     }
 }

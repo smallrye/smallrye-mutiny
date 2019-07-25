@@ -30,12 +30,14 @@ public interface UniEmitter<T> {
     void failure(Throwable failure);
 
     /**
-     * Attaches a @{code cancellation} event handler invoked when the downstream {@link UniSubscription} is cancelled.
-     * This method allow propagating the cancellation to the source and potentially cleanup resources.
+     * Attaches a @{code termination} event handler invoked when the downstream {@link UniSubscription} is cancelled,
+     * or when the emitter has emitted either a {@code result} or {@code failure} event.
+     * <p>
+     * This method allows cleanup resources once the emitter can be disposed (has reached a terminal state).
      *
-     * @param onCancel the action to run on cancellation, must not be {@code null}
+     * @param onTermination the action to run on termination, must not be {@code null}
      * @return this emitter
      */
-    UniEmitter<T> onCancellation(Runnable onCancel);
+    UniEmitter<T> onTermination(Runnable onTermination);
 
 }

@@ -48,7 +48,7 @@ public class MaybeUniAdapter implements UniAdapter<Maybe<?>> {
                     () -> sink.result(null)
             );
 
-            sink.onCancellation(() -> {
+            sink.onTermination(() -> {
                 if (!disposable.isDisposed()) {
                     disposable.dispose();
                 }

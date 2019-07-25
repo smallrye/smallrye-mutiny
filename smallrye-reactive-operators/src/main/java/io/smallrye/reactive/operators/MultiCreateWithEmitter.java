@@ -21,27 +21,32 @@ public class MultiCreateWithEmitter<T> extends MultiOperator<Void, T> {
 
     @Override
     protected Flowable<T> flowable() {
-        return Flowable.create(e -> {
+        return Flowable.create(downstream -> {
             MultiEmitter<T> emitter = new MultiEmitter<T>() {
                 @Override
-                public void result(T result) {
-                    e.onNext(result);
+                public MultiEmitter<T> result(T result) {
+                    try {
+                        downstream.onNext(result);
+                    } catch (Exception downstreamFailure) {
+                        downstream.tryOnError(downstreamFailure);
+                    }
+                    return this;
                 }
 
                 @Override
                 public void failure(Throwable failure) {
-                    e.onError(failure);
+                    downstream.tryOnError(failure);
                 }
 
                 @Override
                 public void complete() {
-                    e.onComplete();
+                    downstream.onComplete();
                 }
 
                 @Override
-                public MultiEmitter<T> onCancellation(Runnable onCancel) {
-                    nonNull(onCancel, "onCancel");
-                    e.setCancellable(onCancel::run);
+                public MultiEmitter<T> onTermination(Runnable callback) {
+                    nonNull(callback, "callback");
+                    downstream.setCancellable(callback::run);
                     return this;
                 }
             };
