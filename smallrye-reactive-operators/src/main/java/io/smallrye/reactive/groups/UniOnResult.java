@@ -28,7 +28,7 @@ public class UniOnResult<T> {
      * @return the new {@link Uni}
      */
     public Uni<T> peek(Consumer<? super T> callback) {
-        return new UniPeekOnEvent<>(upstream, null, nonNull(callback, "callback"), null, null, null);
+        return new UniPeekOnEvent<>(upstream, nonNull(callback, "callback"), null);
     }
 
     /**

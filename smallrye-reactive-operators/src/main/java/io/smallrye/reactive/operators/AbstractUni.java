@@ -3,13 +3,9 @@ package io.smallrye.reactive.operators;
 import io.smallrye.reactive.Multi;
 import io.smallrye.reactive.Uni;
 import io.smallrye.reactive.groups.*;
-import io.smallrye.reactive.subscription.UniSubscription;
 import io.smallrye.reactive.tuples.Pair;
-import org.reactivestreams.Publisher;
 
 import java.util.concurrent.Executor;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
@@ -50,7 +46,7 @@ public abstract class AbstractUni<T> implements Uni<T> {
     }
 
     @Override
-    public UniOnFailure<T> onFailure(Class<? extends Throwable> typeOfFailure ) {
+    public UniOnFailure<T> onFailure(Class<? extends Throwable> typeOfFailure) {
         return new UniOnFailure<>(this, typeOfFailure::isInstance);
     }
 
@@ -97,21 +93,6 @@ public abstract class AbstractUni<T> implements Uni<T> {
     }
 
     @Override
-    public Uni<T> onTerminate(BiConsumer<? super T, Throwable> callback) {
-        return new UniPeekOnEvent<>(this, null, null, null, null, nonNull(callback, "callback"));
-    }
-
-    @Override
-    public Uni<T> onCancellation(Runnable callback) {
-        return new UniPeekOnEvent<>(this, null, null, null, nonNull(callback, "callback"), null);
-    }
-
-    @Override
-    public Uni<T> onSubscription(Consumer<? super UniSubscription> callback) {
-        return new UniPeekOnEvent<>(this, nonNull(callback, "callback"), null, null, null, null);
-    }
-
-    @Override
     public UniAdapt<T> adapt() {
         return new UniAdapt<>(this);
     }
@@ -119,5 +100,10 @@ public abstract class AbstractUni<T> implements Uni<T> {
     @Override
     public Multi<T> toMulti() {
         return Multi.createFrom().publisher(adapt().toPublisher());
+    }
+
+    @Override
+    public UniOnEvent<T> on() {
+        return new UniOnEvent<>(this);
     }
 }

@@ -38,4 +38,15 @@ public class Functions {
         }
     }
 
+    /**
+     * A consumer taking 3 parameters.
+     *
+     * @param <A> the type of the first parameter
+     * @param <B> the type of the second parameter
+     * @param <C> the type of the third parameter
+     */
+    public interface TriConsumer<A, B, C> {
+        void accept(A a, B b, C c);
+    }
+
 }

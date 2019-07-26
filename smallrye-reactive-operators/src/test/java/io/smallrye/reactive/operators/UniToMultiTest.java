@@ -83,11 +83,12 @@ public class UniToMultiTest {
     }
 
 
-
     @Test
     public void testWithNoEvents() {
         AtomicBoolean called = new AtomicBoolean();
-        Multi<Void> multi = Uni.createFrom().<Void>nothing().onCancellation(() -> called.set(true)).toMulti();
+        Multi<Void> multi = Uni.createFrom().<Void>nothing()
+                .on().cancellation(() -> called.set(true))
+                .toMulti();
         multi.subscribe().withSubscriber(MultiAssertSubscriber.create(1))
                 .assertNotTerminated()
                 .cancel()
@@ -97,7 +98,8 @@ public class UniToMultiTest {
     @Test
     public void testWithNoEvents2() {
         AtomicBoolean called = new AtomicBoolean();
-        Multi<Void> multi = Multi.createFrom().uni(Uni.createFrom().<Void>nothing().onCancellation(() -> called.set(true)));
+        Multi<Void> multi = Multi.createFrom().uni(Uni.createFrom().<Void>nothing()
+                .on().cancellation(() -> called.set(true)));
         multi.subscribe().withSubscriber(MultiAssertSubscriber.create(1))
                 .assertNotTerminated()
                 .cancel()

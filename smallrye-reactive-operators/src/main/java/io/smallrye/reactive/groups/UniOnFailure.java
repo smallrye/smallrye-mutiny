@@ -31,9 +31,7 @@ public class UniOnFailure<T> {
      * @return the new {@link Uni}
      */
     public Uni<T> peek(Consumer<Throwable> callback) {
-        return new UniPeekOnEvent<>(upstream, null, null,
-                nonNull(callback, "callback"),
-                null, null);
+        return new UniPeekOnEvent<>(upstream, null, nonNull(callback, "callback"));
     }
 
     /**

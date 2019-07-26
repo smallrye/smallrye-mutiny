@@ -4,6 +4,8 @@ import io.reactivex.Flowable;
 import io.reactivex.exceptions.MissingBackpressureException;
 import io.smallrye.reactive.Multi;
 import io.smallrye.reactive.Uni;
+import io.smallrye.reactive.groups.MultiOnEvent;
+import io.smallrye.reactive.groups.MultiOnFailure;
 import io.smallrye.reactive.groups.MultiOnResult;
 import io.smallrye.reactive.groups.MultiSubscribe;
 import io.smallrye.reactive.subscription.BackPressureFailure;
@@ -11,6 +13,7 @@ import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Predicate;
 
 import static io.smallrye.reactive.helpers.EmptyUniSubscription.CANCELLED;
 
@@ -106,13 +109,22 @@ public abstract class AbstractMulti<T> implements Multi<T> {
     }
 
     @Override
-    public Multi<T> onCancellation(Runnable callback) {
-        return new AbstractMulti<T>() {
+    public MultiOnFailure<T> onFailure() {
+        return new MultiOnFailure<>(this, null);
+    }
 
-            @Override
-            protected Flowable<T> flowable() {
-                return AbstractMulti.this.flowable().doOnCancel(callback::run);
-            }
-        };
+    @Override
+    public MultiOnFailure<T> onFailure(Predicate<? super Throwable> predicate) {
+        return new MultiOnFailure<>(this, predicate);
+    }
+
+    @Override
+    public MultiOnFailure<T> onFailure(Class<? extends Throwable> typeOfFailure) {
+        return new MultiOnFailure<>(this, typeOfFailure::isInstance);
+    }
+
+    @Override
+    public MultiOnEvent<T> on() {
+        return new MultiOnEvent<>(this);
     }
 }

@@ -7,8 +7,6 @@ import io.smallrye.reactive.tuples.Pair;
 
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Executor;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -108,8 +106,8 @@ public interface Uni<T> {
      * <p>Examples:</p>
      * <pre>{@code
      * Uni<T> uni = ...;
-     * T res = uni.onResult().mapToResult(x -> ...); // Map to another result
-     * T res = uni.onResult().mapToUni(x -> ...); // Map to another Uni (flatMap)
+     * uni.onResult().mapToResult(x -> ...); // Map to another result
+     * uni.onResult().mapToUni(x -> ...); // Map to another Uni (flatMap)
      * }</pre>
      *
      * @return the object to configure the action to execute when a result is emitted
@@ -192,7 +190,7 @@ public interface Uni<T> {
      * @param callback the callback called with the result (potentially null) or the failure; must not be {@code null}
      * @return the new {@link Uni}
      */
-    Uni<T> onTerminate(BiConsumer<? super T, Throwable> callback);
+//    Uni<T> onTermination(BiConsumer<? super T, Throwable> callback);
 
     /**
      * Produces a new {@link Uni} invoking the given callback when a subscription to the upstream {@link Uni} is
@@ -201,15 +199,7 @@ public interface Uni<T> {
      * @param callback the callback called on cancellation.
      * @return the new {@link Uni}
      */
-    Uni<T> onCancellation(Runnable callback);
-
-    /**
-     * Produces a new {@link Uni} invoking the given consumer when a subscriber subscribes to this {@link Uni}.
-     *
-     * @param callback the consumer, must not be {@code null}
-     * @return the new {@link Uni}
-     */
-    Uni<T> onSubscription(Consumer<? super UniSubscription> callback);
+//    Uni<T> onCancellation(Runnable callback);
 
 
     /**
@@ -228,7 +218,7 @@ public interface Uni<T> {
      * <code>uni.onFailure(IOException.class).recoverWithResult("hello")</code>
      * <p>
      * The fallback value ({@code hello}) will only be used if the upstream uni fire a failure of type
-     * {@code IOException}.*
+     * {@code IOException}.
      *
      * @param predicate the predicate, {@code null} means applied to all failures
      * @return a UniOnFailure configured with the given predicate on which you can specify the on failure action
@@ -243,7 +233,7 @@ public interface Uni<T> {
      * <code>uni.onFailure(IOException.class).recoverWithResult("hello")</code>
      * <p>
      * The fallback value ({@code hello}) will only be used if the upstream uni fire a failure of type
-     * {@code IOException}.*
+     * {@code IOException}.
      *
      * @param typeOfFailure the class of exception, must not be {@code null}
      * @return a UniOnFailure configured with the given predicate on which you can specify the on failure action
@@ -384,4 +374,13 @@ public interface Uni<T> {
      * @return the produced {@link Multi}, never {@code null}
      */
     Multi<T> toMulti();
+
+    /**
+     * Allows adding behavior when various type of events are emitted by the current {@link Uni} (result, failure) or
+     * by the subscriber (cancellation, subscription)
+     *
+     * @return the object to configure the action to execute when events happen
+     */
+    UniOnEvent<T> on();
 }
+
