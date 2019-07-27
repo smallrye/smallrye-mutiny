@@ -1,6 +1,7 @@
 package io.smallrye.reactive.operators;
 
 import io.reactivex.Flowable;
+import io.reactivex.exceptions.CompositeException;
 import io.reactivex.exceptions.MissingBackpressureException;
 import io.smallrye.reactive.Multi;
 import io.smallrye.reactive.Uni;
@@ -74,7 +75,9 @@ public abstract class AbstractMulti<T> implements Multi<T> {
                 try {
                     if (failure instanceof MissingBackpressureException) {
                         subscriber.onError(new BackPressureFailure(failure.getMessage()));
-                    } else {
+                    } else if (failure instanceof CompositeException) {
+                        subscriber.onError(new io.smallrye.reactive.CompositeException(((CompositeException) failure).getExceptions()));
+                    }else {
                         subscriber.onError(failure);
                     }
                 } finally {
