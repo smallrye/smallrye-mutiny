@@ -1,13 +1,10 @@
 package io.smallrye.reactive.groups;
 
 import io.smallrye.reactive.Multi;
-import io.smallrye.reactive.operators.MultiOnCancellation;
-import io.smallrye.reactive.operators.MultiOnRequest;
-import io.smallrye.reactive.operators.MultiOnSubscription;
-import io.smallrye.reactive.operators.MultiOnTermination;
-import io.smallrye.reactive.tuples.Functions;
+import io.smallrye.reactive.operators.*;
 import org.reactivestreams.Subscription;
 
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.LongConsumer;
 import java.util.function.Predicate;
@@ -61,17 +58,15 @@ public class MultiOnEvent<T> {
     }
 
     /**
-     * Attaches an action that is executed when the {@link Multi} emits a result or a failure or when the subscriber
+     * Attaches an action that is executed when the {@link Multi} emits a completion or a failure or when the subscriber
      * cancels the subscription.
      *
-     * @param consumer the consumer receiving the result, the failure and a boolean indicating whether the termination
-     *                 is due to a cancellation (the 2 first parameters would be {@code null} in this case). Must not
-     *                 be {@code null} If the second parameter (the failure) is not {@code null}, the first is
-     *                 necessary {@code null} and the third is necessary {@code false} as it indicates a termination
-     *                 due to a failure.
+     * @param consumer the consumer receiving the failure if any and a boolean indicating whether the termination
+     *                 is due to a cancellation (the failure parameter would be {@code null} in this case). Must not
+     *                 be {@code null}.
      * @return the new {@link Multi}
      */
-    public Multi<T> termination(Functions.TriConsumer<T, Throwable, Boolean> consumer) {
+    public Multi<T> termination(BiConsumer<Throwable, Boolean> consumer) {
         return new MultiOnTermination<>(upstream, nonNull(consumer, "consumer"));
     }
 
@@ -92,12 +87,12 @@ public class MultiOnEvent<T> {
     }
 
     /**
-     * Like {@link #onFailure(Predicate)} but applied to all failures fired by the upstream multi.
+     * Like {@link #failure(Predicate)} but applied to all failures fired by the upstream multi.
      * It allows configuring the on failure behavior (recovery, retry...).
      *
      * @return a MultiOnFailure on which you can specify the on failure action
      */
-    public MultiOnFailure<T> onFailure() {
+    public MultiOnFailure<T> failure() {
         return upstream.onFailure();
     }
 
@@ -114,7 +109,7 @@ public class MultiOnEvent<T> {
      * @param predicate the predicate, {@code null} means applied to all failures
      * @return a MultiOnFailure configured with the given predicate on which you can specify the on failure action
      */
-    public MultiOnFailure<T> onFailure(Predicate<? super Throwable> predicate) {
+    public MultiOnFailure<T> failure(Predicate<? super Throwable> predicate) {
         return upstream.onFailure(predicate);
     }
 
@@ -131,8 +126,11 @@ public class MultiOnEvent<T> {
      * @param typeOfFailure the class of exception, must not be {@code null}
      * @return a MultiOnFailure configured with the given predicate on which you can specify the on failure action
      */
-    public MultiOnFailure<T> onFailure(Class<? extends Throwable> typeOfFailure) {
+    public MultiOnFailure<T> failure(Class<? extends Throwable> typeOfFailure) {
         return upstream.onFailure(typeOfFailure);
     }
 
+    public Multi<T> completion(Runnable action) {
+        return new MultiOnCompletionPeek<>(upstream, action);
+    }
 }
