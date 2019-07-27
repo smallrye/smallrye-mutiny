@@ -2,14 +2,16 @@ package io.smallrye.reactive.groups;
 
 
 import io.smallrye.reactive.Multi;
-import io.smallrye.reactive.Uni;
-import io.smallrye.reactive.operators.*;
+import io.smallrye.reactive.operators.MultiFlatMapOnFailure;
+import io.smallrye.reactive.operators.MultiMapOnFailure;
+import io.smallrye.reactive.operators.MultiOnFailurePeek;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
+import static io.smallrye.reactive.helpers.ParameterValidation.SUPPLIER_PRODUCED_NULL;
 import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
 
 
@@ -45,12 +47,24 @@ public class MultiOnFailure<T> {
     }
 
     public Multi<T> recoverWithResult(T fallback) {
+        nonNull(fallback, "fallback");
         return recoverWithResult(() -> fallback);
     }
 
     public Multi<T> recoverWithResult(Supplier<T> supplier) {
         nonNull(supplier, "supplier");
-        return recoverWithResult(ignored -> supplier.get());
+        return recoverWithResult(ignored -> {
+            T t = supplier.get();
+            if (t == null) {
+                throw new NullPointerException(SUPPLIER_PRODUCED_NULL);
+            } else {
+                return t;
+            }
+        });
+    }
+
+    public Multi<T> recoverWithCompletion() {
+        return recoverWithMulti(Multi.createFrom().empty());
     }
 
     public Multi<T> recoverWithResult(Function<? super Throwable, ? extends T> fallback) {
