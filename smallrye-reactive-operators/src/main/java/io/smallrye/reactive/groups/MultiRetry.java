@@ -6,6 +6,8 @@ import io.smallrye.reactive.operators.MultiRetryAtMost;
 
 import java.util.function.Predicate;
 
+import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
+
 public class MultiRetry<T> {
 
 
@@ -13,8 +15,8 @@ public class MultiRetry<T> {
     private final Predicate<? super Throwable> predicate;
 
     public MultiRetry(Multi<T> upstream, Predicate<? super Throwable> predicate) {
-        this.upstream = upstream;
-        this.predicate = predicate;
+        this.upstream = nonNull(upstream, "upstream");
+        this.predicate = nonNull(predicate, "predicate");
     }
 
     /**
