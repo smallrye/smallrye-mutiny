@@ -2,7 +2,9 @@ package io.smallrye.reactive.groups;
 
 import io.smallrye.reactive.Multi;
 import io.smallrye.reactive.operators.MultiMapOnResult;
+import io.smallrye.reactive.operators.MultiOnResultPeek;
 
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
@@ -29,5 +31,9 @@ public class MultiOnResult<T> {
      */
     public <R> Multi<R> mapToResult(Function<? super T, ? extends R> mapper) {
         return new MultiMapOnResult<>(upstream, nonNull(mapper, "mapper"));
+    }
+
+    public Multi<T> peek(Consumer<T> consumer) {
+        return new MultiOnResultPeek<>(upstream, nonNull(consumer, "consumer"));
     }
 }
