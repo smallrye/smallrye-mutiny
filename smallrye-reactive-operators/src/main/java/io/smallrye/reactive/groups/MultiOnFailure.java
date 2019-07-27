@@ -30,7 +30,7 @@ public class MultiOnFailure<T> {
      * @return the new {@link Multi}
      */
     public Multi<T> peek(Consumer<Throwable> callback) {
-        return new MultiOnFailurePeek<>(upstream, nonNull(callback, "callback"));
+        return new MultiOnFailurePeek<>(upstream, nonNull(callback, "callback"), predicate);
     }
 
     /**
