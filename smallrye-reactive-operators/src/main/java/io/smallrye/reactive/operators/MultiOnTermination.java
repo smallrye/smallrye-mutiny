@@ -2,23 +2,27 @@ package io.smallrye.reactive.operators;
 
 import io.reactivex.Flowable;
 import io.smallrye.reactive.Multi;
-import io.smallrye.reactive.tuples.Functions;
+
+import java.util.function.BiConsumer;
 
 import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
 
 public class MultiOnTermination<T> extends MultiOperator<T, T> {
-    private final Functions.TriConsumer<T, Throwable, Boolean> consumer;
+    private final BiConsumer<Throwable, Boolean> consumer;
 
-    public MultiOnTermination(Multi<T> upstream, Functions.TriConsumer<T, Throwable, Boolean> consumer) {
+    public MultiOnTermination(Multi<T> upstream, BiConsumer<Throwable, Boolean> consumer) {
         super(nonNull(upstream, "upstream"));
         this.consumer = nonNull(consumer, "consumer");
     }
 
     @Override
     protected Flowable<T> flowable() {
+        // Important: callback order:
+        // onError must be first because if onCompletion or onCancel throws an exception, it should be handled
+        // downstream, and not calling the callback again.
         return upstreamAsFlowable()
-                .doOnCancel(() -> consumer.accept(null, null, true))
-                .doOnError(fail -> consumer.accept(null, fail, false))
-                .doOnNext(result -> consumer.accept(result, null, false));
+                .doOnError(fail -> consumer.accept(fail, false))
+                .doOnComplete(() -> consumer.accept(null, false))
+                .doOnCancel(() -> consumer.accept(null, true));
     }
 }

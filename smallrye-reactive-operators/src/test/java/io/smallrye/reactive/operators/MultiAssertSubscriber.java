@@ -98,7 +98,7 @@ public class MultiAssertSubscriber<T> implements Subscriber<T> {
     }
 
     public MultiAssertSubscriber<T> assertNotTerminated() {
-        assertThat(latch.getCount()).isGreaterThan(0);
+        assertThat(latch.getCount()).as("Multi did not complete yet").isGreaterThan(0);
         return this;
     }
 
