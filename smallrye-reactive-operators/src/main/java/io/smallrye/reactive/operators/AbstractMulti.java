@@ -5,16 +5,14 @@ import io.reactivex.exceptions.CompositeException;
 import io.reactivex.exceptions.MissingBackpressureException;
 import io.smallrye.reactive.Multi;
 import io.smallrye.reactive.Uni;
-import io.smallrye.reactive.groups.MultiOnEvent;
-import io.smallrye.reactive.groups.MultiOnFailure;
-import io.smallrye.reactive.groups.MultiOnResult;
-import io.smallrye.reactive.groups.MultiSubscribe;
+import io.smallrye.reactive.groups.*;
 import io.smallrye.reactive.subscription.BackPressureFailure;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
+import java.util.function.UnaryOperator;
 
 import static io.smallrye.reactive.helpers.EmptyUniSubscription.CANCELLED;
 
@@ -129,5 +127,27 @@ public abstract class AbstractMulti<T> implements Multi<T> {
     @Override
     public MultiOnEvent<T> on() {
         return new MultiOnEvent<>(this);
+    }
+
+    @Override
+    public Multi<T> cache() {
+        return new AbstractMulti<T>() {
+            AtomicReference<Flowable<T>> reference = new AtomicReference<>();
+            @Override
+            protected Flowable<T> flowable() {
+                return reference.updateAndGet(flowable -> {
+                    if (flowable == null) {
+                        return AbstractMulti.this.flowable().cache();
+                    } else {
+                        return flowable;
+                    }
+                });
+            }
+        };
+    }
+
+    @Override
+    public MultiCollect<T> collect() {
+        return new MultiCollect<>(this);
     }
 }
