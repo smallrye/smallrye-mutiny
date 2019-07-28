@@ -80,4 +80,16 @@ public interface Multi<T> extends Publisher<T> {
      * @return the object to configure the action to execute when events happen
      */
     MultiOnEvent<T> on();
+
+
+    /**
+     * Creates a new {@link Multi} that subscribes to this upstream and caches all of its events and replays them, to
+     * all the downstream subscribers.
+     *
+     * @return a multi replaying the events from the upstream.
+     */
+    Multi<T> cache();
+
+
+    MultiCollect<T> collect();
 }

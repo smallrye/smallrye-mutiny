@@ -19,7 +19,7 @@ public abstract class MultiOperator<I, O> extends AbstractMulti<O> {
     @SuppressWarnings("unchecked")
     protected Flowable<I> upstreamAsFlowable() {
         if (upstream instanceof AbstractMulti) {
-            ((AbstractMulti<? extends I>) upstream).flowable();
+            return ((AbstractMulti<I>) upstream).flowable();
         }
         return Flowable.fromPublisher(upstream);
     }
