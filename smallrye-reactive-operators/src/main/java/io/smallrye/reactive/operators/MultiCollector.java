@@ -18,6 +18,11 @@ import java.util.stream.Collectors;
 
 public class MultiCollector {
 
+    private MultiCollector() {
+        // avoid direct instantiation.
+    }
+
+
     public static <T> Uni<T> first(Multi<T> upstream) {
         return Uni.createFrom().multi(upstream);
     }
