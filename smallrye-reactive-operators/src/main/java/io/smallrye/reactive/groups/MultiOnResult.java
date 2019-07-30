@@ -4,9 +4,13 @@ import io.smallrye.reactive.Multi;
 import io.smallrye.reactive.Uni;
 import io.smallrye.reactive.operators.MultiMapOnResult;
 import io.smallrye.reactive.operators.MultiOnResultPeek;
+import io.smallrye.reactive.operators.MultiScan;
+import io.smallrye.reactive.operators.MultiScanWithInitialState;
 
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
 
@@ -55,4 +59,40 @@ public class MultiOnResult<T> {
         nonNull(target, "target");
         return mapToResult(target::cast);
     }
+
+    /**
+     * Produces a {@link Multi} that fires results coming from the reduction of the result emitted by this current
+     * {@link Multi} by the passed {@code scanner} reduction function. The produced multi emits the intermediate
+     * results.
+     * <p>
+     * Unlike {@link #scan(BiFunction)}, this operator uses the value produced by the {@code initialStateProducer} as
+     * first value.
+     *
+     * @param scanner the reduction {@link BiFunction}, the resulting {@link Multi} emits the results of this method.
+     *                The method is called for every result emitted by this Multi.
+     * @return the produced {@link Multi}
+     */
+    public <S> Multi<S> scan(Supplier<S> initialStateProducer, BiFunction<S, ? super T, S> scanner) {
+        nonNull(scanner, "scanner");
+        return new MultiScanWithInitialState<>(upstream,
+                nonNull(initialStateProducer, "initialStateProducer"),
+                nonNull(scanner, "scanner"));
+    }
+
+    /**
+     * Produces a {@link Multi} that fires results coming from the reduction of the result emitted by this current
+     * {@link Multi} by the passed {@code scanner} reduction function. The produced multi emits the intermediate
+     * results.
+     * <p>
+     * Unlike {@link #scan(Supplier, BiFunction)}, this operator doesn't take an initial value but takes the first
+     * result emitted by this {@link Multi} as initial value.
+     *
+     * @param scanner the reduction {@link BiFunction}, the resulting {@link Multi} emits the results of this method.
+     *                The method is called for every result emitted by this Multi.
+     * @return the produced {@link Multi}
+     */
+    public Multi<T> scan(BiFunction<T, T, T> scanner) {
+        return new MultiScan<>(upstream, nonNull(scanner, "scanner"));
+    }
+
 }
