@@ -36,7 +36,7 @@ public class MultiFlattenGroup<I> {
                 prefetch, delayFailure, preserveOrdering);
     }
 
-    public MultiFlattenGroup<I> delayFailureUntilCompletion() {
+    public MultiFlattenGroup<I> collectFailures() {
         return new MultiFlattenGroup<>(upstream, concurrency,
                 prefetch, true, preserveOrdering);
     }

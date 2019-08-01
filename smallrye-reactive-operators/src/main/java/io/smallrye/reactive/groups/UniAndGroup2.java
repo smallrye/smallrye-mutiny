@@ -30,8 +30,8 @@ public class UniAndGroup2<T1, T2> extends UniAndGroupIterable<T1> {
      *
      * @return the current {@link UniAndGroup2}
      */
-    public UniAndGroup2<T1, T2> awaitCompletion() {
-        super.awaitCompletion();
+    public UniAndGroup2<T1, T2> collectFailures() {
+        super.collectFailures();
         return this;
     }
 

@@ -12,7 +12,7 @@ import java.util.Arrays;
  * resolved successfully aggregating their results into a {@link Tuple}, or using a combinator function.
  * <p>
  * The produced {@link Uni} fire a failure if one of {@link Uni Unis} produces a failure. This will
- * cause the other {@link Uni} to be cancelled, expect if {@code awaitCompletion()} is invoked, which delay firing
+ * cause the other {@link Uni} to be cancelled, expect if {@code collectFailures()} is invoked, which delay firing
  * the failure until all {@link Uni}s have completed or failed.
  */
 public class UniZip {
@@ -30,7 +30,7 @@ public class UniZip {
      * {@link Pair} or computed using a {@link java.util.function.BiFunction}.
      * <p>
      * The produced {@link Uni} fires a {@code failure} event if one of the {@link Uni Unis} fires a failure. This
-     * will cause the other {@link Uni} to be cancelled, expect if {@link UniAndGroup2#awaitCompletion()} is invoked
+     * will cause the other {@link Uni} to be cancelled, expect if {@link UniAndGroup2#collectFailures()} is invoked
      * which delay the failure event until all {@link Uni}s have fires a result or failure event. If several
      * {@link Uni unis} fire a failure, the propagated failure is a {@link CompositeException} wrapping all the
      * collected failures.
@@ -51,7 +51,7 @@ public class UniZip {
      * using a {@link Functions.Function3}.
      * <p>
      * The produced {@link Uni} fires a {@code failure} event if one of the {@link Uni Unis} fires a failure. This
-     * will cause the other {@link Uni} to be cancelled, expect if {@link UniAndGroup3#awaitCompletion()} is invoked
+     * will cause the other {@link Uni} to be cancelled, expect if {@link UniAndGroup3#collectFailures()} is invoked
      * which delay the failure event until all {@link Uni}s have fires a result or failure event. If several
      * {@link Uni unis} fire a failure, the propagated failure is a {@link CompositeException} wrapping all the
      * collected failures.
@@ -74,7 +74,7 @@ public class UniZip {
      * using a {@link Functions.Function4}.
      * <p>
      * The produced {@link Uni} fires a {@code failure} event if one of the {@link Uni Unis} fires a failure. This
-     * will cause the other {@link Uni} to be cancelled, expect if {@link UniAndGroup4#awaitCompletion()} is invoked
+     * will cause the other {@link Uni} to be cancelled, expect if {@link UniAndGroup4#collectFailures()} is invoked
      * which delay the failure event until all {@link Uni}s have fires a result or failure event. If several
      * {@link Uni unis} fire a failure, the propagated failure is a {@link CompositeException} wrapping all the
      * collected failures.
@@ -100,7 +100,7 @@ public class UniZip {
      * using a {@link Functions.Function4}.
      * <p>
      * The produced {@link Uni} fires a {@code failure} event if one of the {@link Uni Unis} fires a failure. This
-     * will cause the other {@link Uni} to be cancelled, expect if {@link UniAndGroup5#awaitCompletion()} is invoked
+     * will cause the other {@link Uni} to be cancelled, expect if {@link UniAndGroup5#collectFailures()} is invoked
      * which delay the failure event until all {@link Uni}s have fires a result or failure event. If several
      * {@link Uni unis} fire a failure, the propagated failure is a {@link CompositeException} wrapping all the
      * collected failures.
@@ -128,7 +128,7 @@ public class UniZip {
      * Once all {@link Uni} have completed successfully, the result is computed using a {@code combinator} function.
      * <p>
      * The produced {@link Uni} fires a {@code failure} event if one of the {@link Uni Unis} fires a failure. This
-     * will cause the other {@link Uni} to be cancelled, expect if {@link UniAndGroupIterable#awaitCompletion()} is invoked
+     * will cause the other {@link Uni} to be cancelled, expect if {@link UniAndGroupIterable#collectFailures()} is invoked
      * which delay the failure event until all {@link Uni}s have fires a result or failure event. If several
      * {@link Uni unis} fire a failure, the propagated failure is a {@link CompositeException} wrapping all the
      * collected failures.
@@ -145,7 +145,7 @@ public class UniZip {
      * Once all {@link Uni} have completed successfully, the result is computed using a {@code combinator} function.
      * <p>
      * The produced {@link Uni} fires a {@code failure} event if one of the {@link Uni Unis} fires a failure. This
-     * will cause the other {@link Uni} to be cancelled, expect if {@link UniAndGroupIterable#awaitCompletion()} is invoked
+     * will cause the other {@link Uni} to be cancelled, expect if {@link UniAndGroupIterable#collectFailures()} is invoked
      * which delay the failure event until all {@link Uni}s have fires a result or failure event. If several
      * {@link Uni unis} fire a failure, the propagated failure is a {@link CompositeException} wrapping all the
      * collected failures.

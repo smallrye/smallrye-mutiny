@@ -40,7 +40,7 @@ public class UniCombine {
      * combinator function.
      * <p>
      * If one of the combine {@link Uni} fire a failure, the other unis are cancelled, and the resulting
-     * {@link Uni} fires the failure. If {@code awaitCompletion()}  is called,
+     * {@link Uni} fires the failure. If {@code collectFailures()}  is called,
      * it waits for the completion of all the {@link Uni unis} before propagating the failure event. If more than one
      * {@link Uni} failed, a {@link CompositeException} is fired, wrapping the different collected failures.
      * <p>

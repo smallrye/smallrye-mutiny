@@ -15,7 +15,7 @@ public class UniAndGroupIterable<T1> {
     private final Uni<? extends T1> source;
     private final List<? extends Uni<?>> unis;
 
-    private boolean awaitCompletion;
+    private boolean collectFailures;
 
     public UniAndGroupIterable(Iterable<? extends Uni<?>> iterable) {
         this(null, iterable, false);
@@ -26,7 +26,7 @@ public class UniAndGroupIterable<T1> {
     }
 
     @SuppressWarnings("unchecked")
-    public UniAndGroupIterable(Uni<? extends T1> source, Iterable<? extends Uni<?>> iterable, boolean awaitCompletion) {
+    public UniAndGroupIterable(Uni<? extends T1> source, Iterable<? extends Uni<?>> iterable, boolean collectFailures) {
         this.source = source;
         List<? extends Uni<?>> others;
         if (iterable instanceof List) {
@@ -35,17 +35,17 @@ public class UniAndGroupIterable<T1> {
             others = StreamSupport.stream(iterable.spliterator(), false).collect(Collectors.toList());
         }
         this.unis = others;
-        this.awaitCompletion = awaitCompletion;
+        this.collectFailures = collectFailures;
     }
 
 
-    public UniAndGroupIterable<T1> awaitCompletion() {
-        awaitCompletion = true;
+    public UniAndGroupIterable<T1> collectFailures() {
+        collectFailures = true;
         return this;
     }
 
     public <O> Uni<O> combinedWith(Function<List<?>, O> function) {
-        return new UniAndCombination<>(source, unis, nonNull(function, "function"), awaitCompletion);
+        return new UniAndCombination<>(source, unis, nonNull(function, "function"), collectFailures);
     }
 
 }

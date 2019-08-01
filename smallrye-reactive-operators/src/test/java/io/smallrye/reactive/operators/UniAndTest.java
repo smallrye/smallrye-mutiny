@@ -49,7 +49,7 @@ public class UniAndTest {
                 Uni.createFrom().result(1).and().unis(
                         Uni.createFrom().<Integer>failure(new IOException("boom")),
                         Uni.createFrom().<Integer>failure(new IOException("boom 2")))
-                        .awaitCompletion()
+                        .collectFailures()
                         .asTuple()
                         .subscribe().withSubscriber(UniAssertSubscriber.create());
         subscriber.assertCompletedWithFailure()

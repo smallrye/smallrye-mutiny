@@ -15,8 +15,8 @@ public class UniAndGroup3<T1, T2, T3> extends UniAndGroupIterable<T1> {
         super(source, Arrays.asList(o1, o2));
     }
 
-    public UniAndGroup3<T1, T2, T3> awaitCompletion() {
-        super.awaitCompletion();
+    public UniAndGroup3<T1, T2, T3> collectFailures() {
+        super.collectFailures();
         return this;
     }
 

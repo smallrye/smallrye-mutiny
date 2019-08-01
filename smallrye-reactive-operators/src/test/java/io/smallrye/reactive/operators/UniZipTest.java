@@ -51,7 +51,7 @@ public class UniZipTest {
                         Uni.createFrom().result(1),
                         Uni.createFrom().<Integer>failure(new IOException("boom")),
                         Uni.createFrom().<Integer>failure(new IOException("boom 2")))
-                        .awaitCompletion()
+                        .collectFailures()
                         .asTuple()
                         .subscribe().withSubscriber(UniAssertSubscriber.create());
         subscriber.assertCompletedWithFailure()

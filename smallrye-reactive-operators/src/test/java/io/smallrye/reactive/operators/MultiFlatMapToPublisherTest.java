@@ -40,7 +40,7 @@ public class MultiFlatMapToPublisherTest {
         MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(Long.MAX_VALUE);
 
         Multi.createFrom().range(1, 100_001)
-                .onResult().concatMap().delayFailureUntilCompletion()
+                .onResult().concatMap().collectFailures()
                 .mapToMulti(i -> Multi.createFrom().completionStage(CompletableFuture.supplyAsync(() -> i)))
                 .subscribe(subscriber);
 
@@ -61,7 +61,7 @@ public class MultiFlatMapToPublisherTest {
 
         Multi.createFrom().range(1, 100_001)
                 .onResult().concatMap()
-                .delayFailureUntilCompletion()
+                .collectFailures()
                 .mapToMulti(i -> Multi.createFrom().completionStage(CompletableFuture.supplyAsync(() -> i)))
                 .subscribe(subscriber);
 
@@ -82,7 +82,7 @@ public class MultiFlatMapToPublisherTest {
 
         Multi.createFrom().range(1, 100_001)
                 .onResult()
-                .concatMap().delayFailureUntilCompletion()
+                .concatMap().collectFailures()
                 .mapToMulti(
                         i -> Multi.createFrom().completionStage(CompletableFuture.supplyAsync(() -> {
                             if (i == 99000 || i == 100_000) {
@@ -139,7 +139,7 @@ public class MultiFlatMapToPublisherTest {
         MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(Long.MAX_VALUE);
 
         Multi.createFrom().range(1, 4)
-                .onResult().concatMap().delayFailureUntilCompletion().mapToMulti(i -> Multi.createFrom().results(i, i))
+                .onResult().concatMap().collectFailures().mapToMulti(i -> Multi.createFrom().results(i, i))
                 .subscribe(subscriber);
 
         subscriber.assertReceived(1, 1, 2, 2, 3, 3).assertCompletedSuccessfully();
@@ -150,7 +150,7 @@ public class MultiFlatMapToPublisherTest {
         MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(Long.MAX_VALUE);
 
         Multi.createFrom().range(1, 4)
-                .onResult().concatMap().delayFailureUntilCompletion().mapToMulti(i -> {
+                .onResult().concatMap().collectFailures().mapToMulti(i -> {
             if (i == 2) {
                 return Multi.createFrom().failure(new IOException("boom"));
             } else {
@@ -316,7 +316,7 @@ public class MultiFlatMapToPublisherTest {
         MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(Long.MAX_VALUE);
 
         Multi.createFrom().range(1, 5)
-                .onResult().flatMap().delayFailureUntilCompletion().mapToMulti(i -> {
+                .onResult().flatMap().collectFailures().mapToMulti(i -> {
             if (i % 2 == 0) {
                 return Multi.createFrom().failure(new IOException("boom"));
             } else {
