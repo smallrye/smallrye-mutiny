@@ -2,9 +2,12 @@ package io.smallrye.reactive.operators;
 
 import io.smallrye.reactive.CompositeException;
 import io.smallrye.reactive.Multi;
+import io.smallrye.reactive.Uni;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -40,8 +43,11 @@ public class MultiFlatMapToPublisherTest {
         MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(Long.MAX_VALUE);
 
         Multi.createFrom().range(1, 100_001)
-                .onResult().concatMap().collectFailures()
-                .mapToMulti(i -> Multi.createFrom().completionStage(CompletableFuture.supplyAsync(() -> i)))
+                .onResult()
+                .flatMap()
+                .multi(i -> Multi.createFrom().completionStage(CompletableFuture.supplyAsync(() -> i)))
+                .collectFailures()
+                .concatenateResults()
                 .subscribe(subscriber);
 
         subscriber
@@ -60,9 +66,11 @@ public class MultiFlatMapToPublisherTest {
         MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(Long.MAX_VALUE);
 
         Multi.createFrom().range(1, 100_001)
-                .onResult().concatMap()
+                .onResult()
+                .flatMap()
+                .multi(i -> Multi.createFrom().completionStage(CompletableFuture.supplyAsync(() -> i)))
                 .collectFailures()
-                .mapToMulti(i -> Multi.createFrom().completionStage(CompletableFuture.supplyAsync(() -> i)))
+                .concatenateResults()
                 .subscribe(subscriber);
 
         subscriber
@@ -82,8 +90,8 @@ public class MultiFlatMapToPublisherTest {
 
         Multi.createFrom().range(1, 100_001)
                 .onResult()
-                .concatMap().collectFailures()
-                .mapToMulti(
+                .flatMap()
+                .publisher(
                         i -> Multi.createFrom().completionStage(CompletableFuture.supplyAsync(() -> {
                             if (i == 99000 || i == 100_000) {
                                 throw new IllegalArgumentException("boom");
@@ -92,6 +100,8 @@ public class MultiFlatMapToPublisherTest {
                             }
                         }))
                 )
+                .collectFailures()
+                .concatenateResults()
                 .subscribe(subscriber);
 
         subscriber
@@ -139,7 +149,11 @@ public class MultiFlatMapToPublisherTest {
         MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(Long.MAX_VALUE);
 
         Multi.createFrom().range(1, 4)
-                .onResult().concatMap().collectFailures().mapToMulti(i -> Multi.createFrom().results(i, i))
+                .onResult()
+                .flatMap()
+                .publisher(i -> Multi.createFrom().results(i, i))
+                .collectFailures()
+                .concatenateResults()
                 .subscribe(subscriber);
 
         subscriber.assertReceived(1, 1, 2, 2, 3, 3).assertCompletedSuccessfully();
@@ -150,13 +164,17 @@ public class MultiFlatMapToPublisherTest {
         MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(Long.MAX_VALUE);
 
         Multi.createFrom().range(1, 4)
-                .onResult().concatMap().collectFailures().mapToMulti(i -> {
-            if (i == 2) {
-                return Multi.createFrom().failure(new IOException("boom"));
-            } else {
-                return Multi.createFrom().results(i, i);
-            }
-        })
+                .onResult()
+                .flatMap()
+                .multi(i -> {
+                    if (i == 2) {
+                        return Multi.createFrom().failure(new IOException("boom"));
+                    } else {
+                        return Multi.createFrom().results(i, i);
+                    }
+                })
+                .collectFailures()
+                .concatenateResults()
                 .subscribe(subscriber);
 
         subscriber
@@ -218,11 +236,13 @@ public class MultiFlatMapToPublisherTest {
                 .assertHasNoResults();
 
         subscriber.request(2)
-                .assertReceived(1, 1)
+                .run(() -> assertThat(subscriber.results()).hasSize(2))
                 .request(2)
-                .assertReceived(1, 1, 2, 2)
+                .run(() -> assertThat(subscriber.results()).hasSize(4))
                 .request(10)
-                .assertReceived(1, 1, 2, 2, 3, 3).assertCompletedSuccessfully();
+                .run(() -> assertThat(subscriber.results()).hasSize(6))
+                .assertCompletedSuccessfully();
+        assertThat(subscriber.results()).contains(1, 1, 2, 2, 3, 3);
     }
 
     @Test
@@ -286,7 +306,9 @@ public class MultiFlatMapToPublisherTest {
         MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(Long.MAX_VALUE);
 
         Multi.createFrom().range(1, 10001)
-                .onResult().flatMap().withConcurrency(20).mapToMulti(i -> Multi.createFrom().results(i, i))
+                .onResult().flatMap()
+                .multi(i -> Multi.createFrom().results(i, i))
+                .mergeResults(25)
                 .subscribe(subscriber);
 
         subscriber.assertCompletedSuccessfully();
@@ -296,7 +318,9 @@ public class MultiFlatMapToPublisherTest {
     @Test(expected = IllegalArgumentException.class)
     public void testFlatMapWithInvalidConcurrency() {
         Multi.createFrom().range(1, 10001)
-                .onResult().flatMap().withConcurrency(-1).mapToMulti(i -> Multi.createFrom().results(i, i));
+                .onResult().flatMap()
+                .multi(i -> Multi.createFrom().results(i, i))
+                .mergeResults(-1);
     }
 
     @Test
@@ -304,8 +328,12 @@ public class MultiFlatMapToPublisherTest {
         MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(Long.MAX_VALUE);
 
         Multi.createFrom().range(1, 10001)
-                .onResult().flatMap().withConcurrency(20).mapToMulti(i -> Multi.createFrom().completionStage(CompletableFuture.supplyAsync(() -> i)))
+                .onResult().flatMap()
+                .multi(i -> Multi.createFrom().completionStage(CompletableFuture.supplyAsync(() -> i)))
+                .withRequests(20)
+                .mergeResults(25)
                 .subscribe(subscriber);
+
 
         subscriber.await().assertCompletedSuccessfully();
         assertThat(subscriber.results()).hasSize(10000);
@@ -316,16 +344,67 @@ public class MultiFlatMapToPublisherTest {
         MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(Long.MAX_VALUE);
 
         Multi.createFrom().range(1, 5)
-                .onResult().flatMap().collectFailures().mapToMulti(i -> {
-            if (i % 2 == 0) {
-                return Multi.createFrom().failure(new IOException("boom"));
-            } else {
-                return Multi.createFrom().result(i);
-            }
-        })
+                .onResult().flatMap()
+                .multi(i -> {
+                    if (i % 2 == 0) {
+                        return Multi.createFrom().failure(new IOException("boom"));
+                    } else {
+                        return Multi.createFrom().result(i);
+                    }
+                })
+                .collectFailures()
+                .mergeResults()
                 .subscribe(subscriber);
 
         subscriber.assertReceived(1, 3).assertHasFailedWith(CompositeException.class, "boom");
+    }
+
+    @Test
+    public void testFlatMapUni() {
+        List<Integer> list = Multi.createFrom().range(1, 4)
+                .onResult()
+                .flatMap()
+                .unis(i -> Uni.createFrom().completionStage(CompletableFuture.supplyAsync(() -> i + 1)))
+                .mergeResults()
+                .collect().asList().await().indefinitely();
+
+        assertThat(list).hasSize(3).contains(2, 3, 4);
+    }
+
+    @Test
+    public void testConcatMapUni() {
+        List<Integer> list = Multi.createFrom().range(1, 4)
+                .onResult()
+                .flatMap()
+                .unis(i -> Uni.createFrom().completionStage(CompletableFuture.supplyAsync(() -> i + 1)))
+                .concatenateResults()
+                .collect().asList().await().indefinitely();
+
+        assertThat(list).hasSize(3).containsExactly(2, 3, 4);
+    }
+
+    @Test
+    public void testFlatMapIterable() {
+        List<Integer> list = Multi.createFrom().range(1, 4)
+                .onResult()
+                .flatMap()
+                .iterable(i -> Arrays.asList(i, i + 1))
+                .mergeResults()
+                .collect().asList().await().indefinitely();
+
+        assertThat(list).hasSize(6).containsExactlyInAnyOrder(1, 2, 2, 3, 3, 4);
+    }
+
+    @Test
+    public void testConcatMapIterable() {
+        List<Integer> list = Multi.createFrom().range(1, 4)
+                .onResult()
+                .flatMap()
+                .iterable(i -> Arrays.asList(i, i + 1))
+                .mergeResults()
+                .collect().asList().await().indefinitely();
+
+        assertThat(list).hasSize(6).containsExactly(1, 2, 2, 3, 3, 4);
     }
 
 }

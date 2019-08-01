@@ -17,11 +17,11 @@ public class MultiFlatMap<I, O> extends MultiOperator<I, O> {
     private final boolean preserveOrdering;
 
     public MultiFlatMap(Multi<I> upstream, Function<? super I, ? extends Publisher<? extends O>> mapper, int concurrency,
-                        int prefetch, boolean delayFailure, boolean preserveOrdering) {
+                        int requests, boolean delayFailure, boolean preserveOrdering) {
         super(nonNull(upstream, "upstream"));
         this.mapper = nonNull(mapper, "mapper");
         this.concurrency = positive(concurrency, "concurrency");
-        this.prefetch = positive(prefetch, "prefetch");
+        this.prefetch = positive(requests, "requests");
         this.delayFailurePropagation = delayFailure;
         this.preserveOrdering = preserveOrdering;
 

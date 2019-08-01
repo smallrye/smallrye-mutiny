@@ -2,16 +2,10 @@ package io.smallrye.reactive.groups;
 
 import io.smallrye.reactive.Multi;
 import io.smallrye.reactive.Uni;
-import io.smallrye.reactive.operators.MultiMapOnResult;
-import io.smallrye.reactive.operators.MultiOnResultPeek;
-import io.smallrye.reactive.operators.MultiScan;
-import io.smallrye.reactive.operators.MultiScanWithInitialState;
+import io.smallrye.reactive.operators.*;
 import org.reactivestreams.Publisher;
 
-import java.util.function.BiFunction;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Supplier;
+import java.util.function.*;
 
 import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
 
@@ -96,28 +90,70 @@ public class MultiOnResult<T> {
         return new MultiScan<>(upstream, nonNull(scanner, "scanner"));
     }
 
+    /**
+     * Produces a {@link Multi} containing the results from {@link Publisher} produced by the {@code mapper} for each
+     * result emitted by this {@link Multi}.
+     * <p>
+     * The operation behaves as follows:
+     * <ul>
+     * <li>for each result emitted by this {@link Multi}, the mapper is called and produces a {@link Publisher}
+     * (potentially a {@code Multi}). The mapper must not return {@code null}</li>
+     * <li>The results contained in each of the produced {@link Publisher} are then <strong>merged</strong> in the
+     * produced {@link Multi}. The flatten process may interleaved results.</li>
+     * </ul>
+     *
+     * @param mapper the {@link Function} producing {@link Publisher} / {@link Multi} for each results emitted by the
+     *               upstream {@link Multi}
+     * @param <O>    the type of result emitted by the {@link Publisher} produced by the {@code mapper}
+     * @return the produced {@link Multi}
+     */
     public <O> Multi<O> flatMap(Function<? super T, ? extends Publisher<? extends O>> mapper) {
-        return new MultiFlattenGroup<>(upstream).mapToMulti(mapper);
+        return flatMap().publisher(mapper).mergeResults();
     }
 
+    /**
+     * Produces a {@link Multi} containing the results from {@link Publisher} produced by the {@code mapper} for each
+     * result emitted by this {@link Multi}.
+     * <p>
+     * The operation behaves as follows:
+     * <ul>
+     * <li>for each result emitted by this {@link Multi}, the mapper is called and produces a {@link Publisher}
+     * (potentially a {@code Multi}). The mapper must not return {@code null}</li>
+     * <li>The results contained in each of the produced {@link Publisher} are then <strong>concatenated</strong> in the
+     * produced {@link Multi}. The flatten process makes sure that the results are not interleaved.
+     * </ul>
+     *
+     * @param mapper the {@link Function} producing {@link Publisher} / {@link Multi} for each results emitted by the
+     *               upstream {@link Multi}
+     * @param <O>    the type of result emitted by the {@link Publisher} produced by the {@code mapper}
+     * @return the produced {@link Multi}
+     */
     public <O> Multi<O> concatMap(Function<? super T, ? extends Publisher<? extends O>> mapper) {
-        return new MultiFlattenGroup<>(upstream).preserveOrdering().mapToMulti(mapper);
+        return flatMap().publisher(mapper).concatenateResults();
     }
 
-    public MultiFlattenGroup<T> flatMap() {
-        return new MultiFlattenGroup<>(upstream);
+    /**
+     * Configures a <em>flatMap</em> operation that will result into a {@link Multi}.
+     * <p>
+     * The operations behave as follow:
+     * <ul>
+     * <li>for each result emitted by this {@link Multi}, a mapper is called and produces a {@link Publisher},
+     * {@link Uni} or {@link Iterable}. The mapper must not return {@code null}</li>
+     * <li>The results contained in each of the produced <em>sets</em> are then <strong>merged</strong> (flatMap) or
+     * <strong>concatenated</strong> (concatMap) in the returned {@link Multi}.</li>
+     * </ul>
+     * <p>
+     * The object returned by this method lets you configure the operation such as the <em>requests</em> asked to the
+     * inner {@link Publisher} (produces by the mapper), concurrency (for flatMap)...
+     *
+     * @return the object to configure the {@code flatMap} operation.
+     */
+    public MultiFlatMap<T> flatMap() {
+        return new MultiFlatMap<>(upstream);
     }
 
-    public MultiFlattenGroup<T> concatMap() {
-        return new MultiFlattenGroup<>(upstream).preserveOrdering();
-    }
-
-    public <O> Multi<O> flatMapUni(Function<? super T, ? extends Uni<? extends O>> mapper) {
-        return new MultiFlattenGroup<>(upstream).mapToUni(mapper);
-    }
-
-    public <O> Multi<O> concatMapUni(Function<? super T, ? extends Uni<? extends O>> mapper) {
-        return new MultiFlattenGroup<>(upstream).preserveOrdering().mapToUni(mapper);
+    public Multi<T> filterWith(Predicate<? super T> predicate) {
+        return new MultiFilter<>(upstream, nonNull(predicate, "predicate"));
     }
 
 
