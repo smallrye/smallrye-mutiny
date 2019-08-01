@@ -29,7 +29,7 @@ public class UniAndCombination<I, O> extends UniOperator<I, O> {
         super(upstream);
 
         this.unis = new ArrayList<>();
-        // upstream can be null when using the zip (static) operator.
+        // upstream can be null when using the all (static) operator.
         if (upstream != null) {
             this.unis.add(upstream);
         }
