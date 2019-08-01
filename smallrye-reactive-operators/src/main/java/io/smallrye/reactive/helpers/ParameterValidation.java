@@ -67,4 +67,19 @@ public class ParameterValidation {
         return amount;
     }
 
+    /**
+     * Validates that the passed amount is strictly positive.
+     *
+     * @param amount the amount to be checked
+     * @param name     the name of the parameter, must not be {@code null}
+     * @return the amount is the validation passes.
+     */
+    public static int positive(int amount, String name) {
+        nonNull(name, "name");
+        if (amount <= 0) {
+            throw new IllegalArgumentException(String.format("`%s` must be greater than zero`", name));
+        }
+        return amount;
+    }
+
 }

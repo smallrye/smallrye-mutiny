@@ -6,6 +6,7 @@ import io.smallrye.reactive.operators.MultiMapOnResult;
 import io.smallrye.reactive.operators.MultiOnResultPeek;
 import io.smallrye.reactive.operators.MultiScan;
 import io.smallrye.reactive.operators.MultiScanWithInitialState;
+import org.reactivestreams.Publisher;
 
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
@@ -94,5 +95,30 @@ public class MultiOnResult<T> {
     public Multi<T> scan(BiFunction<T, T, T> scanner) {
         return new MultiScan<>(upstream, nonNull(scanner, "scanner"));
     }
+
+    public <O> Multi<O> flatMap(Function<? super T, ? extends Publisher<? extends O>> mapper) {
+        return new MultiFlattenGroup<>(upstream).mapToMulti(mapper);
+    }
+
+    public <O> Multi<O> concatMap(Function<? super T, ? extends Publisher<? extends O>> mapper) {
+        return new MultiFlattenGroup<>(upstream).preserveOrdering().mapToMulti(mapper);
+    }
+
+    public MultiFlattenGroup<T> flatMap() {
+        return new MultiFlattenGroup<>(upstream);
+    }
+
+    public MultiFlattenGroup<T> concatMap() {
+        return new MultiFlattenGroup<>(upstream).preserveOrdering();
+    }
+
+    public <O> Multi<O> flatMapUni(Function<? super T, ? extends Uni<? extends O>> mapper) {
+        return new MultiFlattenGroup<>(upstream).mapToUni(mapper);
+    }
+
+    public <O> Multi<O> concatMapUni(Function<? super T, ? extends Uni<? extends O>> mapper) {
+        return new MultiFlattenGroup<>(upstream).preserveOrdering().mapToUni(mapper);
+    }
+
 
 }
