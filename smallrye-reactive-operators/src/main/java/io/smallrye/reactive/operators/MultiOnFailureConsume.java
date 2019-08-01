@@ -8,11 +8,11 @@ import java.util.function.Predicate;
 
 import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
 
-public class MultiOnFailurePeek<T> extends MultiOperator<T, T> {
+public class MultiOnFailureConsume<T> extends MultiOperator<T, T> {
     private final Consumer<Throwable> callback;
     private final Predicate<? super Throwable> predicate;
 
-    public MultiOnFailurePeek(Multi<T> upstream, Consumer<Throwable> callback, Predicate<? super Throwable> predicate) {
+    public MultiOnFailureConsume(Multi<T> upstream, Consumer<Throwable> callback, Predicate<? super Throwable> predicate) {
         super(nonNull(upstream, "upstream"));
         this.callback = nonNull(callback, "callback");
         this.predicate = predicate == null ? x -> true : predicate;

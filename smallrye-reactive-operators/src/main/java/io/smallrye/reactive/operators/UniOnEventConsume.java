@@ -5,14 +5,14 @@ import io.smallrye.reactive.Uni;
 
 import java.util.function.Consumer;
 
-public class UniPeekOnEvent<T> extends UniOperator<T, T> {
+public class UniOnEventConsume<T> extends UniOperator<T, T> {
 
     private final Consumer<? super T> onResult;
     private final Consumer<Throwable> onFailure;
 
-    public UniPeekOnEvent(Uni<? extends T> upstream,
-                          Consumer<? super T> onResult,
-                          Consumer<Throwable> onFailure) {
+    public UniOnEventConsume(Uni<? extends T> upstream,
+                             Consumer<? super T> onResult,
+                             Consumer<Throwable> onFailure) {
         super(upstream);
         this.onResult = onResult;
         this.onFailure = onFailure;

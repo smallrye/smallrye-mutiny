@@ -3,7 +3,7 @@ package io.smallrye.reactive.groups;
 import io.smallrye.reactive.Uni;
 import io.smallrye.reactive.operators.UniFlatMapOnResult;
 import io.smallrye.reactive.operators.UniMapOnResult;
-import io.smallrye.reactive.operators.UniPeekOnEvent;
+import io.smallrye.reactive.operators.UniOnEventConsume;
 import io.smallrye.reactive.subscription.UniEmitter;
 
 import java.util.function.BiConsumer;
@@ -27,8 +27,8 @@ public class UniOnResult<T> {
      * @param callback the callback, must not be {@code null}
      * @return the new {@link Uni}
      */
-    public Uni<T> peek(Consumer<? super T> callback) {
-        return new UniPeekOnEvent<>(upstream, nonNull(callback, "callback"), null);
+    public Uni<T> consume(Consumer<? super T> callback) {
+        return new UniOnEventConsume<>(upstream, nonNull(callback, "callback"), null);
     }
 
     /**

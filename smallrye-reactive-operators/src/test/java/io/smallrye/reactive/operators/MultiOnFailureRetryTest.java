@@ -109,7 +109,7 @@ public class MultiOnFailureRetryTest {
         AtomicInteger count = new AtomicInteger();
 
         Multi.createFrom().results(1, 2, 3, 4)
-                .onResult().peek(i -> {
+                .onResult().consume(i -> {
             if (count.getAndIncrement() < 2) {
                 throw new RuntimeException("boom");
             }

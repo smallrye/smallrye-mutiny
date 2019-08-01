@@ -4,7 +4,7 @@ package io.smallrye.reactive.groups;
 import io.smallrye.reactive.Multi;
 import io.smallrye.reactive.operators.MultiFlatMapOnFailure;
 import io.smallrye.reactive.operators.MultiMapOnFailure;
-import io.smallrye.reactive.operators.MultiOnFailurePeek;
+import io.smallrye.reactive.operators.MultiOnFailureConsume;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -31,8 +31,8 @@ public class MultiOnFailure<T> {
      * @param callback the callback, must not be {@code null}
      * @return the new {@link Multi}
      */
-    public Multi<T> peek(Consumer<Throwable> callback) {
-        return new MultiOnFailurePeek<>(upstream, nonNull(callback, "callback"), predicate);
+    public Multi<T> consume(Consumer<Throwable> callback) {
+        return new MultiOnFailureConsume<>(upstream, nonNull(callback, "callback"), predicate);
     }
 
     /**

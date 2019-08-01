@@ -4,7 +4,7 @@ package io.smallrye.reactive.groups;
 import io.smallrye.reactive.Uni;
 import io.smallrye.reactive.operators.UniFlatMapOnFailure;
 import io.smallrye.reactive.operators.UniMapOnFailure;
-import io.smallrye.reactive.operators.UniPeekOnEvent;
+import io.smallrye.reactive.operators.UniOnEventConsume;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -30,8 +30,8 @@ public class UniOnFailure<T> {
      * @param callback the callback, must not be {@code null}
      * @return the new {@link Uni}
      */
-    public Uni<T> peek(Consumer<Throwable> callback) {
-        return new UniPeekOnEvent<>(upstream, null, nonNull(callback, "callback"));
+    public Uni<T> consume(Consumer<Throwable> callback) {
+        return new UniOnEventConsume<>(upstream, null, nonNull(callback, "callback"));
     }
 
     /**

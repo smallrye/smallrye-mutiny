@@ -45,7 +45,7 @@ public class MultiOnResult<T> {
      * @param callback the callback, must not be {@code null}
      * @return the new {@link Uni}
      */
-    public Multi<T> peek(Consumer<T> callback) {
+    public Multi<T> consume(Consumer<T> callback) {
         return new MultiOnResultPeek<>(upstream, nonNull(callback, "callback"));
     }
 
