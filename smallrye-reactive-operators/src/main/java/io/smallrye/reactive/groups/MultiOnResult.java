@@ -152,8 +152,37 @@ public class MultiOnResult<T> {
         return new MultiFlatMap<>(upstream);
     }
 
+    /**
+     * Produces a {@link Multi} containing the results from this {@link Multi} passing the {@code predicate} test.
+     *
+     * @param predicate the predicate, must not be {@code null}
+     * @return the produced {@link Multi}
+     */
     public Multi<T> filterWith(Predicate<? super T> predicate) {
         return new MultiFilter<>(upstream, nonNull(predicate, "predicate"));
+    }
+
+    /**
+     * Produces a {@link Multi} containing the results from this {@link Multi} passing the {@code tester}
+     * asynchronous test. Unlike {@link #filterWith(Predicate)} is the asynchronous aspect of this method. The
+     * test can be asynchronous. Note that this method preserves ordering of the results, even if the test is
+     * asynchronous.
+     *
+     * @param tester the predicate, must not be {@code null}, must not produce {@code null}
+     * @return the produced {@link Multi}
+     */
+    public Multi<T> testWith(Function<? super T, ? extends Uni<Boolean>> tester) {
+        nonNull(tester, "tester");
+        return flatMap().multi(res -> {
+            Uni<Boolean> uni = tester.apply(res);
+            return uni.map(pass -> {
+                if (pass) {
+                    return res;
+                } else {
+                    return null;
+                }
+            }).toMulti();
+        }).concatenateResults();
     }
 
 
