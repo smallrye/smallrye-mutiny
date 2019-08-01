@@ -28,11 +28,11 @@ public class UniDelayOnItem<T> extends UniOperator<T, T> {
     void subscribing(UniSerializedSubscriber<? super T> subscriber) {
         AtomicReference<ScheduledFuture<?>> holder = new AtomicReference<>();
         AtomicReference<UniSubscription> reference = new AtomicReference<>();
-        upstream().subscribe().withSubscriber(new UniSubscriber<T>() {
+        upstream().subscribe().withSubscriber(new UniDelegatingSubscriber<T, T>(subscriber) {
             @Override
             public void onSubscribe(UniSubscription subscription) {
                 if (reference.compareAndSet(null, subscription)) {
-                    subscriber.onSubscribe(() -> {
+                    super.onSubscribe(() -> {
                         if (reference.compareAndSet(subscription, CANCELLED)) {
                             subscription.cancel();
                             ScheduledFuture<?> future = holder.getAndSet(null);
@@ -48,18 +48,13 @@ public class UniDelayOnItem<T> extends UniOperator<T, T> {
             public void onResult(T result) {
                 if (reference.get() != CANCELLED) {
                     try {
-                        ScheduledFuture<?> future = executor.schedule(() -> subscriber.onResult(result), duration.toMillis(), TimeUnit.MILLISECONDS);
+                        ScheduledFuture<?> future = executor.schedule(() -> super.onResult(result), duration.toMillis(), TimeUnit.MILLISECONDS);
                         holder.set(future);
                     } catch (RuntimeException e) {
                         // Typically, a rejected execution exception
-                        subscriber.onFailure(e);
+                        super.onFailure(e);
                     }
                 }
-            }
-
-            @Override
-            public void onFailure(Throwable failure) {
-                subscriber.onFailure(failure);
             }
         });
     }

@@ -1,6 +1,8 @@
 package io.smallrye.reactive;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -9,13 +11,18 @@ import java.util.List;
  *
  * @see io.smallrye.reactive.groups.UniAndGroup
  */
-public class CompositeException extends Exception {
+public class CompositeException extends RuntimeException {
 
     private final List<Throwable> causes;
 
     public CompositeException(List<Throwable> causes) {
         super("Multiple exceptions caught:");
-        this.causes = new ArrayList<>(causes);
+        this.causes = Collections.unmodifiableList(causes);
+    }
+
+    public CompositeException(Throwable... causes) {
+        super("Multiple exceptions caught:");
+        this.causes = Arrays.asList(causes);
     }
 
     @Override

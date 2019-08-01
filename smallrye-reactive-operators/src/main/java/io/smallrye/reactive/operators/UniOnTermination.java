@@ -1,5 +1,6 @@
 package io.smallrye.reactive.operators;
 
+import io.smallrye.reactive.CompositeException;
 import io.smallrye.reactive.Uni;
 import io.smallrye.reactive.subscription.UniSubscription;
 import io.smallrye.reactive.tuples.Functions;
@@ -42,7 +43,7 @@ public class UniOnTermination<T> extends UniOperator<T, T> {
                         try {
                             callback.accept(null, failure, false);
                         } catch (Exception e) {
-                            subscriber.onFailure(e);
+                            subscriber.onFailure(new CompositeException(failure, e));
                             return;
                         }
                         subscriber.onFailure(failure);

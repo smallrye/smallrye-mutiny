@@ -1,5 +1,6 @@
 package io.smallrye.reactive.operators;
 
+import io.smallrye.reactive.CompositeException;
 import io.smallrye.reactive.Uni;
 import org.junit.Test;
 import org.reactivestreams.Subscription;
@@ -103,11 +104,13 @@ public class UniOnEventTest {
                 })
                 .subscribe().withSubscriber(UniAssertSubscriber.create());
 
-        subscriber.assertCompletedWithFailure().assertFailure(IllegalStateException.class, "boom");
+        subscriber.assertCompletedWithFailure()
+                .assertFailure(CompositeException.class, "boom")
+                .assertFailure(CompositeException.class, "kaboom");
         assertThat(result).doesNotHaveValue(1);
         assertThat(subscription.get()).isNotNull();
         assertThat(resultFromTerminate).doesNotHaveValue(1);
-        assertThat(failureFromTerminate.get()).isInstanceOf(IllegalStateException.class);
+        assertThat(failureFromTerminate.get()).isInstanceOf(CompositeException.class);
     }
 
     @Test

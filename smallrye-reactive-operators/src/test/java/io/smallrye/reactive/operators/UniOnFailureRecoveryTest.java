@@ -1,5 +1,6 @@
 package io.smallrye.reactive.operators;
 
+import io.smallrye.reactive.CompositeException;
 import io.smallrye.reactive.Uni;
 import org.junit.Test;
 
@@ -74,11 +75,12 @@ public class UniOnFailureRecoveryTest {
     public void testWithPredicate() {
         Integer result = failed.onFailure(f -> f instanceof IOException).recoverWithResult(23).await().indefinitely();
         assertThat(result).isEqualTo(23);
-        assertThatExceptionOfType(IllegalArgumentException.class)
+
+        assertThatExceptionOfType(CompositeException.class)
                 .isThrownBy(() -> failed.onFailure(f -> {
                     throw new IllegalArgumentException("BOOM!");
                 }).recoverWithResult(23).await().indefinitely())
-                .withMessageEndingWith("BOOM!");
+                .withMessageContaining("BOOM!");
     }
 
     @Test
@@ -147,11 +149,11 @@ public class UniOnFailureRecoveryTest {
         Integer result = failed
                 .onFailure(f -> f instanceof IOException).recoverWithUni(Uni.createFrom().result(23)).await().indefinitely();
         assertThat(result).isEqualTo(23);
-        assertThatExceptionOfType(IllegalArgumentException.class)
+        assertThatExceptionOfType(CompositeException.class)
                 .isThrownBy(() -> failed.onFailure(f -> {
                     throw new IllegalArgumentException("BOOM!");
                 }).recoverWithResult(23).await().indefinitely())
-                .withMessageEndingWith("BOOM!");
+                .withMessageContaining("BOOM!");
     }
 
 

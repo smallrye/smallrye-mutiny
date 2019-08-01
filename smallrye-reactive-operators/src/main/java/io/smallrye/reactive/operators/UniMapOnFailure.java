@@ -1,6 +1,7 @@
 package io.smallrye.reactive.operators;
 
 
+import io.smallrye.reactive.CompositeException;
 import io.smallrye.reactive.Uni;
 
 import java.util.function.Function;
@@ -37,7 +38,7 @@ public class UniMapOnFailure<I, O> extends UniOperator<I, O> {
                 try {
                     test = predicate.test(failure);
                 } catch (RuntimeException e) {
-                    subscriber.onFailure(e);
+                    subscriber.onFailure(new CompositeException(failure, e));
                     return;
                 }
 

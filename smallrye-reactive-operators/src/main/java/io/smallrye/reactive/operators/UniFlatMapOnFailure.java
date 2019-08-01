@@ -1,5 +1,6 @@
 package io.smallrye.reactive.operators;
 
+import io.smallrye.reactive.CompositeException;
 import io.smallrye.reactive.Uni;
 import io.smallrye.reactive.subscription.UniSubscription;
 
@@ -41,7 +42,7 @@ public class UniFlatMapOnFailure<I> extends UniOperator<I, I> {
                 try {
                     test = predicate.test(failure);
                 } catch (RuntimeException e) {
-                    subscriber.onFailure(e);
+                    subscriber.onFailure(new CompositeException(failure, e));
                     return;
                 }
 

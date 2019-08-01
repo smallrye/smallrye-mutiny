@@ -1,6 +1,7 @@
 package io.smallrye.reactive.operators;
 
 
+import io.smallrye.reactive.CompositeException;
 import io.smallrye.reactive.Uni;
 
 import java.util.function.Consumer;
@@ -23,27 +24,31 @@ public class UniOnEventConsume<T> extends UniOperator<T, T> {
         upstream().subscribe().withSubscriber(new UniDelegatingSubscriber<T, T>(subscriber) {
             @Override
             public void onResult(T result) {
-                if (invokeEventHandler(onResult, result, subscriber)) {
+                if (invokeEventHandler(onResult, result, false, subscriber)) {
                     subscriber.onResult(result);
                 }
             }
 
             @Override
             public void onFailure(Throwable failure) {
-                if (invokeEventHandler(onFailure, failure, subscriber)) {
+                if (invokeEventHandler(onFailure, failure, true, subscriber)) {
                     subscriber.onFailure(failure);
                 }
             }
         });
     }
 
-    private <E> boolean invokeEventHandler(Consumer<? super E> handler, E event,
+    private <E> boolean invokeEventHandler(Consumer<? super E> handler, E event, boolean wasCalledByOnFailure,
                                            UniSerializedSubscriber<? super T> subscriber) {
         if (handler != null) {
             try {
                 handler.accept(event);
             } catch (Throwable e) {
-                subscriber.onFailure(e);
+                if (wasCalledByOnFailure) {
+                    subscriber.onFailure(new CompositeException((Throwable) event, e));
+                } else {
+                    subscriber.onFailure(e);
+                }
                 return false;
             }
         }

@@ -34,14 +34,12 @@ public class UniCallSubscribeOn<I> extends UniOperator<I, I> {
 
     }
 
-    class SubscribeOnUniSubscriber implements Runnable, UniSubscriber<I>, UniSubscription {
-
-        final UniSerializedSubscriber<? super I> actual;
+    class SubscribeOnUniSubscriber extends UniDelegatingSubscriber<I, I> implements Runnable, UniSubscriber<I>, UniSubscription {
 
         final AtomicReference<UniSubscription> subscription = new AtomicReference<>();
 
         SubscribeOnUniSubscriber(UniSerializedSubscriber<? super I> actual) {
-            this.actual = actual;
+            super(actual);
         }
 
         @Override
@@ -52,18 +50,8 @@ public class UniCallSubscribeOn<I> extends UniOperator<I, I> {
         @Override
         public void onSubscribe(UniSubscription s) {
             if (subscription.compareAndSet(null, s)) {
-                actual.onSubscribe(this);
+                super.onSubscribe(this);
             }
-        }
-
-        @Override
-        public void onResult(I result) {
-            actual.onResult(result);
-        }
-
-        @Override
-        public void onFailure(Throwable failure) {
-            actual.onFailure(failure);
         }
 
         @Override

@@ -1,5 +1,6 @@
 package io.smallrye.reactive.operators;
 
+import io.smallrye.reactive.CompositeException;
 import io.smallrye.reactive.Uni;
 import org.junit.Test;
 
@@ -145,7 +146,9 @@ public class UniOnFailureMapToTest {
             return new RuntimeException("Karamba");
         })
                 .subscribe().withSubscriber(ts);
-        ts.assertCompletedWithFailure().assertFailure(IllegalArgumentException.class, "boomboom");
+        ts.assertCompletedWithFailure()
+                .assertFailure(CompositeException.class, "boomboom")
+                .assertFailure(CompositeException.class, " boom");
         assertThat(called).isFalse();
     }
 
