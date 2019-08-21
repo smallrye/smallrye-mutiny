@@ -15,14 +15,14 @@ public class UniToMultiTest {
 
     @Test
     public void testFromEmpty() {
-        Multi<Void> multi = Uni.createFrom().nullValue().toMulti();
+        Multi<Void> multi = Uni.createFrom().nullItem().toMulti();
         multi.subscribe().withSubscriber(MultiAssertSubscriber.create(1)).assertCompletedSuccessfully();
         multi.subscribe().withSubscriber(MultiAssertSubscriber.create(0)).assertNotTerminated().cancel();
     }
 
     @Test
     public void testFromEmpty2() {
-        Multi<Void> multi = Multi.createFrom().uni(Uni.createFrom().nullValue());
+        Multi<Void> multi = Multi.createFrom().uni(Uni.createFrom().nullItem());
         multi.subscribe().withSubscriber(MultiAssertSubscriber.create(1)).assertCompletedSuccessfully();
         multi.subscribe().withSubscriber(MultiAssertSubscriber.create(0)).assertNotTerminated().cancel();
     }
@@ -30,12 +30,12 @@ public class UniToMultiTest {
     @Test
     public void testFromResult() {
         AtomicInteger count = new AtomicInteger();
-        Multi<Integer> multi = Uni.createFrom().result(count::incrementAndGet).toMulti();
+        Multi<Integer> multi = Uni.createFrom().item(count::incrementAndGet).toMulti();
         multi.subscribe().withSubscriber(MultiAssertSubscriber.create(1))
                 .assertReceived(1)
                 .assertCompletedSuccessfully();
         multi.subscribe().withSubscriber(MultiAssertSubscriber.create(0)).assertNotTerminated()
-                .assertHasNoResults()
+                .assertHasNotReceivedAnyItem()
                 .request(1)
                 .assertReceived(2)
                 .assertCompletedSuccessfully();
@@ -44,12 +44,12 @@ public class UniToMultiTest {
     @Test
     public void testFromResult2() {
         AtomicInteger count = new AtomicInteger();
-        Multi<Integer> multi = Multi.createFrom().uni(Uni.createFrom().result(count::incrementAndGet));
+        Multi<Integer> multi = Multi.createFrom().uni(Uni.createFrom().item(count::incrementAndGet));
         multi.subscribe().withSubscriber(MultiAssertSubscriber.create(1))
                 .assertReceived(1)
                 .assertCompletedSuccessfully();
         multi.subscribe().withSubscriber(MultiAssertSubscriber.create(0)).assertNotTerminated()
-                .assertHasNoResults()
+                .assertHasNotReceivedAnyItem()
                 .request(1)
                 .assertReceived(2)
                 .assertCompletedSuccessfully();
@@ -115,7 +115,7 @@ public class UniToMultiTest {
                 .assertReceived(1)
                 .assertCompletedSuccessfully();
         multi.subscribe().withSubscriber(MultiAssertSubscriber.create(0)).assertNotTerminated()
-                .assertHasNoResults()
+                .assertHasNotReceivedAnyItem()
                 .request(1)
                 .await()
                 .assertReceived(2)
@@ -132,7 +132,7 @@ public class UniToMultiTest {
                 .assertReceived(1)
                 .assertCompletedSuccessfully();
         multi.subscribe().withSubscriber(MultiAssertSubscriber.create(0)).assertNotTerminated()
-                .assertHasNoResults()
+                .assertHasNotReceivedAnyItem()
                 .request(1)
                 .await()
                 .assertReceived(2)
@@ -144,13 +144,13 @@ public class UniToMultiTest {
         Multi<Integer> multi = Uni.createFrom().completionStage(() -> CompletableFuture.<Integer>supplyAsync(() -> null)).toMulti();
         multi.subscribe().withSubscriber(MultiAssertSubscriber.create(1))
                 .await()
-                .assertHasNoResults()
+                .assertHasNotReceivedAnyItem()
                 .assertCompletedSuccessfully();
         multi.subscribe().withSubscriber(MultiAssertSubscriber.create(0))
                 .assertNotTerminated()
                 .request(1)
                 .await()
-                .assertHasNoResults()
+                .assertHasNotReceivedAnyItem()
                 .assertCompletedSuccessfully();
     }
 
@@ -159,13 +159,13 @@ public class UniToMultiTest {
         Multi<Integer> multi = Multi.createFrom().uni(Uni.createFrom().completionStage(() -> CompletableFuture.supplyAsync(() -> null)));
         multi.subscribe().withSubscriber(MultiAssertSubscriber.create(1))
                 .await()
-                .assertHasNoResults()
+                .assertHasNotReceivedAnyItem()
                 .assertCompletedSuccessfully();
         multi.subscribe().withSubscriber(MultiAssertSubscriber.create(0))
                 .assertNotTerminated()
                 .request(1)
                 .await()
-                .assertHasNoResults()
+                .assertHasNotReceivedAnyItem()
                 .assertCompletedSuccessfully();
     }
 }

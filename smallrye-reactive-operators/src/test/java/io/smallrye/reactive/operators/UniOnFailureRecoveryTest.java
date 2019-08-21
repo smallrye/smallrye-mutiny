@@ -18,26 +18,26 @@ public class UniOnFailureRecoveryTest {
 
     @Test
     public void testRecoverWithDirectValue() {
-        Integer result = failed.onFailure().recoverWithResult(23).await().indefinitely();
-        Integer result2 = Uni.createFrom().result(1).onFailure().recoverWithResult(23).await().indefinitely();
-        assertThat(result).isEqualTo(23);
-        assertThat(result2).isEqualTo(1);
+        Integer value = failed.onFailure().recoverWithResult(23).await().indefinitely();
+        Integer value2 = Uni.createFrom().item(1).onFailure().recoverWithResult(23).await().indefinitely();
+        assertThat(value).isEqualTo(23);
+        assertThat(value2).isEqualTo(1);
     }
 
     @Test
     public void testRecoverWithNullValue() {
-        Integer result = failed.onFailure().recoverWithResult((Integer) null).await().indefinitely();
-        assertThat(result).isEqualTo(null);
+        Integer value = failed.onFailure().recoverWithResult((Integer) null).await().indefinitely();
+        assertThat(value).isEqualTo(null);
     }
 
     @Test
     public void testRecoverWithSupplierOfValue() {
         AtomicInteger count = new AtomicInteger();
         Uni<Integer> recovered = failed.onFailure().recoverWithResult(() -> 23 + count.getAndIncrement());
-        Integer result = recovered.await().indefinitely();
-        Integer result2 = recovered.await().indefinitely();
-        assertThat(result).isEqualTo(23);
-        assertThat(result2).isEqualTo(24);
+        Integer value = recovered.await().indefinitely();
+        Integer value2 = recovered.await().indefinitely();
+        assertThat(value).isEqualTo(23);
+        assertThat(value2).isEqualTo(24);
     }
 
     @Test
@@ -56,16 +56,16 @@ public class UniOnFailureRecoveryTest {
     public void testRecoverWithFunctionProducingOfValue() {
         AtomicInteger count = new AtomicInteger();
         Uni<Integer> recovered = failed.onFailure().recoverWithResult(fail -> 23 + count.getAndIncrement());
-        Integer result = recovered.await().indefinitely();
-        Integer result2 = recovered.await().indefinitely();
-        assertThat(result).isEqualTo(23);
-        assertThat(result2).isEqualTo(24);
+        Integer value = recovered.await().indefinitely();
+        Integer value2 = recovered.await().indefinitely();
+        assertThat(value).isEqualTo(23);
+        assertThat(value2).isEqualTo(24);
     }
 
     @Test
     public void testWithPredicateOnClass() {
-        Integer result = failed.onFailure(IOException.class).recoverWithResult(23).await().indefinitely();
-        assertThat(result).isEqualTo(23);
+        Integer value = failed.onFailure(IOException.class).recoverWithResult(23).await().indefinitely();
+        assertThat(value).isEqualTo(23);
         assertThatExceptionOfType(CompletionException.class)
                 .isThrownBy(() -> failed.onFailure(IllegalStateException.class).recoverWithResult(23).await().indefinitely())
                 .withCauseExactlyInstanceOf(IOException.class);
@@ -73,8 +73,8 @@ public class UniOnFailureRecoveryTest {
 
     @Test
     public void testWithPredicate() {
-        Integer result = failed.onFailure(f -> f instanceof IOException).recoverWithResult(23).await().indefinitely();
-        assertThat(result).isEqualTo(23);
+        Integer value = failed.onFailure(f -> f instanceof IOException).recoverWithResult(23).await().indefinitely();
+        assertThat(value).isEqualTo(23);
 
         assertThatExceptionOfType(CompositeException.class)
                 .isThrownBy(() -> failed.onFailure(f -> {
@@ -85,16 +85,16 @@ public class UniOnFailureRecoveryTest {
 
     @Test
     public void testRecoverWithUni() {
-        Integer result = failed.onFailure().recoverWithUni(Uni.createFrom().result(25)).await().indefinitely();
-        Integer result2 = Uni.createFrom().result(1).onFailure().recoverWithUni(Uni.createFrom().result(25)).await().indefinitely();
-        assertThat(result).isEqualTo(25);
-        assertThat(result2).isEqualTo(1);
+        Integer value = failed.onFailure().recoverWithUni(Uni.createFrom().item(25)).await().indefinitely();
+        Integer value2 = Uni.createFrom().item(1).onFailure().recoverWithUni(Uni.createFrom().item(25)).await().indefinitely();
+        assertThat(value).isEqualTo(25);
+        assertThat(value2).isEqualTo(1);
     }
 
     @Test
     public void testRecoverWithUniNull() {
-        Integer result = failed.onFailure().recoverWithUni(Uni.createFrom().result(1).map(i -> null)).await().indefinitely();
-        assertThat(result).isEqualTo(null);
+        Integer value = failed.onFailure().recoverWithUni(Uni.createFrom().item(1).map(i -> null)).await().indefinitely();
+        assertThat(value).isEqualTo(null);
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -105,11 +105,11 @@ public class UniOnFailureRecoveryTest {
     @Test
     public void testRecoverWithSupplierOfUni() {
         AtomicInteger count = new AtomicInteger();
-        Uni<Integer> uni = failed.onFailure().recoverWithUni(() -> Uni.createFrom().result(() -> 25 + count.incrementAndGet()));
-        Integer result = uni.await().indefinitely();
-        Integer result2 = uni.await().indefinitely();
-        assertThat(result).isEqualTo(26);
-        assertThat(result2).isEqualTo(27);
+        Uni<Integer> uni = failed.onFailure().recoverWithUni(() -> Uni.createFrom().item(() -> 25 + count.incrementAndGet()));
+        Integer value = uni.await().indefinitely();
+        Integer value2 = uni.await().indefinitely();
+        assertThat(value).isEqualTo(26);
+        assertThat(value2).isEqualTo(27);
     }
 
     @Test
@@ -127,28 +127,28 @@ public class UniOnFailureRecoveryTest {
     @Test
     public void testRecoverWithFunctionProducingOfUni() {
         AtomicInteger count = new AtomicInteger();
-        Uni<Integer> recovered = failed.onFailure().recoverWithUni(fail -> Uni.createFrom().result(() -> 23 + count.getAndIncrement()));
-        Integer result = recovered.await().indefinitely();
-        Integer result2 = recovered.await().indefinitely();
-        assertThat(result).isEqualTo(23);
-        assertThat(result2).isEqualTo(24);
+        Uni<Integer> recovered = failed.onFailure().recoverWithUni(fail -> Uni.createFrom().item(() -> 23 + count.getAndIncrement()));
+        Integer value = recovered.await().indefinitely();
+        Integer value2 = recovered.await().indefinitely();
+        assertThat(value).isEqualTo(23);
+        assertThat(value2).isEqualTo(24);
     }
 
     @Test
     public void testRecoveringWithUniWithPredicateOnClass() {
-        Integer result = failed.onFailure(IOException.class).recoverWithUni(Uni.createFrom().result(23)).await().indefinitely();
-        assertThat(result).isEqualTo(23);
+        Integer value = failed.onFailure(IOException.class).recoverWithUni(Uni.createFrom().item(23)).await().indefinitely();
+        assertThat(value).isEqualTo(23);
         assertThatExceptionOfType(CompletionException.class)
                 .isThrownBy(() -> failed
-                        .onFailure(IllegalStateException.class).recoverWithUni(Uni.createFrom().result(23)).await().indefinitely())
+                        .onFailure(IllegalStateException.class).recoverWithUni(Uni.createFrom().item(23)).await().indefinitely())
                 .withCauseExactlyInstanceOf(IOException.class);
     }
 
     @Test
     public void testRecoveringWithUniWithPredicate() {
-        Integer result = failed
-                .onFailure(f -> f instanceof IOException).recoverWithUni(Uni.createFrom().result(23)).await().indefinitely();
-        assertThat(result).isEqualTo(23);
+        Integer value = failed
+                .onFailure(f -> f instanceof IOException).recoverWithUni(Uni.createFrom().item(23)).await().indefinitely();
+        assertThat(value).isEqualTo(23);
         assertThatExceptionOfType(CompositeException.class)
                 .isThrownBy(() -> failed.onFailure(f -> {
                     throw new IllegalArgumentException("BOOM!");
@@ -160,10 +160,10 @@ public class UniOnFailureRecoveryTest {
     @Test
     public void testNotCalledOnResult() {
         UniAssertSubscriber<Integer> ts = UniAssertSubscriber.create();
-        Uni.createFrom().result(1)
-                .onFailure().recoverWithUni(v -> Uni.createFrom().result(2))
+        Uni.createFrom().item(1)
+                .onFailure().recoverWithUni(v -> Uni.createFrom().item(2))
                 .subscribe().withSubscriber(ts);
-        ts.assertCompletedSuccessfully().assertResult(1);
+        ts.assertCompletedSuccessfully().assertItem(1);
     }
 
 
@@ -172,10 +172,10 @@ public class UniOnFailureRecoveryTest {
         UniAssertSubscriber<Integer> ts = UniAssertSubscriber.create();
 
         Uni.createFrom().<Integer>failure(new RuntimeException("boom"))
-                .onFailure().recoverWithUni(fail -> Uni.createFrom().result(2))
+                .onFailure().recoverWithUni(fail -> Uni.createFrom().item(2))
                 .subscribe().withSubscriber(ts);
 
-        ts.assertCompletedSuccessfully().assertResult(2);
+        ts.assertCompletedSuccessfully().assertItem(2);
     }
 
     @Test
@@ -186,7 +186,7 @@ public class UniOnFailureRecoveryTest {
                 .onFailure().recoverWithResult(fail -> 2)
                 .subscribe().withSubscriber(ts);
 
-        ts.assertCompletedSuccessfully().assertResult(2);
+        ts.assertCompletedSuccessfully().assertItem(2);
     }
 
     @Test
@@ -205,10 +205,10 @@ public class UniOnFailureRecoveryTest {
         UniAssertSubscriber<Integer> ts = UniAssertSubscriber.create();
         Uni.createFrom().<Integer>failure(new IOException())
                 .onFailure().mapTo(t -> new IndexOutOfBoundsException())
-                .onFailure(IOException.class).recoverWithUni(Uni.createFrom().result(1))
-                .onFailure(IndexOutOfBoundsException.class).recoverWithUni(Uni.createFrom().result(2))
+                .onFailure(IOException.class).recoverWithUni(Uni.createFrom().item(1))
+                .onFailure(IndexOutOfBoundsException.class).recoverWithUni(Uni.createFrom().item(2))
                 .subscribe().withSubscriber(ts);
-        ts.assertCompletedSuccessfully().assertResult(2);
+        ts.assertCompletedSuccessfully().assertItem(2);
     }
 
 

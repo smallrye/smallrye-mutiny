@@ -10,14 +10,14 @@ import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
 
 public class UniOnResultIgnore<T> {
 
-    private final UniOnResult<T> onResult;
+    private final UniOnItem<T> onResult;
 
-    public UniOnResultIgnore(UniOnResult<T> onResult) {
-        this.onResult = nonNull(onResult, "onResult");
+    public UniOnResultIgnore(UniOnItem<T> onResult) {
+        this.onResult = nonNull(onResult, "onItem");
     }
 
     /**
-     * Ignores the result fired by the current {@link Uni} and fails with the passed failure.
+     * Ignores the item fired by the current {@link Uni} and fails with the passed failure.
      *
      * @param failure the exception to propagate
      * @return the new {@link Uni}
@@ -28,7 +28,7 @@ public class UniOnResultIgnore<T> {
     }
 
     /**
-     * Ignores the result fired by the current {@link Uni}, and fails with a failure produced using the given {@link Supplier}.
+     * Ignores the item fired by the current {@link Uni}, and fails with a failure produced using the given {@link Supplier}.
      *
      * @param supplier the supplier to produce the failure, must not be {@code null}, must not produce {@code null}
      * @return the new {@link Uni}
@@ -48,7 +48,7 @@ public class UniOnResultIgnore<T> {
     }
 
     /**
-     * Ignores the result fired by the current {@link Uni} and continue with the given {@link Uni}.
+     * Ignores the item fired by the current {@link Uni} and continue with the given {@link Uni}.
      *
      * @param other the uni to continue with, must not be {@code null}
      * @param <O> the type of the new Uni
@@ -60,7 +60,7 @@ public class UniOnResultIgnore<T> {
     }
 
     /**
-     * Ignores the result fired by the current {@link Uni} and continue with the {@link Uni} produced by the given supplier.
+     * Ignores the item fired by the current {@link Uni} and continue with the {@link Uni} produced by the given supplier.
      *
      * @param supplier the supplier to produce the new {@link Uni}, must not be {@code null}, must not produce {@code null}
      * @param <O> the type of the new Uni
@@ -72,27 +72,27 @@ public class UniOnResultIgnore<T> {
     }
 
     /**
-     * Ignores the result fired by the current {@link Uni}, and continue with a default value.
+     * Ignores the item fired by the current {@link Uni}, and continue with a default value.
      * Note that if the current {@link Uni} fails, the default value is not used.
      *
      * @param fallback the value to continue with, can be {@code null}
      * @return the new {@link Uni}
      */
     public Uni<T> andContinueWith(T fallback) {
-        return onResult.mapToResult(ignored -> fallback);
+        return onResult.mapToItem(ignored -> fallback);
     }
 
     /**
-     * Ignores the result fired by the current {@link Uni}, and continue with a {@code null} result.
+     * Ignores the item fired by the current {@link Uni}, and continue with a {@code null} item.
      *
      * @return the new {@link Uni}
      */
     public Uni<Void> andContinueWithNull() {
-        return onResult.mapToResult(ignored -> null);
+        return onResult.mapToItem(ignored -> null);
     }
 
     /**
-     * Ignores the result fired by the current {@link Uni}, and continue with the value produced by the given supplier.
+     * Ignores the item fired by the current {@link Uni}, and continue with the value produced by the given supplier.
      * Note that if the current {@link Uni} fails, the supplier is not used.
      *
      * @param supplier the default value, must not be {@code null}, can produce {@code null}
@@ -100,7 +100,7 @@ public class UniOnResultIgnore<T> {
      */
     public Uni<T> andContinueWith(Supplier<? extends T> supplier) {
         nonNull(supplier, "supplier");
-        return onResult.mapToResult(ignored -> supplier.get());
+        return onResult.mapToItem(ignored -> supplier.get());
     }
 
 }

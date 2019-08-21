@@ -11,22 +11,22 @@ import java.util.function.Function;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class UniOnResultFlatMapTest {
+public class UniOnItemFlatMapTest {
 
     @Test
     public void testFlatMapWithImmediateValue() {
         UniAssertSubscriber<Integer> test = UniAssertSubscriber.create();
-        Uni.createFrom().result(1).onResult().mapToUni(v -> Uni.createFrom().result(2)).subscribe().withSubscriber(test);
-        test.assertCompletedSuccessfully().assertResult(2).assertNoFailure();
+        Uni.createFrom().item(1).onItem().mapToUni(v -> Uni.createFrom().item(2)).subscribe().withSubscriber(test);
+        test.assertCompletedSuccessfully().assertItem(2).assertNoFailure();
     }
 
     @Test
     public void testWithImmediateCancellation() {
         UniAssertSubscriber<Integer> test = new UniAssertSubscriber<>(true);
         AtomicBoolean called = new AtomicBoolean();
-        Uni.createFrom().result(1).onResult().mapToUni(v -> {
+        Uni.createFrom().item(1).onItem().mapToUni(v -> {
             called.set(true);
-            return Uni.createFrom().result(2);
+            return Uni.createFrom().item(2);
         }).subscribe().withSubscriber(test);
         test.assertNotCompleted();
         assertThat(called).isFalse();
@@ -37,25 +37,25 @@ public class UniOnResultFlatMapTest {
         UniAssertSubscriber<Integer> test1 = UniAssertSubscriber.create();
         UniAssertSubscriber<Integer> test2 = UniAssertSubscriber.create();
         AtomicInteger count = new AtomicInteger(2);
-        Uni<Integer> uni = Uni.createFrom().result(1).onResult().mapToUni(v -> Uni.createFrom().deferred(() -> Uni.createFrom().result(count.incrementAndGet())));
+        Uni<Integer> uni = Uni.createFrom().item(1).onItem().mapToUni(v -> Uni.createFrom().deferred(() -> Uni.createFrom().item(count.incrementAndGet())));
         uni.subscribe().withSubscriber(test1);
         uni.subscribe().withSubscriber(test2);
-        test1.assertCompletedSuccessfully().assertResult(3).assertNoFailure();
-        test2.assertCompletedSuccessfully().assertResult(4).assertNoFailure();
+        test1.assertCompletedSuccessfully().assertItem(3).assertNoFailure();
+        test2.assertCompletedSuccessfully().assertItem(4).assertNoFailure();
     }
 
     @Test
     public void testWithAnUniResolvedAsynchronously() {
         UniAssertSubscriber<Integer> test = UniAssertSubscriber.create();
-        Uni<Integer> uni = Uni.createFrom().result(1).onResult().mapToUni(v -> Uni.createFrom().emitter(emitter -> new Thread(() -> emitter.result(42)).start()));
+        Uni<Integer> uni = Uni.createFrom().item(1).onItem().mapToUni(v -> Uni.createFrom().emitter(emitter -> new Thread(() -> emitter.complete(42)).start()));
         uni.subscribe().withSubscriber(test);
-        test.await().assertCompletedSuccessfully().assertResult(42).assertNoFailure();
+        test.await().assertCompletedSuccessfully().assertItem(42).assertNoFailure();
     }
 
     @Test
     public void testWithAnUniResolvedAsynchronouslyWithAFailure() {
         UniAssertSubscriber<Integer> test = UniAssertSubscriber.create();
-        Uni<Integer> uni = Uni.createFrom().result(1).onResult().mapToUni(v -> Uni.createFrom().emitter(emitter -> new Thread(() -> emitter.failure(new IOException("boom"))).start()));
+        Uni<Integer> uni = Uni.createFrom().item(1).onItem().mapToUni(v -> Uni.createFrom().emitter(emitter -> new Thread(() -> emitter.fail(new IOException("boom"))).start()));
         uni.subscribe().withSubscriber(test);
         test.await().assertCompletedWithFailure().assertFailure(IOException.class, "boom");
     }
@@ -64,9 +64,9 @@ public class UniOnResultFlatMapTest {
     public void testThatMapperIsNotCalledOnUpstreamFailure() {
         UniAssertSubscriber<Integer> test = UniAssertSubscriber.create();
         AtomicBoolean called = new AtomicBoolean();
-        Uni.createFrom().failure(new Exception("boom")).onResult().mapToUni(v -> {
+        Uni.createFrom().failure(new Exception("boom")).onItem().mapToUni(v -> {
             called.set(true);
-            return Uni.createFrom().result(2);
+            return Uni.createFrom().item(2);
         }).subscribe().withSubscriber(test);
         test.await().assertCompletedWithFailure().assertFailure(Exception.class, "boom");
         assertThat(called).isFalse();
@@ -76,8 +76,8 @@ public class UniOnResultFlatMapTest {
     public void testWithAMapperThrowingAnException() {
         UniAssertSubscriber<Integer> test = UniAssertSubscriber.create();
         AtomicBoolean called = new AtomicBoolean();
-        Uni.createFrom().result(1)
-            .onResult().<Integer>mapToUni(v -> {
+        Uni.createFrom().item(1)
+            .onItem().<Integer>mapToUni(v -> {
                 called.set(true);
                 throw new IllegalStateException("boom");
             })
@@ -90,8 +90,8 @@ public class UniOnResultFlatMapTest {
     public void testWithAMapperReturningNull() {
         UniAssertSubscriber<Integer> test = UniAssertSubscriber.create();
         AtomicBoolean called = new AtomicBoolean();
-        Uni.createFrom().result(1)
-                .onResult().<Integer>mapToUni(v -> {
+        Uni.createFrom().item(1)
+                .onItem().<Integer>mapToUni(v -> {
                     called.set(true);
                     return null;
                 }).subscribe().withSubscriber(test);
@@ -101,7 +101,7 @@ public class UniOnResultFlatMapTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testThatTheMapperCannotBeNull() {
-        Uni.createFrom().result(1).onResult().mapToUni((Function<Integer, Uni<?>>) null);
+        Uni.createFrom().item(1).onItem().mapToUni((Function<Integer, Uni<?>>) null);
     }
 
     @Test
@@ -117,7 +117,7 @@ public class UniOnResultFlatMapTest {
             }
         };
 
-        Uni<Integer> uni = Uni.createFrom().result(1).onResult().mapToUni(v -> Uni.createFrom().completionStage(future));
+        Uni<Integer> uni = Uni.createFrom().item(1).onItem().mapToUni(v -> Uni.createFrom().completionStage(future));
         uni.subscribe().withSubscriber(test);
         test.cancel();
         test.assertNotCompleted();

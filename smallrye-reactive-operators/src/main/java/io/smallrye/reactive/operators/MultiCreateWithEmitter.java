@@ -24,9 +24,9 @@ public class MultiCreateWithEmitter<T> extends MultiOperator<Void, T> {
         return Flowable.create(downstream -> {
             MultiEmitter<T> emitter = new MultiEmitter<T>() {
                 @Override
-                public MultiEmitter<T> result(T result) {
+                public MultiEmitter<T> emit(T item) {
                     try {
-                        downstream.onNext(result);
+                        downstream.onNext(item);
                     } catch (Exception downstreamFailure) {
                         downstream.tryOnError(downstreamFailure);
                     }
@@ -34,7 +34,7 @@ public class MultiCreateWithEmitter<T> extends MultiOperator<Void, T> {
                 }
 
                 @Override
-                public void failure(Throwable failure) {
+                public void fail(Throwable failure) {
                     downstream.tryOnError(failure);
                 }
 

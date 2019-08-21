@@ -14,8 +14,8 @@ public interface UniSubscription extends Subscription {
 
     /**
      * Requests the {@link Uni} to cancel and clean up resources.
-     * If the result is retrieved after cancellation, it is not forwarded to the subscriber.
-     * If the cancellation happens after the delivery of the result, this call is ignored.
+     * If the item is retrieved after cancellation, it is not forwarded to the subscriber.
+     * If the cancellation happens after the delivery of the item, this call is ignored.
      * <p>
      * Calling this method, emits the {@code cancellation} event upstream.
      */

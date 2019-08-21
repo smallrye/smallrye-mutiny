@@ -71,7 +71,7 @@ public class MultiOnFailure<T> {
         nonNull(fallback, "fallback");
         return new MultiFlatMapOnFailure<>(upstream, predicate, failure -> {
             T newResult = fallback.apply(failure);
-            return Multi.createFrom().result(newResult);
+            return Multi.createFrom().item(newResult);
         });
     }
 

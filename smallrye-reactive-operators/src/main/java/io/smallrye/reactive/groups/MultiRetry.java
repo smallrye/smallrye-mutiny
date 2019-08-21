@@ -20,7 +20,7 @@ public class MultiRetry<T> {
     }
 
     /**
-     * Produces a {@link Multi} resubscribing to the current {@link Multi} until it gets a results followed
+     * Produces a {@link Multi} resubscribing to the current {@link Multi} until it gets a items followed
      * by a completion events.
      * <p>
      * On every failure, it re-subscribes, indefinitely.
@@ -33,13 +33,13 @@ public class MultiRetry<T> {
 
     /**
      * Produces a {@link Multi} resubscribing to the current {@link Multi} at most {@code numberOfAttempts} time,
-     * until it gets results followed by the completion event. On every failure, it re-subscribes.
+     * until it gets items followed by the completion event. On every failure, it re-subscribes.
      * <p>
      * If the number of attempt is reached, the last failure is propagated.
      *
      * @param numberOfAttempts the number of attempt, must be greater than zero
      * @return a new {@link Multi} retrying at most {@code numberOfAttempts} times to subscribe to the current
-     * {@link Multi} until it gets a result. When the number of attempt is reached, the last failure is propagated.
+     * {@link Multi} until it gets an item. When the number of attempt is reached, the last failure is propagated.
      */
     public Multi<T> atMost(long numberOfAttempts) {
         return new MultiRetryAtMost<>(upstream, predicate, numberOfAttempts);

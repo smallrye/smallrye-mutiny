@@ -20,8 +20,8 @@ public class UniHandleResultOn<I> extends UniOperator<I, I> {
     public void subscribing(UniSerializedSubscriber<? super I> subscriber) {
         upstream().subscribe().withSubscriber(new UniDelegatingSubscriber<I, I>(subscriber) {
             @Override
-            public void onResult(I result) {
-                executor.execute(() -> subscriber.onResult(result));
+            public void onItem(I item) {
+                executor.execute(() -> subscriber.onItem(item));
             }
         });
     }

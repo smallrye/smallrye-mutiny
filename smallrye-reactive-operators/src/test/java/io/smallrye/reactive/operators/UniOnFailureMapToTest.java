@@ -18,7 +18,7 @@ public class UniOnFailureMapToTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testThatMapperMustNotBeNull() {
-        Uni.createFrom().result(1).onFailure().mapTo(null);
+        Uni.createFrom().item(1).onFailure().mapTo(null);
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -91,7 +91,7 @@ public class UniOnFailureMapToTest {
         try {
             AtomicReference<String> threadName = new AtomicReference<>();
             failure
-                    .handleFailureOn(executor)
+                    .receiveFailureOn(executor)
                     .onFailure().mapTo(fail -> {
                 threadName.set(Thread.currentThread().getName());
                 return new BoomException();
@@ -110,13 +110,13 @@ public class UniOnFailureMapToTest {
     public void testThatMapperIsNotCalledOnResult() {
         UniAssertSubscriber<Integer> ts = UniAssertSubscriber.create();
         AtomicBoolean called = new AtomicBoolean();
-        Uni.createFrom().result(1)
+        Uni.createFrom().item(1)
                 .onFailure().mapTo(f -> {
             called.set(true);
             return f;
         })
                 .subscribe().withSubscriber(ts);
-        ts.assertResult(1);
+        ts.assertItem(1);
         assertThat(called).isFalse();
     }
 

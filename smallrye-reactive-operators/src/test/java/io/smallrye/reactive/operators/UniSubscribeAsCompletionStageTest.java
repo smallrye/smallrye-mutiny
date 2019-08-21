@@ -26,14 +26,14 @@ public class UniSubscribeAsCompletionStageTest {
 
     @Test
     public void testWithImmediateValue() {
-        CompletableFuture<Integer> future = Uni.createFrom().result(1).subscribe().asCompletionStage();
+        CompletableFuture<Integer> future = Uni.createFrom().item(1).subscribe().asCompletionStage();
         assertThat(future).isNotNull();
         assertThat(future).isCompletedWithValue(1);
     }
 
     @Test
     public void testWithImmediateNullValue() {
-        CompletableFuture<Void> future = Uni.createFrom().nullValue().subscribe().asCompletionStage();
+        CompletableFuture<Void> future = Uni.createFrom().nullItem().subscribe().asCompletionStage();
         assertThat(future).isNotNull();
         assertThat(future).isCompletedWithValue(null);
     }
@@ -55,7 +55,7 @@ public class UniSubscribeAsCompletionStageTest {
     @Test
     public void testThatSubscriptionsAreNotShared() {
         AtomicInteger count = new AtomicInteger(1);
-        Uni<Integer> deferred = Uni.createFrom().deferred(() -> Uni.createFrom().result(count.getAndIncrement()));
+        Uni<Integer> deferred = Uni.createFrom().deferred(() -> Uni.createFrom().item(count.getAndIncrement()));
         CompletionStage<Integer> cs1 = deferred.subscribe().asCompletionStage();
         CompletionStage<Integer> cs2 = deferred.subscribe().asCompletionStage();
         assertThat(cs1).isNotNull();
@@ -68,7 +68,7 @@ public class UniSubscribeAsCompletionStageTest {
     @Test
     public void testThatTwoSubscribersWithCache() {
         AtomicInteger count = new AtomicInteger(1);
-        Uni<Integer> cached = Uni.createFrom().deferred(() -> Uni.createFrom().result(count.getAndIncrement())).cache();
+        Uni<Integer> cached = Uni.createFrom().deferred(() -> Uni.createFrom().item(count.getAndIncrement())).cache();
         CompletionStage<Integer> cs1 = cached.subscribe().asCompletionStage();
         CompletionStage<Integer> cs2 = cached.subscribe().asCompletionStage();
         assertThat(cs1).isNotNull();
@@ -80,7 +80,7 @@ public class UniSubscribeAsCompletionStageTest {
     @Test
     public void testCancellationWithImmediateValue() {
         AtomicInteger value = new AtomicInteger(-1);
-        CompletableFuture<Integer> future = Uni.createFrom().result(1).subscribe().asCompletionStage()
+        CompletableFuture<Integer> future = Uni.createFrom().item(1).subscribe().asCompletionStage()
                 .whenComplete((res, fail) -> value.set(res));
         future.cancel(false);
         assertThat(future).isNotCancelled(); // Too late.
@@ -91,9 +91,9 @@ public class UniSubscribeAsCompletionStageTest {
     public void testCancellationWithAsyncValue() {
         executor = Executors.newSingleThreadScheduledExecutor();
         AtomicInteger value = new AtomicInteger(-1);
-        CompletableFuture<Integer> future = Uni.createFrom().result(1)
-                .onResult().delayIt().onExecutor(executor).by(Duration.ofMillis(100))
-                .handleResultOn(executor)
+        CompletableFuture<Integer> future = Uni.createFrom().item(1)
+                .onItem().delayIt().onExecutor(executor).by(Duration.ofMillis(100))
+                .receiveItemOn(executor)
                 .subscribe().asCompletionStage()
                 .whenComplete((res, fail) -> value.set(res));
 
@@ -105,8 +105,8 @@ public class UniSubscribeAsCompletionStageTest {
     @Test
     public void testWithAsyncValue() {
         executor = Executors.newSingleThreadScheduledExecutor();
-        CompletableFuture<Integer> future = Uni.createFrom().result(1)
-                .handleResultOn(executor).subscribe().asCompletionStage();
+        CompletableFuture<Integer> future = Uni.createFrom().item(1)
+                .receiveItemOn(executor).subscribe().asCompletionStage();
         await().until(future::isDone);
         assertThat(future).isCompletedWithValue(1);
     }
@@ -114,7 +114,7 @@ public class UniSubscribeAsCompletionStageTest {
     @Test
     public void testWithAsyncNullValue() {
         executor = Executors.newSingleThreadScheduledExecutor();
-        CompletableFuture<Void> future = Uni.createFrom().nullValue().handleResultOn(executor)
+        CompletableFuture<Void> future = Uni.createFrom().nullItem().receiveItemOn(executor)
                 .subscribe().asCompletionStage();
         await().until(future::isDone);
         assertThat(future).isCompletedWithValue(null);
@@ -124,7 +124,7 @@ public class UniSubscribeAsCompletionStageTest {
     public void testWithAsyncFailure() {
         executor = Executors.newSingleThreadScheduledExecutor();
         CompletableFuture<Integer> future = Uni.createFrom().<Integer>failure(new IOException("boom"))
-                .handleResultOn(executor).subscribe().asCompletionStage();
+                .receiveItemOn(executor).subscribe().asCompletionStage();
         await().until(future::isDone);
         assertThat(future).isCompletedExceptionally();
     }

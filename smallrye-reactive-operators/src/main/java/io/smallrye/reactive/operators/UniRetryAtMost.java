@@ -47,9 +47,9 @@ public class UniRetryAtMost<T> extends UniOperator<T, T> {
             }
 
             @Override
-            public void onResult(T result) {
+            public void onItem(T item) {
                 if (reference.get() != CANCELLED) {
-                    subscriber.onResult(result);
+                    subscriber.onItem(item);
                 }
             }
 

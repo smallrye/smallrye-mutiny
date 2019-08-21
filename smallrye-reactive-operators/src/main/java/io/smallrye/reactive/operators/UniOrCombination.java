@@ -40,7 +40,7 @@ public class UniOrCombination<T> extends UniOperator<Void, T> {
     public void subscribing(UniSerializedSubscriber<? super T> subscriber) {
         if (challengers.isEmpty()) {
             subscriber.onSubscribe(EmptyUniSubscription.CANCELLED);
-            subscriber.onResult(null);
+            subscriber.onItem(null);
             return;
         }
 
@@ -84,7 +84,7 @@ public class UniOrCombination<T> extends UniOperator<Void, T> {
                         if (fail != null) {
                             subscriber.onFailure(fail);
                         } else {
-                            subscriber.onResult((T) res);
+                            subscriber.onItem((T) res);
                         }
                     }
                 })

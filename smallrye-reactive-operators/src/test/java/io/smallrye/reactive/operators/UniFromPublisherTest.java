@@ -17,14 +17,14 @@ public class UniFromPublisherTest {
     public void testWithPublisher() {
         UniAssertSubscriber<Integer> ts = UniAssertSubscriber.create();
         Uni.createFrom().publisher(Flowable.just(1)).subscribe().withSubscriber(ts);
-        ts.assertCompletedSuccessfully().assertResult(1);
+        ts.assertCompletedSuccessfully().assertItem(1);
     }
 
     @Test
     public void testWithPublisherBuilder() {
         UniAssertSubscriber<Integer> ts = UniAssertSubscriber.create();
         Uni.createFrom().publisher(Flowable.just(1)).subscribe().withSubscriber(ts);
-        ts.assertCompletedSuccessfully().assertResult(1);
+        ts.assertCompletedSuccessfully().assertItem(1);
     }
 
     @Test
@@ -32,7 +32,7 @@ public class UniFromPublisherTest {
         UniAssertSubscriber<Integer> ts = UniAssertSubscriber.create();
         AtomicBoolean cancelled = new AtomicBoolean();
         Uni.createFrom().publisher(Flowable.just(1, 2, 3).doOnCancel(() -> cancelled.set(true))).subscribe().withSubscriber(ts);
-        ts.assertCompletedSuccessfully().assertResult(1);
+        ts.assertCompletedSuccessfully().assertItem(1);
         assertThat(cancelled).isTrue();
     }
 
@@ -48,7 +48,7 @@ public class UniFromPublisherTest {
     public void testWithEmptyStream() {
         UniAssertSubscriber<Object> ts = UniAssertSubscriber.create();
         Uni.createFrom().publisher(Flowable.empty()).subscribe().withSubscriber(ts);
-        ts.assertCompletedSuccessfully().assertResult(null);
+        ts.assertCompletedSuccessfully().assertItem(null);
     }
 
     @Test
@@ -64,7 +64,7 @@ public class UniFromPublisherTest {
 
         assertThat(called).isFalse();
         uni.subscribe().withSubscriber(ts);
-        ts.assertCompletedSuccessfully().assertResult(1);
+        ts.assertCompletedSuccessfully().assertItem(1);
         assertThat(called).isTrue();
     }
 

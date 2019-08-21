@@ -18,11 +18,11 @@ import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
  * Allow subscribing to a {@link Uni} to be notified of the different events coming from {@code upstream}.
  * Two kind of events can be received:
  * <ul>
- * <li>{@code result} - the result of the {@link Uni}, can be {@code null}</li>
+ * <li>{@code item} - the item of the {@link Uni}, can be {@code null}</li>
  * <li>{@code failure} - the failure propagated by the {@link Uni}</li>
  * </ul>
  *
- * @param <T> the type of result
+ * @param <T> the type of item
  */
 public class UniSubscribe<T> {
 
@@ -33,7 +33,7 @@ public class UniSubscribe<T> {
     }
 
     /**
-     * Requests the {@link Uni} to start computing the result.
+     * Requests the {@link Uni} to start computing the item.
      * <p>
      * This is a "factory method" and can be called multiple times, each time starting a new {@link UniSubscription}.
      * Each {@link UniSubscription} will work for only a single {@link UniSubscriber}. A {@link UniSubscriber} should
@@ -53,12 +53,12 @@ public class UniSubscribe<T> {
 
     /**
      * Like {@link #withSubscriber(UniSubscriber)} with creating an artificial {@link UniSubscriber} calling the
-     * {@code onResult} and {@code onFailure} callbacks when the events are received.
+     * {@code onItem} and {@code onFailure} callbacks when the events are received.
      * <p>
      * Unlike {@link #withSubscriber(UniSubscriber)}, this method returns the subscription that can be used to cancel
      * the subscription.
      *
-     * @param onResultCallback  callback invoked when the a result event is received, potentially called w
+     * @param onResultCallback  callback invoked when the an item event is received, potentially called w
      *                          ith {@code null} is received. The callback must not be {@code null}
      * @param onFailureCallback callback invoked when a failure event is received, must not be {@code null}
      * @return the subscription
@@ -74,9 +74,9 @@ public class UniSubscribe<T> {
 
     /**
      * Like {@link #withSubscriber(UniSubscriber)} but provides a {@link CompletableFuture} to retrieve the completed
-     * result (potentially {@code null}) and allow chaining operations.
+     * item (potentially {@code null}) and allow chaining operations.
      *
-     * @return a {@link CompletableFuture} to retrieve the result and chain operations on the resolved result or
+     * @return a {@link CompletableFuture} to retrieve the item and chain operations on the resolved item or
      * failure. The returned {@link CompletableFuture} can also be used to cancel the computation.
      */
     public CompletableFuture<T> asCompletionStage() {

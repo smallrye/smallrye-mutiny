@@ -1,7 +1,6 @@
 package io.smallrye.reactive.operators;
 
 import io.smallrye.reactive.Uni;
-import io.smallrye.reactive.subscription.UniSubscriber;
 import io.smallrye.reactive.subscription.UniSubscription;
 
 import java.time.Duration;
@@ -45,10 +44,10 @@ public class UniDelayOnItem<T> extends UniOperator<T, T> {
             }
 
             @Override
-            public void onResult(T result) {
+            public void onItem(T item) {
                 if (reference.get() != CANCELLED) {
                     try {
-                        ScheduledFuture<?> future = executor.schedule(() -> super.onResult(result), duration.toMillis(), TimeUnit.MILLISECONDS);
+                        ScheduledFuture<?> future = executor.schedule(() -> super.onItem(item), duration.toMillis(), TimeUnit.MILLISECONDS);
                         holder.set(future);
                     } catch (RuntimeException e) {
                         // Typically, a rejected execution exception

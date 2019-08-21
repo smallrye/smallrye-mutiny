@@ -25,15 +25,15 @@ public class UniCreateFromEmitterTest {
         AtomicReference<UniEmitter> reference = new AtomicReference<>();
         Uni<Integer> uni = Uni.createFrom().emitter(emitter -> {
             reference.set(emitter);
-            emitter.result(1);
-            emitter.failure(new Exception());
-            emitter.result(2);
-            emitter.result(null);
+            emitter.complete(1);
+            emitter.fail(new Exception());
+            emitter.complete(2);
+            emitter.complete(null);
         });
         UniAssertSubscriber<Integer> subscriber = UniAssertSubscriber.create();
         uni.subscribe().withSubscriber(subscriber);
 
-        subscriber.assertCompletedSuccessfully().assertResult(1);
+        subscriber.assertCompletedSuccessfully().assertItem(1);
         // Other signals are dropped
         assertThat(((DefaultUniEmitter) reference.get()).isTerminated()).isTrue();
     }
@@ -56,7 +56,7 @@ public class UniCreateFromEmitterTest {
         AtomicInteger onTerminationCalled = new AtomicInteger();
         Uni.createFrom().<Integer>emitter(emitter -> {
             emitter.onTermination(onTerminationCalled::incrementAndGet);
-            emitter.result(1);
+            emitter.complete(1);
         }).subscribe().withSubscriber(subscriber);
 
         assertThat(onTerminationCalled).hasValue(1);
@@ -72,7 +72,7 @@ public class UniCreateFromEmitterTest {
         AtomicInteger onTerminationCalled = new AtomicInteger();
         Uni.createFrom().<Integer>emitter(emitter -> {
             emitter.onTermination(onTerminationCalled::incrementAndGet);
-            emitter.failure(new IOException("boom"));
+            emitter.fail(new IOException("boom"));
         }).subscribe().withSubscriber(subscriber);
 
         assertThat(onTerminationCalled).hasValue(1);
@@ -96,7 +96,7 @@ public class UniCreateFromEmitterTest {
     @Test
     public void testWithFailure() {
         UniAssertSubscriber<Integer> subscriber = UniAssertSubscriber.create();
-        Uni.createFrom().<Integer>emitter(emitter -> emitter.failure(new Exception("boom"))).subscribe().withSubscriber(subscriber);
+        Uni.createFrom().<Integer>emitter(emitter -> emitter.fail(new Exception("boom"))).subscribe().withSubscriber(subscriber);
 
         subscriber.assertFailure(Exception.class, "boom");
     }
@@ -118,7 +118,7 @@ public class UniCreateFromEmitterTest {
         AtomicReference<UniEmitter<? super Void>> reference = new AtomicReference<>();
         Uni.createFrom().<Void>emitter(emitter -> {
             reference.set(emitter);
-            emitter.result(null);
+            emitter.complete(null);
         }).subscribe().withSubscriber(subscriber);
 
         subscriber.assertCompletedSuccessfully();
@@ -128,7 +128,7 @@ public class UniCreateFromEmitterTest {
     @Test
     public void testThatFailuresCannotBeNull() {
         UniAssertSubscriber<Integer> subscriber = UniAssertSubscriber.create();
-        Uni.createFrom().<Integer>emitter(emitter -> emitter.failure(null)).subscribe().withSubscriber(subscriber);
+        Uni.createFrom().<Integer>emitter(emitter -> emitter.fail(null)).subscribe().withSubscriber(subscriber);
 
         subscriber.assertFailure(IllegalArgumentException.class, "");
     }
@@ -140,7 +140,7 @@ public class UniCreateFromEmitterTest {
         Uni.createFrom().<Integer>emitter(emitter -> {
             emitter.onTermination(() -> onTerminationCalled.set(true));
             try {
-                emitter.result(1);
+                emitter.complete(1);
                 fail("Exception expected");
             } catch (Exception ex) {
                 // expected
@@ -154,7 +154,7 @@ public class UniCreateFromEmitterTest {
             }
 
             @Override
-            public void onResult(Integer result) {
+            public void onItem(Integer ignored) {
                 throw new NullPointerException("boom");
             }
 
@@ -174,7 +174,7 @@ public class UniCreateFromEmitterTest {
         Uni.createFrom().<Integer>emitter(emitter -> {
             emitter.onTermination(() -> onTerminationCalled.set(true));
             try {
-                emitter.failure(new Exception("boom"));
+                emitter.fail(new Exception("boom"));
                 fail("Exception expected");
             } catch (Exception ex) {
                 // expected
@@ -188,7 +188,7 @@ public class UniCreateFromEmitterTest {
             }
 
             @Override
-            public void onResult(Integer result) {
+            public void onItem(Integer ignored) {
             }
 
             @Override

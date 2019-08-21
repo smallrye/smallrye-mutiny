@@ -15,7 +15,7 @@ public class MultiOnFailureRetryTest {
     private AtomicInteger numberOfSubscriptions = new AtomicInteger();
     private Multi<Integer> failing = Multi.createFrom()
             .<Integer>emitter(emitter ->
-                    emitter.result(1).result(2).result(3).failure(new IOException("boom")))
+                    emitter.emit(1).emit(2).emit(3).fail(new IOException("boom")))
             .on().subscription(s -> numberOfSubscriptions.incrementAndGet());
 
     @Test(expected = IllegalArgumentException.class)
@@ -79,7 +79,7 @@ public class MultiOnFailureRetryTest {
 
         subscriber
                 .assertSubscribed()
-                .assertHasNoResults()
+                .assertHasNotReceivedAnyItem()
                 .request(4)
                 .assertReceived(1, 2, 3, 1)
                 .assertHasNotFailed()
@@ -98,7 +98,7 @@ public class MultiOnFailureRetryTest {
         failing.onFailure().retry().indefinitely()
                 .subscribe().withSubscriber(subscriber);
 
-        await().until(() -> subscriber.results().size() > 10);
+        await().until(() -> subscriber.items().size() > 10);
         subscriber.cancel();
 
         subscriber.assertNotTerminated();
@@ -108,8 +108,8 @@ public class MultiOnFailureRetryTest {
     public void testWithRetryingGoingBackToSuccess() {
         AtomicInteger count = new AtomicInteger();
 
-        Multi.createFrom().results(1, 2, 3, 4)
-                .onResult().consume(i -> {
+        Multi.createFrom().items(1, 2, 3, 4)
+                .onItem().consume(i -> {
             if (count.getAndIncrement() < 2) {
                 throw new RuntimeException("boom");
             }

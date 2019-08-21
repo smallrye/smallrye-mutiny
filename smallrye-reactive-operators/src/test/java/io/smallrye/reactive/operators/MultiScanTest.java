@@ -7,17 +7,17 @@ public class MultiScanTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testThatSupplierMustNotBeNull() {
-        Multi.createFrom().empty().onResult().scan(null, (a, b) -> a);
+        Multi.createFrom().empty().onItem().scan(null, (a, b) -> a);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testThatScannerMustNotBeNull() {
-        Multi.createFrom().empty().onResult().scan(() -> 1, null);
+        Multi.createFrom().empty().onItem().scan(() -> 1, null);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testThatScannerMustNotBeNullWithoutSupplier() {
-        Multi.createFrom().empty().onResult().scan(null);
+        Multi.createFrom().empty().onItem().scan(null);
     }
 
     @Test
@@ -25,7 +25,7 @@ public class MultiScanTest {
         MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(10);
 
         Multi.createFrom().range(1, 10)
-                .onResult().scan((a, b) -> b)
+                .onItem().scan((a, b) -> b)
                 .subscribe().withSubscriber(subscriber);
 
         subscriber
@@ -39,7 +39,7 @@ public class MultiScanTest {
         MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(Long.MAX_VALUE);
 
         Multi.createFrom().range(1, 10)
-                .onResult().scan(() -> 2, (a, b) -> b)
+                .onItem().scan(() -> 2, (a, b) -> b)
                 .subscribe().withSubscriber(subscriber);
 
         subscriber
@@ -52,11 +52,11 @@ public class MultiScanTest {
         MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create();
 
         Multi.createFrom().range(1, 10)
-                .onResult().scan((a, b) -> b)
+                .onItem().scan((a, b) -> b)
                 .subscribe().withSubscriber(subscriber);
 
         subscriber
-                .assertHasNoResults()
+                .assertHasNotReceivedAnyItem()
                 .assertNotTerminated();
 
         subscriber.request(5)
@@ -73,7 +73,7 @@ public class MultiScanTest {
         MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(2);
 
         Multi.createFrom().range(1, 10)
-                .onResult().scan((a, b) -> {
+                .onItem().scan((a, b) -> {
             throw new IllegalArgumentException("boom");
         })
                 .subscribe().withSubscriber(subscriber);
@@ -87,7 +87,7 @@ public class MultiScanTest {
         MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(2);
 
         Multi.createFrom().range(1, 10)
-                .onResult().scan((a, b) -> null)
+                .onItem().scan((a, b) -> null)
                 .subscribe().withSubscriber(subscriber);
 
         subscriber.assertReceived(1)
@@ -99,7 +99,7 @@ public class MultiScanTest {
         MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(2);
 
         Multi.createFrom().range(1, 10)
-                .onResult().scan(() -> 1, (a, b) -> {
+                .onItem().scan(() -> 1, (a, b) -> {
             throw new IllegalArgumentException("boom");
         })
                 .subscribe().withSubscriber(subscriber);
@@ -113,7 +113,7 @@ public class MultiScanTest {
         MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(2);
 
         Multi.createFrom().range(1, 10)
-                .onResult().scan(() -> 1, (a, b) -> null)
+                .onItem().scan(() -> 1, (a, b) -> null)
                 .subscribe().withSubscriber(subscriber);
 
         subscriber.assertReceived(1)

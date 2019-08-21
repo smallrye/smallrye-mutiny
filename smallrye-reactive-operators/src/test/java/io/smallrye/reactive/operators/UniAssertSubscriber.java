@@ -9,7 +9,7 @@ public class UniAssertSubscriber<T> implements UniSubscriber<T> {
     private final boolean cancelImmediatelyOnSubscription;
     private UniSubscription subscription;
     private boolean gotSignal;
-    private T result;
+    private T item;
     private Throwable failure;
     private CompletableFuture<T> future = new CompletableFuture<>();
     private String onResultThreadName;
@@ -42,14 +42,14 @@ public class UniAssertSubscriber<T> implements UniSubscriber<T> {
     }
 
     @Override
-    public synchronized void onResult(T result) {
+    public synchronized void onItem(T item) {
         this.gotSignal = true;
         if (this.future == null) {
             throw new IllegalStateException("No subscription");
         }
-        this.result = result;
+        this.item = item;
         this.onResultThreadName = Thread.currentThread().getName();
-        this.future.complete(result);
+        this.future.complete(item);
     }
 
     @Override
@@ -105,7 +105,7 @@ public class UniAssertSubscriber<T> implements UniSubscriber<T> {
         }
 
         if (! future.isCompletedExceptionally()) {
-            throw new AssertionError("The uni completed successfully: " + result);
+            throw new AssertionError("The uni completed successfully: " + item);
         }
         if (future.isCancelled()) {
             throw new AssertionError("The uni didn't completed successfully, it was cancelled");
@@ -113,14 +113,14 @@ public class UniAssertSubscriber<T> implements UniSubscriber<T> {
         return this;
     }
 
-    public synchronized T getResult() {
+    public synchronized T getItem() {
         if (this.future == null) {
             throw new IllegalStateException("No subscription");
         }
         if (!this.future.isDone()) {
             throw new IllegalStateException("Not done yet");
         }
-        return result;
+        return item;
     }
 
     public synchronized Throwable getFailure() {
@@ -133,13 +133,13 @@ public class UniAssertSubscriber<T> implements UniSubscriber<T> {
         return failure;
     }
 
-    public UniAssertSubscriber<T> assertResult(T expected) {
-        T result = getResult();
-        if (result == null && expected != null) {
+    public UniAssertSubscriber<T> assertItem(T expected) {
+        T item = getItem();
+        if (item == null && expected != null) {
             throw new AssertionError("Expected: " + expected + " but was `null`");
         }
-        if (result != null && !result.equals(expected)) {
-            throw new AssertionError("Expected: " + expected + " but was " + result);
+        if (item != null && !item.equals(expected)) {
+            throw new AssertionError("Expected: " + expected + " but was " + item);
         }
         return this;
     }
@@ -148,7 +148,7 @@ public class UniAssertSubscriber<T> implements UniSubscriber<T> {
         Throwable failure = getFailure();
 
         if (failure == null) {
-            throw new AssertionError("Expected a failure, but the Uni completed with a result");
+            throw new AssertionError("Expected a failure, but the Uni completed with an item");
         }
         if (!exceptionClass.isInstance(failure)) {
             throw new AssertionError("Expected a failure of type " + exceptionClass + ", but it was a " + failure.getClass());

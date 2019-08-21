@@ -7,18 +7,18 @@ import java.util.List;
 public interface Tuple extends Iterable<Object> {
 
     /**
-     * Get the result stored at the given index.
+     * Get the item stored at the given index.
      *
-     * @param index The index of the result to retrieve.
-     * @return The result, can be {@code null}
+     * @param index The index of the item to retrieve.
+     * @return The item, can be {@code null}
      * @throws IndexOutOfBoundsException if the index is greater than the size.
      */
     Object nth(int index);
 
     /**
-     * Gets a {@link java.util.List} of {@link Object} containing the results from this {@link Tuple}
+     * Gets a {@link java.util.List} of {@link Object Objects} containing the items composing this {@link Tuple}
      *
-     * @return A list containing the result of the tuple.
+     * @return A list containing the item of the tuple.
      */
     List<Object> asList();
 
@@ -33,7 +33,7 @@ public interface Tuple extends Iterable<Object> {
     }
 
     /**
-     * @return the number of results stored in the {@link Tuple}
+     * @return the number of items stored in the {@link Tuple}
      */
     int size();
 }

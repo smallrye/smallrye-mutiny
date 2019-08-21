@@ -10,11 +10,11 @@ import java.util.Optional;
 import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
 
 /**
- * Waits and returns the result of the {@link Uni}.
+ * Waits and returns the item emitted by the {@link Uni}. If the {@link Uni} receives a failure, the failure is thrown.
  * <p>
- * This class lets you configure how to retrieves the result of a {@link Uni} by blocking the caller thread.
+ * This class lets you configure how to retrieves the item of a {@link Uni} by blocking the caller thread.
  *
- * @param <T> the type of result
+ * @param <T> the type of item
  * @see Uni#await()
  */
 public class UniAwait<T> {
@@ -27,16 +27,16 @@ public class UniAwait<T> {
 
     /**
      * Subscribes to the {@link Uni} and waits (blocking the caller thread) <strong>indefinitely</strong> until a
-     * {@code result} event is fired or a {@code failure} event is fired by the upstream uni.
+     * {@code item} event is fired or a {@code failure} event is fired by the upstream uni.
      * <p>
-     * If the {@link Uni} fires a result, it returns that result, potentially {@code null} if the operation
+     * If the {@link Uni} fires an item, it returns that item, potentially {@code null} if the operation
      * returns {@code null}.
      * If the {@link Uni} fires a failure, the original exception is thrown (wrapped in
      * a {@link java.util.concurrent.CompletionException} it's a checked exception).
      * <p>
      * Note that each call to this method triggers a new subscription.
      *
-     * @return the result from the {@link Uni}, potentially {@code null}
+     * @return the item from the {@link Uni}, potentially {@code null}
      */
     public T indefinitely() {
         return atMost(null);
@@ -44,9 +44,9 @@ public class UniAwait<T> {
 
     /**
      * Subscribes to the {@link Uni} and waits (blocking the caller thread) <strong>at most</strong> the given duration
-     * until a result or failure is fired by the upstream uni.
+     * until an item or failure is fired by the upstream uni.
      * <p>
-     * If the {@link Uni} fires a result, it returns that result, potentially {@code null} if the operation
+     * If the {@link Uni} fires an item, it returns that item, potentially {@code null} if the operation
      * returns {@code null}.
      * If the {@link Uni} fires a failure, the original exception is thrown (wrapped in
      * a {@link java.util.concurrent.CompletionException} it's a checked exception).
@@ -55,15 +55,15 @@ public class UniAwait<T> {
      * Note that each call to this method triggers a new subscription.
      *
      * @param duration the duration, must not be {@code null}, must not be negative or zero.
-     * @return the result from the {@link Uni}, potentially {@code null}
+     * @return the item from the {@link Uni}, potentially {@code null}
      */
     public T atMost(Duration duration) {
         return UniBlockingAwait.await(upstream, duration);
     }
 
     /**
-     * Indicates that you are awaiting for the result event of the attached {@link Uni} wrapped into an {@link Optional}.
-     * So if the {@link Uni} fires {@code null} as result, you receive an empty {@link Optional}.
+     * Indicates that you are awaiting for the item event of the attached {@link Uni} wrapped into an {@link Optional}.
+     * So if the {@link Uni} fires {@code null} as item, you receive an empty {@link Optional}.
      *
      * @return the {@link UniAwaitOptional} configured to produce an {@link Optional}.
      */

@@ -23,9 +23,9 @@ public class UniOnEventConsume<T> extends UniOperator<T, T> {
     public void subscribing(UniSerializedSubscriber<? super T> subscriber) {
         upstream().subscribe().withSubscriber(new UniDelegatingSubscriber<T, T>(subscriber) {
             @Override
-            public void onResult(T result) {
-                if (invokeEventHandler(onResult, result, false, subscriber)) {
-                    subscriber.onResult(result);
+            public void onItem(T item) {
+                if (invokeEventHandler(onResult, item, false, subscriber)) {
+                    subscriber.onItem(item);
                 }
             }
 

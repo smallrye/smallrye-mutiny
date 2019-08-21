@@ -21,7 +21,7 @@ public class UniCache<I> extends UniOperator<I, I> implements UniSubscriber<I> {
     private final AtomicReference<UniSubscription> subscription = new AtomicReference<>();
     private final List<UniSubscriber<? super I>> subscribers = new ArrayList<>();
     private int state = 0;
-    private I result;
+    private I item;
     private Throwable failure;
 
     UniCache(Uni<? extends I> upstream) {
@@ -44,7 +44,7 @@ public class UniCache<I> extends UniOperator<I, I> implements UniSubscriber<I> {
                     subscribers.add(subscriber);
                     break;
                 case SUBSCRIBED:
-                    // No result yet, but we can provide a Subscription
+                    // No item yet, but we can provide a Subscription
                     subscribers.add(subscriber);
                     action = () ->
                             subscriber.onSubscribe(() -> onCancellation(subscriber));
@@ -82,7 +82,7 @@ public class UniCache<I> extends UniOperator<I, I> implements UniSubscriber<I> {
         if (failure != null) {
             subscriber.onFailure(failure);
         } else {
-            subscriber.onResult(result);
+            subscriber.onItem(item);
         }
     }
 
@@ -100,21 +100,21 @@ public class UniCache<I> extends UniOperator<I, I> implements UniSubscriber<I> {
     }
 
     @Override
-    public void onResult(I result) {
+    public void onItem(I item) {
         List<UniSubscriber<? super I>> list;
         synchronized (this) {
             if (state != SUBSCRIBED) {
-                throw new IllegalStateException("Invalid state - received result while we where not in the SUBSCRIBED state, current state is: " + state);
+                throw new IllegalStateException("Invalid state - received item while we where not in the SUBSCRIBED state, current state is: " + state);
             }
             state = COMPLETED;
-            this.result = result;
+            this.item = item;
             list = new ArrayList<>(subscribers);
             // Clear the list
             this.subscribers.clear();
         }
         // Here we may notify a subscriber that would have cancelled its subscription just after the synchronized await
         // we consider it as pending cancellation.
-        list.forEach(s -> s.onResult(result));
+        list.forEach(s -> s.onItem(item));
     }
 
     @Override
@@ -122,7 +122,7 @@ public class UniCache<I> extends UniOperator<I, I> implements UniSubscriber<I> {
         List<UniSubscriber<? super I>> list;
         synchronized (this) {
             if (state != SUBSCRIBED) {
-                throw new IllegalStateException("Invalid state - received result while we where not in the SUBSCRIBED state, current state is: " + state);
+                throw new IllegalStateException("Invalid state - received item while we where not in the SUBSCRIBED state, current state is: " + state);
             }
             state = COMPLETED;
             this.failure = failure;

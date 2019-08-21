@@ -2,7 +2,7 @@ package io.smallrye.reactive.groups;
 
 import io.smallrye.reactive.CompositeException;
 import io.smallrye.reactive.Uni;
-import io.smallrye.reactive.tuples.Pair;
+import io.smallrye.reactive.tuples.Tuple2;
 
 import java.util.concurrent.Executor;
 
@@ -15,15 +15,15 @@ public class UniCombine {
     }
 
     /**
-     * Creates a {@link Uni} forwarding the first event (result or failure). It behaves like the fastest
-     * of these competing unis. If the passed iterable is empty, the resulting {@link Uni} gets a {@code null} result
+     * Creates a {@link Uni} forwarding the first event (item or failure). It behaves like the fastest
+     * of these competing unis. If the passed iterable is empty, the resulting {@link Uni} gets a {@code null} item
      * just after subscription.
      * <p>
-     * This method subscribes to the set of {@link Uni}. When one of the {@link Uni} fires a result or a failure
+     * This method subscribes to the set of {@link Uni}. When one of the {@link Uni} fires an item or a failure
      * a failure, the event is propagated downstream. Also the other subscriptions are cancelled.
      * <p>
      * Note that the callback from the subscriber are called on the thread used to fire the event of the selected
-     * {@link Uni}. Use {@link Uni#handleResultOn(Executor)} to change that thread.
+     * {@link Uni}. Use {@link Uni#receiveItemOn(Executor)} to change that thread.
      * <p>
      * If the subscription to the returned {@link Uni} is cancelled, the subscription to the {@link Uni unis}
      * contained in the {@code iterable} are also cancelled.
@@ -36,7 +36,7 @@ public class UniCombine {
     }
 
     /**
-     * Combines a set of {@link Uni unis} into a joined result. This result can be a {@code Tuple} or the result of a
+     * Combines a set of {@link Uni unis} into a joined item. This item can be a {@code Tuple} or the item of a
      * combinator function.
      * <p>
      * If one of the combine {@link Uni} fire a failure, the other unis are cancelled, and the resulting
@@ -45,7 +45,7 @@ public class UniCombine {
      * {@link Uni} failed, a {@link CompositeException} is fired, wrapping the different collected failures.
      * <p>
      * Depending on the number of participants, the produced {@link io.smallrye.reactive.tuples.Tuple} is
-     * different from {@link Pair} to {@link io.smallrye.reactive.tuples.Tuple5}. For more participants,
+     * different from {@link Tuple2} to {@link io.smallrye.reactive.tuples.Tuple5}. For more participants,
      * use {@link io.smallrye.reactive.groups.UniZip#unis(Uni[])} or
      * {@link io.smallrye.reactive.groups.UniZip#unis(Iterable)}.
      *

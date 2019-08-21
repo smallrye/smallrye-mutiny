@@ -10,7 +10,7 @@ public class MultiEmptyAndNeverTest {
         Multi<String> nothing = Multi.createFrom().empty();
         nothing.subscribe().withSubscriber(MultiAssertSubscriber.create())
                 .assertCompletedSuccessfully()
-                .assertHasNoResults();
+                .assertHasNotReceivedAnyItem();
     }
 
     @Test

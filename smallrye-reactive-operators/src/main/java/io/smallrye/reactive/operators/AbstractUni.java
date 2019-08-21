@@ -3,7 +3,7 @@ package io.smallrye.reactive.operators;
 import io.smallrye.reactive.Multi;
 import io.smallrye.reactive.Uni;
 import io.smallrye.reactive.groups.*;
-import io.smallrye.reactive.tuples.Pair;
+import io.smallrye.reactive.tuples.Tuple2;
 
 import java.util.concurrent.Executor;
 import java.util.function.Predicate;
@@ -21,18 +21,18 @@ public abstract class AbstractUni<T> implements Uni<T> {
     }
 
     @Override
-    public UniOnResult<T> onResult() {
-        return new UniOnResult<>(this);
+    public UniOnItem<T> onItem() {
+        return new UniOnItem<>(this);
     }
 
     @Override
-    public UniOnTimeout<T> onNoResult() {
+    public UniOnTimeout<T> onNoItem() {
         return new UniOnTimeout<>(this, null, null);
     }
 
     @Override
-    public UniOnNullResult<T> onNullResult() {
-        return new UniOnNullResult<>(this);
+    public UniOnNull<T> onNull() {
+        return new UniOnNull<>(this);
     }
 
     @Override
@@ -56,8 +56,8 @@ public abstract class AbstractUni<T> implements Uni<T> {
     }
 
     @Override
-    public <T2> Uni<Pair<T, T2>> and(Uni<T2> other) {
-        return new UniAndGroup<>(this).uni(nonNull(other, "other")).asPair();
+    public <T2> Uni<Tuple2<T, T2>> and(Uni<T2> other) {
+        return new UniAndGroup<>(this).uni(nonNull(other, "other")).asTuple();
     }
 
     @Override
@@ -70,20 +70,20 @@ public abstract class AbstractUni<T> implements Uni<T> {
         return new UniAwait<>(this);
     }
 
-    //TODO Should handleResultOn and handleFailureOn be part of the onFailure and onResult groups
+    //TODO Should receiveItemOn and receiveFailureOn be part of the onFailure and onItem groups
 
     @Override
-    public Uni<T> handleResultOn(Executor executor) {
+    public Uni<T> receiveItemOn(Executor executor) {
         return new UniHandleResultOn<>(this, nonNull(executor, "executor"));
     }
 
     @Override
-    public Uni<T> handleFailureOn(Executor executor) {
+    public Uni<T> receiveFailureOn(Executor executor) {
         return new UniHandleFailureOn<>(this, nonNull(executor, "executor"));
     }
 
     @Override
-    public Uni<T> callSubscribeOn(Executor executor) {
+    public Uni<T> receiveSubscriptionOn(Executor executor) {
         return new UniCallSubscribeOn<>(this, nonNull(executor, "executor"));
     }
 

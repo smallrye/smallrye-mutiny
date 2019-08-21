@@ -60,10 +60,10 @@ public class UniOnTimeout<T> {
     }
 
     /**
-     * Produces a new {@link Uni} firing a fallback result when the current {@link Uni} the upstream {@link Uni} do not
-     * emit a result before the timeout.
+     * Produces a new {@link Uni} firing a fallback item when the current {@link Uni} the upstream {@link Uni} do not
+     * emit an item before the timeout.
      * <p>
-     * The fallback result (potentially {@code null}) is used as result by the produced {@link Uni}.
+     * The fallback item (potentially {@code null}) is used as item by the produced {@link Uni}.
      *
      * @param fallback the fallback value, may be {@code null}
      * @return the new {@link Uni}
@@ -73,8 +73,8 @@ public class UniOnTimeout<T> {
     }
 
     /**
-     * Produces a new {@link Uni} firing a fallback result supplied by the given supplier when the current {@link Uni}
-     * times out. The produced result (potentially {@code null}) is fired as result by the produced {@link Uni}.
+     * Produces a new {@link Uni} firing a fallback item supplied by the given supplier when the current {@link Uni}
+     * times out. The produced item (potentially {@code null}) is fired as item by the produced {@link Uni}.
      * Note that if the supplier throws an exception, the produced {@link Uni} emits a failure.
      *
      * @param supplier the fallback supplier, may be {@code null}

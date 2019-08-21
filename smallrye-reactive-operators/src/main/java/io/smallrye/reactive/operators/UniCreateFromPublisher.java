@@ -46,7 +46,7 @@ public class UniCreateFromPublisher<O> extends UniOperator<Void, O> {
                     return;
                 }
                 sub.cancel();
-                subscriber.onResult(o);
+                subscriber.onItem(o);
             }
 
             @Override
@@ -68,7 +68,7 @@ public class UniCreateFromPublisher<O> extends UniOperator<Void, O> {
                     return;
                 }
                 sub.cancel();
-                subscriber.onResult(null);
+                subscriber.onItem(null);
             }
         });
     }

@@ -44,7 +44,7 @@ public class MultiCreateFromCompletionStageTest {
         MultiAssertSubscriber<String> subscriber = Multi.createFrom()
                 .completionStage(CompletableFuture.<String>completedFuture(null)).subscribe()
                 .withSubscriber(MultiAssertSubscriber.create(1));
-        subscriber.assertCompletedSuccessfully().assertHasNoResults();
+        subscriber.assertCompletedSuccessfully().assertHasNotReceivedAnyItem();
     }
 
     @Test
@@ -55,7 +55,7 @@ public class MultiCreateFromCompletionStageTest {
                     called.set(true);
                 })).subscribe()
                 .withSubscriber(MultiAssertSubscriber.create(1));
-        subscriber.await().assertCompletedSuccessfully().assertHasNoResults();
+        subscriber.await().assertCompletedSuccessfully().assertHasNotReceivedAnyItem();
         assertThat(called).isTrue();
     }
 
@@ -69,7 +69,7 @@ public class MultiCreateFromCompletionStageTest {
         MultiAssertSubscriber<String> subscriber2 = multi.subscribe().withSubscriber(MultiAssertSubscriber.create());
 
         subscriber1.assertCompletedSuccessfully().assertReceived("hello-1");
-        subscriber2.assertHasNoResults().assertNotTerminated().request(20)
+        subscriber2.assertHasNotReceivedAnyItem().assertNotTerminated().request(20)
                 .assertCompletedSuccessfully().assertReceived("hello-2");
     }
 
@@ -79,8 +79,8 @@ public class MultiCreateFromCompletionStageTest {
         MultiAssertSubscriber<String> subscriber1 = multi.subscribe().withSubscriber(MultiAssertSubscriber.create(1));
         MultiAssertSubscriber<String> subscriber2 = multi.subscribe().withSubscriber(MultiAssertSubscriber.create());
 
-        subscriber1.assertCompletedSuccessfully().assertHasNoResults();
-        subscriber2.assertHasNoResults().assertCompletedSuccessfully();
+        subscriber1.assertCompletedSuccessfully().assertHasNotReceivedAnyItem();
+        subscriber2.assertHasNotReceivedAnyItem().assertCompletedSuccessfully();
     }
 
     @Test

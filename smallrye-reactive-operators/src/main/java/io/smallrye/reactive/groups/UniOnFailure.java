@@ -58,7 +58,7 @@ public class UniOnFailure<T> {
         nonNull(fallback, "fallback");
         return new UniFlatMapOnFailure<>(upstream, predicate, failure -> {
             T newResult = fallback.apply(failure);
-            return Uni.createFrom().result(newResult);
+            return Uni.createFrom().item(newResult);
         });
     }
 

@@ -24,7 +24,7 @@ public class UniAny {
      * Like {@link #of(Iterable)} but with an array of {@link Uni} as parameter
      *
      * @param unis the array, must not be {@code null}, must not contain @{code null}
-     * @param <T>  the type of result emitted by the different unis.
+     * @param <T>  the type of item emitted by the different unis.
      * @return the produced {@link Uni}
      */
     @SafeVarargs
@@ -34,21 +34,21 @@ public class UniAny {
     }
 
     /**
-     * Creates a {@link Uni} forwarding the first event (result or failure). It behaves like the fastest
-     * of these competing unis. If the passed iterable is empty, the resulting {@link Uni} gets a {@code null} result
+     * Creates a {@link Uni} forwarding the first event (item or failure). It behaves like the fastest
+     * of these competing unis. If the passed iterable is empty, the resulting {@link Uni} gets a {@code null} item
      * just after subscription.
      * <p>
-     * This method subscribes to the set of {@link Uni}. When one of the {@link Uni} fires a result or a failure
+     * This method subscribes to the set of {@link Uni}. When one of the {@link Uni} fires an item or a failure
      * a failure, the event is propagated downstream. Also the other subscriptions are cancelled.
      * <p>
      * Note that the callback from the subscriber are called on the thread used to fire the event of the selected
-     * {@link Uni}. Use {@link Uni#handleResultOn(Executor)} to change that thread.
+     * {@link Uni}. Use {@link Uni#receiveItemOn(Executor)} to change that thread.
      * <p>
      * If the subscription to the returned {@link Uni} is cancelled, the subscription to the {@link Uni unis}
      * contained in the {@code iterable} are also cancelled.
      *
      * @param iterable a set of {@link Uni}, must not be {@code null}.
-     * @param <T>      the type of result emitted by the different unis.
+     * @param <T>      the type of item emitted by the different unis.
      * @return the produced {@link Uni}
      */
     public <T> Uni<T> of(Iterable<? extends Uni<? super T>> iterable) {

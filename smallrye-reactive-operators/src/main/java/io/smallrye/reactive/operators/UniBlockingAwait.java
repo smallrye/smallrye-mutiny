@@ -33,8 +33,8 @@ public class UniBlockingAwait {
             }
 
             @Override
-            public void onResult(T result) {
-                reference.set(result);
+            public void onItem(T item) {
+                reference.set(item);
                 latch.countDown();
             }
 

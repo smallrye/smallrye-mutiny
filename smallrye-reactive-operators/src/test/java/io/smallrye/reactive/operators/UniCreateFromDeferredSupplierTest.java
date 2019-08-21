@@ -12,7 +12,7 @@ public class UniCreateFromDeferredSupplierTest {
     @Test
     public void testWithMultipleSubscriptions() {
         AtomicInteger counter = new AtomicInteger();
-        Uni<Integer> s =  Uni.createFrom().deferred(() -> Uni.createFrom().result(counter.incrementAndGet()));
+        Uni<Integer> s =  Uni.createFrom().deferred(() -> Uni.createFrom().item(counter.incrementAndGet()));
 
         for (int i = 1; i < 100; i++) {
             assertThat(s.await().indefinitely()).isEqualTo(i);

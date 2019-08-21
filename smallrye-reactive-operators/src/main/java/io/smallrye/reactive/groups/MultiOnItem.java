@@ -9,24 +9,24 @@ import java.util.function.*;
 
 import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
 
-public class MultiOnResult<T> {
+public class MultiOnItem<T> {
 
     private final Multi<T> upstream;
 
-    public MultiOnResult(Multi<T> upstream) {
+    public MultiOnItem(Multi<T> upstream) {
         this.upstream = nonNull(upstream, "upstream");
     }
 
 
     /**
-     * Produces a new {@link Multi} invoking the given function for each result emitted by the upstream {@link Multi}.
+     * Produces a new {@link Multi} invoking the given function for each item emitted by the upstream {@link Multi}.
      * <p>
-     * The function receives the received result as parameter, and can transform it. The returned object is sent
-     * downstream as {@code result} event.
+     * The function receives the received item as parameter, and can transform it. The returned object is sent
+     * downstream as {@code item} event.
      * <p>
      *
      * @param mapper the mapper function, must not be {@code null}
-     * @param <R>    the type of result produced by the mapper function
+     * @param <R>    the type of item produced by the mapper function
      * @return the new {@link Multi}
      */
     public <R> Multi<R> mapToResult(Function<? super T, ? extends R> mapper) {
@@ -34,7 +34,7 @@ public class MultiOnResult<T> {
     }
 
     /**
-     * Produces a new {@link Multi} invoking the given callback when a {@code result}  event is fired by the upstrea.
+     * Produces a new {@link Multi} invoking the given callback when an {@code item}  event is fired by the upstrea.
      *
      * @param callback the callback, must not be {@code null}
      * @return the new {@link Uni}
@@ -44,10 +44,10 @@ public class MultiOnResult<T> {
     }
 
     /**
-     * Produces an {@link Multi} emitting the result events based on the upstream events but casted to the target class.
+     * Produces an {@link Multi} emitting the item events based on the upstream events but casted to the target class.
      *
      * @param target the target class
-     * @param <O>    the type of result emitted by the produced uni
+     * @param <O>    the type of item emitted by the produced uni
      * @return the new Uni
      */
     public <O> Multi<O> castTo(Class<O> target) {
@@ -56,7 +56,7 @@ public class MultiOnResult<T> {
     }
 
     /**
-     * Produces a {@link Multi} that fires results coming from the reduction of the result emitted by this current
+     * Produces a {@link Multi} that fires items coming from the reduction of the item emitted by this current
      * {@link Multi} by the passed {@code scanner} reduction function. The produced multi emits the intermediate
      * results.
      * <p>
@@ -64,7 +64,7 @@ public class MultiOnResult<T> {
      * first value.
      *
      * @param scanner the reduction {@link BiFunction}, the resulting {@link Multi} emits the results of this method.
-     *                The method is called for every result emitted by this Multi.
+     *                The method is called for every item emitted by this Multi.
      * @return the produced {@link Multi}
      */
     public <S> Multi<S> scan(Supplier<S> initialStateProducer, BiFunction<S, ? super T, S> scanner) {
@@ -75,15 +75,15 @@ public class MultiOnResult<T> {
     }
 
     /**
-     * Produces a {@link Multi} that fires results coming from the reduction of the result emitted by this current
+     * Produces a {@link Multi} that fires results coming from the reduction of the item emitted by this current
      * {@link Multi} by the passed {@code scanner} reduction function. The produced multi emits the intermediate
      * results.
      * <p>
      * Unlike {@link #scan(Supplier, BiFunction)}, this operator doesn't take an initial value but takes the first
-     * result emitted by this {@link Multi} as initial value.
+     * item emitted by this {@link Multi} as initial value.
      *
      * @param scanner the reduction {@link BiFunction}, the resulting {@link Multi} emits the results of this method.
-     *                The method is called for every result emitted by this Multi.
+     *                The method is called for every item emitted by this Multi.
      * @return the produced {@link Multi}
      */
     public Multi<T> scan(BiFunction<T, T, T> scanner) {
@@ -91,20 +91,20 @@ public class MultiOnResult<T> {
     }
 
     /**
-     * Produces a {@link Multi} containing the results from {@link Publisher} produced by the {@code mapper} for each
-     * result emitted by this {@link Multi}.
+     * Produces a {@link Multi} containing the items from {@link Publisher} produced by the {@code mapper} for each
+     * item emitted by this {@link Multi}.
      * <p>
      * The operation behaves as follows:
      * <ul>
-     * <li>for each result emitted by this {@link Multi}, the mapper is called and produces a {@link Publisher}
+     * <li>for each item emitted by this {@link Multi}, the mapper is called and produces a {@link Publisher}
      * (potentially a {@code Multi}). The mapper must not return {@code null}</li>
-     * <li>The results contained in each of the produced {@link Publisher} are then <strong>merged</strong> in the
-     * produced {@link Multi}. The flatten process may interleaved results.</li>
+     * <li>The items emitted by each of the produced {@link Publisher} are then <strong>merged</strong> in the
+     * produced {@link Multi}. The flatten process may interleaved items.</li>
      * </ul>
      *
-     * @param mapper the {@link Function} producing {@link Publisher} / {@link Multi} for each results emitted by the
+     * @param mapper the {@link Function} producing {@link Publisher} / {@link Multi} for each items emitted by the
      *               upstream {@link Multi}
-     * @param <O>    the type of result emitted by the {@link Publisher} produced by the {@code mapper}
+     * @param <O>    the type of item emitted by the {@link Publisher} produced by the {@code mapper}
      * @return the produced {@link Multi}
      */
     public <O> Multi<O> flatMap(Function<? super T, ? extends Publisher<? extends O>> mapper) {
@@ -112,20 +112,20 @@ public class MultiOnResult<T> {
     }
 
     /**
-     * Produces a {@link Multi} containing the results from {@link Publisher} produced by the {@code mapper} for each
-     * result emitted by this {@link Multi}.
+     * Produces a {@link Multi} containing the items from {@link Publisher} produced by the {@code mapper} for each
+     * item emitted by this {@link Multi}.
      * <p>
      * The operation behaves as follows:
      * <ul>
-     * <li>for each result emitted by this {@link Multi}, the mapper is called and produces a {@link Publisher}
+     * <li>for each item emitted by this {@link Multi}, the mapper is called and produces a {@link Publisher}
      * (potentially a {@code Multi}). The mapper must not return {@code null}</li>
-     * <li>The results contained in each of the produced {@link Publisher} are then <strong>concatenated</strong> in the
-     * produced {@link Multi}. The flatten process makes sure that the results are not interleaved.
+     * <li>The items emitted by each of the produced {@link Publisher} are then <strong>concatenated</strong> in the
+     * produced {@link Multi}. The flatten process makes sure that the items are not interleaved.
      * </ul>
      *
-     * @param mapper the {@link Function} producing {@link Publisher} / {@link Multi} for each results emitted by the
+     * @param mapper the {@link Function} producing {@link Publisher} / {@link Multi} for each items emitted by the
      *               upstream {@link Multi}
-     * @param <O>    the type of result emitted by the {@link Publisher} produced by the {@code mapper}
+     * @param <O>    the type of item emitted by the {@link Publisher} produced by the {@code mapper}
      * @return the produced {@link Multi}
      */
     public <O> Multi<O> concatMap(Function<? super T, ? extends Publisher<? extends O>> mapper) {
@@ -133,13 +133,13 @@ public class MultiOnResult<T> {
     }
 
     /**
-     * Configures a <em>flatMap</em> operation that will result into a {@link Multi}.
+     * Configures a <em>flatMap</em> operation that will item into a {@link Multi}.
      * <p>
      * The operations behave as follow:
      * <ul>
-     * <li>for each result emitted by this {@link Multi}, a mapper is called and produces a {@link Publisher},
+     * <li>for each item emitted by this {@link Multi}, a mapper is called and produces a {@link Publisher},
      * {@link Uni} or {@link Iterable}. The mapper must not return {@code null}</li>
-     * <li>The results contained in each of the produced <em>sets</em> are then <strong>merged</strong> (flatMap) or
+     * <li>The items contained in each of the produced <em>sets</em> are then <strong>merged</strong> (flatMap) or
      * <strong>concatenated</strong> (concatMap) in the returned {@link Multi}.</li>
      * </ul>
      * <p>
@@ -153,7 +153,7 @@ public class MultiOnResult<T> {
     }
 
     /**
-     * Produces a {@link Multi} containing the results from this {@link Multi} passing the {@code predicate} test.
+     * Produces a {@link Multi} containing the items from this {@link Multi} passing the {@code predicate} test.
      *
      * @param predicate the predicate, must not be {@code null}
      * @return the produced {@link Multi}
@@ -163,10 +163,9 @@ public class MultiOnResult<T> {
     }
 
     /**
-     * Produces a {@link Multi} containing the results from this {@link Multi} passing the {@code tester}
-     * asynchronous test. Unlike {@link #filterWith(Predicate)} is the asynchronous aspect of this method. The
-     * test can be asynchronous. Note that this method preserves ordering of the results, even if the test is
-     * asynchronous.
+     * Produces a {@link Multi} containing the items from this {@link Multi} passing the {@code tester}
+     * asynchronous test. Unlike {@link #filterWith(Predicate)}, the test is asynchronous. Note that this method
+     * preserves ordering of the items, even if the test is asynchronous.
      *
      * @param tester the predicate, must not be {@code null}, must not produce {@code null}
      * @return the produced {@link Multi}

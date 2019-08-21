@@ -45,7 +45,7 @@ public class MultiOnFailureTest {
         MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(1);
 
         Multi.createFrom().<Integer>failure(new IllegalStateException("boom"))
-                .onFailure(IllegalStateException.class).recoverWithMulti(v -> Multi.createFrom().result(42))
+                .onFailure(IllegalStateException.class).recoverWithMulti(v -> Multi.createFrom().item(42))
                 .subscribe().withSubscriber(subscriber);
 
         subscriber.assertReceived(42)
@@ -58,7 +58,7 @@ public class MultiOnFailureTest {
         MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(1);
 
         Multi.createFrom().<Integer>failure(new IllegalStateException("boom"))
-                .onFailure(IOException.class).recoverWithMulti(v -> Multi.createFrom().result(42))
+                .onFailure(IOException.class).recoverWithMulti(v -> Multi.createFrom().item(42))
                 .subscribe().withSubscriber(subscriber);
 
         subscriber.assertHasFailedWith(IllegalStateException.class, "boom");
@@ -71,7 +71,7 @@ public class MultiOnFailureTest {
         Multi.createFrom().<Integer>failure(new IllegalStateException("boom"))
                 .onFailure(f -> {
                     throw new IllegalArgumentException("bad");
-                }).recoverWithMulti(v -> Multi.createFrom().result(42))
+                }).recoverWithMulti(v -> Multi.createFrom().item(42))
                 .subscribe().withSubscriber(subscriber);
 
         subscriber
@@ -87,7 +87,7 @@ public class MultiOnFailureTest {
                 .onFailure().mapTo(f -> new IOException("kaboom!"))
                 .subscribe().withSubscriber(subscriber);
 
-        subscriber.assertHasNoResults()
+        subscriber.assertHasNotReceivedAnyItem()
                 .assertTerminated()
                 .assertHasFailedWith(IOException.class, "kaboom!");
     }
@@ -101,7 +101,7 @@ public class MultiOnFailureTest {
                 .onFailure().recoverWithMulti(v -> Multi.createFrom().range(50, 61))
                 .subscribe().withSubscriber(subscriber);
 
-        subscriber.assertHasNoResults()
+        subscriber.assertHasNotReceivedAnyItem()
                 .assertHasNotFailed()
                 .assertNotTerminated();
 
@@ -132,12 +132,12 @@ public class MultiOnFailureTest {
 
         subscriber.assertSubscribed();
 
-        reference.get().result(1)
-                .result(2)
-                .result(3)
-                .result(4)
-                .result(5)
-                .failure(new IllegalStateException("boom"));
+        reference.get().emit(1)
+                .emit(2)
+                .emit(3)
+                .emit(4)
+                .emit(5)
+                .fail(new IllegalStateException("boom"));
 
         subscriber.assertReceived(1, 2, 3, 4, 5, 50, 51, 52, 53, 54)
                 .assertHasNotFailed()
@@ -155,12 +155,12 @@ public class MultiOnFailureTest {
 
         subscriber.assertSubscribed();
 
-        reference.get().result(1)
-                .result(2)
-                .result(3)
-                .result(4)
-                .result(5)
-                .failure(new IllegalStateException("boom"));
+        reference.get().emit(1)
+                .emit(2)
+                .emit(3)
+                .emit(4)
+                .emit(5)
+                .fail(new IllegalStateException("boom"));
 
         subscriber.assertReceived(1, 2, 3)
                 .request(5)
@@ -181,7 +181,7 @@ public class MultiOnFailureTest {
         })
                 .subscribe().withSubscriber(subscriber);
 
-        subscriber.assertHasNoResults()
+        subscriber.assertHasNotReceivedAnyItem()
                 .assertTerminated()
                 .assertHasFailedWith(CompositeException.class, "kaboom!")
                 .assertHasFailedWith(CompositeException.class, "karambar");
@@ -195,7 +195,7 @@ public class MultiOnFailureTest {
                 .onFailure().recoverWithMulti(v -> null)
                 .subscribe().withSubscriber(subscriber);
 
-        subscriber.assertHasNoResults()
+        subscriber.assertHasNotReceivedAnyItem()
                 .assertTerminated()
                 .assertHasFailedWith(NullPointerException.class, "mapper");
     }
@@ -253,7 +253,7 @@ public class MultiOnFailureTest {
                 .onFailure().recoverWithCompletion()
                 .subscribe().withSubscriber(MultiAssertSubscriber.create(1))
                 .assertCompletedSuccessfully()
-                .assertHasNoResults();
+                .assertHasNotReceivedAnyItem();
     }
 
 
@@ -261,22 +261,22 @@ public class MultiOnFailureTest {
     public void testRecoverWithMultiUsingEmitterAsFallback() {
         Multi<Integer> multi = Multi.createFrom().emitter(emitter ->
                 emitter
-                        .result(3)
-                        .result(2)
-                        .result(1)
-                        .failure(new IOException("boom"))
+                        .emit(3)
+                        .emit(2)
+                        .emit(1)
+                        .fail(new IOException("boom"))
         );
 
         AtomicInteger subscribed = new AtomicInteger();
         Multi<Integer> fallback = Multi.createFrom()
-                .<Integer>emitter(s -> s.result(42).result(43).complete())
+                .<Integer>emitter(s -> s.emit(42).emit(43).complete())
                 .on().subscription(s -> subscribed.incrementAndGet());
 
         multi.onFailure()
                 .recoverWithMulti(fallback)
                 .subscribe().withSubscriber(MultiAssertSubscriber.create(0))
                 .assertSubscribed()
-                .assertHasNoResults()
+                .assertHasNotReceivedAnyItem()
                 .request(2)
                 .run(() -> assertThat(subscribed).hasValue(0))
                 .assertReceived(3, 2)
@@ -292,22 +292,22 @@ public class MultiOnFailureTest {
     public void testRecoverWithResult2() {
         Multi<Integer> multi = Multi.createFrom().emitter(emitter ->
                 emitter
-                        .result(3)
-                        .result(2)
-                        .result(1)
-                        .failure(new IOException("boom"))
+                        .emit(3)
+                        .emit(2)
+                        .emit(1)
+                        .fail(new IOException("boom"))
         );
 
         AtomicInteger subscribed = new AtomicInteger();
         Multi<Integer> fallback = Multi.createFrom()
-                .result(0)
+                .item(0)
                 .on().subscription(s -> subscribed.incrementAndGet());
 
         multi.onFailure()
                 .recoverWithMulti(fallback)
                 .subscribe().withSubscriber(MultiAssertSubscriber.create(0))
                 .assertSubscribed()
-                .assertHasNoResults()
+                .assertHasNotReceivedAnyItem()
                 .request(2)
                 .run(() -> assertThat(subscribed).hasValue(0))
                 .assertReceived(3, 2)
@@ -373,6 +373,6 @@ public class MultiOnFailureTest {
                 .onFailure(IOException.class::isInstance).recoverWithCompletion()
                 .subscribe().withSubscriber(MultiAssertSubscriber.create(1))
                 .assertCompletedSuccessfully()
-                .assertHasNoResults();
+                .assertHasNotReceivedAnyItem();
     }
 }

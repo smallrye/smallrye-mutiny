@@ -1,10 +1,8 @@
 package io.smallrye.reactive.operators;
 
 import io.smallrye.reactive.Multi;
-import org.assertj.core.data.Index;
 import org.junit.Test;
 
-import java.io.IOException;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
@@ -35,7 +33,7 @@ public class MultiCreateFromOptionalTest {
     public void testWithEmpty() {
         MultiAssertSubscriber<String> subscriber = Multi.createFrom().<String>optional(Optional.empty()).subscribe()
                 .withSubscriber(MultiAssertSubscriber.create(1));
-        subscriber.assertCompletedSuccessfully().assertHasNoResults();
+        subscriber.assertCompletedSuccessfully().assertHasNotReceivedAnyItem();
     }
 
     @Test
@@ -48,7 +46,7 @@ public class MultiCreateFromOptionalTest {
         MultiAssertSubscriber<String> subscriber2 = multi.subscribe().withSubscriber(MultiAssertSubscriber.create());
 
         subscriber1.assertCompletedSuccessfully().assertReceived("hello-1");
-        subscriber2.assertHasNoResults().assertNotTerminated().request(20)
+        subscriber2.assertHasNotReceivedAnyItem().assertNotTerminated().request(20)
                 .assertCompletedSuccessfully().assertReceived("hello-2");
     }
 
@@ -58,8 +56,8 @@ public class MultiCreateFromOptionalTest {
         MultiAssertSubscriber<String> subscriber1 = multi.subscribe().withSubscriber(MultiAssertSubscriber.create(1));
         MultiAssertSubscriber<String> subscriber2 = multi.subscribe().withSubscriber(MultiAssertSubscriber.create());
 
-        subscriber1.assertCompletedSuccessfully().assertHasNoResults();
-        subscriber2.assertHasNoResults().assertCompletedSuccessfully();
+        subscriber1.assertCompletedSuccessfully().assertHasNotReceivedAnyItem();
+        subscriber2.assertHasNotReceivedAnyItem().assertCompletedSuccessfully();
     }
 
     @Test

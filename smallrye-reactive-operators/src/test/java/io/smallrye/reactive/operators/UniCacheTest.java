@@ -25,7 +25,7 @@ public class UniCacheTest {
     @Test
     public void testThatImmediateValueAreCached() {
         AtomicInteger counter = new AtomicInteger();
-        Uni<Integer> cache = Uni.createFrom().result(counter.incrementAndGet()).cache();
+        Uni<Integer> cache = Uni.createFrom().item(counter.incrementAndGet()).cache();
 
         UniAssertSubscriber<Integer> sub1 = UniAssertSubscriber.create();
         UniAssertSubscriber<Integer> sub2 = UniAssertSubscriber.create();
@@ -35,9 +35,9 @@ public class UniCacheTest {
         cache.subscribe().withSubscriber(sub2);
         cache.subscribe().withSubscriber(sub3);
 
-        sub1.assertCompletedSuccessfully().assertResult(1);
-        sub2.assertCompletedSuccessfully().assertResult(1);
-        sub3.assertCompletedSuccessfully().assertResult(1);
+        sub1.assertCompletedSuccessfully().assertItem(1);
+        sub2.assertCompletedSuccessfully().assertItem(1);
+        sub3.assertCompletedSuccessfully().assertItem(1);
     }
 
     @Test
@@ -74,9 +74,9 @@ public class UniCacheTest {
 
         cache.subscribe().withSubscriber(sub3);
 
-        sub1.assertCompletedSuccessfully().assertResult(1);
-        sub2.assertCompletedSuccessfully().assertResult(1);
-        sub3.assertCompletedSuccessfully().assertResult(1);
+        sub1.assertCompletedSuccessfully().assertItem(1);
+        sub2.assertCompletedSuccessfully().assertItem(1);
+        sub3.assertCompletedSuccessfully().assertItem(1);
     }
 
     @Test
@@ -97,9 +97,9 @@ public class UniCacheTest {
 
         cache.subscribe().withSubscriber(sub3);
 
-        sub1.assertCompletedSuccessfully().assertResult(1);
+        sub1.assertCompletedSuccessfully().assertItem(1);
         sub2.assertNotCompleted();
-        sub3.assertCompletedSuccessfully().assertResult(1);
+        sub3.assertCompletedSuccessfully().assertItem(1);
     }
 
     @Test
@@ -120,9 +120,9 @@ public class UniCacheTest {
 
         cache.subscribe().withSubscriber(sub3);
 
-        sub1.assertCompletedSuccessfully().assertResult(1);
-        sub2.assertCompletedSuccessfully().assertResult(1);
-        sub3.assertCompletedSuccessfully().assertResult(1);
+        sub1.assertCompletedSuccessfully().assertItem(1);
+        sub2.assertCompletedSuccessfully().assertItem(1);
+        sub3.assertCompletedSuccessfully().assertItem(1);
     }
 
 
@@ -144,8 +144,8 @@ public class UniCacheTest {
         processor.onNext(42);
         processor.onComplete();
 
-        sub1.assertCompletedSuccessfully().assertResult(23);
-        sub2.assertCompletedSuccessfully().assertResult(23);
+        sub1.assertCompletedSuccessfully().assertItem(23);
+        sub2.assertCompletedSuccessfully().assertItem(23);
     }
 
     @Test
@@ -245,7 +245,7 @@ public class UniCacheTest {
 
     @Test
     public void testWithDoubleCancellation() {
-        Uni<Integer> uni = Uni.createFrom().result(23).cache();
+        Uni<Integer> uni = Uni.createFrom().item(23).cache();
         UniSubscriber<Integer> subscriber = new UniSubscriber<Integer>() {
             @Override
             public void onSubscribe(UniSubscription subscription) {
@@ -254,12 +254,12 @@ public class UniCacheTest {
             }
 
             @Override
-            public void onResult(Integer result) {
+            public void onItem(Integer ignored) {
 
             }
 
             @Override
-            public void onFailure(Throwable failure) {
+            public void onFailure(Throwable ignored) {
 
             }
         };
@@ -267,7 +267,7 @@ public class UniCacheTest {
 
         UniAssertSubscriber<Integer> test = UniAssertSubscriber.create();
         uni.subscribe().withSubscriber(test);
-        test.assertCompletedSuccessfully().assertResult(23);
+        test.assertCompletedSuccessfully().assertItem(23);
 
         uni.subscribe().withSubscriber(subscriber);
     }

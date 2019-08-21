@@ -29,7 +29,7 @@ public class MultiCreateFromPublisherTest {
     public void testWithEmptyPublisher() {
         MultiAssertSubscriber<String> subscriber = Multi.createFrom().<String>publisher(Flowable.empty()).subscribe()
                 .withSubscriber(MultiAssertSubscriber.create());
-        subscriber.assertCompletedSuccessfully().assertHasNoResults();
+        subscriber.assertCompletedSuccessfully().assertHasNotReceivedAnyItem();
     }
 
 
@@ -44,7 +44,7 @@ public class MultiCreateFromPublisherTest {
 
         Multi<Integer> multi = Multi.createFrom().publisher(flowable);
 
-        multi.subscribe().withSubscriber(MultiAssertSubscriber.create()).assertHasNoResults()
+        multi.subscribe().withSubscriber(MultiAssertSubscriber.create()).assertHasNotReceivedAnyItem()
                 .request(2)
                 .assertReceived(1, 2)
                 .run(() -> assertThat(requests).hasValue(2))
@@ -57,7 +57,7 @@ public class MultiCreateFromPublisherTest {
 
         assertThat(count).hasValue(1);
 
-        multi.subscribe().withSubscriber(MultiAssertSubscriber.create()).assertHasNoResults()
+        multi.subscribe().withSubscriber(MultiAssertSubscriber.create()).assertHasNotReceivedAnyItem()
                 .request(2)
                 .assertReceived(1, 2)
                 .request(1)
@@ -78,7 +78,7 @@ public class MultiCreateFromPublisherTest {
 
         Multi<Integer> multi = Multi.createFrom().publisher(flowable);
 
-        multi.subscribe().withSubscriber(MultiAssertSubscriber.create()).assertHasNoResults()
+        multi.subscribe().withSubscriber(MultiAssertSubscriber.create()).assertHasNotReceivedAnyItem()
                 .request(2)
                 .assertReceived(1, 2)
                 .run(() -> assertThat(cancellation).isFalse())

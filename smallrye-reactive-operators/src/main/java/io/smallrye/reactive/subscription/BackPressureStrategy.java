@@ -13,7 +13,7 @@ public enum BackPressureStrategy {
     BUFFER,
 
     /**
-     * Drop the incoming result events if the downstream is not ready to receive it.
+     * Drop the incoming item events if the downstream is not ready to receive it.
      */
     DROP,
 
@@ -23,14 +23,14 @@ public enum BackPressureStrategy {
     ERROR,
 
     /**
-     * Ignore downstream back-pressure requests. Basically it pushes results downstream as they come.
+     * Ignore downstream back-pressure requests. Basically it pushes items downstream as they come.
      * <p>
      * This may cause an {@link BackPressureFailure} to be fired when queues get full downstream.
      */
     IGNORE,
 
     /**
-     * Drop the oldest result events from the buffer so the downstream will get only the latest results from upstream.
+     * Drop the oldest item events from the buffer so the downstream will get only the latest items from upstream.
      */
     LATEST
 }

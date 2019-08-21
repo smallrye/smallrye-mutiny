@@ -20,10 +20,10 @@ public class UniOnFailureRetryTest {
     @Test
     public void testNoRetryOnResult() {
         UniAssertSubscriber<Integer> ts = UniAssertSubscriber.create();
-        Uni.createFrom().result(1)
+        Uni.createFrom().item(1)
                 .onFailure().retry().atMost(1)
                 .subscribe().withSubscriber(ts);
-        ts.assertResult(1);
+        ts.assertItem(1);
 
     }
 
@@ -32,7 +32,7 @@ public class UniOnFailureRetryTest {
         UniAssertSubscriber<Integer> ts = UniAssertSubscriber.create();
 
         AtomicInteger count = new AtomicInteger();
-        Uni.createFrom().result(() -> {
+        Uni.createFrom().item(() -> {
             int i = count.getAndIncrement();
             if (i < 1) {
                 throw new RuntimeException("boom");
@@ -44,7 +44,7 @@ public class UniOnFailureRetryTest {
 
         ts
                 .assertCompletedSuccessfully()
-                .assertResult(1);
+                .assertItem(1);
 
     }
 
@@ -52,7 +52,7 @@ public class UniOnFailureRetryTest {
     public void testWithInfiniteRetry() {
         UniAssertSubscriber<Integer> ts = UniAssertSubscriber.create();
         AtomicInteger count = new AtomicInteger();
-        Uni.createFrom().result(() -> {
+        Uni.createFrom().item(() -> {
             int i = count.getAndIncrement();
             if (i < 10) {
                 throw new RuntimeException("boom");
@@ -64,20 +64,20 @@ public class UniOnFailureRetryTest {
 
         ts
                 .assertCompletedSuccessfully()
-                .assertResult(10);
+                .assertItem(10);
     }
 
     @Test
     public void testWithMapperFailure() {
         AtomicInteger count = new AtomicInteger();
-        Uni.createFrom().result(1)
-                .onResult().consume(input -> {
+        Uni.createFrom().item(1)
+                .onItem().consume(input -> {
             if (count.incrementAndGet() < 2) {
                 throw new RuntimeException("boom");
             }
         })
                 .onFailure().retry().atMost(2)
                 .subscribe().withSubscriber(UniAssertSubscriber.create())
-                .assertResult(1);
+                .assertItem(1);
     }
 }

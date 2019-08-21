@@ -8,11 +8,9 @@ import io.smallrye.reactive.subscription.UniEmitter;
 import io.smallrye.reactive.subscription.UniSubscriber;
 import org.reactivestreams.Publisher;
 
-import java.time.Duration;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -32,20 +30,20 @@ public class UniCreate {
 
     /**
      * Creates a {@link Uni} from the given {@link CompletionStage} or {@link CompletableFuture}.
-     * The produced {@code Uni} emits the result of the passed  {@link CompletionStage}. If the {@link CompletionStage}
-     * never completes (or failed), the produced {@link Uni} would not emit the {@code result} or {@code failure}
+     * The produced {@code Uni} emits the item of the passed  {@link CompletionStage}. If the {@link CompletionStage}
+     * never completes (or failed), the produced {@link Uni} would not emit the {@code item} or {@code failure}
      * events.
      * <p>
      * Cancelling the subscription on the produced {@link Uni} cancels the passed {@link CompletionStage}
      * (calling {@link CompletableFuture#cancel(boolean)} on the future retrieved using
      * {@link CompletionStage#toCompletableFuture()}.
      * <p>
-     * If the stage has already been completed (or failed), the produced {@link Uni} sends the result or failure
+     * If the stage has already been completed (or failed), the produced {@link Uni} sends the item or failure
      * immediately after subscription. If it's not the case, the subscriber's callbacks are called on the thread used
      * by the passed {@link CompletionStage}.
      *
      * @param stage the stage, must not be {@code null}
-     * @param <T>   the type of result
+     * @param <T>   the type of item
      * @return the produced {@link Uni}
      */
     public <T> Uni<T> completionStage(CompletionStage<? extends T> stage) {
@@ -57,14 +55,14 @@ public class UniCreate {
      * Creates a {@link Uni} from the given {@link CompletionStage} or {@link CompletableFuture}. The future is
      * created by invoking the passed {@link Supplier} <strong>lazily</strong> at subscription time.
      * <p>
-     * The produced {@code Uni} emits the result of the passed  {@link CompletionStage}. If the {@link CompletionStage}
-     * never completes (or failed), the produced {@link Uni} would not emit a result or a failure.
+     * The produced {@code Uni} emits the item of the passed  {@link CompletionStage}. If the {@link CompletionStage}
+     * never completes (or failed), the produced {@link Uni} would not emit an item or a failure.
      * <p>
      * Cancelling the subscription on the produced {@link Uni} cancels the passed {@link CompletionStage}
      * (calling {@link CompletableFuture#cancel(boolean)} on the future retrieved using
      * {@link CompletionStage#toCompletableFuture()}.
      * <p>
-     * If the produced stage has already been completed (or failed), the produced {@link Uni} sends the result or failure
+     * If the produced stage has already been completed (or failed), the produced {@link Uni} sends the item or failure
      * immediately after subscription. If it's not the case the subscriber's callbacks are called on the thread used
      * by the passed {@link CompletionStage}.
      * <p>
@@ -72,7 +70,7 @@ public class UniCreate {
      * {@code null}, a failure event containing a {@link NullPointerException} is fired.
      *
      * @param supplier the supplier, must not be {@code null}, must not produce {@code null}
-     * @param <T>      the type of result
+     * @param <T>      the type of item
      * @return the produced {@link Uni}
      */
     public <T> Uni<T> completionStage(Supplier<? extends CompletionStage<? extends T>> supplier) {
@@ -82,19 +80,19 @@ public class UniCreate {
     /**
      * Creates a {@link Uni} from the passed {@link Publisher}.
      * <p>
-     * The produced {@link Uni} emits the <strong>first</strong> result/value emitted by the passed {@link Publisher}.
+     * The produced {@link Uni} emits the <strong>first</strong> item/value emitted by the passed {@link Publisher}.
      * If the publisher emits multiple values, others are dropped. If the publisher emits a failure after a value, the
      * failure is dropped. If the publisher emits the completion signal before having emitted a value, the produced
-     * {@link Uni} emits a {@code null} result event.
+     * {@link Uni} emits a {@code null} item event.
      * <p>
      * When a subscriber subscribes to the produced {@link Uni}, it subscribes to the {@link Publisher} and requests
-     * {@code 1} result. When the first result is received, the subscription is cancelled. Note that each Uni's subscriber
+     * {@code 1} item. When the first item is received, the subscription is cancelled. Note that each Uni's subscriber
      * would produce a new subscription.
      * <p>
      * If the Uni's observer cancels its subscription, the subscription to the {@link Publisher} is also cancelled.
      *
      * @param publisher the publisher, must not be {@code null}
-     * @param <T>       the type of result
+     * @param <T>       the type of item
      * @return the produced {@link Uni}
      */
     public <T> Uni<T> publisher(Publisher<? extends T> publisher) {
@@ -104,60 +102,60 @@ public class UniCreate {
 
     /**
      * Creates a new {@link Uni} that completes immediately after being subscribed to with the specified (potentially
-     * {@code null}) value. The result is retrieved <strong>lazily</strong> at subscription time, using the passed
-     * {@link Supplier}. Unlike {@link #deferred(Supplier)}, the supplier produces a result and not an {@link Uni}.
+     * {@code null}) value. The item is retrieved <strong>lazily</strong> at subscription time, using the passed
+     * {@link Supplier}. Unlike {@link #deferred(Supplier)}, the supplier produces an item and not an {@link Uni}.
      * <p>
-     * If the supplier produces {@code null}, {@code null} is used as result event.
+     * If the supplier produces {@code null}, {@code null} is used as item event.
      * If the supplier throws an exception, a failure event with the exception  is fired. If the supplier produces
      * {@code null}, a failure event containing a {@link NullPointerException} is fired.
      *
-     * @param supplier the result supplier, must not be {@code null}, can produce {@code null}
-     * @param <T>      the type of result
+     * @param supplier the item supplier, must not be {@code null}, can produce {@code null}
+     * @param <T>      the type of item
      * @return the new {@link Uni}
      */
-    public <T> Uni<T> result(Supplier<? extends T> supplier) {
+    public <T> Uni<T> item(Supplier<? extends T> supplier) {
         Supplier<? extends T> actual = nonNull(supplier, "supplier");
         return emitter(emitter -> {
-            T result;
+            T item;
             try {
-                result = actual.get();
+                item = actual.get();
             } catch (RuntimeException e) {
                 // Exception from the supplier, propagate it.
-                emitter.failure(e);
+                emitter.fail(e);
                 return;
             }
-            emitter.result(result);
+            emitter.complete(item);
         });
     }
 
     /**
      * Creates a new {@link Uni} that completes immediately after being subscribed to with the specified (potentially
-     * {@code null}) result.
+     * {@code null}) item.
      *
-     * @param result the result, can be {@code null}
-     * @param <T>    the type of result
+     * @param item the item, can be {@code null}
+     * @param <T>    the type of item
      * @return the new {@link Uni}
      */
-    public <T> Uni<T> result(T result) {
-        return result(() -> result);
+    public <T> Uni<T> item(T item) {
+        return item(() -> item);
     }
 
     /**
-     * Creates a new {@link Uni} that completes immediately after being subscribed to with the result based on the value
+     * Creates a new {@link Uni} that completes immediately after being subscribed to with the item based on the value
      * contained in the given optional if {@link Optional#isPresent()} or {@code null} otherwise.
      *
      * @param optional the optional, must not be {@code null}
-     * @param <T>      the type of the produced result
+     * @param <T>      the type of the produced item
      * @return the new {@link Uni}
      */
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     public <T> Uni<T> optional(Optional<T> optional) {
         Optional<T> actual = nonNull(optional, "optional");
-        return result(() -> actual.orElse(null));
+        return optional(() -> actual);
     }
 
     /**
-     * Creates a new {@link Uni} that completes immediately after being subscribed to with the result based on the value
+     * Creates a new {@link Uni} that completes immediately after being subscribed to with the item based on the value
      * contained in the given optional if {@link Optional#isPresent()} or {@code null} otherwise. Unlike
      * {@link #optional(Optional)}, the passed {@link Supplier} is called lazily at subscription time.
      * <p>
@@ -165,54 +163,20 @@ public class UniCreate {
      * {@code null}, a failure event containing a {@link NullPointerException} is fired.
      *
      * @param supplier the supplier, must not be {@code null}, must not return {@code null}
-     * @param <T>      the type of the produced result
+     * @param <T>      the type of the produced item
      * @return the new {@link Uni}
      */
     public <T> Uni<T> optional(Supplier<Optional<T>> supplier) {
         Supplier<Optional<T>> actual = nonNull(supplier, "supplier");
-        return result(() -> actual.get().orElse(null));
-    }
-
-
-    /**
-     * Creates a new {@link Uni} that emits a {@code null} result after the specified delay. The countdown starts
-     * at subscription time.
-     * <p>
-     * Cancelling the subscription before the delay avoid the {@code result} event to be fired.
-     *
-     * @param duration the duration, must not be {@code null}
-     * @param executor the executor emitting the result once the delay is passed, must not be {@code null}
-     * @return the new {@link Uni}
-     */
-    Uni<Void> delay(Duration duration, ScheduledExecutorService executor) {
-        Duration actual = validate(duration, "duration");
-        ScheduledExecutorService actualExecutor = nonNull(executor, "executor");
-        throw new UnsupportedOperationException("not implemented yet");
-    }
-
-    /**
-     * Creates a new {@link Uni} that emits a {@code null} result after the specified delay. The countdown starts
-     * at subscription time.
-     * <p>
-     * Cancelling the subscription before the delay avoid the {@code result} event to be fired.
-     * <p>
-     * Unlike {@link #delay(Duration, ScheduledExecutorService)}, this method use the default executor service to emit
-     * the {@code result} event.
-     *
-     * @param duration the duration, must not be {@code null}
-     * @return the new {@link Uni}
-     */
-    Uni<Void> delay(Duration duration) {
-        Duration actual = validate(duration, "duration");
-        throw new UnsupportedOperationException("not implemented yet");
+        return item(() -> actual.get().orElse(null));
     }
 
     /**
      * Creates a {@link Uni} deferring the logic to the given consumer. The consumer can be used with callback-based
-     * APIs to fire at most one result (potentially {@code null}), or a failure event.
+     * APIs to fire at most one item (potentially {@code null}), or a failure event.
      * <p>
      * Using this method, you can produce a {@link Uni} based on listener or callbacks APIs. You register the listener
-     * in the consumer and emits the result / failure events when the listener is invoked. Don't forget to unregister
+     * in the consumer and emits the item / failure events when the listener is invoked. Don't forget to unregister
      * the listener on cancellation.
      * <p>
      * Note that the emitter only forwards the first event, subsequent events are dropped.
@@ -222,7 +186,7 @@ public class UniCreate {
      *
      * @param consumer callback receiving the {@link UniEmitter} and events downstream. The callback is
      *                 called for each subscriber (at subscription time). Must not be {@code null}
-     * @param <T>      the type of result
+     * @param <T>      the type of item
      * @return the produced {@link Uni}
      */
     public <T> Uni<T> emitter(Consumer<UniEmitter<? super T>> consumer) {
@@ -238,13 +202,13 @@ public class UniCreate {
      * {@link Uni}. So, it does not create the {@link Uni} until an {@link UniSubscriber subscriber} subscribes, and
      * creates a fresh {@link Uni} for each subscriber.
      * <p>
-     * Unlike {@link #result(Supplier)}, the supplier produces an {@link Uni} (and not a result).
+     * Unlike {@link #item(Supplier)}, the supplier produces an {@link Uni} (and not an item).
      * <p>
      * If the supplier throws an exception, a failure event with the exception  is fired. If the supplier produces
      * {@code null}, a failure event containing a {@link NullPointerException} is fired.
      *
      * @param supplier the supplier, must not be {@code null}, must not produce {@code null}
-     * @param <T>      the type of result
+     * @param <T>      the type of item
      * @return the produced {@link Uni}
      */
     public <T> Uni<T> deferred(Supplier<? extends Uni<? extends T>> supplier) {
@@ -256,7 +220,7 @@ public class UniCreate {
      * Creates a {@link Uni} that emits a {@code failure} event immediately after being subscribed to.
      *
      * @param failure the failure to be fired, must not be {@code null}
-     * @param <T>     the virtual type of result used by the {@link Uni}, must be explicitly set as in
+     * @param <T>     the virtual type of item used by the {@link Uni}, must be explicitly set as in
      *                {@code Uni.<String>failed(exception);}
      * @return the produced {@link Uni}
      */
@@ -272,7 +236,7 @@ public class UniCreate {
      * If the supplier produces {@code null}, a {@code failure} event is fired with a {@link NullPointerException}.
      *
      * @param supplier the supplier producing the failure, must not be {@code null}, must not produce {@code null}
-     * @param <T>      the virtual type of result used by the {@link Uni}, must be explicitly set as in
+     * @param <T>      the virtual type of item used by the {@link Uni}, must be explicitly set as in
      *                 {@code Uni.<String>failed(exception);}
      * @return the produced {@link Uni}
      */
@@ -284,22 +248,22 @@ public class UniCreate {
             try {
                 throwable = actual.get();
             } catch (Exception e) {
-                emitter.failure(e);
+                emitter.fail(e);
                 return;
             }
 
             if (throwable == null) {
-                emitter.failure(new NullPointerException(SUPPLIER_PRODUCED_NULL));
+                emitter.fail(new NullPointerException(SUPPLIER_PRODUCED_NULL));
             } else {
-                emitter.failure(throwable);
+                emitter.fail(throwable);
             }
         });
     }
 
     /**
-     * Creates a {@link Uni} that will never fire a {@code result} or {@code failure} event.
+     * Creates a {@link Uni} that will never fire an {@code item} or {@code failure} event.
      *
-     * @param <T> the virtual type of result
+     * @param <T> the virtual type of item
      * @return a never completing {@link Uni}
      */
     @SuppressWarnings("unchecked")
@@ -308,13 +272,13 @@ public class UniCreate {
     }
 
     /**
-     * Equivalent to {@link #result(Object)}} firing a {@code result} event with {@code null}.
+     * Equivalent to {@link #item(Object)}} firing an {@code item} event with {@code null}.
      *
-     * @return a {@link Uni} immediately calling {@link UniSubscriber#onResult(Object)} with {@code null} just
+     * @return a {@link Uni} immediately calling {@link UniSubscriber#onItem(Object)} with {@code null} just
      * after subscription.
      */
-    public Uni<Void> nullValue() {
-        return result(() -> null);
+    public Uni<Void> nullItem() {
+        return item(() -> null);
     }
 
 
@@ -326,20 +290,20 @@ public class UniCreate {
      * Creates a {@link Uni} from the given {@link Multi}.
      * <p>
      * When a subscriber subscribes to the returned {@link Uni}, it subscribes to the {@link Multi} and requests one
-     * result. The event emitted by the {@link Multi} are then forwarded to the {@link Uni}:
+     * item. The event emitted by the {@link Multi} are then forwarded to the {@link Uni}:
      *
      * <ul>
-     * <li>on result event, the result is fired by the produced {@link Uni}</li>
+     * <li>on item event, the item is fired by the produced {@link Uni}</li>
      * <li>on failure event, the failure is fired by the produced {@link Uni}</li>
-     * <li>on completion event, a {@code null} result is fired by the produces {@link Uni}</li>
-     * <li>any result or failure events received after the first event is dropped</li>
+     * <li>on completion event, a {@code null} item is fired by the produces {@link Uni}</li>
+     * <li>any item or failure events received after the first event is dropped</li>
      * </ul>
      * <p>
      * If the subscription on the produced {@link Uni} is cancelled, the subscription to the passed {@link Multi} is
      * also cancelled.
      *
      * @param multi the multi, must not be {@code null}
-     * @param <T>   the type of result
+     * @param <T>   the type of item
      * @return the produced {@link Uni}
      */
     public <T> Uni<T> multi(Multi<T> multi) {

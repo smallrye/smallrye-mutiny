@@ -43,9 +43,9 @@ public class MaybeUniAdapter implements UniAdapter<Maybe<?>> {
     public Uni<?> adaptFrom(Maybe<?> instance) {
         return Uni.createFrom().emitter(sink -> {
             Disposable disposable = instance.subscribe(
-                    sink::result,
-                    sink::failure,
-                    () -> sink.result(null)
+                    sink::complete,
+                    sink::fail,
+                    () -> sink.complete(null)
             );
 
             sink.onTermination(() -> {

@@ -20,7 +20,7 @@ import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
  * </ul>
  * <p>
  *
- * @param <T> the type of result emitted by the emitter
+ * @param <T> the type of item emitted by the emitter
  */
 public class DefaultUniEmitter<T> implements UniEmitter<T>, UniSubscription {
 
@@ -33,9 +33,9 @@ public class DefaultUniEmitter<T> implements UniEmitter<T>, UniSubscription {
     }
 
     @Override
-    public void result(T value) {
+    public void complete(T item) {
         if (disposed.compareAndSet(false, true)) {
-            downstream.onResult(value);
+            downstream.onItem(item);
             terminate();
         }
     }
@@ -48,7 +48,7 @@ public class DefaultUniEmitter<T> implements UniEmitter<T>, UniSubscription {
     }
 
     @Override
-    public void failure(Throwable failure) {
+    public void fail(Throwable failure) {
         nonNull(failure, "failure");
         if (disposed.compareAndSet(false, true)) {
             downstream.onFailure(failure);

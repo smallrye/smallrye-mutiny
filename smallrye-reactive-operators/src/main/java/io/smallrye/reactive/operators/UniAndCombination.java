@@ -76,7 +76,7 @@ public class UniAndCombination<I, O> extends UniOperator<I, O> {
         }
 
         /**
-         * A uni has fired an event (a result or a failure)
+         * A uni has fired an event (an item or a failure)
          * Checks the progress and decide if an event need to be fired downstream.
          *
          * @param res    the {@link UniHandler}
@@ -97,7 +97,7 @@ public class UniAndCombination<I, O> extends UniOperator<I, O> {
             }
 
             for (UniHandler result : handlers) {
-                if (result.failure != null || result.result != SENTINEL) {
+                if (result.failure != null || result.item != SENTINEL) {
                     incomplete = incomplete - 1;
                 }
             }
@@ -106,23 +106,23 @@ public class UniAndCombination<I, O> extends UniOperator<I, O> {
                 // All unis has fired an event, check the outcome
                 if (cancelled.compareAndSet(false, true)) {
                     List<Throwable> failures = getFailures();
-                    List<Object> results = getResults();
-                    computeAndFireTheOutcome(failures, results);
+                    List<Object> items = getItems();
+                    computeAndFireTheOutcome(failures, items);
                 }
             }
 
         }
 
-        private void computeAndFireTheOutcome(List<Throwable> failures, List<Object> results) {
+        private void computeAndFireTheOutcome(List<Throwable> failures, List<Object> items) {
             if (failures.isEmpty()) {
                 O aggregated;
                 try {
-                    aggregated = combinator.apply(results);
+                    aggregated = combinator.apply(items);
                 } catch (Exception e) {
                     subscriber.onFailure(e);
                     return;
                 }
-                subscriber.onResult(aggregated);
+                subscriber.onItem(aggregated);
             } else  if (failures.size() == 1) {
                 // If we had a single failure, fire it without the CompositeException envelope.
                 subscriber.onFailure(failures.get(0));
@@ -131,9 +131,9 @@ public class UniAndCombination<I, O> extends UniOperator<I, O> {
             }
         }
 
-        private List<Object> getResults() {
+        private List<Object> getItems() {
             return this.handlers.stream()
-                                    .map(u -> u.result)
+                                    .map(u -> u.item)
                                     .collect(Collectors.toList());
         }
 
@@ -149,7 +149,7 @@ public class UniAndCombination<I, O> extends UniOperator<I, O> {
         final AtomicReference<UniSubscription> subscription = new AtomicReference<>();
         private final AndSupervisor supervisor;
         private final Uni uni;
-        Object result = SENTINEL;
+        Object item = SENTINEL;
         Throwable failure;
 
         UniHandler(AndSupervisor supervisor, Uni observed) {
@@ -177,12 +177,12 @@ public class UniAndCombination<I, O> extends UniOperator<I, O> {
         }
 
         @Override
-        public final void onResult(Object x) {
+        public final void onItem(Object x) {
             if (subscription.getAndSet(CANCELLED) == CANCELLED) {
                 // Already cancelled, do nothing
                 return;
             }
-            this.result = x;
+            this.item = x;
             supervisor.check(this, false);
         }
 

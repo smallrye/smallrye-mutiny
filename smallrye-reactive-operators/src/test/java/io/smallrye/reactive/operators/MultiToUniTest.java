@@ -17,40 +17,40 @@ public class MultiToUniTest {
     @Test
     public void testFromEmpty() {
         Uni<Void> uni = Multi.createFrom().<Void>empty().toUni();
-        uni.subscribe().withSubscriber(UniAssertSubscriber.create()).assertCompletedSuccessfully().assertResult(null);
+        uni.subscribe().withSubscriber(UniAssertSubscriber.create()).assertCompletedSuccessfully().assertItem(null);
     }
 
     @Test
     public void testFromEmpty2() {
         Uni<Void> uni = Uni.createFrom().multi(Multi.createFrom().empty());
-        uni.subscribe().withSubscriber(UniAssertSubscriber.create()).assertCompletedSuccessfully().assertResult(null);
+        uni.subscribe().withSubscriber(UniAssertSubscriber.create()).assertCompletedSuccessfully().assertItem(null);
     }
 
     @Test
-    public void testFromResults() {
+    public void testFromItems() {
         AtomicInteger count = new AtomicInteger();
-        Multi<Integer> multi = Multi.createFrom().results(() -> Stream.of(count.incrementAndGet(), 2, 3, 4));
+        Multi<Integer> multi = Multi.createFrom().items(() -> Stream.of(count.incrementAndGet(), 2, 3, 4));
 
         multi.toUni().subscribe().withSubscriber(UniAssertSubscriber.create())
                 .assertCompletedSuccessfully()
-                .assertResult(1);
+                .assertItem(1);
 
         multi.toUni().subscribe().withSubscriber(UniAssertSubscriber.create())
                 .assertCompletedSuccessfully()
-                .assertResult(2);
+                .assertItem(2);
     }
 
     @Test
-    public void testFromResults2() {
+    public void testFromItems2() {
         AtomicInteger count = new AtomicInteger();
-        Multi<Integer> multi = Multi.createFrom().results(() -> Stream.of(count.incrementAndGet(), 2, 3, 4));
+        Multi<Integer> multi = Multi.createFrom().items(() -> Stream.of(count.incrementAndGet(), 2, 3, 4));
         Uni<Integer> uni = Uni.createFrom().multi(multi);
         uni.subscribe().withSubscriber(UniAssertSubscriber.create())
                 .assertCompletedSuccessfully()
-                .assertResult(1);
+                .assertItem(1);
         uni.subscribe().withSubscriber(UniAssertSubscriber.create())
                 .assertCompletedSuccessfully()
-                .assertResult(2);
+                .assertItem(2);
     }
 
     @Test
@@ -112,12 +112,12 @@ public class MultiToUniTest {
 
         multi.toUni().subscribe().withSubscriber(UniAssertSubscriber.create())
                 .await()
-                .assertResult(1)
+                .assertItem(1)
                 .assertCompletedSuccessfully();
 
         Uni.createFrom().multi(multi).subscribe().withSubscriber(UniAssertSubscriber.create())
                 .await()
-                .assertResult(2)
+                .assertItem(2)
                 .assertCompletedSuccessfully();
     }
 }

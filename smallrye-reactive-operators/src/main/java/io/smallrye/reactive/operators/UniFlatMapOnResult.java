@@ -29,7 +29,7 @@ public class UniFlatMapOnResult<I, O> extends UniOperator<I, O> {
         Uni<? extends O> outcome;
         try {
             outcome = mapper.apply(input);
-            // We cannot call onResult here, as if onResult would throw an exception
+            // We cannot call onItem here, as if onItem would throw an exception
             // it would be caught and onFailure would be called. This would be illegal.
         } catch (Exception e) {
             subscriber.onFailure(e);
@@ -62,8 +62,8 @@ public class UniFlatMapOnResult<I, O> extends UniOperator<I, O> {
             }
 
             @Override
-            public void onResult(I result) {
-                invokeAndSubstitute(mapper, result, subscriber, flatMapSubscription);
+            public void onItem(I item) {
+                invokeAndSubstitute(mapper, item, subscriber, flatMapSubscription);
             }
 
         });
@@ -98,7 +98,7 @@ public class UniFlatMapOnResult<I, O> extends UniOperator<I, O> {
                 up.cancel();
             }
             // We don't have to cancel the previous subscription as replace is called once the upstream
-            // has emitted an result event, so it's already disposed.
+            // has emitted an item event, so it's already disposed.
         }
     }
 }

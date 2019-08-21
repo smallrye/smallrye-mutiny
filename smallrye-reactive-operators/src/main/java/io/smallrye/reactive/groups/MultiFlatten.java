@@ -10,8 +10,8 @@ import static io.smallrye.reactive.helpers.ParameterValidation.positive;
 /**
  * The object to tune the <em>flatMap</em> operation
  *
- * @param <I> the type of result emitted by the upstream {@link Multi}
- * @param <O> the type of result emitted by the returned {@link Multi}
+ * @param <I> the type of item emitted by the upstream {@link Multi}
+ * @param <O> the type of item emitted by the returned {@link Multi}
  */
 public class MultiFlatten<I, O> {
 
@@ -44,7 +44,7 @@ public class MultiFlatten<I, O> {
     }
 
     /**
-     * Configures the number the results requested to the <em>streams</em> produced by the mapper.
+     * Configures the number the items requested to the <em>streams</em> produced by the mapper.
      *
      * @param req the request, must be strictly positive
      * @return this {@link MultiFlatten}
@@ -54,14 +54,14 @@ public class MultiFlatten<I, O> {
     }
 
     /**
-     * Produces a {@link Multi} containing the results from {@link Publisher} produced by the {@code mapper} for each
-     * result emitted by this {@link Multi}.
+     * Produces a {@link Multi} containing the items from {@link Publisher} produced by the {@code mapper} for each
+     * item emitted by this {@link Multi}.
      * <p>
      * The operators behaves as follows:
      * <ul>
-     * <li>for each result emitted by this {@link Multi}, the mapper is called and produces a {@link Publisher}
+     * <li>for each item emitted by this {@link Multi}, the mapper is called and produces a {@link Publisher}
      * (potentially a {@code Multi}). The mapper must not return {@code null}</li>
-     * <li>The results contained in each of the produced {@link Publisher} are then <strong>merged</strong> in the
+     * <li>The items contained in each of the produced {@link Publisher} are then <strong>merged</strong> in the
      * produced {@link Multi}. The returned object lets you configure the flattening process.</li>
      * </ul>
      *
@@ -73,14 +73,14 @@ public class MultiFlatten<I, O> {
     }
 
     /**
-     * Produces a {@link Multi} containing the results from {@link Publisher} produced by the {@code mapper} for each
-     * result emitted by this {@link Multi}.
+     * Produces a {@link Multi} containing the items from {@link Publisher} produced by the {@code mapper} for each
+     * item emitted by this {@link Multi}.
      * <p>
      * The operators behaves as follows:
      * <ul>
-     * <li>for each result emitted by this {@link Multi}, the mapper is called and produces a {@link Publisher}
+     * <li>for each item emitted by this {@link Multi}, the mapper is called and produces a {@link Publisher}
      * (potentially a {@code Multi}). The mapper must not return {@code null}</li>
-     * <li>The results contained in each of the produced {@link Publisher} are then <strong>merged</strong> in the
+     * <li>The items contained in each of the produced {@link Publisher} are then <strong>merged</strong> in the
      * produced {@link Multi}. The returned object lets you configure the flattening process.</li>
      * </ul>
      *
@@ -92,14 +92,14 @@ public class MultiFlatten<I, O> {
     }
 
     /**
-     * Produces a {@link Multi} containing the results from {@link Publisher} produced by the {@code mapper} for each
-     * result emitted by this {@link Multi}.
+     * Produces a {@link Multi} containing the items from {@link Publisher} produced by the {@code mapper} for each
+     * item emitted by this {@link Multi}.
      * <p>
      * The operators behaves as follows:
      * <ul>
-     * <li>for each result emitted by this {@link Multi}, the mapper is called and produces a {@link Publisher}
+     * <li>for each item emitted by this {@link Multi}, the mapper is called and produces a {@link Publisher}
      * (potentially a {@code Multi}). The mapper must not return {@code null}</li>
-     * <li>The results contained in each of the produced {@link Publisher} are then <strong>concatenated</strong> in the
+     * <li>The items contained in each of the produced {@link Publisher} are then <strong>concatenated</strong> in the
      * produced {@link Multi}. The returned object lets you configure the flattening process.</li>
      * </ul>
      *

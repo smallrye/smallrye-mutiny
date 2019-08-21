@@ -17,10 +17,10 @@ public class UniRunSubscriptionOnTest {
     @Test
     public void testSubscribeOnWithSupplier() {
         UniAssertSubscriber<Integer> ts = UniAssertSubscriber.create();
-        Uni.createFrom().result(() -> 1)
-                .callSubscribeOn(ForkJoinPool.commonPool())
+        Uni.createFrom().item(() -> 1)
+                .receiveSubscriptionOn(ForkJoinPool.commonPool())
                 .subscribe().withSubscriber(ts);
-        ts.await().assertResult(1);
+        ts.await().assertItem(1);
         assertThat(ts.getOnSubscribeThreadName()).isNotEqualTo(Thread.currentThread().getName());
     }
 
@@ -28,11 +28,11 @@ public class UniRunSubscriptionOnTest {
     public void testWithWithImmediateValue() {
         UniAssertSubscriber<Integer> ts = UniAssertSubscriber.create();
 
-        Uni.createFrom().result(1)
-                .callSubscribeOn(ForkJoinPool.commonPool())
+        Uni.createFrom().item(1)
+                .receiveSubscriptionOn(ForkJoinPool.commonPool())
                 .subscribe().withSubscriber(ts);
 
-        ts.await().assertResult(1);
+        ts.await().assertItem(1);
         assertThat(ts.getOnSubscribeThreadName()).isNotEqualTo(Thread.currentThread().getName());
     }
 
@@ -40,7 +40,7 @@ public class UniRunSubscriptionOnTest {
     public void testWithTimeout() {
         UniAssertSubscriber<Integer> ts = UniAssertSubscriber.create();
 
-        Uni.createFrom().result(() -> {
+        Uni.createFrom().item(() -> {
             try {
                 TimeUnit.SECONDS.sleep(1L);
             } catch (InterruptedException e) {
@@ -48,19 +48,19 @@ public class UniRunSubscriptionOnTest {
             }
             return 0;
         })
-                .onNoResult().after(Duration.ofMillis(100)).recoverWithUni(Uni.createFrom().result(() -> 1))
-                .callSubscribeOn(Infrastructure.getDefaultExecutor())
+                .onNoItem().after(Duration.ofMillis(100)).recoverWithUni(Uni.createFrom().item(() -> 1))
+                .receiveSubscriptionOn(Infrastructure.getDefaultExecutor())
                 .subscribe().withSubscriber(ts);
 
-        ts.await().assertResult(1);
+        ts.await().assertItem(1);
     }
 
     @Test
     public void callableEvaluatedTheRightTime() {
         AtomicInteger count = new AtomicInteger();
 
-        Uni<Integer> uni = Uni.createFrom().result(count::incrementAndGet)
-                .callSubscribeOn(ForkJoinPool.commonPool());
+        Uni<Integer> uni = Uni.createFrom().item(count::incrementAndGet)
+                .receiveSubscriptionOn(ForkJoinPool.commonPool());
 
         assertThat(count).hasValue(0);
         uni.subscribe().withSubscriber(UniAssertSubscriber.create()).await();
@@ -70,7 +70,7 @@ public class UniRunSubscriptionOnTest {
     @Test
     public void testWithFailure() {
         Uni.createFrom().<Void>failure(new IOException("boom"))
-                .callSubscribeOn(Infrastructure.getDefaultExecutor())
+                .receiveSubscriptionOn(Infrastructure.getDefaultExecutor())
                 .subscribe().withSubscriber(UniAssertSubscriber.create())
                 .await()
                 .assertFailure(IOException.class, "boom");

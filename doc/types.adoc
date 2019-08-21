@@ -2,8 +2,8 @@
 
 SmallRye Reactive Operators proposes 2 types:
 
-* `Uni` for operations returning 1 result, potentially `null`
-* `Multi` for operations returning multiple results
+* `Uni` for operations returning 1 item, potentially `null`
+* `Multi` for operations returning multiple items
 
 === Subscription pattern
 
@@ -27,7 +27,7 @@ uni.subscribe().with(
 The `Uni` and `Multi` types focus on the _event-driven_ nature of reactive.
 The types let's you describe the behavior you want _on_ the different events.
 
-For example, to attach some behavior when you receive a result, you would use: `uni.onResult().mapResultTo(i -> i++)`
+For example, to attach some behavior when you receive a result, you would use: `uni.onItem().mapResultTo(i -> i++)`
 To recover from a failure, you would use: `multi.onFailure().recoverWithMulti(myFallback)`
 
 === Events
@@ -35,7 +35,7 @@ To recover from a failure, you would use: `multi.onFailure().recoverWithMulti(my
 There are 6 kind of events.
 
 Three events comes from _upstream_:
-* `onResult` : a result has been received (uni (called at most once) and multi)
+* `onItem` : a result has been received (uni (called at most once) and multi)
 * `onFailure` : a failure has been received (uni and multi, called at most once)
 * `onCompletion`: the stream has reach its end, no more result will be emitted (multi only, called at most once)
 

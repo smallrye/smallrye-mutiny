@@ -18,7 +18,7 @@ public class MultiSubscribe<T> {
     }
 
     /**
-     * Subscribes to the {@link io.smallrye.reactive.Multi} to get a subscription and then start receiving results (
+     * Subscribes to the {@link io.smallrye.reactive.Multi} to get a subscription and then start receiving items (
      * based on the passed requests).
      * <p>
      * This is a "factory method" and can be called multiple times, each time starting a new {@link Subscription}.

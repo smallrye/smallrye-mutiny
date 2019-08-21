@@ -25,8 +25,8 @@ public class UniToPublisher {
         // 3. Cancellation can happen 1) before the request (and so the uni subscription); 2) after the request but
         // before the emission; 3) after the emission. In (1) the uni subscription must not happen. In (2), the emission
         // must not happen. In (3), the emission could happen.
-        // 4. If the uni result is `null` the stream is completed. If the uni result is not `null`, the stream contains
-        // the result and the end of stream signal. In the case of error, the stream propagates the error.
+        // 4. If the uni item is `null` the stream is completed. If the uni item is not `null`, the stream contains
+        // the item and the end of stream signal. In the case of error, the stream propagates the error.
         return subscriber -> {
             AtomicReference<UniSubscription> upstreamSubscription = new AtomicReference<>();
 
@@ -52,10 +52,10 @@ public class UniToPublisher {
                         }
 
                         @Override
-                        public void onResult(T result) {
+                        public void onItem(T item) {
                             if (upstreamSubscription.getAndSet(CANCELLED) != CANCELLED) {
-                                if (result != null) {
-                                    subscriber.onNext(result);
+                                if (item != null) {
+                                    subscriber.onNext(item);
                                 }
                                 subscriber.onComplete();
                             }

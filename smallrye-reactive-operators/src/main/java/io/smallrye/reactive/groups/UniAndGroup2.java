@@ -2,7 +2,7 @@ package io.smallrye.reactive.groups;
 
 import io.smallrye.reactive.CompositeException;
 import io.smallrye.reactive.Uni;
-import io.smallrye.reactive.tuples.Pair;
+import io.smallrye.reactive.tuples.Tuple2;
 import io.smallrye.reactive.tuples.Tuples;
 
 import java.util.Collections;
@@ -11,10 +11,10 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 
 /**
- * Configuresthe combination of 2 {@link Uni unis}.
+ * Configures the combination of 2 {@link Uni unis}.
  *
- * @param <T1> the type of result of the first {@link Uni}
- * @param <T2> the type of result of the second {@link Uni}
+ * @param <T1> the type of item of the first {@link Uni}
+ * @param <T2> the type of item of the second {@link Uni}
  */
 public class UniAndGroup2<T1, T2> extends UniAndGroupIterable<T1> {
 
@@ -24,7 +24,7 @@ public class UniAndGroup2<T1, T2> extends UniAndGroupIterable<T1> {
     }
 
     /**
-     * Configure the processing to wait until all the {@link Uni unis} to fires an event (result or failure) before
+     * Configure the processing to wait until all the {@link Uni unis} to fires an event (item or failure) before
      * firing the failure. If several failures have been collected, a {@link CompositeException} is fired wrapping
      * the different failures.
      *
@@ -36,18 +36,18 @@ public class UniAndGroup2<T1, T2> extends UniAndGroupIterable<T1> {
     }
 
     /**
-     * @return the resulting {@link Uni}. The results are combined into a {@link Pair Pair&lt;T1, T2&gt;}.
+     * @return the resulting {@link Uni}. The items are combined into a {@link Tuple2 Tuple2&lt;T1, T2&gt;}.
      */
-    public Uni<Pair<T1, T2>> asPair() {
-        return combinedWith(Pair::of);
+    public Uni<Tuple2<T1, T2>> asTuple() {
+        return combinedWith(Tuple2::of);
     }
 
     /**
-     * Creates the resulting {@link Uni}. The results are combined using the given combinator function.
+     * Creates the resulting {@link Uni}. The items are combined using the given combinator function.
      *
      * @param combinator the combinator function, must not be {@code null}
-     * @param <O>        the type of result
-     * @return the resulting {@link Uni}. The result are combined into a {@link Pair Pair&lt;T1, T2&gt;}.
+     * @param <O>        the type of item
+     * @return the resulting {@link Uni}. The items are combined into a {@link Tuple2 Tuple2&lt;T1, T2&gt;}.
      */
     @SuppressWarnings("unchecked")
     public <O> Uni<O> combinedWith(BiFunction<T1, T2, O> combinator) {

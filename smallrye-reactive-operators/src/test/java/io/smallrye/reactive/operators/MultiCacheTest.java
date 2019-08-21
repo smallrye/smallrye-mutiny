@@ -13,7 +13,7 @@ public class MultiCacheTest {
     @Test
     public void testCachingWithResultsAndCompletion() {
         AtomicInteger count = new AtomicInteger();
-        Multi<Integer> multi = Multi.createFrom().deferred(() -> Multi.createFrom().results(count.incrementAndGet(),
+        Multi<Integer> multi = Multi.createFrom().deferred(() -> Multi.createFrom().items(count.incrementAndGet(),
                 count.incrementAndGet()))
                 .cache();
         multi.subscribe().withSubscriber(MultiAssertSubscriber.create(2))
@@ -29,9 +29,9 @@ public class MultiCacheTest {
     public void testCachingWithFailure() {
         AtomicInteger count = new AtomicInteger();
         Multi<Integer> multi = Multi.createFrom().<Integer>emitter(emitter ->
-                emitter.result(count.incrementAndGet())
-                        .result(count.incrementAndGet())
-                        .failure(new IOException("boom-" + count.incrementAndGet()))
+                emitter.emit(count.incrementAndGet())
+                        .emit(count.incrementAndGet())
+                        .fail(new IOException("boom-" + count.incrementAndGet()))
         )
                 .cache();
         multi.subscribe().withSubscriber(MultiAssertSubscriber.create(2))
@@ -49,8 +49,8 @@ public class MultiCacheTest {
         AtomicReference<MultiEmitter<? super Integer>> reference = new AtomicReference<>();
         Multi<Integer> multi = Multi.createFrom().<Integer>emitter(emitter -> {
             reference.set(emitter);
-            emitter.result(count.incrementAndGet())
-                    .result(count.incrementAndGet());
+            emitter.emit(count.incrementAndGet())
+                    .emit(count.incrementAndGet());
         })
                 .cache();
         MultiAssertSubscriber<Integer> s1 = multi.subscribe().withSubscriber(MultiAssertSubscriber.create(2))
@@ -61,7 +61,7 @@ public class MultiCacheTest {
                 .assertReceived(1, 2)
                 .assertNotTerminated();
 
-        reference.get().result(count.incrementAndGet()).complete();
+        reference.get().emit(count.incrementAndGet()).complete();
         s1.assertReceived(1, 2).request(1).assertReceived(1, 2, 3).assertCompletedSuccessfully();
         s2.assertReceived(1, 2, 3).assertCompletedSuccessfully();
     }

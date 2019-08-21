@@ -13,11 +13,11 @@ public abstract class Tuples {
 
 
     @SuppressWarnings("unchecked")
-    public static <L, R> Pair<L, R> pair(List<?> list) {
+    public static <L, R> Tuple2<L, R> pair(List<?> list) {
         if (nonNull(list, "list").size() != 2) {
             throw new IllegalArgumentException("Cannot create a pair from the given list, size must be 2 (actual size is " + nonNull(list, "list").size() + ")");
         }
-        return Pair.of((L) list.get(0), (R) list.get(1));
+        return Tuple2.of((L) list.get(0), (R) list.get(1));
     }
 
 

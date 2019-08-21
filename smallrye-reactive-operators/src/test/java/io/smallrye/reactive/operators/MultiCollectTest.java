@@ -14,34 +14,34 @@ public class MultiCollectTest {
 
     @Test
     public void testCollectFirstAndLast() {
-        Multi<Integer> results = Multi.createFrom().results(1, 2, 3);
-        results
+        Multi<Integer> items = Multi.createFrom().items(1, 2, 3);
+        items
                 .collect().first()
                 .subscribe().withSubscriber(UniAssertSubscriber.create())
                 .await()
-                .assertResult(1);
+                .assertItem(1);
 
-        results
+        items
                 .collect().last()
                 .subscribe().withSubscriber(UniAssertSubscriber.create())
                 .await()
-                .assertResult(3);
+                .assertItem(3);
     }
 
     @Test
     public void testCollectWithEmpty() {
-        Multi<Integer> results = Multi.createFrom().empty();
-        results
+        Multi<Integer> items = Multi.createFrom().empty();
+        items
                 .collect().first()
                 .subscribe().withSubscriber(UniAssertSubscriber.create())
                 .await()
-                .assertResult(null);
+                .assertItem(null);
 
-        results
+        items
                 .collect().last()
                 .subscribe().withSubscriber(UniAssertSubscriber.create())
                 .await()
-                .assertResult(null);
+                .assertItem(null);
     }
 
     @Test
@@ -62,12 +62,12 @@ public class MultiCollectTest {
 
     @Test
     public void testAsList() {
-        UniAssertSubscriber<List<Integer>> subscriber = Multi.createFrom().results(1, 2, 3)
+        UniAssertSubscriber<List<Integer>> subscriber = Multi.createFrom().items(1, 2, 3)
                 .collect().asList()
                 .subscribe().withSubscriber(UniAssertSubscriber.create())
                 .await();
 
-        assertThat(subscriber.getResult()).containsExactly(1, 2, 3);
+        assertThat(subscriber.getItem()).containsExactly(1, 2, 3);
     }
 
     @Test
@@ -77,7 +77,7 @@ public class MultiCollectTest {
                 .subscribe().withSubscriber(UniAssertSubscriber.create())
                 .await();
 
-        assertThat(subscriber.getResult()).containsExactly(1, 2, 3, 4, 5, 6, 7, 8, 9).isInstanceOf(LinkedList.class);
+        assertThat(subscriber.getItem()).containsExactly(1, 2, 3, 4, 5, 6, 7, 8, 9).isInstanceOf(LinkedList.class);
     }
 
     @Test
@@ -143,14 +143,14 @@ public class MultiCollectTest {
         }
     }
 
-    private Multi<Person> persons = Multi.createFrom().results(
+    private Multi<Person> persons = Multi.createFrom().items(
             new Person("bob", 1),
             new Person("alice", 2),
             new Person("rob", 3),
             new Person("matt", 4)
     );
 
-    private Multi<Person> personsWithDuplicates = Multi.createFrom().results(
+    private Multi<Person> personsWithDuplicates = Multi.createFrom().items(
             new Person("bob", 1),
             new Person("alice", 2),
             new Person("rob", 3),
@@ -166,7 +166,7 @@ public class MultiCollectTest {
                 .subscribe().withSubscriber(UniAssertSubscriber.create())
                 .assertCompletedSuccessfully();
 
-        assertThat(subscriber.getResult())
+        assertThat(subscriber.getItem())
                 .hasSize(4)
                 .contains(
                         entry("bob", new Person("bob", 1)),
@@ -183,7 +183,7 @@ public class MultiCollectTest {
                 .subscribe().withSubscriber(UniAssertSubscriber.create())
                 .assertCompletedSuccessfully();
 
-        assertThat(subscriber.getResult()).isEmpty();
+        assertThat(subscriber.getItem()).isEmpty();
     }
 
 
@@ -194,9 +194,9 @@ public class MultiCollectTest {
                 .subscribe().withSubscriber(new UniAssertSubscriber<>())
                 .assertCompletedSuccessfully();
 
-        assertThat(subscriber.getResult()).hasSize(4);
-        assertThat(subscriber.getResult().get("alice")).containsExactly(new Person("alice", 2));
-        assertThat(subscriber.getResult().get("rob")).hasSize(2)
+        assertThat(subscriber.getItem()).hasSize(4);
+        assertThat(subscriber.getItem().get("alice")).containsExactly(new Person("alice", 2));
+        assertThat(subscriber.getItem().get("rob")).hasSize(2)
                 .contains(new Person("rob", 3), new Person("rob", 6));
 
     }
@@ -208,14 +208,14 @@ public class MultiCollectTest {
                 .collect().asMultiMap(p -> p.firstName)
                 .subscribe().withSubscriber(new UniAssertSubscriber<>())
                 .assertCompletedSuccessfully();
-        assertThat(subscriber.getResult()).hasSize(0);
+        assertThat(subscriber.getItem()).hasSize(0);
 
     }
 
     @Test
     public void testSumCollector() {
         Multi.createFrom().range(1, 5).collect().with(Collectors.summingInt(value -> value))
-                .subscribe().withSubscriber(new UniAssertSubscriber<>()).assertCompletedSuccessfully().assertResult(10);
+                .subscribe().withSubscriber(new UniAssertSubscriber<>()).assertCompletedSuccessfully().assertItem(10);
     }
 
 }

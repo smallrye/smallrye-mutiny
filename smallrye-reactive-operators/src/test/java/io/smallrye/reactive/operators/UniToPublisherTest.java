@@ -28,7 +28,7 @@ public class UniToPublisherTest {
 
     @Test
     public void testWithImmediateValue() {
-        Publisher<Integer> publisher = Uni.createFrom().result(1).adapt().toPublisher();
+        Publisher<Integer> publisher = Uni.createFrom().item(1).adapt().toPublisher();
         assertThat(publisher).isNotNull();
         int first = Flowable.fromPublisher(publisher).blockingFirst();
         assertThat(first).isEqualTo(1);
@@ -36,7 +36,7 @@ public class UniToPublisherTest {
 
     @Test
     public void testWithImmediateNullValue() {
-        Publisher<Integer> publisher = Uni.createFrom().result((Integer) null).adapt().toPublisher();
+        Publisher<Integer> publisher = Uni.createFrom().item((Integer) null).adapt().toPublisher();
         assertThat(publisher).isNotNull();
         int first = Flowable.fromPublisher(publisher).blockingFirst(2);
         assertThat(first).isEqualTo(2);
@@ -58,7 +58,7 @@ public class UniToPublisherTest {
 
     @Test
     public void testWithImmediateValueWithRequest() {
-        Publisher<Integer> publisher = Uni.createFrom().result(1).adapt().toPublisher();
+        Publisher<Integer> publisher = Uni.createFrom().item(1).adapt().toPublisher();
         assertThat(publisher).isNotNull();
         TestSubscriber<Integer> test = Flowable.fromPublisher(publisher).test(0);
         test.assertSubscribed();
@@ -69,7 +69,7 @@ public class UniToPublisherTest {
 
     @Test
     public void testWithImmediateValueWithRequests() {
-        Publisher<Integer> publisher = Uni.createFrom().result(1).adapt().toPublisher();
+        Publisher<Integer> publisher = Uni.createFrom().item(1).adapt().toPublisher();
         assertThat(publisher).isNotNull();
         TestSubscriber<Integer> test = Flowable.fromPublisher(publisher).test(0);
         test.assertSubscribed();
@@ -80,7 +80,7 @@ public class UniToPublisherTest {
 
     @Test
     public void testInvalidRequest() {
-        Publisher<Integer> publisher = Uni.createFrom().result(1).adapt().toPublisher();
+        Publisher<Integer> publisher = Uni.createFrom().item(1).adapt().toPublisher();
         assertThat(publisher).isNotNull();
         TestSubscriber<Integer> test = Flowable.fromPublisher(publisher).test(0);
         test.assertSubscribed();
@@ -91,7 +91,7 @@ public class UniToPublisherTest {
 
     @Test
     public void testWithImmediateValueWithOneRequestAndImmediateCancellation() {
-        Publisher<Integer> publisher = Uni.createFrom().result(1).adapt().toPublisher();
+        Publisher<Integer> publisher = Uni.createFrom().item(1).adapt().toPublisher();
         assertThat(publisher).isNotNull();
         TestSubscriber<Integer> test = Flowable.fromPublisher(publisher).test(1, true);
         test.assertSubscribed();
@@ -104,7 +104,7 @@ public class UniToPublisherTest {
     public void testThatTwoSubscribersHaveTwoSubscriptions() {
         AtomicInteger count = new AtomicInteger(1);
         Publisher<Integer> publisher =  Uni.createFrom().deferred(() -> Uni.createFrom()
-                .result(count.getAndIncrement()))
+                .item(count.getAndIncrement()))
                 .adapt().toPublisher();
         assertThat(publisher).isNotNull();
         Flowable<Integer> flow = Flowable.fromPublisher(publisher);
@@ -118,7 +118,7 @@ public class UniToPublisherTest {
     public void testThatTwoSubscribersWithCache() {
         AtomicInteger count = new AtomicInteger(1);
         Publisher<Integer> publisher =  Uni.createFrom()
-                .deferred(() -> Uni.createFrom().result(count.getAndIncrement())).cache().adapt().toPublisher();
+                .deferred(() -> Uni.createFrom().item(count.getAndIncrement())).cache().adapt().toPublisher();
         assertThat(publisher).isNotNull();
         Flowable<Integer> flow = Flowable.fromPublisher(publisher);
         int first = flow.blockingFirst();
@@ -129,7 +129,7 @@ public class UniToPublisherTest {
 
     @Test
     public void testCancellationBetweenSubscriptionAndRequest() {
-        Publisher<Integer> publisher = Uni.createFrom().result(1).adapt().toPublisher();
+        Publisher<Integer> publisher = Uni.createFrom().item(1).adapt().toPublisher();
         assertThat(publisher).isNotNull();
         TestSubscriber<Integer> test = Flowable.fromPublisher(publisher).test(0);
         test.assertSubscribed();
@@ -143,7 +143,7 @@ public class UniToPublisherTest {
     public void testCancellationBetweenRequestAndValue() {
         // TODO This is a very broken implementation of "delay" - to be replace once delay is implemented
         executor = Executors.newSingleThreadExecutor();
-        Publisher<Integer> publisher = Uni.createFrom().result(1).handleResultOn(executor).map(x -> {
+        Publisher<Integer> publisher = Uni.createFrom().item(1).receiveItemOn(executor).map(x -> {
             try {
                 Thread.sleep(100);
             } catch (InterruptedException e) {
@@ -164,7 +164,7 @@ public class UniToPublisherTest {
 
     @Test
     public void testCancellationAfterValue() {
-        Publisher<Integer> publisher = Uni.createFrom().result(1).adapt().toPublisher();
+        Publisher<Integer> publisher = Uni.createFrom().item(1).adapt().toPublisher();
         assertThat(publisher).isNotNull();
         TestSubscriber<Integer> test = Flowable.fromPublisher(publisher).test(0);
         test.assertSubscribed();
@@ -180,7 +180,7 @@ public class UniToPublisherTest {
     @Test
     public void testWithAsyncValue() {
         executor = Executors.newSingleThreadScheduledExecutor();
-        Publisher<Integer> publisher = Uni.createFrom().result(1).handleResultOn(executor).adapt().toPublisher();
+        Publisher<Integer> publisher = Uni.createFrom().item(1).receiveItemOn(executor).adapt().toPublisher();
         assertThat(publisher).isNotNull();
         int first = Flowable.fromPublisher(publisher).blockingFirst();
         assertThat(first).isEqualTo(1);
@@ -190,8 +190,8 @@ public class UniToPublisherTest {
     public void testWithAsyncNullValue() {
         executor = Executors.newSingleThreadScheduledExecutor();
 
-        Publisher<Integer> publisher = Uni.createFrom().result((Integer) null)
-                .handleResultOn(executor)
+        Publisher<Integer> publisher = Uni.createFrom().item((Integer) null)
+                .receiveItemOn(executor)
                 .adapt().toPublisher();
         assertThat(publisher).isNotNull();
         int first = Flowable.fromPublisher(publisher).blockingFirst(2);
@@ -203,7 +203,7 @@ public class UniToPublisherTest {
     public void testWithAsyncFailure() {
         executor = Executors.newSingleThreadScheduledExecutor();
         Publisher<Integer> publisher = Uni.createFrom().<Integer>failure(new IOException("boom"))
-                .handleResultOn(executor).adapt().toPublisher();
+                .receiveItemOn(executor).adapt().toPublisher();
         assertThat(publisher).isNotNull();
         try {
             Flowable.fromPublisher(publisher).blockingFirst();

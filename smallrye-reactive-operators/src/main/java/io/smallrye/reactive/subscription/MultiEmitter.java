@@ -6,24 +6,24 @@ import org.reactivestreams.Subscription;
 
 /**
  * An object allowing to send signals to the downstream {@link Multi}.
- * {@link Multi} propagates several results event, once a failure or completion event is fired, the other events have
+ * {@link Multi} propagates several item event, once a failure or completion event is fired, the other events have
  * no effects.
  * <p>
- * Emitting a {@code null} result is invalid and will cause a failure.
+ * Emitting a {@code null} item is invalid and will cause a failure.
  *
- * @param <T> the expected type of results.
+ * @param <T> the expected type of items.
  */
 public interface MultiEmitter<T> {
 
     /**
-     * Emits a {@code result} event downstream with the given (potentially {@code null}) result.
+     * Emits an {@code item} event downstream.
      * <p>
      * Calling this method after a failure or a completion events has no effect.
      *
-     * @param result the result, must not be {@code null}
-     * @return this emitter, so firing result events can be chained.
+     * @param item the item, must not be {@code null}
+     * @return this emitter, so firing item events can be chained.
      */
-    MultiEmitter<T> result(T result);
+    MultiEmitter<T> emit(T item);
 
     /**
      * Emits a {@code failure} event downstream with the given exception.
@@ -32,12 +32,12 @@ public interface MultiEmitter<T> {
      *
      * @param failure the exception, must not be {@code null}
      */
-    void failure(Throwable failure);
+    void fail(Throwable failure);
 
     /**
-     * Emits a {@code completion} event downstream indicating that no more result will be sent.
+     * Emits a {@code completion} event downstream indicating that no more item will be sent.
      * <p>
-     * Calling this method multiple times or after the {@link #failure(Throwable)} method has no effect.
+     * Calling this method multiple times or after the {@link #fail(Throwable)} method has no effect.
      */
     void complete();
 

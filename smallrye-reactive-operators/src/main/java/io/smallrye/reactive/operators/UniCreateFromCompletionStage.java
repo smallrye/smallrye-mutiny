@@ -20,7 +20,7 @@ public class UniCreateFromCompletionStage<O> extends UniOperator<Void, O> {
             if (fail != null) {
                 subscriber.onFailure(fail);
             } else {
-                subscriber.onResult(res);
+                subscriber.onItem(res);
             }
         });
     }

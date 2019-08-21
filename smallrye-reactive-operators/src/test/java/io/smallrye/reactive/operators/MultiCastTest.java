@@ -7,15 +7,15 @@ public class MultiCastTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testThatClassCannotBeNull() {
-        Multi.createFrom().result(1)
-                .onResult().castTo(null);
+        Multi.createFrom().item(1)
+                .onItem().castTo(null);
     }
 
 
     @Test
     public void testCastThatWorks() {
-        Multi.createFrom().result(1)
-                .onResult().castTo(Number.class)
+        Multi.createFrom().item(1)
+                .onItem().castTo(Number.class)
                 .subscribe().withSubscriber(MultiAssertSubscriber.create(1))
                 .assertCompletedSuccessfully()
                 .assertReceived(1);
@@ -23,8 +23,8 @@ public class MultiCastTest {
 
     @Test
     public void testCastThatDoesNotWork() {
-        Multi.createFrom().result(1)
-                .onResult().castTo(String.class)
+        Multi.createFrom().item(1)
+                .onItem().castTo(String.class)
                 .subscribe().withSubscriber(MultiAssertSubscriber.create(1))
                 .assertHasFailedWith(ClassCastException.class, "String");
     }

@@ -25,11 +25,11 @@ public class Tuple5Test {
 
     @Test
     public void testMappingMethods() {
-        assertThat(someTuple.mapResult1(i -> i + 1)).containsExactly(2, 2, 3, 4, 5);
-        assertThat(someTuple.mapResult2(i -> i + 1)).containsExactly(1, 3, 3, 4, 5);
-        assertThat(someTuple.mapResult3(i -> i + 1)).containsExactly(1, 2, 4, 4, 5);
-        assertThat(someTuple.mapResult4(i -> i + 1)).containsExactly(1, 2, 3, 5, 5);
-        assertThat(someTuple.mapResult5(i -> i + 1)).containsExactly(1, 2, 3, 4, 6);
+        assertThat(someTuple.mapItem1(i -> i + 1)).containsExactly(2, 2, 3, 4, 5);
+        assertThat(someTuple.mapItem2(i -> i + 1)).containsExactly(1, 3, 3, 4, 5);
+        assertThat(someTuple.mapItem3(i -> i + 1)).containsExactly(1, 2, 4, 4, 5);
+        assertThat(someTuple.mapItem4(i -> i + 1)).containsExactly(1, 2, 3, 5, 5);
+        assertThat(someTuple.mapItem5(i -> i + 1)).containsExactly(1, 2, 3, 4, 6);
     }
 
     @Test(expected = IndexOutOfBoundsException.class)
@@ -49,11 +49,11 @@ public class Tuple5Test {
         assertThat(someTuple.nth(2)).isEqualTo(3);
         assertThat(someTuple.nth(3)).isEqualTo(4);
         assertThat(someTuple.nth(4)).isEqualTo(5);
-        assertThat(someTuple.getResult1()).isEqualTo(1);
-        assertThat(someTuple.getResult2()).isEqualTo(2);
-        assertThat(someTuple.getResult3()).isEqualTo(3);
-        assertThat(someTuple.getResult4()).isEqualTo(4);
-        assertThat(someTuple.getResult5()).isEqualTo(5);
+        assertThat(someTuple.getItem1()).isEqualTo(1);
+        assertThat(someTuple.getItem2()).isEqualTo(2);
+        assertThat(someTuple.getItem3()).isEqualTo(3);
+        assertThat(someTuple.getItem4()).isEqualTo(4);
+        assertThat(someTuple.getItem5()).isEqualTo(5);
         assertThat(someTuple.size()).isEqualTo(5);
     }
 

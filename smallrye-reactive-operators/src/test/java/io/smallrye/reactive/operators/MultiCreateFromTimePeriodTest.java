@@ -27,22 +27,22 @@ public class MultiCreateFromTimePeriodTest {
     public void testIntervalOfAFewMillis() {
         MultiAssertSubscriber<Long> ts = MultiAssertSubscriber.create(Long.MAX_VALUE);
 
-        // Add a fake result with the beginning time
-        ts.results().add(System.currentTimeMillis());
+        // Add a fake item with the beginning time
+        ts.items().add(System.currentTimeMillis());
 
         Multi.createFrom().ticks()
                 .startingAfter(Duration.ofMillis(100)).onExecutor(executor).every(Duration.ofMillis(100))
-                .onResult().mapToResult(l -> System.currentTimeMillis())
+                .onItem().mapToResult(l -> System.currentTimeMillis())
                 .subscribe().withSubscriber(ts);
 
-        await().until(() -> ts.results().size() == 10);
+        await().until(() -> ts.items().size() == 10);
         ts.cancel();
 
         ts
                 .assertHasNotCompleted()
                 .assertHasNotFailed();
 
-        List<Long> list = ts.results();
+        List<Long> list = ts.items();
         for (int i = 0; i < list.size() - 1; i++) {
             long delta = list.get(i + 1) - list.get(i);
             assertThat(delta).isBetween(20L, 350L);
@@ -53,22 +53,22 @@ public class MultiCreateFromTimePeriodTest {
     public void testWithInfraExecutorAndNoDelay() {
         MultiAssertSubscriber<Long> ts = MultiAssertSubscriber.create(Long.MAX_VALUE);
 
-        // Add a fake result with the beginning time
-        ts.results().add(System.currentTimeMillis());
+        // Add a fake item with the beginning time
+        ts.items().add(System.currentTimeMillis());
 
         Multi.createFrom().ticks()
                 .every(Duration.ofMillis(100))
-                .onResult().mapToResult(l -> System.currentTimeMillis())
+                .onItem().mapToResult(l -> System.currentTimeMillis())
                 .subscribe().withSubscriber(ts);
 
-        await().until(() -> ts.results().size() == 10);
+        await().until(() -> ts.items().size() == 10);
         ts.cancel();
 
         ts
                 .assertHasNotCompleted()
                 .assertHasNotFailed();
 
-        List<Long> list = ts.results();
+        List<Long> list = ts.items();
         for (int i = 0; i < list.size() - 1; i++) {
             long delta = list.get(i + 1) - list.get(i);
             assertThat(delta).isBetween(20L, 350L);
@@ -79,11 +79,11 @@ public class MultiCreateFromTimePeriodTest {
     public void testBackPressureOverflow() {
         MultiAssertSubscriber<Long> ts = MultiAssertSubscriber.create();
 
-        ts.results().add(System.currentTimeMillis());
+        ts.items().add(System.currentTimeMillis());
 
         Multi.createFrom().ticks()
                 .startingAfter(Duration.ofMillis(50)).onExecutor(executor).every(Duration.ofMillis(50))
-                .onResult().mapToResult(l -> System.currentTimeMillis())
+                .onItem().mapToResult(l -> System.currentTimeMillis())
                 .subscribe().withSubscriber(ts);
 
         ts

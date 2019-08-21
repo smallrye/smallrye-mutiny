@@ -20,7 +20,7 @@ public class MultiAssertSubscriber<T> implements Subscriber<T> {
 
     private AtomicLong requested = new AtomicLong();
 
-    private List<T> results = new CopyOnWriteArrayList<>();
+    private List<T> items = new CopyOnWriteArrayList<>();
     private List<Throwable> failures = new CopyOnWriteArrayList<>();
 
     private int numberOfSubscription = 0;
@@ -72,8 +72,8 @@ public class MultiAssertSubscriber<T> implements Subscriber<T> {
         return this;
     }
 
-    public MultiAssertSubscriber<T> assertHasNoResults() {
-        assertThat(results).isEmpty();
+    public MultiAssertSubscriber<T> assertHasNotReceivedAnyItem() {
+        assertThat(items).isEmpty();
         return this;
     }
 
@@ -104,7 +104,7 @@ public class MultiAssertSubscriber<T> implements Subscriber<T> {
 
     @SafeVarargs
     public final MultiAssertSubscriber<T> assertReceived(T... expected) {
-        assertThat(results).containsExactly(expected);
+        assertThat(items).containsExactly(expected);
         return this;
     }
 
@@ -163,7 +163,7 @@ public class MultiAssertSubscriber<T> implements Subscriber<T> {
 
     @Override
     public void onNext(T t) {
-        results.add(t);
+        items.add(t);
     }
 
     @Override
@@ -178,8 +178,8 @@ public class MultiAssertSubscriber<T> implements Subscriber<T> {
         latch.countDown();
     }
 
-    public List<T> results() {
-        return results;
+    public List<T> items() {
+        return items;
     }
 
     public List<Throwable> failures() {

@@ -12,12 +12,12 @@ import java.util.function.Function;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class UniOnResultMapToResult {
+public class UniOnResultMapToItem {
 
 
     @Test(expected = IllegalArgumentException.class)
     public void testThatMapperMustNotBeNull() {
-        Uni.createFrom().result(1).map(null);
+        Uni.createFrom().item(1).map(null);
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -25,7 +25,7 @@ public class UniOnResultMapToResult {
         new UniMapOnResult<>(null, Function.identity());
     }
 
-    private Uni<Integer> one = Uni.createFrom().result(1);
+    private Uni<Integer> one = Uni.createFrom().item(1);
 
     @Test
     public void testSimpleMapping() {
@@ -35,7 +35,7 @@ public class UniOnResultMapToResult {
         one.map(v -> v + 1).subscribe().withSubscriber(ts);
 
         ts.assertCompletedSuccessfully()
-                .assertResult(2);
+                .assertItem(2);
     }
 
     @Test
@@ -50,9 +50,9 @@ public class UniOnResultMapToResult {
         uni.subscribe().withSubscriber(ts2);
 
         ts1.assertCompletedSuccessfully()
-                .assertResult(2);
+                .assertItem(2);
         ts2.assertCompletedSuccessfully()
-                .assertResult(3);
+                .assertItem(3);
     }
 
     @Test
@@ -72,14 +72,14 @@ public class UniOnResultMapToResult {
 
         one.map(v -> null).subscribe().withSubscriber(ts);
 
-        ts.assertCompletedSuccessfully().assertResult(null);
+        ts.assertCompletedSuccessfully().assertItem(null);
     }
 
     @Test
     public void testThatMapperIsCalledWithNull() {
         UniAssertSubscriber<String> ts = UniAssertSubscriber.create();
-        Uni.createFrom().result((String) null).map(x -> "foo").subscribe().withSubscriber(ts);
-        ts.assertCompletedSuccessfully().assertResult("foo");
+        Uni.createFrom().item((String) null).map(x -> "foo").subscribe().withSubscriber(ts);
+        ts.assertCompletedSuccessfully().assertItem("foo");
     }
 
     @Test
@@ -88,15 +88,15 @@ public class UniOnResultMapToResult {
         ExecutorService executor = Executors.newSingleThreadExecutor();
         try {
             AtomicReference<String> threadName = new AtomicReference<>();
-            Uni.createFrom().result(1)
-                    .handleResultOn(executor)
+            Uni.createFrom().item(1)
+                    .receiveItemOn(executor)
                     .map(i -> {
                         threadName.set(Thread.currentThread().getName());
                         return i + 1;
                     })
                     .subscribe().withSubscriber(ts);
 
-            ts.await().assertCompletedSuccessfully().assertResult(2);
+            ts.await().assertCompletedSuccessfully().assertItem(2);
             assertThat(threadName).isNotNull().doesNotHaveValue("main");
             assertThat(ts.getOnResultThreadName()).isEqualTo(threadName.get());
         } finally {

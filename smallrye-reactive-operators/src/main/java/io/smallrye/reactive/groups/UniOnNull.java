@@ -10,18 +10,18 @@ import static io.smallrye.reactive.helpers.ParameterValidation.SUPPLIER_PRODUCED
 import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
 
 
-public class UniOnNullResult<T> {
+public class UniOnNull<T> {
 
     private final Uni<T> upstream;
 
-    public UniOnNullResult(Uni<T> upstream) {
+    public UniOnNull(Uni<T> upstream) {
         this.upstream = nonNull(upstream, "upstream");
     }
 
     /**
-     * If the current {@link Uni} fires {@code null} as result, the produced {@link Uni} emits the passed failure.
+     * If the current {@link Uni} fires {@code null} as item, the produced {@link Uni} emits the passed failure.
      *
-     * @param failure the exception to fire if the current {@link Uni} fires {@code null} as result.
+     * @param failure the exception to fire if the current {@link Uni} fires {@code null} as item.
      * @return the new {@link Uni}
      */
     public Uni<T> failWith(Throwable failure) {
@@ -30,7 +30,7 @@ public class UniOnNullResult<T> {
     }
 
     /**
-     * If the current {@link Uni} fires {@code null} as result, the produced {@link Uni} emits a failure produced
+     * If the current {@link Uni} fires {@code null} as item, the produced {@link Uni} emits a failure produced
      * using the given {@link Supplier}.
      *
      * @param supplier the supplier to produce the failure, must not be {@code null}, must not produce {@code null}
@@ -39,23 +39,23 @@ public class UniOnNullResult<T> {
     public Uni<T> failWith(Supplier<Throwable> supplier) {
         nonNull(supplier, "supplier");
 
-        return upstream.onResult().mapToUni((result, emitter) -> {
-            if (result != null) {
-                emitter.result(result);
+        return upstream.onItem().mapToUni((item, emitter) -> {
+            if (item != null) {
+                emitter.complete(item);
                 return;
             }
             Throwable throwable;
             try {
                 throwable = supplier.get();
             } catch (Exception e) {
-                emitter.failure(e);
+                emitter.fail(e);
                 return;
             }
 
             if (throwable == null) {
-                emitter.failure(new NullPointerException(SUPPLIER_PRODUCED_NULL));
+                emitter.fail(new NullPointerException(SUPPLIER_PRODUCED_NULL));
             } else {
-                emitter.failure(throwable);
+                emitter.fail(throwable);
             }
         });
     }
@@ -70,7 +70,7 @@ public class UniOnNullResult<T> {
     }
 
     /**
-     * If the current {@link Uni} fires {@code null} as result, the produced {@link Uni} emits the events produced
+     * If the current {@link Uni} fires {@code null} as item, the produced {@link Uni} emits the events produced
      * by the {@link Uni} passed as parameter.
      *
      * @param other the unit to switch to, must not be {@code null}
@@ -81,7 +81,7 @@ public class UniOnNullResult<T> {
     }
 
     /**
-     * If the current {@link Uni} fires {@code null} as result, the produced {@link Uni} emits the events produced
+     * If the current {@link Uni} fires {@code null} as item, the produced {@link Uni} emits the events produced
      * by an {@link Uni} supplied using the passed {@link Supplier}
      *
      * @param supplier the supplier to use to produce the uni, must not be {@code null}, must not return {@code null}s
@@ -90,9 +90,9 @@ public class UniOnNullResult<T> {
     public Uni<T> switchTo(Supplier<Uni<? extends T>> supplier) {
         nonNull(supplier, "supplier");
 
-        return upstream.onResult().mapToUni(res -> {
+        return upstream.onItem().mapToUni(res -> {
             if (res != null) {
-                return Uni.createFrom().result(res);
+                return Uni.createFrom().item(res);
             } else {
                 Uni<? extends T> produced;
                 try {
@@ -112,9 +112,9 @@ public class UniOnNullResult<T> {
     }
 
     /**
-     * Provides a default result if the current {@link Uni} fires {@code null} as result.
+     * Provides a default item if the current {@link Uni} fires {@code null} as item.
      *
-     * @param fallback the default result, must not be {@code null}
+     * @param fallback the default item, must not be {@code null}
      * @return the new {@link Uni}
      */
     public Uni<T> continueWith(T fallback) {
@@ -123,15 +123,15 @@ public class UniOnNullResult<T> {
     }
 
     /**
-     * Provides a default result if the current {@link Uni} fires {@code null} as result.
-     * The new result is supplied by the given {@link Supplier}.
+     * Provides a default item if the current {@link Uni} fires {@code null} as item.
+     * The new item is supplied by the given {@link Supplier}.
      *
-     * @param supplier the supplier to produce the new result, must not be {@code null}, must not produce {@code null}
+     * @param supplier the supplier to produce the new item, must not be {@code null}, must not produce {@code null}
      * @return the new {@link Uni}
      */
     public Uni<T> continueWith(Supplier<? extends T> supplier) {
         nonNull(supplier, "supplier");
-        return upstream.onResult().mapToResult(res -> {
+        return upstream.onItem().mapToItem(res -> {
             if (res != null) {
                 return res;
             }

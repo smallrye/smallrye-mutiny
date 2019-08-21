@@ -16,7 +16,7 @@ import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
  * Allows configuring the action to execute on each type of events emitted by a {@link Uni} or by
  * a {@link io.smallrye.reactive.subscription.UniSubscriber}
  *
- * @param <T> the type of result emitted by the {@link Uni}
+ * @param <T> the type of item emitted by the {@link Uni}
  */
 public class UniOnEvent<T> {
 
@@ -51,10 +51,10 @@ public class UniOnEvent<T> {
     }
 
     /**
-     * Attaches an action that is executed when the {@link Uni} emits a result or a failure or when the subscriber
+     * Attaches an action that is executed when the {@link Uni} emits an item or a failure or when the subscriber
      * cancels the subscription.
      *
-     * @param consumer the consumer receiving the result, the failure and a boolean indicating whether the termination
+     * @param consumer the consumer receiving the item, the failure and a boolean indicating whether the termination
      *                 is due to a cancellation (the 2 first parameters would be {@code null} in this case). Must not
      *                 be {@code null} If the second parameter (the failure) is not {@code null}, the first is
      *                 necessary {@code null} and the third is necessary {@code false} as it indicates a termination
@@ -66,21 +66,21 @@ public class UniOnEvent<T> {
     }
 
     /**
-     * Configures the action to execute when the observed {@link Uni} emits the result (potentially {@code null}).
+     * Configures the action to execute when the observed {@link Uni} emits the item (potentially {@code null}).
      *
      * <p>Examples:</p>
      * <pre>{@code
      * Uni<T> uni = ...;
-     * uni.onResult().mapToResult(x -> ...); // Map to another result
-     * uni.onResult().mapToUni(x -> ...); // Map to another Uni (flatMap)
+     * uni.onItem().mapToItem(x -> ...); // Map to another item
+     * uni.onItem().mapToUni(x -> ...); // Map to another Uni (flatMap)
      * }</pre>
      *
-     * @return the object to configure the action to execute when a result is emitted
-     * @see Uni#onNullResult()
-     * @see Uni#onNoResult()
+     * @return the object to configure the action to execute when an item is emitted
+     * @see Uni#onNull()
+     * @see Uni#onNoItem()
      */
-    public UniOnResult<T> result() {
-        return upstream.onResult();
+    public UniOnItem<T> item() {
+        return upstream.onItem();
     }
 
     /**

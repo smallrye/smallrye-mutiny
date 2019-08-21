@@ -5,33 +5,33 @@ import io.smallrye.reactive.Uni;
 
 /**
  * An object allowing to send signals to the downstream {@link Uni}.
- * {@link Uni} propagates a single result event, once the first is propagated, the others events have no effect.
+ * {@link Uni} propagates a single item event, once the first is propagated, the others events have no effect.
  *
- * @param <T> the expected type of result.
+ * @param <T> the expected type of item.
  */
 public interface UniEmitter<T> {
 
     /**
-     * Emits the {@code result} event downstream with the given (potentially {@code null}) result.
+     * Emits the {@code item} event downstream with the given (potentially {@code null}) item.
      * <p>
-     * Calling this method multiple times or after the {@link #failure(Throwable)} method has no effect.
+     * Calling this method multiple times or after the {@link #fail(Throwable)} method has no effect.
      *
-     * @param result the result, may be {@code null}
+     * @param item the item, may be {@code null}
      */
-    void result(T result);
+    void complete(T item);
 
     /**
      * Emits the {@code failure} event downstream with the given exception.
      * <p>
-     * Calling this method multiple times or after the {@link #result(Object)} method has no effect.
+     * Calling this method multiple times or after the {@link #complete(Object)} method has no effect.
      *
      * @param failure the exception, must not be {@code null}
      */
-    void failure(Throwable failure);
+    void fail(Throwable failure);
 
     /**
      * Attaches a @{code termination} event handler invoked when the downstream {@link UniSubscription} is cancelled,
-     * or when the emitter has emitted either a {@code result} or {@code failure} event.
+     * or when the emitter has emitted either an {@code item} or {@code failure} event.
      * <p>
      * This method allows cleanup resources once the emitter can be disposed (has reached a terminal state).
      *

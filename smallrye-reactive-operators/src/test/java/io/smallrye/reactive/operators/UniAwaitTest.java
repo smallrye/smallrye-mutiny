@@ -18,12 +18,12 @@ public class UniAwaitTest {
 
     @Test(timeout = 1000)
     public void testAwaitingOnAnAlreadyResolvedUni() {
-        assertThat(Uni.createFrom().result(1).await().indefinitely()).isEqualTo(1);
+        assertThat(Uni.createFrom().item(1).await().indefinitely()).isEqualTo(1);
     }
 
     @Test(timeout = 100)
     public void testAwaitingOnAnAlreadyResolvedWitNullUni() {
-        assertThat(Uni.createFrom().nullValue().await().indefinitely()).isNull();
+        assertThat(Uni.createFrom().nullItem().await().indefinitely()).isNull();
     }
 
     @Test(timeout = 100)
@@ -41,14 +41,14 @@ public class UniAwaitTest {
     @Test(timeout = 1000)
     public void testAwaitingOnAnAsyncUni() {
         assertThat(
-                 Uni.createFrom().emitter(emitter -> new Thread(() -> emitter.result(1)).start()).await().indefinitely()
+                 Uni.createFrom().emitter(emitter -> new Thread(() -> emitter.complete(1)).start()).await().indefinitely()
         ).isEqualTo(1);
     }
 
     @Test(timeout = 1000)
     public void testAwaitingOnAnAsyncFailingUni() {
         try {
-             Uni.createFrom().emitter(emitter -> new Thread(() -> emitter.failure(new IOException("boom"))).start()).await().indefinitely();
+             Uni.createFrom().emitter(emitter -> new Thread(() -> emitter.fail(new IOException("boom"))).start()).await().indefinitely();
             fail("Exception expected");
         } catch (CompletionException e) {
             assertThat(e).hasCauseInstanceOf(IOException.class).hasMessageEndingWith("boom");
@@ -57,7 +57,7 @@ public class UniAwaitTest {
 
     @Test(timeout = 100)
     public void testAwaitWithTimeOut() {
-        assertThat(Uni.createFrom().result(1).await().atMost(Duration.ofMillis(1000))).isEqualTo(1);
+        assertThat(Uni.createFrom().item(1).await().atMost(Duration.ofMillis(1000))).isEqualTo(1);
     }
 
     @Test(timeout = 100, expected = TimeoutException.class)
@@ -87,14 +87,14 @@ public class UniAwaitTest {
     @Test
     public void testAwaitAsOptionalWithResult() {
         assertThat(
-                 Uni.createFrom().emitter(emitter -> new Thread(() -> emitter.result(1)).start()).await().asOptional().indefinitely()
+                 Uni.createFrom().emitter(emitter -> new Thread(() -> emitter.complete(1)).start()).await().asOptional().indefinitely()
         ).contains(1);
     }
 
     @Test
     public void testAwaitAsOptionalWithFailure() {
         try {
-             Uni.createFrom().emitter(emitter -> new Thread(() -> emitter.failure(new IOException("boom"))).start())
+             Uni.createFrom().emitter(emitter -> new Thread(() -> emitter.fail(new IOException("boom"))).start())
                     .await().asOptional().indefinitely();
             fail("Exception expected");
         } catch (CompletionException e) {
@@ -105,14 +105,14 @@ public class UniAwaitTest {
     @Test
     public void testAwaitAsOptionalWithNull() {
         assertThat(
-                 Uni.createFrom().emitter(emitter -> new Thread(() -> emitter.result(null)).start()).await().asOptional().indefinitely()
+                 Uni.createFrom().emitter(emitter -> new Thread(() -> emitter.complete(null)).start()).await().asOptional().indefinitely()
         ).isEmpty();
     }
 
     @Test
     public void testAwaitAsOptionalWithTimeout() {
         assertThat(
-                 Uni.createFrom().emitter(emitter -> new Thread(() -> emitter.result(1)).start()).await().asOptional().atMost(Duration.ofMillis(1000))
+                 Uni.createFrom().emitter(emitter -> new Thread(() -> emitter.complete(1)).start()).await().asOptional().atMost(Duration.ofMillis(1000))
         ).contains(1);
     }
 

@@ -15,7 +15,7 @@ import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
  * Allows configuring the action to execute on each type of events emitted by a {@link Multi} or by
  * a {@link org.reactivestreams.Subscriber}
  *
- * @param <T> the type of result emitted by the {@link Multi}
+ * @param <T> the type of item emitted by the {@link Multi}
  */
 public class MultiOnEvent<T> {
 
@@ -71,19 +71,19 @@ public class MultiOnEvent<T> {
     }
 
     /**
-     * Configures the action to execute when the observed {@link Multi} emits the result (potentially {@code null}).
+     * Configures the action to execute when the observed {@link Multi} emits the item (potentially {@code null}).
      *
      * <p>Examples:</p>
      * <pre>{@code
      * Multi<T> multi = ...;
-     * multi.onResult().mapToResult(x -> ...); // Map to another result
-     * multi.onResult().mapToUni(x -> ...); // Map to a multi
+     * multi.onItem().mapToItem(x -> ...); // Map to another item
+     * multi.onItem().mapToUni(x -> ...); // Map to a multi
      * }</pre>
      *
-     * @return the object to configure the action to execute when a result is emitted
+     * @return the object to configure the action to execute when an item is emitted
      */
-    public MultiOnResult<T> result() {
-        return upstream.onResult();
+    public MultiOnItem<T> item() {
+        return upstream.onItem();
     }
 
     /**

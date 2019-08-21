@@ -13,11 +13,11 @@ import java.util.concurrent.atomic.AtomicReference;
 import static org.assertj.core.api.Java6Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
-public class UniOnResultDelayTest {
+public class UniOnItemDelayTest {
 
 
     private ScheduledExecutorService executor = Executors.newScheduledThreadPool(4);
-    private Uni<Void> delayed = Uni.createFrom().nullValue().onResult().delayIt()
+    private Uni<Void> delayed = Uni.createFrom().nullItem().onItem().delayIt()
             .onExecutor(executor)
             .by(Duration.ofMillis(100));
 
@@ -29,32 +29,32 @@ public class UniOnResultDelayTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testWithNullDuration() {
-        Uni.createFrom().result(1).onResult().delayIt().by(null);
+        Uni.createFrom().item(1).onItem().delayIt().by(null);
     }
 
     @Test
     public void testDelayOnResultWithDefaultExecutor() {
         long begin = System.currentTimeMillis();
         UniAssertSubscriber<Void> subscriber = UniAssertSubscriber.create();
-        Uni.createFrom().nullValue().onResult().delayIt()
+        Uni.createFrom().nullItem().onItem().delayIt()
                 .by(Duration.ofMillis(100)).subscribe().withSubscriber(subscriber);
         subscriber.await();
         long end = System.currentTimeMillis();
         assertThat(end - begin).isGreaterThanOrEqualTo(100);
-        subscriber.assertCompletedSuccessfully().assertResult(null);
+        subscriber.assertCompletedSuccessfully().assertItem(null);
         assertThat(subscriber.getOnResultThreadName()).isNotEqualTo(Thread.currentThread().getName());
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testWithNegativeDuration() {
-        Uni.createFrom().result(1).onResult().delayIt()
+        Uni.createFrom().item(1).onItem().delayIt()
                 .onExecutor(executor)
                 .by(Duration.ofDays(-1));
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testWithZeroAsDuration() {
-        Uni.createFrom().result(1).onResult().delayIt()
+        Uni.createFrom().item(1).onItem().delayIt()
                 .onExecutor(executor)
                 .by(Duration.ZERO);
     }
@@ -67,7 +67,7 @@ public class UniOnResultDelayTest {
         subscriber.await();
         long end = System.currentTimeMillis();
         assertThat(end - begin).isGreaterThanOrEqualTo(100);
-        subscriber.assertCompletedSuccessfully().assertResult(null);
+        subscriber.assertCompletedSuccessfully().assertItem(null);
         assertThat(subscriber.getOnResultThreadName()).isNotEqualTo(Thread.currentThread().getName());
     }
 
@@ -75,7 +75,7 @@ public class UniOnResultDelayTest {
     public void testThatDelayDoNotImpactFailures() {
         long begin = System.currentTimeMillis();
         UniAssertSubscriber<Void> subscriber = UniAssertSubscriber.create();
-        Uni.createFrom().<Void>failure(new Exception("boom")).onResult().delayIt()
+        Uni.createFrom().<Void>failure(new Exception("boom")).onItem().delayIt()
                 .onExecutor(executor)
                 .by(Duration.ofMillis(100)).
                 subscribe().withSubscriber(subscriber);
@@ -98,7 +98,7 @@ public class UniOnResultDelayTest {
         };
 
         UniAssertSubscriber<Integer> subscriber = new UniAssertSubscriber<>(true);
-        Uni.createFrom().result(1).onResult().delayIt().onExecutor(executor).by(Duration.ofMillis(100)).subscribe().withSubscriber(subscriber);
+        Uni.createFrom().item(1).onItem().delayIt().onExecutor(executor).by(Duration.ofMillis(100)).subscribe().withSubscriber(subscriber);
         subscriber.assertNotCompleted();
         assertThat(called).isFalse();
     }
@@ -107,7 +107,7 @@ public class UniOnResultDelayTest {
     public void testRejectedScheduling() {
         executor.shutdown();
         UniAssertSubscriber<Integer> subscriber = new UniAssertSubscriber<>();
-        Uni.createFrom().result(1).onResult().delayIt()
+        Uni.createFrom().item(1).onItem().delayIt()
                 .onExecutor(executor)
                 .by(Duration.ofMillis(100)).subscribe().withSubscriber(subscriber);
         subscriber.assertCompletedWithFailure().assertFailure(RejectedExecutionException.class, "");
@@ -137,7 +137,7 @@ public class UniOnResultDelayTest {
         };
 
         UniAssertSubscriber<Integer> subscriber = new UniAssertSubscriber<>();
-        Uni.createFrom().result(1).onResult().delayIt()
+        Uni.createFrom().item(1).onItem().delayIt()
                 .onExecutor(executor)
                 .by(Duration.ofMillis(100)).subscribe().withSubscriber(subscriber);
         subscriber.cancel();
@@ -151,20 +151,20 @@ public class UniOnResultDelayTest {
     public void testWithMultipleDelays() {
         AtomicLong counter = new AtomicLong();
         AtomicReference<Throwable> failure = new AtomicReference<>();
-        Uni.createFrom().nullValue().onResult().delayIt()
+        Uni.createFrom().nullItem().onItem().delayIt()
                 .onExecutor(executor)
                 .by(Duration.ofMillis(50))
                 .subscribe().with(v -> counter.incrementAndGet(), failure::set);
 
-        Uni.createFrom().nullValue().onResult().delayIt()
+        Uni.createFrom().nullItem().onItem().delayIt()
                 .onExecutor(executor)
                 .by(Duration.ofMillis(200))
                 .subscribe().with(v -> counter.incrementAndGet(), failure::set);
-        Uni.createFrom().nullValue().onResult().delayIt()
+        Uni.createFrom().nullItem().onItem().delayIt()
                 .onExecutor(executor)
                 .by(Duration.ofMillis(400))
                 .subscribe().with(v -> counter.incrementAndGet(), failure::set);
-        Uni.createFrom().nullValue().onResult().delayIt()
+        Uni.createFrom().nullItem().onItem().delayIt()
                 .onExecutor(executor)
                 .by(Duration.ofMillis(800)).subscribe().with(v -> counter.incrementAndGet(), failure::set);
 

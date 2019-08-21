@@ -11,39 +11,39 @@ import java.util.function.Supplier;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
-public class UniOnNullResultFailTest {
+public class UniOnNullFailTest {
 
 
     @Test(expected = NoSuchElementException.class)
     public void testFail() {
-        Uni.createFrom().nullValue()
-                .onNullResult().fail().await().indefinitely();
+        Uni.createFrom().nullItem()
+                .onNull().fail().await().indefinitely();
     }
 
     @Test
     public void testFailNotCalledOnResult() {
-        assertThat(Uni.createFrom().result(1).onNullResult().fail().await().indefinitely()).isEqualTo(1);
+        assertThat(Uni.createFrom().item(1).onNull().fail().await().indefinitely()).isEqualTo(1);
     }
 
     @Test(expected = RuntimeException.class)
     public void testFailWithException() {
-        Uni.createFrom().nullValue().onNullResult().failWith(new RuntimeException("boom")).await().indefinitely();
+        Uni.createFrom().nullItem().onNull().failWith(new RuntimeException("boom")).await().indefinitely();
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testFailWithExceptionSetToNull() {
-        Uni.createFrom().nullValue().onNullResult().failWith((Exception) null).await().indefinitely();
+        Uni.createFrom().nullItem().onNull().failWith((Exception) null).await().indefinitely();
     }
 
     @Test
     public void testFailWithExceptionNotCalledOnResult() {
-        assertThat(Uni.createFrom().result(1).onNullResult().failWith(new IOException("boom")).await().indefinitely()).isEqualTo(1);
+        assertThat(Uni.createFrom().item(1).onNull().failWith(new IOException("boom")).await().indefinitely()).isEqualTo(1);
     }
 
     @Test
     public void testFailWithExceptionSupplier() {
         AtomicInteger count = new AtomicInteger();
-        Uni<Void> boom = Uni.createFrom().nullValue().onNullResult().failWith(() -> new RuntimeException(Integer.toString(count.incrementAndGet())));
+        Uni<Void> boom = Uni.createFrom().nullItem().onNull().failWith(() -> new RuntimeException(Integer.toString(count.incrementAndGet())));
 
         assertThatExceptionOfType(RuntimeException.class).isThrownBy(() -> boom.await().indefinitely()).withMessageEndingWith("1");
         assertThatExceptionOfType(RuntimeException.class).isThrownBy(() -> boom.await().indefinitely()).withMessageEndingWith("2");
@@ -51,12 +51,12 @@ public class UniOnNullResultFailTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testFailWithExceptionSupplierSetToNull() {
-        Uni.createFrom().nullValue().onNullResult().failWith((Supplier<Throwable>) null).await().indefinitely();
+        Uni.createFrom().nullItem().onNull().failWith((Supplier<Throwable>) null).await().indefinitely();
     }
 
     @Test
     public void testFailWithExceptionSupplierNotCalledOnResult() {
-        assertThat(Uni.createFrom().result(1).onNullResult().failWith(new IOException("boom")).await().indefinitely()).isEqualTo(1);
+        assertThat(Uni.createFrom().item(1).onNull().failWith(new IOException("boom")).await().indefinitely()).isEqualTo(1);
     }
 
 

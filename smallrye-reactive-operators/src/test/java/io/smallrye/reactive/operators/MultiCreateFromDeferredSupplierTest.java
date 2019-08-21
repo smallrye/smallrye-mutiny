@@ -20,7 +20,7 @@ public class MultiCreateFromDeferredSupplierTest {
 
         ts
                 .assertHasNotCompleted()
-                .assertHasNoResults()
+                .assertHasNotReceivedAnyItem()
                 .assertHasFailedWith(NullPointerException.class, "");
     }
 
@@ -34,7 +34,7 @@ public class MultiCreateFromDeferredSupplierTest {
 
         ts
                 .assertHasNotCompleted()
-                .assertHasNoResults()
+                .assertHasNotReceivedAnyItem()
                 .assertHasFailedWith(IllegalStateException.class, "boom");
     }
 
@@ -42,7 +42,7 @@ public class MultiCreateFromDeferredSupplierTest {
     public void testWithASupplierProducingOne() {
         MultiAssertSubscriber<Integer> ts = MultiAssertSubscriber.create(1);
 
-        Multi.createFrom().deferred(() -> Multi.createFrom().result(1)).subscribe(ts);
+        Multi.createFrom().deferred(() -> Multi.createFrom().item(1)).subscribe(ts);
 
         ts.assertCompletedSuccessfully()
                 .assertReceived(1)
@@ -55,7 +55,7 @@ public class MultiCreateFromDeferredSupplierTest {
         AtomicInteger count = new AtomicInteger();
 
         Multi<Integer> multi =
-                Multi.createFrom().deferred(() -> Multi.createFrom().result(count.incrementAndGet()));
+                Multi.createFrom().deferred(() -> Multi.createFrom().item(count.incrementAndGet()));
 
         MultiAssertSubscriber<Integer> s1 = multi.subscribe().withSubscriber(MultiAssertSubscriber.create(1));
         MultiAssertSubscriber<Integer> s2 = multi.subscribe().withSubscriber(MultiAssertSubscriber.create(1));

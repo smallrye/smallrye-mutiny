@@ -14,9 +14,9 @@ public class MultiCreateFromResultsTest {
 
     @Test
     public void testCreationWithASingleResult() {
-        Multi<Integer> multi = Multi.createFrom().result(1);
+        Multi<Integer> multi = Multi.createFrom().item(1);
         multi.subscribe().withSubscriber(MultiAssertSubscriber.create())
-                .assertHasNoResults()
+                .assertHasNotReceivedAnyItem()
                 .assertSubscribed()
                 .request(1)
                 .assertCompletedSuccessfully()
@@ -25,9 +25,9 @@ public class MultiCreateFromResultsTest {
 
     @Test
     public void testCreationWithASingleNullResult() {
-        Multi<String> multi = Multi.createFrom().result((String) null);
+        Multi<String> multi = Multi.createFrom().item((String) null);
         multi.subscribe().withSubscriber(MultiAssertSubscriber.create())
-                .assertHasNoResults()
+                .assertHasNotReceivedAnyItem()
                 .assertSubscribed()
                 .assertCompletedSuccessfully();
     }
@@ -35,10 +35,10 @@ public class MultiCreateFromResultsTest {
     @Test
     public void testCreationWithASingleResultProducedBySupplier() {
         AtomicInteger count = new AtomicInteger();
-        Multi<Integer> multi = Multi.createFrom().result(count::incrementAndGet);
+        Multi<Integer> multi = Multi.createFrom().item(count::incrementAndGet);
         assertThat(count).hasValue(0);
         multi.subscribe().withSubscriber(MultiAssertSubscriber.create())
-                .assertHasNoResults()
+                .assertHasNotReceivedAnyItem()
                 .assertSubscribed()
                 .run(() -> assertThat(count).hasValue(1)) // The supplier is called at subscription time
                 .request(1)
@@ -46,7 +46,7 @@ public class MultiCreateFromResultsTest {
                 .assertReceived(1);
 
         multi.subscribe().withSubscriber(MultiAssertSubscriber.create())
-                .assertHasNoResults()
+                .assertHasNotReceivedAnyItem()
                 .assertSubscribed()
                 .request(1)
                 .assertCompletedSuccessfully()
@@ -55,28 +55,28 @@ public class MultiCreateFromResultsTest {
 
     @Test
     public void testCreationWithNullProducedBySupplier() {
-        Multi<Integer> multi = Multi.createFrom().result(() -> null);
+        Multi<Integer> multi = Multi.createFrom().item(() -> null);
         multi.subscribe().withSubscriber(MultiAssertSubscriber.create())
-                .assertHasNoResults()
+                .assertHasNotReceivedAnyItem()
                 .assertSubscribed()
                 .assertCompletedSuccessfully();
     }
 
     @Test
     public void testCreationWithExceptionThrownBySupplier() {
-        Multi<Integer> multi = Multi.createFrom().result(() -> {
+        Multi<Integer> multi = Multi.createFrom().item(() -> {
             throw new IllegalStateException("boom");
         });
         multi.subscribe().withSubscriber(MultiAssertSubscriber.create())
-                .assertHasNoResults()
+                .assertHasNotReceivedAnyItem()
                 .assertHasFailedWith(IllegalStateException.class, "boom");
     }
 
     @Test
     public void testCreationFromAStream() {
-        Multi<Integer> multi = Multi.createFrom().results(Stream.of(1, 2, 3));
+        Multi<Integer> multi = Multi.createFrom().items(Stream.of(1, 2, 3));
         multi.subscribe().withSubscriber(MultiAssertSubscriber.create())
-                .assertHasNoResults()
+                .assertHasNotReceivedAnyItem()
                 .assertSubscribed()
                 .request(1)
                 .assertReceived(1)
@@ -88,9 +88,9 @@ public class MultiCreateFromResultsTest {
     @Test
     public void testCreationFromAStreamSupplier() {
         AtomicInteger count = new AtomicInteger();
-        Multi<Integer> multi = Multi.createFrom().results(() -> Stream.of(1, 2, count.incrementAndGet()));
+        Multi<Integer> multi = Multi.createFrom().items(() -> Stream.of(1, 2, count.incrementAndGet()));
         multi.subscribe().withSubscriber(MultiAssertSubscriber.create())
-                .assertHasNoResults()
+                .assertHasNotReceivedAnyItem()
                 .assertSubscribed()
                 .request(1)
                 .assertReceived(1)
@@ -99,7 +99,7 @@ public class MultiCreateFromResultsTest {
                 .assertCompletedSuccessfully();
 
         multi.subscribe().withSubscriber(MultiAssertSubscriber.create())
-                .assertHasNoResults()
+                .assertHasNotReceivedAnyItem()
                 .assertSubscribed()
                 .request(1)
                 .assertReceived(1)
@@ -110,46 +110,46 @@ public class MultiCreateFromResultsTest {
 
     @Test
     public void testCreationFromAnEmptyStream() {
-        Multi<Integer> multi = Multi.createFrom().results(Stream.of());
+        Multi<Integer> multi = Multi.createFrom().items(Stream.of());
         multi.subscribe().withSubscriber(MultiAssertSubscriber.create())
-                .assertHasNoResults()
+                .assertHasNotReceivedAnyItem()
                 .assertSubscribed()
                 .assertCompletedSuccessfully();
     }
 
     @Test
     public void testCreationFromAnEmptyStreamSupplier() {
-        Multi<Integer> multi = Multi.createFrom().results(Stream::empty);
+        Multi<Integer> multi = Multi.createFrom().items(Stream::empty);
         multi.subscribe().withSubscriber(MultiAssertSubscriber.create())
-                .assertHasNoResults()
+                .assertHasNotReceivedAnyItem()
                 .assertSubscribed()
                 .assertCompletedSuccessfully();
         multi.subscribe().withSubscriber(MultiAssertSubscriber.create())
-                .assertHasNoResults()
+                .assertHasNotReceivedAnyItem()
                 .assertSubscribed()
                 .assertCompletedSuccessfully();
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testCreationFromANullStream() {
-        Multi.createFrom().results((Stream<Integer>) null);
+        Multi.createFrom().items((Stream<Integer>) null);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testCreationFromANullStreamSupplier() {
-        Multi.createFrom().results((Supplier<Stream<Integer>>) null);
+        Multi.createFrom().items((Supplier<Stream<Integer>>) null);
     }
 
     @Test
     public void testCreationFromAStreamSupplierProducingNull() {
-        Multi<Integer> multi = Multi.createFrom().results((Supplier<Stream<Integer>>) () -> null);
+        Multi<Integer> multi = Multi.createFrom().items((Supplier<Stream<Integer>>) () -> null);
         multi.subscribe().withSubscriber(MultiAssertSubscriber.create())
                 .assertHasFailedWith(NullPointerException.class, "supplier");
     }
 
     @Test
     public void testCreationFromAStreamSupplierThrowingAnException() {
-        Multi<Integer> multi = Multi.createFrom().results((Supplier<Stream<Integer>>) () -> {
+        Multi<Integer> multi = Multi.createFrom().items((Supplier<Stream<Integer>>) () -> {
             throw new IllegalStateException("boom");
         });
         multi.subscribe().withSubscriber(MultiAssertSubscriber.create())
@@ -158,9 +158,9 @@ public class MultiCreateFromResultsTest {
 
     @Test
     public void testCreationFromResults() {
-        Multi<Integer> multi = Multi.createFrom().results(1, 2, 3);
+        Multi<Integer> multi = Multi.createFrom().items(1, 2, 3);
         multi.subscribe().withSubscriber(MultiAssertSubscriber.create())
-                .assertHasNoResults()
+                .assertHasNotReceivedAnyItem()
                 .assertSubscribed()
                 .request(2)
                 .assertReceived(1, 2)
@@ -171,9 +171,9 @@ public class MultiCreateFromResultsTest {
 
     @Test
     public void testCreationFromResultsContainingNull() {
-        Multi<Integer> multi = Multi.createFrom().results(1, null, 3);
+        Multi<Integer> multi = Multi.createFrom().items(1, null, 3);
         multi.subscribe().withSubscriber(MultiAssertSubscriber.create())
-                .assertHasNoResults()
+                .assertHasNotReceivedAnyItem()
                 .assertSubscribed()
                 .request(2)
                 .assertReceived(1)
@@ -182,14 +182,14 @@ public class MultiCreateFromResultsTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testCreationFromResultsWithNull() {
-        Multi.createFrom().results((Integer[]) null);
+        Multi.createFrom().items((Integer[]) null);
     }
 
     @Test
     public void testCreationFromIterable() {
         Multi<Integer> multi = Multi.createFrom().iterable(Arrays.asList(1, 2, 3));
         multi.subscribe().withSubscriber(MultiAssertSubscriber.create())
-                .assertHasNoResults()
+                .assertHasNotReceivedAnyItem()
                 .assertSubscribed()
                 .request(2)
                 .assertReceived(1, 2)
@@ -207,7 +207,7 @@ public class MultiCreateFromResultsTest {
     public void testCreationFromIterableContainingNull() {
         Multi<Integer> multi = Multi.createFrom().iterable(Arrays.asList(1, null, 3));
         multi.subscribe().withSubscriber(MultiAssertSubscriber.create())
-                .assertHasNoResults()
+                .assertHasNotReceivedAnyItem()
                 .assertSubscribed()
                 .request(2)
                 .assertReceived(1)

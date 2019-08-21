@@ -20,7 +20,7 @@ public class UniAdaptToTest {
 
     @Test
     public void testCreatingACompletable() {
-        Completable completable = Uni.createFrom().result(1).adapt().to(Completable.class);
+        Completable completable = Uni.createFrom().item(1).adapt().to(Completable.class);
         assertThat(completable).isNotNull();
         completable.test().assertComplete();
     }
@@ -30,7 +30,7 @@ public class UniAdaptToTest {
         AtomicBoolean called = new AtomicBoolean();
         Completable completable =  Uni.createFrom().deferred(() -> {
             called.set(true);
-            return Uni.createFrom().result(2);
+            return Uni.createFrom().item(2);
         }).adapt().to(Completable.class);
 
         assertThat(completable).isNotNull();
@@ -41,7 +41,7 @@ public class UniAdaptToTest {
 
     @Test
     public void testCreatingACompletableFromVoid() {
-        Completable completable = Uni.createFrom().nullValue().adapt().to(Completable.class);
+        Completable completable = Uni.createFrom().nullItem().adapt().to(Completable.class);
         assertThat(completable).isNotNull();
         completable.test().assertComplete();
     }
@@ -59,7 +59,7 @@ public class UniAdaptToTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testCreatingASingle() {
-        Single<Integer> single = Uni.createFrom().result(1).adapt().to(Single.class);
+        Single<Integer> single = Uni.createFrom().item(1).adapt().to(Single.class);
         assertThat(single).isNotNull();
         single.test()
                 .assertValue(1)
@@ -69,7 +69,7 @@ public class UniAdaptToTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testCreatingASingleFromNull() {
-        Single<Integer> single = Uni.createFrom().nullValue().adapt().to(Single.class);
+        Single<Integer> single = Uni.createFrom().nullItem().adapt().to(Single.class);
         assertThat(single).isNotNull();
         single
                 .test()
@@ -90,7 +90,7 @@ public class UniAdaptToTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testCreatingAMaybe() {
-        Maybe<Integer> maybe = Uni.createFrom().result(1).adapt().to(Maybe.class);
+        Maybe<Integer> maybe = Uni.createFrom().item(1).adapt().to(Maybe.class);
         assertThat(maybe).isNotNull();
         maybe.test()
                 .assertValue(1)
@@ -100,7 +100,7 @@ public class UniAdaptToTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testCreatingAMaybeFromNull() {
-        Maybe<Integer> maybe = Uni.createFrom().nullValue().adapt().to(Maybe.class);
+        Maybe<Integer> maybe = Uni.createFrom().nullItem().adapt().to(Maybe.class);
         assertThat(maybe).isNotNull();
         maybe
                 .test()
@@ -122,7 +122,7 @@ public class UniAdaptToTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testCreatingAnObservable() {
-        Observable<Integer> observable = Uni.createFrom().result(1).adapt().to(Observable.class);
+        Observable<Integer> observable = Uni.createFrom().item(1).adapt().to(Observable.class);
         assertThat(observable).isNotNull();
         observable.test()
                 .assertValue(1)
@@ -132,7 +132,7 @@ public class UniAdaptToTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testCreatingAnObservableFromNull() {
-        Observable<Integer> observable = Uni.createFrom().nullValue().adapt().to(Observable.class);
+        Observable<Integer> observable = Uni.createFrom().nullItem().adapt().to(Observable.class);
         assertThat(observable).isNotNull();
         observable
                 .test()
@@ -154,7 +154,7 @@ public class UniAdaptToTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testCreatingAFlowable() {
-        Flowable<Integer> flowable = Uni.createFrom().result(1).adapt().to(Flowable.class);
+        Flowable<Integer> flowable = Uni.createFrom().item(1).adapt().to(Flowable.class);
         assertThat(flowable).isNotNull();
         flowable.test()
                 .assertValue(1)
@@ -167,7 +167,7 @@ public class UniAdaptToTest {
         AtomicBoolean called = new AtomicBoolean();
         Flowable<Integer> flowable =  Uni.createFrom().deferred(() -> {
             called.set(true);
-            return Uni.createFrom().result(1);
+            return Uni.createFrom().item(1);
         }).adapt().to(Flowable.class);
         assertThat(flowable).isNotNull();
         TestSubscriber<Integer> test = flowable.test(0);
@@ -181,7 +181,7 @@ public class UniAdaptToTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testCreatingAFlowableFromNull() {
-        Flowable<Integer> flowable = Uni.createFrom().nullValue().adapt().to(Flowable.class);
+        Flowable<Integer> flowable = Uni.createFrom().nullItem().adapt().to(Flowable.class);
         assertThat(flowable).isNotNull();
         flowable
                 .test()
@@ -203,7 +203,7 @@ public class UniAdaptToTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testCreatingAFlux() {
-        Flux<Integer> flux = Uni.createFrom().result(1).adapt().to(Flux.class);
+        Flux<Integer> flux = Uni.createFrom().item(1).adapt().to(Flux.class);
         assertThat(flux).isNotNull();
         assertThat(flux.blockFirst()).isEqualTo(1);
     }
@@ -211,7 +211,7 @@ public class UniAdaptToTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testCreatingAFluxFromNull() {
-        Flux<Integer> flux = Uni.createFrom().nullValue().adapt().to(Flux.class);
+        Flux<Integer> flux = Uni.createFrom().nullItem().adapt().to(Flux.class);
         assertThat(flux).isNotNull();
         assertThat(flux.blockFirst()).isNull();
     }
@@ -232,7 +232,7 @@ public class UniAdaptToTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testCreatingAMono() {
-        Mono<Integer> mono = Uni.createFrom().result(1).adapt().to(Mono.class);
+        Mono<Integer> mono = Uni.createFrom().item(1).adapt().to(Mono.class);
         assertThat(mono).isNotNull();
         assertThat(mono.block()).isEqualTo(1);
     }
@@ -240,7 +240,7 @@ public class UniAdaptToTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testCreatingAMonoFromNull() {
-        Mono<Integer> mono = Uni.createFrom().nullValue().adapt().to(Mono.class);
+        Mono<Integer> mono = Uni.createFrom().nullItem().adapt().to(Mono.class);
         assertThat(mono).isNotNull();
         assertThat(mono.block()).isNull();
     }
@@ -261,8 +261,8 @@ public class UniAdaptToTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testCreatingCompletionStages() {
-        Uni<Integer> valued = Uni.createFrom().result(1);
-        Uni<Void> empty = Uni.createFrom().nullValue();
+        Uni<Integer> valued = Uni.createFrom().item(1);
+        Uni<Void> empty = Uni.createFrom().nullItem();
         Uni<Void> failure = Uni.createFrom().failure(new Exception("boom"));
 
         CompletionStage<Integer> stage1 = valued.adapt().to(CompletionStage.class);
@@ -277,8 +277,8 @@ public class UniAdaptToTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testCreatingCompletableFutures() {
-        Uni<Integer> valued = Uni.createFrom().result(1);
-        Uni<Void> empty = Uni.createFrom().nullValue();
+        Uni<Integer> valued = Uni.createFrom().item(1);
+        Uni<Void> empty = Uni.createFrom().nullItem();
         Uni<Void> failure = Uni.createFrom().failure(new Exception("boom"));
 
         CompletableFuture<Integer> stage1 = valued.adapt().to(CompletableFuture.class);

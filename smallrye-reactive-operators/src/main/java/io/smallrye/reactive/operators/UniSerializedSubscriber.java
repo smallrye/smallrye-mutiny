@@ -30,7 +30,7 @@ public class UniSerializedSubscriber<T> implements UniSubscriber<T>, UniSubscrip
         this.downstream = nonNull(subscriber, "subscriber` must not be `null`");
     }
 
-    // TODO Caught RuntimeException thrown by the onResult and onFailure and log them accordingly
+    // TODO Caught RuntimeException thrown by the onItem and onFailure and log them accordingly
 
     public static <T> void subscribe(AbstractUni<T> source, UniSubscriber<? super T> subscriber) {
         UniSerializedSubscriber<T> wrapped = new UniSerializedSubscriber<>(source, subscriber);
@@ -65,9 +65,9 @@ public class UniSerializedSubscriber<T> implements UniSubscriber<T>, UniSubscrip
     }
 
     @Override
-    public void onResult(T result) {
+    public void onItem(T item) {
         if (state.compareAndSet(HAS_SUBSCRIPTION, DONE)) {
-            downstream.onResult(result);
+            downstream.onItem(item);
             dispose();
         } else if (state.get() != DONE) { // Are we already done? In this case, drop the signal
             propagateFailureEvent(this.downstream,

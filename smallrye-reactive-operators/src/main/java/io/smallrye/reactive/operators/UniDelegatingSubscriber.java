@@ -21,8 +21,8 @@ public class UniDelegatingSubscriber<I, O> implements UniSubscriber<I> {
 
     @SuppressWarnings("unchecked")
     @Override
-    public void onResult(I result) {
-        delegate.onResult((O) result);
+    public void onItem(I item) {
+        delegate.onItem((O) item);
     }
 
     @Override

@@ -23,7 +23,7 @@ public class UniCreateWithEmitter<T> extends AbstractUni<T> {
         } catch (RuntimeException e) {
             // we use the emitter to be sure that if the failure happens after the first event being fired, it
             // will be dropped.
-            emitter.failure(e);
+            emitter.fail(e);
         }
     }
 }

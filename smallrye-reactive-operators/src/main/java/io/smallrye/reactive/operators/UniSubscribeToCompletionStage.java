@@ -38,9 +38,9 @@ public class UniSubscribeToCompletionStage {
             }
 
             @Override
-            public void onResult(T result) {
+            public void onItem(T item) {
                 if (ref.getAndSet(CANCELLED) != CANCELLED) {
-                    future.complete(result);
+                    future.complete(item);
                 }
             }
 

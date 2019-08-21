@@ -12,7 +12,6 @@ import org.reactivestreams.Subscription;
 
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
-import java.util.function.UnaryOperator;
 
 import static io.smallrye.reactive.helpers.EmptyUniSubscription.CANCELLED;
 
@@ -57,9 +56,9 @@ public abstract class AbstractMulti<T> implements Multi<T> {
             }
 
             @Override
-            public void onNext(T result) {
+            public void onNext(T item) {
                 try {
-                    subscriber.onNext(result);
+                    subscriber.onNext(item);
                 } catch (Exception e) {
                     Subscription subscription = reference.getAndSet(CANCELLED);
                     if (subscription != null) {
@@ -95,8 +94,8 @@ public abstract class AbstractMulti<T> implements Multi<T> {
     }
 
     @Override
-    public MultiOnResult<T> onResult() {
-        return new MultiOnResult<>(this);
+    public MultiOnItem<T> onItem() {
+        return new MultiOnItem<>(this);
     }
 
     @Override

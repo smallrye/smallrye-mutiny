@@ -67,13 +67,13 @@ public class UniFailOnTimeout<I> extends UniOperator<I, I> {
             }
 
             @Override
-            public void onResult(I result) {
+            public void onItem(I item) {
                 if (doneOrCancelled.compareAndSet(false, true)) {
                     ScheduledFuture<?> future = task.getAndSet(null);
                     if (future != null) {
                         future.cancel(false);
                     }
-                    subscriber.onResult(result);
+                    subscriber.onItem(item);
                 }
             }
 

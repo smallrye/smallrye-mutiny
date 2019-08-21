@@ -21,7 +21,7 @@ public class UniCreateFromCompletionStageTest {
         CompletionStage<String> cs = new CompletableFuture<>();
         Uni.createFrom().completionStage(cs).subscribe().withSubscriber(ts);
         cs.toCompletableFuture().complete(null);
-        ts.assertCompletedSuccessfully().assertResult(null);
+        ts.assertCompletedSuccessfully().assertItem(null);
     }
 
 
@@ -31,7 +31,7 @@ public class UniCreateFromCompletionStageTest {
         CompletionStage<String> cs = new CompletableFuture<>();
         Uni.createFrom().completionStage(cs).subscribe().withSubscriber(ts);
         cs.toCompletableFuture().complete("1");
-        ts.assertCompletedSuccessfully().assertResult("1");
+        ts.assertCompletedSuccessfully().assertItem("1");
     }
 
 
@@ -48,7 +48,7 @@ public class UniCreateFromCompletionStageTest {
     public void testThatNullValueAreAcceptedWithSupplier() {
         UniAssertSubscriber<Void> ts = UniAssertSubscriber.create();
         Uni.createFrom().<Void>completionStage(() -> CompletableFuture.completedFuture(null)).subscribe().withSubscriber(ts);
-        ts.assertCompletedSuccessfully().assertResult(null);
+        ts.assertCompletedSuccessfully().assertItem(null);
     }
 
 
@@ -58,7 +58,7 @@ public class UniCreateFromCompletionStageTest {
         CompletionStage<String> cs = new CompletableFuture<>();
         Uni.createFrom().completionStage(() -> cs).subscribe().withSubscriber(ts);
         cs.toCompletableFuture().complete("1");
-        ts.assertCompletedSuccessfully().assertResult("1");
+        ts.assertCompletedSuccessfully().assertItem("1");
     }
 
 
@@ -78,12 +78,12 @@ public class UniCreateFromCompletionStageTest {
         CompletableFuture<Integer> cs = new CompletableFuture<>();
         cs.complete(1);
         Uni<Integer> uni = Uni.createFrom().completionStage(cs)
-                .onResult().consume(i -> called.set(true));
+                .onItem().consume(i -> called.set(true));
 
         assertThat(called).isFalse();
 
         uni.subscribe().withSubscriber(ts);
-        ts.assertCompletedSuccessfully().assertResult(1);
+        ts.assertCompletedSuccessfully().assertItem(1);
         assertThat(called).isTrue();
     }
 
@@ -97,7 +97,7 @@ public class UniCreateFromCompletionStageTest {
             called.set(true);
             return cs;
         })
-                .onResult().consume(i -> called.set(true));
+                .onItem().consume(i -> called.set(true));
 
         assertThat(called).isFalse();
 
@@ -106,7 +106,7 @@ public class UniCreateFromCompletionStageTest {
         assertThat(called).isFalse();
 
         uni.subscribe().withSubscriber(ts);
-        ts.assertCompletedSuccessfully().assertResult(1);
+        ts.assertCompletedSuccessfully().assertItem(1);
         assertThat(called).isTrue();
     }
 
@@ -116,7 +116,7 @@ public class UniCreateFromCompletionStageTest {
         AtomicBoolean called = new AtomicBoolean();
         CompletableFuture<Integer> cs = new CompletableFuture<>();
         Uni<Integer> uni = Uni.createFrom().completionStage(cs)
-                .onResult().consume(i -> called.set(true));
+                .onItem().consume(i -> called.set(true));
 
         assertThat(called).isFalse();
         uni.subscribe().withSubscriber(ts);
@@ -130,7 +130,7 @@ public class UniCreateFromCompletionStageTest {
         AtomicBoolean called = new AtomicBoolean();
         CompletableFuture<Integer> cs = new CompletableFuture<>();
         Uni<Integer> uni = Uni.createFrom().completionStage(() -> cs)
-                .onResult().consume(i -> called.set(true));
+                .onItem().consume(i -> called.set(true));
 
         assertThat(called).isFalse();
         uni.subscribe().withSubscriber(ts);
@@ -143,7 +143,7 @@ public class UniCreateFromCompletionStageTest {
         UniAssertSubscriber<Integer> ts = UniAssertSubscriber.create();
         CompletableFuture<Integer> cs = new CompletableFuture<>();
         Uni<Integer> uni = Uni.createFrom().completionStage(cs)
-                .onResult().consume(i -> {});
+                .onItem().consume(i -> {});
 
         uni.subscribe().withSubscriber(ts);
         ts.cancel();
@@ -171,13 +171,13 @@ public class UniCreateFromCompletionStageTest {
         UniAssertSubscriber<Integer> ts = UniAssertSubscriber.create();
         CompletableFuture<Integer> cs = new CompletableFuture<>();
         Uni<Integer> uni = Uni.createFrom().completionStage(cs)
-                .onResult().consume(i -> called.set(true));
+                .onItem().consume(i -> called.set(true));
 
         uni.subscribe().withSubscriber(ts);
         cs.complete(1);
         ts.cancel();
         assertThat(called).isTrue();
-        ts.assertResult(1);
+        ts.assertItem(1);
     }
 
     @Test
@@ -190,7 +190,7 @@ public class UniCreateFromCompletionStageTest {
         cs.complete(1);
         ts.cancel();
 
-        ts.assertResult(1);
+        ts.assertItem(1);
     }
 
     @Test(expected = IllegalArgumentException.class)

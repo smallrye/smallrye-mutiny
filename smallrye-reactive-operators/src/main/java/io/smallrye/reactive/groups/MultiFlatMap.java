@@ -11,7 +11,7 @@ import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
 /**
  * Configures a flatMap operator.
  *
- * @param <I> the type of result emitted by the upstream {@link Multi}.
+ * @param <I> the type of item emitted by the upstream {@link Multi}.
  */
 public class MultiFlatMap<I> {
 
@@ -23,10 +23,10 @@ public class MultiFlatMap<I> {
 
     /**
      * Configures the <em>mapper</em> of the <em>flatMap</em> operation.
-     * The mapper returns a {@link Multi multi} and is called for each result emitted by the upstream {@link Multi}.
+     * The mapper returns a {@link Multi multi} and is called for each item emitted by the upstream {@link Multi}.
      *
      * @param mapper the mapper, must not be {@code null}, must not produce {@link null}
-     * @param <O>    the type of result emitted by the {@link Multi} produced by the mapper.
+     * @param <O>    the type of item emitted by the {@link Multi} produced by the mapper.
      * @return the object to configure the flatten behavior.
      */
     public <O> MultiFlatten<I, O> multi(Function<? super I, ? extends Publisher<? extends O>> mapper) {
@@ -35,10 +35,10 @@ public class MultiFlatMap<I> {
 
     /**
      * Configures the <em>mapper</em> of the <em>flatMap</em> operation.
-     * The mapper returns a {@link Publisher publisher} and is called for each result emitted by the upstream {@link Multi}.
+     * The mapper returns a {@link Publisher publisher} and is called for each item emitted by the upstream {@link Multi}.
      *
      * @param mapper the mapper, must not be {@code null}, must not produce {@link null}
-     * @param <O>    the type of result emitted by the {@link Publisher} produced by the mapper.
+     * @param <O>    the type of item emitted by the {@link Publisher} produced by the mapper.
      * @return the object to configure the flatten behavior.
      */
     public <O> MultiFlatten<I, O> publisher(Function<? super I, ? extends Publisher<? extends O>> mapper) {
@@ -47,10 +47,10 @@ public class MultiFlatMap<I> {
 
     /**
      * Configures the <em>mapper</em> of the <em>flatMap</em> operation.
-     * The mapper returns a {@link Iterable iterable} and is called for each result emitted by the upstream {@link Multi}.
+     * The mapper returns a {@link Iterable iterable} and is called for each item emitted by the upstream {@link Multi}.
      *
      * @param mapper the mapper, must not be {@code null}, must not produce {@link null}
-     * @param <O>    the type of result contained by the {@link Iterable} produced by the mapper.
+     * @param <O>    the type of item contained by the {@link Iterable} produced by the mapper.
      * @return the object to configure the flatten behavior.
      */
     public <O> MultiFlatten<I, O> iterable(Function<? super I, ? extends Iterable<? extends O>> mapper) {
@@ -60,10 +60,10 @@ public class MultiFlatMap<I> {
 
     /**
      * Configures the <em>mapper</em> of the <em>flatMap</em> operation.
-     * The mapper returns a {@link Uni uni} and is called for each result emitted by the upstream {@link Multi}.
+     * The mapper returns a {@link Uni uni} and is called for each item emitted by the upstream {@link Multi}.
      *
      * @param mapper the mapper, must not be {@code null}, must not produce {@link null}
-     * @param <O>    the type of result emitted by the {@link Uni} produced by the mapper.
+     * @param <O>    the type of item emitted by the {@link Uni} produced by the mapper.
      * @return the object to configure the flatten behavior.
      */
     public <O> MultiFlatten<I, O> unis(Function<? super I, ? extends Uni<? extends O>> mapper) {

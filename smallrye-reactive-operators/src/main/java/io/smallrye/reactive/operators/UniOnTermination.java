@@ -28,14 +28,14 @@ public class UniOnTermination<T> extends UniOperator<T, T> {
                     }
 
                     @Override
-                    public void onResult(T result) {
+                    public void onItem(T item) {
                         try {
-                            callback.accept(result, null, false);
+                            callback.accept(item, null, false);
                         } catch (Exception e) {
                             subscriber.onFailure(e);
                             return;
                         }
-                        subscriber.onResult(result);
+                        subscriber.onItem(item);
                     }
 
                     @Override

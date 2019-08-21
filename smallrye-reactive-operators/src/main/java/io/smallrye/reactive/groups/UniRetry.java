@@ -18,7 +18,7 @@ public class UniRetry<T> {
     }
 
     /**
-     * Produces a {@link Uni} resubscribing to the current {@link Uni} until it gets a result (potentially {@code null})
+     * Produces a {@link Uni} resubscribing to the current {@link Uni} until it gets an item (potentially {@code null})
      * On every failure, it re-subscribes, indefinitely.
      *
      * @return the {@link Uni}
@@ -29,13 +29,13 @@ public class UniRetry<T> {
 
     /**
      * Produces a {@link Uni} resubscribing to the current {@link Uni} at most {@code numberOfAttempts} time, until it
-     * gets a result (potentially {@code null}). On every failure, it re-subscribes.
+     * gets an item (potentially {@code null}). On every failure, it re-subscribes.
      * <p>
      * If the number of attempt is reached, the last failure is propagated.
      *
      * @param numberOfAttempts the number of attempt, must be greater than zero
      * @return a new {@link Uni} retrying at most {@code numberOfAttempts} times to subscribe to the current {@link Uni}
-     * until it gets a result. When the number of attempt is reached, the last failure is propagated.
+     * until it gets an item. When the number of attempt is reached, the last failure is propagated.
      */
     public Uni<T> atMost(long numberOfAttempts) {
         return new UniRetryAtMost<>(upstream, predicate, numberOfAttempts);

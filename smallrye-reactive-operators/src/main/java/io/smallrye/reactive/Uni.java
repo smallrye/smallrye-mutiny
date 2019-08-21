@@ -3,7 +3,7 @@ package io.smallrye.reactive;
 import io.smallrye.reactive.groups.*;
 import io.smallrye.reactive.subscription.UniSubscriber;
 import io.smallrye.reactive.subscription.UniSubscription;
-import io.smallrye.reactive.tuples.Pair;
+import io.smallrye.reactive.tuples.Tuple2;
 
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Executor;
@@ -18,17 +18,18 @@ import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
  * <p>
  * A {@link Uni} can have two outcomes:
  * <ol>
- * <li>A {@code result} event, forwarding the result of the action, potentially {@code null}</li>
+ * <li>A {@code item} event, forwarding the complete of the action, potentially {@code null} if the action does not
+ * produced a complete, but completed successfully.</li>
  * <li>A {@code failure} event, forwarding the exception</li>
  * </ol>
  * <p>
  * To trigger the computation, a {@link UniSubscriber} must subscribe to the Uni. It will be notified of outcome
- * once they are {@code result} or {@code failure} events are fired by the observed Uni. A subscriber receives
+ * once they is an {@code item} or {@code failure} event fired by the observed Uni. A subscriber receives
  * (asynchronously) a {@link UniSubscription} and can cancel the demand at any time. Note that cancelling after
  * having received the outcome is a no-op.
  * <p>
  *
- * @param <T> the type of result produced by the {@link Uni}
+ * @param <T> the type of item produced by the {@link Uni}
  */
 public interface Uni<T> {
 
@@ -38,13 +39,13 @@ public interface Uni<T> {
      *
      * <p>Examples:</p>
      * <pre>{@code
-     * Uni.from().value(1); // Emit 1 at subscription time
-     * Uni.from().value(() -> x); // Emit x at subscription time, the supplier is invoked for each subscription
-     * Uni.from().completionState(cs); // Emit the result from this completion stage
-     * Uni.from().completionState(() -> cs); // Emit the result from this completion stage, the stage is not created before subscription
+     * Uni.from().item(1); // Emit 1 at subscription time
+     * Uni.from().item(() -> x); // Emit x at subscription time, the supplier is invoked for each subscription
+     * Uni.from().completionState(cs); // Emit the item from this completion stage
+     * Uni.from().completionState(() -> cs); // Emit the item from this completion stage, the stage is not created before subscription
      * Uni.from().failure(exception); // Emit the failure at subscription time
      * Uni.from().deferred(() -> Uni.from().value(x)); // Defer the uni creation until subscription. Each subscription can produce a different uni
-     * Uni.from().nullValue(); // Emit null at subscription time
+     * Uni.from().nullItem(); // Emit null at subscription time
      * Uni.from().nothing(); // Create a Uni not emitting any signal
      * Uni.from().publisher(publisher); // Create a Uni from a Reactive Streams Publisher
      * }</pre>
@@ -66,23 +67,23 @@ public interface Uni<T> {
     }
 
     /**
-     * Requests the {@link Uni} to start resolving the result and allows configuring how the signals are propagated
+     * Requests the {@link Uni} to start resolving the item and allows configuring how the signals are propagated
      * (using a {@link UniSubscriber}, callbacks, or a {@link CompletionStage}. Unlike {@link #await()}, this method
-     * configures non-blocking retrieval of the result and failure.
+     * configures non-blocking retrieval of the item and failure.
      *
      * <p>Examples:</p>
      * <pre>{@code
      *     Uni<String> uni = ...;
      *
      *    Subscription sub = uni.subscribe().with( // The return subscription can be used to cancel the operation
-     *              result -> {},           // Callback calls on result
+     *              item -> {},           // Callback calls on item
      *              failure -> {}           // Callback calls on failure
      *    );
      *
      *    UniSubscriber<String> myUniSubscriber = ...
      *    uni.subscribe().withSubscriber(myUniSubscriber); // Subscribes to the Uni with the passed subscriber
      *
-     *    CompletableFuture future = uni.subscribe().asCompletableFuture(); // Get a CompletionStage receiving the result or failure
+     *    CompletableFuture future = uni.subscribe().asCompletableFuture(); // Get a CompletionStage receiving the item or failure
      *    // Cancelling the returned future cancels the subscription.
      * }</pre>
      *
@@ -92,16 +93,16 @@ public interface Uni<T> {
     UniSubscribe<T> subscribe();
 
     /**
-     * Awaits (blocking the caller thread) until the result or a failure is emitted by the observed {@link Uni}.
+     * Awaits (blocking the caller thread) until the item or a failure is emitted by the observed {@link Uni}.
      * If the observed uni fails, the failure is thrown. In the case of a checked exception, the exception is wrapped
      * into a {@link java.util.concurrent.CompletionException}.
      *
      * <p>Examples:</p>
      * <pre>{@code
      * Uni<T> uni = ...;
-     * T res = uni.await().indefinitely(); // Await indefinitely until it get the result.
+     * T res = uni.await().indefinitely(); // Await indefinitely until it get the item.
      * T res = uni.await().atMost(Duration.ofMillis(1000)); // Awaits at most 1s. After that, a TimeoutException is thrown
-     * Optional<T> res = uni.await().asOptional().indefinitely(); // Retrieves the result as an Optional, empty if the result is null
+     * Optional<T> res = uni.await().asOptional().indefinitely(); // Retrieves the item as an Optional, empty if the item is null
      * }</pre>
      *
      * @return the object to configure the retrieval.
@@ -110,23 +111,21 @@ public interface Uni<T> {
 
 
     /**
-     * Configures the action to execute when the observed {@link Uni} emits the result (potentially {@code null}).
+     * Configures the action to execute when the observed {@link Uni} emits the item (potentially {@code null}).
      *
      * <p>Examples:</p>
      * <pre>{@code
      * Uni<T> uni = ...;
-     * uni.onResult().mapToResult(x -> ...); // Map to another result
-     * uni.onResult().mapToUni(x -> ...); // Map to another Uni (flatMap)
+     * uni.onItem().mapToItem(x -> ...); // Map to another item
+     * uni.onItem().mapToUni(x -> ...); // Map to another Uni (flatMap)
      * }</pre>
      *
-     * @return the object to configure the action to execute when a result is emitted
-     * @see #onNullResult()
-     * @see #onNoResult()
+     * @return the object to configure the action to execute when an item is emitted
      */
-    UniOnResult<T> onResult();
+    UniOnItem<T> onItem();
 
     /**
-     * Combines a set of {@link Uni unis} into a joined result. This result can be a {@code Tuple} or the result of a
+     * Combines a set of {@link Uni unis} into a joined item. This item can be a {@code Tuple} or the item of a
      * combinator function.
      * <p>
      * If one of the combine {@link Uni} fire a failure, the other unis are cancelled, and the resulting
@@ -135,7 +134,7 @@ public interface Uni<T> {
      * {@link Uni} failed, a {@link CompositeException} is fired, wrapping the different collected failures.
      * <p>
      * Depending on the number of participants, the produced {@link io.smallrye.reactive.tuples.Tuple} is
-     * different from {@link Pair} to {@link io.smallrye.reactive.tuples.Tuple5}. For more participants,
+     * different from {@link Tuple2} to {@link io.smallrye.reactive.tuples.Tuple5}. For more participants,
      * use {@link io.smallrye.reactive.groups.UniAndGroup#unis(Uni[])} or
      * {@link io.smallrye.reactive.groups.UniAndGroup#unis(Iterable)}.
      *
@@ -145,27 +144,27 @@ public interface Uni<T> {
     UniAndGroup<T> and();
 
     /**
-     * Combines the result of this {@link Uni} with the result of {@code other} into a {@link Pair}.
+     * Combines the item of this {@link Uni} with the item of {@code other} into a {@link Tuple2}.
      * If {@code this} or {@code other} fails, the other resolution is cancelled.
      *
      * @param other the other {@link Uni}, must not be {@code null}
      * @param <T2>  the type to pair
-     * @return the combination of the 2 results.
-     * @see #and() <code>and</code> for more options on the combination of results
+     * @return the combination of the pair combining the two items.
+     * @see #and() <code>and</code> for more options on the combination of items
      * @see UniCombine#all() <code>Uni.all()</code> for the equivalent static operator
      */
-    <T2> Uni<Pair<T, T2>> and(Uni<T2> other);
+    <T2> Uni<Tuple2<T, T2>> and(Uni<T2> other);
 
     /**
      * Composes this {@link Uni} with a set of {@link Uni} passed to
      * {@link io.smallrye.reactive.groups.UniOr#unis(Uni[])} to produce a new {@link Uni} forwarding the first event
-     * (result or failure). It behaves like the fastest of these competing unis.
+     * (item or failure). It behaves like the fastest of these competing unis.
      * <p>
-     * The process subscribes to the set of {@link Uni}. When one of the {@link Uni} fires a result or a failure,
+     * The process subscribes to the set of {@link Uni}. When one of the {@link Uni} fires an item or a failure,
      * the event is propagated downstream. Also the other subscriptions are cancelled.
      * <p>
      * Note that the callback from the subscriber are called on the thread used to fire the winning {@link Uni}.
-     * Use {@link #handleResultOn(Executor)} to change the thread.
+     * Use {@link #receiveItemOn(Executor)} to change the thread.
      * <p>
      * If the subscription to the returned {@link Uni} is cancelled, the subscription to the {@link Uni unis} from the
      * {@code iterable} are also cancelled.
@@ -176,40 +175,22 @@ public interface Uni<T> {
     UniOr or();
 
     /**
-     * Adds specific behavior when the observed {@link Uni} fires {@code null} as result. While {@code null} is a valid
+     * Adds specific behavior when the observed {@link Uni} fires {@code null} as item. While {@code null} is a valid
      * value, it may require specific processing. This group of operators allows implementing this specific behavior.
      *
      * <p>Examples:</p>
      * <pre><code>
      *     Uni&lt;T&gt; upstream = ...;
      *     Uni&lt;T&gt; uni = ...;
-     *     uni = upstream.onNullResult().continueWith(anotherValue) // use the fallback value if upstream emits null
-     *     uni = upstream.onNullResult().fail() // propagate a NullPointerException if upstream emits null
-     *     uni = upstream.onNullResult().failWith(exception) // propagate the given exception if upstream emits null
-     *     uni = upstream.onNullResult().switchTo(another) // switch to another uni if upstream emits null
+     *     uni = upstream.onNull().continueWith(anotherValue) // use the fallback value if upstream emits null
+     *     uni = upstream.onNull().fail() // propagate a NullPointerException if upstream emits null
+     *     uni = upstream.onNull().failWith(exception) // propagate the given exception if upstream emits null
+     *     uni = upstream.onNull().switchTo(another) // switch to another uni if upstream emits null
      * </code></pre>
      *
      * @return the object to configure the behavior when receiving {@code null}
      */
-    UniOnNullResult<T> onNullResult();
-
-    /**
-     * Produces a new {@link Uni} invoking the given callback when this {@link Uni} fires a result or a failure.
-     *
-     * @param callback the callback called with the result (potentially null) or the failure; must not be {@code null}
-     * @return the new {@link Uni}
-     */
-//    Uni<T> onTermination(BiConsumer<? super T, Throwable> callback);
-
-    /**
-     * Produces a new {@link Uni} invoking the given callback when a subscription to the upstream {@link Uni} is
-     * cancelled.
-     *
-     * @param callback the callback called on cancellation.
-     * @return the new {@link Uni}
-     */
-//    Uni<T> onCancellation(Runnable callback);
-
+    UniOnNull<T> onNull();
 
     /**
      * Like {@link #onFailure(Predicate)} but applied to all failures fired by the upstream uni.
@@ -224,7 +205,7 @@ public interface Uni<T> {
      * {@link UniOnFailure}) is applied.
      * <p>
      * For instance, to only when an {@code IOException} is fired as failure you can use:
-     * <code>uni.onFailure(IOException.class).recoverWithResult("hello")</code>
+     * <code>uni.onFailure(IOException.class).recoverWithItem("hello")</code>
      * <p>
      * The fallback value ({@code hello}) will only be used if the upstream uni fire a failure of type
      * {@code IOException}.
@@ -239,7 +220,7 @@ public interface Uni<T> {
      * {@link UniOnFailure}) is applied.
      * <p>
      * For instance, to only when an {@code IOException} is fired as failure you can use:
-     * <code>uni.onFailure(IOException.class).recoverWithResult("hello")</code>
+     * <code>uni.onFailure(IOException.class).recoverWithItem("hello")</code>
      * <p>
      * The fallback value ({@code hello}) will only be used if the upstream uni fire a failure of type
      * {@code IOException}.
@@ -250,33 +231,33 @@ public interface Uni<T> {
     UniOnFailure<T> onFailure(Class<? extends Throwable> typeOfFailure);
 
     /**
-     * Produces a {@link Uni} reacting when a no result event is fired by the upstream uni during the specified time
+     * Produces a {@link Uni} reacting when a no item event is fired by the upstream uni during the specified time
      * period.
      * <p>
-     * This {@link Uni} detects if this  {@link Uni} does not emit a result before the configured timeout.
+     * This {@link Uni} detects if this  {@link Uni} does not emit an item before the configured timeout.
      * <p>
      * Examples:
      * <code>
-     * uni.onNoResult().after(Duration.ofMillis(1000).fail() // Propagate a TimeOutException
-     * uni.onNoResult().after(Duration.ofMillis(1000).recoverWithValue("fallback") // Inject a fallback result on timeout
-     * uni.onNoResult().after(Duration.ofMillis(1000).on(myExecutor)... // Configure the executor calling on timeout actions
-     * uni.onNoResult().after(Duration.ofMillis(1000).retry().atMost(5) // Retry five times
+     * uni.onNoItem().after(Duration.ofMillis(1000).fail() // Propagate a TimeOutException
+     * uni.onNoItem().after(Duration.ofMillis(1000).recoverWithValue("fallback") // Inject a fallback item on timeout
+     * uni.onNoItem().after(Duration.ofMillis(1000).on(myExecutor)... // Configure the executor calling on timeout actions
+     * uni.onNoItem().after(Duration.ofMillis(1000).retry().atMost(5) // Retry five times
      * </code>
      *
      * @return the on timeout group
      */
-    UniOnTimeout<T> onNoResult();
+    UniOnTimeout<T> onNoItem();
 
     /**
-     * Produces a new {@link Uni} invoking the {@link UniSubscriber#onResult(Object)} on the supplied {@link Executor}.
+     * Produces a new {@link Uni} invoking the {@link UniSubscriber#onItem(Object)} on the supplied {@link Executor}.
      * <p>
-     * Instead of receiving the {@code result} event on the thread firing the event, this method  influences the
+     * Instead of receiving the {@code item} event on the thread firing the event, this method  influences the
      * threading context to switch to a thread from the given executor.
      *
      * @param executor the executor to use, must not be {@code null}
      * @return a new {@link Uni}
      */
-    Uni<T> handleResultOn(Executor executor);
+    Uni<T> receiveItemOn(Executor executor);
 
     /**
      * Produces a new {@link Uni} invoking the {@link UniSubscriber#onFailure(Throwable)} on the supplied {@link Executor}.
@@ -287,20 +268,20 @@ public interface Uni<T> {
      * @param executor the executor to use, must not be {@code null}
      * @return a new {@link Uni}
      */
-    Uni<T> handleFailureOn(Executor executor);
+    Uni<T> receiveFailureOn(Executor executor);
 
     /**
      * When a subscriber subscribes to this {@link Uni}, execute the subscription to the upstream {@link Uni} on a thread
-     * from the given executor. As a result the {@link UniSubscriber#onSubscribe(UniSubscription)} method will be called
+     * from the given executor. As a complete the {@link UniSubscriber#onSubscribe(UniSubscription)} method will be called
      * on this thread (except mentioned otherwise)
      *
      * @param executor the executor to use, must not be {@code null}
      * @return a new {@link Uni}
      */
-    Uni<T> callSubscribeOn(Executor executor);
+    Uni<T> receiveSubscriptionOn(Executor executor);
 
     /**
-     * Caches the events (result or failure) of this {@link Uni} and replays it for all further {@link UniSubscriber}.
+     * Caches the events (item or failure) of this {@link Uni} and replays it for all further {@link UniSubscriber}.
      *
      * @return the new {@link Uni}. Unlike regular {@link Uni}, re-subscribing to this {@link Uni} does not re-compute
      * the outcome but replayed the cached events.
@@ -308,16 +289,16 @@ public interface Uni<T> {
     Uni<T> cache();
 
     /**
-     * Transforms the result (potentially null) emitted by this {@link Uni} by applying a (synchronous) function to it.
-     * This method is equivalent to {@code uni.onResult().mapToResult(x -> ...)}
+     * Transforms the item (potentially null) emitted by this {@link Uni} by applying a (synchronous) function to it.
+     * This method is equivalent to {@code uni.onItem().mapToItem(x -> ...)}
      * For asynchronous composition, look at flatMap.
      *
      * @param mapper the mapper function, must not be {@code null}
      * @param <O>    the output type
-     * @return a new {@link Uni} computing a result of type {@code <O>}.
+     * @return a new {@link Uni} computing an item of type {@code <O>}.
      */
     default <O> Uni<O> map(Function<T, O> mapper) {
-        return onResult().mapToResult(nonNull(mapper, "mapper"));
+        return onItem().mapToItem(nonNull(mapper, "mapper"));
     }
 
     //TODO
@@ -326,24 +307,24 @@ public interface Uni<T> {
     /**
      * Creates an instance of {@link Multi} from this {@link Uni}.
      * <p>
-     * When a subscriber subscribes to the returned {@link Multi} and <strong>request</strong> a result, it subscribes
+     * When a subscriber subscribes to the returned {@link Multi} and <strong>request</strong> an item, it subscribes
      * to this {@link Uni} and the events from this {@link Uni} are propagated to the {@link Multi}:
      * <ul>
-     * <li>if this {@link Uni} emits a non-{@code null} result - this result is propagated to the {@link Multi}
+     * <li>if this {@link Uni} emits a non-{@code null} item - this item is propagated to the {@link Multi}
      * and followed with the completion event</li>
-     * <li>if this {@link Uni} emits a {@code null} result - the {@link Multi} fires the completion event</li>
+     * <li>if this {@link Uni} emits a {@code null} item - the {@link Multi} fires the completion event</li>
      * <li>if this {@link Uni} emits a failure, this failure event is propagated by the {@link Multi}</li>
      * </ul>
      * <p>
      * It's important to note that the subscription to this {@link Uni} happens when the subscriber to the produced
-     * {@link Multi} requests results, and not at subscription time.
+     * {@link Multi} <strong>requests</strong> items, and not at subscription time.
      *
      * @return the produced {@link Multi}, never {@code null}
      */
     Multi<T> toMulti();
 
     /**
-     * Allows adding behavior when various type of events are emitted by the current {@link Uni} (result, failure) or
+     * Allows adding behavior when various type of events are emitted by the current {@link Uni} (item, failure) or
      * by the subscriber (cancellation, subscription)
      *
      * @return the object to configure the action to execute when events happen
