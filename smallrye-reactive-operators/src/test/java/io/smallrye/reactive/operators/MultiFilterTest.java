@@ -37,7 +37,7 @@ public class MultiFilterTest {
         assertThat(Multi.createFrom().range(1, 4)
                 .onItem()
                 .testWith(x -> Uni.createFrom()
-                        .completionStage(() -> CompletableFuture.supplyAsync(() -> x % 2 != 0))
+                        .deferredCompletionStage(() -> CompletableFuture.supplyAsync(() -> x % 2 != 0))
                 )
                 .collect().asList()
                 .await().indefinitely()).containsExactly(1, 3);

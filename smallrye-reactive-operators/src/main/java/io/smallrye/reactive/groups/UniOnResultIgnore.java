@@ -35,7 +35,7 @@ public class UniOnResultIgnore<T> {
      */
     public Uni<T> andFail(Supplier<Throwable> supplier) {
         nonNull(supplier, "supplier");
-        return onResult.mapToUni(ignored -> Uni.createFrom().failure(supplier));
+        return onResult.mapToUni(ignored -> Uni.createFrom().deferredFailure(supplier));
     }
 
     /**

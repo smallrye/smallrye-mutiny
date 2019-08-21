@@ -47,7 +47,7 @@ public class UniCreateFromCompletionStageTest {
     @Test
     public void testThatNullValueAreAcceptedWithSupplier() {
         UniAssertSubscriber<Void> ts = UniAssertSubscriber.create();
-        Uni.createFrom().<Void>completionStage(() -> CompletableFuture.completedFuture(null)).subscribe().withSubscriber(ts);
+        Uni.createFrom().<Void>deferredCompletionStage(() -> CompletableFuture.completedFuture(null)).subscribe().withSubscriber(ts);
         ts.assertCompletedSuccessfully().assertItem(null);
     }
 
@@ -56,7 +56,7 @@ public class UniCreateFromCompletionStageTest {
     public void testWithNonNullValueWithSupplier() {
         UniAssertSubscriber<String> ts = UniAssertSubscriber.create();
         CompletionStage<String> cs = new CompletableFuture<>();
-        Uni.createFrom().completionStage(() -> cs).subscribe().withSubscriber(ts);
+        Uni.createFrom().deferredCompletionStage(() -> cs).subscribe().withSubscriber(ts);
         cs.toCompletableFuture().complete("1");
         ts.assertCompletedSuccessfully().assertItem("1");
     }
@@ -66,7 +66,7 @@ public class UniCreateFromCompletionStageTest {
     public void testWithExceptionWithSupplier() {
         UniAssertSubscriber<String> ts = UniAssertSubscriber.create();
         CompletionStage<String> cs = new CompletableFuture<>();
-        Uni.createFrom().completionStage(() -> cs).subscribe().withSubscriber(ts);
+        Uni.createFrom().deferredCompletionStage(() -> cs).subscribe().withSubscriber(ts);
         cs.toCompletableFuture().completeExceptionally(new IOException("boom"));
         ts.assertFailure(IOException.class, "boom");
     }
@@ -93,7 +93,7 @@ public class UniCreateFromCompletionStageTest {
         AtomicBoolean called = new AtomicBoolean();
         CompletableFuture<Integer> cs = new CompletableFuture<>();
 
-        Uni<Integer> uni = Uni.createFrom().completionStage(() -> {
+        Uni<Integer> uni = Uni.createFrom().deferredCompletionStage(() -> {
             called.set(true);
             return cs;
         })
@@ -129,7 +129,7 @@ public class UniCreateFromCompletionStageTest {
         UniAssertSubscriber<Integer> ts = UniAssertSubscriber.create();
         AtomicBoolean called = new AtomicBoolean();
         CompletableFuture<Integer> cs = new CompletableFuture<>();
-        Uni<Integer> uni = Uni.createFrom().completionStage(() -> cs)
+        Uni<Integer> uni = Uni.createFrom().deferredCompletionStage(() -> cs)
                 .onItem().consume(i -> called.set(true));
 
         assertThat(called).isFalse();
@@ -157,7 +157,7 @@ public class UniCreateFromCompletionStageTest {
     public void testThatSubscriberCanCancelBeforeEmissionWithSupplier() {
         UniAssertSubscriber<Integer> ts = UniAssertSubscriber.create();
         CompletableFuture<Integer> cs = new CompletableFuture<>();
-        Uni<Integer> uni = Uni.createFrom().completionStage(() -> cs);
+        Uni<Integer> uni = Uni.createFrom().deferredCompletionStage(() -> cs);
         uni.subscribe().withSubscriber(ts);
         ts.cancel();
 
@@ -184,7 +184,7 @@ public class UniCreateFromCompletionStageTest {
     public void testThatSubscriberCanCancelAfterEmissionWithSupplier() {
         UniAssertSubscriber<Integer> ts = UniAssertSubscriber.create();
         CompletableFuture<Integer> cs = new CompletableFuture<>();
-        Uni<Integer> uni = Uni.createFrom().completionStage(() -> cs);
+        Uni<Integer> uni = Uni.createFrom().deferredCompletionStage(() -> cs);
 
         uni.subscribe().withSubscriber(ts);
         cs.complete(1);
@@ -200,13 +200,13 @@ public class UniCreateFromCompletionStageTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testThatCompletionStageSupplierCannotBeNull() {
-        Uni.createFrom().completionStage((Supplier<CompletionStage<Void>>) null);
+        Uni.createFrom().deferredCompletionStage((Supplier<CompletionStage<Void>>) null);
     }
 
     @Test
     public void testThatCompletionStageSupplierCannotReturnNull() {
         UniAssertSubscriber<Integer> ts = UniAssertSubscriber.create();
-        Uni<Integer> uni = Uni.createFrom().completionStage(() -> null);
+        Uni<Integer> uni = Uni.createFrom().deferredCompletionStage(() -> null);
 
         uni.subscribe().withSubscriber(ts);
         ts.assertFailure(NullPointerException.class, "");

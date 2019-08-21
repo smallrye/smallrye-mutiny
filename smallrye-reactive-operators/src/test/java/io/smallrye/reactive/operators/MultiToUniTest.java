@@ -29,7 +29,7 @@ public class MultiToUniTest {
     @Test
     public void testFromItems() {
         AtomicInteger count = new AtomicInteger();
-        Multi<Integer> multi = Multi.createFrom().items(() -> Stream.of(count.incrementAndGet(), 2, 3, 4));
+        Multi<Integer> multi = Multi.createFrom().deferredItems(() -> Stream.of(count.incrementAndGet(), 2, 3, 4));
 
         multi.toUni().subscribe().withSubscriber(UniAssertSubscriber.create())
                 .assertCompletedSuccessfully()
@@ -43,7 +43,7 @@ public class MultiToUniTest {
     @Test
     public void testFromItems2() {
         AtomicInteger count = new AtomicInteger();
-        Multi<Integer> multi = Multi.createFrom().items(() -> Stream.of(count.incrementAndGet(), 2, 3, 4));
+        Multi<Integer> multi = Multi.createFrom().deferredItems(() -> Stream.of(count.incrementAndGet(), 2, 3, 4));
         Uni<Integer> uni = Uni.createFrom().multi(multi);
         uni.subscribe().withSubscriber(UniAssertSubscriber.create())
                 .assertCompletedSuccessfully()
@@ -57,7 +57,7 @@ public class MultiToUniTest {
     public void testFromFailure() {
         AtomicInteger count = new AtomicInteger();
         Multi<Integer> multi = Multi.createFrom()
-                .failure(() -> new IOException("boom-" + count.incrementAndGet()));
+                .deferredFailure(() -> new IOException("boom-" + count.incrementAndGet()));
 
         multi.toUni().subscribe().withSubscriber(UniAssertSubscriber.create())
                 .assertFailure(IOException.class, "boom-1");
@@ -70,7 +70,7 @@ public class MultiToUniTest {
     public void testFromFailure2() {
         AtomicInteger count = new AtomicInteger();
         Multi<Integer> multi = Multi.createFrom()
-                .failure(() -> new IOException("boom-" + count.incrementAndGet()));
+                .deferredFailure(() -> new IOException("boom-" + count.incrementAndGet()));
 
         Uni.createFrom().multi(multi).subscribe().withSubscriber(UniAssertSubscriber.create())
                 .assertFailure(IOException.class, "boom-1");
@@ -108,7 +108,7 @@ public class MultiToUniTest {
         AtomicInteger count = new AtomicInteger();
 
 
-        Multi<Integer> multi = Multi.createFrom().completionStage(() -> CompletableFuture.supplyAsync(count::incrementAndGet));
+        Multi<Integer> multi = Multi.createFrom().deferredCompletionStage(() -> CompletableFuture.supplyAsync(count::incrementAndGet));
 
         multi.toUni().subscribe().withSubscriber(UniAssertSubscriber.create())
                 .await()

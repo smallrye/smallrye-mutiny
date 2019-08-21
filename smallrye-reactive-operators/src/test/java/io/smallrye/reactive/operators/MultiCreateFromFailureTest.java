@@ -18,7 +18,7 @@ public class MultiCreateFromFailureTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testThatFailureSupplierCannotBeNull() {
-        Multi.createFrom().failure((Supplier<Throwable>) null);
+        Multi.createFrom().deferredFailure((Supplier<Throwable>) null);
     }
 
     @Test
@@ -32,7 +32,7 @@ public class MultiCreateFromFailureTest {
     public void testWithExceptionSupplier() {
         AtomicInteger count = new AtomicInteger();
         Multi<String> failure = Multi.createFrom()
-                .failure(() -> new IOException("boom-" + count.incrementAndGet()));
+                .deferredFailure(() -> new IOException("boom-" + count.incrementAndGet()));
         MultiAssertSubscriber<String> subscriber1 = failure.subscribe().withSubscriber(MultiAssertSubscriber.create());
         MultiAssertSubscriber<String> subscriber2 = failure.subscribe().withSubscriber(MultiAssertSubscriber.create());
         subscriber1.assertHasFailedWith(IOException.class, "boom-1");
@@ -41,7 +41,7 @@ public class MultiCreateFromFailureTest {
 
     @Test
     public void testWithExceptionThrownBySupplier() {
-        Multi<String> multi  = Multi.createFrom().failure(() -> {
+        Multi<String> multi  = Multi.createFrom().deferredFailure(() -> {
             throw new IllegalStateException("boom");
         });
         MultiAssertSubscriber<String> subscriber1 = multi.subscribe().withSubscriber(MultiAssertSubscriber.create());
@@ -50,7 +50,7 @@ public class MultiCreateFromFailureTest {
 
     @Test
     public void testWithNullReturnedBySupplier() {
-        Multi<String> multi  = Multi.createFrom().failure(() -> null);
+        Multi<String> multi  = Multi.createFrom().deferredFailure(() -> null);
         MultiAssertSubscriber<String> subscriber1 = multi.subscribe().withSubscriber(MultiAssertSubscriber.create());
         subscriber1.assertTerminated();
 

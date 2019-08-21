@@ -14,7 +14,7 @@ public class UniCreateFromFailureTest {
 
     @Test
     public void testWithASupplier() {
-        Uni<Object> boom = Uni.createFrom().failure(() -> new IOException("boom"));
+        Uni<Object> boom = Uni.createFrom().deferredFailure(() -> new IOException("boom"));
         try {
             boom.await().indefinitely();
             fail("Exception expected");
@@ -63,12 +63,12 @@ public class UniCreateFromFailureTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testCreationWithNullAsSupplier() {
-        Uni.createFrom().failure((Supplier<Throwable>) null);
+        Uni.createFrom().deferredFailure((Supplier<Throwable>) null);
     }
 
     @Test
     public void testWithASupplierReturningNull() {
-        Uni<Object> boom = Uni.createFrom().failure(() -> null);
+        Uni<Object> boom = Uni.createFrom().deferredFailure(() -> null);
         try {
             boom.await().indefinitely();
             fail("Exception expected");
@@ -79,7 +79,7 @@ public class UniCreateFromFailureTest {
 
     @Test
     public void testWithASupplierThrowingAnException() {
-        Uni<Object> boom = Uni.createFrom().failure(() -> {
+        Uni<Object> boom = Uni.createFrom().deferredFailure(() -> {
             throw new NoSuchElementException("boom");
         });
         try {

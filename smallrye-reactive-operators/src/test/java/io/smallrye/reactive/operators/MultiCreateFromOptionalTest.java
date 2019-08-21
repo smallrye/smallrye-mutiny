@@ -19,7 +19,7 @@ public class MultiCreateFromOptionalTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testThatOptionalSupplierCannotBeNull() {
-        Multi.createFrom().optional((Supplier<Optional<String>>) null);
+        Multi.createFrom().deferredOptional((Supplier<Optional<String>>) null);
     }
 
     @Test
@@ -41,7 +41,7 @@ public class MultiCreateFromOptionalTest {
         AtomicInteger count = new AtomicInteger();
 
         Multi<String> multi  = Multi.createFrom()
-                .optional(() -> Optional.of("hello-" + count.incrementAndGet()));
+                .deferredOptional(() -> Optional.of("hello-" + count.incrementAndGet()));
         MultiAssertSubscriber<String> subscriber1 = multi.subscribe().withSubscriber(MultiAssertSubscriber.create(1));
         MultiAssertSubscriber<String> subscriber2 = multi.subscribe().withSubscriber(MultiAssertSubscriber.create());
 
@@ -52,7 +52,7 @@ public class MultiCreateFromOptionalTest {
 
     @Test
     public void testWithEmptyProducedInSupplier() {
-        Multi<String> multi  = Multi.createFrom().optional(Optional::empty);
+        Multi<String> multi  = Multi.createFrom().deferredOptional(Optional::empty);
         MultiAssertSubscriber<String> subscriber1 = multi.subscribe().withSubscriber(MultiAssertSubscriber.create(1));
         MultiAssertSubscriber<String> subscriber2 = multi.subscribe().withSubscriber(MultiAssertSubscriber.create());
 
@@ -62,7 +62,7 @@ public class MultiCreateFromOptionalTest {
 
     @Test
     public void testWithExceptionThrownBySupplier() {
-        Multi<String> multi  = Multi.createFrom().optional(() -> {
+        Multi<String> multi  = Multi.createFrom().deferredOptional(() -> {
             throw new IllegalStateException("boom");
         });
         MultiAssertSubscriber<String> subscriber1 = multi.subscribe().withSubscriber(MultiAssertSubscriber.create());
@@ -72,7 +72,7 @@ public class MultiCreateFromOptionalTest {
     @SuppressWarnings("OptionalAssignedToNull")
     @Test
     public void testWithNullReturnedBySupplier() {
-        Multi<String> multi  = Multi.createFrom().optional(() -> null);
+        Multi<String> multi  = Multi.createFrom().deferredOptional(() -> null);
         MultiAssertSubscriber<String> subscriber1 = multi.subscribe().withSubscriber(MultiAssertSubscriber.create());
         subscriber1.assertTerminated();
 

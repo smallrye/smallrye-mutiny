@@ -48,7 +48,7 @@ public class UniCreate {
      */
     public <T> Uni<T> completionStage(CompletionStage<? extends T> stage) {
         CompletionStage<? extends T> actual = nonNull(stage, "stage");
-        return completionStage(() -> actual);
+        return deferredCompletionStage(() -> actual);
     }
 
     /**
@@ -73,7 +73,7 @@ public class UniCreate {
      * @param <T>      the type of item
      * @return the produced {@link Uni}
      */
-    public <T> Uni<T> completionStage(Supplier<? extends CompletionStage<? extends T>> supplier) {
+    public <T> Uni<T> deferredCompletionStage(Supplier<? extends CompletionStage<? extends T>> supplier) {
         return new UniCreateFromCompletionStage<>(nonNull(supplier, "supplier"));
     }
 
@@ -113,7 +113,7 @@ public class UniCreate {
      * @param <T>      the type of item
      * @return the new {@link Uni}
      */
-    public <T> Uni<T> item(Supplier<? extends T> supplier) {
+    public <T> Uni<T> deferredItem(Supplier<? extends T> supplier) {
         Supplier<? extends T> actual = nonNull(supplier, "supplier");
         return emitter(emitter -> {
             T item;
@@ -137,7 +137,7 @@ public class UniCreate {
      * @return the new {@link Uni}
      */
     public <T> Uni<T> item(T item) {
-        return item(() -> item);
+        return deferredItem(() -> item);
     }
 
     /**
@@ -151,7 +151,7 @@ public class UniCreate {
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     public <T> Uni<T> optional(Optional<T> optional) {
         Optional<T> actual = nonNull(optional, "optional");
-        return optional(() -> actual);
+        return deferredOptional(() -> actual);
     }
 
     /**
@@ -166,9 +166,9 @@ public class UniCreate {
      * @param <T>      the type of the produced item
      * @return the new {@link Uni}
      */
-    public <T> Uni<T> optional(Supplier<Optional<T>> supplier) {
+    public <T> Uni<T> deferredOptional(Supplier<Optional<T>> supplier) {
         Supplier<Optional<T>> actual = nonNull(supplier, "supplier");
-        return item(() -> actual.get().orElse(null));
+        return deferredItem(() -> actual.get().orElse(null));
     }
 
     /**
@@ -202,7 +202,7 @@ public class UniCreate {
      * {@link Uni}. So, it does not create the {@link Uni} until an {@link UniSubscriber subscriber} subscribes, and
      * creates a fresh {@link Uni} for each subscriber.
      * <p>
-     * Unlike {@link #item(Supplier)}, the supplier produces an {@link Uni} (and not an item).
+     * Unlike {@link #deferredItem(Supplier)}, the supplier produces an {@link Uni} (and not an item).
      * <p>
      * If the supplier throws an exception, a failure event with the exception  is fired. If the supplier produces
      * {@code null}, a failure event containing a {@link NullPointerException} is fired.
@@ -226,7 +226,7 @@ public class UniCreate {
      */
     public <T> Uni<T> failure(Throwable failure) {
         Throwable exception = nonNull(failure, "failure");
-        return failure(() -> exception);
+        return deferredFailure(() -> exception);
     }
 
     /**
@@ -240,7 +240,7 @@ public class UniCreate {
      *                 {@code Uni.<String>failed(exception);}
      * @return the produced {@link Uni}
      */
-    public <T> Uni<T> failure(Supplier<Throwable> supplier) {
+    public <T> Uni<T> deferredFailure(Supplier<Throwable> supplier) {
         Supplier<Throwable> actual = nonNull(supplier, "supplier");
 
         return emitter(emitter -> {
@@ -278,7 +278,7 @@ public class UniCreate {
      * after subscription.
      */
     public Uni<Void> nullItem() {
-        return item(() -> null);
+        return deferredItem(() -> null);
     }
 
 
