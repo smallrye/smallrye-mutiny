@@ -25,7 +25,7 @@ public class MultiFlatMap<I> {
      * Configures the <em>mapper</em> of the <em>flatMap</em> operation.
      * The mapper returns a {@link Multi multi} and is called for each item emitted by the upstream {@link Multi}.
      *
-     * @param mapper the mapper, must not be {@code null}, must not produce {@link null}
+     * @param mapper the mapper, must not be {@code null}, must not produce {@code null}
      * @param <O>    the type of item emitted by the {@link Multi} produced by the mapper.
      * @return the object to configure the flatten behavior.
      */
@@ -37,7 +37,7 @@ public class MultiFlatMap<I> {
      * Configures the <em>mapper</em> of the <em>flatMap</em> operation.
      * The mapper returns a {@link Publisher publisher} and is called for each item emitted by the upstream {@link Multi}.
      *
-     * @param mapper the mapper, must not be {@code null}, must not produce {@link null}
+     * @param mapper the mapper, must not be {@code null}, must not produce {@code null}
      * @param <O>    the type of item emitted by the {@link Publisher} produced by the mapper.
      * @return the object to configure the flatten behavior.
      */
@@ -49,7 +49,7 @@ public class MultiFlatMap<I> {
      * Configures the <em>mapper</em> of the <em>flatMap</em> operation.
      * The mapper returns a {@link Iterable iterable} and is called for each item emitted by the upstream {@link Multi}.
      *
-     * @param mapper the mapper, must not be {@code null}, must not produce {@link null}
+     * @param mapper the mapper, must not be {@code null}, must not produce {@code null}
      * @param <O>    the type of item contained by the {@link Iterable} produced by the mapper.
      * @return the object to configure the flatten behavior.
      */
@@ -62,7 +62,7 @@ public class MultiFlatMap<I> {
      * Configures the <em>mapper</em> of the <em>flatMap</em> operation.
      * The mapper returns a {@link Uni uni} and is called for each item emitted by the upstream {@link Multi}.
      *
-     * @param mapper the mapper, must not be {@code null}, must not produce {@link null}
+     * @param mapper the mapper, must not be {@code null}, must not produce {@code null}
      * @param <O>    the type of item emitted by the {@link Uni} produced by the mapper.
      * @return the object to configure the flatten behavior.
      */

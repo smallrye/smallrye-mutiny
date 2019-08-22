@@ -83,7 +83,10 @@ public class MultiFlatten<I, O> {
      * <li>The items contained in each of the produced {@link Publisher} are then <strong>merged</strong> in the
      * produced {@link Multi}. The returned object lets you configure the flattening process.</li>
      * </ul>
+     * <p>
+     * This method allows configuring the concurrency, i.e. the maximum number of in-flight/subscribed inner streams
      *
+     * @param concurrency the concurrency
      * @return the object to configure the {@code flatMap} operation.
      */
     public Multi<O> mergeResults(int concurrency) {

@@ -149,6 +149,7 @@ public class MultiCreate {
      * {@link Multi} requests values, and not at subscription time.
      *
      * @param uni the uni, must not be {@code null}
+     * @param <T> the type of item emitted by the resulting {@link Multi} / passed {@link Uni}
      * @return the produced {@link Multi}, never {@code null}
      */
     public <T> Multi<T> uni(Uni<T> uni) {

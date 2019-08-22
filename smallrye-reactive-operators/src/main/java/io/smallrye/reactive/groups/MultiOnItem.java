@@ -63,8 +63,11 @@ public class MultiOnItem<T> {
      * Unlike {@link #scan(BiFunction)}, this operator uses the value produced by the {@code initialStateProducer} as
      * first value.
      *
-     * @param scanner the reduction {@link BiFunction}, the resulting {@link Multi} emits the results of this method.
-     *                The method is called for every item emitted by this Multi.
+     * @param initialStateProducer the producer called to provides the initial value passed to the scanner operation.
+     * @param scanner              the reduction {@link BiFunction}, the resulting {@link Multi} emits the results of
+     *                             this method. The method is called for every item emitted by this Multi.
+     * @param <S>                  the type of item emitted by the produced {@link Multi}. It's the type returned by the
+     *                             {@code scanner} operation.
      * @return the produced {@link Multi}
      */
     public <S> Multi<S> scan(Supplier<S> initialStateProducer, BiFunction<S, ? super T, S> scanner) {
