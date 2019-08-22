@@ -56,7 +56,7 @@ public class ParameterValidation {
      * Validates that the passed amount is strictly positive.
      *
      * @param amount the amount to be checked
-     * @param name     the name of the parameter, must not be {@code null}
+     * @param name   the name of the parameter, must not be {@code null}
      * @return the amount is the validation passes.
      */
     public static long positive(long amount, String name) {
@@ -71,7 +71,7 @@ public class ParameterValidation {
      * Validates that the passed amount is strictly positive.
      *
      * @param amount the amount to be checked
-     * @param name     the name of the parameter, must not be {@code null}
+     * @param name   the name of the parameter, must not be {@code null}
      * @return the amount is the validation passes.
      */
     public static int positive(int amount, String name) {
@@ -82,4 +82,20 @@ public class ParameterValidation {
         return amount;
     }
 
+    /**
+     * Ensures that the given iterable does not contain a {@code null} value.
+     *
+     * @param iterable the iterable
+     * @param name     the name of the parameter, must not be {@code null}
+     */
+    public static <T extends Iterable<?>> T doesNotContainNull(T iterable, String name) {
+        nonNull(name, "name");
+        nonNull(iterable, name);
+        iterable.forEach(m -> {
+            if (m == null) {
+                throw new IllegalArgumentException(String.format("`%s` contains a `null` value", name));
+            }
+        });
+        return iterable;
+    }
 }

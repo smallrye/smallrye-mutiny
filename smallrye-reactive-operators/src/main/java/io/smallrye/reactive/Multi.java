@@ -12,6 +12,16 @@ public interface Multi<T> extends Publisher<T> {
         return MultiCreate.INSTANCE;
     }
 
+    /**
+     * Creates new instances of {@link Multi} by merging, concatenating or associating items from others {@link Multi}
+     * and {@link Publisher}.
+     *
+     * @return the object to configure the creation process.
+     */
+    static MultiCreateBy createBy() {
+        return MultiCreateBy.INSTANCE;
+    }
+
     MultiSubscribe<T> subscribe();
 
     MultiOnItem<T> onItem();
