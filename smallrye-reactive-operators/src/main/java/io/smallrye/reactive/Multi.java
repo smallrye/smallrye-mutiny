@@ -3,6 +3,7 @@ package io.smallrye.reactive;
 import io.smallrye.reactive.groups.*;
 import org.reactivestreams.Publisher;
 
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 public interface Multi<T> extends Publisher<T> {
@@ -90,6 +91,23 @@ public interface Multi<T> extends Publisher<T> {
      */
     Multi<T> cache();
 
-
+    /**
+     * Produces {@link Multi} or {@link Uni} collecting items from this {@link Multi}. You can accumulate the items
+     * into a {@link java.util.List} ({@link MultiCollect#asList()}), {@link java.util.Map}
+     * ({@link MultiCollect#asMap(Function)}...
+     * <p>
+     * You can also retrieve the first and list items using {@link MultiCollect#first()} and {@link MultiCollect#last()}.
+     *
+     * @return the object to configure the collection process.
+     */
     MultiCollect<T> collect();
+
+    /**
+     * Produces {@link Multi} grouping items from this {@link Multi} into various "form of chunks" (list, {@link Multi}).
+     * The grouping can be done linearly ({@link MultiGroup#intoLists()} and {@link MultiGroup#intoMultis()}, or based
+     * on a grouping function ({@link MultiGroup#by(Function)})
+     *
+     * @return the object to configure the grouping.
+     */
+    MultiGroup<T> group();
 }

@@ -59,7 +59,6 @@ public class MultiCollect<T> {
         return MultiCollector.list(upstream);
     }
 
-
     /**
      * Creates a {@link Uni} emitting an item with the object computed by the given {@link Collector}.
      * The collector behaves the same way as on a Java stream.
@@ -177,4 +176,5 @@ public class MultiCollect<T> {
     public <K> Uni<Map<K, Collection<T>>> asMultiMap(Function<? super T, ? extends K> keyMapper) {
         return MultiCollector.multimap(upstream, keyMapper, Function.identity());
     }
+
 }

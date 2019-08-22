@@ -1,14 +1,18 @@
 package io.smallrye.reactive.operators;
 
 import io.reactivex.Flowable;
+import io.reactivex.flowables.GroupedFlowable;
+import io.smallrye.reactive.GroupedMulti;
 import io.smallrye.reactive.Multi;
 import io.smallrye.reactive.Uni;
 import io.smallrye.reactive.operators.flowable.FlowableCollector;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
@@ -79,5 +83,51 @@ public class MultiCollector {
                     return vs;
                 }
         ));
+    }
+
+    public static <T> Multi<List<T>> list(Multi<T> upstream, Duration timeWindow) {
+        return Multi.createFrom().publisher(getFlowable(upstream).buffer(timeWindow.toMillis(), TimeUnit.MILLISECONDS));
+    }
+
+
+    public static <T> Multi<List<T>> list(Multi<T> upstream, int size) {
+        return Multi.createFrom().publisher(getFlowable(upstream).buffer(size));
+    }
+
+    public static <T> Multi<List<T>> list(Multi<T> upstream, int size, int skip) {
+        return Multi.createFrom().publisher(getFlowable(upstream).buffer(size, skip));
+    }
+
+    public static <T> Multi<Multi<T>> multi(Multi<T> upstream, Duration timeWindow) {
+        return Multi.createFrom().publisher(getFlowable(upstream)
+                .window(timeWindow.toMillis(), TimeUnit.MILLISECONDS)
+                .map(f -> Multi.createFrom().publisher(f))
+        );
+    }
+
+    public static <T> Multi<Multi<T>> multi(Multi<T> upstream, int size) {
+        return Multi.createFrom().publisher(getFlowable(upstream)
+                .window(size)
+                .map(f -> Multi.createFrom().publisher(f))
+        );
+    }
+
+    public static <T> Multi<Multi<T>> multi(Multi<T> upstream, int size, int skip) {
+        return Multi.createFrom().publisher(getFlowable(upstream)
+                .window(size, skip)
+                .map(f -> Multi.createFrom().publisher(f))
+        );
+    }
+
+
+    public static <K, V, T> Multi<GroupedMulti<K, V>> groupBy(Multi<T> upstream, Function<? super T, ? extends K> keyMapper,
+                                                       Function<? super T, ? extends V> valueMapper) {
+        Flowable<? extends GroupedFlowable<? extends K, ? extends V>> groups;
+        if (valueMapper == null) {
+             groups = getFlowable(upstream).groupBy(keyMapper::apply, x -> (V) x);
+        } else {
+            groups = getFlowable(upstream).groupBy(keyMapper::apply, valueMapper::apply);
+        }
+        return Multi.createFrom().publisher(groups).onItem().mapToItem(gf -> new DefaultGroupedMulti<>(gf));
     }
 }
