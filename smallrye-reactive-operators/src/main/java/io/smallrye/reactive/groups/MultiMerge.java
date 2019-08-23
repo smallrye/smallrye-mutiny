@@ -27,49 +27,26 @@ public class MultiMerge {
     }
 
     /**
-     * Creates a new {@link Multi} merging the items emitted by the given {@link Multi multis}.
+     * Creates a new {@link Multi} merging the items emitted by the given {@link Multi multis} /
+     * {@link Publisher publishers}.
      *
-     * @param multis the multis, must not be empty, must not contain {@code null}
+     * @param publishers the publishers, must not be empty, must not contain {@code null}
      * @param <T>    the type of item
      * @return the new {@link Multi} emitting the items from the given set of {@link Multi}
      */
-    public final <T> Multi<T> multis(Multi<T>... multis) {
-        return publishers(multis);
-    }
-
-    /**
-     * Creates a new {@link Multi} merging the items emitted by the given {@link Publisher publishers}.
-     *
-     * @param publishers the published, must not be empty, must not contain {@code null}
-     * @param <T>        the type of item
-     * @return the new {@link Multi} emitting the items from the given set of {@link Publisher}
-     */
-    public final <T> Multi<T> publishers(Publisher<T>... publishers) {
+    public final <T> Multi<T> streams(Publisher<T>... publishers) {
         return MultiCombine.merge(Arrays.asList(publishers), collectFailures, requests, concurrency);
     }
 
     /**
-     * Creates a new {@link Multi} merging the items emitted by the given {@link Multi multis}.
-     *
-     * @param iterable the multis, must not be empty, must not contain {@code null}, must not be {@code null}
-     * @param <T>      the type of item
-     * @return the new {@link Multi} emitting the items from the given set of {@link Multi}
-     */
-    public <T> Multi<T> multis(Iterable<Multi<T>> iterable) {
-        List<Publisher<T>> list = new ArrayList<>();
-        iterable.forEach(list::add);
-        return publishers(list);
-    }
-
-
-    /**
-     * Creates a new {@link Multi} merging the items emitted by the given {@link Publisher publishers}.
+     * Creates a new {@link Multi} merging the items emitted by the given {@link Publisher publishers} /
+     * {@link Publisher publishers}.
      *
      * @param iterable the published, must not be empty, must not contain {@code null}, must not be {@code null}
      * @param <T>        the type of item
      * @return the new {@link Multi} emitting the items from the given set of {@link Publisher}
      */
-    public <T> Multi<T> publishers(Iterable<Publisher<T>> iterable) {
+    public <T> Multi<T> streams(Iterable<Publisher<T>> iterable) {
         List<Publisher<T>> list = new ArrayList<>();
         iterable.forEach(list::add);
         return MultiCombine.merge(list, collectFailures, requests, concurrency);

@@ -25,48 +25,26 @@ public class MultiConcat {
     }
 
     /**
-     * Creates a new {@link Multi} concatenating the items emitted by the given {@link Multi multis}.
-     *
-     * @param multis the multis, must not be empty, must not contain {@code null}
-     * @param <T>    the type of item
-     * @return the new {@link Multi} emitting the items from the given set of {@link Multi} using a concatenation
-     */
-    public <T> Multi<T> multis(Multi<T>... multis) {
-        return publishers(multis);
-    }
-
-    /**
-     * Creates a new {@link Multi} concatenating the items emitted by the given {@link Publisher publishers}.
+     * Creates a new {@link Multi} concatenating the items emitted by the given {@link Multi multis} /
+     * {@link Publisher publishers}.
      *
      * @param publishers the publishers, must not be empty, must not contain {@code null}
      * @param <T>        the type of item
-     * @return the new {@link Multi} emitting the items from the given set of {@link Publisher} using a concatenation
+     * @return the new {@link Multi} emitting the items from the given set of {@link Multi} using a concatenation
      */
-    public <T> Multi<T> publishers(Publisher<T>... publishers) {
+    public <T> Multi<T> streams(Publisher<T>... publishers) {
         return MultiCombine.concatenate(Arrays.asList(publishers), collectFailures, requests);
     }
 
     /**
-     * Creates a new {@link Multi} concatenating the items emitted by the given {@link Multi multis}.
-     *
-     * @param iterable the multis, must not be empty, must not contain {@code null}, must not be {@code null}
-     * @param <T>      the type of item
-     * @return the new {@link Multi} emitting the items from the given set of {@link Multi} using a concatenation
-     */
-    public <T> Multi<T> multis(Iterable<Multi<T>> iterable) {
-        List<Publisher<T>> list = new ArrayList<>();
-        iterable.forEach(list::add);
-        return publishers(list);
-    }
-
-    /**
-     * Creates a new {@link Multi} concatenating the items emitted by the given {@link Publisher publishers}.
+     * Creates a new {@link Multi} concatenating the items emitted by the given {@link Multi multis} /
+     * {@link Publisher publishers}..
      *
      * @param iterable the publishers, must not be empty, must not contain {@code null}, must not be {@code null}
      * @param <T>      the type of item
-     * @return the new {@link Multi} emitting the items from the given set of {@link Publisher} using a concatenation
+     * @return the new {@link Multi} emitting the items from the given set of {@link Multi} using a concatenation
      */
-    public <T> Multi<T> publishers(Iterable<Publisher<T>> iterable) {
+    public <T> Multi<T> streams(Iterable<? extends Publisher<T>> iterable) {
         List<Publisher<T>> list = new ArrayList<>();
         iterable.forEach(list::add);
         return MultiCombine.concatenate(list, collectFailures, requests);

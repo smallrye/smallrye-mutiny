@@ -13,7 +13,7 @@ public class MultiConcatTest {
 
     @Test
     public void testConcatenationOfSeveralMultis() {
-        MultiAssertSubscriber<Integer> subscriber = Multi.createBy().concatenating().multis(
+        MultiAssertSubscriber<Integer> subscriber = Multi.createBy().concatenating().streams(
                 Multi.createFrom().item(5),
                 Multi.createFrom().range(1, 3),
                 Multi.createFrom().items(8, 9, 10).onItem().mapToItem(i -> i + 1)
@@ -26,7 +26,7 @@ public class MultiConcatTest {
     @Test
     public void testConcatenationOfSeveralMultisWithConcurrencyAndRequests() {
         MultiAssertSubscriber<Integer> subscriber = Multi.createBy().concatenating().withRequests(1)
-                .multis(
+                .streams(
                         Multi.createFrom().item(5),
                         Multi.createFrom().range(1, 3),
                         Multi.createFrom().items(8, 9, 10).onItem().mapToItem(i -> i + 1)
@@ -38,7 +38,7 @@ public class MultiConcatTest {
 
     @Test
     public void testConcatenationOfSeveralMultisAsIterable() {
-        MultiAssertSubscriber<Integer> subscriber = Multi.createBy().concatenating().multis(
+        MultiAssertSubscriber<Integer> subscriber = Multi.createBy().concatenating().streams(
                 Arrays.asList(
                         Multi.createFrom().item(5),
                         Multi.createFrom().range(1, 3),
@@ -52,7 +52,7 @@ public class MultiConcatTest {
 
     @Test
     public void testConcatenationOfSeveralPublishers() {
-        MultiAssertSubscriber<Integer> subscriber = Multi.createBy().concatenating().publishers(
+        MultiAssertSubscriber<Integer> subscriber = Multi.createBy().concatenating().streams(
                 Flowable.just(5),
                 Multi.createFrom().range(1, 3),
                 Multi.createFrom().items(8, 9, 10).onItem().mapToItem(i -> i + 1)
@@ -64,7 +64,7 @@ public class MultiConcatTest {
 
     @Test
     public void testConcatenationOfSeveralPublishersAsIterable() {
-        MultiAssertSubscriber<Integer> subscriber = Multi.createBy().concatenating().publishers(
+        MultiAssertSubscriber<Integer> subscriber = Multi.createBy().concatenating().streams(
                 Arrays.asList(
                         Flowable.just(5),
                         Multi.createFrom().range(1, 3),
@@ -78,14 +78,14 @@ public class MultiConcatTest {
 
     @Test
     public void testMergingEmpty() {
-        Multi.createBy().concatenating().multis(Multi.createFrom().empty())
+        Multi.createBy().concatenating().streams(Multi.createFrom().empty())
                 .subscribe().withSubscriber(MultiAssertSubscriber.create(1))
                 .assertCompletedSuccessfully().assertHasNotReceivedAnyItem();
     }
 
     @Test
     public void testMergingWithEmpty() {
-        Multi.createBy().concatenating().multis(Multi.createFrom().empty(), Multi.createFrom().item(2))
+        Multi.createBy().concatenating().streams(Multi.createFrom().empty(), Multi.createFrom().item(2))
                 .subscribe().withSubscriber(MultiAssertSubscriber.create(1))
                 .assertCompletedSuccessfully().assertReceived(2);
     }
@@ -95,7 +95,7 @@ public class MultiConcatTest {
         IllegalStateException boom = new IllegalStateException("boom");
         IllegalStateException boom2 = new IllegalStateException("boom2");
 
-        MultiAssertSubscriber<Integer> subscriber = Multi.createBy().concatenating().collectFailures().publishers(
+        MultiAssertSubscriber<Integer> subscriber = Multi.createBy().concatenating().collectFailures().streams(
                 Multi.createFrom().item(5),
                 Multi.createFrom().failure(boom),
                 Multi.createFrom().item(6),
@@ -111,7 +111,7 @@ public class MultiConcatTest {
         CompositeException ce = (CompositeException) subscriber.failures().get(0);
         assertThat(ce.getCauses()).hasSize(2);
 
-        subscriber = Multi.createBy().concatenating().publishers(
+        subscriber = Multi.createBy().concatenating().streams(
                 Multi.createFrom().item(5),
                 Multi.createFrom().failure(boom),
                 Multi.createFrom().item(6),
