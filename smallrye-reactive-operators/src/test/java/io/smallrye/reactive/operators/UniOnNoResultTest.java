@@ -38,17 +38,17 @@ public class UniOnNoResultTest {
     }
 
     @Test
-    public void testRecoverWithResult() {
+    public void testRecoverWithItem() {
         UniAssertSubscriber<Integer> ts = Uni.createFrom().<Integer>nothing()
-                .onNoItem().after(Duration.ofMillis(10)).recoverWithResult(5)
+                .onNoItem().after(Duration.ofMillis(10)).recoverWithItem(5)
                 .subscribe().withSubscriber(UniAssertSubscriber.create());
         ts.await().assertItem(5);
     }
 
     @Test
-    public void testRecoverWithResultSupplier() {
+    public void testRecoverWithItemSupplier() {
         UniAssertSubscriber<Integer> ts = Uni.createFrom().<Integer>nothing()
-                .onNoItem().after(Duration.ofMillis(10)).recoverWithResult(() -> 23)
+                .onNoItem().after(Duration.ofMillis(10)).recoverWithItem(() -> 23)
                 .subscribe().withSubscriber(UniAssertSubscriber.create());
         ts.await().assertItem(23);
     }

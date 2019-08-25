@@ -66,8 +66,8 @@ public class UniOnTimeout<T> {
      * @param fallback the fallback value, may be {@code null}
      * @return the new {@link Uni}
      */
-    public Uni<T> recoverWithResult(T fallback) {
-        return fail().onFailure(TimeoutException.class).recoverWithResult(fallback);
+    public Uni<T> recoverWithItem(T fallback) {
+        return fail().onFailure(TimeoutException.class).recoverWithItem(fallback);
     }
 
     /**
@@ -78,8 +78,8 @@ public class UniOnTimeout<T> {
      * @param supplier the fallback supplier, may be {@code null}
      * @return the new {@link Uni}
      */
-    public Uni<T> recoverWithResult(Supplier<T> supplier) {
-        return fail().onFailure(TimeoutException.class).recoverWithResult(supplier);
+    public Uni<T> recoverWithItem(Supplier<T> supplier) {
+        return fail().onFailure(TimeoutException.class).recoverWithItem(supplier);
     }
 
     /**

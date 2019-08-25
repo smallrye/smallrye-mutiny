@@ -17,22 +17,22 @@ public class UniOnFailureRecoveryTest {
 
     @Test
     public void testRecoverWithDirectValue() {
-        Integer value = failed.onFailure().recoverWithResult(23).await().indefinitely();
-        Integer value2 = Uni.createFrom().item(1).onFailure().recoverWithResult(23).await().indefinitely();
+        Integer value = failed.onFailure().recoverWithItem(23).await().indefinitely();
+        Integer value2 = Uni.createFrom().item(1).onFailure().recoverWithItem(23).await().indefinitely();
         assertThat(value).isEqualTo(23);
         assertThat(value2).isEqualTo(1);
     }
 
     @Test
     public void testRecoverWithNullValue() {
-        Integer value = failed.onFailure().recoverWithResult((Integer) null).await().indefinitely();
+        Integer value = failed.onFailure().recoverWithItem((Integer) null).await().indefinitely();
         assertThat(value).isEqualTo(null);
     }
 
     @Test
     public void testRecoverWithSupplierOfValue() {
         AtomicInteger count = new AtomicInteger();
-        Uni<Integer> recovered = failed.onFailure().recoverWithResult(() -> 23 + count.getAndIncrement());
+        Uni<Integer> recovered = failed.onFailure().recoverWithItem(() -> 23 + count.getAndIncrement());
         Integer value = recovered.await().indefinitely();
         Integer value2 = recovered.await().indefinitely();
         assertThat(value).isEqualTo(23);
@@ -41,7 +41,7 @@ public class UniOnFailureRecoveryTest {
 
     @Test
     public void testWhenSupplierThrowsAnException() {
-        Uni<Integer> recovered = failed.onFailure().recoverWithResult(() -> {
+        Uni<Integer> recovered = failed.onFailure().recoverWithItem(() -> {
             throw new IllegalStateException("boom");
         });
 
@@ -54,7 +54,7 @@ public class UniOnFailureRecoveryTest {
     @Test
     public void testRecoverWithFunctionProducingOfValue() {
         AtomicInteger count = new AtomicInteger();
-        Uni<Integer> recovered = failed.onFailure().recoverWithResult(fail -> 23 + count.getAndIncrement());
+        Uni<Integer> recovered = failed.onFailure().recoverWithItem(fail -> 23 + count.getAndIncrement());
         Integer value = recovered.await().indefinitely();
         Integer value2 = recovered.await().indefinitely();
         assertThat(value).isEqualTo(23);
@@ -63,23 +63,23 @@ public class UniOnFailureRecoveryTest {
 
     @Test
     public void testWithPredicateOnClass() {
-        Integer value = failed.onFailure(IOException.class).recoverWithResult(23).await().indefinitely();
+        Integer value = failed.onFailure(IOException.class).recoverWithItem(23).await().indefinitely();
         assertThat(value).isEqualTo(23);
         assertThatExceptionOfType(CompletionException.class)
-                .isThrownBy(() -> failed.onFailure(IllegalStateException.class).recoverWithResult(23).await()
+                .isThrownBy(() -> failed.onFailure(IllegalStateException.class).recoverWithItem(23).await()
                         .indefinitely())
                 .withCauseExactlyInstanceOf(IOException.class);
     }
 
     @Test
     public void testWithPredicate() {
-        Integer value = failed.onFailure(f -> f instanceof IOException).recoverWithResult(23).await().indefinitely();
+        Integer value = failed.onFailure(f -> f instanceof IOException).recoverWithItem(23).await().indefinitely();
         assertThat(value).isEqualTo(23);
 
         assertThatExceptionOfType(CompositeException.class)
                 .isThrownBy(() -> failed.onFailure(f -> {
                     throw new IllegalArgumentException("BOOM!");
-                }).recoverWithResult(23).await().indefinitely())
+                }).recoverWithItem(23).await().indefinitely())
                 .withMessageContaining("BOOM!");
     }
 
@@ -160,7 +160,7 @@ public class UniOnFailureRecoveryTest {
         assertThatExceptionOfType(CompositeException.class)
                 .isThrownBy(() -> failed.onFailure(f -> {
                     throw new IllegalArgumentException("BOOM!");
-                }).recoverWithResult(23).await().indefinitely())
+                }).recoverWithItem(23).await().indefinitely())
                 .withMessageContaining("BOOM!");
     }
 
@@ -189,7 +189,7 @@ public class UniOnFailureRecoveryTest {
         UniAssertSubscriber<Integer> ts = UniAssertSubscriber.create();
 
         Uni.createFrom().<Integer>failure(new RuntimeException("boom"))
-                .onFailure().recoverWithResult(fail -> 2)
+                .onFailure().recoverWithItem(fail -> 2)
                 .subscribe().withSubscriber(ts);
 
         ts.assertCompletedSuccessfully().assertItem(2);

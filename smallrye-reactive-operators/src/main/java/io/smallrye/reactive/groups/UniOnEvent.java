@@ -98,7 +98,7 @@ public class UniOnEvent<T> {
      * {@link UniOnFailure}) is applied.
      * <p>
      * For instance, to only when an {@code IOException} is fired as failure you can use:
-     * <code>uni.onFailure(IOException.class).recoverWithResult("hello")</code>
+     * <code>uni.onFailure(IOException.class).recoverWithItem("hello")</code>
      * <p>
      * The fallback value ({@code hello}) will only be used if the upstream uni fire a failure of type
      * {@code IOException}.*
@@ -115,7 +115,7 @@ public class UniOnEvent<T> {
      * {@link UniOnFailure}) is applied.
      * <p>
      * For instance, to only when an {@code IOException} is fired as failure you can use:
-     * <code>uni.onFailure(IOException.class).recoverWithResult("hello")</code>
+     * <code>uni.onFailure(IOException.class).recoverWithItem("hello")</code>
      * <p>
      * The fallback value ({@code hello}) will only be used if the upstream uni fire a failure of type
      * {@code IOException}.*

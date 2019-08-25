@@ -101,7 +101,7 @@ public class MultiOnEvent<T> {
      * {@link MultiOnFailure}) is applied.
      * <p>
      * For instance, to only when an {@code IOException} is fired as failure you can use:
-     * <code>multi.onFailure(IOException.class).recoverWithResult("hello")</code>
+     * <code>multi.onFailure(IOException.class).recoverWithItem("hello")</code>
      * <p>
      * The fallback value ({@code hello}) will only be used if the upstream multi fires a failure of type
      * {@code IOException}.
@@ -118,7 +118,7 @@ public class MultiOnEvent<T> {
      * {@link MultiOnFailure}) is applied.
      * <p>
      * For instance, to only when an {@code IOException} is fired as failure you can use:
-     * <code>multi.onFailure(IOException.class).recoverWithResult("hello")</code>
+     * <code>multi.onFailure(IOException.class).recoverWithItem("hello")</code>
      * <p>
      * The fallback value ({@code hello}) will only be used if the upstream multi fire a failure of type
      * {@code IOException}.*

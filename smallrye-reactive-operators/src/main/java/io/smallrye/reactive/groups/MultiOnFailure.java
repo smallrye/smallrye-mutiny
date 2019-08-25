@@ -44,14 +44,14 @@ public class MultiOnFailure<T> {
         return new MultiMapOnFailure<>(upstream, predicate, mapper);
     }
 
-    public Multi<T> recoverWithResult(T fallback) {
+    public Multi<T> recoverWithItem(T fallback) {
         nonNull(fallback, "fallback");
-        return recoverWithResult(() -> fallback);
+        return recoverWithItem(() -> fallback);
     }
 
-    public Multi<T> recoverWithResult(Supplier<T> supplier) {
+    public Multi<T> recoverWithItem(Supplier<T> supplier) {
         nonNull(supplier, "supplier");
-        return recoverWithResult(ignored -> {
+        return recoverWithItem(ignored -> {
             T t = supplier.get();
             if (t == null) {
                 throw new NullPointerException(SUPPLIER_PRODUCED_NULL);
@@ -65,7 +65,7 @@ public class MultiOnFailure<T> {
         return recoverWithMulti(Multi.createFrom().empty());
     }
 
-    public Multi<T> recoverWithResult(Function<? super Throwable, ? extends T> fallback) {
+    public Multi<T> recoverWithItem(Function<? super Throwable, ? extends T> fallback) {
         nonNull(fallback, "fallback");
         return new MultiFlatMapOnFailure<>(upstream, predicate, failure -> {
             T newResult = fallback.apply(failure);

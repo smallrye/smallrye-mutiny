@@ -43,16 +43,16 @@ public class UniOnFailure<T> {
         return new UniMapOnFailure<>(upstream, predicate, mapper);
     }
 
-    public Uni<T> recoverWithResult(T fallback) {
-        return recoverWithResult(() -> fallback);
+    public Uni<T> recoverWithItem(T fallback) {
+        return recoverWithItem(() -> fallback);
     }
 
-    public Uni<T> recoverWithResult(Supplier<T> supplier) {
+    public Uni<T> recoverWithItem(Supplier<T> supplier) {
         nonNull(supplier, "supplier");
-        return recoverWithResult(ignored -> supplier.get());
+        return recoverWithItem(ignored -> supplier.get());
     }
 
-    public Uni<T> recoverWithResult(Function<? super Throwable, ? extends T> fallback) {
+    public Uni<T> recoverWithItem(Function<? super Throwable, ? extends T> fallback) {
         nonNull(fallback, "fallback");
         return new UniFlatMapOnFailure<>(upstream, predicate, failure -> {
             T newResult = fallback.apply(failure);
