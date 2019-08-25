@@ -63,6 +63,7 @@ public class MultiConcat {
     /**
      * Indicates the the merge process should consumes the different streams using the given {@code request}.
      *
+     * @param requests the requests
      * @return a new {@link MultiMerge} configured with the given requests
      */
     public MultiConcat withRequests(int requests) {

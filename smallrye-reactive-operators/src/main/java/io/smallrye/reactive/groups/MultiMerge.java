@@ -65,6 +65,7 @@ public class MultiMerge {
     /**
      * Indicates the the merge process should consumes the different streams using the given {@code request}.
      *
+     * @param requests the request
      * @return a new {@link MultiMerge} configured with the given requests
      */
     public MultiMerge withRequests(int requests) {
@@ -75,6 +76,7 @@ public class MultiMerge {
      * Indicates the the merge process can consume up to {@code concurrency} streams in parallel. Items emitted by these
      * streams may be interleaved in the resulting stream.
      *
+     * @param concurrency the concurrency
      * @return a new {@link MultiMerge} configured with the given concurrency
      */
     public MultiMerge withConcurrency(int concurrency) {

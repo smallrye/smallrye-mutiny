@@ -87,6 +87,8 @@ public class ParameterValidation {
      *
      * @param iterable the iterable
      * @param name     the name of the parameter, must not be {@code null}
+     * @param <T>      the type of the instance
+     * @return the instance if the validation passes
      */
     public static <T extends Iterable<?>> T doesNotContainNull(T iterable, String name) {
         nonNull(name, "name");

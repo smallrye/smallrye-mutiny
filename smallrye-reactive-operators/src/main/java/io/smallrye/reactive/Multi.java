@@ -124,7 +124,7 @@ public interface Multi<T> extends Publisher<T> {
     MultiGroup<T> group();
 
     /**
-     * Produces a new {@link Multi} invoking the {@code onItem}, {@code onFailure} and {@code onCompletion) methods
+     * Produces a new {@link Multi} invoking the {@code onItem}, {@code onFailure} and {@code onCompletion} methods
      * on the supplied {@link Executor}.
      * <p>
      * Instead of receiving the {@code item} event on the thread firing the event, this method  influences the
