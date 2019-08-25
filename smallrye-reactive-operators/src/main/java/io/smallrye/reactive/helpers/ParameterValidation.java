@@ -1,6 +1,7 @@
 package io.smallrye.reactive.helpers;
 
 import java.time.Duration;
+import java.util.Collection;
 
 /**
  * A class to validate method parameters.
@@ -97,5 +98,28 @@ public class ParameterValidation {
             }
         });
         return iterable;
+    }
+
+    /**
+     * Validates that the given collection {@code instance} has size matching the {@code expectedSize}
+     *
+     * @param instance the instance
+     * @param expectedSize the expected size
+     * @param name     the name of the parameter, must not be {@code null}
+     * @param <T>      the type of the instance
+     * @return the instance if the validation passes
+     */
+    public static <T extends Collection<?>> T size(T instance, int expectedSize, String name) {
+        if (name == null) {
+            throw new IllegalArgumentException("The parameter name must be set");
+        }
+        if (instance == null) {
+            throw new IllegalArgumentException(String.format("`%s` must not be `null`", name));
+        }
+        if (instance.size() != expectedSize) {
+            throw new IllegalArgumentException(String.format("`%s` must has size %d, but was %d", name, expectedSize,
+                    instance.size()));
+        }
+        return instance;
     }
 }

@@ -46,7 +46,7 @@ public class UniZip {
     }
 
     /**
-     * Combines the three {@link Uni unis} together.§
+     * Combines the three {@link Uni unis} together.
      * Once all {@link Uni} have completed successfully, the item can be retrieved as a {@link Tuple3} or computed
      * using a {@link Functions.Function3}.
      * <p>

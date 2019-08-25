@@ -134,13 +134,13 @@ public class Tuple2Test {
 
     @Test
     public void testFromList() {
-        Tuple2<Integer, Integer> pair = Tuples.pair(Arrays.asList(1, 2));
+        Tuple2<Integer, Integer> pair = Tuples.tuple2(Arrays.asList(1, 2));
         assertThat(pair).containsExactly(1, 2);
 
-        assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> Tuples.pair(Collections.emptyList()));
-        assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> Tuples.pair(Collections.singletonList(1)));
-        assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> Tuples.pair(Arrays.asList(1, 2, 3)));
-        assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> Tuples.pair(null));
+        assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> Tuples.tuple2(Collections.emptyList()));
+        assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> Tuples.tuple2(Collections.singletonList(1)));
+        assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> Tuples.tuple2(Arrays.asList(1, 2, 3)));
+        assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> Tuples.tuple2(null));
     }
 
 }
