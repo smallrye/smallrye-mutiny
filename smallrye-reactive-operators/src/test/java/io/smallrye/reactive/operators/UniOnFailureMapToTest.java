@@ -80,7 +80,7 @@ public class UniOnFailureMapToTest {
         try {
             AtomicReference<String> threadName = new AtomicReference<>();
             failure
-                    .receiveFailureOn(executor)
+                    .emitOn(executor)
                     .onFailure().mapTo(fail -> {
                 threadName.set(Thread.currentThread().getName());
                 return new BoomException();

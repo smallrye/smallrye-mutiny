@@ -39,7 +39,7 @@ public class UniAny {
      * a failure, the event is propagated downstream. Also the other subscriptions are cancelled.
      * <p>
      * Note that the callback from the subscriber are called on the thread used to fire the event of the selected
-     * {@link Uni}. Use {@link Uni#receiveItemOn(Executor)} to change that thread.
+     * {@link Uni}. Use {@link Uni#emitOn(Executor)} to change that thread.
      * <p>
      * If the subscription to the returned {@link Uni} is cancelled, the subscription to the {@link Uni unis}
      * contained in the {@code iterable} are also cancelled.

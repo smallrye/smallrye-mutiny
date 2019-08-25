@@ -3,17 +3,21 @@ package io.smallrye.reactive.operators;
 import io.reactivex.Flowable;
 import io.reactivex.exceptions.CompositeException;
 import io.reactivex.exceptions.MissingBackpressureException;
+import io.reactivex.schedulers.Schedulers;
 import io.smallrye.reactive.Multi;
 import io.smallrye.reactive.Uni;
 import io.smallrye.reactive.groups.*;
+import io.smallrye.reactive.operators.flowable.ThreadSwitchFlowable;
 import io.smallrye.reactive.subscription.BackPressureFailure;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
+import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
 
 import static io.smallrye.reactive.helpers.EmptyUniSubscription.CANCELLED;
+import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
 
 public abstract class AbstractMulti<T> implements Multi<T> {
 
@@ -154,5 +158,19 @@ public abstract class AbstractMulti<T> implements Multi<T> {
     @Override
     public MultiGroup<T> group() {
         return new MultiGroup<>(this);
+    }
+
+    @Override
+    public Multi<T> emitOn(Executor executor) {
+        return new DefaultMulti<>(
+                flowable().observeOn(Schedulers.from(nonNull(executor, "executor")))
+        );
+    }
+
+    @Override
+    public Multi<T> subscribeOn(Executor executor) {
+        return new DefaultMulti<>(
+                flowable().subscribeOn(Schedulers.from(nonNull(executor, "executor")))
+        );
     }
 }

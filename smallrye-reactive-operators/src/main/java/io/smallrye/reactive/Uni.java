@@ -163,7 +163,7 @@ public interface Uni<T> {
      * the event is propagated downstream. Also the other subscriptions are cancelled.
      * <p>
      * Note that the callback from the subscriber are called on the thread used to fire the winning {@link Uni}.
-     * Use {@link #receiveItemOn(Executor)} to change the thread.
+     * Use {@link #emitOn(Executor)} to change the thread.
      * <p>
      * If the subscription to the returned {@link Uni} is cancelled, the subscription to the {@link Uni unis} from the
      * {@code iterable} are also cancelled.
@@ -248,7 +248,8 @@ public interface Uni<T> {
     UniOnTimeout<T> onNoItem();
 
     /**
-     * Produces a new {@link Uni} invoking the {@link UniSubscriber#onItem(Object)} on the supplied {@link Executor}.
+     * Produces a new {@link Uni} invoking the {@link UniSubscriber#onItem(Object)} and
+     * {@link UniSubscriber#onFailure(Throwable)} on the supplied {@link Executor}.
      * <p>
      * Instead of receiving the {@code item} event on the thread firing the event, this method  influences the
      * threading context to switch to a thread from the given executor.
@@ -256,28 +257,17 @@ public interface Uni<T> {
      * @param executor the executor to use, must not be {@code null}
      * @return a new {@link Uni}
      */
-    Uni<T> receiveItemOn(Executor executor);
+    Uni<T> emitOn(Executor executor);
 
     /**
-     * Produces a new {@link Uni} invoking the {@link UniSubscriber#onFailure(Throwable)} on the supplied {@link Executor}.
-     * <p>
-     * Instead of receiving the {@code failure} event on the thread firing the event, this method influences the
-     * threading context to switch to a thread from the given executor.
-     *
-     * @param executor the executor to use, must not be {@code null}
-     * @return a new {@link Uni}
-     */
-    Uni<T> receiveFailureOn(Executor executor);
-
-    /**
-     * When a subscriber subscribes to this {@link Uni}, execute the subscription to the upstream {@link Uni} on a thread
-     * from the given executor. As a complete the {@link UniSubscriber#onSubscribe(UniSubscription)} method will be called
+     * When a subscriber subscribes to this {@link Uni}, executes the subscription to the upstream {@link Uni} on a thread
+     * from the given executor. As a result, the {@link UniSubscriber#onSubscribe(UniSubscription)} method will be called
      * on this thread (except mentioned otherwise)
      *
      * @param executor the executor to use, must not be {@code null}
      * @return a new {@link Uni}
      */
-    Uni<T> receiveSubscriptionOn(Executor executor);
+    Uni<T> subscribeOn(Executor executor);
 
     /**
      * Caches the events (item or failure) of this {@link Uni} and replays it for all further {@link UniSubscriber}.

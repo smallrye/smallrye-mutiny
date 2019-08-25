@@ -96,7 +96,7 @@ public class UniSubscribeAsCompletionStageTest {
         AtomicInteger value = new AtomicInteger(-1);
         CompletableFuture<Integer> future = Uni.createFrom().item(1)
                 .onItem().delayIt().onExecutor(executor).by(Duration.ofMillis(100))
-                .receiveItemOn(executor)
+                .emitOn(executor)
                 .subscribe().asCompletionStage()
                 .whenComplete((res, fail) -> value.set(res));
 
@@ -108,7 +108,7 @@ public class UniSubscribeAsCompletionStageTest {
     public void testWithAsyncValue() {
         executor = Executors.newSingleThreadScheduledExecutor();
         CompletableFuture<Integer> future = Uni.createFrom().item(1)
-                .receiveItemOn(executor).subscribe().asCompletionStage();
+                .emitOn(executor).subscribe().asCompletionStage();
         await().until(future::isDone);
         assertThat(future).isCompletedWithValue(1);
     }
@@ -116,7 +116,7 @@ public class UniSubscribeAsCompletionStageTest {
     @Test
     public void testWithAsyncNullValue() {
         executor = Executors.newSingleThreadScheduledExecutor();
-        CompletableFuture<Void> future = Uni.createFrom().nullItem().receiveItemOn(executor)
+        CompletableFuture<Void> future = Uni.createFrom().nullItem().emitOn(executor)
                 .subscribe().asCompletionStage();
         await().until(future::isDone);
         assertThat(future).isCompletedWithValue(null);
@@ -126,7 +126,7 @@ public class UniSubscribeAsCompletionStageTest {
     public void testWithAsyncFailure() {
         executor = Executors.newSingleThreadScheduledExecutor();
         CompletableFuture<Integer> future = Uni.createFrom().<Integer>failure(new IOException("boom"))
-                .receiveItemOn(executor).subscribe().asCompletionStage();
+                .emitOn(executor).subscribe().asCompletionStage();
         await().until(future::isDone);
         assertThat(future).isCompletedExceptionally();
     }

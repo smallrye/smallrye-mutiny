@@ -29,7 +29,7 @@ public interface UniSubscriber<T> {
      * before the invocation of this method.
      *
      * <ul>
-     * <li>Executor: Operate on no particular executor, except if {@link Uni#receiveSubscriptionOn} has been called</li>
+     * <li>Executor: Operate on no particular executor, except if {@link Uni#subscribeOn} has been called</li>
      * <li>Exception: Throwing an exception cancels the subscription, {@link #onItem(Object)} and
      * {@link #onFailure(Throwable)} won't be called</li>
      * </ul>
@@ -45,7 +45,7 @@ public interface UniSubscriber<T> {
      * {@link #onFailure(Throwable)} is called, this method won't be called.
      *
      * <ul>
-     * <li>Executor: Operate on no particular executor, except if {@link Uni#receiveItemOn} has been called</li>
+     * <li>Executor: Operate on no particular executor, except if {@link Uni#emitOn} has been called</li>
      * <li>Exception: Throwing an exception cancels the subscription.
      * </ul>
      *
@@ -60,7 +60,7 @@ public interface UniSubscriber<T> {
      * {@link #onItem(Object)} is called, this method won't be called.
      *
      * <ul>
-     * <li>Executor: Operate on no particular executor, except if {@link Uni#receiveItemOn} has been called</li>
+     * <li>Executor: Operate on no particular executor, except if {@link Uni#emitOn} has been called</li>
      * <li>Exception: Throwing an exception cancels the subscription.
      * </ul>
      *

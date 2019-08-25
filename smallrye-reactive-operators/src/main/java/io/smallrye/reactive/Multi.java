@@ -2,7 +2,10 @@ package io.smallrye.reactive;
 
 import io.smallrye.reactive.groups.*;
 import org.reactivestreams.Publisher;
+import org.reactivestreams.Subscriber;
+import org.reactivestreams.Subscription;
 
+import java.util.concurrent.Executor;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -119,4 +122,28 @@ public interface Multi<T> extends Publisher<T> {
      * @return the object to configure the grouping.
      */
     MultiGroup<T> group();
+
+    /**
+     * Produces a new {@link Multi} invoking the {@code onItem}, {@code onFailure} and {@code onCompletion) methods
+     * on the supplied {@link Executor}.
+     * <p>
+     * Instead of receiving the {@code item} event on the thread firing the event, this method  influences the
+     * threading context to switch to a thread from the given executor. Same behavior for failure and completion.
+     *
+     * Note that the subscriber is guaranteed to never be called concurrently.
+     *
+     * @param executor the executor to use, must not be {@code null}
+     * @return a new {@link Multi}
+     */
+    Multi<T> emitOn(Executor executor);
+
+    /**
+     * When a subscriber subscribes to this {@link Multi}, execute the subscription to the upstream {@link Multi} on a
+     * thread from the given executor. As a result, the {@link Subscriber#onSubscribe(Subscription)} method will be called
+     * on this thread (except mentioned otherwise)
+     *
+     * @param executor the executor to use, must not be {@code null}
+     * @return a new {@link Multi}
+     */
+    Multi<T> subscribeOn(Executor executor);
 }

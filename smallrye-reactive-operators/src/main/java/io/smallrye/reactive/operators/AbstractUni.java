@@ -69,20 +69,15 @@ public abstract class AbstractUni<T> implements Uni<T> {
         return new UniAwait<>(this);
     }
 
-    //TODO Should receiveItemOn and receiveFailureOn be part of the onFailure and onItem groups
+    //TODO Should emitOn and receiveFailureOn be part of the onFailure and onItem groups
 
     @Override
-    public Uni<T> receiveItemOn(Executor executor) {
-        return new UniHandleResultOn<>(this, nonNull(executor, "executor"));
+    public Uni<T> emitOn(Executor executor) {
+        return new UniEmitOn<>(this, nonNull(executor, "executor"));
     }
 
     @Override
-    public Uni<T> receiveFailureOn(Executor executor) {
-        return new UniHandleFailureOn<>(this, nonNull(executor, "executor"));
-    }
-
-    @Override
-    public Uni<T> receiveSubscriptionOn(Executor executor) {
+    public Uni<T> subscribeOn(Executor executor) {
         return new UniCallSubscribeOn<>(this, nonNull(executor, "executor"));
     }
 

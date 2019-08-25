@@ -86,7 +86,7 @@ public class UniOnResultMapToItem {
         try {
             AtomicReference<String> threadName = new AtomicReference<>();
             Uni.createFrom().item(1)
-                    .receiveItemOn(executor)
+                    .emitOn(executor)
                     .map(i -> {
                         threadName.set(Thread.currentThread().getName());
                         return i + 1;

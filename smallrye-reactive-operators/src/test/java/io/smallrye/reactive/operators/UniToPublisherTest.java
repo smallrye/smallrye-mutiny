@@ -143,7 +143,7 @@ public class UniToPublisherTest {
     public void testCancellationBetweenRequestAndValue() {
         // TODO This is a very broken implementation of "delay" - to be replace once delay is implemented
         executor = Executors.newSingleThreadExecutor();
-        Publisher<Integer> publisher = Uni.createFrom().item(1).receiveItemOn(executor).map(x -> {
+        Publisher<Integer> publisher = Uni.createFrom().item(1).emitOn(executor).map(x -> {
             try {
                 Thread.sleep(100);
             } catch (InterruptedException e) {
@@ -179,7 +179,7 @@ public class UniToPublisherTest {
     @Test
     public void testWithAsyncValue() {
         executor = Executors.newSingleThreadScheduledExecutor();
-        Publisher<Integer> publisher = Uni.createFrom().item(1).receiveItemOn(executor).adapt().toPublisher();
+        Publisher<Integer> publisher = Uni.createFrom().item(1).emitOn(executor).adapt().toPublisher();
         assertThat(publisher).isNotNull();
         int first = Flowable.fromPublisher(publisher).blockingFirst();
         assertThat(first).isEqualTo(1);
@@ -190,7 +190,7 @@ public class UniToPublisherTest {
         executor = Executors.newSingleThreadScheduledExecutor();
 
         Publisher<Integer> publisher = Uni.createFrom().item((Integer) null)
-                .receiveItemOn(executor)
+                .emitOn(executor)
                 .adapt().toPublisher();
         assertThat(publisher).isNotNull();
         int first = Flowable.fromPublisher(publisher).blockingFirst(2);
@@ -202,7 +202,7 @@ public class UniToPublisherTest {
     public void testWithAsyncFailure() {
         executor = Executors.newSingleThreadScheduledExecutor();
         Publisher<Integer> publisher = Uni.createFrom().<Integer>failure(new IOException("boom"))
-                .receiveItemOn(executor).adapt().toPublisher();
+                .emitOn(executor).adapt().toPublisher();
         assertThat(publisher).isNotNull();
         try {
             Flowable.fromPublisher(publisher).blockingFirst();
