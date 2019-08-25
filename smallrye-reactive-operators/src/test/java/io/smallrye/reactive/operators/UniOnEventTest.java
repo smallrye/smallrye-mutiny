@@ -24,7 +24,7 @@ public class UniOnEventTest {
                 .onItem().consume(Item::set)
                 .onFailure().consume(failure::set)
                 .on().subscription(subscription::set)
-                .on().termination((r, f, c)  -> terminate.set(r))
+                .on().termination((r, f, c) -> terminate.set(r))
                 .subscribe().withSubscriber(UniAssertSubscriber.create());
 
         subscriber.assertItem(1);
@@ -33,7 +33,6 @@ public class UniOnEventTest {
         assertThat(subscription.get()).isNotNull();
         assertThat(terminate).hasValue(1);
     }
-
 
     @Test
     public void testActionsOnFailures() {
@@ -45,7 +44,7 @@ public class UniOnEventTest {
                 .onItem().consume(Item::set)
                 .onFailure().consume(failure::set)
                 .on().subscription(subscription::set)
-                .on().termination((r, f, c)  -> terminate.set(f))
+                .on().termination((r, f, c) -> terminate.set(f))
                 .subscribe().withSubscriber(UniAssertSubscriber.create());
 
         subscriber.assertCompletedWithFailure().assertFailure(IOException.class, "boom");
@@ -68,7 +67,7 @@ public class UniOnEventTest {
                 })
                 .onFailure().consume(failure::set)
                 .on().subscription(subscription::set)
-                .on().termination((r, f, c)  -> {
+                .on().termination((r, f, c) -> {
                     if (r != null) {
                         ItemFromTerminate.set(r);
                     }
@@ -96,7 +95,7 @@ public class UniOnEventTest {
                     throw new IllegalStateException("boom");
                 })
                 .on().subscription(subscription::set)
-                .on().termination((r, f, c)  -> {
+                .on().termination((r, f, c) -> {
                     if (r != null) {
                         ItemFromTerminate.set(r);
                     }
@@ -141,7 +140,7 @@ public class UniOnEventTest {
         AtomicBoolean terminated = new AtomicBoolean();
         UniAssertSubscriber<? super Integer> subscriber =
                 Uni.createFrom().item(1)
-                        .on().termination((r, f, c)  -> terminated.set(c))
+                        .on().termination((r, f, c) -> terminated.set(c))
                         .on().cancellation(() -> called.set(true))
                         .subscribe().withSubscriber(new UniAssertSubscriber<>(true));
 

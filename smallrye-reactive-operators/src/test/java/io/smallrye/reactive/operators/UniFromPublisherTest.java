@@ -2,7 +2,6 @@ package io.smallrye.reactive.operators;
 
 import io.reactivex.BackpressureStrategy;
 import io.reactivex.Flowable;
-
 import io.smallrye.reactive.Uni;
 import org.junit.Test;
 
@@ -31,11 +30,11 @@ public class UniFromPublisherTest {
     public void testWithMultiValuedPublisher() {
         UniAssertSubscriber<Integer> ts = UniAssertSubscriber.create();
         AtomicBoolean cancelled = new AtomicBoolean();
-        Uni.createFrom().publisher(Flowable.just(1, 2, 3).doOnCancel(() -> cancelled.set(true))).subscribe().withSubscriber(ts);
+        Uni.createFrom().publisher(Flowable.just(1, 2, 3).doOnCancel(() -> cancelled.set(true))).subscribe()
+                .withSubscriber(ts);
         ts.assertCompletedSuccessfully().assertItem(1);
         assertThat(cancelled).isTrue();
     }
-
 
     @Test
     public void testWithException() {
@@ -60,7 +59,6 @@ public class UniFromPublisherTest {
             emitter.onNext(1);
             emitter.onComplete();
         }));
-
 
         assertThat(called).isFalse();
         uni.subscribe().withSubscriber(ts);
@@ -103,6 +101,5 @@ public class UniFromPublisherTest {
 
         ts.assertNotCompleted();
     }
-
 
 }

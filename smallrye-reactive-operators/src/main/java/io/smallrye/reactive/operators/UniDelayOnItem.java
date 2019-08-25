@@ -47,7 +47,8 @@ public class UniDelayOnItem<T> extends UniOperator<T, T> {
             public void onItem(T item) {
                 if (reference.get() != CANCELLED) {
                     try {
-                        ScheduledFuture<?> future = executor.schedule(() -> super.onItem(item), duration.toMillis(), TimeUnit.MILLISECONDS);
+                        ScheduledFuture<?> future = executor
+                                .schedule(() -> super.onItem(item), duration.toMillis(), TimeUnit.MILLISECONDS);
                         holder.set(future);
                     } catch (RuntimeException e) {
                         // Typically, a rejected execution exception

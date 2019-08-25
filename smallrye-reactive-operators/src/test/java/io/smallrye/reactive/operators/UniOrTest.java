@@ -22,7 +22,6 @@ public class UniOrTest {
         executor.shutdown();
     }
 
-
     @SuppressWarnings("unchecked")
     @Test(expected = IllegalArgumentException.class)
     public void testWithNullAsIterable() {
@@ -66,21 +65,24 @@ public class UniOrTest {
     @Test
     public void testWithSingleItemCompletingWithAFailure() {
         UniAssertSubscriber<String> subscriber = UniAssertSubscriber.create();
-        Uni.combine().any().of(Uni.createFrom().<String>failure(new IOException("boom"))).subscribe().withSubscriber(subscriber);
+        Uni.combine().any().of(Uni.createFrom().<String>failure(new IOException("boom"))).subscribe()
+                .withSubscriber(subscriber);
         subscriber.assertCompletedWithFailure().assertFailure(IOException.class, "boom");
     }
 
     @Test
     public void testWithTwoUnisCompletingImmediately() {
         UniAssertSubscriber<String> subscriber = UniAssertSubscriber.create();
-        Uni.combine().any().of(Uni.createFrom().item("foo"), Uni.createFrom().item("bar")).subscribe().withSubscriber(subscriber);
+        Uni.combine().any().of(Uni.createFrom().item("foo"), Uni.createFrom().item("bar")).subscribe()
+                .withSubscriber(subscriber);
         subscriber.assertCompletedSuccessfully().assertItem("foo");
     }
 
     @Test
     public void testWithTwoUnisCompletingWithAFailure() {
         UniAssertSubscriber<String> subscriber = UniAssertSubscriber.create();
-        Uni.combine().any().of(Uni.createFrom().failure(new IOException("boom")), Uni.createFrom().item("foo")).subscribe().withSubscriber(subscriber);
+        Uni.combine().any().of(Uni.createFrom().failure(new IOException("boom")), Uni.createFrom().item("foo"))
+                .subscribe().withSubscriber(subscriber);
         subscriber.assertCompletedWithFailure().assertFailure(IOException.class, "boom");
     }
 
@@ -93,8 +95,9 @@ public class UniOrTest {
         subscriber1.assertCompletedSuccessfully().assertItem("bar");
 
         UniAssertSubscriber<String> subscriber2 = UniAssertSubscriber.create();
-        Uni.combine().any().of(Uni.createFrom().item("foo").onItem().delayIt().onExecutor(executor).by(Duration.ofMillis(10)),
-                Uni.createFrom().item("bar").onItem().delayIt().onExecutor(executor).by(Duration.ofMillis(100)))
+        Uni.combine().any()
+                .of(Uni.createFrom().item("foo").onItem().delayIt().onExecutor(executor).by(Duration.ofMillis(10)),
+                        Uni.createFrom().item("bar").onItem().delayIt().onExecutor(executor).by(Duration.ofMillis(100)))
                 .subscribe().withSubscriber(subscriber2);
         subscriber2.await().assertCompletedSuccessfully().assertItem("foo");
     }
@@ -113,20 +116,23 @@ public class UniOrTest {
     @Test(timeout = 1000)
     public void testCompletingAgainstEmpty() {
         Uni<Integer> uni1 = Uni.createFrom().nullItem().map(x -> 1);
-        Uni<Integer> uni2 = Uni.createFrom().nullItem().onItem().delayIt().onExecutor(executor).by(Duration.ofMillis(50)).map(x -> 2);
+        Uni<Integer> uni2 = Uni.createFrom().nullItem().onItem().delayIt().onExecutor(executor)
+                .by(Duration.ofMillis(50)).map(x -> 2);
         assertThat(Uni.combine().any().of(uni1, uni2).await().indefinitely()).isEqualTo(1);
     }
 
     @Test(timeout = 1000)
     public void testCompletingAgainstNever() {
         Uni<Integer> uni1 = Uni.createFrom().nothing().map(x -> 1);
-        Uni<Integer> uni2 = Uni.createFrom().nullItem().onItem().delayIt().onExecutor(executor).by(Duration.ofMillis(50)).map(x -> 2);
+        Uni<Integer> uni2 = Uni.createFrom().nullItem().onItem().delayIt().onExecutor(executor)
+                .by(Duration.ofMillis(50)).map(x -> 2);
         assertThat(Uni.combine().any().of(uni1, uni2).await().asOptional().indefinitely()).contains(2);
     }
 
     @Test
     public void testWithThreeImmediateChallengers() {
-        Uni<Integer> any = Uni.combine().any().of(Uni.createFrom().item(1), Uni.createFrom().item(2), Uni.createFrom().item(3));
+        Uni<Integer> any = Uni.combine().any()
+                .of(Uni.createFrom().item(1), Uni.createFrom().item(2), Uni.createFrom().item(3));
 
         UniAssertSubscriber<Integer> subscriber = UniAssertSubscriber.create();
         any.subscribe().withSubscriber(subscriber);

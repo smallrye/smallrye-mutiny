@@ -109,7 +109,6 @@ public interface Uni<T> {
      */
     UniAwait<T> await();
 
-
     /**
      * Configures the action to execute when the observed {@link Uni} emits the item (potentially {@code null}).
      *

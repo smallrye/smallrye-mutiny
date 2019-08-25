@@ -1,6 +1,5 @@
 package io.smallrye.reactive.adapt;
 
-
 import io.smallrye.reactive.Uni;
 
 /**

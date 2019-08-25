@@ -24,13 +24,6 @@ public class UniRetryTest {
         assertThat(failure.get()).isNotNull();
     }
 
-    class ThrowablePredicate implements Predicate<Throwable> {
-        @Override
-        public boolean test(Throwable throwable) {
-            throw new RuntimeException();
-        }
-    }
-
     @Test
     public void testFailureWithPredicateFailure() {
         AtomicLong counter = new AtomicLong();
@@ -42,6 +35,13 @@ public class UniRetryTest {
 
         await().until(() -> counter.intValue() == 0);
         assertThat(failure.get()).isNotNull();
+    }
+
+    class ThrowablePredicate implements Predicate<Throwable> {
+        @Override
+        public boolean test(Throwable throwable) {
+            throw new RuntimeException();
+        }
     }
 
 }

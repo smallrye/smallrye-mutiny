@@ -1,12 +1,10 @@
 package io.smallrye.reactive.operators;
 
-import io.smallrye.reactive.CompositeException;
 import io.smallrye.reactive.Multi;
 import io.smallrye.reactive.tuples.*;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -99,7 +97,8 @@ public class MultiCombineTest {
     @Test
     public void testCombinationWithBackPressure() {
         Multi<Integer> stream = Multi.createFrom().range(1, 5);
-        MultiAssertSubscriber<Integer> subscriber = Multi.createBy().combining().streams(stream, stream).using((a, b) -> a + b)
+        MultiAssertSubscriber<Integer> subscriber = Multi.createBy().combining().streams(stream, stream)
+                .using((a, b) -> a + b)
                 .subscribe().withSubscriber(MultiAssertSubscriber.create(0));
 
         subscriber.assertNotTerminated().assertHasNotReceivedAnyItem();
@@ -151,13 +150,15 @@ public class MultiCombineTest {
     @Test
     public void testCombinationWithEmpty() {
         Multi.createBy().combining()
-                .streams(Multi.createFrom().<Integer>empty(), Multi.createFrom().range(1, 2_000_000)).using((a, b) -> a + b)
+                .streams(Multi.createFrom().<Integer>empty(), Multi.createFrom().range(1, 2_000_000))
+                .using((a, b) -> a + b)
                 .subscribe().withSubscriber(MultiAssertSubscriber.create(1))
                 .assertCompletedSuccessfully()
                 .assertHasNotReceivedAnyItem();
 
         Multi.createBy().combining()
-                .streams(Multi.createFrom().range(1, 2_000_000), Multi.createFrom().<Integer>empty()).using((a, b) -> a + b)
+                .streams(Multi.createFrom().range(1, 2_000_000), Multi.createFrom().<Integer>empty())
+                .using((a, b) -> a + b)
                 .subscribe().withSubscriber(MultiAssertSubscriber.create(1))
                 .assertCompletedSuccessfully()
                 .assertHasNotReceivedAnyItem();
@@ -223,7 +224,8 @@ public class MultiCombineTest {
                 () -> Multi.createBy().combining().streams(multi, multi).using((Function<List<?>, ?>) null));
 
         assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(
-                () -> Multi.createBy().combining().streams(multi, multi, multi).using((Functions.Function3<Integer, Integer, Integer, ?>) null));
+                () -> Multi.createBy().combining().streams(multi, multi, multi)
+                        .using((Functions.Function3<Integer, Integer, Integer, ?>) null));
     }
 
     @Test
@@ -284,7 +286,8 @@ public class MultiCombineTest {
         Multi<Integer> stream = Multi.createFrom().items(1, 2, 3, 4);
         Multi<Integer> stream2 = Multi.createFrom().items(1, 2, 3, 4);
 
-        Multi.createBy().combining().streams(Arrays.asList(stream, stream2)).using(l -> (Integer) l.get(0) + (Integer) l.get(1))
+        Multi.createBy().combining().streams(Arrays.asList(stream, stream2))
+                .using(l -> (Integer) l.get(0) + (Integer) l.get(1))
                 .subscribe().withSubscriber(MultiAssertSubscriber.create(4))
                 .assertCompletedSuccessfully()
                 .assertReceived(2, 4, 6, 8);
@@ -295,7 +298,8 @@ public class MultiCombineTest {
         Multi<Integer> stream = Multi.createFrom().items(1, 2, 3);
         Multi<Integer> stream2 = Multi.createFrom().items(1, 2, 3, 4);
 
-        Multi.createBy().combining().streams(Arrays.asList(stream, stream2)).using(l -> (Integer) l.get(0) + (Integer) l.get(1))
+        Multi.createBy().combining().streams(Arrays.asList(stream, stream2))
+                .using(l -> (Integer) l.get(0) + (Integer) l.get(1))
                 .subscribe().withSubscriber(MultiAssertSubscriber.create(4))
                 .assertCompletedSuccessfully()
                 .assertReceived(2, 4, 6);
@@ -306,7 +310,8 @@ public class MultiCombineTest {
         Multi<Integer> stream = Multi.createFrom().items(1, 2, 3, 4);
         Multi<Integer> stream2 = Multi.createFrom().items(1, 2, 3);
 
-        Multi.createBy().combining().streams(Arrays.asList(stream, stream2)).using(l -> (Integer) l.get(0) + (Integer) l.get(1))
+        Multi.createBy().combining().streams(Arrays.asList(stream, stream2))
+                .using(l -> (Integer) l.get(0) + (Integer) l.get(1))
                 .subscribe().withSubscriber(MultiAssertSubscriber.create(4))
                 .assertCompletedSuccessfully()
                 .assertReceived(2, 4, 6);
@@ -317,7 +322,8 @@ public class MultiCombineTest {
         Multi<Integer> stream = Multi.createFrom().items(1, 2, 3, 4);
         Multi<Integer> stream2 = Multi.createFrom().items(1, 2, 3);
 
-        Multi.createBy().combining().streams(Arrays.asList(stream, stream2, Multi.createFrom().empty())).using(l -> (Integer) l.get(0) + (Integer) l.get(1))
+        Multi.createBy().combining().streams(Arrays.asList(stream, stream2, Multi.createFrom().empty()))
+                .using(l -> (Integer) l.get(0) + (Integer) l.get(1))
                 .subscribe().withSubscriber(MultiAssertSubscriber.create(4))
                 .assertCompletedSuccessfully()
                 .assertHasNotReceivedAnyItem();
@@ -328,8 +334,8 @@ public class MultiCombineTest {
         Multi<Integer> stream = Multi.createFrom().items(1, 2, 3, 4);
         Multi<Integer> stream2 = Multi.createFrom().items(1, 2, 3);
         Multi.createBy().combining().streams(stream, stream2).latestItems().using((a, b) -> null)
-            .subscribe().withSubscriber(MultiAssertSubscriber.create(4))
-            .assertHasFailedWith(NullPointerException.class, "");
+                .subscribe().withSubscriber(MultiAssertSubscriber.create(4))
+                .assertHasFailedWith(NullPointerException.class, "");
     }
 
     @Test
@@ -355,9 +361,10 @@ public class MultiCombineTest {
     public void testCombineLatest() {
         Multi<Integer> stream = Multi.createFrom().items(1, 2, 3);
 
-        List<Tuple2<Integer, Integer>> list = Multi.createBy().combining().streams(stream, stream).latestItems().asTuple()
+        List<Tuple2<Integer, Integer>> list = Multi.createBy().combining().streams(stream, stream).latestItems()
+                .asTuple()
                 .collect().asList().await().indefinitely();
-        assertThat(list).containsExactly(Tuple2.of(3, 1), Tuple2.of(3, 2), Tuple2.of(3 ,3));
+        assertThat(list).containsExactly(Tuple2.of(3, 1), Tuple2.of(3, 2), Tuple2.of(3, 3));
 
         List<Integer> list2 = Multi.createBy().combining().streams(stream, stream).latestItems().using((a, b) -> a)
                 .collect().asList().await().indefinitely();
@@ -371,7 +378,8 @@ public class MultiCombineTest {
     @Test
     public void testCombineLatestWithSinglePublisher() {
         Multi<Integer> stream = Multi.createFrom().items(1, 2, 3);
-        List<Integer> list = Multi.createBy().combining().streams(Collections.singletonList(stream)).using(l -> (Integer) l.get(0))
+        List<Integer> list = Multi.createBy().combining().streams(Collections.singletonList(stream))
+                .using(l -> (Integer) l.get(0))
                 .collect().asList()
                 .await().indefinitely();
         assertThat(list).containsExactly(1, 2, 3);
@@ -382,7 +390,8 @@ public class MultiCombineTest {
         Multi<Integer> stream = Multi.createFrom().items(1, 2, 3);
         Multi<Integer> empty = Multi.createFrom().empty();
 
-        List<Tuple2<Integer, Integer>> list = Multi.createBy().combining().streams(stream, empty).latestItems().asTuple()
+        List<Tuple2<Integer, Integer>> list = Multi.createBy().combining().streams(stream, empty).latestItems()
+                .asTuple()
                 .collect().asList().await().indefinitely();
         assertThat(list).isEmpty();
     }
@@ -393,7 +402,8 @@ public class MultiCombineTest {
         Multi<Integer> two = Multi.createFrom().item(2);
         Multi<Integer> three = Multi.createFrom().items(3, 4);
 
-        List<Tuple3<Integer, Integer, Integer>> list = Multi.createBy().combining().streams(one, two, three).latestItems().asTuple()
+        List<Tuple3<Integer, Integer, Integer>> list = Multi.createBy().combining().streams(one, two, three)
+                .latestItems().asTuple()
                 .collect().asList().await().indefinitely();
 
         assertThat(list).containsExactly(Tuple3.of(1, 2, 3), Tuple3.of(1, 2, 4));
@@ -406,7 +416,8 @@ public class MultiCombineTest {
         Multi<Integer> three = Multi.createFrom().items(3, 4);
         Multi<Integer> four = Multi.createFrom().items(5);
 
-        List<Tuple4<Integer, Integer, Integer, Integer>> list = Multi.createBy().combining().streams(one, two, three, four).latestItems().asTuple()
+        List<Tuple4<Integer, Integer, Integer, Integer>> list = Multi.createBy().combining()
+                .streams(one, two, three, four).latestItems().asTuple()
                 .collect().asList().await().indefinitely();
 
         assertThat(list).containsExactly(Tuple4.of(1, 2, 4, 5));
@@ -425,7 +436,8 @@ public class MultiCombineTest {
         Multi<Integer> four = Multi.createFrom().items(5);
         Multi<Integer> five = Multi.createFrom().items(6);
 
-        List<Tuple5<Integer, Integer, Integer, Integer, Integer>> list = Multi.createBy().combining().streams(one, two, three, four, five).latestItems().asTuple()
+        List<Tuple5<Integer, Integer, Integer, Integer, Integer>> list = Multi.createBy().combining()
+                .streams(one, two, three, four, five).latestItems().asTuple()
                 .collect().asList().await().indefinitely();
 
         assertThat(list).containsExactly(Tuple5.of(1, 2, 4, 5, 6));
@@ -435,10 +447,10 @@ public class MultiCombineTest {
 
         assertThat(list).containsExactly(Tuple5.of(1, 2, 5, 6, 3), Tuple5.of(1, 2, 5, 6, 4));
 
-        list = Multi.createBy().combining().streams(one, two, four, Multi.createFrom().<Integer>empty(), three).latestItems().asTuple()
+        list = Multi.createBy().combining().streams(one, two, four, Multi.createFrom().<Integer>empty(), three)
+                .latestItems().asTuple()
                 .collect().asList().await().indefinitely();
         assertThat(list).isEmpty();
     }
-
 
 }

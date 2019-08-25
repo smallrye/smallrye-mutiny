@@ -28,7 +28,6 @@ public class EmptyUniSubscription implements UniSubscription {
         }
     }
 
-
     @Override
     public void cancel() {
         // Ignored.

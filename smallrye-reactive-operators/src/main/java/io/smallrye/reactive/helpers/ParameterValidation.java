@@ -12,7 +12,6 @@ public class ParameterValidation {
     public static final String SUPPLIER_PRODUCED_NULL = "The supplier returned `null`";
     public static final String MAPPER_RETURNED_NULL = "The mapper returned `null`";
 
-
     private ParameterValidation() {
         // avoid direct instantiation
     }
@@ -103,10 +102,10 @@ public class ParameterValidation {
     /**
      * Validates that the given collection {@code instance} has size matching the {@code expectedSize}
      *
-     * @param instance the instance
+     * @param instance     the instance
      * @param expectedSize the expected size
-     * @param name     the name of the parameter, must not be {@code null}
-     * @param <T>      the type of the instance
+     * @param name         the name of the parameter, must not be {@code null}
+     * @param <T>          the type of the instance
      * @return the instance if the validation passes
      */
     public static <T extends Collection<?>> T size(T instance, int expectedSize, String name) {

@@ -1,7 +1,5 @@
 package io.smallrye.reactive.operators;
 
-
-
 import io.smallrye.reactive.Uni;
 import io.smallrye.reactive.helpers.EmptyUniSubscription;
 import io.smallrye.reactive.subscription.UniSubscriber;
@@ -12,7 +10,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
-
 
 public class UniOrCombination<T> extends UniOperator<Void, T> {
 
@@ -33,7 +30,6 @@ public class UniOrCombination<T> extends UniOperator<Void, T> {
             challengers.add(nonNull(u, "array` must not contain a `null` value"));
         }
     }
-
 
     @SuppressWarnings("unchecked")
     @Override

@@ -33,7 +33,8 @@ public class MultiItemCombination {
      * @param <T3> the type of item from the third stream
      * @return the object to configure the combination process
      */
-    public <T1, T2, T3> MultiItemCombine3<T1, T2, T3> streams(Publisher<? extends T1> a, Publisher<? extends T2> b, Publisher<? extends T3> c) {
+    public <T1, T2, T3> MultiItemCombine3<T1, T2, T3> streams(Publisher<? extends T1> a, Publisher<? extends T2> b,
+            Publisher<? extends T3> c) {
         return new MultiItemCombine3<>(Arrays.asList(nonNull(a, "a"), nonNull(b, "b"), nonNull(c, "c")));
     }
 
@@ -50,8 +51,10 @@ public class MultiItemCombination {
      * @param <T4> the type of item from the fourth stream
      * @return the object to configure the combination process
      */
-    public <T1, T2, T3, T4> MultiItemCombine4<T1, T2, T3, T4> streams(Publisher<? extends T1> a, Publisher<? extends T2> b, Publisher<? extends T3> c, Publisher<? extends T4> d) {
-        return new MultiItemCombine4<>(Arrays.asList(nonNull(a, "a"), nonNull(b, "b"), nonNull(c, "c"), nonNull(d, "d")));
+    public <T1, T2, T3, T4> MultiItemCombine4<T1, T2, T3, T4> streams(Publisher<? extends T1> a,
+            Publisher<? extends T2> b, Publisher<? extends T3> c, Publisher<? extends T4> d) {
+        return new MultiItemCombine4<>(
+                Arrays.asList(nonNull(a, "a"), nonNull(b, "b"), nonNull(c, "c"), nonNull(d, "d")));
     }
 
     /**
@@ -69,8 +72,11 @@ public class MultiItemCombination {
      * @param <T5> the type of item from the fifth stream
      * @return the object to configure the combination process
      */
-    public <T1, T2, T3, T4, T5> MultiItemCombine5<T1, T2, T3, T4, T5> streams(Publisher<? extends T1> a, Publisher<? extends T2> b, Publisher<? extends T3> c, Publisher<? extends T4> d, Publisher<? extends T5> e) {
-        return new MultiItemCombine5<>(Arrays.asList(nonNull(a, "a"), nonNull(b, "b"), nonNull(c, "c"), nonNull(d, "d"), nonNull(e, "e")));
+    public <T1, T2, T3, T4, T5> MultiItemCombine5<T1, T2, T3, T4, T5> streams(Publisher<? extends T1> a,
+            Publisher<? extends T2> b, Publisher<? extends T3> c, Publisher<? extends T4> d,
+            Publisher<? extends T5> e) {
+        return new MultiItemCombine5<>(
+                Arrays.asList(nonNull(a, "a"), nonNull(b, "b"), nonNull(c, "c"), nonNull(d, "d"), nonNull(e, "e")));
     }
 
     /**
@@ -82,6 +88,5 @@ public class MultiItemCombination {
     public MultiItemCombineIterable streams(Iterable<? extends Publisher<?>> iterable) {
         return new MultiItemCombineIterable(nonNull(iterable, "iterable"));
     }
-
 
 }

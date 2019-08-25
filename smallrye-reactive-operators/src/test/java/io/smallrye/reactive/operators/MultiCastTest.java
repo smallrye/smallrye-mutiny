@@ -11,7 +11,6 @@ public class MultiCastTest {
                 .onItem().castTo(null);
     }
 
-
     @Test
     public void testCastThatWorks() {
         Multi.createFrom().item(1)

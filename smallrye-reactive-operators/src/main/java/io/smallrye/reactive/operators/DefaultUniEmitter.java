@@ -1,6 +1,5 @@
 package io.smallrye.reactive.operators;
 
-
 import io.smallrye.reactive.subscription.UniEmitter;
 import io.smallrye.reactive.subscription.UniSubscriber;
 import io.smallrye.reactive.subscription.UniSubscription;
@@ -9,7 +8,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
-
 
 /**
  * Implementation of the Uni Emitter.
@@ -59,7 +57,7 @@ public class DefaultUniEmitter<T> implements UniEmitter<T>, UniSubscription {
     @Override
     public UniEmitter<T> onTermination(Runnable callback) {
         Runnable actual = nonNull(callback, "callback");
-        if(! disposed.get()) {
+        if (!disposed.get()) {
             this.onTermination.set(actual);
             // Re-check if the termination didn't happen in the meantime
             if (disposed.get()) {
@@ -68,7 +66,6 @@ public class DefaultUniEmitter<T> implements UniEmitter<T>, UniSubscription {
         }
         return this;
     }
-
 
     @Override
     public void cancel() {

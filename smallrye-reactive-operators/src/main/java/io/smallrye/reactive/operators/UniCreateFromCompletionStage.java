@@ -14,7 +14,8 @@ public class UniCreateFromCompletionStage<O> extends UniOperator<Void, O> {
         this.supplier = nonNull(supplier, "supplier");
     }
 
-    private static <O> void forwardFromCompletionStage(CompletionStage<? extends O> stage, UniSerializedSubscriber<? super O> subscriber) {
+    private static <O> void forwardFromCompletionStage(CompletionStage<? extends O> stage,
+            UniSerializedSubscriber<? super O> subscriber) {
         subscriber.onSubscribe(() -> stage.toCompletableFuture().cancel(false));
         stage.whenComplete((res, fail) -> {
             if (fail != null) {

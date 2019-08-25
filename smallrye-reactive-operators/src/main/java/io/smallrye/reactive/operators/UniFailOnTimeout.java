@@ -1,7 +1,5 @@
 package io.smallrye.reactive.operators;
 
-
-
 import io.smallrye.reactive.Uni;
 import io.smallrye.reactive.helpers.Infrastructure;
 import io.smallrye.reactive.helpers.ParameterValidation;
@@ -20,13 +18,13 @@ import java.util.function.Supplier;
 import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
 import static io.smallrye.reactive.helpers.ParameterValidation.validate;
 
-
 public class UniFailOnTimeout<I> extends UniOperator<I, I> {
     private final Duration timeout;
     private final Supplier<Throwable> supplier;
     private final ScheduledExecutorService executor;
 
-    public UniFailOnTimeout(Uni<I> upstream, Duration timeout, Supplier<Throwable> supplier, ScheduledExecutorService executor) {
+    public UniFailOnTimeout(Uni<I> upstream, Duration timeout, Supplier<Throwable> supplier,
+            ScheduledExecutorService executor) {
         super(nonNull(upstream, "upstream"));
         this.timeout = validate(timeout, "onTimeout");
         this.supplier = nonNull(supplier, "supplier");

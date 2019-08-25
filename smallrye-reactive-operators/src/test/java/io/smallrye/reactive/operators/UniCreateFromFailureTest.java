@@ -55,7 +55,6 @@ public class UniCreateFromFailureTest {
         }
     }
 
-
     @Test(expected = IllegalArgumentException.class)
     public void testCreationWithNull() {
         Uni.createFrom().failure((Exception) null);
@@ -89,6 +88,5 @@ public class UniCreateFromFailureTest {
             assertThat(e).isInstanceOf(NoSuchElementException.class);
         }
     }
-
 
 }

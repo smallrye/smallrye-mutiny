@@ -7,7 +7,7 @@ import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
 public class MultiOverflow<T> {
     private final Multi<T> upstream;
 
-    public  MultiOverflow(Multi<T> upstream) {
+    public MultiOverflow(Multi<T> upstream) {
         this.upstream = nonNull(upstream, "upstream");
     }
 

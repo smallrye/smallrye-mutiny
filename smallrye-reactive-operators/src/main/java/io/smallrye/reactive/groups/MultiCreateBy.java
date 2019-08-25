@@ -1,6 +1,5 @@
 package io.smallrye.reactive.groups;
 
-
 public class MultiCreateBy {
     public static final MultiCreateBy INSTANCE = new MultiCreateBy();
 
@@ -46,8 +45,6 @@ public class MultiCreateBy {
      * <p>
      * The combination also allows to collect the failures and propagate a failure when all observed streams have completed
      * (or failed) instead of propagating the failure immediately.
-     *
-     *
      *
      * @return the object to configure the combination
      */

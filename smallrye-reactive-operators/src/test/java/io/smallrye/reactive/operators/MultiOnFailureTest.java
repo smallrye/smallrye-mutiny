@@ -170,7 +170,6 @@ public class MultiOnFailureTest {
                 .assertCompletedSuccessfully();
     }
 
-
     @Test
     public void testWhenRecoverWithMultiIsAlsoAFailure() {
         MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(0);
@@ -199,7 +198,6 @@ public class MultiOnFailureTest {
                 .assertTerminated()
                 .assertHasFailedWith(NullPointerException.class, "mapper");
     }
-
 
     @Test
     public void testRecoverWithResult() {
@@ -255,7 +253,6 @@ public class MultiOnFailureTest {
                 .assertCompletedSuccessfully()
                 .assertHasNotReceivedAnyItem();
     }
-
 
     @Test
     public void testRecoverWithMultiUsingEmitterAsFallback() {
@@ -316,7 +313,6 @@ public class MultiOnFailureTest {
                 .run(() -> assertThat(subscribed).hasValue(1))
                 .assertCompletedSuccessfully();
     }
-
 
     @Test
     public void testOnFailureMapWithPredicate() {

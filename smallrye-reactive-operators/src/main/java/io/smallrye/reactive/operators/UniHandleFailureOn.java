@@ -1,12 +1,10 @@
 package io.smallrye.reactive.operators;
 
-
 import io.smallrye.reactive.Uni;
 
 import java.util.concurrent.Executor;
 
 import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
-
 
 public class UniHandleFailureOn<I> extends UniOperator<I, I> {
     private final Executor executor;

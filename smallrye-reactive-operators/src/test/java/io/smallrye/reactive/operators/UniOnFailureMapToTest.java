@@ -16,6 +16,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class UniOnFailureMapToTest {
 
+    private Uni<Integer> failure = Uni.createFrom().failure(new IOException("boom"));
+
     @Test(expected = IllegalArgumentException.class)
     public void testThatMapperMustNotBeNull() {
         Uni.createFrom().item(1).onFailure().mapTo(null);
@@ -24,18 +26,6 @@ public class UniOnFailureMapToTest {
     @Test(expected = IllegalArgumentException.class)
     public void testThatSourceMustNotBeNull() {
         new UniMapOnFailure<>(null, t -> true, Function.identity());
-    }
-
-    private Uni<Integer> failure = Uni.createFrom().failure(new IOException("boom"));
-
-    private class BoomException extends Exception {
-        BoomException() {
-            super("BoomException");
-        }
-
-        BoomException(int count) {
-            super(Integer.toString(count));
-        }
     }
 
     @Test
@@ -51,7 +41,6 @@ public class UniOnFailureMapToTest {
     public void testWithTwoSubscribers() {
         UniAssertSubscriber<Integer> ts1 = UniAssertSubscriber.create();
         UniAssertSubscriber<Integer> ts2 = UniAssertSubscriber.create();
-
 
         AtomicInteger count = new AtomicInteger();
         Uni<Integer> uni = failure.onFailure().mapTo(t -> new BoomException(count.incrementAndGet()));
@@ -152,5 +141,14 @@ public class UniOnFailureMapToTest {
         assertThat(called).isFalse();
     }
 
+    private class BoomException extends Exception {
+        BoomException() {
+            super("BoomException");
+        }
+
+        BoomException(int count) {
+            super(Integer.toString(count));
+        }
+    }
 
 }

@@ -1,6 +1,5 @@
 package io.smallrye.reactive.operators;
 
-import io.smallrye.reactive.CompositeException;
 import io.smallrye.reactive.Multi;
 import io.smallrye.reactive.tuples.Functions;
 import io.smallrye.reactive.tuples.Tuple5;
@@ -10,7 +9,6 @@ import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
 import static io.smallrye.reactive.helpers.ParameterValidation.size;
 
 public class MultiItemCombine5<T1, T2, T3, T4, T5> extends MultiItemCombineIterable {
-
 
     public MultiItemCombine5(Iterable<Publisher<?>> iterable) {
         super(iterable);
@@ -68,7 +66,8 @@ public class MultiItemCombine5<T1, T2, T3, T4, T5> extends MultiItemCombineItera
         nonNull(combinator, "combinator");
         return super.combine(args -> {
             size(args, 5, "args");
-            return combinator.apply((T1) args.get(0), (T2) args.get(1), (T3) args.get(2), (T4) args.get(3), (T5) args.get(4));
+            return combinator
+                    .apply((T1) args.get(0), (T2) args.get(1), (T3) args.get(2), (T4) args.get(3), (T5) args.get(4));
         });
     }
 }

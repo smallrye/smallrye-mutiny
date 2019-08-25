@@ -334,7 +334,6 @@ public class MultiFlatMapToPublisherTest {
                 .mergeResults(25)
                 .subscribe(subscriber);
 
-
         subscriber.await().assertCompletedSuccessfully();
         assertThat(subscriber.items()).hasSize(10000);
     }

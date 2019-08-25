@@ -10,7 +10,6 @@ import static io.smallrye.reactive.helpers.ParameterValidation.size;
 
 public class MultiItemCombine3<T1, T2, T3> extends MultiItemCombineIterable {
 
-
     public MultiItemCombine3(Iterable<Publisher<?>> iterable) {
         super(iterable);
     }

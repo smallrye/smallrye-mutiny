@@ -15,12 +15,10 @@ import static org.awaitility.Awaitility.await;
 
 public class UniOnItemDelayTest {
 
-
     private ScheduledExecutorService executor = Executors.newScheduledThreadPool(4);
     private Uni<Void> delayed = Uni.createFrom().nullItem().onItem().delayIt()
             .onExecutor(executor)
             .by(Duration.ofMillis(100));
-
 
     @After
     public void shutdown() {
@@ -98,7 +96,8 @@ public class UniOnItemDelayTest {
         };
 
         UniAssertSubscriber<Integer> subscriber = new UniAssertSubscriber<>(true);
-        Uni.createFrom().item(1).onItem().delayIt().onExecutor(executor).by(Duration.ofMillis(100)).subscribe().withSubscriber(subscriber);
+        Uni.createFrom().item(1).onItem().delayIt().onExecutor(executor).by(Duration.ofMillis(100)).subscribe()
+                .withSubscriber(subscriber);
         subscriber.assertNotCompleted();
         assertThat(called).isFalse();
     }

@@ -48,7 +48,6 @@ public class MultiCollect<T> {
         return MultiCollector.last(upstream);
     }
 
-
     /**
      * Creates a {@link Uni} emitting an item containing all elements emitted by this {@link Multi} into a
      * {@link List}. The produced {@link Uni} emits its item when this {@link Multi} completes.
@@ -132,7 +131,7 @@ public class MultiCollect<T> {
      * {@link Multi} completes
      */
     public <K, V> Uni<Map<K, V>> asMap(Function<? super T, ? extends K> keyMapper,
-                                       Function<? super T, ? extends V> valueMapper) {
+            Function<? super T, ? extends V> valueMapper) {
         return MultiCollector.map(upstream, keyMapper, valueMapper);
     }
 
@@ -155,7 +154,7 @@ public class MultiCollect<T> {
      * {@link Multi} completes
      */
     public <K, V> Uni<Map<K, Collection<V>>> asMultiMap(Function<? super T, ? extends K> keyMapper,
-                                                        Function<? super T, ? extends V> valueMapper) {
+            Function<? super T, ? extends V> valueMapper) {
         return MultiCollector.multimap(upstream, keyMapper, valueMapper);
     }
 

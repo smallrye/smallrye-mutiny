@@ -14,6 +14,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class UniOnResultMapToItem {
 
+    private Uni<Integer> one = Uni.createFrom().item(1);
 
     @Test(expected = IllegalArgumentException.class)
     public void testThatMapperMustNotBeNull() {
@@ -25,12 +26,9 @@ public class UniOnResultMapToItem {
         new UniMapOnResult<>(null, Function.identity());
     }
 
-    private Uni<Integer> one = Uni.createFrom().item(1);
-
     @Test
     public void testSimpleMapping() {
         UniAssertSubscriber<Integer> ts = UniAssertSubscriber.create();
-
 
         one.map(v -> v + 1).subscribe().withSubscriber(ts);
 
@@ -42,7 +40,6 @@ public class UniOnResultMapToItem {
     public void testWithTwoSubscribers() {
         UniAssertSubscriber<Integer> ts1 = UniAssertSubscriber.create();
         UniAssertSubscriber<Integer> ts2 = UniAssertSubscriber.create();
-
 
         AtomicInteger count = new AtomicInteger();
         Uni<Integer> uni = one.map(v -> v + count.incrementAndGet());

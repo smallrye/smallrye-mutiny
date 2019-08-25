@@ -6,7 +6,10 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.time.Duration;
-import java.util.concurrent.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -40,7 +43,8 @@ public class UniSubscribeAsCompletionStageTest {
 
     @Test
     public void testWithImmediateFailure() {
-        CompletableFuture<Integer> future = Uni.createFrom().<Integer>failure(new IOException("boom")).subscribe().asCompletionStage();
+        CompletableFuture<Integer> future = Uni.createFrom().<Integer>failure(new IOException("boom")).subscribe()
+                .asCompletionStage();
         assertThat(future).isNotNull();
         try {
             future.join();
@@ -50,7 +54,6 @@ public class UniSubscribeAsCompletionStageTest {
         }
 
     }
-
 
     @Test
     public void testThatSubscriptionsAreNotShared() {
@@ -100,7 +103,6 @@ public class UniSubscribeAsCompletionStageTest {
         future.cancel(false);
         assertThat(value).hasValue(-1);
     }
-
 
     @Test
     public void testWithAsyncValue() {

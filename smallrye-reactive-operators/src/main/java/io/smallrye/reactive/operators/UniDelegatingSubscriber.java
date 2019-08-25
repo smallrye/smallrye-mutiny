@@ -7,7 +7,6 @@ import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
 
 public class UniDelegatingSubscriber<I, O> implements UniSubscriber<I> {
 
-
     private final UniSerializedSubscriber<? super O> delegate;
 
     public UniDelegatingSubscriber(UniSerializedSubscriber<? super O> subscriber) {

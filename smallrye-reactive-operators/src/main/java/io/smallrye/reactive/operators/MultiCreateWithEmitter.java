@@ -19,6 +19,23 @@ public class MultiCreateWithEmitter<T> extends MultiOperator<Void, T> {
         this.backPressureStrategy = strategy;
     }
 
+    public static BackpressureStrategy convert(BackPressureStrategy strategy) {
+        switch (strategy) {
+            case BUFFER:
+                return BackpressureStrategy.BUFFER;
+            case DROP:
+                return BackpressureStrategy.DROP;
+            case IGNORE:
+                return BackpressureStrategy.MISSING;
+            case ERROR:
+                return BackpressureStrategy.ERROR;
+            case LATEST:
+                return BackpressureStrategy.LATEST;
+            default:
+                throw new IllegalArgumentException("Unknown strategy " + strategy);
+        }
+    }
+
     @Override
     protected Flowable<T> flowable() {
         return Flowable.create(downstream -> {
@@ -52,22 +69,5 @@ public class MultiCreateWithEmitter<T> extends MultiOperator<Void, T> {
             };
             consumer.accept(emitter);
         }, convert(backPressureStrategy));
-    }
-
-    public static BackpressureStrategy convert(BackPressureStrategy strategy) {
-        switch (strategy) {
-            case BUFFER:
-                return BackpressureStrategy.BUFFER;
-            case DROP:
-                return BackpressureStrategy.DROP;
-            case IGNORE:
-                return BackpressureStrategy.MISSING;
-            case ERROR:
-                return BackpressureStrategy.ERROR;
-            case LATEST:
-                return BackpressureStrategy.LATEST;
-            default:
-                throw new IllegalArgumentException("Unknown strategy " + strategy);
-        }
     }
 }

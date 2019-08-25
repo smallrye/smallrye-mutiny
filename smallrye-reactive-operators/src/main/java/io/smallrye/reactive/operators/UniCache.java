@@ -1,6 +1,5 @@
 package io.smallrye.reactive.operators;
 
-
 import io.smallrye.reactive.Uni;
 import io.smallrye.reactive.subscription.UniSubscriber;
 import io.smallrye.reactive.subscription.UniSubscription;
@@ -10,7 +9,6 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
-
 
 public class UniCache<I> extends UniOperator<I, I> implements UniSubscriber<I> {
 
@@ -76,7 +74,8 @@ public class UniCache<I> extends UniOperator<I, I> implements UniSubscriber<I> {
     private void replay(UniSubscriber<? super I> subscriber) {
         synchronized (this) {
             if (state != COMPLETED) {
-                throw new IllegalStateException("Invalid state - expected being in the DONE state, but is in state: " + state);
+                throw new IllegalStateException(
+                        "Invalid state - expected being in the DONE state, but is in state: " + state);
             }
         }
         if (failure != null) {
@@ -104,7 +103,9 @@ public class UniCache<I> extends UniOperator<I, I> implements UniSubscriber<I> {
         List<UniSubscriber<? super I>> list;
         synchronized (this) {
             if (state != SUBSCRIBED) {
-                throw new IllegalStateException("Invalid state - received item while we where not in the SUBSCRIBED state, current state is: " + state);
+                throw new IllegalStateException(
+                        "Invalid state - received item while we where not in the SUBSCRIBED state, current state is: "
+                                + state);
             }
             state = COMPLETED;
             this.item = item;
@@ -122,7 +123,9 @@ public class UniCache<I> extends UniOperator<I, I> implements UniSubscriber<I> {
         List<UniSubscriber<? super I>> list;
         synchronized (this) {
             if (state != SUBSCRIBED) {
-                throw new IllegalStateException("Invalid state - received item while we where not in the SUBSCRIBED state, current state is: " + state);
+                throw new IllegalStateException(
+                        "Invalid state - received item while we where not in the SUBSCRIBED state, current state is: "
+                                + state);
             }
             state = COMPLETED;
             this.failure = failure;

@@ -24,5 +24,4 @@ public abstract class MultiOperator<I, O> extends AbstractMulti<O> {
         return Flowable.fromPublisher(upstream);
     }
 
-
 }

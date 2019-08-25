@@ -36,5 +36,4 @@ public class UniAndGroup3<T1, T2, T3> extends UniAndGroupIterable<T1> {
         return super.combinedWith(function);
     }
 
-
 }

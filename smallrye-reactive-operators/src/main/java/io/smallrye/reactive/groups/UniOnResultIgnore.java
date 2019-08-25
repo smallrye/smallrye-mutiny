@@ -1,12 +1,10 @@
 package io.smallrye.reactive.groups;
 
-
 import io.smallrye.reactive.Uni;
 
 import java.util.function.Supplier;
 
 import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
-
 
 public class UniOnResultIgnore<T> {
 
@@ -51,7 +49,7 @@ public class UniOnResultIgnore<T> {
      * Ignores the item fired by the current {@link Uni} and continue with the given {@link Uni}.
      *
      * @param other the uni to continue with, must not be {@code null}
-     * @param <O> the type of the new Uni
+     * @param <O>   the type of the new Uni
      * @return the new Uni
      */
     public <O> Uni<O> andSwitchTo(Uni<? extends O> other) {
@@ -63,7 +61,7 @@ public class UniOnResultIgnore<T> {
      * Ignores the item fired by the current {@link Uni} and continue with the {@link Uni} produced by the given supplier.
      *
      * @param supplier the supplier to produce the new {@link Uni}, must not be {@code null}, must not produce {@code null}
-     * @param <O> the type of the new Uni
+     * @param <O>      the type of the new Uni
      * @return the new Uni
      */
     public <O> Uni<O> andSwitchTo(Supplier<Uni<? extends O>> supplier) {

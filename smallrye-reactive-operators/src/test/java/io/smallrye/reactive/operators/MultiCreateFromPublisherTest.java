@@ -20,7 +20,8 @@ public class MultiCreateFromPublisherTest {
 
     @Test
     public void testWithFailedPublisher() {
-        MultiAssertSubscriber<String> subscriber = Multi.createFrom().<String>publisher(Flowable.error(new IOException("boom"))).subscribe()
+        MultiAssertSubscriber<String> subscriber = Multi.createFrom().<String>publisher(
+                Flowable.error(new IOException("boom"))).subscribe()
                 .withSubscriber(MultiAssertSubscriber.create());
         subscriber.assertHasFailedWith(IOException.class, "boom");
     }
@@ -31,7 +32,6 @@ public class MultiCreateFromPublisherTest {
                 .withSubscriber(MultiAssertSubscriber.create());
         subscriber.assertCompletedSuccessfully().assertHasNotReceivedAnyItem();
     }
-
 
     @Test
     public void testWithRegularPublisher() {

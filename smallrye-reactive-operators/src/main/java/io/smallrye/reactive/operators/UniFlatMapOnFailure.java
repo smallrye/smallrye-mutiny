@@ -12,14 +12,12 @@ import static io.smallrye.reactive.operators.UniFlatMapOnResult.invokeAndSubstit
 
 public class UniFlatMapOnFailure<I> extends UniOperator<I, I> {
 
-
     private final Function<? super Throwable, ? extends Uni<? extends I>> mapper;
     private final Predicate<? super Throwable> predicate;
 
-
     public UniFlatMapOnFailure(Uni<I> upstream,
-                               Predicate<? super Throwable> predicate,
-                               Function<? super Throwable, ? extends Uni<? extends I>> mapper) {
+            Predicate<? super Throwable> predicate,
+            Function<? super Throwable, ? extends Uni<? extends I>> mapper) {
         super(nonNull(upstream, "upstream"));
         this.mapper = nonNull(mapper, "mapper");
         this.predicate = nonNull(predicate, "predicate");

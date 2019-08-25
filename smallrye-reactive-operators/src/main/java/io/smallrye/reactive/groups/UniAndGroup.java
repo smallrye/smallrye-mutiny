@@ -85,7 +85,7 @@ public class UniAndGroup<T1> {
      * @return an {@link UniAndGroup4} to configure the combination
      */
     public <T2, T3, T4> UniAndGroup4<T1, T2, T3, T4> unis(Uni<? extends T2> u2, Uni<? extends T3> u3,
-                                                          Uni<? extends T4> u4) {
+            Uni<? extends T4> u4) {
         return new UniAndGroup4<>(upstream, u2, u3, u4);
     }
 
@@ -111,7 +111,7 @@ public class UniAndGroup<T1> {
      * @return an {@link UniAndGroup5} to configure the combination
      */
     public <T2, T3, T4, T5> UniAndGroup5<T1, T2, T3, T4, T5> unis(Uni<? extends T2> u2, Uni<? extends T3> u3,
-                                                                  Uni<? extends T4> u4, Uni<? extends T5> u5) {
+            Uni<? extends T4> u4, Uni<? extends T5> u5) {
         return new UniAndGroup5<>(upstream, u2, u3, u4, u5);
     }
 
@@ -148,6 +148,5 @@ public class UniAndGroup<T1> {
     public UniAndGroupIterable unis(Iterable<? extends Uni<?>> unis) {
         return new UniAndGroupIterable<>(upstream, unis);
     }
-
 
 }

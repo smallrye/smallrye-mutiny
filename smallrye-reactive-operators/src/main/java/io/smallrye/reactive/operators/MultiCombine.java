@@ -14,7 +14,6 @@ public class MultiCombine {
         // avoid direct instantiation.
     }
 
-
     @SuppressWarnings("unchecked")
     private static <T> Flowable<T> getFlowable(Publisher<T> publisher) {
         if (publisher instanceof Flowable) {
@@ -26,7 +25,8 @@ public class MultiCombine {
         return Flowable.fromPublisher(publisher);
     }
 
-    public static <T> Multi<T> merge(List<Publisher<T>> participants, boolean collectFailures, int requests, int concurrency) {
+    public static <T> Multi<T> merge(List<Publisher<T>> participants, boolean collectFailures, int requests,
+            int concurrency) {
         List<Flowable<T>> flowables = ParameterValidation.doesNotContainNull(participants, "participants")
                 .stream().map(MultiCombine::getFlowable).collect(Collectors.toList());
         Flowable<T> merged;

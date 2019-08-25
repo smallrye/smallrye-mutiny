@@ -6,9 +6,7 @@ import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
 
 public class DefaultMulti<T> extends AbstractMulti<T> {
 
-
     private final Flowable<T> delegate;
-
 
     DefaultMulti(Flowable<T> delegate) {
         this.delegate = nonNull(delegate, "delegate");

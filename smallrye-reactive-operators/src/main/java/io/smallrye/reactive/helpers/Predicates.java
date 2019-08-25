@@ -11,7 +11,7 @@ public class Predicates {
     }
 
     public static <T> boolean testFailure(Predicate<? super Throwable> predicate,
-                                          UniSerializedSubscriber<? super T> subscriber, Throwable failure) {
+            UniSerializedSubscriber<? super T> subscriber, Throwable failure) {
         if (predicate != null) {
             boolean pass;
             try {

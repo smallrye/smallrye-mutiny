@@ -13,10 +13,9 @@ public class UniCreateFromResultTest {
     @Test
     public void testThatNullValueAreAccepted() {
         UniAssertSubscriber<Object> ts = UniAssertSubscriber.create();
-        Uni.createFrom().item((String)null).subscribe().withSubscriber(ts);
+        Uni.createFrom().item((String) null).subscribe().withSubscriber(ts);
         ts.assertCompletedSuccessfully().assertItem(null);
     }
-
 
     @Test
     public void testWithNonNullValue() {
@@ -25,7 +24,6 @@ public class UniCreateFromResultTest {
         ts.assertCompletedSuccessfully().assertItem(1);
     }
 
-
     @Test
     public void testThatEmptyIsAcceptedWithFromOptional() {
         UniAssertSubscriber<Object> ts = UniAssertSubscriber.create();
@@ -33,12 +31,11 @@ public class UniCreateFromResultTest {
         ts.assertCompletedSuccessfully().assertItem(null);
     }
 
-    @SuppressWarnings({"OptionalAssignedToNull", "unchecked"})
+    @SuppressWarnings({ "OptionalAssignedToNull", "unchecked" })
     @Test(expected = IllegalArgumentException.class)
     public void testThatNullIfNotAcceptedByFromOptional() {
         Uni.createFrom().optional((Optional) null); // Immediate failure, no need for subscription
     }
-
 
     @Test
     public void testThatFulfilledOptionalIsAcceptedWithFromOptional() {
@@ -46,7 +43,6 @@ public class UniCreateFromResultTest {
         Uni.createFrom().optional(Optional.of(1)).subscribe().withSubscriber(ts);
         ts.assertCompletedSuccessfully().assertItem(1);
     }
-
 
     @Test
     public void testThatValueIsNotEmittedBeforeSubscription() {

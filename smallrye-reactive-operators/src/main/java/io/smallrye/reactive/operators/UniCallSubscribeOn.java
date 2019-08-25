@@ -1,6 +1,5 @@
 package io.smallrye.reactive.operators;
 
-
 import io.smallrye.reactive.Uni;
 import io.smallrye.reactive.subscription.UniSubscriber;
 import io.smallrye.reactive.subscription.UniSubscription;
@@ -11,9 +10,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import static io.smallrye.reactive.helpers.EmptyUniSubscription.CANCELLED;
 import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
 
-
 public class UniCallSubscribeOn<I> extends UniOperator<I, I> {
-
 
     private final Executor executor;
 
@@ -34,7 +31,8 @@ public class UniCallSubscribeOn<I> extends UniOperator<I, I> {
 
     }
 
-    class SubscribeOnUniSubscriber extends UniDelegatingSubscriber<I, I> implements Runnable, UniSubscriber<I>, UniSubscription {
+    class SubscribeOnUniSubscriber extends UniDelegatingSubscriber<I, I>
+            implements Runnable, UniSubscriber<I>, UniSubscription {
 
         final AtomicReference<UniSubscription> subscription = new AtomicReference<>();
 

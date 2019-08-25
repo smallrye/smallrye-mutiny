@@ -12,7 +12,6 @@ import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
 
 public abstract class AbstractUni<T> implements Uni<T> {
 
-
     abstract void subscribing(UniSerializedSubscriber<? super T> subscriber);
 
     @Override

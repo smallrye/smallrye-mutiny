@@ -17,7 +17,6 @@ public class MultiOnItem<T> {
         this.upstream = nonNull(upstream, "upstream");
     }
 
-
     /**
      * Produces a new {@link Multi} invoking the given function for each item emitted by the upstream {@link Multi}.
      * <p>
@@ -186,6 +185,5 @@ public class MultiOnItem<T> {
             }).toMulti();
         }).concatenateResults();
     }
-
 
 }

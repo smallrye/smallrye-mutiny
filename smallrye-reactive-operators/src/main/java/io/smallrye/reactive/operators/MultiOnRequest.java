@@ -2,9 +2,7 @@ package io.smallrye.reactive.operators;
 
 import io.reactivex.Flowable;
 import io.smallrye.reactive.Multi;
-import org.reactivestreams.Subscription;
 
-import java.util.function.Consumer;
 import java.util.function.LongConsumer;
 
 import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;

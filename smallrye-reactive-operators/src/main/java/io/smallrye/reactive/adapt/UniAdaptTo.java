@@ -44,7 +44,8 @@ public class UniAdaptTo<O> {
         if (instance == null) {
             instance = instantiateUsingFrom();
             if (instance == null) {
-                throw new IllegalArgumentException("Unable to create an instance of " + output.getName() + " from a Uni, no adapter found");
+                throw new IllegalArgumentException(
+                        "Unable to create an instance of " + output.getName() + " from a Uni, no adapter found");
             }
         }
         return instance;

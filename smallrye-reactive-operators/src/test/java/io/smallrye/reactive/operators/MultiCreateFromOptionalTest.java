@@ -40,7 +40,7 @@ public class MultiCreateFromOptionalTest {
     public void testWithAValueProducedInSupplier() {
         AtomicInteger count = new AtomicInteger();
 
-        Multi<String> multi  = Multi.createFrom()
+        Multi<String> multi = Multi.createFrom()
                 .deferredOptional(() -> Optional.of("hello-" + count.incrementAndGet()));
         MultiAssertSubscriber<String> subscriber1 = multi.subscribe().withSubscriber(MultiAssertSubscriber.create(1));
         MultiAssertSubscriber<String> subscriber2 = multi.subscribe().withSubscriber(MultiAssertSubscriber.create());
@@ -52,7 +52,7 @@ public class MultiCreateFromOptionalTest {
 
     @Test
     public void testWithEmptyProducedInSupplier() {
-        Multi<String> multi  = Multi.createFrom().deferredOptional(Optional::empty);
+        Multi<String> multi = Multi.createFrom().deferredOptional(Optional::empty);
         MultiAssertSubscriber<String> subscriber1 = multi.subscribe().withSubscriber(MultiAssertSubscriber.create(1));
         MultiAssertSubscriber<String> subscriber2 = multi.subscribe().withSubscriber(MultiAssertSubscriber.create());
 
@@ -62,7 +62,7 @@ public class MultiCreateFromOptionalTest {
 
     @Test
     public void testWithExceptionThrownBySupplier() {
-        Multi<String> multi  = Multi.createFrom().deferredOptional(() -> {
+        Multi<String> multi = Multi.createFrom().deferredOptional(() -> {
             throw new IllegalStateException("boom");
         });
         MultiAssertSubscriber<String> subscriber1 = multi.subscribe().withSubscriber(MultiAssertSubscriber.create());
@@ -72,10 +72,11 @@ public class MultiCreateFromOptionalTest {
     @SuppressWarnings("OptionalAssignedToNull")
     @Test
     public void testWithNullReturnedBySupplier() {
-        Multi<String> multi  = Multi.createFrom().deferredOptional(() -> null);
+        Multi<String> multi = Multi.createFrom().deferredOptional(() -> null);
         MultiAssertSubscriber<String> subscriber1 = multi.subscribe().withSubscriber(MultiAssertSubscriber.create());
         subscriber1.assertTerminated();
 
-        assertThat(subscriber1.failures()).hasSize(1).allSatisfy(t -> assertThat(t).isInstanceOf(NullPointerException.class));
+        assertThat(subscriber1.failures()).hasSize(1)
+                .allSatisfy(t -> assertThat(t).isInstanceOf(NullPointerException.class));
     }
 }

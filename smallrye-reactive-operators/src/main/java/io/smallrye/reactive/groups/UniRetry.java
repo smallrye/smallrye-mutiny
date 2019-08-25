@@ -1,13 +1,11 @@
 package io.smallrye.reactive.groups;
 
-
 import io.smallrye.reactive.Uni;
 import io.smallrye.reactive.operators.UniRetryAtMost;
 
 import java.util.function.Predicate;
 
 public class UniRetry<T> {
-
 
     private final Uni<T> upstream;
     private final Predicate<? super Throwable> predicate;

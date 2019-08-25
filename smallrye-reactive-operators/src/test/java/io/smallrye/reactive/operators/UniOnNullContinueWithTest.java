@@ -88,5 +88,4 @@ public class UniOnNullContinueWithTest {
                 .onNull().continueWith((Supplier<Integer>) null);
     }
 
-
 }

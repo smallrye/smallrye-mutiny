@@ -103,7 +103,7 @@ public class UniToPublisherTest {
     @Test
     public void testThatTwoSubscribersHaveTwoSubscriptions() {
         AtomicInteger count = new AtomicInteger(1);
-        Publisher<Integer> publisher =  Uni.createFrom().deferred(() -> Uni.createFrom()
+        Publisher<Integer> publisher = Uni.createFrom().deferred(() -> Uni.createFrom()
                 .item(count.getAndIncrement()))
                 .adapt().toPublisher();
         assertThat(publisher).isNotNull();
@@ -117,7 +117,7 @@ public class UniToPublisherTest {
     @Test
     public void testThatTwoSubscribersWithCache() {
         AtomicInteger count = new AtomicInteger(1);
-        Publisher<Integer> publisher =  Uni.createFrom()
+        Publisher<Integer> publisher = Uni.createFrom()
                 .deferred(() -> Uni.createFrom().item(count.getAndIncrement())).cache().adapt().toPublisher();
         assertThat(publisher).isNotNull();
         Flowable<Integer> flow = Flowable.fromPublisher(publisher);
@@ -175,7 +175,6 @@ public class UniToPublisherTest {
         test.assertValue(1);
         test.assertComplete();
     }
-
 
     @Test
     public void testWithAsyncValue() {

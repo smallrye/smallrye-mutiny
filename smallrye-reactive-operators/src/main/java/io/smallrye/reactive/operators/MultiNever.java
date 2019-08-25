@@ -9,7 +9,6 @@ public class MultiNever<T> extends AbstractMulti<T> {
         // avoid direct instantiation.
     }
 
-
     @Override
     protected Flowable<T> flowable() {
         return Flowable.never();

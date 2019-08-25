@@ -107,8 +107,8 @@ public class MultiToUniTest {
     public void testFromAnUniSendingResultEventInTheFuture() {
         AtomicInteger count = new AtomicInteger();
 
-
-        Multi<Integer> multi = Multi.createFrom().deferredCompletionStage(() -> CompletableFuture.supplyAsync(count::incrementAndGet));
+        Multi<Integer> multi = Multi.createFrom()
+                .deferredCompletionStage(() -> CompletableFuture.supplyAsync(count::incrementAndGet));
 
         multi.toUni().subscribe().withSubscriber(UniAssertSubscriber.create())
                 .await()

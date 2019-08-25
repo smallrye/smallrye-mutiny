@@ -1,6 +1,5 @@
 package io.smallrye.reactive.subscription;
 
-
 import io.smallrye.reactive.Multi;
 import org.reactivestreams.Subscription;
 

@@ -12,7 +12,7 @@ import java.util.function.Function;
 public class UniAndGroup5<T1, T2, T3, T4, T5> extends UniAndGroupIterable<T1> {
 
     public UniAndGroup5(Uni<? extends T1> source, Uni<? extends T2> o1, Uni<? extends T3> o2,
-                        Uni<? extends T4> o3, Uni<? extends T5> o4) {
+            Uni<? extends T4> o3, Uni<? extends T5> o4) {
         super(source, Arrays.asList(o1, o2, o3, o4));
     }
 
@@ -38,6 +38,5 @@ public class UniAndGroup5<T1, T2, T3, T4, T5> extends UniAndGroupIterable<T1> {
         };
         return super.combinedWith(function);
     }
-
 
 }

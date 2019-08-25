@@ -1,6 +1,5 @@
 package io.smallrye.reactive.operators;
 
-
 import io.smallrye.reactive.Uni;
 import io.smallrye.reactive.subscription.UniEmitter;
 import org.junit.Test;
@@ -108,7 +107,8 @@ public class UniOnItemFlatMapWithEmitterTest {
     public void testWithCancellationBeforeEmission() {
         UniAssertSubscriber<Integer> test = UniAssertSubscriber.create();
         CompletableFuture<Integer> future = new CompletableFuture<>();
-        Uni<Integer> uni = Uni.createFrom().item(1).onItem().mapToUni((v, e) -> future.whenComplete((x, f) -> e.complete(x)));
+        Uni<Integer> uni = Uni.createFrom().item(1).onItem()
+                .mapToUni((v, e) -> future.whenComplete((x, f) -> e.complete(x)));
         uni.subscribe().withSubscriber(test);
         test.cancel();
         test.assertNotCompleted();

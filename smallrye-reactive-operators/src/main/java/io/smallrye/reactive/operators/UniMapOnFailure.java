@@ -1,6 +1,5 @@
 package io.smallrye.reactive.operators;
 
-
 import io.smallrye.reactive.CompositeException;
 import io.smallrye.reactive.Uni;
 
@@ -16,8 +15,8 @@ public class UniMapOnFailure<I, O> extends UniOperator<I, O> {
     private final Predicate<? super Throwable> predicate;
 
     public UniMapOnFailure(Uni<I> upstream,
-                           Predicate<? super Throwable> predicate,
-                           Function<? super Throwable, ? extends Throwable> mapper) {
+            Predicate<? super Throwable> predicate,
+            Function<? super Throwable, ? extends Throwable> mapper) {
         super(nonNull(upstream, "upstream"));
         this.mapper = nonNull(mapper, "mapper");
         this.predicate = nonNull(predicate, "predicate");

@@ -14,8 +14,8 @@ import java.util.concurrent.CompletionStage;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-import static io.smallrye.reactive.helpers.ParameterValidation.*;
-
+import static io.smallrye.reactive.helpers.ParameterValidation.SUPPLIER_PRODUCED_NULL;
+import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
 
 /**
  * Group methods allowing to create {@link Uni} instances from various sources.
@@ -133,7 +133,7 @@ public class UniCreate {
      * {@code null}) item.
      *
      * @param item the item, can be {@code null}
-     * @param <T>    the type of item
+     * @param <T>  the type of item
      * @return the new {@link Uni}
      */
     public <T> Uni<T> item(T item) {
@@ -280,7 +280,6 @@ public class UniCreate {
     public Uni<Void> nullItem() {
         return deferredItem(() -> null);
     }
-
 
     public <T, X> Uni<T> converterOf(X instance) {
         return UniAdaptFrom.adaptFrom(instance);

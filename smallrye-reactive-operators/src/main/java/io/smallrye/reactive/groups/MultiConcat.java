@@ -15,7 +15,6 @@ import java.util.List;
  */
 public class MultiConcat {
 
-
     private final boolean collectFailures;
     private final int requests;
 

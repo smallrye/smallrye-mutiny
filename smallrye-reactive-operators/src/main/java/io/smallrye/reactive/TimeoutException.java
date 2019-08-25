@@ -13,7 +13,6 @@ public class TimeoutException extends RuntimeException {
         super();
     }
 
-
     /**
      * Constructs a {@code TimeoutException} with the specified detail message.
      *

@@ -11,7 +11,6 @@ import java.util.function.Consumer;
 import static io.smallrye.reactive.helpers.EmptyUniSubscription.CANCELLED;
 import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
 
-
 /**
  * Implementation of a {@link UniSubscriber} based on callbacks.
  * This implementation also implement {@link UniSubscription} to expose the {@link #cancel()} method.
@@ -32,7 +31,7 @@ public class UniCallbackSubscriber<T> implements UniSubscriber<T>, UniSubscripti
      * @param onFailureCallback callback invoked on failure event, must not be {@code null}
      */
     public UniCallbackSubscriber(Consumer<? super T> onResultCallback,
-                          Consumer<? super Throwable> onFailureCallback) {
+            Consumer<? super Throwable> onFailureCallback) {
         this.onResultCallback = nonNull(onResultCallback, "onResultCallback");
         this.onFailureCallback = nonNull(onFailureCallback, "onFailureCallback");
     }

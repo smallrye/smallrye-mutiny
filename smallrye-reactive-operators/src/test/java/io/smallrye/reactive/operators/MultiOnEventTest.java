@@ -198,7 +198,6 @@ public class MultiOnEventTest {
                 .assertCompletedSuccessfully()
                 .assertHasNotReceivedAnyItem();
 
-
         assertThat(subscription.get()).isNotNull();
         assertThat(item.get()).isNull();
         assertThat(failure.get()).isNull();
@@ -207,7 +206,6 @@ public class MultiOnEventTest {
         assertThat(requests.get()).isEqualTo(0);
         assertThat(cancellation.get()).isFalse();
     }
-
 
     @Test
     public void testWithNoEvents() {
@@ -231,7 +229,6 @@ public class MultiOnEventTest {
                 .assertNotTerminated()
                 .assertHasNotReceivedAnyItem();
 
-
         assertThat(subscription.get()).isNotNull();
         assertThat(item.get()).isNull();
         assertThat(failure.get()).isNull();
@@ -244,7 +241,6 @@ public class MultiOnEventTest {
         assertThat(termination.get()).isTrue();
         assertThat(cancellation.get()).isTrue();
     }
-
 
     @Test
     public void testWhenOnItemPeekThrowsExceptions() {
@@ -290,7 +286,6 @@ public class MultiOnEventTest {
                 .assertReceived(1, 2);
     }
 
-
     @Test
     public void testWhenBothOnItemAndOnFailureThrowsException() {
         Multi.createFrom().item(1)
@@ -316,6 +311,5 @@ public class MultiOnEventTest {
 
         assertThat(called).hasValue(1);
     }
-
 
 }

@@ -89,7 +89,8 @@ public class UniZipTest {
         Uni<Integer> uni4 = Uni.createFrom().item(4);
 
         UniAssertSubscriber<Tuple5<Integer, Integer, Integer, Integer, Integer>> subscriber =
-                Uni.combine().all().unis(uni, uni, uni2, uni3, uni4).asTuple().subscribe().withSubscriber(UniAssertSubscriber.create());
+                Uni.combine().all().unis(uni, uni, uni2, uni3, uni4).asTuple().subscribe()
+                        .withSubscriber(UniAssertSubscriber.create());
 
         assertThat(subscriber.getItem().asList()).containsExactly(1, 1, 2, 3, 4);
     }
@@ -101,10 +102,10 @@ public class UniZipTest {
         Uni<Integer> uni3 = Uni.createFrom().item(3);
 
         UniAssertSubscriber<Tuple4<Integer, Integer, Integer, Integer>> subscriber =
-                Uni.combine().all().unis(uni, uni, uni2, uni3).asTuple().subscribe().withSubscriber(UniAssertSubscriber.create());
+                Uni.combine().all().unis(uni, uni, uni2, uni3).asTuple().subscribe()
+                        .withSubscriber(UniAssertSubscriber.create());
 
         assertThat(subscriber.getItem().asList()).containsExactly(1, 1, 2, 3);
     }
-
 
 }

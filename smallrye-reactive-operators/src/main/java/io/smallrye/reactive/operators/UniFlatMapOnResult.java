@@ -2,7 +2,6 @@ package io.smallrye.reactive.operators;
 
 import io.smallrye.reactive.Uni;
 import io.smallrye.reactive.helpers.EmptyUniSubscription;
-import io.smallrye.reactive.helpers.ParameterValidation;
 import io.smallrye.reactive.subscription.UniSubscriber;
 import io.smallrye.reactive.subscription.UniSubscription;
 import org.reactivestreams.Subscription;
@@ -15,7 +14,6 @@ import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
 
 public class UniFlatMapOnResult<I, O> extends UniOperator<I, O> {
 
-
     private final Function<? super I, ? extends Uni<? extends O>> mapper;
 
     public UniFlatMapOnResult(Uni<I> upstream, Function<? super I, ? extends Uni<? extends O>> mapper) {
@@ -24,8 +22,8 @@ public class UniFlatMapOnResult<I, O> extends UniOperator<I, O> {
     }
 
     public static <I, O> void invokeAndSubstitute(Function<? super I, ? extends Uni<? extends O>> mapper, I input,
-                                                  UniSerializedSubscriber<? super O> subscriber,
-                                                  FlatMapSubscription flatMapSubscription) {
+            UniSerializedSubscriber<? super O> subscriber,
+            FlatMapSubscription flatMapSubscription) {
         Uni<? extends O> outcome;
         try {
             outcome = mapper.apply(input);

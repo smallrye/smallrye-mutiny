@@ -1,6 +1,5 @@
 package io.smallrye.reactive.groups;
 
-
 import io.smallrye.reactive.TimeoutException;
 import io.smallrye.reactive.Uni;
 import io.smallrye.reactive.operators.UniFailOnTimeout;
@@ -11,7 +10,6 @@ import java.util.function.Supplier;
 
 import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
 import static io.smallrye.reactive.helpers.ParameterValidation.validate;
-
 
 public class UniOnTimeout<T> {
 
@@ -106,6 +104,5 @@ public class UniOnTimeout<T> {
     public Uni<T> recoverWithUni(Uni<? extends T> fallback) {
         return fail().onFailure(TimeoutException.class).recoverWithUni(fallback);
     }
-
 
 }

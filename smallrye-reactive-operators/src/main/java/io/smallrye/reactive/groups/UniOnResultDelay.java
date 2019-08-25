@@ -26,7 +26,6 @@ public class UniOnResultDelay<T> {
         return new UniDelayOnItem<>(upstream, duration, executor);
     }
 
-
     public Uni<T> until(Function<? super T, ? extends Uni<?>> function) {
         throw new UnsupportedOperationException("to be implemented");
     }

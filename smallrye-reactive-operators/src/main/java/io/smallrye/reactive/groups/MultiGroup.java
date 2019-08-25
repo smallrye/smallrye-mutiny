@@ -44,7 +44,8 @@ public class MultiGroup<T> {
         return MultiCollector.groupBy(upstream, nonNull(keyMapper, "keyMapper"), null);
     }
 
-    public <K, V> Multi<GroupedMulti<K, V>> by(Function<? super T, ? extends K> keyMapper, Function<? super T, ? extends V> valueMapper) {
+    public <K, V> Multi<GroupedMulti<K, V>> by(Function<? super T, ? extends K> keyMapper,
+            Function<? super T, ? extends V> valueMapper) {
         return MultiCollector.groupBy(upstream, nonNull(keyMapper, "keyMapper"), nonNull(valueMapper, "valueMapper"));
     }
 }

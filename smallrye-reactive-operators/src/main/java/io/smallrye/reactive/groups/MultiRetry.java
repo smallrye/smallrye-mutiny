@@ -1,6 +1,5 @@
 package io.smallrye.reactive.groups;
 
-
 import io.smallrye.reactive.Multi;
 import io.smallrye.reactive.operators.MultiRetryAtMost;
 
@@ -9,7 +8,6 @@ import java.util.function.Predicate;
 import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
 
 public class MultiRetry<T> {
-
 
     private final Multi<T> upstream;
     private final Predicate<? super Throwable> predicate;

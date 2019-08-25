@@ -1,6 +1,5 @@
 package io.smallrye.reactive.groups;
 
-
 import io.smallrye.reactive.Uni;
 import io.smallrye.reactive.helpers.UniCallbackSubscriber;
 import io.smallrye.reactive.operators.AbstractUni;
@@ -43,7 +42,7 @@ public class UniSubscribe<T> {
      * receiving by {@link UniSubscriber#onFailure(Throwable)}.
      *
      * @param subscriber the subscriber, must not be {@code null}
-     * @param <S> the type of subscriber returned
+     * @param <S>        the type of subscriber returned
      * @return the passed subscriber
      */
     public <S extends UniSubscriber<? super T>> S withSubscriber(S subscriber) {

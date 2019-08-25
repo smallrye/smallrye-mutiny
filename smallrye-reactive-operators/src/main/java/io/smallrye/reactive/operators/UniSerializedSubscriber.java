@@ -60,7 +60,8 @@ public class UniSerializedSubscriber<T> implements UniSubscriber<T>, UniSubscrip
             }
         } else {
             propagateFailureEvent(this.downstream,
-                    new IllegalStateException("Invalid transition, expected to be in the SUBSCRIBED state but was in " + state.get()));
+                    new IllegalStateException(
+                            "Invalid transition, expected to be in the SUBSCRIBED state but was in " + state.get()));
         }
     }
 
@@ -71,7 +72,9 @@ public class UniSerializedSubscriber<T> implements UniSubscriber<T>, UniSubscrip
             dispose();
         } else if (state.get() != DONE) { // Are we already done? In this case, drop the signal
             propagateFailureEvent(this.downstream,
-                    new IllegalStateException("Invalid transition, expected to be in the HAS_SUBSCRIPTION state but was in " + state.get()));
+                    new IllegalStateException(
+                            "Invalid transition, expected to be in the HAS_SUBSCRIPTION state but was in " + state
+                                    .get()));
         }
     }
 
@@ -83,7 +86,9 @@ public class UniSerializedSubscriber<T> implements UniSubscriber<T>, UniSubscrip
             collectedFailure.compareAndSet(null, failure);
         } else if (state.get() != DONE) { // Are we already done? In this case, drop the signal
             propagateFailureEvent(this.downstream,
-                    new IllegalStateException("Invalid transition, expected to be in the HAS_SUBSCRIPTION state but was in " + state.get()));
+                    new IllegalStateException(
+                            "Invalid transition, expected to be in the HAS_SUBSCRIPTION state but was in " + state
+                                    .get()));
         }
     }
 

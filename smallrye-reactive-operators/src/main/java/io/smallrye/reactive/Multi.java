@@ -92,7 +92,6 @@ public interface Multi<T> extends Publisher<T> {
      */
     MultiOnEvent<T> on();
 
-
     /**
      * Creates a new {@link Multi} that subscribes to this upstream and caches all of its events and replays them, to
      * all the downstream subscribers.

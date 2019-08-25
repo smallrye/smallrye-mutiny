@@ -98,7 +98,8 @@ public class MultiCreateFromCompletionStageTest {
         MultiAssertSubscriber<String> subscriber1 = multi.subscribe().withSubscriber(MultiAssertSubscriber.create());
         subscriber1.assertTerminated();
 
-        assertThat(subscriber1.failures()).hasSize(1).allSatisfy(t -> assertThat(t).isInstanceOf(NullPointerException.class));
+        assertThat(subscriber1.failures()).hasSize(1)
+                .allSatisfy(t -> assertThat(t).isInstanceOf(NullPointerException.class));
     }
 
     @Test

@@ -1,6 +1,5 @@
 package io.smallrye.reactive.groups;
 
-
 import io.smallrye.reactive.CompositeException;
 import io.smallrye.reactive.Uni;
 import io.smallrye.reactive.tuples.*;
@@ -18,7 +17,6 @@ import java.util.Arrays;
 public class UniZip {
 
     public static final UniZip INSTANCE = new UniZip();
-
 
     private UniZip() {
         // avoid direct instantiation
@@ -64,7 +62,8 @@ public class UniZip {
      * @param <T3> the type of the item for the third uni
      * @return an {@link UniAndGroup3} to configure the combination
      */
-    public <T1, T2, T3> UniAndGroup3<T1, T2, T3> unis(Uni<? extends T1> u1, Uni<? extends T2> u2, Uni<? extends T3> u3) {
+    public <T1, T2, T3> UniAndGroup3<T1, T2, T3> unis(Uni<? extends T1> u1, Uni<? extends T2> u2,
+            Uni<? extends T3> u3) {
         return new UniAndGroup3<>(u1, u2, u3);
     }
 
@@ -90,7 +89,7 @@ public class UniZip {
      * @return an {@link UniAndGroup4} to configure the combination
      */
     public <T1, T2, T3, T4> UniAndGroup4<T1, T2, T3, T4> unis(Uni<? extends T1> u1, Uni<? extends T2> u2,
-                                                              Uni<? extends T3> u3, Uni<? extends T4> u4) {
+            Uni<? extends T3> u3, Uni<? extends T4> u4) {
         return new UniAndGroup4<>(u1, u2, u3, u4);
     }
 
@@ -118,8 +117,8 @@ public class UniZip {
      * @return an {@link UniAndGroup5} to configure the combination
      */
     public <T1, T2, T3, T4, T5> UniAndGroup5<T1, T2, T3, T4, T5> unis(Uni<? extends T1> u1, Uni<? extends T2> u2,
-                                                                      Uni<? extends T3> u3, Uni<? extends T4> u4,
-                                                                      Uni<? extends T5> u5) {
+            Uni<? extends T3> u3, Uni<? extends T4> u4,
+            Uni<? extends T5> u5) {
         return new UniAndGroup5<>(u1, u2, u3, u4, u5);
     }
 
@@ -156,6 +155,5 @@ public class UniZip {
     public UniAndGroupIterable unis(Iterable<? extends Uni<?>> unis) {
         return new UniAndGroupIterable<>(unis);
     }
-
 
 }

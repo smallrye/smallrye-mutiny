@@ -28,7 +28,7 @@ public class UniAdaptToTest {
     @Test
     public void testThatSubscriptionOnCompletableProducesTheValue() {
         AtomicBoolean called = new AtomicBoolean();
-        Completable completable =  Uni.createFrom().deferred(() -> {
+        Completable completable = Uni.createFrom().deferred(() -> {
             called.set(true);
             return Uni.createFrom().item(2);
         }).adapt().to(Completable.class);
@@ -165,7 +165,7 @@ public class UniAdaptToTest {
     @Test
     public void testCreatingAFlowableWithRequest() {
         AtomicBoolean called = new AtomicBoolean();
-        Flowable<Integer> flowable =  Uni.createFrom().deferred(() -> {
+        Flowable<Integer> flowable = Uni.createFrom().deferred(() -> {
             called.set(true);
             return Uni.createFrom().item(1);
         }).adapt().to(Flowable.class);

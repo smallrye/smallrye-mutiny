@@ -1,6 +1,5 @@
 package io.smallrye.reactive.groups;
 
-
 import io.smallrye.reactive.Uni;
 
 import java.util.NoSuchElementException;
@@ -8,7 +7,6 @@ import java.util.function.Supplier;
 
 import static io.smallrye.reactive.helpers.ParameterValidation.SUPPLIER_PRODUCED_NULL;
 import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
-
 
 public class UniOnNull<T> {
 

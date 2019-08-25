@@ -20,6 +20,6 @@ public class MultiRetryAtMost<T> extends MultiOperator<T, T> {
 
     @Override
     protected Flowable<T> flowable() {
-        return upstreamAsFlowable().retry((count, failure) -> predicate.test(failure)  && count <= attempts);
+        return upstreamAsFlowable().retry((count, failure) -> predicate.test(failure) && count <= attempts);
     }
 }

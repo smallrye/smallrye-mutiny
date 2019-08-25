@@ -1,6 +1,5 @@
 package io.smallrye.reactive.operators;
 
-
 import io.smallrye.reactive.Uni;
 import org.junit.Test;
 
@@ -14,7 +13,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class UniCreateFromCompletionStageTest {
 
-
     @Test
     public void testThatNullValueAreAccepted() {
         UniAssertSubscriber<String> ts = UniAssertSubscriber.create();
@@ -24,7 +22,6 @@ public class UniCreateFromCompletionStageTest {
         ts.assertCompletedSuccessfully().assertItem(null);
     }
 
-
     @Test
     public void testWithNonNullValue() {
         UniAssertSubscriber<String> ts = UniAssertSubscriber.create();
@@ -33,7 +30,6 @@ public class UniCreateFromCompletionStageTest {
         cs.toCompletableFuture().complete("1");
         ts.assertCompletedSuccessfully().assertItem("1");
     }
-
 
     @Test
     public void testWithException() {
@@ -47,10 +43,10 @@ public class UniCreateFromCompletionStageTest {
     @Test
     public void testThatNullValueAreAcceptedWithSupplier() {
         UniAssertSubscriber<Void> ts = UniAssertSubscriber.create();
-        Uni.createFrom().<Void>deferredCompletionStage(() -> CompletableFuture.completedFuture(null)).subscribe().withSubscriber(ts);
+        Uni.createFrom().<Void>deferredCompletionStage(() -> CompletableFuture.completedFuture(null)).subscribe()
+                .withSubscriber(ts);
         ts.assertCompletedSuccessfully().assertItem(null);
     }
-
 
     @Test
     public void testWithNonNullValueWithSupplier() {
@@ -60,7 +56,6 @@ public class UniCreateFromCompletionStageTest {
         cs.toCompletableFuture().complete("1");
         ts.assertCompletedSuccessfully().assertItem("1");
     }
-
 
     @Test
     public void testWithExceptionWithSupplier() {
@@ -143,7 +138,8 @@ public class UniCreateFromCompletionStageTest {
         UniAssertSubscriber<Integer> ts = UniAssertSubscriber.create();
         CompletableFuture<Integer> cs = new CompletableFuture<>();
         Uni<Integer> uni = Uni.createFrom().completionStage(cs)
-                .onItem().consume(i -> {});
+                .onItem().consume(i -> {
+                });
 
         uni.subscribe().withSubscriber(ts);
         ts.cancel();

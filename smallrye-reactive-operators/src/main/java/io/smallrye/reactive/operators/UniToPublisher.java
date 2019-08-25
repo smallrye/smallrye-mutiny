@@ -47,7 +47,8 @@ public class UniToPublisher {
                         @Override
                         public void onSubscribe(UniSubscription subscription) {
                             if (!upstreamSubscription.compareAndSet(null, subscription)) {
-                                subscriber.onError(new IllegalStateException("Invalid subscription state - already have a subscription for upstream"));
+                                subscriber.onError(new IllegalStateException(
+                                        "Invalid subscription state - already have a subscription for upstream"));
                             }
                         }
 

@@ -5,7 +5,6 @@ import java.util.function.Function;
 
 public class Functions {
 
-
     @FunctionalInterface
     public interface Function3<T1, T2, T3, R> extends Function<List<Object>, R> {
         R apply(T1 item1, T2 item2, T3 item3);

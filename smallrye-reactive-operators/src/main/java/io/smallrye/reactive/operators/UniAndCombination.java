@@ -23,9 +23,9 @@ public class UniAndCombination<I, O> extends UniOperator<I, O> {
     private final List<Uni<?>> unis;
     private final boolean collectAllFailureBeforeFiring;
 
-    public UniAndCombination(Uni<? extends I> upstream,  List<? extends Uni<?>> others,
-                             Function<List<?>, O> combinator,
-                             boolean collectAllFailureBeforeFiring) {
+    public UniAndCombination(Uni<? extends I> upstream, List<? extends Uni<?>> others,
+            Function<List<?>, O> combinator,
+            boolean collectAllFailureBeforeFiring) {
         super(upstream);
 
         this.unis = new ArrayList<>();
@@ -123,7 +123,7 @@ public class UniAndCombination<I, O> extends UniOperator<I, O> {
                     return;
                 }
                 subscriber.onItem(aggregated);
-            } else  if (failures.size() == 1) {
+            } else if (failures.size() == 1) {
                 // If we had a single failure, fire it without the CompositeException envelope.
                 subscriber.onFailure(failures.get(0));
             } else {
@@ -133,14 +133,14 @@ public class UniAndCombination<I, O> extends UniOperator<I, O> {
 
         private List<Object> getItems() {
             return this.handlers.stream()
-                                    .map(u -> u.item)
-                                    .collect(Collectors.toList());
+                    .map(u -> u.item)
+                    .collect(Collectors.toList());
         }
 
         private List<Throwable> getFailures() {
             return handlers.stream()
-                                    .filter(u -> u.failure != null).map(u -> u.failure)
-                                    .collect(Collectors.toList());
+                    .filter(u -> u.failure != null).map(u -> u.failure)
+                    .collect(Collectors.toList());
         }
     }
 

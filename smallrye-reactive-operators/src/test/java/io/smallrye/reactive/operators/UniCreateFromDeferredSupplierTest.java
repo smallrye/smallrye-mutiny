@@ -12,7 +12,7 @@ public class UniCreateFromDeferredSupplierTest {
     @Test
     public void testWithMultipleSubscriptions() {
         AtomicInteger counter = new AtomicInteger();
-        Uni<Integer> s =  Uni.createFrom().deferred(() -> Uni.createFrom().item(counter.incrementAndGet()));
+        Uni<Integer> s = Uni.createFrom().deferred(() -> Uni.createFrom().item(counter.incrementAndGet()));
 
         for (int i = 1; i < 100; i++) {
             assertThat(s.await().indefinitely()).isEqualTo(i);
@@ -21,12 +21,12 @@ public class UniCreateFromDeferredSupplierTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testWithNull() {
-         Uni.createFrom().deferred(null);
+        Uni.createFrom().deferred(null);
     }
 
     @Test
     public void testWithASupplierProducingNull() {
-        Uni<Integer> s =  Uni.createFrom().deferred(() -> null);
+        Uni<Integer> s = Uni.createFrom().deferred(() -> null);
         UniAssertSubscriber<Integer> subscriber = UniAssertSubscriber.create();
         s.subscribe().withSubscriber(subscriber);
         subscriber.assertFailure(NullPointerException.class, "");
@@ -34,7 +34,7 @@ public class UniCreateFromDeferredSupplierTest {
 
     @Test
     public void testWithASupplierThrowingAnException() {
-        Uni<Integer> s =  Uni.createFrom().deferred(() -> {
+        Uni<Integer> s = Uni.createFrom().deferred(() -> {
             throw new IllegalStateException("boom");
         });
         UniAssertSubscriber<Integer> subscriber = UniAssertSubscriber.create();

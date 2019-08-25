@@ -27,21 +27,24 @@ public class UniOnItemIgnoreTest {
     @Test
     public void testIgnoreAndFail() {
         UniAssertSubscriber<Integer> subscriber =
-                Uni.createFrom().item(22).onItem().ignoreIt().andFail().subscribe().withSubscriber(UniAssertSubscriber.create());
+                Uni.createFrom().item(22).onItem().ignoreIt().andFail().subscribe()
+                        .withSubscriber(UniAssertSubscriber.create());
         subscriber.assertFailure(Exception.class, "");
     }
 
     @Test
     public void testIgnoreAndFailWith() {
         UniAssertSubscriber<Integer> subscriber =
-                Uni.createFrom().item(22).onItem().ignoreIt().andFail(new IOException("boom")).subscribe().withSubscriber(UniAssertSubscriber.create());
+                Uni.createFrom().item(22).onItem().ignoreIt().andFail(new IOException("boom")).subscribe()
+                        .withSubscriber(UniAssertSubscriber.create());
         subscriber.assertFailure(IOException.class, "boom");
     }
 
     @Test
     public void testIgnoreAndFailWithSupplier() {
         AtomicInteger count = new AtomicInteger();
-        Uni<Integer> boom = Uni.createFrom().item(22).onItem().ignoreIt().andFail(() -> new IOException("boom " + count.incrementAndGet()));
+        Uni<Integer> boom = Uni.createFrom().item(22).onItem().ignoreIt()
+                .andFail(() -> new IOException("boom " + count.incrementAndGet()));
         UniAssertSubscriber<Integer> s1 = boom.subscribe().withSubscriber(UniAssertSubscriber.create());
         UniAssertSubscriber<Integer> s2 = boom.subscribe().withSubscriber(UniAssertSubscriber.create());
         s1.assertFailure(IOException.class, "boom 1");
@@ -60,7 +63,8 @@ public class UniOnItemIgnoreTest {
 
     @Test
     public void testIgnoreAndContinueWithValue() {
-        assertThat(Uni.createFrom().item(24).onItem().ignoreIt().andContinueWith(42).await().indefinitely()).isEqualTo(42);
+        assertThat(Uni.createFrom().item(24).onItem().ignoreIt().andContinueWith(42).await().indefinitely())
+                .isEqualTo(42);
     }
 
     @Test
@@ -73,13 +77,15 @@ public class UniOnItemIgnoreTest {
 
     @Test
     public void testIgnoreAndContinueWithValueSupplierReturningNull() {
-        assertThat(Uni.createFrom().item(24).onItem().ignoreIt().andContinueWith(() -> null).await().indefinitely()).isEqualTo(null);
+        assertThat(Uni.createFrom().item(24).onItem().ignoreIt().andContinueWith(() -> null).await().indefinitely())
+                .isEqualTo(null);
     }
 
     @Test
     public void testIgnoreAndSwitchToSupplier() {
         AtomicInteger count = new AtomicInteger();
-        Uni<Integer> uni = Uni.createFrom().item(24).onItem().ignoreIt().andSwitchTo(() -> Uni.createFrom().deferredItem(count::incrementAndGet));
+        Uni<Integer> uni = Uni.createFrom().item(24).onItem().ignoreIt()
+                .andSwitchTo(() -> Uni.createFrom().deferredItem(count::incrementAndGet));
         assertThat(uni.await().indefinitely()).isEqualTo(1);
         assertThat(uni.await().indefinitely()).isEqualTo(2);
     }
@@ -87,7 +93,8 @@ public class UniOnItemIgnoreTest {
     @Test
     public void testIgnoreAndSwitchToUni() {
         AtomicInteger count = new AtomicInteger();
-        Uni<Integer> uni = Uni.createFrom().item(24).onItem().ignoreIt().andSwitchTo(Uni.createFrom().deferredItem(count::incrementAndGet));
+        Uni<Integer> uni = Uni.createFrom().item(24).onItem().ignoreIt()
+                .andSwitchTo(Uni.createFrom().deferredItem(count::incrementAndGet));
         assertThat(uni.await().indefinitely()).isEqualTo(1);
         assertThat(uni.await().indefinitely()).isEqualTo(2);
     }

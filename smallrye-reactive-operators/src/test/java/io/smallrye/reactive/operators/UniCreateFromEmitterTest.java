@@ -86,7 +86,8 @@ public class UniCreateFromEmitterTest {
     public void testWithOnTerminationCallback() {
         UniAssertSubscriber<Integer> subscriber = UniAssertSubscriber.create();
         AtomicInteger onTerminationCalled = new AtomicInteger();
-        Uni.createFrom().<Integer>emitter(emitter -> emitter.onTermination(onTerminationCalled::incrementAndGet)).subscribe().withSubscriber(subscriber);
+        Uni.createFrom().<Integer>emitter(emitter -> emitter.onTermination(onTerminationCalled::incrementAndGet))
+                .subscribe().withSubscriber(subscriber);
 
         assertThat(onTerminationCalled).hasValue(0);
         subscriber.cancel();
@@ -96,7 +97,8 @@ public class UniCreateFromEmitterTest {
     @Test
     public void testWithFailure() {
         UniAssertSubscriber<Integer> subscriber = UniAssertSubscriber.create();
-        Uni.createFrom().<Integer>emitter(emitter -> emitter.fail(new Exception("boom"))).subscribe().withSubscriber(subscriber);
+        Uni.createFrom().<Integer>emitter(emitter -> emitter.fail(new Exception("boom"))).subscribe()
+                .withSubscriber(subscriber);
 
         subscriber.assertFailure(Exception.class, "boom");
     }
@@ -122,7 +124,8 @@ public class UniCreateFromEmitterTest {
         }).subscribe().withSubscriber(subscriber);
 
         subscriber.assertCompletedSuccessfully();
-        assertThat(reference.get()).isInstanceOf(DefaultUniEmitter.class).satisfies(e -> ((DefaultUniEmitter) e).isTerminated());
+        assertThat(reference.get()).isInstanceOf(DefaultUniEmitter.class)
+                .satisfies(e -> ((DefaultUniEmitter) e).isTerminated());
     }
 
     @Test

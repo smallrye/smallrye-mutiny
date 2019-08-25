@@ -1,6 +1,5 @@
 package io.smallrye.reactive.operators;
 
-
 import io.smallrye.reactive.Uni;
 import io.smallrye.reactive.helpers.ParameterValidation;
 
@@ -8,7 +7,6 @@ import java.util.function.Supplier;
 
 import static io.smallrye.reactive.helpers.EmptyUniSubscription.CANCELLED;
 import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
-
 
 public class UniCreateFromDeferredSupplier<T> extends UniOperator<Void, T> {
     private final Supplier<? extends Uni<? extends T>> supplier;

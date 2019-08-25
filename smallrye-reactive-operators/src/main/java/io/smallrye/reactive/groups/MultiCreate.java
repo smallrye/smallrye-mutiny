@@ -24,7 +24,6 @@ import java.util.stream.StreamSupport;
 import static io.smallrye.reactive.helpers.ParameterValidation.SUPPLIER_PRODUCED_NULL;
 import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
 
-
 /**
  * Group methods allowing to create {@link Multi} instances from various sources.
  */
@@ -244,7 +243,7 @@ public class MultiCreate {
      * the completion event.
      *
      * @param item the item, can be {@code null} which would create an empty {@link Multi}
-     * @param <T>    the type of item emitted by the produced Multi
+     * @param <T>  the type of item emitted by the produced Multi
      * @return the new {@link Multi}
      */
     public <T> Multi<T> item(T item) {
@@ -261,7 +260,7 @@ public class MultiCreate {
      * When all the items have been emitted, the completion event is fired.
      *
      * @param items the items, must not be {@code null}, must not contain {@code null}
-     * @param <T>     the type of item emitted by the produced Multi
+     * @param <T>   the type of item emitted by the produced Multi
      * @return the new {@link Multi}
      */
     @SafeVarargs
@@ -298,7 +297,7 @@ public class MultiCreate {
      * The stream is consumed sequentially.
      *
      * @param items the items, must not be {@code null}, must not contain {@code null}
-     * @param <T>     the type of item emitted by the produced Multi
+     * @param <T>   the type of item emitted by the produced Multi
      * @return the new {@link Multi}
      */
     public <T> Multi<T> items(Stream<T> items) {
@@ -485,8 +484,7 @@ public class MultiCreate {
         return Multi.createFrom().iterable(() -> IntStream.range(startInclusive, endExclusive).iterator());
     }
 
-
-//    public <T, X> Multi<T> converterOf(X instance) {
-//        return MultiAdaptFrom.adaptFrom(instance);
-//    }
+    //    public <T, X> Multi<T> converterOf(X instance) {
+    //        return MultiAdaptFrom.adaptFrom(instance);
+    //    }
 }

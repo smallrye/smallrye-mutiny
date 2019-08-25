@@ -1,6 +1,5 @@
 package io.smallrye.reactive.groups;
 
-
 import io.smallrye.reactive.Multi;
 import io.smallrye.reactive.operators.MultiFlatMapOnFailure;
 import io.smallrye.reactive.operators.MultiMapOnFailure;
@@ -13,7 +12,6 @@ import java.util.function.Supplier;
 
 import static io.smallrye.reactive.helpers.ParameterValidation.SUPPLIER_PRODUCED_NULL;
 import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
-
 
 public class MultiOnFailure<T> {
 
@@ -90,6 +88,5 @@ public class MultiOnFailure<T> {
     public MultiRetry<T> retry() {
         return new MultiRetry<>(upstream, predicate);
     }
-
 
 }

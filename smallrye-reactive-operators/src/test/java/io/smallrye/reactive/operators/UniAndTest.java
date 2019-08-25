@@ -1,6 +1,5 @@
 package io.smallrye.reactive.operators;
 
-
 import io.smallrye.reactive.CompositeException;
 import io.smallrye.reactive.TimeoutException;
 import io.smallrye.reactive.Uni;
@@ -39,7 +38,8 @@ public class UniAndTest {
 
     @Test(expected = TimeoutException.class)
     public void testWithNever() {
-        Uni<Tuple3<Integer, Integer, Object>> tuple = Uni.createFrom().item(1).and().unis(Uni.createFrom().item(2), Uni.createFrom().nothing()).asTuple();
+        Uni<Tuple3<Integer, Integer, Object>> tuple = Uni.createFrom().item(1).and()
+                .unis(Uni.createFrom().item(2), Uni.createFrom().nothing()).asTuple();
         tuple.await().atMost(Duration.ofMillis(1000));
     }
 
@@ -71,7 +71,8 @@ public class UniAndTest {
 
     @Test
     public void testTerminationJoin() {
-        Uni<Void> uni = Uni.createFrom().item(1).and(Uni.createFrom().item("hello")).onItem().ignoreIt().andContinueWithNull();
+        Uni<Void> uni = Uni.createFrom().item(1).and(Uni.createFrom().item("hello")).onItem().ignoreIt()
+                .andContinueWithNull();
 
         uni.subscribe().withSubscriber(UniAssertSubscriber.create())
                 .assertCompletedSuccessfully()
@@ -86,7 +87,8 @@ public class UniAndTest {
         Uni<Integer> uni4 = Uni.createFrom().item(4);
 
         UniAssertSubscriber<Tuple5<Integer, Integer, Integer, Integer, Integer>> subscriber =
-                uni.and().unis(uni, uni2, uni3, uni4).asTuple().subscribe().withSubscriber(UniAssertSubscriber.create());
+                uni.and().unis(uni, uni2, uni3, uni4).asTuple().subscribe()
+                        .withSubscriber(UniAssertSubscriber.create());
 
         assertThat(subscriber.getItem().asList()).containsExactly(1, 1, 2, 3, 4);
     }
@@ -102,6 +104,5 @@ public class UniAndTest {
 
         assertThat(subscriber.getItem().asList()).containsExactly(1, 1, 2, 3);
     }
-
 
 }

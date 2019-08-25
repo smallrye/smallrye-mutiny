@@ -26,7 +26,6 @@ public class MultiCollector {
         // avoid direct instantiation.
     }
 
-
     public static <T> Uni<T> first(Multi<T> upstream) {
         return Uni.createFrom().multi(upstream);
     }
@@ -51,8 +50,8 @@ public class MultiCollector {
         return Flowable.fromPublisher(upstream);
     }
 
-
-    public static <R, T> Uni<R> collectInto(Multi<T> upstream, Supplier<R> producer, BiConsumer<R, ? super T> combinator) {
+    public static <R, T> Uni<R> collectInto(Multi<T> upstream, Supplier<R> producer,
+            BiConsumer<R, ? super T> combinator) {
         Collector<? super T, R, R> collector = Collector.of(producer, combinator, (BinaryOperator<R>) (r, r2) -> r,
                 Collector.Characteristics.IDENTITY_FINISH);
         return collector(upstream, collector);
@@ -63,13 +62,13 @@ public class MultiCollector {
     }
 
     public static <K, V, T> Uni<Map<K, V>> map(Multi<T> upstream, Function<? super T, ? extends K> keyMapper,
-                                               Function<? super T, ? extends V> valueMapper) {
+            Function<? super T, ? extends V> valueMapper) {
         return collector(upstream, Collectors.toMap(keyMapper, valueMapper));
     }
 
     public static <K, V, R> Uni<Map<K, Collection<V>>> multimap(Multi<R> upstream,
-                                                                Function<? super R, ? extends K> keyMapper,
-                                                                Function<? super R, ? extends V> valueMapper) {
+            Function<? super R, ? extends K> keyMapper,
+            Function<? super R, ? extends V> valueMapper) {
         return collector(upstream, Collectors.toMap(
                 keyMapper,
                 res -> {
@@ -88,7 +87,6 @@ public class MultiCollector {
     public static <T> Multi<List<T>> list(Multi<T> upstream, Duration timeWindow) {
         return Multi.createFrom().publisher(getFlowable(upstream).buffer(timeWindow.toMillis(), TimeUnit.MILLISECONDS));
     }
-
 
     public static <T> Multi<List<T>> list(Multi<T> upstream, int size) {
         return Multi.createFrom().publisher(getFlowable(upstream).buffer(size));
@@ -119,12 +117,12 @@ public class MultiCollector {
         );
     }
 
-
-    public static <K, V, T> Multi<GroupedMulti<K, V>> groupBy(Multi<T> upstream, Function<? super T, ? extends K> keyMapper,
-                                                       Function<? super T, ? extends V> valueMapper) {
+    public static <K, V, T> Multi<GroupedMulti<K, V>> groupBy(Multi<T> upstream,
+            Function<? super T, ? extends K> keyMapper,
+            Function<? super T, ? extends V> valueMapper) {
         Flowable<? extends GroupedFlowable<? extends K, ? extends V>> groups;
         if (valueMapper == null) {
-             groups = getFlowable(upstream).groupBy(keyMapper::apply, x -> (V) x);
+            groups = getFlowable(upstream).groupBy(keyMapper::apply, x -> (V) x);
         } else {
             groups = getFlowable(upstream).groupBy(keyMapper::apply, valueMapper::apply);
         }

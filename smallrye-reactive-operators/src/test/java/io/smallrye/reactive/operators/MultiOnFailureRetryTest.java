@@ -90,7 +90,6 @@ public class MultiOnFailureRetryTest {
         assertThat(numberOfSubscriptions).hasValue(2);
     }
 
-
     @Test
     public void testRetryIndefinitely() {
         MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(20);

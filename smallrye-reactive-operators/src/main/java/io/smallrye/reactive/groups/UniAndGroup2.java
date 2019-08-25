@@ -18,7 +18,6 @@ import java.util.function.Function;
  */
 public class UniAndGroup2<T1, T2> extends UniAndGroupIterable<T1> {
 
-
     public UniAndGroup2(Uni<? extends T1> source, Uni<? extends T2> other) {
         super(source, Collections.singletonList(other), false);
     }
@@ -59,6 +58,5 @@ public class UniAndGroup2<T1, T2> extends UniAndGroupIterable<T1> {
         };
         return super.combinedWith(function);
     }
-
 
 }

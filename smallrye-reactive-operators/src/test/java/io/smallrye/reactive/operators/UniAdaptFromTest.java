@@ -43,7 +43,6 @@ public class UniAdaptFromTest {
         assertThat(uni.await().indefinitely()).isEqualTo(1);
     }
 
-
     @Test
     public void testCreatingFromASingleWithFailure() {
         Uni<Integer> uni = Uni.createFrom().converterOf(Single.error(new IOException("boom")));
@@ -174,14 +173,12 @@ public class UniAdaptFromTest {
         }
     }
 
-
     @Test
     public void testCreatingFromCompletionStages() {
         CompletableFuture<Integer> valued = CompletableFuture.completedFuture(1);
         CompletableFuture<Void> empty = CompletableFuture.completedFuture(null);
         CompletableFuture<Void> boom = new CompletableFuture<>();
         boom.completeExceptionally(new Exception("boom"));
-
 
         Uni<Integer> u1 = Uni.createFrom().completionStage(valued);
         Uni<Void> u2 = Uni.createFrom().completionStage(empty);

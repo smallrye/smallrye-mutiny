@@ -61,5 +61,4 @@ public class UniAwaitOptional<T> {
         return Optional.ofNullable(UniBlockingAwait.await(upstream, duration));
     }
 
-
 }

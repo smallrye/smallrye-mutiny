@@ -151,7 +151,6 @@ public class MultiAssertSubscriber<T> implements Subscriber<T> {
         return this;
     }
 
-
     @Override
     public void onSubscribe(Subscription s) {
         numberOfSubscription++;

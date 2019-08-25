@@ -1,6 +1,5 @@
 package io.smallrye.reactive.groups;
 
-
 import io.smallrye.reactive.Uni;
 import io.smallrye.reactive.operators.UniOrCombination;
 
@@ -10,7 +9,6 @@ import java.util.concurrent.Executor;
 
 import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
 
-
 public class UniAny {
 
     public static final UniAny INSTANCE = new UniAny();
@@ -18,7 +16,6 @@ public class UniAny {
     private UniAny() {
         // avoid direct instantiation.
     }
-
 
     /**
      * Like {@link #of(Iterable)} but with an array of {@link Uni} as parameter

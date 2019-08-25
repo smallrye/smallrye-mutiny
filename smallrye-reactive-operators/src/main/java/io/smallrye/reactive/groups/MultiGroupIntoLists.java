@@ -62,7 +62,7 @@ public class MultiGroupIntoLists<T> {
      * <p>
      * When the upstream {@link Multi} sends the completion event, the produced {@link Multi} emits the current list,
      * and sends the completion event. This last list may not contain {@code size} items. If the upstream {@link Multi}
-     *      * sends the completion event before having emitted any event, the completion event is propagated immediately.
+     * * sends the completion event before having emitted any event, the completion event is propagated immediately.
      * <p>
      * If the upstream {@link Multi} sends a failure, the failure is propagated immediately.
      *

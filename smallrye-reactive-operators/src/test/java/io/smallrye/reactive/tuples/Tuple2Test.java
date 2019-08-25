@@ -14,7 +14,6 @@ public class Tuple2Test {
 
     private Tuple2<Integer, Integer> somePair = Tuple2.of(1, 3);
 
-
     @Test
     public void testThatNullIsAcceptedAsItem1() {
         Tuple2<Object, Integer> pair = Tuple2.of(null, 3);
@@ -73,7 +72,6 @@ public class Tuple2Test {
         assertThat(pair.hashCode()).isNotEqualTo("not a pair".hashCode());
     }
 
-
     @Test
     public void testMapItem1() {
         Tuple2<String, Integer> pair = Tuple2.of("Hello", 42);
@@ -123,7 +121,6 @@ public class Tuple2Test {
         assertThat(somePair.size()).isEqualTo(2);
     }
 
-
     @Test
     public void testEquality() {
         assertThat(somePair).isEqualTo(somePair);
@@ -137,9 +134,12 @@ public class Tuple2Test {
         Tuple2<Integer, Integer> pair = Tuples.tuple2(Arrays.asList(1, 2));
         assertThat(pair).containsExactly(1, 2);
 
-        assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> Tuples.tuple2(Collections.emptyList()));
-        assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> Tuples.tuple2(Collections.singletonList(1)));
-        assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> Tuples.tuple2(Arrays.asList(1, 2, 3)));
+        assertThatExceptionOfType(IllegalArgumentException.class)
+                .isThrownBy(() -> Tuples.tuple2(Collections.emptyList()));
+        assertThatExceptionOfType(IllegalArgumentException.class)
+                .isThrownBy(() -> Tuples.tuple2(Collections.singletonList(1)));
+        assertThatExceptionOfType(IllegalArgumentException.class)
+                .isThrownBy(() -> Tuples.tuple2(Arrays.asList(1, 2, 3)));
         assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> Tuples.tuple2(null));
     }
 

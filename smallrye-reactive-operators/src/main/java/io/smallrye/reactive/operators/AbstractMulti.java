@@ -17,7 +17,6 @@ import static io.smallrye.reactive.helpers.EmptyUniSubscription.CANCELLED;
 
 public abstract class AbstractMulti<T> implements Multi<T> {
 
-
     protected abstract Flowable<T> flowable();
 
     @Override
@@ -73,8 +72,9 @@ public abstract class AbstractMulti<T> implements Multi<T> {
                     if (failure instanceof MissingBackpressureException) {
                         subscriber.onError(new BackPressureFailure(failure.getMessage()));
                     } else if (failure instanceof CompositeException) {
-                        subscriber.onError(new io.smallrye.reactive.CompositeException(((CompositeException) failure).getExceptions()));
-                    }else {
+                        subscriber.onError(new io.smallrye.reactive.CompositeException(
+                                ((CompositeException) failure).getExceptions()));
+                    } else {
                         subscriber.onError(failure);
                     }
                 } finally {
@@ -132,6 +132,7 @@ public abstract class AbstractMulti<T> implements Multi<T> {
     public Multi<T> cache() {
         return new AbstractMulti<T>() {
             AtomicReference<Flowable<T>> reference = new AtomicReference<>();
+
             @Override
             protected Flowable<T> flowable() {
                 return reference.updateAndGet(flowable -> {

@@ -1,6 +1,5 @@
 package io.smallrye.reactive.groups;
 
-
 import io.smallrye.reactive.Uni;
 import io.smallrye.reactive.operators.UniOrCombination;
 

@@ -2,7 +2,6 @@ package io.smallrye.reactive.operators.flowable;
 
 import io.reactivex.Flowable;
 import io.smallrye.reactive.helpers.CancellationSubscriber;
-import io.smallrye.reactive.helpers.ParameterValidation;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 

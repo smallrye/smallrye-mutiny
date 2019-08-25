@@ -84,5 +84,4 @@ public class UniOnNoResultTest {
                 .withMessageContaining("timeout");
     }
 
-
 }

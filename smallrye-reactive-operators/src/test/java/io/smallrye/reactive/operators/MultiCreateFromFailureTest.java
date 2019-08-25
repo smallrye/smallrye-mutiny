@@ -23,7 +23,8 @@ public class MultiCreateFromFailureTest {
 
     @Test
     public void testWithException() {
-        MultiAssertSubscriber<String> subscriber = Multi.createFrom().<String>failure(new IOException("boom")).subscribe()
+        MultiAssertSubscriber<String> subscriber = Multi.createFrom().<String>failure(new IOException("boom"))
+                .subscribe()
                 .withSubscriber(MultiAssertSubscriber.create());
         subscriber.assertHasFailedWith(IOException.class, "boom");
     }
@@ -41,7 +42,7 @@ public class MultiCreateFromFailureTest {
 
     @Test
     public void testWithExceptionThrownBySupplier() {
-        Multi<String> multi  = Multi.createFrom().deferredFailure(() -> {
+        Multi<String> multi = Multi.createFrom().deferredFailure(() -> {
             throw new IllegalStateException("boom");
         });
         MultiAssertSubscriber<String> subscriber1 = multi.subscribe().withSubscriber(MultiAssertSubscriber.create());
@@ -50,10 +51,11 @@ public class MultiCreateFromFailureTest {
 
     @Test
     public void testWithNullReturnedBySupplier() {
-        Multi<String> multi  = Multi.createFrom().deferredFailure(() -> null);
+        Multi<String> multi = Multi.createFrom().deferredFailure(() -> null);
         MultiAssertSubscriber<String> subscriber1 = multi.subscribe().withSubscriber(MultiAssertSubscriber.create());
         subscriber1.assertTerminated();
 
-        assertThat(subscriber1.failures()).hasSize(1).allSatisfy(t -> assertThat(t).isInstanceOf(NullPointerException.class));
+        assertThat(subscriber1.failures()).hasSize(1)
+                .allSatisfy(t -> assertThat(t).isInstanceOf(NullPointerException.class));
     }
 }

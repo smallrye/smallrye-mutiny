@@ -75,9 +75,12 @@ public class Tuple4Test {
         Tuple4<Integer, Integer, Integer, Integer> tuple = Tuples.tuple4(Arrays.asList(1, 2, 3, 4));
         assertThat(tuple).containsExactly(1, 2, 3, 4);
 
-        assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> Tuples.tuple4(Collections.emptyList()));
-        assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> Tuples.tuple4(Collections.singletonList(1)));
-        assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> Tuples.tuple4(Arrays.asList(1, 2, 3, 4, 5)));
+        assertThatExceptionOfType(IllegalArgumentException.class)
+                .isThrownBy(() -> Tuples.tuple4(Collections.emptyList()));
+        assertThatExceptionOfType(IllegalArgumentException.class)
+                .isThrownBy(() -> Tuples.tuple4(Collections.singletonList(1)));
+        assertThatExceptionOfType(IllegalArgumentException.class)
+                .isThrownBy(() -> Tuples.tuple4(Arrays.asList(1, 2, 3, 4, 5)));
         assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> Tuples.tuple4(null));
     }
 }

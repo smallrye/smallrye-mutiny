@@ -28,11 +28,9 @@ public class MultiCreateFromRangeTest {
                 .assertCompletedSuccessfully();
     }
 
-
     @Test(expected = IllegalArgumentException.class)
     public void testThatEndBoundaryCannotBeLessThanStart() {
         Multi.createFrom().range(1, -1);
     }
-
 
 }

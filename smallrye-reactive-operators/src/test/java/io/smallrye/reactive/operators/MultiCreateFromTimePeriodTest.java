@@ -15,7 +15,6 @@ import static org.awaitility.Awaitility.await;
 
 public class MultiCreateFromTimePeriodTest {
 
-
     private ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
 
     @After
@@ -91,6 +90,5 @@ public class MultiCreateFromTimePeriodTest {
                 .await()   // wait until failure
                 .assertHasFailedWith(BackPressureFailure.class, "lack of requests");
     }
-
 
 }

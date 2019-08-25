@@ -10,7 +10,6 @@ import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
 
 public class MultiSubscribe<T> {
 
-
     private final AbstractMulti<T> upstream;
 
     public MultiSubscribe(AbstractMulti<T> upstream) {

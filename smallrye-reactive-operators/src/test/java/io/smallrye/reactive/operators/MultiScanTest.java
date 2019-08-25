@@ -33,7 +33,6 @@ public class MultiScanTest {
                 .assertReceived(1, 2, 3, 4, 5, 6, 7, 8, 9);
     }
 
-
     @Test
     public void testWithSimplerScannerWithSupplier() {
         MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(Long.MAX_VALUE);

@@ -1,6 +1,5 @@
 package io.smallrye.reactive.operators;
 
-
 import io.smallrye.reactive.Uni;
 import io.smallrye.reactive.subscription.UniSubscriber;
 import io.smallrye.reactive.subscription.UniSubscription;
@@ -33,7 +32,8 @@ public class UniSubscribeToCompletionStage {
             @Override
             public void onSubscribe(UniSubscription subscription) {
                 if (!ref.compareAndSet(null, subscription)) {
-                    future.completeExceptionally(new IllegalStateException("Invalid subscription state - Already having an upstream subscription"));
+                    future.completeExceptionally(new IllegalStateException(
+                            "Invalid subscription state - Already having an upstream subscription"));
                 }
             }
 

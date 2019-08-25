@@ -13,7 +13,6 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 public class UniOnNullFailTest {
 
-
     @Test(expected = NoSuchElementException.class)
     public void testFail() {
         Uni.createFrom().nullItem()
@@ -37,16 +36,20 @@ public class UniOnNullFailTest {
 
     @Test
     public void testFailWithExceptionNotCalledOnResult() {
-        assertThat(Uni.createFrom().item(1).onNull().failWith(new IOException("boom")).await().indefinitely()).isEqualTo(1);
+        assertThat(Uni.createFrom().item(1).onNull().failWith(new IOException("boom")).await().indefinitely())
+                .isEqualTo(1);
     }
 
     @Test
     public void testFailWithExceptionSupplier() {
         AtomicInteger count = new AtomicInteger();
-        Uni<Void> boom = Uni.createFrom().nullItem().onNull().failWith(() -> new RuntimeException(Integer.toString(count.incrementAndGet())));
+        Uni<Void> boom = Uni.createFrom().nullItem().onNull()
+                .failWith(() -> new RuntimeException(Integer.toString(count.incrementAndGet())));
 
-        assertThatExceptionOfType(RuntimeException.class).isThrownBy(() -> boom.await().indefinitely()).withMessageEndingWith("1");
-        assertThatExceptionOfType(RuntimeException.class).isThrownBy(() -> boom.await().indefinitely()).withMessageEndingWith("2");
+        assertThatExceptionOfType(RuntimeException.class).isThrownBy(() -> boom.await().indefinitely())
+                .withMessageEndingWith("1");
+        assertThatExceptionOfType(RuntimeException.class).isThrownBy(() -> boom.await().indefinitely())
+                .withMessageEndingWith("2");
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -56,8 +59,8 @@ public class UniOnNullFailTest {
 
     @Test
     public void testFailWithExceptionSupplierNotCalledOnResult() {
-        assertThat(Uni.createFrom().item(1).onNull().failWith(new IOException("boom")).await().indefinitely()).isEqualTo(1);
+        assertThat(Uni.createFrom().item(1).onNull().failWith(new IOException("boom")).await().indefinitely())
+                .isEqualTo(1);
     }
-
 
 }

@@ -15,12 +15,58 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class UniCacheTest {
 
+    private static void race(Runnable candidate1, Runnable candidate2, Executor s) {
+        final CountDownLatch latch = new CountDownLatch(2);
+
+        final RuntimeException[] errors = { null, null };
+
+        List<Runnable> runnables = new ArrayList<>();
+        runnables.add(candidate1);
+        runnables.add(candidate2);
+        Collections.shuffle(runnables);
+
+        s.execute(() -> {
+            try {
+                runnables.get(0).run();
+            } catch (RuntimeException ex) {
+                errors[0] = ex;
+            } finally {
+                latch.countDown();
+            }
+        });
+
+        s.execute(() -> {
+            try {
+                runnables.get(1).run();
+            } catch (RuntimeException ex) {
+                errors[0] = ex;
+            } finally {
+                latch.countDown();
+            }
+        });
+
+        try {
+            if (!latch.await(5, TimeUnit.SECONDS)) {
+                throw new AssertionError("The wait timed out!");
+            }
+        } catch (InterruptedException ex) {
+            Thread.currentThread().interrupt();
+            throw new RuntimeException(ex);
+        }
+
+        if (errors[0] != null) {
+            throw errors[0];
+        }
+
+        if (errors[1] != null) {
+            throw errors[1];
+        }
+    }
 
     @Test(expected = IllegalArgumentException.class)
     public void testThatSourceCannotBeNull() {
         new UniCache<>(null);
     }
-
 
     @Test
     public void testThatImmediateValueAreCached() {
@@ -117,14 +163,12 @@ public class UniCacheTest {
         cs.complete(1);
         sub2.cancel();
 
-
         cache.subscribe().withSubscriber(sub3);
 
         sub1.assertCompletedSuccessfully().assertItem(1);
         sub2.assertCompletedSuccessfully().assertItem(1);
         sub3.assertCompletedSuccessfully().assertItem(1);
     }
-
 
     @Test
     public void assertCachingTheValueEmittedByAProcessor() {
@@ -191,55 +235,6 @@ public class UniCacheTest {
             } finally {
                 executor.shutdown();
             }
-        }
-    }
-
-    private static void race(Runnable candidate1, Runnable candidate2, Executor s) {
-        final CountDownLatch latch = new CountDownLatch(2);
-
-        final RuntimeException[] errors = {null, null};
-
-
-        List<Runnable> runnables = new ArrayList<>();
-        runnables.add(candidate1);
-        runnables.add(candidate2);
-        Collections.shuffle(runnables);
-
-        s.execute(() -> {
-            try {
-                runnables.get(0).run();
-            } catch (RuntimeException ex) {
-                errors[0] = ex;
-            } finally {
-                latch.countDown();
-            }
-        });
-
-        s.execute(() -> {
-            try {
-                runnables.get(1).run();
-            } catch (RuntimeException ex) {
-                errors[0] = ex;
-            } finally {
-                latch.countDown();
-            }
-        });
-
-        try {
-            if (!latch.await(5, TimeUnit.SECONDS)) {
-                throw new AssertionError("The wait timed out!");
-            }
-        } catch (InterruptedException ex) {
-            Thread.currentThread().interrupt();
-            throw new RuntimeException(ex);
-        }
-
-        if (errors[0] != null) {
-            throw errors[0];
-        }
-
-        if (errors[1] != null) {
-            throw errors[1];
         }
     }
 

@@ -1,6 +1,5 @@
 package io.smallrye.reactive.operators;
 
-
 import io.smallrye.reactive.CompositeException;
 import io.smallrye.reactive.Uni;
 
@@ -12,8 +11,8 @@ public class UniOnEventConsume<T> extends UniOperator<T, T> {
     private final Consumer<Throwable> onFailure;
 
     public UniOnEventConsume(Uni<? extends T> upstream,
-                             Consumer<? super T> onResult,
-                             Consumer<Throwable> onFailure) {
+            Consumer<? super T> onResult,
+            Consumer<Throwable> onFailure) {
         super(upstream);
         this.onResult = onResult;
         this.onFailure = onFailure;
@@ -39,7 +38,7 @@ public class UniOnEventConsume<T> extends UniOperator<T, T> {
     }
 
     private <E> boolean invokeEventHandler(Consumer<? super E> handler, E event, boolean wasCalledByOnFailure,
-                                           UniSerializedSubscriber<? super T> subscriber) {
+            UniSerializedSubscriber<? super T> subscriber) {
         if (handler != null) {
             try {
                 handler.accept(event);

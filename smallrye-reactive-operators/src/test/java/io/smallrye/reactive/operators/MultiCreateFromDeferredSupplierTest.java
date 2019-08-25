@@ -49,7 +49,6 @@ public class MultiCreateFromDeferredSupplierTest {
                 .assertHasNotFailed();
     }
 
-
     @Test
     public void testThatEachSubscriberHasItsOwn() {
         AtomicInteger count = new AtomicInteger();

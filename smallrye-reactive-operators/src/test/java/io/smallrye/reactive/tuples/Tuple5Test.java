@@ -77,12 +77,15 @@ public class Tuple5Test {
 
     @Test
     public void testFromList() {
-        Tuple5<Integer, Integer, Integer, Integer, Integer> tuple = Tuples.tuple5(Arrays.asList(1, 2, 3, 4 ,5));
+        Tuple5<Integer, Integer, Integer, Integer, Integer> tuple = Tuples.tuple5(Arrays.asList(1, 2, 3, 4, 5));
         assertThat(tuple).containsExactly(1, 2, 3, 4, 5);
 
-        assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> Tuples.tuple5(Collections.emptyList()));
-        assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> Tuples.tuple5(Collections.singletonList(1)));
-        assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> Tuples.tuple5(Arrays.asList(1, 2, 3, 4, 5, 6)));
+        assertThatExceptionOfType(IllegalArgumentException.class)
+                .isThrownBy(() -> Tuples.tuple5(Collections.emptyList()));
+        assertThatExceptionOfType(IllegalArgumentException.class)
+                .isThrownBy(() -> Tuples.tuple5(Collections.singletonList(1)));
+        assertThatExceptionOfType(IllegalArgumentException.class)
+                .isThrownBy(() -> Tuples.tuple5(Arrays.asList(1, 2, 3, 4, 5, 6)));
         assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> Tuples.tuple5(null));
     }
 }

@@ -29,9 +29,9 @@ public interface UniSubscriber<T> {
      * before the invocation of this method.
      *
      * <ul>
-     *     <li>Executor: Operate on no particular executor, except if {@link Uni#receiveSubscriptionOn} has been called</li>
-     *     <li>Exception: Throwing an exception cancels the subscription, {@link #onItem(Object)} and
-     *     {@link #onFailure(Throwable)} won't be called</li>
+     * <li>Executor: Operate on no particular executor, except if {@link Uni#receiveSubscriptionOn} has been called</li>
+     * <li>Exception: Throwing an exception cancels the subscription, {@link #onItem(Object)} and
+     * {@link #onFailure(Throwable)} won't be called</li>
      * </ul>
      *
      * @param subscription the subscription allowing to cancel the computation.
@@ -45,8 +45,8 @@ public interface UniSubscriber<T> {
      * {@link #onFailure(Throwable)} is called, this method won't be called.
      *
      * <ul>
-     *     <li>Executor: Operate on no particular executor, except if {@link Uni#receiveItemOn} has been called</li>
-     *     <li>Exception: Throwing an exception cancels the subscription.
+     * <li>Executor: Operate on no particular executor, except if {@link Uni#receiveItemOn} has been called</li>
+     * <li>Exception: Throwing an exception cancels the subscription.
      * </ul>
      *
      * @param item the item, may be {@code null}.
@@ -60,8 +60,8 @@ public interface UniSubscriber<T> {
      * {@link #onItem(Object)} is called, this method won't be called.
      *
      * <ul>
-     *     <li>Executor: Operate on no particular executor, except if {@link Uni#receiveItemOn} has been called</li>
-     *     <li>Exception: Throwing an exception cancels the subscription.
+     * <li>Executor: Operate on no particular executor, except if {@link Uni#receiveItemOn} has been called</li>
+     * <li>Exception: Throwing an exception cancels the subscription.
      * </ul>
      *
      * @param failure the failure, cannot be {@code null}.

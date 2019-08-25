@@ -1,6 +1,5 @@
 package io.smallrye.reactive.groups;
 
-
 import io.smallrye.reactive.Uni;
 import io.smallrye.reactive.operators.UniFlatMapOnFailure;
 import io.smallrye.reactive.operators.UniMapOnFailure;
@@ -12,7 +11,6 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
-
 
 public class UniOnFailure<T> {
 
@@ -77,6 +75,5 @@ public class UniOnFailure<T> {
     public UniRetry<T> retry() {
         return new UniRetry<>(upstream, predicate);
     }
-
 
 }

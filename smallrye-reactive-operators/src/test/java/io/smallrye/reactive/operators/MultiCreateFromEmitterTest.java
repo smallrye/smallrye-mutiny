@@ -18,7 +18,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class MultiCreateFromEmitterTest {
 
-
     @Test
     public void testWithDefaultBackPressure() {
         MultiAssertSubscriber<Integer> ts = MultiAssertSubscriber.create();
@@ -58,7 +57,7 @@ public class MultiCreateFromEmitterTest {
             emitter.onTermination(() -> onTerminationCalled.set(true));
             emitter.emit(1);
             emitter.emit(2);
-           throw new IllegalStateException("boom");
+            throw new IllegalStateException("boom");
         });
         multi.subscribe(ts);
         ts.assertSubscribed()
@@ -182,7 +181,6 @@ public class MultiCreateFromEmitterTest {
         subscriber.cancel();
         assertThat(termination).hasValue(1);
     }
-
 
     @Test
     public void testCancellationWhenSubscriberThrowAnException() {

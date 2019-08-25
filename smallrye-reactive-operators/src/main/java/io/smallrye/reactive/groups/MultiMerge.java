@@ -15,7 +15,6 @@ import java.util.List;
  */
 public class MultiMerge {
 
-
     private final boolean collectFailures;
     private final int requests;
     private final int concurrency;
@@ -31,7 +30,7 @@ public class MultiMerge {
      * {@link Publisher publishers}.
      *
      * @param publishers the publishers, must not be empty, must not contain {@code null}
-     * @param <T>    the type of item
+     * @param <T>        the type of item
      * @return the new {@link Multi} emitting the items from the given set of {@link Multi}
      */
     public final <T> Multi<T> streams(Publisher<T>... publishers) {
@@ -43,7 +42,7 @@ public class MultiMerge {
      * {@link Publisher publishers}.
      *
      * @param iterable the published, must not be empty, must not contain {@code null}, must not be {@code null}
-     * @param <T>        the type of item
+     * @param <T>      the type of item
      * @return the new {@link Multi} emitting the items from the given set of {@link Publisher}
      */
     public <T> Multi<T> streams(Iterable<Publisher<T>> iterable) {

@@ -16,20 +16,17 @@ public class CollectorSubscriber<T, A, R> implements Subscriber<T>, Subscription
 
     private final Function<A, R> finisher;
     private final Subscriber<? super R> downstream;
-
+    private final AtomicReference<Subscription> subscription = new AtomicReference<>();
     // Only accessed in the serialized callbacks
     private A intermediate;
 
-    private final AtomicReference<Subscription> subscription = new AtomicReference<>();
-
     CollectorSubscriber(Subscriber<? super R> downstream,
-                        A initialValue, BiConsumer<A, T> accumulator, Function<A, R> finisher) {
+            A initialValue, BiConsumer<A, T> accumulator, Function<A, R> finisher) {
         this.downstream = downstream;
         this.intermediate = initialValue;
         this.accumulator = accumulator;
         this.finisher = finisher;
     }
-
 
     @Override
     public void onSubscribe(Subscription s) {

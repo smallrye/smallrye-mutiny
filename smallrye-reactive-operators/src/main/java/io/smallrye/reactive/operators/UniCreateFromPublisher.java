@@ -9,7 +9,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import static io.smallrye.reactive.helpers.EmptyUniSubscription.CANCELLED;
 import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
 
-
 public class UniCreateFromPublisher<O> extends UniOperator<Void, O> {
     private final Publisher<? extends O> publisher;
 

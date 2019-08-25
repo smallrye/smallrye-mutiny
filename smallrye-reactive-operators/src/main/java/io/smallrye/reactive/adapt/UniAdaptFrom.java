@@ -40,7 +40,9 @@ public class UniAdaptFrom {
         if (uni == null) {
             uni = instantiateUsingToFlowable(instance);
             if (uni == null) {
-                throw new RuntimeException("Unable to create an instance of Uni from an instance of " + instance.getClass().getName() + ", no adapter found");
+                throw new RuntimeException(
+                        "Unable to create an instance of Uni from an instance of " + instance.getClass().getName()
+                                + ", no adapter found");
             }
         }
         return uni;

@@ -16,8 +16,9 @@ public class MultiFlatMap<I, O> extends MultiOperator<I, O> {
     private final boolean delayFailurePropagation;
     private final boolean preserveOrdering;
 
-    public MultiFlatMap(Multi<I> upstream, Function<? super I, ? extends Publisher<? extends O>> mapper, int concurrency,
-                        int requests, boolean delayFailure, boolean preserveOrdering) {
+    public MultiFlatMap(Multi<I> upstream, Function<? super I, ? extends Publisher<? extends O>> mapper,
+            int concurrency,
+            int requests, boolean delayFailure, boolean preserveOrdering) {
         super(nonNull(upstream, "upstream"));
         this.mapper = nonNull(mapper, "mapper");
         this.concurrency = positive(concurrency, "concurrency");
@@ -32,7 +33,6 @@ public class MultiFlatMap<I, O> extends MultiOperator<I, O> {
             }
         }
     }
-
 
     @Override
     protected Flowable<O> flowable() {

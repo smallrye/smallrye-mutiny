@@ -57,7 +57,8 @@ public class MultiCacheTest {
                 .assertReceived(1, 2)
                 .assertNotTerminated();
 
-        MultiAssertSubscriber<Integer> s2 = multi.subscribe().withSubscriber(MultiAssertSubscriber.create(Long.MAX_VALUE))
+        MultiAssertSubscriber<Integer> s2 = multi.subscribe()
+                .withSubscriber(MultiAssertSubscriber.create(Long.MAX_VALUE))
                 .assertReceived(1, 2)
                 .assertNotTerminated();
 

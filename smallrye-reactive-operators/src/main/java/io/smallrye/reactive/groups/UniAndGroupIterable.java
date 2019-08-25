@@ -38,7 +38,6 @@ public class UniAndGroupIterable<T1> {
         this.collectFailures = collectFailures;
     }
 
-
     public UniAndGroupIterable<T1> collectFailures() {
         collectFailures = true;
         return this;
