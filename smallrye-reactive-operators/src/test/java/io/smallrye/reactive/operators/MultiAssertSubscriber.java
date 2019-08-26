@@ -62,7 +62,10 @@ public class MultiAssertSubscriber<T> implements Subscriber<T> {
         }
 
         Throwable throwable = failures.get(0);
-        assertThat(throwable).isInstanceOf(typeOfException).hasMessageContaining(message);
+        assertThat(throwable).isInstanceOf(typeOfException);
+        if (message != null) {
+            assertThat(throwable).hasMessageContaining(message);
+        }
 
         return this;
     }

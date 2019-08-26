@@ -146,4 +146,10 @@ public interface Multi<T> extends Publisher<T> {
      * @return a new {@link Multi}
      */
     Multi<T> subscribeOn(Executor executor);
+
+    /**
+     * Allows configures the actions or continuation to execute when this {@link Multi} fires the completion event.
+     * @return the object to configure the action.
+     */
+    MultiOnCompletion<T> onCompletion();
 }

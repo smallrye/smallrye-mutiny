@@ -1,5 +1,6 @@
 package io.smallrye.reactive.groups;
 
+import io.reactivex.Flowable;
 import io.smallrye.reactive.Multi;
 import io.smallrye.reactive.Uni;
 import io.smallrye.reactive.operators.*;
@@ -40,6 +41,10 @@ public class MultiOnItem<T> {
      */
     public Multi<T> consume(Consumer<T> callback) {
         return new MultiOnResultPeek<>(upstream, nonNull(callback, "callback"));
+    }
+
+    public Multi<Void> ignore() {
+        return new MultiIgnore(upstream);
     }
 
     /**

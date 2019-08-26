@@ -104,13 +104,13 @@ public class UniOnItem<T> {
      * <p>Examples:</p>
      * <pre><code>
      *     Uni&lt;T&gt; upstream = ...;
-     *     uni = upstream.onItem().ignoreIt().andSwitchTo(other) // Ignore the item from upstream and switch to another uni
-     *     uni = upstream.onItem().ignoreIt().andContinueWith(newResult) // Ignore the item from upstream, and fire newResult
+     *     uni = upstream.onItem().ignore().andSwitchTo(other) // Ignore the item from upstream and switch to another uni
+     *     uni = upstream.onItem().ignore().andContinueWith(newResult) // Ignore the item from upstream, and fire newResult
      * </code></pre>
      *
      * @return the object to configure the continuation logic.
      */
-    public UniOnResultIgnore<T> ignoreIt() {
+    public UniOnResultIgnore<T> ignore() {
         return new UniOnResultIgnore<>(this);
     }
 

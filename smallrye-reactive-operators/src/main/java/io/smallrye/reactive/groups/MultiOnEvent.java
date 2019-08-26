@@ -71,13 +71,13 @@ public class MultiOnEvent<T> {
     }
 
     /**
-     * Configures the action to execute when the observed {@link Multi} emits the item (potentially {@code null}).
+     * Configures the action to execute when the observed {@link Multi} emits an item.
      *
      * <p>Examples:</p>
      * <pre>{@code
      * Multi<T> multi = ...;
      * multi.onItem().mapToItem(x -> ...); // Map to another item
-     * multi.onItem().mapToUni(x -> ...); // Map to a multi
+     * multi.onItem().mapToMulti(x -> ...); // Map to a multi
      * }</pre>
      *
      * @return the object to configure the action to execute when an item is emitted
@@ -94,6 +94,15 @@ public class MultiOnEvent<T> {
      */
     public MultiOnFailure<T> failure() {
         return upstream.onFailure();
+    }
+
+    /**
+     * Configures the action to execute when the observed {@link Multi} emits the completion event.
+     *
+     * @return the object to configure the action
+     */
+    public MultiOnCompletion<T> completion() {
+        return upstream.onCompletion();
     }
 
     /**

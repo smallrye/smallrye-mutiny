@@ -74,7 +74,7 @@ public class UniZipTest {
     @Test
     public void testTerminationJoin() {
         Uni<Void> uni = Uni.combine().all().unis(Uni.createFrom().item(1),
-                Uni.createFrom().item("hello")).asTuple().onItem().ignoreIt().andContinueWithNull();
+                Uni.createFrom().item("hello")).asTuple().onItem().ignore().andContinueWithNull();
 
         uni.subscribe().withSubscriber(UniAssertSubscriber.create())
                 .assertCompletedSuccessfully()

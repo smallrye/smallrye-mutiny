@@ -71,7 +71,7 @@ public class UniAndTest {
 
     @Test
     public void testTerminationJoin() {
-        Uni<Void> uni = Uni.createFrom().item(1).and(Uni.createFrom().item("hello")).onItem().ignoreIt()
+        Uni<Void> uni = Uni.createFrom().item(1).and(Uni.createFrom().item("hello")).onItem().ignore()
                 .andContinueWithNull();
 
         uni.subscribe().withSubscriber(UniAssertSubscriber.create())

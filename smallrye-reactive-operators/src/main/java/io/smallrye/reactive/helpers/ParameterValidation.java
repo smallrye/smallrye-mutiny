@@ -1,6 +1,7 @@
 package io.smallrye.reactive.helpers;
 
 import java.time.Duration;
+import java.util.Arrays;
 import java.util.Collection;
 
 /**
@@ -99,6 +100,25 @@ public class ParameterValidation {
             }
         });
         return iterable;
+    }
+
+    /**
+     * Ensures that the given array does not contain a {@code null} value.
+     *
+     * @param array the array
+     * @param name  the name of the parameter, must not be {@code null}
+     * @param <T>   the type of the item contained in the array
+     * @return the instance if the validation passes
+     */
+    public static <T> T[] doesNotContainNull(T[] array, String name) {
+        nonNull(name, "name");
+        nonNull(array, name);
+        Arrays.stream(array).forEach(m -> {
+            if (m == null) {
+                throw new IllegalArgumentException(String.format("`%s` contains a `null` value", name));
+            }
+        });
+        return array;
     }
 
     /**

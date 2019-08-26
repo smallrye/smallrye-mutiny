@@ -173,4 +173,9 @@ public abstract class AbstractMulti<T> implements Multi<T> {
                 flowable().subscribeOn(Schedulers.from(nonNull(executor, "executor")))
         );
     }
+
+    @Override
+    public MultiOnCompletion<T> onCompletion() {
+        return new MultiOnCompletion<>(this);
+    }
 }
