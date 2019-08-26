@@ -53,10 +53,10 @@
 
     <properties>
         <asciidoctorj.version>1.5.8.1</asciidoctorj.version>
-        <rxjava2.version>2.2.9</rxjava2.version>
+        <rxjava2.version>2.2.11</rxjava2.version>
         <reactor-core.version>3.2.10.RELEASE</reactor-core.version>
         <microprofile-reactive-streams.version>1.0.0</microprofile-reactive-streams.version>
-        <reactive-streams.version>1.0.2</reactive-streams.version>
+        <reactive-streams.version>1.0.3</reactive-streams.version>
 
         <!-- Used by release plugin to define git tag -->
         <tagNameFormat>smallrye-reactive-operators-@{project.version}</tagNameFormat>
