@@ -27,7 +27,13 @@ public interface Multi<T> extends Publisher<T> {
         return MultiCreateBy.INSTANCE;
     }
 
+    /**
+     * Configures the subscriber consuming this {@link Multi}.
+     *
+     * @return the object to configure the subscriber
+     */
     MultiSubscribe<T> subscribe();
+
 
     MultiOnItem<T> onItem();
 
@@ -180,7 +186,7 @@ public interface Multi<T> extends Publisher<T> {
      * This method is a shortcut for {@code multi.onItem().mapToItem(mapper)}.
      *
      * @param mapper the mapper function, must not be {@code null}
-     * @param <0>    the type of item produced by the mapper function
+     * @param <O>    the type of item produced by the mapper function
      * @return the new {@link Multi}
      */
     default <O> Multi<O> map(Function<? super T, ? extends O> mapper) {

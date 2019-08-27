@@ -1,9 +1,22 @@
 package io.smallrye.reactive.tuples;
 
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class Functions {
+
+    private static final Consumer NOOP_CONSUMER = x -> {};
+    private static final Runnable NOOP = () -> {};
+
+    @SuppressWarnings("unchecked")
+    public static <T> Consumer<T> noopConsumer() {
+        return NOOP_CONSUMER;
+    }
+
+    public static Runnable noopAction() {
+        return NOOP;
+    }
 
     @FunctionalInterface
     public interface Function3<T1, T2, T3, R> extends Function<List<Object>, R> {

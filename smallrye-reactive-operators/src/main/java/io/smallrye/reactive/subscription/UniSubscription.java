@@ -9,7 +9,7 @@ import org.reactivestreams.Subscription;
  * The main different with the Reactive Streams Subscription is about the <em>request</em> protocol. Uni does not use
  * request and triggers the computation at subscription time.
  */
-public interface UniSubscription extends Subscription {
+public interface UniSubscription extends Subscription, Cancellable {
 
     /**
      * Requests the {@link Uni} to cancel and clean up resources.
