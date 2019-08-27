@@ -129,7 +129,7 @@ public interface Multi<T> extends Publisher<T> {
      * <p>
      * Instead of receiving the {@code item} event on the thread firing the event, this method  influences the
      * threading context to switch to a thread from the given executor. Same behavior for failure and completion.
-     *
+     * <p>
      * Note that the subscriber is guaranteed to never be called concurrently.
      *
      * @param executor the executor to use, must not be {@code null}
@@ -149,13 +149,23 @@ public interface Multi<T> extends Publisher<T> {
 
     /**
      * Allows configures the actions or continuation to execute when this {@link Multi} fires the completion event.
+     *
      * @return the object to configure the action.
      */
     MultiOnCompletion<T> onCompletion();
 
     /**
      * Transforms the streams by skipping, selecting, or merging.
+     *
      * @return the object to configure the transformation.
      */
     MultiTransform<T> transform();
+
+    /**
+     * Configures the back-pressure behavior when the consumer cannot keep up with the emissions from this
+     * {@link Multi}.
+     *
+     * @return the object to configure the overflow strategy
+     */
+    MultiOverflow<T> onOverflow();
 }

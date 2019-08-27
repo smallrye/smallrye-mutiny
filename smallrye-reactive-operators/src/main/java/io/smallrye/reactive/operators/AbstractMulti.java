@@ -182,4 +182,9 @@ public abstract class AbstractMulti<T> implements Multi<T> {
     @Override public MultiTransform<T> transform() {
         return new MultiTransform<>(this);
     }
+
+    @Override
+    public MultiOverflow<T> onOverflow() {
+        return new MultiOverflow<>(this);
+    }
 }
