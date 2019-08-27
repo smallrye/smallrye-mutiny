@@ -9,6 +9,8 @@ import java.util.concurrent.Executor;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
+import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
+
 public interface Multi<T> extends Publisher<T> {
 
     static MultiCreate createFrom() {
@@ -168,4 +170,42 @@ public interface Multi<T> extends Publisher<T> {
      * @return the object to configure the overflow strategy
      */
     MultiOverflow<T> onOverflow();
+
+    /**
+     * Produces a new {@link Multi} invoking the given function for each item emitted by the upstream {@link Multi}.
+     * <p>
+     * The function receives the received item as parameter, and can transform it. The returned object is sent
+     * downstream as {@code item} event.
+     * <p>
+     * This method is a shortcut for {@code multi.onItem().mapToItem(mapper)}.
+     *
+     * @param mapper the mapper function, must not be {@code null}
+     * @param <0>    the type of item produced by the mapper function
+     * @return the new {@link Multi}
+     */
+    default <O> Multi<O> map(Function<? super T, ? extends O> mapper) {
+        return onItem().mapToItem(nonNull(mapper, "mapper"));
+    }
+
+    /**
+     * Produces a {@link Multi} containing the items from {@link Publisher} produced by the {@code mapper} for each
+     * item emitted by this {@link Multi}.
+     * <p>
+     * The operation behaves as follows:
+     * <ul>
+     * <li>for each item emitted by this {@link Multi}, the mapper is called and produces a {@link Publisher}
+     * (potentially a {@code Multi}). The mapper must not return {@code null}</li>
+     * <li>The items emitted by each of the produced {@link Publisher} are then <strong>merged</strong> in the
+     * produced {@link Multi}. The flatten process may interleaved items.</li>
+     * </ul>
+     * This method is a shortcut for {@code multi.onItem().flatMap(mapper)}.
+     *
+     * @param mapper the {@link Function} producing {@link Publisher} / {@link Multi} for each items emitted by the
+     *               upstream {@link Multi}
+     * @param <O>    the type of item emitted by the {@link Publisher} produced by the {@code mapper}
+     * @return the produced {@link Multi}
+     */
+    default <O> Multi<O> flatMap(Function<? super T, ? extends Publisher<? extends O>> mapper) {
+        return onItem().flatMap(nonNull(mapper, "mapper"));
+    }
 }

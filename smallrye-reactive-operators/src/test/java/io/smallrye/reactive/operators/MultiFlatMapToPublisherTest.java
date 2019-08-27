@@ -17,6 +17,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class MultiFlatMapToPublisherTest {
 
     @Test
+    public void testMapShortcut() {
+        Multi.createFrom().items(1, 2)
+                .map(i -> i + 1)
+                .subscribe().withSubscriber(MultiAssertSubscriber.create(2))
+                .assertCompletedSuccessfully()
+                .assertReceived(2, 3);
+    }
+
+    @Test
     public void testConcatMap() {
         MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(Long.MAX_VALUE);
 
@@ -188,6 +197,17 @@ public class MultiFlatMapToPublisherTest {
 
         Multi.createFrom().range(1, 4)
                 .onItem().flatMap(i -> Multi.createFrom().items(i, i))
+                .subscribe(subscriber);
+
+        subscriber.assertReceived(1, 1, 2, 2, 3, 3).assertCompletedSuccessfully();
+    }
+
+    @Test
+    public void testFlatMapShortcut() {
+        MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(Long.MAX_VALUE);
+
+        Multi.createFrom().range(1, 4)
+                .flatMap(i -> Multi.createFrom().items(i, i))
                 .subscribe(subscriber);
 
         subscriber.assertReceived(1, 1, 2, 2, 3, 3).assertCompletedSuccessfully();
