@@ -178,4 +178,8 @@ public abstract class AbstractMulti<T> implements Multi<T> {
     public MultiOnCompletion<T> onCompletion() {
         return new MultiOnCompletion<>(this);
     }
+
+    @Override public MultiTransform<T> transform() {
+        return new MultiTransform<>(this);
+    }
 }

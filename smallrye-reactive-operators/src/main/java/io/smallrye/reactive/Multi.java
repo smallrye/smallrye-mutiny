@@ -152,4 +152,10 @@ public interface Multi<T> extends Publisher<T> {
      * @return the object to configure the action.
      */
     MultiOnCompletion<T> onCompletion();
+
+    /**
+     * Transforms the streams by skipping, selecting, or merging.
+     * @return the object to configure the transformation.
+     */
+    MultiTransform<T> transform();
 }

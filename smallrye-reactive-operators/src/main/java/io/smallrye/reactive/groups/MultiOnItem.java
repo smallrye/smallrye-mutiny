@@ -44,7 +44,7 @@ public class MultiOnItem<T> {
     }
 
     public Multi<Void> ignore() {
-        return new MultiIgnore(upstream);
+        return new MultiIgnore<>(upstream);
     }
 
     /**
