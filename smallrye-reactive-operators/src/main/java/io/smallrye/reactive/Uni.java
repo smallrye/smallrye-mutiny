@@ -5,6 +5,7 @@ import io.smallrye.reactive.subscription.UniSubscriber;
 import io.smallrye.reactive.subscription.UniSubscription;
 import io.smallrye.reactive.tuples.Tuple2;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Executor;
 import java.util.function.Function;
@@ -91,6 +92,15 @@ public interface Uni<T> {
      * @see #await() <code>uni.await() </code>for waiting (blocking the caller thread) until the resolution of the observed Uni.
      */
     UniSubscribe<T> subscribe();
+
+    /**
+     * Shortcut for {@link UniSubscribe#asCompletionStage()}.
+     *
+     * @return the completion stage receiving the items emitted by this {@link Uni}
+     */
+    default CompletableFuture<T> subscribeAsCompletionStage() {
+        return subscribe().asCompletionStage();
+    }
 
     /**
      * Awaits (blocking the caller thread) until the item or a failure is emitted by the observed {@link Uni}.

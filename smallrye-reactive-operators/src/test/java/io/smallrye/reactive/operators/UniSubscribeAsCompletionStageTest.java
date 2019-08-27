@@ -35,6 +35,13 @@ public class UniSubscribeAsCompletionStageTest {
     }
 
     @Test
+    public void testShortcut() {
+        CompletableFuture<Integer> future = Uni.createFrom().item(1).subscribeAsCompletionStage();
+        assertThat(future).isNotNull();
+        assertThat(future).isCompletedWithValue(1);
+    }
+
+    @Test
     public void testWithImmediateNullValue() {
         CompletableFuture<Void> future = Uni.createFrom().nullItem().subscribe().asCompletionStage();
         assertThat(future).isNotNull();
