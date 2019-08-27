@@ -10,7 +10,7 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class MultiCreateFromResultsTest {
+public class MultiCreateFromItemsTest {
 
     @Test
     public void testCreationWithASingleResult() {

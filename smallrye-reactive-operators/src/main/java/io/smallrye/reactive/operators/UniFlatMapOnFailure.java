@@ -8,7 +8,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
-import static io.smallrye.reactive.operators.UniFlatMapOnResult.invokeAndSubstitute;
+import static io.smallrye.reactive.operators.UniFlatMapOnItem.invokeAndSubstitute;
 
 public class UniFlatMapOnFailure<I> extends UniOperator<I, I> {
 
@@ -25,7 +25,7 @@ public class UniFlatMapOnFailure<I> extends UniOperator<I, I> {
 
     @Override
     public void subscribing(UniSerializedSubscriber<? super I> subscriber) {
-        UniFlatMapOnResult.FlatMapSubscription flatMapSubscription = new UniFlatMapOnResult.FlatMapSubscription();
+        UniFlatMapOnItem.FlatMapSubscription flatMapSubscription = new UniFlatMapOnItem.FlatMapSubscription();
         // Subscribe to the source.
         upstream().subscribe().withSubscriber(new UniDelegatingSubscriber<I, I>(subscriber) {
             @Override

@@ -1,11 +1,13 @@
 package io.smallrye.reactive.groups;
 
 import io.smallrye.reactive.Uni;
-import io.smallrye.reactive.operators.UniFlatMapOnResult;
+import io.smallrye.reactive.operators.UniFlatMapCompletionStageOnItem;
+import io.smallrye.reactive.operators.UniFlatMapOnItem;
 import io.smallrye.reactive.operators.UniMapOnResult;
 import io.smallrye.reactive.operators.UniOnEventConsume;
 import io.smallrye.reactive.subscription.UniEmitter;
 
+import java.util.concurrent.CompletionStage;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -56,14 +58,32 @@ public class UniOnItem<T> {
      * <p>
      * This operation is generally named {@code flatMap}.
      *
-     * @param mapper the function called with the item of the this {@link Uni} and producing the {@link Uni},
+     * @param mapper the function called with the item of this {@link Uni} and producing the {@link Uni},
      *               must not be {@code null}, must not return {@code null}.
      * @param <R>    the type of item
      * @return a new {@link Uni} that would fire events from the uni produced by the mapper function, possibly
      * in an asynchronous manner.
      */
     public <R> Uni<R> mapToUni(Function<? super T, ? extends Uni<? extends R>> mapper) {
-        return new UniFlatMapOnResult<>(upstream, mapper);
+        return new UniFlatMapOnItem<>(upstream, mapper);
+    }
+
+    /**
+     * Transforms the received item asynchronously, forwarding the events  emitted by another {@link CompletionStage}
+     * produced by the given {@code mapper}.
+     * <p>
+     * The mapper is called with the item event of the current {@link Uni} and produces an {@link CompletionStage},
+     * possibly using another type of item ({@code R}). The events fired by produced {@link CompletionStage} are
+     * forwarded to the {@link Uni} returned by this method.
+     * <p>*
+     * @param mapper the function called with the item of this {@link Uni} and producing the {@link CompletionStage},
+     *               must not be {@code null}, must not return {@code null}.
+     * @param <R>    the type of item
+     * @return a new {@link Uni} that would fire events from the uni produced by the mapper function, possibly
+     * in an asynchronous manner.
+     */
+    public <R> Uni<R> mapToCompletionStage(Function<? super T, ? extends CompletionStage<? extends R>> mapper) {
+        return new UniFlatMapCompletionStageOnItem<>(upstream, mapper);
     }
 
     /**

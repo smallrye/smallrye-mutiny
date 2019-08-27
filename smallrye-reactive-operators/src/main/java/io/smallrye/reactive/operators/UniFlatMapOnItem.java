@@ -12,11 +12,11 @@ import java.util.function.Function;
 import static io.smallrye.reactive.helpers.ParameterValidation.MAPPER_RETURNED_NULL;
 import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
 
-public class UniFlatMapOnResult<I, O> extends UniOperator<I, O> {
+public class UniFlatMapOnItem<I, O> extends UniOperator<I, O> {
 
     private final Function<? super I, ? extends Uni<? extends O>> mapper;
 
-    public UniFlatMapOnResult(Uni<I> upstream, Function<? super I, ? extends Uni<? extends O>> mapper) {
+    public UniFlatMapOnItem(Uni<I> upstream, Function<? super I, ? extends Uni<? extends O>> mapper) {
         super(nonNull(upstream, "upstream"));
         this.mapper = nonNull(mapper, "mapper");
     }

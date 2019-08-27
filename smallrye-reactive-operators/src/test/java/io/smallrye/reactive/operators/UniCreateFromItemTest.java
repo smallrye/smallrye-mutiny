@@ -8,7 +8,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class UniCreateFromResultTest {
+public class UniCreateFromItemTest {
 
     @Test
     public void testThatNullValueAreAccepted() {

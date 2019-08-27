@@ -383,7 +383,19 @@ public class MultiFlatMapToPublisherTest {
         List<Integer> list = Multi.createFrom().range(1, 4)
                 .onItem()
                 .flatMap()
-                .unis(i -> Uni.createFrom().completionStage(CompletableFuture.supplyAsync(() -> i + 1)))
+                .uni(i -> Uni.createFrom().completionStage(CompletableFuture.supplyAsync(() -> i + 1)))
+                .mergeResults()
+                .collect().asList().await().indefinitely();
+
+        assertThat(list).hasSize(3).contains(2, 3, 4);
+    }
+
+    @Test
+    public void testFlatMapCompletionStage() {
+        List<Integer> list = Multi.createFrom().range(1, 4)
+                .onItem()
+                .flatMap()
+                .completionStage(i -> CompletableFuture.supplyAsync(() -> i + 1))
                 .mergeResults()
                 .collect().asList().await().indefinitely();
 
@@ -395,7 +407,7 @@ public class MultiFlatMapToPublisherTest {
         List<Integer> list = Multi.createFrom().range(1, 4)
                 .onItem()
                 .flatMap()
-                .unis(i -> Uni.createFrom().completionStage(CompletableFuture.supplyAsync(() -> i + 1)))
+                .uni(i -> Uni.createFrom().completionStage(CompletableFuture.supplyAsync(() -> i + 1)))
                 .concatenateResults()
                 .collect().asList().await().indefinitely();
 
