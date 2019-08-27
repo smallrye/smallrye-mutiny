@@ -21,6 +21,13 @@ public class UniOnItemFlatMapTest {
     }
 
     @Test
+    public void testFlatMapShortcut() {
+        UniAssertSubscriber<Integer> test = UniAssertSubscriber.create();
+        Uni.createFrom().item(1).flatMap(v -> Uni.createFrom().item(2)).subscribe().withSubscriber(test);
+        test.assertCompletedSuccessfully().assertItem(2).assertNoFailure();
+    }
+
+    @Test
     public void testWithImmediateCancellation() {
         UniAssertSubscriber<Integer> test = new UniAssertSubscriber<>(true);
         AtomicBoolean called = new AtomicBoolean();

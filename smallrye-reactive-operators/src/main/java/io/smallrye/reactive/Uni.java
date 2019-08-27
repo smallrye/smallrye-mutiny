@@ -268,8 +268,28 @@ public interface Uni<T> {
      * @param <O>    the output type
      * @return a new {@link Uni} computing an item of type {@code <O>}.
      */
-    default <O> Uni<O> map(Function<T, O> mapper) {
+    default <O> Uni<O> map(Function<? super T, ? extends O> mapper) {
         return onItem().mapToItem(nonNull(mapper, "mapper"));
+    }
+
+    /**
+     * Transforms the received item asynchronously, forwarding the events emitted by another {@link Uni} produced by
+     * the given {@code mapper}.
+     * <p>
+     * The mapper is called with the item event of the current {@link Uni} and produces an {@link Uni}, possibly
+     * using another type of item ({@code R}). The events fired by produced {@link Uni} are forwarded to the
+     * {@link Uni} returned by this method.
+     * <p>
+     * This operation is generally named {@code flatMap}.
+     *
+     * @param mapper the function called with the item of the this {@link Uni} and producing the {@link Uni},
+     *               must not be {@code null}, must not return {@code null}.
+     * @param <O>    the type of item
+     * @return a new {@link Uni} that would fire events from the uni produced by the mapper function, possibly
+     * in an asynchronous manner.
+     */
+    default <O> Uni<O> flatMap(Function<? super T, Uni<? extends O>> mapper) {
+        return onItem().mapToUni(nonNull(mapper, "mapper"));
     }
 
     //TODO
