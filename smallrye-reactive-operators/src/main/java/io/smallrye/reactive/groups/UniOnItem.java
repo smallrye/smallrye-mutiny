@@ -138,4 +138,24 @@ public class UniOnItem<T> {
         nonNull(target, "target");
         return mapToItem(target::cast);
     }
+
+    /**
+     * Adds specific behavior when the observed {@link Uni} fires {@code null} as item. While {@code null} is a valid
+     * value, it may require specific processing. This group of operators allows implementing this specific behavior.
+     *
+     * <p>Examples:</p>
+     * <pre><code>
+     *     Uni&lt;T&gt; upstream = ...;
+     *     Uni&lt;T&gt; uni = ...;
+     *     uni = upstream.onItem().ifNull().continueWith(anotherValue) // use the fallback value if upstream emits null
+     *     uni = upstream.onItem().ifNull().fail() // propagate a NullPointerException if upstream emits null
+     *     uni = upstream.onItem().ifNull().failWith(exception) // propagate the given exception if upstream emits null
+     *     uni = upstream.onItem().ifNull().switchTo(another) // switch to another uni if upstream emits null
+     * </code></pre>
+     *
+     * @return the object to configure the behavior when receiving {@code null}
+     */
+    public UniOnNull<T> ifNull() {
+        return new UniOnNull<>(upstream);
+    }
 }

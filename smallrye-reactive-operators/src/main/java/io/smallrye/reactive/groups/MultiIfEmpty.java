@@ -1,10 +1,8 @@
 package io.smallrye.reactive.groups;
 
-import io.reactivex.Flowable;
 import io.smallrye.reactive.Multi;
 import io.smallrye.reactive.Uni;
-import io.smallrye.reactive.operators.MultiOperator;
-import io.smallrye.reactive.operators.MultiSwitchOnCompletion;
+import io.smallrye.reactive.operators.MultiSwitchOnEmpty;
 import io.smallrye.reactive.subscription.MultiEmitter;
 import org.reactivestreams.Publisher;
 
@@ -15,31 +13,16 @@ import java.util.function.Supplier;
 
 import static io.smallrye.reactive.helpers.ParameterValidation.*;
 
-public class MultiOnCompletion<T> {
+public class MultiIfEmpty<T> {
 
     private final Multi<T> upstream;
 
-    public MultiOnCompletion(Multi<T> upstream) {
-        this.upstream = nonNull(upstream, "upstream");
+    MultiIfEmpty(Multi<T> upstream) {
+        this.upstream = upstream;
     }
 
     /**
-     * Creates a new {@link Multi} executing the given {@link Runnable action} when this {@link Multi} completes.
-     *
-     * @param action the action, must not be {@code null}
-     * @return the new multi
-     */
-    public Multi<T> consume(Runnable action) {
-        return new MultiOperator<T, T>(upstream) {
-            @Override
-            protected Flowable<T> flowable() {
-                return upstreamAsFlowable().doOnComplete(action::run);
-            }
-        };
-    }
-
-    /**
-     * When the current {@link Multi} completes, the passed failure is sent downstream.
+     * When the current {@link Multi} completes without having emitted items, the passed failure is sent downstream.
      *
      * @param failure the failure
      * @return the new {@link Multi}
@@ -50,7 +33,8 @@ public class MultiOnCompletion<T> {
     }
 
     /**
-     * When the current {@link Multi} completes, a failure produced by the given {@link Supplier} is sent downstream.
+     * When the current {@link Multi} completes without having emitted items, a failure produced by the given
+     * {@link Supplier} is sent downstream.
      *
      * @param supplier the supplier to produce the failure, must not be {@code null}, must not produce {@code null}
      * @return the new {@link Multi}
@@ -58,7 +42,25 @@ public class MultiOnCompletion<T> {
     public Multi<T> failWith(Supplier<Throwable> supplier) {
         nonNull(supplier, "supplier");
 
-        return switchToEmitter(MultiIfEmpty.createMultiFromFailureSupplier(supplier));
+        return switchToEmitter(createMultiFromFailureSupplier(supplier));
+    }
+
+    static <T> Consumer<MultiEmitter<? super T>> createMultiFromFailureSupplier(Supplier<Throwable> supplier) {
+        return emitter -> {
+            Throwable throwable;
+            try {
+                throwable = supplier.get();
+            } catch (Exception e) {
+                emitter.fail(e);
+                return;
+            }
+
+            if (throwable == null) {
+                emitter.fail(new NullPointerException(SUPPLIER_PRODUCED_NULL));
+            } else {
+                emitter.fail(throwable);
+            }
+        };
     }
 
     /**
@@ -71,8 +73,8 @@ public class MultiOnCompletion<T> {
     }
 
     /**
-     * When the upstream {@link Multi} completes, it continues with the events fired with the emitter passed to the
-     * {@code consumer} callback.
+     * When the upstream {@link Multi} completes without having emitted items, it continues with the events fired with
+     * the emitter passed to the {@code consumer} callback.
      * <p>
      * If the upstream {@link Multi} fails, the switch does not apply.
      *
@@ -86,8 +88,8 @@ public class MultiOnCompletion<T> {
     }
 
     /**
-     * When the upstream {@link Multi} completes, it continues with the events fired by the passed
-     * {@link org.reactivestreams.Publisher} / {@link Multi}.
+     * When the upstream {@link Multi} completes without having emitted items, it continues with the events fired by the
+     * passed {@link org.reactivestreams.Publisher} / {@link Multi}.
      * <p>
      * If the upstream {@link Multi} fails, the switch does not apply.
      *
@@ -99,18 +101,18 @@ public class MultiOnCompletion<T> {
     }
 
     /**
-     * When the upstream {@link Multi} completes, it continues with the events fired by a {@link Publisher} produces
-     * with the given {@link Supplier}.
+     * When the upstream {@link Multi} completes without having emitted items, it continues with the events fired by a
+     * {@link Publisher} produces with the given {@link Supplier}.
      *
      * @param supplier the supplier to use to produce the publisher, must not be {@code null}, must not return {@code null}s
      * @return the new {@link Uni}
      */
     public Multi<T> switchTo(Supplier<Publisher<? extends T>> supplier) {
-        return new MultiSwitchOnCompletion<>(upstream, nonNull(supplier, "supplier"));
+        return new MultiSwitchOnEmpty<>(upstream, nonNull(supplier, "supplier"));
     }
 
     /**
-     * When the upstream {@link Multi} completes, continue with the given items.
+     * When the upstream {@link Multi} completes without having emitted items, continue with the given items.
      *
      * @param items the items, must not be {@code null}, must not contain {@code null}
      * @return the new {@link Multi}
@@ -123,7 +125,7 @@ public class MultiOnCompletion<T> {
     }
 
     /**
-     * When the upstream {@link Multi} completes, continue with the given items.
+     * When the upstream {@link Multi} completes without having emitted items, continue with the given items.
      *
      * @param items the items, must not be {@code null}, must not contain {@code null}
      * @return the new {@link Multi}
@@ -135,17 +137,28 @@ public class MultiOnCompletion<T> {
     }
 
     /**
-     * When the upstream {@link Multi} completes, continue with the items produced by the given {@link Supplier}.
+     * When the upstream {@link Multi} completes without having emitted items, continue with the items produced by the
+     * given {@link Supplier}.
      *
      * @param supplier the supplier to produce the items, must not be {@code null}, must not produce {@code null}
      * @return the new {@link Multi}
      */
     public Multi<T> continueWith(Supplier<? extends Iterable<? extends T>> supplier) {
         nonNull(supplier, "supplier");
-        return switchTo(() -> MultiIfEmpty.createMultiFromIterableSupplier(supplier));
+        return switchTo(() -> createMultiFromIterableSupplier(supplier));
     }
 
-    public MultiIfEmpty<T> ifEmpty() {
-        return new MultiIfEmpty<>(upstream);
+    static <T> Publisher<? extends T> createMultiFromIterableSupplier(Supplier<? extends Iterable<? extends T>> supplier) {
+        Iterable<? extends T> iterable;
+        try {
+            iterable = supplier.get();
+        } catch (Exception e) {
+            return Multi.createFrom().failure(e);
+        }
+        if (iterable == null) {
+            return Multi.createFrom().failure(new NullPointerException(SUPPLIER_PRODUCED_NULL));
+        } else {
+            return Multi.createFrom().iterable(iterable);
+        }
     }
 }

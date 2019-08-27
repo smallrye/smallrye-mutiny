@@ -76,7 +76,6 @@ public class UniOnEvent<T> {
      * }</pre>
      *
      * @return the object to configure the action to execute when an item is emitted
-     * @see Uni#onNull()
      * @see Uni#onNoItem()
      */
     public UniOnItem<T> item() {

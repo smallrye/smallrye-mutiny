@@ -16,7 +16,7 @@ public class UniOnNullContinueWithTest {
     public void testContinue() {
         assertThat(Uni.createFrom().nullItem()
                 .onItem().castTo(Integer.class)
-                .onNull().continueWith(42)
+                .onItem().ifNull().continueWith(42)
                 .await().indefinitely()).isEqualTo(42);
     }
 
@@ -25,7 +25,7 @@ public class UniOnNullContinueWithTest {
         AtomicInteger counter = new AtomicInteger();
         Uni<Integer> uni = Uni.createFrom().nullItem()
                 .onItem().castTo(Integer.class)
-                .onNull().continueWith(counter::incrementAndGet);
+                .onItem().ifNull().continueWith(counter::incrementAndGet);
         assertThat(uni.await().indefinitely()).isEqualTo(1);
         assertThat(uni.await().indefinitely()).isEqualTo(2);
     }
@@ -34,7 +34,7 @@ public class UniOnNullContinueWithTest {
     public void testContinueNotCalledOnResult() {
         assertThat(Uni.createFrom().item(23)
                 .onItem().castTo(Integer.class)
-                .onNull().continueWith(42)
+                .onItem().ifNull().continueWith(42)
                 .await().indefinitely()).isEqualTo(23);
     }
 
@@ -42,7 +42,7 @@ public class UniOnNullContinueWithTest {
     public void testContinueWithSupplierNotCalledOnResult() {
         assertThat(Uni.createFrom().item(23)
                 .onItem().castTo(Integer.class)
-                .onNull().continueWith(() -> 42)
+                .onItem().ifNull().continueWith(() -> 42)
                 .await().indefinitely()).isEqualTo(23);
     }
 
@@ -51,7 +51,7 @@ public class UniOnNullContinueWithTest {
         assertThatExceptionOfType(RuntimeException.class).isThrownBy(() ->
                 Uni.createFrom().failure(new IOException("boom"))
                         .onItem().castTo(Integer.class)
-                        .onNull().continueWith(42)
+                        .onItem().ifNull().continueWith(42)
                         .await().indefinitely()
         ).withCauseExactlyInstanceOf(IOException.class).withMessageEndingWith("boom");
     }
@@ -61,7 +61,7 @@ public class UniOnNullContinueWithTest {
         assertThatExceptionOfType(RuntimeException.class).isThrownBy(() ->
                 Uni.createFrom().failure(new IOException("boom"))
                         .onItem().castTo(Integer.class)
-                        .onNull().continueWith(() -> 42)
+                        .onItem().ifNull().continueWith(() -> 42)
                         .await().indefinitely()
         ).withCauseExactlyInstanceOf(IOException.class).withMessageEndingWith("boom");
     }
@@ -70,14 +70,14 @@ public class UniOnNullContinueWithTest {
     public void testThatContinueWithCannotUseNull() {
         Uni.createFrom().item(23)
                 .onItem().castTo(Integer.class)
-                .onNull().continueWith((Integer) null);
+                .onItem().ifNull().continueWith((Integer) null);
     }
 
     @Test(expected = NullPointerException.class)
     public void testThatContinueWithSupplierCannotReturnNull() {
         Uni.createFrom().item(23)
                 .map(x -> null)
-                .onNull().continueWith(() -> null)
+                .onItem().ifNull().continueWith(() -> null)
                 .await().indefinitely();
     }
 
@@ -85,7 +85,7 @@ public class UniOnNullContinueWithTest {
     public void testThatContinueWithSupplierCannotBeNull() {
         Uni.createFrom().item(23)
                 .onItem().castTo(Integer.class)
-                .onNull().continueWith((Supplier<Integer>) null);
+                .onItem().ifNull().continueWith((Supplier<Integer>) null);
     }
 
 }

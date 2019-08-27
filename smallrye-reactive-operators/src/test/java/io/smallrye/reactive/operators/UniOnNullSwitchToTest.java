@@ -17,7 +17,7 @@ public class UniOnNullSwitchToTest {
     @Test
     public void testSwitchToFallback() {
         assertThat(Uni.createFrom().nullItem().onItem().castTo(Integer.class)
-                .onNull().switchTo(fallback)
+                .onItem().ifNull().switchTo(fallback)
                 .await().indefinitely()).isEqualTo(23);
     }
 
@@ -25,11 +25,11 @@ public class UniOnNullSwitchToTest {
     public void testSwitchToSupplierFallback() {
         AtomicInteger count = new AtomicInteger();
         assertThat(Uni.createFrom().nullItem().onItem().castTo(Integer.class)
-                .onNull().switchTo(() -> fallback.map(i -> i + count.incrementAndGet()))
+                .onItem().ifNull().switchTo(() -> fallback.map(i -> i + count.incrementAndGet()))
                 .await().indefinitely()).isEqualTo(24);
 
         assertThat(Uni.createFrom().nullItem().onItem().castTo(Integer.class)
-                .onNull().switchTo(() -> fallback.map(i -> i + count.incrementAndGet()))
+                .onItem().ifNull().switchTo(() -> fallback.map(i -> i + count.incrementAndGet()))
                 .await().indefinitely()).isEqualTo(25);
     }
 
@@ -38,7 +38,7 @@ public class UniOnNullSwitchToTest {
         assertThatExceptionOfType(RuntimeException.class)
                 .isThrownBy(() ->
                         Uni.createFrom().nullItem().onItem().castTo(Integer.class)
-                                .onNull().switchTo(failure)
+                                .onItem().ifNull().switchTo(failure)
                                 .await().indefinitely()
                 ).withMessageEndingWith("boom");
 
@@ -49,7 +49,7 @@ public class UniOnNullSwitchToTest {
         assertThatExceptionOfType(RuntimeException.class)
                 .isThrownBy(() ->
                         Uni.createFrom().nullItem().onItem().castTo(Integer.class)
-                                .onNull().switchTo(() -> failure)
+                                .onItem().ifNull().switchTo(() -> failure)
                                 .await().indefinitely()
                 ).withMessageEndingWith("boom");
 
@@ -58,14 +58,14 @@ public class UniOnNullSwitchToTest {
     @Test(expected = NullPointerException.class)
     public void testSwitchToNull() {
         Uni.createFrom().nullItem().onItem().castTo(Integer.class)
-                .onNull().switchTo((Uni<Integer>) null)
+                .onItem().ifNull().switchTo((Uni<Integer>) null)
                 .await().indefinitely();
     }
 
     @Test(expected = NullPointerException.class)
     public void testSwitchToNullSupplier() {
         Uni.createFrom().nullItem().onItem().castTo(Integer.class)
-                .onNull().switchTo((Uni<? extends Integer>) null)
+                .onItem().ifNull().switchTo((Uni<? extends Integer>) null)
                 .await().indefinitely();
     }
 

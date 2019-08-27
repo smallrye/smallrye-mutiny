@@ -16,34 +16,34 @@ public class UniOnNullFailTest {
     @Test(expected = NoSuchElementException.class)
     public void testFail() {
         Uni.createFrom().nullItem()
-                .onNull().fail().await().indefinitely();
+                .onItem().ifNull().fail().await().indefinitely();
     }
 
     @Test
     public void testFailNotCalledOnResult() {
-        assertThat(Uni.createFrom().item(1).onNull().fail().await().indefinitely()).isEqualTo(1);
+        assertThat(Uni.createFrom().item(1).onItem().ifNull().fail().await().indefinitely()).isEqualTo(1);
     }
 
     @Test(expected = RuntimeException.class)
     public void testFailWithException() {
-        Uni.createFrom().nullItem().onNull().failWith(new RuntimeException("boom")).await().indefinitely();
+        Uni.createFrom().nullItem().onItem().ifNull().failWith(new RuntimeException("boom")).await().indefinitely();
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testFailWithExceptionSetToNull() {
-        Uni.createFrom().nullItem().onNull().failWith((Exception) null).await().indefinitely();
+        Uni.createFrom().nullItem().onItem().ifNull().failWith((Exception) null).await().indefinitely();
     }
 
     @Test
     public void testFailWithExceptionNotCalledOnResult() {
-        assertThat(Uni.createFrom().item(1).onNull().failWith(new IOException("boom")).await().indefinitely())
+        assertThat(Uni.createFrom().item(1).onItem().ifNull().failWith(new IOException("boom")).await().indefinitely())
                 .isEqualTo(1);
     }
 
     @Test
     public void testFailWithExceptionSupplier() {
         AtomicInteger count = new AtomicInteger();
-        Uni<Void> boom = Uni.createFrom().nullItem().onNull()
+        Uni<Void> boom = Uni.createFrom().nullItem().onItem().ifNull()
                 .failWith(() -> new RuntimeException(Integer.toString(count.incrementAndGet())));
 
         assertThatExceptionOfType(RuntimeException.class).isThrownBy(() -> boom.await().indefinitely())
@@ -54,12 +54,12 @@ public class UniOnNullFailTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testFailWithExceptionSupplierSetToNull() {
-        Uni.createFrom().nullItem().onNull().failWith((Supplier<Throwable>) null).await().indefinitely();
+        Uni.createFrom().nullItem().onItem().ifNull().failWith((Supplier<Throwable>) null).await().indefinitely();
     }
 
     @Test
     public void testFailWithExceptionSupplierNotCalledOnResult() {
-        assertThat(Uni.createFrom().item(1).onNull().failWith(new IOException("boom")).await().indefinitely())
+        assertThat(Uni.createFrom().item(1).onItem().ifNull().failWith(new IOException("boom")).await().indefinitely())
                 .isEqualTo(1);
     }
 

@@ -30,11 +30,6 @@ public abstract class AbstractUni<T> implements Uni<T> {
     }
 
     @Override
-    public UniOnNull<T> onNull() {
-        return new UniOnNull<>(this);
-    }
-
-    @Override
     public UniOnFailure<T> onFailure() {
         return new UniOnFailure<>(this, null);
     }
