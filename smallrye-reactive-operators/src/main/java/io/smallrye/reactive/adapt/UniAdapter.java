@@ -26,14 +26,6 @@ public interface UniAdapter<O> {
     boolean accept(Class<O> clazz);
 
     /**
-     * Adapts an instance of {@link Uni} into an instance of the target class ({@code O}).
-     *
-     * @param uni the uni instance, not {@code null}
-     * @return the created instance, must not be {@code null}
-     */
-    O adaptTo(Uni<?> uni);
-
-    /**
      * Adapts an instance of {@code O} into a {@link Uni}.
      *
      * @param instance the instance of {@code O}, not {@code null}

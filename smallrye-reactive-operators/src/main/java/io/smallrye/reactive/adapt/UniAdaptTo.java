@@ -6,7 +6,6 @@ import org.reactivestreams.Publisher;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.ServiceLoader;
 import java.util.concurrent.CompletableFuture;
 
 import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
@@ -15,12 +14,10 @@ public class UniAdaptTo<O> {
 
     private final Class<O> output;
     private final Uni<?> uni;
-    private final ServiceLoader<UniAdapter> adapters;
 
     public UniAdaptTo(Uni<?> uni, Class<O> output) {
         this.uni = nonNull(uni, "uni");
         this.output = nonNull(output, "output");
-        this.adapters = ServiceLoader.load(UniAdapter.class);
     }
 
     @SuppressWarnings("unchecked")
@@ -32,12 +29,6 @@ public class UniAdaptTo<O> {
 
         if (output.isAssignableFrom(CompletableFuture.class)) {
             return (O) uni.subscribe().asCompletionStage();
-        }
-
-        for (UniAdapter adapter : this.adapters) {
-            if (adapter.accept(output)) {
-                return ((UniAdapter<O>) adapter).adaptTo(uni);
-            }
         }
 
         O instance = instantiateUsingFromPublisher();

@@ -1,4 +1,4 @@
-package io.smallrye.reactive.operators;
+package io.smallrye.reactive.adapt;
 
 import io.reactivex.Completable;
 import io.reactivex.Flowable;

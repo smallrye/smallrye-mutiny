@@ -1,14 +1,16 @@
-package io.smallrye.reactive.operators;
+package io.smallrye.reactive.adapt;
 
 import io.reactivex.*;
 import io.reactivex.subscribers.TestSubscriber;
 import io.smallrye.reactive.Uni;
+import io.smallrye.reactive.adapt.converters.ToSingle;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.io.IOException;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -20,7 +22,7 @@ public class UniAdaptToTest {
 
     @Test
     public void testCreatingACompletable() {
-        Completable completable = Uni.createFrom().item(1).adapt().to(Completable.class);
+        Completable completable = Uni.createFrom().item(1).adapt().toCompletable();
         assertThat(completable).isNotNull();
         completable.test().assertComplete();
     }
@@ -31,7 +33,7 @@ public class UniAdaptToTest {
         Completable completable = Uni.createFrom().deferred(() -> {
             called.set(true);
             return Uni.createFrom().item(2);
-        }).adapt().to(Completable.class);
+        }).adapt().toCompletable();
 
         assertThat(completable).isNotNull();
         assertThat(called).isFalse();
@@ -41,14 +43,14 @@ public class UniAdaptToTest {
 
     @Test
     public void testCreatingACompletableFromVoid() {
-        Completable completable = Uni.createFrom().item(null).adapt().to(Completable.class);
+        Completable completable = Uni.createFrom().item(null).adapt().toCompletable();
         assertThat(completable).isNotNull();
         completable.test().assertComplete();
     }
 
     @Test
     public void testCreatingACompletableWithFailure() {
-        Completable completable = Uni.createFrom().failure(new IOException("boom")).adapt().to(Completable.class);
+        Completable completable = Uni.createFrom().failure(new IOException("boom")).adapt().toCompletable();
         assertThat(completable).isNotNull();
         completable.test().assertError(e -> {
             assertThat(e).hasMessage("boom").isInstanceOf(IOException.class);
@@ -59,17 +61,17 @@ public class UniAdaptToTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testCreatingASingle() {
-        Single<Integer> single = Uni.createFrom().item(1).adapt().to(Single.class);
+        Single<Optional<Integer>> single = Uni.createFrom().item(1).adapt().toSingle();
         assertThat(single).isNotNull();
         single.test()
-                .assertValue(1)
+                .assertValue(Optional.of(1))
                 .assertComplete();
     }
 
     @SuppressWarnings("unchecked")
     @Test
     public void testCreatingASingleFromNull() {
-        Single<Integer> single = Uni.createFrom().item(null).adapt().to(Single.class);
+        Single<Optional<Integer>> single = Uni.createFrom().item((Integer) null).adapt().toSingle();
         assertThat(single).isNotNull();
         single
                 .test()
@@ -79,7 +81,7 @@ public class UniAdaptToTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testCreatingASingleWithFailure() {
-        Single<Integer> single = Uni.createFrom().failure(new IOException("boom")).adapt().to(Single.class);
+        Single<Optional<Integer>> single = Uni.createFrom().<Integer>failure(new IOException("boom")).adapt().toSingle();
         assertThat(single).isNotNull();
         single.test().assertError(e -> {
             assertThat(e).hasMessage("boom").isInstanceOf(IOException.class);
@@ -90,7 +92,7 @@ public class UniAdaptToTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testCreatingAMaybe() {
-        Maybe<Integer> maybe = Uni.createFrom().item(1).adapt().to(Maybe.class);
+        Maybe<Integer> maybe = Uni.createFrom().item(1).adapt().toMaybe();
         assertThat(maybe).isNotNull();
         maybe.test()
                 .assertValue(1)
@@ -100,7 +102,7 @@ public class UniAdaptToTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testCreatingAMaybeFromNull() {
-        Maybe<Integer> maybe = Uni.createFrom().item(null).adapt().to(Maybe.class);
+        Maybe<Integer> maybe = Uni.createFrom().item((Integer) null).adapt().toMaybe();
         assertThat(maybe).isNotNull();
         maybe
                 .test()
@@ -111,7 +113,7 @@ public class UniAdaptToTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testCreatingAMaybeWithFailure() {
-        Maybe<Integer> maybe = Uni.createFrom().failure(new IOException("boom")).adapt().to(Maybe.class);
+        Maybe<Integer> maybe = Uni.createFrom().<Integer>failure(new IOException("boom")).adapt().toMaybe();
         assertThat(maybe).isNotNull();
         maybe.test().assertError(e -> {
             assertThat(e).hasMessage("boom").isInstanceOf(IOException.class);

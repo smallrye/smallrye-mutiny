@@ -15,7 +15,6 @@ public class MaybeUniAdapter implements UniAdapter<Maybe<?>> {
         return Maybe.class.isAssignableFrom(clazz);
     }
 
-    @Override
     public Maybe<?> adaptTo(Uni<?> uni) {
         return Maybe.create(emitter -> {
             CompletableFuture<?> future = uni.subscribe().asCompletionStage();
