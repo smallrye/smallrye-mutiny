@@ -15,8 +15,8 @@ import java.util.List;
  */
 public class MultiConcat {
 
-    private final boolean collectFailures;
-    private final int requests;
+    private boolean collectFailures;
+    private int requests;
 
     public MultiConcat(boolean collectFailures, int requests) {
         this.collectFailures = collectFailures;
@@ -54,20 +54,22 @@ public class MultiConcat {
      * all the items from all (non-failing) participants have ben emitted. Then, the failures are propagated downstream
      * (as a {@link io.smallrye.reactive.CompositeException} if several failures have been received).
      *
-     * @return a new {@link MultiConcat} configured to collect the failures.
+     * @return this {@link MultiConcat} configured to collect the failures.
      */
     public MultiConcat collectFailures() {
-        return new MultiConcat(true, this.requests);
+        this.collectFailures = true;
+        return this;
     }
 
     /**
-     * Indicates the the merge process should consumes the different streams using the given {@code request}.
+     * Indicates that the merge process should consumes the different streams using the given {@code request}.
      *
      * @param requests the requests
-     * @return a new {@link MultiMerge} configured with the given requests
+     * @return this {@link MultiMerge} configured with the given requests
      */
     public MultiConcat withRequests(int requests) {
-        return new MultiConcat(this.collectFailures, requests);
+        this.requests = requests;
+        return this;
     }
 
 }

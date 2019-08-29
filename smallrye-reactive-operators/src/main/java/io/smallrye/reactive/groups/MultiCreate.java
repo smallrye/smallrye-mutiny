@@ -13,6 +13,7 @@ import java.util.Arrays;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
+import java.util.concurrent.Executor;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
@@ -461,7 +462,7 @@ public class MultiCreate {
      * Be aware that if the subscriber does not request enough item in time, a back pressure failure is fired.
      * The produced {@link Multi} never completes until cancellation by the subscriber.
      * <p>
-     * The callbacks are invoked on the executor passed in {@link MultiTimePeriod#onExecutor(ScheduledExecutorService)}.
+     * The callbacks are invoked on the executor passed in {@link MultiTimePeriod#onExecutor(Executor)}.
      *
      * @return the object to configure the time period (initial delay, executor, interval)
      */

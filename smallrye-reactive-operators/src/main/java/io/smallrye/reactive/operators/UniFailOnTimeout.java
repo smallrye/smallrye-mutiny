@@ -1,7 +1,7 @@
 package io.smallrye.reactive.operators;
 
 import io.smallrye.reactive.Uni;
-import io.smallrye.reactive.helpers.Infrastructure;
+import io.smallrye.reactive.infrastructure.Infrastructure;
 import io.smallrye.reactive.helpers.ParameterValidation;
 import io.smallrye.reactive.subscription.UniSubscriber;
 import io.smallrye.reactive.subscription.UniSubscription;
@@ -28,7 +28,7 @@ public class UniFailOnTimeout<I> extends UniOperator<I, I> {
         super(nonNull(upstream, "upstream"));
         this.timeout = validate(timeout, "onTimeout");
         this.supplier = nonNull(supplier, "supplier");
-        this.executor = executor == null ? Infrastructure.getDefaultExecutor() : executor;
+        this.executor = executor == null ? Infrastructure.getDefaultWorkerPool() : executor;
     }
 
     @Override

@@ -1,7 +1,7 @@
 package io.smallrye.reactive.operators;
 
 import io.smallrye.reactive.Uni;
-import io.smallrye.reactive.helpers.Infrastructure;
+import io.smallrye.reactive.infrastructure.Infrastructure;
 import org.junit.Test;
 
 import java.io.IOException;
