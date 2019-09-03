@@ -16,6 +16,7 @@ import static org.awaitility.Awaitility.await;
 public class UniOnItemDelayTest {
 
     private ScheduledExecutorService executor = Executors.newScheduledThreadPool(4);
+  
     private Uni<Void> delayed = Uni.createFrom().item((Void)  null).onItem().delayIt()
             .onExecutor(executor)
             .by(Duration.ofMillis(100));
@@ -34,10 +35,12 @@ public class UniOnItemDelayTest {
     public void testDelayOnResultWithDefaultExecutor() {
         long begin = System.currentTimeMillis();
         UniAssertSubscriber<Void> subscriber = UniAssertSubscriber.create();
+
         Uni.createFrom().item(null)
                 .onItem().castTo(Void.class)
                 .onItem().delayIt()
                 .by(Duration.ofMillis(100)).subscribe().withSubscriber(subscriber);
+
         subscriber.await();
         long end = System.currentTimeMillis();
         assertThat(end - begin).isGreaterThanOrEqualTo(100);

@@ -43,8 +43,9 @@ public class UniOnNullFailTest {
     @Test
     public void testFailWithExceptionSupplier() {
         AtomicInteger count = new AtomicInteger();
-        Uni<Void> boom = Uni.createFrom().item((Void) null).onItem().ifNull()
-                .failWith(() -> new RuntimeException(Integer.toString(count.incrementAndGet())));
+        Uni<Void> boom = Uni.createFrom().item(null)
+                .onItem().castTo(Void.class)
+                .onItem().ifNull().failWith(() -> new RuntimeException(Integer.toString(count.incrementAndGet())));
 
         assertThatExceptionOfType(RuntimeException.class).isThrownBy(() -> boom.await().indefinitely())
                 .withMessageEndingWith("1");

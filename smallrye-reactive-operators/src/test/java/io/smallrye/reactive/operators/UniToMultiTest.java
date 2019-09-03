@@ -15,7 +15,9 @@ public class UniToMultiTest {
 
     @Test
     public void testFromEmpty() {
-        Multi<Void> multi = Uni.createFrom().item((Void)  null).toMulti();
+        Multi<Void> multi = Uni.createFrom().item(null)
+                .onItem().castTo(Void.class)
+                .toMulti();
         multi.subscribe().withSubscriber(MultiAssertSubscriber.create(1)).assertCompletedSuccessfully();
         multi.subscribe().withSubscriber(MultiAssertSubscriber.create(0)).assertNotTerminated().cancel();
     }
