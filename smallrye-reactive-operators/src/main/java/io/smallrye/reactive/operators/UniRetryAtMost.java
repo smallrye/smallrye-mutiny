@@ -24,7 +24,7 @@ public class UniRetryAtMost<T> extends UniOperator<T, T> {
     }
 
     @Override
-    public void subscribing(UniSerializedSubscriber<? super T> subscriber) {
+    protected void subscribing(UniSerializedSubscriber<? super T> subscriber) {
         AtomicInteger numberOfSubscriptions = new AtomicInteger(0);
         UniSubscriber<T> retryingSubscriber = new UniSubscriber<T>() {
             AtomicReference<UniSubscription> reference = new AtomicReference<>();

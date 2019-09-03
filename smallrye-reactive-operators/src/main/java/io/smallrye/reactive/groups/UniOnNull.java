@@ -1,6 +1,7 @@
 package io.smallrye.reactive.groups;
 
 import io.smallrye.reactive.Uni;
+import io.smallrye.reactive.infrastructure.Infrastructure;
 
 import java.util.NoSuchElementException;
 import java.util.function.Supplier;
@@ -37,7 +38,7 @@ public class UniOnNull<T> {
     public Uni<T> failWith(Supplier<Throwable> supplier) {
         nonNull(supplier, "supplier");
 
-        return upstream.onItem().mapToUni((item, emitter) -> {
+        return Infrastructure.onUniCreation(upstream.onItem().mapToUni((item, emitter) -> {
             if (item != null) {
                 emitter.complete(item);
                 return;
@@ -55,7 +56,7 @@ public class UniOnNull<T> {
             } else {
                 emitter.fail(throwable);
             }
-        });
+        }));
     }
 
     /**
@@ -88,7 +89,7 @@ public class UniOnNull<T> {
     public Uni<T> switchTo(Supplier<Uni<? extends T>> supplier) {
         nonNull(supplier, "supplier");
 
-        return upstream.onItem().mapToUni(res -> {
+        Uni<T> uni = upstream.onItem().mapToUni(res -> {
             if (res != null) {
                 return Uni.createFrom().item(res);
             } else {
@@ -106,7 +107,7 @@ public class UniOnNull<T> {
                 }
             }
         });
-
+        return Infrastructure.onUniCreation(uni);
     }
 
     /**
@@ -129,7 +130,7 @@ public class UniOnNull<T> {
      */
     public Uni<T> continueWith(Supplier<? extends T> supplier) {
         nonNull(supplier, "supplier");
-        return upstream.onItem().mapToItem(res -> {
+        return Infrastructure.onUniCreation(upstream.onItem().mapToItem(res -> {
             if (res != null) {
                 return res;
             }
@@ -138,7 +139,7 @@ public class UniOnNull<T> {
                 throw new NullPointerException(SUPPLIER_PRODUCED_NULL);
             }
             return outcome;
-        });
+        }));
     }
 
 }

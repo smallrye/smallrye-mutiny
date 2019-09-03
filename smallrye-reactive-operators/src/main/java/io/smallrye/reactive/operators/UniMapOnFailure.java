@@ -23,7 +23,7 @@ public class UniMapOnFailure<I, O> extends UniOperator<I, O> {
     }
 
     @Override
-    public void subscribing(UniSerializedSubscriber<? super O> subscriber) {
+    protected void subscribing(UniSerializedSubscriber<? super O> subscriber) {
         upstream().subscribe().withSubscriber(new UniDelegatingSubscriber<I, O>(subscriber) {
 
             @Override

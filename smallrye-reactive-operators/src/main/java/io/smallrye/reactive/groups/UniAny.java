@@ -1,6 +1,7 @@
 package io.smallrye.reactive.groups;
 
 import io.smallrye.reactive.Uni;
+import io.smallrye.reactive.infrastructure.Infrastructure;
 import io.smallrye.reactive.operators.UniOrCombination;
 
 import java.util.Arrays;
@@ -27,7 +28,7 @@ public class UniAny {
     @SafeVarargs
     public final <T> Uni<T> of(Uni<? super T>... unis) {
         List<Uni<? super T>> list = Arrays.asList(nonNull(unis, "unis"));
-        return new UniOrCombination<>(list);
+        return Infrastructure.onUniCreation(new UniOrCombination<>(list));
     }
 
     /**
@@ -49,6 +50,6 @@ public class UniAny {
      * @return the produced {@link Uni}
      */
     public <T> Uni<T> of(Iterable<? extends Uni<? super T>> iterable) {
-        return new UniOrCombination<>(iterable);
+        return Infrastructure.onUniCreation(new UniOrCombination<>(iterable));
     }
 }

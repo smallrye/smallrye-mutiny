@@ -47,7 +47,7 @@ public class UniFlatMapCompletionStageOnItem<I, O> extends UniOperator<I, O> {
     }
 
     @Override
-    public void subscribing(UniSerializedSubscriber<? super O> subscriber) {
+    protected void subscribing(UniSerializedSubscriber<? super O> subscriber) {
         UniFlatMapOnItem.FlatMapSubscription flatMapSubscription = new UniFlatMapOnItem.FlatMapSubscription();
         // Subscribe to the source.
         upstream().subscribe().withSubscriber(new UniDelegatingSubscriber<I, O>(subscriber) {

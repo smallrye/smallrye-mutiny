@@ -15,7 +15,7 @@ public class UniEmitOn<I> extends UniOperator<I, I> {
     }
 
     @Override
-    public void subscribing(UniSerializedSubscriber<? super I> subscriber) {
+    protected void subscribing(UniSerializedSubscriber<? super I> subscriber) {
         upstream().subscribe().withSubscriber(new UniDelegatingSubscriber<I, I>(subscriber) {
             @Override
             public void onItem(I item) {

@@ -1,6 +1,7 @@
 package io.smallrye.reactive.groups;
 
 import io.smallrye.reactive.Uni;
+import io.smallrye.reactive.infrastructure.Infrastructure;
 import io.smallrye.reactive.operators.UniFlatMapCompletionStageOnItem;
 import io.smallrye.reactive.operators.UniFlatMapOnItem;
 import io.smallrye.reactive.operators.UniMapOnResult;
@@ -30,7 +31,9 @@ public class UniOnItem<T> {
      * @return the new {@link Uni}
      */
     public Uni<T> consume(Consumer<? super T> callback) {
-        return new UniOnEventConsume<>(upstream, nonNull(callback, "callback"), null);
+        return Infrastructure.onUniCreation(
+                new UniOnEventConsume<>(upstream, nonNull(callback, "callback"), null)
+        );
     }
 
     /**
@@ -45,7 +48,7 @@ public class UniOnItem<T> {
      * @return the new {@link Uni}
      */
     public <R> Uni<R> mapToItem(Function<? super T, ? extends R> mapper) {
-        return new UniMapOnResult<>(upstream, mapper);
+        return Infrastructure.onUniCreation(new UniMapOnResult<>(upstream, mapper));
     }
 
     /**
@@ -65,7 +68,7 @@ public class UniOnItem<T> {
      * in an asynchronous manner.
      */
     public <R> Uni<R> mapToUni(Function<? super T, ? extends Uni<? extends R>> mapper) {
-        return new UniFlatMapOnItem<>(upstream, mapper);
+        return Infrastructure.onUniCreation(new UniFlatMapOnItem<>(upstream, mapper));
     }
 
     /**
@@ -76,6 +79,7 @@ public class UniOnItem<T> {
      * possibly using another type of item ({@code R}). The events fired by produced {@link CompletionStage} are
      * forwarded to the {@link Uni} returned by this method.
      * <p>*
+     *
      * @param mapper the function called with the item of this {@link Uni} and producing the {@link CompletionStage},
      *               must not be {@code null}, must not return {@code null}.
      * @param <R>    the type of item
@@ -83,7 +87,7 @@ public class UniOnItem<T> {
      * in an asynchronous manner.
      */
     public <R> Uni<R> mapToCompletionStage(Function<? super T, ? extends CompletionStage<? extends R>> mapper) {
-        return new UniFlatMapCompletionStageOnItem<>(upstream, mapper);
+        return Infrastructure.onUniCreation(new UniFlatMapCompletionStageOnItem<>(upstream, mapper));
     }
 
     /**
@@ -101,8 +105,9 @@ public class UniOnItem<T> {
      */
     public <R> Uni<R> mapToUni(BiConsumer<? super T, UniEmitter<? super R>> consumer) {
         nonNull(consumer, "consumer");
-        return this.mapToUni(x ->
-                Uni.createFrom().emitter(emitter -> consumer.accept(x, emitter)));
+        return Infrastructure.onUniCreation(
+                this.mapToUni(x ->  Uni.createFrom().emitter(emitter -> consumer.accept(x, emitter)))
+        );
     }
 
     /**
@@ -144,7 +149,7 @@ public class UniOnItem<T> {
      */
     public Uni<T> failWith(Function<? super T, ? extends Throwable> mapper) {
         nonNull(mapper, "mapper");
-        return mapToUni(t -> Uni.createFrom().failure(mapper.apply(t)));
+        return Infrastructure.onUniCreation(mapToUni(t -> Uni.createFrom().failure(mapper.apply(t))));
     }
 
     /**

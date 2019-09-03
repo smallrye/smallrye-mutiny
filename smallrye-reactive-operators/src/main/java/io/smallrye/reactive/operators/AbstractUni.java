@@ -12,7 +12,7 @@ import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
 
 public abstract class AbstractUni<T> implements Uni<T> {
 
-    abstract void subscribing(UniSerializedSubscriber<? super T> subscriber);
+    protected abstract void subscribing(UniSerializedSubscriber<? super T> subscriber);
 
     @Override
     public UniSubscribe<T> subscribe() {
@@ -63,8 +63,6 @@ public abstract class AbstractUni<T> implements Uni<T> {
     public UniAwait<T> await() {
         return new UniAwait<>(this);
     }
-
-    //TODO Should emitOn and receiveFailureOn be part of the onFailure and onItem groups
 
     @Override
     public Uni<T> emitOn(Executor executor) {

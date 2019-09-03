@@ -14,7 +14,7 @@ public class UniOnCancellation<T> extends UniOperator<T, T> {
     }
 
     @Override
-    void subscribing(UniSerializedSubscriber<? super T> subscriber) {
+    protected void subscribing(UniSerializedSubscriber<? super T> subscriber) {
         upstream().subscribe().withSubscriber(new UniDelegatingSubscriber<T, T>(subscriber) {
             @Override
             public void onSubscribe(UniSubscription subscription) {

@@ -19,7 +19,7 @@ public class UniCreateFromPublisher<O> extends UniOperator<Void, O> {
 
     @SuppressWarnings("SubscriberImplementation")
     @Override
-    public void subscribing(UniSerializedSubscriber<? super O> subscriber) {
+    protected void subscribing(UniSerializedSubscriber<? super O> subscriber) {
         AtomicReference<Subscription> reference = new AtomicReference<>();
         publisher.subscribe(new Subscriber<O>() {
             @Override

@@ -20,7 +20,7 @@ public class UniCallSubscribeOn<I> extends UniOperator<I, I> {
     }
 
     @Override
-    public void subscribing(UniSerializedSubscriber<? super I> subscriber) {
+    protected void subscribing(UniSerializedSubscriber<? super I> subscriber) {
         SubscribeOnUniSubscriber downstream = new SubscribeOnUniSubscriber(subscriber);
         try {
             executor.execute(downstream);

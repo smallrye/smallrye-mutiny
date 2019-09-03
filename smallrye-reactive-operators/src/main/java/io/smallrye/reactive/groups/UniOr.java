@@ -1,6 +1,7 @@
 package io.smallrye.reactive.groups;
 
 import io.smallrye.reactive.Uni;
+import io.smallrye.reactive.infrastructure.Infrastructure;
 import io.smallrye.reactive.operators.UniOrCombination;
 
 import java.util.Arrays;
@@ -16,13 +17,14 @@ public class UniOr<T> {
         this.upstream = nonNull(upstream, "upstream");
     }
 
+    @SuppressWarnings("unchecked")
     public Uni<T> uni(Uni<T> other) {
         return unis(upstream, other);
     }
 
     public Uni<T> unis(Uni<T>... other) {
         List<Uni<T>> list = Arrays.asList(other);
-        return new UniOrCombination<T>(list);
+        return Infrastructure.onUniCreation(new UniOrCombination<>(list));
     }
 
 }

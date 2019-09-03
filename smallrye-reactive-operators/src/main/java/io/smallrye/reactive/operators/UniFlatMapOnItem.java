@@ -49,7 +49,7 @@ public class UniFlatMapOnItem<I, O> extends UniOperator<I, O> {
     }
 
     @Override
-    public void subscribing(UniSerializedSubscriber<? super O> subscriber) {
+    protected void subscribing(UniSerializedSubscriber<? super O> subscriber) {
         FlatMapSubscription flatMapSubscription = new FlatMapSubscription();
         // Subscribe to the source.
         upstream().subscribe().withSubscriber(new UniDelegatingSubscriber<I, O>(subscriber) {
