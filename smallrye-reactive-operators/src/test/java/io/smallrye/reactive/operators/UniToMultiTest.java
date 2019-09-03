@@ -15,14 +15,14 @@ public class UniToMultiTest {
 
     @Test
     public void testFromEmpty() {
-        Multi<Void> multi = Uni.createFrom().nullItem().toMulti();
+        Multi<Void> multi = Uni.createFrom().item((Void)  null).toMulti();
         multi.subscribe().withSubscriber(MultiAssertSubscriber.create(1)).assertCompletedSuccessfully();
         multi.subscribe().withSubscriber(MultiAssertSubscriber.create(0)).assertNotTerminated().cancel();
     }
 
     @Test
     public void testFromEmpty2() {
-        Multi<Void> multi = Multi.createFrom().uni(Uni.createFrom().nullItem());
+        Multi<Void> multi = Multi.createFrom().uni(Uni.createFrom().item(null));
         multi.subscribe().withSubscriber(MultiAssertSubscriber.create(1)).assertCompletedSuccessfully();
         multi.subscribe().withSubscriber(MultiAssertSubscriber.create(0)).assertNotTerminated().cancel();
     }

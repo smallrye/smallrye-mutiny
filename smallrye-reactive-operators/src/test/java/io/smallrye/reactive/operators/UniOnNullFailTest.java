@@ -15,7 +15,7 @@ public class UniOnNullFailTest {
 
     @Test(expected = NoSuchElementException.class)
     public void testFail() {
-        Uni.createFrom().nullItem()
+        Uni.createFrom().item(null)
                 .onItem().ifNull().fail().await().indefinitely();
     }
 
@@ -26,12 +26,12 @@ public class UniOnNullFailTest {
 
     @Test(expected = RuntimeException.class)
     public void testFailWithException() {
-        Uni.createFrom().nullItem().onItem().ifNull().failWith(new RuntimeException("boom")).await().indefinitely();
+        Uni.createFrom().item(null).onItem().ifNull().failWith(new RuntimeException("boom")).await().indefinitely();
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testFailWithExceptionSetToNull() {
-        Uni.createFrom().nullItem().onItem().ifNull().failWith((Exception) null).await().indefinitely();
+        Uni.createFrom().item(null).onItem().ifNull().failWith((Exception) null).await().indefinitely();
     }
 
     @Test
@@ -43,7 +43,7 @@ public class UniOnNullFailTest {
     @Test
     public void testFailWithExceptionSupplier() {
         AtomicInteger count = new AtomicInteger();
-        Uni<Void> boom = Uni.createFrom().nullItem().onItem().ifNull()
+        Uni<Void> boom = Uni.createFrom().item((Void) null).onItem().ifNull()
                 .failWith(() -> new RuntimeException(Integer.toString(count.incrementAndGet())));
 
         assertThatExceptionOfType(RuntimeException.class).isThrownBy(() -> boom.await().indefinitely())
@@ -54,7 +54,7 @@ public class UniOnNullFailTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testFailWithExceptionSupplierSetToNull() {
-        Uni.createFrom().nullItem().onItem().ifNull().failWith((Supplier<Throwable>) null).await().indefinitely();
+        Uni.createFrom().item(null).onItem().ifNull().failWith((Supplier<Throwable>) null).await().indefinitely();
     }
 
     @Test

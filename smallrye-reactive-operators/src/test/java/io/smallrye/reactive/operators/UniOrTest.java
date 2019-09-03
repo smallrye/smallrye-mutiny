@@ -104,10 +104,10 @@ public class UniOrTest {
 
     @Test(timeout = 1000)
     public void testBlockingWithDelay() {
-        Uni<Integer> uni1 = Uni.createFrom().nullItem()
+        Uni<Integer> uni1 = Uni.createFrom().item(null)
                 .onItem().delayIt().onExecutor(executor).by(Duration.ofMillis(500))
                 .map(x -> 1);
-        Uni<Integer> uni2 = Uni.createFrom().nullItem()
+        Uni<Integer> uni2 = Uni.createFrom().item(null)
                 .onItem().delayIt().onExecutor(executor).by(Duration.ofMillis(50))
                 .map(x -> 2);
         assertThat(Uni.combine().any().of(uni1, uni2).await().indefinitely()).isEqualTo(2);
@@ -115,8 +115,8 @@ public class UniOrTest {
 
     @Test(timeout = 1000)
     public void testCompletingAgainstEmpty() {
-        Uni<Integer> uni1 = Uni.createFrom().nullItem().map(x -> 1);
-        Uni<Integer> uni2 = Uni.createFrom().nullItem().onItem().delayIt().onExecutor(executor)
+        Uni<Integer> uni1 = Uni.createFrom().item(null).map(x -> 1);
+        Uni<Integer> uni2 = Uni.createFrom().item(null).onItem().delayIt().onExecutor(executor)
                 .by(Duration.ofMillis(50)).map(x -> 2);
         assertThat(Uni.combine().any().of(uni1, uni2).await().indefinitely()).isEqualTo(1);
     }
@@ -124,7 +124,7 @@ public class UniOrTest {
     @Test(timeout = 1000)
     public void testCompletingAgainstNever() {
         Uni<Integer> uni1 = Uni.createFrom().nothing().map(x -> 1);
-        Uni<Integer> uni2 = Uni.createFrom().nullItem().onItem().delayIt().onExecutor(executor)
+        Uni<Integer> uni2 = Uni.createFrom().item(null).onItem().delayIt().onExecutor(executor)
                 .by(Duration.ofMillis(50)).map(x -> 2);
         assertThat(Uni.combine().any().of(uni1, uni2).await().asOptional().indefinitely()).contains(2);
     }
