@@ -41,7 +41,7 @@ public class UniAdaptToTest {
 
     @Test
     public void testCreatingACompletableFromVoid() {
-        Completable completable = Uni.createFrom().nullItem().adapt().to(Completable.class);
+        Completable completable = Uni.createFrom().item(null).adapt().to(Completable.class);
         assertThat(completable).isNotNull();
         completable.test().assertComplete();
     }
@@ -69,7 +69,7 @@ public class UniAdaptToTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testCreatingASingleFromNull() {
-        Single<Integer> single = Uni.createFrom().nullItem().adapt().to(Single.class);
+        Single<Integer> single = Uni.createFrom().item(null).adapt().to(Single.class);
         assertThat(single).isNotNull();
         single
                 .test()
@@ -100,7 +100,7 @@ public class UniAdaptToTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testCreatingAMaybeFromNull() {
-        Maybe<Integer> maybe = Uni.createFrom().nullItem().adapt().to(Maybe.class);
+        Maybe<Integer> maybe = Uni.createFrom().item(null).adapt().to(Maybe.class);
         assertThat(maybe).isNotNull();
         maybe
                 .test()
@@ -132,7 +132,7 @@ public class UniAdaptToTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testCreatingAnObservableFromNull() {
-        Observable<Integer> observable = Uni.createFrom().nullItem().adapt().to(Observable.class);
+        Observable<Integer> observable = Uni.createFrom().item(null).adapt().to(Observable.class);
         assertThat(observable).isNotNull();
         observable
                 .test()
@@ -181,7 +181,7 @@ public class UniAdaptToTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testCreatingAFlowableFromNull() {
-        Flowable<Integer> flowable = Uni.createFrom().nullItem().adapt().to(Flowable.class);
+        Flowable<Integer> flowable = Uni.createFrom().item(null).adapt().to(Flowable.class);
         assertThat(flowable).isNotNull();
         flowable
                 .test()
@@ -211,7 +211,7 @@ public class UniAdaptToTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testCreatingAFluxFromNull() {
-        Flux<Integer> flux = Uni.createFrom().nullItem().adapt().to(Flux.class);
+        Flux<Integer> flux = Uni.createFrom().item(null).adapt().to(Flux.class);
         assertThat(flux).isNotNull();
         assertThat(flux.blockFirst()).isNull();
     }
@@ -240,7 +240,7 @@ public class UniAdaptToTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testCreatingAMonoFromNull() {
-        Mono<Integer> mono = Uni.createFrom().nullItem().adapt().to(Mono.class);
+        Mono<Integer> mono = Uni.createFrom().item(null).adapt().to(Mono.class);
         assertThat(mono).isNotNull();
         assertThat(mono.block()).isNull();
     }
@@ -262,7 +262,7 @@ public class UniAdaptToTest {
     @Test
     public void testCreatingCompletionStages() {
         Uni<Integer> valued = Uni.createFrom().item(1);
-        Uni<Void> empty = Uni.createFrom().nullItem();
+        Uni<Void> empty = Uni.createFrom().item(null);
         Uni<Void> failure = Uni.createFrom().failure(new Exception("boom"));
 
         CompletionStage<Integer> stage1 = valued.adapt().to(CompletionStage.class);
@@ -278,7 +278,7 @@ public class UniAdaptToTest {
     @Test
     public void testCreatingCompletableFutures() {
         Uni<Integer> valued = Uni.createFrom().item(1);
-        Uni<Void> empty = Uni.createFrom().nullItem();
+        Uni<Void> empty = Uni.createFrom().item(null);
         Uni<Void> failure = Uni.createFrom().failure(new Exception("boom"));
 
         CompletableFuture<Integer> stage1 = valued.adapt().to(CompletableFuture.class);
