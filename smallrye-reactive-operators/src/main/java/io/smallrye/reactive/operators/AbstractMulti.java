@@ -187,4 +187,9 @@ public abstract class AbstractMulti<T> implements Multi<T> {
     public MultiOverflow<T> onOverflow() {
         return new MultiOverflow<>(this);
     }
+
+    @Override
+    public MultiBroadcast<T> broadcast() {
+        return new MultiBroadcast<>(this);
+    }
 }
