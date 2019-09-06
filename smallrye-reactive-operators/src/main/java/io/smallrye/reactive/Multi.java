@@ -34,6 +34,11 @@ public interface Multi<T> extends Publisher<T> {
      */
     MultiSubscribe<T> subscribe();
 
+    /**
+     * Configures the behavior when an {@code item} event is received from the this {@link Multi}
+     *
+     * @return the object to configure the behavio.
+     */
     MultiOnItem<T> onItem();
 
     /**
