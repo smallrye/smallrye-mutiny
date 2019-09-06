@@ -34,7 +34,11 @@ public interface Multi<T> extends Publisher<T> {
      */
     MultiSubscribe<T> subscribe();
 
-
+    /**
+     * Configures the behavior when an {@code item} event is received from the this {@link Multi}
+     *
+     * @return the object to configure the behavio.
+     */
     MultiOnItem<T> onItem();
 
     /**
@@ -176,6 +180,14 @@ public interface Multi<T> extends Publisher<T> {
      * @return the object to configure the overflow strategy
      */
     MultiOverflow<T> onOverflow();
+
+    /**
+     * Makes this {@link Multi} be able to broadcast its events ({@code items}, {@code failure}, and {@code completion})
+     * to multiple subscribers.
+     *
+     * @return the object to configure the broadcast
+     */
+    MultiBroadcast<T> broadcast();
 
     /**
      * Produces a new {@link Multi} invoking the given function for each item emitted by the upstream {@link Multi}.
