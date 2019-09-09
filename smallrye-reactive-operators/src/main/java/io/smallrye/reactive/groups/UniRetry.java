@@ -1,6 +1,7 @@
 package io.smallrye.reactive.groups;
 
 import io.smallrye.reactive.Uni;
+import io.smallrye.reactive.infrastructure.Infrastructure;
 import io.smallrye.reactive.operators.UniRetryAtMost;
 
 import java.util.function.Predicate;
@@ -36,7 +37,7 @@ public class UniRetry<T> {
      * until it gets an item. When the number of attempt is reached, the last failure is propagated.
      */
     public Uni<T> atMost(long numberOfAttempts) {
-        return new UniRetryAtMost<>(upstream, predicate, numberOfAttempts);
+        return Infrastructure.onUniCreation(new UniRetryAtMost<>(upstream, predicate, numberOfAttempts));
     }
 
     public Uni<T> until(Predicate<? super Throwable> predicate) {

@@ -1,6 +1,7 @@
 package io.smallrye.reactive.groups;
 
 import io.smallrye.reactive.Uni;
+import io.smallrye.reactive.infrastructure.Infrastructure;
 import io.smallrye.reactive.operators.UniAndCombination;
 
 import java.util.List;
@@ -44,7 +45,9 @@ public class UniAndGroupIterable<T1> {
     }
 
     public <O> Uni<O> combinedWith(Function<List<?>, O> function) {
-        return new UniAndCombination<>(source, unis, nonNull(function, "function"), collectFailures);
+        return Infrastructure
+                .onUniCreation(new UniAndCombination<>(source, unis, nonNull(function, "function"), collectFailures)
+                );
     }
 
 }

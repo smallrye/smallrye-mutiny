@@ -1,6 +1,7 @@
 package io.smallrye.reactive.groups;
 
 import io.smallrye.reactive.Uni;
+import io.smallrye.reactive.infrastructure.Infrastructure;
 import io.smallrye.reactive.operators.UniFlatMapOnFailure;
 import io.smallrye.reactive.operators.UniMapOnFailure;
 import io.smallrye.reactive.operators.UniOnEventConsume;
@@ -29,7 +30,9 @@ public class UniOnFailure<T> {
      * @return the new {@link Uni}
      */
     public Uni<T> consume(Consumer<Throwable> callback) {
-        return new UniOnEventConsume<>(upstream, null, nonNull(callback, "callback"));
+        return Infrastructure.onUniCreation(
+                new UniOnEventConsume<>(upstream, null, nonNull(callback, "callback"))
+        );
     }
 
     /**
@@ -40,7 +43,7 @@ public class UniOnFailure<T> {
      * @return the new {@link Uni}
      */
     public Uni<T> mapTo(Function<? super Throwable, ? extends Throwable> mapper) {
-        return new UniMapOnFailure<>(upstream, predicate, mapper);
+        return Infrastructure.onUniCreation(new UniMapOnFailure<>(upstream, predicate, mapper));
     }
 
     public Uni<T> recoverWithItem(T fallback) {
@@ -54,14 +57,16 @@ public class UniOnFailure<T> {
 
     public Uni<T> recoverWithItem(Function<? super Throwable, ? extends T> fallback) {
         nonNull(fallback, "fallback");
-        return new UniFlatMapOnFailure<>(upstream, predicate, failure -> {
+        return Infrastructure.onUniCreation(new UniFlatMapOnFailure<>(upstream, predicate, failure -> {
             T newResult = fallback.apply(failure);
             return Uni.createFrom().item(newResult);
-        });
+        }));
     }
 
     public Uni<T> recoverWithUni(Function<? super Throwable, ? extends Uni<? extends T>> fallback) {
-        return new UniFlatMapOnFailure<>(upstream, predicate, nonNull(fallback, "fallback"));
+        return Infrastructure.onUniCreation(
+                new UniFlatMapOnFailure<>(upstream, predicate, nonNull(fallback, "fallback"))
+        );
     }
 
     public Uni<T> recoverWithUni(Supplier<? extends Uni<? extends T>> supplier) {

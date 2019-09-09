@@ -3,6 +3,7 @@ package io.smallrye.reactive.groups;
 import io.smallrye.reactive.Multi;
 import io.smallrye.reactive.Uni;
 import io.smallrye.reactive.adapt.UniAdaptFrom;
+import io.smallrye.reactive.infrastructure.Infrastructure;
 import io.smallrye.reactive.operators.*;
 import io.smallrye.reactive.subscription.UniEmitter;
 import io.smallrye.reactive.subscription.UniSubscriber;
@@ -74,7 +75,7 @@ public class UniCreate {
      * @return the produced {@link Uni}
      */
     public <T> Uni<T> deferredCompletionStage(Supplier<? extends CompletionStage<? extends T>> supplier) {
-        return new UniCreateFromCompletionStage<>(nonNull(supplier, "supplier"));
+        return Infrastructure.onUniCreation(new UniCreateFromCompletionStage<>(nonNull(supplier, "supplier")));
     }
 
     /**
@@ -97,7 +98,7 @@ public class UniCreate {
      */
     public <T> Uni<T> publisher(Publisher<? extends T> publisher) {
         Publisher<? extends T> actual = nonNull(publisher, "publisher");
-        return new UniCreateFromPublisher<>(actual);
+        return Infrastructure.onUniCreation(new UniCreateFromPublisher<>(actual));
     }
 
     /**
@@ -191,7 +192,7 @@ public class UniCreate {
      */
     public <T> Uni<T> emitter(Consumer<UniEmitter<? super T>> consumer) {
         Consumer<UniEmitter<? super T>> actual = nonNull(consumer, "consumer");
-        return new UniCreateWithEmitter<>(actual);
+        return Infrastructure.onUniCreation(new UniCreateWithEmitter<>(actual));
     }
 
     /**
@@ -213,7 +214,7 @@ public class UniCreate {
      */
     public <T> Uni<T> deferred(Supplier<? extends Uni<? extends T>> supplier) {
         Supplier<? extends Uni<? extends T>> actual = nonNull(supplier, "supplier");
-        return new UniCreateFromDeferredSupplier<>(actual);
+        return Infrastructure.onUniCreation(new UniCreateFromDeferredSupplier<>(actual));
     }
 
     /**
@@ -269,16 +270,6 @@ public class UniCreate {
     @SuppressWarnings("unchecked")
     public <T> Uni<T> nothing() {
         return (Uni<T>) UniNever.INSTANCE;
-    }
-
-    /**
-     * Equivalent to {@link #item(Object)}} firing an {@code item} event with {@code null}.
-     *
-     * @return a {@link Uni} immediately calling {@link UniSubscriber#onItem(Object)} with {@code null} just
-     * after subscription.
-     */
-    public Uni<Void> nullItem() {
-        return deferredItem(() -> null);
     }
 
     public <T, X> Uni<T> converterOf(X instance) {

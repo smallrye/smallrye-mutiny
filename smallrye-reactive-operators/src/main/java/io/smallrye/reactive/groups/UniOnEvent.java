@@ -1,6 +1,7 @@
 package io.smallrye.reactive.groups;
 
 import io.smallrye.reactive.Uni;
+import io.smallrye.reactive.infrastructure.Infrastructure;
 import io.smallrye.reactive.operators.UniOnCancellation;
 import io.smallrye.reactive.operators.UniOnSubscription;
 import io.smallrye.reactive.operators.UniOnTermination;
@@ -36,7 +37,7 @@ public class UniOnEvent<T> {
      * @return a new {@link Uni}
      */
     public Uni<T> subscription(Consumer<? super UniSubscription> consumer) {
-        return new UniOnSubscription<>(upstream, nonNull(consumer, "consumer"));
+        return Infrastructure.onUniCreation(new UniOnSubscription<>(upstream, nonNull(consumer, "consumer")));
     }
 
     /**
@@ -47,7 +48,7 @@ public class UniOnEvent<T> {
      * @return a new {@link Uni}
      */
     public Uni<T> cancellation(Runnable runnable) {
-        return new UniOnCancellation<>(upstream, nonNull(runnable, "runnable"));
+        return Infrastructure.onUniCreation(new UniOnCancellation<>(upstream, nonNull(runnable, "runnable")));
     }
 
     /**
@@ -62,7 +63,7 @@ public class UniOnEvent<T> {
      * @return the new {@link Uni}
      */
     public Uni<T> termination(Functions.TriConsumer<T, Throwable, Boolean> consumer) {
-        return new UniOnTermination<>(upstream, nonNull(consumer, "consumer"));
+        return Infrastructure.onUniCreation(new UniOnTermination<>(upstream, nonNull(consumer, "consumer")));
     }
 
     /**

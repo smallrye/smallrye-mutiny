@@ -27,7 +27,7 @@ public class UniCache<I> extends UniOperator<I, I> implements UniSubscriber<I> {
     }
 
     @Override
-    public void subscribing(UniSerializedSubscriber<? super I> subscriber) {
+    protected void subscribing(UniSerializedSubscriber<? super I> subscriber) {
         Runnable action = null;
         synchronized (this) {
             switch (state) {

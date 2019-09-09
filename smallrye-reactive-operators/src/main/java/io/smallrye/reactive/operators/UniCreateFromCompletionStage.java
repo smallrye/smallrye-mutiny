@@ -27,7 +27,7 @@ public class UniCreateFromCompletionStage<O> extends UniOperator<Void, O> {
     }
 
     @Override
-    public void subscribing(UniSerializedSubscriber<? super O> subscriber) {
+    protected void subscribing(UniSerializedSubscriber<? super O> subscriber) {
         CompletionStage<? extends O> stage = supplier.get();
 
         if (stage == null) {

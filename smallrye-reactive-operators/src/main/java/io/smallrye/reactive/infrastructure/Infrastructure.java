@@ -1,6 +1,12 @@
 package io.smallrye.reactive.infrastructure;
 
+import io.smallrye.reactive.Uni;
+import io.smallrye.reactive.subscription.UniSubscriber;
+
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Iterator;
+import java.util.List;
 import java.util.ServiceLoader;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -23,10 +29,18 @@ public class Infrastructure {
             DEFAULT_SCHEDULER = scheduler;
             DEFAULT_EXECUTOR = scheduler;
         }
+
+        // Interceptor
+        ServiceLoader<UniInterceptor> interceptorLoader = ServiceLoader.load(UniInterceptor.class);
+        List<UniInterceptor> interceptors = new ArrayList<>();
+        interceptorLoader.iterator().forEachRemaining(interceptors::add);
+        interceptors.sort(Comparator.comparingInt(UniInterceptor::ordinal));
+        UNI_INTERCEPTORS = interceptors;
     }
 
-    private static final  ScheduledExecutorService DEFAULT_SCHEDULER;
-    private static final  Executor DEFAULT_EXECUTOR;
+    private static final ScheduledExecutorService DEFAULT_SCHEDULER;
+    private static final Executor DEFAULT_EXECUTOR;
+    private static final List<UniInterceptor> UNI_INTERCEPTORS;
 
     public static ScheduledExecutorService getDefaultWorkerPool() {
         return DEFAULT_SCHEDULER;
@@ -36,4 +50,39 @@ public class Infrastructure {
         return DEFAULT_EXECUTOR;
     }
 
+    public static <T> Uni<T> onUniCreation(Uni<T> instance) {
+        Uni<T> current = instance;
+        for (UniInterceptor itcp : UNI_INTERCEPTORS) {
+            current = itcp.onUniCreation(current);
+        }
+        return current;
+    }
+
+    public static <T> UniSubscriber<? super T> onUniSubscription(Uni<T> instance, UniSubscriber<? super T> subscriber) {
+        UniSubscriber<? super T> current = subscriber;
+        for (UniInterceptor itcp : UNI_INTERCEPTORS) {
+            current = itcp.onSubscription(instance, current);
+        }
+        return current;
+    }
+
+    // For testing purpose only
+    static void registerUniInterceptor(UniInterceptor e) {
+        UNI_INTERCEPTORS.add(e);
+        UNI_INTERCEPTORS.sort(Comparator.comparingInt(UniInterceptor::ordinal));
+    }
+
+    // For testing purpose only
+    static void clearUniInterceptors() {
+        UNI_INTERCEPTORS.clear();
+    }
+
+    // For testing purpose only
+    static List<UniInterceptor> getUniInterceptors() {
+        return UNI_INTERCEPTORS;
+    }
+
+    private Infrastructure() {
+        // Avoid direct instantiation.
+    }
 }

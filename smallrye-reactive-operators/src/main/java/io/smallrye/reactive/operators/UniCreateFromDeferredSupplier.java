@@ -17,7 +17,7 @@ public class UniCreateFromDeferredSupplier<T> extends UniOperator<Void, T> {
     }
 
     @Override
-    public void subscribing(UniSerializedSubscriber<? super T> subscriber) {
+    protected void subscribing(UniSerializedSubscriber<? super T> subscriber) {
         nonNull(subscriber, "subscriber");
         Uni<? extends T> uni;
         try {

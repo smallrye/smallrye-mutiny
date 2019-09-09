@@ -1,5 +1,6 @@
 package io.smallrye.reactive.operators;
 
+import io.smallrye.reactive.infrastructure.Infrastructure;
 import io.smallrye.reactive.subscription.UniSubscriber;
 import io.smallrye.reactive.subscription.UniSubscription;
 
@@ -33,7 +34,8 @@ public class UniSerializedSubscriber<T> implements UniSubscriber<T>, UniSubscrip
     // TODO Caught RuntimeException thrown by the onItem and onFailure and log them accordingly
 
     public static <T> void subscribe(AbstractUni<T> source, UniSubscriber<? super T> subscriber) {
-        UniSerializedSubscriber<T> wrapped = new UniSerializedSubscriber<>(source, subscriber);
+        UniSubscriber<? super T> actual  = Infrastructure.onUniSubscription(source, subscriber);
+        UniSerializedSubscriber<T> wrapped = new UniSerializedSubscriber<>(source, actual);
         wrapped.subscribe();
     }
 

@@ -2,6 +2,7 @@ package io.smallrye.reactive.groups;
 
 import io.smallrye.reactive.TimeoutException;
 import io.smallrye.reactive.Uni;
+import io.smallrye.reactive.infrastructure.Infrastructure;
 import io.smallrye.reactive.operators.UniFailOnTimeout;
 
 import java.time.Duration;
@@ -45,7 +46,7 @@ public class UniOnTimeout<T> {
     }
 
     public Uni<T> fail() {
-        return failWith(TimeoutException::new);
+        return Infrastructure.onUniCreation(failWith(TimeoutException::new));
     }
 
     public Uni<T> failWith(Throwable failure) {
@@ -54,7 +55,7 @@ public class UniOnTimeout<T> {
 
     public Uni<T> failWith(Supplier<Throwable> supplier) {
         validate(timeout, "timeout");
-        return new UniFailOnTimeout<>(failure, timeout, supplier, executor);
+        return Infrastructure.onUniCreation(new UniFailOnTimeout<>(failure, timeout, supplier, executor));
     }
 
     /**

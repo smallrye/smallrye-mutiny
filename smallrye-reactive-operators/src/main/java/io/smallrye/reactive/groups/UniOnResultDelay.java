@@ -26,7 +26,7 @@ public class UniOnResultDelay<T> {
     }
 
     public Uni<T> by(Duration duration) {
-        return new UniDelayOnItem<>(upstream, duration, executor);
+        return Infrastructure.onUniCreation(new UniDelayOnItem<>(upstream, duration, executor));
     }
 
     public Uni<T> until(Function<? super T, ? extends Uni<?>> function) {

@@ -24,7 +24,7 @@ public class UniFlatMapOnFailure<I> extends UniOperator<I, I> {
     }
 
     @Override
-    public void subscribing(UniSerializedSubscriber<? super I> subscriber) {
+    protected void subscribing(UniSerializedSubscriber<? super I> subscriber) {
         UniFlatMapOnItem.FlatMapSubscription flatMapSubscription = new UniFlatMapOnItem.FlatMapSubscription();
         // Subscribe to the source.
         upstream().subscribe().withSubscriber(new UniDelegatingSubscriber<I, I>(subscriber) {

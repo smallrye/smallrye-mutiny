@@ -10,7 +10,7 @@ public class UniNever<T> extends AbstractUni<T> {
     }
 
     @Override
-    void subscribing(UniSerializedSubscriber<? super T> subscriber) {
+    protected void subscribing(UniSerializedSubscriber<? super T> subscriber) {
         subscriber.onSubscribe(CANCELLED);
     }
 }
