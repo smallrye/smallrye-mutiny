@@ -1,16 +1,23 @@
 package io.smallrye.reactive.groups;
 
 import io.reactivex.internal.subscribers.LambdaSubscriber;
+import io.smallrye.reactive.Multi;
 import io.smallrye.reactive.Uni;
+import io.smallrye.reactive.helpers.BlockingIterable;
 import io.smallrye.reactive.operators.AbstractMulti;
 import io.smallrye.reactive.subscription.Cancellable;
 import io.smallrye.reactive.subscription.UniSubscriber;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
+import java.util.Queue;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
+import static io.smallrye.reactive.helpers.ParameterValidation.positive;
 import static io.smallrye.reactive.tuples.Functions.noopAction;
 import static io.smallrye.reactive.tuples.Functions.noopConsumer;
 
@@ -211,6 +218,42 @@ public class MultiSubscribe<T> {
         );
         withSubscriber(subscriber);
         return subscriber::cancel;
+    }
+
+    /**
+     * @return a blocking iterable used to consume the items emitted by the upstream {@link Multi}.
+     */
+    public BlockingIterable<T> asIterable() {
+        return asIterable(256, () -> new ArrayBlockingQueue<>(256));
+    }
+
+    /**
+     * Consumes the upstream {@link Multi} as an iterable.
+     *
+     * @param batchSize the number of elements stored in the queue
+     * @param supplier  the supplier of queue used internally, must not be {@code null}, must not return {@code null}
+     * @return a blocking iterable used to consume the items emitted by the upstream {@link Multi}.
+     */
+    public BlockingIterable<T> asIterable(int batchSize, Supplier<Queue<T>> supplier) {
+        return new BlockingIterable<>(upstream, batchSize, supplier);
+    }
+
+    /**
+     * @return a <strong>blocking</strong> stream to consume the items from the upstream {@link Multi}.
+     */
+    public Stream<T> asStream() {
+        return asStream(256, () -> new ArrayBlockingQueue<>(256));
+    }
+
+    /**
+     * Consumes the items from the upstream {@link Multi} as a blocking stream.
+     *
+     * @param batchSize the number of element stored in the queue
+     * @param supplier  the supplier of queue used internally, must not be {@code null}, must not return {@code null}
+     * @return a blocking stream used to consume the items from {@link Multi}
+     */
+    public Stream<T> asStream(int batchSize, Supplier<Queue<T>> supplier) {
+        return asIterable(batchSize, supplier).stream();
     }
 
 }
