@@ -15,29 +15,6 @@ public class MaybeUniAdapter implements UniAdapter<Maybe<?>> {
         return Maybe.class.isAssignableFrom(clazz);
     }
 
-    public Maybe<?> adaptTo(Uni<?> uni) {
-        return Maybe.create(emitter -> {
-            CompletableFuture<?> future = uni.subscribe().asCompletionStage();
-            emitter.setCancellable(() -> future.cancel(false));
-            future.whenComplete((res, fail) -> {
-                if (future.isCancelled()) {
-                    return;
-                }
-
-                if (fail != null) {
-                    emitter.onError(fail);
-                } else if (res != null) {
-                    emitter.onSuccess(res);
-                    emitter.onComplete();
-                } else {
-                    emitter.onComplete();
-                }
-
-            });
-        });
-
-    }
-
     @Override
     public Uni<?> adaptFrom(Maybe<?> instance) {
         return Uni.createFrom().emitter(sink -> {
