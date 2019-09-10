@@ -8,9 +8,11 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ServiceLoader;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.function.Function;
 
 import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
 
@@ -41,6 +43,7 @@ public class Infrastructure {
     private static final ScheduledExecutorService DEFAULT_SCHEDULER;
     private static final Executor DEFAULT_EXECUTOR;
     private static final List<UniInterceptor> UNI_INTERCEPTORS;
+    private static Function<CompletableFuture<?>, CompletableFuture<?>> COMPLETABLE_FUTURE_WRAPPER;
 
     public static ScheduledExecutorService getDefaultWorkerPool() {
         return DEFAULT_SCHEDULER;
@@ -84,5 +87,15 @@ public class Infrastructure {
 
     private Infrastructure() {
         // Avoid direct instantiation.
+    }
+
+    public static void setCompletableFutureWrapper(Function<CompletableFuture<?>, CompletableFuture<?>> wrapper) {
+        COMPLETABLE_FUTURE_WRAPPER = wrapper;
+    }
+    
+    @SuppressWarnings("unchecked")
+    public static <T> CompletableFuture<T> wrapCompletableFuture(CompletableFuture<T> future) {
+        Function<CompletableFuture<?>, CompletableFuture<?>> wrapper = COMPLETABLE_FUTURE_WRAPPER;
+        return wrapper != null ? (CompletableFuture<T>) wrapper.apply(future) : future;
     }
 }
