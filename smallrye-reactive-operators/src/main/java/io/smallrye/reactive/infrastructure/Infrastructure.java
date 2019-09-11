@@ -89,7 +89,7 @@ public class Infrastructure {
         // Avoid direct instantiation.
     }
 
-    public static void setCompletableFutureWrapper(Function<CompletableFuture<?>, CompletableFuture<?>> wrapper) {
+    static void setCompletableFutureWrapper(Function<CompletableFuture<?>, CompletableFuture<?>> wrapper) {
         COMPLETABLE_FUTURE_WRAPPER = wrapper;
     }
     
@@ -97,5 +97,14 @@ public class Infrastructure {
     public static <T> CompletableFuture<T> wrapCompletableFuture(CompletableFuture<T> future) {
         Function<CompletableFuture<?>, CompletableFuture<?>> wrapper = COMPLETABLE_FUTURE_WRAPPER;
         return wrapper != null ? (CompletableFuture<T>) wrapper.apply(future) : future;
+    }
+
+    // For testing purpose only
+    static void reloadUniInterceptors() {
+        ServiceLoader<UniInterceptor> interceptorLoader = ServiceLoader.load(UniInterceptor.class);
+        List<UniInterceptor> interceptors = new ArrayList<>();
+        interceptorLoader.iterator().forEachRemaining(interceptors::add);
+        interceptors.sort(Comparator.comparingInt(UniInterceptor::ordinal));
+        UNI_INTERCEPTORS.addAll(interceptors);
     }
 }

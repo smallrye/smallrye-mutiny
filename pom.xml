@@ -56,6 +56,7 @@
         <rxjava2.version>2.2.11</rxjava2.version>
         <reactor-core.version>3.2.10.RELEASE</reactor-core.version>
         <microprofile-reactive-streams.version>1.0.0</microprofile-reactive-streams.version>
+        <microprofile-context-propagation.version>1.0</microprofile-context-propagation.version>
         <reactive-streams.version>1.0.3</reactive-streams.version>
 
         <!-- Used by release plugin to define git tag -->
@@ -80,10 +81,15 @@
                 <version>${reactor-core.version}</version>
             </dependency>
             <dependency>
-                 <groupId>org.eclipse.microprofile.reactive-streams-operators</groupId>
-                 <artifactId>microprofile-reactive-streams-operators-api</artifactId>
-            <version>${microprofile-reactive-streams.version}</version>
-        </dependency>
+                <groupId>org.eclipse.microprofile.reactive-streams-operators</groupId>
+                <artifactId>microprofile-reactive-streams-operators-api</artifactId>
+                <version>${microprofile-reactive-streams.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.microprofile.context-propagation</groupId>
+                <artifactId>microprofile-context-propagation-api</artifactId>
+                <version>${microprofile-context-propagation.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 

@@ -7,6 +7,7 @@ import io.smallrye.reactive.operators.UniSerializedSubscriber;
 import io.smallrye.reactive.subscription.UniSubscriber;
 import io.smallrye.reactive.subscription.UniSubscription;
 import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -14,6 +15,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class UniInterceptorTest {
 
     @After
+    @Before
     public void cleanup() {
         Infrastructure.clearUniInterceptors();
     }
