@@ -1,22 +1,13 @@
-package io.smallrye.reactive.adapt;
+package io.smallrye.reactive.adapt.converters;
 
 import io.reactivex.Maybe;
 import io.reactivex.disposables.Disposable;
 import io.smallrye.reactive.Uni;
+import io.smallrye.reactive.adapt.UniConverter;
 
-import java.util.concurrent.CompletableFuture;
-
-/**
- * {@link UniAdapter} implementation for the {@link Maybe} type.
- */
-public class MaybeUniAdapter implements UniAdapter<Maybe<?>> {
+public class FromMaybe<T> implements UniConverter<Maybe<T>, T> {
     @Override
-    public boolean accept(Class<Maybe<?>> clazz) {
-        return Maybe.class.isAssignableFrom(clazz);
-    }
-
-    @Override
-    public Uni<?> adaptFrom(Maybe<?> instance) {
+    public Uni<T> from(Maybe<T> instance) {
         return Uni.createFrom().emitter(sink -> {
             Disposable disposable = instance.subscribe(
                     sink::complete,

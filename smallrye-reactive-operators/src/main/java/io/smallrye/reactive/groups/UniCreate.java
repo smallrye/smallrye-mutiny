@@ -2,7 +2,6 @@ package io.smallrye.reactive.groups;
 
 import io.smallrye.reactive.Multi;
 import io.smallrye.reactive.Uni;
-import io.smallrye.reactive.adapt.UniAdaptFrom;
 import io.smallrye.reactive.infrastructure.Infrastructure;
 import io.smallrye.reactive.operators.*;
 import io.smallrye.reactive.subscription.UniEmitter;
@@ -270,10 +269,6 @@ public class UniCreate {
     @SuppressWarnings("unchecked")
     public <T> Uni<T> nothing() {
         return (Uni<T>) UniNever.INSTANCE;
-    }
-
-    public <T, X> Uni<T> converterOf(X instance) {
-        return UniAdaptFrom.adaptFrom(instance);
     }
 
     /**
