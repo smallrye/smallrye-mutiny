@@ -48,7 +48,7 @@
     </scm>
 
     <modules>
-        <module>smallrye-reactive-operators</module>    
+        <module>uni-multi</module>
     </modules>
 
     <properties>
