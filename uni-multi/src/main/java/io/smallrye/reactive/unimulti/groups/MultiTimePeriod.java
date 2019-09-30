@@ -1,17 +1,17 @@
 package io.smallrye.reactive.unimulti.groups;
 
-import io.reactivex.Flowable;
-import io.reactivex.schedulers.Schedulers;
-import io.smallrye.reactive.unimulti.Multi;
-import io.smallrye.reactive.unimulti.infrastructure.Infrastructure;
-import io.smallrye.reactive.unimulti.operators.AbstractMulti;
+import static io.smallrye.reactive.unimulti.helpers.ParameterValidation.nonNull;
+import static io.smallrye.reactive.unimulti.helpers.ParameterValidation.validate;
 
 import java.time.Duration;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 
-import static io.smallrye.reactive.unimulti.helpers.ParameterValidation.nonNull;
-import static io.smallrye.reactive.unimulti.helpers.ParameterValidation.validate;
+import io.reactivex.Flowable;
+import io.reactivex.schedulers.Schedulers;
+import io.smallrye.reactive.unimulti.Multi;
+import io.smallrye.reactive.unimulti.infrastructure.Infrastructure;
+import io.smallrye.reactive.unimulti.operators.AbstractMulti;
 
 public class MultiTimePeriod {
 

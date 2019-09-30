@@ -1,11 +1,11 @@
 package io.smallrye.reactive.unimulti.operators;
 
+import static io.smallrye.reactive.unimulti.helpers.ParameterValidation.nonNull;
+
 import io.smallrye.reactive.unimulti.CompositeException;
 import io.smallrye.reactive.unimulti.Uni;
 import io.smallrye.reactive.unimulti.subscription.UniSubscription;
 import io.smallrye.reactive.unimulti.tuples.Functions;
-
-import static io.smallrye.reactive.unimulti.helpers.ParameterValidation.nonNull;
 
 public class UniOnTermination<T> extends UniOperator<T, T> {
     private final Functions.TriConsumer<T, Throwable, Boolean> callback;

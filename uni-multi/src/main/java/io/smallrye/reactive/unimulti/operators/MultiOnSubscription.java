@@ -1,12 +1,13 @@
 package io.smallrye.reactive.unimulti.operators;
 
-import io.reactivex.Flowable;
-import io.smallrye.reactive.unimulti.Multi;
-import org.reactivestreams.Subscription;
+import static io.smallrye.reactive.unimulti.helpers.ParameterValidation.nonNull;
 
 import java.util.function.Consumer;
 
-import static io.smallrye.reactive.unimulti.helpers.ParameterValidation.nonNull;
+import org.reactivestreams.Subscription;
+
+import io.reactivex.Flowable;
+import io.smallrye.reactive.unimulti.Multi;
 
 public class MultiOnSubscription<T> extends MultiOperator<T, T> {
     private final Consumer<? super Subscription> consumer;

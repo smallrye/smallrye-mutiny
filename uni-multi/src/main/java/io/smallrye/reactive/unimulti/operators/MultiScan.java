@@ -1,9 +1,9 @@
 package io.smallrye.reactive.unimulti.operators;
 
+import java.util.function.BiFunction;
+
 import io.reactivex.Flowable;
 import io.smallrye.reactive.unimulti.Multi;
-
-import java.util.function.BiFunction;
 
 public class MultiScan<T> extends MultiOperator<T, T> {
 

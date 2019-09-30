@@ -1,14 +1,15 @@
 package io.smallrye.reactive.unimulti.operators;
 
-import io.smallrye.reactive.unimulti.Uni;
-import org.junit.Test;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import org.junit.Test;
+
+import io.smallrye.reactive.unimulti.Uni;
 
 public class UniOnNullContinueWithTest {
 
@@ -48,22 +49,18 @@ public class UniOnNullContinueWithTest {
 
     @Test
     public void testContinueNotCalledOnFailure() {
-        assertThatExceptionOfType(RuntimeException.class).isThrownBy(() ->
-                Uni.createFrom().failure(new IOException("boom"))
-                        .onItem().castTo(Integer.class)
-                        .onItem().ifNull().continueWith(42)
-                        .await().indefinitely()
-        ).withCauseExactlyInstanceOf(IOException.class).withMessageEndingWith("boom");
+        assertThatExceptionOfType(RuntimeException.class).isThrownBy(() -> Uni.createFrom().failure(new IOException("boom"))
+                .onItem().castTo(Integer.class)
+                .onItem().ifNull().continueWith(42)
+                .await().indefinitely()).withCauseExactlyInstanceOf(IOException.class).withMessageEndingWith("boom");
     }
 
     @Test
     public void testContinueWithSupplierNotCalledOnFailure() {
-        assertThatExceptionOfType(RuntimeException.class).isThrownBy(() ->
-                Uni.createFrom().failure(new IOException("boom"))
-                        .onItem().castTo(Integer.class)
-                        .onItem().ifNull().continueWith(() -> 42)
-                        .await().indefinitely()
-        ).withCauseExactlyInstanceOf(IOException.class).withMessageEndingWith("boom");
+        assertThatExceptionOfType(RuntimeException.class).isThrownBy(() -> Uni.createFrom().failure(new IOException("boom"))
+                .onItem().castTo(Integer.class)
+                .onItem().ifNull().continueWith(() -> 42)
+                .await().indefinitely()).withCauseExactlyInstanceOf(IOException.class).withMessageEndingWith("boom");
     }
 
     @Test(expected = IllegalArgumentException.class)

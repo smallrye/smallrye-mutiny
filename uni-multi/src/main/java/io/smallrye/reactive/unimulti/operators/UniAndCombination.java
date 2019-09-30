@@ -1,18 +1,19 @@
 package io.smallrye.reactive.unimulti.operators;
 
-import io.smallrye.reactive.unimulti.CompositeException;
-import io.smallrye.reactive.unimulti.Uni;
-import io.smallrye.reactive.unimulti.subscription.UniSubscriber;
-import io.smallrye.reactive.unimulti.subscription.UniSubscription;
-import io.smallrye.reactive.unimulti.helpers.EmptyUniSubscription;
-import org.reactivestreams.Subscription;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import org.reactivestreams.Subscription;
+
+import io.smallrye.reactive.unimulti.CompositeException;
+import io.smallrye.reactive.unimulti.Uni;
+import io.smallrye.reactive.unimulti.helpers.EmptyUniSubscription;
+import io.smallrye.reactive.unimulti.subscription.UniSubscriber;
+import io.smallrye.reactive.unimulti.subscription.UniSubscription;
 
 public class UniAndCombination<I, O> extends UniOperator<I, O> {
 
@@ -78,7 +79,7 @@ public class UniAndCombination<I, O> extends UniOperator<I, O> {
          * A uni has fired an event (an item or a failure)
          * Checks the progress and decide if an event need to be fired downstream.
          *
-         * @param res    the {@link UniHandler}
+         * @param res the {@link UniHandler}
          * @param failed whether the {@code res} just fired a failure
          */
         void check(UniHandler res, boolean failed) {

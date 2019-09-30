@@ -1,13 +1,13 @@
 package io.smallrye.reactive.unimulti.operators;
 
-import io.smallrye.reactive.unimulti.CompositeException;
-import io.smallrye.reactive.unimulti.Uni;
-import io.smallrye.reactive.unimulti.subscription.UniSubscription;
+import static io.smallrye.reactive.unimulti.helpers.ParameterValidation.nonNull;
 
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-import static io.smallrye.reactive.unimulti.helpers.ParameterValidation.nonNull;
+import io.smallrye.reactive.unimulti.CompositeException;
+import io.smallrye.reactive.unimulti.Uni;
+import io.smallrye.reactive.unimulti.subscription.UniSubscription;
 
 public class UniFlatMapOnFailure<I> extends UniOperator<I, I> {
 

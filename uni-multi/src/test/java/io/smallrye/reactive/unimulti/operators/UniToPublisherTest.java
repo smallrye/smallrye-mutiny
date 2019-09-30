@@ -1,19 +1,20 @@
 package io.smallrye.reactive.unimulti.operators;
 
-import io.reactivex.Flowable;
-import io.reactivex.subscribers.TestSubscriber;
-import io.smallrye.reactive.unimulti.Uni;
-import org.junit.After;
-import org.junit.Test;
-import org.reactivestreams.Publisher;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import org.junit.After;
+import org.junit.Test;
+import org.reactivestreams.Publisher;
+
+import io.reactivex.Flowable;
+import io.reactivex.subscribers.TestSubscriber;
+import io.smallrye.reactive.unimulti.Uni;
 
 public class UniToPublisherTest {
 
@@ -45,7 +46,7 @@ public class UniToPublisherTest {
     @SuppressWarnings("ResultOfMethodCallIgnored")
     @Test
     public void testWithImmediateFailure() {
-        Publisher<Integer> publisher = Uni.createFrom().<Integer>failure(new IOException("boom")).adapt().toPublisher();
+        Publisher<Integer> publisher = Uni.createFrom().<Integer> failure(new IOException("boom")).adapt().toPublisher();
         assertThat(publisher).isNotNull();
         try {
             Flowable.fromPublisher(publisher).blockingFirst();
@@ -201,7 +202,7 @@ public class UniToPublisherTest {
     @Test
     public void testWithAsyncFailure() {
         executor = Executors.newSingleThreadScheduledExecutor();
-        Publisher<Integer> publisher = Uni.createFrom().<Integer>failure(new IOException("boom"))
+        Publisher<Integer> publisher = Uni.createFrom().<Integer> failure(new IOException("boom"))
                 .emitOn(executor).adapt().toPublisher();
         assertThat(publisher).isNotNull();
         try {

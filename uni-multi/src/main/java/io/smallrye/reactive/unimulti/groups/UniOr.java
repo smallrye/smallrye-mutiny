@@ -1,13 +1,13 @@
 package io.smallrye.reactive.unimulti.groups;
 
-import io.smallrye.reactive.unimulti.Uni;
-import io.smallrye.reactive.unimulti.infrastructure.Infrastructure;
-import io.smallrye.reactive.unimulti.operators.UniOrCombination;
+import static io.smallrye.reactive.unimulti.helpers.ParameterValidation.nonNull;
 
 import java.util.Arrays;
 import java.util.List;
 
-import static io.smallrye.reactive.unimulti.helpers.ParameterValidation.nonNull;
+import io.smallrye.reactive.unimulti.Uni;
+import io.smallrye.reactive.unimulti.infrastructure.Infrastructure;
+import io.smallrye.reactive.unimulti.operators.UniOrCombination;
 
 public class UniOr<T> {
 

@@ -1,13 +1,14 @@
 package io.smallrye.reactive.unimulti.operators;
 
-import io.smallrye.reactive.unimulti.Uni;
-import org.junit.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.Test;
+
+import io.smallrye.reactive.unimulti.Uni;
 
 public class UniOnItemFlatMapToCompletionStageTest {
 
@@ -46,8 +47,7 @@ public class UniOnItemFlatMapToCompletionStageTest {
         Uni<Integer> uni = Uni.createFrom().item(1).onItem().mapToCompletionStage(
                 v -> CompletableFuture.supplyAsync(() -> {
                     throw new IllegalStateException("boom");
-                })
-        );
+                }));
         uni.subscribe().withSubscriber(test);
         test.await().assertCompletedWithFailure().assertFailure(CompletionException.class, "boom");
     }
@@ -69,10 +69,10 @@ public class UniOnItemFlatMapToCompletionStageTest {
         UniAssertSubscriber<Integer> test = UniAssertSubscriber.create();
         AtomicBoolean called = new AtomicBoolean();
         Uni.createFrom().item(1)
-                .onItem().<Integer>mapToCompletionStage(v -> {
-            called.set(true);
-            throw new IllegalStateException("boom");
-        })
+                .onItem().<Integer> mapToCompletionStage(v -> {
+                    called.set(true);
+                    throw new IllegalStateException("boom");
+                })
                 .subscribe().withSubscriber(test);
         test.await().assertCompletedWithFailure().assertFailure(IllegalStateException.class, "boom");
         assertThat(called).isTrue();
@@ -83,10 +83,10 @@ public class UniOnItemFlatMapToCompletionStageTest {
         UniAssertSubscriber<Integer> test = UniAssertSubscriber.create();
         AtomicBoolean called = new AtomicBoolean();
         Uni.createFrom().item(1)
-                .onItem().<Integer>mapToCompletionStage(v -> {
-            called.set(true);
-            return null;
-        }).subscribe().withSubscriber(test);
+                .onItem().<Integer> mapToCompletionStage(v -> {
+                    called.set(true);
+                    return null;
+                }).subscribe().withSubscriber(test);
         test.await().assertCompletedWithFailure().assertFailure(NullPointerException.class, "");
         assertThat(called).isTrue();
     }

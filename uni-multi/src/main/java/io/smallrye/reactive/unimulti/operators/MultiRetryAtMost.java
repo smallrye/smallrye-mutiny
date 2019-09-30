@@ -1,12 +1,12 @@
 package io.smallrye.reactive.unimulti.operators;
 
-import io.reactivex.Flowable;
-import io.smallrye.reactive.unimulti.Multi;
+import static io.smallrye.reactive.unimulti.helpers.ParameterValidation.nonNull;
+import static io.smallrye.reactive.unimulti.helpers.ParameterValidation.positive;
 
 import java.util.function.Predicate;
 
-import static io.smallrye.reactive.unimulti.helpers.ParameterValidation.nonNull;
-import static io.smallrye.reactive.unimulti.helpers.ParameterValidation.positive;
+import io.reactivex.Flowable;
+import io.smallrye.reactive.unimulti.Multi;
 
 public class MultiRetryAtMost<T> extends MultiOperator<T, T> {
     private final Predicate<? super Throwable> predicate;

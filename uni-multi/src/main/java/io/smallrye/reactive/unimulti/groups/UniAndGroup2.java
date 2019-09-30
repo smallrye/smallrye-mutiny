@@ -1,14 +1,14 @@
 package io.smallrye.reactive.unimulti.groups;
 
-import io.smallrye.reactive.unimulti.CompositeException;
-import io.smallrye.reactive.unimulti.Uni;
-import io.smallrye.reactive.unimulti.tuples.Tuple2;
-import io.smallrye.reactive.unimulti.tuples.Tuples;
-
 import java.util.Collections;
 import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+
+import io.smallrye.reactive.unimulti.CompositeException;
+import io.smallrye.reactive.unimulti.Uni;
+import io.smallrye.reactive.unimulti.tuples.Tuple2;
+import io.smallrye.reactive.unimulti.tuples.Tuples;
 
 /**
  * Configures the combination of 2 {@link Uni unis}.
@@ -45,7 +45,7 @@ public class UniAndGroup2<T1, T2> extends UniAndGroupIterable<T1> {
      * Creates the resulting {@link Uni}. The items are combined using the given combinator function.
      *
      * @param combinator the combinator function, must not be {@code null}
-     * @param <O>        the type of item
+     * @param <O> the type of item
      * @return the resulting {@link Uni}. The items are combined into a {@link Tuple2 Tuple2&lt;T1, T2&gt;}.
      */
     @SuppressWarnings("unchecked")

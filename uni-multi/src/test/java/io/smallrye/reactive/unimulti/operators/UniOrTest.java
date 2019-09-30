@@ -1,8 +1,6 @@
 package io.smallrye.reactive.unimulti.operators;
 
-import io.smallrye.reactive.unimulti.Uni;
-import org.junit.After;
-import org.junit.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -11,7 +9,10 @@ import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.After;
+import org.junit.Test;
+
+import io.smallrye.reactive.unimulti.Uni;
 
 public class UniOrTest {
 
@@ -51,7 +52,7 @@ public class UniOrTest {
     @Test
     public void testWithNoCandidate() {
         UniAssertSubscriber<Void> subscriber = UniAssertSubscriber.create();
-        Uni.combine().any().<Void>of().subscribe().withSubscriber(subscriber);
+        Uni.combine().any().<Void> of().subscribe().withSubscriber(subscriber);
         subscriber.assertCompletedSuccessfully().assertItem(null);
     }
 
@@ -65,7 +66,7 @@ public class UniOrTest {
     @Test
     public void testWithSingleItemCompletingWithAFailure() {
         UniAssertSubscriber<String> subscriber = UniAssertSubscriber.create();
-        Uni.combine().any().of(Uni.createFrom().<String>failure(new IOException("boom"))).subscribe()
+        Uni.combine().any().of(Uni.createFrom().<String> failure(new IOException("boom"))).subscribe()
                 .withSubscriber(subscriber);
         subscriber.assertCompletedWithFailure().assertFailure(IOException.class, "boom");
     }

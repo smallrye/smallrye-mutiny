@@ -1,8 +1,6 @@
 package io.smallrye.reactive.unimulti.operators;
 
-import io.smallrye.reactive.unimulti.Multi;
-import io.smallrye.reactive.unimulti.Uni;
-import org.junit.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
@@ -10,13 +8,16 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.Test;
+
+import io.smallrye.reactive.unimulti.Multi;
+import io.smallrye.reactive.unimulti.Uni;
 
 public class MultiToUniTest {
 
     @Test
     public void testFromEmpty() {
-        Uni<Void> uni = Multi.createFrom().<Void>empty().toUni();
+        Uni<Void> uni = Multi.createFrom().<Void> empty().toUni();
         uni.subscribe().withSubscriber(UniAssertSubscriber.create()).assertCompletedSuccessfully().assertItem(null);
     }
 
@@ -82,7 +83,7 @@ public class MultiToUniTest {
     @Test
     public void testWithNoEvents() {
         AtomicBoolean called = new AtomicBoolean();
-        Multi<Void> multi = Multi.createFrom().<Void>nothing().on().cancellation(() -> called.set(true));
+        Multi<Void> multi = Multi.createFrom().<Void> nothing().on().cancellation(() -> called.set(true));
 
         Uni.createFrom().multi(multi).subscribe().withSubscriber(UniAssertSubscriber.create())
                 .assertNoSignals()
@@ -94,7 +95,7 @@ public class MultiToUniTest {
     @Test
     public void testWithNoEvents2() {
         AtomicBoolean called = new AtomicBoolean();
-        Multi<Void> multi = Multi.createFrom().<Void>nothing().on().cancellation(() -> called.set(true));
+        Multi<Void> multi = Multi.createFrom().<Void> nothing().on().cancellation(() -> called.set(true));
 
         multi.toUni().subscribe().withSubscriber(UniAssertSubscriber.create())
                 .assertNoSignals()

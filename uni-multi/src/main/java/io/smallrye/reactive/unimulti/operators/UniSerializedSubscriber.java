@@ -1,13 +1,13 @@
 package io.smallrye.reactive.unimulti.operators;
 
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
+
+import io.smallrye.reactive.unimulti.helpers.EmptyUniSubscription;
+import io.smallrye.reactive.unimulti.helpers.ParameterValidation;
 import io.smallrye.reactive.unimulti.infrastructure.Infrastructure;
 import io.smallrye.reactive.unimulti.subscription.UniSubscriber;
 import io.smallrye.reactive.unimulti.subscription.UniSubscription;
-import io.smallrye.reactive.unimulti.helpers.EmptyUniSubscription;
-import io.smallrye.reactive.unimulti.helpers.ParameterValidation;
-
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * An implementation of {@link UniSubscriber} and {@link UniSubscription} making sure event handlers are only called once.
@@ -33,7 +33,7 @@ public class UniSerializedSubscriber<T> implements UniSubscriber<T>, UniSubscrip
     // TODO Caught RuntimeException thrown by the onItem and onFailure and log them accordingly
 
     public static <T> void subscribe(AbstractUni<T> source, UniSubscriber<? super T> subscriber) {
-        UniSubscriber<? super T> actual  = Infrastructure.onUniSubscription(source, subscriber);
+        UniSubscriber<? super T> actual = Infrastructure.onUniSubscription(source, subscriber);
         UniSerializedSubscriber<T> wrapped = new UniSerializedSubscriber<>(source, actual);
         wrapped.subscribe();
     }

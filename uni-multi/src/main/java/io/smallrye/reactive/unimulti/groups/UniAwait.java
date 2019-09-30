@@ -1,13 +1,13 @@
 package io.smallrye.reactive.unimulti.groups;
 
-import io.smallrye.reactive.unimulti.TimeoutException;
-import io.smallrye.reactive.unimulti.Uni;
-import io.smallrye.reactive.unimulti.operators.UniBlockingAwait;
+import static io.smallrye.reactive.unimulti.helpers.ParameterValidation.nonNull;
 
 import java.time.Duration;
 import java.util.Optional;
 
-import static io.smallrye.reactive.unimulti.helpers.ParameterValidation.nonNull;
+import io.smallrye.reactive.unimulti.TimeoutException;
+import io.smallrye.reactive.unimulti.Uni;
+import io.smallrye.reactive.unimulti.operators.UniBlockingAwait;
 
 /**
  * Waits and returns the item emitted by the {@link Uni}. If the {@link Uni} receives a failure, the failure is thrown.

@@ -1,9 +1,6 @@
 package io.smallrye.reactive.unimulti.helpers;
 
-import io.smallrye.reactive.unimulti.infrastructure.Infrastructure;
-import org.reactivestreams.Publisher;
-import org.reactivestreams.Subscriber;
-import org.reactivestreams.Subscription;
+import static io.smallrye.reactive.unimulti.helpers.ParameterValidation.*;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -15,7 +12,11 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-import static io.smallrye.reactive.unimulti.helpers.ParameterValidation.*;
+import org.reactivestreams.Publisher;
+import org.reactivestreams.Subscriber;
+import org.reactivestreams.Subscription;
+
+import io.smallrye.reactive.unimulti.infrastructure.Infrastructure;
 
 public class BlockingIterable<T> implements Iterable<T> {
 
@@ -108,7 +109,7 @@ public class BlockingIterable<T> implements Iterable<T> {
         @Override
         public boolean hasNext() {
 
-            while(true) {
+            while (true) {
                 boolean actualDone = done.get();
                 boolean empty = queue.isEmpty();
 

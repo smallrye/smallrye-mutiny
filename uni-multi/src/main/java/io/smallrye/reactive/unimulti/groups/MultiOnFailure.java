@@ -1,17 +1,17 @@
 package io.smallrye.reactive.unimulti.groups;
 
-import io.smallrye.reactive.unimulti.Multi;
-import io.smallrye.reactive.unimulti.operators.MultiFlatMapOnFailure;
-import io.smallrye.reactive.unimulti.operators.MultiMapOnFailure;
-import io.smallrye.reactive.unimulti.operators.MultiOnFailureConsume;
+import static io.smallrye.reactive.unimulti.helpers.ParameterValidation.SUPPLIER_PRODUCED_NULL;
+import static io.smallrye.reactive.unimulti.helpers.ParameterValidation.nonNull;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
-import static io.smallrye.reactive.unimulti.helpers.ParameterValidation.SUPPLIER_PRODUCED_NULL;
-import static io.smallrye.reactive.unimulti.helpers.ParameterValidation.nonNull;
+import io.smallrye.reactive.unimulti.Multi;
+import io.smallrye.reactive.unimulti.operators.MultiFlatMapOnFailure;
+import io.smallrye.reactive.unimulti.operators.MultiMapOnFailure;
+import io.smallrye.reactive.unimulti.operators.MultiOnFailureConsume;
 
 public class MultiOnFailure<T> {
 

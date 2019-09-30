@@ -1,16 +1,17 @@
 package io.smallrye.reactive.unimulti.operators.flowable;
 
-import io.reactivex.Flowable;
-import io.smallrye.reactive.unimulti.helpers.CancellationSubscriber;
-import org.reactivestreams.Publisher;
-import org.reactivestreams.Subscriber;
+import static io.smallrye.reactive.unimulti.helpers.EmptyUniSubscription.CANCELLED;
+import static io.smallrye.reactive.unimulti.helpers.ParameterValidation.SUPPLIER_PRODUCED_NULL;
 
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.stream.Collector;
 
-import static io.smallrye.reactive.unimulti.helpers.EmptyUniSubscription.CANCELLED;
-import static io.smallrye.reactive.unimulti.helpers.ParameterValidation.SUPPLIER_PRODUCED_NULL;
+import org.reactivestreams.Publisher;
+import org.reactivestreams.Subscriber;
+
+import io.reactivex.Flowable;
+import io.smallrye.reactive.unimulti.helpers.CancellationSubscriber;
 
 public final class FlowableCollector<T, A, R> extends Flowable<R> {
 
@@ -57,4 +58,3 @@ public final class FlowableCollector<T, A, R> extends Flowable<R> {
         upstream.subscribe(new CollectorSubscriber<>(s, initialValue, accumulator, finisher));
     }
 }
-

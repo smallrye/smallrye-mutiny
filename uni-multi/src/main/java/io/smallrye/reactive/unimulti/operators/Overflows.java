@@ -1,17 +1,16 @@
 package io.smallrye.reactive.unimulti.operators;
 
-import io.smallrye.reactive.unimulti.Multi;
+import static io.smallrye.reactive.unimulti.operators.MultiCollector.getFlowable;
 
 import java.util.function.Consumer;
 
-import static io.smallrye.reactive.unimulti.operators.MultiCollector.getFlowable;
+import io.smallrye.reactive.unimulti.Multi;
 
 public class Overflows {
 
     private Overflows() {
         // Avoid direct instantiation.
     }
-
 
     public static <T> Multi<T> buffer(Multi<T> upstream) {
         return new DefaultMulti<>(getFlowable(upstream).onBackpressureBuffer());

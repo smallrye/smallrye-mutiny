@@ -1,13 +1,14 @@
 package io.smallrye.reactive.unimulti.groups;
 
-import io.smallrye.reactive.unimulti.Multi;
-import io.smallrye.reactive.unimulti.CompositeException;
-import io.smallrye.reactive.unimulti.operators.MultiFlatMap;
-import org.reactivestreams.Publisher;
+import static io.smallrye.reactive.unimulti.helpers.ParameterValidation.positive;
 
 import java.util.function.Function;
 
-import static io.smallrye.reactive.unimulti.helpers.ParameterValidation.positive;
+import org.reactivestreams.Publisher;
+
+import io.smallrye.reactive.unimulti.CompositeException;
+import io.smallrye.reactive.unimulti.Multi;
+import io.smallrye.reactive.unimulti.operators.MultiFlatMap;
 
 /**
  * The object to tune the <em>flatMap</em> operation

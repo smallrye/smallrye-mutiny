@@ -1,18 +1,18 @@
 package io.smallrye.reactive.unimulti.groups;
 
+import static io.smallrye.reactive.unimulti.helpers.ParameterValidation.nonNull;
+
+import java.util.function.Consumer;
+import java.util.function.Predicate;
+
 import io.smallrye.reactive.unimulti.Uni;
 import io.smallrye.reactive.unimulti.infrastructure.Infrastructure;
 import io.smallrye.reactive.unimulti.operators.UniOnCancellation;
 import io.smallrye.reactive.unimulti.operators.UniOnSubscription;
 import io.smallrye.reactive.unimulti.operators.UniOnTermination;
+import io.smallrye.reactive.unimulti.subscription.UniSubscriber;
 import io.smallrye.reactive.unimulti.subscription.UniSubscription;
 import io.smallrye.reactive.unimulti.tuples.Functions;
-import io.smallrye.reactive.unimulti.subscription.UniSubscriber;
-
-import java.util.function.Consumer;
-import java.util.function.Predicate;
-
-import static io.smallrye.reactive.unimulti.helpers.ParameterValidation.nonNull;
 
 /**
  * Allows configuring the action to execute on each type of events emitted by a {@link Uni} or by
@@ -57,10 +57,10 @@ public class UniOnEvent<T> {
      * cancels the subscription.
      *
      * @param consumer the consumer receiving the item, the failure and a boolean indicating whether the termination
-     *                 is due to a cancellation (the 2 first parameters would be {@code null} in this case). Must not
-     *                 be {@code null} If the second parameter (the failure) is not {@code null}, the first is
-     *                 necessary {@code null} and the third is necessary {@code false} as it indicates a termination
-     *                 due to a failure.
+     *        is due to a cancellation (the 2 first parameters would be {@code null} in this case). Must not
+     *        be {@code null} If the second parameter (the failure) is not {@code null}, the first is
+     *        necessary {@code null} and the third is necessary {@code false} as it indicates a termination
+     *        due to a failure.
      * @return the new {@link Uni}
      */
     public Uni<T> termination(Functions.TriConsumer<T, Throwable, Boolean> consumer) {
@@ -70,12 +70,17 @@ public class UniOnEvent<T> {
     /**
      * Configures the action to execute when the observed {@link Uni} emits the item (potentially {@code null}).
      *
-     * <p>Examples:</p>
-     * <pre>{@code
+     * <p>
+     * Examples:
+     * </p>
+     * 
+     * <pre>
+     * {@code
      * Uni<T> uni = ...;
      * uni.onItem().mapToItem(x -> ...); // Map to another item
      * uni.onItem().mapToUni(x -> ...); // Map to another Uni (flatMap)
-     * }</pre>
+     * }
+     * </pre>
      *
      * @return the object to configure the action to execute when an item is emitted
      * @see Uni#onNoItem()

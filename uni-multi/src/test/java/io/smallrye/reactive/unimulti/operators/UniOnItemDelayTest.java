@@ -1,8 +1,7 @@
 package io.smallrye.reactive.unimulti.operators;
 
-import io.smallrye.reactive.unimulti.Uni;
-import org.junit.After;
-import org.junit.Test;
+import static org.assertj.core.api.Java6Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 
 import java.time.Duration;
 import java.util.concurrent.*;
@@ -10,14 +9,16 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static org.assertj.core.api.Java6Assertions.assertThat;
-import static org.awaitility.Awaitility.await;
+import org.junit.After;
+import org.junit.Test;
+
+import io.smallrye.reactive.unimulti.Uni;
 
 public class UniOnItemDelayTest {
 
     private ScheduledExecutorService executor = Executors.newScheduledThreadPool(4);
-  
-    private Uni<Void> delayed = Uni.createFrom().item((Void)  null).onItem().delayIt()
+
+    private Uni<Void> delayed = Uni.createFrom().item((Void) null).onItem().delayIt()
             .onExecutor(executor)
             .by(Duration.ofMillis(100));
 
@@ -78,10 +79,9 @@ public class UniOnItemDelayTest {
     public void testThatDelayDoNotImpactFailures() {
         long begin = System.currentTimeMillis();
         UniAssertSubscriber<Void> subscriber = UniAssertSubscriber.create();
-        Uni.createFrom().<Void>failure(new Exception("boom")).onItem().delayIt()
+        Uni.createFrom().<Void> failure(new Exception("boom")).onItem().delayIt()
                 .onExecutor(executor)
-                .by(Duration.ofMillis(100)).
-                subscribe().withSubscriber(subscriber);
+                .by(Duration.ofMillis(100)).subscribe().withSubscriber(subscriber);
         subscriber.await();
         long end = System.currentTimeMillis();
         assertThat(end - begin).isLessThan(100);

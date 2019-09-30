@@ -1,12 +1,12 @@
 package io.smallrye.reactive.unimulti.operators;
 
-import io.smallrye.reactive.unimulti.Uni;
-import io.smallrye.reactive.unimulti.subscription.UniSubscription;
+import static io.smallrye.reactive.unimulti.helpers.EmptyUniSubscription.CANCELLED;
+import static io.smallrye.reactive.unimulti.helpers.ParameterValidation.nonNull;
 
 import java.util.function.Consumer;
 
-import static io.smallrye.reactive.unimulti.helpers.EmptyUniSubscription.CANCELLED;
-import static io.smallrye.reactive.unimulti.helpers.ParameterValidation.nonNull;
+import io.smallrye.reactive.unimulti.Uni;
+import io.smallrye.reactive.unimulti.subscription.UniSubscription;
 
 public class UniOnSubscription<T> extends UniOperator<T, T> {
     private final Consumer<? super UniSubscription> consumer;

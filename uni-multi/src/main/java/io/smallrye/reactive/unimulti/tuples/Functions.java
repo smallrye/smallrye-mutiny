@@ -6,8 +6,10 @@ import java.util.function.Function;
 
 public class Functions {
 
-    private static final Consumer NOOP_CONSUMER = x -> {};
-    private static final Runnable NOOP = () -> {};
+    private static final Consumer NOOP_CONSUMER = x -> {
+    };
+    private static final Runnable NOOP = () -> {
+    };
 
     @SuppressWarnings("unchecked")
     public static <T> Consumer<T> noopConsumer() {

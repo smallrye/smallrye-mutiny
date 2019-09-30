@@ -1,13 +1,14 @@
 package io.smallrye.reactive.unimulti.operators;
 
-import io.smallrye.reactive.unimulti.Multi;
-import org.junit.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.Test;
+
+import io.smallrye.reactive.unimulti.Multi;
 
 public class MultiCreateFromOptionalTest {
 
@@ -31,7 +32,7 @@ public class MultiCreateFromOptionalTest {
 
     @Test
     public void testWithEmpty() {
-        MultiAssertSubscriber<String> subscriber = Multi.createFrom().<String>optional(Optional.empty()).subscribe()
+        MultiAssertSubscriber<String> subscriber = Multi.createFrom().<String> optional(Optional.empty()).subscribe()
                 .withSubscriber(MultiAssertSubscriber.create(1));
         subscriber.assertCompletedSuccessfully().assertHasNotReceivedAnyItem();
     }

@@ -1,13 +1,13 @@
 package io.smallrye.reactive.unimulti.operators;
 
-import io.smallrye.reactive.unimulti.Uni;
-import io.smallrye.reactive.unimulti.subscription.UniSubscriber;
-import io.smallrye.reactive.unimulti.subscription.UniSubscription;
+import static io.smallrye.reactive.unimulti.helpers.EmptyUniSubscription.CANCELLED;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static io.smallrye.reactive.unimulti.helpers.EmptyUniSubscription.CANCELLED;
+import io.smallrye.reactive.unimulti.Uni;
+import io.smallrye.reactive.unimulti.subscription.UniSubscriber;
+import io.smallrye.reactive.unimulti.subscription.UniSubscription;
 
 public class UniSubscribeToCompletionStage {
 

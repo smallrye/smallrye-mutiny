@@ -1,9 +1,7 @@
 package io.smallrye.reactive.unimulti.operators;
 
-import io.smallrye.reactive.unimulti.Multi;
-import io.smallrye.reactive.unimulti.subscription.BackPressureFailure;
-import io.smallrye.reactive.unimulti.subscription.MultiEmitter;
-import org.junit.Test;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import java.io.IOException;
 import java.util.List;
@@ -11,8 +9,11 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import org.junit.Test;
+
+import io.smallrye.reactive.unimulti.Multi;
+import io.smallrye.reactive.unimulti.subscription.BackPressureFailure;
+import io.smallrye.reactive.unimulti.subscription.MultiEmitter;
 
 public class MultiOnOverflowTest {
 
@@ -33,7 +34,7 @@ public class MultiOnOverflowTest {
 
     @Test
     public void testDropStrategyWithUpstreamFailure() {
-        Multi.createFrom().<Integer>failure(new IOException("boom"))
+        Multi.createFrom().<Integer> failure(new IOException("boom"))
                 .onOverflow().drop()
                 .subscribe().withSubscriber(MultiAssertSubscriber.create(1))
                 .assertHasFailedWith(IOException.class, "boom");
@@ -89,8 +90,8 @@ public class MultiOnOverflowTest {
     public void testDropStrategyWithCallbackThrowingAnException() {
         Multi.createFrom().items(2, 3, 4)
                 .onOverflow().drop(i -> {
-            throw new IllegalStateException("boom");
-        })
+                    throw new IllegalStateException("boom");
+                })
                 .subscribe().withSubscriber(MultiAssertSubscriber.create())
                 .assertHasFailedWith(IllegalStateException.class, "boom");
 
@@ -168,7 +169,7 @@ public class MultiOnOverflowTest {
 
     @Test
     public void testDropPreviousStrategyWithUpstreamFailure() {
-        Multi.createFrom().<Integer>failure(new IOException("boom"))
+        Multi.createFrom().<Integer> failure(new IOException("boom"))
                 .onOverflow().dropPreviousItems()
                 .subscribe().withSubscriber(MultiAssertSubscriber.create(1))
                 .assertHasFailedWith(IOException.class, "boom");
@@ -186,7 +187,7 @@ public class MultiOnOverflowTest {
 
     @Test
     public void testBufferStrategyWithUpstreamFailure() {
-        Multi.createFrom().<Integer>failure(new IOException("boom"))
+        Multi.createFrom().<Integer> failure(new IOException("boom"))
                 .onOverflow().buffer()
                 .subscribe().withSubscriber(MultiAssertSubscriber.create(1))
                 .assertHasFailedWith(IOException.class, "boom");
@@ -223,7 +224,5 @@ public class MultiOnOverflowTest {
 
         sub.assertHasFailedWith(BackPressureFailure.class, null);
     }
-
-
 
 }

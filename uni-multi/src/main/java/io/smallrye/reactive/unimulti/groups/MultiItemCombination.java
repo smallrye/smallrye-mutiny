@@ -1,19 +1,20 @@
 package io.smallrye.reactive.unimulti.groups;
 
-import io.smallrye.reactive.unimulti.operators.*;
-import org.reactivestreams.Publisher;
+import static io.smallrye.reactive.unimulti.helpers.ParameterValidation.nonNull;
 
 import java.util.Arrays;
 
-import static io.smallrye.reactive.unimulti.helpers.ParameterValidation.nonNull;
+import org.reactivestreams.Publisher;
+
+import io.smallrye.reactive.unimulti.operators.*;
 
 public class MultiItemCombination {
 
     /**
      * Combines 2 streams.
      *
-     * @param a    the first stream, must not be {@code null}
-     * @param b    the second stream, must not be {@code null}
+     * @param a the first stream, must not be {@code null}
+     * @param b the second stream, must not be {@code null}
      * @param <T1> the type of item from the first stream
      * @param <T2> the type of item from the second stream
      * @return the object to configure the combination process
@@ -25,9 +26,9 @@ public class MultiItemCombination {
     /**
      * Combines 3 streams.
      *
-     * @param a    the first stream, must not be {@code null}
-     * @param b    the second stream, must not be {@code null}
-     * @param c    the third stream, must not be {@code null}
+     * @param a the first stream, must not be {@code null}
+     * @param b the second stream, must not be {@code null}
+     * @param c the third stream, must not be {@code null}
      * @param <T1> the type of item from the first stream
      * @param <T2> the type of item from the second stream
      * @param <T3> the type of item from the third stream
@@ -41,10 +42,10 @@ public class MultiItemCombination {
     /**
      * Combines 4 streams.
      *
-     * @param a    the first stream, must not be {@code null}
-     * @param b    the second stream, must not be {@code null}
-     * @param c    the third stream, must not be {@code null}
-     * @param d    the fourth stream, must not be {@code null}
+     * @param a the first stream, must not be {@code null}
+     * @param b the second stream, must not be {@code null}
+     * @param c the third stream, must not be {@code null}
+     * @param d the fourth stream, must not be {@code null}
      * @param <T1> the type of item from the first stream
      * @param <T2> the type of item from the second stream
      * @param <T3> the type of item from the third stream
@@ -60,11 +61,11 @@ public class MultiItemCombination {
     /**
      * Combines 5 streams.
      *
-     * @param a    the first stream, must not be {@code null}
-     * @param b    the second stream, must not be {@code null}
-     * @param c    the third stream, must not be {@code null}
-     * @param d    the fourth stream, must not be {@code null}
-     * @param e    the fifth stream, must not be {@code null}
+     * @param a the first stream, must not be {@code null}
+     * @param b the second stream, must not be {@code null}
+     * @param c the third stream, must not be {@code null}
+     * @param d the fourth stream, must not be {@code null}
+     * @param e the fifth stream, must not be {@code null}
      * @param <T1> the type of item from the first stream
      * @param <T2> the type of item from the second stream
      * @param <T3> the type of item from the third stream

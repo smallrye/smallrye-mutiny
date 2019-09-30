@@ -1,14 +1,14 @@
 package io.smallrye.reactive.unimulti.groups;
 
-import io.smallrye.reactive.unimulti.Uni;
-import io.smallrye.reactive.unimulti.infrastructure.Infrastructure;
-import io.smallrye.reactive.unimulti.operators.UniDelayOnItem;
+import static io.smallrye.reactive.unimulti.helpers.ParameterValidation.nonNull;
 
 import java.time.Duration;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.function.Function;
 
-import static io.smallrye.reactive.unimulti.helpers.ParameterValidation.nonNull;
+import io.smallrye.reactive.unimulti.Uni;
+import io.smallrye.reactive.unimulti.infrastructure.Infrastructure;
+import io.smallrye.reactive.unimulti.operators.UniDelayOnItem;
 
 public class UniOnResultDelay<T> {
 

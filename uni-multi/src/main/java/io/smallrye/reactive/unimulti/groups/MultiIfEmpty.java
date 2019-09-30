@@ -1,17 +1,18 @@
 package io.smallrye.reactive.unimulti.groups;
 
-import io.smallrye.reactive.unimulti.Multi;
-import io.smallrye.reactive.unimulti.Uni;
-import io.smallrye.reactive.unimulti.operators.MultiSwitchOnEmpty;
-import io.smallrye.reactive.unimulti.subscription.MultiEmitter;
-import org.reactivestreams.Publisher;
+import static io.smallrye.reactive.unimulti.helpers.ParameterValidation.*;
 
 import java.util.Arrays;
 import java.util.NoSuchElementException;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-import static io.smallrye.reactive.unimulti.helpers.ParameterValidation.*;
+import org.reactivestreams.Publisher;
+
+import io.smallrye.reactive.unimulti.Multi;
+import io.smallrye.reactive.unimulti.Uni;
+import io.smallrye.reactive.unimulti.operators.MultiSwitchOnEmpty;
+import io.smallrye.reactive.unimulti.subscription.MultiEmitter;
 
 public class MultiIfEmpty<T> {
 
@@ -79,7 +80,7 @@ public class MultiIfEmpty<T> {
      * If the upstream {@link Multi} fails, the switch does not apply.
      *
      * @param consumer the callback receiving the emitter to fire the events. Must not be {@code null}. Throwing exception
-     *                 in this function propagates a failure downstream.
+     *        in this function propagates a failure downstream.
      * @return the new {@link Multi}
      */
     public Multi<T> switchToEmitter(Consumer<MultiEmitter<? super T>> consumer) {

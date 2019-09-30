@@ -1,10 +1,10 @@
 package io.smallrye.reactive.unimulti.groups;
 
+import java.util.function.Predicate;
+
 import io.smallrye.reactive.unimulti.Uni;
 import io.smallrye.reactive.unimulti.infrastructure.Infrastructure;
 import io.smallrye.reactive.unimulti.operators.UniRetryAtMost;
-
-import java.util.function.Predicate;
 
 public class UniRetry<T> {
 
@@ -34,7 +34,7 @@ public class UniRetry<T> {
      *
      * @param numberOfAttempts the number of attempt, must be greater than zero
      * @return a new {@link Uni} retrying at most {@code numberOfAttempts} times to subscribe to the current {@link Uni}
-     * until it gets an item. When the number of attempt is reached, the last failure is propagated.
+     *         until it gets an item. When the number of attempt is reached, the last failure is propagated.
      */
     public Uni<T> atMost(long numberOfAttempts) {
         return Infrastructure.onUniCreation(new UniRetryAtMost<>(upstream, predicate, numberOfAttempts));

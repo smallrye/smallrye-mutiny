@@ -1,13 +1,14 @@
 package io.smallrye.reactive.unimulti.operators;
 
-import io.reactivex.Flowable;
-import io.smallrye.reactive.unimulti.Multi;
-import org.reactivestreams.Publisher;
+import static io.smallrye.reactive.unimulti.helpers.ParameterValidation.nonNull;
+import static io.smallrye.reactive.unimulti.helpers.ParameterValidation.positive;
 
 import java.util.function.Function;
 
-import static io.smallrye.reactive.unimulti.helpers.ParameterValidation.nonNull;
-import static io.smallrye.reactive.unimulti.helpers.ParameterValidation.positive;
+import org.reactivestreams.Publisher;
+
+import io.reactivex.Flowable;
+import io.smallrye.reactive.unimulti.Multi;
 
 public class MultiFlatMap<I, O> extends MultiOperator<I, O> {
     private final Function<? super I, ? extends Publisher<? extends O>> mapper;

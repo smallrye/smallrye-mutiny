@@ -1,11 +1,12 @@
 package io.smallrye.reactive.unimulti.helpers;
 
-import io.reactivex.processors.UnicastProcessor;
-import io.smallrye.reactive.unimulti.Multi;
-import io.smallrye.reactive.unimulti.subscription.MultiEmitter;
 import org.reactivestreams.Processor;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
+
+import io.reactivex.processors.UnicastProcessor;
+import io.smallrye.reactive.unimulti.Multi;
+import io.smallrye.reactive.unimulti.subscription.MultiEmitter;
 
 public class MultiEmitterProcessor<T> implements Processor<T, T>, MultiEmitter<T> {
 

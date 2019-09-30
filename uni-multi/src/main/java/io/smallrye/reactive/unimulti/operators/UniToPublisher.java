@@ -1,14 +1,15 @@
 package io.smallrye.reactive.unimulti.operators;
 
-import io.smallrye.reactive.unimulti.Uni;
-import io.smallrye.reactive.unimulti.subscription.UniSubscriber;
-import io.smallrye.reactive.unimulti.subscription.UniSubscription;
-import org.reactivestreams.Publisher;
+import static io.smallrye.reactive.unimulti.helpers.EmptyUniSubscription.CANCELLED;
+import static io.smallrye.reactive.unimulti.helpers.ParameterValidation.nonNull;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-import static io.smallrye.reactive.unimulti.helpers.EmptyUniSubscription.CANCELLED;
-import static io.smallrye.reactive.unimulti.helpers.ParameterValidation.nonNull;
+import org.reactivestreams.Publisher;
+
+import io.smallrye.reactive.unimulti.Uni;
+import io.smallrye.reactive.unimulti.subscription.UniSubscriber;
+import io.smallrye.reactive.unimulti.subscription.UniSubscription;
 
 public class UniToPublisher {
 

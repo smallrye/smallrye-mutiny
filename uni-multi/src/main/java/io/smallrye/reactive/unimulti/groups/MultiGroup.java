@@ -1,12 +1,12 @@
 package io.smallrye.reactive.unimulti.groups;
 
-import io.smallrye.reactive.unimulti.GroupedMulti;
-import io.smallrye.reactive.unimulti.Multi;
-import io.smallrye.reactive.unimulti.operators.MultiCollector;
+import static io.smallrye.reactive.unimulti.helpers.ParameterValidation.nonNull;
 
 import java.util.function.Function;
 
-import static io.smallrye.reactive.unimulti.helpers.ParameterValidation.nonNull;
+import io.smallrye.reactive.unimulti.GroupedMulti;
+import io.smallrye.reactive.unimulti.Multi;
+import io.smallrye.reactive.unimulti.operators.MultiCollector;
 
 public class MultiGroup<T> {
 

@@ -1,9 +1,9 @@
 package io.smallrye.reactive.unimulti.operators;
 
+import java.util.function.Predicate;
+
 import io.reactivex.Flowable;
 import io.smallrye.reactive.unimulti.Multi;
-
-import java.util.function.Predicate;
 
 public class MultiFilter<T> extends MultiOperator<T, T> {
     private final Predicate<? super T> predicate;

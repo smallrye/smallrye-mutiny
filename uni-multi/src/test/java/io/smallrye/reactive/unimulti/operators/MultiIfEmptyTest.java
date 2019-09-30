@@ -1,17 +1,16 @@
 package io.smallrye.reactive.unimulti.operators;
 
-import io.reactivex.Flowable;
-import io.smallrye.reactive.unimulti.Multi;
-import org.junit.Test;
-import org.reactivestreams.Publisher;
-
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.NoSuchElementException;
 import java.util.function.Supplier;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.Test;
+import org.reactivestreams.Publisher;
+
+import io.reactivex.Flowable;
+import io.smallrye.reactive.unimulti.Multi;
 
 public class MultiIfEmptyTest {
 
@@ -22,7 +21,7 @@ public class MultiIfEmptyTest {
                 .subscribe().withSubscriber(MultiAssertSubscriber.create(7))
                 .assertCompletedSuccessfully()
                 .assertReceived(6, 7, 8);
-        
+
     }
 
     @Test
@@ -37,7 +36,7 @@ public class MultiIfEmptyTest {
 
     @Test
     public void testIfEmptyContinueWithAndUpstreamFailure() {
-        Multi.createFrom().<Integer>failure(new IOException("boom"))
+        Multi.createFrom().<Integer> failure(new IOException("boom"))
                 .onCompletion().ifEmpty().continueWith(6, 7, 8)
                 .subscribe().withSubscriber(MultiAssertSubscriber.create(7))
                 .assertHasFailedWith(IOException.class, "boom");
@@ -158,8 +157,8 @@ public class MultiIfEmptyTest {
     public void testIfEmptyContinueWithSupplierThrowingException() {
         Multi.createFrom().empty()
                 .onCompletion().ifEmpty().continueWith((Supplier<? extends Iterable<? extends Integer>>) () -> {
-            throw new IllegalStateException("BOOM!");
-        })
+                    throw new IllegalStateException("BOOM!");
+                })
                 .subscribe().withSubscriber(MultiAssertSubscriber.create(20))
                 .assertHasFailedWith(IllegalStateException.class, "BOOM!")
                 .assertHasNotReceivedAnyItem();
@@ -209,8 +208,8 @@ public class MultiIfEmptyTest {
     public void testIfEmptyFailWithSupplierThrowingException() {
         Multi.createFrom().empty()
                 .onCompletion().ifEmpty().failWith(() -> {
-            throw new IllegalStateException("BOOM!");
-        })
+                    throw new IllegalStateException("BOOM!");
+                })
                 .subscribe().withSubscriber(MultiAssertSubscriber.create(Long.MAX_VALUE))
                 .assertHasFailedWith(IllegalStateException.class, "BOOM!");
     }

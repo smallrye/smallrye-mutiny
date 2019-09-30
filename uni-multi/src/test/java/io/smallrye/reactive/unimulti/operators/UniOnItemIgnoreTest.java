@@ -1,14 +1,15 @@
 package io.smallrye.reactive.unimulti.operators;
 
-import io.smallrye.reactive.unimulti.Uni;
-import org.assertj.core.api.Assertions;
-import org.junit.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import org.assertj.core.api.Assertions;
+import org.junit.Test;
+
+import io.smallrye.reactive.unimulti.Uni;
 
 public class UniOnItemIgnoreTest {
 
@@ -27,17 +28,16 @@ public class UniOnItemIgnoreTest {
 
     @Test
     public void testIgnoreAndFail() {
-        UniAssertSubscriber<Integer> subscriber =
-                Uni.createFrom().item(22).onItem().ignore().andFail().subscribe()
-                        .withSubscriber(UniAssertSubscriber.create());
+        UniAssertSubscriber<Integer> subscriber = Uni.createFrom().item(22).onItem().ignore().andFail().subscribe()
+                .withSubscriber(UniAssertSubscriber.create());
         subscriber.assertFailure(Exception.class, "");
     }
 
     @Test
     public void testIgnoreAndFailWith() {
-        UniAssertSubscriber<Integer> subscriber =
-                Uni.createFrom().item(22).onItem().ignore().andFail(new IOException("boom")).subscribe()
-                        .withSubscriber(UniAssertSubscriber.create());
+        UniAssertSubscriber<Integer> subscriber = Uni.createFrom().item(22).onItem().ignore().andFail(new IOException("boom"))
+                .subscribe()
+                .withSubscriber(UniAssertSubscriber.create());
         subscriber.assertFailure(IOException.class, "boom");
     }
 

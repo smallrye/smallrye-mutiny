@@ -1,7 +1,8 @@
 package io.smallrye.reactive.unimulti.operators;
 
-import io.smallrye.reactive.unimulti.Multi;
 import org.junit.Test;
+
+import io.smallrye.reactive.unimulti.Multi;
 
 public class MultiCastTest {
 

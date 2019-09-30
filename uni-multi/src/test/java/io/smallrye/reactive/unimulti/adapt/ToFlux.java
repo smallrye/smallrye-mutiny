@@ -1,9 +1,9 @@
 package io.smallrye.reactive.unimulti.adapt;
 
+import java.util.function.Function;
+
 import io.smallrye.reactive.unimulti.Uni;
 import reactor.core.publisher.Flux;
-
-import java.util.function.Function;
 
 public class ToFlux<T> implements Function<Uni<T>, Flux<T>> {
     @Override

@@ -1,12 +1,13 @@
 package io.smallrye.reactive.unimulti.operators;
 
-import io.reactivex.Flowable;
-import io.smallrye.reactive.unimulti.Multi;
-import org.reactivestreams.Publisher;
+import static io.smallrye.reactive.unimulti.helpers.ParameterValidation.SUPPLIER_PRODUCED_NULL;
 
 import java.util.function.Supplier;
 
-import static io.smallrye.reactive.unimulti.helpers.ParameterValidation.SUPPLIER_PRODUCED_NULL;
+import org.reactivestreams.Publisher;
+
+import io.reactivex.Flowable;
+import io.smallrye.reactive.unimulti.Multi;
 
 public class MultiSwitchOnEmpty<T> extends MultiOperator<T, T> {
     private final Supplier<Publisher<? extends T>> supplier;

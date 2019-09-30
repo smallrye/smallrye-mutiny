@@ -1,15 +1,15 @@
 package io.smallrye.reactive.unimulti.groups;
 
-import io.smallrye.reactive.unimulti.Uni;
-import io.smallrye.reactive.unimulti.infrastructure.Infrastructure;
-import io.smallrye.reactive.unimulti.operators.UniAndCombination;
+import static io.smallrye.reactive.unimulti.helpers.ParameterValidation.nonNull;
 
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-import static io.smallrye.reactive.unimulti.helpers.ParameterValidation.nonNull;
+import io.smallrye.reactive.unimulti.Uni;
+import io.smallrye.reactive.unimulti.infrastructure.Infrastructure;
+import io.smallrye.reactive.unimulti.operators.UniAndCombination;
 
 public class UniAndGroupIterable<T1> {
 
@@ -46,8 +46,7 @@ public class UniAndGroupIterable<T1> {
 
     public <O> Uni<O> combinedWith(Function<List<?>, O> function) {
         return Infrastructure
-                .onUniCreation(new UniAndCombination<>(source, unis, nonNull(function, "function"), collectFailures)
-                );
+                .onUniCreation(new UniAndCombination<>(source, unis, nonNull(function, "function"), collectFailures));
     }
 
 }

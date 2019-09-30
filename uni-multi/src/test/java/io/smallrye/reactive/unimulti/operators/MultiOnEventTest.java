@@ -1,9 +1,6 @@
 package io.smallrye.reactive.unimulti.operators;
 
-import io.smallrye.reactive.unimulti.CompositeException;
-import io.smallrye.reactive.unimulti.Multi;
-import org.junit.Test;
-import org.reactivestreams.Subscription;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -12,7 +9,11 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.Test;
+import org.reactivestreams.Subscription;
+
+import io.smallrye.reactive.unimulti.CompositeException;
+import io.smallrye.reactive.unimulti.Multi;
 
 public class MultiOnEventTest {
     @Test
@@ -61,7 +62,7 @@ public class MultiOnEventTest {
         AtomicBoolean termination = new AtomicBoolean();
         AtomicBoolean cancellation = new AtomicBoolean();
 
-        Multi.createFrom().<Integer>failure(new IOException("boom"))
+        Multi.createFrom().<Integer> failure(new IOException("boom"))
                 .on().subscription(subscription::set)
                 .on().item().consume(item::set)
                 .on().failure().consume(failure::set)
@@ -91,7 +92,7 @@ public class MultiOnEventTest {
         AtomicBoolean termination = new AtomicBoolean();
         AtomicBoolean cancellation = new AtomicBoolean();
 
-        Multi.createFrom().<Integer>failure(new IOException("boom"))
+        Multi.createFrom().<Integer> failure(new IOException("boom"))
                 .on().subscription(subscription::set)
                 .on().item().consume(item::set)
                 .on().failure(IOException.class).consume(failure::set)
@@ -121,7 +122,7 @@ public class MultiOnEventTest {
         AtomicBoolean termination = new AtomicBoolean();
         AtomicBoolean cancellation = new AtomicBoolean();
 
-        Multi.createFrom().<Integer>failure(new IOException("boom"))
+        Multi.createFrom().<Integer> failure(new IOException("boom"))
                 .on().subscription(subscription::set)
                 .on().item().consume(item::set)
                 .on().failure(f -> f.getMessage().contains("missing")).consume(failure::set)
@@ -155,7 +156,7 @@ public class MultiOnEventTest {
             throw new IllegalStateException("bigboom");
         };
 
-        Multi.createFrom().<Integer>failure(new IOException("smallboom"))
+        Multi.createFrom().<Integer> failure(new IOException("smallboom"))
                 .on().subscription(subscription::set)
                 .on().item().consume(item::set)
                 .on().failure(boom).consume(failure::set)
@@ -186,7 +187,7 @@ public class MultiOnEventTest {
         AtomicBoolean termination = new AtomicBoolean();
         AtomicBoolean cancellation = new AtomicBoolean();
 
-        Multi.createFrom().<Integer>empty()
+        Multi.createFrom().<Integer> empty()
                 .on().subscription(subscription::set)
                 .on().item().consume(item::set)
                 .on().failure().consume(failure::set)
@@ -217,7 +218,7 @@ public class MultiOnEventTest {
         AtomicBoolean termination = new AtomicBoolean();
         AtomicBoolean cancellation = new AtomicBoolean();
 
-        MultiAssertSubscriber<Integer> subscriber = Multi.createFrom().<Integer>nothing()
+        MultiAssertSubscriber<Integer> subscriber = Multi.createFrom().<Integer> nothing()
                 .on().subscription(subscription::set)
                 .on().item().consume(item::set)
                 .on().failure().consume(failure::set)
@@ -248,8 +249,8 @@ public class MultiOnEventTest {
 
         Multi.createFrom().item(1)
                 .on().item().consume(i -> {
-            throw new IllegalArgumentException("boom");
-        })
+                    throw new IllegalArgumentException("boom");
+                })
                 .subscribe().withSubscriber(ts)
                 .assertTerminated()
                 .assertHasFailedWith(IllegalArgumentException.class, "boom");
@@ -259,10 +260,10 @@ public class MultiOnEventTest {
     public void testWhenOnFailurePeekThrowsExceptions() {
         MultiAssertSubscriber<Integer> ts = MultiAssertSubscriber.create(1);
 
-        Multi.createFrom().<Integer>failure(new IOException("source"))
+        Multi.createFrom().<Integer> failure(new IOException("source"))
                 .on().failure().consume(f -> {
-            throw new IllegalArgumentException("boom");
-        })
+                    throw new IllegalArgumentException("boom");
+                })
                 .subscribe().withSubscriber(ts)
                 .assertTerminated()
                 .assertHasFailedWith(CompositeException.class, "boom")
@@ -275,8 +276,8 @@ public class MultiOnEventTest {
 
         Multi.createFrom().items(1, 2)
                 .on().completion(() -> {
-            throw new IllegalArgumentException("boom");
-        })
+                    throw new IllegalArgumentException("boom");
+                })
                 .subscribe().withSubscriber(ts)
                 .assertNotTerminated()
                 .assertReceived(1)
@@ -290,10 +291,10 @@ public class MultiOnEventTest {
     public void testWhenBothOnItemAndOnFailureThrowsException() {
         Multi.createFrom().item(1)
                 .on().item().consume(i -> {
-            throw new IllegalArgumentException("boom1");
-        }).on().failure().consume(t -> {
-            throw new IllegalArgumentException("boom2");
-        }).subscribe().withSubscriber(MultiAssertSubscriber.create(1))
+                    throw new IllegalArgumentException("boom1");
+                }).on().failure().consume(t -> {
+                    throw new IllegalArgumentException("boom2");
+                }).subscribe().withSubscriber(MultiAssertSubscriber.create(1))
                 .assertTerminated()
                 .assertHasFailedWith(CompositeException.class, "boom1")
                 .assertHasFailedWith(CompositeException.class, "boom2");
@@ -304,9 +305,9 @@ public class MultiOnEventTest {
         AtomicInteger called = new AtomicInteger();
         Multi.createFrom().item(1)
                 .on().termination((f, c) -> {
-            called.incrementAndGet();
-            throw new IllegalArgumentException("boom");
-        }).subscribe().withSubscriber(MultiAssertSubscriber.create(1))
+                    called.incrementAndGet();
+                    throw new IllegalArgumentException("boom");
+                }).subscribe().withSubscriber(MultiAssertSubscriber.create(1))
                 .assertHasFailedWith(IllegalArgumentException.class, "boom");
 
         assertThat(called).hasValue(1);

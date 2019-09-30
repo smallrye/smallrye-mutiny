@@ -1,8 +1,8 @@
 package io.smallrye.reactive.unimulti.tuples;
 
-import io.smallrye.reactive.unimulti.helpers.ParameterValidation;
-
 import java.util.List;
+
+import io.smallrye.reactive.unimulti.helpers.ParameterValidation;
 
 /**
  * A set of methods to create {@link Tuple} instances from lists.
@@ -61,4 +61,3 @@ public abstract class Tuples {
         }
     }
 }
-

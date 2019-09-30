@@ -1,8 +1,8 @@
 package io.smallrye.reactive.unimulti.operators;
 
-import io.smallrye.reactive.unimulti.TimeoutException;
-import io.smallrye.reactive.unimulti.Uni;
-import org.junit.Test;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+import static org.awaitility.Awaitility.await;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -10,9 +10,10 @@ import java.util.concurrent.CompletionException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
-import static org.awaitility.Awaitility.await;
+import org.junit.Test;
+
+import io.smallrye.reactive.unimulti.TimeoutException;
+import io.smallrye.reactive.unimulti.Uni;
 
 public class UniAwaitTest {
 
@@ -42,8 +43,7 @@ public class UniAwaitTest {
     public void testAwaitingOnAnAsyncUni() {
         assertThat(
                 Uni.createFrom().emitter(emitter -> new Thread(() -> emitter.complete(1)).start()).await()
-                        .indefinitely()
-        ).isEqualTo(1);
+                        .indefinitely()).isEqualTo(1);
     }
 
     @Test(timeout = 1000)
@@ -90,8 +90,7 @@ public class UniAwaitTest {
     public void testAwaitAsOptionalWithResult() {
         assertThat(
                 Uni.createFrom().emitter(emitter -> new Thread(() -> emitter.complete(1)).start()).await().asOptional()
-                        .indefinitely()
-        ).contains(1);
+                        .indefinitely()).contains(1);
     }
 
     @Test
@@ -109,16 +108,14 @@ public class UniAwaitTest {
     public void testAwaitAsOptionalWithNull() {
         assertThat(
                 Uni.createFrom().emitter(emitter -> new Thread(() -> emitter.complete(null)).start()).await()
-                        .asOptional().indefinitely()
-        ).isEmpty();
+                        .asOptional().indefinitely()).isEmpty();
     }
 
     @Test
     public void testAwaitAsOptionalWithTimeout() {
         assertThat(
                 Uni.createFrom().emitter(emitter -> new Thread(() -> emitter.complete(1)).start()).await().asOptional()
-                        .atMost(Duration.ofMillis(1000))
-        ).contains(1);
+                        .atMost(Duration.ofMillis(1000))).contains(1);
     }
 
     @Test(timeout = 100, expected = TimeoutException.class)

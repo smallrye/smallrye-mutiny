@@ -1,16 +1,17 @@
 package io.smallrye.reactive.unimulti.operators;
 
-import io.smallrye.reactive.unimulti.Multi;
-import io.smallrye.reactive.unimulti.subscription.MultiEmitter;
-import org.junit.Test;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import java.io.IOException;
 import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import org.junit.Test;
+
+import io.smallrye.reactive.unimulti.Multi;
+import io.smallrye.reactive.unimulti.subscription.MultiEmitter;
 
 public class MultiSkipTest {
 
@@ -48,7 +49,7 @@ public class MultiSkipTest {
 
     @Test
     public void testSkipOnUpstreamFailure() {
-        Multi.createFrom().<Integer>failure(new IOException("boom")).transform().bySkippingFirstItems(1)
+        Multi.createFrom().<Integer> failure(new IOException("boom")).transform().bySkippingFirstItems(1)
                 .subscribe().withSubscriber(MultiAssertSubscriber.create(10))
                 .assertHasFailedWith(IOException.class, "boom")
                 .assertHasNotReceivedAnyItem();
@@ -56,7 +57,7 @@ public class MultiSkipTest {
 
     @Test
     public void testSkipLastOnUpstreamFailure() {
-        Multi.createFrom().<Integer>failure(new IOException("boom")).transform().bySkippingLastItems(1)
+        Multi.createFrom().<Integer> failure(new IOException("boom")).transform().bySkippingLastItems(1)
                 .subscribe().withSubscriber(MultiAssertSubscriber.create(10))
                 .assertHasFailedWith(IOException.class, "boom")
                 .assertHasNotReceivedAnyItem();
@@ -80,11 +81,11 @@ public class MultiSkipTest {
 
     @Test
     public void testInvalidSkipNumber() {
-        assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() ->
-                Multi.createFrom().items(1, 2, 3).transform().bySkippingFirstItems(-1));
+        assertThatExceptionOfType(IllegalArgumentException.class)
+                .isThrownBy(() -> Multi.createFrom().items(1, 2, 3).transform().bySkippingFirstItems(-1));
 
-        assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() ->
-                Multi.createFrom().items(1, 2, 3).transform().bySkippingLastItems(-1));
+        assertThatExceptionOfType(IllegalArgumentException.class)
+                .isThrownBy(() -> Multi.createFrom().items(1, 2, 3).transform().bySkippingLastItems(-1));
     }
 
     @Test
@@ -92,7 +93,7 @@ public class MultiSkipTest {
         MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(0);
 
         AtomicReference<MultiEmitter<? super Integer>> emitter = new AtomicReference<>();
-        Multi.createFrom().<Integer>emitter(emitter::set)
+        Multi.createFrom().<Integer> emitter(emitter::set)
                 .transform().bySkippingLastItems(3)
                 .subscribe(subscriber);
 
@@ -140,7 +141,7 @@ public class MultiSkipTest {
 
     @Test
     public void testSkipWhileWithUpstreamFailure() {
-        Multi.createFrom().<Integer>failure(new IOException("boom"))
+        Multi.createFrom().<Integer> failure(new IOException("boom"))
                 .transform().bySkippingItemsWhile(i -> i < 5)
                 .subscribe().withSubscriber(MultiAssertSubscriber.create(10))
                 .assertHasFailedWith(IOException.class, "boom");

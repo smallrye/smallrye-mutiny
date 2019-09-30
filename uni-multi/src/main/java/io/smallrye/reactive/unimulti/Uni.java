@@ -1,20 +1,20 @@
 package io.smallrye.reactive.unimulti;
 
-import io.smallrye.reactive.unimulti.adapt.UniConverter;
-import io.smallrye.reactive.unimulti.subscription.UniEmitter;
-import io.smallrye.reactive.unimulti.subscription.UniSubscriber;
-import io.smallrye.reactive.unimulti.subscription.UniSubscription;
-import io.smallrye.reactive.unimulti.tuples.Tuple2;
-import io.smallrye.reactive.unimulti.groups.*;
-import io.smallrye.reactive.unimulti.helpers.ParameterValidation;
-import io.smallrye.reactive.unimulti.tuples.Tuple;
-import io.smallrye.reactive.unimulti.tuples.Tuple5;
-
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Executor;
 import java.util.function.Function;
 import java.util.function.Predicate;
+
+import io.smallrye.reactive.unimulti.adapt.UniConverter;
+import io.smallrye.reactive.unimulti.groups.*;
+import io.smallrye.reactive.unimulti.helpers.ParameterValidation;
+import io.smallrye.reactive.unimulti.subscription.UniEmitter;
+import io.smallrye.reactive.unimulti.subscription.UniSubscriber;
+import io.smallrye.reactive.unimulti.subscription.UniSubscription;
+import io.smallrye.reactive.unimulti.tuples.Tuple;
+import io.smallrye.reactive.unimulti.tuples.Tuple2;
+import io.smallrye.reactive.unimulti.tuples.Tuple5;
 
 /**
  * A {@link Uni} represent a lazy asynchronous action. It follows a subscription pattern, meaning the the action
@@ -41,8 +41,12 @@ public interface Uni<T> {
      * Creates a new {@link Uni} from various sources such as {@link CompletionStage},
      * {@link UniEmitter}, direct values, {@link Exception}...
      *
-     * <p>Examples:</p>
-     * <pre>{@code
+     * <p>
+     * Examples:
+     * </p>
+     * 
+     * <pre>
+     * {@code
      * Uni.from().item(1); // Emit 1 at subscription time
      * Uni.from().item(() -> x); // Emit x at subscription time, the supplier is invoked for each subscription
      * Uni.from().completionState(cs); // Emit the item from this completion stage
@@ -52,7 +56,8 @@ public interface Uni<T> {
      * Uni.from().item(null); // Emit null at subscription time
      * Uni.from().nothing(); // Create a Uni not emitting any signal
      * Uni.from().publisher(publisher); // Create a Uni from a Reactive Streams Publisher
-     * }</pre>
+     * }
+     * </pre>
      *
      * @return the factory used to create {@link Uni} instances.
      * @see UniCreate
@@ -87,8 +92,12 @@ public interface Uni<T> {
      * (using a {@link UniSubscriber}, callbacks, or a {@link CompletionStage}. Unlike {@link #await()}, this method
      * configures non-blocking retrieval of the item and failure.
      *
-     * <p>Examples:</p>
-     * <pre>{@code
+     * <p>
+     * Examples:
+     * </p>
+     * 
+     * <pre>
+     * {@code
      *     Uni<String> uni = ...;
      *
      *    Subscription sub = uni.subscribe().with( // The return subscription can be used to cancel the operation
@@ -101,7 +110,8 @@ public interface Uni<T> {
      *
      *    CompletableFuture future = uni.subscribe().asCompletableFuture(); // Get a CompletionStage receiving the item or failure
      *    // Cancelling the returned future cancels the subscription.
-     * }</pre>
+     * }
+     * </pre>
      *
      * @return the object to configure the subscription.
      * @see #await() <code>uni.await() </code>for waiting (blocking the caller thread) until the resolution of the observed Uni.
@@ -122,13 +132,18 @@ public interface Uni<T> {
      * If the observed uni fails, the failure is thrown. In the case of a checked exception, the exception is wrapped
      * into a {@link java.util.concurrent.CompletionException}.
      *
-     * <p>Examples:</p>
-     * <pre>{@code
+     * <p>
+     * Examples:
+     * </p>
+     * 
+     * <pre>
+     * {@code
      * Uni<T> uni = ...;
      * T res = uni.await().indefinitely(); // Await indefinitely until it get the item.
      * T res = uni.await().atMost(Duration.ofMillis(1000)); // Awaits at most 1s. After that, a TimeoutException is thrown
      * Optional<T> res = uni.await().asOptional().indefinitely(); // Retrieves the item as an Optional, empty if the item is null
-     * }</pre>
+     * }
+     * </pre>
      *
      * @return the object to configure the retrieval.
      */
@@ -137,12 +152,17 @@ public interface Uni<T> {
     /**
      * Configures the action to execute when the observed {@link Uni} emits the item (potentially {@code null}).
      *
-     * <p>Examples:</p>
-     * <pre>{@code
+     * <p>
+     * Examples:
+     * </p>
+     * 
+     * <pre>
+     * {@code
      * Uni<T> uni = ...;
      * uni.onItem().mapToItem(x -> ...); // Map to another item
      * uni.onItem().mapToUni(x -> ...); // Map to another Uni (flatMap)
-     * }</pre>
+     * }
+     * </pre>
      *
      * @return the object to configure the action to execute when an item is emitted
      */
@@ -153,7 +173,7 @@ public interface Uni<T> {
      * combinator function.
      * <p>
      * If one of the combine {@link Uni} fire a failure, the other unis are cancelled, and the resulting
-     * {@link Uni} fires the failure. If {@code collectFailures()}  is called,
+     * {@link Uni} fires the failure. If {@code collectFailures()} is called,
      * it waits for the completion of all the {@link Uni unis} before propagating the failure event. If more than one
      * {@link Uni} failed, a {@link CompositeException} is fired, wrapping the different collected failures.
      * <p>
@@ -172,7 +192,7 @@ public interface Uni<T> {
      * If {@code this} or {@code other} fails, the other resolution is cancelled.
      *
      * @param other the other {@link Uni}, must not be {@code null}
-     * @param <T2>  the type to pair
+     * @param <T2> the type to pair
      * @return the combination of the pair combining the two items.
      * @see #and() <code>and</code> for more options on the combination of items
      * @see UniCombine#all() <code>Uni.all()</code> for the equivalent static operator
@@ -194,7 +214,8 @@ public interface Uni<T> {
      * {@code iterable} are also cancelled.
      *
      * @return the object to enlist the participants
-     * @see UniCombine#any() <code>Uni.any</code> for a static version of this operator, like <code>Uni first = Uni.any().of(uni1, uni2);</code>
+     * @see UniCombine#any() <code>Uni.any</code> for a static version of this operator, like
+     *      <code>Uni first = Uni.any().of(uni1, uni2);</code>
      */
     UniOr or();
 
@@ -240,7 +261,7 @@ public interface Uni<T> {
      * Produces a {@link Uni} reacting when a no item event is fired by the upstream uni during the specified time
      * period.
      * <p>
-     * This {@link Uni} detects if this  {@link Uni} does not emit an item before the configured timeout.
+     * This {@link Uni} detects if this {@link Uni} does not emit an item before the configured timeout.
      * <p>
      * Examples:
      * <code>
@@ -258,7 +279,7 @@ public interface Uni<T> {
      * Produces a new {@link Uni} invoking the {@link UniSubscriber#onItem(Object)} and
      * {@link UniSubscriber#onFailure(Throwable)} on the supplied {@link Executor}.
      * <p>
-     * Instead of receiving the {@code item} event on the thread firing the event, this method  influences the
+     * Instead of receiving the {@code item} event on the thread firing the event, this method influences the
      * threading context to switch to a thread from the given executor.
      *
      * @param executor the executor to use, must not be {@code null}
@@ -280,7 +301,7 @@ public interface Uni<T> {
      * Caches the events (item or failure) of this {@link Uni} and replays it for all further {@link UniSubscriber}.
      *
      * @return the new {@link Uni}. Unlike regular {@link Uni}, re-subscribing to this {@link Uni} does not re-compute
-     * the outcome but replayed the cached events.
+     *         the outcome but replayed the cached events.
      */
     Uni<T> cache();
 
@@ -290,7 +311,7 @@ public interface Uni<T> {
      * For asynchronous composition, look at flatMap.
      *
      * @param mapper the mapper function, must not be {@code null}
-     * @param <O>    the output type
+     * @param <O> the output type
      * @return a new {@link Uni} computing an item of type {@code <O>}.
      */
     default <O> Uni<O> map(Function<? super T, ? extends O> mapper) {
@@ -308,10 +329,10 @@ public interface Uni<T> {
      * This operation is generally named {@code flatMap}.
      *
      * @param mapper the function called with the item of the this {@link Uni} and producing the {@link Uni},
-     *               must not be {@code null}, must not return {@code null}.
-     * @param <O>    the type of item
+     *        must not be {@code null}, must not return {@code null}.
+     * @param <O> the type of item
      * @return a new {@link Uni} that would fire events from the uni produced by the mapper function, possibly
-     * in an asynchronous manner.
+     *         in an asynchronous manner.
      */
     default <O> Uni<O> flatMap(Function<? super T, Uni<? extends O>> mapper) {
         return onItem().mapToUni(ParameterValidation.nonNull(mapper, "mapper"));
@@ -347,4 +368,3 @@ public interface Uni<T> {
      */
     UniOnEvent<T> on();
 }
-

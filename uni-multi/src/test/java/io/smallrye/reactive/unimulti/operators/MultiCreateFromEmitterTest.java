@@ -1,19 +1,20 @@
 package io.smallrye.reactive.unimulti.operators;
 
-import io.smallrye.reactive.unimulti.Multi;
-import io.smallrye.reactive.unimulti.subscription.BackPressureFailure;
-import io.smallrye.reactive.unimulti.subscription.BackPressureStrategy;
-import io.smallrye.reactive.unimulti.subscription.MultiEmitter;
-import org.junit.Test;
-import org.reactivestreams.Subscriber;
-import org.reactivestreams.Subscription;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.Test;
+import org.reactivestreams.Subscriber;
+import org.reactivestreams.Subscription;
+
+import io.smallrye.reactive.unimulti.Multi;
+import io.smallrye.reactive.unimulti.subscription.BackPressureFailure;
+import io.smallrye.reactive.unimulti.subscription.BackPressureStrategy;
+import io.smallrye.reactive.unimulti.subscription.MultiEmitter;
 
 public class MultiCreateFromEmitterTest {
 
@@ -116,7 +117,7 @@ public class MultiCreateFromEmitterTest {
     @Test
     public void testOnTerminationOnCompletion() {
         AtomicInteger termination = new AtomicInteger();
-        MultiAssertSubscriber<Integer> subscriber = Multi.createFrom().<Integer>emitter(emitter -> {
+        MultiAssertSubscriber<Integer> subscriber = Multi.createFrom().<Integer> emitter(emitter -> {
             emitter.onTermination(termination::incrementAndGet);
             emitter.emit(1);
             emitter.emit(2);
@@ -140,7 +141,7 @@ public class MultiCreateFromEmitterTest {
     @Test
     public void testOnTerminationOnFailure() {
         AtomicInteger termination = new AtomicInteger();
-        MultiAssertSubscriber<Integer> subscriber = Multi.createFrom().<Integer>emitter(emitter -> {
+        MultiAssertSubscriber<Integer> subscriber = Multi.createFrom().<Integer> emitter(emitter -> {
             emitter.onTermination(termination::incrementAndGet);
             emitter.emit(1);
             emitter.emit(2);
@@ -164,7 +165,7 @@ public class MultiCreateFromEmitterTest {
     @Test
     public void testOnTerminationWhenEmpty() {
         AtomicInteger termination = new AtomicInteger();
-        MultiAssertSubscriber<Integer> subscriber = Multi.createFrom().<Integer>emitter(emitter -> {
+        MultiAssertSubscriber<Integer> subscriber = Multi.createFrom().<Integer> emitter(emitter -> {
             emitter.onTermination(termination::incrementAndGet);
             emitter.complete();
         })
@@ -227,7 +228,8 @@ public class MultiCreateFromEmitterTest {
 
     @Test
     public void testIgnoreBackPressureBehavior() {
-        Multi<Integer> multi = Multi.createFrom().emitter(e -> e.emit(1).emit(2).emit(3).complete(), BackPressureStrategy.IGNORE);
+        Multi<Integer> multi = Multi.createFrom().emitter(e -> e.emit(1).emit(2).emit(3).complete(),
+                BackPressureStrategy.IGNORE);
 
         multi.subscribe().withSubscriber(MultiAssertSubscriber.create(1))
                 .assertSubscribed()
@@ -239,7 +241,7 @@ public class MultiCreateFromEmitterTest {
 
     @Test
     public void testWithoutBackPressure() {
-        MultiAssertSubscriber<Integer> subscriber = Multi.createFrom().<Integer>emitter(emitter -> {
+        MultiAssertSubscriber<Integer> subscriber = Multi.createFrom().<Integer> emitter(emitter -> {
             IntStream.range(0, 1000).forEach(emitter::emit);
             emitter.complete();
         }, BackPressureStrategy.IGNORE).subscribe()
@@ -247,7 +249,7 @@ public class MultiCreateFromEmitterTest {
                 .assertCompletedSuccessfully();
         assertThat(subscriber.items()).hasSize(1000);
 
-        subscriber = Multi.createFrom().<Integer>emitter(emitter -> {
+        subscriber = Multi.createFrom().<Integer> emitter(emitter -> {
             IntStream.range(0, 1000).forEach(emitter::emit);
             emitter.complete();
         }, BackPressureStrategy.IGNORE).subscribe()
@@ -259,7 +261,8 @@ public class MultiCreateFromEmitterTest {
 
     @Test
     public void testLatestBackPressureBehavior() {
-        Multi<Integer> multi = Multi.createFrom().emitter(e -> e.emit(1).emit(2).emit(3).complete(), BackPressureStrategy.LATEST);
+        Multi<Integer> multi = Multi.createFrom().emitter(e -> e.emit(1).emit(2).emit(3).complete(),
+                BackPressureStrategy.LATEST);
 
         multi.subscribe().withSubscriber(MultiAssertSubscriber.create(1))
                 .assertSubscribed()
@@ -271,7 +274,7 @@ public class MultiCreateFromEmitterTest {
 
     @Test
     public void testWithLatestBackPressure() {
-        MultiAssertSubscriber<Integer> subscriber = Multi.createFrom().<Integer>emitter(emitter -> {
+        MultiAssertSubscriber<Integer> subscriber = Multi.createFrom().<Integer> emitter(emitter -> {
             IntStream.range(0, 1000).forEach(emitter::emit);
             emitter.complete();
         }, BackPressureStrategy.LATEST).subscribe()
@@ -281,7 +284,7 @@ public class MultiCreateFromEmitterTest {
         // 21 because the 20 first are consumed, and then only the latest is kept.
         assertThat(subscriber.items()).hasSize(21);
 
-        subscriber = Multi.createFrom().<Integer>emitter(emitter -> {
+        subscriber = Multi.createFrom().<Integer> emitter(emitter -> {
             IntStream.range(0, 1000).forEach(emitter::emit);
             emitter.complete();
         }, BackPressureStrategy.LATEST).subscribe()
@@ -291,12 +294,12 @@ public class MultiCreateFromEmitterTest {
                 .assertCompletedSuccessfully();
         assertThat(subscriber.items()).hasSize(1).containsExactly(999);
 
-        Multi.createFrom().<Integer>emitter(MultiEmitter::complete, BackPressureStrategy.LATEST)
+        Multi.createFrom().<Integer> emitter(MultiEmitter::complete, BackPressureStrategy.LATEST)
                 .subscribe().withSubscriber(MultiAssertSubscriber.create(20))
                 .assertCompletedSuccessfully()
                 .assertHasNotReceivedAnyItem();
 
-        subscriber = Multi.createFrom().<Integer>emitter(emitter -> {
+        subscriber = Multi.createFrom().<Integer> emitter(emitter -> {
             IntStream.range(0, 1000).forEach(emitter::emit);
             emitter.fail(new IOException("boom"));
         }, BackPressureStrategy.LATEST).subscribe()
@@ -336,7 +339,7 @@ public class MultiCreateFromEmitterTest {
 
     @Test
     public void testWithDropBackPressure() {
-        MultiAssertSubscriber<Integer> subscriber = Multi.createFrom().<Integer>emitter(emitter -> {
+        MultiAssertSubscriber<Integer> subscriber = Multi.createFrom().<Integer> emitter(emitter -> {
             IntStream.range(0, 1000).forEach(emitter::emit);
             emitter.complete();
         }, BackPressureStrategy.DROP).subscribe()
@@ -346,7 +349,7 @@ public class MultiCreateFromEmitterTest {
         // 20 because the 20 first are consumed, others are dropped
         assertThat(subscriber.items()).hasSize(20);
 
-        subscriber = Multi.createFrom().<Integer>emitter(emitter -> {
+        subscriber = Multi.createFrom().<Integer> emitter(emitter -> {
             IntStream.range(0, 1000).forEach(emitter::emit);
             emitter.complete();
         }, BackPressureStrategy.DROP).subscribe()
@@ -356,12 +359,12 @@ public class MultiCreateFromEmitterTest {
                 .assertCompletedSuccessfully();
         assertThat(subscriber.items()).isEmpty();
 
-        Multi.createFrom().<Integer>emitter(MultiEmitter::complete, BackPressureStrategy.DROP)
+        Multi.createFrom().<Integer> emitter(MultiEmitter::complete, BackPressureStrategy.DROP)
                 .subscribe().withSubscriber(MultiAssertSubscriber.create(20))
                 .assertCompletedSuccessfully()
                 .assertHasNotReceivedAnyItem();
 
-        Multi.createFrom().<Integer>emitter(emitter -> {
+        Multi.createFrom().<Integer> emitter(emitter -> {
             IntStream.range(0, 1000).forEach(emitter::emit);
             emitter.fail(new IOException("boom"));
         }, BackPressureStrategy.DROP).subscribe()
@@ -374,7 +377,8 @@ public class MultiCreateFromEmitterTest {
 
     @Test
     public void testErrorBackPressureBehavior() {
-        Multi<Integer> multi = Multi.createFrom().emitter(e -> e.emit(1).emit(2).emit(3).complete(), BackPressureStrategy.ERROR);
+        Multi<Integer> multi = Multi.createFrom().emitter(e -> e.emit(1).emit(2).emit(3).complete(),
+                BackPressureStrategy.ERROR);
 
         multi.subscribe().withSubscriber(MultiAssertSubscriber.create(1))
                 .assertSubscribed()
@@ -392,4 +396,3 @@ public class MultiCreateFromEmitterTest {
                 .assertHasNotReceivedAnyItem();
     }
 }
-

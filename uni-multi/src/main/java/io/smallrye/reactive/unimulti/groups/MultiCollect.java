@@ -1,8 +1,6 @@
 package io.smallrye.reactive.unimulti.groups;
 
-import io.smallrye.reactive.unimulti.Multi;
-import io.smallrye.reactive.unimulti.Uni;
-import io.smallrye.reactive.unimulti.operators.MultiCollector;
+import static io.smallrye.reactive.unimulti.helpers.ParameterValidation.nonNull;
 
 import java.util.Collection;
 import java.util.List;
@@ -12,7 +10,9 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collector;
 
-import static io.smallrye.reactive.unimulti.helpers.ParameterValidation.nonNull;
+import io.smallrye.reactive.unimulti.Multi;
+import io.smallrye.reactive.unimulti.Uni;
+import io.smallrye.reactive.unimulti.operators.MultiCollector;
 
 public class MultiCollect<T> {
 
@@ -63,8 +63,8 @@ public class MultiCollect<T> {
      * The collector behaves the same way as on a Java stream.
      *
      * @param collector the {@link Collector}, must not be {@code null}
-     * @param <A>       the accumulation type
-     * @param <X>       the item type
+     * @param <A> the accumulation type
+     * @param <X> the item type
      * @return a {@link Uni} emitted the collected object as item, when the {@link Multi} completes
      */
     public <X, A> Uni<X> with(Collector<? super T, A, ? extends X> collector) {
@@ -83,11 +83,11 @@ public class MultiCollect<T> {
      * items have been collected.
      * If the {@link Multi} is empty, the supplied container is returned <em>empty</em>
      *
-     * @param supplier    the supplier of the container instance, called at Subscription time. Must not be {@code null}.
-     *                    Must not produce {@code null}
+     * @param supplier the supplier of the container instance, called at Subscription time. Must not be {@code null}.
+     *        Must not produce {@code null}
      * @param accumulator a consumer called on every item with the container instance and the item. It should
-     *                    <em>add</em> the item into the container. Must not be {@code null}
-     * @param <X>         the type of the container produced by the supplier.
+     *        <em>add</em> the item into the container. Must not be {@code null}
+     * @param <X> the type of the container produced by the supplier.
      * @return a {@link Uni} emitting the collected container as item when this {@link Multi} completes
      */
     public <X> Uni<X> in(Supplier<X> supplier, BiConsumer<X, T> accumulator) {
@@ -95,7 +95,7 @@ public class MultiCollect<T> {
     }
 
     /**
-     * Produces an {@link Uni} emitting a {@link Map} of <code>key -&gt; item</code>  for each item emitted by this
+     * Produces an {@link Uni} emitting a {@link Map} of <code>key -&gt; item</code> for each item emitted by this
      * {@link Multi}. The collected map is emitted by the produced {@link Uni} when the {@link Multi} fires the
      * completion event.
      * <p>
@@ -103,17 +103,17 @@ public class MultiCollect<T> {
      * the associated value will be the most recently emitted item.
      *
      * @param keyMapper a {@link Function} to map item to a key for the {@link Map}. Must not be {@code null},
-     *                  must not produce {@code null}
-     * @param <K>       the type of the key extracted from each item emitted by this {@link Multi}
+     *        must not produce {@code null}
+     * @param <K> the type of the key extracted from each item emitted by this {@link Multi}
      * @return a {@link Uni} emitting an item with the collected {@link Map}. The uni emits the item when this
-     * {@link Multi} completes
+     *         {@link Multi} completes
      */
     public <K> Uni<Map<K, T>> asMap(Function<? super T, ? extends K> keyMapper) {
         return asMap(keyMapper, Function.identity());
     }
 
     /**
-     * Produces an {@link Uni} emitting a {@link Map} of <code>key -&gt; mapped item</code>  for each item emitted by
+     * Produces an {@link Uni} emitting a {@link Map} of <code>key -&gt; mapped item</code> for each item emitted by
      * this {@link Multi}. The collected map is emitted by the produced {@link Uni} when the {@link Multi} fires the
      * completion event.
      * <p>
@@ -121,14 +121,14 @@ public class MultiCollect<T> {
      * the associated value will be the most recently emitted item. The value is computed by applying the
      * {@code valueMapper} function.
      *
-     * @param keyMapper   a {@link Function} to map item to a key for the {@link Map}. Must not be {@code null},
-     *                    must not produce {@code null}
+     * @param keyMapper a {@link Function} to map item to a key for the {@link Map}. Must not be {@code null},
+     *        must not produce {@code null}
      * @param valueMapper a {@link Function} to map item to a value for the {@link Map}. Must not be {@code null},
-     *                    must not produce {@code null}
-     * @param <K>         the type of the key extracted from each item emitted by this {@link Multi}
-     * @param <V>         the type of the value extracted from each item emitted by this {@link Multi}
+     *        must not produce {@code null}
+     * @param <K> the type of the key extracted from each item emitted by this {@link Multi}
+     * @param <V> the type of the value extracted from each item emitted by this {@link Multi}
      * @return a {@link Uni} emitting an item with the collected {@link Map}. The uni emits the item when this
-     * {@link Multi} completes
+     *         {@link Multi} completes
      */
     public <K, V> Uni<Map<K, V>> asMap(Function<? super T, ? extends K> keyMapper,
             Function<? super T, ? extends V> valueMapper) {
@@ -136,7 +136,7 @@ public class MultiCollect<T> {
     }
 
     /**
-     * Produces an {@link Uni} emitting a {@link Map} of <code>key -&gt; Collection of mapped values</code>  for each
+     * Produces an {@link Uni} emitting a {@link Map} of <code>key -&gt; Collection of mapped values</code> for each
      * item emitted by this {@link Multi}. The collected map is emitted by the produced {@link Uni} when the
      * {@link Multi} fires the completion event.
      * <p>
@@ -144,14 +144,14 @@ public class MultiCollect<T> {
      * The value is a collection containing all the values mapped to the specific key. The value is computed
      * by applying the {@code valueMapper} function.
      *
-     * @param keyMapper   a {@link Function} to map item to a key for the {@link Map}. Must not be {@code null},
-     *                    must not produce {@code null}
+     * @param keyMapper a {@link Function} to map item to a key for the {@link Map}. Must not be {@code null},
+     *        must not produce {@code null}
      * @param valueMapper a {@link Function} to map item to a value for the {@link Map}. Must not be {@code null},
-     *                    must not produce {@code null}
-     * @param <K>         the type of the key extracted from each item emitted by this {@link Multi}
-     * @param <V>         the type of the value extracted from each item emitted by this {@link Multi}
+     *        must not produce {@code null}
+     * @param <K> the type of the key extracted from each item emitted by this {@link Multi}
+     * @param <V> the type of the value extracted from each item emitted by this {@link Multi}
      * @return a {@link Uni} emitting an item with the collected {@link Map}. The uni emits the item when this
-     * {@link Multi} completes
+     *         {@link Multi} completes
      */
     public <K, V> Uni<Map<K, Collection<V>>> asMultiMap(Function<? super T, ? extends K> keyMapper,
             Function<? super T, ? extends V> valueMapper) {
@@ -159,7 +159,7 @@ public class MultiCollect<T> {
     }
 
     /**
-     * Produces an {@link Uni} emitting a {@link Map} of <code>key -&gt; Collection of items</code>  for each
+     * Produces an {@link Uni} emitting a {@link Map} of <code>key -&gt; Collection of items</code> for each
      * item emitted by this {@link Multi}. The collected map is emitted by the produced {@link Uni} when the
      * {@link Multi} fires the completion event.
      * <p>
@@ -167,10 +167,10 @@ public class MultiCollect<T> {
      * The value is a collection containing all the items emitted associated to the specific key.
      *
      * @param keyMapper a {@link Function} to map item to a key for the {@link Map}.Must not be {@code null},
-     *                  must not produce {@code null}
-     * @param <K>       the type of the key extracted from each item emitted by this {@link Multi}
+     *        must not produce {@code null}
+     * @param <K> the type of the key extracted from each item emitted by this {@link Multi}
      * @return a {@link Uni} emitting an item with the collected {@link Map}. The uni emits the item when this
-     * {@link Multi} completes
+     *         {@link Multi} completes
      */
     public <K> Uni<Map<K, Collection<T>>> asMultiMap(Function<? super T, ? extends K> keyMapper) {
         return MultiCollector.multimap(upstream, keyMapper, Function.identity());

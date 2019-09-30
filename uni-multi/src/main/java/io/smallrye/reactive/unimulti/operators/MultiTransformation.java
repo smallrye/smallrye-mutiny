@@ -1,8 +1,6 @@
 package io.smallrye.reactive.unimulti.operators;
 
-import io.reactivex.Flowable;
-import io.smallrye.reactive.unimulti.Multi;
-import org.reactivestreams.Publisher;
+import static io.smallrye.reactive.unimulti.operators.MultiCollector.getFlowable;
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -11,7 +9,10 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 
-import static io.smallrye.reactive.unimulti.operators.MultiCollector.getFlowable;
+import org.reactivestreams.Publisher;
+
+import io.reactivex.Flowable;
+import io.smallrye.reactive.unimulti.Multi;
 
 public class MultiTransformation {
 
@@ -60,7 +61,7 @@ public class MultiTransformation {
     }
 
     public static <T> Multi<T> merge(Multi<T> upstream, Publisher<T>... publishers) {
-       return merge(upstream, Arrays.asList(publishers));
+        return merge(upstream, Arrays.asList(publishers));
     }
 
     public static <T> Multi<T> merge(Multi<T> upstream, Iterable<Publisher<T>> iterable) {
@@ -70,6 +71,5 @@ public class MultiTransformation {
         Flowable<T> merged = Flowable.merge(list);
         return new DefaultMulti<>(merged);
     }
-
 
 }

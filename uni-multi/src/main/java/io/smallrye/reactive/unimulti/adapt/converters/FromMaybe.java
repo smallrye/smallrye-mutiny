@@ -12,8 +12,7 @@ public class FromMaybe<T> implements UniConverter<Maybe<T>, T> {
             Disposable disposable = instance.subscribe(
                     sink::complete,
                     sink::fail,
-                    () -> sink.complete(null)
-            );
+                    () -> sink.complete(null));
 
             sink.onTermination(() -> {
                 if (!disposable.isDisposed()) {

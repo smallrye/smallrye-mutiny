@@ -1,13 +1,13 @@
 package io.smallrye.reactive.unimulti.operators.flowable;
 
-import org.reactivestreams.Subscriber;
-import org.reactivestreams.Subscription;
+import static io.smallrye.reactive.unimulti.helpers.EmptyUniSubscription.CANCELLED;
 
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
-import static io.smallrye.reactive.unimulti.helpers.EmptyUniSubscription.CANCELLED;
+import org.reactivestreams.Subscriber;
+import org.reactivestreams.Subscription;
 
 @SuppressWarnings("SubscriberImplementation")
 public class CollectorSubscriber<T, A, R> implements Subscriber<T>, Subscription {

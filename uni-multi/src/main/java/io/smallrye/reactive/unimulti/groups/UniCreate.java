@@ -1,19 +1,20 @@
 package io.smallrye.reactive.unimulti.groups;
 
-import io.smallrye.reactive.unimulti.Multi;
-import io.smallrye.reactive.unimulti.Uni;
-import io.smallrye.reactive.unimulti.infrastructure.Infrastructure;
-import io.smallrye.reactive.unimulti.subscription.UniEmitter;
-import io.smallrye.reactive.unimulti.subscription.UniSubscriber;
-import io.smallrye.reactive.unimulti.helpers.ParameterValidation;
-import io.smallrye.reactive.unimulti.operators.*;
-import org.reactivestreams.Publisher;
-
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+
+import org.reactivestreams.Publisher;
+
+import io.smallrye.reactive.unimulti.Multi;
+import io.smallrye.reactive.unimulti.Uni;
+import io.smallrye.reactive.unimulti.helpers.ParameterValidation;
+import io.smallrye.reactive.unimulti.infrastructure.Infrastructure;
+import io.smallrye.reactive.unimulti.operators.*;
+import io.smallrye.reactive.unimulti.subscription.UniEmitter;
+import io.smallrye.reactive.unimulti.subscription.UniSubscriber;
 
 /**
  * Group methods allowing to create {@link Uni} instances from various sources.
@@ -28,7 +29,7 @@ public class UniCreate {
 
     /**
      * Creates a {@link Uni} from the given {@link CompletionStage} or {@link CompletableFuture}.
-     * The produced {@code Uni} emits the item of the passed  {@link CompletionStage}. If the {@link CompletionStage}
+     * The produced {@code Uni} emits the item of the passed {@link CompletionStage}. If the {@link CompletionStage}
      * never completes (or failed), the produced {@link Uni} would not emit the {@code item} or {@code failure}
      * events.
      * <p>
@@ -41,7 +42,7 @@ public class UniCreate {
      * by the passed {@link CompletionStage}.
      *
      * @param stage the stage, must not be {@code null}
-     * @param <T>   the type of item
+     * @param <T> the type of item
      * @return the produced {@link Uni}
      */
     public <T> Uni<T> completionStage(CompletionStage<? extends T> stage) {
@@ -53,7 +54,7 @@ public class UniCreate {
      * Creates a {@link Uni} from the given {@link CompletionStage} or {@link CompletableFuture}. The future is
      * created by invoking the passed {@link Supplier} <strong>lazily</strong> at subscription time.
      * <p>
-     * The produced {@code Uni} emits the item of the passed  {@link CompletionStage}. If the {@link CompletionStage}
+     * The produced {@code Uni} emits the item of the passed {@link CompletionStage}. If the {@link CompletionStage}
      * never completes (or failed), the produced {@link Uni} would not emit an item or a failure.
      * <p>
      * Cancelling the subscription on the produced {@link Uni} cancels the passed {@link CompletionStage}
@@ -64,11 +65,11 @@ public class UniCreate {
      * immediately after subscription. If it's not the case the subscriber's callbacks are called on the thread used
      * by the passed {@link CompletionStage}.
      * <p>
-     * If the supplier throws an exception, a failure event with the exception  is fired. If the supplier produces
+     * If the supplier throws an exception, a failure event with the exception is fired. If the supplier produces
      * {@code null}, a failure event containing a {@link NullPointerException} is fired.
      *
      * @param supplier the supplier, must not be {@code null}, must not produce {@code null}
-     * @param <T>      the type of item
+     * @param <T> the type of item
      * @return the produced {@link Uni}
      */
     public <T> Uni<T> deferredCompletionStage(Supplier<? extends CompletionStage<? extends T>> supplier) {
@@ -91,7 +92,7 @@ public class UniCreate {
      * If the Uni's observer cancels its subscription, the subscription to the {@link Publisher} is also cancelled.
      *
      * @param publisher the publisher, must not be {@code null}
-     * @param <T>       the type of item
+     * @param <T> the type of item
      * @return the produced {@link Uni}
      */
     public <T> Uni<T> publisher(Publisher<? extends T> publisher) {
@@ -105,11 +106,11 @@ public class UniCreate {
      * {@link Supplier}. Unlike {@link #deferred(Supplier)}, the supplier produces an item and not an {@link Uni}.
      * <p>
      * If the supplier produces {@code null}, {@code null} is used as item event.
-     * If the supplier throws an exception, a failure event with the exception  is fired. If the supplier produces
+     * If the supplier throws an exception, a failure event with the exception is fired. If the supplier produces
      * {@code null}, a failure event containing a {@link NullPointerException} is fired.
      *
      * @param supplier the item supplier, must not be {@code null}, can produce {@code null}
-     * @param <T>      the type of item
+     * @param <T> the type of item
      * @return the new {@link Uni}
      */
     public <T> Uni<T> deferredItem(Supplier<? extends T> supplier) {
@@ -132,7 +133,7 @@ public class UniCreate {
      * {@code null}) item.
      *
      * @param item the item, can be {@code null}
-     * @param <T>  the type of item
+     * @param <T> the type of item
      * @return the new {@link Uni}
      */
     public <T> Uni<T> item(T item) {
@@ -144,7 +145,7 @@ public class UniCreate {
      * contained in the given optional if {@link Optional#isPresent()} or {@code null} otherwise.
      *
      * @param optional the optional, must not be {@code null}
-     * @param <T>      the type of the produced item
+     * @param <T> the type of the produced item
      * @return the new {@link Uni}
      */
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
@@ -158,11 +159,11 @@ public class UniCreate {
      * contained in the given optional if {@link Optional#isPresent()} or {@code null} otherwise. Unlike
      * {@link #optional(Optional)}, the passed {@link Supplier} is called lazily at subscription time.
      * <p>
-     * If the supplier throws an exception, a failure event with the exception  is fired. If the supplier produces
+     * If the supplier throws an exception, a failure event with the exception is fired. If the supplier produces
      * {@code null}, a failure event containing a {@link NullPointerException} is fired.
      *
      * @param supplier the supplier, must not be {@code null}, must not return {@code null}
-     * @param <T>      the type of the produced item
+     * @param <T> the type of the produced item
      * @return the new {@link Uni}
      */
     public <T> Uni<T> deferredOptional(Supplier<Optional<T>> supplier) {
@@ -184,8 +185,8 @@ public class UniCreate {
      * fired.
      *
      * @param consumer callback receiving the {@link UniEmitter} and events downstream. The callback is
-     *                 called for each subscriber (at subscription time). Must not be {@code null}
-     * @param <T>      the type of item
+     *        called for each subscriber (at subscription time). Must not be {@code null}
+     * @param <T> the type of item
      * @return the produced {@link Uni}
      */
     public <T> Uni<T> emitter(Consumer<UniEmitter<? super T>> consumer) {
@@ -203,11 +204,11 @@ public class UniCreate {
      * <p>
      * Unlike {@link #deferredItem(Supplier)}, the supplier produces an {@link Uni} (and not an item).
      * <p>
-     * If the supplier throws an exception, a failure event with the exception  is fired. If the supplier produces
+     * If the supplier throws an exception, a failure event with the exception is fired. If the supplier produces
      * {@code null}, a failure event containing a {@link NullPointerException} is fired.
      *
      * @param supplier the supplier, must not be {@code null}, must not produce {@code null}
-     * @param <T>      the type of item
+     * @param <T> the type of item
      * @return the produced {@link Uni}
      */
     public <T> Uni<T> deferred(Supplier<? extends Uni<? extends T>> supplier) {
@@ -219,8 +220,8 @@ public class UniCreate {
      * Creates a {@link Uni} that emits a {@code failure} event immediately after being subscribed to.
      *
      * @param failure the failure to be fired, must not be {@code null}
-     * @param <T>     the virtual type of item used by the {@link Uni}, must be explicitly set as in
-     *                {@code Uni.<String>failed(exception);}
+     * @param <T> the virtual type of item used by the {@link Uni}, must be explicitly set as in
+     *        {@code Uni.<String>failed(exception);}
      * @return the produced {@link Uni}
      */
     public <T> Uni<T> failure(Throwable failure) {
@@ -235,8 +236,8 @@ public class UniCreate {
      * If the supplier produces {@code null}, a {@code failure} event is fired with a {@link NullPointerException}.
      *
      * @param supplier the supplier producing the failure, must not be {@code null}, must not produce {@code null}
-     * @param <T>      the virtual type of item used by the {@link Uni}, must be explicitly set as in
-     *                 {@code Uni.<String>failed(exception);}
+     * @param <T> the virtual type of item used by the {@link Uni}, must be explicitly set as in
+     *        {@code Uni.<String>failed(exception);}
      * @return the produced {@link Uni}
      */
     public <T> Uni<T> deferredFailure(Supplier<Throwable> supplier) {
@@ -287,7 +288,7 @@ public class UniCreate {
      * also cancelled.
      *
      * @param multi the multi, must not be {@code null}
-     * @param <T>   the type of item
+     * @param <T> the type of item
      * @return the produced {@link Uni}
      */
     public <T> Uni<T> multi(Multi<T> multi) {

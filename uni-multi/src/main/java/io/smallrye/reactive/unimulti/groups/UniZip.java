@@ -1,10 +1,10 @@
 package io.smallrye.reactive.unimulti.groups;
 
+import java.util.Arrays;
+
 import io.smallrye.reactive.unimulti.CompositeException;
 import io.smallrye.reactive.unimulti.Uni;
 import io.smallrye.reactive.unimulti.tuples.*;
-
-import java.util.Arrays;
 
 /**
  * Combines several {@link Uni} into a new {@link Uni} that will fire an item event when all {@link Uni} are
@@ -33,8 +33,8 @@ public class UniZip {
      * {@link Uni unis} fire a failure, the propagated failure is a {@link CompositeException} wrapping all the
      * collected failures.
      *
-     * @param u1   the first uni, must not be {@code null}
-     * @param u2   the second uni, must not be {@code null}
+     * @param u1 the first uni, must not be {@code null}
+     * @param u2 the second uni, must not be {@code null}
      * @param <T1> the type of the item for the first uni
      * @param <T2> the type of the item for the second uni
      * @return an {@link UniAndGroup2} to configure the combination
@@ -54,9 +54,9 @@ public class UniZip {
      * {@link Uni unis} fire a failure, the propagated failure is a {@link CompositeException} wrapping all the
      * collected failures.
      *
-     * @param u1   the first uni to be combined, must not be {@code null}
-     * @param u2   the second uni to be combined, must not be {@code null}
-     * @param u3   the third uni to be combined, must not be {@code null}
+     * @param u1 the first uni to be combined, must not be {@code null}
+     * @param u2 the second uni to be combined, must not be {@code null}
+     * @param u3 the third uni to be combined, must not be {@code null}
      * @param <T1> the type of the item for the first uni
      * @param <T2> the type of the item for the second uni
      * @param <T3> the type of the item for the third uni
@@ -78,10 +78,10 @@ public class UniZip {
      * {@link Uni unis} fire a failure, the propagated failure is a {@link CompositeException} wrapping all the
      * collected failures.
      *
-     * @param u1   the first uni to be combined, must not be {@code null}
-     * @param u2   the second uni to be combined, must not be {@code null}
-     * @param u3   the third uni to be combined, must not be {@code null}
-     * @param u4   the fourth uni to be combined, must not be {@code null}
+     * @param u1 the first uni to be combined, must not be {@code null}
+     * @param u2 the second uni to be combined, must not be {@code null}
+     * @param u3 the third uni to be combined, must not be {@code null}
+     * @param u4 the fourth uni to be combined, must not be {@code null}
      * @param <T1> the type of the item for the first uni
      * @param <T2> the type of the item for the second uni
      * @param <T3> the type of the item for the third uni
@@ -104,11 +104,11 @@ public class UniZip {
      * {@link Uni unis} fire a failure, the propagated failure is a {@link CompositeException} wrapping all the
      * collected failures.
      *
-     * @param u1   the first uni to be combined, must not be {@code null}
-     * @param u2   the second uni to be combined, must not be {@code null}
-     * @param u3   the third uni to be combined, must not be {@code null}
-     * @param u4   the fourth uni to be combined, must not be {@code null}
-     * @param u5   the fifth uni to be combined, must not be {@code null}
+     * @param u1 the first uni to be combined, must not be {@code null}
+     * @param u2 the second uni to be combined, must not be {@code null}
+     * @param u3 the third uni to be combined, must not be {@code null}
+     * @param u4 the fourth uni to be combined, must not be {@code null}
+     * @param u5 the fifth uni to be combined, must not be {@code null}
      * @param <T1> the type of the item for the first uni
      * @param <T2> the type of the item for the second uni
      * @param <T3> the type of the item for the third uni

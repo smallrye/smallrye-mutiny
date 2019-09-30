@@ -1,9 +1,10 @@
 package io.smallrye.reactive.unimulti.operators;
 
-import io.smallrye.reactive.unimulti.Multi;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import org.junit.Test;
 
-import java.util.concurrent.atomic.AtomicInteger;
+import io.smallrye.reactive.unimulti.Multi;
 
 public class MultiCreateFromDeferredSupplierTest {
 
@@ -16,7 +17,7 @@ public class MultiCreateFromDeferredSupplierTest {
     public void testWhenTheSupplierProduceNull() {
         MultiAssertSubscriber<Integer> ts = MultiAssertSubscriber.create();
 
-        Multi.createFrom().<Integer>deferred(() -> null).subscribe(ts);
+        Multi.createFrom().<Integer> deferred(() -> null).subscribe(ts);
 
         ts
                 .assertHasNotCompleted()
@@ -28,7 +29,7 @@ public class MultiCreateFromDeferredSupplierTest {
     public void testWhenTheSupplierThrowsAnException() {
         MultiAssertSubscriber<Integer> ts = MultiAssertSubscriber.create();
 
-        Multi.createFrom().<Integer>deferred(() -> {
+        Multi.createFrom().<Integer> deferred(() -> {
             throw new IllegalStateException("boom");
         }).subscribe(ts);
 
@@ -53,8 +54,7 @@ public class MultiCreateFromDeferredSupplierTest {
     public void testThatEachSubscriberHasItsOwn() {
         AtomicInteger count = new AtomicInteger();
 
-        Multi<Integer> multi =
-                Multi.createFrom().deferred(() -> Multi.createFrom().item(count.incrementAndGet()));
+        Multi<Integer> multi = Multi.createFrom().deferred(() -> Multi.createFrom().item(count.incrementAndGet()));
 
         MultiAssertSubscriber<Integer> s1 = multi.subscribe().withSubscriber(MultiAssertSubscriber.create(1));
         MultiAssertSubscriber<Integer> s2 = multi.subscribe().withSubscriber(MultiAssertSubscriber.create(1));

@@ -1,13 +1,13 @@
 package io.smallrye.reactive.unimulti.groups;
 
-import io.smallrye.reactive.unimulti.TimeoutException;
-import io.smallrye.reactive.unimulti.Uni;
-import io.smallrye.reactive.unimulti.operators.UniBlockingAwait;
+import static io.smallrye.reactive.unimulti.helpers.ParameterValidation.nonNull;
 
 import java.time.Duration;
 import java.util.Optional;
 
-import static io.smallrye.reactive.unimulti.helpers.ParameterValidation.nonNull;
+import io.smallrye.reactive.unimulti.TimeoutException;
+import io.smallrye.reactive.unimulti.Uni;
+import io.smallrye.reactive.unimulti.operators.UniBlockingAwait;
 
 /**
  * Likes {@link UniAwait} but wrapping the item event into an {@link Optional}. This optional is empty if the
@@ -36,7 +36,7 @@ public class UniAwaitOptional<T> {
      * Note that each call to this method triggers a new subscription.
      *
      * @return the item from the {@link Uni} wrapped into an {@link Optional}, empty if the {@link Uni} is resolved
-     * with {@code null}
+     *         with {@code null}
      */
     public Optional<T> indefinitely() {
         return atMost(null);

@@ -1,9 +1,9 @@
 package io.smallrye.reactive.unimulti.operators;
 
+import java.util.concurrent.CompletableFuture;
+
 import io.smallrye.reactive.unimulti.subscription.UniSubscriber;
 import io.smallrye.reactive.unimulti.subscription.UniSubscription;
-
-import java.util.concurrent.CompletableFuture;
 
 public class UniAssertSubscriber<T> implements UniSubscriber<T> {
     private final boolean cancelImmediatelyOnSubscription;

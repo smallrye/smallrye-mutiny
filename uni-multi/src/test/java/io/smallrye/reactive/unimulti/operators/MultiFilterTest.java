@@ -1,13 +1,14 @@
 package io.smallrye.reactive.unimulti.operators;
 
-import io.smallrye.reactive.unimulti.Multi;
-import io.smallrye.reactive.unimulti.Uni;
-import org.junit.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.Test;
+
+import io.smallrye.reactive.unimulti.Multi;
+import io.smallrye.reactive.unimulti.Uni;
 
 public class MultiFilterTest {
 
@@ -37,8 +38,7 @@ public class MultiFilterTest {
         assertThat(Multi.createFrom().range(1, 4)
                 .onItem()
                 .testWith(x -> Uni.createFrom()
-                        .deferredCompletionStage(() -> CompletableFuture.supplyAsync(() -> x % 2 != 0))
-                )
+                        .deferredCompletionStage(() -> CompletableFuture.supplyAsync(() -> x % 2 != 0)))
                 .collect().asList()
                 .await().indefinitely()).containsExactly(1, 3);
     }

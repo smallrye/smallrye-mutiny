@@ -1,21 +1,21 @@
 package io.smallrye.reactive.unimulti.operators;
 
-import io.smallrye.reactive.unimulti.Multi;
-import io.smallrye.reactive.unimulti.groups.MultiRetry;
-import org.junit.Test;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.awaitility.Awaitility.await;
+import org.junit.Test;
+
+import io.smallrye.reactive.unimulti.Multi;
+import io.smallrye.reactive.unimulti.groups.MultiRetry;
 
 public class MultiOnFailureRetryTest {
 
     private AtomicInteger numberOfSubscriptions = new AtomicInteger();
     private Multi<Integer> failing = Multi.createFrom()
-            .<Integer>emitter(emitter ->
-                    emitter.emit(1).emit(2).emit(3).fail(new IOException("boom")))
+            .<Integer> emitter(emitter -> emitter.emit(1).emit(2).emit(3).fail(new IOException("boom")))
             .on().subscription(s -> numberOfSubscriptions.incrementAndGet());
 
     @Test(expected = IllegalArgumentException.class)
@@ -109,10 +109,10 @@ public class MultiOnFailureRetryTest {
 
         Multi.createFrom().items(1, 2, 3, 4)
                 .onItem().consume(i -> {
-            if (count.getAndIncrement() < 2) {
-                throw new RuntimeException("boom");
-            }
-        })
+                    if (count.getAndIncrement() < 2) {
+                        throw new RuntimeException("boom");
+                    }
+                })
                 .onFailure().retry().atMost(2)
                 .subscribe().withSubscriber(MultiAssertSubscriber.create(10))
                 .assertCompletedSuccessfully()

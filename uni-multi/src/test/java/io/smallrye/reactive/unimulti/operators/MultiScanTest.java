@@ -1,7 +1,8 @@
 package io.smallrye.reactive.unimulti.operators;
 
-import io.smallrye.reactive.unimulti.Multi;
 import org.junit.Test;
+
+import io.smallrye.reactive.unimulti.Multi;
 
 public class MultiScanTest {
 
@@ -73,8 +74,8 @@ public class MultiScanTest {
 
         Multi.createFrom().range(1, 10)
                 .onItem().scan((a, b) -> {
-            throw new IllegalArgumentException("boom");
-        })
+                    throw new IllegalArgumentException("boom");
+                })
                 .subscribe().withSubscriber(subscriber);
 
         subscriber.assertReceived(1)
@@ -99,8 +100,8 @@ public class MultiScanTest {
 
         Multi.createFrom().range(1, 10)
                 .onItem().scan(() -> 1, (a, b) -> {
-            throw new IllegalArgumentException("boom");
-        })
+                    throw new IllegalArgumentException("boom");
+                })
                 .subscribe().withSubscriber(subscriber);
 
         subscriber.assertReceived(1)

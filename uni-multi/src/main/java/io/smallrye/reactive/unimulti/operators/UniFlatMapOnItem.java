@@ -1,16 +1,17 @@
 package io.smallrye.reactive.unimulti.operators;
 
-import io.smallrye.reactive.unimulti.Uni;
-import io.smallrye.reactive.unimulti.helpers.EmptyUniSubscription;
-import io.smallrye.reactive.unimulti.subscription.UniSubscriber;
-import io.smallrye.reactive.unimulti.subscription.UniSubscription;
-import org.reactivestreams.Subscription;
+import static io.smallrye.reactive.unimulti.helpers.ParameterValidation.MAPPER_RETURNED_NULL;
+import static io.smallrye.reactive.unimulti.helpers.ParameterValidation.nonNull;
 
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
-import static io.smallrye.reactive.unimulti.helpers.ParameterValidation.MAPPER_RETURNED_NULL;
-import static io.smallrye.reactive.unimulti.helpers.ParameterValidation.nonNull;
+import org.reactivestreams.Subscription;
+
+import io.smallrye.reactive.unimulti.Uni;
+import io.smallrye.reactive.unimulti.helpers.EmptyUniSubscription;
+import io.smallrye.reactive.unimulti.subscription.UniSubscriber;
+import io.smallrye.reactive.unimulti.subscription.UniSubscription;
 
 public class UniFlatMapOnItem<I, O> extends UniOperator<I, O> {
 

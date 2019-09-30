@@ -1,16 +1,16 @@
 package io.smallrye.reactive.unimulti.groups;
 
+import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
+
 import io.smallrye.reactive.unimulti.Uni;
+import io.smallrye.reactive.unimulti.helpers.ParameterValidation;
 import io.smallrye.reactive.unimulti.helpers.UniCallbackSubscriber;
 import io.smallrye.reactive.unimulti.operators.AbstractUni;
 import io.smallrye.reactive.unimulti.operators.UniSerializedSubscriber;
 import io.smallrye.reactive.unimulti.operators.UniSubscribeToCompletionStage;
 import io.smallrye.reactive.unimulti.subscription.UniSubscriber;
 import io.smallrye.reactive.unimulti.subscription.UniSubscription;
-import io.smallrye.reactive.unimulti.helpers.ParameterValidation;
-
-import java.util.concurrent.CompletableFuture;
-import java.util.function.Consumer;
 
 /**
  * Allow subscribing to a {@link Uni} to be notified of the different events coming from {@code upstream}.
@@ -41,7 +41,7 @@ public class UniSubscribe<T> {
      * receiving by {@link UniSubscriber#onFailure(Throwable)}.
      *
      * @param subscriber the subscriber, must not be {@code null}
-     * @param <S>        the type of subscriber returned
+     * @param <S> the type of subscriber returned
      * @return the passed subscriber
      */
     public <S extends UniSubscriber<? super T>> S withSubscriber(S subscriber) {
@@ -56,16 +56,15 @@ public class UniSubscribe<T> {
      * Unlike {@link #withSubscriber(UniSubscriber)}, this method returns the subscription that can be used to cancel
      * the subscription.
      *
-     * @param onResultCallback  callback invoked when the an item event is received, potentially called w
-     *                          ith {@code null} is received. The callback must not be {@code null}
+     * @param onResultCallback callback invoked when the an item event is received, potentially called w
+     *        ith {@code null} is received. The callback must not be {@code null}
      * @param onFailureCallback callback invoked when a failure event is received, must not be {@code null}
      * @return the subscription
      */
     public UniSubscription with(Consumer<? super T> onResultCallback, Consumer<? super Throwable> onFailureCallback) {
         UniCallbackSubscriber<T> subscriber = new UniCallbackSubscriber<>(
                 ParameterValidation.nonNull(onResultCallback, "onResultCallback"),
-                ParameterValidation.nonNull(onFailureCallback, "onFailureCallback")
-        );
+                ParameterValidation.nonNull(onFailureCallback, "onFailureCallback"));
         withSubscriber(subscriber);
         return subscriber;
     }
@@ -75,7 +74,7 @@ public class UniSubscribe<T> {
      * item (potentially {@code null}) and allow chaining operations.
      *
      * @return a {@link CompletableFuture} to retrieve the item and chain operations on the resolved item or
-     * failure. The returned {@link CompletableFuture} can also be used to cancel the computation.
+     *         failure. The returned {@link CompletableFuture} can also be used to cancel the computation.
      */
     public CompletableFuture<T> asCompletionStage() {
         return UniSubscribeToCompletionStage.subscribe(upstream);

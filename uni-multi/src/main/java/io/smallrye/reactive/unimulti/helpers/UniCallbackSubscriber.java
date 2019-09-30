@@ -1,15 +1,16 @@
 package io.smallrye.reactive.unimulti.helpers;
 
-import io.smallrye.reactive.unimulti.Uni;
-import io.smallrye.reactive.unimulti.subscription.UniSubscriber;
-import io.smallrye.reactive.unimulti.subscription.UniSubscription;
-import org.reactivestreams.Subscription;
+import static io.smallrye.reactive.unimulti.helpers.EmptyUniSubscription.CANCELLED;
+import static io.smallrye.reactive.unimulti.helpers.ParameterValidation.nonNull;
 
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
-import static io.smallrye.reactive.unimulti.helpers.EmptyUniSubscription.CANCELLED;
-import static io.smallrye.reactive.unimulti.helpers.ParameterValidation.nonNull;
+import org.reactivestreams.Subscription;
+
+import io.smallrye.reactive.unimulti.Uni;
+import io.smallrye.reactive.unimulti.subscription.UniSubscriber;
+import io.smallrye.reactive.unimulti.subscription.UniSubscription;
 
 /**
  * Implementation of a {@link UniSubscriber} based on callbacks.
@@ -27,7 +28,7 @@ public class UniCallbackSubscriber<T> implements UniSubscriber<T>, UniSubscripti
      * Creates a {@link UniSubscriber} consuming the item and failure of a
      * {@link Uni}.
      *
-     * @param onResultCallback  callback invoked on item event, must not be {@code null}
+     * @param onResultCallback callback invoked on item event, must not be {@code null}
      * @param onFailureCallback callback invoked on failure event, must not be {@code null}
      */
     public UniCallbackSubscriber(Consumer<? super T> onResultCallback,

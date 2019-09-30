@@ -1,12 +1,12 @@
 package io.smallrye.reactive.unimulti.groups;
 
+import java.util.concurrent.Executor;
+
 import io.smallrye.reactive.unimulti.CompositeException;
 import io.smallrye.reactive.unimulti.Uni;
-import io.smallrye.reactive.unimulti.tuples.Tuple2;
 import io.smallrye.reactive.unimulti.tuples.Tuple;
+import io.smallrye.reactive.unimulti.tuples.Tuple2;
 import io.smallrye.reactive.unimulti.tuples.Tuple5;
-
-import java.util.concurrent.Executor;
 
 public class UniCombine {
 
@@ -42,7 +42,7 @@ public class UniCombine {
      * combinator function.
      * <p>
      * If one of the combine {@link Uni} fire a failure, the other unis are cancelled, and the resulting
-     * {@link Uni} fires the failure. If {@code collectFailures()}  is called,
+     * {@link Uni} fires the failure. If {@code collectFailures()} is called,
      * it waits for the completion of all the {@link Uni unis} before propagating the failure event. If more than one
      * {@link Uni} failed, a {@link CompositeException} is fired, wrapping the different collected failures.
      * <p>

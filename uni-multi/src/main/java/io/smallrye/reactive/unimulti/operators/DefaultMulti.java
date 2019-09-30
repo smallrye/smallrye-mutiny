@@ -1,8 +1,8 @@
 package io.smallrye.reactive.unimulti.operators;
 
-import io.reactivex.Flowable;
-
 import static io.smallrye.reactive.unimulti.helpers.ParameterValidation.nonNull;
+
+import io.reactivex.Flowable;
 
 public class DefaultMulti<T> extends AbstractMulti<T> {
 

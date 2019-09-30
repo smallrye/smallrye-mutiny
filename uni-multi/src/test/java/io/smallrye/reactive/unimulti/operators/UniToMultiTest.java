@@ -1,15 +1,16 @@
 package io.smallrye.reactive.unimulti.operators;
 
-import io.smallrye.reactive.unimulti.Multi;
-import io.smallrye.reactive.unimulti.Uni;
-import org.junit.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.Test;
+
+import io.smallrye.reactive.unimulti.Multi;
+import io.smallrye.reactive.unimulti.Uni;
 
 public class UniToMultiTest {
 
@@ -61,7 +62,7 @@ public class UniToMultiTest {
     public void testFromFailure() {
         AtomicInteger count = new AtomicInteger();
         Multi<Integer> multi = Uni.createFrom()
-                .<Integer>deferredFailure(() -> new IOException("boom-" + count.incrementAndGet()))
+                .<Integer> deferredFailure(() -> new IOException("boom-" + count.incrementAndGet()))
                 .toMulti();
         multi.subscribe().withSubscriber(MultiAssertSubscriber.create(1))
                 .assertHasFailedWith(IOException.class, "boom-1");
@@ -87,7 +88,7 @@ public class UniToMultiTest {
     @Test
     public void testWithNoEvents() {
         AtomicBoolean called = new AtomicBoolean();
-        Multi<Void> multi = Uni.createFrom().<Void>nothing()
+        Multi<Void> multi = Uni.createFrom().<Void> nothing()
                 .on().cancellation(() -> called.set(true))
                 .toMulti();
         multi.subscribe().withSubscriber(MultiAssertSubscriber.create(1))
@@ -99,7 +100,7 @@ public class UniToMultiTest {
     @Test
     public void testWithNoEvents2() {
         AtomicBoolean called = new AtomicBoolean();
-        Multi<Void> multi = Multi.createFrom().uni(Uni.createFrom().<Void>nothing()
+        Multi<Void> multi = Multi.createFrom().uni(Uni.createFrom().<Void> nothing()
                 .on().cancellation(() -> called.set(true)));
         multi.subscribe().withSubscriber(MultiAssertSubscriber.create(1))
                 .assertNotTerminated()
@@ -144,7 +145,7 @@ public class UniToMultiTest {
     @Test
     public void testFromAnUniSendingNullResultEventInTheFuture() {
         Multi<Integer> multi = Uni.createFrom()
-                .deferredCompletionStage(() -> CompletableFuture.<Integer>supplyAsync(() -> null)).toMulti();
+                .deferredCompletionStage(() -> CompletableFuture.<Integer> supplyAsync(() -> null)).toMulti();
         multi.subscribe().withSubscriber(MultiAssertSubscriber.create(1))
                 .await()
                 .assertHasNotReceivedAnyItem()

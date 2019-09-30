@@ -1,18 +1,19 @@
 package io.smallrye.reactive.unimulti.operators;
 
-import io.smallrye.reactive.unimulti.Uni;
-import io.smallrye.reactive.unimulti.subscription.UniEmitter;
-import io.smallrye.reactive.unimulti.subscription.UniSubscriber;
-import io.smallrye.reactive.unimulti.subscription.UniSubscription;
-import org.junit.Test;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.fail;
 
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.fail;
+import org.junit.Test;
+
+import io.smallrye.reactive.unimulti.Uni;
+import io.smallrye.reactive.unimulti.subscription.UniEmitter;
+import io.smallrye.reactive.unimulti.subscription.UniSubscriber;
+import io.smallrye.reactive.unimulti.subscription.UniSubscription;
 
 public class UniCreateFromEmitterTest {
     @Test(expected = IllegalArgumentException.class)
@@ -42,8 +43,8 @@ public class UniCreateFromEmitterTest {
     public void testWithOnTerminationActionWithCancellation() {
         UniAssertSubscriber<Integer> subscriber = UniAssertSubscriber.create();
         AtomicInteger onTerminationCalled = new AtomicInteger();
-        Uni.createFrom().<Integer>emitter(emitter ->
-                emitter.onTermination(onTerminationCalled::incrementAndGet)).subscribe().withSubscriber(subscriber);
+        Uni.createFrom().<Integer> emitter(emitter -> emitter.onTermination(onTerminationCalled::incrementAndGet)).subscribe()
+                .withSubscriber(subscriber);
 
         assertThat(onTerminationCalled).hasValue(0);
         subscriber.cancel();
@@ -54,7 +55,7 @@ public class UniCreateFromEmitterTest {
     public void testWithOnTerminationActionWithResult() {
         UniAssertSubscriber<Integer> subscriber = UniAssertSubscriber.create();
         AtomicInteger onTerminationCalled = new AtomicInteger();
-        Uni.createFrom().<Integer>emitter(emitter -> {
+        Uni.createFrom().<Integer> emitter(emitter -> {
             emitter.onTermination(onTerminationCalled::incrementAndGet);
             emitter.complete(1);
         }).subscribe().withSubscriber(subscriber);
@@ -70,7 +71,7 @@ public class UniCreateFromEmitterTest {
     public void testWithOnTerminationActionWithFailure() {
         UniAssertSubscriber<Integer> subscriber = UniAssertSubscriber.create();
         AtomicInteger onTerminationCalled = new AtomicInteger();
-        Uni.createFrom().<Integer>emitter(emitter -> {
+        Uni.createFrom().<Integer> emitter(emitter -> {
             emitter.onTermination(onTerminationCalled::incrementAndGet);
             emitter.fail(new IOException("boom"));
         }).subscribe().withSubscriber(subscriber);
@@ -86,7 +87,7 @@ public class UniCreateFromEmitterTest {
     public void testWithOnTerminationCallback() {
         UniAssertSubscriber<Integer> subscriber = UniAssertSubscriber.create();
         AtomicInteger onTerminationCalled = new AtomicInteger();
-        Uni.createFrom().<Integer>emitter(emitter -> emitter.onTermination(onTerminationCalled::incrementAndGet))
+        Uni.createFrom().<Integer> emitter(emitter -> emitter.onTermination(onTerminationCalled::incrementAndGet))
                 .subscribe().withSubscriber(subscriber);
 
         assertThat(onTerminationCalled).hasValue(0);
@@ -97,7 +98,7 @@ public class UniCreateFromEmitterTest {
     @Test
     public void testWithFailure() {
         UniAssertSubscriber<Integer> subscriber = UniAssertSubscriber.create();
-        Uni.createFrom().<Integer>emitter(emitter -> emitter.fail(new Exception("boom"))).subscribe()
+        Uni.createFrom().<Integer> emitter(emitter -> emitter.fail(new Exception("boom"))).subscribe()
                 .withSubscriber(subscriber);
 
         subscriber.assertFailure(Exception.class, "boom");
@@ -106,7 +107,7 @@ public class UniCreateFromEmitterTest {
     @Test
     public void testWhenTheCallbackThrowsAnException() {
         UniAssertSubscriber<Integer> subscriber = UniAssertSubscriber.create();
-        Uni.createFrom().<Integer>emitter(emitter -> {
+        Uni.createFrom().<Integer> emitter(emitter -> {
             throw new NullPointerException("boom");
         }).subscribe().withSubscriber(subscriber);
 
@@ -118,7 +119,7 @@ public class UniCreateFromEmitterTest {
     public void testThatEmitterIsDisposed() {
         UniAssertSubscriber<Void> subscriber = UniAssertSubscriber.create();
         AtomicReference<UniEmitter<? super Void>> reference = new AtomicReference<>();
-        Uni.createFrom().<Void>emitter(emitter -> {
+        Uni.createFrom().<Void> emitter(emitter -> {
             reference.set(emitter);
             emitter.complete(null);
         }).subscribe().withSubscriber(subscriber);
@@ -131,7 +132,7 @@ public class UniCreateFromEmitterTest {
     @Test
     public void testThatFailuresCannotBeNull() {
         UniAssertSubscriber<Integer> subscriber = UniAssertSubscriber.create();
-        Uni.createFrom().<Integer>emitter(emitter -> emitter.fail(null)).subscribe().withSubscriber(subscriber);
+        Uni.createFrom().<Integer> emitter(emitter -> emitter.fail(null)).subscribe().withSubscriber(subscriber);
 
         subscriber.assertFailure(IllegalArgumentException.class, "");
     }
@@ -140,7 +141,7 @@ public class UniCreateFromEmitterTest {
     public void testFailureThrownBySubscribersOnResult() {
         AtomicBoolean called = new AtomicBoolean();
         AtomicBoolean onTerminationCalled = new AtomicBoolean();
-        Uni.createFrom().<Integer>emitter(emitter -> {
+        Uni.createFrom().<Integer> emitter(emitter -> {
             emitter.onTermination(() -> onTerminationCalled.set(true));
             try {
                 emitter.complete(1);
@@ -151,21 +152,21 @@ public class UniCreateFromEmitterTest {
         })
                 .subscribe().withSubscriber(new UniSubscriber<Integer>() {
 
-            @Override
-            public void onSubscribe(UniSubscription subscription) {
+                    @Override
+                    public void onSubscribe(UniSubscription subscription) {
 
-            }
+                    }
 
-            @Override
-            public void onItem(Integer ignored) {
-                throw new NullPointerException("boom");
-            }
+                    @Override
+                    public void onItem(Integer ignored) {
+                        throw new NullPointerException("boom");
+                    }
 
-            @Override
-            public void onFailure(Throwable failure) {
-                called.set(true);
-            }
-        });
+                    @Override
+                    public void onFailure(Throwable failure) {
+                        called.set(true);
+                    }
+                });
 
         assertThat(called).isFalse();
         assertThat(onTerminationCalled).isFalse();
@@ -174,7 +175,7 @@ public class UniCreateFromEmitterTest {
     @Test
     public void testFailureThrownBySubscribersOnFailure() {
         AtomicBoolean onTerminationCalled = new AtomicBoolean();
-        Uni.createFrom().<Integer>emitter(emitter -> {
+        Uni.createFrom().<Integer> emitter(emitter -> {
             emitter.onTermination(() -> onTerminationCalled.set(true));
             try {
                 emitter.fail(new Exception("boom"));
@@ -185,20 +186,20 @@ public class UniCreateFromEmitterTest {
         })
                 .subscribe().withSubscriber(new UniSubscriber<Integer>() {
 
-            @Override
-            public void onSubscribe(UniSubscription subscription) {
+                    @Override
+                    public void onSubscribe(UniSubscription subscription) {
 
-            }
+                    }
 
-            @Override
-            public void onItem(Integer ignored) {
-            }
+                    @Override
+                    public void onItem(Integer ignored) {
+                    }
 
-            @Override
-            public void onFailure(Throwable failure) {
-                throw new NullPointerException("boom");
-            }
-        });
+                    @Override
+                    public void onFailure(Throwable failure) {
+                        throw new NullPointerException("boom");
+                    }
+                });
 
         assertThat(onTerminationCalled).isFalse();
     }

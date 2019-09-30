@@ -1,10 +1,10 @@
 package io.smallrye.reactive.unimulti.operators;
 
-import io.reactivex.Flowable;
-import io.smallrye.reactive.unimulti.Multi;
-
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
+
+import io.reactivex.Flowable;
+import io.smallrye.reactive.unimulti.Multi;
 
 public class MultiScanWithInitialState<T, S> extends MultiOperator<T, S> {
 

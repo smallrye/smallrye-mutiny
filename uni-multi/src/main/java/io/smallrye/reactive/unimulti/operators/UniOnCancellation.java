@@ -1,9 +1,9 @@
 package io.smallrye.reactive.unimulti.operators;
 
+import static io.smallrye.reactive.unimulti.helpers.ParameterValidation.nonNull;
+
 import io.smallrye.reactive.unimulti.Uni;
 import io.smallrye.reactive.unimulti.subscription.UniSubscription;
-
-import static io.smallrye.reactive.unimulti.helpers.ParameterValidation.nonNull;
 
 public class UniOnCancellation<T> extends UniOperator<T, T> {
     private final Runnable callback;

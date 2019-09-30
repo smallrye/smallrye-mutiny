@@ -1,9 +1,7 @@
 package io.smallrye.reactive.unimulti.operators;
 
-import io.smallrye.reactive.unimulti.Multi;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 
 import java.io.IOException;
 import java.util.LinkedHashSet;
@@ -14,8 +12,11 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.awaitility.Awaitility.await;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
+import io.smallrye.reactive.unimulti.Multi;
 
 public class MultiReceiveItemOnTest {
 
@@ -26,7 +27,8 @@ public class MultiReceiveItemOnTest {
         executor = Executors.newFixedThreadPool(4, new ThreadFactory() {
             AtomicInteger count = new AtomicInteger();
 
-            @Override public Thread newThread(Runnable r) {
+            @Override
+            public Thread newThread(Runnable r) {
                 Thread thread = new Thread(r);
                 thread.setName("test-" + count.incrementAndGet());
                 return thread;
@@ -72,7 +74,7 @@ public class MultiReceiveItemOnTest {
     public void testThatFailureAreDispatchedOnExecutor() {
         Set<String> itemThread = new LinkedHashSet<>();
         Set<String> failureThread = new LinkedHashSet<>();
-        Multi.createFrom().<Integer>failure(new IOException("boom"))
+        Multi.createFrom().<Integer> failure(new IOException("boom"))
                 .emitOn(executor)
                 .onItem().consume(i -> itemThread.add(Thread.currentThread().getName()))
                 .onFailure().consume(f -> failureThread.add(Thread.currentThread().getName()))
@@ -103,7 +105,7 @@ public class MultiReceiveItemOnTest {
 
         assertThat(subscriber.items()).hasSize(100_000);
         int current = -1;
-        for(Integer i: subscriber.items()) {
+        for (Integer i : subscriber.items()) {
             assertThat(i).isGreaterThan(current);
             current = i;
         }
@@ -117,6 +119,5 @@ public class MultiReceiveItemOnTest {
                 .await()
                 .assertReceived(1, 2, 3, 4);
     }
-
 
 }

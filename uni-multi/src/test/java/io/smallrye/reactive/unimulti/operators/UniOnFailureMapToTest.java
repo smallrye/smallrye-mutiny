@@ -1,8 +1,6 @@
 package io.smallrye.reactive.unimulti.operators;
 
-import io.smallrye.reactive.unimulti.CompositeException;
-import io.smallrye.reactive.unimulti.Uni;
-import org.junit.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
 import java.util.concurrent.ExecutorService;
@@ -12,7 +10,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.Test;
+
+import io.smallrye.reactive.unimulti.CompositeException;
+import io.smallrye.reactive.unimulti.Uni;
 
 public class UniOnFailureMapToTest {
 
@@ -82,9 +83,9 @@ public class UniOnFailureMapToTest {
             failure
                     .emitOn(executor)
                     .onFailure().mapTo(fail -> {
-                threadName.set(Thread.currentThread().getName());
-                return new BoomException();
-            })
+                        threadName.set(Thread.currentThread().getName());
+                        return new BoomException();
+                    })
                     .subscribe().withSubscriber(ts);
 
             ts.await().assertFailure(BoomException.class, "BoomException");
@@ -101,9 +102,9 @@ public class UniOnFailureMapToTest {
         AtomicBoolean called = new AtomicBoolean();
         Uni.createFrom().item(1)
                 .onFailure().mapTo(f -> {
-            called.set(true);
-            return f;
-        })
+                    called.set(true);
+                    return f;
+                })
                 .subscribe().withSubscriber(ts);
         ts.assertItem(1);
         assertThat(called).isFalse();
@@ -113,11 +114,11 @@ public class UniOnFailureMapToTest {
     public void testThatMapperIsNotCalledOnNonMatchingPredicate() {
         UniAssertSubscriber<Integer> ts = UniAssertSubscriber.create();
         AtomicBoolean called = new AtomicBoolean();
-        Uni.createFrom().<Integer>failure(new IllegalStateException("boom"))
+        Uni.createFrom().<Integer> failure(new IllegalStateException("boom"))
                 .onFailure(IOException.class).mapTo(f -> {
-            called.set(true);
-            return new IllegalArgumentException("Karamba");
-        })
+                    called.set(true);
+                    return new IllegalArgumentException("Karamba");
+                })
                 .subscribe().withSubscriber(ts);
         ts.assertCompletedWithFailure().assertFailure(IllegalStateException.class, "boom");
         assertThat(called).isFalse();
@@ -127,13 +128,13 @@ public class UniOnFailureMapToTest {
     public void testThatMapperIsNotCalledWhenPredicateThrowsAnException() {
         UniAssertSubscriber<Integer> ts = UniAssertSubscriber.create();
         AtomicBoolean called = new AtomicBoolean();
-        Uni.createFrom().<Integer>failure(new IllegalStateException("boom"))
+        Uni.createFrom().<Integer> failure(new IllegalStateException("boom"))
                 .onFailure(t -> {
                     throw new IllegalArgumentException("boomboom");
                 }).mapTo(f -> {
-            called.set(true);
-            return new RuntimeException("Karamba");
-        })
+                    called.set(true);
+                    return new RuntimeException("Karamba");
+                })
                 .subscribe().withSubscriber(ts);
         ts.assertCompletedWithFailure()
                 .assertFailure(CompositeException.class, "boomboom")

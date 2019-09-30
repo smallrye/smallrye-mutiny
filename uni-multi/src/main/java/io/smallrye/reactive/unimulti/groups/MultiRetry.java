@@ -1,11 +1,11 @@
 package io.smallrye.reactive.unimulti.groups;
 
-import io.smallrye.reactive.unimulti.Multi;
-import io.smallrye.reactive.unimulti.operators.MultiRetryAtMost;
+import static io.smallrye.reactive.unimulti.helpers.ParameterValidation.nonNull;
 
 import java.util.function.Predicate;
 
-import static io.smallrye.reactive.unimulti.helpers.ParameterValidation.nonNull;
+import io.smallrye.reactive.unimulti.Multi;
+import io.smallrye.reactive.unimulti.operators.MultiRetryAtMost;
 
 public class MultiRetry<T> {
 
@@ -37,7 +37,7 @@ public class MultiRetry<T> {
      *
      * @param numberOfAttempts the number of attempt, must be greater than zero
      * @return a new {@link Multi} retrying at most {@code numberOfAttempts} times to subscribe to the current
-     * {@link Multi} until it gets an item. When the number of attempt is reached, the last failure is propagated.
+     *         {@link Multi} until it gets an item. When the number of attempt is reached, the last failure is propagated.
      */
     public Multi<T> atMost(long numberOfAttempts) {
         return new MultiRetryAtMost<>(upstream, predicate, numberOfAttempts);

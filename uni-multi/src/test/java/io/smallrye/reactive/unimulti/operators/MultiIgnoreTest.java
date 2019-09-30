@@ -1,10 +1,10 @@
 package io.smallrye.reactive.unimulti.operators;
 
-import io.smallrye.reactive.unimulti.Multi;
 import org.junit.Test;
 
-public class MultiIgnoreTest {
+import io.smallrye.reactive.unimulti.Multi;
 
+public class MultiIgnoreTest {
 
     @Test
     public void test() {

@@ -1,13 +1,13 @@
 package io.smallrye.reactive.unimulti.operators;
 
+import static io.smallrye.reactive.unimulti.helpers.ParameterValidation.nonNull;
+
+import java.util.function.Consumer;
+
 import io.reactivex.BackpressureStrategy;
 import io.reactivex.Flowable;
 import io.smallrye.reactive.unimulti.subscription.BackPressureStrategy;
 import io.smallrye.reactive.unimulti.subscription.MultiEmitter;
-
-import java.util.function.Consumer;
-
-import static io.smallrye.reactive.unimulti.helpers.ParameterValidation.nonNull;
 
 public class MultiCreateWithEmitter<T> extends MultiOperator<Void, T> {
     private final Consumer<MultiEmitter<? super T>> consumer;

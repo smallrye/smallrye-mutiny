@@ -1,14 +1,15 @@
 package io.smallrye.reactive.unimulti.operators;
 
-import io.reactivex.Flowable;
-import io.smallrye.reactive.unimulti.Multi;
-import org.reactivestreams.Publisher;
+import static io.smallrye.reactive.unimulti.helpers.ParameterValidation.nonNull;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
 
-import static io.smallrye.reactive.unimulti.helpers.ParameterValidation.nonNull;
+import org.reactivestreams.Publisher;
+
+import io.reactivex.Flowable;
+import io.smallrye.reactive.unimulti.Multi;
 
 public class MultiItemCombineIterable {
 
@@ -58,7 +59,7 @@ public class MultiItemCombineIterable {
      * stream using this combinator.
      *
      * @param combinator the combination function, must not be {@code null}
-     * @param <O>        the type of item produced by the returned {@link Multi} (the return type of the combinator)
+     * @param <O> the type of item produced by the returned {@link Multi} (the return type of the combinator)
      * @return the new {@link Multi}
      */
     public <O> Multi<O> using(Function<List<?>, O> combinator) {
