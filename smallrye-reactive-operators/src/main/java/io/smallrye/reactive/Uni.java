@@ -1,5 +1,6 @@
 package io.smallrye.reactive;
 
+import io.smallrye.reactive.adapt.UniConverter;
 import io.smallrye.reactive.groups.*;
 import io.smallrye.reactive.subscription.UniSubscriber;
 import io.smallrye.reactive.subscription.UniSubscription;
@@ -56,6 +57,18 @@ public interface Uni<T> {
      */
     static UniCreate createFrom() {
         return UniCreate.INSTANCE;
+    }
+
+    /**
+     * Creates a new {@link Uni} with the passed converter.
+     *
+     * @param converter performs the type conversion
+     * @param <I> the type being converted from
+     * @param <T> the type for the {@link Uni}
+     * @return the converter
+     */
+    static <I, T> UniConverter<I, T> createWith(UniConverter<I, T> converter) {
+        return converter;
     }
 
     /**
