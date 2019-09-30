@@ -9,7 +9,7 @@
     </parent>
 
     <groupId>io.smallrye.reactive</groupId>
-    <artifactId>uni-multi</artifactId>
+    <artifactId>uni-multi-project</artifactId>
     <version>1.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
