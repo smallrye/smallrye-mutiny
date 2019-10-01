@@ -1,10 +1,10 @@
 package io.smallrye.reactive;
 
-import io.smallrye.reactive.groups.UniAndGroup;
-
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+
+import io.smallrye.reactive.groups.UniAndGroup;
 
 /**
  * An implementation of {@link Exception} collecting several causes.

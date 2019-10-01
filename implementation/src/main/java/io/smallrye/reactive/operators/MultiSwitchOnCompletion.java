@@ -1,12 +1,13 @@
 package io.smallrye.reactive.operators;
 
-import io.reactivex.Flowable;
-import io.smallrye.reactive.Multi;
-import org.reactivestreams.Publisher;
+import static io.smallrye.reactive.helpers.ParameterValidation.SUPPLIER_PRODUCED_NULL;
 
 import java.util.function.Supplier;
 
-import static io.smallrye.reactive.helpers.ParameterValidation.SUPPLIER_PRODUCED_NULL;
+import org.reactivestreams.Publisher;
+
+import io.reactivex.Flowable;
+import io.smallrye.reactive.Multi;
 
 public class MultiSwitchOnCompletion<T> extends MultiOperator<T, T> {
     private final Supplier<Publisher<? extends T>> supplier;

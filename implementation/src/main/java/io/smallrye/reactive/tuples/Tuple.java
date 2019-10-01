@@ -23,7 +23,7 @@ public interface Tuple extends Iterable<Object> {
     List<Object> asList();
 
     /**
-     * Gets an immutable {@link Iterator}  traversing the content of this {@link Tuple}.
+     * Gets an immutable {@link Iterator} traversing the content of this {@link Tuple}.
      *
      * @return the iterator
      */

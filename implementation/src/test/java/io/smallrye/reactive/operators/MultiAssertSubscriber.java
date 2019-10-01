@@ -1,7 +1,6 @@
 package io.smallrye.reactive.operators;
 
-import org.reactivestreams.Subscriber;
-import org.reactivestreams.Subscription;
+import static org.assertj.core.api.Java6Assertions.assertThat;
 
 import java.time.Duration;
 import java.util.List;
@@ -10,7 +9,8 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
-import static org.assertj.core.api.Java6Assertions.assertThat;
+import org.reactivestreams.Subscriber;
+import org.reactivestreams.Subscription;
 
 public class MultiAssertSubscriber<T> implements Subscriber<T> {
 

@@ -1,17 +1,18 @@
 package io.smallrye.reactive.operators;
 
-import io.reactivex.Flowable;
-import io.reactivex.processors.UnicastProcessor;
-import io.smallrye.reactive.Uni;
-import io.smallrye.reactive.subscription.UniSubscriber;
-import io.smallrye.reactive.subscription.UniSubscription;
-import org.junit.Test;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import org.junit.Test;
+
+import io.reactivex.Flowable;
+import io.reactivex.processors.UnicastProcessor;
+import io.smallrye.reactive.Uni;
+import io.smallrye.reactive.subscription.UniSubscriber;
+import io.smallrye.reactive.subscription.UniSubscription;
 
 public class UniCacheTest {
 

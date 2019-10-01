@@ -1,8 +1,6 @@
 package io.smallrye.reactive.groups;
 
-import io.smallrye.reactive.Multi;
-import io.smallrye.reactive.operators.MultiTransformation;
-import org.reactivestreams.Publisher;
+import static io.smallrye.reactive.helpers.ParameterValidation.*;
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -10,7 +8,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.function.Predicate;
 
-import static io.smallrye.reactive.helpers.ParameterValidation.*;
+import org.reactivestreams.Publisher;
+
+import io.smallrye.reactive.Multi;
+import io.smallrye.reactive.operators.MultiTransformation;
 
 public class MultiTransform<T> {
 

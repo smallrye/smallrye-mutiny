@@ -1,13 +1,13 @@
 package io.smallrye.reactive.operators;
 
-import io.smallrye.reactive.CompositeException;
-import io.smallrye.reactive.Uni;
+import static io.smallrye.reactive.helpers.ParameterValidation.SUPPLIER_PRODUCED_NULL;
+import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
 
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-import static io.smallrye.reactive.helpers.ParameterValidation.SUPPLIER_PRODUCED_NULL;
-import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
+import io.smallrye.reactive.CompositeException;
+import io.smallrye.reactive.Uni;
 
 public class UniMapOnFailure<I, O> extends UniOperator<I, O> {
 

@@ -1,13 +1,14 @@
 package io.smallrye.reactive.operators;
 
-import io.reactivex.Flowable;
-import io.smallrye.reactive.CompositeException;
-import io.smallrye.reactive.Multi;
-import org.junit.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Arrays;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.Test;
+
+import io.reactivex.Flowable;
+import io.smallrye.reactive.CompositeException;
+import io.smallrye.reactive.Multi;
 
 public class MultiMergeTest {
 
@@ -16,8 +17,8 @@ public class MultiMergeTest {
         MultiAssertSubscriber<Integer> subscriber = Multi.createBy().merging().streams(
                 Multi.createFrom().item(5),
                 Multi.createFrom().range(1, 3),
-                Multi.createFrom().items(8, 9, 10).onItem().mapToItem(i -> i + 1)
-        ).subscribe().withSubscriber(new MultiAssertSubscriber<>(100));
+                Multi.createFrom().items(8, 9, 10).onItem().mapToItem(i -> i + 1)).subscribe()
+                .withSubscriber(new MultiAssertSubscriber<>(100));
 
         subscriber.assertCompletedSuccessfully()
                 .assertReceived(5, 1, 2, 9, 10, 11);
@@ -29,8 +30,8 @@ public class MultiMergeTest {
                 .streams(
                         Multi.createFrom().item(5),
                         Multi.createFrom().range(1, 3),
-                        Multi.createFrom().items(8, 9, 10).onItem().mapToItem(i -> i + 1)
-                ).subscribe().withSubscriber(new MultiAssertSubscriber<>(100));
+                        Multi.createFrom().items(8, 9, 10).onItem().mapToItem(i -> i + 1))
+                .subscribe().withSubscriber(new MultiAssertSubscriber<>(100));
 
         subscriber.assertCompletedSuccessfully()
                 .assertReceived(5, 1, 2, 9, 10, 11);
@@ -42,9 +43,8 @@ public class MultiMergeTest {
                 Arrays.asList(
                         Multi.createFrom().item(5),
                         Multi.createFrom().range(1, 3),
-                        Multi.createFrom().items(8, 9, 10).onItem().mapToItem(i -> i + 1)
-                )
-        ).subscribe().withSubscriber(new MultiAssertSubscriber<>(100));
+                        Multi.createFrom().items(8, 9, 10).onItem().mapToItem(i -> i + 1)))
+                .subscribe().withSubscriber(new MultiAssertSubscriber<>(100));
 
         subscriber.assertCompletedSuccessfully()
                 .assertReceived(5, 1, 2, 9, 10, 11);
@@ -55,8 +55,8 @@ public class MultiMergeTest {
         MultiAssertSubscriber<Integer> subscriber = Multi.createBy().merging().streams(
                 Flowable.just(5),
                 Multi.createFrom().range(1, 3),
-                Multi.createFrom().items(8, 9, 10).onItem().mapToItem(i -> i + 1)
-        ).subscribe().withSubscriber(new MultiAssertSubscriber<>(100));
+                Multi.createFrom().items(8, 9, 10).onItem().mapToItem(i -> i + 1)).subscribe()
+                .withSubscriber(new MultiAssertSubscriber<>(100));
 
         subscriber.assertCompletedSuccessfully()
                 .assertReceived(5, 1, 2, 9, 10, 11);
@@ -68,9 +68,8 @@ public class MultiMergeTest {
                 Arrays.asList(
                         Flowable.just(5),
                         Multi.createFrom().range(1, 3),
-                        Multi.createFrom().items(8, 9, 10).onItem().mapToItem(i -> i + 1)
-                )
-        ).subscribe().withSubscriber(new MultiAssertSubscriber<>(100));
+                        Multi.createFrom().items(8, 9, 10).onItem().mapToItem(i -> i + 1)))
+                .subscribe().withSubscriber(new MultiAssertSubscriber<>(100));
 
         subscriber.assertCompletedSuccessfully()
                 .assertReceived(5, 1, 2, 9, 10, 11);
@@ -99,8 +98,7 @@ public class MultiMergeTest {
                 Multi.createFrom().item(5),
                 Multi.createFrom().failure(boom),
                 Multi.createFrom().item(6),
-                Multi.createFrom().failure(boom2)
-        ).subscribe().withSubscriber(new MultiAssertSubscriber<>(5));
+                Multi.createFrom().failure(boom2)).subscribe().withSubscriber(new MultiAssertSubscriber<>(5));
 
         subscriber.assertTerminated()
                 .assertReceived(5, 6)
@@ -115,8 +113,7 @@ public class MultiMergeTest {
                 Multi.createFrom().item(5),
                 Multi.createFrom().failure(boom),
                 Multi.createFrom().item(6),
-                Multi.createFrom().failure(boom)
-        ).subscribe().withSubscriber(new MultiAssertSubscriber<>(5));
+                Multi.createFrom().failure(boom)).subscribe().withSubscriber(new MultiAssertSubscriber<>(5));
 
         subscriber.assertTerminated()
                 .assertReceived(5)

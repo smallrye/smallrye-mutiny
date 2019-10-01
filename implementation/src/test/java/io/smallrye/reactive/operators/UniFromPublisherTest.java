@@ -1,14 +1,15 @@
 package io.smallrye.reactive.operators;
 
-import io.reactivex.BackpressureStrategy;
-import io.reactivex.Flowable;
-import io.smallrye.reactive.Uni;
-import org.junit.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.Test;
+
+import io.reactivex.BackpressureStrategy;
+import io.reactivex.Flowable;
+import io.smallrye.reactive.Uni;
 
 public class UniFromPublisherTest {
 
@@ -70,7 +71,7 @@ public class UniFromPublisherTest {
     public void testThatSubscriberIsIncompleteIfThePublisherDoesNotEmit() {
         UniAssertSubscriber<Integer> ts = UniAssertSubscriber.create();
         AtomicBoolean called = new AtomicBoolean();
-        Uni<Integer> uni = Uni.createFrom().<Integer>publisher(Flowable.never()).map(i -> {
+        Uni<Integer> uni = Uni.createFrom().<Integer> publisher(Flowable.never()).map(i -> {
             called.set(true);
             return i + 1;
         });
@@ -85,7 +86,7 @@ public class UniFromPublisherTest {
     @Test
     public void testThatSubscriberCanCancelBeforeEmission() {
         UniAssertSubscriber<Integer> ts = UniAssertSubscriber.create();
-        Uni<Integer> uni = Uni.createFrom().publisher(Flowable.<Integer>create(emitter -> {
+        Uni<Integer> uni = Uni.createFrom().publisher(Flowable.<Integer> create(emitter -> {
             new Thread(() -> {
                 try {
                     Thread.sleep(50);

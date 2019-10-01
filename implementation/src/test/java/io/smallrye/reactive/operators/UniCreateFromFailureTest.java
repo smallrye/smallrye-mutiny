@@ -1,14 +1,15 @@
 package io.smallrye.reactive.operators;
 
-import io.smallrye.reactive.Uni;
-import org.junit.Test;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.fail;
 
 import java.io.IOException;
 import java.util.NoSuchElementException;
 import java.util.function.Supplier;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.fail;
+import org.junit.Test;
+
+import io.smallrye.reactive.Uni;
 
 public class UniCreateFromFailureTest {
 

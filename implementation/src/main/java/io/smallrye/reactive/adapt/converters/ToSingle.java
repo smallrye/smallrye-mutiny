@@ -1,10 +1,10 @@
 package io.smallrye.reactive.adapt.converters;
 
-import io.reactivex.Single;
-import io.smallrye.reactive.Uni;
-
 import java.util.Optional;
 import java.util.function.Function;
+
+import io.reactivex.Single;
+import io.smallrye.reactive.Uni;
 
 public class ToSingle<T> implements Function<Uni<T>, Single<Optional<T>>> {
 

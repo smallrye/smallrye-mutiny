@@ -1,12 +1,12 @@
 package io.smallrye.reactive.groups;
 
-import io.smallrye.reactive.Multi;
-import io.smallrye.reactive.operators.MultiBroadcaster;
+import static io.smallrye.reactive.helpers.ParameterValidation.positive;
+import static io.smallrye.reactive.helpers.ParameterValidation.validate;
 
 import java.time.Duration;
 
-import static io.smallrye.reactive.helpers.ParameterValidation.positive;
-import static io.smallrye.reactive.helpers.ParameterValidation.validate;
+import io.smallrye.reactive.Multi;
+import io.smallrye.reactive.operators.MultiBroadcaster;
 
 /**
  * Makes the upstream {@link Multi} be able to broadcast its events ({@code items}, {@code failure}, and
@@ -40,7 +40,7 @@ public class MultiBroadcast<T> {
      * {@code Multi}.
      *
      * @param numberOfSubscribers the number of subscriber requires before subscribing to the upstream multi and start
-     *                            dispatching the events. Must be strictly positive.
+     *        dispatching the events. Must be strictly positive.
      * @return the {@link Multi} accepting several subscribers
      */
     public Multi<T> toAtLeast(int numberOfSubscribers) {

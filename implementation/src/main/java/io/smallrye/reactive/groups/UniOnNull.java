@@ -1,13 +1,13 @@
 package io.smallrye.reactive.groups;
 
-import io.smallrye.reactive.Uni;
-import io.smallrye.reactive.infrastructure.Infrastructure;
+import static io.smallrye.reactive.helpers.ParameterValidation.SUPPLIER_PRODUCED_NULL;
+import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
 
 import java.util.NoSuchElementException;
 import java.util.function.Supplier;
 
-import static io.smallrye.reactive.helpers.ParameterValidation.SUPPLIER_PRODUCED_NULL;
-import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
+import io.smallrye.reactive.Uni;
+import io.smallrye.reactive.infrastructure.Infrastructure;
 
 public class UniOnNull<T> {
 

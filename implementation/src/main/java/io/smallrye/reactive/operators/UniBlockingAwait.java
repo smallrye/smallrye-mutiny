@@ -1,9 +1,6 @@
 package io.smallrye.reactive.operators;
 
-import io.smallrye.reactive.TimeoutException;
-import io.smallrye.reactive.Uni;
-import io.smallrye.reactive.subscription.UniSubscriber;
-import io.smallrye.reactive.subscription.UniSubscription;
+import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
 
 import java.time.Duration;
 import java.util.concurrent.CompletionException;
@@ -11,7 +8,10 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
+import io.smallrye.reactive.TimeoutException;
+import io.smallrye.reactive.Uni;
+import io.smallrye.reactive.subscription.UniSubscriber;
+import io.smallrye.reactive.subscription.UniSubscription;
 
 public class UniBlockingAwait {
 

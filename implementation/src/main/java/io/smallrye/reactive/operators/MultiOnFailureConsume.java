@@ -1,12 +1,12 @@
 package io.smallrye.reactive.operators;
 
-import io.reactivex.Flowable;
-import io.smallrye.reactive.Multi;
+import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
 
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
-import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
+import io.reactivex.Flowable;
+import io.smallrye.reactive.Multi;
 
 public class MultiOnFailureConsume<T> extends MultiOperator<T, T> {
     private final Consumer<Throwable> callback;

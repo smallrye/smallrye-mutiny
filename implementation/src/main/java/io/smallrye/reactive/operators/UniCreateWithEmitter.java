@@ -1,10 +1,10 @@
 package io.smallrye.reactive.operators;
 
-import io.smallrye.reactive.subscription.UniEmitter;
+import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
 
 import java.util.function.Consumer;
 
-import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
+import io.smallrye.reactive.subscription.UniEmitter;
 
 public class UniCreateWithEmitter<T> extends AbstractUni<T> {
     private final Consumer<UniEmitter<? super T>> consumer;

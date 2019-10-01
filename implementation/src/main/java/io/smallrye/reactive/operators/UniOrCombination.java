@@ -1,15 +1,15 @@
 package io.smallrye.reactive.operators;
 
-import io.smallrye.reactive.Uni;
-import io.smallrye.reactive.helpers.EmptyUniSubscription;
-import io.smallrye.reactive.subscription.UniSubscriber;
+import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
+import io.smallrye.reactive.Uni;
+import io.smallrye.reactive.helpers.EmptyUniSubscription;
+import io.smallrye.reactive.subscription.UniSubscriber;
 
 public class UniOrCombination<T> extends UniOperator<Void, T> {
 
@@ -68,22 +68,20 @@ public class UniOrCombination<T> extends UniOperator<Void, T> {
         });
 
         // Once the subscription has been given, start resolving
-        futures.forEach(future ->
-                future.whenComplete((res, fail) -> {
-                    if (completedOrCancelled.compareAndSet(false, true)) {
-                        // Cancel other
-                        futures.forEach(cf -> {
-                            if (cf != future) {
-                                cf.cancel(false);
-                            }
-                        });
-                        if (fail != null) {
-                            subscriber.onFailure(fail);
-                        } else {
-                            subscriber.onItem((T) res);
-                        }
+        futures.forEach(future -> future.whenComplete((res, fail) -> {
+            if (completedOrCancelled.compareAndSet(false, true)) {
+                // Cancel other
+                futures.forEach(cf -> {
+                    if (cf != future) {
+                        cf.cancel(false);
                     }
-                })
-        );
+                });
+                if (fail != null) {
+                    subscriber.onFailure(fail);
+                } else {
+                    subscriber.onItem((T) res);
+                }
+            }
+        }));
     }
 }

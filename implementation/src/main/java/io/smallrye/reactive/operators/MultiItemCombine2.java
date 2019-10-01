@@ -1,13 +1,14 @@
 package io.smallrye.reactive.operators;
 
-import io.smallrye.reactive.Multi;
-import io.smallrye.reactive.tuples.Tuple2;
-import org.reactivestreams.Publisher;
+import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
+import static io.smallrye.reactive.helpers.ParameterValidation.size;
 
 import java.util.function.BiFunction;
 
-import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
-import static io.smallrye.reactive.helpers.ParameterValidation.size;
+import org.reactivestreams.Publisher;
+
+import io.smallrye.reactive.Multi;
+import io.smallrye.reactive.tuples.Tuple2;
 
 public class MultiItemCombine2<T1, T2> extends MultiItemCombineIterable {
 
@@ -60,7 +61,7 @@ public class MultiItemCombine2<T1, T2> extends MultiItemCombineIterable {
      * Creates the resulting {@link Multi}. The items are combined using the given combinator function.
      *
      * @param combinator the combinator function, must not be {@code null}
-     * @param <O>        the type of item
+     * @param <O> the type of item
      * @return the resulting {@link Multi}.
      */
     @SuppressWarnings("unchecked")

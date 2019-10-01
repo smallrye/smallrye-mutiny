@@ -1,8 +1,7 @@
 package io.smallrye.reactive.operators;
 
-import io.smallrye.reactive.GroupedMulti;
-import io.smallrye.reactive.Multi;
-import org.junit.Test;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -11,8 +10,10 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.awaitility.Awaitility.await;
+import org.junit.Test;
+
+import io.smallrye.reactive.GroupedMulti;
+import io.smallrye.reactive.Multi;
 
 public class MultiGroupTest {
 
@@ -38,8 +39,7 @@ public class MultiGroupTest {
         subscriber.assertCompletedSuccessfully();
         assertThat(subscriber.items()).containsExactly(
                 Arrays.asList(1, 2), Arrays.asList(3, 4), Arrays.asList(5, 6), Arrays.asList(7, 8),
-                Collections.singletonList(9)
-        );
+                Collections.singletonList(9));
     }
 
     @Test
@@ -51,16 +51,14 @@ public class MultiGroupTest {
                 .request(3);
 
         assertThat(subscriber.items()).containsExactly(
-                Arrays.asList(1, 2), Arrays.asList(3, 4), Arrays.asList(5, 6)
-        );
+                Arrays.asList(1, 2), Arrays.asList(3, 4), Arrays.asList(5, 6));
 
         subscriber.assertNotTerminated().request(5);
 
         subscriber.assertCompletedSuccessfully();
         assertThat(subscriber.items()).containsExactly(
                 Arrays.asList(1, 2), Arrays.asList(3, 4), Arrays.asList(5, 6), Arrays.asList(7, 8),
-                Collections.singletonList(9)
-        );
+                Collections.singletonList(9));
     }
 
     @Test
@@ -69,8 +67,7 @@ public class MultiGroupTest {
                 .subscribe().withSubscriber(MultiAssertSubscriber.create(100));
         subscriber.assertCompletedSuccessfully();
         assertThat(subscriber.items()).containsExactly(
-                Arrays.asList(1, 2), Arrays.asList(4, 5), Arrays.asList(7, 8)
-        );
+                Arrays.asList(1, 2), Arrays.asList(4, 5), Arrays.asList(7, 8));
     }
 
     @Test
@@ -81,8 +78,7 @@ public class MultiGroupTest {
         assertThat(subscriber.items()).containsExactly(
                 Arrays.asList(1, 2), Arrays.asList(2, 3), Arrays.asList(3, 4),
                 Arrays.asList(4, 5), Arrays.asList(5, 6), Arrays.asList(6, 7),
-                Arrays.asList(7, 8), Arrays.asList(8, 9), Collections.singletonList(9)
-        );
+                Arrays.asList(7, 8), Arrays.asList(8, 9), Collections.singletonList(9));
     }
 
     @Test
@@ -94,15 +90,13 @@ public class MultiGroupTest {
                 .request(2);
 
         assertThat(subscriber.items()).containsExactly(
-                Arrays.asList(1, 2), Arrays.asList(4, 5)
-        );
+                Arrays.asList(1, 2), Arrays.asList(4, 5));
 
         subscriber.assertNotTerminated().request(5);
 
         subscriber.assertCompletedSuccessfully();
         assertThat(subscriber.items()).containsExactly(
-                Arrays.asList(1, 2), Arrays.asList(4, 5), Arrays.asList(7, 8)
-        );
+                Arrays.asList(1, 2), Arrays.asList(4, 5), Arrays.asList(7, 8));
     }
 
     @Test
@@ -162,8 +156,7 @@ public class MultiGroupTest {
         List<List<Integer>> flatten = flatten(subscriber.items());
         assertThat(flatten).containsExactly(
                 Arrays.asList(1, 2), Arrays.asList(3, 4), Arrays.asList(5, 6), Arrays.asList(7, 8),
-                Collections.singletonList(9)
-        );
+                Collections.singletonList(9));
     }
 
     private <T> List<List<T>> flatten(List<Multi<T>> items) {
@@ -189,8 +182,7 @@ public class MultiGroupTest {
         subscriber.assertCompletedSuccessfully();
         assertThat(flatten(subscriber.items())).containsExactly(
                 Arrays.asList(1, 2), Arrays.asList(3, 4), Arrays.asList(5, 6), Arrays.asList(7, 8),
-                Collections.singletonList(9)
-        );
+                Collections.singletonList(9));
     }
 
     @Test
@@ -199,8 +191,7 @@ public class MultiGroupTest {
                 .subscribe().withSubscriber(MultiAssertSubscriber.create(100));
         subscriber.assertCompletedSuccessfully();
         assertThat(flatten(subscriber.items())).containsExactly(
-                Arrays.asList(1, 2), Arrays.asList(4, 5), Arrays.asList(7, 8)
-        );
+                Arrays.asList(1, 2), Arrays.asList(4, 5), Arrays.asList(7, 8));
     }
 
     @Test
@@ -211,8 +202,7 @@ public class MultiGroupTest {
         assertThat(flatten(subscriber.items())).containsExactly(
                 Arrays.asList(1, 2), Arrays.asList(2, 3), Arrays.asList(3, 4),
                 Arrays.asList(4, 5), Arrays.asList(5, 6), Arrays.asList(6, 7),
-                Arrays.asList(7, 8), Arrays.asList(8, 9), Collections.singletonList(9)
-        );
+                Arrays.asList(7, 8), Arrays.asList(8, 9), Collections.singletonList(9));
     }
 
     @Test
@@ -229,8 +219,7 @@ public class MultiGroupTest {
 
         subscriber.assertCompletedSuccessfully();
         assertThat(flatten(subscriber.items())).containsExactly(
-                Arrays.asList(1, 2), Arrays.asList(4, 5), Arrays.asList(7, 8)
-        );
+                Arrays.asList(1, 2), Arrays.asList(4, 5), Arrays.asList(7, 8));
     }
 
     @Test
@@ -271,10 +260,9 @@ public class MultiGroupTest {
 
     @Test
     public void testGroupByWithKeyMapperOnly() {
-        MultiAssertSubscriber<GroupedMulti<Integer, Integer>> subscriber =
-                Multi.createFrom().range(1, 10)
-                        .group().by(i -> i % 2)
-                        .subscribe().withSubscriber(MultiAssertSubscriber.create(100));
+        MultiAssertSubscriber<GroupedMulti<Integer, Integer>> subscriber = Multi.createFrom().range(1, 10)
+                .group().by(i -> i % 2)
+                .subscribe().withSubscriber(MultiAssertSubscriber.create(100));
 
         subscriber.assertCompletedSuccessfully();
         assertThat(subscriber.items()).hasSize(2);
@@ -291,10 +279,9 @@ public class MultiGroupTest {
 
     @Test
     public void testGroupByWithKeyMapperAndValueMapper() {
-        MultiAssertSubscriber<GroupedMulti<Integer, String>> subscriber =
-                Multi.createFrom().range(1, 10)
-                        .group().by(i -> i % 2, t -> Integer.toString(t))
-                        .subscribe().withSubscriber(MultiAssertSubscriber.create(100));
+        MultiAssertSubscriber<GroupedMulti<Integer, String>> subscriber = Multi.createFrom().range(1, 10)
+                .group().by(i -> i % 2, t -> Integer.toString(t))
+                .subscribe().withSubscriber(MultiAssertSubscriber.create(100));
 
         subscriber.assertCompletedSuccessfully();
         assertThat(subscriber.items()).hasSize(2);
@@ -311,10 +298,9 @@ public class MultiGroupTest {
 
     @Test
     public void testGroupByProducingASingleGroup() {
-        MultiAssertSubscriber<GroupedMulti<Integer, Integer>> subscriber =
-                Multi.createFrom().range(1, 10)
-                        .group().by(i -> 0)
-                        .subscribe().withSubscriber(MultiAssertSubscriber.create(100));
+        MultiAssertSubscriber<GroupedMulti<Integer, Integer>> subscriber = Multi.createFrom().range(1, 10)
+                .group().by(i -> 0)
+                .subscribe().withSubscriber(MultiAssertSubscriber.create(100));
 
         subscriber.assertCompletedSuccessfully();
         assertThat(subscriber.items()).hasSize(1);
@@ -335,10 +321,10 @@ public class MultiGroupTest {
 
     @Test
     public void testGroupByOnFailingMulti() {
-        MultiAssertSubscriber<GroupedMulti<Integer, Integer>> subscriber =
-                Multi.createFrom().<Integer>failure(new IOException("boom"))
-                        .group().by(i -> i % 2)
-                        .subscribe().withSubscriber(MultiAssertSubscriber.create(100));
+        MultiAssertSubscriber<GroupedMulti<Integer, Integer>> subscriber = Multi.createFrom()
+                .<Integer> failure(new IOException("boom"))
+                .group().by(i -> i % 2)
+                .subscribe().withSubscriber(MultiAssertSubscriber.create(100));
 
         subscriber.assertHasFailedWith(IOException.class, "boom");
         assertThat(subscriber.items()).hasSize(0);
@@ -346,21 +332,19 @@ public class MultiGroupTest {
 
     @Test
     public void testGroupByOnEmptyMulti() {
-        MultiAssertSubscriber<GroupedMulti<Integer, Integer>> subscriber =
-                Multi.createFrom().<Integer>empty()
-                        .group().by(i -> i % 2)
-                        .subscribe().withSubscriber(MultiAssertSubscriber.create(100));
+        MultiAssertSubscriber<GroupedMulti<Integer, Integer>> subscriber = Multi.createFrom().<Integer> empty()
+                .group().by(i -> i % 2)
+                .subscribe().withSubscriber(MultiAssertSubscriber.create(100));
 
         subscriber.assertCompletedSuccessfully().assertHasNotReceivedAnyItem();
     }
 
     @Test
     public void testGroupByFollowedWithAFlatMap() {
-        MultiAssertSubscriber<Integer> subscriber =
-                Multi.createFrom().range(1, 10)
-                        .group().by(i -> 1)
-                        .onItem().flatMap(gm -> gm)
-                        .subscribe().withSubscriber(MultiAssertSubscriber.create(100));
+        MultiAssertSubscriber<Integer> subscriber = Multi.createFrom().range(1, 10)
+                .group().by(i -> 1)
+                .onItem().flatMap(gm -> gm)
+                .subscribe().withSubscriber(MultiAssertSubscriber.create(100));
 
         subscriber.assertCompletedSuccessfully();
         assertThat(subscriber.items()).hasSize(9);

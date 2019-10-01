@@ -1,15 +1,16 @@
 package io.smallrye.reactive.infrastructure;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import org.junit.After;
+import org.junit.Test;
+
 import io.smallrye.reactive.Uni;
 import io.smallrye.reactive.operators.AbstractUni;
 import io.smallrye.reactive.operators.UniDelegatingSubscriber;
 import io.smallrye.reactive.operators.UniSerializedSubscriber;
 import io.smallrye.reactive.subscription.UniSubscriber;
 import io.smallrye.reactive.subscription.UniSubscription;
-import org.junit.After;
-import org.junit.Test;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 public class UniInterceptorTest {
 
@@ -23,13 +24,15 @@ public class UniInterceptorTest {
     @Test
     public void testOrdering() {
         UniInterceptor interceptor1 = new UniInterceptor() {
-            @Override public int ordinal() {
+            @Override
+            public int ordinal() {
                 return 1;
             }
         };
 
         UniInterceptor interceptor2 = new UniInterceptor() {
-            @Override public int ordinal() {
+            @Override
+            public int ordinal() {
                 return 2;
             }
         };

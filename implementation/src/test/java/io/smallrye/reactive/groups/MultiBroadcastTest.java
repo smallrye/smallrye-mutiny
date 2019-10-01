@@ -1,16 +1,17 @@
 package io.smallrye.reactive.groups;
 
-import io.smallrye.reactive.Multi;
-import io.smallrye.reactive.helpers.MultiEmitterProcessor;
-import io.smallrye.reactive.operators.MultiAssertSubscriber;
-import org.junit.Test;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 
 import java.io.IOException;
 import java.time.Duration;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.awaitility.Awaitility.await;
+import org.junit.Test;
+
+import io.smallrye.reactive.Multi;
+import io.smallrye.reactive.helpers.MultiEmitterProcessor;
+import io.smallrye.reactive.operators.MultiAssertSubscriber;
 
 public class MultiBroadcastTest {
 
@@ -71,7 +72,6 @@ public class MultiBroadcastTest {
         s1.assertHasFailedWith(IOException.class, "boom");
         s2.assertHasFailedWith(IOException.class, "boom");
     }
-
 
     @Test
     public void testPublishAfterDepartureOfASubscriber() {
@@ -201,7 +201,8 @@ public class MultiBroadcastTest {
         MultiEmitterProcessor<Integer> processor = MultiEmitterProcessor.create();
         processor.onTermination(() -> cancelled.set(true));
 
-        Multi<Integer> multi = processor.toMulti().broadcast().withCancellationAfterLastSubscriberDeparture(Duration.ofSeconds(1))
+        Multi<Integer> multi = processor.toMulti().broadcast()
+                .withCancellationAfterLastSubscriberDeparture(Duration.ofSeconds(1))
                 .toAllSubscribers();
 
         MultiAssertSubscriber<Integer> s1 = multi.subscribe().withSubscriber(MultiAssertSubscriber.create(10));
@@ -257,7 +258,8 @@ public class MultiBroadcastTest {
         MultiEmitterProcessor<Integer> processor = MultiEmitterProcessor.create();
         processor.onTermination(() -> cancelled.set(true));
 
-        Multi<Integer> multi = processor.toMulti().broadcast().withCancellationAfterLastSubscriberDeparture(Duration.ofSeconds(1))
+        Multi<Integer> multi = processor.toMulti().broadcast()
+                .withCancellationAfterLastSubscriberDeparture(Duration.ofSeconds(1))
                 .toAtLeast(2);
 
         MultiAssertSubscriber<Integer> s1 = multi.subscribe().withSubscriber(MultiAssertSubscriber.create(10));

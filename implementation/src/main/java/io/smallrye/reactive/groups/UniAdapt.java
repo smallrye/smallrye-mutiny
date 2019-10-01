@@ -1,17 +1,18 @@
 package io.smallrye.reactive.groups;
 
-import io.reactivex.*;
-import io.smallrye.reactive.Uni;
-import io.smallrye.reactive.operators.UniToPublisher;
-import io.smallrye.reactive.adapt.converters.*;
-import org.reactivestreams.Publisher;
+import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
 
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.function.Function;
 
-import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
+import org.reactivestreams.Publisher;
+
+import io.reactivex.*;
+import io.smallrye.reactive.Uni;
+import io.smallrye.reactive.adapt.converters.*;
+import io.smallrye.reactive.operators.UniToPublisher;
 
 public class UniAdapt<T> {
 

@@ -1,5 +1,12 @@
 package io.smallrye.reactive.groups;
 
+import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
+
+import java.util.concurrent.CompletionStage;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
+import java.util.function.Function;
+
 import io.smallrye.reactive.Uni;
 import io.smallrye.reactive.infrastructure.Infrastructure;
 import io.smallrye.reactive.operators.UniFlatMapCompletionStageOnItem;
@@ -7,13 +14,6 @@ import io.smallrye.reactive.operators.UniFlatMapOnItem;
 import io.smallrye.reactive.operators.UniMapOnResult;
 import io.smallrye.reactive.operators.UniOnEventConsume;
 import io.smallrye.reactive.subscription.UniEmitter;
-
-import java.util.concurrent.CompletionStage;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
-import java.util.function.Function;
-
-import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
 
 public class UniOnItem<T> {
 
@@ -24,7 +24,7 @@ public class UniOnItem<T> {
     }
 
     /**
-     * Produces a new {@link Uni} invoking the given callback when the {@code item}  event is fired. Note that if can
+     * Produces a new {@link Uni} invoking the given callback when the {@code item} event is fired. Note that if can
      * be {@code null}.
      *
      * @param callback the callback, must not be {@code null}
@@ -32,8 +32,7 @@ public class UniOnItem<T> {
      */
     public Uni<T> consume(Consumer<? super T> callback) {
         return Infrastructure.onUniCreation(
-                new UniOnEventConsume<>(upstream, nonNull(callback, "callback"), null)
-        );
+                new UniOnEventConsume<>(upstream, nonNull(callback, "callback"), null));
     }
 
     /**
@@ -44,7 +43,7 @@ public class UniOnItem<T> {
      * For asynchronous composition, see {@link #mapToUni(Function)}.
      *
      * @param mapper the mapper function, must not be {@code null}
-     * @param <R>    the type of Uni item
+     * @param <R> the type of Uni item
      * @return the new {@link Uni}
      */
     public <R> Uni<R> mapToItem(Function<? super T, ? extends R> mapper) {
@@ -52,7 +51,7 @@ public class UniOnItem<T> {
     }
 
     /**
-     * Transforms the received item asynchronously, forwarding the events  emitted by another {@link Uni} produced by
+     * Transforms the received item asynchronously, forwarding the events emitted by another {@link Uni} produced by
      * the given {@code mapper}.
      * <p>
      * The mapper is called with the item event of the current {@link Uni} and produces an {@link Uni}, possibly
@@ -62,29 +61,30 @@ public class UniOnItem<T> {
      * This operation is generally named {@code flatMap}.
      *
      * @param mapper the function called with the item of this {@link Uni} and producing the {@link Uni},
-     *               must not be {@code null}, must not return {@code null}.
-     * @param <R>    the type of item
+     *        must not be {@code null}, must not return {@code null}.
+     * @param <R> the type of item
      * @return a new {@link Uni} that would fire events from the uni produced by the mapper function, possibly
-     * in an asynchronous manner.
+     *         in an asynchronous manner.
      */
     public <R> Uni<R> mapToUni(Function<? super T, ? extends Uni<? extends R>> mapper) {
         return Infrastructure.onUniCreation(new UniFlatMapOnItem<>(upstream, mapper));
     }
 
     /**
-     * Transforms the received item asynchronously, forwarding the events  emitted by another {@link CompletionStage}
+     * Transforms the received item asynchronously, forwarding the events emitted by another {@link CompletionStage}
      * produced by the given {@code mapper}.
      * <p>
      * The mapper is called with the item event of the current {@link Uni} and produces an {@link CompletionStage},
      * possibly using another type of item ({@code R}). The events fired by produced {@link CompletionStage} are
      * forwarded to the {@link Uni} returned by this method.
-     * <p>*
+     * <p>
+     * *
      *
      * @param mapper the function called with the item of this {@link Uni} and producing the {@link CompletionStage},
-     *               must not be {@code null}, must not return {@code null}.
-     * @param <R>    the type of item
+     *        must not be {@code null}, must not return {@code null}.
+     * @param <R> the type of item
      * @return a new {@link Uni} that would fire events from the uni produced by the mapper function, possibly
-     * in an asynchronous manner.
+     *         in an asynchronous manner.
      */
     public <R> Uni<R> mapToCompletionStage(Function<? super T, ? extends CompletionStage<? extends R>> mapper) {
         return Infrastructure.onUniCreation(new UniFlatMapCompletionStageOnItem<>(upstream, mapper));
@@ -98,16 +98,15 @@ public class UniOnItem<T> {
      * These events are these propagated by the produced {@link Uni}.
      *
      * @param consumer the function called with the item of the this {@link Uni} and an {@link UniEmitter}.
-     *                 It must not be {@code null}.
-     * @param <R>      the type of item emitted by the emitter
+     *        It must not be {@code null}.
+     * @param <R> the type of item emitted by the emitter
      * @return a new {@link Uni} that would fire events from the emitter consumed by the mapper function, possibly
-     * in an asynchronous manner.
+     *         in an asynchronous manner.
      */
     public <R> Uni<R> mapToUni(BiConsumer<? super T, UniEmitter<? super R>> consumer) {
         nonNull(consumer, "consumer");
         return Infrastructure.onUniCreation(
-                this.mapToUni(x ->  Uni.createFrom().emitter(emitter -> consumer.accept(x, emitter)))
-        );
+                this.mapToUni(x -> Uni.createFrom().emitter(emitter -> consumer.accept(x, emitter))));
     }
 
     /**
@@ -126,12 +125,17 @@ public class UniOnItem<T> {
      * or {@link UniOnResultIgnore#andSwitchTo(Uni) another Uni}. The produced {@link Uni} propagates the failure
      * event if the upstream uni fires a failure.
      *
-     * <p>Examples:</p>
-     * <pre><code>
+     * <p>
+     * Examples:
+     * </p>
+     * 
+     * <pre>
+     * <code>
      *     Uni&lt;T&gt; upstream = ...;
      *     uni = upstream.onItem().ignore().andSwitchTo(other) // Ignore the item from upstream and switch to another uni
      *     uni = upstream.onItem().ignore().andContinueWith(newResult) // Ignore the item from upstream, and fire newResult
-     * </code></pre>
+     * </code>
+     * </pre>
      *
      * @return the object to configure the continuation logic.
      */
@@ -156,7 +160,7 @@ public class UniOnItem<T> {
      * Produces an {@link Uni} emitting an item based on the upstream item but casted to the target class.
      *
      * @param target the target class
-     * @param <O>    the type of item emitted by the produced uni
+     * @param <O> the type of item emitted by the produced uni
      * @return the new Uni
      */
     public <O> Uni<O> castTo(Class<O> target) {
@@ -168,15 +172,20 @@ public class UniOnItem<T> {
      * Adds specific behavior when the observed {@link Uni} fires {@code null} as item. While {@code null} is a valid
      * value, it may require specific processing. This group of operators allows implementing this specific behavior.
      *
-     * <p>Examples:</p>
-     * <pre><code>
+     * <p>
+     * Examples:
+     * </p>
+     * 
+     * <pre>
+     * <code>
      *     Uni&lt;T&gt; upstream = ...;
      *     Uni&lt;T&gt; uni = ...;
      *     uni = upstream.onItem().ifNull().continueWith(anotherValue) // use the fallback value if upstream emits null
      *     uni = upstream.onItem().ifNull().fail() // propagate a NullPointerException if upstream emits null
      *     uni = upstream.onItem().ifNull().failWith(exception) // propagate the given exception if upstream emits null
      *     uni = upstream.onItem().ifNull().switchTo(another) // switch to another uni if upstream emits null
-     * </code></pre>
+     * </code>
+     * </pre>
      *
      * @return the object to configure the behavior when receiving {@code null}
      */

@@ -1,14 +1,14 @@
 package io.smallrye.reactive.operators;
 
-import io.smallrye.reactive.Uni;
-import io.smallrye.reactive.subscription.UniSubscriber;
-import io.smallrye.reactive.subscription.UniSubscription;
+import static io.smallrye.reactive.helpers.EmptyUniSubscription.CANCELLED;
+import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
 
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static io.smallrye.reactive.helpers.EmptyUniSubscription.CANCELLED;
-import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
+import io.smallrye.reactive.Uni;
+import io.smallrye.reactive.subscription.UniSubscriber;
+import io.smallrye.reactive.subscription.UniSubscription;
 
 public class UniCallSubscribeOn<I> extends UniOperator<I, I> {
 

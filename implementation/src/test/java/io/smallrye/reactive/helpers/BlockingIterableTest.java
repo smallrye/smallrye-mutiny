@@ -1,7 +1,7 @@
 package io.smallrye.reactive.helpers;
 
-import io.smallrye.reactive.Multi;
-import org.junit.Test;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,8 +11,9 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import org.junit.Test;
+
+import io.smallrye.reactive.Multi;
 
 public class BlockingIterableTest {
 
@@ -43,7 +44,7 @@ public class BlockingIterableTest {
     public void testToIterableWithEmptyStream() {
         List<Integer> values = new ArrayList<>();
 
-        for (Integer i : Multi.createFrom().<Integer>empty().subscribe().asIterable()) {
+        for (Integer i : Multi.createFrom().<Integer> empty().subscribe().asIterable()) {
             values.add(i);
         }
 
@@ -54,7 +55,7 @@ public class BlockingIterableTest {
     public void testToIterableWithUpstreamFailure() {
         List<Integer> values = new ArrayList<>();
 
-        for (Integer i : Multi.createFrom().<Integer>failure(new RuntimeException("boom"))
+        for (Integer i : Multi.createFrom().<Integer> failure(new RuntimeException("boom"))
                 .subscribe().asIterable()) {
             values.add(i);
         }
@@ -76,7 +77,7 @@ public class BlockingIterableTest {
     @Test(timeout = 5000)
     public void testToStreamWithEmptyStream() {
         List<Integer> values = new ArrayList<>();
-        Multi.createFrom().<Integer>empty().subscribe().asStream().forEach(values::add);
+        Multi.createFrom().<Integer> empty().subscribe().asStream().forEach(values::add);
         assertThat(values).isEmpty();
     }
 
@@ -106,22 +107,20 @@ public class BlockingIterableTest {
     @SuppressWarnings("ResultOfMethodCallIgnored")
     @Test(timeout = 1000)
     public void testToStreamWithFailure() {
-        Multi<Integer> multi = Multi.createFrom().<Integer>emitter(e -> e.emit(1).emit(0).complete())
+        Multi<Integer> multi = Multi.createFrom().<Integer> emitter(e -> e.emit(1).emit(0).complete())
                 .map(v -> 4 / v);
 
-        assertThatThrownBy(() ->
-                multi.subscribe().asStream().collect(Collectors.toList())
-        ).isInstanceOf(ArithmeticException.class).hasMessageContaining("by zero");
+        assertThatThrownBy(() -> multi.subscribe().asStream().collect(Collectors.toList()))
+                .isInstanceOf(ArithmeticException.class).hasMessageContaining("by zero");
     }
 
     @Test(timeout = 1000)
     public void testToIterableWithFailure() {
-        Multi<Integer> multi = Multi.createFrom().<Integer>emitter(e -> e.emit(1).emit(0).complete())
+        Multi<Integer> multi = Multi.createFrom().<Integer> emitter(e -> e.emit(1).emit(0).complete())
                 .map(v -> 4 / v);
 
-        assertThatThrownBy(() ->
-                multi.subscribe().asIterable().forEach(i -> {})
-        ).isInstanceOf(ArithmeticException.class).hasMessageContaining("by zero");
+        assertThatThrownBy(() -> multi.subscribe().asIterable().forEach(i -> {
+        })).isInstanceOf(ArithmeticException.class).hasMessageContaining("by zero");
     }
 
 }

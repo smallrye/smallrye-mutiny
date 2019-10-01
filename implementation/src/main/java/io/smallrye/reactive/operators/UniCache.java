@@ -1,14 +1,14 @@
 package io.smallrye.reactive.operators;
 
-import io.smallrye.reactive.Uni;
-import io.smallrye.reactive.subscription.UniSubscriber;
-import io.smallrye.reactive.subscription.UniSubscription;
+import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
+import io.smallrye.reactive.Uni;
+import io.smallrye.reactive.subscription.UniSubscriber;
+import io.smallrye.reactive.subscription.UniSubscription;
 
 public class UniCache<I> extends UniOperator<I, I> implements UniSubscriber<I> {
 
@@ -44,8 +44,7 @@ public class UniCache<I> extends UniOperator<I, I> implements UniSubscriber<I> {
                 case SUBSCRIBED:
                     // No item yet, but we can provide a Subscription
                     subscribers.add(subscriber);
-                    action = () ->
-                            subscriber.onSubscribe(() -> onCancellation(subscriber));
+                    action = () -> subscriber.onSubscribe(() -> onCancellation(subscriber));
                     break;
                 case COMPLETED:
                     // Result already computed

@@ -1,9 +1,10 @@
 package io.smallrye.reactive.operators;
 
-import io.smallrye.reactive.Uni;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import org.junit.Test;
 
-import java.util.concurrent.atomic.AtomicInteger;
+import io.smallrye.reactive.Uni;
 
 public class UniOnFailureRetryTest {
 
@@ -72,10 +73,10 @@ public class UniOnFailureRetryTest {
         AtomicInteger count = new AtomicInteger();
         Uni.createFrom().item(1)
                 .onItem().consume(input -> {
-            if (count.incrementAndGet() < 2) {
-                throw new RuntimeException("boom");
-            }
-        })
+                    if (count.incrementAndGet() < 2) {
+                        throw new RuntimeException("boom");
+                    }
+                })
                 .onFailure().retry().atMost(2)
                 .subscribe().withSubscriber(UniAssertSubscriber.create())
                 .assertItem(1);

@@ -1,7 +1,6 @@
 package io.smallrye.reactive.operators;
 
-import io.smallrye.reactive.Multi;
-import org.junit.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
@@ -9,7 +8,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.Test;
+
+import io.smallrye.reactive.Multi;
 
 public class MultiCreateFromCompletionStageTest {
 
@@ -42,7 +43,7 @@ public class MultiCreateFromCompletionStageTest {
     @Test
     public void testWithEmpty() {
         MultiAssertSubscriber<String> subscriber = Multi.createFrom()
-                .completionStage(CompletableFuture.<String>completedFuture(null)).subscribe()
+                .completionStage(CompletableFuture.<String> completedFuture(null)).subscribe()
                 .withSubscriber(MultiAssertSubscriber.create(1));
         subscriber.assertCompletedSuccessfully().assertHasNotReceivedAnyItem();
     }

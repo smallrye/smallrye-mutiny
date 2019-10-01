@@ -1,13 +1,13 @@
 package io.smallrye.reactive.groups;
 
-import io.smallrye.reactive.Multi;
-import io.smallrye.reactive.operators.Overflows;
-import io.smallrye.reactive.subscription.BackPressureFailure;
+import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
+import static io.smallrye.reactive.helpers.ParameterValidation.positive;
 
 import java.util.function.Consumer;
 
-import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
-import static io.smallrye.reactive.helpers.ParameterValidation.positive;
+import io.smallrye.reactive.Multi;
+import io.smallrye.reactive.operators.Overflows;
+import io.smallrye.reactive.subscription.BackPressureFailure;
 
 public class MultiOverflow<T> {
     private final Multi<T> upstream;
@@ -51,7 +51,7 @@ public class MultiOverflow<T> {
      * When the downstream cannot keep up with the upstream emissions, instruct to drop the item.
      *
      * @param callback a callback invoked when an item is dropped. The callback receives the item. Must not be
-     *                 {@code null}
+     *        {@code null}
      * @return the new multi
      */
     public Multi<T> drop(Consumer<T> callback) {

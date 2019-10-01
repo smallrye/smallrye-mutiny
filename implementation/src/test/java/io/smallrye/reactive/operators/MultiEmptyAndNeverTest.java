@@ -1,7 +1,8 @@
 package io.smallrye.reactive.operators;
 
-import io.smallrye.reactive.Multi;
 import org.junit.Test;
+
+import io.smallrye.reactive.Multi;
 
 public class MultiEmptyAndNeverTest {
 

@@ -1,9 +1,9 @@
 package io.smallrye.reactive.operators;
 
+import java.util.function.Function;
+
 import io.smallrye.reactive.Uni;
 import io.smallrye.reactive.helpers.ParameterValidation;
-
-import java.util.function.Function;
 
 public class UniMapOnResult<I, O> extends UniOperator<I, O> {
 

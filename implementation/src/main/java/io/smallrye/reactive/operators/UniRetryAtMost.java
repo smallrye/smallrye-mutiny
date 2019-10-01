@@ -1,17 +1,17 @@
 package io.smallrye.reactive.operators;
 
-import io.smallrye.reactive.Uni;
-import io.smallrye.reactive.subscription.UniSubscriber;
-import io.smallrye.reactive.subscription.UniSubscription;
-import io.smallrye.reactive.helpers.Predicates;
+import static io.smallrye.reactive.helpers.EmptyUniSubscription.CANCELLED;
+import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
+import static io.smallrye.reactive.helpers.ParameterValidation.positive;
 
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
 
-import static io.smallrye.reactive.helpers.EmptyUniSubscription.CANCELLED;
-import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
-import static io.smallrye.reactive.helpers.ParameterValidation.positive;
+import io.smallrye.reactive.Uni;
+import io.smallrye.reactive.helpers.Predicates;
+import io.smallrye.reactive.subscription.UniSubscriber;
+import io.smallrye.reactive.subscription.UniSubscription;
 
 public class UniRetryAtMost<T> extends UniOperator<T, T> {
     private final Predicate<? super Throwable> predicate;

@@ -1,8 +1,6 @@
 package io.smallrye.reactive.operators;
 
-import io.smallrye.reactive.Uni;
-import io.smallrye.reactive.infrastructure.Infrastructure;
-import org.junit.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -10,7 +8,10 @@ import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.Test;
+
+import io.smallrye.reactive.Uni;
+import io.smallrye.reactive.infrastructure.Infrastructure;
 
 public class UniRunSubscriptionOnTest {
 
@@ -69,7 +70,7 @@ public class UniRunSubscriptionOnTest {
 
     @Test
     public void testWithFailure() {
-        Uni.createFrom().<Void>failure(new IOException("boom"))
+        Uni.createFrom().<Void> failure(new IOException("boom"))
                 .subscribeOn(Infrastructure.getDefaultExecutor())
                 .subscribe().withSubscriber(UniAssertSubscriber.create())
                 .await()

@@ -1,13 +1,13 @@
 package io.smallrye.reactive.groups;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.function.Function;
+
 import io.smallrye.reactive.Uni;
 import io.smallrye.reactive.tuples.Functions;
 import io.smallrye.reactive.tuples.Tuple5;
 import io.smallrye.reactive.tuples.Tuples;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.function.Function;
 
 public class UniAndGroup5<T1, T2, T3, T4, T5> extends UniAndGroupIterable<T1> {
 

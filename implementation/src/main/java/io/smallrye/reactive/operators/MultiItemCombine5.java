@@ -1,12 +1,13 @@
 package io.smallrye.reactive.operators;
 
+import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
+import static io.smallrye.reactive.helpers.ParameterValidation.size;
+
+import org.reactivestreams.Publisher;
+
 import io.smallrye.reactive.Multi;
 import io.smallrye.reactive.tuples.Functions;
 import io.smallrye.reactive.tuples.Tuple5;
-import org.reactivestreams.Publisher;
-
-import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
-import static io.smallrye.reactive.helpers.ParameterValidation.size;
 
 public class MultiItemCombine5<T1, T2, T3, T4, T5> extends MultiItemCombineIterable {
 
@@ -58,7 +59,7 @@ public class MultiItemCombine5<T1, T2, T3, T4, T5> extends MultiItemCombineItera
      * Creates the resulting {@link Multi}. The items are combined using the given combinator function.
      *
      * @param combinator the combinator function, must not be {@code null}
-     * @param <O>        the type of item
+     * @param <O> the type of item
      * @return the resulting {@link Multi}.
      */
     @SuppressWarnings("unchecked")

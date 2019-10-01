@@ -1,13 +1,13 @@
 package io.smallrye.reactive.operators;
 
-import io.smallrye.reactive.subscription.UniEmitter;
-import io.smallrye.reactive.subscription.UniSubscriber;
-import io.smallrye.reactive.subscription.UniSubscription;
+import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
+import io.smallrye.reactive.subscription.UniEmitter;
+import io.smallrye.reactive.subscription.UniSubscriber;
+import io.smallrye.reactive.subscription.UniSubscription;
 
 /**
  * Implementation of the Uni Emitter.

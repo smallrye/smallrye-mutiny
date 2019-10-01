@@ -14,7 +14,7 @@ public interface UniInterceptor {
 
     /**
      * @return the interceptor ordinal. The ordinal is used to sort the interceptor. Lower value are executed first.
-     * Default is 100.
+     *         Default is 100.
      */
     default int ordinal() {
         return 100;
@@ -40,9 +40,9 @@ public interface UniInterceptor {
      * Method called when a subscriber subscribes to a {@link Uni}.
      * This method lets you substitute the subscriber.
      *
-     * @param instance   the instance of uni
+     * @param instance the instance of uni
      * @param subscriber the subscriber
-     * @param <T>        the type of item
+     * @param <T> the type of item
      * @return the subscriber to use instead of the passed one. By default, it returns the pass subscriber.
      */
     default <T> UniSubscriber<? super T> onSubscription(Uni<T> instance, UniSubscriber<? super T> subscriber) {

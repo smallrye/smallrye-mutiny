@@ -1,13 +1,13 @@
 package io.smallrye.reactive.operators;
 
-import io.smallrye.reactive.Multi;
-import io.smallrye.reactive.Uni;
-import io.smallrye.reactive.tuples.Tuple2;
-import io.smallrye.reactive.groups.*;
-import io.smallrye.reactive.helpers.ParameterValidation;
-
 import java.util.concurrent.Executor;
 import java.util.function.Predicate;
+
+import io.smallrye.reactive.Multi;
+import io.smallrye.reactive.Uni;
+import io.smallrye.reactive.groups.*;
+import io.smallrye.reactive.helpers.ParameterValidation;
+import io.smallrye.reactive.tuples.Tuple2;
 
 public abstract class AbstractUni<T> implements Uni<T> {
 

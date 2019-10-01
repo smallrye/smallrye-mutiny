@@ -1,17 +1,17 @@
 package io.smallrye.reactive.groups;
 
-import io.smallrye.reactive.Uni;
-import io.smallrye.reactive.infrastructure.Infrastructure;
-import io.smallrye.reactive.operators.UniFlatMapOnFailure;
-import io.smallrye.reactive.operators.UniMapOnFailure;
-import io.smallrye.reactive.operators.UniOnEventConsume;
+import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
-import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
+import io.smallrye.reactive.Uni;
+import io.smallrye.reactive.infrastructure.Infrastructure;
+import io.smallrye.reactive.operators.UniFlatMapOnFailure;
+import io.smallrye.reactive.operators.UniMapOnFailure;
+import io.smallrye.reactive.operators.UniOnEventConsume;
 
 public class UniOnFailure<T> {
 
@@ -31,8 +31,7 @@ public class UniOnFailure<T> {
      */
     public Uni<T> consume(Consumer<Throwable> callback) {
         return Infrastructure.onUniCreation(
-                new UniOnEventConsume<>(upstream, null, nonNull(callback, "callback"))
-        );
+                new UniOnEventConsume<>(upstream, null, nonNull(callback, "callback")));
     }
 
     /**
@@ -65,8 +64,7 @@ public class UniOnFailure<T> {
 
     public Uni<T> recoverWithUni(Function<? super Throwable, ? extends Uni<? extends T>> fallback) {
         return Infrastructure.onUniCreation(
-                new UniFlatMapOnFailure<>(upstream, predicate, nonNull(fallback, "fallback"))
-        );
+                new UniFlatMapOnFailure<>(upstream, predicate, nonNull(fallback, "fallback")));
     }
 
     public Uni<T> recoverWithUni(Supplier<? extends Uni<? extends T>> supplier) {

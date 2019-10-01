@@ -1,7 +1,8 @@
 package io.smallrye.reactive.operators;
 
-import io.smallrye.reactive.Uni;
-import io.smallrye.reactive.subscription.UniSubscription;
+import static io.smallrye.reactive.helpers.EmptyUniSubscription.CANCELLED;
+import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
+import static io.smallrye.reactive.helpers.ParameterValidation.validate;
 
 import java.time.Duration;
 import java.util.concurrent.ScheduledExecutorService;
@@ -9,9 +10,8 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static io.smallrye.reactive.helpers.EmptyUniSubscription.CANCELLED;
-import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
-import static io.smallrye.reactive.helpers.ParameterValidation.validate;
+import io.smallrye.reactive.Uni;
+import io.smallrye.reactive.subscription.UniSubscription;
 
 public class UniDelayOnItem<T> extends UniOperator<T, T> {
     private final Duration duration;

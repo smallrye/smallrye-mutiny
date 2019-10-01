@@ -1,14 +1,14 @@
 package io.smallrye.reactive.groups;
 
-import io.smallrye.reactive.Uni;
-import io.smallrye.reactive.infrastructure.Infrastructure;
-import io.smallrye.reactive.operators.UniOrCombination;
+import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Executor;
 
-import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
+import io.smallrye.reactive.Uni;
+import io.smallrye.reactive.infrastructure.Infrastructure;
+import io.smallrye.reactive.operators.UniOrCombination;
 
 public class UniAny {
 
@@ -22,7 +22,7 @@ public class UniAny {
      * Like {@link #of(Iterable)} but with an array of {@link Uni} as parameter
      *
      * @param unis the array, must not be {@code null}, must not contain @{code null}
-     * @param <T>  the type of item emitted by the different unis.
+     * @param <T> the type of item emitted by the different unis.
      * @return the produced {@link Uni}
      */
     @SafeVarargs
@@ -46,7 +46,7 @@ public class UniAny {
      * contained in the {@code iterable} are also cancelled.
      *
      * @param iterable a set of {@link Uni}, must not be {@code null}.
-     * @param <T>      the type of item emitted by the different unis.
+     * @param <T> the type of item emitted by the different unis.
      * @return the produced {@link Uni}
      */
     public <T> Uni<T> of(Iterable<? extends Uni<? super T>> iterable) {

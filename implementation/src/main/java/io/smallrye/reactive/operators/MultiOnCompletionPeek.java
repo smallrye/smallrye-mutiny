@@ -1,9 +1,9 @@
 package io.smallrye.reactive.operators;
 
+import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
+
 import io.reactivex.Flowable;
 import io.smallrye.reactive.Multi;
-
-import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
 
 public class MultiOnCompletionPeek<T> extends MultiOperator<T, T> {
     private final Runnable callback;

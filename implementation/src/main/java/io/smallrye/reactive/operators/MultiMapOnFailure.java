@@ -1,13 +1,13 @@
 package io.smallrye.reactive.operators;
 
-import io.reactivex.Flowable;
-import io.smallrye.reactive.Multi;
+import static io.smallrye.reactive.helpers.ParameterValidation.MAPPER_RETURNED_NULL;
+import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
 
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-import static io.smallrye.reactive.helpers.ParameterValidation.MAPPER_RETURNED_NULL;
-import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
+import io.reactivex.Flowable;
+import io.smallrye.reactive.Multi;
 
 public class MultiMapOnFailure<T> extends MultiOperator<T, T> {
     private final Predicate<? super Throwable> predicate;

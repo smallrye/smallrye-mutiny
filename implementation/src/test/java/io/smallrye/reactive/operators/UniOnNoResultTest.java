@@ -1,14 +1,15 @@
 package io.smallrye.reactive.operators;
 
-import io.smallrye.reactive.TimeoutException;
-import io.smallrye.reactive.Uni;
-import org.junit.Test;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import java.io.IOException;
 import java.time.Duration;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import org.junit.Test;
+
+import io.smallrye.reactive.TimeoutException;
+import io.smallrye.reactive.Uni;
 
 public class UniOnNoResultTest {
 
@@ -39,7 +40,7 @@ public class UniOnNoResultTest {
 
     @Test
     public void testRecoverWithItem() {
-        UniAssertSubscriber<Integer> ts = Uni.createFrom().<Integer>nothing()
+        UniAssertSubscriber<Integer> ts = Uni.createFrom().<Integer> nothing()
                 .onNoItem().after(Duration.ofMillis(10)).recoverWithItem(5)
                 .subscribe().withSubscriber(UniAssertSubscriber.create());
         ts.await().assertItem(5);
@@ -47,7 +48,7 @@ public class UniOnNoResultTest {
 
     @Test
     public void testRecoverWithItemSupplier() {
-        UniAssertSubscriber<Integer> ts = Uni.createFrom().<Integer>nothing()
+        UniAssertSubscriber<Integer> ts = Uni.createFrom().<Integer> nothing()
                 .onNoItem().after(Duration.ofMillis(10)).recoverWithItem(() -> 23)
                 .subscribe().withSubscriber(UniAssertSubscriber.create());
         ts.await().assertItem(23);
@@ -55,7 +56,7 @@ public class UniOnNoResultTest {
 
     @Test
     public void testRecoverWithSwitchToUni() {
-        UniAssertSubscriber<Integer> ts = Uni.createFrom().<Integer>nothing()
+        UniAssertSubscriber<Integer> ts = Uni.createFrom().<Integer> nothing()
                 .onNoItem().after(Duration.ofMillis(10)).recoverWithUni(() -> Uni.createFrom().item(15))
                 .subscribe().withSubscriber(UniAssertSubscriber.create());
         ts.await().assertItem(15);
@@ -63,7 +64,7 @@ public class UniOnNoResultTest {
 
     @Test
     public void testFailingWithAnotherException() {
-        UniAssertSubscriber<Integer> ts = Uni.createFrom().<Integer>nothing()
+        UniAssertSubscriber<Integer> ts = Uni.createFrom().<Integer> nothing()
                 .onNoItem().after(Duration.ofMillis(10)).failWith(new IOException("boom"))
                 .subscribe().withSubscriber(UniAssertSubscriber.create());
         ts.await().assertFailure(IOException.class, "boom");

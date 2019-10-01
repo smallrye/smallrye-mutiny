@@ -1,14 +1,14 @@
 package io.smallrye.reactive.operators;
 
-import io.smallrye.reactive.Uni;
-import io.smallrye.reactive.subscription.UniSubscriber;
-import io.smallrye.reactive.subscription.UniSubscription;
+import static io.smallrye.reactive.helpers.ParameterValidation.MAPPER_RETURNED_NULL;
+import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
 
 import java.util.concurrent.CompletionStage;
 import java.util.function.Function;
 
-import static io.smallrye.reactive.helpers.ParameterValidation.MAPPER_RETURNED_NULL;
-import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
+import io.smallrye.reactive.Uni;
+import io.smallrye.reactive.subscription.UniSubscriber;
+import io.smallrye.reactive.subscription.UniSubscription;
 
 public class UniFlatMapCompletionStageOnItem<I, O> extends UniOperator<I, O> {
 

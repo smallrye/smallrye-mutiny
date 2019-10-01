@@ -1,7 +1,8 @@
 package io.smallrye.reactive.subscription;
 
-import io.smallrye.reactive.Multi;
 import org.reactivestreams.Subscription;
+
+import io.smallrye.reactive.Multi;
 
 /**
  * An object allowing to send signals to the downstream {@link Multi}.

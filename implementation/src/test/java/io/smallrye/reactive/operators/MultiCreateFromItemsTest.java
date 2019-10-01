@@ -1,14 +1,15 @@
 package io.smallrye.reactive.operators;
 
-import io.smallrye.reactive.Multi;
-import org.junit.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.Test;
+
+import io.smallrye.reactive.Multi;
 
 public class MultiCreateFromItemsTest {
 

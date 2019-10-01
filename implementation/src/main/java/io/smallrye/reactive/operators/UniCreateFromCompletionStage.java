@@ -1,11 +1,11 @@
 package io.smallrye.reactive.operators;
 
-import io.smallrye.reactive.helpers.ParameterValidation;
+import static io.smallrye.reactive.helpers.EmptyUniSubscription.propagateFailureEvent;
 
 import java.util.concurrent.CompletionStage;
 import java.util.function.Supplier;
 
-import static io.smallrye.reactive.helpers.EmptyUniSubscription.propagateFailureEvent;
+import io.smallrye.reactive.helpers.ParameterValidation;
 
 public class UniCreateFromCompletionStage<O> extends UniOperator<Void, O> {
     private final Supplier<? extends CompletionStage<? extends O>> supplier;

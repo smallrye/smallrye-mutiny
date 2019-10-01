@@ -1,12 +1,13 @@
 package io.smallrye.reactive.operators;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.reactivestreams.Publisher;
+
 import io.reactivex.Flowable;
 import io.smallrye.reactive.Multi;
 import io.smallrye.reactive.helpers.ParameterValidation;
-import org.reactivestreams.Publisher;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 public class MultiCombine {
 
