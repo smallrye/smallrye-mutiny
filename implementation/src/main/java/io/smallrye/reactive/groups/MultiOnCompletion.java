@@ -1,19 +1,20 @@
 package io.smallrye.reactive.groups;
 
-import io.reactivex.Flowable;
-import io.smallrye.reactive.Multi;
-import io.smallrye.reactive.Uni;
-import io.smallrye.reactive.operators.MultiOperator;
-import io.smallrye.reactive.operators.MultiSwitchOnCompletion;
-import io.smallrye.reactive.subscription.MultiEmitter;
-import org.reactivestreams.Publisher;
+import static io.smallrye.reactive.helpers.ParameterValidation.*;
 
 import java.util.Arrays;
 import java.util.NoSuchElementException;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-import static io.smallrye.reactive.helpers.ParameterValidation.*;
+import org.reactivestreams.Publisher;
+
+import io.reactivex.Flowable;
+import io.smallrye.reactive.Multi;
+import io.smallrye.reactive.Uni;
+import io.smallrye.reactive.operators.MultiOperator;
+import io.smallrye.reactive.operators.MultiSwitchOnCompletion;
+import io.smallrye.reactive.subscription.MultiEmitter;
 
 public class MultiOnCompletion<T> {
 
@@ -77,7 +78,7 @@ public class MultiOnCompletion<T> {
      * If the upstream {@link Multi} fails, the switch does not apply.
      *
      * @param consumer the callback receiving the emitter to fire the events. Must not be {@code null}. Throwing exception
-     *                 in this function propagates a failure downstream.
+     *        in this function propagates a failure downstream.
      * @return the new {@link Multi}
      */
     public Multi<T> switchToEmitter(Consumer<MultiEmitter<? super T>> consumer) {

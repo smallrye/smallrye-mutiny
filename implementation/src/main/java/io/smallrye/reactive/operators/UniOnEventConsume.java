@@ -1,9 +1,9 @@
 package io.smallrye.reactive.operators;
 
+import java.util.function.Consumer;
+
 import io.smallrye.reactive.CompositeException;
 import io.smallrye.reactive.Uni;
-
-import java.util.function.Consumer;
 
 public class UniOnEventConsume<T> extends UniOperator<T, T> {
 

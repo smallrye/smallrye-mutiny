@@ -1,16 +1,16 @@
 package io.smallrye.reactive.groups;
 
-import io.smallrye.reactive.TimeoutException;
-import io.smallrye.reactive.Uni;
-import io.smallrye.reactive.infrastructure.Infrastructure;
-import io.smallrye.reactive.operators.UniFailOnTimeout;
+import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
+import static io.smallrye.reactive.helpers.ParameterValidation.validate;
 
 import java.time.Duration;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.function.Supplier;
 
-import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
-import static io.smallrye.reactive.helpers.ParameterValidation.validate;
+import io.smallrye.reactive.TimeoutException;
+import io.smallrye.reactive.Uni;
+import io.smallrye.reactive.infrastructure.Infrastructure;
+import io.smallrye.reactive.operators.UniFailOnTimeout;
 
 public class UniOnTimeout<T> {
 

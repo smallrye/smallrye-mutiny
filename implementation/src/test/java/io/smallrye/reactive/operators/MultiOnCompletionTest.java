@@ -1,9 +1,6 @@
 package io.smallrye.reactive.operators;
 
-import io.reactivex.Flowable;
-import io.smallrye.reactive.Multi;
-import org.junit.Test;
-import org.reactivestreams.Publisher;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -12,7 +9,11 @@ import java.util.NoSuchElementException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.Test;
+import org.reactivestreams.Publisher;
+
+import io.reactivex.Flowable;
+import io.smallrye.reactive.Multi;
 
 public class MultiOnCompletionTest {
 
@@ -160,8 +161,8 @@ public class MultiOnCompletionTest {
     public void testOnCompletionContinueWithSupplierThrowingException() {
         Multi.createFrom().range(1, 5)
                 .onCompletion().continueWith((Supplier<? extends Iterable<? extends Integer>>) () -> {
-            throw new IllegalStateException("BOOM!");
-        })
+                    throw new IllegalStateException("BOOM!");
+                })
                 .subscribe().withSubscriber(MultiAssertSubscriber.create(20))
                 .assertHasFailedWith(IllegalStateException.class, "BOOM!")
                 .assertReceived(1, 2, 3, 4);
@@ -211,8 +212,8 @@ public class MultiOnCompletionTest {
     public void testOnCompletionFailWithSupplierThrowingException() {
         Multi.createFrom().range(1, 5)
                 .onCompletion().failWith(() -> {
-            throw new IllegalStateException("BOOM!");
-        })
+                    throw new IllegalStateException("BOOM!");
+                })
                 .subscribe().withSubscriber(MultiAssertSubscriber.create(Long.MAX_VALUE))
                 .assertReceived(1, 2, 3, 4)
                 .assertHasFailedWith(IllegalStateException.class, "BOOM!");

@@ -1,11 +1,11 @@
 package io.smallrye.reactive.operators;
 
-import io.reactivex.Flowable;
-import io.smallrye.reactive.Multi;
+import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
 
 import java.util.function.Consumer;
 
-import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
+import io.reactivex.Flowable;
+import io.smallrye.reactive.Multi;
 
 public class MultiOnResultPeek<T> extends MultiOperator<T, T> {
     private final Consumer<? super T> callback;

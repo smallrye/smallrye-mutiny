@@ -1,13 +1,14 @@
 package io.smallrye.reactive.groups;
 
-import io.smallrye.reactive.Multi;
-import io.smallrye.reactive.Uni;
-import io.smallrye.reactive.operators.*;
-import org.reactivestreams.Publisher;
+import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
 
 import java.util.function.*;
 
-import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
+import org.reactivestreams.Publisher;
+
+import io.smallrye.reactive.Multi;
+import io.smallrye.reactive.Uni;
+import io.smallrye.reactive.operators.*;
 
 public class MultiOnItem<T> {
 
@@ -25,7 +26,7 @@ public class MultiOnItem<T> {
      * <p>
      *
      * @param mapper the mapper function, must not be {@code null}
-     * @param <R>    the type of item produced by the mapper function
+     * @param <R> the type of item produced by the mapper function
      * @return the new {@link Multi}
      */
     public <R> Multi<R> mapToItem(Function<? super T, ? extends R> mapper) {
@@ -33,7 +34,7 @@ public class MultiOnItem<T> {
     }
 
     /**
-     * Produces a new {@link Multi} invoking the given callback when an {@code item}  event is fired by the upstrea.
+     * Produces a new {@link Multi} invoking the given callback when an {@code item} event is fired by the upstrea.
      *
      * @param callback the callback, must not be {@code null}
      * @return the new {@link Uni}
@@ -55,7 +56,7 @@ public class MultiOnItem<T> {
      * Produces an {@link Multi} emitting the item events based on the upstream events but casted to the target class.
      *
      * @param target the target class
-     * @param <O>    the type of item emitted by the produced uni
+     * @param <O> the type of item emitted by the produced uni
      * @return the new Uni
      */
     public <O> Multi<O> castTo(Class<O> target) {
@@ -72,10 +73,10 @@ public class MultiOnItem<T> {
      * first value.
      *
      * @param initialStateProducer the producer called to provides the initial value passed to the scanner operation.
-     * @param scanner              the reduction {@link BiFunction}, the resulting {@link Multi} emits the results of
-     *                             this method. The method is called for every item emitted by this Multi.
-     * @param <S>                  the type of item emitted by the produced {@link Multi}. It's the type returned by the
-     *                             {@code scanner} operation.
+     * @param scanner the reduction {@link BiFunction}, the resulting {@link Multi} emits the results of
+     *        this method. The method is called for every item emitted by this Multi.
+     * @param <S> the type of item emitted by the produced {@link Multi}. It's the type returned by the
+     *        {@code scanner} operation.
      * @return the produced {@link Multi}
      */
     public <S> Multi<S> scan(Supplier<S> initialStateProducer, BiFunction<S, ? super T, S> scanner) {
@@ -94,7 +95,7 @@ public class MultiOnItem<T> {
      * item emitted by this {@link Multi} as initial value.
      *
      * @param scanner the reduction {@link BiFunction}, the resulting {@link Multi} emits the results of this method.
-     *                The method is called for every item emitted by this Multi.
+     *        The method is called for every item emitted by this Multi.
      * @return the produced {@link Multi}
      */
     public Multi<T> scan(BiFunction<T, T, T> scanner) {
@@ -114,8 +115,8 @@ public class MultiOnItem<T> {
      * </ul>
      *
      * @param mapper the {@link Function} producing {@link Publisher} / {@link Multi} for each items emitted by the
-     *               upstream {@link Multi}
-     * @param <O>    the type of item emitted by the {@link Publisher} produced by the {@code mapper}
+     *        upstream {@link Multi}
+     * @param <O> the type of item emitted by the {@link Publisher} produced by the {@code mapper}
      * @return the produced {@link Multi}
      */
     public <O> Multi<O> flatMap(Function<? super T, ? extends Publisher<? extends O>> mapper) {
@@ -135,8 +136,8 @@ public class MultiOnItem<T> {
      * </ul>
      *
      * @param mapper the {@link Function} producing {@link Publisher} / {@link Multi} for each items emitted by the
-     *               upstream {@link Multi}
-     * @param <O>    the type of item emitted by the {@link Publisher} produced by the {@code mapper}
+     *        upstream {@link Multi}
+     * @param <O> the type of item emitted by the {@link Publisher} produced by the {@code mapper}
      * @return the produced {@link Multi}
      */
     public <O> Multi<O> concatMap(Function<? super T, ? extends Publisher<? extends O>> mapper) {

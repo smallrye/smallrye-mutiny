@@ -1,12 +1,7 @@
 package io.smallrye.reactive.adapt;
 
-import io.reactivex.*;
-import io.reactivex.subscribers.TestSubscriber;
-import io.smallrye.reactive.Uni;
-import io.smallrye.reactive.adapt.converters.*;
-import org.junit.Test;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 import java.io.IOException;
 import java.util.NoSuchElementException;
@@ -15,8 +10,14 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import org.junit.Test;
+
+import io.reactivex.*;
+import io.reactivex.subscribers.TestSubscriber;
+import io.smallrye.reactive.Uni;
+import io.smallrye.reactive.adapt.converters.*;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 public class UniAdaptToTest {
 
@@ -143,7 +144,7 @@ public class UniAdaptToTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testCreatingASingleWithFailure() {
-        Single<Optional<Integer>> single = Uni.createFrom().<Integer>failure(new IOException("boom")).adapt().toSingle();
+        Single<Optional<Integer>> single = Uni.createFrom().<Integer> failure(new IOException("boom")).adapt().toSingle();
         assertThat(single).isNotNull();
         single.test().assertError(e -> {
             assertThat(e).hasMessage("boom").isInstanceOf(IOException.class);
@@ -175,7 +176,7 @@ public class UniAdaptToTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testCreatingAMaybeWithFailure() {
-        Maybe<Integer> maybe = Uni.createFrom().<Integer>failure(new IOException("boom")).adapt().toMaybe();
+        Maybe<Integer> maybe = Uni.createFrom().<Integer> failure(new IOException("boom")).adapt().toMaybe();
         assertThat(maybe).isNotNull();
         maybe.test().assertError(e -> {
             assertThat(e).hasMessage("boom").isInstanceOf(IOException.class);
@@ -207,7 +208,8 @@ public class UniAdaptToTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testCreatingAnObservableWithFailure() {
-        Observable<Integer> observable = Uni.createFrom().<Integer>failure(new IOException("boom")).adapt().with(new ToObservable<>());
+        Observable<Integer> observable = Uni.createFrom().<Integer> failure(new IOException("boom")).adapt()
+                .with(new ToObservable<>());
         assertThat(observable).isNotNull();
         observable.test().assertError(e -> {
             assertThat(e).hasMessage("boom").isInstanceOf(IOException.class);
@@ -256,7 +258,7 @@ public class UniAdaptToTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testCreatingAFlowableWithFailure() {
-        Flowable<Integer> flowable = Uni.createFrom().<Integer>failure(new IOException("boom")).adapt().toFlowable();
+        Flowable<Integer> flowable = Uni.createFrom().<Integer> failure(new IOException("boom")).adapt().toFlowable();
         assertThat(flowable).isNotNull();
         flowable.test().assertError(e -> {
             assertThat(e).hasMessage("boom").isInstanceOf(IOException.class);
@@ -283,7 +285,7 @@ public class UniAdaptToTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testCreatingAFluxWithFailure() {
-        Flux<Integer> flux = Uni.createFrom().<Integer>failure(new IOException("boom")).adapt().with(new ToFlux<>());
+        Flux<Integer> flux = Uni.createFrom().<Integer> failure(new IOException("boom")).adapt().with(new ToFlux<>());
         assertThat(flux).isNotNull();
         try {
             flux.blockFirst();
@@ -312,7 +314,7 @@ public class UniAdaptToTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testCreatingAMonoWithFailure() {
-        Mono<Integer> mono = Uni.createFrom().<Integer>failure(new IOException("boom")).adapt().with(new ToMono<>());
+        Mono<Integer> mono = Uni.createFrom().<Integer> failure(new IOException("boom")).adapt().with(new ToMono<>());
         assertThat(mono).isNotNull();
         try {
             mono.block();

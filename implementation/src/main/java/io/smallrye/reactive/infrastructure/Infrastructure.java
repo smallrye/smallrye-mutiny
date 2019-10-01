@@ -1,7 +1,6 @@
 package io.smallrye.reactive.infrastructure;
 
-import io.smallrye.reactive.Uni;
-import io.smallrye.reactive.subscription.UniSubscriber;
+import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -12,7 +11,8 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
-import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
+import io.smallrye.reactive.Uni;
+import io.smallrye.reactive.subscription.UniSubscriber;
 
 public class Infrastructure {
 

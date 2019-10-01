@@ -1,9 +1,7 @@
 package io.smallrye.reactive.operators;
 
-import io.smallrye.reactive.Multi;
-import io.smallrye.reactive.subscription.Cancellable;
-import io.smallrye.reactive.subscription.MultiEmitter;
-import org.junit.Test;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -13,8 +11,11 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.awaitility.Awaitility.await;
+import org.junit.Test;
+
+import io.smallrye.reactive.Multi;
+import io.smallrye.reactive.subscription.Cancellable;
+import io.smallrye.reactive.subscription.MultiEmitter;
 
 public class MultiSubscribeTest {
 
@@ -59,7 +60,7 @@ public class MultiSubscribeTest {
         AtomicBoolean completion = new AtomicBoolean();
         AtomicReference<Throwable> failure = new AtomicReference<>();
         AtomicReference<MultiEmitter<? super Integer>> emitter = new AtomicReference<>();
-        Multi.createFrom().<Integer>emitter(emitter::set)
+        Multi.createFrom().<Integer> emitter(emitter::set)
                 .subscribe().with(items::add, failure::set, () -> completion.set(true));
 
         assertThat(items).isEmpty();
@@ -79,7 +80,7 @@ public class MultiSubscribeTest {
         AtomicBoolean completion = new AtomicBoolean();
         AtomicReference<Throwable> failure = new AtomicReference<>();
         AtomicReference<MultiEmitter<? super Integer>> emitter = new AtomicReference<>();
-        Multi.createFrom().<Integer>emitter(emitter::set)
+        Multi.createFrom().<Integer> emitter(emitter::set)
                 .subscribe().with(items::add, failure::set, () -> completion.set(true));
 
         assertThat(items).isEmpty();
@@ -98,7 +99,7 @@ public class MultiSubscribeTest {
         List<Integer> items = new CopyOnWriteArrayList<>();
         AtomicReference<Throwable> failure = new AtomicReference<>();
         AtomicReference<MultiEmitter<? super Integer>> emitter = new AtomicReference<>();
-        Multi.createFrom().<Integer>emitter(emitter::set)
+        Multi.createFrom().<Integer> emitter(emitter::set)
                 .subscribe().with(items::add, failure::set);
 
         assertThat(items).isEmpty();
@@ -115,7 +116,7 @@ public class MultiSubscribeTest {
         List<Integer> items = new CopyOnWriteArrayList<>();
         AtomicBoolean completion = new AtomicBoolean();
         AtomicReference<MultiEmitter<? super Integer>> emitter = new AtomicReference<>();
-        Multi.createFrom().<Integer>emitter(emitter::set)
+        Multi.createFrom().<Integer> emitter(emitter::set)
                 .subscribe().with(items::add, () -> completion.set(true));
 
         assertThat(items).isEmpty();

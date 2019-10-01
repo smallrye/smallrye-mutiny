@@ -1,13 +1,13 @@
 package io.smallrye.reactive.operators;
 
-import org.reactivestreams.Publisher;
-import org.reactivestreams.Subscriber;
-import org.reactivestreams.Subscription;
+import static io.smallrye.reactive.helpers.EmptyUniSubscription.CANCELLED;
+import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-import static io.smallrye.reactive.helpers.EmptyUniSubscription.CANCELLED;
-import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
+import org.reactivestreams.Publisher;
+import org.reactivestreams.Subscriber;
+import org.reactivestreams.Subscription;
 
 public class UniCreateFromPublisher<O> extends UniOperator<Void, O> {
     private final Publisher<? extends O> publisher;

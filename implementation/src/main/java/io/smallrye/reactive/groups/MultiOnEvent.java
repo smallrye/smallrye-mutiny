@@ -1,15 +1,16 @@
 package io.smallrye.reactive.groups;
 
-import io.smallrye.reactive.Multi;
-import io.smallrye.reactive.operators.*;
-import org.reactivestreams.Subscription;
+import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
 
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.LongConsumer;
 import java.util.function.Predicate;
 
-import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
+import org.reactivestreams.Subscription;
+
+import io.smallrye.reactive.Multi;
+import io.smallrye.reactive.operators.*;
 
 /**
  * Allows configuring the action to execute on each type of events emitted by a {@link Multi} or by
@@ -62,8 +63,8 @@ public class MultiOnEvent<T> {
      * cancels the subscription.
      *
      * @param consumer the consumer receiving the failure if any and a boolean indicating whether the termination
-     *                 is due to a cancellation (the failure parameter would be {@code null} in this case). Must not
-     *                 be {@code null}.
+     *        is due to a cancellation (the failure parameter would be {@code null} in this case). Must not
+     *        be {@code null}.
      * @return the new {@link Multi}
      */
     public Multi<T> termination(BiConsumer<Throwable, Boolean> consumer) {
@@ -73,12 +74,17 @@ public class MultiOnEvent<T> {
     /**
      * Configures the action to execute when the observed {@link Multi} emits an item.
      *
-     * <p>Examples:</p>
-     * <pre>{@code
+     * <p>
+     * Examples:
+     * </p>
+     * 
+     * <pre>
+     * {@code
      * Multi<T> multi = ...;
      * multi.onItem().mapToItem(x -> ...); // Map to another item
      * multi.onItem().mapToMulti(x -> ...); // Map to a multi
-     * }</pre>
+     * }
+     * </pre>
      *
      * @return the object to configure the action to execute when an item is emitted
      */

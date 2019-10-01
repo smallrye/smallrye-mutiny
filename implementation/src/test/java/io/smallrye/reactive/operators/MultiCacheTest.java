@@ -1,12 +1,13 @@
 package io.smallrye.reactive.operators;
 
-import io.smallrye.reactive.Multi;
-import io.smallrye.reactive.subscription.MultiEmitter;
-import org.junit.Test;
-
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
+
+import org.junit.Test;
+
+import io.smallrye.reactive.Multi;
+import io.smallrye.reactive.subscription.MultiEmitter;
 
 public class MultiCacheTest {
 
@@ -28,11 +29,9 @@ public class MultiCacheTest {
     @Test
     public void testCachingWithFailure() {
         AtomicInteger count = new AtomicInteger();
-        Multi<Integer> multi = Multi.createFrom().<Integer>emitter(emitter ->
-                emitter.emit(count.incrementAndGet())
-                        .emit(count.incrementAndGet())
-                        .fail(new IOException("boom-" + count.incrementAndGet()))
-        )
+        Multi<Integer> multi = Multi.createFrom().<Integer> emitter(emitter -> emitter.emit(count.incrementAndGet())
+                .emit(count.incrementAndGet())
+                .fail(new IOException("boom-" + count.incrementAndGet())))
                 .cache();
         multi.subscribe().withSubscriber(MultiAssertSubscriber.create(2))
                 .assertReceived(1, 2)
@@ -47,7 +46,7 @@ public class MultiCacheTest {
     public void testCachingWithDeferredResult() {
         AtomicInteger count = new AtomicInteger();
         AtomicReference<MultiEmitter<? super Integer>> reference = new AtomicReference<>();
-        Multi<Integer> multi = Multi.createFrom().<Integer>emitter(emitter -> {
+        Multi<Integer> multi = Multi.createFrom().<Integer> emitter(emitter -> {
             reference.set(emitter);
             emitter.emit(count.incrementAndGet())
                     .emit(count.incrementAndGet());

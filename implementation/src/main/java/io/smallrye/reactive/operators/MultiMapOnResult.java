@@ -1,9 +1,9 @@
 package io.smallrye.reactive.operators;
 
+import java.util.function.Function;
+
 import io.reactivex.Flowable;
 import io.smallrye.reactive.Multi;
-
-import java.util.function.Function;
 
 public class MultiMapOnResult<T, R> extends MultiOperator<T, R> {
     private final Function<? super T, ? extends R> mapper;

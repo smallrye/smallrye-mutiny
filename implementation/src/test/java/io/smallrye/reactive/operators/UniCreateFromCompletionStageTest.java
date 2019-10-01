@@ -1,7 +1,6 @@
 package io.smallrye.reactive.operators;
 
-import io.smallrye.reactive.Uni;
-import org.junit.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
@@ -9,7 +8,9 @@ import java.util.concurrent.CompletionStage;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.Test;
+
+import io.smallrye.reactive.Uni;
 
 public class UniCreateFromCompletionStageTest {
 
@@ -43,7 +44,7 @@ public class UniCreateFromCompletionStageTest {
     @Test
     public void testThatNullValueAreAcceptedWithSupplier() {
         UniAssertSubscriber<Void> ts = UniAssertSubscriber.create();
-        Uni.createFrom().<Void>deferredCompletionStage(() -> CompletableFuture.completedFuture(null)).subscribe()
+        Uni.createFrom().<Void> deferredCompletionStage(() -> CompletableFuture.completedFuture(null)).subscribe()
                 .withSubscriber(ts);
         ts.assertCompletedSuccessfully().assertItem(null);
     }

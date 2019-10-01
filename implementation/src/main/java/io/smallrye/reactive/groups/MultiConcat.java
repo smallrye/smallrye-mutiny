@@ -1,13 +1,14 @@
 package io.smallrye.reactive.groups;
 
-import io.smallrye.reactive.Multi;
-import io.smallrye.reactive.CompositeException;
-import io.smallrye.reactive.operators.MultiCombine;
-import org.reactivestreams.Publisher;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import org.reactivestreams.Publisher;
+
+import io.smallrye.reactive.CompositeException;
+import io.smallrye.reactive.Multi;
+import io.smallrye.reactive.operators.MultiCombine;
 
 /**
  * Creates new {@link Multi} by concatenating several {@link Multi} or {@link Publisher}.
@@ -29,7 +30,7 @@ public class MultiConcat {
      * {@link Publisher publishers}.
      *
      * @param publishers the publishers, must not be empty, must not contain {@code null}
-     * @param <T>        the type of item
+     * @param <T> the type of item
      * @return the new {@link Multi} emitting the items from the given set of {@link Multi} using a concatenation
      */
     public <T> Multi<T> streams(Publisher<T>... publishers) {
@@ -41,7 +42,7 @@ public class MultiConcat {
      * {@link Publisher publishers}..
      *
      * @param iterable the publishers, must not be empty, must not contain {@code null}, must not be {@code null}
-     * @param <T>      the type of item
+     * @param <T> the type of item
      * @return the new {@link Multi} emitting the items from the given set of {@link Multi} using a concatenation
      */
     public <T> Multi<T> streams(Iterable<? extends Publisher<T>> iterable) {

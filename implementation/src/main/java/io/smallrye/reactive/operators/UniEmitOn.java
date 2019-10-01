@@ -1,10 +1,10 @@
 package io.smallrye.reactive.operators;
 
-import io.smallrye.reactive.Uni;
+import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
 
 import java.util.concurrent.Executor;
 
-import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
+import io.smallrye.reactive.Uni;
 
 public class UniEmitOn<I> extends UniOperator<I, I> {
     private final Executor executor;
@@ -22,7 +22,8 @@ public class UniEmitOn<I> extends UniOperator<I, I> {
                 executor.execute(() -> subscriber.onItem(item));
             }
 
-            @Override public void onFailure(Throwable failure) {
+            @Override
+            public void onFailure(Throwable failure) {
                 executor.execute(() -> subscriber.onFailure(failure));
             }
         });

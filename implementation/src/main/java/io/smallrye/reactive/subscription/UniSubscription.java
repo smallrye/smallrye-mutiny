@@ -1,7 +1,8 @@
 package io.smallrye.reactive.subscription;
 
-import io.smallrye.reactive.Uni;
 import org.reactivestreams.Subscription;
+
+import io.smallrye.reactive.Uni;
 
 /**
  * A {@link Subscription} for the {@link Uni} type.

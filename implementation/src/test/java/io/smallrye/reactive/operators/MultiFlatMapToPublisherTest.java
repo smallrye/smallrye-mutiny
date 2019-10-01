@@ -1,9 +1,6 @@
 package io.smallrye.reactive.operators;
 
-import io.smallrye.reactive.CompositeException;
-import io.smallrye.reactive.Multi;
-import io.smallrye.reactive.Uni;
-import org.junit.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -12,7 +9,11 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.Test;
+
+import io.smallrye.reactive.CompositeException;
+import io.smallrye.reactive.Multi;
+import io.smallrye.reactive.Uni;
 
 public class MultiFlatMapToPublisherTest {
 
@@ -41,7 +42,7 @@ public class MultiFlatMapToPublisherTest {
         MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(Long.MAX_VALUE);
 
         Multi.createFrom().range(1, 4)
-                .onItem().concatMap(i -> Multi.createFrom().<Integer>empty())
+                .onItem().concatMap(i -> Multi.createFrom().<Integer> empty())
                 .subscribe(subscriber);
 
         subscriber.assertCompletedSuccessfully().assertHasNotReceivedAnyItem();
@@ -107,8 +108,7 @@ public class MultiFlatMapToPublisherTest {
                             } else {
                                 return i;
                             }
-                        }))
-                )
+                        })))
                 .collectFailures()
                 .concatenateResults()
                 .subscribe(subscriber);
@@ -131,14 +131,13 @@ public class MultiFlatMapToPublisherTest {
 
         Multi.createFrom().range(1, 100_001)
                 .onItem().concatMap(
-                i -> Multi.createFrom().completionStage(CompletableFuture.supplyAsync(() -> {
-                    if (i == 99000) {
-                        throw new IllegalArgumentException("boom");
-                    } else {
-                        return i;
-                    }
-                }))
-        )
+                        i -> Multi.createFrom().completionStage(CompletableFuture.supplyAsync(() -> {
+                            if (i == 99000) {
+                                throw new IllegalArgumentException("boom");
+                            } else {
+                                return i;
+                            }
+                        })))
                 .subscribe(subscriber);
 
         subscriber
@@ -217,11 +216,11 @@ public class MultiFlatMapToPublisherTest {
     public void testThatFlatMapIsNotCalledOnUpstreamFailure() {
         MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(Long.MAX_VALUE);
         AtomicInteger count = new AtomicInteger();
-        Multi.createFrom().<Integer>failure(new IOException("boom"))
+        Multi.createFrom().<Integer> failure(new IOException("boom"))
                 .onItem().flatMap(i -> {
-            count.incrementAndGet();
-            return Multi.createFrom().item(i);
-        })
+                    count.incrementAndGet();
+                    return Multi.createFrom().item(i);
+                })
                 .subscribe(subscriber);
 
         subscriber.assertHasFailedWith(IOException.class, "boom");
@@ -232,11 +231,11 @@ public class MultiFlatMapToPublisherTest {
     public void testThatFlatMapIsOnlyCallOnResults() {
         MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(Long.MAX_VALUE);
         AtomicInteger count = new AtomicInteger();
-        Multi.createFrom().<Integer>empty()
+        Multi.createFrom().<Integer> empty()
                 .onItem().flatMap(i -> {
-            count.incrementAndGet();
-            return Multi.createFrom().item(i);
-        })
+                    count.incrementAndGet();
+                    return Multi.createFrom().item(i);
+                })
                 .subscribe(subscriber);
 
         subscriber.assertCompletedSuccessfully().assertHasNotReceivedAnyItem();
@@ -269,9 +268,9 @@ public class MultiFlatMapToPublisherTest {
     public void testFlatMapWithMapperThrowingException() {
         MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(Long.MAX_VALUE);
         Multi.createFrom().range(1, 4)
-                .onItem().<Integer>flatMap(i -> {
-            throw new IllegalArgumentException("boom");
-        })
+                .onItem().<Integer> flatMap(i -> {
+                    throw new IllegalArgumentException("boom");
+                })
                 .subscribe(subscriber);
 
         subscriber.assertHasFailedWith(IllegalArgumentException.class, "boom");
@@ -281,7 +280,7 @@ public class MultiFlatMapToPublisherTest {
     public void testFlatMapWithMapperReturningNull() {
         MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(Long.MAX_VALUE);
         Multi.createFrom().range(1, 4)
-                .onItem().<Integer>flatMap(i -> null)
+                .onItem().<Integer> flatMap(i -> null)
                 .subscribe(subscriber);
 
         subscriber.assertHasFailedWith(NullPointerException.class, "");
@@ -291,7 +290,7 @@ public class MultiFlatMapToPublisherTest {
     public void testFlatMapWithMapperReturningNullInAMulti() {
         MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(Long.MAX_VALUE);
         Multi.createFrom().range(1, 4)
-                .onItem().<Integer>flatMap(i -> Multi.createFrom().deferredItem(null))
+                .onItem().<Integer> flatMap(i -> Multi.createFrom().deferredItem(null))
                 .subscribe(subscriber);
 
         subscriber.assertHasFailedWith(IllegalArgumentException.class, "supplier");
@@ -302,7 +301,7 @@ public class MultiFlatMapToPublisherTest {
         MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(Long.MAX_VALUE);
         AtomicInteger count = new AtomicInteger();
         Multi.createFrom().range(1, 4)
-                .onItem().<Integer>flatMap(i -> Multi.createFrom().failure(new IOException("boom")))
+                .onItem().<Integer> flatMap(i -> Multi.createFrom().failure(new IOException("boom")))
                 .subscribe(subscriber);
 
         subscriber.assertHasFailedWith(IOException.class, "boom");

@@ -1,14 +1,15 @@
 package io.smallrye.reactive;
 
-import io.smallrye.reactive.groups.*;
-import io.smallrye.reactive.helpers.ParameterValidation;
+import java.util.concurrent.Executor;
+import java.util.function.Function;
+import java.util.function.Predicate;
+
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
-import java.util.concurrent.Executor;
-import java.util.function.Function;
-import java.util.function.Predicate;
+import io.smallrye.reactive.groups.*;
+import io.smallrye.reactive.helpers.ParameterValidation;
 
 public interface Multi<T> extends Publisher<T> {
 
@@ -138,7 +139,7 @@ public interface Multi<T> extends Publisher<T> {
      * Produces a new {@link Multi} invoking the {@code onItem}, {@code onFailure} and {@code onCompletion} methods
      * on the supplied {@link Executor}.
      * <p>
-     * Instead of receiving the {@code item} event on the thread firing the event, this method  influences the
+     * Instead of receiving the {@code item} event on the thread firing the event, this method influences the
      * threading context to switch to a thread from the given executor. Same behavior for failure and completion.
      * <p>
      * Note that the subscriber is guaranteed to never be called concurrently.
@@ -197,7 +198,7 @@ public interface Multi<T> extends Publisher<T> {
      * This method is a shortcut for {@code multi.onItem().mapToItem(mapper)}.
      *
      * @param mapper the mapper function, must not be {@code null}
-     * @param <O>    the type of item produced by the mapper function
+     * @param <O> the type of item produced by the mapper function
      * @return the new {@link Multi}
      */
     default <O> Multi<O> map(Function<? super T, ? extends O> mapper) {
@@ -218,8 +219,8 @@ public interface Multi<T> extends Publisher<T> {
      * This method is a shortcut for {@code multi.onItem().flatMap(mapper)}.
      *
      * @param mapper the {@link Function} producing {@link Publisher} / {@link Multi} for each items emitted by the
-     *               upstream {@link Multi}
-     * @param <O>    the type of item emitted by the {@link Publisher} produced by the {@code mapper}
+     *        upstream {@link Multi}
+     * @param <O> the type of item emitted by the {@link Publisher} produced by the {@code mapper}
      * @return the produced {@link Multi}
      */
     default <O> Multi<O> flatMap(Function<? super T, ? extends Publisher<? extends O>> mapper) {

@@ -1,15 +1,16 @@
 package io.smallrye.reactive.operators;
 
-import io.smallrye.reactive.CompositeException;
-import io.smallrye.reactive.Uni;
-import org.junit.Test;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import java.io.IOException;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import org.junit.Test;
+
+import io.smallrye.reactive.CompositeException;
+import io.smallrye.reactive.Uni;
 
 public class UniOnFailureRecoveryTest {
 
@@ -177,7 +178,7 @@ public class UniOnFailureRecoveryTest {
     public void testCalledOnFailure() {
         UniAssertSubscriber<Integer> ts = UniAssertSubscriber.create();
 
-        Uni.createFrom().<Integer>failure(new RuntimeException("boom"))
+        Uni.createFrom().<Integer> failure(new RuntimeException("boom"))
                 .onFailure().recoverWithUni(fail -> Uni.createFrom().item(2))
                 .subscribe().withSubscriber(ts);
 
@@ -188,7 +189,7 @@ public class UniOnFailureRecoveryTest {
     public void testCalledOnFailureWithDirectResult() {
         UniAssertSubscriber<Integer> ts = UniAssertSubscriber.create();
 
-        Uni.createFrom().<Integer>failure(new RuntimeException("boom"))
+        Uni.createFrom().<Integer> failure(new RuntimeException("boom"))
                 .onFailure().recoverWithItem(fail -> 2)
                 .subscribe().withSubscriber(ts);
 
@@ -198,7 +199,7 @@ public class UniOnFailureRecoveryTest {
     @Test
     public void testWithMappingOfFailure() {
         UniAssertSubscriber<Integer> ts = UniAssertSubscriber.create();
-        Uni.createFrom().<Integer>failure(new Exception())
+        Uni.createFrom().<Integer> failure(new Exception())
                 .onFailure().mapTo(f -> new RuntimeException("boom"))
                 .subscribe().withSubscriber(ts);
         ts.assertCompletedWithFailure()
@@ -208,7 +209,7 @@ public class UniOnFailureRecoveryTest {
     @Test
     public void testWithMappingOfFailureAndPredicates() {
         UniAssertSubscriber<Integer> ts = UniAssertSubscriber.create();
-        Uni.createFrom().<Integer>failure(new IOException())
+        Uni.createFrom().<Integer> failure(new IOException())
                 .onFailure().mapTo(t -> new IndexOutOfBoundsException())
                 .onFailure(IOException.class).recoverWithUni(Uni.createFrom().item(1))
                 .onFailure(IndexOutOfBoundsException.class).recoverWithUni(Uni.createFrom().item(2))

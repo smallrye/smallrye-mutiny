@@ -1,12 +1,12 @@
 package io.smallrye.reactive.groups;
 
-import io.smallrye.reactive.CompositeException;
-import io.smallrye.reactive.Uni;
-import io.smallrye.reactive.tuples.*;
+import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
 
 import java.util.Arrays;
 
-import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
+import io.smallrye.reactive.CompositeException;
+import io.smallrye.reactive.Uni;
+import io.smallrye.reactive.tuples.*;
 
 /**
  * Combines several {@link Uni unis} into a new {@link Uni} that will be fulfilled when <strong>all</strong>
@@ -37,7 +37,7 @@ public class UniAndGroup<T1> {
      * collected failures.
      *
      * @param other the other uni, must not be {@code null}
-     * @param <T2>  the type of the item for the second uni
+     * @param <T2> the type of the item for the second uni
      * @return an {@link UniAndGroup2} to configure the combination
      */
     public <T2> UniAndGroup2<T1, T2> uni(Uni<? extends T2> other) {
@@ -55,8 +55,8 @@ public class UniAndGroup<T1> {
      * {@link Uni unis} fire a failure, the propagated failure is a {@link CompositeException} wrapping all the
      * collected failures.
      *
-     * @param u2   the second uni to be combined, must not be {@code null}
-     * @param u3   the third uni to be combined, must not be {@code null}
+     * @param u2 the second uni to be combined, must not be {@code null}
+     * @param u3 the third uni to be combined, must not be {@code null}
      * @param <T2> the type of the item for the second uni
      * @param <T3> the type of the item for the third uni
      * @return an {@link UniAndGroup3} to configure the combination
@@ -76,9 +76,9 @@ public class UniAndGroup<T1> {
      * {@link Uni unis} fire a failure, the propagated failure is a {@link CompositeException} wrapping all the
      * collected failures.
      *
-     * @param u2   the second uni to be combined, must not be {@code null}
-     * @param u3   the third uni to be combined, must not be {@code null}
-     * @param u4   the fourth uni to be combined, must not be {@code null}
+     * @param u2 the second uni to be combined, must not be {@code null}
+     * @param u3 the third uni to be combined, must not be {@code null}
+     * @param u4 the fourth uni to be combined, must not be {@code null}
      * @param <T2> the type of the item for the second uni
      * @param <T3> the type of the item for the third uni
      * @param <T4> the type of the item for the fourth uni
@@ -100,10 +100,10 @@ public class UniAndGroup<T1> {
      * {@link Uni unis} fire a failure, the propagated failure is a {@link CompositeException} wrapping all the
      * collected failures.
      *
-     * @param u2   the second uni to be combined, must not be {@code null}
-     * @param u3   the third uni to be combined, must not be {@code null}
-     * @param u4   the fourth uni to be combined, must not be {@code null}
-     * @param u5   the fifth uni to be combined, must not be {@code null}
+     * @param u2 the second uni to be combined, must not be {@code null}
+     * @param u3 the third uni to be combined, must not be {@code null}
+     * @param u4 the fourth uni to be combined, must not be {@code null}
+     * @param u5 the fifth uni to be combined, must not be {@code null}
      * @param <T2> the type of the item for the second uni
      * @param <T3> the type of the item for the third uni
      * @param <T4> the type of the item for the fourth uni

@@ -21,7 +21,7 @@ public class ParameterValidation {
      * Validates that the passed duration is not {@code null} and strictly positive.
      *
      * @param duration the duration
-     * @param name     the name of the parameter, must not be {@code null}
+     * @param name the name of the parameter, must not be {@code null}
      * @return the duration is the validation passes.
      */
     public static Duration validate(Duration duration, String name) {
@@ -39,8 +39,8 @@ public class ParameterValidation {
      * Validates that the given {@code instance} is not {@code null}
      *
      * @param instance the instance
-     * @param name     the name of the parameter, must not be {@code null}
-     * @param <T>      the type of the instance
+     * @param name the name of the parameter, must not be {@code null}
+     * @param <T> the type of the instance
      * @return the instance if the validation passes
      */
     public static <T> T nonNull(T instance, String name) {
@@ -57,7 +57,7 @@ public class ParameterValidation {
      * Validates that the passed amount is strictly positive.
      *
      * @param amount the amount to be checked
-     * @param name   the name of the parameter, must not be {@code null}
+     * @param name the name of the parameter, must not be {@code null}
      * @return the amount is the validation passes.
      */
     public static long positive(long amount, String name) {
@@ -72,7 +72,7 @@ public class ParameterValidation {
      * Validates that the passed amount is strictly positive.
      *
      * @param amount the amount to be checked
-     * @param name   the name of the parameter, must not be {@code null}
+     * @param name the name of the parameter, must not be {@code null}
      * @return the amount is the validation passes.
      */
     public static int positive(int amount, String name) {
@@ -87,7 +87,7 @@ public class ParameterValidation {
      * Validates that the passed amount is positive (including 0).
      *
      * @param amount the amount to be checked
-     * @param name   the name of the parameter, must not be {@code null}
+     * @param name the name of the parameter, must not be {@code null}
      * @return the amount is the validation passes.
      */
     public static int positiveOrZero(int amount, String name) {
@@ -102,8 +102,8 @@ public class ParameterValidation {
      * Ensures that the given iterable does not contain a {@code null} value.
      *
      * @param iterable the iterable
-     * @param name     the name of the parameter, must not be {@code null}
-     * @param <T>      the type of the instance
+     * @param name the name of the parameter, must not be {@code null}
+     * @param <T> the type of the instance
      * @return the instance if the validation passes
      */
     public static <T extends Iterable<?>> T doesNotContainNull(T iterable, String name) {
@@ -121,8 +121,8 @@ public class ParameterValidation {
      * Ensures that the given array does not contain a {@code null} value.
      *
      * @param array the array
-     * @param name  the name of the parameter, must not be {@code null}
-     * @param <T>   the type of the item contained in the array
+     * @param name the name of the parameter, must not be {@code null}
+     * @param <T> the type of the item contained in the array
      * @return the instance if the validation passes
      */
     public static <T> T[] doesNotContainNull(T[] array, String name) {
@@ -139,10 +139,10 @@ public class ParameterValidation {
     /**
      * Validates that the given collection {@code instance} has size matching the {@code expectedSize}
      *
-     * @param instance     the instance
+     * @param instance the instance
      * @param expectedSize the expected size
-     * @param name         the name of the parameter, must not be {@code null}
-     * @param <T>          the type of the instance
+     * @param name the name of the parameter, must not be {@code null}
+     * @param <T> the type of the instance
      * @return the instance if the validation passes
      */
     public static <T extends Collection<?>> T size(T instance, int expectedSize, String name) {

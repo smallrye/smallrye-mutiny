@@ -1,16 +1,17 @@
 package io.smallrye.reactive.operators;
 
-import io.smallrye.reactive.CompositeException;
-import io.smallrye.reactive.Uni;
-import org.junit.Test;
-import org.reactivestreams.Subscription;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.Test;
+import org.reactivestreams.Subscription;
+
+import io.smallrye.reactive.CompositeException;
+import io.smallrye.reactive.Uni;
 
 public class UniOnEventTest {
 
@@ -40,7 +41,7 @@ public class UniOnEventTest {
         AtomicReference<Throwable> failure = new AtomicReference<>();
         AtomicReference<Subscription> subscription = new AtomicReference<>();
         AtomicReference<Throwable> terminate = new AtomicReference<>();
-        UniAssertSubscriber<? super Integer> subscriber = Uni.createFrom().<Integer>failure(new IOException("boom"))
+        UniAssertSubscriber<? super Integer> subscriber = Uni.createFrom().<Integer> failure(new IOException("boom"))
                 .onItem().consume(Item::set)
                 .onFailure().consume(failure::set)
                 .on().subscription(subscription::set)
@@ -89,7 +90,7 @@ public class UniOnEventTest {
         AtomicReference<Subscription> subscription = new AtomicReference<>();
         AtomicInteger ItemFromTerminate = new AtomicInteger();
         AtomicReference<Throwable> failureFromTerminate = new AtomicReference<>();
-        UniAssertSubscriber<? super Integer> subscriber = Uni.createFrom().<Integer>failure(new IOException("kaboom"))
+        UniAssertSubscriber<? super Integer> subscriber = Uni.createFrom().<Integer> failure(new IOException("kaboom"))
                 .onItem().consume(Item::set)
                 .onFailure().consume(e -> {
                     throw new IllegalStateException("boom");
@@ -125,10 +126,9 @@ public class UniOnEventTest {
     @Test
     public void testOnCancelWithImmediateCancellation() {
         AtomicBoolean called = new AtomicBoolean();
-        UniAssertSubscriber<? super Integer> subscriber =
-                Uni.createFrom().item(1)
-                        .on().cancellation(() -> called.set(true))
-                        .subscribe().withSubscriber(new UniAssertSubscriber<>(true));
+        UniAssertSubscriber<? super Integer> subscriber = Uni.createFrom().item(1)
+                .on().cancellation(() -> called.set(true))
+                .subscribe().withSubscriber(new UniAssertSubscriber<>(true));
 
         subscriber.assertNotCompleted();
         assertThat(called).isTrue();
@@ -138,11 +138,10 @@ public class UniOnEventTest {
     public void testOnTerminationWithCancellation() {
         AtomicBoolean called = new AtomicBoolean();
         AtomicBoolean terminated = new AtomicBoolean();
-        UniAssertSubscriber<? super Integer> subscriber =
-                Uni.createFrom().item(1)
-                        .on().termination((r, f, c) -> terminated.set(c))
-                        .on().cancellation(() -> called.set(true))
-                        .subscribe().withSubscriber(new UniAssertSubscriber<>(true));
+        UniAssertSubscriber<? super Integer> subscriber = Uni.createFrom().item(1)
+                .on().termination((r, f, c) -> terminated.set(c))
+                .on().cancellation(() -> called.set(true))
+                .subscribe().withSubscriber(new UniAssertSubscriber<>(true));
 
         subscriber.assertNotCompleted();
         assertThat(called).isTrue();

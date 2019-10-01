@@ -1,13 +1,14 @@
 package io.smallrye.reactive.groups;
 
-import io.smallrye.reactive.Multi;
-import io.smallrye.reactive.CompositeException;
-import io.smallrye.reactive.operators.MultiFlatMap;
-import org.reactivestreams.Publisher;
+import static io.smallrye.reactive.helpers.ParameterValidation.positive;
 
 import java.util.function.Function;
 
-import static io.smallrye.reactive.helpers.ParameterValidation.positive;
+import org.reactivestreams.Publisher;
+
+import io.smallrye.reactive.CompositeException;
+import io.smallrye.reactive.Multi;
+import io.smallrye.reactive.operators.MultiFlatMap;
 
 /**
  * The object to tune the <em>flatMap</em> operation

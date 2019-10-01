@@ -1,9 +1,9 @@
 package io.smallrye.reactive.operators;
 
+import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
+
 import io.smallrye.reactive.subscription.UniSubscriber;
 import io.smallrye.reactive.subscription.UniSubscription;
-
-import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
 
 public class UniDelegatingSubscriber<I, O> implements UniSubscriber<I> {
 

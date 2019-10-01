@@ -1,17 +1,18 @@
 package io.smallrye.reactive.operators;
 
-import io.smallrye.reactive.Multi;
-import io.smallrye.reactive.subscription.BackPressureFailure;
-import org.junit.After;
-import org.junit.Test;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 
 import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.awaitility.Awaitility.await;
+import org.junit.After;
+import org.junit.Test;
+
+import io.smallrye.reactive.Multi;
+import io.smallrye.reactive.subscription.BackPressureFailure;
 
 public class MultiCreateFromTimePeriodTest {
 
@@ -87,7 +88,7 @@ public class MultiCreateFromTimePeriodTest {
 
         ts
                 .request(2) // request only 2
-                .await()   // wait until failure
+                .await() // wait until failure
                 .assertHasFailedWith(BackPressureFailure.class, "lack of requests");
     }
 

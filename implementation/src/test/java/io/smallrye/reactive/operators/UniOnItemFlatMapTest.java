@@ -1,7 +1,6 @@
 package io.smallrye.reactive.operators;
 
-import io.smallrye.reactive.Uni;
-import org.junit.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
@@ -9,7 +8,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.Test;
+
+import io.smallrye.reactive.Uni;
 
 public class UniOnItemFlatMapTest {
 
@@ -87,10 +88,10 @@ public class UniOnItemFlatMapTest {
         UniAssertSubscriber<Integer> test = UniAssertSubscriber.create();
         AtomicBoolean called = new AtomicBoolean();
         Uni.createFrom().item(1)
-                .onItem().<Integer>mapToUni(v -> {
-            called.set(true);
-            throw new IllegalStateException("boom");
-        })
+                .onItem().<Integer> mapToUni(v -> {
+                    called.set(true);
+                    throw new IllegalStateException("boom");
+                })
                 .subscribe().withSubscriber(test);
         test.await().assertCompletedWithFailure().assertFailure(IllegalStateException.class, "boom");
         assertThat(called).isTrue();
@@ -101,10 +102,10 @@ public class UniOnItemFlatMapTest {
         UniAssertSubscriber<Integer> test = UniAssertSubscriber.create();
         AtomicBoolean called = new AtomicBoolean();
         Uni.createFrom().item(1)
-                .onItem().<Integer>mapToUni(v -> {
-            called.set(true);
-            return null;
-        }).subscribe().withSubscriber(test);
+                .onItem().<Integer> mapToUni(v -> {
+                    called.set(true);
+                    return null;
+                }).subscribe().withSubscriber(test);
         test.await().assertCompletedWithFailure().assertFailure(NullPointerException.class, "");
         assertThat(called).isTrue();
     }

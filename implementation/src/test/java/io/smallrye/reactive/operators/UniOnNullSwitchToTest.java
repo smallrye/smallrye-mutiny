@@ -1,13 +1,14 @@
 package io.smallrye.reactive.operators;
 
-import io.smallrye.reactive.Uni;
-import org.junit.Test;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import org.junit.Test;
+
+import io.smallrye.reactive.Uni;
 
 public class UniOnNullSwitchToTest {
 
@@ -36,22 +37,20 @@ public class UniOnNullSwitchToTest {
     @Test
     public void testSwitchToFailure() {
         assertThatExceptionOfType(RuntimeException.class)
-                .isThrownBy(() ->
-                        Uni.createFrom().item(null).onItem().castTo(Integer.class)
-                                .onItem().ifNull().switchTo(failure)
-                                .await().indefinitely()
-                ).withMessageEndingWith("boom");
+                .isThrownBy(() -> Uni.createFrom().item(null).onItem().castTo(Integer.class)
+                        .onItem().ifNull().switchTo(failure)
+                        .await().indefinitely())
+                .withMessageEndingWith("boom");
 
     }
 
     @Test
     public void testSwitchToSupplierFailure() {
         assertThatExceptionOfType(RuntimeException.class)
-                .isThrownBy(() ->
-                        Uni.createFrom().item(null).onItem().castTo(Integer.class)
-                                .onItem().ifNull().switchTo(() -> failure)
-                                .await().indefinitely()
-                ).withMessageEndingWith("boom");
+                .isThrownBy(() -> Uni.createFrom().item(null).onItem().castTo(Integer.class)
+                        .onItem().ifNull().switchTo(() -> failure)
+                        .await().indefinitely())
+                .withMessageEndingWith("boom");
 
     }
 

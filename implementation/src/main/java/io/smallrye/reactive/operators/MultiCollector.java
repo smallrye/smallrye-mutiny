@@ -1,12 +1,5 @@
 package io.smallrye.reactive.operators;
 
-import io.reactivex.Flowable;
-import io.reactivex.flowables.GroupedFlowable;
-import io.smallrye.reactive.GroupedMulti;
-import io.smallrye.reactive.Multi;
-import io.smallrye.reactive.Uni;
-import io.smallrye.reactive.operators.flowable.FlowableCollector;
-
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -19,6 +12,13 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
+
+import io.reactivex.Flowable;
+import io.reactivex.flowables.GroupedFlowable;
+import io.smallrye.reactive.GroupedMulti;
+import io.smallrye.reactive.Multi;
+import io.smallrye.reactive.Uni;
+import io.smallrye.reactive.operators.flowable.FlowableCollector;
 
 public class MultiCollector {
 
@@ -80,8 +80,7 @@ public class MultiCollector {
                 (vs, vs2) -> {
                     vs.addAll(vs2);
                     return vs;
-                }
-        ));
+                }));
     }
 
     public static <T> Multi<List<T>> list(Multi<T> upstream, Duration timeWindow) {
@@ -99,22 +98,19 @@ public class MultiCollector {
     public static <T> Multi<Multi<T>> multi(Multi<T> upstream, Duration timeWindow) {
         return Multi.createFrom().publisher(getFlowable(upstream)
                 .window(timeWindow.toMillis(), TimeUnit.MILLISECONDS)
-                .map(f -> Multi.createFrom().publisher(f))
-        );
+                .map(f -> Multi.createFrom().publisher(f)));
     }
 
     public static <T> Multi<Multi<T>> multi(Multi<T> upstream, int size) {
         return Multi.createFrom().publisher(getFlowable(upstream)
                 .window(size)
-                .map(f -> Multi.createFrom().publisher(f))
-        );
+                .map(f -> Multi.createFrom().publisher(f)));
     }
 
     public static <T> Multi<Multi<T>> multi(Multi<T> upstream, int size, int skip) {
         return Multi.createFrom().publisher(getFlowable(upstream)
                 .window(size, skip)
-                .map(f -> Multi.createFrom().publisher(f))
-        );
+                .map(f -> Multi.createFrom().publisher(f)));
     }
 
     public static <K, V, T> Multi<GroupedMulti<K, V>> groupBy(Multi<T> upstream,

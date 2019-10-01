@@ -1,5 +1,15 @@
 package io.smallrye.reactive.operators;
 
+import static io.smallrye.reactive.helpers.EmptyUniSubscription.CANCELLED;
+import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
+
+import java.util.concurrent.Executor;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Predicate;
+
+import org.reactivestreams.Subscriber;
+import org.reactivestreams.Subscription;
+
 import io.reactivex.Flowable;
 import io.reactivex.exceptions.CompositeException;
 import io.reactivex.exceptions.MissingBackpressureException;
@@ -8,15 +18,6 @@ import io.smallrye.reactive.Multi;
 import io.smallrye.reactive.Uni;
 import io.smallrye.reactive.groups.*;
 import io.smallrye.reactive.subscription.BackPressureFailure;
-import org.reactivestreams.Subscriber;
-import org.reactivestreams.Subscription;
-
-import java.util.concurrent.Executor;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Predicate;
-
-import static io.smallrye.reactive.helpers.EmptyUniSubscription.CANCELLED;
-import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
 
 public abstract class AbstractMulti<T> implements Multi<T> {
 
@@ -162,15 +163,13 @@ public abstract class AbstractMulti<T> implements Multi<T> {
     @Override
     public Multi<T> emitOn(Executor executor) {
         return new DefaultMulti<>(
-                flowable().observeOn(Schedulers.from(nonNull(executor, "executor")))
-        );
+                flowable().observeOn(Schedulers.from(nonNull(executor, "executor"))));
     }
 
     @Override
     public Multi<T> subscribeOn(Executor executor) {
         return new DefaultMulti<>(
-                flowable().subscribeOn(Schedulers.from(nonNull(executor, "executor")))
-        );
+                flowable().subscribeOn(Schedulers.from(nonNull(executor, "executor"))));
     }
 
     @Override
@@ -178,7 +177,8 @@ public abstract class AbstractMulti<T> implements Multi<T> {
         return new MultiOnCompletion<>(this);
     }
 
-    @Override public MultiTransform<T> transform() {
+    @Override
+    public MultiTransform<T> transform() {
         return new MultiTransform<>(this);
     }
 

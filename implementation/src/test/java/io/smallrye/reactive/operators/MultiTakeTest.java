@@ -1,16 +1,17 @@
 package io.smallrye.reactive.operators;
 
-import io.smallrye.reactive.Multi;
-import io.smallrye.reactive.subscription.MultiEmitter;
-import org.junit.Test;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import java.io.IOException;
 import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import org.junit.Test;
+
+import io.smallrye.reactive.Multi;
+import io.smallrye.reactive.subscription.MultiEmitter;
 
 public class MultiTakeTest {
 
@@ -48,7 +49,7 @@ public class MultiTakeTest {
 
     @Test
     public void testTakeOnUpstreamFailure() {
-        Multi.createFrom().<Integer>failure(new IOException("boom")).transform().byTakingFirstItems(1)
+        Multi.createFrom().<Integer> failure(new IOException("boom")).transform().byTakingFirstItems(1)
                 .subscribe().withSubscriber(MultiAssertSubscriber.create(10))
                 .assertHasFailedWith(IOException.class, "boom")
                 .assertHasNotReceivedAnyItem();
@@ -56,7 +57,7 @@ public class MultiTakeTest {
 
     @Test
     public void testTakeLastOnUpstreamFailure() {
-        Multi.createFrom().<Integer>failure(new IOException("boom")).transform().byTakingLastItems(1)
+        Multi.createFrom().<Integer> failure(new IOException("boom")).transform().byTakingLastItems(1)
                 .subscribe().withSubscriber(MultiAssertSubscriber.create(10))
                 .assertHasFailedWith(IOException.class, "boom")
                 .assertHasNotReceivedAnyItem();
@@ -80,11 +81,11 @@ public class MultiTakeTest {
 
     @Test
     public void testInvalidTakeNumber() {
-        assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() ->
-                Multi.createFrom().items(1, 2, 3).transform().byTakingFirstItems(-1));
+        assertThatExceptionOfType(IllegalArgumentException.class)
+                .isThrownBy(() -> Multi.createFrom().items(1, 2, 3).transform().byTakingFirstItems(-1));
 
-        assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() ->
-                Multi.createFrom().items(1, 2, 3).transform().byTakingLastItems(-1));
+        assertThatExceptionOfType(IllegalArgumentException.class)
+                .isThrownBy(() -> Multi.createFrom().items(1, 2, 3).transform().byTakingLastItems(-1));
     }
 
     @Test
@@ -92,7 +93,7 @@ public class MultiTakeTest {
         MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(0);
 
         AtomicReference<MultiEmitter<? super Integer>> emitter = new AtomicReference<>();
-        Multi.createFrom().<Integer>emitter(emitter::set)
+        Multi.createFrom().<Integer> emitter(emitter::set)
                 .transform().byTakingLastItems(3)
                 .subscribe(subscriber);
 
@@ -140,7 +141,7 @@ public class MultiTakeTest {
 
     @Test
     public void testTakeWhileWithUpstreamFailure() {
-        Multi.createFrom().<Integer>failure(new IOException("boom"))
+        Multi.createFrom().<Integer> failure(new IOException("boom"))
                 .transform().byTakingItemsWhile(i -> i < 5)
                 .subscribe().withSubscriber(MultiAssertSubscriber.create(10))
                 .assertHasFailedWith(IOException.class, "boom");

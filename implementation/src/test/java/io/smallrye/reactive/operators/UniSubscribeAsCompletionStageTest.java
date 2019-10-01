@@ -1,8 +1,8 @@
 package io.smallrye.reactive.operators;
 
-import io.smallrye.reactive.Uni;
-import org.junit.After;
-import org.junit.Test;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+import static org.awaitility.Awaitility.await;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -12,9 +12,10 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
-import static org.awaitility.Awaitility.await;
+import org.junit.After;
+import org.junit.Test;
+
+import io.smallrye.reactive.Uni;
 
 public class UniSubscribeAsCompletionStageTest {
 
@@ -50,7 +51,7 @@ public class UniSubscribeAsCompletionStageTest {
 
     @Test
     public void testWithImmediateFailure() {
-        CompletableFuture<Integer> future = Uni.createFrom().<Integer>failure(new IOException("boom")).subscribe()
+        CompletableFuture<Integer> future = Uni.createFrom().<Integer> failure(new IOException("boom")).subscribe()
                 .asCompletionStage();
         assertThat(future).isNotNull();
         try {
@@ -132,7 +133,7 @@ public class UniSubscribeAsCompletionStageTest {
     @Test
     public void testWithAsyncFailure() {
         executor = Executors.newSingleThreadScheduledExecutor();
-        CompletableFuture<Integer> future = Uni.createFrom().<Integer>failure(new IOException("boom"))
+        CompletableFuture<Integer> future = Uni.createFrom().<Integer> failure(new IOException("boom"))
                 .emitOn(executor).subscribe().asCompletionStage();
         await().until(future::isDone);
         assertThat(future).isCompletedExceptionally();

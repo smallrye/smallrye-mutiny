@@ -1,15 +1,16 @@
 package io.smallrye.reactive.operators;
 
-import io.smallrye.reactive.Multi;
+import java.io.IOException;
+
 import org.junit.Test;
 
-import java.io.IOException;
+import io.smallrye.reactive.Multi;
 
 public class MultiDistinctTest {
 
     @Test
     public void testDistinctWithUpstreamFailure() {
-        Multi.createFrom().<Integer>failure(new IOException("boom"))
+        Multi.createFrom().<Integer> failure(new IOException("boom"))
                 .transform().byKeepingDistinctItems()
                 .subscribe().withSubscriber(MultiAssertSubscriber.create(10))
                 .assertHasFailedWith(IOException.class, "boom");
@@ -35,7 +36,7 @@ public class MultiDistinctTest {
 
     @Test
     public void testDropRepetitionsWithUpstreamFailure() {
-        Multi.createFrom().<Integer>failure(new IOException("boom"))
+        Multi.createFrom().<Integer> failure(new IOException("boom"))
                 .transform().byDroppingRepetitions()
                 .subscribe().withSubscriber(MultiAssertSubscriber.create(10))
                 .assertHasFailedWith(IOException.class, "boom");
@@ -58,6 +59,5 @@ public class MultiDistinctTest {
                 .assertCompletedSuccessfully()
                 .assertReceived(1, 2, 3, 4);
     }
-
 
 }

@@ -1,10 +1,10 @@
 package io.smallrye.reactive.adapt.converters;
 
-import io.reactivex.Maybe;
-import io.smallrye.reactive.Uni;
-
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
+
+import io.reactivex.Maybe;
+import io.smallrye.reactive.Uni;
 
 public class ToMaybe<T> implements Function<Uni<T>, Maybe<T>> {
     @Override

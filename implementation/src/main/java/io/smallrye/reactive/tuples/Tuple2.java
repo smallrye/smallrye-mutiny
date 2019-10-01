@@ -48,7 +48,7 @@ public class Tuple2<L, R> implements Tuple {
      * The right part (item2) is not modified.
      *
      * @param mapper the mapping {@link Function} for the left item
-     * @param <T>    the new type for the left item
+     * @param <T> the new type for the left item
      * @return the new {@link Tuple2}
      */
     public <T> Tuple2<T, R> mapItem1(Function<L, T> mapper) {
@@ -60,7 +60,7 @@ public class Tuple2<L, R> implements Tuple {
      * The left (item1) part is not modified.
      *
      * @param mapper the mapping {@link Function} for the right item
-     * @param <T>    the new type for the right item
+     * @param <T> the new type for the right item
      * @return the new {@link Tuple2}
      */
     public <T> Tuple2<L, T> mapItem2(Function<R, T> mapper) {

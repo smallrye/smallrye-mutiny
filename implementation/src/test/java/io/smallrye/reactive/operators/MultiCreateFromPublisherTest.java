@@ -1,15 +1,16 @@
 package io.smallrye.reactive.operators;
 
-import io.reactivex.Flowable;
-import io.smallrye.reactive.Multi;
-import org.junit.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.Test;
+
+import io.reactivex.Flowable;
+import io.smallrye.reactive.Multi;
 
 public class MultiCreateFromPublisherTest {
 
@@ -20,7 +21,7 @@ public class MultiCreateFromPublisherTest {
 
     @Test
     public void testWithFailedPublisher() {
-        MultiAssertSubscriber<String> subscriber = Multi.createFrom().<String>publisher(
+        MultiAssertSubscriber<String> subscriber = Multi.createFrom().<String> publisher(
                 Flowable.error(new IOException("boom"))).subscribe()
                 .withSubscriber(MultiAssertSubscriber.create());
         subscriber.assertHasFailedWith(IOException.class, "boom");
@@ -28,7 +29,7 @@ public class MultiCreateFromPublisherTest {
 
     @Test
     public void testWithEmptyPublisher() {
-        MultiAssertSubscriber<String> subscriber = Multi.createFrom().<String>publisher(Flowable.empty()).subscribe()
+        MultiAssertSubscriber<String> subscriber = Multi.createFrom().<String> publisher(Flowable.empty()).subscribe()
                 .withSubscriber(MultiAssertSubscriber.create());
         subscriber.assertCompletedSuccessfully().assertHasNotReceivedAnyItem();
     }

@@ -5,7 +5,7 @@
     <parent>
         <groupId>io.smallrye</groupId>
         <artifactId>smallrye-parent</artifactId>
-        <version>6</version>
+        <version>12</version>
     </parent>
 
     <groupId>io.smallrye.reactive</groupId>
@@ -31,6 +31,11 @@
         </license>
     </licenses>
 
+    <issueManagement>
+        <system>GitHub</system>
+        <url>https://github.com/smallrye/smallrye-uni-multi/issues</url>
+    </issueManagement>
+
     <developers>
         <developer>
             <id>cescoffier</id>
@@ -41,9 +46,9 @@
     </developers>
 
     <scm>
-        <connection>scm:git:git@github.com:smallrye/smallrye-reactive-operators.git</connection>
-        <developerConnection>scm:git:git@github.com:smallrye/smallrye-reactive-operators.git</developerConnection>
-        <url>https://github.com/smallrye/smallrye-reactive-operators</url>
+        <connection>scm:git:git@github.com:smallrye/smallrye-uni-multi.git</connection>
+        <developerConnection>scm:git:git@github.com:smallrye/smallrye-uni-multi.git</developerConnection>
+        <url>https://github.com/smallrye/smallrye-uni-multi</url>
         <tag>HEAD</tag>
     </scm>
 
@@ -141,7 +146,6 @@
                 <plugin>
                     <groupId>org.jacoco</groupId>
                     <artifactId>jacoco-maven-plugin</artifactId>
-                    <version>0.8.4</version>
                     <executions>
                         <execution>
                             <id>prepare-agent</id>

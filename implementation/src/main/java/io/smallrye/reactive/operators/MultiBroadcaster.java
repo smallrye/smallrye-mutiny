@@ -1,12 +1,12 @@
 package io.smallrye.reactive.operators;
 
-import io.reactivex.Flowable;
-import io.smallrye.reactive.Multi;
+import static io.smallrye.reactive.operators.MultiCollector.getFlowable;
 
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
-import static io.smallrye.reactive.operators.MultiCollector.getFlowable;
+import io.reactivex.Flowable;
+import io.smallrye.reactive.Multi;
 
 public class MultiBroadcaster {
 
@@ -18,7 +18,8 @@ public class MultiBroadcaster {
         if (numberOfSubscribers > 0) {
             if (cancelWhenNoOneIsListening) {
                 if (delayAfterLastDeparture != null) {
-                    return new DefaultMulti<>(flowable.publish().refCount(numberOfSubscribers, delayAfterLastDeparture.toMillis(), TimeUnit.MILLISECONDS));
+                    return new DefaultMulti<>(flowable.publish().refCount(numberOfSubscribers,
+                            delayAfterLastDeparture.toMillis(), TimeUnit.MILLISECONDS));
                 } else {
                     return new DefaultMulti<>(flowable.publish().refCount(numberOfSubscribers));
                 }
@@ -28,7 +29,8 @@ public class MultiBroadcaster {
         } else {
             if (cancelWhenNoOneIsListening) {
                 if (delayAfterLastDeparture != null) {
-                    return new DefaultMulti<>(flowable.publish().refCount(delayAfterLastDeparture.toMillis(), TimeUnit.MILLISECONDS));
+                    return new DefaultMulti<>(
+                            flowable.publish().refCount(delayAfterLastDeparture.toMillis(), TimeUnit.MILLISECONDS));
                 } else {
                     return new DefaultMulti<>(flowable.publish().refCount());
                 }

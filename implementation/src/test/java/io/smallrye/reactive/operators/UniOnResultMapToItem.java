@@ -1,7 +1,6 @@
 package io.smallrye.reactive.operators;
 
-import io.smallrye.reactive.Uni;
-import org.junit.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -10,7 +9,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.Test;
+
+import io.smallrye.reactive.Uni;
 
 public class UniOnResultMapToItem {
 
@@ -105,7 +106,7 @@ public class UniOnResultMapToItem {
     public void testThatMapperIsNotCalledIfPreviousStageFailed() {
         UniAssertSubscriber<Integer> ts = UniAssertSubscriber.create();
         AtomicBoolean called = new AtomicBoolean();
-        Uni.createFrom().<Integer>failure(new Exception("boom"))
+        Uni.createFrom().<Integer> failure(new Exception("boom"))
                 .map(x -> {
                     called.set(true);
                     return x + 1;

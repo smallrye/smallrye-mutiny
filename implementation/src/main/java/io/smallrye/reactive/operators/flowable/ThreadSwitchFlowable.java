@@ -1,11 +1,12 @@
 package io.smallrye.reactive.operators.flowable;
 
-import io.reactivex.Flowable;
+import java.util.concurrent.Executor;
+
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
-import java.util.concurrent.Executor;
+import io.reactivex.Flowable;
 
 public class ThreadSwitchFlowable<T> extends Flowable<T> {
 
@@ -14,24 +15,27 @@ public class ThreadSwitchFlowable<T> extends Flowable<T> {
     private final Executor onFailureExecutor;
     private final Executor onCompletionExecutor;
 
-    public ThreadSwitchFlowable(Publisher<T> upstream, Executor onItemExecutor, Executor onFailureExecutor, Executor onCompletionExecutor) {
+    public ThreadSwitchFlowable(Publisher<T> upstream, Executor onItemExecutor, Executor onFailureExecutor,
+            Executor onCompletionExecutor) {
         this.upstream = upstream;
 
         this.onItemExecutor = onItemExecutor;
         this.onFailureExecutor = onFailureExecutor;
         this.onCompletionExecutor = onCompletionExecutor;
 
-
     }
 
     @Override
     protected void subscribeActual(Subscriber<? super T> s) {
-        @SuppressWarnings("SubscriberImplementation") Subscriber<? super T> delegate = new Subscriber<T>() {
-            @Override public void onSubscribe(Subscription subscription) {
+        @SuppressWarnings("SubscriberImplementation")
+        Subscriber<? super T> delegate = new Subscriber<T>() {
+            @Override
+            public void onSubscribe(Subscription subscription) {
                 s.onSubscribe(subscription);
             }
 
-            @Override public void onNext(T t) {
+            @Override
+            public void onNext(T t) {
                 if (onItemExecutor != null) {
                     onItemExecutor.execute(() -> s.onNext(t));
                 } else {
@@ -39,7 +43,8 @@ public class ThreadSwitchFlowable<T> extends Flowable<T> {
                 }
             }
 
-            @Override public void onError(Throwable throwable) {
+            @Override
+            public void onError(Throwable throwable) {
                 if (onFailureExecutor != null) {
                     onFailureExecutor.execute(() -> s.onError(throwable));
                 } else {
@@ -47,7 +52,8 @@ public class ThreadSwitchFlowable<T> extends Flowable<T> {
                 }
             }
 
-            @Override public void onComplete() {
+            @Override
+            public void onComplete() {
                 if (onCompletionExecutor != null) {
                     onCompletionExecutor.execute(s::onComplete);
                 } else {

@@ -1,9 +1,9 @@
 package io.smallrye.reactive.adapt;
 
+import java.util.function.Function;
+
 import io.smallrye.reactive.Uni;
 import reactor.core.publisher.Mono;
-
-import java.util.function.Function;
 
 public class ToMono<T> implements Function<Uni<T>, Mono<T>> {
     @Override

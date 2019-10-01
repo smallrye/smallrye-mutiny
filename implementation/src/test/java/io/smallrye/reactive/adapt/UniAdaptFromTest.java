@@ -1,17 +1,18 @@
 package io.smallrye.reactive.adapt;
 
-import io.reactivex.*;
-import io.smallrye.reactive.Uni;
-import io.smallrye.reactive.adapt.converters.*;
-import org.junit.Test;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import org.junit.Test;
+
+import io.reactivex.*;
+import io.smallrye.reactive.Uni;
+import io.smallrye.reactive.adapt.converters.*;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 public class UniAdaptFromTest {
 

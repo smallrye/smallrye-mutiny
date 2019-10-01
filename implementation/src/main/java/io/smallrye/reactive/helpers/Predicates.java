@@ -1,8 +1,8 @@
 package io.smallrye.reactive.helpers;
 
-import io.smallrye.reactive.operators.UniSerializedSubscriber;
-
 import java.util.function.Predicate;
+
+import io.smallrye.reactive.operators.UniSerializedSubscriber;
 
 public class Predicates {
 

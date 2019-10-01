@@ -1,14 +1,15 @@
 package io.smallrye.reactive.operators;
 
-import io.smallrye.reactive.Multi;
-import org.junit.Test;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.entry;
 
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.entry;
+import org.junit.Test;
+
+import io.smallrye.reactive.Multi;
 
 public class MultiCollectTest {
 
@@ -16,16 +17,14 @@ public class MultiCollectTest {
             new Person("bob", 1),
             new Person("alice", 2),
             new Person("rob", 3),
-            new Person("matt", 4)
-    );
+            new Person("matt", 4));
     private Multi<Person> personsWithDuplicates = Multi.createFrom().items(
             new Person("bob", 1),
             new Person("alice", 2),
             new Person("rob", 3),
             new Person("matt", 4),
             new Person("bob", 5),
-            new Person("rob", 6)
-    );
+            new Person("rob", 6));
 
     @Test
     public void testCollectFirstAndLast() {
@@ -99,9 +98,9 @@ public class MultiCollectTest {
     public void testCollectInWithSupplierThrowingException() {
         Multi.createFrom().range(1, 10)
                 .collect().in(() -> {
-            throw new IllegalArgumentException("boom");
-        }, (x, y) -> {
-        })
+                    throw new IllegalArgumentException("boom");
+                }, (x, y) -> {
+                })
                 .subscribe().withSubscriber(UniAssertSubscriber.create())
                 .assertFailure(IllegalArgumentException.class, "boom");
     }
@@ -110,11 +109,11 @@ public class MultiCollectTest {
     public void testCollectInWithAccumulatorThrowingException() {
         Multi.createFrom().range(1, 10)
                 .collect().in(LinkedList<Integer>::new, (list, res) -> {
-            list.add(res);
-            if (res == 5) {
-                throw new IllegalArgumentException("boom");
-            }
-        })
+                    list.add(res);
+                    if (res == 5) {
+                        throw new IllegalArgumentException("boom");
+                    }
+                })
                 .subscribe().withSubscriber(UniAssertSubscriber.create())
                 .assertFailure(IllegalArgumentException.class, "boom");
     }
@@ -123,7 +122,7 @@ public class MultiCollectTest {
     public void testCollectInWithSupplierReturningNull() {
         Multi.createFrom().range(1, 10)
                 .collect().in(() -> null, (x, y) -> {
-        })
+                })
                 .subscribe().withSubscriber(UniAssertSubscriber.create())
                 .assertFailure(NullPointerException.class, "supplier");
     }
@@ -141,13 +140,12 @@ public class MultiCollectTest {
                         entry("bob", new Person("bob", 1)),
                         entry("alice", new Person("alice", 2)),
                         entry("rob", new Person("rob", 3)),
-                        entry("matt", new Person("matt", 4))
-                );
+                        entry("matt", new Person("matt", 4)));
     }
 
     @Test
     public void testCollectAsMapWithEmpty() {
-        UniAssertSubscriber<Map<String, Person>> subscriber = Multi.createFrom().<Person>empty()
+        UniAssertSubscriber<Map<String, Person>> subscriber = Multi.createFrom().<Person> empty()
                 .collect().asMap(p -> p.firstName)
                 .subscribe().withSubscriber(UniAssertSubscriber.create())
                 .assertCompletedSuccessfully();
@@ -171,7 +169,7 @@ public class MultiCollectTest {
 
     @Test
     public void testCollectAsMultiMapOnEmpty() {
-        UniAssertSubscriber<Map<String, Collection<Person>>> subscriber = Multi.createFrom().<Person>empty()
+        UniAssertSubscriber<Map<String, Collection<Person>>> subscriber = Multi.createFrom().<Person> empty()
                 .collect().asMultiMap(p -> p.firstName)
                 .subscribe().withSubscriber(new UniAssertSubscriber<>())
                 .assertCompletedSuccessfully();
