@@ -61,9 +61,6 @@
         <reactor-core.version>3.2.10.RELEASE</reactor-core.version>
         <microprofile-reactive-streams.version>1.0.0</microprofile-reactive-streams.version>
         <reactive-streams.version>1.0.3</reactive-streams.version>
-
-        <!-- Used by release plugin to define git tag -->
-        <tagNameFormat>smallrye-reactive-operators-@{project.version}</tagNameFormat>
     </properties>
 
     <dependencyManagement>
