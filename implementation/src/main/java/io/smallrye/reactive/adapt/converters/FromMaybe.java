@@ -6,6 +6,13 @@ import io.smallrye.reactive.Uni;
 import io.smallrye.reactive.adapt.UniConverter;
 
 public class FromMaybe<T> implements UniConverter<Maybe<T>, T> {
+
+    public static final FromMaybe INSTANCE = new FromMaybe();
+
+    private FromMaybe() {
+        // Avoid direct instantiation
+    }
+
     @Override
     public Uni<T> from(Maybe<T> instance) {
         return Uni.createFrom().emitter(sink -> {

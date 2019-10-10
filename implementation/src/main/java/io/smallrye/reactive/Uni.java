@@ -67,15 +67,16 @@ public interface Uni<T> {
     }
 
     /**
-     * Creates a new {@link Uni} with the passed converter.
+     * Creates a new {@link Uni} from the passed instance with the passed converter.
      *
      * @param converter performs the type conversion
+     * @param instance instance to convert from
      * @param <I> the type being converted from
      * @param <T> the type for the {@link Uni}
-     * @return the converter
+     * @return created {@link Uni}
      */
-    static <I, T> UniConverter<I, T> createWith(UniConverter<I, T> converter) {
-        return converter;
+    static <I, T> Uni<T> createWith(UniConverter<I, T> converter, I instance) {
+        return converter.from(instance);
     }
 
     /**

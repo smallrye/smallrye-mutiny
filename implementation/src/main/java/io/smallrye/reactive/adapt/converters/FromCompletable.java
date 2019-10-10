@@ -4,9 +4,15 @@ import io.reactivex.Completable;
 import io.smallrye.reactive.Uni;
 import io.smallrye.reactive.adapt.UniConverter;
 
-public class FromCompletable<T> implements UniConverter<Completable, T> {
+public class FromCompletable implements UniConverter<Completable, Void> {
+    public static final FromCompletable INSTANCE = new FromCompletable();
+
+    private FromCompletable() {
+        // Avoid direct instantiation
+    }
+
     @Override
-    public Uni<T> from(Completable instance) {
+    public Uni<Void> from(Completable instance) {
         return Uni.createFrom().publisher(instance.toFlowable());
     }
 }
