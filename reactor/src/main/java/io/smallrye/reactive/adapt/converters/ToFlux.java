@@ -1,4 +1,4 @@
-package io.smallrye.reactive.adapt;
+package io.smallrye.reactive.adapt.converters;
 
 import java.util.function.Function;
 
