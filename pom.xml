@@ -54,6 +54,8 @@
 
     <modules>
         <module>implementation</module>
+        <module>rxjava</module>
+        <module>reactor</module>
     </modules>
 
     <properties>
@@ -65,6 +67,11 @@
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>io.smallrye.reactive</groupId>
+                <artifactId>uni-multi</artifactId>
+                <version>${project.version}</version>
+            </dependency>
             <dependency>
                 <groupId>org.reactivestreams</groupId>
                 <artifactId>reactive-streams</artifactId>
@@ -81,10 +88,10 @@
                 <version>${reactor-core.version}</version>
             </dependency>
             <dependency>
-                 <groupId>org.eclipse.microprofile.reactive-streams-operators</groupId>
-                 <artifactId>microprofile-reactive-streams-operators-api</artifactId>
-            <version>${microprofile-reactive-streams.version}</version>
-        </dependency>
+                <groupId>org.eclipse.microprofile.reactive-streams-operators</groupId>
+                <artifactId>microprofile-reactive-streams-operators-api</artifactId>
+                <version>${microprofile-reactive-streams.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 

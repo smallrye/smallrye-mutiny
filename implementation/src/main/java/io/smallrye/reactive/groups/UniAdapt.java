@@ -2,14 +2,12 @@ package io.smallrye.reactive.groups;
 
 import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
 
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.function.Function;
 
 import org.reactivestreams.Publisher;
 
-import io.reactivex.*;
 import io.smallrye.reactive.Uni;
 import io.smallrye.reactive.adapt.converters.*;
 import io.smallrye.reactive.operators.UniToPublisher;
@@ -32,31 +30,6 @@ public class UniAdapt<T> {
     public <R> R with(Function<Uni<T>, R> converter) {
         nonNull(converter, "converter");
         return converter.apply(upstream);
-    }
-
-    public Single<Optional<T>> toSingle() {
-        return with(new ToSingle<>());
-    }
-
-    public Single<T> toSingle(T defaultValue) {
-        nonNull(defaultValue, "defaultValue");
-        return with(new ToSingleWithDefault<>(defaultValue));
-    }
-
-    public Completable toCompletable() {
-        return with(new ToCompletable<>());
-    }
-
-    public Maybe<T> toMaybe() {
-        return with(new ToMaybe<>());
-    }
-
-    public Observable<T> toObservable() {
-        return with(new ToObservable<>());
-    }
-
-    public Flowable<T> toFlowable() {
-        return with(new ToFlowable<>());
     }
 
     public CompletionStage<T> toCompletionStage() {

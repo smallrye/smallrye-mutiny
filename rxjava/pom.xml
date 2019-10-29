@@ -10,19 +10,22 @@
         <version>1.0.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>uni-multi</artifactId>
-    <name>SmallRye Uni/Multi implementation</name>
+    <artifactId>uni-multi-rxjava</artifactId>
+    <name>SmallRye Uni/Multi integration with RxJava</name>
+
 
     <dependencies>
         <dependency>
-            <groupId>org.reactivestreams</groupId>
-            <artifactId>reactive-streams</artifactId>
+            <groupId>io.smallrye.reactive</groupId>
+            <artifactId>uni-multi</artifactId>
         </dependency>
+
         <dependency>
             <groupId>io.reactivex.rxjava2</groupId>
             <artifactId>rxjava</artifactId>
         </dependency>
     </dependencies>
+
 
     <profiles>
         <profile>
