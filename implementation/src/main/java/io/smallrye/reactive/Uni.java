@@ -6,7 +6,6 @@ import java.util.concurrent.Executor;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-import io.smallrye.reactive.adapt.UniConverter;
 import io.smallrye.reactive.groups.*;
 import io.smallrye.reactive.helpers.ParameterValidation;
 import io.smallrye.reactive.subscription.UniEmitter;
@@ -64,19 +63,6 @@ public interface Uni<T> {
      */
     static UniCreate createFrom() {
         return UniCreate.INSTANCE;
-    }
-
-    /**
-     * Creates a new {@link Uni} from the passed instance with the passed converter.
-     *
-     * @param converter performs the type conversion
-     * @param instance instance to convert from
-     * @param <I> the type being converted from
-     * @param <T> the type for the {@link Uni}
-     * @return created {@link Uni}
-     */
-    static <I, T> Uni<T> createWith(UniConverter<I, T> converter, I instance) {
-        return converter.from(instance);
     }
 
     /**
@@ -340,7 +326,11 @@ public interface Uni<T> {
     }
 
     //TODO
-    UniAdapt<T> adapt();
+    /**
+     *
+     * @return
+     */
+    UniConvert<T> convert();
 
     /**
      * Creates an instance of {@link Multi} from this {@link Uni}.
