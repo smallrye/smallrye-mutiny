@@ -8,6 +8,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import io.smallrye.reactive.Multi;
 import org.junit.After;
 import org.junit.Test;
 import org.reactivestreams.Publisher;
@@ -211,6 +212,12 @@ public class UniToPublisherTest {
         } catch (Exception e) {
             assertThat(e).hasCauseInstanceOf(IOException.class).hasMessageContaining("boom");
         }
+    }
 
+    @Test
+    public void testUniOfVoid() {
+        Uni<Void> uni = Uni.createFrom().item(null);
+        Multi<Void> publisher = uni.toMulti();
+        assertThat(publisher.collect().asList().await().indefinitely()).isEmpty();
     }
 }
