@@ -8,8 +8,7 @@ import java.io.IOException;
 import org.junit.Test;
 
 import io.smallrye.reactive.Uni;
-import io.smallrye.reactive.converters.uni.ToFlux;
-import io.smallrye.reactive.converters.uni.ToMono;
+import io.smallrye.reactive.converters.uni.ReactorConverters;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -18,7 +17,7 @@ public class UniConvertToTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testCreatingAFlux() {
-        Flux<Integer> flux = Uni.createFrom().item(1).convert().with(new ToFlux<>());
+        Flux<Integer> flux = Uni.createFrom().item(1).convert().with(ReactorConverters.toFlux());
         assertThat(flux).isNotNull();
         assertThat(flux.blockFirst()).isEqualTo(1);
     }
@@ -26,7 +25,7 @@ public class UniConvertToTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testCreatingAFluxFromNull() {
-        Flux<Integer> flux = Uni.createFrom().item((Integer) null).convert().with(new ToFlux<>());
+        Flux<Integer> flux = Uni.createFrom().item((Integer) null).convert().with(ReactorConverters.toFlux());
         assertThat(flux).isNotNull();
         assertThat(flux.blockFirst()).isNull();
     }
@@ -34,7 +33,8 @@ public class UniConvertToTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testCreatingAFluxWithFailure() {
-        Flux<Integer> flux = Uni.createFrom().<Integer> failure(new IOException("boom")).convert().with(new ToFlux<>());
+        Flux<Integer> flux = Uni.createFrom().<Integer> failure(new IOException("boom")).convert()
+                .with(ReactorConverters.toFlux());
         assertThat(flux).isNotNull();
         try {
             flux.blockFirst();
@@ -47,7 +47,7 @@ public class UniConvertToTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testCreatingAMono() {
-        Mono<Integer> mono = Uni.createFrom().item(1).convert().with(new ToMono<>());
+        Mono<Integer> mono = Uni.createFrom().item(1).convert().with(ReactorConverters.toMono());
         assertThat(mono).isNotNull();
         assertThat(mono.block()).isEqualTo(1);
     }
@@ -55,7 +55,7 @@ public class UniConvertToTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testCreatingAMonoFromNull() {
-        Mono<Integer> mono = Uni.createFrom().item((Integer) null).convert().with(new ToMono<>());
+        Mono<Integer> mono = Uni.createFrom().item((Integer) null).convert().with(ReactorConverters.toMono());
         assertThat(mono).isNotNull();
         assertThat(mono.block()).isNull();
     }
@@ -63,7 +63,8 @@ public class UniConvertToTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testCreatingAMonoWithFailure() {
-        Mono<Integer> mono = Uni.createFrom().<Integer> failure(new IOException("boom")).convert().with(new ToMono<>());
+        Mono<Integer> mono = Uni.createFrom().<Integer> failure(new IOException("boom")).convert()
+                .with(ReactorConverters.toMono());
         assertThat(mono).isNotNull();
         try {
             mono.block();

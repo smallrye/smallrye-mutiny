@@ -23,7 +23,7 @@ public class UniConvert<T> {
      * Transforms this {@link Uni} into a type using the provided converter.
      *
      * @param converter the converter function
-     * @return an instance of O
+     * @return an instance of R
      * @throws RuntimeException if the conversion fails.
      */
     public <R> R with(Function<Uni<T>, R> converter) {

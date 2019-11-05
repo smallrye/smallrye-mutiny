@@ -3,25 +3,26 @@ package io.smallrye.reactive.converters;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.junit.Test;
 
-import io.reactivex.*;
+import io.reactivex.Completable;
+import io.reactivex.Flowable;
+import io.reactivex.Maybe;
+import io.reactivex.Observable;
+import io.reactivex.Single;
 import io.reactivex.subscribers.TestSubscriber;
-import io.smallrye.reactive.Uni;
-import io.smallrye.reactive.converters.uni.RxConverters;
-import io.smallrye.reactive.converters.uni.ToCompletable;
-import io.smallrye.reactive.converters.uni.ToSingle;
-import io.smallrye.reactive.converters.uni.ToSingleWithDefault;
+import io.smallrye.reactive.Multi;
+import io.smallrye.reactive.converters.multi.RxConverters;
+import io.smallrye.reactive.converters.multi.ToCompletable;
 
-public class UniConvertToTest {
+public class MultiConvertToTest {
 
     @Test
     public void testCreatingACompletable() {
-        Completable completable = Uni.createFrom().item(1).convert().with(new ToCompletable<>());
+        Completable completable = Multi.createFrom().item(1).convert().with(new ToCompletable<>());
         assertThat(completable).isNotNull();
         completable.test().assertComplete();
     }
@@ -29,9 +30,9 @@ public class UniConvertToTest {
     @Test
     public void testThatSubscriptionOnCompletableProducesTheValue() {
         AtomicBoolean called = new AtomicBoolean();
-        Completable completable = Uni.createFrom().deferred(() -> {
+        Completable completable = Multi.createFrom().deferred(() -> {
             called.set(true);
-            return Uni.createFrom().item(2);
+            return Multi.createFrom().item(2);
         }).convert().with(new ToCompletable<>());
 
         assertThat(completable).isNotNull();
@@ -42,14 +43,14 @@ public class UniConvertToTest {
 
     @Test
     public void testCreatingACompletableFromVoid() {
-        Completable completable = Uni.createFrom().item(null).convert().with(new ToCompletable<>());
+        Completable completable = Multi.createFrom().item(null).convert().with(new ToCompletable<>());
         assertThat(completable).isNotNull();
         completable.test().assertComplete();
     }
 
     @Test
     public void testCreatingACompletableWithFailure() {
-        Completable completable = Uni.createFrom().failure(new IOException("boom")).convert().with(new ToCompletable<>());
+        Completable completable = Multi.createFrom().failure(new IOException("boom")).convert().with(new ToCompletable<>());
         assertThat(completable).isNotNull();
         completable.test().assertError(e -> {
             assertThat(e).hasMessage("boom").isInstanceOf(IOException.class);
@@ -60,7 +61,7 @@ public class UniConvertToTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testCreatingASingle() {
-        Single<Optional<Integer>> single = Uni.createFrom().item(1).convert().with(RxConverters.toSingle());
+        Single<Optional<Integer>> single = Multi.createFrom().item(1).convert().with(RxConverters.toSingle());
         assertThat(single).isNotNull();
         single.test()
                 .assertValue(Optional.of(1))
@@ -70,7 +71,7 @@ public class UniConvertToTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testCreatingASingleByConverter() {
-        Single<Optional<Integer>> single = Uni.createFrom().item(1).convert().with(RxConverters.toSingle());
+        Single<Optional<Integer>> single = Multi.createFrom().item(1).convert().with(RxConverters.toSingle());
         assertThat(single).isNotNull();
         single.test()
                 .assertValue(Optional.of(1))
@@ -79,70 +80,19 @@ public class UniConvertToTest {
 
     @SuppressWarnings("unchecked")
     @Test
-    public void testCreatingASingleWithDefaultFromNull() {
-        Single<Integer> single = Uni.createFrom().item((Integer) null).convert().with(new ToSingleWithDefault<>(22));
-        assertThat(single).isNotNull();
-        single.test()
-                .assertValue(22)
-                .assertComplete();
-    }
-
-    @SuppressWarnings("unchecked")
-    @Test
-    public void testCreatingASingleWithDefaultWithValue() {
-        Single<Integer> single = Uni.createFrom().item(5).convert().with(new ToSingleWithDefault<>(22));
-        assertThat(single).isNotNull();
-        single.test()
-                .assertValue(5)
-                .assertComplete();
-    }
-
-    @SuppressWarnings("unchecked")
-    @Test
-    public void testCreatingASingleWithDefaultFromNullAlternative() {
-        Single<Integer> single = Uni.createFrom().item((Integer) null).convert().with(ToSingle.withDefault(22));
-        assertThat(single).isNotNull();
-        single.test()
-                .assertValue(22)
-                .assertComplete();
-    }
-
-    @SuppressWarnings("unchecked")
-    @Test
-    public void testCreatingASingleWithDefaultFromNullByConverter() {
-        Single<Integer> single = Uni.createFrom().item((Integer) null).convert().with(new ToSingleWithDefault<>(22));
-        assertThat(single).isNotNull();
-        single.test()
-                .assertValue(22)
-                .assertComplete();
-    }
-
-    @SuppressWarnings("unchecked")
-    @Test
-    public void testFailureToCreateSingleFromNull() {
-        Single<Integer> single = Uni.createFrom().item((Integer) null).convert().with(ToSingle.failOnNull());
-        assertThat(single).isNotNull();
-        single.test().assertError(e -> {
-            assertThat(e).isInstanceOf(NoSuchElementException.class);
-            return true;
-        });
-    }
-
-    @SuppressWarnings("unchecked")
-    @Test
     public void testCreatingASingleFromNull() {
-        Single<Optional<Integer>> single = Uni.createFrom().item((Integer) null).convert().with(RxConverters.toSingle());
+        Single<Optional<Integer>> single = Multi.createFrom().item((Integer) null).convert().with(RxConverters.toSingle());
         assertThat(single).isNotNull();
         single
                 .test()
-                .assertValue(Optional.empty())
-                .assertComplete();
+                .assertComplete()
+                .assertNoValues();
     }
 
     @SuppressWarnings("unchecked")
     @Test
     public void testCreatingASingleWithFailure() {
-        Single<Optional<Integer>> single = Uni.createFrom().<Integer> failure(new IOException("boom")).convert()
+        Single<Optional<Integer>> single = Multi.createFrom().<Integer> failure(new IOException("boom")).convert()
                 .with(RxConverters.toSingle());
         assertThat(single).isNotNull();
         single.test().assertError(e -> {
@@ -154,7 +104,7 @@ public class UniConvertToTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testCreatingAMaybe() {
-        Maybe<Integer> maybe = Uni.createFrom().item(1).convert().with(RxConverters.toMaybe());
+        Maybe<Integer> maybe = Multi.createFrom().item(1).convert().with(RxConverters.toMaybe());
         assertThat(maybe).isNotNull();
         maybe.test()
                 .assertValue(1)
@@ -164,7 +114,7 @@ public class UniConvertToTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testCreatingAMaybeFromNull() {
-        Maybe<Integer> maybe = Uni.createFrom().item((Integer) null).convert().with(RxConverters.toMaybe());
+        Maybe<Integer> maybe = Multi.createFrom().item((Integer) null).convert().with(RxConverters.toMaybe());
         assertThat(maybe).isNotNull();
         maybe
                 .test()
@@ -175,7 +125,7 @@ public class UniConvertToTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testCreatingAMaybeWithFailure() {
-        Maybe<Integer> maybe = Uni.createFrom().<Integer> failure(new IOException("boom")).convert()
+        Maybe<Integer> maybe = Multi.createFrom().<Integer> failure(new IOException("boom")).convert()
                 .with(RxConverters.toMaybe());
         assertThat(maybe).isNotNull();
         maybe.test().assertError(e -> {
@@ -187,7 +137,7 @@ public class UniConvertToTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testCreatingAnObservable() {
-        Observable<Integer> observable = Uni.createFrom().item(1).convert().with(RxConverters.toObservable());
+        Observable<Integer> observable = Multi.createFrom().item(1).convert().with(RxConverters.toObservable());
         assertThat(observable).isNotNull();
         observable.test()
                 .assertValue(1)
@@ -197,7 +147,7 @@ public class UniConvertToTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testCreatingAnObservableFromNull() {
-        Observable<Integer> observable = Uni.createFrom().item((Integer) null).convert().with(RxConverters.toObservable());
+        Observable<Integer> observable = Multi.createFrom().item((Integer) null).convert().with(RxConverters.toObservable());
         assertThat(observable).isNotNull();
         observable
                 .test()
@@ -208,7 +158,7 @@ public class UniConvertToTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testCreatingAnObservableWithFailure() {
-        Observable<Integer> observable = Uni.createFrom().<Integer> failure(new IOException("boom")).convert()
+        Observable<Integer> observable = Multi.createFrom().<Integer> failure(new IOException("boom")).convert()
                 .with(RxConverters.toObservable());
         assertThat(observable).isNotNull();
         observable.test().assertError(e -> {
@@ -220,7 +170,7 @@ public class UniConvertToTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testCreatingAFlowable() {
-        Flowable<Integer> flowable = Uni.createFrom().item(1).convert().with(RxConverters.toFlowable());
+        Flowable<Integer> flowable = Multi.createFrom().item(1).convert().with(RxConverters.toFlowable());
         assertThat(flowable).isNotNull();
         flowable.test()
                 .assertValue(1)
@@ -231,9 +181,9 @@ public class UniConvertToTest {
     @Test
     public void testCreatingAFlowableWithRequest() {
         AtomicBoolean called = new AtomicBoolean();
-        Flowable<Integer> flowable = Uni.createFrom().deferred(() -> {
+        Flowable<Integer> flowable = Multi.createFrom().deferred(() -> {
             called.set(true);
-            return Uni.createFrom().item(1);
+            return Multi.createFrom().item(1);
         }).convert().with(RxConverters.toFlowable());
         assertThat(flowable).isNotNull();
         TestSubscriber<Integer> test = flowable.test(0);
@@ -247,7 +197,7 @@ public class UniConvertToTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testCreatingAFlowableFromNull() {
-        Flowable<Integer> flowable = Uni.createFrom().item((Integer) null).convert().with(RxConverters.toFlowable());
+        Flowable<Integer> flowable = Multi.createFrom().item((Integer) null).convert().with(RxConverters.toFlowable());
         assertThat(flowable).isNotNull();
         flowable
                 .test()
@@ -258,7 +208,7 @@ public class UniConvertToTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testCreatingAFlowableWithFailure() {
-        Flowable<Integer> flowable = Uni.createFrom().<Integer> failure(new IOException("boom")).convert()
+        Flowable<Integer> flowable = Multi.createFrom().<Integer> failure(new IOException("boom")).convert()
                 .with(RxConverters.toFlowable());
         assertThat(flowable).isNotNull();
         flowable.test().assertError(e -> {

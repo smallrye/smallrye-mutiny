@@ -7,6 +7,12 @@ import io.reactivex.Maybe;
 import io.smallrye.reactive.Uni;
 
 public class ToMaybe<T> implements Function<Uni<T>, Maybe<T>> {
+    public static final ToMaybe INSTANCE = new ToMaybe();
+
+    private ToMaybe() {
+        // Avoid direct instantiation
+    }
+
     @Override
     public Maybe<T> apply(Uni<T> uni) {
         return Maybe.create(emitter -> {

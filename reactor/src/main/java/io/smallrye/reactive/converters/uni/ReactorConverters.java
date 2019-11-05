@@ -15,4 +15,13 @@ public class ReactorConverters {
         return FromFlux.INSTANCE;
     }
 
+    @SuppressWarnings("unchecked")
+    public static <T> ToMono<T> toMono() {
+        return ToMono.INSTANCE;
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T> ToFlux<T> toFlux() {
+        return ToFlux.INSTANCE;
+    }
 }

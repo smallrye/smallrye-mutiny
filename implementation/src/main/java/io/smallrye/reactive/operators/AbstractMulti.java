@@ -191,4 +191,9 @@ public abstract class AbstractMulti<T> implements Multi<T> {
     public MultiBroadcast<T> broadcast() {
         return new MultiBroadcast<>(this);
     }
+
+    @Override
+    public MultiConvert<T> convert() {
+        return new MultiConvert<>(this);
+    }
 }

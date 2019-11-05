@@ -7,13 +7,19 @@ import io.reactivex.Single;
 import io.smallrye.reactive.Uni;
 
 public class ToSingle<T> implements Function<Uni<T>, Single<Optional<T>>> {
+    public static final ToSingle INSTANCE = new ToSingle();
+
+    private ToSingle() {
+        // Avoid direct instantiation
+    }
 
     public static <R> ToSingleWithDefault<R> withDefault(R defaultValue) {
         return new ToSingleWithDefault<>(defaultValue);
     }
 
+    @SuppressWarnings("unchecked")
     public static <R> ToSingleFailOnNull<R> failOnNull() {
-        return new ToSingleFailOnNull<>();
+        return ToSingleFailOnNull.INSTANCE;
     }
 
     @Override

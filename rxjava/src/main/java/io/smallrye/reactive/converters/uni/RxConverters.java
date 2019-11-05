@@ -30,4 +30,24 @@ public class RxConverters {
         return FromObservable.INSTANCE;
     }
 
+    @SuppressWarnings("unchecked")
+    public static <T> ToSingle<T> toSingle() {
+        return ToSingle.INSTANCE;
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T> ToMaybe<T> toMaybe() {
+        return ToMaybe.INSTANCE;
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T> ToFlowable<T> toFlowable() {
+        return ToFlowable.INSTANCE;
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T> ToObservable<T> toObservable() {
+        return ToObservable.INSTANCE;
+    }
+
 }

@@ -189,6 +189,13 @@ public interface Multi<T> extends Publisher<T> {
      */
     MultiBroadcast<T> broadcast();
 
+    //TODO
+    /**
+     *
+     * @return
+     */
+    MultiConvert<T> convert();
+
     /**
      * Produces a new {@link Multi} invoking the given function for each item emitted by the upstream {@link Multi}.
      * <p>
