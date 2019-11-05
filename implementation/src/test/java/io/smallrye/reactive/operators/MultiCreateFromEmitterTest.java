@@ -15,6 +15,7 @@ import io.smallrye.reactive.Multi;
 import io.smallrye.reactive.subscription.BackPressureFailure;
 import io.smallrye.reactive.subscription.BackPressureStrategy;
 import io.smallrye.reactive.subscription.MultiEmitter;
+import io.smallrye.reactive.test.MultiAssertSubscriber;
 
 public class MultiCreateFromEmitterTest {
 

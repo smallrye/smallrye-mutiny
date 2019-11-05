@@ -5,6 +5,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.Test;
 
 import io.smallrye.reactive.Multi;
+import io.smallrye.reactive.test.MultiAssertSubscriber;
 
 public class MultiCreateFromDeferredSupplierTest {
 

@@ -8,13 +8,13 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import io.smallrye.reactive.Multi;
 import org.junit.After;
 import org.junit.Test;
 import org.reactivestreams.Publisher;
 
 import io.reactivex.Flowable;
 import io.reactivex.subscribers.TestSubscriber;
+import io.smallrye.reactive.Multi;
 import io.smallrye.reactive.Uni;
 
 public class UniToPublisherTest {

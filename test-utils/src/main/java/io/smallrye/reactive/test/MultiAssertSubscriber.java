@@ -1,6 +1,6 @@
-package io.smallrye.reactive.operators;
+package io.smallrye.reactive.test;
 
-import static org.assertj.core.api.Java6Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.Duration;
 import java.util.List;
