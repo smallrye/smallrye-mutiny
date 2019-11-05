@@ -325,10 +325,22 @@ public interface Uni<T> {
         return onItem().mapToUni(ParameterValidation.nonNull(mapper, "mapper"));
     }
 
-    //TODO
     /**
+     * Converts an {@link Uni} to other types such as {@link CompletionStage}
      *
-     * @return
+     * <p>
+     * Examples:
+     * </p>
+     *
+     * <pre>
+     * {@code
+     * uni.convert().toCompletionStage(); // Convert to CompletionStage using convenience method
+     * uni.convert().with(BuiltinConverters.toCompletionStage()); // Convert to CompletionStage using BuiltInConverters
+     * uni.convert().with(uni -> x); // Convert with a custom lambda converter
+     * }
+     * </pre>
+     * @return the object to convert an {@link Uni} instance
+     * @see UniConvert
      */
     UniConvert<T> convert();
 

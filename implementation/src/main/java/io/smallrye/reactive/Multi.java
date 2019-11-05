@@ -189,10 +189,20 @@ public interface Multi<T> extends Publisher<T> {
      */
     MultiBroadcast<T> broadcast();
 
-    //TODO
     /**
+     * Converts a {@link Multi} to other types
      *
-     * @return
+     * <p>
+     * Examples:
+     * </p>
+     *
+     * <pre>
+     * {@code
+     * multi.convert().with(multi -> x); // Convert with a custom lambda converter
+     * }
+     * </pre>
+     * @return the object to convert an {@link Multi} instance
+     * @see MultiConvert
      */
     MultiConvert<T> convert();
 
