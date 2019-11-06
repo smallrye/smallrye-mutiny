@@ -35,6 +35,10 @@ public class RxConverters {
         return ToSingle.INSTANCE;
     }
 
+    public static <T> ToSingleFailOnNull<T> toSingleOnEmptyThrow(Class<? extends Throwable> exceptionClass) {
+        return new ToSingleFailOnNull<>(exceptionClass);
+    }
+
     @SuppressWarnings("unchecked")
     public static <T> ToMaybe<T> toMaybe() {
         return ToMaybe.INSTANCE;

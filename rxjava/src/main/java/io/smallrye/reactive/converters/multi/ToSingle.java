@@ -13,6 +13,10 @@ public class ToSingle<T> implements Function<Multi<T>, Single<Optional<T>>> {
         // Avoid direct instantiation
     }
 
+    public static <R> ToSingleFailOnNull<R> onEmptyThrow(Class<? extends Throwable> exceptionClass) {
+        return new ToSingleFailOnNull<>(exceptionClass);
+    }
+
     @Override
     public Single<Optional<T>> apply(Multi<T> multi) {
         return Single.fromPublisher(multi.map(Optional::ofNullable));

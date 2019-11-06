@@ -3,6 +3,7 @@ package io.smallrye.reactive.converters;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -13,10 +14,11 @@ import io.reactivex.Flowable;
 import io.reactivex.Maybe;
 import io.reactivex.Observable;
 import io.reactivex.Single;
-import io.reactivex.subscribers.TestSubscriber;
 import io.smallrye.reactive.Multi;
 import io.smallrye.reactive.converters.multi.RxConverters;
 import io.smallrye.reactive.converters.multi.ToCompletable;
+import io.smallrye.reactive.converters.multi.ToSingle;
+import io.smallrye.reactive.test.MultiAssertSubscriber;
 
 public class MultiConvertToTest {
 
@@ -81,11 +83,24 @@ public class MultiConvertToTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testCreatingASingleFromNull() {
-        Single<Optional<Integer>> single = Multi.createFrom().item((Integer) null).convert().with(RxConverters.toSingle());
+        Single<Integer> single = Multi.createFrom().item((Integer) null).convert()
+                .with(ToSingle.onEmptyThrow(NoSuchElementException.class));
         assertThat(single).isNotNull();
         single
                 .test()
-                .assertComplete()
+                .assertFailure(NoSuchElementException.class)
+                .assertNoValues();
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void testCreatingASingleFromNullWithConverter() {
+        Single<Integer> single = Multi.createFrom().item((Integer) null).convert()
+                .with(RxConverters.toSingleOnEmptyThrow(NoSuchElementException.class));
+        assertThat(single).isNotNull();
+        single
+                .test()
+                .assertFailure(NoSuchElementException.class)
                 .assertNoValues();
     }
 
@@ -181,16 +196,15 @@ public class MultiConvertToTest {
     @Test
     public void testCreatingAFlowableWithRequest() {
         AtomicBoolean called = new AtomicBoolean();
-        Flowable<Integer> flowable = Multi.createFrom().deferred(() -> {
-            called.set(true);
-            return Multi.createFrom().item(1);
-        }).convert().with(RxConverters.toFlowable());
-        assertThat(flowable).isNotNull();
-        TestSubscriber<Integer> test = flowable.test(0);
+        MultiAssertSubscriber<Integer> subscriber = Multi.createFrom()
+                .deferred(() -> Multi.createFrom().item(1).onItem().consume((item) -> called.set(true)))
+                .convert().with(RxConverters.toFlowable())
+                .subscribeWith(MultiAssertSubscriber.create(0));
+
         assertThat(called).isFalse();
-        test.assertNoValues().assertSubscribed();
-        test.request(2);
-        test.assertValue(1).assertComplete();
+        subscriber.assertHasNotReceivedAnyItem().assertSubscribed();
+        subscriber.request(1);
+        subscriber.assertCompletedSuccessfully().assertReceived(1);
         assertThat(called).isTrue();
     }
 

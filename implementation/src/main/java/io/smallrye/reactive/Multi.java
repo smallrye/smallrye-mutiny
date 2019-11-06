@@ -201,6 +201,7 @@ public interface Multi<T> extends Publisher<T> {
      * multi.convert().with(multi -> x); // Convert with a custom lambda converter
      * }
      * </pre>
+     * 
      * @return the object to convert an {@link Multi} instance
      * @see MultiConvert
      */

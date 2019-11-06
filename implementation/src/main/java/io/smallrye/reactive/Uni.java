@@ -339,6 +339,7 @@ public interface Uni<T> {
      * uni.convert().with(uni -> x); // Convert with a custom lambda converter
      * }
      * </pre>
+     * 
      * @return the object to convert an {@link Uni} instance
      * @see UniConvert
      */
