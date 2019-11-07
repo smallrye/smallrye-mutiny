@@ -14,6 +14,7 @@ import org.reactivestreams.Subscription;
 
 import io.smallrye.reactive.CompositeException;
 import io.smallrye.reactive.Multi;
+import io.smallrye.reactive.test.MultiAssertSubscriber;
 
 public class MultiOnEventTest {
     @Test

@@ -190,6 +190,24 @@ public interface Multi<T> extends Publisher<T> {
     MultiBroadcast<T> broadcast();
 
     /**
+     * Converts a {@link Multi} to other types
+     *
+     * <p>
+     * Examples:
+     * </p>
+     *
+     * <pre>
+     * {@code
+     * multi.convert().with(multi -> x); // Convert with a custom lambda converter
+     * }
+     * </pre>
+     * 
+     * @return the object to convert an {@link Multi} instance
+     * @see MultiConvert
+     */
+    MultiConvert<T> convert();
+
+    /**
      * Produces a new {@link Multi} invoking the given function for each item emitted by the upstream {@link Multi}.
      * <p>
      * The function receives the received item as parameter, and can transform it. The returned object is sent

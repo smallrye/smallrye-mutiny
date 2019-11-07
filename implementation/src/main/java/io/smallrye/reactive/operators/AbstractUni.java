@@ -79,13 +79,13 @@ public abstract class AbstractUni<T> implements Uni<T> {
     }
 
     @Override
-    public UniAdapt<T> adapt() {
-        return new UniAdapt<>(this);
+    public UniConvert<T> convert() {
+        return new UniConvert<>(this);
     }
 
     @Override
     public Multi<T> toMulti() {
-        return Multi.createFrom().publisher(adapt().toPublisher());
+        return Multi.createFrom().publisher(convert().toPublisher());
     }
 
     @Override

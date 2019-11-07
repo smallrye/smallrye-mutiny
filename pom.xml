@@ -53,6 +53,7 @@
     </scm>
 
     <modules>
+        <module>test-utils</module>
         <module>implementation</module>
         <module>rxjava</module>
         <module>reactor</module>
@@ -91,6 +92,13 @@
                 <groupId>org.eclipse.microprofile.reactive-streams-operators</groupId>
                 <artifactId>microprofile-reactive-streams-operators-api</artifactId>
                 <version>${microprofile-reactive-streams.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>io.smallrye.reactive</groupId>
+                <artifactId>uni-multi-test-utils</artifactId>
+                <version>${project.version}</version>
+                <scope>test</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>

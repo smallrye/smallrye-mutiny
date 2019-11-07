@@ -14,6 +14,7 @@ import org.junit.Test;
 import io.smallrye.reactive.CompositeException;
 import io.smallrye.reactive.Multi;
 import io.smallrye.reactive.Uni;
+import io.smallrye.reactive.test.MultiAssertSubscriber;
 
 public class MultiFlatMapToPublisherTest {
 

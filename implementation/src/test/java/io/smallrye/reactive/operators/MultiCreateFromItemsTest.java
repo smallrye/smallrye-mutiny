@@ -10,6 +10,7 @@ import java.util.stream.Stream;
 import org.junit.Test;
 
 import io.smallrye.reactive.Multi;
+import io.smallrye.reactive.test.MultiAssertSubscriber;
 
 public class MultiCreateFromItemsTest {
 

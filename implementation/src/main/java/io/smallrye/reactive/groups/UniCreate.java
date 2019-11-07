@@ -10,6 +10,7 @@ import org.reactivestreams.Publisher;
 
 import io.smallrye.reactive.Multi;
 import io.smallrye.reactive.Uni;
+import io.smallrye.reactive.converters.UniConverter;
 import io.smallrye.reactive.helpers.ParameterValidation;
 import io.smallrye.reactive.infrastructure.Infrastructure;
 import io.smallrye.reactive.operators.*;
@@ -25,6 +26,19 @@ public class UniCreate {
 
     private UniCreate() {
         // avoid direct instantiation.
+    }
+
+    /**
+     * Creates a new {@link Uni} from the passed instance with the passed converter.
+     *
+     * @param converter performs the type conversion
+     * @param instance instance to convert from
+     * @param <I> the type being converted from
+     * @param <T> the type for the {@link Uni}
+     * @return created {@link Uni}
+     */
+    public <I, T> Uni<T> converter(UniConverter<I, T> converter, I instance) {
+        return converter.from(instance);
     }
 
     /**
