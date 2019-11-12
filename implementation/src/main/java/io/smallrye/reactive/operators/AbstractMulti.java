@@ -1,15 +1,5 @@
 package io.smallrye.reactive.operators;
 
-import static io.smallrye.reactive.helpers.EmptyUniSubscription.CANCELLED;
-import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
-
-import java.util.concurrent.Executor;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Predicate;
-
-import org.reactivestreams.Subscriber;
-import org.reactivestreams.Subscription;
-
 import io.reactivex.Flowable;
 import io.reactivex.exceptions.CompositeException;
 import io.reactivex.exceptions.MissingBackpressureException;
@@ -17,20 +7,31 @@ import io.reactivex.schedulers.Schedulers;
 import io.smallrye.reactive.Multi;
 import io.smallrye.reactive.Uni;
 import io.smallrye.reactive.groups.*;
+import io.smallrye.reactive.operators.multi.MultiSubscribeOnOp;
 import io.smallrye.reactive.subscription.BackPressureFailure;
+import org.reactivestreams.Publisher;
+import org.reactivestreams.Subscriber;
+import org.reactivestreams.Subscription;
+
+import java.util.concurrent.Executor;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Predicate;
+
+import static io.smallrye.reactive.helpers.EmptyUniSubscription.CANCELLED;
+import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
 
 public abstract class AbstractMulti<T> implements Multi<T> {
 
-    protected abstract Flowable<T> flowable();
+    protected abstract Publisher<T> publisher();
 
     @Override
     public void subscribe(Subscriber<? super T> subscriber) {
-        Flowable<T> flowable = flowable();
-        if (flowable == null) {
-            throw new IllegalStateException("Invalid call to subscription, we don't have a stream");
+        Publisher<T> publisher = publisher();
+        if (publisher == null) {
+            throw new IllegalStateException("Invalid call to subscription, we don't have a publisher");
         }
         //noinspection SubscriberImplementation
-        flowable.subscribe(new Subscriber<T>() {
+        publisher.subscribe(new Subscriber<T>() {
 
             AtomicReference<Subscription> reference = new AtomicReference<>();
 
@@ -138,10 +139,11 @@ public abstract class AbstractMulti<T> implements Multi<T> {
             AtomicReference<Flowable<T>> reference = new AtomicReference<>();
 
             @Override
-            protected Flowable<T> flowable() {
+            protected Publisher<T> publisher() {
                 return reference.updateAndGet(flowable -> {
                     if (flowable == null) {
-                        return AbstractMulti.this.flowable().cache();
+                        // TODO Change it to not use Flowable.
+                        return Flowable.fromPublisher(AbstractMulti.this.publisher()).cache();
                     } else {
                         return flowable;
                     }
@@ -163,13 +165,13 @@ public abstract class AbstractMulti<T> implements Multi<T> {
     @Override
     public Multi<T> emitOn(Executor executor) {
         return new DefaultMulti<>(
-                flowable().observeOn(Schedulers.from(nonNull(executor, "executor"))));
+                // TODO Change me to not use Flowable
+                Flowable.fromPublisher(publisher()).observeOn(Schedulers.from(nonNull(executor, "executor"))));
     }
 
     @Override
     public Multi<T> subscribeOn(Executor executor) {
-        return new DefaultMulti<>(
-                flowable().subscribeOn(Schedulers.from(nonNull(executor, "executor"))));
+        return new MultiSubscribeOnOp<>(this, executor);
     }
 
     @Override
