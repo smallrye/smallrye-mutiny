@@ -1,19 +1,18 @@
 package io.smallrye.reactive.operators;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.awaitility.Awaitility.await;
+import io.smallrye.reactive.Multi;
+import io.smallrye.reactive.subscription.BackPressureFailure;
+import io.smallrye.reactive.test.MultiAssertSubscriber;
+import org.junit.After;
+import org.junit.Test;
 
 import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
-import org.junit.After;
-import org.junit.Test;
-
-import io.smallrye.reactive.Multi;
-import io.smallrye.reactive.subscription.BackPressureFailure;
-import io.smallrye.reactive.test.MultiAssertSubscriber;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 
 public class MultiCreateFromTimePeriodTest {
 
@@ -51,11 +50,14 @@ public class MultiCreateFromTimePeriodTest {
     }
 
     @Test
-    public void testWithInfraExecutorAndNoDelay() {
+    public void testWithInfraExecutorAndNoDelay() throws InterruptedException {
         MultiAssertSubscriber<Long> ts = MultiAssertSubscriber.create(Long.MAX_VALUE);
 
         // Add a fake item with the beginning time
         ts.items().add(System.currentTimeMillis());
+
+        // No initial delay, so introduce a fake delay
+        Thread.sleep(100);
 
         Multi.createFrom().ticks()
                 .every(Duration.ofMillis(100))

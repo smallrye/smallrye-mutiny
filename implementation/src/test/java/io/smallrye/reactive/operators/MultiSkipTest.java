@@ -199,7 +199,8 @@ public class MultiSkipTest {
 
     @Test
     public void testSkipByTime() {
-        Multi.createFrom().range(1, 100).transform().bySkippingItemsFor(Duration.ofMillis(2000))
+        Multi.createFrom().range(1, 100)
+                .transform().bySkippingItemsFor(Duration.ofMillis(2000))
                 .subscribe().withSubscriber(MultiAssertSubscriber.create(10))
                 .assertCompletedSuccessfully()
                 .assertHasNotReceivedAnyItem();
