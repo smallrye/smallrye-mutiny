@@ -2,6 +2,7 @@ package io.smallrye.reactive.operators.multi;
 
 import io.smallrye.reactive.helpers.ParameterValidation;
 import io.smallrye.reactive.operators.AbstractMulti;
+import io.smallrye.reactive.operators.multi.builders.CollectionBasedMulti;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 
@@ -50,7 +51,7 @@ public final class MultiMergeOp<T> extends AbstractMulti<T> {
         MultiFlatMapOp.FlatMapMainSubscriber<Publisher<? extends T>, T> merger = new MultiFlatMapOp.FlatMapMainSubscriber<>(
                 actual, Function.identity(), postponeFailurePropagation, maxConcurrency, prefetch, mainQueueSupplier,
                 innerQueueSupplier);
-        merger.onSubscribe(new MultiFromCollection.CollectionSubscription<>(merger, upstreams));
+        merger.onSubscribe(new CollectionBasedMulti.CollectionSubscription<>(merger, upstreams));
     }
 
     @Override
