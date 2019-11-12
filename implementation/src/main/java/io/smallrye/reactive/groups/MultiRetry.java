@@ -5,7 +5,7 @@ import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
 import java.util.function.Predicate;
 
 import io.smallrye.reactive.Multi;
-import io.smallrye.reactive.operators.MultiRetryAtMost;
+import io.smallrye.reactive.operators.multi.MultiRetryOp;
 
 public class MultiRetry<T> {
 
@@ -40,7 +40,7 @@ public class MultiRetry<T> {
      *         {@link Multi} until it gets an item. When the number of attempt is reached, the last failure is propagated.
      */
     public Multi<T> atMost(long numberOfAttempts) {
-        return new MultiRetryAtMost<>(upstream, predicate, numberOfAttempts);
+        return new MultiRetryOp<>(upstream, numberOfAttempts);
     }
 
     public Multi<T> until(Predicate<? super Throwable> predicate) {
