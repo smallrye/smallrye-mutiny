@@ -1,13 +1,24 @@
 package io.smallrye.reactive.groups;
 
-import static io.smallrye.reactive.helpers.ParameterValidation.SUPPLIER_PRODUCED_NULL;
-import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
+import io.smallrye.reactive.Multi;
+import io.smallrye.reactive.Uni;
+import io.smallrye.reactive.converters.MultiConverter;
+import io.smallrye.reactive.operators.AbstractMulti;
+import io.smallrye.reactive.operators.MultiCreateWithEmitter;
+import io.smallrye.reactive.operators.multi.builders.DeferredMulti;
+import io.smallrye.reactive.operators.multi.builders.EmptyMulti;
+import io.smallrye.reactive.operators.multi.builders.FailedMulti;
+import io.smallrye.reactive.operators.multi.builders.NeverMulti;
+import io.smallrye.reactive.subscription.BackPressureStrategy;
+import io.smallrye.reactive.subscription.MultiEmitter;
+import org.reactivestreams.Publisher;
+import org.reactivestreams.Subscriber;
 
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
-import java.util.concurrent.Executor;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -15,16 +26,8 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-import org.reactivestreams.Publisher;
-import org.reactivestreams.Subscriber;
-
-import io.reactivex.Flowable;
-import io.smallrye.reactive.Multi;
-import io.smallrye.reactive.Uni;
-import io.smallrye.reactive.converters.MultiConverter;
-import io.smallrye.reactive.operators.*;
-import io.smallrye.reactive.subscription.BackPressureStrategy;
-import io.smallrye.reactive.subscription.MultiEmitter;
+import static io.smallrye.reactive.helpers.ParameterValidation.SUPPLIER_PRODUCED_NULL;
+import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
 
 /**
  * Group methods allowing to create {@link Multi} instances from various sources.
@@ -41,9 +44,9 @@ public class MultiCreate {
      * Creates a new {@link Uni} from the passed instance with the passed converter.
      *
      * @param converter performs the type conversion
-     * @param instance instance to convert from
-     * @param <I> the type being converted from
-     * @param <T> the type for the {@link Uni}
+     * @param instance  instance to convert from
+     * @param <I>       the type being converted from
+     * @param <T>       the type for the {@link Uni}
      * @return created {@link Uni}
      */
     public <I, T> Multi<T> converter(MultiConverter<I, T> converter, I instance) {
@@ -66,7 +69,7 @@ public class MultiCreate {
      * If the completion stage redeems {@code null}, it fires the completion event without any item.
      *
      * @param stage the stage, must not be {@code null}
-     * @param <T> the type of item
+     * @param <T>   the type of item
      * @return the produced {@link Multi}
      */
     public <T> Multi<T> completionStage(CompletionStage<? extends T> stage) {
@@ -97,7 +100,7 @@ public class MultiCreate {
      * {@code null}, a failure event containing a {@link NullPointerException} is fired.
      *
      * @param supplier the supplier, must not be {@code null}, must not produce {@code null}
-     * @param <T> the type of item
+     * @param <T>      the type of item
      * @return the produced {@link Multi}
      */
     public <T> Multi<T> deferredCompletionStage(Supplier<? extends CompletionStage<? extends T>> supplier) {
@@ -134,21 +137,21 @@ public class MultiCreate {
      * If the Multi's observer cancels its subscription, the subscription to the {@link Publisher} is also cancelled.
      *
      * @param publisher the publisher, must not be {@code null}
-     * @param <T> the type of item
+     * @param <T>       the type of item
      * @return the produced {@link Multi}
      */
-    public <T> Multi<T> publisher(Publisher<? extends T> publisher) {
-        Publisher<? extends T> actual = nonNull(publisher, "publisher");
+    public <T> Multi<T> publisher(Publisher<T> publisher) {
+        Publisher<T> actual = nonNull(publisher, "publisher");
         return new AbstractMulti<T>() {
             @Override
-            protected Flowable<T> flowable() {
-                return Flowable.fromPublisher(actual);
+            protected Publisher<T> publisher() {
+                return actual;
             }
         };
     }
 
     /**
-     * Creates an instance of {@link Multi} from the given {@link Uni}.
+     * Creates an never of {@link Multi} from the given {@link Uni}.
      * <p>
      * When a subscriber subscribes to the returned {@link Multi} and <strong>request</strong> an item, it subscribes
      * to the given {@link Uni} and the events from this {@link Uni} are propagated to the {@link Multi}:
@@ -182,7 +185,7 @@ public class MultiCreate {
      * If the supplier throws an exception, a failure event with the exception is fired.
      *
      * @param supplier the item supplier, must not be {@code null}, can produce {@code null}
-     * @param <T> the type of item emitted by the produced Multi
+     * @param <T>      the type of item emitted by the produced Multi
      * @return the new {@link Multi}
      */
     public <T> Multi<T> deferredItem(Supplier<? extends T> supplier) {
@@ -216,7 +219,7 @@ public class MultiCreate {
      * the stream is consumed sequentially.
      *
      * @param supplier the item supplier, must not be {@code null}, must not produce {@code null}
-     * @param <T> the type of item emitted by the produced Multi
+     * @param <T>      the type of item emitted by the produced Multi
      * @return the new {@link Multi}
      */
     public <T> Multi<T> deferredItems(Supplier<? extends Stream<? extends T>> supplier) {
@@ -258,7 +261,7 @@ public class MultiCreate {
      * the completion event.
      *
      * @param item the item, can be {@code null} which would create an empty {@link Multi}
-     * @param <T> the type of item emitted by the produced Multi
+     * @param <T>  the type of item emitted by the produced Multi
      * @return the new {@link Multi}
      */
     public <T> Multi<T> item(T item) {
@@ -275,7 +278,7 @@ public class MultiCreate {
      * When all the items have been emitted, the completion event is fired.
      *
      * @param items the items, must not be {@code null}, must not contain {@code null}
-     * @param <T> the type of item emitted by the produced Multi
+     * @param <T>   the type of item emitted by the produced Multi
      * @return the new {@link Multi}
      */
     @SafeVarargs
@@ -293,7 +296,7 @@ public class MultiCreate {
      * When all the items have been emitted, the completion event is fired.
      *
      * @param iterable the iterable of items, must not be {@code null}, must not contain {@code null}
-     * @param <T> the type of item emitted by the produced Multi
+     * @param <T>      the type of item emitted by the produced Multi
      * @return the new {@link Multi}
      */
     public <T> Multi<T> iterable(Iterable<T> iterable) {
@@ -312,7 +315,7 @@ public class MultiCreate {
      * The stream is consumed sequentially.
      *
      * @param items the items, must not be {@code null}, must not contain {@code null}
-     * @param <T> the type of item emitted by the produced Multi
+     * @param <T>   the type of item emitted by the produced Multi
      * @return the new {@link Multi}
      */
     public <T> Multi<T> items(Stream<T> items) {
@@ -325,7 +328,7 @@ public class MultiCreate {
      * in the given optional if {@link Optional#isPresent()} or empty otherwise.
      *
      * @param optional the optional, must not be {@code null}, an empty optional produces an empty {@link Multi}.
-     * @param <T> the type of the produced item
+     * @param <T>      the type of the produced item
      * @return the new {@link Multi}
      */
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
@@ -346,7 +349,7 @@ public class MultiCreate {
      * {@code null}, a failure event containing a {@link NullPointerException} is fired.
      *
      * @param supplier the supplier, must not be {@code null}, must not return {@code null}
-     * @param <T> the type of the produced item
+     * @param <T>      the type of the produced item
      * @return the new {@link Multi}
      */
     public <T> Multi<T> deferredOptional(Supplier<Optional<T>> supplier) {
@@ -358,7 +361,7 @@ public class MultiCreate {
      * Like {@link #emitter(Consumer, BackPressureStrategy)} with the {@link BackPressureStrategy#BUFFER} strategy.
      *
      * @param consumer the consumer receiving the emitter, must not be {@code null}
-     * @param <T> the type of item emitted by the produced Multi
+     * @param <T>      the type of item emitted by the produced Multi
      * @return the produced {@link Multi}
      */
     public <T> Multi<T> emitter(Consumer<MultiEmitter<? super T>> consumer) {
@@ -379,10 +382,10 @@ public class MultiCreate {
      * If the consume throws an exception, a failure event with the exception is fired.
      *
      * @param consumer callback receiving the {@link MultiEmitter} and events downstream. The callback is
-     *        called for each subscriber (at subscription time). Must not be {@code null}
+     *                 called for each subscriber (at subscription time). Must not be {@code null}
      * @param strategy the back pressure strategy to apply when the downstream subscriber cannot keep up with the
-     *        items emitted by the emitter.
-     * @param <T> the type of items
+     *                 items emitted by the emitter.
+     * @param <T>      the type of items
      * @return the produced {@link Multi}
      */
     public <T> Multi<T> emitter(Consumer<MultiEmitter<? super T>> consumer, BackPressureStrategy strategy) {
@@ -404,20 +407,19 @@ public class MultiCreate {
      * {@code null}, a failure event containing a {@link NullPointerException} is fired.
      *
      * @param supplier the supplier, must not be {@code null}, must not produce {@code null}
-     * @param <T> the type of item
+     * @param <T>      the type of item
      * @return the produced {@link Multi}
      */
     public <T> Multi<T> deferred(Supplier<? extends Multi<? extends T>> supplier) {
-        Supplier<? extends Multi<? extends T>> actual = nonNull(supplier, "supplier");
-        return new MultiCreateFromDeferredSupplier<>(actual);
+        return new DeferredMulti<>(nonNull(supplier, "supplier"));
     }
 
     /**
      * Creates a {@link Multi} that emits a {@code failure} event immediately after being subscribed to.
      *
      * @param failure the failure to be fired, must not be {@code null}
-     * @param <T> the virtual type of item used by the {@link Multi}, must be explicitly set as in
-     *        {@code Multi.<String>failed(exception);}
+     * @param <T>     the virtual type of item used by the {@link Multi}, must be explicitly set as in
+     *                {@code Multi.<String>failed(exception);}
      * @return the produced {@link Multi}
      */
     public <T> Multi<T> failure(Throwable failure) {
@@ -427,23 +429,17 @@ public class MultiCreate {
 
     /**
      * Creates a {@link Multi} that emits a {@code failure} event produced using the passed supplier immediately after
-     * being subscribed to. The supplier is called at subscription time, and produces an instance of {@link Throwable}.
+     * being subscribed to. The supplier is called at subscription time, and produces an never of {@link Throwable}.
      * If the supplier throws an exception, a {@code failure} event is fired with this exception.
      * If the supplier produces {@code null}, a {@code failure} event is fired with a {@link NullPointerException}.
      *
      * @param supplier the supplier producing the failure, must not be {@code null}, must not produce {@code null}
-     * @param <T> the virtual type of item used by the {@link Multi}, must be explicitly set as in
-     *        {@code Multi.<String>failed(exception);}
+     * @param <T>      the virtual type of item used by the {@link Multi}, must be explicitly set as in
+     *                 {@code Multi.<String>failed(exception);}
      * @return the produced {@link Multi}
      */
     public <T> Multi<T> deferredFailure(Supplier<Throwable> supplier) {
-        Supplier<Throwable> actual = nonNull(supplier, "supplier");
-        return new AbstractMulti<T>() {
-            @Override
-            protected Flowable<T> flowable() {
-                return Flowable.error(actual::get);
-            }
-        };
+        return new FailedMulti<>(supplier);
     }
 
     /**
@@ -452,9 +448,8 @@ public class MultiCreate {
      * @param <T> the virtual type of item
      * @return a never emitting {@link Multi}
      */
-    @SuppressWarnings("unchecked")
     public <T> Multi<T> nothing() {
-        return (Multi<T>) MultiNever.INSTANCE;
+        return NeverMulti.never();
     }
 
     /**
@@ -464,9 +459,8 @@ public class MultiCreate {
      * @param <T> the virtual type of item
      * @return an empty {@link Multi}
      */
-    @SuppressWarnings("unchecked")
     public <T> Multi<T> empty() {
-        return (Multi<T>) MultiEmpty.INSTANCE;
+        return EmptyMulti.empty();
     }
 
     /**
@@ -476,7 +470,7 @@ public class MultiCreate {
      * Be aware that if the subscriber does not request enough item in time, a back pressure failure is fired.
      * The produced {@link Multi} never completes until cancellation by the subscriber.
      * <p>
-     * The callbacks are invoked on the executor passed in {@link MultiTimePeriod#onExecutor(Executor)}.
+     * The callbacks are invoked on the executor passed in {@link MultiTimePeriod#onExecutor(ScheduledExecutorService)}.
      *
      * @return the object to configure the time period (initial delay, executor, interval)
      */
@@ -489,7 +483,7 @@ public class MultiCreate {
      * Once all the integers have been emitted, the completion event is fired.
      *
      * @param startInclusive the start integer (inclusive)
-     * @param endExclusive the end integer (exclusive)
+     * @param endExclusive   the end integer (exclusive)
      * @return the {@link Multi} emitting the items
      */
     public Multi<Integer> range(int startInclusive, int endExclusive) {
@@ -499,7 +493,4 @@ public class MultiCreate {
         return Multi.createFrom().iterable(() -> IntStream.range(startInclusive, endExclusive).iterator());
     }
 
-    //    public <T, X> Multi<T> converterOf(X instance) {
-    //        return MultiAdaptFrom.adaptFrom(instance);
-    //    }
 }
