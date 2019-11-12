@@ -10,13 +10,14 @@ import org.reactivestreams.Subscription;
 import io.smallrye.reactive.helpers.ParameterValidation;
 import io.smallrye.reactive.helpers.Subscriptions;
 
+@SuppressWarnings("SubscriberImplementation")
 public abstract class MultiOperatorSubscriber<I, O> implements Subscriber<I>, Subscription {
 
     protected final Subscriber<? super O> downstream;
     protected AtomicReference<Subscription> upstream = new AtomicReference<>();
 
-    public MultiOperatorSubscriber(Subscriber<? super O> actual) {
-        this.downstream = ParameterValidation.nonNull(actual, "actual");
+    public MultiOperatorSubscriber(Subscriber<? super O> downstream) {
+        this.downstream = ParameterValidation.nonNull(downstream, "downstream");
     }
 
     protected boolean isDone() {

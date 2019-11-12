@@ -9,10 +9,7 @@ import org.reactivestreams.Publisher;
 import io.smallrye.reactive.Multi;
 import io.smallrye.reactive.Uni;
 import io.smallrye.reactive.operators.*;
-import io.smallrye.reactive.operators.multi.MultiIgnoreOp;
-import io.smallrye.reactive.operators.multi.MultiMapOp;
-import io.smallrye.reactive.operators.multi.MultiScanOp;
-import io.smallrye.reactive.operators.multi.MultiScanWithSeedOp;
+import io.smallrye.reactive.operators.multi.*;
 
 public class MultiOnItem<T> {
 
@@ -172,7 +169,7 @@ public class MultiOnItem<T> {
      * @return the produced {@link Multi}
      */
     public Multi<T> filterWith(Predicate<? super T> predicate) {
-        return new MultiFilter<>(upstream, nonNull(predicate, "predicate"));
+        return new MultiFilterOp<>(upstream, nonNull(predicate, "predicate"));
     }
 
     /**
