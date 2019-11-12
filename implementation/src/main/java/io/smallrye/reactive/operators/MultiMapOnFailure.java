@@ -1,13 +1,14 @@
 package io.smallrye.reactive.operators;
 
-import static io.smallrye.reactive.helpers.ParameterValidation.MAPPER_RETURNED_NULL;
-import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
+import io.smallrye.reactive.Multi;
+import io.smallrye.reactive.operators.multi.MultiOnFailureResumeOp;
+import org.reactivestreams.Publisher;
 
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-import io.reactivex.Flowable;
-import io.smallrye.reactive.Multi;
+import static io.smallrye.reactive.helpers.ParameterValidation.MAPPER_RETURNED_NULL;
+import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
 
 public class MultiMapOnFailure<T> extends MultiOperator<T, T> {
     private final Predicate<? super Throwable> predicate;
@@ -21,17 +22,18 @@ public class MultiMapOnFailure<T> extends MultiOperator<T, T> {
     }
 
     @Override
-    protected Flowable<T> flowable() {
-        return upstreamAsFlowable().onErrorResumeNext(failure -> {
+    protected Publisher<T> publisher() {
+        Function<? super Throwable, ? extends Publisher<? extends T>> next = failure -> {
             if (predicate.test(failure)) {
                 Throwable throwable = mapper.apply(failure);
                 if (throwable == null) {
-                    return Flowable.error(new NullPointerException(MAPPER_RETURNED_NULL));
+                    return Multi.createFrom().failure(new NullPointerException(MAPPER_RETURNED_NULL));
                 } else {
-                    return Flowable.error(throwable);
+                    return Multi.createFrom().failure(throwable);
                 }
             }
-            return Flowable.error(failure);
-        });
+            return Multi.createFrom().failure(failure);
+        };
+        return new MultiOnFailureResumeOp<>(upstream(), next);
     }
 }
