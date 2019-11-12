@@ -1,11 +1,12 @@
 package io.smallrye.reactive.operators;
 
-import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
+import io.smallrye.reactive.Multi;
+import io.smallrye.reactive.operators.multi.MultiSignalConsumerOp;
+import org.reactivestreams.Publisher;
 
 import java.util.function.BiConsumer;
 
-import io.reactivex.Flowable;
-import io.smallrye.reactive.Multi;
+import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
 
 public class MultiOnTermination<T> extends MultiOperator<T, T> {
     private final BiConsumer<Throwable, Boolean> consumer;
@@ -16,13 +17,15 @@ public class MultiOnTermination<T> extends MultiOperator<T, T> {
     }
 
     @Override
-    protected Flowable<T> flowable() {
-        // Important: callback order:
-        // onError must be first because if onCompletion or onCancel throws an exception, it should be handled
-        // downstream, and not calling the callback again.
-        return upstreamAsFlowable()
-                .doOnError(fail -> consumer.accept(fail, false))
-                .doOnComplete(() -> consumer.accept(null, false))
-                .doOnCancel(() -> consumer.accept(null, true));
+    protected Publisher<T> publisher() {
+        return new MultiSignalConsumerOp<>(
+                upstream(),
+                null,
+                null,
+                f -> consumer.accept(f, false),
+                () -> consumer.accept(null, false),
+                null,
+                () -> consumer.accept(null, true)
+        );
     }
 }

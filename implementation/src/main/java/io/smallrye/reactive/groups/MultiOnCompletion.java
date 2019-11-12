@@ -1,20 +1,19 @@
 package io.smallrye.reactive.groups;
 
-import static io.smallrye.reactive.helpers.ParameterValidation.*;
+import io.smallrye.reactive.Multi;
+import io.smallrye.reactive.Uni;
+import io.smallrye.reactive.operators.MultiSwitchOnCompletion;
+import io.smallrye.reactive.operators.multi.MultiSignalConsumerOp;
+import io.smallrye.reactive.subscription.MultiEmitter;
+import org.reactivestreams.Publisher;
 
 import java.util.Arrays;
 import java.util.NoSuchElementException;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-import org.reactivestreams.Publisher;
-
-import io.reactivex.Flowable;
-import io.smallrye.reactive.Multi;
-import io.smallrye.reactive.Uni;
-import io.smallrye.reactive.operators.MultiOperator;
-import io.smallrye.reactive.operators.MultiSwitchOnCompletion;
-import io.smallrye.reactive.subscription.MultiEmitter;
+import static io.smallrye.reactive.helpers.ParameterValidation.doesNotContainNull;
+import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
 
 public class MultiOnCompletion<T> {
 
@@ -31,12 +30,8 @@ public class MultiOnCompletion<T> {
      * @return the new multi
      */
     public Multi<T> consume(Runnable action) {
-        return new MultiOperator<T, T>(upstream) {
-            @Override
-            protected Flowable<T> flowable() {
-                return upstreamAsFlowable().doOnComplete(action::run);
-            }
-        };
+        return new MultiSignalConsumerOp<>(upstream,
+                null, null, null, action, null, null);
     }
 
     /**
@@ -78,7 +73,7 @@ public class MultiOnCompletion<T> {
      * If the upstream {@link Multi} fails, the switch does not apply.
      *
      * @param consumer the callback receiving the emitter to fire the events. Must not be {@code null}. Throwing exception
-     *        in this function propagates a failure downstream.
+     *                 in this function propagates a failure downstream.
      * @return the new {@link Multi}
      */
     public Multi<T> switchToEmitter(Consumer<MultiEmitter<? super T>> consumer) {

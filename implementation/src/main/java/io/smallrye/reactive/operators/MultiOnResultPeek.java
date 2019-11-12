@@ -1,11 +1,12 @@
 package io.smallrye.reactive.operators;
 
-import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
+import io.smallrye.reactive.Multi;
+import io.smallrye.reactive.operators.multi.MultiSignalConsumerOp;
+import org.reactivestreams.Publisher;
 
 import java.util.function.Consumer;
 
-import io.reactivex.Flowable;
-import io.smallrye.reactive.Multi;
+import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
 
 public class MultiOnResultPeek<T> extends MultiOperator<T, T> {
     private final Consumer<? super T> callback;
@@ -16,7 +17,15 @@ public class MultiOnResultPeek<T> extends MultiOperator<T, T> {
     }
 
     @Override
-    protected Flowable<T> flowable() {
-        return upstreamAsFlowable().doOnNext(callback::accept);
+    protected Publisher<T> publisher() {
+        return new MultiSignalConsumerOp<>(
+                upstream(),
+                null,
+                callback,
+                null,
+                null,
+                null,
+                null
+        );
     }
 }

@@ -1,12 +1,13 @@
 package io.smallrye.reactive.operators;
 
-import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
+import io.smallrye.reactive.Multi;
+import io.smallrye.reactive.operators.multi.MultiSignalConsumerOp;
+import org.reactivestreams.Publisher;
 
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
-import io.reactivex.Flowable;
-import io.smallrye.reactive.Multi;
+import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
 
 public class MultiOnFailureConsume<T> extends MultiOperator<T, T> {
     private final Consumer<Throwable> callback;
@@ -20,11 +21,19 @@ public class MultiOnFailureConsume<T> extends MultiOperator<T, T> {
     }
 
     @Override
-    protected Flowable<T> flowable() {
-        return upstreamAsFlowable().doOnError(failure -> {
-            if (predicate.test(failure)) {
-                callback.accept(failure);
-            }
-        });
+    protected Publisher<T> publisher() {
+        return new MultiSignalConsumerOp<>(
+                upstream(),
+                null,
+                null,
+                failure -> {
+                    if (predicate.test(failure)) {
+                        callback.accept(failure);
+                    }
+                },
+                null,
+                null,
+                null
+        );
     }
 }

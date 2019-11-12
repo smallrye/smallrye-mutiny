@@ -4,8 +4,8 @@ import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
 
 import java.util.function.LongConsumer;
 
-import io.reactivex.Flowable;
 import io.smallrye.reactive.Multi;
+import org.reactivestreams.Publisher;
 
 public class MultiOnRequest<T> extends MultiOperator<T, T> {
     private final LongConsumer consumer;
@@ -16,7 +16,7 @@ public class MultiOnRequest<T> extends MultiOperator<T, T> {
     }
 
     @Override
-    protected Flowable<T> flowable() {
+    protected Publisher<T> publisher() {
         return upstreamAsFlowable().doOnRequest(consumer::accept);
     }
 }
