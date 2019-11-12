@@ -44,9 +44,6 @@ public class MultiCollector {
     }
 
     static <T> Flowable<T> getFlowable(Multi<T> upstream) {
-        if (upstream instanceof AbstractMulti) {
-            return ((AbstractMulti<T>) upstream).flowable();
-        }
         return Flowable.fromPublisher(upstream);
     }
 

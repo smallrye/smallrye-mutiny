@@ -3,6 +3,7 @@ package io.smallrye.reactive.operators;
 import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
 
 import io.reactivex.Flowable;
+import org.reactivestreams.Publisher;
 
 public class DefaultMulti<T> extends AbstractMulti<T> {
 
@@ -13,7 +14,7 @@ public class DefaultMulti<T> extends AbstractMulti<T> {
     }
 
     @Override
-    protected Flowable<T> flowable() {
+    protected Publisher<T> publisher() {
         return delegate;
     }
 }

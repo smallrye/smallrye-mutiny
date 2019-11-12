@@ -8,6 +8,7 @@ import io.reactivex.BackpressureStrategy;
 import io.reactivex.Flowable;
 import io.smallrye.reactive.subscription.BackPressureStrategy;
 import io.smallrye.reactive.subscription.MultiEmitter;
+import org.reactivestreams.Publisher;
 
 public class MultiCreateWithEmitter<T> extends MultiOperator<Void, T> {
     private final Consumer<MultiEmitter<? super T>> consumer;
@@ -37,7 +38,7 @@ public class MultiCreateWithEmitter<T> extends MultiOperator<Void, T> {
     }
 
     @Override
-    protected Flowable<T> flowable() {
+    protected Publisher<T> publisher() {
         return Flowable.create(downstream -> {
             MultiEmitter<T> emitter = new MultiEmitter<T>() {
                 @Override

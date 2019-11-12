@@ -2,8 +2,8 @@ package io.smallrye.reactive.operators;
 
 import java.util.function.Predicate;
 
-import io.reactivex.Flowable;
 import io.smallrye.reactive.Multi;
+import org.reactivestreams.Publisher;
 
 public class MultiFilter<T> extends MultiOperator<T, T> {
     private final Predicate<? super T> predicate;
@@ -14,7 +14,7 @@ public class MultiFilter<T> extends MultiOperator<T, T> {
     }
 
     @Override
-    protected Flowable<T> flowable() {
+    protected Publisher<T> publisher() {
         return upstreamAsFlowable().filter(predicate::test);
     }
 }
