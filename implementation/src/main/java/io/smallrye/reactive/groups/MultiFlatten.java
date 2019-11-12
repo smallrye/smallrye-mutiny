@@ -4,11 +4,12 @@ import static io.smallrye.reactive.helpers.ParameterValidation.positive;
 
 import java.util.function.Function;
 
+import io.smallrye.reactive.helpers.queues.SpscArrayQueue;
+import io.smallrye.reactive.operators.multi.MultiFlatMapOp;
 import org.reactivestreams.Publisher;
 
 import io.smallrye.reactive.CompositeException;
 import io.smallrye.reactive.Multi;
-import io.smallrye.reactive.operators.MultiFlatMap;
 
 /**
  * The object to tune the <em>flatMap</em> operation
@@ -71,13 +72,14 @@ public class MultiFlatten<I, O> {
      * @return the object to configure the {@code flatMap} operation.
      */
     public Multi<O> mergeResults() {
-        return new MultiFlatMap<>(upstream, mapper, 2, requests,
-                collectFailureUntilCompletion, false);
+        return new MultiFlatMapOp<>(upstream, mapper, collectFailureUntilCompletion, requests,
+                2, () -> new SpscArrayQueue<>(256),
+                () -> new SpscArrayQueue<>(256));
     }
 
     /**
      * Produces a {@link Multi} containing the items from {@link Publisher} produced by the {@code mapper} for each
-     * item emitted by this {@link Multi}.
+     * item exmitted by this {@link Multi}.
      * <p>
      * The operators behaves as follows:
      * <ul>
@@ -93,8 +95,9 @@ public class MultiFlatten<I, O> {
      * @return the object to configure the {@code flatMap} operation.
      */
     public Multi<O> mergeResults(int concurrency) {
-        return new MultiFlatMap<>(upstream, mapper, concurrency, requests,
-                collectFailureUntilCompletion, false);
+        return new MultiFlatMapOp<>(upstream, mapper, collectFailureUntilCompletion, concurrency,
+                2, () -> new SpscArrayQueue<>(256),
+                () -> new SpscArrayQueue<>(256));
     }
 
     /**
@@ -112,7 +115,8 @@ public class MultiFlatten<I, O> {
      * @return the object to configure the {@code concatMap} operation.
      */
     public Multi<O> concatenateResults() {
-        return new MultiFlatMap<>(upstream, mapper, 1, requests,
-                collectFailureUntilCompletion, true);
+        return new MultiFlatMapOp<>(upstream, mapper, collectFailureUntilCompletion, 1,
+                2, () -> new SpscArrayQueue<>(256),
+                () -> new SpscArrayQueue<>(256));
     }
 }
