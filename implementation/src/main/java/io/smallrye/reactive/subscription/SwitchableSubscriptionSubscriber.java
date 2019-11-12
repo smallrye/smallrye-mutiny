@@ -11,14 +11,15 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
- * An implementation of {@link Subscription} that allows switching the upstream subscription, dealing with the requests.
+ * An implementation of {@link Subscription} that allows switching the upstream, dealing with the requests accordingly.
  * <p>
  * You must invoke {@link #emitted(long)} after delivered items to manage the request per
  * subscription consistently.
  *
  * @param <O> outgoing item type
  */
-public abstract class MultiSubscriptionSubscriber<O> implements Subscriber<O>, Subscription {
+@SuppressWarnings("SubscriberImplementation")
+public abstract class SwitchableSubscriptionSubscriber<O> implements Subscriber<O>, Subscription {
 
     /**
      * The downstream subscriber
@@ -66,7 +67,7 @@ public abstract class MultiSubscriptionSubscriber<O> implements Subscriber<O>, S
     private final AtomicBoolean cancelled = new AtomicBoolean();
 
 
-    public MultiSubscriptionSubscriber(Subscriber<? super O> downstream) {
+    public SwitchableSubscriptionSubscriber(Subscriber<? super O> downstream) {
         this.downstream = downstream;
     }
 
