@@ -19,6 +19,7 @@ import io.smallrye.reactive.GroupedMulti;
 import io.smallrye.reactive.Multi;
 import io.smallrye.reactive.Uni;
 import io.smallrye.reactive.operators.flowable.FlowableCollector;
+import io.smallrye.reactive.operators.multi.MultiLastItemOp;
 
 public class MultiCollector {
 
@@ -31,7 +32,7 @@ public class MultiCollector {
     }
 
     public static <T> Uni<T> last(Multi<T> upstream) {
-        return Uni.createFrom().publisher(getFlowable(upstream).lastElement().toFlowable());
+        return Uni.createFrom().publisher(new MultiLastItemOp<>(upstream));
     }
 
     public static <T> Uni<List<T>> list(Multi<T> upstream) {
