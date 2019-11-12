@@ -18,7 +18,7 @@ import io.reactivex.flowables.GroupedFlowable;
 import io.smallrye.reactive.GroupedMulti;
 import io.smallrye.reactive.Multi;
 import io.smallrye.reactive.Uni;
-import io.smallrye.reactive.operators.flowable.FlowableCollector;
+import io.smallrye.reactive.operators.multi.MultiCollectorOp;
 import io.smallrye.reactive.operators.multi.MultiLastItemOp;
 
 public class MultiCollector {
@@ -40,7 +40,7 @@ public class MultiCollector {
     }
 
     public static <T, A, R> Uni<R> collector(Multi<T> upstream, Collector<? super T, A, ? extends R> collector) {
-        FlowableCollector<? super T, A, ? extends R> f = new FlowableCollector<>(upstream, collector);
+        MultiCollectorOp<? super T, A, ? extends R> f = new MultiCollectorOp<>(upstream, collector);
         return Uni.createFrom().publisher(f);
     }
 
