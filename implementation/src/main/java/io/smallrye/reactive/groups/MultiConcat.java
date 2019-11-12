@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import io.smallrye.reactive.operators.multi.MultiConcatOp;
 import org.reactivestreams.Publisher;
 
 import io.smallrye.reactive.CompositeException;
@@ -18,11 +19,9 @@ import io.smallrye.reactive.operators.MultiCombine;
 public class MultiConcat {
 
     private boolean collectFailures;
-    private int requests;
 
-    public MultiConcat(boolean collectFailures, int requests) {
+    public MultiConcat(boolean collectFailures) {
         this.collectFailures = collectFailures;
-        this.requests = requests;
     }
 
     /**
@@ -33,8 +32,9 @@ public class MultiConcat {
      * @param <T> the type of item
      * @return the new {@link Multi} emitting the items from the given set of {@link Multi} using a concatenation
      */
-    public <T> Multi<T> streams(Publisher<T>... publishers) {
-        return MultiCombine.concatenate(Arrays.asList(publishers), collectFailures, requests);
+    @SafeVarargs
+    public final <T> Multi<T> streams(Publisher<T>... publishers) {
+        return new MultiConcatOp<>(collectFailures, publishers);
     }
 
     /**
@@ -48,7 +48,8 @@ public class MultiConcat {
     public <T> Multi<T> streams(Iterable<? extends Publisher<T>> iterable) {
         List<Publisher<T>> list = new ArrayList<>();
         iterable.forEach(list::add);
-        return MultiCombine.concatenate(list, collectFailures, requests);
+        //noinspection unchecked
+        return new MultiConcatOp<>(collectFailures, list.toArray(new Publisher[0]));
     }
 
     /**
@@ -63,15 +64,5 @@ public class MultiConcat {
         return this;
     }
 
-    /**
-     * Indicates that the merge process should consumes the different streams using the given {@code request}.
-     *
-     * @param requests the requests
-     * @return this {@link MultiMerge} configured with the given requests
-     */
-    public MultiConcat withRequests(int requests) {
-        this.requests = requests;
-        return this;
-    }
 
 }

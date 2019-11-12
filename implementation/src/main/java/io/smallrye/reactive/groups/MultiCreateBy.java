@@ -18,7 +18,7 @@ public class MultiCreateBy {
      * @return the object to configure the concatenation
      */
     public MultiConcat concatenating() {
-        return new MultiConcat(false, 128);
+        return new MultiConcat(false);
     }
 
     /**
