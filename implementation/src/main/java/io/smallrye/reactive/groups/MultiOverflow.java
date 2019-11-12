@@ -64,6 +64,6 @@ public class MultiOverflow<T> {
      * @return the new multi
      */
     public Multi<T> dropPreviousItems() {
-        return Overflows.dropBufferedItems(upstream);
+        return Overflows.keepLastItem(upstream);
     }
 }
