@@ -1,14 +1,16 @@
 package io.smallrye.reactive.operators;
 
-import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
-import static io.smallrye.reactive.helpers.ParameterValidation.positive;
+import io.reactivex.Flowable;
+import io.smallrye.reactive.Multi;
+import io.smallrye.reactive.helpers.queues.SpscArrayQueue;
+import io.smallrye.reactive.helpers.queues.SpscLinkedArrayQueue;
+import io.smallrye.reactive.operators.multi.MultiFlatMapOp;
+import org.reactivestreams.Publisher;
 
 import java.util.function.Function;
 
-import org.reactivestreams.Publisher;
-
-import io.reactivex.Flowable;
-import io.smallrye.reactive.Multi;
+import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
+import static io.smallrye.reactive.helpers.ParameterValidation.positive;
 
 public class MultiFlatMap<I, O> extends MultiOperator<I, O> {
     private final Function<? super I, ? extends Publisher<? extends O>> mapper;
@@ -36,17 +38,22 @@ public class MultiFlatMap<I, O> extends MultiOperator<I, O> {
     }
 
     @Override
-    protected Flowable<O> flowable() {
+    protected Publisher<O> publisher() {
         Flowable<I> flowable = upstreamAsFlowable();
 
+        // TODO Compute queue size based on concurrency, and requests
         if (preserveOrdering) {
             if (delayFailurePropagation) {
-                return flowable.flatMap(mapper::apply, true, 1, prefetch);
+                return new MultiFlatMapOp<>(upstream(), mapper, true, 1, prefetch,
+                        () -> new SpscArrayQueue<>(8),
+                        () -> new SpscLinkedArrayQueue<>(32));
             } else {
                 return flowable.concatMap(mapper::apply, prefetch);
             }
         } else {
-            return flowable.flatMap(mapper::apply, delayFailurePropagation, concurrency, prefetch);
+            return new MultiFlatMapOp<>(upstream(), mapper, delayFailurePropagation, concurrency, prefetch,
+                    () -> new SpscArrayQueue<>(32),
+                    () -> new SpscLinkedArrayQueue<>(32));
         }
     }
 }
