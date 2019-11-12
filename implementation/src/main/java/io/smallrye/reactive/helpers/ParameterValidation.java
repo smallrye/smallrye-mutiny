@@ -99,6 +99,21 @@ public class ParameterValidation {
     }
 
     /**
+     * Validates that the passed amount is positive (including 0).
+     *
+     * @param amount the amount to be checked
+     * @param name the name of the parameter, must not be {@code null}
+     * @return the amount is the validation passes.
+     */
+    public static long positiveOrZero(long amount, String name) {
+        nonNull(name, "name");
+        if (amount < 0) {
+            throw new IllegalArgumentException(String.format("`%s` must be positive", name));
+        }
+        return amount;
+    }
+
+    /**
      * Ensures that the given iterable does not contain a {@code null} value.
      *
      * @param iterable the iterable
