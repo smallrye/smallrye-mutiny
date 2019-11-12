@@ -26,8 +26,8 @@ public class MultiConcatTest {
     }
 
     @Test
-    public void testConcatenationOfSeveralMultisWithConcurrencyAndRequests() {
-        MultiAssertSubscriber<Integer> subscriber = Multi.createBy().concatenating().withRequests(1)
+    public void testConcatenationOfSeveralMultisWithConcurrency() {
+        MultiAssertSubscriber<Integer> subscriber = Multi.createBy().concatenating()
                 .streams(
                         Multi.createFrom().item(5),
                         Multi.createFrom().range(1, 3),
