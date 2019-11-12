@@ -1,5 +1,6 @@
 package io.smallrye.reactive;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -24,6 +25,12 @@ public class CompositeException extends RuntimeException {
     public CompositeException(Throwable... causes) {
         super("Multiple exceptions caught:");
         this.causes = Arrays.asList(causes);
+    }
+
+    public CompositeException(CompositeException other, Throwable toBeAppended) {
+        List<Throwable> c = new ArrayList<>(other.causes);
+        c.add(toBeAppended);
+        this.causes = Collections.unmodifiableList(c);
     }
 
     @Override
