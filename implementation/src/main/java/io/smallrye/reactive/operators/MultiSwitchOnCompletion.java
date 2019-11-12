@@ -1,13 +1,12 @@
 package io.smallrye.reactive.operators;
 
-import static io.smallrye.reactive.helpers.ParameterValidation.SUPPLIER_PRODUCED_NULL;
+import io.smallrye.reactive.Multi;
+import io.smallrye.reactive.operators.multi.MultiConcatOp;
+import org.reactivestreams.Publisher;
 
 import java.util.function.Supplier;
 
-import org.reactivestreams.Publisher;
-
-import io.reactivex.Flowable;
-import io.smallrye.reactive.Multi;
+import static io.smallrye.reactive.helpers.ParameterValidation.SUPPLIER_PRODUCED_NULL;
 
 public class MultiSwitchOnCompletion<T> extends MultiOperator<T, T> {
     private final Supplier<Publisher<? extends T>> supplier;
@@ -18,18 +17,26 @@ public class MultiSwitchOnCompletion<T> extends MultiOperator<T, T> {
     }
 
     @Override
-    protected Flowable<T> flowable() {
-        return upstreamAsFlowable().concatWith(Flowable.defer(() -> {
+    protected Publisher<T> publisher() {
+        Publisher<T> followup = Multi.createFrom().deferred(() -> {
             Publisher<? extends T> publisher;
             try {
                 publisher = supplier.get();
             } catch (Exception e) {
-                return Flowable.error(e);
+                return Multi.createFrom().failure(e);
             }
             if (publisher == null) {
-                return Flowable.error(new NullPointerException(SUPPLIER_PRODUCED_NULL));
+                return Multi.createFrom().failure(new NullPointerException(SUPPLIER_PRODUCED_NULL));
             }
-            return publisher;
-        }));
+            if (publisher instanceof Multi) {
+                return (Multi) publisher;
+            } else {
+                return Multi.createFrom().publisher(publisher);
+            }
+        });
+
+        @SuppressWarnings("unchecked")
+        Publisher<T>[] publishers = new Publisher[] { upstream(), followup };
+        return new MultiConcatOp<>(false, publishers);
     }
 }
