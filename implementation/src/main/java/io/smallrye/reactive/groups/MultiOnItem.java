@@ -4,6 +4,10 @@ import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
 
 import java.util.function.*;
 
+import io.smallrye.reactive.operators.multi.MultiIgnoreOp;
+import io.smallrye.reactive.operators.multi.MultiMapOp;
+import io.smallrye.reactive.operators.multi.MultiScanOp;
+import io.smallrye.reactive.operators.multi.MultiScanWithSeedOp;
 import org.reactivestreams.Publisher;
 
 import io.smallrye.reactive.Multi;
@@ -30,7 +34,7 @@ public class MultiOnItem<T> {
      * @return the new {@link Multi}
      */
     public <R> Multi<R> mapToItem(Function<? super T, ? extends R> mapper) {
-        return new MultiMapOnResult<>(upstream, nonNull(mapper, "mapper"));
+        return new MultiMapOp<>(upstream, nonNull(mapper, "mapper"));
     }
 
     /**
@@ -49,7 +53,7 @@ public class MultiOnItem<T> {
      * @return the new multi
      */
     public Multi<Void> ignore() {
-        return new MultiIgnore<>(upstream);
+        return new MultiIgnoreOp<>(upstream);
     }
 
     /**
@@ -66,40 +70,37 @@ public class MultiOnItem<T> {
 
     /**
      * Produces a {@link Multi} that fires items coming from the reduction of the item emitted by this current
-     * {@link Multi} by the passed {@code scanner} reduction function. The produced multi emits the intermediate
+     * {@link Multi} by the passed {@code accumulator} reduction function. The produced multi emits the intermediate
      * results.
      * <p>
-     * Unlike {@link #scan(BiFunction)}, this operator uses the value produced by the {@code initialStateProducer} as
+     * Unlike {@link #scan(BinaryOperator)}, this operator uses the value produced by the {@code initialStateProducer} as
      * first value.
      *
-     * @param initialStateProducer the producer called to provides the initial value passed to the scanner operation.
-     * @param scanner the reduction {@link BiFunction}, the resulting {@link Multi} emits the results of
+     * @param initialStateProducer the producer called to provides the initial value passed to the accumulator operation.
+     * @param accumulator the reduction {@link BiFunction}, the resulting {@link Multi} emits the results of
      *        this method. The method is called for every item emitted by this Multi.
      * @param <S> the type of item emitted by the produced {@link Multi}. It's the type returned by the
-     *        {@code scanner} operation.
+     *        {@code accumulator} operation.
      * @return the produced {@link Multi}
      */
-    public <S> Multi<S> scan(Supplier<S> initialStateProducer, BiFunction<S, ? super T, S> scanner) {
-        nonNull(scanner, "scanner");
-        return new MultiScanWithInitialState<>(upstream,
-                nonNull(initialStateProducer, "initialStateProducer"),
-                nonNull(scanner, "scanner"));
+    public <S> Multi<S> scan(Supplier<S> initialStateProducer, BiFunction<S, ? super T, S> accumulator) {
+        return new MultiScanWithSeedOp<>(upstream, initialStateProducer, accumulator);
     }
 
     /**
      * Produces a {@link Multi} that fires results coming from the reduction of the item emitted by this current
-     * {@link Multi} by the passed {@code scanner} reduction function. The produced multi emits the intermediate
+     * {@link Multi} by the passed {@code accumulator} reduction function. The produced multi emits the intermediate
      * results.
      * <p>
      * Unlike {@link #scan(Supplier, BiFunction)}, this operator doesn't take an initial value but takes the first
      * item emitted by this {@link Multi} as initial value.
      *
-     * @param scanner the reduction {@link BiFunction}, the resulting {@link Multi} emits the results of this method.
+     * @param accumulator the reduction {@link BiFunction}, the resulting {@link Multi} emits the results of this method.
      *        The method is called for every item emitted by this Multi.
      * @return the produced {@link Multi}
      */
-    public Multi<T> scan(BiFunction<T, T, T> scanner) {
-        return new MultiScan<>(upstream, nonNull(scanner, "scanner"));
+    public Multi<T> scan(BinaryOperator<T> accumulator) {
+        return new MultiScanOp<>(upstream, accumulator);
     }
 
     /**
