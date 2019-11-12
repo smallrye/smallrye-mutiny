@@ -1,14 +1,15 @@
 package io.smallrye.reactive.operators.multi.overflow;
 
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Consumer;
+
+import org.reactivestreams.Subscriber;
+import org.reactivestreams.Subscription;
+
 import io.smallrye.reactive.Multi;
 import io.smallrye.reactive.helpers.Subscriptions;
 import io.smallrye.reactive.operators.multi.AbstractMultiWithUpstream;
 import io.smallrye.reactive.operators.multi.MultiOperatorSubscriber;
-import org.reactivestreams.Subscriber;
-import org.reactivestreams.Subscription;
-
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.function.Consumer;
 
 public class MultiOnOverflowDropItemsOp<T> extends AbstractMultiWithUpstream<T, T> {
 

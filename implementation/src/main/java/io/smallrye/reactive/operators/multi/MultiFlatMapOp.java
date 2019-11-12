@@ -1,20 +1,21 @@
 package io.smallrye.reactive.operators.multi;
 
-import io.smallrye.reactive.CompositeException;
-import io.smallrye.reactive.Multi;
-import io.smallrye.reactive.helpers.ParameterValidation;
-import io.smallrye.reactive.helpers.Subscriptions;
-import io.smallrye.reactive.subscription.BackPressureFailure;
-import org.reactivestreams.Publisher;
-import org.reactivestreams.Subscriber;
-import org.reactivestreams.Subscription;
-
 import java.util.Queue;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.function.Supplier;
+
+import org.reactivestreams.Publisher;
+import org.reactivestreams.Subscriber;
+import org.reactivestreams.Subscription;
+
+import io.smallrye.reactive.CompositeException;
+import io.smallrye.reactive.Multi;
+import io.smallrye.reactive.helpers.ParameterValidation;
+import io.smallrye.reactive.helpers.Subscriptions;
+import io.smallrye.reactive.subscription.BackPressureFailure;
 
 public final class MultiFlatMapOp<I, O> extends AbstractMultiWithUpstream<I, O> {
     private final Function<? super I, ? extends Publisher<? extends O>> mapper;
@@ -25,7 +26,6 @@ public final class MultiFlatMapOp<I, O> extends AbstractMultiWithUpstream<I, O> 
 
     private final Supplier<? extends Queue<O>> mainQueueSupplier;
     private final Supplier<? extends Queue<O>> innerQueueSupplier;
-
 
     public MultiFlatMapOp(Multi<? extends I> upstream,
             Function<? super I, ? extends Publisher<? extends O>> mapper,
@@ -38,10 +38,8 @@ public final class MultiFlatMapOp<I, O> extends AbstractMultiWithUpstream<I, O> 
         this.postponeFailurePropagation = postponeFailurePropagation;
         this.prefetch = ParameterValidation.positive(prefetch, "prefetch");
         this.maxConcurrency = ParameterValidation.positive(maxConcurrency, "maxConcurrency");
-        this.mainQueueSupplier =
-                ParameterValidation.nonNull(mainQueueSupplier, "mainQueueSupplier");
-        this.innerQueueSupplier =
-                ParameterValidation.nonNull(innerQueueSupplier, "innerQueueSupplier");
+        this.mainQueueSupplier = ParameterValidation.nonNull(mainQueueSupplier, "mainQueueSupplier");
+        this.innerQueueSupplier = ParameterValidation.nonNull(innerQueueSupplier, "innerQueueSupplier");
     }
 
     @Override
@@ -295,7 +293,7 @@ public final class MultiFlatMapOp<I, O> extends AbstractMultiWithUpstream<I, O> 
 
             final Subscriber<? super O> a = actual;
 
-            for (; ; ) {
+            for (;;) {
 
                 boolean d = done;
 
@@ -646,4 +644,3 @@ public final class MultiFlatMapOp<I, O> extends AbstractMultiWithUpstream<I, O> 
         }
     }
 }
-

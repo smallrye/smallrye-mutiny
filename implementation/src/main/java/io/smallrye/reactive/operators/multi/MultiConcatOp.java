@@ -1,14 +1,15 @@
 package io.smallrye.reactive.operators.multi;
 
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
+
+import org.reactivestreams.Publisher;
+import org.reactivestreams.Subscriber;
+
 import io.smallrye.reactive.helpers.ParameterValidation;
 import io.smallrye.reactive.helpers.Subscriptions;
 import io.smallrye.reactive.operators.AbstractMulti;
 import io.smallrye.reactive.subscription.SwitchableSubscriptionSubscriber;
-import org.reactivestreams.Publisher;
-import org.reactivestreams.Subscriber;
-
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Concatenates a fixed set of Publishers.
@@ -42,8 +43,8 @@ public class MultiConcatOp<T> extends AbstractMulti<T> {
         }
 
         if (postponeFailurePropagation) {
-            ConcatArrayAndPostponeFailureSubscriber<T> parent = new
-                    ConcatArrayAndPostponeFailureSubscriber<>(actual, publishers);
+            ConcatArrayAndPostponeFailureSubscriber<T> parent = new ConcatArrayAndPostponeFailureSubscriber<>(actual,
+                    publishers);
             actual.onSubscribe(parent);
 
             if (!parent.isCancelled()) {

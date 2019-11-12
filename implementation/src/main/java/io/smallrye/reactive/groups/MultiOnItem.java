@@ -4,15 +4,15 @@ import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
 
 import java.util.function.*;
 
-import io.smallrye.reactive.operators.multi.MultiIgnoreOp;
-import io.smallrye.reactive.operators.multi.MultiMapOp;
-import io.smallrye.reactive.operators.multi.MultiScanOp;
-import io.smallrye.reactive.operators.multi.MultiScanWithSeedOp;
 import org.reactivestreams.Publisher;
 
 import io.smallrye.reactive.Multi;
 import io.smallrye.reactive.Uni;
 import io.smallrye.reactive.operators.*;
+import io.smallrye.reactive.operators.multi.MultiIgnoreOp;
+import io.smallrye.reactive.operators.multi.MultiMapOp;
+import io.smallrye.reactive.operators.multi.MultiScanOp;
+import io.smallrye.reactive.operators.multi.MultiScanWithSeedOp;
 
 public class MultiOnItem<T> {
 

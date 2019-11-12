@@ -1,16 +1,17 @@
 package io.smallrye.reactive.operators;
 
+import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
+import static io.smallrye.reactive.helpers.ParameterValidation.positive;
+
+import java.util.function.Function;
+
+import org.reactivestreams.Publisher;
+
 import io.reactivex.Flowable;
 import io.smallrye.reactive.Multi;
 import io.smallrye.reactive.helpers.queues.SpscArrayQueue;
 import io.smallrye.reactive.helpers.queues.SpscLinkedArrayQueue;
 import io.smallrye.reactive.operators.multi.MultiFlatMapOp;
-import org.reactivestreams.Publisher;
-
-import java.util.function.Function;
-
-import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
-import static io.smallrye.reactive.helpers.ParameterValidation.positive;
 
 public class MultiFlatMap<I, O> extends MultiOperator<I, O> {
     private final Function<? super I, ? extends Publisher<? extends O>> mapper;

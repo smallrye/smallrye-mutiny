@@ -4,12 +4,12 @@ import static io.smallrye.reactive.helpers.ParameterValidation.positive;
 
 import java.util.function.Function;
 
-import io.smallrye.reactive.helpers.queues.SpscArrayQueue;
-import io.smallrye.reactive.operators.multi.MultiFlatMapOp;
 import org.reactivestreams.Publisher;
 
 import io.smallrye.reactive.CompositeException;
 import io.smallrye.reactive.Multi;
+import io.smallrye.reactive.helpers.queues.SpscArrayQueue;
+import io.smallrye.reactive.operators.multi.MultiFlatMapOp;
 
 /**
  * The object to tune the <em>flatMap</em> operation

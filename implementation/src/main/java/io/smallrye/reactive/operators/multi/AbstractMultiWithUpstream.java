@@ -1,9 +1,10 @@
 package io.smallrye.reactive.operators.multi;
 
+import org.reactivestreams.Publisher;
+
 import io.smallrye.reactive.Multi;
 import io.smallrye.reactive.helpers.ParameterValidation;
 import io.smallrye.reactive.operators.AbstractMulti;
-import org.reactivestreams.Publisher;
 
 /**
  * Abstract base class for operators that take an upstream source {@link Multi}.

@@ -1,11 +1,12 @@
 package io.smallrye.reactive.operators.multi;
 
-import io.smallrye.reactive.Multi;
-import io.smallrye.reactive.subscription.SwitchableSubscriptionSubscriber;
+import java.util.Objects;
+
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 
-import java.util.Objects;
+import io.smallrye.reactive.Multi;
+import io.smallrye.reactive.subscription.SwitchableSubscriptionSubscriber;
 
 /**
  * Switches to another Multi if the upstream is empty (completes without having emitted any items).

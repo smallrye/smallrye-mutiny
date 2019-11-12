@@ -1,13 +1,14 @@
 package io.smallrye.reactive.operators;
 
-import io.smallrye.reactive.Multi;
-import io.smallrye.reactive.operators.multi.builders.FailedMulti;
-import io.smallrye.reactive.operators.multi.MultiSwitchOnEmptyOp;
-import org.reactivestreams.Publisher;
+import static io.smallrye.reactive.helpers.ParameterValidation.SUPPLIER_PRODUCED_NULL;
 
 import java.util.function.Supplier;
 
-import static io.smallrye.reactive.helpers.ParameterValidation.SUPPLIER_PRODUCED_NULL;
+import org.reactivestreams.Publisher;
+
+import io.smallrye.reactive.Multi;
+import io.smallrye.reactive.operators.multi.MultiSwitchOnEmptyOp;
+import io.smallrye.reactive.operators.multi.builders.FailedMulti;
 
 public class MultiSwitchOnEmpty<T> extends MultiOperator<T, T> {
     private final Supplier<Publisher<? extends T>> supplier;

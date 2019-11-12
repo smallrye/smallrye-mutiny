@@ -1,14 +1,15 @@
 package io.smallrye.reactive.operators.multi;
 
-import io.smallrye.reactive.Multi;
-import io.smallrye.reactive.helpers.ParameterValidation;
-import io.smallrye.reactive.helpers.Subscriptions;
-import io.smallrye.reactive.subscription.SerializedSubscriber;
+import java.util.concurrent.atomic.AtomicReference;
+
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
-import java.util.concurrent.atomic.AtomicReference;
+import io.smallrye.reactive.Multi;
+import io.smallrye.reactive.helpers.ParameterValidation;
+import io.smallrye.reactive.helpers.Subscriptions;
+import io.smallrye.reactive.subscription.SerializedSubscriber;
 
 /**
  * Emits items from upstream until another Publisher signals an event (items, failures or completion).

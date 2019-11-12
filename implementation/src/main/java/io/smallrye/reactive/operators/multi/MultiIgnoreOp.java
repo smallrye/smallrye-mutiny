@@ -1,8 +1,9 @@
 package io.smallrye.reactive.operators.multi;
 
-import io.smallrye.reactive.Multi;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
+
+import io.smallrye.reactive.Multi;
 
 public class MultiIgnoreOp<T> extends AbstractMultiWithUpstream<T, Void> {
 

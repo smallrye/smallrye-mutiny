@@ -1,16 +1,17 @@
 package io.smallrye.reactive.operators.multi;
 
-import io.smallrye.reactive.helpers.ParameterValidation;
-import io.smallrye.reactive.operators.AbstractMulti;
-import io.smallrye.reactive.operators.multi.builders.CollectionBasedMulti;
-import org.reactivestreams.Publisher;
-import org.reactivestreams.Subscriber;
-
 import java.util.Collections;
 import java.util.List;
 import java.util.Queue;
 import java.util.function.Function;
 import java.util.function.Supplier;
+
+import org.reactivestreams.Publisher;
+import org.reactivestreams.Subscriber;
+
+import io.smallrye.reactive.helpers.ParameterValidation;
+import io.smallrye.reactive.operators.AbstractMulti;
+import io.smallrye.reactive.operators.multi.builders.CollectionBasedMulti;
 
 /**
  * Creates a {@link io.smallrye.reactive.Multi} merging the items from an array of Publishers.
@@ -40,10 +41,8 @@ public final class MultiMergeOp<T> extends AbstractMulti<T> {
         this.postponeFailurePropagation = postponeFailurePropagation;
         this.prefetch = ParameterValidation.positive(prefetch, "prefetch");
         this.maxConcurrency = ParameterValidation.positive(maxConcurrency, "maxConcurrency");
-        this.mainQueueSupplier =
-                ParameterValidation.nonNull(mainQueueSupplier, "mainQueueSupplier");
-        this.innerQueueSupplier =
-                ParameterValidation.nonNull(innerQueueSupplier, "innerQueueSupplier");
+        this.mainQueueSupplier = ParameterValidation.nonNull(mainQueueSupplier, "mainQueueSupplier");
+        this.innerQueueSupplier = ParameterValidation.nonNull(innerQueueSupplier, "innerQueueSupplier");
     }
 
     @Override

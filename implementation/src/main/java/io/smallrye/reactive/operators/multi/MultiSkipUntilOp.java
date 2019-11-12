@@ -1,10 +1,11 @@
 package io.smallrye.reactive.operators.multi;
 
-import io.smallrye.reactive.Multi;
-import io.smallrye.reactive.helpers.ParameterValidation;
+import java.util.function.Predicate;
+
 import org.reactivestreams.Subscriber;
 
-import java.util.function.Predicate;
+import io.smallrye.reactive.Multi;
+import io.smallrye.reactive.helpers.ParameterValidation;
 
 /**
  * Skips the items from upstream until the passed predicates returns {@code true}.
@@ -54,7 +55,7 @@ public final class MultiSkipUntilOp<T> extends AbstractMultiWithUpstream<T, T> {
                 return;
             }
 
-            if (! toBeSkipped) {
+            if (!toBeSkipped) {
                 gateOpen = true;
                 downstream.onNext(t);
                 return;

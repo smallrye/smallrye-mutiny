@@ -1,16 +1,16 @@
 
-
 package io.smallrye.reactive.operators.multi;
+
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.BiFunction;
+import java.util.function.Supplier;
+
+import org.reactivestreams.Subscriber;
 
 import io.smallrye.reactive.Multi;
 import io.smallrye.reactive.helpers.ParameterValidation;
 import io.smallrye.reactive.helpers.Subscriptions;
 import io.smallrye.reactive.subscription.SwitchableSubscriptionSubscriber;
-import org.reactivestreams.Subscriber;
-
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.BiFunction;
-import java.util.function.Supplier;
 
 public final class MultiScanWithSeedOp<T, R> extends AbstractMultiWithUpstream<T, R> {
 
@@ -98,8 +98,7 @@ public final class MultiScanWithSeedOp<T, R> extends AbstractMultiWithUpstream<T
                     if (isCancelled()) {
                         return;
                     }
-                }
-                while (wip.decrementAndGet() != 0);
+                } while (wip.decrementAndGet() != 0);
             }
 
         }

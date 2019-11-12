@@ -1,6 +1,13 @@
 
-
 package io.smallrye.reactive.operators.multi.overflow;
+
+import java.util.Queue;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Consumer;
+
+import org.reactivestreams.Subscriber;
+import org.reactivestreams.Subscription;
 
 import io.smallrye.reactive.Multi;
 import io.smallrye.reactive.helpers.Subscriptions;
@@ -9,13 +16,6 @@ import io.smallrye.reactive.helpers.queues.SpscLinkedArrayQueue;
 import io.smallrye.reactive.operators.multi.AbstractMultiWithUpstream;
 import io.smallrye.reactive.operators.multi.MultiOperatorSubscriber;
 import io.smallrye.reactive.subscription.BackPressureFailure;
-import org.reactivestreams.Subscriber;
-import org.reactivestreams.Subscription;
-
-import java.util.Queue;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.function.Consumer;
 
 public class MultiOnOverflowBufferOp<T> extends AbstractMultiWithUpstream<T, T> {
 
@@ -127,7 +127,7 @@ public class MultiOnOverflowBufferOp<T> extends AbstractMultiWithUpstream<T, T> 
             if (wip.getAndIncrement() == 0) {
                 int missed = 1;
                 final Queue<T> qe = queue;
-                for (; ; ) {
+                for (;;) {
 
                     if (checkTerminated(done, qe.isEmpty())) {
                         return;

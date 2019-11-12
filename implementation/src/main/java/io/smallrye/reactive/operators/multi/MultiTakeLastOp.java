@@ -1,14 +1,15 @@
 package io.smallrye.reactive.operators.multi;
 
-import io.smallrye.reactive.Multi;
-import io.smallrye.reactive.helpers.ParameterValidation;
-import io.smallrye.reactive.helpers.Subscriptions;
-import org.reactivestreams.Subscriber;
-import org.reactivestreams.Subscription;
-
 import java.util.ArrayDeque;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
+
+import org.reactivestreams.Subscriber;
+import org.reactivestreams.Subscription;
+
+import io.smallrye.reactive.Multi;
+import io.smallrye.reactive.helpers.ParameterValidation;
+import io.smallrye.reactive.helpers.Subscriptions;
 
 /**
  * Implementation of multi, caching and emitting the last n items from upstream (emitted before the upstream completion).

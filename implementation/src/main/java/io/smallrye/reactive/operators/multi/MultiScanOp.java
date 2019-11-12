@@ -1,15 +1,16 @@
 
 package io.smallrye.reactive.operators.multi;
 
-import io.smallrye.reactive.Multi;
-import io.smallrye.reactive.helpers.ParameterValidation;
+import java.util.function.BiFunction;
+
 import org.reactivestreams.Subscriber;
 
-import java.util.function.BiFunction;
-import java.util.function.Supplier;
+import io.smallrye.reactive.Multi;
+import io.smallrye.reactive.helpers.ParameterValidation;
 
 /**
  * Scan operator accumulating items of the same type as the upstream.
+ * 
  * @param <T> the type of item
  */
 public final class MultiScanOp<T> extends AbstractMultiWithUpstream<T, T> {

@@ -1,10 +1,11 @@
 package io.smallrye.reactive.operators.multi.builders;
 
+import org.reactivestreams.Publisher;
+import org.reactivestreams.Subscriber;
+
 import io.smallrye.reactive.Multi;
 import io.smallrye.reactive.helpers.Subscriptions;
 import io.smallrye.reactive.operators.AbstractMulti;
-import org.reactivestreams.Publisher;
-import org.reactivestreams.Subscriber;
 
 /**
  * Implements a {@link org.reactivestreams.Publisher} which only calls {@code onComplete} immediately after subscription.

@@ -1,12 +1,13 @@
 package io.smallrye.reactive.operators;
 
-import io.smallrye.reactive.Multi;
-import io.smallrye.reactive.operators.multi.MultiSignalConsumerOp;
-import org.reactivestreams.Publisher;
+import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
 
 import java.util.function.BiConsumer;
 
-import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
+import org.reactivestreams.Publisher;
+
+import io.smallrye.reactive.Multi;
+import io.smallrye.reactive.operators.multi.MultiSignalConsumerOp;
 
 public class MultiOnTermination<T> extends MultiOperator<T, T> {
     private final BiConsumer<Throwable, Boolean> consumer;
@@ -25,7 +26,6 @@ public class MultiOnTermination<T> extends MultiOperator<T, T> {
                 f -> consumer.accept(f, false),
                 () -> consumer.accept(null, false),
                 null,
-                () -> consumer.accept(null, true)
-        );
+                () -> consumer.accept(null, true));
     }
 }

@@ -1,12 +1,13 @@
 package io.smallrye.reactive.operators.multi;
 
-import io.smallrye.reactive.Multi;
-import io.smallrye.reactive.helpers.ParameterValidation;
-import io.smallrye.reactive.subscription.SwitchableSubscriptionSubscriber;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 
-import java.util.concurrent.atomic.AtomicInteger;
+import io.smallrye.reactive.Multi;
+import io.smallrye.reactive.helpers.ParameterValidation;
+import io.smallrye.reactive.subscription.SwitchableSubscriptionSubscriber;
 
 /**
  * Multi operator re-subscribing to the upstream if if receives a failure event.

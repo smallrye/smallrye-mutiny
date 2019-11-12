@@ -1,12 +1,13 @@
 package io.smallrye.reactive.operators.multi.builders;
 
-import io.smallrye.reactive.helpers.ParameterValidation;
-import io.smallrye.reactive.helpers.Subscriptions;
-import io.smallrye.reactive.operators.AbstractMulti;
+import java.util.function.Supplier;
+
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 
-import java.util.function.Supplier;
+import io.smallrye.reactive.helpers.ParameterValidation;
+import io.smallrye.reactive.helpers.Subscriptions;
+import io.smallrye.reactive.operators.AbstractMulti;
 
 /**
  * Multi emitting a failures (constant or produced by a supplier) to subscribers.

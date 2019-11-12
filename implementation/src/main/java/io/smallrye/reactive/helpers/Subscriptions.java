@@ -1,13 +1,14 @@
 package io.smallrye.reactive.helpers;
 
-import io.smallrye.reactive.CompositeException;
-import org.reactivestreams.Subscriber;
-import org.reactivestreams.Subscription;
-
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
+
+import org.reactivestreams.Subscriber;
+import org.reactivestreams.Subscription;
+
+import io.smallrye.reactive.CompositeException;
 
 public class Subscriptions {
 
@@ -22,7 +23,7 @@ public class Subscriptions {
      * or return true if ready to subscribe.
      *
      * @param current current Subscription, expected to be null
-     * @param next    new Subscription
+     * @param next new Subscription
      * @return true if Subscription can be used
      */
     public static boolean validate(Subscription current, Subscription next) {
@@ -71,7 +72,7 @@ public class Subscriptions {
      * followed immediately by a call to {@code onError} with the given failure.
      *
      * @param subscriber the subscriber, must not be {@code null}
-     * @param failure    the failure, must not be {@code null}
+     * @param failure the failure, must not be {@code null}
      */
     public static void fail(Subscriber<?> subscriber, Throwable failure) {
         ParameterValidation.nonNull(subscriber, "subscriber");
@@ -100,11 +101,11 @@ public class Subscriptions {
      * caps the result at Long.MAX_VALUE and returns the previous value.
      *
      * @param requested the AtomicLong holding the current requested value
-     * @param requests  the value to add, must be positive (not verified)
+     * @param requests the value to add, must be positive (not verified)
      * @return the original value before the add
      */
     public static long add(AtomicLong requested, long requests) {
-        for (; ; ) {
+        for (;;) {
             long r = requested.get();
             if (r == Long.MAX_VALUE) {
                 return Long.MAX_VALUE;
@@ -120,11 +121,11 @@ public class Subscriptions {
      * Atomically subtract the given number (positive, not validated) from the target field unless it contains Long.MAX_VALUE.
      *
      * @param requested the target field holding the current requested amount
-     * @param n         the produced element count, positive (not validated)
+     * @param n the produced element count, positive (not validated)
      * @return the new amount
      */
     public static long substract(AtomicLong requested, long n) {
-        for (; ; ) {
+        for (;;) {
             long current = requested.get();
             if (current == Long.MAX_VALUE) {
                 return Long.MAX_VALUE;

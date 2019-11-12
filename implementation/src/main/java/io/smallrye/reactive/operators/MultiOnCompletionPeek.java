@@ -1,10 +1,11 @@
 package io.smallrye.reactive.operators;
 
-import io.smallrye.reactive.Multi;
-import io.smallrye.reactive.operators.multi.MultiSignalConsumerOp;
+import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
+
 import org.reactivestreams.Publisher;
 
-import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
+import io.smallrye.reactive.Multi;
+import io.smallrye.reactive.operators.multi.MultiSignalConsumerOp;
 
 public class MultiOnCompletionPeek<T> extends MultiOperator<T, T> {
     private final Runnable callback;
@@ -23,7 +24,6 @@ public class MultiOnCompletionPeek<T> extends MultiOperator<T, T> {
                 null,
                 callback,
                 null,
-                null
-        );
+                null);
     }
 }

@@ -1,14 +1,12 @@
 package io.smallrye.reactive.operators.multi;
 
-import io.smallrye.reactive.Multi;
-import io.smallrye.reactive.helpers.ParameterValidation;
-import io.smallrye.reactive.helpers.Subscriptions;
+import java.util.ArrayDeque;
+
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
-import java.util.ArrayDeque;
-
-import static io.smallrye.reactive.helpers.Subscriptions.CANCELLED;
+import io.smallrye.reactive.Multi;
+import io.smallrye.reactive.helpers.ParameterValidation;
 
 /**
  * Skips the numberOfItems last items from upstream.

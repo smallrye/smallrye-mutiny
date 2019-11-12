@@ -1,9 +1,9 @@
 package io.smallrye.reactive.subscription;
 
+import java.util.concurrent.atomic.AtomicReference;
+
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
-
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Subscriber that makes sure signals are delivered sequentially in case the onNext, onError or onComplete methods are
@@ -148,7 +148,7 @@ public final class SerializedSubscriber<T> implements Subscription, Subscriber<T
     }
 
     void serDrainLoop(Subscriber<? super T> actual) {
-        for (; ; ) {
+        for (;;) {
 
             if (cancelled) {
                 return;
@@ -231,7 +231,8 @@ public final class SerializedSubscriber<T> implements Subscription, Subscriber<T
 
         LinkedArrayNode<T> next;
 
-        @SuppressWarnings("unchecked") LinkedArrayNode(T value) {
+        @SuppressWarnings("unchecked")
+        LinkedArrayNode(T value) {
             array = (T[]) new Object[DEFAULT_CAPACITY];
             array[0] = value;
             count = 1;

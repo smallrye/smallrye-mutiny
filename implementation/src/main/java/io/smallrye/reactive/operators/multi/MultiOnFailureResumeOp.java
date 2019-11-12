@@ -1,15 +1,16 @@
 
 package io.smallrye.reactive.operators.multi;
 
-import io.smallrye.reactive.CompositeException;
-import io.smallrye.reactive.Multi;
-import io.smallrye.reactive.helpers.ParameterValidation;
-import io.smallrye.reactive.subscription.SwitchableSubscriptionSubscriber;
+import java.util.function.Function;
+
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
-import java.util.function.Function;
+import io.smallrye.reactive.CompositeException;
+import io.smallrye.reactive.Multi;
+import io.smallrye.reactive.helpers.ParameterValidation;
+import io.smallrye.reactive.subscription.SwitchableSubscriptionSubscriber;
 
 public class MultiOnFailureResumeOp<T> extends AbstractMultiWithUpstream<T, T> {
 

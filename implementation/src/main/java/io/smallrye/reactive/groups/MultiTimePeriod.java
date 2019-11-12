@@ -1,14 +1,14 @@
 package io.smallrye.reactive.groups;
 
-import io.smallrye.reactive.Multi;
-import io.smallrye.reactive.infrastructure.Infrastructure;
-import io.smallrye.reactive.operators.multi.builders.IntervalMulti;
+import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
+import static io.smallrye.reactive.helpers.ParameterValidation.validate;
 
 import java.time.Duration;
 import java.util.concurrent.ScheduledExecutorService;
 
-import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
-import static io.smallrye.reactive.helpers.ParameterValidation.validate;
+import io.smallrye.reactive.Multi;
+import io.smallrye.reactive.infrastructure.Infrastructure;
+import io.smallrye.reactive.operators.multi.builders.IntervalMulti;
 
 public class MultiTimePeriod {
 

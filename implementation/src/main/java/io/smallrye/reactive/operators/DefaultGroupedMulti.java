@@ -1,9 +1,10 @@
 package io.smallrye.reactive.operators;
 
+import org.reactivestreams.Publisher;
+
 import io.reactivex.flowables.GroupedFlowable;
 import io.smallrye.reactive.GroupedMulti;
 import io.smallrye.reactive.helpers.ParameterValidation;
-import org.reactivestreams.Publisher;
 
 public class DefaultGroupedMulti<K, T> extends AbstractMulti<T> implements GroupedMulti<K, T> {
 

@@ -1,13 +1,14 @@
 package io.smallrye.reactive.operators.multi;
 
-import io.smallrye.reactive.CompositeException;
-import io.smallrye.reactive.Multi;
-import io.smallrye.reactive.helpers.Subscriptions;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
+
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Consumer;
+import io.smallrye.reactive.CompositeException;
+import io.smallrye.reactive.Multi;
+import io.smallrye.reactive.helpers.Subscriptions;
 
 /**
  * Attach consumers to the various events and signals received by this {@link org.reactivestreams.Publisher}.

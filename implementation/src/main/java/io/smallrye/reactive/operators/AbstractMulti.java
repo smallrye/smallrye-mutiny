@@ -1,5 +1,16 @@
 package io.smallrye.reactive.operators;
 
+import static io.smallrye.reactive.helpers.EmptyUniSubscription.CANCELLED;
+import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
+
+import java.util.concurrent.Executor;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Predicate;
+
+import org.reactivestreams.Publisher;
+import org.reactivestreams.Subscriber;
+import org.reactivestreams.Subscription;
+
 import io.reactivex.Flowable;
 import io.reactivex.exceptions.CompositeException;
 import io.reactivex.exceptions.MissingBackpressureException;
@@ -9,16 +20,6 @@ import io.smallrye.reactive.Uni;
 import io.smallrye.reactive.groups.*;
 import io.smallrye.reactive.operators.multi.MultiSubscribeOnOp;
 import io.smallrye.reactive.subscription.BackPressureFailure;
-import org.reactivestreams.Publisher;
-import org.reactivestreams.Subscriber;
-import org.reactivestreams.Subscription;
-
-import java.util.concurrent.Executor;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Predicate;
-
-import static io.smallrye.reactive.helpers.EmptyUniSubscription.CANCELLED;
-import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
 
 public abstract class AbstractMulti<T> implements Multi<T> {
 

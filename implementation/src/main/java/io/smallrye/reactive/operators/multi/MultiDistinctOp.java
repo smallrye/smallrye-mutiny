@@ -1,10 +1,11 @@
 package io.smallrye.reactive.operators.multi;
 
-import io.smallrye.reactive.Multi;
-import org.reactivestreams.Subscriber;
-
 import java.util.Collection;
 import java.util.HashSet;
+
+import org.reactivestreams.Subscriber;
+
+import io.smallrye.reactive.Multi;
 
 /**
  * Eliminates the duplicated items from the upstream.

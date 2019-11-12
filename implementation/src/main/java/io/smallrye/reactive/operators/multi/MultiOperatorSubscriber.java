@@ -1,13 +1,14 @@
 package io.smallrye.reactive.operators.multi;
 
-import io.smallrye.reactive.helpers.ParameterValidation;
-import io.smallrye.reactive.helpers.Subscriptions;
-import org.reactivestreams.Subscriber;
-import org.reactivestreams.Subscription;
+import static io.smallrye.reactive.helpers.Subscriptions.CANCELLED;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-import static io.smallrye.reactive.helpers.Subscriptions.CANCELLED;
+import org.reactivestreams.Subscriber;
+import org.reactivestreams.Subscription;
+
+import io.smallrye.reactive.helpers.ParameterValidation;
+import io.smallrye.reactive.helpers.Subscriptions;
 
 public abstract class MultiOperatorSubscriber<I, O> implements Subscriber<I>, Subscription {
 

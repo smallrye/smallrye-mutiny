@@ -1,13 +1,14 @@
 package io.smallrye.reactive.operators.multi;
 
-import io.smallrye.reactive.Multi;
-import io.smallrye.reactive.helpers.ParameterValidation;
-import org.reactivestreams.Publisher;
-import org.reactivestreams.Subscriber;
+import static io.smallrye.reactive.helpers.ParameterValidation.MAPPER_RETURNED_NULL;
 
 import java.util.function.Function;
 
-import static io.smallrye.reactive.helpers.ParameterValidation.MAPPER_RETURNED_NULL;
+import org.reactivestreams.Publisher;
+import org.reactivestreams.Subscriber;
+
+import io.smallrye.reactive.Multi;
+import io.smallrye.reactive.helpers.ParameterValidation;
 
 public final class MultiMapOp<T, U> extends AbstractMultiWithUpstream<T, U> {
     private final Function<? super T, ? extends U> mapper;

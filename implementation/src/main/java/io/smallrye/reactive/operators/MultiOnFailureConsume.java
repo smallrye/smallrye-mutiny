@@ -1,13 +1,14 @@
 package io.smallrye.reactive.operators;
 
-import io.smallrye.reactive.Multi;
-import io.smallrye.reactive.operators.multi.MultiSignalConsumerOp;
-import org.reactivestreams.Publisher;
+import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
 
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
-import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
+import org.reactivestreams.Publisher;
+
+import io.smallrye.reactive.Multi;
+import io.smallrye.reactive.operators.multi.MultiSignalConsumerOp;
 
 public class MultiOnFailureConsume<T> extends MultiOperator<T, T> {
     private final Consumer<Throwable> callback;
@@ -33,7 +34,6 @@ public class MultiOnFailureConsume<T> extends MultiOperator<T, T> {
                 },
                 null,
                 null,
-                null
-        );
+                null);
     }
 }

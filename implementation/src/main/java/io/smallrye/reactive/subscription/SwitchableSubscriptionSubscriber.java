@@ -1,14 +1,15 @@
 package io.smallrye.reactive.subscription;
 
-import io.smallrye.reactive.helpers.ParameterValidation;
-import io.smallrye.reactive.helpers.Subscriptions;
-import org.reactivestreams.Subscriber;
-import org.reactivestreams.Subscription;
-
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
+
+import org.reactivestreams.Subscriber;
+import org.reactivestreams.Subscription;
+
+import io.smallrye.reactive.helpers.ParameterValidation;
+import io.smallrye.reactive.helpers.Subscriptions;
 
 /**
  * An implementation of {@link Subscription} that allows switching the upstream, dealing with the requests accordingly.
@@ -65,7 +66,6 @@ public abstract class SwitchableSubscriptionSubscriber<O> implements Subscriber<
      * Whether or not the downstream cancelled the subscription.
      */
     private final AtomicBoolean cancelled = new AtomicBoolean();
-
 
     public SwitchableSubscriptionSubscriber(Subscriber<? super O> downstream) {
         this.downstream = downstream;
@@ -247,7 +247,7 @@ public abstract class SwitchableSubscriptionSubscriber<O> implements Subscriber<
         long requestAmount = 0L;
         Subscription requestTarget = null;
 
-        for (; ; ) {
+        for (;;) {
 
             Subscription nextUpstream = pendingSubscription.getAndSet(null);
             long pendingRequests = missedRequested.getAndSet(0L);

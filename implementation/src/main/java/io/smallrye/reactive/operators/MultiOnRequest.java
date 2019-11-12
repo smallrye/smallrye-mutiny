@@ -4,8 +4,9 @@ import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
 
 import java.util.function.LongConsumer;
 
-import io.smallrye.reactive.Multi;
 import org.reactivestreams.Publisher;
+
+import io.smallrye.reactive.Multi;
 
 public class MultiOnRequest<T> extends MultiOperator<T, T> {
     private final LongConsumer consumer;

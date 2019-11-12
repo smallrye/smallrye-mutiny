@@ -1,15 +1,16 @@
 package io.smallrye.reactive.operators.multi.overflow;
 
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
+
+import org.reactivestreams.Subscriber;
+import org.reactivestreams.Subscription;
+
 import io.smallrye.reactive.Multi;
 import io.smallrye.reactive.helpers.Subscriptions;
 import io.smallrye.reactive.operators.multi.AbstractMultiWithUpstream;
 import io.smallrye.reactive.operators.multi.MultiOperatorSubscriber;
-import org.reactivestreams.Subscriber;
-import org.reactivestreams.Subscription;
-
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class MultiOnOverflowKeepLastOp<T> extends AbstractMultiWithUpstream<T, T> {
 
@@ -92,7 +93,7 @@ public class MultiOnOverflowKeepLastOp<T> extends AbstractMultiWithUpstream<T, T
 
             int missed = 1;
             final AtomicLong req = requested;
-            for (; ; ) {
+            for (;;) {
                 long emitted = 0L;
 
                 while (emitted != req.get()) {

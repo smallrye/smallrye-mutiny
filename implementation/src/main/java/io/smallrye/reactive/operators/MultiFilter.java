@@ -2,8 +2,9 @@ package io.smallrye.reactive.operators;
 
 import java.util.function.Predicate;
 
-import io.smallrye.reactive.Multi;
 import org.reactivestreams.Publisher;
+
+import io.smallrye.reactive.Multi;
 
 public class MultiFilter<T> extends MultiOperator<T, T> {
     private final Predicate<? super T> predicate;

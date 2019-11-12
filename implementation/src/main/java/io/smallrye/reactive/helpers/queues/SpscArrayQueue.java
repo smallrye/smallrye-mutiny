@@ -9,7 +9,7 @@ import java.util.concurrent.atomic.AtomicReferenceArray;
 /**
  * A Single-Producer-Single-Consumer queue backed by a pre-allocated buffer.
  * <p>
- * Code inspired from  https://github.com/JCTools/JCTools/blob/master/jctools-core/src/main/java/org/jctools/queues/atomic,
+ * Code inspired from https://github.com/JCTools/JCTools/blob/master/jctools-core/src/main/java/org/jctools/queues/atomic,
  * and it's RX Java 2 version.
  *
  * @param <E> the element type of the queue
@@ -78,7 +78,7 @@ public final class SpscArrayQueue<E> extends AtomicReferenceArray<E> implements 
     @Override
     public int size() {
         long ci = consumerIndex.get();
-        for (; ; ) {
+        for (;;) {
             long pi = producerIndex.get();
             long ci2 = consumerIndex.get();
             if (ci == ci2) {
@@ -189,4 +189,3 @@ public final class SpscArrayQueue<E> extends AtomicReferenceArray<E> implements 
         throw new UnsupportedOperationException();
     }
 }
-

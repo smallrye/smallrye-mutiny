@@ -1,15 +1,16 @@
 package io.smallrye.reactive.operators;
 
-import io.smallrye.reactive.Multi;
-import io.smallrye.reactive.helpers.queues.SpscArrayQueue;
-import io.smallrye.reactive.operators.multi.*;
-import org.reactivestreams.Publisher;
-
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Predicate;
+
+import org.reactivestreams.Publisher;
+
+import io.smallrye.reactive.Multi;
+import io.smallrye.reactive.helpers.queues.SpscArrayQueue;
+import io.smallrye.reactive.operators.multi.*;
 
 public class MultiTransformation {
 
@@ -73,8 +74,7 @@ public class MultiTransformation {
                 list.size(),
                 8,
                 () -> new SpscArrayQueue<>(16),
-                () -> new SpscArrayQueue<>(8)
-        );
+                () -> new SpscArrayQueue<>(8));
 
     }
 

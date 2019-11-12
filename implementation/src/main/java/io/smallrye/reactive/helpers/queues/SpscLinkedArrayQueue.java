@@ -10,7 +10,7 @@ import java.util.concurrent.atomic.AtomicReferenceArray;
  * A single-producer single-consumer array-backed queue which can allocate new arrays in case the consumer is slower
  * than the producer.
  * <p>
- * Code inspired from  https://github.com/JCTools/JCTools/blob/master/jctools-core/src/main/java/org/jctools/queues/atomic,
+ * Code inspired from https://github.com/JCTools/JCTools/blob/master/jctools-core/src/main/java/org/jctools/queues/atomic,
  * and it's RX Java 2 version.
  *
  * @param <E> the element type of the queue
@@ -248,9 +248,10 @@ public final class SpscLinkedArrayQueue<E> extends AbstractQueue<E> implements Q
 
     /**
      * Offer two elements at the same time.
-     * <p>Don't use the regular offer() with this at all!
+     * <p>
+     * Don't use the regular offer() with this at all!
      *
-     * @param first  the first value, not null
+     * @param first the first value, not null
      * @param second the second value, not null
      * @return true if the queue accepted the two new values
      */

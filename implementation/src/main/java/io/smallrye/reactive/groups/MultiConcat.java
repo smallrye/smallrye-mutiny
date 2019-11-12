@@ -1,15 +1,13 @@
 package io.smallrye.reactive.groups;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
-import io.smallrye.reactive.operators.multi.MultiConcatOp;
 import org.reactivestreams.Publisher;
 
 import io.smallrye.reactive.CompositeException;
 import io.smallrye.reactive.Multi;
-import io.smallrye.reactive.operators.MultiCombine;
+import io.smallrye.reactive.operators.multi.MultiConcatOp;
 
 /**
  * Creates new {@link Multi} by concatenating several {@link Multi} or {@link Publisher}.
@@ -63,6 +61,5 @@ public class MultiConcat {
         this.collectFailures = true;
         return this;
     }
-
 
 }
