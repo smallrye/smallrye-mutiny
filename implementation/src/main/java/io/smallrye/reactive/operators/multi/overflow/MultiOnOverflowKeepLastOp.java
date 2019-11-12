@@ -119,7 +119,7 @@ public class MultiOnOverflowKeepLastOp<T> extends AbstractMultiWithUpstream<T, T
                 }
 
                 if (emitted != 0L) {
-                    Subscriptions.substract(req, emitted);
+                    Subscriptions.subtract(req, emitted);
                 }
 
                 missed = wip.addAndGet(-missed);

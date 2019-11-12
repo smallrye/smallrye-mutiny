@@ -57,7 +57,7 @@ public class MultiOnOverflowDropItemsOp<T> extends AbstractMultiWithUpstream<T, 
             long req = requested.get();
             if (req != 0L) {
                 downstream.onNext(item);
-                Subscriptions.substract(requested, 1);
+                Subscriptions.subtract(requested, 1);
             } else {
                 // no request, dropping.
                 drop(item);

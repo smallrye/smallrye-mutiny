@@ -124,7 +124,7 @@ public class Subscriptions {
      * @param n the produced element count, positive (not validated)
      * @return the new amount
      */
-    public static long substract(AtomicLong requested, long n) {
+    public static long subtract(AtomicLong requested, long n) {
         for (;;) {
             long current = requested.get();
             if (current == Long.MAX_VALUE) {

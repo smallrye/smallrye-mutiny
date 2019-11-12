@@ -18,6 +18,7 @@ import io.reactivex.schedulers.Schedulers;
 import io.smallrye.reactive.Multi;
 import io.smallrye.reactive.Uni;
 import io.smallrye.reactive.groups.*;
+import io.smallrye.reactive.operators.multi.MultiCacheOp;
 import io.smallrye.reactive.operators.multi.MultiSubscribeOnOp;
 import io.smallrye.reactive.subscription.BackPressureFailure;
 
@@ -136,21 +137,7 @@ public abstract class AbstractMulti<T> implements Multi<T> {
 
     @Override
     public Multi<T> cache() {
-        return new AbstractMulti<T>() {
-            AtomicReference<Flowable<T>> reference = new AtomicReference<>();
-
-            @Override
-            protected Publisher<T> publisher() {
-                return reference.updateAndGet(flowable -> {
-                    if (flowable == null) {
-                        // TODO Change it to not use Flowable.
-                        return Flowable.fromPublisher(AbstractMulti.this.publisher()).cache();
-                    } else {
-                        return flowable;
-                    }
-                });
-            }
-        };
+        return new MultiCacheOp<>(this);
     }
 
     @Override

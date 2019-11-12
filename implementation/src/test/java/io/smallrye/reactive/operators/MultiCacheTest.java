@@ -53,7 +53,8 @@ public class MultiCacheTest {
                     .emit(count.incrementAndGet());
         })
                 .cache();
-        MultiAssertSubscriber<Integer> s1 = multi.subscribe().withSubscriber(MultiAssertSubscriber.create(2))
+        MultiAssertSubscriber<Integer> s1 = multi
+                .subscribe().withSubscriber(MultiAssertSubscriber.create(2))
                 .assertReceived(1, 2)
                 .assertNotTerminated();
 
