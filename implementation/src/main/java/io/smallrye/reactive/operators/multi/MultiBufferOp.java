@@ -35,7 +35,7 @@ import io.smallrye.reactive.helpers.Subscriptions;
 import io.smallrye.reactive.helpers.queues.DrainUtils;
 
 /**
- * Buffers a certain number of items and emits the <em>groups</em> as a single item downstream.
+ * Buffers a given number of items and emits the <em>groups</em> as a single item downstream.
  * This implementation uses {@link java.util.ArrayList} and so emits {@link List}.
  *
  * @param <T> the type of item from upstream
