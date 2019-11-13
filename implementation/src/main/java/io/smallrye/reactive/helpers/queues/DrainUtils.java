@@ -85,13 +85,10 @@ public class DrainUtils {
 
         long e = n & COMPLETED_MASK;
 
-        System.out.println("postCompleteDrain");
-
         for (;;) {
 
             while (e != n) {
                 if (isCancelled.getAsBoolean()) {
-                    System.out.println("cancelled");
                     return true;
                 }
 
@@ -145,14 +142,12 @@ public class DrainUtils {
             AtomicLong requested,
             BooleanSupplier isCancelled) {
 
-        System.out.println("post complete " + queue.isEmpty());
         if (queue.isEmpty()) {
             downstream.onComplete();
             return;
         }
 
         if (postCompleteDrain(requested.get(), downstream, queue, requested, isCancelled)) {
-            System.out.println("drained");
             return;
         }
 
