@@ -2,6 +2,7 @@ package io.smallrye.reactive.operators.multi;
 
 import static io.smallrye.reactive.helpers.Subscriptions.CANCELLED;
 
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.reactivestreams.Subscriber;
@@ -15,6 +16,7 @@ public abstract class MultiOperatorSubscriber<I, O> implements Subscriber<I>, Su
 
     protected final Subscriber<? super O> downstream;
     protected AtomicReference<Subscription> upstream = new AtomicReference<>();
+    protected AtomicBoolean cancelled = new AtomicBoolean();
 
     public MultiOperatorSubscriber(Subscriber<? super O> downstream) {
         this.downstream = ParameterValidation.nonNull(downstream, "downstream");
@@ -22,6 +24,10 @@ public abstract class MultiOperatorSubscriber<I, O> implements Subscriber<I>, Su
 
     protected boolean isDone() {
         return upstream.get() == CANCELLED;
+    }
+
+    protected boolean isCancelled() {
+        return cancelled.get();
     }
 
     @Override
@@ -62,6 +68,8 @@ public abstract class MultiOperatorSubscriber<I, O> implements Subscriber<I>, Su
 
     @Override
     public void cancel() {
-        Subscriptions.cancel(upstream);
+        if (cancelled.compareAndSet(false, true)) {
+            Subscriptions.cancel(upstream);
+        }
     }
 }

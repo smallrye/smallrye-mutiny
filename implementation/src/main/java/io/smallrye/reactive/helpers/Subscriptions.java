@@ -200,6 +200,23 @@ public class Subscriptions {
         return failures.getAndSet(TERMINATED);
     }
 
+    /**
+     * Cap a multiplication to Long.MAX_VALUE
+     *
+     * @param n left operand
+     * @param times right operand
+     * @return n * times or Long.MAX_VALUE
+     */
+    public static long multiply(long n, long times) {
+        long u = n * times;
+        if (((n | times) >>> 31) != 0) {
+            if (u / n != times) {
+                return Long.MAX_VALUE;
+            }
+        }
+        return u;
+    }
+
     public static class EmptySubscription implements Subscription {
 
         @Override
@@ -214,8 +231,44 @@ public class Subscriptions {
 
     }
 
+    /**
+     * Concurrent subtraction bound to 0, mostly used to decrement a request tracker by
+     * the amount produced by the operator.
+     *
+     * @param requested the atomic long keeping track of requests
+     * @param amount delta to subtract
+     * @return value after subtraction or zero
+     */
+    public static long produced(AtomicLong requested, long amount) {
+        long r, u;
+        do {
+            r = requested.get();
+            if (r == 0 || r == Long.MAX_VALUE) {
+                return r;
+            }
+            u = subOrZero(r, amount);
+        } while (!requested.compareAndSet(r, u));
+
+        return u;
+    }
+
+    /**
+     * Cap a subtraction to 0
+     *
+     * @param a left operand
+     * @param b right operand
+     * @return Subtraction result or 0 if overflow
+     */
+    public static long subOrZero(long a, long b) {
+        long res = a - b;
+        if (res < 0L) {
+            return 0;
+        }
+        return res;
+    }
+
     public static <T> SingleItemSubscription<T> single(Subscriber<T> downstream, T item) {
-        return new SingleItemSubscription<T>(downstream, item);
+        return new SingleItemSubscription<>(downstream, item);
     }
 
     private static final class SingleItemSubscription<T> implements Subscription {

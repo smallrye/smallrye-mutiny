@@ -18,6 +18,7 @@ import io.reactivex.flowables.GroupedFlowable;
 import io.smallrye.reactive.GroupedMulti;
 import io.smallrye.reactive.Multi;
 import io.smallrye.reactive.Uni;
+import io.smallrye.reactive.operators.multi.MultiBufferOp;
 import io.smallrye.reactive.operators.multi.MultiCollectorOp;
 import io.smallrye.reactive.operators.multi.MultiLastItemOp;
 
@@ -86,11 +87,11 @@ public class MultiCollector {
     }
 
     public static <T> Multi<List<T>> list(Multi<T> upstream, int size) {
-        return Multi.createFrom().publisher(getFlowable(upstream).buffer(size));
+        return new MultiBufferOp<>(upstream, size, size);
     }
 
     public static <T> Multi<List<T>> list(Multi<T> upstream, int size, int skip) {
-        return Multi.createFrom().publisher(getFlowable(upstream).buffer(size, skip));
+        return new MultiBufferOp<>(upstream, size, skip);
     }
 
     public static <T> Multi<Multi<T>> multi(Multi<T> upstream, Duration timeWindow) {
