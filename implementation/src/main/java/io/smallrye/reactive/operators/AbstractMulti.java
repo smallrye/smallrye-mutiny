@@ -11,14 +11,13 @@ import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
-import io.reactivex.Flowable;
 import io.reactivex.exceptions.CompositeException;
 import io.reactivex.exceptions.MissingBackpressureException;
-import io.reactivex.schedulers.Schedulers;
 import io.smallrye.reactive.Multi;
 import io.smallrye.reactive.Uni;
 import io.smallrye.reactive.groups.*;
 import io.smallrye.reactive.operators.multi.MultiCacheOp;
+import io.smallrye.reactive.operators.multi.MultiEmitOnOp;
 import io.smallrye.reactive.operators.multi.MultiSubscribeOnOp;
 import io.smallrye.reactive.subscription.BackPressureFailure;
 
@@ -152,9 +151,7 @@ public abstract class AbstractMulti<T> implements Multi<T> {
 
     @Override
     public Multi<T> emitOn(Executor executor) {
-        return new DefaultMulti<>(
-                // TODO Change me to not use Flowable
-                Flowable.fromPublisher(publisher()).observeOn(Schedulers.from(nonNull(executor, "executor"))));
+        return new MultiEmitOnOp<>(this, nonNull(executor, "executor"));
     }
 
     @Override
