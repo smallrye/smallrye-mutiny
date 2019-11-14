@@ -1,13 +1,12 @@
 package io.smallrye.reactive.operators;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
-import org.reactivestreams.Publisher;
-
-import io.reactivex.Flowable;
 import io.smallrye.reactive.Multi;
 import io.smallrye.reactive.helpers.ParameterValidation;
+import io.smallrye.reactive.operators.multi.builders.CollectionBasedMulti;
+import org.reactivestreams.Publisher;
+
+import java.util.List;
+import java.util.function.Function;
 
 public class MultiCombine {
 
@@ -15,40 +14,30 @@ public class MultiCombine {
         // avoid direct instantiation.
     }
 
-    @SuppressWarnings("unchecked")
-    private static <T> Flowable<T> getFlowable(Publisher<T> publisher) {
-        if (publisher instanceof Flowable) {
-            return (Flowable) publisher;
-        }
-        if (publisher instanceof Multi) {
-            return MultiCollector.getFlowable((Multi) publisher);
-        }
-        return Flowable.fromPublisher(publisher);
-    }
-
     public static <T> Multi<T> merge(List<Publisher<T>> participants, boolean collectFailures, int requests,
             int concurrency) {
-        List<Flowable<T>> flowables = ParameterValidation.doesNotContainNull(participants, "participants")
-                .stream().map(MultiCombine::getFlowable).collect(Collectors.toList());
-        Flowable<T> merged;
+        List<Publisher<T>> candidates = ParameterValidation.doesNotContainNull(participants, "participants");
         if (collectFailures) {
-            merged = Flowable.mergeDelayError(flowables, concurrency, requests);
+            return new CollectionBasedMulti<>(candidates)
+                    .onItem().flatMap().multi(Function.identity()).collectFailures().withRequests(requests)
+                    .mergeResults(concurrency);
         } else {
-            merged = Flowable.merge(flowables, concurrency, requests);
+            return new CollectionBasedMulti<>(candidates)
+                    .onItem().flatMap().multi(Function.identity()).withRequests(requests).mergeResults(concurrency);
         }
-        return new DefaultMulti<>(merged);
     }
 
     public static <T> Multi<T> concatenate(List<Publisher<T>> participants, boolean collectFailures, int requests) {
-        List<Flowable<T>> flowables = ParameterValidation.doesNotContainNull(participants, "participants")
-                .stream().map(MultiCombine::getFlowable).collect(Collectors.toList());
-        Flowable<T> concatenated;
+        List<Publisher<T>> candidates = ParameterValidation.doesNotContainNull(participants, "participants");
         if (collectFailures) {
-            concatenated = Flowable.concatDelayError(Flowable.fromIterable(flowables), requests, true);
+            return new CollectionBasedMulti<>(candidates)
+                    .onItem().flatMap().multi(Function.identity()).collectFailures().withRequests(requests)
+                    .mergeResults(1);
         } else {
-            concatenated = Flowable.concat(Flowable.fromIterable(flowables), requests);
+            return new CollectionBasedMulti<>(candidates)
+                    .onItem().flatMap().multi(Function.identity()).collectFailures().withRequests(requests)
+                    .mergeResults(1);
         }
-        return new DefaultMulti<>(concatenated);
     }
 
 }

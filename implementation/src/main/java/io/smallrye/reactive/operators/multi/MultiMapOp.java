@@ -10,7 +10,7 @@ import org.reactivestreams.Subscriber;
 import io.smallrye.reactive.Multi;
 import io.smallrye.reactive.helpers.ParameterValidation;
 
-public final class MultiMapOp<T, U> extends AbstractMultiWithUpstream<T, U> {
+public final class MultiMapOp<T, U> extends AbstractMultiOperator<T, U> {
     private final Function<? super T, ? extends U> mapper;
 
     public MultiMapOp(Multi<T> upstream, Function<? super T, ? extends U> mapper) {
@@ -20,7 +20,7 @@ public final class MultiMapOp<T, U> extends AbstractMultiWithUpstream<T, U> {
 
     @Override
     public void subscribe(Subscriber<? super U> s) {
-        upstream.subscribe(new MapSubscriber<T, U>(s, mapper));
+        upstream.subscribe(new MapProcessor<T, U>(s, mapper));
     }
 
     @Override
@@ -28,10 +28,10 @@ public final class MultiMapOp<T, U> extends AbstractMultiWithUpstream<T, U> {
         return this;
     }
 
-    static class MapSubscriber<I, O> extends MultiOperatorSubscriber<I, O> {
+    static class MapProcessor<I, O> extends MultiOperatorProcessor<I, O> {
         private final Function<? super I, ? extends O> mapper;
 
-        private MapSubscriber(Subscriber<? super O> actual, Function<? super I, ? extends O> mapper) {
+        private MapProcessor(Subscriber<? super O> actual, Function<? super I, ? extends O> mapper) {
             super(actual);
             this.mapper = mapper;
         }

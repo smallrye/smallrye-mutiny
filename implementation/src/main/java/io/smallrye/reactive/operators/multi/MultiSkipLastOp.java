@@ -13,7 +13,7 @@ import io.smallrye.reactive.helpers.ParameterValidation;
  *
  * @param <T> the type of item
  */
-public final class MultiSkipLastOp<T> extends AbstractMultiWithUpstream<T, T> {
+public final class MultiSkipLastOp<T> extends AbstractMultiOperator<T, T> {
 
     private final int numberOfItems;
 
@@ -27,17 +27,17 @@ public final class MultiSkipLastOp<T> extends AbstractMultiWithUpstream<T, T> {
         if (numberOfItems == 0) {
             upstream.subscribe(actual);
         } else {
-            upstream.subscribe(new SkipLastSubscriber<>(actual, numberOfItems));
+            upstream.subscribe(new SkipLastProcessor<>(actual, numberOfItems));
         }
     }
 
-    static final class SkipLastSubscriber<T>
-            extends MultiOperatorSubscriber<T, T> {
+    static final class SkipLastProcessor<T>
+            extends MultiOperatorProcessor<T, T> {
 
         private final int numberOfItems;
         private final ArrayDeque<T> queue = new ArrayDeque<>();
 
-        SkipLastSubscriber(Subscriber<? super T> actual, int numberOfItems) {
+        SkipLastProcessor(Subscriber<? super T> actual, int numberOfItems) {
             super(actual);
             this.numberOfItems = numberOfItems;
         }

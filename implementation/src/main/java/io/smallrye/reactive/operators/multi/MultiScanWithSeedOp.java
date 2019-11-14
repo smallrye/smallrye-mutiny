@@ -12,7 +12,7 @@ import io.smallrye.reactive.helpers.ParameterValidation;
 import io.smallrye.reactive.helpers.Subscriptions;
 import io.smallrye.reactive.subscription.SwitchableSubscriptionSubscriber;
 
-public final class MultiScanWithSeedOp<T, R> extends AbstractMultiWithUpstream<T, R> {
+public final class MultiScanWithSeedOp<T, R> extends AbstractMultiOperator<T, R> {
 
     private final BiFunction<R, ? super T, R> accumulator;
 
@@ -43,7 +43,7 @@ public final class MultiScanWithSeedOp<T, R> extends AbstractMultiWithUpstream<T
         private final AtomicInteger wip = new AtomicInteger();
         long produced;
 
-        private ScanSeedSubscriber<T, R> subscriber;
+        private ScanSeedProcessor<T, R> subscriber;
 
         ScanSubscriber(Multi<? extends T> upstream,
                 Subscriber<? super R> downstream,
@@ -90,7 +90,7 @@ public final class MultiScanWithSeedOp<T, R> extends AbstractMultiWithUpstream<T
                         }
                         // Switch.
                         onSubscribe(Subscriptions.single(this, initialValue));
-                        subscriber = new ScanSeedSubscriber<>(this, accumulator, initialValue);
+                        subscriber = new ScanSeedProcessor<>(this, accumulator, initialValue);
                     } else {
                         upstream.subscribe(subscriber);
                     }
@@ -110,12 +110,12 @@ public final class MultiScanWithSeedOp<T, R> extends AbstractMultiWithUpstream<T
         }
     }
 
-    private static final class ScanSeedSubscriber<T, R> extends MultiOperatorSubscriber<T, R> {
+    private static final class ScanSeedProcessor<T, R> extends MultiOperatorProcessor<T, R> {
 
         private final BiFunction<R, ? super T, R> accumulator;
         R current;
 
-        ScanSeedSubscriber(Subscriber<? super R> downstream,
+        ScanSeedProcessor(Subscriber<? super R> downstream,
                 BiFunction<R, ? super T, R> accumulator,
                 R initial) {
             super(downstream);

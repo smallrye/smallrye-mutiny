@@ -5,7 +5,7 @@ import org.reactivestreams.Subscription;
 
 import io.smallrye.reactive.Multi;
 
-public class MultiIgnoreOp<T> extends AbstractMultiWithUpstream<T, Void> {
+public class MultiIgnoreOp<T> extends AbstractMultiOperator<T, Void> {
 
     public MultiIgnoreOp(Multi<T> upstream) {
         super(upstream);
@@ -13,11 +13,11 @@ public class MultiIgnoreOp<T> extends AbstractMultiWithUpstream<T, Void> {
 
     @Override
     public void subscribe(Subscriber<? super Void> downstream) {
-        upstream.subscribe(new MultiIgnoreSubscriber<>(downstream));
+        upstream.subscribe(new MultiIgnoreProcessor<>(downstream));
     }
 
-    static class MultiIgnoreSubscriber<T> extends MultiOperatorSubscriber<T, Void> {
-        MultiIgnoreSubscriber(Subscriber<? super Void> downstream) {
+    static class MultiIgnoreProcessor<T> extends MultiOperatorProcessor<T, Void> {
+        MultiIgnoreProcessor(Subscriber<? super Void> downstream) {
             super(downstream);
         }
 

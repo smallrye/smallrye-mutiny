@@ -1,5 +1,12 @@
 package io.smallrye.reactive.operators;
 
+import io.reactivex.Flowable;
+import io.smallrye.reactive.GroupedMulti;
+import io.smallrye.reactive.Multi;
+import io.smallrye.reactive.Uni;
+import io.smallrye.reactive.infrastructure.Infrastructure;
+import io.smallrye.reactive.operators.multi.*;
+
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -12,17 +19,6 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
-
-import io.reactivex.Flowable;
-import io.reactivex.flowables.GroupedFlowable;
-import io.smallrye.reactive.GroupedMulti;
-import io.smallrye.reactive.Multi;
-import io.smallrye.reactive.Uni;
-import io.smallrye.reactive.infrastructure.Infrastructure;
-import io.smallrye.reactive.operators.multi.MultiBufferOp;
-import io.smallrye.reactive.operators.multi.MultiBufferWithTimeoutOp;
-import io.smallrye.reactive.operators.multi.MultiCollectorOp;
-import io.smallrye.reactive.operators.multi.MultiLastItemOp;
 
 public class MultiCollector {
 
@@ -85,7 +81,8 @@ public class MultiCollector {
     }
 
     public static <T> Multi<List<T>> list(Multi<T> upstream, Duration timeWindow) {
-        return new MultiBufferWithTimeoutOp<>(upstream, Integer.MAX_VALUE, timeWindow, Infrastructure.getDefaultWorkerPool());
+        return new MultiBufferWithTimeoutOp<>(upstream, Integer.MAX_VALUE, timeWindow,
+                Infrastructure.getDefaultWorkerPool());
     }
 
     public static <T> Multi<List<T>> list(Multi<T> upstream, int size) {
@@ -117,12 +114,11 @@ public class MultiCollector {
     public static <K, V, T> Multi<GroupedMulti<K, V>> groupBy(Multi<T> upstream,
             Function<? super T, ? extends K> keyMapper,
             Function<? super T, ? extends V> valueMapper) {
-        Flowable<? extends GroupedFlowable<? extends K, ? extends V>> groups;
         if (valueMapper == null) {
-            groups = getFlowable(upstream).groupBy(keyMapper::apply, x -> (V) x);
+            //noinspection unchecked
+            return new MultiGroupByOp<>(upstream, keyMapper, x -> (V) x);
         } else {
-            groups = getFlowable(upstream).groupBy(keyMapper::apply, valueMapper::apply);
+            return new MultiGroupByOp<>(upstream, keyMapper, valueMapper);
         }
-        return Multi.createFrom().publisher(groups).onItem().mapToItem(gf -> new DefaultGroupedMulti<>(gf));
     }
 }

@@ -7,7 +7,7 @@ import org.reactivestreams.Subscription;
 
 import io.smallrye.reactive.Multi;
 
-public final class MultiLastItemOp<T> extends AbstractMultiWithUpstream<T, T> {
+public final class MultiLastItemOp<T> extends AbstractMultiOperator<T, T> {
 
     public MultiLastItemOp(Multi<T> upstream) {
         super(upstream);
@@ -15,14 +15,14 @@ public final class MultiLastItemOp<T> extends AbstractMultiWithUpstream<T, T> {
 
     @Override
     public void subscribe(Subscriber<? super T> downstream) {
-        upstream.subscribe(new MultiLastItemSubscriber<T>(downstream));
+        upstream.subscribe(new MultiLastItemProcessor<T>(downstream));
     }
 
-    static final class MultiLastItemSubscriber<T> extends MultiOperatorSubscriber<T, T> {
+    static final class MultiLastItemProcessor<T> extends MultiOperatorProcessor<T, T> {
 
         T last;
 
-        MultiLastItemSubscriber(Subscriber<? super T> downstream) {
+        MultiLastItemProcessor(Subscriber<? super T> downstream) {
             super(downstream);
         }
 

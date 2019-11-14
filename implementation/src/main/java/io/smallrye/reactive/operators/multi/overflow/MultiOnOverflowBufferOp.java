@@ -13,11 +13,11 @@ import io.smallrye.reactive.Multi;
 import io.smallrye.reactive.helpers.Subscriptions;
 import io.smallrye.reactive.helpers.queues.SpscArrayQueue;
 import io.smallrye.reactive.helpers.queues.SpscLinkedArrayQueue;
-import io.smallrye.reactive.operators.multi.AbstractMultiWithUpstream;
-import io.smallrye.reactive.operators.multi.MultiOperatorSubscriber;
+import io.smallrye.reactive.operators.multi.AbstractMultiOperator;
+import io.smallrye.reactive.operators.multi.MultiOperatorProcessor;
 import io.smallrye.reactive.subscription.BackPressureFailure;
 
-public class MultiOnOverflowBufferOp<T> extends AbstractMultiWithUpstream<T, T> {
+public class MultiOnOverflowBufferOp<T> extends AbstractMultiOperator<T, T> {
 
     private final int bufferSize;
     private final boolean unbounded;
@@ -35,14 +35,14 @@ public class MultiOnOverflowBufferOp<T> extends AbstractMultiWithUpstream<T, T> 
 
     @Override
     public void subscribe(Subscriber<? super T> downstream) {
-        OnOverflowBufferSubscriber<T> subscriber = new OnOverflowBufferSubscriber<>(downstream,
+        OnOverflowBufferProcessor<T> subscriber = new OnOverflowBufferProcessor<>(downstream,
                 bufferSize, unbounded,
                 postponeFailurePropagation,
                 onOverflow);
         upstream.subscribe(subscriber);
     }
 
-    static final class OnOverflowBufferSubscriber<T> extends MultiOperatorSubscriber<T, T> {
+    static final class OnOverflowBufferProcessor<T> extends MultiOperatorProcessor<T, T> {
 
         private final Queue<T> queue;
         private final boolean postponeFailurePropagation;
@@ -56,7 +56,7 @@ public class MultiOnOverflowBufferOp<T> extends AbstractMultiWithUpstream<T, T> 
         volatile boolean cancelled;
         volatile boolean done;
 
-        OnOverflowBufferSubscriber(Subscriber<? super T> downstream, int bufferSize,
+        OnOverflowBufferProcessor(Subscriber<? super T> downstream, int bufferSize,
                 boolean unbounded, boolean postponeFailurePropagation, Consumer<T> onOverflow) {
             super(downstream);
             this.onOverflow = onOverflow;

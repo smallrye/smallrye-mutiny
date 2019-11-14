@@ -18,7 +18,7 @@ import io.smallrye.reactive.subscription.SerializedSubscriber;
  * @param <T> the type of item from upstream
  * @param <U> the type of item from the other publisher
  */
-public final class MultiTakeUntilOtherOp<T, U> extends AbstractMultiWithUpstream<T, T> {
+public final class MultiTakeUntilOtherOp<T, U> extends AbstractMultiOperator<T, T> {
 
     private final Publisher<U> other;
 
@@ -29,17 +29,17 @@ public final class MultiTakeUntilOtherOp<T, U> extends AbstractMultiWithUpstream
 
     @Override
     public void subscribe(Subscriber<? super T> actual) {
-        TakeUntilMainSubscriber<T> mainSubscriber = new TakeUntilMainSubscriber<>(actual);
+        TakeUntilMainProcessor<T> mainSubscriber = new TakeUntilMainProcessor<>(actual);
         TakeUntilOtherSubscriber<U> otherSubscriber = new TakeUntilOtherSubscriber<>(mainSubscriber);
         other.subscribe(otherSubscriber);
         upstream.subscribe(mainSubscriber);
     }
 
     static final class TakeUntilOtherSubscriber<U> implements Subscriber<U> {
-        final TakeUntilMainSubscriber<?> main;
+        final TakeUntilMainProcessor<?> main;
         boolean once;
 
-        TakeUntilOtherSubscriber(TakeUntilMainSubscriber<?> main) {
+        TakeUntilOtherSubscriber(TakeUntilMainProcessor<?> main) {
             this.main = main;
         }
 
@@ -72,11 +72,11 @@ public final class MultiTakeUntilOtherOp<T, U> extends AbstractMultiWithUpstream
         }
     }
 
-    static final class TakeUntilMainSubscriber<T> extends MultiOperatorSubscriber<T, T> {
+    static final class TakeUntilMainProcessor<T> extends MultiOperatorProcessor<T, T> {
 
         private final AtomicReference<Subscription> other = new AtomicReference<>();
 
-        TakeUntilMainSubscriber(Subscriber<? super T> downstream) {
+        TakeUntilMainProcessor(Subscriber<? super T> downstream) {
             super(new SerializedSubscriber<>(downstream));
         }
 

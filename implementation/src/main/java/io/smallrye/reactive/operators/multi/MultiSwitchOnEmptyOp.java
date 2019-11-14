@@ -11,7 +11,7 @@ import io.smallrye.reactive.subscription.SwitchableSubscriptionSubscriber;
 /**
  * Switches to another Multi if the upstream is empty (completes without having emitted any items).
  */
-public final class MultiSwitchOnEmptyOp<T> extends AbstractMultiWithUpstream<T, T> {
+public final class MultiSwitchOnEmptyOp<T> extends AbstractMultiOperator<T, T> {
 
     private final Publisher<? extends T> alternative;
 

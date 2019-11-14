@@ -12,7 +12,7 @@ import io.smallrye.reactive.operators.AbstractMulti;
  * @param <I> the upstream value type / input type
  * @param <O> the output value type / produced type
  */
-public abstract class AbstractMultiWithUpstream<I, O> extends AbstractMulti<O> implements Multi<O> {
+public abstract class AbstractMultiOperator<I, O> extends AbstractMulti<O> implements Multi<O> {
 
     /**
      * The upstream {@link Multi}.
@@ -20,11 +20,11 @@ public abstract class AbstractMultiWithUpstream<I, O> extends AbstractMulti<O> i
     protected final Multi<? extends I> upstream;
 
     /**
-     * Creates a new {@link AbstractMultiWithUpstream} with the passed {@link Multi} as upstream.
+     * Creates a new {@link AbstractMultiOperator} with the passed {@link Multi} as upstream.
      *
      * @param upstream the upstream, must not be {@code null}
      */
-    public AbstractMultiWithUpstream(Multi<? extends I> upstream) {
+    public AbstractMultiOperator(Multi<? extends I> upstream) {
         this.upstream = ParameterValidation.nonNull(upstream, "upstream");
     }
 

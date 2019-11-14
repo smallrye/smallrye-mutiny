@@ -15,7 +15,7 @@ import io.smallrye.reactive.subscription.SwitchableSubscriptionSubscriber;
  *
  * @param <T> the type of item
  */
-public final class MultiRetryOp<T> extends AbstractMultiWithUpstream<T, T> {
+public final class MultiRetryOp<T> extends AbstractMultiOperator<T, T> {
 
     private final long times;
 

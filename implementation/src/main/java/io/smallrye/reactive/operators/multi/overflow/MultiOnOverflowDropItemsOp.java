@@ -8,10 +8,10 @@ import org.reactivestreams.Subscription;
 
 import io.smallrye.reactive.Multi;
 import io.smallrye.reactive.helpers.Subscriptions;
-import io.smallrye.reactive.operators.multi.AbstractMultiWithUpstream;
-import io.smallrye.reactive.operators.multi.MultiOperatorSubscriber;
+import io.smallrye.reactive.operators.multi.AbstractMultiOperator;
+import io.smallrye.reactive.operators.multi.MultiOperatorProcessor;
 
-public class MultiOnOverflowDropItemsOp<T> extends AbstractMultiWithUpstream<T, T> {
+public class MultiOnOverflowDropItemsOp<T> extends AbstractMultiOperator<T, T> {
 
     private final Consumer<? super T> onItemDrop;
 
@@ -26,15 +26,15 @@ public class MultiOnOverflowDropItemsOp<T> extends AbstractMultiWithUpstream<T, 
     }
 
     public void subscribe(Subscriber<? super T> downstream) {
-        upstream.subscribe(new MultiOnOverflowDropItemsSubscriber<T>(downstream, onItemDrop));
+        upstream.subscribe(new MultiOnOverflowDropItemsProcessor<T>(downstream, onItemDrop));
     }
 
-    static final class MultiOnOverflowDropItemsSubscriber<T> extends MultiOperatorSubscriber<T, T> {
+    static final class MultiOnOverflowDropItemsProcessor<T> extends MultiOperatorProcessor<T, T> {
 
         private final Consumer<? super T> onItemDrop;
         private final AtomicLong requested = new AtomicLong();
 
-        MultiOnOverflowDropItemsSubscriber(Subscriber<? super T> dowsntream, Consumer<? super T> onItemDrop) {
+        MultiOnOverflowDropItemsProcessor(Subscriber<? super T> dowsntream, Consumer<? super T> onItemDrop) {
             super(dowsntream);
             this.onItemDrop = onItemDrop;
         }

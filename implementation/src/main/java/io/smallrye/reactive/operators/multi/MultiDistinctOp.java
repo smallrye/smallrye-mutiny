@@ -12,7 +12,7 @@ import io.smallrye.reactive.Multi;
  *
  * @param <T> the type of items
  */
-public final class MultiDistinctOp<T> extends AbstractMultiWithUpstream<T, T> {
+public final class MultiDistinctOp<T> extends AbstractMultiOperator<T, T> {
 
     public MultiDistinctOp(Multi<? extends T> upstream) {
         super(upstream);
@@ -20,14 +20,14 @@ public final class MultiDistinctOp<T> extends AbstractMultiWithUpstream<T, T> {
 
     @Override
     public void subscribe(Subscriber<? super T> actual) {
-        upstream.subscribe(new DistinctSubscriber<>(actual));
+        upstream.subscribe(new DistinctProcessor<>(actual));
     }
 
-    static final class DistinctSubscriber<T> extends MultiOperatorSubscriber<T, T> {
+    static final class DistinctProcessor<T> extends MultiOperatorProcessor<T, T> {
 
         final Collection<T> collection;
 
-        DistinctSubscriber(Subscriber<? super T> downstream) {
+        DistinctProcessor(Subscriber<? super T> downstream) {
             super(downstream);
             this.collection = new HashSet<>();
         }

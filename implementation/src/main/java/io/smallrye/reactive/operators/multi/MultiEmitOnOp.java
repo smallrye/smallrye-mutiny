@@ -23,7 +23,7 @@ import io.smallrye.reactive.subscription.BackPressureFailure;
  *
  * @param <T> the type of item
  */
-public class MultiEmitOnOp<T> extends AbstractMultiWithUpstream<T, T> {
+public class MultiEmitOnOp<T> extends AbstractMultiOperator<T, T> {
 
     private final Executor executor;
     private final Supplier<? extends Queue<T>> queueSupplier = () -> new SpscArrayQueue<>(16);
@@ -35,10 +35,10 @@ public class MultiEmitOnOp<T> extends AbstractMultiWithUpstream<T, T> {
 
     @Override
     public void subscribe(Subscriber<? super T> downstream) {
-        upstream.subscribe(new MultiEmitOnSubscriber<>(downstream, executor, queueSupplier));
+        upstream.subscribe(new MultiEmitOnProcessor<>(downstream, executor, queueSupplier));
     }
 
-    static final class MultiEmitOnSubscriber<T> extends MultiOperatorSubscriber<T, T> implements Runnable {
+    static final class MultiEmitOnProcessor<T> extends MultiOperatorProcessor<T, T> implements Runnable {
 
         private final Executor executor;
 
@@ -57,7 +57,7 @@ public class MultiEmitOnOp<T> extends AbstractMultiWithUpstream<T, T> {
 
         private long produced;
 
-        MultiEmitOnSubscriber(Subscriber<? super T> downstream,
+        MultiEmitOnProcessor(Subscriber<? super T> downstream,
                 Executor executor,
                 Supplier<? extends Queue<T>> queueSupplier) {
             super(downstream);

@@ -13,7 +13,7 @@ import org.reactivestreams.Subscription;
 import io.smallrye.reactive.Multi;
 import io.smallrye.reactive.helpers.Subscriptions;
 
-public final class MultiCollectorOp<T, A, R> extends AbstractMultiWithUpstream<T, R> {
+public final class MultiCollectorOp<T, A, R> extends AbstractMultiOperator<T, R> {
 
     private final Collector<? super T, A, ? extends R> collector;
 
@@ -47,17 +47,17 @@ public final class MultiCollectorOp<T, A, R> extends AbstractMultiWithUpstream<T
             return;
         }
 
-        upstream.subscribe(new CollectorSubscriber<>(downstream, initialValue, accumulator, finisher));
+        upstream.subscribe(new CollectorProcessor<>(downstream, initialValue, accumulator, finisher));
     }
 
-    static class CollectorSubscriber<T, A, R> extends MultiOperatorSubscriber<T, R> {
+    static class CollectorProcessor<T, A, R> extends MultiOperatorProcessor<T, R> {
 
         private final BiConsumer<A, T> accumulator;
         private final Function<A, R> finisher;
         // Only accessed in the serialized callbacks
         private A intermediate;
 
-        CollectorSubscriber(Subscriber<? super R> downstream,
+        CollectorProcessor(Subscriber<? super R> downstream,
                 A initialValue, BiConsumer<A, T> accumulator, Function<A, R> finisher) {
             super(downstream);
             this.intermediate = initialValue;

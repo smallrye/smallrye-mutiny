@@ -31,7 +31,7 @@ import io.smallrye.reactive.helpers.Subscriptions;
  *
  * @param <T> the type of item
  */
-public class MultiSubscribeOnOp<T> extends AbstractMultiWithUpstream<T, T> {
+public class MultiSubscribeOnOp<T> extends AbstractMultiOperator<T, T> {
 
     private final Executor executor;
 
@@ -44,17 +44,17 @@ public class MultiSubscribeOnOp<T> extends AbstractMultiWithUpstream<T, T> {
 
     @Override
     public void subscribe(Subscriber<? super T> downstream) {
-        SubscribeOnSubscriber<T> sub = new SubscribeOnSubscriber<>(downstream, executor);
+        SubscribeOnProcessor<T> sub = new SubscribeOnProcessor<>(downstream, executor);
         downstream.onSubscribe(sub);
         sub.scheduleSubscription(upstream, downstream);
     }
 
-    static final class SubscribeOnSubscriber<T> extends MultiOperatorSubscriber<T, T> {
+    static final class SubscribeOnProcessor<T> extends MultiOperatorProcessor<T, T> {
 
         private final Executor executor;
         private final AtomicLong requested = new AtomicLong();
 
-        SubscribeOnSubscriber(Subscriber<? super T> downstream, Executor executor) {
+        SubscribeOnProcessor(Subscriber<? super T> downstream, Executor executor) {
             super(downstream);
             this.executor = executor;
         }

@@ -13,7 +13,7 @@ import io.smallrye.reactive.helpers.ParameterValidation;
  *
  * @param <T> the type of item
  */
-public final class MultiTakeWhileOp<T> extends AbstractMultiWithUpstream<T, T> {
+public final class MultiTakeWhileOp<T> extends AbstractMultiOperator<T, T> {
 
     private final Predicate<? super T> predicate;
 
@@ -24,13 +24,13 @@ public final class MultiTakeWhileOp<T> extends AbstractMultiWithUpstream<T, T> {
 
     @Override
     public void subscribe(Subscriber<? super T> actual) {
-        upstream.subscribe(new TakeWhileSubscriber<>(actual, predicate));
+        upstream.subscribe(new TakeWhileProcessor<>(actual, predicate));
     }
 
-    static final class TakeWhileSubscriber<T> extends MultiOperatorSubscriber<T, T> {
+    static final class TakeWhileProcessor<T> extends MultiOperatorProcessor<T, T> {
         private final Predicate<? super T> predicate;
 
-        TakeWhileSubscriber(Subscriber<? super T> downstream, Predicate<? super T> predicate) {
+        TakeWhileProcessor(Subscriber<? super T> downstream, Predicate<? super T> predicate) {
             super(downstream);
             this.predicate = predicate;
         }

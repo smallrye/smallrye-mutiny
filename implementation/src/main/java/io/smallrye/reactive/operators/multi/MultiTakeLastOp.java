@@ -16,7 +16,7 @@ import io.smallrye.reactive.helpers.Subscriptions;
  *
  * @param <T> the type of item
  */
-public class MultiTakeLastOp<T> extends AbstractMultiWithUpstream<T, T> {
+public class MultiTakeLastOp<T> extends AbstractMultiOperator<T, T> {
 
     private final int numberOfItems;
 
@@ -28,15 +28,15 @@ public class MultiTakeLastOp<T> extends AbstractMultiWithUpstream<T, T> {
     @Override
     public void subscribe(Subscriber<? super T> actual) {
         if (numberOfItems == 0) {
-            upstream.subscribe(new TakeLastZeroSubscriber<>(actual));
+            upstream.subscribe(new TakeLastZeroProcessor<>(actual));
         } else {
-            upstream.subscribe(new TakeLastManySubscriber<>(actual, numberOfItems));
+            upstream.subscribe(new TakeLastManyProcessor<>(actual, numberOfItems));
         }
     }
 
-    static final class TakeLastZeroSubscriber<T> extends MultiOperatorSubscriber<T, T> {
+    static final class TakeLastZeroProcessor<T> extends MultiOperatorProcessor<T, T> {
 
-        TakeLastZeroSubscriber(Subscriber<? super T> downstream) {
+        TakeLastZeroProcessor(Subscriber<? super T> downstream) {
             super(downstream);
         }
 
@@ -58,7 +58,7 @@ public class MultiTakeLastOp<T> extends AbstractMultiWithUpstream<T, T> {
         }
     }
 
-    static final class TakeLastManySubscriber<T> extends MultiOperatorSubscriber<T, T> {
+    static final class TakeLastManyProcessor<T> extends MultiOperatorProcessor<T, T> {
 
         private final int numberOfItems;
         private final ArrayDeque<T> queue;
@@ -66,7 +66,7 @@ public class MultiTakeLastOp<T> extends AbstractMultiWithUpstream<T, T> {
         private final AtomicInteger wip = new AtomicInteger();
         volatile boolean upstreamCompleted;
 
-        TakeLastManySubscriber(Subscriber<? super T> downstream, int numberOfItems) {
+        TakeLastManyProcessor(Subscriber<? super T> downstream, int numberOfItems) {
             super(downstream);
             this.numberOfItems = numberOfItems;
             this.queue = new ArrayDeque<>(numberOfItems);

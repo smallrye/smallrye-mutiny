@@ -16,7 +16,7 @@ import io.smallrye.reactive.helpers.Subscriptions;
  *
  * @param <T> the value type
  */
-public final class MultiSignalConsumerOp<T> extends AbstractMultiWithUpstream<T, T> {
+public final class MultiSignalConsumerOp<T> extends AbstractMultiOperator<T, T> {
 
     private final Consumer<? super Subscription> onSubscribe;
 

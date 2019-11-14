@@ -18,7 +18,7 @@ import io.smallrye.reactive.subscription.SerializedSubscriber;
  * @param <T> the type of items emitted by the upstream (and propagated downstream)
  * @param <U> the type of items emitted by the other publisher
  */
-public final class MultiSkipUntilPublisherOp<T, U> extends AbstractMultiWithUpstream<T, T> {
+public final class MultiSkipUntilPublisherOp<T, U> extends AbstractMultiOperator<T, T> {
 
     private final Publisher<U> other;
 
@@ -29,7 +29,7 @@ public final class MultiSkipUntilPublisherOp<T, U> extends AbstractMultiWithUpst
 
     @Override
     public void subscribe(Subscriber<? super T> actual) {
-        SkipUntilMainSubscriber<T> main = new SkipUntilMainSubscriber<>(actual);
+        SkipUntilMainProcessor<T> main = new SkipUntilMainProcessor<>(actual);
         OtherStreamTracker<U> otherSubscriber = new OtherStreamTracker<>(main);
         other.subscribe(otherSubscriber);
         upstream.subscribe(main);
@@ -38,9 +38,9 @@ public final class MultiSkipUntilPublisherOp<T, U> extends AbstractMultiWithUpst
     @SuppressWarnings("SubscriberImplementation")
     static final class OtherStreamTracker<U> implements Subscriber<U> {
 
-        private final SkipUntilMainSubscriber<?> main;
+        private final SkipUntilMainProcessor<?> main;
 
-        OtherStreamTracker(SkipUntilMainSubscriber<?> main) {
+        OtherStreamTracker(SkipUntilMainProcessor<?> main) {
             this.main = main;
         }
 
@@ -68,12 +68,12 @@ public final class MultiSkipUntilPublisherOp<T, U> extends AbstractMultiWithUpst
 
     }
 
-    static final class SkipUntilMainSubscriber<T> extends MultiOperatorSubscriber<T, T> {
+    static final class SkipUntilMainProcessor<T> extends MultiOperatorProcessor<T, T> {
 
         private AtomicReference<Subscription> other = new AtomicReference<>();
         private AtomicBoolean gate = new AtomicBoolean(false);
 
-        SkipUntilMainSubscriber(Subscriber<? super T> downstream) {
+        SkipUntilMainProcessor(Subscriber<? super T> downstream) {
             super(new SerializedSubscriber<>(downstream));
         }
 

@@ -12,7 +12,7 @@ import io.smallrye.reactive.helpers.ParameterValidation;
  *
  * @param <T> the type of item
  */
-public class MultiFilterOp<T> extends AbstractMultiWithUpstream<T, T> {
+public class MultiFilterOp<T> extends AbstractMultiOperator<T, T> {
 
     private final Predicate<? super T> predicate;
 
@@ -23,14 +23,14 @@ public class MultiFilterOp<T> extends AbstractMultiWithUpstream<T, T> {
 
     @Override
     public void subscribe(Subscriber<? super T> downstream) {
-        upstream.subscribe(new MultiFilterSubscriber<>(downstream, predicate));
+        upstream.subscribe(new MultiFilterProcessor<>(downstream, predicate));
     }
 
-    static final class MultiFilterSubscriber<T> extends MultiOperatorSubscriber<T, T> {
+    static final class MultiFilterProcessor<T> extends MultiOperatorProcessor<T, T> {
 
         private final Predicate<? super T> predicate;
 
-        MultiFilterSubscriber(Subscriber<? super T> downstream, Predicate<? super T> predicate) {
+        MultiFilterProcessor(Subscriber<? super T> downstream, Predicate<? super T> predicate) {
             super(downstream);
             this.predicate = predicate;
         }

@@ -9,10 +9,10 @@ import org.reactivestreams.Subscription;
 
 import io.smallrye.reactive.Multi;
 import io.smallrye.reactive.helpers.Subscriptions;
-import io.smallrye.reactive.operators.multi.AbstractMultiWithUpstream;
-import io.smallrye.reactive.operators.multi.MultiOperatorSubscriber;
+import io.smallrye.reactive.operators.multi.AbstractMultiOperator;
+import io.smallrye.reactive.operators.multi.MultiOperatorProcessor;
 
-public class MultiOnOverflowKeepLastOp<T> extends AbstractMultiWithUpstream<T, T> {
+public class MultiOnOverflowKeepLastOp<T> extends AbstractMultiOperator<T, T> {
 
     public MultiOnOverflowKeepLastOp(Multi<T> upstream) {
         super(upstream);
@@ -20,10 +20,10 @@ public class MultiOnOverflowKeepLastOp<T> extends AbstractMultiWithUpstream<T, T
 
     @Override
     public void subscribe(Subscriber<? super T> downstream) {
-        upstream.subscribe(new MultiOnOverflowLatestSubscriber<T>(downstream));
+        upstream.subscribe(new MultiOnOverflowLatestProcessor<T>(downstream));
     }
 
-    static final class MultiOnOverflowLatestSubscriber<T> extends MultiOperatorSubscriber<T, T> {
+    static final class MultiOnOverflowLatestProcessor<T> extends MultiOperatorProcessor<T, T> {
 
         private final AtomicInteger wip = new AtomicInteger();
         private Throwable failure;
@@ -34,7 +34,7 @@ public class MultiOnOverflowKeepLastOp<T> extends AbstractMultiWithUpstream<T, T
 
         private final AtomicReference<T> last = new AtomicReference<>();
 
-        MultiOnOverflowLatestSubscriber(Subscriber<? super T> downstream) {
+        MultiOnOverflowLatestProcessor(Subscriber<? super T> downstream) {
             super(downstream);
         }
 

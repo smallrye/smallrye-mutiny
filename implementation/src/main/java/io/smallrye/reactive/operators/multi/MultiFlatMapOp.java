@@ -17,7 +17,7 @@ import io.smallrye.reactive.helpers.ParameterValidation;
 import io.smallrye.reactive.helpers.Subscriptions;
 import io.smallrye.reactive.subscription.BackPressureFailure;
 
-public final class MultiFlatMapOp<I, O> extends AbstractMultiWithUpstream<I, O> {
+public final class MultiFlatMapOp<I, O> extends AbstractMultiOperator<I, O> {
     private final Function<? super I, ? extends Publisher<? extends O>> mapper;
 
     private final boolean postponeFailurePropagation;

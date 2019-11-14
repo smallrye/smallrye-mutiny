@@ -12,7 +12,7 @@ import io.smallrye.reactive.Multi;
 import io.smallrye.reactive.helpers.ParameterValidation;
 import io.smallrye.reactive.subscription.SwitchableSubscriptionSubscriber;
 
-public class MultiOnFailureResumeOp<T> extends AbstractMultiWithUpstream<T, T> {
+public class MultiOnFailureResumeOp<T> extends AbstractMultiOperator<T, T> {
 
     private final Function<? super Throwable, ? extends Publisher<? extends T>> next;
 

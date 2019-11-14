@@ -12,7 +12,7 @@ import io.smallrye.reactive.helpers.ParameterValidation;
  * Skips the first N items from upstream.
  * Failures and completations are propagated.
  */
-public final class MultiSkipOp<T> extends AbstractMultiWithUpstream<T, T> {
+public final class MultiSkipOp<T> extends AbstractMultiOperator<T, T> {
 
     final long numberOfItems;
 
@@ -26,15 +26,15 @@ public final class MultiSkipOp<T> extends AbstractMultiWithUpstream<T, T> {
         if (numberOfItems == 0) {
             upstream.subscribe(actual);
         } else {
-            upstream.subscribe(new SkipSubscriber<>(actual, numberOfItems));
+            upstream.subscribe(new SkipProcessor<>(actual, numberOfItems));
         }
     }
 
-    static final class SkipSubscriber<T> extends MultiOperatorSubscriber<T, T> {
+    static final class SkipProcessor<T> extends MultiOperatorProcessor<T, T> {
 
         private final AtomicLong remaining;
 
-        SkipSubscriber(Subscriber<? super T> downstream, long items) {
+        SkipProcessor(Subscriber<? super T> downstream, long items) {
             super(downstream);
             this.remaining = new AtomicLong(items);
         }

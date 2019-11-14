@@ -17,7 +17,7 @@ import io.smallrye.reactive.helpers.Subscriptions;
  *
  * @param <T> the type of item
  */
-public final class MultiTakeOp<T> extends AbstractMultiWithUpstream<T, T> {
+public final class MultiTakeOp<T> extends AbstractMultiOperator<T, T> {
 
     private final long numberOfItems;
 
@@ -28,16 +28,16 @@ public final class MultiTakeOp<T> extends AbstractMultiWithUpstream<T, T> {
 
     @Override
     public void subscribe(Subscriber<? super T> downstream) {
-        upstream.subscribe(new TakeSubscriber<>(downstream, numberOfItems));
+        upstream.subscribe(new TakeProcessor<>(downstream, numberOfItems));
     }
 
-    static final class TakeSubscriber<T> extends MultiOperatorSubscriber<T, T> {
+    static final class TakeProcessor<T> extends MultiOperatorProcessor<T, T> {
 
         private final long numberOfItems;
         private long remaining;
         private AtomicInteger wip = new AtomicInteger();
 
-        TakeSubscriber(Subscriber<? super T> downstream, long numberOfItems) {
+        TakeProcessor(Subscriber<? super T> downstream, long numberOfItems) {
             super(downstream);
             this.numberOfItems = numberOfItems;
             this.remaining = numberOfItems;

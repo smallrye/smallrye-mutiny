@@ -13,7 +13,7 @@ import io.smallrye.reactive.helpers.ParameterValidation;
  * 
  * @param <T> the type of item
  */
-public final class MultiScanOp<T> extends AbstractMultiWithUpstream<T, T> {
+public final class MultiScanOp<T> extends AbstractMultiOperator<T, T> {
 
     private final BiFunction<T, ? super T, T> accumulator;
 
@@ -24,15 +24,15 @@ public final class MultiScanOp<T> extends AbstractMultiWithUpstream<T, T> {
 
     @Override
     public void subscribe(Subscriber<? super T> downstream) {
-        upstream.subscribe(new ScanSubscriber<>(downstream, accumulator));
+        upstream.subscribe(new ScanProcessor<>(downstream, accumulator));
     }
 
-    static final class ScanSubscriber<T> extends MultiOperatorSubscriber<T, T> {
+    static final class ScanProcessor<T> extends MultiOperatorProcessor<T, T> {
 
         private final BiFunction<T, ? super T, T> accumulator;
         private T current;
 
-        ScanSubscriber(Subscriber<? super T> downstream, BiFunction<T, ? super T, T> accumulator) {
+        ScanProcessor(Subscriber<? super T> downstream, BiFunction<T, ? super T, T> accumulator) {
             super(downstream);
             this.accumulator = accumulator;
         }

@@ -40,7 +40,7 @@ import io.smallrye.reactive.helpers.queues.DrainUtils;
  *
  * @param <T> the type of item from upstream
  */
-public class MultiBufferOp<T> extends AbstractMultiWithUpstream<T, List<T>> {
+public class MultiBufferOp<T> extends AbstractMultiOperator<T, List<T>> {
 
     private final int size;
 
@@ -58,24 +58,24 @@ public class MultiBufferOp<T> extends AbstractMultiWithUpstream<T, List<T>> {
     @Override
     public void subscribe(Subscriber<? super List<T>> downstream) {
         if (size == skip) {
-            upstream.subscribe(new BufferExactSubscriber<>(downstream, size, supplier));
+            upstream.subscribe(new BufferExactProcessor<>(downstream, size, supplier));
         } else if (skip > size) {
-            upstream.subscribe(new BufferSkipSubscriber<>(downstream, size, skip, supplier));
+            upstream.subscribe(new BufferSkipProcessor<>(downstream, size, skip, supplier));
         } else {
-            upstream.subscribe(new BufferOverlappingSubscriber<>(downstream,
+            upstream.subscribe(new BufferOverlappingProcessor<>(downstream,
                     size,
                     skip,
                     supplier));
         }
     }
 
-    static final class BufferExactSubscriber<T> extends MultiOperatorSubscriber<T, List<T>> {
+    static final class BufferExactProcessor<T> extends MultiOperatorProcessor<T, List<T>> {
 
         private final Supplier<List<T>> supplier;
         private final int size;
         private List<T> current;
 
-        BufferExactSubscriber(Subscriber<? super List<T>> downstream, int size, Supplier<List<T>> supplier) {
+        BufferExactProcessor(Subscriber<? super List<T>> downstream, int size, Supplier<List<T>> supplier) {
             super(downstream);
             this.size = size;
             this.supplier = supplier;
@@ -122,7 +122,7 @@ public class MultiBufferOp<T> extends AbstractMultiWithUpstream<T, List<T>> {
         }
     }
 
-    static final class BufferSkipSubscriber<T> extends MultiOperatorSubscriber<T, List<T>> {
+    static final class BufferSkipProcessor<T> extends MultiOperatorProcessor<T, List<T>> {
 
         private final Supplier<List<T>> supplier;
         private final int size;
@@ -133,7 +133,7 @@ public class MultiBufferOp<T> extends AbstractMultiWithUpstream<T, List<T>> {
 
         private final AtomicInteger wip = new AtomicInteger();
 
-        BufferSkipSubscriber(Subscriber<? super List<T>> downstream, int size, int skip, Supplier<List<T>> supplier) {
+        BufferSkipProcessor(Subscriber<? super List<T>> downstream, int size, int skip, Supplier<List<T>> supplier) {
             super(downstream);
             this.size = size;
             this.skip = skip;
@@ -204,7 +204,7 @@ public class MultiBufferOp<T> extends AbstractMultiWithUpstream<T, List<T>> {
         }
     }
 
-    static final class BufferOverlappingSubscriber<T> extends MultiOperatorSubscriber<T, List<T>> {
+    static final class BufferOverlappingProcessor<T> extends MultiOperatorProcessor<T, List<T>> {
 
         private final Supplier<List<T>> supplier;
         private final int size;
@@ -217,7 +217,7 @@ public class MultiBufferOp<T> extends AbstractMultiWithUpstream<T, List<T>> {
         private final AtomicLong requested = new AtomicLong();
         private final ArrayDeque<List<T>> queue = new ArrayDeque<>();
 
-        BufferOverlappingSubscriber(Subscriber<? super List<T>> downstream, int size, int skip,
+        BufferOverlappingProcessor(Subscriber<? super List<T>> downstream, int size, int skip,
                 Supplier<List<T>> supplier) {
             super(downstream);
             this.size = size;

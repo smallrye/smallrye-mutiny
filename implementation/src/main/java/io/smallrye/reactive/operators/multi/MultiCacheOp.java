@@ -19,7 +19,7 @@ import io.smallrye.reactive.helpers.Subscriptions;
  * @param <T> the type of item
  */
 @SuppressWarnings("SubscriberImplementation")
-public class MultiCacheOp<T> extends AbstractMultiWithUpstream<T, T> implements Subscriber<T> {
+public class MultiCacheOp<T> extends AbstractMultiOperator<T, T> implements Subscriber<T> {
 
     /**
      * Stores whether we already subscribed to the upstream.

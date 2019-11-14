@@ -29,7 +29,7 @@ import java.util.function.Supplier;
  *
  * @param <T> the type of item from upstream
  */
-public final class MultiBufferWithTimeoutOp<T> extends AbstractMultiWithUpstream<T, List<T>> {
+public final class MultiBufferWithTimeoutOp<T> extends AbstractMultiOperator<T, List<T>> {
 
     private final int size;
     private final Supplier<List<T>> supplier;
@@ -56,12 +56,12 @@ public final class MultiBufferWithTimeoutOp<T> extends AbstractMultiWithUpstream
 
     @Override
     public void subscribe(Subscriber<? super List<T>> downstream) {
-        MultiBufferWithTimeoutSubscriber<T> subscriber = new MultiBufferWithTimeoutSubscriber<>(
+        MultiBufferWithTimeoutProcessor<T> subscriber = new MultiBufferWithTimeoutProcessor<>(
                 new SerializedSubscriber<>(downstream), size, timeout, scheduler, supplier);
         upstream.subscribe(subscriber);
     }
 
-    static class MultiBufferWithTimeoutSubscriber<T> extends MultiOperatorSubscriber<T, List<T>> {
+    static class MultiBufferWithTimeoutProcessor<T> extends MultiOperatorProcessor<T, List<T>> {
 
         private static final int RUNNING = 0;
         private static final int SUCCEED = 1;
@@ -80,7 +80,7 @@ public final class MultiBufferWithTimeoutOp<T> extends AbstractMultiWithUpstream
         private List<T> current;
         private ScheduledFuture<?> task;
 
-        MultiBufferWithTimeoutSubscriber(Subscriber<? super List<T>> downstream, int size, Duration timeout,
+        MultiBufferWithTimeoutProcessor(Subscriber<? super List<T>> downstream, int size, Duration timeout,
                 ScheduledExecutorService executor, Supplier<List<T>> supplier) {
             super(downstream);
             this.duration = timeout;

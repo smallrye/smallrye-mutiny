@@ -12,7 +12,7 @@ import io.smallrye.reactive.helpers.ParameterValidation;
  *
  * @param <T> the type of item
  */
-public final class MultiSkipUntilOp<T> extends AbstractMultiWithUpstream<T, T> {
+public final class MultiSkipUntilOp<T> extends AbstractMultiOperator<T, T> {
 
     private final Predicate<? super T> predicate;
 
@@ -23,15 +23,15 @@ public final class MultiSkipUntilOp<T> extends AbstractMultiWithUpstream<T, T> {
 
     @Override
     public void subscribe(Subscriber<? super T> actual) {
-        upstream.subscribe(new SkipUntilSubscriber<>(actual, predicate));
+        upstream.subscribe(new SkipUntilProcessor<>(actual, predicate));
     }
 
-    static final class SkipUntilSubscriber<T> extends MultiOperatorSubscriber<T, T> {
+    static final class SkipUntilProcessor<T> extends MultiOperatorProcessor<T, T> {
 
         private final Predicate<? super T> predicate;
         private boolean gateOpen = false;
 
-        SkipUntilSubscriber(Subscriber<? super T> downstream, Predicate<? super T> predicate) {
+        SkipUntilProcessor(Subscriber<? super T> downstream, Predicate<? super T> predicate) {
             super(downstream);
             this.predicate = predicate;
         }
