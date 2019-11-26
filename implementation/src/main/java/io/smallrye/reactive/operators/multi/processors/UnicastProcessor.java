@@ -235,7 +235,6 @@ public class UnicastProcessor<T> extends AbstractMulti<T> implements Processor<T
         if (cancelled.compareAndSet(false, true)) {
             onTerminate();
             if (wip.getAndIncrement() == 0) {
-                System.out.println("clearing...");
                 queue.clear();
             }
         }

@@ -4,11 +4,7 @@ import io.smallrye.reactive.Multi;
 import io.smallrye.reactive.Uni;
 import io.smallrye.reactive.converters.MultiConverter;
 import io.smallrye.reactive.operators.AbstractMulti;
-import io.smallrye.reactive.operators.MultiCreateWithEmitter;
-import io.smallrye.reactive.operators.multi.builders.DeferredMulti;
-import io.smallrye.reactive.operators.multi.builders.EmptyMulti;
-import io.smallrye.reactive.operators.multi.builders.FailedMulti;
-import io.smallrye.reactive.operators.multi.builders.NeverMulti;
+import io.smallrye.reactive.operators.multi.builders.*;
 import io.smallrye.reactive.subscription.BackPressureStrategy;
 import io.smallrye.reactive.subscription.MultiEmitter;
 import org.reactivestreams.Publisher;
@@ -384,13 +380,18 @@ public class MultiCreate {
      * @param consumer callback receiving the {@link MultiEmitter} and events downstream. The callback is
      *                 called for each subscriber (at subscription time). Must not be {@code null}
      * @param strategy the back pressure strategy to apply when the downstream subscriber cannot keep up with the
+     *                 <<<<<<< HEAD
      *                 items emitted by the emitter.
      * @param <T>      the type of items
+     *                 =======
+     *                 items emitted by the emitter. Must not be {@code null}
+     * @param <T>      the type of items
+     *                 >>>>>>> Add emitter support
      * @return the produced {@link Multi}
      */
     public <T> Multi<T> emitter(Consumer<MultiEmitter<? super T>> consumer, BackPressureStrategy strategy) {
         Consumer<MultiEmitter<? super T>> actual = nonNull(consumer, "consumer");
-        return new MultiCreateWithEmitter<>(actual, strategy);
+        return new EmitterBasedMulti<>(actual, nonNull(strategy, "strategy"));
     }
 
     /**

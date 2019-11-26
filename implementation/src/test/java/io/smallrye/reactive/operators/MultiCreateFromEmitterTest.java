@@ -202,6 +202,7 @@ public class MultiCreateFromEmitterTest {
         source.subscribe(new Subscriber<Integer>() {
             @Override
             public void onSubscribe(Subscription s) {
+                System.out.println(s);
                 s.request(10);
             }
 
