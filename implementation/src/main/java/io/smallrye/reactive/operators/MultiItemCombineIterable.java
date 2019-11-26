@@ -10,6 +10,7 @@ import org.reactivestreams.Publisher;
 
 import io.reactivex.Flowable;
 import io.smallrye.reactive.Multi;
+import io.smallrye.reactive.operators.multi.MultiZipOp;
 
 public class MultiItemCombineIterable {
 
@@ -67,7 +68,7 @@ public class MultiItemCombineIterable {
         return combine(combinator);
     }
 
-    <O> Multi<O> combine(Function<List<?>, O> combinator) {
+    <O> Multi<O> combine(Function<List<?>, ? extends O> combinator) {
         io.reactivex.functions.Function<Object[], O> fn = arr -> {
             List<?> args = Arrays.asList(arr);
             return combinator.apply(args);
@@ -81,9 +82,9 @@ public class MultiItemCombineIterable {
             }
         } else {
             if (collectFailures) {
-                return new DefaultMulti<>(Flowable.zipIterable(iterable, fn, true, 128));
+                return new MultiZipOp<>(iterable, combinator, 128, true);
             } else {
-                return new DefaultMulti<>(Flowable.zip(iterable, fn));
+                return new MultiZipOp<>(iterable, combinator, 128, false);
             }
         }
     }

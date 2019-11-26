@@ -200,6 +200,15 @@ public class Subscriptions {
         return failures.getAndSet(TERMINATED);
     }
 
+    public static void terminateAndPropagate(AtomicReference<Throwable> failures, Subscriber<?> subscriber) {
+        Throwable ex = markFailureAsTerminated(failures);
+        if (ex == null) {
+            subscriber.onComplete();
+        } else if (ex != TERMINATED) {
+            subscriber.onError(ex);
+        }
+    }
+
     /**
      * Cap a multiplication to Long.MAX_VALUE
      *
