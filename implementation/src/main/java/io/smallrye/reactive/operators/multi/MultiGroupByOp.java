@@ -35,7 +35,7 @@ public final class MultiGroupByOp<T, K, V> extends AbstractMultiOperator<T, Grou
     @Override
     public void subscribe(Subscriber<? super GroupedMulti<K, V>> downstream) {
         final Map<Object, GroupedUnicast<K, V>> groups = new ConcurrentHashMap<>();
-        MultiGroupByProcessor<T, K, V> processor = new MultiGroupByProcessor<T, K, V>(downstream, keySelector, valueSelector,
+        MultiGroupByProcessor<T, K, V> processor = new MultiGroupByProcessor<>(downstream, keySelector, valueSelector,
                 groups);
         upstream.subscribe(processor);
     }
@@ -87,8 +87,6 @@ public final class MultiGroupByOp<T, K, V> extends AbstractMultiOperator<T, Grou
                 return;
             }
 
-            final SpscLinkedArrayQueue<GroupedMulti<K, V>> q = this.queue;
-
             K key;
             try {
                 key = keySelector.apply(item);
@@ -126,7 +124,7 @@ public final class MultiGroupByOp<T, K, V> extends AbstractMultiOperator<T, Grou
 
             group.onNext(value);
             if (newGroup) {
-                q.offer(group);
+                this.queue.offer(group);
                 drain();
             }
         }
@@ -194,7 +192,6 @@ public final class MultiGroupByOp<T, K, V> extends AbstractMultiOperator<T, Grou
             int missed = 1;
 
             final SpscLinkedArrayQueue<GroupedMulti<K, V>> q = this.queue;
-            final Subscriber<? super GroupedMulti<K, V>> a = this.downstream;
 
             for (;;) {
 
@@ -213,7 +210,7 @@ public final class MultiGroupByOp<T, K, V> extends AbstractMultiOperator<T, Grou
                     if (hasNoMoreGroup) {
                         break;
                     }
-                    a.onNext(t);
+                    this.downstream.onNext(t);
                     emitted++;
                 }
 

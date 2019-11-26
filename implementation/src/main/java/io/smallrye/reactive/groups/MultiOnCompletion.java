@@ -27,12 +27,13 @@ public class MultiOnCompletion<T> {
     /**
      * Creates a new {@link Multi} executing the given {@link Runnable action} when this {@link Multi} completes.
      *
-     * @param action the action, must not be {@code null}
+     * @param callback the action, must not be {@code null}
      * @return the new multi
      */
-    public Multi<T> consume(Runnable action) {
+    public Multi<T> consume(Runnable callback) {
         return new MultiSignalConsumerOp<>(upstream,
-                null, null, null, action, null, null);
+                null, null, null, nonNull(callback, "callback"), null,
+                null, null);
     }
 
     /**

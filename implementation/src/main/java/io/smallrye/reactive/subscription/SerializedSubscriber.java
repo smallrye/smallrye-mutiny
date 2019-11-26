@@ -13,6 +13,7 @@ import org.reactivestreams.Subscription;
  *
  * @param <T> the type of items
  */
+@SuppressWarnings("SubscriberImplementation")
 public final class SerializedSubscriber<T> implements Subscription, Subscriber<T> {
 
     private final Subscriber<? super T> downstream;

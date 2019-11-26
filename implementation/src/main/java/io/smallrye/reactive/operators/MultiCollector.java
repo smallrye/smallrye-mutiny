@@ -12,7 +12,6 @@ import java.util.function.Supplier;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
-import io.reactivex.Flowable;
 import io.smallrye.reactive.GroupedMulti;
 import io.smallrye.reactive.Multi;
 import io.smallrye.reactive.Uni;
@@ -40,10 +39,6 @@ public class MultiCollector {
     public static <T, A, R> Uni<R> collector(Multi<T> upstream, Collector<? super T, A, ? extends R> collector) {
         MultiCollectorOp<? super T, A, ? extends R> f = new MultiCollectorOp<>(upstream, collector);
         return Uni.createFrom().publisher(f);
-    }
-
-    static <T> Flowable<T> getFlowable(Multi<T> upstream) {
-        return Flowable.fromPublisher(upstream);
     }
 
     public static <R, T> Uni<R> collectInto(Multi<T> upstream, Supplier<R> producer,

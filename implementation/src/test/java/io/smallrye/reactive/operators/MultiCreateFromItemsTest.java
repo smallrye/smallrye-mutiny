@@ -27,7 +27,7 @@ public class MultiCreateFromItemsTest {
 
     @Test
     public void testCreationWithASingleNullResult() {
-        Multi<String> multi = Multi.createFrom().item((String) null);
+        Multi<String> multi = Multi.createFrom().item(null);
         multi.subscribe().withSubscriber(MultiAssertSubscriber.create())
                 .assertHasNotReceivedAnyItem()
                 .assertSubscribed()

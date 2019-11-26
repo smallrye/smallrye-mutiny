@@ -16,9 +16,9 @@ public final class MpscLinkedQueue<T> implements Queue<T> {
     private final AtomicReference<LinkedQueueNode<T>> consumerNode;
 
     public MpscLinkedQueue() {
-        producerNode = new AtomicReference<LinkedQueueNode<T>>();
-        consumerNode = new AtomicReference<LinkedQueueNode<T>>();
-        LinkedQueueNode<T> node = new LinkedQueueNode<T>();
+        producerNode = new AtomicReference<>();
+        consumerNode = new AtomicReference<>();
+        LinkedQueueNode<T> node = new LinkedQueueNode<>();
         spConsumerNode(node);
         xchgProducerNode(node); // this ensures correct construction: StoreLoad
     }
@@ -73,7 +73,7 @@ public final class MpscLinkedQueue<T> implements Queue<T> {
         if (null == e) {
             throw new NullPointerException("Null is not a valid element");
         }
-        final LinkedQueueNode<T> nextNode = new LinkedQueueNode<T>(e);
+        final LinkedQueueNode<T> nextNode = new LinkedQueueNode<>(e);
         final LinkedQueueNode<T> prevProducerNode = xchgProducerNode(nextNode);
         // Should a producer thread get interrupted here the chain WILL be broken until that thread is resumed
         // and completes the store in prev.next.
@@ -112,9 +112,9 @@ public final class MpscLinkedQueue<T> implements Queue<T> {
             return nextValue;
         } else if (currConsumerNode != lvProducerNode()) {
             // spin, we are no longer wait free
+            //noinspection StatementWithEmptyBody
             while ((nextNode = currConsumerNode.lvNext()) == null) {
-            } // NOPMD
-              // got the next node...
+            } // got the next node...
 
             // we have to null out the value because we are going to hang on to the node
             final T nextValue = nextNode.getAndNullValue();
@@ -134,16 +134,11 @@ public final class MpscLinkedQueue<T> implements Queue<T> {
         return null;
     }
 
-    public boolean offer(T v1, T v2) {
-        offer(v1);
-        offer(v2);
-        return true;
-    }
-
     @Override
     public void clear() {
+        //noinspection StatementWithEmptyBody
         while (poll() != null && !isEmpty()) {
-        } // NOPMD
+        }
     }
 
     LinkedQueueNode<T> lvProducerNode() {

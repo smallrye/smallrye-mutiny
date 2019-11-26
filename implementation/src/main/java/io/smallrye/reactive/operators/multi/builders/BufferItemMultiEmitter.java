@@ -74,10 +74,9 @@ public class BufferItemMultiEmitter<T> extends BaseMultiEmitter<T> {
         }
 
         int missed = 1;
-        final Subscriber<? super T> a = downstream;
         final SpscLinkedArrayQueue<T> q = queue;
 
-        for (;;) {
+        do {
             long r = requested.get();
             long e = 0L;
 
@@ -107,7 +106,7 @@ public class BufferItemMultiEmitter<T> extends BaseMultiEmitter<T> {
                 }
 
                 try {
-                    a.onNext(o);
+                    downstream.onNext(o);
                 } catch (Exception x) {
                     cancel();
                 }
@@ -140,9 +139,6 @@ public class BufferItemMultiEmitter<T> extends BaseMultiEmitter<T> {
             }
 
             missed = wip.addAndGet(-missed);
-            if (missed == 0) {
-                break;
-            }
-        }
+        } while (missed != 0);
     }
 }

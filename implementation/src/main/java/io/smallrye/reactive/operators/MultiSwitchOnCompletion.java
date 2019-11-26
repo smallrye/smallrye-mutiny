@@ -30,7 +30,8 @@ public class MultiSwitchOnCompletion<T> extends MultiOperator<T, T> {
                 return Multi.createFrom().failure(new NullPointerException(SUPPLIER_PRODUCED_NULL));
             }
             if (publisher instanceof Multi) {
-                return (Multi) publisher;
+                //noinspection unchecked
+                return (Multi<T>) publisher;
             } else {
                 return Multi.createFrom().publisher(publisher);
             }

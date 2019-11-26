@@ -1,7 +1,9 @@
 package io.smallrye.reactive.operators.multi;
 
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.function.LongConsumer;
 
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
@@ -26,22 +28,26 @@ public final class MultiSignalConsumerOp<T> extends AbstractMultiOperator<T, T> 
 
     private final Runnable onCompletion;
 
-    private final Runnable onTermination;
+    private final BiConsumer<Throwable, Boolean> onTermination;
 
     private final Runnable onCancellation;
+
+    private final LongConsumer onRequest;
 
     public MultiSignalConsumerOp(Multi<? extends T> upstream,
             Consumer<? super Subscription> onSubscribe,
             Consumer<? super T> onItem,
             Consumer<? super Throwable> onFailure,
             Runnable onCompletion,
-            Runnable onTermination,
+            BiConsumer<Throwable, Boolean> onTermination,
+            LongConsumer onRequest,
             Runnable onCancellation) {
         super(upstream);
         this.onSubscribe = onSubscribe;
         this.onItem = onItem;
         this.onFailure = onFailure;
         this.onCompletion = onCompletion;
+        this.onRequest = onRequest;
         this.onTermination = onTermination;
         this.onCancellation = onCancellation;
     }
@@ -63,6 +69,15 @@ public final class MultiSignalConsumerOp<T> extends AbstractMultiOperator<T, T> 
 
         @Override
         public void request(long n) {
+            if (onRequest != null) {
+                try {
+                    onRequest.accept(n);
+                } catch (Throwable e) {
+                    onError(e);
+                    return;
+                }
+            }
+
             subscription.get().request(n);
         }
 
@@ -73,6 +88,14 @@ public final class MultiSignalConsumerOp<T> extends AbstractMultiOperator<T, T> 
                     onCancellation.run();
                 } catch (Throwable e) {
                     onError(e);
+                    return;
+                }
+            }
+            if (onTermination != null) {
+                try {
+                    onTermination.accept(null, true);
+                } catch (Throwable e) {
+                    // Nothing we can do.
                     return;
                 }
             }
@@ -112,21 +135,21 @@ public final class MultiSignalConsumerOp<T> extends AbstractMultiOperator<T, T> 
         }
 
         @Override
-        public void onError(Throwable t) {
+        public void onError(Throwable failure) {
             if (subscription.getAndSet(Subscriptions.CANCELLED) != Subscriptions.CANCELLED) {
                 if (onFailure != null) {
                     try {
-                        onFailure.accept(t);
+                        onFailure.accept(failure);
                     } catch (Throwable e) {
-                        t = new CompositeException(t, e);
+                        failure = new CompositeException(failure, e);
                     }
                 }
 
-                downstream.onError(t);
+                downstream.onError(failure);
 
                 if (onTermination != null) {
                     try {
-                        onTermination.run();
+                        onTermination.accept(failure, false);
                     } catch (Throwable e) {
                         // Nothing we can do...
                     }
@@ -146,15 +169,16 @@ public final class MultiSignalConsumerOp<T> extends AbstractMultiOperator<T, T> 
                     }
                 }
 
-                downstream.onComplete();
-
                 if (onTermination != null) {
                     try {
-                        onTermination.run();
+                        onTermination.accept(null, false);
                     } catch (Throwable e) {
-                        // Nothing we can do.
+                        downstream.onError(e);
+                        return;
                     }
                 }
+
+                downstream.onComplete();
             }
         }
 

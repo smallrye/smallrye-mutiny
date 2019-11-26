@@ -7,8 +7,11 @@ import io.smallrye.reactive.helpers.ParameterValidation;
 /**
  * A set of methods to create {@link Tuple} instances from lists.
  */
-@SuppressWarnings({ "rawtypes" })
 public abstract class Tuples {
+
+    private Tuples() {
+        // avoid direct instantiation.
+    }
 
     @SuppressWarnings("unchecked")
     public static <L, R> Tuple2<L, R> tuple2(List<?> list) {

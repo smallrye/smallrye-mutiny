@@ -153,7 +153,6 @@ public class EmitterBasedMultiTest {
             e.onTermination(() -> terminated.set(true));
             e.emit("a");
             e.fail(null);
-            System.out.println("boom???");
         }).subscribe().withSubscriber(MultiAssertSubscriber.create(2))
                 .await()
                 .assertHasFailedWith(NullPointerException.class, "")

@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Supplier;
 
 import org.junit.Test;
 
@@ -15,12 +14,12 @@ public class MultiCreateFromFailureTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testThatFailureCannotBeNull() {
-        Multi.createFrom().failure((Exception) null);
+        Multi.createFrom().failure(null);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testThatFailureSupplierCannotBeNull() {
-        Multi.createFrom().deferredFailure((Supplier<Throwable>) null);
+        Multi.createFrom().deferredFailure(null);
     }
 
     @Test

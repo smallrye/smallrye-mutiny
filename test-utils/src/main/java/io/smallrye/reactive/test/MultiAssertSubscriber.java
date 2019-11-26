@@ -12,6 +12,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
+@SuppressWarnings("SubscriberImplementation")
 public class MultiAssertSubscriber<T> implements Subscriber<T> {
 
     private final CountDownLatch latch = new CountDownLatch(1);

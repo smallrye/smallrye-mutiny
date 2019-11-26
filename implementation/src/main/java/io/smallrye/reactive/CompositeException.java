@@ -1,9 +1,6 @@
 package io.smallrye.reactive;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 import io.smallrye.reactive.groups.UniAndGroup;
 
@@ -35,12 +32,13 @@ public class CompositeException extends RuntimeException {
 
     @Override
     public String getMessage() {
-        String message = super.getMessage();
+        StringBuilder message = Optional.ofNullable(super.getMessage()).map(StringBuilder::new).orElse(null);
         for (int i = 0; i < causes.size(); i++) {
             Throwable cause = causes.get(i);
-            message = message + "\n\t[Exception " + i + "] " + cause;
+            message = (message == null ? new StringBuilder("null") : message).append("\n\t[Exception ").append(i)
+                    .append("] ").append(cause);
         }
-        return message;
+        return message == null ? null : message.toString();
     }
 
     public List<Throwable> getCauses() {

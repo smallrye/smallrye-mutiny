@@ -121,7 +121,7 @@ public class MultiCacheOp<T> extends AbstractMultiOperator<T, T> implements Subs
         private final MultiCacheOp<T> cache;
         private final AtomicLong requested = new AtomicLong();
         private final AtomicInteger wip = new AtomicInteger();
-        private int lastIndex = 0;
+        private int lastIndex;
 
         CacheSubscription(Subscriber<? super T> downstream, MultiCacheOp<T> cache) {
             this.downstream = downstream;

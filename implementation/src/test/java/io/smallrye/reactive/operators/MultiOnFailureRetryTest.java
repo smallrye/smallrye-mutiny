@@ -21,12 +21,7 @@ public class MultiOnFailureRetryTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testThatUpstreamCannotBeNull() {
-        new MultiRetry<>(null, t -> true);
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void testThatPredicateCannotBeNull() {
-        new MultiRetry<>(Multi.createFrom().nothing(), null);
+        new MultiRetry<>(null);
     }
 
     @Test(expected = IllegalArgumentException.class)

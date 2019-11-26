@@ -1,7 +1,5 @@
 package io.smallrye.reactive.operators;
 
-import static io.smallrye.reactive.operators.MultiCollector.getFlowable;
-
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
@@ -9,6 +7,10 @@ import io.reactivex.Flowable;
 import io.smallrye.reactive.Multi;
 
 public class MultiBroadcaster {
+
+    static <T> Flowable<T> getFlowable(Multi<T> upstream) {
+        return Flowable.fromPublisher(upstream);
+    }
 
     public static <T> Multi<T> publish(Multi<T> upstream, int numberOfSubscribers, boolean cancelWhenNoOneIsListening,
             Duration delayAfterLastDeparture) {

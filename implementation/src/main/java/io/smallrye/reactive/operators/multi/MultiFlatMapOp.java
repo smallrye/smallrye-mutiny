@@ -58,6 +58,7 @@ public final class MultiFlatMapOp<I, O> extends AbstractMultiOperator<I, O> {
         upstream.subscribe(sub);
     }
 
+    @SuppressWarnings("SubscriberImplementation")
     public static final class FlatMapMainSubscriber<I, O> extends FlatMapManager<FlatMapInner<O>>
             implements Subscriber<I>, Subscription {
 
@@ -165,7 +166,6 @@ public final class MultiFlatMapOp<I, O> extends AbstractMultiOperator<I, O> {
             }
         }
 
-        @SuppressWarnings("unchecked")
         @Override
         public void onNext(I item) {
             if (done) {
@@ -570,6 +570,7 @@ public final class MultiFlatMapOp<I, O> extends AbstractMultiOperator<I, O> {
 
     }
 
+    @SuppressWarnings("SubscriberImplementation")
     static final class FlatMapInner<O> implements Subscription, Subscriber<O> {
 
         final FlatMapMainSubscriber<?, O> parent;

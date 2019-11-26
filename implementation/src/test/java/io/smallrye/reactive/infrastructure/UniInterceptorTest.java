@@ -121,6 +121,7 @@ public class UniInterceptorTest {
                     public void onItem(T item) {
                         Integer val = (Integer) item;
                         val = val + 1;
+                        //noinspection unchecked
                         subscriber.onItem((T) val);
                     }
 

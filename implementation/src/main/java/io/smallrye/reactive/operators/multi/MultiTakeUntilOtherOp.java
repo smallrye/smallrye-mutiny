@@ -35,6 +35,7 @@ public final class MultiTakeUntilOtherOp<T, U> extends AbstractMultiOperator<T, 
         upstream.subscribe(mainSubscriber);
     }
 
+    @SuppressWarnings("SubscriberImplementation")
     static final class TakeUntilOtherSubscriber<U> implements Subscriber<U> {
         final TakeUntilMainProcessor<?> main;
         boolean once;

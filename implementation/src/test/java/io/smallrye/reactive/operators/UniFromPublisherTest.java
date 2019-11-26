@@ -86,16 +86,14 @@ public class UniFromPublisherTest {
     @Test
     public void testThatSubscriberCanCancelBeforeEmission() {
         UniAssertSubscriber<Integer> ts = UniAssertSubscriber.create();
-        Uni<Integer> uni = Uni.createFrom().publisher(Flowable.<Integer> create(emitter -> {
-            new Thread(() -> {
-                try {
-                    Thread.sleep(50);
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                }
-                emitter.onNext(1);
-            }).start();
-        }, BackpressureStrategy.DROP)).map(i -> i + 1);
+        Uni<Integer> uni = Uni.createFrom().publisher(Flowable.<Integer> create(emitter -> new Thread(() -> {
+            try {
+                Thread.sleep(50);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+            emitter.onNext(1);
+        }).start(), BackpressureStrategy.DROP)).map(i -> i + 1);
 
         uni.subscribe().withSubscriber(ts);
         ts.cancel();

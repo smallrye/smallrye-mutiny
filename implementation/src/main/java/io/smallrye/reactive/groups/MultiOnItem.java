@@ -8,7 +8,6 @@ import org.reactivestreams.Publisher;
 
 import io.smallrye.reactive.Multi;
 import io.smallrye.reactive.Uni;
-import io.smallrye.reactive.operators.*;
 import io.smallrye.reactive.operators.multi.*;
 
 public class MultiOnItem<T> {
@@ -41,7 +40,15 @@ public class MultiOnItem<T> {
      * @return the new {@link Uni}
      */
     public Multi<T> consume(Consumer<T> callback) {
-        return new MultiOnResultPeek<>(upstream, nonNull(callback, "callback"));
+        return new MultiSignalConsumerOp<>(
+                upstream,
+                null,
+                nonNull(callback, "callback"),
+                null,
+                null,
+                null,
+                null,
+                null);
     }
 
     /**

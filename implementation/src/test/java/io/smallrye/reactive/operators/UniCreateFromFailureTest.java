@@ -5,7 +5,6 @@ import static org.junit.Assert.fail;
 
 import java.io.IOException;
 import java.util.NoSuchElementException;
-import java.util.function.Supplier;
 
 import org.junit.Test;
 
@@ -58,12 +57,12 @@ public class UniCreateFromFailureTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testCreationWithNull() {
-        Uni.createFrom().failure((Exception) null);
+        Uni.createFrom().failure(null);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testCreationWithNullAsSupplier() {
-        Uni.createFrom().deferredFailure((Supplier<Throwable>) null);
+        Uni.createFrom().deferredFailure(null);
     }
 
     @Test

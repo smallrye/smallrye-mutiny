@@ -109,6 +109,7 @@ public final class SpscArrayQueue<E> extends AtomicReferenceArray<E> implements 
     @Override
     public void clear() {
         // we have to test isEmpty because of the weaker poll() guarantee
+        //noinspection StatementWithEmptyBody
         while (poll() != null || !isEmpty()) {
         }
     }

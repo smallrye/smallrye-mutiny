@@ -17,12 +17,12 @@ public class UniOr<T> {
         this.upstream = nonNull(upstream, "upstream");
     }
 
-    @SuppressWarnings("unchecked")
     public Uni<T> uni(Uni<T> other) {
         return unis(upstream, other);
     }
 
-    public Uni<T> unis(Uni<T>... other) {
+    @SafeVarargs
+    public final Uni<T> unis(Uni<T>... other) {
         List<Uni<T>> list = Arrays.asList(other);
         return Infrastructure.onUniCreation(new UniOrCombination<>(list));
     }

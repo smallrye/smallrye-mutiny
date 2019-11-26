@@ -60,6 +60,7 @@ public class MultiTransformation {
         return new MultiDistinctUntilChangedOp<>(upstream);
     }
 
+    @SafeVarargs
     public static <T> Multi<T> merge(Multi<T> upstream, Publisher<T>... publishers) {
         return merge(upstream, Arrays.asList(publishers));
     }

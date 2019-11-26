@@ -46,7 +46,7 @@ public final class EmitterBasedMulti<T> extends AbstractMulti<T> {
                 break;
 
             case LATEST:
-                emitter = new DropLatestOnOverflowMultiEmitter<T>(downstream);
+                emitter = new DropLatestOnOverflowMultiEmitter<>(downstream);
                 break;
 
             default:
@@ -211,7 +211,6 @@ public final class EmitterBasedMulti<T> extends AbstractMulti<T> {
             }
 
             int missed = 1;
-            final Subscriber<? super T> a = downstream;
             final AtomicReference<T> q = queue;
 
             for (;;) {
@@ -244,7 +243,7 @@ public final class EmitterBasedMulti<T> extends AbstractMulti<T> {
                         break;
                     }
 
-                    a.onNext(o);
+                    downstream.onNext(o);
 
                     e++;
                 }

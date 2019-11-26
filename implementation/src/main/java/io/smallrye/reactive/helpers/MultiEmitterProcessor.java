@@ -4,8 +4,8 @@ import org.reactivestreams.Processor;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
-import io.reactivex.processors.UnicastProcessor;
 import io.smallrye.reactive.Multi;
+import io.smallrye.reactive.operators.multi.processors.UnicastProcessor;
 import io.smallrye.reactive.subscription.MultiEmitter;
 
 public class MultiEmitterProcessor<T> implements Processor<T, T>, MultiEmitter<T> {
@@ -13,16 +13,12 @@ public class MultiEmitterProcessor<T> implements Processor<T, T>, MultiEmitter<T
     private final UnicastProcessor<T> processor;
     private volatile Runnable onTermination;
 
-    private MultiEmitterProcessor(int bufferSize) {
-        this.processor = UnicastProcessor.create(bufferSize);
+    private MultiEmitterProcessor() {
+        this.processor = UnicastProcessor.create();
     }
 
     public static <T> MultiEmitterProcessor<T> create() {
-        return create(128);
-    }
-
-    public static <T> MultiEmitterProcessor<T> create(int bufferSize) {
-        return new MultiEmitterProcessor<>(bufferSize);
+        return new MultiEmitterProcessor<>();
     }
 
     @Override

@@ -12,7 +12,6 @@ import io.smallrye.reactive.converters.uni.BuiltinConverters;
 
 public class UniConvertToTest {
 
-    @SuppressWarnings("unchecked")
     @Test
     public void testCreatingCompletionStages() {
         Uni<Integer> valued = Uni.createFrom().item(1);
@@ -28,7 +27,6 @@ public class UniConvertToTest {
         assertThat(stage3).isCompletedExceptionally();
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     public void testCreatingCompletableFutures() {
         Uni<Integer> valued = Uni.createFrom().item(1);

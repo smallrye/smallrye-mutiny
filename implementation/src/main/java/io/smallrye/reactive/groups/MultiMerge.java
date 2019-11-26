@@ -35,6 +35,7 @@ public class MultiMerge {
      * @param <T> the type of item
      * @return the new {@link Multi} emitting the items from the given set of {@link Multi}
      */
+    @SafeVarargs
     public final <T> Multi<T> streams(Publisher<T>... publishers) {
         return MultiCombine.merge(Arrays.asList(publishers), collectFailures, requests, concurrency);
     }

@@ -10,7 +10,7 @@ import java.util.function.Predicate;
 import org.reactivestreams.Subscription;
 
 import io.smallrye.reactive.Multi;
-import io.smallrye.reactive.operators.*;
+import io.smallrye.reactive.operators.multi.MultiSignalConsumerOp;
 
 /**
  * Allows configuring the action to execute on each type of events emitted by a {@link Multi} or by
@@ -32,26 +32,50 @@ public class MultiOnEvent<T> {
      * <p>
      * This method is not intended to cancel the subscription. It's the responsibility of the subscriber to do so.
      *
-     * @param consumer the callback, must not be {@code null}
+     * @param callback the callback, must not be {@code null}
      * @return a new {@link Multi}
      */
-    public Multi<T> subscription(Consumer<? super Subscription> consumer) {
-        return new MultiOnSubscription<>(upstream, nonNull(consumer, "consumer"));
+    public Multi<T> subscription(Consumer<? super Subscription> callback) {
+        return new MultiSignalConsumerOp<>(
+                upstream,
+                nonNull(callback, "callback"),
+                null,
+                null,
+                null,
+                null,
+                null,
+                null);
     }
 
     /**
      * Attaches an action executed when a subscription is cancelled.
      * The upstream is not cancelled yet, but will when the callback completes.
      *
-     * @param runnable the callback, must not be {@code null}
+     * @param callback the callback, must not be {@code null}
      * @return a new {@link Multi}
      */
-    public Multi<T> cancellation(Runnable runnable) {
-        return new MultiOnCancellation<>(upstream, nonNull(runnable, "runnable"));
+    public Multi<T> cancellation(Runnable callback) {
+        return new MultiSignalConsumerOp<>(
+                upstream,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                nonNull(callback, "callback"));
     }
 
-    public Multi<T> request(LongConsumer consumer) {
-        return new MultiOnRequest<>(upstream, consumer);
+    public Multi<T> request(LongConsumer callback) {
+        return new MultiSignalConsumerOp<>(
+                upstream,
+                null,
+                null,
+                null,
+                null,
+                null,
+                nonNull(callback, "callback"),
+                null);
     }
 
     public MultiOverflow overflow() {
@@ -62,13 +86,21 @@ public class MultiOnEvent<T> {
      * Attaches an action that is executed when the {@link Multi} emits a completion or a failure or when the subscriber
      * cancels the subscription.
      *
-     * @param consumer the consumer receiving the failure if any and a boolean indicating whether the termination
+     * @param callback the consumer receiving the failure if any and a boolean indicating whether the termination
      *        is due to a cancellation (the failure parameter would be {@code null} in this case). Must not
      *        be {@code null}.
      * @return the new {@link Multi}
      */
-    public Multi<T> termination(BiConsumer<Throwable, Boolean> consumer) {
-        return new MultiOnTermination<>(upstream, nonNull(consumer, "consumer"));
+    public Multi<T> termination(BiConsumer<Throwable, Boolean> callback) {
+        return new MultiSignalConsumerOp<>(
+                upstream,
+                null,
+                null,
+                null,
+                null,
+                callback,
+                null,
+                null);
     }
 
     /**
@@ -145,7 +177,15 @@ public class MultiOnEvent<T> {
         return upstream.onFailure(typeOfFailure);
     }
 
-    public Multi<T> completion(Runnable action) {
-        return new MultiOnCompletionPeek<>(upstream, action);
+    public Multi<T> completion(Runnable callback) {
+        return new MultiSignalConsumerOp<>(
+                upstream,
+                null,
+                null,
+                null,
+                nonNull(callback, "callback"),
+                null,
+                null,
+                null);
     }
 }

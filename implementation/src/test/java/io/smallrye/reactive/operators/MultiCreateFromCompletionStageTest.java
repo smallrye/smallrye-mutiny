@@ -53,9 +53,7 @@ public class MultiCreateFromCompletionStageTest {
     public void testWithAsyncCompletionWithNull() {
         AtomicBoolean called = new AtomicBoolean();
         MultiAssertSubscriber<Void> subscriber = Multi.createFrom()
-                .completionStage(CompletableFuture.runAsync(() -> {
-                    called.set(true);
-                })).subscribe()
+                .completionStage(CompletableFuture.runAsync(() -> called.set(true))).subscribe()
                 .withSubscriber(MultiAssertSubscriber.create(1));
         subscriber.await().assertCompletedSuccessfully().assertHasNotReceivedAnyItem();
         assertThat(called).isTrue();

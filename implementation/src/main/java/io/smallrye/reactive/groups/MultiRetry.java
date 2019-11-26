@@ -10,11 +10,9 @@ import io.smallrye.reactive.operators.multi.MultiRetryOp;
 public class MultiRetry<T> {
 
     private final Multi<T> upstream;
-    private final Predicate<? super Throwable> predicate;
 
-    public MultiRetry(Multi<T> upstream, Predicate<? super Throwable> predicate) {
+    public MultiRetry(Multi<T> upstream) {
         this.upstream = nonNull(upstream, "upstream");
-        this.predicate = nonNull(predicate, "predicate");
     }
 
     /**

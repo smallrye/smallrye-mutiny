@@ -11,7 +11,7 @@ import java.util.function.Supplier;
 import io.smallrye.reactive.Multi;
 import io.smallrye.reactive.operators.MultiFlatMapOnFailure;
 import io.smallrye.reactive.operators.MultiMapOnFailure;
-import io.smallrye.reactive.operators.MultiOnFailureConsume;
+import io.smallrye.reactive.operators.multi.MultiSignalConsumerOp;
 
 public class MultiOnFailure<T> {
 
@@ -30,7 +30,21 @@ public class MultiOnFailure<T> {
      * @return the new {@link Multi}
      */
     public Multi<T> consume(Consumer<Throwable> callback) {
-        return new MultiOnFailureConsume<>(upstream, nonNull(callback, "callback"), predicate);
+        nonNull(callback, "callback");
+        nonNull(predicate, "predicate");
+        return new MultiSignalConsumerOp<>(
+                upstream,
+                null,
+                null,
+                failure -> {
+                    if (predicate.test(failure)) {
+                        callback.accept(failure);
+                    }
+                },
+                null,
+                null,
+                null,
+                null);
     }
 
     /**
@@ -86,7 +100,7 @@ public class MultiOnFailure<T> {
     }
 
     public MultiRetry<T> retry() {
-        return new MultiRetry<>(upstream, predicate);
+        return new MultiRetry<>(upstream);
     }
 
 }

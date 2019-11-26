@@ -11,6 +11,7 @@ import org.reactivestreams.Subscription;
 import io.smallrye.reactive.groups.*;
 import io.smallrye.reactive.helpers.ParameterValidation;
 
+@SuppressWarnings("PublisherImplementation")
 public interface Multi<T> extends Publisher<T> {
 
     static MultiCreate createFrom() {
