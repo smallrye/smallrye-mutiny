@@ -1,8 +1,6 @@
 package io.smallrye.reactive.groups;
 
 import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
-import static io.smallrye.reactive.tuples.Functions.noopAction;
-import static io.smallrye.reactive.tuples.Functions.noopConsumer;
 
 import java.util.Queue;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -13,12 +11,13 @@ import java.util.stream.Stream;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
-import io.reactivex.internal.subscribers.LambdaSubscriber;
 import io.smallrye.reactive.Multi;
 import io.smallrye.reactive.Uni;
 import io.smallrye.reactive.helpers.BlockingIterable;
 import io.smallrye.reactive.operators.AbstractMulti;
 import io.smallrye.reactive.subscription.Cancellable;
+import io.smallrye.reactive.subscription.CancellableSubscriber;
+import io.smallrye.reactive.subscription.Subscribers;
 import io.smallrye.reactive.subscription.UniSubscriber;
 
 public class MultiSubscribe<T> {
@@ -81,17 +80,12 @@ public class MultiSubscribe<T> {
             Consumer<? super T> onItem,
             Consumer<? super Throwable> onFailure,
             Runnable onComplete) {
-        nonNull(onSubscription, "onSubscription");
-        nonNull(onItem, "onItem");
-        nonNull(onFailure, "onFailure");
-        nonNull(onComplete, "onComplete");
-        LambdaSubscriber<T> subscriber = new LambdaSubscriber<>(
-                onItem::accept,
-                onFailure::accept,
-                onComplete::run,
-                onSubscription::accept);
-        withSubscriber(subscriber);
-        return subscriber::cancel;
+        CancellableSubscriber<? super T> subscriber = Subscribers.from(
+                nonNull(onItem, "onItem"),
+                nonNull(onFailure, "onFailure"),
+                nonNull(onComplete, "onComplete"),
+                nonNull(onSubscription, "onSubscription"));
+        return withSubscriber(subscriber);
     }
 
     /**
@@ -125,13 +119,12 @@ public class MultiSubscribe<T> {
         nonNull(onItem, "onItem");
         nonNull(onFailure, "onFailure");
         nonNull(onComplete, "onComplete");
-        LambdaSubscriber<T> subscriber = new LambdaSubscriber<>(
-                onItem::accept,
-                onFailure::accept,
-                onComplete::run,
+        CancellableSubscriber<? super T> subscriber = Subscribers.from(
+                nonNull(onItem, "onItem"),
+                nonNull(onFailure, "onFailure"),
+                nonNull(onComplete, "onComplete"),
                 s -> s.request(Long.MAX_VALUE));
-        withSubscriber(subscriber);
-        return subscriber::cancel;
+        return withSubscriber(subscriber);
     }
 
     /**
@@ -165,14 +158,12 @@ public class MultiSubscribe<T> {
             Consumer<? super Throwable> onFailure) {
         nonNull(onItem, "onItem");
         nonNull(onFailure, "onFailure");
-        LambdaSubscriber<T> subscriber = new LambdaSubscriber<>(
-                onItem::accept,
-                onFailure::accept,
-                () -> noopAction().run(),
+        CancellableSubscriber<? super T> subscriber = Subscribers.from(
+                nonNull(onItem, "onItem"),
+                nonNull(onFailure, "onFailure"),
+                null,
                 s -> s.request(Long.MAX_VALUE));
-
-        upstream.subscribe(subscriber);
-        return subscriber::cancel;
+        return withSubscriber(subscriber);
     }
 
     /**
@@ -204,13 +195,12 @@ public class MultiSubscribe<T> {
             Runnable onComplete) {
         nonNull(onItem, "onItem");
         nonNull(onComplete, "onComplete");
-        LambdaSubscriber<T> subscriber = new LambdaSubscriber<>(
-                onItem::accept,
-                f -> noopConsumer().accept(f),
-                onComplete::run,
+        CancellableSubscriber<? super T> subscriber = Subscribers.from(
+                nonNull(onItem, "onItem"),
+                null,
+                onComplete,
                 s -> s.request(Long.MAX_VALUE));
-        withSubscriber(subscriber);
-        return subscriber::cancel;
+        return withSubscriber(subscriber);
     }
 
     /**
