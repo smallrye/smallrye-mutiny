@@ -140,12 +140,12 @@ public abstract class AbstractMulti<T> implements Multi<T> {
     }
 
     @Override
-    public MultiCollect<T> collect() {
+    public MultiCollect<T> collectItems() {
         return new MultiCollect<>(this);
     }
 
     @Override
-    public MultiGroup<T> group() {
+    public MultiGroup<T> groupItems() {
         return new MultiGroup<>(this);
     }
 

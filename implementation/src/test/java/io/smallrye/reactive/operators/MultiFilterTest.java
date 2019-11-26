@@ -29,7 +29,7 @@ public class MultiFilterTest {
         Predicate<Integer> test = x -> x % 2 != 0;
         assertThat(Multi.createFrom().range(1, 4)
                 .onItem().filterWith(test)
-                .collect().asList()
+                .collectItems().asList()
                 .await().indefinitely()).containsExactly(1, 3);
     }
 
@@ -39,7 +39,7 @@ public class MultiFilterTest {
                 .onItem()
                 .testWith(x -> Uni.createFrom()
                         .deferredCompletionStage(() -> CompletableFuture.supplyAsync(() -> x % 2 != 0)))
-                .collect().asList()
+                .collectItems().asList()
                 .await().indefinitely()).containsExactly(1, 3);
     }
 

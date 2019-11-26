@@ -19,7 +19,7 @@ public class MultiSkipTest {
     @Test
     public void testSimpleSkip() {
         List<Integer> list = Multi.createFrom().range(1, 5).transform().bySkippingFirstItems(1)
-                .collect().asList().await().indefinitely();
+                .collectItems().asList().await().indefinitely();
 
         assertThat(list).containsExactly(2, 3, 4);
     }
@@ -27,7 +27,7 @@ public class MultiSkipTest {
     @Test
     public void testSkipZero() {
         List<Integer> list = Multi.createFrom().range(1, 5).transform().bySkippingFirstItems(0)
-                .collect().asList().await().indefinitely();
+                .collectItems().asList().await().indefinitely();
 
         assertThat(list).containsExactly(1, 2, 3, 4);
     }
@@ -35,7 +35,7 @@ public class MultiSkipTest {
     @Test
     public void testSimpleSkipLast() {
         List<Integer> list = Multi.createFrom().range(1, 5).transform().bySkippingLastItems(1)
-                .collect().asList().await().indefinitely();
+                .collectItems().asList().await().indefinitely();
 
         assertThat(list).containsExactly(1, 2, 3);
     }
@@ -43,7 +43,7 @@ public class MultiSkipTest {
     @Test
     public void testSimpleSkipZeroLast() {
         List<Integer> list = Multi.createFrom().range(1, 5).transform().bySkippingLastItems(0)
-                .collect().asList().await().indefinitely();
+                .collectItems().asList().await().indefinitely();
 
         assertThat(list).containsExactly(1, 2, 3, 4);
     }

@@ -1,24 +1,23 @@
 package io.smallrye.reactive.operators;
 
-import io.reactivex.Flowable;
-import io.smallrye.reactive.GroupedMulti;
-import io.smallrye.reactive.Multi;
-import io.smallrye.reactive.Uni;
-import io.smallrye.reactive.infrastructure.Infrastructure;
-import io.smallrye.reactive.operators.multi.*;
-
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
+
+import io.reactivex.Flowable;
+import io.smallrye.reactive.GroupedMulti;
+import io.smallrye.reactive.Multi;
+import io.smallrye.reactive.Uni;
+import io.smallrye.reactive.infrastructure.Infrastructure;
+import io.smallrye.reactive.operators.multi.*;
 
 public class MultiCollector {
 
@@ -94,21 +93,15 @@ public class MultiCollector {
     }
 
     public static <T> Multi<Multi<T>> multi(Multi<T> upstream, Duration timeWindow) {
-        return Multi.createFrom().publisher(getFlowable(upstream)
-                .window(timeWindow.toMillis(), TimeUnit.MILLISECONDS)
-                .map(f -> Multi.createFrom().publisher(f)));
+        return new MultiWindowOnDurationOp<>(upstream, timeWindow, Infrastructure.getDefaultWorkerPool());
     }
 
     public static <T> Multi<Multi<T>> multi(Multi<T> upstream, int size) {
-        return Multi.createFrom().publisher(getFlowable(upstream)
-                .window(size)
-                .map(f -> Multi.createFrom().publisher(f)));
+        return new MultiWindowOp<>(upstream, size, size);
     }
 
     public static <T> Multi<Multi<T>> multi(Multi<T> upstream, int size, int skip) {
-        return Multi.createFrom().publisher(getFlowable(upstream)
-                .window(size, skip)
-                .map(f -> Multi.createFrom().publisher(f)));
+        return new MultiWindowOp<>(upstream, size, skip);
     }
 
     public static <K, V, T> Multi<GroupedMulti<K, V>> groupBy(Multi<T> upstream,

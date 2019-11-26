@@ -164,7 +164,7 @@ public class MultiAssertSubscriber<T> implements Subscriber<T> {
     }
 
     @Override
-    public void onNext(T t) {
+    public synchronized void onNext(T t) {
         items.add(t);
     }
 

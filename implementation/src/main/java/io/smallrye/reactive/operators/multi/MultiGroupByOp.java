@@ -1,13 +1,6 @@
 package io.smallrye.reactive.operators.multi;
 
-import io.smallrye.reactive.GroupedMulti;
-import io.smallrye.reactive.Multi;
-import io.smallrye.reactive.helpers.Subscriptions;
-import io.smallrye.reactive.helpers.queues.SpscLinkedArrayQueue;
-import io.smallrye.reactive.operators.AbstractMulti;
-import org.reactivestreams.Publisher;
-import org.reactivestreams.Subscriber;
-import org.reactivestreams.Subscription;
+import static io.smallrye.reactive.helpers.Subscriptions.CANCELLED;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -17,7 +10,15 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
-import static io.smallrye.reactive.helpers.Subscriptions.CANCELLED;
+import org.reactivestreams.Publisher;
+import org.reactivestreams.Subscriber;
+import org.reactivestreams.Subscription;
+
+import io.smallrye.reactive.GroupedMulti;
+import io.smallrye.reactive.Multi;
+import io.smallrye.reactive.helpers.Subscriptions;
+import io.smallrye.reactive.helpers.queues.SpscLinkedArrayQueue;
+import io.smallrye.reactive.operators.AbstractMulti;
 
 public final class MultiGroupByOp<T, K, V> extends AbstractMultiOperator<T, GroupedMulti<K, V>> {
     private final Function<? super T, ? extends K> keySelector;
@@ -34,8 +35,8 @@ public final class MultiGroupByOp<T, K, V> extends AbstractMultiOperator<T, Grou
     @Override
     public void subscribe(Subscriber<? super GroupedMulti<K, V>> downstream) {
         final Map<Object, GroupedUnicast<K, V>> groups = new ConcurrentHashMap<>();
-        MultiGroupByProcessor<T, K, V> processor =
-                new MultiGroupByProcessor<T, K, V>(downstream, keySelector, valueSelector, groups);
+        MultiGroupByProcessor<T, K, V> processor = new MultiGroupByProcessor<T, K, V>(downstream, keySelector, valueSelector,
+                groups);
         upstream.subscribe(processor);
     }
 
@@ -195,7 +196,7 @@ public final class MultiGroupByOp<T, K, V> extends AbstractMultiOperator<T, Grou
             final SpscLinkedArrayQueue<GroupedMulti<K, V>> q = this.queue;
             final Subscriber<? super GroupedMulti<K, V>> a = this.downstream;
 
-            for (; ; ) {
+            for (;;) {
 
                 long requests = requested.get();
                 long emitted = 0L;
@@ -347,7 +348,7 @@ public final class MultiGroupByOp<T, K, V> extends AbstractMultiOperator<T, Grou
         }
 
         public void onNext(T t) {
-            if (! done.get()) {
+            if (!done.get()) {
                 queue.offer(t);
                 drain();
             }
@@ -375,7 +376,7 @@ public final class MultiGroupByOp<T, K, V> extends AbstractMultiOperator<T, Grou
 
             final SpscLinkedArrayQueue<T> q = queue;
             Subscriber<? super T> actual = downstream.get();
-            for (; ; ) {
+            for (;;) {
                 if (actual != null) {
                     long r = requested.get();
                     long e = 0;
@@ -427,15 +428,15 @@ public final class MultiGroupByOp<T, K, V> extends AbstractMultiOperator<T, Grou
             }
 
             if (isDone) {
-                    Throwable e = failure;
-                    if (e != null) {
-                        queue.clear();
-                        downstream.get().onError(e);
-                        return true;
-                    } else if (isEmpty) {
-                        downstream.get().onComplete();
-                        return true;
-                    }
+                Throwable e = failure;
+                if (e != null) {
+                    queue.clear();
+                    downstream.get().onError(e);
+                    return true;
+                } else if (isEmpty) {
+                    downstream.get().onComplete();
+                    return true;
+                }
             }
             return false;
         }

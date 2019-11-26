@@ -385,7 +385,7 @@ public class MultiFlatMapToPublisherTest {
                 .flatMap()
                 .uni(i -> Uni.createFrom().completionStage(CompletableFuture.supplyAsync(() -> i + 1)))
                 .mergeResults()
-                .collect().asList().await().indefinitely();
+                .collectItems().asList().await().indefinitely();
 
         assertThat(list).hasSize(3).contains(2, 3, 4);
     }
@@ -397,7 +397,7 @@ public class MultiFlatMapToPublisherTest {
                 .flatMap()
                 .completionStage(i -> CompletableFuture.supplyAsync(() -> i + 1))
                 .mergeResults()
-                .collect().asList().await().indefinitely();
+                .collectItems().asList().await().indefinitely();
 
         assertThat(list).hasSize(3).contains(2, 3, 4);
     }
@@ -409,7 +409,7 @@ public class MultiFlatMapToPublisherTest {
                 .flatMap()
                 .uni(i -> Uni.createFrom().completionStage(CompletableFuture.supplyAsync(() -> i + 1)))
                 .concatenateResults()
-                .collect().asList().await().indefinitely();
+                .collectItems().asList().await().indefinitely();
 
         assertThat(list).hasSize(3).containsExactly(2, 3, 4);
     }
@@ -421,7 +421,7 @@ public class MultiFlatMapToPublisherTest {
                 .flatMap()
                 .iterable(i -> Arrays.asList(i, i + 1))
                 .mergeResults()
-                .collect().asList().await().indefinitely();
+                .collectItems().asList().await().indefinitely();
 
         assertThat(list).hasSize(6).containsExactlyInAnyOrder(1, 2, 2, 3, 3, 4);
     }
@@ -433,7 +433,7 @@ public class MultiFlatMapToPublisherTest {
                 .flatMap()
                 .iterable(i -> Arrays.asList(i, i + 1))
                 .mergeResults()
-                .collect().asList().await().indefinitely();
+                .collectItems().asList().await().indefinitely();
 
         assertThat(list).hasSize(6).containsExactly(1, 2, 2, 3, 3, 4);
     }

@@ -1,14 +1,5 @@
 
-
 package io.smallrye.reactive.operators.multi;
-
-import io.smallrye.reactive.Multi;
-import io.smallrye.reactive.helpers.ParameterValidation;
-import io.smallrye.reactive.helpers.Subscriptions;
-import io.smallrye.reactive.subscription.BackPressureFailure;
-import io.smallrye.reactive.subscription.SerializedSubscriber;
-import org.reactivestreams.Subscriber;
-import org.reactivestreams.Subscription;
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -21,6 +12,15 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Supplier;
+
+import org.reactivestreams.Subscriber;
+import org.reactivestreams.Subscription;
+
+import io.smallrye.reactive.Multi;
+import io.smallrye.reactive.helpers.ParameterValidation;
+import io.smallrye.reactive.helpers.Subscriptions;
+import io.smallrye.reactive.subscription.BackPressureFailure;
+import io.smallrye.reactive.subscription.SerializedSubscriber;
 
 /**
  * Buffers items from upstream for a given duration and emits the <em>groups</em> as a single item downstream.
@@ -91,7 +91,7 @@ public final class MultiBufferWithTimeoutOp<T> extends AbstractMultiOperator<T, 
             this.flush = () -> {
                 if (terminated.get() == RUNNING) {
                     int index;
-                    for (; ; ) {
+                    for (;;) {
                         index = this.index.get();
                         if (index == 0) {
                             return;
@@ -138,7 +138,7 @@ public final class MultiBufferWithTimeoutOp<T> extends AbstractMultiOperator<T, 
                 if (req != 0L) {
                     if (req != Long.MAX_VALUE) {
                         long next;
-                        for (; ; ) {
+                        for (;;) {
                             next = req - 1;
                             if (requested.compareAndSet(req, next)) {
                                 downstream.onNext(cur);
@@ -164,7 +164,7 @@ public final class MultiBufferWithTimeoutOp<T> extends AbstractMultiOperator<T, 
         @Override
         public void onNext(final T value) {
             int index;
-            for (; ; ) {
+            for (;;) {
                 index = this.index.get() + 1;
                 if (this.index.compareAndSet(index - 1, index)) {
                     break;
@@ -275,4 +275,3 @@ public final class MultiBufferWithTimeoutOp<T> extends AbstractMultiOperator<T, 
         }
     }
 }
-

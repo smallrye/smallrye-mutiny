@@ -15,27 +15,28 @@ import org.junit.Test;
 import io.smallrye.reactive.GroupedMulti;
 import io.smallrye.reactive.Multi;
 import io.smallrye.reactive.test.MultiAssertSubscriber;
+import io.smallrye.reactive.Uni;
 
 public class MultiGroupTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testGroupIntoListsWithSize0() {
-        Multi.createFrom().range(1, 5).group().intoLists().of(0);
+        Multi.createFrom().range(1, 5).groupItems().intoLists().of(0);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testGroupIntoListsWithSize0AndSkip() {
-        Multi.createFrom().range(1, 5).group().intoLists().of(0, 1);
+        Multi.createFrom().range(1, 5).groupItems().intoLists().of(0, 1);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testGroupIntoListsWithSkip0() {
-        Multi.createFrom().range(1, 5).group().intoLists().of(1, 0);
+        Multi.createFrom().range(1, 5).groupItems().intoLists().of(1, 0);
     }
 
     @Test
     public void testGroupIntoListsOfTwoElements() {
-        MultiAssertSubscriber<List<Integer>> subscriber = Multi.createFrom().range(1, 10).group().intoLists().of(2)
+        MultiAssertSubscriber<List<Integer>> subscriber = Multi.createFrom().range(1, 10).groupItems().intoLists().of(2)
                 .subscribe().withSubscriber(MultiAssertSubscriber.create(100));
         subscriber.assertCompletedSuccessfully();
         assertThat(subscriber.items()).containsExactly(
@@ -45,7 +46,7 @@ public class MultiGroupTest {
 
     @Test
     public void testGroupIntoListsOfTwoElementsWithRequests() {
-        MultiAssertSubscriber<List<Integer>> subscriber = Multi.createFrom().range(1, 10).group().intoLists().of(2)
+        MultiAssertSubscriber<List<Integer>> subscriber = Multi.createFrom().range(1, 10).groupItems().intoLists().of(2)
                 .subscribe().withSubscriber(MultiAssertSubscriber.create());
         subscriber
                 .assertSubscribed().assertHasNotReceivedAnyItem()
@@ -64,7 +65,7 @@ public class MultiGroupTest {
 
     @Test
     public void testGroupIntoListsOfTwoElementsWithSkip() {
-        MultiAssertSubscriber<List<Integer>> subscriber = Multi.createFrom().range(1, 10).group().intoLists().of(2, 3)
+        MultiAssertSubscriber<List<Integer>> subscriber = Multi.createFrom().range(1, 10).groupItems().intoLists().of(2, 3)
                 .subscribe().withSubscriber(MultiAssertSubscriber.create(100));
         subscriber.assertCompletedSuccessfully();
         assertThat(subscriber.items()).containsExactly(
@@ -73,7 +74,7 @@ public class MultiGroupTest {
 
     @Test
     public void testGroupIntoListsOfTwoElementsWithSkipSmallerThanSize() {
-        MultiAssertSubscriber<List<Integer>> subscriber = Multi.createFrom().range(1, 10).group().intoLists().of(2, 1)
+        MultiAssertSubscriber<List<Integer>> subscriber = Multi.createFrom().range(1, 10).groupItems().intoLists().of(2, 1)
                 .subscribe().withSubscriber(MultiAssertSubscriber.create(100));
         subscriber.assertCompletedSuccessfully();
         assertThat(subscriber.items()).containsExactly(
@@ -84,7 +85,7 @@ public class MultiGroupTest {
 
     @Test
     public void testGroupIntoListsOfTwoElementsWithRequestsAndSkip() {
-        MultiAssertSubscriber<List<Integer>> subscriber = Multi.createFrom().range(1, 10).group().intoLists().of(2, 3)
+        MultiAssertSubscriber<List<Integer>> subscriber = Multi.createFrom().range(1, 10).groupItems().intoLists().of(2, 3)
                 .subscribe().withSubscriber(MultiAssertSubscriber.create());
         subscriber
                 .assertSubscribed().assertHasNotReceivedAnyItem()
@@ -102,31 +103,31 @@ public class MultiGroupTest {
 
     @Test
     public void testCombinationOfToListsAndAwait() {
-        Multi<List<Integer>> multi = Multi.createFrom().range(1, 10).group().intoLists().of(2);
+        Multi<List<Integer>> multi = Multi.createFrom().range(1, 10).groupItems().intoLists().of(2);
 
-        assertThat(multi.collect().first().await().indefinitely()).containsExactly(1, 2);
-        assertThat(multi.collect().last().await().indefinitely()).containsExactly(9);
+        assertThat(multi.collectItems().first().await().indefinitely()).containsExactly(1, 2);
+        assertThat(multi.collectItems().last().await().indefinitely()).containsExactly(9);
 
-        assertThat(multi.collect().asList().await().indefinitely()).hasSize(5)
+        assertThat(multi.collectItems().asList().await().indefinitely()).hasSize(5)
                 .containsExactly(Arrays.asList(1, 2), Arrays.asList(3, 4), Arrays.asList(5, 6),
                         Arrays.asList(7, 8), Collections.singletonList(9));
     }
 
     @Test
     public void testAsListsOnEmptyStream() {
-        assertThat(Multi.createFrom().empty().group().intoLists().of(2).collect().last().await().indefinitely())
+        assertThat(Multi.createFrom().empty().groupItems().intoLists().of(2).collectItems().last().await().indefinitely())
                 .isNull();
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testAsListsWithNegativeDuration() {
-        Multi.createFrom().range(1, 10).group().intoLists().every(Duration.ofMillis(-2));
+        Multi.createFrom().range(1, 10).groupItems().intoLists().every(Duration.ofMillis(-2));
     }
 
     @Test
     public void testAsListsWithDuration() {
         Multi<Long> publisher = Multi.createFrom().publisher(Multi.createFrom().ticks().every(Duration.ofMillis(2)));
-        MultiAssertSubscriber<List<Long>> subscriber = publisher.group().intoLists().every(Duration.ofMillis(100))
+        MultiAssertSubscriber<List<Long>> subscriber = publisher.groupItems().intoLists().every(Duration.ofMillis(100))
                 .subscribe()
                 .withSubscriber(MultiAssertSubscriber.create(100));
 
@@ -136,22 +137,22 @@ public class MultiGroupTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testGroupIntoMultisWithSize0() {
-        Multi.createFrom().range(1, 5).group().intoMultis().of(0);
+        Multi.createFrom().range(1, 5).groupItems().intoMultis().of(0);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testGroupIntoMultisWithSize0AndSkip() {
-        Multi.createFrom().range(1, 5).group().intoMultis().of(0, 1);
+        Multi.createFrom().range(1, 5).groupItems().intoMultis().of(0, 1);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testGroupIntoMultisWithSkip0() {
-        Multi.createFrom().range(1, 5).group().intoMultis().of(1, 0);
+        Multi.createFrom().range(1, 5).groupItems().intoMultis().of(1, 0);
     }
 
     @Test
     public void testGroupIntoMultisOfTwoElements() {
-        MultiAssertSubscriber<Multi<Integer>> subscriber = Multi.createFrom().range(1, 10).group().intoMultis().of(2)
+        MultiAssertSubscriber<Multi<Integer>> subscriber = Multi.createFrom().range(1, 10).groupItems().intoMultis().of(2)
                 .subscribe().withSubscriber(MultiAssertSubscriber.create(100));
         subscriber.assertCompletedSuccessfully();
         List<List<Integer>> flatten = flatten(subscriber.items());
@@ -163,14 +164,14 @@ public class MultiGroupTest {
     private <T> List<List<T>> flatten(List<Multi<T>> items) {
         List<List<T>> list = new ArrayList<>();
         for (Multi<T> multi : items) {
-            list.add(multi.collect().asList().await().indefinitely());
+            list.add(multi.collectItems().asList().await().indefinitely());
         }
         return list;
     }
 
     @Test
     public void testGroupIntoMultisOfTwoElementsWithRequests() {
-        MultiAssertSubscriber<Multi<Integer>> subscriber = Multi.createFrom().range(1, 10).group().intoMultis().of(2)
+        MultiAssertSubscriber<Multi<Integer>> subscriber = Multi.createFrom().range(1, 10).groupItems().intoMultis().of(2)
                 .subscribe().withSubscriber(MultiAssertSubscriber.create());
         subscriber
                 .assertSubscribed().assertHasNotReceivedAnyItem()
@@ -188,7 +189,7 @@ public class MultiGroupTest {
 
     @Test
     public void testGroupIntoMultisOfTwoElementsWithSkip() {
-        MultiAssertSubscriber<Multi<Integer>> subscriber = Multi.createFrom().range(1, 10).group().intoMultis().of(2, 3)
+        MultiAssertSubscriber<Multi<Integer>> subscriber = Multi.createFrom().range(1, 10).groupItems().intoMultis().of(2, 3)
                 .subscribe().withSubscriber(MultiAssertSubscriber.create(100));
         subscriber.assertCompletedSuccessfully();
         assertThat(flatten(subscriber.items())).containsExactly(
@@ -197,7 +198,7 @@ public class MultiGroupTest {
 
     @Test
     public void testGroupIntoMultisOfTwoElementsWithSkipSmallerThanSize() {
-        MultiAssertSubscriber<Multi<Integer>> subscriber = Multi.createFrom().range(1, 10).group().intoMultis().of(2, 1)
+        MultiAssertSubscriber<Multi<Integer>> subscriber = Multi.createFrom().range(1, 10).groupItems().intoMultis().of(2, 1)
                 .subscribe().withSubscriber(MultiAssertSubscriber.create(100));
         subscriber.assertCompletedSuccessfully();
         assertThat(flatten(subscriber.items())).containsExactly(
@@ -208,7 +209,7 @@ public class MultiGroupTest {
 
     @Test
     public void testGroupIntoMultisOfTwoElementsWithRequestsAndSkip() {
-        MultiAssertSubscriber<Multi<Integer>> subscriber = Multi.createFrom().range(1, 10).group().intoMultis().of(2, 3)
+        MultiAssertSubscriber<Multi<Integer>> subscriber = Multi.createFrom().range(1, 10).groupItems().intoMultis().of(2, 3)
                 .subscribe().withSubscriber(MultiAssertSubscriber.create());
         subscriber
                 .assertSubscribed().assertHasNotReceivedAnyItem()
@@ -225,33 +226,33 @@ public class MultiGroupTest {
 
     @Test
     public void testCombinationOfToMultisAndAwait() {
-        Multi<Multi<Integer>> multi = Multi.createFrom().range(1, 10).group().intoMultis().of(2);
+        Multi<Multi<Integer>> multi = Multi.createFrom().range(1, 10).groupItems().intoMultis().of(2);
 
-        assertThat(multi.collect().first().await().indefinitely().collect().asList().await().indefinitely())
+        assertThat(multi.collectItems().first().await().indefinitely().collectItems().asList().await().indefinitely())
                 .containsExactly(1, 2);
-        assertThat(multi.collect().last().await().indefinitely().collect().asList().await().indefinitely())
+        assertThat(multi.collectItems().last().await().indefinitely().collectItems().asList().await().indefinitely())
                 .containsExactly(9);
 
-        assertThat(flatten(multi.collect().asList().await().indefinitely())).hasSize(5)
+        assertThat(flatten(multi.collectItems().asList().await().indefinitely())).hasSize(5)
                 .containsExactly(Arrays.asList(1, 2), Arrays.asList(3, 4), Arrays.asList(5, 6),
                         Arrays.asList(7, 8), Collections.singletonList(9));
     }
 
     @Test
     public void testAsMultisOnEmptyStream() {
-        assertThat(Multi.createFrom().empty().group().intoMultis().of(2).collect().last().await().indefinitely())
+        assertThat(Multi.createFrom().empty().groupItems().intoMultis().of(2).collectItems().last().await().indefinitely())
                 .isNull();
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testAsMultisWithNegativeDuration() {
-        Multi.createFrom().range(1, 10).group().intoMultis().every(Duration.ofMillis(-2));
+        Multi.createFrom().range(1, 10).groupItems().intoMultis().every(Duration.ofMillis(-2));
     }
 
     @Test
     public void testAsMultisWithDuration() {
         Multi<Long> publisher = Multi.createFrom().publisher(Multi.createFrom().ticks().every(Duration.ofMillis(2)));
-        MultiAssertSubscriber<Multi<Long>> subscriber = publisher.group().intoMultis().every(Duration.ofMillis(100))
+        MultiAssertSubscriber<Multi<Long>> subscriber = publisher.groupItems().intoMultis().every(Duration.ofMillis(100))
                 .subscribe()
                 .withSubscriber(MultiAssertSubscriber.create(100));
 
@@ -260,16 +261,42 @@ public class MultiGroupTest {
     }
 
     @Test
+    public void testBasicTimeWindow() {
+        Multi<Multi<Integer>> multi = Multi.createFrom().range(1, 7)
+                .groupItems().intoMultis().every(Duration.ofMillis(1));
+        Uni<List<Integer>> uni = multi
+                .onItem().flatMap().multi(m -> m).concatenateResults()
+                .collectItems().asList();
+
+        List<Integer> list = uni.await().atMost(Duration.ofSeconds(4));
+        assertThat(list).contains(1, 2, 3, 4, 5, 6);
+    }
+
+    @Test
+    public void testThatWindowWithDurationEmitsEmptyLists() {
+        MultiAssertSubscriber<List<Object>> subscriber = MultiAssertSubscriber.create(3);
+        Multi.createFrom().nothing()
+                .groupItems().intoMultis().every(Duration.ofMillis(10))
+                .onItem().flatMap().uni(m -> m.collectItems().asList()).mergeResults()
+                .subscribe().withSubscriber(subscriber);
+
+        await().until(() -> subscriber.items().size() == 3);
+        List<List<Object>> items = subscriber.items();
+        assertThat(items).allSatisfy(list -> assertThat(list).isEmpty());
+        subscriber.cancel();
+    }
+
+    @Test
     public void testGroupByWithKeyMapperOnly() {
         MultiAssertSubscriber<GroupedMulti<Integer, Integer>> subscriber = Multi.createFrom().range(1, 10)
-                .group().by(i -> i % 2)
+                .groupItems().by(i -> i % 2)
                 .subscribe().withSubscriber(MultiAssertSubscriber.create(100));
 
         subscriber.assertCompletedSuccessfully();
         assertThat(subscriber.items()).hasSize(2);
 
-        List<Integer> odd = subscriber.items().get(0).collect().asList().await().indefinitely();
-        List<Integer> even = subscriber.items().get(1).collect().asList().await().indefinitely();
+        List<Integer> odd = subscriber.items().get(0).collectItems().asList().await().indefinitely();
+        List<Integer> even = subscriber.items().get(1).collectItems().asList().await().indefinitely();
 
         assertThat(subscriber.items().get(0).key()).isEqualTo(1);
         assertThat(subscriber.items().get(1).key()).isEqualTo(0);
@@ -281,14 +308,14 @@ public class MultiGroupTest {
     @Test
     public void testGroupByWithKeyMapperAndValueMapper() {
         MultiAssertSubscriber<GroupedMulti<Integer, String>> subscriber = Multi.createFrom().range(1, 10)
-                .group().by(i -> i % 2, t -> Integer.toString(t))
+                .groupItems().by(i -> i % 2, t -> Integer.toString(t))
                 .subscribe().withSubscriber(MultiAssertSubscriber.create(100));
 
         subscriber.assertCompletedSuccessfully();
         assertThat(subscriber.items()).hasSize(2);
 
-        List<String> odd = subscriber.items().get(0).collect().asList().await().indefinitely();
-        List<String> even = subscriber.items().get(1).collect().asList().await().indefinitely();
+        List<String> odd = subscriber.items().get(0).collectItems().asList().await().indefinitely();
+        List<String> even = subscriber.items().get(1).collectItems().asList().await().indefinitely();
 
         assertThat(subscriber.items().get(0).key()).isEqualTo(1);
         assertThat(subscriber.items().get(1).key()).isEqualTo(0);
@@ -300,31 +327,31 @@ public class MultiGroupTest {
     @Test
     public void testGroupByProducingASingleGroup() {
         MultiAssertSubscriber<GroupedMulti<Integer, Integer>> subscriber = Multi.createFrom().range(1, 10)
-                .group().by(i -> 0)
+                .groupItems().by(i -> 0)
                 .subscribe().withSubscriber(MultiAssertSubscriber.create(100));
 
         subscriber.assertCompletedSuccessfully();
         assertThat(subscriber.items()).hasSize(1);
-        List<Integer> numbers = subscriber.items().get(0).collect().asList().await().indefinitely();
+        List<Integer> numbers = subscriber.items().get(0).collectItems().asList().await().indefinitely();
         assertThat(subscriber.items().get(0).key()).isEqualTo(0);
         assertThat(numbers).hasSize(9);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testGroupByWithNullKeyMapper() {
-        Multi.createFrom().range(1, 10).group().by(null);
+        Multi.createFrom().range(1, 10).groupItems().by(null);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testGroupByWithNullValueMapper() {
-        Multi.createFrom().range(1, 10).group().by(i -> i % 2, null);
+        Multi.createFrom().range(1, 10).groupItems().by(i -> i % 2, null);
     }
 
     @Test
     public void testGroupByOnFailingMulti() {
         MultiAssertSubscriber<GroupedMulti<Integer, Integer>> subscriber = Multi.createFrom()
                 .<Integer> failure(new IOException("boom"))
-                .group().by(i -> i % 2)
+                .groupItems().by(i -> i % 2)
                 .subscribe().withSubscriber(MultiAssertSubscriber.create(100));
 
         subscriber.assertHasFailedWith(IOException.class, "boom");
@@ -334,7 +361,7 @@ public class MultiGroupTest {
     @Test
     public void testGroupByOnEmptyMulti() {
         MultiAssertSubscriber<GroupedMulti<Integer, Integer>> subscriber = Multi.createFrom().<Integer> empty()
-                .group().by(i -> i % 2)
+                .groupItems().by(i -> i % 2)
                 .subscribe().withSubscriber(MultiAssertSubscriber.create(100));
 
         subscriber.assertCompletedSuccessfully().assertHasNotReceivedAnyItem();
@@ -343,7 +370,7 @@ public class MultiGroupTest {
     @Test
     public void testGroupByFollowedWithAFlatMap() {
         MultiAssertSubscriber<Integer> subscriber = Multi.createFrom().range(1, 10)
-                .group().by(i -> 1)
+                .groupItems().by(i -> 1)
                 .onItem().flatMap(gm -> gm)
                 .subscribe().withSubscriber(MultiAssertSubscriber.create(100));
 

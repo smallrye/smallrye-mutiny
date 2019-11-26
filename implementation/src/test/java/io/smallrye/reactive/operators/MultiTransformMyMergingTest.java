@@ -17,7 +17,7 @@ public class MultiTransformMyMergingTest {
         Multi<Integer> m1 = Multi.createFrom().range(1, 10);
         Multi<Integer> m2 = Multi.createFrom().range(10, 12);
 
-        List<Integer> list = m1.transform().byMergingWith(m2).collect().asList().await().indefinitely();
+        List<Integer> list = m1.transform().byMergingWith(m2).collectItems().asList().await().indefinitely();
         assertThat(list).hasSize(11);
     }
 
@@ -27,7 +27,7 @@ public class MultiTransformMyMergingTest {
         Multi<Integer> m2 = Multi.createFrom().range(10, 12);
         Multi<Integer> m3 = Multi.createFrom().range(12, 14);
 
-        List<Integer> list = m1.transform().byMergingWith(Arrays.asList(m2, m3)).collect().asList().await()
+        List<Integer> list = m1.transform().byMergingWith(Arrays.asList(m2, m3)).collectItems().asList().await()
                 .indefinitely();
         assertThat(list).hasSize(13);
     }

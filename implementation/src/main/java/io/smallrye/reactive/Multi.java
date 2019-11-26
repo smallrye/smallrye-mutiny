@@ -124,7 +124,7 @@ public interface Multi<T> extends Publisher<T> {
      *
      * @return the object to configure the collection process.
      */
-    MultiCollect<T> collect();
+    MultiCollect<T> collectItems();
 
     /**
      * Produces {@link Multi} grouping items from this {@link Multi} into various "form of chunks" (list, {@link Multi}).
@@ -133,7 +133,7 @@ public interface Multi<T> extends Publisher<T> {
      *
      * @return the object to configure the grouping.
      */
-    MultiGroup<T> group();
+    MultiGroup<T> groupItems();
 
     /**
      * Produces a new {@link Multi} invoking the {@code onItem}, {@code onFailure} and {@code onCompletion} methods

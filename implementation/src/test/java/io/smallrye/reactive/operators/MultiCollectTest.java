@@ -30,13 +30,13 @@ public class MultiCollectTest {
     public void testCollectFirstAndLast() {
         Multi<Integer> items = Multi.createFrom().items(1, 2, 3);
         items
-                .collect().first()
+                .collectItems().first()
                 .subscribe().withSubscriber(UniAssertSubscriber.create())
                 .await()
                 .assertItem(1);
 
         items
-                .collect().last()
+                .collectItems().last()
                 .subscribe().withSubscriber(UniAssertSubscriber.create())
                 .await()
                 .assertItem(3);
@@ -46,13 +46,13 @@ public class MultiCollectTest {
     public void testCollectWithEmpty() {
         Multi<Integer> items = Multi.createFrom().empty();
         items
-                .collect().first()
+                .collectItems().first()
                 .subscribe().withSubscriber(UniAssertSubscriber.create())
                 .await()
                 .assertItem(null);
 
         items
-                .collect().last()
+                .collectItems().last()
                 .subscribe().withSubscriber(UniAssertSubscriber.create())
                 .await()
                 .assertItem(null);
@@ -62,13 +62,13 @@ public class MultiCollectTest {
     public void testCollectFirstAndLastOnFailure() {
         Multi<Integer> failing = Multi.createFrom().failure(new IOException("boom"));
         failing
-                .collect().first()
+                .collectItems().first()
                 .subscribe().withSubscriber(UniAssertSubscriber.create())
                 .await()
                 .assertFailure(IOException.class, "boom");
 
         failing
-                .collect().last()
+                .collectItems().last()
                 .subscribe().withSubscriber(UniAssertSubscriber.create())
                 .await()
                 .assertFailure(IOException.class, "boom");
@@ -77,7 +77,7 @@ public class MultiCollectTest {
     @Test
     public void testAsList() {
         UniAssertSubscriber<List<Integer>> subscriber = Multi.createFrom().items(1, 2, 3)
-                .collect().asList()
+                .collectItems().asList()
                 .subscribe().withSubscriber(UniAssertSubscriber.create())
                 .await();
 
@@ -87,7 +87,7 @@ public class MultiCollectTest {
     @Test
     public void testCollectIn() {
         UniAssertSubscriber<LinkedList<Integer>> subscriber = Multi.createFrom().range(1, 10)
-                .collect().in(LinkedList<Integer>::new, LinkedList::add)
+                .collectItems().in(LinkedList<Integer>::new, LinkedList::add)
                 .subscribe().withSubscriber(UniAssertSubscriber.create())
                 .await();
 
@@ -97,7 +97,7 @@ public class MultiCollectTest {
     @Test
     public void testCollectInWithSupplierThrowingException() {
         Multi.createFrom().range(1, 10)
-                .collect().in(() -> {
+                .collectItems().in(() -> {
                     throw new IllegalArgumentException("boom");
                 }, (x, y) -> {
                 })
@@ -108,7 +108,7 @@ public class MultiCollectTest {
     @Test
     public void testCollectInWithAccumulatorThrowingException() {
         Multi.createFrom().range(1, 10)
-                .collect().in(LinkedList<Integer>::new, (list, res) -> {
+                .collectItems().in(LinkedList<Integer>::new, (list, res) -> {
                     list.add(res);
                     if (res == 5) {
                         throw new IllegalArgumentException("boom");
@@ -121,7 +121,7 @@ public class MultiCollectTest {
     @Test
     public void testCollectInWithSupplierReturningNull() {
         Multi.createFrom().range(1, 10)
-                .collect().in(() -> null, (x, y) -> {
+                .collectItems().in(() -> null, (x, y) -> {
                 })
                 .subscribe().withSubscriber(UniAssertSubscriber.create())
                 .assertFailure(NullPointerException.class, "supplier");
@@ -130,7 +130,7 @@ public class MultiCollectTest {
     @Test
     public void testCollectIntoMap() {
         UniAssertSubscriber<Map<String, Person>> subscriber = persons
-                .collect().asMap(p -> p.firstName)
+                .collectItems().asMap(p -> p.firstName)
                 .subscribe().withSubscriber(UniAssertSubscriber.create())
                 .assertCompletedSuccessfully();
 
@@ -146,7 +146,7 @@ public class MultiCollectTest {
     @Test
     public void testCollectAsMapWithEmpty() {
         UniAssertSubscriber<Map<String, Person>> subscriber = Multi.createFrom().<Person> empty()
-                .collect().asMap(p -> p.firstName)
+                .collectItems().asMap(p -> p.firstName)
                 .subscribe().withSubscriber(UniAssertSubscriber.create())
                 .assertCompletedSuccessfully();
 
@@ -156,7 +156,7 @@ public class MultiCollectTest {
     @Test
     public void testCollectAsMultiMap() {
         UniAssertSubscriber<Map<String, Collection<Person>>> subscriber = personsWithDuplicates
-                .collect().asMultiMap(p -> p.firstName)
+                .collectItems().asMultiMap(p -> p.firstName)
                 .subscribe().withSubscriber(new UniAssertSubscriber<>())
                 .assertCompletedSuccessfully();
 
@@ -170,7 +170,7 @@ public class MultiCollectTest {
     @Test
     public void testCollectAsMultiMapOnEmpty() {
         UniAssertSubscriber<Map<String, Collection<Person>>> subscriber = Multi.createFrom().<Person> empty()
-                .collect().asMultiMap(p -> p.firstName)
+                .collectItems().asMultiMap(p -> p.firstName)
                 .subscribe().withSubscriber(new UniAssertSubscriber<>())
                 .assertCompletedSuccessfully();
         assertThat(subscriber.getItem()).hasSize(0);
@@ -179,7 +179,7 @@ public class MultiCollectTest {
 
     @Test
     public void testSumCollector() {
-        Multi.createFrom().range(1, 5).collect().with(Collectors.summingInt(value -> value))
+        Multi.createFrom().range(1, 5).collectItems().with(Collectors.summingInt(value -> value))
                 .subscribe().withSubscriber(new UniAssertSubscriber<>()).assertCompletedSuccessfully().assertItem(10);
     }
 
