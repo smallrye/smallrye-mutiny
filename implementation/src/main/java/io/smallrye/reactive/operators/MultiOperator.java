@@ -1,6 +1,5 @@
 package io.smallrye.reactive.operators;
 
-import io.reactivex.Flowable;
 import io.smallrye.reactive.Multi;
 
 public abstract class MultiOperator<I, O> extends AbstractMulti<O> {
@@ -14,10 +13,6 @@ public abstract class MultiOperator<I, O> extends AbstractMulti<O> {
 
     public Multi<I> upstream() {
         return upstream;
-    }
-
-    protected Flowable<I> upstreamAsFlowable() {
-        return Flowable.fromPublisher(upstream);
     }
 
 }

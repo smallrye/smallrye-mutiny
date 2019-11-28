@@ -79,7 +79,7 @@ public class MultiFlatten<I, O> {
 
     /**
      * Produces a {@link Multi} containing the items from {@link Publisher} produced by the {@code mapper} for each
-     * item exmitted by this {@link Multi}.
+     * item emitted by this {@link Multi}.
      * <p>
      * The operators behaves as follows:
      * <ul>
