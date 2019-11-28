@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
 
+import io.smallrye.reactive.operators.multi.MultiCombineLatestOp;
 import org.reactivestreams.Publisher;
 
 import io.reactivex.Flowable;
@@ -69,16 +70,11 @@ public class MultiItemCombineIterable {
     }
 
     <O> Multi<O> combine(Function<List<?>, ? extends O> combinator) {
-        io.reactivex.functions.Function<Object[], O> fn = arr -> {
-            List<?> args = Arrays.asList(arr);
-            return combinator.apply(args);
-        };
-
         if (latest) {
             if (collectFailures) {
-                return new DefaultMulti<>(Flowable.combineLatestDelayError(iterable, fn));
+                return new MultiCombineLatestOp<>(iterable, combinator, 128, true);
             } else {
-                return new DefaultMulti<>(Flowable.combineLatest(iterable, fn));
+                return new MultiCombineLatestOp<>(iterable, combinator, 128, false);
             }
         } else {
             if (collectFailures) {

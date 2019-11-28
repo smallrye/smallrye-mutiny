@@ -226,6 +226,10 @@ public class Subscriptions {
         return u;
     }
 
+    public static Throwable terminate(AtomicReference<Throwable> failure) {
+        return failure.getAndSet(TERMINATED);
+    }
+
     public static class EmptySubscription implements Subscription {
 
         @Override
