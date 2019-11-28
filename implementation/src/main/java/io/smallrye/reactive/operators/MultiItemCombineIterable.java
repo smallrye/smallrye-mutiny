@@ -2,15 +2,13 @@ package io.smallrye.reactive.operators;
 
 import static io.smallrye.reactive.helpers.ParameterValidation.nonNull;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
 
-import io.smallrye.reactive.operators.multi.MultiCombineLatestOp;
 import org.reactivestreams.Publisher;
 
-import io.reactivex.Flowable;
 import io.smallrye.reactive.Multi;
+import io.smallrye.reactive.operators.multi.MultiCombineLatestOp;
 import io.smallrye.reactive.operators.multi.MultiZipOp;
 
 public class MultiItemCombineIterable {

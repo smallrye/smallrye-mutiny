@@ -77,6 +77,7 @@
                 <groupId>org.reactivestreams</groupId>
                 <artifactId>reactive-streams</artifactId>
                 <version>${reactive-streams.version}</version>
+                <scope>provided</scope>
             </dependency>
             <dependency>
                 <groupId>io.reactivex.rxjava2</groupId>

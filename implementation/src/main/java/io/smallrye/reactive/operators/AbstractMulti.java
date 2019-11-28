@@ -11,15 +11,12 @@ import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
-import io.reactivex.exceptions.CompositeException;
-import io.reactivex.exceptions.MissingBackpressureException;
 import io.smallrye.reactive.Multi;
 import io.smallrye.reactive.Uni;
 import io.smallrye.reactive.groups.*;
 import io.smallrye.reactive.operators.multi.MultiCacheOp;
 import io.smallrye.reactive.operators.multi.MultiEmitOnOp;
 import io.smallrye.reactive.operators.multi.MultiSubscribeOnOp;
-import io.smallrye.reactive.subscription.BackPressureFailure;
 
 public abstract class AbstractMulti<T> implements Multi<T> {
 
@@ -75,14 +72,7 @@ public abstract class AbstractMulti<T> implements Multi<T> {
             @Override
             public void onError(Throwable failure) {
                 try {
-                    if (failure instanceof MissingBackpressureException) {
-                        subscriber.onError(new BackPressureFailure(failure.getMessage()));
-                    } else if (failure instanceof CompositeException) {
-                        subscriber.onError(new io.smallrye.reactive.CompositeException(
-                                ((CompositeException) failure).getExceptions()));
-                    } else {
-                        subscriber.onError(failure);
-                    }
+                    subscriber.onError(failure);
                 } finally {
                     reference.set(CANCELLED);
                 }

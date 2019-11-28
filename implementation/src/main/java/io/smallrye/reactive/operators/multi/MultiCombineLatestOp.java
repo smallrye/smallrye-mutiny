@@ -1,12 +1,6 @@
 package io.smallrye.reactive.operators.multi;
 
-import io.smallrye.reactive.helpers.ParameterValidation;
-import io.smallrye.reactive.helpers.Subscriptions;
-import io.smallrye.reactive.helpers.queues.SpscLinkedArrayQueue;
-import io.smallrye.reactive.operators.MultiOperator;
-import org.reactivestreams.Publisher;
-import org.reactivestreams.Subscriber;
-import org.reactivestreams.Subscription;
+import static io.smallrye.reactive.helpers.Subscriptions.CANCELLED;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -17,7 +11,14 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
-import static io.smallrye.reactive.helpers.Subscriptions.CANCELLED;
+import org.reactivestreams.Publisher;
+import org.reactivestreams.Subscriber;
+import org.reactivestreams.Subscription;
+
+import io.smallrye.reactive.helpers.ParameterValidation;
+import io.smallrye.reactive.helpers.Subscriptions;
+import io.smallrye.reactive.helpers.queues.SpscLinkedArrayQueue;
+import io.smallrye.reactive.operators.MultiOperator;
 
 /**
  * Combines the latest values from multiple sources through a function.
@@ -62,8 +63,8 @@ public class MultiCombineLatestOp<I, O> extends MultiOperator<I, O> {
             return;
         }
 
-        CombineLatestCoordinator<I, O> coordinator =
-                new CombineLatestCoordinator<>(downstream, combinator, publishers.size(), bufferSize, delayErrors);
+        CombineLatestCoordinator<I, O> coordinator = new CombineLatestCoordinator<>(downstream, combinator, publishers.size(),
+                bufferSize, delayErrors);
         downstream.onSubscribe(coordinator);
         coordinator.subscribe(publishers);
     }
@@ -193,7 +194,7 @@ public class MultiCombineLatestOp<I, O> extends MultiOperator<I, O> {
 
             int missed = 1;
 
-            for (; ; ) {
+            for (;;) {
                 long req = requested.get();
                 long emitter = 0L;
                 while (emitter != req) {
