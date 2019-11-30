@@ -8,10 +8,12 @@ import io.smallrye.reactive.Multi;
 import io.smallrye.reactive.operators.multi.processors.UnicastProcessor;
 import io.smallrye.reactive.subscription.MultiEmitter;
 
+import java.util.concurrent.atomic.AtomicReference;
+
 public class MultiEmitterProcessor<T> implements Processor<T, T>, MultiEmitter<T> {
 
     private final UnicastProcessor<T> processor;
-    private volatile Runnable onTermination;
+    private final AtomicReference<Runnable> onTermination = new AtomicReference<>();
 
     private MultiEmitterProcessor() {
         this.processor = UnicastProcessor.create();
@@ -39,7 +41,7 @@ public class MultiEmitterProcessor<T> implements Processor<T, T>, MultiEmitter<T
 
     @Override
     public MultiEmitter<T> onTermination(Runnable onTermination) {
-        this.onTermination = onTermination;
+        this.onTermination.set(onTermination);
         return this;
     }
 
@@ -58,8 +60,9 @@ public class MultiEmitterProcessor<T> implements Processor<T, T>, MultiEmitter<T
                     @Override
                     public void cancel() {
                         subscription.cancel();
-                        if (onTermination != null) {
-                            onTermination.run();
+                        Runnable runnable = onTermination.getAndSet(null);
+                        if (runnable != null) {
+                            runnable.run();
                         }
                     }
                 });
