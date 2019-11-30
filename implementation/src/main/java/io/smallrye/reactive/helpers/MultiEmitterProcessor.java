@@ -60,10 +60,7 @@ public class MultiEmitterProcessor<T> implements Processor<T, T>, MultiEmitter<T
                     @Override
                     public void cancel() {
                         subscription.cancel();
-                        Runnable runnable = onTermination.getAndSet(null);
-                        if (runnable != null) {
-                            runnable.run();
-                        }
+                        fireTermination();
                     }
                 });
             }
@@ -76,13 +73,22 @@ public class MultiEmitterProcessor<T> implements Processor<T, T>, MultiEmitter<T
             @Override
             public void onError(Throwable failure) {
                 subscriber.onError(failure);
+                fireTermination();
             }
 
             @Override
             public void onComplete() {
                 subscriber.onComplete();
+                fireTermination();
             }
         });
+    }
+
+    private void fireTermination() {
+        Runnable runnable = onTermination.getAndSet(null);
+        if (runnable != null) {
+            runnable.run();
+        }
     }
 
     @Override
