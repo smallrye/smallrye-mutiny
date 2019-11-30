@@ -1,10 +1,10 @@
-image:https://semaphoreci.com/api/v1/smallrye/smallrye-uni-multi/branches/master/badge.svg["Semaphore CI", link="https://semaphoreci.com/smallrye/smallrye-uni-multi"]
-image:https://sonarcloud.io/api/project_badges/measure?project=smallrye_smallrye-uni-multi&metric=alert_status["Quality Gate Status", link="https://sonarcloud.io/dashboard?id=smallrye_smallrye-uni-multi"]
-image:https://img.shields.io/github/license/smallrye/smallrye-uni-multi.svg["License", link="http://www.apache.org/licenses/LICENSE-2.0"]
+image:https://semaphoreci.com/api/v1/smallrye/smallrye-mutiny/branches/master/badge.svg["Semaphore CI", link="https://semaphoreci.com/smallrye/smallrye-mutiny"]
+image:https://sonarcloud.io/api/project_badges/measure?project=smallrye_smallrye-mutiny&metric=alert_status["Quality Gate Status", link="https://sonarcloud.io/dashboard?id=smallrye_smallrye-mutiny"]
+image:https://img.shields.io/github/license/smallrye/smallrye-mutiny.svg["License", link="http://www.apache.org/licenses/LICENSE-2.0"]
 
-= SmallRye Uni/Multi
+= SmallRye Mutiny
 
-Uni/Multi reactive types implementation.
+Mutiny reactive types implementation.
 
 == Instructions
 
@@ -22,4 +22,4 @@ mvn clean install
 
 === Links
 
-* http://github.com/smallrye/smallrye-uni-multi/[Project Homepage]
+* http://github.com/smallrye/smallrye-mutiny/[Project Homepage]

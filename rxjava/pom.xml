@@ -6,18 +6,18 @@
 
     <parent>
         <groupId>io.smallrye.reactive</groupId>
-        <artifactId>uni-multi-project</artifactId>
+        <artifactId>mutiny-project</artifactId>
         <version>1.0.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>uni-multi-rxjava</artifactId>
+    <artifactId>mutiny-rxjava</artifactId>
     <name>SmallRye Uni/Multi integration with RxJava</name>
 
 
     <dependencies>
         <dependency>
             <groupId>io.smallrye.reactive</groupId>
-            <artifactId>uni-multi</artifactId>
+            <artifactId>mutiny</artifactId>
         </dependency>
 
         <dependency>
@@ -27,7 +27,7 @@
 
         <dependency>
             <groupId>io.smallrye.reactive</groupId>
-            <artifactId>uni-multi-test-utils</artifactId>
+            <artifactId>mutiny-test-utils</artifactId>
         </dependency>
     </dependencies>
 

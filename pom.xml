@@ -9,12 +9,12 @@
     </parent>
 
     <groupId>io.smallrye.reactive</groupId>
-    <artifactId>uni-multi-project</artifactId>
+    <artifactId>mutiny-project</artifactId>
     <version>1.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
-    <name>SmallRye Uni/Multi Project</name>
-    <description>A library to build reactive API</description>
+    <name>SmallRye Mutiny Project</name>
+    <description>A library to build reactive APIs</description>
 
     <inceptionYear>2019</inceptionYear>
     <organization>
@@ -33,7 +33,7 @@
 
     <issueManagement>
         <system>GitHub</system>
-        <url>https://github.com/smallrye/smallrye-uni-multi/issues</url>
+        <url>https://github.com/smallrye/smallrye-mutiny/issues</url>
     </issueManagement>
 
     <developers>
@@ -46,9 +46,9 @@
     </developers>
 
     <scm>
-        <connection>scm:git:git@github.com:smallrye/smallrye-uni-multi.git</connection>
-        <developerConnection>scm:git:git@github.com:smallrye/smallrye-uni-multi.git</developerConnection>
-        <url>https://github.com/smallrye/smallrye-uni-multi</url>
+        <connection>scm:git:git@github.com:smallrye/smallrye-mutiny.git</connection>
+        <developerConnection>scm:git:git@github.com:smallrye/smallrye-mutiny.git</developerConnection>
+        <url>https://github.com/smallrye/smallrye-mutiny</url>
         <tag>HEAD</tag>
     </scm>
 
@@ -70,7 +70,7 @@
         <dependencies>
             <dependency>
                 <groupId>io.smallrye.reactive</groupId>
-                <artifactId>uni-multi</artifactId>
+                <artifactId>mutiny</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -97,7 +97,7 @@
 
             <dependency>
                 <groupId>io.smallrye.reactive</groupId>
-                <artifactId>uni-multi-test-utils</artifactId>
+                <artifactId>mutiny-test-utils</artifactId>
                 <version>${project.version}</version>
                 <scope>test</scope>
             </dependency>
