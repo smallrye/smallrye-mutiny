@@ -7,7 +7,7 @@ import java.util.concurrent.Executors;
 
 import org.junit.Test;
 
-import io.smallrye.reactive.operators.MultiAssertSubscriber;
+import io.smallrye.reactive.test.MultiAssertSubscriber;
 
 public class UnicastProcessorTest {
 

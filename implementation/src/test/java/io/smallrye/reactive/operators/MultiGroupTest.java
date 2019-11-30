@@ -14,8 +14,8 @@ import org.junit.Test;
 
 import io.smallrye.reactive.GroupedMulti;
 import io.smallrye.reactive.Multi;
-import io.smallrye.reactive.test.MultiAssertSubscriber;
 import io.smallrye.reactive.Uni;
+import io.smallrye.reactive.test.MultiAssertSubscriber;
 
 public class MultiGroupTest {
 
