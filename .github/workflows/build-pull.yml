@@ -1,0 +1,48 @@
+name: Pull Request Build
+
+on: pull_request
+
+jobs:
+  build_java8:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Install JDK 1.8
+        uses: joschi/setup-jdk@v1.0.0
+        with:
+          java-version: 'openjdk8'
+      - name: Build with Maven
+        run: mvn -B clean install --file pom.xml
+
+  build_java11:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Install JDK 11
+        uses: joschi/setup-jdk@v1.0.0
+        with:
+          java-version: 'openjdk11'
+      - name: Build with Maven
+        run: mvn -B clean install --file pom.xml
+
+  build_java12:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Install JDK 12
+        uses: joschi/setup-jdk@v1.0.0
+        with:
+          java-version: 'openjdk12'
+      - name: Build with Maven
+        run: mvn -B clean install --file pom.xml
+
+  build_java13:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Install JDK 13
+        uses: joschi/setup-jdk@v1.0.0
+        with:
+          java-version: 'openjdk13'
+      - name: Build with Maven
+        run: mvn -B clean install --file pom.xml
