@@ -10,24 +10,24 @@ import java.util.concurrent.CompletionException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.junit.Test;
+import org.testng.annotations.Test;
 
 import io.smallrye.mutiny.TimeoutException;
 import io.smallrye.mutiny.Uni;
 
 public class UniAwaitTest {
 
-    @Test(timeout = 1000)
+    @Test(timeOut = 1000)
     public void testAwaitingOnAnAlreadyResolvedUni() {
         assertThat(Uni.createFrom().item(1).await().indefinitely()).isEqualTo(1);
     }
 
-    @Test(timeout = 100)
+    @Test(timeOut = 100)
     public void testAwaitingOnAnAlreadyResolvedWitNullUni() {
         assertThat(Uni.createFrom().item(null).await().indefinitely()).isNull();
     }
 
-    @Test(timeout = 100)
+    @Test(timeOut = 100)
     public void testAwaitingOnAnAlreadyFailedUni() {
         try {
             Uni.createFrom().failure(new IOException("boom")).await().indefinitely();
@@ -39,14 +39,14 @@ public class UniAwaitTest {
 
     // Uni.createFrom().failure before onTimeout
 
-    @Test(timeout = 1000)
+    @Test(timeOut = 1000)
     public void testAwaitingOnAnAsyncUni() {
         assertThat(
                 Uni.createFrom().emitter(emitter -> new Thread(() -> emitter.complete(1)).start()).await()
                         .indefinitely()).isEqualTo(1);
     }
 
-    @Test(timeout = 1000)
+    @Test(timeOut = 1000)
     public void testAwaitingOnAnAsyncFailingUni() {
         try {
             Uni.createFrom().emitter(emitter -> new Thread(() -> emitter.fail(new IOException("boom"))).start()).await()
@@ -57,17 +57,17 @@ public class UniAwaitTest {
         }
     }
 
-    @Test(timeout = 100)
+    @Test(timeOut = 100)
     public void testAwaitWithTimeOut() {
         assertThat(Uni.createFrom().item(1).await().atMost(Duration.ofMillis(1000))).isEqualTo(1);
     }
 
-    @Test(timeout = 100, expected = TimeoutException.class)
+    @Test(timeOut = 100, expectedExceptions = TimeoutException.class)
     public void testTimeout() {
         Uni.createFrom().nothing().await().atMost(Duration.ofMillis(10));
     }
 
-    @Test(timeout = 5000)
+    @Test(timeOut = 5000)
     public void testInterruptedTimeout() {
         AtomicBoolean awaiting = new AtomicBoolean();
         AtomicReference<RuntimeException> exception = new AtomicReference<>();
@@ -118,7 +118,7 @@ public class UniAwaitTest {
                         .atMost(Duration.ofMillis(1000))).contains(1);
     }
 
-    @Test(timeout = 100, expected = TimeoutException.class)
+    @Test(timeOut = 100, expectedExceptions = TimeoutException.class)
     public void testTimeoutAndOptional() {
         Uni.createFrom().nothing().await().asOptional().atMost(Duration.ofMillis(10));
     }

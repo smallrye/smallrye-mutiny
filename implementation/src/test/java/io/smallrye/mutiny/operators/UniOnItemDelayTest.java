@@ -9,25 +9,32 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.junit.After;
-import org.junit.Test;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 import io.smallrye.mutiny.Uni;
 
 public class UniOnItemDelayTest {
 
-    private ScheduledExecutorService executor = Executors.newScheduledThreadPool(4);
+    private ScheduledExecutorService executor;
 
-    private Uni<Void> delayed = Uni.createFrom().item((Void) null).onItem().delayIt()
-            .onExecutor(executor)
-            .by(Duration.ofMillis(100));
+    private Uni<Void> delayed;
 
-    @After
+    @BeforeMethod
+    public void init() {
+        executor = Executors.newScheduledThreadPool(4);
+        delayed = Uni.createFrom().item((Void) null).onItem().delayIt()
+                .onExecutor(executor)
+                .by(Duration.ofMillis(100));
+    }
+
+    @AfterMethod
     public void shutdown() {
         executor.shutdown();
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expectedExceptions = IllegalArgumentException.class)
     public void testWithNullDuration() {
         Uni.createFrom().item(1).onItem().delayIt().by(null);
     }
@@ -49,14 +56,14 @@ public class UniOnItemDelayTest {
         assertThat(subscriber.getOnResultThreadName()).isNotEqualTo(Thread.currentThread().getName());
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expectedExceptions = IllegalArgumentException.class)
     public void testWithNegativeDuration() {
         Uni.createFrom().item(1).onItem().delayIt()
                 .onExecutor(executor)
                 .by(Duration.ofDays(-1));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expectedExceptions = IllegalArgumentException.class)
     public void testWithZeroAsDuration() {
         Uni.createFrom().item(1).onItem().delayIt()
                 .onExecutor(executor)

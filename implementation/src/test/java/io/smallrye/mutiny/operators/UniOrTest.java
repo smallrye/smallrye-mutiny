@@ -9,8 +9,8 @@ import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
-import org.junit.After;
-import org.junit.Test;
+import org.testng.annotations.AfterTest;
+import org.testng.annotations.Test;
 
 import io.smallrye.mutiny.Uni;
 
@@ -18,24 +18,24 @@ public class UniOrTest {
 
     private ScheduledExecutorService executor = Executors.newScheduledThreadPool(4);
 
-    @After
+    @AfterTest
     public void shutdown() {
         executor.shutdown();
     }
 
     @SuppressWarnings("unchecked")
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expectedExceptions = IllegalArgumentException.class)
     public void testWithNullAsIterable() {
         Uni.combine().any().of((Iterable) null);
     }
 
     @SuppressWarnings("unchecked")
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expectedExceptions = IllegalArgumentException.class)
     public void testWithNullAsArray() {
         Uni.combine().any().of((Uni[]) null);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expectedExceptions = IllegalArgumentException.class)
     public void testWithItemInIterable() {
         List<Uni<String>> unis = new ArrayList<>();
         unis.add(Uni.createFrom().item("foo"));
@@ -44,7 +44,7 @@ public class UniOrTest {
         Uni.combine().any().of(unis);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expectedExceptions = IllegalArgumentException.class)
     public void testWithItemInArray() {
         Uni.combine().any().of(Uni.createFrom().item("foo"), null, Uni.createFrom().item("bar"));
     }
@@ -103,7 +103,7 @@ public class UniOrTest {
         subscriber2.await().assertCompletedSuccessfully().assertItem("foo");
     }
 
-    @Test(timeout = 1000)
+    @Test(timeOut = 1000)
     public void testBlockingWithDelay() {
         Uni<Integer> uni1 = Uni.createFrom().item(null)
                 .onItem().delayIt().onExecutor(executor).by(Duration.ofMillis(500))
@@ -114,7 +114,7 @@ public class UniOrTest {
         assertThat(Uni.combine().any().of(uni1, uni2).await().indefinitely()).isEqualTo(2);
     }
 
-    @Test(timeout = 1000)
+    @Test(timeOut = 1000)
     public void testCompletingAgainstEmpty() {
         Uni<Integer> uni1 = Uni.createFrom().item(null).map(x -> 1);
         Uni<Integer> uni2 = Uni.createFrom().item(null).onItem().delayIt().onExecutor(executor)
@@ -122,7 +122,7 @@ public class UniOrTest {
         assertThat(Uni.combine().any().of(uni1, uni2).await().indefinitely()).isEqualTo(1);
     }
 
-    @Test(timeout = 1000)
+    @Test(timeOut = 1000)
     public void testCompletingAgainstNever() {
         Uni<Integer> uni1 = Uni.createFrom().nothing().map(x -> 1);
         Uni<Integer> uni2 = Uni.createFrom().item(null).onItem().delayIt().onExecutor(executor)

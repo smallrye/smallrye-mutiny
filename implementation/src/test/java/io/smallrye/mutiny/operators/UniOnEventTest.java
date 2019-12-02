@@ -7,8 +7,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.junit.Test;
 import org.reactivestreams.Subscription;
+import org.testng.annotations.Test;
 
 import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Uni;

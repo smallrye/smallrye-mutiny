@@ -6,7 +6,8 @@ import static org.awaitility.Awaitility.await;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.junit.Test;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.groups.MultiRetry;
@@ -14,23 +15,29 @@ import io.smallrye.mutiny.test.MultiAssertSubscriber;
 
 public class MultiOnFailureRetryTest {
 
-    private AtomicInteger numberOfSubscriptions = new AtomicInteger();
-    private Multi<Integer> failing = Multi.createFrom()
-            .<Integer> emitter(emitter -> emitter.emit(1).emit(2).emit(3).fail(new IOException("boom")))
-            .on().subscription(s -> numberOfSubscriptions.incrementAndGet());
+    private AtomicInteger numberOfSubscriptions;
+    private Multi<Integer> failing;
 
-    @Test(expected = IllegalArgumentException.class)
+    @BeforeMethod
+    public void init() {
+        numberOfSubscriptions = new AtomicInteger();
+        failing = Multi.createFrom()
+                .<Integer> emitter(emitter -> emitter.emit(1).emit(2).emit(3).fail(new IOException("boom")))
+                .on().subscription(s -> numberOfSubscriptions.incrementAndGet());
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
     public void testThatUpstreamCannotBeNull() {
         new MultiRetry<>(null);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expectedExceptions = IllegalArgumentException.class)
     public void testThatTheNumberOfAttemptMustBePositive() {
         Multi.createFrom().nothing()
                 .onFailure().retry().atMost(-1);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expectedExceptions = IllegalArgumentException.class)
     public void testThatTheNumberOfAttemptMustBePositive2() {
         Multi.createFrom().nothing()
                 .onFailure().retry().atMost(0);
@@ -42,7 +49,7 @@ public class MultiOnFailureRetryTest {
 
         Multi.createFrom().range(1, 4)
                 .onFailure().retry().atMost(5)
-                .subscribe().withSubscriber(subscriber);
+                .subscribe().with(subscriber);
 
         subscriber
                 .assertReceived(1, 2, 3)
@@ -55,7 +62,7 @@ public class MultiOnFailureRetryTest {
 
         failing
                 .onFailure().retry().atMost(1)
-                .subscribe().withSubscriber(subscriber);
+                .subscribe().with(subscriber);
 
         subscriber
                 .assertSubscribed()
@@ -71,7 +78,7 @@ public class MultiOnFailureRetryTest {
 
         failing
                 .onFailure().retry().atMost(1)
-                .subscribe().withSubscriber(subscriber);
+                .subscribe().with(subscriber);
 
         subscriber
                 .assertSubscribed()
@@ -91,7 +98,7 @@ public class MultiOnFailureRetryTest {
         MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(20);
 
         failing.onFailure().retry().indefinitely()
-                .subscribe().withSubscriber(subscriber);
+                .subscribe().with(subscriber);
 
         await().until(() -> subscriber.items().size() > 10);
         subscriber.cancel();
@@ -110,7 +117,7 @@ public class MultiOnFailureRetryTest {
                     }
                 })
                 .onFailure().retry().atMost(2)
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(10))
+                .subscribe().with(MultiAssertSubscriber.create(10))
                 .assertCompletedSuccessfully()
                 .assertReceived(1, 2, 3, 4);
     }

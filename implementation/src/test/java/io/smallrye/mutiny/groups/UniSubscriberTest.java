@@ -7,7 +7,7 @@ import java.time.Duration;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.junit.Test;
+import org.testng.annotations.Test;
 
 import io.smallrye.mutiny.Uni;
 
@@ -48,7 +48,7 @@ public class UniSubscriberTest {
         assertThat(failure.get()).isNull();
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expectedExceptions = IllegalArgumentException.class)
     public void testSubscriptionRequestException() {
         AtomicLong counter = new AtomicLong();
         AtomicReference<Throwable> failure = new AtomicReference<>();

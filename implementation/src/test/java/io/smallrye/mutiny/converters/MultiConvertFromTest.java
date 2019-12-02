@@ -2,7 +2,7 @@ package io.smallrye.mutiny.converters;
 
 import java.util.concurrent.CompletableFuture;
 
-import org.junit.Test;
+import org.testng.annotations.Test;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.converters.multi.BuiltinConverters;
@@ -17,7 +17,7 @@ public class MultiConvertFromTest {
         MultiAssertSubscriber<Integer> subscriber = Multi.createFrom()
                 .completionStage(valued)
                 .subscribe()
-                .withSubscriber(MultiAssertSubscriber.create(1));
+                .with(MultiAssertSubscriber.create(1));
 
         subscriber.assertCompletedSuccessfully().assertReceived(1);
     }
@@ -29,9 +29,9 @@ public class MultiConvertFromTest {
         MultiAssertSubscriber<Void> subscriber = Multi.createFrom()
                 .converter(BuiltinConverters.fromCompletionStage(), empty)
                 .subscribe()
-                .withSubscriber(MultiAssertSubscriber.create(1));
+                .with(MultiAssertSubscriber.create(1));
 
-        Multi<Void> m2 = Multi.createFrom().completionStage(empty);
+        Multi.createFrom().completionStage(empty);
 
         subscriber.assertCompletedSuccessfully().assertHasNotReceivedAnyItem();
     }
@@ -44,7 +44,7 @@ public class MultiConvertFromTest {
         MultiAssertSubscriber<Void> subscriber = Multi.createFrom()
                 .converter(BuiltinConverters.fromCompletionStage(), boom)
                 .subscribe()
-                .withSubscriber(MultiAssertSubscriber.create(1));
+                .with(MultiAssertSubscriber.create(1));
 
         subscriber.assertHasFailedWith(Exception.class, "boom");
     }

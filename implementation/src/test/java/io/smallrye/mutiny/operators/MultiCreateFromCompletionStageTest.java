@@ -8,19 +8,19 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
-import org.junit.Test;
+import org.testng.annotations.Test;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.test.MultiAssertSubscriber;
 
 public class MultiCreateFromCompletionStageTest {
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expectedExceptions = IllegalArgumentException.class)
     public void testThatTheCompletionStageCannotBeNull() {
         Multi.createFrom().completionStage((CompletionStage<String>) null);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expectedExceptions = IllegalArgumentException.class)
     public void testThatTheCompletionStageSupplierCannotBeNull() {
         Multi.createFrom().deferredCompletionStage((Supplier<CompletionStage<String>>) null);
     }
@@ -29,7 +29,7 @@ public class MultiCreateFromCompletionStageTest {
     public void testWithAValue() {
         MultiAssertSubscriber<String> subscriber = Multi.createFrom()
                 .completionStage(CompletableFuture.completedFuture("hello")).subscribe()
-                .withSubscriber(MultiAssertSubscriber.create(1));
+                .with(MultiAssertSubscriber.create(1));
         subscriber.assertCompletedSuccessfully().assertReceived("hello");
     }
 
@@ -37,7 +37,7 @@ public class MultiCreateFromCompletionStageTest {
     public void testWithAsyncValue() {
         MultiAssertSubscriber<String> subscriber = Multi.createFrom()
                 .completionStage(CompletableFuture.supplyAsync(() -> "hello")).subscribe()
-                .withSubscriber(MultiAssertSubscriber.create(1));
+                .with(MultiAssertSubscriber.create(1));
         subscriber.await().assertCompletedSuccessfully().assertReceived("hello");
     }
 
@@ -45,7 +45,7 @@ public class MultiCreateFromCompletionStageTest {
     public void testWithEmpty() {
         MultiAssertSubscriber<String> subscriber = Multi.createFrom()
                 .completionStage(CompletableFuture.<String> completedFuture(null)).subscribe()
-                .withSubscriber(MultiAssertSubscriber.create(1));
+                .with(MultiAssertSubscriber.create(1));
         subscriber.assertCompletedSuccessfully().assertHasNotReceivedAnyItem();
     }
 
@@ -54,7 +54,7 @@ public class MultiCreateFromCompletionStageTest {
         AtomicBoolean called = new AtomicBoolean();
         MultiAssertSubscriber<Void> subscriber = Multi.createFrom()
                 .completionStage(CompletableFuture.runAsync(() -> called.set(true))).subscribe()
-                .withSubscriber(MultiAssertSubscriber.create(1));
+                .with(MultiAssertSubscriber.create(1));
         subscriber.await().assertCompletedSuccessfully().assertHasNotReceivedAnyItem();
         assertThat(called).isTrue();
     }
@@ -65,8 +65,8 @@ public class MultiCreateFromCompletionStageTest {
 
         Multi<String> multi = Multi.createFrom()
                 .deferredCompletionStage(() -> CompletableFuture.completedFuture("hello-" + count.incrementAndGet()));
-        MultiAssertSubscriber<String> subscriber1 = multi.subscribe().withSubscriber(MultiAssertSubscriber.create(1));
-        MultiAssertSubscriber<String> subscriber2 = multi.subscribe().withSubscriber(MultiAssertSubscriber.create());
+        MultiAssertSubscriber<String> subscriber1 = multi.subscribe().with(MultiAssertSubscriber.create(1));
+        MultiAssertSubscriber<String> subscriber2 = multi.subscribe().with(MultiAssertSubscriber.create());
 
         subscriber1.assertCompletedSuccessfully().assertReceived("hello-1");
         subscriber2.assertHasNotReceivedAnyItem().assertNotTerminated().request(20)
@@ -76,8 +76,8 @@ public class MultiCreateFromCompletionStageTest {
     @Test
     public void testWithEmptyProducedInSupplier() {
         Multi<String> multi = Multi.createFrom().deferredCompletionStage(() -> CompletableFuture.completedFuture(null));
-        MultiAssertSubscriber<String> subscriber1 = multi.subscribe().withSubscriber(MultiAssertSubscriber.create(1));
-        MultiAssertSubscriber<String> subscriber2 = multi.subscribe().withSubscriber(MultiAssertSubscriber.create());
+        MultiAssertSubscriber<String> subscriber1 = multi.subscribe().with(MultiAssertSubscriber.create(1));
+        MultiAssertSubscriber<String> subscriber2 = multi.subscribe().with(MultiAssertSubscriber.create());
 
         subscriber1.assertCompletedSuccessfully().assertHasNotReceivedAnyItem();
         subscriber2.assertHasNotReceivedAnyItem().assertCompletedSuccessfully();
@@ -88,14 +88,14 @@ public class MultiCreateFromCompletionStageTest {
         Multi<String> multi = Multi.createFrom().deferredCompletionStage(() -> {
             throw new IllegalStateException("boom");
         });
-        MultiAssertSubscriber<String> subscriber1 = multi.subscribe().withSubscriber(MultiAssertSubscriber.create());
+        MultiAssertSubscriber<String> subscriber1 = multi.subscribe().with(MultiAssertSubscriber.create());
         subscriber1.assertTerminated().assertHasFailedWith(IllegalStateException.class, "boom");
     }
 
     @Test
     public void testWithNullReturnedBySupplier() {
         Multi<String> multi = Multi.createFrom().deferredCompletionStage(() -> null);
-        MultiAssertSubscriber<String> subscriber1 = multi.subscribe().withSubscriber(MultiAssertSubscriber.create());
+        MultiAssertSubscriber<String> subscriber1 = multi.subscribe().with(MultiAssertSubscriber.create());
         subscriber1.assertTerminated();
 
         assertThat(subscriber1.failures()).hasSize(1)
@@ -114,7 +114,7 @@ public class MultiCreateFromCompletionStageTest {
         };
 
         Multi<Integer> multi = Multi.createFrom().completionStage(never);
-        MultiAssertSubscriber<Integer> subscriber = multi.subscribe().withSubscriber(MultiAssertSubscriber.create(1));
+        MultiAssertSubscriber<Integer> subscriber = multi.subscribe().with(MultiAssertSubscriber.create(1));
 
         subscriber.assertNotTerminated()
                 .cancel()

@@ -1,12 +1,12 @@
 package io.smallrye.mutiny.operators;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Fail.fail;
 
 import java.io.IOException;
 import java.util.NoSuchElementException;
 
-import org.junit.Test;
+import org.testng.annotations.Test;
 
 import io.smallrye.mutiny.Uni;
 
@@ -55,12 +55,12 @@ public class UniCreateFromFailureTest {
         }
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expectedExceptions = IllegalArgumentException.class)
     public void testCreationWithNull() {
         Uni.createFrom().failure(null);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expectedExceptions = IllegalArgumentException.class)
     public void testCreationWithNullAsSupplier() {
         Uni.createFrom().deferredFailure(null);
     }

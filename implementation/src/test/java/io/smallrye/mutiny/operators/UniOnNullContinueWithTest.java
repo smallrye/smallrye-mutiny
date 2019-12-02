@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
-import org.junit.Test;
+import org.testng.annotations.Test;
 
 import io.smallrye.mutiny.Uni;
 
@@ -63,14 +63,14 @@ public class UniOnNullContinueWithTest {
                 .await().indefinitely()).withCauseExactlyInstanceOf(IOException.class).withMessageEndingWith("boom");
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expectedExceptions = IllegalArgumentException.class)
     public void testThatContinueWithCannotUseNull() {
         Uni.createFrom().item(23)
                 .onItem().castTo(Integer.class)
                 .onItem().ifNull().continueWith((Integer) null);
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test(expectedExceptions = NullPointerException.class)
     public void testThatContinueWithSupplierCannotReturnNull() {
         Uni.createFrom().item(23)
                 .map(x -> null)
@@ -78,7 +78,7 @@ public class UniOnNullContinueWithTest {
                 .await().indefinitely();
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expectedExceptions = IllegalArgumentException.class)
     public void testThatContinueWithSupplierCannotBeNull() {
         Uni.createFrom().item(23)
                 .onItem().castTo(Integer.class)

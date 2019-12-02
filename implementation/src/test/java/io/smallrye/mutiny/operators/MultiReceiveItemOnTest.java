@@ -12,9 +12,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.testng.annotations.AfterTest;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.test.MultiAssertSubscriber;
@@ -23,7 +23,7 @@ public class MultiReceiveItemOnTest {
 
     private ExecutorService executor;
 
-    @Before
+    @BeforeMethod
     public void init() {
         executor = Executors.newFixedThreadPool(4, new ThreadFactory() {
             AtomicInteger count = new AtomicInteger();
@@ -37,17 +37,17 @@ public class MultiReceiveItemOnTest {
         });
     }
 
-    @After
+    @AfterTest
     public void cleanup() {
         executor.shutdownNow();
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expectedExceptions = IllegalArgumentException.class)
     public void testThatExecutorCannotBeNull() {
         Multi.createFrom().item(1).emitOn(null);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expectedExceptions = IllegalArgumentException.class)
     public void testThatSubscribeOnExecutorCannotBeNull() {
         Multi.createFrom().item(1).subscribeOn(null);
     }
@@ -62,7 +62,7 @@ public class MultiReceiveItemOnTest {
                 .emitOn(executor)
                 .onItem().consume(i -> itemThread.add(Thread.currentThread().getName()))
                 .on().completion(() -> completionThread.add(Thread.currentThread().getName()))
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(4))
+                .subscribe().with(MultiAssertSubscriber.create(4))
                 .await()
                 .assertCompletedSuccessfully();
 
@@ -79,7 +79,7 @@ public class MultiReceiveItemOnTest {
                 .emitOn(executor)
                 .onItem().consume(i -> itemThread.add(Thread.currentThread().getName()))
                 .onFailure().consume(f -> failureThread.add(Thread.currentThread().getName()))
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(4))
+                .subscribe().with(MultiAssertSubscriber.create(4))
                 .await()
                 .assertHasFailedWith(IOException.class, "boom");
 
@@ -91,7 +91,7 @@ public class MultiReceiveItemOnTest {
     public void testWithImmediate() {
         Multi.createFrom().items(1, 2, 3, 4)
                 .emitOn(Runnable::run)
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(4))
+                .subscribe().with(MultiAssertSubscriber.create(4))
                 .await()
                 .assertReceived(1, 2, 3, 4);
     }
@@ -100,7 +100,7 @@ public class MultiReceiveItemOnTest {
     public void testWithLargeNumberOfItems() {
         MultiAssertSubscriber<Integer> subscriber = Multi.createFrom().range(0, 100_000)
                 .emitOn(executor)
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(Long.MAX_VALUE))
+                .subscribe().with(MultiAssertSubscriber.create(Long.MAX_VALUE))
                 .await()
                 .assertCompletedSuccessfully();
 
@@ -116,7 +116,7 @@ public class MultiReceiveItemOnTest {
     public void testSubscribeOn() {
         Multi.createFrom().items(1, 2, 3, 4)
                 .subscribeOn(executor)
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(4))
+                .subscribe().with(MultiAssertSubscriber.create(4))
                 .await()
                 .assertReceived(1, 2, 3, 4);
     }

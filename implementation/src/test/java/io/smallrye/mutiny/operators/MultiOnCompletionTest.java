@@ -9,8 +9,8 @@ import java.util.NoSuchElementException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
-import org.junit.Test;
 import org.reactivestreams.Publisher;
+import org.testng.annotations.Test;
 
 import io.reactivex.Flowable;
 import io.smallrye.mutiny.Multi;
@@ -24,7 +24,7 @@ public class MultiOnCompletionTest {
         Multi.createFrom().range(1, 5)
                 .onCompletion().consume(() -> called.set(true))
                 .onCompletion().continueWith(6, 7, 8)
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(7))
+                .subscribe().with(MultiAssertSubscriber.create(7))
                 .assertCompletedSuccessfully()
                 .assertReceived(1, 2, 3, 4, 6, 7, 8);
 
@@ -37,7 +37,7 @@ public class MultiOnCompletionTest {
         Multi.createFrom().emitter(e -> e.emit(1).emit(2).fail(new IOException("boom")))
                 .onCompletion().consume(() -> called.set(true))
                 .onCompletion().continueWith(6, 7, 8)
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(7))
+                .subscribe().with(MultiAssertSubscriber.create(7))
                 .assertHasFailedWith(IOException.class, "boom")
                 .assertReceived(1, 2);
 
@@ -48,7 +48,7 @@ public class MultiOnCompletionTest {
     public void testOnCompletionContinueWithEmpty() {
         Multi.createFrom().range(1, 5)
                 .onCompletion().continueWith()
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(7))
+                .subscribe().with(MultiAssertSubscriber.create(7))
                 .assertCompletedSuccessfully()
                 .assertReceived(1, 2, 3, 4);
     }
@@ -59,7 +59,7 @@ public class MultiOnCompletionTest {
         Multi.createFrom().range(1, 5)
                 .onCompletion().consume(() -> called.set(true))
                 .onCompletion().continueWith(25)
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(7))
+                .subscribe().with(MultiAssertSubscriber.create(7))
                 .assertCompletedSuccessfully()
                 .assertReceived(1, 2, 3, 4, 25);
 
@@ -72,7 +72,7 @@ public class MultiOnCompletionTest {
         Multi.createFrom().range(1, 5)
                 .onCompletion().consume(() -> called.set(true))
                 .onCompletion().continueWith(Arrays.asList(5, 6))
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(7))
+                .subscribe().with(MultiAssertSubscriber.create(7))
                 .assertCompletedSuccessfully()
                 .assertReceived(1, 2, 3, 4, 5, 6);
 
@@ -85,38 +85,38 @@ public class MultiOnCompletionTest {
         Multi.createFrom().range(1, 5)
                 .onCompletion().consume(() -> called.set(true))
                 .onCompletion().continueWith(Collections.emptyList())
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(7))
+                .subscribe().with(MultiAssertSubscriber.create(7))
                 .assertCompletedSuccessfully()
                 .assertReceived(1, 2, 3, 4);
 
         assertThat(called).isTrue();
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expectedExceptions = IllegalArgumentException.class)
     public void testOnCompletionContinueWithNullItem() {
         Multi.createFrom().range(1, 5)
                 .onCompletion().continueWith((Integer) null);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expectedExceptions = IllegalArgumentException.class)
     public void testOnCompletionContinueWithNullAsIterable() {
         Multi.createFrom().range(1, 5)
                 .onCompletion().continueWith((Iterable<Integer>) null);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expectedExceptions = IllegalArgumentException.class)
     public void testOnCompletionContinueWithItemsContainingNullItem() {
         Multi.createFrom().range(1, 5)
                 .onCompletion().continueWith(1, 2, 3, null, 4, 5);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expectedExceptions = IllegalArgumentException.class)
     public void testOnCompletionContinueWithIterableContainingNullItem() {
         Multi.createFrom().range(1, 5)
                 .onCompletion().continueWith(Arrays.asList(1, 2, 3, null, 4, 5));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expectedExceptions = IllegalArgumentException.class)
     public void testOnCompletionContinueWithNullSupplier() {
         Multi.createFrom().range(1, 5)
                 .onCompletion().continueWith((Supplier<? extends Iterable<? extends Integer>>) null);
@@ -126,7 +126,7 @@ public class MultiOnCompletionTest {
     public void testOnCompletionContinueWithSupplier() {
         Multi.createFrom().range(1, 5)
                 .onCompletion().continueWith(() -> Arrays.asList(25, 26))
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(20))
+                .subscribe().with(MultiAssertSubscriber.create(20))
                 .assertCompletedSuccessfully()
                 .assertReceived(1, 2, 3, 4, 25, 26);
     }
@@ -135,7 +135,7 @@ public class MultiOnCompletionTest {
     public void testOnCompletionContinueWithSupplierReturningEmpty() {
         Multi.createFrom().range(1, 5)
                 .onCompletion().continueWith((Supplier<Iterable<? extends Integer>>) Collections::emptyList)
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(20))
+                .subscribe().with(MultiAssertSubscriber.create(20))
                 .assertCompletedSuccessfully()
                 .assertReceived(1, 2, 3, 4);
     }
@@ -144,8 +144,8 @@ public class MultiOnCompletionTest {
     public void testOnCompletionContinueWithSupplierContainingNullItem() {
         Multi.createFrom().range(1, 5)
                 .onCompletion().continueWith(() -> Arrays.asList(25, null, 26))
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(20))
-                .assertHasFailedWith(IllegalArgumentException.class, null)
+                .subscribe().with(MultiAssertSubscriber.create(20))
+                .assertHasFailedWith(NullPointerException.class, null)
                 .assertReceived(1, 2, 3, 4, 25);
     }
 
@@ -153,7 +153,7 @@ public class MultiOnCompletionTest {
     public void testOnCompletionContinueWithSupplierReturningNull() {
         Multi.createFrom().range(1, 5)
                 .onCompletion().continueWith(() -> (Iterable<Integer>) null)
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(20))
+                .subscribe().with(MultiAssertSubscriber.create(20))
                 .assertHasFailedWith(NullPointerException.class, null)
                 .assertReceived(1, 2, 3, 4);
     }
@@ -164,7 +164,7 @@ public class MultiOnCompletionTest {
                 .onCompletion().continueWith((Supplier<? extends Iterable<? extends Integer>>) () -> {
                     throw new IllegalStateException("BOOM!");
                 })
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(20))
+                .subscribe().with(MultiAssertSubscriber.create(20))
                 .assertHasFailedWith(IllegalStateException.class, "BOOM!")
                 .assertReceived(1, 2, 3, 4);
     }
@@ -173,7 +173,7 @@ public class MultiOnCompletionTest {
     public void testOnCompletionFail() {
         Multi.createFrom().range(1, 5)
                 .onCompletion().fail()
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(Long.MAX_VALUE))
+                .subscribe().with(MultiAssertSubscriber.create(Long.MAX_VALUE))
                 .assertReceived(1, 2, 3, 4)
                 .assertHasFailedWith(NoSuchElementException.class, null);
     }
@@ -182,12 +182,12 @@ public class MultiOnCompletionTest {
     public void testOnCompletionFailWithException() {
         Multi.createFrom().range(1, 5)
                 .onCompletion().failWith(new IOException("boom"))
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(Long.MAX_VALUE))
+                .subscribe().with(MultiAssertSubscriber.create(Long.MAX_VALUE))
                 .assertReceived(1, 2, 3, 4)
                 .assertHasFailedWith(IOException.class, "boom");
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expectedExceptions = IllegalArgumentException.class)
     public void testOnCompletionFailWithNullException() {
         Multi.createFrom().range(1, 5)
                 .onCompletion().failWith((Throwable) null);
@@ -198,12 +198,12 @@ public class MultiOnCompletionTest {
     public void testOnCompletionFailWithSupplier() {
         Multi.createFrom().range(1, 5)
                 .onCompletion().failWith(() -> new IOException("boom"))
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(Long.MAX_VALUE))
+                .subscribe().with(MultiAssertSubscriber.create(Long.MAX_VALUE))
                 .assertReceived(1, 2, 3, 4)
                 .assertHasFailedWith(IOException.class, "boom");
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expectedExceptions = IllegalArgumentException.class)
     public void testOnCompletionFailWithNullSupplier() {
         Multi.createFrom().range(1, 5)
                 .onCompletion().failWith((Supplier<Throwable>) null);
@@ -215,7 +215,7 @@ public class MultiOnCompletionTest {
                 .onCompletion().failWith(() -> {
                     throw new IllegalStateException("BOOM!");
                 })
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(Long.MAX_VALUE))
+                .subscribe().with(MultiAssertSubscriber.create(Long.MAX_VALUE))
                 .assertReceived(1, 2, 3, 4)
                 .assertHasFailedWith(IllegalStateException.class, "BOOM!");
     }
@@ -224,7 +224,7 @@ public class MultiOnCompletionTest {
     public void testOnCompletionFailWithSupplierReturningNull() {
         Multi.createFrom().range(1, 5)
                 .onCompletion().failWith(() -> null)
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(Long.MAX_VALUE))
+                .subscribe().with(MultiAssertSubscriber.create(Long.MAX_VALUE))
                 .assertReceived(1, 2, 3, 4)
                 .assertHasFailedWith(NullPointerException.class, null);
     }
@@ -233,7 +233,7 @@ public class MultiOnCompletionTest {
     public void testSwitchTo() {
         Multi.createFrom().range(1, 5)
                 .onCompletion().switchTo(Flowable.just(20))
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(10))
+                .subscribe().with(MultiAssertSubscriber.create(10))
                 .assertCompletedSuccessfully()
                 .assertReceived(1, 2, 3, 4, 20);
     }
@@ -242,7 +242,7 @@ public class MultiOnCompletionTest {
     public void testSwitchToSupplier() {
         Multi.createFrom().range(1, 5)
                 .onCompletion().switchTo(() -> Multi.createFrom().range(5, 8))
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(10))
+                .subscribe().with(MultiAssertSubscriber.create(10))
                 .assertCompletedSuccessfully()
                 .assertReceived(1, 2, 3, 4, 5, 6, 7);
     }
@@ -251,18 +251,18 @@ public class MultiOnCompletionTest {
     public void testSwitchToSupplierReturningNull() {
         Multi.createFrom().range(1, 5)
                 .onCompletion().switchTo(() -> null)
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(10))
+                .subscribe().with(MultiAssertSubscriber.create(10))
                 .assertHasFailedWith(NullPointerException.class, null)
                 .assertReceived(1, 2, 3, 4);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expectedExceptions = IllegalArgumentException.class)
     public void testSwitchToWithConsumerBeingNull() {
         Multi.createFrom().range(1, 5)
                 .onCompletion().switchToEmitter(null);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expectedExceptions = IllegalArgumentException.class)
     public void testSwitchToWithSupplierBeingNull() {
         Multi.createFrom().range(1, 5)
                 .onCompletion().switchTo((Supplier<Publisher<? extends Integer>>) null);
@@ -272,7 +272,7 @@ public class MultiOnCompletionTest {
     public void testSwitchToWithConsumer() {
         Multi.createFrom().range(1, 5)
                 .onCompletion().switchToEmitter(e -> e.emit(5).emit(6).complete())
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(10))
+                .subscribe().with(MultiAssertSubscriber.create(10))
                 .assertCompletedSuccessfully()
                 .assertReceived(1, 2, 3, 4, 5, 6);
     }

@@ -8,13 +8,13 @@ import java.util.NoSuchElementException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
-import org.junit.Test;
+import org.testng.annotations.Test;
 
 import io.smallrye.mutiny.Uni;
 
 public class UniOnNullFailTest {
 
-    @Test(expected = NoSuchElementException.class)
+    @Test(expectedExceptions = NoSuchElementException.class)
     public void testFail() {
         Uni.createFrom().item(null)
                 .onItem().ifNull().fail().await().indefinitely();
@@ -25,12 +25,12 @@ public class UniOnNullFailTest {
         assertThat(Uni.createFrom().item(1).onItem().ifNull().fail().await().indefinitely()).isEqualTo(1);
     }
 
-    @Test(expected = RuntimeException.class)
+    @Test(expectedExceptions = RuntimeException.class)
     public void testFailWithException() {
         Uni.createFrom().item(null).onItem().ifNull().failWith(new RuntimeException("boom")).await().indefinitely();
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expectedExceptions = IllegalArgumentException.class)
     public void testFailWithExceptionSetToNull() {
         Uni.createFrom().item(null).onItem().ifNull().failWith((Exception) null).await().indefinitely();
     }
@@ -54,7 +54,7 @@ public class UniOnNullFailTest {
                 .withMessageEndingWith("2");
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expectedExceptions = IllegalArgumentException.class)
     public void testFailWithExceptionSupplierSetToNull() {
         Uni.createFrom().item(null).onItem().ifNull().failWith((Supplier<Throwable>) null).await().indefinitely();
     }

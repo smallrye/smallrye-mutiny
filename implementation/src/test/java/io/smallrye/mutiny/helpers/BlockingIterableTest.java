@@ -11,13 +11,13 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.junit.Test;
+import org.testng.annotations.Test;
 
 import io.smallrye.mutiny.Multi;
 
 public class BlockingIterableTest {
 
-    @Test(timeout = 5000)
+    @Test(timeOut = 5000)
     public void testToIterable() {
         List<Integer> values = new ArrayList<>();
 
@@ -28,7 +28,7 @@ public class BlockingIterableTest {
         assertThat(values).containsExactly(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
     }
 
-    @Test(timeout = 5000)
+    @Test(timeOut = 5000)
     public void testToIterableWithBufferSizeAndSupplier() {
         Queue<Integer> q = new ArrayBlockingQueue<>(1);
         List<Integer> values = new ArrayList<>();
@@ -40,7 +40,7 @@ public class BlockingIterableTest {
         assertThat(values).containsExactly(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
     }
 
-    @Test(timeout = 5000)
+    @Test(timeOut = 5000)
     public void testToIterableWithEmptyStream() {
         List<Integer> values = new ArrayList<>();
 
@@ -51,7 +51,7 @@ public class BlockingIterableTest {
         assertThat(values).isEmpty();
     }
 
-    @Test(timeout = 5000, expected = RuntimeException.class)
+    @Test(timeOut = 5000, expectedExceptions = RuntimeException.class)
     public void testToIterableWithUpstreamFailure() {
         List<Integer> values = new ArrayList<>();
 
@@ -63,7 +63,7 @@ public class BlockingIterableTest {
         assertThat(values).isEmpty();
     }
 
-    @Test(timeout = 5000)
+    @Test(timeOut = 5000)
     public void testToStream() {
         List<Integer> values = new ArrayList<>();
 
@@ -74,14 +74,14 @@ public class BlockingIterableTest {
         assertThat(values).containsExactly(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
     }
 
-    @Test(timeout = 5000)
+    @Test(timeOut = 5000)
     public void testToStreamWithEmptyStream() {
         List<Integer> values = new ArrayList<>();
         Multi.createFrom().<Integer> empty().subscribe().asStream().forEach(values::add);
         assertThat(values).isEmpty();
     }
 
-    @Test(timeout = 5000)
+    @Test(timeOut = 5000)
     public void testCancellationOnClose() {
         List<Integer> values = new ArrayList<>();
 
@@ -93,7 +93,7 @@ public class BlockingIterableTest {
         assertThat(values).containsExactly(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
     }
 
-    @Test(timeout = 5000)
+    @Test(timeOut = 5000)
     public void testParallelStreamComputation() {
         int n = 10_000;
 
@@ -105,7 +105,7 @@ public class BlockingIterableTest {
     }
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
-    @Test(timeout = 1000)
+    @Test(timeOut = 1000)
     public void testToStreamWithFailure() {
         Multi<Integer> multi = Multi.createFrom().<Integer> emitter(e -> e.emit(1).emit(0).complete())
                 .map(v -> 4 / v);
@@ -114,7 +114,7 @@ public class BlockingIterableTest {
                 .isInstanceOf(ArithmeticException.class).hasMessageContaining("by zero");
     }
 
-    @Test(timeout = 1000)
+    @Test(timeOut = 1000)
     public void testToIterableWithFailure() {
         Multi<Integer> multi = Multi.createFrom().<Integer> emitter(e -> e.emit(1).emit(0).complete())
                 .map(v -> 4 / v);

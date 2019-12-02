@@ -9,7 +9,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.junit.Test;
+import org.testng.annotations.Test;
 
 import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Multi;
@@ -22,7 +22,7 @@ public class MultiFlatMapToPublisherTest {
     public void testMapShortcut() {
         Multi.createFrom().items(1, 2)
                 .map(i -> i + 1)
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(2))
+                .subscribe().with(MultiAssertSubscriber.create(2))
                 .assertCompletedSuccessfully()
                 .assertReceived(2, 3);
     }
@@ -49,7 +49,7 @@ public class MultiFlatMapToPublisherTest {
         subscriber.assertCompletedSuccessfully().assertHasNotReceivedAnyItem();
     }
 
-    @Test(timeout = 60000)
+    @Test(timeOut = 60000)
     public void testConcatMapWithLotsOfResults() {
         MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(Long.MAX_VALUE);
 
@@ -72,7 +72,7 @@ public class MultiFlatMapToPublisherTest {
         }
     }
 
-    @Test(timeout = 60000)
+    @Test(timeOut = 60000)
     public void testConcatMapWithLotsOfResultsAndFailurePropagation() {
         MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(Long.MAX_VALUE);
 
@@ -95,7 +95,7 @@ public class MultiFlatMapToPublisherTest {
         }
     }
 
-    @Test(timeout = 60000)
+    @Test(timeOut = 60000)
     public void testConcatMapWithLotsOfResultsAndFailuresAndFailurePropagation() {
         MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(Long.MAX_VALUE);
 
@@ -126,7 +126,7 @@ public class MultiFlatMapToPublisherTest {
         }
     }
 
-    @Test(timeout = 60000)
+    @Test(timeOut = 60000)
     public void testConcatMapWithLotsOfResultsAndFailuresWithoutFailurePropagation() {
         MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(Long.MAX_VALUE);
 
@@ -335,7 +335,7 @@ public class MultiFlatMapToPublisherTest {
         assertThat(subscriber.items()).hasSize(20000);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expectedExceptions = IllegalArgumentException.class)
     public void testFlatMapWithInvalidConcurrency() {
         Multi.createFrom().range(1, 10001)
                 .onItem().flatMap()

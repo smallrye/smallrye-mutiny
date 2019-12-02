@@ -8,7 +8,7 @@ import java.util.concurrent.CompletionStage;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
-import org.junit.Test;
+import org.testng.annotations.Test;
 
 import io.smallrye.mutiny.Uni;
 
@@ -190,12 +190,12 @@ public class UniCreateFromCompletionStageTest {
         ts.assertItem(1);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expectedExceptions = IllegalArgumentException.class)
     public void testThatCompletionStageCannotBeNull() {
         Uni.createFrom().completionStage((CompletionStage<Void>) null);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expectedExceptions = IllegalArgumentException.class)
     public void testThatCompletionStageSupplierCannotBeNull() {
         Uni.createFrom().deferredCompletionStage((Supplier<CompletionStage<Void>>) null);
     }

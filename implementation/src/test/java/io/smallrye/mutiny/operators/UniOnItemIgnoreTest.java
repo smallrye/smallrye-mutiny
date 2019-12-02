@@ -7,7 +7,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
 import org.assertj.core.api.Assertions;
-import org.junit.Test;
+import org.testng.annotations.Test;
 
 import io.smallrye.mutiny.Uni;
 
@@ -19,7 +19,7 @@ public class UniOnItemIgnoreTest {
                 .onItem().ignore().andContinueWithNull().await().indefinitely()).isNull();
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expectedExceptions = IllegalArgumentException.class)
     public void testIgnoreOnFailure() {
         Uni.createFrom().item(24).map(i -> {
             throw new IllegalArgumentException("BOOM");
@@ -52,12 +52,12 @@ public class UniOnItemIgnoreTest {
         s2.assertFailure(IOException.class, "boom 2");
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expectedExceptions = IllegalArgumentException.class)
     public void testIgnoreAndFailWithWithNullFailure() {
         Uni.createFrom().item(22).onItem().ignore().andFail((Exception) null);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expectedExceptions = IllegalArgumentException.class)
     public void testIgnoreAndFailWithWithNullSupplier() {
         Uni.createFrom().item(22).onItem().ignore().andFail((Supplier<Throwable>) null);
     }
@@ -100,12 +100,12 @@ public class UniOnItemIgnoreTest {
         assertThat(uni.await().indefinitely()).isEqualTo(2);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expectedExceptions = IllegalArgumentException.class)
     public void testIgnoreAndSwitchToNullSupplier() {
         Uni.createFrom().item(22).onItem().ignore().andSwitchTo((Supplier<Uni<?>>) null);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expectedExceptions = IllegalArgumentException.class)
     public void testIgnoreAndSwitchToNull() {
         Uni.createFrom().item(22).onItem().ignore().andSwitchTo((Uni<?>) null);
     }

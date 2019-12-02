@@ -5,7 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.junit.Test;
+import org.testng.annotations.Test;
 
 import io.smallrye.mutiny.Uni;
 
@@ -33,7 +33,7 @@ public class UniCreateFromItemTest {
     }
 
     @SuppressWarnings({ "OptionalAssignedToNull", "unchecked" })
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expectedExceptions = IllegalArgumentException.class)
     public void testThatNullIfNotAcceptedByFromOptional() {
         Uni.createFrom().optional((Optional) null); // Immediate failure, no need for subscription
     }

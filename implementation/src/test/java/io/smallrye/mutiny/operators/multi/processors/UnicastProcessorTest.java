@@ -5,7 +5,7 @@ import static org.awaitility.Awaitility.await;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import org.junit.Test;
+import org.testng.annotations.Test;
 
 import io.smallrye.mutiny.test.MultiAssertSubscriber;
 
@@ -15,9 +15,9 @@ public class UnicastProcessorTest {
     public void testTheProcessorCanGetOnlyOneSubscriber() {
         UnicastProcessor<Integer> processor = UnicastProcessor.create();
         processor.subscribe()
-                .withSubscriber(MultiAssertSubscriber.create());
+                .with(MultiAssertSubscriber.create());
         MultiAssertSubscriber<Integer> second = processor.subscribe()
-                .withSubscriber(MultiAssertSubscriber.create());
+                .with(MultiAssertSubscriber.create());
 
         second.assertHasNotReceivedAnyItem()
                 .assertHasFailedWith(IllegalStateException.class, null)

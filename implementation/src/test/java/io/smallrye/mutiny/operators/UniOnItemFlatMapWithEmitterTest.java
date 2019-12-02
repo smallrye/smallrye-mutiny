@@ -8,7 +8,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
 
-import org.junit.Test;
+import org.testng.annotations.Test;
 
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.subscription.UniEmitter;
@@ -97,7 +97,7 @@ public class UniOnItemFlatMapWithEmitterTest {
         assertThat(called).isTrue();
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expectedExceptions = IllegalArgumentException.class)
     public void testThatTheMapperCannotBeNull() {
         Uni.createFrom().item(1).onItem().mapToUni((BiConsumer<Integer, UniEmitter<? super Integer>>) null);
     }

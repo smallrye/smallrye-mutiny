@@ -5,7 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.io.IOException;
 import java.time.Duration;
 
-import org.junit.Test;
+import org.testng.annotations.Test;
 
 import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.TimeoutException;
@@ -38,7 +38,7 @@ public class UniZipTest {
         subscriber.assertFailure(IOException.class, "boom");
     }
 
-    @Test(expected = TimeoutException.class)
+    @Test(expectedExceptions = TimeoutException.class)
     public void testWithNever() {
         Uni<Tuple3<Integer, Integer, Object>> tuple = Uni.combine().all().unis(Uni.createFrom().item(1),
                 Uni.createFrom().item(2), Uni.createFrom().nothing()).asTuple();

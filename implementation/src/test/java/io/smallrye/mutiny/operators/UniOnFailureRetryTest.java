@@ -2,18 +2,18 @@ package io.smallrye.mutiny.operators;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.junit.Test;
+import org.testng.annotations.Test;
 
 import io.smallrye.mutiny.Uni;
 
 public class UniOnFailureRetryTest {
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expectedExceptions = IllegalArgumentException.class)
     public void testInvalidNumberOfAttempts() {
         Uni.createFrom().nothing().onFailure().retry().atMost(-10);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expectedExceptions = IllegalArgumentException.class)
     public void testInvalidNumberOfAttemptsWithZero() {
         Uni.createFrom().nothing().onFailure().retry().atMost(0);
     }

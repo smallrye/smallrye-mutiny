@@ -3,7 +3,7 @@ package io.smallrye.mutiny.operators;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.junit.Test;
+import org.testng.annotations.Test;
 
 import io.smallrye.mutiny.Uni;
 
@@ -11,7 +11,7 @@ public class UniOnItemFail {
 
     private Uni<Integer> one = Uni.createFrom().item(1);
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expectedExceptions = IllegalArgumentException.class)
     public void testThatMapperCannotBeNull() {
         one.onItem().failWith(null);
     }

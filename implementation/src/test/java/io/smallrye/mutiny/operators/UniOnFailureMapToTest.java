@@ -10,21 +10,27 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
-import org.junit.Test;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Uni;
 
 public class UniOnFailureMapToTest {
 
-    private Uni<Integer> failure = Uni.createFrom().failure(new IOException("boom"));
+    private Uni<Integer> failure;
 
-    @Test(expected = IllegalArgumentException.class)
+    @BeforeMethod
+    public void init() {
+        failure = Uni.createFrom().failure(new IOException("boom"));
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
     public void testThatMapperMustNotBeNull() {
         Uni.createFrom().item(1).onFailure().mapTo(null);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expectedExceptions = IllegalArgumentException.class)
     public void testThatSourceMustNotBeNull() {
         new UniMapOnFailure<>(null, t -> true, Function.identity());
     }

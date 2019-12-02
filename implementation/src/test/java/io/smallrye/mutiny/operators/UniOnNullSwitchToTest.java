@@ -6,7 +6,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.junit.Test;
+import org.testng.annotations.Test;
 
 import io.smallrye.mutiny.Uni;
 
@@ -54,14 +54,14 @@ public class UniOnNullSwitchToTest {
 
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test(expectedExceptions = NullPointerException.class)
     public void testSwitchToNull() {
         Uni.createFrom().item(null).onItem().castTo(Integer.class)
                 .onItem().ifNull().switchTo((Uni<Integer>) null)
                 .await().indefinitely();
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test(expectedExceptions = NullPointerException.class)
     public void testSwitchToNullSupplier() {
         Uni.createFrom().item(null).onItem().castTo(Integer.class)
                 .onItem().ifNull().switchTo((Uni<? extends Integer>) null)

@@ -5,20 +5,20 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
 
-import org.junit.Test;
+import org.testng.annotations.Test;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 
 public class MultiFilterTest {
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expectedExceptions = IllegalArgumentException.class)
     public void testThatPredicateCannotBeNull() {
         Multi.createFrom().range(1, 4)
                 .onItem().filterWith(null);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expectedExceptions = IllegalArgumentException.class)
     public void testThatFunctionCannotBeNull() {
         Multi.createFrom().range(1, 4)
                 .onItem().testWith(null);

@@ -1,13 +1,13 @@
 package io.smallrye.mutiny.operators;
 
-import org.junit.Test;
+import org.testng.annotations.Test;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.test.MultiAssertSubscriber;
 
 public class MultiCastTest {
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expectedExceptions = IllegalArgumentException.class)
     public void testThatClassCannotBeNull() {
         Multi.createFrom().item(1)
                 .onItem().castTo(null);
@@ -17,7 +17,7 @@ public class MultiCastTest {
     public void testCastThatWorks() {
         Multi.createFrom().item(1)
                 .onItem().castTo(Number.class)
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(1))
+                .subscribe().with(MultiAssertSubscriber.create(1))
                 .assertCompletedSuccessfully()
                 .assertReceived(1);
     }
@@ -26,7 +26,7 @@ public class MultiCastTest {
     public void testCastThatDoesNotWork() {
         Multi.createFrom().item(1)
                 .onItem().castTo(String.class)
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(1))
+                .subscribe().with(MultiAssertSubscriber.create(1))
                 .assertHasFailedWith(ClassCastException.class, "String");
     }
 }

@@ -6,7 +6,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.junit.Test;
+import org.testng.annotations.Test;
 
 import io.smallrye.mutiny.Uni;
 
@@ -91,7 +91,7 @@ public class UniOnItemFlatMapToCompletionStageTest {
         assertThat(called).isTrue();
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expectedExceptions = IllegalArgumentException.class)
     public void testThatTheMapperCannotBeNull() {
         Uni.createFrom().item(1).onItem().mapToCompletionStage(null);
     }

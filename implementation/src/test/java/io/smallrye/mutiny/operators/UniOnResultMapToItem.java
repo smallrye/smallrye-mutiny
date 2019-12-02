@@ -9,7 +9,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
-import org.junit.Test;
+import org.testng.annotations.Test;
 
 import io.smallrye.mutiny.Uni;
 
@@ -17,12 +17,12 @@ public class UniOnResultMapToItem {
 
     private Uni<Integer> one = Uni.createFrom().item(1);
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expectedExceptions = IllegalArgumentException.class)
     public void testThatMapperMustNotBeNull() {
         Uni.createFrom().item(1).map(null);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expectedExceptions = IllegalArgumentException.class)
     public void testThatSourceMustNotBeNull() {
         new UniMapOnResult<>(null, Function.identity());
     }

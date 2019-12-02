@@ -1,6 +1,6 @@
 package io.smallrye.mutiny.operators;
 
-import org.junit.Test;
+import org.testng.annotations.Test;
 
 import io.smallrye.mutiny.Uni;
 

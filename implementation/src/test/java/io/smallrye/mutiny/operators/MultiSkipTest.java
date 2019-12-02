@@ -8,7 +8,7 @@ import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.junit.Test;
+import org.testng.annotations.Test;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.subscription.MultiEmitter;
@@ -51,7 +51,7 @@ public class MultiSkipTest {
     @Test
     public void testSkipOnUpstreamFailure() {
         Multi.createFrom().<Integer> failure(new IOException("boom")).transform().bySkippingFirstItems(1)
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(10))
+                .subscribe().with(MultiAssertSubscriber.create(10))
                 .assertHasFailedWith(IOException.class, "boom")
                 .assertHasNotReceivedAnyItem();
     }
@@ -59,7 +59,7 @@ public class MultiSkipTest {
     @Test
     public void testSkipLastOnUpstreamFailure() {
         Multi.createFrom().<Integer> failure(new IOException("boom")).transform().bySkippingLastItems(1)
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(10))
+                .subscribe().with(MultiAssertSubscriber.create(10))
                 .assertHasFailedWith(IOException.class, "boom")
                 .assertHasNotReceivedAnyItem();
     }
@@ -67,7 +67,7 @@ public class MultiSkipTest {
     @Test
     public void testSkipAll() {
         Multi.createFrom().range(1, 5).transform().bySkippingFirstItems(4)
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(10))
+                .subscribe().with(MultiAssertSubscriber.create(10))
                 .assertCompletedSuccessfully()
                 .assertHasNotReceivedAnyItem();
     }
@@ -75,7 +75,7 @@ public class MultiSkipTest {
     @Test
     public void testSkipLastAll() {
         Multi.createFrom().range(1, 5).transform().bySkippingLastItems(4)
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(10))
+                .subscribe().with(MultiAssertSubscriber.create(10))
                 .assertCompletedSuccessfully()
                 .assertHasNotReceivedAnyItem();
     }
@@ -136,7 +136,7 @@ public class MultiSkipTest {
     public void testSkipWhileWithMethodThrowingException() {
         Multi.createFrom().range(1, 10).transform().bySkippingItemsWhile(i -> {
             throw new IllegalStateException("boom");
-        }).subscribe().withSubscriber(MultiAssertSubscriber.create(10))
+        }).subscribe().with(MultiAssertSubscriber.create(10))
                 .assertHasFailedWith(IllegalStateException.class, "boom");
     }
 
@@ -144,11 +144,11 @@ public class MultiSkipTest {
     public void testSkipWhileWithUpstreamFailure() {
         Multi.createFrom().<Integer> failure(new IOException("boom"))
                 .transform().bySkippingItemsWhile(i -> i < 5)
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(10))
+                .subscribe().with(MultiAssertSubscriber.create(10))
                 .assertHasFailedWith(IOException.class, "boom");
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expectedExceptions = IllegalArgumentException.class)
     public void testSkipWhileWithNullMethod() {
         Multi.createFrom().nothing().transform().bySkippingItemsWhile(null);
     }
@@ -156,7 +156,7 @@ public class MultiSkipTest {
     @Test
     public void testSkipWhile() {
         Multi.createFrom().range(1, 10).transform().bySkippingItemsWhile(i -> i < 5)
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(10))
+                .subscribe().with(MultiAssertSubscriber.create(10))
                 .assertCompletedSuccessfully()
                 .assertReceived(5, 6, 7, 8, 9);
     }
@@ -164,7 +164,7 @@ public class MultiSkipTest {
     @Test
     public void testSkipWhileNone() {
         Multi.createFrom().items(1, 2, 3, 4).transform().bySkippingItemsWhile(i -> false)
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(10))
+                .subscribe().with(MultiAssertSubscriber.create(10))
                 .assertCompletedSuccessfully()
                 .assertReceived(1, 2, 3, 4);
     }
@@ -172,7 +172,7 @@ public class MultiSkipTest {
     @Test
     public void testSkipWhileAll() {
         Multi.createFrom().items(1, 2, 3, 4).transform().bySkippingItemsWhile(i -> true)
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(10))
+                .subscribe().with(MultiAssertSubscriber.create(10))
                 .assertCompletedSuccessfully()
                 .assertHasNotReceivedAnyItem();
     }
@@ -181,7 +181,7 @@ public class MultiSkipTest {
     public void testSkipWhileSomeWithBackPressure() {
         MultiAssertSubscriber<Integer> subscriber = Multi.createFrom().items(1, 2, 3, 4).transform()
                 .bySkippingItemsWhile(i -> i < 3)
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(0));
+                .subscribe().with(MultiAssertSubscriber.create(0));
 
         subscriber.assertNotTerminated()
                 .assertHasNotReceivedAnyItem();
@@ -201,12 +201,12 @@ public class MultiSkipTest {
     public void testSkipByTime() {
         Multi.createFrom().range(1, 100)
                 .transform().bySkippingItemsFor(Duration.ofMillis(2000))
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(10))
+                .subscribe().with(MultiAssertSubscriber.create(10))
                 .assertCompletedSuccessfully()
                 .assertHasNotReceivedAnyItem();
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expectedExceptions = IllegalArgumentException.class)
     public void testSkipByTimeWithInvalidDuration() {
         Multi.createFrom().item(1).transform().bySkippingItemsFor(Duration.ofMillis(-1));
     }

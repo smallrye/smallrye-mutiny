@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.junit.Test;
+import org.testng.annotations.Test;
 
 import io.reactivex.Flowable;
 import io.reactivex.processors.UnicastProcessor;
@@ -64,7 +64,7 @@ public class UniCacheTest {
         }
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expectedExceptions = IllegalArgumentException.class)
     public void testThatSourceCannotBeNull() {
         new UniCache<>(null);
     }

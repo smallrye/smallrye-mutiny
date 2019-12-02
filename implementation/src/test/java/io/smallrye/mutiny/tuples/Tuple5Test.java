@@ -6,7 +6,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import java.util.Arrays;
 import java.util.Collections;
 
-import org.junit.Test;
+import org.testng.annotations.Test;
 
 public class Tuple5Test {
 
@@ -32,12 +32,12 @@ public class Tuple5Test {
         assertThat(someTuple.mapItem5(i -> i + 1)).containsExactly(1, 2, 3, 4, 6);
     }
 
-    @Test(expected = IndexOutOfBoundsException.class)
+    @Test(expectedExceptions = IndexOutOfBoundsException.class)
     public void testAccessingNegative() {
         someTuple.nth(-1);
     }
 
-    @Test(expected = IndexOutOfBoundsException.class)
+    @Test(expectedExceptions = IndexOutOfBoundsException.class)
     public void testAccessingOutOfIndex() {
         someTuple.nth(10);
     }

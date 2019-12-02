@@ -6,7 +6,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import java.util.Arrays;
 import java.util.Collections;
 
-import org.junit.Test;
+import org.testng.annotations.Test;
 
 public class Tuple2Test {
 
@@ -102,12 +102,12 @@ public class Tuple2Test {
                 })).withMessage("boom");
     }
 
-    @Test(expected = IndexOutOfBoundsException.class)
+    @Test(expectedExceptions = IndexOutOfBoundsException.class)
     public void testAccessingNegative() {
         somePair.nth(-1);
     }
 
-    @Test(expected = IndexOutOfBoundsException.class)
+    @Test(expectedExceptions = IndexOutOfBoundsException.class)
     public void testAccessingOutOfIndex() {
         somePair.nth(3);
     }

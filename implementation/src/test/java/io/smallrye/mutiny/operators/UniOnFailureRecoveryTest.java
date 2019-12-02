@@ -7,14 +7,20 @@ import java.io.IOException;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.junit.Test;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Uni;
 
 public class UniOnFailureRecoveryTest {
 
-    private Uni<Integer> failed = Uni.createFrom().deferredFailure(IOException::new);
+    private Uni<Integer> failed;
+
+    @BeforeMethod
+    public void init() {
+        failed = Uni.createFrom().deferredFailure(IOException::new);
+    }
 
     @Test
     public void testRecoverWithDirectValue() {
@@ -100,7 +106,7 @@ public class UniOnFailureRecoveryTest {
         assertThat(value).isEqualTo(null);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expectedExceptions = IllegalArgumentException.class)
     public void testRecoverWithUniFail() {
         failed.onFailure().recoverWithUni(Uni.createFrom().deferredFailure(IllegalArgumentException::new)).await()
                 .indefinitely();

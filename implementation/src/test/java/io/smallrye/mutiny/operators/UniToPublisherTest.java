@@ -8,9 +8,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.junit.After;
-import org.junit.Test;
 import org.reactivestreams.Publisher;
+import org.testng.annotations.AfterTest;
+import org.testng.annotations.Test;
 
 import io.reactivex.Flowable;
 import io.reactivex.subscribers.TestSubscriber;
@@ -21,7 +21,7 @@ public class UniToPublisherTest {
 
     private ExecutorService executor;
 
-    @After
+    @AfterTest
     public void shutdown() {
         if (executor != null) {
             executor.shutdown();
