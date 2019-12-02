@@ -31,6 +31,7 @@ public class CollectionBasedMulti<T> extends AbstractMulti<T> {
 
     @Override
     public void subscribe(Subscriber<? super T> actual) {
+        ParameterValidation.nonNullNpe(actual, "subscriber");
         if (collection.isEmpty()) {
             Subscriptions.complete(actual);
             return;
@@ -67,6 +68,8 @@ public class CollectionBasedMulti<T> extends AbstractMulti<T> {
                         followRequests(n);
                     }
                 }
+            } else {
+                downstream.onError(Subscriptions.getInvalidRequestException());
             }
         }
 

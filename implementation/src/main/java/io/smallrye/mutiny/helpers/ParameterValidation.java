@@ -53,6 +53,16 @@ public class ParameterValidation {
         return instance;
     }
 
+    public static <T> T nonNullNpe(T instance, String name) {
+        if (name == null) {
+            throw new NullPointerException("The parameter name must be set");
+        }
+        if (instance == null) {
+            throw new NullPointerException(String.format("`%s` must not be `null`", name));
+        }
+        return instance;
+    }
+
     /**
      * Validates that the passed amount is strictly positive.
      *

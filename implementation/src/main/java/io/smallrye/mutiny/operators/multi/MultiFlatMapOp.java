@@ -11,7 +11,6 @@ import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
-import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.helpers.Subscriptions;
@@ -22,7 +21,6 @@ public final class MultiFlatMapOp<I, O> extends AbstractMultiOperator<I, O> {
 
     private final boolean postponeFailurePropagation;
     private final int maxConcurrency;
-    private final int prefetch;
 
     private final Supplier<? extends Queue<O>> mainQueueSupplier;
     private final Supplier<? extends Queue<O>> innerQueueSupplier;
@@ -31,12 +29,11 @@ public final class MultiFlatMapOp<I, O> extends AbstractMultiOperator<I, O> {
             Function<? super I, ? extends Publisher<? extends O>> mapper,
             boolean postponeFailurePropagation,
             int maxConcurrency,
-            int prefetch, Supplier<? extends Queue<O>> mainQueueSupplier,
+            Supplier<? extends Queue<O>> mainQueueSupplier,
             Supplier<? extends Queue<O>> innerQueueSupplier) {
         super(upstream);
         this.mapper = ParameterValidation.nonNull(mapper, "mapper");
         this.postponeFailurePropagation = postponeFailurePropagation;
-        this.prefetch = ParameterValidation.positive(prefetch, "prefetch");
         this.maxConcurrency = ParameterValidation.positive(maxConcurrency, "maxConcurrency");
         this.mainQueueSupplier = ParameterValidation.nonNull(mainQueueSupplier, "mainQueueSupplier");
         this.innerQueueSupplier = ParameterValidation.nonNull(innerQueueSupplier, "innerQueueSupplier");
@@ -49,11 +46,14 @@ public final class MultiFlatMapOp<I, O> extends AbstractMultiOperator<I, O> {
 
     @Override
     public void subscribe(Subscriber<? super O> subscriber) {
+        if (subscriber == null) {
+            throw new NullPointerException("The subscriber must not be `null`");
+        }
         FlatMapMainSubscriber<I, O> sub = new FlatMapMainSubscriber<>(subscriber,
                 mapper,
                 postponeFailurePropagation,
                 maxConcurrency,
-                prefetch, mainQueueSupplier,
+                mainQueueSupplier,
                 innerQueueSupplier);
         upstream.subscribe(sub);
     }
@@ -68,8 +68,7 @@ public final class MultiFlatMapOp<I, O> extends AbstractMultiOperator<I, O> {
         final Function<? super I, ? extends Publisher<? extends O>> mapper;
         final Supplier<? extends Queue<O>> mainQueueSupplier;
         final Supplier<? extends Queue<O>> innerQueueSupplier;
-        final Subscriber<? super O> actual;
-        private final int prefetch;
+        final Subscriber<? super O> downstream;
 
         volatile Queue<O> queue;
 
@@ -78,7 +77,7 @@ public final class MultiFlatMapOp<I, O> extends AbstractMultiOperator<I, O> {
         volatile boolean done;
         volatile boolean cancelled;
 
-        AtomicReference<Subscription> subscription = new AtomicReference<>();
+        AtomicReference<Subscription> upstream = new AtomicReference<>();
 
         AtomicLong requested = new AtomicLong();
 
@@ -92,19 +91,18 @@ public final class MultiFlatMapOp<I, O> extends AbstractMultiOperator<I, O> {
 
         int lastIndex;
 
-        FlatMapMainSubscriber(Subscriber<? super O> actual,
+        FlatMapMainSubscriber(Subscriber<? super O> downstream,
                 Function<? super I, ? extends Publisher<? extends O>> mapper,
                 boolean delayError,
                 int maxConcurrency,
-                int prefetch, Supplier<? extends Queue<O>> mainQueueSupplier,
+                Supplier<? extends Queue<O>> mainQueueSupplier,
                 Supplier<? extends Queue<O>> innerQueueSupplier) {
-            this.actual = actual;
+            this.downstream = downstream;
             this.mapper = mapper;
             this.delayError = delayError;
             this.maxConcurrency = maxConcurrency;
             this.mainQueueSupplier = mainQueueSupplier;
             this.innerQueueSupplier = innerQueueSupplier;
-            this.prefetch = prefetch;
             this.limit = Subscriptions.unboundedOrLimit(maxConcurrency);
         }
 
@@ -133,14 +131,16 @@ public final class MultiFlatMapOp<I, O> extends AbstractMultiOperator<I, O> {
 
         @Override
         void unsubscribeEntry(FlatMapInner<O> entry) {
-            entry.cancel();
+            entry.onCancellation();
         }
 
         @Override
         public void request(long n) {
-            if (Subscriptions.validate(n)) {
+            if (n > 0) {
                 Subscriptions.add(requested, n);
                 drain();
+            } else {
+                downstream.onError(new IllegalArgumentException("Invalid requests, must be greater than 0"));
             }
         }
 
@@ -150,9 +150,8 @@ public final class MultiFlatMapOp<I, O> extends AbstractMultiOperator<I, O> {
                 cancelled = true;
 
                 if (wip.getAndIncrement() == 0) {
-                    queue.clear();
-                    queue = null;
-                    subscription.getAndSet(Subscriptions.CANCELLED).cancel();
+                    clearQueue();
+                    upstream.getAndSet(Subscriptions.CANCELLED).cancel();
                     unsubscribe();
                 }
             }
@@ -160,8 +159,8 @@ public final class MultiFlatMapOp<I, O> extends AbstractMultiOperator<I, O> {
 
         @Override
         public void onSubscribe(Subscription s) {
-            if (subscription.compareAndSet(null, s)) {
-                actual.onSubscribe(this);
+            if (upstream.compareAndSet(null, s)) {
+                downstream.onSubscribe(this);
                 s.request(Subscriptions.unboundedOrMaxConcurrency(maxConcurrency));
             }
         }
@@ -180,7 +179,11 @@ public final class MultiFlatMapOp<I, O> extends AbstractMultiOperator<I, O> {
                     throw new NullPointerException(ParameterValidation.MAPPER_RETURNED_NULL);
                 }
             } catch (Throwable e) {
-                onError(e);
+                cancelled = true;
+                done = true;
+                Subscriptions.addFailure(failures, e);
+                cancelUpstream();
+                handleTerminationIfDone();
                 return;
             }
 
@@ -190,42 +193,12 @@ public final class MultiFlatMapOp<I, O> extends AbstractMultiOperator<I, O> {
             }
         }
 
-        Queue<O> getOrCreateScalarQueue() {
-            Queue<O> q = queue;
-            if (q == null) {
-                q = mainQueueSupplier.get();
-                queue = q;
-            }
-            return q;
-        }
-
-        private boolean addFailure(Throwable failure) {
-            Throwable current = failures.get();
-
-            if (current == Subscriptions.TERMINATED) {
-                return false;
-            }
-
-            if (current instanceof CompositeException) {
-                failures.set(new CompositeException((CompositeException) current, failure));
-                return true;
-            }
-
-            if (current == null) {
-                failures.set(failure);
-            } else {
-                failures.set(new CompositeException(current, failure));
-            }
-
-            return true;
-        }
-
         @Override
         public void onError(Throwable failure) {
             if (done) {
                 return;
             }
-            addFailure(failure);
+            Subscriptions.addFailure(failures, failure);
             done = true;
             drain();
         }
@@ -242,13 +215,12 @@ public final class MultiFlatMapOp<I, O> extends AbstractMultiOperator<I, O> {
 
         void tryEmit(FlatMapInner<O> inner, O item) {
             if (wip.compareAndSet(0, 1)) {
-                long r = requested.get();
-
+                long req = requested.get();
                 Queue<O> q = inner.queue;
-                if (r != 0 && (q == null || q.isEmpty())) {
-                    actual.onNext(item);
+                if (req != 0 && (q == null || q.isEmpty())) {
+                    downstream.onNext(item);
 
-                    if (r != Long.MAX_VALUE) {
+                    if (req != Long.MAX_VALUE) {
                         requested.decrementAndGet();
                     }
 
@@ -291,7 +263,7 @@ public final class MultiFlatMapOp<I, O> extends AbstractMultiOperator<I, O> {
         void drainLoop() {
             int missed = 1;
 
-            final Subscriber<? super O> a = actual;
+            final Subscriber<? super O> a = downstream;
 
             for (;;) {
 
@@ -305,7 +277,7 @@ public final class MultiFlatMapOp<I, O> extends AbstractMultiOperator<I, O> {
 
                 boolean noSources = isEmpty();
 
-                if (checkTerminated(d, noSources && (sq == null || sq.isEmpty()), a)) {
+                if (ifDoneOrCancelled()) {
                     return;
                 }
 
@@ -324,7 +296,7 @@ public final class MultiFlatMapOp<I, O> extends AbstractMultiOperator<I, O> {
 
                         boolean empty = v == null;
 
-                        if (checkTerminated(d, false, a)) {
+                        if (ifDoneOrCancelled()) {
                             return;
                         }
 
@@ -351,10 +323,7 @@ public final class MultiFlatMapOp<I, O> extends AbstractMultiOperator<I, O> {
                     int j = lastIndex;
                     for (int i = 0; i < n; i++) {
                         if (cancelled) {
-                            queue.clear();
-                            queue = null;
-                            subscription.getAndSet(Subscriptions.CANCELLED).cancel();
-                            unsubscribe();
+                            cancelUpstream();
                             return;
                         }
 
@@ -375,14 +344,14 @@ public final class MultiFlatMapOp<I, O> extends AbstractMultiOperator<I, O> {
                                     try {
                                         v = q.poll();
                                     } catch (Throwable ex) {
-                                        addFailure(ex);
+                                        Subscriptions.addFailure(failures, ex);
                                         v = null;
                                         d = true;
                                     }
 
                                     boolean empty = v == null;
 
-                                    if (checkTerminated(d, false, a)) {
+                                    if (ifDoneOrCancelled()) {
                                         return;
                                     }
 
@@ -445,10 +414,7 @@ public final class MultiFlatMapOp<I, O> extends AbstractMultiOperator<I, O> {
 
                     for (int i = 0; i < n; i++) {
                         if (cancelled) {
-                            queue.clear();
-                            queue = null;
-                            subscription.getAndSet(Subscriptions.CANCELLED).cancel();
-                            unsubscribe();
+                            cancelUpstream();
                             return;
                         }
 
@@ -475,7 +441,7 @@ public final class MultiFlatMapOp<I, O> extends AbstractMultiOperator<I, O> {
                 }
 
                 if (replenishMain != 0L && !done && !cancelled) {
-                    subscription.get().request(replenishMain);
+                    upstream.get().request(replenishMain);
                 }
 
                 if (again) {
@@ -489,24 +455,43 @@ public final class MultiFlatMapOp<I, O> extends AbstractMultiOperator<I, O> {
             }
         }
 
-        boolean checkTerminated(boolean wasDone, boolean isEmpty, Subscriber<?> subscriber) {
-            if (cancelled) {
+        private void cancelUpstream() {
+            clearQueue();
+            Subscription subscription = upstream.getAndSet(Subscriptions.CANCELLED);
+            if (subscription != null) {
+                subscription.cancel();
+            }
+            unsubscribe();
+        }
+
+        private void clearQueue() {
+            if (queue != null) {
                 queue.clear();
                 queue = null;
-                subscription.getAndSet(Subscriptions.CANCELLED).cancel();
-                unsubscribe();
+            }
+        }
 
+        boolean ifDoneOrCancelled() {
+            if (cancelled) {
+                cancelUpstream();
                 return true;
             }
 
+            return handleTerminationIfDone();
+
+        }
+
+        private boolean handleTerminationIfDone() {
+            boolean wasDone = done;
+            boolean isEmpty = isEmpty() && (queue == null || queue.isEmpty());
             if (delayError) {
                 if (wasDone && isEmpty) {
                     Throwable e = failures.get();
                     if (e != null && e != Subscriptions.TERMINATED) {
                         Throwable throwable = failures.getAndSet(Subscriptions.TERMINATED);
-                        subscriber.onError(throwable);
+                        downstream.onError(throwable);
                     } else {
-                        subscriber.onComplete();
+                        downstream.onComplete();
                     }
                     return true;
                 }
@@ -515,30 +500,27 @@ public final class MultiFlatMapOp<I, O> extends AbstractMultiOperator<I, O> {
                     Throwable e = failures.get();
                     if (e != null && e != Subscriptions.TERMINATED) {
                         Throwable throwable = failures.getAndSet(Subscriptions.TERMINATED);
-                        if (queue != null) {
-                            queue.clear();
-                            queue = null;
-                        }
-                        subscription.getAndSet(Subscriptions.CANCELLED).cancel();
+                        clearQueue();
                         unsubscribe();
-                        subscriber.onError(throwable);
+                        downstream.onError(throwable);
                         return true;
                     } else if (isEmpty) {
-                        subscriber.onComplete();
+                        downstream.onComplete();
                         return true;
                     }
                 }
             }
-
             return false;
         }
 
-        void innerError(FlatMapInner<O> inner, Throwable e) {
-            if (e != null) {
-                if (addFailure(e)) {
+        void innerError(FlatMapInner<O> inner, Throwable fail) {
+            if (fail != null) {
+                if (Subscriptions.addFailure(failures, fail)) {
                     inner.done = true;
                     if (!delayError) {
-                        done = true;
+                        cancelUpstream();
+                        downstream.onError(fail);
+                        return;
                     }
                     drain();
                 }
@@ -549,10 +531,10 @@ public final class MultiFlatMapOp<I, O> extends AbstractMultiOperator<I, O> {
 
         void failOverflow() {
             Throwable e = new BackPressureFailure("Buffer full, cannot emit item");
-            addFailure(e);
+            Subscriptions.addFailure(failures, e);
         }
 
-        void innerComplete(FlatMapInner<O> inner) {
+        void innerComplete() {
             if (wip.getAndIncrement() != 0) {
                 return;
             }
@@ -608,20 +590,20 @@ public final class MultiFlatMapOp<I, O> extends AbstractMultiOperator<I, O> {
         }
 
         @Override
-        public void onNext(O t) {
-            parent.tryEmit(this, t);
+        public void onNext(O item) {
+            parent.tryEmit(this, item);
         }
 
         @Override
-        public void onError(Throwable t) {
+        public void onError(Throwable failure) {
             done = true;
-            parent.innerError(this, t);
+            parent.innerError(this, failure);
         }
 
         @Override
         public void onComplete() {
             done = true;
-            parent.innerComplete(this);
+            parent.innerComplete();
         }
 
         @Override
@@ -637,6 +619,14 @@ public final class MultiFlatMapOp<I, O> extends AbstractMultiOperator<I, O> {
 
         @Override
         public void cancel() {
+            subscription.getAndSet(Subscriptions.CANCELLED).cancel();
+            if (queue != null) {
+                queue.clear();
+                queue = null;
+            }
+        }
+
+        public void onCancellation() {
             subscription.getAndSet(Subscriptions.CANCELLED).cancel();
             if (queue != null) {
                 queue.clear();

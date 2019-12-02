@@ -1,5 +1,7 @@
 package io.smallrye.mutiny.helpers;
 
+import java.util.concurrent.atomic.AtomicReference;
+
 import org.reactivestreams.Processor;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
@@ -7,8 +9,6 @@ import org.reactivestreams.Subscription;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.operators.multi.processors.UnicastProcessor;
 import io.smallrye.mutiny.subscription.MultiEmitter;
-
-import java.util.concurrent.atomic.AtomicReference;
 
 public class MultiEmitterProcessor<T> implements Processor<T, T>, MultiEmitter<T> {
 

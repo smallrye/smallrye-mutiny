@@ -19,8 +19,11 @@ public final class MultiMapOp<T, U> extends AbstractMultiOperator<T, U> {
     }
 
     @Override
-    public void subscribe(Subscriber<? super U> s) {
-        upstream.subscribe(new MapProcessor<T, U>(s, mapper));
+    public void subscribe(Subscriber<? super U> downstream) {
+        if (downstream == null) {
+            throw new NullPointerException("Subscriber is `null`");
+        }
+        upstream.subscribe(new MapProcessor<T, U>(downstream, mapper));
     }
 
     @Override
@@ -45,11 +48,11 @@ public final class MultiMapOp<T, U> extends AbstractMultiOperator<T, U> {
             try {
                 v = mapper.apply(item);
             } catch (Throwable ex) {
-                onError(ex);
+                failAndCancel(ex);
                 return;
             }
             if (v == null) {
-                onError(new NullPointerException(MAPPER_RETURNED_NULL));
+                failAndCancel(new NullPointerException(MAPPER_RETURNED_NULL));
             } else {
                 downstream.onNext(v);
             }

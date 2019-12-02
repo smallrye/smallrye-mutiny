@@ -67,8 +67,11 @@ public class MultiOnFailureResumeOp<T> extends AbstractMultiOperator<T, T> {
                         throw new NullPointerException(ParameterValidation.SUPPLIER_PRODUCED_NULL);
                     }
                 } catch (Throwable e) {
-                    CompositeException exception = new CompositeException(failure, e);
-                    super.onError(exception);
+                    if (e == failure) { // Exception rethrown.
+                        super.onError(e);
+                    } else {
+                        super.onError(new CompositeException(failure, e));
+                    }
                     return;
                 }
                 publisher.subscribe(this);

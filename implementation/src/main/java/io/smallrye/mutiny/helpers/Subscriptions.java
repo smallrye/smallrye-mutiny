@@ -5,6 +5,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
@@ -16,6 +17,10 @@ public class Subscriptions {
 
     private Subscriptions() {
         // avoid direct instantiation
+    }
+
+    public static IllegalArgumentException getInvalidRequestException() {
+        return new IllegalArgumentException("Invalid request number, must be greater than 0");
     }
 
     /**
@@ -75,8 +80,16 @@ public class Subscriptions {
      * @param failure the failure, must not be {@code null}
      */
     public static void fail(Subscriber<?> subscriber, Throwable failure) {
+        fail(subscriber, failure, null);
+    }
+
+    public static void fail(Subscriber<?> subscriber, Throwable failure, Publisher<?> upstream) {
         ParameterValidation.nonNull(subscriber, "subscriber");
         ParameterValidation.nonNull(failure, "failure");
+        if (upstream != null) {
+            upstream.subscribe(new CancelledSubscriber<>());
+        }
+
         subscriber.onSubscribe(empty());
         subscriber.onError(failure);
     }
@@ -138,16 +151,6 @@ public class Subscriptions {
                 return update;
             }
         }
-    }
-
-    /**
-     * Evaluate if a request is strictly positive.
-     *
-     * @param n the request value
-     * @return {@code true} if valid
-     */
-    public static boolean validate(long n) {
-        return n > 0;
     }
 
     public static int unboundedOrLimit(int prefetch) {
@@ -311,6 +314,29 @@ public class Subscriptions {
                     downstream.onComplete();
                 }
             }
+        }
+    }
+
+    @SuppressWarnings("SubscriberImplementation")
+    public static class CancelledSubscriber<X> implements Subscriber<X> {
+        @Override
+        public void onSubscribe(Subscription s) {
+            s.cancel();
+        }
+
+        @Override
+        public void onNext(X o) {
+            // Ignored
+        }
+
+        @Override
+        public void onError(Throwable t) {
+            // Ignored
+        }
+
+        @Override
+        public void onComplete() {
+            // Ignored
         }
     }
 }

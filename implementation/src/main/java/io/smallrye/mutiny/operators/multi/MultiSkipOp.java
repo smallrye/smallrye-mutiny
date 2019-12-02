@@ -10,11 +10,11 @@ import io.smallrye.mutiny.helpers.ParameterValidation;
 
 /**
  * Skips the first N items from upstream.
- * Failures and completations are propagated.
+ * Failures and completions are propagated.
  */
 public final class MultiSkipOp<T> extends AbstractMultiOperator<T, T> {
 
-    final long numberOfItems;
+    private final long numberOfItems;
 
     public MultiSkipOp(Multi<? extends T> upstream, long numberOfItems) {
         super(upstream);

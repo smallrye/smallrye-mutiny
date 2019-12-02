@@ -21,7 +21,7 @@ public class MultiTransform<T> {
         this.upstream = upstream;
     }
 
-    public Multi<T> bySkippingFirstItems(int number) {
+    public Multi<T> bySkippingFirstItems(long number) {
         return MultiTransformation.skipFirst(upstream, positiveOrZero(number, "number"));
     }
 
@@ -37,7 +37,7 @@ public class MultiTransform<T> {
         return MultiTransformation.skipForDuration(upstream, validate(duration, "duration"));
     }
 
-    public Multi<T> byTakingFirstItems(int number) {
+    public Multi<T> byTakingFirstItems(long number) {
         return MultiTransformation.takeFirst(upstream, positiveOrZero(number, "number"));
     }
 

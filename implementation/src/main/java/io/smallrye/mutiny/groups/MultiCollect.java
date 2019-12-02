@@ -68,7 +68,7 @@ public class MultiCollect<T> {
      * @return a {@link Uni} emitted the collected object as item, when the {@link Multi} completes
      */
     public <X, A> Uni<X> with(Collector<? super T, A, ? extends X> collector) {
-        return MultiCollector.collector(upstream, collector);
+        return MultiCollector.collector(upstream, collector, true);
     }
 
     /**

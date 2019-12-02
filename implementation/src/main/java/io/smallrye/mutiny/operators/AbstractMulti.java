@@ -2,6 +2,7 @@ package io.smallrye.mutiny.operators;
 
 import static io.smallrye.mutiny.helpers.EmptyUniSubscription.CANCELLED;
 import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
+import static io.smallrye.mutiny.helpers.Subscriptions.getInvalidRequestException;
 
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicReference;
@@ -24,6 +25,9 @@ public abstract class AbstractMulti<T> implements Multi<T> {
 
     @Override
     public void subscribe(Subscriber<? super T> subscriber) {
+        if (subscriber == null) {
+            throw new NullPointerException("Subscriber is `null`");
+        }
         Publisher<T> publisher = publisher();
         if (publisher == null) {
             throw new IllegalStateException("Invalid call to subscription, we don't have a publisher");
@@ -39,7 +43,11 @@ public abstract class AbstractMulti<T> implements Multi<T> {
                     subscriber.onSubscribe(new Subscription() {
                         @Override
                         public void request(long n) {
-                            // pass through
+                            // validate and pass through
+                            if (n <= 0) {
+                                onError(getInvalidRequestException());
+                                return;
+                            }
                             s.request(n);
                         }
 
@@ -59,6 +67,13 @@ public abstract class AbstractMulti<T> implements Multi<T> {
 
             @Override
             public void onNext(T item) {
+                if (item == null) {
+                    Subscription subscription = reference.getAndSet(CANCELLED);
+                    if (subscription != null) {
+                        subscription.cancel();
+                    }
+                    throw new NullPointerException("`null` is not a valid item");
+                }
                 try {
                     subscriber.onNext(item);
                 } catch (Exception e) {
@@ -71,6 +86,9 @@ public abstract class AbstractMulti<T> implements Multi<T> {
 
             @Override
             public void onError(Throwable failure) {
+                if (failure == null) {
+                    throw new NullPointerException("The failure must not be `null`");
+                }
                 try {
                     subscriber.onError(failure);
                 } finally {

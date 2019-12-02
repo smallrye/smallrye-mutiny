@@ -78,6 +78,7 @@ public class MultiEmitOnOp<T> extends AbstractMultiOperator<T, T> {
 
         @Override
         public void onNext(T t) {
+
             if (done) {
                 return;
             }
@@ -87,7 +88,6 @@ public class MultiEmitOnOp<T> extends AbstractMultiOperator<T, T> {
                 done = true;
                 return;
             }
-
             schedule();
         }
 
@@ -154,6 +154,7 @@ public class MultiEmitOnOp<T> extends AbstractMultiOperator<T, T> {
 
         @Override
         public void run() {
+
             int missed = 1;
 
             final Queue<T> q = queue;

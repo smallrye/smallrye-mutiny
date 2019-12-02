@@ -51,7 +51,7 @@ public final class MultiSkipUntilOp<T> extends AbstractMultiOperator<T, T> {
             try {
                 toBeSkipped = predicate.test(t);
             } catch (Throwable e) {
-                onError(e);
+                failAndCancel(e);
                 return;
             }
 

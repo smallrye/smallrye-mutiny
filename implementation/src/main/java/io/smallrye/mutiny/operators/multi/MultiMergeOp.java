@@ -48,7 +48,7 @@ public final class MultiMergeOp<T> extends AbstractMulti<T> {
     @Override
     public void subscribe(Subscriber<? super T> actual) {
         MultiFlatMapOp.FlatMapMainSubscriber<Publisher<? extends T>, T> merger = new MultiFlatMapOp.FlatMapMainSubscriber<>(
-                actual, Function.identity(), postponeFailurePropagation, maxConcurrency, prefetch, mainQueueSupplier,
+                actual, Function.identity(), postponeFailurePropagation, maxConcurrency, mainQueueSupplier,
                 innerQueueSupplier);
         merger.onSubscribe(new CollectionBasedMulti.CollectionSubscription<>(merger, upstreams));
     }

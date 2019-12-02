@@ -22,6 +22,14 @@ public abstract class MultiOperatorProcessor<I, O> implements Subscriber<I>, Sub
         this.downstream = ParameterValidation.nonNull(downstream, "downstream");
     }
 
+    void failAndCancel(Throwable throwable) {
+        Subscription subscription = upstream.get();
+        if (subscription != null) {
+            subscription.cancel();
+        }
+        onError(throwable);
+    }
+
     protected boolean isDone() {
         return upstream.get() == CANCELLED;
     }
@@ -45,7 +53,6 @@ public abstract class MultiOperatorProcessor<I, O> implements Subscriber<I>, Sub
         Subscription subscription = upstream.getAndSet(CANCELLED);
         if (subscription != CANCELLED) {
             downstream.onError(throwable);
-            subscription.cancel();
         }
     }
 
@@ -59,9 +66,11 @@ public abstract class MultiOperatorProcessor<I, O> implements Subscriber<I>, Sub
 
     @Override
     public void request(long numberOfItems) {
-        ParameterValidation.positive(numberOfItems, "numberOfItems");
         Subscription subscription = upstream.get();
         if (subscription != CANCELLED) {
+            if (numberOfItems <= 0) {
+                onError(new IllegalArgumentException("Invalid number of request, must be greater than 0"));
+            }
             subscription.request(numberOfItems);
         }
     }

@@ -2,6 +2,7 @@ package io.smallrye.mutiny.operators.multi;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.reactivestreams.Subscriber;
 
@@ -20,12 +21,16 @@ public final class MultiDistinctOp<T> extends AbstractMultiOperator<T, T> {
 
     @Override
     public void subscribe(Subscriber<? super T> actual) {
+        if (actual == null) {
+            throw new NullPointerException("Subscriber cannot be `null`");
+        }
         upstream.subscribe(new DistinctProcessor<>(actual));
     }
 
     static final class DistinctProcessor<T> extends MultiOperatorProcessor<T, T> {
 
         final Collection<T> collection;
+        final AtomicLong requested = new AtomicLong();
 
         DistinctProcessor(Subscriber<? super T> downstream) {
             super(downstream);
@@ -37,8 +42,10 @@ public final class MultiDistinctOp<T> extends AbstractMultiOperator<T, T> {
             if (isDone()) {
                 return;
             }
+
             if (collection.add(t)) {
                 downstream.onNext(t);
+            } else {
                 request(1);
             }
         }

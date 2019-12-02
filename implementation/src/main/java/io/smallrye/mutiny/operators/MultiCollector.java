@@ -33,11 +33,12 @@ public class MultiCollector {
     }
 
     public static <T> Uni<List<T>> list(Multi<T> upstream) {
-        return collector(upstream, Collectors.toList());
+        return collector(upstream, Collectors.toList(), false);
     }
 
-    public static <T, A, R> Uni<R> collector(Multi<T> upstream, Collector<? super T, A, ? extends R> collector) {
-        MultiCollectorOp<? super T, A, ? extends R> f = new MultiCollectorOp<>(upstream, collector);
+    public static <T, A, R> Uni<R> collector(Multi<T> upstream, Collector<? super T, A, ? extends R> collector,
+            boolean acceptNullAsInitialValue) {
+        MultiCollectorOp<? super T, A, ? extends R> f = new MultiCollectorOp<>(upstream, collector, acceptNullAsInitialValue);
         return Uni.createFrom().publisher(f);
     }
 
@@ -45,7 +46,7 @@ public class MultiCollector {
             BiConsumer<R, ? super T> combinator) {
         Collector<? super T, R, R> collector = Collector.of(producer, combinator, (BinaryOperator<R>) (r, r2) -> r,
                 Collector.Characteristics.IDENTITY_FINISH);
-        return collector(upstream, collector);
+        return collector(upstream, collector, false);
     }
 
     public static <K, T> Uni<Map<K, T>> map(Multi<T> upstream, Function<? super T, ? extends K> keyMapper) {
@@ -54,7 +55,7 @@ public class MultiCollector {
 
     public static <K, V, T> Uni<Map<K, V>> map(Multi<T> upstream, Function<? super T, ? extends K> keyMapper,
             Function<? super T, ? extends V> valueMapper) {
-        return collector(upstream, Collectors.toMap(keyMapper, valueMapper));
+        return collector(upstream, Collectors.toMap(keyMapper, valueMapper), false);
     }
 
     public static <K, V, R> Uni<Map<K, Collection<V>>> multimap(Multi<R> upstream,
@@ -71,7 +72,7 @@ public class MultiCollector {
                 (vs, vs2) -> {
                     vs.addAll(vs2);
                     return vs;
-                }));
+                }), false);
     }
 
     public static <T> Multi<List<T>> list(Multi<T> upstream, Duration timeWindow) {

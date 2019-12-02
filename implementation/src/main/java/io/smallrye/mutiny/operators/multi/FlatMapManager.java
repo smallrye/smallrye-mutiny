@@ -4,7 +4,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public abstract class FlatMapManager<T> {
 
-    private volatile T[] array = empty();
+    private volatile T[] inners = empty();
 
     private int[] free = FREE_EMPTY;
 
@@ -29,13 +29,13 @@ public abstract class FlatMapManager<T> {
         T[] a;
         T[] t = terminated();
         synchronized (this) {
-            a = array;
+            a = inners;
             if (a == t) {
                 return;
             }
             size.lazySet(0);
             free = null;
-            array = t;
+            inners = t;
         }
         for (T e : a) {
             if (e != null) {
@@ -45,16 +45,16 @@ public abstract class FlatMapManager<T> {
     }
 
     final T[] get() {
-        return array;
+        return inners;
     }
 
     final boolean add(T entry) {
-        T[] a = array;
+        T[] a = inners;
         if (a == terminated()) {
             return false;
         }
         synchronized (this) {
-            a = array;
+            a = inners;
             if (a == terminated()) {
                 return false;
             }
@@ -65,7 +65,7 @@ public abstract class FlatMapManager<T> {
                 T[] b = n != 0 ? newArray(n << 1) : newArray(4);
                 System.arraycopy(a, 0, b, 0, n);
 
-                array = b;
+                inners = b;
                 a = b;
 
                 int m = b.length;
@@ -88,7 +88,7 @@ public abstract class FlatMapManager<T> {
 
     final void remove(int index) {
         synchronized (this) {
-            T[] a = array;
+            T[] a = inners;
             if (a != terminated()) {
                 a[index] = null;
                 offerFree(index);
@@ -97,7 +97,7 @@ public abstract class FlatMapManager<T> {
         }
     }
 
-    int pollFree() {
+    private int pollFree() {
         int[] a = free;
         int m = a.length - 1;
         long ci = consumerIndex;
@@ -109,7 +109,7 @@ public abstract class FlatMapManager<T> {
         return a[offset];
     }
 
-    void offerFree(int index) {
+    private void offerFree(int index) {
         int[] a = free;
         int m = a.length - 1;
         long pi = producerIndex;

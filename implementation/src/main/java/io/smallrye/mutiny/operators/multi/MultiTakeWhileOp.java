@@ -45,7 +45,7 @@ public final class MultiTakeWhileOp<T> extends AbstractMultiOperator<T, T> {
             try {
                 pass = predicate.test(t);
             } catch (Throwable e) {
-                onError(e);
+                failAndCancel(e);
                 return;
             }
 

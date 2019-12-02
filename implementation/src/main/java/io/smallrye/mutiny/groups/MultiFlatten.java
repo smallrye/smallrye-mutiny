@@ -73,7 +73,7 @@ public class MultiFlatten<I, O> {
      */
     public Multi<O> mergeResults() {
         return new MultiFlatMapOp<>(upstream, mapper, collectFailureUntilCompletion, requests,
-                2, () -> new SpscArrayQueue<>(256),
+                () -> new SpscArrayQueue<>(256),
                 () -> new SpscArrayQueue<>(256));
     }
 
@@ -96,7 +96,7 @@ public class MultiFlatten<I, O> {
      */
     public Multi<O> mergeResults(int concurrency) {
         return new MultiFlatMapOp<>(upstream, mapper, collectFailureUntilCompletion, concurrency,
-                2, () -> new SpscArrayQueue<>(256),
+                () -> new SpscArrayQueue<>(256),
                 () -> new SpscArrayQueue<>(256));
     }
 
@@ -116,7 +116,7 @@ public class MultiFlatten<I, O> {
      */
     public Multi<O> concatenateResults() {
         return new MultiFlatMapOp<>(upstream, mapper, collectFailureUntilCompletion, 1,
-                2, () -> new SpscArrayQueue<>(256),
+                () -> new SpscArrayQueue<>(256),
                 () -> new SpscArrayQueue<>(256));
     }
 }

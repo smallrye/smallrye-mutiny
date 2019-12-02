@@ -18,7 +18,7 @@ public class MultiTransformation {
         // avoid direct instantiation
     }
 
-    public static <T> Multi<T> skipFirst(Multi<T> upstream, int number) {
+    public static <T> Multi<T> skipFirst(Multi<T> upstream, long number) {
         return new MultiSkipOp<>(upstream, number);
     }
 
@@ -35,7 +35,7 @@ public class MultiTransformation {
         return new MultiSkipUntilOp<>(upstream, predicate);
     }
 
-    public static <T> Multi<T> takeFirst(Multi<T> upstream, int number) {
+    public static <T> Multi<T> takeFirst(Multi<T> upstream, long number) {
         return new MultiTakeOp<>(upstream, number);
     }
 

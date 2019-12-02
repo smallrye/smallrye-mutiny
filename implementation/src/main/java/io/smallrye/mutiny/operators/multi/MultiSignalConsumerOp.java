@@ -54,6 +54,9 @@ public final class MultiSignalConsumerOp<T> extends AbstractMultiOperator<T, T> 
 
     @Override
     public void subscribe(Subscriber<? super T> actual) {
+        if (actual == null) {
+            throw new NullPointerException("Subscriber must not be `null`");
+        }
         upstream.subscribe(new SignalSubscriber(actual));
     }
 
@@ -67,13 +70,21 @@ public final class MultiSignalConsumerOp<T> extends AbstractMultiOperator<T, T> 
             this.downstream = downstream;
         }
 
+        void failAndCancel(Throwable throwable) {
+            Subscription current = subscription.get();
+            if (current != null) {
+                current.cancel();
+            }
+            onError(throwable);
+        }
+
         @Override
         public void request(long n) {
             if (onRequest != null) {
                 try {
                     onRequest.accept(n);
                 } catch (Throwable e) {
-                    onError(e);
+                    failAndCancel(e);
                     return;
                 }
             }
@@ -87,7 +98,7 @@ public final class MultiSignalConsumerOp<T> extends AbstractMultiOperator<T, T> 
                 try {
                     onCancellation.run();
                 } catch (Throwable e) {
-                    onError(e);
+                    failAndCancel(e);
                     return;
                 }
             }
@@ -125,7 +136,7 @@ public final class MultiSignalConsumerOp<T> extends AbstractMultiOperator<T, T> 
                     try {
                         onItem.accept(t);
                     } catch (Throwable e) {
-                        onError(e);
+                        failAndCancel(e);
                         return;
                     }
                 }
@@ -136,7 +147,8 @@ public final class MultiSignalConsumerOp<T> extends AbstractMultiOperator<T, T> 
 
         @Override
         public void onError(Throwable failure) {
-            if (subscription.getAndSet(Subscriptions.CANCELLED) != Subscriptions.CANCELLED) {
+            Subscription up = subscription.getAndSet(Subscriptions.CANCELLED);
+            if (up != Subscriptions.CANCELLED) {
                 if (onFailure != null) {
                     try {
                         onFailure.accept(failure);

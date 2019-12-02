@@ -3,7 +3,6 @@ package io.smallrye.mutiny.groups;
 import static io.smallrye.mutiny.helpers.ParameterValidation.SUPPLIER_PRODUCED_NULL;
 import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
 
-import java.util.Arrays;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
@@ -13,7 +12,6 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
@@ -280,7 +278,7 @@ public class MultiCreate {
      */
     @SafeVarargs
     public final <T> Multi<T> items(T... items) {
-        return iterable(Arrays.asList(nonNull(items, "items")));
+        return new CollectionBasedMulti<>(nonNull(items, "items"));
     }
 
     /**
@@ -297,8 +295,7 @@ public class MultiCreate {
      * @return the new {@link Multi}
      */
     public <T> Multi<T> iterable(Iterable<T> iterable) {
-        nonNull(iterable, "iterable");
-        return deferredItems(() -> StreamSupport.stream(iterable.spliterator(), false));
+        return new IterableBasedMulti<>(nonNull(iterable, "iterable"));
     }
 
     /**
@@ -316,6 +313,7 @@ public class MultiCreate {
      * @return the new {@link Multi}
      */
     public <T> Multi<T> items(Stream<T> items) {
+        // TODO Consider implementing a publisher avoiding buffering items.
         Stream<T> stream = nonNull(items, "items");
         return deferredItems(() -> stream);
     }

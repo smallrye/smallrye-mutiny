@@ -16,10 +16,13 @@ import io.smallrye.mutiny.helpers.Subscriptions;
 public final class MultiCollectorOp<T, A, R> extends AbstractMultiOperator<T, R> {
 
     private final Collector<? super T, A, ? extends R> collector;
+    private final boolean acceptNullAsInitialValue;
 
-    public MultiCollectorOp(Multi<T> upstream, Collector<? super T, A, ? extends R> collector) {
+    public MultiCollectorOp(Multi<T> upstream, Collector<? super T, A, ? extends R> collector,
+            boolean acceptNullAsInitialValue) {
         super(upstream);
         this.collector = collector;
+        this.acceptNullAsInitialValue = acceptNullAsInitialValue;
     }
 
     @Override
@@ -33,21 +36,23 @@ public final class MultiCollectorOp<T, A, R> extends AbstractMultiOperator<T, R>
             accumulator = collector.accumulator();
             finisher = collector.finisher();
         } catch (Exception ex) {
-            Subscriptions.fail(downstream, ex);
+            Subscriptions.fail(downstream, ex, upstream);
             return;
         }
 
-        if (initialValue == null) {
-            Subscriptions.fail(downstream, new NullPointerException(SUPPLIER_PRODUCED_NULL));
+        if (initialValue == null && !acceptNullAsInitialValue) {
+            Subscriptions.fail(downstream, new NullPointerException(SUPPLIER_PRODUCED_NULL), upstream);
             return;
         }
 
         if (accumulator == null) {
-            Subscriptions.fail(downstream, new NullPointerException("`accumulator` must not be `null`"));
+            Subscriptions.fail(downstream, new NullPointerException("`accumulator` must not be `null`"), upstream);
             return;
         }
 
-        upstream.subscribe(new CollectorProcessor<>(downstream, initialValue, accumulator, finisher));
+        CollectorProcessor<? super T, A, ? extends R> processor = new CollectorProcessor<>(downstream, initialValue,
+                accumulator, finisher);
+        upstream.subscribe(processor);
     }
 
     static class CollectorProcessor<T, A, R> extends MultiOperatorProcessor<T, R> {
@@ -71,7 +76,7 @@ public final class MultiCollectorOp<T, A, R> extends AbstractMultiOperator<T, R>
                 try {
                     accumulator.accept(intermediate, item);
                 } catch (Exception ex) {
-                    onError(ex);
+                    failAndCancel(ex);
                 }
             }
         }
@@ -85,7 +90,7 @@ public final class MultiCollectorOp<T, A, R> extends AbstractMultiOperator<T, R>
                 try {
                     result = finisher.apply(intermediate);
                 } catch (Exception ex) {
-                    onError(ex);
+                    downstream.onError(ex);
                     return;
                 }
 
@@ -98,8 +103,9 @@ public final class MultiCollectorOp<T, A, R> extends AbstractMultiOperator<T, R>
         @Override
         public void request(long n) {
             // The subscriber may request only 1 but as we don't know how much we get, we request MAX.
-            // This could we changed with call to request in the OnNext
+            // This could be changed with call to request in the OnNext
             super.request(Long.MAX_VALUE);
         }
+
     }
 }

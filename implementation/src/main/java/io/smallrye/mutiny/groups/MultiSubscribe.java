@@ -44,7 +44,7 @@ public class MultiSubscribe<T> {
      * @return the passed subscriber
      */
     @SuppressWarnings("SubscriberImplementation")
-    public <S extends Subscriber<? super T>> S withSubscriber(S subscriber) {
+    public <S extends Subscriber<? super T>> S with(S subscriber) {
         upstream.subscribe(subscriber);
         return subscriber;
     }
@@ -85,7 +85,7 @@ public class MultiSubscribe<T> {
                 nonNull(onFailure, "onFailure"),
                 nonNull(onComplete, "onComplete"),
                 nonNull(onSubscription, "onSubscription"));
-        return withSubscriber(subscriber);
+        return with(subscriber);
     }
 
     /**
@@ -124,7 +124,7 @@ public class MultiSubscribe<T> {
                 nonNull(onFailure, "onFailure"),
                 nonNull(onComplete, "onComplete"),
                 s -> s.request(Long.MAX_VALUE));
-        return withSubscriber(subscriber);
+        return with(subscriber);
     }
 
     /**
@@ -163,7 +163,7 @@ public class MultiSubscribe<T> {
                 nonNull(onFailure, "onFailure"),
                 null,
                 s -> s.request(Long.MAX_VALUE));
-        return withSubscriber(subscriber);
+        return with(subscriber);
     }
 
     /**
@@ -200,7 +200,7 @@ public class MultiSubscribe<T> {
                 null,
                 onComplete,
                 s -> s.request(Long.MAX_VALUE));
-        return withSubscriber(subscriber);
+        return with(subscriber);
     }
 
     /**

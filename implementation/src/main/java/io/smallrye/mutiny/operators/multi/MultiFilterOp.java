@@ -23,6 +23,9 @@ public class MultiFilterOp<T> extends AbstractMultiOperator<T, T> {
 
     @Override
     public void subscribe(Subscriber<? super T> downstream) {
+        if (downstream == null) {
+            throw new NullPointerException("The subscriber must not be `null`");
+        }
         upstream.subscribe(new MultiFilterProcessor<>(downstream, predicate));
     }
 
@@ -45,7 +48,7 @@ public class MultiFilterOp<T> extends AbstractMultiOperator<T, T> {
             try {
                 passed = predicate.test(t);
             } catch (Throwable exception) {
-                onError(exception);
+                failAndCancel(exception);
                 return;
             }
 
