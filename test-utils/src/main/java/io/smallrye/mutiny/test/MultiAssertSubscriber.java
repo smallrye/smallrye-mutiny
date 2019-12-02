@@ -27,9 +27,15 @@ public class MultiAssertSubscriber<T> implements Subscriber<T> {
     private int numberOfSubscription = 0;
 
     private int numberOfCompletionEvents = 0;
+    private boolean upfrontCancellation;
+
+    public MultiAssertSubscriber(long requested, boolean cancelled) {
+        this.requested.set(requested);
+        upfrontCancellation = cancelled;
+    }
 
     public MultiAssertSubscriber(long requested) {
-        this.requested.set(requested);
+        this(requested, false);
     }
 
     public static <T> MultiAssertSubscriber<T> create() {
@@ -149,9 +155,10 @@ public class MultiAssertSubscriber<T> implements Subscriber<T> {
     }
 
     public MultiAssertSubscriber<T> request(long req) {
-        assertThat(subscription).as("No subscription").isNotNull();
         requested.addAndGet(req);
-        subscription.request(req);
+        if (subscription != null) {
+            subscription.request(req);
+        }
         return this;
     }
 
@@ -159,9 +166,13 @@ public class MultiAssertSubscriber<T> implements Subscriber<T> {
     public void onSubscribe(Subscription s) {
         numberOfSubscription++;
         subscription = s;
+        if (upfrontCancellation) {
+            s.cancel();
+        }
         if (requested.get() > 0) {
             s.request(requested.get());
         }
+
     }
 
     @Override
