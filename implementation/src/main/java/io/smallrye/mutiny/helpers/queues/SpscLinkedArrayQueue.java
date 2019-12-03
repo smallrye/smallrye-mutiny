@@ -40,7 +40,7 @@ public final class SpscLinkedArrayQueue<E> extends AbstractQueue<E> implements Q
         adjustLookAheadStep(p2capacity);
         consumerBuffer = buffer;
         consumerMask = mask;
-        producerLookAhead = mask - 1; // we know it's all empty to start with
+        producerLookAhead = mask - 1L; // we know it's all empty to start with
         soProducerIndex(0L);
     }
 
