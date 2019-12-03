@@ -16,7 +16,7 @@ public class Subscribers {
     }
 
     private static final Consumer<? super Throwable> NO_ON_FAILURE = failure -> new Exception(
-            "Missing onError method in the subscriber", failure).printStackTrace();
+            "Missing onError method in the subscriber", failure).printStackTrace(); // NOSONAR
 
     public static <T> CancellableSubscriber<T> from(Consumer<? super T> onItem) {
         return new CallbackBasedSubscriber<>(onItem, NO_ON_FAILURE, null, null);

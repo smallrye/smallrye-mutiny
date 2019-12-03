@@ -6,7 +6,7 @@ import io.smallrye.mutiny.converters.MultiConverter;
 
 public class FromSingle<T> implements MultiConverter<Single<T>, T> {
 
-    public static FromSingle INSTANCE = new FromSingle();
+    public static final FromSingle INSTANCE = new FromSingle();
 
     private FromSingle() {
         // Avoid direct instantiation

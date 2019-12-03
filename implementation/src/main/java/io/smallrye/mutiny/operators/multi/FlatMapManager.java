@@ -1,10 +1,11 @@
 package io.smallrye.mutiny.operators.multi;
 
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
-public abstract class FlatMapManager<T> {
+abstract class FlatMapManager<T> {
 
-    private volatile T[] inners = empty();
+    private AtomicReference<T[]> inners = new AtomicReference<>(empty());
 
     private int[] free = FREE_EMPTY;
 
@@ -33,13 +34,13 @@ public abstract class FlatMapManager<T> {
         T[] a;
         T[] t = terminated();
         synchronized (this) {
-            a = inners;
+            a = inners.get();
             if (a == t) {
                 return;
             }
             size.lazySet(0);
             free = null;
-            inners = t;
+            inners.set(t);
         }
         for (T e : a) {
             if (e != null) {
@@ -49,16 +50,16 @@ public abstract class FlatMapManager<T> {
     }
 
     final T[] get() {
-        return inners;
+        return inners.get();
     }
 
     final boolean add(T entry) {
-        T[] a = inners;
+        T[] a = inners.get();
         if (a == terminated()) {
             return false;
         }
         synchronized (this) {
-            a = inners;
+            a = inners.get();
             if (a == terminated()) {
                 return false;
             }
@@ -69,7 +70,7 @@ public abstract class FlatMapManager<T> {
                 T[] b = n != 0 ? newArray(n << 1) : newArray(4);
                 System.arraycopy(a, 0, b, 0, n);
 
-                inners = b;
+                inners.set(b);
                 a = b;
 
                 int m = b.length;
@@ -78,7 +79,7 @@ public abstract class FlatMapManager<T> {
                     u[i] = i;
                 }
                 free = u;
-                consumerIndex = n + 1;
+                consumerIndex = n + 1L;
                 producerIndex = m;
 
                 idx = n;
@@ -92,7 +93,7 @@ public abstract class FlatMapManager<T> {
 
     final void remove(int index) {
         synchronized (this) {
-            T[] a = inners;
+            T[] a = inners.get();
             if (a != terminated()) {
                 a[index] = null;
                 offerFree(index);

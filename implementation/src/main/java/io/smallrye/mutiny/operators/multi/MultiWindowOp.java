@@ -262,7 +262,7 @@ public class MultiWindowOp<T> extends AbstractMultiOperator<T, Multi<T>> {
             if (n > 0) {
                 if (firstRequest.compareAndSet(false, true)) {
                     long u = Subscriptions.multiply(size, n);
-                    long v = Subscriptions.multiply(skip - size, n - 1);
+                    long v = Subscriptions.multiply(skip - (long) size, n - 1);
                     long w = Subscriptions.add(u, v);
                     super.request(w);
                 } else {

@@ -6,7 +6,7 @@ import io.smallrye.mutiny.converters.UniConverter;
 
 public class FromSingle<T> implements UniConverter<Single<T>, T> {
 
-    public static FromSingle INSTANCE = new FromSingle();
+    public static final FromSingle INSTANCE = new FromSingle();
 
     private FromSingle() {
         // Avoid direct instantiation

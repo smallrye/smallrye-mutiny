@@ -55,6 +55,12 @@
                         </goals>
                         <configuration>
                             <junitArtifactName>none:none</junitArtifactName>
+                            <properties>
+                                <property>
+                                    <name>surefire.testng.verbose</name>
+                                    <value>5</value>
+                                </property>
+                            </properties>
                         </configuration>
                     </execution>
                 </executions>

@@ -150,7 +150,7 @@ public class MultiBufferOp<T> extends AbstractMultiOperator<T, List<T>> {
                 // n full buffers
                 long u = Subscriptions.multiply(n, size);
                 // + (n - 1) gaps
-                long v = Subscriptions.multiply(skip - size, n - 1);
+                long v = Subscriptions.multiply(skip - (long) size, n - 1);
                 super.request(Subscriptions.add(u, v));
             } else {
                 // n full buffer + gap

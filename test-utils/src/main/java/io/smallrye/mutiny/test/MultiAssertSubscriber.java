@@ -8,6 +8,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
@@ -17,7 +18,7 @@ public class MultiAssertSubscriber<T> implements Subscriber<T> {
 
     private final CountDownLatch latch = new CountDownLatch(1);
 
-    private volatile Subscription subscription;
+    private AtomicReference<Subscription> subscription = new AtomicReference<>();
 
     private AtomicLong requested = new AtomicLong();
 
@@ -92,11 +93,6 @@ public class MultiAssertSubscriber<T> implements Subscriber<T> {
         return this;
     }
 
-    public MultiAssertSubscriber<T> assertNotSubscribed() {
-        assertThat(numberOfSubscription).isEqualTo(0);
-        return this;
-    }
-
     public MultiAssertSubscriber<T> assertSubscribed() {
         assertThat(numberOfSubscription).isEqualTo(1);
         return this;
@@ -149,15 +145,15 @@ public class MultiAssertSubscriber<T> implements Subscriber<T> {
     }
 
     public MultiAssertSubscriber<T> cancel() {
-        assertThat(subscription).as("No subscription").isNotNull();
-        subscription.cancel();
+        assertThat(subscription.get()).as("No subscription").isNotNull();
+        subscription.get().cancel();
         return this;
     }
 
     public MultiAssertSubscriber<T> request(long req) {
         requested.addAndGet(req);
-        if (subscription != null) {
-            subscription.request(req);
+        if (subscription.get() != null) {
+            subscription.get().request(req);
         }
         return this;
     }
@@ -165,7 +161,7 @@ public class MultiAssertSubscriber<T> implements Subscriber<T> {
     @Override
     public void onSubscribe(Subscription s) {
         numberOfSubscription++;
-        subscription = s;
+        subscription.set(s);
         if (upfrontCancellation) {
             s.cancel();
         }
@@ -203,12 +199,10 @@ public class MultiAssertSubscriber<T> implements Subscriber<T> {
     public MultiAssertSubscriber<T> run(Runnable action) {
         try {
             action.run();
+        } catch (AssertionError e) {
+            throw e;
         } catch (Throwable e) {
-            if (e instanceof AssertionError) {
-                throw e;
-            } else {
-                throw new AssertionError(e);
-            }
+            throw new AssertionError(e);
         }
         return this;
     }

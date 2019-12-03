@@ -56,14 +56,6 @@ public class ConnectableMultiConnection implements Runnable, Consumer<Cancellabl
         return subscriberCount;
     }
 
-    public Cancellable getTimer() {
-        return timer;
-    }
-
-    public void setSubscriberCount(long newCount) {
-        this.subscriberCount = newCount;
-    }
-
     public boolean isConnected() {
         return connected;
     }
