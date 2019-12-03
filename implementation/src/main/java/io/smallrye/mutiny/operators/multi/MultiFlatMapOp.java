@@ -86,10 +86,10 @@ public final class MultiFlatMapOp<I, O> extends AbstractMultiOperator<I, O> {
         AtomicInteger wip = new AtomicInteger();
 
         @SuppressWarnings("rawtypes")
-        static final FlatMapInner[] EMPTY = new FlatMapInner[0];
+        static final FlatMapInner[] EMPTY_INNER_ARRAY = new FlatMapInner[0];
 
         @SuppressWarnings("rawtypes")
-        static final FlatMapInner[] TERMINATED = new FlatMapInner[0];
+        static final FlatMapInner[] TERMINATED_INNER_ARRAY = new FlatMapInner[0];
 
         int lastIndex;
 
@@ -111,13 +111,13 @@ public final class MultiFlatMapOp<I, O> extends AbstractMultiOperator<I, O> {
         @SuppressWarnings("unchecked")
         @Override
         FlatMapInner<O>[] empty() {
-            return EMPTY;
+            return EMPTY_INNER_ARRAY;
         }
 
         @SuppressWarnings("unchecked")
         @Override
         FlatMapInner<O>[] terminated() {
-            return TERMINATED;
+            return TERMINATED_INNER_ARRAY;
         }
 
         @SuppressWarnings("unchecked")
