@@ -25,8 +25,8 @@ import io.smallrye.mutiny.subscription.BackPressureFailure;
 
 public class MultiWindowOnDurationOp<T> extends AbstractMultiOperator<T, Multi<T>> {
 
-    final Duration duration;
-    final ScheduledExecutorService executor;
+    private final Duration duration;
+    private final ScheduledExecutorService executor;
 
     public MultiWindowOnDurationOp(Multi<T> upstream, Duration duration, ScheduledExecutorService executor) {
         super(upstream);
@@ -99,7 +99,7 @@ public class MultiWindowOnDurationOp<T> extends AbstractMultiOperator<T, Multi<T
                                 TimeUnit.MILLISECONDS);
             } catch (Exception e) {
                 downstream.onError(e);
-                return timer.none();
+                return TaskHolder.NONE;
             }
         }
 
@@ -284,11 +284,6 @@ public class MultiWindowOnDurationOp<T> extends AbstractMultiOperator<T, Multi<T
                 task.cancel(false);
             }
         }
-
-        Future<?> none() {
-            return NONE;
-        }
-
     }
 
 }

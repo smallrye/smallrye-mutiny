@@ -16,7 +16,7 @@ public abstract class MultiOperatorProcessor<I, O> implements Subscriber<I>, Sub
 
     protected final Subscriber<? super O> downstream;
     protected AtomicReference<Subscription> upstream = new AtomicReference<>();
-    protected AtomicBoolean hasDownstreamCancelled = new AtomicBoolean();
+    AtomicBoolean hasDownstreamCancelled = new AtomicBoolean();
 
     public MultiOperatorProcessor(Subscriber<? super O> downstream) {
         this.downstream = ParameterValidation.nonNull(downstream, "downstream");
