@@ -22,6 +22,6 @@ public class FilterStageFactory implements ProcessingStageFactory<Stage.Filter> 
     public <I, O> ProcessingStage<I, O> create(Engine engine, Stage.Filter stage) {
         Objects.requireNonNull(stage);
         Predicate predicate = Objects.requireNonNull(stage.getPredicate());
-        return source -> (Multi<O>) source.onItem().filterWith(predicate);
+        return source -> (Multi<O>) source.transform().byFilteringItemsWith(predicate);
     }
 }
