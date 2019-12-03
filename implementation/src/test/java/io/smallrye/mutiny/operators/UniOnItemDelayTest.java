@@ -44,7 +44,7 @@ public class UniOnItemDelayTest {
         long begin = System.currentTimeMillis();
         UniAssertSubscriber<Void> subscriber = UniAssertSubscriber.create();
 
-        Uni.createFrom().item(null)
+        Uni.createFrom().item((Object) null)
                 .onItem().castTo(Void.class)
                 .onItem().delayIt()
                 .by(Duration.ofMillis(100)).subscribe().withSubscriber(subscriber);
@@ -162,20 +162,20 @@ public class UniOnItemDelayTest {
     public void testWithMultipleDelays() {
         AtomicLong counter = new AtomicLong();
         AtomicReference<Throwable> failure = new AtomicReference<>();
-        Uni.createFrom().item(null).onItem().delayIt()
+        Uni.createFrom().item((Object) null).onItem().delayIt()
                 .onExecutor(executor)
                 .by(Duration.ofMillis(50))
                 .subscribe().with(v -> counter.incrementAndGet(), failure::set);
 
-        Uni.createFrom().item(null).onItem().delayIt()
+        Uni.createFrom().item((Object) null).onItem().delayIt()
                 .onExecutor(executor)
                 .by(Duration.ofMillis(200))
                 .subscribe().with(v -> counter.incrementAndGet(), failure::set);
-        Uni.createFrom().item(null).onItem().delayIt()
+        Uni.createFrom().item((Object) null).onItem().delayIt()
                 .onExecutor(executor)
                 .by(Duration.ofMillis(400))
                 .subscribe().with(v -> counter.incrementAndGet(), failure::set);
-        Uni.createFrom().item(null).onItem().delayIt()
+        Uni.createFrom().item((Object) null).onItem().delayIt()
                 .onExecutor(executor)
                 .by(Duration.ofMillis(800)).subscribe().with(v -> counter.incrementAndGet(), failure::set);
 

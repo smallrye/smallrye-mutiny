@@ -33,7 +33,7 @@ public class UniOnFailureRetryTest {
         UniAssertSubscriber<Integer> ts = UniAssertSubscriber.create();
 
         AtomicInteger count = new AtomicInteger();
-        Uni.createFrom().deferredItem(() -> {
+        Uni.createFrom().item(() -> {
             int i = count.getAndIncrement();
             if (i < 1) {
                 throw new RuntimeException("boom");
@@ -53,7 +53,7 @@ public class UniOnFailureRetryTest {
     public void testWithInfiniteRetry() {
         UniAssertSubscriber<Integer> ts = UniAssertSubscriber.create();
         AtomicInteger count = new AtomicInteger();
-        Uni.createFrom().deferredItem(() -> {
+        Uni.createFrom().item(() -> {
             int i = count.getAndIncrement();
             if (i < 10) {
                 throw new RuntimeException("boom");

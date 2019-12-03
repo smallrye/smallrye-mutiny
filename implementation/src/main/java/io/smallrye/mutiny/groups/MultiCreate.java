@@ -69,7 +69,7 @@ public class MultiCreate {
      */
     public <T> Multi<T> completionStage(CompletionStage<? extends T> stage) {
         CompletionStage<? extends T> actual = nonNull(stage, "stage");
-        return deferredCompletionStage(() -> actual);
+        return completionStage(() -> actual);
     }
 
     /**
@@ -98,7 +98,7 @@ public class MultiCreate {
      * @param <T> the type of item
      * @return the produced {@link Multi}
      */
-    public <T> Multi<T> deferredCompletionStage(Supplier<? extends CompletionStage<? extends T>> supplier) {
+    public <T> Multi<T> completionStage(Supplier<? extends CompletionStage<? extends T>> supplier) {
         nonNull(supplier, "supplier");
         return emitter(emitter -> {
             CompletionStage<? extends T> stage;
@@ -183,7 +183,7 @@ public class MultiCreate {
      * @param <T> the type of item emitted by the produced Multi
      * @return the new {@link Multi}
      */
-    public <T> Multi<T> deferredItem(Supplier<? extends T> supplier) {
+    public <T> Multi<T> item(Supplier<? extends T> supplier) {
         Supplier<? extends T> actual = nonNull(supplier, "supplier");
         return emitter(emitter -> {
             T item;
@@ -217,7 +217,7 @@ public class MultiCreate {
      * @param <T> the type of item emitted by the produced Multi
      * @return the new {@link Multi}
      */
-    public <T> Multi<T> deferredItems(Supplier<? extends Stream<? extends T>> supplier) {
+    public <T> Multi<T> items(Supplier<? extends Stream<? extends T>> supplier) {
         Supplier<? extends Stream<? extends T>> actual = nonNull(supplier, "supplier");
         return emitter(emitter -> {
             Stream<? extends T> stream;
@@ -260,7 +260,7 @@ public class MultiCreate {
      * @return the new {@link Multi}
      */
     public <T> Multi<T> item(T item) {
-        return deferredItem(() -> item);
+        return item(() -> item);
     }
 
     /**
@@ -315,7 +315,7 @@ public class MultiCreate {
     public <T> Multi<T> items(Stream<T> items) {
         // TODO Consider implementing a publisher avoiding buffering items.
         Stream<T> stream = nonNull(items, "items");
-        return deferredItems(() -> stream);
+        return items(() -> stream);
     }
 
     /**
@@ -329,7 +329,7 @@ public class MultiCreate {
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     public <T> Multi<T> optional(Optional<T> optional) {
         Optional<T> actual = nonNull(optional, "optional");
-        return deferredItem(() -> actual.orElse(null));
+        return item(() -> actual.orElse(null));
     }
 
     /**
@@ -347,9 +347,9 @@ public class MultiCreate {
      * @param <T> the type of the produced item
      * @return the new {@link Multi}
      */
-    public <T> Multi<T> deferredOptional(Supplier<Optional<T>> supplier) {
+    public <T> Multi<T> optional(Supplier<Optional<T>> supplier) {
         Supplier<Optional<T>> actual = nonNull(supplier, "supplier");
-        return deferredItem(() -> actual.get().orElse(null));
+        return item(() -> actual.get().orElse(null));
     }
 
     /**
@@ -396,7 +396,7 @@ public class MultiCreate {
      * {@link Multi}. So, it does not create the {@link Multi} until an {@link Subscriber subscriber} subscribes, and
      * creates a fresh {@link Multi} for each subscriber.
      * <p>
-     * Unlike {@link #deferredItem(Supplier)}, the supplier produces an {@link Multi} (and not an item).
+     * Unlike {@link #item(Supplier)}, the supplier produces an {@link Multi} (and not an item).
      * <p>
      * If the supplier throws an exception, a failure event with the exception is fired. If the supplier produces
      * {@code null}, a failure event containing a {@link NullPointerException} is fired.
@@ -419,7 +419,7 @@ public class MultiCreate {
      */
     public <T> Multi<T> failure(Throwable failure) {
         Throwable exception = nonNull(failure, "failure");
-        return deferredFailure(() -> exception);
+        return failure(() -> exception);
     }
 
     /**
@@ -433,7 +433,7 @@ public class MultiCreate {
      *        {@code Multi.<String>failed(exception);}
      * @return the produced {@link Multi}
      */
-    public <T> Multi<T> deferredFailure(Supplier<Throwable> supplier) {
+    public <T> Multi<T> failure(Supplier<Throwable> supplier) {
         return new FailedMulti<>(supplier);
     }
 

@@ -42,7 +42,7 @@ public class UniConvertToTest {
 
     @Test
     public void testCreatingACompletableFromVoid() {
-        Completable completable = Uni.createFrom().item(null).convert().with(new ToCompletable<>());
+        Completable completable = Uni.createFrom().item((Object) null).convert().with(new ToCompletable<>());
         assertThat(completable).isNotNull();
         completable.test().assertComplete();
     }

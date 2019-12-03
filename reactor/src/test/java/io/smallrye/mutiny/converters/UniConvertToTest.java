@@ -14,7 +14,6 @@ import reactor.core.publisher.Mono;
 
 public class UniConvertToTest {
 
-    @SuppressWarnings("unchecked")
     @Test
     public void testCreatingAFlux() {
         Flux<Integer> flux = Uni.createFrom().item(1).convert().with(ReactorConverters.toFlux());
@@ -22,7 +21,6 @@ public class UniConvertToTest {
         assertThat(flux.blockFirst()).isEqualTo(1);
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     public void testCreatingAFluxFromNull() {
         Flux<Integer> flux = Uni.createFrom().item((Integer) null).convert().with(ReactorConverters.toFlux());
@@ -30,7 +28,6 @@ public class UniConvertToTest {
         assertThat(flux.blockFirst()).isNull();
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     public void testCreatingAFluxWithFailure() {
         Flux<Integer> flux = Uni.createFrom().<Integer> failure(new IOException("boom")).convert()
@@ -44,7 +41,6 @@ public class UniConvertToTest {
         }
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     public void testCreatingAMono() {
         Mono<Integer> mono = Uni.createFrom().item(1).convert().with(ReactorConverters.toMono());
@@ -52,7 +48,6 @@ public class UniConvertToTest {
         assertThat(mono.block()).isEqualTo(1);
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     public void testCreatingAMonoFromNull() {
         Mono<Integer> mono = Uni.createFrom().item((Integer) null).convert().with(ReactorConverters.toMono());
@@ -60,7 +55,6 @@ public class UniConvertToTest {
         assertThat(mono.block()).isNull();
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     public void testCreatingAMonoWithFailure() {
         Mono<Integer> mono = Uni.createFrom().<Integer> failure(new IOException("boom")).convert()

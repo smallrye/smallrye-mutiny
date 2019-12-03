@@ -18,7 +18,7 @@ public class MultiOnFailureResumeTest {
     @Test
     public void onErrorResumeShouldCatchErrorFromSource() {
         AtomicReference<Throwable> exception = new AtomicReference<>();
-        Uni<List<String>> uni = Multi.createFrom().<String> deferredFailure(
+        Uni<List<String>> uni = Multi.createFrom().<String> failure(
                 () -> new QuietRuntimeException("failed"))
                 .onFailure().recoverWithItem(err -> {
                     exception.set(err);

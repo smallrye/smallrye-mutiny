@@ -15,7 +15,7 @@ public class UniOnNullContinueWithTest {
 
     @Test
     public void testContinue() {
-        assertThat(Uni.createFrom().item(null)
+        assertThat(Uni.createFrom().item((Object) null)
                 .onItem().castTo(Integer.class)
                 .onItem().ifNull().continueWith(42)
                 .await().indefinitely()).isEqualTo(42);
@@ -24,7 +24,7 @@ public class UniOnNullContinueWithTest {
     @Test
     public void testContinueWithSupplier() {
         AtomicInteger counter = new AtomicInteger();
-        Uni<Integer> uni = Uni.createFrom().item(null)
+        Uni<Integer> uni = Uni.createFrom().item((Object) null)
                 .onItem().castTo(Integer.class)
                 .onItem().ifNull().continueWith(counter::incrementAndGet);
         assertThat(uni.await().indefinitely()).isEqualTo(1);

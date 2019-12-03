@@ -291,7 +291,7 @@ public class MultiFlatMapToPublisherTest {
     public void testFlatMapWithMapperReturningNullInAMulti() {
         MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(Long.MAX_VALUE);
         Multi.createFrom().range(1, 4)
-                .onItem().<Integer> flatMap(i -> Multi.createFrom().deferredItem(null))
+                .onItem().<Integer> flatMap(i -> Multi.createFrom().item(null))
                 .subscribe(subscriber);
 
         subscriber.assertHasFailedWith(IllegalArgumentException.class, "supplier");

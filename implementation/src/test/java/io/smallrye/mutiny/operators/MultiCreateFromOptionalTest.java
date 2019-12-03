@@ -21,7 +21,7 @@ public class MultiCreateFromOptionalTest {
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void testThatOptionalSupplierCannotBeNull() {
-        Multi.createFrom().deferredOptional((Supplier<Optional<String>>) null);
+        Multi.createFrom().optional((Supplier<Optional<String>>) null);
     }
 
     @Test
@@ -43,7 +43,7 @@ public class MultiCreateFromOptionalTest {
         AtomicInteger count = new AtomicInteger();
 
         Multi<String> multi = Multi.createFrom()
-                .deferredOptional(() -> Optional.of("hello-" + count.incrementAndGet()));
+                .optional(() -> Optional.of("hello-" + count.incrementAndGet()));
         MultiAssertSubscriber<String> subscriber1 = multi.subscribe().with(MultiAssertSubscriber.create(1));
         MultiAssertSubscriber<String> subscriber2 = multi.subscribe().with(MultiAssertSubscriber.create());
 
@@ -54,7 +54,7 @@ public class MultiCreateFromOptionalTest {
 
     @Test
     public void testWithEmptyProducedInSupplier() {
-        Multi<String> multi = Multi.createFrom().deferredOptional(Optional::empty);
+        Multi<String> multi = Multi.createFrom().optional(Optional::empty);
         MultiAssertSubscriber<String> subscriber1 = multi.subscribe().with(MultiAssertSubscriber.create(1));
         MultiAssertSubscriber<String> subscriber2 = multi.subscribe().with(MultiAssertSubscriber.create());
 
@@ -64,7 +64,7 @@ public class MultiCreateFromOptionalTest {
 
     @Test
     public void testWithExceptionThrownBySupplier() {
-        Multi<String> multi = Multi.createFrom().deferredOptional(() -> {
+        Multi<String> multi = Multi.createFrom().optional(() -> {
             throw new IllegalStateException("boom");
         });
         MultiAssertSubscriber<String> subscriber1 = multi.subscribe().with(MultiAssertSubscriber.create());
@@ -74,7 +74,7 @@ public class MultiCreateFromOptionalTest {
     @SuppressWarnings("OptionalAssignedToNull")
     @Test
     public void testWithNullReturnedBySupplier() {
-        Multi<String> multi = Multi.createFrom().deferredOptional(() -> null);
+        Multi<String> multi = Multi.createFrom().optional(() -> null);
         MultiAssertSubscriber<String> subscriber1 = multi.subscribe().with(MultiAssertSubscriber.create());
         subscriber1.assertTerminated();
 

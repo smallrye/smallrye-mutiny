@@ -216,7 +216,7 @@ public class UniToPublisherTest {
 
     @Test
     public void testUniOfVoid() {
-        Uni<Void> uni = Uni.createFrom().item(null);
+        Uni<Void> uni = Uni.createFrom().item((Void) null);
         Multi<Void> publisher = uni.toMulti();
         assertThat(publisher.collectItems().asList().await().indefinitely()).isEmpty();
     }

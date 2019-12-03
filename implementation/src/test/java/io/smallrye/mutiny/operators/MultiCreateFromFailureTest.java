@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Supplier;
 
 import org.testng.annotations.Test;
 
@@ -14,12 +15,12 @@ public class MultiCreateFromFailureTest {
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void testThatFailureCannotBeNull() {
-        Multi.createFrom().failure(null);
+        Multi.createFrom().failure((Throwable) null);
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void testThatFailureSupplierCannotBeNull() {
-        Multi.createFrom().deferredFailure(null);
+        Multi.createFrom().failure((Supplier<Throwable>) null);
     }
 
     @Test
@@ -34,7 +35,7 @@ public class MultiCreateFromFailureTest {
     public void testWithExceptionSupplier() {
         AtomicInteger count = new AtomicInteger();
         Multi<String> failure = Multi.createFrom()
-                .deferredFailure(() -> new IOException("boom-" + count.incrementAndGet()));
+                .failure(() -> new IOException("boom-" + count.incrementAndGet()));
         MultiAssertSubscriber<String> subscriber1 = failure.subscribe().with(MultiAssertSubscriber.create());
         MultiAssertSubscriber<String> subscriber2 = failure.subscribe().with(MultiAssertSubscriber.create());
         subscriber1.assertHasFailedWith(IOException.class, "boom-1");
@@ -43,7 +44,7 @@ public class MultiCreateFromFailureTest {
 
     @Test
     public void testWithExceptionThrownBySupplier() {
-        Multi<String> multi = Multi.createFrom().deferredFailure(() -> {
+        Multi<String> multi = Multi.createFrom().failure(() -> {
             throw new IllegalStateException("boom");
         });
         MultiAssertSubscriber<String> subscriber1 = multi.subscribe().with(MultiAssertSubscriber.create());
@@ -52,7 +53,7 @@ public class MultiCreateFromFailureTest {
 
     @Test
     public void testWithNullReturnedBySupplier() {
-        Multi<String> multi = Multi.createFrom().deferredFailure(() -> null);
+        Multi<String> multi = Multi.createFrom().failure(() -> null);
         MultiAssertSubscriber<String> subscriber1 = multi.subscribe().with(MultiAssertSubscriber.create());
         subscriber1.assertTerminated();
 

@@ -24,7 +24,7 @@ public class UniAwaitTest {
 
     @Test(timeOut = 100)
     public void testAwaitingOnAnAlreadyResolvedWitNullUni() {
-        assertThat(Uni.createFrom().item(null).await().indefinitely()).isNull();
+        assertThat(Uni.createFrom().item((Object) null).await().indefinitely()).isNull();
     }
 
     @Test(timeOut = 100)

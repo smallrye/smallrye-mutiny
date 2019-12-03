@@ -18,7 +18,7 @@ public class UniRunSubscriptionOnTest {
     @Test
     public void testSubscribeOnWithSupplier() {
         UniAssertSubscriber<Integer> ts = UniAssertSubscriber.create();
-        Uni.createFrom().deferredItem(() -> 1)
+        Uni.createFrom().item(() -> 1)
                 .subscribeOn(ForkJoinPool.commonPool())
                 .subscribe().withSubscriber(ts);
         ts.await().assertItem(1);
@@ -41,7 +41,7 @@ public class UniRunSubscriptionOnTest {
     public void testWithTimeout() {
         UniAssertSubscriber<Integer> ts = UniAssertSubscriber.create();
 
-        Uni.createFrom().deferredItem(() -> {
+        Uni.createFrom().item(() -> {
             try {
                 TimeUnit.SECONDS.sleep(1L);
             } catch (InterruptedException e) {
@@ -49,7 +49,7 @@ public class UniRunSubscriptionOnTest {
             }
             return 0;
         })
-                .onNoItem().after(Duration.ofMillis(100)).recoverWithUni(Uni.createFrom().deferredItem(() -> 1))
+                .onNoItem().after(Duration.ofMillis(100)).recoverWithUni(Uni.createFrom().item(() -> 1))
                 .subscribeOn(Infrastructure.getDefaultExecutor())
                 .subscribe().withSubscriber(ts);
 
@@ -60,7 +60,7 @@ public class UniRunSubscriptionOnTest {
     public void callableEvaluatedTheRightTime() {
         AtomicInteger count = new AtomicInteger();
 
-        Uni<Integer> uni = Uni.createFrom().deferredItem(count::incrementAndGet)
+        Uni<Integer> uni = Uni.createFrom().item(count::incrementAndGet)
                 .subscribeOn(ForkJoinPool.commonPool());
 
         assertThat(count).hasValue(0);

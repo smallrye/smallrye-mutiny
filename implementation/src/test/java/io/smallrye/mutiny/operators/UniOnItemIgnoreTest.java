@@ -86,7 +86,7 @@ public class UniOnItemIgnoreTest {
     public void testIgnoreAndSwitchToSupplier() {
         AtomicInteger count = new AtomicInteger();
         Uni<Integer> uni = Uni.createFrom().item(24).onItem().ignore()
-                .andSwitchTo(() -> Uni.createFrom().deferredItem(count::incrementAndGet));
+                .andSwitchTo(() -> Uni.createFrom().item(count::incrementAndGet));
         assertThat(uni.await().indefinitely()).isEqualTo(1);
         assertThat(uni.await().indefinitely()).isEqualTo(2);
     }
@@ -95,7 +95,7 @@ public class UniOnItemIgnoreTest {
     public void testIgnoreAndSwitchToUni() {
         AtomicInteger count = new AtomicInteger();
         Uni<Integer> uni = Uni.createFrom().item(24).onItem().ignore()
-                .andSwitchTo(Uni.createFrom().deferredItem(count::incrementAndGet));
+                .andSwitchTo(Uni.createFrom().item(count::incrementAndGet));
         assertThat(uni.await().indefinitely()).isEqualTo(1);
         assertThat(uni.await().indefinitely()).isEqualTo(2);
     }

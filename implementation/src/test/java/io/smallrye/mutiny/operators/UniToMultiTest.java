@@ -17,7 +17,7 @@ public class UniToMultiTest {
 
     @Test
     public void testFromEmpty() {
-        Multi<Void> multi = Uni.createFrom().item(null)
+        Multi<Void> multi = Uni.createFrom().item((Object) null)
                 .onItem().castTo(Void.class)
                 .toMulti();
         multi.subscribe().with(MultiAssertSubscriber.create(1)).assertCompletedSuccessfully();
@@ -26,7 +26,7 @@ public class UniToMultiTest {
 
     @Test
     public void testFromEmpty2() {
-        Multi<Void> multi = Multi.createFrom().uni(Uni.createFrom().item(null));
+        Multi<Void> multi = Multi.createFrom().uni(Uni.createFrom().item((Void) null));
         multi.subscribe().with(MultiAssertSubscriber.create(1)).assertCompletedSuccessfully();
         multi.subscribe().with(MultiAssertSubscriber.create(0)).assertNotTerminated().cancel();
     }
@@ -34,7 +34,7 @@ public class UniToMultiTest {
     @Test
     public void testFromResult() {
         AtomicInteger count = new AtomicInteger();
-        Multi<Integer> multi = Uni.createFrom().deferredItem(count::incrementAndGet).toMulti();
+        Multi<Integer> multi = Uni.createFrom().item(count::incrementAndGet).toMulti();
         multi.subscribe().with(MultiAssertSubscriber.create(1))
                 .assertReceived(1)
                 .assertCompletedSuccessfully();
@@ -48,7 +48,7 @@ public class UniToMultiTest {
     @Test
     public void testFromResult2() {
         AtomicInteger count = new AtomicInteger();
-        Multi<Integer> multi = Multi.createFrom().uni(Uni.createFrom().deferredItem(count::incrementAndGet));
+        Multi<Integer> multi = Multi.createFrom().uni(Uni.createFrom().item(count::incrementAndGet));
         multi.subscribe().with(MultiAssertSubscriber.create(1))
                 .assertReceived(1)
                 .assertCompletedSuccessfully();
@@ -63,7 +63,7 @@ public class UniToMultiTest {
     public void testFromFailure() {
         AtomicInteger count = new AtomicInteger();
         Multi<Integer> multi = Uni.createFrom()
-                .<Integer> deferredFailure(() -> new IOException("boom-" + count.incrementAndGet()))
+                .<Integer> failure(() -> new IOException("boom-" + count.incrementAndGet()))
                 .toMulti();
         multi.subscribe().with(MultiAssertSubscriber.create(1))
                 .assertHasFailedWith(IOException.class, "boom-1");
@@ -77,7 +77,7 @@ public class UniToMultiTest {
     public void testFromFailure2() {
         AtomicInteger count = new AtomicInteger();
         Multi<Integer> multi = Multi.createFrom().uni(Uni.createFrom()
-                .deferredFailure(() -> new IOException("boom-" + count.incrementAndGet())));
+                .failure(() -> new IOException("boom-" + count.incrementAndGet())));
         multi.subscribe().with(MultiAssertSubscriber.create(1))
                 .assertHasFailedWith(IOException.class, "boom-1");
         multi.subscribe().with(MultiAssertSubscriber.create(0))
@@ -113,7 +113,7 @@ public class UniToMultiTest {
     public void testFromAnUniSendingResultEventInTheFuture() {
         AtomicInteger count = new AtomicInteger();
         Multi<Integer> multi = Uni.createFrom()
-                .deferredCompletionStage(() -> CompletableFuture.supplyAsync(count::incrementAndGet)).toMulti();
+                .completionStage(() -> CompletableFuture.supplyAsync(count::incrementAndGet)).toMulti();
         multi.subscribe().with(MultiAssertSubscriber.create(1))
                 .await()
                 .assertReceived(1)
@@ -130,7 +130,7 @@ public class UniToMultiTest {
     public void testFromAnUniSendingResultEventInTheFuture2() {
         AtomicInteger count = new AtomicInteger();
         Multi<Integer> multi = Multi.createFrom().uni(Uni.createFrom()
-                .deferredCompletionStage(() -> CompletableFuture.supplyAsync(count::incrementAndGet)));
+                .completionStage(() -> CompletableFuture.supplyAsync(count::incrementAndGet)));
         multi.subscribe().with(MultiAssertSubscriber.create(1))
                 .await()
                 .assertReceived(1)
@@ -146,7 +146,7 @@ public class UniToMultiTest {
     @Test
     public void testFromAnUniSendingNullResultEventInTheFuture() {
         Multi<Integer> multi = Uni.createFrom()
-                .deferredCompletionStage(() -> CompletableFuture.<Integer> supplyAsync(() -> null)).toMulti();
+                .completionStage(() -> CompletableFuture.<Integer> supplyAsync(() -> null)).toMulti();
         multi.subscribe().with(MultiAssertSubscriber.create(1))
                 .await()
                 .assertHasNotReceivedAnyItem()
@@ -162,7 +162,7 @@ public class UniToMultiTest {
     @Test
     public void testFromAnUniSendingNullResultEventInTheFuture2() {
         Multi<Integer> multi = Multi.createFrom()
-                .uni(Uni.createFrom().deferredCompletionStage(() -> CompletableFuture.supplyAsync(() -> null)));
+                .uni(Uni.createFrom().completionStage(() -> CompletableFuture.supplyAsync(() -> null)));
         multi.subscribe().with(MultiAssertSubscriber.create(1))
                 .await()
                 .assertHasNotReceivedAnyItem()

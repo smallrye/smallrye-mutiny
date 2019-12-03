@@ -45,7 +45,7 @@ public class MultiConvertToTest {
 
     @Test
     public void testCreatingACompletableFromVoid() {
-        Completable completable = Multi.createFrom().item(null).convert().with(new ToCompletable<>());
+        Completable completable = Multi.createFrom().item((Object) null).convert().with(new ToCompletable<>());
         assertThat(completable).isNotNull();
         completable.test().assertComplete();
     }
@@ -60,7 +60,6 @@ public class MultiConvertToTest {
         });
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     public void testCreatingASingle() {
         Single<Optional<Integer>> single = Multi.createFrom().item(1).convert().with(RxConverters.toSingle());
@@ -70,7 +69,6 @@ public class MultiConvertToTest {
                 .assertComplete();
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     public void testCreatingASingleByConverter() {
         Single<Optional<Integer>> single = Multi.createFrom().item(1).convert().with(RxConverters.toSingle());
@@ -80,7 +78,6 @@ public class MultiConvertToTest {
                 .assertComplete();
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     public void testCreatingASingleFromNull() {
         Single<Integer> single = Multi.createFrom().item((Integer) null).convert()
@@ -92,7 +89,6 @@ public class MultiConvertToTest {
                 .assertNoValues();
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     public void testCreatingASingleFromNullWithConverter() {
         Single<Integer> single = Multi.createFrom().item((Integer) null).convert()
@@ -104,7 +100,6 @@ public class MultiConvertToTest {
                 .assertNoValues();
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     public void testCreatingASingleWithFailure() {
         Single<Optional<Integer>> single = Multi.createFrom().<Integer> failure(new IOException("boom")).convert()
@@ -116,7 +111,6 @@ public class MultiConvertToTest {
         });
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     public void testCreatingAMaybe() {
         Maybe<Integer> maybe = Multi.createFrom().item(1).convert().with(RxConverters.toMaybe());
@@ -126,7 +120,6 @@ public class MultiConvertToTest {
                 .assertComplete();
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     public void testCreatingAMaybeFromNull() {
         Maybe<Integer> maybe = Multi.createFrom().item((Integer) null).convert().with(RxConverters.toMaybe());
@@ -137,7 +130,6 @@ public class MultiConvertToTest {
                 .assertNoValues();
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     public void testCreatingAMaybeWithFailure() {
         Maybe<Integer> maybe = Multi.createFrom().<Integer> failure(new IOException("boom")).convert()
@@ -149,7 +141,6 @@ public class MultiConvertToTest {
         });
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     public void testCreatingAnObservable() {
         Observable<Integer> observable = Multi.createFrom().item(1).convert().with(RxConverters.toObservable());
@@ -159,7 +150,6 @@ public class MultiConvertToTest {
                 .assertComplete();
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     public void testCreatingAnObservableFromNull() {
         Observable<Integer> observable = Multi.createFrom().item((Integer) null).convert().with(RxConverters.toObservable());
@@ -170,7 +160,6 @@ public class MultiConvertToTest {
                 .assertNoValues();
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     public void testCreatingAnObservableWithFailure() {
         Observable<Integer> observable = Multi.createFrom().<Integer> failure(new IOException("boom")).convert()
@@ -182,7 +171,6 @@ public class MultiConvertToTest {
         });
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     public void testCreatingAFlowable() {
         Flowable<Integer> flowable = Multi.createFrom().item(1).convert().with(RxConverters.toFlowable());
@@ -192,7 +180,6 @@ public class MultiConvertToTest {
                 .assertComplete();
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     public void testCreatingAFlowableWithRequest() {
         AtomicBoolean called = new AtomicBoolean();
@@ -208,7 +195,6 @@ public class MultiConvertToTest {
         assertThat(called).isTrue();
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     public void testCreatingAFlowableFromNull() {
         Flowable<Integer> flowable = Multi.createFrom().item((Integer) null).convert().with(RxConverters.toFlowable());
@@ -219,7 +205,6 @@ public class MultiConvertToTest {
                 .assertNoValues();
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     public void testCreatingAFlowableWithFailure() {
         Flowable<Integer> flowable = Multi.createFrom().<Integer> failure(new IOException("boom")).convert()

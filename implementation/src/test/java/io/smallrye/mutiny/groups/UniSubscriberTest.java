@@ -17,7 +17,7 @@ public class UniSubscriberTest {
         AtomicLong counter = new AtomicLong();
         AtomicReference<Throwable> failure = new AtomicReference<>();
 
-        Uni.createFrom().item(null).onItem().delayIt().by(Duration.ofMillis(50))
+        Uni.createFrom().item((Object) null).onItem().delayIt().by(Duration.ofMillis(50))
                 .subscribe().with(v -> counter.incrementAndGet(), failure::set).cancel();
 
         await().until(() -> counter.intValue() == 0);
@@ -41,7 +41,7 @@ public class UniSubscriberTest {
         AtomicLong counter = new AtomicLong();
         AtomicReference<Throwable> failure = new AtomicReference<>();
 
-        Uni.createFrom().item(null).onItem().delayIt().by(Duration.ofMillis(50))
+        Uni.createFrom().item((Object) null).onItem().delayIt().by(Duration.ofMillis(50))
                 .subscribe().with(v -> counter.incrementAndGet(), failure::set).request(5);
 
         await().until(() -> counter.intValue() == 1);

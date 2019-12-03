@@ -16,7 +16,7 @@ public class UniOnNullFailTest {
 
     @Test(expectedExceptions = NoSuchElementException.class)
     public void testFail() {
-        Uni.createFrom().item(null)
+        Uni.createFrom().item((Object) null)
                 .onItem().ifNull().fail().await().indefinitely();
     }
 
@@ -27,12 +27,12 @@ public class UniOnNullFailTest {
 
     @Test(expectedExceptions = RuntimeException.class)
     public void testFailWithException() {
-        Uni.createFrom().item(null).onItem().ifNull().failWith(new RuntimeException("boom")).await().indefinitely();
+        Uni.createFrom().item((Object) null).onItem().ifNull().failWith(new RuntimeException("boom")).await().indefinitely();
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void testFailWithExceptionSetToNull() {
-        Uni.createFrom().item(null).onItem().ifNull().failWith((Exception) null).await().indefinitely();
+        Uni.createFrom().item((Object) null).onItem().ifNull().failWith((Exception) null).await().indefinitely();
     }
 
     @Test
@@ -44,7 +44,7 @@ public class UniOnNullFailTest {
     @Test
     public void testFailWithExceptionSupplier() {
         AtomicInteger count = new AtomicInteger();
-        Uni<Void> boom = Uni.createFrom().item(null)
+        Uni<Void> boom = Uni.createFrom().item((Object) null)
                 .onItem().castTo(Void.class)
                 .onItem().ifNull().failWith(() -> new RuntimeException(Integer.toString(count.incrementAndGet())));
 
@@ -56,7 +56,7 @@ public class UniOnNullFailTest {
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void testFailWithExceptionSupplierSetToNull() {
-        Uni.createFrom().item(null).onItem().ifNull().failWith((Supplier<Throwable>) null).await().indefinitely();
+        Uni.createFrom().item((Object) null).onItem().ifNull().failWith((Supplier<Throwable>) null).await().indefinitely();
     }
 
     @Test

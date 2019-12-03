@@ -19,7 +19,7 @@ public class UniOnFailureRecoveryTest {
 
     @BeforeMethod
     public void init() {
-        failed = Uni.createFrom().deferredFailure(IOException::new);
+        failed = Uni.createFrom().failure(IOException::new);
     }
 
     @Test
@@ -108,7 +108,7 @@ public class UniOnFailureRecoveryTest {
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void testRecoverWithUniFail() {
-        failed.onFailure().recoverWithUni(Uni.createFrom().deferredFailure(IllegalArgumentException::new)).await()
+        failed.onFailure().recoverWithUni(Uni.createFrom().failure(IllegalArgumentException::new)).await()
                 .indefinitely();
     }
 
@@ -116,7 +116,7 @@ public class UniOnFailureRecoveryTest {
     public void testRecoverWithSupplierOfUni() {
         AtomicInteger count = new AtomicInteger();
         Uni<Integer> uni = failed.onFailure()
-                .recoverWithUni(() -> Uni.createFrom().deferredItem(() -> 25 + count.incrementAndGet()));
+                .recoverWithUni(() -> Uni.createFrom().item(() -> 25 + count.incrementAndGet()));
         Integer value = uni.await().indefinitely();
         Integer value2 = uni.await().indefinitely();
         assertThat(value).isEqualTo(26);
@@ -139,7 +139,7 @@ public class UniOnFailureRecoveryTest {
     public void testRecoverWithFunctionProducingOfUni() {
         AtomicInteger count = new AtomicInteger();
         Uni<Integer> recovered = failed.onFailure()
-                .recoverWithUni(fail -> Uni.createFrom().deferredItem(() -> 23 + count.getAndIncrement()));
+                .recoverWithUni(fail -> Uni.createFrom().item(() -> 23 + count.getAndIncrement()));
         Integer value = recovered.await().indefinitely();
         Integer value2 = recovered.await().indefinitely();
         assertThat(value).isEqualTo(23);

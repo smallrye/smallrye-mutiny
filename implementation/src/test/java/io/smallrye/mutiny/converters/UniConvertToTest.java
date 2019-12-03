@@ -15,7 +15,7 @@ public class UniConvertToTest {
     @Test
     public void testCreatingCompletionStages() {
         Uni<Integer> valued = Uni.createFrom().item(1);
-        Uni<Void> empty = Uni.createFrom().item(null);
+        Uni<Void> empty = Uni.createFrom().item((Void) null);
         Uni<Void> failure = Uni.createFrom().failure(new Exception("boom"));
 
         CompletionStage<Integer> stage1 = valued.convert().toCompletionStage();
@@ -30,7 +30,7 @@ public class UniConvertToTest {
     @Test
     public void testCreatingCompletableFutures() {
         Uni<Integer> valued = Uni.createFrom().item(1);
-        Uni<Void> empty = Uni.createFrom().item(null);
+        Uni<Void> empty = Uni.createFrom().item((Void) null);
         Uni<Void> failure = Uni.createFrom().failure(new Exception("boom"));
 
         CompletableFuture<Integer> stage1 = valued.convert().toCompletableFuture();
