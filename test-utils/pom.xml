@@ -11,7 +11,7 @@
     </parent>
 
     <artifactId>mutiny-test-utils</artifactId>
-    <name>SmallRye Uni/Multi Test Utilities</name>
+    <name>SmallRye Mutiny Test Utilities</name>
 
     <dependencies>
         <dependency>

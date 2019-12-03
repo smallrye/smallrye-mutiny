@@ -11,7 +11,7 @@
     </parent>
 
     <artifactId>mutiny</artifactId>
-    <name>SmallRye Uni/Multi implementation</name>
+    <name>SmallRye Mutiny</name>
 
     <dependencies>
         <dependency>

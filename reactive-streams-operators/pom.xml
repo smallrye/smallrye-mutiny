@@ -10,13 +10,8 @@
         <version>1.0.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>mutiny-reactive-streams-operators-project</artifactId>
-
-    <packaging>pom</packaging>
-
-    <modules>
-        <module>reactive-streams-operators</module>
-    </modules>
+    <artifactId>mutiny-reactive-streams-operators</artifactId>
+    <name>SmallRye Mutiny - MicroProfile Reactive Streams Operators Implementation</name>
 
     <dependencies>
         <dependency>
@@ -34,7 +29,53 @@
             <version>${microprofile-reactive-streams.version}</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>io.smallrye.reactive</groupId>
+            <artifactId>mutiny</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.smallrye.reactive</groupId>
+            <artifactId>mutiny-test-utils</artifactId>
+        </dependency>
     </dependencies>
 
-    
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>default-test</id>
+                        <goals>
+                            <goal>test</goal>
+                        </goals>
+                        <configuration>
+                            <excludes>
+                                <exclude>**/tck/*</exclude>
+                            </excludes>
+                            <testNGArtifactName>none:none</testNGArtifactName>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>tck</id>
+                        <goals>
+                            <goal>test</goal>
+                        </goals>
+                        <configuration>
+                            <includes>
+                                <include>**/tck/ReactiveStreamsEngineImplTck</include>
+                            </includes>
+                            <excludes>
+                                <exclude>**/tck/SubscriberWhitebox*</exclude>
+                            </excludes>
+                            <junitArtifactName>none:none</junitArtifactName>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+
 </project>

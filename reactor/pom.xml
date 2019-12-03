@@ -11,7 +11,7 @@
     </parent>
 
     <artifactId>mutiny-reactor</artifactId>
-    <name>SmallRye Uni/Multi integration with Reactor</name>
+    <name>SmallRye Mutiny integration with Reactor</name>
 
 
     <dependencies>

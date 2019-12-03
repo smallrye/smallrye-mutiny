@@ -11,7 +11,7 @@
     </parent>
 
     <artifactId>mutiny-rxjava</artifactId>
-    <name>SmallRye Uni/Multi integration with RxJava</name>
+    <name>SmallRye Mutiny integration with RxJava</name>
 
 
     <dependencies>
