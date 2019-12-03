@@ -16,5 +16,5 @@ jobs:
           MAVEN_SETTINGS: ${{ secrets.MVN_SETTINGS }}
           SMALLRYE_SIGNATURE: ${{ secrets.GPG_SIGNATURE }}
         run: |
-          chmod +x ./build/deploy.sh
-          ./deploy.sh ${{ github.event.deployment.environment }}
+          chmod +x .build/deploy.sh
+          .build/deploy.sh ${{ github.event.deployment.environment }}
