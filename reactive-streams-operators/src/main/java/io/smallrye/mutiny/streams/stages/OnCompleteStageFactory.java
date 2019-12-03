@@ -21,6 +21,6 @@ public class OnCompleteStageFactory implements ProcessingStageFactory<Stage.OnCo
     public <I, O> ProcessingStage<I, O> create(Engine engine, Stage.OnComplete stage) {
         Runnable runnable = Objects.requireNonNull(stage).getAction();
         Objects.requireNonNull(runnable);
-        return source -> (Multi<O>) source.onCompletion().consume(runnable);
+        return source -> (Multi<O>) source.onCompletion().invoke(runnable);
     }
 }

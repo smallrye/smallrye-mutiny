@@ -30,7 +30,7 @@ public class MultiOnCompletion<T> {
      * @param callback the action, must not be {@code null}
      * @return the new multi
      */
-    public Multi<T> consume(Runnable callback) {
+    public Multi<T> invoke(Runnable callback) {
         return new MultiSignalConsumerOp<>(upstream,
                 null, null, null, nonNull(callback, "callback"), null,
                 null, null);

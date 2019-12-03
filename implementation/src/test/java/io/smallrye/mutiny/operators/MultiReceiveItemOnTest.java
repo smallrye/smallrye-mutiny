@@ -60,7 +60,7 @@ public class MultiReceiveItemOnTest {
         Set<String> completionThread = ConcurrentHashMap.newKeySet();
         MultiAssertSubscriber<Integer> subscriber = Multi.createFrom().items(1, 2, 3, 4)
                 .emitOn(executor)
-                .onItem().consume(i -> itemThread.add(Thread.currentThread().getName()))
+                .onItem().invoke(i -> itemThread.add(Thread.currentThread().getName()))
                 .on().completion(() -> completionThread.add(Thread.currentThread().getName()))
                 .subscribe().with(MultiAssertSubscriber.create(4))
                 .await()
@@ -77,8 +77,8 @@ public class MultiReceiveItemOnTest {
         Set<String> failureThread = new LinkedHashSet<>();
         Multi.createFrom().<Integer> failure(new IOException("boom"))
                 .emitOn(executor)
-                .onItem().consume(i -> itemThread.add(Thread.currentThread().getName()))
-                .onFailure().consume(f -> failureThread.add(Thread.currentThread().getName()))
+                .onItem().invoke(i -> itemThread.add(Thread.currentThread().getName()))
+                .onFailure().invoke(f -> failureThread.add(Thread.currentThread().getName()))
                 .subscribe().with(MultiAssertSubscriber.create(4))
                 .await()
                 .assertHasFailedWith(IOException.class, "boom");

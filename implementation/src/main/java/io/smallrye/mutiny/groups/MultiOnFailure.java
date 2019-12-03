@@ -29,7 +29,7 @@ public class MultiOnFailure<T> {
      * @param callback the callback, must not be {@code null}
      * @return the new {@link Multi}
      */
-    public Multi<T> consume(Consumer<Throwable> callback) {
+    public Multi<T> invoke(Consumer<Throwable> callback) {
         nonNull(callback, "callback");
         nonNull(predicate, "predicate");
         return new MultiSignalConsumerOp<>(

@@ -111,7 +111,7 @@ public class MultiOnFailureRetryTest {
         AtomicInteger count = new AtomicInteger();
 
         Multi.createFrom().items(1, 2, 3, 4)
-                .onItem().consume(i -> {
+                .onItem().invoke(i -> {
                     if (count.getAndIncrement() < 2) {
                         throw new RuntimeException("boom");
                     }

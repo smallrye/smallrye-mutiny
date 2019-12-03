@@ -29,7 +29,7 @@ public class UniOnFailure<T> {
      * @param callback the callback, must not be {@code null}
      * @return the new {@link Uni}
      */
-    public Uni<T> consume(Consumer<Throwable> callback) {
+    public Uni<T> invoke(Consumer<Throwable> callback) {
         return Infrastructure.onUniCreation(
                 new UniOnEventConsume<>(upstream, null, nonNull(callback, "callback")));
     }

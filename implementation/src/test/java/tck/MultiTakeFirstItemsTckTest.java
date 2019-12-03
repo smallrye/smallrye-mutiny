@@ -81,7 +81,7 @@ public class MultiTakeFirstItemsTckTest extends AbstractPublisherTck<Long> {
         await(
                 infiniteStream()
                         .on().termination((f, c) -> cancelled.complete(null))
-                        .onItem().consume(i -> {
+                        .onItem().invoke(i -> {
                             if (i == 100) {
                                 cancelled.completeExceptionally(new RuntimeException("Was not cancelled"));
                             }

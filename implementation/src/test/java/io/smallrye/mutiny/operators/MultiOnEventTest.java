@@ -31,8 +31,8 @@ public class MultiOnEventTest {
 
         Multi.createFrom().item(1)
                 .on().subscription(subscription::set)
-                .on().item().consume(item::set)
-                .on().failure().consume(failure::set)
+                .on().item().invoke(item::set)
+                .on().failure().invoke(failure::set)
                 .on().completion(() -> completion.set(true))
                 .on().termination((f, c) -> termination.set(f == null && !c))
                 .on().request(requests::set)
@@ -65,8 +65,8 @@ public class MultiOnEventTest {
 
         Multi.createFrom().<Integer> failure(new IOException("boom"))
                 .on().subscription(subscription::set)
-                .on().item().consume(item::set)
-                .on().failure().consume(failure::set)
+                .on().item().invoke(item::set)
+                .on().failure().invoke(failure::set)
                 .on().completion(() -> completion.set(true))
                 .on().termination((f, c) -> termination.set(f != null))
                 .on().request(requests::set)
@@ -95,8 +95,8 @@ public class MultiOnEventTest {
 
         Multi.createFrom().<Integer> failure(new IOException("boom"))
                 .on().subscription(subscription::set)
-                .on().item().consume(item::set)
-                .on().failure(IOException.class).consume(failure::set)
+                .on().item().invoke(item::set)
+                .on().failure(IOException.class).invoke(failure::set)
                 .on().completion(() -> completion.set(true))
                 .on().termination((f, c) -> termination.set(f != null))
                 .on().request(requests::set)
@@ -125,8 +125,8 @@ public class MultiOnEventTest {
 
         Multi.createFrom().<Integer> failure(new IOException("boom"))
                 .on().subscription(subscription::set)
-                .on().item().consume(item::set)
-                .on().failure(f -> f.getMessage().contains("missing")).consume(failure::set)
+                .on().item().invoke(item::set)
+                .on().failure(f -> f.getMessage().contains("missing")).invoke(failure::set)
                 .on().completion(() -> completion.set(true))
                 .on().termination((f, c) -> termination.set(f != null))
                 .on().request(requests::set)
@@ -159,8 +159,8 @@ public class MultiOnEventTest {
 
         Multi.createFrom().<Integer> failure(new IOException("smallboom"))
                 .on().subscription(subscription::set)
-                .on().item().consume(item::set)
-                .on().failure(boom).consume(failure::set)
+                .on().item().invoke(item::set)
+                .on().failure(boom).invoke(failure::set)
                 .on().completion(() -> completion.set(true))
                 .on().termination((f, c) -> termination.set(f != null))
                 .on().request(requests::set)
@@ -190,8 +190,8 @@ public class MultiOnEventTest {
 
         Multi.createFrom().<Integer> empty()
                 .on().subscription(subscription::set)
-                .on().item().consume(item::set)
-                .on().failure().consume(failure::set)
+                .on().item().invoke(item::set)
+                .on().failure().invoke(failure::set)
                 .on().completion(() -> completion.set(true))
                 .on().termination((f, c) -> termination.set(f == null && !c))
                 .on().request(requests::set)
@@ -221,8 +221,8 @@ public class MultiOnEventTest {
 
         MultiAssertSubscriber<Integer> subscriber = Multi.createFrom().<Integer> nothing()
                 .on().subscription(subscription::set)
-                .on().item().consume(item::set)
-                .on().failure().consume(failure::set)
+                .on().item().invoke(item::set)
+                .on().failure().invoke(failure::set)
                 .on().completion(() -> completion.set(true))
                 .on().termination((f, c) -> termination.set(f == null && c))
                 .on().request(requests::set)
@@ -249,7 +249,7 @@ public class MultiOnEventTest {
         MultiAssertSubscriber<Integer> ts = MultiAssertSubscriber.create(1);
 
         Multi.createFrom().item(1)
-                .on().item().consume(i -> {
+                .on().item().invoke(i -> {
                     throw new IllegalArgumentException("boom");
                 })
                 .subscribe().with(ts)
@@ -262,7 +262,7 @@ public class MultiOnEventTest {
         MultiAssertSubscriber<Integer> ts = MultiAssertSubscriber.create(1);
 
         Multi.createFrom().<Integer> failure(new IOException("source"))
-                .on().failure().consume(f -> {
+                .on().failure().invoke(f -> {
                     throw new IllegalArgumentException("boom");
                 })
                 .subscribe().with(ts)
@@ -291,9 +291,9 @@ public class MultiOnEventTest {
     @Test
     public void testWhenBothOnItemAndOnFailureThrowsException() {
         Multi.createFrom().item(1)
-                .on().item().consume(i -> {
+                .on().item().invoke(i -> {
                     throw new IllegalArgumentException("boom1");
-                }).on().failure().consume(t -> {
+                }).on().failure().invoke(t -> {
                     throw new IllegalArgumentException("boom2");
                 }).subscribe().with(MultiAssertSubscriber.create(1))
                 .assertTerminated()

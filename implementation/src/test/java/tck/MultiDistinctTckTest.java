@@ -85,4 +85,5 @@ public class MultiDistinctTckTest extends AbstractPublisherTck<Integer> {
         return Multi.createFrom().<Integer> failure(new RuntimeException("failed"))
                 .transform().byKeepingDistinctItems();
     }
+
 }

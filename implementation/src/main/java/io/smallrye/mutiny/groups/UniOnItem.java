@@ -30,7 +30,7 @@ public class UniOnItem<T> {
      * @param callback the callback, must not be {@code null}
      * @return the new {@link Uni}
      */
-    public Uni<T> consume(Consumer<? super T> callback) {
+    public Uni<T> invoke(Consumer<? super T> callback) {
         return Infrastructure.onUniCreation(
                 new UniOnEventConsume<>(upstream, nonNull(callback, "callback"), null));
     }

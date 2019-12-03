@@ -139,5 +139,4 @@ public class MultiFlatMapCompletionStageTckTest extends AbstractPublisherTck<Int
         await(cancelled);
         await(result);
     }
-
 }

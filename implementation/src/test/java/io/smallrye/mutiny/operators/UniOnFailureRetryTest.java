@@ -72,7 +72,7 @@ public class UniOnFailureRetryTest {
     public void testWithMapperFailure() {
         AtomicInteger count = new AtomicInteger();
         Uni.createFrom().item(1)
-                .onItem().consume(input -> {
+                .onItem().invoke(input -> {
                     if (count.incrementAndGet() < 2) {
                         throw new RuntimeException("boom");
                     }

@@ -24,6 +24,6 @@ public class PeekStageFactory implements ProcessingStageFactory<Stage.Peek> {
                 .getConsumer();
         Objects.requireNonNull(consumer);
         return source -> (Multi<O>) source
-                .onItem().consume(consumer);
+                .onItem().invoke(consumer);
     }
 }

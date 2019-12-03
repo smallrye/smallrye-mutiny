@@ -22,7 +22,7 @@ public class MultiOnCompletionTest {
     public void testOnCompletionContinueWith() {
         AtomicBoolean called = new AtomicBoolean();
         Multi.createFrom().range(1, 5)
-                .onCompletion().consume(() -> called.set(true))
+                .onCompletion().invoke(() -> called.set(true))
                 .onCompletion().continueWith(6, 7, 8)
                 .subscribe().with(MultiAssertSubscriber.create(7))
                 .assertCompletedSuccessfully()
@@ -35,7 +35,7 @@ public class MultiOnCompletionTest {
     public void testOnCompletionContinueWithAndUpstreamFailure() {
         AtomicBoolean called = new AtomicBoolean();
         Multi.createFrom().emitter(e -> e.emit(1).emit(2).fail(new IOException("boom")))
-                .onCompletion().consume(() -> called.set(true))
+                .onCompletion().invoke(() -> called.set(true))
                 .onCompletion().continueWith(6, 7, 8)
                 .subscribe().with(MultiAssertSubscriber.create(7))
                 .assertHasFailedWith(IOException.class, "boom")
@@ -57,7 +57,7 @@ public class MultiOnCompletionTest {
     public void testOnCompletionContinueWithOne() {
         AtomicBoolean called = new AtomicBoolean();
         Multi.createFrom().range(1, 5)
-                .onCompletion().consume(() -> called.set(true))
+                .onCompletion().invoke(() -> called.set(true))
                 .onCompletion().continueWith(25)
                 .subscribe().with(MultiAssertSubscriber.create(7))
                 .assertCompletedSuccessfully()
@@ -70,7 +70,7 @@ public class MultiOnCompletionTest {
     public void testOnCompletionContinueWithIterable() {
         AtomicBoolean called = new AtomicBoolean();
         Multi.createFrom().range(1, 5)
-                .onCompletion().consume(() -> called.set(true))
+                .onCompletion().invoke(() -> called.set(true))
                 .onCompletion().continueWith(Arrays.asList(5, 6))
                 .subscribe().with(MultiAssertSubscriber.create(7))
                 .assertCompletedSuccessfully()
@@ -83,7 +83,7 @@ public class MultiOnCompletionTest {
     public void testOnCompletionContinueWithEmptyIterable() {
         AtomicBoolean called = new AtomicBoolean();
         Multi.createFrom().range(1, 5)
-                .onCompletion().consume(() -> called.set(true))
+                .onCompletion().invoke(() -> called.set(true))
                 .onCompletion().continueWith(Collections.emptyList())
                 .subscribe().with(MultiAssertSubscriber.create(7))
                 .assertCompletedSuccessfully()

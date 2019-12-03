@@ -51,7 +51,7 @@ public class MultiSkipItemsWhileTckTest extends AbstractPublisherTck<Long> {
     @Test(expectedExceptions = QuietRuntimeException.class, expectedExceptionsMessageRegExp = "failed")
     public void dropWhileStageShouldPropagateUpstreamErrorsAfterFinishedDropping() {
         await(infiniteStream()
-                .onItem().consume(i -> {
+                .onItem().invoke(i -> {
                     if (i == 4) {
                         throw new QuietRuntimeException("failed");
                     }

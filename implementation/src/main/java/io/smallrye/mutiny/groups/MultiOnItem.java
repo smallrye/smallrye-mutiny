@@ -39,7 +39,7 @@ public class MultiOnItem<T> {
      * @param callback the callback, must not be {@code null}
      * @return the new {@link Uni}
      */
-    public Multi<T> consume(Consumer<T> callback) {
+    public Multi<T> invoke(Consumer<T> callback) {
         return new MultiSignalConsumerOp<>(
                 upstream,
                 null,

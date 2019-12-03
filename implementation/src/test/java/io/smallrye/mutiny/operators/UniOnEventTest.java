@@ -22,8 +22,8 @@ public class UniOnEventTest {
         AtomicReference<Subscription> subscription = new AtomicReference<>();
         AtomicInteger terminate = new AtomicInteger();
         UniAssertSubscriber<? super Integer> subscriber = Uni.createFrom().item(1)
-                .onItem().consume(Item::set)
-                .onFailure().consume(failure::set)
+                .onItem().invoke(Item::set)
+                .onFailure().invoke(failure::set)
                 .on().subscription(subscription::set)
                 .on().termination((r, f, c) -> terminate.set(r))
                 .subscribe().withSubscriber(UniAssertSubscriber.create());
@@ -42,8 +42,8 @@ public class UniOnEventTest {
         AtomicReference<Subscription> subscription = new AtomicReference<>();
         AtomicReference<Throwable> terminate = new AtomicReference<>();
         UniAssertSubscriber<? super Integer> subscriber = Uni.createFrom().<Integer> failure(new IOException("boom"))
-                .onItem().consume(Item::set)
-                .onFailure().consume(failure::set)
+                .onItem().invoke(Item::set)
+                .onFailure().invoke(failure::set)
                 .on().subscription(subscription::set)
                 .on().termination((r, f, c) -> terminate.set(f))
                 .subscribe().withSubscriber(UniAssertSubscriber.create());
@@ -63,10 +63,10 @@ public class UniOnEventTest {
         AtomicInteger ItemFromTerminate = new AtomicInteger();
         AtomicReference<Throwable> failureFromTerminate = new AtomicReference<>();
         UniAssertSubscriber<? super Integer> subscriber = Uni.createFrom().item(1)
-                .onItem().consume(i -> {
+                .onItem().invoke(i -> {
                     throw new IllegalStateException("boom");
                 })
-                .onFailure().consume(failure::set)
+                .onFailure().invoke(failure::set)
                 .on().subscription(subscription::set)
                 .on().termination((r, f, c) -> {
                     if (r != null) {
@@ -91,8 +91,8 @@ public class UniOnEventTest {
         AtomicInteger ItemFromTerminate = new AtomicInteger();
         AtomicReference<Throwable> failureFromTerminate = new AtomicReference<>();
         UniAssertSubscriber<? super Integer> subscriber = Uni.createFrom().<Integer> failure(new IOException("kaboom"))
-                .onItem().consume(Item::set)
-                .onFailure().consume(e -> {
+                .onItem().invoke(Item::set)
+                .onFailure().invoke(e -> {
                     throw new IllegalStateException("boom");
                 })
                 .on().subscription(subscription::set)

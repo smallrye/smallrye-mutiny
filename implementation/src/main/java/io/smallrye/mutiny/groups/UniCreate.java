@@ -195,7 +195,7 @@ public class UniCreate {
      * <p>
      * Note that the emitter only forwards the first event, subsequent events are dropped.
      * <p>
-     * If the consume throws an exception, a failure event with the exception is fired if the first event was already
+     * If the consumer throws an exception, a failure event with the exception is fired if the first event was already
      * fired.
      *
      * @param consumer callback receiving the {@link UniEmitter} and events downstream. The callback is

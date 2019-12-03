@@ -22,6 +22,6 @@ public class OnErrorStageFactory implements ProcessingStageFactory<Stage.OnError
     public <I, O> ProcessingStage<I, O> create(Engine engine, Stage.OnError stage) {
         Consumer<Throwable> consumer = Objects.requireNonNull(stage).getConsumer();
         Objects.requireNonNull(consumer);
-        return source -> (Multi<O>) source.onFailure().consume(consumer);
+        return source -> (Multi<O>) source.onFailure().invoke(consumer);
     }
 }

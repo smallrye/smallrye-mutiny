@@ -39,7 +39,7 @@ public class CancelStageFactoryTest extends StageTestBase {
         List<Long> list = new ArrayList<>();
         Multi<Long> publisher = Multi.createFrom().ticks().every(Duration.ofMillis(1000))
                 .emitOn(Infrastructure.getDefaultExecutor())
-                .onItem().consume(list::add)
+                .onItem().invoke(list::add)
                 .on().cancellation(() -> cancelled.set(true));
         CompletionStage<Void> stage = terminal.apply(publisher);
         stage.toCompletableFuture().get();

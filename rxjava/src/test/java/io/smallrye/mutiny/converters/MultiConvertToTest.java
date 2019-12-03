@@ -197,7 +197,7 @@ public class MultiConvertToTest {
     public void testCreatingAFlowableWithRequest() {
         AtomicBoolean called = new AtomicBoolean();
         MultiAssertSubscriber<Integer> subscriber = Multi.createFrom()
-                .deferred(() -> Multi.createFrom().item(1).onItem().consume((item) -> called.set(true)))
+                .deferred(() -> Multi.createFrom().item(1).onItem().invoke((item) -> called.set(true)))
                 .convert().with(RxConverters.toFlowable())
                 .subscribeWith(MultiAssertSubscriber.create(0));
 

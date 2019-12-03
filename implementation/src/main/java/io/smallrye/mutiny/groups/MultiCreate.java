@@ -374,18 +374,13 @@ public class MultiCreate {
      * in the consumer and emits the items / failure / completion events when the listener is invoked. Don't forget
      * to unregister the listener on cancellation.
      * <p>
-     * If the consume throws an exception, a failure event with the exception is fired.
+     * If the consumer throws an exception, a failure event with the exception is fired.
      *
      * @param consumer callback receiving the {@link MultiEmitter} and events downstream. The callback is
      *        called for each subscriber (at subscription time). Must not be {@code null}
      * @param strategy the back pressure strategy to apply when the downstream subscriber cannot keep up with the
-     *        <<<<<<< HEAD
      *        items emitted by the emitter.
-     * @param <T> the type of items
-     *        =======
-     *        items emitted by the emitter. Must not be {@code null}
-     * @param <T> the type of items
-     *        >>>>>>> Add emitter support
+     * @param <T> the type of items emitted by the emitter. Must not be {@code null}
      * @return the produced {@link Multi}
      */
     public <T> Multi<T> emitter(Consumer<MultiEmitter<? super T>> consumer, BackPressureStrategy strategy) {
