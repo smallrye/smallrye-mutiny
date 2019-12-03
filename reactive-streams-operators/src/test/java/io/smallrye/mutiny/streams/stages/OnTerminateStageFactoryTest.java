@@ -1,6 +1,8 @@
 package io.smallrye.mutiny.streams.stages;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
+import static org.hamcrest.Matchers.is;
 
 import java.util.Collections;
 import java.util.Objects;
@@ -44,6 +46,7 @@ public class OnTerminateStageFactoryTest extends StageTestBase {
                 .map(this::asString)
                 .toList()
                 .run().toCompletableFuture().exceptionally(x -> Collections.emptyList()).get();
+        await().untilAtomic(error, is(true));
         assertThat(error).isTrue();
     }
 
@@ -60,12 +63,13 @@ public class OnTerminateStageFactoryTest extends StageTestBase {
                 .map(this::asString)
                 .toList()
                 .run().toCompletableFuture().get();
+        await().untilAtomic(completed, is(true));
         assertThat(completed).isTrue();
     }
 
     private Integer squareOrFailed(int i) {
         if (i == 2) {
-            throw new RuntimeException("failed");
+            throw new IllegalStateException("failed");
         }
         return i * i;
     }
