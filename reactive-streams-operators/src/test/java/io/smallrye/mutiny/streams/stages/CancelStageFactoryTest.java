@@ -74,9 +74,10 @@ public class CancelStageFactoryTest extends StageTestBase {
     @Test
     public void cancelStageShouldCancelTheStage() {
         CompletableFuture<Void> cancelled = new CompletableFuture<>();
-        CompletionStage<Void> result = ReactiveStreams.fromPublisher(s -> s.onSubscribe(new Subscription() {
+        ReactiveStreams.fromPublisher(s -> s.onSubscribe(new Subscription() {
             @Override
             public void request(long n) {
+                // ignored.
             }
 
             @Override
@@ -85,6 +86,7 @@ public class CancelStageFactoryTest extends StageTestBase {
             }
         })).cancel().run();
         await().until(cancelled::isDone);
+        assertThat(cancelled).isCompletedWithValue(null);
     }
 
 }
