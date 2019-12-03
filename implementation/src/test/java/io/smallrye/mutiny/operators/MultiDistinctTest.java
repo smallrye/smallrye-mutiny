@@ -12,7 +12,7 @@ public class MultiDistinctTest {
     @Test
     public void testDistinctWithUpstreamFailure() {
         Multi.createFrom().<Integer> failure(new IOException("boom"))
-                .transform().byKeepingDistinctItems()
+                .transform().byDroppingDuplicates()
                 .subscribe().with(MultiAssertSubscriber.create(10))
                 .assertHasFailedWith(IOException.class, "boom");
     }
@@ -20,7 +20,7 @@ public class MultiDistinctTest {
     @Test
     public void testDistinct() {
         Multi.createFrom().items(1, 2, 3, 4, 2, 4, 2, 4)
-                .transform().byKeepingDistinctItems()
+                .transform().byDroppingDuplicates()
                 .subscribe().with(MultiAssertSubscriber.create(10))
                 .assertCompletedSuccessfully()
                 .assertReceived(1, 2, 3, 4);
@@ -29,7 +29,7 @@ public class MultiDistinctTest {
     @Test
     public void testDistinctOnAStreamWithoutDuplicates() {
         Multi.createFrom().range(1, 5)
-                .transform().byKeepingDistinctItems()
+                .transform().byDroppingDuplicates()
                 .subscribe().with(MultiAssertSubscriber.create(10))
                 .assertCompletedSuccessfully()
                 .assertReceived(1, 2, 3, 4);

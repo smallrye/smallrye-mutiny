@@ -21,7 +21,7 @@ public class MultiDistinctTckTest extends AbstractPublisherTck<Integer> {
     public void distinctStageShouldReturnDistinctElements() {
         assertEquals(await(
                 Multi.createFrom().items(1, 2, 2, 3, 2, 1, 3)
-                        .transform().byKeepingDistinctItems()
+                        .transform().byDroppingDuplicates()
                         .collectItems().asList()
                         .subscribeAsCompletionStage()),
                 Arrays.asList(1, 2, 3));
@@ -30,7 +30,7 @@ public class MultiDistinctTckTest extends AbstractPublisherTck<Integer> {
     @Test
     public void distinctStageShouldReturnAnEmptyStreamWhenCalledOnEmptyStreams() {
         assertEquals(await(Multi.createFrom().empty()
-                .transform().byKeepingDistinctItems()
+                .transform().byDroppingDuplicates()
                 .collectItems().asList()
                 .subscribeAsCompletionStage()), Collections.emptyList());
     }
@@ -38,7 +38,7 @@ public class MultiDistinctTckTest extends AbstractPublisherTck<Integer> {
     @Test(expectedExceptions = QuietRuntimeException.class, expectedExceptionsMessageRegExp = "failed")
     public void distinctStageShouldPropagateUpstreamExceptions() {
         await(Multi.createFrom().failure(new QuietRuntimeException("failed"))
-                .transform().byKeepingDistinctItems()
+                .transform().byDroppingDuplicates()
                 .collectItems().asList()
                 .subscribeAsCompletionStage());
     }
@@ -60,7 +60,7 @@ public class MultiDistinctTckTest extends AbstractPublisherTck<Integer> {
         CompletionStage<List<ObjectThatThrowsFromEquals>> result = Multi.createFrom().items(
                 new ObjectThatThrowsFromEquals(), new ObjectThatThrowsFromEquals())
                 .on().termination((e, c) -> cancelled.complete(null))
-                .transform().byKeepingDistinctItems().collectItems().asList().subscribeAsCompletionStage();
+                .transform().byDroppingDuplicates().collectItems().asList().subscribeAsCompletionStage();
         await(cancelled);
         await(result);
     }
@@ -70,20 +70,20 @@ public class MultiDistinctTckTest extends AbstractPublisherTck<Integer> {
         CompletableFuture<Void> cancelled = new CompletableFuture<>();
         infiniteStream()
                 .on().termination((e, c) -> cancelled.complete(null))
-                .transform().byKeepingDistinctItems().subscribe().with(new Subscriptions.CancelledSubscriber<>());
+                .transform().byDroppingDuplicates().subscribe().with(new Subscriptions.CancelledSubscriber<>());
         await(cancelled);
     }
 
     @Override
     public Publisher<Integer> createPublisher(long elements) {
         return Multi.createFrom().items(IntStream.rangeClosed(1, (int) elements).boxed())
-                .transform().byKeepingDistinctItems();
+                .transform().byDroppingDuplicates();
     }
 
     @Override
     public Publisher<Integer> createFailedPublisher() {
         return Multi.createFrom().<Integer> failure(new RuntimeException("failed"))
-                .transform().byKeepingDistinctItems();
+                .transform().byDroppingDuplicates();
     }
 
 }

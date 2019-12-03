@@ -56,7 +56,7 @@ public class MultiTransform<T> {
         return MultiTransformation.takeWhile(upstream, nonNull(predicate, "predicate"));
     }
 
-    public Multi<T> byKeepingDistinctItems() {
+    public Multi<T> byDroppingDuplicates() {
         return MultiTransformation.distinct(upstream);
     }
 
