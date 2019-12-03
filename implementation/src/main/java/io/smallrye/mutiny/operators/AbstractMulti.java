@@ -18,6 +18,7 @@ import io.smallrye.mutiny.groups.*;
 import io.smallrye.mutiny.operators.multi.MultiCacheOp;
 import io.smallrye.mutiny.operators.multi.MultiEmitOnOp;
 import io.smallrye.mutiny.operators.multi.MultiSubscribeOnOp;
+import io.smallrye.mutiny.subscription.SerializedSubscriber;
 
 public abstract class AbstractMulti<T> implements Multi<T> {
 
@@ -33,7 +34,7 @@ public abstract class AbstractMulti<T> implements Multi<T> {
             throw new IllegalStateException("Invalid call to subscription, we don't have a publisher");
         }
         //noinspection SubscriberImplementation
-        publisher.subscribe(new Subscriber<T>() {
+        publisher.subscribe(new SerializedSubscriber<>(new Subscriber<T>() {
 
             AtomicReference<Subscription> reference = new AtomicReference<>();
 
@@ -104,7 +105,7 @@ public abstract class AbstractMulti<T> implements Multi<T> {
                     reference.set(CANCELLED);
                 }
             }
-        });
+        }));
     }
 
     @Override
