@@ -27,18 +27,4 @@ public class MultiCombine {
                     .onItem().flatMap().multi(Function.identity()).withRequests(requests).mergeResults(concurrency);
         }
     }
-
-    public static <T> Multi<T> concatenate(List<Publisher<T>> participants, boolean collectFailures, int requests) {
-        List<Publisher<T>> candidates = ParameterValidation.doesNotContainNull(participants, "participants");
-        if (collectFailures) {
-            return new CollectionBasedMulti<>(candidates)
-                    .onItem().flatMap().multi(Function.identity()).collectFailures().withRequests(requests)
-                    .mergeResults(1);
-        } else {
-            return new CollectionBasedMulti<>(candidates)
-                    .onItem().flatMap().multi(Function.identity()).collectFailures().withRequests(requests)
-                    .mergeResults(1);
-        }
-    }
-
 }
