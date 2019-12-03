@@ -68,7 +68,7 @@ public class MultiReceiveItemOnTest {
 
         await().until(() -> subscriber.items().size() == 4);
         assertThat(itemThread).allSatisfy(s -> assertThat(s).startsWith("test-"));
-        assertThat(completionThread).allSatisfy(s -> assertThat(s).startsWith("test-"));
+        assertThat(completionThread).hasSizeGreaterThanOrEqualTo(1).allSatisfy(s -> assertThat(s).startsWith("test-"));
     }
 
     @Test
@@ -84,7 +84,7 @@ public class MultiReceiveItemOnTest {
                 .assertHasFailedWith(IOException.class, "boom");
 
         assertThat(itemThread).isEmpty();
-        assertThat(failureThread).hasSize(1).allSatisfy(s -> assertThat(s).startsWith("test-"));
+        assertThat(failureThread).hasSizeGreaterThanOrEqualTo(1).allSatisfy(s -> assertThat(s).startsWith("test-"));
     }
 
     @Test
