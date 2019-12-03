@@ -16,7 +16,7 @@ public abstract class MultiOperatorProcessor<I, O> implements Subscriber<I>, Sub
 
     protected final Subscriber<? super O> downstream;
     protected AtomicReference<Subscription> upstream = new AtomicReference<>();
-    protected AtomicBoolean cancelled = new AtomicBoolean();
+    protected AtomicBoolean hasDownstreamCancelled = new AtomicBoolean();
 
     public MultiOperatorProcessor(Subscriber<? super O> downstream) {
         this.downstream = ParameterValidation.nonNull(downstream, "downstream");
@@ -35,7 +35,7 @@ public abstract class MultiOperatorProcessor<I, O> implements Subscriber<I>, Sub
     }
 
     protected boolean isCancelled() {
-        return cancelled.get();
+        return hasDownstreamCancelled.get();
     }
 
     @Override
@@ -77,7 +77,7 @@ public abstract class MultiOperatorProcessor<I, O> implements Subscriber<I>, Sub
 
     @Override
     public void cancel() {
-        if (cancelled.compareAndSet(false, true)) {
+        if (hasDownstreamCancelled.compareAndSet(false, true)) {
             Subscriptions.cancel(upstream);
         }
     }
