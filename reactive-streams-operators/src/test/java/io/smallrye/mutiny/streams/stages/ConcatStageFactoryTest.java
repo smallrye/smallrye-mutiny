@@ -89,7 +89,8 @@ public class ConcatStageFactoryTest extends StageTestBase {
 
         List<Integer> ints = list.toCompletableFuture().get();
         assertThat(ints).containsExactly(1, 2, 3, 4, 5, 6);
-        assertThat(threads).hasSize(2);
+        // the number of thread depends on the dispatching, it's at least 2, but can be more.
+        assertThat(threads).hasSizeGreaterThanOrEqualTo(2);
 
         io.shutdown();
         computation.shutdown();
