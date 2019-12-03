@@ -1,12 +1,12 @@
-image:https://semaphoreci.com/api/v1/smallrye/smallrye-mutiny/branches/master/badge.svg["Semaphore CI", link="https://semaphoreci.com/smallrye/smallrye-mutiny"]
+image:https://img.shields.io/github/workflow/status/smallrye/smallrye-mutiny/Continuous Integration Build[Build Status]
 image:https://sonarcloud.io/api/project_badges/measure?project=smallrye_smallrye-mutiny&metric=alert_status["Quality Gate Status", link="https://sonarcloud.io/dashboard?id=smallrye_smallrye-mutiny"]
 image:https://img.shields.io/github/license/smallrye/smallrye-mutiny.svg["License", link="http://www.apache.org/licenses/LICENSE-2.0"]
 
-= SmallRye Mutiny
+== SmallRye Mutiny
 
 Mutiny reactive types implementation.
 
-== Instructions
+=== Instructions
 
 Compile and install this project:
 
@@ -15,11 +15,6 @@ Compile and install this project:
 mvn clean install
 ----
 
-=== Project structure
-
-* link:implementation[] - Implementation.
-* link:docs[] - Project documentation.
-
-=== Links
+==== Links
 
 * http://github.com/smallrye/smallrye-mutiny/[Project Homepage]
