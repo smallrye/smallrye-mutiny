@@ -50,23 +50,11 @@ public class UniCreateFromPublisher<O> extends UniOperator<Void, O> {
 
             @Override
             public void onError(Throwable t) {
-                Subscription sub = reference.getAndSet(CANCELLED);
-                if (sub == CANCELLED) {
-                    // Already cancelled, do nothing
-                    return;
-                }
-                sub.cancel();
                 subscriber.onFailure(t);
             }
 
             @Override
             public void onComplete() {
-                Subscription sub = reference.getAndSet(CANCELLED);
-                if (sub == CANCELLED) {
-                    // Already cancelled, do nothing
-                    return;
-                }
-                sub.cancel();
                 subscriber.onItem(null);
             }
         });

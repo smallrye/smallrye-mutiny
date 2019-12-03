@@ -23,6 +23,7 @@ public final class MultiSkipUntilOp<T> extends AbstractMultiOperator<T, T> {
 
     @Override
     public void subscribe(Subscriber<? super T> actual) {
+        ParameterValidation.nonNullNpe(actual, "subscriber");
         upstream.subscribe(new SkipUntilProcessor<>(actual, predicate));
     }
 

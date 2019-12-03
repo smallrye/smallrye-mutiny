@@ -14,7 +14,7 @@ import io.smallrye.mutiny.subscription.SwitchableSubscriptionSubscriber;
 /**
  * Concatenates a fixed set of Publishers.
  * Items from each publisher are emitted in order.
- * All the imtes from one publisher must be consumed before items from another publisher are emitted.
+ * All the items from one publisher must be consumed before items from another publisher are emitted.
  *
  * @param <T> the type of item
  */
@@ -58,43 +58,6 @@ public class MultiConcatOp<T> extends AbstractMulti<T> {
                 parent.onComplete();
             }
         }
-    }
-
-    /**
-     * Returns a new instance of {@link MultiConcatOp} which concatenates items from the current set of upstreams and the
-     * passed upstream (appended at the end).
-     * <p>
-     * This operation doesn't change the current instance but produce a new one.
-     *
-     * @param upstream the new upstream, must not be {@code null}
-     * @return the new MultiConcatOp instance
-     */
-    @SuppressWarnings("unchecked")
-    MultiConcatOp<T> appendUpstream(Publisher<? extends T> upstream) {
-        ParameterValidation.nonNull(upstream, "upstream");
-        int n = publishers.length;
-        Publisher<? extends T>[] newArray = new Publisher[n + 1];
-        System.arraycopy(publishers, 0, newArray, 0, n);
-        newArray[n] = upstream;
-        return new MultiConcatOp<>(postponeFailurePropagation, newArray);
-    }
-
-    /**
-     * Returns a new instance of {@link MultiConcatOp} which concatenates items from the passed upstream followed with
-     * items from the current set of upstreams.
-     * <p>
-     * This operation doesn't change the current instance but produce a new one.
-     *
-     * @param upstream the new upstream, must not be {@code null}
-     * @return the new MultiConcatOp instance
-     */
-    @SuppressWarnings("unchecked")
-    MultiConcatOp<T> prependUpstream(Publisher<? extends T> upstream) {
-        int n = publishers.length;
-        Publisher<? extends T>[] newArray = new Publisher[n + 1];
-        System.arraycopy(publishers, 0, newArray, 1, n);
-        newArray[0] = upstream;
-        return new MultiConcatOp<>(postponeFailurePropagation, newArray);
     }
 
     @Override

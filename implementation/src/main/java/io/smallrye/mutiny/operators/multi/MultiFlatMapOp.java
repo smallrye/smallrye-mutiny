@@ -15,6 +15,8 @@ import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.helpers.Subscriptions;
 import io.smallrye.mutiny.subscription.BackPressureFailure;
+import io.smallrye.mutiny.subscription.SafeSubscriber;
+import io.smallrye.mutiny.subscription.SerializedSubscriber;
 
 public final class MultiFlatMapOp<I, O> extends AbstractMultiOperator<I, O> {
     private final Function<? super I, ? extends Publisher<? extends O>> mapper;
@@ -55,7 +57,7 @@ public final class MultiFlatMapOp<I, O> extends AbstractMultiOperator<I, O> {
                 maxConcurrency,
                 mainQueueSupplier,
                 innerQueueSupplier);
-        upstream.subscribe(sub);
+        upstream.subscribe(new SafeSubscriber<>(new SerializedSubscriber<>(sub)));
     }
 
     @SuppressWarnings("SubscriberImplementation")
@@ -130,8 +132,8 @@ public final class MultiFlatMapOp<I, O> extends AbstractMultiOperator<I, O> {
         }
 
         @Override
-        void unsubscribeEntry(FlatMapInner<O> entry) {
-            entry.onCancellation();
+        void unsubscribeEntry(FlatMapInner<O> entry, boolean fromOnError) {
+            entry.cancel(fromOnError);
         }
 
         @Override
@@ -182,7 +184,7 @@ public final class MultiFlatMapOp<I, O> extends AbstractMultiOperator<I, O> {
                 cancelled = true;
                 done = true;
                 Subscriptions.addFailure(failures, e);
-                cancelUpstream();
+                cancelUpstream(false);
                 handleTerminationIfDone();
                 return;
             }
@@ -323,7 +325,7 @@ public final class MultiFlatMapOp<I, O> extends AbstractMultiOperator<I, O> {
                     int j = lastIndex;
                     for (int i = 0; i < n; i++) {
                         if (cancelled) {
-                            cancelUpstream();
+                            cancelUpstream(false);
                             return;
                         }
 
@@ -414,7 +416,7 @@ public final class MultiFlatMapOp<I, O> extends AbstractMultiOperator<I, O> {
 
                     for (int i = 0; i < n; i++) {
                         if (cancelled) {
-                            cancelUpstream();
+                            cancelUpstream(false);
                             return;
                         }
 
@@ -455,13 +457,13 @@ public final class MultiFlatMapOp<I, O> extends AbstractMultiOperator<I, O> {
             }
         }
 
-        private void cancelUpstream() {
+        private void cancelUpstream(boolean fromOnError) {
             clearQueue();
             Subscription subscription = upstream.getAndSet(Subscriptions.CANCELLED);
             if (subscription != null) {
                 subscription.cancel();
             }
-            unsubscribe();
+            unsubscribe(fromOnError);
         }
 
         private void clearQueue() {
@@ -473,7 +475,7 @@ public final class MultiFlatMapOp<I, O> extends AbstractMultiOperator<I, O> {
 
         boolean ifDoneOrCancelled() {
             if (cancelled) {
-                cancelUpstream();
+                cancelUpstream(false);
                 return true;
             }
 
@@ -501,7 +503,7 @@ public final class MultiFlatMapOp<I, O> extends AbstractMultiOperator<I, O> {
                     if (e != null && e != Subscriptions.TERMINATED) {
                         Throwable throwable = failures.getAndSet(Subscriptions.TERMINATED);
                         clearQueue();
-                        unsubscribe();
+                        unsubscribe(true);
                         downstream.onError(throwable);
                         return true;
                     } else if (isEmpty) {
@@ -518,7 +520,7 @@ public final class MultiFlatMapOp<I, O> extends AbstractMultiOperator<I, O> {
                 if (Subscriptions.addFailure(failures, fail)) {
                     inner.done = true;
                     if (!delayError) {
-                        cancelUpstream();
+                        cancelUpstream(true);
                         downstream.onError(fail);
                         return;
                     }
@@ -619,15 +621,13 @@ public final class MultiFlatMapOp<I, O> extends AbstractMultiOperator<I, O> {
 
         @Override
         public void cancel() {
-            subscription.getAndSet(Subscriptions.CANCELLED).cancel();
-            if (queue != null) {
-                queue.clear();
-                queue = null;
-            }
+            cancel(true);
         }
 
-        public void onCancellation() {
-            subscription.getAndSet(Subscriptions.CANCELLED).cancel();
+        public void cancel(boolean doNotCancel) {
+            if (!doNotCancel) {
+                subscription.getAndSet(Subscriptions.CANCELLED).cancel();
+            }
             if (queue != null) {
                 queue.clear();
                 queue = null;

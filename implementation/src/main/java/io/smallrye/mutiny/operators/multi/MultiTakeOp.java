@@ -28,6 +28,7 @@ public final class MultiTakeOp<T> extends AbstractMultiOperator<T, T> {
 
     @Override
     public void subscribe(Subscriber<? super T> downstream) {
+        ParameterValidation.nonNullNpe(downstream, "subscriber");
         upstream.subscribe(new TakeProcessor<>(downstream, numberOfItems));
     }
 
@@ -81,6 +82,10 @@ public final class MultiTakeOp<T> extends AbstractMultiOperator<T, T> {
 
         @Override
         public void request(long n) {
+            if (n <= 0) {
+                downstream.onError(Subscriptions.getInvalidRequestException());
+                return;
+            }
             Subscription actual = upstream.get();
             if (wip.compareAndSet(0, 1)) {
                 if (n >= this.numberOfItems) {

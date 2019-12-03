@@ -21,11 +21,15 @@ public abstract class FlatMapManager<T> {
 
     abstract T[] newArray(int size);
 
-    abstract void unsubscribeEntry(T entry);
+    abstract void unsubscribeEntry(T entry, boolean fromOnError);
 
     abstract void setIndex(T entry, int index);
 
     final void unsubscribe() {
+        unsubscribe(false);
+    }
+
+    final void unsubscribe(boolean fromOnError) {
         T[] a;
         T[] t = terminated();
         synchronized (this) {
@@ -39,7 +43,7 @@ public abstract class FlatMapManager<T> {
         }
         for (T e : a) {
             if (e != null) {
-                unsubscribeEntry(e);
+                unsubscribeEntry(e, fromOnError);
             }
         }
     }

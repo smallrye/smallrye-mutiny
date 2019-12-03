@@ -128,7 +128,13 @@ public abstract class SwitchableSubscriptionSubscriber<O> implements Subscriber<
         drain();
     }
 
-    final void emitted() {
+    @Override
+    public final void request(long n) {
+        if (n <= 0) {
+            downstream.onError(Subscriptions.getInvalidRequestException());
+            return;
+        }
+
         if (unbounded) {
             return;
         }
@@ -136,65 +142,31 @@ public abstract class SwitchableSubscriptionSubscriber<O> implements Subscriber<
             long r = requested;
 
             if (r != Long.MAX_VALUE) {
-                r--;
-                if (r < 0L) {
-                    r = 0;
-                }
+                r = Subscriptions.add(r, n);
                 requested = r;
-            } else {
-                unbounded = true;
+                if (r == Long.MAX_VALUE) {
+                    unbounded = true;
+                }
+            }
+            Subscription actual = currentUpstream.get();
+
+            if (wip.decrementAndGet() != 0) {
+                drainLoop();
             }
 
-            if (wip.decrementAndGet() == 0) {
-                return;
+            if (actual != null) {
+                actual.request(n);
             }
-
-            drainLoop();
 
             return;
         }
 
-        Subscriptions.add(missedItems, 1L);
+        Subscriptions.add(missedRequested, n);
 
         drain();
     }
 
-    @Override
-    public final void request(long n) {
-        if (n > 0) {
-            if (unbounded) {
-                return;
-            }
-            if (wip.compareAndSet(0, 1)) {
-                long r = requested;
-
-                if (r != Long.MAX_VALUE) {
-                    r = Subscriptions.add(r, n);
-                    requested = r;
-                    if (r == Long.MAX_VALUE) {
-                        unbounded = true;
-                    }
-                }
-                Subscription actual = currentUpstream.get();
-
-                if (wip.decrementAndGet() != 0) {
-                    drainLoop();
-                }
-
-                if (actual != null) {
-                    actual.request(n);
-                }
-
-                return;
-            }
-
-            Subscriptions.add(missedRequested, n);
-
-            drain();
-        }
-    }
-
-    public final void setOrSwitchUpstream(Subscription newUpstream) {
+    protected final void setOrSwitchUpstream(Subscription newUpstream) {
         ParameterValidation.nonNull(newUpstream, "newUpstream");
 
         if (cancelled.get()) {

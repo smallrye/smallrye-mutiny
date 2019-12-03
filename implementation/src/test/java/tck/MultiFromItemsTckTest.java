@@ -1,12 +1,10 @@
 package tck;
 
-import io.smallrye.mutiny.Multi;
+import java.util.stream.LongStream;
+
 import org.reactivestreams.Publisher;
 
-import java.util.List;
-import java.util.function.IntFunction;
-import java.util.stream.Collectors;
-import java.util.stream.LongStream;
+import io.smallrye.mutiny.Multi;
 
 public class MultiFromItemsTckTest extends AbstractPublisherTck<Long> {
     @Override
