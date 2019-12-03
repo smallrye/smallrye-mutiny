@@ -7,6 +7,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
 import org.reactivestreams.Subscriber;
@@ -45,13 +46,27 @@ public class MultiEmitOnOp<T> extends AbstractMultiOperator<T, T> {
 
         private final int limit;
 
+        // State variables
+
+        /**
+         * Store the items
+         */
         private final Queue<T> queue;
 
+        /**
+         * {@code true} if the subscription has been cancelled.
+         */
         private volatile boolean cancelled;
 
+        /**
+         * {@code true} if no more items should be received (failure or completion received)
+         */
         private volatile boolean done;
 
-        private Throwable failure;
+        /**
+         * Stores the failure
+         */
+        private AtomicReference<Throwable> failure = new AtomicReference<>();
 
         private final AtomicInteger wip = new AtomicInteger();
         private final AtomicLong requested = new AtomicLong();
@@ -79,34 +94,34 @@ public class MultiEmitOnOp<T> extends AbstractMultiOperator<T, T> {
 
         @Override
         public void onNext(T t) {
-
             if (done) {
+                // we should not receive any items.
                 return;
             }
 
             if (!queue.offer(t)) {
+                // queue full, this is a failure.
+                // onError will schedule.
+                Subscriptions.cancel(upstream); // cancel upstream
                 onError(new BackPressureFailure("Queue is full, the upstream didn't enforce the requests"));
                 done = true;
-                return;
+            } else {
+                schedule();
             }
-            schedule();
         }
 
         @Override
         public void onError(Throwable throwable) {
-            Subscription subscription = upstream.getAndSet(CANCELLED);
-            if (subscription != CANCELLED) {
+            if (!done || !cancelled) {
                 done = true;
-                failure = throwable;
+                failure.set(throwable);
                 schedule();
-                subscription.cancel();
             }
         }
 
         @Override
         public void onComplete() {
-            Subscription subscription = upstream.getAndSet(CANCELLED);
-            if (subscription != CANCELLED) {
+            if (!done || !cancelled) {
                 done = true;
                 schedule();
             }
@@ -115,11 +130,12 @@ public class MultiEmitOnOp<T> extends AbstractMultiOperator<T, T> {
         @Override
         public void request(long n) {
             if (n > 0) {
-                Subscription subscription = upstream.get();
-                if (subscription != CANCELLED) {
+                if (!done || !cancelled) {
                     Subscriptions.add(requested, n);
                     schedule();
                 }
+            } else {
+                onError(Subscriptions.getInvalidRequestException());
             }
         }
 
@@ -131,21 +147,24 @@ public class MultiEmitOnOp<T> extends AbstractMultiOperator<T, T> {
             cancelled = true;
             Subscriptions.cancel(upstream);
             if (wip.getAndIncrement() == 0) {
+                // nothing was currently dispatched, clearing the queue.
                 queue.clear();
             }
         }
 
         void schedule() {
             if (wip.getAndIncrement() != 0) {
+                // we already have a thread running the loop
                 return;
             }
-
+            // create a new thread.
             try {
                 executor.execute(this);
             } catch (RejectedExecutionException rejected) {
                 Subscription s = upstream.getAndSet(CANCELLED);
                 if (s != CANCELLED) {
                     done = true;
+                    Subscriptions.cancel(upstream);
                     queue.clear();
                     downstream.onError(rejected);
                     super.cancel();
@@ -155,11 +174,8 @@ public class MultiEmitOnOp<T> extends AbstractMultiOperator<T, T> {
 
         @Override
         public void run() {
-
             int missed = 1;
-
             final Queue<T> q = queue;
-
             long emitted = produced;
 
             for (;;) {
@@ -170,38 +186,46 @@ public class MultiEmitOnOp<T> extends AbstractMultiOperator<T, T> {
                     try {
                         item = q.poll();
                     } catch (Throwable ex) {
-                        super.cancel();
+                        done = true;
+                        Subscriptions.cancel(upstream);
                         queue.clear();
-                        super.onError(ex);
+                        downstream.onError(ex);
                         return;
                     }
 
-                    boolean none = item == null;
-
-                    if (isDoneOrCancelled(wasDone, none)) {
+                    boolean empty = item == null;
+                    if (isDoneOrCancelled(wasDone, empty)) {
+                        // we are done.
                         return;
                     }
 
-                    if (none) {
+                    if (empty) {
+                        // queue is empty.
                         break;
                     }
 
+                    // Emitting item
                     downstream.onNext(item);
 
+                    // updating the number of emitted items.
                     emitted++;
                     if (emitted == limit) {
                         if (requests != Long.MAX_VALUE) {
                             requests = requested.addAndGet(-emitted);
                         }
+                        // request another batch
                         super.request(emitted);
                         emitted = 0L;
                     }
                 }
 
+                // we have emitted `limits` items, reached the end of the queue, or reached the number of requests
+                // check if we are down for now (requests meet) or for ever (cancelled or done)
                 if (emitted == requests && isDoneOrCancelled(done, q.isEmpty())) {
                     return;
                 }
 
+                // check if we still have missed notifications.
                 int w = wip.get();
                 if (missed == w) {
                     produced = emitted;
@@ -221,15 +245,19 @@ public class MultiEmitOnOp<T> extends AbstractMultiOperator<T, T> {
                 return true;
             }
 
-            // Failure and completion must wait until we are actually done consuming the items.
-            if (upstreamDone && queueEmpty) {
-                if (failure != null) {
-                    downstream.onError(failure);
-                } else {
-                    downstream.onComplete();
-                }
+            Throwable maybeFailure = failure.get();
+            if (upstreamDone && maybeFailure != null) {
+                // failing
+                downstream.onError(maybeFailure);
                 return true;
             }
+
+            // Failure and completion must wait until we are actually done consuming the items.
+            if (upstreamDone && queueEmpty) {
+                downstream.onComplete();
+                return true;
+            }
+
             return false;
         }
     }

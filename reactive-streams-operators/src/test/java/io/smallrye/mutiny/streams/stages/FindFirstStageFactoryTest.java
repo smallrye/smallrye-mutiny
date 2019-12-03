@@ -31,7 +31,7 @@ public class FindFirstStageFactoryTest extends StageTestBase {
     @Test
     public void create() {
         Multi<Integer> publisher = Multi.createFrom().items(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
-                .subscribeOn(executor);
+                .emitOn(executor);
 
         Optional<Integer> optional = ReactiveStreams.fromPublisher(publisher).filter(i -> i > 5)
                 .findFirst().run().toCompletableFuture().join();

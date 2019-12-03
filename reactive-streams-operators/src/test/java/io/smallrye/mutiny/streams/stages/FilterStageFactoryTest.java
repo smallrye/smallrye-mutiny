@@ -35,7 +35,7 @@ public class FilterStageFactoryTest extends StageTestBase {
         Predicate<Integer> even = i -> i % 2 == 0;
 
         Multi<Integer> publisher = Multi.createFrom().items(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
-                .subscribeOn(executor);
+                .emitOn(executor);
         List<Integer> list = ReactiveStreams.fromPublisher(publisher).filter(even).toList().run()
                 .toCompletableFuture().get();
         assertThat(list).hasSize(5).containsExactly(2, 4, 6, 8, 10);

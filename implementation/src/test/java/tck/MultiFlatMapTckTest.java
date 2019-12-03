@@ -39,6 +39,7 @@ public class MultiFlatMapTckTest extends AbstractPublisherTck<Long> {
     public void flatMapStageShouldMapElements() {
 
         assertEquals(await(Multi.createFrom().items(1, 2, 3)
+                .emitOn(executor)
                 .flatMap(n -> Multi.createFrom().items(n, n, n))
                 .collectItems().asList()
                 .subscribeAsCompletionStage()), Arrays.asList(1, 1, 1, 2, 2, 2, 3, 3, 3));

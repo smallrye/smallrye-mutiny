@@ -40,7 +40,7 @@ public class FlatMapIterableStageFactoryTest extends StageTestBase {
     @Test
     public void create() throws ExecutionException, InterruptedException {
         Multi<Integer> publisher = Multi.createFrom().items(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
-                .subscribeOn(executor);
+                .emitOn(executor);
 
         List<String> list = ReactiveStreams.fromPublisher(publisher)
                 .filter(i -> i < 4)
