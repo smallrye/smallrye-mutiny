@@ -57,12 +57,13 @@
         <module>implementation</module>
         <module>rxjava</module>
         <module>reactor</module>
+        <module>reactive-streams-operators</module>
     </modules>
 
     <properties>
         <rxjava2.version>2.2.11</rxjava2.version>
         <reactor-core.version>3.2.10.RELEASE</reactor-core.version>
-        <microprofile-reactive-streams.version>1.0.0</microprofile-reactive-streams.version>
+        <microprofile-reactive-streams.version>1.0.1</microprofile-reactive-streams.version>
         <reactive-streams.version>1.0.3</reactive-streams.version>
     </properties>
 

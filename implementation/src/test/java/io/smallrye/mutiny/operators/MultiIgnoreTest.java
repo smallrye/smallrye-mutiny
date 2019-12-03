@@ -1,14 +1,14 @@
 package io.smallrye.mutiny.operators;
 
-import org.testng.annotations.Test;
-
-import io.smallrye.mutiny.Multi;
-import io.smallrye.mutiny.test.MultiAssertSubscriber;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import org.testng.annotations.Test;
+
+import io.smallrye.mutiny.Multi;
+import io.smallrye.mutiny.test.MultiAssertSubscriber;
 
 public class MultiIgnoreTest {
 
