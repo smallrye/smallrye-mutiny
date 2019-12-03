@@ -11,26 +11,37 @@ public class MultiBroadcaster {
             Duration delayAfterLastDeparture) {
 
         if (numberOfSubscribers > 0) {
-            if (cancelWhenNoOneIsListening) {
-                if (delayAfterLastDeparture != null) {
-                    return MultiPublishOp.create(upstream)
-                            .referenceCount(numberOfSubscribers, delayAfterLastDeparture);
-                } else {
-                    return MultiPublishOp.create(upstream).referenceCount(numberOfSubscribers, delayAfterLastDeparture);
-                }
+            return createPublishWithSubscribersThreshold(upstream, numberOfSubscribers, cancelWhenNoOneIsListening,
+                    delayAfterLastDeparture);
+        } else {
+            return createPublishImmediate(upstream, cancelWhenNoOneIsListening, delayAfterLastDeparture);
+        }
+    }
+
+    private static <T> Multi<T> createPublishImmediate(Multi<T> upstream, boolean cancelWhenNoOneIsListening,
+            Duration delayAfterLastDeparture) {
+        if (cancelWhenNoOneIsListening) {
+            if (delayAfterLastDeparture != null) {
+                return MultiPublishOp.create(upstream).referenceCount(1, delayAfterLastDeparture);
             } else {
-                return MultiPublishOp.create(upstream).connectAfter(numberOfSubscribers);
+                return MultiPublishOp.create(upstream).referenceCount();
             }
         } else {
-            if (cancelWhenNoOneIsListening) {
-                if (delayAfterLastDeparture != null) {
-                    return MultiPublishOp.create(upstream).referenceCount(1, delayAfterLastDeparture);
-                } else {
-                    return MultiPublishOp.create(upstream).referenceCount();
-                }
+            return MultiPublishOp.create(upstream).connectAfter(1);
+        }
+    }
+
+    private static <T> Multi<T> createPublishWithSubscribersThreshold(Multi<T> upstream, int numberOfSubscribers,
+            boolean cancelWhenNoOneIsListening, Duration delayAfterLastDeparture) {
+        if (cancelWhenNoOneIsListening) {
+            if (delayAfterLastDeparture != null) {
+                return MultiPublishOp.create(upstream).referenceCount(numberOfSubscribers, delayAfterLastDeparture);
             } else {
-                return MultiPublishOp.create(upstream).connectAfter(1);
+                // the duration can be `null`, it will be validated if not `null`.
+                return MultiPublishOp.create(upstream).referenceCount(numberOfSubscribers, null);
             }
+        } else {
+            return MultiPublishOp.create(upstream).connectAfter(numberOfSubscribers);
         }
     }
 
