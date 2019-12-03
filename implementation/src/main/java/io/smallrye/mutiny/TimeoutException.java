@@ -13,13 +13,4 @@ public class TimeoutException extends RuntimeException {
         super();
     }
 
-    /**
-     * Constructs a {@code TimeoutException} with the specified detail message.
-     *
-     * @param message the detail message
-     */
-    public TimeoutException(String message) {
-        super(message);
-    }
-
 }
