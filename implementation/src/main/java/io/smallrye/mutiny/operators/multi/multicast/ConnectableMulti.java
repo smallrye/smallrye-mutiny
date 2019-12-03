@@ -66,6 +66,7 @@ public abstract class ConnectableMulti<T> extends AbstractMulti<T> {
      * Other subscribers can subscribe, it would not re-subscribe to the upstream.
      *
      * @param numberOfSubscribers the number of subscribe to reach before subscribing to upstream.
+     * @return the multi
      */
     public Multi<T> connectAfter(int numberOfSubscribers) {
         ParameterValidation.positive(numberOfSubscribers, "numberOfSubscribers");

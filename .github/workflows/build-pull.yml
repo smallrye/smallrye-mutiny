@@ -12,7 +12,7 @@ jobs:
         with:
           java-version: 'openjdk8'
       - name: Build with Maven
-        run: mvn -B clean install --file pom.xml
+        run: mvn -B clean install javadoc:javadoc --file pom.xml
 
   build_java11:
     runs-on: ubuntu-latest
@@ -23,7 +23,7 @@ jobs:
         with:
           java-version: 'openjdk11'
       - name: Build with Maven
-        run: mvn -B clean install --file pom.xml
+        run: mvn -B clean install javadoc:javadoc --file pom.xml
 
   build_java12:
     runs-on: ubuntu-latest
@@ -34,7 +34,7 @@ jobs:
         with:
           java-version: 'openjdk12'
       - name: Build with Maven
-        run: mvn -B clean install --file pom.xml
+        run: mvn -B clean install javadoc:javadoc --file pom.xml
 
   build_java13:
     runs-on: ubuntu-latest
@@ -45,4 +45,4 @@ jobs:
         with:
           java-version: 'openjdk13'
       - name: Build with Maven
-        run: mvn -B clean install --file pom.xml
+        run: mvn -B clean install javadoc:javadoc --file pom.xml

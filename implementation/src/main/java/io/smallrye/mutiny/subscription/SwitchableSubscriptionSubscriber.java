@@ -200,7 +200,7 @@ public abstract class SwitchableSubscriptionSubscriber<O> implements Subscriber<
     }
 
     /**
-     * @return @{code true} if we need to cancel the current subscription when we switch the upstreams.
+     * @return {@code true} if we need to cancel the current subscription when we switch the upstreams.
      */
     protected boolean cancelUpstreamOnSwitch() {
         return false;

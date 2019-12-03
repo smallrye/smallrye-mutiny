@@ -24,6 +24,7 @@ public class UniConvert<T> {
      *
      * @param converter the converter function
      * @return an instance of R
+     * @param <R> the result type
      * @throws RuntimeException if the conversion fails.
      */
     public <R> R with(Function<Uni<T>, R> converter) {
