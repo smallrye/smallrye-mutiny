@@ -35,6 +35,7 @@ public class MultiEmitOnOp<T> extends AbstractMultiOperator<T, T> {
 
     @Override
     public void subscribe(Subscriber<? super T> downstream) {
+        ParameterValidation.nonNullNpe(downstream, "subscriber");
         upstream.subscribe(new MultiEmitOnProcessor<>(downstream, executor, queueSupplier));
     }
 

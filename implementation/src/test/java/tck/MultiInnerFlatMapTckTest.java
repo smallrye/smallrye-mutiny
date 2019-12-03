@@ -18,7 +18,7 @@ import io.smallrye.mutiny.Multi;
 public class MultiInnerFlatMapTckTest extends SubscriberWhiteboxVerification<Long> {
 
     protected MultiInnerFlatMapTckTest() {
-        super(new TestEnvironment(10L));
+        super(new TestEnvironment(500L));
     }
 
     @Override
