@@ -61,6 +61,16 @@ public class MultiOnItem<T> {
     }
 
     /**
+     * Ignores the passed items. The resulting {@link Uni} will only be completed with {@code null} when the stream
+     * completes or with a failure if the upstream emits a failure..
+     *
+     * @return the new multi
+     */
+    public Uni<Void> ignoreAsUni() {
+        return new MultiIgnoreOp<>(upstream).toUni();
+    }
+
+    /**
      * Produces an {@link Multi} emitting the item events based on the upstream events but casted to the target class.
      *
      * @param target the target class
