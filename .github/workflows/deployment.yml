@@ -18,5 +18,6 @@ jobs:
         run: |
           sudo apt-get update -o Dir::Etc::sourcelist="sources.list" -o Dir::Etc::sourceparts="-" -o APT::Get::List-Cleanup="0"
           sudo apt-get install -y gnupg2
-          chmod +x .build/deploy.sh
+          chmod +x .build/deploy.sh .build/decrypt-secrets.sh
+          .build/decrypt-secrets.sh
           .build/deploy.sh ${{ github.event.deployment.environment }}
