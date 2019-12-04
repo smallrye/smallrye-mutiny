@@ -10,10 +10,12 @@ init_mvn() {
 }
 
 init_gpg() {
+    which gpg
+    which gpg2
     echo ${SMALLRYE_SIGNATURE} > smallrye-sign.asc
-    ls -l | grep smallrye-sign
     echo "signature file imported:"
-    gpg --fast-import smallrye-sign.asc
+    ls -l | grep smallrye-sign
+    gpg2 --fast-import smallrye-sign.asc
 }
 
 init_git() {
