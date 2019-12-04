@@ -16,5 +16,7 @@ jobs:
           MAVEN_SETTINGS: ${{ secrets.MVN_SETTINGS }}
           SMALLRYE_SIGNATURE: ${{ secrets.GPG_SIGNATURE }}
         run: |
+          sudo apt-get update -o Dir::Etc::sourcelist="sources.list" -o Dir::Etc::sourceparts="-" -o APT::Get::List-Cleanup="0"
+          sudo apt-get install -y gnupg2
           chmod +x .build/deploy.sh
           .build/deploy.sh ${{ github.event.deployment.environment }}

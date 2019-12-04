@@ -58,24 +58,48 @@
                         </configuration>
                     </execution>
                     <!--<execution>-->
-                        <!--<id>tck</id>-->
-                        <!--<goals>-->
-                            <!--<goal>test</goal>-->
-                        <!--</goals>-->
-                        <!--<configuration>-->
-                            <!--<includes>-->
-                                <!--<include>**/tck/ReactiveStreamsEngineImplTck</include>-->
-                            <!--</includes>-->
-                            <!--<excludes>-->
-                                <!--<exclude>**/tck/SubscriberWhitebox*</exclude>-->
-                            <!--</excludes>-->
-                            <!--<junitArtifactName>none:none</junitArtifactName>-->
-                        <!--</configuration>-->
+                    <!--<id>tck</id>-->
+                    <!--<goals>-->
+                    <!--<goal>test</goal>-->
+                    <!--</goals>-->
+                    <!--<configuration>-->
+                    <!--<includes>-->
+                    <!--<include>**/tck/ReactiveStreamsEngineImplTck</include>-->
+                    <!--</includes>-->
+                    <!--<excludes>-->
+                    <!--<exclude>**/tck/SubscriberWhitebox*</exclude>-->
+                    <!--</excludes>-->
+                    <!--<junitArtifactName>none:none</junitArtifactName>-->
+                    <!--</configuration>-->
                     <!--</execution>-->
                 </executions>
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>coverage</id>
+            <activation>
+                <property>
+                    <name>sonar.organization</name>
+                    <value>smallrye</value>
+                </property>
+            </activation>
+            <properties>
+                <argLine>@{jacocoArgLine}</argLine>
+            </properties>
+
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.jacoco</groupId>
+                        <artifactId>jacoco-maven-plugin</artifactId>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 
 
 </project>
