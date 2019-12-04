@@ -11,7 +11,7 @@ init_mvn() {
 init_gpg() {
     echo "signature file imported:"
     ls -l | grep smallrye-sign
-    gpg2 --fast-import smallrye-sign.asc
+    gpg2 --fast-import --no-tty --batch --yes smallrye-sign.asc
 }
 
 init_git() {
