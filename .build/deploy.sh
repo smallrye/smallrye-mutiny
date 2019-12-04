@@ -5,13 +5,15 @@ export TARGET=$1
 
 init_mvn() {
     echo ${MAVEN_SETTINGS} > maven-settings.xml
-    echo "settings.xml created"
+    echo "settings.xml created:"
+    ls -l | grep maven-settings
 }
 
 init_gpg() {
     echo ${SMALLRYE_SIGNATURE} > smallrye-sign.asc
+    ls -l | grep smallrye-sign
+    echo "signature file imported:"
     gpg --fast-import smallrye-sign.asc
-    echo "signature file imported"
 }
 
 init_git() {
