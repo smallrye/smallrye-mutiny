@@ -130,7 +130,7 @@ public class UniOnNull<T> {
      */
     public Uni<T> continueWith(Supplier<? extends T> supplier) {
         nonNull(supplier, "supplier");
-        return Infrastructure.onUniCreation(upstream.onItem().mapToItem(res -> {
+        return Infrastructure.onUniCreation(upstream.onItem().apply(res -> {
             if (res != null) {
                 return res;
             }

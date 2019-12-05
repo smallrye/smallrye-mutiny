@@ -146,7 +146,7 @@ public interface Uni<T> {
      * <pre>
      * {@code
      * Uni<T> uni = ...;
-     * uni.onItem().mapToItem(x -> ...); // Map to another item
+     * uni.onItem().apply(x -> ...); // Map to another item
      * uni.onItem().mapToUni(x -> ...); // Map to another Uni (flatMap)
      * }
      * </pre>
@@ -294,7 +294,7 @@ public interface Uni<T> {
 
     /**
      * Transforms the item (potentially null) emitted by this {@link Uni} by applying a (synchronous) function to it.
-     * This method is equivalent to {@code uni.onItem().mapToItem(x -> ...)}
+     * This method is equivalent to {@code uni.onItem().apply(x -> ...)}
      * For asynchronous composition, look at flatMap.
      *
      * @param mapper the mapper function, must not be {@code null}
@@ -302,7 +302,7 @@ public interface Uni<T> {
      * @return a new {@link Uni} computing an item of type {@code <O>}.
      */
     default <O> Uni<O> map(Function<? super T, ? extends O> mapper) {
-        return onItem().mapToItem(ParameterValidation.nonNull(mapper, "mapper"));
+        return onItem().apply(ParameterValidation.nonNull(mapper, "mapper"));
     }
 
     /**

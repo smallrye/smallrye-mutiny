@@ -18,7 +18,7 @@ public class MultiMergeTest {
         MultiAssertSubscriber<Integer> subscriber = Multi.createBy().merging().streams(
                 Multi.createFrom().item(5),
                 Multi.createFrom().range(1, 3),
-                Multi.createFrom().items(8, 9, 10).onItem().mapToItem(i -> i + 1)).subscribe()
+                Multi.createFrom().items(8, 9, 10).onItem().apply(i -> i + 1)).subscribe()
                 .withSubscriber(new MultiAssertSubscriber<>(100));
 
         subscriber.assertCompletedSuccessfully()
@@ -31,7 +31,7 @@ public class MultiMergeTest {
                 .streams(
                         Multi.createFrom().item(5),
                         Multi.createFrom().range(1, 3),
-                        Multi.createFrom().items(8, 9, 10).onItem().mapToItem(i -> i + 1))
+                        Multi.createFrom().items(8, 9, 10).onItem().apply(i -> i + 1))
                 .subscribe().withSubscriber(new MultiAssertSubscriber<>(100));
 
         subscriber.assertCompletedSuccessfully()
@@ -44,7 +44,7 @@ public class MultiMergeTest {
                 Arrays.asList(
                         Multi.createFrom().item(5),
                         Multi.createFrom().range(1, 3),
-                        Multi.createFrom().items(8, 9, 10).onItem().mapToItem(i -> i + 1)))
+                        Multi.createFrom().items(8, 9, 10).onItem().apply(i -> i + 1)))
                 .subscribe().withSubscriber(new MultiAssertSubscriber<>(100));
 
         subscriber.assertCompletedSuccessfully()
@@ -56,7 +56,7 @@ public class MultiMergeTest {
         MultiAssertSubscriber<Integer> subscriber = Multi.createBy().merging().streams(
                 Flowable.just(5),
                 Multi.createFrom().range(1, 3),
-                Multi.createFrom().items(8, 9, 10).onItem().mapToItem(i -> i + 1)).subscribe()
+                Multi.createFrom().items(8, 9, 10).onItem().apply(i -> i + 1)).subscribe()
                 .withSubscriber(new MultiAssertSubscriber<>(100));
 
         subscriber.assertCompletedSuccessfully()
@@ -69,7 +69,7 @@ public class MultiMergeTest {
                 Arrays.asList(
                         Flowable.just(5),
                         Multi.createFrom().range(1, 3),
-                        Multi.createFrom().items(8, 9, 10).onItem().mapToItem(i -> i + 1)))
+                        Multi.createFrom().items(8, 9, 10).onItem().apply(i -> i + 1)))
                 .subscribe().withSubscriber(new MultiAssertSubscriber<>(100));
 
         subscriber.assertCompletedSuccessfully()

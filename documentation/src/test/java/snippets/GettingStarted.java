@@ -8,7 +8,7 @@ public class GettingStarted {
 
     public static void main(String[] args) {
         Multi.createFrom().items("hello", "world")
-                .onItem().mapToItem(s -> s.toUpperCase() + " ")
+                .onItem().apply(s -> s.toUpperCase() + " ")
                 .onCompletion().continueWith("!")
                 .subscribe().with(System.out::print);
     }

@@ -46,7 +46,7 @@ public class UniOnItem<T> {
      * @param <R> the type of Uni item
      * @return the new {@link Uni}
      */
-    public <R> Uni<R> mapToItem(Function<? super T, ? extends R> mapper) {
+    public <R> Uni<R> apply(Function<? super T, ? extends R> mapper) {
         return Infrastructure.onUniCreation(new UniMapOnResult<>(upstream, mapper));
     }
 
@@ -165,7 +165,7 @@ public class UniOnItem<T> {
      */
     public <O> Uni<O> castTo(Class<O> target) {
         nonNull(target, "target");
-        return mapToItem(target::cast);
+        return apply(target::cast);
     }
 
     /**

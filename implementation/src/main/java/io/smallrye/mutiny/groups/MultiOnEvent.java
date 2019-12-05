@@ -113,7 +113,7 @@ public class MultiOnEvent<T> {
      * <pre>
      * {@code
      * Multi<T> multi = ...;
-     * multi.onItem().mapToItem(x -> ...); // Map to another item
+     * multi.onItem().apply(x -> ...); // Map to another item
      * multi.onItem().mapToMulti(x -> ...); // Map to a multi
      * }
      * </pre>

@@ -19,10 +19,10 @@ public class HowToTransformTest {
 
         // tag::sync[]
         String result1 = uni
-                .onItem().mapToItem(s -> s.toUpperCase())
+                .onItem().apply(s -> s.toUpperCase())
                 .await().indefinitely();
         List<String> result2 = multi
-                .onItem().mapToItem(s -> s.toUpperCase())
+                .onItem().apply(s -> s.toUpperCase())
                 .collectItems().asList().await().indefinitely();
         // end::sync[]
 

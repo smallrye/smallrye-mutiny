@@ -29,7 +29,7 @@ public class MultiOnItem<T> {
      * @param <R> the type of item produced by the mapper function
      * @return the new {@link Multi}
      */
-    public <R> Multi<R> mapToItem(Function<? super T, ? extends R> mapper) {
+    public <R> Multi<R> apply(Function<? super T, ? extends R> mapper) {
         return new MultiMapOp<>(upstream, nonNull(mapper, "mapper"));
     }
 
@@ -79,7 +79,7 @@ public class MultiOnItem<T> {
      */
     public <O> Multi<O> castTo(Class<O> target) {
         nonNull(target, "target");
-        return mapToItem(target::cast);
+        return apply(target::cast);
     }
 
     /**

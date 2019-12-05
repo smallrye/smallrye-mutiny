@@ -77,7 +77,7 @@ public class UniOnResultIgnore<T> {
      * @return the new {@link Uni}
      */
     public Uni<T> andContinueWith(T fallback) {
-        return onResult.mapToItem(ignored -> fallback);
+        return onResult.apply(ignored -> fallback);
     }
 
     /**
@@ -86,7 +86,7 @@ public class UniOnResultIgnore<T> {
      * @return the new {@link Uni}
      */
     public Uni<Void> andContinueWithNull() {
-        return onResult.mapToItem(ignored -> null);
+        return onResult.apply(ignored -> null);
     }
 
     /**
@@ -98,7 +98,7 @@ public class UniOnResultIgnore<T> {
      */
     public Uni<T> andContinueWith(Supplier<? extends T> supplier) {
         nonNull(supplier, "supplier");
-        return onResult.mapToItem(ignored -> supplier.get());
+        return onResult.apply(ignored -> supplier.get());
     }
 
 }

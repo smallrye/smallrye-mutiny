@@ -6,7 +6,7 @@ skinparam handwritten true
 skinparam StereotypeFontSize 0
 
 participant Multi.createFrom as m1 #D2B4DE
-participant mapToItem as m2 #FAE5D3
+participant onItem as m2 #FAE5D3
 participant onCompletion as m3 #FAE5D3
 participant "Subscriber" as subscriber #D2B4DE
 

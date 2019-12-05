@@ -77,7 +77,7 @@ public class UniOnEvent<T> {
      * <pre>
      * {@code
      * Uni<T> uni = ...;
-     * uni.onItem().mapToItem(x -> ...); // Map to another item
+     * uni.onItem().apply(x -> ...); // Map to another item
      * uni.onItem().mapToUni(x -> ...); // Map to another Uni (flatMap)
      * }
      * </pre>

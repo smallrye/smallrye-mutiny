@@ -214,14 +214,14 @@ public interface Multi<T> extends Publisher<T> {
      * The function receives the received item as parameter, and can transform it. The returned object is sent
      * downstream as {@code item} event.
      * <p>
-     * This method is a shortcut for {@code multi.onItem().mapToItem(mapper)}.
+     * This method is a shortcut for {@code multi.onItem().apply(mapper)}.
      *
      * @param mapper the mapper function, must not be {@code null}
      * @param <O> the type of item produced by the mapper function
      * @return the new {@link Multi}
      */
     default <O> Multi<O> map(Function<? super T, ? extends O> mapper) {
-        return onItem().mapToItem(ParameterValidation.nonNull(mapper, "mapper"));
+        return onItem().apply(ParameterValidation.nonNull(mapper, "mapper"));
     }
 
     /**

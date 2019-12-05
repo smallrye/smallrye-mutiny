@@ -32,7 +32,7 @@ public class MultiIgnoreTest {
     @Test(expectedExceptions = CompletionException.class, expectedExceptionsMessageRegExp = ".*boom.*")
     public void testAsUniWithFailure() {
         CompletableFuture<Void> future = Multi.createFrom().items(1, 2, 3, 4)
-                .onItem().mapToItem(i -> {
+                .onItem().apply(i -> {
                     if (i == 3) {
                         throw new RuntimeException("boom");
                     }
