@@ -57,13 +57,20 @@ Mutiny also proposes there methods using the most-used variants of them.
 include::../../../src/test/java/snippets/FlatMapTest.java[tags=code]
 ----
 
-=== How do I merge Multis?
+=== How do I merge, concatenate or combine Multis?
 
-=== How do I combine items from several Multis?
+You can create instances of `Multi` by concatenating, merging, or combining `Multis` and `Publishers`:
+
+[source,java,indent=0]
+----
+include::../../../src/test/java/snippets/MergeTest.java[tags=code]
+----
 
 === How can I collect / accumulate results?
 
-=== How do I chain asynchronous call?
+// TODO
+
+=== How do I chain asynchronous calls?
 
 To chain asynchronous calls, use the `onItem().mapToUni` or `onItem().mapToCompletionStage`:
 
@@ -74,18 +81,29 @@ include::../../../src/test/java/snippets/HowToChainAsyncTest.java[tags=code]
 
 === How do I recover from failure?
 
+// TODO
 
 === How do wrap blocking calls?
 
+// TODO
+
 === How to I control the threads?
+
+// TODO
 
 === How do I interact with CompletionStage?
 
+// TODO
+
 === How to I interact with RX Java 2?
+
+// TODO
 
 === How to I interact with Reactor?
 
+// TODO
+
 === How do I control the back-pressure?
 
-
+// TODO
 
