@@ -48,19 +48,26 @@
             <plugin>
                 <groupId>org.asciidoctor</groupId>
                 <artifactId>asciidoctor-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>process-asciidoc</goal>
+                        </goals>
+                        <phase>compile</phase>
+                    </execution>
+                </executions>
                 <configuration>
                     <backend>html</backend>
                     <sourceHighlighter>highlightjs</sourceHighlighter>
                     <attributes>
                         <toc>left</toc>
                         <version>${project.version}</version>
-                        <spec-version>${microprofile-reactive-streams.version}</spec-version>
                     </attributes>
-                    <sourceDirectory>doc</sourceDirectory>
-                    <imagesDir>assets/images</imagesDir>
+                    <sourceDirectory>src/main/docs</sourceDirectory>
+                    <imagesDir>src/main/docs/assets/images</imagesDir>
+                    <outputDirectory>${project.build.directory}/site/</outputDirectory>
                 </configuration>
             </plugin>
         </plugins>
-        <defaultGoal>generate-resources asciidoctor:process-asciidoc</defaultGoal>
     </build>
 </project>
