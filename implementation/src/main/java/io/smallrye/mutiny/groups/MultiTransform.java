@@ -108,7 +108,7 @@ public class MultiTransform<T> {
                     return null;
                 }
             }).toMulti();
-        }).concatenateResults();
+        }).concatenate();
     }
 
 }

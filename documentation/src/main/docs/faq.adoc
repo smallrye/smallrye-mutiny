@@ -18,7 +18,7 @@ include::../../../src/test/java/snippets/HowToTransformTest.java[tags=async]
 
 If you need to generate a sequence of items use, `producePublisher`:
 
-[source, java, indent=0]
+[source,java,indent=0]
 ----
 include::../../../src/test/java/snippets/HowToTransformTest.java[tags=multi]
 ----
@@ -26,13 +26,36 @@ include::../../../src/test/java/snippets/HowToTransformTest.java[tags=multi]
 === How do I filter/select items?
 
 On `Multi`, you may need to filter / select items.
-To achieve this, there is a set of methods available in `multi.transform()`.
+To achieve this, there is a set of methods available in `multi.transform()`:
 
-// take, skip, filter
+[source,java,indent=0]
+----
+include::../../../src/test/java/snippets/HowToFilterTest.java[tags=filter]
 
-// distinct, repetitions
+include::../../../src/test/java/snippets/HowToFilterTest.java[tags=take]
 
-=== Where are my flatMap and concatMap?
+include::../../../src/test/java/snippets/HowToFilterTest.java[tags=skip]
+
+----
+
+You can also drop distinct items or drop repetitions:
+
+[source,java,indent=0]
+----
+include::../../../src/test/java/snippets/HowToFilterTest.java[tags=distinct]
+
+include::../../../src/test/java/snippets/HowToFilterTest.java[tags=repetition]
+----
+
+=== Where are my map, flatMap and concatMap?
+
+If you are a seasoned reactive developer, you may miss the infamous `map`, `flatMap`, `concatMap` methods.
+Mutiny also proposes there methods using the most-used variants of them.
+
+[source,java,indent=0]
+----
+include::../../../src/test/java/snippets/FlatMapTest.java[tags=code]
+----
 
 === How do I merge Multis?
 

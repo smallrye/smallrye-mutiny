@@ -48,7 +48,7 @@ public class FlatMapCompletionStageFactory
                     throw new NullPointerException();
                 }
                 return result;
-            }).concatenateResults();
+            }).concatenate();
         }
     }
 

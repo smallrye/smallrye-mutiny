@@ -41,7 +41,7 @@ public class FlatMapStageFactory implements ProcessingStageFactory<Stage.FlatMap
                         Graph graph = mapper.apply(item);
                         return engine.buildPublisher(Objects.requireNonNull(graph));
                     })
-                    .concatenateResults();
+                    .concatenate();
         }
     }
 }

@@ -43,11 +43,11 @@ public class HowToTransformTest {
                 .onItem().produceCompletionStage(s -> CompletableFuture.supplyAsync(() -> s.toUpperCase()))
                 .await().indefinitely();
         List<String> result3 = multi
-                .onItem().produceUni(s -> Uni.createFrom().item(s.toUpperCase())).concatenateResults()
+                .onItem().produceUni(s -> Uni.createFrom().item(s.toUpperCase())).concatenate()
                 .collectItems().asList().await().indefinitely();
         List<String> result4 = multi
                 .onItem().produceCompletionStage(s -> CompletableFuture.supplyAsync(() -> s.toUpperCase()))
-                .concatenateResults()
+                .concatenate()
                 .collectItems().asList().await().indefinitely();
         // end::async[]
 
@@ -63,7 +63,7 @@ public class HowToTransformTest {
 
         // tag::multi[]
         List<String> result = multi
-                .onItem().producePublisher(s -> Multi.createFrom().item(s.toUpperCase())).concatenateResults()
+                .onItem().producePublisher(s -> Multi.createFrom().item(s.toUpperCase())).concatenate()
                 .collectItems().asList().await().indefinitely();
         // end::multi[]
 

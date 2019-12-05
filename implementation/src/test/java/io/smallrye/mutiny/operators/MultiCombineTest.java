@@ -26,9 +26,9 @@ public class MultiCombineTest {
         Multi<Integer> multi3 = Multi.createFrom().item(3);
         Multi<Integer> multi4 = Multi.createFrom().item(4);
 
-        Multi<Integer> combined = Multi.createBy().combining().streams(Arrays.asList(multi1, multi2, multi3, multi4))
-                .using(l -> l)
-                .onItem().flatMap(l -> Multi.createFrom().iterable(l))
+        Multi<Integer> combined = Multi.createBy()
+                .combining().streams(Arrays.asList(multi1, multi2, multi3, multi4)).using(l -> l)
+                .flatMap(l -> Multi.createFrom().iterable(l))
                 .onItem().castTo(Integer.class);
 
         combined.subscribe().withSubscriber(MultiAssertSubscriber.create(10))

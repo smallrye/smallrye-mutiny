@@ -265,7 +265,7 @@ public class MultiGroupTest {
         Multi<Multi<Integer>> multi = Multi.createFrom().range(1, 7)
                 .groupItems().intoMultis().every(Duration.ofMillis(1));
         Uni<List<Integer>> uni = multi
-                .onItem().produceMulti(m -> m).concatenateResults()
+                .onItem().produceMulti(m -> m).concatenate()
                 .collectItems().asList();
 
         List<Integer> list = uni.await().atMost(Duration.ofSeconds(4));
@@ -277,7 +277,7 @@ public class MultiGroupTest {
         MultiAssertSubscriber<List<Object>> subscriber = MultiAssertSubscriber.create(3);
         Multi.createFrom().nothing()
                 .groupItems().intoMultis().every(Duration.ofMillis(10))
-                .onItem().produceUni(m -> m.collectItems().asList()).mergeResults()
+                .onItem().produceUni(m -> m.collectItems().asList()).merge()
                 .subscribe().withSubscriber(subscriber);
 
         await().until(() -> subscriber.items().size() == 3);
@@ -371,7 +371,7 @@ public class MultiGroupTest {
     public void testGroupByFollowedWithAFlatMap() {
         MultiAssertSubscriber<Integer> subscriber = Multi.createFrom().range(1, 10)
                 .groupItems().by(i -> 1)
-                .onItem().flatMap(gm -> gm)
+                .flatMap(gm -> gm)
                 .subscribe().withSubscriber(MultiAssertSubscriber.create(100));
 
         subscriber.assertCompletedSuccessfully();

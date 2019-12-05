@@ -21,10 +21,10 @@ public class MultiCombine {
         if (collectFailures) {
             return new CollectionBasedMulti<>(candidates)
                     .onItem().produceMulti(Function.identity()).collectFailures().withRequests(requests)
-                    .mergeResults(concurrency);
+                    .merge(concurrency);
         } else {
             return new CollectionBasedMulti<>(candidates)
-                    .onItem().produceMulti(Function.identity()).withRequests(requests).mergeResults(concurrency);
+                    .onItem().produceMulti(Function.identity()).withRequests(requests).merge(concurrency);
         }
     }
 }
