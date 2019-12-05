@@ -22,7 +22,7 @@ public class MultiFlatMapToPublisherTest {
     public void testMapShortcut() {
         Multi.createFrom().items(1, 2)
                 .map(i -> i + 1)
-                .subscribe().with(MultiAssertSubscriber.create(2))
+                .subscribe().withSubscriber(MultiAssertSubscriber.create(2))
                 .assertCompletedSuccessfully()
                 .assertReceived(2, 3);
     }

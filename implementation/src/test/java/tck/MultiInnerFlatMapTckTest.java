@@ -65,7 +65,7 @@ public class MultiInnerFlatMapTckTest extends SubscriberWhiteboxVerification<Lon
         };
         Multi.createFrom().items(Multi.createFrom().<Long> publisher(future::complete))
                 .onItem().flatMap().multi(Function.identity()).concatenateResults()
-                .subscribe().with(subscriber);
+                .subscribe().withSubscriber(subscriber);
         //noinspection unchecked
         return (Subscriber) await(future);
 

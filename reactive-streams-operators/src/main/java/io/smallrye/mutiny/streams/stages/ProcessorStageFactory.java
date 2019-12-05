@@ -24,7 +24,7 @@ public class ProcessorStageFactory implements ProcessingStageFactory<Stage.Proce
                 Objects.requireNonNull(stage).getRsProcessor()));
         return source -> Multi.createFrom().deferred(() -> {
             Multi<O> multi = Multi.createFrom().publisher(processor);
-            source.subscribe().with(processor);
+            source.subscribe().withSubscriber(processor);
             return multi;
         });
     }

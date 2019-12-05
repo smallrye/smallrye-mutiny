@@ -70,7 +70,7 @@ public class MultiDistinctTckTest extends AbstractPublisherTck<Integer> {
         CompletableFuture<Void> cancelled = new CompletableFuture<>();
         infiniteStream()
                 .on().termination((e, c) -> cancelled.complete(null))
-                .transform().byDroppingDuplicates().subscribe().with(new Subscriptions.CancelledSubscriber<>());
+                .transform().byDroppingDuplicates().subscribe().withSubscriber(new Subscriptions.CancelledSubscriber<>());
         await(cancelled);
     }
 

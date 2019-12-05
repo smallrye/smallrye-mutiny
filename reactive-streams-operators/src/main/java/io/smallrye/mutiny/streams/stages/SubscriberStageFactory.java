@@ -38,7 +38,7 @@ public class SubscriberStageFactory implements TerminalStageFactory<Stage.Subscr
         @Override
         public CompletionStage<Void> apply(Multi<I> source) {
             WrappedSubscriber<I> wrapped = new WrappedSubscriber<>(subscriber);
-            source.subscribe().with(wrapped);
+            source.subscribe().withSubscriber(wrapped);
             return wrapped.future();
         }
     }

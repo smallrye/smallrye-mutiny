@@ -20,7 +20,7 @@ public class MultiConvertFromTest {
         MultiAssertSubscriber<Void> subscriber = Multi.createFrom()
                 .converter(RxConverters.fromCompletable(), Completable.complete())
                 .subscribe()
-                .with(MultiAssertSubscriber.create(1));
+                .withSubscriber(MultiAssertSubscriber.create(1));
 
         subscriber.assertCompletedSuccessfully().assertHasNotReceivedAnyItem();
     }
@@ -30,7 +30,7 @@ public class MultiConvertFromTest {
         MultiAssertSubscriber<Void> subscriber = Multi.createFrom()
                 .converter(RxConverters.fromCompletable(), Completable.error(new IOException("boom")))
                 .subscribe()
-                .with(MultiAssertSubscriber.create(1));
+                .withSubscriber(MultiAssertSubscriber.create(1));
 
         subscriber.assertHasFailedWith(IOException.class, "boom");
     }
@@ -40,7 +40,7 @@ public class MultiConvertFromTest {
         MultiAssertSubscriber<Integer> subscriber = Multi.createFrom()
                 .converter(RxConverters.fromSingle(), Single.just(1))
                 .subscribe()
-                .with(MultiAssertSubscriber.create(1));
+                .withSubscriber(MultiAssertSubscriber.create(1));
 
         subscriber.assertCompletedSuccessfully().assertReceived(1);
     }
@@ -50,7 +50,7 @@ public class MultiConvertFromTest {
         MultiAssertSubscriber<Integer> subscriber = Multi.createFrom()
                 .converter(RxConverters.fromSingle(), Single.<Integer> error(new IOException("boom")))
                 .subscribe()
-                .with(MultiAssertSubscriber.create(1));
+                .withSubscriber(MultiAssertSubscriber.create(1));
 
         subscriber.assertHasFailedWith(IOException.class, "boom");
     }
@@ -60,7 +60,7 @@ public class MultiConvertFromTest {
         MultiAssertSubscriber<Integer> subscriber = Multi.createFrom()
                 .converter(RxConverters.fromMaybe(), Maybe.just(1))
                 .subscribe()
-                .with(MultiAssertSubscriber.create(1));
+                .withSubscriber(MultiAssertSubscriber.create(1));
 
         subscriber.assertCompletedSuccessfully().assertReceived(1);
     }
@@ -70,7 +70,7 @@ public class MultiConvertFromTest {
         MultiAssertSubscriber<Void> subscriber = Multi.createFrom()
                 .converter(RxConverters.fromMaybe(), Maybe.<Void> empty())
                 .subscribe()
-                .with(MultiAssertSubscriber.create(1));
+                .withSubscriber(MultiAssertSubscriber.create(1));
 
         subscriber.assertCompletedSuccessfully().assertHasNotReceivedAnyItem();
     }
@@ -80,7 +80,7 @@ public class MultiConvertFromTest {
         MultiAssertSubscriber<Integer> subscriber = Multi.createFrom()
                 .converter(RxConverters.fromMaybe(), Maybe.<Integer> error(new IOException("boom")))
                 .subscribe()
-                .with(MultiAssertSubscriber.create(1));
+                .withSubscriber(MultiAssertSubscriber.create(1));
 
         subscriber.assertHasFailedWith(IOException.class, "boom");
     }
@@ -90,7 +90,7 @@ public class MultiConvertFromTest {
         MultiAssertSubscriber<Integer> subscriber = Multi.createFrom()
                 .converter(RxConverters.fromFlowable(), Flowable.just(1))
                 .subscribe()
-                .with(MultiAssertSubscriber.create(1));
+                .withSubscriber(MultiAssertSubscriber.create(1));
 
         subscriber.assertCompletedSuccessfully().assertReceived(1);
     }
@@ -100,7 +100,7 @@ public class MultiConvertFromTest {
         MultiAssertSubscriber<Integer> subscriber = Multi.createFrom()
                 .converter(RxConverters.fromFlowable(), Flowable.just(1, 2, 3))
                 .subscribe()
-                .with(MultiAssertSubscriber.create(3));
+                .withSubscriber(MultiAssertSubscriber.create(3));
 
         subscriber.assertCompletedSuccessfully().assertReceived(1, 2, 3);
     }
@@ -110,7 +110,7 @@ public class MultiConvertFromTest {
         MultiAssertSubscriber<Void> subscriber = Multi.createFrom()
                 .converter(RxConverters.fromFlowable(), Flowable.<Void> empty())
                 .subscribe()
-                .with(MultiAssertSubscriber.create(1));
+                .withSubscriber(MultiAssertSubscriber.create(1));
 
         subscriber.assertCompletedSuccessfully().assertHasNotReceivedAnyItem();
     }
@@ -120,7 +120,7 @@ public class MultiConvertFromTest {
         MultiAssertSubscriber<Integer> subscriber = Multi.createFrom()
                 .converter(RxConverters.fromFlowable(), Flowable.<Integer> error(new IOException("boom")))
                 .subscribe()
-                .with(MultiAssertSubscriber.create(1));
+                .withSubscriber(MultiAssertSubscriber.create(1));
 
         subscriber.assertHasFailedWith(IOException.class, "boom");
     }
@@ -130,7 +130,7 @@ public class MultiConvertFromTest {
         MultiAssertSubscriber<Integer> subscriber = Multi.createFrom()
                 .converter(RxConverters.fromObservable(), Observable.just(1))
                 .subscribe()
-                .with(MultiAssertSubscriber.create(1));
+                .withSubscriber(MultiAssertSubscriber.create(1));
 
         subscriber.assertCompletedSuccessfully().assertReceived(1);
     }
@@ -140,7 +140,7 @@ public class MultiConvertFromTest {
         MultiAssertSubscriber<Integer> subscriber = Multi.createFrom()
                 .converter(RxConverters.fromObservable(), Observable.just(1, 2, 3))
                 .subscribe()
-                .with(MultiAssertSubscriber.create(3));
+                .withSubscriber(MultiAssertSubscriber.create(3));
 
         subscriber.assertCompletedSuccessfully().assertReceived(1, 2, 3);
     }
@@ -150,7 +150,7 @@ public class MultiConvertFromTest {
         MultiAssertSubscriber<Void> subscriber = Multi.createFrom()
                 .converter(RxConverters.fromObservable(), Observable.<Void> empty())
                 .subscribe()
-                .with(MultiAssertSubscriber.create(1));
+                .withSubscriber(MultiAssertSubscriber.create(1));
 
         subscriber.assertCompletedSuccessfully().assertHasNotReceivedAnyItem();
     }
@@ -160,7 +160,7 @@ public class MultiConvertFromTest {
         MultiAssertSubscriber<Integer> subscriber = Multi.createFrom()
                 .converter(RxConverters.fromObservable(), Observable.<Integer> error(new IOException("boom")))
                 .subscribe()
-                .with(MultiAssertSubscriber.create(1));
+                .withSubscriber(MultiAssertSubscriber.create(1));
 
         subscriber.assertHasFailedWith(IOException.class, "boom");
     }

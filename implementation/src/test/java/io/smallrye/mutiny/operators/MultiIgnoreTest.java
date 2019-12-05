@@ -16,7 +16,7 @@ public class MultiIgnoreTest {
     public void test() {
         Multi.createFrom().items(1, 2, 3, 4)
                 .onItem().ignore()
-                .subscribe().with(MultiAssertSubscriber.create(4))
+                .subscribe().withSubscriber(MultiAssertSubscriber.create(4))
                 .assertCompletedSuccessfully()
                 .assertHasNotReceivedAnyItem();
     }
@@ -47,7 +47,7 @@ public class MultiIgnoreTest {
     public void testWithNever() {
         MultiAssertSubscriber<Void> subscriber = Multi.createFrom().nothing()
                 .onItem().ignore()
-                .subscribe().with(MultiAssertSubscriber.create(4))
+                .subscribe().withSubscriber(MultiAssertSubscriber.create(4))
                 .assertNotTerminated();
 
         subscriber.cancel();

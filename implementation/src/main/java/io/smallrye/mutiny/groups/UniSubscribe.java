@@ -9,6 +9,7 @@ import io.smallrye.mutiny.helpers.UniCallbackSubscriber;
 import io.smallrye.mutiny.operators.AbstractUni;
 import io.smallrye.mutiny.operators.UniSerializedSubscriber;
 import io.smallrye.mutiny.operators.UniSubscribeToCompletionStage;
+import io.smallrye.mutiny.subscription.Cancellable;
 import io.smallrye.mutiny.subscription.UniSubscriber;
 import io.smallrye.mutiny.subscription.UniSubscription;
 
@@ -59,9 +60,9 @@ public class UniSubscribe<T> {
      * @param onResultCallback callback invoked when the an item event is received, potentially called w
      *        ith {@code null} is received. The callback must not be {@code null}
      * @param onFailureCallback callback invoked when a failure event is received, must not be {@code null}
-     * @return the subscription
+     * @return an object to cancel the computation
      */
-    public UniSubscription with(Consumer<? super T> onResultCallback, Consumer<? super Throwable> onFailureCallback) {
+    public Cancellable with(Consumer<? super T> onResultCallback, Consumer<? super Throwable> onFailureCallback) {
         UniCallbackSubscriber<T> subscriber = new UniCallbackSubscriber<>(
                 ParameterValidation.nonNull(onResultCallback, "onResultCallback"),
                 ParameterValidation.nonNull(onFailureCallback, "onFailureCallback"));

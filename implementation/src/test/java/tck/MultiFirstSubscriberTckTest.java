@@ -52,7 +52,7 @@ public class MultiFirstSubscriberTckTest extends SubscriberBlackboxVerification<
                 .flatMap(m -> m)
                 .collectItems().first()
                 .toMulti()
-                .subscribe().with(subscriber);
+                .subscribe().withSubscriber(subscriber);
         //noinspection unchecked
         return (Subscriber) await(future);
 

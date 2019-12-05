@@ -19,7 +19,7 @@ public class MultiConcatTest {
                 Multi.createFrom().item(5),
                 Multi.createFrom().range(1, 3),
                 Multi.createFrom().items(8, 9, 10).onItem().mapToItem(i -> i + 1)).subscribe()
-                .with(new MultiAssertSubscriber<>(100));
+                .withSubscriber(new MultiAssertSubscriber<>(100));
 
         subscriber.assertCompletedSuccessfully()
                 .assertReceived(5, 1, 2, 9, 10, 11);
@@ -32,7 +32,7 @@ public class MultiConcatTest {
                         Multi.createFrom().item(5),
                         Multi.createFrom().range(1, 3),
                         Multi.createFrom().items(8, 9, 10).onItem().mapToItem(i -> i + 1))
-                .subscribe().with(new MultiAssertSubscriber<>(100));
+                .subscribe().withSubscriber(new MultiAssertSubscriber<>(100));
 
         subscriber.assertCompletedSuccessfully()
                 .assertReceived(5, 1, 2, 9, 10, 11);
@@ -45,7 +45,7 @@ public class MultiConcatTest {
                         Multi.createFrom().item(5),
                         Multi.createFrom().range(1, 3),
                         Multi.createFrom().items(8, 9, 10).onItem().mapToItem(i -> i + 1)))
-                .subscribe().with(new MultiAssertSubscriber<>(100));
+                .subscribe().withSubscriber(new MultiAssertSubscriber<>(100));
 
         subscriber.assertCompletedSuccessfully()
                 .assertReceived(5, 1, 2, 9, 10, 11);
@@ -57,7 +57,7 @@ public class MultiConcatTest {
                 Flowable.just(5),
                 Multi.createFrom().range(1, 3),
                 Multi.createFrom().items(8, 9, 10).onItem().mapToItem(i -> i + 1)).subscribe()
-                .with(new MultiAssertSubscriber<>(100));
+                .withSubscriber(new MultiAssertSubscriber<>(100));
 
         subscriber.assertCompletedSuccessfully()
                 .assertReceived(5, 1, 2, 9, 10, 11);
@@ -70,7 +70,7 @@ public class MultiConcatTest {
                         Flowable.just(5),
                         Multi.createFrom().range(1, 3),
                         Multi.createFrom().items(8, 9, 10).onItem().mapToItem(i -> i + 1)))
-                .subscribe().with(new MultiAssertSubscriber<>(100));
+                .subscribe().withSubscriber(new MultiAssertSubscriber<>(100));
 
         subscriber.assertCompletedSuccessfully()
                 .assertReceived(5, 1, 2, 9, 10, 11);
@@ -79,14 +79,14 @@ public class MultiConcatTest {
     @Test
     public void testMergingEmpty() {
         Multi.createBy().concatenating().streams(Multi.createFrom().empty())
-                .subscribe().with(MultiAssertSubscriber.create(1))
+                .subscribe().withSubscriber(MultiAssertSubscriber.create(1))
                 .assertCompletedSuccessfully().assertHasNotReceivedAnyItem();
     }
 
     @Test
     public void testMergingWithEmpty() {
         Multi.createBy().concatenating().streams(Multi.createFrom().empty(), Multi.createFrom().item(2))
-                .subscribe().with(MultiAssertSubscriber.create(1))
+                .subscribe().withSubscriber(MultiAssertSubscriber.create(1))
                 .assertCompletedSuccessfully().assertReceived(2);
     }
 
@@ -99,7 +99,7 @@ public class MultiConcatTest {
                 Multi.createFrom().item(5),
                 Multi.createFrom().failure(boom),
                 Multi.createFrom().item(6),
-                Multi.createFrom().failure(boom2)).subscribe().with(new MultiAssertSubscriber<>(5));
+                Multi.createFrom().failure(boom2)).subscribe().withSubscriber(new MultiAssertSubscriber<>(5));
 
         subscriber.assertTerminated()
                 .assertReceived(5, 6)
@@ -114,7 +114,7 @@ public class MultiConcatTest {
                 Multi.createFrom().item(5),
                 Multi.createFrom().failure(boom),
                 Multi.createFrom().item(6),
-                Multi.createFrom().failure(boom)).subscribe().with(new MultiAssertSubscriber<>(5));
+                Multi.createFrom().failure(boom)).subscribe().withSubscriber(new MultiAssertSubscriber<>(5));
 
         subscriber.assertTerminated()
                 .assertReceived(5)
