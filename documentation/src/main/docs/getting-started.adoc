@@ -1,0 +1,65 @@
+
+== Getting Started
+
+=== Prerequisites
+
+Mutiny runs on top of `Java 8` and above.
+Mutiny implements the https://www.reactive-streams.org/[Reactive Streams] specification, so depends on `org.reactivestreams:reactive-streams:$reactive.streams.version`.
+
+=== Dependencies
+
+To use Mutiny, you just need the `io.smallrye.reactive:mutiny` artifact in your `CLASSPATH`.
+If you are using Maven, declare the following dependency in your `pom.xml`:
+
+[source,xml,subs=attributes+]
+----
+<dependency>
+    <groupId>io.smallrye.reactive</groupId>
+    <artifactId>mutiny</artifactId>
+    <version>{version}</version>
+</dependency>
+----
+
+If you are using Gradle, declare the following dependency in your project:
+
+[source,groovy,subs=attributes+]
+----
+dependencies {
+     implementation 'io.smallrye.reactive:mutiny:{version}'
+}
+----
+
+=== Hello World!
+
+Now, you can create a class with a `public static void main(String... args)` entry point with the following content:
+
+[source,java]
+----
+include::../../../src/test/java/snippets/GettingStarted.java[tags=getting-started]
+----
+
+This code prints `HELLO WORLD !`.
+Let's explain it a bit.
+First it creates an instance of `Multi`.
+A `Multi` is an object that emit _events_. In Reactive lingo, it's a `Publisher`.
+Here, this `Multi` is emitting to _item_ events `hello` and `world`.
+The `onItem` and `onCompletion` lines are processing respectively the _item_ and _completion_ events emitted by the upstream.
+As a result, they also return instances of `Multi` which depending on the events received from upstream would emit events downstream.
+
+In our example, every time the Multi emits an item, we apply a method to transform this item to uppercase, and emits the resulting value.
+Then, when the upstream send the `completion` event (no more items to emit), we produce a last item: `!` and send it downstream.
+Finally, we _subscribe_ to the resulting stream and for each emitted item, print it on the console.
+
+If we represent this as a sequence diagram, we would have:
+
+[plantuml,align=center]
+----
+include::plantuml/getting-started-sequence.puml[]
+----
+
+It's important to understand that items and completion (and failure) flow from upstream to downstream and on the way, these events are processed.
+You can visualize this as an assemble line.
+The raw material is emitted from the initial source.
+Each processing step takes the flowing events and process them.
+Finally, at the end of the line, the finalized items are pushed to the final consumer - the subscriber.
+

@@ -1,5 +1,0 @@
-
-[source, java, indent=0]
-----
-include::{sourcedir}/Intro.java[tags=first]
-----

@@ -1,0 +1,59 @@
+== How Do I do x?
+
+=== How do I transform items?
+
+To transform items synchronously use the `mapToItem` operators:
+
+[source,java,indent=0]
+----
+include::../../../src/test/java/snippets/HowToTransformTest.java[tags=sync]
+----
+
+You can also transform items asynchronously using the `mapToUni` / `mapToCompletionStage` / `flatMap().uni` / `flatMap().completionStage` operators:
+
+[source,java,indent=0]
+----
+include::../../../src/test/java/snippets/HowToTransformTest.java[tags=async]
+----
+
+If you need to generate a sequence of items use, `mapToMulti`:
+
+[source, java, indent=0]
+----
+include::../../../src/test/java/snippets/HowToTransformTest.java[tags=multi]
+----
+
+=== How do I filter/select items?
+
+On `Multi`, you may need to filter / select items.
+To achieve this, there is a set of methods available in `multi.transform()`.
+
+// take, skip, filter
+
+// distinct, repetitions
+
+=== Where are my flatMap and concatMap?
+
+=== How do I merge Multis?
+
+=== How do I combine items from several Multis?
+
+=== How can I collect / accumulate results?
+
+=== How do I chain asynchronous call?
+
+=== How do I recover from failure?
+
+
+=== How do wrap blocking calls?
+
+=== How do I interact with CompletionStage?
+
+=== How to I interact with RX Java 2?
+
+=== How to I interact with Reactor?
+
+=== How do I control the back-pressure?
+
+
+
