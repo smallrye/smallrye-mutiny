@@ -1,7 +1,8 @@
 package io.smallrye.mutiny.groups;
 
-import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
+import static io.smallrye.mutiny.helpers.ParameterValidation.*;
 
+import java.util.concurrent.CompletionStage;
 import java.util.function.*;
 
 import org.reactivestreams.Publisher;
@@ -9,6 +10,7 @@ import org.reactivestreams.Publisher;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.operators.multi.*;
+import io.smallrye.mutiny.subscription.BackPressureStrategy;
 
 public class MultiOnItem<T> {
 
@@ -49,6 +51,103 @@ public class MultiOnItem<T> {
                 null,
                 null,
                 null);
+    }
+
+    /**
+     * Configures the <em>mapper</em> of the <em>flatMap</em> operation.
+     * The mapper returns a {@link Multi multi} and is called for each item emitted by the upstream {@link Multi}.
+     *
+     * @param mapper the mapper, must not be {@code null}, must not produce {@code null}
+     * @param <O> the type of item emitted by the {@link Multi} produced by the mapper.
+     * @return the object to configure the flatten behavior.
+     */
+    public <O> MultiFlatten<T, O> produceMulti(Function<? super T, ? extends Publisher<? extends O>> mapper) {
+        return producePublisher(mapper);
+    }
+
+    /**
+     * Configures the <em>mapper</em> of the <em>flatMap</em> operation.
+     * The mapper returns a {@link Publisher publisher} and is called for each item emitted by the upstream {@link Multi}.
+     *
+     * @param mapper the mapper, must not be {@code null}, must not produce {@code null}
+     * @param <O> the type of item emitted by the {@link Publisher} produced by the mapper.
+     * @return the object to configure the flatten behavior.
+     */
+    public <O> MultiFlatten<T, O> producePublisher(Function<? super T, ? extends Publisher<? extends O>> mapper) {
+        return new MultiFlatten<>(upstream, nonNull(mapper, "mapper"), 1, false);
+    }
+
+    /**
+     * Configures the <em>mapper</em> of the <em>flatMap</em> operation.
+     * The mapper returns a {@link Iterable iterable} and is called for each item emitted by the upstream {@link Multi}.
+     *
+     * @param mapper the mapper, must not be {@code null}, must not produce {@code null}
+     * @param <O> the type of item contained by the {@link Iterable} produced by the mapper.
+     * @return the object to configure the flatten behavior.
+     */
+    public <O> MultiFlatten<T, O> produceIterable(Function<? super T, ? extends Iterable<? extends O>> mapper) {
+        nonNull(mapper, "mapper");
+        return producePublisher((x -> {
+            Iterable<? extends O> iterable = mapper.apply(x);
+            if (iterable == null) {
+                return Multi.createFrom().failure(new NullPointerException(MAPPER_RETURNED_NULL));
+            } else {
+                return Multi.createFrom().iterable(iterable);
+            }
+        }));
+    }
+
+    /**
+     * Configures the <em>mapper</em> of the <em>flatMap</em> operation.
+     * The mapper returns a {@link Uni uni} and is called for each item emitted by the upstream {@link Multi}.
+     *
+     * @param mapper the mapper, must not be {@code null}, must not produce {@code null}
+     * @param <O> the type of item emitted by the {@link Uni} produced by the mapper.
+     * @return the object to configure the flatten behavior.
+     */
+    public <O> MultiFlatten<T, O> produceUni(Function<? super T, ? extends Uni<? extends O>> mapper) {
+        nonNull(mapper, "mapper");
+        Function<? super T, ? extends Publisher<? extends O>> wrapper = res -> mapper.apply(res).toMulti();
+        return new MultiFlatten<>(upstream, wrapper, 1, false);
+    }
+
+    /**
+     * Configures the <em>mapper</em> of the <em>flatMap</em> operation.
+     * The mapper returns a {@link CompletionStage} and is called for each item emitted by the upstream {@link Multi}.
+     *
+     * @param mapper the mapper, must not be {@code null}, must not produce {@code null}
+     * @param <O> the type of item emitted by the {@link CompletionStage} produced by the mapper.
+     * @return the object to configure the flatten behavior.
+     */
+    public <O> MultiFlatten<T, O> produceCompletionStage(Function<? super T, ? extends CompletionStage<? extends O>> mapper) {
+        nonNull(mapper, "mapper");
+        Function<? super T, ? extends Publisher<? extends O>> wrapper = res -> Multi.createFrom().emitter(emitter -> {
+            CompletionStage<? extends O> stage;
+            try {
+                stage = mapper.apply(res);
+            } catch (Exception e) {
+                emitter.fail(e);
+                return;
+            }
+            if (stage == null) {
+                throw new NullPointerException(SUPPLIER_PRODUCED_NULL);
+            }
+
+            emitter.onTermination(() -> stage.toCompletableFuture().cancel(false));
+            stage.whenComplete((r, f) -> {
+                if (f != null) {
+                    emitter.fail(f);
+                } else if (r != null) {
+                    emitter.emit(r);
+                    emitter.complete();
+                } else {
+                    // failure on `null`
+                    emitter.fail(new NullPointerException("The completion stage redeemed `null`"));
+                }
+            });
+        }, BackPressureStrategy.LATEST);
+
+        return new MultiFlatten<>(upstream, wrapper, 1, false);
     }
 
     /**
@@ -129,13 +228,15 @@ public class MultiOnItem<T> {
      * produced {@link Multi}. The flatten process may interleaved items.</li>
      * </ul>
      *
+     * This method is equivalent to {@code multi.onItem().producePublisher(mapper).mergeResults()}.
+     *
      * @param mapper the {@link Function} producing {@link Publisher} / {@link Multi} for each items emitted by the
      *        upstream {@link Multi}
      * @param <O> the type of item emitted by the {@link Publisher} produced by the {@code mapper}
      * @return the produced {@link Multi}
      */
     public <O> Multi<O> flatMap(Function<? super T, ? extends Publisher<? extends O>> mapper) {
-        return flatMap().publisher(mapper).mergeResults();
+        return producePublisher(mapper).mergeResults();
     }
 
     /**
@@ -150,33 +251,15 @@ public class MultiOnItem<T> {
      * produced {@link Multi}. The flatten process makes sure that the items are not interleaved.
      * </ul>
      *
+     * This method is equivalent to {@code multi.onItem().producePublisher(mapper).concatenateResults()}.
+     *
      * @param mapper the {@link Function} producing {@link Publisher} / {@link Multi} for each items emitted by the
      *        upstream {@link Multi}
      * @param <O> the type of item emitted by the {@link Publisher} produced by the {@code mapper}
      * @return the produced {@link Multi}
      */
     public <O> Multi<O> concatMap(Function<? super T, ? extends Publisher<? extends O>> mapper) {
-        return flatMap().publisher(mapper).concatenateResults();
-    }
-
-    /**
-     * Configures a <em>flatMap</em> operation that will item into a {@link Multi}.
-     * <p>
-     * The operations behave as follow:
-     * <ul>
-     * <li>for each item emitted by this {@link Multi}, a mapper is called and produces a {@link Publisher},
-     * {@link Uni} or {@link Iterable}. The mapper must not return {@code null}</li>
-     * <li>The items contained in each of the produced <em>sets</em> are then <strong>merged</strong> (flatMap) or
-     * <strong>concatenated</strong> (concatMap) in the returned {@link Multi}.</li>
-     * </ul>
-     * <p>
-     * The object returned by this method lets you configure the operation such as the <em>requests</em> asked to the
-     * inner {@link Publisher} (produces by the mapper), concurrency (for flatMap)...
-     *
-     * @return the object to configure the {@code flatMap} operation.
-     */
-    public MultiFlatMap<T> flatMap() {
-        return new MultiFlatMap<>(upstream);
+        return producePublisher(mapper).concatenateResults();
     }
 
 }

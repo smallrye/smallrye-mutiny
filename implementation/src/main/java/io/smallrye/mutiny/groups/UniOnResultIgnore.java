@@ -33,7 +33,7 @@ public class UniOnResultIgnore<T> {
      */
     public Uni<T> andFail(Supplier<Throwable> supplier) {
         nonNull(supplier, "supplier");
-        return onResult.mapToUni(ignored -> Uni.createFrom().failure(supplier));
+        return onResult.produceUni(ignored -> Uni.createFrom().failure(supplier));
     }
 
     /**
@@ -54,7 +54,7 @@ public class UniOnResultIgnore<T> {
      */
     public <O> Uni<O> andSwitchTo(Uni<? extends O> other) {
         nonNull(other, "other");
-        return onResult.mapToUni(ignored -> other);
+        return onResult.produceUni(ignored -> other);
     }
 
     /**
@@ -66,7 +66,7 @@ public class UniOnResultIgnore<T> {
      */
     public <O> Uni<O> andSwitchTo(Supplier<Uni<? extends O>> supplier) {
         nonNull(supplier, "supplier");
-        return onResult.mapToUni(ignored -> supplier.get());
+        return onResult.produceUni(ignored -> supplier.get());
     }
 
     /**

@@ -24,7 +24,7 @@ public class MultiCreationTest {
         Multi.createFrom().item(() -> "some value computed at subscription time");
         Multi.createFrom().items("a", "b", "c");
         Multi.createFrom().items(() -> Stream.of("computed", "at", "subscription", "time"));
-        Multi.createFrom().iterable(Arrays.asList("some", "iterable"));
+        Multi.createFrom().iterable(Arrays.asList("some", "produceIterable"));
 
         // Creation from a completion stage or completable future
         Multi.createFrom().completionStage(CompletableFuture.supplyAsync(() -> "result"))

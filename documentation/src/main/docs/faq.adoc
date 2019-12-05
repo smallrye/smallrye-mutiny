@@ -9,14 +9,14 @@ To transform items synchronously use the `apply` operators:
 include::../../../src/test/java/snippets/HowToTransformTest.java[tags=sync]
 ----
 
-You can also transform items asynchronously using the `mapToUni` / `mapToCompletionStage` / `flatMap().uni` / `flatMap().completionStage` operators:
+You can also transform items asynchronously using the `produceUni` / `produceCompletionStage` operators:
 
 [source,java,indent=0]
 ----
 include::../../../src/test/java/snippets/HowToTransformTest.java[tags=async]
 ----
 
-If you need to generate a sequence of items use, `mapToMulti`:
+If you need to generate a sequence of items use, `producePublisher`:
 
 [source, java, indent=0]
 ----
@@ -42,10 +42,19 @@ To achieve this, there is a set of methods available in `multi.transform()`.
 
 === How do I chain asynchronous call?
 
+To chain asynchronous calls, use the `onItem().mapToUni` or `onItem().mapToCompletionStage`:
+
+[source, java, indent=0]
+----
+include::../../../src/test/java/snippets/HowToChainAsyncTest.java[tags=code]
+----
+
 === How do I recover from failure?
 
 
 === How do wrap blocking calls?
+
+=== How to I control the threads?
 
 === How do I interact with CompletionStage?
 

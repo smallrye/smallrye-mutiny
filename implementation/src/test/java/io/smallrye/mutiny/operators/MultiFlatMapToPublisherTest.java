@@ -55,9 +55,7 @@ public class MultiFlatMapToPublisherTest {
 
         Multi.createFrom().range(1, 100_001)
                 .onItem()
-                .flatMap()
-                .multi(i -> Multi.createFrom().completionStage(CompletableFuture.supplyAsync(() -> i)))
-                .collectFailures()
+                .produceMulti(i -> Multi.createFrom().completionStage(CompletableFuture.supplyAsync(() -> i))).collectFailures()
                 .concatenateResults()
                 .subscribe(subscriber);
 
@@ -77,11 +75,8 @@ public class MultiFlatMapToPublisherTest {
         MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(Long.MAX_VALUE);
 
         Multi.createFrom().range(1, 100_001)
-                .onItem()
-                .flatMap()
-                .multi(i -> Multi.createFrom().completionStage(CompletableFuture.supplyAsync(() -> i)))
-                .collectFailures()
-                .concatenateResults()
+                .onItem().produceMulti(i -> Multi.createFrom().completionStage(CompletableFuture.supplyAsync(() -> i)))
+                .collectFailures().concatenateResults()
                 .subscribe(subscriber);
 
         subscriber
@@ -100,9 +95,7 @@ public class MultiFlatMapToPublisherTest {
         MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(Long.MAX_VALUE);
 
         Multi.createFrom().range(1, 100_001)
-                .onItem()
-                .flatMap()
-                .publisher(
+                .onItem().producePublisher(
                         i -> Multi.createFrom().completionStage(CompletableFuture.supplyAsync(() -> {
                             if (i == 99000 || i == 100_000) {
                                 throw new IllegalArgumentException("boom");
@@ -110,8 +103,7 @@ public class MultiFlatMapToPublisherTest {
                                 return i;
                             }
                         })))
-                .collectFailures()
-                .concatenateResults()
+                .collectFailures().concatenateResults()
                 .subscribe(subscriber);
 
         subscriber
@@ -158,11 +150,7 @@ public class MultiFlatMapToPublisherTest {
         MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(Long.MAX_VALUE);
 
         Multi.createFrom().range(1, 4)
-                .onItem()
-                .flatMap()
-                .publisher(i -> Multi.createFrom().items(i, i))
-                .collectFailures()
-                .concatenateResults()
+                .onItem().producePublisher(i -> Multi.createFrom().items(i, i)).collectFailures().concatenateResults()
                 .subscribe(subscriber);
 
         subscriber.assertReceived(1, 1, 2, 2, 3, 3).assertCompletedSuccessfully();
@@ -173,17 +161,13 @@ public class MultiFlatMapToPublisherTest {
         MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(Long.MAX_VALUE);
 
         Multi.createFrom().range(1, 4)
-                .onItem()
-                .flatMap()
-                .multi(i -> {
+                .onItem().produceMulti(i -> {
                     if (i == 2) {
                         return Multi.createFrom().failure(new IOException("boom"));
                     } else {
                         return Multi.createFrom().items(i, i);
                     }
-                })
-                .collectFailures()
-                .concatenateResults()
+                }).collectFailures().concatenateResults()
                 .subscribe(subscriber);
 
         subscriber
@@ -326,9 +310,7 @@ public class MultiFlatMapToPublisherTest {
         MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(Long.MAX_VALUE);
 
         Multi.createFrom().range(1, 10001)
-                .onItem().flatMap()
-                .multi(i -> Multi.createFrom().items(i, i))
-                .mergeResults(25)
+                .onItem().produceMulti(i -> Multi.createFrom().items(i, i)).mergeResults(25)
                 .subscribe(subscriber);
 
         subscriber.assertCompletedSuccessfully();
@@ -338,8 +320,7 @@ public class MultiFlatMapToPublisherTest {
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void testFlatMapWithInvalidConcurrency() {
         Multi.createFrom().range(1, 10001)
-                .onItem().flatMap()
-                .multi(i -> Multi.createFrom().items(i, i))
+                .onItem().produceMulti(i -> Multi.createFrom().items(i, i))
                 .mergeResults(-1);
     }
 
@@ -348,8 +329,7 @@ public class MultiFlatMapToPublisherTest {
         MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(Long.MAX_VALUE);
 
         Multi.createFrom().range(1, 10001)
-                .onItem().flatMap()
-                .multi(i -> Multi.createFrom().completionStage(CompletableFuture.supplyAsync(() -> i)))
+                .onItem().produceMulti(i -> Multi.createFrom().completionStage(CompletableFuture.supplyAsync(() -> i)))
                 .withRequests(20)
                 .mergeResults(25)
                 .subscribe(subscriber);
@@ -363,8 +343,7 @@ public class MultiFlatMapToPublisherTest {
         MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(Long.MAX_VALUE);
 
         Multi.createFrom().range(1, 5)
-                .onItem().flatMap()
-                .multi(i -> {
+                .onItem().produceMulti(i -> {
                     if (i % 2 == 0) {
                         return Multi.createFrom().failure(new IOException("boom"));
                     } else {
@@ -381,9 +360,7 @@ public class MultiFlatMapToPublisherTest {
     @Test
     public void testFlatMapUni() {
         List<Integer> list = Multi.createFrom().range(1, 4)
-                .onItem()
-                .flatMap()
-                .uni(i -> Uni.createFrom().completionStage(CompletableFuture.supplyAsync(() -> i + 1)))
+                .onItem().produceUni(i -> Uni.createFrom().completionStage(CompletableFuture.supplyAsync(() -> i + 1)))
                 .mergeResults()
                 .collectItems().asList().await().indefinitely();
 
@@ -393,9 +370,7 @@ public class MultiFlatMapToPublisherTest {
     @Test
     public void testFlatMapCompletionStage() {
         List<Integer> list = Multi.createFrom().range(1, 4)
-                .onItem()
-                .flatMap()
-                .completionStage(i -> CompletableFuture.supplyAsync(() -> i + 1))
+                .onItem().produceCompletionStage(i -> CompletableFuture.supplyAsync(() -> i + 1))
                 .mergeResults()
                 .collectItems().asList().await().indefinitely();
 
@@ -405,9 +380,7 @@ public class MultiFlatMapToPublisherTest {
     @Test
     public void testConcatMapUni() {
         List<Integer> list = Multi.createFrom().range(1, 4)
-                .onItem()
-                .flatMap()
-                .uni(i -> Uni.createFrom().completionStage(CompletableFuture.supplyAsync(() -> i + 1)))
+                .onItem().produceUni(i -> Uni.createFrom().completionStage(CompletableFuture.supplyAsync(() -> i + 1)))
                 .concatenateResults()
                 .collectItems().asList().await().indefinitely();
 
@@ -417,9 +390,7 @@ public class MultiFlatMapToPublisherTest {
     @Test
     public void testFlatMapIterable() {
         List<Integer> list = Multi.createFrom().range(1, 4)
-                .onItem()
-                .flatMap()
-                .iterable(i -> Arrays.asList(i, i + 1))
+                .onItem().produceIterable(i -> Arrays.asList(i, i + 1))
                 .mergeResults()
                 .collectItems().asList().await().indefinitely();
 
@@ -429,9 +400,7 @@ public class MultiFlatMapToPublisherTest {
     @Test
     public void testConcatMapIterable() {
         List<Integer> list = Multi.createFrom().range(1, 4)
-                .onItem()
-                .flatMap()
-                .iterable(i -> Arrays.asList(i, i + 1))
+                .onItem().produceIterable(i -> Arrays.asList(i, i + 1))
                 .mergeResults()
                 .collectItems().asList().await().indefinitely();
 

@@ -40,7 +40,7 @@ public class UniOnItem<T> {
      * The function receives the item as parameter, and can transform it. The returned object is sent downstream
      * as {@code item}.
      * <p>
-     * For asynchronous composition, see {@link #mapToUni(Function)}.
+     * For asynchronous composition, see {@link #produceUni(Function)}.
      *
      * @param mapper the mapper function, must not be {@code null}
      * @param <R> the type of Uni item
@@ -66,7 +66,7 @@ public class UniOnItem<T> {
      * @return a new {@link Uni} that would fire events from the uni produced by the mapper function, possibly
      *         in an asynchronous manner.
      */
-    public <R> Uni<R> mapToUni(Function<? super T, ? extends Uni<? extends R>> mapper) {
+    public <R> Uni<R> produceUni(Function<? super T, ? extends Uni<? extends R>> mapper) {
         return Infrastructure.onUniCreation(new UniFlatMapOnItem<>(upstream, mapper));
     }
 
@@ -86,7 +86,7 @@ public class UniOnItem<T> {
      * @return a new {@link Uni} that would fire events from the uni produced by the mapper function, possibly
      *         in an asynchronous manner.
      */
-    public <R> Uni<R> mapToCompletionStage(Function<? super T, ? extends CompletionStage<? extends R>> mapper) {
+    public <R> Uni<R> produceCompletionStage(Function<? super T, ? extends CompletionStage<? extends R>> mapper) {
         return Infrastructure.onUniCreation(new UniFlatMapCompletionStageOnItem<>(upstream, mapper));
     }
 
@@ -103,10 +103,10 @@ public class UniOnItem<T> {
      * @return a new {@link Uni} that would fire events from the emitter consumed by the mapper function, possibly
      *         in an asynchronous manner.
      */
-    public <R> Uni<R> mapToUni(BiConsumer<? super T, UniEmitter<? super R>> consumer) {
+    public <R> Uni<R> produceUni(BiConsumer<? super T, UniEmitter<? super R>> consumer) {
         nonNull(consumer, "consumer");
         return Infrastructure.onUniCreation(
-                this.mapToUni(x -> Uni.createFrom().emitter(emitter -> consumer.accept(x, emitter))));
+                this.produceUni(x -> Uni.createFrom().emitter(emitter -> consumer.accept(x, emitter))));
     }
 
     /**
@@ -146,14 +146,14 @@ public class UniOnItem<T> {
     /**
      * Produces a new {@link Uni} invoking the given function when the current {@link Uni} fires an item. The
      * function transforms the received item into a failure that will be fired by the produced {@link Uni}.
-     * For asynchronous composition, see {@link #mapToUni(Function)}}.
+     * For asynchronous composition, see {@link #produceUni(Function)}}.
      *
      * @param mapper the mapper function, must not be {@code null}, must not return {@code null}
      * @return the new {@link Uni}
      */
     public Uni<T> failWith(Function<? super T, ? extends Throwable> mapper) {
         nonNull(mapper, "mapper");
-        return Infrastructure.onUniCreation(mapToUni(t -> Uni.createFrom().failure(mapper.apply(t))));
+        return Infrastructure.onUniCreation(produceUni(t -> Uni.createFrom().failure(mapper.apply(t))));
     }
 
     /**

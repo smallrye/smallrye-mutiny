@@ -31,7 +31,7 @@ public class FlatMapIterableStageFactory implements ProcessingStageFactory<Stage
 
         @Override
         public Multi<O> apply(Multi<I> source) {
-            return source.onItem().flatMap().iterable(mapper).concatenateResults();
+            return source.onItem().produceIterable(mapper).concatenateResults();
         }
     }
 

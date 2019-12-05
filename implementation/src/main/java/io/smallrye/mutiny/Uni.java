@@ -147,7 +147,7 @@ public interface Uni<T> {
      * {@code
      * Uni<T> uni = ...;
      * uni.onItem().apply(x -> ...); // Map to another item
-     * uni.onItem().mapToUni(x -> ...); // Map to another Uni (flatMap)
+     * uni.onItem().produceUni(x -> ...); // Map to another Uni (flatMap)
      * }
      * </pre>
      *
@@ -322,7 +322,7 @@ public interface Uni<T> {
      *         in an asynchronous manner.
      */
     default <O> Uni<O> flatMap(Function<? super T, Uni<? extends O>> mapper) {
-        return onItem().mapToUni(ParameterValidation.nonNull(mapper, "mapper"));
+        return onItem().produceUni(ParameterValidation.nonNull(mapper, "mapper"));
     }
 
     /**

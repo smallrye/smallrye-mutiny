@@ -75,7 +75,7 @@ public class MultiTransform<T> {
     public Multi<T> byMergingWith(Iterable<Publisher<T>> iterable) {
         List<Publisher<T>> list = new ArrayList<>();
         list.add(upstream);
-        nonNull(iterable, "iterable").forEach(list::add);
+        nonNull(iterable, "produceIterable").forEach(list::add);
         return Multi.createBy().merging().streams(list);
     }
 
@@ -99,7 +99,7 @@ public class MultiTransform<T> {
      */
     public Multi<T> byTestingItemsWith(Function<? super T, ? extends Uni<Boolean>> tester) {
         nonNull(tester, "tester");
-        return upstream.onItem().flatMap().multi(res -> {
+        return upstream.onItem().produceMulti(res -> {
             Uni<Boolean> uni = tester.apply(res);
             return uni.map(pass -> {
                 if (pass) {

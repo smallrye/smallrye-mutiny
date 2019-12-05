@@ -18,8 +18,8 @@ public class UniOrCombination<T> extends UniOperator<Void, T> {
     public UniOrCombination(Iterable<? extends Uni<? super T>> iterable) {
         super(null);
         this.challengers = new ArrayList<>();
-        nonNull(iterable, "iterable")
-                .forEach(u -> challengers.add(nonNull(u, "iterable` must not contain a `null` value")));
+        nonNull(iterable, "produceIterable")
+                .forEach(u -> challengers.add(nonNull(u, "produceIterable` must not contain a `null` value")));
     }
 
     public UniOrCombination(Uni<? super T>[] array) {

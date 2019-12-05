@@ -38,7 +38,7 @@ public class UniOnNull<T> {
     public Uni<T> failWith(Supplier<Throwable> supplier) {
         nonNull(supplier, "supplier");
 
-        return Infrastructure.onUniCreation(upstream.onItem().mapToUni((item, emitter) -> {
+        return Infrastructure.onUniCreation(upstream.onItem().produceUni((item, emitter) -> {
             if (item != null) {
                 emitter.complete(item);
                 return;
@@ -89,7 +89,7 @@ public class UniOnNull<T> {
     public Uni<T> switchTo(Supplier<Uni<? extends T>> supplier) {
         nonNull(supplier, "supplier");
 
-        Uni<T> uni = upstream.onItem().mapToUni(res -> {
+        Uni<T> uni = upstream.onItem().produceUni(res -> {
             if (res != null) {
                 return Uni.createFrom().item(res);
             } else {

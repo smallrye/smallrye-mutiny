@@ -37,16 +37,16 @@ public class HowToTransformTest {
 
         // tag::async[]
         String result1 = uni
-                .onItem().mapToUni(s -> Uni.createFrom().item(s.toUpperCase()))
+                .onItem().produceUni(s -> Uni.createFrom().item(s.toUpperCase()))
                 .await().indefinitely();
         String result2 = uni
-                .onItem().mapToCompletionStage(s -> CompletableFuture.supplyAsync(() -> s.toUpperCase()))
+                .onItem().produceCompletionStage(s -> CompletableFuture.supplyAsync(() -> s.toUpperCase()))
                 .await().indefinitely();
         List<String> result3 = multi
-                .onItem().flatMap().uni(s -> Uni.createFrom().item(s.toUpperCase())).concatenateResults()
+                .onItem().produceUni(s -> Uni.createFrom().item(s.toUpperCase())).concatenateResults()
                 .collectItems().asList().await().indefinitely();
         List<String> result4 = multi
-                .onItem().flatMap().completionStage(s -> CompletableFuture.supplyAsync(() -> s.toUpperCase()))
+                .onItem().produceCompletionStage(s -> CompletableFuture.supplyAsync(() -> s.toUpperCase()))
                 .concatenateResults()
                 .collectItems().asList().await().indefinitely();
         // end::async[]
@@ -63,7 +63,7 @@ public class HowToTransformTest {
 
         // tag::multi[]
         List<String> result = multi
-                .onItem().flatMap().publisher(s -> Multi.createFrom().item(s.toUpperCase())).concatenateResults()
+                .onItem().producePublisher(s -> Multi.createFrom().item(s.toUpperCase())).concatenateResults()
                 .collectItems().asList().await().indefinitely();
         // end::multi[]
 
