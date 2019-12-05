@@ -13,8 +13,6 @@ jobs:
       - name: 'Run deployment script for ${{ github.event.deployment.environment }}'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          MAVEN_SETTINGS: ${{ secrets.MVN_SETTINGS }}
-          SMALLRYE_SIGNATURE: ${{ secrets.GPG_SIGNATURE }}
           SECRET_FILES_PASSPHRASE: ${{ secrets.SECRET_FILES_PASSPHRASE }}
         run: |
           sudo apt-get update -o Dir::Etc::sourcelist="sources.list" -o Dir::Etc::sourceparts="-" -o APT::Get::List-Cleanup="0"

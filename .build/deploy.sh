@@ -48,10 +48,10 @@ export MICRO=$(echo ${VERSION}|tr '.' ' '|awk '{print $3}')
 
 if [[ ${TARGET} == "snapshot" ]]; then
     deploy_snapshot
-else
+elif [[ ${TARGET} == "release" ]]; then
     release
+else
+    echo "Unknown environment: ${TARGET}"
 fi
 
 echo "DONE"
-
-
