@@ -58,6 +58,7 @@
         <module>rxjava</module>
         <module>reactor</module>
         <module>reactive-streams-operators</module>
+        <module>documentation</module>
     </modules>
 
     <properties>

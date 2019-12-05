@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>io.smallrye.reactive</groupId>
+        <artifactId>mutiny-project</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>mutiny-documentation</artifactId>
+
+    <dependencies>
+        <dependency>
+            <groupId>io.smallrye.reactive</groupId>
+            <artifactId>mutiny</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.smallrye.reactive</groupId>
+            <artifactId>mutiny</artifactId>
+            <version>${project.version}</version>
+            <classifier>javadoc</classifier>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>3.1.1</version>
+                <executions>
+                    <execution>
+                        <id>unpack</id>
+                        <goals>
+                            <goal>unpack-dependencies</goal>
+                        </goals>
+                        <phase>package</phase>
+                        <configuration>
+                            <includeGroupIds>io.smallrye.reactive</includeGroupIds>
+                            <includeClassifiers>javadoc</includeClassifiers>
+                            <outputDirectory>${project.build.directory}/site/apidocs</outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.asciidoctor</groupId>
+                <artifactId>asciidoctor-maven-plugin</artifactId>
+                <configuration>
+                    <backend>html</backend>
+                    <sourceHighlighter>highlightjs</sourceHighlighter>
+                    <attributes>
+                        <toc>left</toc>
+                        <version>${project.version}</version>
+                        <spec-version>${microprofile-reactive-streams.version}</spec-version>
+                    </attributes>
+                    <sourceDirectory>doc</sourceDirectory>
+                    <imagesDir>assets/images</imagesDir>
+                </configuration>
+            </plugin>
+        </plugins>
+        <defaultGoal>generate-resources asciidoctor:process-asciidoc</defaultGoal>
+    </build>
+</project>
