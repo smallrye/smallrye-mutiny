@@ -68,11 +68,23 @@ include::../../../src/test/java/snippets/MergeTest.java[tags=code]
 
 === How can I collect / accumulate results?
 
-// TODO
+You can collect the items from a `Multi` using the method proposed by `collectItems()`:
+
+[source,java,indent=0]
+----
+include::../../../src/test/java/snippets/CollectTest.java[tags=code]
+----
+
+You can also accumulate results using the `scan` method:
+
+[source,java,indent=0]
+----
+include::../../../src/test/java/snippets/CollectTest.java[tags=acc]
+----
 
 === How do I chain asynchronous calls?
 
-To chain asynchronous calls, use the `onItem().mapToUni` or `onItem().mapToCompletionStage`:
+To chain asynchronous calls, use the `onItem().produceUni` or `onItem().produceCompletionStage`:
 
 [source, java, indent=0]
 ----
