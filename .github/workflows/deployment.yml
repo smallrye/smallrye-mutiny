@@ -1,0 +1,22 @@
+name: Deployment
+on: [deployment]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Install JDK 1.8
+        uses: joschi/setup-jdk@v1.0.0
+        with:
+          java-version: 'openjdk8'
+      - name: 'Run deployment script for ${{ github.event.deployment.environment }}'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SECRET_FILES_PASSPHRASE: ${{ secrets.SECRET_FILES_PASSPHRASE }}
+        run: |
+          sudo apt-get update -o Dir::Etc::sourcelist="sources.list" -o Dir::Etc::sourceparts="-" -o APT::Get::List-Cleanup="0"
+          sudo apt-get install -y gnupg2
+          chmod +x .build/deploy.sh .build/decrypt-secrets.sh
+          .build/decrypt-secrets.sh
+          .build/deploy.sh ${{ github.event.deployment.environment }}

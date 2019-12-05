@@ -1,0 +1,22 @@
+@startuml
+
+skinparam dpi 200
+skinparam useBetaStyle true
+skinparam handwritten true
+skinparam StereotypeFontSize 0
+
+participant Source as pub <<Publisher>> #D2B4DE
+participant "Processor" as proc <<Publisher, Subscriber>> #FAE5D3
+participant "Sink" as sub <<Subscriber>>  #D2B4DE
+
+sub -> proc : subscribe
+proc -> pub : subscribe
+pub -> proc : subscribed[subscription]
+proc -> sub : subscribed[subscription]
+sub -> proc : request[2]
+proc -> pub : request[2]
+pub -> proc : item[...]
+proc -> sub : item[...]
+sub -> proc : cancellation
+proc -> pub : cancellation
+@enduml
