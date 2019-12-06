@@ -8,7 +8,7 @@ import java.io.IOException;
 import org.junit.Test;
 
 import io.smallrye.mutiny.Uni;
-import io.smallrye.mutiny.converters.uni.ReactorConverters;
+import io.smallrye.mutiny.converters.uni.UniReactorConverters;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -16,21 +16,21 @@ public class UniConvertFromTest {
 
     @Test
     public void testCreatingFromAMono() {
-        Uni<Integer> uni = Uni.createFrom().converter(ReactorConverters.fromMono(), Mono.just(1));
+        Uni<Integer> uni = Uni.createFrom().converter(UniReactorConverters.fromMono(), Mono.just(1));
         assertThat(uni).isNotNull();
         assertThat(uni.await().indefinitely()).isEqualTo(1);
     }
 
     @Test
     public void testCreatingFromAnEmptyMono() {
-        Uni<Void> uni = Uni.createFrom().converter(ReactorConverters.fromMono(), Mono.empty());
+        Uni<Void> uni = Uni.createFrom().converter(UniReactorConverters.fromMono(), Mono.empty());
         assertThat(uni).isNotNull();
         assertThat(uni.await().indefinitely()).isNull();
     }
 
     @Test
     public void testCreatingFromAMonoWithFailure() {
-        Uni<Integer> uni = Uni.createFrom().converter(ReactorConverters.fromMono(), Mono.error(new IOException("boom")));
+        Uni<Integer> uni = Uni.createFrom().converter(UniReactorConverters.fromMono(), Mono.error(new IOException("boom")));
         assertThat(uni).isNotNull();
         try {
             uni.await().indefinitely();
@@ -42,28 +42,28 @@ public class UniConvertFromTest {
 
     @Test
     public void testCreatingFromAFlux() {
-        Uni<Integer> uni = Uni.createFrom().converter(ReactorConverters.fromFlux(), Flux.just(1));
+        Uni<Integer> uni = Uni.createFrom().converter(UniReactorConverters.fromFlux(), Flux.just(1));
         assertThat(uni).isNotNull();
         assertThat(uni.await().indefinitely()).isEqualTo(1);
     }
 
     @Test
     public void testCreatingFromAMultiValuedFlux() {
-        Uni<Integer> uni = Uni.createFrom().converter(ReactorConverters.fromFlux(), Flux.just(1, 2, 3));
+        Uni<Integer> uni = Uni.createFrom().converter(UniReactorConverters.fromFlux(), Flux.just(1, 2, 3));
         assertThat(uni).isNotNull();
         assertThat(uni.await().indefinitely()).isEqualTo(1);
     }
 
     @Test
     public void testCreatingFromAnEmptyFlux() {
-        Uni<Void> uni = Uni.createFrom().converter(ReactorConverters.fromFlux(), Flux.empty());
+        Uni<Void> uni = Uni.createFrom().converter(UniReactorConverters.fromFlux(), Flux.empty());
         assertThat(uni).isNotNull();
         assertThat(uni.await().indefinitely()).isNull();
     }
 
     @Test
     public void testCreatingFromAFluxWithFailure() {
-        Uni<Integer> uni = Uni.createFrom().converter(ReactorConverters.fromFlux(), Flux.error(new IOException("boom")));
+        Uni<Integer> uni = Uni.createFrom().converter(UniReactorConverters.fromFlux(), Flux.error(new IOException("boom")));
         assertThat(uni).isNotNull();
         try {
             uni.await().indefinitely();

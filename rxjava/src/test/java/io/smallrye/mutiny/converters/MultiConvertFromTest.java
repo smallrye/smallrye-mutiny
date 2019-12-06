@@ -10,7 +10,7 @@ import io.reactivex.Maybe;
 import io.reactivex.Observable;
 import io.reactivex.Single;
 import io.smallrye.mutiny.Multi;
-import io.smallrye.mutiny.converters.multi.RxConverters;
+import io.smallrye.mutiny.converters.multi.MultiRxConverters;
 import io.smallrye.mutiny.test.MultiAssertSubscriber;
 
 public class MultiConvertFromTest {
@@ -18,7 +18,7 @@ public class MultiConvertFromTest {
     @Test
     public void testCreatingFromACompletable() {
         MultiAssertSubscriber<Void> subscriber = Multi.createFrom()
-                .converter(RxConverters.fromCompletable(), Completable.complete())
+                .converter(MultiRxConverters.fromCompletable(), Completable.complete())
                 .subscribe()
                 .withSubscriber(MultiAssertSubscriber.create(1));
 
@@ -28,7 +28,7 @@ public class MultiConvertFromTest {
     @Test
     public void testCreatingFromACompletableFromVoid() {
         MultiAssertSubscriber<Void> subscriber = Multi.createFrom()
-                .converter(RxConverters.fromCompletable(), Completable.error(new IOException("boom")))
+                .converter(MultiRxConverters.fromCompletable(), Completable.error(new IOException("boom")))
                 .subscribe()
                 .withSubscriber(MultiAssertSubscriber.create(1));
 
@@ -38,7 +38,7 @@ public class MultiConvertFromTest {
     @Test
     public void testCreatingFromASingle() {
         MultiAssertSubscriber<Integer> subscriber = Multi.createFrom()
-                .converter(RxConverters.fromSingle(), Single.just(1))
+                .converter(MultiRxConverters.fromSingle(), Single.just(1))
                 .subscribe()
                 .withSubscriber(MultiAssertSubscriber.create(1));
 
@@ -48,7 +48,7 @@ public class MultiConvertFromTest {
     @Test
     public void testCreatingFromASingleWithFailure() {
         MultiAssertSubscriber<Integer> subscriber = Multi.createFrom()
-                .converter(RxConverters.fromSingle(), Single.<Integer> error(new IOException("boom")))
+                .converter(MultiRxConverters.fromSingle(), Single.<Integer> error(new IOException("boom")))
                 .subscribe()
                 .withSubscriber(MultiAssertSubscriber.create(1));
 
@@ -58,7 +58,7 @@ public class MultiConvertFromTest {
     @Test
     public void testCreatingFromAMaybe() {
         MultiAssertSubscriber<Integer> subscriber = Multi.createFrom()
-                .converter(RxConverters.fromMaybe(), Maybe.just(1))
+                .converter(MultiRxConverters.fromMaybe(), Maybe.just(1))
                 .subscribe()
                 .withSubscriber(MultiAssertSubscriber.create(1));
 
@@ -68,7 +68,7 @@ public class MultiConvertFromTest {
     @Test
     public void testCreatingFromAnEmptyMaybe() {
         MultiAssertSubscriber<Void> subscriber = Multi.createFrom()
-                .converter(RxConverters.fromMaybe(), Maybe.<Void> empty())
+                .converter(MultiRxConverters.fromMaybe(), Maybe.<Void> empty())
                 .subscribe()
                 .withSubscriber(MultiAssertSubscriber.create(1));
 
@@ -78,7 +78,7 @@ public class MultiConvertFromTest {
     @Test
     public void testCreatingFromAMaybeWithFailure() {
         MultiAssertSubscriber<Integer> subscriber = Multi.createFrom()
-                .converter(RxConverters.fromMaybe(), Maybe.<Integer> error(new IOException("boom")))
+                .converter(MultiRxConverters.fromMaybe(), Maybe.<Integer> error(new IOException("boom")))
                 .subscribe()
                 .withSubscriber(MultiAssertSubscriber.create(1));
 
@@ -88,7 +88,7 @@ public class MultiConvertFromTest {
     @Test
     public void testCreatingFromAFlowable() {
         MultiAssertSubscriber<Integer> subscriber = Multi.createFrom()
-                .converter(RxConverters.fromFlowable(), Flowable.just(1))
+                .converter(MultiRxConverters.fromFlowable(), Flowable.just(1))
                 .subscribe()
                 .withSubscriber(MultiAssertSubscriber.create(1));
 
@@ -98,7 +98,7 @@ public class MultiConvertFromTest {
     @Test
     public void testCreatingFromAMultiValuedFlowable() {
         MultiAssertSubscriber<Integer> subscriber = Multi.createFrom()
-                .converter(RxConverters.fromFlowable(), Flowable.just(1, 2, 3))
+                .converter(MultiRxConverters.fromFlowable(), Flowable.just(1, 2, 3))
                 .subscribe()
                 .withSubscriber(MultiAssertSubscriber.create(3));
 
@@ -108,7 +108,7 @@ public class MultiConvertFromTest {
     @Test
     public void testCreatingFromAnEmptyFlowable() {
         MultiAssertSubscriber<Void> subscriber = Multi.createFrom()
-                .converter(RxConverters.fromFlowable(), Flowable.<Void> empty())
+                .converter(MultiRxConverters.fromFlowable(), Flowable.<Void> empty())
                 .subscribe()
                 .withSubscriber(MultiAssertSubscriber.create(1));
 
@@ -118,7 +118,7 @@ public class MultiConvertFromTest {
     @Test
     public void testCreatingFromAFlowableWithFailure() {
         MultiAssertSubscriber<Integer> subscriber = Multi.createFrom()
-                .converter(RxConverters.fromFlowable(), Flowable.<Integer> error(new IOException("boom")))
+                .converter(MultiRxConverters.fromFlowable(), Flowable.<Integer> error(new IOException("boom")))
                 .subscribe()
                 .withSubscriber(MultiAssertSubscriber.create(1));
 
@@ -128,7 +128,7 @@ public class MultiConvertFromTest {
     @Test
     public void testCreatingFromAnObserver() {
         MultiAssertSubscriber<Integer> subscriber = Multi.createFrom()
-                .converter(RxConverters.fromObservable(), Observable.just(1))
+                .converter(MultiRxConverters.fromObservable(), Observable.just(1))
                 .subscribe()
                 .withSubscriber(MultiAssertSubscriber.create(1));
 
@@ -138,7 +138,7 @@ public class MultiConvertFromTest {
     @Test
     public void testCreatingFromAMultiValuedObservable() {
         MultiAssertSubscriber<Integer> subscriber = Multi.createFrom()
-                .converter(RxConverters.fromObservable(), Observable.just(1, 2, 3))
+                .converter(MultiRxConverters.fromObservable(), Observable.just(1, 2, 3))
                 .subscribe()
                 .withSubscriber(MultiAssertSubscriber.create(3));
 
@@ -148,7 +148,7 @@ public class MultiConvertFromTest {
     @Test
     public void testCreatingFromAnEmptyObservable() {
         MultiAssertSubscriber<Void> subscriber = Multi.createFrom()
-                .converter(RxConverters.fromObservable(), Observable.<Void> empty())
+                .converter(MultiRxConverters.fromObservable(), Observable.<Void> empty())
                 .subscribe()
                 .withSubscriber(MultiAssertSubscriber.create(1));
 
@@ -158,7 +158,7 @@ public class MultiConvertFromTest {
     @Test
     public void testCreatingFromAnObservableWithFailure() {
         MultiAssertSubscriber<Integer> subscriber = Multi.createFrom()
-                .converter(RxConverters.fromObservable(), Observable.<Integer> error(new IOException("boom")))
+                .converter(MultiRxConverters.fromObservable(), Observable.<Integer> error(new IOException("boom")))
                 .subscribe()
                 .withSubscriber(MultiAssertSubscriber.create(1));
 

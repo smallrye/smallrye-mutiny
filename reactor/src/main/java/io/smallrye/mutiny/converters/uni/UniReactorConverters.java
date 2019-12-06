@@ -1,7 +1,7 @@
 package io.smallrye.mutiny.converters.uni;
 
-public class ReactorConverters {
-    private ReactorConverters() {
+public class UniReactorConverters {
+    private UniReactorConverters() {
         // Avoid direct instantiation
     }
 

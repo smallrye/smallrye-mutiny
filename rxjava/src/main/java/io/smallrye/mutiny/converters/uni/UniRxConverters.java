@@ -1,8 +1,8 @@
-package io.smallrye.mutiny.converters.multi;
+package io.smallrye.mutiny.converters.uni;
 
-public class RxConverters {
+public class UniRxConverters {
 
-    private RxConverters() {
+    private UniRxConverters() {
         // Avoid direct instantiation
     }
 
@@ -35,10 +35,6 @@ public class RxConverters {
         return ToSingle.INSTANCE;
     }
 
-    public static <T> ToSingleFailOnNull<T> toSingleOnEmptyThrow(Class<? extends Throwable> exceptionClass) {
-        return new ToSingleFailOnNull<>(exceptionClass);
-    }
-
     @SuppressWarnings("unchecked")
     public static <T> ToMaybe<T> toMaybe() {
         return ToMaybe.INSTANCE;
@@ -54,4 +50,8 @@ public class RxConverters {
         return ToObservable.INSTANCE;
     }
 
+    @SuppressWarnings("unchecked")
+    public static <T> ToCompletable<T> toCompletable() {
+        return ToCompletable.INSTANCE;
+    }
 }

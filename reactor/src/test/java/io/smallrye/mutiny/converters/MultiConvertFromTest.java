@@ -5,7 +5,7 @@ import java.io.IOException;
 import org.junit.Test;
 
 import io.smallrye.mutiny.Multi;
-import io.smallrye.mutiny.converters.multi.ReactorConverters;
+import io.smallrye.mutiny.converters.multi.MultiReactorConverters;
 import io.smallrye.mutiny.test.MultiAssertSubscriber;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -15,7 +15,7 @@ public class MultiConvertFromTest {
     @Test
     public void testCreatingFromAMono() {
         MultiAssertSubscriber<Integer> subscriber = Multi.createFrom()
-                .converter(ReactorConverters.fromMono(), Mono.just(1))
+                .converter(MultiReactorConverters.fromMono(), Mono.just(1))
                 .subscribe()
                 .withSubscriber(MultiAssertSubscriber.create(1));
 
@@ -25,7 +25,7 @@ public class MultiConvertFromTest {
     @Test
     public void testCreatingFromAnEmptyMono() {
         MultiAssertSubscriber<Void> subscriber = Multi.createFrom()
-                .converter(ReactorConverters.fromMono(), Mono.<Void> empty())
+                .converter(MultiReactorConverters.fromMono(), Mono.<Void> empty())
                 .subscribe()
                 .withSubscriber(MultiAssertSubscriber.create(1));
 
@@ -35,7 +35,7 @@ public class MultiConvertFromTest {
     @Test
     public void testCreatingFromAMonoWithFailure() {
         MultiAssertSubscriber<Integer> subscriber = Multi.createFrom()
-                .converter(ReactorConverters.fromMono(), Mono.<Integer> error(new IOException("boom")))
+                .converter(MultiReactorConverters.fromMono(), Mono.<Integer> error(new IOException("boom")))
                 .subscribe()
                 .withSubscriber(MultiAssertSubscriber.create(1));
 
@@ -45,7 +45,7 @@ public class MultiConvertFromTest {
     @Test
     public void testCreatingFromAFlux() {
         MultiAssertSubscriber<Integer> subscriber = Multi.createFrom()
-                .converter(ReactorConverters.fromFlux(), Flux.just(1))
+                .converter(MultiReactorConverters.fromFlux(), Flux.just(1))
                 .subscribe()
                 .withSubscriber(MultiAssertSubscriber.create(1));
 
@@ -55,7 +55,7 @@ public class MultiConvertFromTest {
     @Test
     public void testCreatingFromAMultiValuedFlux() {
         MultiAssertSubscriber<Integer> subscriber = Multi.createFrom()
-                .converter(ReactorConverters.fromFlux(), Flux.just(1, 2, 3))
+                .converter(MultiReactorConverters.fromFlux(), Flux.just(1, 2, 3))
                 .subscribe()
                 .withSubscriber(MultiAssertSubscriber.create(3));
 
@@ -66,7 +66,7 @@ public class MultiConvertFromTest {
     @Test
     public void testCreatingFromAnEmptyFlux() {
         MultiAssertSubscriber<Void> subscriber = Multi.createFrom()
-                .converter(ReactorConverters.fromFlux(), Flux.<Void> empty())
+                .converter(MultiReactorConverters.fromFlux(), Flux.<Void> empty())
                 .subscribe()
                 .withSubscriber(MultiAssertSubscriber.create(1));
 
@@ -76,7 +76,7 @@ public class MultiConvertFromTest {
     @Test
     public void testCreatingFromAFluxWithFailure() {
         MultiAssertSubscriber<Integer> subscriber = Multi.createFrom()
-                .converter(ReactorConverters.fromFlux(), Flux.<Integer> error(new IOException("boom")))
+                .converter(MultiReactorConverters.fromFlux(), Flux.<Integer> error(new IOException("boom")))
                 .subscribe()
                 .withSubscriber(MultiAssertSubscriber.create(1));
 

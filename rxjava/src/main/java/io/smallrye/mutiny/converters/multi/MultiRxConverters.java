@@ -1,8 +1,8 @@
-package io.smallrye.mutiny.converters.uni;
+package io.smallrye.mutiny.converters.multi;
 
-public class RxConverters {
+public class MultiRxConverters {
 
-    private RxConverters() {
+    private MultiRxConverters() {
         // Avoid direct instantiation
     }
 
@@ -33,6 +33,11 @@ public class RxConverters {
     @SuppressWarnings("unchecked")
     public static <T> ToSingle<T> toSingle() {
         return ToSingle.INSTANCE;
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T> ToCompletable<T> toCompletable() {
+        return ToCompletable.INSTANCE;
     }
 
     @SuppressWarnings("unchecked")
