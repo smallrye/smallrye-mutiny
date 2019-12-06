@@ -20,9 +20,10 @@ jobs:
           chmod +x .build/deploy.sh .build/decrypt-secrets.sh
           .build/decrypt-secrets.sh
           .build/deploy.sh ${{ github.event.deployment.environment }}
+
       - name: update deploy status
-          if: always()
-          uses: unacast/actions-github-deployment-status@0.2
-          with:
-            github_token: ${{ secrets.GITHUB_TOKEN }}
-            status: ${{ job.status }}
+        if: always()
+        uses: unacast/actions-github-deployment-status@0.2
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          status: ${{ job.status }}
