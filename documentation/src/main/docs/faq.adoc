@@ -169,11 +169,116 @@ include::../../../src/test/java/snippets/CompletionStageTest.java[tags=code]
 
 === How do I interact with RX Java 2?
 
-// TODO
+Mutiny allows converting Rx Java 2 types to/from Uni and Multi instances.
+To enable this feature, add the following dependency to your `CLASSPATH`:
+
+[source,xml,subs=attributes+]
+----
+<dependency>
+    <groupId>io.smallrye.reactive</groupId>
+    <artifactId>mutiny-rxjava</artifactId>
+    <version>{version}</version>
+</dependency>
+----
+
+Then, you would need to import:
+
+[source, java]
+====
+import io.smallrye.mutiny.converters.multi.MultiRxConverters;
+import io.smallrye.mutiny.converters.uni.UniRxConverters;
+====
+
+To create a `Uni` from RxJava 2 objects, use the following methods:
+
+[source, java, indent=0]
+----
+include::../../../src/test/java/snippets/RxJavaTest.java[tags=uni-create]
+----
+
+When converting a `Completable` or an empty `Maybe` to a `Uni`, the `Uni` receives a `null` item.
+Use `onItem().ifNull()` to handle this case.
+
+Note that, when converting an `Observable` or a `Flowable` to a `Uni`, only the first element is requested.
+Once received, the underlying subscription is cancelled.
+
+Also note that you can create a `Uni` from a Reactive Streams `Publisher` using `Uni.createFrom().publisher(...)`.
+
+To create Rx Java 2 types from a `Uni`, use the following methods:
+
+[source, java, indent=0]
+----
+include::../../../src/test/java/snippets/RxJavaTest.java[tags=uni-export]
+----
+
+Because `Uni` can emit `null`, the default converter produces a `Single<Optional<T>>`.
+You can retrieve a `Single<T>` and fail instead using `toSingle().failOnNull()`.
+
+To create a `Multi` from RxJava 2 objects, use the following methods:
+
+[source, java, indent=0]
+----
+include::../../../src/test/java/snippets/RxJavaTest.java[tags=multi-create]
+----
+
+As for `Uni`, you can create a `Multi` from a Reactive Streams `Publisher` using `Multi.createFrom().publisher(...)`.
+
+You can also create RxJava 2 objects from a `Multi`:
+
+[source, java, indent=0]
+----
+include::../../../src/test/java/snippets/RxJavaTest.java[tags=multi-export]
+----
 
 === How do I interact with Reactor?
 
-// TODO
+Mutiny allows converting Rx Java 2 types to/from Uni and Multi instances.
+To enable this feature, add the following dependency to your `CLASSPATH`:
+
+[source,xml,subs=attributes+]
+----
+<dependency>
+    <groupId>io.smallrye.reactive</groupId>
+    <artifactId>mutiny-reactor</artifactId>
+    <version>{version}</version>
+</dependency>
+----
+
+Then, you would need to import:
+
+[source, java]
+====
+import io.smallrye.mutiny.converters.multi.MultiReactorConverters;
+import io.smallrye.mutiny.converters.uni.UniReactorConverters;
+====
+
+To create a `Uni` from Reactor objects, use the following methods:
+
+[source, java, indent=0]
+----
+include::../../../src/test/java/snippets/ReactorTest.java[tags=uni-create]
+----
+
+To create Reactor `Flux` and `Mono` instances from a `Uni`, use the following methods:
+
+[source, java, indent=0]
+----
+include::../../../src/test/java/snippets/ReactorTest.java[tags=uni-export]
+----
+
+To create a `Multi` from Reactor objects, use the following methods:
+
+[source, java, indent=0]
+----
+include::../../../src/test/java/snippets/ReactorTest.java[tags=multi-create]
+----
+
+You can also create Reactor objects from a `Multi`:
+
+[source, java, indent=0]
+----
+include::../../../src/test/java/snippets/ReactorTest.java[tags=multi-export]
+----
 
 === How do I control the back-pressure?
 
@@ -182,6 +287,8 @@ include::../../../src/test/java/snippets/CompletionStageTest.java[tags=code]
 === How do wrap blocking calls?
 
 // TODO
+
+=== Using an Unicast Processor
 
 === Where do I find the JavaDoc
 
