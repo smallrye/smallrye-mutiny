@@ -86,7 +86,7 @@ public class MultiOnFailureTest {
         MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create();
 
         Multi.createFrom().<Integer> failure(new IllegalStateException("boom"))
-                .onFailure().mapTo(f -> new IOException("kaboom!"))
+                .onFailure().apply(f -> new IOException("kaboom!"))
                 .subscribe().withSubscriber(subscriber);
 
         subscriber.assertHasNotReceivedAnyItem()
@@ -316,7 +316,7 @@ public class MultiOnFailureTest {
     public void testOnFailureMapWithPredicate() {
         Multi.createFrom().<Integer> failure(new IOException())
                 .onFailure(IOException.class::isInstance)
-                .mapTo(e -> new Exception("BOOM!!!"))
+                .apply(e -> new Exception("BOOM!!!"))
                 .subscribe().withSubscriber(MultiAssertSubscriber.create(0))
                 .assertHasFailedWith(Exception.class, "BOOM!!!");
     }
@@ -325,7 +325,7 @@ public class MultiOnFailureTest {
     public void testOnFailureMapWithNonPassingPredicate() {
         Multi.createFrom().<Integer> failure(new RuntimeException("first"))
                 .onFailure(IOException.class::isInstance)
-                .mapTo(e -> new Exception("BOOM!!!"))
+                .apply(e -> new Exception("BOOM!!!"))
                 .subscribe().withSubscriber(MultiAssertSubscriber.create(0))
                 .assertHasFailedWith(RuntimeException.class, "first");
     }
@@ -336,7 +336,7 @@ public class MultiOnFailureTest {
                 .onFailure(f -> {
                     throw new IllegalArgumentException("bad");
                 })
-                .mapTo(e -> new Exception("BOOM"))
+                .apply(e -> new Exception("BOOM"))
                 .subscribe().withSubscriber(MultiAssertSubscriber.create(0))
                 .assertHasFailedWith(CompositeException.class, "first")
                 .assertHasFailedWith(CompositeException.class, "bad");

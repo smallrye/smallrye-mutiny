@@ -252,15 +252,15 @@ public interface Uni<T> {
      * <p>
      * Examples:
      * <code>
-     * uni.onNoItem().after(Duration.ofMillis(1000).fail() // Propagate a TimeOutException
-     * uni.onNoItem().after(Duration.ofMillis(1000).recoverWithValue("fallback") // Inject a fallback item on timeout
-     * uni.onNoItem().after(Duration.ofMillis(1000).on(myExecutor)... // Configure the executor calling on timeout actions
-     * uni.onNoItem().after(Duration.ofMillis(1000).retry().atMost(5) // Retry five times
+     * uni.ifNoItem().after(Duration.ofMillis(1000).fail() // Propagate a TimeOutException
+     * uni.ifNoItem().after(Duration.ofMillis(1000).recoverWithValue("fallback") // Inject a fallback item on timeout
+     * uni.ifNoItem().after(Duration.ofMillis(1000).on(myExecutor)... // Configure the executor calling on timeout actions
+     * uni.ifNoItem().after(Duration.ofMillis(1000).retry().atMost(5) // Retry five times
      * </code>
      *
      * @return the on timeout group
      */
-    UniOnTimeout<T> onNoItem();
+    UniOnTimeout<T> ifNoItem();
 
     /**
      * Produces a new {@link Uni} invoking the {@link UniSubscriber#onItem(Object)} and

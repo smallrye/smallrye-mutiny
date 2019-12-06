@@ -83,7 +83,7 @@ public class UniOnEvent<T> {
      * </pre>
      *
      * @return the object to configure the action to execute when an item is emitted
-     * @see Uni#onNoItem()
+     * @see Uni#ifNoItem()
      */
     public UniOnItem<T> item() {
         return upstream.onItem();

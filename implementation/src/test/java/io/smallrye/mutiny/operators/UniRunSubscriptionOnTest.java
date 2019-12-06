@@ -49,7 +49,7 @@ public class UniRunSubscriptionOnTest {
             }
             return 0;
         })
-                .onNoItem().after(Duration.ofMillis(100)).recoverWithUni(Uni.createFrom().item(() -> 1))
+                .ifNoItem().after(Duration.ofMillis(100)).recoverWithUni(Uni.createFrom().item(() -> 1))
                 .subscribeOn(Infrastructure.getDefaultExecutor())
                 .subscribe().withSubscriber(ts);
 
