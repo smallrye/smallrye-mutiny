@@ -105,6 +105,8 @@ The `subscribe` event express the interest and trigger the computation.
 Also, `Uni` can handle items having a `null` value (and as specific method to handle this case).
 `Multi` does not allow it (because the Reactive Streams specification forbids it).
 
+Also, having a `Uni` implementing `Publisher` would be a bit like having `Optional` implementing `Iterable`.
+
 In other words, `Uni` can:
 
 * can receive at most 1 `item` event, or a `failure` event
