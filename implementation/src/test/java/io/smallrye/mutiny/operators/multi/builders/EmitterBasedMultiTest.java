@@ -37,7 +37,7 @@ public class EmitterBasedMultiTest {
             e.emit(1).emit(2).emit(3).complete();
 
             e.fail(new Exception("boom-1"));
-        }).subscribe().with(MultiAssertSubscriber.create(3));
+        }).subscribe().withSubscriber(MultiAssertSubscriber.create(3));
         subscriber.assertSubscribed()
                 .assertReceived(1, 2, 3)
                 .assertCompletedSuccessfully();
@@ -52,7 +52,7 @@ public class EmitterBasedMultiTest {
             e.emit(1).emit(2).emit(3);
 
             throw new RuntimeException("boom");
-        }).subscribe().with(MultiAssertSubscriber.create(3));
+        }).subscribe().withSubscriber(MultiAssertSubscriber.create(3));
         subscriber.assertSubscribed()
                 .assertReceived(1, 2, 3)
                 .assertHasFailedWith(RuntimeException.class, "boom");
@@ -67,7 +67,7 @@ public class EmitterBasedMultiTest {
             e.emit(1).emit(2).emit(3).fail(new Exception("boom"));
 
             e.fail(new Exception("boom-1"));
-        }).subscribe().with(MultiAssertSubscriber.create(3));
+        }).subscribe().withSubscriber(MultiAssertSubscriber.create(3));
         subscriber.assertSubscribed()
                 .assertReceived(1, 2, 3)
                 .assertHasFailedWith(Exception.class, "boom");
@@ -80,7 +80,7 @@ public class EmitterBasedMultiTest {
         MultiAssertSubscriber<Integer> subscriber = Multi.createFrom().<Integer> emitter(e -> {
             e.onTermination(() -> terminated.set(true));
             e.emit(1).emit(2).emit(3);
-        }).subscribe().with(MultiAssertSubscriber.create(3));
+        }).subscribe().withSubscriber(MultiAssertSubscriber.create(3));
         subscriber.assertSubscribed()
                 .assertReceived(1, 2, 3)
                 .assertHasNotCompleted()
@@ -97,7 +97,7 @@ public class EmitterBasedMultiTest {
             e.onTermination(() -> terminated.set(true));
             e.emit("a");
             e.emit(null);
-        }).subscribe().with(MultiAssertSubscriber.create(2))
+        }).subscribe().withSubscriber(MultiAssertSubscriber.create(2))
                 .await()
                 .assertHasNotCompleted()
                 .assertHasFailedWith(NullPointerException.class, "")
@@ -108,7 +108,7 @@ public class EmitterBasedMultiTest {
             e.emit("a");
             e.emit(null);
         }, BackPressureStrategy.LATEST)
-                .subscribe().with(MultiAssertSubscriber.create(2))
+                .subscribe().withSubscriber(MultiAssertSubscriber.create(2))
                 .await()
                 .assertHasNotCompleted()
                 .assertHasFailedWith(NullPointerException.class, "")
@@ -118,7 +118,7 @@ public class EmitterBasedMultiTest {
             e.emit("a");
             e.emit(null);
         }, BackPressureStrategy.DROP)
-                .subscribe().with(MultiAssertSubscriber.create(2))
+                .subscribe().withSubscriber(MultiAssertSubscriber.create(2))
                 .await()
                 .assertHasNotCompleted()
                 .assertHasFailedWith(NullPointerException.class, "")
@@ -128,7 +128,7 @@ public class EmitterBasedMultiTest {
             e.emit("a");
             e.emit(null);
         }, BackPressureStrategy.ERROR)
-                .subscribe().with(MultiAssertSubscriber.create(2))
+                .subscribe().withSubscriber(MultiAssertSubscriber.create(2))
                 .await()
                 .assertHasNotCompleted()
                 .assertHasFailedWith(NullPointerException.class, "")
@@ -138,7 +138,7 @@ public class EmitterBasedMultiTest {
             e.emit("a");
             e.emit(null);
         }, BackPressureStrategy.IGNORE)
-                .subscribe().with(MultiAssertSubscriber.create(2))
+                .subscribe().withSubscriber(MultiAssertSubscriber.create(2))
                 .await()
                 .assertHasNotCompleted()
                 .assertHasFailedWith(NullPointerException.class, "")
@@ -153,7 +153,7 @@ public class EmitterBasedMultiTest {
             e.onTermination(() -> terminated.set(true));
             e.emit("a");
             e.fail(null);
-        }).subscribe().with(MultiAssertSubscriber.create(2))
+        }).subscribe().withSubscriber(MultiAssertSubscriber.create(2))
                 .await()
                 .assertHasFailedWith(NullPointerException.class, "")
                 .assertReceived("a");
@@ -163,7 +163,7 @@ public class EmitterBasedMultiTest {
             e.emit("a");
             e.fail(null);
         }, BackPressureStrategy.LATEST)
-                .subscribe().with(MultiAssertSubscriber.create(2))
+                .subscribe().withSubscriber(MultiAssertSubscriber.create(2))
                 .await()
                 .assertHasFailedWith(NullPointerException.class, "")
                 .assertReceived("a");
@@ -172,7 +172,7 @@ public class EmitterBasedMultiTest {
             e.emit("a");
             e.fail(null);
         }, BackPressureStrategy.DROP)
-                .subscribe().with(MultiAssertSubscriber.create(2))
+                .subscribe().withSubscriber(MultiAssertSubscriber.create(2))
                 .await()
                 .assertHasNotCompleted()
                 .assertHasFailedWith(NullPointerException.class, "")
@@ -182,7 +182,7 @@ public class EmitterBasedMultiTest {
             e.emit("a");
             e.fail(null);
         }, BackPressureStrategy.ERROR)
-                .subscribe().with(MultiAssertSubscriber.create(2))
+                .subscribe().withSubscriber(MultiAssertSubscriber.create(2))
                 .await()
                 .assertHasNotCompleted()
                 .assertHasFailedWith(NullPointerException.class, "")
@@ -192,7 +192,7 @@ public class EmitterBasedMultiTest {
             e.emit("a");
             e.fail(null);
         }, BackPressureStrategy.IGNORE)
-                .subscribe().with(MultiAssertSubscriber.create(2))
+                .subscribe().withSubscriber(MultiAssertSubscriber.create(2))
                 .await()
                 .assertHasNotCompleted()
                 .assertHasFailedWith(NullPointerException.class, "")
@@ -204,7 +204,7 @@ public class EmitterBasedMultiTest {
     public void testSerializedWithConcurrentEmissions() {
         AtomicReference<MultiEmitter<? super Integer>> reference = new AtomicReference<>();
         MultiAssertSubscriber<Integer> subscriber = Multi.createFrom().<Integer> emitter(reference::set).subscribe()
-                .with(MultiAssertSubscriber.create(Long.MAX_VALUE));
+                .withSubscriber(MultiAssertSubscriber.create(Long.MAX_VALUE));
 
         await().until(() -> reference.get() != null);
 
@@ -245,7 +245,7 @@ public class EmitterBasedMultiTest {
     public void testSerializedWithConcurrentEmissionsAndFailure() {
         AtomicReference<MultiEmitter<? super Integer>> reference = new AtomicReference<>();
         MultiAssertSubscriber<Integer> subscriber = Multi.createFrom().<Integer> emitter(reference::set).subscribe()
-                .with(MultiAssertSubscriber.create(Long.MAX_VALUE));
+                .withSubscriber(MultiAssertSubscriber.create(Long.MAX_VALUE));
 
         await().until(() -> reference.get() != null);
 

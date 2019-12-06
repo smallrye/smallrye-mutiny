@@ -16,7 +16,7 @@ public class MultiIgnoreTest {
     public void test() {
         Multi.createFrom().items(1, 2, 3, 4)
                 .onItem().ignore()
-                .subscribe().with(MultiAssertSubscriber.create(4))
+                .subscribe().withSubscriber(MultiAssertSubscriber.create(4))
                 .assertCompletedSuccessfully()
                 .assertHasNotReceivedAnyItem();
     }
@@ -32,7 +32,7 @@ public class MultiIgnoreTest {
     @Test(expectedExceptions = CompletionException.class, expectedExceptionsMessageRegExp = ".*boom.*")
     public void testAsUniWithFailure() {
         CompletableFuture<Void> future = Multi.createFrom().items(1, 2, 3, 4)
-                .onItem().mapToItem(i -> {
+                .onItem().apply(i -> {
                     if (i == 3) {
                         throw new RuntimeException("boom");
                     }
@@ -47,7 +47,7 @@ public class MultiIgnoreTest {
     public void testWithNever() {
         MultiAssertSubscriber<Void> subscriber = Multi.createFrom().nothing()
                 .onItem().ignore()
-                .subscribe().with(MultiAssertSubscriber.create(4))
+                .subscribe().withSubscriber(MultiAssertSubscriber.create(4))
                 .assertNotTerminated();
 
         subscriber.cancel();

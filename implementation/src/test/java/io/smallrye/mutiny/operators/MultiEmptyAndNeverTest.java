@@ -10,7 +10,7 @@ public class MultiEmptyAndNeverTest {
     @Test
     public void testEmpty() {
         Multi<String> nothing = Multi.createFrom().empty();
-        nothing.subscribe().with(MultiAssertSubscriber.create())
+        nothing.subscribe().withSubscriber(MultiAssertSubscriber.create())
                 .assertCompletedSuccessfully()
                 .assertHasNotReceivedAnyItem();
     }
@@ -18,7 +18,7 @@ public class MultiEmptyAndNeverTest {
     @Test
     public void testNever() {
         Multi<String> nothing = Multi.createFrom().nothing();
-        nothing.subscribe().with(MultiAssertSubscriber.create())
+        nothing.subscribe().withSubscriber(MultiAssertSubscriber.create())
                 .assertNotTerminated()
                 .request(2)
                 .assertNotTerminated();

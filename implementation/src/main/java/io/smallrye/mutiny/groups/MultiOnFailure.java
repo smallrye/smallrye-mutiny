@@ -54,7 +54,7 @@ public class MultiOnFailure<T> {
      * @param mapper the mapper function, must not be {@code null}, must not return {@code null}
      * @return the new {@link Multi}
      */
-    public Multi<T> mapTo(Function<? super Throwable, ? extends Throwable> mapper) {
+    public Multi<T> apply(Function<? super Throwable, ? extends Throwable> mapper) {
         return new MultiMapOnFailure<>(upstream, predicate, mapper);
     }
 

@@ -37,12 +37,11 @@ public class FlatMapStageFactory implements ProcessingStageFactory<Stage.FlatMap
         @Override
         public Multi<O> apply(Multi<I> source) {
             return source
-                    .onItem()
-                    .flatMap().<O> publisher(item -> {
+                    .onItem().<O> producePublisher(item -> {
                         Graph graph = mapper.apply(item);
                         return engine.buildPublisher(Objects.requireNonNull(graph));
                     })
-                    .concatenateResults();
+                    .concatenate();
         }
     }
 }

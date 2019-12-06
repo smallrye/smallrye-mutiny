@@ -21,13 +21,13 @@ public class MultiBroadcastTest {
 
         Multi<Integer> multi = processor.toMulti().broadcast().toAllSubscribers();
 
-        MultiAssertSubscriber<Integer> s1 = multi.subscribe().with(MultiAssertSubscriber.create(10));
+        MultiAssertSubscriber<Integer> s1 = multi.subscribe().withSubscriber(MultiAssertSubscriber.create(10));
         s1.assertHasNotReceivedAnyItem().assertNotTerminated();
 
         processor.emit(1).emit(2).emit(3);
         s1.assertReceived(1, 2, 3).assertNotTerminated();
 
-        MultiAssertSubscriber<Integer> s2 = multi.subscribe().with(MultiAssertSubscriber.create(1));
+        MultiAssertSubscriber<Integer> s2 = multi.subscribe().withSubscriber(MultiAssertSubscriber.create(1));
         s2.assertHasNotReceivedAnyItem().assertNotTerminated();
 
         processor.emit(4).emit(5);
@@ -53,13 +53,13 @@ public class MultiBroadcastTest {
 
         Multi<Integer> multi = processor.toMulti().broadcast().toAllSubscribers();
 
-        MultiAssertSubscriber<Integer> s1 = multi.subscribe().with(MultiAssertSubscriber.create(10));
+        MultiAssertSubscriber<Integer> s1 = multi.subscribe().withSubscriber(MultiAssertSubscriber.create(10));
         s1.assertHasNotReceivedAnyItem().assertNotTerminated();
 
         processor.emit(1).emit(2).emit(3);
         s1.assertReceived(1, 2, 3).assertNotTerminated();
 
-        MultiAssertSubscriber<Integer> s2 = multi.subscribe().with(MultiAssertSubscriber.create(1));
+        MultiAssertSubscriber<Integer> s2 = multi.subscribe().withSubscriber(MultiAssertSubscriber.create(1));
         s2.assertHasNotReceivedAnyItem().assertNotTerminated();
 
         processor.emit(4).emit(5);
@@ -79,13 +79,13 @@ public class MultiBroadcastTest {
 
         Multi<Integer> multi = processor.toMulti().broadcast().toAllSubscribers();
 
-        MultiAssertSubscriber<Integer> s1 = multi.subscribe().with(MultiAssertSubscriber.create(10));
+        MultiAssertSubscriber<Integer> s1 = multi.subscribe().withSubscriber(MultiAssertSubscriber.create(10));
         s1.assertHasNotReceivedAnyItem().assertNotTerminated();
 
         processor.emit(1).emit(2).emit(3);
         s1.assertReceived(1, 2, 3).assertNotTerminated();
 
-        MultiAssertSubscriber<Integer> s2 = multi.subscribe().with(MultiAssertSubscriber.create(1));
+        MultiAssertSubscriber<Integer> s2 = multi.subscribe().withSubscriber(MultiAssertSubscriber.create(1));
         s2.assertHasNotReceivedAnyItem().assertNotTerminated();
 
         processor.emit(4).emit(5);
@@ -112,13 +112,13 @@ public class MultiBroadcastTest {
 
         Multi<Integer> multi = processor.toMulti().broadcast().toAllSubscribers();
 
-        MultiAssertSubscriber<Integer> s1 = multi.subscribe().with(MultiAssertSubscriber.create(10));
+        MultiAssertSubscriber<Integer> s1 = multi.subscribe().withSubscriber(MultiAssertSubscriber.create(10));
         s1.assertHasNotReceivedAnyItem().assertNotTerminated();
 
         processor.emit(1).emit(2).emit(3);
         s1.assertReceived(1, 2, 3).assertNotTerminated();
 
-        MultiAssertSubscriber<Integer> s2 = multi.subscribe().with(MultiAssertSubscriber.create(1));
+        MultiAssertSubscriber<Integer> s2 = multi.subscribe().withSubscriber(MultiAssertSubscriber.create(1));
         s2.assertHasNotReceivedAnyItem().assertNotTerminated();
 
         processor.emit(4).emit(5);
@@ -130,7 +130,7 @@ public class MultiBroadcastTest {
         s1.cancel();
         assertThat(cancelled).isFalse();
 
-        MultiAssertSubscriber<Integer> s3 = multi.subscribe().with(MultiAssertSubscriber.create(10));
+        MultiAssertSubscriber<Integer> s3 = multi.subscribe().withSubscriber(MultiAssertSubscriber.create(10));
         processor.emit(23);
         processor.complete();
         s3.assertReceived(23).assertCompletedSuccessfully();
@@ -142,7 +142,7 @@ public class MultiBroadcastTest {
         processor.emit(1).emit(2).emit(3);
         processor.complete();
 
-        processor.toMulti().broadcast().toAllSubscribers().subscribe().with(MultiAssertSubscriber.create(10))
+        processor.toMulti().broadcast().toAllSubscribers().subscribe().withSubscriber(MultiAssertSubscriber.create(10))
                 .assertReceived(1, 2, 3)
                 .assertCompletedSuccessfully();
     }
@@ -176,13 +176,13 @@ public class MultiBroadcastTest {
         Multi<Integer> multi = processor.toMulti().broadcast().withCancellationAfterLastSubscriberDeparture()
                 .toAllSubscribers();
 
-        MultiAssertSubscriber<Integer> s1 = multi.subscribe().with(MultiAssertSubscriber.create(10));
+        MultiAssertSubscriber<Integer> s1 = multi.subscribe().withSubscriber(MultiAssertSubscriber.create(10));
         s1.assertHasNotReceivedAnyItem().assertNotTerminated();
 
         processor.emit(1).emit(2).emit(3);
         s1.assertReceived(1, 2, 3).assertNotTerminated();
 
-        MultiAssertSubscriber<Integer> s2 = multi.subscribe().with(MultiAssertSubscriber.create(1));
+        MultiAssertSubscriber<Integer> s2 = multi.subscribe().withSubscriber(MultiAssertSubscriber.create(1));
         s2.assertHasNotReceivedAnyItem().assertNotTerminated();
 
         processor.emit(4).emit(5);
@@ -205,13 +205,13 @@ public class MultiBroadcastTest {
                 .withCancellationAfterLastSubscriberDeparture(Duration.ofSeconds(1))
                 .toAllSubscribers();
 
-        MultiAssertSubscriber<Integer> s1 = multi.subscribe().with(MultiAssertSubscriber.create(10));
+        MultiAssertSubscriber<Integer> s1 = multi.subscribe().withSubscriber(MultiAssertSubscriber.create(10));
         s1.assertHasNotReceivedAnyItem().assertNotTerminated();
 
         processor.emit(1).emit(2).emit(3);
         s1.assertReceived(1, 2, 3).assertNotTerminated();
 
-        MultiAssertSubscriber<Integer> s2 = multi.subscribe().with(MultiAssertSubscriber.create(1));
+        MultiAssertSubscriber<Integer> s2 = multi.subscribe().withSubscriber(MultiAssertSubscriber.create(1));
         s2.assertHasNotReceivedAnyItem().assertNotTerminated();
 
         processor.emit(4).emit(5);
@@ -234,14 +234,14 @@ public class MultiBroadcastTest {
         Multi<Integer> multi = processor.toMulti().broadcast().withCancellationAfterLastSubscriberDeparture()
                 .toAtLeast(2);
 
-        MultiAssertSubscriber<Integer> s1 = multi.subscribe().with(MultiAssertSubscriber.create(10));
+        MultiAssertSubscriber<Integer> s1 = multi.subscribe().withSubscriber(MultiAssertSubscriber.create(10));
         s1.assertHasNotReceivedAnyItem().assertNotTerminated();
 
         processor.emit(1).emit(2).emit(3);
 
         s1.assertHasNotReceivedAnyItem().assertNotTerminated();
 
-        MultiAssertSubscriber<Integer> s2 = multi.subscribe().with(MultiAssertSubscriber.create(10));
+        MultiAssertSubscriber<Integer> s2 = multi.subscribe().withSubscriber(MultiAssertSubscriber.create(10));
 
         s1.assertReceived(1, 2, 3).assertNotTerminated();
         s2.assertReceived(1, 2, 3).assertNotTerminated();
@@ -262,14 +262,14 @@ public class MultiBroadcastTest {
                 .withCancellationAfterLastSubscriberDeparture(Duration.ofSeconds(1))
                 .toAtLeast(2);
 
-        MultiAssertSubscriber<Integer> s1 = multi.subscribe().with(MultiAssertSubscriber.create(10));
+        MultiAssertSubscriber<Integer> s1 = multi.subscribe().withSubscriber(MultiAssertSubscriber.create(10));
         s1.assertHasNotReceivedAnyItem().assertNotTerminated();
 
         processor.emit(1).emit(2).emit(3);
 
         s1.assertHasNotReceivedAnyItem().assertNotTerminated();
 
-        MultiAssertSubscriber<Integer> s2 = multi.subscribe().with(MultiAssertSubscriber.create(10));
+        MultiAssertSubscriber<Integer> s2 = multi.subscribe().withSubscriber(MultiAssertSubscriber.create(10));
 
         s1.assertReceived(1, 2, 3).assertNotTerminated();
         s2.assertReceived(1, 2, 3).assertNotTerminated();

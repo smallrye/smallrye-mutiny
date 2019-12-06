@@ -28,7 +28,7 @@ public class MultiScanTest {
 
         Multi.createFrom().range(1, 10)
                 .onItem().scan((a, b) -> b)
-                .subscribe().with(subscriber);
+                .subscribe().withSubscriber(subscriber);
 
         subscriber
                 .assertCompletedSuccessfully()
@@ -41,7 +41,7 @@ public class MultiScanTest {
 
         Multi.createFrom().range(1, 10)
                 .onItem().scan(() -> 2, (a, b) -> b)
-                .subscribe().with(subscriber);
+                .subscribe().withSubscriber(subscriber);
 
         subscriber
                 .assertCompletedSuccessfully()
@@ -54,7 +54,7 @@ public class MultiScanTest {
 
         Multi.createFrom().range(1, 10)
                 .onItem().scan((a, b) -> b)
-                .subscribe().with(subscriber);
+                .subscribe().withSubscriber(subscriber);
 
         subscriber
                 .assertHasNotReceivedAnyItem()
@@ -77,7 +77,7 @@ public class MultiScanTest {
                 .onItem().scan((a, b) -> {
                     throw new IllegalArgumentException("boom");
                 })
-                .subscribe().with(subscriber);
+                .subscribe().withSubscriber(subscriber);
 
         subscriber.assertReceived(1)
                 .assertHasFailedWith(IllegalArgumentException.class, "boom");
@@ -89,7 +89,7 @@ public class MultiScanTest {
 
         Multi.createFrom().range(1, 10)
                 .onItem().scan((a, b) -> null)
-                .subscribe().with(subscriber);
+                .subscribe().withSubscriber(subscriber);
 
         subscriber.assertReceived(1)
                 .assertHasFailedWith(NullPointerException.class, "");
@@ -103,7 +103,7 @@ public class MultiScanTest {
                 .onItem().scan(() -> 1, (a, b) -> {
                     throw new IllegalArgumentException("boom");
                 })
-                .subscribe().with(subscriber);
+                .subscribe().withSubscriber(subscriber);
 
         subscriber.assertReceived(1)
                 .assertHasFailedWith(IllegalArgumentException.class, "boom");
@@ -115,7 +115,7 @@ public class MultiScanTest {
 
         Multi.createFrom().range(1, 10)
                 .onItem().scan(() -> 1, (a, b) -> null)
-                .subscribe().with(subscriber);
+                .subscribe().withSubscriber(subscriber);
 
         subscriber.assertReceived(1)
                 .assertHasFailedWith(NullPointerException.class, "");

@@ -57,9 +57,9 @@ public class MultiCreateFromDeferredSupplierTest {
 
         Multi<Integer> multi = Multi.createFrom().deferred(() -> Multi.createFrom().item(count.incrementAndGet()));
 
-        MultiAssertSubscriber<Integer> s1 = multi.subscribe().with(MultiAssertSubscriber.create(1));
-        MultiAssertSubscriber<Integer> s2 = multi.subscribe().with(MultiAssertSubscriber.create(1));
-        MultiAssertSubscriber<Integer> s3 = multi.subscribe().with(MultiAssertSubscriber.create(1));
+        MultiAssertSubscriber<Integer> s1 = multi.subscribe().withSubscriber(MultiAssertSubscriber.create(1));
+        MultiAssertSubscriber<Integer> s2 = multi.subscribe().withSubscriber(MultiAssertSubscriber.create(1));
+        MultiAssertSubscriber<Integer> s3 = multi.subscribe().withSubscriber(MultiAssertSubscriber.create(1));
 
         s1.assertReceived(1).assertCompletedSuccessfully();
         s2.assertReceived(2).assertCompletedSuccessfully();

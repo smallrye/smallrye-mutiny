@@ -17,7 +17,7 @@ public class MultiConvertFromTest {
         MultiAssertSubscriber<Integer> subscriber = Multi.createFrom()
                 .completionStage(valued)
                 .subscribe()
-                .with(MultiAssertSubscriber.create(1));
+                .withSubscriber(MultiAssertSubscriber.create(1));
 
         subscriber.assertCompletedSuccessfully().assertReceived(1);
     }
@@ -29,7 +29,7 @@ public class MultiConvertFromTest {
         MultiAssertSubscriber<Void> subscriber = Multi.createFrom()
                 .converter(BuiltinConverters.fromCompletionStage(), empty)
                 .subscribe()
-                .with(MultiAssertSubscriber.create(1));
+                .withSubscriber(MultiAssertSubscriber.create(1));
 
         Multi.createFrom().completionStage(empty);
 
@@ -44,7 +44,7 @@ public class MultiConvertFromTest {
         MultiAssertSubscriber<Void> subscriber = Multi.createFrom()
                 .converter(BuiltinConverters.fromCompletionStage(), boom)
                 .subscribe()
-                .with(MultiAssertSubscriber.create(1));
+                .withSubscriber(MultiAssertSubscriber.create(1));
 
         subscriber.assertHasFailedWith(Exception.class, "boom");
     }

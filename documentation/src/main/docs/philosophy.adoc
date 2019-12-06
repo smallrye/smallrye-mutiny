@@ -1,0 +1,161 @@
+
+== Mutiny philosophy and concepts
+
+Mutiny is built on 3 main concepts:
+
+* event-driven - the API is make events first-class citizen
+* API navigability - based on the previous concept, the API is built around the type of events
+* _mono_ events or _multi_ events - Mutiny provides 2 types: `Uni` and `Multi`
+
+=== Events
+
+When you use Mutiny you design _assembly lines_ in which events flow.
+Events can flow from upstream to downstream (from source to sinks), or some signals can _swim_ upstream from the sinks to the source.
+
+Events going from upstream to downstream are published by `Publisher` and consumes by `Subscriber`, which may produces events for their downstream, as illustrate by the following diagram:
+
+[plantuml,align=center]
+----
+include::plantuml/philosophy-chain.puml[]
+----
+
+[NOTE]
+====
+An entity that is both a `Publisher` and a `Subscriber` is generally named a `Processor`
+====
+
+Four types of events can flow in this directions:
+
+* subscribed - indicate that the upstream has taken into account the subscription
+* items - events containing some _value_
+* completion - event indicating that no more items will be emitted
+* failure - event indicating that a failure has been encountered, and no more items will be emitted
+
+`failure` and `completion` are terminal events.
+Once they are emitted, no more items are emitted.
+
+Three types of events flow in the opposite direction, _i.e._ from downstream to upstream:
+
+* subscription - event sent by a _subscriber_ to indicate its interest for the events (such as items) emitted by upstream
+* requests - event sent by a _subscriber_ indicating how many items event it is able to handle
+* cancellation - event sent by a _subscriber_ to indicate no more events should be emitted
+
+In a regular scenario, a subscriber:
+
+1. A subscriber _subscribes_ to the upstream - the upstream receives the subscription `subscription request`, and when initialized send the `subscribed` event to the subscriber
+2. The subscriber received the `subscribed` event with a _subscription_ used to emit the `requests` and `cancellation` events
+3. The subscriber sends a `request` event indicating how many items it can handle at the moment, it can indicate 1, _n_, or infinite.
+4. The publisher receiving the `request` event start emitting at most _n_ item events to the subscriber
+5. The subscriber can decide at anytime to request more events, or cancel the subscription
+
+
+[plantuml,align=center]
+----
+include::plantuml/philosophy-protocol.puml[]
+----
+
+The `request` events is the cornerstone of the back-pressure protocol.
+A subscriber should not request more than what it is able to handle, and a publisher should not emit more items than the amount of request received.
+
+[NOTE]
+====
+The protocol presented in this section is the Reactive Streams protocol.
+====
+
+[IMPORTANT]
+====
+If no subscriber _subscribes_, no items would be emitted. More importantly, nothing will ever happen.
+If you program does not do anything, be sure you subscribed to the flow.
+====
+
+=== An event-driven API
+
+Mutiny is an event-driven API.
+So for each the types of event, there is an `on` associated method that let you handle this specific event.
+For example:
+
+[source,java,indent=0]
+----
+include::../../../src/test/java/snippets/EventsTest.java[tags=code]
+----
+
+Of course, the method presented in this snippet are not very interested, while quite useful to trace what's going on.
+Mutiny provides many method to transform items, or the streams, compose actions...
+
+The API is composed by _groups_.
+For example:
+
+* `multi.onItem()` provides the methods to process item events
+* `multi.onFailure()` provides the methods to handle failure and recover
+* `multi.transform()` provides the methods to transform the stream such as filtering or selecting items.
+
+=== Uni and Multi
+
+Mutiny is based on two types:
+
+* `Multi` - handle stream of _0..n_ items (potentially unbounded)
+* `Uni` - handle stream of _0..1_ items
+
+Both `Uni` and `Multi` are asynchronous types.
+They receive and fire events, at anytime.
+
+You may wonder why we do this distinction.
+`Uni` does not need the complete ceremony presented above as the _request_ does not make a lot of sense.
+The `subscribe` event express the interest and trigger the computation.
+Also, `Uni` can handle items having a `null` value (and as specific method to handle this case).
+`Multi` does not allow it (because the Reactive Streams specification forbids it).
+
+Also, having a `Uni` implementing `Publisher` would be a bit like having `Optional` implementing `Iterable`.
+
+In other words, `Uni` can:
+
+* can receive at most 1 `item` event, or a `failure` event
+* cannot receive a `completion` event (`null` in the case of 0 item)
+* cannot received a `request` event
+
+The following snippet shows how you can use `Uni` and `Multi`:
+
+[source,java,indent=0]
+----
+include::../../../src/test/java/snippets/UniMultiComparisonTest.java[tags=code]
+----
+
+You can convert `Unis` to `Multis` and vice-versa:
+
+[source,java,indent=0]
+----
+include::../../../src/test/java/snippets/UniMultiComparisonTest.java[tags=conversion]
+----
+
+=== Creating and Subscribing to Unis
+
+There are many way to create instances of `Unis`:
+
+[source,java,indent=0]
+----
+include::../../../src/test/java/snippets/UniCreationTest.java[tags=code]
+----
+
+Subscribing to `Unis` is done by method provided by `uni.subscribe()`:
+
+[source,java,indent=0]
+----
+include::../../../src/test/java/snippets/UniCreationTest.java[tags=subscription]
+----
+
+=== Creating and Subscribing to Multis
+
+There are many way to create instances of `Multis`:
+
+[source,java,indent=0]
+----
+include::../../../src/test/java/snippets/MultiCreationTest.java[tags=code]
+----
+
+Subscribing to `Multis` is done by method provided by `multi.subscribe()`:
+
+[source,java,indent=0]
+----
+include::../../../src/test/java/snippets/MultiCreationTest.java[tags=subscription]
+----
+

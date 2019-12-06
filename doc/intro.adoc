@@ -1,6 +1,0 @@
-
-SmallRye Reactive Operators proposes an API to build reactive APIs.
-
-The code is released under the Apache Software License 2.0 and is available on
-https://github.com/smallrye/smallrye-reactive-operators[Github].
-

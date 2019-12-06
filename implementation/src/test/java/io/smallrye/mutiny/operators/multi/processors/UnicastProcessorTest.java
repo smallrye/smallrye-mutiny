@@ -15,9 +15,9 @@ public class UnicastProcessorTest {
     public void testTheProcessorCanGetOnlyOneSubscriber() {
         UnicastProcessor<Integer> processor = UnicastProcessor.create();
         processor.subscribe()
-                .with(MultiAssertSubscriber.create());
+                .withSubscriber(MultiAssertSubscriber.create());
         MultiAssertSubscriber<Integer> second = processor.subscribe()
-                .with(MultiAssertSubscriber.create());
+                .withSubscriber(MultiAssertSubscriber.create());
 
         second.assertHasNotReceivedAnyItem()
                 .assertHasFailedWith(IllegalStateException.class, null)

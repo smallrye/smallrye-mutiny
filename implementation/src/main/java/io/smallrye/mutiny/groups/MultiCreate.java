@@ -238,7 +238,7 @@ public class MultiCreate {
                     .forEach(it -> {
                         if (it == null) {
                             failed.set(true);
-                            emitter.fail(new IllegalArgumentException("The iterable contained a `null` value"));
+                            emitter.fail(new IllegalArgumentException("The produceIterable contained a `null` value"));
                             return;
                         }
                         emitter.emit(it);
@@ -295,7 +295,7 @@ public class MultiCreate {
      * @return the new {@link Multi}
      */
     public <T> Multi<T> iterable(Iterable<T> iterable) {
-        return new IterableBasedMulti<>(nonNull(iterable, "iterable"));
+        return new IterableBasedMulti<>(nonNull(iterable, "produceIterable"));
     }
 
     /**

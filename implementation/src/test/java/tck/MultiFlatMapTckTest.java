@@ -123,12 +123,12 @@ public class MultiFlatMapTckTest extends AbstractPublisherTck<Long> {
     @Override
     public Publisher<Long> createPublisher(long elements) {
         return Multi.createFrom().items(LongStream.rangeClosed(1, elements).boxed())
-                .onItem().flatMap(x -> Multi.createFrom().item(x));
+                .flatMap(x -> Multi.createFrom().item(x));
     }
 
     @Override
     public Publisher<Long> createFailedPublisher() {
         return Multi.createFrom().<Long> failure(new RuntimeException("failed"))
-                .onItem().flatMap(x -> Multi.createFrom().item(x));
+                .flatMap(x -> Multi.createFrom().item(x));
     }
 }

@@ -214,14 +214,14 @@ public interface Multi<T> extends Publisher<T> {
      * The function receives the received item as parameter, and can transform it. The returned object is sent
      * downstream as {@code item} event.
      * <p>
-     * This method is a shortcut for {@code multi.onItem().mapToItem(mapper)}.
+     * This method is a shortcut for {@code multi.onItem().apply(mapper)}.
      *
      * @param mapper the mapper function, must not be {@code null}
      * @param <O> the type of item produced by the mapper function
      * @return the new {@link Multi}
      */
     default <O> Multi<O> map(Function<? super T, ? extends O> mapper) {
-        return onItem().mapToItem(ParameterValidation.nonNull(mapper, "mapper"));
+        return onItem().apply(ParameterValidation.nonNull(mapper, "mapper"));
     }
 
     /**
@@ -235,7 +235,7 @@ public interface Multi<T> extends Publisher<T> {
      * <li>The items emitted by each of the produced {@link Publisher} are then <strong>merged</strong> in the
      * produced {@link Multi}. The flatten process may interleaved items.</li>
      * </ul>
-     * This method is a shortcut for {@code multi.onItem().flatMap(mapper)}.
+     * This method is a shortcut for {@code multi.onItem().producePublisher(mapper).merge()}.
      *
      * @param mapper the {@link Function} producing {@link Publisher} / {@link Multi} for each items emitted by the
      *        upstream {@link Multi}
@@ -243,6 +243,29 @@ public interface Multi<T> extends Publisher<T> {
      * @return the produced {@link Multi}
      */
     default <O> Multi<O> flatMap(Function<? super T, ? extends Publisher<? extends O>> mapper) {
-        return onItem().flatMap(ParameterValidation.nonNull(mapper, "mapper"));
+        return onItem().producePublisher(mapper).merge();
+    }
+
+    /**
+     * Produces a {@link Multi} containing the items from {@link Publisher} produced by the {@code mapper} for each
+     * item emitted by this {@link Multi}.
+     * <p>
+     * The operation behaves as follows:
+     * <ul>
+     * <li>for each item emitted by this {@link Multi}, the mapper is called and produces a {@link Publisher}
+     * (potentially a {@code Multi}). The mapper must not return {@code null}</li>
+     * <li>The items emitted by each of the produced {@link Publisher} are then <strong>concatenated</strong> in the
+     * produced {@link Multi}. The flatten process makes sure that the items are not interleaved.
+     * </ul>
+     *
+     * This method is equivalent to {@code multi.onItem().producePublisher(mapper).concatenate()}.
+     *
+     * @param mapper the {@link Function} producing {@link Publisher} / {@link Multi} for each items emitted by the
+     *        upstream {@link Multi}
+     * @param <O> the type of item emitted by the {@link Publisher} produced by the {@code mapper}
+     * @return the produced {@link Multi}
+     */
+    default <O> Multi<O> concatMap(Function<? super T, ? extends Publisher<? extends O>> mapper) {
+        return onItem().producePublisher(mapper).concatenate();
     }
 }

@@ -35,10 +35,10 @@ public class UniOnNull<T> {
      * @param supplier the supplier to produce the failure, must not be {@code null}, must not produce {@code null}
      * @return the new {@link Uni}
      */
-    public Uni<T> failWith(Supplier<Throwable> supplier) {
+    public Uni<T> failWith(Supplier<? extends Throwable> supplier) {
         nonNull(supplier, "supplier");
 
-        return Infrastructure.onUniCreation(upstream.onItem().mapToUni((item, emitter) -> {
+        return Infrastructure.onUniCreation(upstream.onItem().produceUni((item, emitter) -> {
             if (item != null) {
                 emitter.complete(item);
                 return;
@@ -89,7 +89,7 @@ public class UniOnNull<T> {
     public Uni<T> switchTo(Supplier<Uni<? extends T>> supplier) {
         nonNull(supplier, "supplier");
 
-        Uni<T> uni = upstream.onItem().mapToUni(res -> {
+        Uni<T> uni = upstream.onItem().produceUni(res -> {
             if (res != null) {
                 return Uni.createFrom().item(res);
             } else {
@@ -130,7 +130,7 @@ public class UniOnNull<T> {
      */
     public Uni<T> continueWith(Supplier<? extends T> supplier) {
         nonNull(supplier, "supplier");
-        return Infrastructure.onUniCreation(upstream.onItem().mapToItem(res -> {
+        return Infrastructure.onUniCreation(upstream.onItem().apply(res -> {
             if (res != null) {
                 return res;
             }

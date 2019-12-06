@@ -30,7 +30,7 @@ public class MultiEmitOnTest {
     public void testWithSequenceOfItems() {
         MultiAssertSubscriber<Integer> subscriber = Multi.createFrom().items(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
                 .emitOn(executor)
-                .subscribe().with(MultiAssertSubscriber.create());
+                .subscribe().withSubscriber(MultiAssertSubscriber.create());
 
         subscriber.request(2);
         await().until(() -> subscriber.items().size() == 2);
@@ -44,7 +44,7 @@ public class MultiEmitOnTest {
     public void testWithRequest0() {
         MultiAssertSubscriber<Integer> subscriber = Multi.createFrom().items(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
                 .emitOn(executor)
-                .subscribe().with(MultiAssertSubscriber.create());
+                .subscribe().withSubscriber(MultiAssertSubscriber.create());
 
         subscriber.request(0);
         subscriber.await()

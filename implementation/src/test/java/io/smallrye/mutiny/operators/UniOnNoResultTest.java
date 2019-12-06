@@ -18,7 +18,7 @@ public class UniOnNoResultTest {
         UniAssertSubscriber<Integer> ts = UniAssertSubscriber.create();
 
         Uni.createFrom().item(1)
-                .onNoItem().after(Duration.ofMillis(10)).recoverWithUni(Uni.createFrom().nothing())
+                .ifNoItem().after(Duration.ofMillis(10)).recoverWithUni(Uni.createFrom().nothing())
                 .subscribe().withSubscriber(ts);
 
         ts.await().assertCompletedSuccessfully().assertItem(1);
@@ -30,7 +30,7 @@ public class UniOnNoResultTest {
 
         Uni.createFrom().item(1)
                 .onItem().delayIt().by(Duration.ofMillis(10))
-                .onNoItem().after(Duration.ofMillis(1)).fail()
+                .ifNoItem().after(Duration.ofMillis(1)).fail()
                 .subscribe().withSubscriber(ts);
 
         ts.await().assertCompletedWithFailure();
@@ -41,7 +41,7 @@ public class UniOnNoResultTest {
     @Test
     public void testRecoverWithItem() {
         UniAssertSubscriber<Integer> ts = Uni.createFrom().<Integer> nothing()
-                .onNoItem().after(Duration.ofMillis(10)).recoverWithItem(5)
+                .ifNoItem().after(Duration.ofMillis(10)).recoverWithItem(5)
                 .subscribe().withSubscriber(UniAssertSubscriber.create());
         ts.await().assertItem(5);
     }
@@ -49,7 +49,7 @@ public class UniOnNoResultTest {
     @Test
     public void testRecoverWithItemSupplier() {
         UniAssertSubscriber<Integer> ts = Uni.createFrom().<Integer> nothing()
-                .onNoItem().after(Duration.ofMillis(10)).recoverWithItem(() -> 23)
+                .ifNoItem().after(Duration.ofMillis(10)).recoverWithItem(() -> 23)
                 .subscribe().withSubscriber(UniAssertSubscriber.create());
         ts.await().assertItem(23);
     }
@@ -57,7 +57,7 @@ public class UniOnNoResultTest {
     @Test
     public void testRecoverWithSwitchToUni() {
         UniAssertSubscriber<Integer> ts = Uni.createFrom().<Integer> nothing()
-                .onNoItem().after(Duration.ofMillis(10)).recoverWithUni(() -> Uni.createFrom().item(15))
+                .ifNoItem().after(Duration.ofMillis(10)).recoverWithUni(() -> Uni.createFrom().item(15))
                 .subscribe().withSubscriber(UniAssertSubscriber.create());
         ts.await().assertItem(15);
     }
@@ -65,7 +65,7 @@ public class UniOnNoResultTest {
     @Test
     public void testFailingWithAnotherException() {
         UniAssertSubscriber<Integer> ts = Uni.createFrom().<Integer> nothing()
-                .onNoItem().after(Duration.ofMillis(10)).failWith(new IOException("boom"))
+                .ifNoItem().after(Duration.ofMillis(10)).failWith(new IOException("boom"))
                 .subscribe().withSubscriber(UniAssertSubscriber.create());
         ts.await().assertFailure(IOException.class, "boom");
     }
@@ -73,15 +73,15 @@ public class UniOnNoResultTest {
     @Test
     public void testDurationValidity() {
         assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(
-                () -> Uni.createFrom().item(1).onNoItem().after(null))
+                () -> Uni.createFrom().item(1).ifNoItem().after(null))
                 .withMessageContaining("timeout");
 
         assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(
-                () -> Uni.createFrom().item(1).onNoItem().after(Duration.ofMillis(0)))
+                () -> Uni.createFrom().item(1).ifNoItem().after(Duration.ofMillis(0)))
                 .withMessageContaining("timeout");
 
         assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(
-                () -> Uni.createFrom().item(1).onNoItem().after(Duration.ofMillis(-1)))
+                () -> Uni.createFrom().item(1).ifNoItem().after(Duration.ofMillis(-1)))
                 .withMessageContaining("timeout");
     }
 

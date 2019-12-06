@@ -23,7 +23,7 @@ public class MultiOnFailureRetryTest {
         numberOfSubscriptions = new AtomicInteger();
         failing = Multi.createFrom()
                 .<Integer> emitter(emitter -> emitter.emit(1).emit(2).emit(3).fail(new IOException("boom")))
-                .on().subscription(s -> numberOfSubscriptions.incrementAndGet());
+                .on().subscribed(s -> numberOfSubscriptions.incrementAndGet());
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
@@ -49,7 +49,7 @@ public class MultiOnFailureRetryTest {
 
         Multi.createFrom().range(1, 4)
                 .onFailure().retry().atMost(5)
-                .subscribe().with(subscriber);
+                .subscribe().withSubscriber(subscriber);
 
         subscriber
                 .assertReceived(1, 2, 3)
@@ -62,7 +62,7 @@ public class MultiOnFailureRetryTest {
 
         failing
                 .onFailure().retry().atMost(1)
-                .subscribe().with(subscriber);
+                .subscribe().withSubscriber(subscriber);
 
         subscriber
                 .assertSubscribed()
@@ -78,7 +78,7 @@ public class MultiOnFailureRetryTest {
 
         failing
                 .onFailure().retry().atMost(1)
-                .subscribe().with(subscriber);
+                .subscribe().withSubscriber(subscriber);
 
         subscriber
                 .assertSubscribed()
@@ -98,7 +98,7 @@ public class MultiOnFailureRetryTest {
         MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(20);
 
         failing.onFailure().retry().indefinitely()
-                .subscribe().with(subscriber);
+                .subscribe().withSubscriber(subscriber);
 
         await().until(() -> subscriber.items().size() > 10);
         subscriber.cancel();
@@ -117,7 +117,7 @@ public class MultiOnFailureRetryTest {
                     }
                 })
                 .onFailure().retry().atMost(2)
-                .subscribe().with(MultiAssertSubscriber.create(10))
+                .subscribe().withSubscriber(MultiAssertSubscriber.create(10))
                 .assertCompletedSuccessfully()
                 .assertReceived(1, 2, 3, 4);
     }

@@ -35,7 +35,7 @@ public class MultiOnEvent<T> {
      * @param callback the callback, must not be {@code null}
      * @return a new {@link Multi}
      */
-    public Multi<T> subscription(Consumer<? super Subscription> callback) {
+    public Multi<T> subscribed(Consumer<? super Subscription> callback) {
         return new MultiSignalConsumerOp<>(
                 upstream,
                 nonNull(callback, "callback"),
@@ -113,7 +113,7 @@ public class MultiOnEvent<T> {
      * <pre>
      * {@code
      * Multi<T> multi = ...;
-     * multi.onItem().mapToItem(x -> ...); // Map to another item
+     * multi.onItem().apply(x -> ...); // Map to another item
      * multi.onItem().mapToMulti(x -> ...); // Map to a multi
      * }
      * </pre>

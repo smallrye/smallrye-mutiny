@@ -37,7 +37,7 @@ public class MultiOnOverflowTest {
     public void testDropStrategyWithUpstreamFailure() {
         Multi.createFrom().<Integer> failure(new IOException("boom"))
                 .onOverflow().drop()
-                .subscribe().with(MultiAssertSubscriber.create(1))
+                .subscribe().withSubscriber(MultiAssertSubscriber.create(1))
                 .assertHasFailedWith(IOException.class, "boom");
     }
 
@@ -93,7 +93,7 @@ public class MultiOnOverflowTest {
                 .onOverflow().drop(i -> {
                     throw new IllegalStateException("boom");
                 })
-                .subscribe().with(MultiAssertSubscriber.create())
+                .subscribe().withSubscriber(MultiAssertSubscriber.create())
                 .assertHasFailedWith(IllegalStateException.class, "boom");
 
     }
@@ -101,7 +101,7 @@ public class MultiOnOverflowTest {
     @Test
     public void testDropStrategyWithRequests() {
         Multi.createFrom().range(1, 10).onOverflow().drop()
-                .subscribe().with(MultiAssertSubscriber.create(5))
+                .subscribe().withSubscriber(MultiAssertSubscriber.create(5))
                 .assertCompletedSuccessfully()
                 .assertReceived(1, 2, 3, 4, 5);
     }
@@ -172,7 +172,7 @@ public class MultiOnOverflowTest {
     public void testDropPreviousStrategyWithUpstreamFailure() {
         Multi.createFrom().<Integer> failure(new IOException("boom"))
                 .onOverflow().dropPreviousItems()
-                .subscribe().with(MultiAssertSubscriber.create(1))
+                .subscribe().withSubscriber(MultiAssertSubscriber.create(1))
                 .assertHasFailedWith(IOException.class, "boom");
     }
 
@@ -190,7 +190,7 @@ public class MultiOnOverflowTest {
     public void testBufferStrategyWithUpstreamFailure() {
         Multi.createFrom().<Integer> failure(new IOException("boom"))
                 .onOverflow().buffer()
-                .subscribe().with(MultiAssertSubscriber.create(1))
+                .subscribe().withSubscriber(MultiAssertSubscriber.create(1))
                 .assertHasFailedWith(IOException.class, "boom");
     }
 

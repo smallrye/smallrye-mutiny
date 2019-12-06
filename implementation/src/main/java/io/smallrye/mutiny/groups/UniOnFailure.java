@@ -41,7 +41,7 @@ public class UniOnFailure<T> {
      * @param mapper the mapper function, must not be {@code null}, must not return {@code null}
      * @return the new {@link Uni}
      */
-    public Uni<T> mapTo(Function<? super Throwable, ? extends Throwable> mapper) {
+    public Uni<T> apply(Function<? super Throwable, ? extends Throwable> mapper) {
         return Infrastructure.onUniCreation(new UniMapOnFailure<>(upstream, predicate, mapper));
     }
 
