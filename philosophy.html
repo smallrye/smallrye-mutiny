@@ -674,6 +674,9 @@ Also, <code>Uni</code> can handle items having a <code>null</code> value (and as
 <code>Multi</code> does not allow it (because the Reactive Streams specification forbids it).</p>
 </div>
 <div class="paragraph">
+<p>Also, having a <code>Uni</code> implementing <code>Publisher</code> would be a bit like having <code>Optional</code> implementing <code>Iterable</code>.</p>
+</div>
+<div class="paragraph">
 <p>In other words, <code>Uni</code> can:</p>
 </div>
 <div class="ulist">
@@ -898,7 +901,7 @@ multi.subscribe().withSubscriber(new Subscriber&lt;String&gt;() {
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2019-12-05 15:12:44 +0100
+Last updated 2019-12-06 15:06:56 +0100
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">

@@ -447,8 +447,8 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div id="header">
 <h1>SmallRye Mutiny</h1>
 <div class="details">
-<span id="revnumber">version 1.0.0-SNAPSHOT,</span>
-<span id="revdate">2019-12-05</span>
+<span id="revnumber">version 0.1.0-SNAPSHOT,</span>
+<span id="revdate">2019-12-06</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">SmallRye Mutiny</div>
@@ -473,17 +473,21 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <ul class="sectlevel3">
 <li><a href="#_how_do_i_transform_items">3.1. How do I transform items?</a></li>
 <li><a href="#_how_do_i_filterselect_items">3.2. How do I filter/select items?</a></li>
-<li><a href="#_where_are_my_map_flatmap_and_concatmap">3.3. Where are my map, flatMap and concatMap?</a></li>
+<li><a href="#_where_are_my_map_flatmap_and_concatmap_methods">3.3. Where are my map, flatMap and concatMap methods?</a></li>
 <li><a href="#_how_do_i_merge_concatenate_or_combine_multis">3.4. How do I merge, concatenate or combine Multis?</a></li>
 <li><a href="#_how_can_i_collect_accumulate_results">3.5. How can I collect / accumulate results?</a></li>
 <li><a href="#_how_do_i_chain_asynchronous_calls">3.6. How do I chain asynchronous calls?</a></li>
 <li><a href="#_how_do_i_recover_from_failure">3.7. How do I recover from failure?</a></li>
-<li><a href="#_how_do_wrap_blocking_calls">3.8. How do wrap blocking calls?</a></li>
-<li><a href="#_how_to_i_control_the_threads">3.9. How to I control the threads?</a></li>
-<li><a href="#_how_do_i_interact_with_completionstage">3.10. How do I interact with CompletionStage?</a></li>
-<li><a href="#_how_to_i_interact_with_rx_java_2">3.11. How to I interact with RX Java 2?</a></li>
-<li><a href="#_how_to_i_interact_with_reactor">3.12. How to I interact with Reactor?</a></li>
-<li><a href="#_how_do_i_control_the_back_pressure">3.13. How do I control the back-pressure?</a></li>
+<li><a href="#_how_do_i_handle_null">3.8. How do I handle <code>null</code>?</a></li>
+<li><a href="#_how_do_i_handle_timeout">3.9. How do I handle timeout?</a></li>
+<li><a href="#_how_do_i_control_the_threads">3.10. How do I control the threads?</a></li>
+<li><a href="#_how_do_i_interact_with_completionstages">3.11. How do I interact with CompletionStages?</a></li>
+<li><a href="#_how_do_i_interact_with_rx_java_2">3.12. How do I interact with RX Java 2?</a></li>
+<li><a href="#_how_do_i_interact_with_reactor">3.13. How do I interact with Reactor?</a></li>
+<li><a href="#_how_do_i_control_the_back_pressure">3.14. How do I control the back-pressure?</a></li>
+<li><a href="#_how_do_wrap_blocking_calls">3.15. How do wrap blocking calls?</a></li>
+<li><a href="#_using_an_unicast_processor">3.16. Using an Unicast Processor</a></li>
+<li><a href="#_where_do_i_find_the_javadoc">3.17. Where do I find the JavaDoc</a></li>
 </ul>
 </li>
 </ul>
@@ -554,7 +558,7 @@ If you are using Maven, declare the following dependency in your <code>pom.xml</
 <pre class="highlightjs highlight"><code data-lang="xml" class="language-xml hljs">&lt;dependency&gt;
     &lt;groupId&gt;io.smallrye.reactive&lt;/groupId&gt;
     &lt;artifactId&gt;mutiny&lt;/artifactId&gt;
-    &lt;version&gt;1.0.0-SNAPSHOT&lt;/version&gt;
+    &lt;version&gt;0.1.0-SNAPSHOT&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -564,7 +568,7 @@ If you are using Maven, declare the following dependency in your <code>pom.xml</
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code data-lang="groovy" class="language-groovy hljs">dependencies {
-     implementation 'io.smallrye.reactive:mutiny:1.0.0-SNAPSHOT'
+     implementation 'io.smallrye.reactive:mutiny:0.1.0-SNAPSHOT'
 }</code></pre>
 </div>
 </div>
@@ -837,6 +841,9 @@ They receive and fire events, at anytime.</p>
 The <code>subscribe</code> event express the interest and trigger the computation.
 Also, <code>Uni</code> can handle items having a <code>null</code> value (and as specific method to handle this case).
 <code>Multi</code> does not allow it (because the Reactive Streams specification forbids it).</p>
+</div>
+<div class="paragraph">
+<p>Also, having a <code>Uni</code> implementing <code>Publisher</code> would be a bit like having <code>Optional</code> implementing <code>Iterable</code>.</p>
 </div>
 <div class="paragraph">
 <p>In other words, <code>Uni</code> can:</p>
@@ -1174,7 +1181,7 @@ List&lt;Integer&gt; list2 = multi
 </div>
 </div>
 <div class="sect3">
-<h4 id="_where_are_my_map_flatmap_and_concatmap">3.3. Where are my map, flatMap and concatMap?</h4>
+<h4 id="_where_are_my_map_flatmap_and_concatmap_methods">3.3. Where are my map, flatMap and concatMap methods?</h4>
 <div class="paragraph">
 <p>If you are a seasoned reactive developer, you may miss the infamous <code>map</code>, <code>flatMap</code>, <code>concatMap</code> methods.
 Mutiny also proposes there methods using the most-used variants of them.</p>
@@ -1230,12 +1237,38 @@ List&lt;Integer&gt; list3 = Multi.createBy()
 </div>
 <div class="sect3">
 <h4 id="_how_can_i_collect_accumulate_results">3.5. How can I collect / accumulate results?</h4>
+<div class="paragraph">
+<p>You can collect the items from a <code>Multi</code> using the method proposed by <code>collectItems()</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">// collectItems let you collect items into a Uni of data structure.
+// The final result is emitted when the completion event is received
+Uni&lt;List&lt;Integer&gt;&gt; list = multi.collectItems().asList();
+Uni&lt;Map&lt;String, Integer&gt;&gt; map = multi.collectItems().asMap(i -&gt; Integer.toString(i));
 
+// You can retrieve the first and last items
+Uni&lt;Integer&gt; first = multi.collectItems().first();
+Uni&lt;Integer&gt; last = multi.collectItems().last();
+
+// you can also get a **blocking** iterable / streams
+BlockingIterable&lt;Integer&gt; integers = multi.subscribe().asIterable();
+Stream&lt;Integer&gt; stream = multi.subscribe().asStream();</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>You can also accumulate results using the <code>scan</code> method:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">Multi&lt;Integer&gt; added = multi.onItem().scan(() -&gt; 0, (item, acc) -&gt; acc + item);</code></pre>
+</div>
+</div>
 </div>
 <div class="sect3">
 <h4 id="_how_do_i_chain_asynchronous_calls">3.6. How do I chain asynchronous calls?</h4>
 <div class="paragraph">
-<p>To chain asynchronous calls, use the <code>onItem().mapToUni</code> or <code>onItem().mapToCompletionStage</code>:</p>
+<p>To chain asynchronous calls, use the <code>onItem().produceUni</code> or <code>onItem().produceCompletionStage</code>:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -1248,38 +1281,390 @@ List&lt;Integer&gt; list3 = Multi.createBy()
 </div>
 <div class="sect3">
 <h4 id="_how_do_i_recover_from_failure">3.7. How do I recover from failure?</h4>
+<div class="paragraph">
+<p>Failure are inherent to software.
+So you need handle them.
+By default, they flow in the stream until they reach the final subscriber.
+But at any stage you can process the failure and transform or recover from it.</p>
+</div>
+<div class="paragraph">
+<p>The following snippet shows how you can recover from a failure on a <code>Uni</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">// Transform a failure in another type of failure
+CompletableFuture&lt;String&gt; res0 = uni.onFailure().apply(failure -&gt; new MyBusinessException("oh no!"))
+        .subscribeAsCompletionStage();
+
+// Recover with an item
+String res1 = uni
+        .onFailure().recoverWithItem("hello")
+        .await().indefinitely();
+
+// Filter the type of failure
+String res2 = uni
+        .onFailure(IllegalArgumentException.class).recoverWithItem("bonjour")
+        .onFailure(IOException.class).recoverWithItem("hello")
+        .await().indefinitely();
+
+// Recover recover with an uni
+String res3 = uni
+        .onFailure().recoverWithUni(() -&gt; Uni.createFrom().item("fallback"))
+        .await().indefinitely();
+
+// Retry at most twice
+CompletableFuture&lt;String&gt; res4 = uni
+        .onFailure().retry().atMost(2)
+        .subscribeAsCompletionStage();</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p><code>Multis</code> have the same API letting you recovering from failure easily:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">CompletableFuture&lt;String&gt; res0 = multi.onFailure().apply(failure -&gt; new MyBusinessException("oh no!"))
+        .collectItems().first()
+        .subscribeAsCompletionStage();
+
+String res1 = multi
+        .onFailure().recoverWithItem("hello")
+        .collectItems().first()
+        .await().indefinitely();
+
+String res2 = multi
+        .onFailure(IllegalArgumentException.class).recoverWithItem("bonjour")
+        .onFailure(IOException.class).recoverWithItem("hello")
+        .collectItems().first()
+        .await().indefinitely();
+
+String res3 = multi
+        .onFailure().recoverWithMulti(() -&gt; Multi.createFrom().items("a", "b", "c"))
+        .collectItems().first()
+        .await().indefinitely();
+
+CompletableFuture&lt;String&gt; res4 = multi
+        .onFailure().retry().atMost(2)
+        .collectItems().first()
+        .subscribeAsCompletionStage();</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Note that with <code>Multi</code>, a failure cancels the subscription, meaning you will not receive any more items.
+The <code>retry</code> operator let you re-subscribe and continue the reception.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_how_do_i_handle_null">3.8. How do I handle <code>null</code>?</h4>
+<div class="paragraph">
+<p><code>null</code> is only accepted in the <code>Uni</code> type.
+<code>uni.onItem().ifNull()</code> lets you decide what you want to do when the received item is <code>null</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">uni.onItem().ifNull().continueWith("hello");
+uni.onItem().ifNull().switchTo(() -&gt; Uni.createFrom().item("hello"));
+uni.onItem().ifNull().failWith(() -&gt; new Exception("Boom!"));</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_how_do_i_handle_timeout">3.9. How do I handle timeout?</h4>
+<div class="paragraph">
+<p><code>Uni</code> are often used to represent asynchronous operation, like a HTTP call.
+So, it&#8217;s not rare to need to add a timeout on this kind of operation, and recover if the timeout occurs.</p>
+</div>
+<div class="paragraph">
+<p>This can be done using <code>Uni.ifNoItem()</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">String item = uni
+        .ifNoItem().after(Duration.ofMillis(100)).recoverWithItem("some fallback item")
+        .await().indefinitely();</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>On timeout, you can:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>fail</p>
+</li>
+<li>
+<p>recover with a specific item</p>
+</li>
+<li>
+<p>continue with another alternative <code>Uni</code></p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_how_do_i_control_the_threads">3.10. How do I control the threads?</h4>
+<div class="paragraph">
+<p>Except indicated otherwise, the next processor is invoked on the thread emitting the event from upstream.
+You can switch to another thread using the <code>emitOn</code> operator.
+The <code>emitOn</code> operator let you switch thread used to dispatch (upstream to downstream) events, so items, failure and completion.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">String res0 = uni.emitOn(executor)
+        .onItem()
+        .invoke(s -&gt; System.out.println("Received item `" + s + "` on thread: " + Thread.currentThread().getName()))
+        .await().indefinitely();
+
+String res1 = multi.emitOn(executor)
+        .onItem()
+        .invoke(s -&gt; System.out.println("Received item `" + s + "` on thread: " + Thread.currentThread().getName()))
+        .collectItems().first()
+        .await().indefinitely();</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_how_do_i_interact_with_completionstages">3.11. How do I interact with CompletionStages?</h4>
+<div class="paragraph">
+<p><code>CompletionStage</code> and <code>CompletableFuture</code> are classes provided by Java to represent asynchronous actions.
+However, there are not lazy, and do not follow a <em>subscription</em> patterns.</p>
+</div>
+<div class="paragraph">
+<p>Mutiny let you create <code>Uni</code> and <code>Multi</code> from instances from these classes.
+Also, <code>Uni</code> offers a way to retrieve the item or the failure as a <code>CompletableFuture</code>.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">CompletableFuture&lt;String&gt; future1 = Uni
+        // Create from a Completion Stage
+        .createFrom().completionStage(CompletableFuture.supplyAsync(() -&gt; "hello"))
+        .map(String::toUpperCase)
+        .subscribeAsCompletionStage(); // Retrieve as a Completion Stage
+
+CompletableFuture&lt;List&lt;String&gt;&gt; future2 = Multi
+        .createFrom().completionStage(CompletableFuture.supplyAsync(() -&gt; "hello"))
+        .map(String::toUpperCase)
+        .collectItems().asList() // Accumulate items in a list (return a Uni&lt;List&lt;T&gt;&gt;)
+        .subscribeAsCompletionStage();// Retrieve the list as a Completion Stage</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_how_do_i_interact_with_rx_java_2">3.12. How do I interact with RX Java 2?</h4>
+<div class="paragraph">
+<p>Mutiny allows converting Rx Java 2 types to/from Uni and Multi instances.
+To enable this feature, add the following dependency to your <code>CLASSPATH</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="xml" class="language-xml hljs">&lt;dependency&gt;
+    &lt;groupId&gt;io.smallrye.reactive&lt;/groupId&gt;
+    &lt;artifactId&gt;mutiny-rxjava&lt;/artifactId&gt;
+    &lt;version&gt;0.1.0-SNAPSHOT&lt;/version&gt;
+&lt;/dependency&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Then, you would need to import:</p>
+</div>
+<div class="exampleblock">
+<div class="content">
+<div class="paragraph">
+<p>import io.smallrye.mutiny.converters.multi.MultiRxConverters;
+import io.smallrye.mutiny.converters.uni.UniRxConverters;</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>To create a <code>Uni</code> from RxJava 2 objects, use the following methods:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">Completable completable = Completable.complete();
+Single&lt;String&gt; single = Single.just("hello");
+Maybe&lt;String&gt; maybe = Maybe.just("hello");
+Maybe&lt;String&gt; emptyMaybe = Maybe.empty();
+Observable&lt;String&gt; observable = Observable.fromArray("a", "b", "c");
+Flowable&lt;String&gt; flowable = Flowable.fromArray("a", "b", "c");
+
+Uni&lt;Void&gt; uniFromCompletable = Uni.createFrom().converter(UniRxConverters.fromCompletable(), completable);
+Uni&lt;String&gt; uniFromSingle = Uni.createFrom().converter(UniRxConverters.fromSingle(), single);
+Uni&lt;String&gt; uniFromMaybe = Uni.createFrom().converter(UniRxConverters.fromMaybe(), maybe);
+Uni&lt;String&gt; uniFromEmptyMaybe = Uni.createFrom().converter(UniRxConverters.fromMaybe(), emptyMaybe);
+Uni&lt;String&gt; uniFromObservable = Uni.createFrom().converter(UniRxConverters.fromObservable(), observable);
+Uni&lt;String&gt; uniFromFlowable = Uni.createFrom().converter(UniRxConverters.fromFlowable(), flowable);
+Uni&lt;String&gt; uniFromPublisher = Uni.createFrom().publisher(flowable);</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>When converting a <code>Completable</code> or an empty <code>Maybe</code> to a <code>Uni</code>, the <code>Uni</code> receives a <code>null</code> item.
+Use <code>onItem().ifNull()</code> to handle this case.</p>
+</div>
+<div class="paragraph">
+<p>Note that, when converting an <code>Observable</code> or a <code>Flowable</code> to a <code>Uni</code>, only the first element is requested.
+Once received, the underlying subscription is cancelled.</p>
+</div>
+<div class="paragraph">
+<p>Also note that you can create a <code>Uni</code> from a Reactive Streams <code>Publisher</code> using <code>Uni.createFrom().publisher(&#8230;&#8203;)</code>.</p>
+</div>
+<div class="paragraph">
+<p>To create Rx Java 2 types from a <code>Uni</code>, use the following methods:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">Completable completable = uni.convert().with(UniRxConverters.toCompletable());
+Single&lt;Optional&lt;String&gt;&gt; single = uni.convert().with(UniRxConverters.toSingle());
+Single&lt;String&gt; single2 = uni.convert().with(UniRxConverters.toSingle().failOnNull());
+Maybe&lt;String&gt; maybe = uni.convert().with(UniRxConverters.toMaybe());
+Observable&lt;String&gt; observable = uni.convert().with(UniRxConverters.toObservable());
+Flowable&lt;String&gt; flowable = uni.convert().with(UniRxConverters.toFlowable());</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Because <code>Uni</code> can emit <code>null</code>, the default converter produces a <code>Single&lt;Optional&lt;T&gt;&gt;</code>.
+You can retrieve a <code>Single&lt;T&gt;</code> and fail instead using <code>toSingle().failOnNull()</code>.</p>
+</div>
+<div class="paragraph">
+<p>To create a <code>Multi</code> from RxJava 2 objects, use the following methods:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">Completable completable = Completable.complete();
+Single&lt;String&gt; single = Single.just("hello");
+Maybe&lt;String&gt; maybe = Maybe.just("hello");
+Maybe&lt;String&gt; emptyMaybe = Maybe.empty();
+Observable&lt;String&gt; observable = Observable.fromArray("a", "b", "c");
+Flowable&lt;String&gt; flowable = Flowable.fromArray("a", "b", "c");
+
+Multi&lt;Void&gt; multiFromCompletable = Multi.createFrom()
+        .converter(MultiRxConverters.fromCompletable(), completable);
+Multi&lt;String&gt; multiFromSingle = Multi.createFrom().converter(MultiRxConverters.fromSingle(), single);
+Multi&lt;String&gt; multiFromMaybe = Multi.createFrom().converter(MultiRxConverters.fromMaybe(), maybe);
+Multi&lt;String&gt; multiFromEmptyMaybe = Multi.createFrom().converter(MultiRxConverters.fromMaybe(), emptyMaybe);
+Multi&lt;String&gt; multiFromObservable = Multi.createFrom()
+        .converter(MultiRxConverters.fromObservable(), observable);
+Multi&lt;String&gt; multiFromFlowable = Multi.createFrom().converter(MultiRxConverters.fromFlowable(), flowable);
+Multi&lt;String&gt; multiFromPublisher = Multi.createFrom().publisher(flowable);</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>As for <code>Uni</code>, you can create a <code>Multi</code> from a Reactive Streams <code>Publisher</code> using <code>Multi.createFrom().publisher(&#8230;&#8203;)</code>.</p>
+</div>
+<div class="paragraph">
+<p>You can also create RxJava 2 objects from a <code>Multi</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">Completable completable = multi.convert().with(MultiRxConverters.toCompletable());
+Single&lt;Optional&lt;String&gt;&gt; single = multi.convert().with(MultiRxConverters.toSingle());
+Single&lt;String&gt; single2 = multi.convert().with(MultiRxConverters
+        .toSingle().onEmptyThrow(() -&gt; new Exception("D'oh!")));
+Maybe&lt;String&gt; maybe = multi.convert().with(MultiRxConverters.toMaybe());
+Observable&lt;String&gt; observable = multi.convert().with(MultiRxConverters.toObservable());
+Flowable&lt;String&gt; flowable = multi.convert().with(MultiRxConverters.toFlowable());</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_how_do_i_interact_with_reactor">3.13. How do I interact with Reactor?</h4>
+<div class="paragraph">
+<p>Mutiny allows converting Rx Java 2 types to/from Uni and Multi instances.
+To enable this feature, add the following dependency to your <code>CLASSPATH</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="xml" class="language-xml hljs">&lt;dependency&gt;
+    &lt;groupId&gt;io.smallrye.reactive&lt;/groupId&gt;
+    &lt;artifactId&gt;mutiny-reactor&lt;/artifactId&gt;
+    &lt;version&gt;0.1.0-SNAPSHOT&lt;/version&gt;
+&lt;/dependency&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Then, you would need to import:</p>
+</div>
+<div class="exampleblock">
+<div class="content">
+<div class="paragraph">
+<p>import io.smallrye.mutiny.converters.multi.MultiReactorConverters;
+import io.smallrye.mutiny.converters.uni.UniReactorConverters;</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>To create a <code>Uni</code> from Reactor objects, use the following methods:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">Mono&lt;Void&gt; empty = Mono.empty();
+Mono&lt;String&gt; mono = Mono.just("hello");
+Flux&lt;String&gt; flux = Flux.just("a", "b", "c");
+
+Uni&lt;Void&gt; uniFromEmptyMono = Uni.createFrom().converter(UniReactorConverters.fromMono(), empty);
+Uni&lt;String&gt; uniFromMono = Uni.createFrom().converter(UniReactorConverters.fromMono(), mono);
+Uni&lt;String&gt; uniFromFlux = Uni.createFrom().converter(UniReactorConverters.fromFlux(), flux);
+Uni&lt;String&gt; uniFromPublisher = Uni.createFrom().publisher(flux);</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>To create Reactor <code>Flux</code> and <code>Mono</code> instances from a <code>Uni</code>, use the following methods:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">Mono&lt;String&gt; mono = uni.convert().with(UniReactorConverters.toMono());
+Flux&lt;String&gt; flux = uni.convert().with(UniReactorConverters.toFlux());</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>To create a <code>Multi</code> from Reactor objects, use the following methods:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">Mono&lt;Void&gt; empty = Mono.empty();
+Mono&lt;String&gt; mono = Mono.just("hello");
+Flux&lt;String&gt; flux = Flux.just("a", "b", "c");
+
+Multi&lt;Void&gt; multiFromEmptyMono = Multi.createFrom()
+        .converter(MultiReactorConverters.fromMono(), empty);
+Multi&lt;String&gt; multiFromMono = Multi.createFrom().converter(MultiReactorConverters.fromMono(), mono);
+Multi&lt;String&gt; multiFromFlux = Multi.createFrom().converter(MultiReactorConverters.fromFlux(), flux);
+Multi&lt;String&gt; multiFromPublisher = Multi.createFrom().publisher(flux);</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>You can also create Reactor objects from a <code>Multi</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">Mono&lt;String&gt; mono = multi.convert().with(MultiReactorConverters.toMono());
+Flux&lt;String&gt; flux = multi.convert().with(MultiReactorConverters.toFlux());</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_how_do_i_control_the_back_pressure">3.14. How do I control the back-pressure?</h4>
 
 </div>
 <div class="sect3">
-<h4 id="_how_do_wrap_blocking_calls">3.8. How do wrap blocking calls?</h4>
+<h4 id="_how_do_wrap_blocking_calls">3.15. How do wrap blocking calls?</h4>
 
 </div>
 <div class="sect3">
-<h4 id="_how_to_i_control_the_threads">3.9. How to I control the threads?</h4>
+<h4 id="_using_an_unicast_processor">3.16. Using an Unicast Processor</h4>
 
 </div>
 <div class="sect3">
-<h4 id="_how_do_i_interact_with_completionstage">3.10. How do I interact with CompletionStage?</h4>
-
+<h4 id="_where_do_i_find_the_javadoc">3.17. Where do I find the JavaDoc</h4>
+<div class="paragraph">
+<p>The JavaDoc is published <a href="https://smallrye.io/smallrye-mutiny/apidocs/">there</a>.</p>
 </div>
-<div class="sect3">
-<h4 id="_how_to_i_interact_with_rx_java_2">3.11. How to I interact with RX Java 2?</h4>
-
-</div>
-<div class="sect3">
-<h4 id="_how_to_i_interact_with_reactor">3.12. How to I interact with Reactor?</h4>
-
-</div>
-<div class="sect3">
-<h4 id="_how_do_i_control_the_back_pressure">3.13. How do I control the back-pressure?</h4>
-
 </div>
 </div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Version 1.0.0-SNAPSHOT<br>
-Last updated 2019-12-05 16:19:21 +0100
+Version 0.1.0-SNAPSHOT<br>
+Last updated 2019-12-06 15:06:56 +0100
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">
