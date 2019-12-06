@@ -53,5 +53,3 @@ elif [[ ${TARGET} == "release" ]]; then
 else
     echo "Unknown environment: ${TARGET}"
 fi
-
-echo "DONE"
