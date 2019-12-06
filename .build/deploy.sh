@@ -45,6 +45,8 @@ export MAJOR=$(echo ${VERSION}|tr '.' ' '|awk '{print $1}')
 export MINOR=$(echo ${VERSION}|tr '.' ' '|awk '{print $2}')
 export MICRO=$(echo ${VERSION}|tr '.' ' '|awk '{print $3}')
 
+git update-index --assume-unchanged .build/deploy.sh
+git update-index --assume-unchanged .build/decrypt-secrets.sh
 
 if [[ ${TARGET} == "snapshot" ]]; then
     deploy_snapshot
