@@ -1,13 +1,14 @@
 package snippets;
 
-import io.smallrye.mutiny.Multi;
-import io.smallrye.mutiny.Uni;
-import org.junit.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.Test;
+
+import io.smallrye.mutiny.Multi;
+import io.smallrye.mutiny.Uni;
 
 public class EmitOnTest {
 
@@ -20,15 +21,13 @@ public class EmitOnTest {
         // tag::code[]
 
         String res0 = uni.emitOn(executor)
-                .onItem().invoke(s ->
-                        System.out.println("Received item `" + s + "` on thread: " + Thread.currentThread().getName())
-                )
+                .onItem()
+                .invoke(s -> System.out.println("Received item `" + s + "` on thread: " + Thread.currentThread().getName()))
                 .await().indefinitely();
 
         String res1 = multi.emitOn(executor)
-                .onItem().invoke(s ->
-                        System.out.println("Received item `" + s + "` on thread: " + Thread.currentThread().getName())
-                )
+                .onItem()
+                .invoke(s -> System.out.println("Received item `" + s + "` on thread: " + Thread.currentThread().getName()))
                 .collectItems().first()
                 .await().indefinitely();
 

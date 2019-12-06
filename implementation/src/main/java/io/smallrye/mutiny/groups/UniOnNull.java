@@ -35,7 +35,7 @@ public class UniOnNull<T> {
      * @param supplier the supplier to produce the failure, must not be {@code null}, must not produce {@code null}
      * @return the new {@link Uni}
      */
-    public Uni<T> failWith(Supplier<Throwable> supplier) {
+    public Uni<T> failWith(Supplier<? extends Throwable> supplier) {
         nonNull(supplier, "supplier");
 
         return Infrastructure.onUniCreation(upstream.onItem().produceUni((item, emitter) -> {

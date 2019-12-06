@@ -1,15 +1,16 @@
 package snippets;
 
-import io.smallrye.mutiny.Multi;
-import io.smallrye.mutiny.Uni;
-import io.smallrye.mutiny.helpers.BlockingIterable;
-import org.junit.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.Test;
+
+import io.smallrye.mutiny.Multi;
+import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.helpers.BlockingIterable;
 
 public class CollectTest {
 
@@ -47,7 +48,7 @@ public class CollectTest {
         // tag::acc[]
         Multi<Integer> added = multi.onItem().scan(() -> 0, (item, acc) -> acc + item);
         // end::acc[]
-        assertThat(added.subscribe().asIterable()).containsExactly(0, 1 , 3);
+        assertThat(added.subscribe().asIterable()).containsExactly(0, 1, 3);
 
     }
 }

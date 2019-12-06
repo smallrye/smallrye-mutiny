@@ -20,10 +20,10 @@ import io.smallrye.mutiny.subscription.UniSubscription;
 
 public class UniFailOnTimeout<I> extends UniOperator<I, I> {
     private final Duration timeout;
-    private final Supplier<Throwable> supplier;
+    private final Supplier<? extends Throwable> supplier;
     private final ScheduledExecutorService executor;
 
-    public UniFailOnTimeout(Uni<I> upstream, Duration timeout, Supplier<Throwable> supplier,
+    public UniFailOnTimeout(Uni<I> upstream, Duration timeout, Supplier<? extends Throwable> supplier,
             ScheduledExecutorService executor) {
         super(nonNull(upstream, "upstream"));
         this.timeout = validate(timeout, "onTimeout");

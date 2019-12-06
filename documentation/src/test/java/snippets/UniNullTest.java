@@ -1,10 +1,11 @@
 package snippets;
 
-import io.smallrye.mutiny.Multi;
-import io.smallrye.mutiny.Uni;
+import static org.assertj.core.api.Assertions.assertThat;
+
 import org.junit.Test;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import io.smallrye.mutiny.Multi;
+import io.smallrye.mutiny.Uni;
 
 public class UniNullTest {
 
