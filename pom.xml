@@ -179,6 +179,16 @@
                                 <append>true</append>
                             </configuration>
                         </execution>
+                        <execution>
+                            <id>generate-report</id>
+                            <goals>
+                                <goal>report</goal>
+                            </goals>
+                            <phase>verify</phase>
+                            <configuration>
+                                <outputDirectory>${project.build.directory}</outputDirectory>
+                            </configuration>
+                        </execution>
                     </executions>
                 </plugin>
             </plugins>
@@ -205,29 +215,6 @@
 
     <profiles>
         <profile>
-            <id>doc</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.asciidoctor</groupId>
-                        <artifactId>asciidoctor-maven-plugin</artifactId>
-                        <configuration>
-                            <backend>html</backend>
-                            <sourceHighlighter>highlightjs</sourceHighlighter>
-                            <attributes>
-                                <toc>left</toc>
-                                <version>${project.version}</version>
-                            </attributes>
-                            <sourceDirectory>doc</sourceDirectory>
-                            <imagesDir>assets/images</imagesDir>
-                        </configuration>
-                    </plugin>                
-                </plugins>
-                <defaultGoal>generate-resources asciidoctor:process-asciidoc</defaultGoal>
-            </build>
-        </profile>
-
-        <profile>
             <id>release</id>
             <activation>
                 <property>
@@ -237,6 +224,21 @@
             <modules>
                 <module>release</module>
             </modules>
+        </profile>
+        <profile>
+            <id>coverage</id>
+            <properties>
+                <argLine>@{jacocoArgLine}</argLine>
+            </properties>
+
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.jacoco</groupId>
+                        <artifactId>jacoco-maven-plugin</artifactId>
+                    </plugin>
+                </plugins>
+            </build>
         </profile>
     </profiles>
 </project>
