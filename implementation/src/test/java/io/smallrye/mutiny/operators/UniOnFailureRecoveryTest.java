@@ -206,7 +206,7 @@ public class UniOnFailureRecoveryTest {
     public void testWithMappingOfFailure() {
         UniAssertSubscriber<Integer> ts = UniAssertSubscriber.create();
         Uni.createFrom().<Integer> failure(new Exception())
-                .onFailure().mapTo(f -> new RuntimeException("boom"))
+                .onFailure().apply(f -> new RuntimeException("boom"))
                 .subscribe().withSubscriber(ts);
         ts.assertCompletedWithFailure()
                 .assertFailure(RuntimeException.class, "boom");
@@ -216,7 +216,7 @@ public class UniOnFailureRecoveryTest {
     public void testWithMappingOfFailureAndPredicates() {
         UniAssertSubscriber<Integer> ts = UniAssertSubscriber.create();
         Uni.createFrom().<Integer> failure(new IOException())
-                .onFailure().mapTo(t -> new IndexOutOfBoundsException())
+                .onFailure().apply(t -> new IndexOutOfBoundsException())
                 .onFailure(IOException.class).recoverWithUni(Uni.createFrom().item(1))
                 .onFailure(IndexOutOfBoundsException.class).recoverWithUni(Uni.createFrom().item(2))
                 .subscribe().withSubscriber(ts);
