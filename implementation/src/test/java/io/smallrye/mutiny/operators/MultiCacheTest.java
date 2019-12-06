@@ -18,11 +18,11 @@ public class MultiCacheTest {
         Multi<Integer> multi = Multi.createFrom().deferred(() -> Multi.createFrom().items(count.incrementAndGet(),
                 count.incrementAndGet()))
                 .cache();
-        multi.subscribe().with(MultiAssertSubscriber.create(2))
+        multi.subscribe().withSubscriber(MultiAssertSubscriber.create(2))
                 .assertCompletedSuccessfully()
                 .assertReceived(1, 2);
 
-        multi.subscribe().with(MultiAssertSubscriber.create(Long.MAX_VALUE))
+        multi.subscribe().withSubscriber(MultiAssertSubscriber.create(Long.MAX_VALUE))
                 .assertCompletedSuccessfully()
                 .assertReceived(1, 2);
     }
@@ -34,11 +34,11 @@ public class MultiCacheTest {
                 .emit(count.incrementAndGet())
                 .fail(new IOException("boom-" + count.incrementAndGet())))
                 .cache();
-        multi.subscribe().with(MultiAssertSubscriber.create(2))
+        multi.subscribe().withSubscriber(MultiAssertSubscriber.create(2))
                 .assertReceived(1, 2)
                 .assertHasFailedWith(IOException.class, "boom-3");
 
-        multi.subscribe().with(MultiAssertSubscriber.create(Long.MAX_VALUE))
+        multi.subscribe().withSubscriber(MultiAssertSubscriber.create(Long.MAX_VALUE))
                 .assertReceived(1, 2)
                 .assertHasFailedWith(IOException.class, "boom-3");
     }
@@ -54,12 +54,12 @@ public class MultiCacheTest {
         })
                 .cache();
         MultiAssertSubscriber<Integer> s1 = multi
-                .subscribe().with(MultiAssertSubscriber.create(2))
+                .subscribe().withSubscriber(MultiAssertSubscriber.create(2))
                 .assertReceived(1, 2)
                 .assertNotTerminated();
 
         MultiAssertSubscriber<Integer> s2 = multi.subscribe()
-                .with(MultiAssertSubscriber.create(Long.MAX_VALUE))
+                .withSubscriber(MultiAssertSubscriber.create(Long.MAX_VALUE))
                 .assertReceived(1, 2)
                 .assertNotTerminated();
 

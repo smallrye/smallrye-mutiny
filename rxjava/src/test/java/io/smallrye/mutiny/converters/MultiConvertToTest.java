@@ -9,22 +9,16 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.junit.Test;
 
-import io.reactivex.Completable;
-import io.reactivex.Flowable;
-import io.reactivex.Maybe;
-import io.reactivex.Observable;
-import io.reactivex.Single;
+import io.reactivex.*;
 import io.smallrye.mutiny.Multi;
-import io.smallrye.mutiny.converters.multi.RxConverters;
-import io.smallrye.mutiny.converters.multi.ToCompletable;
-import io.smallrye.mutiny.converters.multi.ToSingle;
+import io.smallrye.mutiny.converters.multi.MultiRxConverters;
 import io.smallrye.mutiny.test.MultiAssertSubscriber;
 
 public class MultiConvertToTest {
 
     @Test
     public void testCreatingACompletable() {
-        Completable completable = Multi.createFrom().item(1).convert().with(new ToCompletable<>());
+        Completable completable = Multi.createFrom().item(1).convert().with(MultiRxConverters.toCompletable());
         assertThat(completable).isNotNull();
         completable.test().assertComplete();
     }
@@ -35,7 +29,7 @@ public class MultiConvertToTest {
         Completable completable = Multi.createFrom().deferred(() -> {
             called.set(true);
             return Multi.createFrom().item(2);
-        }).convert().with(new ToCompletable<>());
+        }).convert().with(MultiRxConverters.toCompletable());
 
         assertThat(completable).isNotNull();
         assertThat(called).isFalse();
@@ -45,14 +39,16 @@ public class MultiConvertToTest {
 
     @Test
     public void testCreatingACompletableFromVoid() {
-        Completable completable = Multi.createFrom().item((Object) null).convert().with(new ToCompletable<>());
+        Completable completable = Multi.createFrom().item((Object) null).convert()
+                .with(MultiRxConverters.toCompletable());
         assertThat(completable).isNotNull();
         completable.test().assertComplete();
     }
 
     @Test
     public void testCreatingACompletableWithFailure() {
-        Completable completable = Multi.createFrom().failure(new IOException("boom")).convert().with(new ToCompletable<>());
+        Completable completable = Multi.createFrom().failure(new IOException("boom")).convert()
+                .with(MultiRxConverters.toCompletable());
         assertThat(completable).isNotNull();
         completable.test().assertError(e -> {
             assertThat(e).hasMessage("boom").isInstanceOf(IOException.class);
@@ -62,7 +58,7 @@ public class MultiConvertToTest {
 
     @Test
     public void testCreatingASingle() {
-        Single<Optional<Integer>> single = Multi.createFrom().item(1).convert().with(RxConverters.toSingle());
+        Single<Optional<Integer>> single = Multi.createFrom().item(1).convert().with(MultiRxConverters.toSingle());
         assertThat(single).isNotNull();
         single.test()
                 .assertValue(Optional.of(1))
@@ -71,7 +67,7 @@ public class MultiConvertToTest {
 
     @Test
     public void testCreatingASingleByConverter() {
-        Single<Optional<Integer>> single = Multi.createFrom().item(1).convert().with(RxConverters.toSingle());
+        Single<Optional<Integer>> single = Multi.createFrom().item(1).convert().with(MultiRxConverters.toSingle());
         assertThat(single).isNotNull();
         single.test()
                 .assertValue(Optional.of(1))
@@ -81,7 +77,7 @@ public class MultiConvertToTest {
     @Test
     public void testCreatingASingleFromNull() {
         Single<Integer> single = Multi.createFrom().item((Integer) null).convert()
-                .with(ToSingle.onEmptyThrow(NoSuchElementException.class));
+                .with(MultiRxConverters.toSingle().onEmptyThrow(() -> new NoSuchElementException("not found")));
         assertThat(single).isNotNull();
         single
                 .test()
@@ -92,7 +88,7 @@ public class MultiConvertToTest {
     @Test
     public void testCreatingASingleFromNullWithConverter() {
         Single<Integer> single = Multi.createFrom().item((Integer) null).convert()
-                .with(RxConverters.toSingleOnEmptyThrow(NoSuchElementException.class));
+                .with(MultiRxConverters.toSingle().onEmptyThrow(() -> new NoSuchElementException("not found")));
         assertThat(single).isNotNull();
         single
                 .test()
@@ -103,7 +99,7 @@ public class MultiConvertToTest {
     @Test
     public void testCreatingASingleWithFailure() {
         Single<Optional<Integer>> single = Multi.createFrom().<Integer> failure(new IOException("boom")).convert()
-                .with(RxConverters.toSingle());
+                .with(MultiRxConverters.toSingle());
         assertThat(single).isNotNull();
         single.test().assertError(e -> {
             assertThat(e).hasMessage("boom").isInstanceOf(IOException.class);
@@ -113,7 +109,7 @@ public class MultiConvertToTest {
 
     @Test
     public void testCreatingAMaybe() {
-        Maybe<Integer> maybe = Multi.createFrom().item(1).convert().with(RxConverters.toMaybe());
+        Maybe<Integer> maybe = Multi.createFrom().item(1).convert().with(MultiRxConverters.toMaybe());
         assertThat(maybe).isNotNull();
         maybe.test()
                 .assertValue(1)
@@ -122,7 +118,7 @@ public class MultiConvertToTest {
 
     @Test
     public void testCreatingAMaybeFromNull() {
-        Maybe<Integer> maybe = Multi.createFrom().item((Integer) null).convert().with(RxConverters.toMaybe());
+        Maybe<Integer> maybe = Multi.createFrom().item((Integer) null).convert().with(MultiRxConverters.toMaybe());
         assertThat(maybe).isNotNull();
         maybe
                 .test()
@@ -133,7 +129,7 @@ public class MultiConvertToTest {
     @Test
     public void testCreatingAMaybeWithFailure() {
         Maybe<Integer> maybe = Multi.createFrom().<Integer> failure(new IOException("boom")).convert()
-                .with(RxConverters.toMaybe());
+                .with(MultiRxConverters.toMaybe());
         assertThat(maybe).isNotNull();
         maybe.test().assertError(e -> {
             assertThat(e).hasMessage("boom").isInstanceOf(IOException.class);
@@ -143,7 +139,7 @@ public class MultiConvertToTest {
 
     @Test
     public void testCreatingAnObservable() {
-        Observable<Integer> observable = Multi.createFrom().item(1).convert().with(RxConverters.toObservable());
+        Observable<Integer> observable = Multi.createFrom().item(1).convert().with(MultiRxConverters.toObservable());
         assertThat(observable).isNotNull();
         observable.test()
                 .assertValue(1)
@@ -152,7 +148,8 @@ public class MultiConvertToTest {
 
     @Test
     public void testCreatingAnObservableFromNull() {
-        Observable<Integer> observable = Multi.createFrom().item((Integer) null).convert().with(RxConverters.toObservable());
+        Observable<Integer> observable = Multi.createFrom().item((Integer) null).convert()
+                .with(MultiRxConverters.toObservable());
         assertThat(observable).isNotNull();
         observable
                 .test()
@@ -163,7 +160,7 @@ public class MultiConvertToTest {
     @Test
     public void testCreatingAnObservableWithFailure() {
         Observable<Integer> observable = Multi.createFrom().<Integer> failure(new IOException("boom")).convert()
-                .with(RxConverters.toObservable());
+                .with(MultiRxConverters.toObservable());
         assertThat(observable).isNotNull();
         observable.test().assertError(e -> {
             assertThat(e).hasMessage("boom").isInstanceOf(IOException.class);
@@ -173,7 +170,7 @@ public class MultiConvertToTest {
 
     @Test
     public void testCreatingAFlowable() {
-        Flowable<Integer> flowable = Multi.createFrom().item(1).convert().with(RxConverters.toFlowable());
+        Flowable<Integer> flowable = Multi.createFrom().item(1).convert().with(MultiRxConverters.toFlowable());
         assertThat(flowable).isNotNull();
         flowable.test()
                 .assertValue(1)
@@ -185,7 +182,7 @@ public class MultiConvertToTest {
         AtomicBoolean called = new AtomicBoolean();
         MultiAssertSubscriber<Integer> subscriber = Multi.createFrom()
                 .deferred(() -> Multi.createFrom().item(1).onItem().invoke((item) -> called.set(true)))
-                .convert().with(RxConverters.toFlowable())
+                .convert().with(MultiRxConverters.toFlowable())
                 .subscribeWith(MultiAssertSubscriber.create(0));
 
         assertThat(called).isFalse();
@@ -197,7 +194,8 @@ public class MultiConvertToTest {
 
     @Test
     public void testCreatingAFlowableFromNull() {
-        Flowable<Integer> flowable = Multi.createFrom().item((Integer) null).convert().with(RxConverters.toFlowable());
+        Flowable<Integer> flowable = Multi.createFrom().item((Integer) null).convert()
+                .with(MultiRxConverters.toFlowable());
         assertThat(flowable).isNotNull();
         flowable
                 .test()
@@ -208,7 +206,7 @@ public class MultiConvertToTest {
     @Test
     public void testCreatingAFlowableWithFailure() {
         Flowable<Integer> flowable = Multi.createFrom().<Integer> failure(new IOException("boom")).convert()
-                .with(RxConverters.toFlowable());
+                .with(MultiRxConverters.toFlowable());
         assertThat(flowable).isNotNull();
         flowable.test().assertError(e -> {
             assertThat(e).hasMessage("boom").isInstanceOf(IOException.class);

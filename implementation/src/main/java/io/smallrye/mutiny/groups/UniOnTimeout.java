@@ -53,8 +53,9 @@ public class UniOnTimeout<T> {
         return failWith(() -> failure);
     }
 
-    public Uni<T> failWith(Supplier<Throwable> supplier) {
+    public Uni<T> failWith(Supplier<? extends Throwable> supplier) {
         validate(timeout, "timeout");
+        nonNull(supplier, "supplier");
         return Infrastructure.onUniCreation(new UniFailOnTimeout<>(failure, timeout, supplier, executor));
     }
 

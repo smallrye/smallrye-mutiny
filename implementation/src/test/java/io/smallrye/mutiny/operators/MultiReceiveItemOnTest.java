@@ -62,7 +62,7 @@ public class MultiReceiveItemOnTest {
                 .emitOn(executor)
                 .onItem().invoke(i -> itemThread.add(Thread.currentThread().getName()))
                 .on().completion(() -> completionThread.add(Thread.currentThread().getName()))
-                .subscribe().with(MultiAssertSubscriber.create(4))
+                .subscribe().withSubscriber(MultiAssertSubscriber.create(4))
                 .await()
                 .assertCompletedSuccessfully();
 
@@ -79,7 +79,7 @@ public class MultiReceiveItemOnTest {
                 .emitOn(executor)
                 .onItem().invoke(i -> itemThread.add(Thread.currentThread().getName()))
                 .onFailure().invoke(f -> failureThread.add(Thread.currentThread().getName()))
-                .subscribe().with(MultiAssertSubscriber.create(4))
+                .subscribe().withSubscriber(MultiAssertSubscriber.create(4))
                 .await()
                 .assertHasFailedWith(IOException.class, "boom");
 
@@ -91,7 +91,7 @@ public class MultiReceiveItemOnTest {
     public void testWithImmediate() {
         Multi.createFrom().items(1, 2, 3, 4)
                 .emitOn(Runnable::run)
-                .subscribe().with(MultiAssertSubscriber.create(4))
+                .subscribe().withSubscriber(MultiAssertSubscriber.create(4))
                 .await()
                 .assertReceived(1, 2, 3, 4);
     }
@@ -100,7 +100,7 @@ public class MultiReceiveItemOnTest {
     public void testWithLargeNumberOfItems() {
         MultiAssertSubscriber<Integer> subscriber = Multi.createFrom().range(0, 100_000)
                 .emitOn(executor)
-                .subscribe().with(MultiAssertSubscriber.create(Long.MAX_VALUE))
+                .subscribe().withSubscriber(MultiAssertSubscriber.create(Long.MAX_VALUE))
                 .await()
                 .assertCompletedSuccessfully();
 
@@ -116,7 +116,7 @@ public class MultiReceiveItemOnTest {
     public void testSubscribeOn() {
         Multi.createFrom().items(1, 2, 3, 4)
                 .subscribeOn(executor)
-                .subscribe().with(MultiAssertSubscriber.create(4))
+                .subscribe().withSubscriber(MultiAssertSubscriber.create(4))
                 .await()
                 .assertReceived(1, 2, 3, 4);
     }

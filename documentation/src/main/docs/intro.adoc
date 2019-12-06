@@ -1,0 +1,26 @@
+
+
+SmallRye Mutiny is a reactive programming library.
+Wait? Another one? Yes!
+
+Mutiny is designed after having experienced many issues with other Reactive programming libraries and having seen many developers lost in an endless sequence of _flatMap_.
+Mutiny is taking a different approach.
+First, Mutiny does not provide as many operators as the other famous libraries, but we focused on the most used operators.
+Then, Mutiny provides a more _guided_ API, avoiding having classes with hundreds of methods making even the smartest IDE lost.
+Finally, Mutiny has built-in converted from and to other reactive programing libraries, so you can always pivot.
+
+[TIP]
+.Having questions?
+====
+You can contact the team on the https://groups.google.com/d/forum/smallrye[SmallRye Google Group]
+====
+
+Before digging into Mutiny, we need to understand how it relates to the other _reactive thingies_.
+
+image::mutiny-in-landscape.png[]
+
+Mutiny covers the _yellow_ part of the landscape: it's an event-driven reactive programming library, supporting (Reactive Streams) based back-pressure.
+It reuses ideas from http://reactivex.io/[Reactive eXtensions] but does not follow the same API guidelines and operators.
+Also, it can be used to build Reactive Systems, for example, by combining, Mutiny, and https://smallrye.io/smallrye-reactive-messaging/[Reactive Messaging].
+
+

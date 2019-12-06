@@ -40,13 +40,13 @@ public class MultiIfEmpty<T> {
      * @param supplier the supplier to produce the failure, must not be {@code null}, must not produce {@code null}
      * @return the new {@link Multi}
      */
-    public Multi<T> failWith(Supplier<Throwable> supplier) {
+    public Multi<T> failWith(Supplier<? extends Throwable> supplier) {
         nonNull(supplier, "supplier");
 
         return switchToEmitter(createMultiFromFailureSupplier(supplier));
     }
 
-    static <T> Consumer<MultiEmitter<? super T>> createMultiFromFailureSupplier(Supplier<Throwable> supplier) {
+    static <T> Consumer<MultiEmitter<? super T>> createMultiFromFailureSupplier(Supplier<? extends Throwable> supplier) {
         return emitter -> {
             Throwable throwable;
             try {

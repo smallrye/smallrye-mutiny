@@ -35,25 +35,4 @@ public class UniSubscriberTest {
         await().until(() -> counter.intValue() == 0);
         assertThat(failure.get()).isNotNull();
     }
-
-    @Test
-    public void testSubscriptionRequestIgnored() {
-        AtomicLong counter = new AtomicLong();
-        AtomicReference<Throwable> failure = new AtomicReference<>();
-
-        Uni.createFrom().item((Object) null).onItem().delayIt().by(Duration.ofMillis(50))
-                .subscribe().with(v -> counter.incrementAndGet(), failure::set).request(5);
-
-        await().until(() -> counter.intValue() == 1);
-        assertThat(failure.get()).isNull();
-    }
-
-    @Test(expectedExceptions = IllegalArgumentException.class)
-    public void testSubscriptionRequestException() {
-        AtomicLong counter = new AtomicLong();
-        AtomicReference<Throwable> failure = new AtomicReference<>();
-
-        Uni.createFrom().item(null).onItem().delayIt().by(Duration.ofMillis(50))
-                .subscribe().with(v -> counter.incrementAndGet(), failure::set).request(0);
-    }
 }

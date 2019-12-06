@@ -44,7 +44,7 @@ public class MultiSubscribe<T> {
      * @return the passed subscriber
      */
     @SuppressWarnings("SubscriberImplementation")
-    public <S extends Subscriber<? super T>> S with(S subscriber) {
+    public <S extends Subscriber<? super T>> S withSubscriber(S subscriber) {
         upstream.subscribe(subscriber);
         return subscriber;
     }
@@ -52,7 +52,7 @@ public class MultiSubscribe<T> {
     /**
      * Subscribes to the {@link Multi} to start receiving the items.
      * <p>
-     * This method accepts thw following callbacks:
+     * This method accepts the following callbacks:
      * <ol>
      * <li>{@code onSubscription} receives the {@link Subscription}, you <strong>must</strong> request items using
      * the {@link Subscription#request(long)} method</li>
@@ -85,13 +85,13 @@ public class MultiSubscribe<T> {
                 nonNull(onFailure, "onFailure"),
                 nonNull(onComplete, "onComplete"),
                 nonNull(onSubscription, "onSubscription"));
-        return with(subscriber);
+        return withSubscriber(subscriber);
     }
 
     /**
      * Subscribes to the {@link Multi} to start receiving the items.
      * <p>
-     * This method accepts thw following callbacks:
+     * This method accepts the following callbacks:
      * <ol>
      * <li>{@code onItem} receives the requested items if any</li>
      * <li>{@code onFailure} receives the failure if any</li>
@@ -124,13 +124,13 @@ public class MultiSubscribe<T> {
                 nonNull(onFailure, "onFailure"),
                 nonNull(onComplete, "onComplete"),
                 s -> s.request(Long.MAX_VALUE));
-        return with(subscriber);
+        return withSubscriber(subscriber);
     }
 
     /**
      * Subscribes to the {@link Multi} to start receiving the items.
      * <p>
-     * This method accepts thw following callbacks:
+     * This method accepts the following callbacks:
      * <ol>
      * <li>{@code onItem} receives the requested items if any</li>
      * <li>{@code onFailure} receives the failure if any</li>
@@ -163,13 +163,43 @@ public class MultiSubscribe<T> {
                 nonNull(onFailure, "onFailure"),
                 null,
                 s -> s.request(Long.MAX_VALUE));
-        return with(subscriber);
+        return withSubscriber(subscriber);
     }
 
     /**
      * Subscribes to the {@link Multi} to start receiving the items.
      * <p>
-     * This method accepts thw following callbacks:
+     * This method receives only the {@code onItem} callback, invoked on each item.
+     * So, you won't be notified on stream completion, and on failure the default failure handler is used.
+     * <p>
+     * This method returns a {@link Cancellable} to cancel the subscription.
+     *
+     * <strong>Important:</strong> This method request {@link Long#MAX_VALUE} items.
+     *
+     * <p>
+     * This is a "factory method" and can be called multiple times, each time starting a new {@link Subscription}.
+     * Each {@link Subscription} will work for only a single {@link Subscriber}. A {@link Subscriber} should
+     * only subscribe once to a single {@link Multi}.
+     * *
+     * <p>
+     *
+     * @param onItem the callback receiving the items, must not be {@code null}
+     * @return the cancellable object to cancel the subscription
+     */
+    public Cancellable with(Consumer<? super T> onItem) {
+        nonNull(onItem, "onItem");
+        CancellableSubscriber<? super T> subscriber = Subscribers.from(
+                nonNull(onItem, "onItem"),
+                null,
+                null,
+                s -> s.request(Long.MAX_VALUE));
+        return withSubscriber(subscriber);
+    }
+
+    /**
+     * Subscribes to the {@link Multi} to start receiving the items.
+     * <p>
+     * This method accepts the following callbacks:
      * <ol>
      * <li>{@code onItem} receives the requested items if any</li>
      * <li>{@code onComplete} receives the completion event</li>
@@ -200,7 +230,7 @@ public class MultiSubscribe<T> {
                 null,
                 onComplete,
                 s -> s.request(Long.MAX_VALUE));
-        return with(subscriber);
+        return withSubscriber(subscriber);
     }
 
     /**

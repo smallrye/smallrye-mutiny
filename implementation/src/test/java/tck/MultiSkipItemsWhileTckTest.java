@@ -91,7 +91,7 @@ public class MultiSkipItemsWhileTckTest extends AbstractPublisherTck<Long> {
         infiniteStream()
                 .on().termination((f, c) -> cancelled.complete(null))
                 .transform().bySkippingItemsWhile(i -> i < 3)
-                .subscribe().with(new MultiAssertSubscriber<>(10, true));
+                .subscribe().withSubscriber(new MultiAssertSubscriber<>(10, true));
         await(cancelled);
     }
 

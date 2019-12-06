@@ -18,7 +18,7 @@ public class ToSingle<T> implements Function<Uni<T>, Single<Optional<T>>> {
     }
 
     @SuppressWarnings("unchecked")
-    public static <R> ToSingleFailOnNull<R> failOnNull() {
+    public <R> ToSingleFailOnNull<R> failOnNull() {
         return ToSingleFailOnNull.INSTANCE;
     }
 

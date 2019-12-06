@@ -33,8 +33,8 @@ public class MultiCreateFromTimePeriodTest {
 
         Multi.createFrom().ticks()
                 .startingAfter(Duration.ofMillis(100)).onExecutor(executor).every(Duration.ofMillis(100))
-                .onItem().mapToItem(l -> System.currentTimeMillis())
-                .subscribe().with(ts);
+                .onItem().apply(l -> System.currentTimeMillis())
+                .subscribe().withSubscriber(ts);
 
         await().until(() -> ts.items().size() == 10);
         ts.cancel();
@@ -62,8 +62,8 @@ public class MultiCreateFromTimePeriodTest {
 
         Multi.createFrom().ticks()
                 .every(Duration.ofMillis(100))
-                .onItem().mapToItem(l -> System.currentTimeMillis())
-                .subscribe().with(ts);
+                .onItem().apply(l -> System.currentTimeMillis())
+                .subscribe().withSubscriber(ts);
 
         await().until(() -> ts.items().size() == 10);
         ts.cancel();
@@ -87,8 +87,8 @@ public class MultiCreateFromTimePeriodTest {
 
         Multi.createFrom().ticks()
                 .startingAfter(Duration.ofMillis(50)).onExecutor(executor).every(Duration.ofMillis(50))
-                .onItem().mapToItem(l -> System.currentTimeMillis())
-                .subscribe().with(ts);
+                .onItem().apply(l -> System.currentTimeMillis())
+                .subscribe().withSubscriber(ts);
 
         ts
                 .request(2) // request only 2

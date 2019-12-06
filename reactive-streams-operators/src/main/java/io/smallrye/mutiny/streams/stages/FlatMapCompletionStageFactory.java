@@ -37,7 +37,7 @@ public class FlatMapCompletionStageFactory
 
         @Override
         public Multi<O> apply(Multi<I> source) {
-            return source.onItem().flatMap().completionStage((I item) -> {
+            return source.onItem().produceCompletionStage((I item) -> {
                 if (item == null) {
                     // Throw an NPE to be compliant with the reactive stream spec.
                     throw new NullPointerException();
@@ -48,7 +48,7 @@ public class FlatMapCompletionStageFactory
                     throw new NullPointerException();
                 }
                 return result;
-            }).concatenateResults();
+            }).concatenate();
         }
     }
 

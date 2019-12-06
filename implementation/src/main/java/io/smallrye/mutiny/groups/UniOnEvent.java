@@ -77,13 +77,13 @@ public class UniOnEvent<T> {
      * <pre>
      * {@code
      * Uni<T> uni = ...;
-     * uni.onItem().mapToItem(x -> ...); // Map to another item
-     * uni.onItem().mapToUni(x -> ...); // Map to another Uni (flatMap)
+     * uni.onItem().apply(x -> ...); // Map to another item
+     * uni.onItem().produceUni(x -> ...); // Map to another Uni (flatMap)
      * }
      * </pre>
      *
      * @return the object to configure the action to execute when an item is emitted
-     * @see Uni#onNoItem()
+     * @see Uni#ifNoItem()
      */
     public UniOnItem<T> item() {
         return upstream.onItem();

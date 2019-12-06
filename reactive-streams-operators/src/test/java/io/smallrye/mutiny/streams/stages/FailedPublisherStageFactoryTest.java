@@ -18,7 +18,7 @@ public class FailedPublisherStageFactoryTest extends StageTestBase {
     public void createWithError() {
         Exception failure = new Exception("Boom");
         PublisherStage<Object> boom = factory.create(null, () -> failure);
-        boom.get().subscribe().with(MultiAssertSubscriber.create())
+        boom.get().subscribe().withSubscriber(MultiAssertSubscriber.create())
                 .assertHasFailedWith(Exception.class, "Boom");
     }
 
