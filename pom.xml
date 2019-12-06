@@ -6,7 +6,7 @@
     <parent>
         <groupId>io.smallrye</groupId>
         <artifactId>smallrye-parent</artifactId>
-        <version>14</version>
+        <version>15</version>
     </parent>
 
     <groupId>io.smallrye.reactive</groupId>
@@ -217,11 +217,6 @@
     <profiles>
         <profile>
             <id>release</id>
-            <activation>
-                <property>
-                    <name>!release.maven.bug.always.be.active</name>
-                </property>
-            </activation>
             <modules>
                 <module>release</module>
             </modules>
