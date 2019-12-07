@@ -8,7 +8,7 @@ echo "Cloning repo"
 cd target
 git clone -b gh-pages git@github.com:smallrye/smallrye-mutiny.git site
 echo "Copy content"
-cp -R generated-docs/* site
+yes | cp -R generated-docs/* site
 
 echo "Pushing"
 cd site
