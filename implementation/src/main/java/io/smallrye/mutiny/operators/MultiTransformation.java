@@ -1,15 +1,9 @@
 package io.smallrye.mutiny.operators;
 
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.function.Predicate;
 
-import org.reactivestreams.Publisher;
-
 import io.smallrye.mutiny.Multi;
-import io.smallrye.mutiny.helpers.queues.SpscArrayQueue;
 import io.smallrye.mutiny.operators.multi.*;
 
 public class MultiTransformation {
@@ -58,25 +52,6 @@ public class MultiTransformation {
 
     public static <T> Multi<T> dropRepetitions(Multi<T> upstream) {
         return new MultiDistinctUntilChangedOp<>(upstream);
-    }
-
-    @SafeVarargs
-    public static <T> Multi<T> merge(Multi<T> upstream, Publisher<T>... publishers) {
-        return merge(upstream, Arrays.asList(publishers));
-    }
-
-    public static <T> Multi<T> merge(Multi<T> upstream, Iterable<Publisher<T>> iterable) {
-        List<Publisher<? extends T>> list = new ArrayList<>();
-        list.add(upstream);
-        iterable.forEach(list::add);
-        return new MultiMergeOp<>(
-                list,
-                false,
-                list.size(),
-                8,
-                () -> new SpscArrayQueue<>(16),
-                () -> new SpscArrayQueue<>(8));
-
     }
 
 }

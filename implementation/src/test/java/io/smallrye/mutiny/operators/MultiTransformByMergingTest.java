@@ -3,14 +3,18 @@ package io.smallrye.mutiny.operators;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import org.reactivestreams.Publisher;
 import org.testng.annotations.Test;
 
 import io.smallrye.mutiny.Multi;
+import io.smallrye.mutiny.test.MultiAssertSubscriber;
 
-public class MultiTransformMyMergingTest {
+public class MultiTransformByMergingTest {
 
     @Test
     public void testMerging() {
@@ -48,5 +52,21 @@ public class MultiTransformMyMergingTest {
     public void testMergingWithNullIterable() {
         Multi.createFrom().item(1).transform()
                 .byMergingWith((Iterable<Publisher<Integer>>) null);
+    }
+
+    @Test
+    public void testConcurrentEmissionWithMerge() {
+        ExecutorService service = Executors.newFixedThreadPool(10);
+        Multi<Integer> m1 = Multi.createFrom().range(1, 100).emitOn(service);
+        Multi<Integer> m2 = Multi.createFrom().range(100, 150).emitOn(service);
+        Multi<Integer> m3 = Multi.createFrom().range(150, 200).emitOn(service);
+
+        Multi<Integer> merged = m1.transform().byMergingWith(m2, m3);
+        MultiAssertSubscriber<Integer> subscriber = merged.subscribe()
+                .withSubscriber(MultiAssertSubscriber.create(1000));
+
+        subscriber.await();
+        List<Integer> items = subscriber.items();
+        assertThat(Collections.singleton(items)).noneSatisfy(list -> assertThat(list).isSorted());
     }
 }

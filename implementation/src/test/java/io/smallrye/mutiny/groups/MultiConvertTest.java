@@ -1,12 +1,13 @@
 package io.smallrye.mutiny.groups;
 
-import io.smallrye.mutiny.Multi;
-import org.reactivestreams.Publisher;
-import org.testng.annotations.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import org.reactivestreams.Publisher;
+import org.testng.annotations.Test;
+
+import io.smallrye.mutiny.Multi;
 
 public class MultiConvertTest {
 
