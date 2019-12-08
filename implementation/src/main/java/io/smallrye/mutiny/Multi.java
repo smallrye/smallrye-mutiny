@@ -1,15 +1,16 @@
 package io.smallrye.mutiny;
 
-import java.util.concurrent.Executor;
-import java.util.function.Function;
-import java.util.function.Predicate;
-
+import io.smallrye.mutiny.groups.*;
+import io.smallrye.mutiny.helpers.ParameterValidation;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
-import io.smallrye.mutiny.groups.*;
-import io.smallrye.mutiny.helpers.ParameterValidation;
+import java.util.concurrent.Executor;
+import java.util.function.Function;
+import java.util.function.Predicate;
+
+import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
 
 @SuppressWarnings("PublisherImplementation")
 public interface Multi<T> extends Publisher<T> {
@@ -38,9 +39,30 @@ public interface Multi<T> extends Publisher<T> {
     /**
      * Configures the behavior when an {@code item} event is received from the this {@link Multi}
      *
-     * @return the object to configure the behavio.
+     * @return the object to configure the behavior.
      */
     MultiOnItem<T> onItem();
+
+    /**
+     * Allows structuring the pipeline by creating a logic separation:
+     *
+     * <code><pre>
+     *     Multi multi = upstream
+     *      .then(m -> { ...})
+     *      .then(m -> { ...})
+     *      .then(m -> { ...})
+     * </pre></code>
+     * <p>
+     * With `then` you can structure and chain group of processing.
+     *
+     * @param stage the function receiving the this {@link Multi} as parameter and producing the outcome (can be a
+     *              {@link Multi} or something else), must not be {@code null}.
+     * @param <O>   the outcome type
+     * @return the outcome of the function.
+     */
+    default <O> O then(Function<Multi<T>, O> stage) {
+        return nonNull(stage, "stage").apply(this);
+    }
 
     /**
      * Creates a {@link Uni} from this {@link Multi}.
@@ -202,7 +224,7 @@ public interface Multi<T> extends Publisher<T> {
      * multi.convert().with(multi -> x); // Convert with a custom lambda converter
      * }
      * </pre>
-     * 
+     *
      * @return the object to convert an {@link Multi} instance
      * @see MultiConvert
      */
@@ -217,11 +239,11 @@ public interface Multi<T> extends Publisher<T> {
      * This method is a shortcut for {@code multi.onItem().apply(mapper)}.
      *
      * @param mapper the mapper function, must not be {@code null}
-     * @param <O> the type of item produced by the mapper function
+     * @param <O>    the type of item produced by the mapper function
      * @return the new {@link Multi}
      */
     default <O> Multi<O> map(Function<? super T, ? extends O> mapper) {
-        return onItem().apply(ParameterValidation.nonNull(mapper, "mapper"));
+        return onItem().apply(nonNull(mapper, "mapper"));
     }
 
     /**
@@ -238,8 +260,8 @@ public interface Multi<T> extends Publisher<T> {
      * This method is a shortcut for {@code multi.onItem().producePublisher(mapper).merge()}.
      *
      * @param mapper the {@link Function} producing {@link Publisher} / {@link Multi} for each items emitted by the
-     *        upstream {@link Multi}
-     * @param <O> the type of item emitted by the {@link Publisher} produced by the {@code mapper}
+     *               upstream {@link Multi}
+     * @param <O>    the type of item emitted by the {@link Publisher} produced by the {@code mapper}
      * @return the produced {@link Multi}
      */
     default <O> Multi<O> flatMap(Function<? super T, ? extends Publisher<? extends O>> mapper) {
@@ -257,12 +279,12 @@ public interface Multi<T> extends Publisher<T> {
      * <li>The items emitted by each of the produced {@link Publisher} are then <strong>concatenated</strong> in the
      * produced {@link Multi}. The flatten process makes sure that the items are not interleaved.
      * </ul>
-     *
+     * <p>
      * This method is equivalent to {@code multi.onItem().producePublisher(mapper).concatenate()}.
      *
      * @param mapper the {@link Function} producing {@link Publisher} / {@link Multi} for each items emitted by the
-     *        upstream {@link Multi}
-     * @param <O> the type of item emitted by the {@link Publisher} produced by the {@code mapper}
+     *               upstream {@link Multi}
+     * @param <O>    the type of item emitted by the {@link Publisher} produced by the {@code mapper}
      * @return the produced {@link Multi}
      */
     default <O> Multi<O> concatMap(Function<? super T, ? extends Publisher<? extends O>> mapper) {

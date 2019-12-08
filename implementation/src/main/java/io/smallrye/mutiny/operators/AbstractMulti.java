@@ -192,4 +192,6 @@ public abstract class AbstractMulti<T> implements Multi<T> {
     public MultiConvert<T> convert() {
         return new MultiConvert<>(this);
     }
+
+
 }
