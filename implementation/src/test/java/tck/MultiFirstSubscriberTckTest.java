@@ -8,9 +8,11 @@ import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 import org.reactivestreams.tck.SubscriberBlackboxVerification;
 import org.reactivestreams.tck.TestEnvironment;
+import org.testng.annotations.Ignore;
 
 import io.smallrye.mutiny.Multi;
 
+@Ignore("Subscriber test must be adapted as they are not expected to be used like this")
 public class MultiFirstSubscriberTckTest extends SubscriberBlackboxVerification<Long> {
 
     protected MultiFirstSubscriberTckTest() {
