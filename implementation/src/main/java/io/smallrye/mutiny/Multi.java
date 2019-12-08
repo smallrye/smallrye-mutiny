@@ -1,16 +1,16 @@
 package io.smallrye.mutiny;
 
-import io.smallrye.mutiny.groups.*;
-import io.smallrye.mutiny.helpers.ParameterValidation;
-import org.reactivestreams.Publisher;
-import org.reactivestreams.Subscriber;
-import org.reactivestreams.Subscription;
+import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
 
 import java.util.concurrent.Executor;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
+import org.reactivestreams.Publisher;
+import org.reactivestreams.Subscriber;
+import org.reactivestreams.Subscription;
+
+import io.smallrye.mutiny.groups.*;
 
 @SuppressWarnings("PublisherImplementation")
 public interface Multi<T> extends Publisher<T> {
@@ -48,16 +48,16 @@ public interface Multi<T> extends Publisher<T> {
      *
      * <code><pre>
      *     Multi multi = upstream
-     *      .then(m -> { ...})
-     *      .then(m -> { ...})
-     *      .then(m -> { ...})
+     *      .then(m -&gt; { ...})
+     *      .then(m -&gt; { ...})
+     *      .then(m -&gt; { ...})
      * </pre></code>
      * <p>
-     * With `then` you can structure and chain group of processing.
+     * With `then` you can structure and chain groups of processing.
      *
-     * @param stage the function receiving the this {@link Multi} as parameter and producing the outcome (can be a
-     *              {@link Multi} or something else), must not be {@code null}.
-     * @param <O>   the outcome type
+     * @param stage the function receiving this {@link Multi} as parameter and producing the outcome (can be a
+     *        {@link Multi} or something else), must not be {@code null}.
+     * @param <O> the outcome type
      * @return the outcome of the function.
      */
     default <O> O then(Function<Multi<T>, O> stage) {
@@ -239,7 +239,7 @@ public interface Multi<T> extends Publisher<T> {
      * This method is a shortcut for {@code multi.onItem().apply(mapper)}.
      *
      * @param mapper the mapper function, must not be {@code null}
-     * @param <O>    the type of item produced by the mapper function
+     * @param <O> the type of item produced by the mapper function
      * @return the new {@link Multi}
      */
     default <O> Multi<O> map(Function<? super T, ? extends O> mapper) {
@@ -260,8 +260,8 @@ public interface Multi<T> extends Publisher<T> {
      * This method is a shortcut for {@code multi.onItem().producePublisher(mapper).merge()}.
      *
      * @param mapper the {@link Function} producing {@link Publisher} / {@link Multi} for each items emitted by the
-     *               upstream {@link Multi}
-     * @param <O>    the type of item emitted by the {@link Publisher} produced by the {@code mapper}
+     *        upstream {@link Multi}
+     * @param <O> the type of item emitted by the {@link Publisher} produced by the {@code mapper}
      * @return the produced {@link Multi}
      */
     default <O> Multi<O> flatMap(Function<? super T, ? extends Publisher<? extends O>> mapper) {
@@ -283,8 +283,8 @@ public interface Multi<T> extends Publisher<T> {
      * This method is equivalent to {@code multi.onItem().producePublisher(mapper).concatenate()}.
      *
      * @param mapper the {@link Function} producing {@link Publisher} / {@link Multi} for each items emitted by the
-     *               upstream {@link Multi}
-     * @param <O>    the type of item emitted by the {@link Publisher} produced by the {@code mapper}
+     *        upstream {@link Multi}
+     * @param <O> the type of item emitted by the {@link Publisher} produced by the {@code mapper}
      * @return the produced {@link Multi}
      */
     default <O> Multi<O> concatMap(Function<? super T, ? extends Publisher<? extends O>> mapper) {

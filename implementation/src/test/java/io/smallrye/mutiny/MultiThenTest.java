@@ -2,33 +2,36 @@ package io.smallrye.mutiny;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.testng.annotations.Test;
 
-public class UniThenTest {
+public class MultiThenTest {
 
     @Test
     public void testChainThen() {
-        String result = Uni.createFrom().completionStage(CompletableFuture.supplyAsync(() -> 23))
+        List<String> result = Multi.createFrom().items(1, 2, 3)
+                .then(self -> self.onItem().produceCompletionStage(i -> CompletableFuture.supplyAsync(() -> i)).concatenate())
                 .then(self -> self
                         .onItem().apply(i -> i + 1)
                         .onFailure().retry().indefinitely())
-                .then(self -> self.onItem().produceUni(i -> Uni.createFrom().item(Integer.toString(i))))
+                .then(m -> m.onItem().apply(i -> Integer.toString(i)))
+                .then(m -> m.collectItems().asList())
                 .await().indefinitely();
-        assertThat(result).isEqualTo("24");
+        assertThat(result).containsExactly("2", "3", "4");
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void testThatFunctionMustNotBeNull() {
-        Uni.createFrom().item(1)
+        Multi.createFrom().item(1)
                 .then(null);
     }
 
     @Test(expectedExceptions = IllegalStateException.class, expectedExceptionsMessageRegExp = ".*boom.*")
     public void testThatFunctionMustNotThrowException() {
-        Uni.createFrom().item(1)
+        Multi.createFrom().item(1)
                 .then(i -> {
                     throw new IllegalStateException("boom");
                 });
@@ -37,13 +40,13 @@ public class UniThenTest {
     @Test
     public void testThatFunctionCanReturnNullIfVoid() {
         AtomicReference<String> result = new AtomicReference<>();
-        Void x = Uni.createFrom().completionStage(CompletableFuture.supplyAsync(() -> 23))
+        Void x = Multi.createFrom().completionStage(CompletableFuture.supplyAsync(() -> 23))
                 .then(self -> self
                         .onItem().apply(i -> i + 1)
                         .onFailure().retry().indefinitely())
-                .then(self -> self.onItem().produceUni(i -> Uni.createFrom().item(Integer.toString(i))))
+                .then(self -> self.onItem().produceUni(i -> Uni.createFrom().item(Integer.toString(i))).concatenate())
                 .then(self -> {
-                    String r = self.await().indefinitely();
+                    String r = self.collectItems().first().await().indefinitely();
                     result.set(r);
                     return null; // void
                 });
@@ -52,9 +55,8 @@ public class UniThenTest {
     }
 
     @Test
-    public void testChainingMulti() {
-        String result = Uni.createFrom().completionStage(CompletableFuture.supplyAsync(() -> 23))
-                .then(self -> Multi.createFrom().uni(self))
+    public void testChainingUni() {
+        String result = Multi.createFrom().completionStage(CompletableFuture.supplyAsync(() -> 23))
                 .then(self -> self
                         .onItem().apply(i -> i + 1)
                         .onItem().apply(i -> Integer.toString(i)))

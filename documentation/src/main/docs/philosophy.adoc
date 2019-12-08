@@ -159,3 +159,15 @@ Subscribing to `Multis` is done by method provided by `multi.subscribe()`:
 include::../../../src/test/java/snippets/MultiCreationTest.java[tags=subscription]
 ----
 
+=== Structuring the pipeline
+
+It can be hard to structure your sequence of processing in a readable manner.
+Mutiny provides the `then` function to structure your pipeline:
+
+[source,java,indent=0]
+----
+include::../../../src/test/java/snippets/ThenTest.java[tags=code]
+----
+
+
+`then` can be used on `Multi` and `Uni` and let you group a set of operations in a logical set.

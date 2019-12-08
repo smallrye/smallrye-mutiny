@@ -1,13 +1,6 @@
 package io.smallrye.mutiny;
 
-import io.smallrye.mutiny.groups.*;
-import io.smallrye.mutiny.helpers.ParameterValidation;
-import io.smallrye.mutiny.subscription.UniEmitter;
-import io.smallrye.mutiny.subscription.UniSubscriber;
-import io.smallrye.mutiny.subscription.UniSubscription;
-import io.smallrye.mutiny.tuples.Tuple;
-import io.smallrye.mutiny.tuples.Tuple2;
-import io.smallrye.mutiny.tuples.Tuple5;
+import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
@@ -15,7 +8,13 @@ import java.util.concurrent.Executor;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
+import io.smallrye.mutiny.groups.*;
+import io.smallrye.mutiny.subscription.UniEmitter;
+import io.smallrye.mutiny.subscription.UniSubscriber;
+import io.smallrye.mutiny.subscription.UniSubscription;
+import io.smallrye.mutiny.tuples.Tuple;
+import io.smallrye.mutiny.tuples.Tuple2;
+import io.smallrye.mutiny.tuples.Tuple5;
 
 /**
  * A {@link Uni} represent a lazy asynchronous action. It follows a subscription pattern, meaning the the action
@@ -72,16 +71,16 @@ public interface Uni<T> {
      *
      * <code><pre>
      *     Uni uni = upstream
-     *      .then(u -> { ...})
-     *      .then(u -> { ...})
-     *      .then(u -> { ...})
+     *      .then(u -&gt; { ...})
+     *      .then(u -&gt; { ...})
+     *      .then(u -&gt; { ...})
      * </pre></code>
      * <p>
-     * With `then` you can structure and chain group of processing.
+     * With `then` you can structure and chain groups of processing.
      *
      * @param stage the function receiving the this {@link Uni} as parameter and producing the outcome (can be a
-     *              {@link Uni} or something else), must not be {@code null}.
-     * @param <O>   the outcome type
+     *        {@link Uni} or something else), must not be {@code null}.
+     * @param <O> the outcome type
      * @return the outcome of the function.
      */
     default <O> O then(Function<Uni<T>, O> stage) {
@@ -202,7 +201,7 @@ public interface Uni<T> {
      * If {@code this} or {@code other} fails, the other resolution is cancelled.
      *
      * @param other the other {@link Uni}, must not be {@code null}
-     * @param <T2>  the type to pair
+     * @param <T2> the type to pair
      * @return the combination of the pair combining the two items.
      * @see #and() <code>and</code> for more options on the combination of items
      * @see UniCombine#all() <code>Uni.all()</code> for the equivalent static operator
@@ -225,7 +224,7 @@ public interface Uni<T> {
      *
      * @return the object to enlist the participants
      * @see UniCombine#any() <code>Uni.any</code> for a static version of this operator, like
-     * <code>Uni first = Uni.any().of(uni1, uni2);</code>
+     *      <code>Uni first = Uni.any().of(uni1, uni2);</code>
      */
     UniOr or();
 
@@ -311,7 +310,7 @@ public interface Uni<T> {
      * Caches the events (item or failure) of this {@link Uni} and replays it for all further {@link UniSubscriber}.
      *
      * @return the new {@link Uni}. Unlike regular {@link Uni}, re-subscribing to this {@link Uni} does not re-compute
-     * the outcome but replayed the cached events.
+     *         the outcome but replayed the cached events.
      */
     Uni<T> cache();
 
@@ -321,7 +320,7 @@ public interface Uni<T> {
      * For asynchronous composition, look at flatMap.
      *
      * @param mapper the mapper function, must not be {@code null}
-     * @param <O>    the output type
+     * @param <O> the output type
      * @return a new {@link Uni} computing an item of type {@code <O>}.
      */
     default <O> Uni<O> map(Function<? super T, ? extends O> mapper) {
@@ -339,10 +338,10 @@ public interface Uni<T> {
      * This operation is generally named {@code flatMap}.
      *
      * @param mapper the function called with the item of the this {@link Uni} and producing the {@link Uni},
-     *               must not be {@code null}, must not return {@code null}.
-     * @param <O>    the type of item
+     *        must not be {@code null}, must not return {@code null}.
+     * @param <O> the type of item
      * @return a new {@link Uni} that would fire events from the uni produced by the mapper function, possibly
-     * in an asynchronous manner.
+     *         in an asynchronous manner.
      */
     default <O> Uni<O> flatMap(Function<? super T, Uni<? extends O>> mapper) {
         return onItem().produceUni(nonNull(mapper, "mapper"));
