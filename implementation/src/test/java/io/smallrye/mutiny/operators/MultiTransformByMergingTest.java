@@ -58,8 +58,8 @@ public class MultiTransformByMergingTest {
     public void testConcurrentEmissionWithMerge() {
         ExecutorService service = Executors.newFixedThreadPool(10);
         Multi<Integer> m1 = Multi.createFrom().range(1, 100).emitOn(service);
-        Multi<Integer> m2 = Multi.createFrom().range(100, 150).emitOn(service);
-        Multi<Integer> m3 = Multi.createFrom().range(150, 200).emitOn(service);
+        Multi<Integer> m2 = Multi.createFrom().range(100, 150).emitOn(service).emitOn(service).emitOn(service);
+        Multi<Integer> m3 = Multi.createFrom().range(150, 200).emitOn(service).emitOn(service);
 
         Multi<Integer> merged = m1.transform().byMergingWith(m2, m3);
         MultiAssertSubscriber<Integer> subscriber = merged.subscribe()
