@@ -1,13 +1,13 @@
 package snippets;
 
-import io.smallrye.mutiny.Multi;
-import io.smallrye.mutiny.Uni;
-import org.junit.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.Test;
+
+import io.smallrye.mutiny.Multi;
 
 public class BackPressureTest {
 
