@@ -321,7 +321,7 @@ public class Subscriptions {
     public static class CancelledSubscriber<X> implements Subscriber<X> {
         @Override
         public void onSubscribe(Subscription s) {
-            s.cancel();
+            Objects.requireNonNull(s).cancel();
         }
 
         @Override

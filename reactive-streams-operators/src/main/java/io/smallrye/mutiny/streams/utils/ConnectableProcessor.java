@@ -73,7 +73,7 @@ public class ConnectableProcessor<T> implements Processor<T, T> {
         // However, we could complete of failed in the meantime.
         subscriber.onSubscribe(
                 new WrappedSubscription(subscription.get(),
-                        () -> this.subscriber.set(new CancellationSubscriber<>())));
+                        () -> this.subscriber.set(new Subscriptions.CancelledSubscriber<>())));
         if (!state.compareAndSet(State.HAS_SUBSCRIPTION, State.PROCESSING)) {
             if (state.get() == State.FAILED) {
                 subscriber.onError(failure.get());
@@ -107,7 +107,7 @@ public class ConnectableProcessor<T> implements Processor<T, T> {
         if (!state.compareAndSet(State.IDLE, State.HAS_SUBSCRIPTION)) {
             state.set(State.PROCESSING);
             subscriber.get().onSubscribe(new WrappedSubscription(subscription,
-                    () -> subscriber.set(new CancellationSubscriber<>())));
+                    () -> subscriber.set(new Subscriptions.CancelledSubscriber<>())));
         }
     }
 

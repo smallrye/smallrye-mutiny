@@ -37,7 +37,7 @@ public class CancellablePublisher<T> implements Publisher<T> {
 
     public void cancelIfNotSubscribed() {
         if (subscribed.compareAndSet(false, true)) {
-            source.subscribe(new CancellationSubscriber<>());
+            source.subscribe(new Subscriptions.CancelledSubscriber<>());
         }
     }
 }
