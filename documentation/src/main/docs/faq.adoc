@@ -290,7 +290,15 @@ include::../../../src/test/java/snippets/ReactorTest.java[tags=multi-export]
 
 === How do I control the back-pressure?
 
-// TODO
+When a consumer cannot keep up with the pace of a publisher, there is an overflow condition.
+By default, it would fail and propagate an exception.
+
+However, you can control how the overflow is handled using the `multi.onOverflow()` methods, such as in:
+
+[source, java, indent=0]
+----
+include::../../../src/test/java/snippets/BackPressureTest.java[tags=code]
+----
 
 === How do wrap blocking calls?
 
