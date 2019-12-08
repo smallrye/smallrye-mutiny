@@ -54,7 +54,15 @@ Mutiny also proposes there methods using the most-used variants of them.
 
 [source,java,indent=0]
 ----
-include::../../../src/test/java/snippets/FlatMapTest.java[tags=code]
+include::../../../src/test/java/snippets/FlatMapTest.java[tags=rx]
+----
+
+Mutiny API is quite different from the _traditional_ reactive eXtensions API.
+The equivalent to `map`, `flatMap` and `concatMap` are the following:
+
+[source,java,indent=0]
+----
+include::../../../src/test/java/snippets/FlatMapTest.java[tags=mutiny]
 ----
 
 === How do I merge, concatenate or combine Multis?
