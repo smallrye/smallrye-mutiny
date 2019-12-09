@@ -1,5 +1,7 @@
 package io.smallrye.mutiny;
 
+import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
+
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Executor;
@@ -7,7 +9,6 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 import io.smallrye.mutiny.groups.*;
-import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.subscription.UniEmitter;
 import io.smallrye.mutiny.subscription.UniSubscriber;
 import io.smallrye.mutiny.subscription.UniSubscription;
@@ -43,7 +44,7 @@ public interface Uni<T> {
      * <p>
      * Examples:
      * </p>
-     * 
+     *
      * <pre>
      * {@code
      * Uni.from().item(1); // Emit 1 at subscription time
@@ -66,6 +67,29 @@ public interface Uni<T> {
     }
 
     /**
+     * Allows structuring the pipeline by creating a logic separation:
+     *
+     * <pre>
+     * {@code
+     *     Uni uni = upstream
+     *      .then(u -> { ...})
+     *      .then(u -> { ...})
+     *      .then(u -> { ...})
+     * }
+     * </pre>
+     * <p>
+     * With `then` you can structure and chain groups of processing.
+     *
+     * @param stage the function receiving the this {@link Uni} as parameter and producing the outcome (can be a
+     *        {@link Uni} or something else), must not be {@code null}.
+     * @param <O> the outcome type
+     * @return the outcome of the function.
+     */
+    default <O> O then(Function<Uni<T>, O> stage) {
+        return nonNull(stage, "stage").apply(this);
+    }
+
+    /**
      * Creates a new {@link Uni} combining several others unis such as {@code all} or {@code any}.
      *
      * @return the factory use to combine the uni instances
@@ -82,7 +106,7 @@ public interface Uni<T> {
      * <p>
      * Examples:
      * </p>
-     * 
+     *
      * <pre>
      * {@code
      *     Uni<String> uni = ...;
@@ -122,7 +146,7 @@ public interface Uni<T> {
      * <p>
      * Examples:
      * </p>
-     * 
+     *
      * <pre>
      * {@code
      * Uni<T> uni = ...;
@@ -142,7 +166,7 @@ public interface Uni<T> {
      * <p>
      * Examples:
      * </p>
-     * 
+     *
      * <pre>
      * {@code
      * Uni<T> uni = ...;
@@ -302,7 +326,7 @@ public interface Uni<T> {
      * @return a new {@link Uni} computing an item of type {@code <O>}.
      */
     default <O> Uni<O> map(Function<? super T, ? extends O> mapper) {
-        return onItem().apply(ParameterValidation.nonNull(mapper, "mapper"));
+        return onItem().apply(nonNull(mapper, "mapper"));
     }
 
     /**
@@ -322,7 +346,7 @@ public interface Uni<T> {
      *         in an asynchronous manner.
      */
     default <O> Uni<O> flatMap(Function<? super T, Uni<? extends O>> mapper) {
-        return onItem().produceUni(ParameterValidation.nonNull(mapper, "mapper"));
+        return onItem().produceUni(nonNull(mapper, "mapper"));
     }
 
     /**
@@ -339,7 +363,7 @@ public interface Uni<T> {
      * uni.convert().with(uni -> x); // Convert with a custom lambda converter
      * }
      * </pre>
-     * 
+     *
      * @return the object to convert an {@link Uni} instance
      * @see UniConvert
      */
