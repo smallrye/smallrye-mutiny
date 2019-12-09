@@ -20,6 +20,7 @@ public class MultiConvert<T> {
      * Transforms this {@link Multi} into a type using the provided converter.
      *
      * @param converter the converter function
+     * @param <R> the type produced by the converter
      * @return an instance of R
      * @throws RuntimeException if the conversion fails.
      */
@@ -28,6 +29,13 @@ public class MultiConvert<T> {
         return converter.apply(upstream);
     }
 
+    /**
+     * Converts the {@link Multi} into a {@link Publisher}.
+     * <p>
+     * Basically, this method returns the {@link Multi} as it is, as {@link Multi} implements {@link Publisher}.
+     *
+     * @return the publisher
+     */
     public Publisher<T> toPublisher() {
         return upstream;
     }

@@ -46,12 +46,14 @@ public interface Multi<T> extends Publisher<T> {
     /**
      * Allows structuring the pipeline by creating a logic separation:
      *
-     * <code><pre>
+     * <pre>
+     * {@code
      *     Multi multi = upstream
-     *      .then(m -&gt; { ...})
-     *      .then(m -&gt; { ...})
-     *      .then(m -&gt; { ...})
-     * </pre></code>
+     *      .then(m -> { ...})
+     *      .then(m -> { ...})
+     *      .then(m -> { ...})
+     * }
+     * </pre>
      * <p>
      * With `then` you can structure and chain groups of processing.
      *

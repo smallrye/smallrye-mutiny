@@ -69,12 +69,14 @@ public interface Uni<T> {
     /**
      * Allows structuring the pipeline by creating a logic separation:
      *
-     * <code><pre>
+     * <pre>
+     * {@code
      *     Uni uni = upstream
-     *      .then(u -&gt; { ...})
-     *      .then(u -&gt; { ...})
-     *      .then(u -&gt; { ...})
-     * </pre></code>
+     *      .then(u -> { ...})
+     *      .then(u -> { ...})
+     *      .then(u -> { ...})
+     * }
+     * </pre>
      * <p>
      * With `then` you can structure and chain groups of processing.
      *
