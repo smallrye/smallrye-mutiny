@@ -11,7 +11,7 @@ import org.testng.annotations.Test;
 import io.smallrye.mutiny.TimeoutException;
 import io.smallrye.mutiny.Uni;
 
-public class UniOnNoResultTest {
+public class UniIfNoItemTest {
 
     @Test
     public void testResultWhenTimeoutIsNotReached() {

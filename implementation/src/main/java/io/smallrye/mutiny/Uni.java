@@ -284,7 +284,7 @@ public interface Uni<T> {
      *
      * @return the on timeout group
      */
-    UniOnTimeout<T> ifNoItem();
+    UniIfNoItem<T> ifNoItem();
 
     /**
      * Produces a new {@link Uni} invoking the {@link UniSubscriber#onItem(Object)} and
