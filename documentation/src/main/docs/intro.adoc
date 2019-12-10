@@ -6,7 +6,7 @@ Wait? Another one? Yes!
 Mutiny is designed after having experienced many issues with other Reactive programming libraries and having seen many developers lost in an endless sequence of _flatMap_.
 Mutiny is taking a different approach.
 First, Mutiny does not provide as many operators as the other famous libraries, but we focused on the most used operators.
-Then, Mutiny provides a more _guided_ API, avoiding having classes with hundreds of methods making even the smartest IDE lost.
+Then, Mutiny provides a more _guided_ API, which avoids having classes with hundreds of methods that cause trouble for even the smartest IDE.
 Finally, Mutiny has built-in converted from and to other reactive programing libraries, so you can always pivot.
 
 [TIP]
