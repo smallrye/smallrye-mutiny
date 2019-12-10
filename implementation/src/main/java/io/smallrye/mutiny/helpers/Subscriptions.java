@@ -229,6 +229,32 @@ public class Subscriptions {
         return u;
     }
 
+    /**
+     * Atomically requests from the Subscription in the field if not null, otherwise accumulates
+     * the request amount in the requested field to be requested once the field is set to non-null.
+     * 
+     * @param field the target field that may already contain a Subscription
+     * @param requested the current requested amount
+     * @param n the request amount, positive (verified)
+     */
+    public static void deferredRequest(AtomicReference<Subscription> field, AtomicLong requested, long n) {
+        Subscription subscription = field.get();
+        if (subscription != null) {
+            subscription.request(n);
+        } else {
+            if (n > 0) {
+                add(requested, n);
+                subscription = field.get();
+                if (subscription != null) {
+                    long r = requested.getAndSet(0L);
+                    if (r != 0L) {
+                        subscription.request(r);
+                    }
+                }
+            }
+        }
+    }
+
     public static Throwable terminate(AtomicReference<Throwable> failure) {
         return failure.getAndSet(TERMINATED);
     }
