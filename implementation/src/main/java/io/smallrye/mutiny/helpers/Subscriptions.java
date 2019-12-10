@@ -134,16 +134,16 @@ public class Subscriptions {
      * Atomically subtract the given number (positive, not validated) from the target field unless it contains Long.MAX_VALUE.
      *
      * @param requested the target field holding the current requested amount
-     * @param n the produced element count, positive (not validated)
+     * @param emitted the produced element count, positive (not validated)
      * @return the new amount
      */
-    public static long subtract(AtomicLong requested, long n) {
+    public static long subtract(AtomicLong requested, long emitted) {
         for (;;) {
             long current = requested.get();
             if (current == Long.MAX_VALUE) {
                 return Long.MAX_VALUE;
             }
-            long update = current - n;
+            long update = current - emitted;
             if (update < 0L) {
                 update = 0L;
             }
@@ -235,15 +235,15 @@ public class Subscriptions {
      * 
      * @param field the target field that may already contain a Subscription
      * @param requested the current requested amount
-     * @param n the request amount, positive (verified)
+     * @param requests the request amount, positive (verified)
      */
-    public static void deferredRequest(AtomicReference<Subscription> field, AtomicLong requested, long n) {
+    public static void deferredRequest(AtomicReference<Subscription> field, AtomicLong requested, long requests) {
         Subscription subscription = field.get();
         if (subscription != null) {
-            subscription.request(n);
+            subscription.request(requests);
         } else {
-            if (n > 0) {
-                add(requested, n);
+            if (requests > 0) {
+                add(requested, requests);
                 subscription = field.get();
                 if (subscription != null) {
                     long r = requested.getAndSet(0L);
@@ -333,8 +333,8 @@ public class Subscriptions {
         }
 
         @Override
-        public void request(long n) {
-            if (n > 0) {
+        public void request(long requests) {
+            if (requests > 0) {
                 if (requested.compareAndSet(false, true)) {
                     downstream.onNext(item);
                     downstream.onComplete();
