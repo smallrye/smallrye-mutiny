@@ -24,8 +24,8 @@ public abstract class AbstractUni<T> implements Uni<T> {
     }
 
     @Override
-    public UniOnTimeout<T> ifNoItem() {
-        return new UniOnTimeout<>(this, null, null);
+    public UniIfNoItem<T> ifNoItem() {
+        return new UniIfNoItem<>(this);
     }
 
     @Override

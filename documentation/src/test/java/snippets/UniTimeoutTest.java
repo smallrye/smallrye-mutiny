@@ -1,14 +1,13 @@
 package snippets;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import io.smallrye.mutiny.Uni;
+import org.junit.Test;
 
 import java.time.Duration;
 
-import org.junit.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import io.smallrye.mutiny.Uni;
-
-public class TimeoutTest {
+public class UniTimeoutTest {
 
     @Test
     public void test() {
@@ -21,4 +20,5 @@ public class TimeoutTest {
 
         assertThat(item).isEqualTo("some fallback item");
     }
+
 }
