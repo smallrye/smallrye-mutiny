@@ -1,11 +1,12 @@
 package snippets;
 
-import io.smallrye.mutiny.Multi;
-import org.junit.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.concurrent.CompletableFuture;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.Test;
+
+import io.smallrye.mutiny.Multi;
 
 public class ThenTest {
 
@@ -21,8 +22,7 @@ public class ThenTest {
                 })
                 .then(self -> self
                         .onItem().invoke(item -> System.out.println("The item is " + item))
-                        .collectItems().first()
-                )
+                        .collectItems().first())
                 .then(self -> self.await().indefinitely());
         // end::code[]
         assertThat(result).isEqualTo("24");
