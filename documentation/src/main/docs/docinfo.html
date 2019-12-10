@@ -1,6 +1,21 @@
 <link href="assets/style/foundation-potion.css" media="screen" rel="stylesheet">
 <link href="assets/style/style.css" media="screen" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-fork-ribbon-css/0.2.3/gh-fork-ribbon.min.css"/>
+
+<script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"></script>
 
 <script>
+    $(document).ready(function () {
+        console.log("ready");
+        // Insert the github ribbon
+        var ribbon = $("<a/>").toggleClass("github-fork-ribbon")
+            .attr("href", "https://github.com/smallrye/smallrye-mutiny")
+            .attr("data-ribbon", "Fork me on GitHub")
+            .attr("title", "Fork me on GitHub")
+            .text("Fork me on GitHub");
+        $("body").prepend(ribbon);
 
+    });
 </script>
+
+
