@@ -192,10 +192,10 @@ To enable this feature, add the following dependency to your `CLASSPATH`:
 Then, you would need to import:
 
 [source, java]
-====
+----
 import io.smallrye.mutiny.converters.multi.MultiRxConverters;
 import io.smallrye.mutiny.converters.uni.UniRxConverters;
-====
+----
 
 To create a `Uni` from RxJava 2 objects, use the following methods:
 
@@ -255,10 +255,10 @@ To enable this feature, add the following dependency to your `CLASSPATH`:
 Then, you would need to import:
 
 [source, java]
-====
+----
 import io.smallrye.mutiny.converters.multi.MultiReactorConverters;
 import io.smallrye.mutiny.converters.uni.UniReactorConverters;
-====
+----
 
 To create a `Uni` from Reactor objects, use the following methods:
 
