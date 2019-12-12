@@ -41,7 +41,7 @@ This code prints `HELLO WORLD !`.
 Let's explain it a bit.
 First it creates an instance of `Multi`.
 A `Multi` is an object that emit _events_. In Reactive lingo, it's a `Publisher`.
-Here, this `Multi` is emitting to _item_ events `hello` and `world`.
+Here, this `Multi` is emitting two _item_ events `hello` and `world`.
 The `onItem` and `onCompletion` lines are processing respectively the _item_ and _completion_ events emitted by the upstream.
 As a result, they also return instances of `Multi` which depending on the events received from upstream would emit events downstream.
 
