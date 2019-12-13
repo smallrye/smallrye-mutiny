@@ -460,7 +460,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#_how_do_i_control_the_back_pressure">How do I control the back-pressure?</a></li>
 <li><a href="#_how_do_wrap_blocking_calls">How do wrap blocking calls?</a></li>
 <li><a href="#_using_an_unicast_processor">Using an Unicast Processor</a></li>
-<li><a href="#_where_do_i_find_the_javadoc">Where do I find the JavaDoc</a></li>
+<li><a href="#_where_do_i_find_the_javadoc">Where do I find the JavaDoc?</a></li>
 </ul>
 </li>
 </ul>
@@ -614,11 +614,41 @@ List&lt;Integer&gt; list3 = multi
         .await().indefinitely();</code></pre>
 </div>
 </div>
+<div class="paragraph">
+<p>Mutiny API is quite different from the <em>traditional</em> reactive eXtensions API.
+The equivalent to <code>map</code>, <code>flatMap</code> and <code>concatMap</code> are the following:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">int result = uni
+        .onItem().apply(i -&gt; i + 1)
+        .await().indefinitely();
+
+int result2 = uni
+        .onItem().produceUni(i -&gt; Uni.createFrom().item(i + 1))
+        .await().indefinitely();
+
+List&lt;Integer&gt; list = multi
+        .onItem().apply(i -&gt; i + 1)
+        .collectItems().asList()
+        .await().indefinitely();
+
+List&lt;Integer&gt; list2 = multi
+        .onItem().produceMulti(i -&gt; Multi.createFrom().items(i, i)).merge()
+        .collectItems().asList()
+        .await().indefinitely();
+
+List&lt;Integer&gt; list3 = multi
+        .onItem().produceMulti(i -&gt; Multi.createFrom().items(i, i)).concatenate()
+        .collectItems().asList()
+        .await().indefinitely();</code></pre>
+</div>
+</div>
 </div>
 <div class="sect2">
 <h3 id="_how_do_i_merge_concatenate_or_combine_multis">How do I merge, concatenate or combine Multis?</h3>
 <div class="paragraph">
-<p>You can create instances of <code>Multi</code> by concatenating, merging, or combining <code>Multis</code> and <code>Publishers</code>:</p>
+<p>You can create instances of <code>Multi</code> by concatenating, merging, or combining <code>Multi</code>s and <code>Publisher</code>s:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -670,7 +700,7 @@ Stream&lt;Integer&gt; stream = multi.subscribe().asStream();</code></pre>
 <div class="sect2">
 <h3 id="_how_do_i_chain_asynchronous_calls">How do I chain asynchronous calls?</h3>
 <div class="paragraph">
-<p>To chain asynchronous calls, use the <code>onItem().produceUni</code> or <code>onItem().produceCompletionStage</code>:</p>
+<p>To chain asynchronous calls, use <code>onItem().produceUni</code> or <code>onItem().produceCompletionStage</code>:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -684,8 +714,8 @@ Stream&lt;Integer&gt; stream = multi.subscribe().asStream();</code></pre>
 <div class="sect2">
 <h3 id="_how_do_i_recover_from_failure">How do I recover from failure?</h3>
 <div class="paragraph">
-<p>Failure are inherent to software.
-So you need handle them.
+<p>Failures are inherent to software.
+So you need to handle them.
 By default, they flow in the stream until they reach the final subscriber.
 But at any stage you can process the failure and transform or recover from it.</p>
 </div>
@@ -721,7 +751,7 @@ CompletableFuture&lt;String&gt; res4 = uni
 </div>
 </div>
 <div class="paragraph">
-<p><code>Multis</code> have the same API letting you recovering from failure easily:</p>
+<p><code>Multi</code>s have the same API letting you recover from failure easily:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -753,7 +783,7 @@ CompletableFuture&lt;String&gt; res4 = multi
 </div>
 <div class="paragraph">
 <p>Note that with <code>Multi</code>, a failure cancels the subscription, meaning you will not receive any more items.
-The <code>retry</code> operator let you re-subscribe and continue the reception.</p>
+The <code>retry</code> operator lets you re-subscribe and continue the reception.</p>
 </div>
 </div>
 <div class="sect2">
@@ -773,7 +803,7 @@ uni.onItem().ifNull().failWith(() -&gt; new Exception("Boom!"));</code></pre>
 <div class="sect2">
 <h3 id="_how_do_i_handle_timeout">How do I handle timeout?</h3>
 <div class="paragraph">
-<p><code>Uni</code> are often used to represent asynchronous operation, like a HTTP call.
+<p><code>Uni</code> are often used to represent asynchronous operations, like an HTTP call.
 So, it&#8217;s not rare to need to add a timeout on this kind of operation, and recover if the timeout occurs.</p>
 </div>
 <div class="paragraph">
@@ -808,7 +838,7 @@ So, it&#8217;s not rare to need to add a timeout on this kind of operation, and 
 <div class="paragraph">
 <p>Except indicated otherwise, the next processor is invoked on the thread emitting the event from upstream.
 You can switch to another thread using the <code>emitOn</code> operator.
-The <code>emitOn</code> operator let you switch thread used to dispatch (upstream to downstream) events, so items, failure and completion.</p>
+The <code>emitOn</code> operator lets you switch the thread used to dispatch (upstream to downstream) events, so items, failure and completion.</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -829,10 +859,10 @@ String res1 = multi.emitOn(executor)
 <h3 id="_how_do_i_interact_with_completionstages">How do I interact with CompletionStages?</h3>
 <div class="paragraph">
 <p><code>CompletionStage</code> and <code>CompletableFuture</code> are classes provided by Java to represent asynchronous actions.
-However, there are not lazy, and do not follow a <em>subscription</em> patterns.</p>
+However, they are not lazy, and do not follow a <em>subscription</em> patterns.</p>
 </div>
 <div class="paragraph">
-<p>Mutiny let you create <code>Uni</code> and <code>Multi</code> from instances from these classes.
+<p>Mutiny lets you create <code>Uni</code> and <code>Multi</code> from instances of these classes.
 Also, <code>Uni</code> offers a way to retrieve the item or the failure as a <code>CompletableFuture</code>.</p>
 </div>
 <div class="listingblock">
@@ -862,19 +892,17 @@ To enable this feature, add the following dependency to your <code>CLASSPATH</co
 <pre class="highlightjs highlight"><code data-lang="xml" class="language-xml hljs">&lt;dependency&gt;
     &lt;groupId&gt;io.smallrye.reactive&lt;/groupId&gt;
     &lt;artifactId&gt;mutiny-rxjava&lt;/artifactId&gt;
-    &lt;version&gt;0.1.0&lt;/version&gt;
+    &lt;version&gt;0.1.1&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
 <div class="paragraph">
 <p>Then, you would need to import:</p>
 </div>
-<div class="exampleblock">
+<div class="listingblock">
 <div class="content">
-<div class="paragraph">
-<p>import io.smallrye.mutiny.converters.multi.MultiRxConverters;
-import io.smallrye.mutiny.converters.uni.UniRxConverters;</p>
-</div>
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">import io.smallrye.mutiny.converters.multi.MultiRxConverters;
+import io.smallrye.mutiny.converters.uni.UniRxConverters;</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -970,7 +998,7 @@ Flowable&lt;String&gt; flowable = multi.convert().with(MultiRxConverters.toFlowa
 <div class="sect2">
 <h3 id="_how_do_i_interact_with_reactor">How do I interact with Reactor?</h3>
 <div class="paragraph">
-<p>Mutiny allows converting Rx Java 2 types to/from Uni and Multi instances.
+<p>Mutiny allows converting Project Reactor types to/from <code>Uni</code> and <code>Multi</code> instances.
 To enable this feature, add the following dependency to your <code>CLASSPATH</code>:</p>
 </div>
 <div class="listingblock">
@@ -978,19 +1006,17 @@ To enable this feature, add the following dependency to your <code>CLASSPATH</co
 <pre class="highlightjs highlight"><code data-lang="xml" class="language-xml hljs">&lt;dependency&gt;
     &lt;groupId&gt;io.smallrye.reactive&lt;/groupId&gt;
     &lt;artifactId&gt;mutiny-reactor&lt;/artifactId&gt;
-    &lt;version&gt;0.1.0&lt;/version&gt;
+    &lt;version&gt;0.1.1&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
 <div class="paragraph">
 <p>Then, you would need to import:</p>
 </div>
-<div class="exampleblock">
+<div class="listingblock">
 <div class="content">
-<div class="paragraph">
-<p>import io.smallrye.mutiny.converters.multi.MultiReactorConverters;
-import io.smallrye.mutiny.converters.uni.UniReactorConverters;</p>
-</div>
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">import io.smallrye.mutiny.converters.multi.MultiReactorConverters;
+import io.smallrye.mutiny.converters.uni.UniReactorConverters;</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -1045,18 +1071,85 @@ Flux&lt;String&gt; flux = multi.convert().with(MultiReactorConverters.toFlux());
 </div>
 <div class="sect2">
 <h3 id="_how_do_i_control_the_back_pressure">How do I control the back-pressure?</h3>
+<div class="paragraph">
+<p>When a consumer cannot keep up with the pace of a publisher, there is an overflow condition.
+By default, it would fail and propagate an exception.</p>
+</div>
+<div class="paragraph">
+<p>However, you can control how the overflow is handled using the <code>multi.onOverflow()</code> methods, such as in:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">String res1 = multi
+        .emitOn(executor)
+        .onOverflow().buffer(10)
+        .collectItems().first()
+        .await().indefinitely();
 
+String res2 = multi
+        .emitOn(executor)
+        .onOverflow().dropPreviousItems()
+        .collectItems().first()
+        .await().indefinitely();</code></pre>
+</div>
+</div>
 </div>
 <div class="sect2">
 <h3 id="_how_do_wrap_blocking_calls">How do wrap blocking calls?</h3>
-
+<div class="paragraph">
+<p>It is often the case that a source of data (web service, database&#8230;&#8203;) is synchronous and blocking.
+To deal with such sources in your applications, apply the following pattern:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">Uni&lt;String&gt; blocking = Uni.createFrom().item(this::invokeRemoteServiceUsingBlockingIO)
+        .subscribeOn(Infrastructure.getDefaultWorkerPool());</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Create an <code>Uni</code> that will supply the item using a blocking call, here the <code>invokeRemoteServiceUsingBlockingIO</code> method.
+To avoid blocking the subscriber, use <code>subscribeOn</code> which switch the thread and so call <code>invokeRemoteServiceUsingBlockingIO</code> on another thread.
+Here we pass the default worker thread pool, but you can use your own executor.</p>
+</div>
+<div class="paragraph">
+<p>Note that <code>subscribeOn</code> does not subscribe to the <code>Uni</code>.
+It specifies the <code>executor</code> to use when a subscribe call happens.</p>
+</div>
 </div>
 <div class="sect2">
 <h3 id="_using_an_unicast_processor">Using an Unicast Processor</h3>
+<div class="paragraph">
+<p>The <code>UnicastProcessor</code> is an implementation of <code>Multi</code> that lets you enqueue items in a queue.
+The items are then dispatched to the subscriber using the request protocol.
+While this pattern is against the idea of back-pressure, it lets you connect sources of data that do not support back-pressure with your subscriber.</p>
+</div>
+<div class="paragraph">
+<p>In the following example, the <code>UnicastProcessor</code> is used by a thread emitting items.
+These items are enqueued in the processor and replayed when the subscriber is connected, following the request protocol.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">UnicastProcessor&lt;String&gt; processor = UnicastProcessor.create();
+Multi&lt;String&gt; multi = processor
+        .onItem().apply(String::toUpperCase)
+        .onFailure().recoverWithItem("d'oh");
 
+// Create a source of items that does not follow the request protocol
+new Thread(() -&gt; {
+    for (int i = 0; i &lt; 1000; i++) {
+        processor.onNext(Integer.toString(i));
+    }
+    processor.onComplete();
+}).start();</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>By default the <code>UnicastProcessor</code> uses an unbounded queue.
+You can also pass a fixed size queue that would reject the items once full.</p>
+</div>
 </div>
 <div class="sect2">
-<h3 id="_where_do_i_find_the_javadoc">Where do I find the JavaDoc</h3>
+<h3 id="_where_do_i_find_the_javadoc">Where do I find the JavaDoc?</h3>
 <div class="paragraph">
 <p>The JavaDoc is published <a href="https://smallrye.io/smallrye-mutiny/apidocs/">there</a>.</p>
 </div>
@@ -1066,7 +1159,7 @@ Flux&lt;String&gt; flux = multi.convert().with(MultiReactorConverters.toFlux());
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2019-12-06 15:06:56 +0100
+Last updated 2019-12-13 17:01:25 +0100
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">

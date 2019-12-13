@@ -449,6 +449,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#_uni_and_multi">Uni and Multi</a></li>
 <li><a href="#_creating_and_subscribing_to_unis">Creating and Subscribing to Unis</a></li>
 <li><a href="#_creating_and_subscribing_to_multis">Creating and Subscribing to Multis</a></li>
+<li><a href="#_structuring_the_pipeline">Structuring the pipeline</a></li>
 </ul>
 </li>
 </ul>
@@ -464,13 +465,13 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="ulist">
 <ul>
 <li>
-<p>event-driven - the API is make events first-class citizen</p>
+<p>event-driven - the API makes the event a first-class citizen</p>
 </li>
 <li>
 <p>API navigability - based on the previous concept, the API is built around the type of events</p>
 </li>
 <li>
-<p><em>mono</em> events or <em>multi</em> events - Mutiny provides 2 types: <code>Uni</code> and <code>Multi</code></p>
+<p><em>single</em> or <em>multi</em> items streams - Mutiny provides 2 types: <code>Uni</code> and <code>Multi</code></p>
 </li>
 </ul>
 </div>
@@ -655,7 +656,7 @@ For example:</p>
 <div class="ulist">
 <ul>
 <li>
-<p><code>Multi</code> - handle stream of <em>0..n</em> items (potentially unbounded)</p>
+<p><code>Multi</code> - handle stream of <em>0..*</em> items (potentially unbounded)</p>
 </li>
 <li>
 <p><code>Uni</code> - handle stream of <em>0..1</em> items</p>
@@ -896,12 +897,37 @@ multi.subscribe().withSubscriber(new Subscriber&lt;String&gt;() {
 </div>
 </div>
 </div>
+<div class="sect2">
+<h3 id="_structuring_the_pipeline">Structuring the pipeline</h3>
+<div class="paragraph">
+<p>It can be hard to structure your sequence of processing in a readable manner.
+Mutiny provides the <code>then</code> function to structure your pipeline:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">String result = Multi.createFrom().completionStage(CompletableFuture.supplyAsync(() -&gt; 23))
+        .then(self -&gt; {
+            // Transform each item into a string of the item +1
+            return self
+                    .onItem().apply(i -&gt; i + 1)
+                    .onItem().apply(i -&gt; Integer.toString(i));
+        })
+        .then(self -&gt; self
+                .onItem().invoke(item -&gt; System.out.println("The item is " + item))
+                .collectItems().first())
+        .then(self -&gt; self.await().indefinitely());</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p><code>then</code> can be used on <code>Multi</code> and <code>Uni</code> and let you group a set of operations in a logical set.</p>
+</div>
+</div>
 </div>
 </div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2019-12-06 15:06:56 +0100
+Last updated 2019-12-13 17:01:25 +0100
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">
