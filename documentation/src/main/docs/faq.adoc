@@ -67,7 +67,7 @@ include::../../../src/test/java/snippets/FlatMapTest.java[tags=mutiny]
 
 === How do I merge, concatenate or combine Multis?
 
-You can create instances of `Multi` by concatenating, merging, or combining `Multis` and `Publishers`:
+You can create instances of `Multi` by concatenating, merging, or combining ``Multi``s and ``Publisher``s:
 
 [source,java,indent=0]
 ----
@@ -92,7 +92,7 @@ include::../../../src/test/java/snippets/CollectTest.java[tags=acc]
 
 === How do I chain asynchronous calls?
 
-To chain asynchronous calls, use the `onItem().produceUni` or `onItem().produceCompletionStage`:
+To chain asynchronous calls, use `onItem().produceUni` or `onItem().produceCompletionStage`:
 
 [source,java,indent=0]
 ----
@@ -101,8 +101,8 @@ include::../../../src/test/java/snippets/HowToChainAsyncTest.java[tags=code]
 
 === How do I recover from failure?
 
-Failure are inherent to software.
-So you need handle them.
+Failures are inherent to software.
+So you need to handle them.
 By default, they flow in the stream until they reach the final subscriber.
 But at any stage you can process the failure and transform or recover from it.
 
@@ -113,7 +113,7 @@ The following snippet shows how you can recover from a failure on a `Uni`:
 include::../../../src/test/java/snippets/UniFailureTest.java[tags=code]
 ----
 
-`Multis` have the same API letting you recovering from failure easily:
+``Multi``s have the same API letting you recover from failure easily:
 
 [source,java,indent=0]
 ----
@@ -121,7 +121,7 @@ include::../../../src/test/java/snippets/MultiFailureTest.java[tags=code]
 ----
 
 Note that with `Multi`, a failure cancels the subscription, meaning you will not receive any more items.
-The `retry` operator let you re-subscribe and continue the reception.
+The `retry` operator lets you re-subscribe and continue the reception.
 
 === How do I handle `null`?
 
@@ -135,7 +135,7 @@ include::../../../src/test/java/snippets/UniNullTest.java[tags=code]
 
 === How do I handle timeout?
 
-`Uni` are often used to represent asynchronous operation, like a HTTP call.
+`Uni` are often used to represent asynchronous operations, like an HTTP call.
 So, it's not rare to need to add a timeout on this kind of operation, and recover if the timeout occurs.
 
 This can be done using `Uni.ifNoItem()`:
@@ -155,7 +155,7 @@ On timeout, you can:
 
 Except indicated otherwise, the next processor is invoked on the thread emitting the event from upstream.
 You can switch to another thread using the `emitOn` operator.
-The `emitOn` operator let you switch thread used to dispatch (upstream to downstream) events, so items, failure and completion.
+The `emitOn` operator lets you switch the thread used to dispatch (upstream to downstream) events, so items, failure and completion.
 
 [source,java,indent=0]
 ----
@@ -165,9 +165,9 @@ include::../../../src/test/java/snippets/EmitOnTest.java[tags=code]
 === How do I interact with CompletionStages?
 
 `CompletionStage` and `CompletableFuture` are classes provided by Java to represent asynchronous actions.
-However, there are not lazy, and do not follow a _subscription_ patterns.
+However, they are not lazy, and do not follow a _subscription_ patterns.
 
-Mutiny let you create `Uni` and `Multi` from instances from these classes.
+Mutiny lets you create `Uni` and `Multi` from instances of these classes.
 Also, `Uni` offers a way to retrieve the item or the failure as a `CompletableFuture`.
 
 [source,java,indent=0]
@@ -240,7 +240,7 @@ include::../../../src/test/java/snippets/RxJavaTest.java[tags=multi-export]
 
 === How do I interact with Reactor?
 
-Mutiny allows converting Rx Java 2 types to/from Uni and Multi instances.
+Mutiny allows converting Project Reactor types to/from `Uni` and `Multi` instances.
 To enable this feature, add the following dependency to your `CLASSPATH`:
 
 [source,xml,subs=attributes+]
@@ -319,9 +319,9 @@ It specifies the `executor` to use when a subscribe call happens.
 
 === Using an Unicast Processor
 
-The `UnicastProcessor` is an implementation of `Multi` that let you enqueue items in a queue.
+The `UnicastProcessor` is an implementation of `Multi` that lets you enqueue items in a queue.
 The items are then dispatched to the subscriber using the request protocol.
-While this pattern is against the idea of back-pressure, it let you connect source of data that do not support back-pressure with your subscriber.
+While this pattern is against the idea of back-pressure, it lets you connect sources of data that do not support back-pressure with your subscriber.
 
 In the following example, the `UnicastProcessor` is used by a thread emitting items.
 These items are enqueued in the processor and replayed when the subscriber is connected, following the request protocol.
@@ -334,6 +334,6 @@ include::../../../src/test/java/snippets/UnicastProcessorTest.java[tags=code]
 By default the `UnicastProcessor` uses an unbounded queue.
 You can also pass a fixed size queue that would reject the items once full.
 
-=== Where do I find the JavaDoc
+=== Where do I find the JavaDoc?
 
 The JavaDoc is published https://smallrye.io/smallrye-mutiny/apidocs/[there].
