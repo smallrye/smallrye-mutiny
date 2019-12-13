@@ -7,12 +7,12 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import org.reactivestreams.Publisher;
+
+import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
-import io.smallrye.mutiny.operators.UniFlatMapCompletionStageOnItem;
-import io.smallrye.mutiny.operators.UniFlatMapOnItem;
-import io.smallrye.mutiny.operators.UniMapOnResult;
-import io.smallrye.mutiny.operators.UniOnEventConsume;
+import io.smallrye.mutiny.operators.*;
 import io.smallrye.mutiny.subscription.UniEmitter;
 
 public class UniOnItem<T> {
@@ -68,6 +68,24 @@ public class UniOnItem<T> {
      */
     public <R> Uni<R> produceUni(Function<? super T, ? extends Uni<? extends R>> mapper) {
         return Infrastructure.onUniCreation(new UniFlatMapOnItem<>(upstream, mapper));
+    }
+
+    /**
+     * When this {@code Uni} produce its item (maybe {@code null}), call the given {@code mapper} to produce
+     * a {@link Publisher}. Continue the pipeline with this publisher (as a {@link Multi}).
+     * <p>
+     * The mapper is called with the item event of the current {@link Uni} and produces a {@link Publisher}, possibly
+     * using another type of item ({@code R}). The events fired by produced {@link Publisher} are forwarded to the
+     * {@link Multi} returned by this method.
+     * <p>
+     * This operation is generally named {@code flatMapPublisher}.
+     *
+     * @param mapper the mapper, must not be {@code null}, may expect to receive {@code null} as item.
+     * @param <R> the type of item produced by the resulting {@link Multi}
+     * @return the multi
+     */
+    public <R> Multi<R> produceMulti(Function<? super T, ? extends Publisher<? extends R>> mapper) {
+        return new UniProduceMultiOnItem<>(upstream, mapper);
     }
 
     /**
@@ -128,7 +146,7 @@ public class UniOnItem<T> {
      * <p>
      * Examples:
      * </p>
-     * 
+     *
      * <pre>
      * <code>
      *     Uni&lt;T&gt; upstream = ...;
@@ -175,7 +193,7 @@ public class UniOnItem<T> {
      * <p>
      * Examples:
      * </p>
-     * 
+     *
      * <pre>
      * <code>
      *     Uni&lt;T&gt; upstream = ...;

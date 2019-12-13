@@ -10,7 +10,9 @@ import java.util.function.Function;
 
 import org.testng.annotations.Test;
 
+import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.test.MultiAssertSubscriber;
 
 public class UniOnItemFlatMapTest {
 
@@ -133,5 +135,99 @@ public class UniOnItemFlatMapTest {
         test.cancel();
         test.assertNotCompleted();
         assertThat(cancelled).isTrue();
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void testFlatMapMultiWithNullMapper() {
+        Uni<Integer> uni = Uni.createFrom().item(1);
+        uni.onItem().produceMulti(null);
+    }
+
+    @Test
+    public void testFlatMapMultiWithItem() {
+        Uni.createFrom().item(1)
+                .onItem().produceMulti(i -> Multi.createFrom().range(i, 5))
+                .subscribe().withSubscriber(MultiAssertSubscriber.create(10))
+                .await()
+                .assertCompletedSuccessfully()
+                .assertReceived(1, 2, 3, 4);
+    }
+
+    @Test
+    public void testFlatMapMultiWithNull() {
+        Uni.createFrom().item((Void) null)
+                .onItem().produceMulti(x -> Multi.createFrom().range(1, 5))
+                .subscribe().withSubscriber(MultiAssertSubscriber.create(10))
+                .await()
+                .assertCompletedSuccessfully()
+                .assertReceived(1, 2, 3, 4);
+    }
+
+    @Test
+    public void testFlatMapMultiWithFailure() {
+        Uni.createFrom().<Integer> failure(new IOException("boom"))
+                .onItem().produceMulti(x -> Multi.createFrom().range(1, 5))
+                .subscribe().withSubscriber(MultiAssertSubscriber.create(10))
+                .await()
+                .assertHasFailedWith(IOException.class, "boom")
+                .assertHasNotReceivedAnyItem();
+    }
+
+    @Test
+    public void testFlatMapMultiWithExceptionThrownByMapper() {
+        Uni.createFrom().item(1)
+                .onItem().produceMulti(x -> {
+                    throw new IllegalStateException("boom");
+                })
+                .subscribe().withSubscriber(MultiAssertSubscriber.create(10))
+                .await()
+                .assertHasFailedWith(IllegalStateException.class, "boom")
+                .assertHasNotReceivedAnyItem();
+    }
+
+    @Test
+    public void testFlatMapMultiWithNullReturnedByMapper() {
+        Uni.createFrom().item(1)
+                .onItem().produceMulti(x -> null)
+                .subscribe().withSubscriber(MultiAssertSubscriber.create(10))
+                .await()
+                .assertHasFailedWith(NullPointerException.class, "")
+                .assertHasNotReceivedAnyItem();
+    }
+
+    @Test
+    public void testFlatMapMultiWithNullReturnedByMapperWithCancellationDuringTheUniResolution() {
+        final AtomicBoolean called = new AtomicBoolean();
+
+        Uni.createFrom().<Integer> nothing()
+                .on().cancellation(() -> called.set(true))
+                .onItem().produceMulti(x -> Multi.createFrom().range(x, 10))
+                .subscribe().withSubscriber(MultiAssertSubscriber.create(10))
+
+                .assertNotTerminated()
+                .assertHasNotReceivedAnyItem()
+                .run(() -> assertThat(called).isFalse())
+                .cancel()
+                .run(() -> assertThat(called).isTrue())
+                .assertNotTerminated();
+    }
+
+    @Test
+    public void testFlatMapMultiWithNullReturnedByMapperWithCancellationDuringTheMultiEmissions() {
+        final AtomicBoolean called = new AtomicBoolean();
+        final AtomicBoolean calledUni = new AtomicBoolean();
+
+        Uni.createFrom().item(1)
+                .on().cancellation(() -> calledUni.set(true))
+                .onItem().produceMulti(i -> Multi.createFrom().nothing()
+                        .on().cancellation(() -> called.set(true)))
+                .subscribe().withSubscriber(MultiAssertSubscriber.create(10))
+                .assertNotTerminated()
+                .assertHasNotReceivedAnyItem()
+                .run(() -> assertThat(called).isFalse())
+                .cancel()
+                .run(() -> assertThat(called).isTrue())
+                .run(() -> assertThat(calledUni).isFalse())
+                .assertNotTerminated();
     }
 }
