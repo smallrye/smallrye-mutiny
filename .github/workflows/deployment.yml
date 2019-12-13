@@ -18,7 +18,7 @@ jobs:
           SECRET_FILES_PASSPHRASE: ${{ secrets.SECRET_FILES_PASSPHRASE }}
         run: |
           sudo apt-get update -o Dir::Etc::sourcelist="sources.list" -o Dir::Etc::sourceparts="-" -o APT::Get::List-Cleanup="0"
-          sudo apt-get install -y gnupg2
+          sudo apt-get install -y gnupg2 gnupg-agent
           chmod +x .build/deploy.sh .build/decrypt-secrets.sh
 
           .build/decrypt-secrets.sh

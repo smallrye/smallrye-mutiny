@@ -30,17 +30,17 @@ deploy_release() {
     export NEXT_VERSION=${MAJOR}.${MINOR}.$(expr ${MICRO} + 1)-SNAPSHOT
     echo "Cutting release ${RELEASE_VERSION}, next version would be ${NEXT_VERSION}"
     mvn -B -fn clean
-    mvn -B versions:set -DnewVersion=${RELEASE_VERSION} -DgenerateBackupPoms=false
-    mvn -B clean install -DskipTests -Prelease
+    mvn -B versions:set -DnewVersion=${RELEASE_VERSION} -DgenerateBackupPoms=false -s maven-settings.xml
+    mvn -B clean install -DskipTests -Prelease -s maven-settings.xml
     git commit -am "[RELEASE] - Bump version to ${RELEASE_VERSION}"
     git tag "RELEASE_VERSION"
     echo "Pushing tag to origin"
     git push origin "${RELEASE_VERSION}"
-    mvn -B versions:set -DnewVersion=${NEXT_VERSION} -DgenerateBackupPoms=false
+    mvn -B versions:set -DnewVersion=${NEXT_VERSION} -DgenerateBackupPoms=false -s maven-settings.xml
     git commit -am "[RELEASE] - Bump version to ${NEXT_VERSION}"
     git push origin master
     git checkout ${RELEASE_VERSION}
-    mvn -B deploy -DskipTests -Prelease
+    mvn -B deploy -DskipTests -Prelease -s maven-settings.xml
 }
 
 init_git
