@@ -1,6 +1,7 @@
 image:https://img.shields.io/github/workflow/status/smallrye/smallrye-mutiny/Continuous Integration Build[Build Status]
 image:https://sonarcloud.io/api/project_badges/measure?project=smallrye_smallrye-mutiny&metric=alert_status["Quality Gate Status", link="https://sonarcloud.io/dashboard?id=smallrye_smallrye-mutiny"]
 image:https://img.shields.io/github/license/smallrye/smallrye-mutiny.svg["License", link="http://www.apache.org/licenses/LICENSE-2.0"]
+image:https://img.shields.io/maven-central/v/io.smallrye.reactive/mutiny?color=green[Maven Central]
 
 == SmallRye Mutiny
 
