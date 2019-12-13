@@ -15,7 +15,7 @@ init_gpg() {
 }
 
 init_git() {
-    git config --global user.name "SmallRye Continuous Builder"
+    git config --global user.name "${GITHUB_ACTOR}"
     git config --global user.email "smallrye@googlegroups.com"
 }
 
