@@ -93,7 +93,7 @@ For example:
 
 Mutiny is based on two types:
 
-* `Multi` - handle stream of _0..n_ items (potentially unbounded)
+* `Multi` - handle stream of _0..*_ items (potentially unbounded)
 * `Uni` - handle stream of _0..1_ items
 
 Both `Uni` and `Multi` are asynchronous types.
