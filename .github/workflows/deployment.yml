@@ -5,7 +5,9 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
+        with:
+          ref: 'master'
       - name: Install JDK 1.8
         uses: joschi/setup-jdk@v1.0.0
         with:
