@@ -17,6 +17,8 @@
         <version.asciidoctorj.pdf>1.5.0-alpha.18</version.asciidoctorj.pdf>
         <version.asciidoctorj.diagram>1.5.18</version.asciidoctorj.diagram>
         <site.dir>${project.build.directory}/generated-docs/</site.dir>
+
+        <format.skip>true</format.skip>
     </properties>
 
     <dependencies>

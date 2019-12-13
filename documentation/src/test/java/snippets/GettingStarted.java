@@ -1,6 +1,7 @@
 package snippets;
 
 // tag::getting-started[]
+
 import io.smallrye.mutiny.Multi;
 
 public class GettingStarted {
