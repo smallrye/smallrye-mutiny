@@ -52,8 +52,6 @@ public class MultiReceiveItemOnTest {
         Multi.createFrom().item(1).subscribeOn(null);
     }
 
-    // TODO Rejected execution does not forward a failure, it's caught by RX
-
     @Test
     public void testThatItemsAreDispatchedOnTheRightThread() {
         Set<String> itemThread = ConcurrentHashMap.newKeySet();

@@ -94,7 +94,7 @@ include::../../../src/test/java/snippets/CollectTest.java[tags=acc]
 
 To chain asynchronous calls, use the `onItem().produceUni` or `onItem().produceCompletionStage`:
 
-[source, java, indent=0]
+[source,java,indent=0]
 ----
 include::../../../src/test/java/snippets/HowToChainAsyncTest.java[tags=code]
 ----
@@ -108,14 +108,14 @@ But at any stage you can process the failure and transform or recover from it.
 
 The following snippet shows how you can recover from a failure on a `Uni`:
 
-[source, java, indent=0]
+[source,java,indent=0]
 ----
 include::../../../src/test/java/snippets/UniFailureTest.java[tags=code]
 ----
 
 `Multis` have the same API letting you recovering from failure easily:
 
-[source, java, indent=0]
+[source,java,indent=0]
 ----
 include::../../../src/test/java/snippets/MultiFailureTest.java[tags=code]
 ----
@@ -128,7 +128,7 @@ The `retry` operator let you re-subscribe and continue the reception.
 `null` is only accepted in the `Uni` type.
 `uni.onItem().ifNull()` lets you decide what you want to do when the received item is `null`:
 
-[source, java, indent=0]
+[source,java,indent=0]
 ----
 include::../../../src/test/java/snippets/UniNullTest.java[tags=code]
 ----
@@ -140,9 +140,9 @@ So, it's not rare to need to add a timeout on this kind of operation, and recove
 
 This can be done using `Uni.ifNoItem()`:
 
-[source, java, indent=0]
+[source,java,indent=0]
 ----
-include::../../../src/test/java/snippets/TimeoutTest.java[tags=code]
+include::../../../src/test/java/snippets/UniTimeoutTest.java[tags=code]
 ----
 
 On timeout, you can:
@@ -157,7 +157,7 @@ Except indicated otherwise, the next processor is invoked on the thread emitting
 You can switch to another thread using the `emitOn` operator.
 The `emitOn` operator let you switch thread used to dispatch (upstream to downstream) events, so items, failure and completion.
 
-[source, java, indent=0]
+[source,java,indent=0]
 ----
 include::../../../src/test/java/snippets/EmitOnTest.java[tags=code]
 ----
@@ -170,7 +170,7 @@ However, there are not lazy, and do not follow a _subscription_ patterns.
 Mutiny let you create `Uni` and `Multi` from instances from these classes.
 Also, `Uni` offers a way to retrieve the item or the failure as a `CompletableFuture`.
 
-[source, java, indent=0]
+[source,java,indent=0]
 ----
 include::../../../src/test/java/snippets/CompletionStageTest.java[tags=code]
 ----
@@ -191,7 +191,7 @@ To enable this feature, add the following dependency to your `CLASSPATH`:
 
 Then, you would need to import:
 
-[source, java]
+[source,java]
 ----
 import io.smallrye.mutiny.converters.multi.MultiRxConverters;
 import io.smallrye.mutiny.converters.uni.UniRxConverters;
@@ -199,7 +199,7 @@ import io.smallrye.mutiny.converters.uni.UniRxConverters;
 
 To create a `Uni` from RxJava 2 objects, use the following methods:
 
-[source, java, indent=0]
+[source,java,indent=0]
 ----
 include::../../../src/test/java/snippets/RxJavaTest.java[tags=uni-create]
 ----
@@ -214,7 +214,7 @@ Also note that you can create a `Uni` from a Reactive Streams `Publisher` using 
 
 To create Rx Java 2 types from a `Uni`, use the following methods:
 
-[source, java, indent=0]
+[source,java,indent=0]
 ----
 include::../../../src/test/java/snippets/RxJavaTest.java[tags=uni-export]
 ----
@@ -224,7 +224,7 @@ You can retrieve a `Single<T>` and fail instead using `toSingle().failOnNull()`.
 
 To create a `Multi` from RxJava 2 objects, use the following methods:
 
-[source, java, indent=0]
+[source,java,indent=0]
 ----
 include::../../../src/test/java/snippets/RxJavaTest.java[tags=multi-create]
 ----
@@ -233,7 +233,7 @@ As for `Uni`, you can create a `Multi` from a Reactive Streams `Publisher` using
 
 You can also create RxJava 2 objects from a `Multi`:
 
-[source, java, indent=0]
+[source,java,indent=0]
 ----
 include::../../../src/test/java/snippets/RxJavaTest.java[tags=multi-export]
 ----
@@ -254,7 +254,7 @@ To enable this feature, add the following dependency to your `CLASSPATH`:
 
 Then, you would need to import:
 
-[source, java]
+[source,java]
 ----
 import io.smallrye.mutiny.converters.multi.MultiReactorConverters;
 import io.smallrye.mutiny.converters.uni.UniReactorConverters;
@@ -262,28 +262,28 @@ import io.smallrye.mutiny.converters.uni.UniReactorConverters;
 
 To create a `Uni` from Reactor objects, use the following methods:
 
-[source, java, indent=0]
+[source,java,indent=0]
 ----
 include::../../../src/test/java/snippets/ReactorTest.java[tags=uni-create]
 ----
 
 To create Reactor `Flux` and `Mono` instances from a `Uni`, use the following methods:
 
-[source, java, indent=0]
+[source,java,indent=0]
 ----
 include::../../../src/test/java/snippets/ReactorTest.java[tags=uni-export]
 ----
 
 To create a `Multi` from Reactor objects, use the following methods:
 
-[source, java, indent=0]
+[source,java,indent=0]
 ----
 include::../../../src/test/java/snippets/ReactorTest.java[tags=multi-create]
 ----
 
 You can also create Reactor objects from a `Multi`:
 
-[source, java, indent=0]
+[source,java,indent=0]
 ----
 include::../../../src/test/java/snippets/ReactorTest.java[tags=multi-export]
 ----
@@ -295,18 +295,44 @@ By default, it would fail and propagate an exception.
 
 However, you can control how the overflow is handled using the `multi.onOverflow()` methods, such as in:
 
-[source, java, indent=0]
+[source,java,indent=0]
 ----
 include::../../../src/test/java/snippets/BackPressureTest.java[tags=code]
 ----
 
 === How do wrap blocking calls?
 
-// TODO
+It is often the case that a source of data (web service, database...) is synchronous and blocking.
+To deal with such sources in your applications, apply the following pattern:
+
+[source,java,indent=0]
+----
+include::../../../src/test/java/snippets/UniBlockingTest.java[tags=code]
+----
+
+Create an `Uni` that will supply the item using a blocking call, here the `invokeRemoteServiceUsingBlockingIO` method.
+To avoid blocking the subscriber, use `subscribeOn` which switch the thread and so call `invokeRemoteServiceUsingBlockingIO` on another thread.
+Here we pass the default worker thread pool, but you can use your own executor.
+
+Note that `subscribeOn` does not subscribe to the `Uni`.
+It specifies the `executor` to use when a subscribe call happens.
 
 === Using an Unicast Processor
 
-// TODO
+The `UnicastProcessor` is an implementation of `Multi` that let you enqueue items in a queue.
+The items are then dispatched to the subscriber using the request protocol.
+While this pattern is against the idea of back-pressure, it let you connect source of data that do not support back-pressure with your subscriber.
+
+In the following example, the `UnicastProcessor` is used by a thread emitting items.
+These items are enqueued in the processor and replayed when the subscriber is connected, following the request protocol.
+
+[source,java,indent=0]
+----
+include::../../../src/test/java/snippets/UnicastProcessorTest.java[tags=code]
+----
+
+By default the `UnicastProcessor` uses an unbounded queue.
+You can also pass a fixed size queue that would reject the items once full.
 
 === Where do I find the JavaDoc
 
