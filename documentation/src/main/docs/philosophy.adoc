@@ -3,7 +3,7 @@
 
 Mutiny is built on 3 main concepts:
 
-* event-driven - the API is make events first-class citizen
+* event-driven - the API makes the event a first-class citizen
 * API navigability - based on the previous concept, the API is built around the type of events
 * _single_ or _multi_ items streams - Mutiny provides 2 types: `Uni` and `Multi`
 
