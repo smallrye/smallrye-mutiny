@@ -1,4 +1,9 @@
 # Created by .ignore support plugin (hsz.mobi)
+
+# File created during the release on the CI
+maven-settings.xml
+smallrye-sign.asc
+
 ### Java template
 # Compiled class file
 *.class
