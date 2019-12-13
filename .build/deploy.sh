@@ -33,7 +33,7 @@ deploy_release() {
     mvn -B versions:set -DnewVersion=${RELEASE_VERSION} -DgenerateBackupPoms=false -s maven-settings.xml
     mvn -B clean install -DskipTests -Prelease -s maven-settings.xml
     git commit -am "[RELEASE] - Bump version to ${RELEASE_VERSION}"
-    git tag "RELEASE_VERSION"
+    git tag "${RELEASE_VERSION}"
     echo "Pushing tag to origin"
     git push origin "${RELEASE_VERSION}"
     mvn -B versions:set -DnewVersion=${NEXT_VERSION} -DgenerateBackupPoms=false -s maven-settings.xml
