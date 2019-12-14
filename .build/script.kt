@@ -1,2 +1,2 @@
 #!/usr/bin/env kscript
-println("Hello!")
+println("Hello! " + args.get(1) + " " + args(2));
