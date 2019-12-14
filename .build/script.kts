@@ -1,6 +1,5 @@
 #!/usr/bin/env kscript
 
-val event_type = args[1]
-val client_payload = args[2]
+val client_payload = args[1]
 
-println("Hello! ${event_type} ${client_payload}");
+println("Hello! ${client_payload}");
