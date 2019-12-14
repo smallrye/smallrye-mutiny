@@ -1,5 +1,7 @@
 name: dispatch
-on: repository_dispatch
+on:
+  repository_dispatch:
+    types: internal_event
 
 jobs:
   deploy:
@@ -24,4 +26,4 @@ jobs:
               sdk install kotlin 1.3.61 && \
               sdk install kscript 2.9.0
 
-          kscript .build/script.kts ${GITHUB_TOKEN} ${{ github.event.event_type }} ${{ toJson(github.event.client_payload) }}
+          kscript .build/script.kts ${GITHUB_TOKEN} ${{ github.event.client_payload }}
