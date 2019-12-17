@@ -16,7 +16,7 @@ public class UniInterceptorTest {
 
     @AfterMethod
     public void cleanup() {
-        Infrastructure.clearUniInterceptors();
+        Infrastructure.clearInterceptors();
     }
 
     // Test on events
@@ -44,7 +44,7 @@ public class UniInterceptorTest {
         assertThat(Infrastructure.getUniInterceptors().get(0)).isEqualTo(interceptor1);
         assertThat(Infrastructure.getUniInterceptors().get(1)).isEqualTo(interceptor2);
 
-        Infrastructure.clearUniInterceptors();
+        Infrastructure.clearInterceptors();
         Infrastructure.registerUniInterceptor(interceptor2);
         Infrastructure.registerUniInterceptor(interceptor1);
         assertThat(Infrastructure.getUniInterceptors().get(0)).isEqualTo(interceptor1);

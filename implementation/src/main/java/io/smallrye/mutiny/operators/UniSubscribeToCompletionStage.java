@@ -6,6 +6,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
 
 import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.subscription.UniSubscriber;
 import io.smallrye.mutiny.subscription.UniSubscription;
 
@@ -51,7 +52,7 @@ public class UniSubscribeToCompletionStage {
                 }
             }
         });
-        return future;
+        return Infrastructure.wrapCompletableFuture(future);
     }
 
 }
