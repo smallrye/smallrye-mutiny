@@ -180,8 +180,8 @@ public class MultiContextPropagationTest {
         MultiAssertSubscriber<Integer> sub2 = multi.subscribe()
                 .withSubscriber(MultiAssertSubscriber.create(10));
 
-        sub1.assertCompletedSuccessfully().assertReceived(2, 3);
-        sub2.assertCompletedSuccessfully().assertReceived(2, 3);
+        sub1.await().assertCompletedSuccessfully().assertReceived(2, 3);
+        sub2.await().assertCompletedSuccessfully().assertReceived(2, 3);
     }
 
     @Test
