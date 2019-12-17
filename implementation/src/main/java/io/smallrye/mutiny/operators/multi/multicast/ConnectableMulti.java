@@ -7,6 +7,7 @@ import org.reactivestreams.Subscriber;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.helpers.ParameterValidation;
+import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.AbstractMulti;
 
 /**
@@ -40,7 +41,7 @@ public abstract class ConnectableMulti<T> extends AbstractMulti<T> {
      * @return a {@link Multi}
      */
     public Multi<T> referenceCount() {
-        return new MultiReferenceCount<>(this);
+        return Infrastructure.onMultiCreation(new MultiReferenceCount<>(this));
     }
 
     /**
@@ -56,7 +57,7 @@ public abstract class ConnectableMulti<T> extends AbstractMulti<T> {
             ParameterValidation.validate(duration, "duration");
         }
         ParameterValidation.positive(count, "count");
-        return new MultiReferenceCount<>(this, count, duration);
+        return Infrastructure.onMultiCreation(new MultiReferenceCount<>(this, count, duration));
     }
 
     /**
@@ -70,7 +71,7 @@ public abstract class ConnectableMulti<T> extends AbstractMulti<T> {
      */
     public Multi<T> connectAfter(int numberOfSubscribers) {
         ParameterValidation.positive(numberOfSubscribers, "numberOfSubscribers");
-        return new MultiConnectAfter<>(this, numberOfSubscribers, null);
+        return Infrastructure.onMultiCreation(new MultiConnectAfter<>(this, numberOfSubscribers, null));
     }
 
 }

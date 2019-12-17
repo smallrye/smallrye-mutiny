@@ -9,6 +9,7 @@ import org.reactivestreams.Subscription;
 import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.helpers.ParameterValidation;
+import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.subscription.MultiSubscriber;
 import io.smallrye.mutiny.subscription.SwitchableSubscriptionSubscriber;
 
@@ -24,7 +25,7 @@ public class MultiOnFailureResumeOp<T> extends AbstractMultiOperator<T, T> {
 
     @Override
     public void subscribe(MultiSubscriber<? super T> downstream) {
-        upstream.subscribe(new ResumeSubscriber<>(downstream, next));
+        upstream.subscribe().withSubscriber(new ResumeSubscriber<>(downstream, next));
     }
 
     static final class ResumeSubscriber<T> extends SwitchableSubscriptionSubscriber<T> {
@@ -74,7 +75,7 @@ public class MultiOnFailureResumeOp<T> extends AbstractMultiOperator<T, T> {
                     }
                     return;
                 }
-                publisher.subscribe(this);
+                publisher.subscribe(Infrastructure.onMultiSubscription(publisher, this));
             } else {
                 super.onFailure(failure);
             }

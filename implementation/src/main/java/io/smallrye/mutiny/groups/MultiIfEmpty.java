@@ -11,6 +11,7 @@ import org.reactivestreams.Publisher;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.MultiSwitchOnEmpty;
 import io.smallrye.mutiny.subscription.MultiEmitter;
 
@@ -109,7 +110,7 @@ public class MultiIfEmpty<T> {
      * @return the new {@link Uni}
      */
     public Multi<T> switchTo(Supplier<Publisher<? extends T>> supplier) {
-        return new MultiSwitchOnEmpty<>(upstream, nonNull(supplier, "supplier"));
+        return Infrastructure.onMultiCreation(new MultiSwitchOnEmpty<>(upstream, nonNull(supplier, "supplier")));
     }
 
     /**

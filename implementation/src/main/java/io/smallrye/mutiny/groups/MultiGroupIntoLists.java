@@ -6,6 +6,7 @@ import java.time.Duration;
 import java.util.List;
 
 import io.smallrye.mutiny.Multi;
+import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.MultiCollector;
 
 public class MultiGroupIntoLists<T> {
@@ -34,7 +35,7 @@ public class MultiGroupIntoLists<T> {
      *         window.
      */
     public Multi<List<T>> every(Duration duration) {
-        return MultiCollector.list(upstream, validate(duration, "duration"));
+        return Infrastructure.onMultiCreation(MultiCollector.list(upstream, validate(duration, "duration")));
     }
 
     /**
@@ -52,7 +53,7 @@ public class MultiGroupIntoLists<T> {
      * @return a Multi emitting lists of at most {@code size} items from the upstream Multi.
      */
     public Multi<List<T>> of(int size) {
-        return MultiCollector.list(upstream, positive(size, "size"));
+        return Infrastructure.onMultiCreation(MultiCollector.list(upstream, positive(size, "size")));
     }
 
     /**
@@ -73,7 +74,8 @@ public class MultiGroupIntoLists<T> {
      *         {@code size} items
      */
     public Multi<List<T>> of(int size, int skip) {
-        return MultiCollector.list(upstream, positive(size, "size"), positive(skip, "skip"));
+        return Infrastructure.onMultiCreation(
+                MultiCollector.list(upstream, positive(size, "size"), positive(skip, "skip")));
     }
 
 }

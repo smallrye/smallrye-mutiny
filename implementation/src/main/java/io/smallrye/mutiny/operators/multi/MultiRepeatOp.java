@@ -69,7 +69,7 @@ public class MultiRepeatOp<T> extends AbstractMultiOperator<T, T> implements Mul
 
         @Override
         public void onItem(T t) {
-            passed = ! predicate.test(t);
+            passed = !predicate.test(t);
             if (passed) {
                 emitted++;
                 downstream.onNext(t);

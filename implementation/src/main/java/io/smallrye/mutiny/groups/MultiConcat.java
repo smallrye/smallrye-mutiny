@@ -7,6 +7,7 @@ import org.reactivestreams.Publisher;
 
 import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Multi;
+import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.multi.MultiConcatOp;
 
 /**
@@ -32,7 +33,7 @@ public class MultiConcat {
      */
     @SafeVarargs
     public final <T> Multi<T> streams(Publisher<T>... publishers) {
-        return new MultiConcatOp<>(collectFailures, publishers);
+        return Infrastructure.onMultiCreation(new MultiConcatOp<>(collectFailures, publishers));
     }
 
     /**
@@ -47,7 +48,7 @@ public class MultiConcat {
         List<Publisher<T>> list = new ArrayList<>();
         iterable.forEach(list::add);
         //noinspection unchecked
-        return new MultiConcatOp<>(collectFailures, list.toArray(new Publisher[0]));
+        return Infrastructure.onMultiCreation(new MultiConcatOp<>(collectFailures, list.toArray(new Publisher[0])));
     }
 
     /**

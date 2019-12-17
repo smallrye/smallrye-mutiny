@@ -5,6 +5,7 @@ import java.util.Objects;
 import org.reactivestreams.Publisher;
 
 import io.smallrye.mutiny.Multi;
+import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.subscription.MultiSubscriber;
 import io.smallrye.mutiny.subscription.SwitchableSubscriptionSubscriber;
 
@@ -24,7 +25,7 @@ public final class MultiSwitchOnEmptyOp<T> extends AbstractMultiOperator<T, T> {
     public void subscribe(MultiSubscriber<? super T> actual) {
         SwitchIfEmptySubscriber<T> parent = new SwitchIfEmptySubscriber<>(actual, alternative);
         actual.onSubscribe(parent);
-        upstream.subscribe(parent);
+        upstream.subscribe().withSubscriber(parent);
     }
 
     static final class SwitchIfEmptySubscriber<T> extends SwitchableSubscriptionSubscriber<T> {
@@ -50,7 +51,7 @@ public final class MultiSwitchOnEmptyOp<T> extends AbstractMultiOperator<T, T> {
         public void onCompletion() {
             if (!notEmpty) {
                 notEmpty = true;
-                alternative.subscribe(this);
+                alternative.subscribe(Infrastructure.onMultiSubscription(alternative, this));
             } else {
                 downstream.onCompletion();
             }

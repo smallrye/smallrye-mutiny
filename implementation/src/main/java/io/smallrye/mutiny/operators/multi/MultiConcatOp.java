@@ -7,6 +7,7 @@ import org.reactivestreams.Publisher;
 
 import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.helpers.Subscriptions;
+import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.AbstractMulti;
 import io.smallrye.mutiny.subscription.MultiSubscriber;
 import io.smallrye.mutiny.subscription.SwitchableSubscriptionSubscriber;
@@ -41,7 +42,7 @@ public class MultiConcatOp<T> extends AbstractMulti<T> {
         }
 
         if (publishers.length == 1) {
-            publishers[0].subscribe(actual);
+            publishers[0].subscribe(Infrastructure.onMultiSubscription(publishers[0], actual));
             return;
         }
 
@@ -105,7 +106,7 @@ public class MultiConcatOp<T> extends AbstractMulti<T> {
                         emitted = 0L;
                         emitted(c);
                     }
-                    p.subscribe(this);
+                    p.subscribe(Infrastructure.onMultiSubscription(p, this));
 
                     if (isCancelled()) {
                         return;
@@ -180,7 +181,7 @@ public class MultiConcatOp<T> extends AbstractMulti<T> {
                         produced = 0L;
                         emitted(c);
                     }
-                    p.subscribe(this);
+                    p.subscribe(Infrastructure.onMultiSubscription(p, this));
 
                     if (isCancelled()) {
                         return;

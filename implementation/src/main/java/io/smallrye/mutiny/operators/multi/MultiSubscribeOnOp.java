@@ -108,7 +108,7 @@ public class MultiSubscribeOnOp<T> extends AbstractMultiOperator<T, T> {
 
         void scheduleSubscription(Multi<? extends T> upstream, Subscriber<? super T> downstream) {
             try {
-                executor.execute(() -> upstream.subscribe(this));
+                executor.execute(() -> upstream.subscribe().withSubscriber(this));
             } catch (RejectedExecutionException rejected) {
                 if (!isDone()) {
                     downstream.onError(rejected);

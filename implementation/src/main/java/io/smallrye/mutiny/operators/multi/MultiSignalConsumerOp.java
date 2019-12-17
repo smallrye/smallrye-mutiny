@@ -57,7 +57,7 @@ public final class MultiSignalConsumerOp<T> extends AbstractMultiOperator<T, T> 
         if (actual == null) {
             throw new NullPointerException("Subscriber must not be `null`");
         }
-        upstream.subscribe(new SignalSubscriber(actual));
+        upstream.subscribe().withSubscriber(new SignalSubscriber(actual));
     }
 
     private final class SignalSubscriber implements MultiSubscriber<T>, Subscription {

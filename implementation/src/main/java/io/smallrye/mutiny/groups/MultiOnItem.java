@@ -9,6 +9,7 @@ import org.reactivestreams.Publisher;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.multi.*;
 import io.smallrye.mutiny.subscription.BackPressureStrategy;
 
@@ -32,7 +33,7 @@ public class MultiOnItem<T> {
      * @return the new {@link Multi}
      */
     public <R> Multi<R> apply(Function<? super T, ? extends R> mapper) {
-        return new MultiMapOp<>(upstream, nonNull(mapper, "mapper"));
+        return Infrastructure.onMultiCreation(new MultiMapOp<>(upstream, nonNull(mapper, "mapper")));
     }
 
     /**
@@ -42,7 +43,7 @@ public class MultiOnItem<T> {
      * @return the new {@link Uni}
      */
     public Multi<T> invoke(Consumer<T> callback) {
-        return new MultiSignalConsumerOp<>(
+        return Infrastructure.onMultiCreation(new MultiSignalConsumerOp<>(
                 upstream,
                 null,
                 nonNull(callback, "callback"),
@@ -50,7 +51,7 @@ public class MultiOnItem<T> {
                 null,
                 null,
                 null,
-                null);
+                null));
     }
 
     /**
@@ -189,7 +190,7 @@ public class MultiOnItem<T> {
      * @return the new multi
      */
     public Multi<Void> ignore() {
-        return new MultiIgnoreOp<>(upstream);
+        return Infrastructure.onMultiCreation(new MultiIgnoreOp<>(upstream));
     }
 
     /**
@@ -199,7 +200,7 @@ public class MultiOnItem<T> {
      * @return the new multi
      */
     public Uni<Void> ignoreAsUni() {
-        return new MultiIgnoreOp<>(upstream).toUni();
+        return ignore().toUni();
     }
 
     /**
@@ -230,7 +231,7 @@ public class MultiOnItem<T> {
      * @return the produced {@link Multi}
      */
     public <S> Multi<S> scan(Supplier<S> initialStateProducer, BiFunction<S, ? super T, S> accumulator) {
-        return new MultiScanWithSeedOp<>(upstream, initialStateProducer, accumulator);
+        return Infrastructure.onMultiCreation(new MultiScanWithSeedOp<>(upstream, initialStateProducer, accumulator));
     }
 
     /**
@@ -246,7 +247,7 @@ public class MultiOnItem<T> {
      * @return the produced {@link Multi}
      */
     public Multi<T> scan(BinaryOperator<T> accumulator) {
-        return new MultiScanOp<>(upstream, accumulator);
+        return Infrastructure.onMultiCreation(new MultiScanOp<>(upstream, accumulator));
     }
 
 }

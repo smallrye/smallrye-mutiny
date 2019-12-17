@@ -8,6 +8,7 @@ import java.util.function.Function;
 import org.reactivestreams.Publisher;
 
 import io.smallrye.mutiny.Multi;
+import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.multi.MultiCombineLatestOp;
 import io.smallrye.mutiny.operators.multi.MultiZipOp;
 
@@ -70,15 +71,15 @@ public class MultiItemCombineIterable {
     <O> Multi<O> combine(Function<List<?>, ? extends O> combinator) {
         if (latest) {
             if (collectFailures) {
-                return new MultiCombineLatestOp<>(iterable, combinator, 128, true);
+                return Infrastructure.onMultiCreation(new MultiCombineLatestOp<>(iterable, combinator, 128, true));
             } else {
-                return new MultiCombineLatestOp<>(iterable, combinator, 128, false);
+                return Infrastructure.onMultiCreation(new MultiCombineLatestOp<>(iterable, combinator, 128, false));
             }
         } else {
             if (collectFailures) {
-                return new MultiZipOp<>(iterable, combinator, 128, true);
+                return Infrastructure.onMultiCreation(new MultiZipOp<>(iterable, combinator, 128, true));
             } else {
-                return new MultiZipOp<>(iterable, combinator, 128, false);
+                return Infrastructure.onMultiCreation(new MultiZipOp<>(iterable, combinator, 128, false));
             }
         }
     }

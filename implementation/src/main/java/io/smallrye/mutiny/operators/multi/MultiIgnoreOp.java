@@ -13,7 +13,7 @@ public class MultiIgnoreOp<T> extends AbstractMultiOperator<T, Void> {
 
     @Override
     public void subscribe(MultiSubscriber<? super Void> downstream) {
-        upstream.subscribe(new MultiIgnoreProcessor<>(downstream));
+        upstream.subscribe().withSubscriber(new MultiIgnoreProcessor<>(downstream));
     }
 
     static class MultiIgnoreProcessor<T> extends MultiOperatorProcessor<T, Void> {

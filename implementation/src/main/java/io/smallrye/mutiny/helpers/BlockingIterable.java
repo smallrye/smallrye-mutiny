@@ -33,7 +33,8 @@ public class BlockingIterable<T> implements Iterable<T> {
     @Override
     public Iterator<T> iterator() {
         SubscriberIterator<T> iterator = create();
-        upstream.subscribe(iterator);
+        Subscriber<? super T> actual = Infrastructure.onMultiSubscription(upstream, iterator);
+        upstream.subscribe(actual);
         return iterator;
     }
 
@@ -49,7 +50,8 @@ public class BlockingIterable<T> implements Iterable<T> {
         // On close cancel the subscription.
         Stream<T> stream = StreamSupport.stream(sp, false)
                 .onClose(iterator::terminate);
-        Infrastructure.getDefaultExecutor().execute(() -> upstream.subscribe(iterator));
+        Subscriber<? super T> actual = Infrastructure.onMultiSubscription(upstream, iterator);
+        Infrastructure.getDefaultExecutor().execute(() -> upstream.subscribe(actual));
         return stream;
     }
 

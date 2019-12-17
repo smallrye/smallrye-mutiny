@@ -10,6 +10,7 @@ import org.reactivestreams.Subscription;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.helpers.Subscriptions;
+import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.subscription.MultiSubscriber;
 import io.smallrye.mutiny.subscription.SerializedSubscriber;
 
@@ -32,8 +33,8 @@ public final class MultiSkipUntilPublisherOp<T, U> extends AbstractMultiOperator
     public void subscribe(MultiSubscriber<? super T> actual) {
         SkipUntilMainProcessor<T> main = new SkipUntilMainProcessor<>(actual);
         OtherStreamTracker<U> otherSubscriber = new OtherStreamTracker<>(main);
-        other.subscribe(otherSubscriber);
-        upstream.subscribe(main);
+        other.subscribe(Infrastructure.onMultiSubscription(other, otherSubscriber));
+        upstream.subscribe(Infrastructure.onMultiSubscription(upstream, main));
     }
 
     @SuppressWarnings("SubscriberImplementation")

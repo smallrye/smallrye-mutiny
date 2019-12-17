@@ -11,6 +11,7 @@ import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.helpers.Subscriptions;
 import io.smallrye.mutiny.helpers.queues.SpscArrayQueue;
+import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.AbstractMulti;
 import io.smallrye.mutiny.subscription.MultiSubscriber;
 
@@ -76,7 +77,8 @@ public final class MultiZipOp<O> extends AbstractMulti<O> {
                 if (cancelled || (!postponeFailure && failures.get() != null)) {
                     return;
                 }
-                sources.get(i).subscribe(subscribers.get(i));
+                Publisher<?> publisher = sources.get(i);
+                publisher.subscribe(Infrastructure.onMultiSubscription(publisher, subscribers.get(i)));
             }
         }
 

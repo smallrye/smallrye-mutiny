@@ -59,7 +59,7 @@ public final class MultiBufferWithTimeoutOp<T> extends AbstractMultiOperator<T, 
     public void subscribe(MultiSubscriber<? super List<T>> downstream) {
         MultiBufferWithTimeoutProcessor<T> subscriber = new MultiBufferWithTimeoutProcessor<>(
                 new SerializedSubscriber<>(downstream), size, timeout, scheduler, supplier);
-        upstream.subscribe(subscriber);
+        upstream.subscribe().withSubscriber(subscriber);
     }
 
     static class MultiBufferWithTimeoutProcessor<T> extends MultiOperatorProcessor<T, List<T>> {

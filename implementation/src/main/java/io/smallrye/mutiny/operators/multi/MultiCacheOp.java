@@ -56,7 +56,7 @@ public class MultiCacheOp<T> extends AbstractMultiOperator<T, T> implements Subs
         addDownstreamSubscription(consumer);
 
         if (hasSubscribedToUpstream.compareAndSet(false, true)) {
-            upstream.subscribe(this);
+            upstream.subscribe().withSubscriber(this);
         } else {
             // replay
             consumer.replay();

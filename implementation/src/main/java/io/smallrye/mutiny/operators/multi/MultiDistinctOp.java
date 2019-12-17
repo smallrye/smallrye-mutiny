@@ -22,7 +22,7 @@ public final class MultiDistinctOp<T> extends AbstractMultiOperator<T, T> {
         if (actual == null) {
             throw new NullPointerException("Subscriber cannot be `null`");
         }
-        upstream.subscribe(new DistinctProcessor<>(actual));
+        upstream.subscribe().withSubscriber(new DistinctProcessor<>(actual));
     }
 
     static final class DistinctProcessor<T> extends MultiOperatorProcessor<T, T> {

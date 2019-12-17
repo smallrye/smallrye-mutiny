@@ -25,7 +25,7 @@ public class MultiFilterOp<T> extends AbstractMultiOperator<T, T> {
         if (downstream == null) {
             throw new NullPointerException("The subscriber must not be `null`");
         }
-        upstream.subscribe(new MultiFilterProcessor<>(downstream, predicate));
+        upstream.subscribe().withSubscriber(new MultiFilterProcessor<>(downstream, predicate));
     }
 
     static final class MultiFilterProcessor<T> extends MultiOperatorProcessor<T, T> {

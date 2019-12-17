@@ -5,6 +5,7 @@ import static io.smallrye.mutiny.helpers.ParameterValidation.*;
 import java.time.Duration;
 
 import io.smallrye.mutiny.Multi;
+import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.MultiCollector;
 
 public class MultiGroupIntoMultis<T> {
@@ -33,7 +34,7 @@ public class MultiGroupIntoMultis<T> {
      *         window.
      */
     public Multi<Multi<T>> every(Duration duration) {
-        return MultiCollector.multi(upstream, validate(duration, "duration"));
+        return Infrastructure.onMultiCreation(MultiCollector.multi(upstream, validate(duration, "duration")));
     }
 
     /**
@@ -53,7 +54,7 @@ public class MultiGroupIntoMultis<T> {
      * @return a Multi emitting multis of at most {@code size} items from the upstream Multi.
      */
     public Multi<Multi<T>> of(int size) {
-        return MultiCollector.multi(upstream, positive(size, "size"));
+        return Infrastructure.onMultiCreation(MultiCollector.multi(upstream, positive(size, "size")));
     }
 
     /**
@@ -75,7 +76,7 @@ public class MultiGroupIntoMultis<T> {
      * @return a Multi emitting multis of at most {@code size} items from the upstream Multi.
      */
     public Multi<Multi<T>> of(int size, int skip) {
-        return MultiCollector.multi(upstream, positive(size, "size"), positive(skip, "skip"));
+        return Infrastructure.onMultiCreation(MultiCollector.multi(upstream, positive(size, "size"), positive(skip, "skip")));
     }
 
 }

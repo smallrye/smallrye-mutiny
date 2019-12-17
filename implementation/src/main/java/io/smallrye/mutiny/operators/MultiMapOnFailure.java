@@ -10,6 +10,7 @@ import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 
 import io.smallrye.mutiny.Multi;
+import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.multi.MultiOnFailureResumeOp;
 
 public class MultiMapOnFailure<T> extends MultiOperator<T, T> {
@@ -39,7 +40,7 @@ public class MultiMapOnFailure<T> extends MultiOperator<T, T> {
             }
             return Multi.createFrom().failure(failure);
         };
-        MultiOnFailureResumeOp<T> op = new MultiOnFailureResumeOp<>(upstream(), next);
+        Multi<T> op = Infrastructure.onMultiCreation(new MultiOnFailureResumeOp<>(upstream(), next));
         op.subscribe(subscriber);
     }
 }

@@ -30,7 +30,7 @@ public class MultiConnectAfter<T> extends MultiOperator<T, T> {
             throw new NullPointerException("The subscriber must not be `null`");
         }
         // TODO Wondering if we can just delay the subscription and not call connect.
-        upstream().subscribe(downstream);
+        upstream().subscribe().withSubscriber(downstream);
         if (count.incrementAndGet() == numberOfSubscribers) {
             ((ConnectableMulti) upstream()).connect(connection);
         }

@@ -28,9 +28,9 @@ public class MultiTimePeriod {
     public Multi<Long> every(Duration duration) {
         validate(duration, "duration");
         if (initialDelay != null) {
-            return new IntervalMulti(initialDelay, duration, executor);
+            return Infrastructure.onMultiCreation(new IntervalMulti(initialDelay, duration, executor));
         } else {
-            return new IntervalMulti(duration, executor);
+            return Infrastructure.onMultiCreation(new IntervalMulti(duration, executor));
         }
     }
 

@@ -5,6 +5,7 @@ import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
 import java.util.function.Predicate;
 
 import io.smallrye.mutiny.Multi;
+import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.multi.MultiRetryOp;
 
 public class MultiRetry<T> {
@@ -38,7 +39,7 @@ public class MultiRetry<T> {
      *         {@link Multi} until it gets an item. When the number of attempt is reached, the last failure is propagated.
      */
     public Multi<T> atMost(long numberOfAttempts) {
-        return new MultiRetryOp<>(upstream, numberOfAttempts);
+        return Infrastructure.onMultiCreation(new MultiRetryOp<>(upstream, numberOfAttempts));
     }
 
     public Multi<T> until(Predicate<? super Throwable> predicate) {

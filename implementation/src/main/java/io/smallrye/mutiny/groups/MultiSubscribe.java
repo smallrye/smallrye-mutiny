@@ -13,6 +13,7 @@ import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.helpers.BlockingIterable;
+import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.AbstractMulti;
 import io.smallrye.mutiny.subscription.*;
 
@@ -40,7 +41,8 @@ public class MultiSubscribe<T> {
      * @return the passed subscriber
      */
     public <S extends Subscriber<? super T>> S withSubscriber(S subscriber) {
-        upstream.subscribe(subscriber);
+        Subscriber<? super T> actual = Infrastructure.onMultiSubscription(upstream, subscriber);
+        upstream.subscribe(actual);
         return subscriber;
     }
 
