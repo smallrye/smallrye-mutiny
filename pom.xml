@@ -59,13 +59,17 @@
         <module>reactor</module>
         <module>reactive-streams-operators</module>
         <module>documentation</module>
+        <module>context-propagation</module>
     </modules>
 
     <properties>
         <rxjava2.version>2.2.11</rxjava2.version>
         <reactor-core.version>3.2.10.RELEASE</reactor-core.version>
         <microprofile-reactive-streams.version>1.0.1</microprofile-reactive-streams.version>
+        <microprofile-context-propagation.version>1.0</microprofile-context-propagation.version>
         <reactive-streams.version>1.0.3</reactive-streams.version>
+        <smallrye-context-propagation.version>1.0.11</smallrye-context-propagation.version>
+        <smallrye-config.version>1.5.1</smallrye-config.version>
     </properties>
 
     <dependencyManagement>
@@ -95,6 +99,11 @@
                 <artifactId>microprofile-reactive-streams-operators-api</artifactId>
                 <version>${microprofile-reactive-streams.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.eclipse.microprofile.context-propagation</groupId>
+                <artifactId>microprofile-context-propagation-api</artifactId>
+                <version>${microprofile-context-propagation.version}</version>
+            </dependency>
 
             <dependency>
                 <groupId>io.smallrye.reactive</groupId>
@@ -106,6 +115,18 @@
                 <groupId>org.mockito</groupId>
                 <artifactId>mockito-core</artifactId>
                 <version>3.1.0</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>io.smallrye</groupId>
+                <artifactId>smallrye-context-propagation</artifactId>
+                <version>${smallrye-context-propagation.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>io.smallrye.config</groupId>
+                <artifactId>smallrye-config</artifactId>
+                <version>${smallrye-config.version}</version>
                 <scope>test</scope>
             </dependency>
         </dependencies>
