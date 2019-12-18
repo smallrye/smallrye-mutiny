@@ -5,6 +5,7 @@ import static io.smallrye.mutiny.helpers.ParameterValidation.SUPPLIER_PRODUCED_N
 import java.util.function.Supplier;
 
 import org.reactivestreams.Publisher;
+import org.reactivestreams.Subscriber;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.operators.multi.MultiConcatOp;
@@ -18,7 +19,10 @@ public class MultiSwitchOnCompletion<T> extends MultiOperator<T, T> {
     }
 
     @Override
-    protected Publisher<T> publisher() {
+    public void subscribe(Subscriber<? super T> subscriber) {
+        if (subscriber == null) {
+            throw new NullPointerException("The subscriber must not be `null`");
+        }
         Publisher<T> followup = Multi.createFrom().deferred(() -> {
             Publisher<? extends T> publisher;
             try {
@@ -39,6 +43,7 @@ public class MultiSwitchOnCompletion<T> extends MultiOperator<T, T> {
 
         @SuppressWarnings("unchecked")
         Publisher<T>[] publishers = new Publisher[] { upstream(), followup };
-        return new MultiConcatOp<>(false, publishers);
+        MultiConcatOp<T> op = new MultiConcatOp<>(false, publishers);
+        op.subscribe(subscriber);
     }
 }

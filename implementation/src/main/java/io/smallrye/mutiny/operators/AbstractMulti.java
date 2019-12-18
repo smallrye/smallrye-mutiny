@@ -8,7 +8,6 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
 
-import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
@@ -22,19 +21,13 @@ import io.smallrye.mutiny.subscription.SerializedSubscriber;
 
 public abstract class AbstractMulti<T> implements Multi<T> {
 
-    protected abstract Publisher<T> publisher();
-
     @Override
     public void subscribe(Subscriber<? super T> subscriber) {
         if (subscriber == null) {
             throw new NullPointerException("Subscriber is `null`");
         }
-        Publisher<T> publisher = publisher();
-        if (publisher == null) {
-            throw new IllegalStateException("Invalid call to subscription, we don't have a publisher");
-        }
         //noinspection SubscriberImplementation
-        publisher.subscribe(new SerializedSubscriber<>(new Subscriber<T>() {
+        this.subscribe(new SerializedSubscriber<>(new Subscriber<T>() {
 
             AtomicReference<Subscription> reference = new AtomicReference<>();
 

@@ -56,11 +56,6 @@ public final class MultiPublishOp<T> extends ConnectableMulti<T> {
     }
 
     @Override
-    protected Publisher<T> publisher() {
-        return this;
-    }
-
-    @Override
     public void subscribe(Subscriber<? super T> s) {
         onSubscribe.subscribe(s);
     }

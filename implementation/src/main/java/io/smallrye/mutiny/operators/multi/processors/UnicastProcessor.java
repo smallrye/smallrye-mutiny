@@ -7,7 +7,6 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.reactivestreams.Processor;
-import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
@@ -162,11 +161,6 @@ public class UnicastProcessor<T> extends AbstractMulti<T> implements Processor<T
             // Request max, it's the queue that buffer the items.
             upstream.request(Long.MAX_VALUE);
         }
-    }
-
-    @Override
-    protected Publisher<T> publisher() {
-        return this;
     }
 
     @Override

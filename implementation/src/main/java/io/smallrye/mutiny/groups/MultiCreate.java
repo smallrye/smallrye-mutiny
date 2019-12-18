@@ -23,6 +23,7 @@ import io.smallrye.mutiny.operators.AbstractMulti;
 import io.smallrye.mutiny.operators.multi.builders.*;
 import io.smallrye.mutiny.subscription.BackPressureStrategy;
 import io.smallrye.mutiny.subscription.MultiEmitter;
+import io.smallrye.mutiny.subscription.SafeSubscriber;
 
 /**
  * Group methods allowing to create {@link Multi} instances from various sources.
@@ -139,8 +140,8 @@ public class MultiCreate {
         Publisher<T> actual = nonNull(publisher, "publisher");
         return new AbstractMulti<T>() {
             @Override
-            protected Publisher<T> publisher() {
-                return actual;
+            public void subscribe(Subscriber<? super T> subscriber) {
+                actual.subscribe(new SafeSubscriber<>(subscriber));
             }
         };
     }

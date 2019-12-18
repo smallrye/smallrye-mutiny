@@ -7,6 +7,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 import org.reactivestreams.Publisher;
+import org.reactivestreams.Subscriber;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.operators.multi.MultiOnFailureResumeOp;
@@ -23,7 +24,10 @@ public class MultiFlatMapOnFailure<T> extends MultiOperator<T, T> {
     }
 
     @Override
-    protected Publisher<T> publisher() {
+    public void subscribe(Subscriber<? super T> subscriber) {
+        if (subscriber == null) {
+            throw new NullPointerException("The subscriber must not be `null`");
+        }
         Function<? super Throwable, ? extends Publisher<? extends T>> next = failure -> {
             if (predicate.test(failure)) {
                 Publisher<? extends T> res = mapper.apply(failure);
@@ -35,6 +39,7 @@ public class MultiFlatMapOnFailure<T> extends MultiOperator<T, T> {
             }
             return Multi.createFrom().failure(failure);
         };
-        return new MultiOnFailureResumeOp<>(upstream(), next);
+        MultiOnFailureResumeOp<T> op = new MultiOnFailureResumeOp<>(upstream(), next);
+        op.subscribe(subscriber);
     }
 }

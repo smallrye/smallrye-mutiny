@@ -66,9 +66,9 @@ public final class SafeSubscriber<T> implements Subscriber<T>, Subscription {
         }
 
         if (t == null) {
-            Throwable ex = new NullPointerException("onNext called with null.");
+            NullPointerException ex = new NullPointerException("onNext called with null.");
             cancelAndDispatch(ex);
-            return;
+            throw ex;
         }
 
         try {

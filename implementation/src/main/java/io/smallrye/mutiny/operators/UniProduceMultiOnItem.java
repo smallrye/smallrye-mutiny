@@ -29,12 +29,10 @@ public class UniProduceMultiOnItem<I, O> extends AbstractMulti<O> {
 
     @Override
     public void subscribe(Subscriber<? super O> subscriber) {
+        if (subscriber == null) {
+            throw new NullPointerException("The subscriber must not be `null`");
+        }
         upstream.subscribe().withSubscriber(new FlatMapPublisherSubscriber<>(subscriber, mapper));
-    }
-
-    @Override
-    protected Publisher<O> publisher() {
-        return this;
     }
 
     @SuppressWarnings("SubscriberImplementation")

@@ -17,11 +17,6 @@ public class DeferredMulti<T> extends AbstractMulti<T> {
     }
 
     @Override
-    protected Publisher<T> publisher() {
-        return this;
-    }
-
-    @Override
     public void subscribe(Subscriber<? super T> downstream) {
         Publisher<? extends T> publisher;
         try {

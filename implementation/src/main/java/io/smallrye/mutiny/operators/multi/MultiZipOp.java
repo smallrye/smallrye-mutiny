@@ -44,11 +44,6 @@ public final class MultiZipOp<O> extends AbstractMulti<O> {
         coordinator.subscribe(upstreams);
     }
 
-    @Override
-    protected Publisher<O> publisher() {
-        return this;
-    }
-
     static final class ZipCoordinator<R> implements Subscription {
 
         private final AtomicInteger wip = new AtomicInteger();

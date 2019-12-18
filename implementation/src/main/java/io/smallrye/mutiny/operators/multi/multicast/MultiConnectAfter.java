@@ -2,7 +2,6 @@ package io.smallrye.mutiny.operators.multi.multicast;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 
 import io.smallrye.mutiny.Multi;
@@ -24,11 +23,6 @@ public class MultiConnectAfter<T> extends MultiOperator<T, T> {
         super(upstream);
         this.numberOfSubscribers = numberOfSubscribers;
         this.connection = connection;
-    }
-
-    @Override
-    protected Publisher<T> publisher() {
-        return this;
     }
 
     @Override

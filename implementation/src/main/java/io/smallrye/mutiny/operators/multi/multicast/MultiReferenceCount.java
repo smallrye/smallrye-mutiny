@@ -5,7 +5,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 
 import io.smallrye.mutiny.Multi;
@@ -36,11 +35,6 @@ public class MultiReferenceCount<T> extends AbstractMulti<T> implements Multi<T>
         this.numberOfSubscribers = numberOfSubscribers;
         this.duration = duration;
         this.executor = Infrastructure.getDefaultWorkerPool();
-    }
-
-    @Override
-    protected Publisher<T> publisher() {
-        return this;
     }
 
     @Override

@@ -28,8 +28,4 @@ public final class EmptyMulti extends AbstractMulti<Object> {
         Subscriptions.complete(actual);
     }
 
-    @Override
-    protected Publisher<Object> publisher() {
-        return this;
-    }
 }
