@@ -24,7 +24,7 @@ include::plantuml/philosophy-chain.puml[]
 An entity that is both a `Publisher` and a `Subscriber` is generally named a `Processor`
 ====
 
-Four types of events can flow in this directions:
+Four types of events can flow in this direction:
 
 * subscribed - indicate that the upstream has taken into account the subscription
 * items - events containing some _value_
@@ -54,7 +54,7 @@ In a typical scenario, a subscriber:
 include::plantuml/philosophy-protocol.puml[]
 ----
 
-The `request` events is the cornerstone of the back-pressure protocol.
+The `request` event is the cornerstone of the back-pressure protocol.
 A subscriber should not request more than what it is able to handle, and a publisher should not emit more items than the amount of request received.
 
 [NOTE]
@@ -71,7 +71,7 @@ If you program does not do anything, be sure you subscribed to the flow.
 === An event-driven API
 
 Mutiny is an event-driven API.
-So for each the types of event, there is an `on` associated method that let you handle this specific event.
+So for each types of event, there is an `on` associated method that let you handle this specific event.
 For example:
 
 [source,java,indent=0]
@@ -102,7 +102,7 @@ They receive and fire events, at anytime.
 You may wonder why we make this distinction.
 `Uni` does not need the complete ceremony presented above as the _request_ does not make a lot of sense.
 The `subscribe` event expresses the interest and triggers the computation.
-Also, `Uni` can handle items having a `null` value (and as specific method to handle this case).
+Also, `Uni` can handle items having a `null` value (and has a specific method to handle this case).
 `Multi` does not allow it (because the Reactive Streams specification forbids it).
 
 Also, having a `Uni` implementing `Publisher` would be a bit like having `Optional` implementing `Iterable`.
@@ -111,7 +111,7 @@ In other words, `Uni`:
 
 * can receive at most 1 `item` event, or a `failure` event
 * cannot receive a `completion` event (`null` in the case of 0 item)
-* cannot received a `request` event
+* cannot receive a `request` event
 
 The following snippet shows how you can use `Uni` and `Multi`:
 
@@ -129,7 +129,7 @@ include::../../../src/test/java/snippets/UniMultiComparisonTest.java[tags=conver
 
 === Creating and Subscribing to Unis
 
-There are many way to create instances of `Unis`:
+There are many ways to create instances of `Unis`:
 
 [source,java,indent=0]
 ----
