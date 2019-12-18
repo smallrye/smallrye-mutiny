@@ -228,7 +228,7 @@ public interface Uni<T> {
      * @see UniCombine#any() <code>Uni.any</code> for a static version of this operator, like
      *      <code>Uni first = Uni.any().of(uni1, uni2);</code>
      */
-    UniOr or();
+    UniOr<T> or();
 
     /**
      * Like {@link #onFailure(Predicate)} but applied to all failures fired by the upstream uni.
