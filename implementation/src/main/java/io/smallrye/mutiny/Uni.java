@@ -47,15 +47,15 @@ public interface Uni<T> {
      *
      * <pre>
      * {@code
-     * Uni.from().item(1); // Emit 1 at subscription time
-     * Uni.from().item(() -> x); // Emit x at subscription time, the supplier is invoked for each subscription
-     * Uni.from().completionState(cs); // Emit the item from this completion stage
-     * Uni.from().completionState(() -> cs); // Emit the item from this completion stage, the stage is not created before subscription
-     * Uni.from().failure(exception); // Emit the failure at subscription time
-     * Uni.from().deferred(() -> Uni.from().value(x)); // Defer the uni creation until subscription. Each subscription can produce a different uni
-     * Uni.from().item(null); // Emit null at subscription time
-     * Uni.from().nothing(); // Create a Uni not emitting any signal
-     * Uni.from().publisher(publisher); // Create a Uni from a Reactive Streams Publisher
+     * Uni.createFrom().item(1); // Emit 1 at subscription time
+     * Uni.createFrom().item(() -> x); // Emit x at subscription time, the supplier is invoked for each subscription
+     * Uni.createFrom().completionState(cs); // Emit the item from this completion stage
+     * Uni.createFrom().completionState(() -> cs); // Emit the item from this completion stage, the stage is not created before subscription
+     * Uni.createFrom().failure(exception); // Emit the failure at subscription time
+     * Uni.createFrom().deferred(() -> Uni.from().value(x)); // Defer the uni creation until subscription. Each subscription can produce a different uni
+     * Uni.createFrom().item(null); // Emit null at subscription time
+     * Uni.createFrom().nothing(); // Create a Uni not emitting any signal
+     * Uni.createFrom().publisher(publisher); // Create a Uni from a Reactive Streams Publisher
      * }
      * </pre>
      *
