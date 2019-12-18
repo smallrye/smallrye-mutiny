@@ -17,9 +17,14 @@ import io.smallrye.mutiny.groups.*;
 import io.smallrye.mutiny.operators.multi.MultiCacheOp;
 import io.smallrye.mutiny.operators.multi.MultiEmitOnOp;
 import io.smallrye.mutiny.operators.multi.MultiSubscribeOnOp;
+import io.smallrye.mutiny.subscription.MultiSubscriber;
 import io.smallrye.mutiny.subscription.SerializedSubscriber;
 
 public abstract class AbstractMulti<T> implements Multi<T> {
+
+    public void subscribe(MultiSubscriber<? super T> subscriber) {
+        this.subscribe((Subscriber<? super T>) subscriber);
+    }
 
     @Override
     public void subscribe(Subscriber<? super T> subscriber) {

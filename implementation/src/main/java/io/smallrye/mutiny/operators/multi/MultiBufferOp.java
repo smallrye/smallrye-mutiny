@@ -26,13 +26,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Supplier;
 
-import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.helpers.Subscriptions;
 import io.smallrye.mutiny.helpers.queues.DrainUtils;
+import io.smallrye.mutiny.subscription.MultiSubscriber;
 
 /**
  * Buffers a given number of items and emits the <em>groups</em> as a single item downstream.
@@ -56,7 +56,7 @@ public class MultiBufferOp<T> extends AbstractMultiOperator<T, List<T>> {
     }
 
     @Override
-    public void subscribe(Subscriber<? super List<T>> downstream) {
+    public void subscribe(MultiSubscriber<? super List<T>> downstream) {
         if (size == skip) {
             upstream.subscribe(new BufferExactProcessor<>(downstream, size, supplier));
         } else if (skip > size) {
@@ -75,7 +75,7 @@ public class MultiBufferOp<T> extends AbstractMultiOperator<T, List<T>> {
         private final int size;
         private List<T> current;
 
-        BufferExactProcessor(Subscriber<? super List<T>> downstream, int size, Supplier<List<T>> supplier) {
+        BufferExactProcessor(MultiSubscriber<? super List<T>> downstream, int size, Supplier<List<T>> supplier) {
             super(downstream);
             this.size = size;
             this.supplier = supplier;
@@ -92,7 +92,7 @@ public class MultiBufferOp<T> extends AbstractMultiOperator<T, List<T>> {
         }
 
         @Override
-        public void onNext(T t) {
+        public void onItem(T t) {
             if (isDone()) {
                 return;
             }
@@ -105,19 +105,19 @@ public class MultiBufferOp<T> extends AbstractMultiOperator<T, List<T>> {
             if (current.size() == size) {
                 List<T> buffer = current;
                 current = null;
-                downstream.onNext(buffer);
+                downstream.onItem(buffer);
             }
         }
 
         @Override
-        public void onComplete() {
+        public void onCompletion() {
             Subscription subscription = upstream.getAndSet(CANCELLED);
             if (subscription != CANCELLED) {
                 List<T> buffer = current;
                 if (buffer != null && !buffer.isEmpty()) {
-                    downstream.onNext(buffer);
+                    downstream.onItem(buffer);
                 }
-                downstream.onComplete();
+                downstream.onCompletion();
             }
         }
     }
@@ -133,7 +133,7 @@ public class MultiBufferOp<T> extends AbstractMultiOperator<T, List<T>> {
 
         private final AtomicInteger wip = new AtomicInteger();
 
-        BufferSkipProcessor(Subscriber<? super List<T>> downstream, int size, int skip, Supplier<List<T>> supplier) {
+        BufferSkipProcessor(MultiSubscriber<? super List<T>> downstream, int size, int skip, Supplier<List<T>> supplier) {
             super(downstream);
             this.size = size;
             this.skip = skip;
@@ -159,7 +159,7 @@ public class MultiBufferOp<T> extends AbstractMultiOperator<T, List<T>> {
         }
 
         @Override
-        public void onNext(T item) {
+        public void onItem(T item) {
             if (isDone()) {
                 return;
             }
@@ -175,31 +175,31 @@ public class MultiBufferOp<T> extends AbstractMultiOperator<T, List<T>> {
                 buffer.add(item);
                 if (buffer.size() == size) {
                     current = null;
-                    downstream.onNext(buffer);
+                    downstream.onItem(buffer);
                 }
             }
             index = i + 1;
         }
 
         @Override
-        public void onError(Throwable t) {
+        public void onFailure(Throwable t) {
             Subscription subscription = upstream.getAndSet(CANCELLED);
             if (subscription != CANCELLED) {
                 current = null;
-                downstream.onError(t);
+                downstream.onFailure(t);
             }
         }
 
         @Override
-        public void onComplete() {
+        public void onCompletion() {
             Subscription subscription = upstream.getAndSet(CANCELLED);
             if (subscription != CANCELLED) {
                 List<T> buffer = current;
                 current = null;
                 if (buffer != null) {
-                    downstream.onNext(buffer);
+                    downstream.onItem(buffer);
                 }
-                downstream.onComplete();
+                downstream.onCompletion();
             }
         }
     }
@@ -217,7 +217,7 @@ public class MultiBufferOp<T> extends AbstractMultiOperator<T, List<T>> {
         private final AtomicLong requested = new AtomicLong();
         private final ArrayDeque<List<T>> queue = new ArrayDeque<>();
 
-        BufferOverlappingProcessor(Subscriber<? super List<T>> downstream, int size, int skip,
+        BufferOverlappingProcessor(MultiSubscriber<? super List<T>> downstream, int size, int skip,
                 Supplier<List<T>> supplier) {
             super(downstream);
             this.size = size;
@@ -253,7 +253,7 @@ public class MultiBufferOp<T> extends AbstractMultiOperator<T, List<T>> {
         }
 
         @Override
-        public void onNext(T item) {
+        public void onItem(T item) {
             if (isDone()) {
                 return;
             }
@@ -270,7 +270,7 @@ public class MultiBufferOp<T> extends AbstractMultiOperator<T, List<T>> {
             if (b != null && b.size() + 1 == size) {
                 queue.poll();
                 b.add(item);
-                downstream.onNext(b);
+                downstream.onItem(b);
                 produced++;
             }
 
@@ -282,15 +282,15 @@ public class MultiBufferOp<T> extends AbstractMultiOperator<T, List<T>> {
         }
 
         @Override
-        public void onError(Throwable t) {
+        public void onFailure(Throwable t) {
             Subscription subscription = upstream.getAndSet(CANCELLED);
             if (subscription != CANCELLED) {
-                downstream.onError(t);
+                downstream.onFailure(t);
             }
         }
 
         @Override
-        public void onComplete() {
+        public void onCompletion() {
             Subscription subscription = upstream.getAndSet(CANCELLED);
             if (subscription != CANCELLED) {
                 long p = produced;

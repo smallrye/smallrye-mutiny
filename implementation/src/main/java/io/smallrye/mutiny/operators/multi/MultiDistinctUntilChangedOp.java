@@ -1,8 +1,7 @@
 package io.smallrye.mutiny.operators.multi;
 
-import org.reactivestreams.Subscriber;
-
 import io.smallrye.mutiny.Multi;
+import io.smallrye.mutiny.subscription.MultiSubscriber;
 
 /**
  * Eliminates the duplicated items from the upstream.
@@ -16,7 +15,7 @@ public final class MultiDistinctUntilChangedOp<T> extends AbstractMultiOperator<
     }
 
     @Override
-    public void subscribe(Subscriber<? super T> actual) {
+    public void subscribe(MultiSubscriber<? super T> actual) {
         upstream.subscribe(new DistinctProcessor<>(actual));
     }
 
@@ -24,31 +23,31 @@ public final class MultiDistinctUntilChangedOp<T> extends AbstractMultiOperator<
 
         private T last;
 
-        DistinctProcessor(Subscriber<? super T> downstream) {
+        DistinctProcessor(MultiSubscriber<? super T> downstream) {
             super(downstream);
         }
 
         @Override
-        public void onNext(T t) {
+        public void onItem(T t) {
             if (isDone()) {
                 return;
             }
             if (last == null || !last.equals(t)) {
                 last = t;
-                downstream.onNext(t);
+                downstream.onItem(t);
                 request(1);
             }
         }
 
         @Override
-        public void onError(Throwable t) {
-            super.onError(t);
+        public void onFailure(Throwable t) {
+            super.onFailure(t);
             last = null;
         }
 
         @Override
-        public void onComplete() {
-            super.onComplete();
+        public void onCompletion() {
+            super.onCompletion();
             last = null;
         }
 

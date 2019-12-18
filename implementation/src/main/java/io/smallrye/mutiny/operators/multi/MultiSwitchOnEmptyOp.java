@@ -3,9 +3,9 @@ package io.smallrye.mutiny.operators.multi;
 import java.util.Objects;
 
 import org.reactivestreams.Publisher;
-import org.reactivestreams.Subscriber;
 
 import io.smallrye.mutiny.Multi;
+import io.smallrye.mutiny.subscription.MultiSubscriber;
 import io.smallrye.mutiny.subscription.SwitchableSubscriptionSubscriber;
 
 /**
@@ -21,7 +21,7 @@ public final class MultiSwitchOnEmptyOp<T> extends AbstractMultiOperator<T, T> {
     }
 
     @Override
-    public void subscribe(Subscriber<? super T> actual) {
+    public void subscribe(MultiSubscriber<? super T> actual) {
         SwitchIfEmptySubscriber<T> parent = new SwitchIfEmptySubscriber<>(actual, alternative);
         actual.onSubscribe(parent);
         upstream.subscribe(parent);
@@ -32,27 +32,27 @@ public final class MultiSwitchOnEmptyOp<T> extends AbstractMultiOperator<T, T> {
         private final Publisher<? extends T> alternative;
         boolean notEmpty;
 
-        SwitchIfEmptySubscriber(Subscriber<? super T> downstream,
+        SwitchIfEmptySubscriber(MultiSubscriber<? super T> downstream,
                 Publisher<? extends T> alternative) {
             super(downstream);
             this.alternative = alternative;
         }
 
         @Override
-        public void onNext(T t) {
+        public void onItem(T t) {
             if (!notEmpty) {
                 notEmpty = true;
             }
-            downstream.onNext(t);
+            downstream.onItem(t);
         }
 
         @Override
-        public void onComplete() {
+        public void onCompletion() {
             if (!notEmpty) {
                 notEmpty = true;
                 alternative.subscribe(this);
             } else {
-                downstream.onComplete();
+                downstream.onCompletion();
             }
         }
     }

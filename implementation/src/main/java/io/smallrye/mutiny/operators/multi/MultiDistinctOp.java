@@ -2,11 +2,9 @@ package io.smallrye.mutiny.operators.multi;
 
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.concurrent.atomic.AtomicLong;
-
-import org.reactivestreams.Subscriber;
 
 import io.smallrye.mutiny.Multi;
+import io.smallrye.mutiny.subscription.MultiSubscriber;
 
 /**
  * Eliminates the duplicated items from the upstream.
@@ -20,7 +18,7 @@ public final class MultiDistinctOp<T> extends AbstractMultiOperator<T, T> {
     }
 
     @Override
-    public void subscribe(Subscriber<? super T> actual) {
+    public void subscribe(MultiSubscriber<? super T> actual) {
         if (actual == null) {
             throw new NullPointerException("Subscriber cannot be `null`");
         }
@@ -30,35 +28,44 @@ public final class MultiDistinctOp<T> extends AbstractMultiOperator<T, T> {
     static final class DistinctProcessor<T> extends MultiOperatorProcessor<T, T> {
 
         final Collection<T> collection;
-        final AtomicLong requested = new AtomicLong();
 
-        DistinctProcessor(Subscriber<? super T> downstream) {
+        DistinctProcessor(MultiSubscriber<? super T> downstream) {
             super(downstream);
             this.collection = new HashSet<>();
         }
 
         @Override
-        public void onNext(T t) {
+        public void onItem(T t) {
             if (isDone()) {
                 return;
             }
 
-            if (collection.add(t)) {
-                downstream.onNext(t);
+            boolean added;
+            try {
+                added = collection.add(t);
+            } catch (Throwable e) {
+                // catch exception thrown by the equals / comparator
+                failAndCancel(e);
+                return;
+            }
+
+            if (added) {
+                downstream.onItem(t);
             } else {
                 request(1);
             }
+
         }
 
         @Override
-        public void onError(Throwable t) {
-            super.onError(t);
+        public void onFailure(Throwable t) {
+            super.onFailure(t);
             collection.clear();
         }
 
         @Override
-        public void onComplete() {
-            super.onComplete();
+        public void onCompletion() {
+            super.onCompletion();
             collection.clear();
         }
 

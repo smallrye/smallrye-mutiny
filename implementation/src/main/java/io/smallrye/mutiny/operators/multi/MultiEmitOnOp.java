@@ -10,7 +10,6 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
-import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.Multi;
@@ -18,6 +17,7 @@ import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.helpers.Subscriptions;
 import io.smallrye.mutiny.helpers.queues.SpscArrayQueue;
 import io.smallrye.mutiny.subscription.BackPressureFailure;
+import io.smallrye.mutiny.subscription.MultiSubscriber;
 
 /**
  * Emits events from upstream on a thread managed by the given scheduler.
@@ -35,7 +35,7 @@ public class MultiEmitOnOp<T> extends AbstractMultiOperator<T, T> {
     }
 
     @Override
-    public void subscribe(Subscriber<? super T> downstream) {
+    public void subscribe(MultiSubscriber<? super T> downstream) {
         ParameterValidation.nonNullNpe(downstream, "subscriber");
         upstream.subscribe(new MultiEmitOnProcessor<>(downstream, executor, queueSupplier));
     }
@@ -73,7 +73,7 @@ public class MultiEmitOnOp<T> extends AbstractMultiOperator<T, T> {
 
         private long produced;
 
-        MultiEmitOnProcessor(Subscriber<? super T> downstream,
+        MultiEmitOnProcessor(MultiSubscriber<? super T> downstream,
                 Executor executor,
                 Supplier<? extends Queue<T>> queueSupplier) {
             super(downstream);
@@ -93,7 +93,7 @@ public class MultiEmitOnOp<T> extends AbstractMultiOperator<T, T> {
         }
 
         @Override
-        public void onNext(T t) {
+        public void onItem(T t) {
             if (done) {
                 // we should not receive any items.
                 return;
@@ -103,7 +103,7 @@ public class MultiEmitOnOp<T> extends AbstractMultiOperator<T, T> {
                 // queue full, this is a failure.
                 // onError will schedule.
                 Subscriptions.cancel(upstream); // cancel upstream
-                onError(new BackPressureFailure("Queue is full, the upstream didn't enforce the requests"));
+                onFailure(new BackPressureFailure("Queue is full, the upstream didn't enforce the requests"));
                 done = true;
             } else {
                 schedule();
@@ -111,7 +111,7 @@ public class MultiEmitOnOp<T> extends AbstractMultiOperator<T, T> {
         }
 
         @Override
-        public void onError(Throwable throwable) {
+        public void onFailure(Throwable throwable) {
             if (!done || !cancelled) {
                 done = true;
                 failure.set(throwable);
@@ -120,7 +120,7 @@ public class MultiEmitOnOp<T> extends AbstractMultiOperator<T, T> {
         }
 
         @Override
-        public void onComplete() {
+        public void onCompletion() {
             if (!done || !cancelled) {
                 done = true;
                 schedule();
@@ -135,7 +135,7 @@ public class MultiEmitOnOp<T> extends AbstractMultiOperator<T, T> {
                     schedule();
                 }
             } else {
-                onError(Subscriptions.getInvalidRequestException());
+                onFailure(Subscriptions.getInvalidRequestException());
             }
         }
 
@@ -166,7 +166,7 @@ public class MultiEmitOnOp<T> extends AbstractMultiOperator<T, T> {
                     done = true;
                     Subscriptions.cancel(upstream);
                     queue.clear();
-                    downstream.onError(rejected);
+                    downstream.onFailure(rejected);
                     super.cancel();
                 }
             }
@@ -189,7 +189,7 @@ public class MultiEmitOnOp<T> extends AbstractMultiOperator<T, T> {
                         done = true;
                         Subscriptions.cancel(upstream);
                         queue.clear();
-                        downstream.onError(ex);
+                        downstream.onFailure(ex);
                         return;
                     }
 
@@ -205,7 +205,7 @@ public class MultiEmitOnOp<T> extends AbstractMultiOperator<T, T> {
                     }
 
                     // Emitting item
-                    downstream.onNext(item);
+                    downstream.onItem(item);
 
                     // updating the number of emitted items.
                     emitted++;
@@ -248,13 +248,13 @@ public class MultiEmitOnOp<T> extends AbstractMultiOperator<T, T> {
             Throwable maybeFailure = failure.get();
             if (upstreamDone && maybeFailure != null) {
                 // failing
-                downstream.onError(maybeFailure);
+                downstream.onFailure(maybeFailure);
                 return true;
             }
 
             // Failure and completion must wait until we are actually done consuming the items.
             if (upstreamDone && queueEmpty) {
-                downstream.onComplete();
+                downstream.onCompletion();
                 return true;
             }
 

@@ -4,12 +4,12 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.helpers.Subscriptions;
 import io.smallrye.mutiny.operators.AbstractMulti;
+import io.smallrye.mutiny.subscription.MultiSubscriber;
 
 public class CollectionBasedMulti<T> extends AbstractMulti<T> {
 
@@ -29,7 +29,7 @@ public class CollectionBasedMulti<T> extends AbstractMulti<T> {
     }
 
     @Override
-    public void subscribe(Subscriber<? super T> actual) {
+    public void subscribe(MultiSubscriber<? super T> actual) {
         ParameterValidation.nonNullNpe(actual, "subscriber");
         if (collection.isEmpty()) {
             Subscriptions.complete(actual);
@@ -40,14 +40,14 @@ public class CollectionBasedMulti<T> extends AbstractMulti<T> {
 
     public static final class CollectionSubscription<T> implements Subscription {
 
-        private final Subscriber<? super T> downstream;
+        private final MultiSubscriber<? super T> downstream;
         private final List<T> collection; // Immutable
         private int index;
 
         AtomicBoolean cancelled = new AtomicBoolean();
         AtomicLong requested = new AtomicLong();
 
-        public CollectionSubscription(Subscriber<? super T> downstream, Collection<T> collection) {
+        public CollectionSubscription(MultiSubscriber<? super T> downstream, Collection<T> collection) {
             this.downstream = downstream;
             this.collection = new ArrayList<>(collection);
         }
@@ -63,7 +63,7 @@ public class CollectionBasedMulti<T> extends AbstractMulti<T> {
                     }
                 }
             } else {
-                downstream.onError(Subscriptions.getInvalidRequestException());
+                downstream.onFailure(Subscriptions.getInvalidRequestException());
             }
         }
 
@@ -80,7 +80,7 @@ public class CollectionBasedMulti<T> extends AbstractMulti<T> {
                 }
 
                 while (current != size && emitted != n) {
-                    downstream.onNext(items.get(current));
+                    downstream.onItem(items.get(current));
 
                     if (cancelled.get()) {
                         return;
@@ -91,7 +91,7 @@ public class CollectionBasedMulti<T> extends AbstractMulti<T> {
                 }
 
                 if (current == size) {
-                    downstream.onComplete();
+                    downstream.onCompletion();
                     return;
                 }
 
@@ -113,13 +113,13 @@ public class CollectionBasedMulti<T> extends AbstractMulti<T> {
                 if (cancelled.get()) {
                     return;
                 }
-                downstream.onNext(item);
+                downstream.onItem(item);
             }
 
             if (cancelled.get()) {
                 return;
             }
-            downstream.onComplete();
+            downstream.onCompletion();
         }
 
         @Override

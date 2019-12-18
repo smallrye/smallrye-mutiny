@@ -13,7 +13,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.Multi;
@@ -22,6 +21,7 @@ import io.smallrye.mutiny.helpers.Subscriptions;
 import io.smallrye.mutiny.helpers.queues.MpscLinkedQueue;
 import io.smallrye.mutiny.operators.multi.processors.UnicastProcessor;
 import io.smallrye.mutiny.subscription.BackPressureFailure;
+import io.smallrye.mutiny.subscription.MultiSubscriber;
 
 public class MultiWindowOnDurationOp<T> extends AbstractMultiOperator<T, Multi<T>> {
 
@@ -35,7 +35,7 @@ public class MultiWindowOnDurationOp<T> extends AbstractMultiOperator<T, Multi<T
     }
 
     @Override
-    public void subscribe(Subscriber<? super Multi<T>> actual) {
+    public void subscribe(MultiSubscriber<? super Multi<T>> actual) {
         upstream.subscribe(new WindowTimeoutSubscriber<>(actual, duration, executor));
     }
 
@@ -55,7 +55,7 @@ public class MultiWindowOnDurationOp<T> extends AbstractMultiOperator<T, Multi<T
         volatile boolean done;
         volatile boolean terminated;
 
-        WindowTimeoutSubscriber(Subscriber<? super Multi<T>> downstream, Duration duration,
+        WindowTimeoutSubscriber(MultiSubscriber<? super Multi<T>> downstream, Duration duration,
                 ScheduledExecutorService scheduler) {
             super(downstream);
             this.queue = new MpscLinkedQueue<>();
@@ -82,7 +82,7 @@ public class MultiWindowOnDurationOp<T> extends AbstractMultiOperator<T, Multi<T
                         requested.decrementAndGet();
                     }
                 } else {
-                    downstream.onError(new BackPressureFailure("no requests"));
+                    downstream.onFailure(new BackPressureFailure("no requests"));
                     return;
                 }
 
@@ -98,13 +98,13 @@ public class MultiWindowOnDurationOp<T> extends AbstractMultiOperator<T, Multi<T
                         .scheduleAtFixedRate(new Tick(this), duration.toMillis(), duration.toMillis(),
                                 TimeUnit.MILLISECONDS);
             } catch (Exception e) {
-                downstream.onError(e);
+                downstream.onFailure(e);
                 return TaskHolder.NONE;
             }
         }
 
         @Override
-        public void onNext(T item) {
+        public void onItem(T item) {
             if (terminated) {
                 return;
             }
@@ -125,7 +125,7 @@ public class MultiWindowOnDurationOp<T> extends AbstractMultiOperator<T, Multi<T
         }
 
         @Override
-        public void onError(Throwable t) {
+        public void onFailure(Throwable t) {
             Subscription subscription = upstream.getAndSet(CANCELLED);
             if (subscription != CANCELLED) {
                 done = true;
@@ -134,13 +134,13 @@ public class MultiWindowOnDurationOp<T> extends AbstractMultiOperator<T, Multi<T
                     drainLoop();
                 }
 
-                downstream.onError(t);
+                downstream.onFailure(t);
                 timer.cancel();
             }
         }
 
         @Override
-        public void onComplete() {
+        public void onCompletion() {
             Subscription subscription = upstream.getAndSet(CANCELLED);
             if (subscription != CANCELLED) {
                 done = true;
@@ -148,7 +148,7 @@ public class MultiWindowOnDurationOp<T> extends AbstractMultiOperator<T, Multi<T
                     drainLoop();
                 }
 
-                downstream.onComplete();
+                downstream.onCompletion();
                 timer.cancel();
             }
         }
@@ -163,7 +163,7 @@ public class MultiWindowOnDurationOp<T> extends AbstractMultiOperator<T, Multi<T
         @SuppressWarnings("unchecked")
         void drainLoop() {
             final Queue<Object> q = queue;
-            final Subscriber<? super Multi<T>> actual = downstream;
+            final MultiSubscriber<? super Multi<T>> actual = downstream;
             UnicastProcessor<T> processor = current;
 
             int missed = 1;
@@ -205,7 +205,7 @@ public class MultiWindowOnDurationOp<T> extends AbstractMultiOperator<T, Multi<T
 
                         long requests = requested.get();
                         if (requests != 0L) {
-                            actual.onNext(processor);
+                            actual.onItem(processor);
                             if (requests != Long.MAX_VALUE) {
                                 requested.decrementAndGet();
                             }

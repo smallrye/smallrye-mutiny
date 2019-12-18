@@ -5,20 +5,19 @@ import static io.smallrye.mutiny.helpers.Subscriptions.CANCELLED;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.helpers.Subscriptions;
+import io.smallrye.mutiny.subscription.MultiSubscriber;
 
-@SuppressWarnings("SubscriberImplementation")
-public abstract class MultiOperatorProcessor<I, O> implements Subscriber<I>, Subscription {
+public abstract class MultiOperatorProcessor<I, O> implements MultiSubscriber<I>, Subscription {
 
-    protected final Subscriber<? super O> downstream;
+    protected final MultiSubscriber<? super O> downstream;
     protected AtomicReference<Subscription> upstream = new AtomicReference<>();
     AtomicBoolean hasDownstreamCancelled = new AtomicBoolean();
 
-    public MultiOperatorProcessor(Subscriber<? super O> downstream) {
+    public MultiOperatorProcessor(MultiSubscriber<? super O> downstream) {
         this.downstream = ParameterValidation.nonNull(downstream, "downstream");
     }
 
@@ -27,7 +26,7 @@ public abstract class MultiOperatorProcessor<I, O> implements Subscriber<I>, Sub
         if (subscription != null) {
             subscription.cancel();
         }
-        onError(throwable);
+        onFailure(throwable);
     }
 
     protected boolean isDone() {
@@ -49,18 +48,18 @@ public abstract class MultiOperatorProcessor<I, O> implements Subscriber<I>, Sub
     }
 
     @Override
-    public void onError(Throwable throwable) {
+    public void onFailure(Throwable throwable) {
         Subscription subscription = upstream.getAndSet(CANCELLED);
         if (subscription != CANCELLED) {
-            downstream.onError(throwable);
+            downstream.onFailure(throwable);
         }
     }
 
     @Override
-    public void onComplete() {
+    public void onCompletion() {
         Subscription subscription = upstream.getAndSet(CANCELLED);
         if (subscription != CANCELLED) {
-            downstream.onComplete();
+            downstream.onCompletion();
         }
     }
 
@@ -69,7 +68,7 @@ public abstract class MultiOperatorProcessor<I, O> implements Subscriber<I>, Sub
         Subscription subscription = upstream.get();
         if (subscription != CANCELLED) {
             if (numberOfItems <= 0) {
-                onError(new IllegalArgumentException("Invalid number of request, must be greater than 0"));
+                onFailure(new IllegalArgumentException("Invalid number of request, must be greater than 0"));
             }
             subscription.request(numberOfItems);
         }

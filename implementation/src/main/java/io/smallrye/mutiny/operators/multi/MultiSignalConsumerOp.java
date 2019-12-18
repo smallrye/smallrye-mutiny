@@ -5,12 +5,12 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.LongConsumer;
 
-import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.helpers.Subscriptions;
+import io.smallrye.mutiny.subscription.MultiSubscriber;
 
 /**
  * Attach consumers to the various events and signals received by this {@link org.reactivestreams.Publisher}.
@@ -53,20 +53,19 @@ public final class MultiSignalConsumerOp<T> extends AbstractMultiOperator<T, T> 
     }
 
     @Override
-    public void subscribe(Subscriber<? super T> actual) {
+    public void subscribe(MultiSubscriber<? super T> actual) {
         if (actual == null) {
             throw new NullPointerException("Subscriber must not be `null`");
         }
         upstream.subscribe(new SignalSubscriber(actual));
     }
 
-    @SuppressWarnings("SubscriberImplementation")
-    private final class SignalSubscriber implements Subscriber<T>, Subscription {
+    private final class SignalSubscriber implements MultiSubscriber<T>, Subscription {
 
-        private final Subscriber<? super T> downstream;
+        private final MultiSubscriber<? super T> downstream;
         private final AtomicReference<Subscription> subscription = new AtomicReference<>();
 
-        SignalSubscriber(Subscriber<? super T> downstream) {
+        SignalSubscriber(MultiSubscriber<? super T> downstream) {
             this.downstream = downstream;
         }
 
@@ -75,7 +74,7 @@ public final class MultiSignalConsumerOp<T> extends AbstractMultiOperator<T, T> 
             if (current != null) {
                 current.cancel();
             }
-            onError(throwable);
+            onFailure(throwable);
         }
 
         @Override
@@ -130,7 +129,7 @@ public final class MultiSignalConsumerOp<T> extends AbstractMultiOperator<T, T> 
         }
 
         @Override
-        public void onNext(T t) {
+        public void onItem(T t) {
             if (subscription.get() != Subscriptions.CANCELLED) {
                 if (onItem != null) {
                     try {
@@ -140,13 +139,13 @@ public final class MultiSignalConsumerOp<T> extends AbstractMultiOperator<T, T> 
                         return;
                     }
                 }
-                downstream.onNext(t);
+                downstream.onItem(t);
             }
 
         }
 
         @Override
-        public void onError(Throwable failure) {
+        public void onFailure(Throwable failure) {
             Subscription up = subscription.getAndSet(Subscriptions.CANCELLED);
             if (up != Subscriptions.CANCELLED) {
                 if (onFailure != null) {
@@ -157,7 +156,7 @@ public final class MultiSignalConsumerOp<T> extends AbstractMultiOperator<T, T> 
                     }
                 }
 
-                downstream.onError(failure);
+                downstream.onFailure(failure);
 
                 if (onTermination != null) {
                     try {
@@ -170,13 +169,13 @@ public final class MultiSignalConsumerOp<T> extends AbstractMultiOperator<T, T> 
         }
 
         @Override
-        public void onComplete() {
+        public void onCompletion() {
             if (subscription.getAndSet(Subscriptions.CANCELLED) != Subscriptions.CANCELLED) {
                 if (onCompletion != null) {
                     try {
                         onCompletion.run();
                     } catch (Throwable e) {
-                        downstream.onError(e);
+                        downstream.onFailure(e);
                         return;
                     }
                 }
@@ -185,12 +184,12 @@ public final class MultiSignalConsumerOp<T> extends AbstractMultiOperator<T, T> 
                     try {
                         onTermination.accept(null, false);
                     } catch (Throwable e) {
-                        downstream.onError(e);
+                        downstream.onFailure(e);
                         return;
                     }
                 }
 
-                downstream.onComplete();
+                downstream.onCompletion();
             }
         }
 

@@ -20,6 +20,7 @@ import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.helpers.Subscriptions;
 import io.smallrye.mutiny.subscription.BackPressureFailure;
+import io.smallrye.mutiny.subscription.MultiSubscriber;
 import io.smallrye.mutiny.subscription.SerializedSubscriber;
 
 /**
@@ -55,7 +56,7 @@ public final class MultiBufferWithTimeoutOp<T> extends AbstractMultiOperator<T, 
     }
 
     @Override
-    public void subscribe(Subscriber<? super List<T>> downstream) {
+    public void subscribe(MultiSubscriber<? super List<T>> downstream) {
         MultiBufferWithTimeoutProcessor<T> subscriber = new MultiBufferWithTimeoutProcessor<>(
                 new SerializedSubscriber<>(downstream), size, timeout, scheduler, supplier);
         upstream.subscribe(subscriber);
@@ -80,7 +81,7 @@ public final class MultiBufferWithTimeoutOp<T> extends AbstractMultiOperator<T, 
         private List<T> current;
         private ScheduledFuture<?> task;
 
-        MultiBufferWithTimeoutProcessor(Subscriber<? super List<T>> downstream, int size, Duration timeout,
+        MultiBufferWithTimeoutProcessor(MultiSubscriber<? super List<T>> downstream, int size, Duration timeout,
                 ScheduledExecutorService executor, Supplier<List<T>> supplier) {
             super(downstream);
             this.duration = timeout;
@@ -141,7 +142,7 @@ public final class MultiBufferWithTimeoutOp<T> extends AbstractMultiOperator<T, 
                         for (;;) {
                             next = req - 1;
                             if (requested.compareAndSet(req, next)) {
-                                downstream.onNext(cur);
+                                downstream.onItem(cur);
                                 return;
                             }
 
@@ -151,18 +152,18 @@ public final class MultiBufferWithTimeoutOp<T> extends AbstractMultiOperator<T, 
                             }
                         }
                     } else {
-                        downstream.onNext(cur);
+                        downstream.onItem(cur);
                         return;
                     }
                 }
 
                 cancel();
-                downstream.onError(new BackPressureFailure("Cannot emit item due to lack of requests"));
+                downstream.onFailure(new BackPressureFailure("Cannot emit item due to lack of requests"));
             }
         }
 
         @Override
-        public void onNext(final T value) {
+        public void onItem(final T value) {
             int index;
             for (;;) {
                 index = this.index.get() + 1;
@@ -175,7 +176,7 @@ public final class MultiBufferWithTimeoutOp<T> extends AbstractMultiOperator<T, 
                 try {
                     task = executor.schedule(flush, duration.toMillis(), TimeUnit.MILLISECONDS);
                 } catch (RejectedExecutionException rejected) {
-                    onError(rejected);
+                    onFailure(rejected);
                     return;
                 }
             }
@@ -196,7 +197,7 @@ public final class MultiBufferWithTimeoutOp<T> extends AbstractMultiOperator<T, 
             try {
                 flushCallback();
             } finally {
-                super.onComplete();
+                super.onCompletion();
             }
         }
 
@@ -230,7 +231,7 @@ public final class MultiBufferWithTimeoutOp<T> extends AbstractMultiOperator<T, 
         }
 
         @Override
-        public void onComplete() {
+        public void onCompletion() {
             if (terminated.compareAndSet(RUNNING, SUCCEED)) {
                 if (task != null) {
                     task.cancel(true);
@@ -241,7 +242,7 @@ public final class MultiBufferWithTimeoutOp<T> extends AbstractMultiOperator<T, 
         }
 
         @Override
-        public void onError(Throwable throwable) {
+        public void onFailure(Throwable throwable) {
             if (terminated.compareAndSet(RUNNING, FAILED)) {
                 synchronized (this) {
                     if (current != null) {
@@ -249,7 +250,7 @@ public final class MultiBufferWithTimeoutOp<T> extends AbstractMultiOperator<T, 
                         current = null;
                     }
                 }
-                super.onError(throwable);
+                super.onFailure(throwable);
             }
         }
 

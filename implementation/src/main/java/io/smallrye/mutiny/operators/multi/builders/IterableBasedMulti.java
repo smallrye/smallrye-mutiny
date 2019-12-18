@@ -3,12 +3,12 @@ package io.smallrye.mutiny.operators.multi.builders;
 import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.helpers.Subscriptions;
 import io.smallrye.mutiny.operators.AbstractMulti;
+import io.smallrye.mutiny.subscription.MultiSubscriber;
 
 public class IterableBasedMulti<T> extends AbstractMulti<T> {
 
@@ -19,7 +19,7 @@ public class IterableBasedMulti<T> extends AbstractMulti<T> {
     }
 
     @Override
-    public void subscribe(Subscriber<? super T> downstream) {
+    public void subscribe(MultiSubscriber<? super T> downstream) {
         ParameterValidation.nonNullNpe(downstream, "subscriber");
         Iterator<? extends T> iterator;
         try {
@@ -32,7 +32,7 @@ public class IterableBasedMulti<T> extends AbstractMulti<T> {
         subscribe(downstream, iterator);
     }
 
-    public static <T> void subscribe(Subscriber<? super T> downstream, Iterator<? extends T> it) {
+    public static <T> void subscribe(MultiSubscriber<? super T> downstream, Iterator<? extends T> it) {
         boolean hasNext;
         try {
             hasNext = it.hasNext();
@@ -50,12 +50,12 @@ public class IterableBasedMulti<T> extends AbstractMulti<T> {
 
     abstract static class BaseRangeSubscription<T> implements Subscription {
         protected final Iterator<? extends T> iterator;
-        protected final Subscriber<? super T> downstream;
+        protected final MultiSubscriber<? super T> downstream;
         protected volatile boolean cancelled;
         protected boolean once;
         protected final AtomicLong requested = new AtomicLong();
 
-        BaseRangeSubscription(Subscriber<? super T> downstream, Iterator<? extends T> iterator) {
+        BaseRangeSubscription(MultiSubscriber<? super T> downstream, Iterator<? extends T> iterator) {
             this.downstream = downstream;
             this.iterator = iterator;
         }
@@ -71,7 +71,7 @@ public class IterableBasedMulti<T> extends AbstractMulti<T> {
                     }
                 }
             } else {
-                downstream.onError(Subscriptions.getInvalidRequestException());
+                downstream.onFailure(Subscriptions.getInvalidRequestException());
             }
         }
 
@@ -87,7 +87,7 @@ public class IterableBasedMulti<T> extends AbstractMulti<T> {
 
     static final class IteratorSubscription<T> extends BaseRangeSubscription<T> {
 
-        IteratorSubscription(Subscriber<? super T> actual, Iterator<? extends T> it) {
+        IteratorSubscription(MultiSubscriber<? super T> actual, Iterator<? extends T> it) {
             super(actual, it);
         }
 
@@ -103,7 +103,7 @@ public class IterableBasedMulti<T> extends AbstractMulti<T> {
                 try {
                     t = iterator.next();
                 } catch (Throwable ex) {
-                    downstream.onError(ex);
+                    downstream.onFailure(ex);
                     return;
                 }
 
@@ -112,10 +112,10 @@ public class IterableBasedMulti<T> extends AbstractMulti<T> {
                 }
 
                 if (t == null) {
-                    downstream.onError(new NullPointerException("Iterator.next() returned a null value"));
+                    downstream.onFailure(new NullPointerException("Iterator.next() returned a null value"));
                     return;
                 } else {
-                    downstream.onNext(t);
+                    downstream.onItem(t);
                 }
 
                 if (cancelled) {
@@ -127,13 +127,13 @@ public class IterableBasedMulti<T> extends AbstractMulti<T> {
                 try {
                     b = iterator.hasNext();
                 } catch (Throwable ex) {
-                    downstream.onError(ex);
+                    downstream.onFailure(ex);
                     return;
                 }
 
                 if (!b) {
                     if (!cancelled) {
-                        downstream.onComplete();
+                        downstream.onCompletion();
                     }
                     return;
                 }
@@ -156,7 +156,7 @@ public class IterableBasedMulti<T> extends AbstractMulti<T> {
                     try {
                         t = iterator.next();
                     } catch (Throwable ex) {
-                        downstream.onError(ex);
+                        downstream.onFailure(ex);
                         return;
                     }
 
@@ -165,10 +165,10 @@ public class IterableBasedMulti<T> extends AbstractMulti<T> {
                     }
 
                     if (t == null) {
-                        downstream.onError(new NullPointerException("Iterator.next() returned a null value"));
+                        downstream.onFailure(new NullPointerException("Iterator.next() returned a null value"));
                         return;
                     } else {
-                        downstream.onNext(t);
+                        downstream.onItem(t);
                     }
 
                     if (cancelled) {
@@ -180,13 +180,13 @@ public class IterableBasedMulti<T> extends AbstractMulti<T> {
                     try {
                         b = iterator.hasNext();
                     } catch (Throwable ex) {
-                        downstream.onError(ex);
+                        downstream.onFailure(ex);
                         return;
                     }
 
                     if (!b) {
                         if (!cancelled) {
-                            downstream.onComplete();
+                            downstream.onCompletion();
                         }
                         return;
                     }

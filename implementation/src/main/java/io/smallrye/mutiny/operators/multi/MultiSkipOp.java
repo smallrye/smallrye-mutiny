@@ -2,11 +2,11 @@ package io.smallrye.mutiny.operators.multi;
 
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.helpers.ParameterValidation;
+import io.smallrye.mutiny.subscription.MultiSubscriber;
 
 /**
  * Skips the first N items from upstream.
@@ -22,7 +22,7 @@ public final class MultiSkipOp<T> extends AbstractMultiOperator<T, T> {
     }
 
     @Override
-    public void subscribe(Subscriber<? super T> actual) {
+    public void subscribe(MultiSubscriber<? super T> actual) {
         if (numberOfItems == 0) {
             upstream.subscribe(actual);
         } else {
@@ -34,7 +34,7 @@ public final class MultiSkipOp<T> extends AbstractMultiOperator<T, T> {
 
         private final AtomicLong remaining;
 
-        SkipProcessor(Subscriber<? super T> downstream, long items) {
+        SkipProcessor(MultiSubscriber<? super T> downstream, long items) {
             super(downstream);
             this.remaining = new AtomicLong(items);
         }
@@ -50,10 +50,10 @@ public final class MultiSkipOp<T> extends AbstractMultiOperator<T, T> {
         }
 
         @Override
-        public void onNext(T t) {
+        public void onItem(T t) {
             long r = remaining.getAndDecrement();
             if (r <= 0L) {
-                downstream.onNext(t);
+                downstream.onItem(t);
             }
             // Other elements are skipped.
         }

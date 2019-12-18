@@ -3,10 +3,10 @@ package io.smallrye.mutiny.operators.multi;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.reactivestreams.Publisher;
-import org.reactivestreams.Subscriber;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.helpers.ParameterValidation;
+import io.smallrye.mutiny.subscription.MultiSubscriber;
 import io.smallrye.mutiny.subscription.SwitchableSubscriptionSubscriber;
 
 /**
@@ -25,7 +25,7 @@ public final class MultiRetryOp<T> extends AbstractMultiOperator<T, T> {
     }
 
     @Override
-    public void subscribe(Subscriber<? super T> downstream) {
+    public void subscribe(MultiSubscriber<? super T> downstream) {
         RetrySubscriber<T> subscriber = new RetrySubscriber<>(upstream, downstream, times);
 
         downstream.onSubscribe(subscriber);
@@ -43,25 +43,25 @@ public final class MultiRetryOp<T> extends AbstractMultiOperator<T, T> {
         private long remaining;
         long produced;
 
-        RetrySubscriber(Publisher<? extends T> upstream, Subscriber<? super T> downstream, long attempts) {
+        RetrySubscriber(Publisher<? extends T> upstream, MultiSubscriber<? super T> downstream, long attempts) {
             super(downstream);
             this.upstream = upstream;
             this.remaining = attempts;
         }
 
         @Override
-        public void onNext(T t) {
+        public void onItem(T t) {
             produced++;
-            downstream.onNext(t);
+            downstream.onItem(t);
         }
 
         @Override
-        public void onError(Throwable t) {
+        public void onFailure(Throwable t) {
             long r = remaining;
             if (r != Long.MAX_VALUE) {
                 if (r == 0) {
                     // Forward
-                    downstream.onError(t);
+                    downstream.onFailure(t);
                     return;
                 }
                 remaining = r - 1;

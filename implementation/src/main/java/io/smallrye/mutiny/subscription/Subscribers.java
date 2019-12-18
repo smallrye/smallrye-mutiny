@@ -15,6 +15,7 @@ public class Subscribers {
         return new CancellationSubscriber<>();
     }
 
+    @SuppressWarnings("ThrowableNotThrown")
     private static final Consumer<? super Throwable> NO_ON_FAILURE = failure -> new Exception(
             "Missing onError method in the subscriber", failure).printStackTrace(); // NOSONAR
 
@@ -37,7 +38,6 @@ public class Subscribers {
         return new CallbackBasedSubscriber<>(onItem, onFailure, onCompletion, onSubscription);
     }
 
-    @SuppressWarnings("SubscriberImplementation")
     private static class CancellationSubscriber<T> implements CancellableSubscriber<T> {
         @Override
         public void onSubscribe(Subscription s) {
@@ -45,17 +45,17 @@ public class Subscribers {
         }
 
         @Override
-        public void onNext(T t) {
+        public void onItem(T t) {
             // Ignored
         }
 
         @Override
-        public void onError(Throwable t) {
+        public void onFailure(Throwable t) {
             // Ignored
         }
 
         @Override
-        public void onComplete() {
+        public void onCompletion() {
             // Ignored
         }
 
@@ -100,7 +100,7 @@ public class Subscribers {
         }
 
         @Override
-        public void onNext(T item) {
+        public void onItem(T item) {
             if (subscription.get() != Subscriptions.CANCELLED) {
                 try {
                     // onItem cannot be null.
@@ -113,7 +113,7 @@ public class Subscribers {
         }
 
         @Override
-        public void onError(Throwable t) {
+        public void onFailure(Throwable t) {
             if (subscription.getAndSet(Subscriptions.CANCELLED) != Subscriptions.CANCELLED) {
                 if (onFailure != null) {
                     onFailure.accept(t);
@@ -122,7 +122,7 @@ public class Subscribers {
         }
 
         @Override
-        public void onComplete() {
+        public void onCompletion() {
             if (subscription.getAndSet(Subscriptions.CANCELLED) != Subscriptions.CANCELLED) {
                 if (onCompletion != null) {
                     onCompletion.run();

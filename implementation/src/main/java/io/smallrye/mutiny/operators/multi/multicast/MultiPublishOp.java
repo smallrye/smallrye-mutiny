@@ -15,6 +15,7 @@ import io.smallrye.mutiny.helpers.Subscriptions;
 import io.smallrye.mutiny.helpers.queues.SpscArrayQueue;
 import io.smallrye.mutiny.subscription.BackPressureFailure;
 import io.smallrye.mutiny.subscription.Cancellable;
+import io.smallrye.mutiny.subscription.MultiSubscriber;
 
 /**
  * A connectable observable which shares an underlying source and dispatches source values to subscribers in a
@@ -56,7 +57,7 @@ public final class MultiPublishOp<T> extends ConnectableMulti<T> {
     }
 
     @Override
-    public void subscribe(Subscriber<? super T> s) {
+    public void subscribe(MultiSubscriber<? super T> s) {
         onSubscribe.subscribe(s);
     }
 
@@ -96,7 +97,7 @@ public final class MultiPublishOp<T> extends ConnectableMulti<T> {
     }
 
     @SuppressWarnings({ "rawtypes", "SubscriberImplementation" })
-    static final class PublishSubscriber<T> implements Cancellable, Subscriber<T> {
+    static final class PublishSubscriber<T> implements Cancellable, MultiSubscriber<T> {
 
         /**
          * Indicates an empty array of inner subscribers.
@@ -172,23 +173,23 @@ public final class MultiPublishOp<T> extends ConnectableMulti<T> {
         }
 
         @Override
-        public void onNext(T t) {
+        public void onItem(T t) {
             if (!queue.offer(t)) {
-                onError(new BackPressureFailure("Queue is full"));
+                onFailure(new BackPressureFailure("Queue is full"));
                 return;
             }
             drain();
         }
 
         @Override
-        public void onError(Throwable e) {
+        public void onFailure(Throwable e) {
             if (failureOrCompletion.compareAndSet(null, e)) {
                 drain();
             }
         }
 
         @Override
-        public void onComplete() {
+        public void onCompletion() {
             if (failureOrCompletion.compareAndSet(null, COMPLETED)) {
                 drain();
             }

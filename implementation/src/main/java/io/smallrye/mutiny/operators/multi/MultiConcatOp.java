@@ -4,11 +4,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.reactivestreams.Publisher;
-import org.reactivestreams.Subscriber;
 
 import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.helpers.Subscriptions;
 import io.smallrye.mutiny.operators.AbstractMulti;
+import io.smallrye.mutiny.subscription.MultiSubscriber;
 import io.smallrye.mutiny.subscription.SwitchableSubscriptionSubscriber;
 
 /**
@@ -31,7 +31,7 @@ public class MultiConcatOp<T> extends AbstractMulti<T> {
     }
 
     @Override
-    public void subscribe(Subscriber<? super T> actual) {
+    public void subscribe(MultiSubscriber<? super T> actual) {
         if (actual == null) {
             throw new NullPointerException("The subscriber must not be `null`");
         }
@@ -51,14 +51,14 @@ public class MultiConcatOp<T> extends AbstractMulti<T> {
             actual.onSubscribe(parent);
 
             if (!parent.isCancelled()) {
-                parent.onComplete();
+                parent.onCompletion();
             }
         } else {
             ConcatArraySubscriber<T> parent = new ConcatArraySubscriber<>(actual, publishers);
             actual.onSubscribe(parent);
 
             if (!parent.isCancelled()) {
-                parent.onComplete();
+                parent.onCompletion();
             }
         }
     }
@@ -72,19 +72,19 @@ public class MultiConcatOp<T> extends AbstractMulti<T> {
 
         private final AtomicInteger wip = new AtomicInteger();
 
-        ConcatArraySubscriber(Subscriber<? super T> actual, Publisher<? extends T>[] upstreams) {
+        ConcatArraySubscriber(MultiSubscriber<? super T> actual, Publisher<? extends T>[] upstreams) {
             super(actual);
             this.upstreams = upstreams;
         }
 
         @Override
-        public void onNext(T t) {
+        public void onItem(T t) {
             emitted++;
-            downstream.onNext(t);
+            downstream.onItem(t);
         }
 
         @Override
-        public void onComplete() {
+        public void onCompletion() {
             if (wip.getAndIncrement() == 0) {
                 Publisher<? extends T>[] a = upstreams;
                 do {
@@ -95,7 +95,7 @@ public class MultiConcatOp<T> extends AbstractMulti<T> {
 
                     int i = currentIndex;
                     if (i == a.length) {
-                        downstream.onComplete();
+                        downstream.onCompletion();
                         return;
                     }
 
@@ -128,26 +128,26 @@ public class MultiConcatOp<T> extends AbstractMulti<T> {
         private final AtomicInteger wip = new AtomicInteger();
         private final AtomicReference<Throwable> failure = new AtomicReference<>();
 
-        ConcatArrayAndPostponeFailureSubscriber(Subscriber<? super T> actual, Publisher<? extends T>[] upstreams) {
+        ConcatArrayAndPostponeFailureSubscriber(MultiSubscriber<? super T> actual, Publisher<? extends T>[] upstreams) {
             super(actual);
             this.upstreams = upstreams;
         }
 
         @Override
-        public void onNext(T t) {
+        public void onItem(T t) {
             produced++;
-            downstream.onNext(t);
+            downstream.onItem(t);
         }
 
         @Override
-        public void onError(Throwable t) {
+        public void onFailure(Throwable t) {
             if (Subscriptions.addFailure(failure, t)) {
-                onComplete();
+                onCompletion();
             }
         }
 
         @Override
-        public void onComplete() {
+        public void onCompletion() {
             if (wip.getAndIncrement() == 0) {
                 Publisher<? extends T>[] a = upstreams;
                 do {
@@ -160,9 +160,9 @@ public class MultiConcatOp<T> extends AbstractMulti<T> {
                     if (i == a.length) {
                         Throwable last = Subscriptions.markFailureAsTerminated(failure);
                         if (last != null) {
-                            downstream.onError(last);
+                            downstream.onFailure(last);
                         } else {
-                            downstream.onComplete();
+                            downstream.onCompletion();
                         }
                         return;
                     }
@@ -170,7 +170,7 @@ public class MultiConcatOp<T> extends AbstractMulti<T> {
                     Publisher<? extends T> p = a[i];
 
                     if (p == null) {
-                        downstream.onError(
+                        downstream.onFailure(
                                 new NullPointerException("Source Publisher at currentIndex " + i + " is null"));
                         return;
                     }

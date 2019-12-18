@@ -2,11 +2,11 @@ package io.smallrye.mutiny.operators.multi;
 
 import java.util.ArrayDeque;
 
-import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.helpers.ParameterValidation;
+import io.smallrye.mutiny.subscription.MultiSubscriber;
 
 /**
  * Skips the numberOfItems last items from upstream.
@@ -23,7 +23,7 @@ public final class MultiSkipLastOp<T> extends AbstractMultiOperator<T, T> {
     }
 
     @Override
-    public void subscribe(Subscriber<? super T> actual) {
+    public void subscribe(MultiSubscriber<? super T> actual) {
         if (numberOfItems == 0) {
             upstream.subscribe(actual);
         } else {
@@ -37,7 +37,7 @@ public final class MultiSkipLastOp<T> extends AbstractMultiOperator<T, T> {
         private final int numberOfItems;
         private final ArrayDeque<T> queue = new ArrayDeque<>();
 
-        SkipLastProcessor(Subscriber<? super T> actual, int numberOfItems) {
+        SkipLastProcessor(MultiSubscriber<? super T> actual, int numberOfItems) {
             super(actual);
             this.numberOfItems = numberOfItems;
         }
@@ -54,23 +54,23 @@ public final class MultiSkipLastOp<T> extends AbstractMultiOperator<T, T> {
         }
 
         @Override
-        public void onNext(T t) {
+        public void onItem(T t) {
             if (queue.size() == numberOfItems) {
-                downstream.onNext(queue.pollFirst());
+                downstream.onItem(queue.pollFirst());
             }
             queue.offerLast(t);
         }
 
         @Override
-        public void onError(Throwable t) {
+        public void onFailure(Throwable t) {
             queue.clear();
-            super.onError(t);
+            super.onFailure(t);
         }
 
         @Override
-        public void onComplete() {
+        public void onCompletion() {
             queue.clear();
-            super.onComplete();
+            super.onCompletion();
         }
 
         @Override

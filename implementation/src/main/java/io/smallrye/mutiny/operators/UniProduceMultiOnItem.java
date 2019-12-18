@@ -14,6 +14,7 @@ import org.reactivestreams.Subscription;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.helpers.EmptyUniSubscription;
 import io.smallrye.mutiny.helpers.Subscriptions;
+import io.smallrye.mutiny.subscription.MultiSubscriber;
 import io.smallrye.mutiny.subscription.UniSubscriber;
 import io.smallrye.mutiny.subscription.UniSubscription;
 
@@ -28,7 +29,7 @@ public class UniProduceMultiOnItem<I, O> extends AbstractMulti<O> {
     }
 
     @Override
-    public void subscribe(Subscriber<? super O> subscriber) {
+    public void subscribe(MultiSubscriber<? super O> subscriber) {
         if (subscriber == null) {
             throw new NullPointerException("The subscriber must not be `null`");
         }

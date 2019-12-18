@@ -21,7 +21,7 @@ include::plantuml/philosophy-chain.puml[]
 
 [NOTE]
 ====
-An entity that is both a `Publisher` and a `Subscriber` is generally named a `Processor`
+An entity that is both a `Publisher` and a `Subscriber` is generally named a `Processor`.
 ====
 
 Four types of events can flow in this directions:

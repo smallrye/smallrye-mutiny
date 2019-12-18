@@ -10,6 +10,7 @@ import org.reactivestreams.Subscription;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.helpers.Subscriptions;
+import io.smallrye.mutiny.subscription.MultiSubscriber;
 import io.smallrye.mutiny.subscription.SerializedSubscriber;
 
 /**
@@ -28,7 +29,7 @@ public final class MultiSkipUntilPublisherOp<T, U> extends AbstractMultiOperator
     }
 
     @Override
-    public void subscribe(Subscriber<? super T> actual) {
+    public void subscribe(MultiSubscriber<? super T> actual) {
         SkipUntilMainProcessor<T> main = new SkipUntilMainProcessor<>(actual);
         OtherStreamTracker<U> otherSubscriber = new OtherStreamTracker<>(main);
         other.subscribe(otherSubscriber);
@@ -36,7 +37,7 @@ public final class MultiSkipUntilPublisherOp<T, U> extends AbstractMultiOperator
     }
 
     @SuppressWarnings("SubscriberImplementation")
-    static final class OtherStreamTracker<U> implements Subscriber<U> {
+    static final class OtherStreamTracker<U> implements MultiSubscriber<U> {
 
         private final SkipUntilMainProcessor<?> main;
 
@@ -50,19 +51,19 @@ public final class MultiSkipUntilPublisherOp<T, U> extends AbstractMultiOperator
         }
 
         @Override
-        public void onNext(U t) {
+        public void onItem(U t) {
             main.open();
         }
 
         @Override
-        public void onError(Throwable t) {
+        public void onFailure(Throwable t) {
             if (!main.isOpened()) {
-                main.onError(t);
+                main.onFailure(t);
             }
         }
 
         @Override
-        public void onComplete() {
+        public void onCompletion() {
             main.open();
         }
 
@@ -102,24 +103,24 @@ public final class MultiSkipUntilPublisherOp<T, U> extends AbstractMultiOperator
         }
 
         @Override
-        public void onNext(T t) {
+        public void onItem(T t) {
             if (gate.get()) {
-                downstream.onNext(t);
+                downstream.onItem(t);
             } else {
                 request(1);
             }
         }
 
         @Override
-        public void onError(Throwable t) {
+        public void onFailure(Throwable t) {
             Subscriptions.cancel(other);
-            super.onError(t);
+            super.onFailure(t);
         }
 
         @Override
-        public void onComplete() {
+        public void onCompletion() {
             Subscriptions.cancel(other);
-            super.onComplete();
+            super.onCompletion();
         }
     }
 }

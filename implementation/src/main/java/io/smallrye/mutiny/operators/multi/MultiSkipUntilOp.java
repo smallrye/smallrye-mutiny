@@ -2,10 +2,9 @@ package io.smallrye.mutiny.operators.multi;
 
 import java.util.function.Predicate;
 
-import org.reactivestreams.Subscriber;
-
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.helpers.ParameterValidation;
+import io.smallrye.mutiny.subscription.MultiSubscriber;
 
 /**
  * Skips the items from upstream until the passed predicates returns {@code true}.
@@ -22,7 +21,7 @@ public final class MultiSkipUntilOp<T> extends AbstractMultiOperator<T, T> {
     }
 
     @Override
-    public void subscribe(Subscriber<? super T> actual) {
+    public void subscribe(MultiSubscriber<? super T> actual) {
         ParameterValidation.nonNullNpe(actual, "subscriber");
         upstream.subscribe(new SkipUntilProcessor<>(actual, predicate));
     }
@@ -32,19 +31,19 @@ public final class MultiSkipUntilOp<T> extends AbstractMultiOperator<T, T> {
         private final Predicate<? super T> predicate;
         private boolean gateOpen = false;
 
-        SkipUntilProcessor(Subscriber<? super T> downstream, Predicate<? super T> predicate) {
+        SkipUntilProcessor(MultiSubscriber<? super T> downstream, Predicate<? super T> predicate) {
             super(downstream);
             this.predicate = predicate;
         }
 
         @Override
-        public void onNext(T t) {
+        public void onItem(T t) {
             if (isDone()) {
                 return;
             }
 
             if (gateOpen) {
-                downstream.onNext(t);
+                downstream.onItem(t);
                 return;
             }
 
@@ -58,7 +57,7 @@ public final class MultiSkipUntilOp<T> extends AbstractMultiOperator<T, T> {
 
             if (!toBeSkipped) {
                 gateOpen = true;
-                downstream.onNext(t);
+                downstream.onItem(t);
                 return;
             }
 

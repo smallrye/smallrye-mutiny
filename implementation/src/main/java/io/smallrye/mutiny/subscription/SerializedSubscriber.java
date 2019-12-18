@@ -13,8 +13,7 @@ import org.reactivestreams.Subscription;
  *
  * @param <T> the type of items
  */
-@SuppressWarnings("SubscriberImplementation")
-public final class SerializedSubscriber<T> implements Subscription, Subscriber<T> {
+public final class SerializedSubscriber<T> implements Subscription, MultiSubscriber<T> {
 
     private final Subscriber<? super T> downstream;
 
@@ -48,7 +47,7 @@ public final class SerializedSubscriber<T> implements Subscription, Subscriber<T
     }
 
     @Override
-    public void onNext(T t) {
+    public void onItem(T t) {
         if (cancelled || done) {
             return;
         }
@@ -73,7 +72,7 @@ public final class SerializedSubscriber<T> implements Subscription, Subscriber<T
     }
 
     @Override
-    public void onError(Throwable t) {
+    public void onFailure(Throwable t) {
         if (cancelled || done) {
             return;
         }
@@ -96,7 +95,7 @@ public final class SerializedSubscriber<T> implements Subscription, Subscriber<T
     }
 
     @Override
-    public void onComplete() {
+    public void onCompletion() {
         if (cancelled || done) {
             return;
         }
@@ -208,14 +207,6 @@ public final class SerializedSubscriber<T> implements Subscription, Subscriber<T
                 return;
             }
         }
-    }
-
-    int producerCapacity() {
-        LinkedArrayNode<T> node = tail;
-        if (node != null) {
-            return node.count;
-        }
-        return 0;
     }
 
     /**

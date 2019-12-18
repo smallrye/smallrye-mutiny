@@ -4,13 +4,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
-import org.reactivestreams.Subscriber;
-
 import io.smallrye.mutiny.helpers.Subscriptions;
 import io.smallrye.mutiny.operators.AbstractMulti;
 import io.smallrye.mutiny.subscription.BackPressureFailure;
 import io.smallrye.mutiny.subscription.BackPressureStrategy;
 import io.smallrye.mutiny.subscription.MultiEmitter;
+import io.smallrye.mutiny.subscription.MultiSubscriber;
 
 public final class EmitterBasedMulti<T> extends AbstractMulti<T> {
 
@@ -23,7 +22,7 @@ public final class EmitterBasedMulti<T> extends AbstractMulti<T> {
     }
 
     @Override
-    public void subscribe(Subscriber<? super T> downstream) {
+    public void subscribe(MultiSubscriber<? super T> downstream) {
         BaseMultiEmitter<T> emitter;
 
         switch (backpressure) {
@@ -59,7 +58,7 @@ public final class EmitterBasedMulti<T> extends AbstractMulti<T> {
 
     static final class IgnoreBackPressureMultiEmitter<T> extends BaseMultiEmitter<T> {
 
-        IgnoreBackPressureMultiEmitter(Subscriber<? super T> downstream) {
+        IgnoreBackPressureMultiEmitter(MultiSubscriber<? super T> downstream) {
             super(downstream);
         }
 
@@ -70,9 +69,9 @@ public final class EmitterBasedMulti<T> extends AbstractMulti<T> {
             }
 
             if (item != null) {
-                downstream.onNext(item);
+                downstream.onItem(item);
             } else {
-                fail(new NullPointerException("onNext called with null."));
+                fail(new NullPointerException("`emit` called with `null`."));
                 return this;
             }
 
@@ -88,7 +87,7 @@ public final class EmitterBasedMulti<T> extends AbstractMulti<T> {
 
     abstract static class NoOverflowBaseMultiEmitter<T> extends BaseMultiEmitter<T> {
 
-        NoOverflowBaseMultiEmitter(Subscriber<? super T> downstream) {
+        NoOverflowBaseMultiEmitter(MultiSubscriber<? super T> downstream) {
             super(downstream);
         }
 
@@ -100,12 +99,12 @@ public final class EmitterBasedMulti<T> extends AbstractMulti<T> {
 
             if (t == null) {
                 fail(new NullPointerException(
-                        "onNext called with null. Null values are generally not allowed in 2.x operators and sources."));
+                        "`emit` called with `null`."));
                 return this;
             }
 
             if (requested.get() != 0) {
-                downstream.onNext(t);
+                downstream.onItem(t);
                 Subscriptions.produced(requested, 1);
             } else {
                 onOverflow();
@@ -118,7 +117,7 @@ public final class EmitterBasedMulti<T> extends AbstractMulti<T> {
 
     static final class DropItemOnOverflowMultiEmitter<T> extends NoOverflowBaseMultiEmitter<T> {
 
-        DropItemOnOverflowMultiEmitter(Subscriber<? super T> downstream) {
+        DropItemOnOverflowMultiEmitter(MultiSubscriber<? super T> downstream) {
             super(downstream);
         }
 
@@ -131,7 +130,7 @@ public final class EmitterBasedMulti<T> extends AbstractMulti<T> {
 
     static final class ErrorOnOverflowMultiEmitter<T> extends NoOverflowBaseMultiEmitter<T> {
 
-        ErrorOnOverflowMultiEmitter(Subscriber<? super T> downstream) {
+        ErrorOnOverflowMultiEmitter(MultiSubscriber<? super T> downstream) {
             super(downstream);
         }
 
@@ -149,7 +148,7 @@ public final class EmitterBasedMulti<T> extends AbstractMulti<T> {
         private volatile boolean done;
         private final AtomicInteger wip = new AtomicInteger();
 
-        DropLatestOnOverflowMultiEmitter(Subscriber<? super T> downstream) {
+        DropLatestOnOverflowMultiEmitter(MultiSubscriber<? super T> downstream) {
             super(downstream);
         }
 
@@ -207,7 +206,7 @@ public final class EmitterBasedMulti<T> extends AbstractMulti<T> {
             int missed = 1;
             final AtomicReference<T> q = queue;
 
-            for (;;) {
+            do {
                 long r = requested.get();
                 long e = 0L;
 
@@ -237,7 +236,7 @@ public final class EmitterBasedMulti<T> extends AbstractMulti<T> {
                         break;
                     }
 
-                    downstream.onNext(o);
+                    downstream.onItem(o);
 
                     e++;
                 }
@@ -268,10 +267,7 @@ public final class EmitterBasedMulti<T> extends AbstractMulti<T> {
                 }
 
                 missed = wip.addAndGet(-missed);
-                if (missed == 0) {
-                    break;
-                }
-            }
+            } while (missed != 0);
         }
     }
 

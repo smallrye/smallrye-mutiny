@@ -4,12 +4,12 @@ import java.util.ArrayDeque;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.helpers.Subscriptions;
+import io.smallrye.mutiny.subscription.MultiSubscriber;
 
 /**
  * Implementation of multi, caching and emitting the last n items from upstream (emitted before the upstream completion).
@@ -26,7 +26,7 @@ public class MultiTakeLastOp<T> extends AbstractMultiOperator<T, T> {
     }
 
     @Override
-    public void subscribe(Subscriber<? super T> actual) {
+    public void subscribe(MultiSubscriber<? super T> actual) {
         if (numberOfItems == 0) {
             upstream.subscribe(new TakeLastZeroProcessor<>(actual));
         } else {
@@ -36,7 +36,7 @@ public class MultiTakeLastOp<T> extends AbstractMultiOperator<T, T> {
 
     static final class TakeLastZeroProcessor<T> extends MultiOperatorProcessor<T, T> {
 
-        TakeLastZeroProcessor(Subscriber<? super T> downstream) {
+        TakeLastZeroProcessor(MultiSubscriber<? super T> downstream) {
             super(downstream);
         }
 
@@ -53,7 +53,7 @@ public class MultiTakeLastOp<T> extends AbstractMultiOperator<T, T> {
         }
 
         @Override
-        public void onNext(T t) {
+        public void onItem(T t) {
             // Do nothing, we are dropping all the values.
         }
     }
@@ -66,7 +66,7 @@ public class MultiTakeLastOp<T> extends AbstractMultiOperator<T, T> {
         private final AtomicInteger wip = new AtomicInteger();
         volatile boolean upstreamCompleted;
 
-        TakeLastManyProcessor(Subscriber<? super T> downstream, int numberOfItems) {
+        TakeLastManyProcessor(MultiSubscriber<? super T> downstream, int numberOfItems) {
             super(downstream);
             this.numberOfItems = numberOfItems;
             this.queue = new ArrayDeque<>(numberOfItems);
@@ -93,7 +93,7 @@ public class MultiTakeLastOp<T> extends AbstractMultiOperator<T, T> {
         }
 
         @Override
-        public void onNext(T t) {
+        public void onItem(T t) {
             if (queue.size() == numberOfItems) {
                 queue.poll();
             }
@@ -101,7 +101,7 @@ public class MultiTakeLastOp<T> extends AbstractMultiOperator<T, T> {
         }
 
         @Override
-        public void onComplete() {
+        public void onCompletion() {
             upstreamCompleted = true;
             drain();
         }
@@ -123,11 +123,11 @@ public class MultiTakeLastOp<T> extends AbstractMultiOperator<T, T> {
                             T item = queue.poll();
                             if (item == null) {
                                 // No more items in the queue, completing.
-                                downstream.onComplete();
+                                downstream.onCompletion();
                                 return;
                             }
 
-                            downstream.onNext(item);
+                            downstream.onItem(item);
                             count++;
                         }
 

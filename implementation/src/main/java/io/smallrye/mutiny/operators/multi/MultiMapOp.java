@@ -4,10 +4,9 @@ import static io.smallrye.mutiny.helpers.ParameterValidation.MAPPER_RETURNED_NUL
 
 import java.util.function.Function;
 
-import org.reactivestreams.Subscriber;
-
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.helpers.ParameterValidation;
+import io.smallrye.mutiny.subscription.MultiSubscriber;
 
 public final class MultiMapOp<T, U> extends AbstractMultiOperator<T, U> {
     private final Function<? super T, ? extends U> mapper;
@@ -18,7 +17,7 @@ public final class MultiMapOp<T, U> extends AbstractMultiOperator<T, U> {
     }
 
     @Override
-    public void subscribe(Subscriber<? super U> downstream) {
+    public void subscribe(MultiSubscriber<? super U> downstream) {
         if (downstream == null) {
             throw new NullPointerException("Subscriber is `null`");
         }
@@ -28,13 +27,13 @@ public final class MultiMapOp<T, U> extends AbstractMultiOperator<T, U> {
     static class MapProcessor<I, O> extends MultiOperatorProcessor<I, O> {
         private final Function<? super I, ? extends O> mapper;
 
-        MapProcessor(Subscriber<? super O> actual, Function<? super I, ? extends O> mapper) {
+        MapProcessor(MultiSubscriber<? super O> actual, Function<? super I, ? extends O> mapper) {
             super(actual);
             this.mapper = mapper;
         }
 
         @Override
-        public void onNext(I item) {
+        public void onItem(I item) {
             if (isDone()) {
                 return;
             }
@@ -48,7 +47,7 @@ public final class MultiMapOp<T, U> extends AbstractMultiOperator<T, U> {
             if (v == null) {
                 failAndCancel(new NullPointerException(MAPPER_RETURNED_NULL));
             } else {
-                downstream.onNext(v);
+                downstream.onItem(v);
             }
         }
     }

@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
+import io.smallrye.mutiny.subscription.MultiSubscriber;
 import org.junit.Test;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
@@ -82,25 +83,24 @@ public class MultiCreationTest {
                 failure -> System.out.println("Got a failure: " + failure),
                 () -> System.out.println("Got the completion event"));
 
-        // Use a Reactive Streams subscriber directly.
-        multi.subscribe().withSubscriber(new Subscriber<String>() {
+        multi.subscribe().withSubscriber(new MultiSubscriber<String>() {
             @Override
             public void onSubscribe(Subscription s) {
                 System.out.println("Got subscription: " + s);
             }
 
             @Override
-            public void onNext(String item) {
+            public void onItem(String item) {
                 System.out.println("Got an item: " + item);
             }
 
             @Override
-            public void onError(Throwable failure) {
+            public void onFailure(Throwable failure) {
                 System.out.println("Got a failure: " + failure);
             }
 
             @Override
-            public void onComplete() {
+            public void onCompletion() {
                 System.out.println("Got the completion event");
             }
         });

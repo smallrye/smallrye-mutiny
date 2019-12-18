@@ -7,12 +7,12 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
 import org.reactivestreams.Publisher;
-import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.helpers.Subscriptions;
 import io.smallrye.mutiny.helpers.queues.SpscArrayQueue;
 import io.smallrye.mutiny.operators.AbstractMulti;
+import io.smallrye.mutiny.subscription.MultiSubscriber;
 
 public final class MultiZipOp<O> extends AbstractMulti<O> {
 
@@ -33,7 +33,7 @@ public final class MultiZipOp<O> extends AbstractMulti<O> {
     }
 
     @Override
-    public void subscribe(Subscriber<? super O> downstream) {
+    public void subscribe(MultiSubscriber<? super O> downstream) {
         if (upstreams.size() == 0) {
             Subscriptions.complete(downstream);
             return;
@@ -47,7 +47,7 @@ public final class MultiZipOp<O> extends AbstractMulti<O> {
     static final class ZipCoordinator<R> implements Subscription {
 
         private final AtomicInteger wip = new AtomicInteger();
-        private final Subscriber<? super R> downstream;
+        private final MultiSubscriber<? super R> downstream;
         private final List<ZipSubscriber<R>> subscribers;
 
         private final Function<List<?>, ? extends R> combinator;
@@ -58,7 +58,7 @@ public final class MultiZipOp<O> extends AbstractMulti<O> {
         private volatile boolean cancelled;
         private final List<Object> current;
 
-        ZipCoordinator(Subscriber<? super R> downstream,
+        ZipCoordinator(MultiSubscriber<? super R> downstream,
                 Function<List<?>, ? extends R> combinator, int n, int prefetch, boolean postponeFailure) {
             this.downstream = downstream;
             this.combinator = combinator;
@@ -187,7 +187,7 @@ public final class MultiZipOp<O> extends AbstractMulti<O> {
                         return;
                     }
 
-                    downstream.onNext(v);
+                    downstream.onItem(v);
                     emitted++;
                     values.clear();
                 }
@@ -252,8 +252,7 @@ public final class MultiZipOp<O> extends AbstractMulti<O> {
         }
     }
 
-    @SuppressWarnings("SubscriberImplementation")
-    static final class ZipSubscriber<R> implements Subscriber<Object>, Subscription {
+    static final class ZipSubscriber<R> implements MultiSubscriber<Object>, Subscription {
 
         private final AtomicReference<Subscription> upstream = new AtomicReference<>();
         private final ZipCoordinator<R> parent;
@@ -278,18 +277,18 @@ public final class MultiZipOp<O> extends AbstractMulti<O> {
         }
 
         @Override
-        public void onNext(Object item) {
+        public void onItem(Object item) {
             queue.offer(item);
             parent.drain();
         }
 
         @Override
-        public void onError(Throwable t) {
+        public void onFailure(Throwable t) {
             parent.error(this, t);
         }
 
         @Override
-        public void onComplete() {
+        public void onCompletion() {
             done = true;
             parent.drain();
         }

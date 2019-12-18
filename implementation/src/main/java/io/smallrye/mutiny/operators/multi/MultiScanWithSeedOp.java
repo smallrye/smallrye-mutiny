@@ -5,11 +5,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
-import org.reactivestreams.Subscriber;
-
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.helpers.Subscriptions;
+import io.smallrye.mutiny.subscription.MultiSubscriber;
 import io.smallrye.mutiny.subscription.SwitchableSubscriptionSubscriber;
 
 public final class MultiScanWithSeedOp<T, R> extends AbstractMultiOperator<T, R> {
@@ -25,13 +24,13 @@ public final class MultiScanWithSeedOp<T, R> extends AbstractMultiOperator<T, R>
     }
 
     @Override
-    public void subscribe(Subscriber<? super R> downstream) {
+    public void subscribe(MultiSubscriber<? super R> downstream) {
         ScanSubscriber<T, R> subscriber = new ScanSubscriber<>(upstream, downstream, accumulator, seed);
 
         downstream.onSubscribe(subscriber);
 
         if (!subscriber.isCancelled()) {
-            subscriber.onComplete();
+            subscriber.onCompletion();
         }
     }
 
@@ -46,7 +45,7 @@ public final class MultiScanWithSeedOp<T, R> extends AbstractMultiOperator<T, R>
         private ScanSeedProcessor<T, R> subscriber;
 
         ScanSubscriber(Multi<? extends T> upstream,
-                Subscriber<? super R> downstream,
+                MultiSubscriber<? super R> downstream,
                 BiFunction<R, ? super T, R> accumulator,
                 Supplier<R> seed) {
             super(downstream);
@@ -56,7 +55,7 @@ public final class MultiScanWithSeedOp<T, R> extends AbstractMultiOperator<T, R>
         }
 
         @Override
-        public void onComplete() {
+        public void onCompletion() {
             if (wip.getAndIncrement() == 0) {
                 do {
                     if (isCancelled()) {
@@ -64,7 +63,7 @@ public final class MultiScanWithSeedOp<T, R> extends AbstractMultiOperator<T, R>
                     }
 
                     if (subscriber != null && currentUpstream.get() == subscriber) {
-                        downstream.onComplete();
+                        downstream.onCompletion();
                         return;
                     }
 
@@ -80,12 +79,12 @@ public final class MultiScanWithSeedOp<T, R> extends AbstractMultiOperator<T, R>
                         try {
                             initialValue = initialSupplier.get();
                         } catch (Throwable e) {
-                            onError(e);
+                            onFailure(e);
                             return;
                         }
 
                         if (initialValue == null) {
-                            onError(new NullPointerException("The seed cannot be `null`"));
+                            onFailure(new NullPointerException("The seed cannot be `null`"));
                             return;
                         }
                         // Switch.
@@ -104,9 +103,9 @@ public final class MultiScanWithSeedOp<T, R> extends AbstractMultiOperator<T, R>
         }
 
         @Override
-        public void onNext(R r) {
+        public void onItem(R r) {
             produced++;
-            downstream.onNext(r);
+            downstream.onItem(r);
         }
     }
 
@@ -115,7 +114,7 @@ public final class MultiScanWithSeedOp<T, R> extends AbstractMultiOperator<T, R>
         private final BiFunction<R, ? super T, R> accumulator;
         R current;
 
-        ScanSeedProcessor(Subscriber<? super R> downstream,
+        ScanSeedProcessor(MultiSubscriber<? super R> downstream,
                 BiFunction<R, ? super T, R> accumulator,
                 R initial) {
             super(downstream);
@@ -124,19 +123,19 @@ public final class MultiScanWithSeedOp<T, R> extends AbstractMultiOperator<T, R>
         }
 
         @Override
-        public void onComplete() {
-            super.onComplete();
+        public void onCompletion() {
+            super.onCompletion();
             current = null;
         }
 
         @Override
-        public void onError(Throwable failure) {
-            super.onError(failure);
+        public void onFailure(Throwable failure) {
+            super.onFailure(failure);
             current = null;
         }
 
         @Override
-        public void onNext(T t) {
+        public void onItem(T t) {
             if (isDone()) {
                 return;
             }
@@ -145,14 +144,14 @@ public final class MultiScanWithSeedOp<T, R> extends AbstractMultiOperator<T, R>
             try {
                 r = accumulator.apply(r, t);
             } catch (Throwable e) {
-                onError(e);
+                onFailure(e);
                 return;
             }
             if (r == null) {
-                onError(new NullPointerException("The accumulator returned a null value"));
+                onFailure(new NullPointerException("The accumulator returned a null value"));
                 return;
             }
-            downstream.onNext(r);
+            downstream.onItem(r);
             current = r;
         }
     }

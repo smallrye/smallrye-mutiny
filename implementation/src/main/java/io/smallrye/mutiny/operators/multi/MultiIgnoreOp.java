@@ -1,9 +1,9 @@
 package io.smallrye.mutiny.operators.multi;
 
-import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.Multi;
+import io.smallrye.mutiny.subscription.MultiSubscriber;
 
 public class MultiIgnoreOp<T> extends AbstractMultiOperator<T, Void> {
 
@@ -12,12 +12,12 @@ public class MultiIgnoreOp<T> extends AbstractMultiOperator<T, Void> {
     }
 
     @Override
-    public void subscribe(Subscriber<? super Void> downstream) {
+    public void subscribe(MultiSubscriber<? super Void> downstream) {
         upstream.subscribe(new MultiIgnoreProcessor<>(downstream));
     }
 
     static class MultiIgnoreProcessor<T> extends MultiOperatorProcessor<T, Void> {
-        MultiIgnoreProcessor(Subscriber<? super Void> downstream) {
+        MultiIgnoreProcessor(MultiSubscriber<? super Void> downstream) {
             super(downstream);
         }
 
@@ -33,7 +33,7 @@ public class MultiIgnoreOp<T> extends AbstractMultiOperator<T, Void> {
         }
 
         @Override
-        public void onNext(T ignored) {
+        public void onItem(T ignored) {
             // Ignoring
         }
     }
