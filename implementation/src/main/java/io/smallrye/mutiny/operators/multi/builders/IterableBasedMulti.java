@@ -3,7 +3,6 @@ package io.smallrye.mutiny.operators.multi.builders;
 import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
@@ -17,11 +16,6 @@ public class IterableBasedMulti<T> extends AbstractMulti<T> {
 
     public IterableBasedMulti(Iterable<? extends T> source) {
         this.source = source;
-    }
-
-    @Override
-    protected Publisher<T> publisher() {
-        return this;
     }
 
     @Override

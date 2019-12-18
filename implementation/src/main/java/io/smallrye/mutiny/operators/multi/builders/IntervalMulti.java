@@ -7,7 +7,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
@@ -37,11 +36,6 @@ public class IntervalMulti extends AbstractMulti<Long> {
         this.initialDelay = null;
         this.period = ParameterValidation.validate(period, "period");
         this.executor = ParameterValidation.nonNull(executor, "executor");
-    }
-
-    @Override
-    protected Publisher<Long> publisher() {
-        return this;
     }
 
     @Override

@@ -1,7 +1,5 @@
 package io.smallrye.mutiny.operators.multi;
 
-import org.reactivestreams.Publisher;
-
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.operators.AbstractMulti;
@@ -30,10 +28,5 @@ public abstract class AbstractMultiOperator<I, O> extends AbstractMulti<O> imple
 
     public Multi<? extends I> upstream() {
         return upstream;
-    }
-
-    @Override
-    protected Publisher<O> publisher() {
-        return this;
     }
 }

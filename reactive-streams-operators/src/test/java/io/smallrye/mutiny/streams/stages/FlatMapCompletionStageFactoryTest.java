@@ -97,7 +97,10 @@ public class FlatMapCompletionStageFactoryTest extends StageTestBase {
     @Test(expected = NullPointerException.class)
     public void testInjectingANullItem() {
         AtomicReference<Subscriber<? super String>> reference = new AtomicReference<>();
-        Publisher<String> publisher = reference::set;
+        Publisher<String> publisher = s -> {
+            reference.set(s);
+            s.onSubscribe(Subscriptions.empty());
+        };
 
         ReactiveStreams.fromPublisher(publisher)
                 .flatMapCompletionStage(s -> (CompletionStage<String>) null)

@@ -4,7 +4,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
-import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 
 import io.smallrye.mutiny.helpers.Subscriptions;
@@ -21,11 +20,6 @@ public final class EmitterBasedMulti<T> extends AbstractMulti<T> {
     public EmitterBasedMulti(Consumer<MultiEmitter<? super T>> consumer, BackPressureStrategy backpressure) {
         this.consumer = consumer;
         this.backpressure = backpressure;
-    }
-
-    @Override
-    protected Publisher<T> publisher() {
-        return this;
     }
 
     @Override

@@ -4,7 +4,6 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
@@ -37,11 +36,6 @@ public class CollectionBasedMulti<T> extends AbstractMulti<T> {
             return;
         }
         actual.onSubscribe(new CollectionSubscription<>(actual, collection));
-    }
-
-    @Override
-    protected Publisher<T> publisher() {
-        return this;
     }
 
     public static final class CollectionSubscription<T> implements Subscription {

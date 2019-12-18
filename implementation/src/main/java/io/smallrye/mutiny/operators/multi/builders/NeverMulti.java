@@ -29,11 +29,6 @@ public final class NeverMulti extends AbstractMulti<Object> {
     }
 
     @Override
-    protected Publisher<Object> publisher() {
-        return this;
-    }
-
-    @Override
     public void subscribe(Subscriber<? super Object> actual) {
         actual.onSubscribe(Subscriptions.CANCELLED);
     }

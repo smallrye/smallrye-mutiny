@@ -34,6 +34,9 @@ public final class MultiGroupByOp<T, K, V> extends AbstractMultiOperator<T, Grou
 
     @Override
     public void subscribe(Subscriber<? super GroupedMulti<K, V>> downstream) {
+        if (downstream == null) {
+            throw new NullPointerException("The subscriber must not be `null`");
+        }
         final Map<Object, GroupedUnicast<K, V>> groups = new ConcurrentHashMap<>();
         MultiGroupByProcessor<T, K, V> processor = new MultiGroupByProcessor<>(downstream, keySelector, valueSelector,
                 groups);
@@ -290,11 +293,6 @@ public final class MultiGroupByOp<T, K, V> extends AbstractMultiOperator<T, Grou
         @Override
         public K key() {
             return key;
-        }
-
-        @Override
-        protected Publisher<T> publisher() {
-            return this;
         }
     }
 

@@ -2,7 +2,6 @@ package io.smallrye.mutiny.operators.multi.builders;
 
 import java.util.function.Supplier;
 
-import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 
 import io.smallrye.mutiny.helpers.ParameterValidation;
@@ -26,11 +25,6 @@ public class FailedMulti<T> extends AbstractMulti<T> {
     public FailedMulti(Supplier<Throwable> supplier) {
         ParameterValidation.nonNull(supplier, "supplier");
         this.supplier = supplier;
-    }
-
-    @Override
-    protected Publisher<T> publisher() {
-        return this;
     }
 
     @Override

@@ -42,11 +42,6 @@ public final class MultiFlatMapOp<I, O> extends AbstractMultiOperator<I, O> {
     }
 
     @Override
-    protected Publisher<O> publisher() {
-        return this;
-    }
-
-    @Override
     public void subscribe(Subscriber<? super O> subscriber) {
         if (subscriber == null) {
             throw new NullPointerException("The subscriber must not be `null`");

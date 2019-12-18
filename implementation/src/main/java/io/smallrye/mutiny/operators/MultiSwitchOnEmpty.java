@@ -5,6 +5,7 @@ import static io.smallrye.mutiny.helpers.ParameterValidation.SUPPLIER_PRODUCED_N
 import java.util.function.Supplier;
 
 import org.reactivestreams.Publisher;
+import org.reactivestreams.Subscriber;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.operators.multi.MultiSwitchOnEmptyOp;
@@ -19,7 +20,10 @@ public class MultiSwitchOnEmpty<T> extends MultiOperator<T, T> {
     }
 
     @Override
-    protected Publisher<T> publisher() {
+    public void subscribe(Subscriber<? super T> downstream) {
+        if (downstream == null) {
+            throw new NullPointerException("The subscriber must not be `null`");
+        }
         Supplier<Multi<? extends T>> actual = () -> {
             Publisher<? extends T> publisher;
             try {
@@ -32,12 +36,14 @@ public class MultiSwitchOnEmpty<T> extends MultiOperator<T, T> {
             }
             if (publisher instanceof Multi) {
                 //noinspection unchecked
-                return (Multi) publisher;
+                return (Multi<? extends T>) publisher;
             } else {
                 return Multi.createFrom().publisher(publisher);
             }
         };
+
         Multi<? extends T> deferred = Multi.createFrom().deferred(actual);
-        return new MultiSwitchOnEmptyOp<>(upstream(), deferred);
+        MultiSwitchOnEmptyOp<T> op = new MultiSwitchOnEmptyOp<>(upstream(), deferred);
+        op.subscribe(downstream);
     }
 }

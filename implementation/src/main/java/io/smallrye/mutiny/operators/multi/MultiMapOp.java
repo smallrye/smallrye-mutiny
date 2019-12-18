@@ -4,7 +4,6 @@ import static io.smallrye.mutiny.helpers.ParameterValidation.MAPPER_RETURNED_NUL
 
 import java.util.function.Function;
 
-import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 
 import io.smallrye.mutiny.Multi;
@@ -24,11 +23,6 @@ public final class MultiMapOp<T, U> extends AbstractMultiOperator<T, U> {
             throw new NullPointerException("Subscriber is `null`");
         }
         upstream.subscribe(new MapProcessor<T, U>(downstream, mapper));
-    }
-
-    @Override
-    protected Publisher<U> publisher() {
-        return this;
     }
 
     static class MapProcessor<I, O> extends MultiOperatorProcessor<I, O> {

@@ -32,6 +32,9 @@ public class MultiConcatOp<T> extends AbstractMulti<T> {
 
     @Override
     public void subscribe(Subscriber<? super T> actual) {
+        if (actual == null) {
+            throw new NullPointerException("The subscriber must not be `null`");
+        }
         if (publishers.length == 0) {
             Subscriptions.complete(actual);
             return;
@@ -58,11 +61,6 @@ public class MultiConcatOp<T> extends AbstractMulti<T> {
                 parent.onComplete();
             }
         }
-    }
-
-    @Override
-    protected Publisher<T> publisher() {
-        return this;
     }
 
     static final class ConcatArraySubscriber<T> extends SwitchableSubscriptionSubscriber<T> {

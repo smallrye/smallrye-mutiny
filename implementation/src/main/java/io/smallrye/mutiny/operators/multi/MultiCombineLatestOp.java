@@ -49,6 +49,9 @@ public class MultiCombineLatestOp<I, O> extends MultiOperator<I, O> {
 
     @Override
     public void subscribe(Subscriber<? super O> downstream) {
+        if (downstream == null) {
+            throw new NullPointerException("The subscriber must not be `null`");
+        }
         List<Publisher<? extends I>> publishers = new ArrayList<>();
         this.upstreams.forEach(publishers::add);
 
@@ -67,11 +70,6 @@ public class MultiCombineLatestOp<I, O> extends MultiOperator<I, O> {
                 bufferSize, delayErrors);
         downstream.onSubscribe(coordinator);
         coordinator.subscribe(publishers);
-    }
-
-    @Override
-    protected Publisher<O> publisher() {
-        return this;
     }
 
     private static final class CombineLatestCoordinator<I, O> implements Subscription {
