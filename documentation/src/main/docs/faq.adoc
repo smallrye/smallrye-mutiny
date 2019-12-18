@@ -293,7 +293,7 @@ include::../../../src/test/java/snippets/ReactorTest.java[tags=multi-export]
 When a consumer cannot keep up with the pace of a publisher, there is an overflow condition.
 By default, it would fail and propagate an exception.
 
-However, you can control how the overflow is handled using the `multi.onOverflow()` methods, such as in:
+However, you can control how the overflow is handled using the `multi.onOverflow()` method, such as in:
 
 [source,java,indent=0]
 ----
