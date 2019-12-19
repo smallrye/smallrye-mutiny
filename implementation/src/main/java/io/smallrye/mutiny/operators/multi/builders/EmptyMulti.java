@@ -3,6 +3,7 @@ package io.smallrye.mutiny.operators.multi.builders;
 import org.reactivestreams.Publisher;
 
 import io.smallrye.mutiny.Multi;
+import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.helpers.Subscriptions;
 import io.smallrye.mutiny.operators.AbstractMulti;
 import io.smallrye.mutiny.subscription.MultiSubscriber;
@@ -24,8 +25,9 @@ public final class EmptyMulti extends AbstractMulti<Object> {
     }
 
     @Override
-    public void subscribe(MultiSubscriber<? super Object> actual) {
-        Subscriptions.complete(actual);
+    public void subscribe(MultiSubscriber<? super Object> downstream) {
+        ParameterValidation.nonNullNpe(downstream, "downstream");
+        Subscriptions.complete(downstream);
     }
 
 }

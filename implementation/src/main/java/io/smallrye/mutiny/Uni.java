@@ -395,4 +395,14 @@ public interface Uni<T> {
      * @return the object to configure the action to execute when events happen
      */
     UniOnEvent<T> on();
+
+    /**
+     * Allows configuring repeating behavior.
+     * Repeating allow transforming a {@link Uni} into a {@link Multi} either a specific amount of times or indefinitely.
+     * Each time, a new subscription is attempted on the {@link Uni}.
+     * Cancelling the subscription stops the repeating behavior.
+     *
+     * @return the object to configure the repeating behavior.
+     */
+    UniRepeat<T> repeat();
 }
