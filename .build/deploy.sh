@@ -71,16 +71,16 @@ if [[ ${TARGET} == "snapshot" ]]; then
     deploy_snapshot
 elif [[ ${TARGET} == "release" ]]; then
     echo "Checking release prerequisites"
-    ./build/prepare-release.kts "${GITHUB_TOKEN}" "${EXTRA_ARGS}"
+    .build/prepare-release.kts "${GITHUB_TOKEN}" "${EXTRA_ARGS}"
 
     echo "Cutting release"
     deploy_release
 
     echo "Updating documentation"
-    ./build/doc.sh
+    .build/doc.sh
 
     echo "Executing post-release"
-    ./build/post-release.kts "${GITHUB_TOKEN}"
+    .build/post-release.kts "${GITHUB_TOKEN}"
 else
     echo "Unknown environment: ${TARGET}"
 fi
