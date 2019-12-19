@@ -334,6 +334,17 @@ include::../../../src/test/java/snippets/UnicastProcessorTest.java[tags=code]
 By default the `UnicastProcessor` uses an unbounded queue.
 You can also pass a fixed size queue that would reject the items once full.
 
+=== How to I handle polling
+
+There are many poll-based API around us.
+Sometimes you need to use these APIs to generate a stream from the polled values.
+To do this, use the `repeat()` feature:
+
+[source,java,indent=0]
+----
+include::../../../src/test/java/snippets/PollableSourceTest.java[tags=code]
+----
+
 === Where do I find the JavaDoc?
 
 The JavaDoc is published https://smallrye.io/smallrye-mutiny/apidocs/[there].
