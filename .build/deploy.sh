@@ -70,8 +70,8 @@ fi
 if [[ ${TARGET} == "snapshot" ]]; then
     deploy_snapshot
 elif [[ ${TARGET} == "release" ]]; then
-    echo "Checking release prerequisites"
-    .build/prepare-release.kts "${GITHUB_TOKEN}" "${EXTRA_ARGS}"
+    echo "Checking release prerequisites with ${EXTRA_ARGS}"
+    .build/pre-release.kts "${GITHUB_TOKEN}" "${EXTRA_ARGS}"
 
     echo "Cutting release"
     deploy_release
