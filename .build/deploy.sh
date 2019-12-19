@@ -27,7 +27,12 @@ deploy_snapshot() {
 
 deploy_release() {
     export RELEASE_VERSION=${MAJOR}.${MINOR}.${MICRO}
-    export NEXT_VERSION=${MAJOR}.${MINOR}.$(expr ${MICRO} + 1)-SNAPSHOT
+
+    export NEXT_VERSION=${MAJOR}.$(expr ${MINOR} + 1).${MICRO}-SNAPSHOT
+    if [[ ${MICRO_RELEASE} == "true" ]]; then
+      NEXT_VERSION=${MAJOR}.${MINOR}.$(expr ${MICRO} + 1)-SNAPSHOT
+    fi
+
     echo "Cutting release ${RELEASE_VERSION}, next version would be ${NEXT_VERSION}"
     mvn -B -fn clean
     mvn -B versions:set -DnewVersion=${RELEASE_VERSION} -DgenerateBackupPoms=false -s maven-settings.xml
@@ -57,10 +62,25 @@ export MICRO=$(echo ${VERSION}|tr '.' ' '|awk '{print $3}')
 git update-index --assume-unchanged .build/deploy.sh
 git update-index --assume-unchanged .build/decrypt-secrets.sh
 
+export EXTRA_ARGS=""
+if [[ ${MICRO_RELEASE} == "true" ]]; then
+  EXTRA_ARGS="--micro"
+fi
+
 if [[ ${TARGET} == "snapshot" ]]; then
     deploy_snapshot
 elif [[ ${TARGET} == "release" ]]; then
+    echo "Checking release prerequisites"
+    ./build/prepare-release.kts "${GITHUB_TOKEN}" "${EXTRA_ARGS}"
+
+    echo "Cutting release"
     deploy_release
+
+    echo "Updating documentation"
+    ./build/doc.sh
+
+    echo "Executing post-release"
+    ./build/post-release.kts "${GITHUB_TOKEN}"
 else
     echo "Unknown environment: ${TARGET}"
 fi
