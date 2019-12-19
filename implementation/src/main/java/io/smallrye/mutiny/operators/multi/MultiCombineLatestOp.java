@@ -12,13 +12,13 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
 import org.reactivestreams.Publisher;
-import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.helpers.Subscriptions;
 import io.smallrye.mutiny.helpers.queues.SpscLinkedArrayQueue;
 import io.smallrye.mutiny.operators.MultiOperator;
+import io.smallrye.mutiny.subscription.MultiSubscriber;
 
 /**
  * Combines the latest values from multiple sources through a function.
@@ -48,7 +48,7 @@ public class MultiCombineLatestOp<I, O> extends MultiOperator<I, O> {
     }
 
     @Override
-    public void subscribe(Subscriber<? super O> downstream) {
+    public void subscribe(MultiSubscriber<? super O> downstream) {
         if (downstream == null) {
             throw new NullPointerException("The subscriber must not be `null`");
         }
@@ -66,7 +66,8 @@ public class MultiCombineLatestOp<I, O> extends MultiOperator<I, O> {
             return;
         }
 
-        CombineLatestCoordinator<I, O> coordinator = new CombineLatestCoordinator<>(downstream, combinator, publishers.size(),
+        CombineLatestCoordinator<I, O> coordinator = new CombineLatestCoordinator<>(downstream, combinator,
+                publishers.size(),
                 bufferSize, delayErrors);
         downstream.onSubscribe(coordinator);
         coordinator.subscribe(publishers);
@@ -74,7 +75,7 @@ public class MultiCombineLatestOp<I, O> extends MultiOperator<I, O> {
 
     private static final class CombineLatestCoordinator<I, O> implements Subscription {
 
-        private final Subscriber<? super O> downstream;
+        private final MultiSubscriber<? super O> downstream;
         private final Function<List<?>, ? extends O> combinator;
         private final List<CombineLatestInnerSubscriber<I>> subscribers = new ArrayList<>();
         private final SpscLinkedArrayQueue<Object> queue;
@@ -89,7 +90,7 @@ public class MultiCombineLatestOp<I, O> extends MultiOperator<I, O> {
         private final AtomicReference<Throwable> failure = new AtomicReference<>();
         private final AtomicInteger wip = new AtomicInteger();
 
-        CombineLatestCoordinator(Subscriber<? super O> downstream,
+        CombineLatestCoordinator(MultiSubscriber<? super O> downstream,
                 Function<List<?>, ? extends O> combinator, int size,
                 int bufferSize, boolean delayErrors) {
             this.downstream = downstream;
@@ -220,7 +221,7 @@ public class MultiCombineLatestOp<I, O> extends MultiOperator<I, O> {
                         Subscriptions.terminateAndPropagate(failure, downstream);
                         return;
                     }
-                    downstream.onNext(resultOfCombination);
+                    downstream.onItem(resultOfCombination);
 
                     ((CombineLatestInnerSubscriber<I>) v).requestOneItem();
 
@@ -265,9 +266,9 @@ public class MultiCombineLatestOp<I, O> extends MultiOperator<I, O> {
                         cancelAll();
                         Throwable prev = Subscriptions.terminate(failure);
                         if (prev != null && prev != Subscriptions.TERMINATED) {
-                            downstream.onError(prev);
+                            downstream.onFailure(prev);
                         } else {
-                            downstream.onComplete();
+                            downstream.onCompletion();
                         }
                         return true;
                     }
@@ -276,11 +277,11 @@ public class MultiCombineLatestOp<I, O> extends MultiOperator<I, O> {
                     if (prev != null && prev != Subscriptions.TERMINATED) {
                         cancelAll();
                         queue.clear();
-                        downstream.onError(prev);
+                        downstream.onFailure(prev);
                         return true;
                     } else if (empty) {
                         cancelAll();
-                        downstream.onComplete();
+                        downstream.onCompletion();
                         return true;
                     }
                 }
@@ -295,8 +296,7 @@ public class MultiCombineLatestOp<I, O> extends MultiOperator<I, O> {
         }
     }
 
-    @SuppressWarnings("SubscriberImplementation")
-    private static final class CombineLatestInnerSubscriber<T> implements Subscriber<T> {
+    private static final class CombineLatestInnerSubscriber<T> implements MultiSubscriber<T> {
 
         private final AtomicReference<Subscription> upstream = new AtomicReference<>();
         private final CombineLatestCoordinator<T, ?> parent;
@@ -320,17 +320,17 @@ public class MultiCombineLatestOp<I, O> extends MultiOperator<I, O> {
         }
 
         @Override
-        public void onNext(T t) {
+        public void onItem(T t) {
             parent.innerValue(index, t);
         }
 
         @Override
-        public void onError(Throwable t) {
+        public void onFailure(Throwable t) {
             parent.innerError(index, t);
         }
 
         @Override
-        public void onComplete() {
+        public void onCompletion() {
             parent.innerComplete(index);
         }
 

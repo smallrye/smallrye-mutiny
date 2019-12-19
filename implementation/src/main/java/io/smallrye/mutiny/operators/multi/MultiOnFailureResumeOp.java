@@ -4,12 +4,12 @@ package io.smallrye.mutiny.operators.multi;
 import java.util.function.Function;
 
 import org.reactivestreams.Publisher;
-import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.helpers.ParameterValidation;
+import io.smallrye.mutiny.subscription.MultiSubscriber;
 import io.smallrye.mutiny.subscription.SwitchableSubscriptionSubscriber;
 
 public class MultiOnFailureResumeOp<T> extends AbstractMultiOperator<T, T> {
@@ -23,7 +23,7 @@ public class MultiOnFailureResumeOp<T> extends AbstractMultiOperator<T, T> {
     }
 
     @Override
-    public void subscribe(Subscriber<? super T> downstream) {
+    public void subscribe(MultiSubscriber<? super T> downstream) {
         upstream.subscribe(new ResumeSubscriber<>(downstream, next));
     }
 
@@ -33,7 +33,7 @@ public class MultiOnFailureResumeOp<T> extends AbstractMultiOperator<T, T> {
 
         private boolean switched;
 
-        ResumeSubscriber(Subscriber<? super T> downstream,
+        ResumeSubscriber(MultiSubscriber<? super T> downstream,
                 Function<? super Throwable, ? extends Publisher<? extends T>> next) {
             super(downstream);
             this.next = next;
@@ -48,8 +48,8 @@ public class MultiOnFailureResumeOp<T> extends AbstractMultiOperator<T, T> {
         }
 
         @Override
-        public void onNext(T item) {
-            downstream.onNext(item);
+        public void onItem(T item) {
+            downstream.onItem(item);
 
             if (!switched) {
                 emitted(1);
@@ -57,7 +57,7 @@ public class MultiOnFailureResumeOp<T> extends AbstractMultiOperator<T, T> {
         }
 
         @Override
-        public void onError(Throwable failure) {
+        public void onFailure(Throwable failure) {
             if (!switched) {
                 switched = true;
                 Publisher<? extends T> publisher;
@@ -68,15 +68,15 @@ public class MultiOnFailureResumeOp<T> extends AbstractMultiOperator<T, T> {
                     }
                 } catch (Throwable e) {
                     if (e == failure) { // Exception rethrown.
-                        super.onError(e);
+                        super.onFailure(e);
                     } else {
-                        super.onError(new CompositeException(failure, e));
+                        super.onFailure(new CompositeException(failure, e));
                     }
                     return;
                 }
                 publisher.subscribe(this);
             } else {
-                super.onError(failure);
+                super.onFailure(failure);
             }
         }
 

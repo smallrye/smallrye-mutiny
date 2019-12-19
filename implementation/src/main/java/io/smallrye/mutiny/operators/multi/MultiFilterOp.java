@@ -2,10 +2,9 @@ package io.smallrye.mutiny.operators.multi;
 
 import java.util.function.Predicate;
 
-import org.reactivestreams.Subscriber;
-
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.helpers.ParameterValidation;
+import io.smallrye.mutiny.subscription.MultiSubscriber;
 
 /**
  * Filters out items from the upstream that do <strong>NOT</strong> pass the given filter.
@@ -22,7 +21,7 @@ public class MultiFilterOp<T> extends AbstractMultiOperator<T, T> {
     }
 
     @Override
-    public void subscribe(Subscriber<? super T> downstream) {
+    public void subscribe(MultiSubscriber<? super T> downstream) {
         if (downstream == null) {
             throw new NullPointerException("The subscriber must not be `null`");
         }
@@ -33,13 +32,13 @@ public class MultiFilterOp<T> extends AbstractMultiOperator<T, T> {
 
         private final Predicate<? super T> predicate;
 
-        MultiFilterProcessor(Subscriber<? super T> downstream, Predicate<? super T> predicate) {
+        MultiFilterProcessor(MultiSubscriber<? super T> downstream, Predicate<? super T> predicate) {
             super(downstream);
             this.predicate = predicate;
         }
 
         @Override
-        public void onNext(T t) {
+        public void onItem(T t) {
             if (isDone()) {
                 return;
             }
@@ -53,7 +52,7 @@ public class MultiFilterOp<T> extends AbstractMultiOperator<T, T> {
             }
 
             if (passed) {
-                downstream.onNext(t);
+                downstream.onItem(t);
             } else {
                 request(1);
             }

@@ -7,13 +7,13 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.helpers.Subscriptions;
 import io.smallrye.mutiny.operators.AbstractMulti;
 import io.smallrye.mutiny.subscription.BackPressureFailure;
+import io.smallrye.mutiny.subscription.MultiSubscriber;
 
 public class IntervalMulti extends AbstractMulti<Long> {
 
@@ -39,7 +39,7 @@ public class IntervalMulti extends AbstractMulti<Long> {
     }
 
     @Override
-    public void subscribe(Subscriber<? super Long> actual) {
+    public void subscribe(MultiSubscriber<? super Long> actual) {
         IntervalRunnable runnable = new IntervalRunnable(actual);
 
         actual.onSubscribe(runnable);
@@ -54,19 +54,19 @@ public class IntervalMulti extends AbstractMulti<Long> {
             }
         } catch (RejectedExecutionException ree) {
             if (!runnable.cancelled.get()) {
-                actual.onError(new RejectedExecutionException(ree));
+                actual.onFailure(new RejectedExecutionException(ree));
             }
         }
     }
 
     static final class IntervalRunnable implements Runnable, Subscription {
-        private final Subscriber<? super Long> actual;
+        private final MultiSubscriber<? super Long> actual;
         private final AtomicLong requested = new AtomicLong();
         private final AtomicBoolean cancelled = new AtomicBoolean();
 
         private final AtomicLong count = new AtomicLong();
 
-        IntervalRunnable(Subscriber<? super Long> actual) {
+        IntervalRunnable(MultiSubscriber<? super Long> actual) {
             this.actual = actual;
         }
 
@@ -74,13 +74,13 @@ public class IntervalMulti extends AbstractMulti<Long> {
         public void run() {
             if (!cancelled.get()) {
                 if (requested.get() != 0L) {
-                    actual.onNext(count.getAndIncrement());
+                    actual.onItem(count.getAndIncrement());
                     if (requested.get() != Long.MAX_VALUE) {
                         requested.decrementAndGet();
                     }
                 } else {
                     cancel();
-                    actual.onError(
+                    actual.onFailure(
                             new BackPressureFailure("Could not emit tick " + count + " due to lack of requests"));
                 }
             }

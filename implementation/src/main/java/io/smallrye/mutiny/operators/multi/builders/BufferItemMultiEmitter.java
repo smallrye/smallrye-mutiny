@@ -2,11 +2,10 @@ package io.smallrye.mutiny.operators.multi.builders;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.reactivestreams.Subscriber;
-
 import io.smallrye.mutiny.helpers.Subscriptions;
 import io.smallrye.mutiny.helpers.queues.SpscLinkedArrayQueue;
 import io.smallrye.mutiny.subscription.MultiEmitter;
+import io.smallrye.mutiny.subscription.MultiSubscriber;
 
 public class BufferItemMultiEmitter<T> extends BaseMultiEmitter<T> {
 
@@ -15,7 +14,7 @@ public class BufferItemMultiEmitter<T> extends BaseMultiEmitter<T> {
     private volatile boolean done;
     private final AtomicInteger wip = new AtomicInteger();
 
-    BufferItemMultiEmitter(Subscriber<? super T> actual, int capacityHint) {
+    BufferItemMultiEmitter(MultiSubscriber<? super T> actual, int capacityHint) {
         super(actual);
         this.queue = new SpscLinkedArrayQueue<>(capacityHint);
     }
@@ -27,7 +26,7 @@ public class BufferItemMultiEmitter<T> extends BaseMultiEmitter<T> {
         }
 
         if (t == null) {
-            fail(new NullPointerException("onNext called with null."));
+            fail(new NullPointerException("`emit` called with `null`."));
             return this;
         }
         queue.offer(t);
@@ -106,7 +105,7 @@ public class BufferItemMultiEmitter<T> extends BaseMultiEmitter<T> {
                 }
 
                 try {
-                    downstream.onNext(o);
+                    downstream.onItem(o);
                 } catch (Exception x) {
                     cancel();
                 }

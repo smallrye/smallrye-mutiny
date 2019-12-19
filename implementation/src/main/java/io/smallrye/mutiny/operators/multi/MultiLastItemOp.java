@@ -2,10 +2,10 @@ package io.smallrye.mutiny.operators.multi;
 
 import static io.smallrye.mutiny.helpers.Subscriptions.CANCELLED;
 
-import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.Multi;
+import io.smallrye.mutiny.subscription.MultiSubscriber;
 
 public final class MultiLastItemOp<T> extends AbstractMultiOperator<T, T> {
 
@@ -14,7 +14,7 @@ public final class MultiLastItemOp<T> extends AbstractMultiOperator<T, T> {
     }
 
     @Override
-    public void subscribe(Subscriber<? super T> downstream) {
+    public void subscribe(MultiSubscriber<? super T> downstream) {
         upstream.subscribe(new MultiLastItemProcessor<T>(downstream));
     }
 
@@ -22,7 +22,7 @@ public final class MultiLastItemOp<T> extends AbstractMultiOperator<T, T> {
 
         T last;
 
-        MultiLastItemProcessor(Subscriber<? super T> downstream) {
+        MultiLastItemProcessor(MultiSubscriber<? super T> downstream) {
             super(downstream);
         }
 
@@ -37,28 +37,26 @@ public final class MultiLastItemOp<T> extends AbstractMultiOperator<T, T> {
         }
 
         @Override
-        public void onNext(T item) {
+        public void onItem(T item) {
             last = item;
         }
 
         @Override
-        public void onError(Throwable failure) {
-            super.onError(failure);
+        public void onFailure(Throwable failure) {
+            super.onFailure(failure);
             last = null;
         }
 
         @Override
-        public void onComplete() {
+        public void onCompletion() {
             Subscription subscription = upstream.getAndSet(CANCELLED);
             if (subscription != CANCELLED) {
                 T item = last;
                 if (item != null) {
                     last = null; // release before calling the callback.
-                    downstream.onNext(item);
-                    downstream.onComplete();
-                } else {
-                    downstream.onComplete();
+                    downstream.onItem(item);
                 }
+                downstream.onCompletion();
             }
         }
     }

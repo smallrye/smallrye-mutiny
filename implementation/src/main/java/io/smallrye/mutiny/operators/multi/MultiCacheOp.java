@@ -11,6 +11,7 @@ import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.helpers.Subscriptions;
+import io.smallrye.mutiny.subscription.MultiSubscriber;
 
 /**
  * A {@code multi} caching the events emitted from upstreams and replaying it to subscribers.
@@ -49,7 +50,7 @@ public class MultiCacheOp<T> extends AbstractMultiOperator<T, T> implements Subs
     }
 
     @Override
-    public void subscribe(Subscriber<? super T> downstream) {
+    public void subscribe(MultiSubscriber<? super T> downstream) {
         CacheSubscription<T> consumer = new CacheSubscription<>(downstream, this);
         downstream.onSubscribe(consumer);
         addDownstreamSubscription(consumer);
@@ -117,13 +118,13 @@ public class MultiCacheOp<T> extends AbstractMultiOperator<T, T> implements Subs
      */
     static final class CacheSubscription<T> implements Subscription {
 
-        private final Subscriber<? super T> downstream;
+        private final MultiSubscriber<? super T> downstream;
         private final MultiCacheOp<T> cache;
         private final AtomicLong requested = new AtomicLong();
         private final AtomicInteger wip = new AtomicInteger();
         private int lastIndex;
 
-        CacheSubscription(Subscriber<? super T> downstream, MultiCacheOp<T> cache) {
+        CacheSubscription(MultiSubscriber<? super T> downstream, MultiCacheOp<T> cache) {
             this.downstream = downstream;
             this.cache = cache;
             this.lastIndex = -1;
@@ -150,7 +151,7 @@ public class MultiCacheOp<T> extends AbstractMultiOperator<T, T> implements Subs
                     if (cache.failure != null) {
                         downstream.onError(cache.failure);
                     } else {
-                        downstream.onComplete();
+                        downstream.onCompletion();
                     }
                     return;
                 }
@@ -163,7 +164,7 @@ public class MultiCacheOp<T> extends AbstractMultiOperator<T, T> implements Subs
                 if (consumerRequested > 0L && hasNext()) {
                     lastIndex = lastIndex + 1;
                     Node<T> node = history.get(lastIndex);
-                    downstream.onNext(node.item);
+                    downstream.onItem(node.item);
                     Subscriptions.subtract(requested, 1);
                     continue;
                 }

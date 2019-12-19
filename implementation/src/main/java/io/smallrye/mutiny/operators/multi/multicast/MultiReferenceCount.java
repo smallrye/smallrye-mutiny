@@ -5,12 +5,11 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-import org.reactivestreams.Subscriber;
-
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.AbstractMulti;
 import io.smallrye.mutiny.subscription.Cancellable;
+import io.smallrye.mutiny.subscription.MultiSubscriber;
 
 /**
  * A {@link Multi} stays connected to the source as long as there is at least one subscription.
@@ -38,7 +37,7 @@ public class MultiReferenceCount<T> extends AbstractMulti<T> implements Multi<T>
     }
 
     @Override
-    public void subscribe(Subscriber<? super T> s) {
+    public void subscribe(MultiSubscriber<? super T> s) {
         ConnectableMultiConnection conn;
         boolean connect;
         synchronized (this) {

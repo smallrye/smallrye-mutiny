@@ -3,24 +3,24 @@ package io.smallrye.mutiny.operators.multi.builders;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.helpers.Subscriptions;
 import io.smallrye.mutiny.subscription.MultiEmitter;
+import io.smallrye.mutiny.subscription.MultiSubscriber;
 
 abstract class BaseMultiEmitter<T>
         implements MultiEmitter<T>, Subscription {
 
     protected final AtomicLong requested = new AtomicLong();
-    protected final Subscriber<? super T> downstream;
+    protected final MultiSubscriber<? super T> downstream;
 
     private final AtomicReference<Runnable> onTermination;
 
     private static final Runnable CLEARED = () -> {
     };
 
-    BaseMultiEmitter(Subscriber<? super T> downstream) {
+    BaseMultiEmitter(MultiSubscriber<? super T> downstream) {
         this.downstream = downstream;
         this.onTermination = new AtomicReference<>();
     }
@@ -36,7 +36,7 @@ abstract class BaseMultiEmitter<T>
         }
 
         try {
-            downstream.onComplete();
+            downstream.onCompletion();
         } finally {
             cleanup();
         }
@@ -66,7 +66,7 @@ abstract class BaseMultiEmitter<T>
             return;
         }
         try {
-            downstream.onError(e);
+            downstream.onFailure(e);
         } finally {
             cleanup();
         }

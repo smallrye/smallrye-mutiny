@@ -6,7 +6,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 
-import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.Multi;
@@ -16,6 +15,7 @@ import io.smallrye.mutiny.helpers.queues.SpscLinkedArrayQueue;
 import io.smallrye.mutiny.operators.multi.AbstractMultiOperator;
 import io.smallrye.mutiny.operators.multi.MultiOperatorProcessor;
 import io.smallrye.mutiny.subscription.BackPressureFailure;
+import io.smallrye.mutiny.subscription.MultiSubscriber;
 
 public class MultiOnOverflowBufferOp<T> extends AbstractMultiOperator<T, T> {
 
@@ -34,7 +34,7 @@ public class MultiOnOverflowBufferOp<T> extends AbstractMultiOperator<T, T> {
     }
 
     @Override
-    public void subscribe(Subscriber<? super T> downstream) {
+    public void subscribe(MultiSubscriber<? super T> downstream) {
         OnOverflowBufferProcessor<T> subscriber = new OnOverflowBufferProcessor<>(downstream,
                 bufferSize, unbounded,
                 postponeFailurePropagation,
@@ -56,7 +56,7 @@ public class MultiOnOverflowBufferOp<T> extends AbstractMultiOperator<T, T> {
         volatile boolean cancelled;
         volatile boolean done;
 
-        OnOverflowBufferProcessor(Subscriber<? super T> downstream, int bufferSize,
+        OnOverflowBufferProcessor(MultiSubscriber<? super T> downstream, int bufferSize,
                 boolean unbounded, boolean postponeFailurePropagation, Consumer<T> onOverflow) {
             super(downstream);
             this.onOverflow = onOverflow;
@@ -75,7 +75,7 @@ public class MultiOnOverflowBufferOp<T> extends AbstractMultiOperator<T, T> {
         }
 
         @Override
-        public void onNext(T t) {
+        public void onItem(T t) {
             if (!queue.offer(t)) {
                 BackPressureFailure ex = new BackPressureFailure(
                         "Buffer is full due to lack of downstream consumption");
@@ -84,21 +84,21 @@ public class MultiOnOverflowBufferOp<T> extends AbstractMultiOperator<T, T> {
                 } catch (Throwable e) {
                     ex.initCause(e);
                 }
-                onError(ex);
+                onFailure(ex);
                 return;
             }
             drain();
         }
 
         @Override
-        public void onError(Throwable failure) {
+        public void onFailure(Throwable failure) {
             this.failure = failure;
             done = true;
             drain();
         }
 
         @Override
-        public void onComplete() {
+        public void onCompletion() {
             done = true;
             drain();
         }
@@ -146,7 +146,7 @@ public class MultiOnOverflowBufferOp<T> extends AbstractMultiOperator<T, T> {
                         if (wasEmpty) {
                             break;
                         }
-                        downstream.onNext(item);
+                        downstream.onItem(item);
                         emitted++;
                     }
 
@@ -181,19 +181,19 @@ public class MultiOnOverflowBufferOp<T> extends AbstractMultiOperator<T, T> {
                 if (postponeFailurePropagation) {
                     if (wasEmpty) {
                         if (failure != null) {
-                            super.onError(failure);
+                            super.onFailure(failure);
                         } else {
-                            super.onComplete();
+                            super.onCompletion();
                         }
                         return true;
                     }
                 } else {
                     if (failure != null) {
                         queue.clear();
-                        super.onError(failure);
+                        super.onFailure(failure);
                         return true;
                     } else if (wasEmpty) {
-                        super.onComplete();
+                        super.onCompletion();
                         return true;
                     }
                 }

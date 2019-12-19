@@ -19,6 +19,7 @@ import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.helpers.Subscriptions;
 import io.smallrye.mutiny.helpers.queues.SpscLinkedArrayQueue;
 import io.smallrye.mutiny.operators.AbstractMulti;
+import io.smallrye.mutiny.subscription.MultiSubscriber;
 
 public final class MultiGroupByOp<T, K, V> extends AbstractMultiOperator<T, GroupedMulti<K, V>> {
     private final Function<? super T, ? extends K> keySelector;
@@ -33,7 +34,7 @@ public final class MultiGroupByOp<T, K, V> extends AbstractMultiOperator<T, Grou
     }
 
     @Override
-    public void subscribe(Subscriber<? super GroupedMulti<K, V>> downstream) {
+    public void subscribe(MultiSubscriber<? super GroupedMulti<K, V>> downstream) {
         if (downstream == null) {
             throw new NullPointerException("The subscriber must not be `null`");
         }
@@ -62,7 +63,7 @@ public final class MultiGroupByOp<T, K, V> extends AbstractMultiOperator<T, Grou
         volatile boolean finished;
         boolean done;
 
-        public MultiGroupByProcessor(Subscriber<? super GroupedMulti<K, V>> downstream,
+        public MultiGroupByProcessor(MultiSubscriber<? super GroupedMulti<K, V>> downstream,
                 Function<? super T, ? extends K> keySelector,
                 Function<? super T, ? extends V> valueSelector,
                 Map<Object, GroupedUnicast<K, V>> groups) {
@@ -85,7 +86,7 @@ public final class MultiGroupByOp<T, K, V> extends AbstractMultiOperator<T, Grou
         }
 
         @Override
-        public void onNext(T item) {
+        public void onItem(T item) {
             if (isDone()) {
                 return;
             }
@@ -95,7 +96,7 @@ public final class MultiGroupByOp<T, K, V> extends AbstractMultiOperator<T, Grou
                 key = keySelector.apply(item);
             } catch (Throwable ex) {
                 super.cancel();
-                super.onError(ex);
+                super.onFailure(ex);
                 return;
             }
 
@@ -121,11 +122,11 @@ public final class MultiGroupByOp<T, K, V> extends AbstractMultiOperator<T, Grou
                 }
             } catch (Throwable ex) {
                 super.cancel();
-                super.onError(ex);
+                super.onFailure(ex);
                 return;
             }
 
-            group.onNext(value);
+            group.onItem(value);
             if (newGroup) {
                 this.queue.offer(group);
                 drain();
@@ -133,11 +134,11 @@ public final class MultiGroupByOp<T, K, V> extends AbstractMultiOperator<T, Grou
         }
 
         @Override
-        public void onError(Throwable throwable) {
+        public void onFailure(Throwable throwable) {
             Subscription subscription = upstream.getAndSet(CANCELLED);
             if (subscription != CANCELLED) {
                 done = true;
-                groups.values().forEach(group -> group.onError(throwable));
+                groups.values().forEach(group -> group.onFailure(throwable));
                 groups.clear();
                 failure = throwable;
                 finished = true;
@@ -146,7 +147,7 @@ public final class MultiGroupByOp<T, K, V> extends AbstractMultiOperator<T, Grou
         }
 
         @Override
-        public void onComplete() {
+        public void onCompletion() {
             Subscription subscription = upstream.getAndSet(CANCELLED);
             if (subscription != CANCELLED) {
                 done = true;
@@ -213,7 +214,7 @@ public final class MultiGroupByOp<T, K, V> extends AbstractMultiOperator<T, Grou
                     if (hasNoMoreGroup) {
                         break;
                     }
-                    this.downstream.onNext(t);
+                    this.downstream.onItem(t);
                     emitted++;
                 }
 
@@ -245,10 +246,10 @@ public final class MultiGroupByOp<T, K, V> extends AbstractMultiOperator<T, Grou
                 Throwable ex = failure;
                 if (ex != null) {
                     q.clear();
-                    downstream.onError(ex);
+                    downstream.onFailure(ex);
                     return true;
                 } else if (empty) {
-                    downstream.onComplete();
+                    downstream.onCompletion();
                     return true;
                 }
             }
@@ -274,20 +275,20 @@ public final class MultiGroupByOp<T, K, V> extends AbstractMultiOperator<T, Grou
         }
 
         @Override
-        public void subscribe(Subscriber<? super T> s) {
+        public void subscribe(MultiSubscriber<? super T> s) {
             downstream.subscribe(s);
         }
 
-        public void onNext(T t) {
-            downstream.onNext(t);
+        public void onItem(T t) {
+            downstream.onItem(t);
         }
 
-        public void onError(Throwable e) {
-            downstream.onError(e);
+        public void onFailure(Throwable e) {
+            downstream.onFailure(e);
         }
 
         public void onComplete() {
-            downstream.onComplete();
+            downstream.onCompletion();
         }
 
         @Override
@@ -342,21 +343,21 @@ public final class MultiGroupByOp<T, K, V> extends AbstractMultiOperator<T, Grou
             }
         }
 
-        public void onNext(T t) {
+        public void onItem(T t) {
             if (!done.get()) {
                 queue.offer(t);
                 drain();
             }
         }
 
-        public void onError(Throwable e) {
+        public void onFailure(Throwable e) {
             if (done.compareAndSet(false, true)) {
                 failure = e;
                 drain();
             }
         }
 
-        public void onComplete() {
+        public void onCompletion() {
             if (done.compareAndSet(false, true)) {
                 drain();
             }

@@ -4,13 +4,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.helpers.Subscriptions;
 import io.smallrye.mutiny.operators.multi.AbstractMultiOperator;
 import io.smallrye.mutiny.operators.multi.MultiOperatorProcessor;
+import io.smallrye.mutiny.subscription.MultiSubscriber;
 
 public class MultiOnOverflowKeepLastOp<T> extends AbstractMultiOperator<T, T> {
 
@@ -19,7 +19,7 @@ public class MultiOnOverflowKeepLastOp<T> extends AbstractMultiOperator<T, T> {
     }
 
     @Override
-    public void subscribe(Subscriber<? super T> downstream) {
+    public void subscribe(MultiSubscriber<? super T> downstream) {
         upstream.subscribe(new MultiOnOverflowLatestProcessor<T>(downstream));
     }
 
@@ -34,7 +34,7 @@ public class MultiOnOverflowKeepLastOp<T> extends AbstractMultiOperator<T, T> {
 
         private final AtomicReference<T> last = new AtomicReference<>();
 
-        MultiOnOverflowLatestProcessor(Subscriber<? super T> downstream) {
+        MultiOnOverflowLatestProcessor(MultiSubscriber<? super T> downstream) {
             super(downstream);
         }
 
@@ -49,20 +49,20 @@ public class MultiOnOverflowKeepLastOp<T> extends AbstractMultiOperator<T, T> {
         }
 
         @Override
-        public void onNext(T t) {
+        public void onItem(T t) {
             last.lazySet(t);
             drain();
         }
 
         @Override
-        public void onError(Throwable f) {
+        public void onFailure(Throwable f) {
             failure = f;
             done = true;
             drain();
         }
 
         @Override
-        public void onComplete() {
+        public void onCompletion() {
             done = true;
             drain();
         }
@@ -109,7 +109,7 @@ public class MultiOnOverflowKeepLastOp<T> extends AbstractMultiOperator<T, T> {
                         break;
                     }
 
-                    downstream.onNext(v);
+                    downstream.onItem(v);
 
                     emitted++;
                 }
@@ -138,10 +138,10 @@ public class MultiOnOverflowKeepLastOp<T> extends AbstractMultiOperator<T, T> {
             if (wasDone) {
                 if (failure != null) {
                     last.lazySet(null);
-                    super.onError(failure);
+                    super.onFailure(failure);
                     return true;
                 } else if (wasEmpty) {
-                    super.onComplete();
+                    super.onCompletion();
                     return true;
                 }
             }

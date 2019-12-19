@@ -2,10 +2,9 @@ package io.smallrye.mutiny.operators.multi;
 
 import java.util.function.Predicate;
 
-import org.reactivestreams.Subscriber;
-
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.helpers.ParameterValidation;
+import io.smallrye.mutiny.subscription.MultiSubscriber;
 
 /**
  * Emits the items from upstream while the given predicate returns {@code true} for the item.
@@ -23,7 +22,7 @@ public final class MultiTakeWhileOp<T> extends AbstractMultiOperator<T, T> {
     }
 
     @Override
-    public void subscribe(Subscriber<? super T> actual) {
+    public void subscribe(MultiSubscriber<? super T> actual) {
         ParameterValidation.nonNullNpe(actual, "subscriber");
         upstream.subscribe(new TakeWhileProcessor<>(actual, predicate));
     }
@@ -31,13 +30,13 @@ public final class MultiTakeWhileOp<T> extends AbstractMultiOperator<T, T> {
     static final class TakeWhileProcessor<T> extends MultiOperatorProcessor<T, T> {
         private final Predicate<? super T> predicate;
 
-        TakeWhileProcessor(Subscriber<? super T> downstream, Predicate<? super T> predicate) {
+        TakeWhileProcessor(MultiSubscriber<? super T> downstream, Predicate<? super T> predicate) {
             super(downstream);
             this.predicate = predicate;
         }
 
         @Override
-        public void onNext(T t) {
+        public void onItem(T t) {
             if (isDone()) {
                 return;
             }
@@ -52,11 +51,11 @@ public final class MultiTakeWhileOp<T> extends AbstractMultiOperator<T, T> {
 
             if (!pass) {
                 cancel();
-                downstream.onComplete();
+                downstream.onCompletion();
                 return;
             }
 
-            downstream.onNext(t);
+            downstream.onItem(t);
         }
     }
 }

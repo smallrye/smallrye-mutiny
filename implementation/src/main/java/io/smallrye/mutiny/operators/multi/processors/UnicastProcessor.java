@@ -15,6 +15,7 @@ import io.smallrye.mutiny.helpers.Subscriptions;
 import io.smallrye.mutiny.helpers.queues.SpscLinkedArrayQueue;
 import io.smallrye.mutiny.operators.AbstractMulti;
 import io.smallrye.mutiny.subscription.BackPressureFailure;
+import io.smallrye.mutiny.subscription.MultiSubscriber;
 
 /**
  * Implementation of a processor using a queue to store items and allows a single subscriber to receive
@@ -136,7 +137,7 @@ public class UnicastProcessor<T> extends AbstractMulti<T> implements Processor<T
     }
 
     private boolean isCancelledOrDone(boolean isDone, boolean isEmpty) {
-        Subscriber<? super T> actual = downstream.get();
+        Subscriber<? super T> subscriber = downstream.get();
         if (cancelled.get()) {
             queue.clear();
             return true;
@@ -144,9 +145,9 @@ public class UnicastProcessor<T> extends AbstractMulti<T> implements Processor<T
         if (isDone && isEmpty) {
             Throwable failed = failure.get();
             if (failed != null) {
-                actual.onError(failed);
+                subscriber.onError(failed);
             } else {
-                actual.onComplete();
+                subscriber.onComplete();
             }
             return true;
         }
@@ -164,7 +165,7 @@ public class UnicastProcessor<T> extends AbstractMulti<T> implements Processor<T
     }
 
     @Override
-    public void subscribe(Subscriber<? super T> downstream) {
+    public void subscribe(MultiSubscriber<? super T> downstream) {
         ParameterValidation.nonNull(downstream, "downstream");
         if (this.downstream.compareAndSet(null, downstream)) {
             downstream.onSubscribe(this);

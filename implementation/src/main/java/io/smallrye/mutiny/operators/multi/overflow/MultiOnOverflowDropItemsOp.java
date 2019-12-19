@@ -3,13 +3,13 @@ package io.smallrye.mutiny.operators.multi.overflow;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 
-import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.helpers.Subscriptions;
 import io.smallrye.mutiny.operators.multi.AbstractMultiOperator;
 import io.smallrye.mutiny.operators.multi.MultiOperatorProcessor;
+import io.smallrye.mutiny.subscription.MultiSubscriber;
 
 public class MultiOnOverflowDropItemsOp<T> extends AbstractMultiOperator<T, T> {
 
@@ -25,7 +25,7 @@ public class MultiOnOverflowDropItemsOp<T> extends AbstractMultiOperator<T, T> {
         this.onItemDrop = onItemDrop;
     }
 
-    public void subscribe(Subscriber<? super T> downstream) {
+    public void subscribe(MultiSubscriber<? super T> downstream) {
         upstream.subscribe(new MultiOnOverflowDropItemsProcessor<T>(downstream, onItemDrop));
     }
 
@@ -34,8 +34,8 @@ public class MultiOnOverflowDropItemsOp<T> extends AbstractMultiOperator<T, T> {
         private final Consumer<? super T> onItemDrop;
         private final AtomicLong requested = new AtomicLong();
 
-        MultiOnOverflowDropItemsProcessor(Subscriber<? super T> dowsntream, Consumer<? super T> onItemDrop) {
-            super(dowsntream);
+        MultiOnOverflowDropItemsProcessor(MultiSubscriber<? super T> downstream, Consumer<? super T> onItemDrop) {
+            super(downstream);
             this.onItemDrop = onItemDrop;
         }
 
@@ -50,13 +50,13 @@ public class MultiOnOverflowDropItemsOp<T> extends AbstractMultiOperator<T, T> {
         }
 
         @Override
-        public void onNext(T item) {
+        public void onItem(T item) {
             if (isDone()) {
                 return;
             }
             long req = requested.get();
             if (req != 0L) {
-                downstream.onNext(item);
+                downstream.onItem(item);
                 Subscriptions.subtract(requested, 1);
             } else {
                 // no request, dropping.
@@ -69,7 +69,7 @@ public class MultiOnOverflowDropItemsOp<T> extends AbstractMultiOperator<T, T> {
                 try {
                     onItemDrop.accept(item);
                 } catch (Throwable e) {
-                    onError(e);
+                    onFailure(e);
                 }
             }
         }

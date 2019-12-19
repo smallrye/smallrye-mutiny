@@ -25,6 +25,7 @@ import org.reactivestreams.Subscription;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.helpers.Subscriptions;
+import io.smallrye.mutiny.subscription.MultiSubscriber;
 
 /**
  * Subscribes to the upstream asynchronously using the given executor.
@@ -43,7 +44,7 @@ public class MultiSubscribeOnOp<T> extends AbstractMultiOperator<T, T> {
     }
 
     @Override
-    public void subscribe(Subscriber<? super T> downstream) {
+    public void subscribe(MultiSubscriber<? super T> downstream) {
         SubscribeOnProcessor<T> sub = new SubscribeOnProcessor<>(downstream, executor);
         downstream.onSubscribe(sub);
         sub.scheduleSubscription(upstream, downstream);
@@ -54,7 +55,7 @@ public class MultiSubscribeOnOp<T> extends AbstractMultiOperator<T, T> {
         private final Executor executor;
         private final AtomicLong requested = new AtomicLong();
 
-        SubscribeOnProcessor(Subscriber<? super T> downstream, Executor executor) {
+        SubscribeOnProcessor(MultiSubscriber<? super T> downstream, Executor executor) {
             super(downstream);
             this.executor = executor;
         }
@@ -75,13 +76,13 @@ public class MultiSubscribeOnOp<T> extends AbstractMultiOperator<T, T> {
             try {
                 executor.execute(() -> s.request(n));
             } catch (RejectedExecutionException rejected) {
-                super.onError(rejected);
+                super.onFailure(rejected);
             }
         }
 
         @Override
-        public void onNext(T t) {
-            downstream.onNext(t);
+        public void onItem(T t) {
+            downstream.onItem(t);
         }
 
         @Override

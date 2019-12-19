@@ -7,11 +7,11 @@ import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.stream.Collector;
 
-import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.helpers.Subscriptions;
+import io.smallrye.mutiny.subscription.MultiSubscriber;
 
 public final class MultiCollectorOp<T, A, R> extends AbstractMultiOperator<T, R> {
 
@@ -26,7 +26,7 @@ public final class MultiCollectorOp<T, A, R> extends AbstractMultiOperator<T, R>
     }
 
     @Override
-    public void subscribe(Subscriber<? super R> downstream) {
+    public void subscribe(MultiSubscriber<? super R> downstream) {
         A initialValue;
         BiConsumer<A, ? super T> accumulator;
         Function<A, ? extends R> finisher;
@@ -62,7 +62,7 @@ public final class MultiCollectorOp<T, A, R> extends AbstractMultiOperator<T, R>
         // Only accessed in the serialized callbacks
         private A intermediate;
 
-        CollectorProcessor(Subscriber<? super R> downstream,
+        CollectorProcessor(MultiSubscriber<? super R> downstream,
                 A initialValue, BiConsumer<A, T> accumulator, Function<A, R> finisher) {
             super(downstream);
             this.intermediate = initialValue;
@@ -71,7 +71,7 @@ public final class MultiCollectorOp<T, A, R> extends AbstractMultiOperator<T, R>
         }
 
         @Override
-        public void onNext(T item) {
+        public void onItem(T item) {
             if (upstream.get() != CANCELLED) {
                 try {
                     accumulator.accept(intermediate, item);
@@ -82,7 +82,7 @@ public final class MultiCollectorOp<T, A, R> extends AbstractMultiOperator<T, R>
         }
 
         @Override
-        public void onComplete() {
+        public void onCompletion() {
             Subscription subscription = upstream.getAndSet(Subscriptions.CANCELLED);
             if (subscription != Subscriptions.CANCELLED) {
                 R result;
@@ -90,20 +90,20 @@ public final class MultiCollectorOp<T, A, R> extends AbstractMultiOperator<T, R>
                 try {
                     result = finisher.apply(intermediate);
                 } catch (Exception ex) {
-                    downstream.onError(ex);
+                    downstream.onFailure(ex);
                     return;
                 }
 
                 intermediate = null;
-                downstream.onNext(result);
-                downstream.onComplete();
+                downstream.onItem(result);
+                downstream.onCompletion();
             }
         }
 
         @Override
         public void request(long n) {
             // The subscriber may request only 1 but as we don't know how much we get, we request MAX.
-            // This could be changed with call to request in the OnNext
+            // This could be changed with call to request in the OnNext/OnItem
             super.request(Long.MAX_VALUE);
         }
 

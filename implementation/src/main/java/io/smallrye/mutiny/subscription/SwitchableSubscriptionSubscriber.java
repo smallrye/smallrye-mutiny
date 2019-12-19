@@ -5,7 +5,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.helpers.ParameterValidation;
@@ -19,13 +18,12 @@ import io.smallrye.mutiny.helpers.Subscriptions;
  *
  * @param <O> outgoing item type
  */
-@SuppressWarnings("SubscriberImplementation")
-public abstract class SwitchableSubscriptionSubscriber<O> implements Subscriber<O>, Subscription {
+public abstract class SwitchableSubscriptionSubscriber<O> implements MultiSubscriber<O>, Subscription {
 
     /**
      * The downstream subscriber
      */
-    protected final Subscriber<? super O> downstream;
+    protected final MultiSubscriber<? super O> downstream;
 
     /**
      * The current upstream
@@ -67,7 +65,7 @@ public abstract class SwitchableSubscriptionSubscriber<O> implements Subscriber<
      */
     private final AtomicBoolean cancelled = new AtomicBoolean();
 
-    public SwitchableSubscriptionSubscriber(Subscriber<? super O> downstream) {
+    public SwitchableSubscriptionSubscriber(MultiSubscriber<? super O> downstream) {
         this.downstream = downstream;
     }
 
@@ -83,12 +81,12 @@ public abstract class SwitchableSubscriptionSubscriber<O> implements Subscriber<
     }
 
     @Override
-    public void onComplete() {
+    public void onCompletion() {
         downstream.onComplete();
     }
 
     @Override
-    public void onError(Throwable t) {
+    public void onFailure(Throwable t) {
         downstream.onError(t);
     }
 

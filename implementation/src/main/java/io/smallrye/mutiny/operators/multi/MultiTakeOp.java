@@ -2,12 +2,12 @@ package io.smallrye.mutiny.operators.multi;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.helpers.Subscriptions;
+import io.smallrye.mutiny.subscription.MultiSubscriber;
 
 /**
  * Takes the n first items emitted by the upstream, cancelling the subscription after that.
@@ -27,7 +27,7 @@ public final class MultiTakeOp<T> extends AbstractMultiOperator<T, T> {
     }
 
     @Override
-    public void subscribe(Subscriber<? super T> downstream) {
+    public void subscribe(MultiSubscriber<? super T> downstream) {
         ParameterValidation.nonNullNpe(downstream, "subscriber");
         upstream.subscribe(new TakeProcessor<>(downstream, numberOfItems));
     }
@@ -38,7 +38,7 @@ public final class MultiTakeOp<T> extends AbstractMultiOperator<T, T> {
         private long remaining;
         private AtomicInteger wip = new AtomicInteger();
 
-        TakeProcessor(Subscriber<? super T> downstream, long numberOfItems) {
+        TakeProcessor(MultiSubscriber<? super T> downstream, long numberOfItems) {
             super(downstream);
             this.numberOfItems = numberOfItems;
             this.remaining = numberOfItems;
@@ -59,7 +59,7 @@ public final class MultiTakeOp<T> extends AbstractMultiOperator<T, T> {
         }
 
         @Override
-        public void onNext(T t) {
+        public void onItem(T t) {
             if (upstream.get() == Subscriptions.CANCELLED) {
                 return;
             }
@@ -68,22 +68,22 @@ public final class MultiTakeOp<T> extends AbstractMultiOperator<T, T> {
 
             if (r == 0) {
                 upstream.getAndSet(Subscriptions.CANCELLED).cancel();
-                downstream.onComplete();
+                downstream.onCompletion();
                 return;
             }
 
             remaining = --r;
-            downstream.onNext(t);
+            downstream.onItem(t);
             if (r == 0L) {
                 upstream.getAndSet(Subscriptions.CANCELLED).cancel();
-                downstream.onComplete();
+                downstream.onCompletion();
             }
         }
 
         @Override
         public void request(long n) {
             if (n <= 0) {
-                downstream.onError(Subscriptions.getInvalidRequestException());
+                downstream.onFailure(Subscriptions.getInvalidRequestException());
                 return;
             }
             Subscription actual = upstream.get();

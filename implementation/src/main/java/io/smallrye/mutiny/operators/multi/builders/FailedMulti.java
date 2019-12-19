@@ -2,11 +2,10 @@ package io.smallrye.mutiny.operators.multi.builders;
 
 import java.util.function.Supplier;
 
-import org.reactivestreams.Subscriber;
-
 import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.helpers.Subscriptions;
 import io.smallrye.mutiny.operators.AbstractMulti;
+import io.smallrye.mutiny.subscription.MultiSubscriber;
 
 /**
  * Multi emitting a failures (constant or produced by a supplier) to subscribers.
@@ -28,7 +27,7 @@ public class FailedMulti<T> extends AbstractMulti<T> {
     }
 
     @Override
-    public void subscribe(Subscriber<? super T> actual) {
+    public void subscribe(MultiSubscriber<? super T> actual) {
         try {
             Throwable throwable = supplier.get();
             if (throwable == null) {

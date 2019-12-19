@@ -2,9 +2,8 @@ package io.smallrye.mutiny.operators.multi.multicast;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.reactivestreams.Subscriber;
-
 import io.smallrye.mutiny.operators.multi.MultiOperatorProcessor;
+import io.smallrye.mutiny.subscription.MultiSubscriber;
 
 public class MultiReferenceCountSubscriber<T> extends MultiOperatorProcessor<T, T> {
 
@@ -12,7 +11,7 @@ public class MultiReferenceCountSubscriber<T> extends MultiOperatorProcessor<T, 
     private final MultiReferenceCount<T> parent;
     private final ConnectableMultiConnection connection;
 
-    MultiReferenceCountSubscriber(Subscriber<? super T> downstream, MultiReferenceCount<T> parent,
+    MultiReferenceCountSubscriber(MultiSubscriber<? super T> downstream, MultiReferenceCount<T> parent,
             ConnectableMultiConnection connection) {
         super(downstream);
         this.parent = parent;
@@ -20,23 +19,23 @@ public class MultiReferenceCountSubscriber<T> extends MultiOperatorProcessor<T, 
     }
 
     @Override
-    public void onNext(T t) {
-        downstream.onNext(t);
+    public void onItem(T t) {
+        downstream.onItem(t);
     }
 
     @Override
-    public void onError(Throwable failure) {
+    public void onFailure(Throwable failure) {
         if (done.compareAndSet(false, true)) {
             parent.terminated(connection);
-            super.onError(failure);
+            super.onFailure(failure);
         }
     }
 
     @Override
-    public void onComplete() {
+    public void onCompletion() {
         if (done.compareAndSet(false, true)) {
             parent.terminated(connection);
-            super.onComplete();
+            super.onCompletion();
         }
     }
 

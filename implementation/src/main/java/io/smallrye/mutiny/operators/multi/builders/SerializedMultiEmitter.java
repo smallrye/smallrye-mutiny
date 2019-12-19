@@ -6,19 +6,18 @@ import java.util.Queue;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.helpers.queues.SpscLinkedArrayQueue;
 import io.smallrye.mutiny.subscription.MultiEmitter;
+import io.smallrye.mutiny.subscription.MultiSubscriber;
 
 /**
- * Serializes calls to onNext, onError and onComplete.
+ * Serializes calls to onItem, onFailure and onCompletion and their Reactive Streams equivalent.
  *
  * @param <T> the type of item
  */
-@SuppressWarnings("SubscriberImplementation")
-public class SerializedMultiEmitter<T> implements MultiEmitter<T>, Subscriber<T> {
+public class SerializedMultiEmitter<T> implements MultiEmitter<T>, MultiSubscriber<T> {
 
     private final AtomicInteger wip = new AtomicInteger();
     private final BaseMultiEmitter<T> downstream;
@@ -33,17 +32,16 @@ public class SerializedMultiEmitter<T> implements MultiEmitter<T>, Subscriber<T>
 
     @Override
     public void onSubscribe(Subscription s) {
-
+        // do nothing.
     }
 
     @Override
-    public void onNext(T item) {
+    public void onItem(T item) {
         if (downstream.isCancelled() || done) {
             return;
         }
         if (item == null) {
-            onError(new NullPointerException(
-                    "onNext called with null. Null values are generally not allowed in 2.x operators and sources."));
+            onFailure(new NullPointerException("`onItem` called with `null`"));
             return;
         }
         if (wip.compareAndSet(0, 1)) {
@@ -64,7 +62,7 @@ public class SerializedMultiEmitter<T> implements MultiEmitter<T>, Subscriber<T>
     }
 
     @Override
-    public void onError(Throwable failure) {
+    public void onFailure(Throwable failure) {
         if (downstream.isCancelled() || done) {
             return;
         }
@@ -78,7 +76,7 @@ public class SerializedMultiEmitter<T> implements MultiEmitter<T>, Subscriber<T>
     }
 
     @Override
-    public void onComplete() {
+    public void onCompletion() {
         if (downstream.isCancelled() || done) {
             return;
         }
@@ -133,18 +131,18 @@ public class SerializedMultiEmitter<T> implements MultiEmitter<T>, Subscriber<T>
 
     @Override
     public MultiEmitter<T> emit(T item) {
-        onNext(item);
+        onItem(item);
         return this;
     }
 
     @Override
     public void fail(Throwable failure) {
-        onError(failure);
+        onFailure(failure);
     }
 
     @Override
     public void complete() {
-        onComplete();
+        onCompletion();
     }
 
     @Override

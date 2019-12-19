@@ -20,6 +20,7 @@ import io.smallrye.mutiny.helpers.Subscriptions;
 import io.smallrye.mutiny.helpers.queues.SpscArrayQueue;
 import io.smallrye.mutiny.helpers.queues.SpscLinkedArrayQueue;
 import io.smallrye.mutiny.operators.multi.processors.UnicastProcessor;
+import io.smallrye.mutiny.subscription.MultiSubscriber;
 
 /**
  * Splits the source sequence by time of reception into potentially overlapping {@code Multi}.
@@ -58,7 +59,7 @@ public class MultiWindowOp<T> extends AbstractMultiOperator<T, Multi<T>> {
     }
 
     @Override
-    public void subscribe(Subscriber<? super Multi<T>> downstream) {
+    public void subscribe(MultiSubscriber<? super Multi<T>> downstream) {
         if (skip == size) {
             upstream.subscribe(new MultiWindowExactProcessor<>(downstream,
                     size,
@@ -82,7 +83,7 @@ public class MultiWindowOp<T> extends AbstractMultiOperator<T, Multi<T>> {
         int index;
         private UnicastProcessor<T> processor;
 
-        MultiWindowExactProcessor(Subscriber<? super Multi<T>> downstream,
+        MultiWindowExactProcessor(MultiSubscriber<? super Multi<T>> downstream,
                 int size,
                 Supplier<? extends Queue<T>> supplier) {
             super(downstream);
@@ -92,7 +93,7 @@ public class MultiWindowOp<T> extends AbstractMultiOperator<T, Multi<T>> {
         }
 
         @Override
-        public void onNext(T t) {
+        public void onItem(T t) {
             if (isDone()) {
                 return;
             }
@@ -107,7 +108,7 @@ public class MultiWindowOp<T> extends AbstractMultiOperator<T, Multi<T>> {
                     }
                 });
                 processor = proc;
-                downstream.onNext(proc);
+                downstream.onItem(proc);
             }
 
             i++;
@@ -124,7 +125,7 @@ public class MultiWindowOp<T> extends AbstractMultiOperator<T, Multi<T>> {
         }
 
         @Override
-        public void onError(Throwable failure) {
+        public void onFailure(Throwable failure) {
             Subscription subscription = upstream.getAndSet(CANCELLED);
             if (subscription != CANCELLED) {
                 UnicastProcessor<T> proc = processor;
@@ -132,12 +133,12 @@ public class MultiWindowOp<T> extends AbstractMultiOperator<T, Multi<T>> {
                     processor = null;
                     proc.onError(failure);
                 }
-                downstream.onError(failure);
+                downstream.onFailure(failure);
             }
         }
 
         @Override
-        public void onComplete() {
+        public void onCompletion() {
             Subscription subscription = upstream.getAndSet(CANCELLED);
             if (subscription != CANCELLED) {
                 UnicastProcessor<T> proc = processor;
@@ -146,7 +147,7 @@ public class MultiWindowOp<T> extends AbstractMultiOperator<T, Multi<T>> {
                     proc.onComplete();
                 }
 
-                downstream.onComplete();
+                downstream.onCompletion();
             }
         }
 
@@ -181,7 +182,7 @@ public class MultiWindowOp<T> extends AbstractMultiOperator<T, Multi<T>> {
 
         UnicastProcessor<T> processor;
 
-        MultiWindowWithSkipProcessor(Subscriber<? super Multi<T>> downstream, int size, int skip,
+        MultiWindowWithSkipProcessor(MultiSubscriber<? super Multi<T>> downstream, int size, int skip,
                 Supplier<? extends Queue<T>> supplier) {
             super(downstream);
             this.size = size;
@@ -191,7 +192,7 @@ public class MultiWindowOp<T> extends AbstractMultiOperator<T, Multi<T>> {
         }
 
         @Override
-        public void onNext(T t) {
+        public void onItem(T t) {
             if (isDone()) {
                 return;
             }
@@ -207,7 +208,7 @@ public class MultiWindowOp<T> extends AbstractMultiOperator<T, Multi<T>> {
                     }
                 });
                 processor = proc;
-                downstream.onNext(proc);
+                downstream.onItem(proc);
             }
 
             i++;
@@ -231,7 +232,7 @@ public class MultiWindowOp<T> extends AbstractMultiOperator<T, Multi<T>> {
         }
 
         @Override
-        public void onError(Throwable failure) {
+        public void onFailure(Throwable failure) {
             Subscription subscription = upstream.getAndSet(CANCELLED);
             if (subscription != CANCELLED) {
                 Processor<T, T> proc = processor;
@@ -239,12 +240,12 @@ public class MultiWindowOp<T> extends AbstractMultiOperator<T, Multi<T>> {
                     processor = null;
                     proc.onError(failure);
                 }
-                downstream.onError(failure);
+                downstream.onFailure(failure);
             }
         }
 
         @Override
-        public void onComplete() {
+        public void onCompletion() {
             Subscription subscription = upstream.getAndSet(CANCELLED);
             if (subscription != CANCELLED) {
                 Processor<T, T> proc = processor;
@@ -253,7 +254,7 @@ public class MultiWindowOp<T> extends AbstractMultiOperator<T, Multi<T>> {
                     proc.onComplete();
                 }
 
-                downstream.onComplete();
+                downstream.onCompletion();
             }
         }
 
@@ -301,7 +302,7 @@ public class MultiWindowOp<T> extends AbstractMultiOperator<T, Multi<T>> {
         private int index;
         private int produced;
 
-        MultiWindowWithOverlapProcessor(Subscriber<? super Multi<T>> downstream,
+        MultiWindowWithOverlapProcessor(MultiSubscriber<? super Multi<T>> downstream,
                 int size, int skip,
                 Supplier<? extends Queue<T>> supplier,
                 Queue<UnicastProcessor<T>> overflowQueue) {
@@ -314,7 +315,7 @@ public class MultiWindowOp<T> extends AbstractMultiOperator<T, Multi<T>> {
         }
 
         @Override
-        public void onNext(T t) {
+        public void onItem(T t) {
             if (isDone()) {
                 return;
             }
@@ -354,7 +355,7 @@ public class MultiWindowOp<T> extends AbstractMultiOperator<T, Multi<T>> {
         }
 
         @Override
-        public void onError(Throwable f) {
+        public void onFailure(Throwable f) {
             Subscription subscription = upstream.getAndSet(CANCELLED);
             if (subscription != CANCELLED) {
                 for (UnicastProcessor<T> proc : processors) {
@@ -367,7 +368,7 @@ public class MultiWindowOp<T> extends AbstractMultiOperator<T, Multi<T>> {
         }
 
         @Override
-        public void onComplete() {
+        public void onCompletion() {
             Subscription subscription = upstream.getAndSet(CANCELLED);
             if (subscription != CANCELLED) {
                 for (UnicastProcessor<T> proc : processors) {
@@ -382,7 +383,7 @@ public class MultiWindowOp<T> extends AbstractMultiOperator<T, Multi<T>> {
             if (wip.getAndIncrement() != 0) {
                 return;
             }
-            final Subscriber<? super Multi<T>> actual = downstream;
+            final MultiSubscriber<? super Multi<T>> actual = downstream;
             final Queue<UnicastProcessor<T>> q = overflow;
             int missed = 1;
 
@@ -402,7 +403,7 @@ public class MultiWindowOp<T> extends AbstractMultiOperator<T, Multi<T>> {
                         break;
                     }
 
-                    actual.onNext(t);
+                    actual.onItem(t);
 
                     e++;
                 }
@@ -424,7 +425,7 @@ public class MultiWindowOp<T> extends AbstractMultiOperator<T, Multi<T>> {
             }
         }
 
-        boolean isCancelledOrDone(boolean isDone, boolean isEmpty, Subscriber<?> actual, Queue<?> q) {
+        boolean isCancelledOrDone(boolean isDone, boolean isEmpty, Subscriber<?> subscriber, Queue<?> q) {
             if (isCancelled()) {
                 q.clear();
                 return true;
@@ -435,10 +436,10 @@ public class MultiWindowOp<T> extends AbstractMultiOperator<T, Multi<T>> {
 
                 if (failed != null) {
                     q.clear();
-                    actual.onError(failed);
+                    subscriber.onError(failed);
                     return true;
                 } else if (isEmpty) {
-                    actual.onComplete();
+                    subscriber.onComplete();
                     return true;
                 }
             }

@@ -9,6 +9,7 @@ import org.reactivestreams.Subscription;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.helpers.Subscriptions;
+import io.smallrye.mutiny.subscription.MultiSubscriber;
 import io.smallrye.mutiny.subscription.SerializedSubscriber;
 
 /**
@@ -28,15 +29,14 @@ public final class MultiTakeUntilOtherOp<T, U> extends AbstractMultiOperator<T, 
     }
 
     @Override
-    public void subscribe(Subscriber<? super T> actual) {
+    public void subscribe(MultiSubscriber<? super T> actual) {
         TakeUntilMainProcessor<T> mainSubscriber = new TakeUntilMainProcessor<>(actual);
         TakeUntilOtherSubscriber<U> otherSubscriber = new TakeUntilOtherSubscriber<>(mainSubscriber);
         other.subscribe(otherSubscriber);
         upstream.subscribe(mainSubscriber);
     }
 
-    @SuppressWarnings("SubscriberImplementation")
-    static final class TakeUntilOtherSubscriber<U> implements Subscriber<U> {
+    static final class TakeUntilOtherSubscriber<U> implements MultiSubscriber<U> {
         final TakeUntilMainProcessor<?> main;
         boolean once;
 
@@ -50,26 +50,26 @@ public final class MultiTakeUntilOtherOp<T, U> extends AbstractMultiOperator<T, 
         }
 
         @Override
-        public void onNext(U t) {
-            onComplete();
+        public void onItem(U t) {
+            onCompletion();
         }
 
         @Override
-        public void onError(Throwable t) {
+        public void onFailure(Throwable t) {
             if (once) {
                 return;
             }
             once = true;
-            main.onError(t);
+            main.onFailure(t);
         }
 
         @Override
-        public void onComplete() {
+        public void onCompletion() {
             if (once) {
                 return;
             }
             once = true;
-            main.onComplete();
+            main.onCompletion();
         }
     }
 
@@ -96,21 +96,21 @@ public final class MultiTakeUntilOtherOp<T, U> extends AbstractMultiOperator<T, 
         }
 
         @Override
-        public void onNext(T t) {
+        public void onItem(T t) {
             if (!isDone()) {
-                downstream.onNext(t);
+                downstream.onItem(t);
             }
         }
 
         @Override
-        public void onError(Throwable failure) {
-            super.onError(failure);
+        public void onFailure(Throwable failure) {
+            super.onFailure(failure);
             Subscriptions.cancel(other);
         }
 
         @Override
-        public void onComplete() {
-            super.onComplete();
+        public void onCompletion() {
+            super.onCompletion();
             Subscriptions.cancel(other);
         }
     }
