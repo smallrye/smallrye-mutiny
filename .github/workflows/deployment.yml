@@ -14,7 +14,7 @@ jobs:
           java-version: 'openjdk8'
       - name: 'Run deployment script for ${{ github.event.deployment.environment }}'
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_API_TOKEN }}
           SECRET_FILES_PASSPHRASE: ${{ secrets.SECRET_FILES_PASSPHRASE }}
           MICRO_RELEASE: ${{ github.event.deployment.payload.micro }}
         run: |
