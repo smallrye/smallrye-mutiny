@@ -35,12 +35,28 @@ public class PollableSourceTest {
         // end::code[]
     }
 
+    @Test
+    public void test2() {
+        // tag::code2[]
+        PollableDataSource source = new PollableDataSource();
+        Multi<String> stream = Uni.createFrom().item(source::poll)
+                .subscribeOn(executor)
+                .repeat().until(s -> s != null);
+
+        stream.subscribe().with(item -> System.out.println("Polled item: " + item));
+        // end::code2[]
+        await().until(() -> source.counter.get() >= 5);
+    }
+
     private class PollableDataSource {
 
         private final AtomicInteger counter = new AtomicInteger();
 
         String poll() {
             block();
+            if (counter.get() == 5) {
+                return null;
+            }
             return Integer.toString(counter.getAndIncrement());
         }
 

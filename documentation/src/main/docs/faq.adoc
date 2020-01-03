@@ -334,7 +334,7 @@ include::../../../src/test/java/snippets/UnicastProcessorTest.java[tags=code]
 By default the `UnicastProcessor` uses an unbounded queue.
 You can also pass a fixed size queue that would reject the items once full.
 
-=== How to I handle polling
+=== How do I handle polling?
 
 There are many poll-based API around us.
 Sometimes you need to use these APIs to generate a stream from the polled values.
@@ -344,6 +344,37 @@ To do this, use the `repeat()` feature:
 ----
 include::../../../src/test/java/snippets/PollableSourceTest.java[tags=code]
 ----
+
+You can also stop the repetition using the `repeat().until()` method which will continue the repetition until the given predicate returns `true`:
+
+[source,java,indent=0]
+----
+include::../../../src/test/java/snippets/PollableSourceTest.java[tags=code2]
+----
+
+=== How do I handle pagination?
+
+There are many REST / HTTP API using pagination, _i.e._ return only a subset of the results and you need to request the next page to get the next batch.
+Each batch contains a list of item(s).
+To use this kind of API and generate a continuous stream of items, you need to use the `repeat()` function.
+However, we need to pass a cursor / state to advance and avoid requesting again and again the same page.
+Fortunately, `Uni` provides methods to pass a shared state.
+so by combining these methods, `repeat` and `flatten` you can generate streams from these pages:
+
+[source,java,indent=0]
+----
+include::../../../src/test/java/snippets/PaginationTest.java[tags=code]
+----
+
+First, you create a `Uni` and pass a state supplier.
+The produced state container (here an `AtomicInteger`) is shared among the different subscriptions.
+Be aware it must return a thread safe container, and the supplier is called only once.
+
+Then, use `repeat` to call the paginated API until we have all the items.
+At the point we have a stream of list of item such as `["a", "b", "c"], ["d", "e"], []`.
+However we want the following stream: `"a", "b", "c", "d", "e"`.
+The `flatten` method does exactly this.
+It gets the items from the lists and passes them downstream.
 
 === Where do I find the JavaDoc?
 
