@@ -54,6 +54,38 @@ public class MultiOnItem<T> {
     }
 
     /**
+     * Takes the items from the upstream {@link Multi} that are either {@link Publisher Publisher&lt;O&gt;},
+     * {@link java.lang.reflect.Array O[]}, {@link Iterable Iterable&lt;O&gt;} or {@link Multi Multi&lt;O&gt;} and
+     * flatten the items to obtain a {@link Multi Multi&lt;O&gt;}.
+     * <p>
+     * For example, {@code Multi<[A, B, C], [D, E, F]} is transformed into {@code Multi<A, B, C, D, E, F>}.
+     * <p>
+     * If the items from upstream are not instances of {@link Iterable}, {@link Publisher} or array, an
+     * {@link IllegalArgumentException} is propagated downstream.
+     *
+     * @param <O> the type items contained in the upstream's items.
+     * @return the resulting multi
+     */
+    @SuppressWarnings("unchecked")
+    public <O> Multi<O> flatten() {
+        return upstream.onItem().produceMulti(x -> {
+            if (x instanceof Iterable) {
+                return Multi.createFrom().iterable((Iterable<O>) x);
+            } else if (x instanceof Multi) {
+                return (Multi<O>) x;
+            } else if (x instanceof Publisher) {
+                return Multi.createFrom().publisher((Publisher<O>) x);
+            } else if (x.getClass().isArray()) {
+                O[] item = (O[]) x;
+                return Multi.createFrom().items(item);
+            } else {
+                return Multi.createFrom().failure(new IllegalArgumentException(
+                        "Invalid parameter - cannot flatten instance of " + x.getClass().getName()));
+            }
+        }).concatenate();
+    }
+
+    /**
      * Configures the <em>mapper</em> of the <em>flatMap</em> operation.
      * The mapper returns a {@link Multi multi} and is called for each item emitted by the upstream {@link Multi}.
      *
@@ -119,7 +151,8 @@ public class MultiOnItem<T> {
      * @param <O> the type of item emitted by the {@link CompletionStage} produced by the mapper.
      * @return the object to configure the flatten behavior.
      */
-    public <O> MultiFlatten<T, O> produceCompletionStage(Function<? super T, ? extends CompletionStage<? extends O>> mapper) {
+    public <O> MultiFlatten<T, O> produceCompletionStage(
+            Function<? super T, ? extends CompletionStage<? extends O>> mapper) {
         nonNull(mapper, "mapper");
         Function<? super T, ? extends Publisher<? extends O>> wrapper = res -> Multi.createFrom().emitter(emitter -> {
             CompletionStage<? extends O> stage;
