@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
 import org.testng.annotations.Test;
@@ -207,6 +208,67 @@ public class UniCreateFromCompletionStageTest {
 
         uni.subscribe().withSubscriber(ts);
         ts.assertFailure(NullPointerException.class, "");
+    }
+
+    @Test
+    public void testWithSharedState() {
+        UniAssertSubscriber<Integer> ts1 = UniAssertSubscriber.create();
+        UniAssertSubscriber<Integer> ts2 = UniAssertSubscriber.create();
+        AtomicInteger shared = new AtomicInteger();
+        Uni<Integer> uni = Uni.createFrom().completionStage(() -> shared,
+                state -> CompletableFuture.completedFuture(state.incrementAndGet()));
+
+        assertThat(shared).hasValue(0);
+        uni.subscribe().withSubscriber(ts1);
+        assertThat(shared).hasValue(1);
+        ts1.assertCompletedSuccessfully().assertItem(1);
+        uni.subscribe().withSubscriber(ts2);
+        assertThat(shared).hasValue(2);
+        ts2.assertCompletedSuccessfully().assertItem(2);
+    }
+
+    @Test
+    public void testWithSharedStateProducingFailure() {
+        UniAssertSubscriber<Integer> ts1 = UniAssertSubscriber.create();
+        UniAssertSubscriber<Integer> ts2 = UniAssertSubscriber.create();
+        Supplier<AtomicInteger> boom = () -> {
+            throw new IllegalStateException("boom");
+        };
+
+        Uni<Integer> uni = Uni.createFrom().completionStage(boom,
+                state -> CompletableFuture.completedFuture(state.incrementAndGet()));
+
+        uni.subscribe().withSubscriber(ts1);
+        ts1.assertFailure(IllegalStateException.class, "boom");
+        uni.subscribe().withSubscriber(ts2);
+        ts2.assertFailure(IllegalStateException.class, "Invalid shared state");
+    }
+
+    @Test
+    public void testWithSharedStateProducingNull() {
+        UniAssertSubscriber<Integer> ts1 = UniAssertSubscriber.create();
+        UniAssertSubscriber<Integer> ts2 = UniAssertSubscriber.create();
+        Supplier<AtomicInteger> boom = () -> null;
+
+        Uni<Integer> uni = Uni.createFrom().completionStage(boom,
+                state -> CompletableFuture.completedFuture(state.incrementAndGet()));
+
+        uni.subscribe().withSubscriber(ts1);
+        ts1.assertFailure(NullPointerException.class, "supplier");
+        uni.subscribe().withSubscriber(ts2);
+        ts2.assertFailure(IllegalStateException.class, "Invalid shared state");
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void testThatStateSupplierCannotBeNull() {
+        Uni.createFrom().completionStage(null,
+                x -> CompletableFuture.completedFuture("x"));
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void testThatFunctionCannotBeNull() {
+        Uni.createFrom().completionStage(() -> "hello",
+                null);
     }
 
 }
