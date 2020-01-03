@@ -1,6 +1,7 @@
 package io.smallrye.mutiny.operators.multi;
 
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Predicate;
 
 import org.reactivestreams.Subscription;
 
@@ -10,18 +11,27 @@ import io.smallrye.mutiny.subscription.MultiSubscriber;
 import io.smallrye.mutiny.subscription.SwitchableSubscriptionSubscriber;
 
 public class MultiRepeatOp<T> extends AbstractMultiOperator<T, T> implements Multi<T> {
+    private final Predicate<T> predicate;
     private final long times;
 
     public MultiRepeatOp(Multi<T> upstream, long times) {
         super(upstream);
         this.times = times;
+        this.predicate = x -> true;
+    }
+
+    public MultiRepeatOp(Multi<T> upstream, Predicate<T> predicate) {
+        super(upstream);
+        this.predicate = predicate;
+        this.times = Long.MAX_VALUE;
     }
 
     @Override
     public void subscribe(MultiSubscriber<? super T> downstream) {
         ParameterValidation.nonNullNpe(downstream, "downstream");
         RepeatProcessor<T> processor = new RepeatProcessor<>(upstream, downstream,
-                times != Long.MAX_VALUE ? times - 1 : Long.MAX_VALUE);
+                times != Long.MAX_VALUE ? times - 1 : Long.MAX_VALUE,
+                predicate);
         downstream.onSubscribe(processor);
         upstream.subscribe(processor);
     }
@@ -30,12 +40,25 @@ public class MultiRepeatOp<T> extends AbstractMultiOperator<T, T> implements Mul
 
         private final Multi<? extends T> upstream;
         private long remaining;
+        private Predicate<T> predicate;
+
+        /**
+         * Stores the result of the last test of the predicate, i.e. the test with the last emitted item.
+         * It indicates if the repetition must be stopped (the predicate would have returned {@code false}).
+         * <p>
+         * Access does not need to be synchronized as it is only accessed in onItem and onCompletion which cannot be
+         * called concurrently.
+         */
+        private boolean passed;
+
         private long emitted;
         private final AtomicInteger wip = new AtomicInteger();
 
-        public RepeatProcessor(Multi<? extends T> upstream, MultiSubscriber<? super T> downstream, long times) {
+        public RepeatProcessor(Multi<? extends T> upstream, MultiSubscriber<? super T> downstream,
+                long times, Predicate<T> predicate) {
             super(downstream);
             this.upstream = upstream;
+            this.predicate = predicate;
             this.remaining = times;
         }
 
@@ -46,8 +69,11 @@ public class MultiRepeatOp<T> extends AbstractMultiOperator<T, T> implements Mul
 
         @Override
         public void onItem(T t) {
-            emitted++;
-            downstream.onNext(t);
+            passed = predicate.test(t);
+            if (passed) {
+                emitted++;
+                downstream.onNext(t);
+            }
         }
 
         @Override
@@ -61,7 +87,7 @@ public class MultiRepeatOp<T> extends AbstractMultiOperator<T, T> implements Mul
             if (r != Long.MAX_VALUE) {
                 remaining = r - 1;
             }
-            if (r != 0L) {
+            if (r != 0L && passed) {
                 subscribeNext();
             } else {
                 downstream.onComplete();
