@@ -359,7 +359,7 @@ Each batch contains a list of item(s).
 To use this kind of API and generate a continuous stream of items, you need to use the `repeat()` function.
 However, we need to pass a cursor / state to advance and avoid requesting again and again the same page.
 Fortunately, `Uni` provides methods to pass a shared state.
-so by combining these methods, `repeat` and `flatten` you can generate streams from these pages:
+so by combining these methods, `repeat` and `disjoint` you can generate streams from these pages:
 
 [source,java,indent=0]
 ----
@@ -373,8 +373,13 @@ Be aware it must return a thread safe container, and the supplier is called only
 Then, use `repeat` to call the paginated API until we have all the items.
 At the point we have a stream of list of item such as `["a", "b", "c"], ["d", "e"], []`.
 However we want the following stream: `"a", "b", "c", "d", "e"`.
-The `flatten` method does exactly this.
-It gets the items from the lists and passes them downstream.
+The `disjoint` method does exactly this.
+It gets the items from the lists and passes them downstream:
+
+[plantuml,align=center]
+----
+include::plantuml/disjoint.puml[]
+----
 
 === Where do I find the JavaDoc?
 

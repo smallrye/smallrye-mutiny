@@ -24,7 +24,7 @@ public class MultiFlattenTest {
                 Multi.createFrom().empty(),
                 Multi.createFrom().items("f", "g")
                         .on().subscribed(s -> subscribed.set(true)))
-                .onItem().<String> flatten()
+                .onItem().<String> disjoint()
                 .subscribe().withSubscriber(MultiAssertSubscriber.create(4));
         assertThat(subscribed).isFalse();
         subscriber.assertReceived("a", "b", "c", "d");
@@ -43,7 +43,7 @@ public class MultiFlattenTest {
                 Flowable.empty(),
                 Flowable.just("f", "g")
                         .doOnSubscribe(s -> subscribed.set(true)))
-                .onItem().<String> flatten()
+                .onItem().<String> disjoint()
                 .subscribe().withSubscriber(MultiAssertSubscriber.create(4));
         assertThat(subscribed).isFalse();
         subscriber.assertReceived("a", "b", "c", "d");
@@ -60,7 +60,7 @@ public class MultiFlattenTest {
                 new String[] { "d", "e" },
                 new String[] {},
                 new String[] { "f", "g" })
-                .onItem().<String> flatten()
+                .onItem().<String> disjoint()
                 .subscribe().withSubscriber(MultiAssertSubscriber.create(4));
         subscriber.assertReceived("a", "b", "c", "d");
         subscriber.request(3);
@@ -76,7 +76,7 @@ public class MultiFlattenTest {
                 Collections.emptySet(),
                 Collections.singleton("f"),
                 Collections.singleton("g"))
-                .onItem().<String> flatten()
+                .onItem().<String> disjoint()
                 .subscribe().withSubscriber(MultiAssertSubscriber.create(4));
         subscriber.assertReceived("a", "b", "c", "d");
         subscriber.request(3);
@@ -93,7 +93,7 @@ public class MultiFlattenTest {
                 Multi.createFrom().failure(new IOException("boom")),
                 Multi.createFrom().items("f", "g")
                         .on().subscribed(s -> subscribed.set(true)))
-                .onItem().<String> flatten()
+                .onItem().<String> disjoint()
                 .subscribe().withSubscriber(MultiAssertSubscriber.create(4));
         assertThat(subscribed).isFalse();
         subscriber.assertReceived("a", "b", "c", "d");
@@ -114,7 +114,7 @@ public class MultiFlattenTest {
                 }),
                 Multi.createFrom().items("g")
                         .on().subscribed(s -> subscribed.set(true)))
-                .onItem().<String> flatten()
+                .onItem().<String> disjoint()
                 .subscribe().withSubscriber(MultiAssertSubscriber.create(4));
         assertThat(subscribed).isFalse();
         subscriber.assertReceived("a", "b", "c", "d");
@@ -131,7 +131,7 @@ public class MultiFlattenTest {
                 Collections.emptySet(),
                 Collections.singleton(null),
                 Collections.singleton("g"))
-                .onItem().<String> flatten()
+                .onItem().<String> disjoint()
                 .subscribe().withSubscriber(MultiAssertSubscriber.create(4));
         subscriber.assertReceived("a", "b", "c", "d");
         subscriber.request(3);
@@ -141,7 +141,7 @@ public class MultiFlattenTest {
     @Test
     public void testWithInvalidType() {
         Multi.createFrom().items("a", "b", "c")
-                .onItem().flatten()
+                .onItem().disjoint()
                 .subscribe().withSubscriber(MultiAssertSubscriber.create(2))
                 .assertHasFailedWith(IllegalArgumentException.class, "String");
     }

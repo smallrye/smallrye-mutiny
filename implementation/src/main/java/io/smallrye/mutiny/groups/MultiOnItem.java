@@ -56,7 +56,7 @@ public class MultiOnItem<T> {
     /**
      * Takes the items from the upstream {@link Multi} that are either {@link Publisher Publisher&lt;O&gt;},
      * {@link java.lang.reflect.Array O[]}, {@link Iterable Iterable&lt;O&gt;} or {@link Multi Multi&lt;O&gt;} and
-     * flatten the items to obtain a {@link Multi Multi&lt;O&gt;}.
+     * disjoint the items to obtain a {@link Multi Multi&lt;O&gt;}.
      * <p>
      * For example, {@code Multi<[A, B, C], [D, E, F]} is transformed into {@code Multi<A, B, C, D, E, F>}.
      * <p>
@@ -67,7 +67,7 @@ public class MultiOnItem<T> {
      * @return the resulting multi
      */
     @SuppressWarnings("unchecked")
-    public <O> Multi<O> flatten() {
+    public <O> Multi<O> disjoint() {
         return upstream.onItem().produceMulti(x -> {
             if (x instanceof Iterable) {
                 return Multi.createFrom().iterable((Iterable<O>) x);
@@ -80,7 +80,7 @@ public class MultiOnItem<T> {
                 return Multi.createFrom().items(item);
             } else {
                 return Multi.createFrom().failure(new IllegalArgumentException(
-                        "Invalid parameter - cannot flatten instance of " + x.getClass().getName()));
+                        "Invalid parameter - cannot disjoint instance of " + x.getClass().getName()));
             }
         }).concatenate();
     }

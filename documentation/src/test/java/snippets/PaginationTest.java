@@ -2,7 +2,6 @@ package snippets;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
-import io.smallrye.mutiny.subscription.Cancellable;
 import io.smallrye.mutiny.test.MultiAssertSubscriber;
 import org.junit.Test;
 
@@ -27,7 +26,7 @@ public class PaginationTest {
         Multi<String> stream = Uni.createFrom()
                 .completionStage(() -> new AtomicInteger(), state -> api.getPage(state.getAndIncrement()))
                 .repeat().until(list -> ! list.isEmpty())
-                .onItem().flatten();
+                .onItem().disjoint();
         // end::code[]
         stream.subscribe().withSubscriber(MultiAssertSubscriber.create(10))
                 .assertCompletedSuccessfully()
