@@ -3,7 +3,11 @@ package io.smallrye.mutiny.groups;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import org.reactivestreams.Publisher;
@@ -62,6 +66,60 @@ public class UniCreate {
     public <T> Uni<T> completionStage(CompletionStage<? extends T> stage) {
         CompletionStage<? extends T> actual = ParameterValidation.nonNull(stage, "stage");
         return completionStage(() -> actual);
+    }
+
+    /**
+     * Creates a {@link Uni} from the given {@link CompletionStage} or {@link CompletableFuture}.
+     * The produced {@code Uni} emits the item of the passed {@link CompletionStage}. If the {@link CompletionStage}
+     * never completes (or failed), the produced {@link Uni} would not emit the {@code item} or {@code failure}
+     * events.
+     * <p>
+     * Cancelling the subscription on the produced {@link Uni} cancels the passed {@link CompletionStage}
+     * (calling {@link CompletableFuture#cancel(boolean)} on the future retrieved using
+     * {@link CompletionStage#toCompletableFuture()}.
+     * <p>
+     * If the stage has already been completed (or failed), the produced {@link Uni} sends the item or failure
+     * immediately after subscription. If it's not the case, the subscriber's callbacks are called on the thread used
+     * by the passed {@link CompletionStage}.
+     * <p>
+     * This variant of {@link #completionStage(CompletionStage)} allows passing a state supplier. This supplier allows
+     * sharing some <em>state</em> between the subscribers. It is particularly useful when using {@link Uni#repeat()}
+     * as you can pass a shared state (for example a page counter, like an AtomicInteger, if you implement pagination).
+     * The state supplier is called once, during the first subscription. Note that the mapper is called for every
+     * subscription.
+     * <p>
+     * The state supplier should produce a container wrapping the shared state. This shared state must be thread-safe.
+     *
+     * @param stateSupplier the state supplier, must not return {@code null}, must not be {@code null}
+     * @param mapper the taking the shared state and producing the completion stage.
+     * @param <T> the type of item
+     * @param <S> the type of the state
+     * @return the produced {@link Uni}
+     */
+    public <T, S> Uni<T> completionStage(Supplier<S> stateSupplier,
+            Function<S, ? extends CompletionStage<? extends T>> mapper) {
+        ParameterValidation.nonNull(stateSupplier, "stateSupplier");
+        ParameterValidation.nonNull(mapper, "mapper");
+
+        // Flag checking that the state supplier is only called once.
+        AtomicBoolean once = new AtomicBoolean();
+        // The shared state container.
+        AtomicReference<S> state = new AtomicReference<>();
+
+        return Uni.createFrom().deferred(() -> {
+            try {
+                invokeOnce(once, state, stateSupplier);
+            } catch (Exception e) {
+                return Uni.createFrom().failure(e);
+            }
+
+            S sharedState = state.get();
+            if (sharedState == null) {
+                // The state supplier failed or produced null.
+                return Uni.createFrom().failure(new IllegalStateException("Invalid shared state"));
+            }
+            return Uni.createFrom().completionStage(mapper.apply(sharedState));
+        });
     }
 
     /**
@@ -144,6 +202,50 @@ public class UniCreate {
 
     /**
      * Creates a new {@link Uni} that completes immediately after being subscribed to with the specified (potentially
+     * {@code null}) value. The item is retrieved <strong>lazily</strong> at subscription time, using the passed
+     * {@link Supplier}. Unlike {@link #deferred(Supplier)}, the supplier produces an item and not an {@link Uni}.
+     * <p>
+     * This variant of {@link #item(Supplier)} allows passing a state supplier. This supplier allows
+     * sharing some <em>state</em> between the subscribers. It is particularly useful when using {@link Uni#repeat()}
+     * as you can pass a shared state (for example a page counter, like an AtomicInteger, if you implement pagination).
+     * The state supplier is called once, during the first subscription. Note that the mapper is called for every
+     * subscription.
+     * <p>
+     * The state supplier should produce a container wrapping the shared state. This shared state must be thread-safe.
+     *
+     * @param stateSupplier the state supplier, must not return {@code null}, must not be {@code null}
+     * @param mapper the taking the shared state and producing the item.
+     * @param <T> the type of item
+     * @param <S> the type of the state
+     * @return the produced {@link Uni}
+     */
+    public <T, S> Uni<T> item(Supplier<S> stateSupplier,
+            Function<S, ? extends T> mapper) {
+        ParameterValidation.nonNull(stateSupplier, "stateSupplier");
+        ParameterValidation.nonNull(mapper, "mapper");
+        // Flag checking that the state supplier is only called once.
+        AtomicBoolean once = new AtomicBoolean();
+        // The shared state container.
+        AtomicReference<S> state = new AtomicReference<>();
+
+        return Uni.createFrom().deferred(() -> {
+            try {
+                invokeOnce(once, state, stateSupplier);
+            } catch (Exception e) {
+                return Uni.createFrom().failure(e);
+            }
+
+            S sharedState = state.get();
+            if (sharedState == null) {
+                // The state supplier failed or produced null.
+                return Uni.createFrom().failure(new IllegalStateException("Invalid shared state"));
+            }
+            return Uni.createFrom().item(mapper.apply(sharedState));
+        });
+    }
+
+    /**
+     * Creates a new {@link Uni} that completes immediately after being subscribed to with the specified (potentially
      * {@code null}) item.
      *
      * @param item the item, can be {@code null}
@@ -206,6 +308,68 @@ public class UniCreate {
     public <T> Uni<T> emitter(Consumer<UniEmitter<? super T>> consumer) {
         Consumer<UniEmitter<? super T>> actual = ParameterValidation.nonNull(consumer, "consumer");
         return Infrastructure.onUniCreation(new UniCreateWithEmitter<>(actual));
+    }
+
+    /**
+     * Creates a {@link Uni} deferring the logic to the given consumer. The consumer can be used with callback-based
+     * APIs to fire at most one item (potentially {@code null}), or a failure event.
+     * <p>
+     * Using this method, you can produce a {@link Uni} based on listener or callbacks APIs. You register the listener
+     * in the consumer and emits the item / failure events when the listener is invoked. Don't forget to unregister
+     * the listener on cancellation.
+     * <p>
+     * Note that the emitter only forwards the first event, subsequent events are dropped.
+     * <p>
+     * If the consumer throws an exception, a failure event with the exception is fired if the first event was already
+     * fired.
+     * This variant of {@link #emitter(Consumer)} allows passing a state supplier. This supplier allows
+     * sharing some <em>state</em> between the subscribers. It is particularly useful when using {@link Uni#repeat()}
+     * as you can pass a shared state (for example a page counter, like an AtomicInteger, if you implement pagination).
+     * The state supplier is called once, during the first subscription. Note that the mapper is called for every
+     * subscription.
+     * <p>
+     * The state supplier should produce a container wrapping the shared state. This shared state must be thread-safe.
+     *
+     * @param consumer callback receiving the {@link UniEmitter} and events downstream. The callback is
+     *        called for each subscriber (at subscription time). Must not be {@code null}
+     * @param <T> the type of item
+     * @return the produced {@link Uni}
+     */
+    public <T, S> Uni<T> emitter(Supplier<S> stateSupplier, BiConsumer<S, UniEmitter<? super T>> consumer) {
+        BiConsumer<S, UniEmitter<? super T>> actual = ParameterValidation.nonNull(consumer, "consumer");
+        ParameterValidation.nonNull(stateSupplier, "stateSupplier");
+        // Flag checking that the state supplier is only called once.
+        AtomicBoolean once = new AtomicBoolean();
+        // The shared state container.
+        AtomicReference<S> state = new AtomicReference<>();
+
+        return Uni.createFrom().deferred(() -> {
+            try {
+                invokeOnce(once, state, stateSupplier);
+            } catch (Exception e) {
+                return Uni.createFrom().failure(e);
+            }
+            S sharedState = state.get();
+            if (sharedState == null) {
+                // The state supplier failed or produced null.
+                return Uni.createFrom().failure(new IllegalStateException("Invalid shared state"));
+            }
+            return Uni.createFrom().emitter(e -> actual.accept(sharedState, e));
+        });
+    }
+
+    private <S> void invokeOnce(AtomicBoolean once, AtomicReference<S> container, Supplier<S> supplier) {
+        if (!once.getAndSet(true)) {
+            S sharedState = null;
+            try {
+                sharedState = supplier.get();
+                if (sharedState == null) {
+                    throw new NullPointerException(ParameterValidation.SUPPLIER_PRODUCED_NULL);
+                }
+            } finally {
+                container.set(sharedState);
+            }
+        }
     }
 
     /**

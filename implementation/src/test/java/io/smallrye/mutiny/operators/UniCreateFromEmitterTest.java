@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Supplier;
 
 import org.testng.annotations.Test;
 
@@ -21,9 +22,10 @@ public class UniCreateFromEmitterTest {
         Uni.createFrom().emitter(null);
     }
 
+    @SuppressWarnings("rawtypes")
     @Test
     public void testThatOnlyTheFirstSignalIsConsidered() {
-        AtomicReference<UniEmitter> reference = new AtomicReference<>();
+        AtomicReference<UniEmitter<? super Integer>> reference = new AtomicReference<>();
         Uni<Integer> uni = Uni.createFrom().emitter(emitter -> {
             reference.set(emitter);
             emitter.complete(1);
@@ -43,7 +45,8 @@ public class UniCreateFromEmitterTest {
     public void testWithOnTerminationActionWithCancellation() {
         UniAssertSubscriber<Integer> subscriber = UniAssertSubscriber.create();
         AtomicInteger onTerminationCalled = new AtomicInteger();
-        Uni.createFrom().<Integer> emitter(emitter -> emitter.onTermination(onTerminationCalled::incrementAndGet)).subscribe()
+        Uni.createFrom().<Integer> emitter(emitter -> emitter.onTermination(onTerminationCalled::incrementAndGet))
+                .subscribe()
                 .withSubscriber(subscriber);
 
         assertThat(onTerminationCalled).hasValue(0);
@@ -115,6 +118,7 @@ public class UniCreateFromEmitterTest {
 
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void testThatEmitterIsDisposed() {
         UniAssertSubscriber<Void> subscriber = UniAssertSubscriber.create();
@@ -126,7 +130,7 @@ public class UniCreateFromEmitterTest {
 
         subscriber.assertCompletedSuccessfully();
         assertThat(reference.get()).isInstanceOf(DefaultUniEmitter.class)
-                .satisfies(e -> ((DefaultUniEmitter) e).isTerminated());
+                .satisfies(e -> ((DefaultUniEmitter<? super Void>) e).isTerminated());
     }
 
     @Test
@@ -202,5 +206,67 @@ public class UniCreateFromEmitterTest {
                 });
 
         assertThat(onTerminationCalled).isFalse();
+    }
+
+    @Test
+    public void testWithSharedState() {
+        UniAssertSubscriber<Integer> ts1 = UniAssertSubscriber.create();
+        UniAssertSubscriber<Integer> ts2 = UniAssertSubscriber.create();
+        AtomicInteger shared = new AtomicInteger();
+        Uni<Integer> uni = Uni.createFrom().emitter(() -> shared,
+                (state, emitter) -> emitter.complete(state.incrementAndGet()));
+
+        assertThat(shared).hasValue(0);
+        uni.subscribe().withSubscriber(ts1);
+        assertThat(shared).hasValue(1);
+        ts1.assertCompletedSuccessfully().assertItem(1);
+        uni.subscribe().withSubscriber(ts2);
+        assertThat(shared).hasValue(2);
+        ts2.assertCompletedSuccessfully().assertItem(2);
+    }
+
+    @Test
+    public void testWithSharedStateProducingFailure() {
+        UniAssertSubscriber<Integer> ts1 = UniAssertSubscriber.create();
+        UniAssertSubscriber<Integer> ts2 = UniAssertSubscriber.create();
+        Supplier<AtomicInteger> boom = () -> {
+            throw new IllegalStateException("boom");
+        };
+
+        Uni<Integer> uni = Uni.createFrom().emitter(boom,
+                (state, emitter) -> emitter.complete(state.incrementAndGet()));
+
+        uni.subscribe().withSubscriber(ts1);
+        ts1.assertFailure(IllegalStateException.class, "boom");
+        uni.subscribe().withSubscriber(ts2);
+        ts2.assertFailure(IllegalStateException.class, "Invalid shared state");
+    }
+
+    @Test
+    public void testWithSharedStateProducingNull() {
+        UniAssertSubscriber<Integer> ts1 = UniAssertSubscriber.create();
+        UniAssertSubscriber<Integer> ts2 = UniAssertSubscriber.create();
+        Supplier<AtomicInteger> boom = () -> null;
+
+        Uni<Integer> uni = Uni.createFrom().emitter(boom,
+                (state, emitter) -> emitter.complete(state.incrementAndGet()));
+
+        uni.subscribe().withSubscriber(ts1);
+        ts1.assertFailure(NullPointerException.class, "supplier");
+        uni.subscribe().withSubscriber(ts2);
+        ts2.assertFailure(IllegalStateException.class, "Invalid shared state");
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void testThatStateSupplierCannotBeNull() {
+        Uni.createFrom().emitter(null,
+                (x, emitter) -> {
+                });
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void testThatFunctionCannotBeNull() {
+        Uni.createFrom().emitter(() -> "hello",
+                null);
     }
 }
