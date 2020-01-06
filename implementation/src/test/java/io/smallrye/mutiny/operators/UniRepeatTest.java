@@ -35,7 +35,7 @@ public class UniRepeatTest {
         List<String> items = Arrays.asList("a", "b", "c", "d", "e", "f");
         Iterator<String> iterator = items.iterator();
         List<String> list = Uni.createFrom().item(iterator::next)
-                .repeat().until(v -> !v.equalsIgnoreCase("d"))
+                .repeat().until(v -> v.equalsIgnoreCase("d"))
                 .collectItems().asList()
                 .await().indefinitely();
         assertThat(list).hasSize(3).contains("a", "b", "c");
@@ -74,7 +74,7 @@ public class UniRepeatTest {
         AtomicInteger count = new AtomicInteger();
         AtomicBoolean once = new AtomicBoolean();
         List<Integer> list = Uni.createFrom().item(count::getAndIncrement)
-                .repeat().until(x -> !once.getAndSet(true))
+                .repeat().until(x -> once.getAndSet(true))
                 .collectItems().asList()
                 .await().indefinitely();
 
@@ -86,7 +86,7 @@ public class UniRepeatTest {
     public void testNoRepeatUntil() {
         AtomicInteger count = new AtomicInteger();
         List<Integer> list = Uni.createFrom().item(count::getAndIncrement)
-                .repeat().until(x -> false)
+                .repeat().until(x -> true)
                 .collectItems().asList()
                 .await().indefinitely();
 
@@ -116,7 +116,7 @@ public class UniRepeatTest {
         int value = Uni.createFrom().item(count::incrementAndGet)
                 .repeat().until(x -> {
                     invocations.incrementAndGet();
-                    return true;
+                    return false;
                 })
                 .subscribeOn(Infrastructure.getDefaultWorkerPool())
                 .transform().byTakingFirstItems(num)
@@ -140,7 +140,7 @@ public class UniRepeatTest {
     @Test
     public void testNoStackOverflowWithRepeatUntil() {
         AtomicInteger count = new AtomicInteger();
-        int value = Uni.createFrom().item(1).repeat().until(x -> count.incrementAndGet() <= 100000000L)
+        int value = Uni.createFrom().item(1).repeat().until(x -> count.incrementAndGet() > 100000000L)
                 .subscribeOn(Infrastructure.getDefaultWorkerPool())
                 .transform().byTakingFirstItems(100000L)
                 .collectItems().last()
@@ -178,7 +178,7 @@ public class UniRepeatTest {
     public void testFailurePropagationWithRepeatUntil() {
         Subscriber<Integer> subscriber = Mocks.subscriber();
 
-        Uni.createFrom().<Integer> failure(() -> new IOException("boom")).repeat().until(x -> true)
+        Uni.createFrom().<Integer> failure(() -> new IOException("boom")).repeat().until(x -> false)
                 .transform().byTakingFirstItems(10)
                 .subscribe(subscriber);
 
@@ -227,7 +227,7 @@ public class UniRepeatTest {
     public void testRequestAndCancellationWithRepeatUntil() {
         final AtomicInteger count = new AtomicInteger();
         MultiAssertSubscriber<Integer> subscriber = Uni.createFrom().item(count::incrementAndGet)
-                .repeat().until(x -> true)
+                .repeat().until(x -> false)
                 .subscribeOn(Infrastructure.getDefaultWorkerPool())
                 .subscribe().withSubscriber(MultiAssertSubscriber.create());
 
@@ -314,7 +314,7 @@ public class UniRepeatTest {
             }
             return v;
         })
-                .repeat().until(x -> true)
+                .repeat().until(x -> false)
                 .subscribe().withSubscriber(MultiAssertSubscriber.create());
 
         subscriber.request(10)
@@ -392,7 +392,7 @@ public class UniRepeatTest {
                     if (v % 3 == 0) {
                         throw new IllegalStateException("boom");
                     }
-                    return true;
+                    return false;
                 })
                 .subscribe().withSubscriber(MultiAssertSubscriber.create());
 
@@ -412,7 +412,7 @@ public class UniRepeatTest {
             }
             return v;
         })
-                .repeat().until(value -> value < 1000)
+                .repeat().until(value -> value >= 1000)
                 .subscribe().withSubscriber(MultiAssertSubscriber.create());
 
         subscriber.request(10)
@@ -432,10 +432,4 @@ public class UniRepeatTest {
                 .await().indefinitely();
         assertThat(list).containsExactly(0, 1, 2);
     }
-
-    // TODO Test when supplier return `null` (invalid)
-    // TODO Test when supplier throws an exception
-    // TODO State on emitter and CS and Item... (all method accepting a supplier)
-
-    // TODO Add state method on multi.
 }

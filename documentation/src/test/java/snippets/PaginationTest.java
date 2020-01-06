@@ -18,6 +18,7 @@ public class PaginationTest {
 
     private ExecutorService executor = Executors.newSingleThreadExecutor();
 
+    @SuppressWarnings("Convert2MethodRef")
     @Test
     public void test() {
         // tag::code[]
@@ -25,7 +26,7 @@ public class PaginationTest {
 
         Multi<String> stream = Uni.createFrom()
                 .completionStage(() -> new AtomicInteger(), state -> api.getPage(state.getAndIncrement()))
-                .repeat().until(list -> ! list.isEmpty())
+                .repeat().until(list -> list.isEmpty())
                 .onItem().disjoint();
         // end::code[]
         stream.subscribe().withSubscriber(MultiAssertSubscriber.create(10))

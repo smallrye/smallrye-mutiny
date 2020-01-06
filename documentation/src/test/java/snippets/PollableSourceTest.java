@@ -35,13 +35,14 @@ public class PollableSourceTest {
         // end::code[]
     }
 
+    @SuppressWarnings("Convert2MethodRef")
     @Test
     public void test2() {
         // tag::code2[]
         PollableDataSource source = new PollableDataSource();
         Multi<String> stream = Uni.createFrom().item(source::poll)
                 .subscribeOn(executor)
-                .repeat().until(s -> s != null);
+                .repeat().until(s -> s == null);
 
         stream.subscribe().with(item -> System.out.println("Polled item: " + item));
         // end::code2[]

@@ -68,14 +68,14 @@ public class UniRepeat<T> {
     /**
      * Generates a stream, containing the items from the upstream {@link Uni}, resubscribed until the given predicate
      * returns {@code true}. The predicate is not called on {@code null} item. If you want to intercept this case,
-     * use a sentinel value.
+     * use a sentinel item.
      *
      * @param predicate the predicate, must not be {@code null}
      * @return the {@link Multi} containing the items from the upstream {@link Uni}, resubscribed until the predicate
      *         returns {@code true}.
      */
     public Multi<T> until(Predicate<T> predicate) {
-        return new MultiRepeatOp<>(upstream.toMulti(), ParameterValidation.nonNull(predicate, "predicated"));
+        return new MultiRepeatOp<>(upstream.toMulti(), ParameterValidation.nonNull(predicate, "predicate"));
     }
 
 }

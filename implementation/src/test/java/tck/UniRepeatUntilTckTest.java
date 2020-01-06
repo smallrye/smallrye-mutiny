@@ -14,6 +14,6 @@ public class UniRepeatUntilTckTest extends AbstractPublisherTck<Integer> {
             return Multi.createFrom().empty();
         }
         AtomicInteger count = new AtomicInteger();
-        return Uni.createFrom().item(1).repeat().until(x -> count.getAndIncrement() < elements);
+        return Uni.createFrom().item(1).repeat().until(x -> count.getAndIncrement() >= elements);
     }
 }
