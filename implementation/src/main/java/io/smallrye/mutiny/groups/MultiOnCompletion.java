@@ -12,6 +12,7 @@ import org.reactivestreams.Publisher;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.MultiSwitchOnCompletion;
 import io.smallrye.mutiny.operators.multi.MultiSignalConsumerOp;
 import io.smallrye.mutiny.subscription.MultiEmitter;
@@ -31,9 +32,9 @@ public class MultiOnCompletion<T> {
      * @return the new multi
      */
     public Multi<T> invoke(Runnable callback) {
-        return new MultiSignalConsumerOp<>(upstream,
+        return Infrastructure.onMultiCreation(new MultiSignalConsumerOp<>(upstream,
                 null, null, null, nonNull(callback, "callback"), null,
-                null, null);
+                null, null));
     }
 
     /**
@@ -104,7 +105,7 @@ public class MultiOnCompletion<T> {
      * @return the new {@link Uni}
      */
     public Multi<T> switchTo(Supplier<Publisher<? extends T>> supplier) {
-        return new MultiSwitchOnCompletion<>(upstream, nonNull(supplier, "supplier"));
+        return Infrastructure.onMultiCreation(new MultiSwitchOnCompletion<>(upstream, nonNull(supplier, "supplier")));
     }
 
     /**

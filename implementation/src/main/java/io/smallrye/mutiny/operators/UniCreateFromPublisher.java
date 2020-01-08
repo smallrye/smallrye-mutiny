@@ -9,6 +9,8 @@ import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
+import io.smallrye.mutiny.infrastructure.Infrastructure;
+
 public class UniCreateFromPublisher<O> extends UniOperator<Void, O> {
     private final Publisher<? extends O> publisher;
 
@@ -21,7 +23,7 @@ public class UniCreateFromPublisher<O> extends UniOperator<Void, O> {
     @Override
     protected void subscribing(UniSerializedSubscriber<? super O> subscriber) {
         AtomicReference<Subscription> reference = new AtomicReference<>();
-        publisher.subscribe(new Subscriber<O>() {
+        Subscriber<O> actual = new Subscriber<O>() {
             @Override
             public void onSubscribe(Subscription s) {
                 if (reference.compareAndSet(null, s)) {
@@ -57,6 +59,8 @@ public class UniCreateFromPublisher<O> extends UniOperator<Void, O> {
             public void onComplete() {
                 subscriber.onItem(null);
             }
-        });
+        };
+        Subscriber<? super O> sub = Infrastructure.onMultiSubscription(publisher, actual);
+        publisher.subscribe(sub);
     }
 }

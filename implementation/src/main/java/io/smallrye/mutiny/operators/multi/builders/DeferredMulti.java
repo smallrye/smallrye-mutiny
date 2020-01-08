@@ -6,6 +6,7 @@ import org.reactivestreams.Publisher;
 
 import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.helpers.Subscriptions;
+import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.AbstractMulti;
 import io.smallrye.mutiny.subscription.MultiSubscriber;
 
@@ -28,6 +29,6 @@ public class DeferredMulti<T> extends AbstractMulti<T> {
             Subscriptions.fail(downstream, failure);
             return;
         }
-        publisher.subscribe(downstream);
+        publisher.subscribe(Infrastructure.onMultiSubscription(publisher, downstream));
     }
 }

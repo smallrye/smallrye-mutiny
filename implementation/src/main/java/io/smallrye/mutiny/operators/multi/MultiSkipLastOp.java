@@ -25,9 +25,9 @@ public final class MultiSkipLastOp<T> extends AbstractMultiOperator<T, T> {
     @Override
     public void subscribe(MultiSubscriber<? super T> actual) {
         if (numberOfItems == 0) {
-            upstream.subscribe(actual);
+            upstream.subscribe().withSubscriber(actual);
         } else {
-            upstream.subscribe(new SkipLastProcessor<>(actual, numberOfItems));
+            upstream.subscribe().withSubscriber(new SkipLastProcessor<>(actual, numberOfItems));
         }
     }
 

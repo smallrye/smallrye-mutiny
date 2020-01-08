@@ -13,6 +13,7 @@ import org.reactivestreams.Subscription;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.helpers.Subscriptions;
+import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.subscription.BackPressureFailure;
 import io.smallrye.mutiny.subscription.MultiSubscriber;
 import io.smallrye.mutiny.subscription.SafeSubscriber;
@@ -52,7 +53,7 @@ public final class MultiFlatMapOp<I, O> extends AbstractMultiOperator<I, O> {
                 maxConcurrency,
                 mainQueueSupplier,
                 innerQueueSupplier);
-        upstream.subscribe(new SafeSubscriber<>(new SerializedSubscriber<>(sub)));
+        upstream.subscribe(Infrastructure.onMultiSubscription(upstream, new SafeSubscriber<>(new SerializedSubscriber<>(sub))));
     }
 
     public static final class FlatMapMainSubscriber<I, O> extends FlatMapManager<FlatMapInner<O>>

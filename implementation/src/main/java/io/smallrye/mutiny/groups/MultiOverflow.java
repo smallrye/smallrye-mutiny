@@ -1,12 +1,15 @@
 package io.smallrye.mutiny.groups;
 
 import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
-import static io.smallrye.mutiny.helpers.ParameterValidation.positive;
 
 import java.util.function.Consumer;
 
 import io.smallrye.mutiny.Multi;
-import io.smallrye.mutiny.operators.Overflows;
+import io.smallrye.mutiny.helpers.ParameterValidation;
+import io.smallrye.mutiny.infrastructure.Infrastructure;
+import io.smallrye.mutiny.operators.multi.overflow.MultiOnOverflowBufferOp;
+import io.smallrye.mutiny.operators.multi.overflow.MultiOnOverflowDropItemsOp;
+import io.smallrye.mutiny.operators.multi.overflow.MultiOnOverflowKeepLastOp;
 import io.smallrye.mutiny.subscription.BackPressureFailure;
 
 public class MultiOverflow<T> {
@@ -16,6 +19,12 @@ public class MultiOverflow<T> {
         this.upstream = nonNull(upstream, "upstream");
     }
 
+    public static <T> Multi<T> buffer(Multi<T> upstream, int size) {
+        return new MultiOnOverflowBufferOp<>(upstream, size,
+                false, false, x -> {
+                });
+    }
+
     /**
      * When the downstream cannot keep up with the upstream emissions, instruct to use an <strong>unbounded</strong>
      * buffer to store the items until they are consumed.
@@ -23,7 +32,7 @@ public class MultiOverflow<T> {
      * @return the new multi
      */
     public Multi<T> buffer() {
-        return Overflows.buffer(upstream);
+        return buffer(128);
     }
 
     /**
@@ -35,7 +44,12 @@ public class MultiOverflow<T> {
      * @return the new multi
      */
     public Multi<T> buffer(int size) {
-        return Overflows.buffer(upstream, positive(size, "size"));
+        return Infrastructure
+                .onMultiCreation(new MultiOnOverflowBufferOp<>(upstream, ParameterValidation.positive(size, "size"),
+                        false, false,
+                        x -> {
+                            // do nothing
+                        }));
     }
 
     /**
@@ -44,7 +58,7 @@ public class MultiOverflow<T> {
      * @return the new multi
      */
     public Multi<T> drop() {
-        return Overflows.dropNewItems(upstream);
+        return Infrastructure.onMultiCreation(new MultiOnOverflowDropItemsOp<>(upstream));
     }
 
     /**
@@ -55,7 +69,8 @@ public class MultiOverflow<T> {
      * @return the new multi
      */
     public Multi<T> drop(Consumer<T> callback) {
-        return Overflows.dropNewItems(upstream, nonNull(callback, "callback"));
+        return Infrastructure
+                .onMultiCreation(new MultiOnOverflowDropItemsOp<>(upstream, nonNull(callback, "callback")));
     }
 
     /**
@@ -64,6 +79,6 @@ public class MultiOverflow<T> {
      * @return the new multi
      */
     public Multi<T> dropPreviousItems() {
-        return Overflows.keepLastItem(upstream);
+        return Infrastructure.onMultiCreation(new MultiOnOverflowKeepLastOp<>(upstream));
     }
 }

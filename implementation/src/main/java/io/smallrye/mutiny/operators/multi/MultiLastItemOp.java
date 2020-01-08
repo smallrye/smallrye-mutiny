@@ -15,7 +15,7 @@ public final class MultiLastItemOp<T> extends AbstractMultiOperator<T, T> {
 
     @Override
     public void subscribe(MultiSubscriber<? super T> downstream) {
-        upstream.subscribe(new MultiLastItemProcessor<T>(downstream));
+        upstream.subscribe().withSubscriber(new MultiLastItemProcessor<T>(downstream));
     }
 
     static final class MultiLastItemProcessor<T> extends MultiOperatorProcessor<T, T> {

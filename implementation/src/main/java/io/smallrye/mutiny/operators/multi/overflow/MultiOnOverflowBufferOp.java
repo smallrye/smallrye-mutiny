@@ -39,7 +39,7 @@ public class MultiOnOverflowBufferOp<T> extends AbstractMultiOperator<T, T> {
                 bufferSize, unbounded,
                 postponeFailurePropagation,
                 onOverflow);
-        upstream.subscribe(subscriber);
+        upstream.subscribe().withSubscriber(subscriber);
     }
 
     static final class OnOverflowBufferProcessor<T> extends MultiOperatorProcessor<T, T> {

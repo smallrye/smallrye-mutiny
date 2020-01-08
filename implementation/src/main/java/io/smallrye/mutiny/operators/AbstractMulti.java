@@ -14,6 +14,7 @@ import org.reactivestreams.Subscription;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.groups.*;
+import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.multi.MultiCacheOp;
 import io.smallrye.mutiny.operators.multi.MultiEmitOnOp;
 import io.smallrye.mutiny.operators.multi.MultiSubscribeOnOp;
@@ -23,7 +24,7 @@ import io.smallrye.mutiny.subscription.SerializedSubscriber;
 public abstract class AbstractMulti<T> implements Multi<T> {
 
     public void subscribe(MultiSubscriber<? super T> subscriber) {
-        this.subscribe((Subscriber<? super T>) subscriber);
+        this.subscribe(Infrastructure.onMultiSubscription(this, subscriber));
     }
 
     @Override
@@ -31,6 +32,7 @@ public abstract class AbstractMulti<T> implements Multi<T> {
         if (subscriber == null) {
             throw new NullPointerException("Subscriber is `null`");
         }
+
         //noinspection SubscriberImplementation
         this.subscribe(new SerializedSubscriber<>(new Subscriber<T>() {
 
@@ -143,7 +145,7 @@ public abstract class AbstractMulti<T> implements Multi<T> {
 
     @Override
     public Multi<T> cache() {
-        return new MultiCacheOp<>(this);
+        return Infrastructure.onMultiCreation(new MultiCacheOp<>(this));
     }
 
     @Override
@@ -158,12 +160,12 @@ public abstract class AbstractMulti<T> implements Multi<T> {
 
     @Override
     public Multi<T> emitOn(Executor executor) {
-        return new MultiEmitOnOp<>(this, nonNull(executor, "executor"));
+        return Infrastructure.onMultiCreation(new MultiEmitOnOp<>(this, nonNull(executor, "executor")));
     }
 
     @Override
     public Multi<T> subscribeOn(Executor executor) {
-        return new MultiSubscribeOnOp<>(this, executor);
+        return Infrastructure.onMultiCreation(new MultiSubscribeOnOp<>(this, executor));
     }
 
     @Override

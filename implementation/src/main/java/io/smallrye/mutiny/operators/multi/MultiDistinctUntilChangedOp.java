@@ -16,7 +16,7 @@ public final class MultiDistinctUntilChangedOp<T> extends AbstractMultiOperator<
 
     @Override
     public void subscribe(MultiSubscriber<? super T> actual) {
-        upstream.subscribe(new DistinctProcessor<>(actual));
+        upstream.subscribe().withSubscriber(new DistinctProcessor<>(actual));
     }
 
     static final class DistinctProcessor<T> extends MultiOperatorProcessor<T, T> {

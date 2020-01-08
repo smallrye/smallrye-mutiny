@@ -3,6 +3,7 @@ package io.smallrye.mutiny.operators;
 import java.time.Duration;
 
 import io.smallrye.mutiny.Multi;
+import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.multi.multicast.MultiPublishOp;
 
 public class MultiBroadcaster {
@@ -22,12 +23,13 @@ public class MultiBroadcaster {
             Duration delayAfterLastDeparture) {
         if (cancelWhenNoOneIsListening) {
             if (delayAfterLastDeparture != null) {
-                return MultiPublishOp.create(upstream).referenceCount(1, delayAfterLastDeparture);
+                return Infrastructure
+                        .onMultiCreation(MultiPublishOp.create(upstream).referenceCount(1, delayAfterLastDeparture));
             } else {
-                return MultiPublishOp.create(upstream).referenceCount();
+                return Infrastructure.onMultiCreation(MultiPublishOp.create(upstream).referenceCount());
             }
         } else {
-            return MultiPublishOp.create(upstream).connectAfter(1);
+            return Infrastructure.onMultiCreation(MultiPublishOp.create(upstream).connectAfter(1));
         }
     }
 
@@ -35,13 +37,15 @@ public class MultiBroadcaster {
             boolean cancelWhenNoOneIsListening, Duration delayAfterLastDeparture) {
         if (cancelWhenNoOneIsListening) {
             if (delayAfterLastDeparture != null) {
-                return MultiPublishOp.create(upstream).referenceCount(numberOfSubscribers, delayAfterLastDeparture);
+                return Infrastructure.onMultiCreation(
+                        MultiPublishOp.create(upstream).referenceCount(numberOfSubscribers, delayAfterLastDeparture));
             } else {
                 // the duration can be `null`, it will be validated if not `null`.
-                return MultiPublishOp.create(upstream).referenceCount(numberOfSubscribers, null);
+                return Infrastructure
+                        .onMultiCreation(MultiPublishOp.create(upstream).referenceCount(numberOfSubscribers, null));
             }
         } else {
-            return MultiPublishOp.create(upstream).connectAfter(numberOfSubscribers);
+            return Infrastructure.onMultiCreation(MultiPublishOp.create(upstream).connectAfter(numberOfSubscribers));
         }
     }
 

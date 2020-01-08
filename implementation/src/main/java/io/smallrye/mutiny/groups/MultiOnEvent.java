@@ -10,6 +10,7 @@ import java.util.function.Predicate;
 import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.Multi;
+import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.multi.MultiSignalConsumerOp;
 
 /**
@@ -36,7 +37,7 @@ public class MultiOnEvent<T> {
      * @return a new {@link Multi}
      */
     public Multi<T> subscribed(Consumer<? super Subscription> callback) {
-        return new MultiSignalConsumerOp<>(
+        return Infrastructure.onMultiCreation(new MultiSignalConsumerOp<>(
                 upstream,
                 nonNull(callback, "callback"),
                 null,
@@ -44,7 +45,7 @@ public class MultiOnEvent<T> {
                 null,
                 null,
                 null,
-                null);
+                null));
     }
 
     /**
@@ -55,7 +56,7 @@ public class MultiOnEvent<T> {
      * @return a new {@link Multi}
      */
     public Multi<T> cancellation(Runnable callback) {
-        return new MultiSignalConsumerOp<>(
+        return Infrastructure.onMultiCreation(new MultiSignalConsumerOp<>(
                 upstream,
                 null,
                 null,
@@ -63,11 +64,11 @@ public class MultiOnEvent<T> {
                 null,
                 null,
                 null,
-                nonNull(callback, "callback"));
+                nonNull(callback, "callback")));
     }
 
     public Multi<T> request(LongConsumer callback) {
-        return new MultiSignalConsumerOp<>(
+        return Infrastructure.onMultiCreation(new MultiSignalConsumerOp<>(
                 upstream,
                 null,
                 null,
@@ -75,10 +76,10 @@ public class MultiOnEvent<T> {
                 null,
                 null,
                 nonNull(callback, "callback"),
-                null);
+                null));
     }
 
-    public MultiOverflow overflow() {
+    public MultiOverflow<T> overflow() {
         return new MultiOverflow<>(upstream);
     }
 
@@ -92,7 +93,7 @@ public class MultiOnEvent<T> {
      * @return the new {@link Multi}
      */
     public Multi<T> termination(BiConsumer<Throwable, Boolean> callback) {
-        return new MultiSignalConsumerOp<>(
+        return Infrastructure.onMultiCreation(new MultiSignalConsumerOp<>(
                 upstream,
                 null,
                 null,
@@ -100,7 +101,7 @@ public class MultiOnEvent<T> {
                 null,
                 callback,
                 null,
-                null);
+                null));
     }
 
     /**
@@ -178,7 +179,7 @@ public class MultiOnEvent<T> {
     }
 
     public Multi<T> completion(Runnable callback) {
-        return new MultiSignalConsumerOp<>(
+        return Infrastructure.onMultiCreation(new MultiSignalConsumerOp<>(
                 upstream,
                 null,
                 null,
@@ -186,6 +187,6 @@ public class MultiOnEvent<T> {
                 nonNull(callback, "callback"),
                 null,
                 null,
-                null);
+                null));
     }
 }

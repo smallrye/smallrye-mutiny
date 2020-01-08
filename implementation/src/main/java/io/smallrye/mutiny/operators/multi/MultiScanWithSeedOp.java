@@ -8,6 +8,7 @@ import java.util.function.Supplier;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.helpers.Subscriptions;
+import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.subscription.MultiSubscriber;
 import io.smallrye.mutiny.subscription.SwitchableSubscriptionSubscriber;
 
@@ -91,7 +92,7 @@ public final class MultiScanWithSeedOp<T, R> extends AbstractMultiOperator<T, R>
                         onSubscribe(Subscriptions.single(this, initialValue));
                         subscriber = new ScanSeedProcessor<>(this, accumulator, initialValue);
                     } else {
-                        upstream.subscribe(subscriber);
+                        upstream.subscribe(Infrastructure.onMultiSubscription(upstream, subscriber));
                     }
 
                     if (isCancelled()) {

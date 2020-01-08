@@ -9,6 +9,7 @@ import org.reactivestreams.Publisher;
 import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.helpers.queues.SpscArrayQueue;
+import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.multi.MultiFlatMapOp;
 
 /**
@@ -72,9 +73,10 @@ public class MultiFlatten<I, O> {
      * @return the object to configure the {@code flatMap} operation.
      */
     public Multi<O> merge() {
-        return new MultiFlatMapOp<>(upstream, mapper, collectFailureUntilCompletion, requests,
-                () -> new SpscArrayQueue<>(256),
-                () -> new SpscArrayQueue<>(256));
+        return Infrastructure.onMultiCreation(
+                new MultiFlatMapOp<>(upstream, mapper, collectFailureUntilCompletion, requests,
+                        () -> new SpscArrayQueue<>(256),
+                        () -> new SpscArrayQueue<>(256)));
     }
 
     /**
@@ -95,9 +97,10 @@ public class MultiFlatten<I, O> {
      * @return the object to configure the {@code flatMap} operation.
      */
     public Multi<O> merge(int concurrency) {
-        return new MultiFlatMapOp<>(upstream, mapper, collectFailureUntilCompletion, concurrency,
-                () -> new SpscArrayQueue<>(256),
-                () -> new SpscArrayQueue<>(256));
+        return Infrastructure.onMultiCreation(
+                new MultiFlatMapOp<>(upstream, mapper, collectFailureUntilCompletion, concurrency,
+                        () -> new SpscArrayQueue<>(256),
+                        () -> new SpscArrayQueue<>(256)));
     }
 
     /**
@@ -115,8 +118,9 @@ public class MultiFlatten<I, O> {
      * @return the object to configure the {@code concatMap} operation.
      */
     public Multi<O> concatenate() {
-        return new MultiFlatMapOp<>(upstream, mapper, collectFailureUntilCompletion, 1,
-                () -> new SpscArrayQueue<>(256),
-                () -> new SpscArrayQueue<>(256));
+        return Infrastructure.onMultiCreation(
+                new MultiFlatMapOp<>(upstream, mapper, collectFailureUntilCompletion, 1,
+                        () -> new SpscArrayQueue<>(256),
+                        () -> new SpscArrayQueue<>(256)));
     }
 }

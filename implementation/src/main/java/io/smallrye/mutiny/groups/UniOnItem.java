@@ -85,7 +85,7 @@ public class UniOnItem<T> {
      * @return the multi
      */
     public <R> Multi<R> produceMulti(Function<? super T, ? extends Publisher<? extends R>> mapper) {
-        return new UniProduceMultiOnItem<>(upstream, mapper);
+        return Infrastructure.onMultiCreation(new UniProduceMultiOnItem<>(upstream, mapper));
     }
 
     /**

@@ -8,6 +8,7 @@ import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.Multi;
+import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.streams.Engine;
 import io.smallrye.mutiny.streams.operators.TerminalStage;
 import io.smallrye.mutiny.streams.operators.TerminalStageFactory;
@@ -45,7 +46,7 @@ public class CancelStageFactory implements TerminalStageFactory<Stage.Cancel> {
                     // Do nothing.
                 }
             });
-            return CompletableFuture.completedFuture(null);
+            return Infrastructure.wrapCompletableFuture(CompletableFuture.completedFuture(null));
         };
     }
 }

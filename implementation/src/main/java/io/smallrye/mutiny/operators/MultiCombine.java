@@ -7,6 +7,7 @@ import org.reactivestreams.Publisher;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.helpers.ParameterValidation;
+import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.multi.builders.CollectionBasedMulti;
 
 public class MultiCombine {
@@ -19,12 +20,12 @@ public class MultiCombine {
             int concurrency) {
         List<Publisher<T>> candidates = ParameterValidation.doesNotContainNull(participants, "participants");
         if (collectFailures) {
-            return new CollectionBasedMulti<>(candidates)
+            return Infrastructure.onMultiCreation(new CollectionBasedMulti<>(candidates)
                     .onItem().produceMulti(Function.identity()).collectFailures().withRequests(requests)
-                    .merge(concurrency);
+                    .merge(concurrency));
         } else {
-            return new CollectionBasedMulti<>(candidates)
-                    .onItem().produceMulti(Function.identity()).withRequests(requests).merge(concurrency);
+            return Infrastructure.onMultiCreation(new CollectionBasedMulti<>(candidates)
+                    .onItem().produceMulti(Function.identity()).withRequests(requests).merge(concurrency));
         }
     }
 }

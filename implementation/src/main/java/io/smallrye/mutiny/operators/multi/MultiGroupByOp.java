@@ -41,7 +41,7 @@ public final class MultiGroupByOp<T, K, V> extends AbstractMultiOperator<T, Grou
         final Map<Object, GroupedUnicast<K, V>> groups = new ConcurrentHashMap<>();
         MultiGroupByProcessor<T, K, V> processor = new MultiGroupByProcessor<>(downstream, keySelector, valueSelector,
                 groups);
-        upstream.subscribe(processor);
+        upstream.subscribe().withSubscriber(processor);
     }
 
     public static final class MultiGroupByProcessor<T, K, V> extends MultiOperatorProcessor<T, GroupedMulti<K, V>> {

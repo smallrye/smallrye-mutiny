@@ -9,6 +9,7 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import io.smallrye.mutiny.Multi;
+import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.MultiFlatMapOnFailure;
 import io.smallrye.mutiny.operators.MultiMapOnFailure;
 import io.smallrye.mutiny.operators.multi.MultiSignalConsumerOp;
@@ -32,7 +33,7 @@ public class MultiOnFailure<T> {
     public Multi<T> invoke(Consumer<Throwable> callback) {
         nonNull(callback, "callback");
         nonNull(predicate, "predicate");
-        return new MultiSignalConsumerOp<>(
+        return Infrastructure.onMultiCreation(new MultiSignalConsumerOp<>(
                 upstream,
                 null,
                 null,
@@ -44,7 +45,7 @@ public class MultiOnFailure<T> {
                 null,
                 null,
                 null,
-                null);
+                null));
     }
 
     /**
@@ -55,7 +56,7 @@ public class MultiOnFailure<T> {
      * @return the new {@link Multi}
      */
     public Multi<T> apply(Function<? super Throwable, ? extends Throwable> mapper) {
-        return new MultiMapOnFailure<>(upstream, predicate, mapper);
+        return Infrastructure.onMultiCreation(new MultiMapOnFailure<>(upstream, predicate, mapper));
     }
 
     public Multi<T> recoverWithItem(T fallback) {
@@ -81,14 +82,14 @@ public class MultiOnFailure<T> {
 
     public Multi<T> recoverWithItem(Function<? super Throwable, ? extends T> fallback) {
         nonNull(fallback, "fallback");
-        return new MultiFlatMapOnFailure<>(upstream, predicate, failure -> {
+        return Infrastructure.onMultiCreation(new MultiFlatMapOnFailure<>(upstream, predicate, failure -> {
             T newResult = fallback.apply(failure);
             return Multi.createFrom().item(newResult);
-        });
+        }));
     }
 
     public Multi<T> recoverWithMulti(Function<? super Throwable, ? extends Multi<? extends T>> fallback) {
-        return new MultiFlatMapOnFailure<>(upstream, predicate, nonNull(fallback, "fallback"));
+        return Infrastructure.onMultiCreation(new MultiFlatMapOnFailure<>(upstream, predicate, nonNull(fallback, "fallback")));
     }
 
     public Multi<T> recoverWithMulti(Supplier<? extends Multi<? extends T>> supplier) {

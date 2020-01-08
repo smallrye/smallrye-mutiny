@@ -13,6 +13,7 @@ import org.reactivestreams.Publisher;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.MultiTransformation;
 import io.smallrye.mutiny.operators.multi.MultiFilterOp;
 
@@ -25,43 +26,47 @@ public class MultiTransform<T> {
     }
 
     public Multi<T> bySkippingFirstItems(long number) {
-        return MultiTransformation.skipFirst(upstream, positiveOrZero(number, "number"));
+        return Infrastructure
+                .onMultiCreation(MultiTransformation.skipFirst(upstream, positiveOrZero(number, "number")));
     }
 
     public Multi<T> bySkippingLastItems(int number) {
-        return MultiTransformation.skipLast(upstream, positiveOrZero(number, "number"));
+        return Infrastructure.onMultiCreation(MultiTransformation.skipLast(upstream, positiveOrZero(number, "number")));
     }
 
     public Multi<T> bySkippingItemsWhile(Predicate<? super T> predicate) {
-        return MultiTransformation.skipWhile(upstream, nonNull(predicate, "predicate"));
+        return Infrastructure.onMultiCreation(MultiTransformation.skipWhile(upstream, nonNull(predicate, "predicate")));
     }
 
     public Multi<T> bySkippingItemsFor(Duration duration) {
-        return MultiTransformation.skipForDuration(upstream, validate(duration, "duration"));
+        return Infrastructure
+                .onMultiCreation(MultiTransformation.skipForDuration(upstream, validate(duration, "duration")));
     }
 
     public Multi<T> byTakingFirstItems(long number) {
-        return MultiTransformation.takeFirst(upstream, positiveOrZero(number, "number"));
+        return Infrastructure
+                .onMultiCreation(MultiTransformation.takeFirst(upstream, positiveOrZero(number, "number")));
     }
 
     public Multi<T> byTakingLastItems(int number) {
-        return MultiTransformation.takeLast(upstream, positiveOrZero(number, "number"));
+        return Infrastructure.onMultiCreation(MultiTransformation.takeLast(upstream, positiveOrZero(number, "number")));
     }
 
     public Multi<T> byTakingItemsFor(Duration duration) {
-        return MultiTransformation.takeForDuration(upstream, validate(duration, "duration"));
+        return Infrastructure
+                .onMultiCreation(MultiTransformation.takeForDuration(upstream, validate(duration, "duration")));
     }
 
     public Multi<T> byTakingItemsWhile(Predicate<? super T> predicate) {
-        return MultiTransformation.takeWhile(upstream, nonNull(predicate, "predicate"));
+        return Infrastructure.onMultiCreation(MultiTransformation.takeWhile(upstream, nonNull(predicate, "predicate")));
     }
 
     public Multi<T> byDroppingDuplicates() {
-        return MultiTransformation.distinct(upstream);
+        return Infrastructure.onMultiCreation(MultiTransformation.distinct(upstream));
     }
 
     public Multi<T> byDroppingRepetitions() {
-        return MultiTransformation.dropRepetitions(upstream);
+        return Infrastructure.onMultiCreation(MultiTransformation.dropRepetitions(upstream));
     }
 
     @SafeVarargs
@@ -86,7 +91,7 @@ public class MultiTransform<T> {
      * @return the produced {@link Multi}
      */
     public Multi<T> byFilteringItemsWith(Predicate<? super T> predicate) {
-        return new MultiFilterOp<>(upstream, nonNull(predicate, "predicate"));
+        return Infrastructure.onMultiCreation(new MultiFilterOp<>(upstream, nonNull(predicate, "predicate")));
     }
 
     /**

@@ -20,7 +20,7 @@ public class MultiOnOverflowKeepLastOp<T> extends AbstractMultiOperator<T, T> {
 
     @Override
     public void subscribe(MultiSubscriber<? super T> downstream) {
-        upstream.subscribe(new MultiOnOverflowLatestProcessor<T>(downstream));
+        upstream.subscribe().withSubscriber(new MultiOnOverflowLatestProcessor<T>(downstream));
     }
 
     static final class MultiOnOverflowLatestProcessor<T> extends MultiOperatorProcessor<T, T> {

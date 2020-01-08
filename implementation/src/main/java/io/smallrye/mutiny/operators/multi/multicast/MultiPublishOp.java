@@ -13,13 +13,14 @@ import org.reactivestreams.Subscription;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.helpers.Subscriptions;
 import io.smallrye.mutiny.helpers.queues.SpscArrayQueue;
+import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.subscription.BackPressureFailure;
 import io.smallrye.mutiny.subscription.Cancellable;
 import io.smallrye.mutiny.subscription.MultiSubscriber;
 
 /**
  * A connectable observable which shares an underlying source and dispatches source values to subscribers in a
- * backpressure-aware manner.
+ * back-pressure-aware manner.
  *
  * @param <T> the value type
  */
@@ -58,7 +59,7 @@ public final class MultiPublishOp<T> extends ConnectableMulti<T> {
 
     @Override
     public void subscribe(MultiSubscriber<? super T> s) {
-        onSubscribe.subscribe(s);
+        onSubscribe.subscribe(Infrastructure.onMultiSubscription(upstream, s));
     }
 
     @Override
@@ -92,7 +93,7 @@ public final class MultiPublishOp<T> extends ConnectableMulti<T> {
         }
 
         if (doConnect) {
-            upstream.subscribe(ps);
+            upstream.subscribe(Infrastructure.onMultiSubscription(upstream, ps));
         }
     }
 

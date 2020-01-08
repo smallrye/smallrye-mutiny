@@ -58,11 +58,11 @@ public class MultiBufferOp<T> extends AbstractMultiOperator<T, List<T>> {
     @Override
     public void subscribe(MultiSubscriber<? super List<T>> downstream) {
         if (size == skip) {
-            upstream.subscribe(new BufferExactProcessor<>(downstream, size, supplier));
+            upstream.subscribe().withSubscriber(new BufferExactProcessor<>(downstream, size, supplier));
         } else if (skip > size) {
-            upstream.subscribe(new BufferSkipProcessor<>(downstream, size, skip, supplier));
+            upstream.subscribe().withSubscriber(new BufferSkipProcessor<>(downstream, size, skip, supplier));
         } else {
-            upstream.subscribe(new BufferOverlappingProcessor<>(downstream,
+            upstream.subscribe().withSubscriber(new BufferOverlappingProcessor<>(downstream,
                     size,
                     skip,
                     supplier));

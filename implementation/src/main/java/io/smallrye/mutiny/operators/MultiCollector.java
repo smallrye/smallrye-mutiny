@@ -29,7 +29,7 @@ public class MultiCollector {
     }
 
     public static <T> Uni<T> last(Multi<T> upstream) {
-        return Uni.createFrom().publisher(new MultiLastItemOp<>(upstream));
+        return Uni.createFrom().publisher(Infrastructure.onMultiCreation(new MultiLastItemOp<>(upstream)));
     }
 
     public static <T> Uni<List<T>> list(Multi<T> upstream) {
@@ -38,8 +38,8 @@ public class MultiCollector {
 
     public static <T, A, R> Uni<R> collector(Multi<T> upstream, Collector<? super T, A, ? extends R> collector,
             boolean acceptNullAsInitialValue) {
-        MultiCollectorOp<? super T, A, ? extends R> f = new MultiCollectorOp<>(upstream, collector, acceptNullAsInitialValue);
-        return Uni.createFrom().publisher(f);
+        Multi<R> multi = Infrastructure.onMultiCreation(new MultiCollectorOp<>(upstream, collector, acceptNullAsInitialValue));
+        return Uni.createFrom().publisher(multi);
     }
 
     public static <R, T> Uni<R> collectInto(Multi<T> upstream, Supplier<R> producer,
@@ -76,28 +76,29 @@ public class MultiCollector {
     }
 
     public static <T> Multi<List<T>> list(Multi<T> upstream, Duration timeWindow) {
-        return new MultiBufferWithTimeoutOp<>(upstream, Integer.MAX_VALUE, timeWindow,
-                Infrastructure.getDefaultWorkerPool());
+        return Infrastructure.onMultiCreation(new MultiBufferWithTimeoutOp<>(upstream, Integer.MAX_VALUE, timeWindow,
+                Infrastructure.getDefaultWorkerPool()));
     }
 
     public static <T> Multi<List<T>> list(Multi<T> upstream, int size) {
-        return new MultiBufferOp<>(upstream, size, size);
+        return Infrastructure.onMultiCreation(new MultiBufferOp<>(upstream, size, size));
     }
 
     public static <T> Multi<List<T>> list(Multi<T> upstream, int size, int skip) {
-        return new MultiBufferOp<>(upstream, size, skip);
+        return Infrastructure.onMultiCreation(new MultiBufferOp<>(upstream, size, skip));
     }
 
     public static <T> Multi<Multi<T>> multi(Multi<T> upstream, Duration timeWindow) {
-        return new MultiWindowOnDurationOp<>(upstream, timeWindow, Infrastructure.getDefaultWorkerPool());
+        return Infrastructure
+                .onMultiCreation(new MultiWindowOnDurationOp<>(upstream, timeWindow, Infrastructure.getDefaultWorkerPool()));
     }
 
     public static <T> Multi<Multi<T>> multi(Multi<T> upstream, int size) {
-        return new MultiWindowOp<>(upstream, size, size);
+        return Infrastructure.onMultiCreation(new MultiWindowOp<>(upstream, size, size));
     }
 
     public static <T> Multi<Multi<T>> multi(Multi<T> upstream, int size, int skip) {
-        return new MultiWindowOp<>(upstream, size, skip);
+        return Infrastructure.onMultiCreation(new MultiWindowOp<>(upstream, size, skip));
     }
 
     public static <K, V, T> Multi<GroupedMulti<K, V>> groupBy(Multi<T> upstream,
@@ -105,9 +106,9 @@ public class MultiCollector {
             Function<? super T, ? extends V> valueMapper) {
         if (valueMapper == null) {
             //noinspection unchecked
-            return new MultiGroupByOp<>(upstream, keyMapper, x -> (V) x);
+            return Infrastructure.onMultiCreation(new MultiGroupByOp<>(upstream, keyMapper, x -> (V) x));
         } else {
-            return new MultiGroupByOp<>(upstream, keyMapper, valueMapper);
+            return Infrastructure.onMultiCreation(new MultiGroupByOp<>(upstream, keyMapper, valueMapper));
         }
     }
 }

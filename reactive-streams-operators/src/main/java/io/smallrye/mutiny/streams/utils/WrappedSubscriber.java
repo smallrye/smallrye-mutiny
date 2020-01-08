@@ -9,12 +9,15 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
+import io.smallrye.mutiny.infrastructure.Infrastructure;
+
 /**
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
+@SuppressWarnings("SubscriberImplementation")
 public class WrappedSubscriber<T> implements Subscriber<T> {
 
-    private final CompletableFuture<Void> future = new CompletableFuture<>();
+    private final CompletableFuture<Void> future = Infrastructure.wrapCompletableFuture(new CompletableFuture<>());
     private final Subscriber<T> source;
     private final AtomicBoolean subscribed = new AtomicBoolean(false);
 

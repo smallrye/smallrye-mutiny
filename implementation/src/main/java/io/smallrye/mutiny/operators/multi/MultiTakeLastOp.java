@@ -28,9 +28,9 @@ public class MultiTakeLastOp<T> extends AbstractMultiOperator<T, T> {
     @Override
     public void subscribe(MultiSubscriber<? super T> actual) {
         if (numberOfItems == 0) {
-            upstream.subscribe(new TakeLastZeroProcessor<>(actual));
+            upstream.subscribe().withSubscriber(new TakeLastZeroProcessor<>(actual));
         } else {
-            upstream.subscribe(new TakeLastManyProcessor<>(actual, numberOfItems));
+            upstream.subscribe().withSubscriber(new TakeLastManyProcessor<>(actual, numberOfItems));
         }
     }
 

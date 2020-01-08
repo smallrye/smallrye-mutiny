@@ -9,6 +9,7 @@ import org.reactivestreams.Subscription;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.helpers.Subscriptions;
+import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.subscription.MultiSubscriber;
 import io.smallrye.mutiny.subscription.SerializedSubscriber;
 
@@ -32,8 +33,8 @@ public final class MultiTakeUntilOtherOp<T, U> extends AbstractMultiOperator<T, 
     public void subscribe(MultiSubscriber<? super T> actual) {
         TakeUntilMainProcessor<T> mainSubscriber = new TakeUntilMainProcessor<>(actual);
         TakeUntilOtherSubscriber<U> otherSubscriber = new TakeUntilOtherSubscriber<>(mainSubscriber);
-        other.subscribe(otherSubscriber);
-        upstream.subscribe(mainSubscriber);
+        other.subscribe(Infrastructure.onMultiSubscription(other, otherSubscriber));
+        upstream.subscribe(Infrastructure.onMultiSubscription(upstream, mainSubscriber));
     }
 
     static final class TakeUntilOtherSubscriber<U> implements MultiSubscriber<U> {

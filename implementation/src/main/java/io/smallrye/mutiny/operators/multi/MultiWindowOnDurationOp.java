@@ -36,7 +36,7 @@ public class MultiWindowOnDurationOp<T> extends AbstractMultiOperator<T, Multi<T
 
     @Override
     public void subscribe(MultiSubscriber<? super Multi<T>> actual) {
-        upstream.subscribe(new WindowTimeoutSubscriber<>(actual, duration, executor));
+        upstream.subscribe().withSubscriber(new WindowTimeoutSubscriber<>(actual, duration, executor));
     }
 
     static final class WindowTimeoutSubscriber<T> extends MultiOperatorProcessor<T, Multi<T>> {

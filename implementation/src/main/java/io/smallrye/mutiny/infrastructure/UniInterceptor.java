@@ -8,7 +8,7 @@ import io.smallrye.mutiny.subscription.UniSubscriber;
  * Allow being notified when a new {@link Uni} instance is created and when this {@link Uni} receives events.
  * <p>
  * Implementations are expected to be exposed as SPI, and so the implementation class must be declared in the
- * {@code META-INF/services/io.smallrye.reactive.infrastructure.UniInterceptor} file.
+ * {@code META-INF/services/io.smallrye.mutiny.infrastructure.UniInterceptor} file.
  */
 public interface UniInterceptor {
 
@@ -43,7 +43,7 @@ public interface UniInterceptor {
      * @param instance the instance of uni
      * @param subscriber the subscriber
      * @param <T> the type of item
-     * @return the subscriber to use instead of the passed one. By default, it returns the pass subscriber.
+     * @return the subscriber to use instead of the passed one. By default, it returns the given subscriber.
      */
     default <T> UniSubscriber<? super T> onSubscription(Uni<T> instance, UniSubscriber<? super T> subscriber) {
         return subscriber;

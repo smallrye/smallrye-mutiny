@@ -52,7 +52,7 @@ public final class MultiCollectorOp<T, A, R> extends AbstractMultiOperator<T, R>
 
         CollectorProcessor<? super T, A, ? extends R> processor = new CollectorProcessor<>(downstream, initialValue,
                 accumulator, finisher);
-        upstream.subscribe(processor);
+        upstream.subscribe().withSubscriber(processor);
     }
 
     static class CollectorProcessor<T, A, R> extends MultiOperatorProcessor<T, R> {

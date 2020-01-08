@@ -29,7 +29,7 @@ public final class MultiTakeOp<T> extends AbstractMultiOperator<T, T> {
     @Override
     public void subscribe(MultiSubscriber<? super T> downstream) {
         ParameterValidation.nonNullNpe(downstream, "subscriber");
-        upstream.subscribe(new TakeProcessor<>(downstream, numberOfItems));
+        upstream.subscribe().withSubscriber(new TakeProcessor<>(downstream, numberOfItems));
     }
 
     static final class TakeProcessor<T> extends MultiOperatorProcessor<T, T> {

@@ -8,6 +8,7 @@ import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 
 import io.smallrye.mutiny.Multi;
+import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.multi.MultiConcatOp;
 
 public class MultiSwitchOnCompletion<T> extends MultiOperator<T, T> {
@@ -43,7 +44,7 @@ public class MultiSwitchOnCompletion<T> extends MultiOperator<T, T> {
 
         @SuppressWarnings("unchecked")
         Publisher<T>[] publishers = new Publisher[] { upstream(), followup };
-        MultiConcatOp<T> op = new MultiConcatOp<>(false, publishers);
+        Multi<T> op = Infrastructure.onMultiCreation(new MultiConcatOp<>(false, publishers));
         op.subscribe(subscriber);
     }
 }
