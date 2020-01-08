@@ -462,8 +462,8 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div id="header">
 <h1>SmallRye Mutiny</h1>
 <div class="details">
-<span id="revnumber">version 0.1.1,</span>
-<span id="revdate">2019-12-13</span>
+<span id="revnumber">version 0.2.0,</span>
+<span id="revdate">2020-01-08</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">SmallRye Mutiny</div>
@@ -499,7 +499,9 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#_how_do_i_control_the_back_pressure">2.20. How do I control the back-pressure?</a></li>
 <li><a href="#_how_do_wrap_blocking_calls">2.21. How do wrap blocking calls?</a></li>
 <li><a href="#_using_an_unicast_processor">2.22. Using an Unicast Processor</a></li>
-<li><a href="#_where_do_i_find_the_javadoc">2.23. Where do I find the JavaDoc?</a></li>
+<li><a href="#_how_do_i_handle_polling">2.23. How do I handle polling?</a></li>
+<li><a href="#_how_do_i_handle_pagination">2.24. How do I handle pagination?</a></li>
+<li><a href="#_where_do_i_find_the_javadoc">2.25. Where do I find the JavaDoc?</a></li>
 </ul>
 </li>
 </ul>
@@ -515,10 +517,10 @@ Wait? Another one? Yes!</p>
 </div>
 <div class="paragraph">
 <p>Mutiny is designed after having experienced many issues with other Reactive programming libraries and having seen many developers lost in an endless sequence of <em>flatMap</em>.
-Mutiny is taking a different approach.
-First, Mutiny does not provide as many operators as the other famous libraries, but we focused on the most used operators.
-Then, Mutiny provides a more <em>guided</em> API, which avoids having classes with hundreds of methods that cause trouble for even the smartest IDE.
-Finally, Mutiny has built-in converted from and to other reactive programing libraries, so you can always pivot.</p>
+Mutiny takes a different approach.
+First, Mutiny does not provide as many operators as the other famous libraries, focusing instead on the most used operators.
+Furthermore, Mutiny provides a more <em>guided</em> API, which avoids having classes with hundreds of methods that cause trouble for even the smartest IDE.
+Finally, Mutiny has built-in converters from and to other reactive programing libraries, so you can always pivot.</p>
 </div>
 <div class="admonitionblock tip">
 <table>
@@ -570,7 +572,7 @@ If you are using Maven, declare the following dependency in your <code>pom.xml</
 <pre class="highlightjs highlight"><code data-lang="xml" class="language-xml hljs">&lt;dependency&gt;
     &lt;groupId&gt;io.smallrye.reactive&lt;/groupId&gt;
     &lt;artifactId&gt;mutiny&lt;/artifactId&gt;
-    &lt;version&gt;0.1.1&lt;/version&gt;
+    &lt;version&gt;0.2.0&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -580,7 +582,7 @@ If you are using Maven, declare the following dependency in your <code>pom.xml</
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code data-lang="groovy" class="language-groovy hljs">dependencies {
-     implementation 'io.smallrye.reactive:mutiny:0.1.1'
+     implementation 'io.smallrye.reactive:mutiny:0.2.0'
 }</code></pre>
 </div>
 </div>
@@ -617,7 +619,7 @@ As a result, they also return instances of <code>Multi</code> which depending on
 </div>
 <div class="paragraph">
 <p>In our example, every time the Multi emits an item, we apply a method to transform this item to uppercase, and emits the resulting value.
-Then, when the upstream send the <code>completion</code> event (no more items to emit), we produce a last item: <code>!</code> and send it downstream.
+Then, when the upstream sends the <code>completion</code> event (no more items to emit), we produce a last item: <code>!</code> and send it downstream.
 Finally, we <em>subscribe</em> to the resulting stream and for each emitted item, print it on the console.</p>
 </div>
 <div class="paragraph">
@@ -662,7 +664,7 @@ Finally, at the end of the line, the finalized items are pushed to the final con
 Events can flow from upstream to downstream (from source to sinks), or some signals can <em>swim</em> upstream from the sinks to the source.</p>
 </div>
 <div class="paragraph">
-<p>Events going from upstream to downstream are published by <code>Publisher</code> and consumes by <code>Subscriber</code>, which may produces events for their downstream, as illustrate by the following diagram:</p>
+<p>Events going from upstream to downstream are published by <code>Publisher</code> and consumed by <code>Subscriber</code>, which may produce events for their downstream, as illustrated by the following diagram:</p>
 </div>
 <div class="imageblock text-center">
 <div class="content">
@@ -677,14 +679,14 @@ Events can flow from upstream to downstream (from source to sinks), or some sign
 </td>
 <td class="content">
 <div class="paragraph">
-<p>An entity that is both a <code>Publisher</code> and a <code>Subscriber</code> is generally named a <code>Processor</code></p>
+<p>An entity that is both a <code>Publisher</code> and a <code>Subscriber</code> is generally named a <code>Processor</code>.</p>
 </div>
 </td>
 </tr>
 </table>
 </div>
 <div class="paragraph">
-<p>Four types of events can flow in this directions:</p>
+<p>Four types of events can flow in this direction:</p>
 </div>
 <div class="ulist">
 <ul>
@@ -723,15 +725,15 @@ Once they are emitted, no more items are emitted.</p>
 </ul>
 </div>
 <div class="paragraph">
-<p>In a regular scenario, a subscriber:</p>
+<p>In a typical scenario, a subscriber:</p>
 </div>
 <div class="olist arabic">
 <ol class="arabic">
 <li>
-<p>A subscriber <em>subscribes</em> to the upstream - the upstream receives the subscription <code>subscription request</code>, and when initialized send the <code>subscribed</code> event to the subscriber</p>
+<p>A subscriber <em>subscribes</em> to the upstream - the upstream receives the subscription <code>subscription request</code>, and when initialized sends the <code>subscribed</code> event to the subscriber</p>
 </li>
 <li>
-<p>The subscriber received the <code>subscribed</code> event with a <em>subscription</em> used to emit the <code>requests</code> and <code>cancellation</code> events</p>
+<p>The subscriber receives the <code>subscribed</code> event with a <em>subscription</em> used to emit the <code>requests</code> and <code>cancellation</code> events</p>
 </li>
 <li>
 <p>The subscriber sends a <code>request</code> event indicating how many items it can handle at the moment, it can indicate 1, <em>n</em>, or infinite.</p>
@@ -750,7 +752,7 @@ Once they are emitted, no more items are emitted.</p>
 </div>
 </div>
 <div class="paragraph">
-<p>The <code>request</code> events is the cornerstone of the back-pressure protocol.
+<p>The <code>request</code> event is the cornerstone of the back-pressure protocol.
 A subscriber should not request more than what it is able to handle, and a publisher should not emit more items than the amount of request received.</p>
 </div>
 <div class="admonitionblock note">
@@ -787,7 +789,7 @@ If you program does not do anything, be sure you subscribed to the flow.</p>
 <h4 id="_an_event_driven_api">2.2. An event-driven API</h4>
 <div class="paragraph">
 <p>Mutiny is an event-driven API.
-So for each the types of event, there is an <code>on</code> associated method that let you handle this specific event.
+So for each types of event, there is an <code>on</code> associated method that let you handle this specific event.
 For example:</p>
 </div>
 <div class="listingblock">
@@ -807,7 +809,7 @@ source
 </div>
 </div>
 <div class="paragraph">
-<p>Of course, the method presented in this snippet are not very interested, while quite useful to trace what&#8217;s going on.
+<p>Of course, the methods presented in this snippet are not very interesting, although they are quite useful to trace what&#8217;s going on.
 Mutiny provides many method to transform items, or the streams, compose actions&#8230;&#8203;</p>
 </div>
 <div class="paragraph">
@@ -848,17 +850,17 @@ For example:</p>
 They receive and fire events, at anytime.</p>
 </div>
 <div class="paragraph">
-<p>You may wonder why we do this distinction.
+<p>You may wonder why we make this distinction.
 <code>Uni</code> does not need the complete ceremony presented above as the <em>request</em> does not make a lot of sense.
-The <code>subscribe</code> event express the interest and trigger the computation.
-Also, <code>Uni</code> can handle items having a <code>null</code> value (and as specific method to handle this case).
+The <code>subscribe</code> event expresses the interest and triggers the computation.
+Also, <code>Uni</code> can handle items having a <code>null</code> value (and has a specific method to handle this case).
 <code>Multi</code> does not allow it (because the Reactive Streams specification forbids it).</p>
 </div>
 <div class="paragraph">
 <p>Also, having a <code>Uni</code> implementing <code>Publisher</code> would be a bit like having <code>Optional</code> implementing <code>Iterable</code>.</p>
 </div>
 <div class="paragraph">
-<p>In other words, <code>Uni</code> can:</p>
+<p>In other words, <code>Uni</code>:</p>
 </div>
 <div class="ulist">
 <ul>
@@ -869,7 +871,7 @@ Also, <code>Uni</code> can handle items having a <code>null</code> value (and as
 <p>cannot receive a <code>completion</code> event (<code>null</code> in the case of 0 item)</p>
 </li>
 <li>
-<p>cannot received a <code>request</code> event</p>
+<p>cannot receive a <code>request</code> event</p>
 </li>
 </ul>
 </div>
@@ -915,7 +917,7 @@ Uni.createFrom().item("a")
 <div class="sect3">
 <h4 id="_creating_and_subscribing_to_unis">2.4. Creating and Subscribing to Unis</h4>
 <div class="paragraph">
-<p>There are many way to create instances of <code>Unis</code>:</p>
+<p>There are many ways to create instances of <code>Unis</code>:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -985,7 +987,7 @@ uni.subscribe().withSubscriber(new UniSubscriber&lt;String&gt;() {
 <div class="sect3">
 <h4 id="_creating_and_subscribing_to_multis">2.5. Creating and Subscribing to Multis</h4>
 <div class="paragraph">
-<p>There are many way to create instances of <code>Multis</code>:</p>
+<p>There are many ways to create instances of <code>Multis</code>:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -1052,25 +1054,24 @@ cancellable = multi.subscribe().with(
         failure -&gt; System.out.println("Got a failure: " + failure),
         () -&gt; System.out.println("Got the completion event"));
 
-// Use a Reactive Streams subscriber directly.
-multi.subscribe().withSubscriber(new Subscriber&lt;String&gt;() {
+multi.subscribe().withSubscriber(new MultiSubscriber&lt;String&gt;() {
     @Override
     public void onSubscribe(Subscription s) {
         System.out.println("Got subscription: " + s);
     }
 
     @Override
-    public void onNext(String item) {
+    public void onItem(String item) {
         System.out.println("Got an item: " + item);
     }
 
     @Override
-    public void onError(Throwable failure) {
+    public void onFailure(Throwable failure) {
         System.out.println("Got a failure: " + failure);
     }
 
     @Override
-    public void onComplete() {
+    public void onCompletion() {
         System.out.println("Got the completion event");
     }
 });</code></pre>
@@ -1525,7 +1526,7 @@ To enable this feature, add the following dependency to your <code>CLASSPATH</co
 <pre class="highlightjs highlight"><code data-lang="xml" class="language-xml hljs">&lt;dependency&gt;
     &lt;groupId&gt;io.smallrye.reactive&lt;/groupId&gt;
     &lt;artifactId&gt;mutiny-rxjava&lt;/artifactId&gt;
-    &lt;version&gt;0.1.1&lt;/version&gt;
+    &lt;version&gt;0.2.0&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -1639,7 +1640,7 @@ To enable this feature, add the following dependency to your <code>CLASSPATH</co
 <pre class="highlightjs highlight"><code data-lang="xml" class="language-xml hljs">&lt;dependency&gt;
     &lt;groupId&gt;io.smallrye.reactive&lt;/groupId&gt;
     &lt;artifactId&gt;mutiny-reactor&lt;/artifactId&gt;
-    &lt;version&gt;0.1.1&lt;/version&gt;
+    &lt;version&gt;0.2.0&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -1709,7 +1710,7 @@ Flux&lt;String&gt; flux = multi.convert().with(MultiReactorConverters.toFlux());
 By default, it would fail and propagate an exception.</p>
 </div>
 <div class="paragraph">
-<p>However, you can control how the overflow is handled using the <code>multi.onOverflow()</code> methods, such as in:</p>
+<p>However, you can control how the overflow is handled using the <code>multi.onOverflow()</code> method, such as in:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -1782,7 +1783,81 @@ You can also pass a fixed size queue that would reject the items once full.</p>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_where_do_i_find_the_javadoc">2.23. Where do I find the JavaDoc?</h4>
+<h4 id="_how_do_i_handle_polling">2.23. How do I handle polling?</h4>
+<div class="paragraph">
+<p>There are many poll-based API around us.
+Sometimes you need to use these APIs to generate a stream from the polled values.
+To do this, use the <code>repeat()</code> feature:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">PollableDataSource source = new PollableDataSource();
+// First creates a uni that emit the polled item. Because `poll` blocks, let's use a specific executor
+Uni&lt;String&gt; pollItemFromSource = Uni.createFrom().item(source::poll).subscribeOn(executor);
+// To get the stream of items, just repeat the uni indefinitely
+Multi&lt;String&gt; stream = pollItemFromSource.repeat().indefinitely();
+
+Cancellable cancellable = stream.subscribe().with(item -&gt; System.out.println("Polled item: " + item));
+// ... later ..
+// when you don't want the items anymore, cancel the subscription and close the source if needed.
+cancellable.cancel();
+source.close();</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>You can also stop the repetition using the <code>repeat().until()</code> method which will continue the repetition until the given predicate returns <code>true</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">PollableDataSource source = new PollableDataSource();
+Multi&lt;String&gt; stream = Uni.createFrom().item(source::poll)
+        .subscribeOn(executor)
+        .repeat().until(s -&gt; s == null);
+
+stream.subscribe().with(item -&gt; System.out.println("Polled item: " + item));</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_how_do_i_handle_pagination">2.24. How do I handle pagination?</h4>
+<div class="paragraph">
+<p>There are many REST / HTTP API using pagination, <em>i.e.</em> return only a subset of the results and you need to request the next page to get the next batch.
+Each batch contains a list of item(s).
+To use this kind of API and generate a continuous stream of items, you need to use the <code>repeat()</code> function.
+However, we need to pass a cursor / state to advance and avoid requesting again and again the same page.
+Fortunately, <code>Uni</code> provides methods to pass a shared state.
+so by combining these methods, <code>repeat</code> and <code>disjoint</code> you can generate streams from these pages:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">PaginatedApi api = new PaginatedApi();
+
+Multi&lt;String&gt; stream = Uni.createFrom()
+        .completionStage(() -&gt; new AtomicInteger(), state -&gt; api.getPage(state.getAndIncrement()))
+        .repeat().until(list -&gt; list.isEmpty())
+        .onItem().disjoint();</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>First, you create a <code>Uni</code> and pass a state supplier.
+The produced state container (here an <code>AtomicInteger</code>) is shared among the different subscriptions.
+Be aware it must return a thread safe container, and the supplier is called only once.</p>
+</div>
+<div class="paragraph">
+<p>Then, use <code>repeat</code> to call the paginated API until we have all the items.
+At the point we have a stream of list of item such as <code>["a", "b", "c"], ["d", "e"], []</code>.
+However we want the following stream: <code>"a", "b", "c", "d", "e"</code>.
+The <code>disjoint</code> method does exactly this.
+It gets the items from the lists and passes them downstream:</p>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="assets/images/diag-1cddf88909ef82bdaa96ca9da9f4c028.png" alt="diag 1cddf88909ef82bdaa96ca9da9f4c028" width="639" height="631">
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_where_do_i_find_the_javadoc">2.25. Where do I find the JavaDoc?</h4>
 <div class="paragraph">
 <p>The JavaDoc is published <a href="https://smallrye.io/smallrye-mutiny/apidocs/">there</a>.</p>
 </div>
@@ -1791,7 +1866,7 @@ You can also pass a fixed size queue that would reject the items once full.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Version 0.1.1<br>
+Version 0.2.0<br>
 Last updated 2019-12-13 17:01:25 +0100
 </div>
 </div>

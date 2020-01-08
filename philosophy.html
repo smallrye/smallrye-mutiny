@@ -482,7 +482,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 Events can flow from upstream to downstream (from source to sinks), or some signals can <em>swim</em> upstream from the sinks to the source.</p>
 </div>
 <div class="paragraph">
-<p>Events going from upstream to downstream are published by <code>Publisher</code> and consumes by <code>Subscriber</code>, which may produces events for their downstream, as illustrate by the following diagram:</p>
+<p>Events going from upstream to downstream are published by <code>Publisher</code> and consumed by <code>Subscriber</code>, which may produce events for their downstream, as illustrated by the following diagram:</p>
 </div>
 <div class="imageblock text-center">
 <div class="content">
@@ -497,14 +497,14 @@ Events can flow from upstream to downstream (from source to sinks), or some sign
 </td>
 <td class="content">
 <div class="paragraph">
-<p>An entity that is both a <code>Publisher</code> and a <code>Subscriber</code> is generally named a <code>Processor</code></p>
+<p>An entity that is both a <code>Publisher</code> and a <code>Subscriber</code> is generally named a <code>Processor</code>.</p>
 </div>
 </td>
 </tr>
 </table>
 </div>
 <div class="paragraph">
-<p>Four types of events can flow in this directions:</p>
+<p>Four types of events can flow in this direction:</p>
 </div>
 <div class="ulist">
 <ul>
@@ -543,15 +543,15 @@ Once they are emitted, no more items are emitted.</p>
 </ul>
 </div>
 <div class="paragraph">
-<p>In a regular scenario, a subscriber:</p>
+<p>In a typical scenario, a subscriber:</p>
 </div>
 <div class="olist arabic">
 <ol class="arabic">
 <li>
-<p>A subscriber <em>subscribes</em> to the upstream - the upstream receives the subscription <code>subscription request</code>, and when initialized send the <code>subscribed</code> event to the subscriber</p>
+<p>A subscriber <em>subscribes</em> to the upstream - the upstream receives the subscription <code>subscription request</code>, and when initialized sends the <code>subscribed</code> event to the subscriber</p>
 </li>
 <li>
-<p>The subscriber received the <code>subscribed</code> event with a <em>subscription</em> used to emit the <code>requests</code> and <code>cancellation</code> events</p>
+<p>The subscriber receives the <code>subscribed</code> event with a <em>subscription</em> used to emit the <code>requests</code> and <code>cancellation</code> events</p>
 </li>
 <li>
 <p>The subscriber sends a <code>request</code> event indicating how many items it can handle at the moment, it can indicate 1, <em>n</em>, or infinite.</p>
@@ -570,7 +570,7 @@ Once they are emitted, no more items are emitted.</p>
 </div>
 </div>
 <div class="paragraph">
-<p>The <code>request</code> events is the cornerstone of the back-pressure protocol.
+<p>The <code>request</code> event is the cornerstone of the back-pressure protocol.
 A subscriber should not request more than what it is able to handle, and a publisher should not emit more items than the amount of request received.</p>
 </div>
 <div class="admonitionblock note">
@@ -607,7 +607,7 @@ If you program does not do anything, be sure you subscribed to the flow.</p>
 <h3 id="_an_event_driven_api">An event-driven API</h3>
 <div class="paragraph">
 <p>Mutiny is an event-driven API.
-So for each the types of event, there is an <code>on</code> associated method that let you handle this specific event.
+So for each types of event, there is an <code>on</code> associated method that let you handle this specific event.
 For example:</p>
 </div>
 <div class="listingblock">
@@ -627,7 +627,7 @@ source
 </div>
 </div>
 <div class="paragraph">
-<p>Of course, the method presented in this snippet are not very interested, while quite useful to trace what&#8217;s going on.
+<p>Of course, the methods presented in this snippet are not very interesting, although they are quite useful to trace what&#8217;s going on.
 Mutiny provides many method to transform items, or the streams, compose actions&#8230;&#8203;</p>
 </div>
 <div class="paragraph">
@@ -668,17 +668,17 @@ For example:</p>
 They receive and fire events, at anytime.</p>
 </div>
 <div class="paragraph">
-<p>You may wonder why we do this distinction.
+<p>You may wonder why we make this distinction.
 <code>Uni</code> does not need the complete ceremony presented above as the <em>request</em> does not make a lot of sense.
-The <code>subscribe</code> event express the interest and trigger the computation.
-Also, <code>Uni</code> can handle items having a <code>null</code> value (and as specific method to handle this case).
+The <code>subscribe</code> event expresses the interest and triggers the computation.
+Also, <code>Uni</code> can handle items having a <code>null</code> value (and has a specific method to handle this case).
 <code>Multi</code> does not allow it (because the Reactive Streams specification forbids it).</p>
 </div>
 <div class="paragraph">
 <p>Also, having a <code>Uni</code> implementing <code>Publisher</code> would be a bit like having <code>Optional</code> implementing <code>Iterable</code>.</p>
 </div>
 <div class="paragraph">
-<p>In other words, <code>Uni</code> can:</p>
+<p>In other words, <code>Uni</code>:</p>
 </div>
 <div class="ulist">
 <ul>
@@ -689,7 +689,7 @@ Also, <code>Uni</code> can handle items having a <code>null</code> value (and as
 <p>cannot receive a <code>completion</code> event (<code>null</code> in the case of 0 item)</p>
 </li>
 <li>
-<p>cannot received a <code>request</code> event</p>
+<p>cannot receive a <code>request</code> event</p>
 </li>
 </ul>
 </div>
@@ -735,7 +735,7 @@ Uni.createFrom().item("a")
 <div class="sect2">
 <h3 id="_creating_and_subscribing_to_unis">Creating and Subscribing to Unis</h3>
 <div class="paragraph">
-<p>There are many way to create instances of <code>Unis</code>:</p>
+<p>There are many ways to create instances of <code>Unis</code>:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -805,7 +805,7 @@ uni.subscribe().withSubscriber(new UniSubscriber&lt;String&gt;() {
 <div class="sect2">
 <h3 id="_creating_and_subscribing_to_multis">Creating and Subscribing to Multis</h3>
 <div class="paragraph">
-<p>There are many way to create instances of <code>Multis</code>:</p>
+<p>There are many ways to create instances of <code>Multis</code>:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -872,25 +872,24 @@ cancellable = multi.subscribe().with(
         failure -&gt; System.out.println("Got a failure: " + failure),
         () -&gt; System.out.println("Got the completion event"));
 
-// Use a Reactive Streams subscriber directly.
-multi.subscribe().withSubscriber(new Subscriber&lt;String&gt;() {
+multi.subscribe().withSubscriber(new MultiSubscriber&lt;String&gt;() {
     @Override
     public void onSubscribe(Subscription s) {
         System.out.println("Got subscription: " + s);
     }
 
     @Override
-    public void onNext(String item) {
+    public void onItem(String item) {
         System.out.println("Got an item: " + item);
     }
 
     @Override
-    public void onError(Throwable failure) {
+    public void onFailure(Throwable failure) {
         System.out.println("Got a failure: " + failure);
     }
 
     @Override
-    public void onComplete() {
+    public void onCompletion() {
         System.out.println("Got the completion event");
     }
 });</code></pre>
@@ -927,7 +926,7 @@ Mutiny provides the <code>then</code> function to structure your pipeline:</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2019-12-13 17:01:25 +0100
+Last updated 2020-01-08 10:54:50 +0100
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">

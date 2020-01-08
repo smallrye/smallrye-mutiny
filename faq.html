@@ -460,6 +460,8 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#_how_do_i_control_the_back_pressure">How do I control the back-pressure?</a></li>
 <li><a href="#_how_do_wrap_blocking_calls">How do wrap blocking calls?</a></li>
 <li><a href="#_using_an_unicast_processor">Using an Unicast Processor</a></li>
+<li><a href="#_how_do_i_handle_polling">How do I handle polling?</a></li>
+<li><a href="#_how_do_i_handle_pagination">How do I handle pagination?</a></li>
 <li><a href="#_where_do_i_find_the_javadoc">Where do I find the JavaDoc?</a></li>
 </ul>
 </li>
@@ -892,7 +894,7 @@ To enable this feature, add the following dependency to your <code>CLASSPATH</co
 <pre class="highlightjs highlight"><code data-lang="xml" class="language-xml hljs">&lt;dependency&gt;
     &lt;groupId&gt;io.smallrye.reactive&lt;/groupId&gt;
     &lt;artifactId&gt;mutiny-rxjava&lt;/artifactId&gt;
-    &lt;version&gt;0.1.1&lt;/version&gt;
+    &lt;version&gt;0.2.0&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -1006,7 +1008,7 @@ To enable this feature, add the following dependency to your <code>CLASSPATH</co
 <pre class="highlightjs highlight"><code data-lang="xml" class="language-xml hljs">&lt;dependency&gt;
     &lt;groupId&gt;io.smallrye.reactive&lt;/groupId&gt;
     &lt;artifactId&gt;mutiny-reactor&lt;/artifactId&gt;
-    &lt;version&gt;0.1.1&lt;/version&gt;
+    &lt;version&gt;0.2.0&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -1076,7 +1078,7 @@ Flux&lt;String&gt; flux = multi.convert().with(MultiReactorConverters.toFlux());
 By default, it would fail and propagate an exception.</p>
 </div>
 <div class="paragraph">
-<p>However, you can control how the overflow is handled using the <code>multi.onOverflow()</code> methods, such as in:</p>
+<p>However, you can control how the overflow is handled using the <code>multi.onOverflow()</code> method, such as in:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -1149,6 +1151,80 @@ You can also pass a fixed size queue that would reject the items once full.</p>
 </div>
 </div>
 <div class="sect2">
+<h3 id="_how_do_i_handle_polling">How do I handle polling?</h3>
+<div class="paragraph">
+<p>There are many poll-based API around us.
+Sometimes you need to use these APIs to generate a stream from the polled values.
+To do this, use the <code>repeat()</code> feature:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">PollableDataSource source = new PollableDataSource();
+// First creates a uni that emit the polled item. Because `poll` blocks, let's use a specific executor
+Uni&lt;String&gt; pollItemFromSource = Uni.createFrom().item(source::poll).subscribeOn(executor);
+// To get the stream of items, just repeat the uni indefinitely
+Multi&lt;String&gt; stream = pollItemFromSource.repeat().indefinitely();
+
+Cancellable cancellable = stream.subscribe().with(item -&gt; System.out.println("Polled item: " + item));
+// ... later ..
+// when you don't want the items anymore, cancel the subscription and close the source if needed.
+cancellable.cancel();
+source.close();</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>You can also stop the repetition using the <code>repeat().until()</code> method which will continue the repetition until the given predicate returns <code>true</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">PollableDataSource source = new PollableDataSource();
+Multi&lt;String&gt; stream = Uni.createFrom().item(source::poll)
+        .subscribeOn(executor)
+        .repeat().until(s -&gt; s == null);
+
+stream.subscribe().with(item -&gt; System.out.println("Polled item: " + item));</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_how_do_i_handle_pagination">How do I handle pagination?</h3>
+<div class="paragraph">
+<p>There are many REST / HTTP API using pagination, <em>i.e.</em> return only a subset of the results and you need to request the next page to get the next batch.
+Each batch contains a list of item(s).
+To use this kind of API and generate a continuous stream of items, you need to use the <code>repeat()</code> function.
+However, we need to pass a cursor / state to advance and avoid requesting again and again the same page.
+Fortunately, <code>Uni</code> provides methods to pass a shared state.
+so by combining these methods, <code>repeat</code> and <code>disjoint</code> you can generate streams from these pages:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">PaginatedApi api = new PaginatedApi();
+
+Multi&lt;String&gt; stream = Uni.createFrom()
+        .completionStage(() -&gt; new AtomicInteger(), state -&gt; api.getPage(state.getAndIncrement()))
+        .repeat().until(list -&gt; list.isEmpty())
+        .onItem().disjoint();</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>First, you create a <code>Uni</code> and pass a state supplier.
+The produced state container (here an <code>AtomicInteger</code>) is shared among the different subscriptions.
+Be aware it must return a thread safe container, and the supplier is called only once.</p>
+</div>
+<div class="paragraph">
+<p>Then, use <code>repeat</code> to call the paginated API until we have all the items.
+At the point we have a stream of list of item such as <code>["a", "b", "c"], ["d", "e"], []</code>.
+However we want the following stream: <code>"a", "b", "c", "d", "e"</code>.
+The <code>disjoint</code> method does exactly this.
+It gets the items from the lists and passes them downstream:</p>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="assets/images/diag-1cddf88909ef82bdaa96ca9da9f4c028.png" alt="diag 1cddf88909ef82bdaa96ca9da9f4c028" width="639" height="631">
+</div>
+</div>
+</div>
+<div class="sect2">
 <h3 id="_where_do_i_find_the_javadoc">Where do I find the JavaDoc?</h3>
 <div class="paragraph">
 <p>The JavaDoc is published <a href="https://smallrye.io/smallrye-mutiny/apidocs/">there</a>.</p>
@@ -1159,7 +1235,7 @@ You can also pass a fixed size queue that would reject the items once full.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2019-12-13 17:01:25 +0100
+Last updated 2020-01-08 10:54:50 +0100
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">
