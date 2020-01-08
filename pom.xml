@@ -10,7 +10,7 @@
 
     <groupId>io.smallrye.reactive</groupId>
     <artifactId>mutiny-project</artifactId>
-    <version>0.1.3-SNAPSHOT</version>
+    <version>0.2.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>SmallRye Mutiny Project</name>
@@ -209,6 +209,19 @@
                             <configuration>
                                 <outputDirectory>${project.build.directory}</outputDirectory>
                             </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.jboss.jandex</groupId>
+                    <artifactId>jandex-maven-plugin</artifactId>
+                    <version>1.0.7</version>
+                    <executions>
+                        <execution>
+                            <id>make-index</id>
+                            <goals>
+                                <goal>jandex</goal>
+                            </goals>
                         </execution>
                     </executions>
                 </plugin>
