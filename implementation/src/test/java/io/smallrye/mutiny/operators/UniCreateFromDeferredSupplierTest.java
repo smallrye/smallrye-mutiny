@@ -49,8 +49,8 @@ public class UniCreateFromDeferredSupplierTest {
         UniAssertSubscriber<Integer> ts1 = UniAssertSubscriber.create();
         UniAssertSubscriber<Integer> ts2 = UniAssertSubscriber.create();
         AtomicInteger shared = new AtomicInteger();
-        Uni<Integer> uni = Uni.createFrom().item(() -> shared,
-                AtomicInteger::incrementAndGet);
+        Uni<Integer> uni = Uni.createFrom().deferred(() -> shared,
+                state -> Uni.createFrom().item(state.incrementAndGet()));
 
         assertThat(shared).hasValue(0);
         uni.subscribe().withSubscriber(ts1);
@@ -69,8 +69,8 @@ public class UniCreateFromDeferredSupplierTest {
             throw new IllegalStateException("boom");
         };
 
-        Uni<Integer> uni = Uni.createFrom().item(boom,
-                AtomicInteger::incrementAndGet);
+        Uni<Integer> uni = Uni.createFrom().deferred(boom,
+                page -> Uni.createFrom().item(page.getAndIncrement()));
 
         uni.subscribe().withSubscriber(ts1);
         ts1.assertFailure(IllegalStateException.class, "boom");
@@ -84,8 +84,8 @@ public class UniCreateFromDeferredSupplierTest {
         UniAssertSubscriber<Integer> ts2 = UniAssertSubscriber.create();
         Supplier<AtomicInteger> boom = () -> null;
 
-        Uni<Integer> uni = Uni.createFrom().item(boom,
-                AtomicInteger::incrementAndGet);
+        Uni<Integer> uni = Uni.createFrom().deferred(boom,
+                page -> Uni.createFrom().item(page.getAndIncrement()));
 
         uni.subscribe().withSubscriber(ts1);
         ts1.assertFailure(NullPointerException.class, "supplier");
@@ -95,13 +95,14 @@ public class UniCreateFromDeferredSupplierTest {
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void testThatStateSupplierCannotBeNull() {
-        Uni.createFrom().item(null,
-                x -> "x");
+        Uni.createFrom().deferred(null,
+                x -> Uni.createFrom().item("x"));
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void testThatFunctionCannotBeNull() {
-        Uni.createFrom().item(() -> "hello",
+        Uni.createFrom().deferred(() -> "hello",
                 null);
     }
+
 }
