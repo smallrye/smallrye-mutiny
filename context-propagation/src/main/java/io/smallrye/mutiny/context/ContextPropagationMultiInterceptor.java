@@ -52,10 +52,6 @@ public class ContextPropagationMultiInterceptor implements MultiInterceptor {
     public <T> Multi<T> onMultiCreation(Multi<T> multi) {
         Executor executor = THREAD_CONTEXT.currentContextExecutor();
         return new AbstractMulti<T>() {
-            @Override
-            protected Publisher<T> publisher() {
-                return this;
-            }
 
             @Override
             public void subscribe(Subscriber<? super T> subscriber) {
