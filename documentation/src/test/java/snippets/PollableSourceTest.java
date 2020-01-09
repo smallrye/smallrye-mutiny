@@ -40,9 +40,10 @@ public class PollableSourceTest {
     public void test2() {
         // tag::code2[]
         PollableDataSource source = new PollableDataSource();
-        Multi<String> stream = Uni.createFrom().item(source::poll)
-                .subscribeOn(executor)
-                .repeat().until(s -> s == null);
+        Multi<String> stream = Multi.createBy().repeating()
+                    .supplier(source::poll)
+                    .until(s -> s == null)
+                .subscribeOn(executor);
 
         stream.subscribe().with(item -> System.out.println("Polled item: " + item));
         // end::code2[]

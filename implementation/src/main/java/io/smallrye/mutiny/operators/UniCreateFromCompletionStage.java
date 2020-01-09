@@ -29,7 +29,13 @@ public class UniCreateFromCompletionStage<O> extends UniOperator<Void, O> {
 
     @Override
     protected void subscribing(UniSerializedSubscriber<? super O> subscriber) {
-        CompletionStage<? extends O> stage = supplier.get();
+        CompletionStage<? extends O> stage;
+        try {
+            stage = supplier.get();
+        } catch (Exception e) {
+            propagateFailureEvent(subscriber, e);
+            return;
+        }
 
         if (stage == null) {
             propagateFailureEvent(subscriber, new NullPointerException("The produced completion stage is `null`"));

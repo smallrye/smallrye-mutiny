@@ -423,7 +423,7 @@ public class UniCreate {
      * @param <S> the type of the state
      * @return the produced {@link Uni}
      */
-    public <T, S> Uni<T> deferred(Supplier<S> stateSupplier, Function<S, ? extends Uni<T>> mapper) {
+    public <T, S> Uni<T> deferred(Supplier<S> stateSupplier, Function<S, ? extends Uni<? extends T>> mapper) {
         ParameterValidation.nonNull(stateSupplier, "stateSupplier");
         ParameterValidation.nonNull(mapper, "mapper");
 
