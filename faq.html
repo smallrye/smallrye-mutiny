@@ -894,7 +894,7 @@ To enable this feature, add the following dependency to your <code>CLASSPATH</co
 <pre class="highlightjs highlight"><code data-lang="xml" class="language-xml hljs">&lt;dependency&gt;
     &lt;groupId&gt;io.smallrye.reactive&lt;/groupId&gt;
     &lt;artifactId&gt;mutiny-rxjava&lt;/artifactId&gt;
-    &lt;version&gt;0.2.0&lt;/version&gt;
+    &lt;version&gt;999-SNAPSHOT&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -1008,7 +1008,7 @@ To enable this feature, add the following dependency to your <code>CLASSPATH</co
 <pre class="highlightjs highlight"><code data-lang="xml" class="language-xml hljs">&lt;dependency&gt;
     &lt;groupId&gt;io.smallrye.reactive&lt;/groupId&gt;
     &lt;artifactId&gt;mutiny-reactor&lt;/artifactId&gt;
-    &lt;version&gt;0.2.0&lt;/version&gt;
+    &lt;version&gt;999-SNAPSHOT&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -1173,14 +1173,15 @@ source.close();</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>You can also stop the repetition using the <code>repeat().until()</code> method which will continue the repetition until the given predicate returns <code>true</code>:</p>
+<p>You can also stop the repetition using the <code>repeat().until()</code> method which will continue the repetition until the given predicate returns <code>true</code>, and/or directly create a <code>Multi</code> using <code>Multi.createBy().repeating()</code>:</p>
 </div>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">PollableDataSource source = new PollableDataSource();
-Multi&lt;String&gt; stream = Uni.createFrom().item(source::poll)
-        .subscribeOn(executor)
-        .repeat().until(s -&gt; s == null);
+Multi&lt;String&gt; stream = Multi.createBy().repeating()
+            .supplier(source::poll)
+            .until(s -&gt; s == null)
+        .subscribeOn(executor);
 
 stream.subscribe().with(item -&gt; System.out.println("Polled item: " + item));</code></pre>
 </div>
@@ -1191,28 +1192,28 @@ stream.subscribe().with(item -&gt; System.out.println("Polled item: " + item));<
 <div class="paragraph">
 <p>There are many REST / HTTP API using pagination, <em>i.e.</em> return only a subset of the results and you need to request the next page to get the next batch.
 Each batch contains a list of item(s).
-To use this kind of API and generate a continuous stream of items, you need to use the <code>repeat()</code> function.
+To use this kind of API and generate a continuous stream of items, you need to use the <code>Multi.createBy().repeating()</code> function.
 However, we need to pass a cursor / state to advance and avoid requesting again and again the same page.
-Fortunately, <code>Uni</code> provides methods to pass a shared state.
-so by combining these methods, <code>repeat</code> and <code>disjoint</code> you can generate streams from these pages:</p>
+Fortunately, <code>repeating</code> provides methods to pass a shared state.
+So by combining these methods and <code>disjoint</code> you can generate streams from these pages:</p>
 </div>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">PaginatedApi api = new PaginatedApi();
 
-Multi&lt;String&gt; stream = Uni.createFrom()
-        .completionStage(() -&gt; new AtomicInteger(), state -&gt; api.getPage(state.getAndIncrement()))
-        .repeat().until(list -&gt; list.isEmpty())
+Multi&lt;String&gt; stream = Multi.createBy().repeating()
+            .completionStage(
+                    () -&gt; new AtomicInteger(),
+                    state -&gt; api.getPage(state.getAndIncrement()))
+            .until(list -&gt; list.isEmpty())
         .onItem().disjoint();</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>First, you create a <code>Uni</code> and pass a state supplier.
-The produced state container (here an <code>AtomicInteger</code>) is shared among the different subscriptions.
-Be aware it must return a thread safe container, and the supplier is called only once.</p>
+<p>First, you create a <code>Multi</code> containing the items emitted by the <code>CompletionStage</code> supplier and pass a state supplier to progress among the pages.</p>
 </div>
 <div class="paragraph">
-<p>Then, use <code>repeat</code> to call the paginated API until we have all the items.
+<p>Then, use <code>until</code> to call the paginated API until we have all the items.
 At the point we have a stream of list of item such as <code>["a", "b", "c"], ["d", "e"], []</code>.
 However we want the following stream: <code>"a", "b", "c", "d", "e"</code>.
 The <code>disjoint</code> method does exactly this.
@@ -1235,7 +1236,7 @@ It gets the items from the lists and passes them downstream:</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-01-08 10:54:50 +0100
+Last updated 2020-01-12 16:11:47 +0100
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">
