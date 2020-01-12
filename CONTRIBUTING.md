@@ -37,6 +37,7 @@ Because we are all humans, the project uses a continuous integration approach an
 Please make sure to monitor the output of the build and act accordingly.
 
 Mutiny uses GitHub Actions as CI, so you can see the progress and results in the _checks_ tab of your pull request.
+Follow the results on https://github.com/smallrye/smallrye-mutiny/actions.
 
 ### Tests and documentation are not optional
 
@@ -69,3 +70,45 @@ mvn clean install
 ## The small print
 
 This project is an open source project, please act responsibly, be nice, polite and enjoy!
+
+## Deployment and Release
+
+First you need an environment variable named `GITHUB_TOKEN` with a token allowing access to the GitHub API and having push permission.
+Also you need to check that:
+
+* there are no build in progress of the `ref` branch (`master`)
+* the last build of the `ref` branch (`master`) has been successful
+
+Snapshot deployment is triggered using:
+
+```bash
+curl -X POST -H "Authorization: token $GITHUB_TOKEN" \
+    -H "Accept: application/vnd.github.ant-man-preview+json"  \
+    -H "Content-Type: application/json" \
+    https://api.github.com/repos/smallrye/smallrye-mutiny/deployments \
+    --data '{"ref": "master", "environment": "snapshot"}'
+```
+
+For releases, run:
+
+```bash
+curl -X POST -H "Authorization: token $GITHUB_TOKEN" \
+    -H "Accept: application/vnd.github.ant-man-preview+json"  \
+    -H "Content-Type: application/json" \
+    https://api.github.com/repos/smallrye/smallrye-mutiny/deployments \
+    --data '{"ref": "master", "environment": "release"}'
+```
+
+For micro-releases, use:
+
+```bash
+curl -X POST -H "Authorization: token $GITHUB_TOKEN" \
+    -H "Accept: application/vnd.github.ant-man-preview+json"  \
+    -H "Content-Type: application/json" \
+    https://api.github.com/repos/smallrye/smallrye-mutiny/deployments \
+    --data '{"ref": "master", "environment": "release", "payload": {"micro": true}}'
+```
+
+All these commands trigger GitHub _deployment_.
+Check https://github.com/smallrye/smallrye-mutiny/actions to follow the progress. 
+

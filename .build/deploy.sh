@@ -55,7 +55,7 @@ deploy_release() {
     cd documentation
     echo "Cloning gh-pages"
     cd target
-    git clone -b gh-pages git@github.com:smallrye/smallrye-mutiny.git site
+    git clone -b gh-pages "https://cescoffier:${GITHUB_TOKEN}@github.com/smallrye/smallrye-mutiny.git" site
     echo "Copy content"
     yes | cp -R generated-docs/* site
     echo "Pushing documentation"
@@ -63,6 +63,7 @@ deploy_release() {
     git add -A
     git commit -m "update site"
     git push origin gh-pages
+    cd ../../..
 }
 
 init_git
