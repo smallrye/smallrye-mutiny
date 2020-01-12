@@ -1,5 +1,5 @@
+---
 name: Continuous Integration Build
-
 on:
   push:
     branches:
@@ -12,13 +12,13 @@ jobs:
   build_java8:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v1
-    - name: Install JDK 1.8
-      uses: joschi/setup-jdk@v1.0.0
-      with:
-        java-version: 'openjdk8'
-    - name: Build with Maven
-      run: mvn -B clean install --file pom.xml
+      - uses: actions/checkout@v1
+      - name: Install JDK 1.8
+        uses: joschi/setup-jdk@v1.0.0
+        with:
+          java-version: 'openjdk8'
+      - name: Build with Maven
+        run: mvn -B clean install --file pom.xml
 
   build_java11:
     runs-on: ubuntu-latest
@@ -67,10 +67,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_LOGIN }}
         run: |
-          mvn verify sonar:sonar -Pcoverage -Dsonar.projectKey=smallrye_smallrye-mutiny -Dsonar.projectName="SmallRye Mutiny" -Dsonar.organization=smallrye -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=$SONAR_LOGIN
-
-
-
-
-
-
+          mvn verify sonar:sonar -Pcoverage \
+            -Dsonar.projectKey=smallrye_smallrye-mutiny \
+            -Dsonar.projectName="SmallRye Mutiny" \
+            -Dsonar.organization=smallrye \
+            -Dsonar.host.url=https://sonarcloud.io \
+            -Dsonar.login=$SONAR_LOGIN
