@@ -24,9 +24,11 @@ public class PaginationTest {
         // tag::code[]
         PaginatedApi api = new PaginatedApi();
 
-        Multi<String> stream = Uni.createFrom()
-                .completionStage(() -> new AtomicInteger(), state -> api.getPage(state.getAndIncrement()))
-                .repeat().until(list -> list.isEmpty())
+        Multi<String> stream = Multi.createBy().repeating()
+                    .completionStage(
+                            () -> new AtomicInteger(),
+                            state -> api.getPage(state.getAndIncrement()))
+                    .until(list -> list.isEmpty())
                 .onItem().disjoint();
         // end::code[]
         stream.subscribe().withSubscriber(MultiAssertSubscriber.create(10))

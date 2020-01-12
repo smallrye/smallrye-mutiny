@@ -54,4 +54,14 @@ public class MultiCreateBy {
         return new MultiItemCombination();
     }
 
+    /**
+     * Creates a new {@link Multi} by repeating a given function producing {@link io.smallrye.mutiny.Uni unis} or
+     * {@link java.util.concurrent.CompletionStage Completion Stages}.
+     *
+     * @return the object to configure the repetition
+     */
+    public MultiRepetition repeating() {
+        return new MultiRepetition();
+    }
+
 }
