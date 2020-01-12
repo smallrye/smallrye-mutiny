@@ -17,6 +17,8 @@
 import org.kohsuke.github.*
 import java.io.File
 
+val REPO = "smallrye/smallrye-mutiny"
+
 val token = args[0]; // Fail if the first argument is not there
 var micro = false
 for (arg in args) {
@@ -30,7 +32,7 @@ if (micro) {
 }
 
 val github = GitHubBuilder().withOAuthToken(token).build()
-val repository = github.getRepository("smallrye/smallrye-mutiny")
+val repository = github.getRepository(REPO)
 println("Listing tags of ${repository.getName()}")
 val tags = repository.listTags().asList()
 failIfPredicate({ tags.isNullOrEmpty() }, "No tags in repository ${repository.getName()}")
@@ -52,6 +54,13 @@ failIfPredicate( { existingMilestone == null }, "There is no milestone with name
 
 println("Checking the number of open issues in the milestone ${newVersion}")
 failIfPredicate( { existingMilestone?.getOpenIssues() != 0 }, "The milestone ${newVersion} has ${existingMilestone?.getOpenIssues()} issues opened, check check ${existingMilestone?.getHtmlUrl()}")
+
+println("Write computed version to /tmp/release-version")
+File("/tmp/release-version").writeText(newVersion)
+
+if (micro) {
+    File("/tmp/micro").createNewFile()
+}
 
 fun nextVersion(tag: GHTag) : String {
     // Retrieve the associated release
