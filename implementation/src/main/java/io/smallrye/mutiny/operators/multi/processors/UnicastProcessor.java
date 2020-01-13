@@ -1,21 +1,20 @@
 package io.smallrye.mutiny.operators.multi.processors;
 
-import java.util.Queue;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.atomic.AtomicReference;
-
-import org.reactivestreams.Processor;
-import org.reactivestreams.Subscriber;
-import org.reactivestreams.Subscription;
-
 import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.helpers.Subscriptions;
 import io.smallrye.mutiny.helpers.queues.SpscLinkedArrayQueue;
 import io.smallrye.mutiny.operators.AbstractMulti;
 import io.smallrye.mutiny.subscription.BackPressureFailure;
 import io.smallrye.mutiny.subscription.MultiSubscriber;
+import org.reactivestreams.Processor;
+import org.reactivestreams.Subscriber;
+import org.reactivestreams.Subscription;
+
+import java.util.Queue;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Implementation of a processor using a queue to store items and allows a single subscriber to receive
@@ -51,9 +50,9 @@ public class UnicastProcessor<T> extends AbstractMulti<T> implements Processor<T
     /**
      * Creates a new {@link UnicastProcessor} using the given queue.
      *
-     * @param queue the queue, must not be {@code null}
+     * @param queue         the queue, must not be {@code null}
      * @param onTermination the termination callback, can be {@code null}
-     * @param <I> the type of item
+     * @param <I>           the type of item
      * @return the unicast processor
      */
     public static <I> UnicastProcessor<I> create(Queue<I> queue, Runnable onTermination) {
@@ -76,7 +75,7 @@ public class UnicastProcessor<T> extends AbstractMulti<T> implements Processor<T
 
         final Queue<T> q = queue;
 
-        for (;;) {
+        for (; ; ) {
 
             long r = requested.get();
             long e = 0L;
@@ -123,7 +122,7 @@ public class UnicastProcessor<T> extends AbstractMulti<T> implements Processor<T
         }
 
         int missed = 1;
-        for (;;) {
+        for (; ; ) {
             Subscriber<? super T> actual = downstream.get();
             if (actual != null) {
                 drainWithDownstream(actual);
@@ -232,6 +231,17 @@ public class UnicastProcessor<T> extends AbstractMulti<T> implements Processor<T
             if (wip.getAndIncrement() == 0) {
                 queue.clear();
             }
+            downstream.set(null);
         }
+    }
+
+    /**
+     * Checks whether there is a subscriber listening for the emitted events.
+     * Mostly for testing purpose.
+     *
+     * @return {@code true} if there is a subscriber, {@code false} otherwise
+     */
+    public boolean hasSubscriber() {
+        return downstream.get() != null;
     }
 }

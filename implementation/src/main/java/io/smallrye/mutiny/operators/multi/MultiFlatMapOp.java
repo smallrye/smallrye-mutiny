@@ -53,7 +53,8 @@ public final class MultiFlatMapOp<I, O> extends AbstractMultiOperator<I, O> {
                 maxConcurrency,
                 mainQueueSupplier,
                 innerQueueSupplier);
-        upstream.subscribe(Infrastructure.onMultiSubscription(upstream, new SafeSubscriber<>(new SerializedSubscriber<>(sub))));
+        upstream.subscribe(
+                Infrastructure.onMultiSubscription(upstream, new SafeSubscriber<>(new SerializedSubscriber<>(sub))));
     }
 
     public static final class FlatMapMainSubscriber<I, O> extends FlatMapManager<FlatMapInner<O>>
@@ -197,6 +198,13 @@ public final class MultiFlatMapOp<I, O> extends AbstractMultiOperator<I, O> {
             }
             Subscriptions.addFailure(failures, failure);
             done = true;
+            if (!delayError) {
+                for (FlatMapInner<O> inner : inners.getAndSet(terminated())) {
+                    if (inner != null) {
+                        inner.cancel(false);
+                    }
+                }
+            }
             drain();
         }
 
@@ -264,7 +272,7 @@ public final class MultiFlatMapOp<I, O> extends AbstractMultiOperator<I, O> {
 
             for (;;) {
 
-                boolean d = done;
+                boolean d;
 
                 FlatMapInner<O>[] as = get();
 
@@ -564,11 +572,6 @@ public final class MultiFlatMapOp<I, O> extends AbstractMultiOperator<I, O> {
         volatile Queue<O> queue;
 
         volatile boolean done;
-
-        /**
-         * Represents the optimization mode of this inner subscriber.
-         */
-        int sourceMode;
 
         int index;
 

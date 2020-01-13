@@ -1,6 +1,8 @@
 package io.smallrye.mutiny.operators;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -14,6 +16,7 @@ import org.testng.annotations.Test;
 import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.operators.multi.processors.UnicastProcessor;
 import io.smallrye.mutiny.test.MultiAssertSubscriber;
 
 public class MultiFlatMapToPublisherTest {
@@ -405,6 +408,38 @@ public class MultiFlatMapToPublisherTest {
                 .collectItems().asList().await().indefinitely();
 
         assertThat(list).hasSize(6).containsExactly(1, 2, 2, 3, 3, 4);
+    }
+
+    @Test
+    public void testThatUpstreamFailureCancelledInnersAndIsPropagated() {
+        UnicastProcessor<Integer> processor1 = UnicastProcessor.create();
+        UnicastProcessor<Integer> processor2 = UnicastProcessor.create();
+
+        MultiAssertSubscriber<Integer> subscriber = processor1
+                .flatMap(x -> processor2)
+                .subscribe().withSubscriber(MultiAssertSubscriber.create(10));
+
+        processor1.onNext(1);
+        assertTrue(processor2.hasSubscriber());
+        processor1.onError(new IOException("boom"));
+        assertFalse(processor2.hasSubscriber());
+        subscriber.assertHasFailedWith(IOException.class, "boom");
+    }
+
+    @Test
+    public void testThatUpstreamIsCancelledWhenInnerFails() {
+        UnicastProcessor<Integer> processor1 = UnicastProcessor.create();
+        UnicastProcessor<Integer> processor2 = UnicastProcessor.create();
+
+        MultiAssertSubscriber<Integer> subscriber = processor1
+                .flatMap(x -> processor2)
+                .subscribe().withSubscriber(MultiAssertSubscriber.create(10));
+
+        processor1.onNext(1);
+        assertTrue(processor2.hasSubscriber());
+        processor2.onError(new IOException("boom"));
+        assertFalse(processor1.hasSubscriber());
+        subscriber.assertHasFailedWith(IOException.class, "boom");
     }
 
 }
