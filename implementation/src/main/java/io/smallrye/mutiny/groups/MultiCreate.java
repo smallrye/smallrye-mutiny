@@ -7,7 +7,6 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.IntStream;
@@ -214,7 +213,7 @@ public class MultiCreate {
      * For each items from the supplied stream, an item event is fired. When all the items have been emitted,
      * the completion event is fired.
      * If the supplier throws an exception, a failure event with the exception is fired.
-     * the stream is consumed sequentially.
+     * The stream is consumed sequentially.
      *
      * @param supplier the item supplier, must not be {@code null}, must not produce {@code null}
      * @param <T> the type of item emitted by the produced Multi
@@ -222,34 +221,7 @@ public class MultiCreate {
      */
     public <T> Multi<T> items(Supplier<? extends Stream<? extends T>> supplier) {
         Supplier<? extends Stream<? extends T>> actual = nonNull(supplier, "supplier");
-        return emitter(emitter -> {
-            Stream<? extends T> stream;
-            try {
-                stream = actual.get();
-            } catch (RuntimeException e) {
-                // Exception from the supplier, propagate it.
-                emitter.fail(e);
-                return;
-            }
-            if (stream == null) {
-                emitter.fail(new NullPointerException(SUPPLIER_PRODUCED_NULL));
-                return;
-            }
-            AtomicBoolean failed = new AtomicBoolean();
-            stream
-                    .sequential()
-                    .forEach(it -> {
-                        if (it == null) {
-                            failed.set(true);
-                            emitter.fail(new IllegalArgumentException("The produceIterable contained a `null` value"));
-                            return;
-                        }
-                        emitter.emit(it);
-                    });
-            if (!failed.get()) {
-                emitter.complete();
-            }
-        });
+        return new StreamBasedMulti<>(actual);
     }
 
     /**
@@ -316,7 +288,6 @@ public class MultiCreate {
      * @return the new {@link Multi}
      */
     public <T> Multi<T> items(Stream<T> items) {
-        // TODO Consider implementing a publisher avoiding buffering items.
         Stream<T> stream = nonNull(items, "items");
         return items(() -> stream);
     }
