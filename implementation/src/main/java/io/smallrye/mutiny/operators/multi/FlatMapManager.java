@@ -5,7 +5,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 abstract class FlatMapManager<T> {
 
-    private AtomicReference<T[]> inners = new AtomicReference<>(empty());
+    protected AtomicReference<T[]> inners = new AtomicReference<>(empty());
 
     private int[] free = FREE_EMPTY;
 
