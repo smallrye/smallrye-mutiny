@@ -1,4 +1,5 @@
 #!/usr/bin/env kscript
+@file:MavenRepository("maven-central","https://repo1.maven.org/maven2/")
 @file:DependsOn("org.kohsuke:github-api:1.101")
 
 /**
