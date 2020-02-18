@@ -102,7 +102,7 @@ public class MultiFlatMapCompletionStageTckTest extends AbstractPublisherTck<Int
     public void flatMapCsStageShouldHandleErrorsThrownByCallback() {
         CompletableFuture<Void> cancelled = new CompletableFuture<>();
         CompletionStage<List<Object>> result = this.infiniteStream()
-                .on().termination((fail, can) -> cancelled.complete(null))
+                .on().termination(() -> cancelled.complete(null))
                 .onItem().produceCompletionStage(i -> {
                     throw new QuietRuntimeException("failed");
                 }).merge()
@@ -116,7 +116,7 @@ public class MultiFlatMapCompletionStageTckTest extends AbstractPublisherTck<Int
     public void flatMapCsStageShouldHandleFailedCompletionStages() {
         CompletableFuture<Void> cancelled = new CompletableFuture<>();
         CompletionStage<List<Object>> result = this.infiniteStream()
-                .on().termination((fail, can) -> cancelled.complete(null))
+                .on().termination(() -> cancelled.complete(null))
                 .onItem().produceCompletionStage(i -> {
                     CompletableFuture<Object> failed = new CompletableFuture<>();
                     failed.completeExceptionally(new QuietRuntimeException("failed"));
@@ -132,7 +132,7 @@ public class MultiFlatMapCompletionStageTckTest extends AbstractPublisherTck<Int
     public void flatMapCsStageShouldFailIfNullIsReturned() {
         CompletableFuture<Void> cancelled = new CompletableFuture<>();
         CompletionStage<List<Object>> result = this.infiniteStream()
-                .on().termination((fail, can) -> cancelled.complete(null))
+                .on().termination(() -> cancelled.complete(null))
                 .onItem().produceCompletionStage(i -> CompletableFuture.completedFuture(null)).merge()
                 .collectItems().asList()
                 .subscribeAsCompletionStage();

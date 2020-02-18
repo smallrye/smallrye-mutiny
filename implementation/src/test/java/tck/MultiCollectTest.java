@@ -104,7 +104,7 @@ public class MultiCollectTest extends AbstractTck {
     public void collectStageShouldPropagateErrorsFromAccumulator() {
         CompletableFuture<Void> cancelled = new CompletableFuture<>();
         CompletionStage<String> result = infiniteStream()
-                .on().termination((failed, cancel) -> cancelled.complete(null))
+                .on().termination(() -> cancelled.complete(null))
                 .collectItems().with(Collector.of(() -> "", (a, b) -> {
                     throw new QuietRuntimeException("failed");
                 }, (a, b) -> a + b, Function.identity()))

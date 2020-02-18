@@ -59,7 +59,7 @@ public class MultiDistinctTckTest extends AbstractPublisherTck<Integer> {
         }
         CompletionStage<List<ObjectThatThrowsFromEquals>> result = Multi.createFrom().items(
                 new ObjectThatThrowsFromEquals(), new ObjectThatThrowsFromEquals())
-                .on().termination((e, c) -> cancelled.complete(null))
+                .on().termination(() -> cancelled.complete(null))
                 .transform().byDroppingDuplicates().collectItems().asList().subscribeAsCompletionStage();
         await(cancelled);
         await(result);
@@ -69,7 +69,7 @@ public class MultiDistinctTckTest extends AbstractPublisherTck<Integer> {
     public void distinctStageShouldPropagateCancel() {
         CompletableFuture<Void> cancelled = new CompletableFuture<>();
         infiniteStream()
-                .on().termination((e, c) -> cancelled.complete(null))
+                .on().termination(() -> cancelled.complete(null))
                 .transform().byDroppingDuplicates().subscribe().withSubscriber(new Subscriptions.CancelledSubscriber<>());
         await(cancelled);
     }
