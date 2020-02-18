@@ -616,7 +616,7 @@ public class MultiFromResourceTest {
                 .resource(() -> 1, x -> Multi.createFrom().range(x, 11))
                 .withFinalizer(r -> {
                     return Uni.createFrom().item("ok")
-                            .on().subscription(s -> subscribed.set(true))
+                            .on().subscribed(s -> subscribed.set(true))
                             .onItem().ignore().andContinueWithNull();
                 });
         multi.subscribe().withSubscriber(MultiAssertSubscriber.create(20))
@@ -632,7 +632,7 @@ public class MultiFromResourceTest {
                 .resource(() -> 1, x -> Multi.createFrom().range(x, 11).onCompletion().failWith(new IOException("boom")))
                 .withFinalizer(r -> {
                     return Uni.createFrom().item("ok")
-                            .on().subscription(s -> subscribed.set(true))
+                            .on().subscribed(s -> subscribed.set(true))
                             .onItem().ignore().andContinueWithNull();
                 });
         multi.subscribe().withSubscriber(MultiAssertSubscriber.create(20))
@@ -648,7 +648,7 @@ public class MultiFromResourceTest {
                 .resource(() -> 1, x -> Multi.createFrom().ticks().every(Duration.ofMillis(10)))
                 .withFinalizer(r -> {
                     return Uni.createFrom().item("ok")
-                            .on().subscription(s -> subscribed.set(true))
+                            .on().subscribed(s -> subscribed.set(true))
                             .onItem().ignore().andContinueWithNull();
                 })
                 .transform().byTakingFirstItems(5);
@@ -723,14 +723,14 @@ public class MultiFromResourceTest {
 
         public Uni<Void> commit() {
             return Uni.createFrom().item((Void) null)
-                    .on().subscription(s -> onCompleteSubscribed.set(true));
+                    .on().subscribed(s -> onCompleteSubscribed.set(true));
         }
 
         public Uni<Void> commitFailure() {
             return Uni.createFrom().item((Void) null)
                     .onItem().delayIt().by(DELAY)
                     .onItem().failWith(x -> new IOException("commit failed"))
-                    .on().subscription(s -> onCompleteSubscribed.set(true));
+                    .on().subscribed(s -> onCompleteSubscribed.set(true));
         }
 
         public Uni<Void> commitReturningNull() {
@@ -740,14 +740,14 @@ public class MultiFromResourceTest {
         public Uni<Void> rollback(Throwable failure) {
             return Uni.createFrom().item((Void) null)
                     .onItem().invoke(x -> this.failure.set(failure))
-                    .on().subscription(s -> onFailureSubscribed.set(true));
+                    .on().subscribed(s -> onFailureSubscribed.set(true));
         }
 
         public Uni<Void> rollbackDelay(Throwable failure) {
             return Uni.createFrom().item((Void) null)
                     .onItem().invoke(x -> this.failure.set(failure))
                     .onItem().delayIt().by(DELAY)
-                    .on().subscription(s -> onFailureSubscribed.set(true));
+                    .on().subscribed(s -> onFailureSubscribed.set(true));
         }
 
         public Uni<Void> rollbackFailure(Throwable failure) {
@@ -755,7 +755,7 @@ public class MultiFromResourceTest {
                     .onItem().invoke(x -> this.failure.set(failure))
                     .onItem().delayIt().by(DELAY)
                     .onItem().failWith(x -> new IOException("rollback failed"))
-                    .on().subscription(s -> onFailureSubscribed.set(true));
+                    .on().subscribed(s -> onFailureSubscribed.set(true));
         }
 
         public Uni<Void> rollbackReturningNull(Throwable f) {
@@ -765,7 +765,7 @@ public class MultiFromResourceTest {
 
         public Uni<Void> cancel() {
             return Uni.createFrom().item((Void) null)
-                    .on().subscription(s -> onCancelSubscribed.set(true));
+                    .on().subscribed(s -> onCancelSubscribed.set(true));
         }
     }
 }
