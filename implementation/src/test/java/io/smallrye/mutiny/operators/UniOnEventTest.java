@@ -24,7 +24,7 @@ public class UniOnEventTest {
         UniAssertSubscriber<? super Integer> subscriber = Uni.createFrom().item(1)
                 .onItem().invoke(Item::set)
                 .onFailure().invoke(failure::set)
-                .on().subscription(subscription::set)
+                .on().subscribed(subscription::set)
                 .on().termination((r, f, c) -> terminate.set(r))
                 .subscribe().withSubscriber(UniAssertSubscriber.create());
 
@@ -44,7 +44,7 @@ public class UniOnEventTest {
         UniAssertSubscriber<? super Integer> subscriber = Uni.createFrom().<Integer> failure(new IOException("boom"))
                 .onItem().invoke(Item::set)
                 .onFailure().invoke(failure::set)
-                .on().subscription(subscription::set)
+                .on().subscribed(subscription::set)
                 .on().termination((r, f, c) -> terminate.set(f))
                 .subscribe().withSubscriber(UniAssertSubscriber.create());
 
@@ -67,7 +67,7 @@ public class UniOnEventTest {
                     throw new IllegalStateException("boom");
                 })
                 .onFailure().invoke(failure::set)
-                .on().subscription(subscription::set)
+                .on().subscribed(subscription::set)
                 .on().termination((r, f, c) -> {
                     if (r != null) {
                         ItemFromTerminate.set(r);
@@ -95,7 +95,7 @@ public class UniOnEventTest {
                 .onFailure().invoke(e -> {
                     throw new IllegalStateException("boom");
                 })
-                .on().subscription(subscription::set)
+                .on().subscribed(subscription::set)
                 .on().termination((r, f, c) -> {
                     if (r != null) {
                         ItemFromTerminate.set(r);
@@ -116,7 +116,7 @@ public class UniOnEventTest {
     @Test
     public void testWhenOnSubscriptionThrowsAnException() {
         UniAssertSubscriber<? super Integer> subscriber = Uni.createFrom().item(1)
-                .on().subscription(s -> {
+                .on().subscribed(s -> {
                     throw new IllegalStateException("boom");
                 }).subscribe().withSubscriber(UniAssertSubscriber.create());
 

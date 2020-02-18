@@ -37,7 +37,7 @@ public class UniOnEvent<T> {
      * @param consumer the callback, must not be {@code null}
      * @return a new {@link Uni}
      */
-    public Uni<T> subscription(Consumer<? super UniSubscription> consumer) {
+    public Uni<T> subscribed(Consumer<? super UniSubscription> consumer) {
         return Infrastructure.onUniCreation(new UniOnSubscription<>(upstream, nonNull(consumer, "consumer")));
     }
 
