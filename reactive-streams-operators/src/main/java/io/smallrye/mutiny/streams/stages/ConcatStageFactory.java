@@ -44,7 +44,7 @@ public class ConcatStageFactory implements PublisherStageFactory<Stage.Concat> {
         public Multi<O> get() {
             CancellablePublisher<O> cancellable = new CancellablePublisher<>(engine.buildPublisher(second));
             return Multi.createBy().concatenating().streams(engine.buildPublisher(first), cancellable)
-                    .on().termination((err, cancelled) -> cancellable.cancelIfNotSubscribed());
+                    .on().termination(cancellable::cancelIfNotSubscribed);
         }
     }
 }
