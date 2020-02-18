@@ -68,6 +68,19 @@ public class UniOnEvent<T> {
     }
 
     /**
+     * Attaches an action that is executed when the {@link Uni} emits an item or a failure or when the subscriber
+     * cancels the subscription. Unlike {@link #termination(Functions.TriConsumer)}, the callback does not receive
+     * the item, failure or cancellation.
+     *
+     * @param action the action to run, must not be {@code null}
+     * @return the new {@link Uni}
+     */
+    public Uni<T> termination(Runnable action) {
+        Runnable runnable = nonNull(action, "action");
+        return Infrastructure.onUniCreation(new UniOnTermination<>(upstream, (i, f, c) -> runnable.run()));
+    }
+
+    /**
      * Configures the action to execute when the observed {@link Uni} emits the item (potentially {@code null}).
      *
      * <p>
@@ -90,12 +103,12 @@ public class UniOnEvent<T> {
     }
 
     /**
-     * Like {@link #onFailure(Predicate)} but applied to all failures fired by the upstream uni.
+     * Like {@link #failure(Predicate)} but applied to all failures fired by the upstream uni.
      * It allows configuring the on failure behavior (recovery, retry...).
      *
      * @return a UniOnFailure on which you can specify the on failure action
      */
-    public UniOnFailure<T> onFailure() {
+    public UniOnFailure<T> failure() {
         return upstream.onFailure();
     }
 
@@ -112,7 +125,7 @@ public class UniOnEvent<T> {
      * @param predicate the predicate, {@code null} means applied to all failures
      * @return a UniOnFailure configured with the given predicate on which you can specify the on failure action
      */
-    public UniOnFailure<T> onFailure(Predicate<? super Throwable> predicate) {
+    public UniOnFailure<T> failure(Predicate<? super Throwable> predicate) {
         return upstream.onFailure(predicate);
     }
 
@@ -129,7 +142,7 @@ public class UniOnEvent<T> {
      * @param typeOfFailure the class of exception, must not be {@code null}
      * @return a UniOnFailure configured with the given predicate on which you can specify the on failure action
      */
-    public UniOnFailure<T> onFailure(Class<? extends Throwable> typeOfFailure) {
+    public UniOnFailure<T> failure(Class<? extends Throwable> typeOfFailure) {
         return upstream.onFailure(typeOfFailure);
     }
 
