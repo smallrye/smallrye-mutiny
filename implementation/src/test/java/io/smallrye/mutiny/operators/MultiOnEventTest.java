@@ -27,6 +27,7 @@ public class MultiOnEventTest {
         AtomicBoolean completion = new AtomicBoolean();
         AtomicLong requests = new AtomicLong();
         AtomicBoolean termination = new AtomicBoolean();
+        AtomicBoolean termination2 = new AtomicBoolean();
         AtomicBoolean cancellation = new AtomicBoolean();
 
         Multi.createFrom().item(1)
@@ -35,6 +36,7 @@ public class MultiOnEventTest {
                 .on().failure().invoke(failure::set)
                 .on().completion(() -> completion.set(true))
                 .on().termination((f, c) -> termination.set(f == null && !c))
+                .on().termination(() -> termination2.set(true))
                 .on().request(requests::set)
                 .on().cancellation(() -> cancellation.set(true))
                 .subscribe(ts);
@@ -49,6 +51,7 @@ public class MultiOnEventTest {
         assertThat(failure.get()).isNull();
         assertThat(completion.get()).isTrue();
         assertThat(termination.get()).isTrue();
+        assertThat(termination2.get()).isTrue();
         assertThat(requests.get()).isEqualTo(20);
         assertThat(cancellation.get()).isFalse();
     }
@@ -61,6 +64,7 @@ public class MultiOnEventTest {
         AtomicBoolean completion = new AtomicBoolean();
         AtomicLong requests = new AtomicLong();
         AtomicBoolean termination = new AtomicBoolean();
+        AtomicBoolean termination2 = new AtomicBoolean();
         AtomicBoolean cancellation = new AtomicBoolean();
 
         Multi.createFrom().<Integer> failure(new IOException("boom"))
@@ -69,6 +73,7 @@ public class MultiOnEventTest {
                 .on().failure().invoke(failure::set)
                 .on().completion(() -> completion.set(true))
                 .on().termination((f, c) -> termination.set(f != null))
+                .on().termination(() -> termination2.set(true))
                 .on().request(requests::set)
                 .on().cancellation(() -> cancellation.set(true))
                 .subscribe().withSubscriber(MultiAssertSubscriber.create())
@@ -79,6 +84,7 @@ public class MultiOnEventTest {
         assertThat(failure.get()).isInstanceOf(IOException.class).hasMessageContaining("boom");
         assertThat(completion.get()).isFalse();
         assertThat(termination.get()).isTrue();
+        assertThat(termination2.get()).isTrue();
         assertThat(requests.get()).isEqualTo(0);
         assertThat(cancellation.get()).isFalse();
     }
@@ -186,6 +192,7 @@ public class MultiOnEventTest {
         AtomicBoolean completion = new AtomicBoolean();
         AtomicLong requests = new AtomicLong();
         AtomicBoolean termination = new AtomicBoolean();
+        AtomicBoolean termination2 = new AtomicBoolean();
         AtomicBoolean cancellation = new AtomicBoolean();
 
         Multi.createFrom().<Integer> empty()
@@ -194,6 +201,7 @@ public class MultiOnEventTest {
                 .on().failure().invoke(failure::set)
                 .on().completion(() -> completion.set(true))
                 .on().termination((f, c) -> termination.set(f == null && !c))
+                .on().termination(() -> termination2.set(true))
                 .on().request(requests::set)
                 .on().cancellation(() -> cancellation.set(true))
                 .subscribe().withSubscriber(MultiAssertSubscriber.create())
@@ -205,6 +213,7 @@ public class MultiOnEventTest {
         assertThat(failure.get()).isNull();
         assertThat(completion.get()).isTrue();
         assertThat(termination.get()).isTrue();
+        assertThat(termination2.get()).isTrue();
         assertThat(requests.get()).isEqualTo(0);
         assertThat(cancellation.get()).isFalse();
     }
@@ -217,6 +226,7 @@ public class MultiOnEventTest {
         AtomicBoolean completion = new AtomicBoolean();
         AtomicLong requests = new AtomicLong();
         AtomicBoolean termination = new AtomicBoolean();
+        AtomicBoolean termination2 = new AtomicBoolean();
         AtomicBoolean cancellation = new AtomicBoolean();
 
         MultiAssertSubscriber<Integer> subscriber = Multi.createFrom().<Integer> nothing()
@@ -225,6 +235,7 @@ public class MultiOnEventTest {
                 .on().failure().invoke(failure::set)
                 .on().completion(() -> completion.set(true))
                 .on().termination((f, c) -> termination.set(f == null && c))
+                .on().termination(() -> termination2.set(true))
                 .on().request(requests::set)
                 .on().cancellation(() -> cancellation.set(true))
                 .subscribe().withSubscriber(MultiAssertSubscriber.create(10))
@@ -236,11 +247,13 @@ public class MultiOnEventTest {
         assertThat(failure.get()).isNull();
         assertThat(completion.get()).isFalse();
         assertThat(termination.get()).isFalse();
+        assertThat(termination2.get()).isFalse();
         assertThat(requests.get()).isEqualTo(10);
         assertThat(cancellation.get()).isFalse();
 
         subscriber.cancel();
         assertThat(termination.get()).isTrue();
+        assertThat(termination2.get()).isTrue();
         assertThat(cancellation.get()).isTrue();
     }
 
@@ -306,6 +319,19 @@ public class MultiOnEventTest {
         AtomicInteger called = new AtomicInteger();
         Multi.createFrom().item(1)
                 .on().termination((f, c) -> {
+                    called.incrementAndGet();
+                    throw new IllegalArgumentException("boom");
+                }).subscribe().withSubscriber(MultiAssertSubscriber.create(1))
+                .assertHasFailedWith(IllegalArgumentException.class, "boom");
+
+        assertThat(called).hasValue(1);
+    }
+
+    @Test
+    public void testThatAFailureInTerminationDoesNotRunTerminationTwice2() {
+        AtomicInteger called = new AtomicInteger();
+        Multi.createFrom().item(1)
+                .on().termination(() -> {
                     called.incrementAndGet();
                     throw new IllegalArgumentException("boom");
                 }).subscribe().withSubscriber(MultiAssertSubscriber.create(1))

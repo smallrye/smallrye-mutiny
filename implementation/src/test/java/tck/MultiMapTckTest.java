@@ -29,7 +29,7 @@ public class MultiMapTckTest extends AbstractPublisherTck<Integer> {
     public void mapStageShouldHandleExceptions() {
         CompletableFuture<Void> cancelled = new CompletableFuture<>();
         CompletionStage<List<Object>> result = infiniteStream()
-                .on().termination((fail, can) -> cancelled.complete(null))
+                .on().termination(() -> cancelled.complete(null))
                 .map(foo -> {
                     throw new QuietRuntimeException("failed");
                 })
@@ -51,7 +51,7 @@ public class MultiMapTckTest extends AbstractPublisherTck<Integer> {
     public void mapStageShouldFailIfNullReturned() {
         CompletableFuture<Void> cancelled = new CompletableFuture<>();
         CompletionStage<List<Object>> result = infiniteStream()
-                .on().termination((fail, can) -> cancelled.complete(null))
+                .on().termination(() -> cancelled.complete(null))
                 .map(t -> null)
                 .collectItems().asList().subscribeAsCompletionStage();
         await(cancelled);

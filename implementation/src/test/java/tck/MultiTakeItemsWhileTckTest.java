@@ -37,7 +37,7 @@ public class MultiTakeItemsWhileTckTest extends AbstractPublisherTck<Long> {
     public void takeWhileShouldCancelUpStreamWhenDone() {
         CompletableFuture<Void> cancelled = new CompletableFuture<>();
         infiniteStream()
-                .on().termination((f, c) -> cancelled.complete(null))
+                .on().termination(() -> cancelled.complete(null))
                 .transform().byTakingItemsWhile(t -> false)
                 .collectItems().asList()
                 .subscribeAsCompletionStage();
@@ -65,7 +65,7 @@ public class MultiTakeItemsWhileTckTest extends AbstractPublisherTck<Long> {
     public void takeWhileStageShouldHandleErrors() {
         CompletableFuture<Void> cancelled = new CompletableFuture<>();
         CompletionStage<List<Integer>> result = infiniteStream()
-                .on().termination((f, c) -> cancelled.complete(null))
+                .on().termination(() -> cancelled.complete(null))
                 .transform().byTakingItemsWhile(i -> {
                     throw new QuietRuntimeException("failed");
                 })

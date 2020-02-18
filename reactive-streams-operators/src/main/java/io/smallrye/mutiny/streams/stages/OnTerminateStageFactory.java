@@ -21,6 +21,6 @@ public class OnTerminateStageFactory implements ProcessingStageFactory<Stage.OnT
     public <I, O> ProcessingStage<I, O> create(Engine engine, Stage.OnTerminate stage) {
         Runnable runnable = Objects.requireNonNull(stage).getAction();
         Objects.requireNonNull(runnable);
-        return source -> (Multi<O>) source.on().termination((t, e) -> runnable.run());
+        return source -> (Multi<O>) source.on().termination(runnable);
     }
 }

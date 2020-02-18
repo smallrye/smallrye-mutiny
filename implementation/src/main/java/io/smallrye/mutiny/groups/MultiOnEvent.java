@@ -105,6 +105,28 @@ public class MultiOnEvent<T> {
     }
 
     /**
+     * Attaches an action that is executed when the {@link Multi} emits a completion or a failure or when the subscriber
+     * cancels the subscription. Unlike {@link #termination(BiConsumer)}, the callback does not receive the failure or
+     * cancellation details.
+     *
+     * @param action the action to execute when the streams completes, fails or the subscription gets cancelled. Must
+     *        not be {@code null}.
+     * @return the new {@link Multi}
+     */
+    public Multi<T> termination(Runnable action) {
+        Runnable runnable = nonNull(action, "action");
+        return Infrastructure.onMultiCreation(new MultiSignalConsumerOp<>(
+                upstream,
+                null,
+                null,
+                null,
+                null,
+                (f, c) -> runnable.run(),
+                null,
+                null));
+    }
+
+    /**
      * Configures the action to execute when the observed {@link Multi} emits an item.
      *
      * <p>
