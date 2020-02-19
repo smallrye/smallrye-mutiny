@@ -30,6 +30,7 @@ public abstract class AbstractMulti<T> implements Multi<T> {
     @Override
     public void subscribe(Subscriber<? super T> subscriber) {
         if (subscriber == null) {
+            // NOTE The Reactive Streams TCK mandates throwing an NPE.
             throw new NullPointerException("Subscriber is `null`");
         }
 

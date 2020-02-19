@@ -7,6 +7,7 @@ import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.groups.*;
 import io.smallrye.mutiny.helpers.ParameterValidation;
+import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.tuples.Tuple2;
 
 public abstract class AbstractUni<T> implements Uni<T> {
@@ -50,11 +51,12 @@ public abstract class AbstractUni<T> implements Uni<T> {
 
     @Override
     public <T2> Uni<Tuple2<T, T2>> and(Uni<T2> other) {
-        return new UniAndGroup<>(this).uni(ParameterValidation.nonNull(other, "other")).asTuple();
+        return Infrastructure.onUniCreation(
+                new UniAndGroup<>(this).uni(ParameterValidation.nonNull(other, "other")).asTuple());
     }
 
     @Override
-    public UniOr or() {
+    public UniOr<T> or() {
         return new UniOr<>(this);
     }
 
@@ -65,17 +67,19 @@ public abstract class AbstractUni<T> implements Uni<T> {
 
     @Override
     public Uni<T> emitOn(Executor executor) {
-        return new UniEmitOn<>(this, ParameterValidation.nonNull(executor, "executor"));
+        return Infrastructure.onUniCreation(
+                new UniEmitOn<>(this, ParameterValidation.nonNull(executor, "executor")));
     }
 
     @Override
     public Uni<T> subscribeOn(Executor executor) {
-        return new UniCallSubscribeOn<>(this, ParameterValidation.nonNull(executor, "executor"));
+        return Infrastructure.onUniCreation(
+                new UniCallSubscribeOn<>(this, ParameterValidation.nonNull(executor, "executor")));
     }
 
     @Override
     public Uni<T> cache() {
-        return new UniCache<>(this);
+        return Infrastructure.onUniCreation(new UniCache<>(this));
     }
 
     @Override
