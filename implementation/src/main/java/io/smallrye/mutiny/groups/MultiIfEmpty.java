@@ -52,7 +52,7 @@ public class MultiIfEmpty<T> {
             Throwable throwable;
             try {
                 throwable = supplier.get();
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 emitter.fail(e);
                 return;
             }
@@ -154,7 +154,7 @@ public class MultiIfEmpty<T> {
         Iterable<? extends T> iterable;
         try {
             iterable = supplier.get();
-        } catch (Exception e) {
+        } catch (Throwable e) {
             return Multi.createFrom().failure(e);
         }
         if (iterable == null) {

@@ -23,7 +23,7 @@ public class UniOnSubscription<T> extends UniOperator<T, T> {
             public void onSubscribe(UniSubscription subscription) {
                 try {
                     consumer.accept(subscription);
-                } catch (Exception e) {
+                } catch (Throwable e) {
                     subscriber.onSubscribe(CANCELLED);
                     subscriber.onFailure(e);
                     return;

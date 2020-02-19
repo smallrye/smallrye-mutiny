@@ -27,7 +27,7 @@ public class UniFlatMapCompletionStageOnItem<I, O> extends UniOperator<I, O> {
         CompletionStage<? extends O> outcome;
         try {
             outcome = mapper.apply(input);
-        } catch (Exception e) {
+        } catch (Throwable e) {
             subscriber.onFailure(e);
             return;
         }

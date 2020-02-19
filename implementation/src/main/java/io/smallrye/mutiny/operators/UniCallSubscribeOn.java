@@ -24,7 +24,7 @@ public class UniCallSubscribeOn<I> extends UniOperator<I, I> {
         SubscribeOnUniSubscriber downstream = new SubscribeOnUniSubscriber(subscriber);
         try {
             executor.execute(downstream);
-        } catch (Exception e) {
+        } catch (Throwable e) {
             subscriber.onSubscribe(CANCELLED);
             subscriber.onFailure(e);
         }

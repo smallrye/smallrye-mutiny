@@ -106,7 +106,7 @@ public class BufferItemMultiEmitter<T> extends BaseMultiEmitter<T> {
 
                 try {
                     downstream.onItem(o);
-                } catch (Exception x) {
+                } catch (Throwable x) {
                     cancel();
                 }
 

@@ -22,7 +22,7 @@ public class UniCreateFromDeferredSupplier<T> extends UniOperator<Void, T> {
         Uni<? extends T> uni;
         try {
             uni = supplier.get();
-        } catch (Exception e) {
+        } catch (Throwable e) {
             subscriber.onSubscribe(CANCELLED);
             subscriber.onFailure(e);
             return;

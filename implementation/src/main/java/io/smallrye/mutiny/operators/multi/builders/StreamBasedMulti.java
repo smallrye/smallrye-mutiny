@@ -28,7 +28,7 @@ public class StreamBasedMulti<T> extends AbstractMulti<T> {
 
         try {
             stream = supplier.get();
-        } catch (Exception e) {
+        } catch (Throwable e) {
             Subscriptions.fail(downstream, e);
             return;
         }

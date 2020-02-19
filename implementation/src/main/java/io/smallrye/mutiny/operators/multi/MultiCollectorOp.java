@@ -35,7 +35,7 @@ public final class MultiCollectorOp<T, A, R> extends AbstractMultiOperator<T, R>
             initialValue = collector.supplier().get();
             accumulator = collector.accumulator();
             finisher = collector.finisher();
-        } catch (Exception ex) {
+        } catch (Throwable ex) {
             Subscriptions.fail(downstream, ex, upstream);
             return;
         }
@@ -75,7 +75,7 @@ public final class MultiCollectorOp<T, A, R> extends AbstractMultiOperator<T, R>
             if (upstream.get() != CANCELLED) {
                 try {
                     accumulator.accept(intermediate, item);
-                } catch (Exception ex) {
+                } catch (Throwable ex) {
                     failAndCancel(ex);
                 }
             }
@@ -89,7 +89,7 @@ public final class MultiCollectorOp<T, A, R> extends AbstractMultiOperator<T, R>
 
                 try {
                     result = finisher.apply(intermediate);
-                } catch (Exception ex) {
+                } catch (Throwable ex) {
                     downstream.onFailure(ex);
                     return;
                 }

@@ -96,7 +96,7 @@ public class UniFailOnTimeout<I> extends UniOperator<I, I> {
         Throwable throwable;
         try {
             throwable = supplier.get();
-        } catch (Exception e) {
+        } catch (Throwable e) {
             subscriber.onFailure(e);
             return;
         }

@@ -35,7 +35,7 @@ public class FailedMulti<T> extends AbstractMulti<T> {
             } else {
                 Subscriptions.fail(actual, throwable);
             }
-        } catch (Exception e) {
+        } catch (Throwable e) {
             Subscriptions.fail(actual, e);
         }
 

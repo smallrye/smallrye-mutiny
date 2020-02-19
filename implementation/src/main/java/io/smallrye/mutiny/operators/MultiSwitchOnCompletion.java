@@ -28,7 +28,7 @@ public class MultiSwitchOnCompletion<T> extends MultiOperator<T, T> {
             Publisher<? extends T> publisher;
             try {
                 publisher = supplier.get();
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 return Multi.createFrom().failure(e);
             }
             if (publisher == null) {

@@ -97,7 +97,7 @@ public class MultiWindowOnDurationOp<T> extends AbstractMultiOperator<T, Multi<T
                 return scheduler
                         .scheduleAtFixedRate(new Tick(this), duration.toMillis(), duration.toMillis(),
                                 TimeUnit.MILLISECONDS);
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 downstream.onFailure(e);
                 return TaskHolder.NONE;
             }

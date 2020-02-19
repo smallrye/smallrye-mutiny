@@ -46,7 +46,7 @@ public class UniOnNull<T> {
             Throwable throwable;
             try {
                 throwable = supplier.get();
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 emitter.fail(e);
                 return;
             }
@@ -96,7 +96,7 @@ public class UniOnNull<T> {
                 Uni<? extends T> produced;
                 try {
                     produced = supplier.get();
-                } catch (Exception e) {
+                } catch (Throwable e) {
                     return Uni.createFrom().failure(e);
                 }
 

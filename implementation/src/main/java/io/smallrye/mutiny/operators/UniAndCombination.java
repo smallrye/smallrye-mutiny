@@ -118,7 +118,7 @@ public class UniAndCombination<I, O> extends UniOperator<I, O> {
                 O aggregated;
                 try {
                     aggregated = combinator.apply(items);
-                } catch (Exception e) {
+                } catch (Throwable e) {
                     subscriber.onFailure(e);
                     return;
                 }
