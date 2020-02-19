@@ -105,7 +105,7 @@ public class MultiCreate {
             CompletionStage<? extends T> stage;
             try {
                 stage = supplier.get();
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 emitter.fail(e);
                 return;
             }

@@ -32,7 +32,7 @@ public class UniCreateFromCompletionStage<O> extends UniOperator<Void, O> {
         CompletionStage<? extends O> stage;
         try {
             stage = supplier.get();
-        } catch (Exception e) {
+        } catch (Throwable e) {
             propagateFailureEvent(subscriber, e);
             return;
         }

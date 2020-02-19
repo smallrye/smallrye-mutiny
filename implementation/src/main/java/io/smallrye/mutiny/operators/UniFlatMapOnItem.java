@@ -30,7 +30,7 @@ public class UniFlatMapOnItem<I, O> extends UniOperator<I, O> {
             outcome = mapper.apply(input);
             // We cannot call onItem here, as if onItem would throw an exception
             // it would be caught and onFailure would be called. This would be illegal.
-        } catch (Exception e) {
+        } catch (Throwable e) {
             subscriber.onFailure(e);
             return;
         }

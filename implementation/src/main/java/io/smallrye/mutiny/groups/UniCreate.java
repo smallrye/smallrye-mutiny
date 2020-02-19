@@ -109,7 +109,7 @@ public class UniCreate {
         return Uni.createFrom().deferred(() -> {
             try {
                 invokeOnce(once, state, stateSupplier);
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 return Uni.createFrom().failure(e);
             }
 
@@ -231,7 +231,7 @@ public class UniCreate {
         return Uni.createFrom().deferred(() -> {
             try {
                 invokeOnce(once, state, stateSupplier);
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 return Uni.createFrom().failure(e);
             }
 
@@ -348,7 +348,7 @@ public class UniCreate {
         return Uni.createFrom().deferred(() -> {
             try {
                 invokeOnce(once, state, stateSupplier);
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 return Uni.createFrom().failure(e);
             }
             S sharedState = state.get();
@@ -435,7 +435,7 @@ public class UniCreate {
         return Uni.createFrom().deferred(() -> {
             try {
                 invokeOnce(once, state, stateSupplier);
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 return Uni.createFrom().failure(e);
             }
 
@@ -479,7 +479,7 @@ public class UniCreate {
             Throwable throwable;
             try {
                 throwable = actual.get();
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 emitter.fail(e);
                 return;
             }

@@ -159,7 +159,7 @@ public class MultiOnItem<T> {
             CompletionStage<? extends O> stage;
             try {
                 stage = mapper.apply(res);
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 emitter.fail(e);
                 return;
             }

@@ -65,6 +65,17 @@ public class UniOnResultMapToItem {
     }
 
     @Test
+    public void testWhenTheMapperThrowsAnError() {
+        UniAssertSubscriber<Object> ts = UniAssertSubscriber.create();
+
+        one.map(v -> {
+            throw new AssertionError("OH NO!");
+        }).subscribe().withSubscriber(ts);
+
+        ts.assertFailure(AssertionError.class, "OH NO!");
+    }
+
+    @Test
     public void testThatMapperCanReturnNull() {
         UniAssertSubscriber<Object> ts = UniAssertSubscriber.create();
 

@@ -77,7 +77,7 @@ public abstract class AbstractMulti<T> implements Multi<T> {
                 }
                 try {
                     subscriber.onNext(item);
-                } catch (Exception e) {
+                } catch (Throwable e) {
                     Subscription subscription = reference.getAndSet(CANCELLED);
                     if (subscription != null) {
                         subscription.cancel();

@@ -16,7 +16,7 @@ public class Predicates {
             boolean pass;
             try {
                 pass = predicate.test(failure);
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 subscriber.onFailure(e);
                 return false;
             }

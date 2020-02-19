@@ -29,7 +29,7 @@ public class MultiSwitchOnEmpty<T> extends MultiOperator<T, T> {
             Publisher<? extends T> publisher;
             try {
                 publisher = supplier.get();
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 return Infrastructure.onMultiCreation(new FailedMulti<>(e));
             }
             if (publisher == null) {

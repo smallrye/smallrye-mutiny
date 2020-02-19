@@ -31,7 +31,7 @@ public class UniOnTermination<T> extends UniOperator<T, T> {
                     public void onItem(T item) {
                         try {
                             callback.accept(item, null, false);
-                        } catch (Exception e) {
+                        } catch (Throwable e) {
                             subscriber.onFailure(e);
                             return;
                         }
@@ -42,7 +42,7 @@ public class UniOnTermination<T> extends UniOperator<T, T> {
                     public void onFailure(Throwable failure) {
                         try {
                             callback.accept(null, failure, false);
-                        } catch (Exception e) {
+                        } catch (Throwable e) {
                             subscriber.onFailure(new CompositeException(failure, e));
                             return;
                         }
