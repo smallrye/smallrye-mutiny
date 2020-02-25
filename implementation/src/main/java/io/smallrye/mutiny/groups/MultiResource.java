@@ -42,7 +42,7 @@ public class MultiResource<R, I> {
         ParameterValidation.nonNull(finalizer, "finalizer");
         Function<? super R, Uni<Void>> actual = r -> {
             finalizer.accept(r);
-            return Uni.createFrom().item((Void) null);
+            return Uni.createFrom().voidItem();
         };
         return withFinalizer(actual, (r, ignored) -> actual.apply(r), actual);
     }

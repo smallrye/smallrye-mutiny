@@ -308,17 +308,17 @@ public class MultiFromResourceTest {
 
         BiFunction<Integer, Throwable, Uni<Void>> onFailureCallback = (s, f) -> {
             onFailure.set(s);
-            return Uni.createFrom().item((Void) null);
+            return Uni.createFrom().voidItem();
         };
 
         Function<Integer, Uni<Void>> onCompletionCallback = s -> {
             onComplete.set(s);
-            return Uni.createFrom().item((Void) null);
+            return Uni.createFrom().voidItem();
         };
 
         Function<Integer, Uni<Void>> onCancellationCallback = s -> {
             onCancellation.set(s);
-            return Uni.createFrom().item((Void) null);
+            return Uni.createFrom().voidItem();
         };
 
         Multi.createFrom().resource(supplier,
@@ -343,17 +343,17 @@ public class MultiFromResourceTest {
 
         BiFunction<Integer, Throwable, Uni<Void>> onFailureCallback = (s, f) -> {
             onFailure.set(s);
-            return Uni.createFrom().item((Void) null);
+            return Uni.createFrom().voidItem();
         };
 
         Function<Integer, Uni<Void>> onCompletionCallback = s -> {
             onComplete.set(s);
-            return Uni.createFrom().item((Void) null);
+            return Uni.createFrom().voidItem();
         };
 
         Function<Integer, Uni<Void>> onCancellationCallback = s -> {
             onCancellation.set(s);
-            return Uni.createFrom().item((Void) null);
+            return Uni.createFrom().voidItem();
         };
 
         Multi.createFrom().<Integer, Integer> resource(supplier,
@@ -722,12 +722,12 @@ public class MultiFromResourceTest {
         }
 
         public Uni<Void> commit() {
-            return Uni.createFrom().item((Void) null)
+            return Uni.createFrom().voidItem()
                     .on().subscribed(s -> onCompleteSubscribed.set(true));
         }
 
         public Uni<Void> commitFailure() {
-            return Uni.createFrom().item((Void) null)
+            return Uni.createFrom().voidItem()
                     .onItem().delayIt().by(DELAY)
                     .onItem().failWith(x -> new IOException("commit failed"))
                     .on().subscribed(s -> onCompleteSubscribed.set(true));
@@ -738,20 +738,20 @@ public class MultiFromResourceTest {
         }
 
         public Uni<Void> rollback(Throwable failure) {
-            return Uni.createFrom().item((Void) null)
+            return Uni.createFrom().voidItem()
                     .onItem().invoke(x -> this.failure.set(failure))
                     .on().subscribed(s -> onFailureSubscribed.set(true));
         }
 
         public Uni<Void> rollbackDelay(Throwable failure) {
-            return Uni.createFrom().item((Void) null)
+            return Uni.createFrom().voidItem()
                     .onItem().invoke(x -> this.failure.set(failure))
                     .onItem().delayIt().by(DELAY)
                     .on().subscribed(s -> onFailureSubscribed.set(true));
         }
 
         public Uni<Void> rollbackFailure(Throwable failure) {
-            return Uni.createFrom().item((Void) null)
+            return Uni.createFrom().voidItem()
                     .onItem().invoke(x -> this.failure.set(failure))
                     .onItem().delayIt().by(DELAY)
                     .onItem().failWith(x -> new IOException("rollback failed"))
@@ -764,7 +764,7 @@ public class MultiFromResourceTest {
         }
 
         public Uni<Void> cancel() {
-            return Uni.createFrom().item((Void) null)
+            return Uni.createFrom().voidItem()
                     .on().subscribed(s -> onCancelSubscribed.set(true));
         }
     }

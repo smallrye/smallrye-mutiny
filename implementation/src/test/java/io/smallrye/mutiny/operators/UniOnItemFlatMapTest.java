@@ -155,7 +155,7 @@ public class UniOnItemFlatMapTest {
 
     @Test
     public void testFlatMapMultiWithNull() {
-        Uni.createFrom().item((Void) null)
+        Uni.createFrom().voidItem()
                 .onItem().produceMulti(x -> Multi.createFrom().range(1, 5))
                 .subscribe().withSubscriber(MultiAssertSubscriber.create(10))
                 .await()

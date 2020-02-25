@@ -82,14 +82,14 @@ public class UniCreateFromItemTest {
     @Test
     public void testEmpty() {
         UniAssertSubscriber<Void> subscriber = UniAssertSubscriber.create();
-        Uni.createFrom().item((Void) null).subscribe().withSubscriber(subscriber);
+        Uni.createFrom().voidItem().subscribe().withSubscriber(subscriber);
         subscriber.assertCompletedSuccessfully().assertItem(null);
     }
 
     @Test
     public void testEmptyWithImmediateCancellation() {
         UniAssertSubscriber<Void> subscriber = new UniAssertSubscriber<>(true);
-        Uni.createFrom().item((Void) null).subscribe().withSubscriber(subscriber);
+        Uni.createFrom().voidItem().subscribe().withSubscriber(subscriber);
         subscriber.assertNoFailure().assertNoResult();
     }
 
