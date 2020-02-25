@@ -330,6 +330,7 @@ public final class MultiGroupByOp<T, K, V> extends AbstractMultiOperator<T, Grou
         public void cancel() {
             if (cancelled.compareAndSet(false, true)) {
                 parent.cancel(key);
+                drain();
             }
         }
 
@@ -382,7 +383,7 @@ public final class MultiGroupByOp<T, K, V> extends AbstractMultiOperator<T, Grou
                         T v = q.poll();
                         boolean empty = v == null;
 
-                        if (hasCompleted(isDone, empty)) {
+                        if (hasCompleted(isDone, empty, e)) {
                             return;
                         }
 
@@ -395,7 +396,7 @@ public final class MultiGroupByOp<T, K, V> extends AbstractMultiOperator<T, Grou
                         e++;
                     }
 
-                    if (e == r && hasCompleted(done.get(), q.isEmpty())) {
+                    if (e == r && hasCompleted(done.get(), q.isEmpty(), e)) {
                         return;
                     }
 
@@ -417,9 +418,15 @@ public final class MultiGroupByOp<T, K, V> extends AbstractMultiOperator<T, Grou
             }
         }
 
-        boolean hasCompleted(boolean isDone, boolean isEmpty) {
+        boolean hasCompleted(boolean isDone, boolean isEmpty, long emitted) {
             if (cancelled.get()) {
-                queue.clear();
+                // make sure buffered items can get replenished
+                while (queue.poll() != null) {
+                    emitted++;
+                }
+                if (emitted != 0) {
+                    parent.upstream.get().request(emitted);
+                }
                 return true;
             }
 
