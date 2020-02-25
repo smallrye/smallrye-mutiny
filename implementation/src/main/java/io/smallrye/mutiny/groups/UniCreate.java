@@ -27,6 +27,7 @@ import io.smallrye.mutiny.subscription.UniSubscriber;
 public class UniCreate {
 
     public static final UniCreate INSTANCE = new UniCreate();
+    private static final Uni<Void> UNI_OF_VOID = Uni.createFrom().item((Void) null);
 
     private UniCreate() {
         // avoid direct instantiation.
@@ -257,12 +258,12 @@ public class UniCreate {
     }
 
     /**
-     * Creates a new {@link Uni} that completes immediately after being subscribed to with a {@code null} item.
+     * Creates a new {@link Uni} that completes with a {@code null} item.
      *
      * @return the new {@link Uni} with a {@code null} item
      */
     public Uni<Void> voidItem() {
-        return item(() -> null);
+        return UNI_OF_VOID;
     }
 
     /**
