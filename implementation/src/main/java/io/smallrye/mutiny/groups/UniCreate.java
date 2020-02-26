@@ -27,7 +27,6 @@ import io.smallrye.mutiny.subscription.UniSubscriber;
 public class UniCreate {
 
     public static final UniCreate INSTANCE = new UniCreate();
-    private static final Uni<Void> UNI_OF_VOID = Uni.createFrom().item((Void) null);
     private static final Uni UNI_OF_NULL = Uni.createFrom().item((Object) null);
 
     private UniCreate() {
@@ -263,8 +262,9 @@ public class UniCreate {
      *
      * @return the new {@link Uni} with a {@code null} item
      */
+    @SuppressWarnings("unchecked")
     public Uni<Void> voidItem() {
-        return UNI_OF_VOID;
+        return UNI_OF_NULL;
     }
 
     /**
