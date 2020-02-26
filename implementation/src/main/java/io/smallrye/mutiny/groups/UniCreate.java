@@ -28,6 +28,7 @@ public class UniCreate {
 
     public static final UniCreate INSTANCE = new UniCreate();
     private static final Uni<Void> UNI_OF_VOID = Uni.createFrom().item((Void) null);
+    private static final Uni UNI_OF_NULL = Uni.createFrom().item((Object) null);
 
     private UniCreate() {
         // avoid direct instantiation.
@@ -272,9 +273,9 @@ public class UniCreate {
      * @param <T> the type of item
      * @return the new {@link Uni} with a {@code null} item
      */
-    @SuppressWarnings("UncheckedCastException")
+    @SuppressWarnings("unchecked")
     public <T> Uni<T> nullItem() {
-        return Uni.createFrom().item((T) null);
+        return UNI_OF_NULL;
     }
 
     /**
