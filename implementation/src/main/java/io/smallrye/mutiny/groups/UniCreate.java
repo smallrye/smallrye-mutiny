@@ -262,9 +262,8 @@ public class UniCreate {
      *
      * @return the new {@link Uni} with a {@code null} item
      */
-    @SuppressWarnings("unchecked")
     public Uni<Void> voidItem() {
-        return UNI_OF_NULL;
+        return nullItem();
     }
 
     /**
