@@ -267,6 +267,17 @@ public class UniCreate {
     }
 
     /**
+     * Creates a new {@link Uni} that completes with a {@code null} item.
+     *
+     * @param <T> the type of item
+     * @return the new {@link Uni} with a {@code null} item
+     */
+    @SuppressWarnings("UncheckedCastException")
+    public <T> Uni<T> nullItem() {
+        return Uni.createFrom().item((T) null);
+    }
+
+    /**
      * Creates a new {@link Uni} that completes immediately after being subscribed to with the item based on the value
      * contained in the given optional if {@link Optional#isPresent()} or {@code null} otherwise.
      *

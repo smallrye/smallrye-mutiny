@@ -43,8 +43,15 @@ public class UniSubscribeAsCompletionStageTest {
     }
 
     @Test
-    public void testWithImmediateNullValue() {
+    public void testWithImmediateVoidItem() {
         CompletableFuture<Void> future = Uni.createFrom().voidItem().subscribe().asCompletionStage();
+        assertThat(future).isNotNull();
+        assertThat(future).isCompletedWithValue(null);
+    }
+
+    @Test
+    public void testWithImmediateNullItem() {
+        CompletableFuture<String> future = Uni.createFrom().<String> nullItem().subscribe().asCompletionStage();
         assertThat(future).isNotNull();
         assertThat(future).isCompletedWithValue(null);
     }
@@ -122,9 +129,18 @@ public class UniSubscribeAsCompletionStageTest {
     }
 
     @Test
-    public void testWithAsyncNullValue() {
+    public void testWithAsyncVoidItem() {
         executor = Executors.newSingleThreadScheduledExecutor();
         CompletableFuture<Void> future = Uni.createFrom().voidItem().emitOn(executor)
+                .subscribe().asCompletionStage();
+        await().until(future::isDone);
+        assertThat(future).isCompletedWithValue(null);
+    }
+
+    @Test
+    public void testWithAsyncNullItem() {
+        executor = Executors.newSingleThreadScheduledExecutor();
+        CompletableFuture<String> future = Uni.createFrom().<String> nullItem().emitOn(executor)
                 .subscribe().asCompletionStage();
         await().until(future::isDone);
         assertThat(future).isCompletedWithValue(null);
