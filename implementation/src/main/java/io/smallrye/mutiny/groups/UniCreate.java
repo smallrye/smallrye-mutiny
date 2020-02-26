@@ -27,6 +27,7 @@ import io.smallrye.mutiny.subscription.UniSubscriber;
 public class UniCreate {
 
     public static final UniCreate INSTANCE = new UniCreate();
+    private static final Uni<Void> UNI_OF_VOID = Uni.createFrom().item((Void) null);
 
     private UniCreate() {
         // avoid direct instantiation.
@@ -254,6 +255,26 @@ public class UniCreate {
      */
     public <T> Uni<T> item(T item) {
         return item(() -> item);
+    }
+
+    /**
+     * Creates a new {@link Uni} that completes with a {@code null} item.
+     *
+     * @return the new {@link Uni} with a {@code null} item
+     */
+    public Uni<Void> voidItem() {
+        return UNI_OF_VOID;
+    }
+
+    /**
+     * Creates a new {@link Uni} that completes with a {@code null} item.
+     *
+     * @param <T> the type of item
+     * @return the new {@link Uni} with a {@code null} item
+     */
+    @SuppressWarnings("UncheckedCastException")
+    public <T> Uni<T> nullItem() {
+        return Uni.createFrom().item((T) null);
     }
 
     /**

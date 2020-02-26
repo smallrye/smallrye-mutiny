@@ -26,7 +26,28 @@ public class UniToMultiTest {
 
     @Test
     public void testFromEmpty2() {
-        Multi<Void> multi = Multi.createFrom().uni(Uni.createFrom().item((Void) null));
+        Multi<Void> multi = Multi.createFrom().uni(Uni.createFrom().voidItem());
+        multi.subscribe().withSubscriber(MultiAssertSubscriber.create(1)).assertCompletedSuccessfully();
+        multi.subscribe().withSubscriber(MultiAssertSubscriber.create(0)).assertNotTerminated().cancel();
+    }
+
+    @Test
+    public void testFromEmpty3() {
+        Multi<Void> multi = Uni.createFrom().voidItem().toMulti();
+        multi.subscribe().withSubscriber(MultiAssertSubscriber.create(1)).assertCompletedSuccessfully();
+        multi.subscribe().withSubscriber(MultiAssertSubscriber.create(0)).assertNotTerminated().cancel();
+    }
+
+    @Test
+    public void testFromEmpty4() {
+        Multi<String> multi = Uni.createFrom().<String> nullItem().toMulti();
+        multi.subscribe().withSubscriber(MultiAssertSubscriber.create(1)).assertCompletedSuccessfully();
+        multi.subscribe().withSubscriber(MultiAssertSubscriber.create(0)).assertNotTerminated().cancel();
+    }
+
+    @Test
+    public void testFromEmpty5() {
+        Multi<String> multi = Multi.createFrom().uni(Uni.createFrom().nullItem());
         multi.subscribe().withSubscriber(MultiAssertSubscriber.create(1)).assertCompletedSuccessfully();
         multi.subscribe().withSubscriber(MultiAssertSubscriber.create(0)).assertNotTerminated().cancel();
     }

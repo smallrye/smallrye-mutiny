@@ -24,7 +24,7 @@ public class UniOnItemDelayTest {
     @BeforeMethod
     public void init() {
         executor = Executors.newScheduledThreadPool(4);
-        delayed = Uni.createFrom().item((Void) null).onItem().delayIt()
+        delayed = Uni.createFrom().voidItem().onItem().delayIt()
                 .onExecutor(executor)
                 .by(Duration.ofMillis(100));
     }
