@@ -129,7 +129,7 @@ public class MultiBroadcastTest {
         assertThat(cancelled).isFalse();
         s1.cancel();
         assertThat(cancelled).isFalse();
-
+        assertThat(processor.isCancelled()).isFalse();
         MultiAssertSubscriber<Integer> s3 = multi.subscribe().withSubscriber(MultiAssertSubscriber.create(10));
         processor.emit(23);
         processor.complete();
@@ -191,8 +191,10 @@ public class MultiBroadcastTest {
 
         s2.cancel();
         assertThat(cancelled).isFalse();
+        assertThat(processor.isCancelled()).isFalse();
         s1.cancel();
         assertThat(cancelled).isTrue();
+        assertThat(processor.isCancelled()).isTrue();
     }
 
     @Test

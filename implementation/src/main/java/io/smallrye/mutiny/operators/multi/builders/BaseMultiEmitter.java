@@ -26,6 +26,11 @@ abstract class BaseMultiEmitter<T>
     }
 
     @Override
+    public long requested() {
+        return requested.get();
+    }
+
+    @Override
     public void complete() {
         completion();
     }
@@ -42,7 +47,8 @@ abstract class BaseMultiEmitter<T>
         }
     }
 
-    protected boolean isCancelled() {
+    @Override
+    public boolean isCancelled() {
         return onTermination.get() == CLEARED;
     }
 
