@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.IntStream;
 
 import org.reactivestreams.Subscriber;
@@ -71,7 +72,9 @@ public class MultiCreateFromEmitterTest {
     @Test
     public void testWithRequests() {
         AtomicInteger terminated = new AtomicInteger();
-        Multi.createFrom().emitter(emitter -> {
+        AtomicReference<MultiEmitter<? super Integer>> reference = new AtomicReference<>();
+        Multi.createFrom().<Integer> emitter(emitter -> {
+            reference.set(emitter);
             emitter.onTermination(terminated::incrementAndGet);
             emitter.emit(1);
             emitter.emit(2);
@@ -80,11 +83,54 @@ public class MultiCreateFromEmitterTest {
         })
                 .subscribe().withSubscriber(MultiAssertSubscriber.create())
                 .assertSubscribed()
+                .run(() -> {
+                    assertThat(reference.get()).isNotNull();
+                    assertThat(reference.get().requested()).isEqualTo(0);
+                })
                 .request(2)
+                .run(() -> {
+                    // Already emitted
+                    assertThat(reference.get().requested()).isEqualTo(0);
+                })
                 .assertNotTerminated()
                 .assertReceived(1, 2)
                 .request(2)
                 .assertReceived(1, 2, 3)
+                .assertCompletedSuccessfully();
+
+        assertThat(terminated).hasValue(1);
+    }
+
+    @Test
+    public void testWithMoreRequestsThanValue() {
+        AtomicInteger terminated = new AtomicInteger();
+        AtomicReference<MultiEmitter<? super Integer>> reference = new AtomicReference<>();
+        Multi.createFrom().<Integer> emitter(emitter -> {
+            reference.set(emitter);
+            emitter.onTermination(terminated::incrementAndGet);
+            emitter.emit(1);
+            emitter.emit(2);
+            emitter.emit(3);
+            emitter.complete();
+        })
+                .subscribe().withSubscriber(MultiAssertSubscriber.create())
+                .assertSubscribed()
+                .run(() -> {
+                    assertThat(reference.get()).isNotNull();
+                    assertThat(reference.get().requested()).isEqualTo(0);
+                })
+                .request(2)
+                .run(() -> {
+                    // Already emitted
+                    assertThat(reference.get().requested()).isEqualTo(0);
+                })
+                .assertNotTerminated()
+                .assertReceived(1, 2)
+                .request(10)
+                .assertReceived(1, 2, 3)
+                .run(() -> {
+                    assertThat(reference.get().requested()).isEqualTo(10);
+                })
                 .assertCompletedSuccessfully();
 
         assertThat(terminated).hasValue(1);

@@ -52,4 +52,15 @@ public interface MultiEmitter<T> {
      */
     MultiEmitter<T> onTermination(Runnable onTermination);
 
+    /**
+     * @return {@code true} if the downstream cancelled the stream or the emitter was terminated (with a completion
+     *         or failure events).
+     */
+    boolean isCancelled();
+
+    /**
+     * @return the current outstanding request amount.
+     */
+    long requested();
+
 }

@@ -1,5 +1,7 @@
 package io.smallrye.mutiny.helpers;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.reactivestreams.Processor;
@@ -14,6 +16,8 @@ public class MultiEmitterProcessor<T> implements Processor<T, T>, MultiEmitter<T
 
     private final UnicastProcessor<T> processor;
     private final AtomicReference<Runnable> onTermination = new AtomicReference<>();
+    private final AtomicBoolean terminated = new AtomicBoolean();
+    private final AtomicLong requested = new AtomicLong();
 
     private MultiEmitterProcessor() {
         this.processor = UnicastProcessor.create();
@@ -45,6 +49,16 @@ public class MultiEmitterProcessor<T> implements Processor<T, T>, MultiEmitter<T
         return this;
     }
 
+    @Override
+    public boolean isCancelled() {
+        return terminated.get();
+    }
+
+    @Override
+    public long requested() {
+        return requested.get();
+    }
+
     @SuppressWarnings("SubscriberImplementation")
     @Override
     public void subscribe(Subscriber<? super T> subscriber) {
@@ -54,6 +68,7 @@ public class MultiEmitterProcessor<T> implements Processor<T, T>, MultiEmitter<T
                 subscriber.onSubscribe(new Subscription() {
                     @Override
                     public void request(long l) {
+                        Subscriptions.add(requested, l);
                         subscription.request(l);
                     }
 
@@ -85,9 +100,11 @@ public class MultiEmitterProcessor<T> implements Processor<T, T>, MultiEmitter<T
     }
 
     private void fireTermination() {
-        Runnable runnable = onTermination.getAndSet(null);
-        if (runnable != null) {
-            runnable.run();
+        if (terminated.compareAndSet(false, true)) {
+            Runnable runnable = onTermination.getAndSet(null);
+            if (runnable != null) {
+                runnable.run();
+            }
         }
     }
 
@@ -98,6 +115,7 @@ public class MultiEmitterProcessor<T> implements Processor<T, T>, MultiEmitter<T
 
     @Override
     public void onNext(T item) {
+        Subscriptions.subtract(requested, 1);
         processor.onNext(item);
     }
 

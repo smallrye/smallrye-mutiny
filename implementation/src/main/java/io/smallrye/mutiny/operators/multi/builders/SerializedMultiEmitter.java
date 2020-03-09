@@ -150,4 +150,14 @@ public class SerializedMultiEmitter<T> implements MultiEmitter<T>, MultiSubscrib
         downstream.onTermination(onTermination);
         return this;
     }
+
+    @Override
+    public boolean isCancelled() {
+        return downstream.isCancelled();
+    }
+
+    @Override
+    public long requested() {
+        return downstream.requested();
+    }
 }
