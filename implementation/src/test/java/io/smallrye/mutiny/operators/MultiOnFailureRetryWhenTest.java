@@ -1,9 +1,11 @@
 package io.smallrye.mutiny.operators;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 
 import java.io.IOException;
 import java.time.Duration;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -12,7 +14,6 @@ import org.testng.annotations.Test;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
-import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.multi.MultiRetryWhenOp;
 import io.smallrye.mutiny.test.MultiAssertSubscriber;
 import io.smallrye.mutiny.tuples.Tuple2;
@@ -317,10 +318,11 @@ public class MultiOnFailureRetryWhenTest {
                 e.fail(exception);
             }).start();
         })
-                .onFailure().retry().withBackOff(Duration.ofMillis(100), Duration.ofMillis(10000)).withJitter(0.1)
+                .onFailure().retry().withBackOff(Duration.ofMillis(10), Duration.ofHours(1)).withJitter(0.1)
                 .atMost(4)
                 .subscribe().withSubscriber(MultiAssertSubscriber.create(100));
-        subscriber.await(Duration.ofMinutes(1))
+        await().until(() -> subscriber.items().size() >= 8);
+        subscriber
                 .assertReceived(0, 1, 0, 1, 0, 1, 0, 1)
                 .assertHasFailedWith(IllegalStateException.class, "Retries exhausted");
 
@@ -331,13 +333,13 @@ public class MultiOnFailureRetryWhenTest {
         Exception exception = new IOException("boom retry");
         MultiAssertSubscriber<Integer> subscriber = Multi.createBy().concatenating()
                 .streams(Multi.createFrom().range(0, 2), Multi.createFrom().failure(exception))
-                .subscribeOn(Infrastructure.getDefaultWorkerPool())
+                .subscribeOn(runnable -> new Thread(runnable).start())
 
-                .onFailure().retry().withBackOff(Duration.ofMillis(100), Duration.ofMillis(10000))
+                .onFailure().retry().withBackOff(Duration.ofMillis(100), Duration.ofHours(1))
                 .atMost(4)
                 .subscribe().withSubscriber(MultiAssertSubscriber.create(100));
 
-        subscriber.await(Duration.ofSeconds(60));
+        await().until(() -> subscriber.items().size() >= 8);
         subscriber
                 .assertReceived(0, 1, 0, 1, 0, 1, 0, 1)
                 .assertHasFailedWith(IllegalStateException.class, "Retries exhausted: 4/4");
@@ -348,13 +350,17 @@ public class MultiOnFailureRetryWhenTest {
         Exception exception = new IOException("boom retry");
         MultiAssertSubscriber<Integer> subscriber = Multi.createBy().concatenating()
                 .streams(Multi.createFrom().range(0, 2), Multi.createFrom().failure(exception))
-                .subscribeOn(Infrastructure.getDefaultWorkerPool())
-
-                .onFailure().retry().withBackOff(Duration.ofMillis(100))
+                .subscribeOn(runnable -> new Thread(runnable).start())
+                .onFailure().retry().withBackOff(Duration.ofMillis(10)).withJitter(0.0)
                 .atMost(4)
                 .subscribe().withSubscriber(MultiAssertSubscriber.create(100));
 
-        subscriber.await(Duration.ofSeconds(60));
+        await()
+                .atMost(1, TimeUnit.MINUTES)
+                .until(() -> {
+                    System.out.println(subscriber.items());
+                    return subscriber.items().size() >= 8;
+                });
         subscriber
                 .assertReceived(0, 1, 0, 1, 0, 1, 0, 1)
                 .assertHasFailedWith(IllegalStateException.class, "Retries exhausted: 4/4");
