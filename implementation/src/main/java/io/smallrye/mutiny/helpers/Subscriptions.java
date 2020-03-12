@@ -365,4 +365,81 @@ public class Subscriptions {
             // Ignored
         }
     }
+
+    public static class DeferredSubscription implements Subscription {
+        private AtomicReference<Subscription> subscription = new AtomicReference<>();
+        private AtomicLong pendingRequests = new AtomicLong();
+
+        protected boolean isCancelled() {
+            return subscription.get() == CANCELLED;
+        }
+
+        @Override
+        public void cancel() {
+            Subscription actual = subscription.get();
+            if (actual != CANCELLED) {
+                actual = subscription.getAndSet(CANCELLED);
+                if (actual != null && actual != CANCELLED) {
+                    actual.cancel();
+                }
+            }
+        }
+
+        @Override
+        public void request(long n) {
+            Subscription actual = subscription.get();
+            if (actual != null) {
+                actual.request(n);
+            } else {
+                add(pendingRequests, n);
+                actual = subscription.get();
+                if (actual != null) {
+                    long r = pendingRequests.getAndSet(0L);
+                    if (r != 0L) {
+                        actual.request(r);
+                    }
+                }
+            }
+        }
+
+        /**
+         * Atomically sets the single subscription and requests the missed amount from it.
+         *
+         * @param newSubscription the subscription to set
+         * @return false if this arbiter is cancelled or there was a subscription already set
+         */
+        public boolean set(Subscription newSubscription) {
+            ParameterValidation.nonNull(newSubscription, "newSubscription");
+            Subscription actual = subscription.get();
+
+            // Already cancelled.
+            if (actual == CANCELLED) {
+                newSubscription.cancel();
+                return false;
+            }
+
+            // We already have a subscription, cancel the new one.
+            if (actual != null) {
+                newSubscription.cancel();
+                return false;
+            }
+
+            if (subscription.compareAndSet(null, newSubscription)) {
+                long r = pendingRequests.getAndSet(0L);
+                if (r != 0L) {
+                    newSubscription.request(r);
+                }
+                return true;
+            }
+
+            actual = this.subscription.get();
+
+            if (actual != CANCELLED) {
+                newSubscription.cancel();
+                return false;
+            }
+
+            return false;
+        }
+    }
 }

@@ -5,7 +5,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.reactivestreams.Publisher;
 
 import io.smallrye.mutiny.Multi;
-import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.subscription.MultiSubscriber;
 import io.smallrye.mutiny.subscription.SwitchableSubscriptionSubscriber;
@@ -22,7 +21,7 @@ public final class MultiRetryOp<T> extends AbstractMultiOperator<T, T> {
 
     public MultiRetryOp(Multi<? extends T> upstream, long times) {
         super(upstream);
-        this.times = ParameterValidation.positive(times, "times");
+        this.times = times;
     }
 
     @Override

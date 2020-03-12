@@ -1,8 +1,10 @@
 package io.smallrye.mutiny.groups;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -11,6 +13,8 @@ import org.testng.annotations.Test;
 
 import io.reactivex.Flowable;
 import io.smallrye.mutiny.Multi;
+import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.operators.multi.processors.DirectProcessor;
 import io.smallrye.mutiny.test.MultiAssertSubscriber;
 
 public class MultiFlattenTest {
@@ -146,4 +150,51 @@ public class MultiFlattenTest {
                 .assertHasFailedWith(IllegalArgumentException.class, "String");
     }
 
+    @Test
+    public void testFlatMapRequestsWithEmissionOnExecutor() {
+        MultiAssertSubscriber<String> subscriber = Multi.createFrom().items("a", "b", "c", "d", "e", "f", "g", "h")
+                .onItem()
+                .produceUni(s -> Uni.createFrom().item(s.toUpperCase()).onItem().delayIt().by(Duration.ofMillis(10)))
+                .concatenate()
+                .subscribe().withSubscriber(MultiAssertSubscriber.create(0));
+
+        subscriber
+                .assertSubscribed()
+                .assertHasNotReceivedAnyItem()
+                .request(1);
+
+        await().until(() -> subscriber.items().contains("A"));
+
+        subscriber.request(2);
+        await().until(() -> subscriber.items().contains("B") && subscriber.items().contains("C"));
+
+        subscriber.request(100);
+        subscriber.await().assertCompletedSuccessfully();
+    }
+
+    @Test
+    public void testWithDirectProcessor() {
+        DirectProcessor<String> processor = new DirectProcessor<>();
+        MultiAssertSubscriber<String> subscriber = Multi.createFrom().publisher(processor)
+                .onItem()
+                .produceUni(s -> Uni.createFrom().item(s.toUpperCase()).onItem().delayIt().by(Duration.ofMillis(10)))
+                .concatenate()
+                .subscribe().withSubscriber(MultiAssertSubscriber.create(0));
+
+        subscriber
+                .assertSubscribed()
+                .assertHasNotReceivedAnyItem()
+                .request(1);
+
+        processor.onNext("a");
+        await().until(() -> subscriber.items().contains("A"));
+        subscriber.request(2);
+
+        processor.onNext("b");
+        await().until(() -> subscriber.items().contains("B"));
+        processor.onNext("c");
+        await().until(() -> subscriber.items().contains("C"));
+        processor.onComplete();
+        subscriber.await().assertCompletedSuccessfully();
+    }
 }

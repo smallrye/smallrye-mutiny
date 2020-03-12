@@ -1,16 +1,27 @@
 package io.smallrye.mutiny.groups;
 
 import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
+import static io.smallrye.mutiny.helpers.ParameterValidation.validate;
 
+import java.time.Duration;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
+import org.reactivestreams.Publisher;
+
 import io.smallrye.mutiny.Multi;
+import io.smallrye.mutiny.helpers.ExponentialBackoff;
+import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.multi.MultiRetryOp;
+import io.smallrye.mutiny.operators.multi.MultiRetryWhenOp;
 
 public class MultiRetry<T> {
 
     private final Multi<T> upstream;
+    private Duration initialBackOff;
+    private Duration maxBackoff;
+    private double jitter = 0.5;
 
     public MultiRetry(Multi<T> upstream) {
         this.upstream = nonNull(upstream, "upstream");
@@ -39,12 +50,88 @@ public class MultiRetry<T> {
      *         {@link Multi} until it gets an item. When the number of attempt is reached, the last failure is propagated.
      */
     public Multi<T> atMost(long numberOfAttempts) {
-        return Infrastructure.onMultiCreation(new MultiRetryOp<>(upstream, numberOfAttempts));
+        ParameterValidation.positive(numberOfAttempts, "numberOfAttempts");
+        validateRetryConfiguration();
+
+        if (initialBackOff != null) {
+            Function<Multi<Throwable>, Publisher<Long>> whenStreamFactory = ExponentialBackoff
+                    .randomExponentialBackoffFunction(numberOfAttempts, initialBackOff, maxBackoff, jitter,
+                            Infrastructure.getDefaultWorkerPool());
+            return Infrastructure.onMultiCreation(
+                    new MultiRetryWhenOp<>(upstream, whenStreamFactory));
+        } else {
+            return Infrastructure.onMultiCreation(new MultiRetryOp<>(upstream, numberOfAttempts));
+        }
+
+    }
+
+    private void validateRetryConfiguration() {
+        if (initialBackOff == null && jitter != 0.5) {
+            throw new IllegalArgumentException(
+                    "Invalid retry configuration, `jitter` must be used in combination with back-off");
+        }
     }
 
     public Multi<T> until(Predicate<? super Throwable> predicate) {
         throw new UnsupportedOperationException("not yet implemented");
     }
 
-    // TODO backOff such as withInitialBackOff(Duration first) withMaxBackOff(Duration max) withJitter(double jitter)
+    /**
+     * Produces a {@link Multi} resubscribing to the current {@link Multi} when the {@link Publisher} produced by the
+     * given method emits an item.
+     * As {@link #atMost(long)}, on every failure, it re-subscribes. However, a <em>delay</em> is introduced before
+     * re-subscribing. The re-subscription happens when the produced streams emits an item. If this stream fails,
+     * the downstream gets a failure. It the streams completes, the downstream completes.
+     *
+     * @param whenStreamFactory the function used to produce the stream triggering the re-subscription, must not be
+     *        {@code null}, must not produce {@code null}
+     * @return a new {@link Multi} retrying re-subscribing to the current {@link Multi} when the companion stream,
+     *         produced by {@code whenStreamFactory} emits an item.
+     */
+    public Multi<T> when(Function<Multi<Throwable>, ? extends Publisher<?>> whenStreamFactory) {
+        if (initialBackOff != null || maxBackoff != null || jitter != 0.5) {
+            throw new IllegalArgumentException(
+                    "Invalid retry configuration, `when` cannot be used with a back-off configuration");
+        }
+        return Infrastructure.onMultiCreation(new MultiRetryWhenOp<>(upstream, whenStreamFactory));
+    }
+
+    /**
+     * Configures a back-off delay between to attempt to re-subscribe. A random factor (jitter) is applied to increase
+     * the delay when several failures happen.
+     * 
+     * @param initialBackOff the initial back-off duration, must not be {@code null}, must not be negative.
+     * @return this object to configure the retry policy.
+     */
+    public MultiRetry<T> withBackOff(Duration initialBackOff) {
+        return withBackOff(initialBackOff, ExponentialBackoff.MAX_BACKOFF);
+    }
+
+    /**
+     * Configures a back-off delay between to attempt to re-subscribe. A random factor (jitter) is applied to increase
+     * he delay when several failures happen. The max delays is {@code maxBackOff}.
+     * 
+     * @param initialBackOff the initial back-off duration, must not be {@code null}, must not be negative.
+     * @param maxBackOff the max back-off duration, must not be {@code null}, must not be negative.
+     * @return this object to configure the retry policy.
+     */
+    public MultiRetry<T> withBackOff(Duration initialBackOff, Duration maxBackOff) {
+        this.initialBackOff = validate(initialBackOff, "initialBackOff");
+        this.maxBackoff = validate(maxBackOff, "maxBackOff");
+        return this;
+    }
+
+    /**
+     * Configures the random factor when using back-off. By default, it's set to 0.5.
+     * 
+     * @param jitter the jitter. Must be in [0.0, 1.0]
+     * @return this object to configure the retry policy.
+     */
+    public MultiRetry<T> withJitter(double jitter) {
+        if (jitter < 0 || jitter > 1.0) {
+            throw new IllegalArgumentException("Invalid `jitter`, the value must be in [0.0, 1.0]");
+        }
+        this.jitter = jitter;
+        return this;
+    }
 }
