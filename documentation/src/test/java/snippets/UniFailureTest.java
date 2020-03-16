@@ -1,15 +1,16 @@
 package snippets;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-
-import java.io.IOException;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
-
+import io.smallrye.mutiny.Uni;
 import org.junit.Test;
 
-import io.smallrye.mutiny.Uni;
+import java.io.IOException;
+import java.time.Duration;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 public class UniFailureTest {
 
@@ -54,6 +55,28 @@ public class UniFailureTest {
         assertThatThrownBy(res4::join)
                 .isInstanceOf(CompletionException.class)
                 .hasCauseInstanceOf(IOException.class);
+    }
+
+    @Test
+    public void retry() {
+        AtomicInteger attempt = new AtomicInteger();
+        Uni<String> uni = Uni.createFrom().<String>emitter(e -> {
+            int i = attempt.getAndIncrement();
+            if (i < 3) {
+                e.fail(new MyBusinessException("boom"));
+            } else {
+                e.complete("OK-" + i);
+            }
+        });
+        // tag::code-retry[]
+        Uni<String> uniWithRetry = uni.onFailure().retry().atMost(4);
+        Uni<String> uniWithRetryAndBackoff = uni.onFailure().retry()
+                .withBackOff(Duration.ofMillis(10), Duration.ofMinutes(1))
+                .atMost(5);
+        // end::code-retry[]
+
+        assertThat(uniWithRetry.await().indefinitely()).isEqualTo("OK-" + 3);
+        assertThat(uniWithRetryAndBackoff.await().indefinitely()).isEqualTo("OK-" + 4);
     }
 
     private class MyBusinessException extends Exception {
