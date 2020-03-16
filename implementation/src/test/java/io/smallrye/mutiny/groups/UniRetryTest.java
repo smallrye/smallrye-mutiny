@@ -3,6 +3,11 @@ package io.smallrye.mutiny.groups;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
+import java.io.IOException;
+import java.time.Duration;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
@@ -38,7 +43,99 @@ public class UniRetryTest {
         assertThat(failure.get()).isNotNull();
     }
 
-    class ThrowablePredicate implements Predicate<Throwable> {
+    @Test
+    public void testRetryWhenWithNoFailureInTriggerStream() {
+        List<Throwable> failures = new CopyOnWriteArrayList<>();
+        AtomicInteger count = new AtomicInteger();
+        String value = Uni.createFrom().<String> emitter(e -> {
+            int attempt = count.getAndIncrement();
+            if (attempt == 0) {
+                e.fail(new Exception("boom"));
+            } else if (attempt == 1) {
+                e.fail(new IOException("another-boom"));
+            } else {
+                e.complete("done");
+            }
+        })
+                .onFailure().retry().when(stream -> stream.onItem().invoke(failures::add)
+                        .onItem()
+                        .produceUni(f -> Uni.createFrom().item("tick").onItem().delayIt().by(Duration.ofMillis(10)))
+                        .concatenate())
+                .await().atMost(Duration.ofSeconds(5));
+
+        assertThat(value).isEqualTo("done");
+        assertThat(failures).hasSize(2)
+                .anySatisfy(t -> assertThat(t).hasMessage("boom"))
+                .anySatisfy(t -> assertThat(t).isInstanceOf(IOException.class).hasMessage("another-boom"));
+    }
+
+    @Test(expectedExceptions = IllegalStateException.class, expectedExceptionsMessageRegExp = ".*damned.*")
+    public void testRetryWhenWithFailureInTriggerStream() {
+        AtomicInteger count = new AtomicInteger();
+        Uni.createFrom().<String> emitter(e -> {
+            int attempt = count.getAndIncrement();
+            if (attempt == 0) {
+                e.fail(new Exception("boom"));
+            } else if (attempt == 1) {
+                e.fail(new IOException("another-boom"));
+            } else {
+                e.complete("done");
+            }
+        })
+                .onFailure().retry().when(stream -> stream
+                        .onItem().produceUni(f -> Uni.createFrom().failure(new IllegalStateException("damned!"))).concatenate())
+                .await().atMost(Duration.ofSeconds(5));
+    }
+
+    @Test
+    public void testRetryWhenWithCompletionInTriggerStream() {
+        AtomicInteger count = new AtomicInteger();
+        String value = Uni.createFrom().<String> emitter(e -> {
+            int attempt = count.getAndIncrement();
+            if (attempt == 0) {
+                e.fail(new Exception("boom"));
+            } else if (attempt == 1) {
+                e.fail(new IOException("another-boom"));
+            } else {
+                e.complete("done");
+            }
+        })
+                .onFailure().retry().when(stream -> stream.transform().byTakingFirstItems(1))
+                .await().atMost(Duration.ofSeconds(5));
+        assertThat(value).isNull();
+    }
+
+    @Test
+    public void testRetryWithBackOff() {
+        AtomicInteger count = new AtomicInteger();
+        String value = Uni.createFrom().<String> emitter(e -> {
+            int attempt = count.getAndIncrement();
+            if (attempt == 0) {
+                e.fail(new Exception("boom"));
+            } else if (attempt == 1) {
+                e.fail(new IOException("another-boom"));
+            } else {
+                e.complete("done");
+            }
+        })
+                .onFailure().retry().withBackOff(Duration.ofMillis(10), Duration.ofSeconds(1)).withJitter(1.0)
+                .atMost(20)
+                .await().atMost(Duration.ofSeconds(5));
+
+        assertThat(value).isEqualTo("done");
+    }
+
+    @Test(expectedExceptions = IllegalStateException.class, expectedExceptionsMessageRegExp = ".*4/4.*")
+    public void testRetryWithBackOffReachingMaxAttempt() {
+        AtomicInteger count = new AtomicInteger();
+        Uni.createFrom().<String> emitter(e -> {
+            e.fail(new Exception("boom " + count.getAndIncrement()));
+        })
+                .onFailure().retry().withBackOff(Duration.ofMillis(10), Duration.ofSeconds(20)).withJitter(1.0).atMost(4)
+                .await().atMost(Duration.ofSeconds(5));
+    }
+
+    static class ThrowablePredicate implements Predicate<Throwable> {
         @Override
         public boolean test(Throwable throwable) {
             throw new RuntimeException();
