@@ -14,7 +14,6 @@ import org.testng.annotations.Test;
 import io.reactivex.Flowable;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
-import io.smallrye.mutiny.operators.multi.processors.DirectProcessor;
 import io.smallrye.mutiny.test.MultiAssertSubscriber;
 
 public class MultiFlattenTest {
@@ -169,32 +168,6 @@ public class MultiFlattenTest {
         await().until(() -> subscriber.items().contains("B") && subscriber.items().contains("C"));
 
         subscriber.request(100);
-        subscriber.await().assertCompletedSuccessfully();
-    }
-
-    @Test
-    public void testWithDirectProcessor() {
-        DirectProcessor<String> processor = new DirectProcessor<>();
-        MultiAssertSubscriber<String> subscriber = Multi.createFrom().publisher(processor)
-                .onItem()
-                .produceUni(s -> Uni.createFrom().item(s.toUpperCase()).onItem().delayIt().by(Duration.ofMillis(10)))
-                .concatenate()
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(0));
-
-        subscriber
-                .assertSubscribed()
-                .assertHasNotReceivedAnyItem()
-                .request(1);
-
-        processor.onNext("a");
-        await().until(() -> subscriber.items().contains("A"));
-        subscriber.request(2);
-
-        processor.onNext("b");
-        await().until(() -> subscriber.items().contains("B"));
-        processor.onNext("c");
-        await().until(() -> subscriber.items().contains("C"));
-        processor.onComplete();
         subscriber.await().assertCompletedSuccessfully();
     }
 }

@@ -3,6 +3,7 @@ package io.smallrye.mutiny.operators.multi;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 
+import org.reactivestreams.Processor;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
@@ -11,7 +12,7 @@ import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.helpers.Subscriptions;
 import io.smallrye.mutiny.operators.AbstractMulti;
-import io.smallrye.mutiny.operators.multi.processors.DirectProcessor;
+import io.smallrye.mutiny.operators.multi.processors.UnicastProcessor;
 import io.smallrye.mutiny.subscription.MultiSubscriber;
 import io.smallrye.mutiny.subscription.SerializedSubscriber;
 import io.smallrye.mutiny.subscription.SwitchableSubscriptionSubscriber;
@@ -26,51 +27,51 @@ import io.smallrye.mutiny.subscription.SwitchableSubscriptionSubscriber;
  */
 public final class MultiRetryWhenOp<T> extends AbstractMultiOperator<T, T> {
 
-    final Function<? super Multi<Throwable>, ? extends Publisher<?>> whenStreamFactory;
+    private final Function<? super Multi<Throwable>, ? extends Publisher<?>> triggerStreamFactory;
 
     public MultiRetryWhenOp(Multi<? extends T> upstream,
-            Function<? super Multi<Throwable>, ? extends Publisher<?>> whenStreamFactory) {
+            Function<? super Multi<Throwable>, ? extends Publisher<?>> triggerStreamFactory) {
         super(upstream);
-        this.whenStreamFactory = ParameterValidation.nonNull(whenStreamFactory, "whenStreamFactory");
+        this.triggerStreamFactory = ParameterValidation.nonNull(triggerStreamFactory, "triggerStreamFactory");
     }
 
-    static <T> void subscribe(MultiSubscriber<? super T> downstream,
-            Function<? super Multi<Throwable>, ? extends Publisher<?>> whenStreamFactory,
+    private static <T> void subscribe(MultiSubscriber<? super T> downstream,
+            Function<? super Multi<Throwable>, ? extends Publisher<?>> triggerStreamFactory,
             Multi<? extends T> upstream) {
-        RetryWhenOtherSubscriber other = new RetryWhenOtherSubscriber();
+        TriggerSubscriber other = new TriggerSubscriber();
         Subscriber<Throwable> signaller = new SerializedSubscriber<>(other.processor);
         signaller.onSubscribe(Subscriptions.empty());
         MultiSubscriber<T> serialized = new SerializedSubscriber<>(downstream);
 
-        RetryWhenMainSubscriber<T> main = new RetryWhenMainSubscriber<>(upstream, serialized, signaller);
-        other.main = main;
+        RetryWhenOperator<T> operator = new RetryWhenOperator<>(upstream, serialized, signaller);
+        other.operator = operator;
 
-        serialized.onSubscribe(main);
+        serialized.onSubscribe(operator);
         Publisher<?> publisher;
 
         try {
-            publisher = whenStreamFactory.apply(other);
+            publisher = triggerStreamFactory.apply(other);
             if (publisher == null) {
                 throw new NullPointerException("The stream factory returned `null`");
             }
         } catch (Throwable e) {
-            downstream.onError(e);
+            downstream.onFailure(e);
             return;
         }
 
         publisher.subscribe(other);
 
-        if (!main.isCancelled()) {
-            upstream.subscribe(main);
+        if (!operator.isCancelled()) {
+            upstream.subscribe(operator);
         }
     }
 
     @Override
     public void subscribe(MultiSubscriber<? super T> downstream) {
-        subscribe(downstream, whenStreamFactory, upstream);
+        subscribe(downstream, triggerStreamFactory, upstream);
     }
 
-    static final class RetryWhenMainSubscriber<T> extends SwitchableSubscriptionSubscriber<T> {
+    static final class RetryWhenOperator<T> extends SwitchableSubscriptionSubscriber<T> {
 
         private final Publisher<? extends T> upstream;
         private final AtomicInteger wip = new AtomicInteger();
@@ -79,7 +80,7 @@ public final class MultiRetryWhenOp<T> extends AbstractMultiOperator<T, T> {
 
         long produced;
 
-        RetryWhenMainSubscriber(Publisher<? extends T> upstream, MultiSubscriber<? super T> downstream,
+        RetryWhenOperator(Publisher<? extends T> upstream, MultiSubscriber<? super T> downstream,
                 Subscriber<Throwable> signaller) {
             super(downstream);
             this.upstream = upstream;
@@ -147,29 +148,29 @@ public final class MultiRetryWhenOp<T> extends AbstractMultiOperator<T, T> {
     }
 
     @SuppressWarnings({ "SubscriberImplementation" })
-    static final class RetryWhenOtherSubscriber extends AbstractMulti<Throwable>
+    static final class TriggerSubscriber extends AbstractMulti<Throwable>
             implements Multi<Throwable>, Subscriber<Object> {
-        RetryWhenMainSubscriber<?> main;
-        final DirectProcessor<Throwable> processor = new DirectProcessor<>();
+        RetryWhenOperator<?> operator;
+        private final Processor<Throwable, Throwable> processor = UnicastProcessor.<Throwable> create().serialized();
 
         @Override
         public void onSubscribe(Subscription s) {
-            main.setWhen(s);
+            operator.setWhen(s);
         }
 
         @Override
         public void onNext(Object t) {
-            main.resubscribe();
+            operator.resubscribe();
         }
 
         @Override
         public void onError(Throwable t) {
-            main.whenFailure(t);
+            operator.whenFailure(t);
         }
 
         @Override
         public void onComplete() {
-            main.whenComplete();
+            operator.whenComplete();
         }
 
         @Override

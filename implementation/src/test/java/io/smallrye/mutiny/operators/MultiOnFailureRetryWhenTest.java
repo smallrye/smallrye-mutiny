@@ -94,7 +94,8 @@ public class MultiOnFailureRetryWhenTest {
 
         AtomicInteger count = new AtomicInteger();
         Multi<Integer> retry = multi
-                .onFailure().retry().when(other -> other.flatMap(l -> count.getAndIncrement() == 0 ? Multi.createFrom().item(l)
+                .onFailure().retry()
+                .when(other -> other.flatMap(l -> count.getAndIncrement() == 0 ? Multi.createFrom().item(l)
                         : Multi.createFrom().failure(new IllegalStateException("boom"))));
 
         MultiAssertSubscriber<Integer> subscriber = retry.subscribe()
@@ -132,13 +133,15 @@ public class MultiOnFailureRetryWhenTest {
     @Test
     public void testAfterOnRetryAndCompletion() {
         AtomicBoolean sourceSubscribed = new AtomicBoolean();
-        AtomicBoolean sourceCancelled = new AtomicBoolean();
         Multi<Integer> source = failingAfter1
-                .on().subscribed(sub -> sourceSubscribed.set(true))
-                .on().cancellation(() -> sourceCancelled.set(true));
+                .on().subscribed(sub -> sourceSubscribed.set(true));
 
         Multi<Integer> retry = source
-                .onFailure().retry().when(other -> other.transform().byTakingFirstItems(1));
+                .on().subscribed(s -> System.out.println("subscribing"))
+                .onItem().invoke(i -> System.out.println(" >> " + i))
+                .onFailure().retry().when(other -> other
+                        .onItem().invoke(x -> System.out.println("Got failure " + x))
+                        .transform().byTakingFirstItems(1));
 
         MultiAssertSubscriber<Integer> subscriber = retry.subscribe()
                 .withSubscriber(MultiAssertSubscriber.create(10));
@@ -147,7 +150,6 @@ public class MultiOnFailureRetryWhenTest {
                 .assertReceived(1, 1)
                 .assertCompletedSuccessfully();
         assertThat(sourceSubscribed.get()).isTrue();
-        assertThat(sourceCancelled.get()).isTrue();
     }
 
     @Test
@@ -312,11 +314,9 @@ public class MultiOnFailureRetryWhenTest {
         Exception exception = new IOException("boom retry");
 
         MultiAssertSubscriber<Integer> subscriber = Multi.createFrom().<Integer> emitter(e -> {
-            new Thread(() -> {
-                e.emit(0);
-                e.emit(1);
-                e.fail(exception);
-            }).start();
+            e.emit(0);
+            e.emit(1);
+            e.fail(exception);
         })
                 .onFailure().retry().withBackOff(Duration.ofMillis(10), Duration.ofHours(1)).withJitter(0.1)
                 .atMost(4)
@@ -333,7 +333,6 @@ public class MultiOnFailureRetryWhenTest {
         Exception exception = new IOException("boom retry");
         MultiAssertSubscriber<Integer> subscriber = Multi.createBy().concatenating()
                 .streams(Multi.createFrom().range(0, 2), Multi.createFrom().failure(exception))
-                .subscribeOn(runnable -> new Thread(runnable).start())
 
                 .onFailure().retry().withBackOff(Duration.ofMillis(100), Duration.ofHours(1))
                 .atMost(4)
@@ -350,17 +349,13 @@ public class MultiOnFailureRetryWhenTest {
         Exception exception = new IOException("boom retry");
         MultiAssertSubscriber<Integer> subscriber = Multi.createBy().concatenating()
                 .streams(Multi.createFrom().range(0, 2), Multi.createFrom().failure(exception))
-                .subscribeOn(runnable -> new Thread(runnable).start())
                 .onFailure().retry().withBackOff(Duration.ofMillis(10)).withJitter(0.0)
                 .atMost(4)
                 .subscribe().withSubscriber(MultiAssertSubscriber.create(100));
 
         await()
                 .atMost(1, TimeUnit.MINUTES)
-                .until(() -> {
-                    System.out.println(subscriber.items());
-                    return subscriber.items().size() >= 8;
-                });
+                .until(() -> subscriber.items().size() >= 8);
         subscriber
                 .assertReceived(0, 1, 0, 1, 0, 1, 0, 1)
                 .assertHasFailedWith(IllegalStateException.class, "Retries exhausted: 4/4");

@@ -121,7 +121,13 @@ include::../../../src/test/java/snippets/MultiFailureTest.java[tags=code]
 ----
 
 Note that with `Multi`, a failure cancels the subscription, meaning you will not receive any more items.
-The `retry` operator lets you re-subscribe and continue the reception.
+
+The `retry` operator lets you re-subscribe and continue the reception:
+
+[source,java,indent=0]
+----
+include::../../../src/test/java/snippets/MultiFailureTest.java[tags=code-retry]
+----
 
 === How do I handle `null`?
 
