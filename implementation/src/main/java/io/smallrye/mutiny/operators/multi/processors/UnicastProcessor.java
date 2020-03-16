@@ -245,4 +245,8 @@ public class UnicastProcessor<T> extends AbstractMulti<T> implements Processor<T
     public boolean hasSubscriber() {
         return downstream.get() != null;
     }
+
+    public SerializedProcessor<T, T> serialized() {
+        return new SerializedProcessor<>(this);
+    }
 }

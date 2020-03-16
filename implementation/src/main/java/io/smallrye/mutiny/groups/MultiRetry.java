@@ -19,9 +19,10 @@ import io.smallrye.mutiny.operators.multi.MultiRetryWhenOp;
 public class MultiRetry<T> {
 
     private final Multi<T> upstream;
-    private Duration initialBackOff;
-    private Duration maxBackoff;
-    private double jitter = 0.5;
+    private Duration initialBackOff = Duration.ofSeconds(1);
+    private Duration maxBackoff = ExponentialBackoff.MAX_BACKOFF;
+    private double jitter = ExponentialBackoff.DEFAULT_JITTER;
+    private boolean backOffConfigured = false;
 
     public MultiRetry(Multi<T> upstream) {
         this.upstream = nonNull(upstream, "upstream");
@@ -51,9 +52,7 @@ public class MultiRetry<T> {
      */
     public Multi<T> atMost(long numberOfAttempts) {
         ParameterValidation.positive(numberOfAttempts, "numberOfAttempts");
-        validateRetryConfiguration();
-
-        if (initialBackOff != null) {
+        if (backOffConfigured) {
             Function<Multi<Throwable>, Publisher<Long>> whenStreamFactory = ExponentialBackoff
                     .randomExponentialBackoffFunction(numberOfAttempts, initialBackOff, maxBackoff, jitter,
                             Infrastructure.getDefaultWorkerPool());
@@ -63,13 +62,6 @@ public class MultiRetry<T> {
             return Infrastructure.onMultiCreation(new MultiRetryOp<>(upstream, numberOfAttempts));
         }
 
-    }
-
-    private void validateRetryConfiguration() {
-        if (initialBackOff == null && jitter != 0.5) {
-            throw new IllegalArgumentException(
-                    "Invalid retry configuration, `jitter` must be used in combination with back-off");
-        }
     }
 
     public Multi<T> until(Predicate<? super Throwable> predicate) {
@@ -89,7 +81,7 @@ public class MultiRetry<T> {
      *         produced by {@code whenStreamFactory} emits an item.
      */
     public Multi<T> when(Function<Multi<Throwable>, ? extends Publisher<?>> whenStreamFactory) {
-        if (initialBackOff != null || maxBackoff != null || jitter != 0.5) {
+        if (backOffConfigured) {
             throw new IllegalArgumentException(
                     "Invalid retry configuration, `when` cannot be used with a back-off configuration");
         }
@@ -116,6 +108,7 @@ public class MultiRetry<T> {
      * @return this object to configure the retry policy.
      */
     public MultiRetry<T> withBackOff(Duration initialBackOff, Duration maxBackOff) {
+        this.backOffConfigured = true;
         this.initialBackOff = validate(initialBackOff, "initialBackOff");
         this.maxBackoff = validate(maxBackOff, "maxBackOff");
         return this;
@@ -131,6 +124,7 @@ public class MultiRetry<T> {
         if (jitter < 0 || jitter > 1.0) {
             throw new IllegalArgumentException("Invalid `jitter`, the value must be in [0.0, 1.0]");
         }
+        this.backOffConfigured = true;
         this.jitter = jitter;
         return this;
     }

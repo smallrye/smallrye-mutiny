@@ -14,6 +14,7 @@ import io.smallrye.mutiny.Uni;
 public class ExponentialBackoff {
 
     public static final Duration MAX_BACKOFF = Duration.ofMillis(Long.MAX_VALUE);
+    public static final double DEFAULT_JITTER = 0.5;
 
     private ExponentialBackoff() {
         // avoid direct instantiation
