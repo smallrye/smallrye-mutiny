@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.testng.annotations.BeforeMethod;
@@ -120,6 +121,24 @@ public class MultiOnFailureRetryTest {
                 .subscribe().withSubscriber(MultiAssertSubscriber.create(10))
                 .assertCompletedSuccessfully()
                 .assertReceived(1, 2, 3, 4);
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void testThatYouCannotUseWhenIfBackoffIsConfigured() {
+        Multi.createFrom().item("hello")
+                .onFailure().retry().withBackOff(Duration.ofSeconds(1)).when(t -> Multi.createFrom().item(t));
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void testThatYouCannotUseUntilIfBackoffIsConfigured() {
+        Multi.createFrom().item("hello")
+                .onFailure().retry().withBackOff(Duration.ofSeconds(1)).until(t -> true);
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void testJitterValidation() {
+        Multi.createFrom().item("hello")
+                .onFailure().retry().withJitter(2);
     }
 
 }

@@ -1,18 +1,19 @@
 package io.smallrye.mutiny.groups;
 
+import static io.smallrye.mutiny.helpers.ParameterValidation.validate;
+
+import java.time.Duration;
+import java.util.function.Function;
+import java.util.function.Predicate;
+
+import org.reactivestreams.Publisher;
+
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.helpers.ExponentialBackoff;
 import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.UniRetryAtMost;
-import org.reactivestreams.Publisher;
-
-import java.time.Duration;
-import java.util.function.Function;
-import java.util.function.Predicate;
-
-import static io.smallrye.mutiny.helpers.ParameterValidation.validate;
 
 public class UniRetry<T> {
 
@@ -48,8 +49,8 @@ public class UniRetry<T> {
      *
      * @param numberOfAttempts the number of attempt, must be greater than zero
      * @return a new {@link Uni} retrying at most {@code numberOfAttempts} times to subscribe to the current {@link Uni}
-     * until it gets an item. When the number of attempt is reached, the last failure is propagated. If the back-off
-     * has been configured, a delay is introduced between the attempts.
+     *         until it gets an item. When the number of attempt is reached, the last failure is propagated. If the back-off
+     *         has been configured, a delay is introduced between the attempts.
      */
     public Uni<T> atMost(long numberOfAttempts) {
         if (!backOffConfigured) {
@@ -67,14 +68,14 @@ public class UniRetry<T> {
      * The predicate is called with the failure emitted by the current {@link Uni}.
      *
      * @param predicate the predicate that determines if a re-subscription may happen in case of a specific failure,
-     *                  must not be {@code null}. If the predicate returns {@code true} for the given failure, a
-     *                  re-subscription is attempted.
+     *        must not be {@code null}. If the predicate returns {@code true} for the given failure, a
+     *        re-subscription is attempted.
      * @return the new {@code Uni} instance
      */
     public Uni<T> until(Predicate<? super Throwable> predicate) {
         ParameterValidation.nonNull(predicate, "predicate");
         Function<Multi<Throwable>, Publisher<Long>> whenStreamFactory = stream -> stream.onItem()
-                .produceUni(failure -> Uni.createFrom().<Long>emitter(emitter -> {
+                .produceUni(failure -> Uni.createFrom().<Long> emitter(emitter -> {
                     try {
                         if (predicate.test(failure)) {
                             emitter.complete(1L);
@@ -98,9 +99,9 @@ public class UniRetry<T> {
      * {@code null}.
      *
      * @param whenStreamFactory the function used to produce the stream triggering the re-subscription, must not be
-     *                          {@code null}, must not produce {@code null}
+     *        {@code null}, must not produce {@code null}
      * @return a new {@link Uni} retrying re-subscribing to the current {@link Multi} when the companion stream,
-     * produced by {@code whenStreamFactory} emits an item.
+     *         produced by {@code whenStreamFactory} emits an item.
      */
     public Uni<T> when(Function<Multi<Throwable>, ? extends Publisher<?>> whenStreamFactory) {
         if (backOffConfigured) {
@@ -126,7 +127,7 @@ public class UniRetry<T> {
      * he delay when several failures happen. The max delays is {@code maxBackOff}.
      *
      * @param initialBackOff the initial back-off duration, must not be {@code null}, must not be negative.
-     * @param maxBackOff     the max back-off duration, must not be {@code null}, must not be negative.
+     * @param maxBackOff the max back-off duration, must not be {@code null}, must not be negative.
      * @return this object to configure the retry policy.
      */
     public UniRetry<T> withBackOff(Duration initialBackOff, Duration maxBackOff) {

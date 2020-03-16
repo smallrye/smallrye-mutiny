@@ -3,6 +3,7 @@ package io.smallrye.mutiny.operators;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 
@@ -130,6 +131,37 @@ public class UniOnFailureRetryUntilTest {
         upstream
                 .onFailure().retry().until(t -> false)
                 .await().indefinitely();
+    }
+
+    @Test(expectedExceptions = RuntimeException.class, expectedExceptionsMessageRegExp = ".*kaboom.*")
+    public void testWithPredicateThrowException() {
+        AtomicInteger count = new AtomicInteger();
+        Uni<Integer> upstream = Uni.createFrom().emitter(em -> {
+            int i = count.incrementAndGet();
+            if (i == 1) {
+                em.fail(new Exception("boom"));
+                return;
+            }
+            em.complete(2);
+        });
+
+        upstream
+                .onFailure().retry().until(t -> {
+                    throw new RuntimeException("kaboom");
+                })
+                .await().indefinitely();
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void testJitterValidation() {
+        Uni.createFrom().item(1)
+                .onFailure().retry().withJitter(2);
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void testThatYouCannotUseUntilIfBackoffIsConfigured() {
+        Uni.createFrom().item("hello")
+                .onFailure().retry().withBackOff(Duration.ofSeconds(1)).until(t -> true);
     }
 
 }

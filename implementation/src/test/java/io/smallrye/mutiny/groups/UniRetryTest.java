@@ -14,6 +14,7 @@ import java.util.function.Predicate;
 
 import org.testng.annotations.Test;
 
+import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 
 public class UniRetryTest {
@@ -131,8 +132,15 @@ public class UniRetryTest {
         Uni.createFrom().<String> emitter(e -> {
             e.fail(new Exception("boom " + count.getAndIncrement()));
         })
-                .onFailure().retry().withBackOff(Duration.ofMillis(10), Duration.ofSeconds(20)).withJitter(1.0).atMost(4)
+                .onFailure().retry().withBackOff(Duration.ofMillis(10), Duration.ofSeconds(20)).withJitter(1.0)
+                .atMost(4)
                 .await().atMost(Duration.ofSeconds(5));
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void testThatYouCannotUseWhenIfBackoffIsConfigured() {
+        Uni.createFrom().item("hello")
+                .onFailure().retry().withBackOff(Duration.ofSeconds(1)).when(t -> Multi.createFrom().item(t));
     }
 
     static class ThrowablePredicate implements Predicate<Throwable> {

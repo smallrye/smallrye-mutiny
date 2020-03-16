@@ -23,24 +23,6 @@ public class Subscriptions {
         return new IllegalArgumentException("Invalid request number, must be greater than 0");
     }
 
-    /**
-     * Check Subscription current state and cancel new Subscription if current is set,
-     * or return true if ready to subscribe.
-     *
-     * @param current current Subscription, expected to be null
-     * @param next new Subscription
-     * @return true if Subscription can be used
-     */
-    public static boolean validate(Subscription current, Subscription next) {
-        Objects.requireNonNull(next, "Subscription cannot be null");
-        if (current != null) {
-            next.cancel();
-            return false;
-        }
-
-        return true;
-    }
-
     public static Subscription empty() {
         return new EmptySubscription();
     }
@@ -50,15 +32,6 @@ public class Subscriptions {
      * Calling {@link Subscription#cancel()} is a no-op.
      */
     public static final EmptySubscription CANCELLED = new EmptySubscription();
-
-    public static <T> void propagateFailureEvent(Subscriber<T> subscriber, Throwable failure) {
-        subscriber.onSubscribe(CANCELLED);
-        if (failure == null) {
-            subscriber.onError(new NullPointerException());
-        } else {
-            subscriber.onError(failure);
-        }
-    }
 
     /**
      * Invokes {@code onSubscribe} on the given {@link Subscriber} with the <em>cancelled</em> subscription instance
@@ -159,16 +132,6 @@ public class Subscriptions {
 
     public static long unboundedOrMaxConcurrency(int concurrency) {
         return concurrency == Integer.MAX_VALUE ? Long.MAX_VALUE : concurrency;
-    }
-
-    public static int unboundedOrLimit(int prefetch, int lowTide) {
-        if (lowTide <= 0) {
-            return prefetch;
-        }
-        if (lowTide >= prefetch) {
-            return unboundedOrLimit(prefetch);
-        }
-        return prefetch == Integer.MAX_VALUE ? Integer.MAX_VALUE : lowTide;
     }
 
     public static boolean addFailure(AtomicReference<Throwable> failures, Throwable failure) {
@@ -282,7 +245,8 @@ public class Subscriptions {
      * @return value after subtraction or zero
      */
     public static long produced(AtomicLong requested, long amount) {
-        long r, u;
+        long r;
+        long u;
         do {
             r = requested.get();
             if (r == 0 || r == Long.MAX_VALUE) {
