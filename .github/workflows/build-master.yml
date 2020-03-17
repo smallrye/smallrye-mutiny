@@ -67,7 +67,7 @@ jobs:
         run: mvn -B clean install --file pom.xml
 
   quality:
-    needs: [build_java8, build_java11, build_java12, build_java13]
+    needs: [build_java8, build_java11, build_java12]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
