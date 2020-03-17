@@ -462,8 +462,8 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div id="header">
 <h1>SmallRye Mutiny</h1>
 <div class="details">
-<span id="revnumber">version 0.4.1,</span>
-<span id="revdate">2020-03-13</span>
+<span id="revnumber">version 0.4.2,</span>
+<span id="revdate">2020-03-17</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">SmallRye Mutiny</div>
@@ -572,7 +572,7 @@ If you are using Maven, declare the following dependency in your <code>pom.xml</
 <pre class="highlightjs highlight"><code data-lang="xml" class="language-xml hljs">&lt;dependency&gt;
     &lt;groupId&gt;io.smallrye.reactive&lt;/groupId&gt;
     &lt;artifactId&gt;mutiny&lt;/artifactId&gt;
-    &lt;version&gt;0.4.1&lt;/version&gt;
+    &lt;version&gt;0.4.2&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -582,7 +582,7 @@ If you are using Maven, declare the following dependency in your <code>pom.xml</
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code data-lang="groovy" class="language-groovy hljs">dependencies {
-     implementation 'io.smallrye.reactive:mutiny:0.4.1'
+     implementation 'io.smallrye.reactive:mutiny:0.4.2'
 }</code></pre>
 </div>
 </div>
@@ -1416,8 +1416,15 @@ CompletableFuture&lt;String&gt; res4 = multi
 </div>
 </div>
 <div class="paragraph">
-<p>Note that with <code>Multi</code>, a failure cancels the subscription, meaning you will not receive any more items.
-The <code>retry</code> operator lets you re-subscribe and continue the reception.</p>
+<p>Note that with <code>Multi</code>, a failure cancels the subscription, meaning you will not receive any more items.</p>
+</div>
+<div class="paragraph">
+<p>The <code>retry</code> operator lets you re-subscribe and continue the reception:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs"></code></pre>
+</div>
 </div>
 </div>
 <div class="sect3">
@@ -1526,7 +1533,7 @@ To enable this feature, add the following dependency to your <code>CLASSPATH</co
 <pre class="highlightjs highlight"><code data-lang="xml" class="language-xml hljs">&lt;dependency&gt;
     &lt;groupId&gt;io.smallrye.reactive&lt;/groupId&gt;
     &lt;artifactId&gt;mutiny-rxjava&lt;/artifactId&gt;
-    &lt;version&gt;0.4.1&lt;/version&gt;
+    &lt;version&gt;0.4.2&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -1640,7 +1647,7 @@ To enable this feature, add the following dependency to your <code>CLASSPATH</co
 <pre class="highlightjs highlight"><code data-lang="xml" class="language-xml hljs">&lt;dependency&gt;
     &lt;groupId&gt;io.smallrye.reactive&lt;/groupId&gt;
     &lt;artifactId&gt;mutiny-reactor&lt;/artifactId&gt;
-    &lt;version&gt;0.4.1&lt;/version&gt;
+    &lt;version&gt;0.4.2&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -1834,10 +1841,10 @@ So by combining these methods and <code>disjoint</code> you can generate streams
 <pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">PaginatedApi api = new PaginatedApi();
 
 Multi&lt;String&gt; stream = Multi.createBy().repeating()
-            .completionStage(
-                    () -&gt; new AtomicInteger(),
-                    state -&gt; api.getPage(state.getAndIncrement()))
-            .until(list -&gt; list.isEmpty())
+        .completionStage(
+                () -&gt; new AtomicInteger(),
+                state -&gt; api.getPage(state.getAndIncrement()))
+        .until(list -&gt; list.isEmpty())
         .onItem().disjoint();</code></pre>
 </div>
 </div>
@@ -1867,8 +1874,8 @@ It gets the items from the lists and passes them downstream:</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Version 0.4.1<br>
-Last updated 2020-03-13 07:05:03 UTC
+Version 0.4.2<br>
+Last updated 2020-03-17 08:50:11 UTC
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">

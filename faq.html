@@ -784,8 +784,15 @@ CompletableFuture&lt;String&gt; res4 = multi
 </div>
 </div>
 <div class="paragraph">
-<p>Note that with <code>Multi</code>, a failure cancels the subscription, meaning you will not receive any more items.
-The <code>retry</code> operator lets you re-subscribe and continue the reception.</p>
+<p>Note that with <code>Multi</code>, a failure cancels the subscription, meaning you will not receive any more items.</p>
+</div>
+<div class="paragraph">
+<p>The <code>retry</code> operator lets you re-subscribe and continue the reception:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs"></code></pre>
+</div>
 </div>
 </div>
 <div class="sect2">
@@ -894,7 +901,7 @@ To enable this feature, add the following dependency to your <code>CLASSPATH</co
 <pre class="highlightjs highlight"><code data-lang="xml" class="language-xml hljs">&lt;dependency&gt;
     &lt;groupId&gt;io.smallrye.reactive&lt;/groupId&gt;
     &lt;artifactId&gt;mutiny-rxjava&lt;/artifactId&gt;
-    &lt;version&gt;0.4.1&lt;/version&gt;
+    &lt;version&gt;0.4.2&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -1008,7 +1015,7 @@ To enable this feature, add the following dependency to your <code>CLASSPATH</co
 <pre class="highlightjs highlight"><code data-lang="xml" class="language-xml hljs">&lt;dependency&gt;
     &lt;groupId&gt;io.smallrye.reactive&lt;/groupId&gt;
     &lt;artifactId&gt;mutiny-reactor&lt;/artifactId&gt;
-    &lt;version&gt;0.4.1&lt;/version&gt;
+    &lt;version&gt;0.4.2&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -1202,10 +1209,10 @@ So by combining these methods and <code>disjoint</code> you can generate streams
 <pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">PaginatedApi api = new PaginatedApi();
 
 Multi&lt;String&gt; stream = Multi.createBy().repeating()
-            .completionStage(
-                    () -&gt; new AtomicInteger(),
-                    state -&gt; api.getPage(state.getAndIncrement()))
-            .until(list -&gt; list.isEmpty())
+        .completionStage(
+                () -&gt; new AtomicInteger(),
+                state -&gt; api.getPage(state.getAndIncrement()))
+        .until(list -&gt; list.isEmpty())
         .onItem().disjoint();</code></pre>
 </div>
 </div>
@@ -1236,7 +1243,7 @@ It gets the items from the lists and passes them downstream:</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-03-13 07:05:03 UTC
+Last updated 2020-03-17 08:50:11 UTC
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">
