@@ -11,7 +11,13 @@ import org.reactivestreams.Processor;
 import org.reactivestreams.Publisher;
 
 import io.smallrye.mutiny.Multi;
-import io.smallrye.mutiny.streams.operators.*;
+import io.smallrye.mutiny.streams.operators.Operator;
+import io.smallrye.mutiny.streams.operators.ProcessingStage;
+import io.smallrye.mutiny.streams.operators.ProcessorOperator;
+import io.smallrye.mutiny.streams.operators.PublisherOperator;
+import io.smallrye.mutiny.streams.operators.PublisherStage;
+import io.smallrye.mutiny.streams.operators.TerminalOperator;
+import io.smallrye.mutiny.streams.operators.TerminalStage;
 import io.smallrye.mutiny.streams.spi.Transformer;
 import io.smallrye.mutiny.streams.stages.Stages;
 import io.smallrye.mutiny.streams.utils.ConnectableProcessor;

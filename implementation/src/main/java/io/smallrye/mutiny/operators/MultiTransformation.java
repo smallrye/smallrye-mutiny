@@ -5,7 +5,16 @@ import java.util.function.Predicate;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
-import io.smallrye.mutiny.operators.multi.*;
+import io.smallrye.mutiny.operators.multi.MultiDistinctOp;
+import io.smallrye.mutiny.operators.multi.MultiDistinctUntilChangedOp;
+import io.smallrye.mutiny.operators.multi.MultiSkipLastOp;
+import io.smallrye.mutiny.operators.multi.MultiSkipOp;
+import io.smallrye.mutiny.operators.multi.MultiSkipUntilOp;
+import io.smallrye.mutiny.operators.multi.MultiSkipUntilPublisherOp;
+import io.smallrye.mutiny.operators.multi.MultiTakeLastOp;
+import io.smallrye.mutiny.operators.multi.MultiTakeOp;
+import io.smallrye.mutiny.operators.multi.MultiTakeUntilOtherOp;
+import io.smallrye.mutiny.operators.multi.MultiTakeWhileOp;
 
 public class MultiTransformation {
 

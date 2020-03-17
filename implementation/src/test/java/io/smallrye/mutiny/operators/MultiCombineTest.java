@@ -15,7 +15,11 @@ import org.testng.annotations.Test;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.test.MultiAssertSubscriber;
-import io.smallrye.mutiny.tuples.*;
+import io.smallrye.mutiny.tuples.Functions;
+import io.smallrye.mutiny.tuples.Tuple2;
+import io.smallrye.mutiny.tuples.Tuple3;
+import io.smallrye.mutiny.tuples.Tuple4;
+import io.smallrye.mutiny.tuples.Tuple5;
 
 public class MultiCombineTest {
 

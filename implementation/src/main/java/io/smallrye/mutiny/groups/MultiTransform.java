@@ -1,6 +1,8 @@
 package io.smallrye.mutiny.groups;
 
-import static io.smallrye.mutiny.helpers.ParameterValidation.*;
+import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
+import static io.smallrye.mutiny.helpers.ParameterValidation.positiveOrZero;
+import static io.smallrye.mutiny.helpers.ParameterValidation.validate;
 
 import java.time.Duration;
 import java.util.ArrayList;

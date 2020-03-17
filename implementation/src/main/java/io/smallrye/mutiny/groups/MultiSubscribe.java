@@ -15,7 +15,10 @@ import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.helpers.BlockingIterable;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.AbstractMulti;
-import io.smallrye.mutiny.subscription.*;
+import io.smallrye.mutiny.subscription.Cancellable;
+import io.smallrye.mutiny.subscription.CancellableSubscriber;
+import io.smallrye.mutiny.subscription.MultiSubscriber;
+import io.smallrye.mutiny.subscription.Subscribers;
 
 public class MultiSubscribe<T> {
 

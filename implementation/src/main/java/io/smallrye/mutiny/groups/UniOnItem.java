@@ -12,7 +12,11 @@ import org.reactivestreams.Publisher;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
-import io.smallrye.mutiny.operators.*;
+import io.smallrye.mutiny.operators.UniFlatMapCompletionStageOnItem;
+import io.smallrye.mutiny.operators.UniFlatMapOnItem;
+import io.smallrye.mutiny.operators.UniMapOnResult;
+import io.smallrye.mutiny.operators.UniOnEventConsume;
+import io.smallrye.mutiny.operators.UniProduceMultiOnItem;
 import io.smallrye.mutiny.subscription.UniEmitter;
 
 public class UniOnItem<T> {

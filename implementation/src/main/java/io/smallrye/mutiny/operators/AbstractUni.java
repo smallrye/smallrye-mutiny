@@ -5,7 +5,16 @@ import java.util.function.Predicate;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
-import io.smallrye.mutiny.groups.*;
+import io.smallrye.mutiny.groups.UniAndGroup;
+import io.smallrye.mutiny.groups.UniAwait;
+import io.smallrye.mutiny.groups.UniConvert;
+import io.smallrye.mutiny.groups.UniIfNoItem;
+import io.smallrye.mutiny.groups.UniOnEvent;
+import io.smallrye.mutiny.groups.UniOnFailure;
+import io.smallrye.mutiny.groups.UniOnItem;
+import io.smallrye.mutiny.groups.UniOr;
+import io.smallrye.mutiny.groups.UniRepeat;
+import io.smallrye.mutiny.groups.UniSubscribe;
 import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.tuples.Tuple2;

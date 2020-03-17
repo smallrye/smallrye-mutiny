@@ -1,6 +1,8 @@
 package io.smallrye.mutiny.groups;
 
-import static io.smallrye.mutiny.helpers.ParameterValidation.*;
+import static io.smallrye.mutiny.helpers.ParameterValidation.SUPPLIER_PRODUCED_NULL;
+import static io.smallrye.mutiny.helpers.ParameterValidation.doesNotContainNull;
+import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
 
 import java.util.Arrays;
 import java.util.NoSuchElementException;

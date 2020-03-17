@@ -1,6 +1,8 @@
 package io.smallrye.mutiny.groups;
 
-import static io.smallrye.mutiny.helpers.ParameterValidation.*;
+import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
+import static io.smallrye.mutiny.helpers.ParameterValidation.positive;
+import static io.smallrye.mutiny.helpers.ParameterValidation.validate;
 
 import java.time.Duration;
 
@@ -76,7 +78,8 @@ public class MultiGroupIntoMultis<T> {
      * @return a Multi emitting multis of at most {@code size} items from the upstream Multi.
      */
     public Multi<Multi<T>> of(int size, int skip) {
-        return Infrastructure.onMultiCreation(MultiCollector.multi(upstream, positive(size, "size"), positive(skip, "skip")));
+        return Infrastructure
+                .onMultiCreation(MultiCollector.multi(upstream, positive(size, "size"), positive(skip, "skip")));
     }
 
 }

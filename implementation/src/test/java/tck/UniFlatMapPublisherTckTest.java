@@ -1,7 +1,5 @@
 package tck;
 
-import java.util.concurrent.*;
-
 import org.reactivestreams.Publisher;
 
 import io.smallrye.mutiny.Multi;

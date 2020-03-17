@@ -10,7 +10,19 @@ import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
-import io.smallrye.mutiny.groups.*;
+import io.smallrye.mutiny.groups.MultiBroadcast;
+import io.smallrye.mutiny.groups.MultiCollect;
+import io.smallrye.mutiny.groups.MultiConvert;
+import io.smallrye.mutiny.groups.MultiCreate;
+import io.smallrye.mutiny.groups.MultiCreateBy;
+import io.smallrye.mutiny.groups.MultiGroup;
+import io.smallrye.mutiny.groups.MultiOnCompletion;
+import io.smallrye.mutiny.groups.MultiOnEvent;
+import io.smallrye.mutiny.groups.MultiOnFailure;
+import io.smallrye.mutiny.groups.MultiOnItem;
+import io.smallrye.mutiny.groups.MultiOverflow;
+import io.smallrye.mutiny.groups.MultiSubscribe;
+import io.smallrye.mutiny.groups.MultiTransform;
 
 @SuppressWarnings("PublisherImplementation")
 public interface Multi<T> extends Publisher<T> {

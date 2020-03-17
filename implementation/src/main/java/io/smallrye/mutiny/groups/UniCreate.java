@@ -17,7 +17,11 @@ import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.converters.UniConverter;
 import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
-import io.smallrye.mutiny.operators.*;
+import io.smallrye.mutiny.operators.UniCreateFromCompletionStage;
+import io.smallrye.mutiny.operators.UniCreateFromDeferredSupplier;
+import io.smallrye.mutiny.operators.UniCreateFromPublisher;
+import io.smallrye.mutiny.operators.UniCreateWithEmitter;
+import io.smallrye.mutiny.operators.UniNever;
 import io.smallrye.mutiny.subscription.UniEmitter;
 import io.smallrye.mutiny.subscription.UniSubscriber;
 
@@ -27,6 +31,7 @@ import io.smallrye.mutiny.subscription.UniSubscriber;
 public class UniCreate {
 
     public static final UniCreate INSTANCE = new UniCreate();
+    @SuppressWarnings("rawtypes")
     private static final Uni UNI_OF_NULL = Uni.createFrom().item((Object) null);
 
     private UniCreate() {

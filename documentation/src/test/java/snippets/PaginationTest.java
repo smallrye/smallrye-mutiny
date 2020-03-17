@@ -1,18 +1,19 @@
 package snippets;
 
 import io.smallrye.mutiny.Multi;
-import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.test.MultiAssertSubscriber;
 import org.junit.Test;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import static org.awaitility.Awaitility.await;
 
 public class PaginationTest {
 
@@ -25,10 +26,10 @@ public class PaginationTest {
         PaginatedApi api = new PaginatedApi();
 
         Multi<String> stream = Multi.createBy().repeating()
-                    .completionStage(
-                            () -> new AtomicInteger(),
-                            state -> api.getPage(state.getAndIncrement()))
-                    .until(list -> list.isEmpty())
+                .completionStage(
+                        () -> new AtomicInteger(),
+                        state -> api.getPage(state.getAndIncrement()))
+                .until(list -> list.isEmpty())
                 .onItem().disjoint();
         // end::code[]
         stream.subscribe().withSubscriber(MultiAssertSubscriber.create(10))

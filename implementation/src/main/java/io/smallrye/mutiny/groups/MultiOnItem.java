@@ -1,16 +1,26 @@
 package io.smallrye.mutiny.groups;
 
-import static io.smallrye.mutiny.helpers.ParameterValidation.*;
+import static io.smallrye.mutiny.helpers.ParameterValidation.MAPPER_RETURNED_NULL;
+import static io.smallrye.mutiny.helpers.ParameterValidation.SUPPLIER_PRODUCED_NULL;
+import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
 
 import java.util.concurrent.CompletionStage;
-import java.util.function.*;
+import java.util.function.BiFunction;
+import java.util.function.BinaryOperator;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 import org.reactivestreams.Publisher;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
-import io.smallrye.mutiny.operators.multi.*;
+import io.smallrye.mutiny.operators.multi.MultiIgnoreOp;
+import io.smallrye.mutiny.operators.multi.MultiMapOp;
+import io.smallrye.mutiny.operators.multi.MultiScanOp;
+import io.smallrye.mutiny.operators.multi.MultiScanWithSeedOp;
+import io.smallrye.mutiny.operators.multi.MultiSignalConsumerOp;
 import io.smallrye.mutiny.subscription.BackPressureStrategy;
 
 public class MultiOnItem<T> {

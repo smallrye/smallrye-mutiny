@@ -7,7 +7,11 @@ import java.io.IOException;
 
 import org.junit.Test;
 
-import io.reactivex.*;
+import io.reactivex.Completable;
+import io.reactivex.Flowable;
+import io.reactivex.Maybe;
+import io.reactivex.Observable;
+import io.reactivex.Single;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.converters.uni.UniRxConverters;
 

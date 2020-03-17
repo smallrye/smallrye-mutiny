@@ -16,7 +16,13 @@ import io.smallrye.mutiny.GroupedMulti;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
-import io.smallrye.mutiny.operators.multi.*;
+import io.smallrye.mutiny.operators.multi.MultiBufferOp;
+import io.smallrye.mutiny.operators.multi.MultiBufferWithTimeoutOp;
+import io.smallrye.mutiny.operators.multi.MultiCollectorOp;
+import io.smallrye.mutiny.operators.multi.MultiGroupByOp;
+import io.smallrye.mutiny.operators.multi.MultiLastItemOp;
+import io.smallrye.mutiny.operators.multi.MultiWindowOnDurationOp;
+import io.smallrye.mutiny.operators.multi.MultiWindowOp;
 
 public class MultiCollector {
 

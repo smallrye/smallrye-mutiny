@@ -6,7 +6,11 @@ import java.util.Arrays;
 
 import org.reactivestreams.Publisher;
 
-import io.smallrye.mutiny.operators.*;
+import io.smallrye.mutiny.operators.MultiItemCombine2;
+import io.smallrye.mutiny.operators.MultiItemCombine3;
+import io.smallrye.mutiny.operators.MultiItemCombine4;
+import io.smallrye.mutiny.operators.MultiItemCombine5;
+import io.smallrye.mutiny.operators.MultiItemCombineIterable;
 
 public class MultiItemCombination {
 

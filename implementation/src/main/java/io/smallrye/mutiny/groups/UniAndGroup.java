@@ -6,7 +6,12 @@ import java.util.Arrays;
 
 import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Uni;
-import io.smallrye.mutiny.tuples.*;
+import io.smallrye.mutiny.tuples.Functions;
+import io.smallrye.mutiny.tuples.Tuple;
+import io.smallrye.mutiny.tuples.Tuple2;
+import io.smallrye.mutiny.tuples.Tuple3;
+import io.smallrye.mutiny.tuples.Tuple4;
+import io.smallrye.mutiny.tuples.Tuple5;
 
 /**
  * Combines several {@link Uni unis} into a new {@link Uni} that will be fulfilled when <strong>all</strong>
