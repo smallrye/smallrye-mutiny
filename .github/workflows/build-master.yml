@@ -42,18 +42,6 @@ jobs:
       - name: Build with Maven
         run: mvn -B clean install --file pom.xml
 
-# The download of Java 13 is too brittle to be used
-#  build_java13:
-#    runs-on: ubuntu-latest
-#    steps:
-#      - uses: actions/checkout@v1
-#      - name: Install JDK 13
-#        uses: joschi/setup-jdk@v1.0.0
-#        with:
-#          java-version: 'openjdk13'
-#      - name: Build with Maven
-#        run: mvn -B clean install --file pom.xml
-
   build_java11_openj9:
     runs-on: ubuntu-latest
     steps:
