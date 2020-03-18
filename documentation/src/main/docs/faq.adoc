@@ -323,6 +323,16 @@ Here we pass the default worker thread pool, but you can use your own executor.
 Note that `subscribeOn` does not subscribe to the `Uni`.
 It specifies the `executor` to use when a subscribe call happens.
 
+Using `subscribeOn` works when the blocking operation happens at subscription time.
+But, when you are dealing with `Multi` and need to execute a blocking operation for each item, you need `emitOn`.
+
+While `subscribeOn` runs the subscription on the given executor, `emitOn` configures the executor used to propagate downstream the `item`, `failure` and `completion` events:
+
+[source,java,indent=0]
+----
+include::../../../src/test/java/snippets/UniBlockingTest.java[tags=code-emitOn]
+----
+
 === Using an Unicast Processor
 
 The `UnicastProcessor` is an implementation of `Multi` that lets you enqueue items in a queue.
