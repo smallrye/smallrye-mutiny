@@ -95,7 +95,9 @@ public final class MultiCollectorOp<T, A, R> extends AbstractMultiOperator<T, R>
                 }
 
                 intermediate = null;
-                downstream.onItem(result);
+                if (result != null) {
+                    downstream.onItem(result);
+                }
                 downstream.onCompletion();
             }
         }
