@@ -901,7 +901,7 @@ To enable this feature, add the following dependency to your <code>CLASSPATH</co
 <pre class="highlightjs highlight"><code data-lang="xml" class="language-xml hljs">&lt;dependency&gt;
     &lt;groupId&gt;io.smallrye.reactive&lt;/groupId&gt;
     &lt;artifactId&gt;mutiny-rxjava&lt;/artifactId&gt;
-    &lt;version&gt;0.4.2&lt;/version&gt;
+    &lt;version&gt;0.4.3&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -1015,7 +1015,7 @@ To enable this feature, add the following dependency to your <code>CLASSPATH</co
 <pre class="highlightjs highlight"><code data-lang="xml" class="language-xml hljs">&lt;dependency&gt;
     &lt;groupId&gt;io.smallrye.reactive&lt;/groupId&gt;
     &lt;artifactId&gt;mutiny-reactor&lt;/artifactId&gt;
-    &lt;version&gt;0.4.2&lt;/version&gt;
+    &lt;version&gt;0.4.3&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -1123,6 +1123,20 @@ Here we pass the default worker thread pool, but you can use your own executor.<
 <div class="paragraph">
 <p>Note that <code>subscribeOn</code> does not subscribe to the <code>Uni</code>.
 It specifies the <code>executor</code> to use when a subscribe call happens.</p>
+</div>
+<div class="paragraph">
+<p>Using <code>subscribeOn</code> works when the blocking operation happens at subscription time.
+But, when you are dealing with <code>Multi</code> and need to execute a blocking operation for each item, you need <code>emitOn</code>.</p>
+</div>
+<div class="paragraph">
+<p>While <code>subscribeOn</code> runs the subscription on the given executor, <code>emitOn</code> configures the executor used to propagate downstream the <code>item</code>, <code>failure</code> and <code>completion</code> events:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">Multi&lt;String&gt; multi = Multi.createFrom().items("john", "jack", "sue")
+        .emitOn(Infrastructure.getDefaultWorkerPool())
+        .onItem().apply(this::invokeRemoteServiceUsingBlockingIO);</code></pre>
+</div>
 </div>
 </div>
 <div class="sect2">
@@ -1243,7 +1257,7 @@ It gets the items from the lists and passes them downstream:</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-03-17 08:50:11 UTC
+Last updated 2020-03-18 13:29:24 UTC
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">
