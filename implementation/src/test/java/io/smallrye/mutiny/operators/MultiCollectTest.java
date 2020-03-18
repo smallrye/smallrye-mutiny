@@ -4,11 +4,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.entry;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import org.testng.annotations.Test;
@@ -187,9 +189,20 @@ public class MultiCollectTest {
                 .subscribe().withSubscriber(new UniAssertSubscriber<>()).assertCompletedSuccessfully().assertItem(10);
     }
 
+    @Test
+    public void testWithFinisherReturningNull() {
+        List<String> list = new ArrayList<>();
+        Multi.createFrom().items("a", "b", "c")
+                .map(String::toUpperCase)
+                .collectItems().with(Collector.of(() -> null, (n, t) -> list.add(t), (X, y) -> null, x -> null))
+                .await().indefinitely();
+        assertThat(list).containsExactly("A", "B", "C");
+    }
+
     static class Person {
 
         private final String firstName;
+
         private final long id;
 
         Person(String firstName, long id) {
@@ -214,6 +227,7 @@ public class MultiCollectTest {
         public int hashCode() {
             return Objects.hash(firstName, id);
         }
+
     }
 
 }
