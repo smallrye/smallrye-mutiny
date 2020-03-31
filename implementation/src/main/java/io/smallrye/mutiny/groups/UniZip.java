@@ -156,7 +156,7 @@ public class UniZip {
      * @param unis the list of unis, must not be {@code null}, must not contain {@code null}, must not be empty
      * @return an {@link UniAndGroupIterable} to configure the combination
      */
-    public UniAndGroupIterable unis(Iterable<? extends Uni<?>> unis) {
+    public <O> UniAndGroupIterable<O> unis(Iterable<? extends Uni<?>> unis) {
         return new UniAndGroupIterable<>(unis);
     }
 

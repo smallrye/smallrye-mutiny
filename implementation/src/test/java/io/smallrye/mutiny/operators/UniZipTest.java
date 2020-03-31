@@ -4,6 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
 import java.time.Duration;
+import java.util.Arrays;
+import java.util.List;
 
 import org.testng.annotations.Test;
 
@@ -105,6 +107,21 @@ public class UniZipTest {
                 .withSubscriber(UniAssertSubscriber.create());
 
         assertThat(subscriber.getItem().asList()).containsExactly(1, 1, 2, 3);
+    }
+
+    @Test
+    public void testUniCombine() {
+        Uni<String> uni1 = Uni.createFrom().item("hello");
+        Uni<String> uni2 = Uni.createFrom().item("world");
+        Uni<String> uni3 = Uni.createFrom().item("!");
+
+        String r = Uni.combine().all().unis(uni1, uni2, uni3)
+                .combinedWith((s1, s2, s3) -> s1 + " " + s2 + " " + s3).await().indefinitely();
+        assertThat(r).isEqualTo("hello world !");
+
+        List<Uni<String>> list = Arrays.asList(uni1, uni2, uni3);
+        r = Uni.combine().all().unis(list).combinedWith(l -> l.get(0) + " " + l.get(1) + " " + l.get(2)).await().indefinitely();
+        assertThat(r).isEqualTo("hello world !");
     }
 
 }
