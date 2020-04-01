@@ -40,7 +40,7 @@ public class UniOnItem<T> {
     }
 
     /**
-     * Produces a new {@link Uni} invoking the given function when the current {@link Uni} fire the {@code item} event.
+     * Produces a new {@link Uni} invoking the given function when the current {@link Uni} fires the {@code item} event.
      * The function receives the item as parameter, and can transform it. The returned object is sent downstream
      * as {@code item}.
      * <p>
