@@ -28,18 +28,18 @@ import io.smallrye.mutiny.tuples.Tuple2;
 import io.smallrye.mutiny.tuples.Tuple5;
 
 /**
- * A {@link Uni} represent a lazy asynchronous action. It follows a subscription pattern, meaning the the action
+ * A {@link Uni} represents a lazy asynchronous action. It follows the subscription pattern, meaning that the action
  * is only triggered once a {@link UniSubscriber} subscribes to the {@link Uni}.
  * <p>
  * A {@link Uni} can have two outcomes:
  * <ol>
- * <li>A {@code item} event, forwarding the complete of the action, potentially {@code null} if the action does not
- * produced a complete, but completed successfully.</li>
- * <li>A {@code failure} event, forwarding the exception</li>
+ * <li>An {@code item} event, forwarding the completion of the action (potentially {@code null} if the item
+ * does not represent a value, but the action was completed successfully)</li>
+ * <li>A {@code failure} event, forwarding an exception</li>
  * </ol>
  * <p>
- * To trigger the computation, a {@link UniSubscriber} must subscribe to the Uni. It will be notified of outcome
- * once they is an {@code item} or {@code failure} event fired by the observed Uni. A subscriber receives
+ * To trigger the computation, a {@link UniSubscriber} must subscribe to the Uni. It will be notified of the outcome
+ * once there is an {@code item} or {@code failure} event fired by the observed Uni. A subscriber receives
  * (asynchronously) a {@link UniSubscription} and can cancel the demand at any time. Note that cancelling after
  * having received the outcome is a no-op.
  * <p>

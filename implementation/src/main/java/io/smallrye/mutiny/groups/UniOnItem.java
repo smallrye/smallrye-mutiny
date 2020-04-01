@@ -75,11 +75,11 @@ public class UniOnItem<T> {
     }
 
     /**
-     * When this {@code Uni} produce its item (maybe {@code null}), call the given {@code mapper} to produce
+     * When this {@code Uni} produces its item (maybe {@code null}), call the given {@code mapper} to produce
      * a {@link Publisher}. Continue the pipeline with this publisher (as a {@link Multi}).
      * <p>
      * The mapper is called with the item event of the current {@link Uni} and produces a {@link Publisher}, possibly
-     * using another type of item ({@code R}). The events fired by produced {@link Publisher} are forwarded to the
+     * using another type of item ({@code R}). Events fired by the produced {@link Publisher} are forwarded to the
      * {@link Multi} returned by this method.
      * <p>
      * This operation is generally named {@code flatMapPublisher}.

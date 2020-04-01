@@ -213,13 +213,13 @@ public class MultiCreate {
     }
 
     /**
-     * Creates a new {@link Multi} that emits the items immediately after being subscribed to. The individual item
-     * comes from the {@link Stream} supplied by the given {@link Supplier}. This supplier is called at subscription
+     * Creates a new {@link Multi} that emits the items immediately after being subscribed to. The individual items
+     * come from the {@link Stream} supplied by the given {@link Supplier}. This supplier is called at subscription
      * time.
      * <p>
      * If the supplier produces {@code null}, the produced {@link Multi} fires a failure event.
      * If the supplier produces an empty stream, the produced {@link Multi} fires a completion event.
-     * For each items from the supplied stream, an item event is fired. When all the items have been emitted,
+     * For each item from the supplied stream, an item event is fired. When all the items have been emitted,
      * the completion event is fired.
      * If the supplier throws an exception, a failure event with the exception is fired.
      * The stream is consumed sequentially.
@@ -445,7 +445,7 @@ public class MultiCreate {
      * Creates a {@link Multi} that emits {@code long} items (ticks) starting with 0 and incrementing at
      * specified time intervals.
      * <p>
-     * Be aware that if the subscriber does not request enough item in time, a back pressure failure is fired.
+     * Be aware that if the subscriber does not request enough items in time, a back pressure failure is fired.
      * The produced {@link Multi} never completes until cancellation by the subscriber.
      * <p>
      * The callbacks are invoked on the executor passed in {@link MultiTimePeriod#onExecutor(ScheduledExecutorService)}.

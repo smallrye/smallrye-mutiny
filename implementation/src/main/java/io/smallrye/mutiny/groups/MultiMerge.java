@@ -55,8 +55,8 @@ public class MultiMerge {
     }
 
     /**
-     * Indicates the the merge process should not propagate the first receive failure, but collect them until
-     * all the items from all (non-failing) participants have ben emitted. Then, the failures are propagated downstream
+     * Indicates that the merge process should not propagate the first receive failure, but collect them until
+     * all the items from all (non-failing) participants have been emitted. Then, the failures are propagated downstream
      * (as a {@link CompositeException} if several failures have been received).
      *
      * @return a new {@link MultiMerge} collecting failures
@@ -66,7 +66,7 @@ public class MultiMerge {
     }
 
     /**
-     * Indicates the the merge process should consumes the different streams using the given {@code request}.
+     * Indicates that the merge process should consume the different streams using the given {@code request}.
      *
      * @param requests the request
      * @return a new {@link MultiMerge} configured with the given requests
@@ -76,7 +76,7 @@ public class MultiMerge {
     }
 
     /**
-     * Indicates the the merge process can consume up to {@code concurrency} streams in parallel. Items emitted by these
+     * Indicates that the merge process can consume up to {@code concurrency} streams in parallel. Items emitted by these
      * streams may be interleaved in the resulting stream.
      *
      * @param concurrency the concurrency
