@@ -60,8 +60,8 @@ public class MultiCreate {
 
     /**
      * Creates a {@link Multi} from the given {@link CompletionStage} or {@link CompletableFuture}.
-     * The produced {@code Multi} emits the item of the passed {@link CompletionStage} and then fire the completion
-     * event. If the {@link CompletionStage} never completes (or failed), the produced {@link Multi} would not emit
+     * The produced {@code Multi} emits the item of the passed {@link CompletionStage} and then fires the completion
+     * event. If the {@link CompletionStage} never completes (or fails), the produced {@link Multi} would not emit
      * any {@code item} or {@code failure} events.
      * <p>
      * Cancelling the subscription on the produced {@link Multi} cancels the passed {@link CompletionStage}
