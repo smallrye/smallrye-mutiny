@@ -52,8 +52,8 @@ public class MultiConcat {
     }
 
     /**
-     * Indicates the the concatenation process should not propagate the first receive failure, but collect them until
-     * all the items from all (non-failing) participants have ben emitted. Then, the failures are propagated downstream
+     * Indicates that the concatenation process should not propagate the first receive failure, but collect them until
+     * all the items from all (non-failing) participants have been emitted. Then, the failures are propagated downstream
      * (as a {@link CompositeException} if several failures have been received).
      *
      * @return this {@link MultiConcat} configured to collect the failures.
