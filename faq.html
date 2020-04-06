@@ -460,6 +460,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#_how_do_i_control_the_back_pressure">How do I control the back-pressure?</a></li>
 <li><a href="#_how_do_wrap_blocking_calls">How do wrap blocking calls?</a></li>
 <li><a href="#_using_an_unicast_processor">Using an Unicast Processor</a></li>
+<li><a href="#_creating_hot_streams">Creating hot streams</a></li>
 <li><a href="#_how_do_i_handle_polling">How do I handle polling?</a></li>
 <li><a href="#_how_do_i_handle_pagination">How do I handle pagination?</a></li>
 <li><a href="#_where_do_i_find_the_javadoc">Where do I find the JavaDoc?</a></li>
@@ -901,7 +902,7 @@ To enable this feature, add the following dependency to your <code>CLASSPATH</co
 <pre class="highlightjs highlight"><code data-lang="xml" class="language-xml hljs">&lt;dependency&gt;
     &lt;groupId&gt;io.smallrye.reactive&lt;/groupId&gt;
     &lt;artifactId&gt;mutiny-rxjava&lt;/artifactId&gt;
-    &lt;version&gt;0.4.3&lt;/version&gt;
+    &lt;version&gt;0.4.4&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -1015,7 +1016,7 @@ To enable this feature, add the following dependency to your <code>CLASSPATH</co
 <pre class="highlightjs highlight"><code data-lang="xml" class="language-xml hljs">&lt;dependency&gt;
     &lt;groupId&gt;io.smallrye.reactive&lt;/groupId&gt;
     &lt;artifactId&gt;mutiny-reactor&lt;/artifactId&gt;
-    &lt;version&gt;0.4.3&lt;/version&gt;
+    &lt;version&gt;0.4.4&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -1172,6 +1173,57 @@ You can also pass a fixed size queue that would reject the items once full.</p>
 </div>
 </div>
 <div class="sect2">
+<h3 id="_creating_hot_streams">Creating hot streams</h3>
+<div class="paragraph">
+<p>In a <em>cold</em> stream, the stream is created when one subscriber subscribes to the stream.
+So, if no one subscribes, the actual stream is not created, saving resources (that would be wasted because nobody is interested in the items).</p>
+</div>
+<div class="paragraph">
+<p>In a <em>hot</em> stream, the stream exists before subscribers subscribe.
+The stream emits items even if no subscribers observe the stream.
+If there are no subscribers, the items are just dropped.
+Subscribers only get items emitted after their subscription, meaning that any previous items would not be received.</p>
+</div>
+<div class="paragraph">
+<p>To create a hot stream, you can use <code>io.smallrye.mutiny.operators.multi.processors.BroadcastProcessor</code> that:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>drops items if no subscribers are present</p>
+</li>
+<li>
+<p>forwards items to the set of observing subscribers</p>
+</li>
+</ul>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">BroadcastProcessor&lt;String&gt; processor = BroadcastProcessor.create();
+Multi&lt;String&gt; multi = processor
+        .onItem().apply(String::toUpperCase)
+        .onFailure().recoverWithItem("d'oh");
+
+new Thread(() -&gt; {
+    for (int i = 0; i &lt; 1000; i++) {
+        processor.onNext(Integer.toString(i));
+    }
+    processor.onComplete();
+}).start();
+
+// Subscribers can subscribe at any time.
+// They will only receive items emitted after their subscription.
+// If the source is already terminated (by a completion or a failure signal)
+// the subscriber receives this signal.</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Note that the <code>BroadcastProcessor</code> subscribes to the <em>hot</em> source aggressively and without back-pressure.
+However, the <code>BroadcastProcessor</code> enforces the back-pressure protocol per subscriber.
+If a subscriber is not ready to handle an item emitted by the <em>hot</em> source, an <code>io.smallrye.mutiny.subscription.BackPressureFailure</code> is forwarded to this subscriber.</p>
+</div>
+</div>
+<div class="sect2">
 <h3 id="_how_do_i_handle_polling">How do I handle polling?</h3>
 <div class="paragraph">
 <p>There are many poll-based API around us.
@@ -1257,7 +1309,7 @@ It gets the items from the lists and passes them downstream:</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-03-18 13:29:24 UTC
+Last updated 2020-04-06 16:17:31 UTC
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">
