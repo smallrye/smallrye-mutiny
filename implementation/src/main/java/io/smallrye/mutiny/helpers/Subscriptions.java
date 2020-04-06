@@ -406,4 +406,56 @@ public class Subscriptions {
             return false;
         }
     }
+
+    /**
+     * Atomically subtract the given number from the target atomic long if it doesn't contain {@link Long#MIN_VALUE}
+     * (indicating some cancelled state) or {@link Long#MAX_VALUE} (unbounded mode).
+     * 
+     * @param requested the target field holding the current requested amount
+     * @param n the produced item count, must be positive
+     * @return the new amount
+     */
+    public static long producedAndHandleAlreadyCancelled(AtomicLong requested, long n) {
+        for (;;) {
+            long current = requested.get();
+            if (current == Long.MIN_VALUE) {
+                return Long.MIN_VALUE;
+            }
+            if (current == Long.MAX_VALUE) {
+                return Long.MAX_VALUE;
+            }
+            long update = current - n;
+            if (update < 0L) {
+                update = 0L;
+            }
+            if (requested.compareAndSet(current, update)) {
+                return update;
+            }
+        }
+    }
+
+    /**
+     * Atomically adds the positive value n to the requested value in the {@link AtomicLong} and
+     * caps the result at {@link Long#MAX_VALUE} and returns the previous value and
+     * considers {@link Long#MIN_VALUE} as a cancel indication (no addition then).
+     * 
+     * @param requested the {@code AtomicLong} holding the current requested value
+     * @param n the value to add, must be positive (not verified)
+     * @return the original value before the add
+     */
+    public static long addAndHandledAlreadyCancelled(AtomicLong requested, long n) {
+        for (;;) {
+            long r = requested.get();
+            if (r == Long.MIN_VALUE) {
+                return Long.MIN_VALUE;
+            }
+            if (r == Long.MAX_VALUE) {
+                return Long.MAX_VALUE;
+            }
+            long u = add(r, n);
+            if (requested.compareAndSet(r, u)) {
+                return r;
+            }
+        }
+    }
 }
