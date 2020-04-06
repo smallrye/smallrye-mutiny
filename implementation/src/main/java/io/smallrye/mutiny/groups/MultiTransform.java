@@ -18,6 +18,7 @@ import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.MultiTransformation;
 import io.smallrye.mutiny.operators.multi.MultiFilterOp;
+import io.smallrye.mutiny.operators.multi.processors.BroadcastProcessor;
 
 public class MultiTransform<T> {
 
@@ -116,6 +117,26 @@ public class MultiTransform<T> {
                 }
             }).toMulti();
         }).concatenate();
+    }
+
+    /**
+     * Produces a new {@link Multi} transforming the upstream into a hot stream.
+     * With a hot stream, when no subscribers are present, emitted items are dropped.
+     * Late subscribers would only receive items emitted after their subscription.
+     * If the upstream has already been terminated, the termination event (failure or completion) is forwarded to the
+     * subscribers.
+     *
+     * Note that this operator consumes the upstream stream without back-pressure.
+     * It still enforces downstream back-pressure.
+     * If the subscriber is not ready to receive an item when the upstream emits an item, the subscriber gets a
+     * {@link io.smallrye.mutiny.subscription.BackPressureFailure} failure.
+     *
+     * @return the new multi.
+     */
+    public Multi<T> toHotStream() {
+        BroadcastProcessor<T> processor = BroadcastProcessor.create();
+        upstream.subscribe(processor);
+        return processor;
     }
 
 }
