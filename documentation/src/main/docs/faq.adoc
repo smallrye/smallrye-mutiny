@@ -1,4 +1,4 @@
-== How Do I do x?
+== How Do I do _x_?
 
 === How do I transform items?
 
@@ -121,13 +121,7 @@ include::../../../src/test/java/snippets/MultiFailureTest.java[tags=code]
 ----
 
 Note that with `Multi`, a failure cancels the subscription, meaning you will not receive any more items.
-
-The `retry` operator lets you re-subscribe and continue the reception:
-
-[source,java,indent=0]
-----
-include::../../../src/test/java/snippets/MultiFailureTest.java[tags=code-retry]
-----
+The `retry` operator lets you re-subscribe and continue the reception.
 
 === How do I handle `null`?
 
@@ -333,7 +327,7 @@ While `subscribeOn` runs the subscription on the given executor, `emitOn` config
 include::../../../src/test/java/snippets/UniBlockingTest.java[tags=code-emitOn]
 ----
 
-=== Using an Unicast Processor
+=== How can I use a Unicast Processor
 
 The `UnicastProcessor` is an implementation of `Multi` that lets you enqueue items in a queue.
 The items are then dispatched to the subscriber using the request protocol.
@@ -350,7 +344,18 @@ include::../../../src/test/java/snippets/UnicastProcessorTest.java[tags=code]
 By default the `UnicastProcessor` uses an unbounded queue.
 You can also pass a fixed size queue that would reject the items once full.
 
-=== Creating hot streams
+=== How can I create Uni/Multi from a callback-based API
+
+When dealing with async API using callback, you can create ``Uni``s or ``Multi``s by using _emitters_:
+
+[source, java, indent=0]
+----
+include::../../../src/test/java/snippets/EmitterTest.java[tags=code]
+----
+
+Note that the callback receiving the emitter is called for every subscription.
+
+=== How do I create hot streams
 
 In a _cold_ stream, the stream is created when one subscriber subscribes to the stream.
 So, if no one subscribes, the actual stream is not created, saving resources (that would be wasted because nobody is interested in the items).
