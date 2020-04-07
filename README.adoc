@@ -18,4 +18,4 @@ mvn clean install
 
 ==== Links
 
-* http://github.com/smallrye/smallrye-mutiny/[Project Homepage]
+* https://smallrye.io/smallrye-mutiny[Documentation]
