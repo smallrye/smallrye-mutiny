@@ -9,7 +9,7 @@ jobs:
     steps:
       - uses: actions/checkout@v1
       - name: Install JDK 1.8
-        uses: joschi/setup-jdk@v1.0.0
+        uses: cescoffier/setup-jdk@v1.1.3
         with:
           java-version: 'openjdk8'
       - name: Build with Maven
@@ -20,7 +20,7 @@ jobs:
     steps:
       - uses: actions/checkout@v1
       - name: Install JDK 11
-        uses: joschi/setup-jdk@v1.0.0
+        uses: cescoffier/setup-jdk@v1.1.3
         with:
           java-version: 'openjdk11'
       - name: Build with Maven
@@ -31,7 +31,7 @@ jobs:
     steps:
       - uses: actions/checkout@v1
       - name: Install JDK 12
-        uses: joschi/setup-jdk@v1.0.0
+        uses: cescoffier/setup-jdk@v1.1.3
         with:
           java-version: 'openjdk12'
       - name: Build with Maven
@@ -42,7 +42,7 @@ jobs:
     steps:
       - uses: actions/checkout@v1
       - name: Install JDK 14
-        uses: joschi/setup-jdk@v1.0.0
+        uses: cescoffier/setup-jdk@v1.1.3
         with:
           java-version: 'openjdk14'
       - name: Build with Maven

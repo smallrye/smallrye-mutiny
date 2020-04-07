@@ -10,7 +10,7 @@ jobs:
         with:
           ref: 'master'
       - name: Install JDK 1.8
-        uses: joschi/setup-jdk@v1.0.0
+        uses: cescoffier/setup-jdk@v1.1.3
         with:
           java-version: 'openjdk8'
       - name: 'Run deployment for ${{ github.event.deployment.environment }}'
