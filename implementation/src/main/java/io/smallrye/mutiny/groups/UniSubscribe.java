@@ -57,15 +57,38 @@ public class UniSubscribe<T> {
      * Unlike {@link #withSubscriber(UniSubscriber)}, this method returns the subscription that can be used to cancel
      * the subscription.
      *
-     * @param onResultCallback callback invoked when the an item event is received, potentially called w
-     *        ith {@code null} is received. The callback must not be {@code null}
+     * @param onItemCallback callback invoked when the an item event is received, potentially called with {@code null}
+     *        is received. The callback must not be {@code null}
      * @param onFailureCallback callback invoked when a failure event is received, must not be {@code null}
      * @return an object to cancel the computation
      */
-    public Cancellable with(Consumer<? super T> onResultCallback, Consumer<? super Throwable> onFailureCallback) {
+    public Cancellable with(Consumer<? super T> onItemCallback, Consumer<? super Throwable> onFailureCallback) {
         UniCallbackSubscriber<T> subscriber = new UniCallbackSubscriber<>(
-                ParameterValidation.nonNull(onResultCallback, "onResultCallback"),
+                ParameterValidation.nonNull(onItemCallback, "onItemCallback"),
                 ParameterValidation.nonNull(onFailureCallback, "onFailureCallback"));
+        withSubscriber(subscriber);
+        return subscriber;
+    }
+
+    /**
+     * Like {@link #withSubscriber(UniSubscriber)} with creating an artificial {@link UniSubscriber} calling the
+     * {@code onItem} when the item is received.
+     * <p>
+     * Unlike {@link #withSubscriber(UniSubscriber)}, this method returns the subscription that can be used to cancel
+     * the subscription.
+     * <p>
+     * Unlike {@link #with(Consumer, Consumer)}, this method does not handle failure, and the failure event is dropped.
+     *
+     * @param onItemCallback callback invoked when the an item event is received, potentially called with {@code null}
+     *        is received. The callback must not be {@code null}
+     * @return an object to cancel the computation
+     */
+    public Cancellable with(Consumer<? super T> onItemCallback) {
+        UniCallbackSubscriber<T> subscriber = new UniCallbackSubscriber<>(
+                ParameterValidation.nonNull(onItemCallback, "onItemCallback"),
+                f -> {
+                    // Failure is ignored.
+                });
         withSubscriber(subscriber);
         return subscriber;
     }
