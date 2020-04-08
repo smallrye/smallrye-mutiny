@@ -338,6 +338,9 @@ public class MultiCreate {
     /**
      * Like {@link #emitter(Consumer, BackPressureStrategy)} with the {@link BackPressureStrategy#BUFFER} strategy.
      *
+     * Note that to create hot streams, you should use a
+     * {@link io.smallrye.mutiny.operators.multi.processors.BroadcastProcessor}.
+     *
      * @param consumer the consumer receiving the emitter, must not be {@code null}
      * @param <T> the type of item emitted by the produced Multi
      * @return the produced {@link Multi}
@@ -358,6 +361,9 @@ public class MultiCreate {
      * to unregister the listener on cancellation.
      * <p>
      * If the consumer throws an exception, a failure event with the exception is fired.
+     *
+     * Note that to create hot streams, you should use a
+     * {@link io.smallrye.mutiny.operators.multi.processors.BroadcastProcessor}.
      *
      * @param consumer callback receiving the {@link MultiEmitter} and events downstream. The callback is
      *        called for each subscriber (at subscription time). Must not be {@code null}
