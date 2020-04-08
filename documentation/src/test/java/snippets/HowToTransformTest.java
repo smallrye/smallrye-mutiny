@@ -1,14 +1,15 @@
 package snippets;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import io.smallrye.mutiny.Multi;
+import io.smallrye.mutiny.Uni;
+import org.junit.Test;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-import org.junit.Test;
-
-import io.smallrye.mutiny.Multi;
-import io.smallrye.mutiny.Uni;
+import static io.smallrye.mutiny.unchecked.Unchecked.function;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class HowToTransformTest {
 
@@ -25,6 +26,28 @@ public class HowToTransformTest {
                 .onItem().apply(s -> s.toUpperCase())
                 .collectItems().asList().await().indefinitely();
         // end::sync[]
+
+        assertThat(result1).isEqualTo("HELLO");
+        assertThat(result2).containsExactly("HELLO", "WORLD");
+    }
+
+    private String operationThrowingException(String s) throws IOException {
+        return s.toUpperCase();
+    }
+
+    @Test
+    public void transformSyncUnchecked() {
+        Uni<String> uni = Uni.createFrom().item("hello");
+        Multi<String> multi = Multi.createFrom().items("hello", "world");
+
+        // tag::sync-unchecked[]
+        String result1 = uni
+                .onItem().apply(function(this::operationThrowingException))
+                .await().indefinitely();
+        List<String> result2 = multi
+                .onItem().apply(function(this::operationThrowingException))
+                .collectItems().asList().await().indefinitely();
+        // end::sync-unchecked[]
 
         assertThat(result1).isEqualTo("HELLO");
         assertThat(result2).containsExactly("HELLO", "WORLD");
