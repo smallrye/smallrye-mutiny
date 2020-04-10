@@ -175,7 +175,7 @@ public abstract class AbstractMulti<T> implements Multi<T> {
     }
 
     @Override
-    public Multi<T> subscribeOn(Executor executor) {
+    public Multi<T> runSubscriptionOn(Executor executor) {
         return Infrastructure.onMultiCreation(new MultiSubscribeOnOp<>(this, executor));
     }
 

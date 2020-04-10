@@ -311,20 +311,55 @@ include::../../../src/test/java/snippets/UniBlockingTest.java[tags=code]
 ----
 
 Create an `Uni` that will supply the item using a blocking call, here the `invokeRemoteServiceUsingBlockingIO` method.
-To avoid blocking the subscriber, use `subscribeOn` which switch the thread and so call `invokeRemoteServiceUsingBlockingIO` on another thread.
+To avoid blocking the subscriber, use `runSubscriptionOn` which switch the thread and so call `invokeRemoteServiceUsingBlockingIO` on another thread.
 Here we pass the default worker thread pool, but you can use your own executor.
 
-Note that `subscribeOn` does not subscribe to the `Uni`.
+Note that `runSubscriptionOn` does not subscribe to the `Uni`.
 It specifies the `executor` to use when a subscribe call happens.
 
-Using `subscribeOn` works when the blocking operation happens at subscription time.
+Using `runSubscriptionOn` works when the blocking operation happens at subscription time.
 But, when you are dealing with `Multi` and need to execute a blocking operation for each item, you need `emitOn`.
 
-While `subscribeOn` runs the subscription on the given executor, `emitOn` configures the executor used to propagate downstream the `item`, `failure` and `completion` events:
+While `runSubscriptionOn` runs the subscription on the given executor, `emitOn` configures the executor used to propagate downstream the `item`, `failure` and `completion` events:
 
 [source,java,indent=0]
 ----
 include::../../../src/test/java/snippets/UniBlockingTest.java[tags=code-emitOn]
+----
+
+=== emitOn vs. runSubscriptionOn
+
+The `emitOn` and `runSubscriptionOn` are 2 operators influencing on which threads the event are dispatched.
+However, they target different types of events and different directions.
+
+`emitOn` takes events coming from upstream (items, completion, failure) and replays them downstream on a thread from the given executor.
+Consequently, it affects where the subsequent operators execute (until another `emitOn` is used):
+
+[source,java,indent=0]
+----
+include::../../../src/test/java/snippets/RunSubscriptionOnTest.java[tags=emitOn]
+----
+
+The previous code produces the following sequence:
+
+[plantuml,align=center]
+----
+include::plantuml/emitOn-sequence.puml[]
+----
+
+`runSubscriptionOn` applies to the subscription process.
+It requests the upstream to run its subscription (call of the `subscribe` method on its own upstream) on a thread from the given executor:
+
+[source,java,indent=0]
+----
+include::../../../src/test/java/snippets/RunSubscriptionOnTest.java[tags=runSubscriptionOn]
+----
+
+So, if we consider the previous code snippet, it produces the following sequence:
+
+[plantuml,align=center]
+----
+include::plantuml/runSubscriptionOn-sequence.puml[]
 ----
 
 === How can I use a Unicast Processor

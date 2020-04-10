@@ -52,6 +52,11 @@ public class MultiReceiveItemOnTest {
         Multi.createFrom().item(1).subscribeOn(null);
     }
 
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void testThatRunSubscriptionOnExecutorCannotBeNull() {
+        Multi.createFrom().item(1).runSubscriptionOn(null);
+    }
+
     @Test
     public void testThatItemsAreDispatchedOnTheRightThread() {
         Set<String> itemThread = ConcurrentHashMap.newKeySet();
@@ -114,6 +119,15 @@ public class MultiReceiveItemOnTest {
     public void testSubscribeOn() {
         Multi.createFrom().items(1, 2, 3, 4)
                 .subscribeOn(executor)
+                .subscribe().withSubscriber(MultiAssertSubscriber.create(4))
+                .await()
+                .assertReceived(1, 2, 3, 4);
+    }
+
+    @Test
+    public void testRunSubscriptionOn() {
+        Multi.createFrom().items(1, 2, 3, 4)
+                .runSubscriptionOn(executor)
                 .subscribe().withSubscriber(MultiAssertSubscriber.create(4))
                 .await()
                 .assertReceived(1, 2, 3, 4);

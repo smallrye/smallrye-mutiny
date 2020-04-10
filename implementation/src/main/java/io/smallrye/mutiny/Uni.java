@@ -316,8 +316,22 @@ public interface Uni<T> {
      *
      * @param executor the executor to use, must not be {@code null}
      * @return a new {@link Uni}
+     * @deprecated Use {@link #runSubscriptionOn(Executor)} instead
      */
-    Uni<T> subscribeOn(Executor executor);
+    @Deprecated
+    default Uni<T> subscribeOn(Executor executor) {
+        return runSubscriptionOn(executor);
+    }
+
+    /**
+     * When a subscriber subscribes to this {@link Uni}, executes the subscription to the upstream {@link Uni} on a thread
+     * from the given executor. As a result, the {@link UniSubscriber#onSubscribe(UniSubscription)} method will be called
+     * on this thread (except mentioned otherwise)
+     *
+     * @param executor the executor to use, must not be {@code null}
+     * @return a new {@link Uni}
+     */
+    Uni<T> runSubscriptionOn(Executor executor);
 
     /**
      * Caches the events (item or failure) of this {@link Uni} and replays it for all further {@link UniSubscriber}.

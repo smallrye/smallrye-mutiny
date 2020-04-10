@@ -48,7 +48,7 @@ public class UniContextPropagationTest {
                     assertThat(ctx).isEqualTo(MyContext.get());
                     return 2;
                 })
-                .subscribeOn(executor)
+                .runSubscriptionOn(executor)
                 .map(r -> {
                     assertThat(ctx).isEqualTo(MyContext.get());
                     return r;

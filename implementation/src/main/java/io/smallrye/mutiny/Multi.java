@@ -193,8 +193,22 @@ public interface Multi<T> extends Publisher<T> {
      *
      * @param executor the executor to use, must not be {@code null}
      * @return a new {@link Multi}
+     * @deprecated Use {@link #runSubscriptionOn(Executor)} instead.
      */
-    Multi<T> subscribeOn(Executor executor);
+    @Deprecated
+    default Multi<T> subscribeOn(Executor executor) {
+        return runSubscriptionOn(executor);
+    }
+
+    /**
+     * When a subscriber subscribes to this {@link Multi}, execute the subscription to the upstream {@link Multi} on a
+     * thread from the given executor. As a result, the {@link Subscriber#onSubscribe(Subscription)} method will be called
+     * on this thread (except mentioned otherwise)
+     *
+     * @param executor the executor to use, must not be {@code null}
+     * @return a new {@link Multi}
+     */
+    Multi<T> runSubscriptionOn(Executor executor);
 
     /**
      * Allows configures the actions or continuation to execute when this {@link Multi} fires the completion event.

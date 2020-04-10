@@ -103,7 +103,7 @@ public class UniRepeatTest {
         final AtomicInteger count = new AtomicInteger();
         int value = Uni.createFrom().item(count::incrementAndGet)
                 .repeat().indefinitely()
-                .subscribeOn(Infrastructure.getDefaultWorkerPool())
+                .runSubscriptionOn(Infrastructure.getDefaultWorkerPool())
                 .transform().byTakingFirstItems(num)
                 .collectItems().last()
                 .await().indefinitely();
@@ -121,7 +121,7 @@ public class UniRepeatTest {
                     invocations.incrementAndGet();
                     return false;
                 })
-                .subscribeOn(Infrastructure.getDefaultWorkerPool())
+                .runSubscriptionOn(Infrastructure.getDefaultWorkerPool())
                 .transform().byTakingFirstItems(num)
                 .collectItems().last()
                 .await().indefinitely();
@@ -133,7 +133,7 @@ public class UniRepeatTest {
     @Test
     public void testNoStackOverflow() {
         int value = Uni.createFrom().item(1).repeat().indefinitely()
-                .subscribeOn(Infrastructure.getDefaultWorkerPool())
+                .runSubscriptionOn(Infrastructure.getDefaultWorkerPool())
                 .transform().byTakingFirstItems(100000L)
                 .collectItems().last()
                 .await().indefinitely();
@@ -144,7 +144,7 @@ public class UniRepeatTest {
     public void testNoStackOverflowWithRepeatUntil() {
         AtomicInteger count = new AtomicInteger();
         int value = Uni.createFrom().item(1).repeat().until(x -> count.incrementAndGet() > 100000000L)
-                .subscribeOn(Infrastructure.getDefaultWorkerPool())
+                .runSubscriptionOn(Infrastructure.getDefaultWorkerPool())
                 .transform().byTakingFirstItems(100000L)
                 .collectItems().last()
                 .await().indefinitely();
@@ -195,7 +195,7 @@ public class UniRepeatTest {
         final AtomicInteger count = new AtomicInteger();
         MultiAssertSubscriber<Integer> subscriber = Uni.createFrom().item(count::incrementAndGet)
                 .repeat().indefinitely()
-                .subscribeOn(Infrastructure.getDefaultWorkerPool())
+                .runSubscriptionOn(Infrastructure.getDefaultWorkerPool())
                 .subscribe().withSubscriber(MultiAssertSubscriber.create());
 
         subscriber.assertSubscribed().assertHasNotReceivedAnyItem();
@@ -231,7 +231,7 @@ public class UniRepeatTest {
         final AtomicInteger count = new AtomicInteger();
         MultiAssertSubscriber<Integer> subscriber = Uni.createFrom().item(count::incrementAndGet)
                 .repeat().until(x -> false)
-                .subscribeOn(Infrastructure.getDefaultWorkerPool())
+                .runSubscriptionOn(Infrastructure.getDefaultWorkerPool())
                 .subscribe().withSubscriber(MultiAssertSubscriber.create());
 
         subscriber.assertSubscribed().assertHasNotReceivedAnyItem();
@@ -267,7 +267,7 @@ public class UniRepeatTest {
         final AtomicInteger count = new AtomicInteger();
         MultiAssertSubscriber<Integer> subscriber = Uni.createFrom().item(count::incrementAndGet)
                 .repeat().atMost(3)
-                .subscribeOn(Infrastructure.getDefaultWorkerPool())
+                .runSubscriptionOn(Infrastructure.getDefaultWorkerPool())
                 .subscribe().withSubscriber(MultiAssertSubscriber.create());
 
         subscriber.assertSubscribed().assertHasNotReceivedAnyItem();
