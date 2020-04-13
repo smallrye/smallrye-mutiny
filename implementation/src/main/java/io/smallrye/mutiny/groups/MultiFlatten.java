@@ -74,7 +74,7 @@ public class MultiFlatten<I, O> {
      */
     public Multi<O> merge() {
         return Infrastructure.onMultiCreation(
-                new MultiFlatMapOp<>(upstream, mapper, collectFailureUntilCompletion, requests,
+                new MultiFlatMapOp<>(upstream, mapper, collectFailureUntilCompletion, 4,
                         () -> new SpscArrayQueue<>(256),
                         () -> new SpscArrayQueue<>(256)));
     }
