@@ -96,11 +96,11 @@ public class MultiFlatMapTckTest extends AbstractPublisherTck<Long> {
     }
 
     @Test
-    public void flatMapStageShouldOnlySubscribeToOnePublisherAtATime() throws Exception {
+    public void concatMapStageShouldOnlySubscribeToOnePublisherAtATime() throws Exception {
         AtomicInteger activePublishers = new AtomicInteger();
 
         CompletionStage<List<Integer>> result = Multi.createFrom().items(1, 2, 3, 4, 5)
-                .flatMap(id -> Multi.createFrom()
+                .concatMap(id -> Multi.createFrom()
                         .publisher(new ScheduledPublisher(id, activePublishers, this::getExecutor)))
                 .collectItems().asList()
                 .subscribeAsCompletionStage();
@@ -110,7 +110,7 @@ public class MultiFlatMapTckTest extends AbstractPublisherTck<Long> {
     }
 
     @Test
-    public void flatMapStageShouldPropgateCancelToSubstreams() {
+    public void flatMapStageShouldPropagateCancelToSubstreams() {
         CompletableFuture<Void> outerCancelled = new CompletableFuture<>();
         CompletableFuture<Void> innerCancelled = new CompletableFuture<>();
         await(infiniteStream()

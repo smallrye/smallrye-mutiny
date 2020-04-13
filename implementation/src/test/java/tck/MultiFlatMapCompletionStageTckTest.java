@@ -48,12 +48,12 @@ public class MultiFlatMapCompletionStageTckTest extends AbstractPublisherTck<Int
     }
 
     @Test
-    public void flatMapCsStageShouldMaintainOrderOfFutures() throws Exception {
+    public void flatMapCsStageShouldMaintainOrderOfFuturesIfConcurrencyIs1() throws Exception {
         CompletableFuture<Integer> one = new CompletableFuture<>();
         CompletableFuture<Integer> two = new CompletableFuture<>();
         CompletableFuture<Integer> three = new CompletableFuture<>();
         CompletionStage<List<Integer>> result = Multi.createFrom().<CompletionStage<Integer>> items(one, two, three)
-                .onItem().produceCompletionStage(Function.identity()).merge()
+                .onItem().produceCompletionStage(Function.identity()).merge(1)
                 .collectItems().asList()
                 .subscribeAsCompletionStage();
         three.complete(3);
@@ -65,7 +65,7 @@ public class MultiFlatMapCompletionStageTckTest extends AbstractPublisherTck<Int
     }
 
     @Test
-    public void flatMapCsStageShouldOnlyMapOneElementAtATime() throws Exception {
+    public void flatMapCsStageShouldOnlyMapOneElementAtATimeWithConcurrencyIs1() throws Exception {
         CompletableFuture<Integer> one = new CompletableFuture<>();
         CompletableFuture<Integer> two = new CompletableFuture<>();
         CompletableFuture<Integer> three = new CompletableFuture<>();
@@ -74,7 +74,7 @@ public class MultiFlatMapCompletionStageTckTest extends AbstractPublisherTck<Int
                 .onItem().produceCompletionStage(cs -> {
                     Assert.assertEquals(1, concurrentMaps.incrementAndGet());
                     return cs;
-                }).merge()
+                }).merge(1)
                 .collectItems().asList()
                 .subscribeAsCompletionStage();
         Thread.sleep(100L); // NOSONAR
