@@ -99,6 +99,45 @@ To chain asynchronous calls, use `onItem().produceUni` or `onItem().produceCompl
 include::../../../src/test/java/snippets/HowToChainAsyncTest.java[tags=code]
 ----
 
+=== What's the difference between merge() and concatenate()
+
+Imagine you have a `Multi`, and for each item, you need to call a remote service or execute an asynchronous operation.
+To do this, you write the following code:
+
+[source,java]
+----
+List<String> list = multi
+    .onItem().produceUni(this::asyncService)
+    // .concatenate() or .merge() ?
+----
+
+`produceUni` lets you choose between two _merge_ methods: `merge()` and `concatenate()`:
+
+[source,java,indent=0]
+----
+include::../../../src/test/java/snippets/MergeVsConcatenateTest.java[tags=merge]
+----
+
+[source,java,indent=0]
+----
+include::../../../src/test/java/snippets/MergeVsConcatenateTest.java[tags=concatenate]
+----
+
+The difference between these alternatives is about the ordering.
+Let's imagine you have the following items: `a`, `b`, `c` and the `asyncService` is just producing the uppercase version (but asynchronously, and you don't know when the result is going to be produced).
+
+`concatenate()` preserves the ordering. So, the output will always be `A`, `B`, `C`.
+`merge()` emits the resulting items as soon as they are available, and so may interleave the items.
+The output could be `B`, `A`, `C` if the computation of `b` was faster than for `a`.
+
+`merge()` executes the asynchronous operation concurrently, while `concatenate()` executes them one by one to preserve the ordering.
+With `merge()`, you can also configure the degree of concurrency using: `merge(concurrency)`:
+
+[source,java,indent=0]
+----
+include::../../../src/test/java/snippets/MergeVsConcatenateTest.java[tags=merge-concurrency]
+----
+
 === How do I recover from failure?
 
 Failures are inherent to software.
