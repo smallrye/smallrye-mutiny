@@ -14,7 +14,7 @@ public class UniBlockingTest {
     public void test() {
         // tag::code[]
         Uni<String> blocking = Uni.createFrom().item(this::invokeRemoteServiceUsingBlockingIO)
-                .subscribeOn(Infrastructure.getDefaultWorkerPool());
+                .runSubscriptionOn(Infrastructure.getDefaultWorkerPool());
         // end::code[]
         assertThat(blocking.await().indefinitely()).isEqualTo("hello");
     }
@@ -31,7 +31,7 @@ public class UniBlockingTest {
 
     private String invokeRemoteServiceUsingBlockingIO() {
         try {
-            Thread.sleep(300);
+            Thread.sleep(300);  // NOSONAR
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
@@ -40,7 +40,7 @@ public class UniBlockingTest {
 
     private String invokeRemoteServiceUsingBlockingIO(String s) {
         try {
-            Thread.sleep(300);
+            Thread.sleep(300); // NOSONAR
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }

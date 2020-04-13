@@ -16,10 +16,10 @@ import io.smallrye.mutiny.infrastructure.Infrastructure;
 public class UniRunSubscriptionOnTest {
 
     @Test
-    public void testSubscribeOnWithSupplier() {
+    public void testRunSubscriptionOnWithSupplier() {
         UniAssertSubscriber<Integer> ts = UniAssertSubscriber.create();
         Uni.createFrom().item(() -> 1)
-                .subscribeOn(ForkJoinPool.commonPool())
+                .runSubscriptionOn(ForkJoinPool.commonPool())
                 .subscribe().withSubscriber(ts);
         ts.await().assertItem(1);
         assertThat(ts.getOnSubscribeThreadName()).isNotEqualTo(Thread.currentThread().getName());
@@ -30,7 +30,7 @@ public class UniRunSubscriptionOnTest {
         UniAssertSubscriber<Integer> ts = UniAssertSubscriber.create();
 
         Uni.createFrom().item(1)
-                .subscribeOn(ForkJoinPool.commonPool())
+                .runSubscriptionOn(ForkJoinPool.commonPool())
                 .subscribe().withSubscriber(ts);
 
         ts.await().assertItem(1);
@@ -50,7 +50,7 @@ public class UniRunSubscriptionOnTest {
             return 0;
         })
                 .ifNoItem().after(Duration.ofMillis(100)).recoverWithUni(Uni.createFrom().item(() -> 1))
-                .subscribeOn(Infrastructure.getDefaultExecutor())
+                .runSubscriptionOn(Infrastructure.getDefaultExecutor())
                 .subscribe().withSubscriber(ts);
 
         ts.await().assertItem(1);
@@ -61,7 +61,7 @@ public class UniRunSubscriptionOnTest {
         AtomicInteger count = new AtomicInteger();
 
         Uni<Integer> uni = Uni.createFrom().item(count::incrementAndGet)
-                .subscribeOn(ForkJoinPool.commonPool());
+                .runSubscriptionOn(ForkJoinPool.commonPool());
 
         assertThat(count).hasValue(0);
         uni.subscribe().withSubscriber(UniAssertSubscriber.create()).await();
@@ -71,7 +71,7 @@ public class UniRunSubscriptionOnTest {
     @Test
     public void testWithFailure() {
         Uni.createFrom().<Void> failure(new IOException("boom"))
-                .subscribeOn(Infrastructure.getDefaultExecutor())
+                .runSubscriptionOn(Infrastructure.getDefaultExecutor())
                 .subscribe().withSubscriber(UniAssertSubscriber.create())
                 .await()
                 .assertFailure(IOException.class, "boom");

@@ -16,11 +16,11 @@ public class PollableSourceTest {
     private ExecutorService executor = Executors.newSingleThreadExecutor();
 
     @Test
-    public void test() {
+    public void test() { // NOSONAR
         // tag::code[]
         PollableDataSource source = new PollableDataSource();
         // First creates a uni that emit the polled item. Because `poll` blocks, let's use a specific executor
-        Uni<String> pollItemFromSource = Uni.createFrom().item(source::poll).subscribeOn(executor);
+        Uni<String> pollItemFromSource = Uni.createFrom().item(source::poll).runSubscriptionOn(executor);
         // To get the stream of items, just repeat the uni indefinitely
         Multi<String> stream = pollItemFromSource.repeat().indefinitely();
 
@@ -37,20 +37,20 @@ public class PollableSourceTest {
 
     @SuppressWarnings("Convert2MethodRef")
     @Test
-    public void test2() {
+    public void test2() { // NOSONAR
         // tag::code2[]
         PollableDataSource source = new PollableDataSource();
         Multi<String> stream = Multi.createBy().repeating()
                     .supplier(source::poll)
                     .until(s -> s == null)
-                .subscribeOn(executor);
+                .runSubscriptionOn(executor);
 
         stream.subscribe().with(item -> System.out.println("Polled item: " + item));
         // end::code2[]
         await().until(() -> source.counter.get() >= 5);
     }
 
-    private class PollableDataSource {
+    private static class PollableDataSource {
 
         private final AtomicInteger counter = new AtomicInteger();
 
@@ -64,7 +64,7 @@ public class PollableSourceTest {
 
         private void block() {
             try {
-                Thread.sleep(100);
+                Thread.sleep(100);  // NOSONAR
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }

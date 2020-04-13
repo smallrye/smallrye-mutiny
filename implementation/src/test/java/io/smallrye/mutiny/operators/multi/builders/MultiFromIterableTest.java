@@ -142,7 +142,7 @@ public class MultiFromIterableTest {
         final int expectedCount = 4;
         CountDownLatch latch = new CountDownLatch(expectedCount);
 
-        f.subscribeOn(Infrastructure.getDefaultExecutor())
+        f.runSubscriptionOn(Infrastructure.getDefaultExecutor())
                 .subscribe(new Subscriber<Integer>() {
                     Subscription upstream;
 

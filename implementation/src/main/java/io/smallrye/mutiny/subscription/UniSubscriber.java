@@ -1,5 +1,7 @@
 package io.smallrye.mutiny.subscription;
 
+import java.util.concurrent.Executor;
+
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.groups.UniSubscribe;
 
@@ -30,7 +32,8 @@ public interface UniSubscriber<T> {
      * before the invocation of this method.
      *
      * <ul>
-     * <li>Executor: Operate on no particular executor, except if {@link Uni#subscribeOn} has been called</li>
+     * <li>Executor: Operate on no particular executor, except if {@link Uni#runSubscriptionOn(Executor)} has been
+     * called</li>
      * <li>Exception: Throwing an exception cancels the subscription, {@link #onItem(Object)} and
      * {@link #onFailure(Throwable)} won't be called</li>
      * </ul>
