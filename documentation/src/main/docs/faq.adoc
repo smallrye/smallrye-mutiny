@@ -9,6 +9,13 @@ To transform items synchronously use the `apply` operators:
 include::../../../src/test/java/snippets/HowToTransformTest.java[tags=sync]
 ----
 
+If your operation throws a _checked exception_, you can use the `io.smallrye.mutiny.unchecked.Unchecked` wrappers to avoid having to catch the exception in the _callback_.
+
+[source,java,indent=0]
+----
+include::../../../src/test/java/snippets/HowToTransformTest.java[tags=sync-unchecked]
+----
+
 You can also transform items asynchronously using the `produceUni` / `produceCompletionStage` operators:
 
 [source,java,indent=0]
@@ -22,6 +29,17 @@ If you need to generate a sequence of items use, `producePublisher`:
 ----
 include::../../../src/test/java/snippets/HowToTransformTest.java[tags=multi]
 ----
+
+[NOTE]
+.Unchecked
+====
+Mutiny provides a set of utility classes to handle functions / consumers / suppliers that throw _checked_ exceptions.
+`io.smallrye.mutiny.unchecked.Unchecked` wraps code throwing checked exceptions into Java functions/suppliers/consumers.
+The `try/catch` is done for you and if an exception occurs, it gets rethrown automatically.
+
+You can add the following import statement to simplify the usage of the provided methods:
+`import static io.smallrye.mutiny.unchecked.Unchecked.*;`
+====
 
 === How do I filter/select items?
 
