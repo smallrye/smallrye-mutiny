@@ -23,7 +23,7 @@ public class UniAndGroup2<T1, T2> extends UniAndGroupIterable<T1> {
     }
 
     /**
-     * Configure the processing to wait until all the {@link Uni unis} to fires an event (item or failure) before
+     * Configure the processing to wait until all the {@link Uni unis} to fire an event (item or failure) before
      * firing the failure. If several failures have been collected, a {@link CompositeException} is fired wrapping
      * the different failures.
      *

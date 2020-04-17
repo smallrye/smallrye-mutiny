@@ -16,7 +16,7 @@ public class MultiItemCombine4<T1, T2, T3, T4> extends MultiItemCombineIterable 
     }
 
     /**
-     * Configures the combination to wait until all the {@link Publisher streams} to fires a completion or failure event
+     * Configures the combination to wait until all the {@link Publisher streams} to fire a completion or failure event
      * before propagating a failure downstream.
      *
      * @return the current {@link MultiItemCombine4}
