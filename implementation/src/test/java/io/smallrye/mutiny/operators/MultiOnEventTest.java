@@ -14,6 +14,7 @@ import org.testng.annotations.Test;
 
 import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Multi;
+import io.smallrye.mutiny.operators.multi.processors.BroadcastProcessor;
 import io.smallrye.mutiny.test.MultiAssertSubscriber;
 
 public class MultiOnEventTest {
@@ -328,6 +329,20 @@ public class MultiOnEventTest {
     }
 
     @Test
+    public void testThatAFailureInTerminationAfterAFailureDoesNotRunTerminationTwice() {
+        AtomicInteger called = new AtomicInteger();
+        Multi.createFrom().<Integer> failure(new IOException("IO"))
+                .on().termination((f, c) -> {
+                    called.incrementAndGet();
+                    throw new IllegalArgumentException("boom");
+                }).subscribe().withSubscriber(MultiAssertSubscriber.create(1))
+                .assertHasFailedWith(CompositeException.class, "boom")
+                .assertHasFailedWith(CompositeException.class, "IO");
+
+        assertThat(called).hasValue(1);
+    }
+
+    @Test
     public void testThatAFailureInTerminationDoesNotRunTerminationTwice2() {
         AtomicInteger called = new AtomicInteger();
         Multi.createFrom().item(1)
@@ -338,6 +353,86 @@ public class MultiOnEventTest {
                 .assertHasFailedWith(IllegalArgumentException.class, "boom");
 
         assertThat(called).hasValue(1);
+    }
+
+    @Test
+    public void testThatTerminationIsNotCalledOnCancellationAfterCompletion() {
+        AtomicInteger invocations = new AtomicInteger(0);
+        BroadcastProcessor<Integer> processor = BroadcastProcessor.create();
+        Multi<Integer> multi = Multi.createFrom().publisher(processor)
+                .on().termination(invocations::incrementAndGet);
+
+        MultiAssertSubscriber<Integer> subscriber = multi
+                .subscribe().withSubscriber(MultiAssertSubscriber.create(10));
+        assertThat(invocations).hasValue(0);
+        processor.onNext(1);
+        assertThat(invocations).hasValue(0);
+        processor.onComplete();
+        subscriber.assertCompletedSuccessfully().assertReceived(1);
+        assertThat(invocations).hasValue(1);
+        subscriber.cancel();
+        assertThat(invocations).hasValue(1);
+        subscriber.cancel();
+        assertThat(invocations).hasValue(1);
+    }
+
+    @Test
+    public void testThatTerminationIsNotCalledOnCancellationAfterFailure() {
+        AtomicInteger invocations = new AtomicInteger(0);
+        BroadcastProcessor<Integer> processor = BroadcastProcessor.create();
+        Multi<Integer> multi = Multi.createFrom().publisher(processor)
+                .on().termination(invocations::incrementAndGet);
+        MultiAssertSubscriber<Integer> subscriber = multi
+                .subscribe().withSubscriber(MultiAssertSubscriber.create(10));
+        assertThat(invocations).hasValue(0);
+        processor.onNext(1);
+        assertThat(invocations).hasValue(0);
+        processor.onError(new Exception("boom"));
+        subscriber.assertHasFailedWith(Exception.class, "boom").assertReceived(1);
+        assertThat(invocations).hasValue(1);
+        subscriber.cancel();
+        assertThat(invocations).hasValue(1);
+        subscriber.cancel();
+        assertThat(invocations).hasValue(1);
+    }
+
+    @Test
+    public void testThatTerminationIsNotCalledOnCompletionAfterCancellation() {
+        AtomicInteger invocations = new AtomicInteger(0);
+        BroadcastProcessor<Integer> processor = BroadcastProcessor.create();
+        Multi<Integer> multi = Multi.createFrom().publisher(processor)
+                .on().termination(invocations::incrementAndGet);
+        MultiAssertSubscriber<Integer> subscriber = multi
+                .subscribe().withSubscriber(MultiAssertSubscriber.create(10));
+        assertThat(invocations).hasValue(0);
+        processor.onNext(1);
+        assertThat(invocations).hasValue(0);
+        subscriber.cancel();
+        assertThat(invocations).hasValue(1);
+        processor.onComplete();
+        subscriber.assertNotTerminated();
+        assertThat(invocations).hasValue(1);
+        subscriber.cancel();
+        assertThat(invocations).hasValue(1);
+    }
+
+    @Test
+    public void testThatTerminationIsNotCalledOnFailureAfterCancellation() {
+        AtomicInteger invocations = new AtomicInteger(0);
+        BroadcastProcessor<Integer> processor = BroadcastProcessor.create();
+        Multi<Integer> multi = Multi.createFrom().publisher(processor)
+                .on().termination(invocations::incrementAndGet);
+        MultiAssertSubscriber<Integer> subscriber = multi
+                .subscribe().withSubscriber(MultiAssertSubscriber.create(10));
+        assertThat(invocations).hasValue(0);
+        processor.onNext(1);
+        subscriber.cancel();
+        assertThat(invocations).hasValue(1);
+        processor.onError(new Exception("boom"));
+        subscriber.assertNotTerminated().assertReceived(1);
+        assertThat(invocations).hasValue(1);
+        subscriber.cancel();
+        assertThat(invocations).hasValue(1);
     }
 
 }
