@@ -545,6 +545,41 @@ It gets the items from the lists and passes them downstream:
 include::plantuml/disjoint.puml[]
 ----
 
+=== How do I delay _things_?
+
+You can delay item emission using the `Uni.onItem().delayIt().by(...)` or `Uni.onItem().delayIt().until(...)`.
+The first variant delays the emission by a given duration:
+
+[source,java,indent=0]
+----
+include::../../../src/test/java/snippets/DelayTest.java[tags=delay-by]
+----
+
+You can also delay the emission based on an asynchronous result:
+
+[source,java,indent=0]
+----
+include::../../../src/test/java/snippets/DelayTest.java[tags=delay-until]
+----
+
+The item is propagated downstream when the `Uni` returned by the function emits an item (possibly `null`).
+If the function emits a failure (or throws an exception), this failure is propagated downstream.
+
+To delay items from a `Multi`, you can use the previously mentioned methods:
+
+[source,java,indent=0]
+----
+include::../../../src/test/java/snippets/DelayTest.java[tags=delay-multi]
+----
+
+Generally, you want to introduce random delays.
+You can implement this behavior as follows:
+
+[source,java,indent=0]
+----
+include::../../../src/test/java/snippets/DelayTest.java[tags=delay-multi-random]
+----
+
 === Where do I find the JavaDoc?
 
 The JavaDoc is published https://smallrye.io/smallrye-mutiny/apidocs/[there].
