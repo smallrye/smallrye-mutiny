@@ -117,6 +117,28 @@ To chain asynchronous calls, use `onItem().produceUni` or `onItem().produceCompl
 include::../../../src/test/java/snippets/HowToChainAsyncTest.java[tags=code]
 ----
 
+=== How do I _join_ asynchronous calls?
+
+Joining asynchronous calls, _i.e._ being notified when multiple actions complete, is a common pattern.
+With Mutiny, you can achieve this as follows:
+
+[source, java, indent=0]
+----
+include::../../../src/test/java/snippets/HowToJoinAsyncTest.java[tags=code]
+----
+
+In this example, the results are combined into a `Tuple` that contains the different results.
+
+If you have many `Unis` to join, you can use an iterable and a combinator function:
+
+[source, java, indent=0]
+----
+include::../../../src/test/java/snippets/HowToJoinAsyncTest.java[tags=codeCombinator]
+----
+
+The combinator function is invoked with a `List<Object>` as parameter and passes the different results.
+This function returns the combined result.
+
 === What's the difference between merge() and concatenate()
 
 Imagine you have a `Multi`, and for each item, you need to call a remote service or execute an asynchronous operation.
