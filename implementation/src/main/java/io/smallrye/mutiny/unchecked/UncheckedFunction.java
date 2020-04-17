@@ -31,6 +31,7 @@ public interface UncheckedFunction<T, R> {
      *
      * @param t the function argument
      * @return the function result
+     * @throws Exception if anything wrong happen
      */
     R apply(T t) throws Exception;
 

@@ -27,6 +27,7 @@ public interface UncheckedSupplier<T> {
      * Gets an item.
      *
      * @return an item
+     * @throws Exception if anything wrong happen
      */
     T get() throws Exception;
 
