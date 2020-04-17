@@ -1,5 +1,6 @@
 package io.smallrye.mutiny.operators.multi;
 
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -64,6 +65,7 @@ public final class MultiSignalConsumerOp<T> extends AbstractMultiOperator<T, T> 
 
         private final MultiSubscriber<? super T> downstream;
         private final AtomicReference<Subscription> subscription = new AtomicReference<>();
+        private final AtomicBoolean terminationCalled = new AtomicBoolean();
 
         SignalSubscriber(MultiSubscriber<? super T> downstream) {
             this.downstream = downstream;
@@ -101,15 +103,32 @@ public final class MultiSignalConsumerOp<T> extends AbstractMultiOperator<T, T> 
                     return;
                 }
             }
-            if (onTermination != null) {
-                try {
-                    onTermination.accept(null, true);
-                } catch (Throwable e) {
-                    // Nothing we can do.
-                    return;
+            callTerminationCallback(null, true);
+            subscription.getAndSet(Subscriptions.CANCELLED).cancel();
+        }
+
+        private boolean callTerminationCallback(Throwable failure, boolean cancelled) {
+            if (terminationCalled.compareAndSet(false, true)) {
+                if (onTermination != null) {
+                    try {
+                        onTermination.accept(failure, cancelled);
+                    } catch (Throwable e) {
+                        // We have been called because of the completion event,
+                        // let's propagate the failure.
+                        if (failure == null && !cancelled) {
+                            downstream.onFailure(e);
+                            return true;
+                        }
+                        // We have been called because of a failure event
+                        // propagate a composite exception
+                        if (failure != null) {
+                            downstream.onFailure(new CompositeException(failure, e));
+                            return true;
+                        }
+                    }
                 }
             }
-            subscription.getAndSet(Subscriptions.CANCELLED).cancel();
+            return false;
         }
 
         @Override
@@ -156,14 +175,8 @@ public final class MultiSignalConsumerOp<T> extends AbstractMultiOperator<T, T> 
                     }
                 }
 
-                downstream.onFailure(failure);
-
-                if (onTermination != null) {
-                    try {
-                        onTermination.accept(failure, false);
-                    } catch (Throwable e) {
-                        // Nothing we can do...
-                    }
+                if (!callTerminationCallback(failure, false)) {
+                    downstream.onFailure(failure);
                 }
             }
         }
@@ -180,16 +193,9 @@ public final class MultiSignalConsumerOp<T> extends AbstractMultiOperator<T, T> 
                     }
                 }
 
-                if (onTermination != null) {
-                    try {
-                        onTermination.accept(null, false);
-                    } catch (Throwable e) {
-                        downstream.onFailure(e);
-                        return;
-                    }
+                if (!callTerminationCallback(null, false)) {
+                    downstream.onCompletion();
                 }
-
-                downstream.onCompletion();
             }
         }
 
