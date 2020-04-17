@@ -1,11 +1,10 @@
 package snippets;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import org.junit.Test;
-
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
+import org.junit.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class UniNullTest {
 
@@ -19,6 +18,22 @@ public class UniNullTest {
         // end::code[]
 
         assertThat(uni.onItem().ifNull().continueWith("hello").await().indefinitely()).isEqualTo("hello");
+    }
+
+    @Test
+    public void uniNotNull() {
+        Uni<String> uni = Uni.createFrom().item(() -> null);
+        // tag::code-not-null[]
+        uni
+                .onItem().ifNotNull().apply(String::toUpperCase)
+                .onItem().ifNull().continueWith("yolo!");
+        // end::code-not-null[]
+
+        String r = uni
+                .onItem().ifNotNull().apply(String::toUpperCase)
+                .onItem().ifNull().continueWith("yolo!")
+                .await().indefinitely();
+        assertThat(r).isEqualTo("yolo!");
     }
 
     @Test

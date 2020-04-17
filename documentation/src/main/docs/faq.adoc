@@ -190,6 +190,13 @@ The `retry` operator lets you re-subscribe and continue the reception.
 include::../../../src/test/java/snippets/UniNullTest.java[tags=code]
 ----
 
+The symmetric operation is also available with `ifNotNull` which let you handle the case where the item is _not null_:
+
+[source,java,indent=0]
+----
+include::../../../src/test/java/snippets/UniNullTest.java[tags=code-not-null]
+----
+
 === How do I handle timeout?
 
 `Uni` are often used to represent asynchronous operations, like an HTTP call.
