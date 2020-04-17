@@ -116,7 +116,7 @@ public class UniOnItem<T> {
      * Transforms the received item asynchronously, forwarding the events emitted an {@link UniEmitter} consumes by
      * the given consumer.
      * <p>
-     * The consumer is called with the item event of the current {@link Uni} and an emitter uses to fires events.
+     * The consumer is called with the item event of the current {@link Uni} and an emitter uses to fire events.
      * These events are these propagated by the produced {@link Uni}.
      *
      * @param consumer the function called with the item of the this {@link Uni} and an {@link UniEmitter}.
@@ -213,5 +213,15 @@ public class UniOnItem<T> {
      */
     public UniOnNull<T> ifNull() {
         return new UniOnNull<>(upstream);
+    }
+
+    /**
+     * Adds specific behavior when the observed {@link Uni} fies a {@code non-null} item. If the item is {@code null},
+     * default fallbacks are used.
+     *
+     * @return the object to configure the behavior when receiving a {@code non-null} item
+     */
+    public UniOnNotNull<T> ifNotNull() {
+        return new UniOnNotNull<>(upstream);
     }
 }

@@ -176,6 +176,7 @@ public class SerializedProcessor<I, O> implements Processor<I, O> {
     /**
      * Dispatches the events contained in the queue to the given subscriber.
      *
+     * @param queue the queue of event
      * @param subscriber the subscriber to emit the events to
      */
     @SuppressWarnings("unchecked")

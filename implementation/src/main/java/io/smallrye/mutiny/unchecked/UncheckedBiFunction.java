@@ -52,6 +52,7 @@ public interface UncheckedBiFunction<T, U, R> {
      * @param t the first function argument
      * @param u the second function argument
      * @return the function result
+     * @throws Exception if anything wrong happen
      */
     R apply(T t, U u) throws Exception;
 
