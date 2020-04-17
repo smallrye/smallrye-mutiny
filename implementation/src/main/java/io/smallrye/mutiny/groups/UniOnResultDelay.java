@@ -9,6 +9,7 @@ import java.util.function.Function;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.UniDelayOnItem;
+import io.smallrye.mutiny.operators.UniDelayUntil;
 
 public class UniOnResultDelay<T> {
 
@@ -30,7 +31,8 @@ public class UniOnResultDelay<T> {
     }
 
     public Uni<T> until(Function<? super T, ? extends Uni<?>> function) {
-        throw new UnsupportedOperationException("to be implemented");
+        return Infrastructure.onUniCreation(new UniDelayUntil<>(upstream, function, executor));
+
     }
 
 }
