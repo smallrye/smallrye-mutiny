@@ -3,6 +3,8 @@ package io.smallrye.mutiny.operators;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
@@ -441,5 +443,61 @@ public class MultiCreateFromEmitterTest {
                 .subscribe().withSubscriber(MultiAssertSubscriber.create())
                 .assertCompletedSuccessfully()
                 .assertHasNotReceivedAnyItem();
+    }
+
+    @Test
+    public void testThatWeCanHaveMultipleSubscribers() {
+        AtomicInteger count = new AtomicInteger();
+
+        List<MultiEmitter<? super Integer>> emitters = new ArrayList<>();
+        Multi<Integer> multi = Multi.createFrom().emitter(e -> {
+            int i = count.incrementAndGet();
+            emitters.add(e);
+            e.emit(i);
+            e.emit(i);
+        });
+
+        MultiAssertSubscriber<Integer> subscriber1 = multi.subscribe()
+                .withSubscriber(MultiAssertSubscriber.create(10))
+                .assertReceived(1, 1)
+                .assertNotTerminated();
+
+        MultiAssertSubscriber<Integer> subscriber2 = multi.subscribe()
+                .withSubscriber(MultiAssertSubscriber.create(10))
+                .assertReceived(2, 2)
+                .assertNotTerminated();
+
+        emitters.forEach(MultiEmitter::complete);
+        subscriber1.assertCompletedSuccessfully();
+        subscriber2.assertCompletedSuccessfully();
+
+    }
+
+    @Test
+    public void testThatWeCanHaveMultipleSubscribersWhenUsingBackPressure() {
+        AtomicInteger count = new AtomicInteger();
+
+        List<MultiEmitter<? super Integer>> emitters = new ArrayList<>();
+        Multi<Integer> multi = Multi.createFrom().emitter(e -> {
+            int i = count.incrementAndGet();
+            emitters.add(e);
+            e.emit(i);
+            e.emit(i);
+        }, BackPressureStrategy.DROP);
+
+        MultiAssertSubscriber<Integer> subscriber1 = multi.subscribe()
+                .withSubscriber(MultiAssertSubscriber.create(10))
+                .assertReceived(1, 1)
+                .assertNotTerminated();
+
+        MultiAssertSubscriber<Integer> subscriber2 = multi.subscribe()
+                .withSubscriber(MultiAssertSubscriber.create(10))
+                .assertReceived(2, 2)
+                .assertNotTerminated();
+
+        emitters.forEach(MultiEmitter::complete);
+        subscriber1.assertCompletedSuccessfully();
+        subscriber2.assertCompletedSuccessfully();
+
     }
 }
