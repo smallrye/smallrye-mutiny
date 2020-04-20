@@ -108,6 +108,30 @@ You can also accumulate results using the `scan` method:
 include::../../../src/test/java/snippets/CollectTest.java[tags=acc]
 ----
 
+=== How do I represent asynchronous calls?
+
+When calling a remote service, or anything asynchronous, you need a way to represent this call.
+Most of the time, this should be represented by a `Uni<T>` with `T` the type of result.
+
+For example, a service producing a `String` should be represented as follows:
+
+[source, java]
+----
+Uni<String> invokeMyService();
+----
+
+The returned `Uni` emits the result when the response is available.
+If the service invocation fails, the failure is propagated by the `Uni`.
+
+If your service does not produce a result, use `Uni<Void>`:
+
+[source, java]
+----
+Uni<Void> fireAndForget();
+----
+
+In this case, you still know if the invocation fails (you get a failure event) or if the invocation completes successfully (you get a `Void` item (`null`)).
+
 === How do I chain asynchronous calls?
 
 To chain asynchronous calls, use `onItem().produceUni` or `onItem().produceCompletionStage`:
@@ -218,6 +242,9 @@ The symmetric operation is also available with `ifNotNull` which let you handle 
 ----
 include::../../../src/test/java/snippets/UniNullTest.java[tags=code-not-null]
 ----
+
+IMPORTANT: While supported, emitting `null` should be avoided except for `Uni<Void>`.
+
 
 === How do I handle timeout?
 
