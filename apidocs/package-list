@@ -14,3 +14,4 @@ io.smallrye.mutiny.operators.multi.overflow
 io.smallrye.mutiny.operators.multi.processors
 io.smallrye.mutiny.subscription
 io.smallrye.mutiny.tuples
+io.smallrye.mutiny.unchecked
