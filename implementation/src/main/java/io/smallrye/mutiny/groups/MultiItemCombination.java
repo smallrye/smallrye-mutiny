@@ -4,6 +4,8 @@ import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
 
 import java.util.Arrays;
 
+import org.reactivestreams.Publisher;
+
 import io.smallrye.mutiny.operators.MultiItemCombine2;
 import io.smallrye.mutiny.operators.MultiItemCombine3;
 import io.smallrye.mutiny.operators.MultiItemCombine4;
@@ -13,7 +15,6 @@ import io.smallrye.mutiny.operators.MultiItemCombine7;
 import io.smallrye.mutiny.operators.MultiItemCombine8;
 import io.smallrye.mutiny.operators.MultiItemCombine9;
 import io.smallrye.mutiny.operators.MultiItemCombineIterable;
-import org.reactivestreams.Publisher;
 
 public class MultiItemCombination {
 

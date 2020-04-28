@@ -1,12 +1,13 @@
 package io.smallrye.mutiny.operators;
 
+import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
+import static io.smallrye.mutiny.helpers.ParameterValidation.size;
+
+import org.reactivestreams.Publisher;
+
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.tuples.Functions;
 import io.smallrye.mutiny.tuples.Tuple8;
-import org.reactivestreams.Publisher;
-
-import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
-import static io.smallrye.mutiny.helpers.ParameterValidation.size;
 
 public class MultiItemCombine8<T1, T2, T3, T4, T5, T6, T7, T8> extends MultiItemCombineIterable {
 
@@ -49,7 +50,8 @@ public class MultiItemCombine8<T1, T2, T3, T4, T5, T6, T7, T8> extends MultiItem
     }
 
     /**
-     * @return the resulting {@link Multi}. The items are combined into a {@link Tuple8 Tuple8&lt;T1, T2, T3, T4, T5, T6, T7, T8&gt;}.
+     * @return the resulting {@link Multi}. The items are combined into a {@link Tuple8 Tuple8&lt;T1, T2, T3, T4, T5, T6, T7,
+     *         T8&gt;}.
      */
     public Multi<Tuple8<T1, T2, T3, T4, T5, T6, T7, T8>> asTuple() {
         return using(Tuple8::of);

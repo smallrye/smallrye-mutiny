@@ -1,16 +1,17 @@
 package io.smallrye.mutiny.tuples;
 
-import org.testng.annotations.Test;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import java.util.Arrays;
 import java.util.Collections;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import org.testng.annotations.Test;
 
 public class Tuple8Test {
 
-    private Tuple8<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer> someTuple = new Tuple8<>(1, 2, 3, 4, 5, 6, 7, 8);
+    private Tuple8<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer> someTuple = new Tuple8<>(1, 2, 3, 4,
+            5, 6, 7, 8);
 
     @Test
     public void assertNullValues() {
@@ -73,7 +74,7 @@ public class Tuple8Test {
     @Test
     public void testEquality() {
         assertThat(someTuple).isEqualTo(someTuple);
-        assertThat(someTuple).isNotEqualTo(Tuple8.of(1, 2, 4, 5, 6, 7, 8,10));
+        assertThat(someTuple).isNotEqualTo(Tuple8.of(1, 2, 4, 5, 6, 7, 8, 10));
         assertThat(someTuple).isNotEqualTo(Tuple7.of(1, 2, 4, 5, 6, 7));
         assertThat(someTuple).isNotEqualTo("not a tuple");
         assertThat(someTuple).isEqualTo(Tuple8.of(1, 2, 3, 4, 5, 6, 7, 8));
@@ -82,7 +83,8 @@ public class Tuple8Test {
     @Test
     public void testHashCode() {
         Tuple8<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer> same = Tuple8.of(1, 2, 3, 4, 5, 6, 7, 8);
-        Tuple8<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer> different = Tuple8.of(1, 2, 1, 4, 6, 7, 8, 10);
+        Tuple8<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer> different = Tuple8.of(1, 2, 1, 4, 6, 7,
+                8, 10);
 
         assertThat(someTuple.hashCode())
                 .isEqualTo(same.hashCode())
@@ -91,7 +93,8 @@ public class Tuple8Test {
 
     @Test
     public void testFromList() {
-        Tuple8<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer> tuple = Tuples.tuple8(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8));
+        Tuple8<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer> tuple = Tuples
+                .tuple8(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8));
         assertThat(tuple).containsExactly(1, 2, 3, 4, 5, 6, 7, 8);
 
         assertThatExceptionOfType(IllegalArgumentException.class)

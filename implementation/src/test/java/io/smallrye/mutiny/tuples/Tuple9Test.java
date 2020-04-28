@@ -1,16 +1,17 @@
 package io.smallrye.mutiny.tuples;
 
-import org.testng.annotations.Test;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import java.util.Arrays;
 import java.util.Collections;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import org.testng.annotations.Test;
 
 public class Tuple9Test {
 
-    private Tuple9<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer> someTuple = new Tuple9<>(1, 2, 3, 4, 5, 6, 7, 8, 9);
+    private Tuple9<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer> someTuple = new Tuple9<>(1,
+            2, 3, 4, 5, 6, 7, 8, 9);
 
     @Test
     public void assertNullValues() {
@@ -23,7 +24,7 @@ public class Tuple9Test {
         assertThat(Tuple9.of(1, 2, 3, 4, 5, null, 6, 7, 8)).containsExactly(1, 2, 3, 4, 5, null, 6, 7, 8);
         assertThat(Tuple9.of(1, 2, 3, 4, 5, 6, null, 7, 8)).containsExactly(1, 2, 3, 4, 5, 6, null, 7, 8);
         assertThat(Tuple9.of(1, 2, 3, 4, 5, 6, 7, null, 8)).containsExactly(1, 2, 3, 4, 5, 6, 7, null, 8);
-        assertThat(Tuple9.of(1, 2, 3, 4, 5, 6, 7, 8,null)).containsExactly(1, 2, 3, 4, 5, 6, 7, 8, null);
+        assertThat(Tuple9.of(1, 2, 3, 4, 5, 6, 7, 8, null)).containsExactly(1, 2, 3, 4, 5, 6, 7, 8, null);
         assertThat(Tuple9.of(null, null, null, null, null, null, null, null, null))
                 .containsExactly(null, null, null, null, null, null, null, null, null);
     }
@@ -77,7 +78,7 @@ public class Tuple9Test {
     @Test
     public void testEquality() {
         assertThat(someTuple).isEqualTo(someTuple);
-        assertThat(someTuple).isNotEqualTo(Tuple9.of(1, 2, 4, 5, 6, 7, 8,9, 10));
+        assertThat(someTuple).isNotEqualTo(Tuple9.of(1, 2, 4, 5, 6, 7, 8, 9, 10));
         assertThat(someTuple).isNotEqualTo(Tuple7.of(1, 2, 4, 5, 6, 7, 8));
         assertThat(someTuple).isNotEqualTo("not a tuple");
         assertThat(someTuple).isEqualTo(Tuple9.of(1, 2, 3, 4, 5, 6, 7, 8, 9));
@@ -85,8 +86,10 @@ public class Tuple9Test {
 
     @Test
     public void testHashCode() {
-        Tuple9<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer> same = Tuple9.of(1, 2, 3, 4, 5, 6, 7, 8, 9);
-        Tuple9<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer> different = Tuple9.of(1, 2, 1, 4, 6, 7, 8, 9,10);
+        Tuple9<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer> same = Tuple9.of(1, 2, 3, 4, 5,
+                6, 7, 8, 9);
+        Tuple9<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer> different = Tuple9.of(1, 2, 1,
+                4, 6, 7, 8, 9, 10);
 
         assertThat(someTuple.hashCode())
                 .isEqualTo(same.hashCode())
@@ -95,7 +98,8 @@ public class Tuple9Test {
 
     @Test
     public void testFromList() {
-        Tuple9<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer> tuple = Tuples.tuple9(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9));
+        Tuple9<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer> tuple = Tuples
+                .tuple9(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9));
         assertThat(tuple).containsExactly(1, 2, 3, 4, 5, 6, 7, 8, 9);
 
         assertThatExceptionOfType(IllegalArgumentException.class)

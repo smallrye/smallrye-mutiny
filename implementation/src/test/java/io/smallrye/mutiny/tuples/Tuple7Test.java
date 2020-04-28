@@ -1,12 +1,12 @@
 package io.smallrye.mutiny.tuples;
 
-import org.testng.annotations.Test;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import java.util.Arrays;
 import java.util.Collections;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import org.testng.annotations.Test;
 
 public class Tuple7Test {
 
@@ -69,7 +69,7 @@ public class Tuple7Test {
     @Test
     public void testEquality() {
         assertThat(someTuple).isEqualTo(someTuple);
-        assertThat(someTuple).isNotEqualTo(Tuple7.of(1, 2, 4, 5, 6, 7,10));
+        assertThat(someTuple).isNotEqualTo(Tuple7.of(1, 2, 4, 5, 6, 7, 10));
         assertThat(someTuple).isNotEqualTo("not a tuple");
         assertThat(someTuple).isEqualTo(Tuple7.of(1, 2, 3, 4, 5, 6, 7));
     }
@@ -86,7 +86,8 @@ public class Tuple7Test {
 
     @Test
     public void testFromList() {
-        Tuple7<Integer, Integer, Integer, Integer, Integer, Integer, Integer> tuple = Tuples.tuple7(Arrays.asList(1, 2, 3, 4, 5, 6, 7));
+        Tuple7<Integer, Integer, Integer, Integer, Integer, Integer, Integer> tuple = Tuples
+                .tuple7(Arrays.asList(1, 2, 3, 4, 5, 6, 7));
         assertThat(tuple).containsExactly(1, 2, 3, 4, 5, 6, 7);
 
         assertThatExceptionOfType(IllegalArgumentException.class)

@@ -1,12 +1,13 @@
 package io.smallrye.mutiny.operators;
 
+import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
+import static io.smallrye.mutiny.helpers.ParameterValidation.size;
+
+import org.reactivestreams.Publisher;
+
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.tuples.Functions;
 import io.smallrye.mutiny.tuples.Tuple9;
-import org.reactivestreams.Publisher;
-
-import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
-import static io.smallrye.mutiny.helpers.ParameterValidation.size;
 
 public class MultiItemCombine9<T1, T2, T3, T4, T5, T6, T7, T8, T9> extends MultiItemCombineIterable {
 
@@ -49,7 +50,8 @@ public class MultiItemCombine9<T1, T2, T3, T4, T5, T6, T7, T8, T9> extends Multi
     }
 
     /**
-     * @return the resulting {@link Multi}. The items are combined into a {@link Tuple9 Tuple9&lt;T1, T2, T3, T4, T5, T6, T7, T8, T9&gt;}.
+     * @return the resulting {@link Multi}. The items are combined into a {@link Tuple9 Tuple9&lt;T1, T2, T3, T4, T5, T6, T7,
+     *         T8, T9&gt;}.
      */
     public Multi<Tuple9<T1, T2, T3, T4, T5, T6, T7, T8, T9>> asTuple() {
         return using(Tuple9::of);
@@ -59,7 +61,7 @@ public class MultiItemCombine9<T1, T2, T3, T4, T5, T6, T7, T8, T9> extends Multi
      * Creates the resulting {@link Multi}. The items are combined using the given combinator function.
      *
      * @param combinator the combinator function, must not be {@code null}
-     * @param <O>        the type of item
+     * @param <O> the type of item
      * @return the resulting {@link Multi}.
      */
     @SuppressWarnings("unchecked")

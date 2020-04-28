@@ -12,10 +12,7 @@ import org.testng.annotations.Test;
 import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.TimeoutException;
 import io.smallrye.mutiny.Uni;
-import io.smallrye.mutiny.tuples.Tuple2;
-import io.smallrye.mutiny.tuples.Tuple3;
-import io.smallrye.mutiny.tuples.Tuple4;
-import io.smallrye.mutiny.tuples.Tuple5;
+import io.smallrye.mutiny.tuples.*;
 
 public class UniZipTest {
 
@@ -25,7 +22,8 @@ public class UniZipTest {
         Uni<Integer> uni = Uni.createFrom().item(1);
         Uni<Integer> uni2 = Uni.createFrom().item(2);
 
-        UniAssertSubscriber<Tuple2<Integer, Integer>> subscriber = Uni.combine().all().unis(uni, uni2).asTuple().subscribe()
+        UniAssertSubscriber<Tuple2<Integer, Integer>> subscriber = Uni.combine().all().unis(uni, uni2).asTuple()
+                .subscribe()
                 .withSubscriber(UniAssertSubscriber.create());
 
         assertThat(subscriber.getItem().asList()).containsExactly(1, 2);
@@ -97,6 +95,25 @@ public class UniZipTest {
     }
 
     @Test
+    public void testWithSixUnis() {
+        Uni<Integer> uni1 = Uni.createFrom().item(1);
+        Uni<Integer> uni2 = Uni.createFrom().item(2);
+        Uni<Integer> uni3 = Uni.createFrom().item(3);
+        Uni<Integer> uni4 = Uni.createFrom().item(4);
+        Uni<Integer> uni5 = Uni.createFrom().item(5);
+        Uni<Integer> uni6 = Uni.createFrom().item(6);
+
+        UniAssertSubscriber<Tuple6<Integer, Integer, Integer, Integer, Integer, Integer>> subscriber = Uni.combine()
+                .all()
+                .unis(uni1, uni2, uni3, uni4, uni5, uni6).asTuple()
+                .subscribe().withSubscriber(UniAssertSubscriber.create());
+
+        subscriber.assertCompletedSuccessfully();
+
+        assertThat(subscriber.getItem().asList()).containsExactly(1, 2, 3, 4, 5, 6);
+    }
+
+    @Test
     public void testWithFourUnis() {
         Uni<Integer> uni = Uni.createFrom().item(1);
         Uni<Integer> uni2 = Uni.createFrom().item(2);
@@ -110,6 +127,69 @@ public class UniZipTest {
     }
 
     @Test
+    public void testWithSevenUnis() {
+        Uni<Integer> uni1 = Uni.createFrom().item(1);
+        Uni<Integer> uni2 = Uni.createFrom().item(2);
+        Uni<Integer> uni3 = Uni.createFrom().item(3);
+        Uni<Integer> uni4 = Uni.createFrom().item(4);
+        Uni<Integer> uni5 = Uni.createFrom().item(5);
+        Uni<Integer> uni6 = Uni.createFrom().item(6);
+        Uni<Integer> uni7 = Uni.createFrom().item(7);
+
+        UniAssertSubscriber<Tuple7<Integer, Integer, Integer, Integer, Integer, Integer, Integer>> subscriber = Uni.combine()
+                .all()
+                .unis(uni1, uni2, uni3, uni4, uni5, uni6, uni7).asTuple()
+                .subscribe().withSubscriber(UniAssertSubscriber.create());
+
+        subscriber.assertCompletedSuccessfully();
+
+        assertThat(subscriber.getItem().asList()).containsExactly(1, 2, 3, 4, 5, 6, 7);
+    }
+
+    @Test
+    public void testWithEightUnis() {
+        Uni<Integer> uni1 = Uni.createFrom().item(1);
+        Uni<Integer> uni2 = Uni.createFrom().item(2);
+        Uni<Integer> uni3 = Uni.createFrom().item(3);
+        Uni<Integer> uni4 = Uni.createFrom().item(4);
+        Uni<Integer> uni5 = Uni.createFrom().item(5);
+        Uni<Integer> uni6 = Uni.createFrom().item(6);
+        Uni<Integer> uni7 = Uni.createFrom().item(7);
+        Uni<Integer> uni8 = Uni.createFrom().item(8);
+
+        UniAssertSubscriber<Tuple8<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer>> subscriber = Uni
+                .combine().all()
+                .unis(uni1, uni2, uni3, uni4, uni5, uni6, uni7, uni8).asTuple()
+                .subscribe().withSubscriber(UniAssertSubscriber.create());
+
+        subscriber.assertCompletedSuccessfully();
+
+        assertThat(subscriber.getItem().asList()).containsExactly(1, 2, 3, 4, 5, 6, 7, 8);
+    }
+
+    @Test
+    public void testWithNineUnis() {
+        Uni<Integer> uni1 = Uni.createFrom().item(1);
+        Uni<Integer> uni2 = Uni.createFrom().item(2);
+        Uni<Integer> uni3 = Uni.createFrom().item(3);
+        Uni<Integer> uni4 = Uni.createFrom().item(4);
+        Uni<Integer> uni5 = Uni.createFrom().item(5);
+        Uni<Integer> uni6 = Uni.createFrom().item(6);
+        Uni<Integer> uni7 = Uni.createFrom().item(7);
+        Uni<Integer> uni8 = Uni.createFrom().item(8);
+        Uni<Integer> uni9 = Uni.createFrom().item(9);
+
+        UniAssertSubscriber<Tuple9<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer>> subscriber = Uni
+                .combine().all()
+                .unis(uni1, uni2, uni3, uni4, uni5, uni6, uni7, uni8, uni9).asTuple()
+                .subscribe().withSubscriber(UniAssertSubscriber.create());
+
+        subscriber.assertCompletedSuccessfully();
+
+        assertThat(subscriber.getItem().asList()).containsExactly(1, 2, 3, 4, 5, 6, 7, 8, 9);
+    }
+
+    @Test
     public void testUniCombine() {
         Uni<String> uni1 = Uni.createFrom().item("hello");
         Uni<String> uni2 = Uni.createFrom().item("world");
@@ -120,7 +200,8 @@ public class UniZipTest {
         assertThat(r).isEqualTo("hello world !");
 
         List<Uni<String>> list = Arrays.asList(uni1, uni2, uni3);
-        r = Uni.combine().all().unis(list).combinedWith(l -> l.get(0) + " " + l.get(1) + " " + l.get(2)).await().indefinitely();
+        r = Uni.combine().all().unis(list).combinedWith(l -> l.get(0) + " " + l.get(1) + " " + l.get(2)).await()
+                .indefinitely();
         assertThat(r).isEqualTo("hello world !");
     }
 

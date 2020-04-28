@@ -25,7 +25,7 @@ import io.smallrye.mutiny.subscription.UniSubscriber;
 import io.smallrye.mutiny.subscription.UniSubscription;
 import io.smallrye.mutiny.tuples.Tuple;
 import io.smallrye.mutiny.tuples.Tuple2;
-import io.smallrye.mutiny.tuples.Tuple5;
+import io.smallrye.mutiny.tuples.Tuple9;
 
 /**
  * A {@link Uni} represents a lazy asynchronous action. It follows the subscription pattern, meaning that the action
@@ -200,7 +200,7 @@ public interface Uni<T> {
      * {@link Uni} failed, a {@link CompositeException} is fired, wrapping the different collected failures.
      * <p>
      * Depending on the number of participants, the produced {@link Tuple} is
-     * different from {@link Tuple2} to {@link Tuple5}. For more participants,
+     * different from {@link Tuple2} to {@link Tuple9}. For more participants,
      * use {@link UniAndGroup#unis(Uni[])} or
      * {@link UniAndGroup#unis(Iterable)}.
      *
