@@ -21,6 +21,7 @@ public class MultiItemCombine3<T1, T2, T3> extends MultiItemCombineIterable {
      *
      * @return the current {@link MultiItemCombine3}
      */
+    @Override
     public MultiItemCombine3<T1, T2, T3> collectFailures() {
         super.collectFailures();
         return this;

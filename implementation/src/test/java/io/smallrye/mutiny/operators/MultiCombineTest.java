@@ -20,6 +20,10 @@ import io.smallrye.mutiny.tuples.Tuple2;
 import io.smallrye.mutiny.tuples.Tuple3;
 import io.smallrye.mutiny.tuples.Tuple4;
 import io.smallrye.mutiny.tuples.Tuple5;
+import io.smallrye.mutiny.tuples.Tuple6;
+import io.smallrye.mutiny.tuples.Tuple7;
+import io.smallrye.mutiny.tuples.Tuple8;
+import io.smallrye.mutiny.tuples.Tuple9;
 
 public class MultiCombineTest {
 
@@ -101,10 +105,88 @@ public class MultiCombineTest {
     }
 
     @Test
+    public void testCombinationOfSixStreamsAsTuple() {
+        Multi<Integer> s1 = Multi.createFrom().range(1, 4);
+        Multi<Integer> s2 = Multi.createFrom().range(2, 5);
+        Multi<Integer> s3 = Multi.createFrom().range(3, 6);
+        Multi<Integer> s4 = Multi.createFrom().range(4, 7);
+        Multi<Integer> s5 = Multi.createFrom().range(5, 8);
+        Multi<Integer> s6 = Multi.createFrom().range(6, 9);
+        List<Tuple6<Integer, Integer, Integer, Integer, Integer, Integer>> list = Multi.createBy()
+                .combining().streams(s1, s2, s3, s4, s5, s6).asTuple()
+                .collectItems().asList().await().indefinitely();
+        assertThat(list).hasSize(3)
+                .containsExactly(
+                        Tuple6.of(1, 2, 3, 4, 5, 6),
+                        Tuple6.of(2, 3, 4, 5, 6, 7),
+                        Tuple6.of(3, 4, 5, 6, 7, 8));
+    }
+
+    @Test
+    public void testCombinationOfSevenStreamsAsTuple() {
+        Multi<Integer> s1 = Multi.createFrom().range(1, 4);
+        Multi<Integer> s2 = Multi.createFrom().range(2, 5);
+        Multi<Integer> s3 = Multi.createFrom().range(3, 6);
+        Multi<Integer> s4 = Multi.createFrom().range(4, 7);
+        Multi<Integer> s5 = Multi.createFrom().range(5, 8);
+        Multi<Integer> s6 = Multi.createFrom().range(6, 9);
+        Multi<Integer> s7 = Multi.createFrom().range(7, 10);
+        List<Tuple7<Integer, Integer, Integer, Integer, Integer, Integer, Integer>> list = Multi.createBy()
+                .combining().streams(s1, s2, s3, s4, s5, s6, s7).asTuple()
+                .collectItems().asList().await().indefinitely();
+        assertThat(list).hasSize(3)
+                .containsExactly(
+                        Tuple7.of(1, 2, 3, 4, 5, 6, 7),
+                        Tuple7.of(2, 3, 4, 5, 6, 7, 8),
+                        Tuple7.of(3, 4, 5, 6, 7, 8, 9));
+    }
+
+    @Test
+    public void testCombinationOfEightStreamsAsTuple() {
+        Multi<Integer> s1 = Multi.createFrom().range(1, 4);
+        Multi<Integer> s2 = Multi.createFrom().range(2, 5);
+        Multi<Integer> s3 = Multi.createFrom().range(3, 6);
+        Multi<Integer> s4 = Multi.createFrom().range(4, 7);
+        Multi<Integer> s5 = Multi.createFrom().range(5, 8);
+        Multi<Integer> s6 = Multi.createFrom().range(6, 9);
+        Multi<Integer> s7 = Multi.createFrom().range(7, 10);
+        Multi<Integer> s8 = Multi.createFrom().range(8, 11);
+        List<Tuple8<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer>> list = Multi.createBy()
+                .combining().streams(s1, s2, s3, s4, s5, s6, s7, s8).asTuple()
+                .collectItems().asList().await().indefinitely();
+        assertThat(list).hasSize(3)
+                .containsExactly(
+                        Tuple8.of(1, 2, 3, 4, 5, 6, 7, 8),
+                        Tuple8.of(2, 3, 4, 5, 6, 7, 8, 9),
+                        Tuple8.of(3, 4, 5, 6, 7, 8, 9, 10));
+    }
+
+    @Test
+    public void testCombinationOfNineStreamsAsTuple() {
+        Multi<Integer> s1 = Multi.createFrom().range(1, 4);
+        Multi<Integer> s2 = Multi.createFrom().range(2, 5);
+        Multi<Integer> s3 = Multi.createFrom().range(3, 6);
+        Multi<Integer> s4 = Multi.createFrom().range(4, 7);
+        Multi<Integer> s5 = Multi.createFrom().range(5, 8);
+        Multi<Integer> s6 = Multi.createFrom().range(6, 9);
+        Multi<Integer> s7 = Multi.createFrom().range(7, 10);
+        Multi<Integer> s8 = Multi.createFrom().range(8, 11);
+        Multi<Integer> s9 = Multi.createFrom().range(9, 12);
+        List<Tuple9<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer>> list = Multi.createBy()
+                .combining().streams(s1, s2, s3, s4, s5, s6, s7, s8, s9).asTuple()
+                .collectItems().asList().await().indefinitely();
+        assertThat(list).hasSize(3)
+                .containsExactly(
+                        Tuple9.of(1, 2, 3, 4, 5, 6, 7, 8, 9),
+                        Tuple9.of(2, 3, 4, 5, 6, 7, 8, 9, 10),
+                        Tuple9.of(3, 4, 5, 6, 7, 8, 9, 10, 11));
+    }
+
+    @Test
     public void testCombinationWithBackPressure() {
         Multi<Integer> stream = Multi.createFrom().range(1, 5);
         MultiAssertSubscriber<Integer> subscriber = Multi.createBy().combining().streams(stream, stream)
-                .using((a, b) -> a + b)
+                .using(Integer::sum)
                 .subscribe().withSubscriber(MultiAssertSubscriber.create(0));
 
         subscriber.assertNotTerminated().assertHasNotReceivedAnyItem();
@@ -157,14 +239,14 @@ public class MultiCombineTest {
     public void testCombinationWithEmpty() {
         Multi.createBy().combining()
                 .streams(Multi.createFrom().<Integer> empty(), Multi.createFrom().range(1, 2_000_000))
-                .using((a, b) -> a + b)
+                .using(Integer::sum)
                 .subscribe().withSubscriber(MultiAssertSubscriber.create(1))
                 .assertCompletedSuccessfully()
                 .assertHasNotReceivedAnyItem();
 
         Multi.createBy().combining()
                 .streams(Multi.createFrom().range(1, 2_000_000), Multi.createFrom().<Integer> empty())
-                .using((a, b) -> a + b)
+                .using(Integer::sum)
                 .subscribe().withSubscriber(MultiAssertSubscriber.create(1))
                 .assertCompletedSuccessfully()
                 .assertHasNotReceivedAnyItem();
@@ -454,6 +536,123 @@ public class MultiCombineTest {
         assertThat(list).containsExactly(Tuple5.of(1, 2, 5, 6, 3), Tuple5.of(1, 2, 5, 6, 4));
 
         list = Multi.createBy().combining().streams(one, two, four, Multi.createFrom().<Integer> empty(), three)
+                .latestItems().asTuple()
+                .collectItems().asList().await().indefinitely();
+        assertThat(list).isEmpty();
+    }
+
+    @Test
+    public void testCombineLatestWithSixStreams() {
+        Multi<Integer> one = Multi.createFrom().item(1);
+        Multi<Integer> two = Multi.createFrom().item(2);
+        Multi<Integer> three = Multi.createFrom().items(3, 4);
+        Multi<Integer> four = Multi.createFrom().items(5);
+        Multi<Integer> five = Multi.createFrom().items(6);
+        Multi<Integer> six = Multi.createFrom().items(7);
+
+        List<Tuple6<Integer, Integer, Integer, Integer, Integer, Integer>> list = Multi.createBy().combining()
+                .streams(one, two, three, four, five, six).latestItems().asTuple()
+                .collectItems().asList().await().indefinitely();
+
+        assertThat(list).containsExactly(Tuple6.of(1, 2, 4, 5, 6, 7));
+
+        list = Multi.createBy().combining().streams(one, two, four, five, six, three).latestItems().asTuple()
+                .collectItems().asList().await().indefinitely();
+
+        assertThat(list).containsExactly(Tuple6.of(1, 2, 5, 6, 7, 3), Tuple6.of(1, 2, 5, 6, 7, 4));
+
+        list = Multi.createBy().combining().streams(one, two, four, Multi.createFrom().<Integer> empty(), six, three)
+                .latestItems().asTuple()
+                .collectItems().asList().await().indefinitely();
+        assertThat(list).isEmpty();
+    }
+
+    @Test
+    public void testCombineLatestWithSevenStreams() {
+        Multi<Integer> one = Multi.createFrom().item(1);
+        Multi<Integer> two = Multi.createFrom().item(2);
+        Multi<Integer> three = Multi.createFrom().items(3, 4);
+        Multi<Integer> four = Multi.createFrom().items(5);
+        Multi<Integer> five = Multi.createFrom().items(6);
+        Multi<Integer> six = Multi.createFrom().items(7);
+        Multi<Integer> seven = Multi.createFrom().items(8);
+
+        List<Tuple7<Integer, Integer, Integer, Integer, Integer, Integer, Integer>> list = Multi.createBy().combining()
+                .streams(one, two, three, four, five, six, seven).latestItems().asTuple()
+                .collectItems().asList().await().indefinitely();
+
+        assertThat(list).containsExactly(Tuple7.of(1, 2, 4, 5, 6, 7, 8));
+
+        list = Multi.createBy().combining().streams(one, two, four, five, six, seven, three).latestItems().asTuple()
+                .collectItems().asList().await().indefinitely();
+
+        assertThat(list).containsExactly(Tuple7.of(1, 2, 5, 6, 7, 8, 3),
+                Tuple7.of(1, 2, 5, 6, 7, 8, 4));
+
+        list = Multi.createBy().combining().streams(one, two, four, Multi.createFrom().<Integer> empty(), six, three, seven)
+                .latestItems().asTuple()
+                .collectItems().asList().await().indefinitely();
+        assertThat(list).isEmpty();
+    }
+
+    @Test
+    public void testCombineLatestWithEightStreams() {
+        Multi<Integer> one = Multi.createFrom().item(1);
+        Multi<Integer> two = Multi.createFrom().item(2);
+        Multi<Integer> three = Multi.createFrom().items(3, 4);
+        Multi<Integer> four = Multi.createFrom().items(5);
+        Multi<Integer> five = Multi.createFrom().items(6);
+        Multi<Integer> six = Multi.createFrom().items(7);
+        Multi<Integer> seven = Multi.createFrom().items(8);
+        Multi<Integer> eight = Multi.createFrom().items(9);
+
+        List<Tuple8<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer>> list = Multi.createBy().combining()
+                .streams(one, two, three, four, five, six, seven, eight).latestItems().asTuple()
+                .collectItems().asList().await().indefinitely();
+
+        assertThat(list).containsExactly(Tuple8.of(1, 2, 4, 5, 6, 7, 8, 9));
+
+        list = Multi.createBy().combining().streams(one, two, four, five, six, seven, eight, three).latestItems().asTuple()
+                .collectItems().asList().await().indefinitely();
+
+        assertThat(list).containsExactly(Tuple8.of(1, 2, 5, 6, 7, 8, 9, 3),
+                Tuple8.of(1, 2, 5, 6, 7, 8, 9, 4));
+
+        list = Multi.createBy().combining()
+                .streams(one, two, four, Multi.createFrom().<Integer> empty(), six, three, seven, eight)
+                .latestItems().asTuple()
+                .collectItems().asList().await().indefinitely();
+        assertThat(list).isEmpty();
+    }
+
+    @Test
+    public void testCombineLatestWithNineStreams() {
+        Multi<Integer> one = Multi.createFrom().item(1);
+        Multi<Integer> two = Multi.createFrom().item(2);
+        Multi<Integer> three = Multi.createFrom().items(3, 4);
+        Multi<Integer> four = Multi.createFrom().items(5);
+        Multi<Integer> five = Multi.createFrom().items(6);
+        Multi<Integer> six = Multi.createFrom().items(7);
+        Multi<Integer> seven = Multi.createFrom().items(8);
+        Multi<Integer> eight = Multi.createFrom().items(9);
+        Multi<Integer> nine = Multi.createFrom().items(10);
+
+        List<Tuple9<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer>> list = Multi.createBy()
+                .combining()
+                .streams(one, two, three, four, five, six, seven, eight, nine).latestItems().asTuple()
+                .collectItems().asList().await().indefinitely();
+
+        assertThat(list).containsExactly(Tuple9.of(1, 2, 4, 5, 6, 7, 8, 9, 10));
+
+        list = Multi.createBy().combining().streams(one, two, four, five, six, seven, eight, nine, three).latestItems()
+                .asTuple()
+                .collectItems().asList().await().indefinitely();
+
+        assertThat(list).containsExactly(Tuple9.of(1, 2, 5, 6, 7, 8, 9, 10, 3),
+                Tuple9.of(1, 2, 5, 6, 7, 8, 9, 10, 4));
+
+        list = Multi.createBy().combining()
+                .streams(one, two, four, Multi.createFrom().<Integer> empty(), six, three, seven, eight, nine)
                 .latestItems().asTuple()
                 .collectItems().asList().await().indefinitely();
         assertThat(list).isEmpty();
