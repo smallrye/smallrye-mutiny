@@ -1,11 +1,13 @@
 package io.smallrye.mutiny.operators;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.io.IOException;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.CompletionException;
 
 import org.testng.annotations.Test;
 
@@ -25,7 +27,8 @@ public class UniZipTest {
         Uni<Integer> uni = Uni.createFrom().item(1);
         Uni<Integer> uni2 = Uni.createFrom().item(2);
 
-        UniAssertSubscriber<Tuple2<Integer, Integer>> subscriber = Uni.combine().all().unis(uni, uni2).asTuple().subscribe()
+        UniAssertSubscriber<Tuple2<Integer, Integer>> subscriber = Uni.combine().all().unis(uni, uni2).asTuple()
+                .subscribe()
                 .withSubscriber(UniAssertSubscriber.create());
 
         assertThat(subscriber.getItem().asList()).containsExactly(1, 2);
@@ -120,8 +123,37 @@ public class UniZipTest {
         assertThat(r).isEqualTo("hello world !");
 
         List<Uni<String>> list = Arrays.asList(uni1, uni2, uni3);
-        r = Uni.combine().all().unis(list).combinedWith(l -> l.get(0) + " " + l.get(1) + " " + l.get(2)).await().indefinitely();
+        r = Uni.combine().all().unis(list).combinedWith(l -> l.get(0) + " " + l.get(1) + " " + l.get(2)).await()
+                .indefinitely();
         assertThat(r).isEqualTo("hello world !");
+    }
+
+    @Test
+    public void testDiscardingItems() {
+        Uni<String> uni1 = Uni.createFrom().item("hello");
+        Uni<String> uni2 = Uni.createFrom().item("world");
+        Uni<String> uni3 = Uni.createFrom().item("!");
+        Uni<Integer> uni4 = Uni.createFrom().item(2);
+
+        Void res = Uni.combine().all().unis(uni1, uni2, uni3, uni4).discardItems()
+                .await().indefinitely();
+
+        assertThat(res).isNull();
+
+        Uni<Integer> failed = Uni.createFrom().failure(new IOException("boom"));
+
+        assertThatThrownBy(() -> Uni.combine().all().unis(uni1, uni2, uni3, failed, uni4).discardItems().await().indefinitely())
+                .isInstanceOf(CompletionException.class)
+                .hasCauseInstanceOf(IOException.class)
+                .hasMessageContaining("boom");
+
+        Uni<Integer> failed2 = Uni.createFrom().failure(new IllegalStateException("d'oh"));
+
+        assertThatThrownBy(
+                () -> Uni.combine().all().unis(uni1, uni2, uni3, failed, uni4, failed2).collectFailures().discardItems()
+                        .await().indefinitely())
+                                .isInstanceOf(CompositeException.class)
+                                .hasMessageContaining("boom").hasMessageContaining("d'oh");
     }
 
 }
