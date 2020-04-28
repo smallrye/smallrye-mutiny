@@ -21,6 +21,7 @@ public class MultiItemCombine5<T1, T2, T3, T4, T5> extends MultiItemCombineItera
      *
      * @return the current {@link MultiItemCombine5}
      */
+    @Override
     public MultiItemCombine5<T1, T2, T3, T4, T5> collectFailures() {
         super.collectFailures();
         return this;

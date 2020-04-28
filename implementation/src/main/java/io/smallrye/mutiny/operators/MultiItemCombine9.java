@@ -1,17 +1,16 @@
 package io.smallrye.mutiny.operators;
 
+import io.smallrye.mutiny.Multi;
+import io.smallrye.mutiny.tuples.Functions;
+import io.smallrye.mutiny.tuples.Tuple9;
+import org.reactivestreams.Publisher;
+
 import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
 import static io.smallrye.mutiny.helpers.ParameterValidation.size;
 
-import org.reactivestreams.Publisher;
+public class MultiItemCombine9<T1, T2, T3, T4, T5, T6, T7, T8, T9> extends MultiItemCombineIterable {
 
-import io.smallrye.mutiny.Multi;
-import io.smallrye.mutiny.tuples.Functions;
-import io.smallrye.mutiny.tuples.Tuple4;
-
-public class MultiItemCombine4<T1, T2, T3, T4> extends MultiItemCombineIterable {
-
-    public MultiItemCombine4(Iterable<Publisher<?>> iterable) {
+    public MultiItemCombine9(Iterable<Publisher<?>> iterable) {
         super(iterable);
     }
 
@@ -19,10 +18,10 @@ public class MultiItemCombine4<T1, T2, T3, T4> extends MultiItemCombineIterable 
      * Configures the combination to wait until all the {@link Publisher streams} to fire a completion or failure event
      * before propagating a failure downstream.
      *
-     * @return the current {@link MultiItemCombine4}
+     * @return the current {@link MultiItemCombine9}
      */
     @Override
-    public MultiItemCombine4<T1, T2, T3, T4> collectFailures() {
+    public MultiItemCombine9<T1, T2, T3, T4, T5, T6, T7, T8, T9> collectFailures() {
         super.collectFailures();
         return this;
     }
@@ -41,34 +40,37 @@ public class MultiItemCombine4<T1, T2, T3, T4> extends MultiItemCombineIterable 
      * If one of the stream completes before having emitted a value, the produced streams also completes without emitting
      * a value.
      *
-     * @return the current {@link MultiItemCombine4}
+     * @return the current {@link MultiItemCombine9}
      */
     @Override
-    public MultiItemCombine4<T1, T2, T3, T4> latestItems() {
+    public MultiItemCombine9<T1, T2, T3, T4, T5, T6, T7, T8, T9> latestItems() {
         super.latestItems();
         return this;
     }
 
     /**
-     * @return the resulting {@link Multi}. The items are combined into a {@link Tuple4 Tuple4&lt;T1, T2, T3, T4&gt;}.
+     * @return the resulting {@link Multi}. The items are combined into a {@link Tuple9 Tuple9&lt;T1, T2, T3, T4, T5, T6, T7, T8, T9&gt;}.
      */
-    public Multi<Tuple4<T1, T2, T3, T4>> asTuple() {
-        return using(Tuple4::of);
+    public Multi<Tuple9<T1, T2, T3, T4, T5, T6, T7, T8, T9>> asTuple() {
+        return using(Tuple9::of);
     }
 
     /**
      * Creates the resulting {@link Multi}. The items are combined using the given combinator function.
      *
      * @param combinator the combinator function, must not be {@code null}
-     * @param <O> the type of item
+     * @param <O>        the type of item
      * @return the resulting {@link Multi}.
      */
     @SuppressWarnings("unchecked")
-    public <O> Multi<O> using(Functions.Function4<T1, T2, T3, T4, O> combinator) {
+    public <O> Multi<O> using(Functions.Function9<T1, T2, T3, T4, T5, T6, T7, T8, T9, O> combinator) {
         nonNull(combinator, "combinator");
         return super.combine(args -> {
-            size(args, 4, "args");
-            return combinator.apply((T1) args.get(0), (T2) args.get(1), (T3) args.get(2), (T4) args.get(3));
+            size(args, 9, "args");
+            return combinator
+                    .apply((T1) args.get(0), (T2) args.get(1), (T3) args.get(2), (T4) args.get(3),
+                            (T5) args.get(4), (T6) args.get(5), (T7) args.get(6), (T8) args.get(7),
+                            (T9) args.get(8));
         });
     }
 }
