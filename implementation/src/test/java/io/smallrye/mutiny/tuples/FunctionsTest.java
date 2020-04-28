@@ -31,4 +31,36 @@ public class FunctionsTest {
         assertThat(fn.apply(Arrays.asList(1, 2, 3, 4, 5))).isEqualTo(-3);
     }
 
+    @Test
+    public void testFunction6() {
+        Functions.Function6<Integer, Integer, Integer, Integer, Integer, Integer, Integer> fn = (item1, item2, item3, item4,
+                item5, item6) -> item1 + item2 + item3 - item4 - item5 + item6;
+        assertThat(fn.apply(1, 2, 3, 4, 5, 6)).isEqualTo(3);
+        assertThat(fn.apply(Arrays.asList(1, 2, 3, 4, 5, 6))).isEqualTo(3);
+    }
+
+    @Test
+    public void testFunction7() {
+        Functions.Function7<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer> fn = (item1, item2, item3, item4,
+                item5, item6, item7) -> item1 + item2 + item3 - item4 - item5 + item6 + item7;
+        assertThat(fn.apply(1, 2, 3, 4, 5, 6, 7)).isEqualTo(10);
+        assertThat(fn.apply(Arrays.asList(1, 2, 3, 4, 5, 6, 7))).isEqualTo(10);
+    }
+
+    @Test
+    public void testFunction8() {
+        Functions.Function8<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer> fn
+                = (item1, item2, item3, item4, item5, item6, item7, item8) -> item1 + item2 + item3 - item4 - item5 + item6 + item7 + item8;
+        assertThat(fn.apply(1, 2, 3, 4, 5, 6, 7, 8)).isEqualTo(18);
+        assertThat(fn.apply(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8))).isEqualTo(18);
+    }
+
+    @Test
+    public void testFunction9() {
+        Functions.Function9<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer> fn
+                = (item1, item2, item3, item4, item5, item6, item7, item8, item9) -> item1 + item2 + item3 - item4 - item5 + item6 + item7 + item8 + item9;
+        assertThat(fn.apply(1, 2, 3, 4, 5, 6, 7, 8, 9)).isEqualTo(27);
+        assertThat(fn.apply(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9))).isEqualTo(27);
+    }
+
 }

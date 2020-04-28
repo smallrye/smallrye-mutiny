@@ -50,11 +50,20 @@ public class Tuple5<T1, T2, T3, T4, T5> extends Tuple4<T1, T2, T3, T4> implement
     public Object nth(int index) {
         assertIndexInBounds(index);
 
-        if (index < size() - 1) {
-            return super.nth(index);
+        switch (index) {
+            case 0:
+                return item1;
+            case 1:
+                return item2;
+            case 2:
+                return item3;
+            case 3:
+                return item4;
+            case 4:
+                return item5;
+            default:
+                throw new IllegalArgumentException("invalid index " + index);
         }
-
-        return item5;
     }
 
     @Override
