@@ -14,7 +14,7 @@
     <properties>
         <version.jruby>9.2.7.0</version.jruby>
         <version.asciidoctorj>2.1.0</version.asciidoctorj>
-        <version.asciidoctorj.pdf>1.5.0-alpha.18</version.asciidoctorj.pdf>
+        <version.asciidoctorj.pdf>1.5.3</version.asciidoctorj.pdf>
         <version.asciidoctorj.diagram>1.5.18</version.asciidoctorj.diagram>
         <site.dir>${project.build.directory}/generated-docs/</site.dir>
 
