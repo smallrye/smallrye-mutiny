@@ -63,7 +63,7 @@
     </modules>
 
     <properties>
-        <rxjava2.version>2.2.11</rxjava2.version>
+        <rxjava2.version>2.2.19</rxjava2.version>
         <reactor-core.version>3.2.10.RELEASE</reactor-core.version>
         <microprofile-reactive-streams.version>1.0.1</microprofile-reactive-streams.version>
         <microprofile-context-propagation.version>1.0</microprofile-context-propagation.version>
