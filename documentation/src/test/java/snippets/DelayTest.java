@@ -53,7 +53,7 @@ public class DelayTest {
         // tag::delay-multi-random[]
         Random random = new Random();
         List<Integer> delayed = Multi.createFrom().items(1, 2, 3, 4, 5)
-                .onItem().produceUni(i -> Uni.createFrom().item(i).onItem().delayIt().by(Duration.ofMillis(random.nextInt(100))))
+                .onItem().produceUni(i -> Uni.createFrom().item(i).onItem().delayIt().by(Duration.ofMillis(random.nextInt(100) + 1)))
                 .merge()
                 .collectItems().asList()
                 .await().indefinitely();
