@@ -12,7 +12,7 @@
     <name>SmallRye Mutiny Documentation</name>
 
     <properties>
-        <version.jruby>9.2.7.0</version.jruby>
+        <version.jruby>9.2.11.1</version.jruby>
         <version.asciidoctorj>2.3.0</version.asciidoctorj>
         <version.asciidoctorj.pdf>1.5.3</version.asciidoctorj.pdf>
         <version.asciidoctorj.diagram>1.5.18</version.asciidoctorj.diagram>
