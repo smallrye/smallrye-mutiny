@@ -49,4 +49,16 @@ public class UniAndGroupIterable<T1> {
                 .onUniCreation(new UniAndCombination<>(source, unis, nonNull(function, "function"), collectFailures));
     }
 
+    /**
+     * Discards the items emitted by the combined {@link Uni unis}, and just emits {@code null} when all the
+     * {@link Uni unis} have completed successfully. In the case of failure, the failure is propagated.
+     *
+     * @return the {@code Uni Uni<Void>} emitting {@code null} when all the {@link Uni unis} have completed, or propagating
+     *         the failure.
+     */
+    public Uni<Void> discardItems() {
+        return Infrastructure
+                .onUniCreation(new UniAndCombination<>(source, unis, x -> null, collectFailures));
+    }
+
 }
