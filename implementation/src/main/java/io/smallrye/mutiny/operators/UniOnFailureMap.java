@@ -9,12 +9,12 @@ import java.util.function.Predicate;
 import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Uni;
 
-public class UniMapOnFailure<I, O> extends UniOperator<I, O> {
+public class UniOnFailureMap<I, O> extends UniOperator<I, O> {
 
     private final Function<? super Throwable, ? extends Throwable> mapper;
     private final Predicate<? super Throwable> predicate;
 
-    public UniMapOnFailure(Uni<I> upstream,
+    public UniOnFailureMap(Uni<I> upstream,
             Predicate<? super Throwable> predicate,
             Function<? super Throwable, ? extends Throwable> mapper) {
         super(nonNull(upstream, "upstream"));

@@ -32,7 +32,7 @@ public class UniOnFailureMapToTest {
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void testThatSourceMustNotBeNull() {
-        new UniMapOnFailure<>(null, t -> true, Function.identity());
+        new UniOnFailureMap<>(null, t -> true, Function.identity());
     }
 
     @Test

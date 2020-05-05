@@ -23,7 +23,7 @@ public class UniFlatMapCompletionStageOnItem<I, O> extends UniOperator<I, O> {
     private static <I, O> void invokeAndSubstitute(Function<? super I, ? extends CompletionStage<? extends O>> mapper,
             I input,
             UniSerializedSubscriber<? super O> subscriber,
-            UniFlatMapOnItem.FlatMapSubscription flatMapSubscription) {
+            UniOnItemFlatMap.FlatMapSubscription flatMapSubscription) {
         CompletionStage<? extends O> outcome;
         try {
             outcome = mapper.apply(input);
@@ -48,7 +48,7 @@ public class UniFlatMapCompletionStageOnItem<I, O> extends UniOperator<I, O> {
 
     @Override
     protected void subscribing(UniSerializedSubscriber<? super O> subscriber) {
-        UniFlatMapOnItem.FlatMapSubscription flatMapSubscription = new UniFlatMapOnItem.FlatMapSubscription();
+        UniOnItemFlatMap.FlatMapSubscription flatMapSubscription = new UniOnItemFlatMap.FlatMapSubscription();
         // Subscribe to the source.
         upstream().subscribe().withSubscriber(new UniDelegatingSubscriber<I, O>(subscriber) {
             @Override
