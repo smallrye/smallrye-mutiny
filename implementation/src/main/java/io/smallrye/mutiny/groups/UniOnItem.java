@@ -1,18 +1,19 @@
 package io.smallrye.mutiny.groups;
 
-import io.smallrye.mutiny.Multi;
-import io.smallrye.mutiny.Uni;
-import io.smallrye.mutiny.infrastructure.Infrastructure;
-import io.smallrye.mutiny.operators.*;
-import io.smallrye.mutiny.subscription.UniEmitter;
-import org.reactivestreams.Publisher;
+import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
 
 import java.util.concurrent.CompletionStage;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
+import org.reactivestreams.Publisher;
+
+import io.smallrye.mutiny.Multi;
+import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.infrastructure.Infrastructure;
+import io.smallrye.mutiny.operators.*;
+import io.smallrye.mutiny.subscription.UniEmitter;
 
 public class UniOnItem<T> {
 
@@ -45,7 +46,7 @@ public class UniOnItem<T> {
      * For asynchronous composition, see {@link #produceUni(Function)}.
      *
      * @param mapper the mapper function, must not be {@code null}
-     * @param <R>    the type of Uni item
+     * @param <R> the type of Uni item
      * @return the new {@link Uni}
      */
     public <R> Uni<R> apply(Function<? super T, ? extends R> mapper) {
@@ -63,10 +64,10 @@ public class UniOnItem<T> {
      * This operation is generally named {@code flatMap}.
      *
      * @param mapper the function called with the item of this {@link Uni} and producing the {@link Uni},
-     *               must not be {@code null}, must not return {@code null}.
-     * @param <R>    the type of item
+     *        must not be {@code null}, must not return {@code null}.
+     * @param <R> the type of item
      * @return a new {@link Uni} that would fire events from the uni produced by the mapper function, possibly
-     * in an asynchronous manner.
+     *         in an asynchronous manner.
      */
     public <R> Uni<R> produceUni(Function<? super T, ? extends Uni<? extends R>> mapper) {
         return Infrastructure.onUniCreation(new UniFlatMapOnItem<>(upstream, mapper));
@@ -83,7 +84,7 @@ public class UniOnItem<T> {
      * This operation is generally named {@code flatMapPublisher}.
      *
      * @param mapper the mapper, must not be {@code null}, may expect to receive {@code null} as item.
-     * @param <R>    the type of item produced by the resulting {@link Multi}
+     * @param <R> the type of item produced by the resulting {@link Multi}
      * @return the multi
      */
     public <R> Multi<R> produceMulti(Function<? super T, ? extends Publisher<? extends R>> mapper) {
@@ -101,10 +102,10 @@ public class UniOnItem<T> {
      * *
      *
      * @param mapper the function called with the item of this {@link Uni} and producing the {@link CompletionStage},
-     *               must not be {@code null}, must not return {@code null}.
-     * @param <R>    the type of item
+     *        must not be {@code null}, must not return {@code null}.
+     * @param <R> the type of item
      * @return a new {@link Uni} that would fire events from the uni produced by the mapper function, possibly
-     * in an asynchronous manner.
+     *         in an asynchronous manner.
      */
     public <R> Uni<R> produceCompletionStage(Function<? super T, ? extends CompletionStage<? extends R>> mapper) {
         return Infrastructure.onUniCreation(new UniFlatMapCompletionStageOnItem<>(upstream, mapper));
@@ -118,10 +119,10 @@ public class UniOnItem<T> {
      * These events are these propagated by the produced {@link Uni}.
      *
      * @param consumer the function called with the item of the this {@link Uni} and an {@link UniEmitter}.
-     *                 It must not be {@code null}.
-     * @param <R>      the type of item emitted by the emitter
+     *        It must not be {@code null}.
+     * @param <R> the type of item emitted by the emitter
      * @return a new {@link Uni} that would fire events from the emitter consumed by the mapper function, possibly
-     * in an asynchronous manner.
+     *         in an asynchronous manner.
      */
     public <R> Uni<R> produceUni(BiConsumer<? super T, UniEmitter<? super R>> consumer) {
         nonNull(consumer, "consumer");
@@ -180,7 +181,7 @@ public class UniOnItem<T> {
      * Produces an {@link Uni} emitting an item based on the upstream item but casted to the target class.
      *
      * @param target the target class
-     * @param <O>    the type of item emitted by the produced uni
+     * @param <O> the type of item emitted by the produced uni
      * @return the new Uni
      */
     public <O> Uni<O> castTo(Class<O> target) {
