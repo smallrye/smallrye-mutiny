@@ -1,7 +1,6 @@
 package io.smallrye.mutiny.infrastructure;
 
 import java.util.concurrent.Executor;
-import java.util.concurrent.ScheduledExecutorService;
 
 /**
  * SPI allowing customizing the default executor.
@@ -18,12 +17,5 @@ public interface ExecutorConfiguration {
      * @return the default executor.
      */
     Executor getDefaultWorkerExecutor();
-
-    /**
-     * Gets the executor used to schedule tasks.
-     *
-     * @return the default scheduler.
-     */
-    ScheduledExecutorService getDefaultScheduledExecutor();
 
 }

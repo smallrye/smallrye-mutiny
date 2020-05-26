@@ -7,10 +7,7 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ServiceLoader;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.*;
 import java.util.function.UnaryOperator;
 
 import org.reactivestreams.Publisher;
@@ -27,13 +24,9 @@ public class Infrastructure {
         Iterator<ExecutorConfiguration> iterator = executorLoader.iterator();
         if (iterator.hasNext()) {
             ExecutorConfiguration next = iterator.next();
-            DEFAULT_EXECUTOR = nonNull(next.getDefaultWorkerExecutor(), "executor");
-            DEFAULT_SCHEDULER = nonNull(next.getDefaultScheduledExecutor(), "scheduler");
+            setDefaultExecutor(nonNull(next.getDefaultWorkerExecutor(), "executor"));
         } else {
-            ScheduledExecutorService scheduler = Executors
-                    .newScheduledThreadPool(Runtime.getRuntime().availableProcessors());
-            DEFAULT_SCHEDULER = scheduler;
-            DEFAULT_EXECUTOR = scheduler;
+            setDefaultExecutor();
         }
 
         // Interceptor
@@ -50,11 +43,31 @@ public class Infrastructure {
         MULTI_INTERCEPTORS = interceptors2;
     }
 
-    private static final ScheduledExecutorService DEFAULT_SCHEDULER;
-    private static final Executor DEFAULT_EXECUTOR;
+    /**
+     * Configure or reset the executors.
+     */
+    public static void setDefaultExecutor() {
+        ExecutorService scheduler = ForkJoinPool.commonPool();
+        setDefaultExecutor(scheduler);
+    }
+
+    private static ScheduledExecutorService DEFAULT_SCHEDULER;
+    private static Executor DEFAULT_EXECUTOR;
     private static final List<UniInterceptor> UNI_INTERCEPTORS;
     private static final List<MultiInterceptor> MULTI_INTERCEPTORS;
     private static UnaryOperator<CompletableFuture<?>> completableFutureWrapper;
+
+    public static void setDefaultExecutor(Executor s) {
+        if (s == DEFAULT_EXECUTOR) {
+            return;
+        }
+        Executor existing = DEFAULT_EXECUTOR;
+        if (existing instanceof ExecutorService) {
+            ((ExecutorService) existing).shutdownNow();
+        }
+        DEFAULT_EXECUTOR = s;
+        DEFAULT_SCHEDULER = new MutinyScheduler(s);
+    }
 
     public static ScheduledExecutorService getDefaultWorkerPool() {
         return DEFAULT_SCHEDULER;
