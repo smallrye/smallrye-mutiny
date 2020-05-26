@@ -49,6 +49,7 @@ public class MultiSubscribeTest {
                 .subscribe().with(items::add, failure::set, () -> completion.set(true));
 
         await().until(() -> items.size() > 5);
+        await().until(completion::get);
         assertThat(items).contains(1L, 2L, 3L, 4L, 5L);
         assertThat(failure.get()).isNull();
         assertThat(completion).isTrue();
