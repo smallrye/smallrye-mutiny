@@ -4,13 +4,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.Duration;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.Executor;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -132,7 +128,7 @@ public class MutinySchedulerTest {
     @Test
     public void testDelay() {
         List<Uni<String>> list = new ArrayList<>();
-        Set<String> threads = new HashSet<>();
+        Set<String> threads = new CopyOnWriteArraySet<>();
         for (int i = 0; i < 100; i++) {
             list.add(Uni.createFrom().item("hello")
                     .onItem().delayIt().by(Duration.ofSeconds(1))
