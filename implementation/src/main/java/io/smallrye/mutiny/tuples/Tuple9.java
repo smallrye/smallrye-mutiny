@@ -5,16 +5,16 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
 
-public class Tuple9<T1, T2, T3, T4, T5, T6, T7, T8, T9> extends Tuple8<T1, T2, T3, T4, T5, T6, T7, T8> implements Tuple {
+public class Tuple9<T1, T2, T3, T4, T5, T6, T7, T8, T9> extends Tuple8<T1, T2, T3, T4, T5, T6, T7, T8> implements Tuple { // NOSONAR
 
     final T9 item9;
 
-    Tuple9(T1 a, T2 b, T3 c, T4 d, T5 e, T6 f, T7 g, T8 h, T9 i) {
+    Tuple9(T1 a, T2 b, T3 c, T4 d, T5 e, T6 f, T7 g, T8 h, T9 i) { // NOSONAR
         super(a, b, c, d, e, f, g, h);
         this.item9 = i;
     }
 
-    public static <T1, T2, T3, T4, T5, T6, T7, T8, T9> Tuple9<T1, T2, T3, T4, T5, T6, T7, T8, T9> of(T1 a, T2 b, T3 c, T4 d,
+    public static <T1, T2, T3, T4, T5, T6, T7, T8, T9> Tuple9<T1, T2, T3, T4, T5, T6, T7, T8, T9> of(T1 a, T2 b, T3 c, T4 d, //NOSONAR
             T5 e, T6 f, T7 g, T8 h, T9 i) {
         return new Tuple9<>(a, b, c, d, e, f, g, h, i);
     }
@@ -71,27 +71,10 @@ public class Tuple9<T1, T2, T3, T4, T5, T6, T7, T8, T9> extends Tuple8<T1, T2, T
     public Object nth(int index) {
         assertIndexInBounds(index);
 
-        switch (index) {
-            case 0:
-                return item1;
-            case 1:
-                return item2;
-            case 2:
-                return item3;
-            case 3:
-                return item4;
-            case 4:
-                return item5;
-            case 5:
-                return item6;
-            case 6:
-                return item7;
-            case 7:
-                return item8;
-            case 8:
-                return item9;
-            default:
-                throw new IllegalArgumentException("invalid index " + index);
+        if (index == 8) {
+            return item9;
+        } else {
+            return super.nth(index);
         }
     }
 

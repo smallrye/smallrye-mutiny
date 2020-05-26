@@ -1,13 +1,12 @@
 package io.smallrye.mutiny.operators;
 
-import static io.smallrye.mutiny.helpers.ParameterValidation.MAPPER_RETURNED_NULL;
 import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
+import static io.smallrye.mutiny.operators.UniOnItemFlatMap.handleInnerSubscription;
 
 import java.util.function.BiFunction;
 
 import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Uni;
-import io.smallrye.mutiny.subscription.UniSubscriber;
 import io.smallrye.mutiny.subscription.UniSubscription;
 
 public class UniOnItemOrFailureFlatMap<I, O> extends UniOperator<I, O> {
@@ -30,7 +29,7 @@ public class UniOnItemOrFailureFlatMap<I, O> extends UniOperator<I, O> {
             outcome = mapper.apply(item, failure);
             // We cannot call onItem here, as if onItem would throw an exception
             // it would be caught and onFailure would be called. This would be illegal.
-        } catch (Throwable e) {
+        } catch (Throwable e) { // NOSONAR
             if (failure != null) {
                 subscriber.onFailure(new CompositeException(failure, e));
             } else {
@@ -39,18 +38,7 @@ public class UniOnItemOrFailureFlatMap<I, O> extends UniOperator<I, O> {
             return;
         }
 
-        if (outcome == null) {
-            subscriber.onFailure(new NullPointerException(MAPPER_RETURNED_NULL));
-        } else {
-            UniSubscriber<O> delegate = new UniDelegatingSubscriber<O, O>(subscriber) {
-                @Override
-                public void onSubscribe(UniSubscription secondSubscription) {
-                    flatMapSubscription.replace(secondSubscription);
-                }
-            };
-
-            outcome.subscribe().withSubscriber(delegate);
-        }
+        handleInnerSubscription(subscriber, flatMapSubscription, outcome);
     }
 
     @Override

@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
 
-public class Tuple7<T1, T2, T3, T4, T5, T6, T7> extends Tuple6<T1, T2, T3, T4, T5, T6> implements Tuple {
+public class Tuple7<T1, T2, T3, T4, T5, T6, T7> extends Tuple6<T1, T2, T3, T4, T5, T6> implements Tuple { //NOSONAR
 
     final T7 item7;
 
@@ -60,23 +60,12 @@ public class Tuple7<T1, T2, T3, T4, T5, T6, T7> extends Tuple6<T1, T2, T3, T4, T
     public Object nth(int index) {
         assertIndexInBounds(index);
 
-        switch (index) {
-            case 0:
-                return item1;
-            case 1:
-                return item2;
-            case 2:
-                return item3;
-            case 3:
-                return item4;
-            case 4:
-                return item5;
-            case 5:
-                return item6;
-            case 6:
-                return item7;
-            default:
-                throw new IllegalArgumentException("invalid index " + index);
+        assertIndexInBounds(index);
+
+        if (index == 6) {
+            return item7;
+        } else {
+            return super.nth(index);
         }
     }
 
