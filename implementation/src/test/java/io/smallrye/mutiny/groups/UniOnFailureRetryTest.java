@@ -17,7 +17,7 @@ import org.testng.annotations.Test;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 
-public class UniRetryTest {
+public class UniOnFailureRetryTest {
     @Test
     public void testFailureWithPredicateException() {
         AtomicLong counter = new AtomicLong();

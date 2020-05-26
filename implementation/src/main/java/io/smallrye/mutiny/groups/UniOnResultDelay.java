@@ -1,15 +1,15 @@
 package io.smallrye.mutiny.groups;
 
-import io.smallrye.mutiny.Uni;
-import io.smallrye.mutiny.infrastructure.Infrastructure;
-import io.smallrye.mutiny.operators.UniDelayOnItem;
-import io.smallrye.mutiny.operators.UniDelayUntil;
+import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
 
 import java.time.Duration;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.function.Function;
 
-import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
+import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.infrastructure.Infrastructure;
+import io.smallrye.mutiny.operators.UniDelayOnItem;
+import io.smallrye.mutiny.operators.UniDelayUntil;
 
 /**
  * Configures the delay applied to the item emission.

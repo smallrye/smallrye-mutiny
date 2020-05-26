@@ -9,9 +9,9 @@ import java.util.function.Supplier;
 
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
-import io.smallrye.mutiny.operators.UniFlatMapOnFailure;
-import io.smallrye.mutiny.operators.UniMapOnFailure;
-import io.smallrye.mutiny.operators.UniOnEventConsume;
+import io.smallrye.mutiny.operators.UniOnFailureFlatMap;
+import io.smallrye.mutiny.operators.UniOnFailureMap;
+import io.smallrye.mutiny.operators.UniOnItemConsume;
 
 public class UniOnFailure<T> {
 
@@ -31,7 +31,7 @@ public class UniOnFailure<T> {
      */
     public Uni<T> invoke(Consumer<Throwable> callback) {
         return Infrastructure.onUniCreation(
-                new UniOnEventConsume<>(upstream, null, nonNull(callback, "callback")));
+                new UniOnItemConsume<>(upstream, null, nonNull(callback, "callback")));
     }
 
     /**
@@ -42,7 +42,7 @@ public class UniOnFailure<T> {
      * @return the new {@link Uni}
      */
     public Uni<T> apply(Function<? super Throwable, ? extends Throwable> mapper) {
-        return Infrastructure.onUniCreation(new UniMapOnFailure<>(upstream, predicate, mapper));
+        return Infrastructure.onUniCreation(new UniOnFailureMap<>(upstream, predicate, mapper));
     }
 
     public Uni<T> recoverWithItem(T fallback) {
@@ -56,7 +56,7 @@ public class UniOnFailure<T> {
 
     public Uni<T> recoverWithItem(Function<? super Throwable, ? extends T> fallback) {
         nonNull(fallback, "fallback");
-        return Infrastructure.onUniCreation(new UniFlatMapOnFailure<>(upstream, predicate, failure -> {
+        return Infrastructure.onUniCreation(new UniOnFailureFlatMap<>(upstream, predicate, failure -> {
             T newResult = fallback.apply(failure);
             return Uni.createFrom().item(newResult);
         }));
@@ -64,7 +64,7 @@ public class UniOnFailure<T> {
 
     public Uni<T> recoverWithUni(Function<? super Throwable, ? extends Uni<? extends T>> fallback) {
         return Infrastructure.onUniCreation(
-                new UniFlatMapOnFailure<>(upstream, predicate, nonNull(fallback, "fallback")));
+                new UniOnFailureFlatMap<>(upstream, predicate, nonNull(fallback, "fallback")));
     }
 
     public Uni<T> recoverWithUni(Supplier<? extends Uni<? extends T>> supplier) {
@@ -75,8 +75,8 @@ public class UniOnFailure<T> {
         return recoverWithUni(() -> fallback);
     }
 
-    public UniRetry<T> retry() {
-        return new UniRetry<>(upstream, predicate);
+    public UniOnFailureRetry<T> retry() {
+        return new UniOnFailureRetry<>(upstream, predicate);
     }
 
 }

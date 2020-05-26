@@ -5,17 +5,17 @@ import java.util.function.Consumer;
 import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Uni;
 
-public class UniOnEventConsume<T> extends UniOperator<T, T> {
+public class UniOnItemConsume<T> extends UniOperator<T, T> {
 
-    private final Consumer<? super T> onResult;
-    private final Consumer<Throwable> onFailure;
+    private final Consumer<? super T> onItemCallback;
+    private final Consumer<Throwable> onFailureCallback;
 
-    public UniOnEventConsume(Uni<? extends T> upstream,
-            Consumer<? super T> onResult,
-            Consumer<Throwable> onFailure) {
+    public UniOnItemConsume(Uni<? extends T> upstream,
+            Consumer<? super T> onItemCallback,
+            Consumer<Throwable> onFailureCallback) {
         super(upstream);
-        this.onResult = onResult;
-        this.onFailure = onFailure;
+        this.onItemCallback = onItemCallback;
+        this.onFailureCallback = onFailureCallback;
     }
 
     @Override
@@ -23,14 +23,14 @@ public class UniOnEventConsume<T> extends UniOperator<T, T> {
         upstream().subscribe().withSubscriber(new UniDelegatingSubscriber<T, T>(subscriber) {
             @Override
             public void onItem(T item) {
-                if (invokeEventHandler(onResult, item, false, subscriber)) {
+                if (invokeEventHandler(onItemCallback, item, false, subscriber)) {
                     subscriber.onItem(item);
                 }
             }
 
             @Override
             public void onFailure(Throwable failure) {
-                if (invokeEventHandler(onFailure, failure, true, subscriber)) {
+                if (invokeEventHandler(onFailureCallback, failure, true, subscriber)) {
                     subscriber.onFailure(failure);
                 }
             }

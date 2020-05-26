@@ -5,11 +5,11 @@ import java.util.function.Function;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.helpers.ParameterValidation;
 
-public class UniMapOnResult<I, O> extends UniOperator<I, O> {
+public class UniOnItemMap<I, O> extends UniOperator<I, O> {
 
     private final Function<? super I, ? extends O> mapper;
 
-    public UniMapOnResult(Uni<I> source, Function<? super I, ? extends O> mapper) {
+    public UniOnItemMap(Uni<I> source, Function<? super I, ? extends O> mapper) {
         super(ParameterValidation.nonNull(source, "source"));
         this.mapper = ParameterValidation.nonNull(mapper, "mapper");
     }

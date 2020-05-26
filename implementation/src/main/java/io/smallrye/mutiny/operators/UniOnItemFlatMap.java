@@ -13,11 +13,11 @@ import io.smallrye.mutiny.helpers.EmptyUniSubscription;
 import io.smallrye.mutiny.subscription.UniSubscriber;
 import io.smallrye.mutiny.subscription.UniSubscription;
 
-public class UniFlatMapOnItem<I, O> extends UniOperator<I, O> {
+public class UniOnItemFlatMap<I, O> extends UniOperator<I, O> {
 
     private final Function<? super I, ? extends Uni<? extends O>> mapper;
 
-    public UniFlatMapOnItem(Uni<I> upstream, Function<? super I, ? extends Uni<? extends O>> mapper) {
+    public UniOnItemFlatMap(Uni<I> upstream, Function<? super I, ? extends Uni<? extends O>> mapper) {
         super(nonNull(upstream, "upstream"));
         this.mapper = nonNull(mapper, "mapper");
     }

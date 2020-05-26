@@ -8,18 +8,7 @@ import java.util.concurrent.Executor;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-import io.smallrye.mutiny.groups.UniAndGroup;
-import io.smallrye.mutiny.groups.UniAwait;
-import io.smallrye.mutiny.groups.UniCombine;
-import io.smallrye.mutiny.groups.UniConvert;
-import io.smallrye.mutiny.groups.UniCreate;
-import io.smallrye.mutiny.groups.UniIfNoItem;
-import io.smallrye.mutiny.groups.UniOnEvent;
-import io.smallrye.mutiny.groups.UniOnFailure;
-import io.smallrye.mutiny.groups.UniOnItem;
-import io.smallrye.mutiny.groups.UniOr;
-import io.smallrye.mutiny.groups.UniRepeat;
-import io.smallrye.mutiny.groups.UniSubscribe;
+import io.smallrye.mutiny.groups.*;
 import io.smallrye.mutiny.subscription.UniEmitter;
 import io.smallrye.mutiny.subscription.UniSubscriber;
 import io.smallrye.mutiny.subscription.UniSubscription;
@@ -189,6 +178,14 @@ public interface Uni<T> {
      * @return the object to configure the action to execute when an item is emitted
      */
     UniOnItem<T> onItem();
+
+    /**
+     * Configures the action to execute when the observed {@link Uni} emits either an item (potentially {@code null}))
+     * or a failure. Unlike {@link #onItem()} and {@link #onFailure()} the action would handle both cases in on "go".
+     *
+     * @return the object to configure the action to execute when an item is emitted or when a failure is propagated.
+     */
+    UniOnItemOrFailure<T> onItemOrFailure();
 
     /**
      * Combines a set of {@link Uni unis} into a joined item. This item can be a {@code Tuple} or the item of a

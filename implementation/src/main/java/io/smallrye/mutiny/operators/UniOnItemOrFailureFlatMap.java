@@ -3,32 +3,39 @@ package io.smallrye.mutiny.operators;
 import static io.smallrye.mutiny.helpers.ParameterValidation.MAPPER_RETURNED_NULL;
 import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
 
-import java.util.concurrent.CompletionStage;
-import java.util.function.Function;
+import java.util.function.BiFunction;
 
+import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.subscription.UniSubscriber;
 import io.smallrye.mutiny.subscription.UniSubscription;
 
-public class UniFlatMapCompletionStageOnItem<I, O> extends UniOperator<I, O> {
+public class UniOnItemOrFailureFlatMap<I, O> extends UniOperator<I, O> {
 
-    private final Function<? super I, ? extends CompletionStage<? extends O>> mapper;
+    private final BiFunction<? super I, Throwable, ? extends Uni<? extends O>> mapper;
 
-    public UniFlatMapCompletionStageOnItem(Uni<I> upstream,
-            Function<? super I, ? extends CompletionStage<? extends O>> mapper) {
+    public UniOnItemOrFailureFlatMap(Uni<I> upstream,
+            BiFunction<? super I, Throwable, ? extends Uni<? extends O>> mapper) {
         super(nonNull(upstream, "upstream"));
         this.mapper = nonNull(mapper, "mapper");
     }
 
-    private static <I, O> void invokeAndSubstitute(Function<? super I, ? extends CompletionStage<? extends O>> mapper,
-            I input,
+    public static <I, O> void invokeAndSubstitute(BiFunction<? super I, Throwable, ? extends Uni<? extends O>> mapper,
+            I item,
+            Throwable failure,
             UniSerializedSubscriber<? super O> subscriber,
             UniOnItemFlatMap.FlatMapSubscription flatMapSubscription) {
-        CompletionStage<? extends O> outcome;
+        Uni<? extends O> outcome;
         try {
-            outcome = mapper.apply(input);
+            outcome = mapper.apply(item, failure);
+            // We cannot call onItem here, as if onItem would throw an exception
+            // it would be caught and onFailure would be called. This would be illegal.
         } catch (Throwable e) {
-            subscriber.onFailure(e);
+            if (failure != null) {
+                subscriber.onFailure(new CompositeException(failure, e));
+            } else {
+                subscriber.onFailure(e);
+            }
             return;
         }
 
@@ -42,7 +49,7 @@ public class UniFlatMapCompletionStageOnItem<I, O> extends UniOperator<I, O> {
                 }
             };
 
-            Uni.createFrom().completionStage(outcome).subscribe().withSubscriber(delegate);
+            outcome.subscribe().withSubscriber(delegate);
         }
     }
 
@@ -59,9 +66,13 @@ public class UniFlatMapCompletionStageOnItem<I, O> extends UniOperator<I, O> {
 
             @Override
             public void onItem(I item) {
-                invokeAndSubstitute(mapper, item, subscriber, flatMapSubscription);
+                invokeAndSubstitute(mapper, item, null, subscriber, flatMapSubscription);
             }
 
+            @Override
+            public void onFailure(Throwable failure) {
+                invokeAndSubstitute(mapper, null, failure, subscriber, flatMapSubscription);
+            }
         });
     }
 }

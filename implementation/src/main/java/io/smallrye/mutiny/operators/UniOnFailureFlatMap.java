@@ -9,12 +9,12 @@ import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.subscription.UniSubscription;
 
-public class UniFlatMapOnFailure<I> extends UniOperator<I, I> {
+public class UniOnFailureFlatMap<I> extends UniOperator<I, I> {
 
     private final Function<? super Throwable, ? extends Uni<? extends I>> mapper;
     private final Predicate<? super Throwable> predicate;
 
-    public UniFlatMapOnFailure(Uni<I> upstream,
+    public UniOnFailureFlatMap(Uni<I> upstream,
             Predicate<? super Throwable> predicate,
             Function<? super Throwable, ? extends Uni<? extends I>> mapper) {
         super(nonNull(upstream, "upstream"));
@@ -24,7 +24,7 @@ public class UniFlatMapOnFailure<I> extends UniOperator<I, I> {
 
     @Override
     protected void subscribing(UniSerializedSubscriber<? super I> subscriber) {
-        UniFlatMapOnItem.FlatMapSubscription flatMapSubscription = new UniFlatMapOnItem.FlatMapSubscription();
+        UniOnItemFlatMap.FlatMapSubscription flatMapSubscription = new UniOnItemFlatMap.FlatMapSubscription();
         // Subscribe to the source.
         upstream().subscribe().withSubscriber(new UniDelegatingSubscriber<I, I>(subscriber) {
             @Override
@@ -44,7 +44,7 @@ public class UniFlatMapOnFailure<I> extends UniOperator<I, I> {
                 }
 
                 if (test) {
-                    UniFlatMapOnItem.invokeAndSubstitute(mapper, failure, subscriber, flatMapSubscription);
+                    UniOnItemFlatMap.invokeAndSubstitute(mapper, failure, subscriber, flatMapSubscription);
                 } else {
                     subscriber.onFailure(failure);
                 }
