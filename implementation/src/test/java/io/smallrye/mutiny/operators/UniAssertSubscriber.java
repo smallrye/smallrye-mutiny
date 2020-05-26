@@ -161,7 +161,7 @@ public class UniAssertSubscriber<T> implements UniSubscriber<T> {
         return this;
     }
 
-    public String getOnResultThreadName() {
+    public String getOnItemThreadName() {
         return onResultThreadName;
     }
 

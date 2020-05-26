@@ -1,10 +1,6 @@
 package io.smallrye.mutiny.operators;
 
-import io.smallrye.mutiny.CompositeException;
-import io.smallrye.mutiny.Uni;
-import io.smallrye.mutiny.subscription.UniEmitter;
-import io.smallrye.mutiny.tuples.Functions;
-import org.testng.annotations.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -12,7 +8,12 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import org.testng.annotations.Test;
+
+import io.smallrye.mutiny.CompositeException;
+import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.subscription.UniEmitter;
+import io.smallrye.mutiny.tuples.Functions;
 
 public class UniOnItemOrFailureFlatMapTest {
 
@@ -20,9 +21,8 @@ public class UniOnItemOrFailureFlatMapTest {
     private Uni<Integer> async_one = one.onItem().delayIt().by(Duration.ofMillis(10));
     private Uni<Void> none = Uni.createFrom().nullItem();
     private Uni<Integer> failed = Uni.createFrom().failure(new IOException("boom"));
-    private Uni<Integer> async_failed = Uni.createFrom().emitter(e ->
-            new Thread(() -> e.fail(new IOException("boom"))).start()
-    );
+    private Uni<Integer> async_failed = Uni.createFrom()
+            .emitter(e -> new Thread(() -> e.fail(new IOException("boom"))).start());
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void testThatMapperIsNotNull() {
@@ -129,7 +129,7 @@ public class UniOnItemOrFailureFlatMapTest {
     public void testWithImmediateItemAndThrowingException() {
         UniAssertSubscriber<Integer> test = UniAssertSubscriber.create();
         AtomicInteger count = new AtomicInteger();
-        one.onItemOrFailure().<Integer>produceUni((v, f) -> {
+        one.onItemOrFailure().<Integer> produceUni((v, f) -> {
             assertThat(f).isNull();
             count.incrementAndGet();
             throw new IllegalStateException("kaboom");
@@ -143,7 +143,7 @@ public class UniOnItemOrFailureFlatMapTest {
     public void testWithDeferredItemAndThrowingException() {
         UniAssertSubscriber<Integer> test = UniAssertSubscriber.create();
         AtomicInteger count = new AtomicInteger();
-        async_one.onItemOrFailure().<Integer>produceUni((v, f) -> {
+        async_one.onItemOrFailure().<Integer> produceUni((v, f) -> {
             assertThat(f).isNull();
             count.incrementAndGet();
             throw new IllegalStateException("kaboom");
@@ -157,7 +157,7 @@ public class UniOnItemOrFailureFlatMapTest {
     public void testWithImmediateFailureAndThrowingException() {
         UniAssertSubscriber<Integer> test = UniAssertSubscriber.create();
         AtomicInteger count = new AtomicInteger();
-        failed.onItemOrFailure().<Integer>produceUni((v, f) -> {
+        failed.onItemOrFailure().<Integer> produceUni((v, f) -> {
             assertThat(v).isNull();
             assertThat(f).isNotNull();
             count.incrementAndGet();
@@ -174,10 +174,10 @@ public class UniOnItemOrFailureFlatMapTest {
         UniAssertSubscriber<Integer> test = UniAssertSubscriber.create();
         AtomicBoolean called = new AtomicBoolean();
         one
-                .onItemOrFailure().<Integer>produceUni((v, f) -> {
-            called.set(true);
-            return null;
-        }).subscribe().withSubscriber(test);
+                .onItemOrFailure().<Integer> produceUni((v, f) -> {
+                    called.set(true);
+                    return null;
+                }).subscribe().withSubscriber(test);
         test.await().assertCompletedWithFailure().assertFailure(NullPointerException.class, "");
         assertThat(called).isTrue();
     }
@@ -187,11 +187,11 @@ public class UniOnItemOrFailureFlatMapTest {
         UniAssertSubscriber<Integer> test = UniAssertSubscriber.create();
         AtomicBoolean called = new AtomicBoolean();
         failed
-                .onItemOrFailure().<Integer>produceUni((v, f) -> {
-            assertThat(f).isNotNull();
-            called.set(true);
-            return null;
-        }).subscribe().withSubscriber(test);
+                .onItemOrFailure().<Integer> produceUni((v, f) -> {
+                    assertThat(f).isNotNull();
+                    called.set(true);
+                    return null;
+                }).subscribe().withSubscriber(test);
         test.await().assertCompletedWithFailure().assertFailure(NullPointerException.class, "");
         assertThat(called).isTrue();
     }
@@ -219,7 +219,7 @@ public class UniOnItemOrFailureFlatMapTest {
     @Test
     public void testWithEmitterOnItem() {
         UniAssertSubscriber<Integer> test = UniAssertSubscriber.create();
-        one.onItemOrFailure().<Integer>produceUni((i, f, e) -> {
+        one.onItemOrFailure().<Integer> produceUni((i, f, e) -> {
             assertThat(i).isEqualTo(1);
             assertThat(f).isNull();
             e.complete(2);
@@ -231,7 +231,7 @@ public class UniOnItemOrFailureFlatMapTest {
     @Test
     public void testWithEmitterOnNull() {
         UniAssertSubscriber<Integer> test = UniAssertSubscriber.create();
-        none.onItemOrFailure().<Integer>produceUni((i, f, e) -> {
+        none.onItemOrFailure().<Integer> produceUni((i, f, e) -> {
             assertThat(i).isNull();
             assertThat(f).isNull();
             e.complete(2);
@@ -243,7 +243,7 @@ public class UniOnItemOrFailureFlatMapTest {
     @Test
     public void testWithEmitterOnFailure() {
         UniAssertSubscriber<Integer> test = UniAssertSubscriber.create();
-        failed.onItemOrFailure().<Integer>produceUni((i, f, e) -> {
+        failed.onItemOrFailure().<Integer> produceUni((i, f, e) -> {
             assertThat(i).isNull();
             assertThat(f).isNotNull().isInstanceOf(IOException.class);
             e.complete(2);
@@ -255,7 +255,7 @@ public class UniOnItemOrFailureFlatMapTest {
     @Test
     public void testWithEmitterOnItemThrowingException() {
         UniAssertSubscriber<Integer> test = UniAssertSubscriber.create();
-        one.onItemOrFailure().<Integer>produceUni((i, f, e) -> {
+        one.onItemOrFailure().<Integer> produceUni((i, f, e) -> {
             assertThat(i).isEqualTo(1);
             assertThat(f).isNull();
             throw new IllegalStateException("bing");
@@ -267,13 +267,12 @@ public class UniOnItemOrFailureFlatMapTest {
     @Test
     public void testWithEmitterOnFailureThrowingException() {
         UniAssertSubscriber<Integer> test = UniAssertSubscriber.create();
-        failed.onItemOrFailure().<Integer>produceUni((i, f, e) -> {
+        failed.onItemOrFailure().<Integer> produceUni((i, f, e) -> {
             throw new IllegalStateException("bing");
         }).subscribe().withSubscriber(test);
 
         test.await().assertFailure(CompositeException.class, "bing");
         test.await().assertFailure(CompositeException.class, "boom");
     }
-
 
 }

@@ -21,7 +21,7 @@ public class UniOnNullFailTest {
     }
 
     @Test
-    public void testFailNotCalledOnResult() {
+    public void testFailNotCalledOnItem() {
         assertThat(Uni.createFrom().item(1).onItem().ifNull().fail().await().indefinitely()).isEqualTo(1);
     }
 
@@ -36,7 +36,7 @@ public class UniOnNullFailTest {
     }
 
     @Test
-    public void testFailWithExceptionNotCalledOnResult() {
+    public void testFailWithExceptionNotCalledOnITem() {
         assertThat(Uni.createFrom().item(1).onItem().ifNull().failWith(new IOException("boom")).await().indefinitely())
                 .isEqualTo(1);
     }
@@ -60,7 +60,7 @@ public class UniOnNullFailTest {
     }
 
     @Test
-    public void testFailWithExceptionSupplierNotCalledOnResult() {
+    public void testFailWithExceptionSupplierNotCalledOnItem() {
         assertThat(Uni.createFrom().item(1).onItem().ifNull().failWith(new IOException("boom")).await().indefinitely())
                 .isEqualTo(1);
     }

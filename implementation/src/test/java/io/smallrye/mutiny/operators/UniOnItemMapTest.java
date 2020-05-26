@@ -107,7 +107,7 @@ public class UniOnItemMapTest {
 
             ts.await().assertCompletedSuccessfully().assertItem(2);
             assertThat(threadName).isNotNull().doesNotHaveValue("main");
-            assertThat(ts.getOnResultThreadName()).isEqualTo(threadName.get());
+            assertThat(ts.getOnItemThreadName()).isEqualTo(threadName.get());
         } finally {
             executor.shutdown();
         }

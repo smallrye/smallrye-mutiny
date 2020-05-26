@@ -46,7 +46,7 @@ public class UniOnItemDelayTest {
     }
 
     @Test
-    public void testDelayOnResultWithDefaultExecutor() {
+    public void testDelayOnItemWithDefaultExecutor() {
         long begin = System.currentTimeMillis();
         UniAssertSubscriber<Void> subscriber = UniAssertSubscriber.create();
 
@@ -59,7 +59,7 @@ public class UniOnItemDelayTest {
         long end = System.currentTimeMillis();
         assertThat(end - begin).isGreaterThanOrEqualTo(100);
         subscriber.assertCompletedSuccessfully().assertItem(null);
-        assertThat(subscriber.getOnResultThreadName()).isNotEqualTo(Thread.currentThread().getName());
+        assertThat(subscriber.getOnItemThreadName()).isNotEqualTo(Thread.currentThread().getName());
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
@@ -77,7 +77,7 @@ public class UniOnItemDelayTest {
     }
 
     @Test
-    public void testDelayOnResult() {
+    public void testDelayOnItem() {
         long begin = System.currentTimeMillis();
         UniAssertSubscriber<Void> subscriber = UniAssertSubscriber.create();
         delayed.subscribe().withSubscriber(subscriber);
@@ -85,7 +85,7 @@ public class UniOnItemDelayTest {
         long end = System.currentTimeMillis();
         assertThat(end - begin).isGreaterThanOrEqualTo(100);
         subscriber.assertCompletedSuccessfully().assertItem(null);
-        assertThat(subscriber.getOnResultThreadName()).isNotEqualTo(Thread.currentThread().getName());
+        assertThat(subscriber.getOnItemThreadName()).isNotEqualTo(Thread.currentThread().getName());
     }
 
     @Test

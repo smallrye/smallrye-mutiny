@@ -4,6 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
 import java.time.Duration;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -39,21 +41,25 @@ public class UniRunSubscriptionOnTest {
 
     @Test
     public void testWithTimeout() {
+        ExecutorService executorService = Executors.newSingleThreadExecutor();
         UniAssertSubscriber<Integer> ts = UniAssertSubscriber.create();
 
         Uni.createFrom().item(() -> {
             try {
-                TimeUnit.SECONDS.sleep(1L);
+                TimeUnit.SECONDS.sleep(2L);
             } catch (InterruptedException e) {
                 // ignored
             }
             return 0;
         })
                 .ifNoItem().after(Duration.ofMillis(100)).recoverWithUni(Uni.createFrom().item(() -> 1))
-                .runSubscriptionOn(Infrastructure.getDefaultExecutor())
+                // Should not use the default as in container you may have a single thread, blocked by the sleep statement.
+                .runSubscriptionOn(executorService)
                 .subscribe().withSubscriber(ts);
 
         ts.await().assertItem(1);
+
+        executorService.shutdownNow();
     }
 
     @Test

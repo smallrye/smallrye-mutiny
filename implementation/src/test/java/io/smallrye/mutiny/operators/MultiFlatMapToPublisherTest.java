@@ -216,7 +216,7 @@ public class MultiFlatMapToPublisherTest {
     }
 
     @Test
-    public void testThatFlatMapIsOnlyCallOnResults() {
+    public void testThatFlatMapIsOnlyCallOnItems() {
         MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(Long.MAX_VALUE);
         AtomicInteger count = new AtomicInteger();
         Multi.createFrom().<Integer> empty()

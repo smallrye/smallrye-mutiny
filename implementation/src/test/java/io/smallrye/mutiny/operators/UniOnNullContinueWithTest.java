@@ -32,7 +32,7 @@ public class UniOnNullContinueWithTest {
     }
 
     @Test
-    public void testContinueNotCalledOnResult() {
+    public void testContinueNotCalledOnItem() {
         assertThat(Uni.createFrom().item(23)
                 .onItem().castTo(Integer.class)
                 .onItem().ifNull().continueWith(42)
@@ -40,7 +40,7 @@ public class UniOnNullContinueWithTest {
     }
 
     @Test
-    public void testContinueWithSupplierNotCalledOnResult() {
+    public void testContinueWithSupplierNotCalledOnItem() {
         assertThat(Uni.createFrom().item(23)
                 .onItem().castTo(Integer.class)
                 .onItem().ifNull().continueWith(() -> 42)
