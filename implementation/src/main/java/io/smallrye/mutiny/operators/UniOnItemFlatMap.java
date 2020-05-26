@@ -35,6 +35,11 @@ public class UniOnItemFlatMap<I, O> extends UniOperator<I, O> {
             return;
         }
 
+        handleInnerSubscription(subscriber, flatMapSubscription, outcome);
+    }
+
+    public static <O> void handleInnerSubscription(UniSerializedSubscriber<? super O> subscriber,
+            UniOnItemFlatMap.FlatMapSubscription flatMapSubscription, Uni<? extends O> outcome) {
         if (outcome == null) {
             subscriber.onFailure(new NullPointerException(MAPPER_RETURNED_NULL));
         } else {

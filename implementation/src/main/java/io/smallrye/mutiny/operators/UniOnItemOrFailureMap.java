@@ -21,46 +21,38 @@ public class UniOnItemOrFailureMap<I, O> extends UniOperator<I, O> {
 
             @Override
             public void onItem(I item) {
-                if (subscriber.isCancelledOrDone()) {
-                    // Avoid calling the mapper if we are done to save some cycles.
-                    // If the cancellation happen during the call, the events won't be dispatched.
-                    return;
-                }
+                if (!subscriber.isCancelledOrDone()) {
+                    O outcome;
+                    try {
+                        outcome = mapper.apply(item, null);
+                        // We cannot call onItem here, as if onItem would throw an exception
+                        // it would be caught and onFailure would be called. This would be illegal.
+                    } catch (Throwable e) { // NOSONAR
+                        // Be sure to not call the mapper again with the failure.
+                        subscriber.onFailure(e);
+                        return;
+                    }
 
-                O outcome;
-                try {
-                    outcome = mapper.apply(item, null);
-                    // We cannot call onItem here, as if onItem would throw an exception
-                    // it would be caught and onFailure would be called. This would be illegal.
-                } catch (Throwable e) {
-                    // Be sure to not call the mapper again with the failure.
-                    subscriber.onFailure(e);
-                    return;
+                    subscriber.onItem(outcome);
                 }
-
-                subscriber.onItem(outcome);
             }
 
             @Override
             public void onFailure(Throwable failure) {
-                if (subscriber.isCancelledOrDone()) {
-                    // Avoid calling the mapper if we are done to save some cycles.
-                    // If the cancellation happen during the call, the events won't be dispatched.
-                    return;
-                }
+                if (!subscriber.isCancelledOrDone()) {
+                    O outcome;
+                    try {
+                        outcome = mapper.apply(null, failure);
+                        // We cannot call onItem here, as if onItem would throw an exception
+                        // it would be caught and onFailure would be called. This would be illegal.
+                    } catch (Throwable e) { // NOSONAR
+                        // Be sure to not call the mapper again with the failure.
+                        subscriber.onFailure(new CompositeException(failure, e));
+                        return;
+                    }
 
-                O outcome;
-                try {
-                    outcome = mapper.apply(null, failure);
-                    // We cannot call onItem here, as if onItem would throw an exception
-                    // it would be caught and onFailure would be called. This would be illegal.
-                } catch (Throwable e) {
-                    // Be sure to not call the mapper again with the failure.
-                    subscriber.onFailure(new CompositeException(failure, e));
-                    return;
+                    subscriber.onItem(outcome);
                 }
-
-                subscriber.onItem(outcome);
             }
         });
     }

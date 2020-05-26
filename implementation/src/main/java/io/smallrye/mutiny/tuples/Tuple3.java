@@ -26,15 +26,10 @@ public class Tuple3<T1, T2, T3> extends Tuple2<T1, T2> implements Tuple {
     public Object nth(int index) {
         assertIndexInBounds(index);
 
-        switch (index) {
-            case 0:
-                return item1;
-            case 1:
-                return item2;
-            case 2:
-                return item3;
-            default:
-                throw new IllegalArgumentException("invalid index " + index);
+        if (index == 2) {
+            return item3;
+        } else {
+            return super.nth(index);
         }
     }
 

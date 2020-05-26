@@ -5,16 +5,16 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
 
-public class Tuple8<T1, T2, T3, T4, T5, T6, T7, T8> extends Tuple7<T1, T2, T3, T4, T5, T6, T7> implements Tuple {
+public class Tuple8<T1, T2, T3, T4, T5, T6, T7, T8> extends Tuple7<T1, T2, T3, T4, T5, T6, T7> implements Tuple { //NOSONAR
 
     final T8 item8;
 
-    Tuple8(T1 a, T2 b, T3 c, T4 d, T5 e, T6 f, T7 g, T8 h) {
+    Tuple8(T1 a, T2 b, T3 c, T4 d, T5 e, T6 f, T7 g, T8 h) { //NOSONAR
         super(a, b, c, d, e, f, g);
         this.item8 = h;
     }
 
-    public static <T1, T2, T3, T4, T5, T6, T7, T8> Tuple8<T1, T2, T3, T4, T5, T6, T7, T8> of(T1 a, T2 b, T3 c, T4 d, T5 e, T6 f,
+    public static <T1, T2, T3, T4, T5, T6, T7, T8> Tuple8<T1, T2, T3, T4, T5, T6, T7, T8> of(T1 a, T2 b, T3 c, T4 d, T5 e, T6 f, //NOSONAR
             T7 g, T8 h) {
         return new Tuple8<>(a, b, c, d, e, f, g, h);
     }
@@ -66,25 +66,12 @@ public class Tuple8<T1, T2, T3, T4, T5, T6, T7, T8> extends Tuple7<T1, T2, T3, T
     public Object nth(int index) {
         assertIndexInBounds(index);
 
-        switch (index) {
-            case 0:
-                return item1;
-            case 1:
-                return item2;
-            case 2:
-                return item3;
-            case 3:
-                return item4;
-            case 4:
-                return item5;
-            case 5:
-                return item6;
-            case 6:
-                return item7;
-            case 7:
-                return item8;
-            default:
-                throw new IllegalArgumentException("invalid index " + index);
+        assertIndexInBounds(index);
+
+        if (index == 7) {
+            return item8;
+        } else {
+            return super.nth(index);
         }
     }
 
