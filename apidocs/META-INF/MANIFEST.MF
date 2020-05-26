@@ -1,5 +1,4 @@
 Manifest-Version: 1.0
-Built-By: runner
-Created-By: Apache Maven 3.6.3
-Build-Jdk: 1.8.0_252
+Build-Jdk-Spec: 1.8
+Created-By: Maven Javadoc Plugin 3.2.0
 

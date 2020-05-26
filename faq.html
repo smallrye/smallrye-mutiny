@@ -470,6 +470,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#_how_do_i_handle_pagination">How do I handle pagination?</a></li>
 <li><a href="#_how_do_i_delay_things">How do I delay <em>things</em>?</a></li>
 <li><a href="#_where_do_i_find_the_javadoc">Where do I find the JavaDoc?</a></li>
+<li><a href="#_default_executor_and_integration">Default executor and integration</a></li>
 </ul>
 </li>
 </ul>
@@ -1083,7 +1084,7 @@ To enable this feature, add the following dependency to your <code>CLASSPATH</co
 <pre class="highlightjs highlight"><code data-lang="xml" class="language-xml hljs">&lt;dependency&gt;
     &lt;groupId&gt;io.smallrye.reactive&lt;/groupId&gt;
     &lt;artifactId&gt;mutiny-rxjava&lt;/artifactId&gt;
-    &lt;version&gt;0.5.0&lt;/version&gt;
+    &lt;version&gt;0.5.1&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -1197,7 +1198,7 @@ To enable this feature, add the following dependency to your <code>CLASSPATH</co
 <pre class="highlightjs highlight"><code data-lang="xml" class="language-xml hljs">&lt;dependency&gt;
     &lt;groupId&gt;io.smallrye.reactive&lt;/groupId&gt;
     &lt;artifactId&gt;mutiny-reactor&lt;/artifactId&gt;
-    &lt;version&gt;0.5.0&lt;/version&gt;
+    &lt;version&gt;0.5.1&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -1620,7 +1621,7 @@ You can implement this behavior as follows:</p>
 <div class="content">
 <pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">Random random = new Random();
 List&lt;Integer&gt; delayed = Multi.createFrom().items(1, 2, 3, 4, 5)
-        .onItem().produceUni(i -&gt; Uni.createFrom().item(i).onItem().delayIt().by(Duration.ofMillis(random.nextInt(100))))
+        .onItem().produceUni(i -&gt; Uni.createFrom().item(i).onItem().delayIt().by(Duration.ofMillis(random.nextInt(100) + 1)))
         .merge()
         .collectItems().asList()
         .await().indefinitely();</code></pre>
@@ -1633,12 +1634,26 @@ List&lt;Integer&gt; delayed = Multi.createFrom().items(1, 2, 3, 4, 5)
 <p>The JavaDoc is published <a href="https://smallrye.io/smallrye-mutiny/apidocs/">there</a>.</p>
 </div>
 </div>
+<div class="sect2">
+<h3 id="_default_executor_and_integration">Default executor and integration</h3>
+<div class="paragraph">
+<p>Sometimes, Mutiny needs to execute tasks on other threads, such as monitoring time or delaying actions.
+Most operators relying on such capacity let you pass either a <code>ScheduledExecutorService</code> or an <code>ExecutorService</code>.</p>
+</div>
+<div class="paragraph">
+<p>Mutiny uses the <a href="https://www.oracle.com/technical-resources/articles/java/fork-join.html">fork-join</a> pool as default executor.
+A <code>ScheduledExecutorService</code> is also created but delegates the execution of the delayed/scheduled tasks to the default executor.</p>
+</div>
+<div class="paragraph">
+<p>In the case you want to integrate Mutiny with a thread pool managed by a platform, you can configure it using <code>Infrastructure.setDefaultExecutor()</code> method.</p>
+</div>
+</div>
 </div>
 </div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-04-23 09:56:46 UTC
+Last updated 2020-05-26 14:51:37 UTC
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">
