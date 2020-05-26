@@ -6,11 +6,11 @@ import java.util.function.Supplier;
 
 import io.smallrye.mutiny.Uni;
 
-public class UniOnResultIgnore<T> {
+public class UniOnItemIgnore<T> {
 
     private final UniOnItem<T> onResult;
 
-    public UniOnResultIgnore(UniOnItem<T> onResult) {
+    public UniOnItemIgnore(UniOnItem<T> onResult) {
         this.onResult = nonNull(onResult, "onItem");
     }
 

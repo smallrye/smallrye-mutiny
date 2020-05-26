@@ -103,7 +103,7 @@ public class UniOnFailureMapToTest {
     }
 
     @Test
-    public void testThatMapperIsNotCalledOnResult() {
+    public void testThatMapperIsNotCalledOnItem() {
         UniAssertSubscriber<Integer> ts = UniAssertSubscriber.create();
         AtomicBoolean called = new AtomicBoolean();
         Uni.createFrom().item(1)

@@ -19,7 +19,7 @@ public class UniOnFailureRetryTest {
     }
 
     @Test
-    public void testNoRetryOnResult() {
+    public void testNoRetryOnItem() {
         UniAssertSubscriber<Integer> ts = UniAssertSubscriber.create();
         Uni.createFrom().item(1)
                 .onFailure().retry().atMost(1)

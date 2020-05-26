@@ -172,7 +172,7 @@ public class UniOnFailureRecoveryTest {
     }
 
     @Test
-    public void testNotCalledOnResult() {
+    public void testNotCalledOnItem() {
         UniAssertSubscriber<Integer> ts = UniAssertSubscriber.create();
         Uni.createFrom().item(1)
                 .onFailure().recoverWithUni(v -> Uni.createFrom().item(2))

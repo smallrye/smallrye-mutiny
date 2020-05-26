@@ -135,14 +135,14 @@ public class UniOnItem<T> {
      *
      * @return the object to configure the delay.
      */
-    public UniOnResultDelay<T> delayIt() {
-        return new UniOnResultDelay<>(upstream, null);
+    public UniOnItemDelay<T> delayIt() {
+        return new UniOnItemDelay<>(upstream, null);
     }
 
     /**
      * Produces a {@link Uni} ignoring the item of the current {@link Uni} and continuing with either
-     * {@link UniOnResultIgnore#andContinueWith(Object) another item}, {@link UniOnResultIgnore#andFail() a failure},
-     * or {@link UniOnResultIgnore#andSwitchTo(Uni) another Uni}. The produced {@link Uni} propagates the failure
+     * {@link UniOnItemIgnore#andContinueWith(Object) another item}, {@link UniOnItemIgnore#andFail() a failure},
+     * or {@link UniOnItemIgnore#andSwitchTo(Uni) another Uni}. The produced {@link Uni} propagates the failure
      * event if the upstream uni fires a failure.
      *
      * <p>
@@ -159,8 +159,8 @@ public class UniOnItem<T> {
      *
      * @return the object to configure the continuation logic.
      */
-    public UniOnResultIgnore<T> ignore() {
-        return new UniOnResultIgnore<>(this);
+    public UniOnItemIgnore<T> ignore() {
+        return new UniOnItemIgnore<>(this);
     }
 
     /**

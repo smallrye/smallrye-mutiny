@@ -1,8 +1,6 @@
 package io.smallrye.mutiny.operators;
 
-import io.smallrye.mutiny.CompositeException;
-import io.smallrye.mutiny.Uni;
-import org.testng.annotations.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
 import java.util.concurrent.ExecutorService;
@@ -10,7 +8,10 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import org.testng.annotations.Test;
+
+import io.smallrye.mutiny.CompositeException;
+import io.smallrye.mutiny.Uni;
 
 public class UniOnItemOrFailureInvokeTest {
 
@@ -134,13 +135,13 @@ public class UniOnItemOrFailureInvokeTest {
             one
                     .emitOn(executor)
                     .onItemOrFailure().invoke((i, f) -> {
-                threadName.set(Thread.currentThread().getName());
-            })
+                        threadName.set(Thread.currentThread().getName());
+                    })
                     .subscribe().withSubscriber(ts);
 
             ts.await().assertCompletedSuccessfully().assertItem(1);
             assertThat(threadName).isNotNull().doesNotHaveValue("main");
-            assertThat(ts.getOnResultThreadName()).isEqualTo(threadName.get());
+            assertThat(ts.getOnItemThreadName()).isEqualTo(threadName.get());
         } finally {
             executor.shutdown();
         }
@@ -155,16 +156,16 @@ public class UniOnItemOrFailureInvokeTest {
             failed
                     .emitOn(executor)
                     .onItemOrFailure().invoke((i, f) -> {
-                threadName.set(Thread.currentThread().getName());
-                assertThat(i).isNull();
-                assertThat(f).isNotNull();
-            })
+                        threadName.set(Thread.currentThread().getName());
+                        assertThat(i).isNull();
+                        assertThat(f).isNotNull();
+                    })
                     .onFailure().recoverWithItem(1)
                     .subscribe().withSubscriber(ts);
 
             ts.await().assertCompletedSuccessfully().assertItem(1);
             assertThat(threadName).isNotNull().doesNotHaveValue("main");
-            assertThat(ts.getOnResultThreadName()).isEqualTo(threadName.get());
+            assertThat(ts.getOnItemThreadName()).isEqualTo(threadName.get());
         } finally {
             executor.shutdown();
         }

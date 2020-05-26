@@ -17,18 +17,18 @@ import io.smallrye.mutiny.operators.UniDelayUntil;
  *
  * @param <T> the type of item
  */
-public class UniOnResultDelay<T> {
+public class UniOnItemDelay<T> {
 
     private final Uni<T> upstream;
     private ScheduledExecutorService executor;
 
     /**
-     * Creates a new {@code UniOnResultDelay} instance.
+     * Creates a new {@code UniOnItemDelay} instance.
      *
      * @param upstream the upstream uni
      * @param executor the executor, can be {@code null}, if {@code null} used the default worker executor.
      */
-    public UniOnResultDelay(Uni<T> upstream, ScheduledExecutorService executor) {
+    public UniOnItemDelay(Uni<T> upstream, ScheduledExecutorService executor) {
         this.upstream = upstream;
         this.executor = executor == null ? Infrastructure.getDefaultWorkerPool() : executor;
     }
@@ -37,9 +37,9 @@ public class UniOnResultDelay<T> {
      * Configures the executor which is used to <i>wait</i> for the delay duration.
      *
      * @param executor the executor, must not be {@code null}
-     * @return this {@code UniOnResultDelay}.
+     * @return this {@code UniOnItemDelay}.
      */
-    public UniOnResultDelay<T> onExecutor(ScheduledExecutorService executor) {
+    public UniOnItemDelay<T> onExecutor(ScheduledExecutorService executor) {
         this.executor = nonNull(executor, "executor");
         return this;
     }

@@ -142,7 +142,7 @@ public class UniCreateFromEmitterTest {
     }
 
     @Test
-    public void testFailureThrownBySubscribersOnResult() {
+    public void testFailureThrownBySubscribersOnItem() {
         AtomicBoolean called = new AtomicBoolean();
         AtomicBoolean onTerminationCalled = new AtomicBoolean();
         Uni.createFrom().<Integer> emitter(emitter -> {

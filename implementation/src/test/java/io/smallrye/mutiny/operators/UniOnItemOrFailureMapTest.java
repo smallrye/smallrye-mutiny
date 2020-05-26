@@ -1,8 +1,6 @@
 package io.smallrye.mutiny.operators;
 
-import io.smallrye.mutiny.CompositeException;
-import io.smallrye.mutiny.Uni;
-import org.testng.annotations.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
 import java.util.concurrent.ExecutorService;
@@ -10,7 +8,10 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import org.testng.annotations.Test;
+
+import io.smallrye.mutiny.CompositeException;
+import io.smallrye.mutiny.Uni;
 
 public class UniOnItemOrFailureMapTest {
 
@@ -85,7 +86,7 @@ public class UniOnItemOrFailureMapTest {
         UniAssertSubscriber<Integer> ts = UniAssertSubscriber.create();
 
         AtomicInteger count = new AtomicInteger();
-        one.onItemOrFailure().<Integer>apply((i, f) -> {
+        one.onItemOrFailure().<Integer> apply((i, f) -> {
             assertThat(f).isNull();
             count.incrementAndGet();
             throw new IllegalStateException("kaboom");
@@ -100,7 +101,7 @@ public class UniOnItemOrFailureMapTest {
         UniAssertSubscriber<Integer> ts = UniAssertSubscriber.create();
 
         AtomicInteger count = new AtomicInteger();
-        failed.onItemOrFailure().<Integer>apply((i, f) -> {
+        failed.onItemOrFailure().<Integer> apply((i, f) -> {
             assertThat(i).isNull();
             assertThat(f).isNotNull().isInstanceOf(IOException.class).hasMessageContaining("boom");
             count.incrementAndGet();
@@ -133,7 +134,7 @@ public class UniOnItemOrFailureMapTest {
     public void testThatMapperCanReturnNull() {
         UniAssertSubscriber<Void> ts = UniAssertSubscriber.create();
 
-        one.onItemOrFailure().<Void>apply((v, f) -> null).subscribe().withSubscriber(ts);
+        one.onItemOrFailure().<Void> apply((v, f) -> null).subscribe().withSubscriber(ts);
 
         ts.assertCompletedSuccessfully().assertItem(null);
     }
@@ -147,14 +148,14 @@ public class UniOnItemOrFailureMapTest {
             one
                     .emitOn(executor)
                     .onItemOrFailure().apply((i, f) -> {
-                threadName.set(Thread.currentThread().getName());
-                return i + 1;
-            })
+                        threadName.set(Thread.currentThread().getName());
+                        return i + 1;
+                    })
                     .subscribe().withSubscriber(ts);
 
             ts.await().assertCompletedSuccessfully().assertItem(2);
             assertThat(threadName).isNotNull().doesNotHaveValue("main");
-            assertThat(ts.getOnResultThreadName()).isEqualTo(threadName.get());
+            assertThat(ts.getOnItemThreadName()).isEqualTo(threadName.get());
         } finally {
             executor.shutdown();
         }
@@ -169,16 +170,16 @@ public class UniOnItemOrFailureMapTest {
             failed
                     .emitOn(executor)
                     .onItemOrFailure().apply((i, f) -> {
-                threadName.set(Thread.currentThread().getName());
-                assertThat(i).isNull();
-                assertThat(f).isNotNull();
-                return 1;
-            })
+                        threadName.set(Thread.currentThread().getName());
+                        assertThat(i).isNull();
+                        assertThat(f).isNotNull();
+                        return 1;
+                    })
                     .subscribe().withSubscriber(ts);
 
             ts.await().assertCompletedSuccessfully().assertItem(1);
             assertThat(threadName).isNotNull().doesNotHaveValue("main");
-            assertThat(ts.getOnResultThreadName()).isEqualTo(threadName.get());
+            assertThat(ts.getOnItemThreadName()).isEqualTo(threadName.get());
         } finally {
             executor.shutdown();
         }
