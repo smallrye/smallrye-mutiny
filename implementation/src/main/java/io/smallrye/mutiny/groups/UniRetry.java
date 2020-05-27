@@ -15,7 +15,8 @@ import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.UniRetryAtMost;
 
-public class UniOnFailureRetry<T> {
+// TODO This method should be renamed to UniOnFailureRetry, however it's a breaking change.
+public class UniRetry<T> {
 
     private final Uni<T> upstream;
     private final Predicate<? super Throwable> predicate;
@@ -26,7 +27,7 @@ public class UniOnFailureRetry<T> {
 
     private boolean backOffConfigured = false;
 
-    public UniOnFailureRetry(Uni<T> upstream, Predicate<? super Throwable> predicate) {
+    public UniRetry(Uni<T> upstream, Predicate<? super Throwable> predicate) {
         this.upstream = upstream;
         this.predicate = predicate;
     }
@@ -118,7 +119,7 @@ public class UniOnFailureRetry<T> {
      * @param initialBackOff the initial back-off duration, must not be {@code null}, must not be negative.
      * @return this object to configure the retry policy.
      */
-    public UniOnFailureRetry<T> withBackOff(Duration initialBackOff) {
+    public UniRetry<T> withBackOff(Duration initialBackOff) {
         return withBackOff(initialBackOff, ExponentialBackoff.MAX_BACKOFF);
     }
 
@@ -130,7 +131,7 @@ public class UniOnFailureRetry<T> {
      * @param maxBackOff the max back-off duration, must not be {@code null}, must not be negative.
      * @return this object to configure the retry policy.
      */
-    public UniOnFailureRetry<T> withBackOff(Duration initialBackOff, Duration maxBackOff) {
+    public UniRetry<T> withBackOff(Duration initialBackOff, Duration maxBackOff) {
         this.backOffConfigured = true;
         this.initialBackOffDuration = validate(initialBackOff, "initialBackOff");
         this.maxBackoffDuration = validate(maxBackOff, "maxBackOff");
@@ -143,7 +144,7 @@ public class UniOnFailureRetry<T> {
      * @param jitter the jitter. Must be in [0.0, 1.0]
      * @return this object to configure the retry policy.
      */
-    public UniOnFailureRetry<T> withJitter(double jitter) {
+    public UniRetry<T> withJitter(double jitter) {
         if (jitter < 0 || jitter > 1.0) {
             throw new IllegalArgumentException("Invalid `jitter`, the value must be in [0.0, 1.0]");
         }

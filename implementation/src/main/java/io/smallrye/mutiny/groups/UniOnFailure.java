@@ -75,8 +75,8 @@ public class UniOnFailure<T> {
         return recoverWithUni(() -> fallback);
     }
 
-    public UniOnFailureRetry<T> retry() {
-        return new UniOnFailureRetry<>(upstream, predicate);
+    public UniRetry<T> retry() {
+        return new UniRetry<>(upstream, predicate);
     }
 
 }
