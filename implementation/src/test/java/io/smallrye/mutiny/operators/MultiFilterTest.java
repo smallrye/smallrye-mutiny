@@ -43,4 +43,12 @@ public class MultiFilterTest {
                 .await().indefinitely()).containsExactly(1, 3);
     }
 
+    @Test
+    public void testFilterShortcut() {
+        Predicate<Integer> test = x -> x % 2 != 0;
+        assertThat(Multi.createFrom().range(1, 4)
+                .filter(test)
+                .collectItems().asList()
+                .await().indefinitely()).containsExactly(1, 3);
+    }
 }

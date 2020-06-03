@@ -259,6 +259,20 @@ public interface Multi<T> extends Publisher<T> {
     MultiConvert<T> convert();
 
     /**
+     * Produces a new {@link Multi} with items from the upstream {@link Multi} matching the predicate.
+     * <p>
+     * Items that do not satisfy the predicate are discarded.
+     * <p>
+     * This method is a shortcut for {@code multi.transform().byFilteringItemsWith(predicate)}.
+     *
+     * @param predicate a predicate, must not be {@code null}
+     * @return the new {@link Multi}
+     */
+    default Multi<T> filter(Predicate<? super T> predicate) {
+        return transform().byFilteringItemsWith(predicate);
+    }
+
+    /**
      * Produces a new {@link Multi} invoking the given function for each item emitted by the upstream {@link Multi}.
      * <p>
      * The function receives the received item as parameter, and can transform it. The returned object is sent
