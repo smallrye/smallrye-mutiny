@@ -3,6 +3,7 @@ package io.smallrye.mutiny.streams.utils;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 
+import io.smallrye.mutiny.helpers.StrictMultiSubscriber;
 import org.reactivestreams.Processor;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
@@ -40,7 +41,7 @@ public class ConnectableProcessor<T> implements Processor<T, T> {
         Objects.requireNonNull(subscriber);
 
         // Set the subscriber, if we already have one report an error as we do not support multicasting.
-        if (!this.subscriber.compareAndSet(null, subscriber)) {
+        if (!this.subscriber.compareAndSet(null, new StrictMultiSubscriber<>(subscriber))) {
             Subscriptions.fail(subscriber, new IllegalStateException("Multicasting not supported"));
             return;
         }
