@@ -23,11 +23,13 @@ public class WrappedProcessor<T> implements Processor<T, T> {
 
     @Override
     public void subscribe(Subscriber<? super T> subscriber) {
+        Objects.requireNonNull(subscriber);
         publisher.subscribe(subscriber);
     }
 
     @Override
     public void onSubscribe(Subscription subscription) {
+        Objects.requireNonNull(subscription);
         if (!subscribed.compareAndSet(false, true)) {
             subscription.cancel();
         } else {

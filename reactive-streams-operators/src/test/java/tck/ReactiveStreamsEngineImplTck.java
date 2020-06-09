@@ -10,8 +10,10 @@ import io.smallrye.mutiny.streams.Engine;
  */
 public class ReactiveStreamsEngineImplTck extends ReactiveStreamsTck<Engine> {
 
+    static TestEnvironment ENV = new TestEnvironment(500);
+
     public ReactiveStreamsEngineImplTck() {
-        super(new TestEnvironment(500));
+        super(ENV);
     }
 
     @Override

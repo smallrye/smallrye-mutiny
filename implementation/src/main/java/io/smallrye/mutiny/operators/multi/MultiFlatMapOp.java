@@ -1,5 +1,6 @@
 package io.smallrye.mutiny.operators.multi;
 
+import java.util.Objects;
 import java.util.Queue;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -583,6 +584,7 @@ public final class MultiFlatMapOp<I, O> extends AbstractMultiOperator<I, O> {
 
         @Override
         public void onSubscribe(Subscription s) {
+            Objects.requireNonNull(s);
             if (subscription.compareAndSet(null, s)) {
                 s.request(Subscriptions.unboundedOrMaxConcurrency(prefetch));
             }
@@ -595,6 +597,7 @@ public final class MultiFlatMapOp<I, O> extends AbstractMultiOperator<I, O> {
 
         @Override
         public void onFailure(Throwable failure) {
+            Objects.requireNonNull(failure);
             done = true;
             parent.innerError(this, failure);
         }
