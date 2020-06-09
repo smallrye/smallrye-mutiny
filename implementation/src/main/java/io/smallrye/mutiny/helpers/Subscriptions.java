@@ -195,12 +195,12 @@ public class Subscriptions {
     /**
      * Atomically requests from the Subscription in the field if not null, otherwise accumulates
      * the request amount in the requested field to be requested once the field is set to non-null.
-     * 
+     *
      * @param field the target field that may already contain a Subscription
      * @param requested the current requested amount
      * @param requests the request amount, positive (verified)
      */
-    public static void deferredRequest(AtomicReference<Subscription> field, AtomicLong requested, long requests) {
+    public static void requestIfNotNullOrAccumulate(AtomicReference<Subscription> field, AtomicLong requested, long requests) {
         Subscription subscription = field.get();
         if (subscription != null) {
             subscription.request(requests);
@@ -216,6 +216,46 @@ public class Subscriptions {
                 }
             }
         }
+    }
+
+    /**
+     * Atomically sets the new {@link Subscription} in the container and requests any accumulated amount
+     * from the requested counter.
+     *
+     * @param container the target field for the new Subscription
+     * @param requested the current requested amount
+     * @param subscription the new Subscription, must not be {@code null}
+     * @return true if the Subscription was set the first time
+     */
+    public static boolean setIfEmptyAndRequest(AtomicReference<Subscription> container, AtomicLong requested,
+            Subscription subscription) {
+        if (Subscriptions.setIfEmpty(container, subscription)) {
+            long r = requested.getAndSet(0L);
+            if (r > 0L) {
+                subscription.request(r);
+            } else if (r < 0) {
+                throw new IllegalArgumentException("Invalid amount of request");
+            }
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Atomically sets the subscription on the container if the content is still {@code null}.
+     * If not the passed subscription gets cancelled.
+     *
+     * @param container the target container
+     * @param subscription the new subscription to set
+     * @return {@code true} if the operation succeeded, {@code false} if the target container was already set.
+     */
+    public static boolean setIfEmpty(AtomicReference<Subscription> container, Subscription subscription) {
+        Objects.requireNonNull(subscription, "subscription is null");
+        if (!container.compareAndSet(null, subscription)) {
+            subscription.cancel();
+            return false;
+        }
+        return true;
     }
 
     public static Throwable terminate(AtomicReference<Throwable> failure) {
@@ -410,7 +450,7 @@ public class Subscriptions {
     /**
      * Atomically subtract the given number from the target atomic long if it doesn't contain {@link Long#MIN_VALUE}
      * (indicating some cancelled state) or {@link Long#MAX_VALUE} (unbounded mode).
-     * 
+     *
      * @param requested the target field holding the current requested amount
      * @param n the produced item count, must be positive
      * @return the new amount
@@ -438,7 +478,7 @@ public class Subscriptions {
      * Atomically adds the positive value n to the requested value in the {@link AtomicLong} and
      * caps the result at {@link Long#MAX_VALUE} and returns the previous value and
      * considers {@link Long#MIN_VALUE} as a cancel indication (no addition then).
-     * 
+     *
      * @param requested the {@code AtomicLong} holding the current requested value
      * @param n the value to add, must be positive (not verified)
      * @return the original value before the add
