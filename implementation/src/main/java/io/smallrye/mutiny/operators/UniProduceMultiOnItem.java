@@ -70,7 +70,7 @@ public class UniProduceMultiOnItem<I, O> extends AbstractMulti<O> {
 
         @Override
         public void request(long n) {
-            Subscriptions.deferredRequest(secondUpstream, requested, n);
+            Subscriptions.requestIfNotNullOrAccumulate(secondUpstream, requested, n);
         }
 
         @Override

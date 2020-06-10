@@ -15,7 +15,7 @@ import io.smallrye.mutiny.Multi;
 public abstract class AbstractPublisherTck<T> extends PublisherVerification<T> {
 
     public AbstractPublisherTck() {
-        this(500L);
+        this(100);
     }
 
     public AbstractPublisherTck(long timeout) {

@@ -1,20 +1,23 @@
 package io.smallrye.mutiny.helpers;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.anyLong;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-
-import java.io.IOException;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.atomic.AtomicReference;
-
+import io.reactivex.internal.subscriptions.BooleanSubscription;
+import io.reactivex.internal.subscriptions.SubscriptionHelper;
+import io.smallrye.mutiny.CompositeException;
 import org.reactivestreams.Subscription;
 import org.testng.annotations.Test;
 
-import io.smallrye.mutiny.CompositeException;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.*;
 
 public class SubscriptionsTest {
 
@@ -84,15 +87,15 @@ public class SubscriptionsTest {
         verify(newSub).cancel();
     }
 
-    @Test(invocationCount = 50)
-    public void deferredRequestSubscriptionRace() throws InterruptedException {
+    @Test(invocationCount = 1000)
+    public void requestIfNotNullOrAccumulateRace() throws InterruptedException {
         AtomicReference<Subscription> container = new AtomicReference<>();
         Subscription subscription = mock(Subscription.class);
         AtomicLong requested = new AtomicLong();
 
         CountDownLatch latch = new CountDownLatch(2);
         Runnable r1 = () -> {
-            Subscriptions.deferredRequest(container, requested, 20);
+            Subscriptions.requestIfNotNullOrAccumulate(container, requested, 20);
             latch.countDown();
         };
         Runnable r2 = () -> {
@@ -100,10 +103,130 @@ public class SubscriptionsTest {
             latch.countDown();
         };
 
-        new Thread(r1).start();
-        new Thread(r2).start();
+        shuffleAndRun(r1, r2);
 
         latch.await();
+    }
+
+    @Test(invocationCount = 1000)
+    public void setIfEmptyAndRequestRace() throws InterruptedException {
+        final AtomicReference<Subscription> atomicSubscription = new AtomicReference<>();
+        final AtomicLong r = new AtomicLong();
+
+        final AtomicLong q = new AtomicLong();
+
+        final Subscription a = new Subscription() {
+            @Override
+            public void request(long n) {
+                q.addAndGet(n);
+            }
+
+            @Override
+            public void cancel() {
+                // Ignored.
+            }
+        };
+
+        CountDownLatch latch = new CountDownLatch(2);
+        Runnable r1 = () -> {
+            Subscriptions.setIfEmptyAndRequest(atomicSubscription, r, a);
+            latch.countDown();
+        };
+        Runnable r2 = () -> {
+            Subscriptions.requestIfNotNullOrAccumulate(atomicSubscription, r, 1);
+            latch.countDown();
+        };
+
+        shuffleAndRun(r1, r2);
+
+        latch.await(10, TimeUnit.SECONDS);
+
+        assertThat(atomicSubscription).hasValue(a);
+        assertThat(q.get()).isEqualTo(1);
+        assertThat(r.get()).isEqualTo(0);
+
+    }
+
+    @Test
+    public void testThatTheCancelledSubscriptionCanBeCancelled() {
+        Subscriptions.CANCELLED.cancel();
+        Subscriptions.CANCELLED.cancel();
+    }
+
+
+    @Test
+    public void testSetIfEmpty() {
+        AtomicReference<Subscription> container = new AtomicReference<>();
+        Subscription sub1 = mock(Subscription.class);
+        Subscription sub2 = mock(Subscription.class);
+
+        assertThat(Subscriptions.setIfEmpty(container, sub1)).isTrue();
+        verify(sub1, never()).cancel();
+
+        assertThat(Subscriptions.setIfEmpty(container, sub2)).isFalse();
+        verify(sub1, never()).cancel();
+        verify(sub2, times(1)).cancel();
+    }
+
+    @Test
+    public void testSetIfEmptyAndRequest() {
+        AtomicReference<Subscription> container = new AtomicReference<>();
+        AtomicLong requests = new AtomicLong();
+        Subscription sub1 = mock(Subscription.class);
+        Subscription sub2 = mock(Subscription.class);
+
+        assertThat(Subscriptions.setIfEmptyAndRequest(container, requests, sub1)).isTrue();
+        verify(sub1, never()).cancel();
+        verify(sub1, never()).request(anyLong());
+
+        requests.set(2);
+        assertThat(Subscriptions.setIfEmptyAndRequest(container, requests, sub2)).isFalse();
+        verify(sub1, never()).cancel();
+        verify(sub2, times(1)).cancel();
+        verify(sub1, never()).request(anyLong());
+        assertThat(requests).hasValue(2);
+
+        container.set(null);
+        requests.set(30);
+
+        assertThat(Subscriptions.setIfEmptyAndRequest(container, requests, sub1)).isTrue();
+        verify(sub1, never()).cancel();
+        verify(sub1, times(1)).request(30);
+        assertThat(requests).hasValue(0);
+    }
+
+    @Test
+    public void testThatSetIfEmptyAndRequestCannotHandleNegativeRequests() {
+        AtomicReference<Subscription> container = new AtomicReference<>();
+        AtomicLong requests = new AtomicLong(-23);
+        Subscription sub = mock(Subscription.class);
+
+        assertThatThrownBy(() -> Subscriptions.setIfEmptyAndRequest(container, requests, sub))
+                .isInstanceOf(IllegalArgumentException.class);
+
+        verify(sub, never()).request(anyLong());
+        verify(sub, never()).cancel();
+    }
+
+    @Test
+    public void testThatSetIfEmptyAndRequestCanHandle0Requests() {
+        AtomicReference<Subscription> container = new AtomicReference<>();
+        AtomicLong requests = new AtomicLong(0);
+        Subscription sub = mock(Subscription.class);
+
+        Subscriptions.setIfEmptyAndRequest(container, requests, sub);
+
+        verify(sub, never()).request(anyLong());
+        verify(sub, never()).cancel();
+        assertThat(requests).hasValue(0);
+        assertThat(container).hasValue(sub);
+    }
+
+
+    private void shuffleAndRun(Runnable r1, Runnable r2) {
+        List<Runnable> runnables = Arrays.asList(r1, r2);
+        Collections.shuffle(runnables);
+        runnables.forEach(runnable -> new Thread(runnable).start());
     }
 
 }

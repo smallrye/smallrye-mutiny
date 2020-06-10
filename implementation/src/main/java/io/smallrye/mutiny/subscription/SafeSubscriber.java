@@ -1,5 +1,6 @@
 package io.smallrye.mutiny.subscription;
 
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.reactivestreams.Subscriber;
@@ -52,6 +53,8 @@ public final class SafeSubscriber<T> implements Subscriber<T>, Subscription {
                     // ignore it, nothing we can do.
                 }
             }
+        } else {
+            s.cancel();
         }
     }
 
@@ -95,6 +98,7 @@ public final class SafeSubscriber<T> implements Subscriber<T>, Subscription {
 
     @Override
     public void onError(Throwable t) {
+        Objects.requireNonNull(t);
         if (done) {
             return;
         }

@@ -6,6 +6,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import io.smallrye.mutiny.helpers.StrictMultiSubscriber;
+import io.smallrye.mutiny.subscription.SerializedSubscriber;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
@@ -22,7 +24,7 @@ public class WrappedSubscriber<T> implements Subscriber<T> {
     private final AtomicBoolean subscribed = new AtomicBoolean(false);
 
     public WrappedSubscriber(Subscriber<T> delegate) {
-        this.source = delegate;
+        this.source = new StrictMultiSubscriber<>(delegate);
     }
 
     public CompletionStage<Void> future() {

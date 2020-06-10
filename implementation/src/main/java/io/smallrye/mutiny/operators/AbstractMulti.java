@@ -1,15 +1,11 @@
 package io.smallrye.mutiny.operators;
 
-import static io.smallrye.mutiny.helpers.EmptyUniSubscription.CANCELLED;
 import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
-import static io.smallrye.mutiny.helpers.Subscriptions.getInvalidRequestException;
 
 import java.util.concurrent.Executor;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
 
 import org.reactivestreams.Subscriber;
-import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
@@ -24,12 +20,12 @@ import io.smallrye.mutiny.groups.MultiOnItem;
 import io.smallrye.mutiny.groups.MultiOverflow;
 import io.smallrye.mutiny.groups.MultiSubscribe;
 import io.smallrye.mutiny.groups.MultiTransform;
+import io.smallrye.mutiny.helpers.StrictMultiSubscriber;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.multi.MultiCacheOp;
 import io.smallrye.mutiny.operators.multi.MultiEmitOnOp;
 import io.smallrye.mutiny.operators.multi.MultiSubscribeOnOp;
 import io.smallrye.mutiny.subscription.MultiSubscriber;
-import io.smallrye.mutiny.subscription.SerializedSubscriber;
 
 public abstract class AbstractMulti<T> implements Multi<T> {
 
@@ -44,79 +40,7 @@ public abstract class AbstractMulti<T> implements Multi<T> {
             throw new NullPointerException("Subscriber is `null`");
         }
 
-        //noinspection SubscriberImplementation
-        this.subscribe(new SerializedSubscriber<>(new Subscriber<T>() {
-
-            AtomicReference<Subscription> reference = new AtomicReference<>();
-
-            @Override
-            public void onSubscribe(Subscription s) {
-                if (reference.compareAndSet(null, s)) {
-                    subscriber.onSubscribe(new Subscription() {
-                        @Override
-                        public void request(long n) {
-                            // validate and pass through
-                            if (n <= 0) {
-                                onError(getInvalidRequestException());
-                                return;
-                            }
-                            s.request(n);
-                        }
-
-                        @Override
-                        public void cancel() {
-                            try {
-                                s.cancel();
-                            } finally {
-                                reference.set(CANCELLED);
-                            }
-                        }
-                    });
-                } else {
-                    s.cancel();
-                }
-            }
-
-            @Override
-            public void onNext(T item) {
-                if (item == null) {
-                    Subscription subscription = reference.getAndSet(CANCELLED);
-                    if (subscription != null) {
-                        subscription.cancel();
-                    }
-                    throw new NullPointerException("`null` is not a valid item");
-                }
-                try {
-                    subscriber.onNext(item);
-                } catch (Throwable e) {
-                    Subscription subscription = reference.getAndSet(CANCELLED);
-                    if (subscription != null) {
-                        subscription.cancel();
-                    }
-                }
-            }
-
-            @Override
-            public void onError(Throwable failure) {
-                if (failure == null) {
-                    throw new NullPointerException("The failure must not be `null`");
-                }
-                try {
-                    subscriber.onError(failure);
-                } finally {
-                    reference.set(CANCELLED);
-                }
-            }
-
-            @Override
-            public void onComplete() {
-                try {
-                    subscriber.onComplete();
-                } finally {
-                    reference.set(CANCELLED);
-                }
-            }
-        }));
+        this.subscribe(new StrictMultiSubscriber<>(subscriber));
     }
 
     @Override
