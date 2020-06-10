@@ -1,8 +1,11 @@
 package io.smallrye.mutiny.operators;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -14,7 +17,9 @@ import org.testng.annotations.Test;
 
 import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Multi;
+import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.operators.multi.processors.BroadcastProcessor;
+import io.smallrye.mutiny.subscription.Cancellable;
 import io.smallrye.mutiny.test.MultiAssertSubscriber;
 
 public class MultiOnEventTest {
@@ -433,6 +438,115 @@ public class MultiOnEventTest {
         assertThat(invocations).hasValue(1);
         subscriber.cancel();
         assertThat(invocations).hasValue(1);
+    }
+
+    private Multi<Integer> numbers = Multi.createFrom().items(1, 2);
+    private Multi<Integer> failed = Multi.createBy().concatenating()
+            .streams(numbers, Multi.createFrom().failure(new IOException("boom")));
+    private Uni<Void> sub = Uni.createFrom().nullItem();
+
+    @Test
+    public void testAsyncInvokeOnItem() {
+        AtomicInteger res = new AtomicInteger();
+        AtomicInteger twoGotCalled = new AtomicInteger();
+
+        List<Integer> r = numbers.onItem().invokeUni(i -> {
+            res.set(i);
+            return sub.onItem().invoke(c -> twoGotCalled.incrementAndGet());
+        })
+                .collectItems().asList().await().indefinitely();
+
+        assertThat(r).containsExactly(1, 2);
+        assertThat(twoGotCalled).hasValue(2);
+        assertThat(res).hasValue(2);
+    }
+
+    @Test
+    public void testAsyncInvokeOnFailure() {
+        AtomicInteger res = new AtomicInteger(-1);
+        AtomicInteger twoGotCalled = new AtomicInteger();
+
+        assertThatThrownBy(() -> failed.onItem().invokeUni(
+                i -> {
+                    res.set(i);
+                    return sub.onItem().invoke(c -> twoGotCalled.incrementAndGet());
+                })
+                .collectItems().asList().await().indefinitely())
+                        .isInstanceOf(CompletionException.class)
+                        .hasCauseInstanceOf(IOException.class)
+                        .hasMessageContaining("boom");
+
+        assertThat(twoGotCalled).hasValue(2);
+        assertThat(res).hasValue(2);
+    }
+
+    @Test
+    public void testFailureInAsyncCallback() {
+        AtomicInteger res = new AtomicInteger();
+        Multi<Integer> more = Multi.createFrom().items(1, 2, 3);
+        assertThatThrownBy(() -> more.onItem().invokeUni(i -> {
+            res.set(i);
+            if (i == 2) {
+                throw new RuntimeException("boom");
+            }
+            return Uni.createFrom().nullItem();
+        })
+                .collectItems().asList()
+                .await().indefinitely()).isInstanceOf(RuntimeException.class).hasMessageContaining("boom");
+
+        assertThat(res).hasValue(2);
+    }
+
+    @Test
+    public void testNullReturnedByAsyncCallback() {
+        AtomicInteger res = new AtomicInteger();
+        Multi<Integer> more = Multi.createFrom().items(1, 2, 3);
+        assertThatThrownBy(() -> more.onItem().invokeUni(i -> {
+            res.set(i);
+            if (i == 2) {
+                return null;
+            }
+            return Uni.createFrom().nullItem();
+        })
+                .collectItems().asList()
+                .await().indefinitely()).isInstanceOf(NullPointerException.class).hasMessageContaining("null");
+        assertThat(res).hasValue(2);
+    }
+
+    @Test
+    public void testAsyncInvokeWithSubFailure() {
+        AtomicInteger res = new AtomicInteger(-1);
+        AtomicInteger twoGotCalled = new AtomicInteger(-1);
+        Multi<Integer> more = Multi.createFrom().items(1, 2, 3);
+        Uni<Integer> failing = Uni.createFrom().item(23).onItem().invoke(twoGotCalled::set).onItem()
+                .failWith(k -> new IllegalStateException("boom-" + k));
+
+        assertThatThrownBy(() -> more.onItem().invokeUni(i -> {
+            res.set(i);
+            if (i == 2) {
+                return failing;
+            }
+            return Uni.createFrom().nullItem();
+        })
+                .collectItems().asList()
+                .await().indefinitely()).isInstanceOf(IllegalStateException.class).hasMessageContaining("boom-2");
+
+        assertThat(twoGotCalled).hasValue(23);
+        assertThat(res).hasValue(2);
+    }
+
+    @Test
+    public void testCancellationBeforeActionCompletes() {
+        AtomicBoolean terminated = new AtomicBoolean();
+        Uni<Object> uni = Uni.createFrom().emitter(e -> e.onTermination(() -> terminated.set(true)));
+
+        AtomicInteger result = new AtomicInteger();
+        Cancellable cancellable = numbers
+                .onItem().invokeUni(i -> uni).subscribe().with(result::set);
+
+        cancellable.cancel();
+        assertThat(result).hasValue(0);
+        assertThat(terminated).isTrue();
     }
 
 }

@@ -44,7 +44,7 @@ public class MultiThenTest {
                 .then(self -> self
                         .onItem().apply(i -> i + 1)
                         .onFailure().retry().indefinitely())
-                .then(self -> self.onItem().produceUni(i -> Uni.createFrom().item(Integer.toString(i))).concatenate())
+                .then(self -> self.onItem().applyUniAndConcatenate(i -> Uni.createFrom().item(Integer.toString(i))))
                 .then(self -> {
                     String r = self.collectItems().first().await().indefinitely();
                     result.set(r);

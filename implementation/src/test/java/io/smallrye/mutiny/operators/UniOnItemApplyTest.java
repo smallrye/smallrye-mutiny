@@ -13,7 +13,7 @@ import org.testng.annotations.Test;
 
 import io.smallrye.mutiny.Uni;
 
-public class UniOnItemMapTest {
+public class UniOnItemApplyTest {
 
     private Uni<Integer> one = Uni.createFrom().item(1);
 
@@ -24,7 +24,7 @@ public class UniOnItemMapTest {
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void testThatSourceMustNotBeNull() {
-        new UniOnItemMap<>(null, Function.identity());
+        new UniOnItemApply<>(null, Function.identity());
     }
 
     @Test

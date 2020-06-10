@@ -18,12 +18,12 @@ import io.smallrye.mutiny.subscription.MultiSubscriber;
 import io.smallrye.mutiny.subscription.UniSubscriber;
 import io.smallrye.mutiny.subscription.UniSubscription;
 
-public class UniProduceMultiOnItem<I, O> extends AbstractMulti<O> {
+public class UniOnItemApplyMulti<I, O> extends AbstractMulti<O> {
 
     private final Function<? super I, ? extends Publisher<? extends O>> mapper;
     private final Uni<I> upstream;
 
-    public UniProduceMultiOnItem(Uni<I> upstream, Function<? super I, ? extends Publisher<? extends O>> mapper) {
+    public UniOnItemApplyMulti(Uni<I> upstream, Function<? super I, ? extends Publisher<? extends O>> mapper) {
         this.upstream = nonNull(upstream, "upstream");
         this.mapper = nonNull(mapper, "mapper");
     }
@@ -36,11 +36,11 @@ public class UniProduceMultiOnItem<I, O> extends AbstractMulti<O> {
         upstream.subscribe().withSubscriber(new FlatMapPublisherSubscriber<>(subscriber, mapper));
     }
 
-    @SuppressWarnings("SubscriberImplementation")
+    @SuppressWarnings({ "SubscriberImplementation", "ReactiveStreamsSubscriberImplementation" })
     static final class FlatMapPublisherSubscriber<I, O> implements Subscriber<O>, UniSubscriber<I>, Subscription {
 
-        private AtomicReference<Subscription> secondUpstream;
-        private AtomicReference<UniSubscription> firstUpstream;
+        private final AtomicReference<Subscription> secondUpstream;
+        private final AtomicReference<UniSubscription> firstUpstream;
         private final Subscriber<? super O> downstream;
         private final Function<? super I, ? extends Publisher<? extends O>> mapper;
         private final AtomicLong requested = new AtomicLong();

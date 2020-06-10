@@ -171,7 +171,7 @@ public interface Uni<T> {
      * {@code
      * Uni<T> uni = ...;
      * uni.onItem().apply(x -> ...); // Map to another item
-     * uni.onItem().produceUni(x -> ...); // Map to another Uni (flatMap)
+     * uni.onItem().applyUni(x -> ...); // Map to another Uni (flatMap)
      * }
      * </pre>
      *
@@ -368,7 +368,7 @@ public interface Uni<T> {
      *         in an asynchronous manner.
      */
     default <O> Uni<O> flatMap(Function<? super T, Uni<? extends O>> mapper) {
-        return onItem().produceUni(nonNull(mapper, "mapper"));
+        return onItem().applyUni(nonNull(mapper, "mapper"));
     }
 
     /**

@@ -10,7 +10,7 @@ import org.testng.annotations.Test;
 
 import io.smallrye.mutiny.Uni;
 
-public class UniOnItemFlatMapToCompletionStageTest {
+public class UniOnItemApplyUniToCompletionStageTest {
 
     @Test
     public void testFlatMapWithImmediateValue() {

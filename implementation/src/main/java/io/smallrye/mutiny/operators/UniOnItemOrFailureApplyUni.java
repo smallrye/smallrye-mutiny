@@ -1,7 +1,7 @@
 package io.smallrye.mutiny.operators;
 
 import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
-import static io.smallrye.mutiny.operators.UniOnItemFlatMap.handleInnerSubscription;
+import static io.smallrye.mutiny.operators.UniOnItemApplyUni.handleInnerSubscription;
 
 import java.util.function.BiFunction;
 
@@ -9,11 +9,11 @@ import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.subscription.UniSubscription;
 
-public class UniOnItemOrFailureFlatMap<I, O> extends UniOperator<I, O> {
+public class UniOnItemOrFailureApplyUni<I, O> extends UniOperator<I, O> {
 
     private final BiFunction<? super I, Throwable, ? extends Uni<? extends O>> mapper;
 
-    public UniOnItemOrFailureFlatMap(Uni<I> upstream,
+    public UniOnItemOrFailureApplyUni(Uni<I> upstream,
             BiFunction<? super I, Throwable, ? extends Uni<? extends O>> mapper) {
         super(nonNull(upstream, "upstream"));
         this.mapper = nonNull(mapper, "mapper");
@@ -23,7 +23,7 @@ public class UniOnItemOrFailureFlatMap<I, O> extends UniOperator<I, O> {
             I item,
             Throwable failure,
             UniSerializedSubscriber<? super O> subscriber,
-            UniOnItemFlatMap.FlatMapSubscription flatMapSubscription) {
+            UniOnItemApplyUni.FlatMapSubscription flatMapSubscription) {
         Uni<? extends O> outcome;
         try {
             outcome = mapper.apply(item, failure);
@@ -43,7 +43,7 @@ public class UniOnItemOrFailureFlatMap<I, O> extends UniOperator<I, O> {
 
     @Override
     protected void subscribing(UniSerializedSubscriber<? super O> subscriber) {
-        UniOnItemFlatMap.FlatMapSubscription flatMapSubscription = new UniOnItemFlatMap.FlatMapSubscription();
+        UniOnItemApplyUni.FlatMapSubscription flatMapSubscription = new UniOnItemApplyUni.FlatMapSubscription();
         // Subscribe to the source.
         upstream().subscribe().withSubscriber(new UniDelegatingSubscriber<I, O>(subscriber) {
             @Override

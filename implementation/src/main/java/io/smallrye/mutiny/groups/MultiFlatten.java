@@ -26,7 +26,7 @@ public class MultiFlatten<I, O> {
     private final int requests;
     private final boolean collectFailureUntilCompletion;
 
-    MultiFlatten(Multi<I> upstream,
+    public MultiFlatten(Multi<I> upstream,
             Function<? super I, ? extends Publisher<? extends O>> mapper,
             int requests, boolean collectFailures) {
         this.upstream = upstream;

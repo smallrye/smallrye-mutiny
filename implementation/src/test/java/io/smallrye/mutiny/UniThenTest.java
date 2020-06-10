@@ -15,7 +15,7 @@ public class UniThenTest {
                 .then(self -> self
                         .onItem().apply(i -> i + 1)
                         .onFailure().retry().indefinitely())
-                .then(self -> self.onItem().produceUni(i -> Uni.createFrom().item(Integer.toString(i))))
+                .then(self -> self.onItem().applyUni(i -> Uni.createFrom().item(Integer.toString(i))))
                 .await().indefinitely();
         assertThat(result).isEqualTo("24");
     }
@@ -41,7 +41,7 @@ public class UniThenTest {
                 .then(self -> self
                         .onItem().apply(i -> i + 1)
                         .onFailure().retry().indefinitely())
-                .then(self -> self.onItem().produceUni(i -> Uni.createFrom().item(Integer.toString(i))))
+                .then(self -> self.onItem().applyUni(i -> Uni.createFrom().item(Integer.toString(i))))
                 .then(self -> {
                     String r = self.await().indefinitely();
                     result.set(r);

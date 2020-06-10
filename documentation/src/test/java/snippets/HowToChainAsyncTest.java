@@ -17,8 +17,8 @@ public class HowToChainAsyncTest {
         // tag::code[]
 
         CompletableFuture<String> future = uni
-                .onItem().produceUni(this::asyncOperation)
-                .onItem().produceUni(this::anotherAsyncOperation)
+                .onItem().applyUni(this::asyncOperation)
+                .onItem().applyUni(this::anotherAsyncOperation)
                 .subscribeAsCompletionStage();
 
         // end::code[]

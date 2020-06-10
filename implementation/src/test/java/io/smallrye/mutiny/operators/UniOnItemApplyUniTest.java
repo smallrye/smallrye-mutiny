@@ -14,12 +14,12 @@ import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.test.MultiAssertSubscriber;
 
-public class UniOnItemFlatMapTest {
+public class UniOnItemApplyUniTest {
 
     @Test
     public void testFlatMapWithImmediateValue() {
         UniAssertSubscriber<Integer> test = UniAssertSubscriber.create();
-        Uni.createFrom().item(1).onItem().produceUni(v -> Uni.createFrom().item(2)).subscribe().withSubscriber(test);
+        Uni.createFrom().item(1).onItem().applyUni(v -> Uni.createFrom().item(2)).subscribe().withSubscriber(test);
         test.assertCompletedSuccessfully().assertItem(2).assertNoFailure();
     }
 
@@ -34,7 +34,7 @@ public class UniOnItemFlatMapTest {
     public void testWithImmediateCancellation() {
         UniAssertSubscriber<Integer> test = new UniAssertSubscriber<>(true);
         AtomicBoolean called = new AtomicBoolean();
-        Uni.createFrom().item(1).onItem().produceUni(v -> {
+        Uni.createFrom().item(1).onItem().applyUni(v -> {
             called.set(true);
             return Uni.createFrom().item(2);
         }).subscribe().withSubscriber(test);
@@ -44,6 +44,20 @@ public class UniOnItemFlatMapTest {
 
     @Test
     public void testWithADeferredUi() {
+        UniAssertSubscriber<Integer> test1 = UniAssertSubscriber.create();
+        UniAssertSubscriber<Integer> test2 = UniAssertSubscriber.create();
+        AtomicInteger count = new AtomicInteger(2);
+        Uni<Integer> uni = Uni.createFrom().item(1).onItem()
+                .applyUni(v -> Uni.createFrom().deferred(() -> Uni.createFrom().item(count.incrementAndGet())));
+        uni.subscribe().withSubscriber(test1);
+        uni.subscribe().withSubscriber(test2);
+        test1.assertCompletedSuccessfully().assertItem(3).assertNoFailure();
+        test2.assertCompletedSuccessfully().assertItem(4).assertNoFailure();
+    }
+
+    @SuppressWarnings("deprecation")
+    @Test
+    public void testDeprecatedMethodWithADeferredUi() {
         UniAssertSubscriber<Integer> test1 = UniAssertSubscriber.create();
         UniAssertSubscriber<Integer> test2 = UniAssertSubscriber.create();
         AtomicInteger count = new AtomicInteger(2);
@@ -59,7 +73,7 @@ public class UniOnItemFlatMapTest {
     public void testWithAnUniResolvedAsynchronously() {
         UniAssertSubscriber<Integer> test = UniAssertSubscriber.create();
         Uni<Integer> uni = Uni.createFrom().item(1).onItem()
-                .produceUni(v -> Uni.createFrom().emitter(emitter -> new Thread(() -> emitter.complete(42)).start()));
+                .applyUni(v -> Uni.createFrom().emitter(emitter -> new Thread(() -> emitter.complete(42)).start()));
         uni.subscribe().withSubscriber(test);
         test.await().assertCompletedSuccessfully().assertItem(42).assertNoFailure();
     }
@@ -67,7 +81,7 @@ public class UniOnItemFlatMapTest {
     @Test
     public void testWithAnUniResolvedAsynchronouslyWithAFailure() {
         UniAssertSubscriber<Integer> test = UniAssertSubscriber.create();
-        Uni<Integer> uni = Uni.createFrom().item(1).onItem().produceUni(v -> Uni.createFrom()
+        Uni<Integer> uni = Uni.createFrom().item(1).onItem().applyUni(v -> Uni.createFrom()
                 .emitter(emitter -> new Thread(() -> emitter.fail(new IOException("boom"))).start()));
         uni.subscribe().withSubscriber(test);
         test.await().assertCompletedWithFailure().assertFailure(IOException.class, "boom");
@@ -77,7 +91,7 @@ public class UniOnItemFlatMapTest {
     public void testThatMapperIsNotCalledOnUpstreamFailure() {
         UniAssertSubscriber<Integer> test = UniAssertSubscriber.create();
         AtomicBoolean called = new AtomicBoolean();
-        Uni.createFrom().failure(new Exception("boom")).onItem().produceUni(v -> {
+        Uni.createFrom().failure(new Exception("boom")).onItem().applyUni(v -> {
             called.set(true);
             return Uni.createFrom().item(2);
         }).subscribe().withSubscriber(test);
@@ -90,7 +104,7 @@ public class UniOnItemFlatMapTest {
         UniAssertSubscriber<Integer> test = UniAssertSubscriber.create();
         AtomicBoolean called = new AtomicBoolean();
         Uni.createFrom().item(1)
-                .onItem().<Integer> produceUni(v -> {
+                .onItem().<Integer> applyUni(v -> {
                     called.set(true);
                     throw new IllegalStateException("boom");
                 })
@@ -104,7 +118,7 @@ public class UniOnItemFlatMapTest {
         UniAssertSubscriber<Integer> test = UniAssertSubscriber.create();
         AtomicBoolean called = new AtomicBoolean();
         Uni.createFrom().item(1)
-                .onItem().<Integer> produceUni(v -> {
+                .onItem().<Integer> applyUni(v -> {
                     called.set(true);
                     return null;
                 }).subscribe().withSubscriber(test);
@@ -114,14 +128,14 @@ public class UniOnItemFlatMapTest {
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void testThatTheMapperCannotBeNull() {
-        Uni.createFrom().item(1).onItem().produceUni((Function<Integer, Uni<?>>) null);
+        Uni.createFrom().item(1).onItem().applyUni((Function<Integer, Uni<?>>) null);
     }
 
     @Test
     public void testWithCancellationBeforeEmission() {
         UniAssertSubscriber<Integer> test = UniAssertSubscriber.create();
         AtomicBoolean cancelled = new AtomicBoolean();
-        @SuppressWarnings("unchecked")
+        @SuppressWarnings({ "unchecked", "rawtypes" })
         CompletableFuture<Integer> future = new CompletableFuture() {
             @Override
             public boolean cancel(boolean mayInterruptIfRunning) {
@@ -130,7 +144,7 @@ public class UniOnItemFlatMapTest {
             }
         };
 
-        Uni<Integer> uni = Uni.createFrom().item(1).onItem().produceUni(v -> Uni.createFrom().completionStage(future));
+        Uni<Integer> uni = Uni.createFrom().item(1).onItem().applyUni(v -> Uni.createFrom().completionStage(future));
         uni.subscribe().withSubscriber(test);
         test.cancel();
         test.assertNotCompleted();
@@ -140,13 +154,13 @@ public class UniOnItemFlatMapTest {
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void testFlatMapMultiWithNullMapper() {
         Uni<Integer> uni = Uni.createFrom().item(1);
-        uni.onItem().produceMulti(null);
+        uni.onItem().applyMulti(null);
     }
 
     @Test
     public void testFlatMapMultiWithItem() {
         Uni.createFrom().item(1)
-                .onItem().produceMulti(i -> Multi.createFrom().range(i, 5))
+                .onItem().applyMulti(i -> Multi.createFrom().range(i, 5))
                 .subscribe().withSubscriber(MultiAssertSubscriber.create(10))
                 .await()
                 .assertCompletedSuccessfully()
@@ -156,7 +170,7 @@ public class UniOnItemFlatMapTest {
     @Test
     public void testFlatMapMultiWithNull() {
         Uni.createFrom().voidItem()
-                .onItem().produceMulti(x -> Multi.createFrom().range(1, 5))
+                .onItem().applyMulti(x -> Multi.createFrom().range(1, 5))
                 .subscribe().withSubscriber(MultiAssertSubscriber.create(10))
                 .await()
                 .assertCompletedSuccessfully()
@@ -166,7 +180,7 @@ public class UniOnItemFlatMapTest {
     @Test
     public void testFlatMapMultiWithFailure() {
         Uni.createFrom().<Integer> failure(new IOException("boom"))
-                .onItem().produceMulti(x -> Multi.createFrom().range(1, 5))
+                .onItem().applyMulti(x -> Multi.createFrom().range(1, 5))
                 .subscribe().withSubscriber(MultiAssertSubscriber.create(10))
                 .await()
                 .assertHasFailedWith(IOException.class, "boom")
@@ -176,7 +190,7 @@ public class UniOnItemFlatMapTest {
     @Test
     public void testFlatMapMultiWithExceptionThrownByMapper() {
         Uni.createFrom().item(1)
-                .onItem().produceMulti(x -> {
+                .onItem().applyMulti(x -> {
                     throw new IllegalStateException("boom");
                 })
                 .subscribe().withSubscriber(MultiAssertSubscriber.create(10))
@@ -188,7 +202,7 @@ public class UniOnItemFlatMapTest {
     @Test
     public void testFlatMapMultiWithNullReturnedByMapper() {
         Uni.createFrom().item(1)
-                .onItem().produceMulti(x -> null)
+                .onItem().applyMulti(x -> null)
                 .subscribe().withSubscriber(MultiAssertSubscriber.create(10))
                 .await()
                 .assertHasFailedWith(NullPointerException.class, "")
@@ -201,7 +215,7 @@ public class UniOnItemFlatMapTest {
 
         Uni.createFrom().<Integer> nothing()
                 .on().cancellation(() -> called.set(true))
-                .onItem().produceMulti(x -> Multi.createFrom().range(x, 10))
+                .onItem().applyMulti(x -> Multi.createFrom().range(x, 10))
                 .subscribe().withSubscriber(MultiAssertSubscriber.create(10))
 
                 .assertNotTerminated()
@@ -219,7 +233,7 @@ public class UniOnItemFlatMapTest {
 
         Uni.createFrom().item(1)
                 .on().cancellation(() -> calledUni.set(true))
-                .onItem().produceMulti(i -> Multi.createFrom().nothing()
+                .onItem().applyMulti(i -> Multi.createFrom().nothing()
                         .on().cancellation(() -> called.set(true)))
                 .subscribe().withSubscriber(MultiAssertSubscriber.create(10))
                 .assertNotTerminated()

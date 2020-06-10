@@ -262,7 +262,7 @@ public class MultiToHotStreamTest {
         MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(10);
 
         multi
-                .onItem().produceMulti(i -> processor).withRequests(10).merge()
+                .onItem().applyMulti(i -> processor).withRequests(10).merge()
                 .subscribe().withSubscriber(subscriber);
         processor.onNext(1);
         processor.onNext(2);

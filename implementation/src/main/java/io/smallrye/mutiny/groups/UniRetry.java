@@ -76,7 +76,7 @@ public class UniRetry<T> {
     public Uni<T> until(Predicate<? super Throwable> predicate) {
         ParameterValidation.nonNull(predicate, "predicate");
         Function<Multi<Throwable>, Publisher<Long>> whenStreamFactory = stream -> stream.onItem()
-                .produceUni(failure -> Uni.createFrom().<Long> emitter(emitter -> {
+                .applyUni(failure -> Uni.createFrom().<Long> emitter(emitter -> {
                     try {
                         if (predicate.test(failure)) {
                             emitter.complete(1L);

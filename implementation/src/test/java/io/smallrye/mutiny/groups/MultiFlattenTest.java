@@ -19,7 +19,7 @@ import io.smallrye.mutiny.test.MultiAssertSubscriber;
 public class MultiFlattenTest {
 
     @Test
-    public void testWithMultis() {
+    public void testDisjointWithMultis() {
         AtomicBoolean subscribed = new AtomicBoolean();
         MultiAssertSubscriber<String> subscriber = Multi.createFrom().items(
                 Multi.createFrom().items("a", "b", "c"),
@@ -38,7 +38,7 @@ public class MultiFlattenTest {
     }
 
     @Test
-    public void testWithPublishers() {
+    public void testDisjointWithPublishers() {
         AtomicBoolean subscribed = new AtomicBoolean();
         MultiAssertSubscriber<String> subscriber = Multi.createFrom().items(
                 Flowable.just("a", "b", "c"),
@@ -57,7 +57,7 @@ public class MultiFlattenTest {
     }
 
     @Test
-    public void testWithArrays() {
+    public void testDisjointWithArrays() {
         MultiAssertSubscriber<String> subscriber = Multi.createFrom().items(
                 new String[] { "a", "b", "c" },
                 new String[] { "d", "e" },
@@ -72,7 +72,7 @@ public class MultiFlattenTest {
     }
 
     @Test
-    public void testWithIterables() {
+    public void testDisjointWithIterables() {
         MultiAssertSubscriber<String> subscriber = Multi.createFrom().items(
                 Arrays.asList("a", "b", "c"),
                 Arrays.asList("d", "e"),
@@ -153,7 +153,7 @@ public class MultiFlattenTest {
     public void testFlatMapRequestsWithEmissionOnExecutor() {
         MultiAssertSubscriber<String> subscriber = Multi.createFrom().items("a", "b", "c", "d", "e", "f", "g", "h")
                 .onItem()
-                .produceUni(s -> Uni.createFrom().item(s.toUpperCase()).onItem().delayIt().by(Duration.ofMillis(10)))
+                .applyUni(s -> Uni.createFrom().item(s.toUpperCase()).onItem().delayIt().by(Duration.ofMillis(10)))
                 .concatenate()
                 .subscribe().withSubscriber(MultiAssertSubscriber.create(0));
 

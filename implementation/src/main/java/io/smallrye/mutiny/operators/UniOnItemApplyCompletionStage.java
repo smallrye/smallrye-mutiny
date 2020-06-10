@@ -10,11 +10,11 @@ import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.subscription.UniSubscriber;
 import io.smallrye.mutiny.subscription.UniSubscription;
 
-public class UniFlatMapCompletionStageOnItem<I, O> extends UniOperator<I, O> {
+public class UniOnItemApplyCompletionStage<I, O> extends UniOperator<I, O> {
 
     private final Function<? super I, ? extends CompletionStage<? extends O>> mapper;
 
-    public UniFlatMapCompletionStageOnItem(Uni<I> upstream,
+    public UniOnItemApplyCompletionStage(Uni<I> upstream,
             Function<? super I, ? extends CompletionStage<? extends O>> mapper) {
         super(nonNull(upstream, "upstream"));
         this.mapper = nonNull(mapper, "mapper");
@@ -23,7 +23,7 @@ public class UniFlatMapCompletionStageOnItem<I, O> extends UniOperator<I, O> {
     private static <I, O> void invokeAndSubstitute(Function<? super I, ? extends CompletionStage<? extends O>> mapper,
             I input,
             UniSerializedSubscriber<? super O> subscriber,
-            UniOnItemFlatMap.FlatMapSubscription flatMapSubscription) {
+            UniOnItemApplyUni.FlatMapSubscription flatMapSubscription) {
         CompletionStage<? extends O> outcome;
         try {
             outcome = mapper.apply(input);
@@ -48,7 +48,7 @@ public class UniFlatMapCompletionStageOnItem<I, O> extends UniOperator<I, O> {
 
     @Override
     protected void subscribing(UniSerializedSubscriber<? super O> subscriber) {
-        UniOnItemFlatMap.FlatMapSubscription flatMapSubscription = new UniOnItemFlatMap.FlatMapSubscription();
+        UniOnItemApplyUni.FlatMapSubscription flatMapSubscription = new UniOnItemApplyUni.FlatMapSubscription();
         // Subscribe to the source.
         upstream().subscribe().withSubscriber(new UniDelegatingSubscriber<I, O>(subscriber) {
             @Override

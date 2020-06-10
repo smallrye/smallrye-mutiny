@@ -43,7 +43,7 @@ public class ExponentialBackoff {
 
         AtomicInteger index = new AtomicInteger();
         return t -> t
-                .onItem().produceUni(failure -> {
+                .onItem().applyUniAndConcatenate(failure -> {
                     int iteration = index.incrementAndGet();
                     if (iteration >= numRetries) {
                         return Uni.createFrom().<Long> failure(
@@ -63,7 +63,7 @@ public class ExponentialBackoff {
                     Duration effectiveBackoff = nextBackoff.plusMillis(jitter);
                     return Uni.createFrom().item((long) iteration).onItem().delayIt()
                             .onExecutor(executor).by(effectiveBackoff);
-                }).concatenate();
+                });
     }
 
     private static long computeJitter(Duration firstBackoff, Duration maxBackoff, double jitterFactor,

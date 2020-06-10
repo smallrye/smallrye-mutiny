@@ -291,7 +291,7 @@ public class MultiOnFailureRetryWhenTest {
                 repeat -> {
                     return Multi.createBy().combining().streams(repeat, Multi.createFrom().range(1, 4)).asTuple()
                             .map(Tuple2::getItem2)
-                            .onItem().produceUni(time -> Uni.createFrom().item(time)
+                            .onItem().applyUni(time -> Uni.createFrom().item(time)
                                     .onItem().delayIt().by(Duration.ofMillis(time)))
                             .concatenate();
                 });

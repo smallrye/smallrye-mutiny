@@ -437,7 +437,7 @@ public class BroadcastProcessorTest {
         MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(10);
 
         processor
-                .onItem().produceMulti(i -> processor).withRequests(10).merge()
+                .onItem().applyMulti(i -> processor).withRequests(10).merge()
                 .subscribe().withSubscriber(subscriber);
         processor.onNext(1);
         processor.onNext(2);

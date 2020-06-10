@@ -102,12 +102,15 @@ public class MultiTransform<T> {
      * asynchronous test. Unlike {@link #byFilteringItemsWith(Predicate)}, the test is asynchronous. Note that this method
      * preserves ordering of the items, even if the test is asynchronous.
      *
+     * While the test operation is asynchronous, this method preserves the ordering (so use a concatenate flattening
+     * process).
+     *
      * @param tester the predicate, must not be {@code null}, must not produce {@code null}
      * @return the produced {@link Multi}
      */
     public Multi<T> byTestingItemsWith(Function<? super T, ? extends Uni<Boolean>> tester) {
         nonNull(tester, "tester");
-        return upstream.onItem().produceMulti(res -> {
+        return upstream.onItem().applyMultiAndConcatenate(res -> {
             Uni<Boolean> uni = tester.apply(res);
             return uni.map(pass -> {
                 if (pass) {
@@ -116,7 +119,7 @@ public class MultiTransform<T> {
                     return null;
                 }
             }).toMulti();
-        }).concatenate();
+        });
     }
 
     /**

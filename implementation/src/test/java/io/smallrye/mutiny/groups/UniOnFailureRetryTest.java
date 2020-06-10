@@ -60,7 +60,7 @@ public class UniOnFailureRetryTest {
         })
                 .onFailure().retry().when(stream -> stream.onItem().invoke(failures::add)
                         .onItem()
-                        .produceUni(f -> Uni.createFrom().item("tick").onItem().delayIt().by(Duration.ofMillis(10)))
+                        .applyUni(f -> Uni.createFrom().item("tick").onItem().delayIt().by(Duration.ofMillis(10)))
                         .concatenate())
                 .await().atMost(Duration.ofSeconds(5));
 
@@ -84,7 +84,7 @@ public class UniOnFailureRetryTest {
             }
         })
                 .onFailure().retry().when(stream -> stream
-                        .onItem().produceUni(f -> Uni.createFrom().failure(new IllegalStateException("damned!"))).concatenate())
+                        .onItem().applyUni(f -> Uni.createFrom().failure(new IllegalStateException("damned!"))).concatenate())
                 .await().atMost(Duration.ofSeconds(5));
     }
 
@@ -129,9 +129,7 @@ public class UniOnFailureRetryTest {
     @Test(expectedExceptions = IllegalStateException.class, expectedExceptionsMessageRegExp = ".*4/4.*")
     public void testRetryWithBackOffReachingMaxAttempt() {
         AtomicInteger count = new AtomicInteger();
-        Uni.createFrom().<String> emitter(e -> {
-            e.fail(new Exception("boom " + count.getAndIncrement()));
-        })
+        Uni.createFrom().<String> emitter(e -> e.fail(new Exception("boom " + count.getAndIncrement())))
                 .onFailure().retry().withBackOff(Duration.ofMillis(10), Duration.ofSeconds(20)).withJitter(1.0)
                 .atMost(4)
                 .await().atMost(Duration.ofSeconds(5));

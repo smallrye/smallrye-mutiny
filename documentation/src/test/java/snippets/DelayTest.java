@@ -40,8 +40,8 @@ public class DelayTest {
     public void testDelayMulti() {
         // tag::delay-multi[]
         List<Integer> delayed = Multi.createFrom().items(1, 2, 3, 4, 5)
-                .onItem().produceUni(i -> Uni.createFrom().item(i).onItem().delayIt().by(Duration.ofMillis(10)))
-                .concatenate()
+                .onItem().applyUniAndConcatenate(i ->
+                        Uni.createFrom().item(i).onItem().delayIt().by(Duration.ofMillis(10)))
                 .collectItems().asList()
                 .await().indefinitely();
         // end::delay-multi[]
@@ -53,8 +53,9 @@ public class DelayTest {
         // tag::delay-multi-random[]
         Random random = new Random();
         List<Integer> delayed = Multi.createFrom().items(1, 2, 3, 4, 5)
-                .onItem().produceUni(i -> Uni.createFrom().item(i).onItem().delayIt().by(Duration.ofMillis(random.nextInt(100) + 1)))
-                .merge()
+                .onItem().applyUniAndConcatenate( // Using merge may change the order
+                        i -> Uni.createFrom().item(i)
+                                .onItem().delayIt().by(Duration.ofMillis(random.nextInt(100) + 1)))
                 .collectItems().asList()
                 .await().indefinitely();
         // end::delay-multi-random[]

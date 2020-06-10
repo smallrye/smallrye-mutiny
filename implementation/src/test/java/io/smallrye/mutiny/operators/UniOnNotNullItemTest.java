@@ -1,15 +1,16 @@
 package io.smallrye.mutiny.operators;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.*;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.testng.annotations.Test;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.subscription.Cancellable;
 
 public class UniOnNotNullItemTest {
 
@@ -56,7 +57,100 @@ public class UniOnNotNullItemTest {
     }
 
     @Test
-    public void testProduceUni() {
+    public void testInvokeUni() {
+        AtomicBoolean invoked = new AtomicBoolean();
+        AtomicReference<String> called = new AtomicReference<>();
+        assertThat(Uni.createFrom().item("hello")
+                .onItem().ifNotNull().invokeUni(s -> {
+                    invoked.set(s.equals("hello"));
+                    return Uni.createFrom().item("something").onItem().invoke(called::set);
+                })
+                .await().indefinitely()).isEqualTo("hello");
+        assertThat(invoked).isTrue();
+        assertThat(called).hasValue("something");
+
+        invoked.set(false);
+        called.set(null);
+        assertThat(Uni.createFrom().nullItem()
+                .onItem().ifNotNull().invokeUni(s -> {
+                    invoked.set(s.equals("hello"));
+                    return Uni.createFrom().item("something").onItem().invoke(called::set);
+                })
+                .onItem().ifNull().continueWith("yolo")
+                .await().indefinitely()).isEqualTo("yolo");
+        assertThat(invoked).isFalse();
+        assertThat(called).hasValue(null);
+
+        assertThatThrownBy(() -> Uni.createFrom().<String> failure(new Exception("boom"))
+                .onItem().ifNotNull().invokeUni(s -> {
+                    invoked.set(s.equals("hello"));
+                    return Uni.createFrom().item("something").onItem().invoke(called::set);
+                })
+                .onItem().ifNull().continueWith("yolo")
+                .await().indefinitely()).hasMessageContaining("boom");
+
+        assertThat(invoked).isFalse();
+        assertThat(called).hasValue(null);
+    }
+
+    @Test
+    public void testInvokeUniProducingNull() {
+        assertThatExceptionOfType(NullPointerException.class)
+                .isThrownBy(() -> {
+                    Uni.createFrom().item("hello")
+                            .onItem().ifNotNull().invokeUni(s -> null)
+                            .await().indefinitely();
+                });
+    }
+
+    @Test
+    public void testInvokeUniProducingFailure() {
+        assertThatExceptionOfType(IllegalStateException.class)
+                .isThrownBy(() -> Uni.createFrom().item("hello")
+                        .onItem().ifNotNull()
+                        .invokeUni(s -> Uni.createFrom().failure(new IllegalStateException("boom")))
+                        .await().indefinitely())
+                .withMessageContaining("boom");
+    }
+
+    @Test
+    public void testInvokeUniWithCancellationBeforeEmission() {
+        AtomicBoolean called = new AtomicBoolean();
+        AtomicReference<String> res = new AtomicReference<>();
+        Uni<Object> emitter = Uni.createFrom().emitter(e -> {
+            e.onTermination(() -> called.set(true));
+        });
+
+        Cancellable cancellable = Uni.createFrom().item("hello")
+                .onItem().ifNotNull()
+                .invokeUni(s -> emitter)
+                .subscribe().with(res::set);
+
+        cancellable.cancel();
+        assertThat(res).hasValue(null);
+        assertThat(called).isTrue();
+    }
+
+    @Test
+    public void testApplyUni() {
+        assertThat(Uni.createFrom().item("hello")
+                .onItem().ifNotNull().applyUni(s -> Uni.createFrom().item(s.toUpperCase()))
+                .await().indefinitely()).isEqualTo("HELLO");
+
+        assertThat(Uni.createFrom().item(() -> (String) null)
+                .onItem().ifNotNull().applyUni(s -> Uni.createFrom().item(s.toUpperCase()))
+                .onItem().ifNull().continueWith("yolo")
+                .await().indefinitely()).isEqualTo("yolo");
+
+        assertThatThrownBy(() -> Uni.createFrom().<String> failure(new Exception("boom"))
+                .onItem().ifNotNull().applyUni(s -> Uni.createFrom().item(s.toUpperCase()))
+                .onItem().ifNull().continueWith("yolo")
+                .await().indefinitely()).hasMessageContaining("boom");
+    }
+
+    @SuppressWarnings("deprecation")
+    @Test
+    public void testDeprecatedProduceUni() {
         assertThat(Uni.createFrom().item("hello")
                 .onItem().ifNotNull().produceUni(s -> Uni.createFrom().item(s.toUpperCase()))
                 .await().indefinitely()).isEqualTo("HELLO");
@@ -73,7 +167,25 @@ public class UniOnNotNullItemTest {
     }
 
     @Test
-    public void testProduceUniWithEmitter() {
+    public void testApplyUniWithEmitter() {
+        assertThat(Uni.createFrom().item("hello")
+                .onItem().ifNotNull().applyUni((s, e) -> e.complete(s.toUpperCase()))
+                .await().indefinitely()).isEqualTo("HELLO");
+
+        assertThat(Uni.createFrom().item(() -> (String) null)
+                .onItem().ifNotNull().applyUni((s, e) -> e.complete(s.toUpperCase()))
+                .onItem().ifNull().continueWith("yolo")
+                .await().indefinitely()).isEqualTo("yolo");
+
+        assertThatThrownBy(() -> Uni.createFrom().<String> failure(new Exception("boom"))
+                .onItem().ifNotNull().applyUni((s, e) -> e.complete(s.toUpperCase()))
+                .onItem().ifNull().continueWith("yolo")
+                .await().indefinitely()).hasMessageContaining("boom");
+    }
+
+    @SuppressWarnings("deprecation")
+    @Test
+    public void testDeprecatedProduceUniWithEmitter() {
         assertThat(Uni.createFrom().item("hello")
                 .onItem().ifNotNull().produceUni((s, e) -> e.complete(s.toUpperCase()))
                 .await().indefinitely()).isEqualTo("HELLO");
@@ -90,7 +202,25 @@ public class UniOnNotNullItemTest {
     }
 
     @Test
-    public void testProduceCompletionStage() {
+    public void testApplyCompletionStage() {
+        assertThat(Uni.createFrom().item("hello")
+                .onItem().ifNotNull().applyCompletionStage(x -> CompletableFuture.completedFuture(x.toUpperCase()))
+                .await().indefinitely()).isEqualTo("HELLO");
+
+        assertThat(Uni.createFrom().item(() -> (String) null)
+                .onItem().ifNotNull().applyCompletionStage(x -> CompletableFuture.completedFuture(x.toUpperCase()))
+                .onItem().ifNull().continueWith("yolo")
+                .await().indefinitely()).isEqualTo("yolo");
+
+        assertThatThrownBy(() -> Uni.createFrom().<String> failure(new Exception("boom"))
+                .onItem().ifNotNull().applyCompletionStage(x -> CompletableFuture.completedFuture(x.toUpperCase()))
+                .onItem().ifNull().continueWith("yolo")
+                .await().indefinitely()).hasMessageContaining("boom");
+    }
+
+    @SuppressWarnings("deprecation")
+    @Test
+    public void testDeprecatedProduceCompletionStage() {
         assertThat(Uni.createFrom().item("hello")
                 .onItem().ifNotNull().produceCompletionStage(x -> CompletableFuture.completedFuture(x.toUpperCase()))
                 .await().indefinitely()).isEqualTo("HELLO");
@@ -107,7 +237,28 @@ public class UniOnNotNullItemTest {
     }
 
     @Test
-    public void testProduceMulti() {
+    public void testStream() {
+        assertThat(Uni.createFrom().item("hello")
+                .onItem().ifNotNull().applyMulti(x -> Multi.createFrom().item(x.toUpperCase()))
+                .collectItems().first()
+                .await().indefinitely()).isEqualTo("HELLO");
+
+        assertThat(Uni.createFrom().item(() -> (String) null)
+                .onItem().ifNotNull().applyMulti(x -> Multi.createFrom().item(x.toUpperCase()))
+                .collectItems().first()
+                .onItem().ifNull().continueWith("yolo")
+                .await().indefinitely()).isEqualTo("yolo");
+
+        assertThatThrownBy(() -> Uni.createFrom().<String> failure(new Exception("boom"))
+                .onItem().ifNotNull().applyMulti(x -> Multi.createFrom().item(x.toUpperCase()))
+                .collectItems().first()
+                .onItem().ifNull().continueWith("yolo")
+                .await().indefinitely()).hasMessageContaining("boom");
+    }
+
+    @SuppressWarnings("deprecation")
+    @Test
+    public void testDeprecatedProduceMulti() {
         assertThat(Uni.createFrom().item("hello")
                 .onItem().ifNotNull().produceMulti(x -> Multi.createFrom().item(x.toUpperCase()))
                 .collectItems().first()

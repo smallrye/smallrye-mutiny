@@ -52,9 +52,9 @@ public class UniOnFailureRecoveryTest {
             throw new IllegalStateException("boom");
         });
 
-        assertThatExceptionOfType(IllegalStateException.class)
+        assertThatExceptionOfType(CompositeException.class)
                 .isThrownBy(() -> recovered.await().indefinitely())
-                .withMessage("boom");
+                .withMessageContaining("boom");
 
     }
 
@@ -129,9 +129,9 @@ public class UniOnFailureRecoveryTest {
             throw new IllegalStateException("boom");
         });
 
-        assertThatExceptionOfType(IllegalStateException.class)
+        assertThatExceptionOfType(CompositeException.class)
                 .isThrownBy(() -> recovered.await().indefinitely())
-                .withMessage("boom");
+                .withMessageContaining("boom");
 
     }
 

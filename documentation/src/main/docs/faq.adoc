@@ -16,19 +16,27 @@ If your operation throws a _checked exception_, you can use the `io.smallrye.mut
 include::../../../src/test/java/snippets/HowToTransformTest.java[tags=sync-unchecked]
 ----
 
-You can also transform items asynchronously using the `produceUni` / `produceCompletionStage` operators:
+You can also transform items asynchronously using the `applyUni` / `applyCompletionStage` operators:
 
 [source,java,indent=0]
 ----
 include::../../../src/test/java/snippets/HowToTransformTest.java[tags=async]
 ----
 
-If you need to generate a sequence of items use, `producePublisher`:
+When dealing with multis, you can use:
+
+* `applyUniAndConcatenate` - run the async operation and concatenate the produced items preserving the order from upstream
+* `applyUniAndMerge` - run the async operation and merge the produced items as soon as they are produced.
+* `applyUni` - return an object letting you configure the _flattening_ process (merge or concatenate)
+
+If you need to generate a sequence of items use `applyMulti` / `applyMultiAndMerge` / `applyMultiAndConcatenate`:
 
 [source,java,indent=0]
 ----
 include::../../../src/test/java/snippets/HowToTransformTest.java[tags=multi]
 ----
+
+The difference between merge and concatenate is explained in the <<merge-concatenate>> section.
 
 [NOTE]
 .Unchecked
@@ -134,12 +142,20 @@ In this case, you still know if the invocation fails (you get a failure event) o
 
 === How do I chain asynchronous calls?
 
-To chain asynchronous calls, use `onItem().produceUni` or `onItem().produceCompletionStage`:
+To chain asynchronous calls, use `onItem().applyUni` or `onItem().applyCompletionStage`:
 
 [source,java,indent=0]
 ----
 include::../../../src/test/java/snippets/HowToChainAsyncTest.java[tags=code]
 ----
+
+When dealing with multis, you can use:
+
+* `applyUniAndConcatenate` - run the async operation and concatenate the produced items preserving the order from upstream
+* `applyUniAndMerge` - run the async operation and merge the produced items as soon as they are produced.
+* `applyUni` - return an object letting you configure the _flattening_ process (merge or concatenate)
+
+The difference between merge and concatenate is explained in the <<merge-concatenate>> section.
 
 === How do I _join_ asynchronous calls?
 
@@ -163,6 +179,7 @@ include::../../../src/test/java/snippets/HowToJoinAsyncTest.java[tags=codeCombin
 The combinator function is invoked with a `List<Object>` as parameter and passes the different results.
 This function returns the combined result.
 
+[[merge-concatenate]]
 === What's the difference between merge() and concatenate()
 
 Imagine you have a `Multi`, and for each item, you need to call a remote service or execute an asynchronous operation.
@@ -171,11 +188,30 @@ To do this, you write the following code:
 [source,java]
 ----
 List<String> list = multi
-    .onItem().produceUni(this::asyncService)
-    // .concatenate() or .merge() ?
+    .onItem().applyUniAndMerge(this::asyncService)
+
+// or
+List<String> list = multi
+    .onItem().applyUniAndConcatenate(this::asyncService)
+
+// or
+List<String> list = multi
+    .onItem().applyUni(this::asyncService)
+    // configure the flattening process here using .merge() or .concatenate
 ----
 
-`produceUni` lets you choose between two _merge_ methods: `merge()` and `concatenate()`:
+The difference between these alternatives is about the ordering.
+Let's imagine you have the following items: `a`, `b`, `c` and the `asyncService` is just producing the uppercase version (but asynchronously, and you don't know when the result is going to be produced).
+
+`applyUniAndConcatenate()` preserves the ordering. So, the output will always be `A`, `B`, `C`.
+`applyUniAndMerge()` emits the resulting items as soon as they are available, and so may interleave the items.
+The output could be `B`, `A`, `C` if the computation of `b` was faster than for `a`.
+
+`merge` executes the asynchronous operation concurrently, while `concatenate` executes them one by one to preserve the ordering.
+
+
+`applyUni` returns an object to configure how the produced items are going to be propagated downstream (flattening).
+It lets you choose between two _flattening_ methods: `merge()` and `concatenate()`:
 
 [source,java,indent=0]
 ----
@@ -187,14 +223,6 @@ include::../../../src/test/java/snippets/MergeVsConcatenateTest.java[tags=merge]
 include::../../../src/test/java/snippets/MergeVsConcatenateTest.java[tags=concatenate]
 ----
 
-The difference between these alternatives is about the ordering.
-Let's imagine you have the following items: `a`, `b`, `c` and the `asyncService` is just producing the uppercase version (but asynchronously, and you don't know when the result is going to be produced).
-
-`concatenate()` preserves the ordering. So, the output will always be `A`, `B`, `C`.
-`merge()` emits the resulting items as soon as they are available, and so may interleave the items.
-The output could be `B`, `A`, `C` if the computation of `b` was faster than for `a`.
-
-`merge()` executes the asynchronous operation concurrently, while `concatenate()` executes them one by one to preserve the ordering.
 With `merge()`, you can also configure the degree of concurrency using: `merge(concurrency)`:
 
 [source,java,indent=0]

@@ -8,7 +8,10 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
+import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Multi;
+import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.MultiFlatMapOnFailure;
 import io.smallrye.mutiny.operators.MultiMapOnFailure;
@@ -46,6 +49,41 @@ public class MultiOnFailure<T> {
                 null,
                 null,
                 null));
+    }
+
+    /**
+     * Produces a new {@link Multi} invoking the given @{code action} when a {@code failure} event is received.
+     * <p>
+     * Unlike {@link #invoke(Consumer)}, the passed function returns a {@link Uni}. When the produced {@code Uni} sends
+     * its result, the result is discarded, and the original {@code failure} is forwarded downstream. If the produced
+     * {@code Uni} fails, a {@link io.smallrye.mutiny.CompositeException} composed by the original failure and the
+     * caught failure is propagated downstream.
+     *
+     * If the asynchronous action throws an exception, this exception is propagated downstream as a
+     * {@link io.smallrye.mutiny.CompositeException} composed with the original failure and the caught exception.
+     *
+     * This method preserves the order of the items, meaning that the downstream received the items in the same order
+     * as the upstream has emitted them.
+     *
+     * @param action the function taking the failure and returning a {@link Uni}, must not be {@code null}
+     * @return the new {@link Multi}
+     */
+    @SuppressWarnings("unchecked")
+    public Multi<T> invokeUni(Function<Throwable, ? extends Uni<?>> action) {
+        ParameterValidation.nonNull(action, "action");
+        return recoverWithMulti(failure -> {
+            Uni<?> uni = action.apply(failure);
+            if (uni == null) {
+                throw new NullPointerException("The `action` produced a `null` Uni");
+            }
+            return (Multi<? extends T>) uni.onItemOrFailure().applyUni((ignored, subFailure) -> {
+                if (subFailure != null) {
+                    return Uni.createFrom().failure(new CompositeException(failure, subFailure));
+                } else {
+                    return Uni.createFrom().failure(failure);
+                }
+            }).toMulti();
+        });
     }
 
     /**

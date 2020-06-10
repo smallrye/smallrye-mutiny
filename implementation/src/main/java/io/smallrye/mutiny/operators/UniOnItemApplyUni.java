@@ -8,16 +8,17 @@ import java.util.function.Function;
 
 import org.reactivestreams.Subscription;
 
+import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.helpers.EmptyUniSubscription;
 import io.smallrye.mutiny.subscription.UniSubscriber;
 import io.smallrye.mutiny.subscription.UniSubscription;
 
-public class UniOnItemFlatMap<I, O> extends UniOperator<I, O> {
+public class UniOnItemApplyUni<I, O> extends UniOperator<I, O> {
 
     private final Function<? super I, ? extends Uni<? extends O>> mapper;
 
-    public UniOnItemFlatMap(Uni<I> upstream, Function<? super I, ? extends Uni<? extends O>> mapper) {
+    public UniOnItemApplyUni(Uni<I> upstream, Function<? super I, ? extends Uni<? extends O>> mapper) {
         super(nonNull(upstream, "upstream"));
         this.mapper = nonNull(mapper, "mapper");
     }
@@ -31,7 +32,11 @@ public class UniOnItemFlatMap<I, O> extends UniOperator<I, O> {
             // We cannot call onItem here, as if onItem would throw an exception
             // it would be caught and onFailure would be called. This would be illegal.
         } catch (Throwable e) {
-            subscriber.onFailure(e);
+            if (input instanceof Throwable) {
+                subscriber.onFailure(new CompositeException((Throwable) input, e));
+            } else {
+                subscriber.onFailure(e);
+            }
             return;
         }
 
@@ -39,7 +44,7 @@ public class UniOnItemFlatMap<I, O> extends UniOperator<I, O> {
     }
 
     public static <O> void handleInnerSubscription(UniSerializedSubscriber<? super O> subscriber,
-            UniOnItemFlatMap.FlatMapSubscription flatMapSubscription, Uni<? extends O> outcome) {
+            UniOnItemApplyUni.FlatMapSubscription flatMapSubscription, Uni<? extends O> outcome) {
         if (outcome == null) {
             subscriber.onFailure(new NullPointerException(MAPPER_RETURNED_NULL));
         } else {

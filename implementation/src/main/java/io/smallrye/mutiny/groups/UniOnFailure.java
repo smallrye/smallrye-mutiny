@@ -7,7 +7,9 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
+import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.UniOnFailureFlatMap;
 import io.smallrye.mutiny.operators.UniOnFailureMap;
@@ -32,6 +34,32 @@ public class UniOnFailure<T> {
     public Uni<T> invoke(Consumer<Throwable> callback) {
         return Infrastructure.onUniCreation(
                 new UniOnItemConsume<>(upstream, null, nonNull(callback, "callback")));
+    }
+
+    /**
+     * Produces a new {@link Uni} invoking the given @{code action} when the {@code failure} event is received.
+     * <p>
+     * Unlike {@link #invoke(Consumer)}, the passed function returns a {@link Uni}. When the produced {@code Uni} sends
+     * its item, this item is discarded, and the original {@code failure} is forwarded downstream. If the produced
+     * {@code Uni} fails, a composite failure containing both the original failure and the failure from the executed
+     * action is propagated downstream.
+     * <p>
+     *
+     * @param action the callback, must not be {@code null}
+     * @return the new {@link Uni}
+     */
+    public Uni<T> applyUni(Function<Throwable, ? extends Uni<?>> action) {
+        ParameterValidation.nonNull(action, "action");
+        return recoverWithUni(failure -> {
+            Uni<?> uni = action.apply(failure);
+            if (uni == null) {
+                throw new NullPointerException("The `action` produced a `null` uni");
+            }
+            //noinspection unchecked
+            return (Uni<T>) uni
+                    .onItem().failWith(ignored -> failure)
+                    .onFailure().apply(subFailure -> new CompositeException(failure, subFailure));
+        });
     }
 
     /**

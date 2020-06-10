@@ -1,16 +1,22 @@
 package io.smallrye.mutiny.streams.stages;
 
+import static io.smallrye.mutiny.helpers.ParameterValidation.SUPPLIER_PRODUCED_NULL;
+import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
+
 import java.util.Objects;
 import java.util.concurrent.CompletionStage;
 import java.util.function.Function;
 
 import org.eclipse.microprofile.reactive.streams.operators.spi.Stage;
+import org.reactivestreams.Publisher;
 
 import io.smallrye.mutiny.Multi;
+import io.smallrye.mutiny.groups.MultiFlatten;
 import io.smallrye.mutiny.streams.Engine;
 import io.smallrye.mutiny.streams.operators.ProcessingStage;
 import io.smallrye.mutiny.streams.operators.ProcessingStageFactory;
 import io.smallrye.mutiny.streams.utils.Casts;
+import io.smallrye.mutiny.subscription.BackPressureStrategy;
 
 /**
  * Implementation of the {@link Stage.FlatMapCompletionStage} stage.
@@ -37,18 +43,40 @@ public class FlatMapCompletionStageFactory
 
         @Override
         public Multi<O> apply(Multi<I> source) {
-            return source.onItem().produceCompletionStage((I item) -> {
-                if (item == null) {
-                    // Throw an NPE to be compliant with the reactive stream spec.
-                    throw new NullPointerException();
-                }
-                CompletionStage<O> result = mapper.apply(item);
-                if (result == null) {
-                    // Throw an NPE to be compliant with the reactive stream spec.
-                    throw new NullPointerException();
-                }
-                return result;
-            }).concatenate();
+            // We cannot use applyCompletionStage as the Reactive Streams Operators TCK expect to fail if the completion
+            // stage produces a `null` value, which is not the case with applyCompletionStage
+
+            nonNull(mapper, "mapper");
+            Function<? super I, ? extends Publisher<? extends O>> wrapper = res -> {
+                Objects.requireNonNull(res);
+                return Multi.createFrom().emitter(emitter -> {
+                    CompletionStage<? extends O> stage;
+                    try {
+                        stage = mapper.apply(res);
+                    } catch (Throwable e) {
+                        emitter.fail(e);
+                        return;
+                    }
+                    if (stage == null) {
+                        emitter.fail(new NullPointerException(SUPPLIER_PRODUCED_NULL));
+                        return;
+                    }
+
+                    emitter.onTermination(() -> stage.toCompletableFuture().cancel(false));
+                    stage.whenComplete((r, f) -> {
+                        if (f != null) {
+                            emitter.fail(f);
+                        } else if (r != null) {
+                            emitter.emit(r);
+                            emitter.complete();
+                        } else {
+                            // Here is the difference with the applyCompletionStage mehtod.
+                            emitter.fail(new NullPointerException("The completion stage produced a `null` value"));
+                        }
+                    });
+                }, BackPressureStrategy.LATEST);
+            };
+            return new MultiFlatten<>(source, wrapper, 1, false).concatenate();
         }
     }
 

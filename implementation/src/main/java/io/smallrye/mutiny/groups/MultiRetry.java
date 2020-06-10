@@ -81,7 +81,7 @@ public class MultiRetry<T> {
                     "Invalid retry configuration, `until` cannot be used with a back-off configuration");
         }
         Function<Multi<Throwable>, Publisher<Long>> whenStreamFactory = stream -> stream.onItem()
-                .produceUni(failure -> Uni.createFrom().<Long> emitter(emitter -> {
+                .applyUniAndConcatenate(failure -> Uni.createFrom().<Long> emitter(emitter -> {
                     try {
                         if (predicate.test(failure)) {
                             emitter.complete(1L);
@@ -91,8 +91,7 @@ public class MultiRetry<T> {
                     } catch (Throwable ex) {
                         emitter.fail(ex);
                     }
-                }))
-                .concatenate();
+                }));
         return Infrastructure.onMultiCreation(new MultiRetryWhenOp<>(upstream, whenStreamFactory));
     }
 
