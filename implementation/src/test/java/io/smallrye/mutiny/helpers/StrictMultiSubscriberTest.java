@@ -1,18 +1,19 @@
 package io.smallrye.mutiny.helpers;
 
-import io.smallrye.mutiny.Multi;
-import io.smallrye.mutiny.test.MultiAssertSubscriber;
-import org.reactivestreams.Subscriber;
-import org.reactivestreams.Subscription;
-import org.testng.annotations.Test;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
+import org.reactivestreams.Subscriber;
+import org.reactivestreams.Subscription;
+import org.testng.annotations.Test;
+
+import io.smallrye.mutiny.Multi;
+import io.smallrye.mutiny.test.MultiAssertSubscriber;
 
 public class StrictMultiSubscriberTest {
 

@@ -3,11 +3,11 @@ package io.smallrye.mutiny.streams.utils;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 
-import io.smallrye.mutiny.helpers.StrictMultiSubscriber;
 import org.reactivestreams.Processor;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
+import io.smallrye.mutiny.helpers.StrictMultiSubscriber;
 import io.smallrye.mutiny.helpers.Subscriptions;
 
 /**

@@ -1,11 +1,7 @@
 package io.smallrye.mutiny.helpers;
 
-import io.reactivex.internal.util.AtomicThrowable;
-import io.smallrye.mutiny.subscription.MultiSubscriber;
-import io.smallrye.mutiny.test.MultiAssertSubscriber;
-import org.reactivestreams.Subscriber;
-import org.reactivestreams.Subscription;
-import org.testng.annotations.Test;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -16,8 +12,12 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
+import org.reactivestreams.Subscriber;
+import org.reactivestreams.Subscription;
+import org.testng.annotations.Test;
+
+import io.smallrye.mutiny.subscription.MultiSubscriber;
+import io.smallrye.mutiny.test.MultiAssertSubscriber;
 
 public class HalfSerializerTest {
 
@@ -142,7 +142,7 @@ public class HalfSerializerTest {
     @Test(invocationCount = 1000)
     public void testOnNextOnCompleteRace() throws InterruptedException {
         AtomicInteger wip = new AtomicInteger();
-        AtomicThrowable error = new AtomicThrowable();
+        AtomicReference<Throwable> failure = new AtomicReference<>();
 
         Subscription subscription = mock(Subscription.class);
         MultiAssertSubscriber<Object> test = MultiAssertSubscriber.create(10);
@@ -151,12 +151,12 @@ public class HalfSerializerTest {
         CountDownLatch latch = new CountDownLatch(2);
 
         Runnable r1 = () -> {
-            HalfSerializer.onNext(test, 1, wip, error);
+            HalfSerializer.onNext(test, 1, wip, failure);
             latch.countDown();
         };
 
         Runnable r2 = () -> {
-            HalfSerializer.onComplete(test, wip, error);
+            HalfSerializer.onComplete(test, wip, failure);
             latch.countDown();
         };
 
@@ -171,7 +171,7 @@ public class HalfSerializerTest {
     @Test(invocationCount = 1000)
     public void testOnErrorOnCompleteRace() throws InterruptedException {
         AtomicInteger wip = new AtomicInteger();
-        AtomicThrowable error = new AtomicThrowable();
+        AtomicReference<Throwable> failure = new AtomicReference<>();
 
         Subscription subscription = mock(Subscription.class);
         MultiAssertSubscriber<Object> test = MultiAssertSubscriber.create(10);
@@ -180,12 +180,12 @@ public class HalfSerializerTest {
         CountDownLatch latch = new CountDownLatch(2);
 
         Runnable r1 = () -> {
-            HalfSerializer.onError(test, new IOException("boom"), wip, error);
+            HalfSerializer.onError(test, new IOException("boom"), wip, failure);
             latch.countDown();
         };
 
         Runnable r2 = () -> {
-            HalfSerializer.onComplete(test, wip, error);
+            HalfSerializer.onComplete(test, wip, failure);
             latch.countDown();
         };
 

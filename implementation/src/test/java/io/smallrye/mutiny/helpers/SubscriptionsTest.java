@@ -1,10 +1,8 @@
 package io.smallrye.mutiny.helpers;
 
-import io.reactivex.internal.subscriptions.BooleanSubscription;
-import io.reactivex.internal.subscriptions.SubscriptionHelper;
-import io.smallrye.mutiny.CompositeException;
-import org.reactivestreams.Subscription;
-import org.testng.annotations.Test;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.*;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -15,9 +13,10 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.*;
+import org.reactivestreams.Subscription;
+import org.testng.annotations.Test;
+
+import io.smallrye.mutiny.CompositeException;
 
 public class SubscriptionsTest {
 
@@ -153,7 +152,6 @@ public class SubscriptionsTest {
         Subscriptions.CANCELLED.cancel();
     }
 
-
     @Test
     public void testSetIfEmpty() {
         AtomicReference<Subscription> container = new AtomicReference<>();
@@ -221,7 +219,6 @@ public class SubscriptionsTest {
         assertThat(requests).hasValue(0);
         assertThat(container).hasValue(sub);
     }
-
 
     private void shuffleAndRun(Runnable r1, Runnable r2) {
         List<Runnable> runnables = Arrays.asList(r1, r2);
