@@ -121,10 +121,6 @@ public final class SafeSubscriber<T> implements Subscriber<T>, Subscription {
             return;
         }
 
-        if (t == null) {
-            t = new NullPointerException("onError called with null.");
-        }
-
         try {
             downstream.onError(t);
         } catch (Throwable ex) {
