@@ -6,11 +6,10 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import io.smallrye.mutiny.helpers.StrictMultiSubscriber;
-import io.smallrye.mutiny.subscription.SerializedSubscriber;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
+import io.smallrye.mutiny.helpers.StrictMultiSubscriber;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 
 /**
