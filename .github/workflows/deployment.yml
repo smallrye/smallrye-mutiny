@@ -6,13 +6,22 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/cache@v2
+        with:
+          path: |
+            ~/.m2/repository
+            !~/.m2/repository/**/*-SNAPSHOT/*
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+      - uses: actions/checkout@v1
         with:
           ref: 'master'
       - name: Install JDK 1.8
-        uses: joschi/setup-jdk@v1.0.0
+        uses: AdoptOpenJDK/install-jdk@v1
         with:
-          java-version: 'openjdk8'
+          version: 8
+
       - name: 'Run deployment for ${{ github.event.deployment.environment }}'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_API_TOKEN }}
