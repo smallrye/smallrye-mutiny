@@ -566,7 +566,7 @@ public final class MultiFlatMapOp<I, O> extends AbstractMultiOperator<I, O> {
 
         final int limit;
 
-        AtomicReference<Subscription> subscription = new AtomicReference<>();
+        final AtomicReference<Subscription> subscription = new AtomicReference<>();
 
         long produced;
 
@@ -626,7 +626,10 @@ public final class MultiFlatMapOp<I, O> extends AbstractMultiOperator<I, O> {
 
         public void cancel(boolean doNotCancel) {
             if (!doNotCancel) {
-                subscription.getAndSet(Subscriptions.CANCELLED).cancel();
+                Subscription last = subscription.getAndSet(Subscriptions.CANCELLED);
+                if (last != null) {
+                    last.cancel();
+                }
             }
             if (queue != null) {
                 queue.clear();
