@@ -39,6 +39,15 @@ public final class SafeSubscriber<T> implements Subscriber<T>, Subscription {
         this.downstream = downstream;
     }
 
+    /**
+     * For testing purpose only.
+     * 
+     * @return whether the subscriber is in a terminal state.
+     */
+    boolean isDone() {
+        return done;
+    }
+
     @Override
     public void onSubscribe(Subscription s) {
         if (upstream.compareAndSet(null, s)) {
@@ -176,7 +185,7 @@ public final class SafeSubscriber<T> implements Subscriber<T>, Subscription {
             try {
                 upstream.get().cancel();
             } catch (Throwable ignored) {
-
+                // nothing we can do.
             }
         }
     }
@@ -186,6 +195,7 @@ public final class SafeSubscriber<T> implements Subscriber<T>, Subscription {
         try {
             upstream.get().cancel();
         } catch (Throwable ignored) {
+            // nothing we can do.
         }
     }
 }
