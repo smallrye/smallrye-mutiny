@@ -9,7 +9,7 @@ on:
       - '.github/workflows/deployment.yml'
 
 jobs:
-  build_java_${{ matrix.java }}:
+  build:
     runs-on: ubuntu-latest
     strategy:
       matrix:
