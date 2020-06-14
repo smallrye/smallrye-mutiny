@@ -140,4 +140,26 @@ public class UniOrTest {
         subscriber.assertCompletedSuccessfully().assertItem(1);
     }
 
+    @Test
+    public void testUniOrWithAnotherUni() {
+        UniAssertSubscriber<String> subscriber = UniAssertSubscriber.create();
+        Uni.createFrom().item("foo").or().uni(Uni.createFrom().item("bar")).subscribe()
+                .withSubscriber(subscriber);
+        subscriber.assertCompletedSuccessfully().assertItem("foo");
+    }
+
+    @Test
+    public void testUniOrWithDelayedUni() {
+        Uni<String> first = Uni.createFrom().item("foo").onItem().delayIt().onExecutor(executor)
+                .by(Duration.ofMillis(10));
+        Uni<String> second = Uni.createFrom().item("bar").onItem().delayIt().onExecutor(executor)
+                .by(Duration.ofMillis(1000));
+        Uni<String> third = Uni.createFrom().item("baz").onItem().delayIt().onExecutor(executor)
+                .by(Duration.ofMillis(10000));
+
+        assertThat(third.or().unis(first, second).await().indefinitely()).isEqualTo("foo");
+        assertThat(second.or().unis(third, first).await().indefinitely()).isEqualTo("foo");
+        assertThat(first.or().unis(third, second).await().indefinitely()).isEqualTo("foo");
+    }
+
 }

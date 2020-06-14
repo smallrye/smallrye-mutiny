@@ -2,6 +2,7 @@ package io.smallrye.mutiny.groups;
 
 import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -23,7 +24,9 @@ public class UniOr<T> {
 
     @SafeVarargs
     public final Uni<T> unis(Uni<T>... other) {
-        List<Uni<T>> list = Arrays.asList(other);
+        List<Uni<T>> list = new ArrayList<>();
+        list.add(upstream);
+        list.addAll(Arrays.asList(other));
         return Infrastructure.onUniCreation(new UniOrCombination<>(list));
     }
 
