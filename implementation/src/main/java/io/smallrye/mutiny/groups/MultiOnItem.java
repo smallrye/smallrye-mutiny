@@ -47,12 +47,12 @@ public class MultiOnItem<T> {
     }
 
     /**
-     * Produces a new {@link Multi} invoking the given callback when an {@code item} event is fired by the upstrea.
+     * Produces a new {@link Multi} invoking the given callback when an {@code item} event is fired by the upstream.
      *
      * @param callback the callback, must not be {@code null}
-     * @return the new {@link Uni}
+     * @return the new {@link Multi}
      */
-    public Multi<T> invoke(Consumer<T> callback) {
+    public Multi<T> invoke(Consumer<? super T> callback) {
         return Infrastructure.onMultiCreation(new MultiSignalConsumerOp<>(
                 upstream,
                 null,

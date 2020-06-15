@@ -5,6 +5,7 @@ import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Executor;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -369,6 +370,22 @@ public interface Uni<T> {
      */
     default <O> Uni<O> flatMap(Function<? super T, Uni<? extends O>> mapper) {
         return onItem().produceUni(nonNull(mapper, "mapper"));
+    }
+
+    /**
+     * Produces a new {@link Uni} invoking the given callback when the {@code item} event is fired. Note that the
+     * item can be {@code null}.
+     * <p>
+     * While this method allows implementing side-effects <em>sneakily</em>, it is recommended to not do so, and only use
+     * this method to execute side-effect free synchronous logic, like tracing.
+     *
+     * This method is a shortcut on {@code onItem().invoke(consumer)}.
+     *
+     * @param callback the callback, must not be {@code null}
+     * @return the new {@link Uni}
+     */
+    default Uni<T> sneak(Consumer<? super T> callback) {
+        return onItem().invoke(callback);
     }
 
     /**

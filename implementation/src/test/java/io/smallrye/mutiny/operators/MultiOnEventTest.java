@@ -24,6 +24,7 @@ public class MultiOnEventTest {
 
         AtomicReference<Subscription> subscription = new AtomicReference<>();
         AtomicReference<Integer> item = new AtomicReference<>();
+        AtomicReference<Integer> sneak = new AtomicReference<>();
         AtomicReference<Throwable> failure = new AtomicReference<>();
         AtomicBoolean completion = new AtomicBoolean();
         AtomicLong requests = new AtomicLong();
@@ -34,6 +35,7 @@ public class MultiOnEventTest {
         Multi.createFrom().item(1)
                 .on().subscribed(subscription::set)
                 .on().item().invoke(item::set)
+                .sneak(sneak::set)
                 .on().failure().invoke(failure::set)
                 .on().completion(() -> completion.set(true))
                 .on().termination((f, c) -> termination.set(f == null && !c))
@@ -49,6 +51,7 @@ public class MultiOnEventTest {
 
         assertThat(subscription.get()).isNotNull();
         assertThat(item.get()).isEqualTo(1);
+        assertThat(sneak.get()).isEqualTo(1);
         assertThat(failure.get()).isNull();
         assertThat(completion.get()).isTrue();
         assertThat(termination.get()).isTrue();
@@ -61,6 +64,7 @@ public class MultiOnEventTest {
     public void testCallbacksOnFailure() {
         AtomicReference<Subscription> subscription = new AtomicReference<>();
         AtomicReference<Integer> item = new AtomicReference<>();
+        AtomicReference<Integer> sneak = new AtomicReference<>();
         AtomicReference<Throwable> failure = new AtomicReference<>();
         AtomicBoolean completion = new AtomicBoolean();
         AtomicLong requests = new AtomicLong();
@@ -71,6 +75,7 @@ public class MultiOnEventTest {
         Multi.createFrom().<Integer> failure(new IOException("boom"))
                 .on().subscribed(subscription::set)
                 .on().item().invoke(item::set)
+                .sneak(sneak::set)
                 .on().failure().invoke(failure::set)
                 .on().completion(() -> completion.set(true))
                 .on().termination((f, c) -> termination.set(f != null))
@@ -82,6 +87,7 @@ public class MultiOnEventTest {
 
         assertThat(subscription.get()).isNotNull();
         assertThat(item.get()).isNull();
+        assertThat(sneak.get()).isNull();
         assertThat(failure.get()).isInstanceOf(IOException.class).hasMessageContaining("boom");
         assertThat(completion.get()).isFalse();
         assertThat(termination.get()).isTrue();
@@ -259,7 +265,7 @@ public class MultiOnEventTest {
     }
 
     @Test
-    public void testWhenOnItemPeekThrowsExceptions() {
+    public void testWhenOnItemsneakThrowsExceptions() {
         MultiAssertSubscriber<Integer> ts = MultiAssertSubscriber.create(1);
 
         Multi.createFrom().item(1)
@@ -272,7 +278,7 @@ public class MultiOnEventTest {
     }
 
     @Test
-    public void testWhenOnFailurePeekThrowsExceptions() {
+    public void testWhenOnFailuresneakThrowsExceptions() {
         MultiAssertSubscriber<Integer> ts = MultiAssertSubscriber.create(1);
 
         Multi.createFrom().<Integer> failure(new IOException("source"))
@@ -286,7 +292,7 @@ public class MultiOnEventTest {
     }
 
     @Test
-    public void testWhenOnCompletionPeekThrowsExceptions() {
+    public void testWhenOnCompletionsneakThrowsExceptions() {
         MultiAssertSubscriber<Integer> ts = MultiAssertSubscriber.create(1);
 
         Multi.createFrom().items(1, 2)

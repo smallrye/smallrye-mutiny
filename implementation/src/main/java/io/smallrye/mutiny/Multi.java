@@ -3,6 +3,7 @@ package io.smallrye.mutiny;
 import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
 
 import java.util.concurrent.Executor;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -10,19 +11,7 @@ import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
-import io.smallrye.mutiny.groups.MultiBroadcast;
-import io.smallrye.mutiny.groups.MultiCollect;
-import io.smallrye.mutiny.groups.MultiConvert;
-import io.smallrye.mutiny.groups.MultiCreate;
-import io.smallrye.mutiny.groups.MultiCreateBy;
-import io.smallrye.mutiny.groups.MultiGroup;
-import io.smallrye.mutiny.groups.MultiOnCompletion;
-import io.smallrye.mutiny.groups.MultiOnEvent;
-import io.smallrye.mutiny.groups.MultiOnFailure;
-import io.smallrye.mutiny.groups.MultiOnItem;
-import io.smallrye.mutiny.groups.MultiOverflow;
-import io.smallrye.mutiny.groups.MultiSubscribe;
-import io.smallrye.mutiny.groups.MultiTransform;
+import io.smallrye.mutiny.groups.*;
 
 @SuppressWarnings("PublisherImplementation")
 public interface Multi<T> extends Publisher<T> {
@@ -308,6 +297,19 @@ public interface Multi<T> extends Publisher<T> {
      */
     default <O> Multi<O> flatMap(Function<? super T, ? extends Publisher<? extends O>> mapper) {
         return onItem().producePublisher(mapper).merge();
+    }
+
+    /**
+     * Produces a new {@link Multi} invoking the given callback when an {@code item} event is fired by the upstream.
+     * <p>
+     * While this method allows implementing side-effects <em>sneakily</em>, it is recommended to not do so, and only use
+     * this method to execute side-effect free synchronous logic, like tracing.
+     *
+     * @param callback the callback, must not be {@code null}
+     * @return the new {@link Multi}
+     */
+    default Multi<T> sneak(Consumer<? super T> callback) {
+        return onItem().invoke(callback);
     }
 
     /**

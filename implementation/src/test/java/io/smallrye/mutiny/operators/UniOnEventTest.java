@@ -17,19 +17,22 @@ public class UniOnEventTest {
 
     @Test
     public void testActionsOnItem() {
-        AtomicInteger Item = new AtomicInteger();
+        AtomicInteger item = new AtomicInteger();
+        AtomicInteger sneak = new AtomicInteger();
         AtomicReference<Throwable> failure = new AtomicReference<>();
         AtomicReference<Subscription> subscription = new AtomicReference<>();
         AtomicInteger terminate = new AtomicInteger();
         UniAssertSubscriber<? super Integer> subscriber = Uni.createFrom().item(1)
-                .onItem().invoke(Item::set)
+                .sneak(sneak::set)
+                .onItem().invoke(item::set)
                 .onFailure().invoke(failure::set)
                 .on().subscribed(subscription::set)
                 .on().termination((r, f, c) -> terminate.set(r))
                 .subscribe().withSubscriber(UniAssertSubscriber.create());
 
         subscriber.assertItem(1);
-        assertThat(Item).hasValue(1);
+        assertThat(item).hasValue(1);
+        assertThat(sneak).hasValue(1);
         assertThat(failure.get()).isNull();
         assertThat(subscription.get()).isNotNull();
         assertThat(terminate).hasValue(1);
@@ -37,19 +40,23 @@ public class UniOnEventTest {
 
     @Test
     public void testActionsOnItem2() {
-        AtomicInteger Item = new AtomicInteger();
+        AtomicInteger item = new AtomicInteger();
+        AtomicInteger sneak = new AtomicInteger();
+
         AtomicReference<Throwable> failure = new AtomicReference<>();
         AtomicReference<Subscription> subscription = new AtomicReference<>();
         AtomicBoolean terminate = new AtomicBoolean();
         UniAssertSubscriber<? super Integer> subscriber = Uni.createFrom().item(1)
-                .onItem().invoke(Item::set)
+                .onItem().invoke(item::set)
+                .sneak(sneak::set)
                 .onFailure().invoke(failure::set)
                 .on().subscribed(subscription::set)
                 .on().termination(() -> terminate.set(true))
                 .subscribe().withSubscriber(UniAssertSubscriber.create());
 
         subscriber.assertItem(1);
-        assertThat(Item).hasValue(1);
+        assertThat(item).hasValue(1);
+        assertThat(sneak).hasValue(1);
         assertThat(failure.get()).isNull();
         assertThat(subscription.get()).isNotNull();
         assertThat(terminate).isTrue();
@@ -57,19 +64,22 @@ public class UniOnEventTest {
 
     @Test
     public void testActionsOnFailures() {
-        AtomicInteger Item = new AtomicInteger();
+        AtomicInteger item = new AtomicInteger();
+        AtomicInteger sneak = new AtomicInteger();
+
         AtomicReference<Throwable> failure = new AtomicReference<>();
         AtomicReference<Subscription> subscription = new AtomicReference<>();
         AtomicReference<Throwable> terminate = new AtomicReference<>();
         UniAssertSubscriber<? super Integer> subscriber = Uni.createFrom().<Integer> failure(new IOException("boom"))
-                .onItem().invoke(Item::set)
+                .onItem().invoke(item::set)
                 .onFailure().invoke(failure::set)
                 .on().subscribed(subscription::set)
                 .on().termination((r, f, c) -> terminate.set(f))
                 .subscribe().withSubscriber(UniAssertSubscriber.create());
 
         subscriber.assertCompletedWithFailure().assertFailure(IOException.class, "boom");
-        assertThat(Item).doesNotHaveValue(1);
+        assertThat(item).doesNotHaveValue(1);
+        assertThat(sneak).doesNotHaveValue(1);
         assertThat(failure.get()).isInstanceOf(IOException.class);
         assertThat(subscription.get()).isNotNull();
         assertThat(terminate.get()).isInstanceOf(IOException.class);
@@ -77,19 +87,22 @@ public class UniOnEventTest {
 
     @Test
     public void testActionsOnFailures2() {
-        AtomicInteger Item = new AtomicInteger();
+        AtomicInteger item = new AtomicInteger();
+        AtomicInteger sneak = new AtomicInteger();
+
         AtomicReference<Throwable> failure = new AtomicReference<>();
         AtomicReference<Subscription> subscription = new AtomicReference<>();
         AtomicBoolean terminate = new AtomicBoolean();
         UniAssertSubscriber<? super Integer> subscriber = Uni.createFrom().<Integer> failure(new IOException("boom"))
-                .onItem().invoke(Item::set)
+                .onItem().invoke(item::set)
                 .onFailure().invoke(failure::set)
                 .on().subscribed(subscription::set)
                 .on().termination(() -> terminate.set(true))
                 .subscribe().withSubscriber(UniAssertSubscriber.create());
 
         subscriber.assertCompletedWithFailure().assertFailure(IOException.class, "boom");
-        assertThat(Item).doesNotHaveValue(1);
+        assertThat(item).doesNotHaveValue(1);
+        assertThat(sneak).doesNotHaveValue(1);
         assertThat(failure.get()).isInstanceOf(IOException.class);
         assertThat(subscription.get()).isNotNull();
         assertThat(terminate).isTrue();
@@ -97,10 +110,11 @@ public class UniOnEventTest {
 
     @Test
     public void testWhenOnItemThrowsAnException() {
-        AtomicInteger Item = new AtomicInteger();
+        AtomicInteger item = new AtomicInteger();
+
         AtomicReference<Throwable> failure = new AtomicReference<>();
         AtomicReference<Subscription> subscription = new AtomicReference<>();
-        AtomicInteger ItemFromTerminate = new AtomicInteger();
+        AtomicInteger itemFromTerminate = new AtomicInteger();
         AtomicReference<Throwable> failureFromTerminate = new AtomicReference<>();
         UniAssertSubscriber<? super Integer> subscriber = Uni.createFrom().item(1)
                 .onItem().invoke(i -> {
@@ -110,23 +124,54 @@ public class UniOnEventTest {
                 .on().subscribed(subscription::set)
                 .on().termination((r, f, c) -> {
                     if (r != null) {
-                        ItemFromTerminate.set(r);
+                        itemFromTerminate.set(r);
                     }
                     failureFromTerminate.set(f);
                 })
                 .subscribe().withSubscriber(UniAssertSubscriber.create());
 
         subscriber.assertCompletedWithFailure().assertFailure(IllegalStateException.class, "boom");
-        assertThat(Item).doesNotHaveValue(1);
+        assertThat(item).doesNotHaveValue(1);
         assertThat(failure.get()).isInstanceOf(IllegalStateException.class);
         assertThat(subscription.get()).isNotNull();
-        assertThat(ItemFromTerminate).doesNotHaveValue(1);
+        assertThat(itemFromTerminate).doesNotHaveValue(1);
+        assertThat(failureFromTerminate.get()).isInstanceOf(IllegalStateException.class);
+    }
+
+    @Test
+    public void testWhensneakThrowsAnException() {
+        AtomicInteger item = new AtomicInteger();
+
+        AtomicReference<Throwable> failure = new AtomicReference<>();
+        AtomicReference<Subscription> subscription = new AtomicReference<>();
+        AtomicInteger itemFromTerminate = new AtomicInteger();
+        AtomicReference<Throwable> failureFromTerminate = new AtomicReference<>();
+        UniAssertSubscriber<? super Integer> subscriber = Uni.createFrom().item(1)
+                .sneak(i -> {
+                    throw new IllegalStateException("boom");
+                })
+                .onFailure().invoke(failure::set)
+                .on().subscribed(subscription::set)
+                .on().termination((r, f, c) -> {
+                    if (r != null) {
+                        itemFromTerminate.set(r);
+                    }
+                    failureFromTerminate.set(f);
+                })
+                .subscribe().withSubscriber(UniAssertSubscriber.create());
+
+        subscriber.assertCompletedWithFailure().assertFailure(IllegalStateException.class, "boom");
+        assertThat(item).doesNotHaveValue(1);
+        assertThat(failure.get()).isInstanceOf(IllegalStateException.class);
+        assertThat(subscription.get()).isNotNull();
+        assertThat(itemFromTerminate).doesNotHaveValue(1);
         assertThat(failureFromTerminate.get()).isInstanceOf(IllegalStateException.class);
     }
 
     @Test
     public void testWhenOnItemThrowsAnException2() {
-        AtomicInteger Item = new AtomicInteger();
+        AtomicInteger item = new AtomicInteger();
+
         AtomicReference<Throwable> failure = new AtomicReference<>();
         AtomicReference<Subscription> subscription = new AtomicReference<>();
         AtomicBoolean terminated = new AtomicBoolean();
@@ -140,7 +185,7 @@ public class UniOnEventTest {
                 .subscribe().withSubscriber(UniAssertSubscriber.create());
 
         subscriber.assertCompletedWithFailure().assertFailure(IllegalStateException.class, "boom");
-        assertThat(Item).doesNotHaveValue(1);
+        assertThat(item).doesNotHaveValue(1);
         assertThat(failure.get()).isInstanceOf(IllegalStateException.class);
         assertThat(subscription.get()).isNotNull();
         assertThat(terminated).isTrue();
@@ -148,19 +193,20 @@ public class UniOnEventTest {
 
     @Test
     public void testWhenOnFailureThrowsAnException() {
-        AtomicInteger Item = new AtomicInteger();
+        AtomicInteger item = new AtomicInteger();
+
         AtomicReference<Subscription> subscription = new AtomicReference<>();
-        AtomicInteger ItemFromTerminate = new AtomicInteger();
+        AtomicInteger itemFromTerminate = new AtomicInteger();
         AtomicReference<Throwable> failureFromTerminate = new AtomicReference<>();
         UniAssertSubscriber<? super Integer> subscriber = Uni.createFrom().<Integer> failure(new IOException("kaboom"))
-                .onItem().invoke(Item::set)
+                .onItem().invoke(item::set)
                 .onFailure().invoke(e -> {
                     throw new IllegalStateException("boom");
                 })
                 .on().subscribed(subscription::set)
                 .on().termination((r, f, c) -> {
                     if (r != null) {
-                        ItemFromTerminate.set(r);
+                        itemFromTerminate.set(r);
                     }
                     failureFromTerminate.set(f);
                 })
@@ -169,19 +215,20 @@ public class UniOnEventTest {
         subscriber.assertCompletedWithFailure()
                 .assertFailure(CompositeException.class, "boom")
                 .assertFailure(CompositeException.class, "kaboom");
-        assertThat(Item).doesNotHaveValue(1);
+        assertThat(item).doesNotHaveValue(1);
         assertThat(subscription.get()).isNotNull();
-        assertThat(ItemFromTerminate).doesNotHaveValue(1);
+        assertThat(itemFromTerminate).doesNotHaveValue(1);
         assertThat(failureFromTerminate.get()).isInstanceOf(CompositeException.class);
     }
 
     @Test
     public void testWhenOnFailureThrowsAnException2() {
-        AtomicInteger Item = new AtomicInteger();
+        AtomicInteger item = new AtomicInteger();
+
         AtomicReference<Subscription> subscription = new AtomicReference<>();
         AtomicBoolean terminated = new AtomicBoolean();
         UniAssertSubscriber<? super Integer> subscriber = Uni.createFrom().<Integer> failure(new IOException("kaboom"))
-                .onItem().invoke(Item::set)
+                .onItem().invoke(item::set)
                 .onFailure().invoke(e -> {
                     throw new IllegalStateException("boom");
                 })
@@ -192,7 +239,7 @@ public class UniOnEventTest {
         subscriber.assertCompletedWithFailure()
                 .assertFailure(CompositeException.class, "boom")
                 .assertFailure(CompositeException.class, "kaboom");
-        assertThat(Item).doesNotHaveValue(1);
+        assertThat(item).doesNotHaveValue(1);
         assertThat(subscription.get()).isNotNull();
         assertThat(terminated).isTrue();
     }
