@@ -66,6 +66,57 @@ public class ExponentialBackoff {
                 }).concatenate();
     }
 
+    /**
+     * Computes a method that would delay <em>ticks</em> using an exponential backoff.
+     * Will keep retrying until an expiration time.
+     * The last attempt will start before the expiration time.
+     *
+     * @param expireAt absolute time in millis that specifies when to give up.
+     * @param firstBackoff the delay of the first backoff
+     * @param maxBackoff the max backoff
+     * @param jitterFactor the jitter factor in [0, 1]
+     * @param executor the executor used for the delay
+     * @return the function
+     */
+    public static Function<Multi<Throwable>, Publisher<Long>> randomExponentialBackoffFunctionExpireAt(
+            long expireAt, Duration firstBackoff, Duration maxBackoff,
+            double jitterFactor, ScheduledExecutorService executor) {
+
+        if (jitterFactor < 0 || jitterFactor > 1) {
+            throw new IllegalArgumentException("jitterFactor must be between 0 and 1 (default 0.5)");
+        }
+        ParameterValidation.nonNull(firstBackoff, "firstBackoff");
+        ParameterValidation.nonNull(maxBackoff, "maxBackoff");
+        ParameterValidation.nonNull(executor, "executor");
+
+        AtomicInteger index = new AtomicInteger();
+        return t -> t
+                .onItem().produceUni(failure -> {
+                    int iteration = index.incrementAndGet();
+                    Duration nextBackoff = getNextAttemptDelay(firstBackoff, maxBackoff, iteration);
+
+                    //short-circuit delay == 0 case
+                    if (nextBackoff.isZero()) {
+                        return Uni.createFrom().item((long) iteration);
+                    }
+
+                    ThreadLocalRandom random = ThreadLocalRandom.current();
+                    long jitter = computeJitter(firstBackoff, maxBackoff, jitterFactor, nextBackoff, random);
+                    Duration effectiveBackoff = nextBackoff.plusMillis(jitter);
+
+                    long checkTime = System.currentTimeMillis() + effectiveBackoff.toMillis();
+                    if (checkTime > expireAt) {
+                        return Uni.createFrom().<Long> failure(
+                                new IllegalStateException(
+                                        "Retries exhausted : " + iteration + " attempts against " + checkTime + "/" + expireAt
+                                                + " expiration",
+                                        failure));
+                    }
+                    return Uni.createFrom().item((long) iteration).onItem().delayIt()
+                            .onExecutor(executor).by(effectiveBackoff);
+                }).concatenate();
+    }
+
     private static long computeJitter(Duration firstBackoff, Duration maxBackoff, double jitterFactor,
             Duration nextBackoff, ThreadLocalRandom random) {
         long jitterOffset = getJitter(jitterFactor, nextBackoff);
