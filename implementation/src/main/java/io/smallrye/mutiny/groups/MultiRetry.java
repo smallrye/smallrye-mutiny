@@ -66,6 +66,51 @@ public class MultiRetry<T> {
     }
 
     /**
+     * Produces a {@link Multi} resubscribing to the current {@link Multi} until {@code expireAt} time or
+     * until it gets items followed by the completion event. On every failure, it re-subscribes.
+     * <p>
+     * If expiration time is passed, the last failure is propagated.
+     * Backoff must be configured.
+     *
+     * @param expireAt absolute time in millis that specifies when to give up
+     * @return a new {@link Multi} retrying to subscribe to the current
+     *         {@link Multi} until it gets an item or until expiration {@code expireAt}. When the expiration is reached,
+     *         the last failure is propagated.
+     *
+     * @throws IllegalArgumentException if back off not configured,
+     */
+    public Multi<T> expireAt(long expireAt) {
+        if (!backOffConfigured) {
+            throw new IllegalArgumentException(
+                    "Invalid retry configuration, `expiresAt/expiresIn` must be used with a back-off configuration");
+        }
+        Function<Multi<Throwable>, Publisher<Long>> whenStreamFactory = ExponentialBackoff
+                .randomExponentialBackoffFunctionExpireAt(expireAt,
+                        initialBackOff, maxBackoff, jitter,
+                        Infrastructure.getDefaultWorkerPool());
+        return Infrastructure.onMultiCreation(
+                new MultiRetryWhenOp<>(upstream, whenStreamFactory));
+    }
+
+    /**
+     * Produces a {@link Multi} resubscribing to the current {@link Multi} until {@code expireIn} time or
+     * until it gets items followed by the completion event. On every failure, it re-subscribes.
+     * <p>
+     * If expiration time is passed, the last failure is propagated.
+     * Backoff must be configured.
+     *
+     * @param expireIn relative time in millis that specifies when to give up
+     * @return a new {@link Multi} retrying to subscribe to the current
+     *         {@link Multi} until it gets an item or until expiration {@code expireIn}. When the expiration is reached,
+     *         the last failure is propagated.
+     *
+     * @throws IllegalArgumentException if back off not configured,
+     */
+    public Multi<T> expireIn(long expireIn) {
+        return expireAt(System.currentTimeMillis() + expireIn);
+    }
+
+    /**
      * Produces a {@code Multi} resubscribing to the current {@link Multi} until the given predicate returns {@code false}.
      * The predicate is called with the failure emitted by the current {@link Multi}.
      *

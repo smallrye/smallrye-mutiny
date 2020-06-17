@@ -64,6 +64,28 @@ public class MutinySchedulerTest {
     }
 
     @Test
+    public void testUniRetryExpireIn() {
+        AtomicReference<String> thread = new AtomicReference<>();
+        AtomicInteger count = new AtomicInteger();
+        String res = Uni.createFrom().<String> emitter(e -> {
+            if (count.getAndIncrement() < 2) {
+                e.fail(new Exception("boom"));
+            } else {
+                e.complete("hello");
+            }
+        })
+                .onFailure().retry().withBackOff(Duration.ofNanos(100)).expireIn(5_000L)
+                .map(s -> {
+                    thread.set(Thread.currentThread().getName());
+                    return s.toUpperCase();
+                })
+                .await().indefinitely();
+
+        assertThat(res).isEqualTo("HELLO");
+        assertThat(thread).doesNotHaveValue("main").satisfies(ref -> assertThat(ref.get()).startsWith("my-thread-"));
+    }
+
+    @Test
     public void testMultiRetry() {
         AtomicReference<String> thread = new AtomicReference<>();
         AtomicInteger count = new AtomicInteger();
@@ -76,6 +98,30 @@ public class MutinySchedulerTest {
             }
         })
                 .onFailure().retry().withBackOff(Duration.ofNanos(100)).atMost(3)
+                .map(s -> {
+                    thread.set(Thread.currentThread().getName());
+                    return s.toUpperCase();
+                })
+                .collectItems().first()
+                .await().indefinitely();
+
+        assertThat(res).isEqualTo("HELLO");
+        assertThat(thread).doesNotHaveValue("main").satisfies(ref -> assertThat(ref.get()).startsWith("my-thread-"));
+    }
+
+    @Test
+    public void testMultiRetryExpireIn() {
+        AtomicReference<String> thread = new AtomicReference<>();
+        AtomicInteger count = new AtomicInteger();
+        String res = Multi.createFrom().<String> emitter(e -> {
+            if (count.getAndIncrement() < 2) {
+                e.fail(new Exception("boom"));
+            } else {
+                e.emit("hello");
+                e.complete();
+            }
+        })
+                .onFailure().retry().withBackOff(Duration.ofNanos(100)).expireIn(5_000L)
                 .map(s -> {
                     thread.set(Thread.currentThread().getName());
                     return s.toUpperCase();

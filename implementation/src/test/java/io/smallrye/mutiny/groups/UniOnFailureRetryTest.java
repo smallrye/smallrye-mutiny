@@ -126,6 +126,46 @@ public class UniOnFailureRetryTest {
         assertThat(value).isEqualTo("done");
     }
 
+    @Test
+    public void testExpireInRetryWithBackOff() {
+        AtomicInteger count = new AtomicInteger();
+        String value = Uni.createFrom().<String> emitter(e -> {
+            int attempt = count.getAndIncrement();
+            if (attempt == 0) {
+                e.fail(new Exception("boom"));
+            } else if (attempt == 1) {
+                e.fail(new IOException("another-boom"));
+            } else {
+                e.complete("done");
+            }
+        })
+                .onFailure().retry().withBackOff(Duration.ofMillis(10), Duration.ofSeconds(1)).withJitter(1.0)
+                .expireIn(10_000L)
+                .await().atMost(Duration.ofSeconds(5));
+
+        assertThat(value).isEqualTo("done");
+    }
+
+    @Test
+    public void testExpireAtRetryWithBackOff() {
+        AtomicInteger count = new AtomicInteger();
+        String value = Uni.createFrom().<String> emitter(e -> {
+            int attempt = count.getAndIncrement();
+            if (attempt == 0) {
+                e.fail(new Exception("boom"));
+            } else if (attempt == 1) {
+                e.fail(new IOException("another-boom"));
+            } else {
+                e.complete("done");
+            }
+        })
+                .onFailure().retry().withBackOff(Duration.ofMillis(10), Duration.ofSeconds(1)).withJitter(1.0)
+                .expireAt(System.currentTimeMillis() + 10_000L)
+                .await().atMost(Duration.ofSeconds(5));
+
+        assertThat(value).isEqualTo("done");
+    }
+
     @Test(expectedExceptions = IllegalStateException.class, expectedExceptionsMessageRegExp = ".*4/4.*")
     public void testRetryWithBackOffReachingMaxAttempt() {
         AtomicInteger count = new AtomicInteger();
@@ -137,10 +177,44 @@ public class UniOnFailureRetryTest {
                 .await().atMost(Duration.ofSeconds(5));
     }
 
+    @Test(expectedExceptions = IllegalStateException.class, expectedExceptionsMessageRegExp = ".* attempts.*")
+    public void testRetryWithBackOffReachingExpiresIn() {
+        AtomicInteger count = new AtomicInteger();
+        Uni.createFrom().<String> emitter(e -> {
+            e.fail(new Exception("boom " + count.getAndIncrement()));
+        })
+                .onFailure().retry().withBackOff(Duration.ofMillis(10), Duration.ofSeconds(20)).withJitter(1.0)
+                .expireIn(90L)
+                .await().atMost(Duration.ofSeconds(5));
+    }
+
+    @Test(expectedExceptions = IllegalStateException.class, expectedExceptionsMessageRegExp = ".* attempts.*")
+    public void testRetryWithBackOffReachingExpiresAt() {
+        AtomicInteger count = new AtomicInteger();
+        Uni.createFrom().<String> emitter(e -> {
+            e.fail(new Exception("boom " + count.getAndIncrement()));
+        })
+                .onFailure().retry().withBackOff(Duration.ofMillis(10), Duration.ofSeconds(20)).withJitter(1.0)
+                .expireAt(System.currentTimeMillis() + 90L)
+                .await().atMost(Duration.ofSeconds(5));
+    }
+
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void testThatYouCannotUseWhenIfBackoffIsConfigured() {
         Uni.createFrom().item("hello")
                 .onFailure().retry().withBackOff(Duration.ofSeconds(1)).when(t -> Multi.createFrom().item(t));
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void testExpireAtThatYouCannotUseWhenIfBackoffIsNotConfigured() {
+        Uni.createFrom().item("hello")
+                .onFailure().retry().expireAt(1L);
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void testExpireInThatYouCannotUseWhenIfBackoffIsNotConfigured() {
+        Uni.createFrom().item("hello")
+                .onFailure().retry().expireIn(1L);
     }
 
     static class ThrowablePredicate implements Predicate<Throwable> {
