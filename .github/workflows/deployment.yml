@@ -14,9 +14,10 @@ jobs:
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
           restore-keys: |
             ${{ runner.os }}-maven-
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
         with:
           ref: 'master'
+          token: ${{ secrets.GITHUB_API_TOKEN }}
       - name: Install JDK 1.8
         uses: AdoptOpenJDK/install-jdk@v1
         with:
