@@ -10,17 +10,17 @@ import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.subscription.MultiSubscriber;
 import io.smallrye.mutiny.subscription.SwitchableSubscriptionSubscriber;
 
-public class MultiRepeatOp<T> extends AbstractMultiOperator<T, T> implements Multi<T> {
+public class MultiRepeatUntilOp<T> extends AbstractMultiOperator<T, T> implements Multi<T> {
     private final Predicate<T> predicate;
     private final long times;
 
-    public MultiRepeatOp(Multi<T> upstream, long times) {
+    public MultiRepeatUntilOp(Multi<T> upstream, long times) {
         super(upstream);
         this.times = times;
         this.predicate = x -> false;
     }
 
-    public MultiRepeatOp(Multi<T> upstream, Predicate<T> predicate) {
+    public MultiRepeatUntilOp(Multi<T> upstream, Predicate<T> predicate) {
         super(upstream);
         this.predicate = predicate;
         this.times = Long.MAX_VALUE;
@@ -29,18 +29,18 @@ public class MultiRepeatOp<T> extends AbstractMultiOperator<T, T> implements Mul
     @Override
     public void subscribe(MultiSubscriber<? super T> downstream) {
         ParameterValidation.nonNullNpe(downstream, "downstream");
-        RepeatProcessor<T> processor = new RepeatProcessor<>(upstream, downstream,
+        RepeatUntilProcessor<T> processor = new RepeatUntilProcessor<>(upstream, downstream,
                 times != Long.MAX_VALUE ? times - 1 : Long.MAX_VALUE,
                 predicate);
         downstream.onSubscribe(processor);
         upstream.subscribe(processor);
     }
 
-    static final class RepeatProcessor<T> extends SwitchableSubscriptionSubscriber<T> {
+    static final class RepeatUntilProcessor<T> extends SwitchableSubscriptionSubscriber<T> {
 
         private final Multi<? extends T> upstream;
         private long remaining;
-        private Predicate<T> predicate;
+        private final Predicate<T> predicate;
 
         /**
          * Stores the result of the last test of the predicate, i.e. the test with the last emitted item.
@@ -54,7 +54,7 @@ public class MultiRepeatOp<T> extends AbstractMultiOperator<T, T> implements Mul
         private long emitted;
         private final AtomicInteger wip = new AtomicInteger();
 
-        public RepeatProcessor(Multi<? extends T> upstream, MultiSubscriber<? super T> downstream,
+        public RepeatUntilProcessor(Multi<? extends T> upstream, MultiSubscriber<? super T> downstream,
                 long times, Predicate<T> predicate) {
             super(downstream);
             this.upstream = upstream;
