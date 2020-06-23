@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.testng.annotations.Test;
@@ -138,7 +137,7 @@ public class MultiFlatMapToPublisherTest {
 
         subscriber
                 .await()
-                .assertHasFailedWith(CompletionException.class, "boom");
+                .assertHasFailedWith(IllegalArgumentException.class, "boom");
 
         assertThat(subscriber.items().size()).isEqualTo(99000 - 1);
         int current = 0;

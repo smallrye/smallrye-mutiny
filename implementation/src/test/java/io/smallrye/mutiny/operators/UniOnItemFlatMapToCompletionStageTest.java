@@ -3,7 +3,6 @@ package io.smallrye.mutiny.operators;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.testng.annotations.Test;
@@ -49,7 +48,7 @@ public class UniOnItemFlatMapToCompletionStageTest {
                     throw new IllegalStateException("boom");
                 }));
         uni.subscribe().withSubscriber(test);
-        test.await().assertCompletedWithFailure().assertFailure(CompletionException.class, "boom");
+        test.await().assertCompletedWithFailure().assertFailure(IllegalStateException.class, "boom");
     }
 
     @Test

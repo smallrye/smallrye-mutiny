@@ -2,6 +2,7 @@ package io.smallrye.mutiny.operators;
 
 import static io.smallrye.mutiny.helpers.EmptyUniSubscription.propagateFailureEvent;
 
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.CompletionStage;
 import java.util.function.Supplier;
 
@@ -20,7 +21,11 @@ public class UniCreateFromCompletionStage<O> extends UniOperator<Void, O> {
         subscriber.onSubscribe(() -> stage.toCompletableFuture().cancel(false));
         stage.whenComplete((res, fail) -> {
             if (fail != null) {
-                subscriber.onFailure(fail);
+                if (fail instanceof CompletionException) {
+                    subscriber.onFailure(fail.getCause());
+                } else {
+                    subscriber.onFailure(fail);
+                }
             } else {
                 subscriber.onItem(res);
             }
