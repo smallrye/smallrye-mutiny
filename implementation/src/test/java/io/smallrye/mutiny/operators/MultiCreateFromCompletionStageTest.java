@@ -2,6 +2,7 @@ package io.smallrye.mutiny.operators;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -120,5 +121,36 @@ public class MultiCreateFromCompletionStageTest {
                 .cancel()
                 .assertNotTerminated();
         assertThat(cancelled).isTrue();
+    }
+
+    @Test
+    public void testWithException() {
+        MultiAssertSubscriber<String> ts = MultiAssertSubscriber.create();
+        CompletionStage<String> cs = new CompletableFuture<>();
+        Multi.createFrom().completionStage(cs).subscribe().withSubscriber(ts);
+        cs.toCompletableFuture().completeExceptionally(new IOException("boom"));
+        ts.assertHasFailedWith(IOException.class, "boom");
+    }
+
+    @Test
+    public void testWithRuntimeException() {
+        MultiAssertSubscriber<String> ts = MultiAssertSubscriber.create();
+        CompletionStage<String> cs = new CompletableFuture<>();
+        Multi.createFrom().completionStage(cs).subscribe().withSubscriber(ts);
+        cs.toCompletableFuture().completeExceptionally(new IllegalArgumentException("boom"));
+        ts.assertHasFailedWith(IllegalArgumentException.class, "boom");
+    }
+
+    @Test
+    public void testWithExceptionThrownByAStage() {
+        MultiAssertSubscriber<String> ts = MultiAssertSubscriber.create();
+        CompletionStage<String> cs = new CompletableFuture<>();
+        Multi.createFrom().completionStage(() -> cs
+                .thenApply(String::toUpperCase)
+                .<String> thenApply(s -> {
+                    throw new IllegalStateException("boom");
+                })).subscribe().withSubscriber(ts);
+        cs.toCompletableFuture().complete("bonjour");
+        ts.assertHasFailedWith(IllegalStateException.class, "boom");
     }
 }

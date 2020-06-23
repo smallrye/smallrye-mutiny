@@ -5,6 +5,7 @@ import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
 
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.function.Consumer;
@@ -124,7 +125,11 @@ public class MultiCreate {
             emitter.onTermination(() -> stage.toCompletableFuture().cancel(false));
             stage.whenComplete((r, f) -> {
                 if (f != null) {
-                    emitter.fail(f);
+                    if (f instanceof CompletionException) {
+                        emitter.fail(f.getCause());
+                    } else {
+                        emitter.fail(f);
+                    }
                 } else if (r != null) {
                     emitter.emit(r);
                 }

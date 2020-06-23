@@ -43,6 +43,19 @@ public class UniCreateFromCompletionStageTest {
     }
 
     @Test
+    public void testWithExceptionThrownByAStage() {
+        UniAssertSubscriber<String> ts = UniAssertSubscriber.create();
+        CompletionStage<String> cs = new CompletableFuture<>();
+        Uni.createFrom().completionStage(() -> cs
+                .thenApply(String::toUpperCase)
+                .<String> thenApply(s -> {
+                    throw new IllegalStateException("boom");
+                })).subscribe().withSubscriber(ts);
+        cs.toCompletableFuture().complete("bonjour");
+        ts.assertFailure(IllegalStateException.class, "boom");
+    }
+
+    @Test
     public void testThatNullValueAreAcceptedWithSupplier() {
         UniAssertSubscriber<Void> ts = UniAssertSubscriber.create();
         Uni.createFrom().<Void> completionStage(() -> CompletableFuture.completedFuture(null)).subscribe()
@@ -66,6 +79,15 @@ public class UniCreateFromCompletionStageTest {
         Uni.createFrom().completionStage(() -> cs).subscribe().withSubscriber(ts);
         cs.toCompletableFuture().completeExceptionally(new IOException("boom"));
         ts.assertFailure(IOException.class, "boom");
+    }
+
+    @Test
+    public void testWithExceptionInSupplier() {
+        UniAssertSubscriber<String> ts = UniAssertSubscriber.create();
+        Uni.createFrom().<String> completionStage(() -> {
+            throw new NullPointerException("boom");
+        }).subscribe().withSubscriber(ts);
+        ts.assertFailure(NullPointerException.class, "boom");
     }
 
     @Test
