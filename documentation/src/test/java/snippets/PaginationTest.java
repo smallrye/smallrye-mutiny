@@ -1,6 +1,7 @@
 package snippets;
 
 import io.smallrye.mutiny.Multi;
+import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.test.MultiAssertSubscriber;
 import org.junit.Test;
 
@@ -15,9 +16,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class PaginationTest {
+import static org.assertj.core.api.Assertions.assertThat;
 
-    private ExecutorService executor = Executors.newSingleThreadExecutor();
+public class PaginationTest {
 
     @SuppressWarnings("Convert2MethodRef")
     @Test
@@ -38,6 +39,39 @@ public class PaginationTest {
 
     }
 
+    @SuppressWarnings("Convert2MethodRef")
+    @Test
+    public void test2() {
+        // tag::code2[]
+        PaginatedApi api = new PaginatedApi();
+
+        Multi<Page> stream = Multi.createBy().repeating()
+                .uni(
+                        () -> new AtomicInteger(),
+                        state -> api.retrieve(state.getAndIncrement()))
+                .whilst(page -> page.hasNext());
+        // end::code2[]
+        MultiAssertSubscriber<Page> subscriber = stream.subscribe()
+                .withSubscriber(MultiAssertSubscriber.create(10))
+                .assertCompletedSuccessfully();
+
+        assertThat(subscriber.items()).hasSize(3);
+
+    }
+
+    private static class Page {
+        final boolean hasNext;
+
+        private Page(boolean hasNext) {
+            this.hasNext = hasNext;
+        }
+
+        public boolean hasNext() {
+            return hasNext;
+        }
+    }
+
+
     private class PaginatedApi {
 
         Map<Integer, List<String>> pages = new LinkedHashMap<>();
@@ -55,6 +89,14 @@ public class PaginationTest {
                 strings = Collections.emptyList();
             }
             return CompletableFuture.completedFuture(strings);
+        }
+
+
+        Uni<Page> retrieve(int page) {
+            if (page == 2) {
+                return Uni.createFrom().item(new Page(false));
+            }
+            return Uni.createFrom().item(new Page(true));
         }
     }
 
