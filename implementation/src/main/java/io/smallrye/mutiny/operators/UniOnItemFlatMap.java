@@ -8,6 +8,7 @@ import java.util.function.Function;
 
 import org.reactivestreams.Subscription;
 
+import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.helpers.EmptyUniSubscription;
 import io.smallrye.mutiny.subscription.UniSubscriber;
@@ -31,7 +32,11 @@ public class UniOnItemFlatMap<I, O> extends UniOperator<I, O> {
             // We cannot call onItem here, as if onItem would throw an exception
             // it would be caught and onFailure would be called. This would be illegal.
         } catch (Throwable e) {
-            subscriber.onFailure(e);
+            if (input instanceof Throwable) {
+                subscriber.onFailure(new CompositeException((Throwable) input, e));
+            } else {
+                subscriber.onFailure(e);
+            }
             return;
         }
 

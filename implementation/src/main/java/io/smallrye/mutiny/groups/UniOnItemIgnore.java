@@ -8,10 +8,10 @@ import io.smallrye.mutiny.Uni;
 
 public class UniOnItemIgnore<T> {
 
-    private final UniOnItem<T> onResult;
+    private final UniOnItem<T> onItem;
 
-    public UniOnItemIgnore(UniOnItem<T> onResult) {
-        this.onResult = nonNull(onResult, "onItem");
+    public UniOnItemIgnore(UniOnItem<T> onItem) {
+        this.onItem = nonNull(onItem, "onItem");
     }
 
     /**
@@ -33,7 +33,7 @@ public class UniOnItemIgnore<T> {
      */
     public Uni<T> andFail(Supplier<Throwable> supplier) {
         nonNull(supplier, "supplier");
-        return onResult.produceUni(ignored -> Uni.createFrom().failure(supplier));
+        return onItem.produceUni(ignored -> Uni.createFrom().failure(supplier));
     }
 
     /**
@@ -54,7 +54,7 @@ public class UniOnItemIgnore<T> {
      */
     public <O> Uni<O> andSwitchTo(Uni<? extends O> other) {
         nonNull(other, "other");
-        return onResult.produceUni(ignored -> other);
+        return onItem.produceUni(ignored -> other);
     }
 
     /**
@@ -66,7 +66,7 @@ public class UniOnItemIgnore<T> {
      */
     public <O> Uni<O> andSwitchTo(Supplier<Uni<? extends O>> supplier) {
         nonNull(supplier, "supplier");
-        return onResult.produceUni(ignored -> supplier.get());
+        return onItem.produceUni(ignored -> supplier.get());
     }
 
     /**
@@ -77,7 +77,7 @@ public class UniOnItemIgnore<T> {
      * @return the new {@link Uni}
      */
     public Uni<T> andContinueWith(T fallback) {
-        return onResult.apply(ignored -> fallback);
+        return onItem.apply(ignored -> fallback);
     }
 
     /**
@@ -86,7 +86,7 @@ public class UniOnItemIgnore<T> {
      * @return the new {@link Uni}
      */
     public Uni<Void> andContinueWithNull() {
-        return onResult.apply(ignored -> null);
+        return onItem.apply(ignored -> null);
     }
 
     /**
@@ -98,7 +98,7 @@ public class UniOnItemIgnore<T> {
      */
     public Uni<T> andContinueWith(Supplier<? extends T> supplier) {
         nonNull(supplier, "supplier");
-        return onResult.apply(ignored -> supplier.get());
+        return onItem.apply(ignored -> supplier.get());
     }
 
 }

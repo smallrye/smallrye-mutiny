@@ -7,6 +7,7 @@ import java.util.function.BiFunction;
 
 import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.UniOnItemOrFailureConsume;
 import io.smallrye.mutiny.operators.UniOnItemOrFailureFlatMap;
@@ -27,16 +28,42 @@ public class UniOnItemOrFailure<T> {
      * Note that the item can be {@code null}, so detecting failures must be done by checking whether the {@code failure}
      * parameter is {@code null}.
      *
-     * <p>
-     * While this method allows implementing side-effects, it is recommended to not do so, and only use this method
-     * to execute side-effect free synchronous logic, like tracing.
-     *
      * @param callback the callback, must not be {@code null}
      * @return the new {@link Uni}
      */
     public Uni<T> invoke(BiConsumer<? super T, Throwable> callback) {
         return Infrastructure.onUniCreation(
                 new UniOnItemOrFailureConsume<>(upstream, nonNull(callback, "callback")));
+    }
+
+    /**
+     * Produces a new {@link Uni} invoking the given callback when the {@code item} or {@code failure} event is fired.
+     * Note that the item can be {@code null}, so detecting failures must be done by checking whether the {@code failure}
+     * parameter is {@code null}.
+     *
+     * @param callback the callback, must not be {@code null}
+     * @return the new {@link Uni}
+     */
+    public Uni<T> invokeUni(BiFunction<? super T, Throwable, ? extends Uni<?>> callback) {
+        ParameterValidation.nonNull(callback, "callback");
+        return produceUni((res, fail) -> {
+            Uni<?> uni = callback.apply(res, fail);
+            if (uni == null) {
+                throw new NullPointerException("The callback produced a `null` uni");
+            }
+            return uni
+                    .onItemOrFailure().produceUni((ignored, subFailure) -> {
+                        if (fail != null && subFailure != null) {
+                            return Uni.createFrom().failure(new CompositeException(fail, subFailure));
+                        } else if (fail != null) {
+                            return Uni.createFrom().failure(fail);
+                        } else if (subFailure != null) {
+                            return Uni.createFrom().failure(subFailure);
+                        } else {
+                            return Uni.createFrom().item(res);
+                        }
+                    });
+        });
     }
 
     /**
