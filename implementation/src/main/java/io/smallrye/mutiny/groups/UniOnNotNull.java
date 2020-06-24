@@ -38,6 +38,27 @@ public class UniOnNotNull<T> {
     }
 
     /**
+     * Produces a new {@link Uni} invoking the given @{code action} when the {@code item} event is received. Note that
+     * if the received item is {@code null}, the action is not executed, and the item is propagated downstream.
+     * <p>
+     * Unlike {@link #invoke(Consumer)}, the passed function returns a {@link Uni}. When the produced {@code Uni} sends
+     * its result, the result is discarded, and the original (non null) {@code item} is forwarded downstream. If the
+     * produced {@code Uni} fails, the failure is propagated downstream.
+     *
+     * @param action the callback, must not be {@code null}
+     * @return the new {@link Uni}
+     */
+    public Uni<T> invokeUni(Function<? super T, ? extends Uni<?>> action) {
+        return upstream.onItem().invokeUni(item -> {
+            if (item != null) {
+                return action.apply(item);
+            } else {
+                return Uni.createFrom().nullItem();
+            }
+        });
+    }
+
+    /**
      * Produces a new {@link Uni} invoking the given function when the current {@link Uni} fires the {@code item} event.
      * The function receives the (non-null) item as parameter, and can transform it. The returned object is sent downstream
      * as {@code item}.

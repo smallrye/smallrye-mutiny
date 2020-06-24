@@ -11,6 +11,7 @@ import org.reactivestreams.Publisher;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.*;
 import io.smallrye.mutiny.subscription.UniEmitter;
@@ -26,9 +27,6 @@ public class UniOnItem<T> {
     /**
      * Produces a new {@link Uni} invoking the given callback when the {@code item} event is fired. Note that the
      * item can be {@code null}.
-     * <p>
-     * While this method allows implementing side-effects, it is recommended to not do so, and only use this method
-     * to execute side-effect free synchronous logic, like tracing.
      *
      * @param callback the callback, must not be {@code null}
      * @return the new {@link Uni}
@@ -36,6 +34,30 @@ public class UniOnItem<T> {
     public Uni<T> invoke(Consumer<? super T> callback) {
         return Infrastructure.onUniCreation(
                 new UniOnItemConsume<>(upstream, nonNull(callback, "callback"), null, null));
+    }
+
+    /**
+     * Produces a new {@link Uni} invoking the given @{code action} when the {@code item} event is received. Note that
+     * the received item can be {@code null}.
+     * <p>
+     * Unlike {@link #invoke(Consumer)}, the passed function returns a {@link Uni}. When the produced {@code Uni} sends
+     * its item, this item is discarded, and the original {@code item} is forwarded downstream. If the produced
+     * {@code Uni} fails, the failure is propagated downstream.
+     * <p>
+     *
+     * @param action the callback, must not be {@code null}
+     * @return the new {@link Uni}
+     */
+    public Uni<T> invokeUni(Function<? super T, ? extends Uni<?>> action) {
+        ParameterValidation.nonNull(action, "action");
+        return produceUni(item -> {
+            Uni<?> uni = action.apply(item);
+            if (uni == null) {
+                throw new NullPointerException("The callback produced a `null` uni");
+            }
+            return uni
+                    .onItem().apply(ignored -> item);
+        });
     }
 
     /**

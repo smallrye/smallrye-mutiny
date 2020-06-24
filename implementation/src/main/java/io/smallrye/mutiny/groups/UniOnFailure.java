@@ -2,12 +2,15 @@ package io.smallrye.mutiny.groups;
 
 import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
 
+import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
+import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.UniOnFailureFlatMap;
 import io.smallrye.mutiny.operators.UniOnFailureMap;
@@ -62,6 +65,31 @@ public class UniOnFailure<T> {
      * Produces a new {@link Uni} invoking the given function when the current {@link Uni} propagates a failure
      * (matching the predicate if set). The function can transform the received failure into another exception that will
      * be fired as failure downstream.
+     *
+     * Produces a new {@link Uni} invoking the given @{code action} when the {@code failure} event is received.
+     * <p>
+     * Unlike {@link #invoke(Consumer)}, the passed function returns a {@link Uni}. When the produced {@code Uni} sends
+     * its item, this item is discarded, and the original {@code failure} is forwarded downstream. If the produced
+     * {@code Uni} fails, a composite failure containing both the original failure and the failure from the executed
+     * action is propagated downstream.
+     *
+     * @param action the callback, must not be {@code null}
+     * @return the new {@link Uni}
+     */
+    public Uni<T> invokeUni(Function<Throwable, ? extends Uni<?>> action) {
+        ParameterValidation.nonNull(action, "action");
+        return recoverWithUni(failure -> {
+            Uni<?> uni = Objects.requireNonNull(action.apply(failure), "The `action` produced a `null` uni");
+            //noinspection unchecked
+            return (Uni<T>) uni
+                    .onItem().failWith(ignored -> failure)
+                    .onFailure().apply(subFailure -> new CompositeException(failure, subFailure));
+        });
+    }
+
+    /**
+     * Produces a new {@link Uni} invoking the given function when the current {@link Uni} propagates a failure. The
+     * function can transform the received failure into another exception that will be fired as failure downstream.
      *
      * @param mapper the mapper function, must not be {@code null}, must not return {@code null}
      * @return the new {@link Uni}
