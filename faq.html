@@ -487,7 +487,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">String result1 = uni
+<pre class="highlight"><code class="language-java" data-lang="java">String result1 = uni
         .onItem().apply(s -&gt; s.toUpperCase())
         .await().indefinitely();
 List&lt;String&gt; result2 = multi
@@ -500,7 +500,7 @@ List&lt;String&gt; result2 = multi
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">String result1 = uni
+<pre class="highlight"><code class="language-java" data-lang="java">String result1 = uni
         .onItem().apply(function(this::operationThrowingException))
         .await().indefinitely();
 List&lt;String&gt; result2 = multi
@@ -513,7 +513,7 @@ List&lt;String&gt; result2 = multi
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">String result1 = uni
+<pre class="highlight"><code class="language-java" data-lang="java">String result1 = uni
         .onItem().produceUni(s -&gt; Uni.createFrom().item(s.toUpperCase()))
         .await().indefinitely();
 String result2 = uni
@@ -533,7 +533,7 @@ List&lt;String&gt; result4 = multi
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">List&lt;String&gt; result = multi
+<pre class="highlight"><code class="language-java" data-lang="java">List&lt;String&gt; result = multi
         .onItem().producePublisher(s -&gt; Multi.createFrom().item(s.toUpperCase())).concatenate()
         .collectItems().asList().await().indefinitely();</code></pre>
 </div>
@@ -568,7 +568,7 @@ To achieve this, there is a set of methods available in <code>multi.transform()<
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">List&lt;Integer&gt; list = multi
+<pre class="highlight"><code class="language-java" data-lang="java">List&lt;Integer&gt; list = multi
         .transform().byFilteringItemsWith(i -&gt; i &gt; 6)
         .collectItems().asList()
         .await().indefinitely();
@@ -614,7 +614,7 @@ List&lt;Integer&gt; list3 = multi
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">List&lt;Integer&gt; list = multi
+<pre class="highlight"><code class="language-java" data-lang="java">List&lt;Integer&gt; list = multi
         .transform().byDroppingDuplicates()
         .collectItems().asList()
         .await().indefinitely();
@@ -634,7 +634,7 @@ Mutiny also proposes there methods using the most-used variants of them.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">int result = uni
+<pre class="highlight"><code class="language-java" data-lang="java">int result = uni
         .map(i -&gt; i + 1)
         .await().indefinitely();
 
@@ -664,7 +664,7 @@ The equivalent to <code>map</code>, <code>flatMap</code> and <code>concatMap</co
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">int result = uni
+<pre class="highlight"><code class="language-java" data-lang="java">int result = uni
         .onItem().apply(i -&gt; i + 1)
         .await().indefinitely();
 
@@ -696,7 +696,7 @@ List&lt;Integer&gt; list3 = multi
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">List&lt;Integer&gt; list1 = Multi.createBy().merging().streams(multi1, multi2, multi3)
+<pre class="highlight"><code class="language-java" data-lang="java">List&lt;Integer&gt; list1 = Multi.createBy().merging().streams(multi1, multi2, multi3)
         .collectItems().asList()
         .await().indefinitely();
 
@@ -718,7 +718,7 @@ List&lt;Integer&gt; list3 = Multi.createBy()
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">// collectItems let you collect items into a Uni of data structure.
+<pre class="highlight"><code class="language-java" data-lang="java">// collectItems let you collect items into a Uni of data structure.
 // The final result is emitted when the completion event is received
 Uni&lt;List&lt;Integer&gt;&gt; list = multi.collectItems().asList();
 Uni&lt;Map&lt;String, Integer&gt;&gt; map = multi.collectItems().asMap(i -&gt; Integer.toString(i));
@@ -737,7 +737,7 @@ Stream&lt;Integer&gt; stream = multi.subscribe().asStream();</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">Multi&lt;Integer&gt; added = multi.onItem().scan(() -&gt; 0, (item, acc) -&gt; acc + item);</code></pre>
+<pre class="highlight"><code class="language-java" data-lang="java">Multi&lt;Integer&gt; added = multi.onItem().scan(() -&gt; 0, (item, acc) -&gt; acc + item);</code></pre>
 </div>
 </div>
 </div>
@@ -752,7 +752,7 @@ Most of the time, this should be represented by a <code>Uni&lt;T&gt;</code> with
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">Uni&lt;String&gt; invokeMyService();</code></pre>
+<pre class="highlight"><code class="language-java" data-lang="java">Uni&lt;String&gt; invokeMyService();</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -764,7 +764,7 @@ If the service invocation fails, the failure is propagated by the <code>Uni</cod
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">Uni&lt;Void&gt; fireAndForget();</code></pre>
+<pre class="highlight"><code class="language-java" data-lang="java">Uni&lt;Void&gt; fireAndForget();</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -778,7 +778,7 @@ If the service invocation fails, the failure is propagated by the <code>Uni</cod
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">CompletableFuture&lt;String&gt; future = uni
+<pre class="highlight"><code class="language-java" data-lang="java">CompletableFuture&lt;String&gt; future = uni
         .onItem().produceUni(this::asyncOperation)
         .onItem().produceUni(this::anotherAsyncOperation)
         .subscribeAsCompletionStage();</code></pre>
@@ -793,7 +793,7 @@ With Mutiny, you can achieve this as follows:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">Uni&lt;String&gt; uni1 = getFirstUni();
+<pre class="highlight"><code class="language-java" data-lang="java">Uni&lt;String&gt; uni1 = getFirstUni();
 Uni&lt;String&gt; uni2 = getSecondUni();
 Uni&lt;Integer&gt; uni3 = getThirdUni();
 
@@ -811,7 +811,7 @@ String result  = uni.onItem().apply(tuple -&gt;
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">Uni&lt;String&gt; uni1 = getFirstUni();
+<pre class="highlight"><code class="language-java" data-lang="java">Uni&lt;String&gt; uni1 = getFirstUni();
 Uni&lt;String&gt; uni2 = getSecondUni();
 Uni&lt;Integer&gt; uni3 = getThirdUni();
 
@@ -835,7 +835,7 @@ To do this, you write the following code:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">List&lt;String&gt; list = multi
+<pre class="highlight"><code class="language-java" data-lang="java">List&lt;String&gt; list = multi
     .onItem().produceUni(this::asyncService)
     // .concatenate() or .merge() ?</code></pre>
 </div>
@@ -845,7 +845,7 @@ To do this, you write the following code:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">List&lt;String&gt; list = multi
+<pre class="highlight"><code class="language-java" data-lang="java">List&lt;String&gt; list = multi
         .onItem().produceUni(this::asyncService).merge()
         .collectItems().asList()
         .await().indefinitely();</code></pre>
@@ -853,7 +853,7 @@ To do this, you write the following code:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">List&lt;String&gt; list = multi
+<pre class="highlight"><code class="language-java" data-lang="java">List&lt;String&gt; list = multi
         .onItem().produceUni(this::asyncService).concatenate()
         .collectItems().asList()
         .await().indefinitely();</code></pre>
@@ -874,7 +874,7 @@ With <code>merge()</code>, you can also configure the degree of concurrency usin
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">List&lt;String&gt; list = multi
+<pre class="highlight"><code class="language-java" data-lang="java">List&lt;String&gt; list = multi
         .onItem().produceUni(this::asyncService).merge(8)
         .collectItems().asList()
         .await().indefinitely();</code></pre>
@@ -894,7 +894,7 @@ But at any stage you can process the failure and transform or recover from it.</
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">// Transform a failure in another type of failure
+<pre class="highlight"><code class="language-java" data-lang="java">// Transform a failure in another type of failure
 CompletableFuture&lt;String&gt; res0 = uni.onFailure().apply(failure -&gt; new MyBusinessException("oh no!"))
         .subscribeAsCompletionStage();
 
@@ -925,7 +925,7 @@ CompletableFuture&lt;String&gt; res4 = uni
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">CompletableFuture&lt;String&gt; res0 = multi.onFailure().apply(failure -&gt; new MyBusinessException("oh no!"))
+<pre class="highlight"><code class="language-java" data-lang="java">CompletableFuture&lt;String&gt; res0 = multi.onFailure().apply(failure -&gt; new MyBusinessException("oh no!"))
         .collectItems().first()
         .subscribeAsCompletionStage();
 
@@ -964,7 +964,7 @@ The <code>retry</code> operator lets you re-subscribe and continue the reception
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">uni.onItem().ifNull().continueWith("hello");
+<pre class="highlight"><code class="language-java" data-lang="java">uni.onItem().ifNull().continueWith("hello");
 uni.onItem().ifNull().switchTo(() -&gt; Uni.createFrom().item("hello"));
 uni.onItem().ifNull().failWith(() -&gt; new Exception("Boom!"));</code></pre>
 </div>
@@ -974,7 +974,7 @@ uni.onItem().ifNull().failWith(() -&gt; new Exception("Boom!"));</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">uni
+<pre class="highlight"><code class="language-java" data-lang="java">uni
         .onItem().ifNotNull().apply(String::toUpperCase)
         .onItem().ifNull().continueWith("yolo!");</code></pre>
 </div>
@@ -1003,7 +1003,7 @@ So, it&#8217;s not rare to need to add a timeout on this kind of operation, and 
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">String item = uni
+<pre class="highlight"><code class="language-java" data-lang="java">String item = uni
         .ifNoItem().after(Duration.ofMillis(100)).recoverWithItem("some fallback item")
         .await().indefinitely();</code></pre>
 </div>
@@ -1034,7 +1034,7 @@ The <code>emitOn</code> operator lets you switch the thread used to dispatch (up
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">String res0 = uni.emitOn(executor)
+<pre class="highlight"><code class="language-java" data-lang="java">String res0 = uni.emitOn(executor)
         .onItem()
         .invoke(s -&gt; System.out.println("Received item `" + s + "` on thread: " + Thread.currentThread().getName()))
         .await().indefinitely();
@@ -1059,7 +1059,7 @@ Also, <code>Uni</code> offers a way to retrieve the item or the failure as a <co
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">CompletableFuture&lt;String&gt; future1 = Uni
+<pre class="highlight"><code class="language-java" data-lang="java">CompletableFuture&lt;String&gt; future1 = Uni
         // Create from a Completion Stage
         .createFrom().completionStage(CompletableFuture.supplyAsync(() -&gt; "hello"))
         .map(String::toUpperCase)
@@ -1081,10 +1081,10 @@ To enable this feature, add the following dependency to your <code>CLASSPATH</co
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="xml" class="language-xml hljs">&lt;dependency&gt;
+<pre class="highlight"><code class="language-xml" data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;io.smallrye.reactive&lt;/groupId&gt;
     &lt;artifactId&gt;mutiny-rxjava&lt;/artifactId&gt;
-    &lt;version&gt;0.5.3&lt;/version&gt;
+    &lt;version&gt;0.5.4&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -1093,7 +1093,7 @@ To enable this feature, add the following dependency to your <code>CLASSPATH</co
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">import io.smallrye.mutiny.converters.multi.MultiRxConverters;
+<pre class="highlight"><code class="language-java" data-lang="java">import io.smallrye.mutiny.converters.multi.MultiRxConverters;
 import io.smallrye.mutiny.converters.uni.UniRxConverters;</code></pre>
 </div>
 </div>
@@ -1102,7 +1102,7 @@ import io.smallrye.mutiny.converters.uni.UniRxConverters;</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">Completable completable = Completable.complete();
+<pre class="highlight"><code class="language-java" data-lang="java">Completable completable = Completable.complete();
 Single&lt;String&gt; single = Single.just("hello");
 Maybe&lt;String&gt; maybe = Maybe.just("hello");
 Maybe&lt;String&gt; emptyMaybe = Maybe.empty();
@@ -1134,7 +1134,7 @@ Once received, the underlying subscription is cancelled.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">Completable completable = uni.convert().with(UniRxConverters.toCompletable());
+<pre class="highlight"><code class="language-java" data-lang="java">Completable completable = uni.convert().with(UniRxConverters.toCompletable());
 Single&lt;Optional&lt;String&gt;&gt; single = uni.convert().with(UniRxConverters.toSingle());
 Single&lt;String&gt; single2 = uni.convert().with(UniRxConverters.toSingle().failOnNull());
 Maybe&lt;String&gt; maybe = uni.convert().with(UniRxConverters.toMaybe());
@@ -1151,7 +1151,7 @@ You can retrieve a <code>Single&lt;T&gt;</code> and fail instead using <code>toS
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">Completable completable = Completable.complete();
+<pre class="highlight"><code class="language-java" data-lang="java">Completable completable = Completable.complete();
 Single&lt;String&gt; single = Single.just("hello");
 Maybe&lt;String&gt; maybe = Maybe.just("hello");
 Maybe&lt;String&gt; emptyMaybe = Maybe.empty();
@@ -1177,7 +1177,7 @@ Multi&lt;String&gt; multiFromPublisher = Multi.createFrom().publisher(flowable);
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">Completable completable = multi.convert().with(MultiRxConverters.toCompletable());
+<pre class="highlight"><code class="language-java" data-lang="java">Completable completable = multi.convert().with(MultiRxConverters.toCompletable());
 Single&lt;Optional&lt;String&gt;&gt; single = multi.convert().with(MultiRxConverters.toSingle());
 Single&lt;String&gt; single2 = multi.convert().with(MultiRxConverters
         .toSingle().onEmptyThrow(() -&gt; new Exception("D'oh!")));
@@ -1195,10 +1195,10 @@ To enable this feature, add the following dependency to your <code>CLASSPATH</co
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="xml" class="language-xml hljs">&lt;dependency&gt;
+<pre class="highlight"><code class="language-xml" data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;io.smallrye.reactive&lt;/groupId&gt;
     &lt;artifactId&gt;mutiny-reactor&lt;/artifactId&gt;
-    &lt;version&gt;0.5.3&lt;/version&gt;
+    &lt;version&gt;0.5.4&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -1207,7 +1207,7 @@ To enable this feature, add the following dependency to your <code>CLASSPATH</co
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">import io.smallrye.mutiny.converters.multi.MultiReactorConverters;
+<pre class="highlight"><code class="language-java" data-lang="java">import io.smallrye.mutiny.converters.multi.MultiReactorConverters;
 import io.smallrye.mutiny.converters.uni.UniReactorConverters;</code></pre>
 </div>
 </div>
@@ -1216,7 +1216,7 @@ import io.smallrye.mutiny.converters.uni.UniReactorConverters;</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">Mono&lt;Void&gt; empty = Mono.empty();
+<pre class="highlight"><code class="language-java" data-lang="java">Mono&lt;Void&gt; empty = Mono.empty();
 Mono&lt;String&gt; mono = Mono.just("hello");
 Flux&lt;String&gt; flux = Flux.just("a", "b", "c");
 
@@ -1231,7 +1231,7 @@ Uni&lt;String&gt; uniFromPublisher = Uni.createFrom().publisher(flux);</code></p
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">Mono&lt;String&gt; mono = uni.convert().with(UniReactorConverters.toMono());
+<pre class="highlight"><code class="language-java" data-lang="java">Mono&lt;String&gt; mono = uni.convert().with(UniReactorConverters.toMono());
 Flux&lt;String&gt; flux = uni.convert().with(UniReactorConverters.toFlux());</code></pre>
 </div>
 </div>
@@ -1240,7 +1240,7 @@ Flux&lt;String&gt; flux = uni.convert().with(UniReactorConverters.toFlux());</co
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">Mono&lt;Void&gt; empty = Mono.empty();
+<pre class="highlight"><code class="language-java" data-lang="java">Mono&lt;Void&gt; empty = Mono.empty();
 Mono&lt;String&gt; mono = Mono.just("hello");
 Flux&lt;String&gt; flux = Flux.just("a", "b", "c");
 
@@ -1256,7 +1256,7 @@ Multi&lt;String&gt; multiFromPublisher = Multi.createFrom().publisher(flux);</co
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">Mono&lt;String&gt; mono = multi.convert().with(MultiReactorConverters.toMono());
+<pre class="highlight"><code class="language-java" data-lang="java">Mono&lt;String&gt; mono = multi.convert().with(MultiReactorConverters.toMono());
 Flux&lt;String&gt; flux = multi.convert().with(MultiReactorConverters.toFlux());</code></pre>
 </div>
 </div>
@@ -1272,7 +1272,7 @@ By default, it would fail and propagate an exception.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">String res1 = multi
+<pre class="highlight"><code class="language-java" data-lang="java">String res1 = multi
         .emitOn(executor)
         .onOverflow().buffer(10)
         .collectItems().first()
@@ -1294,7 +1294,7 @@ To deal with such sources in your applications, apply the following pattern:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">Uni&lt;String&gt; blocking = Uni.createFrom().item(this::invokeRemoteServiceUsingBlockingIO)
+<pre class="highlight"><code class="language-java" data-lang="java">Uni&lt;String&gt; blocking = Uni.createFrom().item(this::invokeRemoteServiceUsingBlockingIO)
         .runSubscriptionOn(Infrastructure.getDefaultWorkerPool());</code></pre>
 </div>
 </div>
@@ -1316,7 +1316,7 @@ But, when you are dealing with <code>Multi</code> and need to execute a blocking
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">Multi&lt;String&gt; multi = Multi.createFrom().items("john", "jack", "sue")
+<pre class="highlight"><code class="language-java" data-lang="java">Multi&lt;String&gt; multi = Multi.createFrom().items("john", "jack", "sue")
         .emitOn(Infrastructure.getDefaultWorkerPool())
         .onItem().apply(this::invokeRemoteServiceUsingBlockingIO);</code></pre>
 </div>
@@ -1334,7 +1334,7 @@ Consequently, it affects where the subsequent operators execute (until another <
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">Multi.createFrom().items(this::retrieveItemsFromSource)
+<pre class="highlight"><code class="language-java" data-lang="java">Multi.createFrom().items(this::retrieveItemsFromSource)
         .emitOn(executor)
         .onItem().apply(this::applySomeOperation)
         .subscribe().with(
@@ -1349,7 +1349,7 @@ Consequently, it affects where the subsequent operators execute (until another <
 </div>
 <div class="imageblock text-center">
 <div class="content">
-<img src="assets/images/diag-ce11714f53fedf6861bf5f43e7f2d847.png" alt="diag ce11714f53fedf6861bf5f43e7f2d847" width="2232" height="578">
+<img src="diag-ce11714f53fedf6861bf5f43e7f2d847.png" alt="diag ce11714f53fedf6861bf5f43e7f2d847" width="2232" height="578">
 </div>
 </div>
 <div class="paragraph">
@@ -1358,7 +1358,7 @@ It requests the upstream to run its subscription (call of the <code>subscribe</c
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">Multi.createFrom().items(() -&gt; {
+<pre class="highlight"><code class="language-java" data-lang="java">Multi.createFrom().items(() -&gt; {
     // called on a thread from the executor
     return retrieveItemsFromSource();
 })
@@ -1376,7 +1376,7 @@ It requests the upstream to run its subscription (call of the <code>subscribe</c
 </div>
 <div class="imageblock text-center">
 <div class="content">
-<img src="assets/images/diag-cbd1972d7b4ab697a798e3d1b5ede99e.png" alt="diag cbd1972d7b4ab697a798e3d1b5ede99e" width="2207" height="578">
+<img src="diag-cbd1972d7b4ab697a798e3d1b5ede99e.png" alt="diag cbd1972d7b4ab697a798e3d1b5ede99e" width="2207" height="578">
 </div>
 </div>
 </div>
@@ -1393,7 +1393,7 @@ These items are enqueued in the processor and replayed when the subscriber is co
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">UnicastProcessor&lt;String&gt; processor = UnicastProcessor.create();
+<pre class="highlight"><code class="language-java" data-lang="java">UnicastProcessor&lt;String&gt; processor = UnicastProcessor.create();
 Multi&lt;String&gt; multi = processor
         .onItem().apply(String::toUpperCase)
         .onFailure().recoverWithItem("d'oh");
@@ -1419,7 +1419,7 @@ You can also pass a fixed size queue that would reject the items once full.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">Uni&lt;String&gt; uni = Uni.createFrom().emitter(emitter -&gt; {
+<pre class="highlight"><code class="language-java" data-lang="java">Uni&lt;String&gt; uni = Uni.createFrom().emitter(emitter -&gt; {
     client.execute(ar -&gt; {
         if (ar.failed()) {
             emitter.fail(ar.cause());
@@ -1471,7 +1471,7 @@ Subscribers only get items emitted after their subscription, meaning that any pr
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">BroadcastProcessor&lt;String&gt; processor = BroadcastProcessor.create();
+<pre class="highlight"><code class="language-java" data-lang="java">BroadcastProcessor&lt;String&gt; processor = BroadcastProcessor.create();
 Multi&lt;String&gt; multi = processor
         .onItem().apply(String::toUpperCase)
         .onFailure().recoverWithItem("d'oh");
@@ -1504,7 +1504,7 @@ To do this, use the <code>repeat()</code> feature:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">PollableDataSource source = new PollableDataSource();
+<pre class="highlight"><code class="language-java" data-lang="java">PollableDataSource source = new PollableDataSource();
 // First creates a uni that emit the polled item. Because `poll` blocks, let's use a specific executor
 Uni&lt;String&gt; pollItemFromSource = Uni.createFrom().item(source::poll).runSubscriptionOn(executor);
 // To get the stream of items, just repeat the uni indefinitely
@@ -1522,7 +1522,7 @@ source.close();</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">PollableDataSource source = new PollableDataSource();
+<pre class="highlight"><code class="language-java" data-lang="java">PollableDataSource source = new PollableDataSource();
 Multi&lt;String&gt; stream = Multi.createBy().repeating()
             .supplier(source::poll)
             .until(s -&gt; s == null)
@@ -1535,7 +1535,7 @@ stream.subscribe().with(item -&gt; System.out.println("Polled item: " + item));<
 <div class="sect2">
 <h3 id="_how_do_i_handle_pagination">How do I handle pagination?</h3>
 <div class="paragraph">
-<p>There are many REST / HTTP API using pagination, <em>i.e.</em> return only a subset of the results and you need to request the next page to get the next batch.
+<p>There are many REST / HTTP APIs using pagination, <em>i.e.</em> return only a subset of the results and you need to request the next <em>page</em> to get the next batch.
 Each batch contains a list of item(s).
 To use this kind of API and generate a continuous stream of items, you need to use the <code>Multi.createBy().repeating()</code> function.
 However, we need to pass a cursor / state to advance and avoid requesting again and again the same page.
@@ -1544,7 +1544,7 @@ So by combining these methods and <code>disjoint</code> you can generate streams
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">PaginatedApi api = new PaginatedApi();
+<pre class="highlight"><code class="language-java" data-lang="java">PaginatedApi api = new PaginatedApi();
 
 Multi&lt;String&gt; stream = Multi.createBy().repeating()
         .completionStage(
@@ -1560,13 +1560,48 @@ Multi&lt;String&gt; stream = Multi.createBy().repeating()
 <div class="paragraph">
 <p>Then, use <code>until</code> to call the paginated API until we have all the items.
 At the point we have a stream of list of item such as <code>["a", "b", "c"], ["d", "e"], []</code>.
-However we want the following stream: <code>"a", "b", "c", "d", "e"</code>.
+However, we want the following stream: <code>"a", "b", "c", "d", "e"</code>.
 The <code>disjoint</code> method does exactly this.
 It gets the items from the lists and passes them downstream:</p>
 </div>
 <div class="imageblock text-center">
 <div class="content">
-<img src="assets/images/diag-1cddf88909ef82bdaa96ca9da9f4c028.png" alt="diag 1cddf88909ef82bdaa96ca9da9f4c028" width="652" height="628">
+<img src="diag-1cddf88909ef82bdaa96ca9da9f4c028.png" alt="diag 1cddf88909ef82bdaa96ca9da9f4c028" width="652" height="628">
+</div>
+</div>
+<div class="paragraph">
+<p><code>Multi.createBy().repeating()</code> lets you choose the number of iterations using:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>atMost</code> - exact number of repetitions (or failure happens before reaching that number)</p>
+</li>
+<li>
+<p><code>until</code> - the repetition is stopped if the item emitted by the <code>Uni</code> <strong>passes</strong> a test (predicate).
+It does not propagate the item that did pass the check, and it stops the repetition.
+The check verifies if the current item does not contain valid data.</p>
+</li>
+<li>
+<p><code>whilst</code> - the repetition is stopped if the item emitted by the <code>Uni</code> <strong>does not pass</strong> a test (predicate).
+It does propagate the item downstream even if the check does not pass.
+However, it stops the repetition.
+The test verifies if there is a <em>next</em> batch to be retrieved.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>The following code illustrates the usage of <code>whilst</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-java" data-lang="java">PaginatedApi api = new PaginatedApi();
+
+Multi&lt;Page&gt; stream = Multi.createBy().repeating()
+        .uni(
+                () -&gt; new AtomicInteger(),
+                state -&gt; api.retrieve(state.getAndIncrement()))
+        .whilst(page -&gt; page.hasNext());</code></pre>
 </div>
 </div>
 </div>
@@ -1578,7 +1613,7 @@ The first variant delays the emission by a given duration:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">String delayed = Uni.createFrom().item("hello")
+<pre class="highlight"><code class="language-java" data-lang="java">String delayed = Uni.createFrom().item("hello")
         .onItem().delayIt().by(Duration.ofMillis(10))
         .map(s -&gt; "Delayed " + s)
         .await().indefinitely();</code></pre>
@@ -1589,7 +1624,7 @@ The first variant delays the emission by a given duration:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">String delayed = Uni.createFrom().item("hello")
+<pre class="highlight"><code class="language-java" data-lang="java">String delayed = Uni.createFrom().item("hello")
         // The write method returns a Uni completed
         // when the operation is done.
         .onItem().delayIt().until(this::write)
@@ -1606,7 +1641,7 @@ If the function emits a failure (or throws an exception), this failure is propag
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">List&lt;Integer&gt; delayed = Multi.createFrom().items(1, 2, 3, 4, 5)
+<pre class="highlight"><code class="language-java" data-lang="java">List&lt;Integer&gt; delayed = Multi.createFrom().items(1, 2, 3, 4, 5)
         .onItem().produceUni(i -&gt; Uni.createFrom().item(i).onItem().delayIt().by(Duration.ofMillis(10)))
         .concatenate()
         .collectItems().asList()
@@ -1619,7 +1654,7 @@ You can implement this behavior as follows:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">Random random = new Random();
+<pre class="highlight"><code class="language-java" data-lang="java">Random random = new Random();
 List&lt;Integer&gt; delayed = Multi.createFrom().items(1, 2, 3, 4, 5)
         .onItem().produceUni(i -&gt; Uni.createFrom().item(i).onItem().delayIt().by(Duration.ofMillis(random.nextInt(100) + 1)))
         .merge()
@@ -1653,11 +1688,8 @@ A <code>ScheduledExecutorService</code> is also created but delegates the execut
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-06-18 11:11:31 UTC
+Last updated 2020-06-24 18:25:57 UTC
 </div>
 </div>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/highlight.min.js"></script>
-<script>hljs.initHighlighting()</script>
 </body>
 </html>

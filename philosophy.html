@@ -486,7 +486,7 @@ Events can flow from upstream to downstream (from source to sinks), or some sign
 </div>
 <div class="imageblock text-center">
 <div class="content">
-<img src="assets/images/diag-4e60926db2b100a45f7a3fafb6d1c2c5.png" alt="diag 4e60926db2b100a45f7a3fafb6d1c2c5" width="1287" height="817">
+<img src="diag-4e60926db2b100a45f7a3fafb6d1c2c5.png" alt="diag 4e60926db2b100a45f7a3fafb6d1c2c5" width="1287" height="817">
 </div>
 </div>
 <div class="admonitionblock note">
@@ -566,7 +566,7 @@ Once they are emitted, no more items are emitted.</p>
 </div>
 <div class="imageblock text-center">
 <div class="content">
-<img src="assets/images/diag-c06139c2b31470fa367c3f84a6e51430.png" alt="diag c06139c2b31470fa367c3f84a6e51430" width="997" height="878">
+<img src="diag-c06139c2b31470fa367c3f84a6e51430.png" alt="diag c06139c2b31470fa367c3f84a6e51430" width="997" height="878">
 </div>
 </div>
 <div class="paragraph">
@@ -612,7 +612,7 @@ For example:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">Multi&lt;String&gt; source = Multi.createFrom().items("a", "b", "c");
+<pre class="highlight"><code class="language-java" data-lang="java">Multi&lt;String&gt; source = Multi.createFrom().items("a", "b", "c");
 
 source
         .onItem().invoke(item -&gt; System.out.println("Received item " + item))
@@ -698,7 +698,7 @@ Also, <code>Uni</code> can handle items having a <code>null</code> value (and ha
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">Multi.createFrom().items("a", "b", "c")
+<pre class="highlight"><code class="language-java" data-lang="java">Multi.createFrom().items("a", "b", "c")
         .onItem().apply(i -&gt; i.toUpperCase())
         .subscribe().with(
                 item -&gt; System.out.println("Received: " + item),
@@ -716,7 +716,7 @@ Uni.createFrom().item("a")
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">Multi.createFrom().items("a", "b", "c")
+<pre class="highlight"><code class="language-java" data-lang="java">Multi.createFrom().items("a", "b", "c")
         .onItem().apply(i -&gt; i.toUpperCase())
         .toUni() // Convert the multi to uni, only "a" will be forwarded.
         .subscribe().with(
@@ -739,7 +739,7 @@ Uni.createFrom().item("a")
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">// Creation from a known item, or computed at subscription time
+<pre class="highlight"><code class="language-java" data-lang="java">// Creation from a known item, or computed at subscription time
 Uni.createFrom().item("some known value");
 Uni.createFrom().item(() -&gt; "some value computed at subscription time");
 
@@ -774,7 +774,7 @@ Uni.createFrom().deferred(() -&gt; Uni.createFrom().item("create the uni at subs
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">Uni&lt;String&gt; uni = Uni.createFrom().item("hello");
+<pre class="highlight"><code class="language-java" data-lang="java">Uni&lt;String&gt; uni = Uni.createFrom().item("hello");
 
 // Passing callbacks
 Cancellable cancellable = uni.subscribe().with(
@@ -809,7 +809,7 @@ uni.subscribe().withSubscriber(new UniSubscriber&lt;String&gt;() {
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">// Creation from a known item(s), or computed at subscription time
+<pre class="highlight"><code class="language-java" data-lang="java">// Creation from a known item(s), or computed at subscription time
 Multi.createFrom().item("some known value");
 Multi.createFrom().item(() -&gt; "some value computed at subscription time");
 Multi.createFrom().items("a", "b", "c");
@@ -860,7 +860,7 @@ Multi.createFrom().range(1, 11);</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">Multi&lt;String&gt; multi = Multi.createFrom().items("a", "b", "c");
+<pre class="highlight"><code class="language-java" data-lang="java">Multi&lt;String&gt; multi = Multi.createFrom().items("a", "b", "c");
 
 Cancellable cancellable = multi.subscribe().with(
         item -&gt; System.out.println("Got " + item));
@@ -904,7 +904,7 @@ Mutiny provides the <code>then</code> function to structure your pipeline:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">String result = Multi.createFrom().completionStage(CompletableFuture.supplyAsync(() -&gt; 23))
+<pre class="highlight"><code class="language-java" data-lang="java">String result = Multi.createFrom().completionStage(CompletableFuture.supplyAsync(() -&gt; 23))
         .then(self -&gt; {
             // Transform each item into a string of the item +1
             return self
@@ -926,11 +926,8 @@ Mutiny provides the <code>then</code> function to structure your pipeline:</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-06-18 11:11:31 UTC
+Last updated 2020-06-24 18:25:57 UTC
 </div>
 </div>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/highlight.min.js"></script>
-<script>hljs.initHighlighting()</script>
 </body>
 </html>
