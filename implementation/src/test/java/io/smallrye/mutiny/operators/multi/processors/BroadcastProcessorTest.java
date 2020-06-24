@@ -464,6 +464,6 @@ public class BroadcastProcessorTest {
                 .assertCompletedSuccessfully();
 
         List<Long> items = subscriber.items();
-        assertThat(items).doesNotContain(0L, 1L, 2L, 3L, 4L);
+        assertThat(items).isNotEmpty().doesNotContain(0L, 1L, 2L, 3L, 4L);
     }
 }

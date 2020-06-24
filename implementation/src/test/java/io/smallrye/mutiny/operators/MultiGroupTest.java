@@ -295,7 +295,7 @@ public class MultiGroupTest {
 
         await().until(() -> subscriber.items().size() == 3);
         List<List<Object>> items = subscriber.items();
-        assertThat(items).allSatisfy(list -> assertThat(list).isEmpty());
+        assertThat(items).hasSize(3).allSatisfy(list -> assertThat(list).isEmpty());
         subscriber.cancel();
     }
 
