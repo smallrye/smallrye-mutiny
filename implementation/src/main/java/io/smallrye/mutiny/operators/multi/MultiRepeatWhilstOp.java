@@ -1,14 +1,10 @@
 package io.smallrye.mutiny.operators.multi;
 
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
-
-import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.subscription.MultiSubscriber;
-import io.smallrye.mutiny.subscription.SwitchableSubscriptionSubscriber;
 
 public class MultiRepeatWhilstOp<T> extends AbstractMultiOperator<T, T> implements Multi<T> {
     private final Predicate<T> predicate;
@@ -30,28 +26,13 @@ public class MultiRepeatWhilstOp<T> extends AbstractMultiOperator<T, T> implemen
         upstream.subscribe(processor);
     }
 
-    static final class RepeatWhilstProcessor<T> extends SwitchableSubscriptionSubscriber<T> {
-
-        private final Multi<? extends T> upstream;
-        private long remaining;
-        private final Predicate<T> predicate;
+    static final class RepeatWhilstProcessor<T> extends MultiRepeatUntilOp.RepeatProcessor<T> {
 
         private boolean stop = false;
 
-        private long emitted;
-        private final AtomicInteger wip = new AtomicInteger();
-
         public RepeatWhilstProcessor(Multi<? extends T> upstream, MultiSubscriber<? super T> downstream,
                 long times, Predicate<T> predicate) {
-            super(downstream);
-            this.upstream = upstream;
-            this.predicate = predicate;
-            this.remaining = times;
-        }
-
-        @Override
-        public void onSubscribe(Subscription s) {
-            setOrSwitchUpstream(s);
+            super(upstream, downstream, times, predicate);
         }
 
         @Override
@@ -59,11 +40,6 @@ public class MultiRepeatWhilstOp<T> extends AbstractMultiOperator<T, T> implemen
             stop = !predicate.test(t);
             emitted++;
             downstream.onNext(t);
-        }
-
-        @Override
-        public void onFailure(Throwable t) {
-            downstream.onError(t);
         }
 
         @Override
@@ -77,28 +53,6 @@ public class MultiRepeatWhilstOp<T> extends AbstractMultiOperator<T, T> implemen
                 subscribeNext();
             } else {
                 downstream.onComplete();
-            }
-        }
-
-        /**
-         * Subscribes to the source again via trampolining.
-         */
-        void subscribeNext() {
-            if (wip.getAndIncrement() == 0) {
-                int missed = 1;
-                while (!isCancelled()) {
-                    long p = emitted;
-                    if (p != 0L) {
-                        emitted = 0L;
-                        emitted(p);
-                    }
-                    upstream.subscribe(this);
-
-                    missed = wip.addAndGet(-missed);
-                    if (missed == 0) {
-                        break;
-                    }
-                }
             }
         }
     }
