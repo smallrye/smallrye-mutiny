@@ -9,11 +9,11 @@ import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Supplier;
 
-import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.Multi;
@@ -80,6 +80,7 @@ public final class MultiBufferWithTimeoutOp<T> extends AbstractMultiOperator<T, 
         private AtomicInteger index = new AtomicInteger();
         private List<T> current;
         private ScheduledFuture<?> task;
+        private AtomicBoolean once = new AtomicBoolean();
 
         MultiBufferWithTimeoutProcessor(MultiSubscriber<? super List<T>> downstream, int size, Duration timeout,
                 ScheduledExecutorService executor, Supplier<List<T>> supplier) {
@@ -142,6 +143,7 @@ public final class MultiBufferWithTimeoutOp<T> extends AbstractMultiOperator<T, 
                         for (;;) {
                             next = req - 1;
                             if (requested.compareAndSet(req, next)) {
+                                once.set(true);
                                 downstream.onItem(cur);
                                 return;
                             }
@@ -152,6 +154,7 @@ public final class MultiBufferWithTimeoutOp<T> extends AbstractMultiOperator<T, 
                             }
                         }
                     } else {
+                        once.set(true);
                         downstream.onItem(cur);
                         return;
                     }
@@ -196,23 +199,12 @@ public final class MultiBufferWithTimeoutOp<T> extends AbstractMultiOperator<T, 
         void checkedComplete() {
             try {
                 flushCallback();
+                if (!once.get() && requested.get() > 0) {
+                    downstream.onItem(Collections.emptyList());
+                }
             } finally {
                 super.onCompletion();
             }
-        }
-
-        /**
-         * @return has this {@link Subscriber} terminated with success ?
-         */
-        final boolean isCompleted() {
-            return terminated.get() == SUCCEED;
-        }
-
-        /**
-         * @return has this {@link Subscriber} terminated with an error ?
-         */
-        final boolean isFailed() {
-            return terminated.get() == FAILED;
         }
 
         @Override

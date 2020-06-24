@@ -121,8 +121,16 @@ public class MultiGroupTest {
     @Test
     public void testAsListsOnEmptyStream() {
         assertThat(
-                Multi.createFrom().empty().groupItems().intoLists().of(2).collectItems().last().await().indefinitely())
-                        .isNull();
+                Multi.createFrom().empty().groupItems().intoLists().of(2).collectItems().asList().await().indefinitely())
+                        .containsExactly(Collections.emptyList());
+
+        assertThat(
+                Multi.createFrom().empty().groupItems().intoLists().of(2, 2).collectItems().asList().await().indefinitely())
+                        .containsExactly(Collections.emptyList());
+
+        assertThat(
+                Multi.createFrom().empty().groupItems().intoLists().of(2, 3).collectItems().asList().await().indefinitely())
+                        .containsExactly(Collections.emptyList());
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
@@ -283,6 +291,14 @@ public class MultiGroupTest {
 
         List<Integer> list = uni.await().atMost(Duration.ofSeconds(4));
         assertThat(list).contains(1, 2, 3, 4, 5, 6);
+    }
+
+    @Test
+    public void testTimeWindowOnEmptyMulti() {
+        Uni<List<List<Integer>>> uni = Multi.createFrom().<Integer> empty()
+                .groupItems().intoLists().every(Duration.ofSeconds(5))
+                .collectItems().asList();
+        assertThat(uni.await().indefinitely()).hasSize(1).containsExactly(Collections.emptyList());
     }
 
     @Test

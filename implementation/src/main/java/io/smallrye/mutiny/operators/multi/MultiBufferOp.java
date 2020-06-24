@@ -20,6 +20,7 @@ import static io.smallrye.mutiny.helpers.Subscriptions.CANCELLED;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -74,6 +75,7 @@ public class MultiBufferOp<T> extends AbstractMultiOperator<T, List<T>> {
         private final Supplier<List<T>> supplier;
         private final int size;
         private List<T> current;
+        private boolean once = false;
 
         BufferExactProcessor(MultiSubscriber<? super List<T>> downstream, int size, Supplier<List<T>> supplier) {
             super(downstream);
@@ -105,6 +107,7 @@ public class MultiBufferOp<T> extends AbstractMultiOperator<T, List<T>> {
             if (current.size() == size) {
                 List<T> buffer = current;
                 current = null;
+                once = true;
                 downstream.onItem(buffer);
             }
         }
@@ -116,6 +119,10 @@ public class MultiBufferOp<T> extends AbstractMultiOperator<T, List<T>> {
                 List<T> buffer = current;
                 if (buffer != null && !buffer.isEmpty()) {
                     downstream.onItem(buffer);
+                } else if (!once) {
+                    // If we did not send any list yet (because we got the completion), send an empty list item
+                    // downstream.
+                    downstream.onItem(Collections.emptyList());
                 }
                 downstream.onCompletion();
             }
@@ -130,6 +137,7 @@ public class MultiBufferOp<T> extends AbstractMultiOperator<T, List<T>> {
         private List<T> current;
 
         private long index;
+        private boolean once;
 
         private final AtomicInteger wip = new AtomicInteger();
 
@@ -175,6 +183,7 @@ public class MultiBufferOp<T> extends AbstractMultiOperator<T, List<T>> {
                 buffer.add(item);
                 if (buffer.size() == size) {
                     current = null;
+                    once = true;
                     downstream.onItem(buffer);
                 }
             }
@@ -198,6 +207,8 @@ public class MultiBufferOp<T> extends AbstractMultiOperator<T, List<T>> {
                 current = null;
                 if (buffer != null) {
                     downstream.onItem(buffer);
+                } else if (!once) {
+                    downstream.onItem(Collections.emptyList());
                 }
                 downstream.onCompletion();
             }
@@ -216,6 +227,7 @@ public class MultiBufferOp<T> extends AbstractMultiOperator<T, List<T>> {
         private final AtomicBoolean firstRequest = new AtomicBoolean();
         private final AtomicLong requested = new AtomicLong();
         private final ArrayDeque<List<T>> queue = new ArrayDeque<>();
+        private boolean once;
 
         BufferOverlappingProcessor(MultiSubscriber<? super List<T>> downstream, int size, int skip,
                 Supplier<List<T>> supplier) {
@@ -270,6 +282,7 @@ public class MultiBufferOp<T> extends AbstractMultiOperator<T, List<T>> {
             if (b != null && b.size() + 1 == size) {
                 queue.poll();
                 b.add(item);
+                once = true;
                 downstream.onItem(b);
                 produced++;
             }
@@ -296,6 +309,9 @@ public class MultiBufferOp<T> extends AbstractMultiOperator<T, List<T>> {
                 long p = produced;
                 if (p != 0L) {
                     Subscriptions.produced(requested, p);
+                }
+                if (!once && queue.isEmpty()) {
+                    queue.add(Collections.emptyList());
                 }
                 DrainUtils.postComplete(downstream, queue, requested, this::isCancelled);
             }
