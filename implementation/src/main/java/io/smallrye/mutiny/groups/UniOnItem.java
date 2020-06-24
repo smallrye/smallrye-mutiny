@@ -35,7 +35,7 @@ public class UniOnItem<T> {
      */
     public Uni<T> invoke(Consumer<? super T> callback) {
         return Infrastructure.onUniCreation(
-                new UniOnItemConsume<>(upstream, nonNull(callback, "callback"), null));
+                new UniOnItemConsume<>(upstream, nonNull(callback, "callback"), null, null));
     }
 
     /**

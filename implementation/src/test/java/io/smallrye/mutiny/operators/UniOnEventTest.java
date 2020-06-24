@@ -13,6 +13,7 @@ import org.testng.annotations.Test;
 import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Uni;
 
+@SuppressWarnings("ConstantConditions")
 public class UniOnEventTest {
 
     @Test
@@ -244,6 +245,47 @@ public class UniOnEventTest {
         subscriber.assertNotCompleted();
         assertThat(called).isTrue();
         assertThat(terminated).isTrue();
+    }
+
+    @Test
+    public void testInvokeOnFailureWithPredicate() {
+
+        AtomicBoolean noPredicate = new AtomicBoolean();
+        AtomicBoolean exactClassMatch = new AtomicBoolean();
+        AtomicBoolean parentClassMatch = new AtomicBoolean();
+        AtomicBoolean predicateMatch = new AtomicBoolean();
+        AtomicBoolean predicateNoMatch = new AtomicBoolean();
+        AtomicBoolean classNoMatch = new AtomicBoolean();
+
+        UniAssertSubscriber<Object> subscriber = Uni.createFrom().failure(new IOException("boom"))
+                .onFailure().invoke(t -> noPredicate.set(true))
+                .onFailure(IOException.class).invoke(t -> exactClassMatch.set(true))
+                .onFailure(Exception.class).invoke(t -> parentClassMatch.set(true))
+                .onFailure(IllegalArgumentException.class).invoke(t -> classNoMatch.set(true))
+                .onFailure(t -> t.getMessage().equalsIgnoreCase("boom")).invoke(t -> predicateMatch.set(true))
+                .onFailure(t -> t.getMessage().equalsIgnoreCase("nope")).invoke(t -> predicateNoMatch.set(true))
+                .subscribe().withSubscriber(UniAssertSubscriber.create());
+
+        subscriber.assertCompletedWithFailure().assertFailure(IOException.class, "boom");
+        assertThat(noPredicate).isTrue();
+        assertThat(exactClassMatch).isTrue();
+        assertThat(parentClassMatch).isTrue();
+        assertThat(predicateMatch).isTrue();
+        assertThat(predicateNoMatch).isFalse();
+        assertThat(classNoMatch).isFalse();
+
+        AtomicBoolean called = new AtomicBoolean();
+        subscriber = Uni.createFrom().failure(new IOException("boom"))
+                .onFailure(t -> {
+                    throw new NullPointerException();
+                }).invoke(t -> called.set(true))
+                .subscribe().withSubscriber(UniAssertSubscriber.create());
+        subscriber.assertCompletedWithFailure().assertFailure(CompositeException.class, "boom");
+        CompositeException composite = (CompositeException) subscriber.getFailure();
+        assertThat(composite.getCauses()).hasSize(2)
+                .anySatisfy(t -> assertThat(t).isInstanceOf(NullPointerException.class))
+                .anySatisfy(t -> assertThat(t).isInstanceOf(IOException.class));
+        assertThat(called).isFalse();
     }
 
 }
