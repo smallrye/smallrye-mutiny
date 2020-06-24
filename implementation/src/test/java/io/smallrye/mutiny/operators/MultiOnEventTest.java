@@ -435,4 +435,19 @@ public class MultiOnEventTest {
         assertThat(invocations).hasValue(1);
     }
 
+    @Test
+    public void testThatPredicateFailureProduceCompositeException() {
+        AtomicBoolean called = new AtomicBoolean();
+        MultiAssertSubscriber<Object> subscriber = Multi.createFrom().failure(new IOException("boom"))
+                .onFailure(t -> {
+                    throw new NullPointerException();
+                }).invoke(t -> called.set(true))
+                .subscribe().withSubscriber(MultiAssertSubscriber.create(1));
+
+        subscriber.assertHasFailedWith(CompositeException.class, "boom");
+        CompositeException failure = (CompositeException) subscriber.failures().get(0);
+        assertThat(failure.getCauses()).hasSize(2);
+        assertThat(called).isFalse();
+    }
+
 }
