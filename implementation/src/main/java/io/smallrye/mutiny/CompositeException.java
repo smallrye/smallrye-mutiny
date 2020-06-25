@@ -7,10 +7,14 @@ import java.util.List;
 import java.util.Optional;
 
 import io.smallrye.mutiny.groups.UniAndGroup;
+import io.smallrye.mutiny.helpers.ParameterValidation;
 
 /**
  * An implementation of {@link Exception} collecting several causes.
+ * This class is used to collect multiple failures.
+ *
  * Uses {@link #getCauses()} to retrieves the individual causes.
+ * {@link #getCause()} returns the first cause.
  *
  * @see UniAndGroup
  */
@@ -19,12 +23,26 @@ public class CompositeException extends RuntimeException {
     private final List<Throwable> causes;
 
     public CompositeException(List<Throwable> causes) {
-        super("Multiple exceptions caught:");
+        super("Multiple exceptions caught:", getFirstOrFail(causes));
         this.causes = Collections.unmodifiableList(causes);
     }
 
+    private static Throwable getFirstOrFail(List<Throwable> causes) {
+        if (causes == null || causes.isEmpty()) {
+            throw new IllegalArgumentException("Composite Exception must contains at least one cause");
+        }
+        return ParameterValidation.nonNull(causes.get(0), "cause");
+    }
+
+    private static Throwable getFirstOrFail(Throwable[] causes) {
+        if (causes == null || causes.length == 0) {
+            throw new IllegalArgumentException("Composite Exception must contains at least one cause");
+        }
+        return ParameterValidation.nonNull(causes[0], "cause");
+    }
+
     public CompositeException(Throwable... causes) {
-        super("Multiple exceptions caught:");
+        super("Multiple exceptions caught:", getFirstOrFail(causes));
         this.causes = Arrays.asList(causes);
     }
 
@@ -32,6 +50,7 @@ public class CompositeException extends RuntimeException {
         List<Throwable> c = new ArrayList<>(other.causes);
         c.add(toBeAppended);
         this.causes = Collections.unmodifiableList(c);
+        initCause(getFirstOrFail(this.causes));
     }
 
     @Override
