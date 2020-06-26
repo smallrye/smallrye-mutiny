@@ -13,7 +13,7 @@ public class UniCreateFromDeferredSupplier<T> extends UniOperator<Void, T> {
 
     public UniCreateFromDeferredSupplier(Supplier<? extends Uni<? extends T>> supplier) {
         super(null);
-        this.supplier = nonNull(supplier, "supplier");
+        this.supplier = supplier; // Already checked
     }
 
     @Override
@@ -32,7 +32,7 @@ public class UniCreateFromDeferredSupplier<T> extends UniOperator<Void, T> {
             subscriber.onSubscribe(CANCELLED);
             subscriber.onFailure(new NullPointerException(ParameterValidation.SUPPLIER_PRODUCED_NULL));
         } else {
-            uni.subscribe().withSubscriber(subscriber);
+            AbstractUni.subscribe(uni, subscriber);
         }
     }
 }

@@ -33,7 +33,7 @@ public class UniProduceMultiOnItem<I, O> extends AbstractMulti<O> {
         if (subscriber == null) {
             throw new NullPointerException("The subscriber must not be `null`");
         }
-        upstream.subscribe().withSubscriber(new FlatMapPublisherSubscriber<>(subscriber, mapper));
+        AbstractUni.subscribe(upstream, new FlatMapPublisherSubscriber<>(subscriber, mapper));
     }
 
     @SuppressWarnings("SubscriberImplementation")

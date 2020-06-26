@@ -8,11 +8,30 @@ import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.groups.*;
 import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
+import io.smallrye.mutiny.subscription.UniSubscriber;
 import io.smallrye.mutiny.tuples.Tuple2;
 
 public abstract class AbstractUni<T> implements Uni<T> {
 
     protected abstract void subscribing(UniSerializedSubscriber<? super T> subscriber);
+
+    /**
+     * Encapsulates subscription to slightly optimized the AbstractUni case.
+     *
+     * In the case of AbstractUni, it avoid creating the UniSubscribe group instance.
+     *
+     * @param upstream the upstream, must not be {@code null} (not checked)
+     * @param subscriber the subscriber, must not be {@code null} (not checked)
+     * @param <T> the type of item
+     */
+    public static <T> void subscribe(Uni<? extends T> upstream, UniSubscriber<? super T> subscriber) {
+        if (upstream instanceof AbstractUni) {
+            //noinspection unchecked
+            UniSerializedSubscriber.subscribe((AbstractUni<? extends T>) upstream, subscriber);
+        } else {
+            upstream.subscribe().withSubscriber(subscriber);
+        }
+    }
 
     @Override
     public UniSubscribe<T> subscribe() {

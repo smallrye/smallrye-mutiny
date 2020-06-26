@@ -45,7 +45,7 @@ public class UniOnItemOrFailureFlatMap<I, O> extends UniOperator<I, O> {
     protected void subscribing(UniSerializedSubscriber<? super O> subscriber) {
         UniOnItemFlatMap.FlatMapSubscription flatMapSubscription = new UniOnItemFlatMap.FlatMapSubscription();
         // Subscribe to the source.
-        upstream().subscribe().withSubscriber(new UniDelegatingSubscriber<I, O>(subscriber) {
+        AbstractUni.subscribe(upstream(), new UniDelegatingSubscriber<I, O>(subscriber) {
             @Override
             public void onSubscribe(UniSubscription subscription) {
                 flatMapSubscription.setInitialUpstream(subscription);

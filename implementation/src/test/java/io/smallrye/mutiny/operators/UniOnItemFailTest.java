@@ -7,7 +7,7 @@ import org.testng.annotations.Test;
 
 import io.smallrye.mutiny.Uni;
 
-public class UniOnItemFail {
+public class UniOnItemFailTest {
 
     private Uni<Integer> one = Uni.createFrom().item(1);
 

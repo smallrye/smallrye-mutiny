@@ -54,8 +54,7 @@ public class UniOnItemFlatMap<I, O> extends UniOperator<I, O> {
                     flatMapSubscription.replace(secondSubscription);
                 }
             };
-
-            outcome.subscribe().withSubscriber(delegate);
+            AbstractUni.subscribe(outcome, delegate);
         }
     }
 
@@ -63,7 +62,7 @@ public class UniOnItemFlatMap<I, O> extends UniOperator<I, O> {
     protected void subscribing(UniSerializedSubscriber<? super O> subscriber) {
         FlatMapSubscription flatMapSubscription = new FlatMapSubscription();
         // Subscribe to the source.
-        upstream().subscribe().withSubscriber(new UniDelegatingSubscriber<I, O>(subscriber) {
+        AbstractUni.subscribe(upstream(), new UniDelegatingSubscriber<I, O>(subscriber) {
             @Override
             public void onSubscribe(UniSubscription subscription) {
                 flatMapSubscription.setInitialUpstream(subscription);

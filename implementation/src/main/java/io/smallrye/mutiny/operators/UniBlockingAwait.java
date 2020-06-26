@@ -1,6 +1,7 @@
 package io.smallrye.mutiny.operators;
 
 import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
+import static io.smallrye.mutiny.helpers.ParameterValidation.validate;
 
 import java.time.Duration;
 import java.util.concurrent.CompletionException;
@@ -44,8 +45,7 @@ public class UniBlockingAwait {
                 latch.countDown();
             }
         };
-        nonNull(upstream, "upstream").subscribe().withSubscriber(subscriber);
-
+        AbstractUni.subscribe(upstream, subscriber);
         try {
             if (duration != null) {
                 if (!latch.await(duration.toMillis(), TimeUnit.MILLISECONDS)) {
@@ -75,7 +75,7 @@ public class UniBlockingAwait {
             return;
         }
         if (duration.isZero() || duration.isNegative()) {
-            throw new IllegalArgumentException("`duration` must be greater than zero`");
+            throw new IllegalArgumentException("`duration` must be greater than zero");
         }
     }
 }

@@ -36,7 +36,7 @@ public class UniFailOnTimeout<I> extends UniOperator<I, I> {
         AtomicBoolean doneOrCancelled = new AtomicBoolean();
         AtomicReference<ScheduledFuture<?>> task = new AtomicReference<>();
 
-        upstream().subscribe().withSubscriber(new UniSubscriber<I>() {
+        AbstractUni.subscribe(upstream(), new UniSubscriber<I>() {
             @Override
             public void onSubscribe(UniSubscription subscription) {
                 // Configure the watch dog at subscription time.
