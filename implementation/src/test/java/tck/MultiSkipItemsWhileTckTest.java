@@ -30,7 +30,7 @@ public class MultiSkipItemsWhileTckTest extends AbstractPublisherTck<Long> {
     public void dropWhileStageShouldHandleErrors() {
         CompletableFuture<Void> cancelled = new CompletableFuture<>();
         CompletionStage<List<Integer>> result = infiniteStream()
-                .on().termination(() -> cancelled.complete(null))
+                .onTermination().invoke(() -> cancelled.complete(null))
                 .transform().bySkippingItemsWhile(i -> {
                     throw new QuietRuntimeException("failed");
                 })
@@ -89,7 +89,7 @@ public class MultiSkipItemsWhileTckTest extends AbstractPublisherTck<Long> {
     public void dropWhileStageShouldPropagateCancel() {
         CompletableFuture<Void> cancelled = new CompletableFuture<>();
         infiniteStream()
-                .on().termination(() -> cancelled.complete(null))
+                .onTermination().invoke(() -> cancelled.complete(null))
                 .transform().bySkippingItemsWhile(i -> i < 3)
                 .subscribe().withSubscriber(new MultiAssertSubscriber<>(10, true));
         await(cancelled);

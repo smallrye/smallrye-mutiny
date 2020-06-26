@@ -37,7 +37,7 @@ public class MultiFirstTckTest extends AbstractTck {
     public void findFirstStageShouldCancelUpstream() {
         CompletableFuture<Void> cancelled = new CompletableFuture<>();
         int result = await(infiniteStream()
-                .on().termination(() -> cancelled.complete(null))
+                .onTermination().invoke(() -> cancelled.complete(null))
                 .collectItems().first().subscribeAsCompletionStage());
         assertEquals(result, 1);
         await(cancelled);

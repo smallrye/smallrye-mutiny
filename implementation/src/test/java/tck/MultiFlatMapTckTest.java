@@ -61,7 +61,7 @@ public class MultiFlatMapTckTest extends AbstractPublisherTck<Long> {
     public void flatMapStageShouldHandleExceptions() {
         CompletableFuture<Void> cancelled = new CompletableFuture<>();
         CompletionStage<List<Object>> result = infiniteStream()
-                .on().termination((f, c) -> {
+                .onTermination().invoke((f, c) -> {
                     if (c) {
                         cancelled.complete(null);
                     }
@@ -87,7 +87,7 @@ public class MultiFlatMapTckTest extends AbstractPublisherTck<Long> {
     public void flatMapStageShouldPropagateSubstreamExceptions() {
         CompletableFuture<Void> cancelled = new CompletableFuture<>();
         CompletionStage<List<Object>> result = infiniteStream()
-                .on().termination(() -> cancelled.complete(null))
+                .onTermination().invoke(() -> cancelled.complete(null))
                 .flatMap(f -> Multi.createFrom().failure(new QuietRuntimeException("failed")))
                 .collectItems().asList()
                 .subscribeAsCompletionStage();
@@ -114,8 +114,8 @@ public class MultiFlatMapTckTest extends AbstractPublisherTck<Long> {
         CompletableFuture<Void> outerCancelled = new CompletableFuture<>();
         CompletableFuture<Void> innerCancelled = new CompletableFuture<>();
         await(infiniteStream()
-                .on().termination(() -> outerCancelled.complete(null))
-                .flatMap(i -> infiniteStream().on().termination(() -> innerCancelled.complete(null)))
+                .onTermination().invoke(() -> outerCancelled.complete(null))
+                .flatMap(i -> infiniteStream().onTermination().invoke(() -> innerCancelled.complete(null)))
                 .transform().byTakingFirstItems(5)
                 .collectItems().asList()
                 .subscribeAsCompletionStage());

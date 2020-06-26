@@ -8,7 +8,6 @@ import java.util.function.Predicate;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.UniOnCancellation;
-import io.smallrye.mutiny.operators.UniOnTermination;
 import io.smallrye.mutiny.subscription.UniSubscriber;
 import io.smallrye.mutiny.subscription.UniSubscription;
 import io.smallrye.mutiny.tuples.Functions;
@@ -63,9 +62,11 @@ public class UniOnEvent<T> {
      *        necessary {@code null} and the third is necessary {@code false} as it indicates a termination
      *        due to a failure.
      * @return the new {@link Uni}
+     * @deprecated Use {@code uni.onTermination().invoke(...)} instead
      */
+    @Deprecated
     public Uni<T> termination(Functions.TriConsumer<T, Throwable, Boolean> consumer) {
-        return Infrastructure.onUniCreation(new UniOnTermination<>(upstream, nonNull(consumer, "consumer")));
+        return upstream.onTermination().invoke(consumer);
     }
 
     /**
@@ -75,10 +76,11 @@ public class UniOnEvent<T> {
      *
      * @param action the action to run, must not be {@code null}
      * @return the new {@link Uni}
+     * @deprecated Use {@code uni.onTermination().invoke(...)} instead
      */
+    @Deprecated
     public Uni<T> termination(Runnable action) {
-        Runnable runnable = nonNull(action, "action");
-        return Infrastructure.onUniCreation(new UniOnTermination<>(upstream, (i, f, c) -> runnable.run()));
+        return upstream.onTermination().invoke(action);
     }
 
     /**

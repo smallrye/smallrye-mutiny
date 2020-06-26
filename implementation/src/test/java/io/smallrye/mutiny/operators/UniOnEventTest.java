@@ -26,7 +26,7 @@ public class UniOnEventTest {
                 .onItem().invoke(Item::set)
                 .onFailure().invoke(failure::set)
                 .onSubscribe().invoke(subscription::set)
-                .on().termination((r, f, c) -> terminate.set(r))
+                .onTermination().invoke((r, f, c) -> terminate.set(r))
                 .subscribe().withSubscriber(UniAssertSubscriber.create());
 
         subscriber.assertItem(1);
@@ -46,7 +46,7 @@ public class UniOnEventTest {
                 .onItem().invoke(Item::set)
                 .onFailure().invoke(failure::set)
                 .onSubscribe().invoke(subscription::set)
-                .on().termination(() -> terminate.set(true))
+                .onTermination().invoke(() -> terminate.set(true))
                 .subscribe().withSubscriber(UniAssertSubscriber.create());
 
         subscriber.assertItem(1);
@@ -66,7 +66,7 @@ public class UniOnEventTest {
                 .onItem().invoke(Item::set)
                 .onFailure().invoke(failure::set)
                 .onSubscribe().invoke(subscription::set)
-                .on().termination((r, f, c) -> terminate.set(f))
+                .onTermination().invoke((r, f, c) -> terminate.set(f))
                 .subscribe().withSubscriber(UniAssertSubscriber.create());
 
         subscriber.assertCompletedWithFailure().assertFailure(IOException.class, "boom");
@@ -86,7 +86,7 @@ public class UniOnEventTest {
                 .onItem().invoke(Item::set)
                 .onFailure().invoke(failure::set)
                 .onSubscribe().invoke(subscription::set)
-                .on().termination(() -> terminate.set(true))
+                .onTermination().invoke(() -> terminate.set(true))
                 .subscribe().withSubscriber(UniAssertSubscriber.create());
 
         subscriber.assertCompletedWithFailure().assertFailure(IOException.class, "boom");
@@ -109,7 +109,7 @@ public class UniOnEventTest {
                 })
                 .onFailure().invoke(failure::set)
                 .onSubscribe().invoke(subscription::set)
-                .on().termination((r, f, c) -> {
+                .onTermination().invoke((r, f, c) -> {
                     if (r != null) {
                         ItemFromTerminate.set(r);
                     }
@@ -137,7 +137,7 @@ public class UniOnEventTest {
                 })
                 .onFailure().invoke(failure::set)
                 .onSubscribe().invoke(subscription::set)
-                .on().termination(() -> terminated.set(true))
+                .onTermination().invoke(() -> terminated.set(true))
                 .subscribe().withSubscriber(UniAssertSubscriber.create());
 
         subscriber.assertCompletedWithFailure().assertFailure(IllegalStateException.class, "boom");
@@ -159,7 +159,7 @@ public class UniOnEventTest {
                     throw new IllegalStateException("boom");
                 })
                 .onSubscribe().invoke(subscription::set)
-                .on().termination((r, f, c) -> {
+                .onTermination().invoke((r, f, c) -> {
                     if (r != null) {
                         ItemFromTerminate.set(r);
                     }
@@ -187,7 +187,7 @@ public class UniOnEventTest {
                     throw new IllegalStateException("boom");
                 })
                 .onSubscribe().invoke(subscription::set)
-                .on().termination(() -> terminated.set(true))
+                .onTermination().invoke(() -> terminated.set(true))
                 .subscribe().withSubscriber(UniAssertSubscriber.create());
 
         subscriber.assertCompletedWithFailure()
@@ -224,7 +224,7 @@ public class UniOnEventTest {
         AtomicBoolean called = new AtomicBoolean();
         AtomicBoolean terminated = new AtomicBoolean();
         UniAssertSubscriber<? super Integer> subscriber = Uni.createFrom().item(1)
-                .on().termination((r, f, c) -> terminated.set(c))
+                .onTermination().invoke((r, f, c) -> terminated.set(c))
                 .on().cancellation(() -> called.set(true))
                 .subscribe().withSubscriber(new UniAssertSubscriber<>(true));
 
@@ -238,7 +238,7 @@ public class UniOnEventTest {
         AtomicBoolean called = new AtomicBoolean();
         AtomicBoolean terminated = new AtomicBoolean();
         UniAssertSubscriber<? super Integer> subscriber = Uni.createFrom().item(1)
-                .on().termination(() -> terminated.set(true))
+                .onTermination().invoke(() -> terminated.set(true))
                 .on().cancellation(() -> called.set(true))
                 .subscribe().withSubscriber(new UniAssertSubscriber<>(true));
 
@@ -455,4 +455,196 @@ public class UniOnEventTest {
         assertThat(item.get()).isNull();
         assertThat(eventuallyCalled).isTrue();
     }
+
+    @Test
+    public void testActionsOnTerminationInvokeUniWithResult() {
+        AtomicInteger Item = new AtomicInteger();
+        AtomicReference<Throwable> failure = new AtomicReference<>();
+        AtomicReference<Subscription> subscription = new AtomicReference<>();
+        AtomicInteger terminate = new AtomicInteger();
+        UniAssertSubscriber<? super Integer> subscriber = Uni.createFrom().item(1)
+                .onItem().invoke(Item::set)
+                .onFailure().invoke(failure::set)
+                .on().subscribed(subscription::set)
+                .onTermination().invokeUni((r, f, c) -> {
+                    terminate.set(r);
+                    return Uni.createFrom().item(r * 100);
+                })
+                .subscribe().withSubscriber(UniAssertSubscriber.create());
+
+        subscriber.assertItem(1);
+        assertThat(Item).hasValue(1);
+        assertThat(failure.get()).isNull();
+        assertThat(subscription.get()).isNotNull();
+        assertThat(terminate).hasValue(1);
+    }
+
+    @Test
+    public void testActionsOnTerminationWithfailure() {
+        AtomicInteger Item = new AtomicInteger();
+        AtomicReference<Throwable> failure = new AtomicReference<>();
+        AtomicReference<Subscription> subscription = new AtomicReference<>();
+        AtomicReference<Throwable> terminate = new AtomicReference<>();
+        UniAssertSubscriber<? super Integer> subscriber = Uni.createFrom().<Integer> failure(new IOException("boom"))
+                .onItem().invoke(Item::set)
+                .onFailure().invoke(failure::set)
+                .on().subscribed(subscription::set)
+                .onTermination().invokeUni((r, f, c) -> {
+                    terminate.set(f);
+                    return Uni.createFrom().failure(new IOException("tada"));
+                })
+                .subscribe().withSubscriber(UniAssertSubscriber.create());
+
+        subscriber.assertCompletedWithFailure().assertFailure(CompositeException.class, "boom");
+        CompositeException compositeException = (CompositeException) subscriber.getFailure();
+        assertThat(compositeException).getRootCause().isInstanceOf(IOException.class).hasMessageContaining("boom");
+        assertThat(compositeException.getCauses().get(1)).isInstanceOf(IOException.class).hasMessageContaining("tada");
+        assertThat(Item).doesNotHaveValue(1);
+        assertThat(subscription.get()).isNotNull();
+        assertThat(terminate.get()).isInstanceOf(IOException.class).hasMessageContaining("boom");
+    }
+
+    @Test
+    public void testActionsOnTerminationWithMapperThrowingException() {
+        AtomicInteger Item = new AtomicInteger();
+        AtomicReference<Throwable> failure = new AtomicReference<>();
+        AtomicReference<Subscription> subscription = new AtomicReference<>();
+        AtomicReference<Throwable> terminate = new AtomicReference<>();
+        UniAssertSubscriber<? super Integer> subscriber = Uni.createFrom().<Integer> failure(new IOException("boom"))
+                .onItem().invoke(Item::set)
+                .onFailure().invoke(failure::set)
+                .on().subscribed(subscription::set)
+                .onTermination().invokeUni((r, f, c) -> {
+                    terminate.set(f);
+                    throw new RuntimeException("tada");
+                })
+                .subscribe().withSubscriber(UniAssertSubscriber.create());
+
+        subscriber.assertCompletedWithFailure().assertFailure(CompositeException.class, "boom");
+        CompositeException compositeException = (CompositeException) subscriber.getFailure();
+        assertThat(compositeException).getRootCause().isInstanceOf(IOException.class).hasMessageContaining("boom");
+        assertThat(compositeException.getCauses().get(1)).isInstanceOf(RuntimeException.class).hasMessageContaining("tada");
+        assertThat(Item).doesNotHaveValue(1);
+        assertThat(subscription.get()).isNotNull();
+        assertThat(terminate.get()).isInstanceOf(IOException.class).hasMessageContaining("boom");
+    }
+
+    @Test
+    public void testActionsOnTerminationWithCancellation() {
+        AtomicBoolean called = new AtomicBoolean();
+        AtomicBoolean terminated = new AtomicBoolean();
+        AtomicBoolean upstreamCancelled = new AtomicBoolean();
+        UniAssertSubscriber<? super Integer> subscriber = Uni.createFrom().emitter(e -> {
+            // Do not emit anything, just observe the cancellation.
+            e.onTermination(() -> upstreamCancelled.set(true));
+        })
+                .onTermination().invokeUni((r, f, c) -> {
+                    terminated.set(c);
+                    return Uni.createFrom().item(100);
+                })
+                .on().cancellation(() -> called.set(true))
+                .subscribe().withSubscriber(new UniAssertSubscriber<>());
+
+        subscriber.assertNotCompleted();
+        // Cancel the subscription
+        subscriber.cancel();
+
+        assertThat(called).isTrue();
+        assertThat(terminated).isTrue();
+        assertThat(upstreamCancelled).isTrue();
+    }
+
+    @Test
+    public void testThatTheReturnedUniIsCancelledIfTheDownstreamCancels() {
+        AtomicBoolean called = new AtomicBoolean();
+        AtomicBoolean terminated = new AtomicBoolean();
+        AtomicBoolean cancelled = new AtomicBoolean();
+        AtomicInteger count = new AtomicInteger();
+        UniAssertSubscriber<? super Integer> subscriber = Uni.createFrom().item(1)
+                .onTermination().invokeUni((r, f, c) -> {
+                    count.incrementAndGet();
+                    terminated.set(true);
+                    return Uni.createFrom().emitter(e -> {
+                        // Do not emit any item on purpose.
+                        e.onTermination(() -> {
+                            cancelled.set(true);
+                        });
+                    });
+                })
+                .on().cancellation(() -> called.set(true))
+                .subscribe().withSubscriber(new UniAssertSubscriber<>());
+
+        subscriber.assertNotCompleted();
+        subscriber.cancel();
+        assertThat(count).hasValue(1);
+        assertThat(called).isTrue();
+        assertThat(terminated).isTrue();
+        assertThat(cancelled).isTrue();
+
+        subscriber.cancel();
+        assertThat(count).hasValue(1);
+    }
+
+    @Test
+    public void testActionsOnTerminationWithUniFailingOnCancellation() {
+        AtomicBoolean called = new AtomicBoolean();
+        AtomicBoolean terminated = new AtomicBoolean();
+        AtomicBoolean upstreamCancelled = new AtomicBoolean();
+        AtomicReference<Throwable> innerUniException = new AtomicReference<>();
+        UniAssertSubscriber<? super Integer> subscriber = Uni.createFrom().emitter(e -> {
+            // Do not emit anything, just observe the cancellation.
+            e.onTermination(() -> upstreamCancelled.set(true));
+        })
+                .onTermination().invokeUni((r, f, c) -> {
+                    terminated.set(c);
+                    return Uni
+                            .createFrom().failure(new IOException("boom"))
+                            .onFailure().invoke(innerUniException::set);
+                })
+                .on().cancellation(() -> called.set(true))
+                .subscribe().withSubscriber(new UniAssertSubscriber<>());
+
+        subscriber.assertNotCompleted();
+        // Cancel the subscription
+        subscriber.cancel();
+
+        assertThat(called).isTrue();
+        assertThat(terminated).isTrue();
+        assertThat(upstreamCancelled).isTrue();
+        assertThat(innerUniException)
+                .isNotNull()
+                .satisfies(ref -> assertThat(ref.get()).isInstanceOf(IOException.class).hasMessage("boom"));
+    }
+
+    @Test
+    public void testThatTheReturnedUniIsCancelledIfTheDownstreamCancelsWithSupplier() {
+        AtomicBoolean called = new AtomicBoolean();
+        AtomicBoolean terminated = new AtomicBoolean();
+        AtomicBoolean cancelled = new AtomicBoolean();
+        AtomicInteger count = new AtomicInteger();
+        UniAssertSubscriber<? super Integer> subscriber = Uni.createFrom().item(1)
+                .onTermination().invokeUni(() -> {
+                    count.incrementAndGet();
+                    terminated.set(true);
+                    return Uni.createFrom().emitter(e -> {
+                        // Do not emit any item on purpose.
+                        e.onTermination(() -> {
+                            cancelled.set(true);
+                        });
+                    });
+                })
+                .on().cancellation(() -> called.set(true))
+                .subscribe().withSubscriber(new UniAssertSubscriber<>());
+
+        subscriber.assertNotCompleted();
+        subscriber.cancel();
+        assertThat(count).hasValue(1);
+        assertThat(called).isTrue();
+        assertThat(terminated).isTrue();
+        assertThat(cancelled).isTrue();
+
+        subscriber.cancel();
+        assertThat(count).hasValue(1);
+    }
+
 }
