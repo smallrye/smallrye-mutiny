@@ -26,12 +26,15 @@ public class CompositeExceptionTest {
         assertThat(ce2).getCause().isEqualTo(IO);
 
         assertThat(ce1.getCauses()).containsExactly(IAE, IO, OUPS);
+        assertThat(ce1.getSuppressed()).containsExactly(IO, OUPS);
         assertThat(ce2.getCauses()).containsExactly(IO, IAE, OUPS);
+        assertThat(ce2.getSuppressed()).containsExactly(IAE, OUPS);
 
         CompositeException ce3 = new CompositeException(OUPS);
         assertThat(ce3).hasMessageContaining("oups");
         assertThat(ce3.getCauses()).containsExactly(OUPS);
         assertThat(ce3.getCause()).isEqualTo(OUPS);
+        assertThat(ce3.getSuppressed()).isEmpty();
     }
 
     @Test
@@ -44,12 +47,15 @@ public class CompositeExceptionTest {
         assertThat(ce2).getCause().isEqualTo(IO);
 
         assertThat(ce1.getCauses()).containsExactly(IAE, IO, OUPS);
+        assertThat(ce1.getSuppressed()).containsExactly(IO, OUPS);
         assertThat(ce2.getCauses()).containsExactly(IO, IAE, OUPS);
+        assertThat(ce2.getSuppressed()).containsExactly(IAE, OUPS);
 
         CompositeException ce3 = new CompositeException(Collections.singletonList(OUPS));
         assertThat(ce3).hasMessageContaining("oups");
         assertThat(ce3.getCauses()).containsExactly(OUPS);
         assertThat(ce3.getCause()).isEqualTo(OUPS);
+        assertThat(ce3.getSuppressed()).isEmpty();
     }
 
     @Test
@@ -82,6 +88,14 @@ public class CompositeExceptionTest {
                 .isInstanceOf(IllegalArgumentException.class);
         assertThatThrownBy(() -> new CompositeException(Collections.emptyList()))
                 .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    public void testWithASingleException() {
+        CompositeException ce = new CompositeException(IAE);
+        assertThat(ce.getCauses()).hasSize(1);
+        assertThat(ce.getCause()).isEqualTo(IAE);
+        assertThat(ce.getSuppressed()).isEmpty();
     }
 
 }
