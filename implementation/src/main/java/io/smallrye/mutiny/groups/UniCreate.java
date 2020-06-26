@@ -22,6 +22,8 @@ import io.smallrye.mutiny.operators.UniCreateFromDeferredSupplier;
 import io.smallrye.mutiny.operators.UniCreateFromPublisher;
 import io.smallrye.mutiny.operators.UniCreateWithEmitter;
 import io.smallrye.mutiny.operators.UniNever;
+import io.smallrye.mutiny.operators.uni.builders.KnownFailureUni;
+import io.smallrye.mutiny.operators.uni.builders.KnownItemUni;
 import io.smallrye.mutiny.subscription.UniEmitter;
 import io.smallrye.mutiny.subscription.UniSubscriber;
 
@@ -259,7 +261,7 @@ public class UniCreate {
      * @return the new {@link Uni}
      */
     public <T> Uni<T> item(T item) {
-        return item(() -> item);
+        return Infrastructure.onUniCreation(new KnownItemUni<>(item));
     }
 
     /**
@@ -483,8 +485,7 @@ public class UniCreate {
      * @return the produced {@link Uni}
      */
     public <T> Uni<T> failure(Throwable failure) {
-        Throwable exception = ParameterValidation.nonNull(failure, "failure");
-        return failure(() -> exception);
+        return Infrastructure.onUniCreation(new KnownFailureUni<>(ParameterValidation.nonNull(failure, "failure")));
     }
 
     /**
