@@ -195,7 +195,8 @@ public class UniAndCombination<I, O> extends UniOperator<I, O> {
         }
 
         public void subscribe() {
-            uni.subscribe().withSubscriber(this);
+            //noinspection unchecked
+            AbstractUni.subscribe(uni, this);
         }
     }
 }

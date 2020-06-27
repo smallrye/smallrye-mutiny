@@ -17,7 +17,7 @@ public class UniOnItemOrFailureMap<I, O> extends UniOperator<I, O> {
 
     @Override
     protected void subscribing(UniSerializedSubscriber<? super O> subscriber) {
-        upstream().subscribe().withSubscriber(new UniDelegatingSubscriber<I, O>(subscriber) {
+        AbstractUni.subscribe(upstream(), new UniDelegatingSubscriber<I, O>(subscriber) {
 
             @Override
             public void onItem(I item) {

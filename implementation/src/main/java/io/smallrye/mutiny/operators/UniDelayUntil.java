@@ -24,7 +24,7 @@ public class UniDelayUntil<T> extends UniOperator<T, T> {
     @Override
     protected void subscribing(UniSerializedSubscriber<? super T> subscriber) {
         AtomicReference<UniSubscription> reference = new AtomicReference<>();
-        upstream().subscribe().withSubscriber(new UniDelegatingSubscriber<T, T>(subscriber) {
+        AbstractUni.subscribe(upstream(), new UniDelegatingSubscriber<T, T>(subscriber) {
             @Override
             public void onSubscribe(UniSubscription subscription) {
                 if (reference.compareAndSet(null, subscription)) {

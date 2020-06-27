@@ -17,7 +17,7 @@ public class UniOnTermination<T> extends UniOperator<T, T> {
 
     @Override
     protected void subscribing(UniSerializedSubscriber<? super T> subscriber) {
-        upstream().subscribe().withSubscriber(
+        AbstractUni.subscribe(upstream(),
                 new UniDelegatingSubscriber<T, T>(subscriber) {
                     @Override
                     public void onSubscribe(UniSubscription subscription) {

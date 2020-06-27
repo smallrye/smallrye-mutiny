@@ -42,7 +42,7 @@ public class UniCallSubscribeOn<I> extends UniOperator<I, I> {
 
         @Override
         public void run() {
-            upstream().subscribe().withSubscriber(this);
+            AbstractUni.subscribe(upstream(), this);
         }
 
         @Override

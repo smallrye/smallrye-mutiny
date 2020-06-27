@@ -29,7 +29,7 @@ public class UniSubscribeToCompletionStage {
             }
         };
 
-        uni.subscribe().withSubscriber(new UniSubscriber<T>() {
+        AbstractUni.subscribe(uni, new UniSubscriber<T>() {
             @Override
             public void onSubscribe(UniSubscription subscription) {
                 if (!ref.compareAndSet(null, subscription)) {

@@ -72,10 +72,10 @@ public class UniRetryAtMost<T> extends UniOperator<T, T> {
             }
         };
 
-        upstream().subscribe().withSubscriber(retryingSubscriber);
+        AbstractUni.subscribe(upstream(), retryingSubscriber);
     }
 
     private void resubscribe(Uni<? extends T> upstream, UniSubscriber<T> subscriber) {
-        upstream.subscribe().withSubscriber(subscriber);
+        AbstractUni.subscribe(upstream, subscriber);
     }
 }

@@ -43,7 +43,7 @@ public class UniOrCombination<T> extends UniOperator<Void, T> {
         if (challengers.size() == 1) {
             // Just subscribe to the first and unique uni.
             Uni<? super T> uni = challengers.get(0);
-            uni.subscribe().withSubscriber((UniSubscriber) subscriber);
+            AbstractUni.subscribe(uni, (UniSubscriber) subscriber);
             return;
         }
 

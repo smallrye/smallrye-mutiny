@@ -48,7 +48,7 @@ public class ContextPropagationUniInterceptor implements UniInterceptor {
         return new AbstractUni<T>() {
             @Override
             protected void subscribing(UniSerializedSubscriber<? super T> subscriber) {
-                executor.execute(() -> uni.subscribe().withSubscriber(subscriber));
+                executor.execute(() -> AbstractUni.subscribe(uni, subscriber));
             }
         };
     }
