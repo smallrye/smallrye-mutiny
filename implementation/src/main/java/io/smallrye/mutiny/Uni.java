@@ -203,7 +203,9 @@ public interface Uni<T> {
      *
      * @return the object to configure the join
      * @see UniCombine#all() <code>Uni.all()</code> for the equivalent static operator
+     * @deprecated Use {@link #combine()}
      */
+    @Deprecated
     UniAndGroup<T> and();
 
     /**
@@ -215,7 +217,9 @@ public interface Uni<T> {
      * @return the combination of the pair combining the two items.
      * @see #and() <code>and</code> for more options on the combination of items
      * @see UniCombine#all() <code>Uni.all()</code> for the equivalent static operator
+     * @deprecated Use {@link #combine()}
      */
+    @Deprecated
     <T2> Uni<Tuple2<T, T2>> and(Uni<T2> other);
 
     /**
@@ -235,7 +239,9 @@ public interface Uni<T> {
      * @return the object to enlist the participants
      * @see UniCombine#any() <code>Uni.any</code> for a static version of this operator, like
      *      <code>Uni first = Uni.any().of(uni1, uni2);</code>
+     * @deprecated Use {@link #combine()}
      */
+    @Deprecated
     UniOr<T> or();
 
     /**
