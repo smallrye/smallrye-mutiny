@@ -143,8 +143,8 @@ public class UniOrTest {
     @Test
     public void testUniOrWithAnotherUni() {
         UniAssertSubscriber<String> subscriber = UniAssertSubscriber.create();
-        Uni.createFrom().item("foo").or().uni(Uni.createFrom().item("bar")).subscribe()
-                .withSubscriber(subscriber);
+        Uni.combine().any().of(Uni.createFrom().item("foo"), Uni.createFrom().item("bar"))
+                .subscribe().withSubscriber(subscriber);
         subscriber.assertCompletedSuccessfully().assertItem("foo");
     }
 
@@ -157,9 +157,31 @@ public class UniOrTest {
         Uni<String> third = Uni.createFrom().item("baz").onItem().delayIt().onExecutor(executor)
                 .by(Duration.ofMillis(10000));
 
-        assertThat(third.or().unis(first, second).await().indefinitely()).isEqualTo("foo");
-        assertThat(second.or().unis(third, first).await().indefinitely()).isEqualTo("foo");
-        assertThat(first.or().unis(third, second).await().indefinitely()).isEqualTo("foo");
+        Uni<String> c1 = Uni.combine().any().of(third, first, second);
+        Uni<String> c2 = Uni.combine().any().of(second, third, first);
+        Uni<String> c3 = Uni.combine().any().of(first, third, second);
+
+        assertThat(c1.await().indefinitely()).isEqualTo("foo");
+        assertThat(c2.await().indefinitely()).isEqualTo("foo");
+        assertThat(c3.await().indefinitely()).isEqualTo("foo");
+    }
+
+    @Test
+    public void testUniOrWithDelayedUniAndDeprecatedApis() {
+        Uni<String> first = Uni.createFrom().item("foo").onItem().delayIt().onExecutor(executor)
+                .by(Duration.ofMillis(10));
+        Uni<String> second = Uni.createFrom().item("bar").onItem().delayIt().onExecutor(executor)
+                .by(Duration.ofMillis(1000));
+        Uni<String> third = Uni.createFrom().item("baz").onItem().delayIt().onExecutor(executor)
+                .by(Duration.ofMillis(10000));
+
+        Uni<String> c1 = third.or().unis(first, second);
+        Uni<String> c2 = second.or().unis(third, first);
+        Uni<String> c3 = first.or().unis(third, second);
+
+        assertThat(c1.await().indefinitely()).isEqualTo("foo");
+        assertThat(c2.await().indefinitely()).isEqualTo("foo");
+        assertThat(c3.await().indefinitely()).isEqualTo("foo");
     }
 
 }
