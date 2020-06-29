@@ -70,6 +70,17 @@ public class UniAndTest {
     }
 
     @Test
+    public void testWithCombinatorAndDeprecatedApis() {
+        Uni<Integer> uni1 = Uni.createFrom().item(1);
+        Uni<Integer> uni2 = Uni.createFrom().item(2);
+        Uni<Integer> uni3 = Uni.createFrom().item(3);
+        UniAssertSubscriber<Integer> subscriber = uni1.and().unis(uni2, uni3)
+                .combinedWith((i1, i2, i3) -> i1 + i2 + i3)
+                .subscribe().withSubscriber(UniAssertSubscriber.create());
+        subscriber.await().assertItem(6);
+    }
+
+    @Test
     public void testTerminationJoin() {
         Uni<Void> uni = Uni.combine().all().unis(Uni.createFrom().item(1), Uni.createFrom().item("hello")).asTuple()
                 .onItem().ignore().andContinueWithNull();
@@ -117,6 +128,19 @@ public class UniAndTest {
 
         UniAssertSubscriber<Tuple4<Integer, Integer, Integer, Integer>> subscriber = Uni.combine().all()
                 .unis(uni, uni, uni2, uni3).asTuple()
+                .subscribe().withSubscriber(UniAssertSubscriber.create());
+
+        assertThat(subscriber.getItem().asList()).containsExactly(1, 1, 2, 3);
+    }
+
+    @Test
+    public void testWithFourUnisAndDeprecatedApis() {
+        Uni<Integer> uni = Uni.createFrom().item(1);
+        Uni<Integer> uni2 = Uni.createFrom().item(2);
+        Uni<Integer> uni3 = Uni.createFrom().item(3);
+
+        UniAssertSubscriber<Tuple4<Integer, Integer, Integer, Integer>> subscriber = uni.and()
+                .unis(uni, uni2, uni3).asTuple()
                 .subscribe().withSubscriber(UniAssertSubscriber.create());
 
         assertThat(subscriber.getItem().asList()).containsExactly(1, 1, 2, 3);
