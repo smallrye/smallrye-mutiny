@@ -17,8 +17,8 @@ public class ThenTest {
                 .then(self -> {
                     // Transform each item into a string of the item +1
                     return self
-                            .onItem().apply(i -> i + 1)
-                            .onItem().apply(i -> Integer.toString(i));
+                            .onItem().transform(i -> i + 1)
+                            .onItem().transform(i -> Integer.toString(i));
                 })
                 .then(self -> self
                         .onItem().invoke(item -> System.out.println("The item is " + item))

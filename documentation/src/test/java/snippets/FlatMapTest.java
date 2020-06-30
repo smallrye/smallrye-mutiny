@@ -63,7 +63,7 @@ public class FlatMapTest {
                 .await().indefinitely();
 
         List<Integer> list = multi
-                .onItem().apply(i -> i + 1)
+                .onItem().transform(i -> i + 1)
                 .collectItems().asList()
                 .await().indefinitely();
 

@@ -13,6 +13,17 @@ public class UniThenTest {
     public void testChainThen() {
         String result = Uni.createFrom().completionStage(CompletableFuture.supplyAsync(() -> 23))
                 .then(self -> self
+                        .onItem().transform(i -> i + 1)
+                        .onFailure().retry().indefinitely())
+                .then(self -> self.onItem().produceUni(i -> Uni.createFrom().item(Integer.toString(i))))
+                .await().indefinitely();
+        assertThat(result).isEqualTo("24");
+    }
+
+    @Test
+    public void testChainThenWithDeprecatedApiApply() {
+        String result = Uni.createFrom().completionStage(CompletableFuture.supplyAsync(() -> 23))
+                .then(self -> self
                         .onItem().apply(i -> i + 1)
                         .onFailure().retry().indefinitely())
                 .then(self -> self.onItem().produceUni(i -> Uni.createFrom().item(Integer.toString(i))))
@@ -39,7 +50,7 @@ public class UniThenTest {
         AtomicReference<String> result = new AtomicReference<>();
         Void x = Uni.createFrom().completionStage(CompletableFuture.supplyAsync(() -> 23))
                 .then(self -> self
-                        .onItem().apply(i -> i + 1)
+                        .onItem().transform(i -> i + 1)
                         .onFailure().retry().indefinitely())
                 .then(self -> self.onItem().produceUni(i -> Uni.createFrom().item(Integer.toString(i))))
                 .then(self -> {
@@ -56,8 +67,8 @@ public class UniThenTest {
         String result = Uni.createFrom().completionStage(CompletableFuture.supplyAsync(() -> 23))
                 .then(self -> Multi.createFrom().uni(self))
                 .then(self -> self
-                        .onItem().apply(i -> i + 1)
-                        .onItem().apply(i -> Integer.toString(i)))
+                        .onItem().transform(i -> i + 1)
+                        .onItem().transform(i -> Integer.toString(i)))
                 .then(self -> self.collectItems().first())
                 .then(self -> self.await().indefinitely());
         assertThat(result).isEqualTo("24");

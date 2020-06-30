@@ -21,7 +21,7 @@ public class UniOnItemOrFailureMapTest {
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void testThatMapperMustNotBeNull() {
-        Uni.createFrom().item(1).onItemOrFailure().apply(null);
+        Uni.createFrom().item(1).onItemOrFailure().transform(null);
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
@@ -34,7 +34,7 @@ public class UniOnItemOrFailureMapTest {
         UniAssertSubscriber<Integer> ts = UniAssertSubscriber.create();
 
         AtomicInteger count = new AtomicInteger();
-        one.onItemOrFailure().apply((i, f) -> {
+        one.onItemOrFailure().transform((i, f) -> {
             assertThat(f).isNull();
             count.incrementAndGet();
             return i + 1;
@@ -51,7 +51,7 @@ public class UniOnItemOrFailureMapTest {
         UniAssertSubscriber<Integer> ts = UniAssertSubscriber.create();
 
         AtomicInteger count = new AtomicInteger();
-        none.onItemOrFailure().apply((i, f) -> {
+        none.onItemOrFailure().transform((i, f) -> {
             assertThat(f).isNull();
             count.incrementAndGet();
             return 2;
@@ -68,7 +68,7 @@ public class UniOnItemOrFailureMapTest {
         UniAssertSubscriber<Integer> ts = UniAssertSubscriber.create();
 
         AtomicInteger count = new AtomicInteger();
-        failed.onItemOrFailure().apply((i, f) -> {
+        failed.onItemOrFailure().transform((i, f) -> {
             assertThat(i).isNull();
             assertThat(f).isNotNull().isInstanceOf(IOException.class).hasMessageContaining("boom");
             count.incrementAndGet();
@@ -86,7 +86,7 @@ public class UniOnItemOrFailureMapTest {
         UniAssertSubscriber<Integer> ts = UniAssertSubscriber.create();
 
         AtomicInteger count = new AtomicInteger();
-        one.onItemOrFailure().<Integer> apply((i, f) -> {
+        one.onItemOrFailure().<Integer> transform((i, f) -> {
             assertThat(f).isNull();
             count.incrementAndGet();
             throw new IllegalStateException("kaboom");
@@ -101,7 +101,7 @@ public class UniOnItemOrFailureMapTest {
         UniAssertSubscriber<Integer> ts = UniAssertSubscriber.create();
 
         AtomicInteger count = new AtomicInteger();
-        failed.onItemOrFailure().<Integer> apply((i, f) -> {
+        failed.onItemOrFailure().<Integer> transform((i, f) -> {
             assertThat(i).isNull();
             assertThat(f).isNotNull().isInstanceOf(IOException.class).hasMessageContaining("boom");
             count.incrementAndGet();
@@ -120,7 +120,7 @@ public class UniOnItemOrFailureMapTest {
         UniAssertSubscriber<Integer> ts2 = UniAssertSubscriber.create();
 
         AtomicInteger count = new AtomicInteger();
-        Uni<Integer> uni = one.onItemOrFailure().apply((v, f) -> v + count.incrementAndGet());
+        Uni<Integer> uni = one.onItemOrFailure().transform((v, f) -> v + count.incrementAndGet());
         uni.subscribe().withSubscriber(ts1);
         uni.subscribe().withSubscriber(ts2);
 
@@ -134,7 +134,7 @@ public class UniOnItemOrFailureMapTest {
     public void testThatMapperCanReturnNull() {
         UniAssertSubscriber<Void> ts = UniAssertSubscriber.create();
 
-        one.onItemOrFailure().<Void> apply((v, f) -> null).subscribe().withSubscriber(ts);
+        one.onItemOrFailure().<Void> transform((v, f) -> null).subscribe().withSubscriber(ts);
 
         ts.assertCompletedSuccessfully().assertItem(null);
     }
@@ -147,7 +147,7 @@ public class UniOnItemOrFailureMapTest {
             AtomicReference<String> threadName = new AtomicReference<>();
             one
                     .emitOn(executor)
-                    .onItemOrFailure().apply((i, f) -> {
+                    .onItemOrFailure().transform((i, f) -> {
                         threadName.set(Thread.currentThread().getName());
                         return i + 1;
                     })
@@ -169,7 +169,7 @@ public class UniOnItemOrFailureMapTest {
             AtomicReference<String> threadName = new AtomicReference<>();
             failed
                     .emitOn(executor)
-                    .onItemOrFailure().apply((i, f) -> {
+                    .onItemOrFailure().transform((i, f) -> {
                         threadName.set(Thread.currentThread().getName());
                         assertThat(i).isNull();
                         assertThat(f).isNotNull();

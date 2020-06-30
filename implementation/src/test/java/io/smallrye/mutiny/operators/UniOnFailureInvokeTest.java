@@ -93,7 +93,7 @@ public class UniOnFailureInvokeTest {
         int res = Uni.createFrom().nullItem()
                 .onFailure().invoke(container::set)
                 .onFailure().recoverWithItem(1)
-                .onItem().apply(x -> 5)
+                .onItem().transform(x -> 5)
                 .await().indefinitely();
 
         assertThat(res).isEqualTo(5);
@@ -110,7 +110,7 @@ public class UniOnFailureInvokeTest {
                     return Uni.createFrom().item(22).onItem().invoke(called::set);
                 })
                 .onFailure().recoverWithItem(1)
-                .onItem().apply(x -> 4)
+                .onItem().transform(x -> 4)
                 .await().indefinitely();
 
         assertThat(res).isEqualTo(4);

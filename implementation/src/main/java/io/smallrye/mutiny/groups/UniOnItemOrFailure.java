@@ -79,8 +79,28 @@ public class UniOnItemOrFailure<T> {
      * @param mapper the mapper function, must not be {@code null}
      * @param <R> the type of Uni item
      * @return the new {@link Uni}
+     * @deprecated use {@link #transform(BiFunction)}
      */
+    @Deprecated
     public <R> Uni<R> apply(BiFunction<? super T, Throwable, ? extends R> mapper) {
+        return transform(mapper);
+    }
+
+    /**
+     * Produces a new {@link Uni} invoking the given function when the current {@link Uni} fires the {@code item} or
+     * {@code failure} event. Note that the item can be {@code null}, so detecting failures must be done by checking
+     * whether the {@code failure} parameter is {@code null}.
+     * <p>
+     * The function receives the item and failure as parameters, and can transform the item or recover from the failure.
+     * The returned object is sent downstream as {@code item}.
+     * <p>
+     * For asynchronous composition, see {@link #produceUni(BiFunction)}.
+     *
+     * @param mapper the mapper function, must not be {@code null}
+     * @param <R> the type of Uni item
+     * @return the new {@link Uni}
+     */
+    public <R> Uni<R> transform(BiFunction<? super T, Throwable, ? extends R> mapper) {
         return Infrastructure.onUniCreation(new UniOnItemOrFailureMap<>(upstream, mapper));
     }
 

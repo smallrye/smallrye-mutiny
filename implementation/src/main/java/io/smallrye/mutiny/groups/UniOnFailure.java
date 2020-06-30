@@ -93,8 +93,21 @@ public class UniOnFailure<T> {
      *
      * @param mapper the mapper function, must not be {@code null}, must not return {@code null}
      * @return the new {@link Uni}
+     * @deprecated use {@link #transform(Function)}
      */
+    @Deprecated
     public Uni<T> apply(Function<? super Throwable, ? extends Throwable> mapper) {
+        return transform(mapper);
+    }
+
+    /**
+     * Produces a new {@link Uni} invoking the given function when the current {@link Uni} propagates a failure. The
+     * function can transform the received failure into another exception that will be fired as failure downstream.
+     *
+     * @param mapper the mapper function, must not be {@code null}, must not return {@code null}
+     * @return the new {@link Uni}
+     */
+    public Uni<T> transform(Function<? super Throwable, ? extends Throwable> mapper) {
         return Infrastructure.onUniCreation(new UniOnFailureMap<>(upstream, predicate, mapper));
     }
 

@@ -27,7 +27,7 @@ public class UniOnFailureMapToTest {
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void testThatMapperMustNotBeNull() {
-        Uni.createFrom().item(1).onFailure().apply(null);
+        Uni.createFrom().item(1).onFailure().transform(null);
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
@@ -38,7 +38,7 @@ public class UniOnFailureMapToTest {
     @Test
     public void testSimpleMapping() {
         UniAssertSubscriber<Integer> subscriber = failure
-                .onFailure().apply(t -> new BoomException())
+                .onFailure().transform(t -> new BoomException())
                 .subscribe().withSubscriber(UniAssertSubscriber.create());
         subscriber.assertCompletedWithFailure()
                 .assertFailure(BoomException.class, "BoomException");
@@ -50,7 +50,7 @@ public class UniOnFailureMapToTest {
         UniAssertSubscriber<Integer> ts2 = UniAssertSubscriber.create();
 
         AtomicInteger count = new AtomicInteger();
-        Uni<Integer> uni = failure.onFailure().apply(t -> new BoomException(count.incrementAndGet()));
+        Uni<Integer> uni = failure.onFailure().transform(t -> new BoomException(count.incrementAndGet()));
         uni.subscribe().withSubscriber(ts1);
         uni.subscribe().withSubscriber(ts2);
 
@@ -64,7 +64,7 @@ public class UniOnFailureMapToTest {
     public void testWhenTheMapperThrowsAnException() {
         UniAssertSubscriber<Object> ts = UniAssertSubscriber.create();
 
-        failure.onFailure().apply(t -> {
+        failure.onFailure().transform(t -> {
             throw new RuntimeException("failure");
         }).subscribe().withSubscriber(ts);
 
@@ -75,7 +75,7 @@ public class UniOnFailureMapToTest {
     public void testThatMapperCanNotReturnNull() {
         UniAssertSubscriber<Object> ts = UniAssertSubscriber.create();
 
-        failure.onFailure().apply(t -> null).subscribe().withSubscriber(ts);
+        failure.onFailure().transform(t -> null).subscribe().withSubscriber(ts);
 
         ts.assertFailure(NullPointerException.class, "null");
     }
@@ -88,7 +88,7 @@ public class UniOnFailureMapToTest {
             AtomicReference<String> threadName = new AtomicReference<>();
             failure
                     .emitOn(executor)
-                    .onFailure().apply(fail -> {
+                    .onFailure().transform(fail -> {
                         threadName.set(Thread.currentThread().getName());
                         return new BoomException();
                     })
@@ -107,7 +107,7 @@ public class UniOnFailureMapToTest {
         UniAssertSubscriber<Integer> ts = UniAssertSubscriber.create();
         AtomicBoolean called = new AtomicBoolean();
         Uni.createFrom().item(1)
-                .onFailure().apply(f -> {
+                .onFailure().transform(f -> {
                     called.set(true);
                     return f;
                 })
@@ -121,7 +121,7 @@ public class UniOnFailureMapToTest {
         UniAssertSubscriber<Integer> ts = UniAssertSubscriber.create();
         AtomicBoolean called = new AtomicBoolean();
         Uni.createFrom().<Integer> failure(new IllegalStateException("boom"))
-                .onFailure(IOException.class).apply(f -> {
+                .onFailure(IOException.class).transform(f -> {
                     called.set(true);
                     return new IllegalArgumentException("Karamba");
                 })
@@ -137,7 +137,7 @@ public class UniOnFailureMapToTest {
         Uni.createFrom().<Integer> failure(new IllegalStateException("boom"))
                 .onFailure(t -> {
                     throw new IllegalArgumentException("boomboom");
-                }).apply(f -> {
+                }).transform(f -> {
                     called.set(true);
                     return new RuntimeException("Karamba");
                 })

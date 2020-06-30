@@ -22,7 +22,7 @@ public class RunSubscriptionOnTest {
             // called on a thread from the executor
             return retrieveItemsFromSource();
         })
-                .onItem().apply(this::applySomeOperation)
+                .onItem().transform(this::applySomeOperation)
                 .runSubscriptionOn(executor)
                 .subscribe().with(
                 item -> System.out.println("Item: " + item),
@@ -41,7 +41,7 @@ public class RunSubscriptionOnTest {
         //tag::emitOn[]
         Multi.createFrom().items(this::retrieveItemsFromSource)
                 .emitOn(executor)
-                .onItem().apply(this::applySomeOperation)
+                .onItem().transform(this::applySomeOperation)
                 .subscribe().with(
                 item -> System.out.println("Item: " + item),
                 Throwable::printStackTrace,

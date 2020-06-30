@@ -717,7 +717,7 @@ public class MultiFromResourceTest {
 
         public Multi<String> infinite() {
             return Multi.createFrom().ticks().every(Duration.ofMillis(10))
-                    .onItem().apply(l -> Long.toString(l))
+                    .onItem().transform(l -> Long.toString(l))
                     .on().subscribed(s -> subscribed.set(true));
         }
 
