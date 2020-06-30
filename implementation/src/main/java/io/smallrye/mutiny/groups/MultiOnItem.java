@@ -73,7 +73,6 @@ public class MultiOnItem<T> {
     public Multi<T> invoke(Consumer<T> callback) {
         return Infrastructure.onMultiCreation(new MultiSignalConsumerOp<>(
                 upstream,
-                null,
                 nonNull(callback, "callback"),
                 null,
                 null,

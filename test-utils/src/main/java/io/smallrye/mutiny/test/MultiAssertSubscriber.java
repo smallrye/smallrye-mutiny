@@ -98,6 +98,11 @@ public class MultiAssertSubscriber<T> implements Subscriber<T> {
         return this;
     }
 
+    public MultiAssertSubscriber<T> assertNotSubscribed() {
+        assertThat(numberOfSubscription).isEqualTo(0);
+        return this;
+    }
+
     public MultiAssertSubscriber<T> assertTerminated() {
         assertThat(latch.getCount()).isEqualTo(0);
         return this;

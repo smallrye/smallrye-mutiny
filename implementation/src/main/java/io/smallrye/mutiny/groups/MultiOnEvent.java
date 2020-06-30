@@ -11,6 +11,7 @@ import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
+import io.smallrye.mutiny.operators.multi.MultiOnSubscribeInvokeOp;
 import io.smallrye.mutiny.operators.multi.MultiSignalConsumerOp;
 
 /**
@@ -35,17 +36,11 @@ public class MultiOnEvent<T> {
      *
      * @param callback the callback, must not be {@code null}
      * @return a new {@link Multi}
+     * @deprecated Use {@link Multi#onSubscribe()}
      */
+    @Deprecated
     public Multi<T> subscribed(Consumer<? super Subscription> callback) {
-        return Infrastructure.onMultiCreation(new MultiSignalConsumerOp<>(
-                upstream,
-                nonNull(callback, "callback"),
-                null,
-                null,
-                null,
-                null,
-                null,
-                null));
+        return Infrastructure.onMultiCreation(new MultiOnSubscribeInvokeOp<>(upstream, callback));
     }
 
     /**
@@ -63,14 +58,12 @@ public class MultiOnEvent<T> {
                 null,
                 null,
                 null,
-                null,
                 nonNull(callback, "callback")));
     }
 
     public Multi<T> request(LongConsumer callback) {
         return Infrastructure.onMultiCreation(new MultiSignalConsumerOp<>(
                 upstream,
-                null,
                 null,
                 null,
                 null,
@@ -98,7 +91,6 @@ public class MultiOnEvent<T> {
                 null,
                 null,
                 null,
-                null,
                 callback,
                 null,
                 null));
@@ -117,7 +109,6 @@ public class MultiOnEvent<T> {
         Runnable runnable = nonNull(action, "action");
         return Infrastructure.onMultiCreation(new MultiSignalConsumerOp<>(
                 upstream,
-                null,
                 null,
                 null,
                 null,
@@ -203,7 +194,6 @@ public class MultiOnEvent<T> {
     public Multi<T> completion(Runnable callback) {
         return Infrastructure.onMultiCreation(new MultiSignalConsumerOp<>(
                 upstream,
-                null,
                 null,
                 null,
                 nonNull(callback, "callback"),

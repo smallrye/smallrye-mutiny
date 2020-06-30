@@ -22,6 +22,7 @@ import io.smallrye.mutiny.operators.multi.processors.BroadcastProcessor;
 import io.smallrye.mutiny.subscription.Cancellable;
 import io.smallrye.mutiny.test.MultiAssertSubscriber;
 
+@SuppressWarnings("deprecation")
 public class MultiOnEventTest {
     @Test
     public void testCallbacksWhenItemIsEmitted() {

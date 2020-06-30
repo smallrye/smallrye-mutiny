@@ -33,7 +33,7 @@ public class MultiOnCompletion<T> {
      */
     public Multi<T> invoke(Runnable callback) {
         return Infrastructure.onMultiCreation(new MultiSignalConsumerOp<>(upstream,
-                null, null, null, nonNull(callback, "callback"), null,
+                null, null, nonNull(callback, "callback"), null,
                 null, null));
     }
 

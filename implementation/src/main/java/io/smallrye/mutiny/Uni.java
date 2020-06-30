@@ -205,6 +205,26 @@ public interface Uni<T> {
     UniOnItem<T> onItem();
 
     /**
+     * Configures the action to execute when the observed {@link Uni} sends a {@link UniSubscription}.
+     * The downstream don't have a subscription yet. It will be passed once the configured action completes.
+     *
+     * <p>
+     * Example:
+     * </p>
+     *
+     * <pre>
+     * {@code
+     * uni.onSubscribe().invoke(sub -> System.out.println("subscribed"));
+     * // Delay the subscription by 1 second (or until an asynchronous action completes)
+     * uni.onSubscribe().invokeUni(sub -> Uni.createFrom(1).onItem().delayIt().by(Duration.ofSecond(1)));
+     * }
+     * </pre>
+     *
+     * @return the object to configure the action to execution on subscription.
+     */
+    UniOnSubscribe<T> onSubscribe();
+
+    /**
      * Configures the action to execute when the observed {@link Uni} emits either an item (potentially {@code null}))
      * or a failure. Unlike {@link #onItem()} and {@link #onFailure()} the action would handle both cases in on "go".
      *

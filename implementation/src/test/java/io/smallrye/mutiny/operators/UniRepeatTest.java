@@ -294,6 +294,7 @@ public class UniRepeatTest {
                 .runSubscriptionOn(Infrastructure.getDefaultWorkerPool())
                 .subscribe().withSubscriber(MultiAssertSubscriber.create());
 
+        await().untilAsserted(subscriber::assertSubscribed);
         subscriber.assertSubscribed().assertHasNotReceivedAnyItem();
         subscriber
                 .request(2)
@@ -330,6 +331,7 @@ public class UniRepeatTest {
                 .runSubscriptionOn(Infrastructure.getDefaultWorkerPool())
                 .subscribe().withSubscriber(MultiAssertSubscriber.create());
 
+        await().untilAsserted(subscriber::assertSubscribed);
         subscriber.assertSubscribed().assertHasNotReceivedAnyItem();
         subscriber
                 .request(2)
@@ -366,6 +368,7 @@ public class UniRepeatTest {
                 .runSubscriptionOn(Infrastructure.getDefaultWorkerPool())
                 .subscribe().withSubscriber(MultiAssertSubscriber.create());
 
+        await().untilAsserted(subscriber::assertSubscribed);
         subscriber.assertSubscribed().assertHasNotReceivedAnyItem();
         subscriber
                 .request(2)
@@ -402,6 +405,7 @@ public class UniRepeatTest {
                 .runSubscriptionOn(Infrastructure.getDefaultWorkerPool())
                 .subscribe().withSubscriber(MultiAssertSubscriber.create());
 
+        await().untilAsserted(subscriber::assertSubscribed);
         subscriber.assertSubscribed().assertHasNotReceivedAnyItem();
         subscriber
                 .request(2)

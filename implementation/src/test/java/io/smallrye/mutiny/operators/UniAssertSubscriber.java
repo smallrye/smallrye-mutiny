@@ -204,7 +204,14 @@ public class UniAssertSubscriber<T> implements UniSubscriber<T> {
 
     public UniAssertSubscriber<T> assertSubscribed() {
         if (subscription == null) {
-            throw new AssertionError(("Expected to have a subscription"));
+            throw new AssertionError("Expected to have a subscription");
+        }
+        return this;
+    }
+
+    public UniAssertSubscriber<T> assertNotSubscribed() {
+        if (subscription != null) {
+            throw new AssertionError("Expected to not have a subscription");
         }
         return this;
     }

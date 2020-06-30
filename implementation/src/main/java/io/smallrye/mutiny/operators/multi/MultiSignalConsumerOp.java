@@ -1,7 +1,6 @@
 package io.smallrye.mutiny.operators.multi;
 
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.LongConsumer;
@@ -21,8 +20,6 @@ import io.smallrye.mutiny.subscription.MultiSubscriber;
  */
 public final class MultiSignalConsumerOp<T> extends AbstractMultiOperator<T, T> {
 
-    private final Consumer<? super Subscription> onSubscribe;
-
     private final Consumer<? super T> onItem;
 
     private final Consumer<? super Throwable> onFailure;
@@ -36,7 +33,6 @@ public final class MultiSignalConsumerOp<T> extends AbstractMultiOperator<T, T> 
     private final LongConsumer onRequest;
 
     public MultiSignalConsumerOp(Multi<? extends T> upstream,
-            Consumer<? super Subscription> onSubscribe,
             Consumer<? super T> onItem,
             Consumer<? super Throwable> onFailure,
             Runnable onCompletion,
@@ -44,7 +40,6 @@ public final class MultiSignalConsumerOp<T> extends AbstractMultiOperator<T, T> 
             LongConsumer onRequest,
             Runnable onCancellation) {
         super(upstream);
-        this.onSubscribe = onSubscribe;
         this.onItem = onItem;
         this.onFailure = onFailure;
         this.onCompletion = onCompletion;
@@ -61,18 +56,17 @@ public final class MultiSignalConsumerOp<T> extends AbstractMultiOperator<T, T> 
         upstream.subscribe().withSubscriber(new SignalSubscriber(actual));
     }
 
-    private final class SignalSubscriber implements MultiSubscriber<T>, Subscription {
+    private final class SignalSubscriber extends MultiOperatorProcessor<T, T> implements MultiSubscriber<T>, Subscription {
 
-        private final MultiSubscriber<? super T> downstream;
-        private final AtomicReference<Subscription> subscription = new AtomicReference<>();
         private final AtomicBoolean terminationCalled = new AtomicBoolean();
 
         SignalSubscriber(MultiSubscriber<? super T> downstream) {
-            this.downstream = downstream;
+            super(downstream);
         }
 
+        @Override
         void failAndCancel(Throwable throwable) {
-            Subscription current = subscription.get();
+            Subscription current = upstream.get();
             if (current != null) {
                 current.cancel();
             }
@@ -90,7 +84,7 @@ public final class MultiSignalConsumerOp<T> extends AbstractMultiOperator<T, T> 
                 }
             }
 
-            subscription.get().request(n);
+            upstream.get().request(n);
         }
 
         @Override
@@ -104,7 +98,7 @@ public final class MultiSignalConsumerOp<T> extends AbstractMultiOperator<T, T> 
                 }
             }
             callTerminationCallback(null, true);
-            subscription.getAndSet(Subscriptions.CANCELLED).cancel();
+            upstream.getAndSet(Subscriptions.CANCELLED).cancel();
         }
 
         private boolean callTerminationCallback(Throwable failure, boolean cancelled) {
@@ -132,24 +126,8 @@ public final class MultiSignalConsumerOp<T> extends AbstractMultiOperator<T, T> 
         }
 
         @Override
-        public void onSubscribe(Subscription s) {
-            if (subscription.compareAndSet(null, s)) {
-                if (onSubscribe != null) {
-                    try {
-                        onSubscribe.accept(s);
-                    } catch (Throwable e) {
-                        Subscriptions.fail(downstream, e);
-                        subscription.getAndSet(Subscriptions.CANCELLED).cancel();
-                        return;
-                    }
-                }
-                downstream.onSubscribe(this);
-            }
-        }
-
-        @Override
         public void onItem(T t) {
-            if (subscription.get() != Subscriptions.CANCELLED) {
+            if (upstream.get() != Subscriptions.CANCELLED) {
                 if (onItem != null) {
                     try {
                         onItem.accept(t);
@@ -165,7 +143,7 @@ public final class MultiSignalConsumerOp<T> extends AbstractMultiOperator<T, T> 
 
         @Override
         public void onFailure(Throwable failure) {
-            Subscription up = subscription.getAndSet(Subscriptions.CANCELLED);
+            Subscription up = upstream.getAndSet(Subscriptions.CANCELLED);
             if (up != Subscriptions.CANCELLED) {
                 if (onFailure != null) {
                     try {
@@ -183,7 +161,7 @@ public final class MultiSignalConsumerOp<T> extends AbstractMultiOperator<T, T> 
 
         @Override
         public void onCompletion() {
-            if (subscription.getAndSet(Subscriptions.CANCELLED) != Subscriptions.CANCELLED) {
+            if (upstream.getAndSet(Subscriptions.CANCELLED) != Subscriptions.CANCELLED) {
                 if (onCompletion != null) {
                     try {
                         onCompletion.run();

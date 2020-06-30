@@ -65,7 +65,6 @@ public class MultiOnFailure<T> {
         return Infrastructure.onMultiCreation(new MultiSignalConsumerOp<>(
                 upstream,
                 null,
-                null,
                 failure -> {
                     if (predicate.test(failure)) {
                         callback.accept(failure);

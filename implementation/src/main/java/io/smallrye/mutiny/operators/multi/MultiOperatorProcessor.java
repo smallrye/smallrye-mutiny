@@ -55,6 +55,15 @@ public abstract class MultiOperatorProcessor<I, O> implements MultiSubscriber<I>
         }
     }
 
+    @SuppressWarnings("unchecked")
+    @Override
+    public void onItem(I item) {
+        Subscription subscription = upstream.get();
+        if (subscription != CANCELLED) {
+            downstream.onItem((O) item);
+        }
+    }
+
     @Override
     public void onCompletion() {
         Subscription subscription = upstream.getAndSet(CANCELLED);
@@ -80,4 +89,5 @@ public abstract class MultiOperatorProcessor<I, O> implements MultiSubscriber<I>
             Subscriptions.cancel(upstream);
         }
     }
+
 }
