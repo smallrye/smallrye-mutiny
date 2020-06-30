@@ -84,8 +84,33 @@ public interface Uni<T> {
      *        {@link Uni} or something else), must not be {@code null}.
      * @param <O> the outcome type
      * @return the outcome of the function.
+     * @deprecated use {@link #stage(Function)}
      */
+    @Deprecated
     default <O> O then(Function<Uni<T>, O> stage) {
+        return stage(stage);
+    }
+
+    /**
+     * Allows structuring the pipeline by creating a logic separation:
+     *
+     * <pre>
+     * {@code
+     *     Uni uni = upstream
+     *      .stage(u -> { ...})
+     *      .stage(u -> { ...})
+     *      .stage(u -> { ...})
+     * }
+     * </pre>
+     * <p>
+     * With `stage` you can structure and chain groups of processing.
+     *
+     * @param stage the function receiving the this {@link Uni} as parameter and producing the outcome (can be a
+     *        {@link Uni} or something else), must not be {@code null}.
+     * @param <O> the outcome type
+     * @return the outcome of the function.
+     */
+    default <O> O stage(Function<Uni<T>, O> stage) {
         return nonNull(stage, "stage").apply(this);
     }
 

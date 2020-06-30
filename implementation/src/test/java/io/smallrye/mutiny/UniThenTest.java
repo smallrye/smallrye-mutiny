@@ -12,7 +12,7 @@ public class UniThenTest {
     @Test
     public void testChainThen() {
         String result = Uni.createFrom().completionStage(CompletableFuture.supplyAsync(() -> 23))
-                .then(self -> self
+                .stage(self -> self
                         .onItem().transform(i -> i + 1)
                         .onFailure().retry().indefinitely())
                 .then(self -> self.onItem().produceUni(i -> Uni.createFrom().item(Integer.toString(i))))
@@ -26,7 +26,7 @@ public class UniThenTest {
                 .then(self -> self
                         .onItem().apply(i -> i + 1)
                         .onFailure().retry().indefinitely())
-                .then(self -> self.onItem().produceUni(i -> Uni.createFrom().item(Integer.toString(i))))
+                .stage(self -> self.onItem().produceUni(i -> Uni.createFrom().item(Integer.toString(i))))
                 .await().indefinitely();
         assertThat(result).isEqualTo("24");
     }
@@ -34,13 +34,13 @@ public class UniThenTest {
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void testThatFunctionMustNotBeNull() {
         Uni.createFrom().item(1)
-                .then(null);
+                .stage(null);
     }
 
     @Test(expectedExceptions = IllegalStateException.class, expectedExceptionsMessageRegExp = ".*boom.*")
     public void testThatFunctionMustNotThrowException() {
         Uni.createFrom().item(1)
-                .then(i -> {
+                .stage(i -> {
                     throw new IllegalStateException("boom");
                 });
     }
@@ -49,11 +49,11 @@ public class UniThenTest {
     public void testThatFunctionCanReturnNullIfVoid() {
         AtomicReference<String> result = new AtomicReference<>();
         Void x = Uni.createFrom().completionStage(CompletableFuture.supplyAsync(() -> 23))
-                .then(self -> self
+                .stage(self -> self
                         .onItem().transform(i -> i + 1)
                         .onFailure().retry().indefinitely())
-                .then(self -> self.onItem().produceUni(i -> Uni.createFrom().item(Integer.toString(i))))
-                .then(self -> {
+                .stage(self -> self.onItem().produceUni(i -> Uni.createFrom().item(Integer.toString(i))))
+                .stage(self -> {
                     String r = self.await().indefinitely();
                     result.set(r);
                     return null; // void
@@ -65,12 +65,12 @@ public class UniThenTest {
     @Test
     public void testChainingMulti() {
         String result = Uni.createFrom().completionStage(CompletableFuture.supplyAsync(() -> 23))
-                .then(self -> Multi.createFrom().uni(self))
-                .then(self -> self
+                .stage(self -> Multi.createFrom().uni(self))
+                .stage(self -> self
                         .onItem().transform(i -> i + 1)
                         .onItem().transform(i -> Integer.toString(i)))
-                .then(self -> self.collectItems().first())
-                .then(self -> self.await().indefinitely());
+                .stage(self -> self.collectItems().first())
+                .stage(self -> self.await().indefinitely());
         assertThat(result).isEqualTo("24");
     }
 
