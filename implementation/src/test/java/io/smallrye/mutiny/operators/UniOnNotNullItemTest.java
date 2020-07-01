@@ -33,6 +33,23 @@ public class UniOnNotNullItemTest {
     }
 
     @Test
+    public void testTransform() {
+        assertThat(Uni.createFrom().item("hello")
+                .onItem().ifNotNull().transform(String::toUpperCase)
+                .await().indefinitely()).isEqualTo("HELLO");
+
+        assertThat(Uni.createFrom().item(() -> (String) null)
+                .onItem().ifNotNull().transform(String::toUpperCase)
+                .onItem().ifNull().continueWith("yolo")
+                .await().indefinitely()).isEqualTo("yolo");
+
+        assertThatThrownBy(() -> Uni.createFrom().<String> failure(new Exception("boom"))
+                .onItem().ifNotNull().transform(String::toUpperCase)
+                .onItem().ifNull().continueWith("yolo")
+                .await().indefinitely()).hasMessageContaining("boom");
+    }
+
+    @Test
     public void testInvoke() {
         AtomicBoolean invoked = new AtomicBoolean();
         assertThat(Uni.createFrom().item("hello")

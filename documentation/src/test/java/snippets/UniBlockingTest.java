@@ -24,7 +24,7 @@ public class UniBlockingTest {
         // tag::code-emitOn[]
         Multi<String> multi = Multi.createFrom().items("john", "jack", "sue")
                 .emitOn(Infrastructure.getDefaultWorkerPool())
-                .onItem().apply(this::invokeRemoteServiceUsingBlockingIO);
+                .onItem().transform(this::invokeRemoteServiceUsingBlockingIO);
         // end::code-emitOn[]
         assertThat(multi.collectItems().asList().await().indefinitely()).containsExactly("JOHN", "JACK", "SUE");
     }

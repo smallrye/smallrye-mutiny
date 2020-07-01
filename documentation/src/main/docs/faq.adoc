@@ -2,7 +2,7 @@
 
 === How do I transform items?
 
-To transform items synchronously use the `apply` operators:
+To transform items synchronously use the `transform` operators:
 
 [source,java,indent=0]
 ----

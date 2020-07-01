@@ -42,8 +42,25 @@ public class MultiOnItem<T> {
      * @param mapper the mapper function, must not be {@code null}
      * @param <R> the type of item produced by the mapper function
      * @return the new {@link Multi}
+     * @deprecated Use {@link #transform(Function)}
      */
+    @Deprecated
     public <R> Multi<R> apply(Function<? super T, ? extends R> mapper) {
+        return transform(mapper);
+    }
+
+    /**
+     * Produces a new {@link Multi} invoking the given function for each item emitted by the upstream {@link Multi}.
+     * <p>
+     * The function receives the received item as parameter, and can transform it. The returned object is sent
+     * downstream as {@code item} event.
+     * <p>
+     *
+     * @param mapper the mapper function, must not be {@code null}
+     * @param <R> the type of item produced by the mapper function
+     * @return the new {@link Multi}
+     */
+    public <R> Multi<R> transform(Function<? super T, ? extends R> mapper) {
         return Infrastructure.onMultiCreation(new MultiMapOp<>(upstream, nonNull(mapper, "mapper")));
     }
 
@@ -256,7 +273,7 @@ public class MultiOnItem<T> {
      */
     public <O> Multi<O> castTo(Class<O> target) {
         nonNull(target, "target");
-        return apply(target::cast);
+        return transform(target::cast);
     }
 
     /**

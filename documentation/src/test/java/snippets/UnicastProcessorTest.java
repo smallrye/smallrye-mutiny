@@ -15,7 +15,7 @@ public class UnicastProcessorTest {
         // tag::code[]
         UnicastProcessor<String> processor = UnicastProcessor.create();
         Multi<String> multi = processor
-                .onItem().apply(String::toUpperCase)
+                .onItem().transform(String::toUpperCase)
                 .onFailure().recoverWithItem("d'oh");
 
         // Create a source of items that does not follow the request protocol

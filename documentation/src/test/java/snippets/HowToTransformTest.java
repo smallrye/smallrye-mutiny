@@ -20,10 +20,10 @@ public class HowToTransformTest {
 
         // tag::sync[]
         String result1 = uni
-                .onItem().apply(s -> s.toUpperCase())
+                .onItem().transform(s -> s.toUpperCase())
                 .await().indefinitely();
         List<String> result2 = multi
-                .onItem().apply(s -> s.toUpperCase())
+                .onItem().transform(String::toUpperCase)
                 .collectItems().asList().await().indefinitely();
         // end::sync[]
 
@@ -42,10 +42,10 @@ public class HowToTransformTest {
 
         // tag::sync-unchecked[]
         String result1 = uni
-                .onItem().apply(function(this::operationThrowingException))
+                .onItem().transform(function(this::operationThrowingException))
                 .await().indefinitely();
         List<String> result2 = multi
-                .onItem().apply(function(this::operationThrowingException))
+                .onItem().transform(function(this::operationThrowingException))
                 .collectItems().asList().await().indefinitely();
         // end::sync-unchecked[]
 

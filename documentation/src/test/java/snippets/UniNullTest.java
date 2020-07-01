@@ -25,12 +25,12 @@ public class UniNullTest {
         Uni<String> uni = Uni.createFrom().item(() -> null);
         // tag::code-not-null[]
         uni
-                .onItem().ifNotNull().apply(String::toUpperCase)
+                .onItem().ifNotNull().transform(String::toUpperCase)
                 .onItem().ifNull().continueWith("yolo!");
         // end::code-not-null[]
 
         String r = uni
-                .onItem().ifNotNull().apply(String::toUpperCase)
+                .onItem().ifNotNull().transform(String::toUpperCase)
                 .onItem().ifNull().continueWith("yolo!")
                 .await().indefinitely();
         assertThat(r).isEqualTo("yolo!");

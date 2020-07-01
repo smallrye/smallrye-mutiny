@@ -86,6 +86,19 @@ public class MultiOnFailureTest {
         MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create();
 
         Multi.createFrom().<Integer> failure(new IllegalStateException("boom"))
+                .onFailure().transform(f -> new IOException("kaboom!"))
+                .subscribe().withSubscriber(subscriber);
+
+        subscriber.assertHasNotReceivedAnyItem()
+                .assertTerminated()
+                .assertHasFailedWith(IOException.class, "kaboom!");
+    }
+
+    @Test
+    public void testOnFailureMapWithDeprecatedApiApply() {
+        MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create();
+
+        Multi.createFrom().<Integer> failure(new IllegalStateException("boom"))
                 .onFailure().apply(f -> new IOException("kaboom!"))
                 .subscribe().withSubscriber(subscriber);
 
@@ -316,7 +329,7 @@ public class MultiOnFailureTest {
     public void testOnFailureMapWithPredicate() {
         Multi.createFrom().<Integer> failure(new IOException())
                 .onFailure(IOException.class::isInstance)
-                .apply(e -> new Exception("BOOM!!!"))
+                .transform(e -> new Exception("BOOM!!!"))
                 .subscribe().withSubscriber(MultiAssertSubscriber.create(0))
                 .assertHasFailedWith(Exception.class, "BOOM!!!");
     }
@@ -325,7 +338,7 @@ public class MultiOnFailureTest {
     public void testOnFailureMapWithNonPassingPredicate() {
         Multi.createFrom().<Integer> failure(new RuntimeException("first"))
                 .onFailure(IOException.class::isInstance)
-                .apply(e -> new Exception("BOOM!!!"))
+                .transform(e -> new Exception("BOOM!!!"))
                 .subscribe().withSubscriber(MultiAssertSubscriber.create(0))
                 .assertHasFailedWith(RuntimeException.class, "first");
     }
@@ -336,7 +349,7 @@ public class MultiOnFailureTest {
                 .onFailure(f -> {
                     throw new IllegalArgumentException("bad");
                 })
-                .apply(e -> new Exception("BOOM"))
+                .transform(e -> new Exception("BOOM"))
                 .subscribe().withSubscriber(MultiAssertSubscriber.create(0))
                 .assertHasFailedWith(CompositeException.class, "first")
                 .assertHasFailedWith(CompositeException.class, "bad");

@@ -15,6 +15,19 @@ public class MultiThenTest {
         List<String> result = Multi.createFrom().items(1, 2, 3)
                 .then(self -> self.onItem().produceCompletionStage(i -> CompletableFuture.supplyAsync(() -> i)).concatenate())
                 .then(self -> self
+                        .onItem().transform(i -> i + 1)
+                        .onFailure().retry().indefinitely())
+                .then(m -> m.onItem().transform(i -> Integer.toString(i)))
+                .then(m -> m.collectItems().asList())
+                .await().indefinitely();
+        assertThat(result).containsExactly("2", "3", "4");
+    }
+
+    @Test
+    public void testChainThenWithDeprecatedApply() {
+        List<String> result = Multi.createFrom().items(1, 2, 3)
+                .then(self -> self.onItem().produceCompletionStage(i -> CompletableFuture.supplyAsync(() -> i)).concatenate())
+                .then(self -> self
                         .onItem().apply(i -> i + 1)
                         .onFailure().retry().indefinitely())
                 .then(m -> m.onItem().apply(i -> Integer.toString(i)))
@@ -42,7 +55,7 @@ public class MultiThenTest {
         AtomicReference<String> result = new AtomicReference<>();
         Void x = Multi.createFrom().completionStage(CompletableFuture.supplyAsync(() -> 23))
                 .then(self -> self
-                        .onItem().apply(i -> i + 1)
+                        .onItem().transform(i -> i + 1)
                         .onFailure().retry().indefinitely())
                 .then(self -> self.onItem().produceUni(i -> Uni.createFrom().item(Integer.toString(i))).concatenate())
                 .then(self -> {
@@ -56,6 +69,17 @@ public class MultiThenTest {
 
     @Test
     public void testChainingUni() {
+        String result = Multi.createFrom().completionStage(CompletableFuture.supplyAsync(() -> 23))
+                .then(self -> self
+                        .onItem().transform(i -> i + 1)
+                        .onItem().transform(i -> Integer.toString(i)))
+                .then(self -> self.collectItems().first())
+                .then(self -> self.await().indefinitely());
+        assertThat(result).isEqualTo("24");
+    }
+
+    @Test
+    public void testChainingUniWithDeprecatedApply() {
         String result = Multi.createFrom().completionStage(CompletableFuture.supplyAsync(() -> 23))
                 .then(self -> self
                         .onItem().apply(i -> i + 1)

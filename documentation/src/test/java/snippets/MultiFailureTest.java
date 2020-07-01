@@ -18,7 +18,7 @@ public class MultiFailureTest {
         Multi<String> multi = Multi.createFrom().failure(new IOException("boom"));
         // tag::code[]
 
-        CompletableFuture<String> res0 = multi.onFailure().apply(failure -> new MyBusinessException("oh no!"))
+        CompletableFuture<String> res0 = multi.onFailure().transform(failure -> new MyBusinessException("oh no!"))
                 .collectItems().first()
                 .subscribeAsCompletionStage();
 

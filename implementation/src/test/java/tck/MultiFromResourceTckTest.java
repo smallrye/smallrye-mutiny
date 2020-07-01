@@ -14,6 +14,6 @@ public class MultiFromResourceTckTest extends AbstractPublisherTck<Long> {
         }).withFinalizer(x -> {
             return Uni.createFrom().item(() -> null);
         })
-                .onItem().apply(i -> (long) i);
+                .onItem().transform(i -> (long) i);
     }
 }

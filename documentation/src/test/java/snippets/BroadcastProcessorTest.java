@@ -12,7 +12,7 @@ public class BroadcastProcessorTest {
         // tag::code[]
         BroadcastProcessor<String> processor = BroadcastProcessor.create();
         Multi<String> multi = processor
-                .onItem().apply(String::toUpperCase)
+                .onItem().transform(String::toUpperCase)
                 .onFailure().recoverWithItem("d'oh");
 
         new Thread(() -> {
