@@ -8,7 +8,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.testng.annotations.Test;
 
-public class MultiThenTest {
+public class MultiStageTest {
 
     @Test
     public void testChainStage() {

@@ -7,10 +7,10 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.testng.annotations.Test;
 
-public class UniThenTest {
+public class UniStageTest {
 
     @Test
-    public void testChainThen() {
+    public void testChainStage() {
         String result = Uni.createFrom().completionStage(CompletableFuture.supplyAsync(() -> 23))
                 .stage(self -> self
                         .onItem().transform(i -> i + 1)
