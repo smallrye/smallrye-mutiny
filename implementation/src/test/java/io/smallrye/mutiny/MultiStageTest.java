@@ -13,18 +13,18 @@ public class MultiStageTest {
     @Test
     public void testChainStage() {
         List<String> result = Multi.createFrom().items(1, 2, 3)
-                .then(self -> self.onItem().produceCompletionStage(i -> CompletableFuture.supplyAsync(() -> i)).concatenate())
-                .then(self -> self
+                .stage(self -> self.onItem().produceCompletionStage(i -> CompletableFuture.supplyAsync(() -> i)).concatenate())
+                .stage(self -> self
                         .onItem().transform(i -> i + 1)
                         .onFailure().retry().indefinitely())
-                .then(m -> m.onItem().transform(i -> Integer.toString(i)))
-                .then(m -> m.collectItems().asList())
+                .stage(m -> m.onItem().transform(i -> Integer.toString(i)))
+                .stage(m -> m.collectItems().asList())
                 .await().indefinitely();
         assertThat(result).containsExactly("2", "3", "4");
     }
 
     @Test
-    public void testChainThenWithDeprecatedApply() {
+    public void testChainWithDeprecatedThenAndApply() {
         List<String> result = Multi.createFrom().items(1, 2, 3)
                 .then(self -> self.onItem().produceCompletionStage(i -> CompletableFuture.supplyAsync(() -> i)).concatenate())
                 .then(self -> self

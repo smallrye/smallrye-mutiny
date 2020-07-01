@@ -15,24 +15,13 @@ public class UniStageTest {
                 .stage(self -> self
                         .onItem().transform(i -> i + 1)
                         .onFailure().retry().indefinitely())
-                .then(self -> self.onItem().produceUni(i -> Uni.createFrom().item(Integer.toString(i))))
-                .await().indefinitely();
-        assertThat(result).isEqualTo("24");
-    }
-
-    @Test
-    public void testChainThenWithDeprecatedApiApply() {
-        String result = Uni.createFrom().completionStage(CompletableFuture.supplyAsync(() -> 23))
-                .then(self -> self
-                        .onItem().apply(i -> i + 1)
-                        .onFailure().retry().indefinitely())
                 .stage(self -> self.onItem().produceUni(i -> Uni.createFrom().item(Integer.toString(i))))
                 .await().indefinitely();
         assertThat(result).isEqualTo("24");
     }
 
     @Test
-    public void testChainWithDeprecatedThen() {
+    public void testChainThenWithDeprecatedApplyAndThen() {
         String result = Uni.createFrom().completionStage(CompletableFuture.supplyAsync(() -> 23))
                 .then(self -> self
                         .onItem().apply(i -> i + 1)
