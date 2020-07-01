@@ -36,7 +36,7 @@ public class MultiCreateFromTimePeriodTest {
                 .onItem().transform(l -> System.currentTimeMillis())
                 .subscribe().withSubscriber(ts);
 
-        await().until(() -> ts.items().size() == 10);
+        await().until(() -> ts.items().size() >= 10);
         ts.cancel();
 
         ts
@@ -65,7 +65,7 @@ public class MultiCreateFromTimePeriodTest {
                 .onItem().transform(l -> System.currentTimeMillis())
                 .subscribe().withSubscriber(ts);
 
-        await().until(() -> ts.items().size() == 10);
+        await().until(() -> ts.items().size() >= 10);
         ts.cancel();
 
         ts
