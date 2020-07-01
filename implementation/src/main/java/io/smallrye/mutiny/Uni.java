@@ -5,6 +5,7 @@ import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Executor;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -379,7 +380,41 @@ public interface Uni<T> {
      * @return a new {@link Uni} computing an item of type {@code <O>}.
      */
     default <O> Uni<O> map(Function<? super T, ? extends O> mapper) {
-        return onItem().apply(nonNull(mapper, "mapper"));
+        return onItem().transform(nonNull(mapper, "mapper"));
+    }
+
+    /**
+     * Produces a new {@link Uni} invoking the given callback when the {@code item} event is fired. Note that the
+     * item can be {@code null}.
+     * <p>
+     * If the callback throws an exception, this exception is propagated to the downstream as failure.
+     * <p>
+     * This method is a shortcut on {@link UniOnItem#invoke(Consumer)}
+     *
+     * @param callback the callback, must not be {@code null}
+     * @return the new {@link Uni}
+     */
+    default Uni<T> invoke(Consumer<? super T> callback) {
+        return onItem().invoke(nonNull(callback, "callback"));
+    }
+
+    /**
+     * Produces a new {@link Uni} invoking the given @{code action} when the {@code item} event is received. Note that
+     * the received item can be {@code null}.
+     * <p>
+     * Unlike {@link #invoke(Consumer)}, the passed function returns a {@link Uni}. When the produced {@code Uni} sends
+     * its item, this item is discarded, and the original {@code item} is forwarded downstream. If the produced
+     * {@code Uni} fails, the failure is propagated downstream. If the callback throws an exception, this exception
+     * is propagated downstream as failure.
+     * <p>
+     * This method is a shortcut on {@link UniOnItem#invokeUni(Function)}
+     *
+     * @param action the function taking the item and returning a {@link Uni}, must not be {@code null}, must not return
+     *        {@code null}
+     * @return the new {@link Uni}
+     */
+    default Uni<T> invokeUni(Function<? super T, ? extends Uni<?>> action) {
+        return onItem().invokeUni(nonNull(action, "action"));
     }
 
     /**

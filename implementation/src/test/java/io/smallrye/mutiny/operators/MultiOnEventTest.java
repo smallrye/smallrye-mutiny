@@ -477,6 +477,22 @@ public class MultiOnEventTest {
     }
 
     @Test
+    public void testInvokeUniOnItemWithShortcut() {
+        AtomicInteger res = new AtomicInteger();
+        AtomicInteger twoGotCalled = new AtomicInteger();
+
+        List<Integer> r = numbers.invokeUni(i -> {
+            res.set(i);
+            return sub.invoke(c -> twoGotCalled.incrementAndGet());
+        })
+                .collectItems().asList().await().indefinitely();
+
+        assertThat(r).containsExactly(1, 2);
+        assertThat(twoGotCalled).hasValue(2);
+        assertThat(res).hasValue(2);
+    }
+
+    @Test
     public void testInvokeUniOnFailure() {
         AtomicInteger res = new AtomicInteger(-1);
         AtomicInteger twoGotCalled = new AtomicInteger();
@@ -563,6 +579,37 @@ public class MultiOnEventTest {
         assertThat(result).hasValue(0);
         //noinspection ConstantConditions
         assertThat(terminated).isTrue();
+    }
+
+    @Test
+    public void testInvokeOnItemWithShortcut() {
+        AtomicInteger res = new AtomicInteger();
+
+        List<Integer> r = numbers.invoke(res::set)
+                .collectItems().asList().await().indefinitely();
+
+        assertThat(r).containsExactly(1, 2);
+        assertThat(res).hasValue(2);
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void testThatInvokeConsumerMustNotBeNull() {
+        Multi.createFrom().item(1).onItem().invoke(null);
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void testThatInvokeUniMapperMustNotBeNull() {
+        Multi.createFrom().item(1).onItem().invokeUni(null);
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void testThatInvokeConsumerMustNotBeNullWithShortcut() {
+        Multi.createFrom().item(1).invoke(null);
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void testThatInvokeUniMapperMustNotBeNullWithShortcut() {
+        Multi.createFrom().item(1).invokeUni(null);
     }
 
 }

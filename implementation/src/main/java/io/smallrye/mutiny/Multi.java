@@ -3,6 +3,7 @@ package io.smallrye.mutiny;
 import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
 
 import java.util.concurrent.Executor;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -333,6 +334,42 @@ public interface Multi<T> extends Publisher<T> {
      */
     default <O> Multi<O> flatMap(Function<? super T, ? extends Publisher<? extends O>> mapper) {
         return onItem().producePublisher(mapper).merge();
+    }
+
+    /**
+     * Produces a new {@link Multi} invoking the given callback when an {@code item} event is fired by the upstream.
+     * Note that the received item cannot be {@code null}.
+     * <p>
+     * If the callback throws an exception, this exception is propagated to the downstream as failure. No more items
+     * will be consumed.
+     * <p>
+     * This method is a shortcut on {@link MultiOnItem#invoke(Consumer)}.
+     *
+     * @param callback the callback, must not be {@code null}
+     * @return the new {@link Multi}
+     */
+    default Multi<T> invoke(Consumer<? super T> callback) {
+        return onItem().invoke(nonNull(callback, "callback"));
+    }
+
+    /**
+     * Produces a new {@link Multi} invoking the given @{code action} when an {@code item} event is received. Note that
+     * the received item cannot be {@code null}.
+     * <p>
+     * Unlike {@link #invoke(Consumer)}, the passed function returns a {@link Uni}. When the produced {@code Uni} sends
+     * its result, the result is discarded, and the original {@code item} is forwarded downstream. If the produced
+     * {@code Uni} fails, the failure is propagated downstream. If the action throws an exception, this exception is
+     * propagated downstream as failure.
+     * <p>
+     * This method preserves the order of the items, meaning that the downstream received the items in the same order
+     * as the upstream has emitted them.
+     *
+     * @param action the function taking the item and returning a {@link Uni}, must not be {@code null}, must not return
+     *        {@code null}
+     * @return the new {@link Multi}
+     */
+    default Multi<T> invokeUni(Function<? super T, ? extends Uni<?>> action) {
+        return onItem().invokeUni(nonNull(action, "action"));
     }
 
     /**
