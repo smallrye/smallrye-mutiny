@@ -65,12 +65,17 @@ public class MultiOnItem<T> {
     }
 
     /**
-     * Produces a new {@link Multi} invoking the given callback when an {@code item} event is fired by the upstrea.
-     *
+     * Produces a new {@link Multi} invoking the given callback when an {@code item} event is fired by the upstream.
+     * Note that the received item cannot be {@code null}.
+     * <p>
+     * If the callback throws an exception, this exception is propagated to the downstream as failure. No more items
+     * will be consumed.
+     * <p>
+     * 
      * @param callback the callback, must not be {@code null}
-     * @return the new {@link Uni}
+     * @return the new {@link Multi}
      */
-    public Multi<T> invoke(Consumer<T> callback) {
+    public Multi<T> invoke(Consumer<? super T> callback) {
         return Infrastructure.onMultiCreation(new MultiSignalConsumerOp<>(
                 upstream,
                 null,

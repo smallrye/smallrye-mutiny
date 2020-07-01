@@ -83,6 +83,25 @@ The equivalent to `map`, `flatMap` and `concatMap` are the following:
 include::../../../src/test/java/snippets/FlatMapTest.java[tags=mutiny]
 ----
 
+To _peek_ at items, you can use the `invoke` method:
+
+[source,java,indent=0]
+----
+include::../../../src/test/java/snippets/EventsTest.java[tags=shortcut]
+----
+
+`invoke` is a shortcut for `onItem().invoke(...)`.
+
+Mutiny also provides the `invokeUni` method for executing an action returning a `Uni`.
+This is useful to execute an asynchronous action without modifying incoming item:
+
+[source,java,indent=0]
+----
+include::../../../src/test/java/snippets/EventsTest.java[tags=invoke-uni]
+----
+
+`invokeUni` is a shortcut for `onItem().invokeUni(...)`.
+
 === How do I merge, concatenate or combine Multis?
 
 You can create instances of `Multi` by concatenating, merging, or combining ``Multi``s and ``Publisher``s:

@@ -27,6 +27,8 @@ public class UniOnItem<T> {
     /**
      * Produces a new {@link Uni} invoking the given callback when the {@code item} event is fired. Note that the
      * item can be {@code null}.
+     * <p>
+     * If the callback throws an exception, this exception is propagated to the downstream as failure.
      *
      * @param callback the callback, must not be {@code null}
      * @return the new {@link Uni}
@@ -45,7 +47,8 @@ public class UniOnItem<T> {
      * {@code Uni} fails, the failure is propagated downstream.
      * <p>
      *
-     * @param action the callback, must not be {@code null}
+     * @param action the function taking the item and returning a {@link Uni}, must not be {@code null}, must not return
+     *        {@code null}
      * @return the new {@link Uni}
      */
     public Uni<T> invokeUni(Function<? super T, ? extends Uni<?>> action) {
@@ -56,7 +59,7 @@ public class UniOnItem<T> {
                 throw new NullPointerException("The callback produced a `null` uni");
             }
             return uni
-                    .onItem().apply(ignored -> item);
+                    .onItem().transform(ignored -> item);
         });
     }
 

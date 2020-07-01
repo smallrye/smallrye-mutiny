@@ -29,11 +29,32 @@ public class UniOnItemInvokeTest {
         Uni.createFrom().item(1).onItem().invokeUni(null);
     }
 
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void testThatConsumerMustNotBeNullWithShortcut() {
+        Uni.createFrom().item(1).invoke(null);
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void testThatMapperMustNotBeNullWithShortcut() {
+        Uni.createFrom().item(1).invokeUni(null);
+    }
+
     @Test
     public void testInvokeOnItem() {
         AtomicInteger res = new AtomicInteger();
 
         int r = one.onItem().invoke(res::set)
+                .await().indefinitely();
+
+        assertThat(r).isEqualTo(1);
+        assertThat(res).hasValue(1);
+    }
+
+    @Test
+    public void testInvokeOnItemWithShortcut() {
+        AtomicInteger res = new AtomicInteger();
+
+        int r = one.invoke(res::set)
                 .await().indefinitely();
 
         assertThat(r).isEqualTo(1);
@@ -64,7 +85,7 @@ public class UniOnItemInvokeTest {
     }
 
     @Test
-    public void testAsyncInvokeOnItem() {
+    public void testInvokeUniOnItem() {
         AtomicInteger res = new AtomicInteger();
         AtomicInteger twoGotCalled = new AtomicInteger();
 
@@ -80,7 +101,23 @@ public class UniOnItemInvokeTest {
     }
 
     @Test
-    public void testAsyncInvokeOnFailure() {
+    public void testInvokeUniOnItemWithShortcut() {
+        AtomicInteger res = new AtomicInteger();
+        AtomicInteger twoGotCalled = new AtomicInteger();
+
+        int r = one.invokeUni(i -> {
+            res.set(i);
+            return two.invoke(twoGotCalled::set);
+        })
+                .await().indefinitely();
+
+        assertThat(r).isEqualTo(1);
+        assertThat(twoGotCalled).hasValue(2);
+        assertThat(res).hasValue(1);
+    }
+
+    @Test
+    public void testInvokeUniOnFailure() {
         AtomicInteger res = new AtomicInteger(-1);
         AtomicInteger twoGotCalled = new AtomicInteger(-1);
 
@@ -119,7 +156,7 @@ public class UniOnItemInvokeTest {
     }
 
     @Test
-    public void testAsyncInvokeWithSubFailure() {
+    public void testInvokeUniWithSubFailure() {
         AtomicInteger res = new AtomicInteger(-1);
         AtomicInteger twoGotCalled = new AtomicInteger(-1);
 
