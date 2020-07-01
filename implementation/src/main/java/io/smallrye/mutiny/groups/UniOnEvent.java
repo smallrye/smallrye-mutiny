@@ -8,7 +8,6 @@ import java.util.function.Predicate;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.UniOnCancellation;
-import io.smallrye.mutiny.operators.UniOnSubscription;
 import io.smallrye.mutiny.operators.UniOnTermination;
 import io.smallrye.mutiny.subscription.UniSubscriber;
 import io.smallrye.mutiny.subscription.UniSubscription;
@@ -36,9 +35,11 @@ public class UniOnEvent<T> {
      *
      * @param consumer the callback, must not be {@code null}
      * @return a new {@link Uni}
+     * @deprecated Uni {@link Uni#onSubscribe()} instead.
      */
+    @Deprecated
     public Uni<T> subscribed(Consumer<? super UniSubscription> consumer) {
-        return Infrastructure.onUniCreation(new UniOnSubscription<>(upstream, nonNull(consumer, "consumer")));
+        return upstream.onSubscribe().invoke(consumer);
     }
 
     /**
@@ -86,7 +87,7 @@ public class UniOnEvent<T> {
      * <p>
      * Examples:
      * </p>
-     * 
+     *
      * <pre>
      * {@code
      * Uni<T> uni = ...;

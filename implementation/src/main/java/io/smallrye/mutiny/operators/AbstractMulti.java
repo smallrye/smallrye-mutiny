@@ -17,6 +17,7 @@ import io.smallrye.mutiny.groups.MultiOnCompletion;
 import io.smallrye.mutiny.groups.MultiOnEvent;
 import io.smallrye.mutiny.groups.MultiOnFailure;
 import io.smallrye.mutiny.groups.MultiOnItem;
+import io.smallrye.mutiny.groups.MultiOnSubscribe;
 import io.smallrye.mutiny.groups.MultiOverflow;
 import io.smallrye.mutiny.groups.MultiSubscribe;
 import io.smallrye.mutiny.groups.MultiTransform;
@@ -116,6 +117,11 @@ public abstract class AbstractMulti<T> implements Multi<T> {
     @Override
     public MultiOverflow<T> onOverflow() {
         return new MultiOverflow<>(this);
+    }
+
+    @Override
+    public MultiOnSubscribe<T> onSubscribe() {
+        return new MultiOnSubscribe<>(this);
     }
 
     @Override

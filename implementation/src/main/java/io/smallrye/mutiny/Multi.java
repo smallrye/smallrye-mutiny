@@ -21,6 +21,7 @@ import io.smallrye.mutiny.groups.MultiOnCompletion;
 import io.smallrye.mutiny.groups.MultiOnEvent;
 import io.smallrye.mutiny.groups.MultiOnFailure;
 import io.smallrye.mutiny.groups.MultiOnItem;
+import io.smallrye.mutiny.groups.MultiOnSubscribe;
 import io.smallrye.mutiny.groups.MultiOverflow;
 import io.smallrye.mutiny.groups.MultiSubscribe;
 import io.smallrye.mutiny.groups.MultiTransform;
@@ -146,6 +147,24 @@ public interface Multi<T> extends Publisher<T> {
      * @return a MultiOnFailure configured with the given predicate on which you can specify the on failure action
      */
     MultiOnFailure<T> onFailure(Predicate<? super Throwable> predicate);
+
+    /**
+     * Configures the action to execute when the observed {@link Multi} sends a {@link Subscription}.
+     * The downstream don't have a subscription yet. It will be passed once the configured action completes.
+     *
+     * For example:
+     *
+     * <pre>
+     * {@code
+     * multi.onSubscribe().invoke(sub -> System.out.println("subscribed"));
+     * // Delay the subscription by 1 second (or until an asynchronous action completes)
+     * multi.onSubscribe().invokeUni(sub -> Uni.createFrom(1).onItem().delayIt().by(Duration.ofSecond(1)));
+     * }
+     * </pre>
+     *
+     * @return the object to configure the action to execution on subscription.
+     */
+    MultiOnSubscribe<T> onSubscribe();
 
     /**
      * Configures a type of failure filtering the failures on which the behavior (specified with the returned

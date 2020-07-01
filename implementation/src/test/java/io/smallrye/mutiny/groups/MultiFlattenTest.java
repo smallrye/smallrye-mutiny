@@ -26,7 +26,7 @@ public class MultiFlattenTest {
                 Multi.createFrom().items("d", "e"),
                 Multi.createFrom().empty(),
                 Multi.createFrom().items("f", "g")
-                        .on().subscribed(s -> subscribed.set(true)))
+                        .onSubscribe().invoke(s -> subscribed.set(true)))
                 .onItem().<String> disjoint()
                 .subscribe().withSubscriber(MultiAssertSubscriber.create(4));
         assertThat(subscribed).isFalse();
@@ -95,7 +95,7 @@ public class MultiFlattenTest {
                 Multi.createFrom().items("d", "e"),
                 Multi.createFrom().failure(new IOException("boom")),
                 Multi.createFrom().items("f", "g")
-                        .on().subscribed(s -> subscribed.set(true)))
+                        .onSubscribe().invoke(s -> subscribed.set(true)))
                 .onItem().<String> disjoint()
                 .subscribe().withSubscriber(MultiAssertSubscriber.create(4));
         assertThat(subscribed).isFalse();
@@ -116,7 +116,7 @@ public class MultiFlattenTest {
                     e.fail(new IOException("boom"));
                 }),
                 Multi.createFrom().items("g")
-                        .on().subscribed(s -> subscribed.set(true)))
+                        .onSubscribe().invoke(s -> subscribed.set(true)))
                 .onItem().<String> disjoint()
                 .subscribe().withSubscriber(MultiAssertSubscriber.create(4));
         assertThat(subscribed).isFalse();

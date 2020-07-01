@@ -616,7 +616,7 @@ public class MultiFromResourceTest {
                 .resource(() -> 1, x -> Multi.createFrom().range(x, 11))
                 .withFinalizer(r -> {
                     return Uni.createFrom().item("ok")
-                            .on().subscribed(s -> subscribed.set(true))
+                            .onSubscribe().invoke(s -> subscribed.set(true))
                             .onItem().ignore().andContinueWithNull();
                 });
         multi.subscribe().withSubscriber(MultiAssertSubscriber.create(20))
@@ -632,7 +632,7 @@ public class MultiFromResourceTest {
                 .resource(() -> 1, x -> Multi.createFrom().range(x, 11).onCompletion().failWith(new IOException("boom")))
                 .withFinalizer(r -> {
                     return Uni.createFrom().item("ok")
-                            .on().subscribed(s -> subscribed.set(true))
+                            .onSubscribe().invoke(s -> subscribed.set(true))
                             .onItem().ignore().andContinueWithNull();
                 });
         multi.subscribe().withSubscriber(MultiAssertSubscriber.create(20))
@@ -648,7 +648,7 @@ public class MultiFromResourceTest {
                 .resource(() -> 1, x -> Multi.createFrom().ticks().every(Duration.ofMillis(10)))
                 .withFinalizer(r -> {
                     return Uni.createFrom().item("ok")
-                            .on().subscribed(s -> subscribed.set(true))
+                            .onSubscribe().invoke(s -> subscribed.set(true))
                             .onItem().ignore().andContinueWithNull();
                 })
                 .transform().byTakingFirstItems(5);
@@ -712,25 +712,25 @@ public class MultiFromResourceTest {
 
         public Multi<String> data() {
             return Multi.createFrom().item("in transaction")
-                    .on().subscribed(s -> subscribed.set(true));
+                    .onSubscribe().invoke(s -> subscribed.set(true));
         }
 
         public Multi<String> infinite() {
             return Multi.createFrom().ticks().every(Duration.ofMillis(10))
                     .onItem().transform(l -> Long.toString(l))
-                    .on().subscribed(s -> subscribed.set(true));
+                    .onSubscribe().invoke(s -> subscribed.set(true));
         }
 
         public Uni<Void> commit() {
             return Uni.createFrom().voidItem()
-                    .on().subscribed(s -> onCompleteSubscribed.set(true));
+                    .onSubscribe().invoke(s -> onCompleteSubscribed.set(true));
         }
 
         public Uni<Void> commitFailure() {
             return Uni.createFrom().voidItem()
                     .onItem().delayIt().by(DELAY)
                     .onItem().failWith(x -> new IOException("commit failed"))
-                    .on().subscribed(s -> onCompleteSubscribed.set(true));
+                    .onSubscribe().invoke(s -> onCompleteSubscribed.set(true));
         }
 
         public Uni<Void> commitReturningNull() {
@@ -740,14 +740,14 @@ public class MultiFromResourceTest {
         public Uni<Void> rollback(Throwable failure) {
             return Uni.createFrom().voidItem()
                     .onItem().invoke(x -> this.failure.set(failure))
-                    .on().subscribed(s -> onFailureSubscribed.set(true));
+                    .onSubscribe().invoke(s -> onFailureSubscribed.set(true));
         }
 
         public Uni<Void> rollbackDelay(Throwable failure) {
             return Uni.createFrom().voidItem()
                     .onItem().invoke(x -> this.failure.set(failure))
                     .onItem().delayIt().by(DELAY)
-                    .on().subscribed(s -> onFailureSubscribed.set(true));
+                    .onSubscribe().invoke(s -> onFailureSubscribed.set(true));
         }
 
         public Uni<Void> rollbackFailure(Throwable failure) {
@@ -755,7 +755,7 @@ public class MultiFromResourceTest {
                     .onItem().invoke(x -> this.failure.set(failure))
                     .onItem().delayIt().by(DELAY)
                     .onItem().failWith(x -> new IOException("rollback failed"))
-                    .on().subscribed(s -> onFailureSubscribed.set(true));
+                    .onSubscribe().invoke(s -> onFailureSubscribed.set(true));
         }
 
         public Uni<Void> rollbackReturningNull(Throwable f) {
@@ -765,7 +765,7 @@ public class MultiFromResourceTest {
 
         public Uni<Void> cancel() {
             return Uni.createFrom().voidItem()
-                    .on().subscribed(s -> onCancelSubscribed.set(true));
+                    .onSubscribe().invoke(s -> onCancelSubscribed.set(true));
         }
     }
 }

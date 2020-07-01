@@ -46,7 +46,6 @@ public class MultiSubscribeOnOp<T> extends AbstractMultiOperator<T, T> {
     @Override
     public void subscribe(MultiSubscriber<? super T> downstream) {
         SubscribeOnProcessor<T> sub = new SubscribeOnProcessor<>(downstream, executor);
-        downstream.onSubscribe(sub);
         sub.scheduleSubscription(upstream, downstream);
     }
 
@@ -63,6 +62,7 @@ public class MultiSubscribeOnOp<T> extends AbstractMultiOperator<T, T> {
         @Override
         public void onSubscribe(Subscription subscription) {
             if (upstream.compareAndSet(null, subscription)) {
+                downstream.onSubscribe(this);
                 long requests = requested.getAndSet(0L);
                 if (requests != 0L) {
                     requestUpstream(requests, subscription);
