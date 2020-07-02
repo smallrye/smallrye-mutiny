@@ -5,6 +5,9 @@ import static org.awaitility.Awaitility.await;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
@@ -101,7 +104,7 @@ public class SerializedProcessorTest {
         processor.onComplete();
     }
 
-    @Test(invocationCount = 50)
+    @Test(invocationCount = 100)
     public void verifyOnNextThreadSafety() {
         final Processor<Integer, Integer> processor = UnicastProcessor.<Integer> create().serialized();
         MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(100);
@@ -110,8 +113,11 @@ public class SerializedProcessorTest {
         Runnable r1 = () -> processor.onNext(1);
         Runnable r2 = () -> processor.onNext(2);
 
-        new Thread(r1).start();
-        new Thread(r2).start();
+        List<Runnable> runnables = Arrays.asList(r1, r2);
+        Collections.shuffle(runnables);
+        runnables.forEach(r -> {
+            new Thread(r).start();
+        });
 
         await().until(() -> subscriber.items().size() == 2);
 
@@ -123,7 +129,7 @@ public class SerializedProcessorTest {
         assertThat(items).hasSize(2).contains(1, 2);
     }
 
-    @Test(invocationCount = 50)
+    @Test(invocationCount = 100)
     public void verifyOnErrorThreadSafety() {
         Exception failure = new Exception("boom");
         final Processor<Integer, Integer> processor = UnicastProcessor.<Integer> create().serialized();
@@ -133,8 +139,11 @@ public class SerializedProcessorTest {
         Runnable r1 = () -> processor.onError(failure);
         Runnable r2 = () -> processor.onError(failure);
 
-        new Thread(r1).start();
-        new Thread(r2).start();
+        List<Runnable> runnables = Arrays.asList(r1, r2);
+        Collections.shuffle(runnables);
+        runnables.forEach(r -> {
+            new Thread(r).start();
+        });
 
         subscriber
                 .await()
@@ -142,7 +151,7 @@ public class SerializedProcessorTest {
                 .assertHasFailedWith(Exception.class, "boom");
     }
 
-    @Test(invocationCount = 20)
+    @Test(invocationCount = 100)
     public void verifyOnNextOnErrorThreadSafety() {
         Exception failure = new Exception("boom");
         final Processor<Integer, Integer> processor = UnicastProcessor.<Integer> create().serialized();
@@ -155,8 +164,11 @@ public class SerializedProcessorTest {
         };
         Runnable r2 = () -> processor.onError(failure);
 
-        new Thread(r1).start();
-        new Thread(r2).start();
+        List<Runnable> runnables = Arrays.asList(r1, r2);
+        Collections.shuffle(runnables);
+        runnables.forEach(r -> {
+            new Thread(r).start();
+        });
 
         await().until(() -> !subscriber.items().isEmpty() || !subscriber.failures().isEmpty());
 
@@ -171,7 +183,7 @@ public class SerializedProcessorTest {
         }
     }
 
-    @Test(invocationCount = 20)
+    @Test(invocationCount = 100)
     public void verifyOnNextOnCompleteThreadSafety() {
         final Processor<Integer, Integer> processor = UnicastProcessor.<Integer> create().serialized();
         MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(100);
@@ -183,8 +195,11 @@ public class SerializedProcessorTest {
         };
         Runnable r2 = processor::onComplete;
 
-        new Thread(r1).start();
-        new Thread(r2).start();
+        List<Runnable> runnables = Arrays.asList(r1, r2);
+        Collections.shuffle(runnables);
+        runnables.forEach(r -> {
+            new Thread(r).start();
+        });
 
         subscriber.await();
         subscriber
@@ -196,7 +211,7 @@ public class SerializedProcessorTest {
         }
     }
 
-    @Test(invocationCount = 20)
+    @Test(invocationCount = 100)
     public void verifyOnSubscribeOnCompleteThreadSafety() {
         final Processor<Integer, Integer> processor = UnicastProcessor.<Integer> create().serialized();
         MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(100);
@@ -208,8 +223,11 @@ public class SerializedProcessorTest {
         };
         Runnable r2 = () -> processor.onSubscribe(new Subscriptions.EmptySubscription());
 
-        new Thread(r1).start();
-        new Thread(r2).start();
+        List<Runnable> runnables = Arrays.asList(r1, r2);
+        Collections.shuffle(runnables);
+        runnables.forEach(r -> {
+            new Thread(r).start();
+        });
 
         subscriber.await();
         subscriber
@@ -221,7 +239,7 @@ public class SerializedProcessorTest {
         }
     }
 
-    @Test(invocationCount = 50)
+    @Test(invocationCount = 100)
     public void verifyOnSubscribeOnSubscribeThreadSafety() throws InterruptedException {
         final Processor<Integer, Integer> processor = UnicastProcessor.<Integer> create().serialized();
         MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(100);
@@ -237,8 +255,11 @@ public class SerializedProcessorTest {
             latch.countDown();
         };
 
-        new Thread(r1).start();
-        new Thread(r2).start();
+        List<Runnable> runnables = Arrays.asList(r1, r2);
+        Collections.shuffle(runnables);
+        runnables.forEach(r -> {
+            new Thread(r).start();
+        });
 
         latch.await();
 
@@ -246,7 +267,7 @@ public class SerializedProcessorTest {
                 .assertSubscribed();
     }
 
-    @Test(invocationCount = 50)
+    @Test(invocationCount = 100)
     public void verifyOnFailureOnCompleteThreadSafety() {
         final Processor<Integer, Integer> processor = UnicastProcessor.<Integer> create().serialized();
         MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(100);
@@ -258,8 +279,11 @@ public class SerializedProcessorTest {
         };
         Runnable r2 = () -> processor.onError(new Exception("boom"));
 
-        new Thread(r1).start();
-        new Thread(r2).start();
+        List<Runnable> runnables = Arrays.asList(r1, r2);
+        Collections.shuffle(runnables);
+        runnables.forEach(r -> {
+            new Thread(r).start();
+        });
 
         subscriber.await();
         subscriber
@@ -271,7 +295,7 @@ public class SerializedProcessorTest {
         }
     }
 
-    @Test(invocationCount = 50)
+    @Test(invocationCount = 100)
     public void verifyOnFailureOnFailureThreadSafety() {
         final Processor<Integer, Integer> processor = UnicastProcessor.<Integer> create().serialized();
         MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(100);
@@ -280,8 +304,11 @@ public class SerializedProcessorTest {
         Runnable r1 = () -> processor.onError(new Exception("boom"));
         Runnable r2 = () -> processor.onError(new Exception("boom"));
 
-        new Thread(r1).start();
-        new Thread(r2).start();
+        List<Runnable> runnables = Arrays.asList(r1, r2);
+        Collections.shuffle(runnables);
+        runnables.forEach(r -> {
+            new Thread(r).start();
+        });
 
         subscriber.await();
         subscriber
@@ -297,5 +324,127 @@ public class SerializedProcessorTest {
         Subscription subscription = mock(Subscription.class);
         processor.onSubscribe(subscription);
         verify(subscription).cancel();
+    }
+
+    @Test(invocationCount = 100)
+    public void testRaceBetweenOnNextAndOnComplete() {
+        final Processor<Integer, Integer> processor = UnicastProcessor.<Integer> create().serialized();
+        MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(100);
+        processor.subscribe(subscriber);
+
+        Runnable r1 = () -> {
+            processor.onNext(1);
+            processor.onNext(2);
+            processor.onNext(3);
+            processor.onNext(4);
+            processor.onNext(5);
+        };
+        Runnable r2 = processor::onComplete;
+
+        List<Runnable> runnables = Arrays.asList(r1, r2);
+        Collections.shuffle(runnables);
+        runnables.forEach(r -> {
+            new Thread(r).start();
+        });
+
+        subscriber.await();
+        subscriber
+                .assertSubscribed()
+                .assertCompletedSuccessfully();
+
+        if (subscriber.items().size() != 0) {
+            assertThat(subscriber.items()).contains(1);
+        }
+
+    }
+
+    @Test(invocationCount = 100)
+    public void testRaceBetweenOnNextAndOnSubscribe() {
+        final Processor<Integer, Integer> processor = UnicastProcessor.<Integer> create().serialized();
+        MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(100);
+
+        Runnable r1 = () -> {
+            processor.onNext(1);
+            processor.onNext(2);
+            processor.onNext(3);
+            processor.onNext(4);
+            processor.onNext(5);
+            processor.onComplete();
+        };
+        Runnable r2 = () -> processor.subscribe(subscriber);
+
+        List<Runnable> runnables = Arrays.asList(r1, r2);
+        Collections.shuffle(runnables);
+        runnables.forEach(r -> {
+            new Thread(r).start();
+        });
+
+        subscriber.await();
+        subscriber
+                .assertSubscribed()
+                .assertCompletedSuccessfully();
+
+        if (subscriber.items().size() != 0) {
+            assertThat(subscriber.items()).containsExactly(1, 2, 3, 4, 5);
+        }
+    }
+
+    @Test
+    public void testSubscribingWhileEmittingItem() {
+        SerializedProcessor<Integer, Integer> processor = UnicastProcessor.<Integer> create().serialized();
+        processor.emitting = true;
+
+        processor.onNext(1);
+        processor.onNext(2);
+        processor.onNext(3);
+        processor.onNext(4);
+
+        assertThat(processor.emitting).isTrue();
+        assertThat(processor.done).isFalse();
+
+        processor.onSubscribe(mock(Subscription.class));
+
+        assertThat(processor.emitting).isTrue();
+        assertThat(processor.done).isFalse();
+    }
+
+    @Test
+    public void testSubscribingWhileEmittingItemAndCompletion() {
+        SerializedProcessor<Integer, Integer> processor = UnicastProcessor.<Integer> create().serialized();
+        processor.emitting = true;
+
+        processor.onNext(1);
+        processor.onNext(2);
+        processor.onNext(3);
+        processor.onNext(4);
+        processor.onComplete();
+
+        assertThat(processor.emitting).isTrue();
+        assertThat(processor.done).isTrue();
+
+        processor.onSubscribe(mock(Subscription.class));
+
+        assertThat(processor.emitting).isTrue();
+        assertThat(processor.done).isTrue();
+    }
+
+    @Test
+    public void testSubscribingWhileEmittingFailure() {
+        SerializedProcessor<Integer, Integer> processor = UnicastProcessor.<Integer> create().serialized();
+
+        processor.emitting = true;
+
+        processor.onNext(1);
+        processor.onNext(2);
+        processor.onNext(3);
+        processor.onError(new IOException("boom"));
+
+        assertThat(processor.emitting).isTrue();
+        assertThat(processor.done).isTrue();
+
+        processor.onSubscribe(mock(Subscription.class));
+
+        assertThat(processor.emitting).isTrue();
+        assertThat(processor.done).isTrue();
     }
 }
