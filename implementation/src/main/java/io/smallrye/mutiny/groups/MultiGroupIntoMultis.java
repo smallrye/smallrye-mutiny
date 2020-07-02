@@ -8,7 +8,8 @@ import java.time.Duration;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
-import io.smallrye.mutiny.operators.MultiCollector;
+import io.smallrye.mutiny.operators.multi.MultiWindowOnDurationOp;
+import io.smallrye.mutiny.operators.multi.MultiWindowOp;
 
 public class MultiGroupIntoMultis<T> {
 
@@ -36,7 +37,9 @@ public class MultiGroupIntoMultis<T> {
      *         window.
      */
     public Multi<Multi<T>> every(Duration duration) {
-        return Infrastructure.onMultiCreation(MultiCollector.multi(upstream, validate(duration, "duration")));
+        return Infrastructure
+                .onMultiCreation(new MultiWindowOnDurationOp<>(upstream, validate(duration, "duration"),
+                        Infrastructure.getDefaultWorkerPool()));
     }
 
     /**
@@ -56,7 +59,8 @@ public class MultiGroupIntoMultis<T> {
      * @return a Multi emitting multis of at most {@code size} items from the upstream Multi.
      */
     public Multi<Multi<T>> of(int size) {
-        return Infrastructure.onMultiCreation(MultiCollector.multi(upstream, positive(size, "size")));
+        int validated = positive(size, "size");
+        return Infrastructure.onMultiCreation(new MultiWindowOp<>(upstream, validated, validated));
     }
 
     /**
@@ -78,8 +82,9 @@ public class MultiGroupIntoMultis<T> {
      * @return a Multi emitting multis of at most {@code size} items from the upstream Multi.
      */
     public Multi<Multi<T>> of(int size, int skip) {
-        return Infrastructure
-                .onMultiCreation(MultiCollector.multi(upstream, positive(size, "size"), positive(skip, "skip")));
+        return Infrastructure.onMultiCreation(new MultiWindowOp<>(upstream,
+                positive(size, "size"),
+                positive(skip, "skip")));
     }
 
 }

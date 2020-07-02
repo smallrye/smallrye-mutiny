@@ -12,17 +12,13 @@ import java.util.function.Supplier;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
-import io.smallrye.mutiny.GroupedMulti;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.multi.MultiBufferOp;
 import io.smallrye.mutiny.operators.multi.MultiBufferWithTimeoutOp;
 import io.smallrye.mutiny.operators.multi.MultiCollectorOp;
-import io.smallrye.mutiny.operators.multi.MultiGroupByOp;
 import io.smallrye.mutiny.operators.multi.MultiLastItemOp;
-import io.smallrye.mutiny.operators.multi.MultiWindowOnDurationOp;
-import io.smallrye.mutiny.operators.multi.MultiWindowOp;
 
 public class MultiCollector {
 
@@ -94,27 +90,4 @@ public class MultiCollector {
         return Infrastructure.onMultiCreation(new MultiBufferOp<>(upstream, size, skip));
     }
 
-    public static <T> Multi<Multi<T>> multi(Multi<T> upstream, Duration timeWindow) {
-        return Infrastructure
-                .onMultiCreation(new MultiWindowOnDurationOp<>(upstream, timeWindow, Infrastructure.getDefaultWorkerPool()));
-    }
-
-    public static <T> Multi<Multi<T>> multi(Multi<T> upstream, int size) {
-        return Infrastructure.onMultiCreation(new MultiWindowOp<>(upstream, size, size));
-    }
-
-    public static <T> Multi<Multi<T>> multi(Multi<T> upstream, int size, int skip) {
-        return Infrastructure.onMultiCreation(new MultiWindowOp<>(upstream, size, skip));
-    }
-
-    public static <K, V, T> Multi<GroupedMulti<K, V>> groupBy(Multi<T> upstream,
-            Function<? super T, ? extends K> keyMapper,
-            Function<? super T, ? extends V> valueMapper) {
-        if (valueMapper == null) {
-            //noinspection unchecked
-            return Infrastructure.onMultiCreation(new MultiGroupByOp<>(upstream, keyMapper, x -> (V) x));
-        } else {
-            return Infrastructure.onMultiCreation(new MultiGroupByOp<>(upstream, keyMapper, valueMapper));
-        }
-    }
 }

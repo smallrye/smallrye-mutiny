@@ -6,7 +6,8 @@ import java.util.function.Function;
 
 import io.smallrye.mutiny.GroupedMulti;
 import io.smallrye.mutiny.Multi;
-import io.smallrye.mutiny.operators.MultiCollector;
+import io.smallrye.mutiny.infrastructure.Infrastructure;
+import io.smallrye.mutiny.operators.multi.MultiGroupByOp;
 
 public class MultiGroup<T> {
 
@@ -41,11 +42,14 @@ public class MultiGroup<T> {
     // TODO grouping can also have prefetch and failure collection delay.
 
     public <K> Multi<GroupedMulti<K, T>> by(Function<? super T, ? extends K> keyMapper) {
-        return MultiCollector.groupBy(upstream, nonNull(keyMapper, "keyMapper"), null);
+        Function<? super T, ? extends K> mapper = nonNull(keyMapper, "keyMapper");
+        return Infrastructure.onMultiCreation(new MultiGroupByOp<>(upstream, mapper, x -> x));
     }
 
     public <K, V> Multi<GroupedMulti<K, V>> by(Function<? super T, ? extends K> keyMapper,
             Function<? super T, ? extends V> valueMapper) {
-        return MultiCollector.groupBy(upstream, nonNull(keyMapper, "keyMapper"), nonNull(valueMapper, "valueMapper"));
+        Function<? super T, ? extends K> k = nonNull(keyMapper, "keyMapper");
+        Function<? super T, ? extends V> v = nonNull(valueMapper, "valueMapper");
+        return Infrastructure.onMultiCreation(new MultiGroupByOp<>(upstream, k, v));
     }
 }
