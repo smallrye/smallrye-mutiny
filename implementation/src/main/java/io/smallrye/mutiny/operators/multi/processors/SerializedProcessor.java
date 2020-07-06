@@ -23,7 +23,7 @@ public class SerializedProcessor<I, O> implements Processor<I, O> {
      * Indicates an emission is going on.
      * Access by be guarded by the monitor lock.
      **/
-    private boolean emitting;
+    boolean emitting;
 
     /**
      * If not null, it holds the missed notifications events.
@@ -33,10 +33,10 @@ public class SerializedProcessor<I, O> implements Processor<I, O> {
     /**
      * Indicates a terminal event has been received and all further events will be dropped.
      **/
-    private volatile boolean done;
+    volatile boolean done;
 
     /**
-     * Constructor that wraps an actual subject.
+     * Constructor that wraps an actual processor.
      *
      * @param actual the subject wrapped
      */
@@ -58,11 +58,7 @@ public class SerializedProcessor<I, O> implements Processor<I, O> {
                     cancel = true;
                 } else {
                     if (emitting) {
-                        List<Object> q = queue;
-                        if (q == null) {
-                            q = new ArrayList<>(4);
-                            queue = q;
-                        }
+                        List<Object> q = getOrCreateQueue();
                         q.add(new SubscriptionEvent(s));
                         return;
                     }
@@ -81,6 +77,15 @@ public class SerializedProcessor<I, O> implements Processor<I, O> {
         }
     }
 
+    private List<Object> getOrCreateQueue() {
+        List<Object> q = queue;
+        if (q == null) {
+            q = new ArrayList<>(4);
+            queue = q;
+        }
+        return q;
+    }
+
     @Override
     public void onNext(I item) {
         if (done) {
@@ -91,11 +96,7 @@ public class SerializedProcessor<I, O> implements Processor<I, O> {
                 return;
             }
             if (emitting) {
-                List<Object> q = queue;
-                if (q == null) {
-                    q = new ArrayList<>(4);
-                    queue = q;
-                }
+                List<Object> q = getOrCreateQueue();
                 q.add(new ItemEvent<>(item));
                 return;
             }
@@ -116,11 +117,7 @@ public class SerializedProcessor<I, O> implements Processor<I, O> {
             } else {
                 done = true;
                 if (emitting) {
-                    List<Object> q = queue;
-                    if (q == null) {
-                        q = new ArrayList<>(4);
-                        queue = q;
-                    }
+                    List<Object> q = getOrCreateQueue();
                     q.add(0, new FailureEvent(t));
                     return;
                 }
@@ -141,11 +138,7 @@ public class SerializedProcessor<I, O> implements Processor<I, O> {
             }
             done = true;
             if (emitting) {
-                List<Object> q = queue;
-                if (q == null) {
-                    q = new ArrayList<>(4);
-                    queue = q;
-                }
+                List<Object> q = getOrCreateQueue();
                 q.add(new CompletionEvent());
                 return;
             }
