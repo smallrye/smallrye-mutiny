@@ -5,7 +5,10 @@ import static tck.Await.await;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.function.Function;
 import java.util.stream.LongStream;
 
@@ -16,7 +19,7 @@ import org.testng.annotations.Test;
 
 import io.smallrye.mutiny.Multi;
 
-public class MultiOnITemTRansformToMultiAndConcatenateTckTest extends AbstractPublisherTck<Long> {
+public class MultiOnITemTransformToMultiAndMergeTckTest extends AbstractPublisherTck<Long> {
 
     private ScheduledExecutorService executor;
 
@@ -36,9 +39,10 @@ public class MultiOnITemTRansformToMultiAndConcatenateTckTest extends AbstractPu
 
     @Test
     public void flatMapStageShouldMapElements() {
+
         assertEquals(await(Multi.createFrom().items(1, 2, 3)
                 .emitOn(executor)
-                .onItem().transformToMultiAndConcatenate(n -> Multi.createFrom().items(n, n, n))
+                .onItem().transformToMultiAndMerge(n -> Multi.createFrom().items(n, n, n))
                 .collectItems().asList()
                 .subscribeAsCompletionStage()), Arrays.asList(1, 1, 1, 2, 2, 2, 3, 3, 3));
     }
@@ -46,7 +50,7 @@ public class MultiOnITemTRansformToMultiAndConcatenateTckTest extends AbstractPu
     @Test
     public void flatMapStageShouldAllowEmptySubStreams() {
         assertEquals(await(Multi.createFrom().items(Multi.createFrom().empty(), Multi.createFrom().items(1, 2))
-                .onItem().transformToMultiAndConcatenate(Function.identity())
+                .onItem().transformToMultiAndMerge(Function.identity())
                 .collectItems().asList()
                 .subscribeAsCompletionStage()), Arrays.asList(1, 2));
     }
@@ -60,7 +64,7 @@ public class MultiOnITemTRansformToMultiAndConcatenateTckTest extends AbstractPu
                         cancelled.complete(null);
                     }
                 })
-                .onItem().transformToMultiAndConcatenate(foo -> {
+                .onItem().transformToMultiAndMerge(foo -> {
                     throw new QuietRuntimeException("failed");
                 })
                 .collectItems().asList()
@@ -72,7 +76,7 @@ public class MultiOnITemTRansformToMultiAndConcatenateTckTest extends AbstractPu
     @Test(expectedExceptions = QuietRuntimeException.class, expectedExceptionsMessageRegExp = "failed")
     public void flatMapStageShouldPropagateUpstreamExceptions() {
         await(Multi.createFrom().failure(new QuietRuntimeException("failed"))
-                .onItem().transformToMultiAndConcatenate(x -> Multi.createFrom().item(x))
+                .onItem().transformToMultiAndMerge(x -> Multi.createFrom().item(x))
                 .collectItems().asList()
                 .subscribeAsCompletionStage());
     }
@@ -82,7 +86,7 @@ public class MultiOnITemTRansformToMultiAndConcatenateTckTest extends AbstractPu
         CompletableFuture<Void> cancelled = new CompletableFuture<>();
         CompletionStage<List<Object>> result = infiniteStream()
                 .on().termination(() -> cancelled.complete(null))
-                .onItem().transformToMultiAndConcatenate(f -> Multi.createFrom().failure(new QuietRuntimeException("failed")))
+                .onItem().transformToMultiAndMerge(f -> Multi.createFrom().failure(new QuietRuntimeException("failed")))
                 .collectItems().asList()
                 .subscribeAsCompletionStage();
         await(cancelled);
@@ -95,8 +99,7 @@ public class MultiOnITemTRansformToMultiAndConcatenateTckTest extends AbstractPu
         CompletableFuture<Void> innerCancelled = new CompletableFuture<>();
         await(infiniteStream()
                 .on().termination(() -> outerCancelled.complete(null))
-                .onItem()
-                .transformToMultiAndConcatenate(i -> infiniteStream().on().termination(() -> innerCancelled.complete(null)))
+                .onItem().transformToMultiAndMerge(i -> infiniteStream().on().termination(() -> innerCancelled.complete(null)))
                 .transform().byTakingFirstItems(5)
                 .collectItems().asList()
                 .subscribeAsCompletionStage());
@@ -108,12 +111,12 @@ public class MultiOnITemTRansformToMultiAndConcatenateTckTest extends AbstractPu
     @Override
     public Publisher<Long> createPublisher(long elements) {
         return Multi.createFrom().items(LongStream.rangeClosed(1, elements).boxed())
-                .onItem().transformToMultiAndConcatenate(x -> Multi.createFrom().item(x));
+                .onItem().transformToMultiAndMerge(x -> Multi.createFrom().item(x));
     }
 
     @Override
     public Publisher<Long> createFailedPublisher() {
         return Multi.createFrom().<Long> failure(new RuntimeException("failed"))
-                .onItem().transformToMultiAndConcatenate(x -> Multi.createFrom().item(x));
+                .onItem().transformToMultiAndMerge(x -> Multi.createFrom().item(x));
     }
 }

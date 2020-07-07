@@ -68,13 +68,17 @@ public class HowToTransformTest {
                 )
                 .await().indefinitely();
         List<String> result3 = multi
-                .onItem().transformToUni(s -> Uni.createFrom().item(s.toUpperCase())).concatenate()
+                .onItem().transformToUniAndMerge(s -> Uni.createFrom().item(s.toUpperCase()))
+                .collectItems().asList().await().indefinitely();
+        List<String> result4 = multi
+                .onItem().transformToUniAndConcatenate(s -> Uni.createFrom().item(s.toUpperCase()))
                 .collectItems().asList().await().indefinitely();
         // end::async[]
 
         assertThat(result1).isEqualTo("HELLO");
         assertThat(result2).isEqualTo("HELLO");
         assertThat(result3).containsExactly("HELLO", "WORLD");
+        assertThat(result4).containsExactly("HELLO", "WORLD");
     }
 
     @Test

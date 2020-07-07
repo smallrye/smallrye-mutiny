@@ -20,7 +20,7 @@ public class MultiTransformToUniTest {
                 .concatenate()
                 .collectItems().asList().await().indefinitely();
 
-        assertThat(list).hasSize(3).containsExactly(2, 3, 4);
+        assertThat(list).containsExactly(2, 3, 4);
     }
 
     @Test
@@ -31,7 +31,7 @@ public class MultiTransformToUniTest {
                 .merge()
                 .collectItems().asList().await().indefinitely();
 
-        assertThat(list).hasSize(3).containsExactlyInAnyOrder(2, 3, 4);
+        assertThat(list).containsExactlyInAnyOrder(2, 3, 4);
     }
 
     @Test
@@ -42,7 +42,57 @@ public class MultiTransformToUniTest {
                 .concatenate()
                 .collectItems().asList().await().indefinitely();
 
-        assertThat(list).hasSize(3).containsExactly(2, 3, 4);
+        assertThat(list).containsExactly(2, 3, 4);
+    }
+
+    @Test
+    public void testApplyUniAndMerge() {
+        List<Integer> list = Multi.createFrom().range(1, 4)
+                .onItem()
+                .transformToUniAndMerge(i -> Uni.createFrom().completionStage(CompletableFuture.supplyAsync(() -> i + 1)))
+                .collectItems().asList().await().indefinitely();
+        assertThat(list).containsExactlyInAnyOrder(2, 3, 4);
+    }
+
+    @Test
+    public void testApplyUniAndConcatenate() {
+        List<Integer> list = Multi.createFrom().range(1, 4)
+                .onItem()
+                .transformToUniAndConcatenate(i -> Uni.createFrom().completionStage(CompletableFuture.supplyAsync(() -> i + 1)))
+                .collectItems().asList().await().indefinitely();
+
+        assertThat(list).containsExactly(2, 3, 4);
+    }
+
+    @Test
+    public void testApplyUniAndMergeWithUniOfVoid() {
+        List<Integer> list = Multi.createFrom().range(1, 6)
+                .onItem().transformToUniAndMerge(i -> Uni.createFrom().completionStage(CompletableFuture.supplyAsync(() -> {
+                    if (i % 2 == 0) {
+                        return null;
+                    } else {
+                        return i;
+                    }
+                })))
+                .collectItems().asList().await().indefinitely();
+
+        assertThat(list).containsExactlyInAnyOrder(1, 3, 5);
+    }
+
+    @Test
+    public void testApplyUniAndConcatenateWithUniOfVoid() {
+        List<Integer> list = Multi.createFrom().range(1, 6)
+                .onItem()
+                .transformToUniAndConcatenate(i -> Uni.createFrom().completionStage(CompletableFuture.supplyAsync(() -> {
+                    if (i % 2 == 0) {
+                        return null;
+                    } else {
+                        return i;
+                    }
+                })))
+                .collectItems().asList().await().indefinitely();
+
+        assertThat(list).containsExactly(1, 3, 5);
     }
 
 }

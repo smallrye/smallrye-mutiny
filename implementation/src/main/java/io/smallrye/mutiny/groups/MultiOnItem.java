@@ -293,6 +293,58 @@ public class MultiOnItem<T> {
     }
 
     /**
+     * For each items emitted by the upstream, the given {@code mapper} is invoked. This {@code mapper} returns a
+     * {@link Uni}. The events emitted by the returned {@link Uni} are emitted downstream. Items emitted
+     * by the returned {@link Uni Unis} are emitted downstream using a {@code merge}, meaning that it
+     * may interleave events produced by the different {@link Uni Uni}.
+     *
+     * For example, let's imagine an upstream multi {a, b, c} and a mapper emitting 1 items. This emission may be
+     * delayed for various reasons. For example a -&gt; a1 without delay, b -&gt; b1 after some delay and c -&gt; c1 without
+     * delay. Using this method on the multi {a, b c} with that mapper would produce the following multi {a1, c1, b1}.
+     * Indeed, the b1 item is emitted after c1. So the items from the produced unis are interleaved and are emitted as
+     * soon as they are emitted (respecting the downstream request).
+     *
+     * This operation is often called <em>flatMapSingle</em>.
+     *
+     * If the mapper throws an exception, the failure is propagated downstream. No more items will be emitted.
+     * If one of the produced {@link Uni} propagates a failure, the failure is propagated downstream and no
+     * more items will be emitted.
+     *
+     * @param mapper the mapper, must not be {@code null}, must not produce {@code null}
+     * @param <O> the type of item emitted by the {@link Multi} produced by the mapper.
+     * @return the resulting multi
+     */
+    public <O> Multi<O> transformToUniAndConcatenate(Function<? super T, ? extends Uni<? extends O>> mapper) {
+        return transformToUni(mapper).concatenate();
+    }
+
+    /**
+     * For each items emitted by the upstream, the given {@code mapper} is invoked. This {@code mapper} returns a
+     * {@link Uni}. The events emitted by the returned {@link Uni} are emitted downstream. Items emitted
+     * by the returned {@link Uni Unis} are emitted downstream using a {@code concatenation}, meaning the the returned
+     * {@link Multi} contains the items in the same order as the upstream.
+     *
+     * For example, let's imagine an upstream multi {a, b, c} and a mapper emitting 1 items. This emission may be
+     * delayed for various reasons. For example a -&gt; a1 without delay, b -&gt; b1 after some delay and c -&gt; c1 without
+     * delay. Using this method on the multi {a, b c} with that mapper would produce the following multi {a1, b1, c1}.
+     * Indeed, even if c1 could be emitted before b1, this method preserves the order. So the items from the produced
+     * unis are concatenated.
+     *
+     * This operation is often called <em>concatMapSingle</em>.
+     *
+     * If the mapper throws an exception, the failure is propagated downstream. No more items will be emitted.
+     * If one of the produced {@link Uni} propagates a failure, the failure is propagated downstream and no
+     * more items will be emitted.
+     *
+     * @param mapper the mapper, must not be {@code null}, must not produce {@code null}
+     * @param <O> the type of item emitted by the {@link Multi} produced by the mapper.
+     * @return the resulting multi
+     */
+    public <O> Multi<O> transformToUniAndMerge(Function<? super T, ? extends Uni<? extends O>> mapper) {
+        return transformToUni(mapper).merge();
+    }
+
+    /**
      * On each item received from upstream, invoke the given mapper. This mapper return {@link Uni Uni&lt;T&gt;}.
      * The return object lets you configure the flattening process, i.e. how the items produced
      * by the returned {@link Uni Unis} are propagated to the downstream.

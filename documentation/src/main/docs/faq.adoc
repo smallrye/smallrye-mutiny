@@ -205,15 +205,15 @@ To do this, you write the following code:
 
 [source,java]
 ----
-List<String> list = multi
-    .onItem().produceUni(this::asyncService)	    .onItem().applyUniAndMerge(this::asyncService)
+multi
+    .onItem().transformToUni(this::asyncService)
     // .concatenate() or .merge() ?
 // or
-List<String> list = multi
-    .onItem().applyUniAndConcatenate(this::asyncService)
+multi
+    .onItem().transformToUniAndConcatenate(this::asyncService)
 // or
-List<String> list = multi
-    .onItem().applyUni(this::asyncService)
+multi
+    .onItem().transformToUniAndConcatenateAndMerge(this::asyncService)
 ----
 
 The difference between these alternatives is about the ordering.
@@ -252,6 +252,28 @@ With `merge()`, you can also configure the degree of concurrency using: `merge(c
 ----
 include::../../../src/test/java/snippets/MergeVsConcatenateTest.java[tags=merge-concurrency]
 ----
+
+
+[cols="^2,^2",options="header"]
+.Differences between the concatenate and merge flattening strategies
+|===
+2+| Upstream: {a, b, c}
+
+|_concatenate_
+
+    `.transformToUniAndConcatenate(this::asyncService)`
+|_merge_
+
+    `.transformToUniAndMerge(this::asyncService)`
+
+|`{A, B, C}`
+|`{A, B, C}` or `{B, A, C}` or `{B, C, A}`...
+
+|The downstream items are emitted following the order from the upstream
+|The downstream items are emitted as soon as they are received
+
+|===
+
 
 === How do I recover from failure?
 
