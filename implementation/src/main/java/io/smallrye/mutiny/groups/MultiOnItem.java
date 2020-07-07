@@ -124,7 +124,7 @@ public class MultiOnItem<T> {
      */
     @SuppressWarnings("unchecked")
     public <O> Multi<O> disjoint() {
-        return upstream.onItem().transformToMulti(x -> {
+        return upstream.onItem().transformToMultiAndConcatenate(x -> {
             if (x instanceof Iterable) {
                 return Multi.createFrom().iterable((Iterable<O>) x);
             } else if (x instanceof Multi) {
@@ -138,7 +138,7 @@ public class MultiOnItem<T> {
                 return Multi.createFrom().failure(new IllegalArgumentException(
                         "Invalid parameter - cannot disjoint instance of " + x.getClass().getName()));
             }
-        }).concatenate();
+        });
     }
 
     /**
@@ -170,6 +170,56 @@ public class MultiOnItem<T> {
     }
 
     /**
+     * For each items emitted by the upstream, the given {@code mapper} is invoked. This {@code mapper} returns a
+     * {@link Publisher}. The events emitted by the returned {@link Publisher} are propagated downstream using a
+     * {@code concatenation}, meaning that it does not interleaved the items produced by the different
+     * {@link Publisher Publishers}.
+     *
+     * For example, let's imagine an upstream multi {a, b, c} and a mapper emitting the 3 items with some delays
+     * between them. For example a -&gt; {a1, a2, a3}, b -&gt; {b1, b2, b3} and c -&gt; {c1, c2, c3}. Using this method
+     * on the multi {a, b c} with that mapper may produce the following multi {a1, a2, a3, b1, b2, b3, c1, c2, c3}.
+     * So produced multis are concatenated.
+     *
+     * This operation is often called <em>concatMap</em>.
+     *
+     * If the mapper throws an exception, the failure is propagated downstream. No more items will be emitted.
+     * If one of the produced {@link Publisher} propagates a failure, the failure is propagated downstream and no
+     * more items will be emitted.
+     *
+     * @param mapper the mapper, must not be {@code null}, must not produce {@code null}
+     * @param <O> the type of item emitted by the {@link Multi} produced by the mapper.
+     * @return the resulting multi
+     */
+    public <O> Multi<O> transformToMultiAndConcatenate(Function<? super T, ? extends Publisher<? extends O>> mapper) {
+        return transformToMulti(mapper).concatenate();
+    }
+
+    /**
+     * For each items emitted by the upstream, the given {@code mapper} is invoked. This {@code mapper} returns a
+     * {@link Publisher}. The events emitted by the returned {@link Publisher} are propagated using a {@code merge},
+     * meaning that it may interleave events produced by the different {@link Publisher Publishers}.
+     *
+     * For example, let's imagine an upstream multi {a, b, c} and a mapper emitting the 3 items with some delays
+     * between them. For example a -&gt; {a1, a2, a3}, b -&gt; {b1, b2, b3} and c -&gt; {c1, c2, c3}. Using this method
+     * on the multi {a, b c} with that mapper may produce the following multi {a1, b1, a2, c1, b2, c2, a3, b3, c3}.
+     * So the items from the produced multis are interleaved and are emitted as soon as they are emitted (respecting
+     * the downstream request).
+     *
+     * This operation is often called <em>flatMap</em>.
+     *
+     * If the mapper throws an exception, the failure is propagated downstream. No more items will be emitted.
+     * If one of the produced {@link Publisher} propagates a failure, the failure is propagated downstream and no
+     * more items will be emitted.
+     *
+     * @param mapper the mapper, must not be {@code null}, must not produce {@code null}
+     * @param <O> the type of item emitted by the {@link Multi} produced by the mapper.
+     * @return the resulting multi
+     */
+    public <O> Multi<O> transformToMultiAndMerge(Function<? super T, ? extends Publisher<? extends O>> mapper) {
+        return transformToMulti(mapper).merge();
+    }
+
+    /**
      * On each item received from upstream, invoke the given mapper. This mapper return a {@link Publisher} or
      * a {@link Multi}. The return object lets you configure the flattening process, i.e. how the items produced
      * by the returned {@link Publisher Publishers or Multis} are propagated to the downstream.
@@ -195,14 +245,14 @@ public class MultiOnItem<T> {
      */
     public <O> Multi<O> transformToIterable(Function<? super T, ? extends Iterable<O>> mapper) {
         nonNull(mapper, "mapper");
-        return transformToMulti((x -> {
+        return transformToMultiAndConcatenate((x -> {
             Iterable<O> iterable = mapper.apply(x);
             if (iterable == null) {
                 return Multi.createFrom().failure(new NullPointerException(MAPPER_RETURNED_NULL));
             } else {
                 return Multi.createFrom().iterable(iterable);
             }
-        })).concatenate();
+        }));
     }
 
     /**

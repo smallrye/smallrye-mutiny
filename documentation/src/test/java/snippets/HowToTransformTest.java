@@ -83,7 +83,7 @@ public class HowToTransformTest {
 
         // tag::multi[]
         List<String> result = multi
-                .onItem().transformToMulti(s -> Multi.createFrom().item(s.toUpperCase())).concatenate()
+                .onItem().transformToMultiAndConcatenate(s -> Multi.createFrom().item(s.toUpperCase()))
                 .collectItems().asList().await().indefinitely();
         // end::multi[]
 

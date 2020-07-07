@@ -76,7 +76,7 @@ public class MultiTransformToMultiTest {
     }
 
     @Test(timeOut = 60000)
-    public void testConcatMapWithLotsOfResults() {
+    public void testConcatMapWithLotsOfItems() {
         MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(Long.MAX_VALUE);
 
         Multi.createFrom().range(1, 100_001)
@@ -97,7 +97,7 @@ public class MultiTransformToMultiTest {
     }
 
     @Test(timeOut = 60000)
-    public void testConcatMapWithLotsOfResultsAndFailurePropagation() {
+    public void testConcatMapWithLotsOfItemsAndFailurePropagation() {
         MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(Long.MAX_VALUE);
 
         Multi.createFrom().range(1, 100_001)
@@ -117,7 +117,7 @@ public class MultiTransformToMultiTest {
     }
 
     @Test(timeOut = 60000)
-    public void testConcatMapWithLotsOfResultsAndFailuresAndFailurePropagation() {
+    public void testConcatMapWithLotsOfItemsAndFailuresAndFailurePropagation() {
         MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(Long.MAX_VALUE);
 
         Multi.createFrom().range(1, 100_001)
@@ -145,7 +145,7 @@ public class MultiTransformToMultiTest {
     }
 
     @Test(timeOut = 60000)
-    public void testConcatMapWithLotsOfResultsAndFailuresWithoutFailurePropagation() {
+    public void testConcatMapWithLotsOfItemsAndFailuresWithoutFailurePropagation() {
         MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(Long.MAX_VALUE);
 
         Multi.createFrom().range(1, 100_001)
@@ -202,14 +202,75 @@ public class MultiTransformToMultiTest {
     }
 
     @Test
-    public void testTRansformToMultiAndMerge() {
+    public void testTransformToMultiAndMergeUsingMultiFlatten() {
         MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(Long.MAX_VALUE);
 
         Multi.createFrom().range(1, 4)
-                .onItem().transformToMulti(i -> Multi.createFrom().items(i, i)).merge()
+                .onItem().transformToMulti(i -> {
+                    Multi<Integer> m = Multi.createFrom()
+                            .completionStage(() -> CompletableFuture.supplyAsync(() -> i));
+                    return Multi.createBy().merging().streams(m, m);
+                }).merge()
                 .subscribe(subscriber);
 
-        subscriber.assertReceived(1, 1, 2, 2, 3, 3).assertCompletedSuccessfully();
+        subscriber
+                .await()
+                .assertCompletedSuccessfully();
+        assertThat(subscriber.items()).containsExactlyInAnyOrder(1, 1, 2, 2, 3, 3);
+    }
+
+    @Test
+    public void testTransformToMultiAndConcatenateUsingMultiFlatten() {
+        MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(Long.MAX_VALUE);
+
+        Multi.createFrom().range(1, 4)
+                .onItem().transformToMulti(i -> {
+                    Multi<Integer> m = Multi.createFrom()
+                            .completionStage(() -> CompletableFuture.supplyAsync(() -> i));
+                    return Multi.createBy().merging().streams(m, m);
+                }).concatenate()
+                .subscribe(subscriber);
+
+        subscriber
+                .await()
+                .assertCompletedSuccessfully();
+        assertThat(subscriber.items()).containsExactly(1, 1, 2, 2, 3, 3);
+    }
+
+    @Test
+    public void testTransformToMultiAndMerge() {
+        MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(Long.MAX_VALUE);
+
+        Multi.createFrom().range(1, 4)
+                .onItem().transformToMultiAndMerge(i -> {
+                    Multi<Integer> m = Multi.createFrom()
+                            .completionStage(() -> CompletableFuture.supplyAsync(() -> i));
+                    return Multi.createBy().merging().streams(m, m);
+                })
+                .subscribe(subscriber);
+
+        subscriber
+                .await()
+                .assertCompletedSuccessfully();
+        assertThat(subscriber.items()).containsExactlyInAnyOrder(1, 1, 2, 2, 3, 3);
+    }
+
+    @Test
+    public void testTransformToMultiAndConcatenate() {
+        MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(Long.MAX_VALUE);
+
+        Multi.createFrom().range(1, 4)
+                .onItem().transformToMultiAndConcatenate(i -> {
+                    Multi<Integer> m = Multi.createFrom()
+                            .completionStage(() -> CompletableFuture.supplyAsync(() -> i));
+                    return Multi.createBy().merging().streams(m, m);
+                })
+                .subscribe(subscriber);
+
+        subscriber
+                .await()
+                .assertCompletedSuccessfully();
+        assertThat(subscriber.items()).containsExactlyInAnyOrder(1, 1, 2, 2, 3, 3);
     }
 
     @Test
@@ -220,7 +281,9 @@ public class MultiTransformToMultiTest {
                 .flatMap(i -> Multi.createFrom().items(i, i))
                 .subscribe(subscriber);
 
-        subscriber.assertReceived(1, 1, 2, 2, 3, 3).assertCompletedSuccessfully();
+        subscriber
+                .await()
+                .assertReceived(1, 1, 2, 2, 3, 3).assertCompletedSuccessfully();
     }
 
     @Test

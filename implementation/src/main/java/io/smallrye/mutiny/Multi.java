@@ -352,7 +352,7 @@ public interface Multi<T> extends Publisher<T> {
      * @return the produced {@link Multi}
      */
     default <O> Multi<O> flatMap(Function<? super T, ? extends Publisher<? extends O>> mapper) {
-        return onItem().transformToMulti(mapper).merge();
+        return onItem().transformToMultiAndMerge(mapper);
     }
 
     /**
@@ -411,6 +411,6 @@ public interface Multi<T> extends Publisher<T> {
      * @return the produced {@link Multi}
      */
     default <O> Multi<O> concatMap(Function<? super T, ? extends Publisher<? extends O>> mapper) {
-        return onItem().transformToMulti(mapper).concatenate();
+        return onItem().transformToMultiAndConcatenate(mapper);
     }
 }

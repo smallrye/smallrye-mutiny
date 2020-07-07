@@ -42,7 +42,7 @@ public class StackTest {
 
         List<Integer> results = new ArrayList<>();
         Multi.createFrom().items(() -> intStream(bytes).boxed())
-                .onItem().transformToMulti(i -> Uni.createFrom().item(i).toMulti()).concatenate()
+                .onItem().transformToMultiAndConcatenate(i -> Uni.createFrom().item(i).toMulti())
                 .subscribe().with(results::add, Throwable::printStackTrace);
 
         for (int i = 0; i < length; i++) {

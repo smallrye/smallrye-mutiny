@@ -278,7 +278,7 @@ public class MultiGroupTest {
         Multi<Multi<Integer>> multi = Multi.createFrom().range(1, 7)
                 .groupItems().intoMultis().every(Duration.ofMillis(1));
         Uni<List<Integer>> uni = multi
-                .onItem().transformToMulti(m -> m).concatenate()
+                .onItem().transformToMultiAndConcatenate(m -> m)
                 .collectItems().asList();
 
         List<Integer> list = uni.await().atMost(Duration.ofSeconds(4));

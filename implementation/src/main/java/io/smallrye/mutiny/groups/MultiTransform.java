@@ -107,7 +107,7 @@ public class MultiTransform<T> {
      */
     public Multi<T> byTestingItemsWith(Function<? super T, ? extends Uni<Boolean>> tester) {
         nonNull(tester, "tester");
-        return upstream.onItem().transformToMulti(res -> {
+        return upstream.onItem().transformToMultiAndConcatenate(res -> {
             Uni<Boolean> uni = tester.apply(res);
             return uni.map(pass -> {
                 if (pass) {
@@ -116,7 +116,7 @@ public class MultiTransform<T> {
                     return null;
                 }
             }).toMulti();
-        }).concatenate();
+        });
     }
 
     /**
