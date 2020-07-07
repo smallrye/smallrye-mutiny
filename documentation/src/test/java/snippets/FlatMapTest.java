@@ -59,7 +59,7 @@ public class FlatMapTest {
                 .await().indefinitely();
 
         int result2 = uni
-                .onItem().produceUni(i -> Uni.createFrom().item(i + 1))
+                .onItem().transformToUni(i -> Uni.createFrom().item(i + 1))
                 .await().indefinitely();
 
         List<Integer> list = multi

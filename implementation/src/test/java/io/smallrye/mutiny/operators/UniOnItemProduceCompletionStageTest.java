@@ -9,10 +9,11 @@ import org.testng.annotations.Test;
 
 import io.smallrye.mutiny.Uni;
 
-public class UniOnItemFlatMapToCompletionStageTest {
+@SuppressWarnings({ "deprecation", "ConstantConditions" })
+public class UniOnItemProduceCompletionStageTest {
 
     @Test
-    public void testFlatMapWithImmediateValue() {
+    public void testProduceCompletionStageWithImmediateValue() {
         UniAssertSubscriber<Integer> test = UniAssertSubscriber.create();
         Uni.createFrom().item(1).onItem().produceCompletionStage(v -> CompletableFuture.completedFuture(2)).subscribe()
                 .withSubscriber(test);
@@ -99,8 +100,7 @@ public class UniOnItemFlatMapToCompletionStageTest {
     public void testWithCancellationBeforeEmission() {
         UniAssertSubscriber<Integer> test = UniAssertSubscriber.create();
         AtomicBoolean cancelled = new AtomicBoolean();
-        @SuppressWarnings("unchecked")
-        CompletableFuture<Integer> future = new CompletableFuture() {
+        CompletableFuture<Integer> future = new CompletableFuture<Integer>() {
             @Override
             public boolean cancel(boolean mayInterruptIfRunning) {
                 cancelled.set(true);

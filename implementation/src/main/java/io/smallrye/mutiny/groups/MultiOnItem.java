@@ -109,7 +109,7 @@ public class MultiOnItem<T> {
             if (uni == null) {
                 throw new NullPointerException("The `action` produced a `null` Uni");
             }
-            return uni.onItemOrFailure().produceUni((ignored, failure) -> {
+            return uni.onItemOrFailure().transformToUni((ignored, failure) -> {
                 if (failure != null) {
                     return Uni.createFrom().failure(failure);
                 } else {

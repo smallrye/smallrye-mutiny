@@ -16,7 +16,7 @@ If your operation throws a _checked exception_, you can use the `io.smallrye.mut
 include::../../../src/test/java/snippets/HowToTransformTest.java[tags=sync-unchecked]
 ----
 
-You can also transform items asynchronously using the `produceUni` / `produceCompletionStage` operators:
+You can also transform items asynchronously using the `transformToUni` operator:
 
 [source,java,indent=0]
 ----
@@ -153,7 +153,7 @@ In this case, you still know if the invocation fails (you get a failure event) o
 
 === How do I chain asynchronous calls?
 
-To chain asynchronous calls, use `onItem().produceUni` or `onItem().produceCompletionStage`:
+To chain asynchronous calls, use `onItem().transformToUni`:
 
 [source,java,indent=0]
 ----
@@ -190,11 +190,11 @@ To do this, you write the following code:
 [source,java]
 ----
 List<String> list = multi
-    .onItem().produceUni(this::asyncService)
+    .onItem().transformToUni(this::asyncService)
     // .concatenate() or .merge() ?
 ----
 
-`produceUni` lets you choose between two _merge_ methods: `merge()` and `concatenate()`:
+`transformToUni` lets you choose between two _merge_ methods: `merge()` and `concatenate()`:
 
 [source,java,indent=0]
 ----

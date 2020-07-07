@@ -144,24 +144,43 @@ public class UniOnNotNullItemTest {
     }
 
     @Test
+    @SuppressWarnings("deprecation")
+    public void testProduceUniDeprecated() {
+        assertThat(Uni.createFrom().item("hello")
+                .onItem().ifNotNull().produceUni(s -> Uni.createFrom().item(s.toUpperCase()))
+                .await().indefinitely()).isEqualTo("HELLO");
+
+        assertThat(Uni.createFrom().item(() -> (String) null)
+                .onItem().ifNotNull().produceUni(s -> Uni.createFrom().item(s.toUpperCase()))
+                .onItem().ifNull().continueWith("yolo")
+                .await().indefinitely()).isEqualTo("yolo");
+
+        assertThatThrownBy(() -> Uni.createFrom().<String> failure(new Exception("boom"))
+                .onItem().ifNotNull().produceUni(s -> Uni.createFrom().item(s.toUpperCase()))
+                .onItem().ifNull().continueWith("yolo")
+                .await().indefinitely()).hasMessageContaining("boom");
+    }
+
+    @Test
     public void testProduceUni() {
         assertThat(Uni.createFrom().item("hello")
-                .onItem().ifNotNull().produceUni(s -> Uni.createFrom().item(s.toUpperCase()))
+                .onItem().ifNotNull().transformToUni(s -> Uni.createFrom().item(s.toUpperCase()))
                 .await().indefinitely()).isEqualTo("HELLO");
 
         assertThat(Uni.createFrom().item(() -> (String) null)
-                .onItem().ifNotNull().produceUni(s -> Uni.createFrom().item(s.toUpperCase()))
+                .onItem().ifNotNull().transformToUni(s -> Uni.createFrom().item(s.toUpperCase()))
                 .onItem().ifNull().continueWith("yolo")
                 .await().indefinitely()).isEqualTo("yolo");
 
         assertThatThrownBy(() -> Uni.createFrom().<String> failure(new Exception("boom"))
-                .onItem().ifNotNull().produceUni(s -> Uni.createFrom().item(s.toUpperCase()))
+                .onItem().ifNotNull().transformToUni(s -> Uni.createFrom().item(s.toUpperCase()))
                 .onItem().ifNull().continueWith("yolo")
                 .await().indefinitely()).hasMessageContaining("boom");
     }
 
     @Test
-    public void testProduceUniWithEmitter() {
+    @SuppressWarnings("deprecation")
+    public void testProduceUniWithEmitterDeprecated() {
         assertThat(Uni.createFrom().item("hello")
                 .onItem().ifNotNull().produceUni((s, e) -> e.complete(s.toUpperCase()))
                 .await().indefinitely()).isEqualTo("HELLO");
@@ -178,7 +197,25 @@ public class UniOnNotNullItemTest {
     }
 
     @Test
-    public void testProduceCompletionStage() {
+    public void testTransformToUniWithEmitter() {
+        assertThat(Uni.createFrom().item("hello")
+                .onItem().ifNotNull().transformToUni((s, e) -> e.complete(s.toUpperCase()))
+                .await().indefinitely()).isEqualTo("HELLO");
+
+        assertThat(Uni.createFrom().item(() -> (String) null)
+                .onItem().ifNotNull().transformToUni((s, e) -> e.complete(s.toUpperCase()))
+                .onItem().ifNull().continueWith("yolo")
+                .await().indefinitely()).isEqualTo("yolo");
+
+        assertThatThrownBy(() -> Uni.createFrom().<String> failure(new Exception("boom"))
+                .onItem().ifNotNull().transformToUni((s, e) -> e.complete(s.toUpperCase()))
+                .onItem().ifNull().continueWith("yolo")
+                .await().indefinitely()).hasMessageContaining("boom");
+    }
+
+    @Test
+    @SuppressWarnings("deprecation")
+    public void testProduceCompletionStageDeprecated() {
         assertThat(Uni.createFrom().item("hello")
                 .onItem().ifNotNull().produceCompletionStage(x -> CompletableFuture.completedFuture(x.toUpperCase()))
                 .await().indefinitely()).isEqualTo("HELLO");
@@ -195,7 +232,28 @@ public class UniOnNotNullItemTest {
     }
 
     @Test
-    public void testProduceMulti() {
+    public void testTransformToMulti() {
+        assertThat(Uni.createFrom().item("hello")
+                .onItem().ifNotNull().transformToMulti(x -> Multi.createFrom().item(x.toUpperCase()))
+                .collectItems().first()
+                .await().indefinitely()).isEqualTo("HELLO");
+
+        assertThat(Uni.createFrom().item(() -> (String) null)
+                .onItem().ifNotNull().transformToMulti(x -> Multi.createFrom().item(x.toUpperCase()))
+                .collectItems().first()
+                .onItem().ifNull().continueWith("yolo")
+                .await().indefinitely()).isEqualTo("yolo");
+
+        assertThatThrownBy(() -> Uni.createFrom().<String> failure(new Exception("boom"))
+                .onItem().ifNotNull().transformToMulti(x -> Multi.createFrom().item(x.toUpperCase()))
+                .collectItems().first()
+                .onItem().ifNull().continueWith("yolo")
+                .await().indefinitely()).hasMessageContaining("boom");
+    }
+
+    @Test
+    @SuppressWarnings("deprecation")
+    public void testProduceMultiDeprecated() {
         assertThat(Uni.createFrom().item("hello")
                 .onItem().ifNotNull().produceMulti(x -> Multi.createFrom().item(x.toUpperCase()))
                 .collectItems().first()
