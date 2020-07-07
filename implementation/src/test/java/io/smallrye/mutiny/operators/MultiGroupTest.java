@@ -278,7 +278,7 @@ public class MultiGroupTest {
         Multi<Multi<Integer>> multi = Multi.createFrom().range(1, 7)
                 .groupItems().intoMultis().every(Duration.ofMillis(1));
         Uni<List<Integer>> uni = multi
-                .onItem().produceMulti(m -> m).concatenate()
+                .onItem().transformToMulti(m -> m).concatenate()
                 .collectItems().asList();
 
         List<Integer> list = uni.await().atMost(Duration.ofSeconds(4));
@@ -290,7 +290,7 @@ public class MultiGroupTest {
         MultiAssertSubscriber<List<Object>> subscriber = MultiAssertSubscriber.create(3);
         Multi.createFrom().nothing()
                 .groupItems().intoMultis().every(Duration.ofMillis(10))
-                .onItem().produceUni(m -> m.collectItems().asList()).merge()
+                .onItem().transformToUni(m -> m.collectItems().asList()).merge()
                 .subscribe().withSubscriber(subscriber);
 
         await().until(() -> subscriber.items().size() == 3);

@@ -1,7 +1,7 @@
 package io.smallrye.mutiny.operators;
 
 import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
-import static io.smallrye.mutiny.operators.UniOnItemFlatMap.handleInnerSubscription;
+import static io.smallrye.mutiny.operators.UniOnItemTransformToUni.handleInnerSubscription;
 
 import java.util.function.BiFunction;
 
@@ -23,7 +23,7 @@ public class UniOnItemOrFailureFlatMap<I, O> extends UniOperator<I, O> {
             I item,
             Throwable failure,
             UniSerializedSubscriber<? super O> subscriber,
-            UniOnItemFlatMap.FlatMapSubscription flatMapSubscription) {
+            UniOnItemTransformToUni.FlatMapSubscription flatMapSubscription) {
         Uni<? extends O> outcome;
         try {
             outcome = mapper.apply(item, failure);
@@ -43,7 +43,7 @@ public class UniOnItemOrFailureFlatMap<I, O> extends UniOperator<I, O> {
 
     @Override
     protected void subscribing(UniSerializedSubscriber<? super O> subscriber) {
-        UniOnItemFlatMap.FlatMapSubscription flatMapSubscription = new UniOnItemFlatMap.FlatMapSubscription();
+        UniOnItemTransformToUni.FlatMapSubscription flatMapSubscription = new UniOnItemTransformToUni.FlatMapSubscription();
         // Subscribe to the source.
         AbstractUni.subscribe(upstream(), new UniDelegatingSubscriber<I, O>(subscriber) {
             @Override

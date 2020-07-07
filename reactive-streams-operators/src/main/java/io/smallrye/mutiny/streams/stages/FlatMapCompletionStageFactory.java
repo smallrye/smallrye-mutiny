@@ -7,6 +7,7 @@ import java.util.function.Function;
 import org.eclipse.microprofile.reactive.streams.operators.spi.Stage;
 
 import io.smallrye.mutiny.Multi;
+import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.streams.Engine;
 import io.smallrye.mutiny.streams.operators.ProcessingStage;
 import io.smallrye.mutiny.streams.operators.ProcessingStageFactory;
@@ -37,7 +38,7 @@ public class FlatMapCompletionStageFactory
 
         @Override
         public Multi<O> apply(Multi<I> source) {
-            return source.onItem().produceCompletionStage((I item) -> {
+            return source.onItem().transformToUni((I item) -> {
                 if (item == null) {
                     // Throw an NPE to be compliant with the reactive stream spec.
                     throw new NullPointerException();
@@ -47,7 +48,7 @@ public class FlatMapCompletionStageFactory
                     // Throw an NPE to be compliant with the reactive stream spec.
                     throw new NullPointerException();
                 }
-                return result;
+                return Uni.createFrom().completionStage(result);
             }).concatenate();
         }
     }

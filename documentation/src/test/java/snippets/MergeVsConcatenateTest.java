@@ -26,7 +26,7 @@ public class MergeVsConcatenateTest {
     public void testConcatenate() {
         // tag::concatenate[]
         List<String> list = multi
-                .onItem().produceUni(this::asyncService).concatenate()
+                .onItem().transformToUni(this::asyncService).concatenate()
                 .collectItems().asList()
                 .await().indefinitely();
         // end::concatenate[]
@@ -37,7 +37,7 @@ public class MergeVsConcatenateTest {
     public void testMerge() {
         // tag::merge[]
         List<String> list = multi
-                .onItem().produceUni(this::asyncService).merge()
+                .onItem().transformToUni(this::asyncService).merge()
                 .collectItems().asList()
                 .await().indefinitely();
         // end::merge[]
@@ -48,7 +48,7 @@ public class MergeVsConcatenateTest {
     public void testMergeWithConcurrency() {
         // tag::merge-concurrency[]
         List<String> list = multi
-                .onItem().produceUni(this::asyncService).merge(8)
+                .onItem().transformToUni(this::asyncService).merge(8)
                 .collectItems().asList()
                 .await().indefinitely();
         // end::merge-concurrency[]

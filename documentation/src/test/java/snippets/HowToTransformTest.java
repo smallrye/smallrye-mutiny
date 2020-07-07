@@ -68,18 +68,13 @@ public class HowToTransformTest {
                 )
                 .await().indefinitely();
         List<String> result3 = multi
-                .onItem().produceUni(s -> Uni.createFrom().item(s.toUpperCase())).concatenate()
-                .collectItems().asList().await().indefinitely();
-        List<String> result4 = multi
-                .onItem().produceCompletionStage(s -> CompletableFuture.supplyAsync(() -> s.toUpperCase()))
-                .concatenate()
+                .onItem().transformToUni(s -> Uni.createFrom().item(s.toUpperCase())).concatenate()
                 .collectItems().asList().await().indefinitely();
         // end::async[]
 
         assertThat(result1).isEqualTo("HELLO");
         assertThat(result2).isEqualTo("HELLO");
         assertThat(result3).containsExactly("HELLO", "WORLD");
-        assertThat(result4).containsExactly("HELLO", "WORLD");
     }
 
     @Test
@@ -88,7 +83,7 @@ public class HowToTransformTest {
 
         // tag::multi[]
         List<String> result = multi
-                .onItem().producePublisher(s -> Multi.createFrom().item(s.toUpperCase())).concatenate()
+                .onItem().transformToMulti(s -> Multi.createFrom().item(s.toUpperCase())).concatenate()
                 .collectItems().asList().await().indefinitely();
         // end::multi[]
 

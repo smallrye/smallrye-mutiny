@@ -68,12 +68,12 @@ public class FlatMapTest {
                 .await().indefinitely();
 
         List<Integer> list2 = multi
-                .onItem().produceMulti(i -> Multi.createFrom().items(i, i)).merge()
+                .onItem().transformToMulti(i -> Multi.createFrom().items(i, i)).merge()
                 .collectItems().asList()
                 .await().indefinitely();
 
         List<Integer> list3 = multi
-                .onItem().produceMulti(i -> Multi.createFrom().items(i, i)).concatenate()
+                .onItem().transformToMulti(i -> Multi.createFrom().items(i, i)).concatenate()
                 .collectItems().asList()
                 .await().indefinitely();
 

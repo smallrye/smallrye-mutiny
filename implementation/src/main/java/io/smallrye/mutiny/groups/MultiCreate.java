@@ -284,7 +284,7 @@ public class MultiCreate {
      * @return the new {@link Multi}
      */
     public <T> Multi<T> iterable(Iterable<T> iterable) {
-        return Infrastructure.onMultiCreation(new IterableBasedMulti<>(nonNull(iterable, "produceIterable")));
+        return Infrastructure.onMultiCreation(new IterableBasedMulti<>(nonNull(iterable, "iterable")));
     }
 
     /**

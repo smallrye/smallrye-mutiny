@@ -90,7 +90,7 @@ public class UniOnItem<T> {
      * @return the new {@link Uni}
      */
     public <R> Uni<R> transform(Function<? super T, ? extends R> mapper) {
-        return Infrastructure.onUniCreation(new UniOnItemMap<>(upstream, mapper));
+        return Infrastructure.onUniCreation(new UniOnItemTransform<>(upstream, mapper));
     }
 
     /**
@@ -110,7 +110,7 @@ public class UniOnItem<T> {
      *         in an asynchronous manner.
      */
     public <R> Uni<R> transformToUni(Function<? super T, ? extends Uni<? extends R>> mapper) {
-        return Infrastructure.onUniCreation(new UniOnItemFlatMap<>(upstream, mapper));
+        return Infrastructure.onUniCreation(new UniOnItemTransformToUni<>(upstream, mapper));
     }
 
     /**
@@ -150,7 +150,7 @@ public class UniOnItem<T> {
      * @return the multi
      */
     public <R> Multi<R> transformToMulti(Function<? super T, ? extends Publisher<? extends R>> mapper) {
-        return Infrastructure.onMultiCreation(new UniProduceMultiOnItem<>(upstream, mapper));
+        return Infrastructure.onMultiCreation(new UniOnItemTransformToMulti<>(upstream, mapper));
     }
 
     /**

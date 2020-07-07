@@ -21,11 +21,11 @@ public class MultiCombine {
         List<Publisher<T>> candidates = ParameterValidation.doesNotContainNull(participants, "participants");
         if (collectFailures) {
             return Infrastructure.onMultiCreation(new CollectionBasedMulti<>(candidates)
-                    .onItem().produceMulti(Function.identity()).collectFailures().withRequests(requests)
+                    .onItem().transformToMulti(Function.identity()).collectFailures().withRequests(requests)
                     .merge(concurrency));
         } else {
             return Infrastructure.onMultiCreation(new CollectionBasedMulti<>(candidates)
-                    .onItem().produceMulti(Function.identity()).withRequests(requests).merge(concurrency));
+                    .onItem().transformToMulti(Function.identity()).withRequests(requests).merge(concurrency));
         }
     }
 }

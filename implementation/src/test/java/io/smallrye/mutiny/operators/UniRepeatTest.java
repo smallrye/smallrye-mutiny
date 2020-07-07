@@ -57,7 +57,7 @@ public class UniRepeatTest {
 
         MultiAssertSubscriber<Integer> subscriber = Multi.createBy().repeating()
                 .uni(() -> Uni.createFrom().item(pages[cursor.getAndIncrement()])).whilst(p -> p.next != -1)
-                .onItem().produceMulti(p -> Multi.createFrom().iterable(p.items)).concatenate()
+                .onItem().transformToMulti(p -> Multi.createFrom().iterable(p.items)).concatenate()
                 .subscribe().withSubscriber(MultiAssertSubscriber.create(50));
 
         subscriber.assertCompletedSuccessfully()

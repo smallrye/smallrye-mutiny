@@ -23,7 +23,7 @@ You can also transform items asynchronously using the `transformToUni` operator:
 include::../../../src/test/java/snippets/HowToTransformTest.java[tags=async]
 ----
 
-If you need to generate a sequence of items use, `producePublisher`:
+If you need to generate a sequence of items use, `transformToMulti`:
 
 [source,java,indent=0]
 ----

@@ -18,12 +18,12 @@ import io.smallrye.mutiny.subscription.MultiSubscriber;
 import io.smallrye.mutiny.subscription.UniSubscriber;
 import io.smallrye.mutiny.subscription.UniSubscription;
 
-public class UniProduceMultiOnItem<I, O> extends AbstractMulti<O> {
+public class UniOnItemTransformToMulti<I, O> extends AbstractMulti<O> {
 
     private final Function<? super I, ? extends Publisher<? extends O>> mapper;
     private final Uni<I> upstream;
 
-    public UniProduceMultiOnItem(Uni<I> upstream, Function<? super I, ? extends Publisher<? extends O>> mapper) {
+    public UniOnItemTransformToMulti(Uni<I> upstream, Function<? super I, ? extends Publisher<? extends O>> mapper) {
         this.upstream = nonNull(upstream, "upstream");
         this.mapper = nonNull(mapper, "mapper");
     }

@@ -19,7 +19,7 @@ public class UniOrCombination<T> extends UniOperator<Void, T> {
         super(null);
         this.challengers = new ArrayList<>();
         nonNull(iterable, "produceIterable")
-                .forEach(u -> challengers.add(nonNull(u, "produceIterable` must not contain a `null` value")));
+                .forEach(u -> challengers.add(nonNull(u, "iterable` must not contain a `null` value")));
     }
 
     public UniOrCombination(Uni<? super T>[] array) {
@@ -31,7 +31,7 @@ public class UniOrCombination<T> extends UniOperator<Void, T> {
         }
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     protected void subscribing(UniSerializedSubscriber<? super T> subscriber) {
         if (challengers.isEmpty()) {
