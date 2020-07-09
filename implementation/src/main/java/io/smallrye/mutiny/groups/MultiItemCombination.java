@@ -209,7 +209,7 @@ public class MultiItemCombination {
      * @return the object to configure the combination process
      */
     public MultiItemCombineIterable streams(Iterable<? extends Publisher<?>> iterable) {
-        return new MultiItemCombineIterable(nonNull(iterable, "produceIterable"));
+        return new MultiItemCombineIterable(nonNull(iterable, "iterable"));
     }
 
 }

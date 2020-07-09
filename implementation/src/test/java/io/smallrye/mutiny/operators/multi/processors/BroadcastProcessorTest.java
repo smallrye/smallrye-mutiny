@@ -432,12 +432,12 @@ public class BroadcastProcessorTest {
     }
 
     @Test
-    public void testWithFlatMap() {
+    public void testWithTransformToMultiAndMerge() {
         BroadcastProcessor<Integer> processor = BroadcastProcessor.create();
         MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(10);
 
         processor
-                .onItem().produceMulti(i -> processor).withRequests(10).merge()
+                .onItem().transformToMulti(i -> processor).withRequests(10).merge()
                 .subscribe().withSubscriber(subscriber);
         processor.onNext(1);
         processor.onNext(2);

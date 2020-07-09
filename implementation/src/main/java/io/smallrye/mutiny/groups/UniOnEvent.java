@@ -91,8 +91,8 @@ public class UniOnEvent<T> {
      * <pre>
      * {@code
      * Uni<T> uni = ...;
-     * uni.onItem().apply(x -> ...); // Map to another item
-     * uni.onItem().produceUni(x -> ...); // Map to another Uni (flatMap)
+     * uni.onItem().transform(x -> ...); // Transform the item into another item (~ map)
+     * uni.onItem().transformToUni(x -> ...); // Transform the item into a Uni (~ flatMap)
      * }
      * </pre>
      *

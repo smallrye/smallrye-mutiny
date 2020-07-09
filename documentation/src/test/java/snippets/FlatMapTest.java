@@ -55,11 +55,11 @@ public class FlatMapTest {
         // tag::mutiny[]
 
         int result = uni
-                .onItem().apply(i -> i + 1)
+                .onItem().transform(i -> i + 1)
                 .await().indefinitely();
 
         int result2 = uni
-                .onItem().produceUni(i -> Uni.createFrom().item(i + 1))
+                .onItem().transformToUni(i -> Uni.createFrom().item(i + 1))
                 .await().indefinitely();
 
         List<Integer> list = multi
@@ -68,14 +68,29 @@ public class FlatMapTest {
                 .await().indefinitely();
 
         List<Integer> list2 = multi
-                .onItem().produceMulti(i -> Multi.createFrom().items(i, i)).merge()
+                .onItem().transformToMultiAndMerge(i -> Multi.createFrom().items(i, i))
                 .collectItems().asList()
                 .await().indefinitely();
 
+        // Equivalent to transformToMultiAndMerge but let you configure the flattening process,
+        // failure management, concurrency...
         List<Integer> list3 = multi
-                .onItem().produceMulti(i -> Multi.createFrom().items(i, i)).concatenate()
+                .onItem().transformToMulti(i -> Multi.createFrom().items(i, i)).merge()
                 .collectItems().asList()
                 .await().indefinitely();
+
+        List<Integer> list4 = multi
+                .onItem().transformToMultiAndConcatenate(i -> Multi.createFrom().items(i, i))
+                .collectItems().asList()
+                .await().indefinitely();
+
+        // Equivalent to transformToMultiAndConcatenate but let you configure the flattening process,
+        // failure management...
+        List<Integer> list5 = multi
+                .onItem().transformToMulti(i -> Multi.createFrom().items(i, i)).concatenate()
+                .collectItems().asList()
+                .await().indefinitely();
+
 
         // end::mutiny[]
         assertThat(result).isEqualTo(2);
@@ -83,5 +98,7 @@ public class FlatMapTest {
         assertThat(list).containsExactly(2, 3);
         assertThat(list2).containsExactly(1, 1, 2, 2);
         assertThat(list3).containsExactly(1, 1, 2, 2);
+        assertThat(list4).containsExactly(1, 1, 2, 2);
+        assertThat(list5).containsExactly(1, 1, 2, 2);
     }
 }

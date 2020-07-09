@@ -14,11 +14,11 @@ import io.smallrye.mutiny.helpers.EmptyUniSubscription;
 import io.smallrye.mutiny.subscription.UniSubscriber;
 import io.smallrye.mutiny.subscription.UniSubscription;
 
-public class UniOnItemFlatMap<I, O> extends UniOperator<I, O> {
+public class UniOnItemTransformToUni<I, O> extends UniOperator<I, O> {
 
     private final Function<? super I, ? extends Uni<? extends O>> mapper;
 
-    public UniOnItemFlatMap(Uni<I> upstream, Function<? super I, ? extends Uni<? extends O>> mapper) {
+    public UniOnItemTransformToUni(Uni<I> upstream, Function<? super I, ? extends Uni<? extends O>> mapper) {
         super(nonNull(upstream, "upstream"));
         this.mapper = nonNull(mapper, "mapper");
     }
@@ -44,7 +44,7 @@ public class UniOnItemFlatMap<I, O> extends UniOperator<I, O> {
     }
 
     public static <O> void handleInnerSubscription(UniSerializedSubscriber<? super O> subscriber,
-            UniOnItemFlatMap.FlatMapSubscription flatMapSubscription, Uni<? extends O> outcome) {
+            UniOnItemTransformToUni.FlatMapSubscription flatMapSubscription, Uni<? extends O> outcome) {
         if (outcome == null) {
             subscriber.onFailure(new NullPointerException(MAPPER_RETURNED_NULL));
         } else {

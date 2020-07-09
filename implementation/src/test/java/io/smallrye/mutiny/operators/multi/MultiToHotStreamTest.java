@@ -255,14 +255,14 @@ public class MultiToHotStreamTest {
     }
 
     @Test
-    public void testWithFlatMap() {
+    public void testWithTransformToMultiAndMerge() {
         BroadcastProcessor<Integer> processor = BroadcastProcessor.create();
         Multi<Integer> multi = processor.map(s -> s).transform().toHotStream();
 
         MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(10);
 
         multi
-                .onItem().produceMulti(i -> processor).withRequests(10).merge()
+                .onItem().transformToMulti(i -> processor).withRequests(10).merge()
                 .subscribe().withSubscriber(subscriber);
         processor.onNext(1);
         processor.onNext(2);

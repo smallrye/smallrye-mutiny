@@ -18,7 +18,7 @@ import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.operators.multi.processors.UnicastProcessor;
 import io.smallrye.mutiny.test.MultiAssertSubscriber;
 
-public class MultiFlatMapToPublisherTest {
+public class MultiTransformToMultiTest {
 
     @Test
     public void testMapShortcut() {
@@ -30,7 +30,7 @@ public class MultiFlatMapToPublisherTest {
     }
 
     @Test
-    public void testConcatMap() {
+    public void testConcatMapShortcut() {
         MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(Long.MAX_VALUE);
 
         Multi.createFrom().range(1, 4)
@@ -41,7 +41,7 @@ public class MultiFlatMapToPublisherTest {
     }
 
     @Test
-    public void testConcatMapWithEmpty() {
+    public void testConcatMapShortcutWithEmpty() {
         MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(Long.MAX_VALUE);
 
         Multi.createFrom().range(1, 4)
@@ -51,13 +51,37 @@ public class MultiFlatMapToPublisherTest {
         subscriber.assertCompletedSuccessfully().assertHasNotReceivedAnyItem();
     }
 
+    @Test
+    @SuppressWarnings("deprecation")
+    public void testProduceMultiDeprecated() {
+        MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(Long.MAX_VALUE);
+
+        Multi.createFrom().range(1, 4)
+                .onItem().produceMulti(i -> Multi.createFrom().items(i, i)).concatenate()
+                .subscribe(subscriber);
+
+        subscriber.assertReceived(1, 1, 2, 2, 3, 3).assertCompletedSuccessfully();
+    }
+
+    @Test
+    @SuppressWarnings("deprecation")
+    public void testProducePublisherDeprecated() {
+        MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(Long.MAX_VALUE);
+
+        Multi.createFrom().range(1, 4)
+                .onItem().producePublisher(i -> Multi.createFrom().items(i, i)).concatenate()
+                .subscribe(subscriber);
+
+        subscriber.assertReceived(1, 1, 2, 2, 3, 3).assertCompletedSuccessfully();
+    }
+
     @Test(timeOut = 60000)
-    public void testConcatMapWithLotsOfResults() {
+    public void testConcatMapWithLotsOfItems() {
         MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(Long.MAX_VALUE);
 
         Multi.createFrom().range(1, 100_001)
                 .onItem()
-                .produceMulti(i -> Multi.createFrom().completionStage(CompletableFuture.supplyAsync(() -> i))).collectFailures()
+                .transformToMulti(i -> Multi.createFrom().completionStage(CompletableFuture.supplyAsync(() -> i)))
                 .concatenate()
                 .subscribe(subscriber);
 
@@ -73,11 +97,11 @@ public class MultiFlatMapToPublisherTest {
     }
 
     @Test(timeOut = 60000)
-    public void testConcatMapWithLotsOfResultsAndFailurePropagation() {
+    public void testConcatMapWithLotsOfItemsAndFailurePropagation() {
         MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(Long.MAX_VALUE);
 
         Multi.createFrom().range(1, 100_001)
-                .onItem().produceMulti(i -> Multi.createFrom().completionStage(CompletableFuture.supplyAsync(() -> i)))
+                .onItem().transformToMulti(i -> Multi.createFrom().completionStage(CompletableFuture.supplyAsync(() -> i)))
                 .collectFailures().concatenate()
                 .subscribe(subscriber);
 
@@ -93,11 +117,11 @@ public class MultiFlatMapToPublisherTest {
     }
 
     @Test(timeOut = 60000)
-    public void testConcatMapWithLotsOfResultsAndFailuresAndFailurePropagation() {
+    public void testConcatMapWithLotsOfItemsAndFailuresAndFailurePropagation() {
         MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(Long.MAX_VALUE);
 
         Multi.createFrom().range(1, 100_001)
-                .onItem().producePublisher(
+                .onItem().transformToMulti(
                         i -> Multi.createFrom().completionStage(CompletableFuture.supplyAsync(() -> {
                             if (i == 99000 || i == 100_000) {
                                 throw new IllegalArgumentException("boom");
@@ -121,7 +145,7 @@ public class MultiFlatMapToPublisherTest {
     }
 
     @Test(timeOut = 60000)
-    public void testConcatMapWithLotsOfResultsAndFailuresWithoutFailurePropagation() {
+    public void testConcatMapWithLotsOfItemsAndFailuresWithoutFailurePropagation() {
         MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(Long.MAX_VALUE);
 
         Multi.createFrom().range(1, 100_001)
@@ -152,18 +176,18 @@ public class MultiFlatMapToPublisherTest {
         MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(Long.MAX_VALUE);
 
         Multi.createFrom().range(1, 4)
-                .onItem().producePublisher(i -> Multi.createFrom().items(i, i)).collectFailures().concatenate()
+                .onItem().transformToMulti(i -> Multi.createFrom().items(i, i)).collectFailures().concatenate()
                 .subscribe(subscriber);
 
         subscriber.assertReceived(1, 1, 2, 2, 3, 3).assertCompletedSuccessfully();
     }
 
     @Test
-    public void testConcatMapWithFailuresAndDelay() {
+    public void testTransformToMultiWithConcatenationAndFailuresAndDelay() {
         MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(Long.MAX_VALUE);
 
         Multi.createFrom().range(1, 4)
-                .onItem().produceMulti(i -> {
+                .onItem().transformToMulti(i -> {
                     if (i == 2) {
                         return Multi.createFrom().failure(new IOException("boom"));
                     } else {
@@ -178,14 +202,75 @@ public class MultiFlatMapToPublisherTest {
     }
 
     @Test
-    public void testRegularFlatMap() {
+    public void testTransformToMultiAndMergeUsingMultiFlatten() {
         MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(Long.MAX_VALUE);
 
         Multi.createFrom().range(1, 4)
-                .flatMap(i -> Multi.createFrom().items(i, i))
+                .onItem().transformToMulti(i -> {
+                    Multi<Integer> m = Multi.createFrom()
+                            .completionStage(() -> CompletableFuture.supplyAsync(() -> i));
+                    return Multi.createBy().merging().streams(m, m);
+                }).merge()
                 .subscribe(subscriber);
 
-        subscriber.assertReceived(1, 1, 2, 2, 3, 3).assertCompletedSuccessfully();
+        subscriber
+                .await()
+                .assertCompletedSuccessfully();
+        assertThat(subscriber.items()).containsExactlyInAnyOrder(1, 1, 2, 2, 3, 3);
+    }
+
+    @Test
+    public void testTransformToMultiAndConcatenateUsingMultiFlatten() {
+        MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(Long.MAX_VALUE);
+
+        Multi.createFrom().range(1, 4)
+                .onItem().transformToMulti(i -> {
+                    Multi<Integer> m = Multi.createFrom()
+                            .completionStage(() -> CompletableFuture.supplyAsync(() -> i));
+                    return Multi.createBy().merging().streams(m, m);
+                }).concatenate()
+                .subscribe(subscriber);
+
+        subscriber
+                .await()
+                .assertCompletedSuccessfully();
+        assertThat(subscriber.items()).containsExactly(1, 1, 2, 2, 3, 3);
+    }
+
+    @Test
+    public void testTransformToMultiAndMerge() {
+        MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(Long.MAX_VALUE);
+
+        Multi.createFrom().range(1, 4)
+                .onItem().transformToMultiAndMerge(i -> {
+                    Multi<Integer> m = Multi.createFrom()
+                            .completionStage(() -> CompletableFuture.supplyAsync(() -> i));
+                    return Multi.createBy().merging().streams(m, m);
+                })
+                .subscribe(subscriber);
+
+        subscriber
+                .await()
+                .assertCompletedSuccessfully();
+        assertThat(subscriber.items()).containsExactlyInAnyOrder(1, 1, 2, 2, 3, 3);
+    }
+
+    @Test
+    public void testTransformToMultiAndConcatenate() {
+        MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(Long.MAX_VALUE);
+
+        Multi.createFrom().range(1, 4)
+                .onItem().transformToMultiAndConcatenate(i -> {
+                    Multi<Integer> m = Multi.createFrom()
+                            .completionStage(() -> CompletableFuture.supplyAsync(() -> i));
+                    return Multi.createBy().merging().streams(m, m);
+                })
+                .subscribe(subscriber);
+
+        subscriber
+                .await()
+                .assertCompletedSuccessfully();
+        assertThat(subscriber.items()).containsExactlyInAnyOrder(1, 1, 2, 2, 3, 3);
     }
 
     @Test
@@ -196,7 +281,9 @@ public class MultiFlatMapToPublisherTest {
                 .flatMap(i -> Multi.createFrom().items(i, i))
                 .subscribe(subscriber);
 
-        subscriber.assertReceived(1, 1, 2, 2, 3, 3).assertCompletedSuccessfully();
+        subscriber
+                .await()
+                .assertReceived(1, 1, 2, 2, 3, 3).assertCompletedSuccessfully();
     }
 
     @Test
@@ -308,11 +395,11 @@ public class MultiFlatMapToPublisherTest {
     }
 
     @Test
-    public void testFlatMapWithConcurrency() {
+    public void testTransformToMultiWithConcurrency() {
         MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(Long.MAX_VALUE);
 
         Multi.createFrom().range(1, 10001)
-                .onItem().produceMulti(i -> Multi.createFrom().items(i, i)).merge(25)
+                .onItem().transformToMulti(i -> Multi.createFrom().items(i, i)).merge(25)
                 .subscribe(subscriber);
 
         subscriber.assertCompletedSuccessfully();
@@ -320,18 +407,18 @@ public class MultiFlatMapToPublisherTest {
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
-    public void testFlatMapWithInvalidConcurrency() {
+    public void testTransformToMultiWithInvalidConcurrency() {
         Multi.createFrom().range(1, 10001)
-                .onItem().produceMulti(i -> Multi.createFrom().items(i, i))
+                .onItem().transformToMulti(i -> Multi.createFrom().items(i, i))
                 .merge(-1);
     }
 
     @Test
-    public void testFlatMapWithConcurrencyAndAsyncEmission() {
+    public void testTransformToMultiWithConcurrencyAndAsyncEmission() {
         MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(Long.MAX_VALUE);
 
         Multi.createFrom().range(1, 10001)
-                .onItem().produceMulti(i -> Multi.createFrom().completionStage(CompletableFuture.supplyAsync(() -> i)))
+                .onItem().transformToMulti(i -> Multi.createFrom().completionStage(CompletableFuture.supplyAsync(() -> i)))
                 .withRequests(20)
                 .merge(25)
                 .subscribe(subscriber);
@@ -341,11 +428,11 @@ public class MultiFlatMapToPublisherTest {
     }
 
     @Test
-    public void testRegularFlatMapWithFailurePropagation() {
+    public void testTransformToMultiWithFailurePropagation() {
         MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(Long.MAX_VALUE);
 
         Multi.createFrom().range(1, 5)
-                .onItem().produceMulti(i -> {
+                .onItem().transformToMulti(i -> {
                     if (i % 2 == 0) {
                         return Multi.createFrom().failure(new IOException("boom"));
                     } else {
@@ -360,17 +447,8 @@ public class MultiFlatMapToPublisherTest {
     }
 
     @Test
-    public void testFlatMapUni() {
-        List<Integer> list = Multi.createFrom().range(1, 4)
-                .onItem().produceUni(i -> Uni.createFrom().completionStage(CompletableFuture.supplyAsync(() -> i + 1)))
-                .merge()
-                .collectItems().asList().await().indefinitely();
-
-        assertThat(list).hasSize(3).contains(2, 3, 4);
-    }
-
-    @Test
-    public void testFlatMapCompletionStage() {
+    @SuppressWarnings("deprecation")
+    public void testProduceCompletionStageDeprecated() {
         List<Integer> list = Multi.createFrom().range(1, 4)
                 .onItem().produceCompletionStage(i -> CompletableFuture.supplyAsync(() -> i + 1))
                 .merge()
@@ -380,17 +458,18 @@ public class MultiFlatMapToPublisherTest {
     }
 
     @Test
-    public void testConcatMapUni() {
+    public void testProduceCompletionStageAlternative() {
         List<Integer> list = Multi.createFrom().range(1, 4)
-                .onItem().produceUni(i -> Uni.createFrom().completionStage(CompletableFuture.supplyAsync(() -> i + 1)))
-                .concatenate()
+                .onItem().transformToUni(i -> Uni.createFrom().completionStage(CompletableFuture.supplyAsync(() -> i + 1)))
+                .merge()
                 .collectItems().asList().await().indefinitely();
 
-        assertThat(list).hasSize(3).containsExactly(2, 3, 4);
+        assertThat(list).hasSize(3).contains(2, 3, 4);
     }
 
     @Test
-    public void testFlatMapIterable() {
+    @SuppressWarnings("deprecation")
+    public void testProduceIterableDeprecated() {
         List<Integer> list = Multi.createFrom().range(1, 4)
                 .onItem().produceIterable(i -> Arrays.asList(i, i + 1))
                 .merge()
@@ -400,13 +479,11 @@ public class MultiFlatMapToPublisherTest {
     }
 
     @Test
-    public void testConcatMapIterable() {
+    public void testTransformToIterable() {
         List<Integer> list = Multi.createFrom().range(1, 4)
-                .onItem().produceIterable(i -> Arrays.asList(i, i + 1))
-                .merge()
+                .onItem().transformToIterable(i -> Arrays.asList(i, i + 1))
                 .collectItems().asList().await().indefinitely();
-
-        assertThat(list).hasSize(6).containsExactly(1, 2, 2, 3, 3, 4);
+        assertThat(list).hasSize(6).containsExactlyInAnyOrder(1, 2, 2, 3, 3, 4);
     }
 
     @Test

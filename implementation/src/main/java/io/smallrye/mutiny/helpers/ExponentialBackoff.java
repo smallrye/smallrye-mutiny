@@ -43,7 +43,7 @@ public class ExponentialBackoff {
 
         AtomicInteger index = new AtomicInteger();
         return t -> t
-                .onItem().produceUni(failure -> {
+                .onItem().transformToUni(failure -> {
                     int iteration = index.incrementAndGet();
                     if (iteration >= numRetries) {
                         return Uni.createFrom().<Long> failure(
@@ -91,7 +91,7 @@ public class ExponentialBackoff {
 
         AtomicInteger index = new AtomicInteger();
         return t -> t
-                .onItem().produceUni(failure -> {
+                .onItem().transformToUni(failure -> {
                     int iteration = index.incrementAndGet();
                     Duration nextBackoff = getNextAttemptDelay(firstBackoff, maxBackoff, iteration);
 

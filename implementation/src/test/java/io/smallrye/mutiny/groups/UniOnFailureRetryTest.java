@@ -60,7 +60,7 @@ public class UniOnFailureRetryTest {
         })
                 .onFailure().retry().when(stream -> stream.onItem().invoke(failures::add)
                         .onItem()
-                        .produceUni(f -> Uni.createFrom().item("tick").onItem().delayIt().by(Duration.ofMillis(10)))
+                        .transformToUni(f -> Uni.createFrom().item("tick").onItem().delayIt().by(Duration.ofMillis(10)))
                         .concatenate())
                 .await().atMost(Duration.ofSeconds(5));
 
@@ -84,7 +84,8 @@ public class UniOnFailureRetryTest {
             }
         })
                 .onFailure().retry().when(stream -> stream
-                        .onItem().produceUni(f -> Uni.createFrom().failure(new IllegalStateException("damned!"))).concatenate())
+                        .onItem().transformToUni(f -> Uni.createFrom().failure(new IllegalStateException("damned!")))
+                        .concatenate())
                 .await().atMost(Duration.ofSeconds(5));
     }
 

@@ -153,7 +153,7 @@ public class MultiFlattenTest {
     public void testFlatMapRequestsWithEmissionOnExecutor() {
         MultiAssertSubscriber<String> subscriber = Multi.createFrom().items("a", "b", "c", "d", "e", "f", "g", "h")
                 .onItem()
-                .produceUni(s -> Uni.createFrom().item(s.toUpperCase()).onItem().delayIt().by(Duration.ofMillis(10)))
+                .transformToUni(s -> Uni.createFrom().item(s.toUpperCase()).onItem().delayIt().by(Duration.ofMillis(10)))
                 .concatenate()
                 .subscribe().withSubscriber(MultiAssertSubscriber.create(0));
 

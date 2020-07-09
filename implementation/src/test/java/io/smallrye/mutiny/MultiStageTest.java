@@ -13,7 +13,9 @@ public class MultiStageTest {
     @Test
     public void testChainStage() {
         List<String> result = Multi.createFrom().items(1, 2, 3)
-                .stage(self -> self.onItem().produceCompletionStage(i -> CompletableFuture.supplyAsync(() -> i)).concatenate())
+                .stage(self -> self.onItem()
+                        .transformToUni(i -> Uni.createFrom().completionStage(CompletableFuture.supplyAsync(() -> i)))
+                        .concatenate())
                 .stage(self -> self
                         .onItem().transform(i -> i + 1)
                         .onFailure().retry().indefinitely())
@@ -24,9 +26,12 @@ public class MultiStageTest {
     }
 
     @Test
+    @SuppressWarnings("deprecation")
     public void testChainWithDeprecatedThenAndApply() {
         List<String> result = Multi.createFrom().items(1, 2, 3)
-                .then(self -> self.onItem().produceCompletionStage(i -> CompletableFuture.supplyAsync(() -> i)).concatenate())
+                .then(self -> self.onItem()
+                        .transformToUni(i -> Uni.createFrom().completionStage(CompletableFuture.supplyAsync(() -> i)))
+                        .concatenate())
                 .then(self -> self
                         .onItem().apply(i -> i + 1)
                         .onFailure().retry().indefinitely())
@@ -57,7 +62,7 @@ public class MultiStageTest {
                 .stage(self -> self
                         .onItem().transform(i -> i + 1)
                         .onFailure().retry().indefinitely())
-                .stage(self -> self.onItem().produceUni(i -> Uni.createFrom().item(Integer.toString(i))).concatenate())
+                .stage(self -> self.onItem().transformToUni(i -> Uni.createFrom().item(Integer.toString(i))).concatenate())
                 .stage(self -> {
                     String r = self.collectItems().first().await().indefinitely();
                     result.set(r);

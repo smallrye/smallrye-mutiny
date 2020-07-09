@@ -13,10 +13,21 @@ import org.testng.annotations.Test;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.subscription.UniEmitter;
 
-public class UniOnItemFlatMapWithEmitterTest {
+@SuppressWarnings("ConstantConditions")
+public class UniOnItemTransformToUniWithEmitterTest {
 
     @Test
-    public void testFlatMapWithImmediateValue() {
+    public void testTransformToUniWithImmediateValue() {
+        UniAssertSubscriber<Integer> test = UniAssertSubscriber.create();
+        Uni.createFrom().item(1).onItem().<Integer> transformToUni(
+                (v, e) -> e.complete(2))
+                .subscribe().withSubscriber(test);
+        test.assertCompletedSuccessfully().assertItem(2).assertNoFailure();
+    }
+
+    @Test
+    @SuppressWarnings("deprecation")
+    public void testProduceUniWithImmediateValueDeprecated() {
         UniAssertSubscriber<Integer> test = UniAssertSubscriber.create();
         Uni.createFrom().item(1).onItem().<Integer> produceUni(
                 (v, e) -> e.complete(2))
@@ -28,7 +39,7 @@ public class UniOnItemFlatMapWithEmitterTest {
     public void testWithImmediateCancellation() {
         UniAssertSubscriber<Integer> test = new UniAssertSubscriber<>(true);
         AtomicBoolean called = new AtomicBoolean();
-        Uni.createFrom().item(1).onItem().<Integer> produceUni((v, e) -> {
+        Uni.createFrom().item(1).onItem().<Integer> transformToUni((v, e) -> {
             called.set(true);
             e.complete(2);
         }).subscribe().withSubscriber(test);
@@ -42,7 +53,7 @@ public class UniOnItemFlatMapWithEmitterTest {
         UniAssertSubscriber<Integer> test2 = UniAssertSubscriber.create();
         AtomicInteger count = new AtomicInteger(2);
         Uni<Integer> uni = Uni.createFrom().item(1).onItem()
-                .produceUni((v, e) -> new Thread(() -> e.complete(count.incrementAndGet())).start());
+                .transformToUni((v, e) -> new Thread(() -> e.complete(count.incrementAndGet())).start());
         uni.subscribe().withSubscriber(test1);
         uni.subscribe().withSubscriber(test2);
         test1.await().assertCompletedSuccessfully().assertNoFailure();
@@ -55,7 +66,7 @@ public class UniOnItemFlatMapWithEmitterTest {
     public void testWithAsyncEmitterAndFailure() {
         UniAssertSubscriber<Integer> test = UniAssertSubscriber.create();
         Uni<Integer> uni = Uni.createFrom().item(1).onItem()
-                .produceUni((v, e) -> new Thread(() -> e.fail(new IOException("boom"))).start());
+                .transformToUni((v, e) -> new Thread(() -> e.fail(new IOException("boom"))).start());
         uni.subscribe().withSubscriber(test);
         test.await().assertCompletedWithFailure().assertFailure(IOException.class, "boom");
     }
@@ -64,7 +75,7 @@ public class UniOnItemFlatMapWithEmitterTest {
     public void testThatMapperIsNotCalledOnUpstreamFailure() {
         UniAssertSubscriber<Integer> test = UniAssertSubscriber.create();
         AtomicBoolean called = new AtomicBoolean();
-        Uni.createFrom().failure(new Exception("boom")).onItem().<Integer> produceUni((v, e) -> {
+        Uni.createFrom().failure(new Exception("boom")).onItem().<Integer> transformToUni((v, e) -> {
             called.set(true);
             e.complete(2);
         }).subscribe().withSubscriber(test);
@@ -76,7 +87,7 @@ public class UniOnItemFlatMapWithEmitterTest {
     public void testWithAMapperThrowingAnException() {
         UniAssertSubscriber<Integer> test = UniAssertSubscriber.create();
         AtomicBoolean called = new AtomicBoolean();
-        Uni.createFrom().item(1).onItem().<Integer> produceUni((v, e) -> {
+        Uni.createFrom().item(1).onItem().<Integer> transformToUni((v, e) -> {
             called.set(true);
             throw new IllegalStateException("boom");
         }).subscribe().withSubscriber(test);
@@ -88,7 +99,7 @@ public class UniOnItemFlatMapWithEmitterTest {
     public void testWithAMapperThrowingAnExceptionAfterEmittingAValue() {
         UniAssertSubscriber<Integer> test = UniAssertSubscriber.create();
         AtomicBoolean called = new AtomicBoolean();
-        Uni.createFrom().item(1).onItem().<Integer> produceUni((v, e) -> {
+        Uni.createFrom().item(1).onItem().<Integer> transformToUni((v, e) -> {
             called.set(true);
             e.complete(2);
             throw new IllegalStateException("boom");
@@ -99,7 +110,7 @@ public class UniOnItemFlatMapWithEmitterTest {
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void testThatTheMapperCannotBeNull() {
-        Uni.createFrom().item(1).onItem().produceUni((BiConsumer<Integer, UniEmitter<? super Integer>>) null);
+        Uni.createFrom().item(1).onItem().transformToUni((BiConsumer<Integer, UniEmitter<? super Integer>>) null);
     }
 
     @Test
@@ -107,7 +118,7 @@ public class UniOnItemFlatMapWithEmitterTest {
         UniAssertSubscriber<Integer> test = UniAssertSubscriber.create();
         CompletableFuture<Integer> future = new CompletableFuture<>();
         Uni<Integer> uni = Uni.createFrom().item(1).onItem()
-                .produceUni((v, e) -> future.whenComplete((x, f) -> e.complete(x)));
+                .transformToUni((v, e) -> future.whenComplete((x, f) -> e.complete(x)));
         uni.subscribe().withSubscriber(test);
         test.cancel();
         test.assertNotCompleted();

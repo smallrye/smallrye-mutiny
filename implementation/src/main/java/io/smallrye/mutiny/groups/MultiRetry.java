@@ -126,7 +126,7 @@ public class MultiRetry<T> {
                     "Invalid retry configuration, `until` cannot be used with a back-off configuration");
         }
         Function<Multi<Throwable>, Publisher<Long>> whenStreamFactory = stream -> stream.onItem()
-                .produceUni(failure -> Uni.createFrom().<Long> emitter(emitter -> {
+                .transformToUni(failure -> Uni.createFrom().<Long> emitter(emitter -> {
                     try {
                         if (predicate.test(failure)) {
                             emitter.complete(1L);

@@ -15,7 +15,7 @@ public class UniStageTest {
                 .stage(self -> self
                         .onItem().transform(i -> i + 1)
                         .onFailure().retry().indefinitely())
-                .stage(self -> self.onItem().produceUni(i -> Uni.createFrom().item(Integer.toString(i))))
+                .stage(self -> self.onItem().transformToUni(i -> Uni.createFrom().item(Integer.toString(i))))
                 .await().indefinitely();
         assertThat(result).isEqualTo("24");
     }
@@ -26,7 +26,7 @@ public class UniStageTest {
                 .then(self -> self
                         .onItem().apply(i -> i + 1)
                         .onFailure().retry().indefinitely())
-                .then(self -> self.onItem().produceUni(i -> Uni.createFrom().item(Integer.toString(i))))
+                .then(self -> self.onItem().transformToUni(i -> Uni.createFrom().item(Integer.toString(i))))
                 .await().indefinitely();
         assertThat(result).isEqualTo("24");
     }
@@ -52,7 +52,7 @@ public class UniStageTest {
                 .stage(self -> self
                         .onItem().transform(i -> i + 1)
                         .onFailure().retry().indefinitely())
-                .stage(self -> self.onItem().produceUni(i -> Uni.createFrom().item(Integer.toString(i))))
+                .stage(self -> self.onItem().transformToUni(i -> Uni.createFrom().item(Integer.toString(i))))
                 .stage(self -> {
                     String r = self.await().indefinitely();
                     result.set(r);

@@ -344,7 +344,7 @@ public interface Multi<T> extends Publisher<T> {
      * <li>The items emitted by each of the produced {@link Publisher} are then <strong>merged</strong> in the
      * produced {@link Multi}. The flatten process may interleaved items.</li>
      * </ul>
-     * This method is a shortcut for {@code multi.onItem().producePublisher(mapper).merge()}.
+     * This method is a shortcut for {@code multi.onItem().transformToMulti(mapper).merge()}.
      *
      * @param mapper the {@link Function} producing {@link Publisher} / {@link Multi} for each items emitted by the
      *        upstream {@link Multi}
@@ -352,7 +352,7 @@ public interface Multi<T> extends Publisher<T> {
      * @return the produced {@link Multi}
      */
     default <O> Multi<O> flatMap(Function<? super T, ? extends Publisher<? extends O>> mapper) {
-        return onItem().producePublisher(mapper).merge();
+        return onItem().transformToMultiAndMerge(mapper);
     }
 
     /**
@@ -403,7 +403,7 @@ public interface Multi<T> extends Publisher<T> {
      * produced {@link Multi}. The flatten process makes sure that the items are not interleaved.
      * </ul>
      * <p>
-     * This method is equivalent to {@code multi.onItem().producePublisher(mapper).concatenate()}.
+     * This method is equivalent to {@code multi.onItem().transformToMulti(mapper).concatenate()}.
      *
      * @param mapper the {@link Function} producing {@link Publisher} / {@link Multi} for each items emitted by the
      *        upstream {@link Multi}
@@ -411,6 +411,6 @@ public interface Multi<T> extends Publisher<T> {
      * @return the produced {@link Multi}
      */
     default <O> Multi<O> concatMap(Function<? super T, ? extends Publisher<? extends O>> mapper) {
-        return onItem().producePublisher(mapper).concatenate();
+        return onItem().transformToMultiAndConcatenate(mapper);
     }
 }
