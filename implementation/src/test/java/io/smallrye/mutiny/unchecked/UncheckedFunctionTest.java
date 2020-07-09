@@ -69,6 +69,15 @@ public class UncheckedFunctionTest {
         assertThat(res).isEqualTo(1);
     }
 
+    @Test
+    public void testWithChain() {
+        UniReader reader = i -> Uni.createFrom().item(i);
+        int res = Uni.createFrom().item(1)
+                .chain(function(reader::read))
+                .await().indefinitely();
+        assertThat(res).isEqualTo(1);
+    }
+
     private int validate(int i) throws IOException {
         if (i != 0) {
             return i;

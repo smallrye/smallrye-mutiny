@@ -31,9 +31,16 @@ public class UniOnItemTransformToUniTest {
     }
 
     @Test
-    public void testTransformToUniShortcut() {
+    public void testTransformToUniShortcutFlatmap() {
         UniAssertSubscriber<Integer> test = UniAssertSubscriber.create();
         Uni.createFrom().item(1).flatMap(v -> Uni.createFrom().item(2)).subscribe().withSubscriber(test);
+        test.assertCompletedSuccessfully().assertItem(2).assertNoFailure();
+    }
+
+    @Test
+    public void testTransformToUniShortcutChain() {
+        UniAssertSubscriber<Integer> test = UniAssertSubscriber.create();
+        Uni.createFrom().item(1).chain(v -> Uni.createFrom().item(2)).subscribe().withSubscriber(test);
         test.assertCompletedSuccessfully().assertItem(2).assertNoFailure();
     }
 
