@@ -62,6 +62,11 @@ public class FlatMapTest {
                 .onItem().transformToUni(i -> Uni.createFrom().item(i + 1))
                 .await().indefinitely();
 
+        // Shortcut for .onItem().transformToUni
+        int result3 = uni
+                .chain(i -> Uni.createFrom().item(i + 1))
+                .await().indefinitely();
+
         List<Integer> list = multi
                 .onItem().transform(i -> i + 1)
                 .collectItems().asList()
@@ -95,6 +100,7 @@ public class FlatMapTest {
         // end::mutiny[]
         assertThat(result).isEqualTo(2);
         assertThat(result2).isEqualTo(2);
+        assertThat(result3).isEqualTo(2);
         assertThat(list).containsExactly(2, 3);
         assertThat(list2).containsExactly(1, 1, 2, 2);
         assertThat(list3).containsExactly(1, 1, 2, 2);

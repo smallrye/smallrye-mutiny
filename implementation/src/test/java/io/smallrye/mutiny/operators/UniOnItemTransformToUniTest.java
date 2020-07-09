@@ -7,6 +7,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import org.testng.annotations.Test;
 
@@ -31,10 +32,34 @@ public class UniOnItemTransformToUniTest {
     }
 
     @Test
-    public void testTransformToUniShortcut() {
+    public void testTransformToUniShortcutFlatmap() {
         UniAssertSubscriber<Integer> test = UniAssertSubscriber.create();
         Uni.createFrom().item(1).flatMap(v -> Uni.createFrom().item(2)).subscribe().withSubscriber(test);
         test.assertCompletedSuccessfully().assertItem(2).assertNoFailure();
+    }
+
+    @Test
+    public void testTransformToUniShortcutChain() {
+        UniAssertSubscriber<Integer> test = UniAssertSubscriber.create();
+        Uni.createFrom().item(1).chain(v -> Uni.createFrom().item(2)).subscribe().withSubscriber(test);
+        test.assertCompletedSuccessfully().assertItem(2).assertNoFailure();
+    }
+
+    @Test
+    public void testTransformToUniShortcutThen() {
+        UniAssertSubscriber<Integer> test = UniAssertSubscriber.create();
+        Uni.createFrom().item(1).then(() -> Uni.createFrom().item(2)).subscribe().withSubscriber(test);
+        test.assertCompletedSuccessfully().assertItem(2).assertNoFailure();
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void testTransformToUniShortcutThenWithNullSupplier() {
+        Uni.createFrom().item(1).then((Supplier<Uni<?>>) null);
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void testTransformToUniShortcutChainWithNullMApper() {
+        Uni.createFrom().item(1).chain(null);
     }
 
     @Test

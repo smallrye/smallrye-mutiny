@@ -117,6 +117,31 @@ include::../../../src/test/java/snippets/EventsTest.java[tags=invoke-uni]
 
 `invokeUni` is a shortcut for `onItem().invokeUni(...)`.
 
+
+.List of the shortcuts offered by the Uni class
+|===
+|Shortcut | Equivalent
+
+|`uni.map(x -> y)`
+|`uni.onItem().transform(x -> y)`
+
+|`uni.flatMap(x -> uni2)`
+|`uni.onItem().transformToUni(x -> uni2)`
+
+|`uni.chain(x -> uni2)`
+|`uni.onItem().transformToUni(x -> uni2)`
+
+|`uni.then(() -> uni2)`
+|`uni.onItem().transformToUni(ignored -> uni2)`
+
+|`uni.invoke(x -> System.out.println(x))`
+|`uni.onItem().invoke(x -> System.out.println(x))`
+
+|`uni.invokeUni(x -> uni2)`
+|`uni.onItem().invokeUni(x -> uni2)`
+|===
+
+
 === How do I merge, concatenate or combine Multis?
 
 You can create instances of `Multi` by concatenating, merging, or combining ``Multi``s and ``Publisher``s:

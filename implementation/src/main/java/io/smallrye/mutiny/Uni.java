@@ -8,6 +8,7 @@ import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 import io.smallrye.mutiny.groups.*;
 import io.smallrye.mutiny.subscription.UniEmitter;
@@ -446,6 +447,7 @@ public interface Uni<T> {
      * {@link Uni} returned by this method.
      * <p>
      * This operation is generally named {@code flatMap}.
+     * This method is a shortcut on {@link UniOnItem#transformToUni(Function)} onItem().transformToUni(mapper)}.
      *
      * @param mapper the function called with the item of the this {@link Uni} and producing the {@link Uni},
      *        must not be {@code null}, must not return {@code null}.
@@ -455,6 +457,72 @@ public interface Uni<T> {
      */
     default <O> Uni<O> flatMap(Function<? super T, Uni<? extends O>> mapper) {
         return onItem().transformToUni(nonNull(mapper, "mapper"));
+    }
+
+    /**
+     * One the observed {@code Uni} emits an item, execute the given {@code mapper}. This mapper produces another
+     * {@code Uni}. The downstream receives the events emitted by this produced {@code Uni}.
+     *
+     * This operation allows <em>chaining</em> asynchronous operations: when the upstream completes with an item, run
+     * the mapper and emits the item (or failure) sent by the produced {@code Uni}:
+     *
+     * <pre>
+     * Uni&lt;Session&gt; uni = getSomeSession();
+     * return uni.chain(session -&gt; session.persist(fruit))
+     *         .chain(session -&gt; session.flush())
+     *         .map(x -&gt; Response.ok(fruit).status(201).build());
+     * </pre>
+     *
+     * The mapper is called with the item event of the current {@link Uni} and produces an {@link Uni}, possibly
+     * using another type of item ({@code R}). The events fired by produced {@link Uni} are forwarded to the
+     * {@link Uni} returned by this method.
+     * <p>
+     * This operation is generally named {@code flatMap}.
+     * This method is a shortcut for {@link UniOnItem#transformToUni(Function) onItem().transformToUni(mapper)}.
+     *
+     * @param mapper the function called with the item of the this {@link Uni} and producing the {@link Uni},
+     *        must not be {@code null}, must not return {@code null}.
+     * @param <O> the type of item
+     * @return a new {@link Uni} that would fire events from the uni produced by the mapper function, possibly
+     *         in an asynchronous manner.
+     * @see #then(Supplier)
+     */
+    default <O> Uni<O> chain(Function<? super T, Uni<? extends O>> mapper) {
+        return onItem().transformToUni(nonNull(mapper, "mapper"));
+    }
+
+    /**
+     * One the observed {@code Uni} emits an item, execute the given {@code supplier}. Unlike {@link #chain(Function)},
+     * the received item is not required to run the {@code supplier}, and so omitted. The supplier produces another
+     * {@code Uni}. The downstream receives the events emitted by this produced {@code Uni}.
+     *
+     * This operation allows <em>chaining</em> asynchronous operation when you don't need the previous result: when the
+     * upstream completes with an item, run the supplier and emits the item (or failure) sent by the produced
+     * {@code Uni}:
+     *
+     * <pre>
+     * {@code
+     * String id = ...;
+     * Session session = getSomeSession();
+     * session.find(Fruit.class, id)
+     *        .chain(fruit -> session.remove(fruit)
+     *        .then(() -> session.flush());
+     * }
+     * </pre>
+     *
+     * This method is a shortcut for {@link UniOnItem#transformToUni(Function)
+     * onItem().transformToUni(ignored -> supplier.get())}.
+     *
+     * @param supplier the function called when the item of the this {@link Uni} is emitted and producing the {@link Uni},
+     *        must not be {@code null}, must not return {@code null}.
+     * @param <O> the type of item
+     * @return a new {@link Uni} that would fire events from the uni produced by the mapper function, possibly
+     *         in an asynchronous manner.
+     * @see #chain(Function)
+     */
+    default <O> Uni<O> then(Supplier<Uni<? extends O>> supplier) {
+        Supplier<Uni<? extends O>> actual = nonNull(supplier, "supplier");
+        return onItem().transformToUni(ignored -> actual.get());
     }
 
     /**
