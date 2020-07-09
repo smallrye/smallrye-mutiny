@@ -288,4 +288,171 @@ public class UniOnEventTest {
         assertThat(called).isFalse();
     }
 
+    @Test
+    public void testEventuallyActionOnItem() {
+        AtomicInteger item = new AtomicInteger();
+        AtomicBoolean eventuallyCalled = new AtomicBoolean();
+
+        UniAssertSubscriber<Integer> subscriber = Uni.createFrom().item(69)
+                .invoke(item::set)
+                .eventually(() -> eventuallyCalled.set(true))
+                .subscribe().withSubscriber(UniAssertSubscriber.create());
+
+        subscriber.assertCompletedSuccessfully();
+        assertThat(item.get()).isEqualTo(69);
+        assertThat(eventuallyCalled).isTrue();
+    }
+
+    @Test
+    public void testEventuallyActionOnFailure() {
+        AtomicReference<Object> item = new AtomicReference<>();
+        AtomicBoolean eventuallyCalled = new AtomicBoolean();
+
+        UniAssertSubscriber<Object> subscriber = Uni.createFrom().failure(new IOException("boom"))
+                .invoke(item::set)
+                .eventually(() -> eventuallyCalled.set(true))
+                .subscribe().withSubscriber(UniAssertSubscriber.create());
+
+        subscriber.assertFailure(IOException.class, "boom");
+        assertThat(item.get()).isNull();
+        assertThat(eventuallyCalled).isTrue();
+    }
+
+    @Test
+    public void testEventuallyActionThrowingException() {
+        AtomicReference<Object> item = new AtomicReference<>();
+        AtomicBoolean eventuallyCalled = new AtomicBoolean();
+
+        UniAssertSubscriber<Object> subscriber = Uni.createFrom().failure(new IOException("boom"))
+                .invoke(item::set)
+                .eventually(() -> {
+                    eventuallyCalled.set(true);
+                    throw new RuntimeException("bam");
+                })
+                .subscribe().withSubscriber(UniAssertSubscriber.create());
+
+        subscriber.assertFailure(CompositeException.class, "boom");
+        CompositeException compositeException = (CompositeException) subscriber.getFailure();
+        assertThat(compositeException.getCauses()).hasSize(2);
+        assertThat(compositeException.getCauses().get(0)).isInstanceOf(IOException.class).hasMessage("boom");
+        assertThat(compositeException.getCauses().get(1)).isInstanceOf(RuntimeException.class).hasMessage("bam");
+        assertThat(item.get()).isNull();
+        assertThat(eventuallyCalled).isTrue();
+    }
+
+    @Test
+    public void testEventuallyUniOnItem() {
+        AtomicInteger item = new AtomicInteger();
+        AtomicBoolean eventuallyCalled = new AtomicBoolean();
+
+        UniAssertSubscriber<Integer> subscriber = Uni.createFrom().item(69)
+                .invoke(item::set)
+                .eventually(() -> {
+                    eventuallyCalled.set(true);
+                    return Uni.createFrom().item(100);
+                })
+                .subscribe().withSubscriber(UniAssertSubscriber.create());
+
+        subscriber.assertCompletedSuccessfully();
+        assertThat(item.get()).isEqualTo(69);
+        assertThat(eventuallyCalled).isTrue();
+    }
+
+    @Test
+    public void testEventuallyFailedUniOnItem() {
+        AtomicInteger item = new AtomicInteger();
+        AtomicBoolean eventuallyCalled = new AtomicBoolean();
+
+        UniAssertSubscriber<Integer> subscriber = Uni.createFrom().item(69)
+                .invoke(item::set)
+                .eventually(() -> {
+                    eventuallyCalled.set(true);
+                    return Uni.createFrom().failure(new RuntimeException("tada"));
+                })
+                .subscribe().withSubscriber(UniAssertSubscriber.create());
+
+        subscriber.assertFailure(RuntimeException.class, "tada");
+        assertThat(item.get()).isEqualTo(69);
+        assertThat(eventuallyCalled).isTrue();
+    }
+
+    @Test
+    public void testEventuallyUniOnFailure() {
+        AtomicReference<Object> item = new AtomicReference<>();
+        AtomicBoolean eventuallyCalled = new AtomicBoolean();
+
+        UniAssertSubscriber<Object> subscriber = Uni.createFrom().failure(new IOException("boom"))
+                .invoke(item::set)
+                .eventually(() -> {
+                    eventuallyCalled.set(true);
+                    return Uni.createFrom().item(100);
+                })
+                .subscribe().withSubscriber(UniAssertSubscriber.create());
+
+        subscriber.assertFailure(IOException.class, "boom");
+        assertThat(item.get()).isNull();
+        assertThat(eventuallyCalled).isTrue();
+    }
+
+    @Test
+    public void testEventuallyFailedUniOnFailure() {
+        AtomicReference<Object> item = new AtomicReference<>();
+        AtomicBoolean eventuallyCalled = new AtomicBoolean();
+
+        UniAssertSubscriber<Object> subscriber = Uni.createFrom().failure(new IOException("boom"))
+                .invoke(item::set)
+                .eventually(() -> {
+                    eventuallyCalled.set(true);
+                    return Uni.createFrom().failure(new RuntimeException("bam"));
+                })
+                .subscribe().withSubscriber(UniAssertSubscriber.create());
+
+        subscriber.assertFailure(CompositeException.class, "boom");
+        CompositeException compositeException = (CompositeException) subscriber.getFailure();
+        assertThat(compositeException.getCauses()).hasSize(2);
+        assertThat(compositeException.getCauses().get(0)).isInstanceOf(IOException.class).hasMessage("boom");
+        assertThat(compositeException.getCauses().get(1)).isInstanceOf(RuntimeException.class).hasMessage("bam");
+        assertThat(item.get()).isNull();
+        assertThat(eventuallyCalled).isTrue();
+    }
+
+    @Test
+    public void testEventuallyUniThrowingOnItem() {
+        AtomicInteger item = new AtomicInteger();
+        AtomicBoolean eventuallyCalled = new AtomicBoolean();
+
+        UniAssertSubscriber<Integer> subscriber = Uni.createFrom().item(69)
+                .invoke(item::set)
+                .eventually(() -> {
+                    eventuallyCalled.set(true);
+                    throw new RuntimeException("bam");
+                })
+                .subscribe().withSubscriber(UniAssertSubscriber.create());
+
+        subscriber.assertFailure(RuntimeException.class, "bam");
+        assertThat(item.get()).isEqualTo(69);
+        assertThat(eventuallyCalled).isTrue();
+    }
+
+    @Test
+    public void testEventuallyUniThrowingOnFailure() {
+        AtomicReference<Object> item = new AtomicReference<>();
+        AtomicBoolean eventuallyCalled = new AtomicBoolean();
+
+        UniAssertSubscriber<Object> subscriber = Uni.createFrom().failure(new IOException("boom"))
+                .invoke(item::set)
+                .eventually(() -> {
+                    eventuallyCalled.set(true);
+                    throw new RuntimeException("bam");
+                })
+                .subscribe().withSubscriber(UniAssertSubscriber.create());
+
+        subscriber.assertFailure(CompositeException.class, "boom");
+        CompositeException compositeException = (CompositeException) subscriber.getFailure();
+        assertThat(compositeException.getCauses()).hasSize(2);
+        assertThat(compositeException.getCauses().get(0)).isInstanceOf(IOException.class).hasMessage("boom");
+        assertThat(compositeException.getCauses().get(1)).isInstanceOf(RuntimeException.class).hasMessage("bam");
+        assertThat(item.get()).isNull();
+        assertThat(eventuallyCalled).isTrue();
+    }
 }

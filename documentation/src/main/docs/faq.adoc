@@ -139,6 +139,12 @@ include::../../../src/test/java/snippets/EventsTest.java[tags=invoke-uni]
 
 |`uni.invokeUni(x -> uni2)`
 |`uni.onItem().invokeUni(x -> uni2)`
+
+|`uni.eventually(() -> System.out.println("eventually"))`
+|`uni.onItemOrFailure().invoke((ignoredItem, ignoredException) -> System.out.println("eventually))`
+
+|`uni.eventually(() -> uni2)`
+|`uni.onItemOrFailure().invokeUni((ignoredItem, ignoredException) -> uni2)`
 |===
 
 

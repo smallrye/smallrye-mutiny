@@ -5,10 +5,7 @@ import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Executor;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.function.Supplier;
+import java.util.function.*;
 
 import io.smallrye.mutiny.groups.*;
 import io.smallrye.mutiny.subscription.UniEmitter;
@@ -523,6 +520,61 @@ public interface Uni<T> {
     default <O> Uni<O> then(Supplier<Uni<? extends O>> supplier) {
         Supplier<Uni<? extends O>> actual = nonNull(supplier, "supplier");
         return onItem().transformToUni(ignored -> actual.get());
+    }
+
+    /**
+     * Execute an action after an item or a failure has been emitted.
+     * This is equivalent to a {@code finally} block in Java.
+     *
+     * <pre>
+     * {@code
+     * String id = ...;
+     * Session session = getSomeSession();
+     * session.find(Fruit.class, id)
+     *        .chain(fruit -> session.remove(fruit)
+     *        .then(() -> session.flush())
+     *        .eventually(() -> session.close());
+     * }
+     * </pre>
+     * <p>
+     * This method is a shortcut for {@link UniOnItemOrFailure#invoke(BiConsumer)}:
+     * {@code onItemOrFailure().invoke((item, err) -> action.run())}
+     *
+     * @param action an action to perform, must not be {@code null}.
+     * @return a new {@link Uni} that emits events once the action has completed.
+     * @see #onItemOrFailure()
+     */
+    default Uni<T> eventually(Runnable action) {
+        return onItemOrFailure().invoke((item, err) -> nonNull(action, "action").run());
+    }
+
+    /**
+     * When this {@link Uni} emits an item or a failure, invoke a {@link Uni} supplier then invoke the supplied {@link Uni}.
+     * When the supplied {@link Uni} emits an item then it is ignored, and when it emits a failure it is reported.
+     * <p>
+     * This is equivalent to a {@code finally} block in Java.
+     *
+     * <pre>
+     * {@code
+     * String id = ...;
+     * Session session = getSomeSession();
+     * session.find(Fruit.class, id)
+     *        .chain(fruit -> session.remove(fruit)
+     *        .eventually(() -> session.close());
+     * }
+     * </pre>
+     * <p>
+     * This method is a shortcut for {@link UniOnItemOrFailure#invokeUni(BiFunction)}:
+     * {@code onItemOrFailure().invokeUni((item, err) -> supplier.get())}
+     *
+     * @param supplier a {@link Uni} supplier, cannot be {@code null} and cannot return {@code null}.
+     * @param <O> the type of the item
+     * @return a new {@link Uni} that emits events once the supplied {@link Uni} emits an item or a failure.
+     * @see #onItemOrFailure()
+     */
+    default <O> Uni<T> eventually(Supplier<Uni<? extends O>> supplier) {
+        Supplier<Uni<? extends O>> actual = nonNull(supplier, "supplier");
+        return onItemOrFailure().invokeUni((item, err) -> actual.get());
     }
 
     /**
