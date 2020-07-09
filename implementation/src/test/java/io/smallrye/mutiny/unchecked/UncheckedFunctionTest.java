@@ -1,7 +1,6 @@
 package io.smallrye.mutiny.unchecked;
 
-import static io.smallrye.mutiny.unchecked.Unchecked.function;
-import static io.smallrye.mutiny.unchecked.Unchecked.unchecked;
+import static io.smallrye.mutiny.unchecked.Unchecked.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -51,6 +50,10 @@ public class UncheckedFunctionTest {
         Uni<Integer> read(int i) throws IOException;
     }
 
+    interface UniSupplier {
+        Uni<Integer> get() throws IOException;
+    }
+
     @Test
     public void testWithInterfaceMap() {
         Reader reader = i -> i;
@@ -76,6 +79,15 @@ public class UncheckedFunctionTest {
                 .chain(function(reader::read))
                 .await().indefinitely();
         assertThat(res).isEqualTo(1);
+    }
+
+    @Test
+    public void testWithThen() {
+        UniSupplier reader = () -> Uni.createFrom().item(23);
+        int res = Uni.createFrom().item(1)
+                .then(supplier(reader::get))
+                .await().indefinitely();
+        assertThat(res).isEqualTo(23);
     }
 
     private int validate(int i) throws IOException {
