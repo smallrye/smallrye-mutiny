@@ -699,13 +699,13 @@ Also, <code>Uni</code> can handle items having a <code>null</code> value (and ha
 <div class="listingblock">
 <div class="content">
 <pre class="highlight"><code class="language-java" data-lang="java">Multi.createFrom().items("a", "b", "c")
-        .onItem().apply(i -&gt; i.toUpperCase())
+        .onItem().transform(i -&gt; i.toUpperCase())
         .subscribe().with(
                 item -&gt; System.out.println("Received: " + item),
                 failure -&gt; System.out.println("Failed with " + failure.getMessage()));
 
 Uni.createFrom().item("a")
-        .onItem().apply(i -&gt; i.toUpperCase())
+        .onItem().transform(i -&gt; i.toUpperCase())
         .subscribe().with(
                 item -&gt; System.out.println("Received: " + item),
                 failure -&gt; System.out.println("Failed with " + failure.getMessage()));</code></pre>
@@ -717,14 +717,14 @@ Uni.createFrom().item("a")
 <div class="listingblock">
 <div class="content">
 <pre class="highlight"><code class="language-java" data-lang="java">Multi.createFrom().items("a", "b", "c")
-        .onItem().apply(i -&gt; i.toUpperCase())
+        .onItem().transform(i -&gt; i.toUpperCase())
         .toUni() // Convert the multi to uni, only "a" will be forwarded.
         .subscribe().with(
                 item -&gt; System.out.println("Received: " + item),
                 failure -&gt; System.out.println("Failed with " + failure.getMessage()));
 
 Uni.createFrom().item("a")
-        .onItem().apply(i -&gt; i.toUpperCase())
+        .onItem().transform(i -&gt; i.toUpperCase())
         .toMulti() // Convert the uni to a multi, the completion event will be fired after the emission of "a"
         .subscribe().with(
                 item -&gt; System.out.println("Received: " + item),
@@ -814,7 +814,7 @@ Multi.createFrom().item("some known value");
 Multi.createFrom().item(() -&gt; "some value computed at subscription time");
 Multi.createFrom().items("a", "b", "c");
 Multi.createFrom().items(() -&gt; Stream.of("computed", "at", "subscription", "time"));
-Multi.createFrom().iterable(Arrays.asList("some", "produceIterable"));
+Multi.createFrom().iterable(Arrays.asList("some", "iterable"));
 
 // Creation from a completion stage or completable future
 Multi.createFrom().completionStage(CompletableFuture.supplyAsync(() -&gt; "result"))
@@ -900,25 +900,25 @@ multi.subscribe().withSubscriber(new MultiSubscriber&lt;String&gt;() {
 <h3 id="_structuring_the_pipeline">Structuring the pipeline</h3>
 <div class="paragraph">
 <p>It can be hard to structure your sequence of processing in a readable manner.
-Mutiny provides the <code>then</code> function to structure your pipeline:</p>
+Mutiny provides the <code>stage</code> function to structure your pipeline:</p>
 </div>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight"><code class="language-java" data-lang="java">String result = Multi.createFrom().completionStage(CompletableFuture.supplyAsync(() -&gt; 23))
-        .then(self -&gt; {
+        .stage(self -&gt; {
             // Transform each item into a string of the item +1
             return self
-                    .onItem().apply(i -&gt; i + 1)
-                    .onItem().apply(i -&gt; Integer.toString(i));
+                    .onItem().transform(i -&gt; i + 1)
+                    .onItem().transform(i -&gt; Integer.toString(i));
         })
-        .then(self -&gt; self
+        .stage(self -&gt; self
                 .onItem().invoke(item -&gt; System.out.println("The item is " + item))
                 .collectItems().first())
-        .then(self -&gt; self.await().indefinitely());</code></pre>
+        .stage(self -&gt; self.await().indefinitely());</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p><code>then</code> can be used on <code>Multi</code> and <code>Uni</code> and let you group a set of operations in a logical set.</p>
+<p><code>stage</code> can be used on <code>Multi</code> and <code>Uni</code> and let you group a set of operations in a logical set.</p>
 </div>
 </div>
 </div>
@@ -926,7 +926,7 @@ Mutiny provides the <code>then</code> function to structure your pipeline:</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-06-24 18:25:57 UTC
+Last updated 2020-07-10 10:38:31 UTC
 </div>
 </div>
 </body>

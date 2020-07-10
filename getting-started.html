@@ -474,7 +474,7 @@ If you are using Maven, declare the following dependency in your <code>pom.xml</
 <pre class="highlight"><code class="language-xml" data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;io.smallrye.reactive&lt;/groupId&gt;
     &lt;artifactId&gt;mutiny&lt;/artifactId&gt;
-    &lt;version&gt;0.5.4&lt;/version&gt;
+    &lt;version&gt;0.6.0&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -484,7 +484,7 @@ If you are using Maven, declare the following dependency in your <code>pom.xml</
 <div class="listingblock">
 <div class="content">
 <pre class="highlight"><code class="language-groovy" data-lang="groovy">dependencies {
-     implementation 'io.smallrye.reactive:mutiny:0.5.4'
+     implementation 'io.smallrye.reactive:mutiny:0.6.0'
 }</code></pre>
 </div>
 </div>
@@ -502,7 +502,7 @@ public class GettingStarted {
 
     public static void main(String[] args) {
         Multi.createFrom().items("hello", "world")
-                .onItem().apply(s -&gt; s.toUpperCase() + " ")
+                .onItem().transform(s -&gt; s.toUpperCase() + " ")
                 .onCompletion().continueWith("!")
                 .subscribe().with(System.out::print);
     }
@@ -545,7 +545,7 @@ Finally, at the end of the line, the finalized items are pushed to the final con
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-06-24 18:25:57 UTC
+Last updated 2020-07-10 10:38:31 UTC
 </div>
 </div>
 </body>

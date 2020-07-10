@@ -462,8 +462,8 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div id="header">
 <h1>SmallRye Mutiny</h1>
 <div class="details">
-<span id="revnumber">version 0.5.4,</span>
-<span id="revdate">2020-06-24</span>
+<span id="revnumber">version 0.6.0,</span>
+<span id="revdate">2020-07-10</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">SmallRye Mutiny</div>
@@ -491,7 +491,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#_how_do_i_represent_asynchronous_calls">2.12. How do I represent asynchronous calls?</a></li>
 <li><a href="#_how_do_i_chain_asynchronous_calls">2.13. How do I chain asynchronous calls?</a></li>
 <li><a href="#_how_do_i_join_asynchronous_calls">2.14. How do I <em>join</em> asynchronous calls?</a></li>
-<li><a href="#_whats_the_difference_between_merge_and_concatenate">2.15. What&#8217;s the difference between merge() and concatenate()</a></li>
+<li><a href="#merge-concatenate">2.15. What&#8217;s the difference between merge() and concatenate()</a></li>
 <li><a href="#_how_do_i_recover_from_failure">2.16. How do I recover from failure?</a></li>
 <li><a href="#_how_do_i_handle_null">2.17. How do I handle <code>null</code>?</a></li>
 <li><a href="#_how_do_i_handle_timeout">2.18. How do I handle timeout?</a></li>
@@ -580,7 +580,7 @@ If you are using Maven, declare the following dependency in your <code>pom.xml</
 <pre class="highlight"><code class="language-xml" data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;io.smallrye.reactive&lt;/groupId&gt;
     &lt;artifactId&gt;mutiny&lt;/artifactId&gt;
-    &lt;version&gt;0.5.4&lt;/version&gt;
+    &lt;version&gt;0.6.0&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -590,7 +590,7 @@ If you are using Maven, declare the following dependency in your <code>pom.xml</
 <div class="listingblock">
 <div class="content">
 <pre class="highlight"><code class="language-groovy" data-lang="groovy">dependencies {
-     implementation 'io.smallrye.reactive:mutiny:0.5.4'
+     implementation 'io.smallrye.reactive:mutiny:0.6.0'
 }</code></pre>
 </div>
 </div>
@@ -608,7 +608,7 @@ public class GettingStarted {
 
     public static void main(String[] args) {
         Multi.createFrom().items("hello", "world")
-                .onItem().apply(s -&gt; s.toUpperCase() + " ")
+                .onItem().transform(s -&gt; s.toUpperCase() + " ")
                 .onCompletion().continueWith("!")
                 .subscribe().with(System.out::print);
     }
@@ -889,13 +889,13 @@ Also, <code>Uni</code> can handle items having a <code>null</code> value (and ha
 <div class="listingblock">
 <div class="content">
 <pre class="highlight"><code class="language-java" data-lang="java">Multi.createFrom().items("a", "b", "c")
-        .onItem().apply(i -&gt; i.toUpperCase())
+        .onItem().transform(i -&gt; i.toUpperCase())
         .subscribe().with(
                 item -&gt; System.out.println("Received: " + item),
                 failure -&gt; System.out.println("Failed with " + failure.getMessage()));
 
 Uni.createFrom().item("a")
-        .onItem().apply(i -&gt; i.toUpperCase())
+        .onItem().transform(i -&gt; i.toUpperCase())
         .subscribe().with(
                 item -&gt; System.out.println("Received: " + item),
                 failure -&gt; System.out.println("Failed with " + failure.getMessage()));</code></pre>
@@ -907,14 +907,14 @@ Uni.createFrom().item("a")
 <div class="listingblock">
 <div class="content">
 <pre class="highlight"><code class="language-java" data-lang="java">Multi.createFrom().items("a", "b", "c")
-        .onItem().apply(i -&gt; i.toUpperCase())
+        .onItem().transform(i -&gt; i.toUpperCase())
         .toUni() // Convert the multi to uni, only "a" will be forwarded.
         .subscribe().with(
                 item -&gt; System.out.println("Received: " + item),
                 failure -&gt; System.out.println("Failed with " + failure.getMessage()));
 
 Uni.createFrom().item("a")
-        .onItem().apply(i -&gt; i.toUpperCase())
+        .onItem().transform(i -&gt; i.toUpperCase())
         .toMulti() // Convert the uni to a multi, the completion event will be fired after the emission of "a"
         .subscribe().with(
                 item -&gt; System.out.println("Received: " + item),
@@ -1004,7 +1004,7 @@ Multi.createFrom().item("some known value");
 Multi.createFrom().item(() -&gt; "some value computed at subscription time");
 Multi.createFrom().items("a", "b", "c");
 Multi.createFrom().items(() -&gt; Stream.of("computed", "at", "subscription", "time"));
-Multi.createFrom().iterable(Arrays.asList("some", "produceIterable"));
+Multi.createFrom().iterable(Arrays.asList("some", "iterable"));
 
 // Creation from a completion stage or completable future
 Multi.createFrom().completionStage(CompletableFuture.supplyAsync(() -&gt; "result"))
@@ -1090,83 +1090,126 @@ multi.subscribe().withSubscriber(new MultiSubscriber&lt;String&gt;() {
 <h4 id="_structuring_the_pipeline">2.6. Structuring the pipeline</h4>
 <div class="paragraph">
 <p>It can be hard to structure your sequence of processing in a readable manner.
-Mutiny provides the <code>then</code> function to structure your pipeline:</p>
+Mutiny provides the <code>stage</code> function to structure your pipeline:</p>
 </div>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight"><code class="language-java" data-lang="java">String result = Multi.createFrom().completionStage(CompletableFuture.supplyAsync(() -&gt; 23))
-        .then(self -&gt; {
+        .stage(self -&gt; {
             // Transform each item into a string of the item +1
             return self
-                    .onItem().apply(i -&gt; i + 1)
-                    .onItem().apply(i -&gt; Integer.toString(i));
+                    .onItem().transform(i -&gt; i + 1)
+                    .onItem().transform(i -&gt; Integer.toString(i));
         })
-        .then(self -&gt; self
+        .stage(self -&gt; self
                 .onItem().invoke(item -&gt; System.out.println("The item is " + item))
                 .collectItems().first())
-        .then(self -&gt; self.await().indefinitely());</code></pre>
+        .stage(self -&gt; self.await().indefinitely());</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p><code>then</code> can be used on <code>Multi</code> and <code>Uni</code> and let you group a set of operations in a logical set.
+<p><code>stage</code> can be used on <code>Multi</code> and <code>Uni</code> and let you group a set of operations in a logical set.
 == How Do I do <em>x</em>?</p>
 </div>
 </div>
 <div class="sect3">
 <h4 id="_how_do_i_transform_items">2.7. How do I transform items?</h4>
 <div class="paragraph">
-<p>To transform items synchronously use the <code>apply</code> operators:</p>
+<p>To transform items synchronously use the <code>transform</code> operators:</p>
 </div>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight"><code class="language-java" data-lang="java">String result1 = uni
-        .onItem().apply(s -&gt; s.toUpperCase())
+        .onItem().transform(s -&gt; s.toUpperCase())
         .await().indefinitely();
 List&lt;String&gt; result2 = multi
-        .onItem().apply(s -&gt; s.toUpperCase())
+        .onItem().transform(String::toUpperCase)
         .collectItems().asList().await().indefinitely();</code></pre>
 </div>
 </div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
 <div class="paragraph">
 <p>If your operation throws a <em>checked exception</em>, you can use the <code>io.smallrye.mutiny.unchecked.Unchecked</code> wrappers to avoid having to catch the exception in the <em>callback</em>.</p>
 </div>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight"><code class="language-java" data-lang="java">String result1 = uni
-        .onItem().apply(function(this::operationThrowingException))
+        .onItem().transform(function(this::operationThrowingException))
         .await().indefinitely();
 List&lt;String&gt; result2 = multi
-        .onItem().apply(function(this::operationThrowingException))
+        .onItem().transform(function(this::operationThrowingException))
         .collectItems().asList().await().indefinitely();</code></pre>
 </div>
 </div>
+</td>
+</tr>
+</table>
+</div>
 <div class="paragraph">
-<p>You can also transform items asynchronously using the <code>produceUni</code> / <code>produceCompletionStage</code> operators:</p>
+<p>You can also transform items asynchronously using the <code>transformToUni</code> operator.
+In this case, you return a <code>Uni</code>:</p>
 </div>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight"><code class="language-java" data-lang="java">String result1 = uni
-        .onItem().produceUni(s -&gt; Uni.createFrom().item(s.toUpperCase()))
+        .onItem().transformToUni(s -&gt; Uni.createFrom().item(s.toUpperCase()))
         .await().indefinitely();
 String result2 = uni
-        .onItem().produceCompletionStage(s -&gt; CompletableFuture.supplyAsync(() -&gt; s.toUpperCase()))
+        .onItem().transformToUni(s -&gt; Uni.createFrom().completionStage(
+                CompletableFuture.supplyAsync(() -&gt; s.toUpperCase()))
+        )
         .await().indefinitely();
 List&lt;String&gt; result3 = multi
-        .onItem().produceUni(s -&gt; Uni.createFrom().item(s.toUpperCase())).concatenate()
+        .onItem().transformToUniAndMerge(s -&gt; Uni.createFrom().item(s.toUpperCase()))
         .collectItems().asList().await().indefinitely();
 List&lt;String&gt; result4 = multi
-        .onItem().produceCompletionStage(s -&gt; CompletableFuture.supplyAsync(() -&gt; s.toUpperCase()))
-        .concatenate()
+        .onItem().transformToUniAndConcatenate(s -&gt; Uni.createFrom().item(s.toUpperCase()))
         .collectItems().asList().await().indefinitely();</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>If you need to generate a sequence of items use, <code>producePublisher</code>:</p>
+<p>If the upstream is a <code>multi</code> you can use:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>transformToUniAndConcatenate</code> - run the async operation and concatenate the produced items preserving the order from upstream</p>
+</li>
+<li>
+<p><code>transformToUniAndMerge</code> - run the async operation and merge the produced items as soon as they are produced.</p>
+</li>
+<li>
+<p><code>transformToUni</code> - return an object letting you configure the <em>flattening</em> process (merge or concatenate)</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>The difference between merge and concatenate is explained in the <a href="#merge-concatenate">What&#8217;s the difference between merge() and concatenate()</a> section.
+When producing <code>multis</code> use:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>transformToMultiAndConcatenate</code> - run the async operation and concatenate the items produced by the returned <code>multis</code> preserving the order from upstream,</p>
+</li>
+<li>
+<p><code>transformToMultiAndAndMerge</code> - run the async operation and merge the items produced by the returned <code>multis</code> as soon as they are produced.</p>
+</li>
+<li>
+<p><code>transformToMulti</code> - return an object letting you configure the <em>flattening</em> process (merge/concatenate, concurrency, failure collection)</p>
+</li>
+</ul>
 </div>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight"><code class="language-java" data-lang="java">List&lt;String&gt; result = multi
-        .onItem().producePublisher(s -&gt; Multi.createFrom().item(s.toUpperCase())).concatenate()
+        .onItem().transformToMultiAndConcatenate(s -&gt; Multi.createFrom().item(s.toUpperCase()))
         .collectItems().asList().await().indefinitely();</code></pre>
 </div>
 </div>
@@ -1297,29 +1340,119 @@ The equivalent to <code>map</code>, <code>flatMap</code> and <code>concatMap</co
 <div class="listingblock">
 <div class="content">
 <pre class="highlight"><code class="language-java" data-lang="java">int result = uni
-        .onItem().apply(i -&gt; i + 1)
+        .onItem().transform(i -&gt; i + 1)
         .await().indefinitely();
 
 int result2 = uni
-        .onItem().produceUni(i -&gt; Uni.createFrom().item(i + 1))
+        .onItem().transformToUni(i -&gt; Uni.createFrom().item(i + 1))
+        .await().indefinitely();
+
+// Shortcut for .onItem().transformToUni
+int result3 = uni
+        .chain(i -&gt; Uni.createFrom().item(i + 1))
         .await().indefinitely();
 
 List&lt;Integer&gt; list = multi
-        .onItem().apply(i -&gt; i + 1)
+        .onItem().transform(i -&gt; i + 1)
         .collectItems().asList()
         .await().indefinitely();
 
 List&lt;Integer&gt; list2 = multi
-        .onItem().produceMulti(i -&gt; Multi.createFrom().items(i, i)).merge()
+        .onItem().transformToMultiAndMerge(i -&gt; Multi.createFrom().items(i, i))
         .collectItems().asList()
         .await().indefinitely();
 
+// Equivalent to transformToMultiAndMerge but let you configure the flattening process,
+// failure management, concurrency...
 List&lt;Integer&gt; list3 = multi
-        .onItem().produceMulti(i -&gt; Multi.createFrom().items(i, i)).concatenate()
+        .onItem().transformToMulti(i -&gt; Multi.createFrom().items(i, i)).merge()
+        .collectItems().asList()
+        .await().indefinitely();
+
+List&lt;Integer&gt; list4 = multi
+        .onItem().transformToMultiAndConcatenate(i -&gt; Multi.createFrom().items(i, i))
+        .collectItems().asList()
+        .await().indefinitely();
+
+// Equivalent to transformToMultiAndConcatenate but let you configure the flattening process,
+// failure management...
+List&lt;Integer&gt; list5 = multi
+        .onItem().transformToMulti(i -&gt; Multi.createFrom().items(i, i)).concatenate()
         .collectItems().asList()
         .await().indefinitely();</code></pre>
 </div>
 </div>
+<div class="paragraph">
+<p>To <em>peek</em> at items, you can use the <code>invoke</code> method:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-java" data-lang="java">Multi&lt;String&gt; multi = Multi.createFrom().items("a", "b", "c");
+multi.invoke(item -&gt; System.out.println("Received item " + item));</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p><code>invoke</code> is a shortcut for <code>onItem().invoke(&#8230;&#8203;)</code>.</p>
+</div>
+<div class="paragraph">
+<p>Mutiny also provides the <code>invokeUni</code> method for executing an action returning a <code>Uni</code>.
+This is useful to execute an asynchronous action without modifying incoming item:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-java" data-lang="java">multi.invokeUni(item -&gt; executeAnAsyncAction(item));</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p><code>invokeUni</code> is a shortcut for <code>onItem().invokeUni(&#8230;&#8203;)</code>.</p>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<caption class="title">Table 1. List of the shortcuts offered by the Uni class</caption>
+<colgroup>
+<col style="width: 50%;">
+<col style="width: 50%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Shortcut</th>
+<th class="tableblock halign-left valign-top">Equivalent</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>uni.map(x &#8594; y)</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>uni.onItem().transform(x &#8594; y)</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>uni.flatMap(x &#8594; uni2)</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>uni.onItem().transformToUni(x &#8594; uni2)</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>uni.chain(x &#8594; uni2)</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>uni.onItem().transformToUni(x &#8594; uni2)</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>uni.then(() &#8594; uni2)</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>uni.onItem().transformToUni(ignored &#8594; uni2)</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>uni.invoke(x &#8594; System.out.println(x))</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>uni.onItem().invoke(x &#8594; System.out.println(x))</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>uni.invokeUni(x &#8594; uni2)</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>uni.onItem().invokeUni(x &#8594; uni2)</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>uni.eventually) &#8594; System.out.println("eventually"</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>uni.onItemOrFailure().invokeignoredItem, ignoredException) &#8594; System.out.println("eventually</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>uni.eventually(() &#8594; uni2)</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>uni.onItemOrFailure().invokeUni((ignoredItem, ignoredException) &#8594; uni2)</code></p></td>
+</tr>
+</tbody>
+</table>
 </div>
 <div class="sect3">
 <h4 id="_how_do_i_merge_concatenate_or_combine_multis">2.10. How do I merge, concatenate or combine Multis?</h4>
@@ -1406,13 +1539,13 @@ If the service invocation fails, the failure is propagated by the <code>Uni</cod
 <div class="sect3">
 <h4 id="_how_do_i_chain_asynchronous_calls">2.13. How do I chain asynchronous calls?</h4>
 <div class="paragraph">
-<p>To chain asynchronous calls, use <code>onItem().produceUni</code> or <code>onItem().produceCompletionStage</code>:</p>
+<p>To chain asynchronous calls, use <code>onItem().transformToUni</code>:</p>
 </div>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight"><code class="language-java" data-lang="java">CompletableFuture&lt;String&gt; future = uni
-        .onItem().produceUni(this::asyncOperation)
-        .onItem().produceUni(this::anotherAsyncOperation)
+        .onItem().transformToUni(this::asyncOperation)
+        .onItem().transformToUni(this::anotherAsyncOperation)
         .subscribeAsCompletionStage();</code></pre>
 </div>
 </div>
@@ -1460,25 +1593,44 @@ This function returns the combined result.</p>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_whats_the_difference_between_merge_and_concatenate">2.15. What&#8217;s the difference between merge() and concatenate()</h4>
+<h4 id="merge-concatenate">2.15. What&#8217;s the difference between merge() and concatenate()</h4>
 <div class="paragraph">
 <p>Imagine you have a <code>Multi</code>, and for each item, you need to call a remote service or execute an asynchronous operation.
 To do this, you write the following code:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-java" data-lang="java">List&lt;String&gt; list = multi
-    .onItem().produceUni(this::asyncService)
-    // .concatenate() or .merge() ?</code></pre>
+<pre class="highlight"><code class="language-java" data-lang="java">multi
+    .onItem().transformToUni(this::asyncService)
+    // .concatenate() or .merge() ?
+// or
+multi
+    .onItem().transformToUniAndConcatenate(this::asyncService)
+// or
+multi
+    .onItem().transformToUniAndConcatenateAndMerge(this::asyncService)</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p><code>produceUni</code> lets you choose between two <em>merge</em> methods: <code>merge()</code> and <code>concatenate()</code>:</p>
+<p>The difference between these alternatives is about the ordering.
+Let&#8217;s imagine you have the following items: <code>a</code>, <code>b</code>, <code>c</code> and the <code>asyncService</code> is just producing the uppercase version (but asynchronously, and you don&#8217;t know when the result is going to be produced).</p>
+</div>
+<div class="paragraph">
+<p><code>transformToUniAndConcatenate()</code> preserves the ordering. So, the output will always be <code>A</code>, <code>B</code>, <code>C</code>.
+<code>transformToUniAndMerge()</code> emits the resulting items as soon as they are available, and so may interleave the items.
+The output could be <code>B</code>, <code>A</code>, <code>C</code> if the computation of <code>b</code> was faster than for <code>a</code>.</p>
+</div>
+<div class="paragraph">
+<p><code>merge</code> executes the asynchronous operation concurrently, while <code>concatenate</code> executes them one by one to preserve the ordering.</p>
+</div>
+<div class="paragraph">
+<p><code>transformToUni</code> returns an object to configure how the produced items are going to be propagated downstream (flattening).
+It lets you choose between two <em>flattening</em> methods: <code>merge()</code> and <code>concatenate()</code>:</p>
 </div>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight"><code class="language-java" data-lang="java">List&lt;String&gt; list = multi
-        .onItem().produceUni(this::asyncService).merge()
+        .onItem().transformToUniAndMerge(this::asyncService)
         .collectItems().asList()
         .await().indefinitely();</code></pre>
 </div>
@@ -1486,7 +1638,7 @@ To do this, you write the following code:</p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight"><code class="language-java" data-lang="java">List&lt;String&gt; list = multi
-        .onItem().produceUni(this::asyncService).concatenate()
+        .onItem().transformToUniAndConcatenate(this::asyncService)
         .collectItems().asList()
         .await().indefinitely();</code></pre>
 </div>
@@ -1507,11 +1659,39 @@ With <code>merge()</code>, you can also configure the degree of concurrency usin
 <div class="listingblock">
 <div class="content">
 <pre class="highlight"><code class="language-java" data-lang="java">List&lt;String&gt; list = multi
-        .onItem().produceUni(this::asyncService).merge(8)
+        .onItem().transformToUni(this::asyncService).merge(8)
         .collectItems().asList()
         .await().indefinitely();</code></pre>
 </div>
 </div>
+<table class="tableblock frame-all grid-all stretch">
+<caption class="title">Table 2. Differences between the concatenate and merge flattening strategies</caption>
+<colgroup>
+<col style="width: 50%;">
+<col style="width: 50%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-center valign-top" colspan="2">Upstream: {a, b, c}</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-center valign-top"><p class="tableblock"><em>concatenate</em></p>
+<p class="tableblock">    <code>.transformToUniAndConcatenate(this::asyncService)</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock"><em>merge</em></p>
+<p class="tableblock">    <code>.transformToUniAndMerge(this::asyncService)</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-center valign-top"><p class="tableblock"><code>{A, B, C}</code></p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock"><code>{A, B, C}</code> or <code>{B, A, C}</code> or <code>{B, C, A}</code>&#8230;&#8203;</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-center valign-top"><p class="tableblock">The downstream items are emitted following the order from the upstream</p></td>
+<td class="tableblock halign-center valign-top"><p class="tableblock">The downstream items are emitted as soon as they are received</p></td>
+</tr>
+</tbody>
+</table>
 </div>
 <div class="sect3">
 <h4 id="_how_do_i_recover_from_failure">2.16. How do I recover from failure?</h4>
@@ -1557,7 +1737,7 @@ CompletableFuture&lt;String&gt; res4 = uni
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-java" data-lang="java">CompletableFuture&lt;String&gt; res0 = multi.onFailure().apply(failure -&gt; new MyBusinessException("oh no!"))
+<pre class="highlight"><code class="language-java" data-lang="java">CompletableFuture&lt;String&gt; res0 = multi.onFailure().transform(failure -&gt; new MyBusinessException("oh no!"))
         .collectItems().first()
         .subscribeAsCompletionStage();
 
@@ -1607,7 +1787,7 @@ uni.onItem().ifNull().failWith(() -&gt; new Exception("Boom!"));</code></pre>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight"><code class="language-java" data-lang="java">uni
-        .onItem().ifNotNull().apply(String::toUpperCase)
+        .onItem().ifNotNull().transform(String::toUpperCase)
         .onItem().ifNull().continueWith("yolo!");</code></pre>
 </div>
 </div>
@@ -1716,7 +1896,7 @@ To enable this feature, add the following dependency to your <code>CLASSPATH</co
 <pre class="highlight"><code class="language-xml" data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;io.smallrye.reactive&lt;/groupId&gt;
     &lt;artifactId&gt;mutiny-rxjava&lt;/artifactId&gt;
-    &lt;version&gt;0.5.4&lt;/version&gt;
+    &lt;version&gt;0.6.0&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -1830,7 +2010,7 @@ To enable this feature, add the following dependency to your <code>CLASSPATH</co
 <pre class="highlight"><code class="language-xml" data-lang="xml">&lt;dependency&gt;
     &lt;groupId&gt;io.smallrye.reactive&lt;/groupId&gt;
     &lt;artifactId&gt;mutiny-reactor&lt;/artifactId&gt;
-    &lt;version&gt;0.5.4&lt;/version&gt;
+    &lt;version&gt;0.6.0&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -1950,7 +2130,7 @@ But, when you are dealing with <code>Multi</code> and need to execute a blocking
 <div class="content">
 <pre class="highlight"><code class="language-java" data-lang="java">Multi&lt;String&gt; multi = Multi.createFrom().items("john", "jack", "sue")
         .emitOn(Infrastructure.getDefaultWorkerPool())
-        .onItem().apply(this::invokeRemoteServiceUsingBlockingIO);</code></pre>
+        .onItem().transform(this::invokeRemoteServiceUsingBlockingIO);</code></pre>
 </div>
 </div>
 </div>
@@ -1968,7 +2148,7 @@ Consequently, it affects where the subsequent operators execute (until another <
 <div class="content">
 <pre class="highlight"><code class="language-java" data-lang="java">Multi.createFrom().items(this::retrieveItemsFromSource)
         .emitOn(executor)
-        .onItem().apply(this::applySomeOperation)
+        .onItem().transform(this::applySomeOperation)
         .subscribe().with(
         item -&gt; System.out.println("Item: " + item),
         Throwable::printStackTrace,
@@ -1994,7 +2174,7 @@ It requests the upstream to run its subscription (call of the <code>subscribe</c
     // called on a thread from the executor
     return retrieveItemsFromSource();
 })
-        .onItem().apply(this::applySomeOperation)
+        .onItem().transform(this::applySomeOperation)
         .runSubscriptionOn(executor)
         .subscribe().with(
         item -&gt; System.out.println("Item: " + item),
@@ -2027,7 +2207,7 @@ These items are enqueued in the processor and replayed when the subscriber is co
 <div class="content">
 <pre class="highlight"><code class="language-java" data-lang="java">UnicastProcessor&lt;String&gt; processor = UnicastProcessor.create();
 Multi&lt;String&gt; multi = processor
-        .onItem().apply(String::toUpperCase)
+        .onItem().transform(String::toUpperCase)
         .onFailure().recoverWithItem("d'oh");
 
 // Create a source of items that does not follow the request protocol
@@ -2105,7 +2285,7 @@ Subscribers only get items emitted after their subscription, meaning that any pr
 <div class="content">
 <pre class="highlight"><code class="language-java" data-lang="java">BroadcastProcessor&lt;String&gt; processor = BroadcastProcessor.create();
 Multi&lt;String&gt; multi = processor
-        .onItem().apply(String::toUpperCase)
+        .onItem().transform(String::toUpperCase)
         .onFailure().recoverWithItem("d'oh");
 
 new Thread(() -&gt; {
@@ -2274,7 +2454,7 @@ If the function emits a failure (or throws an exception), this failure is propag
 <div class="listingblock">
 <div class="content">
 <pre class="highlight"><code class="language-java" data-lang="java">List&lt;Integer&gt; delayed = Multi.createFrom().items(1, 2, 3, 4, 5)
-        .onItem().produceUni(i -&gt; Uni.createFrom().item(i).onItem().delayIt().by(Duration.ofMillis(10)))
+        .onItem().transformToUni(i -&gt; Uni.createFrom().item(i).onItem().delayIt().by(Duration.ofMillis(10)))
         .concatenate()
         .collectItems().asList()
         .await().indefinitely();</code></pre>
@@ -2288,7 +2468,7 @@ You can implement this behavior as follows:</p>
 <div class="content">
 <pre class="highlight"><code class="language-java" data-lang="java">Random random = new Random();
 List&lt;Integer&gt; delayed = Multi.createFrom().items(1, 2, 3, 4, 5)
-        .onItem().produceUni(i -&gt; Uni.createFrom().item(i).onItem().delayIt().by(Duration.ofMillis(random.nextInt(100) + 1)))
+        .onItem().transformToUni(i -&gt; Uni.createFrom().item(i).onItem().delayIt().by(Duration.ofMillis(random.nextInt(100) + 1)))
         .merge()
         .collectItems().asList()
         .await().indefinitely();</code></pre>
@@ -2319,8 +2499,8 @@ A <code>ScheduledExecutorService</code> is also created but delegates the execut
 </div>
 <div id="footer">
 <div id="footer-text">
-Version 0.5.4<br>
-Last updated 2020-06-24 18:25:57 UTC
+Version 0.6.0<br>
+Last updated 2020-07-10 10:38:31 UTC
 </div>
 </div>
 </body>

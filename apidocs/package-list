@@ -12,6 +12,7 @@ io.smallrye.mutiny.operators.multi.builders
 io.smallrye.mutiny.operators.multi.multicast
 io.smallrye.mutiny.operators.multi.overflow
 io.smallrye.mutiny.operators.multi.processors
+io.smallrye.mutiny.operators.uni.builders
 io.smallrye.mutiny.subscription
 io.smallrye.mutiny.tuples
 io.smallrye.mutiny.unchecked
