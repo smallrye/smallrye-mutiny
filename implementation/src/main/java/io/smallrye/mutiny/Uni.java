@@ -635,8 +635,8 @@ public interface Uni<T> {
     UniRepeat<T> repeat();
 
     /**
-     * Configures actions to be performed on termination, that is, when there is a failure or the subscriber cancels the
-     * subscription.
+     * Configures actions to be performed on termination, that is, on item, on failure, or when the subscriber cancels
+     * the subscription.
      * 
      * @return the object to configure the termination actions.
      */

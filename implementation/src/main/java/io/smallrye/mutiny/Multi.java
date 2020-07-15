@@ -402,7 +402,7 @@ public interface Multi<T> extends Publisher<T> {
     }
 
     /**
-     * Allows configuring the actions when this {@link Multi} terminates due to a failure or cancellation.
+     * Configures actions when this {@link Multi} terminates on completion, on failure or on subscriber cancellation.
      * 
      * @return the object to configure the termination actions.
      */
