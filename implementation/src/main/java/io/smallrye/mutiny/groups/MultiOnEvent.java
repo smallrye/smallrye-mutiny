@@ -88,14 +88,7 @@ public class MultiOnEvent<T> {
      */
     @Deprecated
     public Multi<T> termination(BiConsumer<Throwable, Boolean> callback) {
-        return Infrastructure.onMultiCreation(new MultiSignalConsumerOp<>(
-                upstream,
-                null,
-                null,
-                null,
-                callback,
-                null,
-                null));
+        return upstream.onTermination().invoke(callback);
     }
 
     /**
@@ -110,15 +103,7 @@ public class MultiOnEvent<T> {
      */
     @Deprecated
     public Multi<T> termination(Runnable action) {
-        Runnable runnable = nonNull(action, "action");
-        return Infrastructure.onMultiCreation(new MultiSignalConsumerOp<>(
-                upstream,
-                null,
-                null,
-                null,
-                (f, c) -> runnable.run(),
-                null,
-                null));
+        return upstream.onTermination().invoke(action);
     }
 
     /**
