@@ -47,20 +47,14 @@ public final class MultiOnSubscribeInvokeUniOp<T> extends AbstractMultiOperator<
             if (upstream.compareAndSet(null, s)) {
                 try {
                     Uni<?> uni = Objects.requireNonNull(onSubscribe.apply(s), "The produced Uni must not be `null`");
-                    System.out.println("Generated uni " + uni);
                     uni
                             .subscribe().with(
-                                    ignored -> {
-                                        System.out.println("finnaly subscribing");
-                                        downstream.onSubscribe(this);
-                                    },
+                                    ignored -> downstream.onSubscribe(this),
                                     failure -> {
-                                        System.out.println("Failed with " + failure);
                                         Subscriptions.fail(downstream, failure);
                                         upstream.getAndSet(Subscriptions.CANCELLED).cancel();
                                     });
                 } catch (Throwable e) {
-                    System.out.println("x Failed with " + e);
                     Subscriptions.fail(downstream, e);
                     upstream.getAndSet(Subscriptions.CANCELLED).cancel();
                 }
