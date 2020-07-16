@@ -57,14 +57,12 @@ public class MultiOnEvent<T> {
                 null,
                 null,
                 null,
-                null,
                 nonNull(callback, "callback")));
     }
 
     public Multi<T> request(LongConsumer callback) {
         return Infrastructure.onMultiCreation(new MultiSignalConsumerOp<>(
                 upstream,
-                null,
                 null,
                 null,
                 null,
@@ -186,7 +184,6 @@ public class MultiOnEvent<T> {
                 null,
                 null,
                 nonNull(callback, "callback"),
-                null,
                 null,
                 null));
     }
