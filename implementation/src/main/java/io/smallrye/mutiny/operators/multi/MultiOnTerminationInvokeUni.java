@@ -36,11 +36,6 @@ public class MultiOnTerminationInvokeUni<T> extends AbstractMultiOperator<T, T> 
         }
 
         @Override
-        public void onItem(T item) {
-            downstream.onItem(item);
-        }
-
-        @Override
         public void cancel() {
             if (cancellable != null) {
                 cancellable.cancel();

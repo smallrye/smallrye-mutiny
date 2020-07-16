@@ -9,8 +9,8 @@ import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
+import io.smallrye.mutiny.operators.multi.MultiOnTerminationInvoke;
 import io.smallrye.mutiny.operators.multi.MultiOnTerminationInvokeUni;
-import io.smallrye.mutiny.operators.multi.MultiSignalConsumerOp;
 
 public class MultiOnTerminate<T> {
 
@@ -30,14 +30,7 @@ public class MultiOnTerminate<T> {
      * @return the new {@link Multi}
      */
     public Multi<T> invoke(BiConsumer<Throwable, Boolean> callback) {
-        return Infrastructure.onMultiCreation(new MultiSignalConsumerOp<>(
-                upstream,
-                null,
-                null,
-                null,
-                nonNull(callback, "callback"),
-                null,
-                null));
+        return Infrastructure.onMultiCreation(new MultiOnTerminationInvoke<>(upstream, nonNull(callback, "callback")));
     }
 
     /**
@@ -50,14 +43,8 @@ public class MultiOnTerminate<T> {
      * @return the new {@link Multi}
      */
     public Multi<T> invoke(Runnable action) {
-        return Infrastructure.onMultiCreation(new MultiSignalConsumerOp<>(
-                upstream,
-                null,
-                null,
-                null,
-                (f, c) -> nonNull(action, "action").run(),
-                null,
-                null));
+        Runnable runnable = nonNull(action, "action");
+        return Infrastructure.onMultiCreation(new MultiOnTerminationInvoke<>(upstream, (f, c) -> runnable.run()));
     }
 
     /**
