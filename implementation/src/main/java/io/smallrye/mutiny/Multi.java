@@ -11,20 +11,7 @@ import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
-import io.smallrye.mutiny.groups.MultiBroadcast;
-import io.smallrye.mutiny.groups.MultiCollect;
-import io.smallrye.mutiny.groups.MultiConvert;
-import io.smallrye.mutiny.groups.MultiCreate;
-import io.smallrye.mutiny.groups.MultiCreateBy;
-import io.smallrye.mutiny.groups.MultiGroup;
-import io.smallrye.mutiny.groups.MultiOnCompletion;
-import io.smallrye.mutiny.groups.MultiOnEvent;
-import io.smallrye.mutiny.groups.MultiOnFailure;
-import io.smallrye.mutiny.groups.MultiOnItem;
-import io.smallrye.mutiny.groups.MultiOnSubscribe;
-import io.smallrye.mutiny.groups.MultiOverflow;
-import io.smallrye.mutiny.groups.MultiSubscribe;
-import io.smallrye.mutiny.groups.MultiTransform;
+import io.smallrye.mutiny.groups.*;
 
 @SuppressWarnings("PublisherImplementation")
 public interface Multi<T> extends Publisher<T> {
@@ -256,7 +243,7 @@ public interface Multi<T> extends Publisher<T> {
     Multi<T> runSubscriptionOn(Executor executor);
 
     /**
-     * Allows configures the actions or continuation to execute when this {@link Multi} fires the completion event.
+     * Allows configuring the actions or continuation to execute when this {@link Multi} fires the completion event.
      *
      * @return the object to configure the action.
      */
@@ -413,4 +400,11 @@ public interface Multi<T> extends Publisher<T> {
     default <O> Multi<O> concatMap(Function<? super T, ? extends Publisher<? extends O>> mapper) {
         return onItem().transformToMultiAndConcatenate(mapper);
     }
+
+    /**
+     * Configures actions when this {@link Multi} terminates on completion, on failure or on subscriber cancellation.
+     * 
+     * @return the object to configure the termination actions.
+     */
+    MultiOnTerminate<T> onTermination();
 }

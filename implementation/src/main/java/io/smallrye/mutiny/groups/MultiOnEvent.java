@@ -84,16 +84,11 @@ public class MultiOnEvent<T> {
      *        is due to a cancellation (the failure parameter would be {@code null} in this case). Must not
      *        be {@code null}.
      * @return the new {@link Multi}
+     * @deprecated use {{@link Multi#onTermination()}}
      */
+    @Deprecated
     public Multi<T> termination(BiConsumer<Throwable, Boolean> callback) {
-        return Infrastructure.onMultiCreation(new MultiSignalConsumerOp<>(
-                upstream,
-                null,
-                null,
-                null,
-                callback,
-                null,
-                null));
+        return upstream.onTermination().invoke(callback);
     }
 
     /**
@@ -104,17 +99,11 @@ public class MultiOnEvent<T> {
      * @param action the action to execute when the streams completes, fails or the subscription gets cancelled. Must
      *        not be {@code null}.
      * @return the new {@link Multi}
+     * @deprecated use {{@link Multi#onTermination()}}
      */
+    @Deprecated
     public Multi<T> termination(Runnable action) {
-        Runnable runnable = nonNull(action, "action");
-        return Infrastructure.onMultiCreation(new MultiSignalConsumerOp<>(
-                upstream,
-                null,
-                null,
-                null,
-                (f, c) -> runnable.run(),
-                null,
-                null));
+        return upstream.onTermination().invoke(action);
     }
 
     /**

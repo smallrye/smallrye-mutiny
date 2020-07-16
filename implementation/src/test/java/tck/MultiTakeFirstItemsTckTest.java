@@ -51,7 +51,7 @@ public class MultiTakeFirstItemsTckTest extends AbstractPublisherTck<Long> {
     public void limitStageShouldCancelUpStreamWhenDone() {
         CompletableFuture<Void> cancelled = new CompletableFuture<>();
         infiniteStream()
-                .on().termination(() -> cancelled.complete(null))
+                .onTermination().invoke(() -> cancelled.complete(null))
                 .transform().byTakingFirstItems(1)
                 .collectItems().asList()
                 .subscribeAsCompletionStage();
@@ -80,7 +80,7 @@ public class MultiTakeFirstItemsTckTest extends AbstractPublisherTck<Long> {
         CompletableFuture<Void> cancelled = new CompletableFuture<>();
         await(
                 infiniteStream()
-                        .on().termination(() -> cancelled.complete(null))
+                        .onTermination().invoke(() -> cancelled.complete(null))
                         .onItem().invoke(i -> {
                             if (i == 100) {
                                 cancelled.completeExceptionally(new RuntimeException("Was not cancelled"));

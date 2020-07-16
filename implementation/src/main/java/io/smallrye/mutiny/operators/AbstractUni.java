@@ -130,4 +130,9 @@ public abstract class AbstractUni<T> implements Uni<T> {
     public UniRepeat<T> repeat() {
         return new UniRepeat<>(this);
     }
+
+    @Override
+    public UniOnTerminate<T> onTermination() {
+        return new UniOnTerminate<>(this);
+    }
 }

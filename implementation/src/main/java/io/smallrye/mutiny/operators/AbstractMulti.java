@@ -9,18 +9,7 @@ import org.reactivestreams.Subscriber;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
-import io.smallrye.mutiny.groups.MultiBroadcast;
-import io.smallrye.mutiny.groups.MultiCollect;
-import io.smallrye.mutiny.groups.MultiConvert;
-import io.smallrye.mutiny.groups.MultiGroup;
-import io.smallrye.mutiny.groups.MultiOnCompletion;
-import io.smallrye.mutiny.groups.MultiOnEvent;
-import io.smallrye.mutiny.groups.MultiOnFailure;
-import io.smallrye.mutiny.groups.MultiOnItem;
-import io.smallrye.mutiny.groups.MultiOnSubscribe;
-import io.smallrye.mutiny.groups.MultiOverflow;
-import io.smallrye.mutiny.groups.MultiSubscribe;
-import io.smallrye.mutiny.groups.MultiTransform;
+import io.smallrye.mutiny.groups.*;
 import io.smallrye.mutiny.helpers.StrictMultiSubscriber;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.multi.MultiCacheOp;
@@ -132,6 +121,11 @@ public abstract class AbstractMulti<T> implements Multi<T> {
     @Override
     public MultiConvert<T> convert() {
         return new MultiConvert<>(this);
+    }
+
+    @Override
+    public MultiOnTerminate<T> onTermination() {
+        return new MultiOnTerminate<>(this);
     }
 
 }
