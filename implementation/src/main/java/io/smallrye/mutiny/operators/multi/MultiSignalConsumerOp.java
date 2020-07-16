@@ -1,7 +1,5 @@
 package io.smallrye.mutiny.operators.multi;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.LongConsumer;
 
@@ -26,8 +24,6 @@ public final class MultiSignalConsumerOp<T> extends AbstractMultiOperator<T, T> 
 
     private final Runnable onCompletion;
 
-    private final BiConsumer<Throwable, Boolean> onTermination;
-
     private final Runnable onCancellation;
 
     private final LongConsumer onRequest;
@@ -36,7 +32,6 @@ public final class MultiSignalConsumerOp<T> extends AbstractMultiOperator<T, T> 
             Consumer<? super T> onItem,
             Consumer<? super Throwable> onFailure,
             Runnable onCompletion,
-            BiConsumer<Throwable, Boolean> onTermination,
             LongConsumer onRequest,
             Runnable onCancellation) {
         super(upstream);
@@ -44,7 +39,6 @@ public final class MultiSignalConsumerOp<T> extends AbstractMultiOperator<T, T> 
         this.onFailure = onFailure;
         this.onCompletion = onCompletion;
         this.onRequest = onRequest;
-        this.onTermination = onTermination;
         this.onCancellation = onCancellation;
     }
 
@@ -56,9 +50,8 @@ public final class MultiSignalConsumerOp<T> extends AbstractMultiOperator<T, T> 
         upstream.subscribe().withSubscriber(new SignalSubscriber(actual));
     }
 
-    private final class SignalSubscriber extends MultiOperatorProcessor<T, T> implements MultiSubscriber<T>, Subscription {
-
-        private final AtomicBoolean terminationCalled = new AtomicBoolean();
+    private final class SignalSubscriber extends MultiOperatorProcessor<T, T>
+            implements MultiSubscriber<T>, Subscription {
 
         SignalSubscriber(MultiSubscriber<? super T> downstream) {
             super(downstream);
@@ -97,32 +90,7 @@ public final class MultiSignalConsumerOp<T> extends AbstractMultiOperator<T, T> 
                     return;
                 }
             }
-            callTerminationCallback(null, true);
             upstream.getAndSet(Subscriptions.CANCELLED).cancel();
-        }
-
-        private boolean callTerminationCallback(Throwable failure, boolean cancelled) {
-            if (terminationCalled.compareAndSet(false, true)) {
-                if (onTermination != null) {
-                    try {
-                        onTermination.accept(failure, cancelled);
-                    } catch (Throwable e) {
-                        // We have been called because of the completion event,
-                        // let's propagate the failure.
-                        if (failure == null && !cancelled) {
-                            downstream.onFailure(e);
-                            return true;
-                        }
-                        // We have been called because of a failure event
-                        // propagate a composite exception
-                        if (failure != null) {
-                            downstream.onFailure(new CompositeException(failure, e));
-                            return true;
-                        }
-                    }
-                }
-            }
-            return false;
         }
 
         @Override
@@ -153,9 +121,7 @@ public final class MultiSignalConsumerOp<T> extends AbstractMultiOperator<T, T> 
                     }
                 }
 
-                if (!callTerminationCallback(failure, false)) {
-                    downstream.onFailure(failure);
-                }
+                downstream.onFailure(failure);
             }
         }
 
@@ -171,9 +137,7 @@ public final class MultiSignalConsumerOp<T> extends AbstractMultiOperator<T, T> 
                     }
                 }
 
-                if (!callTerminationCallback(null, false)) {
-                    downstream.onCompletion();
-                }
+                downstream.onCompletion();
             }
         }
 

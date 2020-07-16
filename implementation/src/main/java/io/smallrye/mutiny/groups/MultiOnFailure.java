@@ -72,7 +72,6 @@ public class MultiOnFailure<T> {
                 },
                 null,
                 null,
-                null,
                 null));
     }
 
