@@ -13,7 +13,7 @@
 
     <properties>
         <version.jruby>9.2.12.0</version.jruby>
-        <version.asciidoctorj>2.3.0</version.asciidoctorj>
+        <version.asciidoctorj>2.4.0</version.asciidoctorj>
         <version.asciidoctorj.pdf>1.5.3</version.asciidoctorj.pdf>
         <version.asciidoctorj.diagram>2.0.2</version.asciidoctorj.diagram>
         <site.dir>${project.build.directory}/generated-docs/</site.dir>
