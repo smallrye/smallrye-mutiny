@@ -14,7 +14,10 @@ import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
-import io.smallrye.mutiny.operators.*;
+import io.smallrye.mutiny.operators.UniOnItemConsume;
+import io.smallrye.mutiny.operators.UniOnItemTransform;
+import io.smallrye.mutiny.operators.UniOnItemTransformToMulti;
+import io.smallrye.mutiny.operators.UniOnItemTransformToUni;
 import io.smallrye.mutiny.subscription.UniEmitter;
 
 public class UniOnItem<T> {
@@ -330,5 +333,27 @@ public class UniOnItem<T> {
      */
     public UniOnNotNull<T> ifNotNull() {
         return new UniOnNotNull<>(upstream);
+    }
+
+    /**
+     * Takes the items from the upstream {@link Uni} that is either a {@link Publisher Publisher&lt;O&gt;},
+     * an {@link java.lang.reflect.Array O[]}, an {@link Iterable Iterable&lt;O&gt;} or a {@link Multi Multi&lt;O&gt;} and
+     * disjoint the items to obtain a {@link Multi Multi&lt;O&gt;}.
+     * <p>
+     * For examples, {@code Uni<[A, B, C]>} is transformed into {@code Multi<A, B, C>}, {@code Uni<[]>} is transformed
+     * into an empty {@code Multi}.
+     * <p>
+     * If the item from the upstream are not instances of {@link Iterable}, {@link Publisher} or array, an
+     * {@link IllegalArgumentException} is propagated downstream.
+     * <p>
+     * If the item is {@code null}, an empty {@code Multi} is produced.
+     * If the upstream propagates a failure, the failure is propagated downstream.
+     *
+     * @param <O> the type of the upstream item.
+     * @return the resulting multi
+     */
+    public <O> Multi<O> disjoint() {
+        return upstream.toMulti()
+                .onItem().disjoint();
     }
 }
