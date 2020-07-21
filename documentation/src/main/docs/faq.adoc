@@ -1,6 +1,7 @@
-== How Do I do _x_?
 
-=== How do I transform items?
+= How Do I do _x_?
+
+== How do I transform items?
 
 To transform items synchronously use the `transform` operators:
 
@@ -56,7 +57,7 @@ You can add the following import statement to simplify the usage of the provided
 `import static io.smallrye.mutiny.unchecked.Unchecked.*;`
 ====
 
-=== How do I filter/select items?
+== How do I filter/select items?
 
 On `Multi`, you may need to filter / select items.
 To achieve this, there is a set of methods available in `multi.transform()`:
@@ -80,7 +81,7 @@ include::../../../src/test/java/snippets/HowToFilterTest.java[tags=distinct]
 include::../../../src/test/java/snippets/HowToFilterTest.java[tags=repetition]
 ----
 
-=== Where are my map, flatMap and concatMap methods?
+== Where are my map, flatMap and concatMap methods?
 
 If you are a seasoned reactive developer, you may miss the infamous `map`, `flatMap`, `concatMap` methods.
 Mutiny also proposes there methods using the most-used variants of them.
@@ -148,7 +149,7 @@ include::../../../src/test/java/snippets/EventsTest.java[tags=invoke-uni]
 |===
 
 
-=== How do I merge, concatenate or combine Multis?
+== How do I merge, concatenate or combine Multis?
 
 You can create instances of `Multi` by concatenating, merging, or combining ``Multi``s and ``Publisher``s:
 
@@ -157,7 +158,7 @@ You can create instances of `Multi` by concatenating, merging, or combining ``Mu
 include::../../../src/test/java/snippets/MergeTest.java[tags=code]
 ----
 
-=== How can I collect / accumulate results?
+== How can I collect / accumulate results?
 
 You can collect the items from a `Multi` using the method proposed by `collectItems()`:
 
@@ -173,7 +174,7 @@ You can also accumulate results using the `scan` method:
 include::../../../src/test/java/snippets/CollectTest.java[tags=acc]
 ----
 
-=== How do I represent asynchronous calls?
+== How do I represent asynchronous calls?
 
 When calling a remote service, or anything asynchronous, you need a way to represent this call.
 Most of the time, this should be represented by a `Uni<T>` with `T` the type of result.
@@ -197,7 +198,7 @@ Uni<Void> fireAndForget();
 
 In this case, you still know if the invocation fails (you get a failure event) or if the invocation completes successfully (you get a `Void` item (`null`)).
 
-=== How do I chain asynchronous calls?
+== How do I chain asynchronous calls?
 
 To chain asynchronous calls, use `onItem().transformToUni`:
 
@@ -206,7 +207,7 @@ To chain asynchronous calls, use `onItem().transformToUni`:
 include::../../../src/test/java/snippets/HowToChainAsyncTest.java[tags=code]
 ----
 
-=== How do I _join_ asynchronous calls?
+== How do I _join_ asynchronous calls?
 
 Joining asynchronous calls, _i.e._ being notified when multiple actions complete, is a common pattern.
 With Mutiny, you can achieve this as follows:
@@ -229,7 +230,7 @@ The combinator function is invoked with a `List<Object>` as parameter and passes
 This function returns the combined result.
 
 [[merge-concatenate]]
-=== What's the difference between merge() and concatenate()
+== What's the difference between merge() and concatenate()
 
 Imagine you have a `Multi`, and for each item, you need to call a remote service or execute an asynchronous operation.
 To do this, you write the following code:
@@ -306,7 +307,7 @@ include::../../../src/test/java/snippets/MergeVsConcatenateTest.java[tags=merge-
 |===
 
 
-=== How do I recover from failure?
+== How do I recover from failure?
 
 Failures are inherent to software.
 So you need to handle them.
@@ -330,7 +331,7 @@ include::../../../src/test/java/snippets/MultiFailureTest.java[tags=code]
 Note that with `Multi`, a failure cancels the subscription, meaning you will not receive any more items.
 The `retry` operator lets you re-subscribe and continue the reception.
 
-=== How do I handle `null`?
+== How do I handle `null`?
 
 `null` is only accepted in the `Uni` type.
 `uni.onItem().ifNull()` lets you decide what you want to do when the received item is `null`:
@@ -349,8 +350,7 @@ include::../../../src/test/java/snippets/UniNullTest.java[tags=code-not-null]
 
 IMPORTANT: While supported, emitting `null` should be avoided except for `Uni<Void>`.
 
-
-=== How do I handle timeout?
+== How do I handle timeout?
 
 `Uni` are often used to represent asynchronous operations, like an HTTP call.
 So, it's not rare to need to add a timeout on this kind of operation, and recover if the timeout occurs.
@@ -368,7 +368,7 @@ On timeout, you can:
 * recover with a specific item
 * continue with another alternative `Uni`
 
-=== How do I control the threads?
+== How do I control the threads?
 
 Except indicated otherwise, the next processor is invoked on the thread emitting the event from upstream.
 You can switch to another thread using the `emitOn` operator.
@@ -379,7 +379,7 @@ The `emitOn` operator lets you switch the thread used to dispatch (upstream to d
 include::../../../src/test/java/snippets/EmitOnTest.java[tags=code]
 ----
 
-=== How do I interact with CompletionStages?
+== How do I interact with CompletionStages?
 
 `CompletionStage` and `CompletableFuture` are classes provided by Java to represent asynchronous actions.
 However, they are not lazy, and do not follow a _subscription_ patterns.
@@ -392,7 +392,7 @@ Also, `Uni` offers a way to retrieve the item or the failure as a `CompletableFu
 include::../../../src/test/java/snippets/CompletionStageTest.java[tags=code]
 ----
 
-=== How do I interact with RX Java 2?
+== How do I interact with RX Java 2?
 
 Mutiny allows converting Rx Java 2 types to/from Uni and Multi instances.
 To enable this feature, add the following dependency to your `CLASSPATH`:
@@ -455,7 +455,7 @@ You can also create RxJava 2 objects from a `Multi`:
 include::../../../src/test/java/snippets/RxJavaTest.java[tags=multi-export]
 ----
 
-=== How do I interact with Reactor?
+== How do I interact with Reactor?
 
 Mutiny allows converting Project Reactor types to/from `Uni` and `Multi` instances.
 To enable this feature, add the following dependency to your `CLASSPATH`:
@@ -505,7 +505,7 @@ You can also create Reactor objects from a `Multi`:
 include::../../../src/test/java/snippets/ReactorTest.java[tags=multi-export]
 ----
 
-=== How do I control the back-pressure?
+== How do I control the back-pressure?
 
 When a consumer cannot keep up with the pace of a publisher, there is an overflow condition.
 By default, it would fail and propagate an exception.
@@ -517,7 +517,7 @@ However, you can control how the overflow is handled using the `multi.onOverflow
 include::../../../src/test/java/snippets/BackPressureTest.java[tags=code]
 ----
 
-=== How do wrap blocking calls?
+== How do wrap blocking calls?
 
 It is often the case that a source of data (web service, database...) is synchronous and blocking.
 To deal with such sources in your applications, apply the following pattern:
@@ -544,7 +544,7 @@ While `runSubscriptionOn` runs the subscription on the given executor, `emitOn` 
 include::../../../src/test/java/snippets/UniBlockingTest.java[tags=code-emitOn]
 ----
 
-=== emitOn vs. runSubscriptionOn
+== emitOn vs. runSubscriptionOn
 
 The `emitOn` and `runSubscriptionOn` are 2 operators influencing on which threads the event are dispatched.
 However, they target different types of events and different directions.
@@ -579,7 +579,7 @@ So, if we consider the previous code snippet, it produces the following sequence
 include::plantuml/runSubscriptionOn-sequence.puml[]
 ----
 
-=== How can I use a Unicast Processor
+== How can I use a Unicast Processor
 
 The `UnicastProcessor` is an implementation of `Multi` that lets you enqueue items in a queue.
 The items are then dispatched to the subscriber using the request protocol.
@@ -596,7 +596,7 @@ include::../../../src/test/java/snippets/UnicastProcessorTest.java[tags=code]
 By default the `UnicastProcessor` uses an unbounded queue.
 You can also pass a fixed size queue that would reject the items once full.
 
-=== How can I create Uni/Multi from a callback-based API
+== How can I create Uni/Multi from a callback-based API
 
 When dealing with async API using callback, you can create ``Uni``s or ``Multi``s by using _emitters_:
 
@@ -607,7 +607,7 @@ include::../../../src/test/java/snippets/EmitterTest.java[tags=code]
 
 Note that the callback receiving the emitter is called for every subscription.
 
-=== How do I create hot streams
+== How do I create hot streams
 
 In a _cold_ stream, the stream is created when one subscriber subscribes to the stream.
 So, if no one subscribes, the actual stream is not created, saving resources (that would be wasted because nobody is interested in the items).
@@ -631,7 +631,7 @@ Note that the `BroadcastProcessor` subscribes to the _hot_ source aggressively a
 However, the `BroadcastProcessor` enforces the back-pressure protocol per subscriber.
 If a subscriber is not ready to handle an item emitted by the _hot_ source, an `io.smallrye.mutiny.subscription.BackPressureFailure` is forwarded to this subscriber.
 
-=== How do I handle polling?
+== How do I handle polling?
 
 There are many poll-based API around us.
 Sometimes you need to use these APIs to generate a stream from the polled values.
@@ -649,7 +649,7 @@ You can also stop the repetition using the `repeat().until()` method which will 
 include::../../../src/test/java/snippets/PollableSourceTest.java[tags=code2]
 ----
 
-=== How do I handle pagination?
+== How do I handle pagination?
 
 There are many REST / HTTP APIs using pagination, _i.e._ return only a subset of the results and you need to request the next _page_ to get the next batch.
 Each batch contains a list of item(s).
@@ -694,7 +694,7 @@ The following code illustrates the usage of `whilst`:
 include::../../../src/test/java/snippets/PaginationTest.java[tags=code2]
 ----
 
-=== How do I delay _things_?
+== How do I delay _things_?
 
 You can delay item emission using the `Uni.onItem().delayIt().by(...)` or `Uni.onItem().delayIt().until(...)`.
 The first variant delays the emission by a given duration:
@@ -729,11 +729,11 @@ You can implement this behavior as follows:
 include::../../../src/test/java/snippets/DelayTest.java[tags=delay-multi-random]
 ----
 
-=== Where do I find the JavaDoc?
+== Where do I find the JavaDoc?
 
 The JavaDoc is published https://smallrye.io/smallrye-mutiny/apidocs/[there].
 
-=== Default executor and integration
+== Default executor and integration
 
 Sometimes, Mutiny needs to execute tasks on other threads, such as monitoring time or delaying actions.
 Most operators relying on such capacity let you pass either a `ScheduledExecutorService` or an `ExecutorService`.
