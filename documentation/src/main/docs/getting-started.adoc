@@ -1,11 +1,11 @@
-== Getting Started
+= Getting Started
 
-=== Prerequisites
+== Prerequisites
 
 Mutiny runs on top of `Java 8` and above.
 Mutiny implements the https://www.reactive-streams.org/[Reactive Streams] specification, so depends on `org.reactivestreams:reactive-streams:$reactive.streams.version`.
 
-=== Dependencies
+== Dependencies
 
 To use Mutiny, you just need the `io.smallrye.reactive:mutiny` artifact in your `CLASSPATH`.
 If you are using Maven, declare the following dependency in your `pom.xml`:
@@ -28,7 +28,7 @@ dependencies {
 }
 ----
 
-=== Hello World!
+== Hello World!
 
 Now, you can create a class with a `public static void main(String... args)` entry point with the following content:
 

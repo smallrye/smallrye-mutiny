@@ -1,5 +1,4 @@
 
-
 SmallRye Mutiny is a reactive programming library.
 Wait? Another one? Yes!
 

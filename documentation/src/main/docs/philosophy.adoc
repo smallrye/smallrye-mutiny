@@ -1,5 +1,5 @@
 
-== Mutiny philosophy and concepts
+= Mutiny philosophy and concepts
 
 Mutiny is built on 3 main concepts:
 
@@ -7,7 +7,7 @@ Mutiny is built on 3 main concepts:
 * API navigability - based on the previous concept, the API is built around the type of events
 * _single_ or _multi_ items streams - Mutiny provides 2 types: `Uni` and `Multi`
 
-=== Events
+== Events
 
 When you use Mutiny you design _assembly lines_ in which events flow.
 Events can flow from upstream to downstream (from source to sinks), or some signals can _swim_ upstream from the sinks to the source.
@@ -68,7 +68,7 @@ If no subscriber _subscribes_, no items would be emitted. More importantly, noth
 If you program does not do anything, be sure you subscribed to the flow.
 ====
 
-=== An event-driven API
+== An event-driven API
 
 Mutiny is an event-driven API.
 So for each types of event, there is an `on` associated method that let you handle this specific event.
@@ -89,7 +89,7 @@ For example:
 * `multi.onFailure()` provides the methods to handle failure and recover
 * `multi.transform()` provides the methods to transform the stream such as filtering or selecting items.
 
-=== Uni and Multi
+== Uni and Multi
 
 Mutiny is based on two types:
 
@@ -127,7 +127,7 @@ You can convert `Unis` to `Multis` and vice-versa:
 include::../../../src/test/java/snippets/UniMultiComparisonTest.java[tags=conversion]
 ----
 
-=== Creating and Subscribing to Unis
+== Creating and Subscribing to Unis
 
 There are many ways to create instances of `Unis`:
 
@@ -143,7 +143,7 @@ Subscribing to `Unis` is done by method provided by `uni.subscribe()`:
 include::../../../src/test/java/snippets/UniCreationTest.java[tags=subscription]
 ----
 
-=== Creating and Subscribing to Multis
+== Creating and Subscribing to Multis
 
 There are many ways to create instances of `Multis`:
 
@@ -159,7 +159,7 @@ Subscribing to `Multis` is done by method provided by `multi.subscribe()`:
 include::../../../src/test/java/snippets/MultiCreationTest.java[tags=subscription]
 ----
 
-=== Structuring the pipeline
+== Structuring the pipeline
 
 It can be hard to structure your sequence of processing in a readable manner.
 Mutiny provides the `stage` function to structure your pipeline:
