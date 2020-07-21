@@ -18,7 +18,7 @@ import org.reactivestreams.Subscription;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.helpers.Subscriptions;
-import io.smallrye.mutiny.helpers.queues.MpscLinkedQueue;
+import io.smallrye.mutiny.helpers.queues.Queues;
 import io.smallrye.mutiny.operators.multi.processors.UnicastProcessor;
 import io.smallrye.mutiny.subscription.BackPressureFailure;
 import io.smallrye.mutiny.subscription.MultiSubscriber;
@@ -58,7 +58,7 @@ public class MultiWindowOnDurationOp<T> extends AbstractMultiOperator<T, Multi<T
         WindowTimeoutSubscriber(MultiSubscriber<? super Multi<T>> downstream, Duration duration,
                 ScheduledExecutorService scheduler) {
             super(downstream);
-            this.queue = new MpscLinkedQueue<>();
+            this.queue = Queues.createMpscQueue();
             this.duration = duration;
             this.scheduler = scheduler;
         }

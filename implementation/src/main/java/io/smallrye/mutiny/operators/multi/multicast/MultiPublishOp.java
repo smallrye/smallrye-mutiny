@@ -12,7 +12,7 @@ import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.helpers.Subscriptions;
-import io.smallrye.mutiny.helpers.queues.SpscArrayQueue;
+import io.smallrye.mutiny.helpers.queues.Queues;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.subscription.BackPressureFailure;
 import io.smallrye.mutiny.subscription.Cancellable;
@@ -137,7 +137,7 @@ public final class MultiPublishOp<T> extends ConnectableMulti<T> {
 
         private static final Throwable COMPLETED = new Exception();
 
-        private final SpscArrayQueue<T> queue;
+        private final Queue<T> queue;
 
         private final AtomicBoolean cancelled = new AtomicBoolean();
 
@@ -150,7 +150,7 @@ public final class MultiPublishOp<T> extends ConnectableMulti<T> {
             this.current = current;
             this.shouldConnect = new AtomicBoolean();
             this.bufferSize = bufferSize;
-            this.queue = new SpscArrayQueue<>(bufferSize);
+            this.queue = (Queue<T>) Queues.get(bufferSize).get();
         }
 
         @Override

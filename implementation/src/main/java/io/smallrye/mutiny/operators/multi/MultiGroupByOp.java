@@ -3,6 +3,7 @@ package io.smallrye.mutiny.operators.multi;
 import static io.smallrye.mutiny.helpers.Subscriptions.CANCELLED;
 
 import java.util.Map;
+import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -17,7 +18,7 @@ import org.reactivestreams.Subscription;
 import io.smallrye.mutiny.GroupedMulti;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.helpers.Subscriptions;
-import io.smallrye.mutiny.helpers.queues.SpscLinkedArrayQueue;
+import io.smallrye.mutiny.helpers.queues.Queues;
 import io.smallrye.mutiny.operators.AbstractMulti;
 import io.smallrye.mutiny.subscription.MultiSubscriber;
 
@@ -48,7 +49,7 @@ public final class MultiGroupByOp<T, K, V> extends AbstractMultiOperator<T, Grou
         private final Function<? super T, ? extends K> keySelector;
         private final Function<? super T, ? extends V> valueSelector;
         private final Map<Object, GroupedUnicast<K, V>> groups;
-        private final SpscLinkedArrayQueue<GroupedMulti<K, V>> queue;
+        private final Queue<GroupedMulti<K, V>> queue;
 
         private static final Object NO_KEY = new Object();
 
@@ -71,7 +72,7 @@ public final class MultiGroupByOp<T, K, V> extends AbstractMultiOperator<T, Grou
             this.keySelector = keySelector;
             this.valueSelector = valueSelector;
             this.groups = groups;
-            this.queue = new SpscLinkedArrayQueue<>(128);
+            this.queue = Queues.<GroupedMulti<K, V>> unbounded(Queues.BUFFER_S).get();
         }
 
         @Override
@@ -195,7 +196,7 @@ public final class MultiGroupByOp<T, K, V> extends AbstractMultiOperator<T, Grou
             }
             int missed = 1;
 
-            final SpscLinkedArrayQueue<GroupedMulti<K, V>> q = this.queue;
+            final Queue<GroupedMulti<K, V>> q = this.queue;
 
             for (;;) {
 
@@ -236,7 +237,7 @@ public final class MultiGroupByOp<T, K, V> extends AbstractMultiOperator<T, Grou
             }
         }
 
-        boolean isDoneOrCancelled(boolean d, boolean empty, SpscLinkedArrayQueue<?> q) {
+        boolean isDoneOrCancelled(boolean d, boolean empty, Queue<?> q) {
             if (isCancelled()) {
                 q.clear();
                 return true;
@@ -297,7 +298,7 @@ public final class MultiGroupByOp<T, K, V> extends AbstractMultiOperator<T, Grou
         }
     }
 
-    @SuppressWarnings("PublisherImplementation")
+    @SuppressWarnings({ "ReactiveStreamsPublisherImplementation" })
     private static final class State<T, K> implements Subscription, Publisher<T> {
 
         private final AtomicReference<Subscriber<? super T>> downstream = new AtomicReference<>();
@@ -307,14 +308,15 @@ public final class MultiGroupByOp<T, K, V> extends AbstractMultiOperator<T, Grou
         private final AtomicInteger wip = new AtomicInteger();
 
         private final K key;
-        private final SpscLinkedArrayQueue<T> queue;
+        private final Queue<T> queue;
         private final MultiGroupByProcessor<?, K, T> parent;
 
         private Throwable failure;
 
+        @SuppressWarnings("unchecked")
         State(MultiGroupByProcessor<?, K, T> parent, K key) {
             this.parent = parent;
-            this.queue = new SpscLinkedArrayQueue<>(128);
+            this.queue = (Queue<T>) Queues.unbounded(Queues.BUFFER_S).get();
             this.key = key;
         }
 
@@ -371,7 +373,7 @@ public final class MultiGroupByOp<T, K, V> extends AbstractMultiOperator<T, Grou
 
             int missed = 1;
 
-            final SpscLinkedArrayQueue<T> q = queue;
+            final Queue<T> q = queue;
             Subscriber<? super T> actual = downstream.get();
             for (;;) {
                 if (actual != null) {

@@ -8,7 +8,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.reactivestreams.Subscription;
 
-import io.smallrye.mutiny.helpers.queues.SpscLinkedArrayQueue;
+import io.smallrye.mutiny.helpers.queues.Queues;
 import io.smallrye.mutiny.subscription.MultiEmitter;
 import io.smallrye.mutiny.subscription.MultiSubscriber;
 
@@ -22,7 +22,7 @@ public class SerializedMultiEmitter<T> implements MultiEmitter<T>, MultiSubscrib
     private final AtomicInteger wip = new AtomicInteger();
     private final BaseMultiEmitter<T> downstream;
     private final AtomicReference<Throwable> failure = new AtomicReference<>();
-    private final SpscLinkedArrayQueue<T> queue = new SpscLinkedArrayQueue<>(16);
+    private final Queue<T> queue = Queues.createMpscQueue();
 
     private volatile boolean done;
 
@@ -50,7 +50,7 @@ public class SerializedMultiEmitter<T> implements MultiEmitter<T>, MultiSubscrib
                 return;
             }
         } else {
-            SpscLinkedArrayQueue<T> q = queue;
+            Queue<T> q = queue;
             synchronized (q) {
                 q.offer(item);
             }

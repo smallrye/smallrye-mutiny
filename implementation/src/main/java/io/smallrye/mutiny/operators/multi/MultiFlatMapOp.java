@@ -14,6 +14,7 @@ import org.reactivestreams.Subscription;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.helpers.Subscriptions;
+import io.smallrye.mutiny.helpers.queues.Queues;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.subscription.BackPressureFailure;
 import io.smallrye.mutiny.subscription.MultiSubscriber;
@@ -25,6 +26,7 @@ public final class MultiFlatMapOp<I, O> extends AbstractMultiOperator<I, O> {
 
     private final boolean postponeFailurePropagation;
     private final int maxConcurrency;
+    private final int requests;
 
     private final Supplier<? extends Queue<O>> mainQueueSupplier;
     private final Supplier<? extends Queue<O>> innerQueueSupplier;
@@ -33,14 +35,15 @@ public final class MultiFlatMapOp<I, O> extends AbstractMultiOperator<I, O> {
             Function<? super I, ? extends Publisher<? extends O>> mapper,
             boolean postponeFailurePropagation,
             int maxConcurrency,
-            Supplier<? extends Queue<O>> mainQueueSupplier,
-            Supplier<? extends Queue<O>> innerQueueSupplier) {
+            int requests) {
         super(upstream);
         this.mapper = ParameterValidation.nonNull(mapper, "mapper");
         this.postponeFailurePropagation = postponeFailurePropagation;
         this.maxConcurrency = ParameterValidation.positive(maxConcurrency, "maxConcurrency");
-        this.mainQueueSupplier = ParameterValidation.nonNull(mainQueueSupplier, "mainQueueSupplier");
-        this.innerQueueSupplier = ParameterValidation.nonNull(innerQueueSupplier, "innerQueueSupplier");
+        this.mainQueueSupplier = Queues.get(maxConcurrency);
+        this.requests = ParameterValidation.positive(requests, "requests");
+        this.innerQueueSupplier = Queues.get(maxConcurrency);
+        ;
     }
 
     @Override
@@ -53,7 +56,9 @@ public final class MultiFlatMapOp<I, O> extends AbstractMultiOperator<I, O> {
                 postponeFailurePropagation,
                 maxConcurrency,
                 mainQueueSupplier,
+                requests,
                 innerQueueSupplier);
+
         upstream.subscribe(
                 Infrastructure.onMultiSubscription(upstream, new SafeSubscriber<>(new SerializedSubscriber<>(sub))));
     }
@@ -63,6 +68,7 @@ public final class MultiFlatMapOp<I, O> extends AbstractMultiOperator<I, O> {
 
         final boolean delayError;
         final int maxConcurrency;
+        final int requests;
         final int limit;
         final Function<? super I, ? extends Publisher<? extends O>> mapper;
         final Supplier<? extends Queue<O>> mainQueueSupplier;
@@ -93,16 +99,18 @@ public final class MultiFlatMapOp<I, O> extends AbstractMultiOperator<I, O> {
         FlatMapMainSubscriber(MultiSubscriber<? super O> downstream,
                 Function<? super I, ? extends Publisher<? extends O>> mapper,
                 boolean delayError,
-                int maxConcurrency,
+                int concurrency,
                 Supplier<? extends Queue<O>> mainQueueSupplier,
+                int requests,
                 Supplier<? extends Queue<O>> innerQueueSupplier) {
             this.downstream = downstream;
             this.mapper = mapper;
             this.delayError = delayError;
-            this.maxConcurrency = maxConcurrency;
+            this.maxConcurrency = concurrency;
             this.mainQueueSupplier = mainQueueSupplier;
-            this.innerQueueSupplier = innerQueueSupplier;
-            this.limit = Subscriptions.unboundedOrLimit(maxConcurrency);
+            this.requests = requests;
+            this.innerQueueSupplier = requests == 0 ? Queues.getXsQueueSupplier() : Queues.get(requests);
+            this.limit = Subscriptions.unboundedOrLimit(concurrency);
         }
 
         @SuppressWarnings("unchecked")
@@ -160,7 +168,7 @@ public final class MultiFlatMapOp<I, O> extends AbstractMultiOperator<I, O> {
         public void onSubscribe(Subscription s) {
             if (upstream.compareAndSet(null, s)) {
                 downstream.onSubscribe(this);
-                s.request(Subscriptions.unboundedOrMaxConcurrency(maxConcurrency));
+                s.request(Subscriptions.unboundedOrRequests(maxConcurrency));
             }
         }
 
@@ -186,7 +194,7 @@ public final class MultiFlatMapOp<I, O> extends AbstractMultiOperator<I, O> {
                 return;
             }
 
-            FlatMapInner<O> inner = new FlatMapInner<>(this, maxConcurrency);
+            FlatMapInner<O> inner = new FlatMapInner<>(this, requests);
             if (add(inner)) {
                 p.subscribe(inner);
             }
@@ -562,7 +570,7 @@ public final class MultiFlatMapOp<I, O> extends AbstractMultiOperator<I, O> {
 
         final FlatMapMainSubscriber<?, O> parent;
 
-        final int prefetch;
+        final int requests;
 
         final int limit;
 
@@ -576,17 +584,17 @@ public final class MultiFlatMapOp<I, O> extends AbstractMultiOperator<I, O> {
 
         int index;
 
-        FlatMapInner(FlatMapMainSubscriber<?, O> parent, int prefetch) {
+        FlatMapInner(FlatMapMainSubscriber<?, O> parent, int requests) {
             this.parent = parent;
-            this.prefetch = prefetch;
-            this.limit = Subscriptions.unboundedOrLimit(prefetch);
+            this.requests = requests;
+            this.limit = Subscriptions.unboundedOrLimit(requests);
         }
 
         @Override
         public void onSubscribe(Subscription s) {
             Objects.requireNonNull(s);
             if (subscription.compareAndSet(null, s)) {
-                s.request(Subscriptions.unboundedOrMaxConcurrency(prefetch));
+                s.request(Subscriptions.unboundedOrRequests(requests));
             }
         }
 

@@ -130,7 +130,7 @@ public class Subscriptions {
         return prefetch == Integer.MAX_VALUE ? Integer.MAX_VALUE : (prefetch - (prefetch >> 2));
     }
 
-    public static long unboundedOrMaxConcurrency(int concurrency) {
+    public static long unboundedOrRequests(int concurrency) {
         return concurrency == Integer.MAX_VALUE ? Long.MAX_VALUE : concurrency;
     }
 

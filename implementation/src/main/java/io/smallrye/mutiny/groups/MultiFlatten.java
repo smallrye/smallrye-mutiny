@@ -8,7 +8,7 @@ import org.reactivestreams.Publisher;
 
 import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Multi;
-import io.smallrye.mutiny.helpers.queues.SpscArrayQueue;
+import io.smallrye.mutiny.helpers.queues.Queues;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.multi.MultiFlatMapOp;
 
@@ -31,7 +31,11 @@ public class MultiFlatten<I, O> {
             int requests, boolean collectFailures) {
         this.upstream = upstream;
         this.mapper = mapper;
-        this.requests = requests;
+        if (requests == 0) {
+            this.requests = Queues.BUFFER_XS;
+        } else {
+            this.requests = requests;
+        }
         this.collectFailureUntilCompletion = collectFailures;
     }
 
@@ -51,11 +55,11 @@ public class MultiFlatten<I, O> {
     /**
      * Configures the number the items requested to the <em>streams</em> produced by the mapper.
      *
-     * @param req the request, must be strictly positive
+     * @param requests the requests, must be strictly positive
      * @return this {@link MultiFlatten}
      */
-    public MultiFlatten<I, O> withRequests(int req) {
-        return new MultiFlatten<>(upstream, mapper, positive(req, "req"), collectFailureUntilCompletion);
+    public MultiFlatten<I, O> withRequests(int requests) {
+        return new MultiFlatten<>(upstream, mapper, positive(requests, "requests"), collectFailureUntilCompletion);
     }
 
     /**
@@ -73,10 +77,7 @@ public class MultiFlatten<I, O> {
      * @return the object to configure the {@code flatMap} operation.
      */
     public Multi<O> merge() {
-        return Infrastructure.onMultiCreation(
-                new MultiFlatMapOp<>(upstream, mapper, collectFailureUntilCompletion, 4,
-                        () -> new SpscArrayQueue<>(256),
-                        () -> new SpscArrayQueue<>(256)));
+        return merge(Queues.BUFFER_S);
     }
 
     /**
@@ -98,9 +99,7 @@ public class MultiFlatten<I, O> {
      */
     public Multi<O> merge(int concurrency) {
         return Infrastructure.onMultiCreation(
-                new MultiFlatMapOp<>(upstream, mapper, collectFailureUntilCompletion, concurrency,
-                        () -> new SpscArrayQueue<>(256),
-                        () -> new SpscArrayQueue<>(256)));
+                new MultiFlatMapOp<>(upstream, mapper, collectFailureUntilCompletion, concurrency, requests));
     }
 
     /**
@@ -119,8 +118,6 @@ public class MultiFlatten<I, O> {
      */
     public Multi<O> concatenate() {
         return Infrastructure.onMultiCreation(
-                new MultiFlatMapOp<>(upstream, mapper, collectFailureUntilCompletion, 1,
-                        () -> new SpscArrayQueue<>(256),
-                        () -> new SpscArrayQueue<>(256)));
+                new MultiFlatMapOp<>(upstream, mapper, collectFailureUntilCompletion, 1, requests));
     }
 }
