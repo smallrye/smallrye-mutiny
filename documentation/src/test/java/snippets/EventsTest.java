@@ -16,7 +16,7 @@ public class EventsTest {
                 .onItem().invoke(item -> System.out.println("Received item " + item))
                 .onFailure().invoke(failure -> System.out.println("Failed with " + failure.getMessage()))
                 .onCompletion().invoke(() -> System.out.println("Completed"))
-                .on().subscribed(subscription -> System.out.println("We are subscribed!"))
+                .onSubscribe().invoke(subscription -> System.out.println("We are subscribed!"))
 
                 .on().cancellation(() -> System.out.println("Downstream has cancelled the interaction"))
                 .on().request(n -> System.out.println("Downstream requested " + n + " items"))
