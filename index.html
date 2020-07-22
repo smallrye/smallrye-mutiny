@@ -463,53 +463,57 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h1>SmallRye Mutiny</h1>
 <div class="details">
 <span id="revnumber">version 0.7.0,</span>
-<span id="revdate">2020-07-16</span>
+<span id="revdate">2020-07-22</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">SmallRye Mutiny</div>
-<ul class="sectlevel2">
+<ul class="sectlevel1">
 <li><a href="#_getting_started">1. Getting Started</a>
-<ul class="sectlevel3">
+<ul class="sectlevel2">
 <li><a href="#_prerequisites">1.1. Prerequisites</a></li>
 <li><a href="#_dependencies">1.2. Dependencies</a></li>
 <li><a href="#_hello_world">1.3. Hello World!</a></li>
 </ul>
 </li>
 <li><a href="#_mutiny_philosophy_and_concepts">2. Mutiny philosophy and concepts</a>
-<ul class="sectlevel3">
+<ul class="sectlevel2">
 <li><a href="#_events">2.1. Events</a></li>
 <li><a href="#_an_event_driven_api">2.2. An event-driven API</a></li>
 <li><a href="#_uni_and_multi">2.3. Uni and Multi</a></li>
 <li><a href="#_creating_and_subscribing_to_unis">2.4. Creating and Subscribing to Unis</a></li>
 <li><a href="#_creating_and_subscribing_to_multis">2.5. Creating and Subscribing to Multis</a></li>
 <li><a href="#_structuring_the_pipeline">2.6. Structuring the pipeline</a></li>
-<li><a href="#_how_do_i_transform_items">2.7. How do I transform items?</a></li>
-<li><a href="#_how_do_i_filterselect_items">2.8. How do I filter/select items?</a></li>
-<li><a href="#_where_are_my_map_flatmap_and_concatmap_methods">2.9. Where are my map, flatMap and concatMap methods?</a></li>
-<li><a href="#_how_do_i_merge_concatenate_or_combine_multis">2.10. How do I merge, concatenate or combine Multis?</a></li>
-<li><a href="#_how_can_i_collect_accumulate_results">2.11. How can I collect / accumulate results?</a></li>
-<li><a href="#_how_do_i_represent_asynchronous_calls">2.12. How do I represent asynchronous calls?</a></li>
-<li><a href="#_how_do_i_chain_asynchronous_calls">2.13. How do I chain asynchronous calls?</a></li>
-<li><a href="#_how_do_i_join_asynchronous_calls">2.14. How do I <em>join</em> asynchronous calls?</a></li>
-<li><a href="#merge-concatenate">2.15. What&#8217;s the difference between merge() and concatenate()</a></li>
-<li><a href="#_how_do_i_recover_from_failure">2.16. How do I recover from failure?</a></li>
-<li><a href="#_how_do_i_handle_null">2.17. How do I handle <code>null</code>?</a></li>
-<li><a href="#_how_do_i_handle_timeout">2.18. How do I handle timeout?</a></li>
-<li><a href="#_how_do_i_control_the_threads">2.19. How do I control the threads?</a></li>
-<li><a href="#_how_do_i_interact_with_completionstages">2.20. How do I interact with CompletionStages?</a></li>
-<li><a href="#_how_do_i_interact_with_rx_java_2">2.21. How do I interact with RX Java 2?</a></li>
-<li><a href="#_how_do_i_interact_with_reactor">2.22. How do I interact with Reactor?</a></li>
-<li><a href="#_how_do_i_control_the_back_pressure">2.23. How do I control the back-pressure?</a></li>
-<li><a href="#_how_do_wrap_blocking_calls">2.24. How do wrap blocking calls?</a></li>
-<li><a href="#_emiton_vs_runsubscriptionon">2.25. emitOn vs. runSubscriptionOn</a></li>
-<li><a href="#_how_can_i_use_a_unicast_processor">2.26. How can I use a Unicast Processor</a></li>
-<li><a href="#_how_can_i_create_unimulti_from_a_callback_based_api">2.27. How can I create Uni/Multi from a callback-based API</a></li>
-<li><a href="#_how_do_i_create_hot_streams">2.28. How do I create hot streams</a></li>
-<li><a href="#_how_do_i_handle_polling">2.29. How do I handle polling?</a></li>
-<li><a href="#_how_do_i_handle_pagination">2.30. How do I handle pagination?</a></li>
-<li><a href="#_how_do_i_delay_things">2.31. How do I delay <em>things</em>?</a></li>
-<li><a href="#_where_do_i_find_the_javadoc">2.32. Where do I find the JavaDoc?</a></li>
-<li><a href="#_default_executor_and_integration">2.33. Default executor and integration</a></li>
+</ul>
+</li>
+<li><a href="#_how_do_i_do_x">3. How Do I do <em>x</em>?</a>
+<ul class="sectlevel2">
+<li><a href="#_how_do_i_transform_items">3.1. How do I transform items?</a></li>
+<li><a href="#_how_do_i_filterselect_items">3.2. How do I filter/select items?</a></li>
+<li><a href="#_where_are_my_map_flatmap_and_concatmap_methods">3.3. Where are my map, flatMap and concatMap methods?</a></li>
+<li><a href="#_how_do_i_merge_concatenate_or_combine_multis">3.4. How do I merge, concatenate or combine Multis?</a></li>
+<li><a href="#_how_can_i_collect_accumulate_results">3.5. How can I collect / accumulate results?</a></li>
+<li><a href="#_how_do_i_represent_asynchronous_calls">3.6. How do I represent asynchronous calls?</a></li>
+<li><a href="#_how_do_i_chain_asynchronous_calls">3.7. How do I chain asynchronous calls?</a></li>
+<li><a href="#_how_do_i_join_asynchronous_calls">3.8. How do I <em>join</em> asynchronous calls?</a></li>
+<li><a href="#merge-concatenate">3.9. What&#8217;s the difference between merge() and concatenate()</a></li>
+<li><a href="#_how_do_i_recover_from_failure">3.10. How do I recover from failure?</a></li>
+<li><a href="#_how_do_i_handle_null">3.11. How do I handle <code>null</code>?</a></li>
+<li><a href="#_how_do_i_handle_timeout">3.12. How do I handle timeout?</a></li>
+<li><a href="#_how_do_i_control_the_threads">3.13. How do I control the threads?</a></li>
+<li><a href="#_how_do_i_interact_with_completionstages">3.14. How do I interact with CompletionStages?</a></li>
+<li><a href="#_how_do_i_interact_with_rx_java_2">3.15. How do I interact with RX Java 2?</a></li>
+<li><a href="#_how_do_i_interact_with_reactor">3.16. How do I interact with Reactor?</a></li>
+<li><a href="#_how_do_i_control_the_back_pressure">3.17. How do I control the back-pressure?</a></li>
+<li><a href="#_how_do_wrap_blocking_calls">3.18. How do wrap blocking calls?</a></li>
+<li><a href="#_emiton_vs_runsubscriptionon">3.19. emitOn vs. runSubscriptionOn</a></li>
+<li><a href="#_how_can_i_use_a_unicast_processor">3.20. How can I use a Unicast Processor</a></li>
+<li><a href="#_how_can_i_create_unimulti_from_a_callback_based_api">3.21. How can I create Uni/Multi from a callback-based API</a></li>
+<li><a href="#_how_do_i_create_hot_streams">3.22. How do I create hot streams</a></li>
+<li><a href="#_how_do_i_handle_polling">3.23. How do I handle polling?</a></li>
+<li><a href="#_how_do_i_handle_pagination">3.24. How do I handle pagination?</a></li>
+<li><a href="#_how_do_i_delay_things">3.25. How do I delay <em>things</em>?</a></li>
+<li><a href="#_where_do_i_find_the_javadoc">3.26. Where do I find the JavaDoc?</a></li>
+<li><a href="#_default_executor_and_integration">3.27. Default executor and integration</a></li>
 </ul>
 </li>
 </ul>
@@ -550,7 +554,7 @@ Finally, Mutiny has built-in converters from and to other reactive programing li
 </div>
 <div class="imageblock">
 <div class="content">
-<img src="mutiny-in-landscape.png" alt="mutiny in landscape">
+<img src="assets/images/mutiny-in-landscape.png" alt="mutiny in landscape">
 </div>
 </div>
 <div class="paragraph">
@@ -560,24 +564,25 @@ Also, it can be used to build Reactive Systems, for example, by combining, Mutin
 </div>
 </div>
 </div>
+<div class="sect1">
+<h2 id="_getting_started">1. Getting Started</h2>
+<div class="sectionbody">
 <div class="sect2">
-<h3 id="_getting_started">1. Getting Started</h3>
-<div class="sect3">
-<h4 id="_prerequisites">1.1. Prerequisites</h4>
+<h3 id="_prerequisites">1.1. Prerequisites</h3>
 <div class="paragraph">
 <p>Mutiny runs on top of <code>Java 8</code> and above.
 Mutiny implements the <a href="https://www.reactive-streams.org/">Reactive Streams</a> specification, so depends on <code>org.reactivestreams:reactive-streams:$reactive.streams.version</code>.</p>
 </div>
 </div>
-<div class="sect3">
-<h4 id="_dependencies">1.2. Dependencies</h4>
+<div class="sect2">
+<h3 id="_dependencies">1.2. Dependencies</h3>
 <div class="paragraph">
 <p>To use Mutiny, you just need the <code>io.smallrye.reactive:mutiny</code> artifact in your <code>CLASSPATH</code>.
 If you are using Maven, declare the following dependency in your <code>pom.xml</code>:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-xml" data-lang="xml">&lt;dependency&gt;
+<pre class="highlightjs highlight"><code data-lang="xml" class="language-xml hljs">&lt;dependency&gt;
     &lt;groupId&gt;io.smallrye.reactive&lt;/groupId&gt;
     &lt;artifactId&gt;mutiny&lt;/artifactId&gt;
     &lt;version&gt;0.7.0&lt;/version&gt;
@@ -589,20 +594,20 @@ If you are using Maven, declare the following dependency in your <code>pom.xml</
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-groovy" data-lang="groovy">dependencies {
+<pre class="highlightjs highlight"><code data-lang="groovy" class="language-groovy hljs">dependencies {
      implementation 'io.smallrye.reactive:mutiny:0.7.0'
 }</code></pre>
 </div>
 </div>
 </div>
-<div class="sect3">
-<h4 id="_hello_world">1.3. Hello World!</h4>
+<div class="sect2">
+<h3 id="_hello_world">1.3. Hello World!</h3>
 <div class="paragraph">
 <p>Now, you can create a class with a <code>public static void main(String&#8230;&#8203; args)</code> entry point with the following content:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-java" data-lang="java">import io.smallrye.mutiny.Multi;
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">import io.smallrye.mutiny.Multi;
 
 public class GettingStarted {
 
@@ -635,7 +640,7 @@ Finally, we <em>subscribe</em> to the resulting stream and for each emitted item
 </div>
 <div class="imageblock text-center">
 <div class="content">
-<img src="diag-36a779d2e869a0312e41e21ab27aab6a.png" alt="diag 36a779d2e869a0312e41e21ab27aab6a" width="1506" height="1215">
+<img src="assets/images/diag-36a779d2e869a0312e41e21ab27aab6a.png" alt="diag 36a779d2e869a0312e41e21ab27aab6a" width="1489" height="1222">
 </div>
 </div>
 <div class="paragraph">
@@ -647,8 +652,10 @@ Finally, at the end of the line, the finalized items are pushed to the final con
 </div>
 </div>
 </div>
-<div class="sect2">
-<h3 id="_mutiny_philosophy_and_concepts">2. Mutiny philosophy and concepts</h3>
+</div>
+<div class="sect1">
+<h2 id="_mutiny_philosophy_and_concepts">2. Mutiny philosophy and concepts</h2>
+<div class="sectionbody">
 <div class="paragraph">
 <p>Mutiny is built on 3 main concepts:</p>
 </div>
@@ -665,8 +672,8 @@ Finally, at the end of the line, the finalized items are pushed to the final con
 </li>
 </ul>
 </div>
-<div class="sect3">
-<h4 id="_events">2.1. Events</h4>
+<div class="sect2">
+<h3 id="_events">2.1. Events</h3>
 <div class="paragraph">
 <p>When you use Mutiny you design <em>assembly lines</em> in which events flow.
 Events can flow from upstream to downstream (from source to sinks), or some signals can <em>swim</em> upstream from the sinks to the source.</p>
@@ -676,7 +683,7 @@ Events can flow from upstream to downstream (from source to sinks), or some sign
 </div>
 <div class="imageblock text-center">
 <div class="content">
-<img src="diag-4e60926db2b100a45f7a3fafb6d1c2c5.png" alt="diag 4e60926db2b100a45f7a3fafb6d1c2c5" width="1287" height="817">
+<img src="assets/images/diag-4e60926db2b100a45f7a3fafb6d1c2c5.png" alt="diag 4e60926db2b100a45f7a3fafb6d1c2c5" width="1247" height="822">
 </div>
 </div>
 <div class="admonitionblock note">
@@ -756,7 +763,7 @@ Once they are emitted, no more items are emitted.</p>
 </div>
 <div class="imageblock text-center">
 <div class="content">
-<img src="diag-c06139c2b31470fa367c3f84a6e51430.png" alt="diag c06139c2b31470fa367c3f84a6e51430" width="997" height="878">
+<img src="assets/images/diag-c06139c2b31470fa367c3f84a6e51430.png" alt="diag c06139c2b31470fa367c3f84a6e51430" width="988" height="883">
 </div>
 </div>
 <div class="paragraph">
@@ -793,8 +800,8 @@ If you program does not do anything, be sure you subscribed to the flow.</p>
 </table>
 </div>
 </div>
-<div class="sect3">
-<h4 id="_an_event_driven_api">2.2. An event-driven API</h4>
+<div class="sect2">
+<h3 id="_an_event_driven_api">2.2. An event-driven API</h3>
 <div class="paragraph">
 <p>Mutiny is an event-driven API.
 So for each types of event, there is an <code>on</code> associated method that let you handle this specific event.
@@ -802,13 +809,13 @@ For example:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-java" data-lang="java">Multi&lt;String&gt; source = Multi.createFrom().items("a", "b", "c");
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">Multi&lt;String&gt; source = Multi.createFrom().items("a", "b", "c");
 
 source
         .onItem().invoke(item -&gt; System.out.println("Received item " + item))
         .onFailure().invoke(failure -&gt; System.out.println("Failed with " + failure.getMessage()))
         .onCompletion().invoke(() -&gt; System.out.println("Completed"))
-        .on().subscribed(subscription -&gt; System.out.println("We are subscribed!"))
+        .onSubscribe().invoke(subscription -&gt; System.out.println("We are subscribed!"))
 
         .on().cancellation(() -&gt; System.out.println("Downstream has cancelled the interaction"))
         .on().request(n -&gt; System.out.println("Downstream requested " + n + " items"))
@@ -838,8 +845,8 @@ For example:</p>
 </ul>
 </div>
 </div>
-<div class="sect3">
-<h4 id="_uni_and_multi">2.3. Uni and Multi</h4>
+<div class="sect2">
+<h3 id="_uni_and_multi">2.3. Uni and Multi</h3>
 <div class="paragraph">
 <p>Mutiny is based on two types:</p>
 </div>
@@ -888,7 +895,7 @@ Also, <code>Uni</code> can handle items having a <code>null</code> value (and ha
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-java" data-lang="java">Multi.createFrom().items("a", "b", "c")
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">Multi.createFrom().items("a", "b", "c")
         .onItem().transform(i -&gt; i.toUpperCase())
         .subscribe().with(
                 item -&gt; System.out.println("Received: " + item),
@@ -906,7 +913,7 @@ Uni.createFrom().item("a")
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-java" data-lang="java">Multi.createFrom().items("a", "b", "c")
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">Multi.createFrom().items("a", "b", "c")
         .onItem().transform(i -&gt; i.toUpperCase())
         .toUni() // Convert the multi to uni, only "a" will be forwarded.
         .subscribe().with(
@@ -922,14 +929,14 @@ Uni.createFrom().item("a")
 </div>
 </div>
 </div>
-<div class="sect3">
-<h4 id="_creating_and_subscribing_to_unis">2.4. Creating and Subscribing to Unis</h4>
+<div class="sect2">
+<h3 id="_creating_and_subscribing_to_unis">2.4. Creating and Subscribing to Unis</h3>
 <div class="paragraph">
 <p>There are many ways to create instances of <code>Unis</code>:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-java" data-lang="java">// Creation from a known item, or computed at subscription time
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">// Creation from a known item, or computed at subscription time
 Uni.createFrom().item("some known value");
 Uni.createFrom().item(() -&gt; "some value computed at subscription time");
 
@@ -964,7 +971,7 @@ Uni.createFrom().deferred(() -&gt; Uni.createFrom().item("create the uni at subs
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-java" data-lang="java">Uni&lt;String&gt; uni = Uni.createFrom().item("hello");
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">Uni&lt;String&gt; uni = Uni.createFrom().item("hello");
 
 // Passing callbacks
 Cancellable cancellable = uni.subscribe().with(
@@ -992,14 +999,14 @@ uni.subscribe().withSubscriber(new UniSubscriber&lt;String&gt;() {
 </div>
 </div>
 </div>
-<div class="sect3">
-<h4 id="_creating_and_subscribing_to_multis">2.5. Creating and Subscribing to Multis</h4>
+<div class="sect2">
+<h3 id="_creating_and_subscribing_to_multis">2.5. Creating and Subscribing to Multis</h3>
 <div class="paragraph">
 <p>There are many ways to create instances of <code>Multis</code>:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-java" data-lang="java">// Creation from a known item(s), or computed at subscription time
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">// Creation from a known item(s), or computed at subscription time
 Multi.createFrom().item("some known value");
 Multi.createFrom().item(() -&gt; "some value computed at subscription time");
 Multi.createFrom().items("a", "b", "c");
@@ -1050,7 +1057,7 @@ Multi.createFrom().range(1, 11);</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-java" data-lang="java">Multi&lt;String&gt; multi = Multi.createFrom().items("a", "b", "c");
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">Multi&lt;String&gt; multi = Multi.createFrom().items("a", "b", "c");
 
 Cancellable cancellable = multi.subscribe().with(
         item -&gt; System.out.println("Got " + item));
@@ -1086,15 +1093,15 @@ multi.subscribe().withSubscriber(new MultiSubscriber&lt;String&gt;() {
 </div>
 </div>
 </div>
-<div class="sect3">
-<h4 id="_structuring_the_pipeline">2.6. Structuring the pipeline</h4>
+<div class="sect2">
+<h3 id="_structuring_the_pipeline">2.6. Structuring the pipeline</h3>
 <div class="paragraph">
 <p>It can be hard to structure your sequence of processing in a readable manner.
 Mutiny provides the <code>stage</code> function to structure your pipeline:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-java" data-lang="java">String result = Multi.createFrom().completionStage(CompletableFuture.supplyAsync(() -&gt; 23))
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">String result = Multi.createFrom().completionStage(CompletableFuture.supplyAsync(() -&gt; 23))
         .stage(self -&gt; {
             // Transform each item into a string of the item +1
             return self
@@ -1108,18 +1115,22 @@ Mutiny provides the <code>stage</code> function to structure your pipeline:</p>
 </div>
 </div>
 <div class="paragraph">
-<p><code>stage</code> can be used on <code>Multi</code> and <code>Uni</code> and let you group a set of operations in a logical set.
-== How Do I do <em>x</em>?</p>
+<p><code>stage</code> can be used on <code>Multi</code> and <code>Uni</code> and let you group a set of operations in a logical set.</p>
 </div>
 </div>
-<div class="sect3">
-<h4 id="_how_do_i_transform_items">2.7. How do I transform items?</h4>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_how_do_i_do_x">3. How Do I do <em>x</em>?</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_how_do_i_transform_items">3.1. How do I transform items?</h3>
 <div class="paragraph">
 <p>To transform items synchronously use the <code>transform</code> operators:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-java" data-lang="java">String result1 = uni
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">String result1 = uni
         .onItem().transform(s -&gt; s.toUpperCase())
         .await().indefinitely();
 List&lt;String&gt; result2 = multi
@@ -1139,7 +1150,7 @@ List&lt;String&gt; result2 = multi
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-java" data-lang="java">String result1 = uni
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">String result1 = uni
         .onItem().transform(function(this::operationThrowingException))
         .await().indefinitely();
 List&lt;String&gt; result2 = multi
@@ -1157,7 +1168,7 @@ In this case, you return a <code>Uni</code>:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-java" data-lang="java">String result1 = uni
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">String result1 = uni
         .onItem().transformToUni(s -&gt; Uni.createFrom().item(s.toUpperCase()))
         .await().indefinitely();
 String result2 = uni
@@ -1208,7 +1219,7 @@ When producing <code>multis</code> use:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-java" data-lang="java">List&lt;String&gt; result = multi
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">List&lt;String&gt; result = multi
         .onItem().transformToMultiAndConcatenate(s -&gt; Multi.createFrom().item(s.toUpperCase()))
         .collectItems().asList().await().indefinitely();</code></pre>
 </div>
@@ -1235,15 +1246,15 @@ The <code>try/catch</code> is done for you and if an exception occurs, it gets r
 </table>
 </div>
 </div>
-<div class="sect3">
-<h4 id="_how_do_i_filterselect_items">2.8. How do I filter/select items?</h4>
+<div class="sect2">
+<h3 id="_how_do_i_filterselect_items">3.2. How do I filter/select items?</h3>
 <div class="paragraph">
 <p>On <code>Multi</code>, you may need to filter / select items.
 To achieve this, there is a set of methods available in <code>multi.transform()</code>:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-java" data-lang="java">List&lt;Integer&gt; list = multi
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">List&lt;Integer&gt; list = multi
         .transform().byFilteringItemsWith(i -&gt; i &gt; 6)
         .collectItems().asList()
         .await().indefinitely();
@@ -1289,7 +1300,7 @@ List&lt;Integer&gt; list3 = multi
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-java" data-lang="java">List&lt;Integer&gt; list = multi
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">List&lt;Integer&gt; list = multi
         .transform().byDroppingDuplicates()
         .collectItems().asList()
         .await().indefinitely();
@@ -1301,15 +1312,15 @@ List&lt;Integer&gt; list2 = multi
 </div>
 </div>
 </div>
-<div class="sect3">
-<h4 id="_where_are_my_map_flatmap_and_concatmap_methods">2.9. Where are my map, flatMap and concatMap methods?</h4>
+<div class="sect2">
+<h3 id="_where_are_my_map_flatmap_and_concatmap_methods">3.3. Where are my map, flatMap and concatMap methods?</h3>
 <div class="paragraph">
 <p>If you are a seasoned reactive developer, you may miss the infamous <code>map</code>, <code>flatMap</code>, <code>concatMap</code> methods.
 Mutiny also proposes there methods using the most-used variants of them.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-java" data-lang="java">int result = uni
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">int result = uni
         .map(i -&gt; i + 1)
         .await().indefinitely();
 
@@ -1339,7 +1350,7 @@ The equivalent to <code>map</code>, <code>flatMap</code> and <code>concatMap</co
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-java" data-lang="java">int result = uni
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">int result = uni
         .onItem().transform(i -&gt; i + 1)
         .await().indefinitely();
 
@@ -1387,7 +1398,7 @@ List&lt;Integer&gt; list5 = multi
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-java" data-lang="java">Multi&lt;String&gt; multi = Multi.createFrom().items("a", "b", "c");
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">Multi&lt;String&gt; multi = Multi.createFrom().items("a", "b", "c");
 multi.invoke(item -&gt; System.out.println("Received item " + item));</code></pre>
 </div>
 </div>
@@ -1400,7 +1411,7 @@ This is useful to execute an asynchronous action without modifying incoming item
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-java" data-lang="java">multi.invokeUni(item -&gt; executeAnAsyncAction(item));</code></pre>
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">multi.invokeUni(item -&gt; executeAnAsyncAction(item));</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -1454,14 +1465,14 @@ This is useful to execute an asynchronous action without modifying incoming item
 </tbody>
 </table>
 </div>
-<div class="sect3">
-<h4 id="_how_do_i_merge_concatenate_or_combine_multis">2.10. How do I merge, concatenate or combine Multis?</h4>
+<div class="sect2">
+<h3 id="_how_do_i_merge_concatenate_or_combine_multis">3.4. How do I merge, concatenate or combine Multis?</h3>
 <div class="paragraph">
 <p>You can create instances of <code>Multi</code> by concatenating, merging, or combining <code>Multi</code>s and <code>Publisher</code>s:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-java" data-lang="java">List&lt;Integer&gt; list1 = Multi.createBy().merging().streams(multi1, multi2, multi3)
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">List&lt;Integer&gt; list1 = Multi.createBy().merging().streams(multi1, multi2, multi3)
         .collectItems().asList()
         .await().indefinitely();
 
@@ -1476,14 +1487,14 @@ List&lt;Integer&gt; list3 = Multi.createBy()
 </div>
 </div>
 </div>
-<div class="sect3">
-<h4 id="_how_can_i_collect_accumulate_results">2.11. How can I collect / accumulate results?</h4>
+<div class="sect2">
+<h3 id="_how_can_i_collect_accumulate_results">3.5. How can I collect / accumulate results?</h3>
 <div class="paragraph">
 <p>You can collect the items from a <code>Multi</code> using the method proposed by <code>collectItems()</code>:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-java" data-lang="java">// collectItems let you collect items into a Uni of data structure.
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">// collectItems let you collect items into a Uni of data structure.
 // The final result is emitted when the completion event is received
 Uni&lt;List&lt;Integer&gt;&gt; list = multi.collectItems().asList();
 Uni&lt;Map&lt;String, Integer&gt;&gt; map = multi.collectItems().asMap(i -&gt; Integer.toString(i));
@@ -1502,12 +1513,12 @@ Stream&lt;Integer&gt; stream = multi.subscribe().asStream();</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-java" data-lang="java">Multi&lt;Integer&gt; added = multi.onItem().scan(() -&gt; 0, (item, acc) -&gt; acc + item);</code></pre>
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">Multi&lt;Integer&gt; added = multi.onItem().scan(() -&gt; 0, (item, acc) -&gt; acc + item);</code></pre>
 </div>
 </div>
 </div>
-<div class="sect3">
-<h4 id="_how_do_i_represent_asynchronous_calls">2.12. How do I represent asynchronous calls?</h4>
+<div class="sect2">
+<h3 id="_how_do_i_represent_asynchronous_calls">3.6. How do I represent asynchronous calls?</h3>
 <div class="paragraph">
 <p>When calling a remote service, or anything asynchronous, you need a way to represent this call.
 Most of the time, this should be represented by a <code>Uni&lt;T&gt;</code> with <code>T</code> the type of result.</p>
@@ -1517,7 +1528,7 @@ Most of the time, this should be represented by a <code>Uni&lt;T&gt;</code> with
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-java" data-lang="java">Uni&lt;String&gt; invokeMyService();</code></pre>
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">Uni&lt;String&gt; invokeMyService();</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -1529,36 +1540,36 @@ If the service invocation fails, the failure is propagated by the <code>Uni</cod
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-java" data-lang="java">Uni&lt;Void&gt; fireAndForget();</code></pre>
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">Uni&lt;Void&gt; fireAndForget();</code></pre>
 </div>
 </div>
 <div class="paragraph">
 <p>In this case, you still know if the invocation fails (you get a failure event) or if the invocation completes successfully (you get a <code>Void</code> item (<code>null</code>)).</p>
 </div>
 </div>
-<div class="sect3">
-<h4 id="_how_do_i_chain_asynchronous_calls">2.13. How do I chain asynchronous calls?</h4>
+<div class="sect2">
+<h3 id="_how_do_i_chain_asynchronous_calls">3.7. How do I chain asynchronous calls?</h3>
 <div class="paragraph">
 <p>To chain asynchronous calls, use <code>onItem().transformToUni</code>:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-java" data-lang="java">CompletableFuture&lt;String&gt; future = uni
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">CompletableFuture&lt;String&gt; future = uni
         .onItem().transformToUni(this::asyncOperation)
         .onItem().transformToUni(this::anotherAsyncOperation)
         .subscribeAsCompletionStage();</code></pre>
 </div>
 </div>
 </div>
-<div class="sect3">
-<h4 id="_how_do_i_join_asynchronous_calls">2.14. How do I <em>join</em> asynchronous calls?</h4>
+<div class="sect2">
+<h3 id="_how_do_i_join_asynchronous_calls">3.8. How do I <em>join</em> asynchronous calls?</h3>
 <div class="paragraph">
 <p>Joining asynchronous calls, <em>i.e.</em> being notified when multiple actions complete, is a common pattern.
 With Mutiny, you can achieve this as follows:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-java" data-lang="java">Uni&lt;String&gt; uni1 = getFirstUni();
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">Uni&lt;String&gt; uni1 = getFirstUni();
 Uni&lt;String&gt; uni2 = getSecondUni();
 Uni&lt;Integer&gt; uni3 = getThirdUni();
 
@@ -1576,7 +1587,7 @@ String result  = uni.onItem().apply(tuple -&gt;
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-java" data-lang="java">Uni&lt;String&gt; uni1 = getFirstUni();
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">Uni&lt;String&gt; uni1 = getFirstUni();
 Uni&lt;String&gt; uni2 = getSecondUni();
 Uni&lt;Integer&gt; uni3 = getThirdUni();
 
@@ -1592,15 +1603,15 @@ Uni&lt;String&gt; uni = Uni.combine().all().unis(list).combinedWith(results -&gt
 This function returns the combined result.</p>
 </div>
 </div>
-<div class="sect3">
-<h4 id="merge-concatenate">2.15. What&#8217;s the difference between merge() and concatenate()</h4>
+<div class="sect2">
+<h3 id="merge-concatenate">3.9. What&#8217;s the difference between merge() and concatenate()</h3>
 <div class="paragraph">
 <p>Imagine you have a <code>Multi</code>, and for each item, you need to call a remote service or execute an asynchronous operation.
 To do this, you write the following code:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-java" data-lang="java">multi
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">multi
     .onItem().transformToUni(this::asyncService)
     // .concatenate() or .merge() ?
 // or
@@ -1629,7 +1640,7 @@ It lets you choose between two <em>flattening</em> methods: <code>merge()</code>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-java" data-lang="java">List&lt;String&gt; list = multi
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">List&lt;String&gt; list = multi
         .onItem().transformToUniAndMerge(this::asyncService)
         .collectItems().asList()
         .await().indefinitely();</code></pre>
@@ -1637,7 +1648,7 @@ It lets you choose between two <em>flattening</em> methods: <code>merge()</code>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-java" data-lang="java">List&lt;String&gt; list = multi
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">List&lt;String&gt; list = multi
         .onItem().transformToUniAndConcatenate(this::asyncService)
         .collectItems().asList()
         .await().indefinitely();</code></pre>
@@ -1658,7 +1669,7 @@ With <code>merge()</code>, you can also configure the degree of concurrency usin
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-java" data-lang="java">List&lt;String&gt; list = multi
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">List&lt;String&gt; list = multi
         .onItem().transformToUni(this::asyncService).merge(8)
         .collectItems().asList()
         .await().indefinitely();</code></pre>
@@ -1693,8 +1704,8 @@ With <code>merge()</code>, you can also configure the degree of concurrency usin
 </tbody>
 </table>
 </div>
-<div class="sect3">
-<h4 id="_how_do_i_recover_from_failure">2.16. How do I recover from failure?</h4>
+<div class="sect2">
+<h3 id="_how_do_i_recover_from_failure">3.10. How do I recover from failure?</h3>
 <div class="paragraph">
 <p>Failures are inherent to software.
 So you need to handle them.
@@ -1706,7 +1717,7 @@ But at any stage you can process the failure and transform or recover from it.</
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-java" data-lang="java">// Transform a failure in another type of failure
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">// Transform a failure in another type of failure
 CompletableFuture&lt;String&gt; res0 = uni.onFailure().apply(failure -&gt; new MyBusinessException("oh no!"))
         .subscribeAsCompletionStage();
 
@@ -1737,7 +1748,7 @@ CompletableFuture&lt;String&gt; res4 = uni
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-java" data-lang="java">CompletableFuture&lt;String&gt; res0 = multi.onFailure().transform(failure -&gt; new MyBusinessException("oh no!"))
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">CompletableFuture&lt;String&gt; res0 = multi.onFailure().transform(failure -&gt; new MyBusinessException("oh no!"))
         .collectItems().first()
         .subscribeAsCompletionStage();
 
@@ -1768,15 +1779,15 @@ CompletableFuture&lt;String&gt; res4 = multi
 The <code>retry</code> operator lets you re-subscribe and continue the reception.</p>
 </div>
 </div>
-<div class="sect3">
-<h4 id="_how_do_i_handle_null">2.17. How do I handle <code>null</code>?</h4>
+<div class="sect2">
+<h3 id="_how_do_i_handle_null">3.11. How do I handle <code>null</code>?</h3>
 <div class="paragraph">
 <p><code>null</code> is only accepted in the <code>Uni</code> type.
 <code>uni.onItem().ifNull()</code> lets you decide what you want to do when the received item is <code>null</code>:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-java" data-lang="java">uni.onItem().ifNull().continueWith("hello");
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">uni.onItem().ifNull().continueWith("hello");
 uni.onItem().ifNull().switchTo(() -&gt; Uni.createFrom().item("hello"));
 uni.onItem().ifNull().failWith(() -&gt; new Exception("Boom!"));</code></pre>
 </div>
@@ -1786,7 +1797,7 @@ uni.onItem().ifNull().failWith(() -&gt; new Exception("Boom!"));</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-java" data-lang="java">uni
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">uni
         .onItem().ifNotNull().transform(String::toUpperCase)
         .onItem().ifNull().continueWith("yolo!");</code></pre>
 </div>
@@ -1804,8 +1815,8 @@ While supported, emitting <code>null</code> should be avoided except for <code>U
 </table>
 </div>
 </div>
-<div class="sect3">
-<h4 id="_how_do_i_handle_timeout">2.18. How do I handle timeout?</h4>
+<div class="sect2">
+<h3 id="_how_do_i_handle_timeout">3.12. How do I handle timeout?</h3>
 <div class="paragraph">
 <p><code>Uni</code> are often used to represent asynchronous operations, like an HTTP call.
 So, it&#8217;s not rare to need to add a timeout on this kind of operation, and recover if the timeout occurs.</p>
@@ -1815,7 +1826,7 @@ So, it&#8217;s not rare to need to add a timeout on this kind of operation, and 
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-java" data-lang="java">String item = uni
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">String item = uni
         .ifNoItem().after(Duration.ofMillis(100)).recoverWithItem("some fallback item")
         .await().indefinitely();</code></pre>
 </div>
@@ -1837,8 +1848,8 @@ So, it&#8217;s not rare to need to add a timeout on this kind of operation, and 
 </ul>
 </div>
 </div>
-<div class="sect3">
-<h4 id="_how_do_i_control_the_threads">2.19. How do I control the threads?</h4>
+<div class="sect2">
+<h3 id="_how_do_i_control_the_threads">3.13. How do I control the threads?</h3>
 <div class="paragraph">
 <p>Except indicated otherwise, the next processor is invoked on the thread emitting the event from upstream.
 You can switch to another thread using the <code>emitOn</code> operator.
@@ -1846,7 +1857,7 @@ The <code>emitOn</code> operator lets you switch the thread used to dispatch (up
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-java" data-lang="java">String res0 = uni.emitOn(executor)
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">String res0 = uni.emitOn(executor)
         .onItem()
         .invoke(s -&gt; System.out.println("Received item `" + s + "` on thread: " + Thread.currentThread().getName()))
         .await().indefinitely();
@@ -1859,8 +1870,8 @@ String res1 = multi.emitOn(executor)
 </div>
 </div>
 </div>
-<div class="sect3">
-<h4 id="_how_do_i_interact_with_completionstages">2.20. How do I interact with CompletionStages?</h4>
+<div class="sect2">
+<h3 id="_how_do_i_interact_with_completionstages">3.14. How do I interact with CompletionStages?</h3>
 <div class="paragraph">
 <p><code>CompletionStage</code> and <code>CompletableFuture</code> are classes provided by Java to represent asynchronous actions.
 However, they are not lazy, and do not follow a <em>subscription</em> patterns.</p>
@@ -1871,7 +1882,7 @@ Also, <code>Uni</code> offers a way to retrieve the item or the failure as a <co
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-java" data-lang="java">CompletableFuture&lt;String&gt; future1 = Uni
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">CompletableFuture&lt;String&gt; future1 = Uni
         // Create from a Completion Stage
         .createFrom().completionStage(CompletableFuture.supplyAsync(() -&gt; "hello"))
         .map(String::toUpperCase)
@@ -1885,15 +1896,15 @@ CompletableFuture&lt;List&lt;String&gt;&gt; future2 = Multi
 </div>
 </div>
 </div>
-<div class="sect3">
-<h4 id="_how_do_i_interact_with_rx_java_2">2.21. How do I interact with RX Java 2?</h4>
+<div class="sect2">
+<h3 id="_how_do_i_interact_with_rx_java_2">3.15. How do I interact with RX Java 2?</h3>
 <div class="paragraph">
 <p>Mutiny allows converting Rx Java 2 types to/from Uni and Multi instances.
 To enable this feature, add the following dependency to your <code>CLASSPATH</code>:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-xml" data-lang="xml">&lt;dependency&gt;
+<pre class="highlightjs highlight"><code data-lang="xml" class="language-xml hljs">&lt;dependency&gt;
     &lt;groupId&gt;io.smallrye.reactive&lt;/groupId&gt;
     &lt;artifactId&gt;mutiny-rxjava&lt;/artifactId&gt;
     &lt;version&gt;0.7.0&lt;/version&gt;
@@ -1905,7 +1916,7 @@ To enable this feature, add the following dependency to your <code>CLASSPATH</co
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-java" data-lang="java">import io.smallrye.mutiny.converters.multi.MultiRxConverters;
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">import io.smallrye.mutiny.converters.multi.MultiRxConverters;
 import io.smallrye.mutiny.converters.uni.UniRxConverters;</code></pre>
 </div>
 </div>
@@ -1914,7 +1925,7 @@ import io.smallrye.mutiny.converters.uni.UniRxConverters;</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-java" data-lang="java">Completable completable = Completable.complete();
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">Completable completable = Completable.complete();
 Single&lt;String&gt; single = Single.just("hello");
 Maybe&lt;String&gt; maybe = Maybe.just("hello");
 Maybe&lt;String&gt; emptyMaybe = Maybe.empty();
@@ -1946,7 +1957,7 @@ Once received, the underlying subscription is cancelled.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-java" data-lang="java">Completable completable = uni.convert().with(UniRxConverters.toCompletable());
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">Completable completable = uni.convert().with(UniRxConverters.toCompletable());
 Single&lt;Optional&lt;String&gt;&gt; single = uni.convert().with(UniRxConverters.toSingle());
 Single&lt;String&gt; single2 = uni.convert().with(UniRxConverters.toSingle().failOnNull());
 Maybe&lt;String&gt; maybe = uni.convert().with(UniRxConverters.toMaybe());
@@ -1963,7 +1974,7 @@ You can retrieve a <code>Single&lt;T&gt;</code> and fail instead using <code>toS
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-java" data-lang="java">Completable completable = Completable.complete();
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">Completable completable = Completable.complete();
 Single&lt;String&gt; single = Single.just("hello");
 Maybe&lt;String&gt; maybe = Maybe.just("hello");
 Maybe&lt;String&gt; emptyMaybe = Maybe.empty();
@@ -1989,7 +2000,7 @@ Multi&lt;String&gt; multiFromPublisher = Multi.createFrom().publisher(flowable);
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-java" data-lang="java">Completable completable = multi.convert().with(MultiRxConverters.toCompletable());
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">Completable completable = multi.convert().with(MultiRxConverters.toCompletable());
 Single&lt;Optional&lt;String&gt;&gt; single = multi.convert().with(MultiRxConverters.toSingle());
 Single&lt;String&gt; single2 = multi.convert().with(MultiRxConverters
         .toSingle().onEmptyThrow(() -&gt; new Exception("D'oh!")));
@@ -1999,15 +2010,15 @@ Flowable&lt;String&gt; flowable = multi.convert().with(MultiRxConverters.toFlowa
 </div>
 </div>
 </div>
-<div class="sect3">
-<h4 id="_how_do_i_interact_with_reactor">2.22. How do I interact with Reactor?</h4>
+<div class="sect2">
+<h3 id="_how_do_i_interact_with_reactor">3.16. How do I interact with Reactor?</h3>
 <div class="paragraph">
 <p>Mutiny allows converting Project Reactor types to/from <code>Uni</code> and <code>Multi</code> instances.
 To enable this feature, add the following dependency to your <code>CLASSPATH</code>:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-xml" data-lang="xml">&lt;dependency&gt;
+<pre class="highlightjs highlight"><code data-lang="xml" class="language-xml hljs">&lt;dependency&gt;
     &lt;groupId&gt;io.smallrye.reactive&lt;/groupId&gt;
     &lt;artifactId&gt;mutiny-reactor&lt;/artifactId&gt;
     &lt;version&gt;0.7.0&lt;/version&gt;
@@ -2019,7 +2030,7 @@ To enable this feature, add the following dependency to your <code>CLASSPATH</co
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-java" data-lang="java">import io.smallrye.mutiny.converters.multi.MultiReactorConverters;
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">import io.smallrye.mutiny.converters.multi.MultiReactorConverters;
 import io.smallrye.mutiny.converters.uni.UniReactorConverters;</code></pre>
 </div>
 </div>
@@ -2028,7 +2039,7 @@ import io.smallrye.mutiny.converters.uni.UniReactorConverters;</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-java" data-lang="java">Mono&lt;Void&gt; empty = Mono.empty();
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">Mono&lt;Void&gt; empty = Mono.empty();
 Mono&lt;String&gt; mono = Mono.just("hello");
 Flux&lt;String&gt; flux = Flux.just("a", "b", "c");
 
@@ -2043,7 +2054,7 @@ Uni&lt;String&gt; uniFromPublisher = Uni.createFrom().publisher(flux);</code></p
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-java" data-lang="java">Mono&lt;String&gt; mono = uni.convert().with(UniReactorConverters.toMono());
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">Mono&lt;String&gt; mono = uni.convert().with(UniReactorConverters.toMono());
 Flux&lt;String&gt; flux = uni.convert().with(UniReactorConverters.toFlux());</code></pre>
 </div>
 </div>
@@ -2052,7 +2063,7 @@ Flux&lt;String&gt; flux = uni.convert().with(UniReactorConverters.toFlux());</co
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-java" data-lang="java">Mono&lt;Void&gt; empty = Mono.empty();
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">Mono&lt;Void&gt; empty = Mono.empty();
 Mono&lt;String&gt; mono = Mono.just("hello");
 Flux&lt;String&gt; flux = Flux.just("a", "b", "c");
 
@@ -2068,13 +2079,13 @@ Multi&lt;String&gt; multiFromPublisher = Multi.createFrom().publisher(flux);</co
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-java" data-lang="java">Mono&lt;String&gt; mono = multi.convert().with(MultiReactorConverters.toMono());
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">Mono&lt;String&gt; mono = multi.convert().with(MultiReactorConverters.toMono());
 Flux&lt;String&gt; flux = multi.convert().with(MultiReactorConverters.toFlux());</code></pre>
 </div>
 </div>
 </div>
-<div class="sect3">
-<h4 id="_how_do_i_control_the_back_pressure">2.23. How do I control the back-pressure?</h4>
+<div class="sect2">
+<h3 id="_how_do_i_control_the_back_pressure">3.17. How do I control the back-pressure?</h3>
 <div class="paragraph">
 <p>When a consumer cannot keep up with the pace of a publisher, there is an overflow condition.
 By default, it would fail and propagate an exception.</p>
@@ -2084,7 +2095,7 @@ By default, it would fail and propagate an exception.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-java" data-lang="java">String res1 = multi
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">String res1 = multi
         .emitOn(executor)
         .onOverflow().buffer(10)
         .collectItems().first()
@@ -2098,15 +2109,15 @@ String res2 = multi
 </div>
 </div>
 </div>
-<div class="sect3">
-<h4 id="_how_do_wrap_blocking_calls">2.24. How do wrap blocking calls?</h4>
+<div class="sect2">
+<h3 id="_how_do_wrap_blocking_calls">3.18. How do wrap blocking calls?</h3>
 <div class="paragraph">
 <p>It is often the case that a source of data (web service, database&#8230;&#8203;) is synchronous and blocking.
 To deal with such sources in your applications, apply the following pattern:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-java" data-lang="java">Uni&lt;String&gt; blocking = Uni.createFrom().item(this::invokeRemoteServiceUsingBlockingIO)
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">Uni&lt;String&gt; blocking = Uni.createFrom().item(this::invokeRemoteServiceUsingBlockingIO)
         .runSubscriptionOn(Infrastructure.getDefaultWorkerPool());</code></pre>
 </div>
 </div>
@@ -2128,14 +2139,14 @@ But, when you are dealing with <code>Multi</code> and need to execute a blocking
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-java" data-lang="java">Multi&lt;String&gt; multi = Multi.createFrom().items("john", "jack", "sue")
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">Multi&lt;String&gt; multi = Multi.createFrom().items("john", "jack", "sue")
         .emitOn(Infrastructure.getDefaultWorkerPool())
         .onItem().transform(this::invokeRemoteServiceUsingBlockingIO);</code></pre>
 </div>
 </div>
 </div>
-<div class="sect3">
-<h4 id="_emiton_vs_runsubscriptionon">2.25. emitOn vs. runSubscriptionOn</h4>
+<div class="sect2">
+<h3 id="_emiton_vs_runsubscriptionon">3.19. emitOn vs. runSubscriptionOn</h3>
 <div class="paragraph">
 <p>The <code>emitOn</code> and <code>runSubscriptionOn</code> are 2 operators influencing on which threads the event are dispatched.
 However, they target different types of events and different directions.</p>
@@ -2146,7 +2157,7 @@ Consequently, it affects where the subsequent operators execute (until another <
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-java" data-lang="java">Multi.createFrom().items(this::retrieveItemsFromSource)
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">Multi.createFrom().items(this::retrieveItemsFromSource)
         .emitOn(executor)
         .onItem().transform(this::applySomeOperation)
         .subscribe().with(
@@ -2161,7 +2172,7 @@ Consequently, it affects where the subsequent operators execute (until another <
 </div>
 <div class="imageblock text-center">
 <div class="content">
-<img src="diag-ce11714f53fedf6861bf5f43e7f2d847.png" alt="diag ce11714f53fedf6861bf5f43e7f2d847" width="2232" height="578">
+<img src="assets/images/diag-ce11714f53fedf6861bf5f43e7f2d847.png" alt="diag ce11714f53fedf6861bf5f43e7f2d847" width="2150" height="580">
 </div>
 </div>
 <div class="paragraph">
@@ -2170,7 +2181,7 @@ It requests the upstream to run its subscription (call of the <code>subscribe</c
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-java" data-lang="java">Multi.createFrom().items(() -&gt; {
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">Multi.createFrom().items(() -&gt; {
     // called on a thread from the executor
     return retrieveItemsFromSource();
 })
@@ -2188,12 +2199,12 @@ It requests the upstream to run its subscription (call of the <code>subscribe</c
 </div>
 <div class="imageblock text-center">
 <div class="content">
-<img src="diag-cbd1972d7b4ab697a798e3d1b5ede99e.png" alt="diag cbd1972d7b4ab697a798e3d1b5ede99e" width="2207" height="578">
+<img src="assets/images/diag-cbd1972d7b4ab697a798e3d1b5ede99e.png" alt="diag cbd1972d7b4ab697a798e3d1b5ede99e" width="2159" height="580">
 </div>
 </div>
 </div>
-<div class="sect3">
-<h4 id="_how_can_i_use_a_unicast_processor">2.26. How can I use a Unicast Processor</h4>
+<div class="sect2">
+<h3 id="_how_can_i_use_a_unicast_processor">3.20. How can I use a Unicast Processor</h3>
 <div class="paragraph">
 <p>The <code>UnicastProcessor</code> is an implementation of <code>Multi</code> that lets you enqueue items in a queue.
 The items are then dispatched to the subscriber using the request protocol.
@@ -2205,7 +2216,7 @@ These items are enqueued in the processor and replayed when the subscriber is co
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-java" data-lang="java">UnicastProcessor&lt;String&gt; processor = UnicastProcessor.create();
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">UnicastProcessor&lt;String&gt; processor = UnicastProcessor.create();
 Multi&lt;String&gt; multi = processor
         .onItem().transform(String::toUpperCase)
         .onFailure().recoverWithItem("d'oh");
@@ -2224,14 +2235,14 @@ new Thread(() -&gt; {
 You can also pass a fixed size queue that would reject the items once full.</p>
 </div>
 </div>
-<div class="sect3">
-<h4 id="_how_can_i_create_unimulti_from_a_callback_based_api">2.27. How can I create Uni/Multi from a callback-based API</h4>
+<div class="sect2">
+<h3 id="_how_can_i_create_unimulti_from_a_callback_based_api">3.21. How can I create Uni/Multi from a callback-based API</h3>
 <div class="paragraph">
 <p>When dealing with async API using callback, you can create <code>Uni</code>s or <code>Multi</code>s by using <em>emitters</em>:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-java" data-lang="java">Uni&lt;String&gt; uni = Uni.createFrom().emitter(emitter -&gt; {
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">Uni&lt;String&gt; uni = Uni.createFrom().emitter(emitter -&gt; {
     client.execute(ar -&gt; {
         if (ar.failed()) {
             emitter.fail(ar.cause());
@@ -2256,8 +2267,8 @@ Multi&lt;String&gt; multi = Multi.createFrom().emitter(emitter -&gt; {
 <p>Note that the callback receiving the emitter is called for every subscription.</p>
 </div>
 </div>
-<div class="sect3">
-<h4 id="_how_do_i_create_hot_streams">2.28. How do I create hot streams</h4>
+<div class="sect2">
+<h3 id="_how_do_i_create_hot_streams">3.22. How do I create hot streams</h3>
 <div class="paragraph">
 <p>In a <em>cold</em> stream, the stream is created when one subscriber subscribes to the stream.
 So, if no one subscribes, the actual stream is not created, saving resources (that would be wasted because nobody is interested in the items).</p>
@@ -2283,7 +2294,7 @@ Subscribers only get items emitted after their subscription, meaning that any pr
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-java" data-lang="java">BroadcastProcessor&lt;String&gt; processor = BroadcastProcessor.create();
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">BroadcastProcessor&lt;String&gt; processor = BroadcastProcessor.create();
 Multi&lt;String&gt; multi = processor
         .onItem().transform(String::toUpperCase)
         .onFailure().recoverWithItem("d'oh");
@@ -2307,8 +2318,8 @@ However, the <code>BroadcastProcessor</code> enforces the back-pressure protocol
 If a subscriber is not ready to handle an item emitted by the <em>hot</em> source, an <code>io.smallrye.mutiny.subscription.BackPressureFailure</code> is forwarded to this subscriber.</p>
 </div>
 </div>
-<div class="sect3">
-<h4 id="_how_do_i_handle_polling">2.29. How do I handle polling?</h4>
+<div class="sect2">
+<h3 id="_how_do_i_handle_polling">3.23. How do I handle polling?</h3>
 <div class="paragraph">
 <p>There are many poll-based API around us.
 Sometimes you need to use these APIs to generate a stream from the polled values.
@@ -2316,7 +2327,7 @@ To do this, use the <code>repeat()</code> feature:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-java" data-lang="java">PollableDataSource source = new PollableDataSource();
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">PollableDataSource source = new PollableDataSource();
 // First creates a uni that emit the polled item. Because `poll` blocks, let's use a specific executor
 Uni&lt;String&gt; pollItemFromSource = Uni.createFrom().item(source::poll).runSubscriptionOn(executor);
 // To get the stream of items, just repeat the uni indefinitely
@@ -2334,7 +2345,7 @@ source.close();</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-java" data-lang="java">PollableDataSource source = new PollableDataSource();
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">PollableDataSource source = new PollableDataSource();
 Multi&lt;String&gt; stream = Multi.createBy().repeating()
             .supplier(source::poll)
             .until(s -&gt; s == null)
@@ -2344,8 +2355,8 @@ stream.subscribe().with(item -&gt; System.out.println("Polled item: " + item));<
 </div>
 </div>
 </div>
-<div class="sect3">
-<h4 id="_how_do_i_handle_pagination">2.30. How do I handle pagination?</h4>
+<div class="sect2">
+<h3 id="_how_do_i_handle_pagination">3.24. How do I handle pagination?</h3>
 <div class="paragraph">
 <p>There are many REST / HTTP APIs using pagination, <em>i.e.</em> return only a subset of the results and you need to request the next <em>page</em> to get the next batch.
 Each batch contains a list of item(s).
@@ -2356,7 +2367,7 @@ So by combining these methods and <code>disjoint</code> you can generate streams
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-java" data-lang="java">PaginatedApi api = new PaginatedApi();
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">PaginatedApi api = new PaginatedApi();
 
 Multi&lt;String&gt; stream = Multi.createBy().repeating()
         .completionStage(
@@ -2378,7 +2389,7 @@ It gets the items from the lists and passes them downstream:</p>
 </div>
 <div class="imageblock text-center">
 <div class="content">
-<img src="diag-1cddf88909ef82bdaa96ca9da9f4c028.png" alt="diag 1cddf88909ef82bdaa96ca9da9f4c028" width="652" height="628">
+<img src="assets/images/diag-1cddf88909ef82bdaa96ca9da9f4c028.png" alt="diag 1cddf88909ef82bdaa96ca9da9f4c028" width="639" height="631">
 </div>
 </div>
 <div class="paragraph">
@@ -2407,7 +2418,7 @@ The test verifies if there is a <em>next</em> batch to be retrieved.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-java" data-lang="java">PaginatedApi api = new PaginatedApi();
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">PaginatedApi api = new PaginatedApi();
 
 Multi&lt;Page&gt; stream = Multi.createBy().repeating()
         .uni(
@@ -2417,15 +2428,15 @@ Multi&lt;Page&gt; stream = Multi.createBy().repeating()
 </div>
 </div>
 </div>
-<div class="sect3">
-<h4 id="_how_do_i_delay_things">2.31. How do I delay <em>things</em>?</h4>
+<div class="sect2">
+<h3 id="_how_do_i_delay_things">3.25. How do I delay <em>things</em>?</h3>
 <div class="paragraph">
 <p>You can delay item emission using the <code>Uni.onItem().delayIt().by(&#8230;&#8203;)</code> or <code>Uni.onItem().delayIt().until(&#8230;&#8203;)</code>.
 The first variant delays the emission by a given duration:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-java" data-lang="java">String delayed = Uni.createFrom().item("hello")
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">String delayed = Uni.createFrom().item("hello")
         .onItem().delayIt().by(Duration.ofMillis(10))
         .map(s -&gt; "Delayed " + s)
         .await().indefinitely();</code></pre>
@@ -2436,7 +2447,7 @@ The first variant delays the emission by a given duration:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-java" data-lang="java">String delayed = Uni.createFrom().item("hello")
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">String delayed = Uni.createFrom().item("hello")
         // The write method returns a Uni completed
         // when the operation is done.
         .onItem().delayIt().until(this::write)
@@ -2453,7 +2464,7 @@ If the function emits a failure (or throws an exception), this failure is propag
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-java" data-lang="java">List&lt;Integer&gt; delayed = Multi.createFrom().items(1, 2, 3, 4, 5)
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">List&lt;Integer&gt; delayed = Multi.createFrom().items(1, 2, 3, 4, 5)
         .onItem().transformToUni(i -&gt; Uni.createFrom().item(i).onItem().delayIt().by(Duration.ofMillis(10)))
         .concatenate()
         .collectItems().asList()
@@ -2466,7 +2477,7 @@ You can implement this behavior as follows:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-java" data-lang="java">Random random = new Random();
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">Random random = new Random();
 List&lt;Integer&gt; delayed = Multi.createFrom().items(1, 2, 3, 4, 5)
         .onItem().transformToUni(i -&gt; Uni.createFrom().item(i).onItem().delayIt().by(Duration.ofMillis(random.nextInt(100) + 1)))
         .merge()
@@ -2475,14 +2486,14 @@ List&lt;Integer&gt; delayed = Multi.createFrom().items(1, 2, 3, 4, 5)
 </div>
 </div>
 </div>
-<div class="sect3">
-<h4 id="_where_do_i_find_the_javadoc">2.32. Where do I find the JavaDoc?</h4>
+<div class="sect2">
+<h3 id="_where_do_i_find_the_javadoc">3.26. Where do I find the JavaDoc?</h3>
 <div class="paragraph">
 <p>The JavaDoc is published <a href="https://smallrye.io/smallrye-mutiny/apidocs/">there</a>.</p>
 </div>
 </div>
-<div class="sect3">
-<h4 id="_default_executor_and_integration">2.33. Default executor and integration</h4>
+<div class="sect2">
+<h3 id="_default_executor_and_integration">3.27. Default executor and integration</h3>
 <div class="paragraph">
 <p>Sometimes, Mutiny needs to execute tasks on other threads, such as monitoring time or delaying actions.
 Most operators relying on such capacity let you pass either a <code>ScheduledExecutorService</code> or an <code>ExecutorService</code>.</p>
@@ -2497,11 +2508,15 @@ A <code>ScheduledExecutorService</code> is also created but delegates the execut
 </div>
 </div>
 </div>
+</div>
 <div id="footer">
 <div id="footer-text">
 Version 0.7.0<br>
-Last updated 2020-07-16 16:23:37 UTC
+Last updated 2019-12-13 17:01:25 +0100
 </div>
 </div>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/highlight.min.js"></script>
+<script>hljs.initHighlighting()</script>
 </body>
 </html>

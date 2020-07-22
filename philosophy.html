@@ -439,11 +439,10 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </head>
 <body class="article toc2 toc-left">
 <div id="header">
+<h1>Mutiny philosophy and concepts</h1>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
 <ul class="sectlevel1">
-<li><a href="#_mutiny_philosophy_and_concepts">Mutiny philosophy and concepts</a>
-<ul class="sectlevel2">
 <li><a href="#_events">Events</a></li>
 <li><a href="#_an_event_driven_api">An event-driven API</a></li>
 <li><a href="#_uni_and_multi">Uni and Multi</a></li>
@@ -451,13 +450,10 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#_creating_and_subscribing_to_multis">Creating and Subscribing to Multis</a></li>
 <li><a href="#_structuring_the_pipeline">Structuring the pipeline</a></li>
 </ul>
-</li>
-</ul>
 </div>
 </div>
 <div id="content">
-<div class="sect1">
-<h2 id="_mutiny_philosophy_and_concepts">Mutiny philosophy and concepts</h2>
+<div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
 <p>Mutiny is built on 3 main concepts:</p>
@@ -475,8 +471,11 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </li>
 </ul>
 </div>
-<div class="sect2">
-<h3 id="_events">Events</h3>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_events">Events</h2>
+<div class="sectionbody">
 <div class="paragraph">
 <p>When you use Mutiny you design <em>assembly lines</em> in which events flow.
 Events can flow from upstream to downstream (from source to sinks), or some signals can <em>swim</em> upstream from the sinks to the source.</p>
@@ -486,7 +485,7 @@ Events can flow from upstream to downstream (from source to sinks), or some sign
 </div>
 <div class="imageblock text-center">
 <div class="content">
-<img src="diag-4e60926db2b100a45f7a3fafb6d1c2c5.png" alt="diag 4e60926db2b100a45f7a3fafb6d1c2c5" width="1287" height="817">
+<img src="assets/images/diag-4e60926db2b100a45f7a3fafb6d1c2c5.png" alt="diag 4e60926db2b100a45f7a3fafb6d1c2c5" width="1247" height="822">
 </div>
 </div>
 <div class="admonitionblock note">
@@ -566,7 +565,7 @@ Once they are emitted, no more items are emitted.</p>
 </div>
 <div class="imageblock text-center">
 <div class="content">
-<img src="diag-c06139c2b31470fa367c3f84a6e51430.png" alt="diag c06139c2b31470fa367c3f84a6e51430" width="997" height="878">
+<img src="assets/images/diag-c06139c2b31470fa367c3f84a6e51430.png" alt="diag c06139c2b31470fa367c3f84a6e51430" width="988" height="883">
 </div>
 </div>
 <div class="paragraph">
@@ -603,8 +602,10 @@ If you program does not do anything, be sure you subscribed to the flow.</p>
 </table>
 </div>
 </div>
-<div class="sect2">
-<h3 id="_an_event_driven_api">An event-driven API</h3>
+</div>
+<div class="sect1">
+<h2 id="_an_event_driven_api">An event-driven API</h2>
+<div class="sectionbody">
 <div class="paragraph">
 <p>Mutiny is an event-driven API.
 So for each types of event, there is an <code>on</code> associated method that let you handle this specific event.
@@ -612,13 +613,13 @@ For example:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-java" data-lang="java">Multi&lt;String&gt; source = Multi.createFrom().items("a", "b", "c");
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">Multi&lt;String&gt; source = Multi.createFrom().items("a", "b", "c");
 
 source
         .onItem().invoke(item -&gt; System.out.println("Received item " + item))
         .onFailure().invoke(failure -&gt; System.out.println("Failed with " + failure.getMessage()))
         .onCompletion().invoke(() -&gt; System.out.println("Completed"))
-        .on().subscribed(subscription -&gt; System.out.println("We are subscribed!"))
+        .onSubscribe().invoke(subscription -&gt; System.out.println("We are subscribed!"))
 
         .on().cancellation(() -&gt; System.out.println("Downstream has cancelled the interaction"))
         .on().request(n -&gt; System.out.println("Downstream requested " + n + " items"))
@@ -648,8 +649,10 @@ For example:</p>
 </ul>
 </div>
 </div>
-<div class="sect2">
-<h3 id="_uni_and_multi">Uni and Multi</h3>
+</div>
+<div class="sect1">
+<h2 id="_uni_and_multi">Uni and Multi</h2>
+<div class="sectionbody">
 <div class="paragraph">
 <p>Mutiny is based on two types:</p>
 </div>
@@ -698,7 +701,7 @@ Also, <code>Uni</code> can handle items having a <code>null</code> value (and ha
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-java" data-lang="java">Multi.createFrom().items("a", "b", "c")
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">Multi.createFrom().items("a", "b", "c")
         .onItem().transform(i -&gt; i.toUpperCase())
         .subscribe().with(
                 item -&gt; System.out.println("Received: " + item),
@@ -716,7 +719,7 @@ Uni.createFrom().item("a")
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-java" data-lang="java">Multi.createFrom().items("a", "b", "c")
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">Multi.createFrom().items("a", "b", "c")
         .onItem().transform(i -&gt; i.toUpperCase())
         .toUni() // Convert the multi to uni, only "a" will be forwarded.
         .subscribe().with(
@@ -732,14 +735,16 @@ Uni.createFrom().item("a")
 </div>
 </div>
 </div>
-<div class="sect2">
-<h3 id="_creating_and_subscribing_to_unis">Creating and Subscribing to Unis</h3>
+</div>
+<div class="sect1">
+<h2 id="_creating_and_subscribing_to_unis">Creating and Subscribing to Unis</h2>
+<div class="sectionbody">
 <div class="paragraph">
 <p>There are many ways to create instances of <code>Unis</code>:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-java" data-lang="java">// Creation from a known item, or computed at subscription time
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">// Creation from a known item, or computed at subscription time
 Uni.createFrom().item("some known value");
 Uni.createFrom().item(() -&gt; "some value computed at subscription time");
 
@@ -774,7 +779,7 @@ Uni.createFrom().deferred(() -&gt; Uni.createFrom().item("create the uni at subs
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-java" data-lang="java">Uni&lt;String&gt; uni = Uni.createFrom().item("hello");
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">Uni&lt;String&gt; uni = Uni.createFrom().item("hello");
 
 // Passing callbacks
 Cancellable cancellable = uni.subscribe().with(
@@ -802,14 +807,16 @@ uni.subscribe().withSubscriber(new UniSubscriber&lt;String&gt;() {
 </div>
 </div>
 </div>
-<div class="sect2">
-<h3 id="_creating_and_subscribing_to_multis">Creating and Subscribing to Multis</h3>
+</div>
+<div class="sect1">
+<h2 id="_creating_and_subscribing_to_multis">Creating and Subscribing to Multis</h2>
+<div class="sectionbody">
 <div class="paragraph">
 <p>There are many ways to create instances of <code>Multis</code>:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-java" data-lang="java">// Creation from a known item(s), or computed at subscription time
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">// Creation from a known item(s), or computed at subscription time
 Multi.createFrom().item("some known value");
 Multi.createFrom().item(() -&gt; "some value computed at subscription time");
 Multi.createFrom().items("a", "b", "c");
@@ -860,7 +867,7 @@ Multi.createFrom().range(1, 11);</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-java" data-lang="java">Multi&lt;String&gt; multi = Multi.createFrom().items("a", "b", "c");
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">Multi&lt;String&gt; multi = Multi.createFrom().items("a", "b", "c");
 
 Cancellable cancellable = multi.subscribe().with(
         item -&gt; System.out.println("Got " + item));
@@ -896,15 +903,17 @@ multi.subscribe().withSubscriber(new MultiSubscriber&lt;String&gt;() {
 </div>
 </div>
 </div>
-<div class="sect2">
-<h3 id="_structuring_the_pipeline">Structuring the pipeline</h3>
+</div>
+<div class="sect1">
+<h2 id="_structuring_the_pipeline">Structuring the pipeline</h2>
+<div class="sectionbody">
 <div class="paragraph">
 <p>It can be hard to structure your sequence of processing in a readable manner.
 Mutiny provides the <code>stage</code> function to structure your pipeline:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-java" data-lang="java">String result = Multi.createFrom().completionStage(CompletableFuture.supplyAsync(() -&gt; 23))
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">String result = Multi.createFrom().completionStage(CompletableFuture.supplyAsync(() -&gt; 23))
         .stage(self -&gt; {
             // Transform each item into a string of the item +1
             return self
@@ -923,11 +932,13 @@ Mutiny provides the <code>stage</code> function to structure your pipeline:</p>
 </div>
 </div>
 </div>
-</div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-07-16 16:23:37 UTC
+Last updated 2020-07-22 11:48:42 +0200
 </div>
 </div>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/highlight.min.js"></script>
+<script>hljs.initHighlighting()</script>
 </body>
 </html>
