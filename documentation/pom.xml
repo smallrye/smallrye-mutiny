@@ -120,15 +120,16 @@
                     </requires>
                     <preserveDirectories>true</preserveDirectories>
                     <backend>html</backend>
-                    <sourceHighlighter>highlightjs</sourceHighlighter>
                     <attributes>
                         <toc>left</toc>
                         <version>${project.version}</version>
                         <reactive.streams.version>${reactive-streams.version}</reactive.streams.version>
                         <icons>font</icons>
+                        <source-highlighter>highlightjs</source-highlighter>
+                        <imagesdir>assets/images</imagesdir>
+                        <attribute-missing>warn</attribute-missing>
                     </attributes>
                     <sourceDirectory>src/main/docs</sourceDirectory>
-                    <imagesDir>assets/images</imagesDir>
                     <outputDirectory>${site.dir}</outputDirectory>
                 </configuration>
             </plugin>
