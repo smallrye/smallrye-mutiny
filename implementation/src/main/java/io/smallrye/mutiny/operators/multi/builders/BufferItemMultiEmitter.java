@@ -1,22 +1,23 @@
 package io.smallrye.mutiny.operators.multi.builders;
 
+import java.util.Queue;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import io.smallrye.mutiny.helpers.Subscriptions;
-import io.smallrye.mutiny.helpers.queues.SpscLinkedArrayQueue;
+import io.smallrye.mutiny.helpers.queues.Queues;
 import io.smallrye.mutiny.subscription.MultiEmitter;
 import io.smallrye.mutiny.subscription.MultiSubscriber;
 
 public class BufferItemMultiEmitter<T> extends BaseMultiEmitter<T> {
 
-    private final SpscLinkedArrayQueue<T> queue;
+    private final Queue<T> queue;
     private Throwable failure;
     private volatile boolean done;
     private final AtomicInteger wip = new AtomicInteger();
 
     BufferItemMultiEmitter(MultiSubscriber<? super T> actual, int capacityHint) {
         super(actual);
-        this.queue = new SpscLinkedArrayQueue<>(capacityHint);
+        this.queue = Queues.<T> unbounded(capacityHint).get();
     }
 
     @Override
@@ -73,7 +74,7 @@ public class BufferItemMultiEmitter<T> extends BaseMultiEmitter<T> {
         }
 
         int missed = 1;
-        final SpscLinkedArrayQueue<T> q = queue;
+        final Queue<T> q = queue;
 
         do {
             long r = requested.get();

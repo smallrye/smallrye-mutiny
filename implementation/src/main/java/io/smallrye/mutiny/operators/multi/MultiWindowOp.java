@@ -17,8 +17,7 @@ import org.reactivestreams.Subscription;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.helpers.Subscriptions;
-import io.smallrye.mutiny.helpers.queues.SpscArrayQueue;
-import io.smallrye.mutiny.helpers.queues.SpscLinkedArrayQueue;
+import io.smallrye.mutiny.helpers.queues.Queues;
 import io.smallrye.mutiny.operators.multi.processors.UnicastProcessor;
 import io.smallrye.mutiny.subscription.MultiSubscriber;
 
@@ -54,8 +53,8 @@ public class MultiWindowOp<T> extends AbstractMultiOperator<T, Multi<T>> {
         super(upstream);
         this.size = ParameterValidation.positive(size, "size");
         this.skip = ParameterValidation.positive(skip, "skip");
-        this.processorQueueSupplier = () -> new SpscArrayQueue<>(size);
-        this.overflowQueueSupplier = () -> new SpscLinkedArrayQueue<>(size);
+        this.processorQueueSupplier = Queues.unbounded(Queues.BUFFER_XS);
+        this.overflowQueueSupplier = Queues.unbounded(Queues.BUFFER_XS);
     }
 
     @Override
@@ -78,7 +77,7 @@ public class MultiWindowOp<T> extends AbstractMultiOperator<T, Multi<T>> {
 
         private final Supplier<? extends Queue<T>> supplier;
         private final int size;
-        private AtomicInteger count = new AtomicInteger();
+        private final AtomicInteger count = new AtomicInteger();
 
         int index;
         private UnicastProcessor<T> processor;

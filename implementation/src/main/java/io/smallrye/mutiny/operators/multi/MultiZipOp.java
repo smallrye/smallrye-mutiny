@@ -13,7 +13,7 @@ import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.helpers.Subscriptions;
-import io.smallrye.mutiny.helpers.queues.SpscArrayQueue;
+import io.smallrye.mutiny.helpers.queues.Queues;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.AbstractMulti;
 import io.smallrye.mutiny.subscription.MultiSubscriber;
@@ -276,7 +276,7 @@ public final class MultiZipOp<O> extends AbstractMulti<O> {
         @Override
         public void onSubscribe(Subscription s) {
             if (upstream.compareAndSet(null, s)) {
-                queue = new SpscArrayQueue<>(prefetch);
+                queue = Queues.get(prefetch).get();
                 s.request(prefetch);
             }
         }

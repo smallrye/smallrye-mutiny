@@ -10,8 +10,7 @@ import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.helpers.Subscriptions;
-import io.smallrye.mutiny.helpers.queues.SpscArrayQueue;
-import io.smallrye.mutiny.helpers.queues.SpscLinkedArrayQueue;
+import io.smallrye.mutiny.helpers.queues.Queues;
 import io.smallrye.mutiny.operators.multi.AbstractMultiOperator;
 import io.smallrye.mutiny.operators.multi.MultiOperatorProcessor;
 import io.smallrye.mutiny.subscription.BackPressureFailure;
@@ -61,7 +60,7 @@ public class MultiOnOverflowBufferOp<T> extends AbstractMultiOperator<T, T> {
             super(downstream);
             this.onOverflow = onOverflow;
             this.postponeFailurePropagation = postponeFailurePropagation;
-            this.queue = unbounded ? new SpscLinkedArrayQueue<>(bufferSize) : new SpscArrayQueue<>(bufferSize);
+            this.queue = unbounded ? Queues.<T> unbounded(bufferSize).get() : Queues.<T> get(bufferSize).get();
         }
 
         @Override

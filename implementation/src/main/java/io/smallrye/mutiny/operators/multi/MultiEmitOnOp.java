@@ -15,7 +15,7 @@ import org.reactivestreams.Subscription;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.helpers.Subscriptions;
-import io.smallrye.mutiny.helpers.queues.SpscArrayQueue;
+import io.smallrye.mutiny.helpers.queues.Queues;
 import io.smallrye.mutiny.subscription.BackPressureFailure;
 import io.smallrye.mutiny.subscription.MultiSubscriber;
 
@@ -27,7 +27,7 @@ import io.smallrye.mutiny.subscription.MultiSubscriber;
 public class MultiEmitOnOp<T> extends AbstractMultiOperator<T, T> {
 
     private final Executor executor;
-    private final Supplier<? extends Queue<T>> queueSupplier = () -> new SpscArrayQueue<>(16);
+    private final Supplier<? extends Queue<T>> queueSupplier = Queues.get(Queues.BUFFER_S);
 
     public MultiEmitOnOp(Multi<? extends T> upstream, Executor executor) {
         super(upstream);
