@@ -641,4 +641,11 @@ public interface Uni<T> {
      * @return the object to configure the termination actions.
      */
     UniOnTerminate<T> onTermination();
+
+    /**
+     * Configures actions to be performed when the subscriber cancels the subscription.
+     * 
+     * @return the object to configure the cancellation actions.
+     */
+    UniOnCancel<T> onCancellation();
 }

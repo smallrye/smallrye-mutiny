@@ -88,7 +88,7 @@ public class UniOnItemTransformToMultiTest {
         final AtomicBoolean called = new AtomicBoolean();
 
         Uni.createFrom().<Integer> nothing()
-                .on().cancellation(() -> called.set(true))
+                .onCancellation().invoke(() -> called.set(true))
                 .onItem().transformToMulti(x -> Multi.createFrom().range(x, 10))
                 .subscribe().withSubscriber(MultiAssertSubscriber.create(10))
 
@@ -106,7 +106,7 @@ public class UniOnItemTransformToMultiTest {
         final AtomicBoolean calledUni = new AtomicBoolean();
 
         Uni.createFrom().item(1)
-                .on().cancellation(() -> calledUni.set(true))
+                .onCancellation().invoke(() -> calledUni.set(true))
                 .onItem().transformToMulti(i -> Multi.createFrom().nothing()
                         .on().cancellation(() -> called.set(true)))
                 .subscribe().withSubscriber(MultiAssertSubscriber.create(10))

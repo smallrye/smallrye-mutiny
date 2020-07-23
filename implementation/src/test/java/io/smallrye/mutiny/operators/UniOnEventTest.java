@@ -209,10 +209,21 @@ public class UniOnEventTest {
     }
 
     @Test
-    public void testOnCancelWithImmediateCancellation() {
+    public void testOnCancelWithImmediateCancellationAndDeprecatedAPI() {
         AtomicBoolean called = new AtomicBoolean();
         UniAssertSubscriber<? super Integer> subscriber = Uni.createFrom().item(1)
                 .on().cancellation(() -> called.set(true))
+                .subscribe().withSubscriber(new UniAssertSubscriber<>(true));
+
+        subscriber.assertNotCompleted();
+        assertThat(called).isTrue();
+    }
+
+    @Test
+    public void testOnCancelWithImmediateCancellation() {
+        AtomicBoolean called = new AtomicBoolean();
+        UniAssertSubscriber<? super Integer> subscriber = Uni.createFrom().item(1)
+                .onCancellation().invoke(() -> called.set(true))
                 .subscribe().withSubscriber(new UniAssertSubscriber<>(true));
 
         subscriber.assertNotCompleted();
@@ -225,7 +236,7 @@ public class UniOnEventTest {
         AtomicBoolean terminated = new AtomicBoolean();
         UniAssertSubscriber<? super Integer> subscriber = Uni.createFrom().item(1)
                 .onTermination().invoke((r, f, c) -> terminated.set(c))
-                .on().cancellation(() -> called.set(true))
+                .onCancellation().invoke(() -> called.set(true))
                 .subscribe().withSubscriber(new UniAssertSubscriber<>(true));
 
         subscriber.assertNotCompleted();
@@ -239,7 +250,7 @@ public class UniOnEventTest {
         AtomicBoolean terminated = new AtomicBoolean();
         UniAssertSubscriber<? super Integer> subscriber = Uni.createFrom().item(1)
                 .onTermination().invoke(() -> terminated.set(true))
-                .on().cancellation(() -> called.set(true))
+                .onCancellation().invoke(() -> called.set(true))
                 .subscribe().withSubscriber(new UniAssertSubscriber<>(true));
 
         subscriber.assertNotCompleted();
@@ -542,7 +553,7 @@ public class UniOnEventTest {
                     terminated.set(c);
                     return Uni.createFrom().item(100);
                 })
-                .on().cancellation(() -> called.set(true))
+                .onCancellation().invoke(() -> called.set(true))
                 .subscribe().withSubscriber(new UniAssertSubscriber<>());
 
         subscriber.assertNotCompleted();
@@ -571,7 +582,7 @@ public class UniOnEventTest {
                         });
                     });
                 })
-                .on().cancellation(() -> called.set(true))
+                .onCancellation().invoke(() -> called.set(true))
                 .subscribe().withSubscriber(new UniAssertSubscriber<>());
 
         subscriber.assertNotCompleted();
@@ -601,7 +612,7 @@ public class UniOnEventTest {
                             .createFrom().failure(new IOException("boom"))
                             .onFailure().invoke(innerUniException::set);
                 })
-                .on().cancellation(() -> called.set(true))
+                .onCancellation().invoke(() -> called.set(true))
                 .subscribe().withSubscriber(new UniAssertSubscriber<>());
 
         subscriber.assertNotCompleted();
@@ -633,7 +644,7 @@ public class UniOnEventTest {
                         });
                     });
                 })
-                .on().cancellation(() -> called.set(true))
+                .onCancellation().invoke(() -> called.set(true))
                 .subscribe().withSubscriber(new UniAssertSubscriber<>());
 
         subscriber.assertNotCompleted();
@@ -647,4 +658,93 @@ public class UniOnEventTest {
         assertThat(count).hasValue(1);
     }
 
+    @Test
+    public void testOnCancellationInvokeUni() {
+        AtomicBoolean emitterTerminationCalled = new AtomicBoolean();
+        AtomicBoolean cancellationUniCalled = new AtomicBoolean();
+        AtomicInteger count = new AtomicInteger();
+
+        UniAssertSubscriber<?> subscriber = Uni.createFrom().emitter(e -> {
+            // Do not emit anything
+            e.onTermination(() -> emitterTerminationCalled.set(true));
+        })
+                .onCancellation().invokeUni(() -> {
+                    count.incrementAndGet();
+                    cancellationUniCalled.set(true);
+                    return Uni.createFrom().item(69);
+                })
+                .subscribe().withSubscriber(new UniAssertSubscriber<>());
+
+        subscriber.assertNotCompleted();
+        subscriber.cancel();
+
+        subscriber.assertNotCompleted();
+        subscriber.assertNoFailure();
+        assertThat(emitterTerminationCalled).isTrue();
+        assertThat(cancellationUniCalled).isTrue();
+        assertThat(count).hasValue(1);
+
+        subscriber.cancel();
+        assertThat(count).hasValue(1);
+    }
+
+    @Test
+    public void testOnCancellationInvokeUniThatFails() {
+        AtomicBoolean emitterTerminationCalled = new AtomicBoolean();
+        AtomicBoolean cancellationUniCalled = new AtomicBoolean();
+        AtomicInteger count = new AtomicInteger();
+
+        UniAssertSubscriber<?> subscriber = Uni.createFrom().emitter(e -> {
+            // Do not emit anything
+            e.onTermination(() -> emitterTerminationCalled.set(true));
+        })
+                .onCancellation().invokeUni(() -> {
+                    count.incrementAndGet();
+                    cancellationUniCalled.set(true);
+                    return Uni.createFrom().failure(new RuntimeException("bam"));
+                })
+                .subscribe().withSubscriber(new UniAssertSubscriber<>());
+
+        subscriber.assertNotCompleted();
+        subscriber.cancel();
+
+        subscriber.assertNotCompleted();
+        subscriber.assertNoFailure();
+        assertThat(emitterTerminationCalled).isTrue();
+        assertThat(cancellationUniCalled).isTrue();
+        assertThat(count).hasValue(1);
+
+        subscriber.cancel();
+        assertThat(count).hasValue(1);
+    }
+
+    @Test
+    public void testOnCancellationInvokeUniThatThrowsException() {
+        AtomicBoolean emitterTerminationCalled = new AtomicBoolean();
+        AtomicBoolean cancellationUniCalled = new AtomicBoolean();
+        AtomicInteger count = new AtomicInteger();
+
+        UniAssertSubscriber<?> subscriber = Uni.createFrom().emitter(e -> {
+            // Do not emit anything
+            e.onTermination(() -> emitterTerminationCalled.set(true));
+        })
+                .onCancellation().invokeUni(() -> {
+                    count.incrementAndGet();
+                    cancellationUniCalled.set(true);
+                    throw new RuntimeException("bam");
+                })
+                .subscribe().withSubscriber(new UniAssertSubscriber<>());
+
+        subscriber.assertNotCompleted();
+        subscriber.cancel();
+
+        subscriber.assertNotCompleted();
+        subscriber.assertNoFailure();
+        assertThat(emitterTerminationCalled).isTrue();
+        assertThat(cancellationUniCalled).isTrue();
+        assertThat(count).hasValue(1);
+
+        subscriber.cancel();
+        assertThat(count).hasValue(1);
+    }
 }

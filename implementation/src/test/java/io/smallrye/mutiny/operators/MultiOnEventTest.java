@@ -46,6 +46,45 @@ public class MultiOnEventTest {
                 .onTermination().invoke((f, c) -> termination.set(f == null && !c))
                 .onTermination().invoke(() -> termination2.set(true))
                 .on().request(requests::set)
+                .onCancellation().invoke(() -> cancellation.set(true))
+                .subscribe(ts);
+
+        ts
+                .request(20)
+                .assertCompletedSuccessfully()
+                .assertReceived(1);
+
+        assertThat(subscription.get()).isNotNull();
+        assertThat(item.get()).isEqualTo(1);
+        assertThat(failure.get()).isNull();
+        assertThat(completion.get()).isTrue();
+        assertThat(termination.get()).isTrue();
+        assertThat(termination2.get()).isTrue();
+        assertThat(requests.get()).isEqualTo(20);
+        assertThat(cancellation.get()).isFalse();
+    }
+
+    @Test
+    public void testCallbacksWhenItemIsEmittedWithDeprecatedOnCancellation() {
+        MultiAssertSubscriber<Integer> ts = MultiAssertSubscriber.create();
+
+        AtomicReference<Subscription> subscription = new AtomicReference<>();
+        AtomicReference<Integer> item = new AtomicReference<>();
+        AtomicReference<Throwable> failure = new AtomicReference<>();
+        AtomicBoolean completion = new AtomicBoolean();
+        AtomicLong requests = new AtomicLong();
+        AtomicBoolean termination = new AtomicBoolean();
+        AtomicBoolean termination2 = new AtomicBoolean();
+        AtomicBoolean cancellation = new AtomicBoolean();
+
+        Multi.createFrom().item(1)
+                .on().subscribed(subscription::set)
+                .on().item().invoke(item::set)
+                .on().failure().invoke(failure::set)
+                .on().completion(() -> completion.set(true))
+                .onTermination().invoke((f, c) -> termination.set(f == null && !c))
+                .onTermination().invoke(() -> termination2.set(true))
+                .on().request(requests::set)
                 .on().cancellation(() -> cancellation.set(true))
                 .subscribe(ts);
 
