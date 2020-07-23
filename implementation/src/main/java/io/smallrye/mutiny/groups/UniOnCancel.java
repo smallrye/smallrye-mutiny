@@ -18,10 +18,27 @@ public class UniOnCancel<T> {
         this.upstream = ParameterValidation.nonNull(upstream, "upstream");
     }
 
+    /**
+     * Attaches an action executed when the subscription is cancelled.
+     * The upstream is not cancelled yet, but will be cancelled when the callback completes.
+     * Note that if the callback throws an exception then it will be discarded.
+     *
+     * @param action the action, must not be {@code null}
+     * @return a new {@link Uni}
+     */
     public Uni<T> invoke(Runnable action) {
         return Infrastructure.onUniCreation(new UniOnCancellation<>(upstream, nonNull(action, "action")));
     }
 
+    /**
+     * Attaches an action executed when the subscription is cancelled.
+     * The upstream is not cancelled yet, but will be cancelled when the returned {@link Uni} completes.
+     * The supplier must not return {@code null}.
+     * Note that the result or the failure of the {@link Uni} will be discarded.
+     *
+     * @param supplier the {@link Uni} supplier, must not return {@code null}.
+     * @return a new {@link Uni}
+     */
     public Uni<T> invokeUni(Supplier<Uni<?>> supplier) {
         return Infrastructure.onUniCreation(new UniOnCancellationInvokeUni<>(upstream, nonNull(supplier, "supplier")));
     }
