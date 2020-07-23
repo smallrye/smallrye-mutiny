@@ -47,9 +47,11 @@ public class UniOnEvent<T> {
      *
      * @param runnable the callback, must not be {@code null}
      * @return a new {@link Uni}
+     * @deprecated Use {@link Uni#onCancellation()} instead.
      */
+    @Deprecated
     public Uni<T> cancellation(Runnable runnable) {
-        return Infrastructure.onUniCreation(new UniOnCancellation<>(upstream, nonNull(runnable, "runnable")));
+        return upstream.onCancellation().invoke(runnable);
     }
 
     /**

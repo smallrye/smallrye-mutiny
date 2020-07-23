@@ -135,4 +135,9 @@ public abstract class AbstractUni<T> implements Uni<T> {
     public UniOnTerminate<T> onTermination() {
         return new UniOnTerminate<>(this);
     }
+
+    @Override
+    public UniOnCancel<T> onCancellation() {
+        return new UniOnCancel<>(this);
+    }
 }
