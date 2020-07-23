@@ -128,4 +128,9 @@ public abstract class AbstractMulti<T> implements Multi<T> {
         return new MultiOnTerminate<>(this);
     }
 
+    @Override
+    public MultiOnCancel<T> onCancellation() {
+        return new MultiOnCancel<>(this);
+    }
+
 }

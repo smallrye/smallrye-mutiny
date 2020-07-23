@@ -49,15 +49,11 @@ public class MultiOnEvent<T> {
      *
      * @param callback the callback, must not be {@code null}
      * @return a new {@link Multi}
+     * @deprecated Use {@link Multi#onCancellation()} instead.
      */
+    @Deprecated
     public Multi<T> cancellation(Runnable callback) {
-        return Infrastructure.onMultiCreation(new MultiSignalConsumerOp<>(
-                upstream,
-                null,
-                null,
-                null,
-                null,
-                nonNull(callback, "callback")));
+        return upstream.onCancellation().invoke(callback);
     }
 
     public Multi<T> request(LongConsumer callback) {

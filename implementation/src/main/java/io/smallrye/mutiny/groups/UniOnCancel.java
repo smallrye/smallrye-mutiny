@@ -1,14 +1,14 @@
 package io.smallrye.mutiny.groups;
 
+import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
+
+import java.util.function.Supplier;
+
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.UniOnCancellation;
 import io.smallrye.mutiny.operators.UniOnCancellationInvokeUni;
-
-import java.util.function.Supplier;
-
-import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
 
 public class UniOnCancel<T> {
 

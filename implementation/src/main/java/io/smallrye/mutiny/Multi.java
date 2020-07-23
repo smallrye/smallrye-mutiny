@@ -407,4 +407,11 @@ public interface Multi<T> extends Publisher<T> {
      * @return the object to configure the termination actions.
      */
     MultiOnTerminate<T> onTermination();
+
+    /**
+     * Configures actions when the subscriber cancels the subscription.
+     * 
+     * @return the object to configure the cancellation actions.
+     */
+    MultiOnCancel<T> onCancellation();
 }

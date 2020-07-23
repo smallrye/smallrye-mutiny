@@ -46,7 +46,7 @@ public class MultiOnTerminationUniInvokeTest {
                     return Uni.createFrom().item(69).invoke(uniItem::set);
                 })
                 .on().request(requests::set)
-                .on().cancellation(() -> cancellation.set(true))
+                .onCancellation().invoke(() -> cancellation.set(true))
                 .subscribe().withSubscriber(ts);
 
         ts
@@ -95,7 +95,7 @@ public class MultiOnTerminationUniInvokeTest {
                     return Uni.createFrom().item(69).invoke(uniItem::set);
                 })
                 .on().request(requests::set)
-                .on().cancellation(() -> cancellation.set(true))
+                .onCancellation().invoke(() -> cancellation.set(true))
                 .subscribe().withSubscriber(ts);
 
         ts
@@ -143,7 +143,7 @@ public class MultiOnTerminationUniInvokeTest {
                     return Uni.createFrom().failure(new IOException("bam"));
                 })
                 .on().request(requests::set)
-                .on().cancellation(() -> cancellation.set(true))
+                .onCancellation().invoke(() -> cancellation.set(true))
                 .subscribe().withSubscriber(ts);
 
         ts
@@ -190,7 +190,7 @@ public class MultiOnTerminationUniInvokeTest {
                     throw new RuntimeException("bam");
                 })
                 .on().request(requests::set)
-                .on().cancellation(() -> cancellation.set(true))
+                .onCancellation().invoke(() -> cancellation.set(true))
                 .subscribe().withSubscriber(ts);
 
         ts
@@ -237,7 +237,7 @@ public class MultiOnTerminationUniInvokeTest {
                     return Uni.createFrom().failure(new RuntimeException("tada"));
                 })
                 .on().request(requests::set)
-                .on().cancellation(() -> cancellation.set(true))
+                .onCancellation().invoke(() -> cancellation.set(true))
                 .subscribe().withSubscriber(ts);
 
         ts
@@ -290,7 +290,7 @@ public class MultiOnTerminationUniInvokeTest {
                     throw new RuntimeException("tada");
                 })
                 .on().request(requests::set)
-                .on().cancellation(() -> cancellation.set(true))
+                .onCancellation().invoke(() -> cancellation.set(true))
                 .subscribe().withSubscriber(ts);
 
         ts
@@ -344,7 +344,7 @@ public class MultiOnTerminationUniInvokeTest {
                         subCancellation.set(sb);
                     });
                 })
-                .on().cancellation(() -> cancellation.set(true))
+                .onCancellation().invoke(() -> cancellation.set(true))
                 .subscribe().withSubscriber(ts);
 
         ts.cancel()
@@ -406,7 +406,7 @@ public class MultiOnTerminationUniInvokeTest {
                                 subCancellation.set(sb);
                             });
                 })
-                .on().cancellation(() -> cancellation.set(true))
+                .onCancellation().invoke(() -> cancellation.set(true))
                 .subscribe().withSubscriber(ts);
 
         ts.request(10);
