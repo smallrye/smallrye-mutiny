@@ -8,6 +8,7 @@ import java.util.NoSuchElementException;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+import io.smallrye.mutiny.operators.multi.MultiOnCompletionInvoke;
 import org.reactivestreams.Publisher;
 
 import io.smallrye.mutiny.Multi;
@@ -28,13 +29,11 @@ public class MultiOnCompletion<T> {
     /**
      * Creates a new {@link Multi} executing the given {@link Runnable action} when this {@link Multi} completes.
      *
-     * @param callback the action, must not be {@code null}
+     * @param action the action, must not be {@code null}
      * @return the new multi
      */
-    public Multi<T> invoke(Runnable callback) {
-        return Infrastructure.onMultiCreation(new MultiSignalConsumerOp<>(upstream,
-                null, null, nonNull(callback, "callback"), null,
-                null));
+    public Multi<T> invoke(Runnable action) {
+        return Infrastructure.onMultiCreation(new MultiOnCompletionInvoke<>(upstream, action));
     }
 
     /**

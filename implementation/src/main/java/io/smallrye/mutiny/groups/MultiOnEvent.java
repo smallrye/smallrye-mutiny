@@ -174,13 +174,8 @@ public class MultiOnEvent<T> {
         return upstream.onFailure(typeOfFailure);
     }
 
+    // TODO deprecate
     public Multi<T> completion(Runnable callback) {
-        return Infrastructure.onMultiCreation(new MultiSignalConsumerOp<>(
-                upstream,
-                null,
-                null,
-                nonNull(callback, "callback"),
-                null,
-                null));
+        return upstream.onCompletion().invoke(callback);
     }
 }

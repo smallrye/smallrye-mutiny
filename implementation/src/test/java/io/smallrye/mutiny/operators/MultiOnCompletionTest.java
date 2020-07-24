@@ -92,6 +92,20 @@ public class MultiOnCompletionTest {
         assertThat(called).isTrue();
     }
 
+    @Test
+    public void testOnCompletionWithInvokeThrowingException() {
+        AtomicBoolean called = new AtomicBoolean();
+        Multi.createFrom().range(1, 5)
+                .onCompletion().invoke(() -> {
+                    called.set(true);
+                    throw new RuntimeException("bam");
+                })
+                .subscribe().withSubscriber(MultiAssertSubscriber.create(7))
+                .assertHasFailedWith(RuntimeException.class, "bam");
+
+        assertThat(called).isTrue();
+    }
+
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void testOnCompletionContinueWithNullItem() {
         Multi.createFrom().range(1, 5)
