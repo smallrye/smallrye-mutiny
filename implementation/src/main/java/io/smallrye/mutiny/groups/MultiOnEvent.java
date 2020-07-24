@@ -174,13 +174,15 @@ public class MultiOnEvent<T> {
         return upstream.onFailure(typeOfFailure);
     }
 
+    /**
+     * Configures a callback when this {@link Multi} completes.
+     *
+     * @param callback the callback, must not be {@code null}
+     * @return the new {@link Multi}
+     * @deprecated Use {@link Multi#onCompletion()} instead
+     */
+    @Deprecated
     public Multi<T> completion(Runnable callback) {
-        return Infrastructure.onMultiCreation(new MultiSignalConsumerOp<>(
-                upstream,
-                null,
-                null,
-                nonNull(callback, "callback"),
-                null,
-                null));
+        return upstream.onCompletion().invoke(callback);
     }
 }

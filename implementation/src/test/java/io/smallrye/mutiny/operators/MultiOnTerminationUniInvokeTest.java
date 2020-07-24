@@ -38,7 +38,7 @@ public class MultiOnTerminationUniInvokeTest {
                 .onSubscribe().invoke(subscription::set)
                 .on().item().invoke(item::set)
                 .on().failure().invoke(failure::set)
-                .on().completion(() -> completion.set(true))
+                .onCompletion().invoke(() -> completion.set(true))
                 .onTermination().invokeUni((t, c) -> {
                     termination.set(true);
                     terminationException.set(t);
@@ -87,7 +87,7 @@ public class MultiOnTerminationUniInvokeTest {
                 .onSubscribe().invoke(subscription::set)
                 .on().item().invoke(item::set)
                 .on().failure().invoke(failure::set)
-                .on().completion(() -> completion.set(true))
+                .onCompletion().invoke(() -> completion.set(true))
                 .onTermination().invokeUni((t, c) -> {
                     termination.set(true);
                     terminationException.set(t);
@@ -135,7 +135,7 @@ public class MultiOnTerminationUniInvokeTest {
                 .onSubscribe().invoke(subscription::set)
                 .on().item().invoke(item::set)
                 .on().failure().invoke(failure::set)
-                .on().completion(() -> completion.set(true))
+                .onCompletion().invoke(() -> completion.set(true))
                 .onTermination().invokeUni((t, c) -> {
                     termination.set(true);
                     terminationException.set(t);
@@ -182,7 +182,7 @@ public class MultiOnTerminationUniInvokeTest {
                 .onSubscribe().invoke(subscription::set)
                 .on().item().invoke(item::set)
                 .on().failure().invoke(failure::set)
-                .on().completion(() -> completion.set(true))
+                .onCompletion().invoke(() -> completion.set(true))
                 .onTermination().invokeUni((t, c) -> {
                     termination.set(true);
                     terminationException.set(t);
@@ -229,7 +229,7 @@ public class MultiOnTerminationUniInvokeTest {
                 .onSubscribe().invoke(subscription::set)
                 .on().item().invoke(item::set)
                 .on().failure().invoke(failure::set)
-                .on().completion(() -> completion.set(true))
+                .onCompletion().invoke(() -> completion.set(true))
                 .onTermination().invokeUni((t, c) -> {
                     termination.set(true);
                     terminationException.set(t);
@@ -282,7 +282,7 @@ public class MultiOnTerminationUniInvokeTest {
                 .onSubscribe().invoke(subscription::set)
                 .on().item().invoke(item::set)
                 .on().failure().invoke(failure::set)
-                .on().completion(() -> completion.set(true))
+                .onCompletion().invoke(() -> completion.set(true))
                 .onTermination().invokeUni((t, c) -> {
                     termination.set(true);
                     terminationException.set(t);

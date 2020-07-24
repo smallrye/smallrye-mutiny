@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.NoSuchElementException;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
 import org.reactivestreams.Publisher;
@@ -14,6 +15,7 @@ import org.testng.annotations.Test;
 
 import io.reactivex.Flowable;
 import io.smallrye.mutiny.Multi;
+import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.test.MultiAssertSubscriber;
 
 public class MultiOnCompletionTest {
@@ -88,6 +90,20 @@ public class MultiOnCompletionTest {
                 .subscribe().withSubscriber(MultiAssertSubscriber.create(7))
                 .assertCompletedSuccessfully()
                 .assertReceived(1, 2, 3, 4);
+
+        assertThat(called).isTrue();
+    }
+
+    @Test
+    public void testOnCompletionWithInvokeThrowingException() {
+        AtomicBoolean called = new AtomicBoolean();
+        Multi.createFrom().range(1, 5)
+                .onCompletion().invoke(() -> {
+                    called.set(true);
+                    throw new RuntimeException("bam");
+                })
+                .subscribe().withSubscriber(MultiAssertSubscriber.create(7))
+                .assertHasFailedWith(RuntimeException.class, "bam");
 
         assertThat(called).isTrue();
     }
@@ -277,4 +293,137 @@ public class MultiOnCompletionTest {
                 .assertReceived(1, 2, 3, 4, 5, 6);
     }
 
+    @Test
+    public void testInvokeUni() {
+        AtomicBoolean called = new AtomicBoolean();
+
+        Multi.createFrom().range(1, 5)
+                .onCompletion().invokeUni(() -> {
+                    called.set(true);
+                    return Uni.createFrom().item(69);
+                })
+                .subscribe().withSubscriber(MultiAssertSubscriber.create(7))
+                .assertCompletedSuccessfully()
+                .assertReceived(1, 2, 3, 4);
+
+        assertThat(called).isTrue();
+    }
+
+    @Test
+    public void testInvokeUniThatHasFailed() {
+        AtomicBoolean called = new AtomicBoolean();
+
+        Multi.createFrom().range(1, 5)
+                .onCompletion().invokeUni(() -> {
+                    called.set(true);
+                    return Uni.createFrom().failure(new RuntimeException("bam"));
+                })
+                .subscribe().withSubscriber(MultiAssertSubscriber.create(7))
+                .assertReceived(1, 2, 3, 4)
+                .assertHasFailedWith(RuntimeException.class, "bam");
+
+        assertThat(called).isTrue();
+    }
+
+    @Test
+    public void testInvokeUniThatThrowsException() {
+        AtomicBoolean called = new AtomicBoolean();
+
+        Multi.createFrom().range(1, 5)
+                .onCompletion().invokeUni(() -> {
+                    called.set(true);
+                    throw new RuntimeException("bam");
+                })
+                .subscribe().withSubscriber(MultiAssertSubscriber.create(7))
+                .assertReceived(1, 2, 3, 4)
+                .assertHasFailedWith(RuntimeException.class, "bam");
+
+        assertThat(called).isTrue();
+    }
+
+    @Test
+    public void testInvokeUniCancellation() {
+        AtomicBoolean called = new AtomicBoolean();
+        AtomicBoolean uniCancelled = new AtomicBoolean();
+        AtomicInteger counter = new AtomicInteger();
+
+        MultiAssertSubscriber<Integer> ts = Multi.createFrom().range(1, 5)
+                .onCompletion().invokeUni(() -> {
+                    called.set(true);
+                    counter.incrementAndGet();
+                    return Uni.createFrom().emitter(e -> {
+                        // do nothing
+                    })
+                            .onCancellation().invoke(() -> {
+                                counter.incrementAndGet();
+                                uniCancelled.set(true);
+                            });
+                })
+                .subscribe().withSubscriber(MultiAssertSubscriber.create(7));
+
+        ts.assertReceived(1, 2, 3, 4);
+        ts.assertHasNotCompleted();
+        assertThat(called.get()).isTrue();
+        assertThat(uniCancelled.get()).isFalse();
+        assertThat(counter.get()).isEqualTo(1);
+
+        ts.cancel();
+        ts.assertHasNotCompleted();
+        assertThat(uniCancelled.get()).isTrue();
+        assertThat(counter.get()).isEqualTo(2);
+
+        ts.cancel();
+        assertThat(counter.get()).isEqualTo(2);
+    }
+
+    @Test(invocationCount = 100)
+    public void rogueEmittersInvoke() {
+        AtomicInteger counter = new AtomicInteger();
+
+        MultiAssertSubscriber<Object> ts = Multi.createFrom()
+                .emitter(e -> {
+                    Thread t1 = new Thread(e::complete);
+                    Thread t2 = new Thread(e::complete);
+                    t1.start();
+                    t2.start();
+                    try {
+                        t1.join();
+                        t2.join();
+                    } catch (InterruptedException interruptedException) {
+                        throw new RuntimeException(interruptedException);
+                    }
+                })
+                .onCompletion().invoke(counter::incrementAndGet)
+                .subscribe().withSubscriber(MultiAssertSubscriber.create(10));
+
+        ts.assertCompletedSuccessfully();
+        assertThat(counter.get()).isEqualTo(1);
+    }
+
+    @Test(invocationCount = 100)
+    public void rogueEmittersInvokeUni() {
+        AtomicInteger counter = new AtomicInteger();
+
+        MultiAssertSubscriber<Object> ts = Multi.createFrom()
+                .emitter(e -> {
+                    Thread t1 = new Thread(e::complete);
+                    Thread t2 = new Thread(e::complete);
+                    t1.start();
+                    t2.start();
+                    try {
+                        t1.join();
+                        t2.join();
+                    } catch (InterruptedException interruptedException) {
+                        throw new RuntimeException(interruptedException);
+                    }
+                })
+                .onCompletion().invokeUni(() -> {
+                    counter.incrementAndGet();
+                    return Uni.createFrom().item(69);
+                })
+                .subscribe().withSubscriber(MultiAssertSubscriber.create(10));
+
+        ts.assertCompletedSuccessfully();
+        assertThat(counter.get()).isEqualTo(1);
+    }
 }
