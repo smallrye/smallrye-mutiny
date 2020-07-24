@@ -375,4 +375,55 @@ public class MultiOnCompletionTest {
         ts.cancel();
         assertThat(counter.get()).isEqualTo(2);
     }
+
+    @Test(invocationCount = 100)
+    public void rogueEmittersInvoke() {
+        AtomicInteger counter = new AtomicInteger();
+
+        MultiAssertSubscriber<Object> ts = Multi.createFrom()
+                .emitter(e -> {
+                    Thread t1 = new Thread(e::complete);
+                    Thread t2 = new Thread(e::complete);
+                    t1.start();
+                    t2.start();
+                    try {
+                        t1.join();
+                        t2.join();
+                    } catch (InterruptedException interruptedException) {
+                        throw new RuntimeException(interruptedException);
+                    }
+                })
+                .onCompletion().invoke(counter::incrementAndGet)
+                .subscribe().withSubscriber(MultiAssertSubscriber.create(10));
+
+        ts.assertCompletedSuccessfully();
+        assertThat(counter.get()).isEqualTo(1);
+    }
+
+    @Test(invocationCount = 100)
+    public void rogueEmittersInvokeUni() {
+        AtomicInteger counter = new AtomicInteger();
+
+        MultiAssertSubscriber<Object> ts = Multi.createFrom()
+                .emitter(e -> {
+                    Thread t1 = new Thread(e::complete);
+                    Thread t2 = new Thread(e::complete);
+                    t1.start();
+                    t2.start();
+                    try {
+                        t1.join();
+                        t2.join();
+                    } catch (InterruptedException interruptedException) {
+                        throw new RuntimeException(interruptedException);
+                    }
+                })
+                .onCompletion().invokeUni(() -> {
+                    counter.incrementAndGet();
+                    return Uni.createFrom().item(69);
+                })
+                .subscribe().withSubscriber(MultiAssertSubscriber.create(10));
+
+        ts.assertCompletedSuccessfully();
+        assertThat(counter.get()).isEqualTo(1);
+    }
 }
