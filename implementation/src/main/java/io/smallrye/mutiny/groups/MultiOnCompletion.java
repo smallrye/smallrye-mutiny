@@ -8,15 +8,14 @@ import java.util.NoSuchElementException;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-import io.smallrye.mutiny.operators.multi.MultiOnCompletionInvoke;
-import io.smallrye.mutiny.operators.multi.MultiOnCompletionInvokeUni;
 import org.reactivestreams.Publisher;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.MultiSwitchOnCompletion;
-import io.smallrye.mutiny.operators.multi.MultiSignalConsumerOp;
+import io.smallrye.mutiny.operators.multi.MultiOnCompletionInvoke;
+import io.smallrye.mutiny.operators.multi.MultiOnCompletionInvokeUni;
 import io.smallrye.mutiny.subscription.MultiEmitter;
 
 public class MultiOnCompletion<T> {

@@ -10,13 +10,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
-import io.smallrye.mutiny.Uni;
-import org.awaitility.Awaitility;
 import org.reactivestreams.Publisher;
 import org.testng.annotations.Test;
 
 import io.reactivex.Flowable;
 import io.smallrye.mutiny.Multi;
+import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.test.MultiAssertSubscriber;
 
 public class MultiOnCompletionTest {

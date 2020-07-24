@@ -2,13 +2,13 @@ package io.smallrye.mutiny.operators.multi;
 
 import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Supplier;
+
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.subscription.Cancellable;
 import io.smallrye.mutiny.subscription.MultiSubscriber;
-
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Supplier;
 
 public class MultiOnCompletionInvokeUni<T> extends AbstractMultiOperator<T, T> {
 

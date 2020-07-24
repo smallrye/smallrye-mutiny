@@ -174,7 +174,14 @@ public class MultiOnEvent<T> {
         return upstream.onFailure(typeOfFailure);
     }
 
-    // TODO deprecate
+    /**
+     * Configures a callback when this {@link Multi} completes.
+     *
+     * @param callback the callback, must not be {@code null}
+     * @return the new {@link Multi}
+     * @deprecated Use {@link Multi#onCompletion()} instead
+     */
+    @Deprecated
     public Multi<T> completion(Runnable callback) {
         return upstream.onCompletion().invoke(callback);
     }

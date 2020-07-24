@@ -64,7 +64,7 @@ public class MultiReceiveItemOnTest {
         MultiAssertSubscriber<Integer> subscriber = Multi.createFrom().items(1, 2, 3, 4)
                 .emitOn(executor)
                 .onItem().invoke(i -> itemThread.add(Thread.currentThread().getName()))
-                .on().completion(() -> completionThread.add(Thread.currentThread().getName()))
+                .onCompletion().invoke(() -> completionThread.add(Thread.currentThread().getName()))
                 .subscribe().withSubscriber(MultiAssertSubscriber.create(4))
                 .await()
                 .assertCompletedSuccessfully();

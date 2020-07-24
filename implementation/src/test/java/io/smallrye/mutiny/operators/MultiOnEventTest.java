@@ -42,7 +42,7 @@ public class MultiOnEventTest {
                 .on().subscribed(subscription::set)
                 .on().item().invoke(item::set)
                 .on().failure().invoke(failure::set)
-                .on().completion(() -> completion.set(true))
+                .onCompletion().invoke(() -> completion.set(true))
                 .onTermination().invoke((f, c) -> termination.set(f == null && !c))
                 .onTermination().invoke(() -> termination2.set(true))
                 .on().request(requests::set)
@@ -65,7 +65,7 @@ public class MultiOnEventTest {
     }
 
     @Test
-    public void testCallbacksWhenItemIsEmittedWithDeprecatedOnCancellation() {
+    public void testCallbacksWhenItemIsEmittedWithDeprecatedApis() {
         MultiAssertSubscriber<Integer> ts = MultiAssertSubscriber.create();
 
         AtomicReference<Subscription> subscription = new AtomicReference<>();
@@ -157,7 +157,7 @@ public class MultiOnEventTest {
                 .on().subscribed(subscription::set)
                 .on().item().invoke(item::set)
                 .on().failure().invoke(failure::set)
-                .on().completion(() -> completion.set(true))
+                .onCompletion().invoke(() -> completion.set(true))
                 .onTermination().invoke((f, c) -> termination.set(f != null))
                 .onTermination().invoke(() -> termination2.set(true))
                 .on().request(requests::set)
@@ -222,7 +222,7 @@ public class MultiOnEventTest {
                 .on().subscribed(subscription::set)
                 .on().item().invoke(item::set)
                 .on().failure(IOException.class).invoke(failure::set)
-                .on().completion(() -> completion.set(true))
+                .onCompletion().invoke(() -> completion.set(true))
                 .onTermination().invoke((f, c) -> termination.set(f != null))
                 .on().request(requests::set)
                 .on().cancellation(() -> cancellation.set(true))
@@ -252,7 +252,7 @@ public class MultiOnEventTest {
                 .on().subscribed(subscription::set)
                 .on().item().invoke(item::set)
                 .on().failure(f -> f.getMessage().contains("missing")).invoke(failure::set)
-                .on().completion(() -> completion.set(true))
+                .onCompletion().invoke(() -> completion.set(true))
                 .onTermination().invoke((f, c) -> termination.set(f != null))
                 .on().request(requests::set)
                 .on().cancellation(() -> cancellation.set(true))
@@ -286,7 +286,7 @@ public class MultiOnEventTest {
                 .on().subscribed(subscription::set)
                 .on().item().invoke(item::set)
                 .on().failure(boom).invoke(failure::set)
-                .on().completion(() -> completion.set(true))
+                .onCompletion().invoke(() -> completion.set(true))
                 .onTermination().invoke((f, c) -> termination.set(f != null))
                 .on().request(requests::set)
                 .on().cancellation(() -> cancellation.set(true))
@@ -318,7 +318,7 @@ public class MultiOnEventTest {
                 .on().subscribed(subscription::set)
                 .on().item().invoke(item::set)
                 .on().failure().invoke(failure::set)
-                .on().completion(() -> completion.set(true))
+                .onCompletion().invoke(() -> completion.set(true))
                 .onTermination().invoke((f, c) -> termination.set(f == null && !c))
                 .onTermination().invoke(() -> termination2.set(true))
                 .on().request(requests::set)
@@ -352,7 +352,7 @@ public class MultiOnEventTest {
                 .on().subscribed(subscription::set)
                 .on().item().invoke(item::set)
                 .on().failure().invoke(failure::set)
-                .on().completion(() -> completion.set(true))
+                .onCompletion().invoke(() -> completion.set(true))
                 .onTermination().invoke((f, c) -> termination.set(f == null && c))
                 .onTermination().invoke(() -> termination2.set(true))
                 .on().request(requests::set)
@@ -408,7 +408,7 @@ public class MultiOnEventTest {
         MultiAssertSubscriber<Integer> ts = MultiAssertSubscriber.create(1);
 
         Multi.createFrom().items(1, 2)
-                .on().completion(() -> {
+                .onCompletion().invoke(() -> {
                     throw new IllegalArgumentException("boom");
                 })
                 .subscribe().withSubscriber(ts)

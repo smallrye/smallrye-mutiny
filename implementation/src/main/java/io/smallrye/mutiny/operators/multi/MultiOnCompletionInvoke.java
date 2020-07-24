@@ -2,10 +2,10 @@ package io.smallrye.mutiny.operators.multi;
 
 import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.subscription.MultiSubscriber;
-
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public class MultiOnCompletionInvoke<T> extends AbstractMultiOperator<T, T> {
 
