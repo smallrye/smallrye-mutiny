@@ -9,6 +9,7 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import io.smallrye.mutiny.operators.multi.MultiOnCompletionInvoke;
+import io.smallrye.mutiny.operators.multi.MultiOnCompletionInvokeUni;
 import org.reactivestreams.Publisher;
 
 import io.smallrye.mutiny.Multi;
@@ -30,10 +31,21 @@ public class MultiOnCompletion<T> {
      * Creates a new {@link Multi} executing the given {@link Runnable action} when this {@link Multi} completes.
      *
      * @param action the action, must not be {@code null}
-     * @return the new multi
+     * @return the new {@link Multi}
      */
     public Multi<T> invoke(Runnable action) {
         return Infrastructure.onMultiCreation(new MultiOnCompletionInvoke<>(upstream, action));
+    }
+
+    /**
+     * Creates a new {@link Multi} executing the given {@link Uni} action when this {@link Multi} completes.
+     * The completion notification is sent downstream when the {@link Uni} has completed.
+     * 
+     * @param supplier the supplier, must return a non-{@code null} {@link Uni}
+     * @return the new {@link Multi}
+     */
+    public Multi<T> invokeUni(Supplier<Uni<?>> supplier) {
+        return Infrastructure.onMultiCreation(new MultiOnCompletionInvokeUni<>(upstream, supplier));
     }
 
     /**
