@@ -45,7 +45,7 @@ public class MultiOnEventTest {
                 .onCompletion().invoke(() -> completion.set(true))
                 .onTermination().invoke((f, c) -> termination.set(f == null && !c))
                 .onTermination().invoke(() -> termination2.set(true))
-                .on().request(requests::set)
+                .onRequest().invoke(requests::set)
                 .onCancellation().invoke(() -> cancellation.set(true))
                 .subscribe(ts);
 
@@ -84,7 +84,7 @@ public class MultiOnEventTest {
                 .on().termination().invoke(() -> completion.set(true))
                 .on().termination().invoke((f, c) -> termination.set(f == null && !c))
                 .on().termination().invoke(() -> termination2.set(true))
-                .on().request(requests::set)
+                .on().request().invoke(requests::set)
                 .on().cancellation().invoke(() -> cancellation.set(true))
                 .subscribe(ts);
 
@@ -199,8 +199,8 @@ public class MultiOnEventTest {
                 .onCompletion().invoke(() -> completion.set(true))
                 .onTermination().invoke((f, c) -> termination.set(f != null))
                 .onTermination().invoke(() -> termination2.set(true))
-                .on().request(requests::set)
-                .on().cancellation(() -> cancellation.set(true))
+                .onRequest().invoke(requests::set)
+                .onCancellation().invoke(() -> cancellation.set(true))
                 .subscribe().withSubscriber(MultiAssertSubscriber.create())
                 .assertHasFailedWith(IOException.class, "boom");
 
@@ -263,7 +263,7 @@ public class MultiOnEventTest {
                 .on().failure(IOException.class).invoke(failure::set)
                 .onCompletion().invoke(() -> completion.set(true))
                 .onTermination().invoke((f, c) -> termination.set(f != null))
-                .on().request(requests::set)
+                .onRequest().invoke(requests::set)
                 .on().cancellation(() -> cancellation.set(true))
                 .subscribe().withSubscriber(MultiAssertSubscriber.create())
                 .assertHasFailedWith(IOException.class, "boom");
@@ -293,8 +293,8 @@ public class MultiOnEventTest {
                 .on().failure(f -> f.getMessage().contains("missing")).invoke(failure::set)
                 .onCompletion().invoke(() -> completion.set(true))
                 .onTermination().invoke((f, c) -> termination.set(f != null))
-                .on().request(requests::set)
-                .on().cancellation(() -> cancellation.set(true))
+                .onRequest().invoke(requests::set)
+                .onCancellation().invoke(() -> cancellation.set(true))
                 .subscribe().withSubscriber(MultiAssertSubscriber.create())
                 .assertHasFailedWith(IOException.class, "boom");
 
@@ -327,8 +327,8 @@ public class MultiOnEventTest {
                 .on().failure(boom).invoke(failure::set)
                 .onCompletion().invoke(() -> completion.set(true))
                 .onTermination().invoke((f, c) -> termination.set(f != null))
-                .on().request(requests::set)
-                .on().cancellation(() -> cancellation.set(true))
+                .onRequest().invoke(requests::set)
+                .onCancellation().invoke(() -> cancellation.set(true))
                 .subscribe().withSubscriber(MultiAssertSubscriber.create())
                 .assertHasFailedWith(CompositeException.class, "bigboom")
                 .assertHasFailedWith(CompositeException.class, "smallboom");
@@ -360,8 +360,8 @@ public class MultiOnEventTest {
                 .onCompletion().invoke(() -> completion.set(true))
                 .onTermination().invoke((f, c) -> termination.set(f == null && !c))
                 .onTermination().invoke(() -> termination2.set(true))
-                .on().request(requests::set)
-                .on().cancellation(() -> cancellation.set(true))
+                .onRequest().invoke(requests::set)
+                .onCancellation().invoke(() -> cancellation.set(true))
                 .subscribe().withSubscriber(MultiAssertSubscriber.create())
                 .assertCompletedSuccessfully()
                 .assertHasNotReceivedAnyItem();
@@ -394,8 +394,8 @@ public class MultiOnEventTest {
                 .onCompletion().invoke(() -> completion.set(true))
                 .onTermination().invoke((f, c) -> termination.set(f == null && c))
                 .onTermination().invoke(() -> termination2.set(true))
-                .on().request(requests::set)
-                .on().cancellation(() -> cancellation.set(true))
+                .onRequest().invoke(requests::set)
+                .onCancellation().invoke(() -> cancellation.set(true))
                 .subscribe().withSubscriber(MultiAssertSubscriber.create(10))
                 .assertNotTerminated()
                 .assertHasNotReceivedAnyItem();

@@ -5,7 +5,6 @@ import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
-import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.subscription.UniSubscriber;
 import io.smallrye.mutiny.subscription.UniSubscription;
