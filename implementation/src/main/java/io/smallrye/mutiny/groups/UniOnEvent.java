@@ -5,6 +5,7 @@ import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
+import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.subscription.UniSubscriber;
 import io.smallrye.mutiny.subscription.UniSubscription;
@@ -149,4 +150,39 @@ public class UniOnEvent<T> {
         return upstream.onFailure(typeOfFailure);
     }
 
+    /**
+     * Configures actions when the subscription is cancelled.
+     *
+     * @return the object to configure the actions
+     */
+    public UniOnCancel<T> cancellation() {
+        return upstream.onCancellation();
+    }
+
+    /**
+     * Configure actions when receiving a subscription.
+     *
+     * @return the object to configure the actions
+     */
+    public UniOnSubscribe<T> subscribe() {
+        return upstream.onSubscribe();
+    }
+
+    /**
+     * Configures actions when the {@link Uni} terminates on either an item, a failure or a cancellation.
+     *
+     * @return the object to configure the actions
+     */
+    public UniOnTerminate<T> termination() {
+        return upstream.onTermination();
+    }
+
+    /**
+     * Configures actions when receiving either an item or a failure.
+     *
+     * @return the object to configure the actions
+     */
+    public UniOnItemOrFailure<T> itemOrFailure() {
+        return upstream.onItemOrFailure();
+    }
 }

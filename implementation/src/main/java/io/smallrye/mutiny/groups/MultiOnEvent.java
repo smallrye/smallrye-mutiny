@@ -185,4 +185,31 @@ public class MultiOnEvent<T> {
     public Multi<T> completion(Runnable callback) {
         return upstream.onCompletion().invoke(callback);
     }
+
+    /**
+     * Configure actions when receiving a subscription.
+     * 
+     * @return the object to configure the actions
+     */
+    public MultiOnSubscribe<T> subscribe() {
+        return upstream.onSubscribe();
+    }
+
+    /**
+     * Configures actions when the subscription is cancelled.
+     *
+     * @return the object to configure the actions
+     */
+    public MultiOnCancel<T> cancellation() {
+        return upstream.onCancellation();
+    }
+
+    /**
+     * Configures actions when the {@link Multi} terminates on either a completion, a failure or a cancellation.
+     * 
+     * @return the object to configure the actions
+     */
+    public MultiOnTerminate<T> termination() {
+        return upstream.onTermination();
+    }
 }
