@@ -559,3 +559,6 @@ Temporary Items
 
 # Vert.x cache
 .vertx
+
+# Cache folder
+**/.cache/
