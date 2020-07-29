@@ -12,7 +12,6 @@ import org.reactivestreams.Subscription;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.multi.MultiOnSubscribeInvokeOp;
-import io.smallrye.mutiny.operators.multi.MultiSignalConsumerOp;
 
 /**
  * Allows configuring the action to execute on each type of events emitted by a {@link Multi} or by
@@ -56,14 +55,15 @@ public class MultiOnEvent<T> {
         return upstream.onCancellation().invoke(callback);
     }
 
+    /**
+     * Action when items are being requested.
+     *
+     * @param callback the action
+     * @deprecated Use {@link Multi#onRequest()} instead
+     */
+    @Deprecated
     public Multi<T> request(LongConsumer callback) {
-        return Infrastructure.onMultiCreation(new MultiSignalConsumerOp<>(
-                upstream,
-                null,
-                null,
-                null,
-                nonNull(callback, "callback"),
-                null));
+        return upstream.onRequest().invoke(callback);
     }
 
     public MultiOverflow<T> overflow() {
@@ -184,5 +184,41 @@ public class MultiOnEvent<T> {
     @Deprecated
     public Multi<T> completion(Runnable callback) {
         return upstream.onCompletion().invoke(callback);
+    }
+
+    /**
+     * Configure actions when receiving a subscription.
+     * 
+     * @return the object to configure the actions
+     */
+    public MultiOnSubscribe<T> subscribe() {
+        return upstream.onSubscribe();
+    }
+
+    /**
+     * Configures actions when the subscription is cancelled.
+     *
+     * @return the object to configure the actions
+     */
+    public MultiOnCancel<T> cancellation() {
+        return upstream.onCancellation();
+    }
+
+    /**
+     * Configures actions when the {@link Multi} terminates on either a completion, a failure or a cancellation.
+     * 
+     * @return the object to configure the actions
+     */
+    public MultiOnTerminate<T> termination() {
+        return upstream.onTermination();
+    }
+
+    /**
+     * Configures actions when items are being requested.
+     *
+     * @return the object to configure the actions
+     */
+    public MultiOnRequest<T> request() {
+        return upstream.onRequest();
     }
 }

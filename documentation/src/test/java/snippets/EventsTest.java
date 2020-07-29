@@ -18,9 +18,8 @@ public class EventsTest {
                 .onCompletion().invoke(() -> System.out.println("Completed"))
                 .onSubscribe().invoke(subscription -> System.out.println("We are subscribed!"))
                 .onCancellation().invoke(() -> System.out.println("Downstream has cancelled the interaction"))
-                .on().request(n -> System.out.println("Downstream requested " + n + " items"))
-                .subscribe().with(item -> {
-                });
+                .onRequest().invoke(n -> System.out.println("Downstream requested " + n + " items"))
+                .subscribe().with(item -> System.out.println("Subscriber received " + item));
         // end::code[]
 
         // tag::shortcut[]

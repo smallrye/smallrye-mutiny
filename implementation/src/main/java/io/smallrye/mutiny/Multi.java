@@ -404,14 +404,21 @@ public interface Multi<T> extends Publisher<T> {
     /**
      * Configures actions when this {@link Multi} terminates on completion, on failure or on subscriber cancellation.
      * 
-     * @return the object to configure the termination actions.
+     * @return the object to configure the termination actions
      */
     MultiOnTerminate<T> onTermination();
 
     /**
      * Configures actions when the subscriber cancels the subscription.
      * 
-     * @return the object to configure the cancellation actions.
+     * @return the object to configure the cancellation actions
      */
     MultiOnCancel<T> onCancellation();
+
+    /**
+     * Configures actions when items are being requested.
+     *
+     * @return the object to configure the actions
+     */
+    MultiOnRequest<T> onRequest();
 }

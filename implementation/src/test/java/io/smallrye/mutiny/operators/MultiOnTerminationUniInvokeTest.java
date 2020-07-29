@@ -19,55 +19,6 @@ import io.smallrye.mutiny.test.MultiAssertSubscriber;
 public class MultiOnTerminationUniInvokeTest {
 
     @Test
-    public void testTerminationWhenItemIsEmitted() {
-        MultiAssertSubscriber<Integer> ts = MultiAssertSubscriber.create();
-
-        AtomicReference<Subscription> subscription = new AtomicReference<>();
-        AtomicReference<Integer> item = new AtomicReference<>();
-        AtomicReference<Throwable> failure = new AtomicReference<>();
-        AtomicBoolean completion = new AtomicBoolean();
-        AtomicLong requests = new AtomicLong();
-        AtomicBoolean cancellation = new AtomicBoolean();
-
-        AtomicBoolean termination = new AtomicBoolean();
-        AtomicReference<Integer> uniItem = new AtomicReference<>();
-        AtomicReference<Throwable> terminationException = new AtomicReference<>();
-        AtomicBoolean terminationCancelledFlag = new AtomicBoolean();
-
-        Multi.createFrom().item(1)
-                .onSubscribe().invoke(subscription::set)
-                .on().item().invoke(item::set)
-                .on().failure().invoke(failure::set)
-                .onCompletion().invoke(() -> completion.set(true))
-                .onTermination().invokeUni((t, c) -> {
-                    termination.set(true);
-                    terminationException.set(t);
-                    terminationCancelledFlag.set(c);
-                    return Uni.createFrom().item(69).invoke(uniItem::set);
-                })
-                .on().request(requests::set)
-                .onCancellation().invoke(() -> cancellation.set(true))
-                .subscribe().withSubscriber(ts);
-
-        ts
-                .request(20)
-                .assertCompletedSuccessfully()
-                .assertReceived(1);
-
-        assertThat(subscription.get()).isNotNull();
-        assertThat(item.get()).isEqualTo(1);
-        assertThat(failure.get()).isNull();
-        assertThat(completion.get()).isTrue();
-        assertThat(requests.get()).isEqualTo(20);
-        assertThat(cancellation.get()).isFalse();
-
-        assertThat(termination.get()).isTrue();
-        assertThat(terminationException.get()).isNull();
-        assertThat(terminationCancelledFlag.get()).isFalse();
-        assertThat(uniItem.get()).isEqualTo(69);
-    }
-
-    @Test
     public void testTerminationWhenErrorIsEmitted() {
         MultiAssertSubscriber<Object> ts = MultiAssertSubscriber.create();
 
@@ -94,7 +45,7 @@ public class MultiOnTerminationUniInvokeTest {
                     terminationCancelledFlag.set(c);
                     return Uni.createFrom().item(69).invoke(uniItem::set);
                 })
-                .on().request(requests::set)
+                .onRequest().invoke(requests::set)
                 .onCancellation().invoke(() -> cancellation.set(true))
                 .subscribe().withSubscriber(ts);
 
@@ -142,7 +93,7 @@ public class MultiOnTerminationUniInvokeTest {
                     terminationCancelledFlag.set(c);
                     return Uni.createFrom().failure(new IOException("bam"));
                 })
-                .on().request(requests::set)
+                .onRequest().invoke(requests::set)
                 .onCancellation().invoke(() -> cancellation.set(true))
                 .subscribe().withSubscriber(ts);
 
@@ -189,7 +140,7 @@ public class MultiOnTerminationUniInvokeTest {
                     terminationCancelledFlag.set(c);
                     throw new RuntimeException("bam");
                 })
-                .on().request(requests::set)
+                .onRequest().invoke(requests::set)
                 .onCancellation().invoke(() -> cancellation.set(true))
                 .subscribe().withSubscriber(ts);
 
@@ -236,7 +187,7 @@ public class MultiOnTerminationUniInvokeTest {
                     terminationCancelledFlag.set(c);
                     return Uni.createFrom().failure(new RuntimeException("tada"));
                 })
-                .on().request(requests::set)
+                .onRequest().invoke(requests::set)
                 .onCancellation().invoke(() -> cancellation.set(true))
                 .subscribe().withSubscriber(ts);
 
@@ -289,7 +240,7 @@ public class MultiOnTerminationUniInvokeTest {
                     terminationCancelledFlag.set(c);
                     throw new RuntimeException("tada");
                 })
-                .on().request(requests::set)
+                .onRequest().invoke(requests::set)
                 .onCancellation().invoke(() -> cancellation.set(true))
                 .subscribe().withSubscriber(ts);
 

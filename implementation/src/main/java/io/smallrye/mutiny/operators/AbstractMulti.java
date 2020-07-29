@@ -133,4 +133,9 @@ public abstract class AbstractMulti<T> implements Multi<T> {
         return new MultiOnCancel<>(this);
     }
 
+    @Override
+    public MultiOnRequest<T> onRequest() {
+        return new MultiOnRequest<>(this);
+    }
+
 }
