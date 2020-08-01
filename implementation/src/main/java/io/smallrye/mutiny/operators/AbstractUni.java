@@ -107,8 +107,8 @@ public abstract class AbstractUni<T> implements Uni<T> {
     }
 
     @Override
-    public Uni<T> cache() {
-        return Infrastructure.onUniCreation(new UniCache<>(this));
+    public UniCacheEvents<T> cacheEvents() {
+        return new UniCacheEvents<>(this);
     }
 
     @Override

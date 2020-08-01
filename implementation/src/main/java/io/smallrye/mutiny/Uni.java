@@ -8,6 +8,7 @@ import java.util.concurrent.Executor;
 import java.util.function.*;
 
 import io.smallrye.mutiny.groups.*;
+import io.smallrye.mutiny.operators.UniCacheEvents;
 import io.smallrye.mutiny.subscription.UniEmitter;
 import io.smallrye.mutiny.subscription.UniSubscriber;
 import io.smallrye.mutiny.subscription.UniSubscription;
@@ -382,11 +383,40 @@ public interface Uni<T> {
 
     /**
      * Caches the events (item or failure) of this {@link Uni} and replays it for all further {@link UniSubscriber}.
+     * This method is equivalent to {@code uni.cacheEvents().indefinitely()}.
      *
      * @return the new {@link Uni}. Unlike regular {@link Uni}, re-subscribing to this {@link Uni} does not re-compute
      *         the outcome but replayed the cached events.
+     *
+     * @deprecated use {@link #cacheEvents()} with the <code>indefinitely()</code> option instead
      */
-    Uni<T> cache();
+    @Deprecated
+    default Uni<T> cache() {
+        return cacheEvents().indefinitely();
+    }
+
+    /**
+     * Cache the events propagated by the upstream.
+     * The returned objects allow configuring how long the events (item or failure) are cached.
+     * <p>
+     * If the upstream has not propagated an event, it _waits_ for it and passes it downstream.
+     * All subsequent subscriptions will get the same event (item or failure) until the cache is invalidated.
+     * After invalidation, upon the next subscription, the upstream is re-subscribed and the propagated event is cached again.
+     * <p>
+     * The former {@link #cache()} is replaced with:
+     * <code>
+     * uni.cacheEvents().indefinitely()
+     * </code>
+     * <p>
+     * As soon as an event (item or failure) was received, the event can be validated for further subscribers:
+     * <code>
+     * BiPredicate validator = (item, failure) -&gt; item != null &amp;&amp; item.isStillValid();
+     * uni.cacheEvents().whilst(validator);
+     * </code>
+     *
+     * @return a {@link UniCacheEvents} to configure cache behaviour.
+     */
+    UniCacheEvents<T> cacheEvents();
 
     /**
      * Transforms the item (potentially null) emitted by this {@link Uni} by applying a (synchronous) function to it.

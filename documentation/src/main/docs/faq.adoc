@@ -729,6 +729,31 @@ You can implement this behavior as follows:
 include::../../../src/test/java/snippets/DelayTest.java[tags=delay-multi-random]
 ----
 
+== How do I _cache_ events of a Uni?
+
+You can cache the events (item or failure) that are emitted by a `Uni`:
+
+[source,java,indent=0]
+----
+include::../../../src/test/java/snippets/CacheTest.java[tags=indefinitely]
+----
+
+Using `.cacheEvents().indefinitely()` will also cache failures, it simply holds the first event emitted by the upstream.
+
+For fine grain control whether events should be cached you can pass a predicate that is evaluated on each subscription:
+
+[source,java,indent=0]
+----
+include::../../../src/test/java/snippets/CacheTest.java[tags=whilst]
+----
+
+Further options are:
+
+[source,java,indent=0]
+----
+include::../../../src/test/java/snippets/CacheTest.java[tags=others]
+----
+
 == Where do I find the JavaDoc?
 
 The JavaDoc is published https://smallrye.io/smallrye-mutiny/apidocs/[there].
