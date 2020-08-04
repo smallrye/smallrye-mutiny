@@ -42,6 +42,8 @@
             <artifactId>smallrye-config</artifactId>
             <scope>test</scope>
         </dependency>
+
+
     </dependencies>
-    
+
 </project>
