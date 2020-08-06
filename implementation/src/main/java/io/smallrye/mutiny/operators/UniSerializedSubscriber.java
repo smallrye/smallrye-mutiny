@@ -33,6 +33,7 @@ public class UniSerializedSubscriber<T> implements UniSubscriber<T>, UniSubscrip
     private final AtomicInteger state = new AtomicInteger(INIT);
     private final AbstractUni<T> upstream;
     private final UniSubscriber<? super T> downstream;
+
     private UniSubscription subscription;
     private final AtomicReference<Throwable> failure = new AtomicReference<>();
 

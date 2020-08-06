@@ -2,7 +2,6 @@ package io.smallrye.mutiny.operators;
 
 import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
 
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
 import io.smallrye.mutiny.Uni;
@@ -21,9 +20,6 @@ public class UniOnCancellationInvokeUni<I> extends UniOperator<I, I> {
     protected void subscribing(UniSerializedSubscriber<? super I> subscriber) {
         upstream().subscribe().withSubscriber(new UniDelegatingSubscriber<I, I>(subscriber) {
 
-            // Guard to invoke the supplier only once
-            private final AtomicBoolean invoked = new AtomicBoolean();
-
             @Override
             public void onSubscribe(UniSubscription subscription) {
                 subscriber.onSubscribe(new UniSubscription() {
@@ -36,14 +32,10 @@ public class UniOnCancellationInvokeUni<I> extends UniOperator<I, I> {
                     }
 
                     private Uni<?> execute() {
-                        if (invoked.compareAndSet(false, true)) {
-                            try {
-                                return nonNull(supplier.get(), "uni");
-                            } catch (Throwable err) {
-                                return Uni.createFrom().failure(err);
-                            }
-                        } else {
-                            return Uni.createFrom().nullItem();
+                        try {
+                            return nonNull(supplier.get(), "uni");
+                        } catch (Throwable err) {
+                            return Uni.createFrom().failure(err);
                         }
                     }
                 });
