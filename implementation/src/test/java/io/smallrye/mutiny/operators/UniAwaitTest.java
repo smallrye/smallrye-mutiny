@@ -1,7 +1,6 @@
 package io.smallrye.mutiny.operators;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.*;
 import static org.awaitility.Awaitility.await;
 
 import java.io.IOException;
@@ -36,8 +35,6 @@ public class UniAwaitTest {
             assertThat(e).hasCauseInstanceOf(IOException.class).hasMessageEndingWith("boom");
         }
     }
-
-    // Uni.createFrom().failure before onTimeout
 
     @Test(timeOut = 1000)
     public void testAwaitingOnAnAsyncUni() {
@@ -121,6 +118,20 @@ public class UniAwaitTest {
     @Test(timeOut = 100, expectedExceptions = TimeoutException.class)
     public void testTimeoutAndOptional() {
         Uni.createFrom().nothing().await().asOptional().atMost(Duration.ofMillis(10));
+    }
+
+    @Test
+    public void testInvalidDurations() {
+        Uni<Integer> one = Uni.createFrom().item(1);
+
+        // Null duration means infinite
+        assertThat(one.await().atMost(null)).isEqualTo(1);
+
+        assertThatThrownBy(() -> one.await().atMost(Duration.ofMillis(-2000)))
+                .isInstanceOf(IllegalArgumentException.class).hasMessageContaining("duration");
+
+        assertThatThrownBy(() -> one.await().atMost(Duration.ofSeconds(0)))
+                .isInstanceOf(IllegalArgumentException.class).hasMessageContaining("duration");
     }
 
 }
