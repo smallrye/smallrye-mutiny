@@ -71,6 +71,7 @@ public class UniOnItemDelayUntilTest {
         assertThat(i).isEqualTo(1);
     }
 
+
     @Test
     public void testWithDelay() {
         int i = Uni.createFrom().item(1).onItem().delayIt().until(x -> delayed)
@@ -114,6 +115,21 @@ public class UniOnItemDelayUntilTest {
                 .subscribe().withSubscriber(UniAssertSubscriber.create());
         subscriber.assertNoResult();
         subscriber.cancel();
+    }
+
+    @Test
+    public void testImmediateCancellation() {
+        AtomicBoolean called = new AtomicBoolean();
+        UniAssertSubscriber<Integer> subscriber = Uni.createFrom().item(1)
+                // It will never emit the item
+                .onItem().delayIt().until(i -> {
+                    called.set(true);
+                    return Uni.createFrom().nothing();
+                })
+                .subscribe().withSubscriber(new UniAssertSubscriber<>(true));
+
+        subscriber.assertNotCompleted();
+        assertThat(called).isFalse();
     }
 
     @Test
