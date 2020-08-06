@@ -36,23 +36,6 @@
             <groupId>io.smallrye.reactive</groupId>
             <artifactId>mutiny-test-utils</artifactId>
         </dependency>
-
-        <dependency>
-            <groupId>io.smallrye.reactive</groupId>
-            <artifactId>mutiny-context-propagation</artifactId>
-            <version>${project.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>io.smallrye</groupId>
-            <artifactId>smallrye-context-propagation</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>io.smallrye.config</groupId>
-            <artifactId>smallrye-config</artifactId>
-            <scope>test</scope>
-        </dependency>
     </dependencies>
 
     <build>
@@ -114,6 +97,33 @@
                     </plugin>
                 </plugins>
             </build>
+        </profile>
+
+        <profile>
+            <id>tck-with-context-propagation</id>
+            <activation>
+                <property>
+                    <name>!disable.tck-with-cp</name>
+                </property>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <groupId>io.smallrye.reactive</groupId>
+                    <artifactId>mutiny-context-propagation</artifactId>
+                    <version>${project.version}</version>
+                    <scope>test</scope>
+                </dependency>
+                <dependency>
+                    <groupId>io.smallrye</groupId>
+                    <artifactId>smallrye-context-propagation</artifactId>
+                    <scope>test</scope>
+                </dependency>
+                <dependency>
+                    <groupId>io.smallrye.config</groupId>
+                    <artifactId>smallrye-config</artifactId>
+                    <scope>test</scope>
+                </dependency>
+            </dependencies>
         </profile>
     </profiles>
 
