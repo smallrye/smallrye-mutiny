@@ -235,7 +235,7 @@ public class MultiCreate {
      */
     public <T> Multi<T> items(Supplier<? extends Stream<? extends T>> supplier) {
         Supplier<? extends Stream<? extends T>> actual = nonNull(supplier, "supplier");
-        return new StreamBasedMulti<>(actual);
+        return Infrastructure.onMultiCreation(new StreamBasedMulti<>(actual));
     }
 
     /**
