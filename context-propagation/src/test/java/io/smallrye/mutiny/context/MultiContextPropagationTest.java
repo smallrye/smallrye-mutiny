@@ -22,7 +22,7 @@ import io.smallrye.mutiny.test.MultiAssertSubscriber;
 
 public class MultiContextPropagationTest {
 
-    private ExecutorService executor = Executors.newFixedThreadPool(4);
+    private final ExecutorService executor = Executors.newFixedThreadPool(4);
 
     @BeforeMethod
     public void initContext() {

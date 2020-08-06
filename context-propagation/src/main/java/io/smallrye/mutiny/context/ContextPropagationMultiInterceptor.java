@@ -23,32 +23,10 @@ public class ContextPropagationMultiInterceptor implements MultiInterceptor {
     static final ThreadContext THREAD_CONTEXT = ContextManagerProvider.instance().getContextManager()
             .newThreadContextBuilder().build();
 
-    @SuppressWarnings({ "ReactiveStreamsSubscriberImplementation" })
     @Override
     public <T> Subscriber<? super T> onSubscription(Publisher<? extends T> instance, Subscriber<? super T> subscriber) {
         Executor executor = THREAD_CONTEXT.currentContextExecutor();
-        return new Subscriber<T>() {
-
-            @Override
-            public void onSubscribe(Subscription subscription) {
-                executor.execute(() -> subscriber.onSubscribe(subscription));
-            }
-
-            @Override
-            public void onNext(T item) {
-                executor.execute(() -> subscriber.onNext(item));
-            }
-
-            @Override
-            public void onError(Throwable failure) {
-                executor.execute(() -> subscriber.onError(failure));
-            }
-
-            @Override
-            public void onComplete() {
-                executor.execute(subscriber::onComplete);
-            }
-        };
+        return new ContextPropagationSubscriber<>(executor, subscriber);
     }
 
     @Override
@@ -80,6 +58,40 @@ public class ContextPropagationMultiInterceptor implements MultiInterceptor {
                     }
                 }
             });
+        }
+    }
+
+    @SuppressWarnings({ "ReactiveStreamsSubscriberImplementation" })
+    public static class ContextPropagationSubscriber<T> implements Subscriber<T> {
+
+        private final Executor executor;
+        private final Subscriber<? super T> subscriber;
+
+        public ContextPropagationSubscriber(Executor executor, Subscriber<? super T> subscriber) {
+            this.executor = executor;
+            this.subscriber = subscriber;
+        }
+
+        @Override
+        public void onSubscribe(Subscription subscription) {
+            executor.execute(() -> subscriber.onSubscribe(subscription));
+        }
+
+        @Override
+        public void onNext(T item) {
+            Objects.requireNonNull(item);
+            executor.execute(() -> subscriber.onNext(item));
+        }
+
+        @Override
+        public void onError(Throwable failure) {
+            Objects.requireNonNull(failure);
+            executor.execute(() -> subscriber.onError(failure));
+        }
+
+        @Override
+        public void onComplete() {
+            executor.execute(subscriber::onComplete);
         }
     }
 }
