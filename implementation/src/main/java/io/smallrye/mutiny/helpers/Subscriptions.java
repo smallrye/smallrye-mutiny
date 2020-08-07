@@ -347,7 +347,7 @@ public class Subscriptions {
         }
     }
 
-    @SuppressWarnings("SubscriberImplementation")
+    @SuppressWarnings({ "ReactiveStreamsSubscriberImplementation" })
     public static class CancelledSubscriber<X> implements Subscriber<X> {
         @Override
         public void onSubscribe(Subscription s) {
@@ -371,8 +371,8 @@ public class Subscriptions {
     }
 
     public static class DeferredSubscription implements Subscription {
-        private AtomicReference<Subscription> subscription = new AtomicReference<>();
-        private AtomicLong pendingRequests = new AtomicLong();
+        private final AtomicReference<Subscription> subscription = new AtomicReference<>();
+        private final AtomicLong pendingRequests = new AtomicLong();
 
         protected boolean isCancelled() {
             return subscription.get() == CANCELLED;

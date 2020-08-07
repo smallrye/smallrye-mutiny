@@ -1,5 +1,6 @@
 package io.smallrye.mutiny.subscription;
 
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.reactivestreams.Subscriber;
@@ -48,6 +49,7 @@ public final class SerializedSubscriber<T> implements Subscription, MultiSubscri
 
     @Override
     public void onItem(T t) {
+        Objects.requireNonNull(t); // Reactive Streams requirement
         if (cancelled || done) {
             return;
         }

@@ -71,7 +71,6 @@ public class UniOnItemDelayUntilTest {
         assertThat(i).isEqualTo(1);
     }
 
-
     @Test
     public void testWithDelay() {
         int i = Uni.createFrom().item(1).onItem().delayIt().until(x -> delayed)

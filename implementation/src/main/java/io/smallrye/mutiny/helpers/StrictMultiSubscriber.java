@@ -1,5 +1,6 @@
 package io.smallrye.mutiny.helpers;
 
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -78,6 +79,7 @@ public class StrictMultiSubscriber<T>
 
     @Override
     public void onItem(T t) {
+        Objects.requireNonNull(t);
         HalfSerializer.onNext(downstream, t, wip, failure);
     }
 
