@@ -31,34 +31,37 @@ public abstract class SwitchableSubscriptionSubscriber<O> implements MultiSubscr
     protected final AtomicReference<Subscription> currentUpstream = new AtomicReference<>();
 
     /**
-     * outstanding request amount.
+     * Outstanding request amount.
+     * Package-private for testing purpose.
      */
-    private long requested;
+    long requested;
 
     /**
-     * {@code true} if request is Long.MAX.
+     * {@code true} if request is Long.MAX_VALUE.
+     * Package-private for testing purpose.
      */
-    private boolean unbounded;
+    boolean unbounded;
 
     /**
      * Pending subscription.
      */
-    private final AtomicReference<Subscription> pendingSubscription = new AtomicReference<>();
+    final AtomicReference<Subscription> pendingSubscription = new AtomicReference<>();
 
     /**
      * Pending amount of request.
      */
-    private final AtomicLong missedRequested = new AtomicLong();
+    final AtomicLong missedRequested = new AtomicLong();
 
     /**
      * Pending amount of emitted items.
      */
-    private final AtomicLong missedItems = new AtomicLong();
+    final AtomicLong missedItems = new AtomicLong();
 
     /**
      * Whether or not there is work in progress.
+     * Package-private for testing purpose.
      */
-    private final AtomicInteger wip = new AtomicInteger();
+    final AtomicInteger wip = new AtomicInteger();
 
     /**
      * Whether or not the downstream cancelled the subscription.
@@ -104,7 +107,7 @@ public abstract class SwitchableSubscriptionSubscriber<O> implements MultiSubscr
 
             if (r != Long.MAX_VALUE) {
                 long u = r - n;
-                if (u < 0L) {
+                if (u <= 0L) {
                     u = 0;
                 }
                 requested = u;
@@ -165,7 +168,7 @@ public abstract class SwitchableSubscriptionSubscriber<O> implements MultiSubscr
     }
 
     protected final void setOrSwitchUpstream(Subscription newUpstream) {
-        ParameterValidation.nonNull(newUpstream, "newUpstream");
+        ParameterValidation.nonNullNpe(newUpstream, "newUpstream"); // Reactive Streams mandates an NPE here.
 
         if (cancelled.get()) {
             newUpstream.cancel();
@@ -211,7 +214,7 @@ public abstract class SwitchableSubscriptionSubscriber<O> implements MultiSubscr
         drainLoop();
     }
 
-    private void drainLoop() {
+    void drainLoop() {
         int missed = 1;
 
         long requestAmount = 0L;
@@ -237,7 +240,6 @@ public abstract class SwitchableSubscriptionSubscriber<O> implements MultiSubscr
                 long req = requested;
                 if (req != Long.MAX_VALUE) {
                     long res = Subscriptions.add(req, pendingRequests);
-
                     if (res != Long.MAX_VALUE) {
                         long remaining = res - pendingItems;
                         if (remaining < 0L) {
