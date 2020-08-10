@@ -1,5 +1,7 @@
 package io.smallrye.mutiny.operators.multi;
 
+import java.util.Objects;
+
 import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.Multi;
@@ -13,11 +15,11 @@ public class MultiIgnoreOp<T> extends AbstractMultiOperator<T, Void> {
 
     @Override
     public void subscribe(MultiSubscriber<? super Void> downstream) {
-        upstream.subscribe().withSubscriber(new MultiIgnoreProcessor<>(downstream));
+        upstream.subscribe().withSubscriber(new MultiIgnoreProcessor<>(Objects.requireNonNull(downstream)));
     }
 
-    static class MultiIgnoreProcessor<T> extends MultiOperatorProcessor<T, Void> {
-        MultiIgnoreProcessor(MultiSubscriber<? super Void> downstream) {
+    public static class MultiIgnoreProcessor<T> extends MultiOperatorProcessor<T, Void> {
+        public MultiIgnoreProcessor(MultiSubscriber<? super Void> downstream) {
             super(downstream);
         }
 
@@ -29,6 +31,15 @@ public class MultiIgnoreOp<T> extends AbstractMultiOperator<T, Void> {
                 subscription.request(Long.MAX_VALUE);
             } else {
                 subscription.cancel();
+            }
+        }
+
+        @Override
+        public void request(long numberOfItems) {
+            // Request is handled by the onSubscribe method
+            // Just validate the parameter for compliance with Reactive Streams.
+            if (numberOfItems <= 0) {
+                onFailure(new IllegalArgumentException("Invalid number of request, must be greater than 0"));
             }
         }
 
