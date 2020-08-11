@@ -12,7 +12,7 @@ abstract class FlatMapManager<T> {
     private long producerIndex;
     private long consumerIndex;
 
-    private AtomicInteger size = new AtomicInteger();
+    private final AtomicInteger size = new AtomicInteger();
 
     private static final int[] FREE_EMPTY = new int[0];
 
