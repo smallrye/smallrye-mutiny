@@ -10,6 +10,7 @@ import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.CompositeException;
+import io.smallrye.mutiny.subscription.UniSubscription;
 
 public class Subscriptions {
 
@@ -262,7 +263,7 @@ public class Subscriptions {
         return failure.getAndSet(TERMINATED);
     }
 
-    public static class EmptySubscription implements Subscription {
+    public static class EmptySubscription implements Subscription, UniSubscription {
 
         @Override
         public void request(long requests) {
