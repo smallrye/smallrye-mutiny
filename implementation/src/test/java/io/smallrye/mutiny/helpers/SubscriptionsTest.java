@@ -1,8 +1,8 @@
 package io.smallrye.mutiny.helpers;
 
-import io.smallrye.mutiny.CompositeException;
-import org.reactivestreams.Subscription;
-import org.testng.annotations.Test;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.*;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -13,9 +13,10 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.*;
+import org.reactivestreams.Subscription;
+import org.testng.annotations.Test;
+
+import io.smallrye.mutiny.CompositeException;
 
 public class SubscriptionsTest {
 

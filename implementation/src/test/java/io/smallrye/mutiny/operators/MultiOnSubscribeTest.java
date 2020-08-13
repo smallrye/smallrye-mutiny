@@ -49,7 +49,6 @@ public class MultiOnSubscribeTest {
         assertThat(reference).doesNotHaveValue(null);
     }
 
-    @SuppressWarnings("deprecation")
     @Test
     public void testDeprecatedOnSubscribed() {
         AtomicInteger count = new AtomicInteger();
@@ -105,7 +104,6 @@ public class MultiOnSubscribeTest {
 
         assertThat(count).hasValue(2);
         assertThat(reference).doesNotHaveValue(null);
-
     }
 
     @Test
@@ -239,5 +237,18 @@ public class MultiOnSubscribeTest {
                 .assertSubscribed()
                 .assertCompletedSuccessfully().assertReceived(1, 2, 3);
 
+    }
+
+    @Test
+    public void testThatRunOnSubscriptionEmitRequestOnSubscribe() {
+        AssertSubscriber<Integer> subscriber = Multi.createFrom().items(1, 2, 3)
+                .runSubscriptionOn(Infrastructure.getDefaultExecutor())
+                .subscribe().withSubscriber(AssertSubscriber.create(2));
+
+        subscriber
+                .request(1)
+                .await()
+                .assertReceived(1, 2, 3)
+                .assertCompletedSuccessfully();
     }
 }
