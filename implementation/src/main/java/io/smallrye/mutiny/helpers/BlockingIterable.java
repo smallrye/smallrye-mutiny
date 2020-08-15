@@ -23,6 +23,7 @@ import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.infrastructure.Infrastructure;
+import io.smallrye.mutiny.subscription.BackPressureFailure;
 
 public class BlockingIterable<T> implements Iterable<T> {
 
@@ -85,7 +86,7 @@ public class BlockingIterable<T> implements Iterable<T> {
         }
     }
 
-    @SuppressWarnings("SubscriberImplementation")
+    @SuppressWarnings("ReactiveStreamsSubscriberImplementation")
     private static final class SubscriberIterator<T> implements Subscriber<T>, Iterator<T> {
 
         private final Queue<T> queue;
@@ -141,10 +142,10 @@ public class BlockingIterable<T> implements Iterable<T> {
                         while (!done.get() && queue.isEmpty()) {
                             condition.await();
                         }
-                    } catch (InterruptedException intex) {
+                    } catch (InterruptedException e) {
                         Thread.currentThread().interrupt();
                         terminateAndFire();
-                        propagateFailure(intex);
+                        propagateFailure(e);
                     } finally {
                         lock.unlock();
                     }
@@ -210,7 +211,7 @@ public class BlockingIterable<T> implements Iterable<T> {
         public void onNext(T t) {
             if (!queue.offer(t)) {
                 subscription.getAndSet(EmptyUniSubscription.CANCELLED).cancel();
-                onError(new IllegalStateException("Buffer is full, cannot deliver the item"));
+                onError(new BackPressureFailure("Buffer is full, cannot deliver the item"));
             } else {
                 fire();
             }
