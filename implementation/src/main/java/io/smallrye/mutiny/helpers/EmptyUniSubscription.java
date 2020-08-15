@@ -19,13 +19,17 @@ public class EmptyUniSubscription implements UniSubscription {
         // Avoid direct instantiation.
     }
 
+    /**
+     * Propagates a failure to the given downstream subscriber.
+     * The subscriber receive the {@code CANCELLED} subscription followed with the failure.
+     *
+     * @param subscriber the subscriber, must not be {@code null}
+     * @param failure the failure, must not be {@code null}
+     * @param <T> the expected item type
+     */
     public static <T> void propagateFailureEvent(UniSubscriber<T> subscriber, Throwable failure) {
         subscriber.onSubscribe(CANCELLED);
-        if (failure == null) {
-            subscriber.onFailure(new NullPointerException());
-        } else {
-            subscriber.onFailure(failure);
-        }
+        subscriber.onFailure(failure);
     }
 
     @Override
