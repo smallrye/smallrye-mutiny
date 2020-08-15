@@ -1,8 +1,8 @@
 package io.smallrye.mutiny.helpers;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.*;
+import io.smallrye.mutiny.CompositeException;
+import org.reactivestreams.Subscription;
+import org.testng.annotations.Test;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -13,10 +13,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.reactivestreams.Subscription;
-import org.testng.annotations.Test;
-
-import io.smallrye.mutiny.CompositeException;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.*;
 
 public class SubscriptionsTest {
 
@@ -218,6 +217,23 @@ public class SubscriptionsTest {
         verify(sub, never()).cancel();
         assertThat(requests).hasValue(0);
         assertThat(container).hasValue(sub);
+    }
+
+    @Test
+    public void testCancelledSubscriber() {
+        Subscriptions.CancelledSubscriber<Integer> subscriber = new Subscriptions.CancelledSubscriber<>();
+        Subscription subscription = mock(Subscription.class);
+        subscriber.onSubscribe(subscription);
+        verify(subscription).cancel();
+        verify(subscription, never()).request(anyLong());
+
+        // Verify that other method are noop
+        subscriber.onNext(1);
+        subscriber.onComplete();
+        subscriber.onError(new Exception("boom"));
+
+        assertThatThrownBy(() -> subscriber.onSubscribe(null))
+                .isInstanceOf(NullPointerException.class);
     }
 
     private void shuffleAndRun(Runnable r1, Runnable r2) {
