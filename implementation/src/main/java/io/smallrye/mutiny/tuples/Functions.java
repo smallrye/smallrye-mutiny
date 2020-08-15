@@ -1,26 +1,11 @@
 package io.smallrye.mutiny.tuples;
 
 import java.util.List;
-import java.util.function.Consumer;
 import java.util.function.Function;
 
 public final class Functions {
 
     private Functions() {
-    }
-
-    private static final Consumer NOOP_CONSUMER = x -> {
-    };
-    private static final Runnable NOOP = () -> {
-    };
-
-    @SuppressWarnings("unchecked")
-    public static <T> Consumer<T> noopConsumer() {
-        return NOOP_CONSUMER;
-    }
-
-    public static Runnable noopAction() {
-        return NOOP;
     }
 
     @FunctionalInterface
