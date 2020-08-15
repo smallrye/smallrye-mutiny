@@ -65,7 +65,7 @@ public class Subscribers {
         }
     }
 
-    private static class CallbackBasedSubscriber<T> implements CancellableSubscriber<T>, Subscription {
+    public static class CallbackBasedSubscriber<T> implements CancellableSubscriber<T>, Subscription {
 
         private final AtomicReference<Subscription> subscription = new AtomicReference<>();
         private final Consumer<? super T> onItem;
