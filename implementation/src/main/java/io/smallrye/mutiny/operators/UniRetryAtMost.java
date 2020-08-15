@@ -9,7 +9,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
 
 import io.smallrye.mutiny.Uni;
-import io.smallrye.mutiny.helpers.Predicates;
 import io.smallrye.mutiny.subscription.UniSubscriber;
 import io.smallrye.mutiny.subscription.UniSubscription;
 
@@ -27,7 +26,7 @@ public class UniRetryAtMost<T> extends UniOperator<T, T> {
     protected void subscribing(UniSerializedSubscriber<? super T> subscriber) {
         AtomicInteger numberOfSubscriptions = new AtomicInteger(0);
         UniSubscriber<T> retryingSubscriber = new UniSubscriber<T>() {
-            AtomicReference<UniSubscription> reference = new AtomicReference<>();
+            final AtomicReference<UniSubscription> reference = new AtomicReference<>();
 
             @Override
             public void onSubscribe(UniSubscription subscription) {
@@ -53,7 +52,7 @@ public class UniRetryAtMost<T> extends UniOperator<T, T> {
             @Override
             public void onFailure(Throwable failure) {
                 if (reference.get() != CANCELLED) {
-                    if (!Predicates.testFailure(predicate, subscriber, failure)) {
+                    if (!test(subscriber, failure)) {
                         return;
                     }
 
@@ -77,5 +76,22 @@ public class UniRetryAtMost<T> extends UniOperator<T, T> {
 
     private void resubscribe(Uni<? extends T> upstream, UniSubscriber<T> subscriber) {
         AbstractUni.subscribe(upstream, subscriber);
+    }
+
+    private boolean test(
+            UniSerializedSubscriber<? super T> subscriber, Throwable failure) {
+        boolean pass;
+        try {
+            pass = predicate.test(failure);
+        } catch (Throwable e) {
+            subscriber.onFailure(e);
+            return false;
+        }
+        if (!pass) {
+            subscriber.onFailure(failure);
+            return false;
+        } else {
+            return true;
+        }
     }
 }
