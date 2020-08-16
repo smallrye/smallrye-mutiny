@@ -9,7 +9,7 @@ import org.testng.annotations.Test;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
-import io.smallrye.mutiny.test.MultiAssertSubscriber;
+import io.smallrye.mutiny.test.AssertSubscriber;
 
 @SuppressWarnings("ConstantConditions")
 public class UniOnItemTransformToMultiTest {
@@ -24,7 +24,7 @@ public class UniOnItemTransformToMultiTest {
     public void testTransformToMultiWithItem() {
         Uni.createFrom().item(1)
                 .onItem().transformToMulti(i -> Multi.createFrom().range(i, 5))
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(10))
+                .subscribe().withSubscriber(AssertSubscriber.create(10))
                 .await()
                 .assertCompletedSuccessfully()
                 .assertReceived(1, 2, 3, 4);
@@ -35,7 +35,7 @@ public class UniOnItemTransformToMultiTest {
     public void testTransformToMultiWithItemDeprecated() {
         Uni.createFrom().item(1)
                 .onItem().produceMulti(i -> Multi.createFrom().range(i, 5))
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(10))
+                .subscribe().withSubscriber(AssertSubscriber.create(10))
                 .await()
                 .assertCompletedSuccessfully()
                 .assertReceived(1, 2, 3, 4);
@@ -45,7 +45,7 @@ public class UniOnItemTransformToMultiTest {
     public void testTransformToMultiWithNull() {
         Uni.createFrom().voidItem()
                 .onItem().transformToMulti(x -> Multi.createFrom().range(1, 5))
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(10))
+                .subscribe().withSubscriber(AssertSubscriber.create(10))
                 .await()
                 .assertCompletedSuccessfully()
                 .assertReceived(1, 2, 3, 4);
@@ -55,7 +55,7 @@ public class UniOnItemTransformToMultiTest {
     public void testTransformToMultiWithFailure() {
         Uni.createFrom().<Integer> failure(new IOException("boom"))
                 .onItem().transformToMulti(x -> Multi.createFrom().range(1, 5))
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(10))
+                .subscribe().withSubscriber(AssertSubscriber.create(10))
                 .await()
                 .assertHasFailedWith(IOException.class, "boom")
                 .assertHasNotReceivedAnyItem();
@@ -67,7 +67,7 @@ public class UniOnItemTransformToMultiTest {
                 .onItem().transformToMulti(x -> {
                     throw new IllegalStateException("boom");
                 })
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(10))
+                .subscribe().withSubscriber(AssertSubscriber.create(10))
                 .await()
                 .assertHasFailedWith(IllegalStateException.class, "boom")
                 .assertHasNotReceivedAnyItem();
@@ -77,7 +77,7 @@ public class UniOnItemTransformToMultiTest {
     public void testTransformToMultiWithNullReturnedByMapper() {
         Uni.createFrom().item(1)
                 .onItem().transformToMulti(x -> null)
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(10))
+                .subscribe().withSubscriber(AssertSubscriber.create(10))
                 .await()
                 .assertHasFailedWith(NullPointerException.class, "")
                 .assertHasNotReceivedAnyItem();
@@ -90,7 +90,7 @@ public class UniOnItemTransformToMultiTest {
         Uni.createFrom().<Integer> nothing()
                 .onCancellation().invoke(() -> called.set(true))
                 .onItem().transformToMulti(x -> Multi.createFrom().range(x, 10))
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(10))
+                .subscribe().withSubscriber(AssertSubscriber.create(10))
 
                 .assertNotTerminated()
                 .assertHasNotReceivedAnyItem()
@@ -109,7 +109,7 @@ public class UniOnItemTransformToMultiTest {
                 .onCancellation().invoke(() -> calledUni.set(true))
                 .onItem().transformToMulti(i -> Multi.createFrom().nothing()
                         .on().cancellation(() -> called.set(true)))
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(10))
+                .subscribe().withSubscriber(AssertSubscriber.create(10))
                 .assertNotTerminated()
                 .assertHasNotReceivedAnyItem()
                 .run(() -> assertThat(called).isFalse())

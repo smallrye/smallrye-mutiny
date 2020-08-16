@@ -16,7 +16,7 @@ import io.reactivex.Observable;
 import io.reactivex.Single;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.converters.multi.MultiRxConverters;
-import io.smallrye.mutiny.test.MultiAssertSubscriber;
+import io.smallrye.mutiny.test.AssertSubscriber;
 
 public class MultiConvertToTest {
 
@@ -184,10 +184,10 @@ public class MultiConvertToTest {
     @Test
     public void testCreatingAFlowableWithRequest() {
         AtomicBoolean called = new AtomicBoolean();
-        MultiAssertSubscriber<Integer> subscriber = Multi.createFrom()
+        AssertSubscriber<Integer> subscriber = Multi.createFrom()
                 .deferred(() -> Multi.createFrom().item(1).onItem().invoke((item) -> called.set(true)))
                 .convert().with(MultiRxConverters.toFlowable())
-                .subscribeWith(MultiAssertSubscriber.create(0));
+                .subscribeWith(AssertSubscriber.create(0));
 
         assertThat(called).isFalse();
         subscriber.assertHasNotReceivedAnyItem().assertSubscribed();

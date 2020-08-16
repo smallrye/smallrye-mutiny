@@ -12,7 +12,7 @@ import org.testng.annotations.Test;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.subscription.MultiEmitter;
-import io.smallrye.mutiny.test.MultiAssertSubscriber;
+import io.smallrye.mutiny.test.AssertSubscriber;
 
 public class MultiTakeTest {
 
@@ -51,7 +51,7 @@ public class MultiTakeTest {
     @Test
     public void testTakeOnUpstreamFailure() {
         Multi.createFrom().<Integer> failure(new IOException("boom")).transform().byTakingFirstItems(1)
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(10))
+                .subscribe().withSubscriber(AssertSubscriber.create(10))
                 .assertHasFailedWith(IOException.class, "boom")
                 .assertHasNotReceivedAnyItem();
     }
@@ -59,7 +59,7 @@ public class MultiTakeTest {
     @Test
     public void testTakeLastOnUpstreamFailure() {
         Multi.createFrom().<Integer> failure(new IOException("boom")).transform().byTakingLastItems(1)
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(10))
+                .subscribe().withSubscriber(AssertSubscriber.create(10))
                 .assertHasFailedWith(IOException.class, "boom")
                 .assertHasNotReceivedAnyItem();
     }
@@ -67,7 +67,7 @@ public class MultiTakeTest {
     @Test
     public void testTakeAll() {
         Multi.createFrom().range(1, 5).transform().byTakingFirstItems(4)
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(10))
+                .subscribe().withSubscriber(AssertSubscriber.create(10))
                 .assertCompletedSuccessfully()
                 .assertReceived(1, 2, 3, 4);
     }
@@ -75,7 +75,7 @@ public class MultiTakeTest {
     @Test
     public void testTakeLastAll() {
         Multi.createFrom().range(1, 5).transform().byTakingLastItems(4)
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(10))
+                .subscribe().withSubscriber(AssertSubscriber.create(10))
                 .assertCompletedSuccessfully()
                 .assertReceived(1, 2, 3, 4);
     }
@@ -91,7 +91,7 @@ public class MultiTakeTest {
 
     @Test
     public void testTakeLastWithBackPressure() {
-        MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(0);
+        AssertSubscriber<Integer> subscriber = AssertSubscriber.create(0);
 
         AtomicReference<MultiEmitter<? super Integer>> emitter = new AtomicReference<>();
         Multi.createFrom().<Integer> emitter(emitter::set)
@@ -122,7 +122,7 @@ public class MultiTakeTest {
 
     @Test
     public void testTakeSomeLastItems() {
-        MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(Long.MAX_VALUE);
+        AssertSubscriber<Integer> subscriber = AssertSubscriber.create(Long.MAX_VALUE);
 
         Multi.createFrom().range(1, 11)
                 .transform().byTakingLastItems(3)
@@ -136,7 +136,7 @@ public class MultiTakeTest {
     public void testTakeWhileWithMethodThrowingException() {
         Multi.createFrom().range(1, 10).transform().byTakingItemsWhile(i -> {
             throw new IllegalStateException("boom");
-        }).subscribe().withSubscriber(MultiAssertSubscriber.create(10))
+        }).subscribe().withSubscriber(AssertSubscriber.create(10))
                 .assertHasFailedWith(IllegalStateException.class, "boom");
     }
 
@@ -144,7 +144,7 @@ public class MultiTakeTest {
     public void testTakeWhileWithUpstreamFailure() {
         Multi.createFrom().<Integer> failure(new IOException("boom"))
                 .transform().byTakingItemsWhile(i -> i < 5)
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(10))
+                .subscribe().withSubscriber(AssertSubscriber.create(10))
                 .assertHasFailedWith(IOException.class, "boom");
     }
 
@@ -156,7 +156,7 @@ public class MultiTakeTest {
     @Test
     public void testTakeWhile() {
         Multi.createFrom().range(1, 10).transform().byTakingItemsWhile(i -> i < 5)
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(10))
+                .subscribe().withSubscriber(AssertSubscriber.create(10))
                 .assertCompletedSuccessfully()
                 .assertReceived(1, 2, 3, 4);
     }
@@ -164,7 +164,7 @@ public class MultiTakeTest {
     @Test
     public void testTakeWhileNone() {
         Multi.createFrom().items(1, 2, 3, 4).transform().byTakingItemsWhile(i -> false)
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(10))
+                .subscribe().withSubscriber(AssertSubscriber.create(10))
                 .assertCompletedSuccessfully()
                 .assertHasNotReceivedAnyItem();
     }
@@ -172,16 +172,16 @@ public class MultiTakeTest {
     @Test
     public void testTakeWhileAll() {
         Multi.createFrom().items(1, 2, 3, 4).transform().byTakingItemsWhile(i -> true)
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(10))
+                .subscribe().withSubscriber(AssertSubscriber.create(10))
                 .assertCompletedSuccessfully()
                 .assertReceived(1, 2, 3, 4);
     }
 
     @Test
     public void testTakeWhileSomeWithBackPressure() {
-        MultiAssertSubscriber<Integer> subscriber = Multi.createFrom().items(1, 2, 3, 4).transform()
+        AssertSubscriber<Integer> subscriber = Multi.createFrom().items(1, 2, 3, 4).transform()
                 .byTakingItemsWhile(i -> i < 3)
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(0));
+                .subscribe().withSubscriber(AssertSubscriber.create(0));
 
         subscriber.assertNotTerminated()
                 .assertHasNotReceivedAnyItem();
@@ -201,7 +201,7 @@ public class MultiTakeTest {
     public void testLimitingInfiniteStream() {
         Multi.createFrom().ticks().every(Duration.ofMillis(2))
                 .transform().byTakingFirstItems(5)
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(Long.MAX_VALUE))
+                .subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE))
                 .await()
                 .assertCompletedSuccessfully()
                 .assertReceived(0L, 1L, 2L, 3L, 4L);
@@ -209,9 +209,9 @@ public class MultiTakeTest {
 
     @Test
     public void testTakeByTime() {
-        MultiAssertSubscriber<Integer> subscriber = Multi.createFrom().range(1, 100).transform()
+        AssertSubscriber<Integer> subscriber = Multi.createFrom().range(1, 100).transform()
                 .byTakingItemsFor(Duration.ofMillis(1000))
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(10))
+                .subscribe().withSubscriber(AssertSubscriber.create(10))
                 .await()
                 .assertCompletedSuccessfully();
 

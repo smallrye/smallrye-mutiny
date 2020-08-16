@@ -18,7 +18,7 @@ import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.multi.MultiOnSubscribeInvokeOp;
 import io.smallrye.mutiny.operators.multi.MultiOnSubscribeInvokeUniOp;
 import io.smallrye.mutiny.subscription.UniEmitter;
-import io.smallrye.mutiny.test.MultiAssertSubscriber;
+import io.smallrye.mutiny.test.AssertSubscriber;
 
 public class MultiOnSubscribeTest {
 
@@ -32,7 +32,7 @@ public class MultiOnSubscribeTest {
                     count.incrementAndGet();
                 });
 
-        MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(10);
+        AssertSubscriber<Integer> subscriber = AssertSubscriber.create(10);
 
         assertThat(count).hasValue(0);
         assertThat(reference).hasValue(null);
@@ -42,7 +42,7 @@ public class MultiOnSubscribeTest {
         assertThat(count).hasValue(1);
         assertThat(reference).doesNotHaveValue(null);
 
-        MultiAssertSubscriber<Integer> subscriber2 = MultiAssertSubscriber.create(10);
+        AssertSubscriber<Integer> subscriber2 = AssertSubscriber.create(10);
         multi.subscribe().withSubscriber(subscriber2).assertCompletedSuccessfully().assertReceived(1, 2, 3);
 
         assertThat(count).hasValue(2);
@@ -60,7 +60,7 @@ public class MultiOnSubscribeTest {
                     count.incrementAndGet();
                 });
 
-        MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(10);
+        AssertSubscriber<Integer> subscriber = AssertSubscriber.create(10);
 
         assertThat(count).hasValue(0);
         assertThat(reference).hasValue(null);
@@ -70,7 +70,7 @@ public class MultiOnSubscribeTest {
         assertThat(count).hasValue(1);
         assertThat(reference).doesNotHaveValue(null);
 
-        MultiAssertSubscriber<Integer> subscriber2 = MultiAssertSubscriber.create(10);
+        AssertSubscriber<Integer> subscriber2 = AssertSubscriber.create(10);
         multi.subscribe().withSubscriber(subscriber2).assertCompletedSuccessfully().assertReceived(1, 2, 3);
 
         assertThat(count).hasValue(2);
@@ -90,7 +90,7 @@ public class MultiOnSubscribeTest {
                             .onSubscribe().invoke(sub::set);
                 });
 
-        MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(10);
+        AssertSubscriber<Integer> subscriber = AssertSubscriber.create(10);
 
         assertThat(count).hasValue(0);
         assertThat(reference).hasValue(null);
@@ -100,7 +100,7 @@ public class MultiOnSubscribeTest {
         assertThat(count).hasValue(1);
         assertThat(reference).doesNotHaveValue(null);
 
-        MultiAssertSubscriber<Integer> subscriber2 = MultiAssertSubscriber.create(10);
+        AssertSubscriber<Integer> subscriber2 = AssertSubscriber.create(10);
         multi.subscribe().withSubscriber(subscriber2).assertCompletedSuccessfully().assertReceived(1, 2, 3);
 
         assertThat(count).hasValue(2);
@@ -115,7 +115,7 @@ public class MultiOnSubscribeTest {
                     throw new IllegalStateException("boom");
                 });
 
-        MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create();
+        AssertSubscriber<Integer> subscriber = AssertSubscriber.create();
 
         multi.subscribe().withSubscriber(subscriber)
                 .assertHasFailedWith(IllegalStateException.class, "boom");
@@ -129,7 +129,7 @@ public class MultiOnSubscribeTest {
                     throw new IllegalStateException("boom");
                 });
 
-        MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create();
+        AssertSubscriber<Integer> subscriber = AssertSubscriber.create();
 
         multi.subscribe().withSubscriber(subscriber)
                 .assertHasFailedWith(IllegalStateException.class, "boom");
@@ -141,7 +141,7 @@ public class MultiOnSubscribeTest {
         Multi<Integer> multi = Multi.createFrom().items(1, 2, 3)
                 .onSubscribe().invokeUni(s -> Uni.createFrom().failure(new IOException("boom")));
 
-        MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create();
+        AssertSubscriber<Integer> subscriber = AssertSubscriber.create();
 
         multi.subscribe().withSubscriber(subscriber)
                 .assertHasFailedWith(IOException.class, "boom");
@@ -153,7 +153,7 @@ public class MultiOnSubscribeTest {
         Multi<Integer> multi = Multi.createFrom().items(1, 2, 3)
                 .onSubscribe().invokeUni(s -> null);
 
-        MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create();
+        AssertSubscriber<Integer> subscriber = AssertSubscriber.create();
 
         multi.subscribe().withSubscriber(subscriber)
                 .assertHasFailedWith(NullPointerException.class, "`null`");
@@ -185,7 +185,7 @@ public class MultiOnSubscribeTest {
     @Test
     public void testThatSubscriptionIsNotPassedDownstreamUntilInvokeCallbackCompletes() {
         CountDownLatch latch = new CountDownLatch(1);
-        MultiAssertSubscriber<Integer> subscriber = Multi.createFrom().items(1, 2, 3)
+        AssertSubscriber<Integer> subscriber = Multi.createFrom().items(1, 2, 3)
                 .onSubscribe().invoke(s -> {
                     try {
                         latch.await();
@@ -195,7 +195,7 @@ public class MultiOnSubscribeTest {
                     }
                 })
                 .runSubscriptionOn(Infrastructure.getDefaultExecutor())
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(3));
+                .subscribe().withSubscriber(AssertSubscriber.create(3));
 
         subscriber.assertNotSubscribed();
         latch.countDown();
@@ -207,9 +207,9 @@ public class MultiOnSubscribeTest {
     @Test
     public void testThatSubscriptionIsNotPassedDownstreamUntilProducedUniCompletes() {
         AtomicReference<UniEmitter<? super Integer>> emitter = new AtomicReference<>();
-        MultiAssertSubscriber<Integer> subscriber = Multi.createFrom().items(1, 2, 3)
+        AssertSubscriber<Integer> subscriber = Multi.createFrom().items(1, 2, 3)
                 .onSubscribe().invokeUni(s -> Uni.createFrom().emitter((Consumer<UniEmitter<? super Integer>>) emitter::set))
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(3));
+                .subscribe().withSubscriber(AssertSubscriber.create(3));
 
         subscriber.assertNotSubscribed();
 
@@ -225,10 +225,10 @@ public class MultiOnSubscribeTest {
     @Test
     public void testThatSubscriptionIsNotPassedDownstreamUntilProducedUniCompletesWithDifferentThread() {
         AtomicReference<UniEmitter<? super Integer>> emitter = new AtomicReference<>();
-        MultiAssertSubscriber<Integer> subscriber = Multi.createFrom().items(1, 2, 3)
+        AssertSubscriber<Integer> subscriber = Multi.createFrom().items(1, 2, 3)
                 .onSubscribe().invokeUni(s -> Uni.createFrom().emitter((Consumer<UniEmitter<? super Integer>>) emitter::set))
                 .runSubscriptionOn(Infrastructure.getDefaultExecutor())
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(3));
+                .subscribe().withSubscriber(AssertSubscriber.create(3));
 
         subscriber.assertNotSubscribed();
 

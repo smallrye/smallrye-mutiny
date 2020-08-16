@@ -16,7 +16,7 @@ import org.testng.annotations.Test;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.operators.multi.MultiRetryWhenOp;
-import io.smallrye.mutiny.test.MultiAssertSubscriber;
+import io.smallrye.mutiny.test.AssertSubscriber;
 import io.smallrye.mutiny.tuples.Tuple2;
 
 public class MultiOnFailureRetryWhenTest {
@@ -52,9 +52,9 @@ public class MultiOnFailureRetryWhenTest {
         Multi<Integer> when = Multi.createFrom().range(1, 10)
                 .on().cancellation(cancelled::incrementAndGet);
 
-        MultiAssertSubscriber<Integer> subscriber = failingAfter1
+        AssertSubscriber<Integer> subscriber = failingAfter1
                 .onFailure().retry().when(x -> when)
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(3));
+                .subscribe().withSubscriber(AssertSubscriber.create(3));
 
         subscriber.assertReceived(1, 1, 1)
                 .cancel();
@@ -73,9 +73,9 @@ public class MultiOnFailureRetryWhenTest {
                 .onSubscribe().invoke(sub -> subscribed.set(true))
                 .on().cancellation(() -> cancelled.set(true));
 
-        MultiAssertSubscriber<Integer> subscriber = multi
+        AssertSubscriber<Integer> subscriber = multi
                 .onFailure().retry().when(other -> Multi.createFrom().failure(new IllegalStateException("boom")))
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(10));
+                .subscribe().withSubscriber(AssertSubscriber.create(10));
 
         subscriber
                 .assertSubscribed()
@@ -100,8 +100,8 @@ public class MultiOnFailureRetryWhenTest {
                 .when(other -> other.flatMap(l -> count.getAndIncrement() == 0 ? Multi.createFrom().item(l)
                         : Multi.createFrom().failure(new IllegalStateException("boom"))));
 
-        MultiAssertSubscriber<Integer> subscriber = retry.subscribe()
-                .withSubscriber(MultiAssertSubscriber.create(10));
+        AssertSubscriber<Integer> subscriber = retry.subscribe()
+                .withSubscriber(AssertSubscriber.create(10));
         subscriber
                 .assertSubscribed()
                 .assertReceived(1, 1)
@@ -122,8 +122,8 @@ public class MultiOnFailureRetryWhenTest {
         Multi<Integer> retry = source
                 .onFailure().retry().when(other -> Multi.createFrom().empty());
 
-        MultiAssertSubscriber<Integer> subscriber = retry.subscribe()
-                .withSubscriber(MultiAssertSubscriber.create(10));
+        AssertSubscriber<Integer> subscriber = retry.subscribe()
+                .withSubscriber(AssertSubscriber.create(10));
         subscriber
                 .assertSubscribed()
                 .assertCompletedSuccessfully();
@@ -142,8 +142,8 @@ public class MultiOnFailureRetryWhenTest {
                 .onFailure().retry().when(other -> other
                         .transform().byTakingFirstItems(1));
 
-        MultiAssertSubscriber<Integer> subscriber = retry.subscribe()
-                .withSubscriber(MultiAssertSubscriber.create(10));
+        AssertSubscriber<Integer> subscriber = retry.subscribe()
+                .withSubscriber(AssertSubscriber.create(10));
         subscriber
                 .assertSubscribed()
                 .assertReceived(1, 1)
@@ -153,7 +153,7 @@ public class MultiOnFailureRetryWhenTest {
 
     @Test
     public void testRepeat() {
-        MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(11);
+        AssertSubscriber<Integer> subscriber = AssertSubscriber.create(11);
 
         failingAfter1
                 .onFailure().retry().when(v -> Multi.createFrom().range(1, 11))
@@ -166,7 +166,7 @@ public class MultiOnFailureRetryWhenTest {
 
     @Test
     public void testRepeatWithBackPressure() {
-        MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(0);
+        AssertSubscriber<Integer> subscriber = AssertSubscriber.create(0);
 
         failingAfter2
                 .onFailure().retry().when(v -> Multi.createFrom().range(1, 6))
@@ -195,7 +195,7 @@ public class MultiOnFailureRetryWhenTest {
 
     @Test
     public void testWithOtherStreamBeingEmpty() {
-        MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(0);
+        AssertSubscriber<Integer> subscriber = AssertSubscriber.create(0);
 
         failingAfter2
                 .onFailure().retry().when(v -> Multi.createFrom().empty())
@@ -208,7 +208,7 @@ public class MultiOnFailureRetryWhenTest {
 
     @Test
     public void testWithOtherStreamFailing2() {
-        MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(0);
+        AssertSubscriber<Integer> subscriber = AssertSubscriber.create(0);
 
         failingAfter2
                 .onFailure().retry().when(v -> Multi.createFrom().failure(new RuntimeException("failed")))
@@ -221,7 +221,7 @@ public class MultiOnFailureRetryWhenTest {
 
     @Test
     public void testWithOtherStreamThrowingException() {
-        MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(10);
+        AssertSubscriber<Integer> subscriber = AssertSubscriber.create(10);
 
         failingAfter2
                 .onFailure().retry().when(v -> {
@@ -237,7 +237,7 @@ public class MultiOnFailureRetryWhenTest {
 
     @Test
     public void testWithOtherStreamReturningNull() {
-        MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(10);
+        AssertSubscriber<Integer> subscriber = AssertSubscriber.create(10);
 
         failingAfter2
                 .onFailure().retry().when(v -> null)
@@ -251,32 +251,32 @@ public class MultiOnFailureRetryWhenTest {
 
     @Test
     public void testWithOtherStreamFailingAfterAFewItems() {
-        MultiAssertSubscriber<Integer> ts = MultiAssertSubscriber.create(10);
+        AssertSubscriber<Integer> subscriber = AssertSubscriber.create(10);
 
         failingAfter2.onFailure().retry().when(v -> v.map(a -> {
             throw new RuntimeException("failed");
         }))
-                .subscribe(ts);
+                .subscribe(subscriber);
 
-        ts.assertReceived(1, 2)
+        subscriber.assertReceived(1, 2)
                 .assertHasFailedWith(RuntimeException.class, "failed");
 
     }
 
     @Test
     public void testInfiniteRetry() {
-        MultiAssertSubscriber<Integer> ts = MultiAssertSubscriber.create(0);
+        AssertSubscriber<Integer> subscriber = AssertSubscriber.create(0);
 
         failingAfter2
                 .onFailure().retry().when(v -> v)
-                .subscribe(ts);
+                .subscribe(subscriber);
 
-        ts.request(8);
+        subscriber.request(8);
 
-        ts.assertReceived(1, 2, 1, 2, 1, 2, 1, 2)
+        subscriber.assertReceived(1, 2, 1, 2, 1, 2, 1, 2)
                 .assertNotTerminated();
 
-        ts.cancel();
+        subscriber.cancel();
     }
 
     Multi<String> getMultiWithManualExponentialRetry() {
@@ -299,8 +299,8 @@ public class MultiOnFailureRetryWhenTest {
 
     @Test
     public void testManualExponentialRetry() {
-        MultiAssertSubscriber<String> subscriber = getMultiWithManualExponentialRetry()
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(100));
+        AssertSubscriber<String> subscriber = getMultiWithManualExponentialRetry()
+                .subscribe().withSubscriber(AssertSubscriber.create(100));
 
         subscriber
                 .await(Duration.ofSeconds(10))
@@ -312,14 +312,14 @@ public class MultiOnFailureRetryWhenTest {
     public void testRetryWithRandomBackoff() {
         Exception exception = new IOException("boom retry");
 
-        MultiAssertSubscriber<Integer> subscriber = Multi.createFrom().<Integer> emitter(e -> {
+        AssertSubscriber<Integer> subscriber = Multi.createFrom().<Integer> emitter(e -> {
             e.emit(0);
             e.emit(1);
             e.fail(exception);
         })
                 .onFailure().retry().withBackOff(Duration.ofMillis(10), Duration.ofHours(1)).withJitter(0.1)
                 .atMost(4)
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(100));
+                .subscribe().withSubscriber(AssertSubscriber.create(100));
         await().until(() -> subscriber.items().size() >= 8);
         subscriber
                 .assertReceived(0, 1, 0, 1, 0, 1, 0, 1)
@@ -330,12 +330,12 @@ public class MultiOnFailureRetryWhenTest {
     @Test
     public void testRetryWithRandomBackoffAndDefaultJitter() {
         Exception exception = new IOException("boom retry");
-        MultiAssertSubscriber<Integer> subscriber = Multi.createBy().concatenating()
+        AssertSubscriber<Integer> subscriber = Multi.createBy().concatenating()
                 .streams(Multi.createFrom().range(0, 2), Multi.createFrom().failure(exception))
 
                 .onFailure().retry().withBackOff(Duration.ofMillis(100), Duration.ofHours(1))
                 .atMost(4)
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(100));
+                .subscribe().withSubscriber(AssertSubscriber.create(100));
 
         await().until(() -> subscriber.items().size() >= 8);
         subscriber
@@ -346,11 +346,11 @@ public class MultiOnFailureRetryWhenTest {
     @Test
     public void testRetryWithDefaultMax() {
         Exception exception = new IOException("boom retry");
-        MultiAssertSubscriber<Integer> subscriber = Multi.createBy().concatenating()
+        AssertSubscriber<Integer> subscriber = Multi.createBy().concatenating()
                 .streams(Multi.createFrom().range(0, 2), Multi.createFrom().failure(exception))
                 .onFailure().retry().withBackOff(Duration.ofMillis(10)).withJitter(0.0)
                 .atMost(4)
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(100));
+                .subscribe().withSubscriber(AssertSubscriber.create(100));
 
         await()
                 .atMost(1, TimeUnit.MINUTES)

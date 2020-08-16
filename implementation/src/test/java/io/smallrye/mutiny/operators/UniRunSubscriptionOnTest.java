@@ -19,30 +19,30 @@ public class UniRunSubscriptionOnTest {
 
     @Test
     public void testRunSubscriptionOnWithSupplier() {
-        UniAssertSubscriber<Integer> ts = UniAssertSubscriber.create();
+        UniAssertSubscriber<Integer> subscriber = UniAssertSubscriber.create();
         Uni.createFrom().item(() -> 1)
                 .runSubscriptionOn(ForkJoinPool.commonPool())
-                .subscribe().withSubscriber(ts);
-        ts.await().assertItem(1);
-        assertThat(ts.getOnSubscribeThreadName()).isNotEqualTo(Thread.currentThread().getName());
+                .subscribe().withSubscriber(subscriber);
+        subscriber.await().assertItem(1);
+        assertThat(subscriber.getOnSubscribeThreadName()).isNotEqualTo(Thread.currentThread().getName());
     }
 
     @Test
     public void testWithWithImmediateValue() {
-        UniAssertSubscriber<Integer> ts = UniAssertSubscriber.create();
+        UniAssertSubscriber<Integer> subscriber = UniAssertSubscriber.create();
 
         Uni.createFrom().item(1)
                 .runSubscriptionOn(ForkJoinPool.commonPool())
-                .subscribe().withSubscriber(ts);
+                .subscribe().withSubscriber(subscriber);
 
-        ts.await().assertItem(1);
-        assertThat(ts.getOnSubscribeThreadName()).isNotEqualTo(Thread.currentThread().getName());
+        subscriber.await().assertItem(1);
+        assertThat(subscriber.getOnSubscribeThreadName()).isNotEqualTo(Thread.currentThread().getName());
     }
 
     @Test
     public void testWithTimeout() {
         ExecutorService executorService = Executors.newSingleThreadExecutor();
-        UniAssertSubscriber<Integer> ts = UniAssertSubscriber.create();
+        UniAssertSubscriber<Integer> subscriber = UniAssertSubscriber.create();
 
         Uni.createFrom().item(() -> {
             try {
@@ -55,9 +55,9 @@ public class UniRunSubscriptionOnTest {
                 .ifNoItem().after(Duration.ofMillis(100)).recoverWithUni(Uni.createFrom().item(() -> 1))
                 // Should not use the default as in container you may have a single thread, blocked by the sleep statement.
                 .runSubscriptionOn(executorService)
-                .subscribe().withSubscriber(ts);
+                .subscribe().withSubscriber(subscriber);
 
-        ts.await().assertItem(1);
+        subscriber.await().assertItem(1);
 
         executorService.shutdownNow();
     }

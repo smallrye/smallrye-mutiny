@@ -20,7 +20,7 @@ import org.testng.annotations.Test;
 import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
-import io.smallrye.mutiny.test.MultiAssertSubscriber;
+import io.smallrye.mutiny.test.AssertSubscriber;
 
 public class MultiFromResourceTest {
 
@@ -33,7 +33,7 @@ public class MultiFromResourceTest {
                 s -> Multi.createFrom().items(s))
                 .withFinalizer(r -> {
                 });
-        MultiAssertSubscriber<String> subscriber = multi.subscribe().withSubscriber(MultiAssertSubscriber.create(10));
+        AssertSubscriber<String> subscriber = multi.subscribe().withSubscriber(AssertSubscriber.create(10));
         subscriber
                 .assertHasFailedWith(IllegalArgumentException.class, "boom")
                 .assertHasNotReceivedAnyItem();
@@ -46,7 +46,7 @@ public class MultiFromResourceTest {
                 s -> Multi.createFrom().items(s))
                 .withFinalizer(r -> {
                 });
-        MultiAssertSubscriber<String> subscriber = multi.subscribe().withSubscriber(MultiAssertSubscriber.create(10));
+        AssertSubscriber<String> subscriber = multi.subscribe().withSubscriber(AssertSubscriber.create(10));
         subscriber
                 .assertHasFailedWith(IllegalArgumentException.class, "")
                 .assertHasNotReceivedAnyItem();
@@ -69,7 +69,7 @@ public class MultiFromResourceTest {
         Multi<String> multi = Multi.createFrom().resource(supplier, stream)
                 .withFinalizer(r -> {
                 });
-        MultiAssertSubscriber<String> subscriber = multi.subscribe().withSubscriber(MultiAssertSubscriber.create(10));
+        AssertSubscriber<String> subscriber = multi.subscribe().withSubscriber(AssertSubscriber.create(10));
         subscriber
                 .assertHasFailedWith(IllegalArgumentException.class, "boom")
                 .assertHasNotReceivedAnyItem();
@@ -82,7 +82,7 @@ public class MultiFromResourceTest {
                 s -> (Publisher<String>) null)
                 .withFinalizer(r -> {
                 });
-        MultiAssertSubscriber<String> subscriber = multi.subscribe().withSubscriber(MultiAssertSubscriber.create(10));
+        AssertSubscriber<String> subscriber = multi.subscribe().withSubscriber(AssertSubscriber.create(10));
         subscriber
                 .assertHasFailedWith(IllegalArgumentException.class, "")
                 .assertHasNotReceivedAnyItem();
@@ -132,7 +132,7 @@ public class MultiFromResourceTest {
 
     @Test
     public void simpleSynchronousTest() {
-        MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(10);
+        AssertSubscriber<Integer> subscriber = AssertSubscriber.create(10);
         AtomicInteger cleanup = new AtomicInteger();
         Multi.createFrom().resource(() -> 1, r -> Multi.createFrom().range(r, 11))
                 .withFinalizer(cleanup::set)
@@ -146,8 +146,8 @@ public class MultiFromResourceTest {
 
     @Test
     public void simpleSynchronousTestWithMultipleSubscribers() {
-        MultiAssertSubscriber<Integer> subscriber1 = MultiAssertSubscriber.create(10);
-        MultiAssertSubscriber<Integer> subscriber2 = MultiAssertSubscriber.create(10);
+        AssertSubscriber<Integer> subscriber1 = AssertSubscriber.create(10);
+        AssertSubscriber<Integer> subscriber2 = AssertSubscriber.create(10);
         List<Integer> list = new ArrayList<>();
         AtomicInteger count = new AtomicInteger();
         Multi<Integer> multi = Multi.createFrom().resource(count::incrementAndGet,
@@ -169,7 +169,7 @@ public class MultiFromResourceTest {
 
     @Test
     public void testCleanupCalledOnCompletionWithSynchronousFinalizer() {
-        MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(9);
+        AssertSubscriber<Integer> subscriber = AssertSubscriber.create(9);
         AtomicInteger cleanup = new AtomicInteger();
         Multi.createFrom().resource(() -> 1, r -> Multi.createFrom().range(r, 11))
                 .withFinalizer(cleanup::set)
@@ -186,7 +186,7 @@ public class MultiFromResourceTest {
 
     @Test
     public void testCleanupCalledOnCancellationWithSynchronousFinalizer() {
-        MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(4);
+        AssertSubscriber<Integer> subscriber = AssertSubscriber.create(4);
         AtomicInteger cleanup = new AtomicInteger();
         Multi.createFrom().resource(() -> 1, r -> Multi.createFrom().range(r, 11))
                 .withFinalizer(cleanup::set)
@@ -203,7 +203,7 @@ public class MultiFromResourceTest {
 
     @Test
     public void testCleanupCalledOnFailureWithSynchronousFinalizer() {
-        MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(1);
+        AssertSubscriber<Integer> subscriber = AssertSubscriber.create(1);
         AtomicInteger cleanup = new AtomicInteger();
         Multi.createFrom().resource(() -> 1, r -> Multi.createFrom().<Integer> emitter(e -> {
             e.emit(1).emit(2).fail(new IOException("boom"));
@@ -221,7 +221,7 @@ public class MultiFromResourceTest {
 
     @Test
     public void testThatFinalizerIsNotCalledWhenResourceSupplierThrowsAnException() {
-        MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(1);
+        AssertSubscriber<Integer> subscriber = AssertSubscriber.create(1);
         Supplier<Integer> supplier = () -> {
             throw new IllegalArgumentException("boom");
         };
@@ -238,7 +238,7 @@ public class MultiFromResourceTest {
 
     @Test
     public void testThatFinalizerIsCalledWhenStreamSupplierThrowsAnException() {
-        MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(1);
+        AssertSubscriber<Integer> subscriber = AssertSubscriber.create(1);
         AtomicInteger cleanup = new AtomicInteger();
         Multi.createFrom().<Integer, Integer> resource(() -> 1, s -> {
             throw new IllegalArgumentException("boom");
@@ -252,7 +252,7 @@ public class MultiFromResourceTest {
 
     @Test
     public void testThatFinalizerIsCalledWhenStreamSupplierReturnsNull() {
-        MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(1);
+        AssertSubscriber<Integer> subscriber = AssertSubscriber.create(1);
         AtomicInteger cleanup = new AtomicInteger();
         Multi.createFrom().<Integer, Integer> resource(() -> 1, s -> null)
                 .withFinalizer(cleanup::set)
@@ -264,7 +264,7 @@ public class MultiFromResourceTest {
 
     @Test
     public void testThatFinalizerThrowingException() {
-        MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(20);
+        AssertSubscriber<Integer> subscriber = AssertSubscriber.create(20);
         Consumer<Integer> fin = s -> {
             throw new IllegalStateException("boom");
         };
@@ -279,7 +279,7 @@ public class MultiFromResourceTest {
 
     @Test
     public void testThatFinalizerThrowingExceptionAfterStreamFailure() {
-        MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(20);
+        AssertSubscriber<Integer> subscriber = AssertSubscriber.create(20);
         Consumer<Integer> fin = s -> {
             throw new IllegalStateException("boom");
         };
@@ -298,7 +298,7 @@ public class MultiFromResourceTest {
 
     @Test
     public void testThatOnFailureFinalizerIsNotCallIfResourceSupplierThrowsAnException() {
-        MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(20);
+        AssertSubscriber<Integer> subscriber = AssertSubscriber.create(20);
         Supplier<Integer> supplier = () -> {
             throw new NullPointerException("boom");
         };
@@ -335,7 +335,7 @@ public class MultiFromResourceTest {
 
     @Test
     public void cancellationShouldBePossible() {
-        MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(20);
+        AssertSubscriber<Integer> subscriber = AssertSubscriber.create(20);
         Supplier<Integer> supplier = () -> 1;
         AtomicInteger onFailure = new AtomicInteger();
         AtomicInteger onComplete = new AtomicInteger();
@@ -376,7 +376,7 @@ public class MultiFromResourceTest {
                 .withFinalizer(FakeTransactionalResource::commit, FakeTransactionalResource::rollback,
                         FakeTransactionalResource::cancel);
 
-        multi.subscribe().withSubscriber(MultiAssertSubscriber.create(20))
+        multi.subscribe().withSubscriber(AssertSubscriber.create(20))
                 .assertReceived("in transaction")
                 .assertCompletedSuccessfully();
 
@@ -396,7 +396,7 @@ public class MultiFromResourceTest {
                 .withFinalizer(FakeTransactionalResource::commit, FakeTransactionalResource::rollback,
                         FakeTransactionalResource::cancel);
 
-        multi.subscribe().withSubscriber(MultiAssertSubscriber.create(20))
+        multi.subscribe().withSubscriber(AssertSubscriber.create(20))
                 .assertHasFailedWith(IllegalStateException.class, "boom");
 
         assertThat(resource.subscribed).isFalse();
@@ -414,7 +414,7 @@ public class MultiFromResourceTest {
                 .withFinalizer(FakeTransactionalResource::commit, FakeTransactionalResource::rollback,
                         FakeTransactionalResource::cancel);
 
-        multi.subscribe().withSubscriber(MultiAssertSubscriber.create(20))
+        multi.subscribe().withSubscriber(AssertSubscriber.create(20))
                 .assertHasFailedWith(IllegalArgumentException.class, "`null`");
 
         assertThat(resource.subscribed).isFalse();
@@ -433,7 +433,7 @@ public class MultiFromResourceTest {
                 .withFinalizer(FakeTransactionalResource::commit, FakeTransactionalResource::rollback,
                         FakeTransactionalResource::cancel);
 
-        multi.subscribe().withSubscriber(MultiAssertSubscriber.create(20))
+        multi.subscribe().withSubscriber(AssertSubscriber.create(20))
                 .assertHasFailedWith(IOException.class, "boom");
 
         assertThat(resource.subscribed).isFalse();
@@ -452,7 +452,7 @@ public class MultiFromResourceTest {
                         FakeTransactionalResource::cancel)
                 .transform().byTakingFirstItems(3);
 
-        multi.subscribe().withSubscriber(MultiAssertSubscriber.create(Long.MAX_VALUE))
+        multi.subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE))
                 .await()
                 .assertReceived("0", "1", "2")
                 .assertCompletedSuccessfully();
@@ -472,7 +472,7 @@ public class MultiFromResourceTest {
                         r -> r.cancel().onItem().failWith(x -> new IOException("boom")))
                 .transform().byTakingFirstItems(3);
 
-        multi.subscribe().withSubscriber(MultiAssertSubscriber.create(Long.MAX_VALUE))
+        multi.subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE))
                 .await()
                 .assertReceived("0", "1", "2")
                 .assertCompletedSuccessfully();
@@ -492,7 +492,7 @@ public class MultiFromResourceTest {
                         r -> null)
                 .transform().byTakingFirstItems(3);
 
-        multi.subscribe().withSubscriber(MultiAssertSubscriber.create(Long.MAX_VALUE))
+        multi.subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE))
                 .await()
                 .assertReceived("0", "1", "2")
                 .assertCompletedSuccessfully();
@@ -513,7 +513,7 @@ public class MultiFromResourceTest {
                         FakeTransactionalResource::cancel)
                 .transform().byTakingFirstItems(3);
 
-        multi.subscribe().withSubscriber(MultiAssertSubscriber.create(Long.MAX_VALUE))
+        multi.subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE))
                 .await()
                 .assertReceived("in transaction")
                 .assertHasFailedWith(IOException.class, "boom");
@@ -534,7 +534,7 @@ public class MultiFromResourceTest {
                         FakeTransactionalResource::cancel)
                 .transform().byTakingFirstItems(3);
 
-        multi.subscribe().withSubscriber(MultiAssertSubscriber.create(Long.MAX_VALUE))
+        multi.subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE))
                 .await()
                 .assertReceived("in transaction")
                 .assertHasFailedWith(IOException.class, "commit failed");
@@ -556,7 +556,7 @@ public class MultiFromResourceTest {
                         FakeTransactionalResource::cancel)
                 .transform().byTakingFirstItems(3);
 
-        multi.subscribe().withSubscriber(MultiAssertSubscriber.create(Long.MAX_VALUE))
+        multi.subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE))
                 .await()
                 .assertReceived("in transaction")
                 .assertHasFailedWith(NullPointerException.class, "`null`");
@@ -576,7 +576,7 @@ public class MultiFromResourceTest {
                 .withFinalizer(FakeTransactionalResource::commit, FakeTransactionalResource::rollbackFailure,
                         FakeTransactionalResource::cancel);
 
-        multi.subscribe().withSubscriber(MultiAssertSubscriber.create(20))
+        multi.subscribe().withSubscriber(AssertSubscriber.create(20))
                 .await()
                 .assertHasFailedWith(CompositeException.class, "boom")
                 .assertHasFailedWith(CompositeException.class, "rollback failed");
@@ -597,7 +597,7 @@ public class MultiFromResourceTest {
                 .withFinalizer(FakeTransactionalResource::commit, FakeTransactionalResource::rollbackReturningNull,
                         FakeTransactionalResource::cancel);
 
-        multi.subscribe().withSubscriber(MultiAssertSubscriber.create(20))
+        multi.subscribe().withSubscriber(AssertSubscriber.create(20))
                 .await()
                 .assertHasFailedWith(CompositeException.class, "boom")
                 .assertHasFailedWith(CompositeException.class, "`null`");
@@ -619,7 +619,7 @@ public class MultiFromResourceTest {
                             .onSubscribe().invoke(s -> subscribed.set(true))
                             .onItem().ignore().andContinueWithNull();
                 });
-        multi.subscribe().withSubscriber(MultiAssertSubscriber.create(20))
+        multi.subscribe().withSubscriber(AssertSubscriber.create(20))
                 .assertCompletedSuccessfully()
                 .assertReceived(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
         assertThat(subscribed).isTrue();
@@ -635,7 +635,7 @@ public class MultiFromResourceTest {
                             .onSubscribe().invoke(s -> subscribed.set(true))
                             .onItem().ignore().andContinueWithNull();
                 });
-        multi.subscribe().withSubscriber(MultiAssertSubscriber.create(20))
+        multi.subscribe().withSubscriber(AssertSubscriber.create(20))
                 .assertHasFailedWith(IOException.class, "boom")
                 .assertReceived(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
         assertThat(subscribed).isTrue();
@@ -652,7 +652,7 @@ public class MultiFromResourceTest {
                             .onItem().ignore().andContinueWithNull();
                 })
                 .transform().byTakingFirstItems(5);
-        multi.subscribe().withSubscriber(MultiAssertSubscriber.create(20))
+        multi.subscribe().withSubscriber(AssertSubscriber.create(20))
                 .await()
                 .assertCompletedSuccessfully()
                 .assertReceived(0L, 1L, 2L, 3L, 4L);
@@ -662,7 +662,7 @@ public class MultiFromResourceTest {
     @Test
     public void testThatOnCancellationIsNotCalledAfterCompletion() {
         FakeTransactionalResource resource = new FakeTransactionalResource();
-        MultiAssertSubscriber<String> subscriber = MultiAssertSubscriber.create(4);
+        AssertSubscriber<String> subscriber = AssertSubscriber.create(4);
         Multi.createFrom().resource(() -> resource, FakeTransactionalResource::data)
                 .withFinalizer(
                         FakeTransactionalResource::commit,
@@ -682,7 +682,7 @@ public class MultiFromResourceTest {
     @Test
     public void testThatOnCancellationIsNotCalledAfterFailure() {
         FakeTransactionalResource resource = new FakeTransactionalResource();
-        MultiAssertSubscriber<String> subscriber = MultiAssertSubscriber.create(4);
+        AssertSubscriber<String> subscriber = AssertSubscriber.create(4);
         Multi.createFrom().resource(() -> resource, r -> r.data().onCompletion().failWith(new IOException("boom")))
                 .withFinalizer(
                         FakeTransactionalResource::commit,

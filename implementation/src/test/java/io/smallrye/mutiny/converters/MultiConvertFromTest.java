@@ -6,7 +6,7 @@ import org.testng.annotations.Test;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.converters.multi.BuiltinConverters;
-import io.smallrye.mutiny.test.MultiAssertSubscriber;
+import io.smallrye.mutiny.test.AssertSubscriber;
 
 public class MultiConvertFromTest {
 
@@ -14,10 +14,10 @@ public class MultiConvertFromTest {
     public void testCreatingFromCompletionStageWithValue() {
         CompletableFuture<Integer> valued = CompletableFuture.completedFuture(1);
 
-        MultiAssertSubscriber<Integer> subscriber = Multi.createFrom()
+        AssertSubscriber<Integer> subscriber = Multi.createFrom()
                 .completionStage(valued)
                 .subscribe()
-                .withSubscriber(MultiAssertSubscriber.create(1));
+                .withSubscriber(AssertSubscriber.create(1));
 
         subscriber.assertCompletedSuccessfully().assertReceived(1);
     }
@@ -26,10 +26,10 @@ public class MultiConvertFromTest {
     public void testCreatingFromCompletionStageWithEmpty() {
         CompletableFuture<Void> empty = CompletableFuture.completedFuture(null);
 
-        MultiAssertSubscriber<Void> subscriber = Multi.createFrom()
+        AssertSubscriber<Void> subscriber = Multi.createFrom()
                 .converter(BuiltinConverters.fromCompletionStage(), empty)
                 .subscribe()
-                .withSubscriber(MultiAssertSubscriber.create(1));
+                .withSubscriber(AssertSubscriber.create(1));
 
         Multi.createFrom().completionStage(empty);
 
@@ -41,10 +41,10 @@ public class MultiConvertFromTest {
         CompletableFuture<Void> boom = new CompletableFuture<>();
         boom.completeExceptionally(new Exception("boom"));
 
-        MultiAssertSubscriber<Void> subscriber = Multi.createFrom()
+        AssertSubscriber<Void> subscriber = Multi.createFrom()
                 .converter(BuiltinConverters.fromCompletionStage(), boom)
                 .subscribe()
-                .withSubscriber(MultiAssertSubscriber.create(1));
+                .withSubscriber(AssertSubscriber.create(1));
 
         subscriber.assertHasFailedWith(Exception.class, "boom");
     }

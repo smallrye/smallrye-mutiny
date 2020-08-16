@@ -9,30 +9,30 @@ import org.testng.annotations.Test;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
-import io.smallrye.mutiny.test.MultiAssertSubscriber;
+import io.smallrye.mutiny.test.AssertSubscriber;
 
 public class MultiOnRequestTest {
 
     @Test
     public void testInvoke() {
-        MultiAssertSubscriber<Integer> ts = MultiAssertSubscriber.create();
+        AssertSubscriber<Integer> subscriber = AssertSubscriber.create();
 
         AtomicLong requested = new AtomicLong();
 
         Multi.createFrom().item(1)
                 .onRequest().invoke(requested::set)
-                .subscribe().withSubscriber(ts);
+                .subscribe().withSubscriber(subscriber);
 
-        ts.request(10);
+        subscriber.request(10);
 
-        ts.assertCompletedSuccessfully();
-        assertThat(ts.items()).containsExactly(1);
+        subscriber.assertCompletedSuccessfully();
+        assertThat(subscriber.items()).containsExactly(1);
         assertThat(requested.get()).isEqualTo(10);
     }
 
     @Test
     public void testInvokeThrowingException() {
-        MultiAssertSubscriber<Integer> ts = MultiAssertSubscriber.create();
+        AssertSubscriber<Integer> subscriber = AssertSubscriber.create();
 
         AtomicLong requested = new AtomicLong();
 
@@ -41,17 +41,17 @@ public class MultiOnRequestTest {
                     requested.set(count);
                     throw new RuntimeException("woops");
                 })
-                .subscribe().withSubscriber(ts);
+                .subscribe().withSubscriber(subscriber);
 
-        ts.request(10);
-        ts.assertHasFailedWith(RuntimeException.class, "woops");
-        ts.assertHasNotReceivedAnyItem();
+        subscriber.request(10);
+        subscriber.assertHasFailedWith(RuntimeException.class, "woops");
+        subscriber.assertHasNotReceivedAnyItem();
         assertThat(requested.get()).isEqualTo(10);
     }
 
     @Test
     public void testInvokeUni() {
-        MultiAssertSubscriber<Integer> ts = MultiAssertSubscriber.create();
+        AssertSubscriber<Integer> subscriber = AssertSubscriber.create();
 
         AtomicLong requested = new AtomicLong();
 
@@ -60,18 +60,18 @@ public class MultiOnRequestTest {
                     requested.set(count);
                     return Uni.createFrom().item("ok");
                 })
-                .subscribe().withSubscriber(ts);
+                .subscribe().withSubscriber(subscriber);
 
-        ts.request(10);
+        subscriber.request(10);
 
-        ts.assertCompletedSuccessfully();
-        assertThat(ts.items()).containsExactly(1);
+        subscriber.assertCompletedSuccessfully();
+        assertThat(subscriber.items()).containsExactly(1);
         assertThat(requested.get()).isEqualTo(10);
     }
 
     @Test
     public void testInvokeUniError() {
-        MultiAssertSubscriber<Integer> ts = MultiAssertSubscriber.create();
+        AssertSubscriber<Integer> subscriber = AssertSubscriber.create();
 
         AtomicLong requested = new AtomicLong();
 
@@ -80,19 +80,19 @@ public class MultiOnRequestTest {
                     requested.set(count);
                     return Uni.createFrom().failure(new RuntimeException("woops"));
                 })
-                .subscribe().withSubscriber(ts);
+                .subscribe().withSubscriber(subscriber);
 
-        ts.request(10);
+        subscriber.request(10);
 
-        ts.request(10);
-        ts.assertHasFailedWith(RuntimeException.class, "woops");
-        ts.assertHasNotReceivedAnyItem();
+        subscriber.request(10);
+        subscriber.assertHasFailedWith(RuntimeException.class, "woops");
+        subscriber.assertHasNotReceivedAnyItem();
         assertThat(requested.get()).isEqualTo(10);
     }
 
     @Test
     public void testInvokeUniThrowingException() {
-        MultiAssertSubscriber<Integer> ts = MultiAssertSubscriber.create();
+        AssertSubscriber<Integer> subscriber = AssertSubscriber.create();
 
         AtomicLong requested = new AtomicLong();
 
@@ -101,19 +101,19 @@ public class MultiOnRequestTest {
                     requested.set(count);
                     throw new RuntimeException("woops");
                 })
-                .subscribe().withSubscriber(ts);
+                .subscribe().withSubscriber(subscriber);
 
-        ts.request(10);
+        subscriber.request(10);
 
-        ts.request(10);
-        ts.assertHasFailedWith(RuntimeException.class, "woops");
-        ts.assertHasNotReceivedAnyItem();
+        subscriber.request(10);
+        subscriber.assertHasFailedWith(RuntimeException.class, "woops");
+        subscriber.assertHasNotReceivedAnyItem();
         assertThat(requested.get()).isEqualTo(10);
     }
 
     @Test
     public void testInvokeUniAndCancellation() {
-        MultiAssertSubscriber<Object> ts = MultiAssertSubscriber.create();
+        AssertSubscriber<Object> subscriber = AssertSubscriber.create();
 
         AtomicLong requested = new AtomicLong();
         AtomicBoolean cancellation = new AtomicBoolean();
@@ -127,13 +127,13 @@ public class MultiOnRequestTest {
                         // Do nothing
                     })
                             .onCancellation().invoke(() -> cancellation.set(true));
-                }).subscribe().withSubscriber(ts);
+                }).subscribe().withSubscriber(subscriber);
 
-        ts.request(10);
-        ts.cancel();
+        subscriber.request(10);
+        subscriber.cancel();
 
-        ts.assertHasNotCompleted();
-        ts.assertHasNotReceivedAnyItem();
+        subscriber.assertHasNotCompleted();
+        subscriber.assertHasNotReceivedAnyItem();
         assertThat(requested.get()).isEqualTo(10);
         assertThat(cancellation.get()).isTrue();
     }

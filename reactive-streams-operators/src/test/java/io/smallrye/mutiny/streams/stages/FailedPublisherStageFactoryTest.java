@@ -3,7 +3,7 @@ package io.smallrye.mutiny.streams.stages;
 import org.junit.Test;
 
 import io.smallrye.mutiny.streams.operators.PublisherStage;
-import io.smallrye.mutiny.test.MultiAssertSubscriber;
+import io.smallrye.mutiny.test.AssertSubscriber;
 
 /**
  * Checks the behavior of {@link FailedPublisherStageFactory}.
@@ -18,7 +18,7 @@ public class FailedPublisherStageFactoryTest extends StageTestBase {
     public void createWithError() {
         Exception failure = new Exception("Boom");
         PublisherStage<Object> boom = factory.create(null, () -> failure);
-        boom.get().subscribe().withSubscriber(MultiAssertSubscriber.create())
+        boom.get().subscribe().withSubscriber(AssertSubscriber.create())
                 .assertHasFailedWith(Exception.class, "Boom");
     }
 

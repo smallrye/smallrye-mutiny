@@ -10,13 +10,13 @@ import org.testng.annotations.Test;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
-import io.smallrye.mutiny.test.MultiAssertSubscriber;
+import io.smallrye.mutiny.test.AssertSubscriber;
 
 public class MultiOnCancellationInvokeUniTest {
 
     @Test
     public void testCancellationWithNoRequestedItem() {
-        MultiAssertSubscriber<Integer> ts = MultiAssertSubscriber.create();
+        AssertSubscriber<Integer> subscriber = AssertSubscriber.create();
 
         AtomicReference<Integer> item = new AtomicReference<>();
         AtomicBoolean cancellation = new AtomicBoolean();
@@ -27,9 +27,9 @@ public class MultiOnCancellationInvokeUniTest {
                     cancellation.set(true);
                     return Uni.createFrom().item("value");
                 })
-                .subscribe().withSubscriber(ts);
+                .subscribe().withSubscriber(subscriber);
 
-        ts.cancel()
+        subscriber.cancel()
                 .assertHasNotReceivedAnyItem()
                 .assertHasNotCompleted();
 
@@ -39,7 +39,7 @@ public class MultiOnCancellationInvokeUniTest {
 
     @Test
     public void testCancellationWithNoRequestedItemAndFailedUni() {
-        MultiAssertSubscriber<Integer> ts = MultiAssertSubscriber.create();
+        AssertSubscriber<Integer> subscriber = AssertSubscriber.create();
 
         AtomicReference<Integer> item = new AtomicReference<>();
         AtomicBoolean cancellation = new AtomicBoolean();
@@ -50,9 +50,9 @@ public class MultiOnCancellationInvokeUniTest {
                     cancellation.set(true);
                     return Uni.createFrom().failure(new RuntimeException("bam"));
                 })
-                .subscribe().withSubscriber(ts);
+                .subscribe().withSubscriber(subscriber);
 
-        ts.cancel()
+        subscriber.cancel()
                 .assertHasNotReceivedAnyItem()
                 .assertHasNotCompleted();
 
@@ -62,7 +62,7 @@ public class MultiOnCancellationInvokeUniTest {
 
     @Test
     public void testCancellationWithNoRequestedItemAndThrowingInvokeUni() {
-        MultiAssertSubscriber<Integer> ts = MultiAssertSubscriber.create();
+        AssertSubscriber<Integer> subscriber = AssertSubscriber.create();
 
         AtomicReference<Integer> item = new AtomicReference<>();
         AtomicBoolean cancellation = new AtomicBoolean();
@@ -73,9 +73,9 @@ public class MultiOnCancellationInvokeUniTest {
                     cancellation.set(true);
                     throw new RuntimeException("bam");
                 })
-                .subscribe().withSubscriber(ts);
+                .subscribe().withSubscriber(subscriber);
 
-        ts.cancel()
+        subscriber.cancel()
                 .assertHasNotReceivedAnyItem()
                 .assertHasNotCompleted();
 
@@ -85,7 +85,7 @@ public class MultiOnCancellationInvokeUniTest {
 
     @Test
     public void testCancellationAfterOneItem() {
-        MultiAssertSubscriber<Object> ts = MultiAssertSubscriber.create();
+        AssertSubscriber<Object> subscriber = AssertSubscriber.create();
 
         AtomicReference<Object> item = new AtomicReference<>();
         AtomicBoolean cancellation = new AtomicBoolean();
@@ -100,22 +100,22 @@ public class MultiOnCancellationInvokeUniTest {
                     cancellation.set(true);
                     return Uni.createFrom().item("value");
                 })
-                .subscribe().withSubscriber(ts);
+                .subscribe().withSubscriber(subscriber);
 
-        ts.request(10);
+        subscriber.request(10);
 
         assertThat(item.get()).isEqualTo(1);
         assertThat(cancellation.get()).isFalse();
         assertThat(counter.get()).isEqualTo(0);
 
-        ts.cancel()
+        subscriber.cancel()
                 .assertHasNotCompleted()
                 .assertHasNotFailed();
 
         assertThat(cancellation.get()).isTrue();
         assertThat(counter.get()).isEqualTo(1);
 
-        ts.cancel();
+        subscriber.cancel();
         assertThat(counter.get()).isEqualTo(1);
     }
 }

@@ -14,7 +14,7 @@ import java.util.function.Function;
 import org.testng.annotations.Test;
 
 import io.smallrye.mutiny.Multi;
-import io.smallrye.mutiny.test.MultiAssertSubscriber;
+import io.smallrye.mutiny.test.AssertSubscriber;
 import io.smallrye.mutiny.tuples.Functions;
 import io.smallrye.mutiny.tuples.Tuple2;
 import io.smallrye.mutiny.tuples.Tuple3;
@@ -39,7 +39,7 @@ public class MultiCombineTest {
                 .flatMap(l -> Multi.createFrom().iterable(l))
                 .onItem().castTo(Integer.class);
 
-        combined.subscribe().withSubscriber(MultiAssertSubscriber.create(10))
+        combined.subscribe().withSubscriber(AssertSubscriber.create(10))
                 .assertCompletedSuccessfully()
                 .assertReceived(1, 2, 3, 4);
     }
@@ -185,9 +185,9 @@ public class MultiCombineTest {
     @Test
     public void testCombinationWithBackPressure() {
         Multi<Integer> stream = Multi.createFrom().range(1, 5);
-        MultiAssertSubscriber<Integer> subscriber = Multi.createBy().combining().streams(stream, stream)
+        AssertSubscriber<Integer> subscriber = Multi.createBy().combining().streams(stream, stream)
                 .using(Integer::sum)
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(0));
+                .subscribe().withSubscriber(AssertSubscriber.create(0));
 
         subscriber.assertNotTerminated().assertHasNotReceivedAnyItem();
 
@@ -240,14 +240,14 @@ public class MultiCombineTest {
         Multi.createBy().combining()
                 .streams(Multi.createFrom().<Integer> empty(), Multi.createFrom().range(1, 2_000_000))
                 .using(Integer::sum)
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(1))
+                .subscribe().withSubscriber(AssertSubscriber.create(1))
                 .assertCompletedSuccessfully()
                 .assertHasNotReceivedAnyItem();
 
         Multi.createBy().combining()
                 .streams(Multi.createFrom().range(1, 2_000_000), Multi.createFrom().<Integer> empty())
                 .using(Integer::sum)
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(1))
+                .subscribe().withSubscriber(AssertSubscriber.create(1))
                 .assertCompletedSuccessfully()
                 .assertHasNotReceivedAnyItem();
     }
@@ -256,7 +256,7 @@ public class MultiCombineTest {
     public void testCombiningASingleStreamUsingIterable() {
         Multi.createBy().combining().streams(Collections.singletonList(Multi.createFrom().item(1))).using(l -> l.get(0))
                 .onItem().castTo(Integer.class)
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(1))
+                .subscribe().withSubscriber(AssertSubscriber.create(1))
                 .assertCompletedSuccessfully()
                 .assertReceived(1);
     }
@@ -265,7 +265,7 @@ public class MultiCombineTest {
     public void testCombiningASingleEmptyStreamUsingIterable() {
         Multi.createBy().combining().streams(Collections.singletonList(Multi.createFrom().empty())).using(l -> l.get(0))
                 .onItem().castTo(Integer.class)
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(1))
+                .subscribe().withSubscriber(AssertSubscriber.create(1))
                 .assertCompletedSuccessfully()
                 .assertHasNotReceivedAnyItem();
     }
@@ -321,7 +321,7 @@ public class MultiCombineTest {
         Multi<Integer> multi = Multi.createFrom().item(1);
 
         Multi.createBy().combining().streams(multi, multi).using((i, j) -> null)
-                .subscribe().withSubscriber(new MultiAssertSubscriber<>(2))
+                .subscribe().withSubscriber(new AssertSubscriber<>(2))
                 .assertHasFailedWith(NullPointerException.class, "");
     }
 
@@ -332,7 +332,7 @@ public class MultiCombineTest {
         Multi.createBy().combining().streams(multi, multi).using((i, j) -> {
             throw new IllegalArgumentException("boom");
         })
-                .subscribe().withSubscriber(new MultiAssertSubscriber<>(2))
+                .subscribe().withSubscriber(new AssertSubscriber<>(2))
                 .assertHasFailedWith(IllegalArgumentException.class, "boom");
     }
 
@@ -342,7 +342,7 @@ public class MultiCombineTest {
         Multi<Integer> multi2 = Multi.createFrom().emitter(e -> e.emit(1).fail(new IOException("boom")));
 
         Multi.createBy().combining().streams(multi, multi2).asTuple()
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(3))
+                .subscribe().withSubscriber(AssertSubscriber.create(3))
                 .assertHasFailedWith(IOException.class, "boom")
                 .assertReceived(Tuple2.of(1, 1));
     }
@@ -354,7 +354,7 @@ public class MultiCombineTest {
         Multi<Integer> multi3 = Multi.createFrom().emitter(e -> e.emit(1).emit(2).fail(new IOException("boom")));
 
         Multi.createBy().combining().streams(multi, multi2, multi, multi3).collectFailures().asTuple()
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(3))
+                .subscribe().withSubscriber(AssertSubscriber.create(3))
                 .assertHasFailedWith(IOException.class, "boom")
                 .assertReceived(Tuple4.of(1, 1, 1, 1));
     }
@@ -376,7 +376,7 @@ public class MultiCombineTest {
 
         Multi.createBy().combining().streams(Arrays.asList(stream, stream2))
                 .using(l -> (Integer) l.get(0) + (Integer) l.get(1))
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(4))
+                .subscribe().withSubscriber(AssertSubscriber.create(4))
                 .assertCompletedSuccessfully()
                 .assertReceived(2, 4, 6, 8);
     }
@@ -388,7 +388,7 @@ public class MultiCombineTest {
 
         Multi.createBy().combining().streams(Arrays.asList(stream, stream2))
                 .using(l -> (Integer) l.get(0) + (Integer) l.get(1))
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(4))
+                .subscribe().withSubscriber(AssertSubscriber.create(4))
                 .assertCompletedSuccessfully()
                 .assertReceived(2, 4, 6);
     }
@@ -400,7 +400,7 @@ public class MultiCombineTest {
 
         Multi.createBy().combining().streams(Arrays.asList(stream, stream2))
                 .using(l -> (Integer) l.get(0) + (Integer) l.get(1))
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(4))
+                .subscribe().withSubscriber(AssertSubscriber.create(4))
                 .assertCompletedSuccessfully()
                 .assertReceived(2, 4, 6);
     }
@@ -412,7 +412,7 @@ public class MultiCombineTest {
 
         Multi.createBy().combining().streams(Arrays.asList(stream, stream2, Multi.createFrom().empty()))
                 .using(l -> (Integer) l.get(0) + (Integer) l.get(1))
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(4))
+                .subscribe().withSubscriber(AssertSubscriber.create(4))
                 .assertCompletedSuccessfully()
                 .assertHasNotReceivedAnyItem();
     }
@@ -422,7 +422,7 @@ public class MultiCombineTest {
         Multi<Integer> stream = Multi.createFrom().items(1, 2, 3, 4);
         Multi<Integer> stream2 = Multi.createFrom().items(1, 2, 3);
         Multi.createBy().combining().streams(stream, stream2).latestItems().using((a, b) -> null)
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(4))
+                .subscribe().withSubscriber(AssertSubscriber.create(4))
                 .assertHasFailedWith(NullPointerException.class, "");
     }
 
@@ -433,7 +433,7 @@ public class MultiCombineTest {
         Multi.createBy().combining().streams(stream, stream2).latestItems().using((a, b) -> {
             throw new IllegalStateException("boom");
         })
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(4))
+                .subscribe().withSubscriber(AssertSubscriber.create(4))
                 .assertHasFailedWith(IllegalStateException.class, "boom");
     }
 
@@ -441,7 +441,7 @@ public class MultiCombineTest {
     public void testCombineLatestWithFailingStream() {
         Multi<Integer> stream = Multi.createFrom().failure(new IOException("boom"));
         Multi.createBy().combining().streams(stream, Multi.createFrom().nothing()).latestItems().using((a, b) -> null)
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(4))
+                .subscribe().withSubscriber(AssertSubscriber.create(4))
                 .assertHasFailedWith(IOException.class, "boom");
     }
 

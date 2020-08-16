@@ -14,21 +14,21 @@ import org.testng.annotations.Test;
 import io.reactivex.Flowable;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
-import io.smallrye.mutiny.test.MultiAssertSubscriber;
+import io.smallrye.mutiny.test.AssertSubscriber;
 
 public class MultiFlattenTest {
 
     @Test
     public void testWithMultis() {
         AtomicBoolean subscribed = new AtomicBoolean();
-        MultiAssertSubscriber<String> subscriber = Multi.createFrom().items(
+        AssertSubscriber<String> subscriber = Multi.createFrom().items(
                 Multi.createFrom().items("a", "b", "c"),
                 Multi.createFrom().items("d", "e"),
                 Multi.createFrom().empty(),
                 Multi.createFrom().items("f", "g")
                         .onSubscribe().invoke(s -> subscribed.set(true)))
                 .onItem().<String> disjoint()
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(4));
+                .subscribe().withSubscriber(AssertSubscriber.create(4));
         assertThat(subscribed).isFalse();
         subscriber.assertReceived("a", "b", "c", "d");
         subscriber.request(3);
@@ -40,14 +40,14 @@ public class MultiFlattenTest {
     @Test
     public void testWithPublishers() {
         AtomicBoolean subscribed = new AtomicBoolean();
-        MultiAssertSubscriber<String> subscriber = Multi.createFrom().items(
+        AssertSubscriber<String> subscriber = Multi.createFrom().items(
                 Flowable.just("a", "b", "c"),
                 Flowable.just("d", "e"),
                 Flowable.empty(),
                 Flowable.just("f", "g")
                         .doOnSubscribe(s -> subscribed.set(true)))
                 .onItem().<String> disjoint()
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(4));
+                .subscribe().withSubscriber(AssertSubscriber.create(4));
         assertThat(subscribed).isFalse();
         subscriber.assertReceived("a", "b", "c", "d");
         subscriber.request(3);
@@ -58,13 +58,13 @@ public class MultiFlattenTest {
 
     @Test
     public void testWithArrays() {
-        MultiAssertSubscriber<String> subscriber = Multi.createFrom().items(
+        AssertSubscriber<String> subscriber = Multi.createFrom().items(
                 new String[] { "a", "b", "c" },
                 new String[] { "d", "e" },
                 new String[] {},
                 new String[] { "f", "g" })
                 .onItem().<String> disjoint()
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(4));
+                .subscribe().withSubscriber(AssertSubscriber.create(4));
         subscriber.assertReceived("a", "b", "c", "d");
         subscriber.request(3);
         subscriber.assertCompletedSuccessfully();
@@ -73,14 +73,14 @@ public class MultiFlattenTest {
 
     @Test
     public void testWithIterables() {
-        MultiAssertSubscriber<String> subscriber = Multi.createFrom().items(
+        AssertSubscriber<String> subscriber = Multi.createFrom().items(
                 Arrays.asList("a", "b", "c"),
                 Arrays.asList("d", "e"),
                 Collections.emptySet(),
                 Collections.singleton("f"),
                 Collections.singleton("g"))
                 .onItem().<String> disjoint()
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(4));
+                .subscribe().withSubscriber(AssertSubscriber.create(4));
         subscriber.assertReceived("a", "b", "c", "d");
         subscriber.request(3);
         subscriber.assertCompletedSuccessfully();
@@ -90,14 +90,14 @@ public class MultiFlattenTest {
     @Test
     public void testWithMultisWithAFailure() {
         AtomicBoolean subscribed = new AtomicBoolean();
-        MultiAssertSubscriber<String> subscriber = Multi.createFrom().items(
+        AssertSubscriber<String> subscriber = Multi.createFrom().items(
                 Multi.createFrom().items("a", "b", "c"),
                 Multi.createFrom().items("d", "e"),
                 Multi.createFrom().failure(new IOException("boom")),
                 Multi.createFrom().items("f", "g")
                         .onSubscribe().invoke(s -> subscribed.set(true)))
                 .onItem().<String> disjoint()
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(4));
+                .subscribe().withSubscriber(AssertSubscriber.create(4));
         assertThat(subscribed).isFalse();
         subscriber.assertReceived("a", "b", "c", "d");
         subscriber.request(3);
@@ -108,7 +108,7 @@ public class MultiFlattenTest {
     @Test
     public void testWithMultisWithOneEmittingAFailure() {
         AtomicBoolean subscribed = new AtomicBoolean();
-        MultiAssertSubscriber<String> subscriber = Multi.createFrom().items(
+        AssertSubscriber<String> subscriber = Multi.createFrom().items(
                 Multi.createFrom().items("a", "b", "c"),
                 Multi.createFrom().items("d", "e"),
                 Multi.createFrom().emitter(e -> {
@@ -118,7 +118,7 @@ public class MultiFlattenTest {
                 Multi.createFrom().items("g")
                         .onSubscribe().invoke(s -> subscribed.set(true)))
                 .onItem().<String> disjoint()
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(4));
+                .subscribe().withSubscriber(AssertSubscriber.create(4));
         assertThat(subscribed).isFalse();
         subscriber.assertReceived("a", "b", "c", "d");
         subscriber.request(3);
@@ -128,14 +128,14 @@ public class MultiFlattenTest {
 
     @Test
     public void testWithIterablesContainingNull() {
-        MultiAssertSubscriber<String> subscriber = Multi.createFrom().items(
+        AssertSubscriber<String> subscriber = Multi.createFrom().items(
                 Arrays.asList("a", "b", "c"),
                 Arrays.asList("d", "e"),
                 Collections.emptySet(),
                 Collections.singleton(null),
                 Collections.singleton("g"))
                 .onItem().<String> disjoint()
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(4));
+                .subscribe().withSubscriber(AssertSubscriber.create(4));
         subscriber.assertReceived("a", "b", "c", "d");
         subscriber.request(3);
         subscriber.assertHasFailedWith(NullPointerException.class, "");
@@ -145,17 +145,17 @@ public class MultiFlattenTest {
     public void testWithInvalidType() {
         Multi.createFrom().items("a", "b", "c")
                 .onItem().disjoint()
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(2))
+                .subscribe().withSubscriber(AssertSubscriber.create(2))
                 .assertHasFailedWith(IllegalArgumentException.class, "String");
     }
 
     @Test
     public void testFlatMapRequestsWithEmissionOnExecutor() {
-        MultiAssertSubscriber<String> subscriber = Multi.createFrom().items("a", "b", "c", "d", "e", "f", "g", "h")
+        AssertSubscriber<String> subscriber = Multi.createFrom().items("a", "b", "c", "d", "e", "f", "g", "h")
                 .onItem()
                 .transformToUni(s -> Uni.createFrom().item(s.toUpperCase()).onItem().delayIt().by(Duration.ofMillis(10)))
                 .concatenate()
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(0));
+                .subscribe().withSubscriber(AssertSubscriber.create(0));
 
         subscriber
                 .assertSubscribed()

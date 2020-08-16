@@ -13,41 +13,96 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
-@SuppressWarnings("SubscriberImplementation")
-public class MultiAssertSubscriber<T> implements Subscriber<T> {
+@SuppressWarnings({ "ReactiveStreamsSubscriberImplementation" })
+public class AssertSubscriber<T> implements Subscriber<T> {
 
+    /**
+     * Latch waiting for the completion of failure event.
+     */
     private final CountDownLatch latch = new CountDownLatch(1);
 
-    private AtomicReference<Subscription> subscription = new AtomicReference<>();
+    /**
+     * The subscription received from upstream.
+     */
+    private final AtomicReference<Subscription> subscription = new AtomicReference<>();
 
-    private AtomicLong requested = new AtomicLong();
+    /**
+     * The number of requested items.
+     */
+    private final AtomicLong requested = new AtomicLong();
 
-    private List<T> items = new CopyOnWriteArrayList<>();
-    private List<Throwable> failures = new CopyOnWriteArrayList<>();
+    /**
+     * The received items.
+     */
+    private final List<T> items = new CopyOnWriteArrayList<>();
 
+    /**
+     * The received failures.
+     * Reactive Streams compliant upstream should only send one failure.
+     */
+    private final List<Throwable> failures = new CopyOnWriteArrayList<>();
+
+    /**
+     * A subscriber on which we delegate the events.
+     * Useful to verify which method is called.
+     */
+    private final Subscriber<T> spy;
+
+    /**
+     * Number of subscription received from upstream.
+     * Reactive Streams compliant upstream should only send one subscription.
+     */
     private int numberOfSubscription = 0;
 
+    /**
+     * Number of completion events.
+     * Reactive Streams compliant upstream should only send one subscription.
+     */
     private int numberOfCompletionEvents = 0;
-    private boolean upfrontCancellation;
 
-    public MultiAssertSubscriber(long requested, boolean cancelled) {
-        this.requested.set(requested);
-        upfrontCancellation = cancelled;
+    /**
+     * Whether or not the subscriber should cancel the subscription as soon as it receives it.
+     * In this case, no request will be made.
+     */
+    private final boolean upfrontCancellation;
+
+    /**
+     * Whether the subscription has been cancelled.
+     * This field is set to {@code true} when the subscriber calls {@code cancel} on the subscription.
+     */
+    private boolean cancelled;
+
+    public AssertSubscriber(long requested, boolean cancelled) {
+        this(null, requested, cancelled);
     }
 
-    public MultiAssertSubscriber(long requested) {
+    public AssertSubscriber(Subscriber<T> spy, long requested, boolean cancelled) {
+        this.requested.set(requested);
+        this.upfrontCancellation = cancelled;
+        this.spy = spy;
+    }
+
+    public AssertSubscriber(Subscriber<T> spy) {
+        this(spy, 0, false);
+    }
+
+    public AssertSubscriber(long requested) {
         this(requested, false);
     }
 
-    public static <T> MultiAssertSubscriber<T> create() {
-        return new MultiAssertSubscriber<>(0);
+    public static <T> AssertSubscriber<T> create() {
+        return new AssertSubscriber<>(0);
     }
 
-    public static <T> MultiAssertSubscriber<T> create(long requested) {
-        return new MultiAssertSubscriber<>(requested);
+    public static <T> AssertSubscriber<T> create(long requested) {
+        return new AssertSubscriber<>(requested);
     }
 
-    public MultiAssertSubscriber<T> assertCompletedSuccessfully() {
+    public static <T> AssertSubscriber<T> create(Subscriber<T> spy) {
+        return new AssertSubscriber<>(spy);
+    }
+
+    public AssertSubscriber<T> assertCompletedSuccessfully() {
         assertHasNotFailed();
         int num = numberOfCompletionEvents;
         if (num == 0) {
@@ -59,7 +114,7 @@ public class MultiAssertSubscriber<T> implements Subscriber<T> {
         return this;
     }
 
-    public MultiAssertSubscriber<T> assertHasFailedWith(Class<? extends Throwable> typeOfException, String message) {
+    public AssertSubscriber<T> assertHasFailedWith(Class<? extends Throwable> typeOfException, String message) {
         assertHasNotCompleted();
         int count = failures.size();
         if (count == 0) {
@@ -78,48 +133,48 @@ public class MultiAssertSubscriber<T> implements Subscriber<T> {
         return this;
     }
 
-    public MultiAssertSubscriber<T> assertHasNotFailed() {
+    public AssertSubscriber<T> assertHasNotFailed() {
         assertThat(failures).hasSize(0);
         return this;
     }
 
-    public MultiAssertSubscriber<T> assertHasNotReceivedAnyItem() {
+    public AssertSubscriber<T> assertHasNotReceivedAnyItem() {
         assertThat(items).isEmpty();
         return this;
     }
 
-    public MultiAssertSubscriber<T> assertHasNotCompleted() {
+    public AssertSubscriber<T> assertHasNotCompleted() {
         assertThat(numberOfCompletionEvents).isEqualTo(0);
         return this;
     }
 
-    public MultiAssertSubscriber<T> assertSubscribed() {
+    public AssertSubscriber<T> assertSubscribed() {
         assertThat(numberOfSubscription).isEqualTo(1);
         return this;
     }
 
-    public MultiAssertSubscriber<T> assertNotSubscribed() {
+    public AssertSubscriber<T> assertNotSubscribed() {
         assertThat(numberOfSubscription).isEqualTo(0);
         return this;
     }
 
-    public MultiAssertSubscriber<T> assertTerminated() {
+    public AssertSubscriber<T> assertTerminated() {
         assertThat(latch.getCount()).isEqualTo(0);
         return this;
     }
 
-    public MultiAssertSubscriber<T> assertNotTerminated() {
-        assertThat(latch.getCount()).as("Multi did not complete yet").isGreaterThan(0);
+    public AssertSubscriber<T> assertNotTerminated() {
+        assertThat(latch.getCount()).as("Multi did already complete").isGreaterThan(0);
         return this;
     }
 
     @SafeVarargs
-    public final MultiAssertSubscriber<T> assertReceived(T... expected) {
+    public final AssertSubscriber<T> assertReceived(T... expected) {
         assertThat(items).containsExactly(expected);
         return this;
     }
 
-    public MultiAssertSubscriber<T> await() {
+    public AssertSubscriber<T> await() {
         if (latch.getCount() == 0) {
             // We are done already.
             return this;
@@ -133,7 +188,7 @@ public class MultiAssertSubscriber<T> implements Subscriber<T> {
         return this;
     }
 
-    public MultiAssertSubscriber<T> await(Duration duration) {
+    public AssertSubscriber<T> await(Duration duration) {
         if (latch.getCount() == 0) {
             // We are done already.
             return this;
@@ -149,13 +204,14 @@ public class MultiAssertSubscriber<T> implements Subscriber<T> {
         return this;
     }
 
-    public MultiAssertSubscriber<T> cancel() {
+    public AssertSubscriber<T> cancel() {
         assertThat(subscription.get()).as("No subscription").isNotNull();
         subscription.get().cancel();
+        cancelled = true;
         return this;
     }
 
-    public MultiAssertSubscriber<T> request(long req) {
+    public AssertSubscriber<T> request(long req) {
         requested.addAndGet(req);
         if (subscription.get() != null) {
             subscription.get().request(req);
@@ -165,10 +221,18 @@ public class MultiAssertSubscriber<T> implements Subscriber<T> {
 
     @Override
     public void onSubscribe(Subscription s) {
+        if (spy != null) {
+            spy.onSubscribe(s);
+        }
+
         numberOfSubscription++;
         subscription.set(s);
         if (upfrontCancellation) {
             s.cancel();
+            cancelled = true;
+            // Do not request is cancelled.
+            return;
+
         }
         if (requested.get() > 0) {
             s.request(requested.get());
@@ -178,17 +242,26 @@ public class MultiAssertSubscriber<T> implements Subscriber<T> {
 
     @Override
     public synchronized void onNext(T t) {
+        if (spy != null) {
+            spy.onNext(t);
+        }
         items.add(t);
     }
 
     @Override
     public void onError(Throwable t) {
+        if (spy != null) {
+            spy.onError(t);
+        }
         failures.add(t);
         latch.countDown();
     }
 
     @Override
     public void onComplete() {
+        if (spy != null) {
+            spy.onComplete();
+        }
         numberOfCompletionEvents++;
         latch.countDown();
     }
@@ -201,7 +274,7 @@ public class MultiAssertSubscriber<T> implements Subscriber<T> {
         return failures;
     }
 
-    public MultiAssertSubscriber<T> run(Runnable action) {
+    public AssertSubscriber<T> run(Runnable action) {
         try {
             action.run();
         } catch (AssertionError e) {
@@ -210,5 +283,9 @@ public class MultiAssertSubscriber<T> implements Subscriber<T> {
             throw new AssertionError(e);
         }
         return this;
+    }
+
+    public boolean isCancelled() {
+        return cancelled;
     }
 }

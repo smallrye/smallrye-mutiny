@@ -18,7 +18,7 @@ import org.testng.annotations.Test;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
-import io.smallrye.mutiny.test.MultiAssertSubscriber;
+import io.smallrye.mutiny.test.AssertSubscriber;
 
 public class MultiContextPropagationTest {
 
@@ -175,14 +175,14 @@ public class MultiContextPropagationTest {
             return r;
         }).broadcast().toAllSubscribers();
 
-        MultiAssertSubscriber<Integer> sub1 = multi
+        AssertSubscriber<Integer> sub1 = multi
                 .map(i -> {
                     assertThat(ctx).isEqualTo(MyContext.get());
                     return i;
                 })
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(10));
-        MultiAssertSubscriber<Integer> sub2 = multi.subscribe()
-                .withSubscriber(MultiAssertSubscriber.create(10));
+                .subscribe().withSubscriber(AssertSubscriber.create(10));
+        AssertSubscriber<Integer> sub2 = multi.subscribe()
+                .withSubscriber(AssertSubscriber.create(10));
 
         sub1.await().assertCompletedSuccessfully().assertReceived(2, 3);
         sub2.await().assertCompletedSuccessfully().assertReceived(2, 3);

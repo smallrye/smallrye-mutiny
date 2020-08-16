@@ -2,7 +2,7 @@ package snippets;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.operators.multi.processors.BroadcastProcessor;
-import io.smallrye.mutiny.test.MultiAssertSubscriber;
+import io.smallrye.mutiny.test.AssertSubscriber;
 import org.junit.Test;
 
 public class BroadcastProcessorTest {
@@ -28,7 +28,7 @@ public class BroadcastProcessorTest {
         // the subscriber receives this signal.
 
         // end::code[]
-        MultiAssertSubscriber<String> subscriber = MultiAssertSubscriber.create(Long.MAX_VALUE);
+        AssertSubscriber<String> subscriber = AssertSubscriber.create(Long.MAX_VALUE);
         multi.subscribe().withSubscriber(subscriber)
                 .await()
                 .assertCompletedSuccessfully();

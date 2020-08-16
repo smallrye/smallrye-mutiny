@@ -10,7 +10,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import io.smallrye.mutiny.Multi;
-import io.smallrye.mutiny.test.MultiAssertSubscriber;
+import io.smallrye.mutiny.test.AssertSubscriber;
 
 public class MultiEmitOnTest {
 
@@ -28,9 +28,9 @@ public class MultiEmitOnTest {
 
     @Test
     public void testWithSequenceOfItems() {
-        MultiAssertSubscriber<Integer> subscriber = Multi.createFrom().items(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
+        AssertSubscriber<Integer> subscriber = Multi.createFrom().items(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
                 .emitOn(executor)
-                .subscribe().withSubscriber(MultiAssertSubscriber.create());
+                .subscribe().withSubscriber(AssertSubscriber.create());
 
         subscriber.request(2);
         await().until(() -> subscriber.items().size() == 2);
@@ -42,9 +42,9 @@ public class MultiEmitOnTest {
 
     @Test
     public void testWithRequest0() {
-        MultiAssertSubscriber<Integer> subscriber = Multi.createFrom().items(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
+        AssertSubscriber<Integer> subscriber = Multi.createFrom().items(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
                 .emitOn(executor)
-                .subscribe().withSubscriber(MultiAssertSubscriber.create());
+                .subscribe().withSubscriber(AssertSubscriber.create());
 
         subscriber.request(0);
         subscriber.await()

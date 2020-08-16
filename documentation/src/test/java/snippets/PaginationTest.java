@@ -2,7 +2,7 @@ package snippets;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
-import io.smallrye.mutiny.test.MultiAssertSubscriber;
+import io.smallrye.mutiny.test.AssertSubscriber;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -12,8 +12,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -33,7 +31,7 @@ public class PaginationTest {
                 .until(list -> list.isEmpty())
                 .onItem().disjoint();
         // end::code[]
-        stream.subscribe().withSubscriber(MultiAssertSubscriber.create(10))
+        stream.subscribe().withSubscriber(AssertSubscriber.create(10))
                 .assertCompletedSuccessfully()
                 .assertReceived("a", "b", "c", "d", "e", "f", "g", "h");
 
@@ -51,8 +49,8 @@ public class PaginationTest {
                         state -> api.retrieve(state.getAndIncrement()))
                 .whilst(page -> page.hasNext());
         // end::code2[]
-        MultiAssertSubscriber<Page> subscriber = stream.subscribe()
-                .withSubscriber(MultiAssertSubscriber.create(10))
+        AssertSubscriber<Page> subscriber = stream.subscribe()
+                .withSubscriber(AssertSubscriber.create(10))
                 .assertCompletedSuccessfully();
 
         assertThat(subscriber.items()).hasSize(3);

@@ -20,17 +20,17 @@ public class UniOnFailureRetryTest {
 
     @Test
     public void testNoRetryOnItem() {
-        UniAssertSubscriber<Integer> ts = UniAssertSubscriber.create();
+        UniAssertSubscriber<Integer> subscriber = UniAssertSubscriber.create();
         Uni.createFrom().item(1)
                 .onFailure().retry().atMost(1)
-                .subscribe().withSubscriber(ts);
-        ts.assertItem(1);
+                .subscribe().withSubscriber(subscriber);
+        subscriber.assertItem(1);
 
     }
 
     @Test
     public void testWithOneRetry() {
-        UniAssertSubscriber<Integer> ts = UniAssertSubscriber.create();
+        UniAssertSubscriber<Integer> subscriber = UniAssertSubscriber.create();
 
         AtomicInteger count = new AtomicInteger();
         Uni.createFrom().item(() -> {
@@ -41,9 +41,9 @@ public class UniOnFailureRetryTest {
             return i;
         })
                 .onFailure().retry().atMost(1)
-                .subscribe().withSubscriber(ts);
+                .subscribe().withSubscriber(subscriber);
 
-        ts
+        subscriber
                 .assertCompletedSuccessfully()
                 .assertItem(1);
 
@@ -51,7 +51,7 @@ public class UniOnFailureRetryTest {
 
     @Test
     public void testWithInfiniteRetry() {
-        UniAssertSubscriber<Integer> ts = UniAssertSubscriber.create();
+        UniAssertSubscriber<Integer> subscriber = UniAssertSubscriber.create();
         AtomicInteger count = new AtomicInteger();
         Uni.createFrom().item(() -> {
             int i = count.getAndIncrement();
@@ -61,9 +61,9 @@ public class UniOnFailureRetryTest {
             return i;
         })
                 .onFailure().retry().indefinitely()
-                .subscribe().withSubscriber(ts);
+                .subscribe().withSubscriber(subscriber);
 
-        ts
+        subscriber
                 .assertCompletedSuccessfully()
                 .assertItem(10);
     }

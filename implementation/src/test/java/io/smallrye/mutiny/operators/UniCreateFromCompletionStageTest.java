@@ -13,86 +13,87 @@ import org.testng.annotations.Test;
 
 import io.smallrye.mutiny.Uni;
 
+@SuppressWarnings("ConstantConditions")
 public class UniCreateFromCompletionStageTest {
 
     @Test
     public void testThatNullValueAreAccepted() {
-        UniAssertSubscriber<String> ts = UniAssertSubscriber.create();
+        UniAssertSubscriber<String> subscriber = UniAssertSubscriber.create();
         CompletionStage<String> cs = new CompletableFuture<>();
-        Uni.createFrom().completionStage(cs).subscribe().withSubscriber(ts);
+        Uni.createFrom().completionStage(cs).subscribe().withSubscriber(subscriber);
         cs.toCompletableFuture().complete(null);
-        ts.assertCompletedSuccessfully().assertItem(null);
+        subscriber.assertCompletedSuccessfully().assertItem(null);
     }
 
     @Test
     public void testWithNonNullValue() {
-        UniAssertSubscriber<String> ts = UniAssertSubscriber.create();
+        UniAssertSubscriber<String> subscriber = UniAssertSubscriber.create();
         CompletionStage<String> cs = new CompletableFuture<>();
-        Uni.createFrom().completionStage(cs).subscribe().withSubscriber(ts);
+        Uni.createFrom().completionStage(cs).subscribe().withSubscriber(subscriber);
         cs.toCompletableFuture().complete("1");
-        ts.assertCompletedSuccessfully().assertItem("1");
+        subscriber.assertCompletedSuccessfully().assertItem("1");
     }
 
     @Test
     public void testWithException() {
-        UniAssertSubscriber<String> ts = UniAssertSubscriber.create();
+        UniAssertSubscriber<String> subscriber = UniAssertSubscriber.create();
         CompletionStage<String> cs = new CompletableFuture<>();
-        Uni.createFrom().completionStage(cs).subscribe().withSubscriber(ts);
+        Uni.createFrom().completionStage(cs).subscribe().withSubscriber(subscriber);
         cs.toCompletableFuture().completeExceptionally(new IOException("boom"));
-        ts.assertFailure(IOException.class, "boom");
+        subscriber.assertFailure(IOException.class, "boom");
     }
 
     @Test
     public void testWithExceptionThrownByAStage() {
-        UniAssertSubscriber<String> ts = UniAssertSubscriber.create();
+        UniAssertSubscriber<String> subscriber = UniAssertSubscriber.create();
         CompletionStage<String> cs = new CompletableFuture<>();
         Uni.createFrom().completionStage(() -> cs
                 .thenApply(String::toUpperCase)
                 .<String> thenApply(s -> {
                     throw new IllegalStateException("boom");
-                })).subscribe().withSubscriber(ts);
+                })).subscribe().withSubscriber(subscriber);
         cs.toCompletableFuture().complete("bonjour");
-        ts.assertFailure(IllegalStateException.class, "boom");
+        subscriber.assertFailure(IllegalStateException.class, "boom");
     }
 
     @Test
     public void testThatNullValueAreAcceptedWithSupplier() {
-        UniAssertSubscriber<Void> ts = UniAssertSubscriber.create();
+        UniAssertSubscriber<Void> subscriber = UniAssertSubscriber.create();
         Uni.createFrom().<Void> completionStage(() -> CompletableFuture.completedFuture(null)).subscribe()
-                .withSubscriber(ts);
-        ts.assertCompletedSuccessfully().assertItem(null);
+                .withSubscriber(subscriber);
+        subscriber.assertCompletedSuccessfully().assertItem(null);
     }
 
     @Test
     public void testWithNonNullValueWithSupplier() {
-        UniAssertSubscriber<String> ts = UniAssertSubscriber.create();
+        UniAssertSubscriber<String> subscriber = UniAssertSubscriber.create();
         CompletionStage<String> cs = new CompletableFuture<>();
-        Uni.createFrom().completionStage(() -> cs).subscribe().withSubscriber(ts);
+        Uni.createFrom().completionStage(() -> cs).subscribe().withSubscriber(subscriber);
         cs.toCompletableFuture().complete("1");
-        ts.assertCompletedSuccessfully().assertItem("1");
+        subscriber.assertCompletedSuccessfully().assertItem("1");
     }
 
     @Test
     public void testWithExceptionWithSupplier() {
-        UniAssertSubscriber<String> ts = UniAssertSubscriber.create();
+        UniAssertSubscriber<String> subscriber = UniAssertSubscriber.create();
         CompletionStage<String> cs = new CompletableFuture<>();
-        Uni.createFrom().completionStage(() -> cs).subscribe().withSubscriber(ts);
+        Uni.createFrom().completionStage(() -> cs).subscribe().withSubscriber(subscriber);
         cs.toCompletableFuture().completeExceptionally(new IOException("boom"));
-        ts.assertFailure(IOException.class, "boom");
+        subscriber.assertFailure(IOException.class, "boom");
     }
 
     @Test
     public void testWithExceptionInSupplier() {
-        UniAssertSubscriber<String> ts = UniAssertSubscriber.create();
+        UniAssertSubscriber<String> subscriber = UniAssertSubscriber.create();
         Uni.createFrom().<String> completionStage(() -> {
             throw new NullPointerException("boom");
-        }).subscribe().withSubscriber(ts);
-        ts.assertFailure(NullPointerException.class, "boom");
+        }).subscribe().withSubscriber(subscriber);
+        subscriber.assertFailure(NullPointerException.class, "boom");
     }
 
     @Test
     public void testThatValueIsNotEmittedBeforeSubscription() {
-        UniAssertSubscriber<Integer> ts = UniAssertSubscriber.create();
+        UniAssertSubscriber<Integer> subscriber = UniAssertSubscriber.create();
         AtomicBoolean called = new AtomicBoolean();
         CompletableFuture<Integer> cs = new CompletableFuture<>();
         cs.complete(1);
@@ -101,14 +102,14 @@ public class UniCreateFromCompletionStageTest {
 
         assertThat(called).isFalse();
 
-        uni.subscribe().withSubscriber(ts);
-        ts.assertCompletedSuccessfully().assertItem(1);
+        uni.subscribe().withSubscriber(subscriber);
+        subscriber.assertCompletedSuccessfully().assertItem(1);
         assertThat(called).isTrue();
     }
 
     @Test
     public void testThatValueIsNotEmittedBeforeSubscriptionWithSupplier() {
-        UniAssertSubscriber<Integer> ts = UniAssertSubscriber.create();
+        UniAssertSubscriber<Integer> subscriber = UniAssertSubscriber.create();
         AtomicBoolean called = new AtomicBoolean();
         CompletableFuture<Integer> cs = new CompletableFuture<>();
 
@@ -124,93 +125,93 @@ public class UniCreateFromCompletionStageTest {
 
         assertThat(called).isFalse();
 
-        uni.subscribe().withSubscriber(ts);
-        ts.assertCompletedSuccessfully().assertItem(1);
+        uni.subscribe().withSubscriber(subscriber);
+        subscriber.assertCompletedSuccessfully().assertItem(1);
         assertThat(called).isTrue();
     }
 
     @Test
     public void testThatSubscriberIsIncompleteIfTheStageDoesNotEmit() {
-        UniAssertSubscriber<Integer> ts = UniAssertSubscriber.create();
+        UniAssertSubscriber<Integer> subscriber = UniAssertSubscriber.create();
         AtomicBoolean called = new AtomicBoolean();
         CompletableFuture<Integer> cs = new CompletableFuture<>();
         Uni<Integer> uni = Uni.createFrom().completionStage(cs)
                 .onItem().invoke(i -> called.set(true));
 
         assertThat(called).isFalse();
-        uni.subscribe().withSubscriber(ts);
+        uni.subscribe().withSubscriber(subscriber);
         assertThat(called).isFalse();
-        ts.assertNotCompleted();
+        subscriber.assertNotCompleted();
     }
 
     @Test
     public void testThatSubscriberIsIncompleteIfTheStageDoesNotEmitFromSupplier() {
-        UniAssertSubscriber<Integer> ts = UniAssertSubscriber.create();
+        UniAssertSubscriber<Integer> subscriber = UniAssertSubscriber.create();
         AtomicBoolean called = new AtomicBoolean();
         CompletableFuture<Integer> cs = new CompletableFuture<>();
         Uni<Integer> uni = Uni.createFrom().completionStage(() -> cs)
                 .onItem().invoke(i -> called.set(true));
 
         assertThat(called).isFalse();
-        uni.subscribe().withSubscriber(ts);
+        uni.subscribe().withSubscriber(subscriber);
         assertThat(called).isFalse();
-        ts.assertNotCompleted();
+        subscriber.assertNotCompleted();
     }
 
     @Test
     public void testThatSubscriberCanCancelBeforeEmission() {
-        UniAssertSubscriber<Integer> ts = UniAssertSubscriber.create();
+        UniAssertSubscriber<Integer> subscriber = UniAssertSubscriber.create();
         CompletableFuture<Integer> cs = new CompletableFuture<>();
         Uni<Integer> uni = Uni.createFrom().completionStage(cs)
                 .onItem().invoke(i -> {
                 });
 
-        uni.subscribe().withSubscriber(ts);
-        ts.cancel();
+        uni.subscribe().withSubscriber(subscriber);
+        subscriber.cancel();
 
         cs.complete(1);
 
-        ts.assertNotCompleted();
+        subscriber.assertNotCompleted();
     }
 
     @Test
     public void testThatSubscriberCanCancelBeforeEmissionWithSupplier() {
-        UniAssertSubscriber<Integer> ts = UniAssertSubscriber.create();
+        UniAssertSubscriber<Integer> subscriber = UniAssertSubscriber.create();
         CompletableFuture<Integer> cs = new CompletableFuture<>();
         Uni<Integer> uni = Uni.createFrom().completionStage(() -> cs);
-        uni.subscribe().withSubscriber(ts);
-        ts.cancel();
+        uni.subscribe().withSubscriber(subscriber);
+        subscriber.cancel();
 
         cs.complete(1);
-        ts.assertNotCompleted();
+        subscriber.assertNotCompleted();
     }
 
     @Test
     public void testThatSubscriberCanCancelAfterEmission() {
         AtomicBoolean called = new AtomicBoolean();
-        UniAssertSubscriber<Integer> ts = UniAssertSubscriber.create();
+        UniAssertSubscriber<Integer> subscriber = UniAssertSubscriber.create();
         CompletableFuture<Integer> cs = new CompletableFuture<>();
         Uni<Integer> uni = Uni.createFrom().completionStage(cs)
                 .onItem().invoke(i -> called.set(true));
 
-        uni.subscribe().withSubscriber(ts);
+        uni.subscribe().withSubscriber(subscriber);
         cs.complete(1);
-        ts.cancel();
+        subscriber.cancel();
         assertThat(called).isTrue();
-        ts.assertItem(1);
+        subscriber.assertItem(1);
     }
 
     @Test
     public void testThatSubscriberCanCancelAfterEmissionWithSupplier() {
-        UniAssertSubscriber<Integer> ts = UniAssertSubscriber.create();
+        UniAssertSubscriber<Integer> subscriber = UniAssertSubscriber.create();
         CompletableFuture<Integer> cs = new CompletableFuture<>();
         Uni<Integer> uni = Uni.createFrom().completionStage(() -> cs);
 
-        uni.subscribe().withSubscriber(ts);
+        uni.subscribe().withSubscriber(subscriber);
         cs.complete(1);
-        ts.cancel();
+        subscriber.cancel();
 
-        ts.assertItem(1);
+        subscriber.assertItem(1);
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
@@ -225,34 +226,34 @@ public class UniCreateFromCompletionStageTest {
 
     @Test
     public void testThatCompletionStageSupplierCannotReturnNull() {
-        UniAssertSubscriber<Integer> ts = UniAssertSubscriber.create();
+        UniAssertSubscriber<Integer> subscriber = UniAssertSubscriber.create();
         Uni<Integer> uni = Uni.createFrom().completionStage(() -> null);
 
-        uni.subscribe().withSubscriber(ts);
-        ts.assertFailure(NullPointerException.class, "");
+        uni.subscribe().withSubscriber(subscriber);
+        subscriber.assertFailure(NullPointerException.class, "");
     }
 
     @Test
     public void testWithSharedState() {
-        UniAssertSubscriber<Integer> ts1 = UniAssertSubscriber.create();
-        UniAssertSubscriber<Integer> ts2 = UniAssertSubscriber.create();
+        UniAssertSubscriber<Integer> subscriber1 = UniAssertSubscriber.create();
+        UniAssertSubscriber<Integer> subscriber2 = UniAssertSubscriber.create();
         AtomicInteger shared = new AtomicInteger();
         Uni<Integer> uni = Uni.createFrom().completionStage(() -> shared,
                 state -> CompletableFuture.completedFuture(state.incrementAndGet()));
 
         assertThat(shared).hasValue(0);
-        uni.subscribe().withSubscriber(ts1);
+        uni.subscribe().withSubscriber(subscriber1);
         assertThat(shared).hasValue(1);
-        ts1.assertCompletedSuccessfully().assertItem(1);
-        uni.subscribe().withSubscriber(ts2);
+        subscriber1.assertCompletedSuccessfully().assertItem(1);
+        uni.subscribe().withSubscriber(subscriber2);
         assertThat(shared).hasValue(2);
-        ts2.assertCompletedSuccessfully().assertItem(2);
+        subscriber2.assertCompletedSuccessfully().assertItem(2);
     }
 
     @Test
     public void testWithSharedStateProducingFailure() {
-        UniAssertSubscriber<Integer> ts1 = UniAssertSubscriber.create();
-        UniAssertSubscriber<Integer> ts2 = UniAssertSubscriber.create();
+        UniAssertSubscriber<Integer> subscriber1 = UniAssertSubscriber.create();
+        UniAssertSubscriber<Integer> subscriber2 = UniAssertSubscriber.create();
         Supplier<AtomicInteger> boom = () -> {
             throw new IllegalStateException("boom");
         };
@@ -260,25 +261,25 @@ public class UniCreateFromCompletionStageTest {
         Uni<Integer> uni = Uni.createFrom().completionStage(boom,
                 state -> CompletableFuture.completedFuture(state.incrementAndGet()));
 
-        uni.subscribe().withSubscriber(ts1);
-        ts1.assertFailure(IllegalStateException.class, "boom");
-        uni.subscribe().withSubscriber(ts2);
-        ts2.assertFailure(IllegalStateException.class, "Invalid shared state");
+        uni.subscribe().withSubscriber(subscriber1);
+        subscriber1.assertFailure(IllegalStateException.class, "boom");
+        uni.subscribe().withSubscriber(subscriber2);
+        subscriber2.assertFailure(IllegalStateException.class, "Invalid shared state");
     }
 
     @Test
     public void testWithSharedStateProducingNull() {
-        UniAssertSubscriber<Integer> ts1 = UniAssertSubscriber.create();
-        UniAssertSubscriber<Integer> ts2 = UniAssertSubscriber.create();
+        UniAssertSubscriber<Integer> s1 = UniAssertSubscriber.create();
+        UniAssertSubscriber<Integer> s2 = UniAssertSubscriber.create();
         Supplier<AtomicInteger> boom = () -> null;
 
         Uni<Integer> uni = Uni.createFrom().completionStage(boom,
                 state -> CompletableFuture.completedFuture(state.incrementAndGet()));
 
-        uni.subscribe().withSubscriber(ts1);
-        ts1.assertFailure(NullPointerException.class, "supplier");
-        uni.subscribe().withSubscriber(ts2);
-        ts2.assertFailure(IllegalStateException.class, "Invalid shared state");
+        uni.subscribe().withSubscriber(s1);
+        s1.assertFailure(NullPointerException.class, "supplier");
+        uni.subscribe().withSubscriber(s2);
+        s2.assertFailure(IllegalStateException.class, "Invalid shared state");
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)

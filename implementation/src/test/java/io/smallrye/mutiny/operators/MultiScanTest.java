@@ -3,7 +3,7 @@ package io.smallrye.mutiny.operators;
 import org.testng.annotations.Test;
 
 import io.smallrye.mutiny.Multi;
-import io.smallrye.mutiny.test.MultiAssertSubscriber;
+import io.smallrye.mutiny.test.AssertSubscriber;
 
 public class MultiScanTest {
 
@@ -24,7 +24,7 @@ public class MultiScanTest {
 
     @Test
     public void testWithSimplerScanner() {
-        MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(10);
+        AssertSubscriber<Integer> subscriber = AssertSubscriber.create(10);
 
         Multi.createFrom().range(1, 10)
                 .onItem().scan((a, b) -> b)
@@ -37,7 +37,7 @@ public class MultiScanTest {
 
     @Test
     public void testWithSimplerScannerWithSupplier() {
-        MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(Long.MAX_VALUE);
+        AssertSubscriber<Integer> subscriber = AssertSubscriber.create(Long.MAX_VALUE);
 
         Multi.createFrom().range(1, 10)
                 .onItem().scan(() -> 2, (a, b) -> b)
@@ -50,7 +50,7 @@ public class MultiScanTest {
 
     @Test
     public void testWithRequests() {
-        MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create();
+        AssertSubscriber<Integer> subscriber = AssertSubscriber.create();
 
         Multi.createFrom().range(1, 10)
                 .onItem().scan((a, b) -> b)
@@ -71,7 +71,7 @@ public class MultiScanTest {
 
     @Test
     public void testWithAScannerThrowingException() {
-        MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(2);
+        AssertSubscriber<Integer> subscriber = AssertSubscriber.create(2);
 
         Multi.createFrom().range(1, 10)
                 .onItem().scan((a, b) -> {
@@ -85,7 +85,7 @@ public class MultiScanTest {
 
     @Test
     public void testWithAScannerReturningNull() {
-        MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(2);
+        AssertSubscriber<Integer> subscriber = AssertSubscriber.create(2);
 
         Multi.createFrom().range(1, 10)
                 .onItem().scan((a, b) -> null)
@@ -97,7 +97,7 @@ public class MultiScanTest {
 
     @Test
     public void testWithAScannerThrowingExceptionWithSupplier() {
-        MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(2);
+        AssertSubscriber<Integer> subscriber = AssertSubscriber.create(2);
 
         Multi.createFrom().range(1, 10)
                 .onItem().scan(() -> 1, (a, b) -> {
@@ -111,7 +111,7 @@ public class MultiScanTest {
 
     @Test
     public void testWithAScannerReturningNullWithSupplier() {
-        MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(2);
+        AssertSubscriber<Integer> subscriber = AssertSubscriber.create(2);
 
         Multi.createFrom().range(1, 10)
                 .onItem().scan(() -> 1, (a, b) -> null)

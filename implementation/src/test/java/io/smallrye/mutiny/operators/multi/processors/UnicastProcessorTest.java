@@ -7,7 +7,7 @@ import java.util.concurrent.Executors;
 
 import org.testng.annotations.Test;
 
-import io.smallrye.mutiny.test.MultiAssertSubscriber;
+import io.smallrye.mutiny.test.AssertSubscriber;
 
 public class UnicastProcessorTest {
 
@@ -15,9 +15,9 @@ public class UnicastProcessorTest {
     public void testTheProcessorCanGetOnlyOneSubscriber() {
         UnicastProcessor<Integer> processor = UnicastProcessor.create();
         processor.subscribe()
-                .withSubscriber(MultiAssertSubscriber.create());
-        MultiAssertSubscriber<Integer> second = processor.subscribe()
-                .withSubscriber(MultiAssertSubscriber.create());
+                .withSubscriber(AssertSubscriber.create());
+        AssertSubscriber<Integer> second = processor.subscribe()
+                .withSubscriber(AssertSubscriber.create());
 
         second.assertHasNotReceivedAnyItem()
                 .assertHasFailedWith(IllegalStateException.class, null)
@@ -38,7 +38,7 @@ public class UnicastProcessorTest {
             executor.submit(produce);
         }
 
-        MultiAssertSubscriber<Object> subscriber = MultiAssertSubscriber.create(Long.MAX_VALUE);
+        AssertSubscriber<Object> subscriber = AssertSubscriber.create(Long.MAX_VALUE);
         processor.subscribe(subscriber);
 
         await().until(() -> subscriber.items().size() == 5 * 10000);

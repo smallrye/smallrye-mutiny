@@ -15,9 +15,9 @@ import io.smallrye.mutiny.Uni;
 
 public class UniOnItemOrFailureMapTest {
 
-    private Uni<Integer> one = Uni.createFrom().item(1);
-    private Uni<Void> none = Uni.createFrom().nullItem();
-    private Uni<Integer> failed = Uni.createFrom().failure(new IOException("boom"));
+    private final Uni<Integer> one = Uni.createFrom().item(1);
+    private final Uni<Void> none = Uni.createFrom().nullItem();
+    private final Uni<Integer> failed = Uni.createFrom().failure(new IOException("boom"));
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void testThatMapperMustNotBeNull() {
@@ -31,16 +31,16 @@ public class UniOnItemOrFailureMapTest {
 
     @Test
     public void testMappingOnItem() {
-        UniAssertSubscriber<Integer> ts = UniAssertSubscriber.create();
+        UniAssertSubscriber<Integer> subscriber = UniAssertSubscriber.create();
 
         AtomicInteger count = new AtomicInteger();
         one.onItemOrFailure().transform((i, f) -> {
             assertThat(f).isNull();
             count.incrementAndGet();
             return i + 1;
-        }).subscribe().withSubscriber(ts);
+        }).subscribe().withSubscriber(subscriber);
 
-        ts.assertCompletedSuccessfully()
+        subscriber.assertCompletedSuccessfully()
                 .assertItem(2);
 
         assertThat(count).hasValue(1);
@@ -48,16 +48,16 @@ public class UniOnItemOrFailureMapTest {
 
     @Test
     public void testMappingOnNullItem() {
-        UniAssertSubscriber<Integer> ts = UniAssertSubscriber.create();
+        UniAssertSubscriber<Integer> subscriber = UniAssertSubscriber.create();
 
         AtomicInteger count = new AtomicInteger();
         none.onItemOrFailure().transform((i, f) -> {
             assertThat(f).isNull();
             count.incrementAndGet();
             return 2;
-        }).subscribe().withSubscriber(ts);
+        }).subscribe().withSubscriber(subscriber);
 
-        ts.assertCompletedSuccessfully()
+        subscriber.assertCompletedSuccessfully()
                 .assertItem(2);
 
         assertThat(count).hasValue(1);
@@ -65,7 +65,7 @@ public class UniOnItemOrFailureMapTest {
 
     @Test
     public void testMappingOnFailure() {
-        UniAssertSubscriber<Integer> ts = UniAssertSubscriber.create();
+        UniAssertSubscriber<Integer> subscriber = UniAssertSubscriber.create();
 
         AtomicInteger count = new AtomicInteger();
         failed.onItemOrFailure().transform((i, f) -> {
@@ -73,9 +73,9 @@ public class UniOnItemOrFailureMapTest {
             assertThat(f).isNotNull().isInstanceOf(IOException.class).hasMessageContaining("boom");
             count.incrementAndGet();
             return 2;
-        }).subscribe().withSubscriber(ts);
+        }).subscribe().withSubscriber(subscriber);
 
-        ts.assertCompletedSuccessfully()
+        subscriber.assertCompletedSuccessfully()
                 .assertItem(2);
 
         assertThat(count).hasValue(1);
@@ -83,22 +83,22 @@ public class UniOnItemOrFailureMapTest {
 
     @Test
     public void testMappingOnItemThrowingException() {
-        UniAssertSubscriber<Integer> ts = UniAssertSubscriber.create();
+        UniAssertSubscriber<Integer> subscriber = UniAssertSubscriber.create();
 
         AtomicInteger count = new AtomicInteger();
         one.onItemOrFailure().<Integer> transform((i, f) -> {
             assertThat(f).isNull();
             count.incrementAndGet();
             throw new IllegalStateException("kaboom");
-        }).subscribe().withSubscriber(ts);
+        }).subscribe().withSubscriber(subscriber);
 
-        ts.assertFailure(IllegalStateException.class, "kaboom");
+        subscriber.assertFailure(IllegalStateException.class, "kaboom");
         assertThat(count).hasValue(1);
     }
 
     @Test
     public void testMappingOnFailureThrowingException() {
-        UniAssertSubscriber<Integer> ts = UniAssertSubscriber.create();
+        UniAssertSubscriber<Integer> subscriber = UniAssertSubscriber.create();
 
         AtomicInteger count = new AtomicInteger();
         failed.onItemOrFailure().<Integer> transform((i, f) -> {
@@ -106,42 +106,42 @@ public class UniOnItemOrFailureMapTest {
             assertThat(f).isNotNull().isInstanceOf(IOException.class).hasMessageContaining("boom");
             count.incrementAndGet();
             throw new IllegalStateException("kaboom");
-        }).subscribe().withSubscriber(ts);
+        }).subscribe().withSubscriber(subscriber);
 
-        ts.assertFailure(CompositeException.class, "kaboom");
-        ts.assertFailure(CompositeException.class, "boom");
+        subscriber.assertFailure(CompositeException.class, "kaboom");
+        subscriber.assertFailure(CompositeException.class, "boom");
 
         assertThat(count).hasValue(1);
     }
 
     @Test
     public void testWithTwoSubscribers() {
-        UniAssertSubscriber<Integer> ts1 = UniAssertSubscriber.create();
-        UniAssertSubscriber<Integer> ts2 = UniAssertSubscriber.create();
+        UniAssertSubscriber<Integer> s1 = UniAssertSubscriber.create();
+        UniAssertSubscriber<Integer> s2 = UniAssertSubscriber.create();
 
         AtomicInteger count = new AtomicInteger();
         Uni<Integer> uni = one.onItemOrFailure().transform((v, f) -> v + count.incrementAndGet());
-        uni.subscribe().withSubscriber(ts1);
-        uni.subscribe().withSubscriber(ts2);
+        uni.subscribe().withSubscriber(s1);
+        uni.subscribe().withSubscriber(s2);
 
-        ts1.assertCompletedSuccessfully()
+        s1.assertCompletedSuccessfully()
                 .assertItem(2);
-        ts2.assertCompletedSuccessfully()
+        s2.assertCompletedSuccessfully()
                 .assertItem(3);
     }
 
     @Test
     public void testThatMapperCanReturnNull() {
-        UniAssertSubscriber<Void> ts = UniAssertSubscriber.create();
+        UniAssertSubscriber<Void> subscriber = UniAssertSubscriber.create();
 
-        one.onItemOrFailure().<Void> transform((v, f) -> null).subscribe().withSubscriber(ts);
+        one.onItemOrFailure().<Void> transform((v, f) -> null).subscribe().withSubscriber(subscriber);
 
-        ts.assertCompletedSuccessfully().assertItem(null);
+        subscriber.assertCompletedSuccessfully().assertItem(null);
     }
 
     @Test
     public void testThatMapperIsCalledOnTheRightExecutorOnItem() {
-        UniAssertSubscriber<Integer> ts = new UniAssertSubscriber<>();
+        UniAssertSubscriber<Integer> subscriber = new UniAssertSubscriber<>();
         ExecutorService executor = Executors.newSingleThreadExecutor();
         try {
             AtomicReference<String> threadName = new AtomicReference<>();
@@ -151,11 +151,11 @@ public class UniOnItemOrFailureMapTest {
                         threadName.set(Thread.currentThread().getName());
                         return i + 1;
                     })
-                    .subscribe().withSubscriber(ts);
+                    .subscribe().withSubscriber(subscriber);
 
-            ts.await().assertCompletedSuccessfully().assertItem(2);
+            subscriber.await().assertCompletedSuccessfully().assertItem(2);
             assertThat(threadName).isNotNull().doesNotHaveValue("main");
-            assertThat(ts.getOnItemThreadName()).isEqualTo(threadName.get());
+            assertThat(subscriber.getOnItemThreadName()).isEqualTo(threadName.get());
         } finally {
             executor.shutdown();
         }
@@ -163,7 +163,7 @@ public class UniOnItemOrFailureMapTest {
 
     @Test
     public void testThatMapperIsCalledOnTheRightExecutorOnFailure() {
-        UniAssertSubscriber<Integer> ts = new UniAssertSubscriber<>();
+        UniAssertSubscriber<Integer> subscriber = new UniAssertSubscriber<>();
         ExecutorService executor = Executors.newSingleThreadExecutor();
         try {
             AtomicReference<String> threadName = new AtomicReference<>();
@@ -175,11 +175,11 @@ public class UniOnItemOrFailureMapTest {
                         assertThat(f).isNotNull();
                         return 1;
                     })
-                    .subscribe().withSubscriber(ts);
+                    .subscribe().withSubscriber(subscriber);
 
-            ts.await().assertCompletedSuccessfully().assertItem(1);
+            subscriber.await().assertCompletedSuccessfully().assertItem(1);
             assertThat(threadName).isNotNull().doesNotHaveValue("main");
-            assertThat(ts.getOnItemThreadName()).isEqualTo(threadName.get());
+            assertThat(subscriber.getOnItemThreadName()).isEqualTo(threadName.get());
         } finally {
             executor.shutdown();
         }
