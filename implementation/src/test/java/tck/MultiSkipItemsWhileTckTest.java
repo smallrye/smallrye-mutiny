@@ -14,7 +14,7 @@ import org.reactivestreams.Publisher;
 import org.testng.annotations.Test;
 
 import io.smallrye.mutiny.Multi;
-import io.smallrye.mutiny.test.MultiAssertSubscriber;
+import io.smallrye.mutiny.test.AssertSubscriber;
 
 public class MultiSkipItemsWhileTckTest extends AbstractPublisherTck<Long> {
 
@@ -91,7 +91,7 @@ public class MultiSkipItemsWhileTckTest extends AbstractPublisherTck<Long> {
         infiniteStream()
                 .onTermination().invoke(() -> cancelled.complete(null))
                 .transform().bySkippingItemsWhile(i -> i < 3)
-                .subscribe().withSubscriber(new MultiAssertSubscriber<>(10, true));
+                .subscribe().withSubscriber(new AssertSubscriber<>(10, true));
         await(cancelled);
     }
 

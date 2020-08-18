@@ -15,7 +15,7 @@ import io.smallrye.mutiny.Uni;
 
 public class UniOnItemTransformTest {
 
-    private Uni<Integer> one = Uni.createFrom().item(1);
+    private final Uni<Integer> one = Uni.createFrom().item(1);
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void testThatMapperMustNotBeNull() {
@@ -29,71 +29,71 @@ public class UniOnItemTransformTest {
 
     @Test
     public void testSimpleMapping() {
-        UniAssertSubscriber<Integer> ts = UniAssertSubscriber.create();
+        UniAssertSubscriber<Integer> subscriber = UniAssertSubscriber.create();
 
-        one.map(v -> v + 1).subscribe().withSubscriber(ts);
+        one.map(v -> v + 1).subscribe().withSubscriber(subscriber);
 
-        ts.assertCompletedSuccessfully()
+        subscriber.assertCompletedSuccessfully()
                 .assertItem(2);
     }
 
     @Test
     public void testWithTwoSubscribers() {
-        UniAssertSubscriber<Integer> ts1 = UniAssertSubscriber.create();
-        UniAssertSubscriber<Integer> ts2 = UniAssertSubscriber.create();
+        UniAssertSubscriber<Integer> s1 = UniAssertSubscriber.create();
+        UniAssertSubscriber<Integer> s2 = UniAssertSubscriber.create();
 
         AtomicInteger count = new AtomicInteger();
         Uni<Integer> uni = one.map(v -> v + count.incrementAndGet());
-        uni.subscribe().withSubscriber(ts1);
-        uni.subscribe().withSubscriber(ts2);
+        uni.subscribe().withSubscriber(s1);
+        uni.subscribe().withSubscriber(s2);
 
-        ts1.assertCompletedSuccessfully()
+        s1.assertCompletedSuccessfully()
                 .assertItem(2);
-        ts2.assertCompletedSuccessfully()
+        s2.assertCompletedSuccessfully()
                 .assertItem(3);
     }
 
     @Test
     public void testWhenTheMapperThrowsAnException() {
-        UniAssertSubscriber<Object> ts = UniAssertSubscriber.create();
+        UniAssertSubscriber<Object> subscriber = UniAssertSubscriber.create();
 
         one.map(v -> {
             throw new RuntimeException("failure");
-        }).subscribe().withSubscriber(ts);
+        }).subscribe().withSubscriber(subscriber);
 
-        ts.assertFailure(RuntimeException.class, "failure");
+        subscriber.assertFailure(RuntimeException.class, "failure");
     }
 
     @Test
     public void testWhenTheMapperThrowsAnError() {
-        UniAssertSubscriber<Object> ts = UniAssertSubscriber.create();
+        UniAssertSubscriber<Object> subscriber = UniAssertSubscriber.create();
 
         one.map(v -> {
             throw new AssertionError("OH NO!");
-        }).subscribe().withSubscriber(ts);
+        }).subscribe().withSubscriber(subscriber);
 
-        ts.assertFailure(AssertionError.class, "OH NO!");
+        subscriber.assertFailure(AssertionError.class, "OH NO!");
     }
 
     @Test
     public void testThatMapperCanReturnNull() {
-        UniAssertSubscriber<Object> ts = UniAssertSubscriber.create();
+        UniAssertSubscriber<Object> subscriber = UniAssertSubscriber.create();
 
-        one.map(v -> null).subscribe().withSubscriber(ts);
+        one.map(v -> null).subscribe().withSubscriber(subscriber);
 
-        ts.assertCompletedSuccessfully().assertItem(null);
+        subscriber.assertCompletedSuccessfully().assertItem(null);
     }
 
     @Test
     public void testThatMapperIsCalledWithNull() {
-        UniAssertSubscriber<String> ts = UniAssertSubscriber.create();
-        Uni.createFrom().item((String) null).map(x -> "foo").subscribe().withSubscriber(ts);
-        ts.assertCompletedSuccessfully().assertItem("foo");
+        UniAssertSubscriber<String> subscriber = UniAssertSubscriber.create();
+        Uni.createFrom().item((String) null).map(x -> "foo").subscribe().withSubscriber(subscriber);
+        subscriber.assertCompletedSuccessfully().assertItem("foo");
     }
 
     @Test
     public void testThatMapperIsCalledOnTheRightExecutor() {
-        UniAssertSubscriber<Integer> ts = new UniAssertSubscriber<>();
+        UniAssertSubscriber<Integer> subscriber = new UniAssertSubscriber<>();
         ExecutorService executor = Executors.newSingleThreadExecutor();
         try {
             AtomicReference<String> threadName = new AtomicReference<>();
@@ -103,11 +103,11 @@ public class UniOnItemTransformTest {
                         threadName.set(Thread.currentThread().getName());
                         return i + 1;
                     })
-                    .subscribe().withSubscriber(ts);
+                    .subscribe().withSubscriber(subscriber);
 
-            ts.await().assertCompletedSuccessfully().assertItem(2);
+            subscriber.await().assertCompletedSuccessfully().assertItem(2);
             assertThat(threadName).isNotNull().doesNotHaveValue("main");
-            assertThat(ts.getOnItemThreadName()).isEqualTo(threadName.get());
+            assertThat(subscriber.getOnItemThreadName()).isEqualTo(threadName.get());
         } finally {
             executor.shutdown();
         }
@@ -115,15 +115,15 @@ public class UniOnItemTransformTest {
 
     @Test
     public void testThatMapperIsNotCalledIfPreviousStageFailed() {
-        UniAssertSubscriber<Integer> ts = UniAssertSubscriber.create();
+        UniAssertSubscriber<Integer> subscriber = UniAssertSubscriber.create();
         AtomicBoolean called = new AtomicBoolean();
         Uni.createFrom().<Integer> failure(new Exception("boom"))
                 .map(x -> {
                     called.set(true);
                     return x + 1;
-                }).subscribe().withSubscriber(ts);
+                }).subscribe().withSubscriber(subscriber);
 
-        ts.assertFailure(Exception.class, "boom");
+        subscriber.assertFailure(Exception.class, "boom");
         assertThat(called).isFalse();
     }
 }

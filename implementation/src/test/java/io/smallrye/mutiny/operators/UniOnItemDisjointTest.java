@@ -14,7 +14,7 @@ import org.testng.annotations.Test;
 import io.reactivex.Flowable;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
-import io.smallrye.mutiny.test.MultiAssertSubscriber;
+import io.smallrye.mutiny.test.AssertSubscriber;
 
 public class UniOnItemDisjointTest {
 
@@ -123,10 +123,10 @@ public class UniOnItemDisjointTest {
     @Test
     public void testDisjointWithNeverPublisher() {
         AtomicBoolean cancelled = new AtomicBoolean();
-        MultiAssertSubscriber<String> subscriber = Uni.createFrom()
+        AssertSubscriber<String> subscriber = Uni.createFrom()
                 .item(Flowable.never().doOnCancel(() -> cancelled.set(true)))
                 .onItem().<String> disjoint()
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(10));
+                .subscribe().withSubscriber(AssertSubscriber.create(10));
 
         subscriber.assertSubscribed()
                 .assertNotTerminated();
@@ -142,10 +142,10 @@ public class UniOnItemDisjointTest {
     @Test
     public void testDisjointWithNothing() {
         AtomicBoolean cancelled = new AtomicBoolean();
-        MultiAssertSubscriber<String> subscriber = Uni.createFrom()
+        AssertSubscriber<String> subscriber = Uni.createFrom()
                 .item(Multi.createFrom().nothing().on().cancellation(() -> cancelled.set(true)))
                 .onItem().<String> disjoint()
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(10));
+                .subscribe().withSubscriber(AssertSubscriber.create(10));
 
         subscriber.assertSubscribed()
                 .assertNotTerminated();

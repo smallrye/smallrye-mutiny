@@ -6,7 +6,7 @@ import org.junit.Test;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.operators.multi.processors.UnicastProcessor;
-import io.smallrye.mutiny.test.MultiAssertSubscriber;
+import io.smallrye.mutiny.test.AssertSubscriber;
 
 public class UnicastProcessorTest {
 
@@ -27,7 +27,7 @@ public class UnicastProcessorTest {
         }).start();
 
         // end::code[]
-        MultiAssertSubscriber<String> subscriber = MultiAssertSubscriber.create(Long.MAX_VALUE);
+        AssertSubscriber<String> subscriber = AssertSubscriber.create(Long.MAX_VALUE);
         multi.subscribe().withSubscriber(subscriber)
                 .await()
                 .run(() -> assertThat(subscriber.items()).hasSize(1000));

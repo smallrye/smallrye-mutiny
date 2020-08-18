@@ -12,11 +12,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.Test;
 import org.reactivestreams.Subscription;
 
-public class MultiAssertSubscriberTest {
+public class AssertSubscriberTest {
 
     @Test
     public void testItemsAndCompletion() {
-        MultiAssertSubscriber<String> subscriber = MultiAssertSubscriber.create();
+        AssertSubscriber<String> subscriber = AssertSubscriber.create();
         Subscription subscription = mock(Subscription.class);
         subscriber.assertNotTerminated();
         subscriber.onSubscribe(subscription);
@@ -34,7 +34,7 @@ public class MultiAssertSubscriberTest {
 
     @Test
     public void testItemsAndFailure() {
-        MultiAssertSubscriber<String> subscriber = MultiAssertSubscriber.create();
+        AssertSubscriber<String> subscriber = AssertSubscriber.create();
         Subscription subscription = mock(Subscription.class);
 
         subscriber.onSubscribe(subscription);
@@ -51,7 +51,7 @@ public class MultiAssertSubscriberTest {
 
     @Test
     public void testNoItems() {
-        MultiAssertSubscriber<String> subscriber = MultiAssertSubscriber.create();
+        AssertSubscriber<String> subscriber = AssertSubscriber.create();
         Subscription subscription = mock(Subscription.class);
 
         subscriber.onSubscribe(subscription);
@@ -66,7 +66,7 @@ public class MultiAssertSubscriberTest {
 
     @Test
     public void testAwait() {
-        MultiAssertSubscriber<String> subscriber = MultiAssertSubscriber.create();
+        AssertSubscriber<String> subscriber = AssertSubscriber.create();
         Subscription subscription = mock(Subscription.class);
 
         subscriber.onSubscribe(subscription);
@@ -84,7 +84,7 @@ public class MultiAssertSubscriberTest {
 
     @Test
     public void testAwaitWithDuration() {
-        MultiAssertSubscriber<String> subscriber = MultiAssertSubscriber.create();
+        AssertSubscriber<String> subscriber = AssertSubscriber.create();
         Subscription subscription = mock(Subscription.class);
 
         subscriber.onSubscribe(subscription);
@@ -102,7 +102,7 @@ public class MultiAssertSubscriberTest {
 
     @Test
     public void testAwaitOnFailure() {
-        MultiAssertSubscriber<String> subscriber = MultiAssertSubscriber.create();
+        AssertSubscriber<String> subscriber = AssertSubscriber.create();
         Subscription subscription = mock(Subscription.class);
 
         subscriber.onSubscribe(subscription);
@@ -120,7 +120,7 @@ public class MultiAssertSubscriberTest {
 
     @Test
     public void testAwaitAlreadyCompleted() {
-        MultiAssertSubscriber<String> subscriber = MultiAssertSubscriber.create();
+        AssertSubscriber<String> subscriber = AssertSubscriber.create();
         Subscription subscription = mock(Subscription.class);
 
         subscriber.onSubscribe(subscription);
@@ -133,7 +133,7 @@ public class MultiAssertSubscriberTest {
 
     @Test
     public void testAwaitAlreadyFailed() {
-        MultiAssertSubscriber<String> subscriber = MultiAssertSubscriber.create();
+        AssertSubscriber<String> subscriber = AssertSubscriber.create();
         Subscription subscription = mock(Subscription.class);
 
         subscriber.onSubscribe(subscription);
@@ -146,7 +146,7 @@ public class MultiAssertSubscriberTest {
 
     @Test
     public void testUpfrontCancellation() {
-        MultiAssertSubscriber<String> subscriber = new MultiAssertSubscriber<>(0, true);
+        AssertSubscriber<String> subscriber = new AssertSubscriber<>(0, true);
         Subscription subscription = mock(Subscription.class);
         subscriber.onSubscribe(subscription);
         verify(subscription).cancel();
@@ -154,7 +154,7 @@ public class MultiAssertSubscriberTest {
 
     @Test
     public void testUpfrontRequest() {
-        MultiAssertSubscriber<String> subscriber = MultiAssertSubscriber.create(10);
+        AssertSubscriber<String> subscriber = AssertSubscriber.create(10);
         Subscription subscription = mock(Subscription.class);
         subscriber.onSubscribe(subscription);
         verify(subscription).request(10);
@@ -162,7 +162,7 @@ public class MultiAssertSubscriberTest {
 
     @Test
     public void testRun() {
-        MultiAssertSubscriber<String> subscriber = MultiAssertSubscriber.create();
+        AssertSubscriber<String> subscriber = AssertSubscriber.create();
         AtomicInteger count = new AtomicInteger();
         subscriber.run(count::incrementAndGet).run(count::incrementAndGet);
 

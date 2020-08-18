@@ -12,13 +12,13 @@ import org.testng.annotations.Test;
 import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.subscription.MultiEmitter;
-import io.smallrye.mutiny.test.MultiAssertSubscriber;
+import io.smallrye.mutiny.test.AssertSubscriber;
 
 public class MultiOnFailureTest {
 
     @Test
     public void testThatRecoverWithMultiNotCalledWhenNoFailure() {
-        MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(20);
+        AssertSubscriber<Integer> subscriber = AssertSubscriber.create(20);
 
         Multi.createFrom().range(1, 10)
                 .onFailure().recoverWithMulti(v -> Multi.createFrom().range(50, 100))
@@ -31,7 +31,7 @@ public class MultiOnFailureTest {
 
     @Test
     public void testRecoverWithMultiWithFailure() {
-        MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(20);
+        AssertSubscriber<Integer> subscriber = AssertSubscriber.create(20);
 
         Multi.createFrom().<Integer> failure(new IllegalStateException("boom"))
                 .onFailure().recoverWithMulti(v -> Multi.createFrom().range(50, 52))
@@ -44,7 +44,7 @@ public class MultiOnFailureTest {
 
     @Test
     public void testRecoverWithMultiWithPredicate() {
-        MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(1);
+        AssertSubscriber<Integer> subscriber = AssertSubscriber.create(1);
 
         Multi.createFrom().<Integer> failure(new IllegalStateException("boom"))
                 .onFailure(IllegalStateException.class).recoverWithMulti(v -> Multi.createFrom().item(42))
@@ -57,7 +57,7 @@ public class MultiOnFailureTest {
 
     @Test
     public void testRecoverWithMultiWithPredicateNotPassing() {
-        MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(1);
+        AssertSubscriber<Integer> subscriber = AssertSubscriber.create(1);
 
         Multi.createFrom().<Integer> failure(new IllegalStateException("boom"))
                 .onFailure(IOException.class).recoverWithMulti(v -> Multi.createFrom().item(42))
@@ -68,7 +68,7 @@ public class MultiOnFailureTest {
 
     @Test
     public void testRecoverWithMultiWithPredicateThrowingException() {
-        MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(1);
+        AssertSubscriber<Integer> subscriber = AssertSubscriber.create(1);
 
         Multi.createFrom().<Integer> failure(new IllegalStateException("boom"))
                 .onFailure(f -> {
@@ -83,7 +83,7 @@ public class MultiOnFailureTest {
 
     @Test
     public void testOnFailureMap() {
-        MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create();
+        AssertSubscriber<Integer> subscriber = AssertSubscriber.create();
 
         Multi.createFrom().<Integer> failure(new IllegalStateException("boom"))
                 .onFailure().transform(f -> new IOException("kaboom!"))
@@ -96,7 +96,7 @@ public class MultiOnFailureTest {
 
     @Test
     public void testOnFailureMapWithDeprecatedApiApply() {
-        MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create();
+        AssertSubscriber<Integer> subscriber = AssertSubscriber.create();
 
         Multi.createFrom().<Integer> failure(new IllegalStateException("boom"))
                 .onFailure().apply(f -> new IOException("kaboom!"))
@@ -109,7 +109,7 @@ public class MultiOnFailureTest {
 
     @Test
     public void testRequestOnTheMultiReturnedByRecoverWithMulti() {
-        MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(0);
+        AssertSubscriber<Integer> subscriber = AssertSubscriber.create(0);
 
         Multi.createFrom()
                 .<Integer> failure(new IllegalStateException("boom"))
@@ -138,7 +138,7 @@ public class MultiOnFailureTest {
 
     @Test
     public void testRecoverWithMultiWithSomeResulsubscriberBeforeFailing() {
-        MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(20);
+        AssertSubscriber<Integer> subscriber = AssertSubscriber.create(20);
 
         AtomicReference<MultiEmitter<? super Integer>> reference = new AtomicReference<>();
         Multi.createFrom().<Integer> emitter(reference::set)
@@ -161,7 +161,7 @@ public class MultiOnFailureTest {
 
     @Test
     public void testRecoverWithMultiWithSomeResulsubscriberBeforeFailingWithRequessubscriber() {
-        MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(3);
+        AssertSubscriber<Integer> subscriber = AssertSubscriber.create(3);
 
         AtomicReference<MultiEmitter<? super Integer>> reference = new AtomicReference<>();
         Multi.createFrom().<Integer> emitter(reference::set)
@@ -187,7 +187,7 @@ public class MultiOnFailureTest {
 
     @Test
     public void testWhenRecoverWithMultiIsAlsoAFailure() {
-        MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(0);
+        AssertSubscriber<Integer> subscriber = AssertSubscriber.create(0);
 
         Multi.createFrom().<Integer> failure(new IOException("karambar"))
                 .onFailure().recoverWithMulti(v -> {
@@ -203,7 +203,7 @@ public class MultiOnFailureTest {
 
     @Test
     public void testWhenRecoverWithMultiReturnsNull() {
-        MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(0);
+        AssertSubscriber<Integer> subscriber = AssertSubscriber.create(0);
 
         Multi.createFrom().<Integer> failure(new IOException("karambar"))
                 .onFailure().recoverWithMulti(v -> null)
@@ -218,7 +218,7 @@ public class MultiOnFailureTest {
     public void testRecoverWithItem() {
         Multi.createFrom().<Integer> failure(new IllegalStateException("boom"))
                 .onFailure().recoverWithItem(42)
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(1))
+                .subscribe().withSubscriber(AssertSubscriber.create(1))
                 .assertCompletedSuccessfully()
                 .assertReceived(42);
     }
@@ -229,12 +229,12 @@ public class MultiOnFailureTest {
         Multi<Integer> multi = Multi.createFrom().<Integer> failure(new IllegalStateException("boom"))
                 .onFailure().recoverWithItem(count::incrementAndGet);
         multi
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(1))
+                .subscribe().withSubscriber(AssertSubscriber.create(1))
                 .assertCompletedSuccessfully()
                 .assertReceived(1);
 
         multi
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(1))
+                .subscribe().withSubscriber(AssertSubscriber.create(1))
                 .assertCompletedSuccessfully()
                 .assertReceived(2);
     }
@@ -255,7 +255,7 @@ public class MultiOnFailureTest {
     public void testRecoverWithItemAndSupplierReturningNull() {
         Multi.createFrom().<Integer> failure(new IllegalStateException("boom"))
                 .onFailure().recoverWithItem(() -> null)
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(1))
+                .subscribe().withSubscriber(AssertSubscriber.create(1))
                 .assertHasFailedWith(CompositeException.class, "boom")
                 .assertHasFailedWith(CompositeException.class, "supplier");
     }
@@ -264,7 +264,7 @@ public class MultiOnFailureTest {
     public void testRecoverWithCompletion() {
         Multi.createFrom().<Integer> failure(new IllegalStateException("boom"))
                 .onFailure().recoverWithCompletion()
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(1))
+                .subscribe().withSubscriber(AssertSubscriber.create(1))
                 .assertCompletedSuccessfully()
                 .assertHasNotReceivedAnyItem();
     }
@@ -284,7 +284,7 @@ public class MultiOnFailureTest {
 
         multi.onFailure()
                 .recoverWithMulti(fallback)
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(0))
+                .subscribe().withSubscriber(AssertSubscriber.create(0))
                 .assertSubscribed()
                 .assertHasNotReceivedAnyItem()
                 .request(2)
@@ -313,7 +313,7 @@ public class MultiOnFailureTest {
 
         multi.onFailure()
                 .recoverWithMulti(fallback)
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(0))
+                .subscribe().withSubscriber(AssertSubscriber.create(0))
                 .assertSubscribed()
                 .assertHasNotReceivedAnyItem()
                 .request(2)
@@ -330,7 +330,7 @@ public class MultiOnFailureTest {
         Multi.createFrom().<Integer> failure(new IOException())
                 .onFailure(IOException.class::isInstance)
                 .transform(e -> new Exception("BOOM!!!"))
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(0))
+                .subscribe().withSubscriber(AssertSubscriber.create(0))
                 .assertHasFailedWith(Exception.class, "BOOM!!!");
     }
 
@@ -339,18 +339,18 @@ public class MultiOnFailureTest {
         Multi.createFrom().<Integer> failure(new RuntimeException("first"))
                 .onFailure(IOException.class::isInstance)
                 .transform(e -> new Exception("BOOM!!!"))
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(0))
+                .subscribe().withSubscriber(AssertSubscriber.create(0))
                 .assertHasFailedWith(RuntimeException.class, "first");
     }
 
     @Test
     public void testOnFailureMapWithPredicateThrowingException() {
-        MultiAssertSubscriber<Integer> subscriber = Multi.createFrom().<Integer> failure(new RuntimeException("first"))
+        AssertSubscriber<Integer> subscriber = Multi.createFrom().<Integer> failure(new RuntimeException("first"))
                 .onFailure(f -> {
                     throw new IllegalArgumentException("bad");
                 })
                 .transform(e -> new Exception("BOOM"))
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(0))
+                .subscribe().withSubscriber(AssertSubscriber.create(0))
                 .assertHasFailedWith(CompositeException.class, "first")
                 .assertHasFailedWith(CompositeException.class, "bad");
 
@@ -361,7 +361,7 @@ public class MultiOnFailureTest {
     public void testOnFailureRecoverWithItemAndPredicate() {
         Multi.createFrom().<Integer> failure(new IOException())
                 .onFailure(IOException.class::isInstance).recoverWithItem(42)
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(1))
+                .subscribe().withSubscriber(AssertSubscriber.create(1))
                 .assertCompletedSuccessfully()
                 .assertReceived(42);
     }
@@ -370,7 +370,7 @@ public class MultiOnFailureTest {
     public void testOnFailureRecoverWithItemAndPredicateNotPassing() {
         Multi.createFrom().<Integer> failure(new IOException("boom"))
                 .onFailure(IllegalStateException.class::isInstance).recoverWithItem(42)
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(1))
+                .subscribe().withSubscriber(AssertSubscriber.create(1))
                 .assertHasFailedWith(IOException.class, "boom");
     }
 
@@ -378,7 +378,7 @@ public class MultiOnFailureTest {
     public void testOnFailureRecoverWithCompletionAndPredicate() {
         Multi.createFrom().<Integer> failure(new IOException())
                 .onFailure(IOException.class::isInstance).recoverWithCompletion()
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(1))
+                .subscribe().withSubscriber(AssertSubscriber.create(1))
                 .assertCompletedSuccessfully()
                 .assertHasNotReceivedAnyItem();
     }

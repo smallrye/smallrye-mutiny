@@ -9,7 +9,7 @@ import java.util.function.Supplier;
 import org.testng.annotations.Test;
 
 import io.smallrye.mutiny.Multi;
-import io.smallrye.mutiny.test.MultiAssertSubscriber;
+import io.smallrye.mutiny.test.AssertSubscriber;
 
 public class MultiCreateFromFailureTest {
 
@@ -25,9 +25,9 @@ public class MultiCreateFromFailureTest {
 
     @Test
     public void testWithException() {
-        MultiAssertSubscriber<String> subscriber = Multi.createFrom().<String> failure(new IOException("boom"))
+        AssertSubscriber<String> subscriber = Multi.createFrom().<String> failure(new IOException("boom"))
                 .subscribe()
-                .withSubscriber(MultiAssertSubscriber.create());
+                .withSubscriber(AssertSubscriber.create());
         subscriber.assertHasFailedWith(IOException.class, "boom");
     }
 
@@ -36,8 +36,8 @@ public class MultiCreateFromFailureTest {
         AtomicInteger count = new AtomicInteger();
         Multi<String> failure = Multi.createFrom()
                 .failure(() -> new IOException("boom-" + count.incrementAndGet()));
-        MultiAssertSubscriber<String> subscriber1 = failure.subscribe().withSubscriber(MultiAssertSubscriber.create());
-        MultiAssertSubscriber<String> subscriber2 = failure.subscribe().withSubscriber(MultiAssertSubscriber.create());
+        AssertSubscriber<String> subscriber1 = failure.subscribe().withSubscriber(AssertSubscriber.create());
+        AssertSubscriber<String> subscriber2 = failure.subscribe().withSubscriber(AssertSubscriber.create());
         subscriber1.assertHasFailedWith(IOException.class, "boom-1");
         subscriber2.assertHasFailedWith(IOException.class, "boom-2");
     }
@@ -47,14 +47,14 @@ public class MultiCreateFromFailureTest {
         Multi<String> multi = Multi.createFrom().failure(() -> {
             throw new IllegalStateException("boom");
         });
-        MultiAssertSubscriber<String> subscriber1 = multi.subscribe().withSubscriber(MultiAssertSubscriber.create());
+        AssertSubscriber<String> subscriber1 = multi.subscribe().withSubscriber(AssertSubscriber.create());
         subscriber1.assertTerminated().assertHasFailedWith(IllegalStateException.class, "boom");
     }
 
     @Test
     public void testWithNullReturnedBySupplier() {
         Multi<String> multi = Multi.createFrom().failure(() -> null);
-        MultiAssertSubscriber<String> subscriber1 = multi.subscribe().withSubscriber(MultiAssertSubscriber.create());
+        AssertSubscriber<String> subscriber1 = multi.subscribe().withSubscriber(AssertSubscriber.create());
         subscriber1.assertTerminated();
 
         assertThat(subscriber1.failures()).hasSize(1)

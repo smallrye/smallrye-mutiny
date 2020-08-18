@@ -173,54 +173,54 @@ public class UniOnFailureRecoveryTest {
 
     @Test
     public void testNotCalledOnItem() {
-        UniAssertSubscriber<Integer> ts = UniAssertSubscriber.create();
+        UniAssertSubscriber<Integer> subscriber = UniAssertSubscriber.create();
         Uni.createFrom().item(1)
                 .onFailure().recoverWithUni(v -> Uni.createFrom().item(2))
-                .subscribe().withSubscriber(ts);
-        ts.assertCompletedSuccessfully().assertItem(1);
+                .subscribe().withSubscriber(subscriber);
+        subscriber.assertCompletedSuccessfully().assertItem(1);
     }
 
     @Test
     public void testCalledOnFailure() {
-        UniAssertSubscriber<Integer> ts = UniAssertSubscriber.create();
+        UniAssertSubscriber<Integer> subscriber = UniAssertSubscriber.create();
 
         Uni.createFrom().<Integer> failure(new RuntimeException("boom"))
                 .onFailure().recoverWithUni(fail -> Uni.createFrom().item(2))
-                .subscribe().withSubscriber(ts);
+                .subscribe().withSubscriber(subscriber);
 
-        ts.assertCompletedSuccessfully().assertItem(2);
+        subscriber.assertCompletedSuccessfully().assertItem(2);
     }
 
     @Test
     public void testCalledOnFailureWithDirectResult() {
-        UniAssertSubscriber<Integer> ts = UniAssertSubscriber.create();
+        UniAssertSubscriber<Integer> subscriber = UniAssertSubscriber.create();
 
         Uni.createFrom().<Integer> failure(new RuntimeException("boom"))
                 .onFailure().recoverWithItem(fail -> 2)
-                .subscribe().withSubscriber(ts);
+                .subscribe().withSubscriber(subscriber);
 
-        ts.assertCompletedSuccessfully().assertItem(2);
+        subscriber.assertCompletedSuccessfully().assertItem(2);
     }
 
     @Test
     public void testWithMappingOfFailure() {
-        UniAssertSubscriber<Integer> ts = UniAssertSubscriber.create();
+        UniAssertSubscriber<Integer> subscriber = UniAssertSubscriber.create();
         Uni.createFrom().<Integer> failure(new Exception())
                 .onFailure().transform(f -> new RuntimeException("boom"))
-                .subscribe().withSubscriber(ts);
-        ts.assertCompletedWithFailure()
+                .subscribe().withSubscriber(subscriber);
+        subscriber.assertCompletedWithFailure()
                 .assertFailure(RuntimeException.class, "boom");
     }
 
     @Test
     public void testWithMappingOfFailureAndPredicates() {
-        UniAssertSubscriber<Integer> ts = UniAssertSubscriber.create();
+        UniAssertSubscriber<Integer> subscriber = UniAssertSubscriber.create();
         Uni.createFrom().<Integer> failure(new IOException())
                 .onFailure().transform(t -> new IndexOutOfBoundsException())
                 .onFailure(IOException.class).recoverWithUni(Uni.createFrom().item(1))
                 .onFailure(IndexOutOfBoundsException.class).recoverWithUni(Uni.createFrom().item(2))
-                .subscribe().withSubscriber(ts);
-        ts.assertCompletedSuccessfully().assertItem(2);
+                .subscribe().withSubscriber(subscriber);
+        subscriber.assertCompletedSuccessfully().assertItem(2);
     }
 
 }

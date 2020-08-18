@@ -17,14 +17,14 @@ import org.testng.annotations.Test;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.helpers.Subscriptions;
-import io.smallrye.mutiny.test.MultiAssertSubscriber;
+import io.smallrye.mutiny.test.AssertSubscriber;
 
 public class SerializedProcessorTest {
 
     @Test
     public void testAPI() {
         SerializedProcessor<String, String> processor = new SerializedProcessor<>(UnicastProcessor.create());
-        MultiAssertSubscriber<String> subscriber = new MultiAssertSubscriber<>(10);
+        AssertSubscriber<String> subscriber = new AssertSubscriber<>(10);
         processor.subscribe(subscriber);
         processor.onNext("hello");
         processor.onComplete();
@@ -41,7 +41,7 @@ public class SerializedProcessorTest {
         unicast.onComplete();
         SerializedProcessor<Integer, Integer> serialized = unicast.serialized();
 
-        MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(1);
+        AssertSubscriber<Integer> subscriber = AssertSubscriber.create(1);
         serialized.subscribe(subscriber);
         subscriber.await()
                 .assertReceived(1)
@@ -54,7 +54,7 @@ public class SerializedProcessorTest {
         unicast.onComplete();
         SerializedProcessor<Integer, Integer> serialized = unicast.serialized();
 
-        MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(1);
+        AssertSubscriber<Integer> subscriber = AssertSubscriber.create(1);
         serialized.subscribe(subscriber);
         subscriber.await()
                 .assertHasNotReceivedAnyItem()
@@ -68,7 +68,7 @@ public class SerializedProcessorTest {
         unicast.onError(new Exception("boom"));
         SerializedProcessor<Integer, Integer> serialized = unicast.serialized();
 
-        MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(1);
+        AssertSubscriber<Integer> subscriber = AssertSubscriber.create(1);
         serialized.subscribe(subscriber);
         subscriber.await()
                 .assertReceived(1)
@@ -81,7 +81,7 @@ public class SerializedProcessorTest {
         unicast.onNext(1);
         SerializedProcessor<Integer, Integer> serialized = unicast.serialized();
 
-        MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(1);
+        AssertSubscriber<Integer> subscriber = AssertSubscriber.create(1);
         serialized.subscribe(subscriber);
         subscriber
                 .assertReceived(1)
@@ -91,7 +91,7 @@ public class SerializedProcessorTest {
     @Test
     public void testWithMultipleItems() {
         Processor<Integer, Integer> processor = UnicastProcessor.<Integer> create().serialized();
-        MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(10);
+        AssertSubscriber<Integer> subscriber = AssertSubscriber.create(10);
         processor.subscribe(subscriber);
 
         Multi.createFrom().range(1, 11).subscribe(processor);
@@ -107,7 +107,7 @@ public class SerializedProcessorTest {
     @Test(invocationCount = 100)
     public void verifyOnNextThreadSafety() {
         final Processor<Integer, Integer> processor = UnicastProcessor.<Integer> create().serialized();
-        MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(100);
+        AssertSubscriber<Integer> subscriber = AssertSubscriber.create(100);
         processor.subscribe(subscriber);
 
         Runnable r1 = () -> processor.onNext(1);
@@ -133,7 +133,7 @@ public class SerializedProcessorTest {
     public void verifyOnErrorThreadSafety() {
         Exception failure = new Exception("boom");
         final Processor<Integer, Integer> processor = UnicastProcessor.<Integer> create().serialized();
-        MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(100);
+        AssertSubscriber<Integer> subscriber = AssertSubscriber.create(100);
         processor.subscribe(subscriber);
 
         Runnable r1 = () -> processor.onError(failure);
@@ -155,7 +155,7 @@ public class SerializedProcessorTest {
     public void verifyOnNextOnErrorThreadSafety() {
         Exception failure = new Exception("boom");
         final Processor<Integer, Integer> processor = UnicastProcessor.<Integer> create().serialized();
-        MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(100);
+        AssertSubscriber<Integer> subscriber = AssertSubscriber.create(100);
         processor.subscribe(subscriber);
 
         Runnable r1 = () -> {
@@ -186,7 +186,7 @@ public class SerializedProcessorTest {
     @Test(invocationCount = 100)
     public void verifyOnNextOnCompleteThreadSafety() {
         final Processor<Integer, Integer> processor = UnicastProcessor.<Integer> create().serialized();
-        MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(100);
+        AssertSubscriber<Integer> subscriber = AssertSubscriber.create(100);
         processor.subscribe(subscriber);
 
         Runnable r1 = () -> {
@@ -214,7 +214,7 @@ public class SerializedProcessorTest {
     @Test(invocationCount = 100)
     public void verifyOnSubscribeOnCompleteThreadSafety() {
         final Processor<Integer, Integer> processor = UnicastProcessor.<Integer> create().serialized();
-        MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(100);
+        AssertSubscriber<Integer> subscriber = AssertSubscriber.create(100);
         processor.subscribe(subscriber);
 
         Runnable r1 = () -> {
@@ -242,7 +242,7 @@ public class SerializedProcessorTest {
     @Test(invocationCount = 100)
     public void verifyOnSubscribeOnSubscribeThreadSafety() throws InterruptedException {
         final Processor<Integer, Integer> processor = UnicastProcessor.<Integer> create().serialized();
-        MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(100);
+        AssertSubscriber<Integer> subscriber = AssertSubscriber.create(100);
         processor.subscribe(subscriber);
 
         CountDownLatch latch = new CountDownLatch(2);
@@ -270,7 +270,7 @@ public class SerializedProcessorTest {
     @Test(invocationCount = 100)
     public void verifyOnFailureOnCompleteThreadSafety() {
         final Processor<Integer, Integer> processor = UnicastProcessor.<Integer> create().serialized();
-        MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(100);
+        AssertSubscriber<Integer> subscriber = AssertSubscriber.create(100);
         processor.subscribe(subscriber);
 
         Runnable r1 = () -> {
@@ -298,7 +298,7 @@ public class SerializedProcessorTest {
     @Test(invocationCount = 100)
     public void verifyOnFailureOnFailureThreadSafety() {
         final Processor<Integer, Integer> processor = UnicastProcessor.<Integer> create().serialized();
-        MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(100);
+        AssertSubscriber<Integer> subscriber = AssertSubscriber.create(100);
         processor.subscribe(subscriber);
 
         Runnable r1 = () -> processor.onError(new Exception("boom"));
@@ -329,7 +329,7 @@ public class SerializedProcessorTest {
     @Test(invocationCount = 100)
     public void testRaceBetweenOnNextAndOnComplete() {
         final Processor<Integer, Integer> processor = UnicastProcessor.<Integer> create().serialized();
-        MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(100);
+        AssertSubscriber<Integer> subscriber = AssertSubscriber.create(100);
         processor.subscribe(subscriber);
 
         Runnable r1 = () -> {
@@ -361,7 +361,7 @@ public class SerializedProcessorTest {
     @Test(invocationCount = 100)
     public void testRaceBetweenOnNextAndOnSubscribe() {
         final Processor<Integer, Integer> processor = UnicastProcessor.<Integer> create().serialized();
-        MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(100);
+        AssertSubscriber<Integer> subscriber = AssertSubscriber.create(100);
 
         Runnable r1 = () -> {
             processor.onNext(1);

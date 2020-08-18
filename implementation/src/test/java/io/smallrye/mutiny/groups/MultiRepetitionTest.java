@@ -14,7 +14,7 @@ import org.testng.annotations.Test;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.subscription.UniEmitter;
-import io.smallrye.mutiny.test.MultiAssertSubscriber;
+import io.smallrye.mutiny.test.AssertSubscriber;
 
 public class MultiRepetitionTest {
 
@@ -27,8 +27,8 @@ public class MultiRepetitionTest {
                 .atMost(2);
 
         assertThat(shared).hasValue(0);
-        MultiAssertSubscriber<Integer> subscriber = multi.subscribe()
-                .withSubscriber(MultiAssertSubscriber.create(1));
+        AssertSubscriber<Integer> subscriber = multi.subscribe()
+                .withSubscriber(AssertSubscriber.create(1));
 
         subscriber.assertReceived(1);
         assertThat(shared).hasValue(1);
@@ -44,8 +44,8 @@ public class MultiRepetitionTest {
                 .atMost(2);
 
         assertThat(shared).hasValue(0);
-        MultiAssertSubscriber<Integer> subscriber = multi.subscribe()
-                .withSubscriber(MultiAssertSubscriber.create(1));
+        AssertSubscriber<Integer> subscriber = multi.subscribe()
+                .withSubscriber(AssertSubscriber.create(1));
 
         subscriber.assertReceived(1);
         assertThat(shared).hasValue(1);
@@ -64,8 +64,8 @@ public class MultiRepetitionTest {
                         (state, emitter) -> emitter.complete(state.incrementAndGet()))
                 .atMost(2);
 
-        MultiAssertSubscriber<Integer> subscriber = multi.subscribe()
-                .withSubscriber(MultiAssertSubscriber.create(1));
+        AssertSubscriber<Integer> subscriber = multi.subscribe()
+                .withSubscriber(AssertSubscriber.create(1));
 
         subscriber.assertHasFailedWith(IllegalStateException.class, "boom");
     }
@@ -79,8 +79,8 @@ public class MultiRepetitionTest {
                         (state, emitter) -> emitter.complete(state.incrementAndGet()))
                 .atMost(2);
 
-        MultiAssertSubscriber<Integer> subscriber = multi.subscribe()
-                .withSubscriber(MultiAssertSubscriber.create(1));
+        AssertSubscriber<Integer> subscriber = multi.subscribe()
+                .withSubscriber(AssertSubscriber.create(1));
 
         subscriber.assertHasFailedWith(NullPointerException.class, "supplier");
     }
@@ -111,8 +111,8 @@ public class MultiRepetitionTest {
                 .atMost(2);
 
         assertThat(shared).hasValue(0);
-        MultiAssertSubscriber<Integer> subscriber = multi.subscribe()
-                .withSubscriber(MultiAssertSubscriber.create(1));
+        AssertSubscriber<Integer> subscriber = multi.subscribe()
+                .withSubscriber(AssertSubscriber.create(1));
 
         subscriber.assertReceived(1);
         assertThat(shared).hasValue(1);
@@ -128,8 +128,8 @@ public class MultiRepetitionTest {
                 .atMost(2);
 
         assertThat(shared).hasValue(0);
-        MultiAssertSubscriber<Integer> subscriber = multi.subscribe()
-                .withSubscriber(MultiAssertSubscriber.create(1));
+        AssertSubscriber<Integer> subscriber = multi.subscribe()
+                .withSubscriber(AssertSubscriber.create(1));
 
         subscriber.assertReceived(1);
         assertThat(shared).hasValue(1);
@@ -147,8 +147,8 @@ public class MultiRepetitionTest {
                 .uni(boom, (state) -> Uni.createFrom().item(state.incrementAndGet()))
                 .atMost(2);
 
-        MultiAssertSubscriber<Integer> subscriber = multi.subscribe()
-                .withSubscriber(MultiAssertSubscriber.create(1));
+        AssertSubscriber<Integer> subscriber = multi.subscribe()
+                .withSubscriber(AssertSubscriber.create(1));
 
         subscriber.assertHasFailedWith(IllegalStateException.class, "boom");
     }
@@ -159,8 +159,8 @@ public class MultiRepetitionTest {
                 .<Integer> uni(() -> Uni.createFrom().failure(new IllegalStateException("boom")))
                 .atMost(2);
 
-        MultiAssertSubscriber<Integer> subscriber = multi.subscribe()
-                .withSubscriber(MultiAssertSubscriber.create(1));
+        AssertSubscriber<Integer> subscriber = multi.subscribe()
+                .withSubscriber(AssertSubscriber.create(1));
 
         subscriber.assertHasFailedWith(IllegalStateException.class, "boom");
     }
@@ -171,8 +171,8 @@ public class MultiRepetitionTest {
                 .<Integer> uni(() -> null)
                 .atMost(2);
 
-        MultiAssertSubscriber<Integer> subscriber = multi.subscribe()
-                .withSubscriber(MultiAssertSubscriber.create(1));
+        AssertSubscriber<Integer> subscriber = multi.subscribe()
+                .withSubscriber(AssertSubscriber.create(1));
 
         subscriber.assertHasFailedWith(NullPointerException.class, "");
     }
@@ -185,8 +185,8 @@ public class MultiRepetitionTest {
                 .uni(boom, (state) -> Uni.createFrom().item(state.incrementAndGet()))
                 .atMost(2);
 
-        MultiAssertSubscriber<Integer> subscriber = multi.subscribe()
-                .withSubscriber(MultiAssertSubscriber.create(1));
+        AssertSubscriber<Integer> subscriber = multi.subscribe()
+                .withSubscriber(AssertSubscriber.create(1));
 
         subscriber.assertHasFailedWith(NullPointerException.class, "supplier");
     }
@@ -211,8 +211,8 @@ public class MultiRepetitionTest {
                 .atMost(2);
 
         assertThat(shared).hasValue(0);
-        MultiAssertSubscriber<Integer> subscriber = multi.subscribe()
-                .withSubscriber(MultiAssertSubscriber.create(1));
+        AssertSubscriber<Integer> subscriber = multi.subscribe()
+                .withSubscriber(AssertSubscriber.create(1));
 
         subscriber.assertReceived(1);
         assertThat(shared).hasValue(1);
@@ -228,8 +228,8 @@ public class MultiRepetitionTest {
                 .atMost(2);
 
         assertThat(shared).hasValue(0);
-        MultiAssertSubscriber<Integer> subscriber = multi.subscribe()
-                .withSubscriber(MultiAssertSubscriber.create(1));
+        AssertSubscriber<Integer> subscriber = multi.subscribe()
+                .withSubscriber(AssertSubscriber.create(1));
 
         subscriber.assertReceived(1);
         assertThat(shared).hasValue(1);
@@ -247,8 +247,8 @@ public class MultiRepetitionTest {
                 .completionStage(boom, (state) -> CompletableFuture.completedFuture(state.incrementAndGet()))
                 .atMost(2);
 
-        MultiAssertSubscriber<Integer> subscriber = multi.subscribe()
-                .withSubscriber(MultiAssertSubscriber.create(1));
+        AssertSubscriber<Integer> subscriber = multi.subscribe()
+                .withSubscriber(AssertSubscriber.create(1));
 
         subscriber.assertHasFailedWith(IllegalStateException.class, "boom");
     }
@@ -261,8 +261,8 @@ public class MultiRepetitionTest {
                 })
                 .atMost(2);
 
-        MultiAssertSubscriber<Integer> subscriber = multi.subscribe()
-                .withSubscriber(MultiAssertSubscriber.create(1));
+        AssertSubscriber<Integer> subscriber = multi.subscribe()
+                .withSubscriber(AssertSubscriber.create(1));
 
         subscriber.assertHasFailedWith(IllegalStateException.class, "boom");
     }
@@ -275,8 +275,8 @@ public class MultiRepetitionTest {
                 .completionStage(boom, (state) -> CompletableFuture.completedFuture(state.incrementAndGet()))
                 .atMost(2);
 
-        MultiAssertSubscriber<Integer> subscriber = multi.subscribe()
-                .withSubscriber(MultiAssertSubscriber.create(1));
+        AssertSubscriber<Integer> subscriber = multi.subscribe()
+                .withSubscriber(AssertSubscriber.create(1));
 
         subscriber.assertHasFailedWith(NullPointerException.class, "supplier");
     }
@@ -287,8 +287,8 @@ public class MultiRepetitionTest {
                 .<Integer> completionStage(() -> CompletableFuture.completedFuture(null))
                 .atMost(2);
 
-        MultiAssertSubscriber<Integer> subscriber = multi.subscribe()
-                .withSubscriber(MultiAssertSubscriber.create(2));
+        AssertSubscriber<Integer> subscriber = multi.subscribe()
+                .withSubscriber(AssertSubscriber.create(2));
 
         subscriber.assertTerminated().assertCompletedSuccessfully().assertHasNotReceivedAnyItem();
     }
@@ -314,8 +314,8 @@ public class MultiRepetitionTest {
                 .atMost(2);
 
         assertThat(shared).hasValue(0);
-        MultiAssertSubscriber<Integer> subscriber = multi.subscribe()
-                .withSubscriber(MultiAssertSubscriber.create(1));
+        AssertSubscriber<Integer> subscriber = multi.subscribe()
+                .withSubscriber(AssertSubscriber.create(1));
 
         subscriber.assertReceived(1);
         assertThat(shared).hasValue(1);
@@ -331,8 +331,8 @@ public class MultiRepetitionTest {
                 .atMost(2);
 
         assertThat(shared).hasValue(0);
-        MultiAssertSubscriber<Integer> subscriber = multi.subscribe()
-                .withSubscriber(MultiAssertSubscriber.create(1));
+        AssertSubscriber<Integer> subscriber = multi.subscribe()
+                .withSubscriber(AssertSubscriber.create(1));
 
         subscriber.assertReceived(1);
         assertThat(shared).hasValue(1);

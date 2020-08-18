@@ -18,42 +18,45 @@ public class UniCreateFromFailureTest {
         Uni<Object> boom = Uni.createFrom().failure(() -> new IOException("boom"));
         try {
             boom.await().indefinitely();
-            fail("Exception expected");
         } catch (Exception e) {
             assertThat(e).hasCauseInstanceOf(IOException.class);
+            return;
         }
+        fail("Exception expected");
     }
 
     @Test
     public void testCreationWithCheckedException() {
-        UniAssertSubscriber<Object> ts = UniAssertSubscriber.create();
-        Uni.createFrom().failure(new Exception("boom")).subscribe().withSubscriber(ts);
-        ts.assertFailure(Exception.class, "boom");
+        UniAssertSubscriber<Object> subscriber = UniAssertSubscriber.create();
+        Uni.createFrom().failure(new Exception("boom")).subscribe().withSubscriber(subscriber);
+        subscriber.assertFailure(Exception.class, "boom");
 
         try {
             Uni.createFrom().failure(new Exception("boom")).await().asOptional().indefinitely();
-            fail("Exception expected");
         } catch (Exception e) {
             assertThat(e).hasCauseInstanceOf(Exception.class)
                     .isInstanceOf(RuntimeException.class);
+            return;
         }
-
+        fail("Exception expected");
     }
 
     @Test
     public void testCreationWithRuntimeException() {
-        UniAssertSubscriber<Object> ts = UniAssertSubscriber.create();
-        Uni.createFrom().failure(new RuntimeException("boom")).subscribe().withSubscriber(ts);
-        ts.assertFailure(RuntimeException.class, "boom");
+        UniAssertSubscriber<Object> subscriber = UniAssertSubscriber.create();
+        Uni.createFrom().failure(new RuntimeException("boom")).subscribe().withSubscriber(subscriber);
+        subscriber.assertFailure(RuntimeException.class, "boom");
 
         try {
             Uni.createFrom().failure(new RuntimeException("boom")).await().indefinitely();
-            fail("Exception expected");
         } catch (Exception e) {
             assertThat(e)
                     .isInstanceOf(RuntimeException.class)
                     .hasMessage("boom");
+            return;
         }
+        fail("Exception expected");
+
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
@@ -71,10 +74,11 @@ public class UniCreateFromFailureTest {
         Uni<Object> boom = Uni.createFrom().failure(() -> null);
         try {
             boom.await().indefinitely();
-            fail("Exception expected");
         } catch (Exception e) {
             assertThat(e).isInstanceOf(NullPointerException.class);
+            return;
         }
+        fail("Exception expected");
     }
 
     @Test
@@ -84,10 +88,11 @@ public class UniCreateFromFailureTest {
         });
         try {
             boom.await().indefinitely();
-            fail("Exception expected");
         } catch (Exception e) {
             assertThat(e).isInstanceOf(NoSuchElementException.class);
+            return;
         }
+        fail("Exception expected");
     }
 
 }

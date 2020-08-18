@@ -12,7 +12,7 @@ import org.testng.annotations.Test;
 import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
-import io.smallrye.mutiny.test.MultiAssertSubscriber;
+import io.smallrye.mutiny.test.AssertSubscriber;
 
 public class MultiOnFailureInvokeUniTest {
 
@@ -27,10 +27,10 @@ public class MultiOnFailureInvokeUniTest {
         AtomicReference<Throwable> failure = new AtomicReference<>();
         AtomicInteger twoGotCalled = new AtomicInteger();
 
-        MultiAssertSubscriber<Integer> subscriber = numbers.onFailure().invokeUni(i -> {
+        AssertSubscriber<Integer> subscriber = numbers.onFailure().invokeUni(i -> {
             failure.set(i);
             return sub.onItem().invoke(c -> twoGotCalled.incrementAndGet());
-        }).subscribe().withSubscriber(MultiAssertSubscriber.create(10));
+        }).subscribe().withSubscriber(AssertSubscriber.create(10));
 
         subscriber.assertCompletedSuccessfully()
                 .assertReceived(1, 2);
@@ -43,10 +43,10 @@ public class MultiOnFailureInvokeUniTest {
         AtomicReference<Throwable> failure = new AtomicReference<>();
         AtomicInteger twoGotCalled = new AtomicInteger();
 
-        MultiAssertSubscriber<Integer> subscriber = failed.onFailure().invokeUni(i -> {
+        AssertSubscriber<Integer> subscriber = failed.onFailure().invokeUni(i -> {
             failure.set(i);
             return sub.onItem().invoke(c -> twoGotCalled.incrementAndGet());
-        }).subscribe().withSubscriber(MultiAssertSubscriber.create(10));
+        }).subscribe().withSubscriber(AssertSubscriber.create(10));
 
         subscriber.assertHasFailedWith(IOException.class, "boom")
                 .assertReceived(1, 2);
@@ -58,10 +58,10 @@ public class MultiOnFailureInvokeUniTest {
     public void testFailureInAsyncCallback() {
         AtomicReference<Throwable> failure = new AtomicReference<>();
 
-        MultiAssertSubscriber<Integer> subscriber = failed.onFailure().invokeUni(i -> {
+        AssertSubscriber<Integer> subscriber = failed.onFailure().invokeUni(i -> {
             failure.set(i);
             throw new RuntimeException("kaboom");
-        }).subscribe().withSubscriber(MultiAssertSubscriber.create(10));
+        }).subscribe().withSubscriber(AssertSubscriber.create(10));
 
         subscriber
                 .assertHasFailedWith(CompositeException.class, "boom")
@@ -74,10 +74,10 @@ public class MultiOnFailureInvokeUniTest {
     public void testNullReturnedByAsyncCallback() {
         AtomicReference<Throwable> failure = new AtomicReference<>();
 
-        MultiAssertSubscriber<Integer> subscriber = failed.onFailure().invokeUni(i -> {
+        AssertSubscriber<Integer> subscriber = failed.onFailure().invokeUni(i -> {
             failure.set(i);
             return null;
-        }).subscribe().withSubscriber(MultiAssertSubscriber.create(10));
+        }).subscribe().withSubscriber(AssertSubscriber.create(10));
 
         subscriber
                 .assertHasFailedWith(CompositeException.class, "boom")
@@ -90,10 +90,10 @@ public class MultiOnFailureInvokeUniTest {
     public void testInvokeUniWithSubFailure() {
         AtomicReference<Throwable> failure = new AtomicReference<>();
 
-        MultiAssertSubscriber<Integer> subscriber = failed.onFailure().invokeUni(i -> {
+        AssertSubscriber<Integer> subscriber = failed.onFailure().invokeUni(i -> {
             failure.set(i);
             return Uni.createFrom().failure(new IllegalStateException("d'oh"));
-        }).subscribe().withSubscriber(MultiAssertSubscriber.create(10));
+        }).subscribe().withSubscriber(AssertSubscriber.create(10));
 
         subscriber
                 .assertHasFailedWith(CompositeException.class, "boom")
@@ -107,8 +107,8 @@ public class MultiOnFailureInvokeUniTest {
         AtomicBoolean terminated = new AtomicBoolean();
         Uni<Object> uni = Uni.createFrom().emitter(e -> e.onTermination(() -> terminated.set(true)));
 
-        MultiAssertSubscriber<Integer> subscriber = failed.onFailure().invokeUni(i -> uni)
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(10));
+        AssertSubscriber<Integer> subscriber = failed.onFailure().invokeUni(i -> uni)
+                .subscribe().withSubscriber(AssertSubscriber.create(10));
 
         subscriber.cancel();
         //noinspection ConstantConditions

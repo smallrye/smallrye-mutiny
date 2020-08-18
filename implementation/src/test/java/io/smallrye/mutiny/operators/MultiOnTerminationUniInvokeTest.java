@@ -14,13 +14,13 @@ import org.testng.annotations.Test;
 import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
-import io.smallrye.mutiny.test.MultiAssertSubscriber;
+import io.smallrye.mutiny.test.AssertSubscriber;
 
 public class MultiOnTerminationUniInvokeTest {
 
     @Test
     public void testTerminationWhenErrorIsEmitted() {
-        MultiAssertSubscriber<Object> ts = MultiAssertSubscriber.create();
+        AssertSubscriber<Object> subscriber = AssertSubscriber.create();
 
         AtomicReference<Subscription> subscription = new AtomicReference<>();
         AtomicReference<Object> item = new AtomicReference<>();
@@ -47,9 +47,9 @@ public class MultiOnTerminationUniInvokeTest {
                 })
                 .onRequest().invoke(requests::set)
                 .onCancellation().invoke(() -> cancellation.set(true))
-                .subscribe().withSubscriber(ts);
+                .subscribe().withSubscriber(subscriber);
 
-        ts
+        subscriber
                 .request(20)
                 .assertHasNotReceivedAnyItem()
                 .assertHasFailedWith(IOException.class, "boom");
@@ -69,7 +69,7 @@ public class MultiOnTerminationUniInvokeTest {
 
     @Test
     public void testTerminationWhenItemIsEmittedButUniInvokeIsFailed() {
-        MultiAssertSubscriber<Integer> ts = MultiAssertSubscriber.create();
+        AssertSubscriber<Integer> subscriber = AssertSubscriber.create();
 
         AtomicReference<Subscription> subscription = new AtomicReference<>();
         AtomicReference<Integer> item = new AtomicReference<>();
@@ -95,9 +95,9 @@ public class MultiOnTerminationUniInvokeTest {
                 })
                 .onRequest().invoke(requests::set)
                 .onCancellation().invoke(() -> cancellation.set(true))
-                .subscribe().withSubscriber(ts);
+                .subscribe().withSubscriber(subscriber);
 
-        ts
+        subscriber
                 .request(20)
                 .assertReceived(1)
                 .assertHasFailedWith(IOException.class, "bam");
@@ -116,7 +116,7 @@ public class MultiOnTerminationUniInvokeTest {
 
     @Test
     public void testTerminationWhenItemIsEmittedButUniInvokeThrowsException() {
-        MultiAssertSubscriber<Integer> ts = MultiAssertSubscriber.create();
+        AssertSubscriber<Integer> subscriber = AssertSubscriber.create();
 
         AtomicReference<Subscription> subscription = new AtomicReference<>();
         AtomicReference<Integer> item = new AtomicReference<>();
@@ -142,9 +142,9 @@ public class MultiOnTerminationUniInvokeTest {
                 })
                 .onRequest().invoke(requests::set)
                 .onCancellation().invoke(() -> cancellation.set(true))
-                .subscribe().withSubscriber(ts);
+                .subscribe().withSubscriber(subscriber);
 
-        ts
+        subscriber
                 .request(20)
                 .assertReceived(1)
                 .assertHasFailedWith(RuntimeException.class, "bam");
@@ -163,7 +163,7 @@ public class MultiOnTerminationUniInvokeTest {
 
     @Test
     public void testTerminationWhenErrorIsEmittedButUniInvokeIsFailed() {
-        MultiAssertSubscriber<Object> ts = MultiAssertSubscriber.create();
+        AssertSubscriber<Object> subscriber = AssertSubscriber.create();
 
         AtomicReference<Subscription> subscription = new AtomicReference<>();
         AtomicReference<Object> item = new AtomicReference<>();
@@ -189,15 +189,15 @@ public class MultiOnTerminationUniInvokeTest {
                 })
                 .onRequest().invoke(requests::set)
                 .onCancellation().invoke(() -> cancellation.set(true))
-                .subscribe().withSubscriber(ts);
+                .subscribe().withSubscriber(subscriber);
 
-        ts
+        subscriber
                 .request(20)
                 .assertHasNotReceivedAnyItem()
                 .assertHasFailedWith(CompositeException.class, "boom");
 
-        assertThat(ts.failures()).hasSize(1);
-        CompositeException compositeException = (CompositeException) ts.failures().get(0);
+        assertThat(subscriber.failures()).hasSize(1);
+        CompositeException compositeException = (CompositeException) subscriber.failures().get(0);
         assertThat(compositeException.getCauses()).hasSize(2);
         assertThat(compositeException.getCauses().get(0)).isInstanceOf(IOException.class).hasMessage("boom");
         assertThat(compositeException.getCauses().get(1)).isInstanceOf(RuntimeException.class).hasMessage("tada");
@@ -216,7 +216,7 @@ public class MultiOnTerminationUniInvokeTest {
 
     @Test
     public void testTerminationWhenErrorIsEmittedButUniInvokeThrowsException() {
-        MultiAssertSubscriber<Object> ts = MultiAssertSubscriber.create();
+        AssertSubscriber<Object> subscriber = AssertSubscriber.create();
 
         AtomicReference<Subscription> subscription = new AtomicReference<>();
         AtomicReference<Object> item = new AtomicReference<>();
@@ -242,15 +242,15 @@ public class MultiOnTerminationUniInvokeTest {
                 })
                 .onRequest().invoke(requests::set)
                 .onCancellation().invoke(() -> cancellation.set(true))
-                .subscribe().withSubscriber(ts);
+                .subscribe().withSubscriber(subscriber);
 
-        ts
+        subscriber
                 .request(20)
                 .assertHasNotReceivedAnyItem()
                 .assertHasFailedWith(CompositeException.class, "boom");
 
-        assertThat(ts.failures()).hasSize(1);
-        CompositeException compositeException = (CompositeException) ts.failures().get(0);
+        assertThat(subscriber.failures()).hasSize(1);
+        CompositeException compositeException = (CompositeException) subscriber.failures().get(0);
         assertThat(compositeException.getCauses()).hasSize(2);
         assertThat(compositeException.getCauses().get(0)).isInstanceOf(IOException.class).hasMessage("boom");
         assertThat(compositeException.getCauses().get(1)).isInstanceOf(RuntimeException.class).hasMessage("tada");
@@ -269,7 +269,7 @@ public class MultiOnTerminationUniInvokeTest {
 
     @Test
     public void testTerminationWithCancellationAndNotItems() {
-        MultiAssertSubscriber<Integer> ts = MultiAssertSubscriber.create();
+        AssertSubscriber<Integer> subscriber = AssertSubscriber.create();
 
         AtomicReference<Integer> item = new AtomicReference<>();
         AtomicBoolean cancellation = new AtomicBoolean();
@@ -296,9 +296,9 @@ public class MultiOnTerminationUniInvokeTest {
                     });
                 })
                 .onCancellation().invoke(() -> cancellation.set(true))
-                .subscribe().withSubscriber(ts);
+                .subscribe().withSubscriber(subscriber);
 
-        ts.cancel()
+        subscriber.cancel()
                 .assertHasNotReceivedAnyItem()
                 .assertHasNotCompleted();
 
@@ -316,7 +316,7 @@ public class MultiOnTerminationUniInvokeTest {
 
     @Test
     public void testTerminationWithCancellationAfterOneItem() {
-        MultiAssertSubscriber<Object> ts = MultiAssertSubscriber.create();
+        AssertSubscriber<Object> subscriber = AssertSubscriber.create();
 
         AtomicReference<Object> item = new AtomicReference<>();
         AtomicBoolean cancellation = new AtomicBoolean();
@@ -358,15 +358,15 @@ public class MultiOnTerminationUniInvokeTest {
                             });
                 })
                 .onCancellation().invoke(() -> cancellation.set(true))
-                .subscribe().withSubscriber(ts);
+                .subscribe().withSubscriber(subscriber);
 
-        ts.request(10);
+        subscriber.request(10);
         await().untilTrue(firstItemEmitted);
-        ts.cancel();
+        subscriber.cancel();
         cancellationSent.set(true);
         await().untilTrue(uniCompleted);
 
-        ts.assertReceived(1).assertHasNotCompleted();
+        subscriber.assertReceived(1).assertHasNotCompleted();
 
         assertThat(item.get()).isEqualTo(1);
         assertThat(cancellation.get()).isTrue();

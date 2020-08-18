@@ -17,7 +17,7 @@ import org.reactivestreams.Subscription;
 import org.testng.annotations.Test;
 
 import io.smallrye.mutiny.subscription.MultiSubscriber;
-import io.smallrye.mutiny.test.MultiAssertSubscriber;
+import io.smallrye.mutiny.test.AssertSubscriber;
 
 public class HalfSerializerTest {
 
@@ -27,7 +27,7 @@ public class HalfSerializerTest {
         AtomicInteger wip = new AtomicInteger();
         AtomicReference<Throwable> failure = new AtomicReference<>();
         AtomicReference<Subscriber<Object>> subscriber = new AtomicReference<>();
-        MultiAssertSubscriber<Object> test = MultiAssertSubscriber.create(10);
+        AssertSubscriber<Object> test = AssertSubscriber.create(10);
 
         MultiSubscriber s = new MultiSubscriber() {
             @Override
@@ -67,7 +67,7 @@ public class HalfSerializerTest {
         AtomicInteger wip = new AtomicInteger();
         AtomicReference<Throwable> failure = new AtomicReference<>();
         AtomicReference<Subscriber<Object>> subscriber = new AtomicReference<>();
-        MultiAssertSubscriber<Object> test = MultiAssertSubscriber.create(10);
+        AssertSubscriber<Object> test = AssertSubscriber.create(10);
 
         MultiSubscriber s = new MultiSubscriber() {
             @Override
@@ -107,7 +107,7 @@ public class HalfSerializerTest {
         AtomicInteger wip = new AtomicInteger();
         AtomicReference<Throwable> failure = new AtomicReference<>();
         AtomicReference<Subscriber<Object>> subscriber = new AtomicReference<>();
-        MultiAssertSubscriber<Object> test = MultiAssertSubscriber.create(10);
+        AssertSubscriber<Object> test = AssertSubscriber.create(10);
 
         MultiSubscriber s = new MultiSubscriber() {
             @Override
@@ -145,7 +145,7 @@ public class HalfSerializerTest {
         AtomicReference<Throwable> failure = new AtomicReference<>();
 
         Subscription subscription = mock(Subscription.class);
-        MultiAssertSubscriber<Object> test = MultiAssertSubscriber.create(10);
+        AssertSubscriber<Object> test = AssertSubscriber.create(10);
         test.onSubscribe(subscription);
 
         CountDownLatch latch = new CountDownLatch(2);
@@ -174,7 +174,7 @@ public class HalfSerializerTest {
         AtomicReference<Throwable> failure = new AtomicReference<>();
 
         Subscription subscription = mock(Subscription.class);
-        MultiAssertSubscriber<Object> test = MultiAssertSubscriber.create(10);
+        AssertSubscriber<Object> test = AssertSubscriber.create(10);
         test.onSubscribe(subscription);
 
         CountDownLatch latch = new CountDownLatch(2);

@@ -12,7 +12,7 @@ import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.operators.multi.processors.BroadcastProcessor;
 import io.smallrye.mutiny.operators.multi.processors.UnicastProcessor;
 import io.smallrye.mutiny.subscription.BackPressureFailure;
-import io.smallrye.mutiny.test.MultiAssertSubscriber;
+import io.smallrye.mutiny.test.AssertSubscriber;
 
 public class MultiToHotStreamTest {
 
@@ -21,15 +21,15 @@ public class MultiToHotStreamTest {
         UnicastProcessor<String> processor = UnicastProcessor.create();
 
         Multi<String> multi = processor.map(s -> s).transform().toHotStream();
-        MultiAssertSubscriber<String> subscriber1 = multi.subscribe()
-                .withSubscriber(MultiAssertSubscriber.create(10));
+        AssertSubscriber<String> subscriber1 = multi.subscribe()
+                .withSubscriber(AssertSubscriber.create(10));
 
         processor.onNext("one");
         processor.onNext("two");
         processor.onNext("three");
 
-        MultiAssertSubscriber<String> subscriber2 = multi.subscribe()
-                .withSubscriber(MultiAssertSubscriber.create(10));
+        AssertSubscriber<String> subscriber2 = multi.subscribe()
+                .withSubscriber(AssertSubscriber.create(10));
 
         processor.onNext("four");
         processor.onComplete();
@@ -48,20 +48,20 @@ public class MultiToHotStreamTest {
         BroadcastProcessor<String> processor = BroadcastProcessor.create();
 
         Multi<String> multi = processor.map(s -> s).transform().toHotStream();
-        MultiAssertSubscriber<String> subscriber1 = multi.subscribe()
-                .withSubscriber(MultiAssertSubscriber.create(10));
+        AssertSubscriber<String> subscriber1 = multi.subscribe()
+                .withSubscriber(AssertSubscriber.create(10));
 
         processor.onNext("one");
         processor.onNext("two");
         processor.onNext("three");
 
-        MultiAssertSubscriber<String> subscriber2 = multi.subscribe()
-                .withSubscriber(MultiAssertSubscriber.create(10));
+        AssertSubscriber<String> subscriber2 = multi.subscribe()
+                .withSubscriber(AssertSubscriber.create(10));
 
         processor.onComplete();
 
-        MultiAssertSubscriber<String> subscriber3 = multi.subscribe()
-                .withSubscriber(MultiAssertSubscriber.create(10));
+        AssertSubscriber<String> subscriber3 = multi.subscribe()
+                .withSubscriber(AssertSubscriber.create(10));
 
         subscriber1
                 .assertReceived("one", "two", "three")
@@ -81,20 +81,20 @@ public class MultiToHotStreamTest {
         BroadcastProcessor<String> processor = BroadcastProcessor.create();
         Multi<String> multi = processor.map(s -> s).transform().toHotStream();
 
-        MultiAssertSubscriber<String> subscriber1 = multi.subscribe()
-                .withSubscriber(MultiAssertSubscriber.create(10));
+        AssertSubscriber<String> subscriber1 = multi.subscribe()
+                .withSubscriber(AssertSubscriber.create(10));
 
         processor.onNext("one");
         processor.onNext("two");
         processor.onNext("three");
 
-        MultiAssertSubscriber<String> subscriber2 = multi.subscribe()
-                .withSubscriber(MultiAssertSubscriber.create(10));
+        AssertSubscriber<String> subscriber2 = multi.subscribe()
+                .withSubscriber(AssertSubscriber.create(10));
 
         processor.onError(new Exception("boom"));
 
-        MultiAssertSubscriber<String> subscriber3 = multi.subscribe()
-                .withSubscriber(MultiAssertSubscriber.create(10));
+        AssertSubscriber<String> subscriber3 = multi.subscribe()
+                .withSubscriber(AssertSubscriber.create(10));
 
         subscriber1
                 .assertReceived("one", "two", "three")
@@ -114,8 +114,8 @@ public class MultiToHotStreamTest {
         BroadcastProcessor<Integer> processor = BroadcastProcessor.create();
         Multi<Integer> multi = processor.map(s -> s).transform().toHotStream();
 
-        MultiAssertSubscriber<Integer> subscriber = multi.subscribe()
-                .withSubscriber(MultiAssertSubscriber.create(10));
+        AssertSubscriber<Integer> subscriber = multi.subscribe()
+                .withSubscriber(AssertSubscriber.create(10));
 
         processor.onNext(1);
         processor.onNext(2);
@@ -130,15 +130,15 @@ public class MultiToHotStreamTest {
         BroadcastProcessor<String> processor = BroadcastProcessor.create();
         Multi<String> multi = processor.map(s -> s).transform().toHotStream();
 
-        MultiAssertSubscriber<String> subscriber1 = multi.subscribe()
-                .withSubscriber(MultiAssertSubscriber.create(10));
+        AssertSubscriber<String> subscriber1 = multi.subscribe()
+                .withSubscriber(AssertSubscriber.create(10));
 
         processor.onNext("one");
 
         subscriber1.assertReceived("one");
 
-        MultiAssertSubscriber<String> subscriber2 = multi.subscribe()
-                .withSubscriber(MultiAssertSubscriber.create(10));
+        AssertSubscriber<String> subscriber2 = multi.subscribe()
+                .withSubscriber(AssertSubscriber.create(10));
 
         processor.onNext("two");
 
@@ -168,8 +168,8 @@ public class MultiToHotStreamTest {
         BroadcastProcessor<String> processor = BroadcastProcessor.create();
         Multi<String> multi = processor.map(s -> s).transform().toHotStream();
 
-        MultiAssertSubscriber<String> subscriber1 = multi.subscribe()
-                .withSubscriber(MultiAssertSubscriber.create(10));
+        AssertSubscriber<String> subscriber1 = multi.subscribe()
+                .withSubscriber(AssertSubscriber.create(10));
 
         processor.onNext("one");
 
@@ -193,8 +193,8 @@ public class MultiToHotStreamTest {
         BroadcastProcessor<String> processor = BroadcastProcessor.create();
         Multi<String> multi = processor.map(s -> s).transform().toHotStream();
 
-        MultiAssertSubscriber<String> subscriber1 = multi.subscribe()
-                .withSubscriber(MultiAssertSubscriber.create(10));
+        AssertSubscriber<String> subscriber1 = multi.subscribe()
+                .withSubscriber(AssertSubscriber.create(10));
 
         processor.onNext("one");
 
@@ -215,8 +215,8 @@ public class MultiToHotStreamTest {
         BroadcastProcessor<String> processor = BroadcastProcessor.create();
         Multi<String> multi = processor.map(s -> s).transform().toHotStream();
 
-        MultiAssertSubscriber<String> subscriber1 = multi.subscribe()
-                .withSubscriber(MultiAssertSubscriber.create(10));
+        AssertSubscriber<String> subscriber1 = multi.subscribe()
+                .withSubscriber(AssertSubscriber.create(10));
 
         processor.onNext("one");
 
@@ -238,10 +238,10 @@ public class MultiToHotStreamTest {
         BroadcastProcessor<Integer> processor = BroadcastProcessor.create();
         Multi<Integer> multi = processor.map(s -> s).transform().toHotStream();
 
-        MultiAssertSubscriber<Integer> s1 = multi.subscribe()
-                .withSubscriber(MultiAssertSubscriber.create(10));
-        MultiAssertSubscriber<Integer> s2 = multi.subscribe()
-                .withSubscriber(MultiAssertSubscriber.create(4));
+        AssertSubscriber<Integer> s1 = multi.subscribe()
+                .withSubscriber(AssertSubscriber.create(10));
+        AssertSubscriber<Integer> s2 = multi.subscribe()
+                .withSubscriber(AssertSubscriber.create(4));
 
         for (int i = 0; i < 10; i++) {
             processor.onNext(i);
@@ -259,7 +259,7 @@ public class MultiToHotStreamTest {
         BroadcastProcessor<Integer> processor = BroadcastProcessor.create();
         Multi<Integer> multi = processor.map(s -> s).transform().toHotStream();
 
-        MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(10);
+        AssertSubscriber<Integer> subscriber = AssertSubscriber.create(10);
 
         multi
                 .onItem().transformToMulti(i -> processor).withRequests(10).merge()
@@ -282,8 +282,8 @@ public class MultiToHotStreamTest {
                 .transform().toHotStream();
         Thread.sleep(50); // NOSONAR
 
-        MultiAssertSubscriber<Long> subscriber = ticks.subscribe()
-                .withSubscriber(MultiAssertSubscriber.create(Long.MAX_VALUE))
+        AssertSubscriber<Long> subscriber = ticks.subscribe()
+                .withSubscriber(AssertSubscriber.create(Long.MAX_VALUE))
                 .await(Duration.ofSeconds(10))
                 .assertCompletedSuccessfully();
 

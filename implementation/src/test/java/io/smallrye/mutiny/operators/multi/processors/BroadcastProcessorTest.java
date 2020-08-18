@@ -17,7 +17,7 @@ import org.testng.annotations.Test;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.subscription.BackPressureFailure;
-import io.smallrye.mutiny.test.MultiAssertSubscriber;
+import io.smallrye.mutiny.test.AssertSubscriber;
 
 public class BroadcastProcessorTest {
 
@@ -37,15 +37,15 @@ public class BroadcastProcessorTest {
     public void testWithTwoSubscribers() {
         BroadcastProcessor<String> processor = BroadcastProcessor.create();
 
-        MultiAssertSubscriber<String> subscriber1 = processor.subscribe()
-                .withSubscriber(MultiAssertSubscriber.create(10));
+        AssertSubscriber<String> subscriber1 = processor.subscribe()
+                .withSubscriber(AssertSubscriber.create(10));
 
         processor.onNext("one");
         processor.onNext("two");
         processor.onNext("three");
 
-        MultiAssertSubscriber<String> subscriber2 = processor.subscribe()
-                .withSubscriber(MultiAssertSubscriber.create(10));
+        AssertSubscriber<String> subscriber2 = processor.subscribe()
+                .withSubscriber(AssertSubscriber.create(10));
 
         processor.onNext("four");
         processor.onComplete();
@@ -63,8 +63,8 @@ public class BroadcastProcessorTest {
     public void testWithTwoSubscribersSerialized() {
         SerializedProcessor<String, String> processor = BroadcastProcessor.<String> create().serialized();
 
-        MultiAssertSubscriber<String> subscriber1 = MultiAssertSubscriber.create(10);
-        MultiAssertSubscriber<String> subscriber2 = MultiAssertSubscriber.create(10);
+        AssertSubscriber<String> subscriber1 = AssertSubscriber.create(10);
+        AssertSubscriber<String> subscriber2 = AssertSubscriber.create(10);
 
         processor.subscribe(subscriber1);
 
@@ -90,20 +90,20 @@ public class BroadcastProcessorTest {
     public void testSubscriptionAfterCompletion() {
         BroadcastProcessor<String> processor = BroadcastProcessor.create();
 
-        MultiAssertSubscriber<String> subscriber1 = processor.subscribe()
-                .withSubscriber(MultiAssertSubscriber.create(10));
+        AssertSubscriber<String> subscriber1 = processor.subscribe()
+                .withSubscriber(AssertSubscriber.create(10));
 
         processor.onNext("one");
         processor.onNext("two");
         processor.onNext("three");
 
-        MultiAssertSubscriber<String> subscriber2 = processor.subscribe()
-                .withSubscriber(MultiAssertSubscriber.create(10));
+        AssertSubscriber<String> subscriber2 = processor.subscribe()
+                .withSubscriber(AssertSubscriber.create(10));
 
         processor.onComplete();
 
-        MultiAssertSubscriber<String> subscriber3 = processor.subscribe()
-                .withSubscriber(MultiAssertSubscriber.create(10));
+        AssertSubscriber<String> subscriber3 = processor.subscribe()
+                .withSubscriber(AssertSubscriber.create(10));
 
         subscriber1
                 .assertReceived("one", "two", "three")
@@ -122,20 +122,20 @@ public class BroadcastProcessorTest {
     public void testSubscriptionAfterFailure() {
         BroadcastProcessor<String> processor = BroadcastProcessor.create();
 
-        MultiAssertSubscriber<String> subscriber1 = processor.subscribe()
-                .withSubscriber(MultiAssertSubscriber.create(10));
+        AssertSubscriber<String> subscriber1 = processor.subscribe()
+                .withSubscriber(AssertSubscriber.create(10));
 
         processor.onNext("one");
         processor.onNext("two");
         processor.onNext("three");
 
-        MultiAssertSubscriber<String> subscriber2 = processor.subscribe()
-                .withSubscriber(MultiAssertSubscriber.create(10));
+        AssertSubscriber<String> subscriber2 = processor.subscribe()
+                .withSubscriber(AssertSubscriber.create(10));
 
         processor.onError(new Exception("boom"));
 
-        MultiAssertSubscriber<String> subscriber3 = processor.subscribe()
-                .withSubscriber(MultiAssertSubscriber.create(10));
+        AssertSubscriber<String> subscriber3 = processor.subscribe()
+                .withSubscriber(AssertSubscriber.create(10));
 
         subscriber1
                 .assertReceived("one", "two", "three")
@@ -153,8 +153,8 @@ public class BroadcastProcessorTest {
     @Test
     public void testFailureAfterCompletion() {
         BroadcastProcessor<Integer> processor = BroadcastProcessor.create();
-        MultiAssertSubscriber<Integer> subscriber = processor.subscribe()
-                .withSubscriber(MultiAssertSubscriber.create(10));
+        AssertSubscriber<Integer> subscriber = processor.subscribe()
+                .withSubscriber(AssertSubscriber.create(10));
 
         processor.onNext(1);
         processor.onNext(2);
@@ -168,15 +168,15 @@ public class BroadcastProcessorTest {
     public void testNoITemAfterCancellation() {
         BroadcastProcessor<String> processor = BroadcastProcessor.create();
 
-        MultiAssertSubscriber<String> subscriber1 = processor.subscribe()
-                .withSubscriber(MultiAssertSubscriber.create(10));
+        AssertSubscriber<String> subscriber1 = processor.subscribe()
+                .withSubscriber(AssertSubscriber.create(10));
 
         processor.onNext("one");
 
         subscriber1.assertReceived("one");
 
-        MultiAssertSubscriber<String> subscriber2 = processor.subscribe()
-                .withSubscriber(MultiAssertSubscriber.create(10));
+        AssertSubscriber<String> subscriber2 = processor.subscribe()
+                .withSubscriber(AssertSubscriber.create(10));
 
         processor.onNext("two");
 
@@ -205,8 +205,8 @@ public class BroadcastProcessorTest {
     public void testResubscription() {
         BroadcastProcessor<String> processor = BroadcastProcessor.create();
 
-        MultiAssertSubscriber<String> subscriber1 = processor.subscribe()
-                .withSubscriber(MultiAssertSubscriber.create(10));
+        AssertSubscriber<String> subscriber1 = processor.subscribe()
+                .withSubscriber(AssertSubscriber.create(10));
 
         processor.onNext("one");
 
@@ -229,8 +229,8 @@ public class BroadcastProcessorTest {
     public void testResubscriptionAfterCompletion() {
         BroadcastProcessor<String> processor = BroadcastProcessor.create();
 
-        MultiAssertSubscriber<String> subscriber1 = processor.subscribe()
-                .withSubscriber(MultiAssertSubscriber.create(10));
+        AssertSubscriber<String> subscriber1 = processor.subscribe()
+                .withSubscriber(AssertSubscriber.create(10));
 
         processor.onNext("one");
 
@@ -251,8 +251,8 @@ public class BroadcastProcessorTest {
     public void testResubscriptionAfterFailure() {
         BroadcastProcessor<String> processor = BroadcastProcessor.create();
 
-        MultiAssertSubscriber<String> subscriber1 = processor.subscribe()
-                .withSubscriber(MultiAssertSubscriber.create(10));
+        AssertSubscriber<String> subscriber1 = processor.subscribe()
+                .withSubscriber(AssertSubscriber.create(10));
 
         processor.onNext("one");
 
@@ -274,10 +274,10 @@ public class BroadcastProcessorTest {
         Multi<Integer> upstream = Multi.createFrom().range(0, 10);
         BroadcastProcessor<Integer> processor = BroadcastProcessor.create();
 
-        MultiAssertSubscriber<Integer> s1 = processor.subscribe()
-                .withSubscriber(MultiAssertSubscriber.create(10));
-        MultiAssertSubscriber<Integer> s2 = processor.subscribe()
-                .withSubscriber(MultiAssertSubscriber.create(10));
+        AssertSubscriber<Integer> s1 = processor.subscribe()
+                .withSubscriber(AssertSubscriber.create(10));
+        AssertSubscriber<Integer> s2 = processor.subscribe()
+                .withSubscriber(AssertSubscriber.create(10));
 
         upstream.subscribe(processor);
 
@@ -292,8 +292,8 @@ public class BroadcastProcessorTest {
         Multi<Integer> upstream = Multi.createFrom().range(0, 10);
         BroadcastProcessor<Integer> processor = BroadcastProcessor.create();
         upstream.subscribe(processor);
-        MultiAssertSubscriber<Integer> s1 = processor.subscribe()
-                .withSubscriber(MultiAssertSubscriber.create(10));
+        AssertSubscriber<Integer> s1 = processor.subscribe()
+                .withSubscriber(AssertSubscriber.create(10));
 
         s1.assertCompletedSuccessfully()
                 .assertHasNotReceivedAnyItem();
@@ -304,8 +304,8 @@ public class BroadcastProcessorTest {
         Multi<Integer> upstream = Multi.createFrom().empty();
         BroadcastProcessor<Integer> processor = BroadcastProcessor.create();
         upstream.subscribe(processor);
-        MultiAssertSubscriber<Integer> s1 = processor.subscribe()
-                .withSubscriber(MultiAssertSubscriber.create(10));
+        AssertSubscriber<Integer> s1 = processor.subscribe()
+                .withSubscriber(AssertSubscriber.create(10));
 
         s1.assertCompletedSuccessfully()
                 .assertHasNotReceivedAnyItem();
@@ -316,10 +316,10 @@ public class BroadcastProcessorTest {
         Multi<Integer> upstream = Multi.createFrom().failure(new Exception("boom"));
         BroadcastProcessor<Integer> processor = BroadcastProcessor.create();
         upstream.subscribe(processor);
-        MultiAssertSubscriber<Integer> s1 = processor.subscribe()
-                .withSubscriber(MultiAssertSubscriber.create(10));
-        MultiAssertSubscriber<Integer> s2 = processor.subscribe()
-                .withSubscriber(MultiAssertSubscriber.create(10));
+        AssertSubscriber<Integer> s1 = processor.subscribe()
+                .withSubscriber(AssertSubscriber.create(10));
+        AssertSubscriber<Integer> s2 = processor.subscribe()
+                .withSubscriber(AssertSubscriber.create(10));
         s1.assertHasFailedWith(Exception.class, "boom");
         s2.assertHasFailedWith(Exception.class, "boom");
     }
@@ -327,10 +327,10 @@ public class BroadcastProcessorTest {
     @Test
     public void testWhenSubscriberDoesNotHaveRequestedEnough() {
         BroadcastProcessor<Integer> processor = BroadcastProcessor.create();
-        MultiAssertSubscriber<Integer> s1 = processor.subscribe()
-                .withSubscriber(MultiAssertSubscriber.create(10));
-        MultiAssertSubscriber<Integer> s2 = processor.subscribe()
-                .withSubscriber(MultiAssertSubscriber.create(4));
+        AssertSubscriber<Integer> s1 = processor.subscribe()
+                .withSubscriber(AssertSubscriber.create(10));
+        AssertSubscriber<Integer> s2 = processor.subscribe()
+                .withSubscriber(AssertSubscriber.create(4));
 
         for (int i = 0; i < 10; i++) {
             processor.onNext(i);
@@ -345,8 +345,8 @@ public class BroadcastProcessorTest {
 
     @Test
     public void testCrossCancellation() {
-        MultiAssertSubscriber<Integer> subscriber1 = MultiAssertSubscriber.create(10);
-        MultiAssertSubscriber<Integer> subscriber2 = new MultiAssertSubscriber<Integer>(10) {
+        AssertSubscriber<Integer> subscriber1 = AssertSubscriber.create(10);
+        AssertSubscriber<Integer> subscriber2 = new AssertSubscriber<Integer>(10) {
             @Override
             public synchronized void onNext(Integer o) {
                 super.onNext(o);
@@ -363,8 +363,8 @@ public class BroadcastProcessorTest {
 
     @Test
     public void testCrossCancellationOnFailure() {
-        MultiAssertSubscriber<Integer> subscriber1 = MultiAssertSubscriber.create(10);
-        MultiAssertSubscriber<Integer> subscriber2 = new MultiAssertSubscriber<Integer>(10) {
+        AssertSubscriber<Integer> subscriber1 = AssertSubscriber.create(10);
+        AssertSubscriber<Integer> subscriber2 = new AssertSubscriber<Integer>(10) {
             @Override
             public synchronized void onError(Throwable failure) {
                 super.onError(failure);
@@ -382,7 +382,7 @@ public class BroadcastProcessorTest {
     @Test(invocationCount = 100)
     public void testCompletionRace() {
         BroadcastProcessor<Integer> processor = BroadcastProcessor.create();
-        MultiAssertSubscriber<Object> subscriber = MultiAssertSubscriber.create(1);
+        AssertSubscriber<Object> subscriber = AssertSubscriber.create(1);
         processor.subscribe(subscriber);
 
         final AtomicInteger count = new AtomicInteger(2);
@@ -403,7 +403,7 @@ public class BroadcastProcessorTest {
     @Test(invocationCount = 100)
     public void testCompletionVsSubscriptionRace() throws InterruptedException {
         BroadcastProcessor<Integer> processor = BroadcastProcessor.create();
-        MultiAssertSubscriber<Object> subscriber = MultiAssertSubscriber.create(1);
+        AssertSubscriber<Object> subscriber = AssertSubscriber.create(1);
 
         CountDownLatch latch = new CountDownLatch(2);
         final AtomicInteger count = new AtomicInteger(2);
@@ -434,7 +434,7 @@ public class BroadcastProcessorTest {
     @Test
     public void testWithTransformToMultiAndMerge() {
         BroadcastProcessor<Integer> processor = BroadcastProcessor.create();
-        MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(10);
+        AssertSubscriber<Integer> subscriber = AssertSubscriber.create(10);
 
         processor
                 .onItem().transformToMulti(i -> processor).withRequests(10).merge()
@@ -458,8 +458,8 @@ public class BroadcastProcessorTest {
         ticks.subscribe().withSubscriber(processor);
         Thread.sleep(50); // NOSONAR
 
-        MultiAssertSubscriber<Long> subscriber = processor.subscribe()
-                .withSubscriber(MultiAssertSubscriber.create(Long.MAX_VALUE))
+        AssertSubscriber<Long> subscriber = processor.subscribe()
+                .withSubscriber(AssertSubscriber.create(Long.MAX_VALUE))
                 .await(Duration.ofSeconds(10))
                 .assertCompletedSuccessfully();
 

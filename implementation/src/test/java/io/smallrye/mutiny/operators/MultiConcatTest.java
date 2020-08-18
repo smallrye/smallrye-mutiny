@@ -9,17 +9,17 @@ import org.testng.annotations.Test;
 import io.reactivex.Flowable;
 import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Multi;
-import io.smallrye.mutiny.test.MultiAssertSubscriber;
+import io.smallrye.mutiny.test.AssertSubscriber;
 
 public class MultiConcatTest {
 
     @Test
     public void testConcatenationOfSeveralMultis() {
-        MultiAssertSubscriber<Integer> subscriber = Multi.createBy().concatenating().streams(
+        AssertSubscriber<Integer> subscriber = Multi.createBy().concatenating().streams(
                 Multi.createFrom().item(5),
                 Multi.createFrom().range(1, 3),
                 Multi.createFrom().items(8, 9, 10).onItem().transform(i -> i + 1)).subscribe()
-                .withSubscriber(new MultiAssertSubscriber<>(100));
+                .withSubscriber(new AssertSubscriber<>(100));
 
         subscriber.assertCompletedSuccessfully()
                 .assertReceived(5, 1, 2, 9, 10, 11);
@@ -27,12 +27,12 @@ public class MultiConcatTest {
 
     @Test
     public void testConcatenationOfSeveralMultisWithConcurrency() {
-        MultiAssertSubscriber<Integer> subscriber = Multi.createBy().concatenating()
+        AssertSubscriber<Integer> subscriber = Multi.createBy().concatenating()
                 .streams(
                         Multi.createFrom().item(5),
                         Multi.createFrom().range(1, 3),
                         Multi.createFrom().items(8, 9, 10).onItem().transform(i -> i + 1))
-                .subscribe().withSubscriber(new MultiAssertSubscriber<>(100));
+                .subscribe().withSubscriber(new AssertSubscriber<>(100));
 
         subscriber.assertCompletedSuccessfully()
                 .assertReceived(5, 1, 2, 9, 10, 11);
@@ -40,12 +40,12 @@ public class MultiConcatTest {
 
     @Test
     public void testConcatenationOfSeveralMultisWithConcurrencyAndDeprecatedApply() {
-        MultiAssertSubscriber<Integer> subscriber = Multi.createBy().concatenating()
+        AssertSubscriber<Integer> subscriber = Multi.createBy().concatenating()
                 .streams(
                         Multi.createFrom().item(5),
                         Multi.createFrom().range(1, 3),
                         Multi.createFrom().items(8, 9, 10).onItem().apply(i -> i + 1))
-                .subscribe().withSubscriber(new MultiAssertSubscriber<>(100));
+                .subscribe().withSubscriber(new AssertSubscriber<>(100));
 
         subscriber.assertCompletedSuccessfully()
                 .assertReceived(5, 1, 2, 9, 10, 11);
@@ -53,12 +53,12 @@ public class MultiConcatTest {
 
     @Test
     public void testConcatenationOfSeveralMultisAsIterable() {
-        MultiAssertSubscriber<Integer> subscriber = Multi.createBy().concatenating().streams(
+        AssertSubscriber<Integer> subscriber = Multi.createBy().concatenating().streams(
                 Arrays.asList(
                         Multi.createFrom().item(5),
                         Multi.createFrom().range(1, 3),
                         Multi.createFrom().items(8, 9, 10).onItem().transform(i -> i + 1)))
-                .subscribe().withSubscriber(new MultiAssertSubscriber<>(100));
+                .subscribe().withSubscriber(new AssertSubscriber<>(100));
 
         subscriber.assertCompletedSuccessfully()
                 .assertReceived(5, 1, 2, 9, 10, 11);
@@ -66,11 +66,11 @@ public class MultiConcatTest {
 
     @Test
     public void testConcatenationOfSeveralPublishers() {
-        MultiAssertSubscriber<Integer> subscriber = Multi.createBy().concatenating().streams(
+        AssertSubscriber<Integer> subscriber = Multi.createBy().concatenating().streams(
                 Flowable.just(5),
                 Multi.createFrom().range(1, 3),
                 Multi.createFrom().items(8, 9, 10).onItem().transform(i -> i + 1)).subscribe()
-                .withSubscriber(new MultiAssertSubscriber<>(100));
+                .withSubscriber(new AssertSubscriber<>(100));
 
         subscriber.assertCompletedSuccessfully()
                 .assertReceived(5, 1, 2, 9, 10, 11);
@@ -78,12 +78,12 @@ public class MultiConcatTest {
 
     @Test
     public void testConcatenationOfSeveralPublishersAsIterable() {
-        MultiAssertSubscriber<Integer> subscriber = Multi.createBy().concatenating().streams(
+        AssertSubscriber<Integer> subscriber = Multi.createBy().concatenating().streams(
                 Arrays.asList(
                         Flowable.just(5),
                         Multi.createFrom().range(1, 3),
                         Multi.createFrom().items(8, 9, 10).onItem().transform(i -> i + 1)))
-                .subscribe().withSubscriber(new MultiAssertSubscriber<>(100));
+                .subscribe().withSubscriber(new AssertSubscriber<>(100));
 
         subscriber.assertCompletedSuccessfully()
                 .assertReceived(5, 1, 2, 9, 10, 11);
@@ -92,14 +92,14 @@ public class MultiConcatTest {
     @Test
     public void testMergingEmpty() {
         Multi.createBy().concatenating().streams(Multi.createFrom().empty())
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(1))
+                .subscribe().withSubscriber(AssertSubscriber.create(1))
                 .assertCompletedSuccessfully().assertHasNotReceivedAnyItem();
     }
 
     @Test
     public void testMergingWithEmpty() {
         Multi.createBy().concatenating().streams(Multi.createFrom().empty(), Multi.createFrom().item(2))
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(1))
+                .subscribe().withSubscriber(AssertSubscriber.create(1))
                 .assertCompletedSuccessfully().assertReceived(2);
     }
 
@@ -108,11 +108,11 @@ public class MultiConcatTest {
         IllegalStateException boom = new IllegalStateException("boom");
         IllegalStateException boom2 = new IllegalStateException("boom2");
 
-        MultiAssertSubscriber<Integer> subscriber = Multi.createBy().concatenating().collectFailures().streams(
+        AssertSubscriber<Integer> subscriber = Multi.createBy().concatenating().collectFailures().streams(
                 Multi.createFrom().item(5),
                 Multi.createFrom().failure(boom),
                 Multi.createFrom().item(6),
-                Multi.createFrom().failure(boom2)).subscribe().withSubscriber(new MultiAssertSubscriber<>(5));
+                Multi.createFrom().failure(boom2)).subscribe().withSubscriber(new AssertSubscriber<>(5));
 
         subscriber.assertTerminated()
                 .assertReceived(5, 6)
@@ -127,7 +127,7 @@ public class MultiConcatTest {
                 Multi.createFrom().item(5),
                 Multi.createFrom().failure(boom),
                 Multi.createFrom().item(6),
-                Multi.createFrom().failure(boom)).subscribe().withSubscriber(new MultiAssertSubscriber<>(5));
+                Multi.createFrom().failure(boom)).subscribe().withSubscriber(new AssertSubscriber<>(5));
 
         subscriber.assertTerminated()
                 .assertReceived(5)

@@ -21,8 +21,8 @@ import org.testng.annotations.Test;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
+import io.smallrye.mutiny.test.AssertSubscriber;
 import io.smallrye.mutiny.test.Mocks;
-import io.smallrye.mutiny.test.MultiAssertSubscriber;
 
 public class UniRepeatTest {
 
@@ -55,10 +55,10 @@ public class UniRepeatTest {
         Page[] pages = new Page[] { page1, page2, page3 };
         AtomicInteger cursor = new AtomicInteger();
 
-        MultiAssertSubscriber<Integer> subscriber = Multi.createBy().repeating()
+        AssertSubscriber<Integer> subscriber = Multi.createBy().repeating()
                 .uni(() -> Uni.createFrom().item(pages[cursor.getAndIncrement()])).whilst(p -> p.next != -1)
                 .onItem().transformToMulti(p -> Multi.createFrom().iterable(p.items)).concatenate()
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(50));
+                .subscribe().withSubscriber(AssertSubscriber.create(50));
 
         subscriber.assertCompletedSuccessfully()
                 .assertReceived(1, 2, 3, 4, 5, 6, 7, 8);
@@ -289,10 +289,10 @@ public class UniRepeatTest {
     @Test
     public void testRequestAndCancellation() {
         final AtomicInteger count = new AtomicInteger();
-        MultiAssertSubscriber<Integer> subscriber = Uni.createFrom().item(count::incrementAndGet)
+        AssertSubscriber<Integer> subscriber = Uni.createFrom().item(count::incrementAndGet)
                 .repeat().indefinitely()
                 .runSubscriptionOn(Infrastructure.getDefaultWorkerPool())
-                .subscribe().withSubscriber(MultiAssertSubscriber.create());
+                .subscribe().withSubscriber(AssertSubscriber.create());
 
         await().untilAsserted(subscriber::assertSubscribed);
         subscriber.assertSubscribed().assertHasNotReceivedAnyItem();
@@ -326,10 +326,10 @@ public class UniRepeatTest {
     @Test
     public void testRequestAndCancellationWithRepeatUntil() {
         final AtomicInteger count = new AtomicInteger();
-        MultiAssertSubscriber<Integer> subscriber = Uni.createFrom().item(count::incrementAndGet)
+        AssertSubscriber<Integer> subscriber = Uni.createFrom().item(count::incrementAndGet)
                 .repeat().until(x -> false)
                 .runSubscriptionOn(Infrastructure.getDefaultWorkerPool())
-                .subscribe().withSubscriber(MultiAssertSubscriber.create());
+                .subscribe().withSubscriber(AssertSubscriber.create());
 
         await().untilAsserted(subscriber::assertSubscribed);
         subscriber.assertSubscribed().assertHasNotReceivedAnyItem();
@@ -363,10 +363,10 @@ public class UniRepeatTest {
     @Test
     public void testRequestAndCancellationWithRepeatWhilst() {
         final AtomicInteger count = new AtomicInteger();
-        MultiAssertSubscriber<Integer> subscriber = Uni.createFrom().item(count::incrementAndGet)
+        AssertSubscriber<Integer> subscriber = Uni.createFrom().item(count::incrementAndGet)
                 .repeat().whilst(x -> true)
                 .runSubscriptionOn(Infrastructure.getDefaultWorkerPool())
-                .subscribe().withSubscriber(MultiAssertSubscriber.create());
+                .subscribe().withSubscriber(AssertSubscriber.create());
 
         await().untilAsserted(subscriber::assertSubscribed);
         subscriber.assertSubscribed().assertHasNotReceivedAnyItem();
@@ -400,10 +400,10 @@ public class UniRepeatTest {
     @Test
     public void testRequestWithAtMost() {
         final AtomicInteger count = new AtomicInteger();
-        MultiAssertSubscriber<Integer> subscriber = Uni.createFrom().item(count::incrementAndGet)
+        AssertSubscriber<Integer> subscriber = Uni.createFrom().item(count::incrementAndGet)
                 .repeat().atMost(3)
                 .runSubscriptionOn(Infrastructure.getDefaultWorkerPool())
-                .subscribe().withSubscriber(MultiAssertSubscriber.create());
+                .subscribe().withSubscriber(AssertSubscriber.create());
 
         await().untilAsserted(subscriber::assertSubscribed);
         subscriber.assertSubscribed().assertHasNotReceivedAnyItem();
@@ -426,7 +426,7 @@ public class UniRepeatTest {
     @Test
     public void testFailurePropagationAfterFewRepeats() {
         AtomicInteger count = new AtomicInteger();
-        MultiAssertSubscriber<Integer> subscriber = Uni.createFrom().item(() -> {
+        AssertSubscriber<Integer> subscriber = Uni.createFrom().item(() -> {
             int v = count.incrementAndGet();
             if (v == 3) {
                 throw new IllegalStateException("boom");
@@ -434,7 +434,7 @@ public class UniRepeatTest {
             return v;
         })
                 .repeat().indefinitely()
-                .subscribe().withSubscriber(MultiAssertSubscriber.create());
+                .subscribe().withSubscriber(AssertSubscriber.create());
 
         subscriber.request(10)
                 .await()
@@ -446,7 +446,7 @@ public class UniRepeatTest {
     @Test
     public void testFailurePropagationAfterFewRepeatsWithRepeatUntil() {
         AtomicInteger count = new AtomicInteger();
-        MultiAssertSubscriber<Integer> subscriber = Uni.createFrom().item(() -> {
+        AssertSubscriber<Integer> subscriber = Uni.createFrom().item(() -> {
             int v = count.incrementAndGet();
             if (v == 3) {
                 throw new IllegalStateException("boom");
@@ -454,7 +454,7 @@ public class UniRepeatTest {
             return v;
         })
                 .repeat().until(x -> false)
-                .subscribe().withSubscriber(MultiAssertSubscriber.create());
+                .subscribe().withSubscriber(AssertSubscriber.create());
 
         subscriber.request(10)
                 .await()
@@ -466,7 +466,7 @@ public class UniRepeatTest {
     @Test
     public void testFailurePropagationAfterFewRepeatsWithRepeatWhilst() {
         AtomicInteger count = new AtomicInteger();
-        MultiAssertSubscriber<Integer> subscriber = Uni.createFrom().item(() -> {
+        AssertSubscriber<Integer> subscriber = Uni.createFrom().item(() -> {
             int v = count.incrementAndGet();
             if (v == 3) {
                 throw new IllegalStateException("boom");
@@ -474,7 +474,7 @@ public class UniRepeatTest {
             return v;
         })
                 .repeat().whilst(x -> true)
-                .subscribe().withSubscriber(MultiAssertSubscriber.create());
+                .subscribe().withSubscriber(AssertSubscriber.create());
 
         subscriber.request(10)
                 .await()
@@ -486,7 +486,7 @@ public class UniRepeatTest {
     @Test
     public void testFailurePropagationAfterMaxRepeats() {
         AtomicInteger count = new AtomicInteger();
-        MultiAssertSubscriber<Integer> subscriber = Uni.createFrom().item(() -> {
+        AssertSubscriber<Integer> subscriber = Uni.createFrom().item(() -> {
             int v = count.incrementAndGet();
             if (v == 3) {
                 throw new IllegalStateException("boom");
@@ -494,7 +494,7 @@ public class UniRepeatTest {
             return v;
         })
                 .repeat().atMost(2)
-                .subscribe().withSubscriber(MultiAssertSubscriber.create());
+                .subscribe().withSubscriber(AssertSubscriber.create());
 
         subscriber.request(10)
                 .await()
@@ -506,7 +506,7 @@ public class UniRepeatTest {
     @Test
     public void testEmptyUniOnceInAWhileWithAtMost() {
         AtomicInteger count = new AtomicInteger();
-        MultiAssertSubscriber<Integer> subscriber = Uni.createFrom().item(() -> {
+        AssertSubscriber<Integer> subscriber = Uni.createFrom().item(() -> {
             int v = count.incrementAndGet();
             if (v % 3 == 0) {
                 return null;
@@ -514,7 +514,7 @@ public class UniRepeatTest {
             return v;
         })
                 .repeat().atMost(10)
-                .subscribe().withSubscriber(MultiAssertSubscriber.create());
+                .subscribe().withSubscriber(AssertSubscriber.create());
 
         subscriber.request(100)
                 .await()
@@ -526,7 +526,7 @@ public class UniRepeatTest {
     @Test
     public void testEmptyUniOnceInAWhileWithIndefinitely() {
         AtomicInteger count = new AtomicInteger();
-        MultiAssertSubscriber<Integer> subscriber = Uni.createFrom().item(() -> {
+        AssertSubscriber<Integer> subscriber = Uni.createFrom().item(() -> {
             int v = count.incrementAndGet();
             if (v % 3 == 0) {
                 return null;
@@ -534,7 +534,7 @@ public class UniRepeatTest {
             return v;
         })
                 .repeat().indefinitely()
-                .subscribe().withSubscriber(MultiAssertSubscriber.create());
+                .subscribe().withSubscriber(AssertSubscriber.create());
 
         subscriber.request(10)
                 .run(() -> await().until(() -> subscriber.items().size() == 10))
@@ -546,14 +546,14 @@ public class UniRepeatTest {
     @Test
     public void testPredicateFailureWithUntil() {
         AtomicInteger count = new AtomicInteger();
-        MultiAssertSubscriber<Integer> subscriber = Uni.createFrom().item(count::incrementAndGet)
+        AssertSubscriber<Integer> subscriber = Uni.createFrom().item(count::incrementAndGet)
                 .repeat().until(v -> {
                     if (v % 3 == 0) {
                         throw new IllegalStateException("boom");
                     }
                     return false;
                 })
-                .subscribe().withSubscriber(MultiAssertSubscriber.create());
+                .subscribe().withSubscriber(AssertSubscriber.create());
 
         subscriber.request(10)
                 .assertHasFailedWith(IllegalStateException.class, "boom")
@@ -564,14 +564,14 @@ public class UniRepeatTest {
     @Test
     public void testPredicateFailureWithWhilst() {
         AtomicInteger count = new AtomicInteger();
-        MultiAssertSubscriber<Integer> subscriber = Uni.createFrom().item(count::incrementAndGet)
+        AssertSubscriber<Integer> subscriber = Uni.createFrom().item(count::incrementAndGet)
                 .repeat().whilst(v -> {
                     if (v % 3 == 0) {
                         throw new IllegalStateException("boom");
                     }
                     return true;
                 })
-                .subscribe().withSubscriber(MultiAssertSubscriber.create());
+                .subscribe().withSubscriber(AssertSubscriber.create());
 
         subscriber.request(10)
                 .assertHasFailedWith(IllegalStateException.class, "boom")
@@ -582,7 +582,7 @@ public class UniRepeatTest {
     @Test
     public void testEmptyUniOnceInAWhileWithUntil() {
         AtomicInteger count = new AtomicInteger();
-        MultiAssertSubscriber<Integer> subscriber = Uni.createFrom().item(() -> {
+        AssertSubscriber<Integer> subscriber = Uni.createFrom().item(() -> {
             int v = count.incrementAndGet();
             if (v % 3 == 0) {
                 return null;
@@ -590,7 +590,7 @@ public class UniRepeatTest {
             return v;
         })
                 .repeat().until(value -> value >= 1000)
-                .subscribe().withSubscriber(MultiAssertSubscriber.create());
+                .subscribe().withSubscriber(AssertSubscriber.create());
 
         subscriber.request(10)
                 .run(() -> await().until(() -> subscriber.items().size() == 10))
@@ -602,7 +602,7 @@ public class UniRepeatTest {
     @Test
     public void testEmptyUniOnceInAWhileWithWhilst() {
         AtomicInteger count = new AtomicInteger();
-        MultiAssertSubscriber<Integer> subscriber = Uni.createFrom().item(() -> {
+        AssertSubscriber<Integer> subscriber = Uni.createFrom().item(() -> {
             int v = count.incrementAndGet();
             if (v % 3 == 0) {
                 return null;
@@ -610,7 +610,7 @@ public class UniRepeatTest {
             return v;
         })
                 .repeat().whilst(value -> value < 1000)
-                .subscribe().withSubscriber(MultiAssertSubscriber.create());
+                .subscribe().withSubscriber(AssertSubscriber.create());
 
         subscriber.request(10)
                 .run(() -> await().until(() -> subscriber.items().size() == 10))

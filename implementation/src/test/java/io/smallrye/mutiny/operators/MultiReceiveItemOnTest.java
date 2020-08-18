@@ -17,7 +17,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import io.smallrye.mutiny.Multi;
-import io.smallrye.mutiny.test.MultiAssertSubscriber;
+import io.smallrye.mutiny.test.AssertSubscriber;
 
 public class MultiReceiveItemOnTest {
 
@@ -61,11 +61,11 @@ public class MultiReceiveItemOnTest {
     public void testThatItemsAreDispatchedOnTheRightThread() {
         Set<String> itemThread = ConcurrentHashMap.newKeySet();
         Set<String> completionThread = ConcurrentHashMap.newKeySet();
-        MultiAssertSubscriber<Integer> subscriber = Multi.createFrom().items(1, 2, 3, 4)
+        AssertSubscriber<Integer> subscriber = Multi.createFrom().items(1, 2, 3, 4)
                 .emitOn(executor)
                 .onItem().invoke(i -> itemThread.add(Thread.currentThread().getName()))
                 .onCompletion().invoke(() -> completionThread.add(Thread.currentThread().getName()))
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(4))
+                .subscribe().withSubscriber(AssertSubscriber.create(4))
                 .await()
                 .assertCompletedSuccessfully();
 
@@ -82,7 +82,7 @@ public class MultiReceiveItemOnTest {
                 .emitOn(executor)
                 .onItem().invoke(i -> itemThread.add(Thread.currentThread().getName()))
                 .onFailure().invoke(f -> failureThread.add(Thread.currentThread().getName()))
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(4))
+                .subscribe().withSubscriber(AssertSubscriber.create(4))
                 .await()
                 .assertHasFailedWith(IOException.class, "boom");
 
@@ -94,16 +94,16 @@ public class MultiReceiveItemOnTest {
     public void testWithImmediate() {
         Multi.createFrom().items(1, 2, 3, 4)
                 .emitOn(Runnable::run)
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(4))
+                .subscribe().withSubscriber(AssertSubscriber.create(4))
                 .await()
                 .assertReceived(1, 2, 3, 4);
     }
 
     @Test
     public void testWithLargeNumberOfItems() {
-        MultiAssertSubscriber<Integer> subscriber = Multi.createFrom().range(0, 100_000)
+        AssertSubscriber<Integer> subscriber = Multi.createFrom().range(0, 100_000)
                 .emitOn(executor)
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(Long.MAX_VALUE))
+                .subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE))
                 .await()
                 .assertCompletedSuccessfully();
 
@@ -119,7 +119,7 @@ public class MultiReceiveItemOnTest {
     public void testSubscribeOn() {
         Multi.createFrom().items(1, 2, 3, 4)
                 .subscribeOn(executor)
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(4))
+                .subscribe().withSubscriber(AssertSubscriber.create(4))
                 .await()
                 .assertReceived(1, 2, 3, 4);
     }
@@ -128,7 +128,7 @@ public class MultiReceiveItemOnTest {
     public void testRunSubscriptionOn() {
         Multi.createFrom().items(1, 2, 3, 4)
                 .runSubscriptionOn(executor)
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(4))
+                .subscribe().withSubscriber(AssertSubscriber.create(4))
                 .await()
                 .assertReceived(1, 2, 3, 4);
     }

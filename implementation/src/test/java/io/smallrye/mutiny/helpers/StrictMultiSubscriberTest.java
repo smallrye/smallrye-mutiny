@@ -13,13 +13,13 @@ import org.reactivestreams.Subscription;
 import org.testng.annotations.Test;
 
 import io.smallrye.mutiny.Multi;
-import io.smallrye.mutiny.test.MultiAssertSubscriber;
+import io.smallrye.mutiny.test.AssertSubscriber;
 
 public class StrictMultiSubscriberTest {
 
     @Test
     public void testItemReception() {
-        MultiAssertSubscriber<Integer> test = MultiAssertSubscriber.create(Long.MAX_VALUE);
+        AssertSubscriber<Integer> test = AssertSubscriber.create(Long.MAX_VALUE);
         StrictMultiSubscriber<Integer> strict = new StrictMultiSubscriber<>(test);
         Multi.createFrom().range(0, 5)
                 .subscribe().withSubscriber(strict);
@@ -28,7 +28,7 @@ public class StrictMultiSubscriberTest {
 
     @Test
     public void testItemReceptionWithBackPressure() {
-        MultiAssertSubscriber<Integer> test = MultiAssertSubscriber.create(0);
+        AssertSubscriber<Integer> test = AssertSubscriber.create(0);
         StrictMultiSubscriber<Integer> strict = new StrictMultiSubscriber<>(test);
         Multi.createFrom().range(0, 5)
                 .subscribe().withSubscriber(strict);
@@ -47,7 +47,7 @@ public class StrictMultiSubscriberTest {
 
     @Test
     public void testFailureReception() {
-        MultiAssertSubscriber<Integer> test = MultiAssertSubscriber.create(Long.MAX_VALUE);
+        AssertSubscriber<Integer> test = AssertSubscriber.create(Long.MAX_VALUE);
         StrictMultiSubscriber<Integer> strict = new StrictMultiSubscriber<>(test);
         Multi.createFrom().range(0, 5).onCompletion().failWith(new IOException("boom"))
                 .subscribe().withSubscriber(strict);

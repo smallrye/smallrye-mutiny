@@ -10,7 +10,7 @@ import org.testng.annotations.Test;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.operators.multi.processors.UnicastProcessor;
-import io.smallrye.mutiny.test.MultiAssertSubscriber;
+import io.smallrye.mutiny.test.AssertSubscriber;
 
 public class MultiOnFailureRetryUntilTest {
 
@@ -29,7 +29,7 @@ public class MultiOnFailureRetryUntilTest {
     @Test
     public void testWithoutFailure() {
         Multi<Integer> upstream = Multi.createFrom().range(0, 4);
-        MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(10);
+        AssertSubscriber<Integer> subscriber = AssertSubscriber.create(10);
         upstream
                 .onFailure().retry().until(t -> true)
                 .subscribe().withSubscriber(subscriber);
@@ -52,7 +52,7 @@ public class MultiOnFailureRetryUntilTest {
             em.complete();
         });
 
-        MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(10);
+        AssertSubscriber<Integer> subscriber = AssertSubscriber.create(10);
         upstream
                 .onFailure().retry().until(t -> true)
                 .subscribe(subscriber);
@@ -67,7 +67,7 @@ public class MultiOnFailureRetryUntilTest {
             em.emit(1);
             em.fail(new Exception("boom"));
         });
-        MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(10);
+        AssertSubscriber<Integer> subscriber = AssertSubscriber.create(10);
 
         upstream
                 .onFailure().retry().until(retryTwice)
@@ -91,7 +91,7 @@ public class MultiOnFailureRetryUntilTest {
             em.complete();
         });
 
-        MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(10);
+        AssertSubscriber<Integer> subscriber = AssertSubscriber.create(10);
         upstream
                 .onFailure().retry().until(retryOnIoException).subscribe().withSubscriber(subscriber);
 
@@ -117,7 +117,7 @@ public class MultiOnFailureRetryUntilTest {
             em.emit(3);
             em.fail(ise);
         });
-        MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(10);
+        AssertSubscriber<Integer> subscriber = AssertSubscriber.create(10);
         upstream
                 .onFailure().retry().until(retryOnIoException)
                 .subscribe().withSubscriber(subscriber);
@@ -131,9 +131,9 @@ public class MultiOnFailureRetryUntilTest {
     public void testUnsubscribeFromRetry() {
         UnicastProcessor<Integer> processor = UnicastProcessor.create();
 
-        MultiAssertSubscriber<Integer> subscriber = Multi.createFrom().publisher(processor)
+        AssertSubscriber<Integer> subscriber = Multi.createFrom().publisher(processor)
                 .onFailure().retry().until(retryTwice)
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(10));
+                .subscribe().withSubscriber(AssertSubscriber.create(10));
 
         processor.onNext(1);
         subscriber.cancel();
@@ -158,7 +158,7 @@ public class MultiOnFailureRetryUntilTest {
             em.complete();
         });
 
-        MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(10);
+        AssertSubscriber<Integer> subscriber = AssertSubscriber.create(10);
         upstream
                 .onFailure().retry().until(t -> {
                     throw new IllegalStateException("boom");
@@ -183,7 +183,7 @@ public class MultiOnFailureRetryUntilTest {
             em.complete();
         });
 
-        MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(10);
+        AssertSubscriber<Integer> subscriber = AssertSubscriber.create(10);
         upstream
                 .onFailure().retry().until(t -> false)
                 .subscribe().withSubscriber(subscriber);

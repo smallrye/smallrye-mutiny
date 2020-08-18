@@ -210,25 +210,25 @@ public class UniCreateFromEmitterTest {
 
     @Test
     public void testWithSharedState() {
-        UniAssertSubscriber<Integer> ts1 = UniAssertSubscriber.create();
-        UniAssertSubscriber<Integer> ts2 = UniAssertSubscriber.create();
+        UniAssertSubscriber<Integer> s1 = UniAssertSubscriber.create();
+        UniAssertSubscriber<Integer> s2 = UniAssertSubscriber.create();
         AtomicInteger shared = new AtomicInteger();
         Uni<Integer> uni = Uni.createFrom().emitter(() -> shared,
                 (state, emitter) -> emitter.complete(state.incrementAndGet()));
 
         assertThat(shared).hasValue(0);
-        uni.subscribe().withSubscriber(ts1);
+        uni.subscribe().withSubscriber(s1);
         assertThat(shared).hasValue(1);
-        ts1.assertCompletedSuccessfully().assertItem(1);
-        uni.subscribe().withSubscriber(ts2);
+        s1.assertCompletedSuccessfully().assertItem(1);
+        uni.subscribe().withSubscriber(s2);
         assertThat(shared).hasValue(2);
-        ts2.assertCompletedSuccessfully().assertItem(2);
+        s2.assertCompletedSuccessfully().assertItem(2);
     }
 
     @Test
     public void testWithSharedStateProducingFailure() {
-        UniAssertSubscriber<Integer> ts1 = UniAssertSubscriber.create();
-        UniAssertSubscriber<Integer> ts2 = UniAssertSubscriber.create();
+        UniAssertSubscriber<Integer> s1 = UniAssertSubscriber.create();
+        UniAssertSubscriber<Integer> s2 = UniAssertSubscriber.create();
         Supplier<AtomicInteger> boom = () -> {
             throw new IllegalStateException("boom");
         };
@@ -236,25 +236,25 @@ public class UniCreateFromEmitterTest {
         Uni<Integer> uni = Uni.createFrom().emitter(boom,
                 (state, emitter) -> emitter.complete(state.incrementAndGet()));
 
-        uni.subscribe().withSubscriber(ts1);
-        ts1.assertFailure(IllegalStateException.class, "boom");
-        uni.subscribe().withSubscriber(ts2);
-        ts2.assertFailure(IllegalStateException.class, "Invalid shared state");
+        uni.subscribe().withSubscriber(s1);
+        s1.assertFailure(IllegalStateException.class, "boom");
+        uni.subscribe().withSubscriber(s2);
+        s2.assertFailure(IllegalStateException.class, "Invalid shared state");
     }
 
     @Test
     public void testWithSharedStateProducingNull() {
-        UniAssertSubscriber<Integer> ts1 = UniAssertSubscriber.create();
-        UniAssertSubscriber<Integer> ts2 = UniAssertSubscriber.create();
+        UniAssertSubscriber<Integer> s1 = UniAssertSubscriber.create();
+        UniAssertSubscriber<Integer> s2 = UniAssertSubscriber.create();
         Supplier<AtomicInteger> boom = () -> null;
 
         Uni<Integer> uni = Uni.createFrom().emitter(boom,
                 (state, emitter) -> emitter.complete(state.incrementAndGet()));
 
-        uni.subscribe().withSubscriber(ts1);
-        ts1.assertFailure(NullPointerException.class, "supplier");
-        uni.subscribe().withSubscriber(ts2);
-        ts2.assertFailure(IllegalStateException.class, "Invalid shared state");
+        uni.subscribe().withSubscriber(s1);
+        s1.assertFailure(NullPointerException.class, "supplier");
+        uni.subscribe().withSubscriber(s2);
+        s2.assertFailure(IllegalStateException.class, "Invalid shared state");
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)

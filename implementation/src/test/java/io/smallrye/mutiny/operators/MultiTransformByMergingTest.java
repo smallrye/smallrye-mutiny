@@ -13,7 +13,7 @@ import org.testng.annotations.Ignore;
 import org.testng.annotations.Test;
 
 import io.smallrye.mutiny.Multi;
-import io.smallrye.mutiny.test.MultiAssertSubscriber;
+import io.smallrye.mutiny.test.AssertSubscriber;
 
 public class MultiTransformByMergingTest {
 
@@ -64,8 +64,8 @@ public class MultiTransformByMergingTest {
         Multi<Integer> m3 = Multi.createFrom().range(150, 200).emitOn(service).emitOn(service);
 
         Multi<Integer> merged = m1.transform().byMergingWith(m2, m3);
-        MultiAssertSubscriber<Integer> subscriber = merged.subscribe()
-                .withSubscriber(MultiAssertSubscriber.create(1000));
+        AssertSubscriber<Integer> subscriber = merged.subscribe()
+                .withSubscriber(AssertSubscriber.create(1000));
 
         subscriber.await();
         List<Integer> items = subscriber.items();

@@ -23,8 +23,8 @@ import org.testng.annotations.Test;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.test.AbstractSubscriber;
+import io.smallrye.mutiny.test.AssertSubscriber;
 import io.smallrye.mutiny.test.Mocks;
-import io.smallrye.mutiny.test.MultiAssertSubscriber;
 
 public class MultiFromIterableTest {
 
@@ -92,32 +92,32 @@ public class MultiFromIterableTest {
         }
         Multi<Integer> f = Multi.createFrom().iterable(list);
 
-        MultiAssertSubscriber<Integer> ts = MultiAssertSubscriber.create();
-        ts.assertHasNotReceivedAnyItem();
-        f.subscribe(ts);
-        ts.request(1);
-        ts.assertReceived(1);
-        ts.request(2);
-        ts.assertReceived(1, 2, 3);
-        ts.request(3);
-        ts.assertReceived(1, 2, 3, 4, 5, 6);
-        ts.request(list.size());
-        ts.assertTerminated();
+        AssertSubscriber<Integer> subscriber = AssertSubscriber.create();
+        subscriber.assertHasNotReceivedAnyItem();
+        f.subscribe(subscriber);
+        subscriber.request(1);
+        subscriber.assertReceived(1);
+        subscriber.request(2);
+        subscriber.assertReceived(1, 2, 3);
+        subscriber.request(3);
+        subscriber.assertReceived(1, 2, 3, 4, 5, 6);
+        subscriber.request(list.size());
+        subscriber.assertTerminated();
     }
 
     @Test
     public void testWithoutBackPressure() {
         Multi<Integer> f = Multi.createFrom().iterable(Arrays.asList(1, 2, 3, 4, 5));
 
-        MultiAssertSubscriber<Integer> ts = MultiAssertSubscriber.create();
+        AssertSubscriber<Integer> subscriber = AssertSubscriber.create();
 
-        ts.assertHasNotReceivedAnyItem();
+        subscriber.assertHasNotReceivedAnyItem();
 
-        ts.request(Long.MAX_VALUE); // infinite
-        f.subscribe(ts);
+        subscriber.request(Long.MAX_VALUE); // infinite
+        f.subscribe(subscriber);
 
-        ts.assertReceived(1, 2, 3, 4, 5);
-        ts.assertTerminated();
+        subscriber.assertReceived(1, 2, 3, 4, 5);
+        subscriber.assertTerminated();
     }
 
     @Test
@@ -125,16 +125,16 @@ public class MultiFromIterableTest {
         Multi<Integer> f = Multi.createFrom().iterable(Arrays.asList(1, 2, 3));
 
         for (int i = 0; i < 10; i++) {
-            MultiAssertSubscriber<Integer> ts = MultiAssertSubscriber.create(Long.MAX_VALUE);
+            AssertSubscriber<Integer> subscriber = AssertSubscriber.create(Long.MAX_VALUE);
 
-            f.subscribe(ts);
+            f.subscribe(subscriber);
 
-            ts.assertReceived(1, 2, 3)
+            subscriber.assertReceived(1, 2, 3)
                     .assertCompletedSuccessfully();
         }
     }
 
-    @SuppressWarnings("SubscriberImplementation")
+    @SuppressWarnings({ "ReactiveStreamsSubscriberImplementation" })
     @Test
     public void fromIterableRequestOverflow() throws InterruptedException {
         Multi<Integer> f = Multi.createFrom().iterable(Arrays.asList(1, 2, 3, 4));
@@ -171,7 +171,7 @@ public class MultiFromIterableTest {
         assertTrue(latch.await(10, TimeUnit.SECONDS));
     }
 
-    @SuppressWarnings("SubscriberImplementation")
+    @SuppressWarnings("ReactiveStreamsSubscriberImplementation")
     @Test
     public void fromEmptyIterableWhenZeroRequestedShouldStillEmitOnCompletedEagerly() {
         final AtomicBoolean completed = new AtomicBoolean(false);
@@ -229,7 +229,7 @@ public class MultiFromIterableTest {
         };
         Multi.createFrom().iterable(iterable)
                 .transform().byTakingFirstItems(1)
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(10));
+                .subscribe().withSubscriber(AssertSubscriber.create(10));
         assertFalse(called.get());
     }
 
@@ -277,11 +277,11 @@ public class MultiFromIterableTest {
             throw new IllegalStateException("BOOM");
         };
 
-        MultiAssertSubscriber<Integer> ts = MultiAssertSubscriber.create();
+        AssertSubscriber<Integer> subscriber = AssertSubscriber.create();
 
-        Multi.createFrom().iterable(it).subscribe(ts);
+        Multi.createFrom().iterable(it).subscribe(subscriber);
 
-        ts.assertHasNotReceivedAnyItem()
+        subscriber.assertHasNotReceivedAnyItem()
                 .assertHasFailedWith(IllegalStateException.class, "BOOM");
     }
 
@@ -298,9 +298,9 @@ public class MultiFromIterableTest {
                 return null;
             }
         };
-        MultiAssertSubscriber<Integer> ts = MultiAssertSubscriber.create();
-        Multi.createFrom().iterable(it).subscribe(ts);
-        ts.assertHasNotReceivedAnyItem()
+        AssertSubscriber<Integer> subscriber = AssertSubscriber.create();
+        Multi.createFrom().iterable(it).subscribe(subscriber);
+        subscriber.assertHasNotReceivedAnyItem()
                 .assertHasFailedWith(IllegalStateException.class, "BOOM");
     }
 
@@ -323,11 +323,11 @@ public class MultiFromIterableTest {
             }
         };
 
-        MultiAssertSubscriber<Integer> ts = MultiAssertSubscriber.create(10);
+        AssertSubscriber<Integer> subscriber = AssertSubscriber.create(10);
 
-        Multi.createFrom().iterable(it).subscribe(ts);
+        Multi.createFrom().iterable(it).subscribe(subscriber);
 
-        ts.assertReceived(1)
+        subscriber.assertReceived(1)
                 .assertHasFailedWith(IllegalStateException.class, "BOOM");
     }
 
@@ -350,9 +350,9 @@ public class MultiFromIterableTest {
             }
         };
 
-        MultiAssertSubscriber<Integer> ts = MultiAssertSubscriber.create(10);
-        Multi.createFrom().iterable(it).subscribe(ts);
-        ts.assertReceived(1)
+        AssertSubscriber<Integer> subscriber = AssertSubscriber.create(10);
+        Multi.createFrom().iterable(it).subscribe(subscriber);
+        subscriber.assertReceived(1)
                 .assertHasFailedWith(IllegalStateException.class, "BOOM");
     }
 
@@ -370,11 +370,11 @@ public class MultiFromIterableTest {
             }
         };
 
-        MultiAssertSubscriber<Integer> ts = MultiAssertSubscriber.create(1);
+        AssertSubscriber<Integer> subscriber = AssertSubscriber.create(1);
 
-        Multi.createFrom().iterable(it).subscribe(ts);
+        Multi.createFrom().iterable(it).subscribe(subscriber);
 
-        ts.assertHasNotReceivedAnyItem()
+        subscriber.assertHasNotReceivedAnyItem()
                 .assertHasFailedWith(IllegalStateException.class, "BOOM");
     }
 
@@ -392,11 +392,11 @@ public class MultiFromIterableTest {
             }
         };
 
-        MultiAssertSubscriber<Integer> ts = MultiAssertSubscriber.create(1);
+        AssertSubscriber<Integer> subscriber = AssertSubscriber.create(1);
 
-        Multi.createFrom().iterable(it).subscribe(ts);
+        Multi.createFrom().iterable(it).subscribe(subscriber);
 
-        ts.assertHasNotReceivedAnyItem()
+        subscriber.assertHasNotReceivedAnyItem()
                 .assertHasFailedWith(IllegalStateException.class, "BOOM");
     }
 
@@ -419,15 +419,15 @@ public class MultiFromIterableTest {
             }
         };
 
-        MultiAssertSubscriber<Integer> ts = new MultiAssertSubscriber<>(5, true);
-        Multi.createFrom().iterable(it).subscribe(ts);
-        ts.assertHasNotReceivedAnyItem()
+        AssertSubscriber<Integer> subscriber = new AssertSubscriber<>(5, true);
+        Multi.createFrom().iterable(it).subscribe(subscriber);
+        subscriber.assertHasNotReceivedAnyItem()
                 .assertNotTerminated();
     }
 
     @Test
     public void hasNextCancels() {
-        final MultiAssertSubscriber<Integer> ts = MultiAssertSubscriber.create(1);
+        final AssertSubscriber<Integer> subscriber = AssertSubscriber.create(1);
 
         Multi.createFrom().iterable(() -> new Iterator<Integer>() {
             int count;
@@ -435,7 +435,7 @@ public class MultiFromIterableTest {
             @Override
             public boolean hasNext() {
                 if (++count == 2) {
-                    ts.cancel();
+                    subscriber.cancel();
                 }
                 return true;
             }
@@ -450,9 +450,9 @@ public class MultiFromIterableTest {
                 throw new UnsupportedOperationException();
             }
         })
-                .subscribe(ts);
+                .subscribe(subscriber);
 
-        ts.assertReceived(1)
+        subscriber.assertReceived(1)
                 .assertNotTerminated();
     }
 

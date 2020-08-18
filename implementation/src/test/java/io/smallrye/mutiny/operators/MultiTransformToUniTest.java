@@ -10,7 +10,7 @@ import org.testng.annotations.Test;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
-import io.smallrye.mutiny.test.MultiAssertSubscriber;
+import io.smallrye.mutiny.test.AssertSubscriber;
 
 public class MultiTransformToUniTest {
 
@@ -27,33 +27,33 @@ public class MultiTransformToUniTest {
 
     @Test
     public void testTransformToUniAndConcatenateWithFailure() {
-        MultiAssertSubscriber<Object> ts = MultiAssertSubscriber.create();
+        AssertSubscriber<Object> subscriber = AssertSubscriber.create();
 
         Multi.createFrom().range(1, 4)
                 .onItem()
                 .transformToUni(i -> Uni.createFrom().failure(new RuntimeException("boom")))
                 .concatenate()
-                .subscribe().withSubscriber(ts);
+                .subscribe().withSubscriber(subscriber);
 
-        ts.assertHasFailedWith(RuntimeException.class, "boom");
+        subscriber.assertHasFailedWith(RuntimeException.class, "boom");
     }
 
     @Test
     public void testTransformToUniAndConcatenateWithNull() {
-        MultiAssertSubscriber<Object> ts = MultiAssertSubscriber.create();
+        AssertSubscriber<Object> subscriber = AssertSubscriber.create();
 
         Multi.createFrom().range(1, 4)
                 .onItem()
                 .transformToUni(i -> Uni.createFrom().nullItem())
                 .concatenate()
-                .subscribe().withSubscriber(ts);
+                .subscribe().withSubscriber(subscriber);
 
-        ts.assertHasNotReceivedAnyItem().assertCompletedSuccessfully();
+        subscriber.assertHasNotReceivedAnyItem().assertCompletedSuccessfully();
     }
 
     @Test
     public void testTransformToUniAndConcatenateWithException() {
-        MultiAssertSubscriber<Object> ts = MultiAssertSubscriber.create();
+        AssertSubscriber<Object> subscriber = AssertSubscriber.create();
 
         Multi.createFrom().range(1, 4)
                 .onItem()
@@ -61,14 +61,14 @@ public class MultiTransformToUniTest {
                     throw new RuntimeException("boom");
                 })
                 .concatenate()
-                .subscribe().withSubscriber(ts);
+                .subscribe().withSubscriber(subscriber);
 
-        ts.assertHasFailedWith(RuntimeException.class, "boom");
+        subscriber.assertHasFailedWith(RuntimeException.class, "boom");
     }
 
     @Test
     public void testTransformToUniAndConcatenateWithCancellation() {
-        MultiAssertSubscriber<Object> ts = MultiAssertSubscriber.create();
+        AssertSubscriber<Object> subscriber = AssertSubscriber.create();
         AtomicBoolean uniCancelled = new AtomicBoolean();
 
         Multi.createFrom().items(1, 2, 3)
@@ -77,10 +77,10 @@ public class MultiTransformToUniTest {
                         .completionStage(CompletableFuture.supplyAsync(this::delayedHello))
                         .onCancellation().invoke(() -> uniCancelled.set(true)))
                 .concatenate()
-                .subscribe().withSubscriber(ts);
+                .subscribe().withSubscriber(subscriber);
 
-        ts.request(1).cancel();
-        ts.assertHasNotCompleted().assertHasNotFailed().assertHasNotReceivedAnyItem();
+        subscriber.request(1).cancel();
+        subscriber.assertHasNotCompleted().assertHasNotFailed().assertHasNotReceivedAnyItem();
         assertThat(uniCancelled.get()).isTrue();
     }
 
@@ -116,20 +116,20 @@ public class MultiTransformToUniTest {
 
     @Test
     public void testTransformToUniAndMergeWithFailure() {
-        MultiAssertSubscriber<Object> ts = MultiAssertSubscriber.create();
+        AssertSubscriber<Object> subscriber = AssertSubscriber.create();
 
         Multi.createFrom().range(1, 4)
                 .onItem()
                 .transformToUni(i -> Uni.createFrom().failure(new RuntimeException("boom")))
                 .merge()
-                .subscribe().withSubscriber(ts);
+                .subscribe().withSubscriber(subscriber);
 
-        ts.assertHasFailedWith(RuntimeException.class, "boom");
+        subscriber.assertHasFailedWith(RuntimeException.class, "boom");
     }
 
     @Test
     public void testTransformToUniAndMergeWithException() {
-        MultiAssertSubscriber<Object> ts = MultiAssertSubscriber.create();
+        AssertSubscriber<Object> subscriber = AssertSubscriber.create();
 
         Multi.createFrom().range(1, 4)
                 .onItem()
@@ -137,27 +137,27 @@ public class MultiTransformToUniTest {
                     throw new RuntimeException("boom");
                 })
                 .merge()
-                .subscribe().withSubscriber(ts);
+                .subscribe().withSubscriber(subscriber);
 
-        ts.assertHasFailedWith(RuntimeException.class, "boom");
+        subscriber.assertHasFailedWith(RuntimeException.class, "boom");
     }
 
     @Test
     public void testTransformToUniAndMergeWithNull() {
-        MultiAssertSubscriber<Object> ts = MultiAssertSubscriber.create();
+        AssertSubscriber<Object> subscriber = AssertSubscriber.create();
 
         Multi.createFrom().range(1, 4)
                 .onItem()
                 .transformToUni(i -> Uni.createFrom().nullItem())
                 .merge()
-                .subscribe().withSubscriber(ts);
+                .subscribe().withSubscriber(subscriber);
 
-        ts.assertHasNotReceivedAnyItem().assertCompletedSuccessfully();
+        subscriber.assertHasNotReceivedAnyItem().assertCompletedSuccessfully();
     }
 
     @Test
     public void testTransformToUniAndMergeWithCancellation() {
-        MultiAssertSubscriber<Object> ts = MultiAssertSubscriber.create();
+        AssertSubscriber<Object> subscriber = AssertSubscriber.create();
         AtomicBoolean uniCancelled = new AtomicBoolean();
 
         Multi.createFrom().items(1, 2, 3)
@@ -166,10 +166,10 @@ public class MultiTransformToUniTest {
                         .completionStage(CompletableFuture.supplyAsync(this::delayedHello))
                         .onCancellation().invoke(() -> uniCancelled.set(true)))
                 .merge()
-                .subscribe().withSubscriber(ts);
+                .subscribe().withSubscriber(subscriber);
 
-        ts.request(1).cancel();
-        ts.assertHasNotCompleted().assertHasNotFailed().assertHasNotReceivedAnyItem();
+        subscriber.request(1).cancel();
+        subscriber.assertHasNotCompleted().assertHasNotFailed().assertHasNotReceivedAnyItem();
         assertThat(uniCancelled.get()).isTrue();
     }
 

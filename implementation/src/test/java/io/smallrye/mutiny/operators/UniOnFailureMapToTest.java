@@ -46,43 +46,43 @@ public class UniOnFailureMapToTest {
 
     @Test
     public void testWithTwoSubscribers() {
-        UniAssertSubscriber<Integer> ts1 = UniAssertSubscriber.create();
-        UniAssertSubscriber<Integer> ts2 = UniAssertSubscriber.create();
+        UniAssertSubscriber<Integer> s1 = UniAssertSubscriber.create();
+        UniAssertSubscriber<Integer> s2 = UniAssertSubscriber.create();
 
         AtomicInteger count = new AtomicInteger();
         Uni<Integer> uni = failure.onFailure().transform(t -> new BoomException(count.incrementAndGet()));
-        uni.subscribe().withSubscriber(ts1);
-        uni.subscribe().withSubscriber(ts2);
+        uni.subscribe().withSubscriber(s1);
+        uni.subscribe().withSubscriber(s2);
 
-        ts1.assertCompletedWithFailure()
+        s1.assertCompletedWithFailure()
                 .assertFailure(BoomException.class, "1");
-        ts2.assertCompletedWithFailure()
+        s2.assertCompletedWithFailure()
                 .assertFailure(BoomException.class, "2");
     }
 
     @Test
     public void testWhenTheMapperThrowsAnException() {
-        UniAssertSubscriber<Object> ts = UniAssertSubscriber.create();
+        UniAssertSubscriber<Object> subscriber = UniAssertSubscriber.create();
 
         failure.onFailure().transform(t -> {
             throw new RuntimeException("failure");
-        }).subscribe().withSubscriber(ts);
+        }).subscribe().withSubscriber(subscriber);
 
-        ts.assertFailure(RuntimeException.class, "failure");
+        subscriber.assertFailure(RuntimeException.class, "failure");
     }
 
     @Test
     public void testThatMapperCanNotReturnNull() {
-        UniAssertSubscriber<Object> ts = UniAssertSubscriber.create();
+        UniAssertSubscriber<Object> subscriber = UniAssertSubscriber.create();
 
-        failure.onFailure().transform(t -> null).subscribe().withSubscriber(ts);
+        failure.onFailure().transform(t -> null).subscribe().withSubscriber(subscriber);
 
-        ts.assertFailure(NullPointerException.class, "null");
+        subscriber.assertFailure(NullPointerException.class, "null");
     }
 
     @Test
     public void testThatMapperIsCalledOnTheRightExecutor() {
-        UniAssertSubscriber<Integer> ts = new UniAssertSubscriber<>();
+        UniAssertSubscriber<Integer> subscriber = new UniAssertSubscriber<>();
         ExecutorService executor = Executors.newSingleThreadExecutor();
         try {
             AtomicReference<String> threadName = new AtomicReference<>();
@@ -92,11 +92,11 @@ public class UniOnFailureMapToTest {
                         threadName.set(Thread.currentThread().getName());
                         return new BoomException();
                     })
-                    .subscribe().withSubscriber(ts);
+                    .subscribe().withSubscriber(subscriber);
 
-            ts.await().assertFailure(BoomException.class, "BoomException");
+            subscriber.await().assertFailure(BoomException.class, "BoomException");
             assertThat(threadName).isNotNull().doesNotHaveValue("main");
-            assertThat(ts.getOnFailureThreadName()).isEqualTo(threadName.get());
+            assertThat(subscriber.getOnFailureThreadName()).isEqualTo(threadName.get());
         } finally {
             executor.shutdown();
         }
@@ -104,35 +104,35 @@ public class UniOnFailureMapToTest {
 
     @Test
     public void testThatMapperIsNotCalledOnItem() {
-        UniAssertSubscriber<Integer> ts = UniAssertSubscriber.create();
+        UniAssertSubscriber<Integer> subscriber = UniAssertSubscriber.create();
         AtomicBoolean called = new AtomicBoolean();
         Uni.createFrom().item(1)
                 .onFailure().transform(f -> {
                     called.set(true);
                     return f;
                 })
-                .subscribe().withSubscriber(ts);
-        ts.assertItem(1);
+                .subscribe().withSubscriber(subscriber);
+        subscriber.assertItem(1);
         assertThat(called).isFalse();
     }
 
     @Test
     public void testThatMapperIsNotCalledOnNonMatchingPredicate() {
-        UniAssertSubscriber<Integer> ts = UniAssertSubscriber.create();
+        UniAssertSubscriber<Integer> subscriber = UniAssertSubscriber.create();
         AtomicBoolean called = new AtomicBoolean();
         Uni.createFrom().<Integer> failure(new IllegalStateException("boom"))
                 .onFailure(IOException.class).transform(f -> {
                     called.set(true);
                     return new IllegalArgumentException("Karamba");
                 })
-                .subscribe().withSubscriber(ts);
-        ts.assertCompletedWithFailure().assertFailure(IllegalStateException.class, "boom");
+                .subscribe().withSubscriber(subscriber);
+        subscriber.assertCompletedWithFailure().assertFailure(IllegalStateException.class, "boom");
         assertThat(called).isFalse();
     }
 
     @Test
     public void testThatMapperIsNotCalledWhenPredicateThrowsAnException() {
-        UniAssertSubscriber<Integer> ts = UniAssertSubscriber.create();
+        UniAssertSubscriber<Integer> subscriber = UniAssertSubscriber.create();
         AtomicBoolean called = new AtomicBoolean();
         Uni.createFrom().<Integer> failure(new IllegalStateException("boom"))
                 .onFailure(t -> {
@@ -141,14 +141,14 @@ public class UniOnFailureMapToTest {
                     called.set(true);
                     return new RuntimeException("Karamba");
                 })
-                .subscribe().withSubscriber(ts);
-        ts.assertCompletedWithFailure()
+                .subscribe().withSubscriber(subscriber);
+        subscriber.assertCompletedWithFailure()
                 .assertFailure(CompositeException.class, "boomboom")
                 .assertFailure(CompositeException.class, " boom");
         assertThat(called).isFalse();
     }
 
-    private class BoomException extends Exception {
+    private static class BoomException extends Exception {
         BoomException() {
             super("BoomException");
         }

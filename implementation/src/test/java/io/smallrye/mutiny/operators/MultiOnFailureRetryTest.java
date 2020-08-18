@@ -12,7 +12,7 @@ import org.testng.annotations.Test;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.groups.MultiRetry;
-import io.smallrye.mutiny.test.MultiAssertSubscriber;
+import io.smallrye.mutiny.test.AssertSubscriber;
 
 public class MultiOnFailureRetryTest {
 
@@ -46,7 +46,7 @@ public class MultiOnFailureRetryTest {
 
     @Test
     public void testNoRetryOnNoFailure() {
-        MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(5);
+        AssertSubscriber<Integer> subscriber = AssertSubscriber.create(5);
 
         Multi.createFrom().range(1, 4)
                 .onFailure().retry().atMost(5)
@@ -59,7 +59,7 @@ public class MultiOnFailureRetryTest {
 
     @Test
     public void testWithASingleRetry() {
-        MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(10);
+        AssertSubscriber<Integer> subscriber = AssertSubscriber.create(10);
 
         failing
                 .onFailure().retry().atMost(1)
@@ -75,7 +75,7 @@ public class MultiOnFailureRetryTest {
 
     @Test
     public void testWithASingleRetryAndRequests() {
-        MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(0);
+        AssertSubscriber<Integer> subscriber = AssertSubscriber.create(0);
 
         failing
                 .onFailure().retry().atMost(1)
@@ -96,7 +96,7 @@ public class MultiOnFailureRetryTest {
 
     @Test
     public void testRetryIndefinitely() {
-        MultiAssertSubscriber<Integer> subscriber = MultiAssertSubscriber.create(20);
+        AssertSubscriber<Integer> subscriber = AssertSubscriber.create(20);
 
         failing.onFailure().retry().indefinitely()
                 .subscribe().withSubscriber(subscriber);
@@ -118,7 +118,7 @@ public class MultiOnFailureRetryTest {
                     }
                 })
                 .onFailure().retry().atMost(2)
-                .subscribe().withSubscriber(MultiAssertSubscriber.create(10))
+                .subscribe().withSubscriber(AssertSubscriber.create(10))
                 .assertCompletedSuccessfully()
                 .assertReceived(1, 2, 3, 4);
     }

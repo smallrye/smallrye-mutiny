@@ -5,7 +5,7 @@ import static org.junit.Assert.assertEquals;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
-import org.junit.Test;
+import org.testng.annotations.Test;
 
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.unchecked.Unchecked;
@@ -63,7 +63,7 @@ public class CausedTest {
                 .indefinitely());
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expectedExceptions = IllegalArgumentException.class)
     public void testWithNullParameter() {
         Uni.createFrom()
                 .item(Unchecked.supplier(this::numberSupplierThrowingNumberFormatException))
