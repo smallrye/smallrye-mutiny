@@ -15,18 +15,29 @@ import io.smallrye.mutiny.subscription.UniSubscription;
 public class UniSerializedSubscriber<T> implements UniSubscriber<T>, UniSubscription {
 
     private static final int INIT = 0;
+    /**
+     * Got a downstream subscriber.
+     */
     private static final int SUBSCRIBED = 1;
+
+    /**
+     * Got a subscription from upstream.
+     */
     private static final int HAS_SUBSCRIPTION = 2;
-    private static final int DONE = 3; // Terminal state
+
+    /**
+     * Got a failure or item from upstream
+     */
+    private static final int DONE = 3;
 
     private final AtomicInteger state = new AtomicInteger(INIT);
-    private final AbstractUni<T> source;
+    private final AbstractUni<T> upstream;
     private final UniSubscriber<? super T> downstream;
-    private UniSubscription upstream;
-    private AtomicReference<Throwable> collectedFailure = new AtomicReference<>();
+    private UniSubscription subscription;
+    private final AtomicReference<Throwable> failure = new AtomicReference<>();
 
-    private UniSerializedSubscriber(AbstractUni<T> source, UniSubscriber<? super T> subscriber) {
-        this.source = ParameterValidation.nonNull(source, "source");
+    UniSerializedSubscriber(AbstractUni<T> upstream, UniSubscriber<? super T> subscriber) {
+        this.upstream = ParameterValidation.nonNull(upstream, "source");
         this.downstream = ParameterValidation.nonNull(subscriber, "subscriber` must not be `null`");
     }
 
@@ -40,10 +51,7 @@ public class UniSerializedSubscriber<T> implements UniSubscriber<T>, UniSubscrip
 
     private void subscribe() {
         if (state.compareAndSet(INIT, SUBSCRIBED)) {
-            this.source.subscribing(this);
-        } else {
-            EmptyUniSubscription.propagateFailureEvent(this.downstream,
-                    new IllegalStateException("Unable to subscribe, already got a subscriber"));
+            upstream.subscribing(this);
         }
     }
 
@@ -52,60 +60,61 @@ public class UniSerializedSubscriber<T> implements UniSubscriber<T>, UniSubscrip
         ParameterValidation.nonNull(subscription, "subscription");
 
         if (state.compareAndSet(SUBSCRIBED, HAS_SUBSCRIPTION)) {
-            this.upstream = subscription;
+            this.subscription = subscription;
             this.downstream.onSubscribe(this);
         } else if (state.get() == DONE) {
-            Throwable collected = collectedFailure.getAndSet(null);
+            Throwable collected = failure.getAndSet(null);
             if (collected != null) {
+                this.downstream.onSubscribe(this);
                 this.downstream.onFailure(collected);
             }
         } else {
             EmptyUniSubscription.propagateFailureEvent(this.downstream,
                     new IllegalStateException(
-                            "Invalid transition, expected to be in the SUBSCRIBED state but was in " + state.get()));
+                            "Invalid transition, expected to be in the SUBSCRIBED state but was in " + state));
         }
     }
 
     @Override
     public void onItem(T item) {
-        if (state.compareAndSet(HAS_SUBSCRIPTION, DONE)) {
-            downstream.onItem(item);
-            dispose();
-        } else if (state.get() != DONE) { // Are we already done? In this case, drop the signal
+        if (state.compareAndSet(SUBSCRIBED, DONE)) {
             EmptyUniSubscription.propagateFailureEvent(this.downstream,
                     new IllegalStateException(
-                            "Invalid transition, expected to be in the HAS_SUBSCRIPTION state but was in " + state
-                                    .get()));
+                            "Invalid transition, expected to be in the HAS_SUBSCRIPTION states but was in SUBSCRIBED"));
+        } else if (state.compareAndSet(HAS_SUBSCRIPTION, DONE)) {
+            downstream.onItem(item);
         }
+        dispose();
     }
 
     @Override
     public void onFailure(Throwable failure) {
-        if (state.compareAndSet(HAS_SUBSCRIPTION, DONE)) {
-            downstream.onFailure(failure);
-        } else if (state.compareAndSet(SUBSCRIBED, DONE)) {
-            collectedFailure.compareAndSet(null, failure);
-        } else if (state.get() != DONE) { // Are we already done? In this case, drop the signal
+        if (state.compareAndSet(SUBSCRIBED, DONE)) {
             EmptyUniSubscription.propagateFailureEvent(this.downstream,
                     new IllegalStateException(
-                            "Invalid transition, expected to be in the HAS_SUBSCRIPTION state but was in " + state
-                                    .get()));
+                            "Invalid transition, expected to be in the HAS_SUBSCRIPTION states but was in "
+                                    + state));
+        } else if (state.compareAndSet(HAS_SUBSCRIPTION, DONE)) {
+            downstream.onFailure(failure);
+            dispose();
         }
     }
 
     private void dispose() {
-        upstream = null;
+        subscription = null;
     }
 
     @Override
     public void cancel() {
         if (state.compareAndSet(HAS_SUBSCRIPTION, DONE)) {
-            upstream.cancel();
+            subscription.cancel();
+            dispose();
+        } else if (state.compareAndSet(SUBSCRIBED, DONE)) {
             dispose();
         }
     }
 
-    public boolean isCancelledOrDone() {
+    public synchronized boolean isCancelledOrDone() {
         return state.get() == DONE;
     }
 }
