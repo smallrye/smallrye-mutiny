@@ -2,6 +2,7 @@ package io.smallrye.mutiny.subscription;
 
 import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
 
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
@@ -101,6 +102,7 @@ public class Subscribers {
 
         @Override
         public void onItem(T item) {
+            Objects.requireNonNull(item);
             if (subscription.get() != Subscriptions.CANCELLED) {
                 try {
                     // onItem cannot be null.
@@ -114,6 +116,7 @@ public class Subscribers {
 
         @Override
         public void onFailure(Throwable t) {
+            Objects.requireNonNull(t);
             if (subscription.getAndSet(Subscriptions.CANCELLED) != Subscriptions.CANCELLED) {
                 if (onFailure != null) {
                     onFailure.accept(t);
