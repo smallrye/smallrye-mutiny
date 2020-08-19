@@ -33,6 +33,7 @@ public class UniSerializedSubscriber<T> implements UniSubscriber<T>, UniSubscrip
     private final AtomicInteger state = new AtomicInteger(INIT);
     private final AbstractUni<T> upstream;
     private final UniSubscriber<? super T> downstream;
+
     private UniSubscription subscription;
     private final AtomicReference<Throwable> failure = new AtomicReference<>();
 
@@ -109,9 +110,10 @@ public class UniSerializedSubscriber<T> implements UniSubscriber<T>, UniSubscrip
         if (state.compareAndSet(HAS_SUBSCRIPTION, DONE)) {
             subscription.cancel();
             dispose();
-        } else if (state.compareAndSet(SUBSCRIBED, DONE)) {
-            dispose();
+        } else {
+            state.set(DONE);
         }
+
     }
 
     public synchronized boolean isCancelledOrDone() {
