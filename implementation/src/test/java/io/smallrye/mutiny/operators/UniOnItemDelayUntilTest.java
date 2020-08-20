@@ -117,6 +117,21 @@ public class UniOnItemDelayUntilTest {
     }
 
     @Test
+    public void testImmediateCancellation() {
+        AtomicBoolean called = new AtomicBoolean();
+        UniAssertSubscriber<Integer> subscriber = Uni.createFrom().item(1)
+                // It will never emit the item
+                .onItem().delayIt().until(i -> {
+                    called.set(true);
+                    return Uni.createFrom().nothing();
+                })
+                .subscribe().withSubscriber(new UniAssertSubscriber<>(true));
+
+        subscriber.assertNotCompleted();
+        assertThat(called).isFalse();
+    }
+
+    @Test
     public void testCancellationDuringWaitingTimeWithEmissionAfterward() {
         AtomicReference<UniEmitter<?>> reference = new AtomicReference<>();
         UniAssertSubscriber<Integer> subscriber = Uni.createFrom().item(1)

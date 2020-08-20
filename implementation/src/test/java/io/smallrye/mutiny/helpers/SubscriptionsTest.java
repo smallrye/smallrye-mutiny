@@ -220,6 +220,23 @@ public class SubscriptionsTest {
         assertThat(container).hasValue(sub);
     }
 
+    @Test
+    public void testCancelledSubscriber() {
+        Subscriptions.CancelledSubscriber<Integer> subscriber = new Subscriptions.CancelledSubscriber<>();
+        Subscription subscription = mock(Subscription.class);
+        subscriber.onSubscribe(subscription);
+        verify(subscription).cancel();
+        verify(subscription, never()).request(anyLong());
+
+        // Verify that other method are noop
+        subscriber.onNext(1);
+        subscriber.onComplete();
+        subscriber.onError(new Exception("boom"));
+
+        assertThatThrownBy(() -> subscriber.onSubscribe(null))
+                .isInstanceOf(NullPointerException.class);
+    }
+
     private void shuffleAndRun(Runnable r1, Runnable r2) {
         List<Runnable> runnables = Arrays.asList(r1, r2);
         Collections.shuffle(runnables);

@@ -10,6 +10,7 @@ import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.CompositeException;
+import io.smallrye.mutiny.subscription.UniSubscription;
 
 public class Subscriptions {
 
@@ -262,7 +263,7 @@ public class Subscriptions {
         return failure.getAndSet(TERMINATED);
     }
 
-    public static class EmptySubscription implements Subscription {
+    public static class EmptySubscription implements Subscription, UniSubscription {
 
         @Override
         public void request(long requests) {
@@ -347,7 +348,7 @@ public class Subscriptions {
         }
     }
 
-    @SuppressWarnings("SubscriberImplementation")
+    @SuppressWarnings({ "ReactiveStreamsSubscriberImplementation" })
     public static class CancelledSubscriber<X> implements Subscriber<X> {
         @Override
         public void onSubscribe(Subscription s) {
@@ -371,8 +372,8 @@ public class Subscriptions {
     }
 
     public static class DeferredSubscription implements Subscription {
-        private AtomicReference<Subscription> subscription = new AtomicReference<>();
-        private AtomicLong pendingRequests = new AtomicLong();
+        private final AtomicReference<Subscription> subscription = new AtomicReference<>();
+        private final AtomicLong pendingRequests = new AtomicLong();
 
         protected boolean isCancelled() {
             return subscription.get() == CANCELLED;

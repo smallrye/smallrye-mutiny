@@ -1,5 +1,6 @@
 package io.smallrye.mutiny.operators.multi.processors;
 
+import java.util.Objects;
 import java.util.Queue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -37,6 +38,7 @@ public class UnicastProcessor<T> extends AbstractMulti<T> implements Processor<T
     private final AtomicInteger wip = new AtomicInteger();
     private final AtomicLong requested = new AtomicLong();
     private final AtomicReference<Subscriber<? super T>> downstream = new AtomicReference<>();
+    private volatile boolean hasUpstream;
 
     /**
      * Creates a new {@link UnicastProcessor} using a new unbounded queue.
@@ -156,9 +158,14 @@ public class UnicastProcessor<T> extends AbstractMulti<T> implements Processor<T
 
     @Override
     public void onSubscribe(Subscription upstream) {
+        if (hasUpstream) {
+            upstream.cancel();
+            return;
+        }
         if (isDoneOrCancelled()) {
             upstream.cancel();
         } else {
+            hasUpstream = true;
             // Request max, it's the queue that buffer the items.
             upstream.request(Long.MAX_VALUE);
         }
@@ -196,6 +203,7 @@ public class UnicastProcessor<T> extends AbstractMulti<T> implements Processor<T
 
     @Override
     public void onError(Throwable failure) {
+        Objects.requireNonNull(failure);
         if (isDoneOrCancelled()) {
             return;
         }

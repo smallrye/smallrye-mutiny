@@ -14,6 +14,7 @@ import java.util.function.Supplier;
 
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.helpers.ParameterValidation;
+import io.smallrye.mutiny.helpers.Subscriptions;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.subscription.UniSubscriber;
 import io.smallrye.mutiny.subscription.UniSubscription;
@@ -48,6 +49,7 @@ public class UniFailOnTimeout<I> extends UniOperator<I, I> {
                     }, timeout.toMillis(), TimeUnit.MILLISECONDS));
                 } catch (RejectedExecutionException e) {
                     // Executor out of service.
+                    subscriber.onSubscribe(Subscriptions.CANCELLED);
                     subscriber.onFailure(e);
                     return;
                 }

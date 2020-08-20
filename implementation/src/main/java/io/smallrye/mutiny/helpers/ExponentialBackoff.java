@@ -34,12 +34,7 @@ public class ExponentialBackoff {
             long numRetries, Duration firstBackoff, Duration maxBackoff,
             double jitterFactor, ScheduledExecutorService executor) {
 
-        if (jitterFactor < 0 || jitterFactor > 1) {
-            throw new IllegalArgumentException("jitterFactor must be between 0 and 1 (default 0.5)");
-        }
-        ParameterValidation.nonNull(firstBackoff, "firstBackoff");
-        ParameterValidation.nonNull(maxBackoff, "maxBackoff");
-        ParameterValidation.nonNull(executor, "executor");
+        validate(firstBackoff, maxBackoff, jitterFactor, executor);
 
         AtomicInteger index = new AtomicInteger();
         return t -> t
@@ -51,19 +46,42 @@ public class ExponentialBackoff {
                                         failure));
                     }
 
-                    Duration nextBackoff = getNextAttemptDelay(firstBackoff, maxBackoff, iteration);
-
-                    //short-circuit delay == 0 case
-                    if (nextBackoff.isZero()) {
-                        return Uni.createFrom().item((long) iteration);
-                    }
-
-                    ThreadLocalRandom random = ThreadLocalRandom.current();
-                    long jitter = computeJitter(firstBackoff, maxBackoff, jitterFactor, nextBackoff, random);
-                    Duration effectiveBackoff = nextBackoff.plusMillis(jitter);
+                    Duration delay = getNextDelay(firstBackoff, maxBackoff, jitterFactor, iteration);
                     return Uni.createFrom().item((long) iteration).onItem().delayIt()
-                            .onExecutor(executor).by(effectiveBackoff);
+                            .onExecutor(executor).by(delay);
                 }).concatenate();
+    }
+
+    private static Duration getNextDelay(Duration firstBackoff, Duration maxBackoff, double jitterFactor, int iteration) {
+        Duration nextBackoff = getNextAttemptDelay(firstBackoff, maxBackoff, iteration);
+
+        // Compute the jitter
+        long jitterOffset = getJitter(jitterFactor, nextBackoff);
+        long lowBound = Math.max(firstBackoff.minus(nextBackoff).toMillis(), -jitterOffset);
+        long highBound = Math.min(maxBackoff.minus(nextBackoff).toMillis(), jitterOffset);
+        long jitter;
+        ThreadLocalRandom random = ThreadLocalRandom.current();
+        if (highBound == lowBound) {
+            if (highBound == 0) {
+                jitter = 0;
+            } else {
+                jitter = random.nextLong(highBound);
+            }
+        } else {
+            jitter = random.nextLong(lowBound, highBound);
+        }
+
+        return nextBackoff.plusMillis(jitter);
+    }
+
+    private static void validate(Duration firstBackoff, Duration maxBackoff, double jitterFactor,
+            ScheduledExecutorService executor) {
+        if (jitterFactor < 0 || jitterFactor > 1) {
+            throw new IllegalArgumentException("jitterFactor must be between 0 and 1 (default 0.5)");
+        }
+        ParameterValidation.nonNull(firstBackoff, "firstBackoff");
+        ParameterValidation.nonNull(maxBackoff, "maxBackoff");
+        ParameterValidation.nonNull(executor, "executor");
     }
 
     /**
@@ -82,29 +100,15 @@ public class ExponentialBackoff {
             long expireAt, Duration firstBackoff, Duration maxBackoff,
             double jitterFactor, ScheduledExecutorService executor) {
 
-        if (jitterFactor < 0 || jitterFactor > 1) {
-            throw new IllegalArgumentException("jitterFactor must be between 0 and 1 (default 0.5)");
-        }
-        ParameterValidation.nonNull(firstBackoff, "firstBackoff");
-        ParameterValidation.nonNull(maxBackoff, "maxBackoff");
-        ParameterValidation.nonNull(executor, "executor");
+        validate(firstBackoff, maxBackoff, jitterFactor, executor);
 
         AtomicInteger index = new AtomicInteger();
         return t -> t
                 .onItem().transformToUni(failure -> {
                     int iteration = index.incrementAndGet();
-                    Duration nextBackoff = getNextAttemptDelay(firstBackoff, maxBackoff, iteration);
+                    Duration delay = getNextDelay(firstBackoff, maxBackoff, jitterFactor, iteration);
 
-                    //short-circuit delay == 0 case
-                    if (nextBackoff.isZero()) {
-                        return Uni.createFrom().item((long) iteration);
-                    }
-
-                    ThreadLocalRandom random = ThreadLocalRandom.current();
-                    long jitter = computeJitter(firstBackoff, maxBackoff, jitterFactor, nextBackoff, random);
-                    Duration effectiveBackoff = nextBackoff.plusMillis(jitter);
-
-                    long checkTime = System.currentTimeMillis() + effectiveBackoff.toMillis();
+                    long checkTime = System.currentTimeMillis() + delay.toMillis();
                     if (checkTime > expireAt) {
                         return Uni.createFrom().<Long> failure(
                                 new IllegalStateException(
@@ -113,26 +117,8 @@ public class ExponentialBackoff {
                                         failure));
                     }
                     return Uni.createFrom().item((long) iteration).onItem().delayIt()
-                            .onExecutor(executor).by(effectiveBackoff);
+                            .onExecutor(executor).by(delay);
                 }).concatenate();
-    }
-
-    private static long computeJitter(Duration firstBackoff, Duration maxBackoff, double jitterFactor,
-            Duration nextBackoff, ThreadLocalRandom random) {
-        long jitterOffset = getJitter(jitterFactor, nextBackoff);
-        long lowBound = Math.max(firstBackoff.minus(nextBackoff).toMillis(), -jitterOffset);
-        long highBound = Math.min(maxBackoff.minus(nextBackoff).toMillis(), jitterOffset);
-        long jitter;
-        if (highBound == lowBound) {
-            if (highBound == 0) {
-                jitter = 0;
-            } else {
-                jitter = random.nextLong(highBound);
-            }
-        } else {
-            jitter = random.nextLong(lowBound, highBound);
-        }
-        return jitter;
     }
 
     private static long getJitter(double jitterFactor, Duration nextBackoff) {

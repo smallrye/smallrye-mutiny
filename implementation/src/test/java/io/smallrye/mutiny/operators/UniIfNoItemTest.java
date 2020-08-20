@@ -5,6 +5,9 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import java.io.IOException;
 import java.time.Duration;
+import java.util.concurrent.Executors;
+import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.ScheduledExecutorService;
 
 import org.testng.annotations.Test;
 
@@ -83,6 +86,52 @@ public class UniIfNoItemTest {
         assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(
                 () -> Uni.createFrom().item(1).ifNoItem().after(Duration.ofMillis(-1)))
                 .withMessageContaining("timeout");
+    }
+
+    @Test
+    public void testFailingOnTimeoutWithShutdownExecutor() {
+        ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+        executor.shutdown();
+        UniAssertSubscriber<Object> subscriber = Uni.createFrom().emitter(e -> {
+            // To nothing
+        })
+                .ifNoItem().after(Duration.ofMillis(10)).on(executor).fail()
+                .subscribe().withSubscriber(UniAssertSubscriber.create());
+
+        subscriber
+                .await()
+                .assertCompletedWithFailure()
+                .assertFailure(RejectedExecutionException.class, "");
+    }
+
+    @Test
+    public void testFailingOnTimeoutWithImmediateCancellation() {
+        ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+        UniAssertSubscriber<Object> subscriber = Uni.createFrom().emitter(e -> {
+            // To nothing
+        })
+                .ifNoItem().after(Duration.ofMillis(10)).on(executor).fail()
+                .subscribe().withSubscriber(new UniAssertSubscriber<>(true));
+
+        subscriber.assertNotCompleted()
+                .assertSubscribed()
+                .assertNoResult();
+    }
+
+    @Test
+    public void testFailingOnTimeoutWithCancellation() {
+        ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+        UniAssertSubscriber<Object> subscriber = Uni.createFrom().emitter(e -> {
+            // To nothing
+        })
+                .ifNoItem().after(Duration.ofMillis(1000)).on(executor).fail()
+                .subscribe().withSubscriber(new UniAssertSubscriber<>(false));
+
+        subscriber.cancel();
+
+        subscriber.assertNotCompleted()
+                .assertSubscribed()
+                .assertNoResult();
     }
 
 }

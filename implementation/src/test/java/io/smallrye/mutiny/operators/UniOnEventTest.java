@@ -1,8 +1,11 @@
 package io.smallrye.mutiny.operators;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 
 import java.io.IOException;
+import java.time.Duration;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
@@ -701,6 +704,56 @@ public class UniOnEventTest {
         subscriber.assertNotCompleted();
         subscriber.assertNoFailure();
         assertThat(emitterTerminationCalled).isTrue();
+        assertThat(cancellationUniCalled).isTrue();
+        assertThat(count).hasValue(1);
+
+        subscriber.cancel();
+        assertThat(count).hasValue(1);
+    }
+
+    @Test(invocationCount = 100)
+    public void testOnCancellationInvokeUniWithDoubleCancellation() throws InterruptedException {
+        AtomicBoolean emitterTerminationCalled = new AtomicBoolean();
+        AtomicBoolean cancellationUniCalled = new AtomicBoolean();
+        AtomicInteger count = new AtomicInteger();
+
+        UniAssertSubscriber<?> subscriber = Uni.createFrom().emitter(e -> {
+            // Do not emit anything
+            e.onTermination(() -> emitterTerminationCalled.set(true));
+        })
+                .onCancellation().invokeUni(() -> {
+                    count.incrementAndGet();
+                    cancellationUniCalled.set(true);
+                    return Uni.createFrom().item(69)
+                            // Delay the event to give a chance to the second cancellation to be called before this
+                            // uni to complete.
+                            .onItem().delayIt().by(Duration.ofMillis(5));
+                })
+                .subscribe().withSubscriber(new UniAssertSubscriber<>());
+
+        subscriber.assertNotCompleted();
+
+        CountDownLatch latch = new CountDownLatch(2);
+        CountDownLatch done = new CountDownLatch(2);
+        Runnable runnable = () -> {
+            latch.countDown();
+            try {
+                latch.await();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                // Ignore it.
+            }
+            subscriber.cancel();
+            done.countDown();
+        };
+
+        new Thread(runnable).start();
+        new Thread(runnable).start();
+
+        done.await();
+        await().until(emitterTerminationCalled::get);
+        subscriber.assertNotCompleted();
+        subscriber.assertNoFailure();
         assertThat(cancellationUniCalled).isTrue();
         assertThat(count).hasValue(1);
 

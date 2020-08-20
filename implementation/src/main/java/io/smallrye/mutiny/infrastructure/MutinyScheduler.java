@@ -74,13 +74,13 @@ public class MutinyScheduler extends ScheduledThreadPoolExecutor {
         }
 
         @Override
-        public V get() {
-            throw new UnsupportedOperationException();
+        public V get() throws ExecutionException, InterruptedException {
+            return origin.get();
         }
 
         @Override
-        public V get(long timeout, TimeUnit unit) {
-            throw new UnsupportedOperationException();
+        public V get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
+            return origin.get(timeout, unit);
         }
     }
 
