@@ -6,10 +6,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.*;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.testng.annotations.Test;
 
-@SuppressWarnings({ "rawtypes", "unchecked" })
+@SuppressWarnings({ "rawtypes", "unchecked", "MismatchedQueryAndUpdateOfCollection" })
 public class QueuesTest {
 
     @Test
@@ -127,7 +129,7 @@ public class QueuesTest {
         assertThat(queue).isEmpty();
     }
 
-    @SuppressWarnings({ "ConfusingArgumentToVarargsMethod", "ConstantConditions", "RedundantCollectionOperation",
+    @SuppressWarnings({ "ConstantConditions", "RedundantCollectionOperation",
             "SuspiciousMethodCalls" })
     @Test
     public void testSingletonQueue() {
@@ -216,6 +218,275 @@ public class QueuesTest {
         iterator = queue.iterator();
         assertThat(iterator.hasNext()).isFalse();
         assertThat(iterator.next()).isNull();
+    }
+
+    @Test(expectedExceptions = NullPointerException.class)
+    public void testThatSpscArrayQueueCannotReceiveNull() {
+        SpscArrayQueue<Object> q = new SpscArrayQueue<>(16);
+        q.offer(null);
+    }
+
+    @Test(expectedExceptions = NullPointerException.class)
+    public void testThatSpscLinkedArrayQueueCannotReceiveNull() {
+        SpscLinkedArrayQueue<Object> q = new SpscLinkedArrayQueue<>(16);
+        q.offer(null);
+    }
+
+    @Test(expectedExceptions = NullPointerException.class)
+    public void testThatMpscLinkedQueueCannotReceiveNull() {
+        MpscLinkedQueue<Object> q = new MpscLinkedQueue<>();
+        q.offer(null);
+    }
+
+    @Test
+    public void testSpscArrayQueueOffer() {
+        SpscArrayQueue<Object> q = new SpscArrayQueue<>(16);
+        q.offer(1);
+        q.offer(2);
+        assertThat(q.size()).isEqualTo(2);
+        assertThat(q.peek()).isEqualTo(1);
+        assertThat(q.poll()).isEqualTo(1);
+        assertThat(q.peek()).isEqualTo(2);
+        assertThat(q.poll()).isEqualTo(2);
+        assertThat(q.poll()).isNull();
+    }
+
+    @Test
+    public void testSpscLinkedArrayQueueOffer() {
+        SpscLinkedArrayQueue<Object> q = new SpscLinkedArrayQueue<>(16);
+        q.offer(1);
+        q.offer(2);
+        assertThat(q.poll()).isEqualTo(1);
+        assertThat(q.poll()).isEqualTo(2);
+        assertThat(q.poll()).isNull();
+    }
+
+    @Test
+    public void testSpscLinkedArrayQueueBiOffer() {
+        SpscLinkedArrayQueue<Object> q = new SpscLinkedArrayQueue<>(16);
+        q.offer(1, 2);
+        assertThat(q.poll()).isEqualTo(1);
+        assertThat(q.poll()).isEqualTo(2);
+        assertThat(q.poll()).isNull();
+    }
+
+    @Test
+    public void testMpscLinkedQueueOffer() {
+        MpscLinkedQueue<Object> q = new MpscLinkedQueue<>();
+        assertThat(q.isEmpty()).isTrue();
+        q.offer(1);
+        q.offer(2);
+        assertThat(q.isEmpty()).isFalse();
+        assertThat(q.poll()).isEqualTo(1);
+        assertThat(q.poll()).isEqualTo(2);
+        assertThat(q.poll()).isNull();
+        assertThat(q.isEmpty()).isTrue();
+    }
+
+    @Test
+    public void testSpscCapacity() {
+        SpscArrayQueue<Integer> q = new SpscArrayQueue<>(8);
+        assertThat(q.offer(1)).isTrue();
+        assertThat(q.offer(2)).isTrue();
+        assertThat(q.offer(3)).isTrue();
+        assertThat(q.offer(4)).isTrue();
+        assertThat(q.offer(5)).isTrue();
+        assertThat(q.offer(6)).isTrue();
+        assertThat(q.offer(7)).isTrue();
+        assertThat(q.offer(8)).isTrue();
+        assertThat(q.size()).isEqualTo(8);
+
+        assertThat(q.offer(9)).isFalse();
+    }
+
+    @Test
+    public void testSpscLinkedNewBufferPeek() {
+        SpscLinkedArrayQueue<Integer> q = new SpscLinkedArrayQueue<>(8);
+        assertThat(q.offer(1)).isTrue();
+        assertThat(q.offer(2)).isTrue();
+        assertThat(q.offer(3)).isTrue();
+        assertThat(q.offer(4)).isTrue();
+        assertThat(q.offer(5)).isTrue();
+        assertThat(q.offer(6)).isTrue();
+        assertThat(q.offer(7)).isTrue();
+        assertThat(q.offer(8)).isTrue();
+        assertThat(q.offer(9)).isTrue();
+
+        for (int i = 0; i < 9; i++) {
+            assertThat(q.peek()).isEqualTo(i + 1);
+            assertThat(q.poll()).isEqualTo(i + 1);
+        }
+
+        assertThat(q.peek()).isNull();
+        assertThat(q.poll()).isNull();
+    }
+
+    @Test
+    public void testSpscLinkedNewBufferPeekWithBiOffer() {
+        SpscLinkedArrayQueue<Integer> q = new SpscLinkedArrayQueue<>(8);
+        assertThat(q.offer(1, 2)).isTrue();
+        assertThat(q.offer(3, 4)).isTrue();
+        assertThat(q.size()).isEqualTo(4);
+        assertThat(q.offer(5, 6)).isTrue();
+        assertThat(q.offer(7, 8)).isTrue();
+        assertThat(q.offer(9)).isTrue();
+        assertThat(q.size()).isEqualTo(9);
+
+        for (int i = 0; i < 9; i++) {
+            assertThat(q.peek()).isEqualTo(i + 1);
+            assertThat(q.poll()).isEqualTo(i + 1);
+        }
+
+        assertThat(q.peek()).isNull();
+        assertThat(q.poll()).isNull();
+    }
+
+    @Test
+    public void testMpscOfferPollRace() throws Exception {
+        MpscLinkedQueue<Integer> q = new MpscLinkedQueue<>();
+        CountDownLatch start = new CountDownLatch(3);
+
+        final AtomicInteger c = new AtomicInteger(3);
+
+        Thread t1 = new Thread(new Runnable() {
+            int i;
+
+            @Override
+            public void run() {
+                start.countDown();
+                try {
+                    start.await();
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+
+                while (i++ < 10000) {
+                    q.offer(i);
+                }
+            }
+        });
+        t1.start();
+
+        Thread t2 = new Thread(new Runnable() {
+            int i = 10000;
+
+            @Override
+            public void run() {
+                start.countDown();
+                try {
+                    start.await();
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+
+                while (i++ < 10000) {
+                    q.offer(i);
+                }
+            }
+        });
+        t2.start();
+
+        Runnable r3 = new Runnable() {
+            int i = 20000;
+
+            @Override
+            public void run() {
+                start.countDown();
+                try {
+                    start.await();
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+
+                while (--i > 0) {
+                    q.poll();
+                }
+            }
+        };
+        r3.run();
+
+        t1.join();
+        t2.join();
+    }
+
+    @SuppressWarnings("ResultOfMethodCallIgnored")
+    @Test
+    public void testUnsupportedAPIFromMpsc() {
+        MpscLinkedQueue<Integer> q = new MpscLinkedQueue<>();
+        q.offer(1);
+        q.offer(2);
+
+        assertThatThrownBy(() -> q.add(3))
+                .isInstanceOf(UnsupportedOperationException.class);
+        assertThatThrownBy(() -> q.remove(2))
+                .isInstanceOf(UnsupportedOperationException.class);
+        assertThatThrownBy(q::remove)
+                .isInstanceOf(UnsupportedOperationException.class);
+        assertThatThrownBy(() -> q.addAll(Arrays.asList(4, 5, 6)))
+                .isInstanceOf(UnsupportedOperationException.class);
+        assertThatThrownBy(() -> q.containsAll(Arrays.asList(4, 5, 6)))
+                .isInstanceOf(UnsupportedOperationException.class);
+        assertThatThrownBy(() -> q.contains(1))
+                .isInstanceOf(UnsupportedOperationException.class);
+        assertThatThrownBy(q::size)
+                .isInstanceOf(UnsupportedOperationException.class);
+        assertThatThrownBy(() -> q.removeAll(Arrays.asList(4, 5, 6)))
+                .isInstanceOf(UnsupportedOperationException.class);
+        assertThatThrownBy(() -> q.retainAll(Arrays.asList(4, 5, 6)))
+                .isInstanceOf(UnsupportedOperationException.class);
+        assertThatThrownBy(q::element)
+                .isInstanceOf(UnsupportedOperationException.class);
+        assertThatThrownBy(q::peek)
+                .isInstanceOf(UnsupportedOperationException.class);
+        assertThatThrownBy(q::iterator)
+                .isInstanceOf(UnsupportedOperationException.class);
+        assertThatThrownBy(q::toArray)
+                .isInstanceOf(UnsupportedOperationException.class);
+        assertThatThrownBy(() -> q.toArray(new Integer[0]))
+                .isInstanceOf(UnsupportedOperationException.class);
+    }
+
+    @SuppressWarnings("ResultOfMethodCallIgnored")
+    @Test
+    public void testUnsupportedAPIFromSpscArrayQueue() {
+        SpscArrayQueue<Integer> q = new SpscArrayQueue<>(3);
+        q.offer(1);
+        q.offer(2);
+
+        assertThatThrownBy(() -> q.add(3))
+                .isInstanceOf(UnsupportedOperationException.class);
+        assertThatThrownBy(() -> q.remove(2))
+                .isInstanceOf(UnsupportedOperationException.class);
+        assertThatThrownBy(q::remove)
+                .isInstanceOf(UnsupportedOperationException.class);
+        assertThatThrownBy(() -> q.addAll(Arrays.asList(4, 5, 6)))
+                .isInstanceOf(UnsupportedOperationException.class);
+        assertThatThrownBy(() -> q.containsAll(Arrays.asList(4, 5, 6)))
+                .isInstanceOf(UnsupportedOperationException.class);
+        assertThatThrownBy(() -> q.contains(1))
+                .isInstanceOf(UnsupportedOperationException.class);
+        assertThatThrownBy(() -> q.removeAll(Arrays.asList(4, 5, 6)))
+                .isInstanceOf(UnsupportedOperationException.class);
+        assertThatThrownBy(() -> q.retainAll(Arrays.asList(4, 5, 6)))
+                .isInstanceOf(UnsupportedOperationException.class);
+        assertThatThrownBy(q::element)
+                .isInstanceOf(UnsupportedOperationException.class);
+        assertThatThrownBy(q::iterator)
+                .isInstanceOf(UnsupportedOperationException.class);
+        assertThatThrownBy(q::toArray)
+                .isInstanceOf(UnsupportedOperationException.class);
+        assertThatThrownBy(() -> q.toArray(new Integer[0]))
+                .isInstanceOf(UnsupportedOperationException.class);
+    }
+
+    @Test
+    public void testUnsupportedAPIFromSpscLinkedArrayQueue() {
+        SpscLinkedArrayQueue<Integer> q = new SpscLinkedArrayQueue<>(5);
+        q.offer(1);
+        q.offer(2);
+        // Other methods are implemented by AbstractCollection.
+        assertThatThrownBy(q::iterator)
+                .isInstanceOf(UnsupportedOperationException.class);
     }
 
 }
