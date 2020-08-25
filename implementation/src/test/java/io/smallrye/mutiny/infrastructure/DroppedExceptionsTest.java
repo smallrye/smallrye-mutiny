@@ -1,6 +1,7 @@
 package io.smallrye.mutiny.infrastructure;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -21,6 +22,13 @@ public class DroppedExceptionsTest {
     public void cleanup() {
         System.setErr(systemErr);
         Infrastructure.resetDroppedExceptionHandler();
+    }
+
+    @Test
+    public void rejectNullConsumer() {
+        assertThatThrownBy(() -> Infrastructure.setDroppedExceptionHandler(null))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("handler");
     }
 
     @Test
