@@ -16,7 +16,7 @@ import org.testng.annotations.Test;
 import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Uni;
 
-public class UniOnFailureMapToTest {
+public class UniOnFailureTransformTest {
 
     private Uni<Integer> failure;
 
