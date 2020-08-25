@@ -13,6 +13,7 @@ import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.helpers.Subscriptions;
+import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.AbstractMulti;
 import io.smallrye.mutiny.subscription.MultiSubscriber;
 
@@ -192,8 +193,7 @@ public class ResourceMulti<R, I> extends AbstractMulti<I> {
                 uni.subscribe().with(
                         completed -> {
                         },
-                        failed -> {
-                        } // ignore the failure, we have cancelled anyway.
+                        Infrastructure::handleDroppedException // ignore the failure, we have cancelled anyway.
                 );
             }
         }
