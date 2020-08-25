@@ -8,11 +8,10 @@ import java.util.Collections;
 
 import org.testng.annotations.Test;
 
+@SuppressWarnings("EqualsWithItself")
 public class Tuple2Test {
 
-    // TODO Test tuples
-
-    private Tuple2<Integer, Integer> somePair = Tuple2.of(1, 3);
+    private final Tuple2<Integer, Integer> somePair = Tuple2.of(1, 3);
 
     @Test
     public void testThatNullIsAcceptedAsItem1() {
@@ -124,6 +123,7 @@ public class Tuple2Test {
     @Test
     public void testEquality() {
         assertThat(somePair).isEqualTo(somePair);
+        assertThat(somePair.equals(somePair)).isTrue();
         assertThat(somePair).isNotEqualTo(Tuple2.of(1, 1));
         assertThat(somePair).isNotEqualTo("not a pair");
         assertThat(somePair).isEqualTo(Tuple2.of(1, 3));
@@ -141,6 +141,11 @@ public class Tuple2Test {
         assertThatExceptionOfType(IllegalArgumentException.class)
                 .isThrownBy(() -> Tuples.tuple2(Arrays.asList(1, 2, 3)));
         assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> Tuples.tuple2(null));
+    }
+
+    @Test
+    public void testToString() {
+        assertThat(somePair.toString()).contains("item1=1", "item2=3");
     }
 
 }

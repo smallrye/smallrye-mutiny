@@ -118,6 +118,6 @@ public class Tuple2<L, R> implements Tuple {
 
     @Override
     public String toString() {
-        return "Tuple2{left=" + item1 + ", right=" + item2 + '}';
+        return "Tuple{item1=" + item1 + ", item2=" + item2 + '}';
     }
 }
