@@ -72,8 +72,8 @@ public final class MultiSkipUntilPublisherOp<T, U> extends AbstractMultiOperator
 
     static final class SkipUntilMainProcessor<T> extends MultiOperatorProcessor<T, T> {
 
-        private AtomicReference<Subscription> other = new AtomicReference<>();
-        private AtomicBoolean gate = new AtomicBoolean(false);
+        private final AtomicReference<Subscription> other = new AtomicReference<>();
+        private final AtomicBoolean gate = new AtomicBoolean(false);
 
         SkipUntilMainProcessor(Subscriber<? super T> downstream) {
             super(new SerializedSubscriber<>(downstream));

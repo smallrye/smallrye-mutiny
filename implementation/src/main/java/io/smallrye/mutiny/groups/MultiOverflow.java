@@ -19,12 +19,6 @@ public class MultiOverflow<T> {
         this.upstream = nonNull(upstream, "upstream");
     }
 
-    public static <T> Multi<T> buffer(Multi<T> upstream, int size) {
-        return new MultiOnOverflowBufferOp<>(upstream, size,
-                false, false, x -> {
-                });
-    }
-
     /**
      * When the downstream cannot keep up with the upstream emissions, instruct to use an <strong>unbounded</strong>
      * buffer to store the items until they are consumed.

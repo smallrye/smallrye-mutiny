@@ -59,6 +59,7 @@ public class MultiOnEvent<T> {
      * Action when items are being requested.
      *
      * @param callback the action
+     * @return a new {@link Multi}
      * @deprecated Use {@link Multi#onRequest()} instead
      */
     @Deprecated

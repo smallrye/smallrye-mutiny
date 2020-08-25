@@ -103,7 +103,7 @@ public abstract class AbstractUni<T> implements Uni<T> {
     @Override
     public Uni<T> runSubscriptionOn(Executor executor) {
         return Infrastructure.onUniCreation(
-                new UniCallSubscribeOn<>(this, executor));
+                new UniRunSubscribeOn<>(this, executor));
     }
 
     @Override

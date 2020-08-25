@@ -15,7 +15,7 @@ import org.testng.annotations.Test;
 
 import io.smallrye.mutiny.Multi;
 
-public class MultiMapTckTest extends AbstractPublisherTck<Integer> {
+public class MultiOnItemTransformTckTest extends AbstractPublisherTck<Integer> {
 
     @Test
     public void mapStageShouldMapElements() {

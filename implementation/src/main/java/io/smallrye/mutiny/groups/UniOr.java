@@ -18,10 +18,6 @@ public class UniOr<T> {
         this.upstream = nonNull(upstream, "upstream");
     }
 
-    public Uni<T> uni(Uni<T> other) {
-        return unis(upstream, other);
-    }
-
     @SafeVarargs
     public final Uni<T> unis(Uni<T>... other) {
         List<Uni<T>> list = new ArrayList<>();

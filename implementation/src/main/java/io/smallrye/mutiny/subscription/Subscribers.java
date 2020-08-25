@@ -12,58 +12,14 @@ import io.smallrye.mutiny.helpers.Subscriptions;
 
 public class Subscribers {
 
-    public static <T> CancellableSubscriber<T> cancelled() {
-        return new CancellationSubscriber<>();
-    }
-
     @SuppressWarnings("ThrowableNotThrown")
-    private static final Consumer<? super Throwable> NO_ON_FAILURE = failure -> new Exception(
-            "Missing onError method in the subscriber", failure).printStackTrace(); // NOSONAR
-
-    public static <T> CancellableSubscriber<T> from(Consumer<? super T> onItem) {
-        return new CallbackBasedSubscriber<>(onItem, NO_ON_FAILURE, null, null);
-    }
-
-    public static <T> CancellableSubscriber<T> from(Consumer<? super T> onItem, Consumer<? super Throwable> onFailure) {
-        return new CallbackBasedSubscriber<>(onItem, onFailure, null, null);
-    }
-
-    public static <T> CancellableSubscriber<T> from(Consumer<? super T> onItem, Consumer<? super Throwable> onFailure,
-            Runnable onCompletion) {
-        return new CallbackBasedSubscriber<>(onItem, onFailure, onCompletion, null);
-    }
+    public static final Consumer<? super Throwable> NO_ON_FAILURE = failure -> new Exception(
+            "Missing onFailure/onError handler in the subscriber", failure).printStackTrace(); // NOSONAR
 
     public static <T> CancellableSubscriber<T> from(Consumer<? super T> onItem, Consumer<? super Throwable> onFailure,
             Runnable onCompletion,
             Consumer<? super Subscription> onSubscription) {
         return new CallbackBasedSubscriber<>(onItem, onFailure, onCompletion, onSubscription);
-    }
-
-    private static class CancellationSubscriber<T> implements CancellableSubscriber<T> {
-        @Override
-        public void onSubscribe(Subscription s) {
-            s.cancel();
-        }
-
-        @Override
-        public void onItem(T t) {
-            // Ignored
-        }
-
-        @Override
-        public void onFailure(Throwable t) {
-            // Ignored
-        }
-
-        @Override
-        public void onCompletion() {
-            // Ignored
-        }
-
-        @Override
-        public void cancel() {
-            // already cancelled, so ignoring.
-        }
     }
 
     public static class CallbackBasedSubscriber<T> implements CancellableSubscriber<T>, Subscription {

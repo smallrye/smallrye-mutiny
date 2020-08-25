@@ -2,6 +2,7 @@ package io.smallrye.mutiny.operators.multi;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Objects;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.subscription.MultiSubscriber;
@@ -19,10 +20,7 @@ public final class MultiDistinctOp<T> extends AbstractMultiOperator<T, T> {
 
     @Override
     public void subscribe(MultiSubscriber<? super T> actual) {
-        if (actual == null) {
-            throw new NullPointerException("Subscriber cannot be `null`");
-        }
-        upstream.subscribe().withSubscriber(new DistinctProcessor<>(actual));
+        upstream.subscribe(new DistinctProcessor<>(Objects.requireNonNull(actual, "Subscriber must not be `null`")));
     }
 
     static final class DistinctProcessor<T> extends MultiOperatorProcessor<T, T> {

@@ -177,7 +177,7 @@ public final class SpscLinkedArrayQueue<E> extends AbstractQueue<E> implements Q
 
     @Override
     public Iterator<E> iterator() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     public int size() {

@@ -126,12 +126,12 @@ public final class MpscLinkedQueue<T> implements Queue<T> {
 
     @Override
     public T element() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public T peek() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override

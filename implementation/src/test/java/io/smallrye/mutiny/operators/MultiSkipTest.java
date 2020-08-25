@@ -6,11 +6,14 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.testng.TestException;
 import org.testng.annotations.Test;
 
 import io.smallrye.mutiny.Multi;
+import io.smallrye.mutiny.operators.multi.MultiSkipUntilPublisherOp;
 import io.smallrye.mutiny.subscription.MultiEmitter;
 import io.smallrye.mutiny.test.AssertSubscriber;
 
@@ -209,6 +212,62 @@ public class MultiSkipTest {
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void testSkipByTimeWithInvalidDuration() {
         Multi.createFrom().item(1).transform().bySkippingItemsFor(Duration.ofMillis(-1));
+    }
+
+    @Test
+    public void testMultiSkipUntilPublisherOpeningOnItem() {
+        Multi<Integer> upstream = Multi.createFrom().items(1, 2, 3, 4, 5, 6);
+        new MultiSkipUntilPublisherOp<>(upstream, Multi.createFrom().item(0))
+                .subscribe().withSubscriber(AssertSubscriber.create(10))
+                .assertReceived(1, 2, 3, 4, 5, 6)
+                .assertCompletedSuccessfully();
+    }
+
+    @Test
+    public void testMultiSkipUntilPublisherOpeningOnCompletion() {
+        Multi<Integer> upstream = Multi.createFrom().items(1, 2, 3, 4, 5, 6);
+        new MultiSkipUntilPublisherOp<>(upstream, Multi.createFrom().empty())
+                .subscribe().withSubscriber(AssertSubscriber.create(10))
+                .assertReceived(1, 2, 3, 4, 5, 6)
+                .assertCompletedSuccessfully();
+    }
+
+    @Test
+    public void testMultiSkipUntilPublisherWithOtherFailing() {
+        Multi<Integer> upstream = Multi.createFrom().items(1, 2, 3, 4, 5, 6);
+        new MultiSkipUntilPublisherOp<>(upstream, Multi.createFrom().failure(new IOException("boom")))
+                .subscribe().withSubscriber(AssertSubscriber.create(10))
+                .assertHasFailedWith(IOException.class, "boom");
+    }
+
+    @Test
+    public void testMultiSkipUntilPublisherWithUpstreamFailing() {
+        Multi<Integer> upstream1 = Multi.createFrom().items(1, 2, 3, 4, 5, 6);
+        Multi<Integer> upstream2 = Multi.createFrom().failure(new TestException("boom"));
+        new MultiSkipUntilPublisherOp<>(Multi.createBy().concatenating().streams(upstream1, upstream2),
+                Multi.createFrom().item(0))
+                        .subscribe().withSubscriber(AssertSubscriber.create(10))
+                        .assertReceived(1, 2, 3, 4, 5, 6)
+                        .assertHasFailedWith(TestException.class, "boom");
+    }
+
+    @SuppressWarnings("ConstantConditions")
+    @Test
+    public void testMultiSkipUntilPublisherWithDownstreamCancellationAndVerifyOtherIsCancelled() {
+        AtomicBoolean upstreamCancelled = new AtomicBoolean();
+        AtomicBoolean otherCancelled = new AtomicBoolean();
+        Multi<Long> upstream = Multi.createFrom().ticks().every(Duration.ofMillis(10))
+                .onOverflow().drop()
+                .onCancellation().invoke(() -> upstreamCancelled.set(true));
+
+        AssertSubscriber<Long> subscriber = new MultiSkipUntilPublisherOp<>(upstream,
+                Multi.createFrom().nothing().onCancellation().invoke(() -> otherCancelled.set(true)))
+                        .subscribe().withSubscriber(AssertSubscriber.create(1));
+
+        subscriber.cancel();
+        assertThat(upstreamCancelled).isTrue();
+        assertThat(otherCancelled).isTrue();
+
     }
 
 }

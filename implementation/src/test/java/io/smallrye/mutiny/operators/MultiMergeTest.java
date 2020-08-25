@@ -103,7 +103,7 @@ public class MultiMergeTest {
     }
 
     @Test
-    public void testWithFailureCollection() {
+    public void testWithFailureCollectionWithConcatenation() {
         IllegalStateException boom = new IllegalStateException("boom");
         IllegalStateException boom2 = new IllegalStateException("boom2");
 
@@ -123,6 +123,38 @@ public class MultiMergeTest {
         assertThat(ce.getCauses()).hasSize(2);
 
         subscriber = Multi.createBy().concatenating().streams(
+                Multi.createFrom().item(5),
+                Multi.createFrom().failure(boom),
+                Multi.createFrom().item(6),
+                Multi.createFrom().failure(boom)).subscribe().withSubscriber(new AssertSubscriber<>(5));
+
+        subscriber.assertTerminated()
+                .assertReceived(5)
+                .assertHasFailedWith(IllegalStateException.class, "boom");
+
+    }
+
+    @Test
+    public void testWithFailureCollectionWithMerge() {
+        IllegalStateException boom = new IllegalStateException("boom");
+        IllegalStateException boom2 = new IllegalStateException("boom2");
+
+        AssertSubscriber<Integer> subscriber = Multi.createBy().merging().collectFailures().streams(
+                Multi.createFrom().item(5),
+                Multi.createFrom().failure(boom),
+                Multi.createFrom().item(6),
+                Multi.createFrom().failure(boom2)).subscribe().withSubscriber(new AssertSubscriber<>(5));
+
+        subscriber.assertTerminated()
+                .assertReceived(5, 6)
+                .assertHasFailedWith(CompositeException.class, "boom")
+                .assertHasFailedWith(CompositeException.class, "boom2");
+
+        assertThat(subscriber.failures().get(0)).isInstanceOf(CompositeException.class);
+        CompositeException ce = (CompositeException) subscriber.failures().get(0);
+        assertThat(ce.getCauses()).hasSize(2);
+
+        subscriber = Multi.createBy().merging().streams(
                 Multi.createFrom().item(5),
                 Multi.createFrom().failure(boom),
                 Multi.createFrom().item(6),

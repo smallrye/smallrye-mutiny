@@ -1,6 +1,7 @@
 package io.smallrye.mutiny.groups;
 
 import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
+import static io.smallrye.mutiny.subscription.Subscribers.NO_ON_FAILURE;
 
 import java.util.Queue;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -210,7 +211,7 @@ public class MultiSubscribe<T> {
         nonNull(onItem, "onItem");
         CancellableSubscriber<? super T> subscriber = Subscribers.from(
                 nonNull(onItem, "onItem"),
-                null,
+                NO_ON_FAILURE,
                 null,
                 s -> s.request(Long.MAX_VALUE));
         return withSubscriber(subscriber);

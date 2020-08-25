@@ -24,10 +24,10 @@ public final class MultiMapOp<T, U> extends AbstractMultiOperator<T, U> {
         upstream.subscribe().withSubscriber(new MapProcessor<T, U>(downstream, mapper));
     }
 
-    static class MapProcessor<I, O> extends MultiOperatorProcessor<I, O> {
+    public static class MapProcessor<I, O> extends MultiOperatorProcessor<I, O> {
         private final Function<? super I, ? extends O> mapper;
 
-        MapProcessor(MultiSubscriber<? super O> actual, Function<? super I, ? extends O> mapper) {
+        public MapProcessor(MultiSubscriber<? super O> actual, Function<? super I, ? extends O> mapper) {
             super(actual);
             this.mapper = mapper;
         }

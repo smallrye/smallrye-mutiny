@@ -19,8 +19,8 @@ public class DrainUtils {
      * The AtomicLong (this) holds the requested amount in bits 0..62 so there is room
      * for one signal bit. This also means the standard request accounting helper method doesn't work.
      */
-    private static final long COMPLETED_MASK = 0x8000_0000_0000_0000L;
-    private static final long REQUESTED_MASK = 0x7FFF_FFFF_FFFF_FFFFL;
+    protected static final long COMPLETED_MASK = 0x8000_0000_0000_0000L;
+    protected static final long REQUESTED_MASK = 0x7FFF_FFFF_FFFF_FFFFL;
 
     private DrainUtils() {
         // avoid direct instantiation.
