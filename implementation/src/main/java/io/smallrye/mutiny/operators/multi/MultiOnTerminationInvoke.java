@@ -7,6 +7,7 @@ import java.util.function.BiConsumer;
 
 import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Multi;
+import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.subscription.MultiSubscriber;
 
 public class MultiOnTerminationInvoke<T> extends AbstractMultiOperator<T, T> {
@@ -61,7 +62,7 @@ public class MultiOnTerminationInvoke<T> extends AbstractMultiOperator<T, T> {
             try {
                 execute(null, true);
             } catch (Throwable ignored) {
-                // TODO this exception is being swallowed
+                Infrastructure.handleDroppedException(ignored);
             }
             super.cancel();
         }

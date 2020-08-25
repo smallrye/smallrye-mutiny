@@ -6,6 +6,7 @@ import java.util.function.Consumer;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.helpers.UniCallbackSubscriber;
+import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.AbstractUni;
 import io.smallrye.mutiny.operators.UniSerializedSubscriber;
 import io.smallrye.mutiny.operators.UniSubscribeToCompletionStage;
@@ -86,9 +87,7 @@ public class UniSubscribe<T> {
     public Cancellable with(Consumer<? super T> onItemCallback) {
         UniCallbackSubscriber<T> subscriber = new UniCallbackSubscriber<>(
                 ParameterValidation.nonNull(onItemCallback, "onItemCallback"),
-                f -> {
-                    // Failure is ignored.
-                });
+                Infrastructure::handleDroppedException);
         withSubscriber(subscriber);
         return subscriber;
     }
