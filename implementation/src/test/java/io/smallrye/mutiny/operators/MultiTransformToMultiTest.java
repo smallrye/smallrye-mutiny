@@ -2,7 +2,6 @@ package io.smallrye.mutiny.operators;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
@@ -114,7 +113,8 @@ public class MultiTransformToMultiTest {
         AssertSubscriber<Integer> subscriber = AssertSubscriber.create(Long.MAX_VALUE);
 
         Multi.createFrom().range(1, 100_001)
-                .onItem().transformToMulti(i -> Multi.createFrom().completionStage(CompletableFuture.supplyAsync(() -> i)))
+                .onItem()
+                .transformToMulti(i -> Multi.createFrom().completionStage(CompletableFuture.supplyAsync(() -> i)))
                 .collectFailures().concatenate()
                 .subscribe(subscriber);
 
@@ -431,7 +431,8 @@ public class MultiTransformToMultiTest {
         AssertSubscriber<Integer> subscriber = AssertSubscriber.create(Long.MAX_VALUE);
 
         Multi.createFrom().range(1, 10001)
-                .onItem().transformToMulti(i -> Multi.createFrom().completionStage(CompletableFuture.supplyAsync(() -> i)))
+                .onItem()
+                .transformToMulti(i -> Multi.createFrom().completionStage(CompletableFuture.supplyAsync(() -> i)))
                 .withRequests(20)
                 .merge(25)
                 .subscribe(subscriber);
@@ -473,7 +474,8 @@ public class MultiTransformToMultiTest {
     @Test
     public void testProduceCompletionStageAlternative() {
         List<Integer> list = Multi.createFrom().range(1, 4)
-                .onItem().transformToUni(i -> Uni.createFrom().completionStage(CompletableFuture.supplyAsync(() -> i + 1)))
+                .onItem()
+                .transformToUni(i -> Uni.createFrom().completionStage(CompletableFuture.supplyAsync(() -> i + 1)))
                 .merge()
                 .collectItems().asList().await().indefinitely();
 
@@ -864,7 +866,6 @@ public class MultiTransformToMultiTest {
         AssertSubscriber<Integer> subscriber = Multi.createFrom().range(1, 1001)
                 .flatMap(i -> Multi.createFrom().item(i).runSubscriptionOn(Infrastructure.getDefaultExecutor()))
                 .subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE));
-
         subscriber.await()
                 .assertCompletedSuccessfully();
         assertThat(subscriber.items()).hasSize(1000);
@@ -1095,7 +1096,6 @@ public class MultiTransformToMultiTest {
             BroadcastProcessor<Integer> processor = BroadcastProcessor.create();
             AssertSubscriber<Integer> subscriber = processor.flatMap(k -> Multi.createFrom().item(k))
                     .subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE));
-
             CountDownLatch start = new CountDownLatch(1);
             CountDownLatch done = new CountDownLatch(2);
             Runnable r1 = () -> {
@@ -1154,6 +1154,7 @@ public class MultiTransformToMultiTest {
     public void testNoDeliveryAfterFailure() {
         BroadcastProcessor<Integer> processor = BroadcastProcessor.create();
         Subscriber<Integer> subscriber = Mocks.subscriber();
+
         processor.onItem().transformToMulti(i -> Multi.createFrom().item(i + 1)).merge()
                 .subscribe().withSubscriber(subscriber);
 
@@ -1167,4 +1168,5 @@ public class MultiTransformToMultiTest {
         verify(subscriber, never()).onComplete();
         verify(subscriber, never()).onNext(3);
     }
+
 }

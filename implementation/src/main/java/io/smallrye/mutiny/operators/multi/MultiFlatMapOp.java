@@ -29,7 +29,6 @@ public final class MultiFlatMapOp<I, O> extends AbstractMultiOperator<I, O> {
     private final int requests;
 
     private final Supplier<? extends Queue<O>> mainQueueSupplier;
-    private final Supplier<? extends Queue<O>> innerQueueSupplier;
 
     public MultiFlatMapOp(Multi<? extends I> upstream,
             Function<? super I, ? extends Publisher<? extends O>> mapper,
@@ -42,8 +41,6 @@ public final class MultiFlatMapOp<I, O> extends AbstractMultiOperator<I, O> {
         this.maxConcurrency = ParameterValidation.positive(maxConcurrency, "maxConcurrency");
         this.mainQueueSupplier = Queues.get(maxConcurrency);
         this.requests = ParameterValidation.positive(requests, "requests");
-        this.innerQueueSupplier = Queues.get(maxConcurrency);
-        ;
     }
 
     @Override
@@ -56,8 +53,7 @@ public final class MultiFlatMapOp<I, O> extends AbstractMultiOperator<I, O> {
                 postponeFailurePropagation,
                 maxConcurrency,
                 mainQueueSupplier,
-                requests,
-                innerQueueSupplier);
+                requests);
 
         upstream.subscribe(
                 Infrastructure.onMultiSubscription(upstream, new SafeSubscriber<>(new SerializedSubscriber<>(sub))));
@@ -77,12 +73,12 @@ public final class MultiFlatMapOp<I, O> extends AbstractMultiOperator<I, O> {
 
         volatile Queue<O> queue;
 
-        AtomicReference<Throwable> failures = new AtomicReference<>();
+        final AtomicReference<Throwable> failures = new AtomicReference<>();
 
         volatile boolean done;
         volatile boolean cancelled;
 
-        AtomicReference<Subscription> upstream = new AtomicReference<>();
+        final AtomicReference<Subscription> upstream = new AtomicReference<>();
 
         AtomicLong requested = new AtomicLong();
 
@@ -96,13 +92,12 @@ public final class MultiFlatMapOp<I, O> extends AbstractMultiOperator<I, O> {
 
         int lastIndex;
 
-        FlatMapMainSubscriber(MultiSubscriber<? super O> downstream,
+        public FlatMapMainSubscriber(MultiSubscriber<? super O> downstream,
                 Function<? super I, ? extends Publisher<? extends O>> mapper,
                 boolean delayError,
                 int concurrency,
                 Supplier<? extends Queue<O>> mainQueueSupplier,
-                int requests,
-                Supplier<? extends Queue<O>> innerQueueSupplier) {
+                int requests) {
             this.downstream = downstream;
             this.mapper = mapper;
             this.delayError = delayError;
@@ -258,7 +253,6 @@ public final class MultiFlatMapOp<I, O> extends AbstractMultiOperator<I, O> {
                 drainLoop();
             } else {
                 Queue<O> q = getOrCreateInnerQueue(inner);
-
                 if (!q.offer(item)) {
                     failOverflow();
                     inner.done = true;
