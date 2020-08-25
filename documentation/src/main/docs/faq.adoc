@@ -742,3 +742,26 @@ Mutiny uses the https://www.oracle.com/technical-resources/articles/java/fork-jo
 A `ScheduledExecutorService` is also created but delegates the execution of the delayed/scheduled tasks to the default executor.
 
 In the case you want to integrate Mutiny with a thread pool managed by a platform, you can configure it using `Infrastructure.setDefaultExecutor()` method.
+
+== Handling dropped exceptions
+
+There are a few corner cases where Mutiny cannot propagate an exception to a `Uni` or a `Multi` subscriber.
+Consider the following example:
+
+[source,java,indent=0]
+----
+include::../../../src/test/java/snippets/DroppedExceptionTest.java[tags=code]
+----
+
+The `onCancellation().invokeUni(...)` method is called when the `Uni` subscription is cancelled.
+The returned `Uni` is failed with a `IOException`, but since the subscription itself has been cancelled then there is no way to catch the exception.
+
+By default Mutiny reports such dropped exceptions to the standard error stream along with the corresponding stack trace.
+You can change how these exceptions are handled using `Infrastructure.setDroppedExceptionHandler`.
+
+The following logs dropped exceptions to a logger:
+
+[source,java,indent=0]
+----
+include::../../../src/test/java/snippets/DroppedExceptionTest.java[tags=override-handler]
+----

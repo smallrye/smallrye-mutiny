@@ -131,6 +131,11 @@ public class Infrastructure {
         droppedExceptionHandler.accept(throwable);
     }
 
+    /**
+     * Defines a custom dropped exception handler.
+     * 
+     * @param handler the handler, must not be {@code null} and must not throw an exception or it will also be lost.
+     */
     public static void setDroppedExceptionHandler(Consumer<Throwable> handler) {
         ParameterValidation.nonNull(handler, "handler");
         droppedExceptionHandler = handler;
