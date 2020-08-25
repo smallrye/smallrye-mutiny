@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.Test;
 
@@ -14,12 +15,15 @@ import io.reactivex.Flowable;
 import io.reactivex.Maybe;
 import io.reactivex.Observable;
 import io.reactivex.Single;
+import io.reactivex.observers.TestObserver;
 import io.reactivex.subscribers.TestSubscriber;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.converters.uni.ToSingle;
 import io.smallrye.mutiny.converters.uni.ToSingleWithDefault;
 import io.smallrye.mutiny.converters.uni.UniRxConverters;
+import io.smallrye.mutiny.subscription.UniEmitter;
 
+@SuppressWarnings("ConstantConditions")
 public class UniConvertToTest {
 
     @Test
@@ -155,6 +159,24 @@ public class UniConvertToTest {
         maybe.test()
                 .assertValue(1)
                 .assertComplete();
+    }
+
+    @Test
+    public void testCreatingAMaybeWithSubscriberAlreadyCancelled() {
+        AtomicBoolean cancelled = new AtomicBoolean();
+        AtomicReference<UniEmitter<? super Integer>> emitter = new AtomicReference<>();
+        Maybe<Integer> maybe = Uni.createFrom().<Integer> emitter(emitter::set)
+                .onCancellation().invoke(() -> cancelled.set(true))
+                .convert().with(UniRxConverters.toMaybe());
+        assertThat(maybe).isNotNull();
+        TestObserver<Integer> observer = maybe.test();
+        observer.cancel();
+
+        emitter.get().complete(1);
+        assertThat(observer.isCancelled()).isTrue();
+        observer.assertEmpty();
+
+        assertThat(cancelled).isTrue();
     }
 
     @Test

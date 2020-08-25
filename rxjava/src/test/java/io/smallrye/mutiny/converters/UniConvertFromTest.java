@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
 import java.io.IOException;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.junit.Test;
 
@@ -15,6 +16,7 @@ import io.reactivex.Single;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.converters.uni.UniRxConverters;
 
+@SuppressWarnings({ "CatchMayIgnoreException", "ConstantConditions" })
 public class UniConvertFromTest {
 
     @Test
@@ -61,6 +63,17 @@ public class UniConvertFromTest {
         Uni<Integer> uni = Uni.createFrom().converter(UniRxConverters.fromMaybe(), Maybe.just(1));
         assertThat(uni).isNotNull();
         assertThat(uni.await().indefinitely()).isEqualTo(1);
+    }
+
+    @Test
+    public void testCreatingFromAMaybeNeverEmitting() {
+        AtomicBoolean cancelled = new AtomicBoolean();
+        Uni<Integer> uni = Uni.createFrom().converter(UniRxConverters.fromMaybe(), Maybe.<Integer> never()
+                .doOnDispose(() -> cancelled.set(true)));
+        assertThat(uni).isNotNull();
+        uni.subscribe().with(i -> {
+        }).cancel();
+        assertThat(cancelled).isTrue();
     }
 
     @Test

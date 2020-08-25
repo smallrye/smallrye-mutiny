@@ -7,6 +7,7 @@ import io.smallrye.mutiny.converters.UniConverter;
 
 public class FromMaybe<T> implements UniConverter<Maybe<T>, T> {
 
+    @SuppressWarnings("rawtypes")
     public static final FromMaybe INSTANCE = new FromMaybe();
 
     private FromMaybe() {
