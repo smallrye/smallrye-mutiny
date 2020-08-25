@@ -1,13 +1,12 @@
 package io.smallrye.mutiny.operators;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 
 import java.io.IOException;
 import java.time.Duration;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ForkJoinPool;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.testng.annotations.Test;
@@ -81,6 +80,65 @@ public class UniRunSubscriptionOnTest {
                 .subscribe().withSubscriber(UniAssertSubscriber.create())
                 .await()
                 .assertFailure(IOException.class, "boom");
+    }
+
+    @Test
+    public void testImmediateCancellation() {
+        UniAssertSubscriber<Integer> subscriber = Uni.createFrom().<Integer> emitter(e -> {
+            // Do nothing
+        })
+                .runSubscriptionOn(Infrastructure.getDefaultExecutor())
+                .subscribe().withSubscriber(new UniAssertSubscriber<>(true));
+
+        subscriber.assertNotCompleted();
+    }
+
+    @SuppressWarnings("ConstantConditions")
+    @Test
+    public void testCancellation() {
+        AtomicBoolean called = new AtomicBoolean();
+        UniAssertSubscriber<Integer> subscriber = Uni.createFrom().<Integer> emitter(e -> {
+            called.set(true);
+        })
+                .runSubscriptionOn(Infrastructure.getDefaultExecutor())
+                .subscribe().withSubscriber(new UniAssertSubscriber<>(true));
+
+        await().untilAsserted(subscriber::assertSubscribed);
+        subscriber.assertSubscribed();
+        assertThat(called).isTrue();
+    }
+
+    @Test
+    public void testRejectedTask() {
+        ExecutorService pool = Executors.newSingleThreadExecutor();
+        pool.shutdown();
+        AtomicBoolean called = new AtomicBoolean();
+        UniAssertSubscriber<Integer> subscriber = Uni.createFrom().<Integer> emitter(e -> {
+            called.set(true);
+        })
+                .runSubscriptionOn(pool)
+                .subscribe().withSubscriber(UniAssertSubscriber.create());
+        assertThat(called).isFalse();
+        subscriber.await()
+                .assertFailure(RejectedExecutionException.class, "");
+    }
+
+    @Test
+    public void testSubscriptionFailing() {
+        AtomicBoolean called = new AtomicBoolean();
+        UniAssertSubscriber<Integer> subscriber = new AbstractUni<Integer>() {
+
+            @Override
+            protected void subscribing(UniSerializedSubscriber<? super Integer> subscriber) {
+                throw new IllegalArgumentException("boom");
+            }
+        }
+                .runSubscriptionOn(Infrastructure.getDefaultExecutor())
+                .subscribe().withSubscriber(UniAssertSubscriber.create());
+        assertThat(called).isFalse();
+        subscriber
+                .await()
+                .assertFailure(IllegalArgumentException.class, "boom");
     }
 
 }

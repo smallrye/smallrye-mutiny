@@ -10,11 +10,11 @@ import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.subscription.UniSubscriber;
 import io.smallrye.mutiny.subscription.UniSubscription;
 
-public class UniCallSubscribeOn<I> extends UniOperator<I, I> {
+public class UniRunSubscribeOn<I> extends UniOperator<I, I> {
 
     private final Executor executor;
 
-    public UniCallSubscribeOn(Uni<? extends I> upstream, Executor executor) {
+    public UniRunSubscribeOn(Uni<? extends I> upstream, Executor executor) {
         super(nonNull(upstream, "upstream"));
         this.executor = nonNull(executor, "executor");
     }
@@ -42,7 +42,12 @@ public class UniCallSubscribeOn<I> extends UniOperator<I, I> {
 
         @Override
         public void run() {
-            AbstractUni.subscribe(upstream(), this);
+            try {
+                AbstractUni.subscribe(upstream(), this);
+            } catch (Exception e) {
+                super.onSubscribe(CANCELLED);
+                super.onFailure(e);
+            }
         }
 
         @Override
