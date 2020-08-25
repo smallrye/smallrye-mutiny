@@ -13,7 +13,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Supplier;
 
-import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.Multi;
@@ -75,9 +74,9 @@ public final class MultiBufferWithTimeoutOp<T> extends AbstractMultiOperator<T, 
         private final Supplier<List<T>> supplier;
         private final Runnable flush;
 
-        private AtomicInteger terminated = new AtomicInteger(RUNNING);
-        private AtomicLong requested = new AtomicLong();
-        private AtomicInteger index = new AtomicInteger();
+        private final AtomicInteger terminated = new AtomicInteger(RUNNING);
+        private final AtomicLong requested = new AtomicLong();
+        private final AtomicInteger index = new AtomicInteger();
         private List<T> current;
         private ScheduledFuture<?> task;
 
@@ -199,20 +198,6 @@ public final class MultiBufferWithTimeoutOp<T> extends AbstractMultiOperator<T, 
             } finally {
                 super.onCompletion();
             }
-        }
-
-        /**
-         * @return has this {@link Subscriber} terminated with success ?
-         */
-        final boolean isCompleted() {
-            return terminated.get() == SUCCEED;
-        }
-
-        /**
-         * @return has this {@link Subscriber} terminated with an error ?
-         */
-        final boolean isFailed() {
-            return terminated.get() == FAILED;
         }
 
         @Override
