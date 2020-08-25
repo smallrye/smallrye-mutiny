@@ -1,6 +1,9 @@
 package io.smallrye.mutiny.converters;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import java.io.IOException;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.junit.Test;
 
@@ -13,6 +16,7 @@ import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.converters.multi.MultiRxConverters;
 import io.smallrye.mutiny.test.AssertSubscriber;
 
+@SuppressWarnings("ConstantConditions")
 public class MultiConvertFromTest {
 
     @Test
@@ -63,6 +67,17 @@ public class MultiConvertFromTest {
                 .withSubscriber(AssertSubscriber.create(1));
 
         subscriber.assertCompletedSuccessfully().assertReceived(1);
+    }
+
+    @Test
+    public void testCreatingFromAMaybeNeverEmitting() {
+        AtomicBoolean cancelled = new AtomicBoolean();
+        Multi<Integer> multi = Multi.createFrom().converter(MultiRxConverters.fromMaybe(), Maybe.<Integer> never()
+                .doOnDispose(() -> cancelled.set(true)));
+        assertThat(multi).isNotNull();
+        multi.subscribe().with(i -> {
+        }).cancel();
+        assertThat(cancelled).isTrue();
     }
 
     @Test

@@ -7,6 +7,7 @@ import io.reactivex.Maybe;
 import io.smallrye.mutiny.Uni;
 
 public class ToMaybe<T> implements Function<Uni<T>, Maybe<T>> {
+    @SuppressWarnings("rawtypes")
     public static final ToMaybe INSTANCE = new ToMaybe();
 
     private ToMaybe() {

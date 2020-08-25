@@ -6,18 +6,18 @@ import java.io.IOException;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.Test;
 
-import io.reactivex.Completable;
-import io.reactivex.Flowable;
-import io.reactivex.Maybe;
-import io.reactivex.Observable;
-import io.reactivex.Single;
+import io.reactivex.*;
+import io.reactivex.observers.TestObserver;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.converters.multi.MultiRxConverters;
+import io.smallrye.mutiny.subscription.MultiEmitter;
 import io.smallrye.mutiny.test.AssertSubscriber;
 
+@SuppressWarnings("ConstantConditions")
 public class MultiConvertToTest {
 
     @Test
@@ -118,6 +118,24 @@ public class MultiConvertToTest {
         maybe.test()
                 .assertValue(1)
                 .assertComplete();
+    }
+
+    @Test
+    public void testCreatingAMaybeWithSubscriberAlreadyCancelled() {
+        AtomicBoolean cancelled = new AtomicBoolean();
+        AtomicReference<MultiEmitter<? super Integer>> emitter = new AtomicReference<>();
+        Maybe<Integer> maybe = Multi.createFrom().<Integer> emitter(emitter::set)
+                .onCancellation().invoke(() -> cancelled.set(true))
+                .convert().with(MultiRxConverters.toMaybe());
+        assertThat(maybe).isNotNull();
+        TestObserver<Integer> observer = maybe.test();
+        observer.cancel();
+
+        emitter.get().emit(1).complete();
+        assertThat(observer.isCancelled()).isTrue();
+        observer.assertEmpty();
+
+        assertThat(cancelled).isTrue();
     }
 
     @Test
