@@ -7,6 +7,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.subscription.Cancellable;
 import io.smallrye.mutiny.subscription.UniSubscription;
 import io.smallrye.mutiny.tuples.Functions;
@@ -47,7 +48,8 @@ public class UniOnTerminationInvokeUni<I> extends UniOperator<I, I> {
                                     ignored -> {
                                         subscription.cancel();
                                     },
-                                    failure -> { // TODO avoid swallowing this exception if the downstream was cancelled
+                                    failure -> {
+                                        Infrastructure.handleDroppedException(failure);
                                         subscription.cancel();
                                     });
                         }

@@ -9,6 +9,7 @@ import java.util.function.Consumer;
 import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.subscription.UniSubscriber;
 import io.smallrye.mutiny.subscription.UniSubscription;
 
@@ -67,7 +68,7 @@ public class UniCallbackSubscriber<T> implements UniSubscriber<T>, UniSubscripti
         try {
             onResultCallback.accept(x);
         } catch (Throwable t) {
-            // TODO Log this, or collect the failure
+            Infrastructure.handleDroppedException(t);
         }
     }
 

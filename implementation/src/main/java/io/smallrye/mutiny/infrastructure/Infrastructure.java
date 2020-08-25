@@ -8,6 +8,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ServiceLoader;
 import java.util.concurrent.*;
+import java.util.function.Consumer;
 import java.util.function.UnaryOperator;
 
 import org.reactivestreams.Publisher;
@@ -15,6 +16,7 @@ import org.reactivestreams.Subscriber;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.subscription.UniSubscriber;
 
 public class Infrastructure {
@@ -56,6 +58,7 @@ public class Infrastructure {
     private static final List<UniInterceptor> UNI_INTERCEPTORS;
     private static final List<MultiInterceptor> MULTI_INTERCEPTORS;
     private static UnaryOperator<CompletableFuture<?>> completableFutureWrapper;
+    private static Consumer<Throwable> droppedExceptionHandler = Infrastructure::printAndDump;
 
     public static void setDefaultExecutor(Executor s) {
         if (s == DEFAULT_EXECUTOR) {
@@ -124,6 +127,26 @@ public class Infrastructure {
         return wrapper != null ? (CompletableFuture<T>) wrapper.apply(future) : future;
     }
 
+    public static void handleDroppedException(Throwable throwable) {
+        droppedExceptionHandler.accept(throwable);
+    }
+
+    /**
+     * Defines a custom dropped exception handler.
+     * 
+     * @param handler the handler, must not be {@code null} and must not throw an exception or it will also be lost.
+     */
+    public static void setDroppedExceptionHandler(Consumer<Throwable> handler) {
+        ParameterValidation.nonNull(handler, "handler");
+        droppedExceptionHandler = handler;
+    }
+
+    private static void printAndDump(Throwable throwable) {
+        System.err.println("[-- Mutiny had to drop the following exception --]");
+        throwable.printStackTrace();
+        System.err.println("[------------------------------------------------]");
+    }
+
     // For testing purpose only
     static void registerUniInterceptor(UniInterceptor e) {
         UNI_INTERCEPTORS.add(e);
@@ -152,6 +175,11 @@ public class Infrastructure {
     public static void clearInterceptors() {
         UNI_INTERCEPTORS.clear();
         MULTI_INTERCEPTORS.clear();
+    }
+
+    // For testing purpose only
+    public static void resetDroppedExceptionHandler() {
+        droppedExceptionHandler = Infrastructure::printAndDump;
     }
 
     private Infrastructure() {

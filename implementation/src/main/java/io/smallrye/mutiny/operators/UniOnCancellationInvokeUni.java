@@ -5,6 +5,7 @@ import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
 import java.util.function.Supplier;
 
 import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.subscription.UniSubscription;
 
 public class UniOnCancellationInvokeUni<I> extends UniOperator<I, I> {
@@ -28,7 +29,10 @@ public class UniOnCancellationInvokeUni<I> extends UniOperator<I, I> {
                     public void cancel() {
                         execute().subscribe().with(
                                 ignoredItem -> subscription.cancel(),
-                                ignoredException -> subscription.cancel()); // TODO avoid swallowing this exception
+                                ignoredException -> {
+                                    Infrastructure.handleDroppedException(ignoredException);
+                                    subscription.cancel();
+                                });
                     }
 
                     private Uni<?> execute() {

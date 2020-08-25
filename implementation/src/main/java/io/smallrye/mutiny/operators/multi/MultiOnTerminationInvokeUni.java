@@ -9,6 +9,7 @@ import java.util.function.BiFunction;
 import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.subscription.Cancellable;
 import io.smallrye.mutiny.subscription.MultiSubscriber;
 
@@ -43,7 +44,10 @@ public class MultiOnTerminationInvokeUni<T> extends AbstractMultiOperator<T, T> 
             } else {
                 execute(null, true).subscribe().with(
                         ignored -> super.cancel(),
-                        ignored -> super.cancel()); // TODO this exception is being swallowed
+                        ignored -> {
+                            Infrastructure.handleDroppedException(ignored);
+                            super.cancel();
+                        });
             }
         }
 
