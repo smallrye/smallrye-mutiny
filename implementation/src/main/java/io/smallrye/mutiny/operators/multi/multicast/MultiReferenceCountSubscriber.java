@@ -2,6 +2,7 @@ package io.smallrye.mutiny.operators.multi.multicast;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.multi.MultiOperatorProcessor;
 import io.smallrye.mutiny.subscription.MultiSubscriber;
 
@@ -28,6 +29,8 @@ public class MultiReferenceCountSubscriber<T> extends MultiOperatorProcessor<T, 
         if (done.compareAndSet(false, true)) {
             parent.terminated(connection);
             super.onFailure(failure);
+        } else {
+            Infrastructure.handleDroppedException(failure);
         }
     }
 

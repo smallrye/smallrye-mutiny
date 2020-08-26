@@ -18,6 +18,7 @@ import org.reactivestreams.Subscription;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.helpers.Subscriptions;
+import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.subscription.BackPressureFailure;
 import io.smallrye.mutiny.subscription.MultiSubscriber;
 import io.smallrye.mutiny.subscription.SerializedSubscriber;
@@ -236,6 +237,8 @@ public final class MultiBufferWithTimeoutOp<T> extends AbstractMultiOperator<T, 
                     }
                 }
                 super.onFailure(throwable);
+            } else {
+                Infrastructure.handleDroppedException(throwable);
             }
         }
 

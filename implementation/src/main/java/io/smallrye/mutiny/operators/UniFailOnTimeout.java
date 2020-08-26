@@ -85,6 +85,8 @@ public class UniFailOnTimeout<I> extends UniOperator<I, I> {
                         future.cancel(false);
                     }
                     subscriber.onFailure(failure);
+                } else {
+                    Infrastructure.handleDroppedException(failure);
                 }
             }
         });

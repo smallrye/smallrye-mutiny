@@ -19,6 +19,7 @@ import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.helpers.Subscriptions;
 import io.smallrye.mutiny.helpers.queues.Queues;
+import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.multi.processors.UnicastProcessor;
 import io.smallrye.mutiny.subscription.BackPressureFailure;
 import io.smallrye.mutiny.subscription.MultiSubscriber;
@@ -136,6 +137,8 @@ public class MultiWindowOnDurationOp<T> extends AbstractMultiOperator<T, Multi<T
 
                 downstream.onFailure(t);
                 timer.cancel();
+            } else {
+                Infrastructure.handleDroppedException(t);
             }
         }
 

@@ -18,6 +18,7 @@ import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.helpers.Subscriptions;
 import io.smallrye.mutiny.helpers.queues.Queues;
+import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.multi.processors.UnicastProcessor;
 import io.smallrye.mutiny.subscription.MultiSubscriber;
 
@@ -134,6 +135,8 @@ public class MultiWindowOp<T> extends AbstractMultiOperator<T, Multi<T>> {
                     proc.onError(failure);
                 }
                 downstream.onFailure(failure);
+            } else {
+                Infrastructure.handleDroppedException(failure);
             }
         }
 
@@ -241,6 +244,8 @@ public class MultiWindowOp<T> extends AbstractMultiOperator<T, Multi<T>> {
                     proc.onError(failure);
                 }
                 downstream.onFailure(failure);
+            } else {
+                Infrastructure.handleDroppedException(failure);
             }
         }
 
@@ -364,6 +369,8 @@ public class MultiWindowOp<T> extends AbstractMultiOperator<T, Multi<T>> {
                 processors.clear();
                 failure.set(f);
                 drain();
+            } else {
+                Infrastructure.handleDroppedException(f);
             }
         }
 

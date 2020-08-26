@@ -9,6 +9,7 @@ import java.util.function.Consumer;
 import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.helpers.Subscriptions;
+import io.smallrye.mutiny.infrastructure.Infrastructure;
 
 public class Subscribers {
 
@@ -76,7 +77,11 @@ public class Subscribers {
             if (subscription.getAndSet(Subscriptions.CANCELLED) != Subscriptions.CANCELLED) {
                 if (onFailure != null) {
                     onFailure.accept(t);
+                } else {
+                    Infrastructure.handleDroppedException(t);
                 }
+            } else {
+                Infrastructure.handleDroppedException(t);
             }
         }
 

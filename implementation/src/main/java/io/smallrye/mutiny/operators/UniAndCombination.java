@@ -12,6 +12,7 @@ import org.reactivestreams.Subscription;
 import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.helpers.EmptyUniSubscription;
+import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.subscription.UniSubscriber;
 import io.smallrye.mutiny.subscription.UniSubscription;
 
@@ -170,6 +171,7 @@ public class UniAndCombination<I, O> extends UniOperator<I, O> {
         public final void onFailure(Throwable t) {
             if (subscription.getAndSet(EmptyUniSubscription.CANCELLED) == EmptyUniSubscription.CANCELLED) {
                 // Already cancelled, do nothing
+                Infrastructure.handleDroppedException(t);
                 return;
             }
             this.failure = t;
