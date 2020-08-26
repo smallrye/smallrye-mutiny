@@ -210,7 +210,7 @@ public class MultiOnFailure<T> {
      * @return the new {@link Multi} that would emit events from the multi produced by the given function in case the
      *         upstream sends a failure.
      */
-    public Multi<T> recoverWithMulti(Function<? super Throwable, ? extends Multi<? extends T>> function) {
+    public Multi<T> recoverWithMulti(Function<? super Throwable, Multi<? extends T>> function) {
         return Infrastructure.onMultiCreation(new MultiFlatMapOnFailure<>(upstream, predicate,
                 nonNull(function, "function")));
     }
@@ -228,7 +228,7 @@ public class MultiOnFailure<T> {
      * @return the new {@link Multi} that would emit events from the multi produced by the given supplier in case the
      *         upstream sends a failure.
      */
-    public Multi<T> recoverWithMulti(Supplier<? extends Multi<? extends T>> supplier) {
+    public Multi<T> recoverWithMulti(Supplier<Multi<? extends T>> supplier) {
         return recoverWithMulti(ignored -> supplier.get());
     }
 
