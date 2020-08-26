@@ -22,7 +22,7 @@ public class MultiRepetition {
      * @param <T> the type of emitted item
      * @return the object to configure the repetition
      */
-    public <S, T> UniRepeat<T> uni(Supplier<S> stateSupplier, Function<S, ? extends Uni<? extends T>> producer) {
+    public <S, T> UniRepeat<T> uni(Supplier<S> stateSupplier, Function<S, Uni<? extends T>> producer) {
         Uni<T> upstream = Uni.createFrom().deferred(stateSupplier, producer);
         return new UniRepeat<>(upstream);
     }
@@ -34,7 +34,7 @@ public class MultiRepetition {
      * @param <T> the type of emitted item
      * @return the object to configure the repetition
      */
-    public <T> UniRepeat<T> uni(Supplier<? extends Uni<? extends T>> uniSupplier) {
+    public <T> UniRepeat<T> uni(Supplier<Uni<? extends T>> uniSupplier) {
         Uni<T> upstream = Uni.createFrom().deferred(uniSupplier);
         return new UniRepeat<>(upstream);
     }

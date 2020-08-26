@@ -65,7 +65,7 @@ public class UniOnItemDelay<T> {
      * @param function the function, must not be {@code null}
      * @return the produced {@link Uni}.
      */
-    public Uni<T> until(Function<? super T, ? extends Uni<?>> function) {
+    public Uni<T> until(Function<? super T, Uni<?>> function) {
         return Infrastructure.onUniCreation(new UniDelayUntil<>(upstream, function, executor));
     }
 

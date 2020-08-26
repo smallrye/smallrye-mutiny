@@ -11,12 +11,12 @@ import io.smallrye.mutiny.subscription.UniSubscription;
 
 public class UniOnFailureFlatMap<I> extends UniOperator<I, I> {
 
-    private final Function<? super Throwable, ? extends Uni<? extends I>> mapper;
+    private final Function<? super Throwable, Uni<? extends I>> mapper;
     private final Predicate<? super Throwable> predicate;
 
     public UniOnFailureFlatMap(Uni<I> upstream,
             Predicate<? super Throwable> predicate,
-            Function<? super Throwable, ? extends Uni<? extends I>> mapper) {
+            Function<? super Throwable, Uni<? extends I>> mapper) {
         super(nonNull(upstream, "upstream"));
         this.mapper = nonNull(mapper, "mapper");
         this.predicate = nonNull(predicate, "predicate");

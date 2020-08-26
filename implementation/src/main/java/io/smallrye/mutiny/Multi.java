@@ -374,7 +374,7 @@ public interface Multi<T> extends Publisher<T> {
      *        {@code null}
      * @return the new {@link Multi}
      */
-    default Multi<T> invokeUni(Function<? super T, ? extends Uni<?>> action) {
+    default Multi<T> invokeUni(Function<? super T, Uni<?>> action) {
         return onItem().invokeUni(nonNull(action, "action"));
     }
 

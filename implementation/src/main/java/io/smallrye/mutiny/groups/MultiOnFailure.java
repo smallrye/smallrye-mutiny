@@ -92,7 +92,7 @@ public class MultiOnFailure<T> {
      * @param action the function taking the failure and returning a {@link Uni}, must not be {@code null}
      * @return the new {@link Multi}
      */
-    public Multi<T> invokeUni(Function<Throwable, ? extends Uni<?>> action) {
+    public Multi<T> invokeUni(Function<Throwable, Uni<?>> action) {
         ParameterValidation.nonNull(action, "action");
         return recoverWithMulti(failure -> {
             Uni<?> uni = action.apply(failure);

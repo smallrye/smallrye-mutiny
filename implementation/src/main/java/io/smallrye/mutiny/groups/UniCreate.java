@@ -419,8 +419,8 @@ public class UniCreate {
      * @param <T> the type of item
      * @return the produced {@link Uni}
      */
-    public <T> Uni<T> deferred(Supplier<? extends Uni<? extends T>> supplier) {
-        Supplier<? extends Uni<? extends T>> actual = ParameterValidation.nonNull(supplier, "supplier");
+    public <T> Uni<T> deferred(Supplier<Uni<? extends T>> supplier) {
+        Supplier<Uni<? extends T>> actual = ParameterValidation.nonNull(supplier, "supplier");
         return Infrastructure.onUniCreation(new UniCreateFromDeferredSupplier<>(actual));
     }
 
@@ -451,7 +451,7 @@ public class UniCreate {
      * @param <S> the type of the state
      * @return the produced {@link Uni}
      */
-    public <T, S> Uni<T> deferred(Supplier<S> stateSupplier, Function<S, ? extends Uni<? extends T>> mapper) {
+    public <T, S> Uni<T> deferred(Supplier<S> stateSupplier, Function<S, Uni<? extends T>> mapper) {
         ParameterValidation.nonNull(stateSupplier, "stateSupplier");
         ParameterValidation.nonNull(mapper, "mapper");
 

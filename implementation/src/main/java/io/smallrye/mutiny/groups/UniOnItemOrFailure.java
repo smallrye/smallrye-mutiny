@@ -44,7 +44,7 @@ public class UniOnItemOrFailure<T> {
      * @param callback the callback, must not be {@code null}
      * @return the new {@link Uni}
      */
-    public Uni<T> invokeUni(BiFunction<? super T, Throwable, ? extends Uni<?>> callback) {
+    public Uni<T> invokeUni(BiFunction<? super T, Throwable, Uni<?>> callback) {
         ParameterValidation.nonNull(callback, "callback");
         return transformToUni((res, fail) -> {
             Uni<?> uni = callback.apply(res, fail);
@@ -123,7 +123,7 @@ public class UniOnItemOrFailure<T> {
      * @return a new {@link Uni} that would fire events from the uni produced by the mapper function, possibly
      *         in an asynchronous manner.
      */
-    public <R> Uni<R> transformToUni(BiFunction<? super T, Throwable, ? extends Uni<? extends R>> mapper) {
+    public <R> Uni<R> transformToUni(BiFunction<? super T, Throwable, Uni<? extends R>> mapper) {
         return Infrastructure.onUniCreation(new UniOnItemOrFailureFlatMap<>(upstream, mapper));
     }
 
@@ -148,7 +148,7 @@ public class UniOnItemOrFailure<T> {
      * @deprecated Use {@link #transformToUni(BiFunction)} instead
      */
     @Deprecated
-    public <R> Uni<R> produceUni(BiFunction<? super T, Throwable, ? extends Uni<? extends R>> mapper) {
+    public <R> Uni<R> produceUni(BiFunction<? super T, Throwable, Uni<? extends R>> mapper) {
         return transformToUni(mapper);
     }
 

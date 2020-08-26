@@ -431,7 +431,7 @@ public interface Uni<T> {
      *        {@code null}
      * @return the new {@link Uni}
      */
-    default Uni<T> invokeUni(Function<? super T, ? extends Uni<?>> action) {
+    default Uni<T> invokeUni(Function<? super T, Uni<?>> action) {
         return onItem().invokeUni(nonNull(action, "action"));
     }
 

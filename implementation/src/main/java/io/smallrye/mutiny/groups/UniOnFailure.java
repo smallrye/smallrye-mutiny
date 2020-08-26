@@ -76,7 +76,7 @@ public class UniOnFailure<T> {
      * @param action the callback, must not be {@code null}
      * @return the new {@link Uni}
      */
-    public Uni<T> invokeUni(Function<Throwable, ? extends Uni<?>> action) {
+    public Uni<T> invokeUni(Function<Throwable, Uni<?>> action) {
         ParameterValidation.nonNull(action, "action");
         return recoverWithUni(failure -> {
             Uni<?> uni = Objects.requireNonNull(action.apply(failure), "The `action` produced a `null` uni");
@@ -166,7 +166,7 @@ public class UniOnFailure<T> {
      * @return the new {@link Uni} that would emit events from the uni produced by the given function in case the
      *         upstream sends a failure.
      */
-    public Uni<T> recoverWithUni(Function<? super Throwable, ? extends Uni<? extends T>> function) {
+    public Uni<T> recoverWithUni(Function<? super Throwable, Uni<? extends T>> function) {
         return Infrastructure.onUniCreation(
                 new UniOnFailureFlatMap<>(upstream, predicate, nonNull(function, "function")));
     }
@@ -183,7 +183,7 @@ public class UniOnFailure<T> {
      * @return the new {@link Uni} that would emits events from the uni produced by the given supplier in case the
      *         upstream sends a failure.
      */
-    public Uni<T> recoverWithUni(Supplier<? extends Uni<? extends T>> supplier) {
+    public Uni<T> recoverWithUni(Supplier<Uni<? extends T>> supplier) {
         return recoverWithUni(ignored -> supplier.get());
     }
 
