@@ -8,6 +8,7 @@ import java.util.function.Predicate;
 
 import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.infrastructure.Infrastructure;
 
 public class UniOnFailureMap<I, O> extends UniOperator<I, O> {
 
@@ -31,6 +32,7 @@ public class UniOnFailureMap<I, O> extends UniOperator<I, O> {
                 if (subscriber.isCancelledOrDone()) {
                     // Avoid calling the mapper if we are done to save some cycles.
                     // If the cancellation happen during the call, the events won't be dispatched.
+                    Infrastructure.handleDroppedException(failure);
                     return;
                 }
                 boolean test;

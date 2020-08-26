@@ -19,6 +19,7 @@ import io.smallrye.mutiny.GroupedMulti;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.helpers.Subscriptions;
 import io.smallrye.mutiny.helpers.queues.Queues;
+import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.AbstractMulti;
 import io.smallrye.mutiny.subscription.MultiSubscriber;
 
@@ -144,6 +145,8 @@ public final class MultiGroupByOp<T, K, V> extends AbstractMultiOperator<T, Grou
                 failure = throwable;
                 finished = true;
                 drain();
+            } else {
+                Infrastructure.handleDroppedException(throwable);
             }
         }
 
@@ -357,6 +360,8 @@ public final class MultiGroupByOp<T, K, V> extends AbstractMultiOperator<T, Grou
             if (done.compareAndSet(false, true)) {
                 failure = e;
                 drain();
+            } else {
+                Infrastructure.handleDroppedException(e);
             }
         }
 

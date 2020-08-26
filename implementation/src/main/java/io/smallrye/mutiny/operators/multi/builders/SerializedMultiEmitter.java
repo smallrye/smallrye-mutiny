@@ -9,6 +9,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.helpers.queues.Queues;
+import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.subscription.MultiEmitter;
 import io.smallrye.mutiny.subscription.MultiSubscriber;
 
@@ -64,6 +65,7 @@ public class SerializedMultiEmitter<T> implements MultiEmitter<T>, MultiSubscrib
     @Override
     public void onFailure(Throwable failure) {
         if (downstream.isCancelled() || done) {
+            Infrastructure.handleDroppedException(failure);
             return;
         }
         if (failure == null) {

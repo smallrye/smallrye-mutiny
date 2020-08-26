@@ -6,6 +6,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
+import io.smallrye.mutiny.infrastructure.Infrastructure;
+
 /**
  * Subscriber that makes sure signals are delivered sequentially in case the onNext, onError or onComplete methods are
  * called concurrently.
@@ -76,11 +78,13 @@ public final class SerializedSubscriber<T> implements Subscription, MultiSubscri
     @Override
     public void onFailure(Throwable t) {
         if (cancelled || done) {
+            Infrastructure.handleDroppedException(t);
             return;
         }
 
         synchronized (this) {
             if (cancelled || done) {
+                Infrastructure.handleDroppedException(t);
                 return;
             }
 
@@ -89,6 +93,7 @@ public final class SerializedSubscriber<T> implements Subscription, MultiSubscri
 
             if (emitting) {
                 missed = true;
+                Infrastructure.handleDroppedException(t);
                 return;
             }
         }

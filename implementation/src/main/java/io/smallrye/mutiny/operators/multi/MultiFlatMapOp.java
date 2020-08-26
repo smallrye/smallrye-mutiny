@@ -198,6 +198,7 @@ public final class MultiFlatMapOp<I, O> extends AbstractMultiOperator<I, O> {
         @Override
         public void onFailure(Throwable failure) {
             if (done) {
+                Infrastructure.handleDroppedException(failure);
                 return;
             }
             Subscriptions.addFailure(failures, failure);

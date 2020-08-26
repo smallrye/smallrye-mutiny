@@ -32,6 +32,7 @@ import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.helpers.Subscriptions;
 import io.smallrye.mutiny.helpers.queues.DrainUtils;
+import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.subscription.MultiSubscriber;
 
 /**
@@ -187,6 +188,8 @@ public class MultiBufferOp<T> extends AbstractMultiOperator<T, List<T>> {
             if (subscription != CANCELLED) {
                 current = null;
                 downstream.onFailure(t);
+            } else {
+                Infrastructure.handleDroppedException(t);
             }
         }
 
@@ -286,6 +289,8 @@ public class MultiBufferOp<T> extends AbstractMultiOperator<T, List<T>> {
             Subscription subscription = upstream.getAndSet(CANCELLED);
             if (subscription != CANCELLED) {
                 downstream.onFailure(t);
+            } else {
+                Infrastructure.handleDroppedException(t);
             }
         }
 

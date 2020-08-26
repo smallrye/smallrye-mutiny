@@ -9,6 +9,7 @@ import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.helpers.Subscriptions;
+import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.subscription.MultiSubscriber;
 
 public abstract class MultiOperatorProcessor<I, O> implements MultiSubscriber<I>, Subscription {
@@ -52,6 +53,8 @@ public abstract class MultiOperatorProcessor<I, O> implements MultiSubscriber<I>
         Subscription subscription = upstream.getAndSet(CANCELLED);
         if (subscription != CANCELLED) {
             downstream.onFailure(throwable);
+        } else {
+            Infrastructure.handleDroppedException(throwable);
         }
     }
 
