@@ -11,15 +11,15 @@ import io.smallrye.mutiny.subscription.UniSubscription;
 
 public class UniOnItemOrFailureFlatMap<I, O> extends UniOperator<I, O> {
 
-    private final BiFunction<? super I, Throwable, ? extends Uni<? extends O>> mapper;
+    private final BiFunction<? super I, Throwable, Uni<? extends O>> mapper;
 
     public UniOnItemOrFailureFlatMap(Uni<I> upstream,
-            BiFunction<? super I, Throwable, ? extends Uni<? extends O>> mapper) {
+            BiFunction<? super I, Throwable, Uni<? extends O>> mapper) {
         super(nonNull(upstream, "upstream"));
         this.mapper = nonNull(mapper, "mapper");
     }
 
-    public static <I, O> void invokeAndSubstitute(BiFunction<? super I, Throwable, ? extends Uni<? extends O>> mapper,
+    public static <I, O> void invokeAndSubstitute(BiFunction<? super I, Throwable, Uni<? extends O>> mapper,
             I item,
             Throwable failure,
             UniSerializedSubscriber<? super O> subscriber,

@@ -105,7 +105,7 @@ public class MultiTransform<T> {
      * @param tester the predicate, must not be {@code null}, must not produce {@code null}
      * @return the produced {@link Multi}
      */
-    public Multi<T> byTestingItemsWith(Function<? super T, ? extends Uni<Boolean>> tester) {
+    public Multi<T> byTestingItemsWith(Function<? super T, Uni<Boolean>> tester) {
         nonNull(tester, "tester");
         return upstream.onItem().transformToMultiAndConcatenate(res -> {
             Uni<Boolean> uni = tester.apply(res);

@@ -15,10 +15,10 @@ import io.smallrye.mutiny.operators.multi.MultiOnFailureResumeOp;
 
 public class MultiFlatMapOnFailure<T> extends MultiOperator<T, T> {
     private final Predicate<? super Throwable> predicate;
-    private final Function<? super Throwable, ? extends Multi<? extends T>> mapper;
+    private final Function<? super Throwable, Multi<? extends T>> mapper;
 
     public MultiFlatMapOnFailure(Multi<T> upstream, Predicate<? super Throwable> predicate,
-            Function<? super Throwable, ? extends Multi<? extends T>> mapper) {
+            Function<? super Throwable, Multi<? extends T>> mapper) {
         super(nonNull(upstream, "upstream"));
         this.predicate = predicate == null ? x -> true : predicate;
         this.mapper = nonNull(mapper, "mapper");

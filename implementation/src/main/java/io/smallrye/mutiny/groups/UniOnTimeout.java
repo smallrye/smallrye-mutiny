@@ -92,7 +92,7 @@ public class UniOnTimeout<T> {
      * @param supplier the fallback supplier, must not be {@code null}, must not produce {@code null}
      * @return the new {@link Uni}
      */
-    public Uni<T> recoverWithUni(Supplier<? extends Uni<? extends T>> supplier) {
+    public Uni<T> recoverWithUni(Supplier<Uni<? extends T>> supplier) {
         return fail().onFailure(TimeoutException.class).recoverWithUni(supplier);
     }
 

@@ -16,14 +16,14 @@ import io.smallrye.mutiny.subscription.UniSubscription;
 
 public class UniOnItemTransformToUni<I, O> extends UniOperator<I, O> {
 
-    private final Function<? super I, ? extends Uni<? extends O>> mapper;
+    private final Function<? super I, Uni<? extends O>> mapper;
 
-    public UniOnItemTransformToUni(Uni<I> upstream, Function<? super I, ? extends Uni<? extends O>> mapper) {
+    public UniOnItemTransformToUni(Uni<I> upstream, Function<? super I, Uni<? extends O>> mapper) {
         super(nonNull(upstream, "upstream"));
         this.mapper = nonNull(mapper, "mapper");
     }
 
-    public static <I, O> void invokeAndSubstitute(Function<? super I, ? extends Uni<? extends O>> mapper, I input,
+    public static <I, O> void invokeAndSubstitute(Function<? super I, Uni<? extends O>> mapper, I input,
             UniSerializedSubscriber<? super O> subscriber,
             FlatMapSubscription flatMapSubscription) {
         Uni<? extends O> outcome;

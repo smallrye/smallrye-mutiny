@@ -399,7 +399,7 @@ public class MultiCreate {
      * @param <T> the type of item
      * @return the produced {@link Multi}
      */
-    public <T> Multi<T> deferred(Supplier<? extends Multi<? extends T>> supplier) {
+    public <T> Multi<T> deferred(Supplier<Multi<? extends T>> supplier) {
         return Infrastructure.onMultiCreation(new DeferredMulti<>(nonNull(supplier, "supplier")));
     }
 

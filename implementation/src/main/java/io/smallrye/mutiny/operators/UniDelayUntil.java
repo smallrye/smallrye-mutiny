@@ -11,10 +11,10 @@ import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.subscription.UniSubscription;
 
 public class UniDelayUntil<T> extends UniOperator<T, T> {
-    private final Function<? super T, ? extends Uni<?>> function;
+    private final Function<? super T, Uni<?>> function;
     private final ScheduledExecutorService executor;
 
-    public UniDelayUntil(Uni<T> upstream, Function<? super T, ? extends Uni<?>> function,
+    public UniDelayUntil(Uni<T> upstream, Function<? super T, Uni<?>> function,
             ScheduledExecutorService executor) {
         super(nonNull(upstream, "upstream"));
         this.function = nonNull(function, "function");

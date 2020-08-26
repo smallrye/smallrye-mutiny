@@ -91,7 +91,7 @@ public class MultiOnItem<T> {
      * @param action the function taking the item and returning a {@link Uni}, must not be {@code null}
      * @return the new {@link Multi}
      */
-    public Multi<T> invokeUni(Function<? super T, ? extends Uni<?>> action) {
+    public Multi<T> invokeUni(Function<? super T, Uni<?>> action) {
         ParameterValidation.nonNull(action, "action");
         return transformToUni(i -> {
             Uni<?> uni = action.apply(i);
@@ -285,7 +285,7 @@ public class MultiOnItem<T> {
      * @param <O> the type of item emitted by the {@link Multi} produced by the mapper.
      * @return the object to configure the flatten behavior.
      */
-    public <O> MultiFlatten<T, O> transformToUni(Function<? super T, ? extends Uni<? extends O>> mapper) {
+    public <O> MultiFlatten<T, O> transformToUni(Function<? super T, Uni<? extends O>> mapper) {
         nonNull(mapper, "mapper");
         Function<? super T, ? extends Publisher<? extends O>> wrapper = res -> mapper.apply(res).toMulti();
         return new MultiFlatten<>(upstream, wrapper, 1, false);
@@ -313,7 +313,7 @@ public class MultiOnItem<T> {
      * @param <O> the type of item emitted by the {@link Multi} produced by the mapper.
      * @return the resulting multi
      */
-    public <O> Multi<O> transformToUniAndConcatenate(Function<? super T, ? extends Uni<? extends O>> mapper) {
+    public <O> Multi<O> transformToUniAndConcatenate(Function<? super T, Uni<? extends O>> mapper) {
         return transformToUni(mapper).concatenate();
     }
 
@@ -339,7 +339,7 @@ public class MultiOnItem<T> {
      * @param <O> the type of item emitted by the {@link Multi} produced by the mapper.
      * @return the resulting multi
      */
-    public <O> Multi<O> transformToUniAndMerge(Function<? super T, ? extends Uni<? extends O>> mapper) {
+    public <O> Multi<O> transformToUniAndMerge(Function<? super T, Uni<? extends O>> mapper) {
         return transformToUni(mapper).merge();
     }
 
@@ -354,7 +354,7 @@ public class MultiOnItem<T> {
      * @deprecated Use {@link #transformToUni(Function)} instead
      */
     @Deprecated
-    public <O> MultiFlatten<T, O> produceUni(Function<? super T, ? extends Uni<? extends O>> mapper) {
+    public <O> MultiFlatten<T, O> produceUni(Function<? super T, Uni<? extends O>> mapper) {
         nonNull(mapper, "mapper");
         Function<? super T, ? extends Publisher<? extends O>> wrapper = res -> mapper.apply(res).toMulti();
         return new MultiFlatten<>(upstream, wrapper, 1, false);

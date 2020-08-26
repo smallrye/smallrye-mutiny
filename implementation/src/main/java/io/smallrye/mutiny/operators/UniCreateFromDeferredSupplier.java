@@ -9,9 +9,9 @@ import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.helpers.ParameterValidation;
 
 public class UniCreateFromDeferredSupplier<T> extends UniOperator<Void, T> {
-    private final Supplier<? extends Uni<? extends T>> supplier;
+    private final Supplier<Uni<? extends T>> supplier;
 
-    public UniCreateFromDeferredSupplier(Supplier<? extends Uni<? extends T>> supplier) {
+    public UniCreateFromDeferredSupplier(Supplier<Uni<? extends T>> supplier) {
         super(null);
         this.supplier = supplier; // Already checked
     }

@@ -55,7 +55,7 @@ public class UniOnItem<T> {
      *        {@code null}
      * @return the new {@link Uni}
      */
-    public Uni<T> invokeUni(Function<? super T, ? extends Uni<?>> action) {
+    public Uni<T> invokeUni(Function<? super T, Uni<?>> action) {
         ParameterValidation.nonNull(action, "action");
         return transformToUni(item -> {
             Uni<?> uni = Objects.requireNonNull(action.apply(item), "The callback produced a `null` uni");
@@ -112,7 +112,7 @@ public class UniOnItem<T> {
      * @return a new {@link Uni} that would fire events from the uni produced by the mapper function, possibly
      *         in an asynchronous manner.
      */
-    public <R> Uni<R> transformToUni(Function<? super T, ? extends Uni<? extends R>> mapper) {
+    public <R> Uni<R> transformToUni(Function<? super T, Uni<? extends R>> mapper) {
         return Infrastructure.onUniCreation(new UniOnItemTransformToUni<>(upstream, mapper));
     }
 
@@ -134,7 +134,7 @@ public class UniOnItem<T> {
      * @deprecated Use {@link #transformToUni(Function)} instead
      */
     @Deprecated
-    public <R> Uni<R> produceUni(Function<? super T, ? extends Uni<? extends R>> mapper) {
+    public <R> Uni<R> produceUni(Function<? super T, Uni<? extends R>> mapper) {
         return transformToUni(mapper);
     }
 
