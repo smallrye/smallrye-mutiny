@@ -56,7 +56,7 @@ public class UniInterceptorTest {
     public void testCreationInterception() {
         Infrastructure.registerUniInterceptor(new UniInterceptor() {
 
-            long creationTime = System.nanoTime();
+            final long creationTime = System.nanoTime();
 
             @Override
             public <T> Uni<T> onUniCreation(Uni<T> uni) {
@@ -83,7 +83,7 @@ public class UniInterceptorTest {
     public void testCreationInterceptionWithMap() {
         Infrastructure.registerUniInterceptor(new UniInterceptor() {
 
-            long creationTime = System.nanoTime();
+            final long creationTime = System.nanoTime();
 
             @Override
             public <T> Uni<T> onUniCreation(Uni<T> uni) {
@@ -137,5 +137,23 @@ public class UniInterceptorTest {
 
         int result = Uni.createFrom().item(23).map(i -> i * 2).await().indefinitely();
         assertThat(result).isEqualTo(23 * 2 + 1 + 1 + 1); // 3 subscribers: item, map and the subscriber
+    }
+
+    @Test
+    public void testDefaultOrdinal() {
+        UniInterceptor itcp = new UniInterceptor() {
+          // do nothing
+        };
+
+        assertThat(itcp.ordinal()).isEqualTo(UniInterceptor.DEFAULT_ORDINAL);
+
+        itcp = new UniInterceptor() {
+            @Override
+            public int ordinal() {
+                return 25;
+            }
+        };
+
+        assertThat(itcp.ordinal()).isEqualTo(25);
     }
 }
