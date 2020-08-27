@@ -15,7 +15,7 @@ import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.MultiFlatMapOnFailure;
 import io.smallrye.mutiny.operators.MultiMapOnFailure;
-import io.smallrye.mutiny.operators.multi.MultiSignalConsumerOp;
+import io.smallrye.mutiny.operators.multi.MultiOnFailureInvoke;
 import io.smallrye.mutiny.subscription.Cancellable;
 
 /**
@@ -62,17 +62,7 @@ public class MultiOnFailure<T> {
     public Multi<T> invoke(Consumer<Throwable> callback) {
         nonNull(callback, "callback");
         nonNull(predicate, "predicate");
-        return Infrastructure.onMultiCreation(new MultiSignalConsumerOp<>(
-                upstream,
-                null,
-                failure -> {
-                    if (predicate.test(failure)) {
-                        callback.accept(failure);
-                    }
-                },
-                null,
-                null,
-                null));
+        return Infrastructure.onMultiCreation(new MultiOnFailureInvoke<>(upstream, callback, predicate));
     }
 
     /**

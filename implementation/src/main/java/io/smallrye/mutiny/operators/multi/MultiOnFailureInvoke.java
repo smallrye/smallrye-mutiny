@@ -1,0 +1,53 @@
+package io.smallrye.mutiny.operators.multi;
+
+import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
+
+import java.util.function.Consumer;
+import java.util.function.Predicate;
+
+import org.reactivestreams.Subscription;
+
+import io.smallrye.mutiny.CompositeException;
+import io.smallrye.mutiny.Multi;
+import io.smallrye.mutiny.helpers.Subscriptions;
+import io.smallrye.mutiny.subscription.MultiSubscriber;
+
+public class MultiOnFailureInvoke<T> extends AbstractMultiOperator<T, T> {
+
+    private final Consumer<Throwable> callback;
+    private final Predicate<? super Throwable> predicate;
+
+    public MultiOnFailureInvoke(Multi<? extends T> upstream, Consumer<Throwable> callback,
+            Predicate<? super Throwable> predicate) {
+        super(nonNull(upstream, "upstream"));
+        this.callback = nonNull(callback, "callback");
+        this.predicate = predicate;
+    }
+
+    @Override
+    public void subscribe(MultiSubscriber<? super T> downstream) {
+        upstream.subscribe().withSubscriber(new MultiOnFailureInvokeProcessor(nonNull(downstream, "downstream")));
+    }
+
+    class MultiOnFailureInvokeProcessor extends MultiOperatorProcessor<T, T> {
+
+        public MultiOnFailureInvokeProcessor(MultiSubscriber<? super T> downstream) {
+            super(downstream);
+        }
+
+        @Override
+        public void onFailure(Throwable failure) {
+            Subscription up = upstream.getAndSet(Subscriptions.CANCELLED);
+            if (up != Subscriptions.CANCELLED) {
+                try {
+                    if (predicate.test(failure)) {
+                        callback.accept(failure);
+                    }
+                } catch (Throwable e) {
+                    failure = new CompositeException(failure, e);
+                }
+                downstream.onFailure(failure);
+            }
+        }
+    }
+}
