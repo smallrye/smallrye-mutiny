@@ -34,7 +34,7 @@ public final class SerializedSubscriber<T> implements Subscription, MultiSubscri
 
     private Throwable failure;
 
-    private AtomicReference<Subscription> upstream = new AtomicReference<>();
+    private final AtomicReference<Subscription> upstream = new AtomicReference<>();
 
     public SerializedSubscriber(Subscriber<? super T> downstream) {
         this.downstream = downstream;
@@ -46,6 +46,7 @@ public final class SerializedSubscriber<T> implements Subscription, MultiSubscri
             downstream.onSubscribe(this);
         } else {
             s.cancel();
+            Infrastructure.handleDroppedException(new IllegalStateException("Subscription already set"));
         }
     }
 
@@ -72,7 +73,7 @@ public final class SerializedSubscriber<T> implements Subscription, MultiSubscri
 
         downstream.onNext(t);
 
-        serDrainLoop(downstream);
+        serializedDrainLoop(downstream);
     }
 
     @Override
@@ -93,7 +94,6 @@ public final class SerializedSubscriber<T> implements Subscription, MultiSubscri
 
             if (emitting) {
                 missed = true;
-                Infrastructure.handleDroppedException(t);
                 return;
             }
         }
@@ -154,7 +154,7 @@ public final class SerializedSubscriber<T> implements Subscription, MultiSubscri
         }
     }
 
-    void serDrainLoop(Subscriber<? super T> actual) {
+    void serializedDrainLoop(Subscriber<? super T> actual) {
         for (;;) {
 
             if (cancelled) {
