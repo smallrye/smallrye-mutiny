@@ -26,7 +26,7 @@ public class UniAndGroupIterable<T1> {
         this(source, iterable, false);
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     public UniAndGroupIterable(Uni<? extends T1> source, Iterable<? extends Uni<?>> iterable, boolean collectFailures) {
         this.source = source;
         List<? extends Uni<?>> others;
