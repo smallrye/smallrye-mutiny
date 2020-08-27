@@ -16,7 +16,10 @@ import io.smallrye.mutiny.tuples.*;
  */
 public class UniZip {
 
-    public static final UniZip INSTANCE = new UniZip();
+    /**
+     * Singleton instance.
+     */
+    static final UniZip INSTANCE = new UniZip();
 
     private UniZip() {
         // avoid direct instantiation

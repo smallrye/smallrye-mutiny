@@ -1,6 +1,8 @@
 package io.smallrye.mutiny.operators;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+import static org.mockito.Mockito.mock;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -10,12 +12,22 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.Test;
 
+import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.subscription.UniEmitter;
+import io.smallrye.mutiny.subscription.UniSubscriber;
+import io.smallrye.mutiny.subscription.UniSubscription;
 
 public class UniSerializedSubscriberTest {
+
+    @AfterMethod
+    public void cleanup() {
+        Infrastructure.resetDroppedExceptionHandler();
+    }
 
     @Test
     public void testNormal() {
@@ -290,6 +302,199 @@ public class UniSerializedSubscriberTest {
                     .assertCompletedSuccessfully()
                     .assertItem(1);
         }
+    }
+
+    @Test
+    public void testDroppedExceptionsWhenOnFailureThrowsAnException() {
+        AtomicReference<Throwable> captured = new AtomicReference<>();
+        Infrastructure.setDroppedExceptionHandler(captured::set);
+
+        AtomicReference<UniEmitter<? super Integer>> reference = new AtomicReference<>();
+        AbstractUni<Integer> uni = (AbstractUni<Integer>) Uni.createFrom().<Integer> emitter(
+                reference::set);
+
+        UniSerializedSubscriber.subscribe(uni, new UniSubscriber<Integer>() {
+            @Override
+            public void onSubscribe(UniSubscription subscription) {
+                // Do nothing
+            }
+
+            @Override
+            public void onItem(Integer item) {
+                // Do nothing
+            }
+
+            @Override
+            public void onFailure(Throwable failure) {
+                throw new IllegalArgumentException("boom");
+            }
+        });
+
+        try {
+            reference.get().fail(new IOException("I/O"));
+            fail("Exception expected");
+        } catch (IllegalArgumentException e) {
+            // Expected.
+        }
+        assertThat(captured.get()).isNotNull().isInstanceOf(CompositeException.class)
+                .hasMessageContaining("boom").hasMessageContaining("I/O");
+    }
+
+    @Test
+    public void testDroppedExceptionsWhenOnItemThrowsAnException() {
+        AtomicBoolean called = new AtomicBoolean();
+        AtomicReference<Throwable> captured = new AtomicReference<>();
+        Infrastructure.setDroppedExceptionHandler(captured::set);
+
+        AtomicReference<UniEmitter<? super Integer>> reference = new AtomicReference<>();
+        AbstractUni<Integer> uni = (AbstractUni<Integer>) Uni.createFrom().<Integer> emitter(
+                reference::set);
+
+        UniSerializedSubscriber.subscribe(uni, new UniSubscriber<Integer>() {
+            @Override
+            public void onSubscribe(UniSubscription subscription) {
+                // Do nothing
+            }
+
+            @Override
+            public void onItem(Integer item) {
+                throw new IllegalArgumentException("boom");
+
+            }
+
+            @Override
+            public void onFailure(Throwable failure) {
+                called.set(true);
+            }
+        });
+
+        try {
+            reference.get().complete(1);
+            fail("Exception expected");
+        } catch (IllegalArgumentException e) {
+            // Exception expected
+        }
+        assertThat(captured.get()).isNotNull().isInstanceOf(IllegalArgumentException.class).hasMessageContaining("boom");
+        assertThat(called).isFalse();
+    }
+
+    @Test
+    public void testDroppedExceptionsWhenOnFailureCalledMultipleTimes() {
+        AtomicReference<Throwable> received = new AtomicReference<>();
+        AtomicReference<Throwable> captured = new AtomicReference<>();
+        Infrastructure.setDroppedExceptionHandler(captured::set);
+
+        AtomicReference<UniSerializedSubscriber<? super Integer>> sub = new AtomicReference<>();
+        AbstractUni<Integer> uni = new AbstractUni<Integer>() {
+            @Override
+            protected void subscribing(UniSerializedSubscriber<? super Integer> subscriber) {
+                sub.set(subscriber);
+            }
+        };
+
+        UniSerializedSubscriber.subscribe(uni, new UniSubscriber<Integer>() {
+            @Override
+            public void onSubscribe(UniSubscription subscription) {
+                // Do nothing
+            }
+
+            @Override
+            public void onItem(Integer item) {
+                // Do nothing
+            }
+
+            @Override
+            public void onFailure(Throwable failure) {
+                received.set(failure);
+            }
+        });
+        sub.get().onSubscribe(mock(UniSubscription.class));
+
+        sub.get().onFailure(new IOException("I/O"));
+        assertThat(captured.get()).isNull();
+        assertThat(received.get()).isInstanceOf(IOException.class).hasMessageContaining("I/O");
+
+        sub.get().onFailure(new IllegalStateException("boom"));
+        assertThat(captured.get()).isNotNull()
+                .isInstanceOf(IllegalStateException.class).hasMessageContaining("boom");
+
+        assertThat(received.get()).isInstanceOf(IOException.class).hasMessageContaining("I/O");
+    }
+
+    @Test
+    public void testDroppedExceptionsWhenOnFailureCalledAfterOnItem() {
+        AtomicReference<Throwable> captured = new AtomicReference<>();
+        Infrastructure.setDroppedExceptionHandler(captured::set);
+
+        AtomicReference<UniSerializedSubscriber<? super Integer>> sub = new AtomicReference<>();
+        AbstractUni<Integer> uni = new AbstractUni<Integer>() {
+            @Override
+            protected void subscribing(UniSerializedSubscriber<? super Integer> subscriber) {
+                sub.set(subscriber);
+            }
+        };
+
+        UniSerializedSubscriber.subscribe(uni, new UniSubscriber<Integer>() {
+            @Override
+            public void onSubscribe(UniSubscription subscription) {
+                // Do nothing
+            }
+
+            @Override
+            public void onItem(Integer item) {
+                // Do nothing
+            }
+
+            @Override
+            public void onFailure(Throwable failure) {
+                // Do nothing
+            }
+        });
+        sub.get().onSubscribe(mock(UniSubscription.class));
+
+        sub.get().onItem(1);
+        assertThat(captured.get()).isNull();
+
+        sub.get().onFailure(new IllegalStateException("boom"));
+        assertThat(captured.get()).isNotNull()
+                .isInstanceOf(IllegalStateException.class).hasMessageContaining("boom");
+    }
+
+    @Test
+    public void testDroppedExceptionsWhenOnFailureCalledAfterCancellation() {
+        AtomicReference<Throwable> captured = new AtomicReference<>();
+        Infrastructure.setDroppedExceptionHandler(captured::set);
+
+        AtomicReference<UniSerializedSubscriber<? super Integer>> sub = new AtomicReference<>();
+        AbstractUni<Integer> uni = new AbstractUni<Integer>() {
+            @Override
+            protected void subscribing(UniSerializedSubscriber<? super Integer> subscriber) {
+                sub.set(subscriber);
+            }
+        };
+
+        UniSerializedSubscriber.subscribe(uni, new UniSubscriber<Integer>() {
+            @Override
+            public void onSubscribe(UniSubscription subscription) {
+                subscription.cancel();
+            }
+
+            @Override
+            public void onItem(Integer item) {
+                // Do nothing
+            }
+
+            @Override
+            public void onFailure(Throwable failure) {
+                // Do nothing
+            }
+        });
+        sub.get().onSubscribe(mock(UniSubscription.class));
+        sub.get().cancel();
+
+        sub.get().onFailure(new IllegalStateException("boom"));
+        assertThat(captured.get()).isNotNull()
+                .isInstanceOf(IllegalStateException.class).hasMessageContaining("boom");
     }
 
     private void await(CountDownLatch latch) {

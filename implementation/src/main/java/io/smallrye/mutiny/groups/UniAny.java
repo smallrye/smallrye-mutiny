@@ -28,7 +28,7 @@ public class UniAny {
     @SafeVarargs
     public final <T> Uni<T> of(Uni<? super T>... unis) {
         List<Uni<? super T>> list = Arrays.asList(nonNull(unis, "unis"));
-        return Infrastructure.onUniCreation(new UniOrCombination<>(list));
+        return of(list);
     }
 
     /**

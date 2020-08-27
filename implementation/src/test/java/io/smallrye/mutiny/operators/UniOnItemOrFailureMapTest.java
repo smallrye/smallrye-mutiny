@@ -12,6 +12,7 @@ import org.testng.annotations.Test;
 
 import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.subscription.UniEmitter;
 
 public class UniOnItemOrFailureMapTest {
 
@@ -41,6 +42,24 @@ public class UniOnItemOrFailureMapTest {
         }).subscribe().withSubscriber(subscriber);
 
         subscriber.assertCompletedSuccessfully()
+                .assertItem(2);
+
+        assertThat(count).hasValue(1);
+    }
+
+    @Test
+    @SuppressWarnings("deprecation")
+    public void testMappingOnItemDeprecated() {
+        UniAssertSubscriber<Integer> ts = UniAssertSubscriber.create();
+
+        AtomicInteger count = new AtomicInteger();
+        one.onItemOrFailure().apply((i, f) -> {
+            assertThat(f).isNull();
+            count.incrementAndGet();
+            return i + 1;
+        }).subscribe().withSubscriber(ts);
+
+        ts.assertCompletedSuccessfully()
                 .assertItem(2);
 
         assertThat(count).hasValue(1);
@@ -133,9 +152,7 @@ public class UniOnItemOrFailureMapTest {
     @Test
     public void testThatMapperCanReturnNull() {
         UniAssertSubscriber<Void> subscriber = UniAssertSubscriber.create();
-
         one.onItemOrFailure().<Void> transform((v, f) -> null).subscribe().withSubscriber(subscriber);
-
         subscriber.assertCompletedSuccessfully().assertItem(null);
     }
 
@@ -183,5 +200,75 @@ public class UniOnItemOrFailureMapTest {
         } finally {
             executor.shutdown();
         }
+    }
+
+    @Test
+    public void testMapperNotCalledAfterCancellationOnItem() {
+        UniAssertSubscriber<Integer> ts = UniAssertSubscriber.create();
+        AtomicReference<UniEmitter<? super Integer>> emitter = new AtomicReference<>();
+        AtomicInteger count = new AtomicInteger();
+        Uni.createFrom().<Integer> emitter(emitter::set)
+                .onItemOrFailure().transform((i, f) -> {
+                    count.incrementAndGet();
+                    return i + 1;
+                }).subscribe().withSubscriber(ts);
+
+        ts.assertSubscribed();
+        ts.cancel();
+        assertThat(count).hasValue(0);
+        emitter.get().complete(1);
+        assertThat(count).hasValue(0);
+    }
+
+    @Test
+    public void testMapperNotCalledAfterImmediateCancellationOnItem() {
+        UniAssertSubscriber<Integer> ts = new UniAssertSubscriber<>(true);
+        AtomicReference<UniEmitter<? super Integer>> emitter = new AtomicReference<>();
+        AtomicInteger count = new AtomicInteger();
+        Uni.createFrom().<Integer> emitter(emitter::set)
+                .onItemOrFailure().transform((i, f) -> {
+                    count.incrementAndGet();
+                    return i + 1;
+                }).subscribe().withSubscriber(ts);
+
+        ts.assertSubscribed();
+        assertThat(count).hasValue(0);
+        emitter.get().complete(1);
+        assertThat(count).hasValue(0);
+    }
+
+    @Test
+    public void testMapperNotCalledAfterCancellationOnFailure() {
+        UniAssertSubscriber<Integer> ts = UniAssertSubscriber.create();
+        AtomicReference<UniEmitter<? super Integer>> emitter = new AtomicReference<>();
+        AtomicInteger count = new AtomicInteger();
+        Uni.createFrom().<Integer> emitter(emitter::set)
+                .onItemOrFailure().transform((i, f) -> {
+                    count.incrementAndGet();
+                    return i + 1;
+                }).subscribe().withSubscriber(ts);
+
+        ts.assertSubscribed();
+        ts.cancel();
+        assertThat(count).hasValue(0);
+        emitter.get().fail(new IOException("boom"));
+        assertThat(count).hasValue(0);
+    }
+
+    @Test
+    public void testMapperNotCalledAfterImmediateCancellationOnFailure() {
+        UniAssertSubscriber<Integer> ts = new UniAssertSubscriber<>(true);
+        AtomicReference<UniEmitter<? super Integer>> emitter = new AtomicReference<>();
+        AtomicInteger count = new AtomicInteger();
+        Uni.createFrom().<Integer> emitter(emitter::set)
+                .onItemOrFailure().transform((i, f) -> {
+                    count.incrementAndGet();
+                    return i + 1;
+                }).subscribe().withSubscriber(ts);
+
+        ts.assertSubscribed();
+        assertThat(count).hasValue(0);
+        emitter.get().fail(new IOException("boom"));
+        assertThat(count).hasValue(0);
     }
 }

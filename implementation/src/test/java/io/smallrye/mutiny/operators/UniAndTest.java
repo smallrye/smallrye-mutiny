@@ -4,6 +4,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
 import java.time.Duration;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import org.testng.annotations.Test;
 
@@ -20,7 +24,8 @@ public class UniAndTest {
         Uni<Integer> uni = Uni.createFrom().item(1);
         Uni<Integer> uni2 = Uni.createFrom().item(2);
 
-        UniAssertSubscriber<Tuple2<Integer, Integer>> subscriber = Uni.combine().all().unis(uni, uni2).asTuple().subscribe()
+        UniAssertSubscriber<Tuple2<Integer, Integer>> subscriber = Uni.combine().all().unis(uni, uni2).asTuple()
+                .subscribe()
                 .withSubscriber(UniAssertSubscriber.create());
 
         assertThat(subscriber.getItem().asList()).containsExactly(1, 2);
@@ -113,7 +118,8 @@ public class UniAndTest {
         Uni<Integer> uni5 = Uni.createFrom().item(5);
         Uni<Integer> uni6 = Uni.createFrom().item(6);
 
-        UniAssertSubscriber<Tuple6<Integer, Integer, Integer, Integer, Integer, Integer>> subscriber = Uni.combine().all()
+        UniAssertSubscriber<Tuple6<Integer, Integer, Integer, Integer, Integer, Integer>> subscriber = Uni.combine()
+                .all()
                 .unis(uni1, uni2, uni3, uni4, uni5, uni6).asTuple().subscribe()
                 .withSubscriber(UniAssertSubscriber.create());
 
@@ -156,7 +162,8 @@ public class UniAndTest {
         Uni<Integer> uni6 = Uni.createFrom().item(6);
         Uni<Integer> uni7 = Uni.createFrom().item(7);
 
-        UniAssertSubscriber<Tuple7<Integer, Integer, Integer, Integer, Integer, Integer, Integer>> subscriber = Uni.combine()
+        UniAssertSubscriber<Tuple7<Integer, Integer, Integer, Integer, Integer, Integer, Integer>> subscriber = Uni
+                .combine()
                 .all()
                 .unis(uni1, uni2, uni3, uni4, uni5, uni6, uni7).asTuple().subscribe()
                 .withSubscriber(UniAssertSubscriber.create());
@@ -201,6 +208,57 @@ public class UniAndTest {
                 .withSubscriber(UniAssertSubscriber.create());
 
         assertThat(subscriber.getItem().asList()).containsExactly(1, 2, 3, 4, 5, 6, 7, 8, 9);
+    }
+
+    @Test
+    public void testWithListOfUnis() {
+        Uni<Integer> uni1 = Uni.createFrom().item(1);
+        Uni<Integer> uni2 = Uni.createFrom().item(2);
+        Uni<Integer> uni3 = Uni.createFrom().item(3);
+        Uni<Integer> uni4 = Uni.createFrom().item(4);
+        Uni<Integer> uni5 = Uni.createFrom().item(5);
+        Uni<Integer> uni6 = Uni.createFrom().item(6);
+        Uni<Integer> uni7 = Uni.createFrom().item(7);
+        Uni<Integer> uni8 = Uni.createFrom().item(8);
+        Uni<Integer> uni9 = Uni.createFrom().item(9);
+
+        List<Uni<Integer>> list = Arrays.asList(uni1, uni2, uni3, uni4, uni5, uni6, uni7, uni8, uni9);
+
+        UniAssertSubscriber<Integer> subscriber = Uni
+                .combine().all().unis(list)
+                .combinedWith(items -> items.stream().mapToInt(i -> (Integer) i).sum())
+                .subscribe()
+                .withSubscriber(UniAssertSubscriber.create());
+
+        subscriber
+                .assertCompletedSuccessfully()
+                .assertItem(1 + 2 + 3 + 4 + 5 + 6 + 7 + 8 + 9);
+    }
+
+    @Test
+    public void testWithSetOfUnis() {
+        Uni<Integer> uni1 = Uni.createFrom().item(1);
+        Uni<Integer> uni2 = Uni.createFrom().item(2);
+        Uni<Integer> uni3 = Uni.createFrom().item(3);
+        Uni<Integer> uni4 = Uni.createFrom().item(4);
+        Uni<Integer> uni5 = Uni.createFrom().item(5);
+        Uni<Integer> uni6 = Uni.createFrom().item(6);
+        Uni<Integer> uni7 = Uni.createFrom().item(7);
+        Uni<Integer> uni8 = Uni.createFrom().item(8);
+        Uni<Integer> uni9 = Uni.createFrom().item(9);
+
+        List<Uni<Integer>> list = Arrays.asList(uni1, uni2, uni3, uni4, uni5, uni6, uni7, uni8, uni9);
+        Set<Uni<Integer>> set = new HashSet<>(list);
+
+        UniAssertSubscriber<Integer> subscriber = Uni
+                .combine().all().unis(set)
+                .combinedWith(items -> items.stream().mapToInt(i -> (Integer) i).sum())
+                .subscribe()
+                .withSubscriber(UniAssertSubscriber.create());
+
+        subscriber
+                .assertCompletedSuccessfully()
+                .assertItem(1 + 2 + 3 + 4 + 5 + 6 + 7 + 8 + 9);
     }
 
 }

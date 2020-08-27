@@ -6,17 +6,27 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import java.io.IOException;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.mockito.internal.stubbing.answers.ThrowsException;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.Test;
 
 import io.smallrye.mutiny.CompositeException;
+import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.helpers.Subscriptions;
+import io.smallrye.mutiny.infrastructure.Infrastructure;
+import io.smallrye.mutiny.test.Mocks;
 
 @SuppressWarnings("unchecked")
 public class SafeSubscriberTest {
+
+    @AfterMethod
+    public void cleanup() {
+        Infrastructure.resetDroppedExceptionHandler();
+    }
 
     @Test
     public void testThatDownstreamFailureInOnSubscribeCancelsTheSubscription() {
@@ -357,6 +367,107 @@ public class SafeSubscriberTest {
         verify(subscriber, times(1)).onSubscribe(safe);
 
         safe.request(25L);
+    }
+
+    @Test
+    public void testDroppedFailureIfOnFailureThrowAnException() {
+        AtomicReference<Throwable> captured = new AtomicReference<>();
+        Infrastructure.setDroppedExceptionHandler(captured::set);
+
+        Subscriber<Integer> subscriber = Mocks.subscriber(2);
+        doThrow(new IllegalArgumentException("boom")).when(subscriber).onError(any(Throwable.class));
+
+        Multi.createFrom().<Integer> failure(() -> new IOException("I/O"))
+                .subscribe().withSubscriber(new SafeSubscriber<>(subscriber));
+
+        assertThat(captured.get())
+                .isInstanceOf(CompositeException.class)
+                .hasMessageContaining("I/O").hasMessageContaining("boom");
+    }
+
+    @Test
+    public void testDroppedFailureIfOnSubscriptionAndOnFailureThrowAnException() {
+        AtomicReference<Throwable> captured = new AtomicReference<>();
+        Infrastructure.setDroppedExceptionHandler(captured::set);
+
+        Subscriber<Integer> subscriber = Mocks.subscriber(2);
+        doThrow(new IllegalStateException("boomA")).when(subscriber).onSubscribe(any(Subscription.class));
+        doThrow(new IllegalArgumentException("boomB")).when(subscriber).onError(any(Throwable.class));
+
+        SafeSubscriber<Integer> safe = new SafeSubscriber<>(subscriber);
+        safe.onError(new IOException("I/O"));
+
+        assertThat(captured.get())
+                .isInstanceOf(CompositeException.class)
+                .hasMessageContaining("I/O").hasMessageContaining("boomA").hasMessageNotContaining("boomB");
+    }
+
+    @Test
+    public void testDroppedFailureIfOnFailureThrowAnExceptionWithoutSubscription() {
+        AtomicReference<Throwable> captured = new AtomicReference<>();
+        Infrastructure.setDroppedExceptionHandler(captured::set);
+
+        Subscriber<Integer> subscriber = Mocks.subscriber(2);
+        doThrow(new IllegalArgumentException("boomB")).when(subscriber).onError(any(Throwable.class));
+
+        SafeSubscriber<Integer> safe = new SafeSubscriber<>(subscriber);
+        safe.onError(new IOException("I/O"));
+
+        assertThat(captured.get())
+                .isInstanceOf(CompositeException.class)
+                .hasMessageContaining("I/O").hasMessageContaining("Subscription not set").hasMessageContaining("boomB");
+    }
+
+    @Test
+    public void testProtocolViolation() {
+        Subscriber<Integer> subscriber = Mocks.subscriber(2);
+
+        SafeSubscriber<Integer> safe = new SafeSubscriber<>(subscriber);
+        safe.onComplete();
+
+        verify(subscriber).onSubscribe(any(Subscription.class));
+        verify(subscriber).onError(any(NullPointerException.class));
+
+    }
+
+    @Test
+    public void testProtocolViolationWithOnSubscribeThrowingException() {
+        AtomicReference<Throwable> captured = new AtomicReference<>();
+        Infrastructure.setDroppedExceptionHandler(captured::set);
+
+        Subscriber<Integer> subscriber = Mocks.subscriber(2);
+        doThrow(new IllegalStateException("boom")).when(subscriber).onSubscribe(any(Subscription.class));
+
+        SafeSubscriber<Integer> safe = new SafeSubscriber<>(subscriber);
+        safe.onComplete();
+
+        verify(subscriber).onSubscribe(any(Subscription.class));
+
+        assertThat(captured.get())
+                .isInstanceOf(CompositeException.class)
+                .hasMessageContaining("boom")
+                .hasMessageContaining("Subscription not set!");
+
+    }
+
+    @Test
+    public void testProtocolViolationWithOnFailureThrowingException() {
+        AtomicReference<Throwable> captured = new AtomicReference<>();
+        Infrastructure.setDroppedExceptionHandler(captured::set);
+
+        Subscriber<Integer> subscriber = Mocks.subscriber(2);
+        doThrow(new IllegalStateException("boom")).when(subscriber).onError(any(Throwable.class));
+
+        SafeSubscriber<Integer> safe = new SafeSubscriber<>(subscriber);
+        safe.onComplete();
+
+        verify(subscriber).onSubscribe(any(Subscription.class));
+
+        assertThat(captured.get())
+                .isInstanceOf(CompositeException.class)
+                .hasMessageContaining("boom")
+                .hasMessageContaining("Subscription not set!");
+
     }
 
 }

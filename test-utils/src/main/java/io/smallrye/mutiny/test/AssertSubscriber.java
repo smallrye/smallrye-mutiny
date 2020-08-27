@@ -58,7 +58,7 @@ public class AssertSubscriber<T> implements Subscriber<T> {
      * Number of completion events.
      * Reactive Streams compliant upstream should only send one subscription.
      */
-    private int numberOfCompletionEvents = 0;
+    private volatile int numberOfCompletionEvents = 0;
 
     /**
      * Whether or not the subscriber should cancel the subscription as soon as it receives it.
@@ -287,5 +287,9 @@ public class AssertSubscriber<T> implements Subscriber<T> {
 
     public boolean isCancelled() {
         return cancelled;
+    }
+
+    public boolean hasCompleted() {
+        return numberOfCompletionEvents >= 1;
     }
 }

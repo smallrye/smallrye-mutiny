@@ -8,6 +8,7 @@ import java.util.function.Consumer;
 
 import org.reactivestreams.Subscription;
 
+import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.helpers.Subscriptions;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 
@@ -50,7 +51,7 @@ public class Subscribers {
                     onSubscription.accept(this);
                 } catch (Throwable ex) {
                     s.cancel();
-                    onError(ex);
+                    Infrastructure.handleDroppedException(ex);
                 }
             } else {
                 s.cancel();
@@ -66,7 +67,7 @@ public class Subscribers {
                     onItem.accept(item);
                 } catch (Throwable e) {
                     subscription.getAndSet(Subscriptions.CANCELLED).cancel();
-                    onError(e);
+                    Infrastructure.handleDroppedException(e);
                 }
             }
         }
@@ -76,7 +77,11 @@ public class Subscribers {
             Objects.requireNonNull(t);
             if (subscription.getAndSet(Subscriptions.CANCELLED) != Subscriptions.CANCELLED) {
                 if (onFailure != null) {
-                    onFailure.accept(t);
+                    try {
+                        onFailure.accept(t);
+                    } catch (Throwable e) {
+                        Infrastructure.handleDroppedException(new CompositeException(t, e));
+                    }
                 } else {
                     Infrastructure.handleDroppedException(t);
                 }

@@ -20,12 +20,6 @@ public class UniOnItemTransform<I, O> extends UniOperator<I, O> {
 
             @Override
             public void onItem(I item) {
-                if (subscriber.isCancelledOrDone()) {
-                    // Avoid calling the mapper if we are done to save some cycles.
-                    // If the cancellation happen during the call, the events won't be dispatched.
-                    return;
-                }
-
                 O outcome;
                 try {
                     outcome = mapper.apply(item);
