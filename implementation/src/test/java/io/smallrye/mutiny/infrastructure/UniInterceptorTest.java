@@ -142,7 +142,7 @@ public class UniInterceptorTest {
     @Test
     public void testDefaultOrdinal() {
         UniInterceptor itcp = new UniInterceptor() {
-          // do nothing
+            // do nothing
         };
 
         assertThat(itcp.ordinal()).isEqualTo(UniInterceptor.DEFAULT_ORDINAL);

@@ -16,7 +16,7 @@ import io.smallrye.mutiny.infrastructure.Infrastructure;
  *
  * @param <T> the value type
  */
-@SuppressWarnings("SubscriberImplementation")
+@SuppressWarnings({ "ReactiveStreamsSubscriberImplementation" })
 public final class SafeSubscriber<T> implements Subscriber<T>, Subscription {
     /**
      * The actual Subscriber.
@@ -122,14 +122,14 @@ public final class SafeSubscriber<T> implements Subscriber<T>, Subscription {
                 downstream.onSubscribe(Subscriptions.empty());
             } catch (Throwable e) {
                 // can't call onError because the actual's state may be corrupt at this point
-                Infrastructure.handleDroppedException(e);
+                Infrastructure.handleDroppedException(new CompositeException(t, e));
                 return;
             }
             try {
                 downstream.onError(new CompositeException(t, npe));
             } catch (Throwable e) {
                 // nothing we can do.
-                Infrastructure.handleDroppedException(e);
+                Infrastructure.handleDroppedException(new CompositeException(t, npe, e));
             }
             return;
         }
@@ -138,7 +138,7 @@ public final class SafeSubscriber<T> implements Subscriber<T>, Subscription {
             downstream.onError(t);
         } catch (Throwable ex) {
             // nothing we can do.
-            Infrastructure.handleDroppedException(ex);
+            Infrastructure.handleDroppedException(new CompositeException(t, ex));
         }
     }
 
@@ -163,7 +163,6 @@ public final class SafeSubscriber<T> implements Subscriber<T>, Subscription {
     }
 
     private void onCompleteNoSubscription() {
-
         manageViolationProtocol();
     }
 
@@ -174,14 +173,14 @@ public final class SafeSubscriber<T> implements Subscriber<T>, Subscription {
             downstream.onSubscribe(Subscriptions.empty());
         } catch (Throwable e) {
             // can't call onError because the actual's state may be corrupt at this point
-            Infrastructure.handleDroppedException(e);
+            Infrastructure.handleDroppedException(new CompositeException(ex, e));
             return;
         }
         try {
             downstream.onError(ex);
         } catch (Throwable e) {
             // nothing we can do.
-            Infrastructure.handleDroppedException(e);
+            Infrastructure.handleDroppedException(new CompositeException(ex, e));
         }
     }
 
@@ -192,9 +191,9 @@ public final class SafeSubscriber<T> implements Subscriber<T>, Subscription {
         } catch (Throwable e) {
             try {
                 upstream.get().cancel();
-            } catch (Throwable ignored) {
+            } catch (Throwable ex) {
                 // nothing we can do.
-                Infrastructure.handleDroppedException(ignored);
+                Infrastructure.handleDroppedException(new CompositeException(e, ex));
             }
         }
     }
@@ -203,9 +202,9 @@ public final class SafeSubscriber<T> implements Subscriber<T>, Subscription {
     public void cancel() {
         try {
             upstream.get().cancel();
-        } catch (Throwable ignored) {
+        } catch (Throwable e) {
             // nothing we can do.
-            Infrastructure.handleDroppedException(ignored);
+            Infrastructure.handleDroppedException(e);
         }
     }
 }
