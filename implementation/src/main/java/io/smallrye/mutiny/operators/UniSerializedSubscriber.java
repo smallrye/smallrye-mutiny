@@ -3,6 +3,7 @@ package io.smallrye.mutiny.operators;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
+import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.helpers.EmptyUniSubscription;
 import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
@@ -41,8 +42,6 @@ public class UniSerializedSubscriber<T> implements UniSubscriber<T>, UniSubscrip
         this.upstream = ParameterValidation.nonNull(upstream, "source");
         this.downstream = ParameterValidation.nonNull(subscriber, "subscriber` must not be `null`");
     }
-
-    // TODO Caught RuntimeException thrown by the onItem and onFailure and log them accordingly
 
     public static <T> void subscribe(AbstractUni<T> source, UniSubscriber<? super T> subscriber) {
         UniSubscriber<? super T> actual = Infrastructure.onUniSubscription(source, subscriber);
@@ -83,7 +82,12 @@ public class UniSerializedSubscriber<T> implements UniSubscriber<T>, UniSubscrip
                     new IllegalStateException(
                             "Invalid transition, expected to be in the HAS_SUBSCRIPTION states but was in SUBSCRIBED"));
         } else if (state.compareAndSet(HAS_SUBSCRIPTION, DONE)) {
-            downstream.onItem(item);
+            try {
+                downstream.onItem(item);
+            } catch (Throwable e) {
+                Infrastructure.handleDroppedException(e);
+                throw e; // Rethrow in case of synchronous emission
+            }
         }
         dispose();
     }
@@ -96,8 +100,16 @@ public class UniSerializedSubscriber<T> implements UniSubscriber<T>, UniSubscrip
                             "Invalid transition, expected to be in the HAS_SUBSCRIPTION states but was in "
                                     + state));
         } else if (state.compareAndSet(HAS_SUBSCRIPTION, DONE)) {
-            downstream.onFailure(failure);
-            dispose();
+            try {
+                downstream.onFailure(failure);
+            } catch (Throwable e) {
+                Infrastructure.handleDroppedException(new CompositeException(failure, e));
+                throw e; // Rethrow in case of synchronous emission
+            } finally {
+                dispose();
+            }
+        } else {
+            Infrastructure.handleDroppedException(failure);
         }
     }
 

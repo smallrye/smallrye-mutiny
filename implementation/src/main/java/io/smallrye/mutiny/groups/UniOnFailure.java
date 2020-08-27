@@ -13,7 +13,7 @@ import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.UniOnFailureFlatMap;
-import io.smallrye.mutiny.operators.UniOnFailureMap;
+import io.smallrye.mutiny.operators.UniOnFailureTransform;
 import io.smallrye.mutiny.operators.UniOnItemConsume;
 
 /**
@@ -108,7 +108,7 @@ public class UniOnFailure<T> {
      * @return the new {@link Uni}
      */
     public Uni<T> transform(Function<? super Throwable, ? extends Throwable> mapper) {
-        return Infrastructure.onUniCreation(new UniOnFailureMap<>(upstream, predicate, mapper));
+        return Infrastructure.onUniCreation(new UniOnFailureTransform<>(upstream, predicate, mapper));
     }
 
     /**
