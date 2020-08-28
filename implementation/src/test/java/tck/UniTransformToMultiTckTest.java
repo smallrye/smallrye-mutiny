@@ -5,17 +5,17 @@ import org.reactivestreams.Publisher;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 
-public class UniTransformToMultiTckTest extends AbstractPublisherTck<Integer> {
+public class UniTransformToMultiTckTest extends AbstractPublisherTck<Long> {
 
     @Override
-    public Publisher<Integer> createPublisher(long elements) {
+    public Publisher<Long> createPublisher(long elements) {
         return Uni.createFrom().item(elements)
-                .onItem().transformToMulti(max -> Multi.createFrom().range(0, (int) elements));
+                .onItem().transformToMulti(max -> Multi.createFrom().iterable(iterate(elements)));
     }
 
     @Override
-    public Publisher<Integer> createFailedPublisher() {
+    public Publisher<Long> createFailedPublisher() {
         return Uni.createFrom().<Integer> failure(new RuntimeException("failed"))
-                .onItem().transformToMulti(max -> Multi.createFrom().range(0, 100));
+                .onItem().transformToMulti(max -> Multi.createFrom().iterable(iterate(100)));
     }
 }

@@ -1,12 +1,11 @@
 package tck;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static tck.Await.await;
 
 import java.util.concurrent.CompletableFuture;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Multi;
 
@@ -30,7 +29,7 @@ public class MultiFirstTckTest extends AbstractTck {
     @Test
     public void findFirstStageShouldReturnEmptyForEmptyStream() {
         assertNull(await(Multi.createFrom().items()
-                .collectItems().first().subscribeAsCompletionStage()), null);
+                .collectItems().first().subscribeAsCompletionStage()));
     }
 
     @Test
@@ -43,10 +42,10 @@ public class MultiFirstTckTest extends AbstractTck {
         await(cancelled);
     }
 
-    @Test(expectedExceptions = QuietRuntimeException.class, expectedExceptionsMessageRegExp = "failed")
+    @Test
     public void findFirstStageShouldPropagateErrors() {
-        await(Multi.createFrom().failure(new QuietRuntimeException("failed"))
-                .collectItems().first().subscribeAsCompletionStage());
+        assertThrows(QuietRuntimeException.class, () -> await(Multi.createFrom().failure(new QuietRuntimeException("failed"))
+                .collectItems().first().subscribeAsCompletionStage()));
     }
 
     @Test

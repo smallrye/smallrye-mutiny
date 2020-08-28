@@ -13,4 +13,9 @@ public class MultiDisjointTckTest extends AbstractPublisherTck<Long> {
         return Multi.createFrom().item(list)
                 .onItem().disjoint();
     }
+
+    @Override
+    public long maxElementsFromPublisher() {
+        return 1024;
+    }
 }

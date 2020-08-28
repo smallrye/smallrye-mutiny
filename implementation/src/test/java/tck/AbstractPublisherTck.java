@@ -6,9 +6,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
 
 import org.reactivestreams.Publisher;
-import org.reactivestreams.tck.PublisherVerification;
 import org.reactivestreams.tck.TestEnvironment;
 import org.reactivestreams.tck.flow.support.TestException;
+import org.reactivestreams.tck.junit5.PublisherVerification;
 
 import io.smallrye.mutiny.Multi;
 
@@ -25,11 +25,6 @@ public abstract class AbstractPublisherTck<T> extends PublisherVerification<T> {
     @Override
     public Publisher<T> createFailedPublisher() {
         return Multi.createFrom().failure(new TestException());
-    }
-
-    @Override
-    public long maxElementsFromPublisher() {
-        return 1024;
     }
 
     /**

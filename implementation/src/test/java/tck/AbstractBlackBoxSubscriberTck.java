@@ -1,7 +1,7 @@
 package tck;
 
-import org.reactivestreams.tck.SubscriberBlackboxVerification;
 import org.reactivestreams.tck.TestEnvironment;
+import org.reactivestreams.tck.junit5.SubscriberBlackboxVerification;
 
 public abstract class AbstractBlackBoxSubscriberTck extends SubscriberBlackboxVerification<Integer> {
 

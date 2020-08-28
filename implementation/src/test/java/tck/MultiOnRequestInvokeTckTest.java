@@ -1,7 +1,5 @@
 package tck;
 
-import java.util.stream.LongStream;
-
 import org.reactivestreams.Publisher;
 
 import io.smallrye.mutiny.Multi;
@@ -10,7 +8,7 @@ public class MultiOnRequestInvokeTckTest extends AbstractPublisherTck<Long> {
 
     @Override
     public Publisher<Long> createPublisher(long elements) {
-        return Multi.createFrom().items(LongStream.rangeClosed(1, elements).boxed())
+        return Multi.createFrom().iterable(iterate(elements))
                 .onRequest().invoke((count) -> {
                     // Do nothing
                 });
@@ -23,4 +21,10 @@ public class MultiOnRequestInvokeTckTest extends AbstractPublisherTck<Long> {
                     // noop
                 });
     }
+
+    @Override
+    public long maxElementsFromPublisher() {
+        return 1024;
+    }
+
 }

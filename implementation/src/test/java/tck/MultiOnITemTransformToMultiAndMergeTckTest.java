@@ -1,6 +1,7 @@
 package tck;
 
-import static org.testng.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static tck.Await.await;
 
 import java.util.Arrays;
@@ -12,10 +13,10 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.function.Function;
 import java.util.stream.LongStream;
 
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
-import org.testng.annotations.AfterTest;
-import org.testng.annotations.BeforeTest;
-import org.testng.annotations.Test;
 
 import io.smallrye.mutiny.Multi;
 
@@ -23,12 +24,12 @@ public class MultiOnITemTransformToMultiAndMergeTckTest extends AbstractPublishe
 
     private ScheduledExecutorService executor;
 
-    @BeforeTest
+    @BeforeEach
     public void init() {
         executor = Executors.newScheduledThreadPool(4);
     }
 
-    @AfterTest
+    @AfterEach
     public void shutdown() {
         executor.shutdown();
     }
@@ -39,7 +40,6 @@ public class MultiOnITemTransformToMultiAndMergeTckTest extends AbstractPublishe
 
     @Test
     public void flatMapStageShouldMapElements() {
-
         assertEquals(await(Multi.createFrom().items(1, 2, 3)
                 .emitOn(executor)
                 .onItem().transformToMultiAndMerge(n -> Multi.createFrom().items(n, n, n))
@@ -55,42 +55,47 @@ public class MultiOnITemTransformToMultiAndMergeTckTest extends AbstractPublishe
                 .subscribeAsCompletionStage()), Arrays.asList(1, 2));
     }
 
-    @Test(expectedExceptions = QuietRuntimeException.class, expectedExceptionsMessageRegExp = "failed")
+    @Test
     public void flatMapStageShouldHandleExceptions() {
-        CompletableFuture<Void> cancelled = new CompletableFuture<>();
-        CompletionStage<List<Object>> result = infiniteStream()
-                .on().termination((f, c) -> {
-                    if (c) {
-                        cancelled.complete(null);
-                    }
-                })
-                .onItem().transformToMultiAndMerge(foo -> {
-                    throw new QuietRuntimeException("failed");
-                })
-                .collectItems().asList()
-                .subscribeAsCompletionStage();
-        await(cancelled);
-        await(result);
+        assertThrows(QuietRuntimeException.class, () -> {
+            CompletableFuture<Void> cancelled = new CompletableFuture<>();
+            CompletionStage<List<Object>> result = infiniteStream()
+                    .onTermination().invoke((f, c) -> {
+                        if (c) {
+                            cancelled.complete(null);
+                        }
+                    })
+                    .onItem().transformToMultiAndMerge(foo -> {
+                        throw new QuietRuntimeException("failed");
+                    })
+                    .collectItems().asList()
+                    .subscribeAsCompletionStage();
+            await(cancelled);
+            await(result);
+        });
     }
 
-    @Test(expectedExceptions = QuietRuntimeException.class, expectedExceptionsMessageRegExp = "failed")
+    @Test
     public void flatMapStageShouldPropagateUpstreamExceptions() {
-        await(Multi.createFrom().failure(new QuietRuntimeException("failed"))
+        assertThrows(QuietRuntimeException.class, () -> await(Multi.createFrom().failure(new QuietRuntimeException("failed"))
                 .onItem().transformToMultiAndMerge(x -> Multi.createFrom().item(x))
                 .collectItems().asList()
-                .subscribeAsCompletionStage());
+                .subscribeAsCompletionStage()));
     }
 
-    @Test(expectedExceptions = QuietRuntimeException.class, expectedExceptionsMessageRegExp = "failed")
+    @Test
     public void flatMapStageShouldPropagateSubstreamExceptions() {
-        CompletableFuture<Void> cancelled = new CompletableFuture<>();
-        CompletionStage<List<Object>> result = infiniteStream()
-                .on().termination(() -> cancelled.complete(null))
-                .onItem().transformToMultiAndMerge(f -> Multi.createFrom().failure(new QuietRuntimeException("failed")))
-                .collectItems().asList()
-                .subscribeAsCompletionStage();
-        await(cancelled);
-        await(result);
+        assertThrows(QuietRuntimeException.class, () -> {
+            CompletableFuture<Void> cancelled = new CompletableFuture<>();
+            CompletionStage<List<Object>> result = infiniteStream()
+                    .onTermination().invoke(() -> cancelled.complete(null))
+                    .onItem()
+                    .transformToMultiAndMerge(f -> Multi.createFrom().failure(new QuietRuntimeException("failed")))
+                    .collectItems().asList()
+                    .subscribeAsCompletionStage();
+            await(cancelled);
+            await(result);
+        });
     }
 
     @Test
@@ -98,8 +103,9 @@ public class MultiOnITemTransformToMultiAndMergeTckTest extends AbstractPublishe
         CompletableFuture<Void> outerCancelled = new CompletableFuture<>();
         CompletableFuture<Void> innerCancelled = new CompletableFuture<>();
         await(infiniteStream()
-                .on().termination(() -> outerCancelled.complete(null))
-                .onItem().transformToMultiAndMerge(i -> infiniteStream().on().termination(() -> innerCancelled.complete(null)))
+                .onTermination().invoke(() -> outerCancelled.complete(null))
+                .onItem().transformToMultiAndMerge(i -> infiniteStream().onTermination()
+                        .invoke(() -> innerCancelled.complete(null)))
                 .transform().byTakingFirstItems(5)
                 .collectItems().asList()
                 .subscribeAsCompletionStage());

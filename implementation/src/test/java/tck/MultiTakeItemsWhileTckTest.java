@@ -1,6 +1,7 @@
 package tck;
 
-import static org.testng.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static tck.Await.await;
 
 import java.util.Arrays;
@@ -10,8 +11,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.stream.LongStream;
 
+import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
-import org.testng.annotations.Test;
 
 import io.smallrye.mutiny.Multi;
 
@@ -61,18 +62,20 @@ public class MultiTakeItemsWhileTckTest extends AbstractPublisherTck<Long> {
                 Arrays.asList(1, 2));
     }
 
-    @Test(expectedExceptions = QuietRuntimeException.class, expectedExceptionsMessageRegExp = "failed")
+    @Test
     public void takeWhileStageShouldHandleErrors() {
-        CompletableFuture<Void> cancelled = new CompletableFuture<>();
-        CompletionStage<List<Integer>> result = infiniteStream()
-                .onTermination().invoke(() -> cancelled.complete(null))
-                .transform().byTakingItemsWhile(i -> {
-                    throw new QuietRuntimeException("failed");
-                })
-                .collectItems().asList()
-                .subscribeAsCompletionStage();
-        await(cancelled);
-        await(result);
+        assertThrows(QuietRuntimeException.class, () -> {
+            CompletableFuture<Void> cancelled = new CompletableFuture<>();
+            CompletionStage<List<Integer>> result = infiniteStream()
+                    .onTermination().invoke(() -> cancelled.complete(null))
+                    .transform().byTakingItemsWhile(i -> {
+                        throw new QuietRuntimeException("failed");
+                    })
+                    .collectItems().asList()
+                    .subscribeAsCompletionStage();
+            await(cancelled);
+            await(result);
+        });
     }
 
     @Override

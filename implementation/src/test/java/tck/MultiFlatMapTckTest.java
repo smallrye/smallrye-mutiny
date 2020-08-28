@@ -1,23 +1,20 @@
 package tck;
 
-import static org.testng.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static tck.Await.await;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.LongStream;
 
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
-import org.testng.annotations.AfterTest;
-import org.testng.annotations.BeforeTest;
-import org.testng.annotations.Test;
 
 import io.smallrye.mutiny.Multi;
 
@@ -25,12 +22,12 @@ public class MultiFlatMapTckTest extends AbstractPublisherTck<Long> {
 
     private ScheduledExecutorService executor;
 
-    @BeforeTest
+    @BeforeEach
     public void init() {
         executor = Executors.newScheduledThreadPool(4);
     }
 
-    @AfterTest
+    @AfterEach
     public void shutdown() {
         executor.shutdown();
     }
@@ -57,42 +54,46 @@ public class MultiFlatMapTckTest extends AbstractPublisherTck<Long> {
                 .subscribeAsCompletionStage()), Arrays.asList(1, 2));
     }
 
-    @Test(expectedExceptions = QuietRuntimeException.class, expectedExceptionsMessageRegExp = "failed")
+    @Test
     public void flatMapStageShouldHandleExceptions() {
-        CompletableFuture<Void> cancelled = new CompletableFuture<>();
-        CompletionStage<List<Object>> result = infiniteStream()
-                .onTermination().invoke((f, c) -> {
-                    if (c) {
-                        cancelled.complete(null);
-                    }
-                })
-                .flatMap(foo -> {
-                    throw new QuietRuntimeException("failed");
-                })
-                .collectItems().asList()
-                .subscribeAsCompletionStage();
-        await(cancelled);
-        await(result);
+        assertThrows(QuietRuntimeException.class, () -> {
+            CompletableFuture<Void> cancelled = new CompletableFuture<>();
+            CompletionStage<List<Object>> result = infiniteStream()
+                    .onTermination().invoke((f, c) -> {
+                        if (c) {
+                            cancelled.complete(null);
+                        }
+                    })
+                    .flatMap(foo -> {
+                        throw new QuietRuntimeException("failed");
+                    })
+                    .collectItems().asList()
+                    .subscribeAsCompletionStage();
+            await(cancelled);
+            await(result);
+        });
     }
 
-    @Test(expectedExceptions = QuietRuntimeException.class, expectedExceptionsMessageRegExp = "failed")
+    @Test
     public void flatMapStageShouldPropagateUpstreamExceptions() {
-        await(Multi.createFrom().failure(new QuietRuntimeException("failed"))
+        assertThrows(QuietRuntimeException.class, () -> await(Multi.createFrom().failure(new QuietRuntimeException("failed"))
                 .flatMap(x -> Multi.createFrom().item(x))
                 .collectItems().asList()
-                .subscribeAsCompletionStage());
+                .subscribeAsCompletionStage()));
     }
 
-    @Test(expectedExceptions = QuietRuntimeException.class, expectedExceptionsMessageRegExp = "failed")
+    @Test
     public void flatMapStageShouldPropagateSubstreamExceptions() {
-        CompletableFuture<Void> cancelled = new CompletableFuture<>();
-        CompletionStage<List<Object>> result = infiniteStream()
-                .onTermination().invoke(() -> cancelled.complete(null))
-                .flatMap(f -> Multi.createFrom().failure(new QuietRuntimeException("failed")))
-                .collectItems().asList()
-                .subscribeAsCompletionStage();
-        await(cancelled);
-        await(result);
+        assertThrows(QuietRuntimeException.class, () -> {
+            CompletableFuture<Void> cancelled = new CompletableFuture<>();
+            CompletionStage<List<Object>> result = infiniteStream()
+                    .onTermination().invoke(() -> cancelled.complete(null))
+                    .flatMap(f -> Multi.createFrom().failure(new QuietRuntimeException("failed")))
+                    .collectItems().asList()
+                    .subscribeAsCompletionStage();
+            await(cancelled);
+            await(result);
+        });
     }
 
     @Test

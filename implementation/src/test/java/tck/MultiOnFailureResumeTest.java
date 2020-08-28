@@ -1,6 +1,7 @@
 package tck;
 
-import static org.testng.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static tck.Await.await;
 
 import java.util.Arrays;
@@ -8,7 +9,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
@@ -80,31 +81,33 @@ public class MultiOnFailureResumeTest {
         assertEquals(exception.get().getMessage(), "failed");
     }
 
-    @Test(expectedExceptions = RuntimeException.class)
+    @Test
     public void onErrorResumeStageShouldPropagateRuntimeExceptions() {
-        await(Multi.createFrom().<String> failure(new Exception("source-failure"))
+        assertThrows(RuntimeException.class, () -> await(Multi.createFrom().<String> failure(new Exception("source-failure"))
                 .onFailure().recoverWithMulti(t -> {
                     throw new QuietRuntimeException("failed");
                 })
                 .collectItems().asList()
-                .subscribeAsCompletionStage());
+                .subscribeAsCompletionStage()));
     }
 
-    @Test(expectedExceptions = RuntimeException.class)
+    @Test
     public void onErrorResumeWithStageShouldPropagateRuntimeExceptions() {
-        await(Multi.createFrom().<String> failure(new Exception("source-failure"))
+        assertThrows(RuntimeException.class, () -> await(Multi.createFrom().<String> failure(new Exception("source-failure"))
                 .onFailure().recoverWithItem(t -> {
                     throw new QuietRuntimeException("failed");
                 })
                 .collectItems().asList()
-                .subscribeAsCompletionStage());
+                .subscribeAsCompletionStage()));
     }
 
-    @Test(expectedExceptions = QuietRuntimeException.class, expectedExceptionsMessageRegExp = ".*boom.*")
+    @Test
     public void onErrorResumeWithShouldBeAbleToInjectAFailure() {
-        await(Multi.createFrom().<String> failure(new QuietRuntimeException("failed"))
-                .onFailure().recoverWithMulti(err -> Multi.createFrom().failure(new QuietRuntimeException("boom")))
-                .collectItems().asList()
-                .subscribeAsCompletionStage());
+        assertThrows(QuietRuntimeException.class,
+                () -> await(Multi.createFrom().<String> failure(new QuietRuntimeException("failed"))
+                        .onFailure()
+                        .recoverWithMulti(err -> Multi.createFrom().failure(new QuietRuntimeException("boom")))
+                        .collectItems().asList()
+                        .subscribeAsCompletionStage()));
     }
 }

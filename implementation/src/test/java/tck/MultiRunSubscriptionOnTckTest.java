@@ -4,9 +4,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.LongStream;
 
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.reactivestreams.Publisher;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
 
 import io.smallrye.mutiny.Multi;
 
@@ -14,12 +14,12 @@ public class MultiRunSubscriptionOnTckTest extends AbstractPublisherTck<Long> {
 
     private ExecutorService executor;
 
-    @BeforeMethod
+    @BeforeEach
     public void init() {
         executor = Executors.newFixedThreadPool(3);
     }
 
-    @AfterMethod
+    @AfterEach
     public void cleanup() {
         executor.shutdown();
     }

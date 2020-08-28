@@ -1,6 +1,6 @@
 package tck;
 
-import static org.testng.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static tck.Await.await;
 
 import java.util.Arrays;
@@ -8,9 +8,9 @@ import java.util.Collections;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.LongStream;
 
+import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscription;
-import org.testng.annotations.Test;
 
 import io.smallrye.mutiny.Multi;
 

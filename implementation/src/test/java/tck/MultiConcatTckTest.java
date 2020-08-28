@@ -1,14 +1,15 @@
 package tck;
 
-import static org.testng.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static tck.Await.await;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.stream.LongStream;
 
+import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
-import org.testng.annotations.Test;
 
 import io.smallrye.mutiny.Multi;
 
@@ -24,13 +25,13 @@ public class MultiConcatTckTest extends AbstractPublisherTck<Long> {
                 Arrays.asList(1, 2, 3, 4, 5, 6));
     }
 
-    @Test(expectedExceptions = QuietRuntimeException.class, expectedExceptionsMessageRegExp = "failed")
+    @Test
     public void concatStageShouldPropagateExceptionsFromSecondStage() {
-        await(
+        assertThrows(QuietRuntimeException.class, () -> await(
                 Multi.createBy().concatenating().streams(
                         Multi.createFrom().items(1, 2, 3),
                         Multi.createFrom().failure(new QuietRuntimeException("failed"))).collectItems().asList()
-                        .subscribeAsCompletionStage());
+                        .subscribeAsCompletionStage()));
     }
 
     @Test
@@ -90,5 +91,10 @@ public class MultiConcatTckTest extends AbstractPublisherTck<Long> {
                         () -> LongStream.rangeClosed(1, toEmitFromFirst).boxed().iterator()),
                 Multi.createFrom().iterable(
                         () -> LongStream.rangeClosed(toEmitFromFirst + 1, elements).boxed().iterator()));
+    }
+
+    @Override
+    public long maxElementsFromPublisher() {
+        return 1024;
     }
 }

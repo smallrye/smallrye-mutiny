@@ -1,6 +1,6 @@
 package tck;
 
-import static org.testng.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -17,10 +17,10 @@ import org.reactivestreams.Subscription;
  * and then completes 100ms later. It also uses activePublishers to ensure
  * that it is the only publisher that is subscribed to at any one time.
  */
-@SuppressWarnings("PublisherImplementation")
+@SuppressWarnings("ReactiveStreamsPublisherImplementation")
 class ScheduledPublisher implements Publisher<Integer> {
     private final int id;
-    private AtomicBoolean published = new AtomicBoolean(false);
+    private final AtomicBoolean published = new AtomicBoolean(false);
     private final AtomicInteger activePublishers;
     private final Supplier<ScheduledExecutorService> supplier;
 

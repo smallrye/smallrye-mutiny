@@ -1,6 +1,7 @@
 package tck;
 
-import static org.testng.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static tck.Await.await;
 
 import java.util.Arrays;
@@ -10,8 +11,8 @@ import java.util.concurrent.CompletionStage;
 import java.util.function.Function;
 import java.util.stream.IntStream;
 
+import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
-import org.testng.annotations.Test;
 
 import io.smallrye.mutiny.Multi;
 
@@ -25,37 +26,41 @@ public class MultiOnItemTransformTckTest extends AbstractPublisherTck<Integer> {
                 .subscribeAsCompletionStage()), Arrays.asList("1", "2", "3"));
     }
 
-    @Test(expectedExceptions = QuietRuntimeException.class, expectedExceptionsMessageRegExp = "failed")
+    @Test
     public void mapStageShouldHandleExceptions() {
-        CompletableFuture<Void> cancelled = new CompletableFuture<>();
-        CompletionStage<List<Object>> result = infiniteStream()
-                .onTermination().invoke(() -> cancelled.complete(null))
-                .map(foo -> {
-                    throw new QuietRuntimeException("failed");
-                })
-                .collectItems().asList()
-                .subscribeAsCompletionStage();
-        await(cancelled);
-        await(result);
+        assertThrows(QuietRuntimeException.class, () -> {
+            CompletableFuture<Void> cancelled = new CompletableFuture<>();
+            CompletionStage<List<Object>> result = infiniteStream()
+                    .onTermination().invoke(() -> cancelled.complete(null))
+                    .map(foo -> {
+                        throw new QuietRuntimeException("failed");
+                    })
+                    .collectItems().asList()
+                    .subscribeAsCompletionStage();
+            await(cancelled);
+            await(result);
+        });
     }
 
-    @Test(expectedExceptions = QuietRuntimeException.class, expectedExceptionsMessageRegExp = "failed")
+    @Test
     public void mapStageShouldPropagateUpstreamExceptions() {
-        await(Multi.createFrom().failure(new QuietRuntimeException("failed"))
+        assertThrows(QuietRuntimeException.class, () -> await(Multi.createFrom().failure(new QuietRuntimeException("failed"))
                 .map(Function.identity())
                 .collectItems().asList()
-                .subscribeAsCompletionStage());
+                .subscribeAsCompletionStage()));
     }
 
-    @Test(expectedExceptions = NullPointerException.class)
+    @Test
     public void mapStageShouldFailIfNullReturned() {
-        CompletableFuture<Void> cancelled = new CompletableFuture<>();
-        CompletionStage<List<Object>> result = infiniteStream()
-                .onTermination().invoke(() -> cancelled.complete(null))
-                .map(t -> null)
-                .collectItems().asList().subscribeAsCompletionStage();
-        await(cancelled);
-        await(result);
+        assertThrows(NullPointerException.class, () -> {
+            CompletableFuture<Void> cancelled = new CompletableFuture<>();
+            CompletionStage<List<Object>> result = infiniteStream()
+                    .onTermination().invoke(() -> cancelled.complete(null))
+                    .map(t -> null)
+                    .collectItems().asList().subscribeAsCompletionStage();
+            await(cancelled);
+            await(result);
+        });
     }
 
     @Override

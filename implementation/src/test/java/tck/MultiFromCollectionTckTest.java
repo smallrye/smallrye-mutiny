@@ -16,4 +16,9 @@ public class MultiFromCollectionTckTest extends AbstractPublisherTck<Long> {
         }
         return Multi.createFrom().items(list.toArray(new Long[0]));
     }
+
+    @Override
+    public long maxElementsFromPublisher() {
+        return 1024;
+    }
 }

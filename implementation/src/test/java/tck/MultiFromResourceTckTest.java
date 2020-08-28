@@ -16,4 +16,10 @@ public class MultiFromResourceTckTest extends AbstractPublisherTck<Long> {
         })
                 .onItem().transform(i -> (long) i);
     }
+
+    @Override
+    public long maxElementsFromPublisher() {
+        return 1024;
+    }
+
 }
