@@ -3,6 +3,7 @@ package io.smallrye.mutiny.operators;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.awaitility.Awaitility.await;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.time.Duration;
 import java.util.concurrent.Executors;
@@ -10,9 +11,9 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.subscription.UniEmitter;
@@ -23,7 +24,7 @@ public class UniOnItemDelayUntilTest {
 
     private Uni<Void> delayed;
 
-    @BeforeMethod
+    @BeforeEach
     public void init() {
         executor = Executors.newScheduledThreadPool(4);
         delayed = Uni.createFrom().voidItem().onItem().delayIt()
@@ -31,26 +32,29 @@ public class UniOnItemDelayUntilTest {
                 .until(x -> Uni.createFrom().nullItem().onItem().delayIt().by(Duration.ofMillis(10)));
     }
 
-    @AfterMethod
+    @AfterEach
     public void shutdown() {
         executor.shutdown();
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testWithNullFunction() {
-        Uni.createFrom().item(1).onItem().delayIt().until(null);
+        assertThrows(IllegalArgumentException.class,
+                () -> Uni.createFrom().item(1).onItem().delayIt().until(null));
     }
 
-    @Test(expectedExceptions = NullPointerException.class)
+    @Test
     public void testWithFunctionReturningNull() {
-        Uni.createFrom().item(1).onItem().delayIt().until(x -> null).await().indefinitely();
+        assertThrows(NullPointerException.class,
+                () -> Uni.createFrom().item(1).onItem().delayIt().until(x -> null).await().indefinitely());
     }
 
-    @Test(expectedExceptions = IllegalStateException.class)
+    @Test
     public void testWithFunctionThrowException() {
-        Uni.createFrom().item(1).onItem().delayIt().until(x -> {
-            throw new IllegalStateException("boom");
-        }).await().indefinitely();
+        assertThrows(IllegalStateException.class,
+                () -> Uni.createFrom().item(1).onItem().delayIt().until(x -> {
+                    throw new IllegalStateException("boom");
+                }).await().indefinitely());
     }
 
     @Test
@@ -97,9 +101,7 @@ public class UniOnItemDelayUntilTest {
         int i = Uni.createFrom().item(1)
                 .emitOn(executor)
                 .onItem().delayIt().onExecutor(exec).until(x -> Uni.createFrom().nullItem()
-                        .onItem().invoke(ignored -> {
-                            thread.set(Thread.currentThread().getName());
-                        }))
+                        .onItem().invoke(ignored -> thread.set(Thread.currentThread().getName())))
                 .await().indefinitely();
         assertThat(i).isEqualTo(1);
         assertThat(thread.get()).isEqualTo("my-thread");

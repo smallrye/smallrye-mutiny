@@ -2,8 +2,8 @@ package io.smallrye.mutiny.infrastructure;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.operators.AbstractUni;
@@ -14,7 +14,7 @@ import io.smallrye.mutiny.subscription.UniSubscription;
 
 public class UniInterceptorTest {
 
-    @AfterMethod
+    @AfterEach
     public void cleanup() {
         Infrastructure.clearInterceptors();
     }

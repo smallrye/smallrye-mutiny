@@ -2,7 +2,7 @@ package io.smallrye.mutiny.operators.uni.builders;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.operators.UniAssertSubscriber;

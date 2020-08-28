@@ -1,6 +1,6 @@
 package io.smallrye.mutiny.operators;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.test.AssertSubscriber;

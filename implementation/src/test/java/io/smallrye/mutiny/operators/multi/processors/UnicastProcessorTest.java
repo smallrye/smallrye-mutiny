@@ -8,8 +8,8 @@ import java.util.Queue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import org.junit.jupiter.api.Test;
 import org.reactivestreams.Subscription;
-import org.testng.annotations.Test;
 
 import io.smallrye.mutiny.helpers.queues.Queues;
 import io.smallrye.mutiny.subscription.BackPressureFailure;

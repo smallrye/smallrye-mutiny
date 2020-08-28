@@ -2,22 +2,23 @@ package io.smallrye.mutiny.operators;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
 import java.util.NoSuchElementException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Uni;
 
 public class UniOnNullFailTest {
 
-    @Test(expectedExceptions = NoSuchElementException.class)
+    @Test
     public void testFail() {
-        Uni.createFrom().item((Object) null)
-                .onItem().ifNull().fail().await().indefinitely();
+        assertThrows(NoSuchElementException.class, () -> Uni.createFrom().item((Object) null)
+                .onItem().ifNull().fail().await().indefinitely());
     }
 
     @Test
@@ -25,14 +26,17 @@ public class UniOnNullFailTest {
         assertThat(Uni.createFrom().item(1).onItem().ifNull().fail().await().indefinitely()).isEqualTo(1);
     }
 
-    @Test(expectedExceptions = RuntimeException.class)
+    @Test
     public void testFailWithException() {
-        Uni.createFrom().item((Object) null).onItem().ifNull().failWith(new RuntimeException("boom")).await().indefinitely();
+        assertThrows(RuntimeException.class,
+                () -> Uni.createFrom().item((Object) null).onItem().ifNull().failWith(new RuntimeException("boom")).await()
+                        .indefinitely());
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testFailWithExceptionSetToNull() {
-        Uni.createFrom().item((Object) null).onItem().ifNull().failWith((Exception) null).await().indefinitely();
+        assertThrows(IllegalArgumentException.class,
+                () -> Uni.createFrom().item((Object) null).onItem().ifNull().failWith((Exception) null).await().indefinitely());
     }
 
     @Test
@@ -54,9 +58,11 @@ public class UniOnNullFailTest {
                 .withMessageEndingWith("2");
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testFailWithExceptionSupplierSetToNull() {
-        Uni.createFrom().item((Object) null).onItem().ifNull().failWith((Supplier<Throwable>) null).await().indefinitely();
+        assertThrows(IllegalArgumentException.class,
+                () -> Uni.createFrom().item((Object) null).onItem().ifNull().failWith((Supplier<Throwable>) null).await()
+                        .indefinitely());
     }
 
     @Test

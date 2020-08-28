@@ -8,11 +8,11 @@ import static org.mockito.Mockito.*;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.internal.stubbing.answers.ThrowsException;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.Test;
 
 import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Multi;
@@ -23,7 +23,7 @@ import io.smallrye.mutiny.test.Mocks;
 @SuppressWarnings("unchecked")
 public class SafeSubscriberTest {
 
-    @AfterMethod
+    @AfterEach
     public void cleanup() {
         Infrastructure.resetDroppedExceptionHandler();
     }

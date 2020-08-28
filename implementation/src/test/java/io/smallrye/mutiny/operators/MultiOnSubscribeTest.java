@@ -2,6 +2,7 @@ package io.smallrye.mutiny.operators;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
 import java.util.concurrent.CountDownLatch;
@@ -9,8 +10,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
+import org.junit.jupiter.api.Test;
 import org.reactivestreams.Subscription;
-import org.testng.annotations.Test;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
@@ -157,27 +158,28 @@ public class MultiOnSubscribeTest {
                 .assertHasFailedWith(NullPointerException.class, "`null`");
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testThatInvokeConsumerCannotBeNull() {
-        Multi.createFrom().items(1, 2, 3)
-                .onSubscribe().invoke(null);
+        assertThrows(IllegalArgumentException.class, () -> Multi.createFrom().items(1, 2, 3)
+                .onSubscribe().invoke(null));
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testThatInvokeUniFunctionCannotBeNull() {
-        Multi.createFrom().items(1, 2, 3)
-                .onSubscribe().invokeUni(null);
+        assertThrows(IllegalArgumentException.class, () -> Multi.createFrom().items(1, 2, 3)
+                .onSubscribe().invokeUni(null));
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testThatInvokeUpstreamCannotBeNull() {
-        new MultiOnSubscribeInvokeOp<>(null, s -> {
-        });
+        assertThrows(IllegalArgumentException.class, () -> new MultiOnSubscribeInvokeOp<>(null, s -> {
+        }));
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testThatInvokeUniUpstreamCannotBeNull() {
-        new MultiOnSubscribeInvokeUniOp<>(null, s -> Uni.createFrom().nullItem());
+        assertThrows(IllegalArgumentException.class,
+                () -> new MultiOnSubscribeInvokeUniOp<>(null, s -> Uni.createFrom().nullItem()));
     }
 
     @Test
@@ -206,7 +208,8 @@ public class MultiOnSubscribeTest {
     public void testThatSubscriptionIsNotPassedDownstreamUntilProducedUniCompletes() {
         AtomicReference<UniEmitter<? super Integer>> emitter = new AtomicReference<>();
         AssertSubscriber<Integer> subscriber = Multi.createFrom().items(1, 2, 3)
-                .onSubscribe().invokeUni(s -> Uni.createFrom().emitter((Consumer<UniEmitter<? super Integer>>) emitter::set))
+                .onSubscribe()
+                .invokeUni(s -> Uni.createFrom().emitter((Consumer<UniEmitter<? super Integer>>) emitter::set))
                 .subscribe().withSubscriber(AssertSubscriber.create(3));
 
         subscriber.assertNotSubscribed();
@@ -224,7 +227,8 @@ public class MultiOnSubscribeTest {
     public void testThatSubscriptionIsNotPassedDownstreamUntilProducedUniCompletesWithDifferentThread() {
         AtomicReference<UniEmitter<? super Integer>> emitter = new AtomicReference<>();
         AssertSubscriber<Integer> subscriber = Multi.createFrom().items(1, 2, 3)
-                .onSubscribe().invokeUni(s -> Uni.createFrom().emitter((Consumer<UniEmitter<? super Integer>>) emitter::set))
+                .onSubscribe()
+                .invokeUni(s -> Uni.createFrom().emitter((Consumer<UniEmitter<? super Integer>>) emitter::set))
                 .runSubscriptionOn(Infrastructure.getDefaultExecutor())
                 .subscribe().withSubscriber(AssertSubscriber.create(3));
 

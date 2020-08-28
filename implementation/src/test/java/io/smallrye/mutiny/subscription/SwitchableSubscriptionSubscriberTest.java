@@ -10,9 +10,10 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.RepeatedTest;
+import org.junit.jupiter.api.Test;
 import org.reactivestreams.Subscription;
-import org.testng.annotations.BeforeTest;
-import org.testng.annotations.Test;
 
 import io.smallrye.mutiny.test.AssertSubscriber;
 
@@ -22,7 +23,7 @@ public class SwitchableSubscriptionSubscriberTest {
     private MultiSubscriber<Integer> downstream;
     private SwitchableSubscriptionSubscriber<Integer> switchable;
 
-    @BeforeTest
+    @BeforeEach
     public void init() {
         subscriber = AssertSubscriber.create(10);
         downstream = new MultiSubscriber<Integer>() {
@@ -153,7 +154,7 @@ public class SwitchableSubscriptionSubscriberTest {
         verify(third, times(1)).request(8);
     }
 
-    @Test(invocationCount = 100)
+    @RepeatedTest(100)
     public void testRaceOnSwitch() throws InterruptedException {
         switchable = new SwitchableSubscriptionSubscriber<Integer>(downstream) {
             @Override
@@ -212,7 +213,7 @@ public class SwitchableSubscriptionSubscriberTest {
         verify(third, atMost(1)).request(5);
     }
 
-    @Test(invocationCount = 100)
+    @RepeatedTest(100)
     public void testRaceOnSwitchWithCancellationOnSwitch() throws InterruptedException {
         switchable = new SwitchableSubscriptionSubscriber<Integer>(downstream) {
             @Override
@@ -276,7 +277,7 @@ public class SwitchableSubscriptionSubscriberTest {
         verify(third, atMost(1)).request(5);
     }
 
-    @Test(invocationCount = 50)
+    @RepeatedTest(50)
     public void testRaceOnSwitchAndEmitted() throws InterruptedException {
         switchable = new SwitchableSubscriptionSubscriber<Integer>(downstream) {
             @Override

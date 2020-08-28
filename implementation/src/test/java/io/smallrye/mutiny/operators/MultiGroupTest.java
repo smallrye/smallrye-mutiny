@@ -2,6 +2,7 @@ package io.smallrye.mutiny.operators;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -12,7 +13,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.GroupedMulti;
 import io.smallrye.mutiny.Multi;
@@ -21,19 +22,19 @@ import io.smallrye.mutiny.test.AssertSubscriber;
 
 public class MultiGroupTest {
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testGroupIntoListsWithSize0() {
-        Multi.createFrom().range(1, 5).groupItems().intoLists().of(0);
+        assertThrows(IllegalArgumentException.class, () -> Multi.createFrom().range(1, 5).groupItems().intoLists().of(0));
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testGroupIntoListsWithSize0AndSkip() {
-        Multi.createFrom().range(1, 5).groupItems().intoLists().of(0, 1);
+        assertThrows(IllegalArgumentException.class, () -> Multi.createFrom().range(1, 5).groupItems().intoLists().of(0, 1));
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testGroupIntoListsWithSkip0() {
-        Multi.createFrom().range(1, 5).groupItems().intoLists().of(1, 0);
+        assertThrows(IllegalArgumentException.class, () -> Multi.createFrom().range(1, 5).groupItems().intoLists().of(1, 0));
     }
 
     @Test
@@ -125,9 +126,10 @@ public class MultiGroupTest {
                         .isNull();
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testAsListsWithNegativeDuration() {
-        Multi.createFrom().range(1, 10).groupItems().intoLists().every(Duration.ofMillis(-2));
+        assertThrows(IllegalArgumentException.class,
+                () -> Multi.createFrom().range(1, 10).groupItems().intoLists().every(Duration.ofMillis(-2)));
     }
 
     @Test
@@ -141,19 +143,19 @@ public class MultiGroupTest {
         subscriber.cancel();
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testGroupIntoMultisWithSize0() {
-        Multi.createFrom().range(1, 5).groupItems().intoMultis().of(0);
+        assertThrows(IllegalArgumentException.class, () -> Multi.createFrom().range(1, 5).groupItems().intoMultis().of(0));
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testGroupIntoMultisWithSize0AndSkip() {
-        Multi.createFrom().range(1, 5).groupItems().intoMultis().of(0, 1);
+        assertThrows(IllegalArgumentException.class, () -> Multi.createFrom().range(1, 5).groupItems().intoMultis().of(0, 1));
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testGroupIntoMultisWithSkip0() {
-        Multi.createFrom().range(1, 5).groupItems().intoMultis().of(1, 0);
+        assertThrows(IllegalArgumentException.class, () -> Multi.createFrom().range(1, 5).groupItems().intoMultis().of(1, 0));
     }
 
     @Test
@@ -256,9 +258,10 @@ public class MultiGroupTest {
                         .isNull();
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testAsMultisWithNegativeDuration() {
-        Multi.createFrom().range(1, 10).groupItems().intoMultis().every(Duration.ofMillis(-2));
+        assertThrows(IllegalArgumentException.class,
+                () -> Multi.createFrom().range(1, 10).groupItems().intoMultis().every(Duration.ofMillis(-2)));
     }
 
     @Test
@@ -350,14 +353,14 @@ public class MultiGroupTest {
         assertThat(numbers).hasSize(9);
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testGroupByWithNullKeyMapper() {
-        Multi.createFrom().range(1, 10).groupItems().by(null);
+        assertThrows(IllegalArgumentException.class, () -> Multi.createFrom().range(1, 10).groupItems().by(null));
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testGroupByWithNullValueMapper() {
-        Multi.createFrom().range(1, 10).groupItems().by(i -> i % 2, null);
+        assertThrows(IllegalArgumentException.class, () -> Multi.createFrom().range(1, 10).groupItems().by(i -> i % 2, null));
     }
 
     @Test

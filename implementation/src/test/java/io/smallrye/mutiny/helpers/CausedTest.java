@@ -1,11 +1,12 @@
 package io.smallrye.mutiny.helpers;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.unchecked.Unchecked;
@@ -63,16 +64,16 @@ public class CausedTest {
                 .indefinitely());
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testWithNullParameter() {
-        Uni.createFrom()
+        assertThrows(IllegalArgumentException.class, () -> Uni.createFrom()
                 .item(Unchecked.supplier(this::numberSupplierThrowingNumberFormatException))
                 .onFailure(Caused.by(null))
                 .recoverWithItem(SPECIFIC)
                 .onFailure()
                 .recoverWithItem(GENERIC)
                 .await()
-                .indefinitely();
+                .indefinitely());
     }
 
     private String stringSupplierThrowingIOException() throws IOException {

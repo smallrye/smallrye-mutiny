@@ -1,19 +1,21 @@
 package io.smallrye.mutiny.operators;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Uni;
 
 public class UniOnItemFailTest {
 
-    private Uni<Integer> one = Uni.createFrom().item(1);
+    private final Uni<Integer> one = Uni.createFrom().item(1);
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testThatMapperCannotBeNull() {
-        one.onItem().failWith(null);
+        assertThrows(IllegalArgumentException.class, () -> one.onItem().failWith(null));
     }
 
     @Test

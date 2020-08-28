@@ -1,6 +1,7 @@
 package io.smallrye.mutiny.operators;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
@@ -8,7 +9,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.subscription.UniEmitter;
@@ -108,9 +109,10 @@ public class UniOnItemTransformToUniWithEmitterTest {
         assertThat(called).isTrue();
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testThatTheMapperCannotBeNull() {
-        Uni.createFrom().item(1).onItem().transformToUni((BiConsumer<Integer, UniEmitter<? super Integer>>) null);
+        assertThrows(IllegalArgumentException.class, () -> Uni.createFrom().item(1).onItem()
+                .transformToUni((BiConsumer<Integer, UniEmitter<? super Integer>>) null));
     }
 
     @Test

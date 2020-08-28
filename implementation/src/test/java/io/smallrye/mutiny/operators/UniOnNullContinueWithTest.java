@@ -2,12 +2,13 @@ package io.smallrye.mutiny.operators;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Uni;
 
@@ -49,40 +50,46 @@ public class UniOnNullContinueWithTest {
 
     @Test
     public void testContinueNotCalledOnFailure() {
-        assertThatExceptionOfType(RuntimeException.class).isThrownBy(() -> Uni.createFrom().failure(new IOException("boom"))
-                .onItem().castTo(Integer.class)
-                .onItem().ifNull().continueWith(42)
-                .await().indefinitely()).withCauseExactlyInstanceOf(IOException.class).withMessageEndingWith("boom");
+        assertThatExceptionOfType(RuntimeException.class)
+                .isThrownBy(() -> Uni.createFrom().failure(new IOException("boom"))
+                        .onItem().castTo(Integer.class)
+                        .onItem().ifNull().continueWith(42)
+                        .await().indefinitely())
+                .withCauseExactlyInstanceOf(IOException.class)
+                .withMessageEndingWith("boom");
     }
 
     @Test
     public void testContinueWithSupplierNotCalledOnFailure() {
-        assertThatExceptionOfType(RuntimeException.class).isThrownBy(() -> Uni.createFrom().failure(new IOException("boom"))
-                .onItem().castTo(Integer.class)
-                .onItem().ifNull().continueWith(() -> 42)
-                .await().indefinitely()).withCauseExactlyInstanceOf(IOException.class).withMessageEndingWith("boom");
+        assertThatExceptionOfType(RuntimeException.class)
+                .isThrownBy(() -> Uni.createFrom().failure(new IOException("boom"))
+                        .onItem().castTo(Integer.class)
+                        .onItem().ifNull().continueWith(() -> 42)
+                        .await().indefinitely())
+                .withCauseExactlyInstanceOf(IOException.class)
+                .withMessageEndingWith("boom");
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testThatContinueWithCannotUseNull() {
-        Uni.createFrom().item(23)
+        assertThrows(IllegalArgumentException.class, () -> Uni.createFrom().item(23)
                 .onItem().castTo(Integer.class)
-                .onItem().ifNull().continueWith((Integer) null);
+                .onItem().ifNull().continueWith((Integer) null));
     }
 
-    @Test(expectedExceptions = NullPointerException.class)
+    @Test
     public void testThatContinueWithSupplierCannotReturnNull() {
-        Uni.createFrom().item(23)
+        assertThrows(NullPointerException.class, () -> Uni.createFrom().item(23)
                 .map(x -> null)
                 .onItem().ifNull().continueWith(() -> null)
-                .await().indefinitely();
+                .await().indefinitely());
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testThatContinueWithSupplierCannotBeNull() {
-        Uni.createFrom().item(23)
+        assertThrows(IllegalArgumentException.class, () -> Uni.createFrom().item(23)
                 .onItem().castTo(Integer.class)
-                .onItem().ifNull().continueWith((Supplier<Integer>) null);
+                .onItem().ifNull().continueWith((Supplier<Integer>) null));
     }
 
 }

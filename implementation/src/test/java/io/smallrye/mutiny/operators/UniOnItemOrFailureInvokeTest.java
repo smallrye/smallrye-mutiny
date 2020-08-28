@@ -2,6 +2,7 @@ package io.smallrye.mutiny.operators;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
 import java.util.concurrent.ExecutorService;
@@ -10,7 +11,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Uni;
@@ -23,19 +24,19 @@ public class UniOnItemOrFailureInvokeTest {
     private final Uni<Void> none = Uni.createFrom().nullItem();
     private final Uni<Integer> failed = Uni.createFrom().failure(new IOException("boom"));
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testThatCallbackMustNotBeNull() {
-        Uni.createFrom().item(1).onItemOrFailure().invoke(null);
+        assertThrows(IllegalArgumentException.class, () -> Uni.createFrom().item(1).onItemOrFailure().invoke(null));
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testThatSourceMustNotBeNull() {
-        new UniOnItemOrFailureMap<>(null, (x, f) -> x);
+        assertThrows(IllegalArgumentException.class, () -> new UniOnItemOrFailureMap<>(null, (x, f) -> x));
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testThatCallbackMustNotBeNullWithInvokeUni() {
-        Uni.createFrom().item(1).onItemOrFailure().invokeUni(null);
+        assertThrows(IllegalArgumentException.class, () -> Uni.createFrom().item(1).onItemOrFailure().invokeUni(null));
     }
 
     @Test

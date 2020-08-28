@@ -2,13 +2,14 @@ package io.smallrye.mutiny.operators;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Uni;
@@ -19,14 +20,14 @@ public class UniOnFailureInvokeTest {
     private static final IOException BOOM = new IOException("boom");
     private final Uni<Integer> failure = Uni.createFrom().failure(BOOM);
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testThatConsumeMustNotBeNull() {
-        Uni.createFrom().item(1).onFailure().invoke(null);
+        assertThrows(IllegalArgumentException.class, () -> Uni.createFrom().item(1).onFailure().invoke(null));
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testThatFunctionMustNotBeNull() {
-        Uni.createFrom().item(1).onFailure().invokeUni(null);
+        assertThrows(IllegalArgumentException.class, () -> Uni.createFrom().item(1).onFailure().invokeUni(null));
     }
 
     @Test

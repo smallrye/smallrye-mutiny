@@ -1,11 +1,12 @@
 package io.smallrye.mutiny.operators;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Uni;
 
@@ -21,9 +22,9 @@ public class UniCreateFromDeferredSupplierTest {
         }
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testWithNull() {
-        Uni.createFrom().deferred(null);
+        assertThrows(IllegalArgumentException.class, () -> Uni.createFrom().deferred(null));
     }
 
     @Test
@@ -93,16 +94,16 @@ public class UniCreateFromDeferredSupplierTest {
         s2.assertFailure(IllegalStateException.class, "Invalid shared state");
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testThatStateSupplierCannotBeNull() {
-        Uni.createFrom().deferred(null,
-                x -> Uni.createFrom().item("x"));
+        assertThrows(IllegalArgumentException.class, () -> Uni.createFrom().deferred(null,
+                x -> Uni.createFrom().item("x")));
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testThatFunctionCannotBeNull() {
-        Uni.createFrom().deferred(() -> "hello",
-                null);
+        assertThrows(IllegalArgumentException.class, () -> Uni.createFrom().deferred(() -> "hello",
+                null));
     }
 
 }

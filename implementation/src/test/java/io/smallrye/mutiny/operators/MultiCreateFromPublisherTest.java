@@ -1,13 +1,14 @@
 package io.smallrye.mutiny.operators;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
 import io.reactivex.Flowable;
 import io.smallrye.mutiny.Multi;
@@ -15,9 +16,9 @@ import io.smallrye.mutiny.test.AssertSubscriber;
 
 public class MultiCreateFromPublisherTest {
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testThatPublisherCannotBeNull() {
-        Multi.createFrom().publisher(null);
+        assertThrows(IllegalArgumentException.class, () -> Multi.createFrom().publisher(null));
     }
 
     @Test

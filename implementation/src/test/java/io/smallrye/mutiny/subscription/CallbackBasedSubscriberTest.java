@@ -6,9 +6,9 @@ import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 import org.reactivestreams.Subscription;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.Test;
 
 import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Multi;
@@ -17,7 +17,7 @@ import io.smallrye.mutiny.infrastructure.Infrastructure;
 @SuppressWarnings("ConstantConditions")
 public class CallbackBasedSubscriberTest {
 
-    @AfterMethod
+    @AfterEach
     public void cleanup() {
         Infrastructure.resetDroppedExceptionHandler();
     }

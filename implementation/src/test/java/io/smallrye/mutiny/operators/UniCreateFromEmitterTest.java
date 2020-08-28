@@ -1,7 +1,8 @@
 package io.smallrye.mutiny.operators;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.testng.Assert.fail;
+import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -9,7 +10,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.subscription.UniEmitter;
@@ -17,9 +18,9 @@ import io.smallrye.mutiny.subscription.UniSubscriber;
 import io.smallrye.mutiny.subscription.UniSubscription;
 
 public class UniCreateFromEmitterTest {
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testThatConsumerCannotBeNull() {
-        Uni.createFrom().emitter(null);
+        assertThrows(IllegalArgumentException.class, () -> Uni.createFrom().emitter(null));
     }
 
     @SuppressWarnings("rawtypes")
@@ -257,16 +258,16 @@ public class UniCreateFromEmitterTest {
         s2.assertFailure(IllegalStateException.class, "Invalid shared state");
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testThatStateSupplierCannotBeNull() {
-        Uni.createFrom().emitter(null,
+        assertThrows(IllegalArgumentException.class, () -> Uni.createFrom().emitter(null,
                 (x, emitter) -> {
-                });
+                }));
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testThatFunctionCannotBeNull() {
-        Uni.createFrom().emitter(() -> "hello",
-                null);
+        assertThrows(IllegalArgumentException.class, () -> Uni.createFrom().emitter(() -> "hello",
+                null));
     }
 }

@@ -1,6 +1,7 @@
 package io.smallrye.mutiny.operators;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -10,14 +11,16 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
+import org.junit.jupiter.api.RepeatedTest;
+import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
-import org.testng.annotations.Test;
 
 import io.reactivex.Flowable;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.test.AssertSubscriber;
 
+@SuppressWarnings("ConstantConditions")
 public class MultiOnCompletionTest {
 
     @Test
@@ -108,34 +111,34 @@ public class MultiOnCompletionTest {
         assertThat(called).isTrue();
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testOnCompletionContinueWithNullItem() {
-        Multi.createFrom().range(1, 5)
-                .onCompletion().continueWith((Integer) null);
+        assertThrows(IllegalArgumentException.class, () -> Multi.createFrom().range(1, 5)
+                .onCompletion().continueWith((Integer) null));
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testOnCompletionContinueWithNullAsIterable() {
-        Multi.createFrom().range(1, 5)
-                .onCompletion().continueWith((Iterable<Integer>) null);
+        assertThrows(IllegalArgumentException.class, () -> Multi.createFrom().range(1, 5)
+                .onCompletion().continueWith((Iterable<Integer>) null));
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testOnCompletionContinueWithItemsContainingNullItem() {
-        Multi.createFrom().range(1, 5)
-                .onCompletion().continueWith(1, 2, 3, null, 4, 5);
+        assertThrows(IllegalArgumentException.class, () -> Multi.createFrom().range(1, 5)
+                .onCompletion().continueWith(1, 2, 3, null, 4, 5));
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testOnCompletionContinueWithIterableContainingNullItem() {
-        Multi.createFrom().range(1, 5)
-                .onCompletion().continueWith(Arrays.asList(1, 2, 3, null, 4, 5));
+        assertThrows(IllegalArgumentException.class, () -> Multi.createFrom().range(1, 5)
+                .onCompletion().continueWith(Arrays.asList(1, 2, 3, null, 4, 5)));
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testOnCompletionContinueWithNullSupplier() {
-        Multi.createFrom().range(1, 5)
-                .onCompletion().continueWith((Supplier<? extends Iterable<? extends Integer>>) null);
+        assertThrows(IllegalArgumentException.class, () -> Multi.createFrom().range(1, 5)
+                .onCompletion().continueWith((Supplier<? extends Iterable<? extends Integer>>) null));
     }
 
     @Test
@@ -203,10 +206,10 @@ public class MultiOnCompletionTest {
                 .assertHasFailedWith(IOException.class, "boom");
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testOnCompletionFailWithNullException() {
-        Multi.createFrom().range(1, 5)
-                .onCompletion().failWith((Throwable) null);
+        assertThrows(IllegalArgumentException.class, () -> Multi.createFrom().range(1, 5)
+                .onCompletion().failWith((Throwable) null));
 
     }
 
@@ -219,10 +222,10 @@ public class MultiOnCompletionTest {
                 .assertHasFailedWith(IOException.class, "boom");
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testOnCompletionFailWithNullSupplier() {
-        Multi.createFrom().range(1, 5)
-                .onCompletion().failWith((Supplier<Throwable>) null);
+        assertThrows(IllegalArgumentException.class,
+                () -> Multi.createFrom().range(1, 5).onCompletion().failWith((Supplier<Throwable>) null));
     }
 
     @Test
@@ -272,16 +275,16 @@ public class MultiOnCompletionTest {
                 .assertReceived(1, 2, 3, 4);
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
-    public void testSwitchToWithConsumerBeingNull() {
-        Multi.createFrom().range(1, 5)
-                .onCompletion().switchToEmitter(null);
+    @Test
+    public void testSwitchToWithSupplierBeingNull() {
+        assertThrows(IllegalArgumentException.class, () -> Multi.createFrom().range(1, 5)
+                .onCompletion().switchTo((Supplier<Publisher<? extends Integer>>) null));
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
-    public void testSwitchToWithSupplierBeingNull() {
-        Multi.createFrom().range(1, 5)
-                .onCompletion().switchTo((Supplier<Publisher<? extends Integer>>) null);
+    @Test
+    public void testSwitchToWithConsumerBeingNull() {
+        assertThrows(IllegalArgumentException.class, () -> Multi.createFrom().range(1, 5)
+                .onCompletion().switchToEmitter(null));
     }
 
     @Test
@@ -377,7 +380,7 @@ public class MultiOnCompletionTest {
         assertThat(counter.get()).isEqualTo(2);
     }
 
-    @Test(invocationCount = 100)
+    @RepeatedTest(100)
     public void rogueEmittersInvoke() {
         AtomicInteger counter = new AtomicInteger();
 
@@ -401,7 +404,7 @@ public class MultiOnCompletionTest {
         assertThat(counter.get()).isEqualTo(1);
     }
 
-    @Test(invocationCount = 100)
+    @RepeatedTest(100)
     public void rogueEmittersInvokeUni() {
         AtomicInteger counter = new AtomicInteger();
 

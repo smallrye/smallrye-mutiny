@@ -2,12 +2,14 @@ package io.smallrye.mutiny.operators;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Fail.fail;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
 import java.util.NoSuchElementException;
 import java.util.function.Supplier;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Uni;
 
@@ -55,18 +57,17 @@ public class UniCreateFromFailureTest {
                     .hasMessage("boom");
             return;
         }
-        fail("Exception expected");
-
+        Assertions.fail("Exception expected");
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testCreationWithNull() {
-        Uni.createFrom().failure((Throwable) null);
+        assertThrows(IllegalArgumentException.class, () -> Uni.createFrom().failure((Throwable) null));
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testCreationWithNullAsSupplier() {
-        Uni.createFrom().failure((Supplier<Throwable>) null);
+        assertThrows(IllegalArgumentException.class, () -> Uni.createFrom().failure((Supplier<Throwable>) null));
     }
 
     @Test
@@ -78,7 +79,7 @@ public class UniCreateFromFailureTest {
             assertThat(e).isInstanceOf(NullPointerException.class);
             return;
         }
-        fail("Exception expected");
+        Assertions.fail("Exception expected");
     }
 
     @Test

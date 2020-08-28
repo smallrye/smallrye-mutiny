@@ -1,11 +1,12 @@
 package io.smallrye.mutiny.operators;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Uni;
 
@@ -91,9 +92,9 @@ public class UniOnItemProduceCompletionStageTest {
         assertThat(called).isTrue();
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testThatTheMapperCannotBeNull() {
-        Uni.createFrom().item(1).onItem().produceCompletionStage(null);
+        assertThrows(IllegalArgumentException.class, () -> Uni.createFrom().item(1).onItem().produceCompletionStage(null));
     }
 
     @Test

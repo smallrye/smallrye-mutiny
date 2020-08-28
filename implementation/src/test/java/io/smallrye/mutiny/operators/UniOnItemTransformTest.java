@@ -1,6 +1,7 @@
 package io.smallrye.mutiny.operators;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -10,7 +11,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.subscription.UniEmitter;
@@ -19,14 +20,14 @@ public class UniOnItemTransformTest {
 
     private final Uni<Integer> one = Uni.createFrom().item(1);
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testThatMapperMustNotBeNull() {
-        Uni.createFrom().item(1).map(null);
+        assertThrows(IllegalArgumentException.class, () -> Uni.createFrom().item(1).map(null));
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testThatSourceMustNotBeNull() {
-        new UniOnItemTransform<>(null, Function.identity());
+        assertThrows(IllegalArgumentException.class, () -> new UniOnItemTransform<>(null, Function.identity()));
     }
 
     @Test

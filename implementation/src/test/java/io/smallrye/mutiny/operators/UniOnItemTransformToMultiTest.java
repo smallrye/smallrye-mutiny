@@ -1,11 +1,12 @@
 package io.smallrye.mutiny.operators;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
@@ -14,10 +15,12 @@ import io.smallrye.mutiny.test.AssertSubscriber;
 @SuppressWarnings("ConstantConditions")
 public class UniOnItemTransformToMultiTest {
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testTransformToMultiWithNullMapper() {
-        Uni<Integer> uni = Uni.createFrom().item(1);
-        uni.onItem().transformToMulti(null);
+        assertThrows(IllegalArgumentException.class, () -> {
+            Uni<Integer> uni = Uni.createFrom().item(1);
+            uni.onItem().transformToMulti(null);
+        });
     }
 
     @Test

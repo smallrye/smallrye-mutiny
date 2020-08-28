@@ -8,8 +8,9 @@ import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
-import org.testng.annotations.AfterTest;
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.subscription.BackPressureFailure;
@@ -19,7 +20,7 @@ public class MultiCreateFromTimePeriodTest {
 
     private final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
 
-    @AfterTest
+    @AfterEach
     public void cleanup() {
         executor.shutdown();
     }
@@ -79,7 +80,8 @@ public class MultiCreateFromTimePeriodTest {
         }
     }
 
-    @Test(timeOut = 1000)
+    @Test
+    @Timeout(1)
     public void testBackPressureOverflow() {
         AssertSubscriber<Long> subscriber = AssertSubscriber.create();
 

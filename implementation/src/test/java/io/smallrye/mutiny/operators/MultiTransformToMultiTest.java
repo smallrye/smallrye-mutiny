@@ -2,9 +2,8 @@ package io.smallrye.mutiny.operators;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -17,8 +16,10 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.RepeatedTest;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 import org.reactivestreams.Subscriber;
-import org.testng.annotations.Test;
 
 import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Multi;
@@ -87,7 +88,8 @@ public class MultiTransformToMultiTest {
         subscriber.assertReceived(1, 1, 2, 2, 3, 3).assertCompletedSuccessfully();
     }
 
-    @Test(timeOut = 60000)
+    @Test
+    @Timeout(60)
     public void testConcatMapWithLotsOfItems() {
         AssertSubscriber<Integer> subscriber = AssertSubscriber.create(Long.MAX_VALUE);
 
@@ -108,7 +110,8 @@ public class MultiTransformToMultiTest {
         }
     }
 
-    @Test(timeOut = 60000)
+    @Test
+    @Timeout(60)
     public void testConcatMapWithLotsOfItemsAndFailurePropagation() {
         AssertSubscriber<Integer> subscriber = AssertSubscriber.create(Long.MAX_VALUE);
 
@@ -129,7 +132,8 @@ public class MultiTransformToMultiTest {
         }
     }
 
-    @Test(timeOut = 60000)
+    @Test
+    @Timeout(60)
     public void testConcatMapWithLotsOfItemsAndFailuresAndFailurePropagation() {
         AssertSubscriber<Integer> subscriber = AssertSubscriber.create(Long.MAX_VALUE);
 
@@ -157,7 +161,8 @@ public class MultiTransformToMultiTest {
         }
     }
 
-    @Test(timeOut = 60000)
+    @Test
+    @Timeout(60)
     public void testConcatMapWithLotsOfItemsAndFailuresWithoutFailurePropagation() {
         AssertSubscriber<Integer> subscriber = AssertSubscriber.create(Long.MAX_VALUE);
 
@@ -419,11 +424,11 @@ public class MultiTransformToMultiTest {
         assertThat(subscriber.items()).hasSize(20000);
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testTransformToMultiWithInvalidConcurrency() {
-        Multi.createFrom().range(1, 10001)
+        assertThrows(IllegalArgumentException.class, () -> Multi.createFrom().range(1, 10001)
                 .onItem().transformToMulti(i -> Multi.createFrom().items(i, i))
-                .merge(-1);
+                .merge(-1));
     }
 
     @Test
@@ -757,7 +762,7 @@ public class MultiTransformToMultiTest {
         verify(subscriber).onError(any(IllegalArgumentException.class));
     }
 
-    @Test(invocationCount = 10)
+    @RepeatedTest(10)
     public void testMaxConcurrency() {
         final int maxConcurrency = 4;
         final AtomicInteger subscriptionTracker = new AtomicInteger();
@@ -829,7 +834,7 @@ public class MultiTransformToMultiTest {
         verify(mock, never()).onError(any(Throwable.class));
     }
 
-    @Test(invocationCount = 100)
+    @RepeatedTest(10)
     public void testThatConcurrencyDontMissItems() {
         int max = 10000;
         List<Integer> expected = Multi.createFrom().range(0, max).collectItems().asList().await().indefinitely();
@@ -845,7 +850,7 @@ public class MultiTransformToMultiTest {
         assertThat(subscriber.items()).containsExactlyInAnyOrderElementsOf(expected);
     }
 
-    @Test(invocationCount = 10)
+    @RepeatedTest(10)
     public void testThatConcatenateDontMissItemsAndPreserveOrder() {
         int max = 10000;
         List<Integer> expected = Multi.createFrom().range(0, max).collectItems().asList().await().indefinitely();
@@ -861,7 +866,7 @@ public class MultiTransformToMultiTest {
         assertThat(subscriber.items()).containsExactlyElementsOf(expected);
     }
 
-    @Test(invocationCount = 10)
+    @RepeatedTest(10)
     public void testFlatMapSimplePassThroughWithExecutor() {
         AssertSubscriber<Integer> subscriber = Multi.createFrom().range(1, 1001)
                 .flatMap(i -> Multi.createFrom().item(i).runSubscriptionOn(Infrastructure.getDefaultExecutor()))
@@ -871,7 +876,7 @@ public class MultiTransformToMultiTest {
         assertThat(subscriber.items()).hasSize(1000);
     }
 
-    @Test(invocationCount = 10)
+    @RepeatedTest(10)
     public void testFlatMapSimplePassThroughWithoutExecutor() {
         AssertSubscriber<Integer> subscriber = Multi.createFrom().items(1, 2)
                 .flatMap(i -> Multi.createFrom().items(i + 1, i + 2))

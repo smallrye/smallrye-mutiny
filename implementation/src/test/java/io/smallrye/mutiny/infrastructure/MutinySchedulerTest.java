@@ -1,7 +1,6 @@
 package io.smallrye.mutiny.infrastructure;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.awaitility.Awaitility.await;
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -12,9 +11,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
@@ -22,7 +21,7 @@ import io.smallrye.mutiny.Uni;
 @SuppressWarnings("ConstantConditions")
 public class MutinySchedulerTest {
 
-    @BeforeClass
+    @BeforeAll
     public static void init() {
         ExecutorService exec = Executors.newFixedThreadPool(4, new ThreadFactory() {
             final AtomicInteger count = new AtomicInteger();
@@ -35,7 +34,7 @@ public class MutinySchedulerTest {
         Infrastructure.setDefaultExecutor(exec);
     }
 
-    @AfterClass
+    @AfterAll
     public static void reset() {
         Executor current = Infrastructure.getDefaultExecutor();
         if (current instanceof ExecutorService) {

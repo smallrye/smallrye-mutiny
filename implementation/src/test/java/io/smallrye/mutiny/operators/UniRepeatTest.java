@@ -2,10 +2,8 @@ package io.smallrye.mutiny.operators;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -15,8 +13,8 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.junit.jupiter.api.Test;
 import org.reactivestreams.Subscriber;
-import org.testng.annotations.Test;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
@@ -64,28 +62,28 @@ public class UniRepeatTest {
                 .assertReceived(1, 2, 3, 4, 5, 6, 7, 8);
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testRepeat0() {
-        Uni.createFrom().item(0)
+        assertThrows(IllegalArgumentException.class, () -> Uni.createFrom().item(0)
                 .repeat().atMost(0)
                 .collectItems().asList()
-                .await().indefinitely();
+                .await().indefinitely());
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testRepeatUntilWithNullPredicate() {
-        Uni.createFrom().item(0)
+        assertThrows(IllegalArgumentException.class, () -> Uni.createFrom().item(0)
                 .repeat().until(null)
                 .collectItems().asList()
-                .await().indefinitely();
+                .await().indefinitely());
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testRepeatWhilstWithNullPredicate() {
-        Uni.createFrom().item(0)
+        assertThrows(IllegalArgumentException.class, () -> Uni.createFrom().item(0)
                 .repeat().whilst(null)
                 .collectItems().asList()
-                .await().indefinitely();
+                .await().indefinitely());
     }
 
     @Test

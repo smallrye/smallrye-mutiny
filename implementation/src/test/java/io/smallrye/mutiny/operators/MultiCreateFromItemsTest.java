@@ -2,6 +2,7 @@ package io.smallrye.mutiny.operators;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.Arrays;
 import java.util.List;
@@ -11,7 +12,7 @@ import java.util.function.Supplier;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.test.AssertSubscriber;
@@ -174,7 +175,8 @@ public class MultiCreateFromItemsTest {
 
     @Test
     public void testNullWithStreams() {
-        assertThatThrownBy(() -> Multi.createFrom().items((Stream<String>) null)).isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> Multi.createFrom().items((Stream<String>) null))
+                .isInstanceOf(IllegalArgumentException.class);
 
         Multi.createFrom().items(() -> null)
                 .subscribe().withSubscriber(AssertSubscriber.create(10))
@@ -266,14 +268,14 @@ public class MultiCreateFromItemsTest {
                 .assertCompletedSuccessfully();
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testCreationFromANullStream() {
-        Multi.createFrom().items((Stream<Integer>) null);
+        assertThrows(IllegalArgumentException.class, () -> Multi.createFrom().items((Stream<Integer>) null));
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testCreationFromANullStreamSupplier() {
-        Multi.createFrom().items((Supplier<Stream<Integer>>) null);
+        assertThrows(IllegalArgumentException.class, () -> Multi.createFrom().items((Supplier<Stream<Integer>>) null));
     }
 
     @Test
@@ -305,14 +307,14 @@ public class MultiCreateFromItemsTest {
                 .assertReceived(1, 2, 3);
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testCreationFromResultsContainingNull() {
-        Multi.createFrom().items(1, null, 3);
+        assertThrows(IllegalArgumentException.class, () -> Multi.createFrom().items(1, null, 3));
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testCreationFromResultsWithNull() {
-        Multi.createFrom().items((Integer[]) null);
+        assertThrows(IllegalArgumentException.class, () -> Multi.createFrom().items((Integer[]) null));
     }
 
     @Test
@@ -328,9 +330,9 @@ public class MultiCreateFromItemsTest {
                 .assertReceived(1, 2, 3);
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testCreationFromIterableWithNull() {
-        Multi.createFrom().iterable((Iterable<Integer>) null);
+        assertThrows(IllegalArgumentException.class, () -> Multi.createFrom().iterable((Iterable<Integer>) null));
     }
 
     @Test

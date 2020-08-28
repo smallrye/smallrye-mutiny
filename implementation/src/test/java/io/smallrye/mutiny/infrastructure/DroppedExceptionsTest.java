@@ -8,8 +8,8 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.subscription.Cancellable;
@@ -18,7 +18,7 @@ public class DroppedExceptionsTest {
 
     private static final PrintStream systemErr = System.err;
 
-    @After
+    @AfterEach
     public void cleanup() {
         System.setErr(systemErr);
         Infrastructure.resetDroppedExceptionHandler();

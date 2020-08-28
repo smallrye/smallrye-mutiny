@@ -1,17 +1,19 @@
 package io.smallrye.mutiny.operators;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.test.AssertSubscriber;
 
 public class MultiCreateFromDeferredSupplierTest {
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testThatTheSupplierCannotBeNull() {
-        Multi.createFrom().deferred(null);
+        assertThrows(IllegalArgumentException.class, () -> Multi.createFrom().deferred(null));
     }
 
     @Test

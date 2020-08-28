@@ -1,25 +1,27 @@
 package io.smallrye.mutiny.operators;
 
-import org.testng.annotations.Test;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.test.AssertSubscriber;
 
 public class MultiScanTest {
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testThatSupplierMustNotBeNull() {
-        Multi.createFrom().empty().onItem().scan(null, (a, b) -> a);
+        assertThrows(IllegalArgumentException.class, () -> Multi.createFrom().empty().onItem().scan(null, (a, b) -> a));
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testThatScannerMustNotBeNull() {
-        Multi.createFrom().empty().onItem().scan(() -> 1, null);
+        assertThrows(IllegalArgumentException.class, () -> Multi.createFrom().empty().onItem().scan(() -> 1, null));
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testThatScannerMustNotBeNullWithoutSupplier() {
-        Multi.createFrom().empty().onItem().scan(null);
+        assertThrows(IllegalArgumentException.class, () -> Multi.createFrom().empty().onItem().scan(null));
     }
 
     @Test

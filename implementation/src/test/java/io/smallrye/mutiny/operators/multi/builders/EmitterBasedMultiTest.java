@@ -2,6 +2,7 @@ package io.smallrye.mutiny.operators.multi.builders;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -9,24 +10,25 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.subscription.BackPressureStrategy;
 import io.smallrye.mutiny.subscription.MultiEmitter;
 import io.smallrye.mutiny.test.AssertSubscriber;
 
+@SuppressWarnings("ConstantConditions")
 public class EmitterBasedMultiTest {
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testThatConsumerCannotBeNull() {
-        Multi.createFrom().emitter(null, BackPressureStrategy.BUFFER);
+        assertThrows(IllegalArgumentException.class, () -> Multi.createFrom().emitter(null, BackPressureStrategy.BUFFER));
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testThatStrategyCannotBeNull() {
-        Multi.createFrom().emitter(e -> {
-        }, null);
+        assertThrows(IllegalArgumentException.class, () -> Multi.createFrom().emitter(e -> {
+        }, null));
     }
 
     @Test

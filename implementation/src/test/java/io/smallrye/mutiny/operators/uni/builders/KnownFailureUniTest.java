@@ -1,10 +1,11 @@
 package io.smallrye.mutiny.operators.uni.builders;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.operators.UniAssertSubscriber;
@@ -17,9 +18,9 @@ public class KnownFailureUniTest {
                 .hasCauseInstanceOf(IOException.class).hasMessageContaining("io");
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testCreationWithNull() {
-        Uni.createFrom().failure((Throwable) null);
+        assertThrows(IllegalArgumentException.class, () -> Uni.createFrom().failure((Throwable) null));
     }
 
     @Test

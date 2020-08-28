@@ -2,18 +2,19 @@ package io.smallrye.mutiny.operators;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Uni;
 
 public class UniOnNullSwitchToTest {
 
-    private Uni<Integer> fallback = Uni.createFrom().item(23);
-    private Uni<Integer> failure = Uni.createFrom().failure(new IOException("boom"));
+    private final Uni<Integer> fallback = Uni.createFrom().item(23);
+    private final Uni<Integer> failure = Uni.createFrom().failure(new IOException("boom"));
 
     @Test
     public void testSwitchToFallback() {
@@ -54,18 +55,18 @@ public class UniOnNullSwitchToTest {
 
     }
 
-    @Test(expectedExceptions = NullPointerException.class)
+    @Test
     public void testSwitchToNull() {
-        Uni.createFrom().item((Object) null).onItem().castTo(Integer.class)
+        assertThrows(NullPointerException.class, () -> Uni.createFrom().item((Object) null).onItem().castTo(Integer.class)
                 .onItem().ifNull().switchTo((Uni<Integer>) null)
-                .await().indefinitely();
+                .await().indefinitely());
     }
 
-    @Test(expectedExceptions = NullPointerException.class)
+    @Test
     public void testSwitchToNullSupplier() {
-        Uni.createFrom().item((Object) null).onItem().castTo(Integer.class)
+        assertThrows(NullPointerException.class, () -> Uni.createFrom().item((Object) null).onItem().castTo(Integer.class)
                 .onItem().ifNull().switchTo((Uni<? extends Integer>) null)
-                .await().indefinitely();
+                .await().indefinitely());
     }
 
 }

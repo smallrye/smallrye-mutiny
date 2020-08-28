@@ -2,13 +2,14 @@ package io.smallrye.mutiny.operators;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.subscription.Cancellable;
@@ -19,24 +20,24 @@ public class UniOnItemInvokeTest {
     private final Uni<Integer> failed = Uni.createFrom().failure(new IOException("boom"));
     private final Uni<Integer> two = Uni.createFrom().item(2);
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testThatConsumerMustNotBeNull() {
-        Uni.createFrom().item(1).onItem().invoke(null);
+        assertThrows(IllegalArgumentException.class, () -> Uni.createFrom().item(1).onItem().invoke(null));
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testThatMapperMustNotBeNull() {
-        Uni.createFrom().item(1).onItem().invokeUni(null);
+        assertThrows(IllegalArgumentException.class, () -> Uni.createFrom().item(1).onItem().invokeUni(null));
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testThatConsumerMustNotBeNullWithShortcut() {
-        Uni.createFrom().item(1).invoke(null);
+        assertThrows(IllegalArgumentException.class, () -> Uni.createFrom().item(1).invoke(null));
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testThatMapperMustNotBeNullWithShortcut() {
-        Uni.createFrom().item(1).invokeUni(null);
+        assertThrows(IllegalArgumentException.class, () -> Uni.createFrom().item(1).invokeUni(null));
     }
 
     @Test

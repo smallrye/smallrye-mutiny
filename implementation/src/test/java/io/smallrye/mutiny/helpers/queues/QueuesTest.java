@@ -4,12 +4,13 @@ import static io.smallrye.mutiny.helpers.queues.Queues.BUFFER_S;
 import static io.smallrye.mutiny.helpers.queues.Queues.BUFFER_XS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
 @SuppressWarnings({ "rawtypes", "unchecked", "MismatchedQueryAndUpdateOfCollection" })
 public class QueuesTest {
@@ -220,22 +221,28 @@ public class QueuesTest {
         assertThat(iterator.next()).isNull();
     }
 
-    @Test(expectedExceptions = NullPointerException.class)
+    @Test
     public void testThatSpscArrayQueueCannotReceiveNull() {
-        SpscArrayQueue<Object> q = new SpscArrayQueue<>(16);
-        q.offer(null);
+        assertThrows(NullPointerException.class, () -> {
+            SpscArrayQueue<Object> q = new SpscArrayQueue<>(16);
+            q.offer(null);
+        });
     }
 
-    @Test(expectedExceptions = NullPointerException.class)
+    @Test
     public void testThatSpscLinkedArrayQueueCannotReceiveNull() {
-        SpscLinkedArrayQueue<Object> q = new SpscLinkedArrayQueue<>(16);
-        q.offer(null);
+        assertThrows(NullPointerException.class, () -> {
+            SpscLinkedArrayQueue<Object> q = new SpscLinkedArrayQueue<>(16);
+            q.offer(null);
+        });
     }
 
-    @Test(expectedExceptions = NullPointerException.class)
+    @Test
     public void testThatMpscLinkedQueueCannotReceiveNull() {
-        MpscLinkedQueue<Object> q = new MpscLinkedQueue<>();
-        q.offer(null);
+        assertThrows(NullPointerException.class, () -> {
+            MpscLinkedQueue<Object> q = new MpscLinkedQueue<>();
+            q.offer(null);
+        });
     }
 
     @Test

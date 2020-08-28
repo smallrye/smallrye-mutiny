@@ -9,7 +9,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
 import io.reactivex.Flowable;
 import io.smallrye.mutiny.Multi;

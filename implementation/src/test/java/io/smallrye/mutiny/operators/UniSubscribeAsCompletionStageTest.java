@@ -12,8 +12,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.testng.annotations.AfterTest;
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Uni;
 
@@ -21,7 +21,7 @@ public class UniSubscribeAsCompletionStageTest {
 
     private ScheduledExecutorService executor;
 
-    @AfterTest
+    @AfterEach
     public void shutdown() {
         if (executor != null) {
             executor.shutdown();

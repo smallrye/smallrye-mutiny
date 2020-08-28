@@ -1,6 +1,7 @@
 package io.smallrye.mutiny.operators;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -9,44 +10,50 @@ import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
-import org.testng.annotations.AfterTest;
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.RepeatedTest;
+import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Uni;
 
+;
+
 public class UniOrTest {
 
-    private ScheduledExecutorService executor = Executors.newScheduledThreadPool(4);
+    private final ScheduledExecutorService executor = Executors.newScheduledThreadPool(4);
 
-    @AfterTest
+    @AfterEach
     public void shutdown() {
         executor.shutdown();
     }
 
-    @SuppressWarnings("unchecked")
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @Test
     public void testWithNullAsIterable() {
-        Uni.combine().any().of((Iterable) null);
+        assertThrows(IllegalArgumentException.class, () -> Uni.combine().any().of((Iterable) null));
     }
 
-    @SuppressWarnings("unchecked")
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @Test
     public void testWithNullAsArray() {
-        Uni.combine().any().of((Uni[]) null);
+        assertThrows(IllegalArgumentException.class, () -> Uni.combine().any().of((Uni[]) null));
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testWithItemInIterable() {
-        List<Uni<String>> unis = new ArrayList<>();
-        unis.add(Uni.createFrom().item("foo"));
-        unis.add(null);
-        unis.add(Uni.createFrom().item("bar"));
-        Uni.combine().any().of(unis);
+        assertThrows(IllegalArgumentException.class, () -> {
+            List<Uni<String>> unis = new ArrayList<>();
+            unis.add(Uni.createFrom().item("foo"));
+            unis.add(null);
+            unis.add(Uni.createFrom().item("bar"));
+            Uni.combine().any().of(unis);
+        });
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testWithItemInArray() {
-        Uni.combine().any().of(Uni.createFrom().item("foo"), null, Uni.createFrom().item("bar"));
+        assertThrows(IllegalArgumentException.class,
+                () -> Uni.combine().any().of(Uni.createFrom().item("foo"), null, Uni.createFrom().item("bar")));
     }
 
     @Test
@@ -103,7 +110,7 @@ public class UniOrTest {
         subscriber2.await().assertCompletedSuccessfully().assertItem("foo");
     }
 
-    @Test(timeOut = 1000)
+    @RepeatedTest(100)
     public void testBlockingWithDelay() {
         Uni<Integer> uni1 = Uni.createFrom().item((Object) null)
                 .onItem().delayIt().onExecutor(executor).by(Duration.ofMillis(500))
@@ -114,7 +121,7 @@ public class UniOrTest {
         assertThat(Uni.combine().any().of(uni1, uni2).await().indefinitely()).isEqualTo(2);
     }
 
-    @Test(timeOut = 1000)
+    @RepeatedTest(100)
     public void testCompletingAgainstEmpty() {
         Uni<Integer> uni1 = Uni.createFrom().item((Object) null).map(x -> 1);
         Uni<Integer> uni2 = Uni.createFrom().item((Object) null).onItem().delayIt().onExecutor(executor)
@@ -122,7 +129,7 @@ public class UniOrTest {
         assertThat(Uni.combine().any().of(uni1, uni2).await().indefinitely()).isEqualTo(1);
     }
 
-    @Test(timeOut = 1000)
+    @RepeatedTest(100)
     public void testCompletingAgainstNever() {
         Uni<Integer> uni1 = Uni.createFrom().nothing().map(x -> 1);
         Uni<Integer> uni2 = Uni.createFrom().item((Object) null).onItem().delayIt().onExecutor(executor)

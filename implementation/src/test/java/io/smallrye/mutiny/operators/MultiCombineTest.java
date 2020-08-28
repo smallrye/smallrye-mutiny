@@ -2,6 +2,7 @@ package io.smallrye.mutiny.operators;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -11,7 +12,7 @@ import java.util.concurrent.CompletionException;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.test.AssertSubscriber;
@@ -270,9 +271,9 @@ public class MultiCombineTest {
                 .assertHasNotReceivedAnyItem();
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testThatIterableCannotBeNull() {
-        Multi.createBy().combining().streams(null);
+        assertThrows(IllegalArgumentException.class, () -> Multi.createBy().combining().streams(null));
     }
 
     @Test
@@ -359,14 +360,17 @@ public class MultiCombineTest {
                 .assertReceived(Tuple4.of(1, 1, 1, 1));
     }
 
-    @Test(expectedExceptions = CompletionException.class)
+    @Test
     public void testCombinationOfAFailingStream() {
-        Multi<Integer> stream = Multi.createFrom().items(1, 2, 3, 4);
-        Multi<Integer> fail = Multi.createFrom().failure(new IOException("boom"));
+        assertThrows(CompletionException.class, () -> {
 
-        Multi.createBy()
-                .combining().streams(stream, fail).asTuple()
-                .collectItems().asList().await().indefinitely();
+            Multi<Integer> stream = Multi.createFrom().items(1, 2, 3, 4);
+            Multi<Integer> fail = Multi.createFrom().failure(new IOException("boom"));
+
+            Multi.createBy()
+                    .combining().streams(stream, fail).asTuple()
+                    .collectItems().asList().await().indefinitely();
+        });
     }
 
     @Test

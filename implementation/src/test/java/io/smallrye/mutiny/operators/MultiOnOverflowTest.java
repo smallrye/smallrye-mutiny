@@ -2,6 +2,7 @@ package io.smallrye.mutiny.operators;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
 import java.util.List;
@@ -9,7 +10,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.subscription.BackPressureFailure;
@@ -18,9 +19,9 @@ import io.smallrye.mutiny.test.AssertSubscriber;
 
 public class MultiOnOverflowTest {
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testThatDropCallbackCannotBeNull() {
-        Multi.createFrom().item(1).onOverflow().drop(null);
+        assertThrows(IllegalArgumentException.class, () -> Multi.createFrom().item(1).onOverflow().drop(null));
     }
 
     @Test

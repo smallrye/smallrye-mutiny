@@ -1,10 +1,9 @@
 package io.smallrye.mutiny.operators.multi.builders;
 
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -15,10 +14,10 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
-import org.testng.annotations.Test;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
@@ -28,9 +27,9 @@ import io.smallrye.mutiny.test.Mocks;
 
 public class MultiFromIterableTest {
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void nullMustBeRejected() {
-        Multi.createFrom().iterable(null);
+        assertThrows(IllegalArgumentException.class, () -> Multi.createFrom().iterable(null));
     }
 
     @Test

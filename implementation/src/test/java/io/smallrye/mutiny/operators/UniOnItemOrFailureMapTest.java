@@ -1,6 +1,7 @@
 package io.smallrye.mutiny.operators;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
 import java.util.concurrent.ExecutorService;
@@ -8,7 +9,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Uni;
@@ -20,14 +21,14 @@ public class UniOnItemOrFailureMapTest {
     private final Uni<Void> none = Uni.createFrom().nullItem();
     private final Uni<Integer> failed = Uni.createFrom().failure(new IOException("boom"));
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testThatMapperMustNotBeNull() {
-        Uni.createFrom().item(1).onItemOrFailure().transform(null);
+        assertThrows(IllegalArgumentException.class, () -> Uni.createFrom().item(1).onItemOrFailure().transform(null));
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testThatSourceMustNotBeNull() {
-        new UniOnItemOrFailureMap<>(null, (x, f) -> x);
+        assertThrows(IllegalArgumentException.class, () -> new UniOnItemOrFailureMap<>(null, (x, f) -> x));
     }
 
     @Test

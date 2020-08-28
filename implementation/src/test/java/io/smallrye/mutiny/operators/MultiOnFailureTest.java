@@ -1,13 +1,14 @@
 package io.smallrye.mutiny.operators;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Multi;
@@ -239,16 +240,18 @@ public class MultiOnFailureTest {
                 .assertReceived(2);
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testRecoverWithItemWithNull() {
-        Multi.createFrom().<String> failure(new IllegalStateException("boom"))
-                .onFailure().recoverWithItem((String) null);
+        assertThrows(IllegalArgumentException.class,
+                () -> Multi.createFrom().<String> failure(new IllegalStateException("boom"))
+                        .onFailure().recoverWithItem((String) null));
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testRecoverWithItemWithNullSupplier() {
-        Multi.createFrom().<String> failure(new IllegalStateException("boom"))
-                .onFailure().recoverWithItem((Supplier<String>) null);
+        assertThrows(IllegalArgumentException.class,
+                () -> Multi.createFrom().<String> failure(new IllegalStateException("boom"))
+                        .onFailure().recoverWithItem((Supplier<String>) null));
     }
 
     @Test

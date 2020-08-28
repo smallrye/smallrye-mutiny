@@ -1,6 +1,7 @@
 package io.smallrye.mutiny.operators;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
@@ -9,7 +10,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Uni;
 
@@ -214,14 +215,15 @@ public class UniCreateFromCompletionStageTest {
         subscriber.assertItem(1);
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testThatCompletionStageCannotBeNull() {
-        Uni.createFrom().completionStage((CompletionStage<Void>) null);
+        assertThrows(IllegalArgumentException.class, () -> Uni.createFrom().completionStage((CompletionStage<Void>) null));
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testThatCompletionStageSupplierCannotBeNull() {
-        Uni.createFrom().completionStage((Supplier<CompletionStage<Void>>) null);
+        assertThrows(IllegalArgumentException.class,
+                () -> Uni.createFrom().completionStage((Supplier<CompletionStage<Void>>) null));
     }
 
     @Test
@@ -282,16 +284,16 @@ public class UniCreateFromCompletionStageTest {
         s2.assertFailure(IllegalStateException.class, "Invalid shared state");
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testThatStateSupplierCannotBeNull() {
-        Uni.createFrom().completionStage(null,
-                x -> CompletableFuture.completedFuture("x"));
+        assertThrows(IllegalArgumentException.class, () -> Uni.createFrom().completionStage(null,
+                x -> CompletableFuture.completedFuture("x")));
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testThatFunctionCannotBeNull() {
-        Uni.createFrom().completionStage(() -> "hello",
-                null);
+        assertThrows(IllegalArgumentException.class, () -> Uni.createFrom().completionStage(() -> "hello",
+                null));
     }
 
 }

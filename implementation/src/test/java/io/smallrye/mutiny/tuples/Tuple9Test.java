@@ -2,11 +2,12 @@ package io.smallrye.mutiny.tuples;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.Arrays;
 import java.util.Collections;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
 public class Tuple9Test {
 
@@ -42,14 +43,14 @@ public class Tuple9Test {
         assertThat(someTuple.mapItem9(i -> i + 1)).containsExactly(1, 2, 3, 4, 5, 6, 7, 8, 10);
     }
 
-    @Test(expectedExceptions = IndexOutOfBoundsException.class)
+    @Test
     public void testAccessingNegative() {
-        someTuple.nth(-1);
+        assertThrows(IndexOutOfBoundsException.class, () -> someTuple.nth(-1));
     }
 
-    @Test(expectedExceptions = IndexOutOfBoundsException.class)
+    @Test
     public void testAccessingOutOfIndex() {
-        someTuple.nth(10);
+        assertThrows(IndexOutOfBoundsException.class, () -> someTuple.nth(10));
     }
 
     @Test

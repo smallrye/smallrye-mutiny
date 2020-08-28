@@ -2,7 +2,7 @@ package io.smallrye.mutiny.converters;
 
 import java.util.concurrent.CompletableFuture;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.converters.multi.BuiltinConverters;

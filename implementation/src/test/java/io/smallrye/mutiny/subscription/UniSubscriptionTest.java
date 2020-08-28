@@ -2,7 +2,7 @@ package io.smallrye.mutiny.subscription;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
 public class UniSubscriptionTest {
     @Test

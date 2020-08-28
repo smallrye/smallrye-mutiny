@@ -8,7 +8,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import java.io.IOException;
 import java.util.function.BiFunction;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
 public class UncheckedBiFunctionTest {
 

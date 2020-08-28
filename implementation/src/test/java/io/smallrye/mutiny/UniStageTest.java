@@ -1,11 +1,13 @@
 package io.smallrye.mutiny;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
 public class UniStageTest {
 
@@ -31,18 +33,18 @@ public class UniStageTest {
         assertThat(result).isEqualTo("24");
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testThatFunctionMustNotBeNull() {
-        Uni.createFrom().item(1)
-                .stage(null);
+        assertThrows(IllegalArgumentException.class, () -> Uni.createFrom().item(1)
+                .stage(null));
     }
 
-    @Test(expectedExceptions = IllegalStateException.class, expectedExceptionsMessageRegExp = ".*boom.*")
+    @Test
     public void testThatFunctionMustNotThrowException() {
-        Uni.createFrom().item(1)
+        assertThatThrownBy(() -> Uni.createFrom().item(1)
                 .stage(i -> {
                     throw new IllegalStateException("boom");
-                });
+                })).isInstanceOf(IllegalStateException.class).hasMessageContaining("boom");
     }
 
     @Test

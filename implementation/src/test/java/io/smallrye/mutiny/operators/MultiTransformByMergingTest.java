@@ -1,6 +1,7 @@
 package io.smallrye.mutiny.operators;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -8,9 +9,9 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
-import org.testng.annotations.Ignore;
-import org.testng.annotations.Test;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.test.AssertSubscriber;
@@ -37,26 +38,26 @@ public class MultiTransformByMergingTest {
         assertThat(list).hasSize(13);
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testMergingWithNull() {
-        Multi.createFrom().item(1).transform()
-                .byMergingWith(Multi.createFrom().item(2), null, Multi.createFrom().item(3));
-    }
-
-    @Test(expectedExceptions = IllegalArgumentException.class)
-    public void testMergingWithIterableContainingNull() {
-        Multi.createFrom().item(1).transform()
-                .byMergingWith(Arrays.asList(Multi.createFrom().item(2), null, Multi.createFrom().item(3)));
-    }
-
-    @Test(expectedExceptions = IllegalArgumentException.class)
-    public void testMergingWithNullIterable() {
-        Multi.createFrom().item(1).transform()
-                .byMergingWith((Iterable<Publisher<Integer>>) null);
+        assertThrows(IllegalArgumentException.class, () -> Multi.createFrom().item(1).transform()
+                .byMergingWith(Multi.createFrom().item(2), null, Multi.createFrom().item(3)));
     }
 
     @Test
-    @Ignore("this test is failing on CI - must be investigated")
+    public void testMergingWithIterableContainingNull() {
+        assertThrows(IllegalArgumentException.class, () -> Multi.createFrom().item(1).transform()
+                .byMergingWith(Arrays.asList(Multi.createFrom().item(2), null, Multi.createFrom().item(3))));
+    }
+
+    @Test
+    public void testMergingWithNullIterable() {
+        assertThrows(IllegalArgumentException.class, () -> Multi.createFrom().item(1).transform()
+                .byMergingWith((Iterable<Publisher<Integer>>) null));
+    }
+
+    @Test
+    @Disabled("this test is failing on CI - must be investigated")
     public void testConcurrentEmissionWithMerge() {
         ExecutorService service = Executors.newFixedThreadPool(10);
         Multi<Integer> m1 = Multi.createFrom().range(1, 100).emitOn(service);

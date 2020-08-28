@@ -1,6 +1,7 @@
 package io.smallrye.mutiny.operators;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -9,8 +10,8 @@ import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
 
+import org.junit.jupiter.api.Test;
 import org.reactivestreams.Subscriber;
-import org.testng.annotations.Test;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
@@ -21,23 +22,25 @@ import io.smallrye.mutiny.test.Mocks;
 
 public class MultiFilterTest {
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testThatPredicateCannotBeNull() {
-        Multi.createFrom().range(1, 4)
-                .transform().byFilteringItemsWith(null);
+        assertThrows(IllegalArgumentException.class, () -> Multi.createFrom().range(1, 4)
+                .transform().byFilteringItemsWith(null));
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testThatFunctionCannotBeNull() {
-        Multi.createFrom().range(1, 4)
-                .transform().byTestingItemsWith(null);
+        assertThrows(IllegalArgumentException.class, () -> Multi.createFrom().range(1, 4)
+                .transform().byTestingItemsWith(null));
     }
 
-    @Test(expectedExceptions = NullPointerException.class)
+    @Test
     public void testThatSubscriberCannotBeNull() {
-        Multi<Integer> multi = Multi.createFrom().range(1, 4);
-        MultiFilterOp<Integer> filter = new MultiFilterOp<>(multi, x -> x % 2 == 0);
-        filter.subscribe(null);
+        assertThrows(NullPointerException.class, () -> {
+            Multi<Integer> multi = Multi.createFrom().range(1, 4);
+            MultiFilterOp<Integer> filter = new MultiFilterOp<>(multi, x -> x % 2 == 0);
+            filter.subscribe(null);
+        });
     }
 
     @Test

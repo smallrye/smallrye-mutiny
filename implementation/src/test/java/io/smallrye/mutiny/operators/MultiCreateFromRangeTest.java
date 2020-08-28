@@ -1,6 +1,8 @@
 package io.smallrye.mutiny.operators;
 
-import org.testng.annotations.Test;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.test.AssertSubscriber;
@@ -30,9 +32,9 @@ public class MultiCreateFromRangeTest {
                 .assertCompletedSuccessfully();
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testThatEndBoundaryCannotBeLessThanStart() {
-        Multi.createFrom().range(1, -1);
+        assertThrows(IllegalArgumentException.class, () -> Multi.createFrom().range(1, -1));
     }
 
 }

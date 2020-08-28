@@ -2,13 +2,14 @@ package io.smallrye.mutiny.operators;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Uni;
@@ -17,7 +18,7 @@ public class UniOnFailureRecoveryTest {
 
     private Uni<Integer> failed;
 
-    @BeforeMethod
+    @BeforeEach
     public void init() {
         failed = Uni.createFrom().failure(IOException::new);
     }
@@ -106,10 +107,11 @@ public class UniOnFailureRecoveryTest {
         assertThat(value).isEqualTo(null);
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testRecoverWithUniFail() {
-        failed.onFailure().recoverWithUni(Uni.createFrom().failure(IllegalArgumentException::new)).await()
-                .indefinitely();
+        assertThrows(IllegalArgumentException.class,
+                () -> failed.onFailure().recoverWithUni(Uni.createFrom().failure(IllegalArgumentException::new)).await()
+                        .indefinitely());
     }
 
     @Test

@@ -3,6 +3,7 @@ package io.smallrye.mutiny.helpers;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.awaitility.Awaitility.await;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -14,8 +15,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 import org.reactivestreams.Subscriber;
-import org.testng.annotations.Test;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.helpers.queues.SpscArrayQueue;
@@ -24,7 +26,8 @@ import io.smallrye.mutiny.subscription.BackPressureFailure;
 
 public class BlockingIterableTest {
 
-    @Test(timeOut = 5000)
+    @Test
+    @Timeout(5)
     public void testToIterable() {
         List<Integer> values = new ArrayList<>();
 
@@ -39,7 +42,8 @@ public class BlockingIterableTest {
         assertThat(values).containsExactly(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
     }
 
-    @Test(timeOut = 5000)
+    @Test
+    @Timeout(5)
     public void testToIterableWithBufferSizeAndSupplier() {
         Queue<Integer> q = new ArrayBlockingQueue<>(1);
         List<Integer> values = new ArrayList<>();
@@ -51,7 +55,8 @@ public class BlockingIterableTest {
         assertThat(values).containsExactly(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
     }
 
-    @Test(timeOut = 5000)
+    @Test
+    @Timeout(5)
     public void testToIterableWithEmptyStream() {
         List<Integer> values = new ArrayList<>();
 
@@ -62,19 +67,23 @@ public class BlockingIterableTest {
         assertThat(values).isEmpty();
     }
 
-    @Test(timeOut = 5000, expectedExceptions = RuntimeException.class)
+    @Test
+    @Timeout(5)
     public void testToIterableWithUpstreamFailure() {
-        List<Integer> values = new ArrayList<>();
+        assertThrows(RuntimeException.class, () -> {
+            List<Integer> values = new ArrayList<>();
 
-        for (Integer i : Multi.createFrom().<Integer> failure(new RuntimeException("boom"))
-                .subscribe().asIterable()) {
-            values.add(i);
-        }
+            for (Integer i : Multi.createFrom().<Integer> failure(new RuntimeException("boom"))
+                    .subscribe().asIterable()) {
+                values.add(i);
+            }
 
-        assertThat(values).isEmpty();
+            assertThat(values).isEmpty();
+        });
     }
 
-    @Test(timeOut = 5000)
+    @Test
+    @Timeout(5)
     public void testToStream() {
         List<Integer> values = new ArrayList<>();
 
@@ -85,14 +94,16 @@ public class BlockingIterableTest {
         assertThat(values).containsExactly(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
     }
 
-    @Test(timeOut = 5000)
+    @Test
+    @Timeout(5)
     public void testToStreamWithEmptyStream() {
         List<Integer> values = new ArrayList<>();
         Multi.createFrom().<Integer> empty().subscribe().asStream().forEach(values::add);
         assertThat(values).isEmpty();
     }
 
-    @Test(timeOut = 5000)
+    @Test
+    @Timeout(5)
     public void testCancellationOnClose() {
         List<Integer> values = new ArrayList<>();
 
@@ -104,7 +115,8 @@ public class BlockingIterableTest {
         assertThat(values).containsExactly(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
     }
 
-    @Test(timeOut = 5000)
+    @Test
+    @Timeout(5)
     public void testParallelStreamComputation() {
         int n = 10_000;
 
@@ -116,7 +128,8 @@ public class BlockingIterableTest {
     }
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
-    @Test(timeOut = 1000)
+    @Test
+    @Timeout(1)
     public void testToStreamWithFailure() {
         Multi<Integer> multi = Multi.createFrom().<Integer> emitter(e -> e.emit(1).emit(0).complete())
                 .map(v -> 4 / v);
@@ -125,7 +138,8 @@ public class BlockingIterableTest {
                 .isInstanceOf(ArithmeticException.class).hasMessageContaining("by zero");
     }
 
-    @Test(timeOut = 1000)
+    @Test
+    @Timeout(1)
     public void testToIterableWithFailure() {
         Multi<Integer> multi = Multi.createFrom().<Integer> emitter(e -> e.emit(1).emit(0).complete())
                 .map(v -> 4 / v);
@@ -134,7 +148,8 @@ public class BlockingIterableTest {
         })).isInstanceOf(ArithmeticException.class).hasMessageContaining("by zero");
     }
 
-    @Test(timeOut = 1000)
+    @Test
+    @Timeout(1)
     public void testToIterableWithCheckedFailure() {
         Multi<Integer> multi = Multi.createFrom().emitter(e -> e.emit(1).emit(0).fail(new IOException("boom")));
 
@@ -144,27 +159,25 @@ public class BlockingIterableTest {
                 .hasMessageContaining("boom");
     }
 
-    @Test(timeOut = 1000)
+    @Test
+    @Timeout(1)
     public void testQueueSupplierFailing() {
-        assertThatThrownBy(() -> {
-            Multi.createFrom().items(1, 2, 3, 4, 5, 6)
-                    .subscribe().asIterable(10, () -> {
-                        throw new IllegalArgumentException("boom");
-                    }).forEach(i -> {
-                        // noop - the iterable is created lazily.
-                    });
-        }).isInstanceOf(IllegalArgumentException.class).hasMessageContaining("boom");
+        assertThatThrownBy(() -> Multi.createFrom().items(1, 2, 3, 4, 5, 6)
+                .subscribe().asIterable(10, () -> {
+                    throw new IllegalArgumentException("boom");
+                }).forEach(i -> {
+                    // noop - the iterable is created lazily.
+                })).isInstanceOf(IllegalArgumentException.class).hasMessageContaining("boom");
 
     }
 
-    @Test(timeOut = 1000)
+    @Test
+    @Timeout(1)
     public void testQueueSupplierReturningNull() {
-        assertThatThrownBy(() -> {
-            Multi.createFrom().items(1, 2, 3, 4, 5, 6)
-                    .subscribe().asIterable(10, () -> null).forEach(i -> {
-                        // noop - the iterable is created lazily.
-                    });
-        }).isInstanceOf(IllegalStateException.class);
+        assertThatThrownBy(() -> Multi.createFrom().items(1, 2, 3, 4, 5, 6)
+                .subscribe().asIterable(10, () -> null).forEach(i -> {
+                    // noop - the iterable is created lazily.
+                })).isInstanceOf(IllegalStateException.class);
 
     }
 
@@ -196,29 +209,32 @@ public class BlockingIterableTest {
         assertThat(cancelled).isTrue();
     }
 
-    @Test(expectedExceptions = NullPointerException.class)
+    @Test
     @SuppressWarnings("ConstantConditions")
     public void testWithNullValues() {
-        Multi<Integer> rogue = new AbstractMulti<Integer>() {
-            @Override
-            public void subscribe(Subscriber<? super Integer> subscriber) {
-                subscriber.onNext(1);
-                subscriber.onNext(2);
-                subscriber.onNext(3);
-                subscriber.onNext(null);
-            }
-        };
-        BlockingIterable<Integer> integers = rogue.subscribe().asIterable();
-        integers.forEach(i -> assertThat(i).isPositive());
+        assertThrows(NullPointerException.class, () -> {
+            Multi<Integer> rogue = new AbstractMulti<Integer>() {
+                @Override
+                public void subscribe(Subscriber<? super Integer> subscriber) {
+                    subscriber.onNext(1);
+                    subscriber.onNext(2);
+                    subscriber.onNext(3);
+                    subscriber.onNext(null);
+                }
+            };
+            BlockingIterable<Integer> integers = rogue.subscribe().asIterable();
+            integers.forEach(i -> assertThat(i).isPositive());
+        });
     }
 
-    @Test(expectedExceptions = BackPressureFailure.class)
+    @Test
     public void testOverflow() {
-
-        BlockingIterable<Integer> integers = Multi.createFrom()
-                .<Integer> emitter(e -> e.emit(1).emit(2).emit(3).emit(4).emit(5))
-                .subscribe().asIterable(10, () -> new SpscArrayQueue<>(4));
-        integers.forEach(i -> assertThat(i).isPositive());
+        assertThrows(BackPressureFailure.class, () -> {
+            BlockingIterable<Integer> integers = Multi.createFrom()
+                    .<Integer> emitter(e -> e.emit(1).emit(2).emit(3).emit(4).emit(5))
+                    .subscribe().asIterable(10, () -> new SpscArrayQueue<>(4));
+            integers.forEach(i -> assertThat(i).isPositive());
+        });
     }
 
 }
