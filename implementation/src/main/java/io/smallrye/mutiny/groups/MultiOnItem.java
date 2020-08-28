@@ -66,13 +66,7 @@ public class MultiOnItem<T> {
      * @return the new {@link Multi}
      */
     public Multi<T> invoke(Consumer<? super T> callback) {
-        return Infrastructure.onMultiCreation(new MultiSignalConsumerOp<>(
-                upstream,
-                nonNull(callback, "callback"),
-                null,
-                null,
-                null,
-                null));
+        return Infrastructure.onMultiCreation(new MultiOnItemInvoke<>(upstream, callback));
     }
 
     /**
