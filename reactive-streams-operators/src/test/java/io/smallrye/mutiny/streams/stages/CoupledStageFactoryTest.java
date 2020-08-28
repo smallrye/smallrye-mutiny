@@ -1,7 +1,7 @@
 package io.smallrye.mutiny.streams.stages;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.testng.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
@@ -29,9 +29,7 @@ public class CoupledStageFactoryTest {
                 .via(
                         ReactiveStreams.coupled(ReactiveStreams.builder().cancel().build(),
                                 idlePublisher()
-                                        .onTerminate(() -> {
-                                            publisherCancelled.complete(null);
-                                        }).buildRs()))
+                                        .onTerminate(() -> publisherCancelled.complete(null)).buildRs()))
                 .onComplete(() -> downstreamCompleted.complete(null))
                 .ignore()
                 .run();
@@ -80,13 +78,9 @@ public class CoupledStageFactoryTest {
         CompletableFuture<Void> subscriberCompleted = new CompletableFuture<>();
         CompletableFuture<Void> upstreamCancelled = new CompletableFuture<>();
         idlePublisher()
-                .onTerminate(() -> {
-                    upstreamCancelled.complete(null);
-                })
+                .onTerminate(() -> upstreamCancelled.complete(null))
                 .via(ReactiveStreams.coupled(ReactiveStreams.builder()
-                        .onComplete(() -> {
-                            subscriberCompleted.complete(null);
-                        })
+                        .onComplete(() -> subscriberCompleted.complete(null))
                         .ignore(), ReactiveStreams.empty()))
                 .ignore().run();
         await(subscriberCompleted);
