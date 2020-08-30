@@ -3,6 +3,7 @@ package io.smallrye.mutiny.streams.stages;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -15,7 +16,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.eclipse.microprofile.reactive.streams.operators.ReactiveStreams;
 import org.eclipse.microprofile.reactive.streams.operators.spi.Stage;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.Multi;
@@ -27,6 +28,7 @@ import io.smallrye.mutiny.streams.operators.TerminalStage;
  *
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
  */
+@SuppressWarnings("ConstantConditions")
 public class CancelStageFactoryTest extends StageTestBase {
 
     private final CancelStageFactory factory = new CancelStageFactory();
@@ -40,7 +42,7 @@ public class CancelStageFactoryTest extends StageTestBase {
         Multi<Long> publisher = Multi.createFrom().ticks().every(Duration.ofMillis(1000))
                 .emitOn(Infrastructure.getDefaultExecutor())
                 .onItem().invoke(list::add)
-                .on().cancellation(() -> cancelled.set(true));
+                .onCancellation().invoke(() -> cancelled.set(true));
         CompletionStage<Void> stage = terminal.apply(publisher);
         stage.toCompletableFuture().get();
 
@@ -49,9 +51,9 @@ public class CancelStageFactoryTest extends StageTestBase {
         assertThat(cancelled).isTrue();
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test
     public void createWithoutStage() {
-        factory.create(null, null);
+        assertThrows(NullPointerException.class, () -> factory.create(null, null));
     }
 
     @Test

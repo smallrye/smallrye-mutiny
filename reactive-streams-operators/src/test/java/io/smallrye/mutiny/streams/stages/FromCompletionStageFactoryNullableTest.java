@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.List;
 import java.util.Optional;
@@ -13,7 +14,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.eclipse.microprofile.reactive.streams.operators.ReactiveStreams;
 import org.eclipse.microprofile.reactive.streams.operators.spi.Stage;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  * Checks the behavior of the {@link Stage.FromCompletionStageNullable} class.
@@ -92,14 +93,14 @@ public class FromCompletionStageFactoryNullableTest extends StageTestBase {
         await().untilAtomic(done, is(true));
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test
     public void createWithoutStage() {
-        factory.create(null, null);
+        assertThrows(NullPointerException.class, () -> factory.create(null, null));
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test
     public void createWithNullResult() {
-        factory.create(null, () -> null).get();
+        assertThrows(NullPointerException.class, () -> factory.create(null, () -> null).get());
     }
 
 }

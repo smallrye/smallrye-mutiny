@@ -1,6 +1,8 @@
 package io.smallrye.mutiny.streams.stages;
 
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.streams.operators.PublisherStage;
 import io.smallrye.mutiny.test.AssertSubscriber;
@@ -22,13 +24,14 @@ public class FailedPublisherStageFactoryTest extends StageTestBase {
                 .assertHasFailedWith(Exception.class, "Boom");
     }
 
-    @Test(expected = NullPointerException.class)
-    public void createWithoutError() {
-        factory.create(null, () -> null);
+    @Test
+    public void createWithoutStage() {
+        assertThrows(NullPointerException.class, () -> factory.create(null, null));
     }
 
-    @Test(expected = NullPointerException.class)
-    public void createWithoutStage() {
-        factory.create(null, null);
+    @Test
+    public void createWithoutError() {
+        assertThrows(NullPointerException.class, () -> factory.create(null, () -> null));
     }
+
 }

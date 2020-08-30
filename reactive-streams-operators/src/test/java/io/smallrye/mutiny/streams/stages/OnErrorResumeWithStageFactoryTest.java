@@ -1,6 +1,7 @@
 package io.smallrye.mutiny.streams.stages;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.Collections;
 import java.util.List;
@@ -11,7 +12,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.eclipse.microprofile.reactive.streams.operators.ReactiveStreams;
 import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Multi;
 
@@ -58,14 +59,14 @@ public class OnErrorResumeWithStageFactoryTest extends StageTestBase {
         assertThat(error.get()).hasMessage("Failed");
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test
     public void createWithoutStage() {
-        factory.create(null, null);
+        assertThrows(NullPointerException.class, () -> factory.create(null, null));
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test
     public void createWithoutFunction() {
-        factory.create(null, () -> null);
+        assertThrows(NullPointerException.class, () -> factory.create(null, () -> null));
     }
 
 }

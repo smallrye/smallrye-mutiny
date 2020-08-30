@@ -1,6 +1,7 @@
 package io.smallrye.mutiny.streams.stages;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -10,7 +11,7 @@ import java.util.function.Predicate;
 
 import org.eclipse.microprofile.reactive.streams.operators.ReactiveStreams;
 import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Multi;
 
@@ -41,14 +42,14 @@ public class FilterStageFactoryTest extends StageTestBase {
         assertThat(list).hasSize(5).containsExactly(2, 4, 6, 8, 10);
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test
     public void createWithoutStage() {
-        factory.create(null, null);
+        assertThrows(NullPointerException.class, () -> factory.create(null, null));
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test
     public void createWithoutPredicate() {
-        factory.create(null, () -> null);
+        assertThrows(NullPointerException.class, () -> factory.create(null, () -> null));
     }
 
 }

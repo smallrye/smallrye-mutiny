@@ -12,7 +12,7 @@ import java.util.concurrent.TimeoutException;
 import org.eclipse.microprofile.reactive.streams.operators.PublisherBuilder;
 import org.eclipse.microprofile.reactive.streams.operators.ReactiveStreams;
 import org.eclipse.microprofile.reactive.streams.operators.tck.spi.QuietRuntimeException;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class CoupledStageFactoryTest {
 

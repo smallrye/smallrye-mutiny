@@ -74,6 +74,12 @@
                                 <exclude>**/tck/SubscriberWhitebox*</exclude>
                             </excludes>
                             <junitArtifactName>none:none</junitArtifactName>
+                            <properties>
+                                <property>
+                                    <name>surefire.testng.verbose</name>
+                                    <value>10</value>
+                                </property>
+                            </properties>
                         </configuration>
                     </execution>
                 </executions>

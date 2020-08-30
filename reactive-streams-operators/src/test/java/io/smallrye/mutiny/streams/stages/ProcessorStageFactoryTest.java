@@ -1,6 +1,7 @@
 package io.smallrye.mutiny.streams.stages;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.Arrays;
 import java.util.List;
@@ -11,7 +12,7 @@ import java.util.concurrent.Executors;
 import org.eclipse.microprofile.reactive.streams.operators.ProcessorBuilder;
 import org.eclipse.microprofile.reactive.streams.operators.ReactiveStreams;
 import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.reactivestreams.Processor;
 
 import io.smallrye.mutiny.Multi;
@@ -77,14 +78,14 @@ public class ProcessorStageFactoryTest extends StageTestBase {
         return asStringProcessorBuilder().buildRs();
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test
     public void createWithoutStage() {
-        factory.create(null, null);
+        assertThrows(NullPointerException.class, () -> factory.create(null, null));
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test
     public void createWithoutFunction() {
-        factory.create(null, () -> null);
+        assertThrows(NullPointerException.class, () -> factory.create(null, () -> null));
     }
 
 }

@@ -1,6 +1,7 @@
 package io.smallrye.mutiny.streams.stages;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -10,7 +11,7 @@ import java.util.concurrent.Executors;
 import org.eclipse.microprofile.reactive.streams.operators.ReactiveStreams;
 import org.eclipse.microprofile.reactive.streams.operators.tck.spi.QuietRuntimeException;
 import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Multi;
 
@@ -40,23 +41,24 @@ public class DropWhileStageFactoryTest extends StageTestBase {
         assertThat(list).hasSize(5).containsExactly(6, 7, 8, 9, 10);
     }
 
-    @Test(expected = NullPointerException.class)
+    @SuppressWarnings("ConstantConditions")
+    @Test
     public void createWithoutStage() {
-        factory.create(null, null);
+        assertThrows(NullPointerException.class, () -> factory.create(null, null));
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test
     public void createWithoutPredicate() {
-        factory.create(null, () -> null);
+        assertThrows(NullPointerException.class, () -> factory.create(null, () -> null));
     }
 
-    @Test(expected = QuietRuntimeException.class)
+    @Test
     public void dropWhileStageShouldPropagateUpstreamErrorsAfterFinishedDropping() {
-        this.awaitCompletion(this.infiniteStream().peek((i) -> {
+        assertThrows(QuietRuntimeException.class, () -> this.awaitCompletion(this.infiniteStream().peek((i) -> {
             if (i == 4) {
                 throw new QuietRuntimeException("failed");
             }
-        }).dropWhile((i) -> i < 3).toList().run());
+        }).dropWhile((i) -> i < 3).toList().run()));
     }
 
 }
