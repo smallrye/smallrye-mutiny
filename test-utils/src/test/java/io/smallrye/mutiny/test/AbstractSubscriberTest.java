@@ -12,10 +12,12 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.awaitility.core.ConditionTimeoutException;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
+@SuppressWarnings("ConstantConditions")
 public class AbstractSubscriberTest {
 
     @Test
@@ -221,7 +223,8 @@ public class AbstractSubscriberTest {
         await().untilTrue(unblocked);
     }
 
-    @Test(timeout = 10)
+    @Test
+    @Timeout(1)
     public void testAwaitWhenAlreadyCompleted() {
         AssertSubscriber<Integer> subscriber = AssertSubscriber.create(10);
         subscriber.onComplete();
@@ -233,7 +236,8 @@ public class AbstractSubscriberTest {
 
     }
 
-    @Test(timeout = 10)
+    @Test
+    @Timeout(1)
     public void testAwaitWhenAlreadyFailed() {
         AssertSubscriber<Integer> subscriber = AssertSubscriber.create(10);
         subscriber.onError(new IOException("boom"));
