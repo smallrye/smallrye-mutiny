@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Multi;
 

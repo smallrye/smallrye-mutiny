@@ -3,7 +3,7 @@ package snippets;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import io.smallrye.mutiny.Multi;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.infrastructure.Infrastructure;

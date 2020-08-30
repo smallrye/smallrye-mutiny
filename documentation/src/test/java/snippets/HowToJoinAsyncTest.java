@@ -8,7 +8,7 @@ import java.util.concurrent.CompletableFuture;
 
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.tuples.Tuple3;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Uni;
 

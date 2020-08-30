@@ -6,7 +6,7 @@ import java.util.logging.Logger;
 
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.subscription.Cancellable;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.subscription.UniEmitter;
