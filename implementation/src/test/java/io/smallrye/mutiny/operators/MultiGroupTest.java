@@ -3,38 +3,53 @@ package io.smallrye.mutiny.operators;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 import java.io.IOException;
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.reactivestreams.Subscriber;
+import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.GroupedMulti;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.infrastructure.Infrastructure;
+import io.smallrye.mutiny.subscription.MultiSubscriber;
 import io.smallrye.mutiny.test.AssertSubscriber;
+import io.smallrye.mutiny.test.Mocks;
 
 public class MultiGroupTest {
 
+    @AfterEach
+    public void cleanup() {
+        Infrastructure.resetDroppedExceptionHandler();
+    }
+
     @Test
     public void testGroupIntoListsWithSize0() {
-        assertThrows(IllegalArgumentException.class, () -> Multi.createFrom().range(1, 5).groupItems().intoLists().of(0));
+        assertThrows(IllegalArgumentException.class,
+                () -> Multi.createFrom().range(1, 5).groupItems().intoLists().of(0));
     }
 
     @Test
     public void testGroupIntoListsWithSize0AndSkip() {
-        assertThrows(IllegalArgumentException.class, () -> Multi.createFrom().range(1, 5).groupItems().intoLists().of(0, 1));
+        assertThrows(IllegalArgumentException.class,
+                () -> Multi.createFrom().range(1, 5).groupItems().intoLists().of(0, 1));
     }
 
     @Test
     public void testGroupIntoListsWithSkip0() {
-        assertThrows(IllegalArgumentException.class, () -> Multi.createFrom().range(1, 5).groupItems().intoLists().of(1, 0));
+        assertThrows(IllegalArgumentException.class,
+                () -> Multi.createFrom().range(1, 5).groupItems().intoLists().of(1, 0));
     }
 
     @Test
@@ -77,11 +92,34 @@ public class MultiGroupTest {
     }
 
     @Test
+    public void testGroupIntoListsOfTwoElementsWithSkipAndFailure() {
+        AssertSubscriber<List<Integer>> subscriber = Multi.createFrom().range(1, 10).groupItems().intoLists()
+                .of(2, 3).onCompletion().fail()
+                .subscribe().withSubscriber(AssertSubscriber.create(100));
+        subscriber.assertHasFailedWith(NoSuchElementException.class, null);
+        assertThat(subscriber.items()).containsExactly(
+                Arrays.asList(1, 2), Arrays.asList(4, 5), Arrays.asList(7, 8));
+    }
+
+    @Test
     public void testGroupIntoListsOfTwoElementsWithSkipSmallerThanSize() {
         AssertSubscriber<List<Integer>> subscriber = Multi.createFrom().range(1, 10).groupItems().intoLists()
                 .of(2, 1)
                 .subscribe().withSubscriber(AssertSubscriber.create(100));
         subscriber.assertCompletedSuccessfully();
+        assertThat(subscriber.items()).containsExactly(
+                Arrays.asList(1, 2), Arrays.asList(2, 3), Arrays.asList(3, 4),
+                Arrays.asList(4, 5), Arrays.asList(5, 6), Arrays.asList(6, 7),
+                Arrays.asList(7, 8), Arrays.asList(8, 9), Collections.singletonList(9));
+    }
+
+    @Test
+    public void testGroupIntoListsOfTwoElementsWithSkipSmallerThanSizeAndFailure() {
+        AssertSubscriber<List<Integer>> subscriber = Multi.createFrom().range(1, 10).groupItems().intoLists()
+                .of(2, 1)
+                .onCompletion().fail()
+                .subscribe().withSubscriber(AssertSubscriber.create(100));
+        subscriber.assertHasFailedWith(NoSuchElementException.class, null);
         assertThat(subscriber.items()).containsExactly(
                 Arrays.asList(1, 2), Arrays.asList(2, 3), Arrays.asList(3, 4),
                 Arrays.asList(4, 5), Arrays.asList(5, 6), Arrays.asList(6, 7),
@@ -145,17 +183,20 @@ public class MultiGroupTest {
 
     @Test
     public void testGroupIntoMultisWithSize0() {
-        assertThrows(IllegalArgumentException.class, () -> Multi.createFrom().range(1, 5).groupItems().intoMultis().of(0));
+        assertThrows(IllegalArgumentException.class,
+                () -> Multi.createFrom().range(1, 5).groupItems().intoMultis().of(0));
     }
 
     @Test
     public void testGroupIntoMultisWithSize0AndSkip() {
-        assertThrows(IllegalArgumentException.class, () -> Multi.createFrom().range(1, 5).groupItems().intoMultis().of(0, 1));
+        assertThrows(IllegalArgumentException.class,
+                () -> Multi.createFrom().range(1, 5).groupItems().intoMultis().of(0, 1));
     }
 
     @Test
     public void testGroupIntoMultisWithSkip0() {
-        assertThrows(IllegalArgumentException.class, () -> Multi.createFrom().range(1, 5).groupItems().intoMultis().of(1, 0));
+        assertThrows(IllegalArgumentException.class,
+                () -> Multi.createFrom().range(1, 5).groupItems().intoMultis().of(1, 0));
     }
 
     @Test
@@ -164,6 +205,19 @@ public class MultiGroupTest {
                 .of(2)
                 .subscribe().withSubscriber(AssertSubscriber.create(100));
         subscriber.assertCompletedSuccessfully();
+        List<List<Integer>> flatten = flatten(subscriber.items());
+        assertThat(flatten).containsExactly(
+                Arrays.asList(1, 2), Arrays.asList(3, 4), Arrays.asList(5, 6), Arrays.asList(7, 8),
+                Collections.singletonList(9));
+    }
+
+    @Test
+    public void testGroupIntoMultisOfTwoElementsWithFailure() {
+        AssertSubscriber<Multi<Integer>> subscriber = Multi.createFrom().range(1, 10).groupItems().intoMultis()
+                .of(2)
+                .onCompletion().fail()
+                .subscribe().withSubscriber(AssertSubscriber.create(100));
+        subscriber.assertHasFailedWith(NoSuchElementException.class, null);
         List<List<Integer>> flatten = flatten(subscriber.items());
         assertThat(flatten).containsExactly(
                 Arrays.asList(1, 2), Arrays.asList(3, 4), Arrays.asList(5, 6), Arrays.asList(7, 8),
@@ -289,6 +343,20 @@ public class MultiGroupTest {
     }
 
     @Test
+    public void testBasicTimeWindowWithFailure() {
+        Multi<Integer> multi = Multi.createBy().concatenating().streams(
+                Multi.createFrom().range(1, 7),
+                Multi.createFrom().failure(() -> new IOException("boom")))
+                .groupItems().intoMultis().every(Duration.ofMillis(1))
+                .onItem().transformToMultiAndConcatenate(m -> m);
+
+        multi.subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE))
+                .await()
+                .assertReceived(1, 2, 3, 4, 5, 6)
+                .assertHasFailedWith(IOException.class, "boom");
+    }
+
+    @Test
     public void testThatWindowWithDurationEmitsEmptyLists() {
         AssertSubscriber<List<Object>> subscriber = AssertSubscriber.create(3);
         Multi.createFrom().nothing()
@@ -360,7 +428,8 @@ public class MultiGroupTest {
 
     @Test
     public void testGroupByWithNullValueMapper() {
-        assertThrows(IllegalArgumentException.class, () -> Multi.createFrom().range(1, 10).groupItems().by(i -> i % 2, null));
+        assertThrows(IllegalArgumentException.class,
+                () -> Multi.createFrom().range(1, 10).groupItems().by(i -> i % 2, null));
     }
 
     @Test
@@ -414,5 +483,241 @@ public class MultiGroupTest {
         }
 
         assertThat(counter.get()).isEqualTo(1001);
+    }
+
+    @Test
+    public void testSkipGroupWithFailures() {
+        AssertSubscriber<List<Object>> subscriber = Multi.createFrom().failure(new IOException("boom"))
+                .groupItems().intoLists().of(2, 4)
+                .subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE));
+
+        subscriber.assertHasFailedWith(IOException.class, "boom");
+    }
+
+    @Test
+    public void testSkipGroupAsMultisWithFailures() {
+        AssertSubscriber<Multi<Object>> subscriber = Multi.createFrom().failure(new IOException("boom"))
+                .groupItems().intoMultis().of(2, 4)
+                .subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE));
+
+        subscriber.assertHasFailedWith(IOException.class, "boom");
+    }
+
+    @Test
+    public void testOverlapGroupWithFailures() {
+        AssertSubscriber<List<Object>> subscriber = Multi.createFrom().failure(new IOException("boom"))
+                .groupItems().intoLists().of(4, 2)
+                .subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE));
+
+        subscriber.assertHasFailedWith(IOException.class, "boom");
+    }
+
+    @Test
+    public void testOverlapGroupAsMultisWithFailures() {
+        AssertSubscriber<Multi<Object>> subscriber = Multi.createFrom().failure(new IOException("boom"))
+                .groupItems().intoMultis().of(4, 2)
+                .subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE));
+
+        subscriber.assertHasFailedWith(IOException.class, "boom");
+    }
+
+    @Test
+    public void testExactGroupAsMultisWithFailures() {
+        AssertSubscriber<Multi<Object>> subscriber = Multi.createFrom().failure(new IOException("boom"))
+                .groupItems().intoMultis().of(2)
+                .subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE));
+
+        subscriber.assertHasFailedWith(IOException.class, "boom");
+    }
+
+    @Test
+    public void testSkipGroupWithRogueFailures() {
+        AtomicReference<Throwable> caught = new AtomicReference<>();
+        Infrastructure.setDroppedExceptionHandler(caught::set);
+
+        AbstractMulti<Integer> rogue = new AbstractMulti<Integer>() {
+            @Override
+            public void subscribe(MultiSubscriber<? super Integer> subscriber) {
+                subscriber.onSubscribe(mock(Subscription.class));
+                subscriber.onItem(1);
+                subscriber.onItem(2);
+                subscriber.onItem(3);
+                subscriber.onItem(4);
+                subscriber.onFailure(new IOException("boom-1"));
+                subscriber.onItem(5);
+                subscriber.onItem(6);
+                subscriber.onFailure(new IOException("boom-2"));
+                subscriber.onCompletion();
+            }
+        };
+
+        AssertSubscriber<List<Integer>> subscriber = rogue
+                .groupItems().intoLists().of(2, 4)
+                .subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE));
+
+        subscriber.assertHasFailedWith(IOException.class, "boom-1");
+        assertThat(caught.get()).hasMessageContaining("boom-2");
+    }
+
+    @Test
+    public void testSkipGroupAsMultisWithRogueFailures() {
+        AtomicReference<Throwable> caught = new AtomicReference<>();
+        Infrastructure.setDroppedExceptionHandler(caught::set);
+
+        AbstractMulti<Integer> rogue = new AbstractMulti<Integer>() {
+            @Override
+            public void subscribe(MultiSubscriber<? super Integer> subscriber) {
+                subscriber.onSubscribe(mock(Subscription.class));
+                subscriber.onItem(1);
+                subscriber.onItem(2);
+                subscriber.onItem(3);
+                subscriber.onItem(4);
+                subscriber.onFailure(new IOException("boom-1"));
+                subscriber.onItem(5);
+                subscriber.onItem(6);
+                subscriber.onFailure(new IOException("boom-2"));
+                subscriber.onCompletion();
+            }
+        };
+
+        AssertSubscriber<Integer> subscriber = rogue
+                .groupItems().intoMultis().of(2, 4)
+                .onItem().transformToMultiAndConcatenate(m -> m)
+                .subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE));
+
+        subscriber.assertHasFailedWith(IOException.class, "boom-1");
+        assertThat(caught.get()).hasMessageContaining("boom-2");
+    }
+
+    @Test
+    public void testOverlapGroupWithRogueFailures() {
+        AtomicReference<Throwable> caught = new AtomicReference<>();
+        Infrastructure.setDroppedExceptionHandler(caught::set);
+
+        AbstractMulti<Integer> rogue = new AbstractMulti<Integer>() {
+            @Override
+            public void subscribe(MultiSubscriber<? super Integer> subscriber) {
+                subscriber.onSubscribe(mock(Subscription.class));
+                subscriber.onItem(1);
+                subscriber.onItem(2);
+                subscriber.onItem(3);
+                subscriber.onItem(4);
+                subscriber.onFailure(new IOException("boom-1"));
+                subscriber.onItem(5);
+                subscriber.onItem(6);
+                subscriber.onFailure(new IOException("boom-2"));
+                subscriber.onCompletion();
+            }
+        };
+
+        AssertSubscriber<List<Integer>> subscriber = rogue
+                .groupItems().intoLists().of(4, 2)
+                .subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE));
+
+        subscriber.assertHasFailedWith(IOException.class, "boom-1");
+        assertThat(caught.get()).hasMessageContaining("boom-2");
+    }
+
+    @Test
+    public void testOverlapGroupAsMultisWithRogueFailures() {
+        AtomicReference<Throwable> caught = new AtomicReference<>();
+        Infrastructure.setDroppedExceptionHandler(caught::set);
+
+        AbstractMulti<Integer> rogue = new AbstractMulti<Integer>() {
+            @Override
+            public void subscribe(MultiSubscriber<? super Integer> subscriber) {
+                subscriber.onSubscribe(mock(Subscription.class));
+                subscriber.onItem(1);
+                subscriber.onItem(2);
+                subscriber.onItem(3);
+                subscriber.onItem(4);
+                subscriber.onFailure(new IOException("boom-1"));
+                subscriber.onItem(5);
+                subscriber.onItem(6);
+                subscriber.onFailure(new IOException("boom-2"));
+                subscriber.onCompletion();
+            }
+        };
+
+        AssertSubscriber<Integer> subscriber = rogue
+                .groupItems().intoMultis().of(4, 2)
+                .onItem().transformToMultiAndConcatenate(m -> m)
+                .subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE));
+
+        subscriber.assertHasFailedWith(IOException.class, "boom-1");
+        assertThat(caught.get()).hasMessageContaining("boom-2");
+    }
+
+    @Test
+    public void testExactGroupAsMultisWithRogueFailures() {
+        AtomicReference<Throwable> caught = new AtomicReference<>();
+        Infrastructure.setDroppedExceptionHandler(caught::set);
+
+        AbstractMulti<Integer> rogue = new AbstractMulti<Integer>() {
+            @Override
+            public void subscribe(MultiSubscriber<? super Integer> subscriber) {
+                subscriber.onSubscribe(mock(Subscription.class));
+                subscriber.onItem(1);
+                subscriber.onItem(2);
+                subscriber.onItem(3);
+                subscriber.onItem(4);
+                subscriber.onFailure(new IOException("boom-1"));
+                subscriber.onItem(5);
+                subscriber.onItem(6);
+                subscriber.onFailure(new IOException("boom-2"));
+                subscriber.onCompletion();
+            }
+        };
+
+        AssertSubscriber<Integer> subscriber = rogue
+                .groupItems().intoMultis().of(2)
+                .onItem().transformToMultiAndConcatenate(m -> m)
+                .subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE));
+
+        subscriber.assertHasFailedWith(IOException.class, "boom-1");
+        assertThat(caught.get()).hasMessageContaining("boom-2");
+    }
+
+    @Test
+    public void testInvalidRequestsWhenGroupingIntoLists() {
+        Subscriber<List<Integer>> listExact = Mocks.subscriber(-1);
+        Multi.createFrom().items(1, 2, 3, 4)
+                .groupItems().intoLists().of(2)
+                .subscribe().withSubscriber(listExact);
+        verify(listExact).onError(any(IllegalArgumentException.class));
+
+        Subscriber<List<Integer>> listSkip = Mocks.subscriber(-1);
+        Multi.createFrom().items(1, 2, 3, 4)
+                .groupItems().intoLists().of(2, 4)
+                .subscribe().withSubscriber(listSkip);
+        verify(listSkip).onError(any(IllegalArgumentException.class));
+
+        Subscriber<List<Integer>> listOverlap = Mocks.subscriber(-1);
+        Multi.createFrom().items(1, 2, 3, 4)
+                .groupItems().intoLists().of(4, 2)
+                .subscribe().withSubscriber(listOverlap);
+        verify(listOverlap).onError(any(IllegalArgumentException.class));
+    }
+
+    @Test
+    public void testInvalidRequestsWhenGroupingIntoMultis() {
+        Subscriber<Multi<Integer>> listExact = Mocks.subscriber(-1);
+        Multi.createFrom().items(1, 2, 3, 4)
+                .groupItems().intoMultis().of(2)
+                .subscribe().withSubscriber(listExact);
+        verify(listExact).onError(any(IllegalArgumentException.class));
+
+        Subscriber<Multi<Integer>> listSkip = Mocks.subscriber(-1);
+        Multi.createFrom().items(1, 2, 3, 4)
+                .groupItems().intoMultis().of(2, 4)
+                .subscribe().withSubscriber(listSkip);
+        verify(listSkip).onError(any(IllegalArgumentException.class));
+
+        Subscriber<Multi<Integer>> listOverlap = Mocks.subscriber(-1);
+        Multi.createFrom().items(1, 2, 3, 4)
+                .groupItems().intoMultis().of(4, 2)
+                .subscribe().withSubscriber(listOverlap);
+        verify(listOverlap).onError(any(IllegalArgumentException.class));
+
     }
 }
