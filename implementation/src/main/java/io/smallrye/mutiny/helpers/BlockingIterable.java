@@ -136,7 +136,10 @@ public class BlockingIterable<T> implements Iterable<T> {
 
                 // We are not done, check if empty, and block until we get data.
                 if (empty) {
-                    // TODO Must be sure we are not on an IO Thread here.
+                    if (!Infrastructure.canCallerThreadBeBlocked()) {
+                        throw new IllegalStateException(
+                                "The current thread cannot be blocked: " + Thread.currentThread().getName());
+                    }
                     lock.lock();
                     try {
                         while (!done.get() && queue.isEmpty()) {

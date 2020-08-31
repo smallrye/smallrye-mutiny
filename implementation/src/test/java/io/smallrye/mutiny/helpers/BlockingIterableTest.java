@@ -11,16 +11,22 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 import org.reactivestreams.Subscriber;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.helpers.queues.SpscArrayQueue;
+import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.AbstractMulti;
 import io.smallrye.mutiny.subscription.BackPressureFailure;
 
@@ -237,4 +243,97 @@ public class BlockingIterableTest {
         });
     }
 
+    @Nested
+    static class ThreadBlockingTest {
+
+        @BeforeEach
+        void reset() {
+            Infrastructure.resetCanCallerThreadBeBlockedSupplier();
+        }
+
+        @Test
+        void defaultBlocking() throws InterruptedException {
+            Multi<Integer> empty = Multi.createFrom().emitter(e -> {
+                // Never emit anything to block
+            });
+            CountDownLatch latch = new CountDownLatch(1);
+            AtomicReference<Throwable> error = new AtomicReference<>();
+            AtomicBoolean hasNext = new AtomicBoolean();
+
+            Thread thread = new Thread(() -> {
+                try {
+                    hasNext.set(empty.subscribe().asIterable().iterator().hasNext());
+                } catch (Throwable err) {
+                    error.set(err);
+                }
+                latch.countDown();
+            }, "my-thread");
+
+            thread.start();
+            boolean completedEarly = latch.await(1, TimeUnit.SECONDS);
+
+            assertThat(completedEarly).isFalse();
+            assertThat(hasNext).isFalse();
+            assertThat(error.get()).isNull();
+        }
+
+        @Test
+        void defaultBlockingAllow() throws InterruptedException {
+            Infrastructure.setCanCallerThreadBeBlockedSupplier(() -> !Thread.currentThread().getName().contains("-forbidden-"));
+
+            Multi<Integer> empty = Multi.createFrom().emitter(e -> {
+                // Never emit anything to block
+            });
+            CountDownLatch latch = new CountDownLatch(1);
+            AtomicReference<Throwable> error = new AtomicReference<>();
+            AtomicBoolean hasNext = new AtomicBoolean();
+
+            Thread thread = new Thread(() -> {
+                try {
+                    hasNext.set(empty.subscribe().asIterable().iterator().hasNext());
+                } catch (Throwable err) {
+                    error.set(err);
+                }
+                latch.countDown();
+            }, "my-thread");
+
+            thread.start();
+            boolean completedEarly = latch.await(1, TimeUnit.SECONDS);
+
+            assertThat(completedEarly).isFalse();
+            assertThat(hasNext).isFalse();
+            assertThat(error.get()).isNull();
+        }
+
+        @Test
+        void defaultBlockingForbid() throws InterruptedException {
+            Infrastructure.setCanCallerThreadBeBlockedSupplier(() -> !Thread.currentThread().getName().contains("-forbidden-"));
+
+            Multi<Integer> empty = Multi.createFrom().emitter(e -> {
+                // Never emit anything to block
+            });
+            CountDownLatch latch = new CountDownLatch(1);
+            AtomicReference<Throwable> error = new AtomicReference<>();
+            AtomicBoolean hasNext = new AtomicBoolean();
+
+            Thread thread = new Thread(() -> {
+                try {
+                    hasNext.set(empty.subscribe().asIterable().iterator().hasNext());
+                } catch (Throwable err) {
+                    error.set(err);
+                }
+                latch.countDown();
+            }, "my-forbidden-thread");
+
+            thread.start();
+            boolean completedEarly = latch.await(1, TimeUnit.SECONDS);
+
+            assertThat(completedEarly).isTrue();
+            assertThat(hasNext).isFalse();
+            assertThat(error.get())
+                    .isNotNull()
+                    .isInstanceOf(IllegalStateException.class)
+                    .hasMessage("The current thread cannot be blocked: my-forbidden-thread");
+        }
+    }
 }
