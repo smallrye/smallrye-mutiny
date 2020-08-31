@@ -41,7 +41,7 @@ public class DroppedExceptionsTest {
 
         Infrastructure.handleDroppedException(new RuntimeException("yolo"));
         assertThat(outputStream.toString())
-                .startsWith("[-- Mutiny had to drop the following exception --]")
+                .contains("[-- Mutiny had to drop the following exception --]")
                 .contains("yolo")
                 .contains("java.lang.RuntimeException")
                 .contains("io.smallrye.mutiny.infrastructure.DroppedExceptionsTest.testDefaultHandler")
