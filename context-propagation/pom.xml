@@ -43,14 +43,20 @@
             <scope>test</scope>
         </dependency>
 
-
+        <dependency>
+            <groupId>io.smallrye.reactive</groupId>
+            <artifactId>reactive-streams-junit5-tck</artifactId>
+            <version>${project.version}</version>
+            <classifier>tests</classifier>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>org.reactivestreams</groupId>
             <artifactId>reactive-streams-tck</artifactId>
             <version>${reactive-streams.version}</version>
             <scope>test</scope>
         </dependency>
-
     </dependencies>
 
     <build>
@@ -65,7 +71,8 @@
                             <goal>test</goal>
                         </goals>
                         <configuration>
-                            <junitArtifactName>none:none</junitArtifactName>
+                            <!-- Disable TestNG -->
+                            <testNGArtifactName>none:none</testNGArtifactName>
                         </configuration>
                     </execution>
                 </executions>

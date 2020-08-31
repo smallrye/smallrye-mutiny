@@ -5,8 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.util.stream.LongStream;
 
 import org.reactivestreams.Publisher;
-import org.reactivestreams.tck.PublisherVerification;
 import org.reactivestreams.tck.TestEnvironment;
+import org.reactivestreams.tck.junit5.PublisherVerification;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.context.ContextPropagationMultiInterceptor;

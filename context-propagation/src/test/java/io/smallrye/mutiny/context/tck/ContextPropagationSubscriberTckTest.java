@@ -4,8 +4,8 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
-import org.reactivestreams.tck.SubscriberWhiteboxVerification;
 import org.reactivestreams.tck.TestEnvironment;
+import org.reactivestreams.tck.junit5.SubscriberWhiteboxVerification;
 
 import io.smallrye.mutiny.context.ContextPropagationMultiInterceptor;
 
