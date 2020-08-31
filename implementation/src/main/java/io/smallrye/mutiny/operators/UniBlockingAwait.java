@@ -11,6 +11,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import io.smallrye.mutiny.TimeoutException;
 import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.subscription.UniSubscriber;
 import io.smallrye.mutiny.subscription.UniSubscription;
 
@@ -23,6 +24,10 @@ public class UniBlockingAwait {
     public static <T> T await(Uni<T> upstream, Duration duration) {
         nonNull(upstream, "upstream");
         validate(duration);
+
+        if (!Infrastructure.canCallerThreadBeBlocked()) {
+            throw new IllegalStateException("The current thread cannot be blocked: " + Thread.currentThread().getName());
+        }
 
         CountDownLatch latch = new CountDownLatch(1);
         AtomicReference<T> reference = new AtomicReference<>();

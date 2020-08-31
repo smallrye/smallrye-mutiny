@@ -8,6 +8,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ServiceLoader;
 import java.util.concurrent.*;
+import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.UnaryOperator;
 
@@ -43,6 +44,8 @@ public class Infrastructure {
         multiItcp.iterator().forEachRemaining(interceptors2::add);
         interceptors2.sort(Comparator.comparingInt(MultiInterceptor::ordinal));
         MULTI_INTERCEPTORS = interceptors2;
+
+        resetCanCallerThreadBeBlockedSupplier();
     }
 
     /**
@@ -59,6 +62,7 @@ public class Infrastructure {
     private static final List<MultiInterceptor> MULTI_INTERCEPTORS;
     private static UnaryOperator<CompletableFuture<?>> completableFutureWrapper;
     private static Consumer<Throwable> droppedExceptionHandler = Infrastructure::printAndDump;
+    private static BooleanSupplier canCallerThreadBeBlockedSupplier;
 
     public static void setDefaultExecutor(Executor s) {
         if (s == DEFAULT_EXECUTOR) {
@@ -132,6 +136,20 @@ public class Infrastructure {
     }
 
     /**
+     * Defines a custom caller thread blocking check supplier.
+     *
+     * @param supplier the supplier, must not be {@code null} and must not throw an exception or it will also be lost.
+     */
+    public static void setCanCallerThreadBeBlockedSupplier(BooleanSupplier supplier) {
+        nonNull(supplier, "supplier");
+        canCallerThreadBeBlockedSupplier = supplier;
+    }
+
+    public static boolean canCallerThreadBeBlocked() {
+        return canCallerThreadBeBlockedSupplier.getAsBoolean();
+    }
+
+    /**
      * Defines a custom dropped exception handler.
      * 
      * @param handler the handler, must not be {@code null} and must not throw an exception or it will also be lost.
@@ -180,6 +198,11 @@ public class Infrastructure {
     // For testing purpose only
     public static void resetDroppedExceptionHandler() {
         droppedExceptionHandler = Infrastructure::printAndDump;
+    }
+
+    // For testing purpose only
+    public static void resetCanCallerThreadBeBlockedSupplier() {
+        canCallerThreadBeBlockedSupplier = () -> true;
     }
 
     private Infrastructure() {

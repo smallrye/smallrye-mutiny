@@ -517,7 +517,7 @@ However, you can control how the overflow is handled using the `multi.onOverflow
 include::../../../src/test/java/snippets/BackPressureTest.java[tags=code]
 ----
 
-== How do wrap blocking calls?
+== How to wrap blocking calls?
 
 It is often the case that a source of data (web service, database...) is synchronous and blocking.
 To deal with such sources in your applications, apply the following pattern:
@@ -543,6 +543,11 @@ While `runSubscriptionOn` runs the subscription on the given executor, `emitOn` 
 ----
 include::../../../src/test/java/snippets/UniBlockingTest.java[tags=code-emitOn]
 ----
+
+[TIP]
+====
+You can define a caller thread checker hook by calling `Infrastructure.setCanCallerThreadBeBlockedSupplier(supplier)` to indicate when a blocking operation should not be allowed by Mutiny, resulting in a `IllegalStateException` to be thrown.
+====
 
 == emitOn vs. runSubscriptionOn
 

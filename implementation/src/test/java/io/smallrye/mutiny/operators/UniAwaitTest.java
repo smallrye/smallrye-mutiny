@@ -10,11 +10,14 @@ import java.util.concurrent.CompletionException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 
 import io.smallrye.mutiny.TimeoutException;
 import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.infrastructure.Infrastructure;
 
 public class UniAwaitTest {
 
@@ -146,4 +149,65 @@ public class UniAwaitTest {
                 .isInstanceOf(IllegalArgumentException.class).hasMessageContaining("duration");
     }
 
+    @Nested
+    static class ThreadBlockingTest {
+
+        @BeforeEach
+        void reset() {
+            Infrastructure.resetCanCallerThreadBeBlockedSupplier();
+        }
+
+        @Test
+        void checkAllowByDefault() throws InterruptedException {
+            Uni<Integer> one = Uni.createFrom().item(1);
+            AtomicReference<Throwable> exception = new AtomicReference<>();
+            Thread thread = new Thread(() -> {
+                try {
+                    assertThat(one.await().indefinitely()).isEqualTo(1);
+                } catch (Throwable err) {
+                    exception.set(err);
+                }
+            }, "my-thread");
+            thread.start();
+            thread.join();
+            assertThat(exception.get()).isNull();
+        }
+
+        @Test
+        void checkAllow() throws InterruptedException {
+            Infrastructure.setCanCallerThreadBeBlockedSupplier(() -> !Thread.currentThread().getName().contains("-forbidden-"));
+            Uni<Integer> one = Uni.createFrom().item(1);
+            AtomicReference<Throwable> exception = new AtomicReference<>();
+            Thread thread = new Thread(() -> {
+                try {
+                    assertThat(one.await().indefinitely()).isEqualTo(1);
+                } catch (Throwable err) {
+                    exception.set(err);
+                }
+            }, "my-thread");
+            thread.start();
+            thread.join();
+            assertThat(exception.get()).isNull();
+        }
+
+        @Test
+        void checkForbid() throws InterruptedException {
+            Infrastructure.setCanCallerThreadBeBlockedSupplier(() -> !Thread.currentThread().getName().contains("-forbidden-"));
+            Uni<Integer> one = Uni.createFrom().item(1);
+            AtomicReference<Throwable> exception = new AtomicReference<>();
+            Thread thread = new Thread(() -> {
+                try {
+                    assertThat(one.await().indefinitely()).isEqualTo(1);
+                } catch (Throwable err) {
+                    exception.set(err);
+                }
+            }, "my-forbidden-thread");
+            thread.start();
+            thread.join();
+            assertThat(exception.get())
+                    .isNotNull()
+                    .isInstanceOf(IllegalStateException.class)
+                    .hasMessage("The current thread cannot be blocked: my-forbidden-thread");
+        }
+    }
 }
