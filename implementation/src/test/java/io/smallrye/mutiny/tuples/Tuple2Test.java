@@ -2,17 +2,16 @@ package io.smallrye.mutiny.tuples;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.Arrays;
 import java.util.Collections;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
 public class Tuple2Test {
 
-    // TODO Test tuples
-
-    private Tuple2<Integer, Integer> somePair = Tuple2.of(1, 3);
+    private final Tuple2<Integer, Integer> somePair = Tuple2.of(1, 3);
 
     @Test
     public void testThatNullIsAcceptedAsItem1() {
@@ -102,14 +101,14 @@ public class Tuple2Test {
                 })).withMessage("boom");
     }
 
-    @Test(expectedExceptions = IndexOutOfBoundsException.class)
+    @Test
     public void testAccessingNegative() {
-        somePair.nth(-1);
+        assertThrows(IndexOutOfBoundsException.class, () -> somePair.nth(-1));
     }
 
-    @Test(expectedExceptions = IndexOutOfBoundsException.class)
+    @Test
     public void testAccessingOutOfIndex() {
-        somePair.nth(3);
+        assertThrows(IndexOutOfBoundsException.class, () -> somePair.nth(3));
     }
 
     @Test

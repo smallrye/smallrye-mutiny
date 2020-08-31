@@ -1,6 +1,7 @@
 package tck;
 
-import static org.testng.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static tck.Await.await;
 
 import java.util.Arrays;
@@ -10,8 +11,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.stream.IntStream;
 
+import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
-import org.testng.annotations.Test;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.helpers.Subscriptions;
@@ -35,34 +36,36 @@ public class MultiDistinctTckTest extends AbstractPublisherTck<Integer> {
                 .subscribeAsCompletionStage()), Collections.emptyList());
     }
 
-    @Test(expectedExceptions = QuietRuntimeException.class, expectedExceptionsMessageRegExp = "failed")
+    @Test
     public void distinctStageShouldPropagateUpstreamExceptions() {
-        await(Multi.createFrom().failure(new QuietRuntimeException("failed"))
+        assertThrows(QuietRuntimeException.class, () -> await(Multi.createFrom().failure(new QuietRuntimeException("failed"))
                 .transform().byDroppingDuplicates()
                 .collectItems().asList()
-                .subscribeAsCompletionStage());
+                .subscribeAsCompletionStage()));
     }
 
-    @Test(expectedExceptions = QuietRuntimeException.class, expectedExceptionsMessageRegExp = "failed")
+    @Test
     public void distinctStageShouldPropagateExceptionsThrownByEquals() {
-        CompletableFuture<Void> cancelled = new CompletableFuture<>();
-        class ObjectThatThrowsFromEquals {
-            @Override
-            public int hashCode() {
-                return 1;
-            }
+        assertThrows(QuietRuntimeException.class, () -> {
+            CompletableFuture<Void> cancelled = new CompletableFuture<>();
+            class ObjectThatThrowsFromEquals {
+                @Override
+                public int hashCode() {
+                    return 1;
+                }
 
-            @Override
-            public boolean equals(Object obj) {
-                throw new QuietRuntimeException("failed");
+                @Override
+                public boolean equals(Object obj) {
+                    throw new QuietRuntimeException("failed");
+                }
             }
-        }
-        CompletionStage<List<ObjectThatThrowsFromEquals>> result = Multi.createFrom().items(
-                new ObjectThatThrowsFromEquals(), new ObjectThatThrowsFromEquals())
-                .onTermination().invoke(() -> cancelled.complete(null))
-                .transform().byDroppingDuplicates().collectItems().asList().subscribeAsCompletionStage();
-        await(cancelled);
-        await(result);
+            CompletionStage<List<ObjectThatThrowsFromEquals>> result = Multi.createFrom().items(
+                    new ObjectThatThrowsFromEquals(), new ObjectThatThrowsFromEquals())
+                    .onTermination().invoke(() -> cancelled.complete(null))
+                    .transform().byDroppingDuplicates().collectItems().asList().subscribeAsCompletionStage();
+            await(cancelled);
+            await(result);
+        });
     }
 
     @Test
@@ -70,7 +73,8 @@ public class MultiDistinctTckTest extends AbstractPublisherTck<Integer> {
         CompletableFuture<Void> cancelled = new CompletableFuture<>();
         infiniteStream()
                 .onTermination().invoke(() -> cancelled.complete(null))
-                .transform().byDroppingDuplicates().subscribe().withSubscriber(new Subscriptions.CancelledSubscriber<>());
+                .transform().byDroppingDuplicates().subscribe()
+                .withSubscriber(new Subscriptions.CancelledSubscriber<>());
         await(cancelled);
     }
 

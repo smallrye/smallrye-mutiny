@@ -3,14 +3,11 @@ package io.smallrye.mutiny.streams.stages;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 import static org.awaitility.Awaitility.await;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.*;
 import java.util.function.Function;
 import java.util.function.ToIntFunction;
 import java.util.stream.Collector;
@@ -19,7 +16,7 @@ import java.util.stream.Collectors;
 import org.eclipse.microprofile.reactive.streams.operators.ReactiveStreams;
 import org.eclipse.microprofile.reactive.streams.operators.tck.spi.QuietRuntimeException;
 import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.streams.Engine;
@@ -57,14 +54,14 @@ public class CollectStageFactoryTest extends StageTestBase {
         assertThat(list).hasSize(10);
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test
     public void createWithoutStage() {
-        factory.create(new Engine(), null);
+        assertThrows(NullPointerException.class, () -> factory.create(new Engine(), null));
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test
     public void createWithoutCollector() {
-        factory.create(null, () -> null);
+        assertThrows(NullPointerException.class, () -> factory.create(null, () -> null));
     }
 
     @Test
@@ -87,7 +84,7 @@ public class CollectStageFactoryTest extends StageTestBase {
 
     }
 
-    @Test(expected = QuietRuntimeException.class)
+    @Test
     public void collectStageShouldPropagateErrorsFromAccumulator() {
         CompletableFuture<Void> cancelled = new CompletableFuture<>();
         CompletionStage<String> result = this.infiniteStream().onTerminate(() -> {
@@ -96,24 +93,25 @@ public class CollectStageFactoryTest extends StageTestBase {
             throw new QuietRuntimeException("failed");
         }, (a, b) -> a + b, Function.identity())).run();
         this.awaitCompletion(cancelled);
-        this.awaitCompletion(result);
+        assertThrows(QuietRuntimeException.class, () -> this.awaitCompletion(result));
+
     }
 
-    @Test(expected = QuietRuntimeException.class)
+    @Test
     public void collectStageShouldPropagateErrorsFromFinisher() {
         CompletionStage<Object> result = ReactiveStreams.of(new Integer[] { 1, 2, 3 }).collect(Collector.of(
                 () -> 0,
                 (a, b) -> {
                 },
-                (a, b) -> a + b,
+                Integer::sum,
                 (r) -> {
                     throw new QuietRuntimeException("failed");
                 }))
                 .run();
-        this.awaitCompletion(result);
+        assertThrows(QuietRuntimeException.class, () -> this.awaitCompletion(result));
     }
 
-    @Test(expected = QuietRuntimeException.class)
+    @Test
     public void collectStageShouldPropagateErrorsFromSupplierThroughCompletionStage2() {
         CompletableFuture<Void> cancelled = new CompletableFuture<>();
         CompletionStage<Integer> result = null;
@@ -123,14 +121,15 @@ public class CollectStageFactoryTest extends StageTestBase {
                     .collect(Collector.<Integer, Integer, Integer> of(() -> {
                         throw new QuietRuntimeException("failed");
                     }, (a, b) -> {
-                    }, (a, b) -> a + b, Function.identity()))
+                    }, Integer::sum, Function.identity()))
                     .run();
         } catch (Exception e) {
             fail("Exception thrown directly from stream, it should have been captured by the returned CompletionStage",
                     e);
         }
         awaitCompletion(cancelled);
-        awaitCompletion(result);
+        CompletionStage<Integer> actual = result;
+        assertThrows(QuietRuntimeException.class, () -> this.awaitCompletion(actual));
     }
 
 }

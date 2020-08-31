@@ -1,21 +1,23 @@
 package io.smallrye.mutiny.operators;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Uni;
 
 public class UniOnFailureRetryTest {
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testInvalidNumberOfAttempts() {
-        Uni.createFrom().nothing().onFailure().retry().atMost(-10);
+        assertThrows(IllegalArgumentException.class, () -> Uni.createFrom().nothing().onFailure().retry().atMost(-10));
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testInvalidNumberOfAttemptsWithZero() {
-        Uni.createFrom().nothing().onFailure().retry().atMost(0);
+        assertThrows(IllegalArgumentException.class, () -> Uni.createFrom().nothing().onFailure().retry().atMost(0));
     }
 
     @Test

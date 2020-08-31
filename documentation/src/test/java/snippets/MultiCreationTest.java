@@ -6,7 +6,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
 import io.smallrye.mutiny.subscription.MultiSubscriber;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 

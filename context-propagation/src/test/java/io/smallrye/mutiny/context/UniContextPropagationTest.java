@@ -1,6 +1,7 @@
 package io.smallrye.mutiny.context;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
@@ -8,34 +9,35 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import org.testng.Assert;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.AfterSuite;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.*;
 
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 
 public class UniContextPropagationTest {
 
-    private ExecutorService executor = Executors.newFixedThreadPool(4);
+    private static ExecutorService executor;
 
-    @BeforeMethod
+    @BeforeEach
     public void initContext() {
         Infrastructure.clearInterceptors();
         Infrastructure.reloadUniInterceptors();
         MyContext.init();
     }
 
-    @AfterMethod
+    @AfterEach
     public void clearContext() {
         Infrastructure.clearInterceptors();
         MyContext.clear();
     }
 
-    @AfterSuite
-    public void shutdown() {
+    @BeforeAll
+    public static void init() {
+        executor = Executors.newFixedThreadPool(4);
+    }
+
+    @AfterAll
+    public static void shutdown() {
         executor.shutdown();
     }
 
@@ -119,7 +121,7 @@ public class UniContextPropagationTest {
         CompletableFuture<Integer> cf = new CompletableFuture<>();
         new Thread(() -> {
             try {
-                Assert.assertNull(MyContext.get());
+                assertNull(MyContext.get());
                 int result = cs2.get();
                 cf.complete(result);
             } catch (Throwable t) {

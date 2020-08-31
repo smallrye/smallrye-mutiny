@@ -2,6 +2,7 @@ package io.smallrye.mutiny.groups;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -12,7 +13,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
@@ -70,23 +71,25 @@ public class UniOnFailureRetryTest {
                 .anySatisfy(t -> assertThat(t).isInstanceOf(IOException.class).hasMessage("another-boom"));
     }
 
-    @Test(expectedExceptions = IllegalStateException.class, expectedExceptionsMessageRegExp = ".*damned.*")
+    @Test
     public void testRetryWhenWithFailureInTriggerStream() {
-        AtomicInteger count = new AtomicInteger();
-        Uni.createFrom().<String> emitter(e -> {
-            int attempt = count.getAndIncrement();
-            if (attempt == 0) {
-                e.fail(new Exception("boom"));
-            } else if (attempt == 1) {
-                e.fail(new IOException("another-boom"));
-            } else {
-                e.complete("done");
-            }
-        })
-                .onFailure().retry().when(stream -> stream
-                        .onItem().transformToUni(f -> Uni.createFrom().failure(new IllegalStateException("damned!")))
-                        .concatenate())
-                .await().atMost(Duration.ofSeconds(5));
+        assertThrows(IllegalStateException.class, () -> {
+            AtomicInteger count = new AtomicInteger();
+            Uni.createFrom().<String> emitter(e -> {
+                int attempt = count.getAndIncrement();
+                if (attempt == 0) {
+                    e.fail(new Exception("boom"));
+                } else if (attempt == 1) {
+                    e.fail(new IOException("another-boom"));
+                } else {
+                    e.complete("done");
+                }
+            })
+                    .onFailure().retry().when(stream -> stream
+                            .onItem().transformToUni(f -> Uni.createFrom().failure(new IllegalStateException("damned!")))
+                            .concatenate())
+                    .await().atMost(Duration.ofSeconds(5));
+        });
     }
 
     @Test
@@ -167,55 +170,59 @@ public class UniOnFailureRetryTest {
         assertThat(value).isEqualTo("done");
     }
 
-    @Test(expectedExceptions = IllegalStateException.class, expectedExceptionsMessageRegExp = ".*4/4.*")
+    @Test
     public void testRetryWithBackOffReachingMaxAttempt() {
-        AtomicInteger count = new AtomicInteger();
-        Uni.createFrom().<String> emitter(e -> {
-            e.fail(new Exception("boom " + count.getAndIncrement()));
-        })
-                .onFailure().retry().withBackOff(Duration.ofMillis(10), Duration.ofSeconds(20)).withJitter(1.0)
-                .atMost(4)
-                .await().atMost(Duration.ofSeconds(5));
+        assertThrows(IllegalStateException.class, () -> {
+            AtomicInteger count = new AtomicInteger();
+            Uni.createFrom().<String> emitter(e -> {
+                e.fail(new Exception("boom " + count.getAndIncrement()));
+            })
+                    .onFailure().retry().withBackOff(Duration.ofMillis(10), Duration.ofSeconds(20)).withJitter(1.0)
+                    .atMost(4)
+                    .await().atMost(Duration.ofSeconds(5));
+        });
     }
 
-    @Test(expectedExceptions = IllegalStateException.class, expectedExceptionsMessageRegExp = ".* attempts.*")
+    @Test
     public void testRetryWithBackOffReachingExpiresIn() {
-        AtomicInteger count = new AtomicInteger();
-        Uni.createFrom().<String> emitter(e -> {
-            e.fail(new Exception("boom " + count.getAndIncrement()));
-        })
-                .onFailure().retry().withBackOff(Duration.ofMillis(10), Duration.ofSeconds(20)).withJitter(1.0)
-                .expireIn(90L)
-                .await().atMost(Duration.ofSeconds(5));
+        assertThrows(IllegalStateException.class, () -> {
+            AtomicInteger count = new AtomicInteger();
+            Uni.createFrom().<String> emitter(e -> {
+                e.fail(new Exception("boom " + count.getAndIncrement()));
+            })
+                    .onFailure().retry().withBackOff(Duration.ofMillis(10), Duration.ofSeconds(20)).withJitter(1.0)
+                    .expireIn(90L)
+                    .await().atMost(Duration.ofSeconds(5));
+        });
     }
 
-    @Test(expectedExceptions = IllegalStateException.class, expectedExceptionsMessageRegExp = ".* attempts.*")
+    @Test
     public void testRetryWithBackOffReachingExpiresAt() {
-        AtomicInteger count = new AtomicInteger();
-        Uni.createFrom().<String> emitter(e -> {
-            e.fail(new Exception("boom " + count.getAndIncrement()));
-        })
-                .onFailure().retry().withBackOff(Duration.ofMillis(10), Duration.ofSeconds(20)).withJitter(1.0)
-                .expireAt(System.currentTimeMillis() + 90L)
-                .await().atMost(Duration.ofSeconds(5));
+        assertThrows(IllegalStateException.class, () -> {
+            AtomicInteger count = new AtomicInteger();
+            Uni.createFrom().<String> emitter(e -> e.fail(new Exception("boom " + count.getAndIncrement())))
+                    .onFailure().retry().withBackOff(Duration.ofMillis(10), Duration.ofSeconds(20)).withJitter(1.0)
+                    .expireAt(System.currentTimeMillis() + 90L)
+                    .await().atMost(Duration.ofSeconds(5));
+        });
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testThatYouCannotUseWhenIfBackoffIsConfigured() {
-        Uni.createFrom().item("hello")
-                .onFailure().retry().withBackOff(Duration.ofSeconds(1)).when(t -> Multi.createFrom().item(t));
+        assertThrows(IllegalArgumentException.class, () -> Uni.createFrom().item("hello")
+                .onFailure().retry().withBackOff(Duration.ofSeconds(1)).when(t -> Multi.createFrom().item(t)));
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testExpireAtThatYouCannotUseWhenIfBackoffIsNotConfigured() {
-        Uni.createFrom().item("hello")
-                .onFailure().retry().expireAt(1L);
+        assertThrows(IllegalArgumentException.class, () -> Uni.createFrom().item("hello")
+                .onFailure().retry().expireAt(1L));
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testExpireInThatYouCannotUseWhenIfBackoffIsNotConfigured() {
-        Uni.createFrom().item("hello")
-                .onFailure().retry().expireIn(1L);
+        assertThrows(IllegalArgumentException.class, () -> Uni.createFrom().item("hello")
+                .onFailure().retry().expireIn(1L));
     }
 
     static class ThrowablePredicate implements Predicate<Throwable> {

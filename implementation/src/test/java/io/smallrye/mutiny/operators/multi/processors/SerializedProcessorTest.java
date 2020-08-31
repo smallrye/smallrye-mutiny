@@ -11,9 +11,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
+import org.junit.jupiter.api.RepeatedTest;
+import org.junit.jupiter.api.Test;
 import org.reactivestreams.Processor;
 import org.reactivestreams.Subscription;
-import org.testng.annotations.Test;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.helpers.Subscriptions;
@@ -104,7 +105,7 @@ public class SerializedProcessorTest {
         processor.onComplete();
     }
 
-    @Test(invocationCount = 100)
+    @RepeatedTest(100)
     public void verifyOnNextThreadSafety() {
         final Processor<Integer, Integer> processor = UnicastProcessor.<Integer> create().serialized();
         AssertSubscriber<Integer> subscriber = AssertSubscriber.create(100);
@@ -129,7 +130,7 @@ public class SerializedProcessorTest {
         assertThat(items).hasSize(2).contains(1, 2);
     }
 
-    @Test(invocationCount = 100)
+    @RepeatedTest(100)
     public void verifyOnErrorThreadSafety() {
         Exception failure = new Exception("boom");
         final Processor<Integer, Integer> processor = UnicastProcessor.<Integer> create().serialized();
@@ -151,7 +152,7 @@ public class SerializedProcessorTest {
                 .assertHasFailedWith(Exception.class, "boom");
     }
 
-    @Test(invocationCount = 100)
+    @RepeatedTest(100)
     public void verifyOnNextOnErrorThreadSafety() {
         Exception failure = new Exception("boom");
         final Processor<Integer, Integer> processor = UnicastProcessor.<Integer> create().serialized();
@@ -183,7 +184,7 @@ public class SerializedProcessorTest {
         }
     }
 
-    @Test(invocationCount = 100)
+    @RepeatedTest(100)
     public void verifyOnNextOnCompleteThreadSafety() {
         final Processor<Integer, Integer> processor = UnicastProcessor.<Integer> create().serialized();
         AssertSubscriber<Integer> subscriber = AssertSubscriber.create(100);
@@ -211,7 +212,7 @@ public class SerializedProcessorTest {
         }
     }
 
-    @Test(invocationCount = 100)
+    @RepeatedTest(100)
     public void verifyOnSubscribeOnCompleteThreadSafety() {
         final Processor<Integer, Integer> processor = UnicastProcessor.<Integer> create().serialized();
         AssertSubscriber<Integer> subscriber = AssertSubscriber.create(100);
@@ -239,7 +240,7 @@ public class SerializedProcessorTest {
         }
     }
 
-    @Test(invocationCount = 100)
+    @RepeatedTest(100)
     public void verifyOnSubscribeOnSubscribeThreadSafety() throws InterruptedException {
         final Processor<Integer, Integer> processor = UnicastProcessor.<Integer> create().serialized();
         AssertSubscriber<Integer> subscriber = AssertSubscriber.create(100);
@@ -267,7 +268,7 @@ public class SerializedProcessorTest {
                 .assertSubscribed();
     }
 
-    @Test(invocationCount = 100)
+    @RepeatedTest(100)
     public void verifyOnFailureOnCompleteThreadSafety() {
         final Processor<Integer, Integer> processor = UnicastProcessor.<Integer> create().serialized();
         AssertSubscriber<Integer> subscriber = AssertSubscriber.create(100);
@@ -295,7 +296,7 @@ public class SerializedProcessorTest {
         }
     }
 
-    @Test(invocationCount = 100)
+    @RepeatedTest(100)
     public void verifyOnFailureOnFailureThreadSafety() {
         final Processor<Integer, Integer> processor = UnicastProcessor.<Integer> create().serialized();
         AssertSubscriber<Integer> subscriber = AssertSubscriber.create(100);
@@ -326,7 +327,7 @@ public class SerializedProcessorTest {
         verify(subscription).cancel();
     }
 
-    @Test(invocationCount = 100)
+    @RepeatedTest(100)
     public void testRaceBetweenOnNextAndOnComplete() {
         final Processor<Integer, Integer> processor = UnicastProcessor.<Integer> create().serialized();
         AssertSubscriber<Integer> subscriber = AssertSubscriber.create(100);
@@ -358,7 +359,7 @@ public class SerializedProcessorTest {
 
     }
 
-    @Test(invocationCount = 100)
+    @RepeatedTest(100)
     public void testRaceBetweenOnNextAndOnSubscribe() {
         final Processor<Integer, Integer> processor = UnicastProcessor.<Integer> create().serialized();
         AssertSubscriber<Integer> subscriber = AssertSubscriber.create(100);

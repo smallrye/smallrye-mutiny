@@ -1,14 +1,15 @@
 package io.smallrye.mutiny.operators;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 
+import org.junit.jupiter.api.Test;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
-import org.testng.annotations.Test;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.helpers.MultiSubscribers;
@@ -37,18 +38,20 @@ public class MultiIgnoreTest {
         assertThat(future.join()).isNull();
     }
 
-    @Test(expectedExceptions = CompletionException.class, expectedExceptionsMessageRegExp = ".*boom.*")
+    @Test
     public void testAsUniWithFailure() {
-        CompletableFuture<Void> future = Multi.createFrom().items(1, 2, 3, 4)
-                .onItem().transform(i -> {
-                    if (i == 3) {
-                        throw new RuntimeException("boom");
-                    }
-                    return i;
-                })
-                .onItem().ignoreAsUni()
-                .subscribeAsCompletionStage();
-        assertThat(future.join()).isNull();
+        assertThrows(CompletionException.class, () -> {
+            CompletableFuture<Void> future = Multi.createFrom().items(1, 2, 3, 4)
+                    .onItem().transform(i -> {
+                        if (i == 3) {
+                            throw new RuntimeException("boom");
+                        }
+                        return i;
+                    })
+                    .onItem().ignoreAsUni()
+                    .subscribeAsCompletionStage();
+            assertThat(future.join()).isNull();
+        });
     }
 
     @Test
@@ -70,10 +73,12 @@ public class MultiIgnoreTest {
         future.cancel(true);
     }
 
-    @Test(expectedExceptions = NullPointerException.class)
+    @Test
     public void testSubscriberCannotBeNull() {
-        MultiIgnoreOp<Integer> ignore = new MultiIgnoreOp<>(Multi.createFrom().items(1, 2, 3, 4));
-        ignore.subscribe(null);
+        assertThrows(NullPointerException.class, () -> {
+            MultiIgnoreOp<Integer> ignore = new MultiIgnoreOp<>(Multi.createFrom().items(1, 2, 3, 4));
+            ignore.subscribe(null);
+        });
     }
 
     @Test

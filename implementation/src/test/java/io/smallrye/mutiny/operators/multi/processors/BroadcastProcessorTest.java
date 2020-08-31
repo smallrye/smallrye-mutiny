@@ -11,9 +11,10 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.RepeatedTest;
+import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.subscription.BackPressureFailure;
@@ -23,12 +24,12 @@ public class BroadcastProcessorTest {
 
     private ExecutorService executor;
 
-    @BeforeMethod
+    @BeforeEach
     public void setup() {
         executor = Executors.newFixedThreadPool(4);
     }
 
-    @AfterMethod
+    @AfterEach
     public void cleanup() {
         executor.shutdownNow();
     }
@@ -379,7 +380,7 @@ public class BroadcastProcessorTest {
         subscriber1.assertHasNotReceivedAnyItem().assertNotTerminated();
     }
 
-    @Test(invocationCount = 100)
+    @RepeatedTest(100)
     public void testCompletionRace() {
         BroadcastProcessor<Integer> processor = BroadcastProcessor.create();
         AssertSubscriber<Object> subscriber = AssertSubscriber.create(1);
@@ -400,7 +401,7 @@ public class BroadcastProcessorTest {
         subscriber.await(Duration.ofSeconds(5)).assertCompletedSuccessfully();
     }
 
-    @Test(invocationCount = 100)
+    @RepeatedTest(100)
     public void testCompletionVsSubscriptionRace() throws InterruptedException {
         BroadcastProcessor<Integer> processor = BroadcastProcessor.create();
         AssertSubscriber<Object> subscriber = AssertSubscriber.create(1);

@@ -2,15 +2,17 @@ package io.smallrye.mutiny.tuples;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.Arrays;
 import java.util.Collections;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
 public class Tuple8Test {
 
-    private Tuple8<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer> someTuple = new Tuple8<>(1, 2, 3, 4,
+    private final Tuple8<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer> someTuple = new Tuple8<>(1,
+            2, 3, 4,
             5, 6, 7, 8);
 
     @Test
@@ -40,14 +42,14 @@ public class Tuple8Test {
         assertThat(someTuple.mapItem8(i -> i + 1)).containsExactly(1, 2, 3, 4, 5, 6, 7, 9);
     }
 
-    @Test(expectedExceptions = IndexOutOfBoundsException.class)
+    @Test
     public void testAccessingNegative() {
-        someTuple.nth(-1);
+        assertThrows(IndexOutOfBoundsException.class, () -> someTuple.nth(-1));
     }
 
-    @Test(expectedExceptions = IndexOutOfBoundsException.class)
+    @Test
     public void testAccessingOutOfIndex() {
-        someTuple.nth(10);
+        assertThrows(IndexOutOfBoundsException.class, () -> someTuple.nth(10));
     }
 
     @Test
@@ -82,9 +84,11 @@ public class Tuple8Test {
 
     @Test
     public void testHashCode() {
-        Tuple8<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer> same = Tuple8.of(1, 2, 3, 4, 5, 6, 7, 8);
-        Tuple8<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer> different = Tuple8.of(1, 2, 1, 4, 6, 7,
-                8, 10);
+        Tuple8<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer> same = Tuple8
+                .of(1, 2, 3, 4, 5, 6, 7, 8);
+        Tuple8<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer> different = Tuple8
+                .of(1, 2, 1, 4, 6, 7,
+                        8, 10);
 
         assertThat(someTuple.hashCode())
                 .isEqualTo(same.hashCode())

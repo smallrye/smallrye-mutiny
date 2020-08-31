@@ -2,7 +2,7 @@ package io.smallrye.mutiny.converters;
 
 import java.io.IOException;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.converters.multi.MultiReactorConverters;

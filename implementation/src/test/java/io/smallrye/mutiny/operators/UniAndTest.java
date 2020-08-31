@@ -1,6 +1,7 @@
 package io.smallrye.mutiny.operators;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -9,7 +10,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.TimeoutException;
@@ -40,13 +41,15 @@ public class UniAndTest {
         subscriber.assertFailure(IOException.class, "boom");
     }
 
-    @Test(expectedExceptions = TimeoutException.class)
+    @Test
     public void testWithNever() {
-        Uni<Tuple3<Integer, Integer, Object>> tuple = Uni.combine().all().unis(
-                Uni.createFrom().item(1),
-                Uni.createFrom().item(2),
-                Uni.createFrom().nothing()).asTuple();
-        tuple.await().atMost(Duration.ofMillis(1000));
+        assertThrows(TimeoutException.class, () -> {
+            Uni<Tuple3<Integer, Integer, Object>> tuple = Uni.combine().all().unis(
+                    Uni.createFrom().item(1),
+                    Uni.createFrom().item(2),
+                    Uni.createFrom().nothing()).asTuple();
+            tuple.await().atMost(Duration.ofMillis(100));
+        });
     }
 
     @Test

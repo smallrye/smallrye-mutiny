@@ -1,11 +1,12 @@
 package io.smallrye.mutiny.groups;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.List;
 
+import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
-import org.testng.annotations.Test;
 
 import io.smallrye.mutiny.Multi;
 
@@ -25,14 +26,14 @@ public class MultiConvertTest {
         assertThat(items).isSameAs(publisher);
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testThatConverterCannotBeNull() {
-        Multi.createFrom().items(1, 2, 3).convert().with(null);
+        assertThrows(IllegalArgumentException.class, () -> Multi.createFrom().items(1, 2, 3).convert().with(null));
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testThatUpstreamCannotBeNull() {
-        new MultiConvert<>(null);
+        assertThrows(IllegalArgumentException.class, () -> new MultiConvert<>(null));
     }
 
 }

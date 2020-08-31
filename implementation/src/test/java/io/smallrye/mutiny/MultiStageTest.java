@@ -1,12 +1,13 @@
 package io.smallrye.mutiny;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
 public class MultiStageTest {
 
@@ -41,18 +42,18 @@ public class MultiStageTest {
         assertThat(result).containsExactly("2", "3", "4");
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testThatFunctionMustNotBeNull() {
-        Multi.createFrom().item(1)
-                .stage(null);
+        assertThrows(IllegalArgumentException.class, () -> Multi.createFrom().item(1)
+                .stage(null));
     }
 
-    @Test(expectedExceptions = IllegalStateException.class, expectedExceptionsMessageRegExp = ".*boom.*")
+    @Test
     public void testThatFunctionMustNotThrowException() {
-        Multi.createFrom().item(1)
+        assertThrows(IllegalStateException.class, () -> Multi.createFrom().item(1)
                 .stage(i -> {
                     throw new IllegalStateException("boom");
-                });
+                }));
     }
 
     @Test
@@ -62,7 +63,8 @@ public class MultiStageTest {
                 .stage(self -> self
                         .onItem().transform(i -> i + 1)
                         .onFailure().retry().indefinitely())
-                .stage(self -> self.onItem().transformToUni(i -> Uni.createFrom().item(Integer.toString(i))).concatenate())
+                .stage(self -> self.onItem().transformToUni(i -> Uni.createFrom().item(Integer.toString(i)))
+                        .concatenate())
                 .stage(self -> {
                     String r = self.collectItems().first().await().indefinitely();
                     result.set(r);

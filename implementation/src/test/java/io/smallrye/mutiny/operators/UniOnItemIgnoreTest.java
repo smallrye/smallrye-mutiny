@@ -1,16 +1,18 @@
 package io.smallrye.mutiny.operators;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
 import org.assertj.core.api.Assertions;
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Uni;
 
+@SuppressWarnings("ConstantConditions")
 public class UniOnItemIgnoreTest {
 
     @Test
@@ -19,11 +21,11 @@ public class UniOnItemIgnoreTest {
                 .onItem().ignore().andContinueWithNull().await().indefinitely()).isNull();
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testIgnoreOnFailure() {
-        Uni.createFrom().item(24).map(i -> {
+        assertThrows(IllegalArgumentException.class, () -> Uni.createFrom().item(24).map(i -> {
             throw new IllegalArgumentException("BOOM");
-        }).onItem().ignore().andContinueWithNull().await().indefinitely();
+        }).onItem().ignore().andContinueWithNull().await().indefinitely());
     }
 
     @Test
@@ -35,7 +37,8 @@ public class UniOnItemIgnoreTest {
 
     @Test
     public void testIgnoreAndFailWith() {
-        UniAssertSubscriber<Integer> subscriber = Uni.createFrom().item(22).onItem().ignore().andFail(new IOException("boom"))
+        UniAssertSubscriber<Integer> subscriber = Uni.createFrom().item(22).onItem().ignore()
+                .andFail(new IOException("boom"))
                 .subscribe()
                 .withSubscriber(UniAssertSubscriber.create());
         subscriber.assertFailure(IOException.class, "boom");
@@ -52,14 +55,16 @@ public class UniOnItemIgnoreTest {
         s2.assertFailure(IOException.class, "boom 2");
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testIgnoreAndFailWithWithNullFailure() {
-        Uni.createFrom().item(22).onItem().ignore().andFail((Exception) null);
+        assertThrows(IllegalArgumentException.class,
+                () -> Uni.createFrom().item(22).onItem().ignore().andFail((Exception) null));
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testIgnoreAndFailWithWithNullSupplier() {
-        Uni.createFrom().item(22).onItem().ignore().andFail((Supplier<Throwable>) null);
+        assertThrows(IllegalArgumentException.class,
+                () -> Uni.createFrom().item(22).onItem().ignore().andFail((Supplier<Throwable>) null));
     }
 
     @Test
@@ -78,7 +83,8 @@ public class UniOnItemIgnoreTest {
 
     @Test
     public void testIgnoreAndContinueWithValueSupplierReturningNull() {
-        Assertions.assertThat(Uni.createFrom().item(24).onItem().ignore().andContinueWith(() -> null).await().indefinitely())
+        Assertions.assertThat(
+                Uni.createFrom().item(24).onItem().ignore().andContinueWith(() -> null).await().indefinitely())
                 .isEqualTo(null);
     }
 
@@ -100,13 +106,15 @@ public class UniOnItemIgnoreTest {
         assertThat(uni.await().indefinitely()).isEqualTo(2);
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testIgnoreAndSwitchToNullSupplier() {
-        Uni.createFrom().item(22).onItem().ignore().andSwitchTo((Supplier<Uni<?>>) null);
+        assertThrows(IllegalArgumentException.class,
+                () -> Uni.createFrom().item(22).onItem().ignore().andSwitchTo((Supplier<Uni<?>>) null));
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testIgnoreAndSwitchToNull() {
-        Uni.createFrom().item(22).onItem().ignore().andSwitchTo((Uni<?>) null);
+        assertThrows(IllegalArgumentException.class,
+                () -> Uni.createFrom().item(22).onItem().ignore().andSwitchTo((Uni<?>) null));
     }
 }

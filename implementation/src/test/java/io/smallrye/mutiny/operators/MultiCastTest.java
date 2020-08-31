@@ -1,16 +1,18 @@
 package io.smallrye.mutiny.operators;
 
-import org.testng.annotations.Test;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.test.AssertSubscriber;
 
 public class MultiCastTest {
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testThatClassCannotBeNull() {
-        Multi.createFrom().item(1)
-                .onItem().castTo(null);
+        assertThrows(IllegalArgumentException.class, () -> Multi.createFrom().item(1)
+                .onItem().castTo(null));
     }
 
     @Test

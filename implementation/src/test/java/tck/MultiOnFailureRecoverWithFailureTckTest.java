@@ -1,7 +1,6 @@
 package tck;
 
 import java.util.function.Function;
-import java.util.stream.LongStream;
 
 import org.reactivestreams.Publisher;
 
@@ -11,7 +10,7 @@ public class MultiOnFailureRecoverWithFailureTckTest extends AbstractPublisherTc
 
     @Override
     public Publisher<Long> createPublisher(long elements) {
-        return Multi.createFrom().items(LongStream.rangeClosed(1, elements).boxed())
+        return Multi.createFrom().iterable(iterate(elements))
                 .onFailure().recoverWithMulti(t -> {
                     if (t instanceof RuntimeException) {
                         throw (RuntimeException) t;

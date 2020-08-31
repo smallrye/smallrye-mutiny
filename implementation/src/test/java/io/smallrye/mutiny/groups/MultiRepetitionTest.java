@@ -1,6 +1,7 @@
 package io.smallrye.mutiny.groups;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -9,7 +10,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
@@ -85,22 +86,23 @@ public class MultiRepetitionTest {
         subscriber.assertHasFailedWith(NullPointerException.class, "supplier");
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testThatStateSupplierCannotBeNullWithEmitterWithSharedState() {
-        Multi.createBy().repeating().uni(null,
+        assertThrows(IllegalArgumentException.class, () -> Multi.createBy().repeating().uni(null,
                 (x, emitter) -> {
-                });
+                }));
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testThatFunctionCannotBeNullWithEmitterWithSharedState() {
-        Multi.createBy().repeating().uni(() -> "hello",
-                (BiConsumer<String, UniEmitter<? super String>>) null);
+        assertThrows(IllegalArgumentException.class, () -> Multi.createBy().repeating().uni(() -> "hello",
+                (BiConsumer<String, UniEmitter<? super String>>) null));
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testThatFunctionCannotBeNullWithEmitter() {
-        Multi.createBy().repeating().uni((Consumer<UniEmitter<? super Object>>) null);
+        assertThrows(IllegalArgumentException.class,
+                () -> Multi.createBy().repeating().uni((Consumer<UniEmitter<? super Object>>) null));
     }
 
     @Test
@@ -191,16 +193,17 @@ public class MultiRepetitionTest {
         subscriber.assertHasFailedWith(NullPointerException.class, "supplier");
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testThatStateSupplierCannotBeNullWithUniWithSharedState() {
-        Multi.createBy().repeating().uni(null,
+        assertThrows(IllegalArgumentException.class, () -> Multi.createBy().repeating().uni(null,
                 (x, emitter) -> {
-                });
+                }));
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testThatFunctionCannotBeNullWithUniWithSharedState() {
-        Multi.createBy().repeating().uni(() -> "hello", (Function<String, Uni<? extends String>>) null);
+        assertThrows(IllegalArgumentException.class,
+                () -> Multi.createBy().repeating().uni(() -> "hello", (Function<String, Uni<? extends String>>) null));
     }
 
     @Test
@@ -293,16 +296,17 @@ public class MultiRepetitionTest {
         subscriber.assertTerminated().assertCompletedSuccessfully().assertHasNotReceivedAnyItem();
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testThatStateSupplierCannotBeNullWithCompletionStageWithSharedState() {
-        Multi.createBy().repeating().completionStage(null,
-                x -> CompletableFuture.completedFuture(1));
+        assertThrows(IllegalArgumentException.class, () -> Multi.createBy().repeating().completionStage(null,
+                x -> CompletableFuture.completedFuture(1)));
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testThatFunctionCannotBeNullWithCompletionStageWithSharedState() {
-        Multi.createBy().repeating().completionStage(() -> "hello",
-                (Function<String, CompletableFuture<? extends String>>) null);
+        assertThrows(IllegalArgumentException.class, () -> Multi.createBy().repeating().completionStage(() -> "hello",
+                (Function<String, CompletableFuture<? extends String>>) null));
+
     }
 
     @Test

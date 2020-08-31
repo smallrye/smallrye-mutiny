@@ -36,6 +36,11 @@
             <groupId>io.smallrye.reactive</groupId>
             <artifactId>mutiny-test-utils</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -69,6 +74,12 @@
                                 <exclude>**/tck/SubscriberWhitebox*</exclude>
                             </excludes>
                             <junitArtifactName>none:none</junitArtifactName>
+                            <properties>
+                                <property>
+                                    <name>surefire.testng.verbose</name>
+                                    <value>10</value>
+                                </property>
+                            </properties>
                         </configuration>
                     </execution>
                 </executions>

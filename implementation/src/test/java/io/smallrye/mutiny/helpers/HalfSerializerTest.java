@@ -12,9 +12,10 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.junit.jupiter.api.RepeatedTest;
+import org.junit.jupiter.api.Test;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
-import org.testng.annotations.Test;
 
 import io.smallrye.mutiny.subscription.MultiSubscriber;
 import io.smallrye.mutiny.test.AssertSubscriber;
@@ -139,7 +140,7 @@ public class HalfSerializerTest {
         test.assertHasFailedWith(IOException.class, "test");
     }
 
-    @Test(invocationCount = 1000)
+    @RepeatedTest(100)
     public void testOnNextOnCompleteRace() throws InterruptedException {
         AtomicInteger wip = new AtomicInteger();
         AtomicReference<Throwable> failure = new AtomicReference<>();
@@ -168,7 +169,7 @@ public class HalfSerializerTest {
         assertThat(test.items()).hasSizeBetween(0, 1);
     }
 
-    @Test(invocationCount = 1000)
+    @RepeatedTest(100)
     public void testOnErrorOnCompleteRace() throws InterruptedException {
         AtomicInteger wip = new AtomicInteger();
         AtomicReference<Throwable> failure = new AtomicReference<>();

@@ -10,14 +10,15 @@ import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.RepeatedTest;
+import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
-import org.testng.TestException;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
+import io.smallrye.mutiny.TestException;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.test.AssertSubscriber;
 import io.smallrye.mutiny.test.Mocks;
@@ -26,12 +27,12 @@ public class SerializedSubscriberTest {
 
     Subscriber<Integer> subscriber;
 
-    @BeforeMethod
+    @BeforeEach
     public void before() {
         subscriber = Mocks.subscriber(Long.MAX_VALUE);
     }
 
-    @AfterMethod
+    @AfterEach
     public void clean() {
         Infrastructure.resetDroppedExceptionHandler();
     }
@@ -95,7 +96,7 @@ public class SerializedSubscriberTest {
         assertThat(busy.maxConcurrentThreads.get()).isEqualTo(1);
     }
 
-    @Test(invocationCount = 10)
+    @RepeatedTest(10)
     public void testMultiThreadedEmissionWithFailureInTheMiddleOfTheStream() throws InterruptedException {
         MultiThreadedPublisher publisher = new MultiThreadedPublisher(1, 2, 3, -1, 4, 5, 6, 7, 8, 9);
         BusySubscriber busy = new BusySubscriber();
@@ -280,7 +281,7 @@ public class SerializedSubscriberTest {
         }
     }
 
-    @Test(invocationCount = 10)
+    @RepeatedTest(10)
     public void testOnCompleteRace() {
         AssertSubscriber<Integer> subscriber = new AssertSubscriber<>(Long.MAX_VALUE);
         SerializedSubscriber<Integer> serialized = new SerializedSubscriber<>(subscriber);
@@ -298,7 +299,7 @@ public class SerializedSubscriberTest {
         subscriber.await().assertCompletedSuccessfully();
     }
 
-    @Test(invocationCount = 10)
+    @RepeatedTest(10)
     public void testOnNextOnCompleteRace() {
         AssertSubscriber<Integer> subscriber = new AssertSubscriber<>(Long.MAX_VALUE);
         SerializedSubscriber<Integer> serialized = new SerializedSubscriber<>(subscriber);
@@ -327,7 +328,7 @@ public class SerializedSubscriberTest {
         assertThat(subscriber.items()).hasSizeBetween(0, 1);
     }
 
-    @Test(invocationCount = 10)
+    @RepeatedTest(10)
     public void testOnNextOnErrorRace() {
         AssertSubscriber<Integer> subscriber = new AssertSubscriber<>(Long.MAX_VALUE);
         SerializedSubscriber<Integer> serialized = new SerializedSubscriber<>(subscriber);
@@ -356,7 +357,7 @@ public class SerializedSubscriberTest {
         assertThat(subscriber.items()).hasSizeBetween(0, 1);
     }
 
-    @Test(invocationCount = 10)
+    @RepeatedTest(10)
     public void testOnCompleteOnErrorRace() {
         AssertSubscriber<Integer> subscriber = new AssertSubscriber<>(Long.MAX_VALUE);
         SerializedSubscriber<Integer> serialized = new SerializedSubscriber<>(subscriber);

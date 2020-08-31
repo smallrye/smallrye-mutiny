@@ -1,6 +1,7 @@
 package io.smallrye.mutiny.operators;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -8,7 +9,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Uni;
@@ -25,10 +26,10 @@ public class UniOnItemOrFailureFlatMapTest {
     private final Uni<Integer> async_failed = Uni.createFrom()
             .emitter(e -> new Thread(() -> e.fail(new IOException("boom"))).start());
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testThatMapperIsNotNull() {
-        one.onItemOrFailure().transformToUni(
-                (Functions.TriConsumer<? super Integer, Throwable, UniEmitter<? super Object>>) null);
+        assertThrows(IllegalArgumentException.class, () -> one.onItemOrFailure().transformToUni(
+                (Functions.TriConsumer<? super Integer, Throwable, UniEmitter<? super Object>>) null));
     }
 
     @Test
@@ -134,7 +135,8 @@ public class UniOnItemOrFailureFlatMapTest {
         UniAssertSubscriber<Integer> test2 = UniAssertSubscriber.create();
         AtomicInteger count = new AtomicInteger(2);
         Uni<Integer> uni = one.onItemOrFailure()
-                .transformToUni((v, f) -> Uni.createFrom().deferred(() -> Uni.createFrom().item(count.incrementAndGet())));
+                .transformToUni(
+                        (v, f) -> Uni.createFrom().deferred(() -> Uni.createFrom().item(count.incrementAndGet())));
         uni.subscribe().withSubscriber(test1);
         uni.subscribe().withSubscriber(test2);
         test1.assertCompletedSuccessfully().assertItem(3).assertNoFailure();

@@ -2,22 +2,17 @@ package io.smallrye.mutiny.operators;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.time.Duration;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.Executors;
-import java.util.concurrent.RejectedExecutionException;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Uni;
 
@@ -27,7 +22,7 @@ public class UniOnItemDelayTest {
 
     private Uni<Void> delayed;
 
-    @BeforeMethod
+    @BeforeEach
     public void init() {
         executor = Executors.newScheduledThreadPool(4);
         delayed = Uni.createFrom().voidItem().onItem().delayIt()
@@ -35,14 +30,14 @@ public class UniOnItemDelayTest {
                 .by(Duration.ofMillis(100));
     }
 
-    @AfterMethod
+    @AfterEach
     public void shutdown() {
         executor.shutdown();
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testWithNullDuration() {
-        Uni.createFrom().item(1).onItem().delayIt().by(null);
+        assertThrows(IllegalArgumentException.class, () -> Uni.createFrom().item(1).onItem().delayIt().by(null));
     }
 
     @Test
@@ -62,18 +57,18 @@ public class UniOnItemDelayTest {
         assertThat(subscriber.getOnItemThreadName()).isNotEqualTo(Thread.currentThread().getName());
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testWithNegativeDuration() {
-        Uni.createFrom().item(1).onItem().delayIt()
+        assertThrows(IllegalArgumentException.class, () -> Uni.createFrom().item(1).onItem().delayIt()
                 .onExecutor(executor)
-                .by(Duration.ofDays(-1));
+                .by(Duration.ofDays(-1)));
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testWithZeroAsDuration() {
-        Uni.createFrom().item(1).onItem().delayIt()
+        assertThrows(IllegalArgumentException.class, () -> Uni.createFrom().item(1).onItem().delayIt()
                 .onExecutor(executor)
-                .by(Duration.ZERO);
+                .by(Duration.ZERO));
     }
 
     @Test

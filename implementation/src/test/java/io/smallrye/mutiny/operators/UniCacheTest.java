@@ -1,5 +1,7 @@
 package io.smallrye.mutiny.operators;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -11,7 +13,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
 import io.reactivex.Flowable;
 import io.reactivex.processors.UnicastProcessor;
@@ -69,9 +71,9 @@ public class UniCacheTest {
         }
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testThatSourceCannotBeNull() {
-        new UniCache<>(null);
+        assertThrows(IllegalArgumentException.class, () -> new UniCache<>(null));
     }
 
     @Test

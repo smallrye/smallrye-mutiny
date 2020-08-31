@@ -13,8 +13,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.junit.jupiter.api.RepeatedTest;
+import org.junit.jupiter.api.Test;
 import org.reactivestreams.Subscription;
-import org.testng.annotations.Test;
 
 import io.smallrye.mutiny.CompositeException;
 
@@ -86,7 +87,7 @@ public class SubscriptionsTest {
         verify(newSub).cancel();
     }
 
-    @Test(invocationCount = 1000)
+    @RepeatedTest(100)
     public void requestIfNotNullOrAccumulateRace() throws InterruptedException {
         AtomicReference<Subscription> container = new AtomicReference<>();
         Subscription subscription = mock(Subscription.class);
@@ -107,7 +108,7 @@ public class SubscriptionsTest {
         latch.await();
     }
 
-    @Test(invocationCount = 1000)
+    @RepeatedTest(100)
     public void setIfEmptyAndRequestRace() throws InterruptedException {
         final AtomicReference<Subscription> atomicSubscription = new AtomicReference<>();
         final AtomicLong r = new AtomicLong();

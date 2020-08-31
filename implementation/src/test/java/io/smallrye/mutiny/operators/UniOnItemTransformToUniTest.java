@@ -1,6 +1,7 @@
 package io.smallrye.mutiny.operators;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
@@ -9,7 +10,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Uni;
 
@@ -19,7 +20,8 @@ public class UniOnItemTransformToUniTest {
     @Test
     public void testTransformToUniWithImmediateValue() {
         UniAssertSubscriber<Integer> test = UniAssertSubscriber.create();
-        Uni.createFrom().item(1).onItem().transformToUni(v -> Uni.createFrom().item(2)).subscribe().withSubscriber(test);
+        Uni.createFrom().item(1).onItem().transformToUni(v -> Uni.createFrom().item(2)).subscribe()
+                .withSubscriber(test);
         test.assertCompletedSuccessfully().assertItem(2).assertNoFailure();
     }
 
@@ -52,14 +54,14 @@ public class UniOnItemTransformToUniTest {
         test.assertCompletedSuccessfully().assertItem(2).assertNoFailure();
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testTransformToUniShortcutThenWithNullSupplier() {
-        Uni.createFrom().item(1).then((Supplier<Uni<?>>) null);
+        assertThrows(IllegalArgumentException.class, () -> Uni.createFrom().item(1).then((Supplier<Uni<?>>) null));
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
-    public void testTransformToUniShortcutChainWithNullMApper() {
-        Uni.createFrom().item(1).chain(null);
+    @Test
+    public void testTransformToUniShortcutChainWithNullMapper() {
+        assertThrows(IllegalArgumentException.class, () -> Uni.createFrom().item(1).chain(null));
     }
 
     @Test
@@ -91,7 +93,8 @@ public class UniOnItemTransformToUniTest {
     public void testWithAnUniResolvedAsynchronously() {
         UniAssertSubscriber<Integer> test = UniAssertSubscriber.create();
         Uni<Integer> uni = Uni.createFrom().item(1).onItem()
-                .transformToUni(v -> Uni.createFrom().emitter(emitter -> new Thread(() -> emitter.complete(42)).start()));
+                .transformToUni(
+                        v -> Uni.createFrom().emitter(emitter -> new Thread(() -> emitter.complete(42)).start()));
         uni.subscribe().withSubscriber(test);
         test.await().assertCompletedSuccessfully().assertItem(42).assertNoFailure();
     }
@@ -144,9 +147,10 @@ public class UniOnItemTransformToUniTest {
         assertThat(called).isTrue();
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testThatTheMapperCannotBeNull() {
-        Uni.createFrom().item(1).onItem().transformToUni((Function<Integer, Uni<?>>) null);
+        assertThrows(IllegalArgumentException.class,
+                () -> Uni.createFrom().item(1).onItem().transformToUni((Function<Integer, Uni<?>>) null));
     }
 
     @Test
@@ -161,7 +165,8 @@ public class UniOnItemTransformToUniTest {
             }
         };
 
-        Uni<Integer> uni = Uni.createFrom().item(1).onItem().transformToUni(v -> Uni.createFrom().completionStage(future));
+        Uni<Integer> uni = Uni.createFrom().item(1).onItem()
+                .transformToUni(v -> Uni.createFrom().completionStage(future));
         uni.subscribe().withSubscriber(test);
         test.cancel();
         test.assertNotCompleted();

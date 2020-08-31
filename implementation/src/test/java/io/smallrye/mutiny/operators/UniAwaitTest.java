@@ -2,6 +2,7 @@ package io.smallrye.mutiny.operators;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.awaitility.Awaitility.await;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -9,24 +10,28 @@ import java.util.concurrent.CompletionException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 
 import io.smallrye.mutiny.TimeoutException;
 import io.smallrye.mutiny.Uni;
 
 public class UniAwaitTest {
 
-    @Test(timeOut = 1000)
+    @Test
+    @Timeout(1)
     public void testAwaitingOnAnAlreadyResolvedUni() {
         assertThat(Uni.createFrom().item(1).await().indefinitely()).isEqualTo(1);
     }
 
-    @Test(timeOut = 100)
+    @Test
+    @Timeout(10)
     public void testAwaitingOnAnAlreadyResolvedWitNullUni() {
         assertThat(Uni.createFrom().item((Object) null).await().indefinitely()).isNull();
     }
 
-    @Test(timeOut = 100)
+    @Test
+    @Timeout(10)
     public void testAwaitingOnAnAlreadyFailedUni() {
         try {
             Uni.createFrom().failure(new IOException("boom")).await().indefinitely();
@@ -36,14 +41,16 @@ public class UniAwaitTest {
         }
     }
 
-    @Test(timeOut = 1000)
+    @Test
+    @Timeout(10)
     public void testAwaitingOnAnAsyncUni() {
         assertThat(
                 Uni.createFrom().emitter(emitter -> new Thread(() -> emitter.complete(1)).start()).await()
                         .indefinitely()).isEqualTo(1);
     }
 
-    @Test(timeOut = 1000)
+    @Test
+    @Timeout(10)
     public void testAwaitingOnAnAsyncFailingUni() {
         try {
             Uni.createFrom().emitter(emitter -> new Thread(() -> emitter.fail(new IOException("boom"))).start()).await()
@@ -54,17 +61,20 @@ public class UniAwaitTest {
         }
     }
 
-    @Test(timeOut = 100)
+    @Test
+    @Timeout(10)
     public void testAwaitWithTimeOut() {
         assertThat(Uni.createFrom().item(1).await().atMost(Duration.ofMillis(1000))).isEqualTo(1);
     }
 
-    @Test(timeOut = 100, expectedExceptions = TimeoutException.class)
+    @Test
+    @Timeout(10)
     public void testTimeout() {
-        Uni.createFrom().nothing().await().atMost(Duration.ofMillis(10));
+        assertThrows(TimeoutException.class, () -> Uni.createFrom().nothing().await().atMost(Duration.ofMillis(10)));
     }
 
-    @Test(timeOut = 5000)
+    @Test
+    @Timeout(5)
     public void testInterruptedTimeout() {
         AtomicBoolean awaiting = new AtomicBoolean();
         AtomicReference<RuntimeException> exception = new AtomicReference<>();
@@ -115,9 +125,11 @@ public class UniAwaitTest {
                         .atMost(Duration.ofMillis(1000))).contains(1);
     }
 
-    @Test(timeOut = 100, expectedExceptions = TimeoutException.class)
+    @Test
+    @Timeout(1)
     public void testTimeoutAndOptional() {
-        Uni.createFrom().nothing().await().asOptional().atMost(Duration.ofMillis(10));
+        assertThrows(TimeoutException.class,
+                () -> Uni.createFrom().nothing().await().asOptional().atMost(Duration.ofMillis(10)));
     }
 
     @Test

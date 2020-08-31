@@ -2,13 +2,14 @@ package io.smallrye.mutiny.operators;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
 import java.time.Duration;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.groups.MultiRetry;
@@ -19,7 +20,7 @@ public class MultiOnFailureRetryTest {
     private AtomicInteger numberOfSubscriptions;
     private Multi<Integer> failing;
 
-    @BeforeMethod
+    @BeforeEach
     public void init() {
         numberOfSubscriptions = new AtomicInteger();
         failing = Multi.createFrom()
@@ -27,21 +28,21 @@ public class MultiOnFailureRetryTest {
                 .onSubscribe().invoke(s -> numberOfSubscriptions.incrementAndGet());
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testThatUpstreamCannotBeNull() {
-        new MultiRetry<>(null);
+        assertThrows(IllegalArgumentException.class, () -> new MultiRetry<>(null));
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testThatTheNumberOfAttemptMustBePositive() {
-        Multi.createFrom().nothing()
-                .onFailure().retry().atMost(-1);
+        assertThrows(IllegalArgumentException.class, () -> Multi.createFrom().nothing()
+                .onFailure().retry().atMost(-1));
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testThatTheNumberOfAttemptMustBePositive2() {
-        Multi.createFrom().nothing()
-                .onFailure().retry().atMost(0);
+        assertThrows(IllegalArgumentException.class, () -> Multi.createFrom().nothing()
+                .onFailure().retry().atMost(0));
     }
 
     @Test
@@ -123,22 +124,22 @@ public class MultiOnFailureRetryTest {
                 .assertReceived(1, 2, 3, 4);
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testThatYouCannotUseWhenIfBackoffIsConfigured() {
-        Multi.createFrom().item("hello")
-                .onFailure().retry().withBackOff(Duration.ofSeconds(1)).when(t -> Multi.createFrom().item(t));
+        assertThrows(IllegalArgumentException.class, () -> Multi.createFrom().item("hello")
+                .onFailure().retry().withBackOff(Duration.ofSeconds(1)).when(t -> Multi.createFrom().item(t)));
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testThatYouCannotUseUntilIfBackoffIsConfigured() {
-        Multi.createFrom().item("hello")
-                .onFailure().retry().withBackOff(Duration.ofSeconds(1)).until(t -> true);
+        assertThrows(IllegalArgumentException.class, () -> Multi.createFrom().item("hello")
+                .onFailure().retry().withBackOff(Duration.ofSeconds(1)).until(t -> true));
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testJitterValidation() {
-        Multi.createFrom().item("hello")
-                .onFailure().retry().withJitter(2);
+        assertThrows(IllegalArgumentException.class, () -> Multi.createFrom().item("hello")
+                .onFailure().retry().withJitter(2));
     }
 
 }

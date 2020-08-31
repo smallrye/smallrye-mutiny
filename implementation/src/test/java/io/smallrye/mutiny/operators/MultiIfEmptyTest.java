@@ -1,13 +1,15 @@
 package io.smallrye.mutiny.operators;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.NoSuchElementException;
 import java.util.function.Supplier;
 
+import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
-import org.testng.annotations.Test;
 
 import io.reactivex.Flowable;
 import io.smallrye.mutiny.Multi;
@@ -89,34 +91,34 @@ public class MultiIfEmptyTest {
                 .assertHasNotReceivedAnyItem();
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testIfEmptyContinueWithNullItem() {
-        Multi.createFrom().empty()
-                .onCompletion().ifEmpty().continueWith((Integer) null);
+        assertThrows(IllegalArgumentException.class, () -> Multi.createFrom().empty()
+                .onCompletion().ifEmpty().continueWith((Integer) null));
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testIfEmptyContinueWithNullAsIterable() {
-        Multi.createFrom().empty()
-                .onCompletion().ifEmpty().continueWith((Iterable<Integer>) null);
+        assertThrows(IllegalArgumentException.class, () -> Multi.createFrom().empty()
+                .onCompletion().ifEmpty().continueWith((Iterable<Integer>) null));
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testIfEmptyContinueWithItemsContainingNullItem() {
-        Multi.createFrom().empty()
-                .onCompletion().ifEmpty().continueWith(1, 2, 3, null, 4, 5);
+        assertThrows(IllegalArgumentException.class, () -> Multi.createFrom().empty()
+                .onCompletion().ifEmpty().continueWith(1, 2, 3, null, 4, 5));
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testIfEmptyContinueWithIterableContainingNullItem() {
-        Multi.createFrom().empty()
-                .onCompletion().ifEmpty().continueWith(Arrays.asList(1, 2, 3, null, 4, 5));
+        assertThrows(IllegalArgumentException.class, () -> Multi.createFrom().empty()
+                .onCompletion().ifEmpty().continueWith(Arrays.asList(1, 2, 3, null, 4, 5)));
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testIfEmptyContinueWithNullSupplier() {
-        Multi.createFrom().empty()
-                .onCompletion().ifEmpty().continueWith((Supplier<? extends Iterable<? extends Integer>>) null);
+        assertThrows(IllegalArgumentException.class, () -> Multi.createFrom().empty()
+                .onCompletion().ifEmpty().continueWith((Supplier<? extends Iterable<? extends Integer>>) null));
     }
 
     @Test
@@ -183,11 +185,10 @@ public class MultiIfEmptyTest {
                 .assertHasNotReceivedAnyItem();
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testIfEmptyFailWithNullException() {
-        Multi.createFrom().empty()
-                .onCompletion().ifEmpty().failWith((Throwable) null);
-
+        assertThrows(IllegalArgumentException.class, () -> Multi.createFrom().empty()
+                .onCompletion().ifEmpty().failWith((Throwable) null));
     }
 
     @Test
@@ -199,10 +200,10 @@ public class MultiIfEmptyTest {
                 .assertHasNotReceivedAnyItem();
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testIfEmptyFailWithNullSupplier() {
-        Multi.createFrom().empty()
-                .onCompletion().ifEmpty().failWith((Supplier<Throwable>) null);
+        assertThrows(IllegalArgumentException.class, () -> Multi.createFrom().empty()
+                .onCompletion().ifEmpty().failWith((Supplier<Throwable>) null));
     }
 
     @Test
@@ -250,16 +251,16 @@ public class MultiIfEmptyTest {
                 .assertHasNotReceivedAnyItem();
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testSwitchToWithConsumerBeingNull() {
-        Multi.createFrom().empty()
-                .onCompletion().ifEmpty().switchToEmitter(null);
+        assertThrows(IllegalArgumentException.class, () -> Multi.createFrom().empty()
+                .onCompletion().ifEmpty().switchToEmitter(null));
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testSwitchToWithSupplierBeingNull() {
-        Multi.createFrom().empty()
-                .onCompletion().ifEmpty().switchTo((Supplier<Publisher<?>>) null);
+        assertThrows(IllegalArgumentException.class, () -> Multi.createFrom().empty()
+                .onCompletion().ifEmpty().switchTo((Supplier<Publisher<?>>) null));
     }
 
     @Test

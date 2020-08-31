@@ -2,6 +2,7 @@ package io.smallrye.mutiny.streams.stages;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Fail.fail;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.List;
 import java.util.Objects;
@@ -15,7 +16,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.eclipse.microprofile.reactive.streams.operators.ReactiveStreams;
 import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 
@@ -66,14 +67,14 @@ public class FlatMapCompletionStageFactoryTest extends StageTestBase {
         return cf;
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test
     public void createWithoutStage() {
-        factory.create(null, null);
+        assertThrows(NullPointerException.class, () -> factory.create(null, null));
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test
     public void createWithoutFunction() {
-        factory.create(null, () -> null);
+        assertThrows(NullPointerException.class, () -> factory.create(null, () -> null));
     }
 
     @Test
@@ -99,7 +100,8 @@ public class FlatMapCompletionStageFactoryTest extends StageTestBase {
         }
     }
 
-    @Test(expected = NullPointerException.class)
+    @SuppressWarnings("ConstantConditions")
+    @Test
     public void testInjectingANullItem() {
         AtomicReference<Subscriber<? super String>> reference = new AtomicReference<>();
         Publisher<String> publisher = s -> {
@@ -113,17 +115,22 @@ public class FlatMapCompletionStageFactoryTest extends StageTestBase {
                 .run()
                 .toCompletableFuture();
 
-        reference.get().onNext(null);
+        assertThrows(NullPointerException.class, () -> {
+            reference.get().onNext(null);
+        });
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test
     public void flatMapCsStageShouldFailIfNullIsReturned() {
-        CompletableFuture<Void> cancelled = new CompletableFuture<>();
-        CompletionStage<List<Object>> result = this.infiniteStream()
-                .onTerminate(() -> cancelled.complete(null))
-                .flatMapCompletionStage(t -> CompletableFuture.completedFuture(null)).toList().run();
-        this.awaitCompletion(cancelled);
-        this.awaitCompletion(result);
+        assertThrows(NullPointerException.class, () -> {
+
+            CompletableFuture<Void> cancelled = new CompletableFuture<>();
+            CompletionStage<List<Object>> result = this.infiniteStream()
+                    .onTerminate(() -> cancelled.complete(null))
+                    .flatMapCompletionStage(t -> CompletableFuture.completedFuture(null)).toList().run();
+            this.awaitCompletion(cancelled);
+            this.awaitCompletion(result);
+        });
     }
 
 }

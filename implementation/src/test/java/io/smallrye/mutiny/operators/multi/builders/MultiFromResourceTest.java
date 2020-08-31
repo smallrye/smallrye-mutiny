@@ -1,6 +1,7 @@
 package io.smallrye.mutiny.operators.multi.builders;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -14,8 +15,8 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
-import org.testng.annotations.Test;
 
 import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Multi;
@@ -52,12 +53,12 @@ public class MultiFromResourceTest {
                 .assertHasNotReceivedAnyItem();
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testWithNullAsResourceSupplier() {
-        Multi.createFrom().resource(null,
+        assertThrows(IllegalArgumentException.class, () -> Multi.createFrom().resource(null,
                 s -> Multi.createFrom().items(s))
                 .withFinalizer(r -> {
-                });
+                }));
     }
 
     @Test
@@ -88,46 +89,52 @@ public class MultiFromResourceTest {
                 .assertHasNotReceivedAnyItem();
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testWithNullAsStreamSupplier() {
-        Multi.createFrom().resource(() -> "hello", null)
+        assertThrows(IllegalArgumentException.class, () -> Multi.createFrom().resource(() -> "hello", null)
                 .withFinalizer(r -> {
-                });
+                }));
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testWithNullAsFinalizer() {
-        Multi.createFrom().resource(() -> "hello", null)
-                .withFinalizer((Consumer<String>) null);
+        assertThrows(IllegalArgumentException.class, () -> Multi.createFrom().resource(() -> "hello", null)
+                .withFinalizer((Consumer<String>) null));
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testWithNullAsFinalizer2() {
-        Multi.createFrom().resource(() -> "hello", null)
-                .withFinalizer((Function<String, Uni<Void>>) null);
+        assertThrows(IllegalArgumentException.class, () -> Multi.createFrom().resource(() -> "hello", null)
+                .withFinalizer((Function<String, Uni<Void>>) null));
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testWithNullAsFinalizer3() {
-        Function<String, Uni<Void>> function = s -> Uni.createFrom().item(() -> null);
-        Multi.createFrom().resource(() -> "hello", null)
-                .withFinalizer(function, null, function);
+        assertThrows(IllegalArgumentException.class, () -> {
+            Function<String, Uni<Void>> function = s -> Uni.createFrom().item(() -> null);
+            Multi.createFrom().resource(() -> "hello", null)
+                    .withFinalizer(function, null, function);
+        });
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testWithNullAsFinalizer4() {
-        Function<String, Uni<Void>> function = s -> Uni.createFrom().item(() -> null);
-        BiFunction<String, Throwable, Uni<Void>> onFailure = (s, f) -> Uni.createFrom().item(() -> null);
-        Multi.createFrom().resource(() -> "hello", null)
-                .withFinalizer(null, onFailure, function);
+        assertThrows(IllegalArgumentException.class, () -> {
+            Function<String, Uni<Void>> function = s -> Uni.createFrom().item(() -> null);
+            BiFunction<String, Throwable, Uni<Void>> onFailure = (s, f) -> Uni.createFrom().item(() -> null);
+            Multi.createFrom().resource(() -> "hello", null)
+                    .withFinalizer(null, onFailure, function);
+        });
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testWithNullAsFinalizer5() {
-        Function<String, Uni<Void>> function = s -> Uni.createFrom().item(() -> null);
-        BiFunction<String, Throwable, Uni<Void>> onFailure = (s, f) -> Uni.createFrom().item(() -> null);
-        Multi.createFrom().resource(() -> "hello", null)
-                .withFinalizer(function, onFailure, null);
+        assertThrows(IllegalArgumentException.class, () -> {
+            Function<String, Uni<Void>> function = s -> Uni.createFrom().item(() -> null);
+            BiFunction<String, Throwable, Uni<Void>> onFailure = (s, f) -> Uni.createFrom().item(() -> null);
+            Multi.createFrom().resource(() -> "hello", null)
+                    .withFinalizer(function, onFailure, null);
+        });
     }
 
     @Test
@@ -629,7 +636,8 @@ public class MultiFromResourceTest {
     public void testOnFailureWithSingleFinalizer() {
         AtomicBoolean subscribed = new AtomicBoolean();
         Multi<Integer> multi = Multi.createFrom()
-                .resource(() -> 1, x -> Multi.createFrom().range(x, 11).onCompletion().failWith(new IOException("boom")))
+                .resource(() -> 1,
+                        x -> Multi.createFrom().range(x, 11).onCompletion().failWith(new IOException("boom")))
                 .withFinalizer(r -> {
                     return Uni.createFrom().item("ok")
                             .onSubscribe().invoke(s -> subscribed.set(true))

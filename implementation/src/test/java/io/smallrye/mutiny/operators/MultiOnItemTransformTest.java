@@ -1,9 +1,11 @@
 package io.smallrye.mutiny.operators;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.operators.multi.MultiMapOp;
@@ -12,14 +14,14 @@ import io.smallrye.mutiny.test.AssertSubscriber;
 
 public class MultiOnItemTransformTest {
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testMapperCannotBeNull() {
-        new MultiMapOp<>(Multi.createFrom().item(1), null);
+        assertThrows(IllegalArgumentException.class, () -> new MultiMapOp<>(Multi.createFrom().item(1), null));
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testUpstreamCannotBeNull() {
-        new MultiMapOp<>(null, x -> x);
+        assertThrows(IllegalArgumentException.class, () -> new MultiMapOp<>(null, x -> x));
     }
 
     @Test

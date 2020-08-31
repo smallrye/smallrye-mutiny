@@ -1,13 +1,14 @@
 package io.smallrye.mutiny.operators;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Uni;
 
@@ -35,9 +36,10 @@ public class UniCreateFromItemTest {
     }
 
     @SuppressWarnings({ "OptionalAssignedToNull", "unchecked", "rawtypes" })
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testThatNullIfNotAcceptedByFromOptional() {
-        Uni.createFrom().optional((Optional) null); // Immediate failure, no need for subscription
+        assertThrows(IllegalArgumentException.class, () -> Uni.createFrom().optional((Optional) null) // Immediate failure, no need for subscription
+        );
     }
 
     @Test
@@ -157,16 +159,16 @@ public class UniCreateFromItemTest {
         s2.assertFailure(IllegalStateException.class, "Invalid shared state");
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testThatStateSupplierCannotBeNull() {
-        Uni.createFrom().item(null,
-                x -> "x");
+        assertThrows(IllegalArgumentException.class, () -> Uni.createFrom().item(null,
+                x -> "x"));
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testThatFunctionCannotBeNull() {
-        Uni.createFrom().item(() -> "hello",
-                null);
+        assertThrows(IllegalArgumentException.class, () -> Uni.createFrom().item(() -> "hello",
+                null));
     }
 
 }

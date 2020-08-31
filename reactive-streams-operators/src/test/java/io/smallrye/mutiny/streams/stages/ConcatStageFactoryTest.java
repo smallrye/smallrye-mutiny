@@ -2,6 +2,7 @@ package io.smallrye.mutiny.streams.stages;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -16,7 +17,7 @@ import org.eclipse.microprofile.reactive.streams.operators.PublisherBuilder;
 import org.eclipse.microprofile.reactive.streams.operators.ReactiveStreams;
 import org.eclipse.microprofile.reactive.streams.operators.spi.Graph;
 import org.eclipse.microprofile.reactive.streams.operators.spi.Stage;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.streams.Engine;
@@ -30,25 +31,27 @@ public class ConcatStageFactoryTest extends StageTestBase {
 
     private final ConcatStageFactory factory = new ConcatStageFactory();
 
-    @Test(expected = NullPointerException.class)
+    @Test
     public void testWithoutAStage() {
-        factory.create(new Engine(), null);
+        assertThrows(NullPointerException.class, () -> factory.create(new Engine(), null));
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test
     public void testWithoutEngine() {
-        Graph g1 = () -> Collections.singletonList((Stage.Of) () -> Arrays.asList(1, 2, 3));
-        Graph g2 = () -> Collections.singletonList((Stage.Of) () -> Arrays.asList(1, 2, 3));
-        factory.create(null, new Stage.Concat() {
-            @Override
-            public Graph getFirst() {
-                return g1;
-            }
+        assertThrows(NullPointerException.class, () -> {
+            Graph g1 = () -> Collections.singletonList((Stage.Of) () -> Arrays.asList(1, 2, 3));
+            Graph g2 = () -> Collections.singletonList((Stage.Of) () -> Arrays.asList(1, 2, 3));
+            factory.create(null, new Stage.Concat() {
+                @Override
+                public Graph getFirst() {
+                    return g1;
+                }
 
-            @Override
-            public Graph getSecond() {
-                return g2;
-            }
+                @Override
+                public Graph getSecond() {
+                    return g2;
+                }
+            });
         });
     }
 

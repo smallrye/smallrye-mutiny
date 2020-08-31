@@ -12,8 +12,9 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.RepeatedTest;
+import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Uni;
@@ -24,7 +25,7 @@ import io.smallrye.mutiny.subscription.UniSubscription;
 
 public class UniSerializedSubscriberTest {
 
-    @AfterMethod
+    @AfterEach
     public void cleanup() {
         Infrastructure.resetDroppedExceptionHandler();
     }
@@ -170,7 +171,7 @@ public class UniSerializedSubscriberTest {
 
     }
 
-    @Test(invocationCount = 100)
+    @RepeatedTest(100)
     public void testRaceBetweenItemAndFailure() {
         AtomicReference<UniEmitter<? super Integer>> reference = new AtomicReference<>();
         Uni<Integer> uni = Uni.createFrom().<Integer> emitter(reference::set);
@@ -210,7 +211,7 @@ public class UniSerializedSubscriberTest {
         }
     }
 
-    @Test(invocationCount = 100)
+    @RepeatedTest(100)
     public void testRaceBetweenMultipleItems() {
         AtomicReference<UniEmitter<? super Integer>> reference = new AtomicReference<>();
         Uni<Integer> uni = Uni.createFrom().<Integer> emitter(reference::set);
@@ -250,7 +251,7 @@ public class UniSerializedSubscriberTest {
         assertThat(subscriber.getItem()).isBetween(1, 3);
     }
 
-    @Test(invocationCount = 100)
+    @RepeatedTest(100)
     public void testRaceBetweenItemAndCancellation() {
         AtomicReference<UniEmitter<? super Integer>> reference = new AtomicReference<>();
         AtomicBoolean cancelled = new AtomicBoolean();

@@ -2,13 +2,14 @@ package io.smallrye.mutiny.operators;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
 import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.subscription.MultiEmitter;
@@ -148,9 +149,9 @@ public class MultiTakeTest {
                 .assertHasFailedWith(IOException.class, "boom");
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testTakeWhileWithNullMethod() {
-        Multi.createFrom().nothing().transform().byTakingItemsWhile(null);
+        assertThrows(IllegalArgumentException.class, () -> Multi.createFrom().nothing().transform().byTakingItemsWhile(null));
     }
 
     @Test
@@ -218,9 +219,10 @@ public class MultiTakeTest {
         assertThat(subscriber.items()).hasSize(10);
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testSkipByTimeWithInvalidDuration() {
-        Multi.createFrom().item(1).transform().byTakingItemsFor(Duration.ofMillis(-1));
+        assertThrows(IllegalArgumentException.class,
+                () -> Multi.createFrom().item(1).transform().byTakingItemsFor(Duration.ofMillis(-1)));
     }
 
 }

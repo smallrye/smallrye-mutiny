@@ -1,14 +1,16 @@
 package io.smallrye.mutiny.operators;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import java.io.IOException;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
-import org.testng.TestException;
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Multi;
+import io.smallrye.mutiny.TestException;
 import io.smallrye.mutiny.subscription.MultiEmitter;
 import io.smallrye.mutiny.test.AssertSubscriber;
 
@@ -32,11 +34,11 @@ public class MultiDistinctTest {
     }
 
     @SuppressWarnings("ConstantConditions")
-    @Test(expectedExceptions = NullPointerException.class)
+    @Test
     public void testThatNullSubscriberAreRejected() {
-        Multi.createFrom().items(1, 2, 3, 4, 2, 4, 2, 4)
+        assertThrows(NullPointerException.class, () -> Multi.createFrom().items(1, 2, 3, 4, 2, 4, 2, 4)
                 .transform().byDroppingDuplicates()
-                .subscribe(null);
+                .subscribe(null));
     }
 
     @Test

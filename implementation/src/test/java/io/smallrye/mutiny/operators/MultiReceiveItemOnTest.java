@@ -2,6 +2,7 @@ package io.smallrye.mutiny.operators;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
 import java.util.LinkedHashSet;
@@ -12,9 +13,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.testng.annotations.AfterTest;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.test.AssertSubscriber;
@@ -23,10 +24,10 @@ public class MultiReceiveItemOnTest {
 
     private ExecutorService executor;
 
-    @BeforeMethod
+    @BeforeEach
     public void init() {
         executor = Executors.newFixedThreadPool(4, new ThreadFactory() {
-            AtomicInteger count = new AtomicInteger();
+            final AtomicInteger count = new AtomicInteger();
 
             @Override
             public Thread newThread(Runnable r) {
@@ -37,24 +38,24 @@ public class MultiReceiveItemOnTest {
         });
     }
 
-    @AfterTest
+    @AfterEach
     public void cleanup() {
         executor.shutdownNow();
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testThatExecutorCannotBeNull() {
-        Multi.createFrom().item(1).emitOn(null);
+        assertThrows(IllegalArgumentException.class, () -> Multi.createFrom().item(1).emitOn(null));
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testThatSubscribeOnExecutorCannotBeNull() {
-        Multi.createFrom().item(1).subscribeOn(null);
+        assertThrows(IllegalArgumentException.class, () -> Multi.createFrom().item(1).subscribeOn(null));
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testThatRunSubscriptionOnExecutorCannotBeNull() {
-        Multi.createFrom().item(1).runSubscriptionOn(null);
+        assertThrows(IllegalArgumentException.class, () -> Multi.createFrom().item(1).runSubscriptionOn(null));
     }
 
     @Test

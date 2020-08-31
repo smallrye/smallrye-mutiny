@@ -14,4 +14,10 @@ public class MultiFromIterableTckTest extends AbstractPublisherTck<Long> {
         List<Long> list = LongStream.rangeClosed(1, elements).boxed().collect(Collectors.toList());
         return Multi.createFrom().iterable(list);
     }
+
+    @Override
+    public long maxElementsFromPublisher() {
+        return 1024;
+    }
+
 }

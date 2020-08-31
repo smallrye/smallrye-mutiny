@@ -2,6 +2,7 @@ package io.smallrye.mutiny.operators;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -9,9 +10,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Ignore;
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
@@ -25,7 +26,7 @@ public class MultiOnFailureRetryWhenTest {
     private Multi<Integer> failingAfter2;
     private Multi<Integer> failingAfter1;
 
-    @BeforeMethod
+    @BeforeEach
     public void init() {
         numberOfSubscriptions = new AtomicInteger();
         failingAfter2 = Multi.createFrom()
@@ -36,14 +37,14 @@ public class MultiOnFailureRetryWhenTest {
                 .streams(Multi.createFrom().item(1), Multi.createFrom().failure(new RuntimeException("boom")));
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testThatUpstreamCannotBeNull() {
-        new MultiRetryWhenOp<>(null, v -> v);
+        assertThrows(IllegalArgumentException.class, () -> new MultiRetryWhenOp<>(null, v -> v));
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testThatStreamFactoryCannotBeNull() {
-        Multi.createFrom().nothing().onFailure().retry().when(null);
+        assertThrows(IllegalArgumentException.class, () -> Multi.createFrom().nothing().onFailure().retry().when(null));
     }
 
     @Test
@@ -86,7 +87,7 @@ public class MultiOnFailureRetryWhenTest {
     }
 
     @Test
-    @Ignore("To be investigated - the switch to the strict serializer broken the cancellation check")
+    @Disabled("To be investigated - the switch to the strict serializer broken the cancellation check")
     public void testWhatTheWhenStreamFailsTheUpstreamIsCancelled() {
         AtomicBoolean subscribed = new AtomicBoolean();
         AtomicBoolean cancelled = new AtomicBoolean();
@@ -288,13 +289,11 @@ public class MultiOnFailureRetryWhenTest {
                 s.fail(new RuntimeException("test " + i));
             }
         }).onFailure().retry().when(
-                repeat -> {
-                    return Multi.createBy().combining().streams(repeat, Multi.createFrom().range(1, 4)).asTuple()
-                            .map(Tuple2::getItem2)
-                            .onItem().transformToUni(time -> Uni.createFrom().item(time)
-                                    .onItem().delayIt().by(Duration.ofMillis(time)))
-                            .concatenate();
-                });
+                repeat -> Multi.createBy().combining().streams(repeat, Multi.createFrom().range(1, 4)).asTuple()
+                        .map(Tuple2::getItem2)
+                        .onItem().transformToUni(time -> Uni.createFrom().item(time)
+                                .onItem().delayIt().by(Duration.ofMillis(time)))
+                        .concatenate());
     }
 
     @Test

@@ -5,9 +5,9 @@ import static org.awaitility.Awaitility.await;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.test.AssertSubscriber;
@@ -16,12 +16,12 @@ public class MultiEmitOnTest {
 
     private ExecutorService executor;
 
-    @BeforeMethod
+    @BeforeEach
     public void init() {
         executor = Executors.newFixedThreadPool(4);
     }
 
-    @AfterMethod
+    @AfterEach
     public void shutdown() {
         executor.shutdown();
     }

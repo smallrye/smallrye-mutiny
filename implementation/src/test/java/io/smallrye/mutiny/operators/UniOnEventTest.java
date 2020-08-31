@@ -10,8 +10,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.junit.jupiter.api.RepeatedTest;
+import org.junit.jupiter.api.Test;
 import org.reactivestreams.Subscription;
-import org.testng.annotations.Test;
 
 import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Uni;
@@ -711,7 +712,7 @@ public class UniOnEventTest {
         assertThat(count).hasValue(1);
     }
 
-    @Test(invocationCount = 100)
+    @RepeatedTest(100)
     public void testOnCancellationInvokeUniWithDoubleCancellation() throws InterruptedException {
         AtomicBoolean emitterTerminationCalled = new AtomicBoolean();
         AtomicBoolean cancellationUniCalled = new AtomicBoolean();

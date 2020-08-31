@@ -7,8 +7,9 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BooleanSupplier;
 
+import org.junit.jupiter.api.RepeatedTest;
+import org.junit.jupiter.api.Test;
 import org.reactivestreams.Subscription;
-import org.testng.annotations.Test;
 
 import io.reactivex.internal.util.QueueDrainHelper;
 import io.smallrye.mutiny.test.AssertSubscriber;
@@ -45,7 +46,7 @@ public class DrainUtilsTest {
                 .assertReceived(1);
     }
 
-    @Test(invocationCount = 100)
+    @RepeatedTest(100)
     public void testCompleteVsRequestRace() throws InterruptedException {
         BooleanSupplier isCancelled = () -> false;
         Subscription subscription = mock(Subscription.class);

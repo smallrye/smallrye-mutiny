@@ -1,6 +1,7 @@
 package io.smallrye.mutiny.streams;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -12,7 +13,7 @@ import org.eclipse.microprofile.reactive.streams.operators.ReactiveStreams;
 import org.eclipse.microprofile.reactive.streams.operators.spi.Graph;
 import org.eclipse.microprofile.reactive.streams.operators.spi.Stage;
 import org.eclipse.microprofile.reactive.streams.operators.spi.UnsupportedStageException;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Multi;
 
@@ -46,26 +47,30 @@ public class EngineTest {
         assertThat(integer).contains(6);
     }
 
-    @Test(expected = UnsupportedStageException.class)
+    @Test
     public void testUnknownTerminalStage() {
-        engine = new Engine();
-        List<Stage> stages = new ArrayList<>();
-        stages.add((Stage.Map) () -> i -> (int) i + 1);
-        stages.add(new Stage() {
-            // Unknown stage
+        assertThrows(UnsupportedStageException.class, () -> {
+            engine = new Engine();
+            List<Stage> stages = new ArrayList<>();
+            stages.add((Stage.Map) () -> i -> (int) i + 1);
+            stages.add(new Stage() {
+                // Unknown stage
+            });
+            Graph graph = () -> stages;
+            engine.buildSubscriber(graph);
         });
-        Graph graph = () -> stages;
-        engine.buildSubscriber(graph);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testInvalidSubscriber() {
-        engine = new Engine();
-        List<Stage> stages = new ArrayList<>();
-        stages.add((Stage.Map) () -> i -> (int) i + 1);
-        // This graph is not closed - so it's invalid
-        Graph graph = () -> stages;
-        engine.buildSubscriber(graph);
+        assertThrows(IllegalArgumentException.class, () -> {
+            engine = new Engine();
+            List<Stage> stages = new ArrayList<>();
+            stages.add((Stage.Map) () -> i -> (int) i + 1);
+            // This graph is not closed - so it's invalid
+            Graph graph = () -> stages;
+            engine.buildSubscriber(graph);
+        });
     }
 
     @Test
@@ -80,30 +85,34 @@ public class EngineTest {
         assertThat(engine.buildCompletion(graph)).isNotNull();
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testInvalidCompletion() {
-        engine = new Engine();
-        List<Stage> stages = new ArrayList<>();
-        stages.add((Stage.PublisherStage) () -> Multi.createFrom().empty());
-        stages.add((Stage.Map) () -> i -> (int) i + 1);
-        // This graph is not closed - so it's invalid
-        Graph graph = () -> stages;
-        engine.buildCompletion(graph);
+        assertThrows(IllegalArgumentException.class, () -> {
+            engine = new Engine();
+            List<Stage> stages = new ArrayList<>();
+            stages.add((Stage.PublisherStage) () -> Multi.createFrom().empty());
+            stages.add((Stage.Map) () -> i -> (int) i + 1);
+            // This graph is not closed - so it's invalid
+            Graph graph = () -> stages;
+            engine.buildCompletion(graph);
+        });
     }
 
-    @Test(expected = UnsupportedStageException.class)
+    @Test
     public void testCompletionWithUnknownStage() {
-        engine = new Engine();
-        List<Stage> stages = new ArrayList<>();
-        stages.add((Stage.PublisherStage) () -> Multi.createFrom().empty());
-        stages.add((Stage.Map) () -> i -> (int) i + 1);
-        stages.add(new Stage() {
-            // Unknown stage.
+        assertThrows(UnsupportedStageException.class, () -> {
+            engine = new Engine();
+            List<Stage> stages = new ArrayList<>();
+            stages.add((Stage.PublisherStage) () -> Multi.createFrom().empty());
+            stages.add((Stage.Map) () -> i -> (int) i + 1);
+            stages.add(new Stage() {
+                // Unknown stage.
+            });
+            stages.add(new Stage.FindFirst() {
+            });
+            Graph graph = () -> stages;
+            assertThat(engine.buildCompletion(graph)).isNotNull();
         });
-        stages.add(new Stage.FindFirst() {
-        });
-        Graph graph = () -> stages;
-        assertThat(engine.buildCompletion(graph)).isNotNull();
     }
 
     @Test
@@ -116,28 +125,32 @@ public class EngineTest {
         assertThat(engine.buildPublisher(graph)).isNotNull();
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testInvalidPublisher() {
-        engine = new Engine();
-        List<Stage> stages = new ArrayList<>();
-        stages.add((Stage.Map) () -> i -> (int) i + 1);
-        stages.add(new Stage.FindFirst() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            engine = new Engine();
+            List<Stage> stages = new ArrayList<>();
+            stages.add((Stage.Map) () -> i -> (int) i + 1);
+            stages.add(new Stage.FindFirst() {
+            });
+            // This graph is closed, invalid as publisher
+            Graph graph = () -> stages;
+            engine.buildPublisher(graph);
         });
-        // This graph is closed, invalid as publisher
-        Graph graph = () -> stages;
-        engine.buildPublisher(graph);
     }
 
-    @Test(expected = UnsupportedStageException.class)
+    @Test
     public void testCreatingPublisherWithUnknownStage() {
-        engine = new Engine();
-        List<Stage> stages = new ArrayList<>();
-        stages.add(new Stage() {
-            // Unknown stage.
+        assertThrows(UnsupportedStageException.class, () -> {
+            engine = new Engine();
+            List<Stage> stages = new ArrayList<>();
+            stages.add(new Stage() {
+                // Unknown stage.
+            });
+            stages.add((Stage.Map) () -> i -> (int) i + 1);
+            Graph graph = () -> stages;
+            engine.buildPublisher(graph);
         });
-        stages.add((Stage.Map) () -> i -> (int) i + 1);
-        Graph graph = () -> stages;
-        engine.buildPublisher(graph);
     }
 
 }

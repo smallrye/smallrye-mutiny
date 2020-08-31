@@ -2,6 +2,7 @@ package io.smallrye.mutiny.operators;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -9,10 +10,10 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.testng.TestException;
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Multi;
+import io.smallrye.mutiny.TestException;
 import io.smallrye.mutiny.operators.multi.MultiSkipUntilPublisherOp;
 import io.smallrye.mutiny.subscription.MultiEmitter;
 import io.smallrye.mutiny.test.AssertSubscriber;
@@ -151,9 +152,10 @@ public class MultiSkipTest {
                 .assertHasFailedWith(IOException.class, "boom");
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testSkipWhileWithNullMethod() {
-        Multi.createFrom().nothing().transform().bySkippingItemsWhile(null);
+        assertThrows(IllegalArgumentException.class,
+                () -> Multi.createFrom().nothing().transform().bySkippingItemsWhile(null));
     }
 
     @Test
@@ -209,9 +211,10 @@ public class MultiSkipTest {
                 .assertHasNotReceivedAnyItem();
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testSkipByTimeWithInvalidDuration() {
-        Multi.createFrom().item(1).transform().bySkippingItemsFor(Duration.ofMillis(-1));
+        assertThrows(IllegalArgumentException.class,
+                () -> Multi.createFrom().item(1).transform().bySkippingItemsFor(Duration.ofMillis(-1)));
     }
 
     @Test

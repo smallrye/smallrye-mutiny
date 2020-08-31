@@ -1,12 +1,13 @@
 package io.smallrye.mutiny.operators;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.test.AssertSubscriber;
@@ -14,14 +15,14 @@ import io.smallrye.mutiny.test.AssertSubscriber;
 public class MultiCreateFromOptionalTest {
 
     @SuppressWarnings("OptionalAssignedToNull")
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testThatTheOptionalCannotBeNull() {
-        Multi.createFrom().optional((Optional<String>) null);
+        assertThrows(IllegalArgumentException.class, () -> Multi.createFrom().optional((Optional<String>) null));
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testThatOptionalSupplierCannotBeNull() {
-        Multi.createFrom().optional((Supplier<Optional<String>>) null);
+        assertThrows(IllegalArgumentException.class, () -> Multi.createFrom().optional((Supplier<Optional<String>>) null));
     }
 
     @Test

@@ -13,4 +13,9 @@ public class MultiFromStreamTckTest extends AbstractPublisherTck<Long> {
         Stream<Long> list = LongStream.rangeClosed(1, elements).boxed();
         return Multi.createFrom().items(list);
     }
+
+    @Override
+    public long maxElementsFromPublisher() {
+        return 1024;
+    }
 }

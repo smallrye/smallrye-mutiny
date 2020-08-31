@@ -1,6 +1,7 @@
 package tck;
 
-import static org.testng.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static tck.Await.await;
 
 import java.util.Arrays;
@@ -10,8 +11,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.stream.LongStream;
 
+import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
-import org.testng.annotations.Test;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.test.AssertSubscriber;
@@ -26,31 +27,34 @@ public class MultiSkipItemsWhileTckTest extends AbstractPublisherTck<Long> {
                 .subscribeAsCompletionStage()), Arrays.asList(3, 4, 0));
     }
 
-    @Test(expectedExceptions = QuietRuntimeException.class, expectedExceptionsMessageRegExp = "failed")
+    @Test
     public void dropWhileStageShouldHandleErrors() {
-        CompletableFuture<Void> cancelled = new CompletableFuture<>();
-        CompletionStage<List<Integer>> result = infiniteStream()
-                .onTermination().invoke(() -> cancelled.complete(null))
-                .transform().bySkippingItemsWhile(i -> {
-                    throw new QuietRuntimeException("failed");
-                })
-                .collectItems().asList()
-                .subscribeAsCompletionStage();
-        await(cancelled);
-        await(result);
+        assertThrows(QuietRuntimeException.class, () -> {
+            CompletableFuture<Void> cancelled = new CompletableFuture<>();
+            CompletionStage<List<Integer>> result = infiniteStream()
+                    .onTermination().invoke(() -> cancelled.complete(null))
+                    .transform().bySkippingItemsWhile(i -> {
+                        throw new QuietRuntimeException("failed");
+                    })
+                    .collectItems().asList()
+                    .subscribeAsCompletionStage();
+            await(cancelled);
+            await(result);
+        });
     }
 
-    @Test(expectedExceptions = QuietRuntimeException.class, expectedExceptionsMessageRegExp = "failed")
+    @Test
     public void dropWhileStageShouldPropagateUpstreamErrorsWhileDropping() {
-        await(Multi.createFrom().<Integer> failure(new QuietRuntimeException("failed"))
-                .transform().bySkippingItemsWhile(i -> i < 3)
-                .collectItems().asList()
-                .subscribeAsCompletionStage());
+        assertThrows(QuietRuntimeException.class,
+                () -> await(Multi.createFrom().<Integer> failure(new QuietRuntimeException("failed"))
+                        .transform().bySkippingItemsWhile(i -> i < 3)
+                        .collectItems().asList()
+                        .subscribeAsCompletionStage()));
     }
 
-    @Test(expectedExceptions = QuietRuntimeException.class, expectedExceptionsMessageRegExp = "failed")
+    @Test
     public void dropWhileStageShouldPropagateUpstreamErrorsAfterFinishedDropping() {
-        await(infiniteStream()
+        assertThrows(QuietRuntimeException.class, () -> await(infiniteStream()
                 .onItem().invoke(i -> {
                     if (i == 4) {
                         throw new QuietRuntimeException("failed");
@@ -58,7 +62,7 @@ public class MultiSkipItemsWhileTckTest extends AbstractPublisherTck<Long> {
                 })
                 .transform().bySkippingItemsWhile(i -> i < 3)
                 .collectItems().asList()
-                .subscribeAsCompletionStage());
+                .subscribeAsCompletionStage()));
     }
 
     @Test

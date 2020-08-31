@@ -1,26 +1,27 @@
 package io.smallrye.mutiny.operators;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.test.AssertSubscriber;
 
 public class MultiCreateFromFailureTest {
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testThatFailureCannotBeNull() {
-        Multi.createFrom().failure((Throwable) null);
+        assertThrows(IllegalArgumentException.class, () -> Multi.createFrom().failure((Throwable) null));
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testThatFailureSupplierCannotBeNull() {
-        Multi.createFrom().failure((Supplier<Throwable>) null);
+        assertThrows(IllegalArgumentException.class, () -> Multi.createFrom().failure((Supplier<Throwable>) null));
     }
 
     @Test
