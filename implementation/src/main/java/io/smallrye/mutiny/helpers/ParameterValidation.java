@@ -36,7 +36,7 @@ public class ParameterValidation {
     }
 
     /**
-     * Validates that the given {@code instance} is not {@code null}
+     * Validates that the given {@code instance} is not {@code null}.
      *
      * @param instance the instance
      * @param name the name of the parameter, must not be {@code null}
@@ -44,19 +44,24 @@ public class ParameterValidation {
      * @return the instance if the validation passes
      */
     public static <T> T nonNull(T instance, String name) {
-        if (name == null) {
-            throw new IllegalArgumentException("The parameter name must be set");
-        }
         if (instance == null) {
             throw new IllegalArgumentException(String.format("`%s` must not be `null`", name));
         }
         return instance;
     }
 
+    /**
+     * Validates that the given {@code instance} is not {@code null}.
+     * Unlike {@link #nonNull(Object, String)}, this method throw a {@link NullPointerException}.
+     *
+     * It's generally used to be compliant with the Reactive Streams specification expecting {@link NullPointerException}.
+     *
+     * @param instance the instance
+     * @param name the name of the parameter, must not be {@code null}
+     * @param <T> the type of the instance
+     * @return the instance if the validation passes
+     */
     public static <T> T nonNullNpe(T instance, String name) {
-        if (name == null) {
-            throw new NullPointerException("The parameter name must be set");
-        }
         if (instance == null) {
             throw new NullPointerException(String.format("`%s` must not be `null`", name));
         }
@@ -71,7 +76,6 @@ public class ParameterValidation {
      * @return the amount is the validation passes.
      */
     public static long positive(long amount, String name) {
-        nonNull(name, "name");
         if (amount <= 0) {
             throw new IllegalArgumentException(String.format("`%s` must be greater than zero`", name));
         }
@@ -86,7 +90,6 @@ public class ParameterValidation {
      * @return the amount is the validation passes.
      */
     public static int positive(int amount, String name) {
-        nonNull(name, "name");
         if (amount <= 0) {
             throw new IllegalArgumentException(String.format("`%s` must be greater than zero", name));
         }
@@ -101,7 +104,6 @@ public class ParameterValidation {
      * @return the amount is the validation passes.
      */
     public static int positiveOrZero(int amount, String name) {
-        nonNull(name, "name");
         if (amount < 0) {
             throw new IllegalArgumentException(String.format("`%s` must be positive", name));
         }
@@ -116,7 +118,6 @@ public class ParameterValidation {
      * @return the amount is the validation passes.
      */
     public static long positiveOrZero(long amount, String name) {
-        nonNull(name, "name");
         if (amount < 0) {
             throw new IllegalArgumentException(String.format("`%s` must be positive", name));
         }
@@ -132,7 +133,6 @@ public class ParameterValidation {
      * @return the instance if the validation passes
      */
     public static <T extends Iterable<?>> T doesNotContainNull(T iterable, String name) {
-        nonNull(name, "name");
         nonNull(iterable, name);
         iterable.forEach(m -> {
             if (m == null) {
@@ -151,7 +151,6 @@ public class ParameterValidation {
      * @return the instance if the validation passes
      */
     public static <T> T[] doesNotContainNull(T[] array, String name) {
-        nonNull(name, "name");
         nonNull(array, name);
         Arrays.stream(array).forEach(m -> {
             if (m == null) {
@@ -171,12 +170,7 @@ public class ParameterValidation {
      * @return the instance if the validation passes
      */
     public static <T extends Collection<?>> T size(T instance, int expectedSize, String name) {
-        if (name == null) {
-            throw new IllegalArgumentException("The parameter name must be set");
-        }
-        if (instance == null) {
-            throw new IllegalArgumentException(String.format("`%s` must not be `null`", name));
-        }
+        nonNull(instance, name);
         if (instance.size() != expectedSize) {
             throw new IllegalArgumentException(String.format("`%s` must has size %d, but was %d", name, expectedSize,
                     instance.size()));
