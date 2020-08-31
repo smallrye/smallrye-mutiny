@@ -9,6 +9,7 @@ import java.io.PrintStream;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Uni;
@@ -18,6 +19,7 @@ public class DroppedExceptionsTest {
 
     private static final PrintStream systemErr = System.err;
 
+    @BeforeEach
     @AfterEach
     public void cleanup() {
         System.setErr(systemErr);
