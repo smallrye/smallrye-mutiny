@@ -91,7 +91,7 @@ public class DroppedExceptionsTest {
 
         cancellable.cancel();
         assertThat(outputStream.toString())
-                .startsWith("[-- Mutiny had to drop the following exception --]")
+                .contains("[-- Mutiny had to drop the following exception --]")
                 .contains("boom")
                 .contains("java.io.IOException")
                 .contains("io.smallrye.mutiny.infrastructure.DroppedExceptionsTest")
