@@ -106,7 +106,7 @@ public class UniSerializedSubscriberTest {
 
         subscriber
                 .assertSubscribed()
-                .assertFailure(IllegalStateException.class, "Invalid");
+                .assertFailure(IOException.class, "boom");
 
     }
 

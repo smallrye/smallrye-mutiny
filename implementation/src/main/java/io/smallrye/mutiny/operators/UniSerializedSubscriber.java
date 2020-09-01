@@ -78,9 +78,9 @@ public class UniSerializedSubscriber<T> implements UniSubscriber<T>, UniSubscrip
     @Override
     public void onItem(T item) {
         if (state.compareAndSet(SUBSCRIBED, DONE)) {
-            EmptyUniSubscription.propagateFailureEvent(this.downstream,
-                    new IllegalStateException(
-                            "Invalid transition, expected to be in the HAS_SUBSCRIPTION states but was in SUBSCRIBED"));
+            failure.set(new IllegalStateException(
+                    "Invalid transition, expected to be in the HAS_SUBSCRIPTION states but was in SUBSCRIBED and received onItem("
+                            + item + ")"));
         } else if (state.compareAndSet(HAS_SUBSCRIPTION, DONE)) {
             try {
                 downstream.onItem(item);
@@ -93,23 +93,20 @@ public class UniSerializedSubscriber<T> implements UniSubscriber<T>, UniSubscrip
     }
 
     @Override
-    public void onFailure(Throwable failure) {
+    public void onFailure(Throwable throwable) {
         if (state.compareAndSet(SUBSCRIBED, DONE)) {
-            EmptyUniSubscription.propagateFailureEvent(this.downstream,
-                    new IllegalStateException(
-                            "Invalid transition, expected to be in the HAS_SUBSCRIPTION states but was in "
-                                    + state));
+            failure.set(throwable);
         } else if (state.compareAndSet(HAS_SUBSCRIPTION, DONE)) {
             try {
-                downstream.onFailure(failure);
+                downstream.onFailure(throwable);
             } catch (Throwable e) {
-                Infrastructure.handleDroppedException(new CompositeException(failure, e));
+                Infrastructure.handleDroppedException(new CompositeException(throwable, e));
                 throw e; // Rethrow in case of synchronous emission
             } finally {
                 dispose();
             }
         } else {
-            Infrastructure.handleDroppedException(failure);
+            Infrastructure.handleDroppedException(throwable);
         }
     }
 
