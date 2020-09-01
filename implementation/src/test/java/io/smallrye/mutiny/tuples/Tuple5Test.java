@@ -89,4 +89,11 @@ public class Tuple5Test {
                 .isThrownBy(() -> Tuples.tuple5(Arrays.asList(1, 2, 3, 4, 5, 6)));
         assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> Tuples.tuple5(null));
     }
+
+    @Test
+    public void testToString() {
+        for (int i = 1; i <= someTuple.size(); i++) {
+            assertThat(someTuple.toString()).contains("item" + i + "=" + someTuple.nth(i - 1));
+        }
+    }
 }

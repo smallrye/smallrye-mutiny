@@ -9,9 +9,10 @@ import java.util.Collections;
 
 import org.junit.jupiter.api.Test;
 
+@SuppressWarnings("EqualsWithItself")
 public class Tuple3Test {
 
-    private Tuple3<Integer, Integer, Integer> someTuple = new Tuple3<>(1, 2, 3);
+    private final Tuple3<Integer, Integer, Integer> someTuple = new Tuple3<>(1, 2, 3);
 
     @Test
     public void assertNullValues() {
@@ -52,6 +53,7 @@ public class Tuple3Test {
     @Test
     public void testEquality() {
         assertThat(someTuple).isEqualTo(someTuple);
+        assertThat(someTuple.equals(someTuple)).isTrue();
         assertThat(someTuple).isNotEqualTo(Tuple3.of(1, 2, 4));
         assertThat(someTuple).isNotEqualTo("not a tuple");
         assertThat(someTuple).isEqualTo(Tuple3.of(1, 2, 3));
@@ -79,5 +81,12 @@ public class Tuple3Test {
         assertThatExceptionOfType(IllegalArgumentException.class)
                 .isThrownBy(() -> Tuples.tuple3(Arrays.asList(1, 2, 3, 4)));
         assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> Tuples.tuple3(null));
+    }
+
+    @Test
+    public void testToString() {
+        for (int i = 1; i <= someTuple.size(); i++) {
+            assertThat(someTuple.toString()).contains("item" + i + "=" + someTuple.nth(i - 1));
+        }
     }
 }
