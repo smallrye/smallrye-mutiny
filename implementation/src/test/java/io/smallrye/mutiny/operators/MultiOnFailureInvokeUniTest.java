@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 
 import org.junit.jupiter.api.Test;
 
@@ -29,7 +30,7 @@ public class MultiOnFailureInvokeUniTest {
 
         AssertSubscriber<Integer> subscriber = numbers.onFailure().invokeUni(i -> {
             failure.set(i);
-            return sub.onItem().invoke(c -> twoGotCalled.incrementAndGet());
+            return sub.onItem().invoke((Consumer<? super Void>) c -> twoGotCalled.incrementAndGet());
         }).subscribe().withSubscriber(AssertSubscriber.create(10));
 
         subscriber.assertCompletedSuccessfully()
@@ -45,7 +46,7 @@ public class MultiOnFailureInvokeUniTest {
 
         AssertSubscriber<Integer> subscriber = failed.onFailure().invokeUni(i -> {
             failure.set(i);
-            return sub.onItem().invoke(c -> twoGotCalled.incrementAndGet());
+            return sub.onItem().invoke((Consumer<? super Void>) c -> twoGotCalled.incrementAndGet());
         }).subscribe().withSubscriber(AssertSubscriber.create(10));
 
         subscriber.assertHasFailedWith(IOException.class, "boom")

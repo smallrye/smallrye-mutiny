@@ -10,6 +10,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -101,7 +102,7 @@ public class UniOnItemDelayUntilTest {
         int i = Uni.createFrom().item(1)
                 .emitOn(executor)
                 .onItem().delayIt().onExecutor(exec).until(x -> Uni.createFrom().nullItem()
-                        .onItem().invoke(ignored -> thread.set(Thread.currentThread().getName())))
+                        .onItem().invoke((Consumer<? super Object>) ignored -> thread.set(Thread.currentThread().getName())))
                 .await().indefinitely();
         assertThat(i).isEqualTo(1);
         assertThat(thread.get()).isEqualTo("my-thread");

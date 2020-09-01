@@ -747,20 +747,20 @@ public class MultiFromResourceTest {
 
         public Uni<Void> rollback(Throwable failure) {
             return Uni.createFrom().voidItem()
-                    .onItem().invoke(x -> this.failure.set(failure))
+                    .onItem().invoke((Consumer<? super Void>) x -> this.failure.set(failure))
                     .onSubscribe().invoke(s -> onFailureSubscribed.set(true));
         }
 
         public Uni<Void> rollbackDelay(Throwable failure) {
             return Uni.createFrom().voidItem()
-                    .onItem().invoke(x -> this.failure.set(failure))
+                    .onItem().invoke((Consumer<? super Void>) x -> this.failure.set(failure))
                     .onItem().delayIt().by(DELAY)
                     .onSubscribe().invoke(s -> onFailureSubscribed.set(true));
         }
 
         public Uni<Void> rollbackFailure(Throwable failure) {
             return Uni.createFrom().voidItem()
-                    .onItem().invoke(x -> this.failure.set(failure))
+                    .onItem().invoke((Consumer<? super Void>) x -> this.failure.set(failure))
                     .onItem().delayIt().by(DELAY)
                     .onItem().failWith(x -> new IOException("rollback failed"))
                     .onSubscribe().invoke(s -> onFailureSubscribed.set(true));

@@ -430,9 +430,30 @@ public interface Uni<T> {
      * @param action the function taking the item and returning a {@link Uni}, must not be {@code null}, must not return
      *        {@code null}
      * @return the new {@link Uni}
+     * @deprecated Use {@link #invoke(Function)}
      */
+    @Deprecated
     default Uni<T> invokeUni(Function<? super T, Uni<?>> action) {
         return onItem().invokeUni(nonNull(action, "action"));
+    }
+
+    /**
+     * Produces a new {@link Uni} invoking the given @{code action} when the {@code item} event is received. Note that
+     * the received item can be {@code null}.
+     * <p>
+     * Unlike {@link #invoke(Consumer)}, the passed function returns a {@link Uni}. When the produced {@code Uni} sends
+     * its item, this item is discarded, and the original {@code item} is forwarded downstream. If the produced
+     * {@code Uni} fails, the failure is propagated downstream. If the callback throws an exception, this exception
+     * is propagated downstream as failure.
+     * <p>
+     * This method is a shortcut on {@link UniOnItem#invokeUni(Function)}
+     *
+     * @param action the function taking the item and returning a {@link Uni}, must not be {@code null}, must not return
+     *        {@code null}
+     * @return the new {@link Uni}
+     */
+    default Uni<T> invoke(Function<? super T, Uni<?>> action) {
+        return onItem().invoke(nonNull(action, "action"));
     }
 
     /**

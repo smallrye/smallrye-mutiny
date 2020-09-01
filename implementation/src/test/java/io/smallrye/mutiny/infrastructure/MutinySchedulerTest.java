@@ -10,6 +10,7 @@ import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -141,7 +142,7 @@ public class MutinySchedulerTest {
         List<Long> list = Multi.createFrom().ticks().every(Duration.ofMillis(10))
                 .transform().byTakingFirstItems(5)
                 .collectItems().asList()
-                .onItem().invoke(l -> thread.set(Thread.currentThread().getName()))
+                .onItem().invoke((Consumer<? super List<Long>>) l -> thread.set(Thread.currentThread().getName()))
                 .await().indefinitely();
 
         assertThat(list).hasSize(5);
@@ -155,7 +156,7 @@ public class MutinySchedulerTest {
                 .groupItems().intoLists().every(Duration.ofMillis(10))
                 .transform().byTakingFirstItems(5)
                 .collectItems().asList()
-                .onItem().invoke(l -> thread.set(Thread.currentThread().getName()))
+                .onItem().invoke((Consumer<? super List<List<Long>>>) l -> thread.set(Thread.currentThread().getName()))
                 .await().indefinitely();
         assertThat(thread.get()).startsWith("my-thread-");
     }
@@ -168,7 +169,7 @@ public class MutinySchedulerTest {
             // do nothing
         })
                 .ifNoItem().after(Duration.ofMillis(10)).recoverWithItem("hello")
-                .onItem().invoke(l -> thread.set(Thread.currentThread().getName()))
+                .onItem().invoke((Consumer<? super Object>) l -> thread.set(Thread.currentThread().getName()))
                 .await().indefinitely();
         assertThat(thread.get()).startsWith("my-thread-");
     }
@@ -180,7 +181,7 @@ public class MutinySchedulerTest {
         for (int i = 0; i < 100; i++) {
             list.add(Uni.createFrom().item("hello")
                     .onItem().delayIt().by(Duration.ofSeconds(1))
-                    .onItem().invoke(s -> threads.add(Thread.currentThread().getName())));
+                    .onItem().invoke((Consumer<? super String>) s -> threads.add(Thread.currentThread().getName())));
         }
 
         Uni.combine().all().unis(list).combinedWith(x -> null).await().indefinitely();

@@ -8,6 +8,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import org.junit.jupiter.api.Test;
@@ -99,7 +100,7 @@ public class UniCreateFromCompletionStageTest {
         CompletableFuture<Integer> cs = new CompletableFuture<>();
         cs.complete(1);
         Uni<Integer> uni = Uni.createFrom().completionStage(cs)
-                .onItem().invoke(i -> called.set(true));
+                .onItem().invoke((Consumer<? super Integer>) i -> called.set(true));
 
         assertThat(called).isFalse();
 
@@ -118,7 +119,7 @@ public class UniCreateFromCompletionStageTest {
             called.set(true);
             return cs;
         })
-                .onItem().invoke(i -> called.set(true));
+                .onItem().invoke((Consumer<? super Integer>) i -> called.set(true));
 
         assertThat(called).isFalse();
 
@@ -137,7 +138,7 @@ public class UniCreateFromCompletionStageTest {
         AtomicBoolean called = new AtomicBoolean();
         CompletableFuture<Integer> cs = new CompletableFuture<>();
         Uni<Integer> uni = Uni.createFrom().completionStage(cs)
-                .onItem().invoke(i -> called.set(true));
+                .onItem().invoke((Consumer<? super Integer>) i -> called.set(true));
 
         assertThat(called).isFalse();
         uni.subscribe().withSubscriber(subscriber);
@@ -151,7 +152,7 @@ public class UniCreateFromCompletionStageTest {
         AtomicBoolean called = new AtomicBoolean();
         CompletableFuture<Integer> cs = new CompletableFuture<>();
         Uni<Integer> uni = Uni.createFrom().completionStage(() -> cs)
-                .onItem().invoke(i -> called.set(true));
+                .onItem().invoke((Consumer<? super Integer>) i -> called.set(true));
 
         assertThat(called).isFalse();
         uni.subscribe().withSubscriber(subscriber);
@@ -193,7 +194,7 @@ public class UniCreateFromCompletionStageTest {
         UniAssertSubscriber<Integer> subscriber = UniAssertSubscriber.create();
         CompletableFuture<Integer> cs = new CompletableFuture<>();
         Uni<Integer> uni = Uni.createFrom().completionStage(cs)
-                .onItem().invoke(i -> called.set(true));
+                .onItem().invoke((Consumer<? super Integer>) i -> called.set(true));
 
         uni.subscribe().withSubscriber(subscriber);
         cs.complete(1);

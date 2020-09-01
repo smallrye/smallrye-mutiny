@@ -11,6 +11,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 import org.junit.jupiter.api.Test;
@@ -620,7 +621,7 @@ public class MultiOnEventTest {
 
         List<Integer> r = numbers.onItem().invokeUni(i -> {
             res.set(i);
-            return sub.onItem().invoke(c -> twoGotCalled.incrementAndGet());
+            return sub.onItem().invoke((Consumer<? super Void>) c -> twoGotCalled.incrementAndGet());
         })
                 .collectItems().asList().await().indefinitely();
 
@@ -636,7 +637,7 @@ public class MultiOnEventTest {
 
         List<Integer> r = numbers.invokeUni(i -> {
             res.set(i);
-            return sub.invoke(c -> twoGotCalled.incrementAndGet());
+            return sub.invoke((Consumer<? super Void>) c -> twoGotCalled.incrementAndGet());
         })
                 .collectItems().asList().await().indefinitely();
 
@@ -653,7 +654,7 @@ public class MultiOnEventTest {
         assertThatThrownBy(() -> failed.onItem().invokeUni(
                 i -> {
                     res.set(i);
-                    return sub.onItem().invoke(c -> twoGotCalled.incrementAndGet());
+                    return sub.onItem().invoke((Consumer<? super Void>) c -> twoGotCalled.incrementAndGet());
                 })
                 .collectItems().asList().await().indefinitely())
                         .isInstanceOf(CompletionException.class)

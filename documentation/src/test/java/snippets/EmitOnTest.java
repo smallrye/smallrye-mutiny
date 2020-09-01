@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.function.Consumer;
 
 import org.junit.jupiter.api.Test;
 
@@ -22,7 +23,7 @@ public class EmitOnTest {
 
         String res0 = uni.emitOn(executor)
                 .onItem()
-                .invoke(s -> System.out.println("Received item `" + s + "` on thread: " + Thread.currentThread().getName()))
+                .invoke((Consumer<? super String>) s -> System.out.println("Received item `" + s + "` on thread: " + Thread.currentThread().getName()))
                 .await().indefinitely();
 
         String res1 = multi.emitOn(executor)

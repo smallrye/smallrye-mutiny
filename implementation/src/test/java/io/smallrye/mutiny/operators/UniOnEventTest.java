@@ -9,6 +9,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
@@ -128,7 +129,7 @@ public class UniOnEventTest {
         AtomicInteger ItemFromTerminate = new AtomicInteger();
         AtomicReference<Throwable> failureFromTerminate = new AtomicReference<>();
         UniAssertSubscriber<? super Integer> subscriber = Uni.createFrom().item(1)
-                .onItem().invoke(i -> {
+                .onItem().invoke((Consumer<? super Integer>) i -> {
                     throw new IllegalStateException("boom");
                 })
                 .onFailure().invoke(failure::set)
@@ -156,7 +157,7 @@ public class UniOnEventTest {
         AtomicReference<Subscription> subscription = new AtomicReference<>();
         AtomicBoolean terminated = new AtomicBoolean();
         UniAssertSubscriber<? super Integer> subscriber = Uni.createFrom().item(1)
-                .onItem().invoke(i -> {
+                .onItem().invoke((Consumer<? super Integer>) i -> {
                     throw new IllegalStateException("boom");
                 })
                 .onFailure().invoke(failure::set)

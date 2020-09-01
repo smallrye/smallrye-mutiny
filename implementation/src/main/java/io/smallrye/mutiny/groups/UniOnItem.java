@@ -54,8 +54,27 @@ public class UniOnItem<T> {
      * @param action the function taking the item and returning a {@link Uni}, must not be {@code null}, must not return
      *        {@code null}
      * @return the new {@link Uni}
+     * @deprecated Use {@link #invoke(Function)}
      */
+    @Deprecated
     public Uni<T> invokeUni(Function<? super T, Uni<?>> action) {
+        return invoke(action);
+    }
+
+    /**
+     * Produces a new {@link Uni} invoking the given @{code action} when the {@code item} event is received. Note that
+     * the received item can be {@code null}.
+     * <p>
+     * Unlike {@link #invoke(Consumer)}, the passed function returns a {@link Uni}. When the produced {@code Uni} sends
+     * its item, this item is discarded, and the original {@code item} is forwarded downstream. If the produced
+     * {@code Uni} fails, the failure is propagated downstream.
+     * <p>
+     *
+     * @param action the function taking the item and returning a {@link Uni}, must not be {@code null}, must not return
+     *        {@code null}
+     * @return the new {@link Uni}
+     */
+    public Uni<T> invoke(Function<? super T, Uni<?>> action) {
         ParameterValidation.nonNull(action, "action");
         return transformToUni(item -> {
             Uni<?> uni = Objects.requireNonNull(action.apply(item), "The callback produced a `null` uni");
