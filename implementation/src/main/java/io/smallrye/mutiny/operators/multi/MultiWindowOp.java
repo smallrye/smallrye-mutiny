@@ -156,10 +156,8 @@ public class MultiWindowOp<T> extends AbstractMultiOperator<T, Multi<T>> {
 
         @Override
         public void request(long n) {
-            if (n > 0) {
-                long u = Subscriptions.multiply(size, n);
-                super.request(u);
-            }
+            long u = Subscriptions.multiply(size, n);
+            super.request(u);
         }
 
         @Override
@@ -265,16 +263,14 @@ public class MultiWindowOp<T> extends AbstractMultiOperator<T, Multi<T>> {
 
         @Override
         public void request(long n) {
-            if (n > 0) {
-                if (firstRequest.compareAndSet(false, true)) {
-                    long u = Subscriptions.multiply(size, n);
-                    long v = Subscriptions.multiply(skip - (long) size, n - 1);
-                    long w = Subscriptions.add(u, v);
-                    super.request(w);
-                } else {
-                    long u = Subscriptions.multiply(skip, n);
-                    super.request(u);
-                }
+            if (firstRequest.compareAndSet(false, true)) {
+                long u = Subscriptions.multiply(size, n);
+                long v = Subscriptions.multiply(skip - (long) size, n - 1);
+                long w = Subscriptions.add(u, v);
+                super.request(w);
+            } else {
+                long u = Subscriptions.multiply(skip, n);
+                super.request(u);
             }
         }
 
@@ -456,19 +452,17 @@ public class MultiWindowOp<T> extends AbstractMultiOperator<T, Multi<T>> {
 
         @Override
         public void request(long n) {
-            if (n > 0) {
-                Subscriptions.add(requested, n);
+            Subscriptions.add(requested, n);
 
-                if (firstRequest.compareAndSet(false, true)) {
-                    long u = Subscriptions.multiply(skip, n - 1);
-                    long v = Subscriptions.add(size, u);
-                    super.request(v);
-                } else {
-                    long u = Subscriptions.multiply(skip, n);
-                    super.request(u);
-                }
-                drain();
+            if (firstRequest.compareAndSet(false, true)) {
+                long u = Subscriptions.multiply(skip, n - 1);
+                long v = Subscriptions.add(size, u);
+                super.request(v);
+            } else {
+                long u = Subscriptions.multiply(skip, n);
+                super.request(u);
             }
+            drain();
         }
 
         @Override

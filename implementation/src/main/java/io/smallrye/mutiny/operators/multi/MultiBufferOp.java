@@ -84,11 +84,9 @@ public class MultiBufferOp<T> extends AbstractMultiOperator<T, List<T>> {
 
         @Override
         public void request(long n) {
-            if (n > 0) {
-                Subscription subscription = upstream.get();
-                if (subscription != CANCELLED) {
-                    subscription.request(Subscriptions.multiply(n, size));
-                }
+            Subscription subscription = upstream.get();
+            if (subscription != CANCELLED) {
+                subscription.request(Subscriptions.multiply(n, size));
             }
         }
 
@@ -134,7 +132,8 @@ public class MultiBufferOp<T> extends AbstractMultiOperator<T, List<T>> {
 
         private final AtomicInteger wip = new AtomicInteger();
 
-        BufferSkipProcessor(MultiSubscriber<? super List<T>> downstream, int size, int skip, Supplier<List<T>> supplier) {
+        BufferSkipProcessor(MultiSubscriber<? super List<T>> downstream, int size, int skip,
+                Supplier<List<T>> supplier) {
             super(downstream);
             this.size = size;
             this.skip = skip;
@@ -143,10 +142,6 @@ public class MultiBufferOp<T> extends AbstractMultiOperator<T, List<T>> {
 
         @Override
         public void request(long n) {
-            if (n <= 0) {
-                return;
-            }
-
             if (wip.compareAndSet(0, 1)) {
                 // n full buffers
                 long u = Subscriptions.multiply(n, size);
@@ -230,10 +225,6 @@ public class MultiBufferOp<T> extends AbstractMultiOperator<T, List<T>> {
 
         @Override
         public void request(long n) {
-            if (n <= 0) {
-                return;
-            }
-
             if (DrainUtils.postCompleteRequest(n,
                     downstream,
                     queue,
