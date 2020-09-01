@@ -244,7 +244,7 @@ public class BlockingIterableTest {
     }
 
     @Nested
-    static class ThreadBlockingTest {
+    class ThreadBlockingTest {
 
         @BeforeEach
         void reset() {

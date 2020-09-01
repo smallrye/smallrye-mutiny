@@ -150,7 +150,7 @@ public class UniAwaitTest {
     }
 
     @Nested
-    static class ThreadBlockingTest {
+    class ThreadBlockingTest {
 
         @BeforeEach
         void reset() {
