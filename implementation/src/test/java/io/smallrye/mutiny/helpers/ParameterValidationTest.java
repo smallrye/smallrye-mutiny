@@ -1,21 +1,27 @@
 package io.smallrye.mutiny.helpers;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
 import java.util.Collections;
 import java.util.List;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
 public class ParameterValidationTest {
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testUnexpectedSize() {
-        List<Integer> list = Collections.singletonList(1);
-        ParameterValidation.size(list, 2, "list");
+        assertThatThrownBy(() -> {
+            List<Integer> list = Collections.singletonList(1);
+            ParameterValidation.size(list, 2, "list");
+        }).isInstanceOf(IllegalArgumentException.class).hasMessageContaining("list");
+
     }
 
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test
     public void testSizeWithNull() {
-        ParameterValidation.size(null, 2, "list");
+        assertThatThrownBy(() -> ParameterValidation.size(null, 2, "list")).isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("list");
     }
 
 }
