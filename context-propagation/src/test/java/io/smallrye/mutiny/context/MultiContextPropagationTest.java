@@ -3,6 +3,8 @@ package io.smallrye.mutiny.context;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.concurrent.*;
 
@@ -153,7 +155,7 @@ public class MultiContextPropagationTest {
         assertThat(result).isEqualTo(2);
     }
 
-    @Test
+    @RepeatedTest(100)
     public void testBroadcast() {
         MyContext ctx = MyContext.get();
         assertThat(ctx).isNotNull();
@@ -171,7 +173,7 @@ public class MultiContextPropagationTest {
         }).map(r -> {
             assertThat(ctx).isEqualTo(MyContext.get());
             return r;
-        }).broadcast().toAllSubscribers();
+        }).broadcast().toAtLeast(2);
 
         AssertSubscriber<Integer> sub1 = multi
                 .map(i -> {
@@ -182,8 +184,8 @@ public class MultiContextPropagationTest {
         AssertSubscriber<Integer> sub2 = multi.subscribe()
                 .withSubscriber(AssertSubscriber.create(10));
 
-        sub1.await().assertCompletedSuccessfully().assertReceived(2, 3);
-        sub2.await().assertCompletedSuccessfully().assertReceived(2, 3);
+        sub1.await(Duration.of(5, ChronoUnit.SECONDS)).assertCompletedSuccessfully().assertReceived(2, 3);
+        sub2.await(Duration.of(5, ChronoUnit.SECONDS)).assertCompletedSuccessfully().assertReceived(2, 3);
     }
 
     @Test
