@@ -61,6 +61,11 @@ public class UniOnFailure<T> {
                 new UniOnItemConsume<>(upstream, null, nonNull(callback, "callback"), predicate));
     }
 
+    public Uni<T> invoke(Runnable callback) {
+        ParameterValidation.nonNull(callback, "callback");
+        return invoke(i -> callback.run());
+    }
+
     /**
      * Produces a new {@link Uni} invoking the given function when the current {@link Uni} propagates a failure
      * (matching the predicate if set). The function can transform the received failure into another exception that will
@@ -76,7 +81,7 @@ public class UniOnFailure<T> {
      * @param action the callback, must not be {@code null}
      * @return the new {@link Uni}
      */
-    public Uni<T> invokeUni(Function<Throwable, Uni<?>> action) {
+    public Uni<T> call(Function<Throwable, Uni<?>> action) {
         ParameterValidation.nonNull(action, "action");
         return recoverWithUni(failure -> {
             Uni<?> uni = Objects.requireNonNull(action.apply(failure), "The `action` produced a `null` uni");
@@ -85,6 +90,11 @@ public class UniOnFailure<T> {
                     .onItem().failWith(ignored -> failure)
                     .onFailure().apply(subFailure -> new CompositeException(failure, subFailure));
         });
+    }
+
+    public Uni<T> call(Supplier<Uni<?>> action) {
+        ParameterValidation.nonNull(action, "action");
+        return call(i -> action.get());
     }
 
     /**

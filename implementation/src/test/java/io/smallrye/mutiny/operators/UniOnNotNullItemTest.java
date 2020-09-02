@@ -77,7 +77,7 @@ public class UniOnNotNullItemTest {
         AtomicBoolean invoked = new AtomicBoolean();
         AtomicReference<String> called = new AtomicReference<>();
         assertThat(Uni.createFrom().item("hello")
-                .onItem().ifNotNull().invokeUni(s -> {
+                .onItem().ifNotNull().call(s -> {
                     invoked.set(s.equals("hello"));
                     return Uni.createFrom().item("something").onItem().invoke(called::set);
                 })
@@ -88,7 +88,7 @@ public class UniOnNotNullItemTest {
         invoked.set(false);
         called.set(null);
         assertThat(Uni.createFrom().nullItem()
-                .onItem().ifNotNull().invokeUni(s -> {
+                .onItem().ifNotNull().call(s -> {
                     invoked.set(s.equals("hello"));
                     return Uni.createFrom().item("something").onItem().invoke(called::set);
                 })
@@ -98,7 +98,7 @@ public class UniOnNotNullItemTest {
         assertThat(called).hasValue(null);
 
         assertThatThrownBy(() -> Uni.createFrom().<String> failure(new Exception("boom"))
-                .onItem().ifNotNull().invokeUni(s -> {
+                .onItem().ifNotNull().call(s -> {
                     invoked.set(s.equals("hello"));
                     return Uni.createFrom().item("something").onItem().invoke(called::set);
                 })
@@ -113,7 +113,7 @@ public class UniOnNotNullItemTest {
     public void testInvokeUniProducingNull() {
         assertThatExceptionOfType(NullPointerException.class)
                 .isThrownBy(() -> Uni.createFrom().item("hello")
-                        .onItem().ifNotNull().invokeUni(s -> null)
+                        .onItem().ifNotNull().call(s -> null)
                         .await().indefinitely());
     }
 
@@ -122,7 +122,7 @@ public class UniOnNotNullItemTest {
         assertThatExceptionOfType(IllegalStateException.class)
                 .isThrownBy(() -> Uni.createFrom().item("hello")
                         .onItem().ifNotNull()
-                        .invokeUni(s -> Uni.createFrom().failure(new IllegalStateException("boom")))
+                        .call(s -> Uni.createFrom().failure(new IllegalStateException("boom")))
                         .await().indefinitely())
                 .withMessageContaining("boom");
     }
@@ -135,7 +135,7 @@ public class UniOnNotNullItemTest {
 
         Cancellable cancellable = Uni.createFrom().item("hello")
                 .onItem().ifNotNull()
-                .invokeUni(s -> emitter)
+                .call(s -> emitter)
                 .subscribe().with(res::set);
 
         cancellable.cancel();

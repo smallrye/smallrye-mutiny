@@ -4,6 +4,7 @@ import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
 
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
+import java.util.function.Supplier;
 
 import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Uni;
@@ -12,6 +13,7 @@ import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.UniOnItemOrFailureConsume;
 import io.smallrye.mutiny.operators.UniOnItemOrFailureFlatMap;
 import io.smallrye.mutiny.operators.UniOnItemOrFailureMap;
+import io.smallrye.mutiny.operators.UniOnTermination;
 import io.smallrye.mutiny.subscription.UniEmitter;
 import io.smallrye.mutiny.tuples.Functions;
 
@@ -36,6 +38,11 @@ public class UniOnItemOrFailure<T> {
                 new UniOnItemOrFailureConsume<>(upstream, nonNull(callback, "callback")));
     }
 
+    public Uni<T> invoke(Runnable callback) {
+        ParameterValidation.nonNull(callback, "callback");
+        return invoke((i, x) -> callback.run());
+    }
+
     /**
      * Produces a new {@link Uni} invoking the given callback when the {@code item} or {@code failure} event is fired.
      * Note that the item can be {@code null}, so detecting failures must be done by checking whether the {@code failure}
@@ -44,7 +51,7 @@ public class UniOnItemOrFailure<T> {
      * @param callback the callback, must not be {@code null}
      * @return the new {@link Uni}
      */
-    public Uni<T> invokeUni(BiFunction<? super T, Throwable, Uni<?>> callback) {
+    public Uni<T> call(BiFunction<? super T, Throwable, Uni<?>> callback) {
         ParameterValidation.nonNull(callback, "callback");
         return transformToUni((res, fail) -> {
             Uni<?> uni = callback.apply(res, fail);
@@ -64,6 +71,11 @@ public class UniOnItemOrFailure<T> {
                         }
                     });
         });
+    }
+
+    public Uni<T> call(Supplier<Uni<?>> callback) {
+        ParameterValidation.nonNull(callback, "callback");
+        return call((i, x) -> callback.get());
     }
 
     /**

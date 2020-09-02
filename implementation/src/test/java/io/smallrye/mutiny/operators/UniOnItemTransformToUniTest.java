@@ -50,18 +50,18 @@ public class UniOnItemTransformToUniTest {
     @Test
     public void testTransformToUniShortcutThen() {
         UniAssertSubscriber<Integer> test = UniAssertSubscriber.create();
-        Uni.createFrom().item(1).then(() -> Uni.createFrom().item(2)).subscribe().withSubscriber(test);
+        Uni.createFrom().item(1).chain(() -> Uni.createFrom().item(2)).subscribe().withSubscriber(test);
         test.assertCompletedSuccessfully().assertItem(2).assertNoFailure();
     }
 
     @Test
     public void testTransformToUniShortcutThenWithNullSupplier() {
-        assertThrows(IllegalArgumentException.class, () -> Uni.createFrom().item(1).then((Supplier<Uni<?>>) null));
+        assertThrows(IllegalArgumentException.class, () -> Uni.createFrom().item(1).chain((Supplier<Uni<?>>) null));
     }
 
     @Test
     public void testTransformToUniShortcutChainWithNullMapper() {
-        assertThrows(IllegalArgumentException.class, () -> Uni.createFrom().item(1).chain(null));
+        assertThrows(IllegalArgumentException.class, () -> Uni.createFrom().item(1).chain((Supplier<Uni<?>>) null));
     }
 
     @Test

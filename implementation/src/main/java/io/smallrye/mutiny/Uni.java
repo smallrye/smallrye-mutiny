@@ -413,7 +413,11 @@ public interface Uni<T> {
      * @return the new {@link Uni}
      */
     default Uni<T> invoke(Consumer<? super T> callback) {
-        return onItem().invoke(nonNull(callback, "callback"));
+        return onItem().invoke(callback);
+    }
+
+    default Uni<T> invoke(Runnable callback) {
+        return onItem().invoke(callback);
     }
 
     /**
@@ -425,14 +429,18 @@ public interface Uni<T> {
      * {@code Uni} fails, the failure is propagated downstream. If the callback throws an exception, this exception
      * is propagated downstream as failure.
      * <p>
-     * This method is a shortcut on {@link UniOnItem#invokeUni(Function)}
+     * This method is a shortcut on {@link UniOnItem#call(Function)}
      *
      * @param action the function taking the item and returning a {@link Uni}, must not be {@code null}, must not return
      *        {@code null}
      * @return the new {@link Uni}
      */
-    default Uni<T> invokeUni(Function<? super T, Uni<?>> action) {
-        return onItem().invokeUni(nonNull(action, "action"));
+    default Uni<T> call(Function<? super T, Uni<?>> action) {
+        return onItem().call(action);
+    }
+
+    default Uni<T> call(Supplier<Uni<?>> action) {
+        return onItem().call(action);
     }
 
     /**
@@ -482,7 +490,7 @@ public interface Uni<T> {
      * @param <O> the type of item
      * @return a new {@link Uni} that would fire events from the uni produced by the mapper function, possibly
      *         in an asynchronous manner.
-     * @see #then(Supplier)
+     * @see #chain(Supplier)
      */
     default <O> Uni<O> chain(Function<? super T, Uni<? extends O>> mapper) {
         return onItem().transformToUni(nonNull(mapper, "mapper"));
@@ -517,9 +525,9 @@ public interface Uni<T> {
      *         in an asynchronous manner.
      * @see #chain(Function)
      */
-    default <O> Uni<O> then(Supplier<Uni<? extends O>> supplier) {
-        Supplier<Uni<? extends O>> actual = nonNull(supplier, "supplier");
-        return onItem().transformToUni(ignored -> actual.get());
+    default <O> Uni<O> chain(Supplier<Uni<? extends O>> supplier) {
+        nonNull(supplier, "supplier");
+        return onItem().transformToUni(ignored -> supplier.get());
     }
 
     /**
@@ -564,7 +572,7 @@ public interface Uni<T> {
      * }
      * </pre>
      * <p>
-     * This method is a shortcut for {@link UniOnItemOrFailure#invokeUni(BiFunction)}:
+     * This method is a shortcut for {@link UniOnItemOrFailure#call(BiFunction)}:
      * {@code onItemOrFailure().invokeUni((item, err) -> supplier.get())}
      *
      * @param supplier a {@link Uni} supplier, cannot be {@code null} and cannot return {@code null}.
@@ -574,7 +582,7 @@ public interface Uni<T> {
      */
     default <O> Uni<T> eventually(Supplier<Uni<? extends O>> supplier) {
         Supplier<Uni<? extends O>> actual = nonNull(supplier, "supplier");
-        return onItemOrFailure().invokeUni((item, err) -> actual.get());
+        return onItemOrFailure().call((item, err) -> actual.get());
     }
 
     /**

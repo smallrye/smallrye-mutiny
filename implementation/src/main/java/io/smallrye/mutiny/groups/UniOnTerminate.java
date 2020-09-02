@@ -60,21 +60,21 @@ public class UniOnTerminate<T> {
      *        The function must return a non-{@code null} {@link Uni}.
      * @return the new {@link Uni}
      */
-    public Uni<T> invokeUni(Functions.Function3<? super T, Throwable, Boolean, Uni<?>> mapper) {
+    public Uni<T> call(Functions.Function3<? super T, Throwable, Boolean, Uni<?>> mapper) {
         return Infrastructure
                 .onUniCreation(new UniOnTerminationInvokeUni<>(upstream, ParameterValidation.nonNull(mapper, "mapper")));
     }
 
     /**
      * Attaches an action that is executed when the {@link Uni} emits an item or a failure or when the subscriber
-     * cancels the subscription. Unlike {@link #invokeUni(Functions.Function3)} the supplier does not receive the
+     * cancels the subscription. Unlike {@link #call(Functions.Function3)} the supplier does not receive the
      * item, failure or cancellation.
      *
      * @param supplier must return a non-{@code null} {@link Uni}.
      * @return the new {@link Uni}
      */
-    public Uni<T> invokeUni(Supplier<Uni<?>> supplier) {
+    public Uni<T> call(Supplier<Uni<?>> supplier) {
         nonNull(supplier, "supplier");
-        return invokeUni((i, f, c) -> supplier.get());
+        return call((i, f, c) -> supplier.get());
     }
 }

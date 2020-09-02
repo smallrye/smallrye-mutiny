@@ -6,6 +6,7 @@ import java.util.concurrent.CompletionStage;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import org.reactivestreams.Publisher;
 
@@ -36,6 +37,10 @@ public class UniOnNotNull<T> {
         });
     }
 
+    public Uni<T> invoke(Runnable callback) {
+        return invoke(i -> callback.run());
+    }
+
     /**
      * Produces a new {@link Uni} invoking the given @{code action} when the {@code item} event is received. Note that
      * if the received item is {@code null}, the action is not executed, and the item is propagated downstream.
@@ -47,14 +52,18 @@ public class UniOnNotNull<T> {
      * @param action the callback, must not be {@code null}
      * @return the new {@link Uni}
      */
-    public Uni<T> invokeUni(Function<? super T, Uni<?>> action) {
-        return upstream.onItem().invokeUni(item -> {
+    public Uni<T> call(Function<? super T, Uni<?>> action) {
+        return upstream.onItem().call(item -> {
             if (item != null) {
                 return action.apply(item);
             } else {
                 return Uni.createFrom().nullItem();
             }
         });
+    }
+
+    public Uni<T> call(Supplier<Uni<?>> action) {
+        return call(i -> action.get());
     }
 
     /**

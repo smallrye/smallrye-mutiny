@@ -85,7 +85,7 @@ public class UncheckedFunctionTest {
     public void testWithThen() {
         UniSupplier reader = () -> Uni.createFrom().item(23);
         int res = Uni.createFrom().item(1)
-                .then(supplier(reader::get))
+                .chain(supplier(reader::get))
                 .await().indefinitely();
         assertThat(res).isEqualTo(23);
     }
