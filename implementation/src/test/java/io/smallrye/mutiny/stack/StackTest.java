@@ -2,7 +2,6 @@ package io.smallrye.mutiny.stack;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
@@ -59,15 +58,15 @@ public class StackTest {
         List<Integer> list = new ArrayList<>();
 
         AtomicInteger index = new AtomicInteger();
-        Uni.createFrom().<Byte> emitter(e -> {
-            if (index.get() > bytes.length) {
-                e.complete(null);
+        Uni.createFrom().<Integer> emitter(e -> {
+            if (index.get() > bytes.length - 1) {
+                e.complete(Integer.MIN_VALUE);
             } else {
                 int i = index.getAndIncrement();
-                e.complete(bytes[i]);
+                e.complete(new Byte(bytes[i]).intValue());
             }
-        }).repeat().until(Objects::isNull)
-                .subscribe().with(i -> list.add(i.intValue()));
+        }).repeat().until(b -> b == Integer.MIN_VALUE)
+                .subscribe().with(list::add);
 
         for (int i = 0; i < length; i++) {
             Assertions.assertThat(bytes[i]).isEqualTo(list.get(i).byteValue());
