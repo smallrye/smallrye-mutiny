@@ -1,5 +1,6 @@
 package io.smallrye.mutiny.operators.multi.processors;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.mockito.Mockito.mock;
 
@@ -8,6 +9,7 @@ import java.util.Queue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.reactivestreams.Subscription;
 
@@ -30,14 +32,14 @@ public class UnicastProcessorTest {
                 .assertHasNotCompleted();
     }
 
-    @Test
+    @RepeatedTest(100)
     public void testWithMultithreadedUpstream() {
         UnicastProcessor<String> processor = UnicastProcessor.create();
         ExecutorService executor = Executors.newFixedThreadPool(5);
         for (int i = 0; i < 5; i++) {
             int t = i;
             Runnable produce = () -> {
-                for (int j = 0; j < 10000; j++) {
+                for (int j = 0; j < 1000; j++) {
                     processor.onNext(t + "-" + j);
                 }
             };
@@ -47,7 +49,14 @@ public class UnicastProcessorTest {
         AssertSubscriber<Object> subscriber = AssertSubscriber.create(Long.MAX_VALUE);
         processor.subscribe(subscriber);
 
-        await().until(() -> subscriber.items().size() == 5 * 10000);
+        await().until(() -> subscriber.items().size() == 5 * 1000);
+        processor.onComplete();
+        for (int i = 0; i < 5; i++) {
+            for (int j = 0; j < 1000; j++) {
+                assertThat(subscriber.items()).contains(i + "-" + j);
+            }
+        }
+
         executor.shutdownNow();
     }
 
