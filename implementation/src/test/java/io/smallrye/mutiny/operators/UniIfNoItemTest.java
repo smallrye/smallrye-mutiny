@@ -11,8 +11,10 @@ import java.util.concurrent.ScheduledExecutorService;
 
 import org.junit.jupiter.api.Test;
 
+import io.smallrye.mutiny.TestException;
 import io.smallrye.mutiny.TimeoutException;
 import io.smallrye.mutiny.Uni;
+import org.junit.jupiter.api.Timeout;
 
 public class UniIfNoItemTest {
 
@@ -38,7 +40,45 @@ public class UniIfNoItemTest {
 
         subscriber.await().assertCompletedWithFailure();
         assertThat(subscriber.getFailure()).isInstanceOf(TimeoutException.class);
+    }
 
+    @Test
+    public void testTimeoutOnFailure() {
+        UniAssertSubscriber<Integer> subscriber = UniAssertSubscriber.create();
+
+        Uni.createFrom().<Integer> emitter(e -> new Thread(() -> {
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException interruptedException) {
+                Thread.currentThread().interrupt();
+            }
+            e.fail(new TestException("boom"));
+        }).start())
+                .ifNoItem().after(Duration.ofMillis(1)).fail()
+                .subscribe().withSubscriber(subscriber);
+
+        subscriber.await().assertCompletedWithFailure();
+        assertThat(subscriber.getFailure()).isInstanceOf(TimeoutException.class);
+    }
+
+    @Test
+    @Timeout(2)
+    public void testFailureBeforeTimeout() {
+        UniAssertSubscriber<Integer> subscriber = UniAssertSubscriber.create();
+
+        Uni.createFrom().<Integer> emitter(e -> new Thread(() -> {
+            try {
+                Thread.sleep(1);
+            } catch (InterruptedException interruptedException) {
+                Thread.currentThread().interrupt();
+            }
+            e.fail(new TestException("boom"));
+        }).start())
+                .ifNoItem().after(Duration.ofMillis(10000)).fail()
+                .subscribe().withSubscriber(subscriber);
+
+        subscriber.await().assertCompletedWithFailure();
+        assertThat(subscriber.getFailure()).isInstanceOf(TestException.class);
     }
 
     @Test
@@ -132,6 +172,21 @@ public class UniIfNoItemTest {
         subscriber.assertNotCompleted()
                 .assertSubscribed()
                 .assertNoResult();
+    }
+
+    @Test
+    public void testTimeoutWithCustomSupplierFailing() {
+        UniAssertSubscriber<Integer> subscriber = UniAssertSubscriber.create();
+
+        Uni.createFrom().item(1)
+                .onItem().delayIt().by(Duration.ofMillis(10))
+                .ifNoItem().after(Duration.ofMillis(1)).failWith(() -> {
+                    throw new IllegalArgumentException("boom");
+                })
+                .subscribe().withSubscriber(subscriber);
+
+        subscriber.await().assertCompletedWithFailure();
+        assertThat(subscriber.getFailure()).isInstanceOf(IllegalArgumentException.class);
     }
 
 }
