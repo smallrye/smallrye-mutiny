@@ -35,7 +35,7 @@ public class UniSerializedSubscriber<T> implements UniSubscriber<T>, UniSubscrip
     private final AbstractUni<T> upstream;
     private final UniSubscriber<? super T> downstream;
 
-    private UniSubscription subscription;
+    private volatile UniSubscription subscription;
     private final AtomicReference<Throwable> failure = new AtomicReference<>();
 
     UniSerializedSubscriber(AbstractUni<T> upstream, UniSubscriber<? super T> subscriber) {
@@ -117,6 +117,9 @@ public class UniSerializedSubscriber<T> implements UniSubscriber<T>, UniSubscrip
     @Override
     public void cancel() {
         if (state.compareAndSet(HAS_SUBSCRIPTION, DONE)) {
+            while (subscription == null) {
+                // We are in the middle of a race condition with onSubscribe()
+            }
             subscription.cancel();
             dispose();
         } else {
