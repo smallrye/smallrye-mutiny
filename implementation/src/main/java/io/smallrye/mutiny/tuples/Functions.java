@@ -6,6 +6,7 @@ import java.util.function.Function;
 public final class Functions {
 
     private Functions() {
+        // Avoid direct instantiation.
     }
 
     @FunctionalInterface

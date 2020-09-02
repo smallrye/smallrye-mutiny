@@ -27,6 +27,16 @@ public class UniRunSubscriptionOnTest {
     }
 
     @Test
+    public void testRunSubscriptionOnWithSupplierWithDeprecatedMethod() {
+        UniAssertSubscriber<Integer> subscriber = UniAssertSubscriber.create();
+        Uni.createFrom().item(() -> 1)
+                .subscribeOn(ForkJoinPool.commonPool())
+                .subscribe().withSubscriber(subscriber);
+        subscriber.await().assertItem(1);
+        assertThat(subscriber.getOnSubscribeThreadName()).isNotEqualTo(Thread.currentThread().getName());
+    }
+
+    @Test
     public void testWithWithImmediateValue() {
         UniAssertSubscriber<Integer> subscriber = UniAssertSubscriber.create();
 
