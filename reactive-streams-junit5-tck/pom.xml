@@ -12,7 +12,8 @@
 
     <artifactId>reactive-streams-junit5-tck</artifactId>
 
-    <description>The Reactive Streams TCK using Junit 5 instead of TestNG</description>
+    <name>Reactive Streams TCK with JUnit5</name>
+    <description>The Reactive Streams TCK using JUnit 5 instead of TestNG</description>
 
     <dependencies>
         <dependency>
