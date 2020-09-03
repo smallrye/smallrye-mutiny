@@ -556,7 +556,7 @@ public interface Uni<T> {
      * Uni&lt;Session&gt; uni = getSomeSession();
      * return uni.chain(session -&gt; session.persist(fruit))
      *         .chain(session -&gt; session.flush())
-     *         .chain(() -> server.close());
+     *         .chain(() -&gt; server.close());
      * </pre>
      *
      * The supplier ignores the item event of the current {@link Uni} and produces an {@link Uni}, possibly
