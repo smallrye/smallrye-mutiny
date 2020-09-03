@@ -60,7 +60,7 @@ public class UniOnTerminate<T> {
      *        The function must return a non-{@code null} {@link Uni}.
      * @return the new {@link Uni}
      */
-    public Uni<T> invokeUni(Functions.Function3<? super T, Throwable, Boolean, Uni<?>> mapper) {
+    public Uni<T> call(Functions.Function3<? super T, Throwable, Boolean, Uni<?>> mapper) {
         return Infrastructure
                 .onUniCreation(new UniOnTerminationInvokeUni<>(upstream, ParameterValidation.nonNull(mapper, "mapper")));
     }
@@ -73,8 +73,40 @@ public class UniOnTerminate<T> {
      * @param supplier must return a non-{@code null} {@link Uni}.
      * @return the new {@link Uni}
      */
-    public Uni<T> invokeUni(Supplier<Uni<?>> supplier) {
+    public Uni<T> call(Supplier<Uni<?>> supplier) {
         nonNull(supplier, "supplier");
         return invokeUni((i, f, c) -> supplier.get());
+    }
+
+    /**
+     * Attaches an action that is executed when the {@link Uni} emits an item or a failure or when the subscriber
+     * cancels the subscription.
+     *
+     * @param mapper the function receiving the item, the failure and a boolean indicating whether the termination
+     *        is due to a cancellation. When an item is emitted then the failure is {@code null} and the boolean
+     *        is {@code false}. When a failure is emitted then the item is {@code null} and the boolean
+     *        is {@code false}. When the subscription has been cancelled then the boolean is {@code true} and the
+     *        other parameters are {@code null}.
+     *        The function must return a non-{@code null} {@link Uni}.
+     * @return the new {@link Uni}
+     * @deprecated Use {@link #call(Supplier)}
+     */
+    @Deprecated
+    public Uni<T> invokeUni(Functions.Function3<? super T, Throwable, Boolean, Uni<?>> mapper) {
+        return call(mapper);
+    }
+
+    /**
+     * Attaches an action that is executed when the {@link Uni} emits an item or a failure or when the subscriber
+     * cancels the subscription. Unlike {@link #invokeUni(Functions.Function3)} the supplier does not receive the
+     * item, failure or cancellation.
+     *
+     * @param supplier must return a non-{@code null} {@link Uni}.
+     * @return the new {@link Uni}
+     * @deprecated Use {@link #call(Supplier)}
+     */
+    @Deprecated
+    public Uni<T> invokeUni(Supplier<Uni<?>> supplier) {
+        return call(supplier);
     }
 }

@@ -56,12 +56,13 @@ public class UniOnItemTransformToUniTest {
 
     @Test
     public void testTransformToUniShortcutThenWithNullSupplier() {
-        assertThrows(IllegalArgumentException.class, () -> Uni.createFrom().item(1).then((Supplier<Uni<?>>) null));
+        assertThrows(IllegalArgumentException.class, () -> Uni.createFrom().item(1).chain((Supplier<Uni<?>>) null));
     }
 
     @Test
     public void testTransformToUniShortcutChainWithNullMapper() {
-        assertThrows(IllegalArgumentException.class, () -> Uni.createFrom().item(1).chain(null));
+        assertThrows(IllegalArgumentException.class,
+                () -> Uni.createFrom().item(1).chain((Function<? super Integer, Uni<?>>) null));
     }
 
     @Test

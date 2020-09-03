@@ -7,6 +7,7 @@ import java.util.concurrent.CompletionStage;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import org.reactivestreams.Publisher;
 
@@ -43,6 +44,38 @@ public class UniOnItem<T> {
     }
 
     /**
+     * Produces a new {@link Uni} invoking the given callback when the {@code item} event is fired, ignoring its value.
+     * <p>
+     * If the callback throws an exception, this exception is propagated to the downstream as failure.
+     *
+     * @param callback the callback, must not be {@code null}
+     * @return the new {@link Uni}
+     */
+    public Uni<T> invoke(Runnable callback) {
+        Runnable actual = nonNull(callback, "callback");
+        return invoke(ignored -> actual.run());
+    }
+
+    /**
+     * Produces a new {@link Uni} invoking the given @{code action} when the {@code item} event is received. Note that
+     * the received item can be {@code null}.
+     * <p>
+     * Unlike {@link #invoke(Consumer)}, the passed function returns a {@link Uni}. When the produced {@code Uni} sends
+     * its item, this item is discarded, and the original {@code item} is forwarded downstream. If the produced
+     * {@code Uni} fails, the failure is propagated downstream.
+     * <p>
+     *
+     * @param action the function taking the item and returning a {@link Uni}, must not be {@code null}, must not return
+     *        {@code null}
+     * @return the new {@link Uni}
+     * @deprecated Use {@link #call(Function)}
+     */
+    @Deprecated
+    public Uni<T> invokeUni(Function<? super T, Uni<?>> action) {
+        return call(action);
+    }
+
+    /**
      * Produces a new {@link Uni} invoking the given @{code action} when the {@code item} event is received. Note that
      * the received item can be {@code null}.
      * <p>
@@ -55,13 +88,29 @@ public class UniOnItem<T> {
      *        {@code null}
      * @return the new {@link Uni}
      */
-    public Uni<T> invokeUni(Function<? super T, Uni<?>> action) {
+    public Uni<T> call(Function<? super T, Uni<?>> action) {
         ParameterValidation.nonNull(action, "action");
         return transformToUni(item -> {
             Uni<?> uni = Objects.requireNonNull(action.apply(item), "The callback produced a `null` uni");
             return uni
                     .onItem().transform(ignored -> item);
         });
+    }
+
+    /**
+     * Produces a new {@link Uni} invoking the given @{code action} when the {@code item} event is received, ignoring it.
+     * <p>
+     * Unlike {@link #invoke(Consumer)}, the passed function returns a {@link Uni}. When the produced {@code Uni} sends
+     * its item, this item is discarded, and the original {@code item} is forwarded downstream. If the produced
+     * {@code Uni} fails, the failure is propagated downstream.
+     * <p>
+     *
+     * @param action the action returning a {@link Uni}, must not be {@code null}, must not return {@code null}
+     * @return the new {@link Uni}
+     */
+    public Uni<T> call(Supplier<Uni<?>> action) {
+        Supplier<Uni<?>> actual = nonNull(action, "action");
+        return call(ignored -> actual.get());
     }
 
     /**

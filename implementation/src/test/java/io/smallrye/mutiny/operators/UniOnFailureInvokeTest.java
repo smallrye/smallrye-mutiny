@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 
 import org.junit.jupiter.api.Test;
 
@@ -22,7 +23,7 @@ public class UniOnFailureInvokeTest {
 
     @Test
     public void testThatConsumeMustNotBeNull() {
-        assertThrows(IllegalArgumentException.class, () -> Uni.createFrom().item(1).onFailure().invoke(null));
+        assertThrows(IllegalArgumentException.class, () -> Uni.createFrom().item(1).onFailure().invoke((Consumer<Throwable>) null));
     }
 
     @Test

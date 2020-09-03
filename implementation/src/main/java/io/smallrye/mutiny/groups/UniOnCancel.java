@@ -38,8 +38,23 @@ public class UniOnCancel<T> {
      *
      * @param supplier the {@link Uni} supplier, must not return {@code null}.
      * @return a new {@link Uni}
+     * @deprecated Use {@link #call(Supplier)}
      */
+    @Deprecated
     public Uni<T> invokeUni(Supplier<Uni<?>> supplier) {
+        return call(supplier);
+    }
+
+    /**
+     * Attaches an action executed when the subscription is cancelled.
+     * The upstream is not cancelled yet, but will be cancelled when the returned {@link Uni} completes.
+     * The supplier must not return {@code null}.
+     * Note that the result or the failure of the {@link Uni} will be discarded.
+     *
+     * @param supplier the {@link Uni} supplier, must not return {@code null}.
+     * @return a new {@link Uni}
+     */
+    public Uni<T> call(Supplier<Uni<?>> supplier) {
         return Infrastructure.onUniCreation(new UniOnCancellationInvokeUni<>(upstream, nonNull(supplier, "supplier")));
     }
 }

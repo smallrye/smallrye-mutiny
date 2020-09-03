@@ -160,7 +160,7 @@ public class UniOnSubscribeTest {
     @Test
     public void testThatInvokeConsumerCannotBeNull() {
         assertThrows(IllegalArgumentException.class, () -> Uni.createFrom().item(1)
-                .onSubscribe().invoke(null));
+                .onSubscribe().invoke((Consumer<? super UniSubscription>) null));
     }
 
     @Test

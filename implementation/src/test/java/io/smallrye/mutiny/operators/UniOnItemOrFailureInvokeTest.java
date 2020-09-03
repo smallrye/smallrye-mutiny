@@ -10,6 +10,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.BiConsumer;
 
 import org.junit.jupiter.api.Test;
 
@@ -26,7 +27,7 @@ public class UniOnItemOrFailureInvokeTest {
 
     @Test
     public void testThatCallbackMustNotBeNull() {
-        assertThrows(IllegalArgumentException.class, () -> Uni.createFrom().item(1).onItemOrFailure().invoke(null));
+        assertThrows(IllegalArgumentException.class, () -> Uni.createFrom().item(1).onItemOrFailure().invoke((BiConsumer<? super Integer, Throwable>) null));
     }
 
     @Test

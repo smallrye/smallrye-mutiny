@@ -62,6 +62,42 @@ public class UniOnFailure<T> {
     }
 
     /**
+     * Produces a new {@link Uni} invoking the given callback when this {@link Uni} emits a failure (matching the
+     * predicate if set).
+     * <p>
+     * If the callback throws an exception, a {@link io.smallrye.mutiny.CompositeException} is propagated downstream.
+     * This exception is composed by the received failure and the thrown exception.
+     *
+     * @param callback the callback, must not be {@code null}
+     * @return the new {@link Uni}
+     */
+    public Uni<T> invoke(Runnable callback) {
+        Runnable actual = nonNull(callback, "callback");
+        return invoke(ignored -> actual.run());
+    }
+
+    /**
+     * Produces a new {@link Uni} invoking the given function when the current {@link Uni} propagates a failure
+     * (matching the predicate if set). The function can transform the received failure into another exception that will
+     * be fired as failure downstream.
+     *
+     * Produces a new {@link Uni} invoking the given @{code action} when the {@code failure} event is received.
+     * <p>
+     * Unlike {@link #invoke(Consumer)}, the passed function returns a {@link Uni}. When the produced {@code Uni} sends
+     * its item, this item is discarded, and the original {@code failure} is forwarded downstream. If the produced
+     * {@code Uni} fails, a composite failure containing both the original failure and the failure from the executed
+     * action is propagated downstream.
+     *
+     * @param action the callback, must not be {@code null}
+     * @return the new {@link Uni}
+     * @deprecated Use {@link #call(Function)}
+     */
+    @Deprecated
+    public Uni<T> invokeUni(Function<Throwable, Uni<?>> action) {
+        return call(action);
+    }
+
+    /**
      * Produces a new {@link Uni} invoking the given function when the current {@link Uni} propagates a failure
      * (matching the predicate if set). The function can transform the received failure into another exception that will
      * be fired as failure downstream.
@@ -76,7 +112,7 @@ public class UniOnFailure<T> {
      * @param action the callback, must not be {@code null}
      * @return the new {@link Uni}
      */
-    public Uni<T> invokeUni(Function<Throwable, Uni<?>> action) {
+    public Uni<T> call(Function<Throwable, Uni<?>> action) {
         ParameterValidation.nonNull(action, "action");
         return recoverWithUni(failure -> {
             Uni<?> uni = Objects.requireNonNull(action.apply(failure), "The `action` produced a `null` uni");
@@ -85,6 +121,25 @@ public class UniOnFailure<T> {
                     .onItem().failWith(ignored -> failure)
                     .onFailure().apply(subFailure -> new CompositeException(failure, subFailure));
         });
+    }
+
+    /**
+     * Produces a new {@link Uni} invoking the given supplier when the current {@link Uni} propagates a failure
+     * (matching the predicate if set). The supplier ignores the failure.
+     *
+     * Produces a new {@link Uni} invoking the given @{code supplier} when the {@code failure} event is received.
+     * <p>
+     * Unlike {@link #invoke(Consumer)}, the passed function returns a {@link Uni}. When the produced {@code Uni} sends
+     * its item, this item is discarded, and the original {@code failure} is forwarded downstream. If the produced
+     * {@code Uni} fails, a composite failure containing both the original failure and the failure from the executed
+     * supplier is propagated downstream.
+     *
+     * @param supplier the supplier, must not be {@code null}
+     * @return the new {@link Uni}
+     */
+    public Uni<T> call(Supplier<Uni<?>> supplier) {
+        Supplier<Uni<?>> actual = nonNull(supplier, "supplier");
+        return call(ignored -> actual.get());
     }
 
     /**

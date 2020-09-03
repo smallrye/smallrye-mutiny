@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 
 import org.junit.jupiter.api.Test;
 
@@ -22,7 +23,7 @@ public class UniOnItemInvokeTest {
 
     @Test
     public void testThatConsumerMustNotBeNull() {
-        assertThrows(IllegalArgumentException.class, () -> Uni.createFrom().item(1).onItem().invoke(null));
+        assertThrows(IllegalArgumentException.class, () -> Uni.createFrom().item(1).onItem().invoke((Consumer<? super Integer>) null));
     }
 
     @Test
@@ -32,7 +33,7 @@ public class UniOnItemInvokeTest {
 
     @Test
     public void testThatConsumerMustNotBeNullWithShortcut() {
-        assertThrows(IllegalArgumentException.class, () -> Uni.createFrom().item(1).invoke(null));
+        assertThrows(IllegalArgumentException.class, () -> Uni.createFrom().item(1).invoke((Consumer<? super Integer>) null));
     }
 
     @Test
