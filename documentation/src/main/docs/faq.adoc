@@ -108,15 +108,15 @@ include::../../../src/test/java/snippets/EventsTest.java[tags=shortcut]
 
 `invoke` is a shortcut for `onItem().invoke(...)`.
 
-Mutiny also provides the `invokeUni` method for executing an action returning a `Uni`.
+Mutiny also provides the `call` method for executing an action returning a `Uni`.
 This is useful to execute an asynchronous action without modifying incoming item:
 
 [source,java,indent=0]
 ----
-include::../../../src/test/java/snippets/EventsTest.java[tags=invoke-uni]
+include::../../../src/test/java/snippets/EventsTest.java[tags=call-uni]
 ----
 
-`invokeUni` is a shortcut for `onItem().invokeUni(...)`.
+`call` is a shortcut for `onItem().call(...)`.
 
 
 .List of the shortcuts offered by the Uni class
@@ -138,14 +138,14 @@ include::../../../src/test/java/snippets/EventsTest.java[tags=invoke-uni]
 |`uni.invoke(x -> System.out.println(x))`
 |`uni.onItem().invoke(x -> System.out.println(x))`
 
-|`uni.invokeUni(x -> uni2)`
-|`uni.onItem().invokeUni(x -> uni2)`
+|`uni.call(x -> uni2)`
+|`uni.onItem().call(x -> uni2)`
 
 |`uni.eventually(() -> System.out.println("eventually"))`
-|`uni.onItemOrFailure().invoke((ignoredItem, ignoredException) -> System.out.println("eventually))`
+|`uni.onItemOrFailure().invoke((ignoredItem, ignoredException) -> System.out.println("eventually"))`
 
 |`uni.eventually(() -> uni2)`
-|`uni.onItemOrFailure().invokeUni((ignoredItem, ignoredException) -> uni2)`
+|`uni.onItemOrFailure().call((ignoredItem, ignoredException) -> uni2)`
 |===
 
 
@@ -758,7 +758,7 @@ Consider the following example:
 include::../../../src/test/java/snippets/DroppedExceptionTest.java[tags=code]
 ----
 
-The `onCancellation().invokeUni(...)` method is called when the `Uni` subscription is cancelled.
+The `onCancellation().call(...)` method is called when the `Uni` subscription is cancelled.
 The returned `Uni` is failed with a `IOException`, but since the subscription itself has been cancelled then there is no way to catch the exception.
 
 By default Mutiny reports such dropped exceptions to the standard error stream along with the corresponding stack trace.
