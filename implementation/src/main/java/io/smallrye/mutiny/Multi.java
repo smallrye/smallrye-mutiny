@@ -6,6 +6,7 @@ import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
@@ -343,6 +344,46 @@ public interface Multi<T> extends Publisher<T> {
     }
 
     /**
+     * Produces a new {@link Multi} invoking the given @{code action} when an {@code item} event is received. Note that
+     * the received item cannot be {@code null}.
+     * <p>
+     * Unlike {@link #invoke(Consumer)}, the passed function returns a {@link Uni}. When the produced {@code Uni} sends
+     * its result, the result is discarded, and the original {@code item} is forwarded downstream. If the produced
+     * {@code Uni} fails, the failure is propagated downstream.
+     * <p>
+     * If the asynchronous action throws an exception, this exception is propagated downstream.
+     * <p>
+     * This method preserves the order of the items, meaning that the downstream received the items in the same order
+     * as the upstream has emitted them.
+     *
+     * @param action the function taking the item and returning a {@link Uni}, must not be {@code null}
+     * @return the new {@link Multi}
+     */
+    default Multi<T> call(Function<? super T, Uni<?>> action) {
+        return onItem().call(action);
+    }
+
+    /**
+     * Produces a new {@link Multi} invoking the given @{code action} when an {@code item} event is received, but
+     * ignoring it in the callback.
+     * <p>
+     * Unlike {@link #invoke(Consumer)}, the passed function returns a {@link Uni}. When the produced {@code Uni} sends
+     * its result, the result is discarded, and the original {@code item} is forwarded downstream. If the produced
+     * {@code Uni} fails, the failure is propagated downstream.
+     * <p>
+     * If the asynchronous action throws an exception, this exception is propagated downstream.
+     * <p>
+     * This method preserves the order of the items, meaning that the downstream received the items in the same order
+     * as the upstream has emitted them.
+     *
+     * @param action the function taking the item and returning a {@link Uni}, must not be {@code null}
+     * @return the new {@link Multi}
+     */
+    default Multi<T> call(Supplier<Uni<?>> action) {
+        return onItem().call(action);
+    }
+
+    /**
      * Produces a new {@link Multi} invoking the given callback when an {@code item} event is fired by the upstream.
      * Note that the received item cannot be {@code null}.
      * <p>
@@ -356,6 +397,20 @@ public interface Multi<T> extends Publisher<T> {
      */
     default Multi<T> invoke(Consumer<? super T> callback) {
         return onItem().invoke(nonNull(callback, "callback"));
+    }
+
+    /**
+     * Produces a new {@link Multi} invoking the given callback when an {@code item} event is fired by the upstream.
+     * <p>
+     * If the callback throws an exception, this exception is propagated to the downstream as failure. No more items
+     * will be consumed.
+     * <p>
+     *
+     * @param callback the callback, must not be {@code null}
+     * @return the new {@link Multi}
+     */
+    default Multi<T> invoke(Runnable callback) {
+        return onItem().invoke(callback);
     }
 
     /**
@@ -373,7 +428,9 @@ public interface Multi<T> extends Publisher<T> {
      * @param action the function taking the item and returning a {@link Uni}, must not be {@code null}, must not return
      *        {@code null}
      * @return the new {@link Multi}
+     * @deprecated Use {@link #call(Function)}
      */
+    @Deprecated
     default Multi<T> invokeUni(Function<? super T, Uni<?>> action) {
         return onItem().invokeUni(nonNull(action, "action"));
     }

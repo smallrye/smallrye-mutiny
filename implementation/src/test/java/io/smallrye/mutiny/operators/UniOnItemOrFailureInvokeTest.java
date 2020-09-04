@@ -27,7 +27,8 @@ public class UniOnItemOrFailureInvokeTest {
 
     @Test
     public void testThatCallbackMustNotBeNull() {
-        assertThrows(IllegalArgumentException.class, () -> Uni.createFrom().item(1).onItemOrFailure().invoke((BiConsumer<? super Integer, Throwable>) null));
+        assertThrows(IllegalArgumentException.class,
+                () -> Uni.createFrom().item(1).onItemOrFailure().invoke((BiConsumer<? super Integer, Throwable>) null));
     }
 
     @Test

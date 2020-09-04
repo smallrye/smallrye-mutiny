@@ -23,7 +23,8 @@ public class UniOnItemInvokeTest {
 
     @Test
     public void testThatConsumerMustNotBeNull() {
-        assertThrows(IllegalArgumentException.class, () -> Uni.createFrom().item(1).onItem().invoke((Consumer<? super Integer>) null));
+        assertThrows(IllegalArgumentException.class,
+                () -> Uni.createFrom().item(1).onItem().invoke((Consumer<? super Integer>) null));
     }
 
     @Test

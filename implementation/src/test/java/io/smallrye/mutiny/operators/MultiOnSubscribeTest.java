@@ -164,7 +164,7 @@ public class MultiOnSubscribeTest {
     @Test
     public void testThatInvokeConsumerCannotBeNull() {
         assertThrows(IllegalArgumentException.class, () -> Multi.createFrom().items(1, 2, 3)
-                .onSubscribe().invoke(null));
+                .onSubscribe().invoke((Consumer<? super Subscription>) null));
     }
 
     @Test

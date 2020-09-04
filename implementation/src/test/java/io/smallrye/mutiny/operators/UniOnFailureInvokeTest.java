@@ -23,7 +23,8 @@ public class UniOnFailureInvokeTest {
 
     @Test
     public void testThatConsumeMustNotBeNull() {
-        assertThrows(IllegalArgumentException.class, () -> Uni.createFrom().item(1).onFailure().invoke((Consumer<Throwable>) null));
+        assertThrows(IllegalArgumentException.class,
+                () -> Uni.createFrom().item(1).onFailure().invoke((Consumer<Throwable>) null));
     }
 
     @Test

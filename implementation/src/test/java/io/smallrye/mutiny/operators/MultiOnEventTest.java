@@ -11,6 +11,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 import org.junit.jupiter.api.Test;
@@ -747,7 +748,8 @@ public class MultiOnEventTest {
 
     @Test
     public void testThatInvokeConsumerMustNotBeNull() {
-        assertThrows(IllegalArgumentException.class, () -> Multi.createFrom().item(1).onItem().invoke(null));
+        assertThrows(IllegalArgumentException.class,
+                () -> Multi.createFrom().item(1).onItem().invoke((Consumer<? super Integer>) null));
     }
 
     @Test
@@ -757,7 +759,7 @@ public class MultiOnEventTest {
 
     @Test
     public void testThatInvokeConsumerMustNotBeNullWithShortcut() {
-        assertThrows(IllegalArgumentException.class, () -> Multi.createFrom().item(1).invoke(null));
+        assertThrows(IllegalArgumentException.class, () -> Multi.createFrom().item(1).invoke((Consumer<? super Integer>) null));
     }
 
     @Test
