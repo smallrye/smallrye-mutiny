@@ -66,7 +66,7 @@ public class MultiEmitOnOp<T> extends AbstractMultiOperator<T, T> {
         /**
          * Stores the failure
          */
-        private AtomicReference<Throwable> failure = new AtomicReference<>();
+        private final AtomicReference<Throwable> failure = new AtomicReference<>();
 
         private final AtomicInteger wip = new AtomicInteger();
         private final AtomicLong requested = new AtomicLong();
@@ -182,16 +182,7 @@ public class MultiEmitOnOp<T> extends AbstractMultiOperator<T, T> {
                 long requests = requested.get();
                 while (emitted != requests) {
                     boolean wasDone = done;
-                    T item;
-                    try {
-                        item = q.poll();
-                    } catch (Throwable ex) {
-                        done = true;
-                        Subscriptions.cancel(upstream);
-                        queue.clear();
-                        downstream.onFailure(ex);
-                        return;
-                    }
+                    T item = q.poll();
 
                     boolean empty = item == null;
                     if (isDoneOrCancelled(wasDone, empty)) {
