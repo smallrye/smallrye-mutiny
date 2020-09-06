@@ -84,6 +84,9 @@ public class MultiEmitOnTest {
         AssertSubscriber<Integer> subscriber = rogue
                 .emitOn(executor)
                 .subscribe().withSubscriber(AssertSubscriber.create(1));
+
+        await().untilAsserted(() -> subscriber.assertHasFailedWith(BackPressureFailure.class, ""));
+
         subscriber.assertHasFailedWith(BackPressureFailure.class, "");
     }
 
