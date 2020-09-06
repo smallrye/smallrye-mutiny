@@ -17,14 +17,12 @@ package io.smallrye.mutiny.operators.multi;
 
 import java.util.concurrent.Executor;
 import java.util.concurrent.RejectedExecutionException;
-import java.util.concurrent.atomic.AtomicLong;
 
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.helpers.ParameterValidation;
-import io.smallrye.mutiny.helpers.Subscriptions;
 import io.smallrye.mutiny.subscription.MultiSubscriber;
 
 /**
@@ -52,7 +50,6 @@ public class MultiSubscribeOnOp<T> extends AbstractMultiOperator<T, T> {
     static final class SubscribeOnProcessor<T> extends MultiOperatorProcessor<T, T> {
 
         private final Executor executor;
-        private final AtomicLong requested = new AtomicLong();
 
         SubscribeOnProcessor(MultiSubscriber<? super T> downstream, Executor executor) {
             super(downstream);
@@ -63,10 +60,6 @@ public class MultiSubscribeOnOp<T> extends AbstractMultiOperator<T, T> {
         public void onSubscribe(Subscription subscription) {
             if (upstream.compareAndSet(null, subscription)) {
                 downstream.onSubscribe(this);
-                long requests = requested.getAndSet(0L);
-                if (requests != 0L) {
-                    requestUpstream(requests, subscription);
-                }
             } else {
                 subscription.cancel();
             }
@@ -80,6 +73,16 @@ public class MultiSubscribeOnOp<T> extends AbstractMultiOperator<T, T> {
             }
         }
 
+        void scheduleSubscription(Multi<? extends T> upstream, Subscriber<? super T> downstream) {
+            try {
+                executor.execute(() -> upstream.subscribe().withSubscriber(this));
+            } catch (RejectedExecutionException rejected) {
+                if (!isDone()) {
+                    downstream.onError(rejected);
+                }
+            }
+        }
+
         @Override
         public void onItem(T t) {
             downstream.onItem(t);
@@ -89,30 +92,7 @@ public class MultiSubscribeOnOp<T> extends AbstractMultiOperator<T, T> {
         public void request(long n) {
             if (n > 0) {
                 Subscription subscription = upstream.get();
-                if (subscription != null) {
-                    requestUpstream(n, subscription);
-                } else {
-                    // We are not yet subscribed.
-                    Subscriptions.add(requested, n);
-                    // Check we if are subscribed now
-                    subscription = upstream.get();
-                    if (subscription != null) {
-                        long requests = requested.getAndSet(0L);
-                        if (requests != 0L) {
-                            requestUpstream(requests, subscription);
-                        }
-                    }
-                }
-            }
-        }
-
-        void scheduleSubscription(Multi<? extends T> upstream, Subscriber<? super T> downstream) {
-            try {
-                executor.execute(() -> upstream.subscribe().withSubscriber(this));
-            } catch (RejectedExecutionException rejected) {
-                if (!isDone()) {
-                    downstream.onError(rejected);
-                }
+                requestUpstream(n, subscription);
             }
         }
     }
