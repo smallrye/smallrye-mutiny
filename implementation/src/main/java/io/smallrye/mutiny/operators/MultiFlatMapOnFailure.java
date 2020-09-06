@@ -3,6 +3,7 @@ package io.smallrye.mutiny.operators;
 import static io.smallrye.mutiny.helpers.ParameterValidation.MAPPER_RETURNED_NULL;
 import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
 
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -26,9 +27,7 @@ public class MultiFlatMapOnFailure<T> extends MultiOperator<T, T> {
 
     @Override
     public void subscribe(Subscriber<? super T> subscriber) {
-        if (subscriber == null) {
-            throw new NullPointerException("The subscriber must not be `null`");
-        }
+        Objects.requireNonNull(subscriber, "The subscriber must not be `null`");
         Function<? super Throwable, ? extends Publisher<? extends T>> next = failure -> {
             if (predicate.test(failure)) {
                 Publisher<? extends T> res = mapper.apply(failure);
