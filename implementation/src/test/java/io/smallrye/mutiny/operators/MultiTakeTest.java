@@ -2,6 +2,7 @@ package io.smallrye.mutiny.operators;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
@@ -12,7 +13,9 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Multi;
+import io.smallrye.mutiny.TestException;
 import io.smallrye.mutiny.subscription.MultiEmitter;
+import io.smallrye.mutiny.subscription.MultiSubscriber;
 import io.smallrye.mutiny.test.AssertSubscriber;
 
 public class MultiTakeTest {
@@ -151,7 +154,8 @@ public class MultiTakeTest {
 
     @Test
     public void testTakeWhileWithNullMethod() {
-        assertThrows(IllegalArgumentException.class, () -> Multi.createFrom().nothing().transform().byTakingItemsWhile(null));
+        assertThrows(IllegalArgumentException.class,
+                () -> Multi.createFrom().nothing().transform().byTakingItemsWhile(null));
     }
 
     @Test
@@ -217,6 +221,92 @@ public class MultiTakeTest {
                 .assertCompletedSuccessfully();
 
         assertThat(subscriber.items()).hasSize(10);
+    }
+
+    @Test
+    public void testTakeByTimeWithFailure() {
+        Multi<Integer> multi = Multi.createBy().concatenating().streams(
+                Multi.createFrom().range(1, 5),
+                Multi.createFrom().failure(new TestException("boom")),
+                Multi.createFrom().range(5, 10));
+        AssertSubscriber<Integer> subscriber = multi
+                .transform().byTakingItemsFor(Duration.ofMillis(1000))
+                .subscribe().withSubscriber(AssertSubscriber.create(100))
+                .await()
+                .assertHasFailedWith(TestException.class, "boom");
+
+        assertThat(subscriber.items()).hasSize(4);
+    }
+
+    @Test
+    public void testTakeByTimeWithCancellation() {
+        Multi<Integer> multi = Multi.createBy().concatenating().streams(
+                Multi.createFrom().range(1, 5),
+                Multi.createFrom().range(5, 10));
+        AssertSubscriber<Integer> subscriber = multi
+                .transform().byTakingItemsFor(Duration.ofMillis(1000))
+                .subscribe().withSubscriber(AssertSubscriber.create(4));
+
+        await().until(() -> subscriber.items().size() == 4);
+        subscriber.cancel();
+
+        assertThat(subscriber.items()).hasSize(4);
+    }
+
+    @Test
+    public void testTakeByTimeWithImmediateCancellation() {
+        Multi<Integer> multi = Multi.createBy().concatenating().streams(
+                Multi.createFrom().range(1, 5),
+                Multi.createFrom().range(5, 10));
+        AssertSubscriber<Integer> subscriber = multi
+                .transform().byTakingItemsFor(Duration.ofMillis(1000))
+                .subscribe().withSubscriber(new AssertSubscriber<>(4, true));
+
+        subscriber.assertSubscribed()
+                .assertNotTerminated()
+                .assertHasNotReceivedAnyItem();
+    }
+
+    @Test
+    public void testTakeByTimeWithRogueUpstreamSendingFailureAfterCompletion() {
+        Multi<Integer> rogue = new AbstractMulti<Integer>() {
+            @Override
+            public void subscribe(MultiSubscriber<? super Integer> subscriber) {
+                subscriber.onItem(1);
+                subscriber.onItem(2);
+                subscriber.onComplete();
+                subscriber.onItem(3);
+                subscriber.onError(new IOException("boom"));
+            }
+        };
+        AssertSubscriber<Integer> subscriber = rogue
+                .transform().byTakingItemsFor(Duration.ofMillis(1000))
+                .subscribe().withSubscriber(AssertSubscriber.create(100))
+                .await()
+                .assertCompletedSuccessfully();
+
+        assertThat(subscriber.items()).hasSize(2);
+    }
+
+    @Test
+    public void testTakeByTimeWithRogueUpstreamSendingCompletionAfterFailure() {
+        Multi<Integer> rogue = new AbstractMulti<Integer>() {
+            @Override
+            public void subscribe(MultiSubscriber<? super Integer> subscriber) {
+                subscriber.onItem(1);
+                subscriber.onItem(2);
+                subscriber.onError(new IOException("boom"));
+                subscriber.onItem(3);
+                subscriber.onComplete();
+            }
+        };
+        AssertSubscriber<Integer> subscriber = rogue
+                .transform().byTakingItemsFor(Duration.ofMillis(1000))
+                .subscribe().withSubscriber(AssertSubscriber.create(100))
+                .await()
+                .assertHasFailedWith(IOException.class, "boom");
+
+        assertThat(subscriber.items()).hasSize(2);
     }
 
     @Test

@@ -1,5 +1,6 @@
 package io.smallrye.mutiny.operators.multi;
 
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.reactivestreams.Publisher;
@@ -37,11 +38,11 @@ public final class MultiTakeUntilOtherOp<T, U> extends AbstractMultiOperator<T, 
         upstream.subscribe(Infrastructure.onMultiSubscription(upstream, mainSubscriber));
     }
 
-    static final class TakeUntilOtherSubscriber<U> implements MultiSubscriber<U> {
+    public static final class TakeUntilOtherSubscriber<U> implements MultiSubscriber<U> {
         final TakeUntilMainProcessor<?> main;
         boolean once;
 
-        TakeUntilOtherSubscriber(TakeUntilMainProcessor<?> main) {
+        public TakeUntilOtherSubscriber(TakeUntilMainProcessor<?> main) {
             this.main = main;
         }
 
@@ -52,16 +53,18 @@ public final class MultiTakeUntilOtherOp<T, U> extends AbstractMultiOperator<T, 
 
         @Override
         public void onItem(U t) {
+            Objects.requireNonNull(t);
             onCompletion();
         }
 
         @Override
         public void onFailure(Throwable t) {
+            Objects.requireNonNull(t);
             if (once) {
                 return;
             }
             once = true;
-            main.onFailure(t);
+            main.onOtherFailure(t);
         }
 
         @Override
@@ -70,15 +73,15 @@ public final class MultiTakeUntilOtherOp<T, U> extends AbstractMultiOperator<T, 
                 return;
             }
             once = true;
-            main.onCompletion();
+            main.onOtherCompletion();
         }
     }
 
-    static final class TakeUntilMainProcessor<T> extends MultiOperatorProcessor<T, T> {
+    public static final class TakeUntilMainProcessor<T> extends MultiOperatorProcessor<T, T> {
 
         private final AtomicReference<Subscription> other = new AtomicReference<>();
 
-        TakeUntilMainProcessor(Subscriber<? super T> downstream) {
+        public TakeUntilMainProcessor(Subscriber<? super T> downstream) {
             super(new SerializedSubscriber<>(downstream));
         }
 
@@ -109,10 +112,18 @@ public final class MultiTakeUntilOtherOp<T, U> extends AbstractMultiOperator<T, 
             Subscriptions.cancel(other);
         }
 
+        public void onOtherFailure(Throwable failure) {
+            super.onFailure(failure);
+        }
+
         @Override
         public void onCompletion() {
             super.onCompletion();
             Subscriptions.cancel(other);
+        }
+
+        public void onOtherCompletion() {
+            super.onCompletion();
         }
     }
 }
