@@ -3,6 +3,7 @@ package io.smallrye.mutiny.operators.multi;
 import static io.smallrye.mutiny.helpers.Subscriptions.CANCELLED;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -37,9 +38,7 @@ public final class MultiGroupByOp<T, K, V> extends AbstractMultiOperator<T, Grou
 
     @Override
     public void subscribe(MultiSubscriber<? super GroupedMulti<K, V>> downstream) {
-        if (downstream == null) {
-            throw new NullPointerException("The subscriber must not be `null`");
-        }
+        Objects.requireNonNull(downstream, "The subscriber must not be `null`");
         final Map<Object, GroupedUnicast<K, V>> groups = new ConcurrentHashMap<>();
         MultiGroupByProcessor<T, K, V> processor = new MultiGroupByProcessor<>(downstream, keySelector, valueSelector,
                 groups);
@@ -97,8 +96,8 @@ public final class MultiGroupByOp<T, K, V> extends AbstractMultiOperator<T, Grou
             try {
                 key = keySelector.apply(item);
             } catch (Throwable ex) {
-                super.cancel();
                 super.onFailure(ex);
+                super.cancel();
                 return;
             }
 
@@ -123,8 +122,8 @@ public final class MultiGroupByOp<T, K, V> extends AbstractMultiOperator<T, Grou
                     throw new NullPointerException("The selector returned `null`");
                 }
             } catch (Throwable ex) {
-                super.cancel();
                 super.onFailure(ex);
+                super.cancel();
                 return;
             }
 
