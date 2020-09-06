@@ -23,17 +23,17 @@ public final class MultiZipOp<O> extends AbstractMulti<O> {
     private final List<Publisher<?>> upstreams;
     private final Function<List<?>, ? extends O> combinator;
     private final int bufferSize;
-    private final boolean postponeFailure;
+    private final boolean collectFailures;
 
     public MultiZipOp(Iterable<? extends Publisher<?>> upstreams,
             Function<List<?>, ? extends O> combinator,
             int bufferSize,
-            boolean postponeFailure) {
+            boolean collectFailures) {
         this.upstreams = new LinkedList<>();
         upstreams.forEach(this.upstreams::add);
         this.combinator = combinator;
         this.bufferSize = bufferSize;
-        this.postponeFailure = postponeFailure;
+        this.collectFailures = collectFailures;
     }
 
     @Override
@@ -43,7 +43,7 @@ public final class MultiZipOp<O> extends AbstractMulti<O> {
             return;
         }
         ZipCoordinator<O> coordinator = new ZipCoordinator<>(downstream, combinator, upstreams.size(), bufferSize,
-                postponeFailure);
+                collectFailures);
         downstream.onSubscribe(coordinator);
         coordinator.subscribe(upstreams);
     }
@@ -57,16 +57,16 @@ public final class MultiZipOp<O> extends AbstractMulti<O> {
         private final Function<List<?>, ? extends R> combinator;
         private final AtomicLong requested = new AtomicLong();
         private final AtomicReference<Throwable> failures = new AtomicReference<>();
-        private final boolean postponeFailure;
+        private final boolean collectFailures;
 
         private volatile boolean cancelled;
         private final List<Object> current;
 
         ZipCoordinator(MultiSubscriber<? super R> downstream,
-                Function<List<?>, ? extends R> combinator, int n, int prefetch, boolean postponeFailure) {
+                Function<List<?>, ? extends R> combinator, int n, int prefetch, boolean collectFailures) {
             this.downstream = downstream;
             this.combinator = combinator;
-            this.postponeFailure = postponeFailure;
+            this.collectFailures = collectFailures;
 
             subscribers = new ArrayList<>();
             for (int i = 0; i < n; i++) {
@@ -77,7 +77,7 @@ public final class MultiZipOp<O> extends AbstractMulti<O> {
 
         void subscribe(List<Publisher<?>> sources) {
             for (int i = 0; i < sources.size(); i++) {
-                if (cancelled || (!postponeFailure && failures.get() != null)) {
+                if (cancelled || (!collectFailures && failures.get() != null)) {
                     return;
                 }
                 Publisher<?> publisher = sources.get(i);
@@ -132,8 +132,7 @@ public final class MultiZipOp<O> extends AbstractMulti<O> {
                     if (cancelled) {
                         return;
                     }
-
-                    if (!postponeFailure && failures.get() != null) {
+                    if (!collectFailures && failures.get() != null) {
                         cancelAll();
                         Subscriptions.terminateAndPropagate(failures, downstream);
                         return;
@@ -144,30 +143,20 @@ public final class MultiZipOp<O> extends AbstractMulti<O> {
                     for (int j = 0; j < n; j++) {
                         ZipSubscriber<R> inner = qs.get(j);
                         if (values.get(j) == null) {
-                            try {
-                                boolean d = inner.done;
-                                Queue<Object> q = inner.queue;
+                            boolean d = inner.done;
+                            Queue<Object> q = inner.queue;
 
-                                Object v = q != null ? q.poll() : null;
+                            Object v = q != null ? q.poll() : null;
 
-                                boolean sourceEmpty = v == null;
-                                if (d && sourceEmpty) {
-                                    cancelAll();
-                                    Subscriptions.terminateAndPropagate(failures, downstream);
-                                    return;
-                                }
-                                if (!sourceEmpty) {
-                                    values.set(j, v);
-                                } else {
-                                    empty = true;
-                                }
-                            } catch (Throwable ex) {
-                                Subscriptions.addFailure(failures, ex);
-                                if (!postponeFailure) {
-                                    cancelAll();
-                                    Subscriptions.terminateAndPropagate(failures, downstream);
-                                    return;
-                                }
+                            boolean sourceEmpty = v == null;
+                            if (d && sourceEmpty) {
+                                cancelAll();
+                                Subscriptions.terminateAndPropagate(failures, downstream);
+                                return;
+                            }
+                            if (!sourceEmpty) {
+                                values.set(j, v);
+                            } else {
                                 empty = true;
                             }
                         }
@@ -202,7 +191,7 @@ public final class MultiZipOp<O> extends AbstractMulti<O> {
                         return;
                     }
 
-                    if (!postponeFailure && failures.get() != null) {
+                    if (!collectFailures && failures.get() != null) {
                         cancelAll();
                         Subscriptions.terminateAndPropagate(failures, downstream);
                         return;
@@ -211,27 +200,18 @@ public final class MultiZipOp<O> extends AbstractMulti<O> {
                     for (int j = 0; j < n; j++) {
                         ZipSubscriber<R> inner = qs.get(j);
                         if (values.get(j) == null) {
-                            try {
-                                boolean d = inner.done;
-                                Queue<Object> q = inner.queue;
-                                Object v = q != null ? q.poll() : null;
+                            boolean d = inner.done;
+                            Queue<Object> q = inner.queue;
+                            Object v = q != null ? q.poll() : null;
 
-                                boolean empty = v == null;
-                                if (d && empty) {
-                                    cancelAll();
-                                    Subscriptions.terminateAndPropagate(failures, downstream);
-                                    return;
-                                }
-                                if (!empty) {
-                                    values.set(j, v);
-                                }
-                            } catch (Throwable ex) {
-                                Subscriptions.addFailure(failures, ex);
-                                if (!postponeFailure) {
-                                    cancelAll();
-                                    Subscriptions.terminateAndPropagate(failures, downstream);
-                                    return;
-                                }
+                            boolean empty = v == null;
+                            if (d && empty) {
+                                cancelAll();
+                                Subscriptions.terminateAndPropagate(failures, downstream);
+                                return;
+                            }
+                            if (!empty) {
+                                values.set(j, v);
                             }
                         }
                     }

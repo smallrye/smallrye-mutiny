@@ -9,12 +9,15 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletionException;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Multi;
+import io.smallrye.mutiny.subscription.MultiEmitter;
 import io.smallrye.mutiny.test.AssertSubscriber;
 import io.smallrye.mutiny.tuples.Functions;
 import io.smallrye.mutiny.tuples.Tuple2;
@@ -26,6 +29,7 @@ import io.smallrye.mutiny.tuples.Tuple7;
 import io.smallrye.mutiny.tuples.Tuple8;
 import io.smallrye.mutiny.tuples.Tuple9;
 
+@SuppressWarnings("ConstantConditions")
 public class MultiCombineTest {
 
     @Test
@@ -361,6 +365,32 @@ public class MultiCombineTest {
     }
 
     @Test
+    public void testCombiningWithFailuresAtSameTimeAndCollectFailure() {
+        AtomicReference<MultiEmitter<? super Integer>> emitter1 = new AtomicReference<>();
+        AtomicReference<MultiEmitter<? super Integer>> emitter2 = new AtomicReference<>();
+        Multi<Integer> multi = Multi.createFrom().items(1, 2, 3);
+        Multi<Integer> multi2 = Multi.createFrom().emitter(e -> {
+            emitter1.set(e);
+            e.emit(1);
+        });
+        Multi<Integer> multi3 = Multi.createFrom().emitter(e -> {
+            emitter2.set(e);
+            e.emit(1);
+        });
+
+        Multi.createBy().combining().streams(multi, multi2, multi, multi3).collectFailures().asTuple()
+                .subscribe().withSubscriber(AssertSubscriber.create(1))
+                .assertReceived(Tuple4.of(1, 1, 1, 1))
+                .request(2)
+                .run(() -> {
+                    emitter1.get().emit(2).fail(new IOException("boomA"));
+                    emitter2.get().emit(2).fail(new IOException("boomB"));
+                })
+                .assertReceived(Tuple4.of(1, 1, 1, 1), Tuple4.of(2, 2, 2, 2))
+                .assertHasFailedWith(IOException.class, "boomA");
+    }
+
+    @Test
     public void testCombinationOfAFailingStream() {
         assertThrows(CompletionException.class, () -> {
 
@@ -407,6 +437,81 @@ public class MultiCombineTest {
                 .subscribe().withSubscriber(AssertSubscriber.create(4))
                 .assertCompletedSuccessfully()
                 .assertReceived(2, 4, 6);
+    }
+
+    @Test
+    public void testMultiCombineNoStreams() {
+        Multi.createBy().combining().streams(Collections.emptyList()).using(l -> l)
+                .subscribe().withSubscriber(AssertSubscriber.create(4))
+                .assertCompletedSuccessfully()
+                .assertHasNotReceivedAnyItem();
+    }
+
+    @Test
+    public void testMultiCombineWithCancellation() {
+        AtomicBoolean cancelled1 = new AtomicBoolean();
+        AtomicBoolean cancelled2 = new AtomicBoolean();
+        AtomicBoolean cancelled3 = new AtomicBoolean();
+        Multi<Integer> stream1 = Multi.createFrom().emitter(e -> {
+            e.onTermination(() -> cancelled1.set(true));
+            e.emit(1);
+        });
+        Multi<Integer> stream2 = Multi.createFrom().emitter(e -> {
+            e.onTermination(() -> cancelled2.set(true));
+            e.emit(2);
+        });
+        Multi<Integer> stream3 = Multi.createFrom().emitter(e -> {
+            e.onTermination(() -> cancelled3.set(true));
+        });
+
+        Multi.createBy().combining().streams(stream1, stream2, stream3).asTuple()
+                .subscribe().withSubscriber(AssertSubscriber.create(4))
+                .assertSubscribed()
+                .assertNotTerminated()
+                .cancel()
+                .assertHasNotReceivedAnyItem();
+
+        assertThat(cancelled1).isTrue();
+        assertThat(cancelled2).isTrue();
+        assertThat(cancelled3).isTrue();
+    }
+
+    @Test
+    public void testMultiCombineWithImmediateCancellation() {
+        AtomicBoolean cancelled1 = new AtomicBoolean();
+        AtomicBoolean cancelled2 = new AtomicBoolean();
+        AtomicBoolean cancelled3 = new AtomicBoolean();
+        AtomicBoolean subscribe1 = new AtomicBoolean();
+        AtomicBoolean subscribe2 = new AtomicBoolean();
+        AtomicBoolean subscribe3 = new AtomicBoolean();
+        Multi<Integer> stream1 = Multi.createFrom().emitter(e -> {
+            subscribe1.set(true);
+            e.onTermination(() -> cancelled1.set(true));
+            e.emit(1);
+        });
+        Multi<Integer> stream2 = Multi.createFrom().emitter(e -> {
+            subscribe2.set(true);
+            e.onTermination(() -> cancelled2.set(true));
+            e.emit(2);
+        });
+        Multi<Integer> stream3 = Multi.createFrom().emitter(e -> {
+            subscribe3.set(true);
+            e.onTermination(() -> cancelled3.set(true));
+        });
+
+        Multi.createBy().combining().streams(stream1, stream2, stream3).asTuple()
+                .subscribe().withSubscriber(new AssertSubscriber<>(3, true))
+                .assertSubscribed()
+                .assertNotTerminated()
+                .cancel()
+                .assertHasNotReceivedAnyItem();
+
+        assertThat(subscribe1).isFalse();
+        assertThat(subscribe2).isFalse();
+        assertThat(subscribe3).isFalse();
+        assertThat(cancelled1).isFalse();
+        assertThat(cancelled2).isFalse();
+        assertThat(cancelled3).isFalse();
     }
 
     @Test

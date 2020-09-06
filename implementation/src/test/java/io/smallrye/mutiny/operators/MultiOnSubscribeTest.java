@@ -6,6 +6,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
@@ -244,7 +247,7 @@ public class MultiOnSubscribeTest {
     }
 
     @Test
-    public void testThatRunOnSubscriptionEmitRequestOnSubscribe() {
+    public void testThatRunSubscriptionOnEmitRequestOnSubscribe() {
         AssertSubscriber<Integer> subscriber = Multi.createFrom().items(1, 2, 3)
                 .runSubscriptionOn(Infrastructure.getDefaultExecutor())
                 .subscribe().withSubscriber(AssertSubscriber.create(2));
@@ -255,4 +258,34 @@ public class MultiOnSubscribeTest {
                 .assertReceived(1, 2, 3)
                 .assertCompletedSuccessfully();
     }
+
+    @Test
+    public void testRunSubscriptionOnShutdownExecutor() {
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        executor.shutdownNow();
+
+        AssertSubscriber<Integer> subscriber = Multi.createFrom().items(1, 2, 3)
+                .runSubscriptionOn(executor)
+                .subscribe().withSubscriber(AssertSubscriber.create(2));
+
+        subscriber.assertHasFailedWith(RejectedExecutionException.class, "");
+    }
+
+    @Test
+    public void testRunSubscriptionOnShutdownExecutorRequests() {
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+
+        AssertSubscriber<Integer> subscriber = Multi.createFrom().items(1, 2, 3)
+                .runSubscriptionOn(executor)
+                .subscribe().withSubscriber(AssertSubscriber.create(0));
+
+        await().untilAsserted(subscriber::assertSubscribed);
+
+        subscriber.assertHasNotReceivedAnyItem();
+        executor.shutdownNow();
+        subscriber.request(2);
+
+        subscriber.assertHasFailedWith(RejectedExecutionException.class, "");
+    }
+
 }

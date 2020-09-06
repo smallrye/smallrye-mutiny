@@ -13,6 +13,7 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -21,8 +22,10 @@ import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.GroupedMulti;
 import io.smallrye.mutiny.Multi;
+import io.smallrye.mutiny.TestException;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
+import io.smallrye.mutiny.subscription.MultiEmitter;
 import io.smallrye.mutiny.subscription.MultiSubscriber;
 import io.smallrye.mutiny.test.AssertSubscriber;
 import io.smallrye.mutiny.test.Mocks;
@@ -719,5 +722,128 @@ public class MultiGroupTest {
                 .subscribe().withSubscriber(listOverlap);
         verify(listOverlap).onError(any(IllegalArgumentException.class));
 
+    }
+
+    @Test
+    public void testGroupByWithKeyMapperThrowingException() {
+        AssertSubscriber<GroupedMulti<Integer, Integer>> subscriber = Multi.createFrom().range(1, 10)
+                .groupItems().<Integer> by(i -> {
+                    throw new ArithmeticException("boom");
+                })
+                .subscribe().withSubscriber(AssertSubscriber.create(100));
+
+        subscriber.assertHasFailedWith(ArithmeticException.class, "boom");
+    }
+
+    @Test
+    public void testGroupByWithValueMapperThrowingException() {
+        AssertSubscriber<GroupedMulti<Integer, Integer>> subscriber = Multi.createFrom().range(1, 10)
+                .groupItems().<Integer, Integer> by(i -> i % 2, i -> {
+                    throw new TestException("boom");
+                })
+                .subscribe().withSubscriber(AssertSubscriber.create(100));
+
+        subscriber.assertHasFailedWith(TestException.class, "boom");
+    }
+
+    @Test
+    public void testGroupByWithValueMapperReturningNull() {
+        AssertSubscriber<GroupedMulti<Integer, Integer>> subscriber = Multi.createFrom().range(1, 10)
+                .groupItems().<Integer, Integer> by(i -> i % 2, i -> null)
+                .subscribe().withSubscriber(AssertSubscriber.create(100));
+
+        subscriber.assertHasFailedWith(NullPointerException.class, "");
+    }
+
+    @Test
+    public void testCancellationOnUpstream() {
+        AssertSubscriber<GroupedMulti<Long, Long>> subscriber = Multi.createFrom().ticks().every(Duration.ofMillis(2))
+                .groupItems().by(l -> l % 2)
+                .subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE));
+
+        subscriber.assertSubscribed();
+        await().until(() -> subscriber.items().size() == 2);
+        AssertSubscriber<Long> s1 = subscriber.items().get(0).subscribe()
+                .withSubscriber(AssertSubscriber.create(Long.MAX_VALUE));
+        s1.assertSubscribed();
+        AssertSubscriber<Long> s2 = subscriber.items().get(1).subscribe()
+                .withSubscriber(AssertSubscriber.create(Long.MAX_VALUE));
+        s2.assertSubscribed();
+
+        await().until(() -> s1.items().size() >= 3);
+        await().until(() -> s2.items().size() >= 3);
+
+        subscriber.cancel();
+
+        assertThat(subscriber.items()).hasSize(2);
+        s1.assertNotTerminated();
+        s2.assertNotTerminated();
+
+    }
+
+    @Test
+    public void testCancellationOnGroup() {
+        AssertSubscriber<GroupedMulti<Long, Long>> subscriber = Multi.createFrom().ticks().every(Duration.ofMillis(2))
+                .groupItems().by(l -> l % 2)
+                .subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE));
+
+        subscriber.assertSubscribed();
+        await().until(() -> subscriber.items().size() == 2);
+        AssertSubscriber<Long> s1 = subscriber.items().get(0).subscribe()
+                .withSubscriber(AssertSubscriber.create(Long.MAX_VALUE));
+        s1.assertSubscribed();
+        AssertSubscriber<Long> s2 = subscriber.items().get(1).subscribe()
+                .withSubscriber(AssertSubscriber.create(Long.MAX_VALUE));
+        s2.assertSubscribed();
+
+        await().until(() -> s1.items().size() >= 3);
+        await().until(() -> s2.items().size() >= 3);
+
+        s2.cancel();
+
+        await().until(() -> s1.items().size() >= 5);
+
+        subscriber.cancel();
+    }
+
+    @Test
+    public void testImmediateCancellationOnUpstream() {
+        AssertSubscriber<GroupedMulti<Long, Long>> subscriber = Multi.createFrom().ticks().every(Duration.ofMillis(2))
+                .groupItems().by(l -> l % 2)
+                .subscribe().withSubscriber(new AssertSubscriber<>(Long.MAX_VALUE, true));
+
+        subscriber.assertSubscribed();
+        assertThat(subscriber.assertNotTerminated().isCancelled()).isTrue();
+    }
+
+    @Test
+    public void testGroupByWithUpstreamFailure() {
+        AtomicReference<MultiEmitter<? super Long>> emitter = new AtomicReference<>();
+
+        Multi<Long> multi = Multi.createBy().merging().streams(
+                Multi.createFrom().ticks().every(Duration.ofMillis(2)),
+                Multi.createFrom().emitter((Consumer<MultiEmitter<? super Long>>) emitter::set));
+
+        AssertSubscriber<GroupedMulti<Long, Long>> subscriber = multi
+                .groupItems().by(l -> l % 2)
+                .subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE));
+
+        subscriber.assertSubscribed();
+        await().until(() -> subscriber.items().size() == 2);
+        AssertSubscriber<Long> s1 = subscriber.items().get(0).subscribe()
+                .withSubscriber(AssertSubscriber.create(Long.MAX_VALUE));
+        s1.assertSubscribed();
+        AssertSubscriber<Long> s2 = subscriber.items().get(1).subscribe()
+                .withSubscriber(AssertSubscriber.create(Long.MAX_VALUE));
+        s2.assertSubscribed();
+
+        await().until(() -> s1.items().size() >= 3);
+        await().until(() -> s2.items().size() >= 3);
+
+        emitter.get().fail(new TestException("boom"));
+
+        s1.assertHasFailedWith(TestException.class, "boom");
+        s2.assertHasFailedWith(TestException.class, "boom");
+        subscriber.assertHasFailedWith(TestException.class, "boom");
     }
 }

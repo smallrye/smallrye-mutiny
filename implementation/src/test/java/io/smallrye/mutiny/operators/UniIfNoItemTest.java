@@ -10,11 +10,11 @@ import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ScheduledExecutorService;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 
 import io.smallrye.mutiny.TestException;
 import io.smallrye.mutiny.TimeoutException;
 import io.smallrye.mutiny.Uni;
-import org.junit.jupiter.api.Timeout;
 
 public class UniIfNoItemTest {
 
