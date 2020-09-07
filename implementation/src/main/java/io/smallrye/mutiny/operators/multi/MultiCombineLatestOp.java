@@ -2,10 +2,7 @@ package io.smallrye.mutiny.operators.multi;
 
 import static io.smallrye.mutiny.helpers.Subscriptions.CANCELLED;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
@@ -50,9 +47,7 @@ public class MultiCombineLatestOp<I, O> extends MultiOperator<I, O> {
 
     @Override
     public void subscribe(MultiSubscriber<? super O> downstream) {
-        if (downstream == null) {
-            throw new NullPointerException("The subscriber must not be `null`");
-        }
+        Objects.requireNonNull(downstream, "The subscriber must not be `null`");
         List<Publisher<? extends I>> publishers = new ArrayList<>();
         this.upstreams.forEach(publishers::add);
 

@@ -25,6 +25,7 @@ import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.TestException;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
+import io.smallrye.mutiny.subscription.BackPressureFailure;
 import io.smallrye.mutiny.subscription.MultiEmitter;
 import io.smallrye.mutiny.subscription.MultiSubscriber;
 import io.smallrye.mutiny.test.AssertSubscriber;
@@ -182,6 +183,44 @@ public class MultiGroupTest {
 
         await().until(() -> subscriber.items().size() > 3);
         subscriber.cancel();
+    }
+
+    @Test
+    public void testAsListsWithDurationWithCompletion() {
+        Multi<Long> publisher = Multi.createFrom().publisher(Multi.createFrom().ticks().every(Duration.ofMillis(2)))
+                .transform().byTakingFirstItems(10);
+        AssertSubscriber<List<Long>> subscriber = publisher.groupItems().intoLists().every(Duration.ofMillis(100))
+                .subscribe()
+                .withSubscriber(AssertSubscriber.create(100));
+        subscriber.await();
+        subscriber.assertCompletedSuccessfully();
+    }
+
+    @Test
+    public void testAsListsWithDurationWithFailure() {
+        Multi<Long> publisher = Multi.createFrom().publisher(Multi.createFrom().ticks().every(Duration.ofMillis(2)))
+                .transform().byTakingFirstItems(10)
+                .onCompletion().failWith(new IOException("boom"));
+        AssertSubscriber<List<Long>> subscriber = publisher.groupItems().intoLists().every(Duration.ofMillis(100))
+                .subscribe()
+                .withSubscriber(AssertSubscriber.create(100));
+        subscriber.await();
+        subscriber.assertHasFailedWith(IOException.class, "boom");
+    }
+
+    @SuppressWarnings("ConstantConditions")
+    @Test
+    public void testAsListsWithDurationAndLackOfRequests() {
+        AtomicBoolean cancelled = new AtomicBoolean();
+        Multi<Long> publisher = Multi.createFrom().publisher(Multi.createFrom().ticks().every(Duration.ofMillis(2)))
+                .onCancellation().invoke(() -> cancelled.set(true));
+        AssertSubscriber<List<Long>> subscriber = publisher.groupItems().intoLists().every(Duration.ofMillis(100))
+                .subscribe()
+                .withSubscriber(AssertSubscriber.create(2));
+
+        subscriber.await()
+                .assertHasFailedWith(BackPressureFailure.class, "");
+        assertThat(cancelled).isTrue();
     }
 
     @Test
