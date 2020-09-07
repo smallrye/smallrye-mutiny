@@ -13,26 +13,26 @@ import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.subscription.Cancellable;
 import io.smallrye.mutiny.subscription.MultiSubscriber;
 
-public class MultiOnTerminationInvokeUni<T> extends AbstractMultiOperator<T, T> {
+public class MultiOnTerminationCall<T> extends AbstractMultiOperator<T, T> {
 
     private final BiFunction<Throwable, Boolean, Uni<?>> mapper;
 
-    public MultiOnTerminationInvokeUni(Multi<? extends T> upstream, BiFunction<Throwable, Boolean, Uni<?>> mapper) {
+    public MultiOnTerminationCall(Multi<? extends T> upstream, BiFunction<Throwable, Boolean, Uni<?>> mapper) {
         super(nonNull(upstream, "upstream"));
         this.mapper = nonNull(mapper, "mapper");
     }
 
     @Override
     public void subscribe(MultiSubscriber<? super T> downstream) {
-        upstream.subscribe().withSubscriber(new MultiOnTerminationInvokeUniProcessor(nonNull(downstream, "downstream")));
+        upstream.subscribe().withSubscriber(new MultiOnTerminationCallProcessor(nonNull(downstream, "downstream")));
     }
 
-    class MultiOnTerminationInvokeUniProcessor extends MultiOperatorProcessor<T, T> {
+    class MultiOnTerminationCallProcessor extends MultiOperatorProcessor<T, T> {
 
         private volatile Cancellable cancellable;
         private final AtomicBoolean mapperInvoked = new AtomicBoolean();
 
-        public MultiOnTerminationInvokeUniProcessor(MultiSubscriber<? super T> downstream) {
+        public MultiOnTerminationCallProcessor(MultiSubscriber<? super T> downstream) {
             super(downstream);
         }
 

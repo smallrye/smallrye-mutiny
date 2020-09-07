@@ -11,8 +11,8 @@ import org.reactivestreams.Subscription;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
+import io.smallrye.mutiny.operators.multi.MultiOnSubscribeCall;
 import io.smallrye.mutiny.operators.multi.MultiOnSubscribeInvokeOp;
-import io.smallrye.mutiny.operators.multi.MultiOnSubscribeInvokeUniOp;
 
 /**
  * Group to configure the action to execute when the observed {@link Multi} sends a {@link Subscription}.
@@ -79,7 +79,7 @@ public class MultiOnSubscribe<T> {
      */
     public Multi<T> call(Function<? super Subscription, Uni<?>> action) {
         return Infrastructure.onMultiCreation(
-                new MultiOnSubscribeInvokeUniOp<>(upstream, nonNull(action, "action")));
+                new MultiOnSubscribeCall<>(upstream, nonNull(action, "action")));
     }
 
     /**

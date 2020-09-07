@@ -297,7 +297,7 @@ public class MultiOnCompletionTest {
     }
 
     @Test
-    public void testInvokeUni() {
+    public void testCall() {
         AtomicBoolean called = new AtomicBoolean();
 
         Multi.createFrom().range(1, 5)
@@ -313,7 +313,7 @@ public class MultiOnCompletionTest {
     }
 
     @Test
-    public void testInvokeUniThatHasFailed() {
+    public void testCallThatHasFailed() {
         AtomicBoolean called = new AtomicBoolean();
 
         Multi.createFrom().range(1, 5)
@@ -330,7 +330,7 @@ public class MultiOnCompletionTest {
 
     @SuppressWarnings("ConstantConditions")
     @Test
-    public void testInvokeUniThatThrowsException() {
+    public void testCallThatThrowsException() {
         AtomicBoolean called = new AtomicBoolean();
 
         Multi.createFrom().range(1, 5)
@@ -346,7 +346,7 @@ public class MultiOnCompletionTest {
     }
 
     @Test
-    public void testInvokeUniCancellation() {
+    public void testCallCancellation() {
         AtomicBoolean called = new AtomicBoolean();
         AtomicBoolean uniCancelled = new AtomicBoolean();
         AtomicInteger counter = new AtomicInteger();
@@ -405,7 +405,7 @@ public class MultiOnCompletionTest {
     }
 
     @RepeatedTest(100)
-    public void rogueEmittersInvokeUni() {
+    public void rogueEmittersCall() {
         AtomicInteger counter = new AtomicInteger();
 
         AssertSubscriber<Object> subscriber = Multi.createFrom()

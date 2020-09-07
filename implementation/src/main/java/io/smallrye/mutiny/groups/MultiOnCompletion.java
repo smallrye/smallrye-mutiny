@@ -14,8 +14,8 @@ import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.MultiSwitchOnCompletion;
+import io.smallrye.mutiny.operators.multi.MultiOnCompletionCall;
 import io.smallrye.mutiny.operators.multi.MultiOnCompletionInvoke;
-import io.smallrye.mutiny.operators.multi.MultiOnCompletionInvokeUni;
 import io.smallrye.mutiny.subscription.MultiEmitter;
 
 public class MultiOnCompletion<T> {
@@ -57,7 +57,7 @@ public class MultiOnCompletion<T> {
      * @return the new {@link Multi}
      */
     public Multi<T> call(Supplier<Uni<?>> supplier) {
-        return Infrastructure.onMultiCreation(new MultiOnCompletionInvokeUni<>(upstream, supplier));
+        return Infrastructure.onMultiCreation(new MultiOnCompletionCall<>(upstream, supplier));
     }
 
     /**

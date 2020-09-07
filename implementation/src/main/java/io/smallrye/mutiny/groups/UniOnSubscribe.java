@@ -8,8 +8,8 @@ import java.util.function.Supplier;
 
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
+import io.smallrye.mutiny.operators.UniOnSubscribeCall;
 import io.smallrye.mutiny.operators.UniOnSubscribeInvoke;
-import io.smallrye.mutiny.operators.UniOnSubscribeInvokeUni;
 import io.smallrye.mutiny.subscription.UniSubscription;
 
 /**
@@ -79,7 +79,7 @@ public class UniOnSubscribe<T> {
      */
     public Uni<T> call(Function<? super UniSubscription, Uni<?>> action) {
         return Infrastructure.onUniCreation(
-                new UniOnSubscribeInvokeUni<>(upstream, nonNull(action, "action")));
+                new UniOnSubscribeCall<>(upstream, nonNull(action, "action")));
     }
 
     /**

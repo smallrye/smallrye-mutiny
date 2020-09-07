@@ -12,7 +12,7 @@ import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.test.AssertSubscriber;
 
-public class MultiOnCancellationInvokeUniTest {
+public class MultiOnCancellationCallTest {
 
     @Test
     public void testCancellationWithNoRequestedItem() {
@@ -61,7 +61,7 @@ public class MultiOnCancellationInvokeUniTest {
     }
 
     @Test
-    public void testCancellationWithNoRequestedItemAndThrowingInvokeUni() {
+    public void testCancellationWithNoRequestedItemAndThrowingCall() {
         AssertSubscriber<Integer> subscriber = AssertSubscriber.create();
 
         AtomicReference<Integer> item = new AtomicReference<>();

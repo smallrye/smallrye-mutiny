@@ -38,7 +38,7 @@ public class UniOnItemOrFailureInvokeTest {
     }
 
     @Test
-    public void testThatCallbackMustNotBeNullWithInvokeUni() {
+    public void testThatCallbackMustNotBeNullWithCall() {
         assertThrows(IllegalArgumentException.class,
                 () -> Uni.createFrom().item(1).onItemOrFailure().call((Supplier<Uni<?>>) null));
     }
@@ -107,7 +107,7 @@ public class UniOnItemOrFailureInvokeTest {
     }
 
     @Test
-    public void testCallbackOnItemThrowingExceptionWithInvokeUni() {
+    public void testCallbackOnItemThrowingExceptionWithCall() {
         UniAssertSubscriber<Integer> subscriber = UniAssertSubscriber.create();
 
         AtomicInteger count = new AtomicInteger();

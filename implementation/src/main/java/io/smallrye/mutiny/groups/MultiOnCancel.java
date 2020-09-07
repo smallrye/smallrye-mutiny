@@ -7,8 +7,8 @@ import java.util.function.Supplier;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
+import io.smallrye.mutiny.operators.multi.MultiOnCancellationCall;
 import io.smallrye.mutiny.operators.multi.MultiOnCancellationInvoke;
-import io.smallrye.mutiny.operators.multi.MultiOnCancellationInvokeUni;
 
 public class MultiOnCancel<T> {
 
@@ -40,7 +40,7 @@ public class MultiOnCancel<T> {
      * @return a new {@link Multi}
      */
     public Multi<T> call(Supplier<Uni<?>> supplier) {
-        return Infrastructure.onMultiCreation(new MultiOnCancellationInvokeUni<>(upstream, nonNull(supplier, "supplier")));
+        return Infrastructure.onMultiCreation(new MultiOnCancellationCall<>(upstream, nonNull(supplier, "supplier")));
     }
 
     /**

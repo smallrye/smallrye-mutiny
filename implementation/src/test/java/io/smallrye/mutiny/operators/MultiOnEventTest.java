@@ -616,7 +616,7 @@ public class MultiOnEventTest {
     private final Uni<Void> sub = Uni.createFrom().nullItem();
 
     @Test
-    public void testInvokeUniOnItem() {
+    public void testCallOnItem() {
         AtomicInteger res = new AtomicInteger();
         AtomicInteger twoGotCalled = new AtomicInteger();
 

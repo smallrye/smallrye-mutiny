@@ -10,8 +10,8 @@ import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
+import io.smallrye.mutiny.operators.multi.MultiOnTerminationCall;
 import io.smallrye.mutiny.operators.multi.MultiOnTerminationInvoke;
-import io.smallrye.mutiny.operators.multi.MultiOnTerminationInvokeUni;
 
 public class MultiOnTerminate<T> {
 
@@ -58,7 +58,7 @@ public class MultiOnTerminate<T> {
      * @return the new {@link Multi}
      */
     public Multi<T> call(BiFunction<Throwable, Boolean, Uni<?>> mapper) {
-        return Infrastructure.onMultiCreation(new MultiOnTerminationInvokeUni<>(upstream, mapper));
+        return Infrastructure.onMultiCreation(new MultiOnTerminationCall<>(upstream, mapper));
     }
 
     /**

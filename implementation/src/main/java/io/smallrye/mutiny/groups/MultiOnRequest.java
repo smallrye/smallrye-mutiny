@@ -9,8 +9,8 @@ import java.util.function.Supplier;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
+import io.smallrye.mutiny.operators.multi.MultiOnRequestCall;
 import io.smallrye.mutiny.operators.multi.MultiOnRequestInvoke;
-import io.smallrye.mutiny.operators.multi.MultiOnRequestInvokeUni;
 
 public class MultiOnRequest<T> {
 
@@ -56,7 +56,7 @@ public class MultiOnRequest<T> {
      * @return the new {@link Multi}
      */
     public Multi<T> call(LongFunction<Uni<?>> mapper) {
-        return Infrastructure.onMultiCreation(new MultiOnRequestInvokeUni<>(upstream, nonNull(mapper, "mapper")));
+        return Infrastructure.onMultiCreation(new MultiOnRequestCall<>(upstream, nonNull(mapper, "mapper")));
     }
 
     /**

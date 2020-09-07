@@ -14,7 +14,7 @@ import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.test.AssertSubscriber;
 
-public class MultiOnFailureInvokeUniTest {
+public class MultiOnFailureCallTest {
 
     public static final IOException BOOM = new IOException("boom");
     private final Multi<Integer> numbers = Multi.createFrom().items(1, 2);
@@ -119,7 +119,7 @@ public class MultiOnFailureInvokeUniTest {
     }
 
     @Test
-    public void testInvokeUniWithSubFailure() {
+    public void testCallWithSubFailure() {
         AtomicReference<Throwable> failure = new AtomicReference<>();
 
         AssertSubscriber<Integer> subscriber = failed.onFailure().call(i -> {

@@ -8,11 +8,11 @@ import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.subscription.UniSubscription;
 
-public class UniOnCancellationInvokeUni<I> extends UniOperator<I, I> {
+public class UniOnCancellationCall<I> extends UniOperator<I, I> {
 
     private final Supplier<Uni<?>> supplier;
 
-    public UniOnCancellationInvokeUni(Uni<? extends I> upstream, Supplier<Uni<?>> supplier) {
+    public UniOnCancellationCall(Uni<? extends I> upstream, Supplier<Uni<?>> supplier) {
         super(nonNull(upstream, "upstream"));
         this.supplier = nonNull(supplier, "supplier");
     }

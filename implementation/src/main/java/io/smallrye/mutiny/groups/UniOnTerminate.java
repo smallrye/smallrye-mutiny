@@ -8,7 +8,7 @@ import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.UniOnTermination;
-import io.smallrye.mutiny.operators.UniOnTerminationInvokeUni;
+import io.smallrye.mutiny.operators.UniOnTerminationCall;
 import io.smallrye.mutiny.tuples.Functions;
 
 public class UniOnTerminate<T> {
@@ -62,7 +62,7 @@ public class UniOnTerminate<T> {
      */
     public Uni<T> call(Functions.Function3<? super T, Throwable, Boolean, Uni<?>> mapper) {
         return Infrastructure
-                .onUniCreation(new UniOnTerminationInvokeUni<>(upstream, ParameterValidation.nonNull(mapper, "mapper")));
+                .onUniCreation(new UniOnTerminationCall<>(upstream, ParameterValidation.nonNull(mapper, "mapper")));
     }
 
     /**

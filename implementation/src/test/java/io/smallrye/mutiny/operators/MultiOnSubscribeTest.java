@@ -20,8 +20,8 @@ import org.reactivestreams.Subscription;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
+import io.smallrye.mutiny.operators.multi.MultiOnSubscribeCall;
 import io.smallrye.mutiny.operators.multi.MultiOnSubscribeInvokeOp;
-import io.smallrye.mutiny.operators.multi.MultiOnSubscribeInvokeUniOp;
 import io.smallrye.mutiny.subscription.UniEmitter;
 import io.smallrye.mutiny.test.AssertSubscriber;
 
@@ -183,7 +183,7 @@ public class MultiOnSubscribeTest {
     @Test
     public void testThatCallUpstreamCannotBeNull() {
         assertThrows(IllegalArgumentException.class,
-                () -> new MultiOnSubscribeInvokeUniOp<>(null, s -> Uni.createFrom().nullItem()));
+                () -> new MultiOnSubscribeCall<>(null, s -> Uni.createFrom().nullItem()));
     }
 
     @Test
