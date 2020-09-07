@@ -492,7 +492,7 @@ public class UniOnEventTest {
     }
 
     @Test
-    public void testActionsOnTerminationInvokeUniWithResult() {
+    public void testActionsOnTerminationCallWithResult() {
         AtomicInteger Item = new AtomicInteger();
         AtomicReference<Throwable> failure = new AtomicReference<>();
         AtomicReference<Subscription> subscription = new AtomicReference<>();
@@ -501,7 +501,7 @@ public class UniOnEventTest {
                 .onItem().invoke(Item::set)
                 .onFailure().invoke(failure::set)
                 .onSubscribe().invoke(subscription::set)
-                .onTermination().invokeUni((r, f, c) -> {
+                .onTermination().call((r, f, c) -> {
                     terminate.set(r);
                     return Uni.createFrom().item(r * 100);
                 })
@@ -524,7 +524,7 @@ public class UniOnEventTest {
                 .onItem().invoke(Item::set)
                 .onFailure().invoke(failure::set)
                 .onSubscribe().invoke(subscription::set)
-                .onTermination().invokeUni((r, f, c) -> {
+                .onTermination().call((r, f, c) -> {
                     terminate.set(f);
                     return Uni.createFrom().failure(new IOException("tada"));
                 })
@@ -549,7 +549,7 @@ public class UniOnEventTest {
                 .onItem().invoke(Item::set)
                 .onFailure().invoke(failure::set)
                 .onSubscribe().invoke(subscription::set)
-                .onTermination().invokeUni((r, f, c) -> {
+                .onTermination().call((r, f, c) -> {
                     terminate.set(f);
                     throw new RuntimeException("tada");
                 })
@@ -573,7 +573,7 @@ public class UniOnEventTest {
             // Do not emit anything, just observe the cancellation.
             e.onTermination(() -> upstreamCancelled.set(true));
         })
-                .onTermination().invokeUni((r, f, c) -> {
+                .onTermination().call((r, f, c) -> {
                     terminated.set(c);
                     return Uni.createFrom().item(100);
                 })
@@ -596,7 +596,7 @@ public class UniOnEventTest {
         AtomicBoolean cancelled = new AtomicBoolean();
         AtomicInteger count = new AtomicInteger();
         UniAssertSubscriber<? super Integer> subscriber = Uni.createFrom().item(1)
-                .onTermination().invokeUni((r, f, c) -> {
+                .onTermination().call((r, f, c) -> {
                     count.incrementAndGet();
                     terminated.set(true);
                     return Uni.createFrom().emitter(e -> {
@@ -630,7 +630,7 @@ public class UniOnEventTest {
             // Do not emit anything, just observe the cancellation.
             e.onTermination(() -> upstreamCancelled.set(true));
         })
-                .onTermination().invokeUni((r, f, c) -> {
+                .onTermination().call((r, f, c) -> {
                     terminated.set(c);
                     return Uni
                             .createFrom().failure(new IOException("boom"))
@@ -658,7 +658,7 @@ public class UniOnEventTest {
         AtomicBoolean cancelled = new AtomicBoolean();
         AtomicInteger count = new AtomicInteger();
         UniAssertSubscriber<? super Integer> subscriber = Uni.createFrom().item(1)
-                .onTermination().invokeUni(() -> {
+                .onTermination().call(() -> {
                     count.incrementAndGet();
                     terminated.set(true);
                     return Uni.createFrom().emitter(e -> {
@@ -683,7 +683,7 @@ public class UniOnEventTest {
     }
 
     @Test
-    public void testOnCancellationInvokeUni() {
+    public void testOnCancellationCall() {
         AtomicBoolean emitterTerminationCalled = new AtomicBoolean();
         AtomicBoolean cancellationUniCalled = new AtomicBoolean();
         AtomicInteger count = new AtomicInteger();
@@ -692,7 +692,7 @@ public class UniOnEventTest {
             // Do not emit anything
             e.onTermination(() -> emitterTerminationCalled.set(true));
         })
-                .onCancellation().invokeUni(() -> {
+                .onCancellation().call(() -> {
                     count.incrementAndGet();
                     cancellationUniCalled.set(true);
                     return Uni.createFrom().item(69);
@@ -713,7 +713,7 @@ public class UniOnEventTest {
     }
 
     @RepeatedTest(100)
-    public void testOnCancellationInvokeUniWithDoubleCancellation() throws InterruptedException {
+    public void testOnCancellationCallWithDoubleCancellation() throws InterruptedException {
         AtomicBoolean emitterTerminationCalled = new AtomicBoolean();
         AtomicBoolean cancellationUniCalled = new AtomicBoolean();
         AtomicInteger count = new AtomicInteger();
@@ -722,7 +722,7 @@ public class UniOnEventTest {
             // Do not emit anything
             e.onTermination(() -> emitterTerminationCalled.set(true));
         })
-                .onCancellation().invokeUni(() -> {
+                .onCancellation().call(() -> {
                     count.incrementAndGet();
                     cancellationUniCalled.set(true);
                     return Uni.createFrom().item(69)
@@ -763,7 +763,7 @@ public class UniOnEventTest {
     }
 
     @Test
-    public void testOnCancellationInvokeUniThatFails() {
+    public void testOnCancellationCallThatFails() {
         AtomicBoolean emitterTerminationCalled = new AtomicBoolean();
         AtomicBoolean cancellationUniCalled = new AtomicBoolean();
         AtomicInteger count = new AtomicInteger();
@@ -772,7 +772,7 @@ public class UniOnEventTest {
             // Do not emit anything
             e.onTermination(() -> emitterTerminationCalled.set(true));
         })
-                .onCancellation().invokeUni(() -> {
+                .onCancellation().call(() -> {
                     count.incrementAndGet();
                     cancellationUniCalled.set(true);
                     return Uni.createFrom().failure(new RuntimeException("bam"));
@@ -793,7 +793,7 @@ public class UniOnEventTest {
     }
 
     @Test
-    public void testOnCancellationInvokeUniThatThrowsException() {
+    public void testOnCancellationCallThatThrowsException() {
         AtomicBoolean emitterTerminationCalled = new AtomicBoolean();
         AtomicBoolean cancellationUniCalled = new AtomicBoolean();
         AtomicInteger count = new AtomicInteger();
@@ -802,7 +802,7 @@ public class UniOnEventTest {
             // Do not emit anything
             e.onTermination(() -> emitterTerminationCalled.set(true));
         })
-                .onCancellation().invokeUni(() -> {
+                .onCancellation().call(() -> {
                     count.incrementAndGet();
                     cancellationUniCalled.set(true);
                     throw new RuntimeException("bam");

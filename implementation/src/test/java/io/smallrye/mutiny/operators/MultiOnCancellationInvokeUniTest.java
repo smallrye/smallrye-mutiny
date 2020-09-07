@@ -23,7 +23,7 @@ public class MultiOnCancellationInvokeUniTest {
 
         Multi.createFrom().item(1)
                 .onItem().invoke(item::set)
-                .onCancellation().invokeUni(() -> {
+                .onCancellation().call(() -> {
                     cancellation.set(true);
                     return Uni.createFrom().item("value");
                 })
@@ -46,7 +46,7 @@ public class MultiOnCancellationInvokeUniTest {
 
         Multi.createFrom().item(1)
                 .onItem().invoke(item::set)
-                .onCancellation().invokeUni(() -> {
+                .onCancellation().call(() -> {
                     cancellation.set(true);
                     return Uni.createFrom().failure(new RuntimeException("bam"));
                 })
@@ -69,7 +69,7 @@ public class MultiOnCancellationInvokeUniTest {
 
         Multi.createFrom().item(1)
                 .onItem().invoke(item::set)
-                .onCancellation().invokeUni(() -> {
+                .onCancellation().call(() -> {
                     cancellation.set(true);
                     throw new RuntimeException("bam");
                 })
@@ -95,7 +95,7 @@ public class MultiOnCancellationInvokeUniTest {
             e.emit(1);
         })
                 .onItem().invoke(item::set)
-                .onCancellation().invokeUni(() -> {
+                .onCancellation().call(() -> {
                     counter.incrementAndGet();
                     cancellation.set(true);
                     return Uni.createFrom().item("value");

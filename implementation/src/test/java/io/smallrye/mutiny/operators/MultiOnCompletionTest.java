@@ -301,7 +301,7 @@ public class MultiOnCompletionTest {
         AtomicBoolean called = new AtomicBoolean();
 
         Multi.createFrom().range(1, 5)
-                .onCompletion().invokeUni(() -> {
+                .onCompletion().call(() -> {
                     called.set(true);
                     return Uni.createFrom().item(69);
                 })
@@ -317,7 +317,7 @@ public class MultiOnCompletionTest {
         AtomicBoolean called = new AtomicBoolean();
 
         Multi.createFrom().range(1, 5)
-                .onCompletion().invokeUni(() -> {
+                .onCompletion().call(() -> {
                     called.set(true);
                     return Uni.createFrom().failure(new RuntimeException("bam"));
                 })
@@ -334,7 +334,7 @@ public class MultiOnCompletionTest {
         AtomicBoolean called = new AtomicBoolean();
 
         Multi.createFrom().range(1, 5)
-                .onCompletion().invokeUni(() -> {
+                .onCompletion().call(() -> {
                     called.set(true);
                     throw new RuntimeException("bam");
                 })
@@ -352,7 +352,7 @@ public class MultiOnCompletionTest {
         AtomicInteger counter = new AtomicInteger();
 
         AssertSubscriber<Integer> subscriber = Multi.createFrom().range(1, 5)
-                .onCompletion().invokeUni(() -> {
+                .onCompletion().call(() -> {
                     called.set(true);
                     counter.incrementAndGet();
                     return Uni.createFrom().emitter(e -> {
@@ -421,7 +421,7 @@ public class MultiOnCompletionTest {
                         throw new RuntimeException(interruptedException);
                     }
                 })
-                .onCompletion().invokeUni(() -> {
+                .onCompletion().call(() -> {
                     counter.incrementAndGet();
                     return Uni.createFrom().item(69);
                 })

@@ -215,7 +215,7 @@ public interface Uni<T> {
      * {@code
      * uni.onSubscribe().invoke(sub -> System.out.println("subscribed"));
      * // Delay the subscription by 1 second (or until an asynchronous action completes)
-     * uni.onSubscribe().invokeUni(sub -> Uni.createFrom(1).onItem().delayIt().by(Duration.ofSecond(1)));
+     * uni.onSubscribe().call(sub -> Uni.createFrom(1).onItem().delayIt().by(Duration.ofSecond(1)));
      * }
      * </pre>
      *
@@ -441,7 +441,7 @@ public interface Uni<T> {
      * {@code Uni} fails, the failure is propagated downstream. If the callback throws an exception, this exception
      * is propagated downstream as failure.
      * <p>
-     * This method is a shortcut on {@link UniOnItem#invokeUni(Function)}
+     * This method is a shortcut on {@link UniOnItem#call(Function)}
      *
      * @param function the function taking the item and returning a {@link Uni}, must not be {@code null}, must not return
      *        {@code null}
@@ -460,7 +460,7 @@ public interface Uni<T> {
      * {@code Uni} fails, the failure is propagated downstream. If the callback throws an exception, this exception
      * is propagated downstream as failure.
      * <p>
-     * This method is a shortcut on {@link UniOnItem#invokeUni(Function)}
+     * This method is a shortcut on {@link UniOnItem#call(Function)}
      *
      * @param supplier the supplier taking the item and returning a {@link Uni}, must not be {@code null}, must not return
      *        {@code null}
@@ -479,7 +479,7 @@ public interface Uni<T> {
      * {@code Uni} fails, the failure is propagated downstream. If the callback throws an exception, this exception
      * is propagated downstream as failure.
      * <p>
-     * This method is a shortcut on {@link UniOnItem#invokeUni(Function)}
+     * This method is a shortcut on {@link UniOnItem#call(Function)}
      *
      * @param action the function taking the item and returning a {@link Uni}, must not be {@code null}, must not return
      *        {@code null}
@@ -654,8 +654,8 @@ public interface Uni<T> {
      * }
      * </pre>
      * <p>
-     * This method is a shortcut for {@link UniOnItemOrFailure#invokeUni(BiFunction)}:
-     * {@code onItemOrFailure().invokeUni((item, err) -> supplier.get())}
+     * This method is a shortcut for {@link UniOnItemOrFailure#call(BiFunction)}:
+     * {@code onItemOrFailure().call((item, err) -> supplier.get())}
      *
      * @param supplier a {@link Uni} supplier, cannot be {@code null} and cannot return {@code null}.
      * @param <O> the type of the item
@@ -664,7 +664,7 @@ public interface Uni<T> {
      */
     default <O> Uni<T> eventually(Supplier<Uni<? extends O>> supplier) {
         Supplier<Uni<? extends O>> actual = nonNull(supplier, "supplier");
-        return onItemOrFailure().invokeUni((item, err) -> actual.get());
+        return onItemOrFailure().call((item, err) -> actual.get());
     }
 
     /**

@@ -12,12 +12,12 @@ public class MultiOnTerminationInvokeUniTckTest extends AbstractPublisherTck<Lon
     @Override
     public Publisher<Long> createPublisher(long elements) {
         return Multi.createFrom().items(LongStream.rangeClosed(1, elements).boxed())
-                .onTermination().invokeUni((t, c) -> Uni.createFrom().nullItem());
+                .onTermination().call((t, c) -> Uni.createFrom().nullItem());
     }
 
     @Override
     public Publisher<Long> createFailedPublisher() {
         return Multi.createFrom().<Long> failure(new RuntimeException("failed"))
-                .onTermination().invokeUni((t, c) -> Uni.createFrom().nullItem());
+                .onTermination().call((t, c) -> Uni.createFrom().nullItem());
     }
 }

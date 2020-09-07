@@ -77,7 +77,7 @@ public class UniOnNotNull<T> {
      * @return the new {@link Uni}
      */
     public Uni<T> call(Function<? super T, Uni<?>> action) {
-        return upstream.onItem().invokeUni(item -> {
+        return upstream.onItem().call(item -> {
             if (item != null) {
                 return action.apply(item);
             } else {

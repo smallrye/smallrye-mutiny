@@ -12,12 +12,12 @@ public class MultiOnItemInvokeUniTckTest extends AbstractPublisherTck<Long> {
     @Override
     public Publisher<Long> createPublisher(long elements) {
         return Multi.createFrom().items(LongStream.rangeClosed(1, elements).boxed())
-                .onItem().invokeUni(x -> Uni.createFrom().nullItem());
+                .onItem().call(x -> Uni.createFrom().nullItem());
     }
 
     @Override
     public Publisher<Long> createFailedPublisher() {
         return Multi.createFrom().<Long> failure(new RuntimeException("failed"))
-                .onItem().invokeUni(x -> Uni.createFrom().nullItem());
+                .onItem().call(x -> Uni.createFrom().nullItem());
     }
 }

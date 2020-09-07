@@ -23,7 +23,7 @@ public class MultiOnFailureInvokeUniTest {
     private final Uni<Void> sub = Uni.createFrom().nullItem();
 
     @Test
-    public void testInvokeUniOnItem() {
+    public void testDeprecatedInvokeUniOnItem() {
         AtomicReference<Throwable> failure = new AtomicReference<>();
         AtomicInteger twoGotCalled = new AtomicInteger();
 
@@ -39,7 +39,23 @@ public class MultiOnFailureInvokeUniTest {
     }
 
     @Test
-    public void testInvokeUniOnFailure() {
+    public void testCallOnItem() {
+        AtomicReference<Throwable> failure = new AtomicReference<>();
+        AtomicInteger twoGotCalled = new AtomicInteger();
+
+        AssertSubscriber<Integer> subscriber = numbers.onFailure().call(i -> {
+            failure.set(i);
+            return sub.onItem().invoke(c -> twoGotCalled.incrementAndGet());
+        }).subscribe().withSubscriber(AssertSubscriber.create(10));
+
+        subscriber.assertCompletedSuccessfully()
+                .assertReceived(1, 2);
+        assertThat(twoGotCalled).hasValue(0);
+        assertThat(failure).hasValue(null);
+    }
+
+    @Test
+    public void testDeprecatedInvokeUniOnFailure() {
         AtomicReference<Throwable> failure = new AtomicReference<>();
         AtomicInteger twoGotCalled = new AtomicInteger();
 
@@ -55,10 +71,26 @@ public class MultiOnFailureInvokeUniTest {
     }
 
     @Test
+    public void testCallOnFailure() {
+        AtomicReference<Throwable> failure = new AtomicReference<>();
+        AtomicInteger twoGotCalled = new AtomicInteger();
+
+        AssertSubscriber<Integer> subscriber = failed.onFailure().call(i -> {
+            failure.set(i);
+            return sub.onItem().invoke(c -> twoGotCalled.incrementAndGet());
+        }).subscribe().withSubscriber(AssertSubscriber.create(10));
+
+        subscriber.assertHasFailedWith(IOException.class, "boom")
+                .assertReceived(1, 2);
+        assertThat(twoGotCalled).hasValue(1);
+        assertThat(failure).hasValue(BOOM);
+    }
+
+    @Test
     public void testFailureInAsyncCallback() {
         AtomicReference<Throwable> failure = new AtomicReference<>();
 
-        AssertSubscriber<Integer> subscriber = failed.onFailure().invokeUni(i -> {
+        AssertSubscriber<Integer> subscriber = failed.onFailure().call(i -> {
             failure.set(i);
             throw new RuntimeException("kaboom");
         }).subscribe().withSubscriber(AssertSubscriber.create(10));
@@ -74,7 +106,7 @@ public class MultiOnFailureInvokeUniTest {
     public void testNullReturnedByAsyncCallback() {
         AtomicReference<Throwable> failure = new AtomicReference<>();
 
-        AssertSubscriber<Integer> subscriber = failed.onFailure().invokeUni(i -> {
+        AssertSubscriber<Integer> subscriber = failed.onFailure().call(i -> {
             failure.set(i);
             return null;
         }).subscribe().withSubscriber(AssertSubscriber.create(10));
@@ -90,7 +122,7 @@ public class MultiOnFailureInvokeUniTest {
     public void testInvokeUniWithSubFailure() {
         AtomicReference<Throwable> failure = new AtomicReference<>();
 
-        AssertSubscriber<Integer> subscriber = failed.onFailure().invokeUni(i -> {
+        AssertSubscriber<Integer> subscriber = failed.onFailure().call(i -> {
             failure.set(i);
             return Uni.createFrom().failure(new IllegalStateException("d'oh"));
         }).subscribe().withSubscriber(AssertSubscriber.create(10));
@@ -107,7 +139,7 @@ public class MultiOnFailureInvokeUniTest {
         AtomicBoolean terminated = new AtomicBoolean();
         Uni<Object> uni = Uni.createFrom().emitter(e -> e.onTermination(() -> terminated.set(true)));
 
-        AssertSubscriber<Integer> subscriber = failed.onFailure().invokeUni(i -> uni)
+        AssertSubscriber<Integer> subscriber = failed.onFailure().call(i -> uni)
                 .subscribe().withSubscriber(AssertSubscriber.create(10));
 
         subscriber.cancel();

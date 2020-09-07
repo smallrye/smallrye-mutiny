@@ -10,12 +10,12 @@ public class MultiOnSubscribeInvokeUniTckTest extends AbstractPublisherTck<Long>
     @Override
     public Publisher<Long> createPublisher(long elements) {
         return Multi.createFrom().iterable(iterate(elements))
-                .onSubscribe().invokeUni(x -> Uni.createFrom().nullItem());
+                .onSubscribe().call(x -> Uni.createFrom().nullItem());
     }
 
     @Override
     public Publisher<Long> createFailedPublisher() {
         return Multi.createFrom().<Long> failure(new RuntimeException("failed"))
-                .onSubscribe().invokeUni(x -> Uni.createFrom().nullItem());
+                .onSubscribe().call(x -> Uni.createFrom().nullItem());
     }
 }

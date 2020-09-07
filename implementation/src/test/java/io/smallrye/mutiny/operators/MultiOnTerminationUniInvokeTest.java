@@ -39,7 +39,7 @@ public class MultiOnTerminationUniInvokeTest {
                 .on().item().invoke(item::set)
                 .on().failure().invoke(failure::set)
                 .onCompletion().invoke(() -> completion.set(true))
-                .onTermination().invokeUni((t, c) -> {
+                .onTermination().call((t, c) -> {
                     termination.set(true);
                     terminationException.set(t);
                     terminationCancelledFlag.set(c);
@@ -87,7 +87,7 @@ public class MultiOnTerminationUniInvokeTest {
                 .on().item().invoke(item::set)
                 .on().failure().invoke(failure::set)
                 .onCompletion().invoke(() -> completion.set(true))
-                .onTermination().invokeUni((t, c) -> {
+                .onTermination().call((t, c) -> {
                     termination.set(true);
                     terminationException.set(t);
                     terminationCancelledFlag.set(c);
@@ -134,7 +134,7 @@ public class MultiOnTerminationUniInvokeTest {
                 .on().item().invoke(item::set)
                 .on().failure().invoke(failure::set)
                 .onCompletion().invoke(() -> completion.set(true))
-                .onTermination().invokeUni((t, c) -> {
+                .onTermination().call((t, c) -> {
                     termination.set(true);
                     terminationException.set(t);
                     terminationCancelledFlag.set(c);
@@ -181,7 +181,7 @@ public class MultiOnTerminationUniInvokeTest {
                 .on().item().invoke(item::set)
                 .on().failure().invoke(failure::set)
                 .onCompletion().invoke(() -> completion.set(true))
-                .onTermination().invokeUni((t, c) -> {
+                .onTermination().call((t, c) -> {
                     termination.set(true);
                     terminationException.set(t);
                     terminationCancelledFlag.set(c);
@@ -234,7 +234,7 @@ public class MultiOnTerminationUniInvokeTest {
                 .on().item().invoke(item::set)
                 .on().failure().invoke(failure::set)
                 .onCompletion().invoke(() -> completion.set(true))
-                .onTermination().invokeUni((t, c) -> {
+                .onTermination().call((t, c) -> {
                     termination.set(true);
                     terminationException.set(t);
                     terminationCancelledFlag.set(c);
@@ -285,7 +285,7 @@ public class MultiOnTerminationUniInvokeTest {
 
         Multi.createFrom().item(1)
                 .on().item().invoke(item::set)
-                .onTermination().invokeUni((t, c) -> {
+                .onTermination().call((t, c) -> {
                     termination.set(true);
                     terminationException.set(t);
                     terminationCancelledFlag.set(c);
@@ -339,7 +339,7 @@ public class MultiOnTerminationUniInvokeTest {
             firstItemEmitted.set(true);
         })
                 .onItem().invoke(item::set)
-                .onTermination().invokeUni((t, c) -> { // Must be called for a completion
+                .onTermination().call((t, c) -> { // Must be called for a completion
                     termination.set(true);
                     terminationException.set(t);
                     terminationCancelledFlag.set(c);

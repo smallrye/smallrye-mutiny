@@ -11,6 +11,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiConsumer;
+import java.util.function.Supplier;
 
 import org.junit.jupiter.api.Test;
 
@@ -38,7 +39,8 @@ public class UniOnItemOrFailureInvokeTest {
 
     @Test
     public void testThatCallbackMustNotBeNullWithInvokeUni() {
-        assertThrows(IllegalArgumentException.class, () -> Uni.createFrom().item(1).onItemOrFailure().invokeUni(null));
+        assertThrows(IllegalArgumentException.class,
+                () -> Uni.createFrom().item(1).onItemOrFailure().call((Supplier<Uni<?>>) null));
     }
 
     @Test
@@ -197,11 +199,11 @@ public class UniOnItemOrFailureInvokeTest {
     }
 
     @Test
-    public void testInvokeUniOnItem() {
+    public void testCallOnItem() {
         UniAssertSubscriber<Integer> subscriber = UniAssertSubscriber.create();
         AtomicInteger reference = new AtomicInteger();
         AtomicInteger count = new AtomicInteger();
-        one.onItemOrFailure().invokeUni((i, f) -> {
+        one.onItemOrFailure().call((i, f) -> {
             assertThat(f).isNull();
             count.incrementAndGet();
             return two.onItem().invoke(reference::set);
@@ -214,11 +216,11 @@ public class UniOnItemOrFailureInvokeTest {
     }
 
     @Test
-    public void testInvokeUniNullOnItem() {
+    public void testCallNullOnItem() {
         UniAssertSubscriber<Void> subscriber = UniAssertSubscriber.create();
         AtomicInteger reference = new AtomicInteger();
         AtomicInteger count = new AtomicInteger();
-        none.onItemOrFailure().invokeUni((i, f) -> {
+        none.onItemOrFailure().call((i, f) -> {
             assertThat(f).isNull();
             assertThat(i).isNull();
             count.incrementAndGet();
@@ -231,11 +233,11 @@ public class UniOnItemOrFailureInvokeTest {
     }
 
     @Test
-    public void testInvokeUniOnFailure() {
+    public void testCallOnFailure() {
         UniAssertSubscriber<Integer> subscriber = UniAssertSubscriber.create();
         AtomicInteger reference = new AtomicInteger();
         AtomicInteger count = new AtomicInteger();
-        failed.onItemOrFailure().invokeUni((i, f) -> {
+        failed.onItemOrFailure().call((i, f) -> {
             assertThat(i).isNull();
             assertThat(f).isNotNull().isInstanceOf(IOException.class).hasMessageContaining("boom");
             count.incrementAndGet();
@@ -249,37 +251,37 @@ public class UniOnItemOrFailureInvokeTest {
     }
 
     @Test
-    public void testInvokeUniProducingNullOnItem() {
+    public void testCallProducingNullOnItem() {
         assertThatExceptionOfType(NullPointerException.class)
                 .isThrownBy(() -> one
-                        .onItemOrFailure().invokeUni((s, f) -> null)
+                        .onItemOrFailure().call((s, f) -> null)
                         .await().indefinitely());
     }
 
     @Test
-    public void testInvokeUniProducingNullOnFailure() {
+    public void testCallProducingNullOnFailure() {
         assertThatExceptionOfType(CompositeException.class)
                 .isThrownBy(() -> failed
-                        .onItemOrFailure().invokeUni((s, f) -> null)
+                        .onItemOrFailure().call((s, f) -> null)
                         .await().indefinitely())
                 .withMessageContaining("null").withMessageContaining("boom");
     }
 
     @Test
-    public void testInvokeUniFailingOnItem() {
+    public void testCallFailingOnItem() {
         assertThatExceptionOfType(IllegalStateException.class)
                 .isThrownBy(() -> one
-                        .onItemOrFailure().invokeUni((s, f) -> {
+                        .onItemOrFailure().call((s, f) -> {
                             throw new IllegalStateException("boom");
                         })
                         .await().indefinitely());
     }
 
     @Test
-    public void testInvokeUniFailingOnFailure() {
+    public void testCallFailingOnFailure() {
         assertThatExceptionOfType(CompositeException.class)
                 .isThrownBy(() -> failed
-                        .onItemOrFailure().invokeUni((s, f) -> {
+                        .onItemOrFailure().call((s, f) -> {
                             throw new IllegalStateException("d'oh");
                         })
                         .await().indefinitely())
@@ -287,33 +289,33 @@ public class UniOnItemOrFailureInvokeTest {
     }
 
     @Test
-    public void testInvokeUniProducingFailureOnItem() {
+    public void testCallProducingFailureOnItem() {
         assertThatExceptionOfType(IllegalStateException.class)
                 .isThrownBy(() -> Uni.createFrom().item("hello")
                         .onItemOrFailure()
-                        .invokeUni((s, f) -> Uni.createFrom().failure(new IllegalStateException("boom")))
+                        .call((s, f) -> Uni.createFrom().failure(new IllegalStateException("boom")))
                         .await().indefinitely())
                 .withMessageContaining("boom");
     }
 
     @Test
-    public void testInvokeUniProducingFailureOnFailure() {
+    public void testCallProducingFailureOnFailure() {
         assertThatExceptionOfType(CompositeException.class)
                 .isThrownBy(() -> failed
                         .onItemOrFailure()
-                        .invokeUni((s, f) -> Uni.createFrom().failure(new IllegalStateException("d'oh")))
+                        .call((s, f) -> Uni.createFrom().failure(new IllegalStateException("d'oh")))
                         .await().indefinitely())
                 .withMessageContaining("d'oh").withMessageContaining("boom");
     }
 
     @Test
-    public void testInvokeUniWithCancellationBeforeEmission() {
+    public void testCallWithCancellationBeforeEmission() {
         AtomicBoolean called = new AtomicBoolean();
         AtomicReference<String> res = new AtomicReference<>();
         Uni<Object> emitter = Uni.createFrom().emitter(e -> e.onTermination(() -> called.set(true)));
 
         Cancellable cancellable = Uni.createFrom().item("hello")
-                .onItemOrFailure().invokeUni((s, f) -> emitter)
+                .onItemOrFailure().call((s, f) -> emitter)
                 .subscribe().with(res::set);
 
         cancellable.cancel();

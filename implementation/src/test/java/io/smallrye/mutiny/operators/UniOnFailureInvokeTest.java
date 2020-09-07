@@ -9,6 +9,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 import org.junit.jupiter.api.Test;
 
@@ -29,7 +30,8 @@ public class UniOnFailureInvokeTest {
 
     @Test
     public void testThatFunctionMustNotBeNull() {
-        assertThrows(IllegalArgumentException.class, () -> Uni.createFrom().item(1).onFailure().invokeUni(null));
+        assertThrows(IllegalArgumentException.class,
+                () -> Uni.createFrom().item(1).onFailure().call((Function<Throwable, Uni<?>>) null));
     }
 
     @Test
@@ -57,11 +59,11 @@ public class UniOnFailureInvokeTest {
     }
 
     @Test
-    public void testInvokeUniOnFailure() {
+    public void testCallOnFailure() {
         AtomicReference<Throwable> container = new AtomicReference<>();
         AtomicInteger called = new AtomicInteger(-1);
         int res = failure
-                .onFailure().invokeUni(t -> {
+                .onFailure().call(t -> {
                     container.set(t);
                     return Uni.createFrom().item(22).onItem().invoke(called::set);
                 })
@@ -74,11 +76,11 @@ public class UniOnFailureInvokeTest {
     }
 
     @Test
-    public void testInvokeUniNotCalledOnItem() {
+    public void testCallNotCalledOnItem() {
         AtomicReference<Throwable> container = new AtomicReference<>();
         AtomicInteger called = new AtomicInteger(-1);
         int res = Uni.createFrom().item(3)
-                .onFailure().invokeUni(t -> {
+                .onFailure().call(t -> {
                     container.set(t);
                     return Uni.createFrom().item(22).onItem().invoke(called::set);
                 })
@@ -104,11 +106,11 @@ public class UniOnFailureInvokeTest {
     }
 
     @Test
-    public void testInvokeUniNotCalledOnNullItem() {
+    public void testCallNotCalledOnNullItem() {
         AtomicReference<Throwable> container = new AtomicReference<>();
         AtomicInteger called = new AtomicInteger(-1);
         int res = Uni.createFrom().nullItem()
-                .onFailure().invokeUni(t -> {
+                .onFailure().call(t -> {
                     container.set(t);
                     return Uni.createFrom().item(22).onItem().invoke(called::set);
                 })
@@ -136,10 +138,10 @@ public class UniOnFailureInvokeTest {
     }
 
     @Test
-    public void testInvokeUniOnFailureWithExceptionThrownByCallback() {
+    public void testCallOnFailureWithExceptionThrownByCallback() {
         AtomicReference<Throwable> container = new AtomicReference<>();
         assertThatThrownBy(() -> failure
-                .onFailure().invokeUni(t -> {
+                .onFailure().call(t -> {
                     container.set(t);
                     throw new IllegalStateException("bad");
                 })
@@ -150,10 +152,10 @@ public class UniOnFailureInvokeTest {
     }
 
     @Test
-    public void testInvokeUniOnFailureWithCallbackReturningNull() {
+    public void testCallOnFailureWithCallbackReturningNull() {
         AtomicReference<Throwable> container = new AtomicReference<>();
         assertThatThrownBy(() -> failure
-                .onFailure().invokeUni(t -> {
+                .onFailure().call(t -> {
                     container.set(t);
                     return null;
                 })
@@ -170,7 +172,7 @@ public class UniOnFailureInvokeTest {
 
         AtomicInteger result = new AtomicInteger();
         AtomicReference<Throwable> failed = new AtomicReference<>();
-        Cancellable cancellable = failure.onFailure().invokeUni(i -> uni).subscribe()
+        Cancellable cancellable = failure.onFailure().call(i -> uni).subscribe()
                 .with(result::set, failed::set);
 
         cancellable.cancel();

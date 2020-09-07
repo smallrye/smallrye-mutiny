@@ -9,6 +9,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 import org.junit.jupiter.api.Test;
 
@@ -73,12 +74,12 @@ public class UniOnSubscribeTest {
     }
 
     @Test
-    public void testInvokeUni() {
+    public void testCall() {
         AtomicInteger count = new AtomicInteger();
         AtomicReference<UniSubscription> reference = new AtomicReference<>();
         AtomicReference<UniSubscription> sub = new AtomicReference<>();
         Uni<Integer> uni = Uni.createFrom().item(1)
-                .onSubscribe().invokeUni(s -> {
+                .onSubscribe().call(s -> {
                     reference.set(s);
                     count.incrementAndGet();
                     return Uni.createFrom().nullItem()
@@ -120,9 +121,9 @@ public class UniOnSubscribeTest {
     }
 
     @Test
-    public void testInvokeUniThrowingException() {
+    public void testCallThrowingException() {
         Uni<Integer> uni = Uni.createFrom().item(1)
-                .onSubscribe().invokeUni(s -> {
+                .onSubscribe().call(s -> {
                     throw new IllegalStateException("boom");
                 });
 
@@ -134,9 +135,9 @@ public class UniOnSubscribeTest {
     }
 
     @Test
-    public void testInvokeUniProvidingFailure() {
+    public void testCallProvidingFailure() {
         Uni<Integer> uni = Uni.createFrom().item(1)
-                .onSubscribe().invokeUni(s -> Uni.createFrom().failure(new IOException("boom")));
+                .onSubscribe().call(s -> Uni.createFrom().failure(new IOException("boom")));
 
         UniAssertSubscriber<Integer> subscriber = UniAssertSubscriber.create();
 
@@ -146,9 +147,9 @@ public class UniOnSubscribeTest {
     }
 
     @Test
-    public void testInvokeUniReturningNullUni() {
+    public void testCallReturningNullUni() {
         Uni<Integer> uni = Uni.createFrom().item(1)
-                .onSubscribe().invokeUni(s -> null);
+                .onSubscribe().call(s -> null);
 
         UniAssertSubscriber<Integer> subscriber = UniAssertSubscriber.create();
 
@@ -164,9 +165,9 @@ public class UniOnSubscribeTest {
     }
 
     @Test
-    public void testThatInvokeUniFunctionCannotBeNull() {
+    public void testThatCallFunctionCannotBeNull() {
         assertThrows(IllegalArgumentException.class, () -> Uni.createFrom().item(1)
-                .onSubscribe().invokeUni(null));
+                .onSubscribe().call((Function<? super UniSubscription, Uni<?>>) null));
     }
 
     @Test
@@ -176,7 +177,7 @@ public class UniOnSubscribeTest {
     }
 
     @Test
-    public void testThatInvokeUniUpstreamCannotBeNull() {
+    public void testThatCallUpstreamCannotBeNull() {
         assertThrows(IllegalArgumentException.class,
                 () -> new UniOnSubscribeInvokeUni<>(null, s -> Uni.createFrom().nullItem()));
 
@@ -209,7 +210,7 @@ public class UniOnSubscribeTest {
         AtomicReference<UniEmitter<? super Integer>> emitter = new AtomicReference<>();
         UniAssertSubscriber<Integer> subscriber = Uni.createFrom().item(() -> 1)
                 .onSubscribe()
-                .invokeUni(s -> Uni.createFrom().emitter((Consumer<UniEmitter<? super Integer>>) emitter::set))
+                .call(s -> Uni.createFrom().emitter((Consumer<UniEmitter<? super Integer>>) emitter::set))
                 .subscribe().withSubscriber(UniAssertSubscriber.create());
 
         subscriber.assertNotSubscribed();
@@ -228,7 +229,7 @@ public class UniOnSubscribeTest {
         AtomicReference<UniEmitter<? super Integer>> emitter = new AtomicReference<>();
         UniAssertSubscriber<Integer> subscriber = Uni.createFrom().item(() -> 1)
                 .onSubscribe()
-                .invokeUni(s -> Uni.createFrom().emitter((Consumer<UniEmitter<? super Integer>>) emitter::set))
+                .call(s -> Uni.createFrom().emitter((Consumer<UniEmitter<? super Integer>>) emitter::set))
                 .runSubscriptionOn(Infrastructure.getDefaultExecutor())
                 .subscribe().withSubscriber(UniAssertSubscriber.create());
 

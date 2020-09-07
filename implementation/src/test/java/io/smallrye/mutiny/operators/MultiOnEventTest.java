@@ -12,6 +12,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 import org.junit.jupiter.api.Test;
@@ -619,7 +620,7 @@ public class MultiOnEventTest {
         AtomicInteger res = new AtomicInteger();
         AtomicInteger twoGotCalled = new AtomicInteger();
 
-        List<Integer> r = numbers.onItem().invokeUni(i -> {
+        List<Integer> r = numbers.onItem().call(i -> {
             res.set(i);
             return sub.onItem().invoke(c -> twoGotCalled.incrementAndGet());
         })
@@ -631,11 +632,11 @@ public class MultiOnEventTest {
     }
 
     @Test
-    public void testInvokeUniOnItemWithShortcut() {
+    public void testCallOnItemWithShortcut() {
         AtomicInteger res = new AtomicInteger();
         AtomicInteger twoGotCalled = new AtomicInteger();
 
-        List<Integer> r = numbers.invokeUni(i -> {
+        List<Integer> r = numbers.call(i -> {
             res.set(i);
             return sub.invoke(c -> twoGotCalled.incrementAndGet());
         })
@@ -647,11 +648,11 @@ public class MultiOnEventTest {
     }
 
     @Test
-    public void testInvokeUniOnFailure() {
+    public void testCallOnFailure() {
         AtomicInteger res = new AtomicInteger(-1);
         AtomicInteger twoGotCalled = new AtomicInteger();
 
-        assertThatThrownBy(() -> failed.onItem().invokeUni(
+        assertThatThrownBy(() -> failed.onItem().call(
                 i -> {
                     res.set(i);
                     return sub.onItem().invoke(c -> twoGotCalled.incrementAndGet());
@@ -669,7 +670,7 @@ public class MultiOnEventTest {
     public void testFailureInAsyncCallback() {
         AtomicInteger res = new AtomicInteger();
         Multi<Integer> more = Multi.createFrom().items(1, 2, 3);
-        assertThatThrownBy(() -> more.onItem().invokeUni(i -> {
+        assertThatThrownBy(() -> more.onItem().call(i -> {
             res.set(i);
             if (i == 2) {
                 throw new RuntimeException("boom");
@@ -686,7 +687,7 @@ public class MultiOnEventTest {
     public void testNullReturnedByAsyncCallback() {
         AtomicInteger res = new AtomicInteger();
         Multi<Integer> more = Multi.createFrom().items(1, 2, 3);
-        assertThatThrownBy(() -> more.onItem().invokeUni(i -> {
+        assertThatThrownBy(() -> more.onItem().call(i -> {
             res.set(i);
             if (i == 2) {
                 return null;
@@ -699,14 +700,14 @@ public class MultiOnEventTest {
     }
 
     @Test
-    public void testInvokeUniWithSubFailure() {
+    public void testCallWithSubFailure() {
         AtomicInteger res = new AtomicInteger(-1);
         AtomicInteger twoGotCalled = new AtomicInteger(-1);
         Multi<Integer> more = Multi.createFrom().items(1, 2, 3);
         Uni<Integer> failing = Uni.createFrom().item(23).onItem().invoke(twoGotCalled::set).onItem()
                 .failWith(k -> new IllegalStateException("boom-" + k));
 
-        assertThatThrownBy(() -> more.onItem().invokeUni(i -> {
+        assertThatThrownBy(() -> more.onItem().call(i -> {
             res.set(i);
             if (i == 2) {
                 return failing;
@@ -727,7 +728,7 @@ public class MultiOnEventTest {
 
         AtomicInteger result = new AtomicInteger();
         Cancellable cancellable = numbers
-                .onItem().invokeUni(i -> uni).subscribe().with(result::set);
+                .onItem().call(i -> uni).subscribe().with(result::set);
 
         cancellable.cancel();
         assertThat(result).hasValue(0);
@@ -753,8 +754,9 @@ public class MultiOnEventTest {
     }
 
     @Test
-    public void testThatInvokeUniMapperMustNotBeNull() {
-        assertThrows(IllegalArgumentException.class, () -> Multi.createFrom().item(1).onItem().invokeUni(null));
+    public void testThatCallMapperMustNotBeNull() {
+        assertThrows(IllegalArgumentException.class,
+                () -> Multi.createFrom().item(1).onItem().call((Function<? super Integer, Uni<?>>) null));
     }
 
     @Test
@@ -763,8 +765,9 @@ public class MultiOnEventTest {
     }
 
     @Test
-    public void testThatInvokeUniMapperMustNotBeNullWithShortcut() {
-        assertThrows(IllegalArgumentException.class, () -> Multi.createFrom().item(1).invokeUni(null));
+    public void testThatCallMapperMustNotBeNullWithShortcut() {
+        assertThrows(IllegalArgumentException.class,
+                () -> Multi.createFrom().item(1).call((Function<? super Integer, Uni<?>>) null));
     }
 
 }

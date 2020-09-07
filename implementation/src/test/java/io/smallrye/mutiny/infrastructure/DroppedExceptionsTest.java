@@ -65,7 +65,7 @@ public class DroppedExceptionsTest {
                 .emitter(e -> {
                     // Never emit anything
                 })
-                .onCancellation().invokeUni(() -> Uni.createFrom().failure(new IOException("boom")))
+                .onCancellation().call(() -> Uni.createFrom().failure(new IOException("boom")))
                 .subscribe().with(item -> {
                     // Nothing to see here anyway
                 });
@@ -84,7 +84,7 @@ public class DroppedExceptionsTest {
                 .emitter(e -> {
                     // Never emit anything
                 })
-                .onCancellation().invokeUni(() -> Uni.createFrom().failure(new IOException("boom")))
+                .onCancellation().call(() -> Uni.createFrom().failure(new IOException("boom")))
                 .subscribe().with(item -> {
                     // Nothing to see here anyway
                 });

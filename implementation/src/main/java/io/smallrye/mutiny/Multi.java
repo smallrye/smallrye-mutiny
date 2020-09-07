@@ -146,7 +146,7 @@ public interface Multi<T> extends Publisher<T> {
      * {@code
      * multi.onSubscribe().invoke(sub -> System.out.println("subscribed"));
      * // Delay the subscription by 1 second (or until an asynchronous action completes)
-     * multi.onSubscribe().invokeUni(sub -> Uni.createFrom(1).onItem().delayIt().by(Duration.ofSecond(1)));
+     * multi.onSubscribe().call(sub -> Uni.createFrom(1).onItem().delayIt().by(Duration.ofSecond(1)));
      * }
      * </pre>
      *
