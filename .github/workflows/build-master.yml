@@ -67,3 +67,5 @@ jobs:
             -Dsonar.host.url=https://sonarcloud.io \
             -Dsonar.login=$SONAR_LOGIN \
             -Dsonar.coverage.jacoco.xmlReportPaths=target/jacoco.xml
+      - name: Codecov
+        uses: codecov/codecov-action@v1.0.13

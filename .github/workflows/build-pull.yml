@@ -31,4 +31,6 @@ jobs:
           version: ${{ matrix.java.version }}
           source: ${{ matrix.java.source }}
       - name: Build with Maven
-        run: mvn -B clean install --file pom.xml
+        run: mvn -B clean install -Pcoverage --file pom.xml
+      - name: Codecov
+        uses: codecov/codecov-action@v1.0.13
