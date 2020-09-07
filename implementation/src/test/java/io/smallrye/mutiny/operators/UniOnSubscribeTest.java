@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
@@ -87,6 +88,44 @@ public class UniOnSubscribeTest {
                 });
 
         UniAssertSubscriber<Integer> subscriber = UniAssertSubscriber.create();
+
+        assertThat(count).hasValue(0);
+        assertThat(reference).hasValue(null);
+        assertThat(sub).hasValue(null);
+
+        uni.subscribe().withSubscriber(subscriber);
+
+        assertThat(count).hasValue(1);
+        assertThat(reference).doesNotHaveValue(null);
+        assertThat(sub).doesNotHaveValue(null);
+
+        uni.subscribe().withSubscriber(subscriber);
+
+        assertThat(count).hasValue(2);
+        assertThat(reference).doesNotHaveValue(null);
+        assertThat(sub).doesNotHaveValue(null);
+
+    }
+
+    @Test
+    public void testDelayedCallAfterFailure() {
+        AtomicInteger count = new AtomicInteger();
+        AtomicReference<UniSubscription> reference = new AtomicReference<>();
+        AtomicReference<UniSubscription> sub = new AtomicReference<>();
+        Uni<Object> uni = Uni.createFrom().failure(new IOException("boom"))
+                .onSubscribe().call(s -> {
+                    reference.set(s);
+                    count.incrementAndGet();
+                    return Uni.createFrom().emitter(e -> {
+                        new Thread(() -> {
+                            await().during(100, TimeUnit.MILLISECONDS);
+                            e.complete("yo");
+                        }).start();
+                    })
+                            .onSubscribe().invoke(sub::set);
+                });
+
+        UniAssertSubscriber<Object> subscriber = UniAssertSubscriber.create();
 
         assertThat(count).hasValue(0);
         assertThat(reference).hasValue(null);
