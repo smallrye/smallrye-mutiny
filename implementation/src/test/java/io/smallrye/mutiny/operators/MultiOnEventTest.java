@@ -36,6 +36,9 @@ public class MultiOnEventTest {
         AtomicReference<Integer> item = new AtomicReference<>();
         AtomicReference<Throwable> failure = new AtomicReference<>();
         AtomicBoolean completion = new AtomicBoolean();
+        AtomicBoolean invokedOnItemRunnable = new AtomicBoolean();
+        AtomicBoolean invokedOnItemSupplier = new AtomicBoolean();
+        AtomicBoolean calledOnItemSupplier = new AtomicBoolean();
         AtomicLong requests = new AtomicLong();
         AtomicBoolean termination = new AtomicBoolean();
         AtomicBoolean termination2 = new AtomicBoolean();
@@ -45,6 +48,15 @@ public class MultiOnEventTest {
                 .on().subscribed(subscription::set)
                 .on().item().invoke(item::set)
                 .on().failure().invoke(failure::set)
+                .onItem().invoke(() -> invokedOnItemRunnable.set(true))
+                .onItem().call(() -> {
+                    calledOnItemSupplier.set(true);
+                    return Uni.createFrom().item("yo");
+                })
+                .onItem().invokeUni(ignored -> {
+                    invokedOnItemSupplier.set(true);
+                    return Uni.createFrom().item("yo");
+                })
                 .onCompletion().invoke(() -> completion.set(true))
                 .onTermination().invoke((f, c) -> termination.set(f == null && !c))
                 .onTermination().invoke(() -> termination2.set(true))
@@ -61,6 +73,9 @@ public class MultiOnEventTest {
         assertThat(item.get()).isEqualTo(1);
         assertThat(failure.get()).isNull();
         assertThat(completion.get()).isTrue();
+        assertThat(invokedOnItemRunnable.get()).isTrue();
+        assertThat(invokedOnItemSupplier.get()).isTrue();
+        assertThat(calledOnItemSupplier.get()).isTrue();
         assertThat(termination.get()).isTrue();
         assertThat(termination2.get()).isTrue();
         assertThat(requests.get()).isEqualTo(20);

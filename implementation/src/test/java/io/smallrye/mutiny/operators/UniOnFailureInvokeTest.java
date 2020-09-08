@@ -37,12 +37,21 @@ public class UniOnFailureInvokeTest {
     @Test
     public void testInvokeOnFailure() {
         AtomicReference<Throwable> container = new AtomicReference<>();
+        AtomicBoolean invokedRunnable = new AtomicBoolean();
+        AtomicBoolean invokedUni = new AtomicBoolean();
         int res = failure
                 .onFailure().invoke(container::set)
+                .onFailure().invoke(() -> invokedRunnable.set(true))
+                .onFailure().invokeUni(ignored -> {
+                    invokedUni.set(true);
+                    return Uni.createFrom().item(69);
+                })
                 .onFailure().recoverWithItem(1)
                 .await().indefinitely();
 
         assertThat(res).isEqualTo(1);
+        assertThat(invokedRunnable.get()).isTrue();
+        assertThat(invokedUni.get()).isTrue();
         assertThat(container).hasValue(BOOM);
     }
 
@@ -62,15 +71,21 @@ public class UniOnFailureInvokeTest {
     public void testCallOnFailure() {
         AtomicReference<Throwable> container = new AtomicReference<>();
         AtomicInteger called = new AtomicInteger(-1);
+        AtomicBoolean calledSupplier = new AtomicBoolean();
         int res = failure
                 .onFailure().call(t -> {
                     container.set(t);
                     return Uni.createFrom().item(22).onItem().invoke(called::set);
                 })
+                .onFailure().call(() -> {
+                    calledSupplier.set(true);
+                    return Uni.createFrom().item(69);
+                })
                 .onFailure().recoverWithItem(1)
                 .await().indefinitely();
 
         assertThat(res).isEqualTo(1);
+        assertThat(calledSupplier.get()).isTrue();
         assertThat(container).hasValue(BOOM);
         assertThat(called).hasValue(22);
     }

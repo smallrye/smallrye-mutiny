@@ -48,15 +48,31 @@ public class UniOnItemOrFailureInvokeTest {
         UniAssertSubscriber<Integer> subscriber = UniAssertSubscriber.create();
 
         AtomicInteger count = new AtomicInteger();
-        one.onItemOrFailure().invoke((i, f) -> {
-            assertThat(f).isNull();
-            count.incrementAndGet();
-        }).subscribe().withSubscriber(subscriber);
+        AtomicBoolean invokedRunnable = new AtomicBoolean();
+        AtomicBoolean invokedUni = new AtomicBoolean();
+        AtomicBoolean calledSupplier = new AtomicBoolean();
+        one
+                .onItemOrFailure().invoke((i, f) -> {
+                    assertThat(f).isNull();
+                    count.incrementAndGet();
+                })
+                .onItemOrFailure().invoke(() -> invokedRunnable.set(true))
+                .onItemOrFailure().invokeUni((i, r) -> {
+                    invokedUni.set(true);
+                    return Uni.createFrom().item(69);
+                })
+                .onItemOrFailure().call(() -> {
+                    calledSupplier.set(true);
+                    return Uni.createFrom().item(69);
+                })
+                .subscribe().withSubscriber(subscriber);
 
         subscriber.assertCompletedSuccessfully()
                 .assertItem(1);
 
         assertThat(count).hasValue(1);
+        assertThat(invokedRunnable.get()).isTrue();
+        assertThat(calledSupplier.get()).isTrue();
     }
 
     @Test
