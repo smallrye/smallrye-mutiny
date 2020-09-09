@@ -47,7 +47,7 @@ public class UniCacheTest {
             try {
                 runnables.get(1).run();
             } catch (RuntimeException ex) {
-                errors[0] = ex;
+                errors[1] = ex;
             } finally {
                 latch.countDown();
             }
