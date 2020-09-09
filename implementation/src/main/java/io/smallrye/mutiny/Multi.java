@@ -432,7 +432,7 @@ public interface Multi<T> extends Publisher<T> {
      */
     @Deprecated
     default Multi<T> invokeUni(Function<? super T, Uni<?>> action) {
-        return onItem().invokeUni(nonNull(action, "action"));
+        return onItem().call(nonNull(action, "action"));
     }
 
     /**
