@@ -6,6 +6,7 @@ import java.util.concurrent.CompletionStage;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import org.reactivestreams.Publisher;
 
@@ -37,6 +38,34 @@ public class UniOnNotNull<T> {
     }
 
     /**
+     * Produces a new {@link Uni} invoking the given callback when the {@code item} event is fired. If the item is
+     * {@code null}, the callback is not invoked.
+     *
+     * @param callback the callback, must not be {@code null}
+     * @return the new {@link Uni}
+     */
+    public Uni<T> invoke(Runnable callback) {
+        return upstream.onItem().invoke(callback);
+    }
+
+    /**
+     * Produces a new {@link Uni} invoking the given @{code action} when the {@code item} event is received. Note that
+     * if the received item is {@code null}, the action is not executed, and the item is propagated downstream.
+     * <p>
+     * Unlike {@link #invoke(Consumer)}, the passed function returns a {@link Uni}. When the produced {@code Uni} sends
+     * its result, the result is discarded, and the original (non null) {@code item} is forwarded downstream. If the
+     * produced {@code Uni} fails, the failure is propagated downstream.
+     *
+     * @param action the callback, must not be {@code null}
+     * @return the new {@link Uni}
+     * @deprecated Use {@link #call(Function)}
+     */
+    @Deprecated
+    public Uni<T> invokeUni(Function<? super T, Uni<?>> action) {
+        return call(action);
+    }
+
+    /**
      * Produces a new {@link Uni} invoking the given @{code action} when the {@code item} event is received. Note that
      * if the received item is {@code null}, the action is not executed, and the item is propagated downstream.
      * <p>
@@ -47,14 +76,29 @@ public class UniOnNotNull<T> {
      * @param action the callback, must not be {@code null}
      * @return the new {@link Uni}
      */
-    public Uni<T> invokeUni(Function<? super T, Uni<?>> action) {
-        return upstream.onItem().invokeUni(item -> {
+    public Uni<T> call(Function<? super T, Uni<?>> action) {
+        return upstream.onItem().call(item -> {
             if (item != null) {
                 return action.apply(item);
             } else {
                 return Uni.createFrom().nullItem();
             }
         });
+    }
+
+    /**
+     * Produces a new {@link Uni} invoking the given @{code action} when the {@code item} event is received. Note that
+     * if the received item is {@code null}, the action is not executed.
+     * <p>
+     * Unlike {@link #invoke(Consumer)}, the passed function returns a {@link Uni}. When the produced {@code Uni} sends
+     * its result, the result is discarded, and the original (non null) {@code item} is forwarded downstream. If the
+     * produced {@code Uni} fails, the failure is propagated downstream.
+     *
+     * @param action the callback, must not be {@code null} and must not return {@code null}
+     * @return the new {@link Uni}
+     */
+    public Uni<T> call(Supplier<Uni<?>> action) {
+        return upstream.onItem().call(action);
     }
 
     /**

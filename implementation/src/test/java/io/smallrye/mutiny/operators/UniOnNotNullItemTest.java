@@ -16,7 +16,7 @@ import io.smallrye.mutiny.subscription.Cancellable;
 public class UniOnNotNullItemTest {
 
     @Test
-    public void testApply() {
+    public void testDeprecatedApply() {
         assertThat(Uni.createFrom().item("hello")
                 .onItem().ifNotNull().apply(String::toUpperCase)
                 .await().indefinitely()).isEqualTo("HELLO");
@@ -73,11 +73,11 @@ public class UniOnNotNullItemTest {
     }
 
     @Test
-    public void testInvokeUni() {
+    public void testCall() {
         AtomicBoolean invoked = new AtomicBoolean();
         AtomicReference<String> called = new AtomicReference<>();
         assertThat(Uni.createFrom().item("hello")
-                .onItem().ifNotNull().invokeUni(s -> {
+                .onItem().ifNotNull().call(s -> {
                     invoked.set(s.equals("hello"));
                     return Uni.createFrom().item("something").onItem().invoke(called::set);
                 })
@@ -88,7 +88,7 @@ public class UniOnNotNullItemTest {
         invoked.set(false);
         called.set(null);
         assertThat(Uni.createFrom().nullItem()
-                .onItem().ifNotNull().invokeUni(s -> {
+                .onItem().ifNotNull().call(s -> {
                     invoked.set(s.equals("hello"));
                     return Uni.createFrom().item("something").onItem().invoke(called::set);
                 })
@@ -98,7 +98,7 @@ public class UniOnNotNullItemTest {
         assertThat(called).hasValue(null);
 
         assertThatThrownBy(() -> Uni.createFrom().<String> failure(new Exception("boom"))
-                .onItem().ifNotNull().invokeUni(s -> {
+                .onItem().ifNotNull().call(s -> {
                     invoked.set(s.equals("hello"));
                     return Uni.createFrom().item("something").onItem().invoke(called::set);
                 })
@@ -110,32 +110,32 @@ public class UniOnNotNullItemTest {
     }
 
     @Test
-    public void testInvokeUniProducingNull() {
+    public void testCallProducingNull() {
         assertThatExceptionOfType(NullPointerException.class)
                 .isThrownBy(() -> Uni.createFrom().item("hello")
-                        .onItem().ifNotNull().invokeUni(s -> null)
+                        .onItem().ifNotNull().call(s -> null)
                         .await().indefinitely());
     }
 
     @Test
-    public void testInvokeUniProducingFailure() {
+    public void testCallProducingFailure() {
         assertThatExceptionOfType(IllegalStateException.class)
                 .isThrownBy(() -> Uni.createFrom().item("hello")
                         .onItem().ifNotNull()
-                        .invokeUni(s -> Uni.createFrom().failure(new IllegalStateException("boom")))
+                        .call(s -> Uni.createFrom().failure(new IllegalStateException("boom")))
                         .await().indefinitely())
                 .withMessageContaining("boom");
     }
 
     @Test
-    public void testInvokeUniWithCancellationBeforeEmission() {
+    public void testCallWithCancellationBeforeEmission() {
         AtomicBoolean called = new AtomicBoolean();
         AtomicReference<String> res = new AtomicReference<>();
         Uni<Object> emitter = Uni.createFrom().emitter(e -> e.onTermination(() -> called.set(true)));
 
         Cancellable cancellable = Uni.createFrom().item("hello")
                 .onItem().ifNotNull()
-                .invokeUni(s -> emitter)
+                .call(s -> emitter)
                 .subscribe().with(res::set);
 
         cancellable.cancel();

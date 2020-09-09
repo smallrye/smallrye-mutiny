@@ -215,7 +215,7 @@ public interface Uni<T> {
      * {@code
      * uni.onSubscribe().invoke(sub -> System.out.println("subscribed"));
      * // Delay the subscription by 1 second (or until an asynchronous action completes)
-     * uni.onSubscribe().invokeUni(sub -> Uni.createFrom(1).onItem().delayIt().by(Duration.ofSecond(1)));
+     * uni.onSubscribe().call(sub -> Uni.createFrom(1).onItem().delayIt().by(Duration.ofSecond(1)));
      * }
      * </pre>
      *
@@ -413,7 +413,23 @@ public interface Uni<T> {
      * @return the new {@link Uni}
      */
     default Uni<T> invoke(Consumer<? super T> callback) {
-        return onItem().invoke(nonNull(callback, "callback"));
+        Consumer<? super T> actual = nonNull(callback, "callback");
+        return onItem().invoke(actual);
+    }
+
+    /**
+     * Produces a new {@link Uni} invoking the given callback when the {@code item} event is fired, but ignoring it.
+     * <p>
+     * If the callback throws an exception, this exception is propagated to the downstream as failure.
+     * <p>
+     * This method is a shortcut on {@link UniOnItem#invoke(Consumer)}
+     *
+     * @param callback the callback, must not be {@code null}
+     * @return the new {@link Uni}
+     */
+    default Uni<T> invoke(Runnable callback) {
+        Runnable actual = nonNull(callback, "callback");
+        return onItem().invoke(actual);
     }
 
     /**
@@ -425,14 +441,54 @@ public interface Uni<T> {
      * {@code Uni} fails, the failure is propagated downstream. If the callback throws an exception, this exception
      * is propagated downstream as failure.
      * <p>
-     * This method is a shortcut on {@link UniOnItem#invokeUni(Function)}
+     * This method is a shortcut on {@link UniOnItem#call(Function)}
+     *
+     * @param function the function taking the item and returning a {@link Uni}, must not be {@code null}, must not return
+     *        {@code null}
+     * @return the new {@link Uni}
+     */
+    default Uni<T> call(Function<? super T, Uni<?>> function) {
+        return onItem().call(function);
+    }
+
+    /**
+     * Produces a new {@link Uni} invoking the given @{code action} when the {@code item} event is received, but
+     * ignoring it.
+     * <p>
+     * Unlike {@link #invoke(Consumer)}, the passed function returns a {@link Uni}. When the produced {@code Uni} sends
+     * its item, this item is discarded, and the original {@code item} is forwarded downstream. If the produced
+     * {@code Uni} fails, the failure is propagated downstream. If the callback throws an exception, this exception
+     * is propagated downstream as failure.
+     * <p>
+     * This method is a shortcut on {@link UniOnItem#call(Function)}
+     *
+     * @param supplier the supplier taking the item and returning a {@link Uni}, must not be {@code null}, must not return
+     *        {@code null}
+     * @return the new {@link Uni}
+     */
+    default Uni<T> call(Supplier<Uni<?>> supplier) {
+        return onItem().call(supplier);
+    }
+
+    /**
+     * Produces a new {@link Uni} invoking the given @{code action} when the {@code item} event is received. Note that
+     * the received item can be {@code null}.
+     * <p>
+     * Unlike {@link #invoke(Consumer)}, the passed function returns a {@link Uni}. When the produced {@code Uni} sends
+     * its item, this item is discarded, and the original {@code item} is forwarded downstream. If the produced
+     * {@code Uni} fails, the failure is propagated downstream. If the callback throws an exception, this exception
+     * is propagated downstream as failure.
+     * <p>
+     * This method is a shortcut on {@link UniOnItem#call(Function)}
      *
      * @param action the function taking the item and returning a {@link Uni}, must not be {@code null}, must not return
      *        {@code null}
      * @return the new {@link Uni}
+     * @deprecated Use {@link #call(Function)} instead
      */
+    @Deprecated
     default Uni<T> invokeUni(Function<? super T, Uni<?>> action) {
-        return onItem().invokeUni(nonNull(action, "action"));
+        return onItem().invokeUni(action);
     }
 
     /**
@@ -457,7 +513,7 @@ public interface Uni<T> {
     }
 
     /**
-     * One the observed {@code Uni} emits an item, execute the given {@code mapper}. This mapper produces another
+     * Once the observed {@code Uni} emits an item, execute the given {@code mapper}. This mapper produces another
      * {@code Uni}. The downstream receives the events emitted by this produced {@code Uni}.
      *
      * This operation allows <em>chaining</em> asynchronous operations: when the upstream completes with an item, run
@@ -471,7 +527,7 @@ public interface Uni<T> {
      * </pre>
      *
      * The mapper is called with the item event of the current {@link Uni} and produces an {@link Uni}, possibly
-     * using another type of item ({@code R}). The events fired by produced {@link Uni} are forwarded to the
+     * using another type of item ({@code O}). The events fired by produced {@link Uni} are forwarded to the
      * {@link Uni} returned by this method.
      * <p>
      * This operation is generally named {@code flatMap}.
@@ -485,11 +541,44 @@ public interface Uni<T> {
      * @see #then(Supplier)
      */
     default <O> Uni<O> chain(Function<? super T, Uni<? extends O>> mapper) {
-        return onItem().transformToUni(nonNull(mapper, "mapper"));
+        Function<? super T, Uni<? extends O>> actual = nonNull(mapper, "mapper");
+        return onItem().transformToUni(actual);
     }
 
     /**
-     * One the observed {@code Uni} emits an item, execute the given {@code supplier}. Unlike {@link #chain(Function)},
+     * Once the observed {@code Uni} emits an item, execute the given {@code supplier}. This supplier produces another
+     * {@code Uni}. The downstream receives the events emitted by this produced {@code Uni}.
+     *
+     * This operation allows <em>chaining</em> asynchronous operations: when the upstream completes with an item, run
+     * the supplier and emits the item (or failure) sent by the produced {@code Uni}:
+     *
+     * <pre>
+     * Uni&lt;Session&gt; uni = getSomeSession();
+     * return uni.chain(session -&gt; session.persist(fruit))
+     *         .chain(session -&gt; session.flush())
+     *         .chain(() -&gt; server.close());
+     * </pre>
+     *
+     * The supplier ignores the item event of the current {@link Uni} and produces an {@link Uni}, possibly
+     * using another type of item ({@code O}). The events fired by produced {@link Uni} are forwarded to the
+     * {@link Uni} returned by this method.
+     * <p>
+     * This method is a shortcut for {@link UniOnItem#transformToUni(Function)}
+     * {@code onItem().transformToUni(ignored -> supplier.get())}.
+     *
+     * @param supplier the supplier producing the {@link Uni}, must not be {@code null}, must not return {@code null}.
+     * @param <O> the type of item
+     * @return a new {@link Uni} that would fire events from the uni produced by the mapper function, possibly
+     *         in an asynchronous manner.
+     * @see #then(Supplier)
+     */
+    default <O> Uni<O> chain(Supplier<Uni<? extends O>> supplier) {
+        Supplier<Uni<? extends O>> actual = nonNull(supplier, "supplier");
+        return onItem().transformToUni(ignored -> actual.get());
+    }
+
+    /**
+     * Once the observed {@code Uni} emits an item, execute the given {@code supplier}. Unlike {@link #chain(Function)},
      * the received item is not required to run the {@code supplier}, and so omitted. The supplier produces another
      * {@code Uni}. The downstream receives the events emitted by this produced {@code Uni}.
      *
@@ -516,10 +605,11 @@ public interface Uni<T> {
      * @return a new {@link Uni} that would fire events from the uni produced by the mapper function, possibly
      *         in an asynchronous manner.
      * @see #chain(Function)
+     * @deprecated Use {@link #chain(Supplier)} instead
      */
+    @Deprecated
     default <O> Uni<O> then(Supplier<Uni<? extends O>> supplier) {
-        Supplier<Uni<? extends O>> actual = nonNull(supplier, "supplier");
-        return onItem().transformToUni(ignored -> actual.get());
+        return chain(supplier);
     }
 
     /**
@@ -564,8 +654,8 @@ public interface Uni<T> {
      * }
      * </pre>
      * <p>
-     * This method is a shortcut for {@link UniOnItemOrFailure#invokeUni(BiFunction)}:
-     * {@code onItemOrFailure().invokeUni((item, err) -> supplier.get())}
+     * This method is a shortcut for {@link UniOnItemOrFailure#call(BiFunction)}:
+     * {@code onItemOrFailure().call((item, err) -> supplier.get())}
      *
      * @param supplier a {@link Uni} supplier, cannot be {@code null} and cannot return {@code null}.
      * @param <O> the type of the item
@@ -574,7 +664,7 @@ public interface Uni<T> {
      */
     default <O> Uni<T> eventually(Supplier<Uni<? extends O>> supplier) {
         Supplier<Uni<? extends O>> actual = nonNull(supplier, "supplier");
-        return onItemOrFailure().invokeUni((item, err) -> actual.get());
+        return onItemOrFailure().call((item, err) -> actual.get());
     }
 
     /**

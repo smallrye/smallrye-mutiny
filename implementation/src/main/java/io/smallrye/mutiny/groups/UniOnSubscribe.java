@@ -4,11 +4,12 @@ import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
+import io.smallrye.mutiny.operators.UniOnSubscribeCall;
 import io.smallrye.mutiny.operators.UniOnSubscribeInvoke;
-import io.smallrye.mutiny.operators.UniOnSubscribeInvokeUni;
 import io.smallrye.mutiny.subscription.UniSubscription;
 
 /**
@@ -23,7 +24,7 @@ import io.smallrye.mutiny.subscription.UniSubscription;
  * {@code
  * uni.onSubscribe().invoke(sub -> System.out.println("subscribed"));
  * // Delay the subscription by 1 second (or until an asynchronous action completes)
- * uni.onSubscribe().invokeUni(sub -> Uni.createFrom(1).onItem().delayIt().by(Duration.ofSecond(1)));
+ * uni.onSubscribe().call(sub -> Uni.createFrom(1).onItem().delayIt().by(Duration.ofSecond(1)));
  *}
  * </pre>
  *
@@ -52,6 +53,20 @@ public class UniOnSubscribe<T> {
     }
 
     /**
+     * Produces a new {@link Uni} invoking the given callback when the {@code subscription} is received.
+     * <p>
+     * The callback in invoked before passing a subscription event downstream.
+     * If the callback throws an exception, the downstream receives a subscription and the failure immediately.
+     *
+     * @param callback the callback, must not be {@code null}.
+     * @return the new {@link Uni}
+     */
+    public Uni<T> invoke(Runnable callback) {
+        Runnable actual = nonNull(callback, "callback");
+        return invoke(ignored -> actual.run());
+    }
+
+    /**
      * Produces a new {@link Uni} invoking the given @{code action} when the {@code subscription} event is received.
      * <p>
      * Unlike {@link #invoke(Consumer)}, the passed function returns a {@link Uni}. When the produced {@code Uni} sends
@@ -62,9 +77,42 @@ public class UniOnSubscribe<T> {
      * @param action the callback, must not be {@code null}
      * @return the new {@link Uni}
      */
-    public Uni<T> invokeUni(Function<? super UniSubscription, Uni<?>> action) {
+    public Uni<T> call(Function<? super UniSubscription, Uni<?>> action) {
         return Infrastructure.onUniCreation(
-                new UniOnSubscribeInvokeUni<>(upstream, nonNull(action, "action")));
+                new UniOnSubscribeCall<>(upstream, nonNull(action, "action")));
+    }
+
+    /**
+     * Produces a new {@link Uni} invoking the given @{code action} when the {@code subscription} event is received.
+     * <p>
+     * Unlike {@link #invoke(Consumer)}, the passed function returns a {@link Uni}. When the produced {@code Uni} sends
+     * the subscription, the function is called. The subscription event is passed downstream only when the {@link Uni}
+     * completes. If the produced {@code Uni} fails or if the function throws an exception, the failure is propagated
+     * downstream.
+     *
+     * @param action the callback, must not be {@code null}
+     * @return the new {@link Uni}
+     */
+    public Uni<T> call(Supplier<Uni<?>> action) {
+        Supplier<Uni<?>> actual = nonNull(action, "action");
+        return call(ignored -> actual.get());
+    }
+
+    /**
+     * Produces a new {@link Uni} invoking the given @{code action} when the {@code subscription} event is received.
+     * <p>
+     * Unlike {@link #invoke(Consumer)}, the passed function returns a {@link Uni}. When the produced {@code Uni} sends
+     * the subscription, the function is called. The subscription event is passed downstream only when the {@link Uni}
+     * completes. If the produced {@code Uni} fails or if the function throws an exception, the failure is propagated
+     * downstream.
+     *
+     * @param action the callback, must not be {@code null}
+     * @return the new {@link Uni}
+     * @deprecated Use {@link #call(Function)}
+     */
+    @Deprecated
+    public Uni<T> invokeUni(Function<? super UniSubscription, Uni<?>> action) {
+        return call(action);
     }
 
 }

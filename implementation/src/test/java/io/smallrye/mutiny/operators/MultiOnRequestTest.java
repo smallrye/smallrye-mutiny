@@ -50,7 +50,7 @@ public class MultiOnRequestTest {
     }
 
     @Test
-    public void testInvokeUni() {
+    public void testDeprecatedInvokeUni() {
         AssertSubscriber<Integer> subscriber = AssertSubscriber.create();
 
         AtomicLong requested = new AtomicLong();
@@ -70,13 +70,33 @@ public class MultiOnRequestTest {
     }
 
     @Test
-    public void testInvokeUniError() {
+    public void testCall() {
         AssertSubscriber<Integer> subscriber = AssertSubscriber.create();
 
         AtomicLong requested = new AtomicLong();
 
         Multi.createFrom().item(1)
-                .onRequest().invokeUni(count -> {
+                .onRequest().call(count -> {
+                    requested.set(count);
+                    return Uni.createFrom().item("ok");
+                })
+                .subscribe().withSubscriber(subscriber);
+
+        subscriber.request(10);
+
+        subscriber.assertCompletedSuccessfully();
+        assertThat(subscriber.items()).containsExactly(1);
+        assertThat(requested.get()).isEqualTo(10);
+    }
+
+    @Test
+    public void testCallError() {
+        AssertSubscriber<Integer> subscriber = AssertSubscriber.create();
+
+        AtomicLong requested = new AtomicLong();
+
+        Multi.createFrom().item(1)
+                .onRequest().call(count -> {
                     requested.set(count);
                     return Uni.createFrom().failure(new RuntimeException("woops"));
                 })
@@ -91,13 +111,13 @@ public class MultiOnRequestTest {
     }
 
     @Test
-    public void testInvokeUniThrowingException() {
+    public void testCallThrowingException() {
         AssertSubscriber<Integer> subscriber = AssertSubscriber.create();
 
         AtomicLong requested = new AtomicLong();
 
         Multi.createFrom().item(1)
-                .onRequest().invokeUni(count -> {
+                .onRequest().call(count -> {
                     requested.set(count);
                     throw new RuntimeException("woops");
                 })
@@ -112,7 +132,7 @@ public class MultiOnRequestTest {
     }
 
     @Test
-    public void testInvokeUniAndCancellation() {
+    public void testCallAndCancellation() {
         AssertSubscriber<Object> subscriber = AssertSubscriber.create();
 
         AtomicLong requested = new AtomicLong();
@@ -121,7 +141,7 @@ public class MultiOnRequestTest {
         Multi.createFrom().emitter(e -> {
             // Do nothing
         })
-                .onRequest().invokeUni(count -> {
+                .onRequest().call(count -> {
                     requested.set(count);
                     return Uni.createFrom().emitter(ue -> {
                         // Do nothing

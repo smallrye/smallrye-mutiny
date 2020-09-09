@@ -27,9 +27,9 @@ public class EventsTest {
         multi.invoke(item -> System.out.println("Received item " + item));
         // end::shortcut[]
 
-        // tag::invoke-uni[]
-        multi.invokeUni(item -> executeAnAsyncAction(item));
-        // end::invoke-uni[]
+        // tag::call-uni[]
+        multi.call(item -> executeAnAsyncAction(item));
+        // end::call-uni[]
 
     }
 

@@ -10,23 +10,23 @@ import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.subscription.Cancellable;
 import io.smallrye.mutiny.subscription.MultiSubscriber;
 
-public class MultiOnRequestInvokeUni<T> extends AbstractMultiOperator<T, T> {
+public class MultiOnRequestCall<T> extends AbstractMultiOperator<T, T> {
 
     private final LongFunction<Uni<?>> mapper;
 
-    public MultiOnRequestInvokeUni(Multi<? extends T> upstream, LongFunction<Uni<?>> mapper) {
+    public MultiOnRequestCall(Multi<? extends T> upstream, LongFunction<Uni<?>> mapper) {
         super(nonNull(upstream, "upstream"));
         this.mapper = nonNull(mapper, "consumer");
     }
 
     @Override
     public void subscribe(MultiSubscriber<? super T> downstream) {
-        upstream.subscribe().withSubscriber(new MultiOnRequestInvokeUniOperator(nonNull(downstream, "downstream")));
+        upstream.subscribe().withSubscriber(new MultiOnRequestCallOperator(nonNull(downstream, "downstream")));
     }
 
-    class MultiOnRequestInvokeUniOperator extends MultiOperatorProcessor<T, T> {
+    class MultiOnRequestCallOperator extends MultiOperatorProcessor<T, T> {
 
-        public MultiOnRequestInvokeUniOperator(MultiSubscriber<? super T> downstream) {
+        public MultiOnRequestCallOperator(MultiSubscriber<? super T> downstream) {
             super(downstream);
         }
 

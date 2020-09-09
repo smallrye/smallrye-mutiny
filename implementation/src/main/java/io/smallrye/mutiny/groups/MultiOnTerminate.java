@@ -4,13 +4,14 @@ import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
 
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
+import java.util.function.Supplier;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
+import io.smallrye.mutiny.operators.multi.MultiOnTerminationCall;
 import io.smallrye.mutiny.operators.multi.MultiOnTerminationInvoke;
-import io.smallrye.mutiny.operators.multi.MultiOnTerminationInvokeUni;
 
 public class MultiOnTerminate<T> {
 
@@ -48,15 +49,42 @@ public class MultiOnTerminate<T> {
     }
 
     /**
-     * Attaches an action that is executed when the {@link Multi} mits a completion or a failure or when the subscriber
+     * Attaches an action that is executed when the {@link Multi} emits a completion or a failure or when the subscriber
      * cancels the subscription.
      * 
      * @param mapper the function to execute where the first argument is a non-{@code null} exception on failure, and
      *        the second argument is a boolean which is {@code true} when the subscriber cancels the subscription.
-     *        The function returns a {@link Uni}.
+     *        The function returns a {@link Uni} and must not be {@code null}.
      * @return the new {@link Multi}
      */
+    public Multi<T> call(BiFunction<Throwable, Boolean, Uni<?>> mapper) {
+        return Infrastructure.onMultiCreation(new MultiOnTerminationCall<>(upstream, mapper));
+    }
+
+    /**
+     * Attaches an action that is executed when the {@link Multi} emits a completion or a failure or when the subscriber
+     * cancels the subscription.
+     *
+     * @param supplier the supplier returns a {@link Uni} and must not be {@code null}.
+     * @return the new {@link Multi}
+     */
+    public Multi<T> call(Supplier<Uni<?>> supplier) {
+        Supplier<Uni<?>> actual = nonNull(supplier, "supplier");
+        return call((ignoredFailure, ignoredCancellation) -> actual.get());
+    }
+
+    /**
+     * Attaches an action that is executed when the {@link Multi} mits a completion or a failure or when the subscriber
+     * cancels the subscription.
+     *
+     * @param mapper the function to execute where the first argument is a non-{@code null} exception on failure, and
+     *        the second argument is a boolean which is {@code true} when the subscriber cancels the subscription.
+     *        The function returns a {@link Uni}.
+     * @return the new {@link Multi}
+     * @deprecated Use {@link #call(BiFunction)}
+     */
+    @Deprecated
     public Multi<T> invokeUni(BiFunction<Throwable, Boolean, Uni<?>> mapper) {
-        return Infrastructure.onMultiCreation(new MultiOnTerminationInvokeUni<>(upstream, mapper));
+        return call(mapper);
     }
 }

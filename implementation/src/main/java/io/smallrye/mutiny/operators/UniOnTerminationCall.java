@@ -12,11 +12,11 @@ import io.smallrye.mutiny.subscription.Cancellable;
 import io.smallrye.mutiny.subscription.UniSubscription;
 import io.smallrye.mutiny.tuples.Functions;
 
-public class UniOnTerminationInvokeUni<I> extends UniOperator<I, I> {
+public class UniOnTerminationCall<I> extends UniOperator<I, I> {
 
     private final Functions.Function3<? super I, Throwable, Boolean, Uni<?>> mapper;
 
-    public UniOnTerminationInvokeUni(Uni<I> upstream,
+    public UniOnTerminationCall(Uni<I> upstream,
             Functions.Function3<? super I, Throwable, Boolean, Uni<?>> mapper) {
         super(nonNull(upstream, "upstream"));
         this.mapper = nonNull(mapper, "mapper");

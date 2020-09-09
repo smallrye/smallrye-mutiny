@@ -4,6 +4,7 @@ import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
 
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
+import java.util.function.Supplier;
 
 import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Uni;
@@ -38,13 +39,25 @@ public class UniOnItemOrFailure<T> {
 
     /**
      * Produces a new {@link Uni} invoking the given callback when the {@code item} or {@code failure} event is fired.
+     * The failure or item is being ignore by the callback.
+     *
+     * @param callback the callback, must not be {@code null}
+     * @return the new {@link Uni}
+     */
+    public Uni<T> invoke(Runnable callback) {
+        Runnable actual = nonNull(callback, "callback");
+        return invoke((ignoredItem, ignoredFailure) -> actual.run());
+    }
+
+    /**
+     * Produces a new {@link Uni} invoking the given callback when the {@code item} or {@code failure} event is fired.
      * Note that the item can be {@code null}, so detecting failures must be done by checking whether the {@code failure}
      * parameter is {@code null}.
      *
      * @param callback the callback, must not be {@code null}
      * @return the new {@link Uni}
      */
-    public Uni<T> invokeUni(BiFunction<? super T, Throwable, Uni<?>> callback) {
+    public Uni<T> call(BiFunction<? super T, Throwable, Uni<?>> callback) {
         ParameterValidation.nonNull(callback, "callback");
         return transformToUni((res, fail) -> {
             Uni<?> uni = callback.apply(res, fail);
@@ -64,6 +77,32 @@ public class UniOnItemOrFailure<T> {
                         }
                     });
         });
+    }
+
+    /**
+     * Produces a new {@link Uni} invoking the given callback when the {@code item} or {@code failure} event is fired.
+     * The failure or item is being ignore by the callback.
+     *
+     * @param callback the callback, must not be {@code null}
+     * @return the new {@link Uni}
+     */
+    public Uni<T> call(Supplier<Uni<?>> callback) {
+        Supplier<Uni<?>> actual = nonNull(callback, "callback");
+        return call((ignoredItem, ignoredFailure) -> actual.get());
+    }
+
+    /**
+     * Produces a new {@link Uni} invoking the given callback when the {@code item} or {@code failure} event is fired.
+     * Note that the item can be {@code null}, so detecting failures must be done by checking whether the {@code failure}
+     * parameter is {@code null}.
+     *
+     * @param callback the callback, must not be {@code null}
+     * @return the new {@link Uni}
+     * @deprecated Use {@link #call(BiFunction)}
+     */
+    @Deprecated
+    public Uni<T> invokeUni(BiFunction<? super T, Throwable, Uni<?>> callback) {
+        return call(callback);
     }
 
     /**

@@ -24,7 +24,7 @@ public class DroppedExceptionTest {
         // tag::code[]
         Cancellable cancellable = Uni.createFrom()
                 .emitter(this::emitter)
-                .onCancellation().invokeUni(() -> Uni.createFrom().failure(new IOException("boom")))
+                .onCancellation().call(() -> Uni.createFrom().failure(new IOException("boom")))
                 .subscribe().with(this::onItem, this::onFailure);
 
         cancellable.cancel();

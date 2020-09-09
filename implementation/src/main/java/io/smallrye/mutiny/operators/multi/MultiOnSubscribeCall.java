@@ -18,11 +18,11 @@ import io.smallrye.mutiny.subscription.MultiSubscriber;
  *
  * @param <T> the value type
  */
-public final class MultiOnSubscribeInvokeUniOp<T> extends AbstractMultiOperator<T, T> {
+public final class MultiOnSubscribeCall<T> extends AbstractMultiOperator<T, T> {
 
     private final Function<? super Subscription, Uni<?>> onSubscribe;
 
-    public MultiOnSubscribeInvokeUniOp(Multi<? extends T> upstream,
+    public MultiOnSubscribeCall(Multi<? extends T> upstream,
             Function<? super Subscription, Uni<?>> onSubscribe) {
         super(upstream);
         this.onSubscribe = onSubscribe;

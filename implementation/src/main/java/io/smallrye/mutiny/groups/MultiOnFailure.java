@@ -66,6 +66,21 @@ public class MultiOnFailure<T> {
     }
 
     /**
+     * Produces a new {@link Multi} invoking the given callback when the upstream {@link Multi} emits a failure
+     * (matching the predicate if set), and ignoring the failure in the callback.
+     * <p>
+     * If the callback throws an exception, a {@link io.smallrye.mutiny.CompositeException} is propagated downstream.
+     * This exception is composed by the received failure and the thrown exception.
+     *
+     * @param callback the callback, must not be {@code null}
+     * @return the new {@link Multi}
+     */
+    public Multi<T> invoke(Runnable callback) {
+        Runnable actual = nonNull(callback, "callback");
+        return invoke(ignored -> actual.run());
+    }
+
+    /**
      * Produces a new {@link Multi} invoking the given @{code action} when a {@code failure} event is received.
      * <p>
      * Unlike {@link #invoke(Consumer)}, the passed function returns a {@link Uni}. When the produced {@code Uni} sends
@@ -82,7 +97,7 @@ public class MultiOnFailure<T> {
      * @param action the function taking the failure and returning a {@link Uni}, must not be {@code null}
      * @return the new {@link Multi}
      */
-    public Multi<T> invokeUni(Function<Throwable, Uni<?>> action) {
+    public Multi<T> call(Function<Throwable, Uni<?>> action) {
         ParameterValidation.nonNull(action, "action");
         return recoverWithMulti(failure -> {
             Uni<?> uni = action.apply(failure);
@@ -100,6 +115,51 @@ public class MultiOnFailure<T> {
             });
 
         });
+    }
+
+    /**
+     * Produces a new {@link Multi} invoking the given @{code action} when a {@code failure} event is received.
+     * <p>
+     * Unlike {@link #invoke(Consumer)}, the passed function returns a {@link Uni}. When the produced {@code Uni} sends
+     * its result, the result is discarded, and the original {@code failure} is forwarded downstream. If the produced
+     * {@code Uni} fails, a {@link io.smallrye.mutiny.CompositeException} composed by the original failure and the
+     * caught failure is propagated downstream.
+     * <p>
+     * If the asynchronous action throws an exception, this exception is propagated downstream as a
+     * {@link io.smallrye.mutiny.CompositeException} composed with the original failure and the caught exception.
+     * <p>
+     * This method preserves the order of the items, meaning that the downstream received the items in the same order
+     * as the upstream has emitted them.
+     *
+     * @param action the supplier returning a {@link Uni}, must not be {@code null}
+     * @return the new {@link Multi}
+     */
+    public Multi<T> call(Supplier<Uni<?>> action) {
+        Supplier<Uni<?>> actual = nonNull(action, "action");
+        return call(ignored -> actual.get());
+    }
+
+    /**
+     * Produces a new {@link Multi} invoking the given @{code action} when a {@code failure} event is received.
+     * <p>
+     * Unlike {@link #invoke(Consumer)}, the passed function returns a {@link Uni}. When the produced {@code Uni} sends
+     * its result, the result is discarded, and the original {@code failure} is forwarded downstream. If the produced
+     * {@code Uni} fails, a {@link io.smallrye.mutiny.CompositeException} composed by the original failure and the
+     * caught failure is propagated downstream.
+     * <p>
+     * If the asynchronous action throws an exception, this exception is propagated downstream as a
+     * {@link io.smallrye.mutiny.CompositeException} composed with the original failure and the caught exception.
+     * <p>
+     * This method preserves the order of the items, meaning that the downstream received the items in the same order
+     * as the upstream has emitted them.
+     *
+     * @param action the function taking the failure and returning a {@link Uni}, must not be {@code null}
+     * @return the new {@link Multi}
+     * @deprecated Use {@link #call(Function)}
+     */
+    @Deprecated
+    public Multi<T> invokeUni(Function<Throwable, Uni<?>> action) {
+        return call(action);
     }
 
     /**

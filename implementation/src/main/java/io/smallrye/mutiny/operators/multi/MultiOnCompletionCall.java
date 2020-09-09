@@ -7,35 +7,45 @@ import java.util.function.Supplier;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.subscription.Cancellable;
 import io.smallrye.mutiny.subscription.MultiSubscriber;
 
-public class MultiOnCancellationInvokeUni<T> extends AbstractMultiOperator<T, T> {
+public class MultiOnCompletionCall<T> extends AbstractMultiOperator<T, T> {
 
     private final Supplier<Uni<?>> supplier;
 
-    public MultiOnCancellationInvokeUni(Multi<? extends T> upstream, Supplier<Uni<?>> supplier) {
+    public MultiOnCompletionCall(Multi<? extends T> upstream, Supplier<Uni<?>> supplier) {
         super(nonNull(upstream, "upstream"));
         this.supplier = nonNull(supplier, "supplier");
     }
 
     @Override
     public void subscribe(MultiSubscriber<? super T> downstream) {
-        upstream.subscribe().withSubscriber(new MultiOnCancellationInvokeUniProcessor(downstream));
+        upstream.subscribe().withSubscriber(new MultiOnCompletionCallProcessor(nonNull(downstream, "downstream")));
     }
 
-    class MultiOnCancellationInvokeUniProcessor extends MultiOperatorProcessor<T, T> {
+    class MultiOnCompletionCallProcessor extends MultiOperatorProcessor<T, T> {
 
         private final AtomicBoolean supplierInvoked = new AtomicBoolean();
+        private volatile Cancellable cancellable;
 
-        public MultiOnCancellationInvokeUniProcessor(MultiSubscriber<? super T> downstream) {
+        public MultiOnCompletionCallProcessor(MultiSubscriber<? super T> downstream) {
             super(downstream);
         }
 
         @Override
+        public void onCompletion() {
+            cancellable = execute().subscribe().with(
+                    ignored -> super.onCompletion(),
+                    err -> super.onFailure(err));
+        }
+
+        @Override
         public void cancel() {
-            execute().subscribe().with(
-                    ignoredItem -> super.cancel(),
-                    ignoredFailure -> super.cancel());
+            if (cancellable != null) {
+                cancellable.cancel();
+            }
+            super.cancel();
         }
 
         private Uni<?> execute() {

@@ -9,11 +9,11 @@ import io.smallrye.mutiny.helpers.EmptyUniSubscription;
 import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.subscription.UniSubscription;
 
-public class UniOnSubscribeInvokeUni<T> extends UniOperator<T, T> {
+public class UniOnSubscribeCall<T> extends UniOperator<T, T> {
 
     private final Function<? super UniSubscription, Uni<?>> callback;
 
-    public UniOnSubscribeInvokeUni(Uni<? extends T> upstream,
+    public UniOnSubscribeCall(Uni<? extends T> upstream,
             Function<? super UniSubscription, Uni<?>> callback) {
         super(ParameterValidation.nonNull(upstream, "upstream"));
         this.callback = callback;

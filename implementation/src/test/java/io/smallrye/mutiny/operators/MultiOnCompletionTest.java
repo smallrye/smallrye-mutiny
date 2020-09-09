@@ -297,11 +297,11 @@ public class MultiOnCompletionTest {
     }
 
     @Test
-    public void testInvokeUni() {
+    public void testCall() {
         AtomicBoolean called = new AtomicBoolean();
 
         Multi.createFrom().range(1, 5)
-                .onCompletion().invokeUni(() -> {
+                .onCompletion().call(() -> {
                     called.set(true);
                     return Uni.createFrom().item(69);
                 })
@@ -313,11 +313,11 @@ public class MultiOnCompletionTest {
     }
 
     @Test
-    public void testInvokeUniThatHasFailed() {
+    public void testCallThatHasFailed() {
         AtomicBoolean called = new AtomicBoolean();
 
         Multi.createFrom().range(1, 5)
-                .onCompletion().invokeUni(() -> {
+                .onCompletion().call(() -> {
                     called.set(true);
                     return Uni.createFrom().failure(new RuntimeException("bam"));
                 })
@@ -330,11 +330,11 @@ public class MultiOnCompletionTest {
 
     @SuppressWarnings("ConstantConditions")
     @Test
-    public void testInvokeUniThatThrowsException() {
+    public void testCallThatThrowsException() {
         AtomicBoolean called = new AtomicBoolean();
 
         Multi.createFrom().range(1, 5)
-                .onCompletion().invokeUni(() -> {
+                .onCompletion().call(() -> {
                     called.set(true);
                     throw new RuntimeException("bam");
                 })
@@ -346,13 +346,13 @@ public class MultiOnCompletionTest {
     }
 
     @Test
-    public void testInvokeUniCancellation() {
+    public void testCallCancellation() {
         AtomicBoolean called = new AtomicBoolean();
         AtomicBoolean uniCancelled = new AtomicBoolean();
         AtomicInteger counter = new AtomicInteger();
 
         AssertSubscriber<Integer> subscriber = Multi.createFrom().range(1, 5)
-                .onCompletion().invokeUni(() -> {
+                .onCompletion().call(() -> {
                     called.set(true);
                     counter.incrementAndGet();
                     return Uni.createFrom().emitter(e -> {
@@ -405,7 +405,7 @@ public class MultiOnCompletionTest {
     }
 
     @RepeatedTest(100)
-    public void rogueEmittersInvokeUni() {
+    public void rogueEmittersCall() {
         AtomicInteger counter = new AtomicInteger();
 
         AssertSubscriber<Object> subscriber = Multi.createFrom()
@@ -421,7 +421,7 @@ public class MultiOnCompletionTest {
                         throw new RuntimeException(interruptedException);
                     }
                 })
-                .onCompletion().invokeUni(() -> {
+                .onCompletion().call(() -> {
                     counter.incrementAndGet();
                     return Uni.createFrom().item(69);
                 })

@@ -12,6 +12,7 @@ import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 import org.junit.jupiter.api.Test;
 import org.reactivestreams.Subscription;
@@ -19,8 +20,8 @@ import org.reactivestreams.Subscription;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
+import io.smallrye.mutiny.operators.multi.MultiOnSubscribeCall;
 import io.smallrye.mutiny.operators.multi.MultiOnSubscribeInvokeOp;
-import io.smallrye.mutiny.operators.multi.MultiOnSubscribeInvokeUniOp;
 import io.smallrye.mutiny.subscription.UniEmitter;
 import io.smallrye.mutiny.test.AssertSubscriber;
 
@@ -81,12 +82,12 @@ public class MultiOnSubscribeTest {
     }
 
     @Test
-    public void testInvokeUni() {
+    public void testCall() {
         AtomicInteger count = new AtomicInteger();
         AtomicReference<Subscription> reference = new AtomicReference<>();
         AtomicReference<Subscription> sub = new AtomicReference<>();
         Multi<Integer> multi = Multi.createFrom().items(1, 2, 3)
-                .onSubscribe().invokeUni(s -> {
+                .onSubscribe().call(s -> {
                     reference.set(s);
                     count.incrementAndGet();
                     return Uni.createFrom().nullItem()
@@ -125,9 +126,9 @@ public class MultiOnSubscribeTest {
     }
 
     @Test
-    public void testInvokeUniThrowingException() {
+    public void testCallThrowingException() {
         Multi<Integer> multi = Multi.createFrom().items(1, 2, 3)
-                .onSubscribe().invokeUni(s -> {
+                .onSubscribe().call(s -> {
                     throw new IllegalStateException("boom");
                 });
 
@@ -139,9 +140,9 @@ public class MultiOnSubscribeTest {
     }
 
     @Test
-    public void testInvokeUniProvidingFailure() {
+    public void testCallProvidingFailure() {
         Multi<Integer> multi = Multi.createFrom().items(1, 2, 3)
-                .onSubscribe().invokeUni(s -> Uni.createFrom().failure(new IOException("boom")));
+                .onSubscribe().call(s -> Uni.createFrom().failure(new IOException("boom")));
 
         AssertSubscriber<Integer> subscriber = AssertSubscriber.create();
 
@@ -151,9 +152,9 @@ public class MultiOnSubscribeTest {
     }
 
     @Test
-    public void testInvokeUniReturningNullUni() {
+    public void testCallReturningNullUni() {
         Multi<Integer> multi = Multi.createFrom().items(1, 2, 3)
-                .onSubscribe().invokeUni(s -> null);
+                .onSubscribe().call(s -> null);
 
         AssertSubscriber<Integer> subscriber = AssertSubscriber.create();
 
@@ -164,13 +165,13 @@ public class MultiOnSubscribeTest {
     @Test
     public void testThatInvokeConsumerCannotBeNull() {
         assertThrows(IllegalArgumentException.class, () -> Multi.createFrom().items(1, 2, 3)
-                .onSubscribe().invoke(null));
+                .onSubscribe().invoke((Consumer<? super Subscription>) null));
     }
 
     @Test
-    public void testThatInvokeUniFunctionCannotBeNull() {
+    public void testThatCallFunctionCannotBeNull() {
         assertThrows(IllegalArgumentException.class, () -> Multi.createFrom().items(1, 2, 3)
-                .onSubscribe().invokeUni(null));
+                .onSubscribe().call((Function<? super Subscription, Uni<?>>) null));
     }
 
     @Test
@@ -180,9 +181,9 @@ public class MultiOnSubscribeTest {
     }
 
     @Test
-    public void testThatInvokeUniUpstreamCannotBeNull() {
+    public void testThatCallUpstreamCannotBeNull() {
         assertThrows(IllegalArgumentException.class,
-                () -> new MultiOnSubscribeInvokeUniOp<>(null, s -> Uni.createFrom().nullItem()));
+                () -> new MultiOnSubscribeCall<>(null, s -> Uni.createFrom().nullItem()));
     }
 
     @Test
@@ -212,7 +213,7 @@ public class MultiOnSubscribeTest {
         AtomicReference<UniEmitter<? super Integer>> emitter = new AtomicReference<>();
         AssertSubscriber<Integer> subscriber = Multi.createFrom().items(1, 2, 3)
                 .onSubscribe()
-                .invokeUni(s -> Uni.createFrom().emitter((Consumer<UniEmitter<? super Integer>>) emitter::set))
+                .call(s -> Uni.createFrom().emitter((Consumer<UniEmitter<? super Integer>>) emitter::set))
                 .subscribe().withSubscriber(AssertSubscriber.create(3));
 
         subscriber.assertNotSubscribed();
@@ -231,7 +232,7 @@ public class MultiOnSubscribeTest {
         AtomicReference<UniEmitter<? super Integer>> emitter = new AtomicReference<>();
         AssertSubscriber<Integer> subscriber = Multi.createFrom().items(1, 2, 3)
                 .onSubscribe()
-                .invokeUni(s -> Uni.createFrom().emitter((Consumer<UniEmitter<? super Integer>>) emitter::set))
+                .call(s -> Uni.createFrom().emitter((Consumer<UniEmitter<? super Integer>>) emitter::set))
                 .runSubscriptionOn(Infrastructure.getDefaultExecutor())
                 .subscribe().withSubscriber(AssertSubscriber.create(3));
 

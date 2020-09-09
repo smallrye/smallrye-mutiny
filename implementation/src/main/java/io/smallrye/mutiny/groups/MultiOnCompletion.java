@@ -14,8 +14,8 @@ import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.MultiSwitchOnCompletion;
+import io.smallrye.mutiny.operators.multi.MultiOnCompletionCall;
 import io.smallrye.mutiny.operators.multi.MultiOnCompletionInvoke;
-import io.smallrye.mutiny.operators.multi.MultiOnCompletionInvokeUni;
 import io.smallrye.mutiny.subscription.MultiEmitter;
 
 public class MultiOnCompletion<T> {
@@ -42,9 +42,22 @@ public class MultiOnCompletion<T> {
      * 
      * @param supplier the supplier, must return a non-{@code null} {@link Uni}
      * @return the new {@link Multi}
+     * @deprecated Use {@link #call(Supplier)}
      */
+    @Deprecated
     public Multi<T> invokeUni(Supplier<Uni<?>> supplier) {
-        return Infrastructure.onMultiCreation(new MultiOnCompletionInvokeUni<>(upstream, supplier));
+        return call(supplier);
+    }
+
+    /**
+     * Creates a new {@link Multi} executing the given {@link Uni} action when this {@link Multi} completes.
+     * The completion notification is sent downstream when the {@link Uni} has completed.
+     *
+     * @param supplier the supplier, must return a non-{@code null} {@link Uni}
+     * @return the new {@link Multi}
+     */
+    public Multi<T> call(Supplier<Uni<?>> supplier) {
+        return Infrastructure.onMultiCreation(new MultiOnCompletionCall<>(upstream, supplier));
     }
 
     /**

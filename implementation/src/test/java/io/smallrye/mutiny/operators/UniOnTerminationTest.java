@@ -146,4 +146,39 @@ public class UniOnTerminationTest {
         subscriber.assertFailure(CompositeException.class, "boom");
         subscriber.assertFailure(CompositeException.class, "I/O");
     }
+
+    @Test
+    void testTerminationOnFailureAndCallReturningAnItem() {
+        AtomicBoolean cancelled = new AtomicBoolean();
+        AtomicReference<Throwable> failure = new AtomicReference<>();
+        AtomicReference<Object> result = new AtomicReference<>();
+
+        AtomicBoolean subCancelled = new AtomicBoolean();
+        AtomicReference<Throwable> subFailure = new AtomicReference<>();
+        AtomicReference<Object> subResult = new AtomicReference<>();
+
+        UniAssertSubscriber<?> subscriber = Uni.createFrom().failure(new IOException("boom"))
+                .onTermination().call((r, f, c) -> {
+                    result.set(r);
+                    failure.set(f);
+                    cancelled.set(c);
+                    return Uni.createFrom().item("yolo")
+                            .onTermination().invoke((sr, sf, sc) -> {
+                                subResult.set(sr);
+                                subFailure.set(sf);
+                                subCancelled.set(sc);
+                            });
+                })
+                .subscribe().withSubscriber(new UniAssertSubscriber<>());
+
+        subscriber.assertFailure(IOException.class, "boom");
+
+        assertThat(result.get()).isNull();
+        assertThat(failure.get()).isInstanceOf(IOException.class).hasMessage("boom");
+        assertThat(cancelled.get()).isFalse();
+
+        assertThat(subResult.get()).isEqualTo("yolo");
+        assertThat(subFailure.get()).isNull();
+        assertThat(subCancelled.get()).isFalse();
+    }
 }

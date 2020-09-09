@@ -8,6 +8,8 @@ import java.io.IOException;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 import org.junit.jupiter.api.Test;
 
@@ -22,22 +24,25 @@ public class UniOnItemInvokeTest {
 
     @Test
     public void testThatConsumerMustNotBeNull() {
-        assertThrows(IllegalArgumentException.class, () -> Uni.createFrom().item(1).onItem().invoke(null));
+        assertThrows(IllegalArgumentException.class,
+                () -> Uni.createFrom().item(1).onItem().invoke((Consumer<? super Integer>) null));
     }
 
     @Test
     public void testThatMapperMustNotBeNull() {
-        assertThrows(IllegalArgumentException.class, () -> Uni.createFrom().item(1).onItem().invokeUni(null));
+        assertThrows(IllegalArgumentException.class,
+                () -> Uni.createFrom().item(1).onItem().call((Function<? super Integer, Uni<?>>) null));
     }
 
     @Test
     public void testThatConsumerMustNotBeNullWithShortcut() {
-        assertThrows(IllegalArgumentException.class, () -> Uni.createFrom().item(1).invoke(null));
+        assertThrows(IllegalArgumentException.class, () -> Uni.createFrom().item(1).invoke((Consumer<? super Integer>) null));
     }
 
     @Test
     public void testThatMapperMustNotBeNullWithShortcut() {
-        assertThrows(IllegalArgumentException.class, () -> Uni.createFrom().item(1).invokeUni(null));
+        assertThrows(IllegalArgumentException.class,
+                () -> Uni.createFrom().item(1).call((Function<? super Integer, Uni<?>>) null));
     }
 
     @Test
@@ -86,7 +91,7 @@ public class UniOnItemInvokeTest {
     }
 
     @Test
-    public void testInvokeUniOnItem() {
+    public void testDeprecatedInvokeUniOnItem() {
         AtomicInteger res = new AtomicInteger();
         AtomicInteger twoGotCalled = new AtomicInteger();
 
@@ -102,11 +107,27 @@ public class UniOnItemInvokeTest {
     }
 
     @Test
-    public void testInvokeUniOnItemWithShortcut() {
+    public void testCallOnItem() {
         AtomicInteger res = new AtomicInteger();
         AtomicInteger twoGotCalled = new AtomicInteger();
 
-        int r = one.invokeUni(i -> {
+        int r = one.onItem().call(i -> {
+            res.set(i);
+            return two.onItem().invoke(twoGotCalled::set);
+        })
+                .await().indefinitely();
+
+        assertThat(r).isEqualTo(1);
+        assertThat(twoGotCalled).hasValue(2);
+        assertThat(res).hasValue(1);
+    }
+
+    @Test
+    public void testCallOnItemWithShortcut() {
+        AtomicInteger res = new AtomicInteger();
+        AtomicInteger twoGotCalled = new AtomicInteger();
+
+        int r = one.call(i -> {
             res.set(i);
             return two.invoke(twoGotCalled::set);
         })
@@ -118,11 +139,26 @@ public class UniOnItemInvokeTest {
     }
 
     @Test
-    public void testInvokeUniOnFailure() {
+    public void testDeprecatedInvokeUniOnFailure() {
         AtomicInteger res = new AtomicInteger(-1);
         AtomicInteger twoGotCalled = new AtomicInteger(-1);
 
-        assertThatThrownBy(() -> failed.onItem().invokeUni(i -> {
+        assertThatThrownBy(() -> failed.onItem().call(i -> {
+            res.set(i);
+            return two.onItem().invoke(twoGotCalled::set);
+        }).await().indefinitely()).isInstanceOf(CompletionException.class).hasCauseInstanceOf(IOException.class)
+                .hasMessageContaining("boom");
+
+        assertThat(twoGotCalled).hasValue(-1);
+        assertThat(res).hasValue(-1);
+    }
+
+    @Test
+    public void testCallOnFailure() {
+        AtomicInteger res = new AtomicInteger(-1);
+        AtomicInteger twoGotCalled = new AtomicInteger(-1);
+
+        assertThatThrownBy(() -> failed.onItem().call(i -> {
             res.set(i);
             return two.onItem().invoke(twoGotCalled::set);
         }).await().indefinitely()).isInstanceOf(CompletionException.class).hasCauseInstanceOf(IOException.class)
@@ -136,7 +172,7 @@ public class UniOnItemInvokeTest {
     public void testFailureInAsyncCallback() {
         AtomicInteger res = new AtomicInteger();
 
-        assertThatThrownBy(() -> one.onItem().invokeUni(i -> {
+        assertThatThrownBy(() -> one.onItem().call(i -> {
             res.set(i);
             throw new RuntimeException("boom");
         }).await().indefinitely()).isInstanceOf(RuntimeException.class).hasMessageContaining("boom");
@@ -148,7 +184,7 @@ public class UniOnItemInvokeTest {
     public void testNullReturnedByAsyncCallback() {
         AtomicInteger res = new AtomicInteger();
 
-        assertThatThrownBy(() -> one.onItem().invokeUni(i -> {
+        assertThatThrownBy(() -> one.onItem().call(i -> {
             res.set(i);
             return null;
         }).await().indefinitely()).isInstanceOf(NullPointerException.class).hasMessageContaining("null");
@@ -157,11 +193,11 @@ public class UniOnItemInvokeTest {
     }
 
     @Test
-    public void testInvokeUniWithSubFailure() {
+    public void testCallWithSubFailure() {
         AtomicInteger res = new AtomicInteger(-1);
         AtomicInteger twoGotCalled = new AtomicInteger(-1);
 
-        assertThatThrownBy(() -> one.onItem().invokeUni(i -> {
+        assertThatThrownBy(() -> one.onItem().call(i -> {
             res.set(i);
             return two.onItem().invoke(twoGotCalled::set)
                     .onItem().failWith(k -> new IllegalStateException("boom-" + k));
@@ -177,7 +213,7 @@ public class UniOnItemInvokeTest {
         Uni<Object> uni = Uni.createFrom().emitter(e -> e.onTermination(() -> terminated.set(true)));
 
         AtomicInteger result = new AtomicInteger();
-        Cancellable cancellable = one.onItem().invokeUni(i -> uni).subscribe().with(result::set);
+        Cancellable cancellable = one.onItem().call(i -> uni).subscribe().with(result::set);
 
         cancellable.cancel();
         assertThat(result).hasValue(0);

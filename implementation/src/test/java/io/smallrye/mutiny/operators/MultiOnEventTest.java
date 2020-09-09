@@ -11,6 +11,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 import org.junit.jupiter.api.Test;
@@ -34,6 +36,9 @@ public class MultiOnEventTest {
         AtomicReference<Integer> item = new AtomicReference<>();
         AtomicReference<Throwable> failure = new AtomicReference<>();
         AtomicBoolean completion = new AtomicBoolean();
+        AtomicBoolean invokedOnItemRunnable = new AtomicBoolean();
+        AtomicBoolean invokedOnItemSupplier = new AtomicBoolean();
+        AtomicBoolean calledOnItemSupplier = new AtomicBoolean();
         AtomicLong requests = new AtomicLong();
         AtomicBoolean termination = new AtomicBoolean();
         AtomicBoolean termination2 = new AtomicBoolean();
@@ -43,6 +48,15 @@ public class MultiOnEventTest {
                 .on().subscribed(subscription::set)
                 .on().item().invoke(item::set)
                 .on().failure().invoke(failure::set)
+                .onItem().invoke(() -> invokedOnItemRunnable.set(true))
+                .onItem().call(() -> {
+                    calledOnItemSupplier.set(true);
+                    return Uni.createFrom().item("yo");
+                })
+                .onItem().invokeUni(ignored -> {
+                    invokedOnItemSupplier.set(true);
+                    return Uni.createFrom().item("yo");
+                })
                 .onCompletion().invoke(() -> completion.set(true))
                 .onTermination().invoke((f, c) -> termination.set(f == null && !c))
                 .onTermination().invoke(() -> termination2.set(true))
@@ -59,6 +73,9 @@ public class MultiOnEventTest {
         assertThat(item.get()).isEqualTo(1);
         assertThat(failure.get()).isNull();
         assertThat(completion.get()).isTrue();
+        assertThat(invokedOnItemRunnable.get()).isTrue();
+        assertThat(invokedOnItemSupplier.get()).isTrue();
+        assertThat(calledOnItemSupplier.get()).isTrue();
         assertThat(termination.get()).isTrue();
         assertThat(termination2.get()).isTrue();
         assertThat(requests.get()).isEqualTo(20);
@@ -614,11 +631,11 @@ public class MultiOnEventTest {
     private final Uni<Void> sub = Uni.createFrom().nullItem();
 
     @Test
-    public void testInvokeUniOnItem() {
+    public void testCallOnItem() {
         AtomicInteger res = new AtomicInteger();
         AtomicInteger twoGotCalled = new AtomicInteger();
 
-        List<Integer> r = numbers.onItem().invokeUni(i -> {
+        List<Integer> r = numbers.onItem().call(i -> {
             res.set(i);
             return sub.onItem().invoke(c -> twoGotCalled.incrementAndGet());
         })
@@ -630,11 +647,11 @@ public class MultiOnEventTest {
     }
 
     @Test
-    public void testInvokeUniOnItemWithShortcut() {
+    public void testCallOnItemWithShortcut() {
         AtomicInteger res = new AtomicInteger();
         AtomicInteger twoGotCalled = new AtomicInteger();
 
-        List<Integer> r = numbers.invokeUni(i -> {
+        List<Integer> r = numbers.call(i -> {
             res.set(i);
             return sub.invoke(c -> twoGotCalled.incrementAndGet());
         })
@@ -646,11 +663,11 @@ public class MultiOnEventTest {
     }
 
     @Test
-    public void testInvokeUniOnFailure() {
+    public void testCallOnFailure() {
         AtomicInteger res = new AtomicInteger(-1);
         AtomicInteger twoGotCalled = new AtomicInteger();
 
-        assertThatThrownBy(() -> failed.onItem().invokeUni(
+        assertThatThrownBy(() -> failed.onItem().call(
                 i -> {
                     res.set(i);
                     return sub.onItem().invoke(c -> twoGotCalled.incrementAndGet());
@@ -668,7 +685,7 @@ public class MultiOnEventTest {
     public void testFailureInAsyncCallback() {
         AtomicInteger res = new AtomicInteger();
         Multi<Integer> more = Multi.createFrom().items(1, 2, 3);
-        assertThatThrownBy(() -> more.onItem().invokeUni(i -> {
+        assertThatThrownBy(() -> more.onItem().call(i -> {
             res.set(i);
             if (i == 2) {
                 throw new RuntimeException("boom");
@@ -685,7 +702,7 @@ public class MultiOnEventTest {
     public void testNullReturnedByAsyncCallback() {
         AtomicInteger res = new AtomicInteger();
         Multi<Integer> more = Multi.createFrom().items(1, 2, 3);
-        assertThatThrownBy(() -> more.onItem().invokeUni(i -> {
+        assertThatThrownBy(() -> more.onItem().call(i -> {
             res.set(i);
             if (i == 2) {
                 return null;
@@ -698,14 +715,14 @@ public class MultiOnEventTest {
     }
 
     @Test
-    public void testInvokeUniWithSubFailure() {
+    public void testCallWithSubFailure() {
         AtomicInteger res = new AtomicInteger(-1);
         AtomicInteger twoGotCalled = new AtomicInteger(-1);
         Multi<Integer> more = Multi.createFrom().items(1, 2, 3);
         Uni<Integer> failing = Uni.createFrom().item(23).onItem().invoke(twoGotCalled::set).onItem()
                 .failWith(k -> new IllegalStateException("boom-" + k));
 
-        assertThatThrownBy(() -> more.onItem().invokeUni(i -> {
+        assertThatThrownBy(() -> more.onItem().call(i -> {
             res.set(i);
             if (i == 2) {
                 return failing;
@@ -726,7 +743,7 @@ public class MultiOnEventTest {
 
         AtomicInteger result = new AtomicInteger();
         Cancellable cancellable = numbers
-                .onItem().invokeUni(i -> uni).subscribe().with(result::set);
+                .onItem().call(i -> uni).subscribe().with(result::set);
 
         cancellable.cancel();
         assertThat(result).hasValue(0);
@@ -747,22 +764,25 @@ public class MultiOnEventTest {
 
     @Test
     public void testThatInvokeConsumerMustNotBeNull() {
-        assertThrows(IllegalArgumentException.class, () -> Multi.createFrom().item(1).onItem().invoke(null));
+        assertThrows(IllegalArgumentException.class,
+                () -> Multi.createFrom().item(1).onItem().invoke((Consumer<? super Integer>) null));
     }
 
     @Test
-    public void testThatInvokeUniMapperMustNotBeNull() {
-        assertThrows(IllegalArgumentException.class, () -> Multi.createFrom().item(1).onItem().invokeUni(null));
+    public void testThatCallMapperMustNotBeNull() {
+        assertThrows(IllegalArgumentException.class,
+                () -> Multi.createFrom().item(1).onItem().call((Function<? super Integer, Uni<?>>) null));
     }
 
     @Test
     public void testThatInvokeConsumerMustNotBeNullWithShortcut() {
-        assertThrows(IllegalArgumentException.class, () -> Multi.createFrom().item(1).invoke(null));
+        assertThrows(IllegalArgumentException.class, () -> Multi.createFrom().item(1).invoke((Consumer<? super Integer>) null));
     }
 
     @Test
-    public void testThatInvokeUniMapperMustNotBeNullWithShortcut() {
-        assertThrows(IllegalArgumentException.class, () -> Multi.createFrom().item(1).invokeUni(null));
+    public void testThatCallMapperMustNotBeNullWithShortcut() {
+        assertThrows(IllegalArgumentException.class,
+                () -> Multi.createFrom().item(1).call((Function<? super Integer, Uni<?>>) null));
     }
 
 }
