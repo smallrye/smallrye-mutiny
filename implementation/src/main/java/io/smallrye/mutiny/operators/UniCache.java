@@ -74,7 +74,7 @@ public class UniCache<I> extends UniOperator<I, I> implements UniSubscriber<I> {
         synchronized (this) {
             if (state != COMPLETED) {
                 throw new IllegalStateException(
-                        "Invalid state - expected being in the DONE state, but is in state: " + state);
+                        "Invalid state - expected being in the COMPLETED state, but is in state: " + state);
             }
         }
         if (failure != null) {
