@@ -1,9 +1,14 @@
 package io.smallrye.mutiny.operators;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
@@ -14,6 +19,7 @@ import io.smallrye.mutiny.TestException;
 import io.smallrye.mutiny.subscription.MultiEmitter;
 import io.smallrye.mutiny.test.AssertSubscriber;
 
+@SuppressWarnings("ConstantConditions")
 public class MultiDistinctTest {
 
     @Test
@@ -65,6 +71,47 @@ public class MultiDistinctTest {
                 .subscribe().withSubscriber(AssertSubscriber.create(10))
                 .assertCompletedSuccessfully()
                 .assertReceived(1, 2, 3, 4, 2, 4, 1, 2, 4);
+    }
+
+    @Test
+    public void testDropRepetitionsWithCancellation() {
+        AtomicLong count = new AtomicLong();
+        AtomicBoolean cancelled = new AtomicBoolean();
+        AssertSubscriber<Long> subscriber = Multi.createFrom().ticks().every(Duration.ofMillis(1))
+                .onCancellation().invoke(() -> cancelled.set(true))
+                .onItem().transform(l -> {
+                    if (count.getAndIncrement() % 2 == 0) {
+                        return l;
+                    } else {
+                        return l - 1;
+                    }
+                })
+                .transform().byDroppingRepetitions()
+                .subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE));
+
+        await().until(() -> subscriber.items().size() >= 10);
+        subscriber.cancel();
+        assertThat(cancelled).isTrue();
+    }
+
+    @Test
+    public void testDropRepetitionsWithImmediateCancellation() {
+        AtomicLong count = new AtomicLong();
+        AtomicBoolean cancelled = new AtomicBoolean();
+        Multi.createFrom().ticks().every(Duration.ofMillis(1))
+                .onCancellation().invoke(() -> cancelled.set(true))
+                .onItem().transform(l -> {
+                    if (count.getAndIncrement() % 2 == 0) {
+                        return l;
+                    } else {
+                        return l - 1;
+                    }
+                })
+                .transform().byDroppingRepetitions()
+                .subscribe().withSubscriber(new AssertSubscriber<>(Long.MAX_VALUE, true));
+
+        assertThat(cancelled).isTrue();
+        assertThat(count).hasValue(0);
     }
 
     @Test
