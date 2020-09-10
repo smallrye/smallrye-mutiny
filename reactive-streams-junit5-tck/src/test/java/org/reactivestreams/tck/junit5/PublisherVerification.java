@@ -282,7 +282,7 @@ public abstract class PublisherVerification<T> extends org.reactivestreams.tck.P
 
     @Override
     public void notVerified(String message) {
-        System.err.println("[Not Verified] " + message);
+        StackTraceElement element = Thread.currentThread().getStackTrace()[3];
+        System.err.println("[Not Verified - " + element.getMethodName() + "] " + message);
     }
-
 }
