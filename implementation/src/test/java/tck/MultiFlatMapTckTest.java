@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
-import java.util.stream.LongStream;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -76,10 +75,11 @@ public class MultiFlatMapTckTest extends AbstractPublisherTck<Long> {
 
     @Test
     public void flatMapStageShouldPropagateUpstreamExceptions() {
-        assertThrows(QuietRuntimeException.class, () -> await(Multi.createFrom().failure(new QuietRuntimeException("failed"))
-                .flatMap(x -> Multi.createFrom().item(x))
-                .collectItems().asList()
-                .subscribeAsCompletionStage()));
+        assertThrows(QuietRuntimeException.class,
+                () -> await(Multi.createFrom().failure(new QuietRuntimeException("failed"))
+                        .flatMap(x -> Multi.createFrom().item(x))
+                        .collectItems().asList()
+                        .subscribeAsCompletionStage()));
     }
 
     @Test
@@ -127,13 +127,13 @@ public class MultiFlatMapTckTest extends AbstractPublisherTck<Long> {
 
     @Override
     public Publisher<Long> createPublisher(long elements) {
-        return Multi.createFrom().items(LongStream.rangeClosed(1, elements).boxed())
+        return upstream(elements)
                 .flatMap(x -> Multi.createFrom().item(x));
     }
 
     @Override
     public Publisher<Long> createFailedPublisher() {
-        return Multi.createFrom().<Long> failure(new RuntimeException("failed"))
+        return failedUpstream()
                 .flatMap(x -> Multi.createFrom().item(x));
     }
 }

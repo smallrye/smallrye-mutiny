@@ -11,7 +11,6 @@ import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.function.Function;
-import java.util.stream.LongStream;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -77,10 +76,11 @@ public class MultiOnITemTransformToMultiAndConcatenateTckTest extends AbstractPu
 
     @Test
     public void flatMapStageShouldPropagateUpstreamExceptions() {
-        assertThrows(QuietRuntimeException.class, () -> await(Multi.createFrom().failure(new QuietRuntimeException("failed"))
-                .onItem().transformToMultiAndConcatenate(x -> Multi.createFrom().item(x))
-                .collectItems().asList()
-                .subscribeAsCompletionStage()));
+        assertThrows(QuietRuntimeException.class,
+                () -> await(Multi.createFrom().failure(new QuietRuntimeException("failed"))
+                        .onItem().transformToMultiAndConcatenate(x -> Multi.createFrom().item(x))
+                        .collectItems().asList()
+                        .subscribeAsCompletionStage()));
     }
 
     @Test
@@ -118,13 +118,13 @@ public class MultiOnITemTransformToMultiAndConcatenateTckTest extends AbstractPu
 
     @Override
     public Publisher<Long> createPublisher(long elements) {
-        return Multi.createFrom().items(LongStream.rangeClosed(1, elements).boxed())
+        return upstream(elements)
                 .onItem().transformToMultiAndConcatenate(x -> Multi.createFrom().item(x));
     }
 
     @Override
     public Publisher<Long> createFailedPublisher() {
-        return Multi.createFrom().<Long> failure(new RuntimeException("failed"))
+        return failedUpstream()
                 .onItem().transformToMultiAndConcatenate(x -> Multi.createFrom().item(x));
     }
 }

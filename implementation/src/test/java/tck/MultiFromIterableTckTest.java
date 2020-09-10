@@ -12,7 +12,7 @@ public class MultiFromIterableTckTest extends AbstractPublisherTck<Long> {
     @Override
     public Publisher<Long> createPublisher(long elements) {
         List<Long> list = LongStream.rangeClosed(1, elements).boxed().collect(Collectors.toList());
-        return Multi.createFrom().iterable(list);
+        return Multi.createFrom().deferred(() -> Multi.createFrom().iterable(list));
     }
 
     @Override

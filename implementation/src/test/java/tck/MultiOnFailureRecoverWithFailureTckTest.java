@@ -4,13 +4,11 @@ import java.util.function.Function;
 
 import org.reactivestreams.Publisher;
 
-import io.smallrye.mutiny.Multi;
-
 public class MultiOnFailureRecoverWithFailureTckTest extends AbstractPublisherTck<Long> {
 
     @Override
     public Publisher<Long> createPublisher(long elements) {
-        return Multi.createFrom().iterable(iterate(elements))
+        return upstream(elements)
                 .onFailure().recoverWithMulti(t -> {
                     if (t instanceof RuntimeException) {
                         throw (RuntimeException) t;
@@ -22,7 +20,7 @@ public class MultiOnFailureRecoverWithFailureTckTest extends AbstractPublisherTc
 
     @Override
     public Publisher<Long> createFailedPublisher() {
-        return Multi.createFrom().<Long> failure(new RuntimeException("failed"))
+        return failedUpstream()
                 .onFailure().recoverWithItem(t -> {
                     // Re-throw the exception.
                     if (t instanceof RuntimeException) {

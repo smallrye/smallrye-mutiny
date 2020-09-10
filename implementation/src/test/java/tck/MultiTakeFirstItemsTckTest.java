@@ -6,7 +6,6 @@ import static tck.Await.await;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.LongStream;
 
 import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
@@ -95,13 +94,13 @@ public class MultiTakeFirstItemsTckTest extends AbstractPublisherTck<Long> {
 
     @Override
     public Publisher<Long> createPublisher(long elements) {
-        return Multi.createFrom().items(LongStream.rangeClosed(1, elements).boxed())
+        return upstream(elements)
                 .transform().byTakingFirstItems(Long.MAX_VALUE);
     }
 
     @Override
     public Publisher<Long> createFailedPublisher() {
-        return Multi.createFrom().<Long> failure(new RuntimeException("failed"))
+        return failedUpstream()
                 .transform().byTakingFirstItems(Long.MAX_VALUE);
     }
 }

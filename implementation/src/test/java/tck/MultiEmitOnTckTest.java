@@ -7,8 +7,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.reactivestreams.Publisher;
 
-import io.smallrye.mutiny.Multi;
-
 public class MultiEmitOnTckTest extends AbstractPublisherTck<Long> {
 
     private ExecutorService executor;
@@ -25,13 +23,13 @@ public class MultiEmitOnTckTest extends AbstractPublisherTck<Long> {
 
     @Override
     public Publisher<Long> createPublisher(long elements) {
-        return Multi.createFrom().iterable(iterate(elements))
+        return upstream(elements)
                 .emitOn(executor);
     }
 
     @Override
     public Publisher<Long> createFailedPublisher() {
-        return Multi.createFrom().<Long> failure(new IllegalStateException("failed"))
+        return failedUpstream()
                 .emitOn(executor);
     }
 }

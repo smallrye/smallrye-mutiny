@@ -10,7 +10,7 @@ public class UniTransformToMultiTckTest extends AbstractPublisherTck<Long> {
     @Override
     public Publisher<Long> createPublisher(long elements) {
         return Uni.createFrom().item(elements)
-                .onItem().transformToMulti(max -> Multi.createFrom().iterable(iterate(elements)));
+                .onItem().transformToMulti(max -> upstream(elements));
     }
 
     @Override

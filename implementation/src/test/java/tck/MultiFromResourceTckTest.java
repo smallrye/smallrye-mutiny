@@ -10,16 +10,11 @@ public class MultiFromResourceTckTest extends AbstractPublisherTck<Long> {
     public Publisher<Long> createPublisher(long elements) {
         return Multi.createFrom().resource(() -> elements, max -> {
             int bound = max.intValue();
-            return Multi.createFrom().range(0, bound);
+            return upstream(bound);
         }).withFinalizer(x -> {
             return Uni.createFrom().item(() -> null);
         })
-                .onItem().transform(i -> (long) i);
-    }
-
-    @Override
-    public long maxElementsFromPublisher() {
-        return 1024;
+                .onItem().transform(i -> i);
     }
 
 }
