@@ -22,6 +22,14 @@ public abstract class AbstractPublisherTck<T> extends PublisherVerification<T> {
         super(new TestEnvironment(timeout));
     }
 
+    public Multi<Long> upstream(long elements) {
+        return Multi.createFrom().deferred(() -> Multi.createFrom().iterable(iterate(elements)));
+    }
+
+    public Multi<Long> failedUpstream() {
+        return Multi.createFrom().failure(() -> new RuntimeException("failed"));
+    }
+
     @Override
     public Publisher<T> createFailedPublisher() {
         return Multi.createFrom().failure(new TestException());
@@ -30,7 +38,7 @@ public abstract class AbstractPublisherTck<T> extends PublisherVerification<T> {
     /**
      * Creates an Iterable with the specified number of elements or an infinite one if
      * elements > Integer.MAX_VALUE.
-     * 
+     *
      * @param elements the number of elements to return, Integer.MAX_VALUE means an infinite sequence
      * @return the Iterable
      */
@@ -43,17 +51,13 @@ public abstract class AbstractPublisherTck<T> extends PublisherVerification<T> {
     }
 
     /**
-     * Create an array of Long values, ranging from 0L to elements - 1L.
-     * 
-     * @param elements the number of elements to return
-     * @return the array
+     * An infinite stream of integers starting from one.
      */
-    protected Long[] array(long elements) {
-        Long[] a = new Long[(int) elements];
-        for (int i = 0; i < elements; i++) {
-            a[i] = (long) i;
-        }
-        return a;
+    Multi<Integer> infiniteStream() {
+        return Multi.createFrom().iterable(() -> {
+            AtomicInteger value = new AtomicInteger();
+            return IntStream.generate(value::incrementAndGet).boxed().iterator();
+        });
     }
 
     static final class FiniteRange implements Iterable<Long> {
@@ -122,15 +126,5 @@ public abstract class AbstractPublisherTck<T> extends PublisherVerification<T> {
                 throw new UnsupportedOperationException();
             }
         }
-    }
-
-    /**
-     * An infinite stream of integers starting from one.
-     */
-    Multi<Integer> infiniteStream() {
-        return Multi.createFrom().iterable(() -> {
-            AtomicInteger value = new AtomicInteger();
-            return IntStream.generate(value::incrementAndGet).boxed().iterator();
-        });
     }
 }

@@ -9,7 +9,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
-import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
@@ -17,7 +16,7 @@ import org.reactivestreams.Publisher;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.helpers.Subscriptions;
 
-public class MultiDistinctTckTest extends AbstractPublisherTck<Integer> {
+public class MultiDistinctTckTest extends AbstractPublisherTck<Long> {
     @Test
     public void distinctStageShouldReturnDistinctElements() {
         assertEquals(await(
@@ -38,10 +37,11 @@ public class MultiDistinctTckTest extends AbstractPublisherTck<Integer> {
 
     @Test
     public void distinctStageShouldPropagateUpstreamExceptions() {
-        assertThrows(QuietRuntimeException.class, () -> await(Multi.createFrom().failure(new QuietRuntimeException("failed"))
-                .transform().byDroppingDuplicates()
-                .collectItems().asList()
-                .subscribeAsCompletionStage()));
+        assertThrows(QuietRuntimeException.class,
+                () -> await(Multi.createFrom().failure(new QuietRuntimeException("failed"))
+                        .transform().byDroppingDuplicates()
+                        .collectItems().asList()
+                        .subscribeAsCompletionStage()));
     }
 
     @Test
@@ -79,14 +79,14 @@ public class MultiDistinctTckTest extends AbstractPublisherTck<Integer> {
     }
 
     @Override
-    public Publisher<Integer> createPublisher(long elements) {
-        return Multi.createFrom().items(IntStream.rangeClosed(1, (int) elements).boxed())
+    public Publisher<Long> createPublisher(long elements) {
+        return upstream(elements)
                 .transform().byDroppingDuplicates();
     }
 
     @Override
-    public Publisher<Integer> createFailedPublisher() {
-        return Multi.createFrom().<Integer> failure(new RuntimeException("failed"))
+    public Publisher<Long> createFailedPublisher() {
+        return failedUpstream()
                 .transform().byDroppingDuplicates();
     }
 

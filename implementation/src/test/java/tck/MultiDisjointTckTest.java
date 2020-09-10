@@ -10,7 +10,13 @@ public class MultiDisjointTckTest extends AbstractPublisherTck<Long> {
     @Override
     public Publisher<Long> createPublisher(long elements) {
         Long[] list = LongStream.rangeClosed(1, elements).boxed().toArray(Long[]::new);
-        return Multi.createFrom().item(list)
+        return Multi.createFrom().item(() -> list)
+                .onItem().disjoint();
+    }
+
+    @Override
+    public Publisher<Long> createFailedPublisher() {
+        return failedUpstream()
                 .onItem().disjoint();
     }
 

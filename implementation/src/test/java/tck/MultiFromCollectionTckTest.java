@@ -14,7 +14,7 @@ public class MultiFromCollectionTckTest extends AbstractPublisherTck<Long> {
         for (int i = 0; i < elements; i++) {
             list.add((long) i);
         }
-        return Multi.createFrom().items(list.toArray(new Long[0]));
+        return Multi.createFrom().deferred(() -> Multi.createFrom().items(list.toArray(new Long[0])));
     }
 
     @Override

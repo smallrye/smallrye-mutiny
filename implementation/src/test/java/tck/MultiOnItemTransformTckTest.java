@@ -9,14 +9,13 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.function.Function;
-import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
 
 import io.smallrye.mutiny.Multi;
 
-public class MultiOnItemTransformTckTest extends AbstractPublisherTck<Integer> {
+public class MultiOnItemTransformTckTest extends AbstractPublisherTck<Long> {
 
     @Test
     public void mapStageShouldMapElements() {
@@ -44,10 +43,11 @@ public class MultiOnItemTransformTckTest extends AbstractPublisherTck<Integer> {
 
     @Test
     public void mapStageShouldPropagateUpstreamExceptions() {
-        assertThrows(QuietRuntimeException.class, () -> await(Multi.createFrom().failure(new QuietRuntimeException("failed"))
-                .map(Function.identity())
-                .collectItems().asList()
-                .subscribeAsCompletionStage()));
+        assertThrows(QuietRuntimeException.class,
+                () -> await(Multi.createFrom().failure(new QuietRuntimeException("failed"))
+                        .map(Function.identity())
+                        .collectItems().asList()
+                        .subscribeAsCompletionStage()));
     }
 
     @Test
@@ -64,14 +64,14 @@ public class MultiOnItemTransformTckTest extends AbstractPublisherTck<Integer> {
     }
 
     @Override
-    public Publisher<Integer> createPublisher(long elements) {
-        return Multi.createFrom().items(IntStream.rangeClosed(1, (int) elements).boxed())
+    public Publisher<Long> createPublisher(long elements) {
+        return upstream(elements)
                 .map(Function.identity());
     }
 
     @Override
-    public Publisher<Integer> createFailedPublisher() {
-        return Multi.createFrom().<Integer> failure(new RuntimeException("failed"))
+    public Publisher<Long> createFailedPublisher() {
+        return failedUpstream()
                 .map(Function.identity());
     }
 

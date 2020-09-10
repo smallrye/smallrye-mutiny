@@ -9,7 +9,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
-import java.util.stream.LongStream;
 
 import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
@@ -80,13 +79,13 @@ public class MultiTakeItemsWhileTckTest extends AbstractPublisherTck<Long> {
 
     @Override
     public Publisher<Long> createPublisher(long elements) {
-        return Multi.createFrom().items(LongStream.rangeClosed(1, elements).boxed())
+        return upstream(elements)
                 .transform().byTakingItemsWhile(x -> true);
     }
 
     @Override
     public Publisher<Long> createFailedPublisher() {
-        return Multi.createFrom().<Long> failure(new RuntimeException("failed"))
+        return failedUpstream()
                 .transform().byTakingItemsWhile(x -> true);
     }
 }

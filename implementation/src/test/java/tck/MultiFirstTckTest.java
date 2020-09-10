@@ -44,8 +44,9 @@ public class MultiFirstTckTest extends AbstractTck {
 
     @Test
     public void findFirstStageShouldPropagateErrors() {
-        assertThrows(QuietRuntimeException.class, () -> await(Multi.createFrom().failure(new QuietRuntimeException("failed"))
-                .collectItems().first().subscribeAsCompletionStage()));
+        assertThrows(QuietRuntimeException.class,
+                () -> await(Multi.createFrom().failure(new QuietRuntimeException("failed"))
+                        .collectItems().first().subscribeAsCompletionStage()));
     }
 
     @Test

@@ -83,22 +83,24 @@ public class MultiOnFailureResumeTest {
 
     @Test
     public void onErrorResumeStageShouldPropagateRuntimeExceptions() {
-        assertThrows(RuntimeException.class, () -> await(Multi.createFrom().<String> failure(new Exception("source-failure"))
-                .onFailure().recoverWithMulti(t -> {
-                    throw new QuietRuntimeException("failed");
-                })
-                .collectItems().asList()
-                .subscribeAsCompletionStage()));
+        assertThrows(RuntimeException.class,
+                () -> await(Multi.createFrom().<String> failure(new Exception("source-failure"))
+                        .onFailure().recoverWithMulti(t -> {
+                            throw new QuietRuntimeException("failed");
+                        })
+                        .collectItems().asList()
+                        .subscribeAsCompletionStage()));
     }
 
     @Test
     public void onErrorResumeWithStageShouldPropagateRuntimeExceptions() {
-        assertThrows(RuntimeException.class, () -> await(Multi.createFrom().<String> failure(new Exception("source-failure"))
-                .onFailure().recoverWithItem(t -> {
-                    throw new QuietRuntimeException("failed");
-                })
-                .collectItems().asList()
-                .subscribeAsCompletionStage()));
+        assertThrows(RuntimeException.class,
+                () -> await(Multi.createFrom().<String> failure(new Exception("source-failure"))
+                        .onFailure().recoverWithItem(t -> {
+                            throw new QuietRuntimeException("failed");
+                        })
+                        .collectItems().asList()
+                        .subscribeAsCompletionStage()));
     }
 
     @Test

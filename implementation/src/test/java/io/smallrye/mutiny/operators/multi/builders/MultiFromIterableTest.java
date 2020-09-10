@@ -322,7 +322,7 @@ public class MultiFromIterableTest {
             }
         };
 
-        AssertSubscriber<Integer> subscriber = AssertSubscriber.create(10);
+        AssertSubscriber<Integer> subscriber = AssertSubscriber.create(Long.MAX_VALUE);
 
         Multi.createFrom().iterable(it).subscribe(subscriber);
 
@@ -369,7 +369,7 @@ public class MultiFromIterableTest {
             }
         };
 
-        AssertSubscriber<Integer> subscriber = AssertSubscriber.create(1);
+        AssertSubscriber<Integer> subscriber = AssertSubscriber.create(Long.MAX_VALUE);
 
         Multi.createFrom().iterable(it).subscribe(subscriber);
 

@@ -2,13 +2,11 @@ package tck;
 
 import org.reactivestreams.Publisher;
 
-import io.smallrye.mutiny.Multi;
-
 public class MultiOnTerminationInvokeTckTest extends AbstractPublisherTck<Long> {
 
     @Override
     public Publisher<Long> createPublisher(long elements) {
-        return Multi.createFrom().iterable(iterate(elements))
+        return upstream(elements)
                 .onTermination().invoke(() -> {
                     // Do nothing
                 });
@@ -16,7 +14,7 @@ public class MultiOnTerminationInvokeTckTest extends AbstractPublisherTck<Long> 
 
     @Override
     public Publisher<Long> createFailedPublisher() {
-        return Multi.createFrom().<Long> failure(new RuntimeException("failed"))
+        return failedUpstream()
                 .onTermination().invoke(() -> {
                     // noop
                 });

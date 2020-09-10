@@ -35,7 +35,7 @@ public class MultiFlatMapCompletionStageTckTest extends AbstractPublisherTck<Lon
 
     @Override
     public Publisher<Long> createPublisher(long elements) {
-        return Multi.createFrom().iterable(iterate(elements))
+        return upstream(elements)
                 // Use supplyAsync on purpose to check the concurrency.
                 .onItem().transformToUni(i -> Uni.createFrom().completionStage(CompletableFuture.supplyAsync(() -> i)))
                 .merge();
@@ -43,7 +43,7 @@ public class MultiFlatMapCompletionStageTckTest extends AbstractPublisherTck<Lon
 
     @Override
     public Publisher<Long> createFailedPublisher() {
-        return Multi.createFrom().<Long> failure(new RuntimeException("failed"))
+        return failedUpstream()
                 // Use supplyAsync on purpose to check the concurrency.
                 .onItem().transformToUni(i -> Uni.createFrom().completionStage(CompletableFuture.supplyAsync(() -> i)))
                 .merge();

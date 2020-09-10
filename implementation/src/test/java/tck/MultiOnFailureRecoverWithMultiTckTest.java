@@ -10,13 +10,13 @@ public class MultiOnFailureRecoverWithMultiTckTest extends AbstractPublisherTck<
 
     @Override
     public Publisher<Long> createPublisher(long l) {
-        return Multi.createFrom().<Long> failure(new RuntimeException("failed"))
+        return failedUpstream()
                 .onFailure().recoverWithMulti(t -> Multi.createFrom().items(LongStream.rangeClosed(1, l).boxed()));
     }
 
     @Override
     public Publisher<Long> createFailedPublisher() {
-        return Multi.createFrom().<Long> failure(new RuntimeException("failed"))
+        return failedUpstream()
                 .onFailure().recoverWithMulti(t -> {
                     // Re-throw the exception.
                     if (t instanceof RuntimeException) {

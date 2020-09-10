@@ -2,21 +2,18 @@ package tck;
 
 import org.reactivestreams.Publisher;
 
-public class MultiOnSubscribeInvokeTckTest extends AbstractPublisherTck<Long> {
+public class MultiDistinctUntilChangedTckTest extends AbstractPublisherTck<Long> {
 
     @Override
     public Publisher<Long> createPublisher(long elements) {
         return upstream(elements)
-                .onSubscribe().invoke(x -> {
-                    // noop
-                });
+                .transform().byDroppingRepetitions();
     }
 
     @Override
     public Publisher<Long> createFailedPublisher() {
         return failedUpstream()
-                .onSubscribe().invoke(x -> {
-                    // noop
-                });
+                .transform().byDroppingRepetitions();
     }
+
 }

@@ -35,6 +35,8 @@ public final class MultiDistinctUntilChangedOp<T> extends AbstractMultiOperator<
             if (last == null || !last.equals(t)) {
                 last = t;
                 downstream.onItem(t);
+            } else {
+                // Request the next one, as that item is dropped.
                 request(1);
             }
         }
