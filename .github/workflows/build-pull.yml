@@ -11,8 +11,7 @@ jobs:
         java: [
           {'version': '8', 'source': 'releases'},
           {'version': '11', 'source': 'releases'},
-          {'version': '14', 'source': 'releases'},
-          {'version': '15', 'source': 'nightly'}
+          {'version': '14', 'source': 'releases'}
         ]
     name: Build with Java ${{ matrix.java.version }}
     steps:
@@ -34,3 +33,25 @@ jobs:
         run: mvn -B clean install -Pcoverage --file pom.xml
       - name: Codecov
         uses: codecov/codecov-action@v1.0.13
+  java15:
+      runs-on: ubuntu-20.04
+      name: Build with Java 15
+      steps:
+        - uses: actions/cache@v2
+          with:
+            path: |
+              ~/.m2/repository
+              !~/.m2/repository/**/*-SNAPSHOT/*
+            key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+            restore-keys: |
+              ${{ runner.os }}-maven-
+        - uses: actions/checkout@v2
+        - name: Install JDK 15
+          uses: AdoptOpenJDK/install-jdk@v1
+          with:
+            version: 15
+            source: https://cdn.azul.com/zulu/bin/zulu15.0.77-ea-jdk15.0.0-ea.36-linux_x64.tar.gz
+            archiveExtension: .tar
+        - name: Build with Maven
+          run: mvn -B clean install -Pcoverage --file pom.xml
+
