@@ -24,7 +24,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
       - uses: actions/checkout@v2
-      - name: Install JDK ${{ matrix.java.version }}
+      - name: Install JDK ${{ matrix.java.version }} (OpenJDK)
         uses: AdoptOpenJDK/install-jdk@v1
         with:
           version: ${{ matrix.java.version }}
@@ -46,12 +46,11 @@ jobs:
             restore-keys: |
               ${{ runner.os }}-maven-
         - uses: actions/checkout@v2
-        - name: Install JDK 15
-          uses: AdoptOpenJDK/install-jdk@v1
+        - name: Install JDK 15 (Zulu)
+          uses: actions/setup-java@v1.4.2
           with:
-            version: 15
-            source: https://cdn.azul.com/zulu/bin/zulu15.0.77-ea-jdk15.0.0-ea.36-linux_x64.tar.gz
-            archiveExtension: .tar
+            java-version: '15-ea'
+            architecture: x64
         - name: Build with Maven
           run: mvn -B clean install -Pcoverage --file pom.xml
 
