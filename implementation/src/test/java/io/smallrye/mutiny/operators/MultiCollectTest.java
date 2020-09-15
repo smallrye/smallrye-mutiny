@@ -4,12 +4,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.entry;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
+import java.util.function.BiConsumer;
+import java.util.function.BinaryOperator;
+import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
@@ -19,12 +18,12 @@ import io.smallrye.mutiny.Multi;
 
 public class MultiCollectTest {
 
-    private Multi<Person> persons = Multi.createFrom().items(
+    private final Multi<Person> persons = Multi.createFrom().items(
             new Person("bob", 1),
             new Person("alice", 2),
             new Person("rob", 3),
             new Person("matt", 4));
-    private Multi<Person> personsWithDuplicates = Multi.createFrom().items(
+    private final Multi<Person> personsWithDuplicates = Multi.createFrom().items(
             new Person("bob", 1),
             new Person("alice", 2),
             new Person("rob", 3),
@@ -134,6 +133,39 @@ public class MultiCollectTest {
     }
 
     @Test
+    public void testCollectInWithAccumulatorSupplierReturningNull() {
+        Multi.createFrom().range(1, 10)
+                .collectItems().with(new Collector<Integer, Integer, Integer>() {
+            @Override
+            public Supplier<Integer> supplier() {
+                return () -> 0;
+            }
+
+            @Override
+            public BiConsumer<Integer, Integer> accumulator() {
+                return null;
+            }
+
+            @Override
+            public BinaryOperator<Integer> combiner() {
+                return (a, b) -> 0;
+            }
+
+            @Override
+            public Function<Integer, Integer> finisher() {
+                return i -> i;
+            }
+
+            @Override
+            public Set<Characteristics> characteristics() {
+                return Collections.emptySet();
+            }
+        })
+                .subscribe().withSubscriber(UniAssertSubscriber.create())
+                .assertFailure(NullPointerException.class, "accumulator");
+    }
+
+    @Test
     public void testCollectIntoMap() {
         UniAssertSubscriber<Map<String, Person>> subscriber = persons
                 .collectItems().asMap(p -> p.firstName)
@@ -171,6 +203,19 @@ public class MultiCollectTest {
         assertThat(subscriber.getItem().get("rob")).hasSize(2)
                 .contains(new Person("rob", 3), new Person("rob", 6));
 
+    }
+
+    @Test
+    public void testCollectAsMultiMapWithValueMapper() {
+        UniAssertSubscriber<Map<String, Collection<Long>>> subscriber = personsWithDuplicates
+                .collectItems().asMultiMap(p -> p.firstName, p -> p.id)
+                .subscribe().withSubscriber(new UniAssertSubscriber<>())
+                .assertCompletedSuccessfully();
+
+        assertThat(subscriber.getItem()).hasSize(4);
+        assertThat(subscriber.getItem().get("alice")).containsExactly(2L);
+        assertThat(subscriber.getItem().get("rob")).hasSize(2)
+                .contains(3L, 6L);
     }
 
     @Test
