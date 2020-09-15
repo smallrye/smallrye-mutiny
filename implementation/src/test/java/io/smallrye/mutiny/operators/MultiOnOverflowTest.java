@@ -35,6 +35,16 @@ public class MultiOnOverflowTest {
     }
 
     @Test
+    public void testDropStrategyDeprecated() {
+        AssertSubscriber<Integer> sub = AssertSubscriber.create(20);
+        Multi.createFrom().range(1, 10)
+                .on().overflow().drop()
+                .subscribe(sub);
+        sub.assertCompletedSuccessfully()
+                .assertReceived(1, 2, 3, 4, 5, 6, 7, 8, 9);
+    }
+
+    @Test
     public void testDropStrategyWithUpstreamFailure() {
         Multi.createFrom().<Integer> failure(new IOException("boom"))
                 .onOverflow().drop()
