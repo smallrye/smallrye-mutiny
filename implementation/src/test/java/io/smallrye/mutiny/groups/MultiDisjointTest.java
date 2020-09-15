@@ -16,7 +16,8 @@ import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.test.AssertSubscriber;
 
-public class MultiFlattenTest {
+@SuppressWarnings("ConstantConditions")
+public class MultiDisjointTest {
 
     @Test
     public void testWithMultis() {
