@@ -24,6 +24,13 @@ public class UniOnNullSwitchToTest {
     }
 
     @Test
+    public void testSwitchOnNonNull() {
+        assertThat(Uni.createFrom().item(1).onItem().castTo(Integer.class)
+                .onItem().ifNull().switchTo(fallback)
+                .await().indefinitely()).isEqualTo(1);
+    }
+
+    @Test
     public void testSwitchToSupplierFallback() {
         AtomicInteger count = new AtomicInteger();
         assertThat(Uni.createFrom().item((Object) null).onItem().castTo(Integer.class)
@@ -52,8 +59,20 @@ public class UniOnNullSwitchToTest {
                         .onItem().ifNull().switchTo(() -> failure)
                         .await().indefinitely())
                 .withMessageEndingWith("boom");
+    }
+
+    @Test
+    public void testSwitchToSupplierThrowingException() {
+        assertThatExceptionOfType(IllegalStateException.class)
+                .isThrownBy(() -> Uni.createFrom().item((Object) null).onItem().castTo(Integer.class)
+                        .onItem().ifNull().switchTo(() -> {
+                            throw new IllegalStateException("boom");
+                        })
+                        .await().indefinitely())
+                .withMessageEndingWith("boom");
 
     }
+
 
     @Test
     public void testSwitchToNull() {
