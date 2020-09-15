@@ -1,9 +1,19 @@
 package io.smallrye.mutiny.operators;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import io.smallrye.mutiny.CompositeException;
+import io.smallrye.mutiny.Multi;
+import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.infrastructure.Infrastructure;
+import io.smallrye.mutiny.operators.multi.MultiFlatMapOp;
+import io.smallrye.mutiny.operators.multi.processors.BroadcastProcessor;
+import io.smallrye.mutiny.operators.multi.processors.UnicastProcessor;
+import io.smallrye.mutiny.test.AssertSubscriber;
+import io.smallrye.mutiny.test.Mocks;
+import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.RepeatedTest;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
+import org.reactivestreams.Subscriber;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -15,21 +25,10 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.RepeatedTest;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Timeout;
-import org.reactivestreams.Subscriber;
-
-import io.smallrye.mutiny.CompositeException;
-import io.smallrye.mutiny.Multi;
-import io.smallrye.mutiny.Uni;
-import io.smallrye.mutiny.infrastructure.Infrastructure;
-import io.smallrye.mutiny.operators.multi.MultiFlatMapOp;
-import io.smallrye.mutiny.operators.multi.processors.BroadcastProcessor;
-import io.smallrye.mutiny.operators.multi.processors.UnicastProcessor;
-import io.smallrye.mutiny.test.AssertSubscriber;
-import io.smallrye.mutiny.test.Mocks;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 public class MultiTransformToMultiTest {
 
@@ -58,7 +57,7 @@ public class MultiTransformToMultiTest {
         AssertSubscriber<Integer> subscriber = AssertSubscriber.create(Long.MAX_VALUE);
 
         Multi.createFrom().range(1, 4)
-                .concatMap(i -> Multi.createFrom().<Integer> empty())
+                .concatMap(i -> Multi.createFrom().<Integer>empty())
                 .subscribe(subscriber);
 
         subscriber.assertCompletedSuccessfully().assertHasNotReceivedAnyItem();
@@ -139,13 +138,13 @@ public class MultiTransformToMultiTest {
 
         Multi.createFrom().range(1, 100_001)
                 .onItem().transformToMulti(
-                        i -> Multi.createFrom().completionStage(CompletableFuture.supplyAsync(() -> {
-                            if (i == 99000 || i == 100_000) {
-                                throw new IllegalArgumentException("boom");
-                            } else {
-                                return i;
-                            }
-                        })))
+                i -> Multi.createFrom().completionStage(CompletableFuture.supplyAsync(() -> {
+                    if (i == 99000 || i == 100_000) {
+                        throw new IllegalArgumentException("boom");
+                    } else {
+                        return i;
+                    }
+                })))
                 .collectFailures().concatenate()
                 .subscribe(subscriber);
 
@@ -201,17 +200,25 @@ public class MultiTransformToMultiTest {
     }
 
     @Test
+    public void testInvalidRequest() {
+        assertThatThrownBy(() -> {
+            Multi.createFrom().range(1, 4)
+                    .onItem().transformToMulti(i -> Multi.createFrom().items(i, i)).withRequests(0).concatenate();
+        }).isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
     public void testTransformToMultiWithConcatenationAndFailuresAndDelay() {
         AssertSubscriber<Integer> subscriber = AssertSubscriber.create(Long.MAX_VALUE);
 
         Multi.createFrom().range(1, 4)
                 .onItem().transformToMulti(i -> {
-                    if (i == 2) {
-                        return Multi.createFrom().failure(new IOException("boom"));
-                    } else {
-                        return Multi.createFrom().items(i, i);
-                    }
-                }).collectFailures().concatenate()
+            if (i == 2) {
+                return Multi.createFrom().failure(new IOException("boom"));
+            } else {
+                return Multi.createFrom().items(i, i);
+            }
+        }).collectFailures().concatenate()
                 .subscribe(subscriber);
 
         subscriber
@@ -225,10 +232,10 @@ public class MultiTransformToMultiTest {
 
         Multi.createFrom().range(1, 4)
                 .onItem().transformToMulti(i -> {
-                    Multi<Integer> m = Multi.createFrom()
-                            .completionStage(() -> CompletableFuture.supplyAsync(() -> i));
-                    return Multi.createBy().merging().streams(m, m);
-                }).merge()
+            Multi<Integer> m = Multi.createFrom()
+                    .completionStage(() -> CompletableFuture.supplyAsync(() -> i));
+            return Multi.createBy().merging().streams(m, m);
+        }).merge()
                 .subscribe(subscriber);
 
         subscriber
@@ -243,10 +250,10 @@ public class MultiTransformToMultiTest {
 
         Multi.createFrom().range(1, 4)
                 .onItem().transformToMulti(i -> {
-                    Multi<Integer> m = Multi.createFrom()
-                            .completionStage(() -> CompletableFuture.supplyAsync(() -> i));
-                    return Multi.createBy().merging().streams(m, m);
-                }).concatenate()
+            Multi<Integer> m = Multi.createFrom()
+                    .completionStage(() -> CompletableFuture.supplyAsync(() -> i));
+            return Multi.createBy().merging().streams(m, m);
+        }).concatenate()
                 .subscribe(subscriber);
 
         subscriber
@@ -261,10 +268,10 @@ public class MultiTransformToMultiTest {
 
         Multi.createFrom().range(1, 4)
                 .onItem().transformToMultiAndMerge(i -> {
-                    Multi<Integer> m = Multi.createFrom()
-                            .completionStage(() -> CompletableFuture.supplyAsync(() -> i));
-                    return Multi.createBy().merging().streams(m, m);
-                })
+            Multi<Integer> m = Multi.createFrom()
+                    .completionStage(() -> CompletableFuture.supplyAsync(() -> i));
+            return Multi.createBy().merging().streams(m, m);
+        })
                 .subscribe(subscriber);
 
         subscriber
@@ -279,10 +286,10 @@ public class MultiTransformToMultiTest {
 
         Multi.createFrom().range(1, 4)
                 .onItem().transformToMultiAndConcatenate(i -> {
-                    Multi<Integer> m = Multi.createFrom()
-                            .completionStage(() -> CompletableFuture.supplyAsync(() -> i));
-                    return Multi.createBy().merging().streams(m, m);
-                })
+            Multi<Integer> m = Multi.createFrom()
+                    .completionStage(() -> CompletableFuture.supplyAsync(() -> i));
+            return Multi.createBy().merging().streams(m, m);
+        })
                 .subscribe(subscriber);
 
         subscriber
@@ -308,7 +315,7 @@ public class MultiTransformToMultiTest {
     public void testThatFlatMapIsNotCalledOnUpstreamFailure() {
         AssertSubscriber<Integer> subscriber = AssertSubscriber.create(Long.MAX_VALUE);
         AtomicInteger count = new AtomicInteger();
-        Multi.createFrom().<Integer> failure(new IOException("boom"))
+        Multi.createFrom().<Integer>failure(new IOException("boom"))
                 .flatMap(i -> {
                     count.incrementAndGet();
                     return Multi.createFrom().item(i);
@@ -323,7 +330,7 @@ public class MultiTransformToMultiTest {
     public void testThatFlatMapIsOnlyCallOnItems() {
         AssertSubscriber<Integer> subscriber = AssertSubscriber.create(Long.MAX_VALUE);
         AtomicInteger count = new AtomicInteger();
-        Multi.createFrom().<Integer> empty()
+        Multi.createFrom().<Integer>empty()
                 .flatMap(i -> {
                     count.incrementAndGet();
                     return Multi.createFrom().item(i);
@@ -360,7 +367,7 @@ public class MultiTransformToMultiTest {
     public void testFlatMapWithMapperThrowingException() {
         AssertSubscriber<Integer> subscriber = AssertSubscriber.create(Long.MAX_VALUE);
         Multi.createFrom().range(1, 4)
-                .<Integer> flatMap(i -> {
+                .<Integer>flatMap(i -> {
                     throw new IllegalArgumentException("boom");
                 })
                 .subscribe(subscriber);
@@ -372,7 +379,7 @@ public class MultiTransformToMultiTest {
     public void testFlatMapWithMapperReturningNull() {
         AssertSubscriber<Integer> subscriber = AssertSubscriber.create(Long.MAX_VALUE);
         Multi.createFrom().range(1, 4)
-                .<Integer> flatMap(i -> null)
+                .<Integer>flatMap(i -> null)
                 .subscribe(subscriber);
 
         subscriber.assertHasFailedWith(NullPointerException.class, "");
@@ -382,7 +389,7 @@ public class MultiTransformToMultiTest {
     public void testFlatMapWithMapperReturningNullInAMulti() {
         AssertSubscriber<Integer> subscriber = AssertSubscriber.create(Long.MAX_VALUE);
         Multi.createFrom().range(1, 4)
-                .<Integer> flatMap(i -> Multi.createFrom().item(null))
+                .<Integer>flatMap(i -> Multi.createFrom().item(null))
                 .subscribe(subscriber);
 
         subscriber.assertHasFailedWith(IllegalArgumentException.class, "supplier");
@@ -393,7 +400,7 @@ public class MultiTransformToMultiTest {
         AssertSubscriber<Integer> subscriber = AssertSubscriber.create(Long.MAX_VALUE);
         AtomicInteger count = new AtomicInteger();
         Multi.createFrom().range(1, 4)
-                .<Integer> flatMap(i -> Multi.createFrom().failure(new IOException("boom")))
+                .<Integer>flatMap(i -> Multi.createFrom().failure(new IOException("boom")))
                 .subscribe(subscriber);
 
         subscriber.assertHasFailedWith(IOException.class, "boom");
@@ -452,12 +459,12 @@ public class MultiTransformToMultiTest {
 
         Multi.createFrom().range(1, 5)
                 .onItem().transformToMulti(i -> {
-                    if (i % 2 == 0) {
-                        return Multi.createFrom().failure(new IOException("boom"));
-                    } else {
-                        return Multi.createFrom().item(i);
-                    }
-                })
+            if (i % 2 == 0) {
+                return Multi.createFrom().failure(new IOException("boom"));
+            } else {
+                return Multi.createFrom().item(i);
+            }
+        })
                 .collectFailures()
                 .merge()
                 .subscribe(subscriber);
@@ -474,6 +481,60 @@ public class MultiTransformToMultiTest {
                 .collectItems().asList().await().indefinitely();
 
         assertThat(list).hasSize(3).contains(2, 3, 4);
+    }
+
+    @Test
+    @SuppressWarnings("deprecation")
+    public void testProduceCompletionStageRedeemingNullDeprecated() {
+        assertThatThrownBy(() -> {
+            Multi.createFrom().range(1, 4)
+                    .onItem().produceCompletionStage(i -> CompletableFuture.supplyAsync(() -> null))
+                    .merge()
+                    .collectItems().asList().await().indefinitely();
+        }).isInstanceOf(NullPointerException.class);
+    }
+
+    @Test
+    @SuppressWarnings("deprecation")
+    public void testProduceCompletionStageRedeemingFailureDeprecated() {
+        assertThatThrownBy(() -> {
+            Multi.createFrom().range(1, 4)
+                    .onItem().produceCompletionStage(i -> {
+                CompletableFuture<Integer> cs = new CompletableFuture<>();
+                cs.completeExceptionally(new IllegalStateException("boom"));
+                return cs;
+            })
+                    .merge()
+                    .collectItems().asList().await().indefinitely();
+        }).isInstanceOf(IllegalStateException.class)
+                .hasMessage("boom");
+    }
+
+    @Test
+    @SuppressWarnings("deprecation")
+    public void testProduceCompletionStageWithMapperThrowingExceptionDeprecated() {
+        assertThatThrownBy(() -> {
+            Multi.createFrom().range(1, 4)
+                    .onItem().<Integer>produceCompletionStage(i -> {
+                throw new IllegalStateException("boom");
+            })
+                    .merge()
+                    .collectItems().asList().await().indefinitely();
+        }).isInstanceOf(IllegalStateException.class)
+                .hasMessage("boom");
+    }
+
+    @Test
+    @SuppressWarnings("deprecation")
+    public void testProduceCompletionStageWithMapperReturningNullDeprecated() {
+        assertThatThrownBy(() -> {
+            Multi.createFrom().range(1, 4)
+                    .onItem().<Integer>produceCompletionStage(i -> {
+                return null;
+            })
+                    .merge()
+                    .collectItems().asList().await().indefinitely();
+        }).isInstanceOf(NullPointerException.class);
     }
 
     @Test
@@ -504,6 +565,39 @@ public class MultiTransformToMultiTest {
                 .onItem().transformToIterable(i -> Arrays.asList(i, i + 1))
                 .collectItems().asList().await().indefinitely();
         assertThat(list).hasSize(6).containsExactlyInAnyOrder(1, 2, 2, 3, 3, 4);
+    }
+
+    @Test
+    public void testTransformToIterableWithMapperThrowingException() {
+        assertThatThrownBy(() -> {
+            Multi.createFrom().range(1, 4)
+                    .onItem().<Integer>transformToIterable(i -> {
+                throw new IllegalStateException("boom");
+            })
+                    .collectItems().asList().await().indefinitely();
+        })
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage("boom");
+    }
+
+    @Test
+    public void testTransformToIterableWithMapperReturningNull() {
+        assertThatThrownBy(() -> {
+            Multi.createFrom().range(1, 4)
+                    .onItem().<Integer>transformToIterable(i -> null)
+                    .collectItems().asList().await().indefinitely();
+        })
+                .isInstanceOf(NullPointerException.class);
+    }
+
+    @Test
+    public void testProduceIterableWithMapperReturningNullDeprecated() {
+        assertThatThrownBy(() -> {
+            Multi.createFrom().range(1, 4)
+                    .onItem().<Integer>produceIterable(i -> null).concatenate()
+                    .collectItems().asList().await().indefinitely();
+        })
+                .isInstanceOf(NullPointerException.class);
     }
 
     @Test
@@ -587,12 +681,12 @@ public class MultiTransformToMultiTest {
         Integer[] inputs = { 2, 32, 512 };
         Multi.createFrom().items(inputs)
                 .onItem().transformToIterable(i -> {
-                    if (i != 32) {
-                        return Arrays.asList(i * 2, i * 4, i * 8);
-                    } else {
-                        throw new IllegalArgumentException("boom");
-                    }
-                })
+            if (i != 32) {
+                return Arrays.asList(i * 2, i * 4, i * 8);
+            } else {
+                throw new IllegalArgumentException("boom");
+            }
+        })
                 .subscribe().withSubscriber(subscriber);
 
         verify(subscriber).onNext(2 * 2);
@@ -609,12 +703,12 @@ public class MultiTransformToMultiTest {
         Integer[] inputs = { 2, 32, 512 };
         Multi.createFrom().items(inputs)
                 .onItem().transformToMultiAndMerge(i -> {
-                    if (i != 32) {
-                        return Multi.createFrom().items(i * 2, i * 4, i * 8);
-                    } else {
-                        return Multi.createFrom().failure(new IllegalArgumentException("boom"));
-                    }
-                })
+            if (i != 32) {
+                return Multi.createFrom().items(i * 2, i * 4, i * 8);
+            } else {
+                return Multi.createFrom().failure(new IllegalArgumentException("boom"));
+            }
+        })
                 .subscribe().withSubscriber(subscriber);
 
         verify(subscriber).onNext(2 * 2);
@@ -631,12 +725,12 @@ public class MultiTransformToMultiTest {
         Integer[] inputs = { 2, 32, 512 };
         Multi.createFrom().items(inputs)
                 .onItem().transformToMultiAndMerge(i -> {
-                    if (i != 32) {
-                        return Multi.createFrom().items(i * 2, i * 4, i * 8);
-                    } else {
-                        throw new IllegalArgumentException("boom");
-                    }
-                })
+            if (i != 32) {
+                return Multi.createFrom().items(i * 2, i * 4, i * 8);
+            } else {
+                throw new IllegalArgumentException("boom");
+            }
+        })
                 .subscribe().withSubscriber(subscriber);
 
         verify(subscriber).onNext(2 * 2);
@@ -653,12 +747,12 @@ public class MultiTransformToMultiTest {
         Integer[] inputs = { 2, 32, 512 };
         Multi.createFrom().items(inputs)
                 .onItem().transformToMultiAndConcatenate(i -> {
-                    if (i != 32) {
-                        return Multi.createFrom().items(i * 2, i * 4, i * 8);
-                    } else {
-                        return Multi.createFrom().failure(new IllegalArgumentException("boom"));
-                    }
-                })
+            if (i != 32) {
+                return Multi.createFrom().items(i * 2, i * 4, i * 8);
+            } else {
+                return Multi.createFrom().failure(new IllegalArgumentException("boom"));
+            }
+        })
                 .subscribe().withSubscriber(subscriber);
 
         verify(subscriber).onNext(2 * 2);
@@ -675,12 +769,12 @@ public class MultiTransformToMultiTest {
         Integer[] inputs = { 2, 32, 512 };
         Multi.createFrom().items(inputs)
                 .onItem().transformToMultiAndConcatenate(i -> {
-                    if (i != 32) {
-                        return Multi.createFrom().items(i * 2, i * 4, i * 8);
-                    } else {
-                        throw new IllegalArgumentException("boom");
-                    }
-                })
+            if (i != 32) {
+                return Multi.createFrom().items(i * 2, i * 4, i * 8);
+            } else {
+                throw new IllegalArgumentException("boom");
+            }
+        })
                 .subscribe().withSubscriber(subscriber);
 
         verify(subscriber).onNext(2 * 2);
@@ -698,12 +792,12 @@ public class MultiTransformToMultiTest {
 
         Multi.createFrom().items(inputs)
                 .onItem().transform(i -> {
-                    if (i == 32) {
-                        throw new IllegalArgumentException("boom");
-                    } else {
-                        return i;
-                    }
-                })
+            if (i == 32) {
+                throw new IllegalArgumentException("boom");
+            } else {
+                return i;
+            }
+        })
                 .onItem().transformToMultiAndMerge(i -> Multi.createFrom().items(i * 2, i * 4, i * 8))
                 .subscribe().withSubscriber(subscriber);
 
@@ -722,12 +816,12 @@ public class MultiTransformToMultiTest {
 
         Multi.createFrom().items(inputs)
                 .onItem().transform(i -> {
-                    if (i == 32) {
-                        throw new IllegalArgumentException("boom");
-                    } else {
-                        return i;
-                    }
-                })
+            if (i == 32) {
+                throw new IllegalArgumentException("boom");
+            } else {
+                return i;
+            }
+        })
                 .onItem().transformToMultiAndConcatenate(i -> Multi.createFrom().items(i * 2, i * 4, i * 8))
                 .subscribe().withSubscriber(subscriber);
 
@@ -746,12 +840,12 @@ public class MultiTransformToMultiTest {
 
         Multi.createFrom().items(inputs)
                 .onItem().transform(i -> {
-                    if (i == 32) {
-                        throw new IllegalArgumentException("boom");
-                    } else {
-                        return i;
-                    }
-                })
+            if (i == 32) {
+                throw new IllegalArgumentException("boom");
+            } else {
+                return i;
+            }
+        })
                 .onItem().transformToIterable(i -> Arrays.asList(i * 2, i * 4, i * 8))
                 .subscribe().withSubscriber(subscriber);
 
@@ -840,7 +934,8 @@ public class MultiTransformToMultiTest {
         List<Integer> expected = Multi.createFrom().range(0, max).collectItems().asList().await().indefinitely();
         AssertSubscriber<Integer> subscriber = Multi.createFrom().range(0, max)
                 .onItem()
-                .transformToMulti(i -> Multi.createFrom().item(i).runSubscriptionOn(Infrastructure.getDefaultWorkerPool()))
+                .transformToMulti(
+                        i -> Multi.createFrom().item(i).runSubscriptionOn(Infrastructure.getDefaultWorkerPool()))
                 .merge(8)
                 .subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE));
 
@@ -856,7 +951,8 @@ public class MultiTransformToMultiTest {
         List<Integer> expected = Multi.createFrom().range(0, max).collectItems().asList().await().indefinitely();
         AssertSubscriber<Integer> subscriber = Multi.createFrom().range(0, max)
                 .onItem()
-                .transformToMulti(i -> Multi.createFrom().item(i).runSubscriptionOn(Infrastructure.getDefaultWorkerPool()))
+                .transformToMulti(
+                        i -> Multi.createFrom().item(i).runSubscriptionOn(Infrastructure.getDefaultWorkerPool()))
                 .concatenate()
                 .subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE));
 
