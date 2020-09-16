@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Multi;
+import io.smallrye.mutiny.TestException;
 import io.smallrye.mutiny.subscription.MultiEmitter;
 import io.smallrye.mutiny.test.AssertSubscriber;
 
@@ -83,7 +84,7 @@ public class MultiOnFailureTest {
     }
 
     @Test
-    public void testOnFailureMap() {
+    public void testOnFailureTransform() {
         AssertSubscriber<Integer> subscriber = AssertSubscriber.create();
 
         Multi.createFrom().<Integer> failure(new IllegalStateException("boom"))
@@ -96,7 +97,64 @@ public class MultiOnFailureTest {
     }
 
     @Test
-    public void testOnFailureMapWithDeprecatedApiApply() {
+    public void testOnFailureTransformWithMapperReturningNull() {
+        AssertSubscriber<Integer> subscriber = AssertSubscriber.create();
+
+        Multi.createFrom().<Integer> failure(new IllegalStateException("boom"))
+                .onFailure().transform(f -> null)
+                .subscribe().withSubscriber(subscriber);
+
+        subscriber.assertHasNotReceivedAnyItem()
+                .assertTerminated()
+                .assertHasFailedWith(NullPointerException.class, "");
+    }
+
+    @Test
+    public void testOnFailureTransformWithMapperThrowingException() {
+        AssertSubscriber<Integer> subscriber = AssertSubscriber.create();
+
+        Multi.createFrom().<Integer> failure(new IllegalStateException("boom"))
+                .onFailure().transform(f -> {
+                    throw new TestException("no");
+                })
+                .subscribe().withSubscriber(subscriber);
+
+        subscriber.assertHasNotReceivedAnyItem()
+                .assertTerminated()
+                .assertHasFailedWith(CompositeException.class, "boom")
+                .assertHasFailedWith(CompositeException.class, "no");
+    }
+
+    @Test
+    public void testOnFailureTransformWithPassingPredicate() {
+        AssertSubscriber<Integer> subscriber = AssertSubscriber.create();
+
+        Multi.createFrom().<Integer> failure(new IllegalStateException("boom"))
+                .onFailure(t -> t instanceof IllegalStateException)
+                .transform(f -> new IOException("kaboom!"))
+                .subscribe().withSubscriber(subscriber);
+
+        subscriber.assertHasNotReceivedAnyItem()
+                .assertTerminated()
+                .assertHasFailedWith(IOException.class, "kaboom!");
+    }
+
+    @Test
+    public void testOnFailureTransformWithNotPassingPredicate() {
+        AssertSubscriber<Integer> subscriber = AssertSubscriber.create();
+
+        Multi.createFrom().<Integer> failure(new IllegalStateException("boom"))
+                .onFailure(t -> t instanceof TestException)
+                .transform(f -> new IOException("kaboom!"))
+                .subscribe().withSubscriber(subscriber);
+
+        subscriber.assertHasNotReceivedAnyItem()
+                .assertTerminated()
+                .assertHasFailedWith(IllegalStateException.class, "boom");
+    }
+
+    @Test
+    public void testOnFailureTransformWithDeprecatedApiApply() {
         AssertSubscriber<Integer> subscriber = AssertSubscriber.create();
 
         Multi.createFrom().<Integer> failure(new IllegalStateException("boom"))
@@ -329,7 +387,7 @@ public class MultiOnFailureTest {
     }
 
     @Test
-    public void testOnFailureMapWithPredicate() {
+    public void testOnFailureTransformWithPredicate() {
         Multi.createFrom().<Integer> failure(new IOException())
                 .onFailure(IOException.class::isInstance)
                 .transform(e -> new Exception("BOOM!!!"))
@@ -338,7 +396,7 @@ public class MultiOnFailureTest {
     }
 
     @Test
-    public void testOnFailureMapWithNonPassingPredicate() {
+    public void testOnFailureTransformWithNonPassingPredicate() {
         Multi.createFrom().<Integer> failure(new RuntimeException("first"))
                 .onFailure(IOException.class::isInstance)
                 .transform(e -> new Exception("BOOM!!!"))
@@ -347,7 +405,7 @@ public class MultiOnFailureTest {
     }
 
     @Test
-    public void testOnFailureMapWithPredicateThrowingException() {
+    public void testOnFailureTransformWithPredicateThrowingException() {
         AssertSubscriber<Integer> subscriber = Multi.createFrom().<Integer> failure(new RuntimeException("first"))
                 .onFailure(f -> {
                     throw new IllegalArgumentException("bad");

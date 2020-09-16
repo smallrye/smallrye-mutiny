@@ -3,6 +3,7 @@ package io.smallrye.mutiny.operators;
 import static io.smallrye.mutiny.helpers.ParameterValidation.MAPPER_RETURNED_NULL;
 import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
 
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -13,11 +14,11 @@ import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.multi.MultiOnFailureResumeOp;
 
-public class MultiMapOnFailure<T> extends MultiOperator<T, T> {
+public class MultiOnFailureTransform<T> extends MultiOperator<T, T> {
     private final Predicate<? super Throwable> predicate;
     private final Function<? super Throwable, ? extends Throwable> mapper;
 
-    public MultiMapOnFailure(Multi<T> upstream, Predicate<? super Throwable> predicate,
+    public MultiOnFailureTransform(Multi<T> upstream, Predicate<? super Throwable> predicate,
             Function<? super Throwable, ? extends Throwable> mapper) {
         super(nonNull(upstream, "upstream"));
         this.predicate = predicate == null ? x -> true : predicate;
@@ -26,9 +27,7 @@ public class MultiMapOnFailure<T> extends MultiOperator<T, T> {
 
     @Override
     public void subscribe(Subscriber<? super T> subscriber) {
-        if (subscriber == null) {
-            throw new NullPointerException("The subscriber must not be `null`");
-        }
+        Objects.requireNonNull(subscriber, "The subscriber must not be `null`");
         Function<? super Throwable, ? extends Publisher<? extends T>> next = failure -> {
             if (predicate.test(failure)) {
                 Throwable throwable = mapper.apply(failure);
