@@ -54,17 +54,17 @@ public class MultiOnOverflowTest {
 
     @Test
     public void testDropStrategyWithBackPressure() {
-        AssertSubscriber<Integer> sub = AssertSubscriber.create();
+        AssertSubscriber<Integer> sub = AssertSubscriber.create(0);
         Multi.createFrom().range(1, 10)
                 .onOverflow().drop()
                 .subscribe(sub);
-
-        sub.assertCompletedSuccessfully().assertHasNotReceivedAnyItem();
+        sub.request(1);
+        sub.assertCompletedSuccessfully().assertReceived(1);
     }
 
     @Test
     public void testDropStrategyWithEmitter() {
-        AssertSubscriber<Integer> sub = AssertSubscriber.create();
+        AssertSubscriber<Integer> sub = AssertSubscriber.create(0);
         AtomicReference<MultiEmitter<? super Integer>> emitter = new AtomicReference<>();
         List<Integer> list = new CopyOnWriteArrayList<>();
         Multi<Integer> multi = Multi.createFrom().emitter((Consumer<MultiEmitter<? super Integer>>) emitter::set)
@@ -77,13 +77,13 @@ public class MultiOnOverflowTest {
         emitter.get().emit(5).complete();
         sub
                 .assertCompletedSuccessfully()
-                .assertReceived(2, 3, 5);
-        assertThat(list).containsExactly(1, 4);
+                .assertReceived(1, 2, 5);
+        assertThat(list).containsExactly(3, 4);
     }
 
     @Test
     public void testDropStrategyWithEmitterWithoutCallback() {
-        AssertSubscriber<Integer> sub = AssertSubscriber.create();
+        AssertSubscriber<Integer> sub = AssertSubscriber.create(0);
         AtomicReference<MultiEmitter<? super Integer>> emitter = new AtomicReference<>();
         Multi<Integer> multi = Multi.createFrom().emitter((Consumer<MultiEmitter<? super Integer>>) emitter::set)
                 .onOverflow().drop();
@@ -95,7 +95,7 @@ public class MultiOnOverflowTest {
         emitter.get().emit(5).complete();
         sub
                 .assertCompletedSuccessfully()
-                .assertReceived(2, 3, 5);
+                .assertReceived(1, 2, 5);
     }
 
     @Test
@@ -104,7 +104,7 @@ public class MultiOnOverflowTest {
                 .onOverflow().drop(i -> {
                     throw new IllegalStateException("boom");
                 })
-                .subscribe().withSubscriber(AssertSubscriber.create())
+                .subscribe().withSubscriber(AssertSubscriber.create(1))
                 .assertHasFailedWith(IllegalStateException.class, "boom");
 
     }

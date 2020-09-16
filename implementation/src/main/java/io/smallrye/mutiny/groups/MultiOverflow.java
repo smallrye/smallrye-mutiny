@@ -40,7 +40,7 @@ public class MultiOverflow<T> {
     public Multi<T> buffer(int size) {
         return Infrastructure
                 .onMultiCreation(new MultiOnOverflowBufferOp<>(upstream, ParameterValidation.positive(size, "size"),
-                        false, false,
+                        false,
                         x -> {
                             // do nothing
                         }));

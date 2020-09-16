@@ -20,15 +20,12 @@ public class MultiOnOverflowBufferOp<T> extends AbstractMultiOperator<T, T> {
 
     private final int bufferSize;
     private final boolean unbounded;
-    private final boolean postponeFailurePropagation;
     private final Consumer<T> onOverflow;
 
-    public MultiOnOverflowBufferOp(Multi<T> upstream, int bufferSize, boolean unbounded,
-            boolean postponeFailurePropagation, Consumer<T> onOverflow) {
+    public MultiOnOverflowBufferOp(Multi<T> upstream, int bufferSize, boolean unbounded, Consumer<T> onOverflow) {
         super(upstream);
         this.bufferSize = bufferSize;
         this.unbounded = unbounded;
-        this.postponeFailurePropagation = postponeFailurePropagation;
         this.onOverflow = onOverflow;
     }
 
@@ -36,7 +33,6 @@ public class MultiOnOverflowBufferOp<T> extends AbstractMultiOperator<T, T> {
     public void subscribe(MultiSubscriber<? super T> downstream) {
         OnOverflowBufferProcessor<T> subscriber = new OnOverflowBufferProcessor<>(downstream,
                 bufferSize, unbounded,
-                postponeFailurePropagation,
                 onOverflow);
         upstream.subscribe().withSubscriber(subscriber);
     }
@@ -44,7 +40,6 @@ public class MultiOnOverflowBufferOp<T> extends AbstractMultiOperator<T, T> {
     static final class OnOverflowBufferProcessor<T> extends MultiOperatorProcessor<T, T> {
 
         private final Queue<T> queue;
-        private final boolean postponeFailurePropagation;
         private final Consumer<T> onOverflow;
 
         Throwable failure;
@@ -56,10 +51,9 @@ public class MultiOnOverflowBufferOp<T> extends AbstractMultiOperator<T, T> {
         volatile boolean done;
 
         OnOverflowBufferProcessor(MultiSubscriber<? super T> downstream, int bufferSize,
-                boolean unbounded, boolean postponeFailurePropagation, Consumer<T> onOverflow) {
+                boolean unbounded, Consumer<T> onOverflow) {
             super(downstream);
             this.onOverflow = onOverflow;
-            this.postponeFailurePropagation = postponeFailurePropagation;
             this.queue = unbounded ? Queues.<T> unbounded(bufferSize).get() : Queues.<T> get(bufferSize).get();
         }
 
@@ -177,24 +171,13 @@ public class MultiOnOverflowBufferOp<T> extends AbstractMultiOperator<T, T> {
                 return true;
             }
             if (wasDone) {
-                if (postponeFailurePropagation) {
-                    if (wasEmpty) {
-                        if (failure != null) {
-                            super.onFailure(failure);
-                        } else {
-                            super.onCompletion();
-                        }
-                        return true;
-                    }
-                } else {
-                    if (failure != null) {
-                        queue.clear();
-                        super.onFailure(failure);
-                        return true;
-                    } else if (wasEmpty) {
-                        super.onCompletion();
-                        return true;
-                    }
+                if (failure != null) {
+                    queue.clear();
+                    super.onFailure(failure);
+                    return true;
+                } else if (wasEmpty) {
+                    super.onCompletion();
+                    return true;
                 }
             }
             return false;
