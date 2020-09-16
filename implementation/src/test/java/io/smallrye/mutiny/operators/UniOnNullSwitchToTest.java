@@ -73,7 +73,6 @@ public class UniOnNullSwitchToTest {
 
     }
 
-
     @Test
     public void testSwitchToNull() {
         assertThrows(NullPointerException.class, () -> Uni.createFrom().item((Object) null).onItem().castTo(Integer.class)

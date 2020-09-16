@@ -136,31 +136,31 @@ public class MultiCollectTest {
     public void testCollectInWithAccumulatorSupplierReturningNull() {
         Multi.createFrom().range(1, 10)
                 .collectItems().with(new Collector<Integer, Integer, Integer>() {
-            @Override
-            public Supplier<Integer> supplier() {
-                return () -> 0;
-            }
+                    @Override
+                    public Supplier<Integer> supplier() {
+                        return () -> 0;
+                    }
 
-            @Override
-            public BiConsumer<Integer, Integer> accumulator() {
-                return null;
-            }
+                    @Override
+                    public BiConsumer<Integer, Integer> accumulator() {
+                        return null;
+                    }
 
-            @Override
-            public BinaryOperator<Integer> combiner() {
-                return (a, b) -> 0;
-            }
+                    @Override
+                    public BinaryOperator<Integer> combiner() {
+                        return (a, b) -> 0;
+                    }
 
-            @Override
-            public Function<Integer, Integer> finisher() {
-                return i -> i;
-            }
+                    @Override
+                    public Function<Integer, Integer> finisher() {
+                        return i -> i;
+                    }
 
-            @Override
-            public Set<Characteristics> characteristics() {
-                return Collections.emptySet();
-            }
-        })
+                    @Override
+                    public Set<Characteristics> characteristics() {
+                        return Collections.emptySet();
+                    }
+                })
                 .subscribe().withSubscriber(UniAssertSubscriber.create())
                 .assertFailure(NullPointerException.class, "accumulator");
     }

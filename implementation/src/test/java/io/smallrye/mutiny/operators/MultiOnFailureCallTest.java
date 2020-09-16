@@ -87,6 +87,22 @@ public class MultiOnFailureCallTest {
     }
 
     @Test
+    public void testCallOnFailureWithSupplier() {
+        AtomicReference<Throwable> failure = new AtomicReference<>();
+        AtomicInteger twoGotCalled = new AtomicInteger();
+
+        AssertSubscriber<Integer> subscriber = failed.onFailure().call(i -> {
+            failure.set(i);
+            return sub.onItem().invoke(twoGotCalled::incrementAndGet);
+        }).subscribe().withSubscriber(AssertSubscriber.create(10));
+
+        subscriber.assertHasFailedWith(IOException.class, "boom")
+                .assertReceived(1, 2);
+        assertThat(twoGotCalled).hasValue(1);
+        assertThat(failure).hasValue(BOOM);
+    }
+
+    @Test
     public void testFailureInAsyncCallback() {
         AtomicReference<Throwable> failure = new AtomicReference<>();
 

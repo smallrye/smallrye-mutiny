@@ -39,8 +39,6 @@ public class UniOnNullFailTest {
                 () -> Uni.createFrom().item((Object) null).onItem().ifNull().failWith((Exception) null).await().indefinitely());
     }
 
-
-
     @Test
     public void testFailWithExceptionNotCalledOnITem() {
         assertThat(Uni.createFrom().item(1).onItem().ifNull().failWith(new IOException("boom")).await().indefinitely())

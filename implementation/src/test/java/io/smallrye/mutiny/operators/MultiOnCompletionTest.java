@@ -318,9 +318,9 @@ public class MultiOnCompletionTest {
 
         Multi.createFrom().range(1, 5)
                 .onCompletion().invokeUni(() -> {
-            called.set(true);
-            return Uni.createFrom().item(69);
-        })
+                    called.set(true);
+                    return Uni.createFrom().item(69);
+                })
                 .subscribe().withSubscriber(AssertSubscriber.create(7))
                 .assertCompletedSuccessfully()
                 .assertReceived(1, 2, 3, 4);
@@ -334,9 +334,9 @@ public class MultiOnCompletionTest {
 
         Multi.createFrom().range(1, 5)
                 .on().completion().call(() -> {
-            called.set(true);
-            return Uni.createFrom().item(69);
-        })
+                    called.set(true);
+                    return Uni.createFrom().item(69);
+                })
                 .subscribe().withSubscriber(AssertSubscriber.create(7))
                 .assertCompletedSuccessfully()
                 .assertReceived(1, 2, 3, 4);

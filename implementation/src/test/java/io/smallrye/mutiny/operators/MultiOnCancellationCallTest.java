@@ -47,9 +47,9 @@ public class MultiOnCancellationCallTest {
         Multi.createFrom().item(1)
                 .onItem().invoke(item::set)
                 .onCancellation().invokeUni(() -> {
-            cancellation.set(true);
-            return Uni.createFrom().item("value");
-        })
+                    cancellation.set(true);
+                    return Uni.createFrom().item("value");
+                })
                 .subscribe().withSubscriber(subscriber);
 
         subscriber.cancel()

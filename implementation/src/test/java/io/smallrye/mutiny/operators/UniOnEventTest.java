@@ -515,7 +515,7 @@ public class UniOnEventTest {
     }
 
     @Test
-    public void testActionsOnTerminationWithfailure() {
+    public void testActionsOnTerminationWithFailure() {
         AtomicInteger Item = new AtomicInteger();
         AtomicReference<Throwable> failure = new AtomicReference<>();
         AtomicReference<Subscription> subscription = new AtomicReference<>();
@@ -537,6 +537,77 @@ public class UniOnEventTest {
         assertThat(Item).doesNotHaveValue(1);
         assertThat(subscription.get()).isNotNull();
         assertThat(terminate.get()).isInstanceOf(IOException.class).hasMessageContaining("boom");
+    }
+
+    @Test
+    public void testActionsOnTerminationCallWithSupplierWithResult() {
+        AtomicInteger Item = new AtomicInteger();
+        AtomicReference<Throwable> failure = new AtomicReference<>();
+        AtomicReference<Subscription> subscription = new AtomicReference<>();
+        AtomicBoolean terminate = new AtomicBoolean();
+        UniAssertSubscriber<? super Integer> subscriber = Uni.createFrom().item(1)
+                .onItem().invoke(Item::set)
+                .onFailure().invoke(failure::set)
+                .onSubscribe().invoke(subscription::set)
+                .onTermination().call(() -> {
+                    terminate.set(true);
+                    return Uni.createFrom().item(100);
+                })
+                .subscribe().withSubscriber(UniAssertSubscriber.create());
+
+        subscriber.assertItem(1);
+        assertThat(Item).hasValue(1);
+        assertThat(failure.get()).isNull();
+        assertThat(subscription.get()).isNotNull();
+        assertThat(terminate).isTrue();
+    }
+
+    @Test
+    public void testActionsOnTerminationInvokeUniWithResultDeprecated() {
+        AtomicInteger Item = new AtomicInteger();
+        AtomicReference<Throwable> failure = new AtomicReference<>();
+        AtomicReference<Subscription> subscription = new AtomicReference<>();
+        AtomicBoolean terminate = new AtomicBoolean();
+        UniAssertSubscriber<? super Integer> subscriber = Uni.createFrom().item(1)
+                .onItem().invoke(Item::set)
+                .onFailure().invoke(failure::set)
+                .onSubscribe().invoke(subscription::set)
+                .onTermination().invokeUni(() -> {
+                    terminate.set(true);
+                    return Uni.createFrom().item(100);
+                })
+                .subscribe().withSubscriber(UniAssertSubscriber.create());
+
+        subscriber.assertItem(1);
+        assertThat(Item).hasValue(1);
+        assertThat(failure.get()).isNull();
+        assertThat(subscription.get()).isNotNull();
+        assertThat(terminate).isTrue();
+    }
+
+    @Test
+    public void testActionsOnTerminationWithSupplierOnFailure() {
+        AtomicInteger Item = new AtomicInteger();
+        AtomicReference<Throwable> failure = new AtomicReference<>();
+        AtomicReference<Subscription> subscription = new AtomicReference<>();
+        AtomicBoolean terminate = new AtomicBoolean();
+        UniAssertSubscriber<? super Integer> subscriber = Uni.createFrom().<Integer> failure(new IOException("boom"))
+                .onItem().invoke(Item::set)
+                .onFailure().invoke(failure::set)
+                .onSubscribe().invoke(subscription::set)
+                .onTermination().call(() -> {
+                    terminate.set(true);
+                    return Uni.createFrom().failure(new IOException("tada"));
+                })
+                .subscribe().withSubscriber(UniAssertSubscriber.create());
+
+        subscriber.assertCompletedWithFailure().assertFailure(CompositeException.class, "boom");
+        CompositeException compositeException = (CompositeException) subscriber.getFailure();
+        assertThat(compositeException).getRootCause().isInstanceOf(IOException.class).hasMessageContaining("boom");
+        assertThat(compositeException.getCauses().get(1)).isInstanceOf(IOException.class).hasMessageContaining("tada");
+        assertThat(Item).doesNotHaveValue(1);
+        assertThat(subscription.get()).isNotNull();
+        assertThat(terminate.get()).isTrue();
     }
 
     @Test
