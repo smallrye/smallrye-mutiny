@@ -120,8 +120,10 @@ public class UniSerializedSubscriber<T> implements UniSubscriber<T>, UniSubscrip
             while (subscription == null) {
                 // We are in the middle of a race condition with onSubscribe()
             }
-            subscription.cancel();
-            dispose();
+            if (subscription != null) { // May have been cancelled already by another thread.
+                subscription.cancel();
+                dispose();
+            }
         } else {
             state.set(DONE);
         }
