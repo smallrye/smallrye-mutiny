@@ -133,7 +133,7 @@ public final class MultiPublishOp<T> extends ConnectableMulti<T> {
         /**
          * Contains either the failure or the `COMPLETED` object.
          */
-        private AtomicReference<Throwable> failureOrCompletion = new AtomicReference<>();
+        private final AtomicReference<Throwable> failureOrCompletion = new AtomicReference<>();
 
         private static final Throwable COMPLETED = new Exception();
 
