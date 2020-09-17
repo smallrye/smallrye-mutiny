@@ -14,7 +14,7 @@ import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.MultiFlatMapOnFailure;
-import io.smallrye.mutiny.operators.MultiMapOnFailure;
+import io.smallrye.mutiny.operators.MultiOnFailureTransform;
 import io.smallrye.mutiny.operators.multi.MultiOnFailureInvoke;
 import io.smallrye.mutiny.subscription.Cancellable;
 
@@ -183,7 +183,7 @@ public class MultiOnFailure<T> {
      * @return the new {@link Multi}
      */
     public Multi<T> transform(Function<? super Throwable, ? extends Throwable> mapper) {
-        return Infrastructure.onMultiCreation(new MultiMapOnFailure<>(upstream, predicate, mapper));
+        return Infrastructure.onMultiCreation(new MultiOnFailureTransform<>(upstream, predicate, mapper));
     }
 
     /**

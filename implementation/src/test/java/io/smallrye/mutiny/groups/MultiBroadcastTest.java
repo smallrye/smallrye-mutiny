@@ -282,4 +282,25 @@ public class MultiBroadcastTest {
         assertThat(cancelled).isFalse();
         await().until(cancelled::get);
     }
+
+    @Test
+    public void testRequestsd() {
+        Multi<Integer> multi = Multi.createFrom().range(0, 1000)
+                .broadcast().toAtLeast(2);
+
+        AssertSubscriber<Integer> subscriber1 = new AssertSubscriber<>(Long.MAX_VALUE);
+        AssertSubscriber<Integer> subscriber2 = new AssertSubscriber<>(100);
+
+        multi.subscribe().withSubscriber(subscriber1);
+        multi.subscribe().withSubscriber(subscriber2);
+
+        await().until(() -> subscriber1.items().size() == 100 && subscriber2.items().size() == 100);
+
+        subscriber2.request(1000);
+
+        subscriber1.await().assertCompletedSuccessfully();
+        assertThat(subscriber1.items()).hasSize(1000);
+        subscriber2.await().assertCompletedSuccessfully();
+        assertThat(subscriber2.items()).hasSize(1000);
+    }
 }

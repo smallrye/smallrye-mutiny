@@ -31,11 +31,7 @@ public class MultiFlatten<I, O> {
             int requests, boolean collectFailures) {
         this.upstream = upstream;
         this.mapper = mapper;
-        if (requests == 0) {
-            this.requests = Queues.BUFFER_XS;
-        } else {
-            this.requests = requests;
-        }
+        this.requests = requests;
         this.collectFailureUntilCompletion = collectFailures;
     }
 

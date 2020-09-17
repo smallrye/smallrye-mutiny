@@ -11,6 +11,7 @@ import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.test.AssertSubscriber;
 
+@SuppressWarnings("ConstantConditions")
 public class MultiOnRequestTest {
 
     @Test
@@ -28,6 +29,23 @@ public class MultiOnRequestTest {
         subscriber.assertCompletedSuccessfully();
         assertThat(subscriber.items()).containsExactly(1);
         assertThat(requested.get()).isEqualTo(10);
+    }
+
+    @Test
+    public void testInvokeRunnable() {
+        AssertSubscriber<Integer> subscriber = AssertSubscriber.create();
+
+        AtomicBoolean called = new AtomicBoolean();
+
+        Multi.createFrom().item(1)
+                .onRequest().invoke(() -> called.set(true))
+                .subscribe().withSubscriber(subscriber);
+
+        subscriber.request(10);
+
+        subscriber.assertCompletedSuccessfully();
+        assertThat(subscriber.items()).containsExactly(1);
+        assertThat(called).isTrue();
     }
 
     @Test
@@ -87,6 +105,23 @@ public class MultiOnRequestTest {
         subscriber.assertCompletedSuccessfully();
         assertThat(subscriber.items()).containsExactly(1);
         assertThat(requested.get()).isEqualTo(10);
+    }
+
+    @Test
+    public void testCallWithSupplier() {
+        AssertSubscriber<Integer> subscriber = AssertSubscriber.create();
+        AtomicBoolean called = new AtomicBoolean();
+
+        Multi.createFrom().item(1)
+                .onRequest().call(() -> Uni.createFrom().item("ok")
+                        .onSubscribe().invoke(() -> called.set(true)))
+                .subscribe().withSubscriber(subscriber);
+
+        subscriber.request(10);
+
+        subscriber.assertCompletedSuccessfully();
+        assertThat(subscriber.items()).containsExactly(1);
+        assertThat(called).isTrue();
     }
 
     @Test

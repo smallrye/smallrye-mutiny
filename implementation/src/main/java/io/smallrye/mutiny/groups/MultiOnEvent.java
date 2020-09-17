@@ -67,6 +67,7 @@ public class MultiOnEvent<T> {
         return upstream.onRequest().invoke(callback);
     }
 
+    @Deprecated
     public MultiOverflow<T> overflow() {
         return new MultiOverflow<>(upstream);
     }

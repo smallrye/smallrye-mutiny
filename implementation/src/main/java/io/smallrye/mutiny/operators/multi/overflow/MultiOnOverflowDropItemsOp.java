@@ -1,5 +1,6 @@
 package io.smallrye.mutiny.operators.multi.overflow;
 
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 
@@ -34,6 +35,7 @@ public class MultiOnOverflowDropItemsOp<T> extends AbstractMultiOperator<T, T> {
 
         private final Consumer<? super T> onItemDrop;
         private final AtomicLong requested = new AtomicLong();
+        private final AtomicBoolean once = new AtomicBoolean();
 
         MultiOnOverflowDropItemsProcessor(MultiSubscriber<? super T> downstream, Consumer<? super T> onItemDrop) {
             super(downstream);
@@ -44,7 +46,6 @@ public class MultiOnOverflowDropItemsOp<T> extends AbstractMultiOperator<T, T> {
         public void onSubscribe(Subscription subscription) {
             if (upstream.compareAndSet(null, subscription)) {
                 downstream.onSubscribe(this);
-                subscription.request(Long.MAX_VALUE);
             } else {
                 subscription.cancel();
             }
@@ -79,6 +80,9 @@ public class MultiOnOverflowDropItemsOp<T> extends AbstractMultiOperator<T, T> {
         public void request(long n) {
             if (n > 0) {
                 Subscriptions.add(requested, n);
+                if (once.compareAndSet(false, true)) {
+                    upstream.get().request(Long.MAX_VALUE);
+                }
             }
         }
     }

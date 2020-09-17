@@ -66,6 +66,20 @@ public class UniOnNullFailTest {
     }
 
     @Test
+    public void estFailWithExceptionSupplierThrowingException() {
+        assertThrows(IllegalStateException.class,
+                () -> Uni.createFrom().item((Object) null).onItem().ifNull().failWith(() -> {
+                    throw new IllegalStateException("boom");
+                }).await().indefinitely());
+    }
+
+    @Test
+    public void testFailWithExceptionSupplierReturningNull() {
+        assertThrows(NullPointerException.class,
+                () -> Uni.createFrom().item((Object) null).onItem().ifNull().failWith(() -> null).await().indefinitely());
+    }
+
+    @Test
     public void testFailWithExceptionSupplierNotCalledOnItem() {
         assertThat(Uni.createFrom().item(1).onItem().ifNull().failWith(new IOException("boom")).await().indefinitely())
                 .isEqualTo(1);

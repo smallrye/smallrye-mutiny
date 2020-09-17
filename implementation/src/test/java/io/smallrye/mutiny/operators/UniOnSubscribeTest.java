@@ -47,6 +47,25 @@ public class UniOnSubscribeTest {
         assertThat(reference).doesNotHaveValue(null);
     }
 
+    @Test
+    public void testInvokeRunnable() {
+        AtomicInteger count = new AtomicInteger();
+        Uni<Integer> uni = Uni.createFrom().item(1)
+                .onSubscribe().invoke(count::incrementAndGet);
+
+        UniAssertSubscriber<Integer> subscriber = UniAssertSubscriber.create();
+
+        assertThat(count).hasValue(0);
+
+        uni.subscribe().withSubscriber(subscriber);
+
+        assertThat(count).hasValue(1);
+
+        uni.subscribe().withSubscriber(subscriber);
+
+        assertThat(count).hasValue(2);
+    }
+
     @SuppressWarnings("deprecation")
     @Test
     public void testDeprecatedOnSubscribed() {
@@ -81,6 +100,67 @@ public class UniOnSubscribeTest {
         AtomicReference<UniSubscription> sub = new AtomicReference<>();
         Uni<Integer> uni = Uni.createFrom().item(1)
                 .onSubscribe().call(s -> {
+                    reference.set(s);
+                    count.incrementAndGet();
+                    return Uni.createFrom().nullItem()
+                            .onSubscribe().invoke(sub::set);
+                });
+
+        UniAssertSubscriber<Integer> subscriber = UniAssertSubscriber.create();
+
+        assertThat(count).hasValue(0);
+        assertThat(reference).hasValue(null);
+        assertThat(sub).hasValue(null);
+
+        uni.subscribe().withSubscriber(subscriber);
+
+        assertThat(count).hasValue(1);
+        assertThat(reference).doesNotHaveValue(null);
+        assertThat(sub).doesNotHaveValue(null);
+
+        uni.subscribe().withSubscriber(subscriber);
+
+        assertThat(count).hasValue(2);
+        assertThat(reference).doesNotHaveValue(null);
+        assertThat(sub).doesNotHaveValue(null);
+
+    }
+
+    @Test
+    public void testCallWithSupplier() {
+        AtomicInteger count = new AtomicInteger();
+        AtomicReference<UniSubscription> sub = new AtomicReference<>();
+        Uni<Integer> uni = Uni.createFrom().item(1)
+                .onSubscribe().call(() -> {
+                    count.incrementAndGet();
+                    return Uni.createFrom().nullItem()
+                            .onSubscribe().invoke(sub::set);
+                });
+
+        UniAssertSubscriber<Integer> subscriber = UniAssertSubscriber.create();
+
+        assertThat(count).hasValue(0);
+        assertThat(sub).hasValue(null);
+
+        uni.subscribe().withSubscriber(subscriber);
+
+        assertThat(count).hasValue(1);
+        assertThat(sub).doesNotHaveValue(null);
+
+        uni.subscribe().withSubscriber(subscriber);
+
+        assertThat(count).hasValue(2);
+        assertThat(sub).doesNotHaveValue(null);
+
+    }
+
+    @Test
+    public void testInvokeUniDeprecated() {
+        AtomicInteger count = new AtomicInteger();
+        AtomicReference<UniSubscription> reference = new AtomicReference<>();
+        AtomicReference<UniSubscription> sub = new AtomicReference<>();
+        Uni<Integer> uni = Uni.createFrom().item(1)
+                .onSubscribe().invokeUni(s -> {
                     reference.set(s);
                     count.incrementAndGet();
                     return Uni.createFrom().nullItem()

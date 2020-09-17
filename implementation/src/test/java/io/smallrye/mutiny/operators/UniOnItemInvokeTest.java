@@ -16,6 +16,7 @@ import org.junit.jupiter.api.Test;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.subscription.Cancellable;
 
+@SuppressWarnings("ConstantConditions")
 public class UniOnItemInvokeTest {
 
     private final Uni<Integer> one = Uni.createFrom().item(1);
@@ -54,6 +55,17 @@ public class UniOnItemInvokeTest {
 
         assertThat(r).isEqualTo(1);
         assertThat(res).hasValue(1);
+    }
+
+    @Test
+    public void testInvokeOnItemWithRunnable() {
+        AtomicBoolean called = new AtomicBoolean();
+
+        int r = one.onItem().invoke(() -> called.set(true))
+                .await().indefinitely();
+
+        assertThat(r).isEqualTo(1);
+        assertThat(called).isTrue();
     }
 
     @Test
@@ -120,6 +132,17 @@ public class UniOnItemInvokeTest {
         assertThat(r).isEqualTo(1);
         assertThat(twoGotCalled).hasValue(2);
         assertThat(res).hasValue(1);
+    }
+
+    @Test
+    public void testCallOnItemWithSupplier() {
+        AtomicInteger twoGotCalled = new AtomicInteger();
+
+        int r = one.onItem().call(() -> two.onItem().invoke(twoGotCalled::set))
+                .await().indefinitely();
+
+        assertThat(r).isEqualTo(1);
+        assertThat(twoGotCalled).hasValue(2);
     }
 
     @Test

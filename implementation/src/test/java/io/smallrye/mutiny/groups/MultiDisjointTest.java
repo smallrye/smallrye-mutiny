@@ -16,7 +16,8 @@ import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.test.AssertSubscriber;
 
-public class MultiFlattenTest {
+@SuppressWarnings("ConstantConditions")
+public class MultiDisjointTest {
 
     @Test
     public void testWithMultis() {
@@ -26,7 +27,7 @@ public class MultiFlattenTest {
                 Multi.createFrom().items("d", "e"),
                 Multi.createFrom().empty(),
                 Multi.createFrom().items("f", "g")
-                        .onSubscribe().invoke(s -> subscribed.set(true)))
+                        .onSubscribe().invoke(() -> subscribed.set(true)))
                 .onItem().<String> disjoint()
                 .subscribe().withSubscriber(AssertSubscriber.create(4));
         assertThat(subscribed).isFalse();
@@ -95,7 +96,7 @@ public class MultiFlattenTest {
                 Multi.createFrom().items("d", "e"),
                 Multi.createFrom().failure(new IOException("boom")),
                 Multi.createFrom().items("f", "g")
-                        .onSubscribe().invoke(s -> subscribed.set(true)))
+                        .onSubscribe().invoke(() -> subscribed.set(true)))
                 .onItem().<String> disjoint()
                 .subscribe().withSubscriber(AssertSubscriber.create(4));
         assertThat(subscribed).isFalse();
@@ -116,7 +117,7 @@ public class MultiFlattenTest {
                     e.fail(new IOException("boom"));
                 }),
                 Multi.createFrom().items("g")
-                        .onSubscribe().invoke(s -> subscribed.set(true)))
+                        .onSubscribe().invoke(() -> subscribed.set(true)))
                 .onItem().<String> disjoint()
                 .subscribe().withSubscriber(AssertSubscriber.create(4));
         assertThat(subscribed).isFalse();

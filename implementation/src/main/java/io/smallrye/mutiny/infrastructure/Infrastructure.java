@@ -161,6 +161,8 @@ public class Infrastructure {
 
     private static void printAndDump(Throwable throwable) {
         System.err.println("[-- Mutiny had to drop the following exception --]");
+        StackTraceElement element = Thread.currentThread().getStackTrace()[3];
+        System.err.println("Exception received by: " + element.toString());
         throwable.printStackTrace();
         System.err.println("[------------------------------------------------]");
     }
