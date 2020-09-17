@@ -485,7 +485,7 @@ Events can flow from upstream to downstream (from source to sinks), or some sign
 </div>
 <div class="imageblock text-center">
 <div class="content">
-<img src="assets/images/diag-4e60926db2b100a45f7a3fafb6d1c2c5.png" alt="diag 4e60926db2b100a45f7a3fafb6d1c2c5" width="1247" height="822">
+<img src="assets/images/diag-4e60926db2b100a45f7a3fafb6d1c2c5.png" alt="diag 4e60926db2b100a45f7a3fafb6d1c2c5" width="1287" height="817">
 </div>
 </div>
 <div class="admonitionblock note">
@@ -565,7 +565,7 @@ Once they are emitted, no more items are emitted.</p>
 </div>
 <div class="imageblock text-center">
 <div class="content">
-<img src="assets/images/diag-c06139c2b31470fa367c3f84a6e51430.png" alt="diag c06139c2b31470fa367c3f84a6e51430" width="988" height="883">
+<img src="assets/images/diag-c06139c2b31470fa367c3f84a6e51430.png" alt="diag c06139c2b31470fa367c3f84a6e51430" width="997" height="878">
 </div>
 </div>
 <div class="paragraph">
@@ -620,11 +620,9 @@ source
         .onFailure().invoke(failure -&gt; System.out.println("Failed with " + failure.getMessage()))
         .onCompletion().invoke(() -&gt; System.out.println("Completed"))
         .onSubscribe().invoke(subscription -&gt; System.out.println("We are subscribed!"))
-
-        .on().cancellation(() -&gt; System.out.println("Downstream has cancelled the interaction"))
-        .on().request(n -&gt; System.out.println("Downstream requested " + n + " items"))
-        .subscribe().with(item -&gt; {
-        });</code></pre>
+        .onCancellation().invoke(() -&gt; System.out.println("Downstream has cancelled the interaction"))
+        .onRequest().invoke(n -&gt; System.out.println("Downstream requested " + n + " items"))
+        .subscribe().with(item -&gt; System.out.println("Subscriber received " + item));</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -934,7 +932,7 @@ Mutiny provides the <code>stage</code> function to structure your pipeline:</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-07-22 11:48:42 +0200
+Last updated 2020-09-17 14:54:48 UTC
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">

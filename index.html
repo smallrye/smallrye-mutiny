@@ -462,8 +462,8 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div id="header">
 <h1>SmallRye Mutiny</h1>
 <div class="details">
-<span id="revnumber">version 0.7.0,</span>
-<span id="revdate">2020-07-22</span>
+<span id="revnumber">version 0.8.0,</span>
+<span id="revdate">2020-09-17</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">SmallRye Mutiny</div>
@@ -504,7 +504,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#_how_do_i_interact_with_rx_java_2">3.15. How do I interact with RX Java 2?</a></li>
 <li><a href="#_how_do_i_interact_with_reactor">3.16. How do I interact with Reactor?</a></li>
 <li><a href="#_how_do_i_control_the_back_pressure">3.17. How do I control the back-pressure?</a></li>
-<li><a href="#_how_do_wrap_blocking_calls">3.18. How do wrap blocking calls?</a></li>
+<li><a href="#_how_to_wrap_blocking_calls">3.18. How to wrap blocking calls?</a></li>
 <li><a href="#_emiton_vs_runsubscriptionon">3.19. emitOn vs. runSubscriptionOn</a></li>
 <li><a href="#_how_can_i_use_a_unicast_processor">3.20. How can I use a Unicast Processor</a></li>
 <li><a href="#_how_can_i_create_unimulti_from_a_callback_based_api">3.21. How can I create Uni/Multi from a callback-based API</a></li>
@@ -514,6 +514,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#_how_do_i_delay_things">3.25. How do I delay <em>things</em>?</a></li>
 <li><a href="#_where_do_i_find_the_javadoc">3.26. Where do I find the JavaDoc?</a></li>
 <li><a href="#_default_executor_and_integration">3.27. Default executor and integration</a></li>
+<li><a href="#_handling_dropped_exceptions">3.28. Handling dropped exceptions</a></li>
 </ul>
 </li>
 </ul>
@@ -585,7 +586,7 @@ If you are using Maven, declare the following dependency in your <code>pom.xml</
 <pre class="highlightjs highlight"><code data-lang="xml" class="language-xml hljs">&lt;dependency&gt;
     &lt;groupId&gt;io.smallrye.reactive&lt;/groupId&gt;
     &lt;artifactId&gt;mutiny&lt;/artifactId&gt;
-    &lt;version&gt;0.7.0&lt;/version&gt;
+    &lt;version&gt;0.8.0&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -595,7 +596,7 @@ If you are using Maven, declare the following dependency in your <code>pom.xml</
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code data-lang="groovy" class="language-groovy hljs">dependencies {
-     implementation 'io.smallrye.reactive:mutiny:0.7.0'
+     implementation 'io.smallrye.reactive:mutiny:0.8.0'
 }</code></pre>
 </div>
 </div>
@@ -640,7 +641,7 @@ Finally, we <em>subscribe</em> to the resulting stream and for each emitted item
 </div>
 <div class="imageblock text-center">
 <div class="content">
-<img src="assets/images/diag-36a779d2e869a0312e41e21ab27aab6a.png" alt="diag 36a779d2e869a0312e41e21ab27aab6a" width="1489" height="1222">
+<img src="assets/images/diag-36a779d2e869a0312e41e21ab27aab6a.png" alt="diag 36a779d2e869a0312e41e21ab27aab6a" width="1506" height="1215">
 </div>
 </div>
 <div class="paragraph">
@@ -683,7 +684,7 @@ Events can flow from upstream to downstream (from source to sinks), or some sign
 </div>
 <div class="imageblock text-center">
 <div class="content">
-<img src="assets/images/diag-4e60926db2b100a45f7a3fafb6d1c2c5.png" alt="diag 4e60926db2b100a45f7a3fafb6d1c2c5" width="1247" height="822">
+<img src="assets/images/diag-4e60926db2b100a45f7a3fafb6d1c2c5.png" alt="diag 4e60926db2b100a45f7a3fafb6d1c2c5" width="1287" height="817">
 </div>
 </div>
 <div class="admonitionblock note">
@@ -763,7 +764,7 @@ Once they are emitted, no more items are emitted.</p>
 </div>
 <div class="imageblock text-center">
 <div class="content">
-<img src="assets/images/diag-c06139c2b31470fa367c3f84a6e51430.png" alt="diag c06139c2b31470fa367c3f84a6e51430" width="988" height="883">
+<img src="assets/images/diag-c06139c2b31470fa367c3f84a6e51430.png" alt="diag c06139c2b31470fa367c3f84a6e51430" width="997" height="878">
 </div>
 </div>
 <div class="paragraph">
@@ -816,11 +817,9 @@ source
         .onFailure().invoke(failure -&gt; System.out.println("Failed with " + failure.getMessage()))
         .onCompletion().invoke(() -&gt; System.out.println("Completed"))
         .onSubscribe().invoke(subscription -&gt; System.out.println("We are subscribed!"))
-
-        .on().cancellation(() -&gt; System.out.println("Downstream has cancelled the interaction"))
-        .on().request(n -&gt; System.out.println("Downstream requested " + n + " items"))
-        .subscribe().with(item -&gt; {
-        });</code></pre>
+        .onCancellation().invoke(() -&gt; System.out.println("Downstream has cancelled the interaction"))
+        .onRequest().invoke(n -&gt; System.out.println("Downstream requested " + n + " items"))
+        .subscribe().with(item -&gt; System.out.println("Subscriber received " + item));</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -1406,16 +1405,16 @@ multi.invoke(item -&gt; System.out.println("Received item " + item));</code></pr
 <p><code>invoke</code> is a shortcut for <code>onItem().invoke(&#8230;&#8203;)</code>.</p>
 </div>
 <div class="paragraph">
-<p>Mutiny also provides the <code>invokeUni</code> method for executing an action returning a <code>Uni</code>.
+<p>Mutiny also provides the <code>call</code> method for executing an action returning a <code>Uni</code>.
 This is useful to execute an asynchronous action without modifying incoming item:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">multi.invokeUni(item -&gt; executeAnAsyncAction(item));</code></pre>
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">multi.call(item -&gt; executeAnAsyncAction(item));</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p><code>invokeUni</code> is a shortcut for <code>onItem().invokeUni(&#8230;&#8203;)</code>.</p>
+<p><code>call</code> is a shortcut for <code>onItem().call(&#8230;&#8203;)</code>.</p>
 </div>
 <table class="tableblock frame-all grid-all stretch">
 <caption class="title">Table 1. List of the shortcuts offered by the Uni class</caption>
@@ -1451,16 +1450,16 @@ This is useful to execute an asynchronous action without modifying incoming item
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>uni.onItem().invoke(x &#8594; System.out.println(x))</code></p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>uni.invokeUni(x &#8594; uni2)</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>uni.onItem().invokeUni(x &#8594; uni2)</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>uni.call(x &#8594; uni2)</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>uni.onItem().call(x &#8594; uni2)</code></p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>uni.eventually) &#8594; System.out.println("eventually"</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>uni.onItemOrFailure().invokeignoredItem, ignoredException) &#8594; System.out.println("eventually</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>uni.onItemOrFailure().invokeignoredItem, ignoredException) &#8594; System.out.println("eventually"</code></p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>uni.eventually(() &#8594; uni2)</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>uni.onItemOrFailure().invokeUni((ignoredItem, ignoredException) &#8594; uni2)</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>uni.onItemOrFailure().call((ignoredItem, ignoredException) &#8594; uni2)</code></p></td>
 </tr>
 </tbody>
 </table>
@@ -1907,7 +1906,7 @@ To enable this feature, add the following dependency to your <code>CLASSPATH</co
 <pre class="highlightjs highlight"><code data-lang="xml" class="language-xml hljs">&lt;dependency&gt;
     &lt;groupId&gt;io.smallrye.reactive&lt;/groupId&gt;
     &lt;artifactId&gt;mutiny-rxjava&lt;/artifactId&gt;
-    &lt;version&gt;0.7.0&lt;/version&gt;
+    &lt;version&gt;0.8.0&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -2021,7 +2020,7 @@ To enable this feature, add the following dependency to your <code>CLASSPATH</co
 <pre class="highlightjs highlight"><code data-lang="xml" class="language-xml hljs">&lt;dependency&gt;
     &lt;groupId&gt;io.smallrye.reactive&lt;/groupId&gt;
     &lt;artifactId&gt;mutiny-reactor&lt;/artifactId&gt;
-    &lt;version&gt;0.7.0&lt;/version&gt;
+    &lt;version&gt;0.8.0&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -2110,7 +2109,7 @@ String res2 = multi
 </div>
 </div>
 <div class="sect2">
-<h3 id="_how_do_wrap_blocking_calls">3.18. How do wrap blocking calls?</h3>
+<h3 id="_how_to_wrap_blocking_calls">3.18. How to wrap blocking calls?</h3>
 <div class="paragraph">
 <p>It is often the case that a source of data (web service, database&#8230;&#8203;) is synchronous and blocking.
 To deal with such sources in your applications, apply the following pattern:</p>
@@ -2144,6 +2143,20 @@ But, when you are dealing with <code>Multi</code> and need to execute a blocking
         .onItem().transform(this::invokeRemoteServiceUsingBlockingIO);</code></pre>
 </div>
 </div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>You can define a caller thread checker hook by calling <code>Infrastructure.setCanCallerThreadBeBlockedSupplier(supplier)</code> to indicate when a blocking operation should not be allowed by Mutiny, resulting in a <code>IllegalStateException</code> to be thrown.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
 </div>
 <div class="sect2">
 <h3 id="_emiton_vs_runsubscriptionon">3.19. emitOn vs. runSubscriptionOn</h3>
@@ -2172,7 +2185,7 @@ Consequently, it affects where the subsequent operators execute (until another <
 </div>
 <div class="imageblock text-center">
 <div class="content">
-<img src="assets/images/diag-ce11714f53fedf6861bf5f43e7f2d847.png" alt="diag ce11714f53fedf6861bf5f43e7f2d847" width="2150" height="580">
+<img src="assets/images/diag-ce11714f53fedf6861bf5f43e7f2d847.png" alt="diag ce11714f53fedf6861bf5f43e7f2d847" width="2232" height="578">
 </div>
 </div>
 <div class="paragraph">
@@ -2199,7 +2212,7 @@ It requests the upstream to run its subscription (call of the <code>subscribe</c
 </div>
 <div class="imageblock text-center">
 <div class="content">
-<img src="assets/images/diag-cbd1972d7b4ab697a798e3d1b5ede99e.png" alt="diag cbd1972d7b4ab697a798e3d1b5ede99e" width="2159" height="580">
+<img src="assets/images/diag-cbd1972d7b4ab697a798e3d1b5ede99e.png" alt="diag cbd1972d7b4ab697a798e3d1b5ede99e" width="2207" height="578">
 </div>
 </div>
 </div>
@@ -2389,7 +2402,7 @@ It gets the items from the lists and passes them downstream:</p>
 </div>
 <div class="imageblock text-center">
 <div class="content">
-<img src="assets/images/diag-1cddf88909ef82bdaa96ca9da9f4c028.png" alt="diag 1cddf88909ef82bdaa96ca9da9f4c028" width="639" height="631">
+<img src="assets/images/diag-1cddf88909ef82bdaa96ca9da9f4c028.png" alt="diag 1cddf88909ef82bdaa96ca9da9f4c028" width="652" height="628">
 </div>
 </div>
 <div class="paragraph">
@@ -2506,13 +2519,46 @@ A <code>ScheduledExecutorService</code> is also created but delegates the execut
 <p>In the case you want to integrate Mutiny with a thread pool managed by a platform, you can configure it using <code>Infrastructure.setDefaultExecutor()</code> method.</p>
 </div>
 </div>
+<div class="sect2">
+<h3 id="_handling_dropped_exceptions">3.28. Handling dropped exceptions</h3>
+<div class="paragraph">
+<p>There are a few corner cases where Mutiny cannot propagate an exception to a <code>Uni</code> or a <code>Multi</code> subscriber.
+Consider the following example:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">Cancellable cancellable = Uni.createFrom()
+        .emitter(this::emitter)
+        .onCancellation().call(() -&gt; Uni.createFrom().failure(new IOException("boom")))
+        .subscribe().with(this::onItem, this::onFailure);
+
+cancellable.cancel();</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The <code>onCancellation().call(&#8230;&#8203;)</code> method is called when the <code>Uni</code> subscription is cancelled.
+The returned <code>Uni</code> is failed with a <code>IOException</code>, but since the subscription itself has been cancelled then there is no way to catch the exception.</p>
+</div>
+<div class="paragraph">
+<p>By default Mutiny reports such dropped exceptions to the standard error stream along with the corresponding stack trace.
+You can change how these exceptions are handled using <code>Infrastructure.setDroppedExceptionHandler</code>.</p>
+</div>
+<div class="paragraph">
+<p>The following logs dropped exceptions to a logger:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">Infrastructure.setDroppedExceptionHandler(err -&gt; logger.log(Level.SEVERE, "Mutiny dropped exception", err));</code></pre>
+</div>
+</div>
+</div>
 </div>
 </div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Version 0.7.0<br>
-Last updated 2019-12-13 17:01:25 +0100
+Version 0.8.0<br>
+Last updated 2020-09-17 14:54:48 UTC
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">
