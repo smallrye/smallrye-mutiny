@@ -5,6 +5,8 @@ import static org.awaitility.Awaitility.await;
 
 import java.io.IOException;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
@@ -110,8 +112,9 @@ public class MultiOnFailureInvokeTest {
         CountDownLatch latch = new CountDownLatch(1);
         AtomicBoolean called = new AtomicBoolean();
 
+        ExecutorService executor = Executors.newSingleThreadExecutor();
         AssertSubscriber<Integer> subscriber = failed
-                .emitOn(Infrastructure.getDefaultExecutor())
+                .emitOn(executor)
                 .onFailure().invoke(i -> {
                     try {
                         called.set(true);
@@ -125,6 +128,7 @@ public class MultiOnFailureInvokeTest {
         await().until(called::get);
         subscriber.cancel();
         latch.countDown();
+        executor.shutdownNow();
     }
 
     @Test
