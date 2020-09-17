@@ -49,7 +49,7 @@ deploy_release() {
     git push origin "${RELEASE_VERSION}"
 
     echo "Deploying release artifacts"
-    mvn -B deploy -DskipTests -Prelease -s maven-settings.xml
+    mvn -B clean deploy -DskipTests -Prelease -s maven-settings.xml
 
     echo "Deploying documentation"
     cd documentation
