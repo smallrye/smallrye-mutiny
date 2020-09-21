@@ -2,9 +2,11 @@ package io.smallrye.mutiny.operators;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicReference;
@@ -13,6 +15,8 @@ import java.util.function.Consumer;
 import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Multi;
+import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.subscription.BackPressureFailure;
 import io.smallrye.mutiny.subscription.MultiEmitter;
 import io.smallrye.mutiny.test.AssertSubscriber;
@@ -32,6 +36,20 @@ public class MultiOnOverflowTest {
                 .subscribe(sub);
         sub.assertCompletedSuccessfully()
                 .assertReceived(1, 2, 3, 4, 5, 6, 7, 8, 9);
+    }
+
+    @Test
+    public void testDropStrategyOnHotStream() {
+        AssertSubscriber<Long> sub = AssertSubscriber.create(20);
+        Multi.createFrom().ticks().every(Duration.ofMillis(1))
+                .onOverflow().drop()
+                .emitOn(Infrastructure.getDefaultExecutor())
+                .onItem().call(l -> Uni.createFrom().item(0).onItem().delayIt().by(Duration.ofMillis(2)))
+                .subscribe(sub);
+
+        await().until(() -> sub.items().size() == 20);
+        sub.assertHasNotFailed();
+        sub.cancel();
     }
 
     @Test
@@ -58,13 +76,12 @@ public class MultiOnOverflowTest {
         Multi.createFrom().range(1, 10)
                 .onOverflow().drop()
                 .subscribe(sub);
-        sub.request(1);
-        sub.assertCompletedSuccessfully().assertReceived(1);
+        sub.await().assertCompletedSuccessfully().assertHasNotReceivedAnyItem();
     }
 
     @Test
     public void testDropStrategyWithEmitter() {
-        AssertSubscriber<Integer> sub = AssertSubscriber.create(0);
+        AssertSubscriber<Integer> sub = AssertSubscriber.create();
         AtomicReference<MultiEmitter<? super Integer>> emitter = new AtomicReference<>();
         List<Integer> list = new CopyOnWriteArrayList<>();
         Multi<Integer> multi = Multi.createFrom().emitter((Consumer<MultiEmitter<? super Integer>>) emitter::set)
@@ -77,8 +94,8 @@ public class MultiOnOverflowTest {
         emitter.get().emit(5).complete();
         sub
                 .assertCompletedSuccessfully()
-                .assertReceived(1, 2, 5);
-        assertThat(list).containsExactly(3, 4);
+                .assertReceived(2, 3, 5);
+        assertThat(list).containsExactly(1, 4);
     }
 
     @Test
@@ -95,7 +112,7 @@ public class MultiOnOverflowTest {
         emitter.get().emit(5).complete();
         sub
                 .assertCompletedSuccessfully()
-                .assertReceived(1, 2, 5);
+                .assertReceived(2, 3, 5);
     }
 
     @Test
@@ -104,7 +121,7 @@ public class MultiOnOverflowTest {
                 .onOverflow().drop(i -> {
                     throw new IllegalStateException("boom");
                 })
-                .subscribe().withSubscriber(AssertSubscriber.create(1))
+                .subscribe().withSubscriber(AssertSubscriber.create(0))
                 .assertHasFailedWith(IllegalStateException.class, "boom");
 
     }
