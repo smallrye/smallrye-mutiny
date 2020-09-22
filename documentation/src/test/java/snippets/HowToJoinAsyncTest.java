@@ -23,7 +23,7 @@ public class HowToJoinAsyncTest {
         Uni<Integer> uni3 = getThirdUni();
 
         Uni<Tuple3<String, String, Integer>> uni = Uni.combine().all().unis(uni1, uni2, uni3).asTuple();
-        String result  = uni.onItem().apply(tuple ->
+        String result  = uni.onItem().transform(tuple ->
                 tuple.getItem1() + " " + tuple.getItem2() + " " + tuple.getItem3() + " !")
                 .await().indefinitely();
 
