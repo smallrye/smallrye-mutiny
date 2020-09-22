@@ -60,6 +60,11 @@ public class UniRetry<T> {
             Function<Multi<Throwable>, Publisher<Long>> factory = ExponentialBackoff
                     .randomExponentialBackoffFunction(numberOfAttempts,
                             initialBackOffDuration, maxBackoffDuration, jitter, Infrastructure.getDefaultWorkerPool());
+
+            if (predicate != null) {
+                factory = addPredicateToBackoffFactory(factory);
+            }
+
             return upstream.toMulti().onFailure().retry().when(factory).toUni();
         }
     }
@@ -85,7 +90,28 @@ public class UniRetry<T> {
         Function<Multi<Throwable>, Publisher<Long>> factory = ExponentialBackoff
                 .randomExponentialBackoffFunctionExpireAt(expireAt,
                         initialBackOffDuration, maxBackoffDuration, jitter, Infrastructure.getDefaultWorkerPool());
+
+        if (predicate != null) {
+            factory = addPredicateToBackoffFactory(factory);
+        }
+
         return upstream.toMulti().onFailure().retry().when(factory).toUni();
+    }
+
+    private Function<Multi<Throwable>, Publisher<Long>> addPredicateToBackoffFactory(
+            Function<Multi<Throwable>, Publisher<Long>> factory) {
+        return factory.compose(value -> value.onItem()
+                .transformToUni(throwable -> Uni.createFrom().<Throwable> emitter(emitter -> {
+                    try {
+                        if (predicate.test(throwable)) {
+                            emitter.complete(throwable);
+                        } else {
+                            emitter.fail(throwable);
+                        }
+                    } catch (RuntimeException e) {
+                        emitter.fail(e);
+                    }
+                })).concatenate());
     }
 
     /**
