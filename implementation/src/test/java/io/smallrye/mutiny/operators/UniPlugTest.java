@@ -1,5 +1,7 @@
 package io.smallrye.mutiny.operators;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -29,6 +31,22 @@ class UniPlugTest {
                 .subscribe().withSubscriber(subscriber);
 
         subscriber.assertFailure(RuntimeException.class, "boom");
+    }
+
+    @Test
+    @DisplayName("Reject null operator provider")
+    void rejectNullProvider() {
+        assertThatThrownBy(() -> Uni.createFrom().item("yo").plug(null).subscribe().asCompletionStage())
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("operatorProvider");
+    }
+
+    @Test
+    @DisplayName("Reject null operator provider")
+    void rejectProvidedNull() {
+        assertThatThrownBy(() -> Uni.createFrom().item("yo").plug(uni -> null).subscribe().asCompletionStage())
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("uni");
     }
 
     static private class Greeter<T> extends UniOperator<T, String> {

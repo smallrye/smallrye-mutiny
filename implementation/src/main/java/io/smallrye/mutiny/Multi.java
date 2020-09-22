@@ -13,6 +13,7 @@ import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.groups.*;
+import io.smallrye.mutiny.infrastructure.Infrastructure;
 
 @SuppressWarnings("PublisherImplementation")
 public interface Multi<T> extends Publisher<T> {
@@ -481,4 +482,17 @@ public interface Multi<T> extends Publisher<T> {
      * @return the object to configure the actions
      */
     MultiOnRequest<T> onRequest();
+
+    /**
+     * Plug a user-defined operator that does not belong to the existing Mutiny API.
+     *
+     * @param operatorProvider a function to create and bind a new operator instance, taking {@code this} {@link Multi} as a
+     *        parameter and returning a new {@link Multi}. Must neither be {@code null} nor return {@code null}.
+     * @param <R> the output type
+     * @return the new {@link Multi}
+     */
+    default <R> Multi<R> plug(Function<Multi<T>, Multi<R>> operatorProvider) {
+        Function<Multi<T>, Multi<R>> provider = nonNull(operatorProvider, "operatorProvider");
+        return Infrastructure.onMultiCreation(nonNull(provider.apply(this), "multi"));
+    }
 }
