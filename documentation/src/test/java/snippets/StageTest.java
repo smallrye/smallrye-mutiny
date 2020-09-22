@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Multi;
 
-public class ThenTest {
+public class StageTest {
 
     @Test
     public void test() {

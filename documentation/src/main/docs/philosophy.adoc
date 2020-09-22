@@ -166,7 +166,7 @@ Mutiny provides the `stage` function to structure your pipeline:
 
 [source,java,indent=0]
 ----
-include::../../../src/test/java/snippets/ThenTest.java[tags=code]
+include::../../../src/test/java/snippets/StageTest.java[tags=code]
 ----
 
 
