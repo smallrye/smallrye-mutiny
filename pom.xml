@@ -238,6 +238,9 @@
                     <groupId>org.moditect</groupId>
                     <artifactId>moditect-maven-plugin</artifactId>
                     <version>1.0.0.RC1</version>
+                    <configuration>
+                        <overwriteExistingFiles>true</overwriteExistingFiles>
+                    </configuration>
                 </plugin>
             </plugins>
         </pluginManagement>
