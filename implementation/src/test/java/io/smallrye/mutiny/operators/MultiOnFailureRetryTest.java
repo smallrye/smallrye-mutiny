@@ -142,6 +142,7 @@ public class MultiOnFailureRetryTest {
                 .retry()
                 .withBackOff(Duration.ofMillis(10)).atMost(3)
                 .subscribe().withSubscriber(AssertSubscriber.create(10))
+                .await()
                 .assertHasFailedWith(RuntimeException.class, "boom")
                 .assertReceived(1, 2, 3);
     }
