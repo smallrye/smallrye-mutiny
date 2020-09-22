@@ -20,13 +20,15 @@ import io.smallrye.mutiny.operators.multi.MultiRetryWhenOp;
 public class MultiRetry<T> {
 
     private final Multi<T> upstream;
+    private final Predicate<? super Throwable> predicate;
     private Duration initialBackOff = Duration.ofSeconds(1);
     private Duration maxBackoff = ExponentialBackoff.MAX_BACKOFF;
     private double jitter = ExponentialBackoff.DEFAULT_JITTER;
     private boolean backOffConfigured = false;
 
-    public MultiRetry(Multi<T> upstream) {
+    public MultiRetry(Multi<T> upstream, Predicate<? super Throwable> predicate) {
         this.upstream = nonNull(upstream, "upstream");
+        this.predicate = predicate;
     }
 
     /**
@@ -57,6 +59,11 @@ public class MultiRetry<T> {
             Function<Multi<Throwable>, Publisher<Long>> whenStreamFactory = ExponentialBackoff
                     .randomExponentialBackoffFunction(numberOfAttempts, initialBackOff, maxBackoff, jitter,
                             Infrastructure.getDefaultWorkerPool());
+
+            if (predicate != null) {
+                whenStreamFactory = addPredicateToBackoffFactory(whenStreamFactory);
+            }
+
             return Infrastructure.onMultiCreation(
                     new MultiRetryWhenOp<>(upstream, whenStreamFactory));
         } else {
@@ -88,8 +95,29 @@ public class MultiRetry<T> {
                 .randomExponentialBackoffFunctionExpireAt(expireAt,
                         initialBackOff, maxBackoff, jitter,
                         Infrastructure.getDefaultWorkerPool());
+
+        if (predicate != null) {
+            whenStreamFactory = addPredicateToBackoffFactory(whenStreamFactory);
+        }
+
         return Infrastructure.onMultiCreation(
                 new MultiRetryWhenOp<>(upstream, whenStreamFactory));
+    }
+
+    private Function<Multi<Throwable>, Publisher<Long>> addPredicateToBackoffFactory(
+            Function<Multi<Throwable>, Publisher<Long>> whenStreamFactory) {
+        return whenStreamFactory.compose(value -> value.onItem()
+                .transformToUni(throwable -> Uni.createFrom().<Throwable> emitter(emitter -> {
+                    try {
+                        if (predicate.test(throwable)) {
+                            emitter.complete(throwable);
+                        } else {
+                            emitter.fail(throwable);
+                        }
+                    } catch (RuntimeException e) {
+                        emitter.fail(e);
+                    }
+                })).concatenate());
     }
 
     /**

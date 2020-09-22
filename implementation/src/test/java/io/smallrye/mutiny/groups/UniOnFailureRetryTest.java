@@ -208,6 +208,42 @@ public class UniOnFailureRetryTest {
     }
 
     @Test
+    public void testRetryWithBackOffAndPredicateExpiresAt() {
+        AtomicInteger numberOfRetries = new AtomicInteger();
+
+        assertThrows(IllegalArgumentException.class, () -> Uni.createFrom().<String> emitter(e -> {
+            int attempt = numberOfRetries.getAndIncrement();
+            if (attempt == 0) {
+                e.fail(new IOException("will-retry"));
+            } else {
+                e.fail(new IllegalArgumentException("boom"));
+            }
+
+        }).onFailure(IOException.class).retry().withBackOff(Duration.ofMillis(10)).expireIn(10_000L)
+                .await().atMost(Duration.ofSeconds(5)));
+
+        assertThat(numberOfRetries.get()).isEqualTo(2);
+    }
+
+    @Test
+    public void testRetryWithBackOffAndPredicateAtMost() {
+        AtomicInteger numberOfRetries = new AtomicInteger();
+
+        assertThrows(IllegalArgumentException.class, () -> Uni.createFrom().<String> emitter(e -> {
+            int attempt = numberOfRetries.getAndIncrement();
+            if (attempt == 0) {
+                e.fail(new IOException("will-retry"));
+            } else {
+                e.fail(new IllegalArgumentException("boom"));
+            }
+
+        }).onFailure(IOException.class).retry().withBackOff(Duration.ofMillis(10)).atMost(2)
+                .await().atMost(Duration.ofSeconds(5)));
+
+        assertThat(numberOfRetries.get()).isEqualTo(2);
+    }
+
+    @Test
     public void testThatYouCannotUseWhenIfBackoffIsConfigured() {
         assertThrows(IllegalArgumentException.class, () -> Uni.createFrom().item("hello")
                 .onFailure().retry().withBackOff(Duration.ofSeconds(1)).when(t -> Multi.createFrom().item(t)));

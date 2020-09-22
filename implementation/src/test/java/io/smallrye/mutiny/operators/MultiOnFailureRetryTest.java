@@ -30,7 +30,7 @@ public class MultiOnFailureRetryTest {
 
     @Test
     public void testThatUpstreamCannotBeNull() {
-        assertThrows(IllegalArgumentException.class, () -> new MultiRetry<>(null));
+        assertThrows(IllegalArgumentException.class, () -> new MultiRetry<>(null, null));
     }
 
     @Test
@@ -122,6 +122,28 @@ public class MultiOnFailureRetryTest {
                 .subscribe().withSubscriber(AssertSubscriber.create(10))
                 .assertCompletedSuccessfully()
                 .assertReceived(1, 2, 3, 4);
+    }
+
+    @Test
+    public void testWithRetryWithBackoffWithPredicate() {
+        AtomicInteger count = new AtomicInteger();
+
+        Multi.createFrom().items(1, 2, 3, 4)
+                .onItem().invoke(i -> {
+                    int counter = count.getAndIncrement();
+                    if (counter == 3 || counter == 4) {
+                        throw new IllegalArgumentException("must-retry");
+                    }
+                    if (counter == 5) {
+                        throw new RuntimeException("boom");
+                    }
+                })
+                .onFailure(IllegalArgumentException.class)
+                .retry()
+                .withBackOff(Duration.ofMillis(10)).atMost(3)
+                .subscribe().withSubscriber(AssertSubscriber.create(10))
+                .assertHasFailedWith(RuntimeException.class, "boom")
+                .assertReceived(1, 2, 3);
     }
 
     @Test

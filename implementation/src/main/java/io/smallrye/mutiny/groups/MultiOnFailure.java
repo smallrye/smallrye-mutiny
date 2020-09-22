@@ -301,7 +301,7 @@ public class MultiOnFailure<T> {
      * @return the object to configure the retry.
      */
     public MultiRetry<T> retry() {
-        return new MultiRetry<>(upstream);
+        return new MultiRetry<>(upstream, predicate);
     }
 
 }
