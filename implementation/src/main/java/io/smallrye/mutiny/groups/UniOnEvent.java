@@ -15,7 +15,9 @@ import io.smallrye.mutiny.tuples.Functions;
  * a {@link UniSubscriber}
  *
  * @param <T> the type of item emitted by the {@link Uni}
+ * @deprecated Use the specialized groups in {@link Uni} instead, e.g. {@link Uni#onItem()} or {@link Uni#onTermination()}.
  */
+@Deprecated
 public class UniOnEvent<T> {
 
     private final Uni<T> upstream;
@@ -100,7 +102,9 @@ public class UniOnEvent<T> {
      *
      * @return the object to configure the action to execute when an item is emitted
      * @see Uni#ifNoItem()
+     * @deprecated Use {@link Uni#onItem()} instead
      */
+    @Deprecated
     public UniOnItem<T> item() {
         return upstream.onItem();
     }
@@ -110,7 +114,9 @@ public class UniOnEvent<T> {
      * It allows configuring the on failure behavior (recovery, retry...).
      *
      * @return a UniOnFailure on which you can specify the on failure action
+     * @deprecated Use {@link Uni#onFailure()} instead
      */
+    @Deprecated
     public UniOnFailure<T> failure() {
         return upstream.onFailure();
     }
@@ -127,7 +133,9 @@ public class UniOnEvent<T> {
      *
      * @param predicate the predicate, {@code null} means applied to all failures
      * @return a UniOnFailure configured with the given predicate on which you can specify the on failure action
+     * @deprecated Use {@link Uni#onFailure(Predicate)} )} instead
      */
+    @Deprecated
     public UniOnFailure<T> failure(Predicate<? super Throwable> predicate) {
         return upstream.onFailure(predicate);
     }
@@ -144,7 +152,9 @@ public class UniOnEvent<T> {
      *
      * @param typeOfFailure the class of exception, must not be {@code null}
      * @return a UniOnFailure configured with the given predicate on which you can specify the on failure action
+     * @deprecated Use {@link Uni#onFailure(Class)} )} instead
      */
+    @Deprecated
     public UniOnFailure<T> failure(Class<? extends Throwable> typeOfFailure) {
         return upstream.onFailure(typeOfFailure);
     }
@@ -153,7 +163,9 @@ public class UniOnEvent<T> {
      * Configures actions when the subscription is cancelled.
      *
      * @return the object to configure the actions
+     * @deprecated Use {@link Uni#onCancellation()} )} instead
      */
+    @Deprecated
     public UniOnCancel<T> cancellation() {
         return upstream.onCancellation();
     }
@@ -162,7 +174,9 @@ public class UniOnEvent<T> {
      * Configure actions when receiving a subscription.
      *
      * @return the object to configure the actions
+     * @deprecated Use {@link Uni#onSubscribe()} )} instead
      */
+    @Deprecated
     public UniOnSubscribe<T> subscribe() {
         return upstream.onSubscribe();
     }
@@ -171,7 +185,9 @@ public class UniOnEvent<T> {
      * Configures actions when the {@link Uni} terminates on either an item, a failure or a cancellation.
      *
      * @return the object to configure the actions
+     * @deprecated Use {@link Uni#onTermination()} )} instead
      */
+    @Deprecated
     public UniOnTerminate<T> termination() {
         return upstream.onTermination();
     }
@@ -180,7 +196,9 @@ public class UniOnEvent<T> {
      * Configures actions when receiving either an item or a failure.
      *
      * @return the object to configure the actions
+     * @deprecated Use {@link Uni#onItemOrFailure()} )} instead
      */
+    @Deprecated
     public UniOnItemOrFailure<T> itemOrFailure() {
         return upstream.onItemOrFailure();
     }

@@ -174,7 +174,10 @@ public interface Multi<T> extends Publisher<T> {
      * completion) or by the subscriber (cancellation, request, subscription)
      *
      * @return the object to configure the action to execute when events happen
+     * @deprecated Use the specialized groups in {@link Multi}, e.g. {@link Multi#onItem()} or {@link Multi#onSubscribe()}
+     *             instead
      */
+    @Deprecated
     MultiOnEvent<T> on();
 
     /**

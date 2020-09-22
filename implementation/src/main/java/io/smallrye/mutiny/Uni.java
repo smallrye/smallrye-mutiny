@@ -711,7 +711,9 @@ public interface Uni<T> {
      * by the subscriber (cancellation, subscription)
      *
      * @return the object to configure the action to execute when events happen
+     * @deprecated Use the specialized groups in {@link Uni} instead, e.g. {@link Uni#onItem()} or {@link Uni#onTermination()}.
      */
+    @Deprecated
     UniOnEvent<T> on();
 
     /**

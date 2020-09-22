@@ -18,7 +18,9 @@ import io.smallrye.mutiny.operators.multi.MultiOnSubscribeInvokeOp;
  * a {@link org.reactivestreams.Subscriber}
  *
  * @param <T> the type of item emitted by the {@link Multi}
+ * @deprecated Use the specialized groups in {@link Multi}, e.g. {@link Multi#onItem()} or {@link Multi#onSubscribe()} instead
  */
+@Deprecated
 public class MultiOnEvent<T> {
 
     private final Multi<T> upstream;
@@ -118,7 +120,9 @@ public class MultiOnEvent<T> {
      * </pre>
      *
      * @return the object to configure the action to execute when an item is emitted
+     * @deprecated Use {@link Multi#onItem()} instead
      */
+    @Deprecated
     public MultiOnItem<T> item() {
         return upstream.onItem();
     }
@@ -128,7 +132,9 @@ public class MultiOnEvent<T> {
      * It allows configuring the on failure behavior (recovery, retry...).
      *
      * @return a MultiOnFailure on which you can specify the on failure action
+     * @deprecated Use {@link Multi#onFailure()} instead
      */
+    @Deprecated
     public MultiOnFailure<T> failure() {
         return upstream.onFailure();
     }
@@ -137,7 +143,9 @@ public class MultiOnEvent<T> {
      * Configures the action to execute when the observed {@link Multi} emits the completion event.
      *
      * @return the object to configure the action
+     * @deprecated Use {@link Multi#onCompletion()} instead
      */
+    @Deprecated
     public MultiOnCompletion<T> completion() {
         return upstream.onCompletion();
     }
@@ -154,7 +162,9 @@ public class MultiOnEvent<T> {
      *
      * @param predicate the predicate, {@code null} means applied to all failures
      * @return a MultiOnFailure configured with the given predicate on which you can specify the on failure action
+     * @deprecated Use {@link Multi#onFailure(Predicate)} instead
      */
+    @Deprecated
     public MultiOnFailure<T> failure(Predicate<? super Throwable> predicate) {
         return upstream.onFailure(predicate);
     }
@@ -171,7 +181,9 @@ public class MultiOnEvent<T> {
      *
      * @param typeOfFailure the class of exception, must not be {@code null}
      * @return a MultiOnFailure configured with the given predicate on which you can specify the on failure action
+     * @deprecated Use {@link Multi#onFailure(Class)} instead
      */
+    @Deprecated
     public MultiOnFailure<T> failure(Class<? extends Throwable> typeOfFailure) {
         return upstream.onFailure(typeOfFailure);
     }
@@ -192,7 +204,9 @@ public class MultiOnEvent<T> {
      * Configure actions when receiving a subscription.
      * 
      * @return the object to configure the actions
+     * @deprecated Use {@link Multi#onSubscribe()} instead
      */
+    @Deprecated
     public MultiOnSubscribe<T> subscribe() {
         return upstream.onSubscribe();
     }
@@ -201,7 +215,9 @@ public class MultiOnEvent<T> {
      * Configures actions when the subscription is cancelled.
      *
      * @return the object to configure the actions
+     * @deprecated Use {@link Multi#onCancellation()} instead
      */
+    @Deprecated
     public MultiOnCancel<T> cancellation() {
         return upstream.onCancellation();
     }
@@ -210,7 +226,9 @@ public class MultiOnEvent<T> {
      * Configures actions when the {@link Multi} terminates on either a completion, a failure or a cancellation.
      * 
      * @return the object to configure the actions
+     * @deprecated Use {@link Multi#onTermination()} instead
      */
+    @Deprecated
     public MultiOnTerminate<T> termination() {
         return upstream.onTermination();
     }
@@ -219,7 +237,9 @@ public class MultiOnEvent<T> {
      * Configures actions when items are being requested.
      *
      * @return the object to configure the actions
+     * @deprecated Use {@link Multi#onRequest()} instead
      */
+    @Deprecated
     public MultiOnRequest<T> request() {
         return upstream.onRequest();
     }
