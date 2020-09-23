@@ -9,7 +9,16 @@ coverage:
   status:
     project:
       default:
+        target: auto
         threshold: 5%
+        branches:
+          - master
+        if_no_uploads: error
+        if_not_found: error
+        if_ci_failed: error
+        only_pulls: false
+        paths:
+          - "**/src"
 
 parsers:
   gcov:
