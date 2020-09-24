@@ -42,7 +42,7 @@ class UniPlugTest {
     }
 
     @Test
-    @DisplayName("Reject null operator provider")
+    @DisplayName("Reject operator providing null")
     void rejectProvidedNull() {
         assertThatThrownBy(() -> Uni.createFrom().item("yo").plug(uni -> null).subscribe().asCompletionStage())
                 .isInstanceOf(IllegalArgumentException.class)

@@ -45,7 +45,7 @@ public class MultiPlugTest {
     }
 
     @Test
-    @DisplayName("Reject null operator provider")
+    @DisplayName("Reject operator providing null")
     void rejectProvidedNull() {
         assertThatThrownBy(() -> Multi.createFrom().item("yo").plug(multi -> null).subscribe().asIterable())
                 .isInstanceOf(IllegalArgumentException.class)
