@@ -263,7 +263,8 @@ class SpyTest {
         @Test
         @DisplayName("Spy onFailure() with a matching class selector")
         void spyOnFailureClassMatching() {
-            MultiOnFailureSpy<Object> spy = Spy.onFailure(Multi.createFrom().failure(new IOException("boom")), IOException.class);
+            MultiOnFailureSpy<Object> spy = Spy.onFailure(Multi.createFrom().failure(new IOException("boom")),
+                    IOException.class);
             AssertSubscriber<Object> subscriber = spy.subscribe().withSubscriber(AssertSubscriber.create(10));
 
             subscriber.assertHasFailedWith(IOException.class, "boom");
@@ -275,7 +276,8 @@ class SpyTest {
         @Test
         @DisplayName("Spy onFailure() with a non-matching class selector")
         void spyOnFailureClassNotMatching() {
-            MultiOnFailureSpy<Object> spy = Spy.onFailure(Multi.createFrom().failure(new IOException("boom")), IllegalStateException.class);
+            MultiOnFailureSpy<Object> spy = Spy.onFailure(Multi.createFrom().failure(new IOException("boom")),
+                    IllegalStateException.class);
             AssertSubscriber<Object> subscriber = spy.subscribe().withSubscriber(AssertSubscriber.create(10));
 
             subscriber.assertHasFailedWith(IOException.class, "boom");
@@ -306,6 +308,105 @@ class SpyTest {
             assertThat(spy.invoked()).isFalse();
             assertThat(spy.invocationCount()).isEqualTo(0);
             assertThat(spy.lastFailure()).isNull();
+        }
+
+        @Test
+        @DisplayName("Spy onItem()")
+        void spyOnItem() {
+            MultiOnItemSpy<Integer> spy = Spy.onItem(Multi.createFrom().items(1, 2, 3));
+            AssertSubscriber<Integer> subscriber = spy.subscribe().withSubscriber(AssertSubscriber.create(10));
+
+            subscriber.assertCompletedSuccessfully();
+            assertThat(subscriber.items()).containsExactly(1, 2, 3);
+            assertThat(spy.invoked()).isTrue();
+            assertThat(spy.invocationCount()).isEqualTo(3);
+            assertThat(spy.items()).containsExactly(1, 2, 3);
+
+            spy.clearItems();
+            assertThat(spy.items()).isEmpty();
+        }
+
+        @Test
+        @DisplayName("Spy onRequest()")
+        void spyOnRequest() {
+            MultiOnRequestSpy<Integer> spy = Spy.onRequest(Multi.createFrom().items(1, 2, 3));
+            AssertSubscriber<Integer> subscriber = spy.subscribe().withSubscriber(AssertSubscriber.create(10));
+            subscriber.request(5);
+
+            subscriber.assertCompletedSuccessfully();
+            assertThat(subscriber.items()).containsExactly(1, 2, 3);
+            assertThat(spy.invoked()).isTrue();
+            assertThat(spy.invocationCount()).isEqualTo(2);
+            assertThat(spy.requestedCount()).isEqualTo(15);
+
+            spy.resetCounter();
+            assertThat(spy.requestedCount()).isEqualTo(0);
+        }
+
+        @Test
+        @DisplayName("Spy onSubscribe()")
+        void spyOnSubscribe() {
+            MultiOnSubscribeSpy<Integer> spy = Spy.onSubscribe(Multi.createFrom().items(1, 2, 3));
+            AssertSubscriber<Integer> subscriber = spy.subscribe().withSubscriber(AssertSubscriber.create(10));
+
+            subscriber.assertCompletedSuccessfully();
+            assertThat(subscriber.items()).containsExactly(1, 2, 3);
+            assertThat(spy.invoked()).isTrue();
+            assertThat(spy.invocationCount()).isEqualTo(1);
+            assertThat(spy.lastSubscription()).isNotNull();
+        }
+
+        @Test
+        @DisplayName("Spy onTermination() with completion")
+        void spyOnTerminationComplete() {
+            MultiOnTerminationSpy<Integer> spy = Spy.onTermination(Multi.createFrom().item(69));
+
+            assertThatThrownBy(spy::lastTerminationFailure).isInstanceOf(IllegalStateException.class);
+            assertThatThrownBy(spy::lastTerminationWasCancelled).isInstanceOf(IllegalStateException.class);
+
+            AssertSubscriber<Integer> subscriber = spy.subscribe().withSubscriber(AssertSubscriber.create(10));
+
+            subscriber.assertCompletedSuccessfully();
+            assertThat(subscriber.items()).containsExactly(69);
+            assertThat(spy.invoked()).isTrue();
+            assertThat(spy.invocationCount()).isEqualTo(1);
+            assertThat(spy.lastTerminationFailure()).isNull();
+            assertThat(spy.lastTerminationWasCancelled()).isFalse();
+        }
+
+        @Test
+        @DisplayName("Spy onTermination() with failure")
+        void spyOnTerminationFailure() {
+            MultiOnTerminationSpy<Integer> spy = Spy.onTermination(Multi.createFrom().failure(new IOException("boom")));
+
+            assertThatThrownBy(spy::lastTerminationFailure).isInstanceOf(IllegalStateException.class);
+            assertThatThrownBy(spy::lastTerminationWasCancelled).isInstanceOf(IllegalStateException.class);
+
+            AssertSubscriber<Integer> subscriber = spy.subscribe().withSubscriber(AssertSubscriber.create(10));
+
+            subscriber.assertHasFailedWith(IOException.class, "boom");
+            assertThat(spy.invoked()).isTrue();
+            assertThat(spy.invocationCount()).isEqualTo(1);
+            assertThat(spy.lastTerminationFailure()).isNotNull().isInstanceOf(IOException.class).hasMessage("boom");
+            assertThat(spy.lastTerminationWasCancelled()).isFalse();
+        }
+
+        @Test
+        @DisplayName("Spy onTermination() with cancellation")
+        void spyOnTerminationCancellation() {
+            MultiOnTerminationSpy<Integer> spy = Spy.onTermination(Multi.createFrom().item(69));
+
+            assertThatThrownBy(spy::lastTerminationFailure).isInstanceOf(IllegalStateException.class);
+            assertThatThrownBy(spy::lastTerminationWasCancelled).isInstanceOf(IllegalStateException.class);
+
+            AssertSubscriber<Integer> subscriber = spy.subscribe().withSubscriber(AssertSubscriber.create());
+            subscriber.cancel();
+
+            subscriber.assertHasNotReceivedAnyItem().assertHasNotCompleted().assertHasNotFailed();
+            assertThat(spy.invoked()).isTrue();
+            assertThat(spy.invocationCount()).isEqualTo(1);
+            assertThat(spy.lastTerminationFailure()).isNull();
+            assertThat(spy.lastTerminationWasCancelled()).isTrue();
         }
     }
 }

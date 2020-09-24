@@ -4,7 +4,6 @@ import java.util.function.Predicate;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
-import io.smallrye.mutiny.operators.multi.MultiOnFailureInvoke;
 
 public interface Spy {
 
@@ -62,5 +61,21 @@ public interface Spy {
 
     static <T> MultiOnFailureSpy<T> onFailure(Multi<T> upstream, Class<? extends Throwable> typeOfFailure) {
         return (MultiOnFailureSpy<T>) upstream.plug(multi -> new MultiOnFailureSpy<>(upstream, typeOfFailure));
+    }
+
+    static <T> MultiOnItemSpy<T> onItem(Multi<T> upstream) {
+        return (MultiOnItemSpy<T>) upstream.plug(multi -> new MultiOnItemSpy<>(upstream));
+    }
+
+    static <T> MultiOnRequestSpy<T> onRequest(Multi<T> upstream) {
+        return (MultiOnRequestSpy<T>) upstream.plug(multi -> new MultiOnRequestSpy<>(upstream));
+    }
+
+    static <T> MultiOnSubscribeSpy<T> onSubscribe(Multi<T> upstream) {
+        return (MultiOnSubscribeSpy<T>) upstream.plug(multi -> new MultiOnSubscribeSpy<>(upstream));
+    }
+
+    static <T> MultiOnTerminationSpy<T> onTermination(Multi<T> upstream) {
+        return (MultiOnTerminationSpy<T>) upstream.plug(multi -> new MultiOnTerminationSpy<>(upstream));
     }
 }

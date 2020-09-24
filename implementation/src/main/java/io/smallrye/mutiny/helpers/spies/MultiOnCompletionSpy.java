@@ -1,7 +1,6 @@
 package io.smallrye.mutiny.helpers.spies;
 
 import io.smallrye.mutiny.Multi;
-import io.smallrye.mutiny.operators.multi.MultiOperatorProcessor;
 import io.smallrye.mutiny.subscription.MultiSubscriber;
 
 public class MultiOnCompletionSpy<T> extends MultiSpyBase<T> {

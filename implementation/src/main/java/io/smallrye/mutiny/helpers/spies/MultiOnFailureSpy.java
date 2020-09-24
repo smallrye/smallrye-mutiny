@@ -1,10 +1,10 @@
 package io.smallrye.mutiny.helpers.spies;
 
+import java.util.function.Predicate;
+
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.groups.MultiOnFailure;
 import io.smallrye.mutiny.subscription.MultiSubscriber;
-
-import java.util.function.Predicate;
 
 public class MultiOnFailureSpy<T> extends MultiSpyBase<T> {
 

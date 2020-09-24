@@ -1,0 +1,31 @@
+package io.smallrye.mutiny.helpers.spies;
+
+import java.util.concurrent.atomic.AtomicLong;
+
+import io.smallrye.mutiny.Multi;
+import io.smallrye.mutiny.subscription.MultiSubscriber;
+
+public class MultiOnRequestSpy<T> extends MultiSpyBase<T> {
+
+    private final AtomicLong requestedCount = new AtomicLong();
+
+    public void resetCounter() {
+        requestedCount.set(0);
+    }
+
+    public long requestedCount() {
+        return requestedCount.get();
+    }
+
+    public MultiOnRequestSpy(Multi<? extends T> upstream) {
+        super(upstream);
+    }
+
+    @Override
+    public void subscribe(MultiSubscriber<? super T> downstream) {
+        upstream.onRequest().invoke(count -> {
+            incrementInvocationCount();
+            requestedCount.addAndGet(count);
+        }).subscribe().withSubscriber(downstream);
+    }
+}
