@@ -2,9 +2,13 @@ package io.smallrye.mutiny.helpers.spies;
 
 import java.util.function.Predicate;
 
+import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.operators.multi.MultiOnFailureInvoke;
 
 public interface Spy {
+
+    // --------------------------------------------------------------------- //
 
     static <T> UniOnSubscribeSpy<T> onSubscribe(Uni<T> upstream) {
         return (UniOnSubscribeSpy<T>) upstream.plug(uni -> new UniOnSubscribeSpy<>(upstream));
@@ -36,5 +40,27 @@ public interface Spy {
 
     static <T> UniOnFailureSpy<T> onFailure(Uni<T> upstream, Class<? extends Throwable> typeOfFailure) {
         return (UniOnFailureSpy<T>) upstream.plug(uni -> new UniOnFailureSpy<>(upstream, typeOfFailure));
+    }
+
+    // --------------------------------------------------------------------- //
+
+    static <T> MultiOnCancellationSpy<T> onCancellation(Multi<T> upstream) {
+        return (MultiOnCancellationSpy<T>) upstream.plug(multi -> new MultiOnCancellationSpy<>(upstream));
+    }
+
+    static <T> MultiOnCompletionSpy<T> onCompletion(Multi<T> upstream) {
+        return (MultiOnCompletionSpy<T>) upstream.plug(multi -> new MultiOnCompletionSpy<>(upstream));
+    }
+
+    static <T> MultiOnFailureSpy<T> onFailure(Multi<T> upstream) {
+        return (MultiOnFailureSpy<T>) upstream.plug(multi -> new MultiOnFailureSpy<>(upstream));
+    }
+
+    static <T> MultiOnFailureSpy<T> onFailure(Multi<T> upstream, Predicate<? super Throwable> predicate) {
+        return (MultiOnFailureSpy<T>) upstream.plug(multi -> new MultiOnFailureSpy<>(upstream, predicate));
+    }
+
+    static <T> MultiOnFailureSpy<T> onFailure(Multi<T> upstream, Class<? extends Throwable> typeOfFailure) {
+        return (MultiOnFailureSpy<T>) upstream.plug(multi -> new MultiOnFailureSpy<>(upstream, typeOfFailure));
     }
 }

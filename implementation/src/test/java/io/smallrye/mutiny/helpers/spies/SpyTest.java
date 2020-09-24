@@ -9,11 +9,15 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.operators.UniAssertSubscriber;
 import io.smallrye.mutiny.subscription.UniSubscription;
+import io.smallrye.mutiny.test.AssertSubscriber;
 
 class SpyTest {
+
+    // --------------------------------------------------------------------- //
 
     @DisplayName("Spy on Uni")
     @Nested
@@ -43,6 +47,7 @@ class SpyTest {
         @DisplayName("Spy onCancellation()")
         void spyOnCancellation() {
             UniOnCancellationSpy<Integer> spy = Spy.onCancellation(Uni.createFrom().emitter(e -> {
+                // Do not emit anything
             }));
             UniAssertSubscriber<Integer> subscriber = spy.subscribe().withSubscriber(UniAssertSubscriber.create());
 
@@ -92,6 +97,7 @@ class SpyTest {
         @DisplayName("Spy onTermination() when the subscription is cancelled")
         void spyOnTerminationCancelled() {
             UniOnTerminationSpy<Integer> spy = Spy.onTermination(Uni.createFrom().emitter(e -> {
+                // Do not emit anything
             }));
 
             assertThatThrownBy(spy::lastTerminationItem).isInstanceOf(IllegalStateException.class);
@@ -204,6 +210,99 @@ class SpyTest {
             UniAssertSubscriber<Object> subscriber = spy.subscribe().withSubscriber(UniAssertSubscriber.create());
 
             subscriber.assertFailure(IOException.class, "boom");
+            assertThat(spy.invoked()).isFalse();
+            assertThat(spy.invocationCount()).isEqualTo(0);
+            assertThat(spy.lastFailure()).isNull();
+        }
+    }
+
+    // --------------------------------------------------------------------- //
+
+    @DisplayName("Spy on Multi")
+    @Nested
+    class SpyMulti {
+
+        @Test
+        @DisplayName("Spy onCancellation()")
+        void spyOnCancellation() {
+            MultiOnCancellationSpy<Object> spy = Spy.onCancellation(Multi.createFrom().emitter(e -> {
+                // Do not emit anything
+            }));
+            AssertSubscriber<Object> subscriber = spy.subscribe().withSubscriber(AssertSubscriber.create());
+            subscriber.cancel();
+
+            subscriber.assertHasNotCompleted().assertHasNotReceivedAnyItem();
+            assertThat(spy.invoked()).isTrue();
+            assertThat(spy.invocationCount()).isEqualTo(1);
+        }
+
+        @Test
+        @DisplayName("Spy onCompletion()")
+        void spyOnCompletion() {
+            MultiOnCompletionSpy<Integer> spy = Spy.onCompletion(Multi.createFrom().item(69));
+            AssertSubscriber<Object> subscriber = spy.subscribe().withSubscriber(AssertSubscriber.create(10));
+
+            subscriber.assertCompletedSuccessfully();
+            assertThat(subscriber.items()).containsExactly(69);
+            assertThat(spy.invoked()).isTrue();
+            assertThat(spy.invocationCount()).isEqualTo(1);
+        }
+
+        @Test
+        @DisplayName("Spy onFailure() with no selector")
+        void spyOnFailure() {
+            MultiOnFailureSpy<Object> spy = Spy.onFailure(Multi.createFrom().failure(new IOException("boom")));
+            AssertSubscriber<Object> subscriber = spy.subscribe().withSubscriber(AssertSubscriber.create(10));
+
+            subscriber.assertHasFailedWith(IOException.class, "boom");
+            assertThat(spy.invoked()).isTrue();
+            assertThat(spy.invocationCount()).isEqualTo(1);
+            assertThat(spy.lastFailure()).isNotNull().isInstanceOf(IOException.class).hasMessage("boom");
+        }
+
+        @Test
+        @DisplayName("Spy onFailure() with a matching class selector")
+        void spyOnFailureClassMatching() {
+            MultiOnFailureSpy<Object> spy = Spy.onFailure(Multi.createFrom().failure(new IOException("boom")), IOException.class);
+            AssertSubscriber<Object> subscriber = spy.subscribe().withSubscriber(AssertSubscriber.create(10));
+
+            subscriber.assertHasFailedWith(IOException.class, "boom");
+            assertThat(spy.invoked()).isTrue();
+            assertThat(spy.invocationCount()).isEqualTo(1);
+            assertThat(spy.lastFailure()).isNotNull().isInstanceOf(IOException.class).hasMessage("boom");
+        }
+
+        @Test
+        @DisplayName("Spy onFailure() with a non-matching class selector")
+        void spyOnFailureClassNotMatching() {
+            MultiOnFailureSpy<Object> spy = Spy.onFailure(Multi.createFrom().failure(new IOException("boom")), IllegalStateException.class);
+            AssertSubscriber<Object> subscriber = spy.subscribe().withSubscriber(AssertSubscriber.create(10));
+
+            subscriber.assertHasFailedWith(IOException.class, "boom");
+            assertThat(spy.invoked()).isFalse();
+            assertThat(spy.invocationCount()).isEqualTo(0);
+            assertThat(spy.lastFailure()).isNull();
+        }
+
+        @Test
+        @DisplayName("Spy onFailure() with a matching predicate selector")
+        void spyOnFailurePredicateMatching() {
+            MultiOnFailureSpy<Object> spy = Spy.onFailure(Multi.createFrom().failure(new IOException("boom")), t -> true);
+            AssertSubscriber<Object> subscriber = spy.subscribe().withSubscriber(AssertSubscriber.create(10));
+
+            subscriber.assertHasFailedWith(IOException.class, "boom");
+            assertThat(spy.invoked()).isTrue();
+            assertThat(spy.invocationCount()).isEqualTo(1);
+            assertThat(spy.lastFailure()).isNotNull().isInstanceOf(IOException.class).hasMessage("boom");
+        }
+
+        @Test
+        @DisplayName("Spy onFailure() with a non-matching predicate selector")
+        void spyOnFailurePredicateNotMatching() {
+            MultiOnFailureSpy<Object> spy = Spy.onFailure(Multi.createFrom().failure(new IOException("boom")), t -> false);
+            AssertSubscriber<Object> subscriber = spy.subscribe().withSubscriber(AssertSubscriber.create(10));
+
+            subscriber.assertHasFailedWith(IOException.class, "boom");
             assertThat(spy.invoked()).isFalse();
             assertThat(spy.invocationCount()).isEqualTo(0);
             assertThat(spy.lastFailure()).isNull();

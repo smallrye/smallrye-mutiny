@@ -2,10 +2,10 @@ package io.smallrye.mutiny.helpers.spies;
 
 import java.util.concurrent.atomic.AtomicLong;
 
-import io.smallrye.mutiny.Uni;
-import io.smallrye.mutiny.operators.UniOperator;
+import io.smallrye.mutiny.Multi;
+import io.smallrye.mutiny.operators.multi.AbstractMultiOperator;
 
-abstract class UniSpyBase<T> extends UniOperator<T, T> {
+abstract class MultiSpyBase<T> extends AbstractMultiOperator<T, T> {
 
     private AtomicLong invocationCount = new AtomicLong();
 
@@ -21,8 +21,7 @@ abstract class UniSpyBase<T> extends UniOperator<T, T> {
         return invocationCount() > 0;
     }
 
-    UniSpyBase(Uni<T> upstream) {
+    MultiSpyBase(Multi<? extends T> upstream) {
         super(upstream);
     }
-
 }
