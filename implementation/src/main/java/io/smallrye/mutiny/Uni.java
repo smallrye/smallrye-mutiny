@@ -8,6 +8,7 @@ import java.util.concurrent.Executor;
 import java.util.function.*;
 
 import io.smallrye.mutiny.groups.*;
+import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.subscription.UniEmitter;
 import io.smallrye.mutiny.subscription.UniSubscriber;
 import io.smallrye.mutiny.subscription.UniSubscription;
@@ -740,4 +741,17 @@ public interface Uni<T> {
      * @return the object to configure the cancellation actions.
      */
     UniOnCancel<T> onCancellation();
+
+    /**
+     * Plug a user-defined operator that does not belong to the existing Mutiny API.
+     * 
+     * @param operatorProvider a function to create and bind a new operator instance, taking {@code this} {@link Uni} as a
+     *        parameter and returning a new {@link Uni}. Must neither be {@code null} nor return {@code null}.
+     * @param <R> the output type
+     * @return the new {@link Uni}
+     */
+    default <R> Uni<R> plug(Function<Uni<T>, Uni<R>> operatorProvider) {
+        Function<Uni<T>, Uni<R>> provider = nonNull(operatorProvider, "operatorProvider");
+        return Infrastructure.onUniCreation(nonNull(provider.apply(this), "uni"));
+    }
 }
