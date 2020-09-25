@@ -30,4 +30,11 @@ public class MultiOnRequestSpy<T> extends MultiSpyBase<T> {
             requestedCount.addAndGet(count);
         }).subscribe().withSubscriber(downstream);
     }
+
+    @Override
+    public String toString() {
+        return "MultiOnRequestSpy{" +
+                "requestedCount=" + requestedCount +
+                "} " + super.toString();
+    }
 }

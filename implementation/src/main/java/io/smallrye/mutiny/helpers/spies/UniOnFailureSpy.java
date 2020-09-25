@@ -52,4 +52,11 @@ public class UniOnFailureSpy<T> extends UniSpyBase<T> {
             lastFailure = failure;
         }).subscribe().withSubscriber(downstream);
     }
+
+    @Override
+    public String toString() {
+        return "UniOnFailureSpy{" +
+                "lastFailure=" + lastFailure +
+                "} " + super.toString();
+    }
 }

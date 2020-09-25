@@ -14,4 +14,9 @@ public class MultiOnCompletionSpy<T> extends MultiSpyBase<T> {
         upstream.onCompletion().invoke(this::incrementInvocationCount)
                 .subscribe().withSubscriber(downstream);
     }
+
+    @Override
+    public String toString() {
+        return "MultiOnCompletionSpy{} " + super.toString();
+    }
 }

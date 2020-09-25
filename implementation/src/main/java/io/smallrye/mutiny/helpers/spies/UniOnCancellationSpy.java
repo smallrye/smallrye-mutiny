@@ -15,4 +15,9 @@ public class UniOnCancellationSpy<T> extends UniSpyBase<T> {
                 .onCancellation().invoke(this::incrementInvocationCount)
                 .subscribe().withSubscriber(downstream);
     }
+
+    @Override
+    public String toString() {
+        return "UniOnCancellationSpy{} " + super.toString();
+    }
 }

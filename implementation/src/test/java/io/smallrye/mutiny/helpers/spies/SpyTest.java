@@ -289,6 +289,11 @@ class SpyTest {
 
             assertThat(spy.invoked()).isTrue();
             assertThat(spy.invocationCount()).isEqualTo(4);
+
+            assertThat(spy.toString())
+                    .contains("{lastItem=69, lastFailure=null}")
+                    .contains("Tuple{item1=69,item2=null,item3=false}");
+
             spy.reset();
             assertThat(spy.invoked()).isFalse();
             assertThat(spy.invocationCount()).isEqualTo(0);
@@ -557,6 +562,11 @@ class SpyTest {
 
             assertThat(spy.invoked()).isTrue();
             assertThat(spy.invocationCount()).isEqualTo(8);
+
+            assertThat(spy.toString())
+                    .contains("onItemSpy=MultiOnItemSpy{items=[1, 2, 3]}")
+                    .contains("onRequestSpy=MultiOnRequestSpy{requestedCount=11}");
+
             spy.reset();
             assertThat(spy.invoked()).isFalse();
             assertThat(spy.invocationCount()).isEqualTo(0);

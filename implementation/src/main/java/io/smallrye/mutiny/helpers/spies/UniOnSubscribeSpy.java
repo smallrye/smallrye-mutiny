@@ -31,4 +31,11 @@ public class UniOnSubscribeSpy<T> extends UniSpyBase<T> {
                 })
                 .subscribe().withSubscriber(downstream);
     }
+
+    @Override
+    public String toString() {
+        return "UniOnSubscribeSpy{" +
+                "lastSubscription=" + lastSubscription +
+                "} " + super.toString();
+    }
 }

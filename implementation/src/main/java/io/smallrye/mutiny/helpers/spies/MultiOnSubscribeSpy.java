@@ -30,4 +30,11 @@ public class MultiOnSubscribeSpy<T> extends MultiSpyBase<T> {
             lastSubscription = subscription;
         }).subscribe().withSubscriber(downstream);
     }
+
+    @Override
+    public String toString() {
+        return "MultiOnSubscribeSpy{" +
+                "lastSubscription=" + lastSubscription +
+                "} " + super.toString();
+    }
 }

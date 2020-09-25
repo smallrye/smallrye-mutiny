@@ -14,4 +14,9 @@ public class MultiOnCancellationSpy<T> extends MultiSpyBase<T> {
         upstream.onCancellation().invoke(this::incrementInvocationCount)
                 .subscribe().withSubscriber(downstream);
     }
+
+    @Override
+    public String toString() {
+        return "MultiOnCancellationSpy{} " + super.toString();
+    }
 }

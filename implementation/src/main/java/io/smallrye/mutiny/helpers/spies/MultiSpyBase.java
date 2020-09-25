@@ -28,4 +28,11 @@ abstract class MultiSpyBase<T> extends AbstractMultiOperator<T, T> {
     MultiSpyBase(Multi<? extends T> upstream) {
         super(upstream);
     }
+
+    @Override
+    public String toString() {
+        return "MultiSpyBase{" +
+                "invocationCount=" + invocationCount +
+                "}";
+    }
 }

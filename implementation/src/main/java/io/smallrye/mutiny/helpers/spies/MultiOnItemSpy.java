@@ -38,4 +38,11 @@ public class MultiOnItemSpy<T> extends MultiSpyBase<T> {
             }
         }).subscribe().withSubscriber(downstream);
     }
+
+    @Override
+    public String toString() {
+        return "MultiOnItemSpy{" +
+                "items=" + items +
+                "} " + super.toString();
+    }
 }

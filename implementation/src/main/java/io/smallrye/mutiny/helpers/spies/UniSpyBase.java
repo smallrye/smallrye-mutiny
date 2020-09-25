@@ -28,4 +28,11 @@ abstract class UniSpyBase<T> extends UniOperator<T, T> {
     public void reset() {
         invocationCount.set(0);
     }
+
+    @Override
+    public String toString() {
+        return "UniSpyBase{" +
+                "invocationCount=" + invocationCount +
+                "}";
+    }
 }

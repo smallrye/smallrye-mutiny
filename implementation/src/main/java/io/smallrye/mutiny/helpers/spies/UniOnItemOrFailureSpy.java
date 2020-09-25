@@ -43,4 +43,12 @@ public class UniOnItemOrFailureSpy<T> extends UniSpyBase<T> {
                 })
                 .subscribe().withSubscriber(downstream);
     }
+
+    @Override
+    public String toString() {
+        return "UniOnItemOrFailureSpy{" +
+                "lastItem=" + lastItem +
+                ", lastFailure=" + lastFailure +
+                "} " + super.toString();
+    }
 }

@@ -79,4 +79,17 @@ public class MultiGlobalSpy<T> extends MultiSpyBase<T> {
         onSubscribeSpy.reset();
         onTerminationSpy.reset();
     }
+
+    @Override
+    public String toString() {
+        return "MultiGlobalSpy{" +
+                "onCancellationSpy=" + onCancellationSpy +
+                ", onCompletionSpy=" + onCompletionSpy +
+                ", onFailureSpy=" + onFailureSpy +
+                ", onItemSpy=" + onItemSpy +
+                ", onRequestSpy=" + onRequestSpy +
+                ", onSubscribeSpy=" + onSubscribeSpy +
+                ", onTerminationSpy=" + onTerminationSpy +
+                "} " + super.toString();
+    }
 }

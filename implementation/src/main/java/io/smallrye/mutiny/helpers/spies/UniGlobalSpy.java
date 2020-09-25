@@ -71,4 +71,16 @@ public class UniGlobalSpy<T> extends UniSpyBase<T> {
     protected void subscribing(UniSerializedSubscriber<? super T> downstream) {
         onTerminationSpy.subscribe().withSubscriber(downstream);
     }
+
+    @Override
+    public String toString() {
+        return "UniGlobalSpy{" +
+                "onCancellationSpy=" + onCancellationSpy +
+                ", onFailureSpy=" + onFailureSpy +
+                ", onItemOrFailureSpy=" + onItemOrFailureSpy +
+                ", onItemSpy=" + onItemSpy +
+                ", onSubscribeSpy=" + onSubscribeSpy +
+                ", onTerminationSpy=" + onTerminationSpy +
+                "} " + super.toString();
+    }
 }

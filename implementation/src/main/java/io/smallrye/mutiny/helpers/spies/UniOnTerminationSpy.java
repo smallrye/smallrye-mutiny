@@ -39,4 +39,11 @@ public class UniOnTerminationSpy<T> extends UniSpyBase<T> {
                 })
                 .subscribe().withSubscriber(downstream);
     }
+
+    @Override
+    public String toString() {
+        return "UniOnTerminationSpy{" +
+                "lastTermination=" + lastTermination +
+                "} " + super.toString();
+    }
 }

@@ -33,4 +33,11 @@ public class MultiOnTerminationSpy<T> extends MultiSpyBase<T> {
             incrementInvocationCount();
         }).subscribe().withSubscriber(downstream);
     }
+
+    @Override
+    public String toString() {
+        return "MultiOnTerminationSpy{" +
+                "lastTermination=" + lastTermination +
+                "} " + super.toString();
+    }
 }

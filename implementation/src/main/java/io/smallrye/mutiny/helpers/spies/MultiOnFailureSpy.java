@@ -52,4 +52,11 @@ public class MultiOnFailureSpy<T> extends MultiSpyBase<T> {
             lastFailure = failure;
         }).subscribe().withSubscriber(dowstream);
     }
+
+    @Override
+    public String toString() {
+        return "MultiOnFailureSpy{" +
+                "lastFailure=" + lastFailure +
+                "} " + super.toString();
+    }
 }
