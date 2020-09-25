@@ -41,6 +41,10 @@ public interface Spy {
         return (UniOnFailureSpy<T>) upstream.plug(uni -> new UniOnFailureSpy<>(upstream, typeOfFailure));
     }
 
+    static <T> UniGlobalSpy<T> globally(Uni<T> upstream) {
+        return (UniGlobalSpy<T>) upstream.plug(uni -> new UniGlobalSpy<>(upstream));
+    }
+
     // --------------------------------------------------------------------- //
 
     static <T> MultiOnCancellationSpy<T> onCancellation(Multi<T> upstream) {
@@ -77,5 +81,9 @@ public interface Spy {
 
     static <T> MultiOnTerminationSpy<T> onTermination(Multi<T> upstream) {
         return (MultiOnTerminationSpy<T>) upstream.plug(multi -> new MultiOnTerminationSpy<>(upstream));
+    }
+
+    static <T> MultiGlobalSpy<T> globally(Multi<T> upstream) {
+        return (MultiGlobalSpy<T>) upstream.plug(multi -> new MultiGlobalSpy<>(upstream));
     }
 }

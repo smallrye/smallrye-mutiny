@@ -272,6 +272,27 @@ class SpyTest {
             assertThat(spy.invocationCount()).isEqualTo(0);
             assertThat(spy.lastFailure()).isNull();
         }
+
+        @Test
+        @DisplayName("Spy globally")
+        void globally() {
+            UniGlobalSpy<Integer> spy = Spy.globally(Uni.createFrom().item(69));
+            UniAssertSubscriber<Integer> subscriber = spy.subscribe().withSubscriber(UniAssertSubscriber.create());
+
+            subscriber.assertCompletedSuccessfully().assertItem(69);
+            assertThat(spy.onCancellationSpy().invoked()).isFalse();
+            assertThat(spy.onFailureSpy().invoked()).isFalse();
+            assertThat(spy.onItemSpy().invoked()).isTrue();
+            assertThat(spy.onItemOrFailureSpy().invoked()).isTrue();
+            assertThat(spy.onSubscribeSpy().invoked()).isTrue();
+            assertThat(spy.onTerminationSpy().invoked()).isTrue();
+
+            assertThat(spy.invoked()).isTrue();
+            assertThat(spy.invocationCount()).isEqualTo(4);
+            spy.reset();
+            assertThat(spy.invoked()).isFalse();
+            assertThat(spy.invocationCount()).isEqualTo(0);
+        }
     }
 
     // --------------------------------------------------------------------- //
@@ -512,6 +533,33 @@ class SpyTest {
             assertThat(spy.invocationCount()).isEqualTo(0);
             assertThat(spy.lastTerminationWasCancelled()).isFalse();
             assertThat(spy.lastTerminationFailure()).isNull();
+        }
+
+        @Test
+        @DisplayName("Spy globally")
+        void globally() {
+            MultiGlobalSpy<Integer> spy = Spy.globally(Multi.createFrom().items(1, 2, 3));
+            AssertSubscriber<Integer> subscriber = spy.subscribe().withSubscriber(AssertSubscriber.create());
+
+            subscriber.request(1);
+            subscriber.request(10);
+
+            subscriber.assertCompletedSuccessfully();
+            assertThat(subscriber.items()).containsExactly(1, 2, 3);
+
+            assertThat(spy.onCancellationSpy().invoked()).isFalse();
+            assertThat(spy.onCompletionSpy().invoked()).isTrue();
+            assertThat(spy.onFailureSpy().invoked()).isFalse();
+            assertThat(spy.onItemSpy().invoked()).isTrue();
+            assertThat(spy.onRequestSpy().invoked()).isTrue();
+            assertThat(spy.onSubscribeSpy().invoked()).isTrue();
+            assertThat(spy.onTerminationSpy().invoked()).isTrue();
+
+            assertThat(spy.invoked()).isTrue();
+            assertThat(spy.invocationCount()).isEqualTo(8);
+            spy.reset();
+            assertThat(spy.invoked()).isFalse();
+            assertThat(spy.invocationCount()).isEqualTo(0);
         }
     }
 }
