@@ -16,6 +16,12 @@ public class UniOnItemSpy<T> extends UniSpyBase<T> {
     }
 
     @Override
+    public void reset() {
+        super.reset();
+        lastItem = null;
+    }
+
+    @Override
     protected void subscribing(UniSerializedSubscriber<? super T> downstream) {
         upstream()
                 .onItem().invoke(item -> {

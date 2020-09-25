@@ -8,20 +8,18 @@ public class MultiOnTerminationSpy<T> extends MultiSpyBase<T> {
 
     private volatile Tuple2<Throwable, Boolean> lastTermination;
 
-    private void throwWhenTerminationIsNull() {
-        if (lastTermination == null) {
-            throw new IllegalStateException("The uni hasn't terminated yet ");
-        }
-    }
-
     public Throwable lastTerminationFailure() throws IllegalStateException {
-        throwWhenTerminationIsNull();
-        return lastTermination.getItem1();
+        return (lastTermination == null) ? null : lastTermination.getItem1();
     }
 
     public boolean lastTerminationWasCancelled() throws IllegalStateException {
-        throwWhenTerminationIsNull();
-        return lastTermination.getItem2();
+        return (lastTermination != null) && lastTermination.getItem2();
+    }
+
+    @Override
+    public void reset() {
+        super.reset();
+        lastTermination = null;
     }
 
     MultiOnTerminationSpy(Multi<? extends T> upstream) {

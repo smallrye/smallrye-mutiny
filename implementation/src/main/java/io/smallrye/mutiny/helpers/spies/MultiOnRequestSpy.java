@@ -9,16 +9,18 @@ public class MultiOnRequestSpy<T> extends MultiSpyBase<T> {
 
     private final AtomicLong requestedCount = new AtomicLong();
 
-    public void resetCounter() {
-        requestedCount.set(0);
-    }
-
     public long requestedCount() {
         return requestedCount.get();
     }
 
     public MultiOnRequestSpy(Multi<? extends T> upstream) {
         super(upstream);
+    }
+
+    @Override
+    public void reset() {
+        super.reset();
+        requestedCount.set(0);
     }
 
     @Override

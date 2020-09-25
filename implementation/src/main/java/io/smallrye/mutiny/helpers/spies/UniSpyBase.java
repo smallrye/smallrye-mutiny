@@ -25,4 +25,7 @@ abstract class UniSpyBase<T> extends UniOperator<T, T> {
         super(upstream);
     }
 
+    public void reset() {
+        invocationCount.set(0);
+    }
 }

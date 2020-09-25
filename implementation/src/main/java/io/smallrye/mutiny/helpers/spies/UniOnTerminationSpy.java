@@ -12,25 +12,22 @@ public class UniOnTerminationSpy<T> extends UniSpyBase<T> {
         super(upstream);
     }
 
-    private void throwWhenTerminationIsNull() {
-        if (lastTermination == null) {
-            throw new IllegalStateException("The uni hasn't terminated yet ");
-        }
-    }
-
     public T lastTerminationItem() throws IllegalStateException {
-        throwWhenTerminationIsNull();
-        return lastTermination.getItem1();
+        return (lastTermination == null) ? null : lastTermination.getItem1();
     }
 
     public Throwable lastTerminationFailure() throws IllegalStateException {
-        throwWhenTerminationIsNull();
-        return lastTermination.getItem2();
+        return (lastTermination == null) ? null : lastTermination.getItem2();
     }
 
     public boolean lastTerminationWasCancelled() throws IllegalStateException {
-        throwWhenTerminationIsNull();
-        return lastTermination.getItem3();
+        return (lastTermination != null) && lastTermination.getItem3();
+    }
+
+    @Override
+    public void reset() {
+        super.reset();
+        lastTermination = null;
     }
 
     @Override

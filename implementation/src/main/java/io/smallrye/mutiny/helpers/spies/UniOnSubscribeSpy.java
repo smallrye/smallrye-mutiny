@@ -17,6 +17,12 @@ public class UniOnSubscribeSpy<T> extends UniSpyBase<T> {
     }
 
     @Override
+    public void reset() {
+        super.reset();
+        lastSubscription = null;
+    }
+
+    @Override
     protected void subscribing(UniSerializedSubscriber<? super T> downstream) {
         upstream()
                 .onSubscribe().invoke(uniSubscription -> {

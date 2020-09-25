@@ -1,7 +1,6 @@
 package io.smallrye.mutiny.helpers.spies;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.io.IOException;
 
@@ -41,6 +40,10 @@ class SpyTest {
             UniSubscription secondSubscription = spy.lastSubscription();
             assertThat(secondSubscription).isNotNull();
             assertThat(firstSubscription).isNotSameAs(secondSubscription);
+
+            spy.reset();
+            assertThat(spy.invocationCount()).isEqualTo(0);
+            assertThat(spy.lastSubscription()).isNull();
         }
 
         @Test
@@ -55,6 +58,9 @@ class SpyTest {
             subscriber.assertNotCompleted();
             assertThat(spy.invoked()).isTrue();
             assertThat(spy.invocationCount()).isEqualTo(1);
+
+            spy.reset();
+            assertThat(spy.invocationCount()).isEqualTo(0);
         }
 
         @Test
@@ -62,9 +68,9 @@ class SpyTest {
         void spyOnTerminationEmitted() {
             UniOnTerminationSpy<Integer> spy = Spy.onTermination(Uni.createFrom().item(69));
 
-            assertThatThrownBy(spy::lastTerminationItem).isInstanceOf(IllegalStateException.class);
-            assertThatThrownBy(spy::lastTerminationFailure).isInstanceOf(IllegalStateException.class);
-            assertThatThrownBy(spy::lastTerminationWasCancelled).isInstanceOf(IllegalStateException.class);
+            assertThat(spy.lastTerminationItem()).isNull();
+            assertThat(spy.lastTerminationWasCancelled()).isFalse();
+            assertThat(spy.lastTerminationFailure()).isNull();
 
             UniAssertSubscriber<Integer> subscriber = spy.subscribe().withSubscriber(UniAssertSubscriber.create());
             subscriber.assertCompletedSuccessfully().assertItem(69);
@@ -73,6 +79,12 @@ class SpyTest {
             assertThat(spy.lastTerminationItem()).isEqualTo(69);
             assertThat(spy.lastTerminationFailure()).isNull();
             assertThat(spy.lastTerminationWasCancelled()).isFalse();
+
+            spy.reset();
+            assertThat(spy.invocationCount()).isEqualTo(0);
+            assertThat(spy.lastTerminationItem()).isNull();
+            assertThat(spy.lastTerminationWasCancelled()).isFalse();
+            assertThat(spy.lastTerminationFailure()).isNull();
         }
 
         @Test
@@ -80,9 +92,9 @@ class SpyTest {
         void spyOnTerminationFailure() {
             UniOnTerminationSpy<Integer> spy = Spy.onTermination(Uni.createFrom().failure(new IOException("boom")));
 
-            assertThatThrownBy(spy::lastTerminationItem).isInstanceOf(IllegalStateException.class);
-            assertThatThrownBy(spy::lastTerminationFailure).isInstanceOf(IllegalStateException.class);
-            assertThatThrownBy(spy::lastTerminationWasCancelled).isInstanceOf(IllegalStateException.class);
+            assertThat(spy.lastTerminationItem()).isNull();
+            assertThat(spy.lastTerminationWasCancelled()).isFalse();
+            assertThat(spy.lastTerminationFailure()).isNull();
 
             UniAssertSubscriber<Integer> subscriber = spy.subscribe().withSubscriber(UniAssertSubscriber.create());
             subscriber.assertFailure(IOException.class, "boom");
@@ -91,6 +103,12 @@ class SpyTest {
             assertThat(spy.lastTerminationItem()).isNull();
             assertThat(spy.lastTerminationFailure()).isNotNull().isInstanceOf(IOException.class).hasMessage("boom");
             assertThat(spy.lastTerminationWasCancelled()).isFalse();
+
+            spy.reset();
+            assertThat(spy.invocationCount()).isEqualTo(0);
+            assertThat(spy.lastTerminationItem()).isNull();
+            assertThat(spy.lastTerminationWasCancelled()).isFalse();
+            assertThat(spy.lastTerminationFailure()).isNull();
         }
 
         @Test
@@ -100,9 +118,9 @@ class SpyTest {
                 // Do not emit anything
             }));
 
-            assertThatThrownBy(spy::lastTerminationItem).isInstanceOf(IllegalStateException.class);
-            assertThatThrownBy(spy::lastTerminationFailure).isInstanceOf(IllegalStateException.class);
-            assertThatThrownBy(spy::lastTerminationWasCancelled).isInstanceOf(IllegalStateException.class);
+            assertThat(spy.lastTerminationItem()).isNull();
+            assertThat(spy.lastTerminationWasCancelled()).isFalse();
+            assertThat(spy.lastTerminationFailure()).isNull();
 
             UniAssertSubscriber<Integer> subscriber = spy.subscribe().withSubscriber(UniAssertSubscriber.create());
             subscriber.cancel();
@@ -112,6 +130,12 @@ class SpyTest {
             assertThat(spy.lastTerminationItem()).isNull();
             assertThat(spy.lastTerminationFailure()).isNull();
             assertThat(spy.lastTerminationWasCancelled()).isTrue();
+
+            spy.reset();
+            assertThat(spy.invocationCount()).isEqualTo(0);
+            assertThat(spy.lastTerminationItem()).isNull();
+            assertThat(spy.lastTerminationWasCancelled()).isFalse();
+            assertThat(spy.lastTerminationFailure()).isNull();
         }
 
         @Test
@@ -124,6 +148,10 @@ class SpyTest {
             assertThat(spy.invoked()).isTrue();
             assertThat(spy.invocationCount()).isEqualTo(1);
             assertThat(spy.lastItem()).isEqualTo(69);
+
+            spy.reset();
+            assertThat(spy.invocationCount()).isEqualTo(0);
+            assertThat(spy.lastItem()).isNull();
         }
 
         @Test
@@ -138,6 +166,11 @@ class SpyTest {
             assertThat(spy.hasFailed()).isFalse();
             assertThat(spy.lastItem()).isEqualTo(69);
             assertThat(spy.lastFailure()).isNull();
+
+            spy.reset();
+            assertThat(spy.invocationCount()).isEqualTo(0);
+            assertThat(spy.lastFailure()).isNull();
+            assertThat(spy.lastItem()).isNull();
         }
 
         @Test
@@ -152,6 +185,11 @@ class SpyTest {
             assertThat(spy.hasFailed()).isTrue();
             assertThat(spy.lastItem()).isNull();
             assertThat(spy.lastFailure()).isNotNull().isInstanceOf(IOException.class).hasMessage("boom");
+
+            spy.reset();
+            assertThat(spy.invocationCount()).isEqualTo(0);
+            assertThat(spy.lastFailure()).isNull();
+            assertThat(spy.lastItem()).isNull();
         }
 
         @Test
@@ -164,6 +202,10 @@ class SpyTest {
             assertThat(spy.invoked()).isTrue();
             assertThat(spy.invocationCount()).isEqualTo(1);
             assertThat(spy.lastFailure()).isNotNull().isInstanceOf(IOException.class).hasMessage("boom");
+
+            spy.reset();
+            assertThat(spy.invocationCount()).isEqualTo(0);
+            assertThat(spy.lastFailure()).isNull();
         }
 
         @Test
@@ -176,6 +218,10 @@ class SpyTest {
             assertThat(spy.invoked()).isTrue();
             assertThat(spy.invocationCount()).isEqualTo(1);
             assertThat(spy.lastFailure()).isNotNull().isInstanceOf(IOException.class).hasMessage("boom");
+
+            spy.reset();
+            assertThat(spy.invocationCount()).isEqualTo(0);
+            assertThat(spy.lastFailure()).isNull();
         }
 
         @Test
@@ -188,6 +234,10 @@ class SpyTest {
             assertThat(spy.invoked()).isTrue();
             assertThat(spy.invocationCount()).isEqualTo(1);
             assertThat(spy.lastFailure()).isNotNull().isInstanceOf(IOException.class).hasMessage("boom");
+
+            spy.reset();
+            assertThat(spy.invocationCount()).isEqualTo(0);
+            assertThat(spy.lastFailure()).isNull();
         }
 
         @Test
@@ -201,6 +251,10 @@ class SpyTest {
             assertThat(spy.invoked()).isFalse();
             assertThat(spy.invocationCount()).isEqualTo(0);
             assertThat(spy.lastFailure()).isNull();
+
+            spy.reset();
+            assertThat(spy.invocationCount()).isEqualTo(0);
+            assertThat(spy.lastFailure()).isNull();
         }
 
         @Test
@@ -211,6 +265,10 @@ class SpyTest {
 
             subscriber.assertFailure(IOException.class, "boom");
             assertThat(spy.invoked()).isFalse();
+            assertThat(spy.invocationCount()).isEqualTo(0);
+            assertThat(spy.lastFailure()).isNull();
+
+            spy.reset();
             assertThat(spy.invocationCount()).isEqualTo(0);
             assertThat(spy.lastFailure()).isNull();
         }
@@ -234,6 +292,9 @@ class SpyTest {
             subscriber.assertHasNotCompleted().assertHasNotReceivedAnyItem();
             assertThat(spy.invoked()).isTrue();
             assertThat(spy.invocationCount()).isEqualTo(1);
+
+            spy.reset();
+            assertThat(spy.invocationCount()).isEqualTo(0);
         }
 
         @Test
@@ -246,6 +307,9 @@ class SpyTest {
             assertThat(subscriber.items()).containsExactly(69);
             assertThat(spy.invoked()).isTrue();
             assertThat(spy.invocationCount()).isEqualTo(1);
+
+            spy.reset();
+            assertThat(spy.invocationCount()).isEqualTo(0);
         }
 
         @Test
@@ -258,6 +322,10 @@ class SpyTest {
             assertThat(spy.invoked()).isTrue();
             assertThat(spy.invocationCount()).isEqualTo(1);
             assertThat(spy.lastFailure()).isNotNull().isInstanceOf(IOException.class).hasMessage("boom");
+
+            spy.reset();
+            assertThat(spy.invocationCount()).isEqualTo(0);
+            assertThat(spy.lastFailure()).isNull();
         }
 
         @Test
@@ -271,6 +339,10 @@ class SpyTest {
             assertThat(spy.invoked()).isTrue();
             assertThat(spy.invocationCount()).isEqualTo(1);
             assertThat(spy.lastFailure()).isNotNull().isInstanceOf(IOException.class).hasMessage("boom");
+
+            spy.reset();
+            assertThat(spy.invocationCount()).isEqualTo(0);
+            assertThat(spy.lastFailure()).isNull();
         }
 
         @Test
@@ -282,6 +354,10 @@ class SpyTest {
 
             subscriber.assertHasFailedWith(IOException.class, "boom");
             assertThat(spy.invoked()).isFalse();
+            assertThat(spy.invocationCount()).isEqualTo(0);
+            assertThat(spy.lastFailure()).isNull();
+
+            spy.reset();
             assertThat(spy.invocationCount()).isEqualTo(0);
             assertThat(spy.lastFailure()).isNull();
         }
@@ -296,6 +372,10 @@ class SpyTest {
             assertThat(spy.invoked()).isTrue();
             assertThat(spy.invocationCount()).isEqualTo(1);
             assertThat(spy.lastFailure()).isNotNull().isInstanceOf(IOException.class).hasMessage("boom");
+
+            spy.reset();
+            assertThat(spy.invocationCount()).isEqualTo(0);
+            assertThat(spy.lastFailure()).isNull();
         }
 
         @Test
@@ -306,6 +386,10 @@ class SpyTest {
 
             subscriber.assertHasFailedWith(IOException.class, "boom");
             assertThat(spy.invoked()).isFalse();
+            assertThat(spy.invocationCount()).isEqualTo(0);
+            assertThat(spy.lastFailure()).isNull();
+
+            spy.reset();
             assertThat(spy.invocationCount()).isEqualTo(0);
             assertThat(spy.lastFailure()).isNull();
         }
@@ -322,7 +406,8 @@ class SpyTest {
             assertThat(spy.invocationCount()).isEqualTo(3);
             assertThat(spy.items()).containsExactly(1, 2, 3);
 
-            spy.clearItems();
+            spy.reset();
+            assertThat(spy.invocationCount()).isEqualTo(0);
             assertThat(spy.items()).isEmpty();
         }
 
@@ -339,7 +424,8 @@ class SpyTest {
             assertThat(spy.invocationCount()).isEqualTo(2);
             assertThat(spy.requestedCount()).isEqualTo(15);
 
-            spy.resetCounter();
+            spy.reset();
+            assertThat(spy.invocationCount()).isEqualTo(0);
             assertThat(spy.requestedCount()).isEqualTo(0);
         }
 
@@ -354,6 +440,10 @@ class SpyTest {
             assertThat(spy.invoked()).isTrue();
             assertThat(spy.invocationCount()).isEqualTo(1);
             assertThat(spy.lastSubscription()).isNotNull();
+
+            spy.reset();
+            assertThat(spy.invocationCount()).isEqualTo(0);
+            assertThat(spy.lastSubscription()).isNull();
         }
 
         @Test
@@ -361,8 +451,8 @@ class SpyTest {
         void spyOnTerminationComplete() {
             MultiOnTerminationSpy<Integer> spy = Spy.onTermination(Multi.createFrom().item(69));
 
-            assertThatThrownBy(spy::lastTerminationFailure).isInstanceOf(IllegalStateException.class);
-            assertThatThrownBy(spy::lastTerminationWasCancelled).isInstanceOf(IllegalStateException.class);
+            assertThat(spy.lastTerminationWasCancelled()).isFalse();
+            assertThat(spy.lastTerminationFailure()).isNull();
 
             AssertSubscriber<Integer> subscriber = spy.subscribe().withSubscriber(AssertSubscriber.create(10));
 
@@ -372,6 +462,11 @@ class SpyTest {
             assertThat(spy.invocationCount()).isEqualTo(1);
             assertThat(spy.lastTerminationFailure()).isNull();
             assertThat(spy.lastTerminationWasCancelled()).isFalse();
+
+            spy.reset();
+            assertThat(spy.invocationCount()).isEqualTo(0);
+            assertThat(spy.lastTerminationWasCancelled()).isFalse();
+            assertThat(spy.lastTerminationFailure()).isNull();
         }
 
         @Test
@@ -379,8 +474,8 @@ class SpyTest {
         void spyOnTerminationFailure() {
             MultiOnTerminationSpy<Integer> spy = Spy.onTermination(Multi.createFrom().failure(new IOException("boom")));
 
-            assertThatThrownBy(spy::lastTerminationFailure).isInstanceOf(IllegalStateException.class);
-            assertThatThrownBy(spy::lastTerminationWasCancelled).isInstanceOf(IllegalStateException.class);
+            assertThat(spy.lastTerminationWasCancelled()).isFalse();
+            assertThat(spy.lastTerminationFailure()).isNull();
 
             AssertSubscriber<Integer> subscriber = spy.subscribe().withSubscriber(AssertSubscriber.create(10));
 
@@ -389,6 +484,11 @@ class SpyTest {
             assertThat(spy.invocationCount()).isEqualTo(1);
             assertThat(spy.lastTerminationFailure()).isNotNull().isInstanceOf(IOException.class).hasMessage("boom");
             assertThat(spy.lastTerminationWasCancelled()).isFalse();
+
+            spy.reset();
+            assertThat(spy.invocationCount()).isEqualTo(0);
+            assertThat(spy.lastTerminationWasCancelled()).isFalse();
+            assertThat(spy.lastTerminationFailure()).isNull();
         }
 
         @Test
@@ -396,8 +496,8 @@ class SpyTest {
         void spyOnTerminationCancellation() {
             MultiOnTerminationSpy<Integer> spy = Spy.onTermination(Multi.createFrom().item(69));
 
-            assertThatThrownBy(spy::lastTerminationFailure).isInstanceOf(IllegalStateException.class);
-            assertThatThrownBy(spy::lastTerminationWasCancelled).isInstanceOf(IllegalStateException.class);
+            assertThat(spy.lastTerminationWasCancelled()).isFalse();
+            assertThat(spy.lastTerminationFailure()).isNull();
 
             AssertSubscriber<Integer> subscriber = spy.subscribe().withSubscriber(AssertSubscriber.create());
             subscriber.cancel();
@@ -407,6 +507,11 @@ class SpyTest {
             assertThat(spy.invocationCount()).isEqualTo(1);
             assertThat(spy.lastTerminationFailure()).isNull();
             assertThat(spy.lastTerminationWasCancelled()).isTrue();
+
+            spy.reset();
+            assertThat(spy.invocationCount()).isEqualTo(0);
+            assertThat(spy.lastTerminationWasCancelled()).isFalse();
+            assertThat(spy.lastTerminationFailure()).isNull();
         }
     }
 }

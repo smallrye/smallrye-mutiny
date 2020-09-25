@@ -32,6 +32,12 @@ public class MultiOnFailureSpy<T> extends MultiSpyBase<T> {
     }
 
     @Override
+    public void reset() {
+        super.reset();
+        lastFailure = null;
+    }
+
+    @Override
     public void subscribe(MultiSubscriber<? super T> dowstream) {
         MultiOnFailure<? extends T> group;
         if (predicate != null) {

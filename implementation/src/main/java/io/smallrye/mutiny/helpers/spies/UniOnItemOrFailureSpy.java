@@ -20,6 +20,13 @@ public class UniOnItemOrFailureSpy<T> extends UniSpyBase<T> {
         return lastItem;
     }
 
+    @Override
+    public void reset() {
+        super.reset();
+        lastItem = null;
+        lastFailure = null;
+    }
+
     public Throwable lastFailure() {
         return lastFailure;
     }

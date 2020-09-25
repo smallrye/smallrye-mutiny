@@ -17,6 +17,12 @@ public class UniOnFailureSpy<T> extends UniSpyBase<T> {
         return lastFailure;
     }
 
+    @Override
+    public void reset() {
+        super.reset();
+        lastFailure = null;
+    }
+
     UniOnFailureSpy(Uni<T> upstream) {
         super(upstream);
     }

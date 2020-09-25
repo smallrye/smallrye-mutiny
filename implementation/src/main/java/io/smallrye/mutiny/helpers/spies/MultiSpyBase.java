@@ -21,6 +21,10 @@ abstract class MultiSpyBase<T> extends AbstractMultiOperator<T, T> {
         return invocationCount() > 0;
     }
 
+    public void reset() {
+        invocationCount.set(0);
+    }
+
     MultiSpyBase(Multi<? extends T> upstream) {
         super(upstream);
     }

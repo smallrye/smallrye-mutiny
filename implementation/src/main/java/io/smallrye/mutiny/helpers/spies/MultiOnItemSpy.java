@@ -11,18 +11,18 @@ public class MultiOnItemSpy<T> extends MultiSpyBase<T> {
 
     private final ArrayList<T> items = new ArrayList<>();
 
-    public void clearItems() {
+    public List<T> items() {
+        List<T> view;
+        view = Collections.synchronizedList(items);
+        return view;
+    }
+
+    @Override
+    public void reset() {
+        super.reset();
         synchronized (items) {
             items.clear();
         }
-    }
-
-    public List<T> items() {
-        List<T> view;
-        synchronized (items) {
-            view = Collections.unmodifiableList(items);
-        }
-        return view;
     }
 
     MultiOnItemSpy(Multi<? extends T> upstream) {
