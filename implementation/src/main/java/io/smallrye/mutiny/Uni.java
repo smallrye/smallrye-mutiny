@@ -754,4 +754,43 @@ public interface Uni<T> {
         Function<Uni<T>, Uni<R>> provider = nonNull(operatorProvider, "operatorProvider");
         return Infrastructure.onUniCreation(nonNull(provider.apply(this), "uni"));
     }
+
+    /**
+     * Ignore the item emitted by this {@link Uni} and replace it with another value.
+     * <p>
+     * This is a shortcut for {@code uni.onItem().transform(ignore -> item)}.
+     * 
+     * @param item the replacement value
+     * @param <O> the output type
+     * @return the new {@link Uni}
+     */
+    default <O> Uni<O> replaceWith(O item) {
+        return onItem().transform(ignore -> item);
+    }
+
+    /**
+     * Ignore the item emitted by this {@link Uni} and replace it with another value using a {@link Supplier}.
+     * <p>
+     * This is a shortcut for {@code uni.onItem().transform(ignore -> supplier.get())}.
+     *
+     * @param supplier the replacement value supplier
+     * @param <O> the output type
+     * @return the new {@link Uni}
+     */
+    default <O> Uni<O> replaceWith(Supplier<O> supplier) {
+        return onItem().transform(ignore -> supplier.get());
+    }
+
+    /**
+     * Ignore the item emitted by this {@link Uni} and replace it with another value using a {@link Uni}.
+     * <p>
+     * This is a shortcut for {@code uni.onItem().transformToUni(ignore -> uni)}.
+     *
+     * @param uni the replacement value {@link Uni}
+     * @param <O> the output type
+     * @return the new {@link Uni}
+     */
+    default <O> Uni<O> replaceWith(Uni<O> uni) {
+        return onItem().transformToUni(ignore -> uni);
+    }
 }
