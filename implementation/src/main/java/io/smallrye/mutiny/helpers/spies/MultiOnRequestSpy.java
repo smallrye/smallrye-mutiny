@@ -3,6 +3,7 @@ package io.smallrye.mutiny.helpers.spies;
 import java.util.concurrent.atomic.AtomicLong;
 
 import io.smallrye.mutiny.Multi;
+import io.smallrye.mutiny.helpers.Subscriptions;
 import io.smallrye.mutiny.subscription.MultiSubscriber;
 
 public class MultiOnRequestSpy<T> extends MultiSpyBase<T> {
@@ -27,7 +28,7 @@ public class MultiOnRequestSpy<T> extends MultiSpyBase<T> {
     public void subscribe(MultiSubscriber<? super T> downstream) {
         upstream.onRequest().invoke(count -> {
             incrementInvocationCount();
-            requestedCount.addAndGet(count);
+            Subscriptions.add(requestedCount, count);
         }).subscribe().withSubscriber(downstream);
     }
 
