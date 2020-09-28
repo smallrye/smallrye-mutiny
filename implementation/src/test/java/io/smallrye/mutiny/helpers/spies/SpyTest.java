@@ -438,6 +438,39 @@ class SpyTest {
         }
 
         @Test
+        @DisplayName("Spy onItem() and track items")
+        void spyOnItemTrackItems() {
+            MultiOnItemSpy<Integer> spy = Spy.onItem(Multi.createFrom().items(1, 2, 3), true);
+            AssertSubscriber<Integer> subscriber = spy.subscribe().withSubscriber(AssertSubscriber.create(10));
+
+            subscriber.assertCompletedSuccessfully();
+            assertThat(subscriber.items()).containsExactly(1, 2, 3);
+            assertThat(spy.invoked()).isTrue();
+            assertThat(spy.invocationCount()).isEqualTo(3);
+            assertThat(spy.items()).containsExactly(1, 2, 3);
+
+            spy.reset();
+            assertThat(spy.invocationCount()).isEqualTo(0);
+            assertThat(spy.items()).isEmpty();
+        }
+
+        @Test
+        @DisplayName("Spy onItem() and do not track items")
+        void spyOnItemDoNotTrackItems() {
+            MultiOnItemSpy<Integer> spy = Spy.onItem(Multi.createFrom().items(1, 2, 3), false);
+            AssertSubscriber<Integer> subscriber = spy.subscribe().withSubscriber(AssertSubscriber.create(10));
+
+            subscriber.assertCompletedSuccessfully();
+            assertThat(subscriber.items()).containsExactly(1, 2, 3);
+            assertThat(spy.invoked()).isTrue();
+            assertThat(spy.invocationCount()).isEqualTo(3);
+            assertThat(spy.items()).isEmpty();
+
+            spy.reset();
+            assertThat(spy.invocationCount()).isEqualTo(0);
+        }
+
+        @Test
         @DisplayName("Spy onRequest()")
         void spyOnRequest() {
             MultiOnRequestSpy<Integer> spy = Spy.onRequest(Multi.createFrom().items(1, 2, 3));
