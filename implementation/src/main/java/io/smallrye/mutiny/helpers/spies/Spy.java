@@ -176,14 +176,26 @@ public interface Spy {
     }
 
     /**
-     * Spy {@link Multi#onItem()} events.
+     * Spy {@link Multi#onItem()} events and keep track of the items.
      *
      * @param upstream the upstream
      * @param <T> the items type
      * @return a new {@link Multi}
      */
     static <T> MultiOnItemSpy<T> onItem(Multi<T> upstream) {
-        return (MultiOnItemSpy<T>) upstream.plug(multi -> new MultiOnItemSpy<>(upstream));
+        return onItem(upstream, true);
+    }
+
+    /**
+     * Spy {@link Multi#onItem()} events and optionally keep track of the items.
+     * 
+     * @param upstream the upstream
+     * @param trackItems {@code true} when items shall be tracked, {@code false} otherwise
+     * @param <T> the items type
+     * @return a new {@link Multi}
+     */
+    static <T> MultiOnItemSpy<T> onItem(Multi<T> upstream, boolean trackItems) {
+        return (MultiOnItemSpy<T>) upstream.plug(multi -> new MultiOnItemSpy<>(upstream, trackItems));
     }
 
     /**
