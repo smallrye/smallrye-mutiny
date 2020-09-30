@@ -41,15 +41,15 @@ public class FlatMapCompletionStageFactory
             return source.onItem().transformToUni((I item) -> {
                 if (item == null) {
                     // Propagate an NPE to be compliant with the reactive stream spec.
-                    return Uni.createFrom().failure(new NullPointerException());
+                    return Uni.createFrom().failure(NullPointerException::new);
                 }
                 CompletionStage<O> result = mapper.apply(item);
                 if (result == null) {
                     // Propagate an NPE to be compliant with the reactive stream spec.
-                    return Uni.createFrom().failure(new NullPointerException());
+                    return Uni.createFrom().failure(NullPointerException::new);
                 }
                 return Uni.createFrom().completionStage(result)
-                        .onItem().ifNull().failWith(new NullPointerException());
+                        .onItem().ifNull().failWith(NullPointerException::new);
             }).concatenate();
         }
     }
