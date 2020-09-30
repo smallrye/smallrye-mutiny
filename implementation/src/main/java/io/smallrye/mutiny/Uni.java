@@ -399,10 +399,13 @@ public interface Uni<T> {
     // TODO
     default Uni<T> cacheFor(Duration duration) {
         return cacheUntil(new BooleanSupplier() {
-            private volatile long startTime = System.currentTimeMillis();
+            private volatile long startTime = -1;
 
             @Override
             public boolean getAsBoolean() {
+                if (startTime == -1) {
+                    startTime = System.currentTimeMillis();
+                }
                 boolean invalidates = (System.currentTimeMillis() - startTime) > duration.toMillis();
                 if (invalidates) {
                     startTime = System.currentTimeMillis();
