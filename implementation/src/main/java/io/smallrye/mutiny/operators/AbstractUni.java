@@ -1,6 +1,7 @@
 package io.smallrye.mutiny.operators;
 
 import java.util.concurrent.Executor;
+import java.util.function.BooleanSupplier;
 import java.util.function.Predicate;
 
 import io.smallrye.mutiny.Multi;
@@ -109,6 +110,11 @@ public abstract class AbstractUni<T> implements Uni<T> {
     @Override
     public Uni<T> cache() {
         return Infrastructure.onUniCreation(new UniCache<>(this));
+    }
+
+    @Override
+    public Uni<T> cacheUntil(BooleanSupplier invalidationGuard) {
+        return new UniCache<>(this, invalidationGuard);
     }
 
     @Override

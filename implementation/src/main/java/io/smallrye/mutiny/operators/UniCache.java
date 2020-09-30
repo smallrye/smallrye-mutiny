@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.BooleanSupplier;
 
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.subscription.UniSubscriber;
@@ -21,22 +22,36 @@ public class UniCache<I> extends UniOperator<I, I> implements UniSubscriber<I> {
         CACHING
     }
 
+    private final BooleanSupplier invalidationRequested;
+
     private final AtomicReference<State> state = new AtomicReference<>(State.INIT);
 
     private final AtomicInteger wip = new AtomicInteger();
     private final List<UniSerializedSubscriber<? super I>> awaitingSubscription = synchronizedList(new ArrayList<>());
     private final List<UniSerializedSubscriber<? super I>> awaitingResult = synchronizedList(new ArrayList<>());
 
+    private volatile UniSubscription upstreamSubscription;
     private volatile I item;
     private volatile Throwable failure;
 
     UniCache(Uni<? extends I> upstream) {
+        this(upstream, () -> false);
+    }
+
+    UniCache(Uni<? extends I> upstream, BooleanSupplier invalidationRequested) {
         super(nonNull(upstream, "upstream"));
+        this.invalidationRequested = invalidationRequested;
     }
 
     @Override
     protected void subscribing(UniSerializedSubscriber<? super I> subscriber) {
         awaitingSubscription.add(subscriber);
+        if (invalidationRequested.getAsBoolean() && state.get() != State.SUBSCRIBING) {
+            state.set(State.INIT);
+            if (upstreamSubscription != null) {
+                upstreamSubscription.cancel();
+            }
+        }
         if (state.compareAndSet(State.INIT, State.SUBSCRIBING)) {
             // This thread is performing the upstream subscription
             AbstractUni.subscribe(upstream(), this);
@@ -46,6 +61,7 @@ public class UniCache<I> extends UniOperator<I, I> implements UniSubscriber<I> {
 
     @Override
     public void onSubscribe(UniSubscription subscription) {
+        upstreamSubscription = subscription;
         if (!state.compareAndSet(State.SUBSCRIBING, State.SUBSCRIBED)) {
             throw new IllegalStateException("Current state is " + state.get() + " but should be " + State.SUBSCRIBING);
         }
@@ -63,6 +79,8 @@ public class UniCache<I> extends UniOperator<I, I> implements UniSubscriber<I> {
         for (;;) {
 
             ArrayList<UniSerializedSubscriber<? super I>> subscribers;
+            I currentItem;
+            Throwable currentFailure;
 
             if (!awaitingSubscription.isEmpty()) {
                 // Make a safe copy of the subscribers awaiting for a subscription
@@ -72,33 +90,51 @@ public class UniCache<I> extends UniOperator<I, I> implements UniSubscriber<I> {
 
                 // Handle the subscribers that are awaiting a subscription
                 for (UniSerializedSubscriber<? super I> subscriber : subscribers) {
+                    currentItem = item;
+                    currentFailure = failure;
                     State state = this.state.get();
                     switch (state) {
+                        case INIT:
+                        case SUBSCRIBING:
+                            break;
                         case SUBSCRIBED:
                             subscriber.onSubscribe(() -> tryCancelSubscription(subscriber));
+                            awaitingSubscription.remove(subscriber);
                             awaitingResult.add(subscriber);
                             break;
                         case CACHING:
                             subscriber.onSubscribe(() -> tryCancelSubscription(subscriber));
-                            dispatchResult(subscriber);
+                            if (currentFailure != null) {
+                                subscriber.onFailure(currentFailure);
+                            } else {
+                                subscriber.onItem(currentItem);
+                            }
+                            awaitingSubscription.remove(subscriber);
                             awaitingResult.remove(subscriber);
                             break;
                         default:
                             throw new IllegalStateException("Current state is " + state);
                     }
-                    awaitingSubscription.remove(subscriber);
                 }
             }
 
-            if (state.get() == State.CACHING && !awaitingResult.isEmpty()) {
+            if (!awaitingResult.isEmpty()) {
                 // Make a safe copy of the subscribers awaiting a result
                 synchronized (awaitingResult) {
                     subscribers = new ArrayList<>(awaitingResult);
                 }
                 // Handle the subscribers that are awaiting a result
                 for (UniSerializedSubscriber<? super I> subscriber : subscribers) {
-                    dispatchResult(subscriber);
-                    awaitingResult.remove(subscriber);
+                    currentItem = item;
+                    currentFailure = failure;
+                    if (state.get() == State.CACHING) {
+                        if (failure != null) {
+                            subscriber.onFailure(currentFailure);
+                        } else {
+                            subscriber.onItem(currentItem);
+                        }
+                        awaitingResult.remove(subscriber);
+                    }
                 }
             }
 
@@ -106,14 +142,6 @@ public class UniCache<I> extends UniOperator<I, I> implements UniSubscriber<I> {
             if (missed == 0) {
                 break;
             }
-        }
-    }
-
-    private void dispatchResult(UniSerializedSubscriber<? super I> subscriber) {
-        if (failure != null) {
-            subscriber.onFailure(failure);
-        } else {
-            subscriber.onItem(item);
         }
     }
 
@@ -126,9 +154,7 @@ public class UniCache<I> extends UniOperator<I, I> implements UniSubscriber<I> {
     public void onItem(I item) {
         this.item = item;
         this.failure = null;
-        if (!state.compareAndSet(State.SUBSCRIBED, State.CACHING)) {
-            throw new IllegalStateException("Current state is " + state + " but should be " + State.SUBSCRIBED);
-        }
+        checkStateCorrectness();
         drain();
     }
 
@@ -136,9 +162,20 @@ public class UniCache<I> extends UniOperator<I, I> implements UniSubscriber<I> {
     public void onFailure(Throwable failure) {
         this.item = null;
         this.failure = failure;
-        if (!state.compareAndSet(State.SUBSCRIBED, State.CACHING)) {
-            throw new IllegalStateException("Current state is " + state + " but should be " + State.SUBSCRIBED);
-        }
+        checkStateCorrectness();
         drain();
+    }
+
+    private void checkStateCorrectness() {
+        switch (state.get()) {
+            case INIT:
+            case SUBSCRIBING:
+                return;
+            default:
+                // TODO maybe there's an issue with concurrent invalidations
+                if (!state.compareAndSet(State.SUBSCRIBED, State.CACHING)) {
+                    throw new IllegalStateException("Current state is " + state + " but should be " + State.SUBSCRIBED);
+                }
+        }
     }
 }

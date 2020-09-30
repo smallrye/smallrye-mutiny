@@ -1,18 +1,20 @@
 package io.smallrye.mutiny.operators;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.BooleanSupplier;
 
+import io.smallrye.mutiny.helpers.spies.Spy;
+import io.smallrye.mutiny.helpers.spies.UniOnSubscribeSpy;
+import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 
 import io.reactivex.Flowable;
@@ -275,4 +277,85 @@ public class UniCacheTest {
         uni.subscribe().withSubscriber(subscriber);
     }
 
+    @Test
+    public void testBasicInvalidation() {
+        AtomicInteger counter = new AtomicInteger(0);
+        AtomicBoolean invalidate = new AtomicBoolean(false);
+        UniOnSubscribeSpy<Integer> onSubscribeSpy = Spy.onSubscribe(Uni.createFrom().item(counter::getAndIncrement));
+        Uni<Integer> cachingUni = onSubscribeSpy.cacheUntil(invalidate::get);
+
+        UniAssertSubscriber<Integer> subscriber = cachingUni.subscribe().withSubscriber(UniAssertSubscriber.create());
+        subscriber.assertCompletedSuccessfully().assertItem(0);
+        assertThat(onSubscribeSpy.invocationCount()).isEqualTo(1);
+
+        subscriber = cachingUni.subscribe().withSubscriber(UniAssertSubscriber.create());
+        subscriber.assertCompletedSuccessfully().assertItem(0);
+        assertThat(onSubscribeSpy.invocationCount()).isEqualTo(1);
+
+        invalidate.set(true);
+
+        subscriber = cachingUni.subscribe().withSubscriber(UniAssertSubscriber.create());
+        subscriber.assertCompletedSuccessfully().assertItem(1);
+        assertThat(onSubscribeSpy.invocationCount()).isEqualTo(2);
+
+        subscriber = cachingUni.subscribe().withSubscriber(UniAssertSubscriber.create());
+        subscriber.assertCompletedSuccessfully().assertItem(2);
+        assertThat(onSubscribeSpy.invocationCount()).isEqualTo(3);
+
+        invalidate.set(false);
+
+        subscriber = cachingUni.subscribe().withSubscriber(UniAssertSubscriber.create());
+        subscriber.assertCompletedSuccessfully().assertItem(2);
+        assertThat(onSubscribeSpy.invocationCount()).isEqualTo(3);
+    }
+
+    @Test
+    public void testDurationInvalidation() throws InterruptedException {
+        AtomicInteger counter = new AtomicInteger(0);
+        UniOnSubscribeSpy<Integer> onSubscribeSpy = Spy.onSubscribe(Uni.createFrom().item(counter::getAndIncrement));
+        Uni<Integer> cachingUni = onSubscribeSpy.cacheFor(Duration.ofMillis(500));
+
+        UniAssertSubscriber<Integer> subscriber = cachingUni.subscribe().withSubscriber(UniAssertSubscriber.create());
+        subscriber.assertCompletedSuccessfully().assertItem(0);
+        assertThat(onSubscribeSpy.invocationCount()).isEqualTo(1);
+
+        subscriber = cachingUni.subscribe().withSubscriber(UniAssertSubscriber.create());
+        subscriber.assertCompletedSuccessfully().assertItem(0);
+        assertThat(onSubscribeSpy.invocationCount()).isEqualTo(1);
+
+        Thread.sleep(500);
+
+        subscriber = cachingUni.subscribe().withSubscriber(UniAssertSubscriber.create());
+        subscriber.assertCompletedSuccessfully().assertItem(1);
+        assertThat(onSubscribeSpy.invocationCount()).isEqualTo(2);
+
+        subscriber = cachingUni.subscribe().withSubscriber(UniAssertSubscriber.create());
+        subscriber.assertCompletedSuccessfully().assertItem(1);
+        assertThat(onSubscribeSpy.invocationCount()).isEqualTo(2);
+    }
+
+    @Test
+    public void testSubscribersRaceWithRandomInvalidations() {
+        for (int i = 0; i < 2000; i++) {
+            Flowable<Integer> flowable = Flowable.just(1, 2, 3);
+            BooleanSupplier invalidationGuard = () -> ThreadLocalRandom.current().nextBoolean();
+            Uni<Integer> cached = Uni.createFrom().publisher(flowable).cacheUntil(invalidationGuard);
+
+            UniAssertSubscriber<Integer> subscriber = new UniAssertSubscriber<>(false);
+
+            Runnable r1 = () -> {
+                cached.subscribe().withSubscriber(subscriber);
+                subscriber.cancel();
+            };
+
+            Runnable r2 = () -> cached.subscribe().withSubscriber(new UniAssertSubscriber<>());
+
+            ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+            try {
+                race(r1, r2, executor);
+            } finally {
+                executor.shutdown();
+            }
+        }
+    }
 }
