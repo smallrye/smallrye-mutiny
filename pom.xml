@@ -71,6 +71,7 @@
         <reactive-streams.version>1.0.3</reactive-streams.version>
         <smallrye-context-propagation.version>1.0.16</smallrye-context-propagation.version>
         <smallrye-config.version>1.9.0</smallrye-config.version>
+        <smallrye-common-annotation.version>1.4.0</smallrye-common-annotation.version>
 
         <junit.version>5.7.0</junit.version>
     </properties>

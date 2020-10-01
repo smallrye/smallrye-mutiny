@@ -29,6 +29,12 @@
         </dependency>
 
         <dependency>
+            <groupId>io.smallrye.common</groupId>
+            <artifactId>smallrye-common-annotation</artifactId>
+            <version>${smallrye-common-annotation.version}</version>
+        </dependency>
+
+        <dependency>
             <groupId>io.smallrye.reactive</groupId>
             <artifactId>reactive-streams-junit5-tck</artifactId>
             <version>${project.version}</version>
