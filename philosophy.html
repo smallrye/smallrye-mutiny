@@ -485,7 +485,7 @@ Events can flow from upstream to downstream (from source to sinks), or some sign
 </div>
 <div class="imageblock text-center">
 <div class="content">
-<img src="assets/images/diag-4e60926db2b100a45f7a3fafb6d1c2c5.png" alt="diag 4e60926db2b100a45f7a3fafb6d1c2c5" width="1287" height="817">
+<img src="assets/images/diag-4e60926db2b100a45f7a3fafb6d1c2c5.png" alt="Diagram" width="1287" height="817">
 </div>
 </div>
 <div class="admonitionblock note">
@@ -565,7 +565,7 @@ Once they are emitted, no more items are emitted.</p>
 </div>
 <div class="imageblock text-center">
 <div class="content">
-<img src="assets/images/diag-c06139c2b31470fa367c3f84a6e51430.png" alt="diag c06139c2b31470fa367c3f84a6e51430" width="997" height="878">
+<img src="assets/images/diag-c06139c2b31470fa367c3f84a6e51430.png" alt="Diagram" width="997" height="878">
 </div>
 </div>
 <div class="paragraph">
@@ -700,13 +700,13 @@ Also, <code>Uni</code> can handle items having a <code>null</code> value (and ha
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">Multi.createFrom().items("a", "b", "c")
-        .onItem().transform(i -&gt; i.toUpperCase())
+        .onItem().transform(String::toUpperCase)
         .subscribe().with(
                 item -&gt; System.out.println("Received: " + item),
                 failure -&gt; System.out.println("Failed with " + failure.getMessage()));
 
 Uni.createFrom().item("a")
-        .onItem().transform(i -&gt; i.toUpperCase())
+        .onItem().transform(String::toUpperCase)
         .subscribe().with(
                 item -&gt; System.out.println("Received: " + item),
                 failure -&gt; System.out.println("Failed with " + failure.getMessage()));</code></pre>
@@ -718,14 +718,14 @@ Uni.createFrom().item("a")
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">Multi.createFrom().items("a", "b", "c")
-        .onItem().transform(i -&gt; i.toUpperCase())
+        .onItem().transform(String::toUpperCase)
         .toUni() // Convert the multi to uni, only "a" will be forwarded.
         .subscribe().with(
                 item -&gt; System.out.println("Received: " + item),
                 failure -&gt; System.out.println("Failed with " + failure.getMessage()));
 
 Uni.createFrom().item("a")
-        .onItem().transform(i -&gt; i.toUpperCase())
+        .onItem().transform(String::toUpperCase)
         .toMulti() // Convert the uni to a multi, the completion event will be fired after the emission of "a"
         .subscribe().with(
                 item -&gt; System.out.println("Received: " + item),
@@ -932,7 +932,7 @@ Mutiny provides the <code>stage</code> function to structure your pipeline:</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-09-21 12:18:11 UTC
+Last updated 2020-10-01 09:23:16 UTC
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">

@@ -471,6 +471,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#_where_do_i_find_the_javadoc">Where do I find the JavaDoc?</a></li>
 <li><a href="#_default_executor_and_integration">Default executor and integration</a></li>
 <li><a href="#_handling_dropped_exceptions">Handling dropped exceptions</a></li>
+<li><a href="#_can_i_have_custom_operators">Can I have custom operators?</a></li>
 </ul>
 </div>
 </div>
@@ -941,7 +942,7 @@ Uni&lt;String&gt; uni2 = getSecondUni();
 Uni&lt;Integer&gt; uni3 = getThirdUni();
 
 Uni&lt;Tuple3&lt;String, String, Integer&gt;&gt; uni = Uni.combine().all().unis(uni1, uni2, uni3).asTuple();
-String result  = uni.onItem().apply(tuple -&gt;
+String result  = uni.onItem().transform(tuple -&gt;
         tuple.getItem1() + " " + tuple.getItem2() + " " + tuple.getItem3() + " !")
         .await().indefinitely();</code></pre>
 </div>
@@ -1288,7 +1289,7 @@ To enable this feature, add the following dependency to your <code>CLASSPATH</co
 <pre class="highlightjs highlight"><code data-lang="xml" class="language-xml hljs">&lt;dependency&gt;
     &lt;groupId&gt;io.smallrye.reactive&lt;/groupId&gt;
     &lt;artifactId&gt;mutiny-rxjava&lt;/artifactId&gt;
-    &lt;version&gt;0.8.1&lt;/version&gt;
+    &lt;version&gt;0.9.0&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -1404,7 +1405,7 @@ To enable this feature, add the following dependency to your <code>CLASSPATH</co
 <pre class="highlightjs highlight"><code data-lang="xml" class="language-xml hljs">&lt;dependency&gt;
     &lt;groupId&gt;io.smallrye.reactive&lt;/groupId&gt;
     &lt;artifactId&gt;mutiny-reactor&lt;/artifactId&gt;
-    &lt;version&gt;0.8.1&lt;/version&gt;
+    &lt;version&gt;0.9.0&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -1575,7 +1576,7 @@ Consequently, it affects where the subsequent operators execute (until another <
 </div>
 <div class="imageblock text-center">
 <div class="content">
-<img src="assets/images/diag-ce11714f53fedf6861bf5f43e7f2d847.png" alt="diag ce11714f53fedf6861bf5f43e7f2d847" width="2232" height="578">
+<img src="assets/images/diag-ce11714f53fedf6861bf5f43e7f2d847.png" alt="Diagram" width="2232" height="578">
 </div>
 </div>
 <div class="paragraph">
@@ -1602,7 +1603,7 @@ It requests the upstream to run its subscription (call of the <code>subscribe</c
 </div>
 <div class="imageblock text-center">
 <div class="content">
-<img src="assets/images/diag-cbd1972d7b4ab697a798e3d1b5ede99e.png" alt="diag cbd1972d7b4ab697a798e3d1b5ede99e" width="2207" height="578">
+<img src="assets/images/diag-cbd1972d7b4ab697a798e3d1b5ede99e.png" alt="Diagram" width="2207" height="578">
 </div>
 </div>
 </div>
@@ -1802,7 +1803,7 @@ It gets the items from the lists and passes them downstream:</p>
 </div>
 <div class="imageblock text-center">
 <div class="content">
-<img src="assets/images/diag-1cddf88909ef82bdaa96ca9da9f4c028.png" alt="diag 1cddf88909ef82bdaa96ca9da9f4c028" width="652" height="628">
+<img src="assets/images/diag-1cddf88909ef82bdaa96ca9da9f4c028.png" alt="Diagram" width="652" height="628">
 </div>
 </div>
 <div class="paragraph">
@@ -1961,10 +1962,75 @@ You can change how these exceptions are handled using <code>Infrastructure.setDr
 </div>
 </div>
 </div>
+<div class="sect1">
+<h2 id="_can_i_have_custom_operators">Can I have custom operators?</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Yes, but please write operators responsibly!</p>
+</div>
+<div class="paragraph">
+<p>Both <code>Uni</code> and <code>Multi</code> support custom operators using the <code>plug</code> operator.
+Here is an example where we use a custom <code>Multi</code> operator that randomly drops items:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">Multi.createFrom()
+        .range(1, 101)
+        .plug(RandomDrop::new)
+        .subscribe().with(System.out::println);</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>with the operator defined as follows:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="java" class="language-java hljs">public class RandomDrop&lt;T&gt; extends AbstractMultiOperator&lt;T, T&gt; {
+    public RandomDrop(Multi&lt;? extends T&gt; upstream) {
+        super(upstream);
+    }
+
+    @Override
+    public void subscribe(MultiSubscriber&lt;? super T&gt; downstream) {
+        upstream.subscribe().withSubscriber(new DropProcessor(downstream));
+    }
+
+    private class DropProcessor extends MultiOperatorProcessor&lt;T, T&gt; {
+        DropProcessor(MultiSubscriber&lt;? super T&gt; downstream) {
+            super(downstream);
+        }
+
+        @Override
+        public void onItem(T item) {
+            if (ThreadLocalRandom.current().nextBoolean()) {
+                super.onItem(item);
+            }
+        }
+    }
+}</code></pre>
+</div>
+</div>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-warning" title="Warning"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>Custom operators are an advanced feature: when possible please use the existing operators and use helpers such as <code>stage</code> to write readable code.
+In the case of custom <code>Multi</code> operators it is wise to test them against the <em>Reactive Streams TCK</em>.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-09-21 12:18:11 UTC
+Last updated 2020-10-01 09:23:16 UTC
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">
