@@ -124,7 +124,7 @@ public class ConnectableProcessor<T> implements Processor<T, T> {
     }
 
     @Override
-    public void onComplete() {
+    public synchronized void onComplete() {
         if (state.get() == State.PROCESSING) {
             subscriber.get().onComplete();
             state.set(State.COMPLETE);
@@ -136,7 +136,7 @@ public class ConnectableProcessor<T> implements Processor<T, T> {
     }
 
     @Override
-    public void onError(Throwable throwable) {
+    public synchronized void onError(Throwable throwable) {
         Objects.requireNonNull(throwable);
         this.failure.set(throwable);
         if (state.get() == State.PROCESSING) {
