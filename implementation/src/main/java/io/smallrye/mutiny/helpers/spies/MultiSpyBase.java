@@ -7,7 +7,7 @@ import io.smallrye.mutiny.operators.multi.AbstractMultiOperator;
 
 abstract class MultiSpyBase<T> extends AbstractMultiOperator<T, T> {
 
-    private AtomicLong invocationCount = new AtomicLong();
+    private final AtomicLong invocationCount = new AtomicLong();
 
     protected void incrementInvocationCount() {
         invocationCount.incrementAndGet();
