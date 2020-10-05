@@ -43,6 +43,12 @@
             <email>clement[AT]apache[DOT]org</email>
             <url>https://github.com/cescoffier</url>
         </developer>
+        <developer>
+            <id>jponge</id>
+            <name>Julien Ponge</name>
+            <email>julien[AT]ponge[DOT]org</email>
+            <url>https://github.com/jponge</url>
+        </developer>
     </developers>
 
     <scm>
