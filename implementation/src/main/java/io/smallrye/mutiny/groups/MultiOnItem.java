@@ -2,6 +2,7 @@ package io.smallrye.mutiny.groups;
 
 import static io.smallrye.mutiny.helpers.ParameterValidation.*;
 
+import java.util.Objects;
 import java.util.concurrent.CompletionStage;
 import java.util.function.*;
 
@@ -518,6 +519,41 @@ public class MultiOnItem<T> {
      */
     public Multi<T> scan(BinaryOperator<T> accumulator) {
         return Infrastructure.onMultiCreation(new MultiScanOp<>(upstream, accumulator));
+    }
+
+    /**
+     * Produces a new {@link Multi} invoking the given function when the current {@link Multi} fires an item (only once).
+     * The function transforms the received item into a failure that will be fired by the produced {@link Multi}.
+     * For asynchronous composition, see {@link #transformToUni(Function)}}.
+     *
+     * The upstream subscription is cancelled after the emission of the first item, as a failure is propagated downstream.
+     *
+     * @param mapper the mapper function, must not be {@code null}, must not return {@code null}
+     * @return the new {@link Multi}
+     */
+    public Multi<T> failWith(Function<? super T, ? extends Throwable> mapper) {
+        nonNull(mapper, "mapper");
+        return Infrastructure.onMultiCreation(transformToUniAndConcatenate(t -> {
+            Throwable failure = Objects.requireNonNull(mapper.apply(t), MAPPER_RETURNED_NULL);
+            return Uni.createFrom().failure(failure);
+        }));
+    }
+
+    /**
+     * Produces a new {@link Multi} invoking the given supplier when the current {@link Uni} fires an item.
+     * The supplier produce the received item into a failure that will be fired by the produced {@link Multi}.
+     *
+     * The upstream subscription is cancelled after the emission of the first item, as a failure is propagated downstream.
+     *
+     * @param supplier the supplier to produce the failure, must not be {@code null}, must not produce {@code null}
+     * @return the new {@link Multi}
+     */
+    public Multi<T> failWith(Supplier<? extends Throwable> supplier) {
+        nonNull(supplier, "supplier");
+        return Infrastructure.onMultiCreation(transformToUniAndConcatenate(ignored -> {
+            Throwable failure = Objects.requireNonNull(supplier.get(), SUPPLIER_PRODUCED_NULL);
+            return Uni.createFrom().failure(failure);
+        }));
     }
 
 }

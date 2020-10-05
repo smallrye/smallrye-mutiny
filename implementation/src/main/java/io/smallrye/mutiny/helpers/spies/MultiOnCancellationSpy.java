@@ -15,6 +15,10 @@ public class MultiOnCancellationSpy<T> extends MultiSpyBase<T> {
                 .subscribe().withSubscriber(downstream);
     }
 
+    public boolean isCancelled() {
+        return invoked();
+    }
+
     @Override
     public String toString() {
         return "MultiOnCancellationSpy{} " + super.toString();
