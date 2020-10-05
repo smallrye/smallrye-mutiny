@@ -1,6 +1,6 @@
 package io.smallrye.mutiny.groups;
 
-import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
+import static io.smallrye.mutiny.helpers.ParameterValidation.*;
 
 import java.util.Objects;
 import java.util.concurrent.CompletionStage;
@@ -334,7 +334,25 @@ public class UniOnItem<T> {
      */
     public Uni<T> failWith(Function<? super T, ? extends Throwable> mapper) {
         nonNull(mapper, "mapper");
-        return Infrastructure.onUniCreation(transformToUni(t -> Uni.createFrom().failure(mapper.apply(t))));
+        return Infrastructure.onUniCreation(transformToUni(t -> {
+            Throwable failure = Objects.requireNonNull(mapper.apply(t), MAPPER_RETURNED_NULL);
+            return Uni.createFrom().failure(failure);
+        }));
+    }
+
+    /**
+     * Produces a new {@link Uni} invoking the given supplier when the current {@link Uni} fires an item.
+     * The supplier produce the received item into a failure that will be fired by the produced {@link Uni}.
+     *
+     * @param supplier the supplier to produce the failure, must not be {@code null}, must not produce {@code null}
+     * @return the new {@link Uni}
+     */
+    public Uni<T> failWith(Supplier<? extends Throwable> supplier) {
+        nonNull(supplier, "supplier");
+        return Infrastructure.onUniCreation(transformToUni(ignored -> {
+            Throwable failure = Objects.requireNonNull(supplier.get(), SUPPLIER_PRODUCED_NULL);
+            return Uni.createFrom().failure(failure);
+        }));
     }
 
     /**
