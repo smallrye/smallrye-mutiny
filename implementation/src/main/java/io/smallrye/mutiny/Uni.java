@@ -793,4 +793,15 @@ public interface Uni<T> {
     default <O> Uni<O> replaceWith(Uni<O> uni) {
         return onItem().transformToUni(ignore -> uni);
     }
+
+    /**
+     * Ignore the item emitted by this {@link Uni} and replace it with {@code null}.
+     * <p>
+     * This is a shortcut for {@code uni.onItem().transform(ignore -> null)}.
+     * 
+     * @return the new {@link Uni}
+     */
+    default Uni<T> replaceWithNull() {
+        return onItem().transform(ignore -> null);
+    }
 }

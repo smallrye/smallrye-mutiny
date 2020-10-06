@@ -262,4 +262,12 @@ public class UniOnFailure<T> {
         return new UniRetry<>(upstream, predicate);
     }
 
+    /**
+     * Recovers from the received failure by ignoring it and emitting a {@code null} item in the resulting {@link Uni}.
+     *
+     * @return the new {@link Uni} that emits {@code null} on failure
+     */
+    public Uni<T> recoverWithNull() {
+        return recoverWithItem(failure -> null);
+    }
 }

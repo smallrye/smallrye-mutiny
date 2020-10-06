@@ -38,6 +38,12 @@ public class UniOnFailureRecoveryTest {
     }
 
     @Test
+    public void testRecoverWithNull() {
+        Integer value = failed.onFailure().recoverWithNull().await().indefinitely();
+        assertThat(value).isEqualTo(null);
+    }
+
+    @Test
     public void testRecoverWithSupplierOfValue() {
         AtomicInteger count = new AtomicInteger();
         Uni<Integer> recovered = failed.onFailure().recoverWithItem(() -> 23 + count.getAndIncrement());
