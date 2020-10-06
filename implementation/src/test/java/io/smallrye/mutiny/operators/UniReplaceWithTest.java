@@ -39,4 +39,15 @@ class UniReplaceWithTest {
 
         subscriber.assertCompletedSuccessfully().assertItem(63);
     }
+
+    @Test
+    @DisplayName("Replace with null")
+    void replaceWithNull() {
+        UniAssertSubscriber<Integer> subscriber = Uni.createFrom()
+                .item(69)
+                .replaceWithNull()
+                .subscribe().withSubscriber(UniAssertSubscriber.create());
+
+        subscriber.assertCompletedSuccessfully().assertItem(null);
+    }
 }
