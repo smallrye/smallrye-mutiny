@@ -1271,4 +1271,58 @@ public class MultiTransformToMultiTest {
         verify(subscriber, never()).onNext(3);
     }
 
+    @RepeatedTest(100)
+    public void testMergeRaceWithInnerEmissionOnAnotherThreadForSomeItems() {
+        AssertSubscriber<Integer> subscriber = Multi.createFrom().range(0, 20)
+                .onItem().transformToMulti(i -> {
+                    if (i % 5 != 0) {
+                        return Multi.createFrom().item(i);
+                    } else {
+                        return Multi.createFrom().item(-i)
+                                .emitOn(Infrastructure.getDefaultExecutor());
+                    }
+                }).merge(1)
+                .subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE));
+
+        subscriber.await().assertCompletedSuccessfully();
+        assertThat(subscriber.items()).hasSize(20);
+        assertThat(subscriber.items())
+                .containsExactlyInAnyOrder(0, 1, 2, 3, 4, -5, 6, 7, 8, 9, -10, 11, 12, 13, 14, -15, 16, 17, 18, 19);
+
+        subscriber = Multi.createFrom().range(0, 20)
+                .onItem().transformToMulti(i -> {
+                    if (i % 5 != 0) {
+                        return Multi.createFrom().item(i);
+                    } else {
+                        return Multi.createFrom().item(-i)
+                                .emitOn(Infrastructure.getDefaultExecutor());
+                    }
+                }).merge(5)
+                .subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE));
+
+        subscriber.await().assertCompletedSuccessfully();
+        assertThat(subscriber.items()).hasSize(20);
+        assertThat(subscriber.items())
+                .containsExactlyInAnyOrder(0, 1, 2, 3, 4, -5, 6, 7, 8, 9, -10, 11, 12, 13, 14, -15, 16, 17, 18, 19);
+    }
+
+    @RepeatedTest(100)
+    public void testConcatRaceWithInnerEmissionOnAnotherThreadForSomeItems() {
+        AssertSubscriber<Integer> subscriber = Multi.createFrom().range(0, 20)
+                .onItem().transformToMulti(i -> {
+                    if (i % 5 != 0) {
+                        return Multi.createFrom().item(i);
+                    } else {
+                        return Multi.createFrom().item(-i)
+                                .emitOn(Infrastructure.getDefaultExecutor());
+                    }
+                }).concatenate()
+                .subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE));
+
+        subscriber.await().assertCompletedSuccessfully();
+        assertThat(subscriber.items()).hasSize(20);
+        assertThat(subscriber.items())
+                .containsExactly(0, 1, 2, 3, 4, -5, 6, 7, 8, 9, -10, 11, 12, 13, 14, -15, 16, 17, 18, 19);
+    }
+
 }
