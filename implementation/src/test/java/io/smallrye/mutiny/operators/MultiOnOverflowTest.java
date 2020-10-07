@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.mock;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -13,12 +14,16 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 import org.junit.jupiter.api.Test;
+import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.helpers.spies.MultiOnCancellationSpy;
+import io.smallrye.mutiny.helpers.spies.Spy;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.subscription.BackPressureFailure;
 import io.smallrye.mutiny.subscription.MultiEmitter;
+import io.smallrye.mutiny.subscription.MultiSubscriber;
 import io.smallrye.mutiny.test.AssertSubscriber;
 
 public class MultiOnOverflowTest {
@@ -252,6 +257,35 @@ public class MultiOnOverflowTest {
                 .subscribe(sub);
 
         sub.assertHasFailedWith(BackPressureFailure.class, null);
+    }
+
+    @Test
+    public void testOnOverflowFailureShouldCancelTheUpstream() {
+        AtomicReference<MultiSubscriber<? super Integer>> reference = new AtomicReference<>();
+        AbstractMulti<Integer> rogue = new AbstractMulti<Integer>() {
+            @Override
+            public void subscribe(MultiSubscriber<? super Integer> subscriber) {
+                subscriber.onSubscribe(mock(Subscription.class));
+                reference.set(subscriber);
+            }
+        };
+        MultiOnCancellationSpy<Integer> onCancellationSpy = Spy.onCancellation(rogue);
+
+        AssertSubscriber<Integer> subscriber = onCancellationSpy.onOverflow().buffer(1)
+                .subscribe().withSubscriber(AssertSubscriber.create(0));
+
+        subscriber.assertSubscribed();
+        assertThat(reference.get()).isNotNull();
+        subscriber.assertNotTerminated();
+
+        reference.get().onNext(1);
+        reference.get().onNext(2);
+        reference.get().onNext(3);
+        reference.get().onNext(4);
+        reference.get().onNext(5);
+
+        subscriber.assertHasFailedWith(BackPressureFailure.class, "Buffer");
+        assertThat(onCancellationSpy.isCancelled()).isTrue();
     }
 
 }

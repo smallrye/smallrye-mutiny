@@ -173,7 +173,12 @@ public class MultiOnOverflowBufferOp<T> extends AbstractMultiOperator<T, T> {
             if (wasDone) {
                 if (failure != null) {
                     queue.clear();
-                    super.onFailure(failure);
+                    if (failure instanceof BackPressureFailure) {
+                        super.cancel();
+                        downstream.onFailure(failure);
+                    } else {
+                        super.onFailure(failure);
+                    }
                     return true;
                 } else if (wasEmpty) {
                     super.onCompletion();
