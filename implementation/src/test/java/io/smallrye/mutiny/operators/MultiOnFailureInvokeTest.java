@@ -2,11 +2,13 @@ package io.smallrye.mutiny.operators;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
+import static org.awaitility.Awaitility.with;
 
 import java.io.IOException;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
@@ -109,25 +111,21 @@ public class MultiOnFailureInvokeTest {
 
     @RepeatedTest(10)
     public void testCancellationBeforeActionCompletes() {
-        CountDownLatch latch = new CountDownLatch(1);
-        AtomicBoolean called = new AtomicBoolean();
+        AtomicBoolean onFailureEntered = new AtomicBoolean();
+        AtomicBoolean cancelled = new AtomicBoolean();
 
         ExecutorService executor = Executors.newSingleThreadExecutor();
         AssertSubscriber<Integer> subscriber = failed
                 .emitOn(executor)
                 .onFailure().invoke(i -> {
-                    try {
-                        called.set(true);
-                        latch.await();
-                    } catch (InterruptedException e) {
-                        Thread.currentThread().interrupt();
-                    }
+                    onFailureEntered.set(true);
+                    await().atMost(5, TimeUnit.SECONDS).and().untilTrue(cancelled);
                 })
                 .subscribe().withSubscriber(AssertSubscriber.create(10));
 
-        await().until(called::get);
+        with().pollDelay(100, TimeUnit.MILLISECONDS).await().atMost(5, TimeUnit.SECONDS).and().untilTrue(onFailureEntered);
         subscriber.cancel();
-        latch.countDown();
+        cancelled.set(true);
         executor.shutdownNow();
     }
 
