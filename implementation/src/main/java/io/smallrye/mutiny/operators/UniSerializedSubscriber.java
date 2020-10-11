@@ -89,7 +89,6 @@ public class UniSerializedSubscriber<T> implements UniSubscriber<T>, UniSubscrip
                 throw e; // Rethrow in case of synchronous emission
             }
         }
-        dispose();
     }
 
     @Override
@@ -102,16 +101,10 @@ public class UniSerializedSubscriber<T> implements UniSubscriber<T>, UniSubscrip
             } catch (Throwable e) {
                 Infrastructure.handleDroppedException(new CompositeException(throwable, e));
                 throw e; // Rethrow in case of synchronous emission
-            } finally {
-                dispose();
             }
         } else {
             Infrastructure.handleDroppedException(throwable);
         }
-    }
-
-    private void dispose() {
-        subscription = null;
     }
 
     @Override
@@ -122,12 +115,10 @@ public class UniSerializedSubscriber<T> implements UniSubscriber<T>, UniSubscrip
             }
             if (subscription != null) { // May have been cancelled already by another thread.
                 subscription.cancel();
-                dispose();
             }
         } else {
             state.set(DONE);
         }
-
     }
 
     public synchronized boolean isCancelledOrDone() {
