@@ -31,8 +31,8 @@ public class SerializedProcessorTest {
         processor.onComplete();
 
         subscriber.await()
-                .assertReceived("hello")
-                .assertCompletedSuccessfully();
+                .assertItems("hello")
+                .assertCompleted();
     }
 
     @Test
@@ -45,8 +45,8 @@ public class SerializedProcessorTest {
         AssertSubscriber<Integer> subscriber = AssertSubscriber.create(1);
         serialized.subscribe(subscriber);
         subscriber.await()
-                .assertReceived(1)
-                .assertCompletedSuccessfully();
+                .assertItems(1)
+                .assertCompleted();
     }
 
     @Test
@@ -59,7 +59,7 @@ public class SerializedProcessorTest {
         serialized.subscribe(subscriber);
         subscriber.await()
                 .assertHasNotReceivedAnyItem()
-                .assertCompletedSuccessfully();
+                .assertCompleted();
     }
 
     @Test
@@ -72,8 +72,8 @@ public class SerializedProcessorTest {
         AssertSubscriber<Integer> subscriber = AssertSubscriber.create(1);
         serialized.subscribe(subscriber);
         subscriber.await()
-                .assertReceived(1)
-                .assertHasFailedWith(Exception.class, "boom");
+                .assertItems(1)
+                .assertFailedWith(Exception.class, "boom");
     }
 
     @Test
@@ -85,8 +85,8 @@ public class SerializedProcessorTest {
         AssertSubscriber<Integer> subscriber = AssertSubscriber.create(1);
         serialized.subscribe(subscriber);
         subscriber
-                .assertReceived(1)
-                .assertHasNotCompleted();
+                .assertItems(1)
+                .assertNotTerminated();
     }
 
     @Test
@@ -98,8 +98,8 @@ public class SerializedProcessorTest {
         Multi.createFrom().range(1, 11).subscribe(processor);
 
         subscriber
-                .assertReceived(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
-                .assertCompletedSuccessfully();
+                .assertItems(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
+                .assertCompleted();
 
         processor.onNext(11);
         processor.onComplete();
@@ -120,13 +120,13 @@ public class SerializedProcessorTest {
             new Thread(r).start();
         });
 
-        await().until(() -> subscriber.items().size() == 2);
+        await().until(() -> subscriber.getItems().size() == 2);
 
         subscriber
                 .assertSubscribed()
                 .assertNotTerminated();
 
-        List<Integer> items = subscriber.items();
+        List<Integer> items = subscriber.getItems();
         assertThat(items).hasSize(2).contains(1, 2);
     }
 
@@ -149,7 +149,7 @@ public class SerializedProcessorTest {
         subscriber
                 .await()
                 .assertSubscribed()
-                .assertHasFailedWith(Exception.class, "boom");
+                .assertFailedWith(Exception.class, "boom");
     }
 
     @RepeatedTest(100)
@@ -171,16 +171,16 @@ public class SerializedProcessorTest {
             new Thread(r).start();
         });
 
-        await().until(() -> !subscriber.items().isEmpty() || !subscriber.failures().isEmpty());
+        await().until(() -> !subscriber.getItems().isEmpty() || subscriber.getFailure() != null);
 
         subscriber
                 .assertSubscribed()
                 .assertTerminated();
 
-        if (subscriber.items().size() != 0) {
-            assertThat(subscriber.items()).containsExactly(1);
+        if (subscriber.getItems().size() != 0) {
+            assertThat(subscriber.getItems()).containsExactly(1);
         } else {
-            assertThat(subscriber.failures()).containsExactly(failure);
+            assertThat(subscriber.getFailure()).isEqualTo(failure);
         }
     }
 
@@ -205,10 +205,10 @@ public class SerializedProcessorTest {
         subscriber.await();
         subscriber
                 .assertSubscribed()
-                .assertCompletedSuccessfully();
+                .assertCompleted();
 
-        if (subscriber.items().size() != 0) {
-            assertThat(subscriber.items()).containsExactly(1);
+        if (subscriber.getItems().size() != 0) {
+            assertThat(subscriber.getItems()).containsExactly(1);
         }
     }
 
@@ -233,10 +233,10 @@ public class SerializedProcessorTest {
         subscriber.await();
         subscriber
                 .assertSubscribed()
-                .assertCompletedSuccessfully();
+                .assertCompleted();
 
-        if (subscriber.items().size() != 0) {
-            assertThat(subscriber.items()).containsExactly(1);
+        if (subscriber.getItems().size() != 0) {
+            assertThat(subscriber.getItems()).containsExactly(1);
         }
     }
 
@@ -291,8 +291,8 @@ public class SerializedProcessorTest {
                 .assertSubscribed()
                 .assertTerminated();
 
-        if (subscriber.items().size() != 0) {
-            assertThat(subscriber.items()).containsExactly(1);
+        if (subscriber.getItems().size() != 0) {
+            assertThat(subscriber.getItems()).containsExactly(1);
         }
     }
 
@@ -315,7 +315,7 @@ public class SerializedProcessorTest {
         subscriber
                 .assertSubscribed()
                 .assertTerminated()
-                .assertHasFailedWith(Exception.class, "boom");
+                .assertFailedWith(Exception.class, "boom");
     }
 
     @Test
@@ -351,10 +351,10 @@ public class SerializedProcessorTest {
         subscriber.await();
         subscriber
                 .assertSubscribed()
-                .assertCompletedSuccessfully();
+                .assertCompleted();
 
-        if (subscriber.items().size() != 0) {
-            assertThat(subscriber.items()).contains(1);
+        if (subscriber.getItems().size() != 0) {
+            assertThat(subscriber.getItems()).contains(1);
         }
 
     }
@@ -383,10 +383,10 @@ public class SerializedProcessorTest {
         subscriber.await();
         subscriber
                 .assertSubscribed()
-                .assertCompletedSuccessfully();
+                .assertCompleted();
 
-        if (subscriber.items().size() != 0) {
-            assertThat(subscriber.items()).containsExactly(1, 2, 3, 4, 5);
+        if (subscriber.getItems().size() != 0) {
+            assertThat(subscriber.getItems()).containsExactly(1, 2, 3, 4, 5);
         }
     }
 

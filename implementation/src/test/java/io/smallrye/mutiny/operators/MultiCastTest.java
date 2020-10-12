@@ -20,8 +20,8 @@ public class MultiCastTest {
         Multi.createFrom().item(1)
                 .onItem().castTo(Number.class)
                 .subscribe().withSubscriber(AssertSubscriber.create(1))
-                .assertCompletedSuccessfully()
-                .assertReceived(1);
+                .assertCompleted()
+                .assertItems(1);
     }
 
     @Test
@@ -29,6 +29,6 @@ public class MultiCastTest {
         Multi.createFrom().item(1)
                 .onItem().castTo(String.class)
                 .subscribe().withSubscriber(AssertSubscriber.create(1))
-                .assertHasFailedWith(ClassCastException.class, "String");
+                .assertFailedWith(ClassCastException.class, "String");
     }
 }

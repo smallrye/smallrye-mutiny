@@ -29,7 +29,7 @@ public class KnownFailureUniTest {
                 .subscribe().withSubscriber(UniAssertSubscriber.create());
 
         hello.cancel();
-        hello.assertFailure(IOException.class, "boom");
+        hello.assertFailedWith(IOException.class, "boom");
     }
 
     @Test
@@ -37,7 +37,7 @@ public class KnownFailureUniTest {
         UniAssertSubscriber<String> subscriber = new UniAssertSubscriber<>(true);
         Uni.createFrom().<String> failure(new IOException("boom"))
                 .subscribe().withSubscriber(subscriber);
-        subscriber.assertNotCompleted();
+        subscriber.assertNotTerminated();
     }
 
 }

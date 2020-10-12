@@ -235,7 +235,7 @@ public class UniOnSubscribeTest {
         UniAssertSubscriber<Integer> subscriber = UniAssertSubscriber.create();
 
         uni.subscribe().withSubscriber(subscriber)
-                .assertFailure(IllegalStateException.class, "boom");
+                .assertFailedWith(IllegalStateException.class, "boom");
 
     }
 
@@ -249,7 +249,7 @@ public class UniOnSubscribeTest {
         UniAssertSubscriber<Integer> subscriber = UniAssertSubscriber.create();
 
         uni.subscribe().withSubscriber(subscriber)
-                .assertFailure(IllegalStateException.class, "boom");
+                .assertFailedWith(IllegalStateException.class, "boom");
 
     }
 
@@ -261,7 +261,7 @@ public class UniOnSubscribeTest {
         UniAssertSubscriber<Integer> subscriber = UniAssertSubscriber.create();
 
         uni.subscribe().withSubscriber(subscriber)
-                .assertFailure(IOException.class, "boom");
+                .assertFailedWith(IOException.class, "boom");
 
     }
 
@@ -273,7 +273,7 @@ public class UniOnSubscribeTest {
         UniAssertSubscriber<Integer> subscriber = UniAssertSubscriber.create();
 
         uni.subscribe().withSubscriber(subscriber)
-                .assertFailure(NullPointerException.class, "`null`");
+                .assertFailedWith(NullPointerException.class, "`null`");
 
     }
 
@@ -321,7 +321,7 @@ public class UniOnSubscribeTest {
         latch.countDown();
         subscriber.await()
                 .assertSubscribed()
-                .assertCompletedSuccessfully().assertItem(1);
+                .assertCompleted().assertItem(1);
     }
 
     @Test
@@ -339,7 +339,7 @@ public class UniOnSubscribeTest {
 
         subscriber.await()
                 .assertSubscribed()
-                .assertCompletedSuccessfully().assertItem(1);
+                .assertCompleted().assertItem(1);
 
     }
 
@@ -359,7 +359,7 @@ public class UniOnSubscribeTest {
 
         subscriber.await()
                 .assertSubscribed()
-                .assertCompletedSuccessfully().assertItem(1);
+                .assertCompleted().assertItem(1);
 
     }
 }

@@ -30,8 +30,8 @@ public class MultiOnCompletionTest {
                 .onCompletion().invoke(() -> called.set(true))
                 .onCompletion().continueWith(6, 7, 8)
                 .subscribe().withSubscriber(AssertSubscriber.create(7))
-                .assertCompletedSuccessfully()
-                .assertReceived(1, 2, 3, 4, 6, 7, 8);
+                .assertCompleted()
+                .assertItems(1, 2, 3, 4, 6, 7, 8);
 
         assertThat(called).isTrue();
     }
@@ -43,8 +43,8 @@ public class MultiOnCompletionTest {
                 .onCompletion().invoke(() -> called.set(true))
                 .onCompletion().continueWith(6, 7, 8)
                 .subscribe().withSubscriber(AssertSubscriber.create(7))
-                .assertHasFailedWith(IOException.class, "boom")
-                .assertReceived(1, 2);
+                .assertFailedWith(IOException.class, "boom")
+                .assertItems(1, 2);
 
         assertThat(called).isFalse();
     }
@@ -54,8 +54,8 @@ public class MultiOnCompletionTest {
         Multi.createFrom().range(1, 5)
                 .onCompletion().continueWith()
                 .subscribe().withSubscriber(AssertSubscriber.create(7))
-                .assertCompletedSuccessfully()
-                .assertReceived(1, 2, 3, 4);
+                .assertCompleted()
+                .assertItems(1, 2, 3, 4);
     }
 
     @Test
@@ -65,8 +65,8 @@ public class MultiOnCompletionTest {
                 .onCompletion().invoke(() -> called.set(true))
                 .onCompletion().continueWith(25)
                 .subscribe().withSubscriber(AssertSubscriber.create(7))
-                .assertCompletedSuccessfully()
-                .assertReceived(1, 2, 3, 4, 25);
+                .assertCompleted()
+                .assertItems(1, 2, 3, 4, 25);
 
         assertThat(called).isTrue();
     }
@@ -78,8 +78,8 @@ public class MultiOnCompletionTest {
                 .onCompletion().invoke(() -> called.set(true))
                 .onCompletion().continueWith(Arrays.asList(5, 6))
                 .subscribe().withSubscriber(AssertSubscriber.create(7))
-                .assertCompletedSuccessfully()
-                .assertReceived(1, 2, 3, 4, 5, 6);
+                .assertCompleted()
+                .assertItems(1, 2, 3, 4, 5, 6);
 
         assertThat(called).isTrue();
     }
@@ -91,8 +91,8 @@ public class MultiOnCompletionTest {
                 .onCompletion().invoke(() -> called.set(true))
                 .onCompletion().continueWith(Collections.emptyList())
                 .subscribe().withSubscriber(AssertSubscriber.create(7))
-                .assertCompletedSuccessfully()
-                .assertReceived(1, 2, 3, 4);
+                .assertCompleted()
+                .assertItems(1, 2, 3, 4);
 
         assertThat(called).isTrue();
     }
@@ -106,7 +106,7 @@ public class MultiOnCompletionTest {
                     throw new RuntimeException("bam");
                 })
                 .subscribe().withSubscriber(AssertSubscriber.create(7))
-                .assertHasFailedWith(RuntimeException.class, "bam");
+                .assertFailedWith(RuntimeException.class, "bam");
 
         assertThat(called).isTrue();
     }
@@ -146,8 +146,8 @@ public class MultiOnCompletionTest {
         Multi.createFrom().range(1, 5)
                 .onCompletion().continueWith(() -> Arrays.asList(25, 26))
                 .subscribe().withSubscriber(AssertSubscriber.create(20))
-                .assertCompletedSuccessfully()
-                .assertReceived(1, 2, 3, 4, 25, 26);
+                .assertCompleted()
+                .assertItems(1, 2, 3, 4, 25, 26);
     }
 
     @Test
@@ -155,8 +155,8 @@ public class MultiOnCompletionTest {
         Multi.createFrom().range(1, 5)
                 .onCompletion().continueWith((Supplier<Iterable<? extends Integer>>) Collections::emptyList)
                 .subscribe().withSubscriber(AssertSubscriber.create(20))
-                .assertCompletedSuccessfully()
-                .assertReceived(1, 2, 3, 4);
+                .assertCompleted()
+                .assertItems(1, 2, 3, 4);
     }
 
     @Test
@@ -164,8 +164,8 @@ public class MultiOnCompletionTest {
         Multi.createFrom().range(1, 5)
                 .onCompletion().continueWith(() -> Arrays.asList(25, null, 26))
                 .subscribe().withSubscriber(AssertSubscriber.create(20))
-                .assertHasFailedWith(NullPointerException.class, null)
-                .assertReceived(1, 2, 3, 4, 25);
+                .assertFailedWith(NullPointerException.class, null)
+                .assertItems(1, 2, 3, 4, 25);
     }
 
     @Test
@@ -173,8 +173,8 @@ public class MultiOnCompletionTest {
         Multi.createFrom().range(1, 5)
                 .onCompletion().continueWith(() -> (Iterable<Integer>) null)
                 .subscribe().withSubscriber(AssertSubscriber.create(20))
-                .assertHasFailedWith(NullPointerException.class, null)
-                .assertReceived(1, 2, 3, 4);
+                .assertFailedWith(NullPointerException.class, null)
+                .assertItems(1, 2, 3, 4);
     }
 
     @Test
@@ -184,8 +184,8 @@ public class MultiOnCompletionTest {
                     throw new IllegalStateException("BOOM!");
                 })
                 .subscribe().withSubscriber(AssertSubscriber.create(20))
-                .assertHasFailedWith(IllegalStateException.class, "BOOM!")
-                .assertReceived(1, 2, 3, 4);
+                .assertFailedWith(IllegalStateException.class, "BOOM!")
+                .assertItems(1, 2, 3, 4);
     }
 
     @Test
@@ -193,8 +193,8 @@ public class MultiOnCompletionTest {
         Multi.createFrom().range(1, 5)
                 .onCompletion().fail()
                 .subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE))
-                .assertReceived(1, 2, 3, 4)
-                .assertHasFailedWith(NoSuchElementException.class, null);
+                .assertItems(1, 2, 3, 4)
+                .assertFailedWith(NoSuchElementException.class, null);
     }
 
     @Test
@@ -202,8 +202,8 @@ public class MultiOnCompletionTest {
         Multi.createFrom().range(1, 5)
                 .onCompletion().failWith(new IOException("boom"))
                 .subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE))
-                .assertReceived(1, 2, 3, 4)
-                .assertHasFailedWith(IOException.class, "boom");
+                .assertItems(1, 2, 3, 4)
+                .assertFailedWith(IOException.class, "boom");
     }
 
     @Test
@@ -218,8 +218,8 @@ public class MultiOnCompletionTest {
         Multi.createFrom().range(1, 5)
                 .onCompletion().failWith(() -> new IOException("boom"))
                 .subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE))
-                .assertReceived(1, 2, 3, 4)
-                .assertHasFailedWith(IOException.class, "boom");
+                .assertItems(1, 2, 3, 4)
+                .assertFailedWith(IOException.class, "boom");
     }
 
     @Test
@@ -235,8 +235,8 @@ public class MultiOnCompletionTest {
                     throw new IllegalStateException("BOOM!");
                 })
                 .subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE))
-                .assertReceived(1, 2, 3, 4)
-                .assertHasFailedWith(IllegalStateException.class, "BOOM!");
+                .assertItems(1, 2, 3, 4)
+                .assertFailedWith(IllegalStateException.class, "BOOM!");
     }
 
     @Test
@@ -244,8 +244,8 @@ public class MultiOnCompletionTest {
         Multi.createFrom().range(1, 5)
                 .onCompletion().failWith(() -> null)
                 .subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE))
-                .assertReceived(1, 2, 3, 4)
-                .assertHasFailedWith(NullPointerException.class, null);
+                .assertItems(1, 2, 3, 4)
+                .assertFailedWith(NullPointerException.class, null);
     }
 
     @Test
@@ -253,8 +253,8 @@ public class MultiOnCompletionTest {
         Multi.createFrom().range(1, 5)
                 .onCompletion().switchTo(Flowable.just(20))
                 .subscribe().withSubscriber(AssertSubscriber.create(10))
-                .assertCompletedSuccessfully()
-                .assertReceived(1, 2, 3, 4, 20);
+                .assertCompleted()
+                .assertItems(1, 2, 3, 4, 20);
     }
 
     @Test
@@ -262,8 +262,8 @@ public class MultiOnCompletionTest {
         Multi.createFrom().range(1, 5)
                 .onCompletion().switchTo(() -> Multi.createFrom().range(5, 8))
                 .subscribe().withSubscriber(AssertSubscriber.create(10))
-                .assertCompletedSuccessfully()
-                .assertReceived(1, 2, 3, 4, 5, 6, 7);
+                .assertCompleted()
+                .assertItems(1, 2, 3, 4, 5, 6, 7);
     }
 
     @Test
@@ -271,8 +271,8 @@ public class MultiOnCompletionTest {
         Multi.createFrom().range(1, 5)
                 .onCompletion().switchTo(() -> null)
                 .subscribe().withSubscriber(AssertSubscriber.create(10))
-                .assertHasFailedWith(NullPointerException.class, null)
-                .assertReceived(1, 2, 3, 4);
+                .assertFailedWith(NullPointerException.class, null)
+                .assertItems(1, 2, 3, 4);
     }
 
     @Test
@@ -292,8 +292,8 @@ public class MultiOnCompletionTest {
         Multi.createFrom().range(1, 5)
                 .onCompletion().switchToEmitter(e -> e.emit(5).emit(6).complete())
                 .subscribe().withSubscriber(AssertSubscriber.create(10))
-                .assertCompletedSuccessfully()
-                .assertReceived(1, 2, 3, 4, 5, 6);
+                .assertCompleted()
+                .assertItems(1, 2, 3, 4, 5, 6);
     }
 
     @Test
@@ -306,8 +306,8 @@ public class MultiOnCompletionTest {
                     return Uni.createFrom().item(69);
                 })
                 .subscribe().withSubscriber(AssertSubscriber.create(7))
-                .assertCompletedSuccessfully()
-                .assertReceived(1, 2, 3, 4);
+                .assertCompleted()
+                .assertItems(1, 2, 3, 4);
 
         assertThat(called).isTrue();
     }
@@ -322,8 +322,8 @@ public class MultiOnCompletionTest {
                     return Uni.createFrom().item(69);
                 })
                 .subscribe().withSubscriber(AssertSubscriber.create(7))
-                .assertCompletedSuccessfully()
-                .assertReceived(1, 2, 3, 4);
+                .assertCompleted()
+                .assertItems(1, 2, 3, 4);
 
         assertThat(called).isTrue();
     }
@@ -338,8 +338,8 @@ public class MultiOnCompletionTest {
                     return Uni.createFrom().item(69);
                 })
                 .subscribe().withSubscriber(AssertSubscriber.create(7))
-                .assertCompletedSuccessfully()
-                .assertReceived(1, 2, 3, 4);
+                .assertCompleted()
+                .assertItems(1, 2, 3, 4);
 
         assertThat(called).isTrue();
     }
@@ -354,8 +354,8 @@ public class MultiOnCompletionTest {
                     return Uni.createFrom().failure(new RuntimeException("bam"));
                 })
                 .subscribe().withSubscriber(AssertSubscriber.create(7))
-                .assertReceived(1, 2, 3, 4)
-                .assertHasFailedWith(RuntimeException.class, "bam");
+                .assertItems(1, 2, 3, 4)
+                .assertFailedWith(RuntimeException.class, "bam");
 
         assertThat(called).isTrue();
     }
@@ -371,8 +371,8 @@ public class MultiOnCompletionTest {
                     throw new RuntimeException("bam");
                 })
                 .subscribe().withSubscriber(AssertSubscriber.create(7))
-                .assertReceived(1, 2, 3, 4)
-                .assertHasFailedWith(RuntimeException.class, "bam");
+                .assertItems(1, 2, 3, 4)
+                .assertFailedWith(RuntimeException.class, "bam");
 
         assertThat(called).isTrue();
     }
@@ -397,14 +397,14 @@ public class MultiOnCompletionTest {
                 })
                 .subscribe().withSubscriber(AssertSubscriber.create(7));
 
-        subscriber.assertReceived(1, 2, 3, 4);
-        subscriber.assertHasNotCompleted();
+        subscriber.assertItems(1, 2, 3, 4);
+        subscriber.assertNotTerminated();
         assertThat(called.get()).isTrue();
         assertThat(uniCancelled.get()).isFalse();
         assertThat(counter.get()).isEqualTo(1);
 
         subscriber.cancel();
-        subscriber.assertHasNotCompleted();
+        subscriber.assertNotTerminated();
         assertThat(uniCancelled.get()).isTrue();
         assertThat(counter.get()).isEqualTo(2);
 
@@ -432,7 +432,7 @@ public class MultiOnCompletionTest {
                 .onCompletion().invoke(counter::incrementAndGet)
                 .subscribe().withSubscriber(AssertSubscriber.create(10));
 
-        subscriber.assertCompletedSuccessfully();
+        subscriber.assertCompleted();
         assertThat(counter.get()).isEqualTo(1);
     }
 
@@ -459,7 +459,7 @@ public class MultiOnCompletionTest {
                 })
                 .subscribe().withSubscriber(AssertSubscriber.create(10));
 
-        subscriber.assertCompletedSuccessfully();
+        subscriber.assertCompleted();
         assertThat(counter.get()).isEqualTo(1);
     }
 }

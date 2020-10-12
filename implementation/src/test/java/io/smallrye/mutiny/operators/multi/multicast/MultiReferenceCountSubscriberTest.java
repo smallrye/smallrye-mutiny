@@ -23,7 +23,7 @@ class MultiReferenceCountSubscriberTest {
                 .withSubscriber(AssertSubscriber.create(1));
 
         subscriber.request(2).cancel();
-        subscriber.assertReceived(1, 2, 3);
+        subscriber.assertItems(1, 2, 3);
     }
 
     @Test
@@ -38,9 +38,9 @@ class MultiReferenceCountSubscriberTest {
 
         subscriber2.request(3);
         subscriber1.request(3).cancel();
-        subscriber1.assertReceived(1, 2, 3);
+        subscriber1.assertItems(1, 2, 3);
         subscriber2.request(20);
-        subscriber2.assertReceived(1, 2, 3, 4, 5);
+        subscriber2.assertItems(1, 2, 3, 4, 5);
     }
 
     @Test
@@ -55,7 +55,7 @@ class MultiReferenceCountSubscriberTest {
                 .withSubscriber(AssertSubscriber.create(Long.MAX_VALUE));
 
         subscriber
-                .assertHasFailedWith(IOException.class, "boom");
+                .assertFailedWith(IOException.class, "boom");
 
     }
 
@@ -73,10 +73,10 @@ class MultiReferenceCountSubscriberTest {
                 .withSubscriber(AssertSubscriber.create(Long.MAX_VALUE));
 
         subscriber1
-                .assertHasFailedWith(IOException.class, "boom");
+                .assertFailedWith(IOException.class, "boom");
 
         subscriber2
-                .assertHasFailedWith(IOException.class, "boom");
+                .assertFailedWith(IOException.class, "boom");
     }
 
     @Test
@@ -102,7 +102,7 @@ class MultiReferenceCountSubscriberTest {
                 .withSubscriber(AssertSubscriber.create(Long.MAX_VALUE));
 
         subscriber
-                .assertHasFailedWith(IOException.class, "boom");
+                .assertFailedWith(IOException.class, "boom");
 
     }
 

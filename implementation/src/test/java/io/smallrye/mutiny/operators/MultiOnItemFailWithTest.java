@@ -41,7 +41,7 @@ public class MultiOnItemFailWithTest {
                     return new IOException();
                 })
                 .subscribe().withSubscriber(AssertSubscriber.<Number> create())
-                .assertHasFailedWith(TestException.class, "");
+                .assertFailedWith(TestException.class, "");
         assertThat(called).isFalse();
         assertThat(items.isCancelled()).isTrue();
     }
@@ -55,7 +55,7 @@ public class MultiOnItemFailWithTest {
                     return new IOException(Integer.toString(item));
                 })
                 .subscribe().withSubscriber(AssertSubscriber.<Number> create())
-                .assertHasFailedWith(TestException.class, "");
+                .assertFailedWith(TestException.class, "");
 
         assertThat(called).isFalse();
         assertThat(items.isCancelled()).isTrue();
@@ -132,7 +132,7 @@ public class MultiOnItemFailWithTest {
         items
                 .onItem().failWith(i -> new TestException("boom-" + i))
                 .subscribe().withSubscriber(AssertSubscriber.create(10))
-                .assertHasFailedWith(TestException.class, "boom-1");
+                .assertFailedWith(TestException.class, "boom-1");
         assertThat(items.isCancelled()).isTrue();
     }
 
@@ -141,7 +141,7 @@ public class MultiOnItemFailWithTest {
         Multi.createFrom().empty()
                 .onItem().failWith(i -> new TestException("boom-" + i))
                 .subscribe().withSubscriber(AssertSubscriber.create(10))
-                .assertCompletedSuccessfully();
+                .assertCompleted();
     }
 
     @Test
@@ -149,7 +149,7 @@ public class MultiOnItemFailWithTest {
         Multi.createFrom().empty()
                 .onItem().failWith(() -> new TestException("boom"))
                 .subscribe().withSubscriber(AssertSubscriber.create(10))
-                .assertCompletedSuccessfully();
+                .assertCompleted();
     }
 
     @Test
@@ -159,10 +159,10 @@ public class MultiOnItemFailWithTest {
                 .failWith(s -> new IOException(Integer.toString(s + count.getAndIncrement())));
         uni
                 .subscribe().withSubscriber(AssertSubscriber.<Number> create())
-                .assertHasFailedWith(IOException.class, "1");
+                .assertFailedWith(IOException.class, "1");
         uni
                 .subscribe().withSubscriber(AssertSubscriber.<Number> create())
-                .assertHasFailedWith(IOException.class, "2");
+                .assertFailedWith(IOException.class, "2");
     }
 
     @Test
@@ -170,12 +170,12 @@ public class MultiOnItemFailWithTest {
         items
                 .onItem().failWith(() -> new TestException("boom"))
                 .subscribe().withSubscriber(AssertSubscriber.create(10))
-                .assertHasFailedWith(TestException.class, "boom");
+                .assertFailedWith(TestException.class, "boom");
         assertThat(items.invocationCount()).isEqualTo(1);
         items
                 .onItem().failWith(() -> new IOException("boom"))
                 .subscribe().withSubscriber(AssertSubscriber.create(10))
-                .assertHasFailedWith(IOException.class, "boom");
+                .assertFailedWith(IOException.class, "boom");
         assertThat(items.invocationCount()).isEqualTo(2);
     }
 
@@ -183,10 +183,10 @@ public class MultiOnItemFailWithTest {
     public void testSupplierOrFunctionReturningNull() {
         items.onItem().failWith(item -> null)
                 .subscribe().withSubscriber(new AssertSubscriber<>(10))
-                .assertHasFailedWith(NullPointerException.class, "mapper");
+                .assertFailedWith(NullPointerException.class, "mapper");
 
         items.onItem().failWith(() -> null).subscribe().withSubscriber(new AssertSubscriber<>(10))
-                .assertHasFailedWith(NullPointerException.class, "supplier");
+                .assertFailedWith(NullPointerException.class, "supplier");
     }
 
     @Test
@@ -194,12 +194,12 @@ public class MultiOnItemFailWithTest {
         items.onItem().failWith(item -> {
             throw new IllegalArgumentException("boom-" + item);
         }).subscribe().withSubscriber(new AssertSubscriber<>(10))
-                .assertHasFailedWith(IllegalArgumentException.class, "boom");
+                .assertFailedWith(IllegalArgumentException.class, "boom");
 
         items.onItem().failWith(() -> {
             throw new IllegalArgumentException("boom");
         }).subscribe().withSubscriber(new AssertSubscriber<>(10))
-                .assertHasFailedWith(IllegalArgumentException.class, "boom");
+                .assertFailedWith(IllegalArgumentException.class, "boom");
     }
 
 }

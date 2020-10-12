@@ -19,7 +19,7 @@ public class MultiConvertFromTest {
                 .subscribe()
                 .withSubscriber(AssertSubscriber.create(1));
 
-        subscriber.assertCompletedSuccessfully().assertReceived(1);
+        subscriber.assertCompleted().assertItems(1);
     }
 
     @Test
@@ -29,7 +29,7 @@ public class MultiConvertFromTest {
                 .subscribe()
                 .withSubscriber(AssertSubscriber.create(1));
 
-        subscriber.assertCompletedSuccessfully().assertHasNotReceivedAnyItem();
+        subscriber.assertCompleted().assertHasNotReceivedAnyItem();
     }
 
     @Test
@@ -39,7 +39,7 @@ public class MultiConvertFromTest {
                 .subscribe()
                 .withSubscriber(AssertSubscriber.create(1));
 
-        subscriber.assertHasFailedWith(IOException.class, "boom");
+        subscriber.assertFailedWith(IOException.class, "boom");
     }
 
     @Test
@@ -49,7 +49,7 @@ public class MultiConvertFromTest {
                 .subscribe()
                 .withSubscriber(AssertSubscriber.create(1));
 
-        subscriber.assertCompletedSuccessfully().assertReceived(1);
+        subscriber.assertCompleted().assertItems(1);
     }
 
     @Test
@@ -59,8 +59,8 @@ public class MultiConvertFromTest {
                 .subscribe()
                 .withSubscriber(AssertSubscriber.create(3));
 
-        subscriber.assertCompletedSuccessfully()
-                .assertReceived(1, 2, 3);
+        subscriber.assertCompleted()
+                .assertItems(1, 2, 3);
     }
 
     @Test
@@ -70,7 +70,7 @@ public class MultiConvertFromTest {
                 .subscribe()
                 .withSubscriber(AssertSubscriber.create(1));
 
-        subscriber.assertCompletedSuccessfully().assertHasNotReceivedAnyItem();
+        subscriber.assertCompleted().assertHasNotReceivedAnyItem();
     }
 
     @Test
@@ -80,6 +80,6 @@ public class MultiConvertFromTest {
                 .subscribe()
                 .withSubscriber(AssertSubscriber.create(1));
 
-        subscriber.assertHasFailedWith(IOException.class, "boom");
+        subscriber.assertFailedWith(IOException.class, "boom");
     }
 }

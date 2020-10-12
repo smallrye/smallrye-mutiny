@@ -29,7 +29,7 @@ public class MultiCreateFromFailureTest {
         AssertSubscriber<String> subscriber = Multi.createFrom().<String> failure(new IOException("boom"))
                 .subscribe()
                 .withSubscriber(AssertSubscriber.create());
-        subscriber.assertHasFailedWith(IOException.class, "boom");
+        subscriber.assertFailedWith(IOException.class, "boom");
     }
 
     @Test
@@ -39,8 +39,8 @@ public class MultiCreateFromFailureTest {
                 .failure(() -> new IOException("boom-" + count.incrementAndGet()));
         AssertSubscriber<String> subscriber1 = failure.subscribe().withSubscriber(AssertSubscriber.create());
         AssertSubscriber<String> subscriber2 = failure.subscribe().withSubscriber(AssertSubscriber.create());
-        subscriber1.assertHasFailedWith(IOException.class, "boom-1");
-        subscriber2.assertHasFailedWith(IOException.class, "boom-2");
+        subscriber1.assertFailedWith(IOException.class, "boom-1");
+        subscriber2.assertFailedWith(IOException.class, "boom-2");
     }
 
     @Test
@@ -49,7 +49,7 @@ public class MultiCreateFromFailureTest {
             throw new IllegalStateException("boom");
         });
         AssertSubscriber<String> subscriber1 = multi.subscribe().withSubscriber(AssertSubscriber.create());
-        subscriber1.assertTerminated().assertHasFailedWith(IllegalStateException.class, "boom");
+        subscriber1.assertTerminated().assertFailedWith(IllegalStateException.class, "boom");
     }
 
     @Test
@@ -58,7 +58,6 @@ public class MultiCreateFromFailureTest {
         AssertSubscriber<String> subscriber1 = multi.subscribe().withSubscriber(AssertSubscriber.create());
         subscriber1.assertTerminated();
 
-        assertThat(subscriber1.failures()).hasSize(1)
-                .allSatisfy(t -> assertThat(t).isInstanceOf(NullPointerException.class));
+        assertThat(subscriber1.getFailure()).isNotNull().isInstanceOf(NullPointerException.class);
     }
 }

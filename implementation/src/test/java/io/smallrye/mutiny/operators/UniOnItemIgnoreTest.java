@@ -32,7 +32,7 @@ public class UniOnItemIgnoreTest {
     public void testIgnoreAndFail() {
         UniAssertSubscriber<Integer> subscriber = Uni.createFrom().item(22).onItem().ignore().andFail().subscribe()
                 .withSubscriber(UniAssertSubscriber.create());
-        subscriber.assertFailure(Exception.class, "");
+        subscriber.assertFailedWith(Exception.class, "");
     }
 
     @Test
@@ -41,7 +41,7 @@ public class UniOnItemIgnoreTest {
                 .andFail(new IOException("boom"))
                 .subscribe()
                 .withSubscriber(UniAssertSubscriber.create());
-        subscriber.assertFailure(IOException.class, "boom");
+        subscriber.assertFailedWith(IOException.class, "boom");
     }
 
     @Test
@@ -51,8 +51,8 @@ public class UniOnItemIgnoreTest {
                 .andFail(() -> new IOException("boom " + count.incrementAndGet()));
         UniAssertSubscriber<Integer> s1 = boom.subscribe().withSubscriber(UniAssertSubscriber.create());
         UniAssertSubscriber<Integer> s2 = boom.subscribe().withSubscriber(UniAssertSubscriber.create());
-        s1.assertFailure(IOException.class, "boom 1");
-        s2.assertFailure(IOException.class, "boom 2");
+        s1.assertFailedWith(IOException.class, "boom 1");
+        s2.assertFailedWith(IOException.class, "boom 2");
     }
 
     @Test

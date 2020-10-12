@@ -26,14 +26,14 @@ public class MultiCreateFromPublisherTest {
         AssertSubscriber<String> subscriber = Multi.createFrom().<String> publisher(
                 Flowable.error(new IOException("boom"))).subscribe()
                 .withSubscriber(AssertSubscriber.create());
-        subscriber.assertHasFailedWith(IOException.class, "boom");
+        subscriber.assertFailedWith(IOException.class, "boom");
     }
 
     @Test
     public void testWithEmptyPublisher() {
         AssertSubscriber<String> subscriber = Multi.createFrom().<String> publisher(Flowable.empty()).subscribe()
                 .withSubscriber(AssertSubscriber.create());
-        subscriber.assertCompletedSuccessfully().assertHasNotReceivedAnyItem();
+        subscriber.assertCompleted().assertHasNotReceivedAnyItem();
     }
 
     @Test
@@ -49,26 +49,26 @@ public class MultiCreateFromPublisherTest {
 
         multi.subscribe().withSubscriber(AssertSubscriber.create()).assertHasNotReceivedAnyItem()
                 .request(2)
-                .assertReceived(1, 2)
+                .assertItems(1, 2)
                 .run(() -> assertThat(requests).hasValue(2))
                 .request(1)
-                .assertReceived(1, 2, 3)
+                .assertItems(1, 2, 3)
                 .request(1)
-                .assertReceived(1, 2, 3, 4)
+                .assertItems(1, 2, 3, 4)
                 .run(() -> assertThat(requests).hasValue(4))
-                .assertCompletedSuccessfully();
+                .assertCompleted();
 
         assertThat(count).hasValue(1);
 
         multi.subscribe().withSubscriber(AssertSubscriber.create()).assertHasNotReceivedAnyItem()
                 .request(2)
-                .assertReceived(1, 2)
+                .assertItems(1, 2)
                 .request(1)
-                .assertReceived(1, 2, 3)
+                .assertItems(1, 2, 3)
                 .request(1)
-                .assertReceived(1, 2, 3, 4)
+                .assertItems(1, 2, 3, 4)
                 .run(() -> assertThat(requests).hasValue(8))
-                .assertCompletedSuccessfully();
+                .assertCompleted();
 
         assertThat(count).hasValue(2);
 
@@ -83,13 +83,13 @@ public class MultiCreateFromPublisherTest {
 
         multi.subscribe().withSubscriber(AssertSubscriber.create()).assertHasNotReceivedAnyItem()
                 .request(2)
-                .assertReceived(1, 2)
+                .assertItems(1, 2)
                 .run(() -> assertThat(cancellation).isFalse())
                 .request(1)
-                .assertReceived(1, 2, 3)
+                .assertItems(1, 2, 3)
                 .cancel()
                 .request(1)
-                .assertReceived(1, 2, 3)
+                .assertItems(1, 2, 3)
                 .assertNotTerminated();
 
         assertThat(cancellation).isTrue();

@@ -26,7 +26,7 @@ public class UniIfNoItemTest {
                 .ifNoItem().after(Duration.ofMillis(10)).recoverWithUni(Uni.createFrom().nothing())
                 .subscribe().withSubscriber(subscriber);
 
-        subscriber.await().assertCompletedSuccessfully().assertItem(1);
+        subscriber.await().assertCompleted().assertItem(1);
     }
 
     @Test
@@ -38,7 +38,7 @@ public class UniIfNoItemTest {
                 .ifNoItem().after(Duration.ofMillis(1)).fail()
                 .subscribe().withSubscriber(subscriber);
 
-        subscriber.await().assertCompletedWithFailure();
+        subscriber.await().assertFailed();
         assertThat(subscriber.getFailure()).isInstanceOf(TimeoutException.class);
     }
 
@@ -57,7 +57,7 @@ public class UniIfNoItemTest {
                 .ifNoItem().after(Duration.ofMillis(1)).fail()
                 .subscribe().withSubscriber(subscriber);
 
-        subscriber.await().assertCompletedWithFailure();
+        subscriber.await().assertFailed();
         assertThat(subscriber.getFailure()).isInstanceOf(TimeoutException.class);
     }
 
@@ -77,7 +77,7 @@ public class UniIfNoItemTest {
                 .ifNoItem().after(Duration.ofMillis(10000)).fail()
                 .subscribe().withSubscriber(subscriber);
 
-        subscriber.await().assertCompletedWithFailure();
+        subscriber.await().assertFailed();
         assertThat(subscriber.getFailure()).isInstanceOf(TestException.class);
     }
 
@@ -110,7 +110,7 @@ public class UniIfNoItemTest {
         UniAssertSubscriber<Integer> subscriber = Uni.createFrom().<Integer> nothing()
                 .ifNoItem().after(Duration.ofMillis(10)).failWith(new IOException("boom"))
                 .subscribe().withSubscriber(UniAssertSubscriber.create());
-        subscriber.await().assertFailure(IOException.class, "boom");
+        subscriber.await().assertFailedWith(IOException.class, "boom");
     }
 
     @Test
@@ -140,8 +140,8 @@ public class UniIfNoItemTest {
 
         subscriber
                 .await()
-                .assertCompletedWithFailure()
-                .assertFailure(RejectedExecutionException.class, "");
+                .assertFailed()
+                .assertFailedWith(RejectedExecutionException.class, "");
     }
 
     @Test
@@ -153,9 +153,8 @@ public class UniIfNoItemTest {
                 .ifNoItem().after(Duration.ofMillis(10)).on(executor).fail()
                 .subscribe().withSubscriber(new UniAssertSubscriber<>(true));
 
-        subscriber.assertNotCompleted()
-                .assertSubscribed()
-                .assertNoResult();
+        subscriber.assertNotTerminated()
+                .assertSubscribed();
     }
 
     @Test
@@ -169,9 +168,8 @@ public class UniIfNoItemTest {
 
         subscriber.cancel();
 
-        subscriber.assertNotCompleted()
-                .assertSubscribed()
-                .assertNoResult();
+        subscriber.assertNotTerminated()
+                .assertSubscribed();
     }
 
     @Test
@@ -185,7 +183,7 @@ public class UniIfNoItemTest {
                 })
                 .subscribe().withSubscriber(subscriber);
 
-        subscriber.await().assertCompletedWithFailure();
+        subscriber.await().assertFailed();
         assertThat(subscriber.getFailure()).isInstanceOf(IllegalArgumentException.class);
     }
 

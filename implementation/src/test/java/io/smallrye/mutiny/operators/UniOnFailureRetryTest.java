@@ -46,7 +46,7 @@ public class UniOnFailureRetryTest {
                 .subscribe().withSubscriber(subscriber);
 
         subscriber
-                .assertCompletedSuccessfully()
+                .assertCompleted()
                 .assertItem(1);
 
     }
@@ -66,7 +66,7 @@ public class UniOnFailureRetryTest {
                 .subscribe().withSubscriber(subscriber);
 
         subscriber
-                .assertCompletedSuccessfully()
+                .assertCompleted()
                 .assertItem(10);
     }
 

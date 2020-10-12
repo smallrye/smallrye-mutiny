@@ -31,10 +31,10 @@ public class MultiDisjointTest {
                 .onItem().<String> disjoint()
                 .subscribe().withSubscriber(AssertSubscriber.create(4));
         assertThat(subscribed).isFalse();
-        subscriber.assertReceived("a", "b", "c", "d");
+        subscriber.assertItems("a", "b", "c", "d");
         subscriber.request(3);
-        subscriber.assertCompletedSuccessfully();
-        assertThat(subscriber.items()).contains("e", "f", "g");
+        subscriber.assertCompleted();
+        assertThat(subscriber.getItems()).contains("e", "f", "g");
         assertThat(subscribed).isTrue();
     }
 
@@ -50,10 +50,10 @@ public class MultiDisjointTest {
                 .onItem().<String> disjoint()
                 .subscribe().withSubscriber(AssertSubscriber.create(4));
         assertThat(subscribed).isFalse();
-        subscriber.assertReceived("a", "b", "c", "d");
+        subscriber.assertItems("a", "b", "c", "d");
         subscriber.request(3);
-        subscriber.assertCompletedSuccessfully();
-        assertThat(subscriber.items()).contains("e", "f", "g");
+        subscriber.assertCompleted();
+        assertThat(subscriber.getItems()).contains("e", "f", "g");
         assertThat(subscribed).isTrue();
     }
 
@@ -66,10 +66,10 @@ public class MultiDisjointTest {
                 new String[] { "f", "g" })
                 .onItem().<String> disjoint()
                 .subscribe().withSubscriber(AssertSubscriber.create(4));
-        subscriber.assertReceived("a", "b", "c", "d");
+        subscriber.assertItems("a", "b", "c", "d");
         subscriber.request(3);
-        subscriber.assertCompletedSuccessfully();
-        assertThat(subscriber.items()).contains("e", "f", "g");
+        subscriber.assertCompleted();
+        assertThat(subscriber.getItems()).contains("e", "f", "g");
     }
 
     @Test
@@ -82,10 +82,10 @@ public class MultiDisjointTest {
                 Collections.singleton("g"))
                 .onItem().<String> disjoint()
                 .subscribe().withSubscriber(AssertSubscriber.create(4));
-        subscriber.assertReceived("a", "b", "c", "d");
+        subscriber.assertItems("a", "b", "c", "d");
         subscriber.request(3);
-        subscriber.assertCompletedSuccessfully();
-        assertThat(subscriber.items()).contains("e", "f", "g");
+        subscriber.assertCompleted();
+        assertThat(subscriber.getItems()).contains("e", "f", "g");
     }
 
     @Test
@@ -100,9 +100,9 @@ public class MultiDisjointTest {
                 .onItem().<String> disjoint()
                 .subscribe().withSubscriber(AssertSubscriber.create(4));
         assertThat(subscribed).isFalse();
-        subscriber.assertReceived("a", "b", "c", "d");
+        subscriber.assertItems("a", "b", "c", "d");
         subscriber.request(3);
-        subscriber.assertHasFailedWith(IOException.class, "boom");
+        subscriber.assertFailedWith(IOException.class, "boom");
         assertThat(subscribed).isFalse();
     }
 
@@ -121,9 +121,9 @@ public class MultiDisjointTest {
                 .onItem().<String> disjoint()
                 .subscribe().withSubscriber(AssertSubscriber.create(4));
         assertThat(subscribed).isFalse();
-        subscriber.assertReceived("a", "b", "c", "d");
+        subscriber.assertItems("a", "b", "c", "d");
         subscriber.request(3);
-        subscriber.assertHasFailedWith(IOException.class, "boom");
+        subscriber.assertFailedWith(IOException.class, "boom");
         assertThat(subscribed).isFalse();
     }
 
@@ -137,9 +137,9 @@ public class MultiDisjointTest {
                 Collections.singleton("g"))
                 .onItem().<String> disjoint()
                 .subscribe().withSubscriber(AssertSubscriber.create(4));
-        subscriber.assertReceived("a", "b", "c", "d");
+        subscriber.assertItems("a", "b", "c", "d");
         subscriber.request(3);
-        subscriber.assertHasFailedWith(NullPointerException.class, "");
+        subscriber.assertFailedWith(NullPointerException.class, "");
     }
 
     @Test
@@ -147,7 +147,7 @@ public class MultiDisjointTest {
         Multi.createFrom().items("a", "b", "c")
                 .onItem().disjoint()
                 .subscribe().withSubscriber(AssertSubscriber.create(2))
-                .assertHasFailedWith(IllegalArgumentException.class, "String");
+                .assertFailedWith(IllegalArgumentException.class, "String");
     }
 
     @Test
@@ -163,12 +163,12 @@ public class MultiDisjointTest {
                 .assertHasNotReceivedAnyItem()
                 .request(1);
 
-        await().until(() -> subscriber.items().contains("A"));
+        await().until(() -> subscriber.getItems().contains("A"));
 
         subscriber.request(2);
-        await().until(() -> subscriber.items().contains("B") && subscriber.items().contains("C"));
+        await().until(() -> subscriber.getItems().contains("B") && subscriber.getItems().contains("C"));
 
         subscriber.request(100);
-        subscriber.await().assertCompletedSuccessfully();
+        subscriber.await().assertCompleted();
     }
 }

@@ -131,7 +131,7 @@ public class MultiFilterTest {
         processor.onNext(5);
         processor.onNext(6);
         processor.onComplete();
-        subscriber.assertReceived(2, 4)
+        subscriber.assertItems(2, 4)
                 .assertNotTerminated();
     }
 
@@ -153,7 +153,7 @@ public class MultiFilterTest {
         processor.onNext(5);
         processor.onNext(6);
         processor.onComplete();
-        subscriber.assertReceived(2)
-                .assertHasFailedWith(IllegalArgumentException.class, "boom");
+        subscriber.assertItems(2)
+                .assertFailedWith(IllegalArgumentException.class, "boom");
     }
 }

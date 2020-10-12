@@ -39,8 +39,8 @@ public class MultiOnOverflowTest {
         Multi.createFrom().range(1, 10)
                 .onOverflow().drop()
                 .subscribe(sub);
-        sub.assertCompletedSuccessfully()
-                .assertReceived(1, 2, 3, 4, 5, 6, 7, 8, 9);
+        sub.assertCompleted()
+                .assertItems(1, 2, 3, 4, 5, 6, 7, 8, 9);
     }
 
     @Test
@@ -52,8 +52,8 @@ public class MultiOnOverflowTest {
                 .onItem().call(l -> Uni.createFrom().item(0).onItem().delayIt().by(Duration.ofMillis(2)))
                 .subscribe(sub);
 
-        await().until(() -> sub.items().size() == 20);
-        sub.assertHasNotFailed();
+        await().until(() -> sub.getItems().size() == 20);
+        sub.assertNotTerminated();
         sub.cancel();
     }
 
@@ -63,8 +63,8 @@ public class MultiOnOverflowTest {
         Multi.createFrom().range(1, 10)
                 .on().overflow().drop()
                 .subscribe(sub);
-        sub.assertCompletedSuccessfully()
-                .assertReceived(1, 2, 3, 4, 5, 6, 7, 8, 9);
+        sub.assertCompleted()
+                .assertItems(1, 2, 3, 4, 5, 6, 7, 8, 9);
     }
 
     @Test
@@ -72,7 +72,7 @@ public class MultiOnOverflowTest {
         Multi.createFrom().<Integer> failure(new IOException("boom"))
                 .onOverflow().drop()
                 .subscribe().withSubscriber(AssertSubscriber.create(1))
-                .assertHasFailedWith(IOException.class, "boom");
+                .assertFailedWith(IOException.class, "boom");
     }
 
     @Test
@@ -81,7 +81,7 @@ public class MultiOnOverflowTest {
         Multi.createFrom().range(1, 10)
                 .onOverflow().drop()
                 .subscribe(sub);
-        sub.await().assertCompletedSuccessfully().assertHasNotReceivedAnyItem();
+        sub.await().assertCompleted().assertHasNotReceivedAnyItem();
     }
 
     @Test
@@ -98,8 +98,8 @@ public class MultiOnOverflowTest {
         sub.request(1);
         emitter.get().emit(5).complete();
         sub
-                .assertCompletedSuccessfully()
-                .assertReceived(2, 3, 5);
+                .assertCompleted()
+                .assertItems(2, 3, 5);
         assertThat(list).containsExactly(1, 4);
     }
 
@@ -116,8 +116,8 @@ public class MultiOnOverflowTest {
         sub.request(1);
         emitter.get().emit(5).complete();
         sub
-                .assertCompletedSuccessfully()
-                .assertReceived(2, 3, 5);
+                .assertCompleted()
+                .assertItems(2, 3, 5);
     }
 
     @Test
@@ -127,7 +127,7 @@ public class MultiOnOverflowTest {
                     throw new IllegalStateException("boom");
                 })
                 .subscribe().withSubscriber(AssertSubscriber.create(0))
-                .assertHasFailedWith(IllegalStateException.class, "boom");
+                .assertFailedWith(IllegalStateException.class, "boom");
 
     }
 
@@ -135,8 +135,8 @@ public class MultiOnOverflowTest {
     public void testDropStrategyWithRequests() {
         Multi.createFrom().range(1, 10).onOverflow().drop()
                 .subscribe().withSubscriber(AssertSubscriber.create(5))
-                .assertCompletedSuccessfully()
-                .assertReceived(1, 2, 3, 4, 5);
+                .assertCompleted()
+                .assertItems(1, 2, 3, 4, 5);
     }
 
     @Test
@@ -145,8 +145,8 @@ public class MultiOnOverflowTest {
         Multi.createFrom().range(1, 10)
                 .onOverflow().dropPreviousItems()
                 .subscribe(sub);
-        sub.assertCompletedSuccessfully()
-                .assertReceived(1, 2, 3, 4, 5, 6, 7, 8, 9);
+        sub.assertCompleted()
+                .assertItems(1, 2, 3, 4, 5, 6, 7, 8, 9);
     }
 
     @Test
@@ -158,8 +158,8 @@ public class MultiOnOverflowTest {
         sub.assertNotTerminated();
 
         sub.request(1000);
-        sub.assertCompletedSuccessfully();
-        assertThat(sub.items()).containsExactly(1, 999);
+        sub.assertCompleted();
+        assertThat(sub.getItems()).containsExactly(1, 999);
 
         sub = AssertSubscriber.create(0);
         Multi.createFrom().range(1, 1000)
@@ -168,8 +168,8 @@ public class MultiOnOverflowTest {
         sub.assertNotTerminated();
 
         sub.request(1000);
-        sub.assertCompletedSuccessfully();
-        assertThat(sub.items()).containsExactly(999);
+        sub.assertCompleted();
+        assertThat(sub.getItems()).containsExactly(999);
     }
 
     @Test
@@ -187,18 +187,18 @@ public class MultiOnOverflowTest {
         sub.assertNotTerminated().assertHasNotReceivedAnyItem();
 
         sub.request(1);
-        sub.assertNotTerminated().assertReceived(2);
+        sub.assertNotTerminated().assertItems(2);
 
         emitter.get().emit(3).emit(4);
 
         sub.request(2);
-        sub.assertNotTerminated().assertReceived(2, 4);
+        sub.assertNotTerminated().assertItems(2, 4);
 
         emitter.get().emit(5);
-        sub.assertNotTerminated().assertReceived(2, 4, 5);
+        sub.assertNotTerminated().assertItems(2, 4, 5);
 
         emitter.get().complete();
-        sub.assertCompletedSuccessfully();
+        sub.assertCompleted();
     }
 
     @Test
@@ -206,7 +206,7 @@ public class MultiOnOverflowTest {
         Multi.createFrom().<Integer> failure(new IOException("boom"))
                 .onOverflow().dropPreviousItems()
                 .subscribe().withSubscriber(AssertSubscriber.create(1))
-                .assertHasFailedWith(IOException.class, "boom");
+                .assertFailedWith(IOException.class, "boom");
     }
 
     @Test
@@ -215,8 +215,8 @@ public class MultiOnOverflowTest {
         Multi.createFrom().range(1, 10)
                 .onOverflow().buffer()
                 .subscribe(sub);
-        sub.assertCompletedSuccessfully()
-                .assertReceived(1, 2, 3, 4, 5, 6, 7, 8, 9);
+        sub.assertCompleted()
+                .assertItems(1, 2, 3, 4, 5, 6, 7, 8, 9);
     }
 
     @Test
@@ -224,7 +224,7 @@ public class MultiOnOverflowTest {
         Multi.createFrom().<Integer> failure(new IOException("boom"))
                 .onOverflow().buffer()
                 .subscribe().withSubscriber(AssertSubscriber.create(1))
-                .assertHasFailedWith(IOException.class, "boom");
+                .assertFailedWith(IOException.class, "boom");
     }
 
     @Test
@@ -242,11 +242,11 @@ public class MultiOnOverflowTest {
                 .onOverflow().buffer()
                 .subscribe(sub);
 
-        sub.request(5).assertReceived(1, 2, 3, 4, 5);
+        sub.request(5).assertItems(1, 2, 3, 4, 5);
         sub.request(90).assertNotTerminated();
-        assertThat(sub.items()).hasSize(95).contains(94, 95, 20, 33);
+        assertThat(sub.getItems()).hasSize(95).contains(94, 95, 20, 33);
         sub.request(5);
-        assertThat(sub.items()).hasSize(99).endsWith(99);
+        assertThat(sub.getItems()).hasSize(99).endsWith(99);
     }
 
     @Test
@@ -256,7 +256,7 @@ public class MultiOnOverflowTest {
                 .onOverflow().buffer(20)
                 .subscribe(sub);
 
-        sub.assertHasFailedWith(BackPressureFailure.class, null);
+        sub.assertFailedWith(BackPressureFailure.class, null);
     }
 
     @Test
@@ -284,7 +284,7 @@ public class MultiOnOverflowTest {
         reference.get().onNext(4);
         reference.get().onNext(5);
 
-        subscriber.assertHasFailedWith(BackPressureFailure.class, "Buffer");
+        subscriber.assertFailedWith(BackPressureFailure.class, "Buffer");
         assertThat(onCancellationSpy.isCancelled()).isTrue();
     }
 

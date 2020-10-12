@@ -34,8 +34,8 @@ public class MultiOnItemTransformTest {
                     return i + 1;
                 })
                 .subscribe().withSubscriber(AssertSubscriber.create(3))
-                .assertHasFailedWith(NullPointerException.class, "")
-                .assertReceived(2);
+                .assertFailedWith(NullPointerException.class, "")
+                .assertItems(2);
     }
 
     @Test
@@ -46,8 +46,8 @@ public class MultiOnItemTransformTest {
         Multi.createBy().concatenating().streams(upstream1, upstream2)
                 .onItem().transform(i -> i + 1)
                 .subscribe().withSubscriber(AssertSubscriber.create(3))
-                .assertHasFailedWith(IOException.class, "boom")
-                .assertReceived(2, 3);
+                .assertFailedWith(IOException.class, "boom")
+                .assertItems(2, 3);
     }
 
     @Test
@@ -55,8 +55,8 @@ public class MultiOnItemTransformTest {
         Multi.createFrom().items(1, 2, 3)
                 .onItem().transform(i -> i + 1)
                 .subscribe().withSubscriber(AssertSubscriber.create(3))
-                .assertCompletedSuccessfully()
-                .assertReceived(2, 3, 4);
+                .assertCompleted()
+                .assertItems(2, 3, 4);
     }
 
     @Test
@@ -67,11 +67,11 @@ public class MultiOnItemTransformTest {
                 .assertNotTerminated()
                 .assertSubscribed()
                 .request(2)
-                .assertReceived(2, 3)
+                .assertItems(2, 3)
                 .assertNotTerminated()
                 .request(2)
-                .assertReceived(2, 3, 4)
-                .assertCompletedSuccessfully();
+                .assertItems(2, 3, 4)
+                .assertCompleted();
     }
 
     @Test
@@ -84,8 +84,8 @@ public class MultiOnItemTransformTest {
                     return i + 1;
                 })
                 .subscribe().withSubscriber(AssertSubscriber.create(3))
-                .assertHasFailedWith(ArithmeticException.class, "boom")
-                .assertReceived(2);
+                .assertFailedWith(ArithmeticException.class, "boom")
+                .assertItems(2);
     }
 
     @Test
@@ -99,13 +99,13 @@ public class MultiOnItemTransformTest {
                 .assertHasNotReceivedAnyItem()
                 .run(() -> emitter.get().emit(1).emit(2))
                 .assertNotTerminated()
-                .assertReceived(2)
+                .assertItems(2)
                 .cancel()
                 .assertNotTerminated()
-                .assertReceived(2)
+                .assertItems(2)
                 .run(() -> emitter.get().emit(3).complete())
                 .assertNotTerminated()
-                .assertReceived(2);
+                .assertItems(2);
 
         Multi.createFrom().<Integer> emitter(emitter::set)
                 .onItem().transform(i -> i + 1)
@@ -115,13 +115,13 @@ public class MultiOnItemTransformTest {
                 .assertHasNotReceivedAnyItem()
                 .run(() -> emitter.get().emit(1).emit(2))
                 .assertNotTerminated()
-                .assertReceived(2, 3)
+                .assertItems(2, 3)
                 .cancel()
                 .assertNotTerminated()
-                .assertReceived(2, 3)
+                .assertItems(2, 3)
                 .run(() -> emitter.get().emit(3).fail(new IOException("boom")))
                 .assertNotTerminated()
-                .assertReceived(2, 3);
+                .assertItems(2, 3);
     }
 
 }

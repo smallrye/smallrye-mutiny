@@ -89,7 +89,7 @@ public class UniRunSubscriptionOnTest {
                 .runSubscriptionOn(Infrastructure.getDefaultExecutor())
                 .subscribe().withSubscriber(UniAssertSubscriber.create())
                 .await()
-                .assertFailure(IOException.class, "boom");
+                .assertFailedWith(IOException.class, "boom");
     }
 
     @Test
@@ -100,7 +100,7 @@ public class UniRunSubscriptionOnTest {
                 .runSubscriptionOn(Infrastructure.getDefaultExecutor())
                 .subscribe().withSubscriber(new UniAssertSubscriber<>(true));
 
-        subscriber.assertNotCompleted();
+        subscriber.assertNotTerminated();
     }
 
     @SuppressWarnings("ConstantConditions")
@@ -130,7 +130,7 @@ public class UniRunSubscriptionOnTest {
                 .subscribe().withSubscriber(UniAssertSubscriber.create());
         assertThat(called).isFalse();
         subscriber.await()
-                .assertFailure(RejectedExecutionException.class, "");
+                .assertFailedWith(RejectedExecutionException.class, "");
     }
 
     @Test
@@ -148,7 +148,7 @@ public class UniRunSubscriptionOnTest {
         assertThat(called).isFalse();
         subscriber
                 .await()
-                .assertFailure(IllegalArgumentException.class, "boom");
+                .assertFailedWith(IllegalArgumentException.class, "boom");
     }
 
 }

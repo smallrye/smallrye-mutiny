@@ -52,12 +52,12 @@ public class BroadcastProcessorTest {
         processor.onComplete();
 
         subscriber1
-                .assertReceived("one", "two", "three", "four")
-                .assertCompletedSuccessfully();
+                .assertItems("one", "two", "three", "four")
+                .assertCompleted();
 
         subscriber2
-                .assertReceived("four")
-                .assertCompletedSuccessfully();
+                .assertItems("four")
+                .assertCompleted();
     }
 
     @Test
@@ -79,12 +79,12 @@ public class BroadcastProcessorTest {
         processor.onComplete();
 
         subscriber1
-                .assertReceived("one", "two", "three", "four")
-                .assertCompletedSuccessfully();
+                .assertItems("one", "two", "three", "four")
+                .assertCompleted();
 
         subscriber2
-                .assertReceived("four")
-                .assertCompletedSuccessfully();
+                .assertItems("four")
+                .assertCompleted();
     }
 
     @Test
@@ -107,16 +107,16 @@ public class BroadcastProcessorTest {
                 .withSubscriber(AssertSubscriber.create(10));
 
         subscriber1
-                .assertReceived("one", "two", "three")
-                .assertCompletedSuccessfully();
+                .assertItems("one", "two", "three")
+                .assertCompleted();
 
         subscriber2
                 .assertHasNotReceivedAnyItem()
-                .assertCompletedSuccessfully();
+                .assertCompleted();
 
         subscriber3
                 .assertHasNotReceivedAnyItem()
-                .assertCompletedSuccessfully();
+                .assertCompleted();
     }
 
     @Test
@@ -139,16 +139,16 @@ public class BroadcastProcessorTest {
                 .withSubscriber(AssertSubscriber.create(10));
 
         subscriber1
-                .assertReceived("one", "two", "three")
-                .assertHasFailedWith(Exception.class, "boom");
+                .assertItems("one", "two", "three")
+                .assertFailedWith(Exception.class, "boom");
 
         subscriber2
                 .assertHasNotReceivedAnyItem()
-                .assertHasFailedWith(Exception.class, "boom");
+                .assertFailedWith(Exception.class, "boom");
 
         subscriber3
                 .assertHasNotReceivedAnyItem()
-                .assertHasFailedWith(Exception.class, "boom");
+                .assertFailedWith(Exception.class, "boom");
     }
 
     @Test
@@ -162,7 +162,7 @@ public class BroadcastProcessorTest {
         processor.onComplete();
         processor.onError(new Exception("boom"));
 
-        subscriber.assertCompletedSuccessfully().assertReceived(1, 2);
+        subscriber.assertCompleted().assertItems(1, 2);
     }
 
     @Test
@@ -174,32 +174,32 @@ public class BroadcastProcessorTest {
 
         processor.onNext("one");
 
-        subscriber1.assertReceived("one");
+        subscriber1.assertItems("one");
 
         AssertSubscriber<String> subscriber2 = processor.subscribe()
                 .withSubscriber(AssertSubscriber.create(10));
 
         processor.onNext("two");
 
-        subscriber1.assertReceived("one", "two");
-        subscriber2.assertReceived("two");
+        subscriber1.assertItems("one", "two");
+        subscriber2.assertItems("two");
 
         subscriber1.cancel();
 
         processor.onNext("three");
 
-        subscriber1.assertNotTerminated().assertReceived("one", "two");
-        subscriber2.assertReceived("two", "three");
+        subscriber1.assertNotTerminated().assertItems("one", "two");
+        subscriber2.assertItems("two", "three");
 
         processor.onComplete();
 
-        subscriber2.assertReceived("two", "three").assertCompletedSuccessfully();
-        subscriber1.assertNotTerminated().assertReceived("one", "two");
+        subscriber2.assertItems("two", "three").assertCompleted();
+        subscriber1.assertNotTerminated().assertItems("one", "two");
 
         processor.onNext("four");
 
-        subscriber2.assertReceived("two", "three").assertCompletedSuccessfully();
-        subscriber1.assertNotTerminated().assertReceived("one", "two");
+        subscriber2.assertItems("two", "three").assertCompleted();
+        subscriber1.assertNotTerminated().assertItems("one", "two");
     }
 
     @Test
@@ -211,7 +211,7 @@ public class BroadcastProcessorTest {
 
         processor.onNext("one");
 
-        subscriber1.assertReceived("one");
+        subscriber1.assertItems("one");
         subscriber1.cancel();
 
         processor.onNext("two");
@@ -221,8 +221,8 @@ public class BroadcastProcessorTest {
         processor.onNext("three");
         processor.onComplete();
 
-        subscriber1.assertReceived("one", "three")
-                .assertCompletedSuccessfully();
+        subscriber1.assertItems("one", "three")
+                .assertCompleted();
 
     }
 
@@ -235,7 +235,7 @@ public class BroadcastProcessorTest {
 
         processor.onNext("one");
 
-        subscriber1.assertReceived("one");
+        subscriber1.assertItems("one");
         subscriber1.cancel();
 
         processor.onNext("two");
@@ -243,8 +243,8 @@ public class BroadcastProcessorTest {
 
         processor.subscribe(subscriber1);
 
-        subscriber1.assertReceived("one")
-                .assertCompletedSuccessfully();
+        subscriber1.assertItems("one")
+                .assertCompleted();
 
     }
 
@@ -257,7 +257,7 @@ public class BroadcastProcessorTest {
 
         processor.onNext("one");
 
-        subscriber1.assertReceived("one");
+        subscriber1.assertItems("one");
         subscriber1.cancel();
 
         processor.onNext("two");
@@ -265,8 +265,8 @@ public class BroadcastProcessorTest {
 
         processor.subscribe(subscriber1);
 
-        subscriber1.assertReceived("one")
-                .assertHasFailedWith(IOException.class, "boom");
+        subscriber1.assertItems("one")
+                .assertFailedWith(IOException.class, "boom");
 
     }
 
@@ -282,10 +282,10 @@ public class BroadcastProcessorTest {
 
         upstream.subscribe(processor);
 
-        s1.assertCompletedSuccessfully()
-                .assertReceived(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
-        s2.assertCompletedSuccessfully()
-                .assertReceived(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
+        s1.assertCompleted()
+                .assertItems(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
+        s2.assertCompleted()
+                .assertItems(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
     }
 
     @Test
@@ -296,7 +296,7 @@ public class BroadcastProcessorTest {
         AssertSubscriber<Integer> s1 = processor.subscribe()
                 .withSubscriber(AssertSubscriber.create(10));
 
-        s1.assertCompletedSuccessfully()
+        s1.assertCompleted()
                 .assertHasNotReceivedAnyItem();
     }
 
@@ -308,7 +308,7 @@ public class BroadcastProcessorTest {
         AssertSubscriber<Integer> s1 = processor.subscribe()
                 .withSubscriber(AssertSubscriber.create(10));
 
-        s1.assertCompletedSuccessfully()
+        s1.assertCompleted()
                 .assertHasNotReceivedAnyItem();
     }
 
@@ -321,8 +321,8 @@ public class BroadcastProcessorTest {
                 .withSubscriber(AssertSubscriber.create(10));
         AssertSubscriber<Integer> s2 = processor.subscribe()
                 .withSubscriber(AssertSubscriber.create(10));
-        s1.assertHasFailedWith(Exception.class, "boom");
-        s2.assertHasFailedWith(Exception.class, "boom");
+        s1.assertFailedWith(Exception.class, "boom");
+        s2.assertFailedWith(Exception.class, "boom");
     }
 
     @Test
@@ -338,10 +338,10 @@ public class BroadcastProcessorTest {
         }
         processor.onComplete();
 
-        s1.assertCompletedSuccessfully()
-                .assertReceived(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
+        s1.assertCompleted()
+                .assertItems(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
 
-        s2.assertHasFailedWith(BackPressureFailure.class, "request");
+        s2.assertFailedWith(BackPressureFailure.class, "request");
     }
 
     @Test
@@ -358,7 +358,7 @@ public class BroadcastProcessorTest {
         processor.subscribe().withSubscriber(subscriber2);
         processor.subscribe().withSubscriber(subscriber1);
         processor.onNext(1);
-        subscriber2.assertReceived(1);
+        subscriber2.assertItems(1);
         subscriber1.assertHasNotReceivedAnyItem();
     }
 
@@ -376,7 +376,7 @@ public class BroadcastProcessorTest {
         processor.subscribe().withSubscriber(subscriber2);
         processor.subscribe().withSubscriber(subscriber1);
         processor.onError(new Exception("boom"));
-        subscriber2.assertHasFailedWith(Exception.class, "boom");
+        subscriber2.assertFailedWith(Exception.class, "boom");
         subscriber1.assertHasNotReceivedAnyItem().assertNotTerminated();
     }
 
@@ -398,7 +398,7 @@ public class BroadcastProcessorTest {
         executor.submit(task);
         executor.submit(task);
 
-        subscriber.await(Duration.ofSeconds(5)).assertCompletedSuccessfully();
+        subscriber.await(Duration.ofSeconds(5)).assertCompleted();
     }
 
     @RepeatedTest(100)
@@ -446,8 +446,8 @@ public class BroadcastProcessorTest {
         processor.onNext(4);
         processor.onComplete();
 
-        subscriber.assertReceived(2, 3, 3, 4, 4, 4)
-                .assertCompletedSuccessfully();
+        subscriber.assertItems(2, 3, 3, 4, 4, 4)
+                .assertCompleted();
 
     }
 
@@ -462,9 +462,9 @@ public class BroadcastProcessorTest {
         AssertSubscriber<Long> subscriber = processor.subscribe()
                 .withSubscriber(AssertSubscriber.create(Long.MAX_VALUE))
                 .await(Duration.ofSeconds(10))
-                .assertCompletedSuccessfully();
+                .assertCompleted();
 
-        List<Long> items = subscriber.items();
+        List<Long> items = subscriber.getItems();
         assertThat(items).isNotEmpty().doesNotContain(0L, 1L, 2L, 3L, 4L);
     }
 }

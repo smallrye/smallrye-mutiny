@@ -58,8 +58,8 @@ public class UniRepeatTest {
                 .onItem().transformToMulti(p -> Multi.createFrom().iterable(p.items)).concatenate()
                 .subscribe().withSubscriber(AssertSubscriber.create(50));
 
-        subscriber.assertCompletedSuccessfully()
-                .assertReceived(1, 2, 3, 4, 5, 6, 7, 8);
+        subscriber.assertCompleted()
+                .assertItems(1, 2, 3, 4, 5, 6, 7, 8);
     }
 
     @Test
@@ -297,26 +297,26 @@ public class UniRepeatTest {
         subscriber
                 .request(2)
                 .run(() -> {
-                    await().until(() -> subscriber.items().size() == 2);
-                    assertThat(subscriber.items()).containsExactly(1, 2);
+                    await().until(() -> subscriber.getItems().size() == 2);
+                    assertThat(subscriber.getItems()).containsExactly(1, 2);
                     assertThat(count).hasValue(2);
                 })
                 .request(1)
                 .run(() -> {
-                    await().until(() -> subscriber.items().size() == 3);
-                    assertThat(subscriber.items()).containsExactly(1, 2, 3);
+                    await().until(() -> subscriber.getItems().size() == 3);
+                    assertThat(subscriber.getItems()).containsExactly(1, 2, 3);
                     assertThat(count).hasValue(3);
                 })
                 .cancel()
                 .run(() -> {
-                    await().until(() -> subscriber.items().size() == 3);
-                    assertThat(subscriber.items()).containsExactly(1, 2, 3);
+                    await().until(() -> subscriber.getItems().size() == 3);
+                    assertThat(subscriber.getItems()).containsExactly(1, 2, 3);
                     assertThat(count).hasValue(3);
                 })
                 .request(20)
                 .run(() -> {
-                    await().until(() -> subscriber.items().size() == 3);
-                    assertThat(subscriber.items()).containsExactly(1, 2, 3);
+                    await().until(() -> subscriber.getItems().size() == 3);
+                    assertThat(subscriber.getItems()).containsExactly(1, 2, 3);
                     assertThat(count).hasValue(3);
                 });
     }
@@ -334,26 +334,26 @@ public class UniRepeatTest {
         subscriber
                 .request(2)
                 .run(() -> {
-                    await().until(() -> subscriber.items().size() == 2);
-                    assertThat(subscriber.items()).containsExactly(1, 2);
+                    await().until(() -> subscriber.getItems().size() == 2);
+                    assertThat(subscriber.getItems()).containsExactly(1, 2);
                     assertThat(count).hasValue(2);
                 })
                 .request(1)
                 .run(() -> {
-                    await().until(() -> subscriber.items().size() == 3);
-                    assertThat(subscriber.items()).containsExactly(1, 2, 3);
+                    await().until(() -> subscriber.getItems().size() == 3);
+                    assertThat(subscriber.getItems()).containsExactly(1, 2, 3);
                     assertThat(count).hasValue(3);
                 })
                 .cancel()
                 .run(() -> {
-                    await().until(() -> subscriber.items().size() == 3);
-                    assertThat(subscriber.items()).containsExactly(1, 2, 3);
+                    await().until(() -> subscriber.getItems().size() == 3);
+                    assertThat(subscriber.getItems()).containsExactly(1, 2, 3);
                     assertThat(count).hasValue(3);
                 })
                 .request(20)
                 .run(() -> {
-                    await().until(() -> subscriber.items().size() == 3);
-                    assertThat(subscriber.items()).containsExactly(1, 2, 3);
+                    await().until(() -> subscriber.getItems().size() == 3);
+                    assertThat(subscriber.getItems()).containsExactly(1, 2, 3);
                     assertThat(count).hasValue(3);
                 });
     }
@@ -371,26 +371,26 @@ public class UniRepeatTest {
         subscriber
                 .request(2)
                 .run(() -> {
-                    await().until(() -> subscriber.items().size() == 2);
-                    assertThat(subscriber.items()).containsExactly(1, 2);
+                    await().until(() -> subscriber.getItems().size() == 2);
+                    assertThat(subscriber.getItems()).containsExactly(1, 2);
                     assertThat(count).hasValue(2);
                 })
                 .request(1)
                 .run(() -> {
-                    await().until(() -> subscriber.items().size() == 3);
-                    assertThat(subscriber.items()).containsExactly(1, 2, 3);
+                    await().until(() -> subscriber.getItems().size() == 3);
+                    assertThat(subscriber.getItems()).containsExactly(1, 2, 3);
                     assertThat(count).hasValue(3);
                 })
                 .cancel()
                 .run(() -> {
-                    await().until(() -> subscriber.items().size() == 3);
-                    assertThat(subscriber.items()).containsExactly(1, 2, 3);
+                    await().until(() -> subscriber.getItems().size() == 3);
+                    assertThat(subscriber.getItems()).containsExactly(1, 2, 3);
                     assertThat(count).hasValue(3);
                 })
                 .request(20)
                 .run(() -> {
-                    await().until(() -> subscriber.items().size() == 3);
-                    assertThat(subscriber.items()).containsExactly(1, 2, 3);
+                    await().until(() -> subscriber.getItems().size() == 3);
+                    assertThat(subscriber.getItems()).containsExactly(1, 2, 3);
                     assertThat(count).hasValue(3);
                 });
     }
@@ -408,17 +408,17 @@ public class UniRepeatTest {
         subscriber
                 .request(2)
                 .run(() -> {
-                    await().until(() -> subscriber.items().size() == 2);
-                    assertThat(subscriber.items()).containsExactly(1, 2);
+                    await().until(() -> subscriber.getItems().size() == 2);
+                    assertThat(subscriber.getItems()).containsExactly(1, 2);
                     assertThat(count).hasValue(2);
                 })
                 .request(20)
                 .run(() -> {
-                    await().until(() -> subscriber.items().size() == 3);
-                    assertThat(subscriber.items()).containsExactly(1, 2, 3);
+                    await().until(() -> subscriber.getItems().size() == 3);
+                    assertThat(subscriber.getItems()).containsExactly(1, 2, 3);
                     assertThat(count).hasValue(3);
                 })
-                .assertCompletedSuccessfully();
+                .assertCompleted();
     }
 
     @Test
@@ -436,9 +436,9 @@ public class UniRepeatTest {
 
         subscriber.request(10)
                 .await()
-                .assertReceived(1, 2)
-                .assertHasFailedWith(IllegalStateException.class, "boom");
-        assertThat(subscriber.items()).hasSize(2);
+                .assertItems(1, 2)
+                .assertFailedWith(IllegalStateException.class, "boom");
+        assertThat(subscriber.getItems()).hasSize(2);
     }
 
     @Test
@@ -456,9 +456,9 @@ public class UniRepeatTest {
 
         subscriber.request(10)
                 .await()
-                .assertReceived(1, 2)
-                .assertHasFailedWith(IllegalStateException.class, "boom");
-        assertThat(subscriber.items()).hasSize(2);
+                .assertItems(1, 2)
+                .assertFailedWith(IllegalStateException.class, "boom");
+        assertThat(subscriber.getItems()).hasSize(2);
     }
 
     @Test
@@ -476,9 +476,9 @@ public class UniRepeatTest {
 
         subscriber.request(10)
                 .await()
-                .assertReceived(1, 2)
-                .assertHasFailedWith(IllegalStateException.class, "boom");
-        assertThat(subscriber.items()).hasSize(2);
+                .assertItems(1, 2)
+                .assertFailedWith(IllegalStateException.class, "boom");
+        assertThat(subscriber.getItems()).hasSize(2);
     }
 
     @Test
@@ -496,9 +496,9 @@ public class UniRepeatTest {
 
         subscriber.request(10)
                 .await()
-                .assertReceived(1, 2)
-                .assertCompletedSuccessfully();
-        assertThat(subscriber.items()).hasSize(2);
+                .assertItems(1, 2)
+                .assertCompleted();
+        assertThat(subscriber.getItems()).hasSize(2);
     }
 
     @Test
@@ -516,8 +516,8 @@ public class UniRepeatTest {
 
         subscriber.request(100)
                 .await()
-                .assertReceived(1, 2, 4, 5, 7, 8, 10)
-                .assertCompletedSuccessfully();
+                .assertItems(1, 2, 4, 5, 7, 8, 10)
+                .assertCompleted();
         assertThat(count).hasValue(10);
     }
 
@@ -535,8 +535,8 @@ public class UniRepeatTest {
                 .subscribe().withSubscriber(AssertSubscriber.create());
 
         subscriber.request(10)
-                .run(() -> await().until(() -> subscriber.items().size() == 10))
-                .assertReceived(1, 2, 4, 5, 7, 8, 10, 11, 13, 14)
+                .run(() -> await().until(() -> subscriber.getItems().size() == 10))
+                .assertItems(1, 2, 4, 5, 7, 8, 10, 11, 13, 14)
                 .cancel();
         assertThat(count).hasValue(14);
     }
@@ -554,8 +554,8 @@ public class UniRepeatTest {
                 .subscribe().withSubscriber(AssertSubscriber.create());
 
         subscriber.request(10)
-                .assertHasFailedWith(IllegalStateException.class, "boom")
-                .assertReceived(1, 2);
+                .assertFailedWith(IllegalStateException.class, "boom")
+                .assertItems(1, 2);
         assertThat(count).hasValue(3);
     }
 
@@ -572,8 +572,8 @@ public class UniRepeatTest {
                 .subscribe().withSubscriber(AssertSubscriber.create());
 
         subscriber.request(10)
-                .assertHasFailedWith(IllegalStateException.class, "boom")
-                .assertReceived(1, 2);
+                .assertFailedWith(IllegalStateException.class, "boom")
+                .assertItems(1, 2);
         assertThat(count).hasValue(3);
     }
 
@@ -591,8 +591,8 @@ public class UniRepeatTest {
                 .subscribe().withSubscriber(AssertSubscriber.create());
 
         subscriber.request(10)
-                .run(() -> await().until(() -> subscriber.items().size() == 10))
-                .assertReceived(1, 2, 4, 5, 7, 8, 10, 11, 13, 14)
+                .run(() -> await().until(() -> subscriber.getItems().size() == 10))
+                .assertItems(1, 2, 4, 5, 7, 8, 10, 11, 13, 14)
                 .cancel();
         assertThat(count).hasValue(14);
     }
@@ -611,8 +611,8 @@ public class UniRepeatTest {
                 .subscribe().withSubscriber(AssertSubscriber.create());
 
         subscriber.request(10)
-                .run(() -> await().until(() -> subscriber.items().size() == 10))
-                .assertReceived(1, 2, 4, 5, 7, 8, 10, 11, 13, 14)
+                .run(() -> await().until(() -> subscriber.getItems().size() == 10))
+                .assertItems(1, 2, 4, 5, 7, 8, 10, 11, 13, 14)
                 .cancel();
         assertThat(count).hasValue(14);
     }

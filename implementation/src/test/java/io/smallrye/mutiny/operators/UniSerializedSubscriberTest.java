@@ -46,8 +46,7 @@ public class UniSerializedSubscriberTest {
         reference.get().fail(new IOException("boom"));
 
         subscriber
-                .assertCompletedSuccessfully()
-                .assertNoFailure()
+                .assertCompleted()
                 .assertItem(1);
     }
 
@@ -64,9 +63,7 @@ public class UniSerializedSubscriberTest {
 
         reference.get().fail(new IOException("boom"));
         subscriber
-                .assertNoResult()
-                .assertCompletedWithFailure()
-                .assertFailure(IOException.class, "boom");
+                .assertFailedWith(IOException.class, "boom");
     }
 
     @Test
@@ -85,8 +82,7 @@ public class UniSerializedSubscriberTest {
         reference.get().fail(new IOException("boom"));
 
         subscriber
-                .assertCompletedSuccessfully()
-                .assertNoFailure()
+                .assertCompleted()
                 .assertItem(null);
     }
 
@@ -106,7 +102,7 @@ public class UniSerializedSubscriberTest {
 
         subscriber
                 .assertSubscribed()
-                .assertFailure(IOException.class, "boom");
+                .assertFailedWith(IOException.class, "boom");
 
     }
 
@@ -126,7 +122,7 @@ public class UniSerializedSubscriberTest {
 
         subscriber
                 .assertSubscribed()
-                .assertFailure(IllegalStateException.class, "Invalid");
+                .assertFailedWith(IllegalStateException.class, "Invalid");
 
     }
 
@@ -146,7 +142,7 @@ public class UniSerializedSubscriberTest {
         });
         subscriber
                 .assertSubscribed()
-                .assertFailure(IllegalStateException.class, "Invalid transition");
+                .assertFailedWith(IllegalStateException.class, "Invalid transition");
 
     }
 
@@ -203,10 +199,10 @@ public class UniSerializedSubscriberTest {
         subscriber.await();
 
         if (subscriber.getFailure() != null) {
-            subscriber.assertCompletedWithFailure()
-                    .assertFailure(IOException.class, "boom");
+            subscriber.assertFailed()
+                    .assertFailedWith(IOException.class, "boom");
         } else {
-            subscriber.assertCompletedSuccessfully()
+            subscriber.assertCompleted()
                     .assertItem(1);
         }
     }
@@ -247,7 +243,7 @@ public class UniSerializedSubscriberTest {
         runnables.forEach(r -> new Thread(r).start());
 
         subscriber.await();
-        subscriber.assertCompletedSuccessfully();
+        subscriber.assertCompleted();
         assertThat(subscriber.getItem()).isBetween(1, 3);
     }
 
@@ -296,11 +292,11 @@ public class UniSerializedSubscriberTest {
         await(done);
 
         if (cancelled.get()) {
-            subscriber.assertNotCompleted();
+            subscriber.assertNotTerminated();
         } else {
             subscriber
                     .await()
-                    .assertCompletedSuccessfully()
+                    .assertCompleted()
                     .assertItem(1);
         }
     }

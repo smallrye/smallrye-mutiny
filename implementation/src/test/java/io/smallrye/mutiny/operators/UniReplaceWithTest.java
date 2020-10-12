@@ -15,7 +15,7 @@ class UniReplaceWithTest {
                 .replaceWith(63)
                 .subscribe().withSubscriber(UniAssertSubscriber.create());
 
-        subscriber.assertCompletedSuccessfully().assertItem(63);
+        subscriber.assertCompleted().assertItem(63);
     }
 
     @Test
@@ -26,7 +26,7 @@ class UniReplaceWithTest {
                 .replaceWith(() -> 63)
                 .subscribe().withSubscriber(UniAssertSubscriber.create());
 
-        subscriber.assertCompletedSuccessfully().assertItem(63);
+        subscriber.assertCompleted().assertItem(63);
     }
 
     @Test
@@ -37,7 +37,7 @@ class UniReplaceWithTest {
                 .replaceWith(Uni.createFrom().item(63))
                 .subscribe().withSubscriber(UniAssertSubscriber.create());
 
-        subscriber.assertCompletedSuccessfully().assertItem(63);
+        subscriber.assertCompleted().assertItem(63);
     }
 
     @Test
@@ -48,6 +48,6 @@ class UniReplaceWithTest {
                 .replaceWithNull()
                 .subscribe().withSubscriber(UniAssertSubscriber.create());
 
-        subscriber.assertCompletedSuccessfully().assertItem(null);
+        subscriber.assertCompleted().assertItem(null);
     }
 }

@@ -210,7 +210,7 @@ public class MultiConvertToTest {
         assertThat(called).isFalse();
         subscriber.assertHasNotReceivedAnyItem().assertSubscribed();
         subscriber.request(1);
-        subscriber.assertCompletedSuccessfully().assertReceived(1);
+        subscriber.assertCompleted().assertItems(1);
         assertThat(called).isTrue();
     }
 

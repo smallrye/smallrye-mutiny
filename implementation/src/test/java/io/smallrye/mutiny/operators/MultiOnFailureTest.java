@@ -27,8 +27,8 @@ public class MultiOnFailureTest {
                 .subscribe().withSubscriber(subscriber);
 
         subscriber
-                .assertCompletedSuccessfully()
-                .assertReceived(1, 2, 3, 4, 5, 6, 7, 8, 9);
+                .assertCompleted()
+                .assertItems(1, 2, 3, 4, 5, 6, 7, 8, 9);
     }
 
     @Test
@@ -39,9 +39,8 @@ public class MultiOnFailureTest {
                 .onFailure().recoverWithMulti(v -> Multi.createFrom().range(50, 52))
                 .subscribe().withSubscriber(subscriber);
 
-        subscriber.assertReceived(50, 51)
-                .assertHasNotFailed()
-                .assertCompletedSuccessfully();
+        subscriber.assertItems(50, 51)
+                .assertCompleted();
     }
 
     @Test
@@ -52,9 +51,8 @@ public class MultiOnFailureTest {
                 .onFailure(IllegalStateException.class).recoverWithMulti(v -> Multi.createFrom().item(42))
                 .subscribe().withSubscriber(subscriber);
 
-        subscriber.assertReceived(42)
-                .assertHasNotFailed()
-                .assertCompletedSuccessfully();
+        subscriber.assertItems(42)
+                .assertCompleted();
     }
 
     @Test
@@ -65,7 +63,7 @@ public class MultiOnFailureTest {
                 .onFailure(IOException.class).recoverWithMulti(v -> Multi.createFrom().item(42))
                 .subscribe().withSubscriber(subscriber);
 
-        subscriber.assertHasFailedWith(IllegalStateException.class, "boom");
+        subscriber.assertFailedWith(IllegalStateException.class, "boom");
     }
 
     @Test
@@ -79,8 +77,8 @@ public class MultiOnFailureTest {
                 .subscribe().withSubscriber(subscriber);
 
         subscriber
-                .assertHasFailedWith(CompositeException.class, "boom")
-                .assertHasFailedWith(CompositeException.class, "bad");
+                .assertFailedWith(CompositeException.class, "boom")
+                .assertFailedWith(CompositeException.class, "bad");
     }
 
     @Test
@@ -93,7 +91,7 @@ public class MultiOnFailureTest {
 
         subscriber.assertHasNotReceivedAnyItem()
                 .assertTerminated()
-                .assertHasFailedWith(IOException.class, "kaboom!");
+                .assertFailedWith(IOException.class, "kaboom!");
     }
 
     @Test
@@ -106,7 +104,7 @@ public class MultiOnFailureTest {
 
         subscriber.assertHasNotReceivedAnyItem()
                 .assertTerminated()
-                .assertHasFailedWith(NullPointerException.class, "");
+                .assertFailedWith(NullPointerException.class, "");
     }
 
     @Test
@@ -121,8 +119,8 @@ public class MultiOnFailureTest {
 
         subscriber.assertHasNotReceivedAnyItem()
                 .assertTerminated()
-                .assertHasFailedWith(CompositeException.class, "boom")
-                .assertHasFailedWith(CompositeException.class, "no");
+                .assertFailedWith(CompositeException.class, "boom")
+                .assertFailedWith(CompositeException.class, "no");
     }
 
     @Test
@@ -136,7 +134,7 @@ public class MultiOnFailureTest {
 
         subscriber.assertHasNotReceivedAnyItem()
                 .assertTerminated()
-                .assertHasFailedWith(IOException.class, "kaboom!");
+                .assertFailedWith(IOException.class, "kaboom!");
     }
 
     @Test
@@ -150,7 +148,7 @@ public class MultiOnFailureTest {
 
         subscriber.assertHasNotReceivedAnyItem()
                 .assertTerminated()
-                .assertHasFailedWith(IllegalStateException.class, "boom");
+                .assertFailedWith(IllegalStateException.class, "boom");
     }
 
     @Test
@@ -163,7 +161,7 @@ public class MultiOnFailureTest {
 
         subscriber.assertHasNotReceivedAnyItem()
                 .assertTerminated()
-                .assertHasFailedWith(IOException.class, "kaboom!");
+                .assertFailedWith(IOException.class, "kaboom!");
     }
 
     @Test
@@ -176,23 +174,19 @@ public class MultiOnFailureTest {
                 .subscribe().withSubscriber(subscriber);
 
         subscriber.assertHasNotReceivedAnyItem()
-                .assertHasNotFailed()
                 .assertNotTerminated();
 
         subscriber.request(4)
-                .assertReceived(50, 51, 52, 53)
-                .assertHasNotFailed()
+                .assertItems(50, 51, 52, 53)
                 .assertNotTerminated();
 
         subscriber.request(5)
-                .assertReceived(50, 51, 52, 53, 54, 55, 56, 57, 58)
-                .assertHasNotFailed()
+                .assertItems(50, 51, 52, 53, 54, 55, 56, 57, 58)
                 .assertNotTerminated();
 
         subscriber.request(5)
-                .assertReceived(50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60)
-                .assertHasNotFailed()
-                .assertCompletedSuccessfully();
+                .assertItems(50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60)
+                .assertCompleted();
     }
 
     @Test
@@ -213,9 +207,8 @@ public class MultiOnFailureTest {
                 .emit(5)
                 .fail(new IllegalStateException("boom"));
 
-        subscriber.assertReceived(1, 2, 3, 4, 5, 50, 51, 52, 53, 54)
-                .assertHasNotFailed()
-                .assertCompletedSuccessfully();
+        subscriber.assertItems(1, 2, 3, 4, 5, 50, 51, 52, 53, 54)
+                .assertCompleted();
     }
 
     @Test
@@ -236,12 +229,11 @@ public class MultiOnFailureTest {
                 .emit(5)
                 .fail(new IllegalStateException("boom"));
 
-        subscriber.assertReceived(1, 2, 3)
+        subscriber.assertItems(1, 2, 3)
                 .request(5)
-                .assertReceived(1, 2, 3, 4, 5, 50, 51, 52)
+                .assertItems(1, 2, 3, 4, 5, 50, 51, 52)
                 .request(10)
-                .assertHasNotFailed()
-                .assertCompletedSuccessfully();
+                .assertCompleted();
     }
 
     @Test
@@ -256,8 +248,8 @@ public class MultiOnFailureTest {
 
         subscriber.assertHasNotReceivedAnyItem()
                 .assertTerminated()
-                .assertHasFailedWith(CompositeException.class, "kaboom!")
-                .assertHasFailedWith(CompositeException.class, "karambar");
+                .assertFailedWith(CompositeException.class, "kaboom!")
+                .assertFailedWith(CompositeException.class, "karambar");
     }
 
     @Test
@@ -270,7 +262,7 @@ public class MultiOnFailureTest {
 
         subscriber.assertHasNotReceivedAnyItem()
                 .assertTerminated()
-                .assertHasFailedWith(NullPointerException.class, "mapper");
+                .assertFailedWith(NullPointerException.class, "mapper");
     }
 
     @Test
@@ -278,8 +270,8 @@ public class MultiOnFailureTest {
         Multi.createFrom().<Integer> failure(new IllegalStateException("boom"))
                 .onFailure().recoverWithItem(42)
                 .subscribe().withSubscriber(AssertSubscriber.create(1))
-                .assertCompletedSuccessfully()
-                .assertReceived(42);
+                .assertCompleted()
+                .assertItems(42);
     }
 
     @Test
@@ -289,13 +281,13 @@ public class MultiOnFailureTest {
                 .onFailure().recoverWithItem(count::incrementAndGet);
         multi
                 .subscribe().withSubscriber(AssertSubscriber.create(1))
-                .assertCompletedSuccessfully()
-                .assertReceived(1);
+                .assertCompleted()
+                .assertItems(1);
 
         multi
                 .subscribe().withSubscriber(AssertSubscriber.create(1))
-                .assertCompletedSuccessfully()
-                .assertReceived(2);
+                .assertCompleted()
+                .assertItems(2);
     }
 
     @Test
@@ -317,8 +309,8 @@ public class MultiOnFailureTest {
         Multi.createFrom().<Integer> failure(new IllegalStateException("boom"))
                 .onFailure().recoverWithItem(() -> null)
                 .subscribe().withSubscriber(AssertSubscriber.create(1))
-                .assertHasFailedWith(CompositeException.class, "boom")
-                .assertHasFailedWith(CompositeException.class, "supplier");
+                .assertFailedWith(CompositeException.class, "boom")
+                .assertFailedWith(CompositeException.class, "supplier");
     }
 
     @Test
@@ -326,7 +318,7 @@ public class MultiOnFailureTest {
         Multi.createFrom().<Integer> failure(new IllegalStateException("boom"))
                 .onFailure().recoverWithCompletion()
                 .subscribe().withSubscriber(AssertSubscriber.create(1))
-                .assertCompletedSuccessfully()
+                .assertCompleted()
                 .assertHasNotReceivedAnyItem();
     }
 
@@ -350,13 +342,13 @@ public class MultiOnFailureTest {
                 .assertHasNotReceivedAnyItem()
                 .request(2)
                 .run(() -> assertThat(subscribed).hasValue(0))
-                .assertReceived(3, 2)
+                .assertItems(3, 2)
                 .request(2)
-                .assertReceived(3, 2, 1, 42)
+                .assertItems(3, 2, 1, 42)
                 .run(() -> assertThat(subscribed).hasValue(1))
                 .request(2)
-                .assertReceived(3, 2, 1, 42, 43)
-                .assertCompletedSuccessfully();
+                .assertItems(3, 2, 1, 42, 43)
+                .assertCompleted();
     }
 
     @Test
@@ -379,11 +371,11 @@ public class MultiOnFailureTest {
                 .assertHasNotReceivedAnyItem()
                 .request(2)
                 .run(() -> assertThat(subscribed).hasValue(0))
-                .assertReceived(3, 2)
+                .assertItems(3, 2)
                 .request(2)
-                .assertReceived(3, 2, 1, 0)
+                .assertItems(3, 2, 1, 0)
                 .run(() -> assertThat(subscribed).hasValue(1))
-                .assertCompletedSuccessfully();
+                .assertCompleted();
     }
 
     @Test
@@ -392,7 +384,7 @@ public class MultiOnFailureTest {
                 .onFailure(IOException.class::isInstance)
                 .transform(e -> new Exception("BOOM!!!"))
                 .subscribe().withSubscriber(AssertSubscriber.create(0))
-                .assertHasFailedWith(Exception.class, "BOOM!!!");
+                .assertFailedWith(Exception.class, "BOOM!!!");
     }
 
     @Test
@@ -401,7 +393,7 @@ public class MultiOnFailureTest {
                 .onFailure(IOException.class::isInstance)
                 .transform(e -> new Exception("BOOM!!!"))
                 .subscribe().withSubscriber(AssertSubscriber.create(0))
-                .assertHasFailedWith(RuntimeException.class, "first");
+                .assertFailedWith(RuntimeException.class, "first");
     }
 
     @Test
@@ -412,10 +404,10 @@ public class MultiOnFailureTest {
                 })
                 .transform(e -> new Exception("BOOM"))
                 .subscribe().withSubscriber(AssertSubscriber.create(0))
-                .assertHasFailedWith(CompositeException.class, "first")
-                .assertHasFailedWith(CompositeException.class, "bad");
+                .assertFailedWith(CompositeException.class, "first")
+                .assertFailedWith(CompositeException.class, "bad");
 
-        assertThat(subscriber.failures().get(0)).hasMessageNotContaining("BOOM");
+        assertThat(subscriber.getFailure()).hasMessageNotContaining("BOOM");
     }
 
     @Test
@@ -423,8 +415,8 @@ public class MultiOnFailureTest {
         Multi.createFrom().<Integer> failure(new IOException())
                 .onFailure(IOException.class::isInstance).recoverWithItem(42)
                 .subscribe().withSubscriber(AssertSubscriber.create(1))
-                .assertCompletedSuccessfully()
-                .assertReceived(42);
+                .assertCompleted()
+                .assertItems(42);
     }
 
     @Test
@@ -432,7 +424,7 @@ public class MultiOnFailureTest {
         Multi.createFrom().<Integer> failure(new IOException("boom"))
                 .onFailure(IllegalStateException.class::isInstance).recoverWithItem(42)
                 .subscribe().withSubscriber(AssertSubscriber.create(1))
-                .assertHasFailedWith(IOException.class, "boom");
+                .assertFailedWith(IOException.class, "boom");
     }
 
     @Test
@@ -440,7 +432,7 @@ public class MultiOnFailureTest {
         Multi.createFrom().<Integer> failure(new IOException())
                 .onFailure(IOException.class::isInstance).recoverWithCompletion()
                 .subscribe().withSubscriber(AssertSubscriber.create(1))
-                .assertCompletedSuccessfully()
+                .assertCompleted()
                 .assertHasNotReceivedAnyItem();
     }
 }

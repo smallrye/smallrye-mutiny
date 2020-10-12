@@ -56,7 +56,7 @@ public class MultiTakeTest {
     public void testTakeOnUpstreamFailure() {
         Multi.createFrom().<Integer> failure(new IOException("boom")).transform().byTakingFirstItems(1)
                 .subscribe().withSubscriber(AssertSubscriber.create(10))
-                .assertHasFailedWith(IOException.class, "boom")
+                .assertFailedWith(IOException.class, "boom")
                 .assertHasNotReceivedAnyItem();
     }
 
@@ -64,7 +64,7 @@ public class MultiTakeTest {
     public void testTakeLastOnUpstreamFailure() {
         Multi.createFrom().<Integer> failure(new IOException("boom")).transform().byTakingLastItems(1)
                 .subscribe().withSubscriber(AssertSubscriber.create(10))
-                .assertHasFailedWith(IOException.class, "boom")
+                .assertFailedWith(IOException.class, "boom")
                 .assertHasNotReceivedAnyItem();
     }
 
@@ -72,16 +72,16 @@ public class MultiTakeTest {
     public void testTakeAll() {
         Multi.createFrom().range(1, 5).transform().byTakingFirstItems(4)
                 .subscribe().withSubscriber(AssertSubscriber.create(10))
-                .assertCompletedSuccessfully()
-                .assertReceived(1, 2, 3, 4);
+                .assertCompleted()
+                .assertItems(1, 2, 3, 4);
     }
 
     @Test
     public void testTakeLastAll() {
         Multi.createFrom().range(1, 5).transform().byTakingLastItems(4)
                 .subscribe().withSubscriber(AssertSubscriber.create(10))
-                .assertCompletedSuccessfully()
-                .assertReceived(1, 2, 3, 4);
+                .assertCompleted()
+                .assertItems(1, 2, 3, 4);
     }
 
     @Test
@@ -120,8 +120,8 @@ public class MultiTakeTest {
         emitter.get().emit(5).emit(6).emit(7).emit(8).emit(9).emit(10).complete();
 
         subscriber.request(5)
-                .assertCompletedSuccessfully()
-                .assertReceived(8, 9, 10);
+                .assertCompleted()
+                .assertItems(8, 9, 10);
     }
 
     @Test
@@ -132,8 +132,8 @@ public class MultiTakeTest {
                 .transform().byTakingLastItems(3)
                 .subscribe(subscriber);
 
-        subscriber.assertCompletedSuccessfully()
-                .assertReceived(8, 9, 10);
+        subscriber.assertCompleted()
+                .assertItems(8, 9, 10);
     }
 
     @Test
@@ -141,7 +141,7 @@ public class MultiTakeTest {
         Multi.createFrom().range(1, 10).transform().byTakingItemsWhile(i -> {
             throw new IllegalStateException("boom");
         }).subscribe().withSubscriber(AssertSubscriber.create(10))
-                .assertHasFailedWith(IllegalStateException.class, "boom");
+                .assertFailedWith(IllegalStateException.class, "boom");
     }
 
     @Test
@@ -149,7 +149,7 @@ public class MultiTakeTest {
         Multi.createFrom().<Integer> failure(new IOException("boom"))
                 .transform().byTakingItemsWhile(i -> i < 5)
                 .subscribe().withSubscriber(AssertSubscriber.create(10))
-                .assertHasFailedWith(IOException.class, "boom");
+                .assertFailedWith(IOException.class, "boom");
     }
 
     @Test
@@ -162,15 +162,15 @@ public class MultiTakeTest {
     public void testTakeWhile() {
         Multi.createFrom().range(1, 10).transform().byTakingItemsWhile(i -> i < 5)
                 .subscribe().withSubscriber(AssertSubscriber.create(10))
-                .assertCompletedSuccessfully()
-                .assertReceived(1, 2, 3, 4);
+                .assertCompleted()
+                .assertItems(1, 2, 3, 4);
     }
 
     @Test
     public void testTakeWhileNone() {
         Multi.createFrom().items(1, 2, 3, 4).transform().byTakingItemsWhile(i -> false)
                 .subscribe().withSubscriber(AssertSubscriber.create(10))
-                .assertCompletedSuccessfully()
+                .assertCompleted()
                 .assertHasNotReceivedAnyItem();
     }
 
@@ -178,8 +178,8 @@ public class MultiTakeTest {
     public void testTakeWhileAll() {
         Multi.createFrom().items(1, 2, 3, 4).transform().byTakingItemsWhile(i -> true)
                 .subscribe().withSubscriber(AssertSubscriber.create(10))
-                .assertCompletedSuccessfully()
-                .assertReceived(1, 2, 3, 4);
+                .assertCompleted()
+                .assertItems(1, 2, 3, 4);
     }
 
     @Test
@@ -194,12 +194,12 @@ public class MultiTakeTest {
         subscriber.request(1);
 
         subscriber.assertNotTerminated()
-                .assertReceived(1);
+                .assertItems(1);
 
         subscriber.request(2);
 
-        subscriber.assertCompletedSuccessfully()
-                .assertReceived(1, 2);
+        subscriber.assertCompleted()
+                .assertItems(1, 2);
     }
 
     @Test
@@ -208,8 +208,8 @@ public class MultiTakeTest {
                 .transform().byTakingFirstItems(5)
                 .subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE))
                 .await()
-                .assertCompletedSuccessfully()
-                .assertReceived(0L, 1L, 2L, 3L, 4L);
+                .assertCompleted()
+                .assertItems(0L, 1L, 2L, 3L, 4L);
     }
 
     @Test
@@ -218,9 +218,9 @@ public class MultiTakeTest {
                 .byTakingItemsFor(Duration.ofMillis(1000))
                 .subscribe().withSubscriber(AssertSubscriber.create(10))
                 .await()
-                .assertCompletedSuccessfully();
+                .assertCompleted();
 
-        assertThat(subscriber.items()).hasSize(10);
+        assertThat(subscriber.getItems()).hasSize(10);
     }
 
     @Test
@@ -233,9 +233,9 @@ public class MultiTakeTest {
                 .transform().byTakingItemsFor(Duration.ofMillis(1000))
                 .subscribe().withSubscriber(AssertSubscriber.create(100))
                 .await()
-                .assertHasFailedWith(TestException.class, "boom");
+                .assertFailedWith(TestException.class, "boom");
 
-        assertThat(subscriber.items()).hasSize(4);
+        assertThat(subscriber.getItems()).hasSize(4);
     }
 
     @Test
@@ -247,10 +247,10 @@ public class MultiTakeTest {
                 .transform().byTakingItemsFor(Duration.ofMillis(1000))
                 .subscribe().withSubscriber(AssertSubscriber.create(4));
 
-        await().until(() -> subscriber.items().size() == 4);
+        await().until(() -> subscriber.getItems().size() == 4);
         subscriber.cancel();
 
-        assertThat(subscriber.items()).hasSize(4);
+        assertThat(subscriber.getItems()).hasSize(4);
     }
 
     @Test
@@ -283,9 +283,9 @@ public class MultiTakeTest {
                 .transform().byTakingItemsFor(Duration.ofMillis(1000))
                 .subscribe().withSubscriber(AssertSubscriber.create(100))
                 .await()
-                .assertCompletedSuccessfully();
+                .assertCompleted();
 
-        assertThat(subscriber.items()).hasSize(2);
+        assertThat(subscriber.getItems()).hasSize(2);
     }
 
     @Test
@@ -304,9 +304,9 @@ public class MultiTakeTest {
                 .transform().byTakingItemsFor(Duration.ofMillis(1000))
                 .subscribe().withSubscriber(AssertSubscriber.create(100))
                 .await()
-                .assertHasFailedWith(IOException.class, "boom");
+                .assertFailedWith(IOException.class, "boom");
 
-        assertThat(subscriber.items()).hasSize(2);
+        assertThat(subscriber.getItems()).hasSize(2);
     }
 
     @Test

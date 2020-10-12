@@ -31,7 +31,7 @@ public class UniCreateFromFailureTest {
     public void testCreationWithCheckedException() {
         UniAssertSubscriber<Object> subscriber = UniAssertSubscriber.create();
         Uni.createFrom().failure(new Exception("boom")).subscribe().withSubscriber(subscriber);
-        subscriber.assertFailure(Exception.class, "boom");
+        subscriber.assertFailedWith(Exception.class, "boom");
 
         try {
             Uni.createFrom().failure(new Exception("boom")).await().asOptional().indefinitely();
@@ -47,7 +47,7 @@ public class UniCreateFromFailureTest {
     public void testCreationWithRuntimeException() {
         UniAssertSubscriber<Object> subscriber = UniAssertSubscriber.create();
         Uni.createFrom().failure(new RuntimeException("boom")).subscribe().withSubscriber(subscriber);
-        subscriber.assertFailure(RuntimeException.class, "boom");
+        subscriber.assertFailedWith(RuntimeException.class, "boom");
 
         try {
             Uni.createFrom().failure(new RuntimeException("boom")).await().indefinitely();

@@ -31,6 +31,6 @@ public class BroadcastProcessorTest {
         AssertSubscriber<String> subscriber = AssertSubscriber.create(Long.MAX_VALUE);
         multi.subscribe().withSubscriber(subscriber)
                 .await()
-                .assertCompletedSuccessfully();
+                .assertCompleted();
     }
 }

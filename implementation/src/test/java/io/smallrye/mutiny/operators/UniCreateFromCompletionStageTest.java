@@ -23,7 +23,7 @@ public class UniCreateFromCompletionStageTest {
         CompletionStage<String> cs = new CompletableFuture<>();
         Uni.createFrom().completionStage(cs).subscribe().withSubscriber(subscriber);
         cs.toCompletableFuture().complete(null);
-        subscriber.assertCompletedSuccessfully().assertItem(null);
+        subscriber.assertCompleted().assertItem(null);
     }
 
     @Test
@@ -32,7 +32,7 @@ public class UniCreateFromCompletionStageTest {
         CompletionStage<String> cs = new CompletableFuture<>();
         Uni.createFrom().completionStage(cs).subscribe().withSubscriber(subscriber);
         cs.toCompletableFuture().complete("1");
-        subscriber.assertCompletedSuccessfully().assertItem("1");
+        subscriber.assertCompleted().assertItem("1");
     }
 
     @Test
@@ -41,7 +41,7 @@ public class UniCreateFromCompletionStageTest {
         CompletionStage<String> cs = new CompletableFuture<>();
         Uni.createFrom().completionStage(cs).subscribe().withSubscriber(subscriber);
         cs.toCompletableFuture().completeExceptionally(new IOException("boom"));
-        subscriber.assertFailure(IOException.class, "boom");
+        subscriber.assertFailedWith(IOException.class, "boom");
     }
 
     @Test
@@ -54,7 +54,7 @@ public class UniCreateFromCompletionStageTest {
                     throw new IllegalStateException("boom");
                 })).subscribe().withSubscriber(subscriber);
         cs.toCompletableFuture().complete("bonjour");
-        subscriber.assertFailure(IllegalStateException.class, "boom");
+        subscriber.assertFailedWith(IllegalStateException.class, "boom");
     }
 
     @Test
@@ -62,7 +62,7 @@ public class UniCreateFromCompletionStageTest {
         UniAssertSubscriber<Void> subscriber = UniAssertSubscriber.create();
         Uni.createFrom().<Void> completionStage(() -> CompletableFuture.completedFuture(null)).subscribe()
                 .withSubscriber(subscriber);
-        subscriber.assertCompletedSuccessfully().assertItem(null);
+        subscriber.assertCompleted().assertItem(null);
     }
 
     @Test
@@ -71,7 +71,7 @@ public class UniCreateFromCompletionStageTest {
         CompletionStage<String> cs = new CompletableFuture<>();
         Uni.createFrom().completionStage(() -> cs).subscribe().withSubscriber(subscriber);
         cs.toCompletableFuture().complete("1");
-        subscriber.assertCompletedSuccessfully().assertItem("1");
+        subscriber.assertCompleted().assertItem("1");
     }
 
     @Test
@@ -80,7 +80,7 @@ public class UniCreateFromCompletionStageTest {
         CompletionStage<String> cs = new CompletableFuture<>();
         Uni.createFrom().completionStage(() -> cs).subscribe().withSubscriber(subscriber);
         cs.toCompletableFuture().completeExceptionally(new IOException("boom"));
-        subscriber.assertFailure(IOException.class, "boom");
+        subscriber.assertFailedWith(IOException.class, "boom");
     }
 
     @Test
@@ -89,7 +89,7 @@ public class UniCreateFromCompletionStageTest {
         Uni.createFrom().<String> completionStage(() -> {
             throw new NullPointerException("boom");
         }).subscribe().withSubscriber(subscriber);
-        subscriber.assertFailure(NullPointerException.class, "boom");
+        subscriber.assertFailedWith(NullPointerException.class, "boom");
     }
 
     @Test
@@ -104,7 +104,7 @@ public class UniCreateFromCompletionStageTest {
         assertThat(called).isFalse();
 
         uni.subscribe().withSubscriber(subscriber);
-        subscriber.assertCompletedSuccessfully().assertItem(1);
+        subscriber.assertCompleted().assertItem(1);
         assertThat(called).isTrue();
     }
 
@@ -127,7 +127,7 @@ public class UniCreateFromCompletionStageTest {
         assertThat(called).isFalse();
 
         uni.subscribe().withSubscriber(subscriber);
-        subscriber.assertCompletedSuccessfully().assertItem(1);
+        subscriber.assertCompleted().assertItem(1);
         assertThat(called).isTrue();
     }
 
@@ -142,7 +142,7 @@ public class UniCreateFromCompletionStageTest {
         assertThat(called).isFalse();
         uni.subscribe().withSubscriber(subscriber);
         assertThat(called).isFalse();
-        subscriber.assertNotCompleted();
+        subscriber.assertNotTerminated();
     }
 
     @Test
@@ -156,7 +156,7 @@ public class UniCreateFromCompletionStageTest {
         assertThat(called).isFalse();
         uni.subscribe().withSubscriber(subscriber);
         assertThat(called).isFalse();
-        subscriber.assertNotCompleted();
+        subscriber.assertNotTerminated();
     }
 
     @Test
@@ -172,7 +172,7 @@ public class UniCreateFromCompletionStageTest {
 
         cs.complete(1);
 
-        subscriber.assertNotCompleted();
+        subscriber.assertNotTerminated();
     }
 
     @Test
@@ -184,7 +184,7 @@ public class UniCreateFromCompletionStageTest {
         subscriber.cancel();
 
         cs.complete(1);
-        subscriber.assertNotCompleted();
+        subscriber.assertNotTerminated();
     }
 
     @Test
@@ -232,7 +232,7 @@ public class UniCreateFromCompletionStageTest {
         Uni<Integer> uni = Uni.createFrom().completionStage(() -> null);
 
         uni.subscribe().withSubscriber(subscriber);
-        subscriber.assertFailure(NullPointerException.class, "");
+        subscriber.assertFailedWith(NullPointerException.class, "");
     }
 
     @Test
@@ -246,10 +246,10 @@ public class UniCreateFromCompletionStageTest {
         assertThat(shared).hasValue(0);
         uni.subscribe().withSubscriber(subscriber1);
         assertThat(shared).hasValue(1);
-        subscriber1.assertCompletedSuccessfully().assertItem(1);
+        subscriber1.assertCompleted().assertItem(1);
         uni.subscribe().withSubscriber(subscriber2);
         assertThat(shared).hasValue(2);
-        subscriber2.assertCompletedSuccessfully().assertItem(2);
+        subscriber2.assertCompleted().assertItem(2);
     }
 
     @Test
@@ -264,9 +264,9 @@ public class UniCreateFromCompletionStageTest {
                 state -> CompletableFuture.completedFuture(state.incrementAndGet()));
 
         uni.subscribe().withSubscriber(subscriber1);
-        subscriber1.assertFailure(IllegalStateException.class, "boom");
+        subscriber1.assertFailedWith(IllegalStateException.class, "boom");
         uni.subscribe().withSubscriber(subscriber2);
-        subscriber2.assertFailure(IllegalStateException.class, "Invalid shared state");
+        subscriber2.assertFailedWith(IllegalStateException.class, "Invalid shared state");
     }
 
     @Test
@@ -279,9 +279,9 @@ public class UniCreateFromCompletionStageTest {
                 state -> CompletableFuture.completedFuture(state.incrementAndGet()));
 
         uni.subscribe().withSubscriber(s1);
-        s1.assertFailure(NullPointerException.class, "supplier");
+        s1.assertFailedWith(NullPointerException.class, "supplier");
         uni.subscribe().withSubscriber(s2);
-        s2.assertFailure(IllegalStateException.class, "Invalid shared state");
+        s2.assertFailedWith(IllegalStateException.class, "Invalid shared state");
     }
 
     @Test

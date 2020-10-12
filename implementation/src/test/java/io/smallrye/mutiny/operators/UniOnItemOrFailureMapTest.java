@@ -42,7 +42,7 @@ public class UniOnItemOrFailureMapTest {
             return i + 1;
         }).subscribe().withSubscriber(subscriber);
 
-        subscriber.assertCompletedSuccessfully()
+        subscriber.assertCompleted()
                 .assertItem(2);
 
         assertThat(count).hasValue(1);
@@ -60,7 +60,7 @@ public class UniOnItemOrFailureMapTest {
             return i + 1;
         }).subscribe().withSubscriber(ts);
 
-        ts.assertCompletedSuccessfully()
+        ts.assertCompleted()
                 .assertItem(2);
 
         assertThat(count).hasValue(1);
@@ -77,7 +77,7 @@ public class UniOnItemOrFailureMapTest {
             return 2;
         }).subscribe().withSubscriber(subscriber);
 
-        subscriber.assertCompletedSuccessfully()
+        subscriber.assertCompleted()
                 .assertItem(2);
 
         assertThat(count).hasValue(1);
@@ -95,7 +95,7 @@ public class UniOnItemOrFailureMapTest {
             return 2;
         }).subscribe().withSubscriber(subscriber);
 
-        subscriber.assertCompletedSuccessfully()
+        subscriber.assertCompleted()
                 .assertItem(2);
 
         assertThat(count).hasValue(1);
@@ -112,7 +112,7 @@ public class UniOnItemOrFailureMapTest {
             throw new IllegalStateException("kaboom");
         }).subscribe().withSubscriber(subscriber);
 
-        subscriber.assertFailure(IllegalStateException.class, "kaboom");
+        subscriber.assertFailedWith(IllegalStateException.class, "kaboom");
         assertThat(count).hasValue(1);
     }
 
@@ -128,8 +128,8 @@ public class UniOnItemOrFailureMapTest {
             throw new IllegalStateException("kaboom");
         }).subscribe().withSubscriber(subscriber);
 
-        subscriber.assertFailure(CompositeException.class, "kaboom");
-        subscriber.assertFailure(CompositeException.class, "boom");
+        subscriber.assertFailedWith(CompositeException.class, "kaboom");
+        subscriber.assertFailedWith(CompositeException.class, "boom");
 
         assertThat(count).hasValue(1);
     }
@@ -144,9 +144,9 @@ public class UniOnItemOrFailureMapTest {
         uni.subscribe().withSubscriber(s1);
         uni.subscribe().withSubscriber(s2);
 
-        s1.assertCompletedSuccessfully()
+        s1.assertCompleted()
                 .assertItem(2);
-        s2.assertCompletedSuccessfully()
+        s2.assertCompleted()
                 .assertItem(3);
     }
 
@@ -154,7 +154,7 @@ public class UniOnItemOrFailureMapTest {
     public void testThatMapperCanReturnNull() {
         UniAssertSubscriber<Void> subscriber = UniAssertSubscriber.create();
         one.onItemOrFailure().<Void> transform((v, f) -> null).subscribe().withSubscriber(subscriber);
-        subscriber.assertCompletedSuccessfully().assertItem(null);
+        subscriber.assertCompleted().assertItem(null);
     }
 
     @Test
@@ -171,7 +171,7 @@ public class UniOnItemOrFailureMapTest {
                     })
                     .subscribe().withSubscriber(subscriber);
 
-            subscriber.await().assertCompletedSuccessfully().assertItem(2);
+            subscriber.await().assertCompleted().assertItem(2);
             assertThat(threadName).isNotNull().doesNotHaveValue("main");
             assertThat(subscriber.getOnItemThreadName()).isEqualTo(threadName.get());
         } finally {
@@ -195,7 +195,7 @@ public class UniOnItemOrFailureMapTest {
                     })
                     .subscribe().withSubscriber(subscriber);
 
-            subscriber.await().assertCompletedSuccessfully().assertItem(1);
+            subscriber.await().assertCompleted().assertItem(1);
             assertThat(threadName).isNotNull().doesNotHaveValue("main");
             assertThat(subscriber.getOnItemThreadName()).isEqualTo(threadName.get());
         } finally {

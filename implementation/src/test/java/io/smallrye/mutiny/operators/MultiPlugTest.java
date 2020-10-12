@@ -21,7 +21,7 @@ public class MultiPlugTest {
                 .onItem().transform(String::toUpperCase)
                 .subscribe().withSubscriber(AssertSubscriber.create(10));
 
-        subscriber.assertCompletedSuccessfully().assertReceived(
+        subscriber.assertCompleted().assertItems(
                 "HELLO A!", "HELLO B!", "HELLO C!");
     }
 
@@ -33,7 +33,7 @@ public class MultiPlugTest {
                 .onItem().transform(String::toUpperCase)
                 .subscribe().withSubscriber(AssertSubscriber.create(10));
 
-        subscriber.assertHasFailedWith(RuntimeException.class, "boom");
+        subscriber.assertFailedWith(RuntimeException.class, "boom");
     }
 
     @Test

@@ -23,7 +23,7 @@ public class UniOnItemTransformToUniWithEmitterTest {
         Uni.createFrom().item(1).onItem().<Integer> transformToUni(
                 (v, e) -> e.complete(2))
                 .subscribe().withSubscriber(test);
-        test.assertCompletedSuccessfully().assertItem(2).assertNoFailure();
+        test.assertCompleted().assertItem(2);
     }
 
     @Test
@@ -33,7 +33,7 @@ public class UniOnItemTransformToUniWithEmitterTest {
         Uni.createFrom().item(1).onItem().<Integer> produceUni(
                 (v, e) -> e.complete(2))
                 .subscribe().withSubscriber(test);
-        test.assertCompletedSuccessfully().assertItem(2).assertNoFailure();
+        test.assertCompleted().assertItem(2);
     }
 
     @Test
@@ -44,7 +44,7 @@ public class UniOnItemTransformToUniWithEmitterTest {
             called.set(true);
             e.complete(2);
         }).subscribe().withSubscriber(test);
-        test.assertNotCompleted();
+        test.assertNotTerminated();
         assertThat(called).isFalse();
     }
 
@@ -57,8 +57,8 @@ public class UniOnItemTransformToUniWithEmitterTest {
                 .transformToUni((v, e) -> new Thread(() -> e.complete(count.incrementAndGet())).start());
         uni.subscribe().withSubscriber(test1);
         uni.subscribe().withSubscriber(test2);
-        test1.await().assertCompletedSuccessfully().assertNoFailure();
-        test2.await().assertCompletedSuccessfully().assertNoFailure();
+        test1.await().assertCompleted();
+        test2.await().assertCompleted();
         assertThat(test1.getItem()).isBetween(3, 4);
         assertThat(test2.getItem()).isBetween(3, 4);
     }
@@ -69,7 +69,7 @@ public class UniOnItemTransformToUniWithEmitterTest {
         Uni<Integer> uni = Uni.createFrom().item(1).onItem()
                 .transformToUni((v, e) -> new Thread(() -> e.fail(new IOException("boom"))).start());
         uni.subscribe().withSubscriber(test);
-        test.await().assertCompletedWithFailure().assertFailure(IOException.class, "boom");
+        test.await().assertFailed().assertFailedWith(IOException.class, "boom");
     }
 
     @Test
@@ -80,7 +80,7 @@ public class UniOnItemTransformToUniWithEmitterTest {
             called.set(true);
             e.complete(2);
         }).subscribe().withSubscriber(test);
-        test.await().assertCompletedWithFailure().assertFailure(Exception.class, "boom");
+        test.await().assertFailed().assertFailedWith(Exception.class, "boom");
         assertThat(called).isFalse();
     }
 
@@ -92,7 +92,7 @@ public class UniOnItemTransformToUniWithEmitterTest {
             called.set(true);
             throw new IllegalStateException("boom");
         }).subscribe().withSubscriber(test);
-        test.await().assertCompletedWithFailure().assertFailure(IllegalStateException.class, "boom");
+        test.await().assertFailed().assertFailedWith(IllegalStateException.class, "boom");
         assertThat(called).isTrue();
     }
 
@@ -105,7 +105,7 @@ public class UniOnItemTransformToUniWithEmitterTest {
             e.complete(2);
             throw new IllegalStateException("boom");
         }).subscribe().withSubscriber(test);
-        test.await().assertCompletedSuccessfully().assertItem(2).assertNoFailure();
+        test.await().assertCompleted().assertItem(2);
         assertThat(called).isTrue();
     }
 
@@ -123,6 +123,6 @@ public class UniOnItemTransformToUniWithEmitterTest {
                 .transformToUni((v, e) -> future.whenComplete((x, f) -> e.complete(x)));
         uni.subscribe().withSubscriber(test);
         test.cancel();
-        test.assertNotCompleted();
+        test.assertNotTerminated();
     }
 }

@@ -66,8 +66,8 @@ public class MultiOnEventTest {
 
         subscriber
                 .request(20)
-                .assertCompletedSuccessfully()
-                .assertReceived(1);
+                .assertCompleted()
+                .assertItems(1);
 
         assertThat(subscription.get()).isNotNull();
         assertThat(item.get()).isEqualTo(1);
@@ -108,8 +108,8 @@ public class MultiOnEventTest {
 
         subscriber
                 .request(20)
-                .assertCompletedSuccessfully()
-                .assertReceived(1);
+                .assertCompleted()
+                .assertItems(1);
 
         assertThat(subscription.get()).isNotNull();
         assertThat(item.get()).isEqualTo(1);
@@ -147,8 +147,8 @@ public class MultiOnEventTest {
 
         subscriber
                 .request(20)
-                .assertCompletedSuccessfully()
-                .assertReceived(1);
+                .assertCompleted()
+                .assertItems(1);
 
         assertThat(subscription.get()).isNotNull();
         assertThat(item.get()).isEqualTo(1);
@@ -186,8 +186,8 @@ public class MultiOnEventTest {
 
         subscriber
                 .request(20)
-                .assertCompletedSuccessfully()
-                .assertReceived(1);
+                .assertCompleted()
+                .assertItems(1);
 
         assertThat(subscription.get()).isNotNull();
         assertThat(item.get()).isEqualTo(1);
@@ -220,7 +220,7 @@ public class MultiOnEventTest {
                 .onRequest().invoke(requests::set)
                 .onCancellation().invoke(() -> cancellation.set(true))
                 .subscribe().withSubscriber(AssertSubscriber.create())
-                .assertHasFailedWith(IOException.class, "boom");
+                .assertFailedWith(IOException.class, "boom");
 
         assertThat(subscription.get()).isNotNull();
         assertThat(item.get()).isNull();
@@ -253,7 +253,7 @@ public class MultiOnEventTest {
                 .on().request(requests::set)
                 .on().cancellation(() -> cancellation.set(true))
                 .subscribe().withSubscriber(AssertSubscriber.create())
-                .assertHasFailedWith(IOException.class, "boom");
+                .assertFailedWith(IOException.class, "boom");
 
         assertThat(subscription.get()).isNotNull();
         assertThat(item.get()).isNull();
@@ -284,7 +284,7 @@ public class MultiOnEventTest {
                 .onRequest().invoke(requests::set)
                 .on().cancellation(() -> cancellation.set(true))
                 .subscribe().withSubscriber(AssertSubscriber.create())
-                .assertHasFailedWith(IOException.class, "boom");
+                .assertFailedWith(IOException.class, "boom");
 
         assertThat(subscription.get()).isNotNull();
         assertThat(item.get()).isNull();
@@ -314,7 +314,7 @@ public class MultiOnEventTest {
                 .onRequest().invoke(requests::set)
                 .onCancellation().invoke(() -> cancellation.set(true))
                 .subscribe().withSubscriber(AssertSubscriber.create())
-                .assertHasFailedWith(IOException.class, "boom");
+                .assertFailedWith(IOException.class, "boom");
 
         assertThat(subscription.get()).isNotNull();
         assertThat(item.get()).isNull();
@@ -348,8 +348,8 @@ public class MultiOnEventTest {
                 .onRequest().invoke(requests::set)
                 .onCancellation().invoke(() -> cancellation.set(true))
                 .subscribe().withSubscriber(AssertSubscriber.create())
-                .assertHasFailedWith(CompositeException.class, "bigboom")
-                .assertHasFailedWith(CompositeException.class, "smallboom");
+                .assertFailedWith(CompositeException.class, "bigboom")
+                .assertFailedWith(CompositeException.class, "smallboom");
 
         assertThat(subscription.get()).isNotNull();
         assertThat(item.get()).isNull();
@@ -381,7 +381,7 @@ public class MultiOnEventTest {
                 .onRequest().invoke(requests::set)
                 .onCancellation().invoke(() -> cancellation.set(true))
                 .subscribe().withSubscriber(AssertSubscriber.create())
-                .assertCompletedSuccessfully()
+                .assertCompleted()
                 .assertHasNotReceivedAnyItem();
 
         assertThat(subscription.get()).isNotNull();
@@ -443,7 +443,7 @@ public class MultiOnEventTest {
                 })
                 .subscribe().withSubscriber(subscriber)
                 .assertTerminated()
-                .assertHasFailedWith(IllegalArgumentException.class, "boom");
+                .assertFailedWith(IllegalArgumentException.class, "boom");
     }
 
     @Test
@@ -456,8 +456,8 @@ public class MultiOnEventTest {
                 })
                 .subscribe().withSubscriber(subscriber)
                 .assertTerminated()
-                .assertHasFailedWith(CompositeException.class, "boom")
-                .assertHasFailedWith(CompositeException.class, "source");
+                .assertFailedWith(CompositeException.class, "boom")
+                .assertFailedWith(CompositeException.class, "source");
     }
 
     @Test
@@ -470,11 +470,11 @@ public class MultiOnEventTest {
                 })
                 .subscribe().withSubscriber(subscriber)
                 .assertNotTerminated()
-                .assertReceived(1)
+                .assertItems(1)
                 .request(1)
                 .assertTerminated()
-                .assertHasFailedWith(IllegalArgumentException.class, "boom")
-                .assertReceived(1, 2);
+                .assertFailedWith(IllegalArgumentException.class, "boom")
+                .assertItems(1, 2);
     }
 
     @Test
@@ -486,8 +486,8 @@ public class MultiOnEventTest {
                     throw new IllegalArgumentException("boom2");
                 }).subscribe().withSubscriber(AssertSubscriber.create(1))
                 .assertTerminated()
-                .assertHasFailedWith(CompositeException.class, "boom1")
-                .assertHasFailedWith(CompositeException.class, "boom2");
+                .assertFailedWith(CompositeException.class, "boom1")
+                .assertFailedWith(CompositeException.class, "boom2");
     }
 
     @Test
@@ -498,7 +498,7 @@ public class MultiOnEventTest {
                     called.incrementAndGet();
                     throw new IllegalArgumentException("boom");
                 }).subscribe().withSubscriber(AssertSubscriber.create(1))
-                .assertHasFailedWith(IllegalArgumentException.class, "boom");
+                .assertFailedWith(IllegalArgumentException.class, "boom");
 
         assertThat(called).hasValue(1);
     }
@@ -511,8 +511,8 @@ public class MultiOnEventTest {
                     called.incrementAndGet();
                     throw new IllegalArgumentException("boom");
                 }).subscribe().withSubscriber(AssertSubscriber.create(1))
-                .assertHasFailedWith(CompositeException.class, "boom")
-                .assertHasFailedWith(CompositeException.class, "IO");
+                .assertFailedWith(CompositeException.class, "boom")
+                .assertFailedWith(CompositeException.class, "IO");
 
         assertThat(called).hasValue(1);
     }
@@ -525,7 +525,7 @@ public class MultiOnEventTest {
                     called.incrementAndGet();
                     throw new IllegalArgumentException("boom");
                 }).subscribe().withSubscriber(AssertSubscriber.create(1))
-                .assertHasFailedWith(IllegalArgumentException.class, "boom");
+                .assertFailedWith(IllegalArgumentException.class, "boom");
 
         assertThat(called).hasValue(1);
     }
@@ -543,7 +543,7 @@ public class MultiOnEventTest {
         processor.onNext(1);
         assertThat(invocations).hasValue(0);
         processor.onComplete();
-        subscriber.assertCompletedSuccessfully().assertReceived(1);
+        subscriber.assertCompleted().assertItems(1);
         assertThat(invocations).hasValue(1);
         subscriber.cancel();
         assertThat(invocations).hasValue(1);
@@ -563,7 +563,7 @@ public class MultiOnEventTest {
         processor.onNext(1);
         assertThat(invocations).hasValue(0);
         processor.onError(new Exception("boom"));
-        subscriber.assertHasFailedWith(Exception.class, "boom").assertReceived(1);
+        subscriber.assertFailedWith(Exception.class, "boom").assertItems(1);
         assertThat(invocations).hasValue(1);
         subscriber.cancel();
         assertThat(invocations).hasValue(1);
@@ -604,7 +604,7 @@ public class MultiOnEventTest {
         subscriber.cancel();
         assertThat(invocations).hasValue(1);
         processor.onError(new Exception("boom"));
-        subscriber.assertNotTerminated().assertReceived(1);
+        subscriber.assertNotTerminated().assertItems(1);
         assertThat(invocations).hasValue(1);
         subscriber.cancel();
         assertThat(invocations).hasValue(1);
@@ -619,8 +619,8 @@ public class MultiOnEventTest {
                 }).invoke(t -> called.set(true))
                 .subscribe().withSubscriber(AssertSubscriber.create(1));
 
-        subscriber.assertHasFailedWith(CompositeException.class, "boom");
-        CompositeException failure = (CompositeException) subscriber.failures().get(0);
+        subscriber.assertFailedWith(CompositeException.class, "boom");
+        CompositeException failure = (CompositeException) subscriber.getFailure();
         assertThat(failure.getCauses()).hasSize(2);
         assertThat(called).isFalse();
     }

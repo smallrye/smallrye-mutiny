@@ -29,14 +29,14 @@ public class MultiCreateFromOptionalTest {
     public void testWithAValue() {
         AssertSubscriber<String> subscriber = Multi.createFrom().optional(Optional.of("hello")).subscribe()
                 .withSubscriber(AssertSubscriber.create(1));
-        subscriber.assertCompletedSuccessfully().assertReceived("hello");
+        subscriber.assertCompleted().assertItems("hello");
     }
 
     @Test
     public void testWithEmpty() {
         AssertSubscriber<String> subscriber = Multi.createFrom().<String> optional(Optional.empty()).subscribe()
                 .withSubscriber(AssertSubscriber.create(1));
-        subscriber.assertCompletedSuccessfully().assertHasNotReceivedAnyItem();
+        subscriber.assertCompleted().assertHasNotReceivedAnyItem();
     }
 
     @Test
@@ -48,9 +48,9 @@ public class MultiCreateFromOptionalTest {
         AssertSubscriber<String> subscriber1 = multi.subscribe().withSubscriber(AssertSubscriber.create(1));
         AssertSubscriber<String> subscriber2 = multi.subscribe().withSubscriber(AssertSubscriber.create());
 
-        subscriber1.assertCompletedSuccessfully().assertReceived("hello-1");
+        subscriber1.assertCompleted().assertItems("hello-1");
         subscriber2.assertHasNotReceivedAnyItem().assertNotTerminated().request(20)
-                .assertCompletedSuccessfully().assertReceived("hello-2");
+                .assertCompleted().assertItems("hello-2");
     }
 
     @Test
@@ -59,8 +59,8 @@ public class MultiCreateFromOptionalTest {
         AssertSubscriber<String> subscriber1 = multi.subscribe().withSubscriber(AssertSubscriber.create(1));
         AssertSubscriber<String> subscriber2 = multi.subscribe().withSubscriber(AssertSubscriber.create());
 
-        subscriber1.assertCompletedSuccessfully().assertHasNotReceivedAnyItem();
-        subscriber2.assertHasNotReceivedAnyItem().assertCompletedSuccessfully();
+        subscriber1.assertCompleted().assertHasNotReceivedAnyItem();
+        subscriber2.assertHasNotReceivedAnyItem().assertCompleted();
     }
 
     @Test
@@ -69,7 +69,7 @@ public class MultiCreateFromOptionalTest {
             throw new IllegalStateException("boom");
         });
         AssertSubscriber<String> subscriber1 = multi.subscribe().withSubscriber(AssertSubscriber.create());
-        subscriber1.assertTerminated().assertHasFailedWith(IllegalStateException.class, "boom");
+        subscriber1.assertTerminated().assertFailedWith(IllegalStateException.class, "boom");
     }
 
     @SuppressWarnings("OptionalAssignedToNull")
@@ -79,7 +79,6 @@ public class MultiCreateFromOptionalTest {
         AssertSubscriber<String> subscriber1 = multi.subscribe().withSubscriber(AssertSubscriber.create());
         subscriber1.assertTerminated();
 
-        assertThat(subscriber1.failures()).hasSize(1)
-                .allSatisfy(t -> assertThat(t).isInstanceOf(NullPointerException.class));
+        assertThat(subscriber1.getFailure()).isNotNull().isInstanceOf(NullPointerException.class);
     }
 }

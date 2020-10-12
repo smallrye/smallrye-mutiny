@@ -25,7 +25,7 @@ public class KnownItemUniTest {
                 .subscribe().withSubscriber(UniAssertSubscriber.create());
 
         hello.cancel();
-        hello.assertCompletedSuccessfully().assertItem("hello");
+        hello.assertCompleted().assertItem("hello");
     }
 
     @Test
@@ -33,7 +33,7 @@ public class KnownItemUniTest {
         UniAssertSubscriber<String> subscriber = new UniAssertSubscriber<>(true);
         Uni.createFrom().item("hello")
                 .subscribe().withSubscriber(subscriber);
-        subscriber.assertNotCompleted();
+        subscriber.assertNotTerminated();
     }
 
 }

@@ -37,8 +37,8 @@ public class MultiOnFailureInvokeTest {
         AssertSubscriber<Integer> subscriber = numbers.onFailure().invoke(failure::set)
                 .subscribe().withSubscriber(AssertSubscriber.create(10));
 
-        subscriber.assertCompletedSuccessfully()
-                .assertReceived(1, 2);
+        subscriber.assertCompleted()
+                .assertItems(1, 2);
         assertThat(twoGotCalled).hasValue(0);
         assertThat(failure).hasValue(null);
     }
@@ -51,8 +51,8 @@ public class MultiOnFailureInvokeTest {
         AssertSubscriber<Integer> subscriber = numbers.onFailure().invoke(() -> called.set(true))
                 .subscribe().withSubscriber(AssertSubscriber.create(10));
 
-        subscriber.assertCompletedSuccessfully()
-                .assertReceived(1, 2);
+        subscriber.assertCompleted()
+                .assertItems(1, 2);
         assertThat(twoGotCalled).hasValue(0);
         assertThat(called).isFalse();
     }
@@ -64,8 +64,8 @@ public class MultiOnFailureInvokeTest {
         AssertSubscriber<Integer> subscriber = failed.onFailure().invoke(failure::set)
                 .subscribe().withSubscriber(AssertSubscriber.create(10));
 
-        subscriber.assertHasFailedWith(IOException.class, "boom")
-                .assertReceived(1, 2);
+        subscriber.assertFailedWith(IOException.class, "boom")
+                .assertItems(1, 2);
         assertThat(failure).hasValue(BOOM);
     }
 
@@ -76,8 +76,8 @@ public class MultiOnFailureInvokeTest {
         AssertSubscriber<Integer> subscriber = failed.onFailure().invoke(() -> called.set(true))
                 .subscribe().withSubscriber(AssertSubscriber.create(10));
 
-        subscriber.assertHasFailedWith(IOException.class, "boom")
-                .assertReceived(1, 2);
+        subscriber.assertFailedWith(IOException.class, "boom")
+                .assertItems(1, 2);
         assertThat(called).isTrue();
     }
 
@@ -91,9 +91,9 @@ public class MultiOnFailureInvokeTest {
         }).subscribe().withSubscriber(AssertSubscriber.create(10));
 
         subscriber
-                .assertHasFailedWith(CompositeException.class, "boom")
-                .assertHasFailedWith(CompositeException.class, "kaboom")
-                .assertReceived(1, 2);
+                .assertFailedWith(CompositeException.class, "boom")
+                .assertFailedWith(CompositeException.class, "kaboom")
+                .assertItems(1, 2);
         assertThat(failure).hasValue(BOOM);
     }
 
@@ -104,9 +104,9 @@ public class MultiOnFailureInvokeTest {
         }).subscribe().withSubscriber(AssertSubscriber.create(10));
 
         subscriber
-                .assertHasFailedWith(CompositeException.class, "boom")
-                .assertHasFailedWith(CompositeException.class, "kaboom")
-                .assertReceived(1, 2);
+                .assertFailedWith(CompositeException.class, "boom")
+                .assertFailedWith(CompositeException.class, "kaboom")
+                .assertItems(1, 2);
     }
 
     @RepeatedTest(10)

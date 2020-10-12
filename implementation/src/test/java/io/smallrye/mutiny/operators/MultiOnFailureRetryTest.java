@@ -54,8 +54,8 @@ public class MultiOnFailureRetryTest {
                 .subscribe().withSubscriber(subscriber);
 
         subscriber
-                .assertReceived(1, 2, 3)
-                .assertCompletedSuccessfully();
+                .assertItems(1, 2, 3)
+                .assertCompleted();
     }
 
     @Test
@@ -68,8 +68,8 @@ public class MultiOnFailureRetryTest {
 
         subscriber
                 .assertSubscribed()
-                .assertHasFailedWith(IOException.class, "boom")
-                .assertReceived(1, 2, 3, 1, 2, 3);
+                .assertFailedWith(IOException.class, "boom")
+                .assertItems(1, 2, 3, 1, 2, 3);
 
         assertThat(numberOfSubscriptions).hasValue(2);
     }
@@ -86,11 +86,10 @@ public class MultiOnFailureRetryTest {
                 .assertSubscribed()
                 .assertHasNotReceivedAnyItem()
                 .request(4)
-                .assertReceived(1, 2, 3, 1)
-                .assertHasNotFailed()
+                .assertItems(1, 2, 3, 1)
                 .request(2)
-                .assertHasFailedWith(IOException.class, "boom")
-                .assertReceived(1, 2, 3, 1, 2, 3);
+                .assertFailedWith(IOException.class, "boom")
+                .assertItems(1, 2, 3, 1, 2, 3);
 
         assertThat(numberOfSubscriptions).hasValue(2);
     }
@@ -102,7 +101,7 @@ public class MultiOnFailureRetryTest {
         failing.onFailure().retry().indefinitely()
                 .subscribe().withSubscriber(subscriber);
 
-        await().until(() -> subscriber.items().size() > 10);
+        await().until(() -> subscriber.getItems().size() > 10);
         subscriber.cancel();
 
         subscriber.assertNotTerminated();
@@ -120,8 +119,8 @@ public class MultiOnFailureRetryTest {
                 })
                 .onFailure().retry().atMost(2)
                 .subscribe().withSubscriber(AssertSubscriber.create(10))
-                .assertCompletedSuccessfully()
-                .assertReceived(1, 2, 3, 4);
+                .assertCompleted()
+                .assertItems(1, 2, 3, 4);
     }
 
     @Test
@@ -143,8 +142,8 @@ public class MultiOnFailureRetryTest {
                 .withBackOff(Duration.ofMillis(10)).atMost(3)
                 .subscribe().withSubscriber(AssertSubscriber.create(10))
                 .await()
-                .assertHasFailedWith(RuntimeException.class, "boom")
-                .assertReceived(1, 2, 3);
+                .assertFailedWith(RuntimeException.class, "boom")
+                .assertItems(1, 2, 3);
     }
 
     @Test

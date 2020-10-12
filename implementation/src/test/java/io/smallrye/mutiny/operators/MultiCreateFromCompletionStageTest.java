@@ -33,7 +33,7 @@ public class MultiCreateFromCompletionStageTest {
         AssertSubscriber<String> subscriber = Multi.createFrom()
                 .completionStage(CompletableFuture.completedFuture("hello")).subscribe()
                 .withSubscriber(AssertSubscriber.create(1));
-        subscriber.assertCompletedSuccessfully().assertReceived("hello");
+        subscriber.assertCompleted().assertItems("hello");
     }
 
     @Test
@@ -41,7 +41,7 @@ public class MultiCreateFromCompletionStageTest {
         AssertSubscriber<String> subscriber = Multi.createFrom()
                 .completionStage(CompletableFuture.supplyAsync(() -> "hello")).subscribe()
                 .withSubscriber(AssertSubscriber.create(1));
-        subscriber.await().assertCompletedSuccessfully().assertReceived("hello");
+        subscriber.await().assertCompleted().assertItems("hello");
     }
 
     @Test
@@ -49,7 +49,7 @@ public class MultiCreateFromCompletionStageTest {
         AssertSubscriber<String> subscriber = Multi.createFrom()
                 .completionStage(CompletableFuture.<String> completedFuture(null)).subscribe()
                 .withSubscriber(AssertSubscriber.create(1));
-        subscriber.assertCompletedSuccessfully().assertHasNotReceivedAnyItem();
+        subscriber.assertCompleted().assertHasNotReceivedAnyItem();
     }
 
     @Test
@@ -58,7 +58,7 @@ public class MultiCreateFromCompletionStageTest {
         AssertSubscriber<Void> subscriber = Multi.createFrom()
                 .completionStage(CompletableFuture.runAsync(() -> called.set(true))).subscribe()
                 .withSubscriber(AssertSubscriber.create(1));
-        subscriber.await().assertCompletedSuccessfully().assertHasNotReceivedAnyItem();
+        subscriber.await().assertCompleted().assertHasNotReceivedAnyItem();
         assertThat(called).isTrue();
     }
 
@@ -71,9 +71,9 @@ public class MultiCreateFromCompletionStageTest {
         AssertSubscriber<String> subscriber1 = multi.subscribe().withSubscriber(AssertSubscriber.create(1));
         AssertSubscriber<String> subscriber2 = multi.subscribe().withSubscriber(AssertSubscriber.create());
 
-        subscriber1.assertCompletedSuccessfully().assertReceived("hello-1");
+        subscriber1.assertCompleted().assertItems("hello-1");
         subscriber2.assertHasNotReceivedAnyItem().assertNotTerminated().request(20)
-                .assertCompletedSuccessfully().assertReceived("hello-2");
+                .assertCompleted().assertItems("hello-2");
     }
 
     @Test
@@ -82,8 +82,8 @@ public class MultiCreateFromCompletionStageTest {
         AssertSubscriber<String> subscriber1 = multi.subscribe().withSubscriber(AssertSubscriber.create(1));
         AssertSubscriber<String> subscriber2 = multi.subscribe().withSubscriber(AssertSubscriber.create());
 
-        subscriber1.assertCompletedSuccessfully().assertHasNotReceivedAnyItem();
-        subscriber2.assertHasNotReceivedAnyItem().assertCompletedSuccessfully();
+        subscriber1.assertCompleted().assertHasNotReceivedAnyItem();
+        subscriber2.assertHasNotReceivedAnyItem().assertCompleted();
     }
 
     @Test
@@ -92,7 +92,7 @@ public class MultiCreateFromCompletionStageTest {
             throw new IllegalStateException("boom");
         });
         AssertSubscriber<String> subscriber1 = multi.subscribe().withSubscriber(AssertSubscriber.create());
-        subscriber1.assertTerminated().assertHasFailedWith(IllegalStateException.class, "boom");
+        subscriber1.assertTerminated().assertFailedWith(IllegalStateException.class, "boom");
     }
 
     @Test
@@ -101,8 +101,7 @@ public class MultiCreateFromCompletionStageTest {
         AssertSubscriber<String> subscriber1 = multi.subscribe().withSubscriber(AssertSubscriber.create());
         subscriber1.assertTerminated();
 
-        assertThat(subscriber1.failures()).hasSize(1)
-                .allSatisfy(t -> assertThat(t).isInstanceOf(NullPointerException.class));
+        assertThat(subscriber1.getFailure()).isNotNull().isInstanceOf(NullPointerException.class);
     }
 
     @SuppressWarnings("ConstantConditions")
@@ -132,7 +131,7 @@ public class MultiCreateFromCompletionStageTest {
         CompletionStage<String> cs = new CompletableFuture<>();
         Multi.createFrom().completionStage(cs).subscribe().withSubscriber(subscriber);
         cs.toCompletableFuture().completeExceptionally(new IOException("boom"));
-        subscriber.assertHasFailedWith(IOException.class, "boom");
+        subscriber.assertFailedWith(IOException.class, "boom");
     }
 
     @Test
@@ -141,7 +140,7 @@ public class MultiCreateFromCompletionStageTest {
         CompletionStage<String> cs = new CompletableFuture<>();
         Multi.createFrom().completionStage(cs).subscribe().withSubscriber(subscriber);
         cs.toCompletableFuture().completeExceptionally(new IllegalArgumentException("boom"));
-        subscriber.assertHasFailedWith(IllegalArgumentException.class, "boom");
+        subscriber.assertFailedWith(IllegalArgumentException.class, "boom");
     }
 
     @Test
@@ -154,6 +153,6 @@ public class MultiCreateFromCompletionStageTest {
                     throw new IllegalStateException("boom");
                 })).subscribe().withSubscriber(subscriber);
         cs.toCompletableFuture().complete("bonjour");
-        subscriber.assertHasFailedWith(IllegalStateException.class, "boom");
+        subscriber.assertFailedWith(IllegalStateException.class, "boom");
     }
 }

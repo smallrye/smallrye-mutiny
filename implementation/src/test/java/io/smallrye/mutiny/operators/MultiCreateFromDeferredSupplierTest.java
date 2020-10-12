@@ -23,9 +23,8 @@ public class MultiCreateFromDeferredSupplierTest {
         Multi.createFrom().<Integer> deferred(() -> null).subscribe(subscriber);
 
         subscriber
-                .assertHasNotCompleted()
                 .assertHasNotReceivedAnyItem()
-                .assertHasFailedWith(NullPointerException.class, "");
+                .assertFailedWith(NullPointerException.class, "");
     }
 
     @Test
@@ -37,9 +36,8 @@ public class MultiCreateFromDeferredSupplierTest {
         }).subscribe(subscriber);
 
         subscriber
-                .assertHasNotCompleted()
                 .assertHasNotReceivedAnyItem()
-                .assertHasFailedWith(IllegalStateException.class, "boom");
+                .assertFailedWith(IllegalStateException.class, "boom");
     }
 
     @Test
@@ -48,9 +46,8 @@ public class MultiCreateFromDeferredSupplierTest {
 
         Multi.createFrom().deferred(() -> Multi.createFrom().item(1)).subscribe(subscriber);
 
-        subscriber.assertCompletedSuccessfully()
-                .assertReceived(1)
-                .assertHasNotFailed();
+        subscriber.assertCompleted()
+                .assertItems(1);
     }
 
     @Test
@@ -63,8 +60,8 @@ public class MultiCreateFromDeferredSupplierTest {
         AssertSubscriber<Integer> s2 = multi.subscribe().withSubscriber(AssertSubscriber.create(1));
         AssertSubscriber<Integer> s3 = multi.subscribe().withSubscriber(AssertSubscriber.create(1));
 
-        s1.assertReceived(1).assertCompletedSuccessfully();
-        s2.assertReceived(2).assertCompletedSuccessfully();
-        s3.assertReceived(3).assertCompletedSuccessfully();
+        s1.assertItems(1).assertCompleted();
+        s2.assertItems(2).assertCompleted();
+        s3.assertItems(3).assertCompleted();
     }
 }

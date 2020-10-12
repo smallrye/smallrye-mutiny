@@ -23,7 +23,7 @@ public class StrictMultiSubscriberTest {
         StrictMultiSubscriber<Integer> strict = new StrictMultiSubscriber<>(test);
         Multi.createFrom().range(0, 5)
                 .subscribe().withSubscriber(strict);
-        test.assertReceived(0, 1, 2, 3, 4).assertCompletedSuccessfully();
+        test.assertItems(0, 1, 2, 3, 4).assertCompleted();
     }
 
     @Test
@@ -36,13 +36,13 @@ public class StrictMultiSubscriberTest {
         test.assertNotTerminated().assertHasNotReceivedAnyItem();
 
         test.request(2);
-        test.assertReceived(0, 1).assertNotTerminated();
+        test.assertItems(0, 1).assertNotTerminated();
 
         test.request(3);
-        test.assertReceived(0, 1, 2, 3, 4).assertCompletedSuccessfully();
+        test.assertItems(0, 1, 2, 3, 4).assertCompleted();
 
         test.request(2);
-        test.assertReceived(0, 1, 2, 3, 4).assertCompletedSuccessfully();
+        test.assertItems(0, 1, 2, 3, 4).assertCompleted();
     }
 
     @Test
@@ -51,8 +51,8 @@ public class StrictMultiSubscriberTest {
         StrictMultiSubscriber<Integer> strict = new StrictMultiSubscriber<>(test);
         Multi.createFrom().range(0, 5).onCompletion().failWith(new IOException("boom"))
                 .subscribe().withSubscriber(strict);
-        test.assertReceived(0, 1, 2, 3, 4)
-                .assertHasFailedWith(IOException.class, "boom");
+        test.assertItems(0, 1, 2, 3, 4)
+                .assertFailedWith(IOException.class, "boom");
     }
 
     @Test

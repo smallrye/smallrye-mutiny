@@ -40,7 +40,7 @@ public class UniZipTest {
         UniAssertSubscriber<Tuple2<Integer, Integer>> subscriber = Uni.combine().all()
                 .unis(uni, Uni.createFrom().<Integer> failure(new IOException("boom"))).asTuple()
                 .subscribe().withSubscriber(UniAssertSubscriber.create());
-        subscriber.assertFailure(IOException.class, "boom");
+        subscriber.assertFailedWith(IOException.class, "boom");
     }
 
     @Test
@@ -61,9 +61,9 @@ public class UniZipTest {
                 .collectFailures()
                 .asTuple()
                 .subscribe().withSubscriber(UniAssertSubscriber.create());
-        subscriber.assertCompletedWithFailure()
-                .assertFailure(CompositeException.class, "boom")
-                .assertFailure(CompositeException.class, "boom 2");
+        subscriber.assertFailed()
+                .assertFailedWith(CompositeException.class, "boom")
+                .assertFailedWith(CompositeException.class, "boom 2");
     }
 
     @Test
@@ -83,7 +83,7 @@ public class UniZipTest {
                 Uni.createFrom().item("hello")).asTuple().onItem().ignore().andContinueWithNull();
 
         uni.subscribe().withSubscriber(UniAssertSubscriber.create())
-                .assertCompletedSuccessfully()
+                .assertCompleted()
                 .assertItem(null);
     }
 
@@ -115,7 +115,7 @@ public class UniZipTest {
                 .unis(uni1, uni2, uni3, uni4, uni5, uni6).asTuple()
                 .subscribe().withSubscriber(UniAssertSubscriber.create());
 
-        subscriber.assertCompletedSuccessfully();
+        subscriber.assertCompleted();
 
         assertThat(subscriber.getItem().asList()).containsExactly(1, 2, 3, 4, 5, 6);
     }
@@ -149,7 +149,7 @@ public class UniZipTest {
                 .unis(uni1, uni2, uni3, uni4, uni5, uni6, uni7).asTuple()
                 .subscribe().withSubscriber(UniAssertSubscriber.create());
 
-        subscriber.assertCompletedSuccessfully();
+        subscriber.assertCompleted();
 
         assertThat(subscriber.getItem().asList()).containsExactly(1, 2, 3, 4, 5, 6, 7);
     }
@@ -170,7 +170,7 @@ public class UniZipTest {
                 .unis(uni1, uni2, uni3, uni4, uni5, uni6, uni7, uni8).asTuple()
                 .subscribe().withSubscriber(UniAssertSubscriber.create());
 
-        subscriber.assertCompletedSuccessfully();
+        subscriber.assertCompleted();
 
         assertThat(subscriber.getItem().asList()).containsExactly(1, 2, 3, 4, 5, 6, 7, 8);
     }
@@ -192,7 +192,7 @@ public class UniZipTest {
                 .unis(uni1, uni2, uni3, uni4, uni5, uni6, uni7, uni8, uni9).asTuple()
                 .subscribe().withSubscriber(UniAssertSubscriber.create());
 
-        subscriber.assertCompletedSuccessfully();
+        subscriber.assertCompleted();
 
         assertThat(subscriber.getItem().asList()).containsExactly(1, 2, 3, 4, 5, 6, 7, 8, 9);
     }
@@ -408,8 +408,7 @@ public class UniZipTest {
         UniAssertSubscriber<Integer> subscriber = all.subscribe().withSubscriber(new UniAssertSubscriber<>());
 
         subscriber.assertSubscribed()
-                .assertNotCompleted()
-                .assertNoFailure();
+                .assertNotTerminated();
 
         assertThat(subscriptions).allSatisfy(bool -> assertThat(bool).isTrue());
         assertThat(cancellations).allSatisfy(bool -> assertThat(bool).isFalse());

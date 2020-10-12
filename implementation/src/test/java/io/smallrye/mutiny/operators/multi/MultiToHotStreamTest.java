@@ -35,12 +35,12 @@ public class MultiToHotStreamTest {
         processor.onComplete();
 
         subscriber1
-                .assertReceived("one", "two", "three", "four")
-                .assertCompletedSuccessfully();
+                .assertItems("one", "two", "three", "four")
+                .assertCompleted();
 
         subscriber2
-                .assertReceived("four")
-                .assertCompletedSuccessfully();
+                .assertItems("four")
+                .assertCompleted();
     }
 
     @Test
@@ -64,16 +64,16 @@ public class MultiToHotStreamTest {
                 .withSubscriber(AssertSubscriber.create(10));
 
         subscriber1
-                .assertReceived("one", "two", "three")
-                .assertCompletedSuccessfully();
+                .assertItems("one", "two", "three")
+                .assertCompleted();
 
         subscriber2
                 .assertHasNotReceivedAnyItem()
-                .assertCompletedSuccessfully();
+                .assertCompleted();
 
         subscriber3
                 .assertHasNotReceivedAnyItem()
-                .assertCompletedSuccessfully();
+                .assertCompleted();
     }
 
     @Test
@@ -97,16 +97,16 @@ public class MultiToHotStreamTest {
                 .withSubscriber(AssertSubscriber.create(10));
 
         subscriber1
-                .assertReceived("one", "two", "three")
-                .assertHasFailedWith(Exception.class, "boom");
+                .assertItems("one", "two", "three")
+                .assertFailedWith(Exception.class, "boom");
 
         subscriber2
                 .assertHasNotReceivedAnyItem()
-                .assertHasFailedWith(Exception.class, "boom");
+                .assertFailedWith(Exception.class, "boom");
 
         subscriber3
                 .assertHasNotReceivedAnyItem()
-                .assertHasFailedWith(Exception.class, "boom");
+                .assertFailedWith(Exception.class, "boom");
     }
 
     @Test
@@ -122,7 +122,7 @@ public class MultiToHotStreamTest {
         processor.onComplete();
         processor.onError(new Exception("boom"));
 
-        subscriber.assertCompletedSuccessfully().assertReceived(1, 2);
+        subscriber.assertCompleted().assertItems(1, 2);
     }
 
     @Test
@@ -135,32 +135,32 @@ public class MultiToHotStreamTest {
 
         processor.onNext("one");
 
-        subscriber1.assertReceived("one");
+        subscriber1.assertItems("one");
 
         AssertSubscriber<String> subscriber2 = multi.subscribe()
                 .withSubscriber(AssertSubscriber.create(10));
 
         processor.onNext("two");
 
-        subscriber1.assertReceived("one", "two");
-        subscriber2.assertReceived("two");
+        subscriber1.assertItems("one", "two");
+        subscriber2.assertItems("two");
 
         subscriber1.cancel();
 
         processor.onNext("three");
 
-        subscriber1.assertNotTerminated().assertReceived("one", "two");
-        subscriber2.assertReceived("two", "three");
+        subscriber1.assertNotTerminated().assertItems("one", "two");
+        subscriber2.assertItems("two", "three");
 
         processor.onComplete();
 
-        subscriber2.assertReceived("two", "three").assertCompletedSuccessfully();
-        subscriber1.assertNotTerminated().assertReceived("one", "two");
+        subscriber2.assertItems("two", "three").assertCompleted();
+        subscriber1.assertNotTerminated().assertItems("one", "two");
 
         processor.onNext("four");
 
-        subscriber2.assertReceived("two", "three").assertCompletedSuccessfully();
-        subscriber1.assertNotTerminated().assertReceived("one", "two");
+        subscriber2.assertItems("two", "three").assertCompleted();
+        subscriber1.assertNotTerminated().assertItems("one", "two");
     }
 
     @Test
@@ -173,7 +173,7 @@ public class MultiToHotStreamTest {
 
         processor.onNext("one");
 
-        subscriber1.assertReceived("one");
+        subscriber1.assertItems("one");
         subscriber1.cancel();
 
         processor.onNext("two");
@@ -183,8 +183,8 @@ public class MultiToHotStreamTest {
         processor.onNext("three");
         processor.onComplete();
 
-        subscriber1.assertReceived("one", "three")
-                .assertCompletedSuccessfully();
+        subscriber1.assertItems("one", "three")
+                .assertCompleted();
 
     }
 
@@ -198,7 +198,7 @@ public class MultiToHotStreamTest {
 
         processor.onNext("one");
 
-        subscriber1.assertReceived("one");
+        subscriber1.assertItems("one");
         subscriber1.cancel();
 
         processor.onNext("two");
@@ -206,8 +206,8 @@ public class MultiToHotStreamTest {
 
         processor.subscribe(subscriber1);
 
-        subscriber1.assertReceived("one")
-                .assertCompletedSuccessfully();
+        subscriber1.assertItems("one")
+                .assertCompleted();
     }
 
     @Test
@@ -220,7 +220,7 @@ public class MultiToHotStreamTest {
 
         processor.onNext("one");
 
-        subscriber1.assertReceived("one");
+        subscriber1.assertItems("one");
         subscriber1.cancel();
 
         processor.onNext("two");
@@ -228,8 +228,8 @@ public class MultiToHotStreamTest {
 
         processor.subscribe(subscriber1);
 
-        subscriber1.assertReceived("one")
-                .assertHasFailedWith(IOException.class, "boom");
+        subscriber1.assertItems("one")
+                .assertFailedWith(IOException.class, "boom");
 
     }
 
@@ -248,10 +248,10 @@ public class MultiToHotStreamTest {
         }
         processor.onComplete();
 
-        s1.assertCompletedSuccessfully()
-                .assertReceived(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
+        s1.assertCompleted()
+                .assertItems(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
 
-        s2.assertHasFailedWith(BackPressureFailure.class, "request");
+        s2.assertFailedWith(BackPressureFailure.class, "request");
     }
 
     @Test
@@ -270,8 +270,8 @@ public class MultiToHotStreamTest {
         processor.onNext(4);
         processor.onComplete();
 
-        subscriber.assertReceived(2, 3, 3, 4, 4, 4)
-                .assertCompletedSuccessfully();
+        subscriber.assertItems(2, 3, 3, 4, 4, 4)
+                .assertCompleted();
 
     }
 
@@ -285,9 +285,9 @@ public class MultiToHotStreamTest {
         AssertSubscriber<Long> subscriber = ticks.subscribe()
                 .withSubscriber(AssertSubscriber.create(Long.MAX_VALUE))
                 .await(Duration.ofSeconds(10))
-                .assertCompletedSuccessfully();
+                .assertCompleted();
 
-        List<Long> items = subscriber.items();
+        List<Long> items = subscriber.getItems();
         assertThat(items).isNotEmpty().doesNotContain(0L, 1L, 2L, 3L, 4L);
     }
 }

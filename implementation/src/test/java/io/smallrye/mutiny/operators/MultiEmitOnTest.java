@@ -38,11 +38,11 @@ public class MultiEmitOnTest {
                 .subscribe().withSubscriber(AssertSubscriber.create());
 
         subscriber.request(2);
-        await().until(() -> subscriber.items().size() == 2);
-        subscriber.assertReceived(1, 2);
+        await().until(() -> subscriber.getItems().size() == 2);
+        subscriber.assertItems(1, 2);
         subscriber.request(20);
-        await().until(() -> subscriber.items().size() == 10);
-        subscriber.assertReceived(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
+        await().until(() -> subscriber.getItems().size() == 10);
+        subscriber.assertItems(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
     }
 
     @Test
@@ -53,7 +53,7 @@ public class MultiEmitOnTest {
 
         subscriber.request(0);
         subscriber.await()
-                .assertHasFailedWith(IllegalArgumentException.class, "request");
+                .assertFailedWith(IllegalArgumentException.class, "request");
     }
 
     @Test
@@ -65,7 +65,7 @@ public class MultiEmitOnTest {
                 .emitOn(executor)
                 .subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE));
 
-        subscriber.assertHasFailedWith(RejectedExecutionException.class, "");
+        subscriber.assertFailedWith(RejectedExecutionException.class, "");
     }
 
     @Test
@@ -85,9 +85,9 @@ public class MultiEmitOnTest {
                 .emitOn(executor)
                 .subscribe().withSubscriber(AssertSubscriber.create(1));
 
-        await().untilAsserted(() -> subscriber.assertHasFailedWith(BackPressureFailure.class, ""));
+        await().untilAsserted(() -> subscriber.assertFailedWith(BackPressureFailure.class, ""));
 
-        subscriber.assertHasFailedWith(BackPressureFailure.class, "");
+        subscriber.assertFailedWith(BackPressureFailure.class, "");
     }
 
 }

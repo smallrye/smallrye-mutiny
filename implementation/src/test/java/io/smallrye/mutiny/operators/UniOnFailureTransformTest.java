@@ -45,8 +45,8 @@ public class UniOnFailureTransformTest {
         UniAssertSubscriber<Integer> subscriber = failure
                 .onFailure().transform(t -> new BoomException())
                 .subscribe().withSubscriber(UniAssertSubscriber.create());
-        subscriber.assertCompletedWithFailure()
-                .assertFailure(BoomException.class, "BoomException");
+        subscriber.assertFailed()
+                .assertFailedWith(BoomException.class, "BoomException");
     }
 
     @Test
@@ -59,10 +59,10 @@ public class UniOnFailureTransformTest {
         uni.subscribe().withSubscriber(s1);
         uni.subscribe().withSubscriber(s2);
 
-        s1.assertCompletedWithFailure()
-                .assertFailure(BoomException.class, "1");
-        s2.assertCompletedWithFailure()
-                .assertFailure(BoomException.class, "2");
+        s1.assertFailed()
+                .assertFailedWith(BoomException.class, "1");
+        s2.assertFailed()
+                .assertFailedWith(BoomException.class, "2");
     }
 
     @Test
@@ -73,7 +73,7 @@ public class UniOnFailureTransformTest {
             throw new RuntimeException("failure");
         }).subscribe().withSubscriber(subscriber);
 
-        subscriber.assertFailure(RuntimeException.class, "failure");
+        subscriber.assertFailedWith(RuntimeException.class, "failure");
     }
 
     @Test
@@ -82,7 +82,7 @@ public class UniOnFailureTransformTest {
 
         failure.onFailure().transform(t -> null).subscribe().withSubscriber(subscriber);
 
-        subscriber.assertFailure(NullPointerException.class, "null");
+        subscriber.assertFailedWith(NullPointerException.class, "null");
     }
 
     @Test
@@ -99,7 +99,7 @@ public class UniOnFailureTransformTest {
                     })
                     .subscribe().withSubscriber(subscriber);
 
-            subscriber.await().assertFailure(BoomException.class, "BoomException");
+            subscriber.await().assertFailedWith(BoomException.class, "BoomException");
             assertThat(threadName).isNotNull().doesNotHaveValue("main");
             assertThat(subscriber.getOnFailureThreadName()).isEqualTo(threadName.get());
         } finally {
@@ -131,7 +131,7 @@ public class UniOnFailureTransformTest {
                     return new IllegalArgumentException("Karamba");
                 })
                 .subscribe().withSubscriber(subscriber);
-        subscriber.assertCompletedWithFailure().assertFailure(IllegalStateException.class, "boom");
+        subscriber.assertFailed().assertFailedWith(IllegalStateException.class, "boom");
         assertThat(called).isFalse();
     }
 
@@ -147,9 +147,9 @@ public class UniOnFailureTransformTest {
                     return new RuntimeException("Karamba");
                 })
                 .subscribe().withSubscriber(subscriber);
-        subscriber.assertCompletedWithFailure()
-                .assertFailure(CompositeException.class, "boomboom")
-                .assertFailure(CompositeException.class, " boom");
+        subscriber.assertFailed()
+                .assertFailedWith(CompositeException.class, "boomboom")
+                .assertFailedWith(CompositeException.class, " boom");
         assertThat(called).isFalse();
     }
 
@@ -166,7 +166,7 @@ public class UniOnFailureTransformTest {
                 .subscribe().withSubscriber(UniAssertSubscriber.create());
 
         assertThat(called).isFalse();
-        subscriber.assertNotCompleted().assertNoFailure().assertSubscribed();
+        subscriber.assertNotTerminated().assertSubscribed();
         subscriber.cancel();
         emitter.get().fail(new IOException("boom"));
         assertThat(called).isFalse();
@@ -185,7 +185,7 @@ public class UniOnFailureTransformTest {
                 .subscribe().withSubscriber(new UniAssertSubscriber<>(true));
 
         assertThat(called).isFalse();
-        subscriber.assertNotCompleted().assertNoFailure().assertSubscribed();
+        subscriber.assertNotTerminated().assertSubscribed();
         subscriber.cancel();
         emitter.get().fail(new IOException("boom"));
         assertThat(called).isFalse();

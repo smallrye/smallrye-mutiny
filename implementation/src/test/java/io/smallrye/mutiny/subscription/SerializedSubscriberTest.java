@@ -230,8 +230,8 @@ public class SerializedSubscriberTest {
         serialized.onNext(1);
 
         subscriber
-                .assertReceived(1)
-                .assertHasFailedWith(TestException.class, "boom-1");
+                .assertItems(1)
+                .assertFailedWith(TestException.class, "boom-1");
 
         assertThat(failures).hasSize(1).allSatisfy(f -> assertThat(f).isInstanceOf(TestException.class)
                 .hasMessageContaining("boom-2"));
@@ -256,8 +256,8 @@ public class SerializedSubscriberTest {
         subscriber.onNext(1);
 
         subscriber
-                .assertReceived(1)
-                .assertCompletedSuccessfully();
+                .assertItems(1)
+                .assertCompleted();
     }
 
     @Test
@@ -296,7 +296,7 @@ public class SerializedSubscriberTest {
         };
         Arrays.asList(runnable, runnable).forEach(r -> new Thread(r).start());
 
-        subscriber.await().assertCompletedSuccessfully();
+        subscriber.await().assertCompleted();
     }
 
     @RepeatedTest(10)
@@ -324,8 +324,8 @@ public class SerializedSubscriberTest {
         Collections.shuffle(runnables);
         runnables.forEach(r -> new Thread(r).start());
 
-        subscriber.await().assertCompletedSuccessfully();
-        assertThat(subscriber.items()).hasSizeBetween(0, 1);
+        subscriber.await().assertCompleted();
+        assertThat(subscriber.getItems()).hasSizeBetween(0, 1);
     }
 
     @RepeatedTest(10)
@@ -353,8 +353,8 @@ public class SerializedSubscriberTest {
         Collections.shuffle(runnables);
         runnables.forEach(r -> new Thread(r).start());
 
-        subscriber.await().assertHasFailedWith(TestException.class, "boom");
-        assertThat(subscriber.items()).hasSizeBetween(0, 1);
+        subscriber.await().assertFailedWith(TestException.class, "boom");
+        assertThat(subscriber.getItems()).hasSizeBetween(0, 1);
     }
 
     @RepeatedTest(10)
@@ -384,9 +384,9 @@ public class SerializedSubscriberTest {
 
         subscriber.await();
         if (subscriber.hasCompleted()) {
-            subscriber.assertCompletedSuccessfully().assertHasNotReceivedAnyItem();
+            subscriber.assertCompleted().assertHasNotReceivedAnyItem();
         } else {
-            subscriber.assertHasFailedWith(TestException.class, "boom");
+            subscriber.assertFailedWith(TestException.class, "boom");
         }
     }
 

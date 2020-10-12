@@ -60,14 +60,14 @@ public class UniOrTest {
     public void testWithNoCandidate() {
         UniAssertSubscriber<Void> subscriber = UniAssertSubscriber.create();
         Uni.combine().any().<Void> of().subscribe().withSubscriber(subscriber);
-        subscriber.assertCompletedSuccessfully().assertItem(null);
+        subscriber.assertCompleted().assertItem(null);
     }
 
     @Test
     public void testWithSingleItemCompletingSuccessfully() {
         UniAssertSubscriber<String> subscriber = UniAssertSubscriber.create();
         Uni.combine().any().of(Uni.createFrom().item("foo")).subscribe().withSubscriber(subscriber);
-        subscriber.assertCompletedSuccessfully().assertItem("foo");
+        subscriber.assertCompleted().assertItem("foo");
     }
 
     @Test
@@ -75,7 +75,7 @@ public class UniOrTest {
         UniAssertSubscriber<String> subscriber = UniAssertSubscriber.create();
         Uni.combine().any().of(Uni.createFrom().<String> failure(new IOException("boom"))).subscribe()
                 .withSubscriber(subscriber);
-        subscriber.assertCompletedWithFailure().assertFailure(IOException.class, "boom");
+        subscriber.assertFailed().assertFailedWith(IOException.class, "boom");
     }
 
     @Test
@@ -83,7 +83,7 @@ public class UniOrTest {
         UniAssertSubscriber<String> subscriber = UniAssertSubscriber.create();
         Uni.combine().any().of(Uni.createFrom().item("foo"), Uni.createFrom().item("bar")).subscribe()
                 .withSubscriber(subscriber);
-        subscriber.assertCompletedSuccessfully().assertItem("foo");
+        subscriber.assertCompleted().assertItem("foo");
     }
 
     @Test
@@ -91,7 +91,7 @@ public class UniOrTest {
         UniAssertSubscriber<String> subscriber = UniAssertSubscriber.create();
         Uni.combine().any().of(Uni.createFrom().failure(new IOException("boom")), Uni.createFrom().item("foo"))
                 .subscribe().withSubscriber(subscriber);
-        subscriber.assertCompletedWithFailure().assertFailure(IOException.class, "boom");
+        subscriber.assertFailed().assertFailedWith(IOException.class, "boom");
     }
 
     @Test
@@ -100,14 +100,14 @@ public class UniOrTest {
         Uni.combine().any().of(Uni.createFrom().item("foo")
                 .onItem().delayIt().onExecutor(executor).by(Duration.ofMillis(10)), Uni.createFrom().item("bar"))
                 .subscribe().withSubscriber(subscriber1);
-        subscriber1.assertCompletedSuccessfully().assertItem("bar");
+        subscriber1.assertCompleted().assertItem("bar");
 
         UniAssertSubscriber<String> subscriber2 = UniAssertSubscriber.create();
         Uni.combine().any()
                 .of(Uni.createFrom().item("foo").onItem().delayIt().onExecutor(executor).by(Duration.ofMillis(10)),
                         Uni.createFrom().item("bar").onItem().delayIt().onExecutor(executor).by(Duration.ofMillis(100)))
                 .subscribe().withSubscriber(subscriber2);
-        subscriber2.await().assertCompletedSuccessfully().assertItem("foo");
+        subscriber2.await().assertCompleted().assertItem("foo");
     }
 
     @RepeatedTest(100)
@@ -144,7 +144,7 @@ public class UniOrTest {
 
         UniAssertSubscriber<Integer> subscriber = UniAssertSubscriber.create();
         any.subscribe().withSubscriber(subscriber);
-        subscriber.assertCompletedSuccessfully().assertItem(1);
+        subscriber.assertCompleted().assertItem(1);
     }
 
     @Test
@@ -152,7 +152,7 @@ public class UniOrTest {
         UniAssertSubscriber<String> subscriber = UniAssertSubscriber.create();
         Uni.combine().any().of(Uni.createFrom().item("foo"), Uni.createFrom().item("bar"))
                 .subscribe().withSubscriber(subscriber);
-        subscriber.assertCompletedSuccessfully().assertItem("foo");
+        subscriber.assertCompleted().assertItem("foo");
     }
 
     @Test

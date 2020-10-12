@@ -29,8 +29,8 @@ public class UniOnItemTransformToMultiTest {
                 .onItem().transformToMulti(i -> Multi.createFrom().range(i, 5))
                 .subscribe().withSubscriber(AssertSubscriber.create(10))
                 .await()
-                .assertCompletedSuccessfully()
-                .assertReceived(1, 2, 3, 4);
+                .assertCompleted()
+                .assertItems(1, 2, 3, 4);
     }
 
     @Test
@@ -40,8 +40,8 @@ public class UniOnItemTransformToMultiTest {
                 .onItem().produceMulti(i -> Multi.createFrom().range(i, 5))
                 .subscribe().withSubscriber(AssertSubscriber.create(10))
                 .await()
-                .assertCompletedSuccessfully()
-                .assertReceived(1, 2, 3, 4);
+                .assertCompleted()
+                .assertItems(1, 2, 3, 4);
     }
 
     @Test
@@ -50,8 +50,8 @@ public class UniOnItemTransformToMultiTest {
                 .onItem().transformToMulti(x -> Multi.createFrom().range(1, 5))
                 .subscribe().withSubscriber(AssertSubscriber.create(10))
                 .await()
-                .assertCompletedSuccessfully()
-                .assertReceived(1, 2, 3, 4);
+                .assertCompleted()
+                .assertItems(1, 2, 3, 4);
     }
 
     @Test
@@ -60,7 +60,7 @@ public class UniOnItemTransformToMultiTest {
                 .onItem().transformToMulti(x -> Multi.createFrom().range(1, 5))
                 .subscribe().withSubscriber(AssertSubscriber.create(10))
                 .await()
-                .assertHasFailedWith(IOException.class, "boom")
+                .assertFailedWith(IOException.class, "boom")
                 .assertHasNotReceivedAnyItem();
     }
 
@@ -72,7 +72,7 @@ public class UniOnItemTransformToMultiTest {
                 })
                 .subscribe().withSubscriber(AssertSubscriber.create(10))
                 .await()
-                .assertHasFailedWith(IllegalStateException.class, "boom")
+                .assertFailedWith(IllegalStateException.class, "boom")
                 .assertHasNotReceivedAnyItem();
     }
 
@@ -82,7 +82,7 @@ public class UniOnItemTransformToMultiTest {
                 .onItem().transformToMulti(x -> null)
                 .subscribe().withSubscriber(AssertSubscriber.create(10))
                 .await()
-                .assertHasFailedWith(NullPointerException.class, "")
+                .assertFailedWith(NullPointerException.class, "")
                 .assertHasNotReceivedAnyItem();
     }
 

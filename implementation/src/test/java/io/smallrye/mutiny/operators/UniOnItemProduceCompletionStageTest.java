@@ -18,7 +18,7 @@ public class UniOnItemProduceCompletionStageTest {
         UniAssertSubscriber<Integer> test = UniAssertSubscriber.create();
         Uni.createFrom().item(1).onItem().produceCompletionStage(v -> CompletableFuture.completedFuture(2)).subscribe()
                 .withSubscriber(test);
-        test.assertCompletedSuccessfully().assertItem(2).assertNoFailure();
+        test.assertCompleted().assertItem(2);
     }
 
     @Test
@@ -29,7 +29,7 @@ public class UniOnItemProduceCompletionStageTest {
             called.set(true);
             return CompletableFuture.completedFuture(2);
         }).subscribe().withSubscriber(test);
-        test.assertNotCompleted();
+        test.assertNotTerminated();
         assertThat(called).isFalse();
     }
 
@@ -39,7 +39,7 @@ public class UniOnItemProduceCompletionStageTest {
         Uni<Integer> uni = Uni.createFrom().item(1).onItem()
                 .produceCompletionStage(v -> CompletableFuture.supplyAsync(() -> 42));
         uni.subscribe().withSubscriber(test);
-        test.await().assertCompletedSuccessfully().assertItem(42).assertNoFailure();
+        test.await().assertCompleted().assertItem(42);
     }
 
     @Test
@@ -50,7 +50,7 @@ public class UniOnItemProduceCompletionStageTest {
                     throw new IllegalStateException("boom");
                 }));
         uni.subscribe().withSubscriber(test);
-        test.await().assertCompletedWithFailure().assertFailure(IllegalStateException.class, "boom");
+        test.await().assertFailed().assertFailedWith(IllegalStateException.class, "boom");
     }
 
     @Test
@@ -61,7 +61,7 @@ public class UniOnItemProduceCompletionStageTest {
             called.set(true);
             return CompletableFuture.completedFuture(2);
         }).subscribe().withSubscriber(test);
-        test.await().assertCompletedWithFailure().assertFailure(Exception.class, "boom");
+        test.await().assertFailed().assertFailedWith(Exception.class, "boom");
         assertThat(called).isFalse();
     }
 
@@ -75,7 +75,7 @@ public class UniOnItemProduceCompletionStageTest {
                     throw new IllegalStateException("boom");
                 })
                 .subscribe().withSubscriber(test);
-        test.await().assertCompletedWithFailure().assertFailure(IllegalStateException.class, "boom");
+        test.await().assertFailed().assertFailedWith(IllegalStateException.class, "boom");
         assertThat(called).isTrue();
     }
 
@@ -88,7 +88,7 @@ public class UniOnItemProduceCompletionStageTest {
                     called.set(true);
                     return null;
                 }).subscribe().withSubscriber(test);
-        test.await().assertCompletedWithFailure().assertFailure(NullPointerException.class, "");
+        test.await().assertFailed().assertFailedWith(NullPointerException.class, "");
         assertThat(called).isTrue();
     }
 
@@ -112,7 +112,7 @@ public class UniOnItemProduceCompletionStageTest {
         Uni<Integer> uni = Uni.createFrom().item(1).onItem().produceCompletionStage(v -> future);
         uni.subscribe().withSubscriber(test);
         test.cancel();
-        test.assertNotCompleted();
+        test.assertNotTerminated();
         assertThat(cancelled).isTrue();
     }
 }

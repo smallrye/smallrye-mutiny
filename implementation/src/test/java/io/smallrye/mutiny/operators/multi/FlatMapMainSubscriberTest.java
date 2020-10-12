@@ -35,7 +35,7 @@ public class FlatMapMainSubscriberTest {
                 .subscribe().withSubscriber(sub);
 
         sub.request(-1);
-        subscriber.assertHasFailedWith(IllegalArgumentException.class, "");
+        subscriber.assertFailedWith(IllegalArgumentException.class, "");
     }
 
     @Test
@@ -124,7 +124,7 @@ public class FlatMapMainSubscriberTest {
                 .onItem().transformToMulti(v -> rogue)
                 .merge(1)
                 .subscribe().withSubscriber(AssertSubscriber.create(0))
-                .assertHasFailedWith(BackPressureFailure.class, "");
+                .assertFailedWith(BackPressureFailure.class, "");
     }
 
     @Test
@@ -193,6 +193,6 @@ public class FlatMapMainSubscriberTest {
         pp.onNext(1);
 
         subscriber.request(1)
-                .assertReceived(1);
+                .assertItems(1);
     }
 }

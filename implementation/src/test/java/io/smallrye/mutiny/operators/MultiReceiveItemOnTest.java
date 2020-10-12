@@ -68,9 +68,9 @@ public class MultiReceiveItemOnTest {
                 .onCompletion().invoke(() -> completionThread.add(Thread.currentThread().getName()))
                 .subscribe().withSubscriber(AssertSubscriber.create(4))
                 .await()
-                .assertCompletedSuccessfully();
+                .assertCompleted();
 
-        await().until(() -> subscriber.items().size() == 4);
+        await().until(() -> subscriber.getItems().size() == 4);
         assertThat(itemThread).allSatisfy(s -> assertThat(s).startsWith("test-"));
         assertThat(completionThread).hasSizeGreaterThanOrEqualTo(1).allSatisfy(s -> assertThat(s).startsWith("test-"));
     }
@@ -85,7 +85,7 @@ public class MultiReceiveItemOnTest {
                 .onFailure().invoke(f -> failureThread.add(Thread.currentThread().getName()))
                 .subscribe().withSubscriber(AssertSubscriber.create(4))
                 .await()
-                .assertHasFailedWith(IOException.class, "boom");
+                .assertFailedWith(IOException.class, "boom");
 
         assertThat(itemThread).isEmpty();
         assertThat(failureThread).hasSizeGreaterThanOrEqualTo(1).allSatisfy(s -> assertThat(s).startsWith("test-"));
@@ -97,7 +97,7 @@ public class MultiReceiveItemOnTest {
                 .emitOn(Runnable::run)
                 .subscribe().withSubscriber(AssertSubscriber.create(4))
                 .await()
-                .assertReceived(1, 2, 3, 4);
+                .assertItems(1, 2, 3, 4);
     }
 
     @Test
@@ -106,11 +106,11 @@ public class MultiReceiveItemOnTest {
                 .emitOn(executor)
                 .subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE))
                 .await()
-                .assertCompletedSuccessfully();
+                .assertCompleted();
 
-        assertThat(subscriber.items()).hasSize(100_000);
+        assertThat(subscriber.getItems()).hasSize(100_000);
         int current = -1;
-        for (Integer i : subscriber.items()) {
+        for (Integer i : subscriber.getItems()) {
             assertThat(i).isGreaterThan(current);
             current = i;
         }
@@ -122,7 +122,7 @@ public class MultiReceiveItemOnTest {
                 .subscribeOn(executor)
                 .subscribe().withSubscriber(AssertSubscriber.create(4))
                 .await()
-                .assertReceived(1, 2, 3, 4);
+                .assertItems(1, 2, 3, 4);
     }
 
     @Test
@@ -131,7 +131,7 @@ public class MultiReceiveItemOnTest {
                 .runSubscriptionOn(executor)
                 .subscribe().withSubscriber(AssertSubscriber.create(4))
                 .await()
-                .assertReceived(1, 2, 3, 4);
+                .assertItems(1, 2, 3, 4);
     }
 
 }

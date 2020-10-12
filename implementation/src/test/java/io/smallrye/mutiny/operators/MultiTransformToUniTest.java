@@ -35,7 +35,7 @@ public class MultiTransformToUniTest {
                 .concatenate()
                 .subscribe().withSubscriber(subscriber);
 
-        subscriber.assertHasFailedWith(RuntimeException.class, "boom");
+        subscriber.assertFailedWith(RuntimeException.class, "boom");
     }
 
     @Test
@@ -48,7 +48,7 @@ public class MultiTransformToUniTest {
                 .concatenate()
                 .subscribe().withSubscriber(subscriber);
 
-        subscriber.assertHasNotReceivedAnyItem().assertCompletedSuccessfully();
+        subscriber.assertHasNotReceivedAnyItem().assertCompleted();
     }
 
     @Test
@@ -63,7 +63,7 @@ public class MultiTransformToUniTest {
                 .concatenate()
                 .subscribe().withSubscriber(subscriber);
 
-        subscriber.assertHasFailedWith(RuntimeException.class, "boom");
+        subscriber.assertFailedWith(RuntimeException.class, "boom");
     }
 
     @Test
@@ -80,7 +80,7 @@ public class MultiTransformToUniTest {
                 .subscribe().withSubscriber(subscriber);
 
         subscriber.request(1).cancel();
-        subscriber.assertHasNotCompleted().assertHasNotFailed().assertHasNotReceivedAnyItem();
+        subscriber.assertNotTerminated().assertHasNotReceivedAnyItem();
         assertThat(uniCancelled.get()).isTrue();
     }
 
@@ -124,7 +124,7 @@ public class MultiTransformToUniTest {
                 .merge()
                 .subscribe().withSubscriber(subscriber);
 
-        subscriber.assertHasFailedWith(RuntimeException.class, "boom");
+        subscriber.assertFailedWith(RuntimeException.class, "boom");
     }
 
     @Test
@@ -139,7 +139,7 @@ public class MultiTransformToUniTest {
                 .merge()
                 .subscribe().withSubscriber(subscriber);
 
-        subscriber.assertHasFailedWith(RuntimeException.class, "boom");
+        subscriber.assertFailedWith(RuntimeException.class, "boom");
     }
 
     @Test
@@ -152,7 +152,7 @@ public class MultiTransformToUniTest {
                 .merge()
                 .subscribe().withSubscriber(subscriber);
 
-        subscriber.assertHasNotReceivedAnyItem().assertCompletedSuccessfully();
+        subscriber.assertHasNotReceivedAnyItem().assertCompleted();
     }
 
     @Test
@@ -169,7 +169,7 @@ public class MultiTransformToUniTest {
                 .subscribe().withSubscriber(subscriber);
 
         subscriber.request(1).cancel();
-        subscriber.assertHasNotCompleted().assertHasNotFailed().assertHasNotReceivedAnyItem();
+        subscriber.assertNotTerminated().assertHasNotReceivedAnyItem();
         assertThat(uniCancelled.get()).isTrue();
     }
 

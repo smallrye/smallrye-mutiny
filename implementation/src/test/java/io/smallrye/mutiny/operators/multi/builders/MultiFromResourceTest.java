@@ -36,7 +36,7 @@ public class MultiFromResourceTest {
                 });
         AssertSubscriber<String> subscriber = multi.subscribe().withSubscriber(AssertSubscriber.create(10));
         subscriber
-                .assertHasFailedWith(IllegalArgumentException.class, "boom")
+                .assertFailedWith(IllegalArgumentException.class, "boom")
                 .assertHasNotReceivedAnyItem();
     }
 
@@ -49,7 +49,7 @@ public class MultiFromResourceTest {
                 });
         AssertSubscriber<String> subscriber = multi.subscribe().withSubscriber(AssertSubscriber.create(10));
         subscriber
-                .assertHasFailedWith(IllegalArgumentException.class, "")
+                .assertFailedWith(IllegalArgumentException.class, "")
                 .assertHasNotReceivedAnyItem();
     }
 
@@ -72,7 +72,7 @@ public class MultiFromResourceTest {
                 });
         AssertSubscriber<String> subscriber = multi.subscribe().withSubscriber(AssertSubscriber.create(10));
         subscriber
-                .assertHasFailedWith(IllegalArgumentException.class, "boom")
+                .assertFailedWith(IllegalArgumentException.class, "boom")
                 .assertHasNotReceivedAnyItem();
     }
 
@@ -85,7 +85,7 @@ public class MultiFromResourceTest {
                 });
         AssertSubscriber<String> subscriber = multi.subscribe().withSubscriber(AssertSubscriber.create(10));
         subscriber
-                .assertHasFailedWith(IllegalArgumentException.class, "")
+                .assertFailedWith(IllegalArgumentException.class, "")
                 .assertHasNotReceivedAnyItem();
     }
 
@@ -145,9 +145,8 @@ public class MultiFromResourceTest {
                 .withFinalizer(cleanup::set)
                 .subscribe(subscriber);
         subscriber
-                .assertReceived(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
-                .assertCompletedSuccessfully()
-                .assertHasNotFailed();
+                .assertItems(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
+                .assertCompleted();
         assertThat(cleanup.get()).isEqualTo(1);
     }
 
@@ -164,13 +163,11 @@ public class MultiFromResourceTest {
         multi.subscribe(subscriber2);
 
         subscriber1
-                .assertReceived(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
-                .assertCompletedSuccessfully()
-                .assertHasNotFailed();
+                .assertItems(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
+                .assertCompleted();
         subscriber2
-                .assertReceived(2, 3, 4, 5, 6, 7, 8, 9, 10)
-                .assertCompletedSuccessfully()
-                .assertHasNotFailed();
+                .assertItems(2, 3, 4, 5, 6, 7, 8, 9, 10)
+                .assertCompleted();
         assertThat(list).containsExactly(1, 2);
     }
 
@@ -182,13 +179,12 @@ public class MultiFromResourceTest {
                 .withFinalizer(cleanup::set)
                 .subscribe(subscriber);
         subscriber
-                .assertReceived(1, 2, 3, 4, 5, 6, 7, 8, 9)
+                .assertItems(1, 2, 3, 4, 5, 6, 7, 8, 9)
                 .run(() -> assertThat(cleanup).hasValue(0))
                 .request(1)
-                .assertReceived(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
+                .assertItems(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
                 .run(() -> assertThat(cleanup).hasValue(1))
-                .assertCompletedSuccessfully()
-                .assertHasNotFailed();
+                .assertCompleted();
     }
 
     @Test
@@ -199,13 +195,12 @@ public class MultiFromResourceTest {
                 .withFinalizer(cleanup::set)
                 .subscribe(subscriber);
         subscriber
-                .assertReceived(1, 2, 3, 4)
+                .assertItems(1, 2, 3, 4)
                 .run(() -> assertThat(cleanup).hasValue(0))
                 .cancel()
-                .assertReceived(1, 2, 3, 4)
+                .assertItems(1, 2, 3, 4)
                 .run(() -> assertThat(cleanup).hasValue(1))
-                .assertHasNotCompleted()
-                .assertHasNotFailed();
+                .assertNotTerminated();
     }
 
     @Test
@@ -218,12 +213,12 @@ public class MultiFromResourceTest {
                 .withFinalizer(cleanup::set)
                 .subscribe(subscriber);
         subscriber
-                .assertReceived(1)
+                .assertItems(1)
                 .run(() -> assertThat(cleanup).hasValue(0))
                 .request(3)
-                .assertReceived(1, 2)
+                .assertItems(1, 2)
                 .run(() -> assertThat(cleanup).hasValue(1))
-                .assertHasFailedWith(IOException.class, "boom");
+                .assertFailedWith(IOException.class, "boom");
     }
 
     @Test
@@ -239,7 +234,7 @@ public class MultiFromResourceTest {
                 .withFinalizer(cleanup::set)
                 .subscribe(subscriber);
         subscriber
-                .assertHasFailedWith(IllegalArgumentException.class, "boom");
+                .assertFailedWith(IllegalArgumentException.class, "boom");
         assertThat(cleanup).hasValue(0);
     }
 
@@ -253,7 +248,7 @@ public class MultiFromResourceTest {
                 .withFinalizer(cleanup::set)
                 .subscribe(subscriber);
         subscriber
-                .assertHasFailedWith(IllegalArgumentException.class, "boom");
+                .assertFailedWith(IllegalArgumentException.class, "boom");
         assertThat(cleanup).hasValue(1);
     }
 
@@ -265,7 +260,7 @@ public class MultiFromResourceTest {
                 .withFinalizer(cleanup::set)
                 .subscribe(subscriber);
         subscriber
-                .assertHasFailedWith(IllegalArgumentException.class, "`null`");
+                .assertFailedWith(IllegalArgumentException.class, "`null`");
         assertThat(cleanup).hasValue(1);
     }
 
@@ -279,9 +274,8 @@ public class MultiFromResourceTest {
                 .withFinalizer(fin)
                 .subscribe(subscriber);
         subscriber
-                .assertReceived(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
-                .assertHasNotCompleted()
-                .assertHasFailedWith(IllegalStateException.class, "boom");
+                .assertItems(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
+                .assertFailedWith(IllegalStateException.class, "boom");
     }
 
     @Test
@@ -296,10 +290,9 @@ public class MultiFromResourceTest {
                 .withFinalizer(fin)
                 .subscribe(subscriber);
         subscriber
-                .assertReceived(1, 2)
-                .assertHasNotCompleted()
-                .assertHasFailedWith(CompositeException.class, "boom")
-                .assertHasFailedWith(CompositeException.class, "no!");
+                .assertItems(1, 2)
+                .assertFailedWith(CompositeException.class, "boom")
+                .assertFailedWith(CompositeException.class, "no!");
 
     }
 
@@ -334,7 +327,7 @@ public class MultiFromResourceTest {
                 .subscribe(subscriber);
 
         subscriber
-                .assertHasFailedWith(NullPointerException.class, "boom");
+                .assertFailedWith(NullPointerException.class, "boom");
         assertThat(onFailure).hasValue(0);
         assertThat(onCancellation).hasValue(0);
         assertThat(onComplete).hasValue(0);
@@ -384,8 +377,8 @@ public class MultiFromResourceTest {
                         FakeTransactionalResource::cancel);
 
         multi.subscribe().withSubscriber(AssertSubscriber.create(20))
-                .assertReceived("in transaction")
-                .assertCompletedSuccessfully();
+                .assertItems("in transaction")
+                .assertCompleted();
 
         assertThat(resource.subscribed).isTrue();
         assertThat(resource.onCompleteSubscribed).isTrue();
@@ -404,7 +397,7 @@ public class MultiFromResourceTest {
                         FakeTransactionalResource::cancel);
 
         multi.subscribe().withSubscriber(AssertSubscriber.create(20))
-                .assertHasFailedWith(IllegalStateException.class, "boom");
+                .assertFailedWith(IllegalStateException.class, "boom");
 
         assertThat(resource.subscribed).isFalse();
         assertThat(resource.onCompleteSubscribed).isFalse();
@@ -422,7 +415,7 @@ public class MultiFromResourceTest {
                         FakeTransactionalResource::cancel);
 
         multi.subscribe().withSubscriber(AssertSubscriber.create(20))
-                .assertHasFailedWith(IllegalArgumentException.class, "`null`");
+                .assertFailedWith(IllegalArgumentException.class, "`null`");
 
         assertThat(resource.subscribed).isFalse();
         assertThat(resource.onCompleteSubscribed).isFalse();
@@ -441,7 +434,7 @@ public class MultiFromResourceTest {
                         FakeTransactionalResource::cancel);
 
         multi.subscribe().withSubscriber(AssertSubscriber.create(20))
-                .assertHasFailedWith(IOException.class, "boom");
+                .assertFailedWith(IOException.class, "boom");
 
         assertThat(resource.subscribed).isFalse();
         assertThat(resource.onCompleteSubscribed).isFalse();
@@ -461,8 +454,8 @@ public class MultiFromResourceTest {
 
         multi.subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE))
                 .await()
-                .assertReceived("0", "1", "2")
-                .assertCompletedSuccessfully();
+                .assertItems("0", "1", "2")
+                .assertCompleted();
 
         assertThat(resource.subscribed).isTrue();
         assertThat(resource.onCompleteSubscribed).isFalse();
@@ -481,8 +474,8 @@ public class MultiFromResourceTest {
 
         multi.subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE))
                 .await()
-                .assertReceived("0", "1", "2")
-                .assertCompletedSuccessfully();
+                .assertItems("0", "1", "2")
+                .assertCompleted();
 
         assertThat(resource.subscribed).isTrue();
         assertThat(resource.onCompleteSubscribed).isFalse();
@@ -501,8 +494,8 @@ public class MultiFromResourceTest {
 
         multi.subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE))
                 .await()
-                .assertReceived("0", "1", "2")
-                .assertCompletedSuccessfully();
+                .assertItems("0", "1", "2")
+                .assertCompleted();
 
         assertThat(resource.subscribed).isTrue();
         assertThat(resource.onCompleteSubscribed).isFalse();
@@ -522,8 +515,8 @@ public class MultiFromResourceTest {
 
         multi.subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE))
                 .await()
-                .assertReceived("in transaction")
-                .assertHasFailedWith(IOException.class, "boom");
+                .assertItems("in transaction")
+                .assertFailedWith(IOException.class, "boom");
 
         assertThat(resource.subscribed).isTrue();
         assertThat(resource.onCompleteSubscribed).isTrue();
@@ -543,8 +536,8 @@ public class MultiFromResourceTest {
 
         multi.subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE))
                 .await()
-                .assertReceived("in transaction")
-                .assertHasFailedWith(IOException.class, "commit failed");
+                .assertItems("in transaction")
+                .assertFailedWith(IOException.class, "commit failed");
 
         assertThat(resource.subscribed).isTrue();
         assertThat(resource.onCompleteSubscribed).isTrue();
@@ -565,8 +558,8 @@ public class MultiFromResourceTest {
 
         multi.subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE))
                 .await()
-                .assertReceived("in transaction")
-                .assertHasFailedWith(NullPointerException.class, "`null`");
+                .assertItems("in transaction")
+                .assertFailedWith(NullPointerException.class, "`null`");
 
         assertThat(resource.subscribed).isTrue();
         assertThat(resource.onCompleteSubscribed).isFalse();
@@ -585,8 +578,8 @@ public class MultiFromResourceTest {
 
         multi.subscribe().withSubscriber(AssertSubscriber.create(20))
                 .await()
-                .assertHasFailedWith(CompositeException.class, "boom")
-                .assertHasFailedWith(CompositeException.class, "rollback failed");
+                .assertFailedWith(CompositeException.class, "boom")
+                .assertFailedWith(CompositeException.class, "rollback failed");
 
         assertThat(resource.subscribed).isTrue();
         assertThat(resource.onCompleteSubscribed).isFalse();
@@ -606,8 +599,8 @@ public class MultiFromResourceTest {
 
         multi.subscribe().withSubscriber(AssertSubscriber.create(20))
                 .await()
-                .assertHasFailedWith(CompositeException.class, "boom")
-                .assertHasFailedWith(CompositeException.class, "`null`");
+                .assertFailedWith(CompositeException.class, "boom")
+                .assertFailedWith(CompositeException.class, "`null`");
 
         assertThat(resource.subscribed).isTrue();
         assertThat(resource.onCompleteSubscribed).isFalse();
@@ -627,8 +620,8 @@ public class MultiFromResourceTest {
                             .onItem().ignore().andContinueWithNull();
                 });
         multi.subscribe().withSubscriber(AssertSubscriber.create(20))
-                .assertCompletedSuccessfully()
-                .assertReceived(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
+                .assertCompleted()
+                .assertItems(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
         assertThat(subscribed).isTrue();
     }
 
@@ -644,8 +637,8 @@ public class MultiFromResourceTest {
                             .onItem().ignore().andContinueWithNull();
                 });
         multi.subscribe().withSubscriber(AssertSubscriber.create(20))
-                .assertHasFailedWith(IOException.class, "boom")
-                .assertReceived(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
+                .assertFailedWith(IOException.class, "boom")
+                .assertItems(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
         assertThat(subscribed).isTrue();
     }
 
@@ -662,8 +655,8 @@ public class MultiFromResourceTest {
                 .transform().byTakingFirstItems(5);
         multi.subscribe().withSubscriber(AssertSubscriber.create(20))
                 .await()
-                .assertCompletedSuccessfully()
-                .assertReceived(0L, 1L, 2L, 3L, 4L);
+                .assertCompleted()
+                .assertItems(0L, 1L, 2L, 3L, 4L);
         assertThat(subscribed).isTrue();
     }
 
@@ -679,7 +672,7 @@ public class MultiFromResourceTest {
                 .subscribe(subscriber);
         subscriber
                 .await()
-                .assertCompletedSuccessfully()
+                .assertCompleted()
                 .cancel();
 
         assertThat(resource.onCompleteSubscribed).isTrue();
@@ -699,7 +692,7 @@ public class MultiFromResourceTest {
                 .subscribe(subscriber);
         subscriber
                 .await()
-                .assertHasFailedWith(IOException.class, "boom")
+                .assertFailedWith(IOException.class, "boom")
                 .cancel();
 
         assertThat(resource.onCompleteSubscribed).isFalse();

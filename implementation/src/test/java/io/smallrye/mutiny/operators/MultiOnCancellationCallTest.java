@@ -31,7 +31,7 @@ public class MultiOnCancellationCallTest {
 
         subscriber.cancel()
                 .assertHasNotReceivedAnyItem()
-                .assertHasNotCompleted();
+                .assertNotTerminated();
 
         assertThat(item.get()).isNull();
         assertThat(cancellation.get()).isTrue();
@@ -54,7 +54,7 @@ public class MultiOnCancellationCallTest {
 
         subscriber.cancel()
                 .assertHasNotReceivedAnyItem()
-                .assertHasNotCompleted();
+                .assertNotTerminated();
 
         assertThat(item.get()).isNull();
         assertThat(cancellation.get()).isTrue();
@@ -77,7 +77,7 @@ public class MultiOnCancellationCallTest {
 
         subscriber.cancel()
                 .assertHasNotReceivedAnyItem()
-                .assertHasNotCompleted();
+                .assertNotTerminated();
 
         assertThat(item.get()).isNull();
         assertThat(cancellation.get()).isTrue();
@@ -100,7 +100,7 @@ public class MultiOnCancellationCallTest {
 
         subscriber.cancel()
                 .assertHasNotReceivedAnyItem()
-                .assertHasNotCompleted();
+                .assertNotTerminated();
 
         assertThat(item.get()).isNull();
         assertThat(cancellation.get()).isTrue();
@@ -131,9 +131,7 @@ public class MultiOnCancellationCallTest {
         assertThat(cancellation.get()).isFalse();
         assertThat(counter.get()).isEqualTo(0);
 
-        subscriber.cancel()
-                .assertHasNotCompleted()
-                .assertHasNotFailed();
+        subscriber.cancel().assertNotTerminated();
 
         assertThat(cancellation.get()).isTrue();
         assertThat(counter.get()).isEqualTo(1);

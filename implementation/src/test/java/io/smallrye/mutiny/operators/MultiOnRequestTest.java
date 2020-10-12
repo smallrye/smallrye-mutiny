@@ -26,8 +26,8 @@ public class MultiOnRequestTest {
 
         subscriber.request(10);
 
-        subscriber.assertCompletedSuccessfully();
-        assertThat(subscriber.items()).containsExactly(1);
+        subscriber.assertCompleted();
+        assertThat(subscriber.getItems()).containsExactly(1);
         assertThat(requested.get()).isEqualTo(10);
     }
 
@@ -43,8 +43,8 @@ public class MultiOnRequestTest {
 
         subscriber.request(10);
 
-        subscriber.assertCompletedSuccessfully();
-        assertThat(subscriber.items()).containsExactly(1);
+        subscriber.assertCompleted();
+        assertThat(subscriber.getItems()).containsExactly(1);
         assertThat(called).isTrue();
     }
 
@@ -62,7 +62,7 @@ public class MultiOnRequestTest {
                 .subscribe().withSubscriber(subscriber);
 
         subscriber.request(10);
-        subscriber.assertHasFailedWith(RuntimeException.class, "woops");
+        subscriber.assertFailedWith(RuntimeException.class, "woops");
         subscriber.assertHasNotReceivedAnyItem();
         assertThat(requested.get()).isEqualTo(10);
     }
@@ -82,8 +82,8 @@ public class MultiOnRequestTest {
 
         subscriber.request(10);
 
-        subscriber.assertCompletedSuccessfully();
-        assertThat(subscriber.items()).containsExactly(1);
+        subscriber.assertCompleted();
+        assertThat(subscriber.getItems()).containsExactly(1);
         assertThat(requested.get()).isEqualTo(10);
     }
 
@@ -102,8 +102,8 @@ public class MultiOnRequestTest {
 
         subscriber.request(10);
 
-        subscriber.assertCompletedSuccessfully();
-        assertThat(subscriber.items()).containsExactly(1);
+        subscriber.assertCompleted();
+        assertThat(subscriber.getItems()).containsExactly(1);
         assertThat(requested.get()).isEqualTo(10);
     }
 
@@ -119,8 +119,8 @@ public class MultiOnRequestTest {
 
         subscriber.request(10);
 
-        subscriber.assertCompletedSuccessfully();
-        assertThat(subscriber.items()).containsExactly(1);
+        subscriber.assertCompleted();
+        assertThat(subscriber.getItems()).containsExactly(1);
         assertThat(called).isTrue();
     }
 
@@ -140,7 +140,7 @@ public class MultiOnRequestTest {
         subscriber.request(10);
 
         subscriber.request(10);
-        subscriber.assertHasFailedWith(RuntimeException.class, "woops");
+        subscriber.assertFailedWith(RuntimeException.class, "woops");
         subscriber.assertHasNotReceivedAnyItem();
         assertThat(requested.get()).isEqualTo(10);
     }
@@ -161,7 +161,7 @@ public class MultiOnRequestTest {
         subscriber.request(10);
 
         subscriber.request(10);
-        subscriber.assertHasFailedWith(RuntimeException.class, "woops");
+        subscriber.assertFailedWith(RuntimeException.class, "woops");
         subscriber.assertHasNotReceivedAnyItem();
         assertThat(requested.get()).isEqualTo(10);
     }
@@ -187,7 +187,7 @@ public class MultiOnRequestTest {
         subscriber.request(10);
         subscriber.cancel();
 
-        subscriber.assertHasNotCompleted();
+        subscriber.assertNotTerminated();
         subscriber.assertHasNotReceivedAnyItem();
         assertThat(requested.get()).isEqualTo(10);
         assertThat(cancellation.get()).isTrue();
