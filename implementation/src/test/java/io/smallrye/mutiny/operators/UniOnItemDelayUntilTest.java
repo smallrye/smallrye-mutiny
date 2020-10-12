@@ -89,7 +89,7 @@ public class UniOnItemDelayUntilTest {
                 .onItem().delayIt().until(i -> Uni.createFrom().emitter(reference::set))
                 .subscribe().withSubscriber(UniAssertSubscriber.create());
         await().until(() -> reference.get() != null);
-        subscriber.assertNoResult();
+        subscriber.assertNotTerminated();
         reference.get().complete(null);
         subscriber.await().assertItem(1);
     }
@@ -114,7 +114,7 @@ public class UniOnItemDelayUntilTest {
                 // It will never emit the item
                 .onItem().delayIt().until(i -> Uni.createFrom().nothing())
                 .subscribe().withSubscriber(UniAssertSubscriber.create());
-        subscriber.assertNoResult();
+        subscriber.assertNotTerminated();
         subscriber.cancel();
     }
 
@@ -129,7 +129,7 @@ public class UniOnItemDelayUntilTest {
                 })
                 .subscribe().withSubscriber(new UniAssertSubscriber<>(true));
 
-        subscriber.assertNotCompleted();
+        subscriber.assertNotTerminated();
         assertThat(called).isFalse();
     }
 
@@ -140,9 +140,9 @@ public class UniOnItemDelayUntilTest {
                 .onItem().delayIt().until(i -> Uni.createFrom().emitter(reference::set))
                 .subscribe().withSubscriber(UniAssertSubscriber.create());
         await().until(() -> reference.get() != null);
-        subscriber.assertNoResult();
+        subscriber.assertNotTerminated();
         subscriber.cancel();
         reference.get().complete(null);
-        subscriber.assertNoResult();
+        subscriber.assertNotTerminated();
     }
 }

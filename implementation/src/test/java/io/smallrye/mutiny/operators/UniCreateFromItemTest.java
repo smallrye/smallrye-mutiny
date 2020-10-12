@@ -18,21 +18,21 @@ public class UniCreateFromItemTest {
     public void testThatNullValueAreAccepted() {
         UniAssertSubscriber<Object> subscriber = UniAssertSubscriber.create();
         Uni.createFrom().item((String) null).subscribe().withSubscriber(subscriber);
-        subscriber.assertCompletedSuccessfully().assertItem(null);
+        subscriber.assertCompleted().assertItem(null);
     }
 
     @Test
     public void testWithNonNullValue() {
         UniAssertSubscriber<Integer> subscriber = UniAssertSubscriber.create();
         Uni.createFrom().item(1).subscribe().withSubscriber(subscriber);
-        subscriber.assertCompletedSuccessfully().assertItem(1);
+        subscriber.assertCompleted().assertItem(1);
     }
 
     @Test
     public void testThatEmptyIsAcceptedWithFromOptional() {
         UniAssertSubscriber<Object> subscriber = UniAssertSubscriber.create();
         Uni.createFrom().optional(Optional.empty()).subscribe().withSubscriber(subscriber);
-        subscriber.assertCompletedSuccessfully().assertItem(null);
+        subscriber.assertCompleted().assertItem(null);
     }
 
     @SuppressWarnings({ "OptionalAssignedToNull", "unchecked", "rawtypes" })
@@ -46,7 +46,7 @@ public class UniCreateFromItemTest {
     public void testThatFulfilledOptionalIsAcceptedWithFromOptional() {
         UniAssertSubscriber<Integer> subscriber = UniAssertSubscriber.create();
         Uni.createFrom().optional(Optional.of(1)).subscribe().withSubscriber(subscriber);
-        subscriber.assertCompletedSuccessfully().assertItem(1);
+        subscriber.assertCompleted().assertItem(1);
     }
 
     @SuppressWarnings("ConstantConditions")
@@ -62,7 +62,7 @@ public class UniCreateFromItemTest {
         assertThat(called).isFalse();
 
         uni.subscribe().withSubscriber(subscriber);
-        subscriber.assertCompletedSuccessfully().assertItem(2);
+        subscriber.assertCompleted().assertItem(2);
         assertThat(called).isTrue();
     }
 
@@ -78,36 +78,36 @@ public class UniCreateFromItemTest {
         Uni<String> foo = Uni.createFrom().item("foo");
         foo.subscribe().withSubscriber(subscriber1);
         foo.subscribe().withSubscriber(subscriber2);
-        subscriber1.assertNoResult().assertNoFailure();
-        subscriber2.assertCompletedSuccessfully().assertItem("foo");
+        subscriber1.assertNotTerminated();
+        subscriber2.assertCompleted().assertItem("foo");
     }
 
     @Test
     public void testEmpty() {
         UniAssertSubscriber<Void> subscriber = UniAssertSubscriber.create();
         Uni.createFrom().voidItem().subscribe().withSubscriber(subscriber);
-        subscriber.assertCompletedSuccessfully().assertItem(null);
+        subscriber.assertCompleted().assertItem(null);
     }
 
     @Test
     public void testEmptyTyped() {
         UniAssertSubscriber<String> subscriber = UniAssertSubscriber.create();
         Uni.createFrom().<String> nullItem().subscribe().withSubscriber(subscriber);
-        subscriber.assertCompletedSuccessfully().assertItem(null);
+        subscriber.assertCompleted().assertItem(null);
     }
 
     @Test
     public void testEmptyWithImmediateCancellation() {
         UniAssertSubscriber<Void> subscriber = new UniAssertSubscriber<>(true);
         Uni.createFrom().voidItem().subscribe().withSubscriber(subscriber);
-        subscriber.assertNoFailure().assertNoResult();
+        subscriber.assertNotTerminated();
     }
 
     @Test
     public void testEmptyTypedWithImmediateCancellation() {
         UniAssertSubscriber<String> subscriber = new UniAssertSubscriber<>(true);
         Uni.createFrom().<String> nullItem().subscribe().withSubscriber(subscriber);
-        subscriber.assertNoFailure().assertNoResult();
+        subscriber.assertNotTerminated();
     }
 
     @Test
@@ -121,10 +121,10 @@ public class UniCreateFromItemTest {
         assertThat(shared).hasValue(0);
         uni.subscribe().withSubscriber(s1);
         assertThat(shared).hasValue(1);
-        s1.assertCompletedSuccessfully().assertItem(1);
+        s1.assertCompleted().assertItem(1);
         uni.subscribe().withSubscriber(s2);
         assertThat(shared).hasValue(2);
-        s2.assertCompletedSuccessfully().assertItem(2);
+        s2.assertCompleted().assertItem(2);
     }
 
     @Test
@@ -139,9 +139,9 @@ public class UniCreateFromItemTest {
                 AtomicInteger::incrementAndGet);
 
         uni.subscribe().withSubscriber(s1);
-        s1.assertFailure(IllegalStateException.class, "boom");
+        s1.assertFailedWith(IllegalStateException.class, "boom");
         uni.subscribe().withSubscriber(s2);
-        s2.assertFailure(IllegalStateException.class, "Invalid shared state");
+        s2.assertFailedWith(IllegalStateException.class, "Invalid shared state");
     }
 
     @Test
@@ -154,9 +154,9 @@ public class UniCreateFromItemTest {
                 AtomicInteger::incrementAndGet);
 
         uni.subscribe().withSubscriber(s1);
-        s1.assertFailure(NullPointerException.class, "supplier");
+        s1.assertFailedWith(NullPointerException.class, "supplier");
         uni.subscribe().withSubscriber(s2);
-        s2.assertFailure(IllegalStateException.class, "Invalid shared state");
+        s2.assertFailedWith(IllegalStateException.class, "Invalid shared state");
     }
 
     @Test

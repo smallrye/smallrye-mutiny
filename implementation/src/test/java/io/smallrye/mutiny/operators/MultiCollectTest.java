@@ -70,13 +70,13 @@ public class MultiCollectTest {
                 .collectItems().first()
                 .subscribe().withSubscriber(UniAssertSubscriber.create())
                 .await()
-                .assertFailure(IOException.class, "boom");
+                .assertFailedWith(IOException.class, "boom");
 
         failing
                 .collectItems().last()
                 .subscribe().withSubscriber(UniAssertSubscriber.create())
                 .await()
-                .assertFailure(IOException.class, "boom");
+                .assertFailedWith(IOException.class, "boom");
     }
 
     @Test
@@ -107,7 +107,7 @@ public class MultiCollectTest {
                 }, (x, y) -> {
                 })
                 .subscribe().withSubscriber(UniAssertSubscriber.create())
-                .assertFailure(IllegalArgumentException.class, "boom");
+                .assertFailedWith(IllegalArgumentException.class, "boom");
     }
 
     @Test
@@ -120,7 +120,7 @@ public class MultiCollectTest {
                     }
                 })
                 .subscribe().withSubscriber(UniAssertSubscriber.create())
-                .assertFailure(IllegalArgumentException.class, "boom");
+                .assertFailedWith(IllegalArgumentException.class, "boom");
     }
 
     @Test
@@ -129,7 +129,7 @@ public class MultiCollectTest {
                 .collectItems().in(() -> null, (x, y) -> {
                 })
                 .subscribe().withSubscriber(UniAssertSubscriber.create())
-                .assertFailure(NullPointerException.class, "supplier");
+                .assertFailedWith(NullPointerException.class, "supplier");
     }
 
     @Test
@@ -162,7 +162,7 @@ public class MultiCollectTest {
                     }
                 })
                 .subscribe().withSubscriber(UniAssertSubscriber.create())
-                .assertFailure(NullPointerException.class, "accumulator");
+                .assertFailedWith(NullPointerException.class, "accumulator");
     }
 
     @Test
@@ -170,7 +170,7 @@ public class MultiCollectTest {
         UniAssertSubscriber<Map<String, Person>> subscriber = persons
                 .collectItems().asMap(p -> p.firstName)
                 .subscribe().withSubscriber(UniAssertSubscriber.create())
-                .assertCompletedSuccessfully();
+                .assertCompleted();
 
         assertThat(subscriber.getItem())
                 .hasSize(4)
@@ -186,7 +186,7 @@ public class MultiCollectTest {
         UniAssertSubscriber<Map<String, Person>> subscriber = Multi.createFrom().<Person> empty()
                 .collectItems().asMap(p -> p.firstName)
                 .subscribe().withSubscriber(UniAssertSubscriber.create())
-                .assertCompletedSuccessfully();
+                .assertCompleted();
 
         assertThat(subscriber.getItem()).isEmpty();
     }
@@ -196,7 +196,7 @@ public class MultiCollectTest {
         UniAssertSubscriber<Map<String, Collection<Person>>> subscriber = personsWithDuplicates
                 .collectItems().asMultiMap(p -> p.firstName)
                 .subscribe().withSubscriber(new UniAssertSubscriber<>())
-                .assertCompletedSuccessfully();
+                .assertCompleted();
 
         assertThat(subscriber.getItem()).hasSize(4);
         assertThat(subscriber.getItem().get("alice")).containsExactly(new Person("alice", 2));
@@ -210,7 +210,7 @@ public class MultiCollectTest {
         UniAssertSubscriber<Map<String, Collection<Long>>> subscriber = personsWithDuplicates
                 .collectItems().asMultiMap(p -> p.firstName, p -> p.id)
                 .subscribe().withSubscriber(new UniAssertSubscriber<>())
-                .assertCompletedSuccessfully();
+                .assertCompleted();
 
         assertThat(subscriber.getItem()).hasSize(4);
         assertThat(subscriber.getItem().get("alice")).containsExactly(2L);
@@ -223,7 +223,7 @@ public class MultiCollectTest {
         UniAssertSubscriber<Map<String, Collection<Person>>> subscriber = Multi.createFrom().<Person> empty()
                 .collectItems().asMultiMap(p -> p.firstName)
                 .subscribe().withSubscriber(new UniAssertSubscriber<>())
-                .assertCompletedSuccessfully();
+                .assertCompleted();
         assertThat(subscriber.getItem()).hasSize(0);
 
     }
@@ -231,7 +231,7 @@ public class MultiCollectTest {
     @Test
     public void testSumCollector() {
         Multi.createFrom().range(1, 5).collectItems().with(Collectors.summingInt(value -> value))
-                .subscribe().withSubscriber(new UniAssertSubscriber<>()).assertCompletedSuccessfully().assertItem(10);
+                .subscribe().withSubscriber(new UniAssertSubscriber<>()).assertCompleted().assertItem(10);
     }
 
     @Test

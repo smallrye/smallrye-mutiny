@@ -93,7 +93,7 @@ public class UniOnEventTest {
                 .onTermination().invoke((r, f, c) -> terminate.set(f))
                 .subscribe().withSubscriber(UniAssertSubscriber.create());
 
-        subscriber.assertCompletedWithFailure().assertFailure(IOException.class, "boom");
+        subscriber.assertFailed().assertFailedWith(IOException.class, "boom");
         assertThat(item).doesNotHaveValue(1);
         assertThat(failure.get()).isInstanceOf(IOException.class);
         assertThat(subscription.get()).isNotNull();
@@ -113,7 +113,7 @@ public class UniOnEventTest {
                 .onTermination().invoke(() -> terminate.set(true))
                 .subscribe().withSubscriber(UniAssertSubscriber.create());
 
-        subscriber.assertCompletedWithFailure().assertFailure(IOException.class, "boom");
+        subscriber.assertFailed().assertFailedWith(IOException.class, "boom");
         assertThat(item).doesNotHaveValue(1);
         assertThat(failure.get()).isInstanceOf(IOException.class);
         assertThat(subscription.get()).isNotNull();
@@ -141,7 +141,7 @@ public class UniOnEventTest {
                 })
                 .subscribe().withSubscriber(UniAssertSubscriber.create());
 
-        subscriber.assertCompletedWithFailure().assertFailure(IllegalStateException.class, "boom");
+        subscriber.assertFailed().assertFailedWith(IllegalStateException.class, "boom");
         assertThat(item).doesNotHaveValue(1);
         assertThat(failure.get()).isInstanceOf(IllegalStateException.class);
         assertThat(subscription.get()).isNotNull();
@@ -164,7 +164,7 @@ public class UniOnEventTest {
                 .onTermination().invoke(() -> terminated.set(true))
                 .subscribe().withSubscriber(UniAssertSubscriber.create());
 
-        subscriber.assertCompletedWithFailure().assertFailure(IllegalStateException.class, "boom");
+        subscriber.assertFailed().assertFailedWith(IllegalStateException.class, "boom");
         assertThat(item).doesNotHaveValue(1);
         assertThat(failure.get()).isInstanceOf(IllegalStateException.class);
         assertThat(subscription.get()).isNotNull();
@@ -191,9 +191,9 @@ public class UniOnEventTest {
                 })
                 .subscribe().withSubscriber(UniAssertSubscriber.create());
 
-        subscriber.assertCompletedWithFailure()
-                .assertFailure(CompositeException.class, "boom")
-                .assertFailure(CompositeException.class, "kaboom");
+        subscriber.assertFailed()
+                .assertFailedWith(CompositeException.class, "boom")
+                .assertFailedWith(CompositeException.class, "kaboom");
         assertThat(item).doesNotHaveValue(1);
         assertThat(subscription.get()).isNotNull();
         assertThat(ItemFromTerminate).doesNotHaveValue(1);
@@ -214,9 +214,9 @@ public class UniOnEventTest {
                 .onTermination().invoke(() -> terminated.set(true))
                 .subscribe().withSubscriber(UniAssertSubscriber.create());
 
-        subscriber.assertCompletedWithFailure()
-                .assertFailure(CompositeException.class, "boom")
-                .assertFailure(CompositeException.class, "kaboom");
+        subscriber.assertFailed()
+                .assertFailedWith(CompositeException.class, "boom")
+                .assertFailedWith(CompositeException.class, "kaboom");
         assertThat(item).doesNotHaveValue(1);
         assertThat(subscription.get()).isNotNull();
         assertThat(terminated).isTrue();
@@ -229,7 +229,7 @@ public class UniOnEventTest {
                     throw new IllegalStateException("boom");
                 }).subscribe().withSubscriber(UniAssertSubscriber.create());
 
-        subscriber.assertFailure(IllegalStateException.class, "boom");
+        subscriber.assertFailedWith(IllegalStateException.class, "boom");
     }
 
     @Test
@@ -239,7 +239,7 @@ public class UniOnEventTest {
                 .on().cancellation(() -> called.set(true))
                 .subscribe().withSubscriber(new UniAssertSubscriber<>(true));
 
-        subscriber.assertNotCompleted();
+        subscriber.assertNotTerminated();
         assertThat(called).isTrue();
     }
 
@@ -250,7 +250,7 @@ public class UniOnEventTest {
                 .onCancellation().invoke(() -> called.set(true))
                 .subscribe().withSubscriber(new UniAssertSubscriber<>(true));
 
-        subscriber.assertNotCompleted();
+        subscriber.assertNotTerminated();
         assertThat(called).isTrue();
     }
 
@@ -263,7 +263,7 @@ public class UniOnEventTest {
                 .onCancellation().invoke(() -> called.set(true))
                 .subscribe().withSubscriber(new UniAssertSubscriber<>(true));
 
-        subscriber.assertNotCompleted();
+        subscriber.assertNotTerminated();
         assertThat(called).isTrue();
         assertThat(terminated).isTrue();
     }
@@ -277,7 +277,7 @@ public class UniOnEventTest {
                 .onCancellation().invoke(() -> called.set(true))
                 .subscribe().withSubscriber(new UniAssertSubscriber<>(true));
 
-        subscriber.assertNotCompleted();
+        subscriber.assertNotTerminated();
         assertThat(called).isTrue();
         assertThat(terminated).isTrue();
     }
@@ -301,7 +301,7 @@ public class UniOnEventTest {
                 .onFailure(t -> t.getMessage().equalsIgnoreCase("nope")).invoke(t -> predicateNoMatch.set(true))
                 .subscribe().withSubscriber(UniAssertSubscriber.create());
 
-        subscriber.assertCompletedWithFailure().assertFailure(IOException.class, "boom");
+        subscriber.assertFailed().assertFailedWith(IOException.class, "boom");
         assertThat(noPredicate).isTrue();
         assertThat(exactClassMatch).isTrue();
         assertThat(parentClassMatch).isTrue();
@@ -315,7 +315,7 @@ public class UniOnEventTest {
                     throw new NullPointerException();
                 }).invoke(t -> called.set(true))
                 .subscribe().withSubscriber(UniAssertSubscriber.create());
-        subscriber.assertCompletedWithFailure().assertFailure(CompositeException.class, "boom");
+        subscriber.assertFailed().assertFailedWith(CompositeException.class, "boom");
         CompositeException composite = (CompositeException) subscriber.getFailure();
         assertThat(composite.getCauses()).hasSize(2)
                 .anySatisfy(t -> assertThat(t).isInstanceOf(NullPointerException.class))
@@ -333,7 +333,7 @@ public class UniOnEventTest {
                 .eventually(() -> eventuallyCalled.set(true))
                 .subscribe().withSubscriber(UniAssertSubscriber.create());
 
-        subscriber.assertCompletedSuccessfully();
+        subscriber.assertCompleted();
         assertThat(item.get()).isEqualTo(69);
         assertThat(eventuallyCalled).isTrue();
     }
@@ -348,7 +348,7 @@ public class UniOnEventTest {
                 .eventually(() -> eventuallyCalled.set(true))
                 .subscribe().withSubscriber(UniAssertSubscriber.create());
 
-        subscriber.assertFailure(IOException.class, "boom");
+        subscriber.assertFailedWith(IOException.class, "boom");
         assertThat(item.get()).isNull();
         assertThat(eventuallyCalled).isTrue();
     }
@@ -366,7 +366,7 @@ public class UniOnEventTest {
                 })
                 .subscribe().withSubscriber(UniAssertSubscriber.create());
 
-        subscriber.assertFailure(CompositeException.class, "boom");
+        subscriber.assertFailedWith(CompositeException.class, "boom");
         CompositeException compositeException = (CompositeException) subscriber.getFailure();
         assertThat(compositeException.getCauses()).hasSize(2);
         assertThat(compositeException.getCauses().get(0)).isInstanceOf(IOException.class).hasMessage("boom");
@@ -388,7 +388,7 @@ public class UniOnEventTest {
                 })
                 .subscribe().withSubscriber(UniAssertSubscriber.create());
 
-        subscriber.assertCompletedSuccessfully();
+        subscriber.assertCompleted();
         assertThat(item.get()).isEqualTo(69);
         assertThat(eventuallyCalled).isTrue();
     }
@@ -406,7 +406,7 @@ public class UniOnEventTest {
                 })
                 .subscribe().withSubscriber(UniAssertSubscriber.create());
 
-        subscriber.assertFailure(RuntimeException.class, "tada");
+        subscriber.assertFailedWith(RuntimeException.class, "tada");
         assertThat(item.get()).isEqualTo(69);
         assertThat(eventuallyCalled).isTrue();
     }
@@ -424,7 +424,7 @@ public class UniOnEventTest {
                 })
                 .subscribe().withSubscriber(UniAssertSubscriber.create());
 
-        subscriber.assertFailure(IOException.class, "boom");
+        subscriber.assertFailedWith(IOException.class, "boom");
         assertThat(item.get()).isNull();
         assertThat(eventuallyCalled).isTrue();
     }
@@ -442,7 +442,7 @@ public class UniOnEventTest {
                 })
                 .subscribe().withSubscriber(UniAssertSubscriber.create());
 
-        subscriber.assertFailure(CompositeException.class, "boom");
+        subscriber.assertFailedWith(CompositeException.class, "boom");
         CompositeException compositeException = (CompositeException) subscriber.getFailure();
         assertThat(compositeException.getCauses()).hasSize(2);
         assertThat(compositeException.getCauses().get(0)).isInstanceOf(IOException.class).hasMessage("boom");
@@ -464,7 +464,7 @@ public class UniOnEventTest {
                 })
                 .subscribe().withSubscriber(UniAssertSubscriber.create());
 
-        subscriber.assertFailure(RuntimeException.class, "bam");
+        subscriber.assertFailedWith(RuntimeException.class, "bam");
         assertThat(item.get()).isEqualTo(69);
         assertThat(eventuallyCalled).isTrue();
     }
@@ -482,7 +482,7 @@ public class UniOnEventTest {
                 })
                 .subscribe().withSubscriber(UniAssertSubscriber.create());
 
-        subscriber.assertFailure(CompositeException.class, "boom");
+        subscriber.assertFailedWith(CompositeException.class, "boom");
         CompositeException compositeException = (CompositeException) subscriber.getFailure();
         assertThat(compositeException.getCauses()).hasSize(2);
         assertThat(compositeException.getCauses().get(0)).isInstanceOf(IOException.class).hasMessage("boom");
@@ -530,7 +530,7 @@ public class UniOnEventTest {
                 })
                 .subscribe().withSubscriber(UniAssertSubscriber.create());
 
-        subscriber.assertCompletedWithFailure().assertFailure(CompositeException.class, "boom");
+        subscriber.assertFailed().assertFailedWith(CompositeException.class, "boom");
         CompositeException compositeException = (CompositeException) subscriber.getFailure();
         assertThat(compositeException).getRootCause().isInstanceOf(IOException.class).hasMessageContaining("boom");
         assertThat(compositeException.getCauses().get(1)).isInstanceOf(IOException.class).hasMessageContaining("tada");
@@ -601,7 +601,7 @@ public class UniOnEventTest {
                 })
                 .subscribe().withSubscriber(UniAssertSubscriber.create());
 
-        subscriber.assertCompletedWithFailure().assertFailure(CompositeException.class, "boom");
+        subscriber.assertFailed().assertFailedWith(CompositeException.class, "boom");
         CompositeException compositeException = (CompositeException) subscriber.getFailure();
         assertThat(compositeException).getRootCause().isInstanceOf(IOException.class).hasMessageContaining("boom");
         assertThat(compositeException.getCauses().get(1)).isInstanceOf(IOException.class).hasMessageContaining("tada");
@@ -626,7 +626,7 @@ public class UniOnEventTest {
                 })
                 .subscribe().withSubscriber(UniAssertSubscriber.create());
 
-        subscriber.assertCompletedWithFailure().assertFailure(CompositeException.class, "boom");
+        subscriber.assertFailed().assertFailedWith(CompositeException.class, "boom");
         CompositeException compositeException = (CompositeException) subscriber.getFailure();
         assertThat(compositeException).getRootCause().isInstanceOf(IOException.class).hasMessageContaining("boom");
         assertThat(compositeException.getCauses().get(1)).isInstanceOf(RuntimeException.class).hasMessageContaining("tada");
@@ -651,7 +651,7 @@ public class UniOnEventTest {
                 .onCancellation().invoke(() -> called.set(true))
                 .subscribe().withSubscriber(new UniAssertSubscriber<>());
 
-        subscriber.assertNotCompleted();
+        subscriber.assertNotTerminated();
         // Cancel the subscription
         subscriber.cancel();
 
@@ -680,7 +680,7 @@ public class UniOnEventTest {
                 .onCancellation().invoke(() -> called.set(true))
                 .subscribe().withSubscriber(new UniAssertSubscriber<>());
 
-        subscriber.assertNotCompleted();
+        subscriber.assertNotTerminated();
         subscriber.cancel();
         assertThat(count).hasValue(1);
         assertThat(called).isTrue();
@@ -710,7 +710,7 @@ public class UniOnEventTest {
                 .onCancellation().invoke(() -> called.set(true))
                 .subscribe().withSubscriber(new UniAssertSubscriber<>());
 
-        subscriber.assertNotCompleted();
+        subscriber.assertNotTerminated();
         // Cancel the subscription
         subscriber.cancel();
 
@@ -742,7 +742,7 @@ public class UniOnEventTest {
                 .onCancellation().invoke(() -> called.set(true))
                 .subscribe().withSubscriber(new UniAssertSubscriber<>());
 
-        subscriber.assertNotCompleted();
+        subscriber.assertNotTerminated();
         subscriber.cancel();
         assertThat(count).hasValue(1);
         assertThat(called).isTrue();
@@ -770,11 +770,10 @@ public class UniOnEventTest {
                 })
                 .subscribe().withSubscriber(new UniAssertSubscriber<>());
 
-        subscriber.assertNotCompleted();
+        subscriber.assertNotTerminated();
         subscriber.cancel();
 
-        subscriber.assertNotCompleted();
-        subscriber.assertNoFailure();
+        subscriber.assertNotTerminated();
         assertThat(emitterTerminationCalled).isTrue();
         assertThat(cancellationUniCalled).isTrue();
         assertThat(count).hasValue(1);
@@ -803,7 +802,7 @@ public class UniOnEventTest {
                 })
                 .subscribe().withSubscriber(new UniAssertSubscriber<>());
 
-        subscriber.assertNotCompleted();
+        subscriber.assertNotTerminated();
 
         CountDownLatch latch = new CountDownLatch(2);
         CountDownLatch done = new CountDownLatch(2);
@@ -824,8 +823,7 @@ public class UniOnEventTest {
 
         done.await();
         await().until(emitterTerminationCalled::get);
-        subscriber.assertNotCompleted();
-        subscriber.assertNoFailure();
+        subscriber.assertNotTerminated();
         assertThat(cancellationUniCalled).isTrue();
         assertThat(count).hasValue(1);
 
@@ -850,11 +848,10 @@ public class UniOnEventTest {
                 })
                 .subscribe().withSubscriber(new UniAssertSubscriber<>());
 
-        subscriber.assertNotCompleted();
+        subscriber.assertNotTerminated();
         subscriber.cancel();
 
-        subscriber.assertNotCompleted();
-        subscriber.assertNoFailure();
+        subscriber.assertNotTerminated();
         assertThat(emitterTerminationCalled).isTrue();
         assertThat(cancellationUniCalled).isTrue();
         assertThat(count).hasValue(1);
@@ -880,11 +877,10 @@ public class UniOnEventTest {
                 })
                 .subscribe().withSubscriber(new UniAssertSubscriber<>());
 
-        subscriber.assertNotCompleted();
+        subscriber.assertNotTerminated();
         subscriber.cancel();
 
-        subscriber.assertNotCompleted();
-        subscriber.assertNoFailure();
+        subscriber.assertNotTerminated();
         assertThat(emitterTerminationCalled).isTrue();
         assertThat(cancellationUniCalled).isTrue();
         assertThat(count).hasValue(1);

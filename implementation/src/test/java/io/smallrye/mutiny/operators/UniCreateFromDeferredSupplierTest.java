@@ -32,7 +32,7 @@ public class UniCreateFromDeferredSupplierTest {
         Uni<Integer> s = Uni.createFrom().deferred(() -> null);
         UniAssertSubscriber<Integer> subscriber = UniAssertSubscriber.create();
         s.subscribe().withSubscriber(subscriber);
-        subscriber.assertFailure(NullPointerException.class, "");
+        subscriber.assertFailedWith(NullPointerException.class, "");
     }
 
     @Test
@@ -42,7 +42,7 @@ public class UniCreateFromDeferredSupplierTest {
         });
         UniAssertSubscriber<Integer> subscriber = UniAssertSubscriber.create();
         s.subscribe().withSubscriber(subscriber);
-        subscriber.assertFailure(IllegalStateException.class, "boom");
+        subscriber.assertFailedWith(IllegalStateException.class, "boom");
     }
 
     @Test
@@ -56,10 +56,10 @@ public class UniCreateFromDeferredSupplierTest {
         assertThat(shared).hasValue(0);
         uni.subscribe().withSubscriber(s1);
         assertThat(shared).hasValue(1);
-        s1.assertCompletedSuccessfully().assertItem(1);
+        s1.assertCompleted().assertItem(1);
         uni.subscribe().withSubscriber(s2);
         assertThat(shared).hasValue(2);
-        s2.assertCompletedSuccessfully().assertItem(2);
+        s2.assertCompleted().assertItem(2);
     }
 
     @Test
@@ -74,9 +74,9 @@ public class UniCreateFromDeferredSupplierTest {
                 page -> Uni.createFrom().item(page.getAndIncrement()));
 
         uni.subscribe().withSubscriber(s1);
-        s1.assertFailure(IllegalStateException.class, "boom");
+        s1.assertFailedWith(IllegalStateException.class, "boom");
         uni.subscribe().withSubscriber(s2);
-        s2.assertFailure(IllegalStateException.class, "Invalid shared state");
+        s2.assertFailedWith(IllegalStateException.class, "Invalid shared state");
     }
 
     @Test
@@ -89,9 +89,9 @@ public class UniCreateFromDeferredSupplierTest {
                 page -> Uni.createFrom().item(page.getAndIncrement()));
 
         uni.subscribe().withSubscriber(s1);
-        s1.assertFailure(NullPointerException.class, "supplier");
+        s1.assertFailedWith(NullPointerException.class, "supplier");
         uni.subscribe().withSubscriber(s2);
-        s2.assertFailure(IllegalStateException.class, "Invalid shared state");
+        s2.assertFailedWith(IllegalStateException.class, "Invalid shared state");
     }
 
     @Test

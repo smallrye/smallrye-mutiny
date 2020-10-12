@@ -25,15 +25,15 @@ public class MultiBroadcastTest {
         s1.assertHasNotReceivedAnyItem().assertNotTerminated();
 
         processor.emit(1).emit(2).emit(3);
-        s1.assertReceived(1, 2, 3).assertNotTerminated();
+        s1.assertItems(1, 2, 3).assertNotTerminated();
 
         AssertSubscriber<Integer> s2 = multi.subscribe().withSubscriber(AssertSubscriber.create(1));
         s2.assertHasNotReceivedAnyItem().assertNotTerminated();
 
         processor.emit(4).emit(5);
         // 5 is not received, because we use the lower number of requests.
-        s1.assertReceived(1, 2, 3, 4).assertNotTerminated();
-        s2.assertReceived(4).assertNotTerminated();
+        s1.assertItems(1, 2, 3, 4).assertNotTerminated();
+        s2.assertItems(4).assertNotTerminated();
 
         processor.complete();
 
@@ -43,8 +43,8 @@ public class MultiBroadcastTest {
         // No one completed, because the are still ongoing items, and not enough requests
         s2.request(10);
 
-        s1.assertCompletedSuccessfully();
-        s2.assertCompletedSuccessfully();
+        s1.assertCompleted();
+        s2.assertCompleted();
     }
 
     @Test
@@ -57,20 +57,20 @@ public class MultiBroadcastTest {
         s1.assertHasNotReceivedAnyItem().assertNotTerminated();
 
         processor.emit(1).emit(2).emit(3);
-        s1.assertReceived(1, 2, 3).assertNotTerminated();
+        s1.assertItems(1, 2, 3).assertNotTerminated();
 
         AssertSubscriber<Integer> s2 = multi.subscribe().withSubscriber(AssertSubscriber.create(1));
         s2.assertHasNotReceivedAnyItem().assertNotTerminated();
 
         processor.emit(4).emit(5);
         // 5 is not received, because we use the lower number of requests.
-        s1.assertReceived(1, 2, 3, 4).assertNotTerminated();
-        s2.assertReceived(4).assertNotTerminated();
+        s1.assertItems(1, 2, 3, 4).assertNotTerminated();
+        s2.assertItems(4).assertNotTerminated();
 
         processor.fail(new IOException("boom"));
 
-        s1.assertHasFailedWith(IOException.class, "boom");
-        s2.assertHasFailedWith(IOException.class, "boom");
+        s1.assertFailedWith(IOException.class, "boom");
+        s2.assertFailedWith(IOException.class, "boom");
     }
 
     @Test
@@ -83,15 +83,15 @@ public class MultiBroadcastTest {
         s1.assertHasNotReceivedAnyItem().assertNotTerminated();
 
         processor.emit(1).emit(2).emit(3);
-        s1.assertReceived(1, 2, 3).assertNotTerminated();
+        s1.assertItems(1, 2, 3).assertNotTerminated();
 
         AssertSubscriber<Integer> s2 = multi.subscribe().withSubscriber(AssertSubscriber.create(1));
         s2.assertHasNotReceivedAnyItem().assertNotTerminated();
 
         processor.emit(4).emit(5);
         // 5 is not received, because we use the lower number of requests.
-        s1.assertReceived(1, 2, 3, 4).assertNotTerminated();
-        s2.assertReceived(4).assertNotTerminated();
+        s1.assertItems(1, 2, 3, 4).assertNotTerminated();
+        s2.assertItems(4).assertNotTerminated();
 
         processor.complete();
 
@@ -100,8 +100,8 @@ public class MultiBroadcastTest {
 
         s2.cancel();
 
-        s1.assertReceived(1, 2, 3, 4, 5);
-        s1.assertCompletedSuccessfully();
+        s1.assertItems(1, 2, 3, 4, 5);
+        s1.assertCompleted();
     }
 
     @Test
@@ -116,14 +116,14 @@ public class MultiBroadcastTest {
         s1.assertHasNotReceivedAnyItem().assertNotTerminated();
 
         processor.emit(1).emit(2).emit(3);
-        s1.assertReceived(1, 2, 3).assertNotTerminated();
+        s1.assertItems(1, 2, 3).assertNotTerminated();
 
         AssertSubscriber<Integer> s2 = multi.subscribe().withSubscriber(AssertSubscriber.create(1));
         s2.assertHasNotReceivedAnyItem().assertNotTerminated();
 
         processor.emit(4).emit(5);
-        s1.assertReceived(1, 2, 3, 4).assertNotTerminated();
-        s2.assertReceived(4).assertNotTerminated();
+        s1.assertItems(1, 2, 3, 4).assertNotTerminated();
+        s2.assertItems(4).assertNotTerminated();
 
         s2.cancel();
         assertThat(cancelled).isFalse();
@@ -133,7 +133,7 @@ public class MultiBroadcastTest {
         AssertSubscriber<Integer> s3 = multi.subscribe().withSubscriber(AssertSubscriber.create(10));
         processor.emit(23);
         processor.complete();
-        s3.assertReceived(23).assertCompletedSuccessfully();
+        s3.assertItems(23).assertCompleted();
     }
 
     @Test
@@ -143,8 +143,8 @@ public class MultiBroadcastTest {
         processor.complete();
 
         processor.toMulti().broadcast().toAllSubscribers().subscribe().withSubscriber(AssertSubscriber.create(10))
-                .assertReceived(1, 2, 3)
-                .assertCompletedSuccessfully();
+                .assertItems(1, 2, 3)
+                .assertCompleted();
     }
 
     @Test
@@ -161,10 +161,10 @@ public class MultiBroadcastTest {
 
         multi.subscribe(s2);
 
-        s1.assertCompletedSuccessfully()
-                .assertReceived(1, 2, 3, 4);
-        s2.assertCompletedSuccessfully()
-                .assertReceived(1, 2, 3, 4);
+        s1.assertCompleted()
+                .assertItems(1, 2, 3, 4);
+        s2.assertCompleted()
+                .assertItems(1, 2, 3, 4);
     }
 
     @Test
@@ -180,14 +180,14 @@ public class MultiBroadcastTest {
         s1.assertHasNotReceivedAnyItem().assertNotTerminated();
 
         processor.emit(1).emit(2).emit(3);
-        s1.assertReceived(1, 2, 3).assertNotTerminated();
+        s1.assertItems(1, 2, 3).assertNotTerminated();
 
         AssertSubscriber<Integer> s2 = multi.subscribe().withSubscriber(AssertSubscriber.create(1));
         s2.assertHasNotReceivedAnyItem().assertNotTerminated();
 
         processor.emit(4).emit(5);
-        s1.assertReceived(1, 2, 3, 4).assertNotTerminated();
-        s2.assertReceived(4).assertNotTerminated();
+        s1.assertItems(1, 2, 3, 4).assertNotTerminated();
+        s2.assertItems(4).assertNotTerminated();
 
         s2.cancel();
         assertThat(cancelled).isFalse();
@@ -211,14 +211,14 @@ public class MultiBroadcastTest {
         s1.assertHasNotReceivedAnyItem().assertNotTerminated();
 
         processor.emit(1).emit(2).emit(3);
-        s1.assertReceived(1, 2, 3).assertNotTerminated();
+        s1.assertItems(1, 2, 3).assertNotTerminated();
 
         AssertSubscriber<Integer> s2 = multi.subscribe().withSubscriber(AssertSubscriber.create(1));
         s2.assertHasNotReceivedAnyItem().assertNotTerminated();
 
         processor.emit(4).emit(5);
-        s1.assertReceived(1, 2, 3, 4).assertNotTerminated();
-        s2.assertReceived(4).assertNotTerminated();
+        s1.assertItems(1, 2, 3, 4).assertNotTerminated();
+        s2.assertItems(4).assertNotTerminated();
 
         s2.cancel();
         assertThat(cancelled).isFalse();
@@ -245,8 +245,8 @@ public class MultiBroadcastTest {
 
         AssertSubscriber<Integer> s2 = multi.subscribe().withSubscriber(AssertSubscriber.create(10));
 
-        s1.assertReceived(1, 2, 3).assertNotTerminated();
-        s2.assertReceived(1, 2, 3).assertNotTerminated();
+        s1.assertItems(1, 2, 3).assertNotTerminated();
+        s2.assertItems(1, 2, 3).assertNotTerminated();
 
         s2.cancel();
         assertThat(cancelled).isFalse();
@@ -273,8 +273,8 @@ public class MultiBroadcastTest {
 
         AssertSubscriber<Integer> s2 = multi.subscribe().withSubscriber(AssertSubscriber.create(10));
 
-        s1.assertReceived(1, 2, 3).assertNotTerminated();
-        s2.assertReceived(1, 2, 3).assertNotTerminated();
+        s1.assertItems(1, 2, 3).assertNotTerminated();
+        s2.assertItems(1, 2, 3).assertNotTerminated();
 
         s2.cancel();
         assertThat(cancelled).isFalse();
@@ -294,13 +294,13 @@ public class MultiBroadcastTest {
         multi.subscribe().withSubscriber(subscriber1);
         multi.subscribe().withSubscriber(subscriber2);
 
-        await().until(() -> subscriber1.items().size() == 100 && subscriber2.items().size() == 100);
+        await().until(() -> subscriber1.getItems().size() == 100 && subscriber2.getItems().size() == 100);
 
         subscriber2.request(1000);
 
-        subscriber1.await().assertCompletedSuccessfully();
-        assertThat(subscriber1.items()).hasSize(1000);
-        subscriber2.await().assertCompletedSuccessfully();
-        assertThat(subscriber2.items()).hasSize(1000);
+        subscriber1.await().assertCompleted();
+        assertThat(subscriber1.getItems()).hasSize(1000);
+        subscriber2.await().assertCompleted();
+        assertThat(subscriber2.getItems()).hasSize(1000);
     }
 }

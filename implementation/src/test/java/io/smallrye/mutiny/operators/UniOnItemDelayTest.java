@@ -53,7 +53,7 @@ public class UniOnItemDelayTest {
         subscriber.await();
         long end = System.currentTimeMillis();
         assertThat(end - begin).isGreaterThanOrEqualTo(100);
-        subscriber.assertCompletedSuccessfully().assertItem(null);
+        subscriber.assertCompleted().assertItem(null);
         assertThat(subscriber.getOnItemThreadName()).isNotEqualTo(Thread.currentThread().getName());
     }
 
@@ -79,7 +79,7 @@ public class UniOnItemDelayTest {
         subscriber.await();
         long end = System.currentTimeMillis();
         assertThat(end - begin).isGreaterThanOrEqualTo(100);
-        subscriber.assertCompletedSuccessfully().assertItem(null);
+        subscriber.assertCompleted().assertItem(null);
         assertThat(subscriber.getOnItemThreadName()).isNotEqualTo(Thread.currentThread().getName());
     }
 
@@ -93,7 +93,7 @@ public class UniOnItemDelayTest {
         subscriber.await();
         long end = System.currentTimeMillis();
         assertThat(end - begin).isLessThan(100);
-        subscriber.assertCompletedWithFailure().assertFailure(Exception.class, "boom");
+        subscriber.assertFailed().assertFailedWith(Exception.class, "boom");
     }
 
     @Test
@@ -111,7 +111,7 @@ public class UniOnItemDelayTest {
         UniAssertSubscriber<Integer> subscriber = new UniAssertSubscriber<>(true);
         Uni.createFrom().item(1).onItem().delayIt().onExecutor(executor).by(Duration.ofMillis(100)).subscribe()
                 .withSubscriber(subscriber);
-        subscriber.assertNotCompleted();
+        subscriber.assertNotTerminated();
         assertThat(called).isFalse();
     }
 
@@ -122,7 +122,7 @@ public class UniOnItemDelayTest {
         Uni.createFrom().item(1).onItem().delayIt()
                 .onExecutor(executor)
                 .by(Duration.ofMillis(100)).subscribe().withSubscriber(subscriber);
-        subscriber.assertCompletedWithFailure().assertFailure(RejectedExecutionException.class, "");
+        subscriber.assertFailed().assertFailedWith(RejectedExecutionException.class, "");
     }
 
     @Test
@@ -156,7 +156,7 @@ public class UniOnItemDelayTest {
         latch.countDown();
 
         await().until(() -> future.get() != null && future.get().isCancelled());
-        subscriber.assertNotCompleted();
+        subscriber.assertNotTerminated();
     }
 
     @Test

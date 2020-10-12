@@ -42,13 +42,13 @@ public class MultiOnSubscribeTest {
         assertThat(count).hasValue(0);
         assertThat(reference).hasValue(null);
 
-        multi.subscribe().withSubscriber(subscriber).assertCompletedSuccessfully().assertReceived(1, 2, 3);
+        multi.subscribe().withSubscriber(subscriber).assertCompleted().assertItems(1, 2, 3);
 
         assertThat(count).hasValue(1);
         assertThat(reference).doesNotHaveValue(null);
 
         AssertSubscriber<Integer> subscriber2 = AssertSubscriber.create(10);
-        multi.subscribe().withSubscriber(subscriber2).assertCompletedSuccessfully().assertReceived(1, 2, 3);
+        multi.subscribe().withSubscriber(subscriber2).assertCompleted().assertItems(1, 2, 3);
 
         assertThat(count).hasValue(2);
         assertThat(reference).doesNotHaveValue(null);
@@ -69,13 +69,13 @@ public class MultiOnSubscribeTest {
         assertThat(count).hasValue(0);
         assertThat(reference).hasValue(null);
 
-        multi.subscribe().withSubscriber(subscriber).assertCompletedSuccessfully().assertReceived(1, 2, 3);
+        multi.subscribe().withSubscriber(subscriber).assertCompleted().assertItems(1, 2, 3);
 
         assertThat(count).hasValue(1);
         assertThat(reference).doesNotHaveValue(null);
 
         AssertSubscriber<Integer> subscriber2 = AssertSubscriber.create(10);
-        multi.subscribe().withSubscriber(subscriber2).assertCompletedSuccessfully().assertReceived(1, 2, 3);
+        multi.subscribe().withSubscriber(subscriber2).assertCompleted().assertItems(1, 2, 3);
 
         assertThat(count).hasValue(2);
         assertThat(reference).doesNotHaveValue(null);
@@ -99,13 +99,13 @@ public class MultiOnSubscribeTest {
         assertThat(count).hasValue(0);
         assertThat(reference).hasValue(null);
 
-        multi.subscribe().withSubscriber(subscriber).assertCompletedSuccessfully().assertReceived(1, 2, 3);
+        multi.subscribe().withSubscriber(subscriber).assertCompleted().assertItems(1, 2, 3);
 
         assertThat(count).hasValue(1);
         assertThat(reference).doesNotHaveValue(null);
 
         AssertSubscriber<Integer> subscriber2 = AssertSubscriber.create(10);
-        multi.subscribe().withSubscriber(subscriber2).assertCompletedSuccessfully().assertReceived(1, 2, 3);
+        multi.subscribe().withSubscriber(subscriber2).assertCompleted().assertItems(1, 2, 3);
 
         assertThat(count).hasValue(2);
         assertThat(reference).doesNotHaveValue(null);
@@ -121,7 +121,7 @@ public class MultiOnSubscribeTest {
         AssertSubscriber<Integer> subscriber = AssertSubscriber.create();
 
         multi.subscribe().withSubscriber(subscriber)
-                .assertHasFailedWith(IllegalStateException.class, "boom");
+                .assertFailedWith(IllegalStateException.class, "boom");
 
     }
 
@@ -135,7 +135,7 @@ public class MultiOnSubscribeTest {
         AssertSubscriber<Integer> subscriber = AssertSubscriber.create();
 
         multi.subscribe().withSubscriber(subscriber)
-                .assertHasFailedWith(IllegalStateException.class, "boom");
+                .assertFailedWith(IllegalStateException.class, "boom");
 
     }
 
@@ -147,7 +147,7 @@ public class MultiOnSubscribeTest {
         AssertSubscriber<Integer> subscriber = AssertSubscriber.create();
 
         multi.subscribe().withSubscriber(subscriber)
-                .assertHasFailedWith(IOException.class, "boom");
+                .assertFailedWith(IOException.class, "boom");
 
     }
 
@@ -159,7 +159,7 @@ public class MultiOnSubscribeTest {
         AssertSubscriber<Integer> subscriber = AssertSubscriber.create();
 
         multi.subscribe().withSubscriber(subscriber)
-                .assertHasFailedWith(NullPointerException.class, "`null`");
+                .assertFailedWith(NullPointerException.class, "`null`");
     }
 
     @Test
@@ -205,7 +205,7 @@ public class MultiOnSubscribeTest {
         latch.countDown();
         subscriber.await()
                 .assertSubscribed()
-                .assertCompletedSuccessfully().assertReceived(1, 2, 3);
+                .assertCompleted().assertItems(1, 2, 3);
     }
 
     @Test
@@ -223,7 +223,7 @@ public class MultiOnSubscribeTest {
 
         subscriber.await()
                 .assertSubscribed()
-                .assertCompletedSuccessfully().assertReceived(1, 2, 3);
+                .assertCompleted().assertItems(1, 2, 3);
 
     }
 
@@ -243,7 +243,7 @@ public class MultiOnSubscribeTest {
 
         subscriber.await()
                 .assertSubscribed()
-                .assertCompletedSuccessfully().assertReceived(1, 2, 3);
+                .assertCompleted().assertItems(1, 2, 3);
 
     }
 
@@ -256,8 +256,8 @@ public class MultiOnSubscribeTest {
         subscriber
                 .request(1)
                 .await()
-                .assertReceived(1, 2, 3)
-                .assertCompletedSuccessfully();
+                .assertItems(1, 2, 3)
+                .assertCompleted();
     }
 
     @Test
@@ -269,7 +269,7 @@ public class MultiOnSubscribeTest {
                 .runSubscriptionOn(executor)
                 .subscribe().withSubscriber(AssertSubscriber.create(2));
 
-        subscriber.assertHasFailedWith(RejectedExecutionException.class, "");
+        subscriber.assertFailedWith(RejectedExecutionException.class, "");
     }
 
     @Test
@@ -286,7 +286,7 @@ public class MultiOnSubscribeTest {
         executor.shutdownNow();
         subscriber.request(2);
 
-        subscriber.assertHasFailedWith(RejectedExecutionException.class, "");
+        subscriber.assertFailedWith(RejectedExecutionException.class, "");
     }
 
 }

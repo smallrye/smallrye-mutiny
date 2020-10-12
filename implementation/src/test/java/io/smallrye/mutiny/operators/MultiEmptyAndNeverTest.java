@@ -11,7 +11,7 @@ public class MultiEmptyAndNeverTest {
     public void testEmpty() {
         Multi<String> nothing = Multi.createFrom().empty();
         nothing.subscribe().withSubscriber(AssertSubscriber.create())
-                .assertCompletedSuccessfully()
+                .assertCompleted()
                 .assertHasNotReceivedAnyItem();
     }
 

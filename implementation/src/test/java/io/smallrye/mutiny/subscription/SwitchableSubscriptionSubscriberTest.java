@@ -58,7 +58,7 @@ public class SwitchableSubscriptionSubscriberTest {
             }
         };
         switchable.request(-1);
-        subscriber.assertHasFailedWith(IllegalArgumentException.class, "");
+        subscriber.assertFailedWith(IllegalArgumentException.class, "");
     }
 
     @Test

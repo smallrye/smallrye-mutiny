@@ -57,7 +57,7 @@ public class MultiOnFailureRetryWhenTest {
                 .onFailure().retry().when(x -> when)
                 .subscribe().withSubscriber(AssertSubscriber.create(3));
 
-        subscriber.assertReceived(1, 1, 1)
+        subscriber.assertItems(1, 1, 1)
                 .cancel();
 
         assertThat(cancelled).hasValue(1);
@@ -80,7 +80,7 @@ public class MultiOnFailureRetryWhenTest {
 
         subscriber
                 .assertSubscribed()
-                .assertHasFailedWith(IllegalStateException.class, "boom");
+                .assertFailedWith(IllegalStateException.class, "boom");
 
         assertThat(subscribed.get()).isFalse();
         assertThat(cancelled.get()).isFalse();
@@ -105,8 +105,8 @@ public class MultiOnFailureRetryWhenTest {
                 .withSubscriber(AssertSubscriber.create(10));
         subscriber
                 .assertSubscribed()
-                .assertReceived(1, 1)
-                .assertHasFailedWith(IllegalStateException.class, "boom");
+                .assertItems(1, 1)
+                .assertFailedWith(IllegalStateException.class, "boom");
 
         assertThat(subscribed.get()).isTrue();
         assertThat(cancelled.get()).isTrue();
@@ -127,7 +127,7 @@ public class MultiOnFailureRetryWhenTest {
                 .withSubscriber(AssertSubscriber.create(10));
         subscriber
                 .assertSubscribed()
-                .assertCompletedSuccessfully();
+                .assertCompleted();
 
         assertThat(subscribed.get()).isFalse();
         assertThat(cancelled.get()).isFalse();
@@ -147,8 +147,8 @@ public class MultiOnFailureRetryWhenTest {
                 .withSubscriber(AssertSubscriber.create(10));
         subscriber
                 .assertSubscribed()
-                .assertReceived(1, 1)
-                .assertCompletedSuccessfully();
+                .assertItems(1, 1)
+                .assertCompleted();
         assertThat(sourceSubscribed.get()).isTrue();
     }
 
@@ -161,8 +161,8 @@ public class MultiOnFailureRetryWhenTest {
                 .subscribe(subscriber);
 
         subscriber
-                .assertReceived(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1)
-                .assertCompletedSuccessfully();
+                .assertItems(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1)
+                .assertCompleted();
     }
 
     @Test
@@ -178,20 +178,20 @@ public class MultiOnFailureRetryWhenTest {
                 .assertNotTerminated()
 
                 .request(1)
-                .assertReceived(1)
+                .assertItems(1)
                 .assertNotTerminated()
 
                 .request(2)
-                .assertReceived(1, 2, 1)
+                .assertItems(1, 2, 1)
                 .assertNotTerminated()
 
                 .request(5)
-                .assertReceived(1, 2, 1, 2, 1, 2, 1, 2)
+                .assertItems(1, 2, 1, 2, 1, 2, 1, 2)
                 .assertNotTerminated()
 
                 .request(10)
-                .assertReceived(1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2)
-                .assertCompletedSuccessfully();
+                .assertItems(1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2)
+                .assertCompleted();
     }
 
     @Test
@@ -204,7 +204,7 @@ public class MultiOnFailureRetryWhenTest {
 
         subscriber
                 .assertHasNotReceivedAnyItem()
-                .assertCompletedSuccessfully();
+                .assertCompleted();
     }
 
     @Test
@@ -217,7 +217,7 @@ public class MultiOnFailureRetryWhenTest {
 
         subscriber
                 .assertHasNotReceivedAnyItem()
-                .assertHasFailedWith(RuntimeException.class, "failed");
+                .assertFailedWith(RuntimeException.class, "failed");
     }
 
     @Test
@@ -232,7 +232,7 @@ public class MultiOnFailureRetryWhenTest {
 
         subscriber
                 .assertHasNotReceivedAnyItem()
-                .assertHasFailedWith(RuntimeException.class, "failed");
+                .assertFailedWith(RuntimeException.class, "failed");
 
     }
 
@@ -246,7 +246,7 @@ public class MultiOnFailureRetryWhenTest {
 
         subscriber
                 .assertHasNotReceivedAnyItem()
-                .assertHasFailedWith(NullPointerException.class, "");
+                .assertFailedWith(NullPointerException.class, "");
 
     }
 
@@ -259,8 +259,8 @@ public class MultiOnFailureRetryWhenTest {
         }))
                 .subscribe(subscriber);
 
-        subscriber.assertReceived(1, 2)
-                .assertHasFailedWith(RuntimeException.class, "failed");
+        subscriber.assertItems(1, 2)
+                .assertFailedWith(RuntimeException.class, "failed");
 
     }
 
@@ -274,7 +274,7 @@ public class MultiOnFailureRetryWhenTest {
 
         subscriber.request(8);
 
-        subscriber.assertReceived(1, 2, 1, 2, 1, 2, 1, 2)
+        subscriber.assertItems(1, 2, 1, 2, 1, 2, 1, 2)
                 .assertNotTerminated();
 
         subscriber.cancel();
@@ -303,8 +303,8 @@ public class MultiOnFailureRetryWhenTest {
 
         subscriber
                 .await(Duration.ofSeconds(10))
-                .assertReceived("hey")
-                .assertCompletedSuccessfully();
+                .assertItems("hey")
+                .assertCompleted();
     }
 
     @Test
@@ -319,10 +319,10 @@ public class MultiOnFailureRetryWhenTest {
                 .onFailure().retry().withBackOff(Duration.ofMillis(10), Duration.ofHours(1)).withJitter(0.1)
                 .atMost(4)
                 .subscribe().withSubscriber(AssertSubscriber.create(100));
-        await().until(() -> subscriber.items().size() >= 8);
+        await().until(() -> subscriber.getItems().size() >= 8);
         subscriber
-                .assertReceived(0, 1, 0, 1, 0, 1, 0, 1)
-                .assertHasFailedWith(IllegalStateException.class, "Retries exhausted");
+                .assertItems(0, 1, 0, 1, 0, 1, 0, 1)
+                .assertFailedWith(IllegalStateException.class, "Retries exhausted");
 
     }
 
@@ -336,10 +336,10 @@ public class MultiOnFailureRetryWhenTest {
                 .atMost(4)
                 .subscribe().withSubscriber(AssertSubscriber.create(100));
 
-        await().until(() -> subscriber.items().size() >= 8);
+        await().until(() -> subscriber.getItems().size() >= 8);
         subscriber
-                .assertReceived(0, 1, 0, 1, 0, 1, 0, 1)
-                .assertHasFailedWith(IllegalStateException.class, "Retries exhausted: 4/4");
+                .assertItems(0, 1, 0, 1, 0, 1, 0, 1)
+                .assertFailedWith(IllegalStateException.class, "Retries exhausted: 4/4");
     }
 
     @Test
@@ -353,10 +353,10 @@ public class MultiOnFailureRetryWhenTest {
 
         await()
                 .atMost(1, TimeUnit.MINUTES)
-                .until(() -> subscriber.items().size() >= 8);
+                .until(() -> subscriber.getItems().size() >= 8);
         subscriber
-                .assertReceived(0, 1, 0, 1, 0, 1, 0, 1)
-                .assertHasFailedWith(IllegalStateException.class, "Retries exhausted: 4/4");
+                .assertItems(0, 1, 0, 1, 0, 1, 0, 1)
+                .assertFailedWith(IllegalStateException.class, "Retries exhausted: 4/4");
     }
 
 }

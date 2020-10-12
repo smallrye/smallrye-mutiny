@@ -41,8 +41,8 @@ public class EmitterBasedMultiTest {
             e.fail(new Exception("boom-1"));
         }).subscribe().withSubscriber(AssertSubscriber.create(3));
         subscriber.assertSubscribed()
-                .assertReceived(1, 2, 3)
-                .assertCompletedSuccessfully();
+                .assertItems(1, 2, 3)
+                .assertCompleted();
         assertThat(terminated).isTrue();
     }
 
@@ -56,8 +56,8 @@ public class EmitterBasedMultiTest {
             throw new RuntimeException("boom");
         }).subscribe().withSubscriber(AssertSubscriber.create(3));
         subscriber.assertSubscribed()
-                .assertReceived(1, 2, 3)
-                .assertHasFailedWith(RuntimeException.class, "boom");
+                .assertItems(1, 2, 3)
+                .assertFailedWith(RuntimeException.class, "boom");
         assertThat(terminated).isTrue();
     }
 
@@ -71,8 +71,8 @@ public class EmitterBasedMultiTest {
             e.fail(new Exception("boom-1"));
         }).subscribe().withSubscriber(AssertSubscriber.create(3));
         subscriber.assertSubscribed()
-                .assertReceived(1, 2, 3)
-                .assertHasFailedWith(Exception.class, "boom");
+                .assertItems(1, 2, 3)
+                .assertFailedWith(Exception.class, "boom");
         assertThat(terminated).isTrue();
     }
 
@@ -84,9 +84,8 @@ public class EmitterBasedMultiTest {
             e.emit(1).emit(2).emit(3);
         }).subscribe().withSubscriber(AssertSubscriber.create(3));
         subscriber.assertSubscribed()
-                .assertReceived(1, 2, 3)
-                .assertHasNotCompleted()
-                .assertHasNotFailed();
+                .assertItems(1, 2, 3)
+                .assertNotTerminated();
         assertThat(terminated).isFalse();
         subscriber.cancel();
         assertThat(terminated).isTrue();
@@ -101,9 +100,8 @@ public class EmitterBasedMultiTest {
             e.emit(null);
         }).subscribe().withSubscriber(AssertSubscriber.create(2))
                 .await()
-                .assertHasNotCompleted()
-                .assertHasFailedWith(NullPointerException.class, "")
-                .assertReceived("a");
+                .assertFailedWith(NullPointerException.class, "")
+                .assertItems("a");
         assertThat(terminated).isTrue();
 
         Multi.createFrom().<String> emitter(e -> {
@@ -112,9 +110,8 @@ public class EmitterBasedMultiTest {
         }, BackPressureStrategy.LATEST)
                 .subscribe().withSubscriber(AssertSubscriber.create(2))
                 .await()
-                .assertHasNotCompleted()
-                .assertHasFailedWith(NullPointerException.class, "")
-                .assertReceived("a");
+                .assertFailedWith(NullPointerException.class, "")
+                .assertItems("a");
 
         Multi.createFrom().<String> emitter(e -> {
             e.emit("a");
@@ -122,9 +119,8 @@ public class EmitterBasedMultiTest {
         }, BackPressureStrategy.DROP)
                 .subscribe().withSubscriber(AssertSubscriber.create(2))
                 .await()
-                .assertHasNotCompleted()
-                .assertHasFailedWith(NullPointerException.class, "")
-                .assertReceived("a");
+                .assertFailedWith(NullPointerException.class, "")
+                .assertItems("a");
 
         Multi.createFrom().<String> emitter(e -> {
             e.emit("a");
@@ -132,9 +128,8 @@ public class EmitterBasedMultiTest {
         }, BackPressureStrategy.ERROR)
                 .subscribe().withSubscriber(AssertSubscriber.create(2))
                 .await()
-                .assertHasNotCompleted()
-                .assertHasFailedWith(NullPointerException.class, "")
-                .assertReceived("a");
+                .assertFailedWith(NullPointerException.class, "")
+                .assertItems("a");
 
         Multi.createFrom().<String> emitter(e -> {
             e.emit("a");
@@ -142,9 +137,8 @@ public class EmitterBasedMultiTest {
         }, BackPressureStrategy.IGNORE)
                 .subscribe().withSubscriber(AssertSubscriber.create(2))
                 .await()
-                .assertHasNotCompleted()
-                .assertHasFailedWith(NullPointerException.class, "")
-                .assertReceived("a");
+                .assertFailedWith(NullPointerException.class, "")
+                .assertItems("a");
 
     }
 
@@ -157,8 +151,8 @@ public class EmitterBasedMultiTest {
             e.fail(null);
         }).subscribe().withSubscriber(AssertSubscriber.create(2))
                 .await()
-                .assertHasFailedWith(NullPointerException.class, "")
-                .assertReceived("a");
+                .assertFailedWith(NullPointerException.class, "")
+                .assertItems("a");
         assertThat(terminated).isTrue();
 
         Multi.createFrom().<String> emitter(e -> {
@@ -167,8 +161,8 @@ public class EmitterBasedMultiTest {
         }, BackPressureStrategy.LATEST)
                 .subscribe().withSubscriber(AssertSubscriber.create(2))
                 .await()
-                .assertHasFailedWith(NullPointerException.class, "")
-                .assertReceived("a");
+                .assertFailedWith(NullPointerException.class, "")
+                .assertItems("a");
 
         Multi.createFrom().<String> emitter(e -> {
             e.emit("a");
@@ -176,9 +170,8 @@ public class EmitterBasedMultiTest {
         }, BackPressureStrategy.DROP)
                 .subscribe().withSubscriber(AssertSubscriber.create(2))
                 .await()
-                .assertHasNotCompleted()
-                .assertHasFailedWith(NullPointerException.class, "")
-                .assertReceived("a");
+                .assertFailedWith(NullPointerException.class, "")
+                .assertItems("a");
 
         Multi.createFrom().<String> emitter(e -> {
             e.emit("a");
@@ -186,9 +179,8 @@ public class EmitterBasedMultiTest {
         }, BackPressureStrategy.ERROR)
                 .subscribe().withSubscriber(AssertSubscriber.create(2))
                 .await()
-                .assertHasNotCompleted()
-                .assertHasFailedWith(NullPointerException.class, "")
-                .assertReceived("a");
+                .assertFailedWith(NullPointerException.class, "")
+                .assertItems("a");
 
         Multi.createFrom().<String> emitter(e -> {
             e.emit("a");
@@ -196,9 +188,8 @@ public class EmitterBasedMultiTest {
         }, BackPressureStrategy.IGNORE)
                 .subscribe().withSubscriber(AssertSubscriber.create(2))
                 .await()
-                .assertHasNotCompleted()
-                .assertHasFailedWith(NullPointerException.class, "")
-                .assertReceived("a");
+                .assertFailedWith(NullPointerException.class, "")
+                .assertItems("a");
 
     }
 
@@ -239,7 +230,7 @@ public class EmitterBasedMultiTest {
         service.submit(r1);
         service.submit(r2);
 
-        await().until(() -> subscriber.items().size() == 1200);
+        await().until(() -> subscriber.getItems().size() == 1200);
         service.shutdown();
     }
 
@@ -281,7 +272,7 @@ public class EmitterBasedMultiTest {
         service.submit(r1);
         service.submit(r2);
 
-        subscriber.await().assertHasFailedWith(Exception.class, "boom");
+        subscriber.await().assertFailedWith(Exception.class, "boom");
         service.shutdown();
     }
 }

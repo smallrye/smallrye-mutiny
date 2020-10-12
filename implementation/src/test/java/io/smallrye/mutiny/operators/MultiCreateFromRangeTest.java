@@ -14,22 +14,22 @@ public class MultiCreateFromRangeTest {
         AssertSubscriber<Integer> subscriber = AssertSubscriber.create();
         Multi.createFrom().range(1, 10).subscribe().withSubscriber(subscriber)
                 .request(3)
-                .assertReceived(1, 2, 3)
-                .assertHasNotCompleted()
+                .assertItems(1, 2, 3)
+                .assertNotTerminated()
                 .request(10)
-                .assertReceived(1, 2, 3, 4, 5, 6, 7, 8, 9)
-                .assertCompletedSuccessfully();
+                .assertItems(1, 2, 3, 4, 5, 6, 7, 8, 9)
+                .assertCompleted();
     }
 
     @Test
     public void testARangeFrom0to10WithFullConsumptionAtSubscription() {
         AssertSubscriber<Integer> subscriber = AssertSubscriber.create(9);
         Multi.createFrom().range(1, 10).subscribe().withSubscriber(subscriber)
-                .assertReceived(1, 2, 3, 4, 5, 6, 7, 8, 9)
-                .assertCompletedSuccessfully()
+                .assertItems(1, 2, 3, 4, 5, 6, 7, 8, 9)
+                .assertCompleted()
                 .request(3)
-                .assertReceived(1, 2, 3, 4, 5, 6, 7, 8, 9)
-                .assertCompletedSuccessfully();
+                .assertItems(1, 2, 3, 4, 5, 6, 7, 8, 9)
+                .assertCompleted();
     }
 
     @Test

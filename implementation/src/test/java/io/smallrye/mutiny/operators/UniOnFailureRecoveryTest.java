@@ -185,7 +185,7 @@ public class UniOnFailureRecoveryTest {
         Uni.createFrom().item(1)
                 .onFailure().recoverWithUni(v -> Uni.createFrom().item(2))
                 .subscribe().withSubscriber(subscriber);
-        subscriber.assertCompletedSuccessfully().assertItem(1);
+        subscriber.assertCompleted().assertItem(1);
     }
 
     @Test
@@ -196,7 +196,7 @@ public class UniOnFailureRecoveryTest {
                 .onFailure().recoverWithUni(fail -> Uni.createFrom().item(2))
                 .subscribe().withSubscriber(subscriber);
 
-        subscriber.assertCompletedSuccessfully().assertItem(2);
+        subscriber.assertCompleted().assertItem(2);
     }
 
     @Test
@@ -207,7 +207,7 @@ public class UniOnFailureRecoveryTest {
                 .onFailure().recoverWithItem(fail -> 2)
                 .subscribe().withSubscriber(subscriber);
 
-        subscriber.assertCompletedSuccessfully().assertItem(2);
+        subscriber.assertCompleted().assertItem(2);
     }
 
     @Test
@@ -216,8 +216,8 @@ public class UniOnFailureRecoveryTest {
         Uni.createFrom().<Integer> failure(new Exception())
                 .onFailure().transform(f -> new RuntimeException("boom"))
                 .subscribe().withSubscriber(subscriber);
-        subscriber.assertCompletedWithFailure()
-                .assertFailure(RuntimeException.class, "boom");
+        subscriber.assertFailed()
+                .assertFailedWith(RuntimeException.class, "boom");
     }
 
     @Test
@@ -228,7 +228,7 @@ public class UniOnFailureRecoveryTest {
                 .onFailure(IOException.class).recoverWithUni(Uni.createFrom().item(1))
                 .onFailure(IndexOutOfBoundsException.class).recoverWithUni(Uni.createFrom().item(2))
                 .subscribe().withSubscriber(subscriber);
-        subscriber.assertCompletedSuccessfully().assertItem(2);
+        subscriber.assertCompleted().assertItem(2);
     }
 
 }

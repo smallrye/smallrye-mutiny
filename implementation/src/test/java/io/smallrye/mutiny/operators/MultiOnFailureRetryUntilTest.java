@@ -33,7 +33,7 @@ public class MultiOnFailureRetryUntilTest {
         upstream
                 .onFailure().retry().until(t -> true)
                 .subscribe().withSubscriber(subscriber);
-        subscriber.assertReceived(0, 1, 2, 3).assertCompletedSuccessfully();
+        subscriber.assertItems(0, 1, 2, 3).assertCompleted();
     }
 
     @Test
@@ -57,7 +57,7 @@ public class MultiOnFailureRetryUntilTest {
                 .onFailure().retry().until(t -> true)
                 .subscribe(subscriber);
 
-        subscriber.assertReceived(0, 1, 0, 1, 2, 3).assertCompletedSuccessfully();
+        subscriber.assertItems(0, 1, 0, 1, 2, 3).assertCompleted();
     }
 
     @Test
@@ -73,7 +73,7 @@ public class MultiOnFailureRetryUntilTest {
                 .onFailure().retry().until(retryTwice)
                 .subscribe().withSubscriber(subscriber);
 
-        subscriber.assertReceived(0, 1, 0, 1, 0, 1).assertHasFailedWith(Exception.class, "boom");
+        subscriber.assertItems(0, 1, 0, 1, 0, 1).assertFailedWith(Exception.class, "boom");
     }
 
     @Test
@@ -96,8 +96,8 @@ public class MultiOnFailureRetryUntilTest {
                 .onFailure().retry().until(retryOnIoException).subscribe().withSubscriber(subscriber);
 
         subscriber
-                .assertReceived(0, 1, 0, 1, 2, 3)
-                .assertCompletedSuccessfully();
+                .assertItems(0, 1, 0, 1, 2, 3)
+                .assertCompleted();
     }
 
     @Test
@@ -123,8 +123,8 @@ public class MultiOnFailureRetryUntilTest {
                 .subscribe().withSubscriber(subscriber);
 
         subscriber
-                .assertHasFailedWith(IllegalStateException.class, "kaboom")
-                .assertReceived(0, 1, 0, 1, 2, 3);
+                .assertFailedWith(IllegalStateException.class, "kaboom")
+                .assertItems(0, 1, 0, 1, 2, 3);
     }
 
     @Test
@@ -138,7 +138,7 @@ public class MultiOnFailureRetryUntilTest {
         processor.onNext(1);
         subscriber.cancel();
         processor.onNext(2);
-        assertThat(subscriber.items()).hasSize(1);
+        assertThat(subscriber.getItems()).hasSize(1);
         subscriber.assertNotTerminated();
     }
 
@@ -164,7 +164,7 @@ public class MultiOnFailureRetryUntilTest {
                     throw new IllegalStateException("boom");
                 })
                 .subscribe().withSubscriber(subscriber);
-        subscriber.assertReceived(0, 1).assertHasFailedWith(IllegalStateException.class, "boom");
+        subscriber.assertItems(0, 1).assertFailedWith(IllegalStateException.class, "boom");
     }
 
     @Test
@@ -187,7 +187,7 @@ public class MultiOnFailureRetryUntilTest {
         upstream
                 .onFailure().retry().until(t -> false)
                 .subscribe().withSubscriber(subscriber);
-        subscriber.assertReceived(0, 1).assertHasFailedWith(Exception.class, "boom");
+        subscriber.assertItems(0, 1).assertFailedWith(Exception.class, "boom");
     }
 
 }

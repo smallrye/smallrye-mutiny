@@ -52,7 +52,7 @@ public class MultiOnTerminationUniInvokeTest {
         subscriber
                 .request(20)
                 .assertHasNotReceivedAnyItem()
-                .assertHasFailedWith(IOException.class, "boom");
+                .assertFailedWith(IOException.class, "boom");
 
         assertThat(subscription.get()).isNotNull();
         assertThat(item.get()).isNull();
@@ -99,8 +99,8 @@ public class MultiOnTerminationUniInvokeTest {
 
         subscriber
                 .request(20)
-                .assertReceived(1)
-                .assertHasFailedWith(IOException.class, "bam");
+                .assertItems(1)
+                .assertFailedWith(IOException.class, "bam");
 
         assertThat(subscription.get()).isNotNull();
         assertThat(item.get()).isEqualTo(1);
@@ -146,8 +146,8 @@ public class MultiOnTerminationUniInvokeTest {
 
         subscriber
                 .request(20)
-                .assertReceived(1)
-                .assertHasFailedWith(RuntimeException.class, "bam");
+                .assertItems(1)
+                .assertFailedWith(RuntimeException.class, "bam");
 
         assertThat(subscription.get()).isNotNull();
         assertThat(item.get()).isEqualTo(1);
@@ -194,10 +194,10 @@ public class MultiOnTerminationUniInvokeTest {
         subscriber
                 .request(20)
                 .assertHasNotReceivedAnyItem()
-                .assertHasFailedWith(CompositeException.class, "boom");
+                .assertFailedWith(CompositeException.class, "boom");
 
-        assertThat(subscriber.failures()).hasSize(1);
-        CompositeException compositeException = (CompositeException) subscriber.failures().get(0);
+        assertThat(subscriber.getFailure()).isNotNull();
+        CompositeException compositeException = (CompositeException) subscriber.getFailure();
         assertThat(compositeException.getCauses()).hasSize(2);
         assertThat(compositeException.getCauses().get(0)).isInstanceOf(IOException.class).hasMessage("boom");
         assertThat(compositeException.getCauses().get(1)).isInstanceOf(RuntimeException.class).hasMessage("tada");
@@ -247,10 +247,10 @@ public class MultiOnTerminationUniInvokeTest {
         subscriber
                 .request(20)
                 .assertHasNotReceivedAnyItem()
-                .assertHasFailedWith(CompositeException.class, "boom");
+                .assertFailedWith(CompositeException.class, "boom");
 
-        assertThat(subscriber.failures()).hasSize(1);
-        CompositeException compositeException = (CompositeException) subscriber.failures().get(0);
+        assertThat(subscriber.getFailure()).isNotNull();
+        CompositeException compositeException = (CompositeException) subscriber.getFailure();
         assertThat(compositeException.getCauses()).hasSize(2);
         assertThat(compositeException.getCauses().get(0)).isInstanceOf(IOException.class).hasMessage("boom");
         assertThat(compositeException.getCauses().get(1)).isInstanceOf(RuntimeException.class).hasMessage("tada");
@@ -300,7 +300,7 @@ public class MultiOnTerminationUniInvokeTest {
 
         subscriber.cancel()
                 .assertHasNotReceivedAnyItem()
-                .assertHasNotCompleted();
+                .assertNotTerminated();
 
         assertThat(item.get()).isNull();
         assertThat(cancellation.get()).isTrue();
@@ -366,7 +366,7 @@ public class MultiOnTerminationUniInvokeTest {
         cancellationSent.set(true);
         await().untilTrue(uniCompleted);
 
-        subscriber.assertReceived(1).assertHasNotCompleted();
+        subscriber.assertItems(1).assertNotTerminated();
 
         assertThat(item.get()).isEqualTo(1);
         assertThat(cancellation.get()).isTrue();

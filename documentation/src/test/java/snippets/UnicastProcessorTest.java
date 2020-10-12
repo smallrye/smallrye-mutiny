@@ -30,6 +30,6 @@ public class UnicastProcessorTest {
         AssertSubscriber<String> subscriber = AssertSubscriber.create(Long.MAX_VALUE);
         multi.subscribe().withSubscriber(subscriber)
                 .await()
-                .run(() -> assertThat(subscriber.items()).hasSize(1000));
+                .run(() -> assertThat(subscriber.getItems()).hasSize(1000));
     }
 }

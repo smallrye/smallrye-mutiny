@@ -67,7 +67,7 @@ public class UniOnTerminationTest {
         UniAssertSubscriber<? super Integer> subscriber = Uni.createFrom().<Integer> failure(new TestException("boom"))
                 .onTermination().invoke((r, f, c) -> terminate.set(f))
                 .subscribe().withSubscriber(UniAssertSubscriber.create());
-        subscriber.assertFailure(TestException.class, "boom");
+        subscriber.assertFailedWith(TestException.class, "boom");
         assertThat(terminate.get()).hasMessageContaining("boom").isInstanceOf(TestException.class);
     }
 
@@ -78,7 +78,7 @@ public class UniOnTerminationTest {
                 .emitOn(Infrastructure.getDefaultExecutor())
                 .onTermination().invoke((r, f, c) -> terminate.set(f))
                 .subscribe().withSubscriber(UniAssertSubscriber.create());
-        subscriber.await().assertFailure(TestException.class, "boom");
+        subscriber.await().assertFailedWith(TestException.class, "boom");
         assertThat(terminate.get()).hasMessageContaining("boom").isInstanceOf(TestException.class);
     }
 
@@ -88,7 +88,7 @@ public class UniOnTerminationTest {
         UniAssertSubscriber<? super Integer> subscriber = Uni.createFrom().<Integer> failure(new TestException("boom"))
                 .onTermination().invoke(() -> terminate.set(true))
                 .subscribe().withSubscriber(UniAssertSubscriber.create());
-        subscriber.assertFailure(TestException.class, "boom");
+        subscriber.assertFailedWith(TestException.class, "boom");
         assertThat(terminate).isTrue();
     }
 
@@ -99,7 +99,7 @@ public class UniOnTerminationTest {
                 .emitOn(Infrastructure.getDefaultExecutor())
                 .onTermination().invoke(() -> terminate.set(true))
                 .subscribe().withSubscriber(UniAssertSubscriber.create());
-        subscriber.await().assertFailure(TestException.class, "boom");
+        subscriber.await().assertFailedWith(TestException.class, "boom");
         assertThat(terminate).isTrue();
     }
 
@@ -133,7 +133,7 @@ public class UniOnTerminationTest {
                     throw new TestException("boom");
                 })
                 .subscribe().withSubscriber(UniAssertSubscriber.create());
-        subscriber.assertFailure(TestException.class, "boom");
+        subscriber.assertFailedWith(TestException.class, "boom");
     }
 
     @Test
@@ -143,8 +143,8 @@ public class UniOnTerminationTest {
                     throw new TestException("boom");
                 })
                 .subscribe().withSubscriber(UniAssertSubscriber.create());
-        subscriber.assertFailure(CompositeException.class, "boom");
-        subscriber.assertFailure(CompositeException.class, "I/O");
+        subscriber.assertFailedWith(CompositeException.class, "boom");
+        subscriber.assertFailedWith(CompositeException.class, "I/O");
     }
 
     @Test
@@ -171,7 +171,7 @@ public class UniOnTerminationTest {
                 })
                 .subscribe().withSubscriber(new UniAssertSubscriber<>());
 
-        subscriber.assertFailure(IOException.class, "boom");
+        subscriber.assertFailedWith(IOException.class, "boom");
 
         assertThat(result.get()).isNull();
         assertThat(failure.get()).isInstanceOf(IOException.class).hasMessage("boom");

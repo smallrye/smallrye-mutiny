@@ -27,9 +27,8 @@ public class AssertSubscriberTest {
         subscriber.onNext("b");
         subscriber.onComplete();
 
-        subscriber.assertReceived("a", "b")
-                .assertCompletedSuccessfully()
-                .assertHasNotFailed();
+        subscriber.assertItems("a", "b")
+                .assertCompleted();
     }
 
     @Test
@@ -44,8 +43,8 @@ public class AssertSubscriberTest {
         subscriber.onNext("b");
         subscriber.onError(new IOException("boom"));
 
-        subscriber.assertReceived("a", "b")
-                .assertHasFailedWith(IOException.class, "boom")
+        subscriber.assertItems("a", "b")
+                .assertFailedWith(IOException.class, "boom")
                 .assertTerminated();
     }
 
@@ -58,7 +57,6 @@ public class AssertSubscriberTest {
         subscriber.request(2);
 
         subscriber.assertNotTerminated();
-        subscriber.assertHasNotFailed();
         subscriber.assertHasNotReceivedAnyItem();
 
         subscriber.cancel();
@@ -79,7 +77,7 @@ public class AssertSubscriberTest {
         }).start();
 
         subscriber.await();
-        subscriber.assertCompletedSuccessfully();
+        subscriber.assertCompleted();
     }
 
     @Test
@@ -97,7 +95,7 @@ public class AssertSubscriberTest {
         }).start();
 
         subscriber.await(Duration.ofMillis(100));
-        subscriber.assertCompletedSuccessfully();
+        subscriber.assertCompleted();
     }
 
     @Test
@@ -115,7 +113,7 @@ public class AssertSubscriberTest {
         }).start();
 
         subscriber.await();
-        subscriber.assertHasFailedWith(Exception.class, "boom");
+        subscriber.assertFailedWith(Exception.class, "boom");
     }
 
     @Test
@@ -128,7 +126,7 @@ public class AssertSubscriberTest {
         subscriber.onComplete();
 
         subscriber.await();
-        subscriber.assertCompletedSuccessfully();
+        subscriber.assertCompleted();
     }
 
     @Test
@@ -141,7 +139,7 @@ public class AssertSubscriberTest {
         subscriber.onError(new Exception("boom"));
 
         subscriber.await();
-        subscriber.assertHasFailedWith(Exception.class, "boom");
+        subscriber.assertFailedWith(Exception.class, "boom");
     }
 
     @Test

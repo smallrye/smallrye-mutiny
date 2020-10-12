@@ -7,13 +7,14 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
-@SuppressWarnings({ "ReactiveStreamsSubscriberImplementation" })
+@SuppressWarnings({ "ReactiveStreamsSubscriberImplementation", "ConstantConditions" })
 public class AssertSubscriber<T> implements Subscriber<T> {
 
     /**
@@ -37,10 +38,14 @@ public class AssertSubscriber<T> implements Subscriber<T> {
     private final List<T> items = new CopyOnWriteArrayList<>();
 
     /**
-     * The received failures.
-     * Reactive Streams compliant upstream should only send one failure.
+     * The received failure.
      */
-    private final List<Throwable> failures = new CopyOnWriteArrayList<>();
+    private final AtomicReference<Throwable> failure = new AtomicReference<>();
+
+    /**
+     * Whether the stream completed successfully.
+     */
+    private final AtomicBoolean completed = new AtomicBoolean();
 
     /**
      * A subscriber on which we delegate the events.
@@ -53,12 +58,6 @@ public class AssertSubscriber<T> implements Subscriber<T> {
      * Reactive Streams compliant upstream should only send one subscription.
      */
     private int numberOfSubscription = 0;
-
-    /**
-     * Number of completion events.
-     * Reactive Streams compliant upstream should only send one subscription.
-     */
-    private volatile int numberOfCompletionEvents = 0;
 
     /**
      * Whether or not the subscriber should cancel the subscription as soon as it receives it.
@@ -102,29 +101,21 @@ public class AssertSubscriber<T> implements Subscriber<T> {
         return new AssertSubscriber<>(spy);
     }
 
-    public AssertSubscriber<T> assertCompletedSuccessfully() {
-        assertHasNotFailed();
-        int num = numberOfCompletionEvents;
-        if (num == 0) {
-            throw new AssertionError("Not yet completed");
-        }
-        if (num > 1) {
-            throw new AssertionError("Too many completions: " + num);
-        }
+    public AssertSubscriber<T> assertCompleted() {
+        assertThat(completed).isTrue();
+        assertThat(failure.get()).isNull();
         return this;
     }
 
-    public AssertSubscriber<T> assertHasFailedWith(Class<? extends Throwable> typeOfException, String message) {
-        assertHasNotCompleted();
-        int count = failures.size();
-        if (count == 0) {
+    public AssertSubscriber<T> assertFailedWith(Class<? extends Throwable> typeOfException, String message) {
+        if (failure.get() == null) {
             throw new AssertionError("The multi didn't failed");
         }
-        if (count > 1) {
-            throw new AssertionError("The multi emitted several failure events errors: " + count);
+        if (completed.get()) {
+            throw new AssertionError("The multi completed successfully");
         }
 
-        Throwable throwable = failures.get(0);
+        Throwable throwable = failure.get();
         assertThat(throwable).isInstanceOf(typeOfException);
         if (message != null) {
             assertThat(throwable).hasMessageContaining(message);
@@ -133,18 +124,8 @@ public class AssertSubscriber<T> implements Subscriber<T> {
         return this;
     }
 
-    public AssertSubscriber<T> assertHasNotFailed() {
-        assertThat(failures).hasSize(0);
-        return this;
-    }
-
     public AssertSubscriber<T> assertHasNotReceivedAnyItem() {
         assertThat(items).isEmpty();
-        return this;
-    }
-
-    public AssertSubscriber<T> assertHasNotCompleted() {
-        assertThat(numberOfCompletionEvents).isEqualTo(0);
         return this;
     }
 
@@ -169,7 +150,7 @@ public class AssertSubscriber<T> implements Subscriber<T> {
     }
 
     @SafeVarargs
-    public final AssertSubscriber<T> assertReceived(T... expected) {
+    public final AssertSubscriber<T> assertItems(T... expected) {
         assertThat(items).containsExactly(expected);
         return this;
     }
@@ -253,25 +234,25 @@ public class AssertSubscriber<T> implements Subscriber<T> {
         if (spy != null) {
             spy.onError(t);
         }
-        failures.add(t);
+        failure.set(t);
         latch.countDown();
     }
 
     @Override
     public void onComplete() {
+        completed.set(true);
         if (spy != null) {
             spy.onComplete();
         }
-        numberOfCompletionEvents++;
         latch.countDown();
     }
 
-    public List<T> items() {
+    public List<T> getItems() {
         return items;
     }
 
-    public List<Throwable> failures() {
-        return failures;
+    public Throwable getFailure() {
+        return failure.get();
     }
 
     public AssertSubscriber<T> run(Runnable action) {
@@ -290,6 +271,6 @@ public class AssertSubscriber<T> implements Subscriber<T> {
     }
 
     public boolean hasCompleted() {
-        return numberOfCompletionEvents >= 1;
+        return completed.get();
     }
 }

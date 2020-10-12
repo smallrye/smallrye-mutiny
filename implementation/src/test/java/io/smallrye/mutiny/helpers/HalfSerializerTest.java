@@ -59,7 +59,7 @@ public class HalfSerializerTest {
         Subscription subscription = mock(Subscription.class);
         s.onSubscribe(subscription);
         HalfSerializer.onNext(s, 1, wip, failure);
-        test.assertReceived(1).assertNotTerminated().assertHasNotFailed();
+        test.assertItems(1).assertNotTerminated();
     }
 
     @Test
@@ -99,7 +99,7 @@ public class HalfSerializerTest {
         Subscription subscription = mock(Subscription.class);
         s.onSubscribe(subscription);
         HalfSerializer.onNext(s, 1, wip, failure);
-        test.assertHasFailedWith(IOException.class, "boom");
+        test.assertFailedWith(IOException.class, "boom");
     }
 
     @Test
@@ -137,7 +137,7 @@ public class HalfSerializerTest {
         Subscription subscription = mock(Subscription.class);
         s.onSubscribe(subscription);
         HalfSerializer.onError(s, new IOException("test"), wip, failure);
-        test.assertHasFailedWith(IOException.class, "test");
+        test.assertFailedWith(IOException.class, "test");
     }
 
     @RepeatedTest(100)
@@ -165,8 +165,8 @@ public class HalfSerializerTest {
 
         latch.await(10, TimeUnit.SECONDS);
 
-        test.assertCompletedSuccessfully();
-        assertThat(test.items()).hasSizeBetween(0, 1);
+        test.assertCompleted();
+        assertThat(test.getItems()).hasSizeBetween(0, 1);
     }
 
     @RepeatedTest(100)

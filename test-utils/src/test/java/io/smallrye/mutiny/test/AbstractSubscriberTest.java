@@ -160,7 +160,7 @@ public class AbstractSubscriberTest {
         verify(spy).onComplete();
         verify(spy, never()).onError(any(Throwable.class));
 
-        assertThat(subscriber.failures()).isEmpty();
+        assertThat(subscriber.getFailure()).isNull();
     }
 
     @Test
@@ -184,7 +184,7 @@ public class AbstractSubscriberTest {
         verify(spy, never()).onComplete();
         verify(spy).onError(any(IOException.class));
 
-        assertThat(subscriber.failures()).hasSize(1);
+        assertThat(subscriber.getFailure()).isInstanceOf(IOException.class);
     }
 
     @Test
@@ -232,7 +232,7 @@ public class AbstractSubscriberTest {
         subscriber.await(Duration.ofSeconds(100));
         subscriber.await();
 
-        subscriber.assertCompletedSuccessfully();
+        subscriber.assertCompleted();
 
     }
 
@@ -245,7 +245,7 @@ public class AbstractSubscriberTest {
         subscriber.await(Duration.ofSeconds(100));
         subscriber.await();
 
-        subscriber.assertHasFailedWith(IOException.class, "boom");
+        subscriber.assertFailedWith(IOException.class, "boom");
 
     }
 

@@ -67,7 +67,7 @@ public class UniOnItemOrFailureInvokeTest {
                 })
                 .subscribe().withSubscriber(subscriber);
 
-        subscriber.assertCompletedSuccessfully()
+        subscriber.assertCompleted()
                 .assertItem(1);
 
         assertThat(count).hasValue(1);
@@ -85,7 +85,7 @@ public class UniOnItemOrFailureInvokeTest {
             count.incrementAndGet();
         }).subscribe().withSubscriber(subscriber);
 
-        subscriber.assertCompletedSuccessfully()
+        subscriber.assertCompleted()
                 .assertItem(null);
 
         assertThat(count).hasValue(1);
@@ -102,7 +102,7 @@ public class UniOnItemOrFailureInvokeTest {
             count.incrementAndGet();
         }).subscribe().withSubscriber(subscriber);
 
-        subscriber.assertFailure(IOException.class, "boom");
+        subscriber.assertFailedWith(IOException.class, "boom");
 
         assertThat(count).hasValue(1);
     }
@@ -118,7 +118,7 @@ public class UniOnItemOrFailureInvokeTest {
             throw new IllegalStateException("kaboom");
         }).subscribe().withSubscriber(subscriber);
 
-        subscriber.assertFailure(IllegalStateException.class, "kaboom");
+        subscriber.assertFailedWith(IllegalStateException.class, "kaboom");
         assertThat(count).hasValue(1);
     }
 
@@ -133,7 +133,7 @@ public class UniOnItemOrFailureInvokeTest {
             throw new IllegalStateException("kaboom");
         }).subscribe().withSubscriber(subscriber);
 
-        subscriber.assertFailure(IllegalStateException.class, "kaboom");
+        subscriber.assertFailedWith(IllegalStateException.class, "kaboom");
         assertThat(count).hasValue(1);
     }
 
@@ -149,8 +149,8 @@ public class UniOnItemOrFailureInvokeTest {
             throw new IllegalStateException("kaboom");
         }).subscribe().withSubscriber(subscriber);
 
-        subscriber.assertFailure(CompositeException.class, "kaboom");
-        subscriber.assertFailure(CompositeException.class, "boom");
+        subscriber.assertFailedWith(CompositeException.class, "kaboom");
+        subscriber.assertFailedWith(CompositeException.class, "boom");
 
         assertThat(count).hasValue(1);
     }
@@ -165,9 +165,9 @@ public class UniOnItemOrFailureInvokeTest {
         uni.subscribe().withSubscriber(s1);
         uni.subscribe().withSubscriber(s2);
 
-        s1.assertCompletedSuccessfully()
+        s1.assertCompleted()
                 .assertItem(1);
-        s2.assertCompletedSuccessfully()
+        s2.assertCompleted()
                 .assertItem(1);
     }
 
@@ -182,7 +182,7 @@ public class UniOnItemOrFailureInvokeTest {
                     .onItemOrFailure().invoke((i, f) -> threadName.set(Thread.currentThread().getName()))
                     .subscribe().withSubscriber(subscriber);
 
-            subscriber.await().assertCompletedSuccessfully().assertItem(1);
+            subscriber.await().assertCompleted().assertItem(1);
             assertThat(threadName).isNotNull().doesNotHaveValue("main");
             assertThat(subscriber.getOnItemThreadName()).isEqualTo(threadName.get());
         } finally {
@@ -206,7 +206,7 @@ public class UniOnItemOrFailureInvokeTest {
                     .onFailure().recoverWithItem(1)
                     .subscribe().withSubscriber(subscriber);
 
-            subscriber.await().assertCompletedSuccessfully().assertItem(1);
+            subscriber.await().assertCompleted().assertItem(1);
             assertThat(threadName).isNotNull().doesNotHaveValue("main");
             assertThat(subscriber.getOnItemThreadName()).isEqualTo(threadName.get());
         } finally {
@@ -225,7 +225,7 @@ public class UniOnItemOrFailureInvokeTest {
             return two.onItem().invoke(reference::set);
         }).subscribe().withSubscriber(subscriber);
 
-        subscriber.assertCompletedSuccessfully()
+        subscriber.assertCompleted()
                 .assertItem(1);
         assertThat(reference).hasValue(2);
         assertThat(count).hasValue(1);
@@ -243,7 +243,7 @@ public class UniOnItemOrFailureInvokeTest {
             return two.onItem().invoke(reference::set);
         }).subscribe().withSubscriber(subscriber);
 
-        subscriber.assertCompletedSuccessfully().assertItem(null);
+        subscriber.assertCompleted().assertItem(null);
         assertThat(reference).hasValue(2);
         assertThat(count).hasValue(1);
     }
@@ -261,7 +261,7 @@ public class UniOnItemOrFailureInvokeTest {
 
         }).subscribe().withSubscriber(subscriber);
 
-        subscriber.assertFailure(IOException.class, "boom");
+        subscriber.assertFailedWith(IOException.class, "boom");
         assertThat(reference).hasValue(2);
         assertThat(count).hasValue(1);
     }

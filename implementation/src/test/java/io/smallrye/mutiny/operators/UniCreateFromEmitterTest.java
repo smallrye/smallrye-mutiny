@@ -37,7 +37,7 @@ public class UniCreateFromEmitterTest {
         UniAssertSubscriber<Integer> subscriber = UniAssertSubscriber.create();
         uni.subscribe().withSubscriber(subscriber);
 
-        subscriber.assertCompletedSuccessfully().assertItem(1);
+        subscriber.assertCompleted().assertItem(1);
         // Other signals are dropped
         assertThat(((DefaultUniEmitter) reference.get()).isTerminated()).isTrue();
     }
@@ -68,7 +68,7 @@ public class UniCreateFromEmitterTest {
         subscriber.cancel();
         assertThat(onTerminationCalled).hasValue(1);
 
-        subscriber.assertCompletedSuccessfully();
+        subscriber.assertCompleted();
     }
 
     @Test
@@ -84,7 +84,7 @@ public class UniCreateFromEmitterTest {
         subscriber.cancel();
         assertThat(onTerminationCalled).hasValue(1);
 
-        subscriber.assertFailure(IOException.class, "boom");
+        subscriber.assertFailedWith(IOException.class, "boom");
     }
 
     @Test
@@ -105,7 +105,7 @@ public class UniCreateFromEmitterTest {
         Uni.createFrom().<Integer> emitter(emitter -> emitter.fail(new Exception("boom"))).subscribe()
                 .withSubscriber(subscriber);
 
-        subscriber.assertFailure(Exception.class, "boom");
+        subscriber.assertFailedWith(Exception.class, "boom");
     }
 
     @Test
@@ -115,7 +115,7 @@ public class UniCreateFromEmitterTest {
             throw new NullPointerException("boom");
         }).subscribe().withSubscriber(subscriber);
 
-        subscriber.assertFailure(NullPointerException.class, "boom");
+        subscriber.assertFailedWith(NullPointerException.class, "boom");
 
     }
 
@@ -129,7 +129,7 @@ public class UniCreateFromEmitterTest {
             emitter.complete(null);
         }).subscribe().withSubscriber(subscriber);
 
-        subscriber.assertCompletedSuccessfully();
+        subscriber.assertCompleted();
         assertThat(reference.get()).isInstanceOf(DefaultUniEmitter.class)
                 .satisfies(e -> ((DefaultUniEmitter<? super Void>) e).isTerminated());
     }
@@ -139,7 +139,7 @@ public class UniCreateFromEmitterTest {
         UniAssertSubscriber<Integer> subscriber = UniAssertSubscriber.create();
         Uni.createFrom().<Integer> emitter(emitter -> emitter.fail(null)).subscribe().withSubscriber(subscriber);
 
-        subscriber.assertFailure(IllegalArgumentException.class, "");
+        subscriber.assertFailedWith(IllegalArgumentException.class, "");
     }
 
     @Test
@@ -220,10 +220,10 @@ public class UniCreateFromEmitterTest {
         assertThat(shared).hasValue(0);
         uni.subscribe().withSubscriber(s1);
         assertThat(shared).hasValue(1);
-        s1.assertCompletedSuccessfully().assertItem(1);
+        s1.assertCompleted().assertItem(1);
         uni.subscribe().withSubscriber(s2);
         assertThat(shared).hasValue(2);
-        s2.assertCompletedSuccessfully().assertItem(2);
+        s2.assertCompleted().assertItem(2);
     }
 
     @Test
@@ -238,9 +238,9 @@ public class UniCreateFromEmitterTest {
                 (state, emitter) -> emitter.complete(state.incrementAndGet()));
 
         uni.subscribe().withSubscriber(s1);
-        s1.assertFailure(IllegalStateException.class, "boom");
+        s1.assertFailedWith(IllegalStateException.class, "boom");
         uni.subscribe().withSubscriber(s2);
-        s2.assertFailure(IllegalStateException.class, "Invalid shared state");
+        s2.assertFailedWith(IllegalStateException.class, "Invalid shared state");
     }
 
     @Test
@@ -253,9 +253,9 @@ public class UniCreateFromEmitterTest {
                 (state, emitter) -> emitter.complete(state.incrementAndGet()));
 
         uni.subscribe().withSubscriber(s1);
-        s1.assertFailure(NullPointerException.class, "supplier");
+        s1.assertFailedWith(NullPointerException.class, "supplier");
         uni.subscribe().withSubscriber(s2);
-        s2.assertFailure(IllegalStateException.class, "Invalid shared state");
+        s2.assertFailedWith(IllegalStateException.class, "Invalid shared state");
     }
 
     @Test

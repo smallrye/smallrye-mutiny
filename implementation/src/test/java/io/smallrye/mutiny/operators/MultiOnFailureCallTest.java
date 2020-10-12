@@ -32,8 +32,8 @@ public class MultiOnFailureCallTest {
             return sub.onItem().invoke(c -> twoGotCalled.incrementAndGet());
         }).subscribe().withSubscriber(AssertSubscriber.create(10));
 
-        subscriber.assertCompletedSuccessfully()
-                .assertReceived(1, 2);
+        subscriber.assertCompleted()
+                .assertItems(1, 2);
         assertThat(twoGotCalled).hasValue(0);
         assertThat(failure).hasValue(null);
     }
@@ -48,8 +48,8 @@ public class MultiOnFailureCallTest {
             return sub.onItem().invoke(c -> twoGotCalled.incrementAndGet());
         }).subscribe().withSubscriber(AssertSubscriber.create(10));
 
-        subscriber.assertCompletedSuccessfully()
-                .assertReceived(1, 2);
+        subscriber.assertCompleted()
+                .assertItems(1, 2);
         assertThat(twoGotCalled).hasValue(0);
         assertThat(failure).hasValue(null);
     }
@@ -64,8 +64,8 @@ public class MultiOnFailureCallTest {
             return sub.onItem().invoke(c -> twoGotCalled.incrementAndGet());
         }).subscribe().withSubscriber(AssertSubscriber.create(10));
 
-        subscriber.assertHasFailedWith(IOException.class, "boom")
-                .assertReceived(1, 2);
+        subscriber.assertFailedWith(IOException.class, "boom")
+                .assertItems(1, 2);
         assertThat(twoGotCalled).hasValue(1);
         assertThat(failure).hasValue(BOOM);
     }
@@ -80,8 +80,8 @@ public class MultiOnFailureCallTest {
             return sub.onItem().invoke(c -> twoGotCalled.incrementAndGet());
         }).subscribe().withSubscriber(AssertSubscriber.create(10));
 
-        subscriber.assertHasFailedWith(IOException.class, "boom")
-                .assertReceived(1, 2);
+        subscriber.assertFailedWith(IOException.class, "boom")
+                .assertItems(1, 2);
         assertThat(twoGotCalled).hasValue(1);
         assertThat(failure).hasValue(BOOM);
     }
@@ -96,8 +96,8 @@ public class MultiOnFailureCallTest {
             return sub.onItem().invoke(twoGotCalled::incrementAndGet);
         }).subscribe().withSubscriber(AssertSubscriber.create(10));
 
-        subscriber.assertHasFailedWith(IOException.class, "boom")
-                .assertReceived(1, 2);
+        subscriber.assertFailedWith(IOException.class, "boom")
+                .assertItems(1, 2);
         assertThat(twoGotCalled).hasValue(1);
         assertThat(failure).hasValue(BOOM);
     }
@@ -112,9 +112,9 @@ public class MultiOnFailureCallTest {
         }).subscribe().withSubscriber(AssertSubscriber.create(10));
 
         subscriber
-                .assertHasFailedWith(CompositeException.class, "boom")
-                .assertHasFailedWith(CompositeException.class, "kaboom")
-                .assertReceived(1, 2);
+                .assertFailedWith(CompositeException.class, "boom")
+                .assertFailedWith(CompositeException.class, "kaboom")
+                .assertItems(1, 2);
         assertThat(failure).hasValue(BOOM);
     }
 
@@ -128,9 +128,9 @@ public class MultiOnFailureCallTest {
         }).subscribe().withSubscriber(AssertSubscriber.create(10));
 
         subscriber
-                .assertHasFailedWith(CompositeException.class, "boom")
-                .assertHasFailedWith(CompositeException.class, "null")
-                .assertReceived(1, 2);
+                .assertFailedWith(CompositeException.class, "boom")
+                .assertFailedWith(CompositeException.class, "null")
+                .assertItems(1, 2);
         assertThat(failure).hasValue(BOOM);
     }
 
@@ -144,9 +144,9 @@ public class MultiOnFailureCallTest {
         }).subscribe().withSubscriber(AssertSubscriber.create(10));
 
         subscriber
-                .assertHasFailedWith(CompositeException.class, "boom")
-                .assertHasFailedWith(CompositeException.class, "d'oh")
-                .assertReceived(1, 2);
+                .assertFailedWith(CompositeException.class, "boom")
+                .assertFailedWith(CompositeException.class, "d'oh")
+                .assertItems(1, 2);
         assertThat(failure).hasValue(BOOM);
     }
 

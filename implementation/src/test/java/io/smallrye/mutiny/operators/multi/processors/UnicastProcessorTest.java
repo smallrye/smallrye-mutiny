@@ -28,8 +28,7 @@ public class UnicastProcessorTest {
                 .withSubscriber(AssertSubscriber.create());
 
         second.assertHasNotReceivedAnyItem()
-                .assertHasFailedWith(IllegalStateException.class, null)
-                .assertHasNotCompleted();
+                .assertFailedWith(IllegalStateException.class, null);
     }
 
     @RepeatedTest(100)
@@ -49,11 +48,11 @@ public class UnicastProcessorTest {
         AssertSubscriber<Object> subscriber = AssertSubscriber.create(Long.MAX_VALUE);
         processor.subscribe(subscriber);
 
-        await().until(() -> subscriber.items().size() == 5 * 1000);
+        await().until(() -> subscriber.getItems().size() == 5 * 1000);
         processor.onComplete();
         for (int i = 0; i < 5; i++) {
             for (int j = 0; j < 1000; j++) {
-                assertThat(subscriber.items()).contains(i + "-" + j);
+                assertThat(subscriber.getItems()).contains(i + "-" + j);
             }
         }
 
@@ -116,10 +115,10 @@ public class UnicastProcessorTest {
         processor.onNext(4);
 
         subscriber.assertSubscribed()
-                .assertReceived(1, 2)
+                .assertItems(1, 2)
                 // The overflow is only propagated on the next request.
                 .request(2)
-                .assertHasFailedWith(BackPressureFailure.class, "");
+                .assertFailedWith(BackPressureFailure.class, "");
     }
 
 }

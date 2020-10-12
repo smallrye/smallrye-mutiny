@@ -27,7 +27,7 @@ public class MultiDistinctTest {
         Multi.createFrom().<Integer> failure(new IOException("boom"))
                 .transform().byDroppingDuplicates()
                 .subscribe().withSubscriber(AssertSubscriber.create(10))
-                .assertHasFailedWith(IOException.class, "boom");
+                .assertFailedWith(IOException.class, "boom");
     }
 
     @Test
@@ -35,8 +35,8 @@ public class MultiDistinctTest {
         Multi.createFrom().items(1, 2, 3, 4, 2, 4, 2, 4)
                 .transform().byDroppingDuplicates()
                 .subscribe().withSubscriber(AssertSubscriber.create(10))
-                .assertCompletedSuccessfully()
-                .assertReceived(1, 2, 3, 4);
+                .assertCompleted()
+                .assertItems(1, 2, 3, 4);
     }
 
     @SuppressWarnings("ConstantConditions")
@@ -52,8 +52,8 @@ public class MultiDistinctTest {
         Multi.createFrom().range(1, 5)
                 .transform().byDroppingDuplicates()
                 .subscribe().withSubscriber(AssertSubscriber.create(10))
-                .assertCompletedSuccessfully()
-                .assertReceived(1, 2, 3, 4);
+                .assertCompleted()
+                .assertItems(1, 2, 3, 4);
     }
 
     @Test
@@ -61,7 +61,7 @@ public class MultiDistinctTest {
         Multi.createFrom().<Integer> failure(new IOException("boom"))
                 .transform().byDroppingRepetitions()
                 .subscribe().withSubscriber(AssertSubscriber.create(10))
-                .assertHasFailedWith(IOException.class, "boom");
+                .assertFailedWith(IOException.class, "boom");
     }
 
     @Test
@@ -69,8 +69,8 @@ public class MultiDistinctTest {
         Multi.createFrom().items(1, 2, 3, 4, 4, 2, 2, 4, 1, 1, 2, 4)
                 .transform().byDroppingRepetitions()
                 .subscribe().withSubscriber(AssertSubscriber.create(10))
-                .assertCompletedSuccessfully()
-                .assertReceived(1, 2, 3, 4, 2, 4, 1, 2, 4);
+                .assertCompleted()
+                .assertItems(1, 2, 3, 4, 2, 4, 1, 2, 4);
     }
 
     @Test
@@ -89,7 +89,7 @@ public class MultiDistinctTest {
                 .transform().byDroppingRepetitions()
                 .subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE));
 
-        await().until(() -> subscriber.items().size() >= 10);
+        await().until(() -> subscriber.getItems().size() >= 10);
         subscriber.cancel();
         assertThat(cancelled).isTrue();
     }
@@ -119,8 +119,8 @@ public class MultiDistinctTest {
         Multi.createFrom().range(1, 5)
                 .transform().byDroppingRepetitions()
                 .subscribe().withSubscriber(AssertSubscriber.create(10))
-                .assertCompletedSuccessfully()
-                .assertReceived(1, 2, 3, 4);
+                .assertCompleted()
+                .assertItems(1, 2, 3, 4);
     }
 
     @Test
@@ -135,11 +135,11 @@ public class MultiDistinctTest {
                 .assertNotTerminated();
 
         emitter.get().emit(1).emit(2).emit(1);
-        subscriber.assertReceived(1, 2);
+        subscriber.assertItems(1, 2);
 
         subscriber.cancel();
         emitter.get().emit(1).emit(3).emit(4);
-        subscriber.assertReceived(1, 2);
+        subscriber.assertItems(1, 2);
     }
 
     @Test
@@ -156,7 +156,7 @@ public class MultiDistinctTest {
         BadlyComparableStuff item1 = new BadlyComparableStuff();
         BadlyComparableStuff item2 = new BadlyComparableStuff();
         emitter.get().emit(item1).emit(item2).complete();
-        subscriber.assertHasFailedWith(TestException.class, "boom");
+        subscriber.assertFailedWith(TestException.class, "boom");
     }
 
     private static class BadlyComparableStuff {

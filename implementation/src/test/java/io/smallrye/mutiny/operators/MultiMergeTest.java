@@ -21,8 +21,8 @@ public class MultiMergeTest {
                 Multi.createFrom().items(8, 9, 10).onItem().transform(i -> i + 1)).subscribe()
                 .withSubscriber(new AssertSubscriber<>(100));
 
-        subscriber.assertCompletedSuccessfully()
-                .assertReceived(5, 1, 2, 9, 10, 11);
+        subscriber.assertCompleted()
+                .assertItems(5, 1, 2, 9, 10, 11);
     }
 
     @Test
@@ -33,8 +33,8 @@ public class MultiMergeTest {
                 Multi.createFrom().items(8, 9, 10).onItem().apply(i -> i + 1)).subscribe()
                 .withSubscriber(new AssertSubscriber<>(100));
 
-        subscriber.assertCompletedSuccessfully()
-                .assertReceived(5, 1, 2, 9, 10, 11);
+        subscriber.assertCompleted()
+                .assertItems(5, 1, 2, 9, 10, 11);
     }
 
     @Test
@@ -46,8 +46,8 @@ public class MultiMergeTest {
                         Multi.createFrom().items(8, 9, 10).onItem().transform(i -> i + 1))
                 .subscribe().withSubscriber(new AssertSubscriber<>(100));
 
-        subscriber.assertCompletedSuccessfully()
-                .assertReceived(5, 1, 2, 9, 10, 11);
+        subscriber.assertCompleted()
+                .assertItems(5, 1, 2, 9, 10, 11);
     }
 
     @Test
@@ -59,8 +59,8 @@ public class MultiMergeTest {
                         Multi.createFrom().items(8, 9, 10).onItem().transform(i -> i + 1)))
                 .subscribe().withSubscriber(new AssertSubscriber<>(100));
 
-        subscriber.assertCompletedSuccessfully()
-                .assertReceived(5, 1, 2, 9, 10, 11);
+        subscriber.assertCompleted()
+                .assertItems(5, 1, 2, 9, 10, 11);
     }
 
     @Test
@@ -71,8 +71,8 @@ public class MultiMergeTest {
                 Multi.createFrom().items(8, 9, 10).onItem().transform(i -> i + 1)).subscribe()
                 .withSubscriber(new AssertSubscriber<>(100));
 
-        subscriber.assertCompletedSuccessfully()
-                .assertReceived(5, 1, 2, 9, 10, 11);
+        subscriber.assertCompleted()
+                .assertItems(5, 1, 2, 9, 10, 11);
     }
 
     @Test
@@ -84,22 +84,22 @@ public class MultiMergeTest {
                         Multi.createFrom().items(8, 9, 10).onItem().transform(i -> i + 1)))
                 .subscribe().withSubscriber(new AssertSubscriber<>(100));
 
-        subscriber.assertCompletedSuccessfully()
-                .assertReceived(5, 1, 2, 9, 10, 11);
+        subscriber.assertCompleted()
+                .assertItems(5, 1, 2, 9, 10, 11);
     }
 
     @Test
     public void testMergingEmpty() {
         Multi.createBy().merging().streams(Multi.createFrom().empty())
                 .subscribe().withSubscriber(AssertSubscriber.create(1))
-                .assertCompletedSuccessfully().assertHasNotReceivedAnyItem();
+                .assertCompleted().assertHasNotReceivedAnyItem();
     }
 
     @Test
     public void testMergingWithEmpty() {
         Multi.createBy().merging().streams(Multi.createFrom().empty(), Multi.createFrom().item(2))
                 .subscribe().withSubscriber(AssertSubscriber.create(1))
-                .assertCompletedSuccessfully().assertReceived(2);
+                .assertCompleted().assertItems(2);
     }
 
     @Test
@@ -114,12 +114,12 @@ public class MultiMergeTest {
                 Multi.createFrom().failure(boom2)).subscribe().withSubscriber(new AssertSubscriber<>(5));
 
         subscriber.assertTerminated()
-                .assertReceived(5, 6)
-                .assertHasFailedWith(CompositeException.class, "boom")
-                .assertHasFailedWith(CompositeException.class, "boom2");
+                .assertItems(5, 6)
+                .assertFailedWith(CompositeException.class, "boom")
+                .assertFailedWith(CompositeException.class, "boom2");
 
-        assertThat(subscriber.failures().get(0)).isInstanceOf(CompositeException.class);
-        CompositeException ce = (CompositeException) subscriber.failures().get(0);
+        assertThat(subscriber.getFailure()).isInstanceOf(CompositeException.class);
+        CompositeException ce = (CompositeException) subscriber.getFailure();
         assertThat(ce.getCauses()).hasSize(2);
 
         subscriber = Multi.createBy().concatenating().streams(
@@ -129,8 +129,8 @@ public class MultiMergeTest {
                 Multi.createFrom().failure(boom)).subscribe().withSubscriber(new AssertSubscriber<>(5));
 
         subscriber.assertTerminated()
-                .assertReceived(5)
-                .assertHasFailedWith(IllegalStateException.class, "boom");
+                .assertItems(5)
+                .assertFailedWith(IllegalStateException.class, "boom");
 
     }
 
@@ -146,12 +146,12 @@ public class MultiMergeTest {
                 Multi.createFrom().failure(boom2)).subscribe().withSubscriber(new AssertSubscriber<>(5));
 
         subscriber.assertTerminated()
-                .assertReceived(5, 6)
-                .assertHasFailedWith(CompositeException.class, "boom")
-                .assertHasFailedWith(CompositeException.class, "boom2");
+                .assertItems(5, 6)
+                .assertFailedWith(CompositeException.class, "boom")
+                .assertFailedWith(CompositeException.class, "boom2");
 
-        assertThat(subscriber.failures().get(0)).isInstanceOf(CompositeException.class);
-        CompositeException ce = (CompositeException) subscriber.failures().get(0);
+        assertThat(subscriber.getFailure()).isInstanceOf(CompositeException.class);
+        CompositeException ce = (CompositeException) subscriber.getFailure();
         assertThat(ce.getCauses()).hasSize(2);
 
         subscriber = Multi.createBy().merging().streams(
@@ -161,8 +161,8 @@ public class MultiMergeTest {
                 Multi.createFrom().failure(boom)).subscribe().withSubscriber(new AssertSubscriber<>(5));
 
         subscriber.assertTerminated()
-                .assertReceived(5)
-                .assertHasFailedWith(IllegalStateException.class, "boom");
+                .assertItems(5)
+                .assertFailedWith(IllegalStateException.class, "boom");
 
     }
 }

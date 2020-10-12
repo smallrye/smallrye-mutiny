@@ -32,8 +32,8 @@ public class PaginationTest {
                 .onItem().disjoint();
         // end::code[]
         stream.subscribe().withSubscriber(AssertSubscriber.create(10))
-                .assertCompletedSuccessfully()
-                .assertReceived("a", "b", "c", "d", "e", "f", "g", "h");
+                .assertCompleted()
+                .assertItems("a", "b", "c", "d", "e", "f", "g", "h");
 
     }
 
@@ -51,9 +51,9 @@ public class PaginationTest {
         // end::code2[]
         AssertSubscriber<Page> subscriber = stream.subscribe()
                 .withSubscriber(AssertSubscriber.create(10))
-                .assertCompletedSuccessfully();
+                .assertCompleted();
 
-        assertThat(subscriber.items()).hasSize(3);
+        assertThat(subscriber.getItems()).hasSize(3);
 
     }
 

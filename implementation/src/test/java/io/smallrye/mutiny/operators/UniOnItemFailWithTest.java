@@ -37,7 +37,7 @@ public class UniOnItemFailWithTest {
                     return new IOException();
                 })
                 .subscribe().withSubscriber(UniAssertSubscriber.<Number> create())
-                .assertFailure(TestException.class, "");
+                .assertFailedWith(TestException.class, "");
 
         assertThat(called).isFalse();
     }
@@ -51,7 +51,7 @@ public class UniOnItemFailWithTest {
                     return new IOException(Integer.toString(item));
                 })
                 .subscribe().withSubscriber(UniAssertSubscriber.<Number> create())
-                .assertFailure(TestException.class, "");
+                .assertFailedWith(TestException.class, "");
 
         assertThat(called).isFalse();
     }
@@ -66,8 +66,7 @@ public class UniOnItemFailWithTest {
                 })
                 .subscribe().withSubscriber(new UniAssertSubscriber<>(true));
 
-        subscriber.assertSubscribed()
-                .assertNotCompleted();
+        subscriber.assertSubscribed().assertNotTerminated();
         assertThat(called).isFalse();
     }
 
@@ -81,8 +80,7 @@ public class UniOnItemFailWithTest {
                 })
                 .subscribe().withSubscriber(new UniAssertSubscriber<>(true));
 
-        subscriber.assertSubscribed()
-                .assertNotCompleted();
+        subscriber.assertSubscribed().assertNotTerminated();
         assertThat(called).isFalse();
     }
 
@@ -104,10 +102,10 @@ public class UniOnItemFailWithTest {
         Uni<Integer> uni = one.onItem().failWith(s -> new IOException(Integer.toString(s + count.getAndIncrement())));
         uni
                 .subscribe().withSubscriber(UniAssertSubscriber.<Number> create())
-                .assertFailure(IOException.class, "1");
+                .assertFailedWith(IOException.class, "1");
         uni
                 .subscribe().withSubscriber(UniAssertSubscriber.<Number> create())
-                .assertFailure(IOException.class, "2");
+                .assertFailedWith(IOException.class, "2");
     }
 
     @Test
@@ -128,10 +126,10 @@ public class UniOnItemFailWithTest {
         Uni<Integer> uni = one.onItem().failWith(() -> new IOException(Integer.toString(count.getAndIncrement())));
         uni
                 .subscribe().withSubscriber(UniAssertSubscriber.<Number> create())
-                .assertFailure(IOException.class, "0");
+                .assertFailedWith(IOException.class, "0");
         uni
                 .subscribe().withSubscriber(UniAssertSubscriber.<Number> create())
-                .assertFailure(IOException.class, "1");
+                .assertFailedWith(IOException.class, "1");
     }
 
     @Test

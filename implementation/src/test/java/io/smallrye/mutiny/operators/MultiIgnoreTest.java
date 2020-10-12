@@ -25,7 +25,7 @@ public class MultiIgnoreTest {
         Multi.createFrom().items(1, 2, 3, 4)
                 .onItem().ignore()
                 .subscribe().withSubscriber(AssertSubscriber.create(4))
-                .assertCompletedSuccessfully()
+                .assertCompleted()
                 .assertHasNotReceivedAnyItem();
     }
 
@@ -106,6 +106,6 @@ public class MultiIgnoreTest {
 
         subscriber
                 .request(-1)
-                .assertHasFailedWith(IllegalArgumentException.class, null);
+                .assertFailedWith(IllegalArgumentException.class, null);
     }
 }

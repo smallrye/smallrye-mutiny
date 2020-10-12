@@ -19,12 +19,12 @@ public class MultiCacheTest {
                 count.incrementAndGet()))
                 .cache();
         multi.subscribe().withSubscriber(AssertSubscriber.create(2))
-                .assertCompletedSuccessfully()
-                .assertReceived(1, 2);
+                .assertCompleted()
+                .assertItems(1, 2);
 
         multi.subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE))
-                .assertCompletedSuccessfully()
-                .assertReceived(1, 2);
+                .assertCompleted()
+                .assertItems(1, 2);
     }
 
     @Test
@@ -35,12 +35,12 @@ public class MultiCacheTest {
                 .fail(new IOException("boom-" + count.incrementAndGet())))
                 .cache();
         multi.subscribe().withSubscriber(AssertSubscriber.create(2))
-                .assertReceived(1, 2)
-                .assertHasFailedWith(IOException.class, "boom-3");
+                .assertItems(1, 2)
+                .assertFailedWith(IOException.class, "boom-3");
 
         multi.subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE))
-                .assertReceived(1, 2)
-                .assertHasFailedWith(IOException.class, "boom-3");
+                .assertItems(1, 2)
+                .assertFailedWith(IOException.class, "boom-3");
     }
 
     @Test
@@ -55,16 +55,16 @@ public class MultiCacheTest {
                 .cache();
         AssertSubscriber<Integer> s1 = multi
                 .subscribe().withSubscriber(AssertSubscriber.create(2))
-                .assertReceived(1, 2)
+                .assertItems(1, 2)
                 .assertNotTerminated();
 
         AssertSubscriber<Integer> s2 = multi.subscribe()
                 .withSubscriber(AssertSubscriber.create(Long.MAX_VALUE))
-                .assertReceived(1, 2)
+                .assertItems(1, 2)
                 .assertNotTerminated();
 
         reference.get().emit(count.incrementAndGet()).complete();
-        s1.assertReceived(1, 2).request(1).assertReceived(1, 2, 3).assertCompletedSuccessfully();
-        s2.assertReceived(1, 2, 3).assertCompletedSuccessfully();
+        s1.assertItems(1, 2).request(1).assertItems(1, 2, 3).assertCompleted();
+        s2.assertItems(1, 2, 3).assertCompleted();
     }
 }

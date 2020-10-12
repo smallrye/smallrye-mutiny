@@ -89,9 +89,9 @@ public class UniCacheTest {
         cache.subscribe().withSubscriber(sub2);
         cache.subscribe().withSubscriber(sub3);
 
-        sub1.assertCompletedSuccessfully().assertItem(1);
-        sub2.assertCompletedSuccessfully().assertItem(1);
-        sub3.assertCompletedSuccessfully().assertItem(1);
+        sub1.assertCompleted().assertItem(1);
+        sub2.assertCompleted().assertItem(1);
+        sub3.assertCompleted().assertItem(1);
     }
 
     @Test
@@ -107,9 +107,9 @@ public class UniCacheTest {
         cache.subscribe().withSubscriber(sub2);
         cache.subscribe().withSubscriber(sub3);
 
-        sub1.assertFailure(Exception.class, "0");
-        sub2.assertFailure(Exception.class, "0");
-        sub3.assertFailure(Exception.class, "0");
+        sub1.assertFailedWith(Exception.class, "0");
+        sub2.assertFailedWith(Exception.class, "0");
+        sub3.assertFailedWith(Exception.class, "0");
     }
 
     @Test
@@ -128,9 +128,9 @@ public class UniCacheTest {
 
         cache.subscribe().withSubscriber(sub3);
 
-        sub1.assertCompletedSuccessfully().assertItem(1);
-        sub2.assertCompletedSuccessfully().assertItem(1);
-        sub3.assertCompletedSuccessfully().assertItem(1);
+        sub1.assertCompleted().assertItem(1);
+        sub2.assertCompleted().assertItem(1);
+        sub3.assertCompleted().assertItem(1);
     }
 
     @Test
@@ -151,9 +151,9 @@ public class UniCacheTest {
 
         cache.subscribe().withSubscriber(sub3);
 
-        sub1.assertCompletedSuccessfully().assertItem(1);
-        sub2.assertNotCompleted();
-        sub3.assertCompletedSuccessfully().assertItem(1);
+        sub1.assertCompleted().assertItem(1);
+        sub2.assertNotTerminated();
+        sub3.assertCompleted().assertItem(1);
     }
 
     @Test
@@ -173,9 +173,9 @@ public class UniCacheTest {
 
         cache.subscribe().withSubscriber(sub3);
 
-        sub1.assertCompletedSuccessfully().assertItem(1);
-        sub2.assertCompletedSuccessfully().assertItem(1);
-        sub3.assertCompletedSuccessfully().assertItem(1);
+        sub1.assertCompleted().assertItem(1);
+        sub2.assertCompleted().assertItem(1);
+        sub3.assertCompleted().assertItem(1);
     }
 
     @Test
@@ -189,15 +189,15 @@ public class UniCacheTest {
         cached.subscribe().withSubscriber(sub1);
         cached.subscribe().withSubscriber(sub2);
 
-        sub1.assertNotCompleted();
-        sub2.assertNotCompleted();
+        sub1.assertNotTerminated();
+        sub2.assertNotTerminated();
 
         processor.onNext(23);
         processor.onNext(42);
         processor.onComplete();
 
-        sub1.assertCompletedSuccessfully().assertItem(23);
-        sub2.assertCompletedSuccessfully().assertItem(23);
+        sub1.assertCompleted().assertItem(23);
+        sub2.assertCompleted().assertItem(23);
     }
 
     @Test
@@ -211,15 +211,15 @@ public class UniCacheTest {
         cached.subscribe().withSubscriber(sub1);
         cached.subscribe().withSubscriber(sub2);
 
-        sub1.assertNoResult().assertNoFailure();
-        sub2.assertNoResult().assertNoFailure();
+        sub1.assertNotTerminated();
+        sub2.assertNotTerminated();
 
         processor.onNext(23);
         processor.onNext(42);
         processor.onComplete();
 
-        sub1.assertNoResult().assertNoFailure();
-        sub2.assertNoResult().assertNoFailure();
+        sub1.assertNotTerminated();
+        sub2.assertNotTerminated();
     }
 
     @Test
@@ -270,7 +270,7 @@ public class UniCacheTest {
 
         UniAssertSubscriber<Integer> test = UniAssertSubscriber.create();
         uni.subscribe().withSubscriber(test);
-        test.assertCompletedSuccessfully().assertItem(23);
+        test.assertCompleted().assertItem(23);
 
         uni.subscribe().withSubscriber(subscriber);
     }

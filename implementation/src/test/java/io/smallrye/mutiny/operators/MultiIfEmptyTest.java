@@ -22,8 +22,8 @@ public class MultiIfEmptyTest {
         Multi.createFrom().empty()
                 .onCompletion().ifEmpty().continueWith(6, 7, 8)
                 .subscribe().withSubscriber(AssertSubscriber.create(7))
-                .assertCompletedSuccessfully()
-                .assertReceived(6, 7, 8);
+                .assertCompleted()
+                .assertItems(6, 7, 8);
 
     }
 
@@ -32,8 +32,8 @@ public class MultiIfEmptyTest {
         Multi.createFrom().item(1)
                 .onCompletion().ifEmpty().continueWith(6, 7, 8)
                 .subscribe().withSubscriber(AssertSubscriber.create(7))
-                .assertCompletedSuccessfully()
-                .assertReceived(1);
+                .assertCompleted()
+                .assertItems(1);
 
     }
 
@@ -42,7 +42,7 @@ public class MultiIfEmptyTest {
         Multi.createFrom().<Integer> failure(new IOException("boom"))
                 .onCompletion().ifEmpty().continueWith(6, 7, 8)
                 .subscribe().withSubscriber(AssertSubscriber.create(7))
-                .assertHasFailedWith(IOException.class, "boom");
+                .assertFailedWith(IOException.class, "boom");
 
     }
 
@@ -51,7 +51,7 @@ public class MultiIfEmptyTest {
         Multi.createFrom().empty()
                 .onCompletion().ifEmpty().continueWith()
                 .subscribe().withSubscriber(AssertSubscriber.create(7))
-                .assertCompletedSuccessfully()
+                .assertCompleted()
                 .assertHasNotReceivedAnyItem();
     }
 
@@ -60,8 +60,8 @@ public class MultiIfEmptyTest {
         Multi.createFrom().empty()
                 .onCompletion().ifEmpty().continueWith(25)
                 .subscribe().withSubscriber(AssertSubscriber.create(7))
-                .assertCompletedSuccessfully()
-                .assertReceived(25);
+                .assertCompleted()
+                .assertItems(25);
     }
 
     @Test
@@ -69,8 +69,8 @@ public class MultiIfEmptyTest {
         Multi.createFrom().items(1, 2, 3).transform().bySkippingFirstItems(5)
                 .onCompletion().ifEmpty().continueWith(25)
                 .subscribe().withSubscriber(AssertSubscriber.create(7))
-                .assertCompletedSuccessfully()
-                .assertReceived(25);
+                .assertCompleted()
+                .assertItems(25);
     }
 
     @Test
@@ -78,8 +78,8 @@ public class MultiIfEmptyTest {
         Multi.createFrom().empty()
                 .onCompletion().ifEmpty().continueWith(Arrays.asList(5, 6))
                 .subscribe().withSubscriber(AssertSubscriber.create(7))
-                .assertCompletedSuccessfully()
-                .assertReceived(5, 6);
+                .assertCompleted()
+                .assertItems(5, 6);
     }
 
     @Test
@@ -87,7 +87,7 @@ public class MultiIfEmptyTest {
         Multi.createFrom().empty()
                 .onCompletion().ifEmpty().continueWith(Collections.emptyList())
                 .subscribe().withSubscriber(AssertSubscriber.create(7))
-                .assertCompletedSuccessfully()
+                .assertCompleted()
                 .assertHasNotReceivedAnyItem();
     }
 
@@ -126,8 +126,8 @@ public class MultiIfEmptyTest {
         Multi.createFrom().empty()
                 .onCompletion().ifEmpty().continueWith(() -> Arrays.asList(25, 26))
                 .subscribe().withSubscriber(AssertSubscriber.create(20))
-                .assertCompletedSuccessfully()
-                .assertReceived(25, 26);
+                .assertCompleted()
+                .assertItems(25, 26);
     }
 
     @Test
@@ -135,7 +135,7 @@ public class MultiIfEmptyTest {
         Multi.createFrom().empty()
                 .onCompletion().ifEmpty().continueWith((Supplier<Iterable<? extends Integer>>) Collections::emptyList)
                 .subscribe().withSubscriber(AssertSubscriber.create(20))
-                .assertCompletedSuccessfully()
+                .assertCompleted()
                 .assertHasNotReceivedAnyItem();
     }
 
@@ -144,8 +144,8 @@ public class MultiIfEmptyTest {
         Multi.createFrom().empty()
                 .onCompletion().ifEmpty().continueWith(() -> Arrays.asList(25, null, 26))
                 .subscribe().withSubscriber(AssertSubscriber.create(20))
-                .assertHasFailedWith(NullPointerException.class, null)
-                .assertReceived(25);
+                .assertFailedWith(NullPointerException.class, null)
+                .assertItems(25);
     }
 
     @Test
@@ -153,7 +153,7 @@ public class MultiIfEmptyTest {
         Multi.createFrom().empty()
                 .onCompletion().ifEmpty().continueWith(() -> (Iterable<Integer>) null)
                 .subscribe().withSubscriber(AssertSubscriber.create(20))
-                .assertHasFailedWith(NullPointerException.class, null);
+                .assertFailedWith(NullPointerException.class, null);
     }
 
     @Test
@@ -163,7 +163,7 @@ public class MultiIfEmptyTest {
                     throw new IllegalStateException("BOOM!");
                 })
                 .subscribe().withSubscriber(AssertSubscriber.create(20))
-                .assertHasFailedWith(IllegalStateException.class, "BOOM!")
+                .assertFailedWith(IllegalStateException.class, "BOOM!")
                 .assertHasNotReceivedAnyItem();
     }
 
@@ -172,7 +172,7 @@ public class MultiIfEmptyTest {
         Multi.createFrom().empty()
                 .onCompletion().ifEmpty().fail()
                 .subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE))
-                .assertHasFailedWith(NoSuchElementException.class, null)
+                .assertFailedWith(NoSuchElementException.class, null)
                 .assertHasNotReceivedAnyItem();
     }
 
@@ -181,7 +181,7 @@ public class MultiIfEmptyTest {
         Multi.createFrom().empty()
                 .onCompletion().ifEmpty().failWith(new IOException("boom"))
                 .subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE))
-                .assertHasFailedWith(IOException.class, "boom")
+                .assertFailedWith(IOException.class, "boom")
                 .assertHasNotReceivedAnyItem();
     }
 
@@ -196,7 +196,7 @@ public class MultiIfEmptyTest {
         Multi.createFrom().empty()
                 .onCompletion().ifEmpty().failWith(() -> new IOException("boom"))
                 .subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE))
-                .assertHasFailedWith(IOException.class, "boom")
+                .assertFailedWith(IOException.class, "boom")
                 .assertHasNotReceivedAnyItem();
     }
 
@@ -213,7 +213,7 @@ public class MultiIfEmptyTest {
                     throw new IllegalStateException("BOOM!");
                 })
                 .subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE))
-                .assertHasFailedWith(IllegalStateException.class, "BOOM!");
+                .assertFailedWith(IllegalStateException.class, "BOOM!");
     }
 
     @Test
@@ -221,7 +221,7 @@ public class MultiIfEmptyTest {
         Multi.createFrom().empty()
                 .onCompletion().ifEmpty().failWith(() -> null)
                 .subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE))
-                .assertHasFailedWith(NullPointerException.class, null);
+                .assertFailedWith(NullPointerException.class, null);
     }
 
     @Test
@@ -229,8 +229,8 @@ public class MultiIfEmptyTest {
         Multi.createFrom().empty()
                 .onCompletion().ifEmpty().switchTo(Flowable.just(20))
                 .subscribe().withSubscriber(AssertSubscriber.create(10))
-                .assertCompletedSuccessfully()
-                .assertReceived(20);
+                .assertCompleted()
+                .assertItems(20);
     }
 
     @Test
@@ -238,8 +238,8 @@ public class MultiIfEmptyTest {
         Multi.createFrom().empty()
                 .onCompletion().ifEmpty().switchTo(() -> Multi.createFrom().range(5, 8))
                 .subscribe().withSubscriber(AssertSubscriber.create(10))
-                .assertCompletedSuccessfully()
-                .assertReceived(5, 6, 7);
+                .assertCompleted()
+                .assertItems(5, 6, 7);
     }
 
     @Test
@@ -247,7 +247,7 @@ public class MultiIfEmptyTest {
         Multi.createFrom().empty()
                 .onCompletion().ifEmpty().switchTo(() -> null)
                 .subscribe().withSubscriber(AssertSubscriber.create(10))
-                .assertHasFailedWith(NullPointerException.class, null)
+                .assertFailedWith(NullPointerException.class, null)
                 .assertHasNotReceivedAnyItem();
     }
 
@@ -268,8 +268,8 @@ public class MultiIfEmptyTest {
         Multi.createFrom().empty()
                 .onCompletion().ifEmpty().switchToEmitter(e -> e.emit(5).emit(6).complete())
                 .subscribe().withSubscriber(AssertSubscriber.create(10))
-                .assertCompletedSuccessfully()
-                .assertReceived(5, 6);
+                .assertCompleted()
+                .assertItems(5, 6);
     }
 
 }

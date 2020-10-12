@@ -18,7 +18,7 @@ class UniPlugTest {
                 .onItem().transform(String::toUpperCase)
                 .subscribe().withSubscriber(subscriber);
 
-        subscriber.assertCompletedSuccessfully().assertItem("HELLO YOU!");
+        subscriber.assertCompleted().assertItem("HELLO YOU!");
     }
 
     @Test
@@ -30,7 +30,7 @@ class UniPlugTest {
                 .onItem().transform(String::toUpperCase)
                 .subscribe().withSubscriber(subscriber);
 
-        subscriber.assertFailure(RuntimeException.class, "boom");
+        subscriber.assertFailedWith(RuntimeException.class, "boom");
     }
 
     @Test

@@ -27,14 +27,14 @@ class SpyTest {
             UniOnSubscribeSpy<Integer> spy = Spy.onSubscribe(Uni.createFrom().item(69));
             UniAssertSubscriber<Integer> subscriber = spy.subscribe().withSubscriber(UniAssertSubscriber.create());
 
-            subscriber.assertCompletedSuccessfully().assertItem(69);
+            subscriber.assertCompleted().assertItem(69);
             assertThat(spy.invoked()).isTrue();
             assertThat(spy.invocationCount()).isEqualTo(1);
             UniSubscription firstSubscription = spy.lastSubscription();
             assertThat(firstSubscription).isNotNull();
 
             subscriber = spy.subscribe().withSubscriber(UniAssertSubscriber.create());
-            subscriber.assertCompletedSuccessfully().assertItem(69);
+            subscriber.assertCompleted().assertItem(69);
             assertThat(spy.invoked()).isTrue();
             assertThat(spy.invocationCount()).isEqualTo(2);
             UniSubscription secondSubscription = spy.lastSubscription();
@@ -55,7 +55,7 @@ class SpyTest {
             UniAssertSubscriber<Integer> subscriber = spy.subscribe().withSubscriber(UniAssertSubscriber.create());
 
             subscriber.cancel();
-            subscriber.assertNotCompleted();
+            subscriber.assertNotTerminated();
             assertThat(spy.invoked()).isTrue();
             assertThat(spy.invocationCount()).isEqualTo(1);
 
@@ -73,7 +73,7 @@ class SpyTest {
             assertThat(spy.lastTerminationFailure()).isNull();
 
             UniAssertSubscriber<Integer> subscriber = spy.subscribe().withSubscriber(UniAssertSubscriber.create());
-            subscriber.assertCompletedSuccessfully().assertItem(69);
+            subscriber.assertCompleted().assertItem(69);
             assertThat(spy.invoked()).isTrue();
             assertThat(spy.invocationCount()).isEqualTo(1);
             assertThat(spy.lastTerminationItem()).isEqualTo(69);
@@ -97,7 +97,7 @@ class SpyTest {
             assertThat(spy.lastTerminationFailure()).isNull();
 
             UniAssertSubscriber<Integer> subscriber = spy.subscribe().withSubscriber(UniAssertSubscriber.create());
-            subscriber.assertFailure(IOException.class, "boom");
+            subscriber.assertFailedWith(IOException.class, "boom");
             assertThat(spy.invoked()).isTrue();
             assertThat(spy.invocationCount()).isEqualTo(1);
             assertThat(spy.lastTerminationItem()).isNull();
@@ -124,7 +124,7 @@ class SpyTest {
 
             UniAssertSubscriber<Integer> subscriber = spy.subscribe().withSubscriber(UniAssertSubscriber.create());
             subscriber.cancel();
-            subscriber.assertNotCompleted();
+            subscriber.assertNotTerminated();
             assertThat(spy.invoked()).isTrue();
             assertThat(spy.invocationCount()).isEqualTo(1);
             assertThat(spy.lastTerminationItem()).isNull();
@@ -144,7 +144,7 @@ class SpyTest {
             UniOnItemSpy<Integer> spy = Spy.onItem(Uni.createFrom().item(69));
             UniAssertSubscriber<Integer> subscriber = spy.subscribe().withSubscriber(UniAssertSubscriber.create());
 
-            subscriber.assertCompletedSuccessfully().assertItem(69);
+            subscriber.assertCompleted().assertItem(69);
             assertThat(spy.invoked()).isTrue();
             assertThat(spy.invocationCount()).isEqualTo(1);
             assertThat(spy.lastItem()).isEqualTo(69);
@@ -160,7 +160,7 @@ class SpyTest {
             UniOnItemOrFailureSpy<Integer> spy = Spy.onItemOrFailure(Uni.createFrom().item(69));
             UniAssertSubscriber<Integer> subscriber = spy.subscribe().withSubscriber(UniAssertSubscriber.create());
 
-            subscriber.assertCompletedSuccessfully().assertItem(69);
+            subscriber.assertCompleted().assertItem(69);
             assertThat(spy.invoked()).isTrue();
             assertThat(spy.invocationCount()).isEqualTo(1);
             assertThat(spy.hasFailed()).isFalse();
@@ -179,7 +179,7 @@ class SpyTest {
             UniOnItemOrFailureSpy<Integer> spy = Spy.onItemOrFailure(Uni.createFrom().failure(new IOException("boom")));
             UniAssertSubscriber<Integer> subscriber = spy.subscribe().withSubscriber(UniAssertSubscriber.create());
 
-            subscriber.assertFailure(IOException.class, "boom");
+            subscriber.assertFailedWith(IOException.class, "boom");
             assertThat(spy.invoked()).isTrue();
             assertThat(spy.invocationCount()).isEqualTo(1);
             assertThat(spy.hasFailed()).isTrue();
@@ -198,7 +198,7 @@ class SpyTest {
             UniOnFailureSpy<Object> spy = Spy.onFailure(Uni.createFrom().failure(new IOException("boom")));
             UniAssertSubscriber<Object> subscriber = spy.subscribe().withSubscriber(UniAssertSubscriber.create());
 
-            subscriber.assertFailure(IOException.class, "boom");
+            subscriber.assertFailedWith(IOException.class, "boom");
             assertThat(spy.invoked()).isTrue();
             assertThat(spy.invocationCount()).isEqualTo(1);
             assertThat(spy.lastFailure()).isNotNull().isInstanceOf(IOException.class).hasMessage("boom");
@@ -214,7 +214,7 @@ class SpyTest {
             UniOnFailureSpy<Object> spy = Spy.onFailure(Uni.createFrom().failure(new IOException("boom")), IOException.class);
             UniAssertSubscriber<Object> subscriber = spy.subscribe().withSubscriber(UniAssertSubscriber.create());
 
-            subscriber.assertFailure(IOException.class, "boom");
+            subscriber.assertFailedWith(IOException.class, "boom");
             assertThat(spy.invoked()).isTrue();
             assertThat(spy.invocationCount()).isEqualTo(1);
             assertThat(spy.lastFailure()).isNotNull().isInstanceOf(IOException.class).hasMessage("boom");
@@ -230,7 +230,7 @@ class SpyTest {
             UniOnFailureSpy<Object> spy = Spy.onFailure(Uni.createFrom().failure(new IOException("boom")), t -> true);
             UniAssertSubscriber<Object> subscriber = spy.subscribe().withSubscriber(UniAssertSubscriber.create());
 
-            subscriber.assertFailure(IOException.class, "boom");
+            subscriber.assertFailedWith(IOException.class, "boom");
             assertThat(spy.invoked()).isTrue();
             assertThat(spy.invocationCount()).isEqualTo(1);
             assertThat(spy.lastFailure()).isNotNull().isInstanceOf(IOException.class).hasMessage("boom");
@@ -247,7 +247,7 @@ class SpyTest {
                     RuntimeException.class);
             UniAssertSubscriber<Object> subscriber = spy.subscribe().withSubscriber(UniAssertSubscriber.create());
 
-            subscriber.assertFailure(IOException.class, "boom");
+            subscriber.assertFailedWith(IOException.class, "boom");
             assertThat(spy.invoked()).isFalse();
             assertThat(spy.invocationCount()).isEqualTo(0);
             assertThat(spy.lastFailure()).isNull();
@@ -263,7 +263,7 @@ class SpyTest {
             UniOnFailureSpy<Object> spy = Spy.onFailure(Uni.createFrom().failure(new IOException("boom")), t -> false);
             UniAssertSubscriber<Object> subscriber = spy.subscribe().withSubscriber(UniAssertSubscriber.create());
 
-            subscriber.assertFailure(IOException.class, "boom");
+            subscriber.assertFailedWith(IOException.class, "boom");
             assertThat(spy.invoked()).isFalse();
             assertThat(spy.invocationCount()).isEqualTo(0);
             assertThat(spy.lastFailure()).isNull();
@@ -279,7 +279,7 @@ class SpyTest {
             UniGlobalSpy<Integer> spy = Spy.globally(Uni.createFrom().item(69));
             UniAssertSubscriber<Integer> subscriber = spy.subscribe().withSubscriber(UniAssertSubscriber.create());
 
-            subscriber.assertCompletedSuccessfully().assertItem(69);
+            subscriber.assertCompleted().assertItem(69);
             assertThat(spy.onCancellationSpy().invoked()).isFalse();
             assertThat(spy.onFailureSpy().invoked()).isFalse();
             assertThat(spy.onItemSpy().invoked()).isTrue();
@@ -315,7 +315,7 @@ class SpyTest {
             AssertSubscriber<Object> subscriber = spy.subscribe().withSubscriber(AssertSubscriber.create());
             subscriber.cancel();
 
-            subscriber.assertHasNotCompleted().assertHasNotReceivedAnyItem();
+            subscriber.assertNotTerminated().assertHasNotReceivedAnyItem();
             assertThat(spy.invoked()).isTrue();
             assertThat(spy.invocationCount()).isEqualTo(1);
 
@@ -329,8 +329,8 @@ class SpyTest {
             MultiOnCompletionSpy<Integer> spy = Spy.onCompletion(Multi.createFrom().item(69));
             AssertSubscriber<Object> subscriber = spy.subscribe().withSubscriber(AssertSubscriber.create(10));
 
-            subscriber.assertCompletedSuccessfully();
-            assertThat(subscriber.items()).containsExactly(69);
+            subscriber.assertCompleted();
+            assertThat(subscriber.getItems()).containsExactly(69);
             assertThat(spy.invoked()).isTrue();
             assertThat(spy.invocationCount()).isEqualTo(1);
 
@@ -344,7 +344,7 @@ class SpyTest {
             MultiOnFailureSpy<Object> spy = Spy.onFailure(Multi.createFrom().failure(new IOException("boom")));
             AssertSubscriber<Object> subscriber = spy.subscribe().withSubscriber(AssertSubscriber.create(10));
 
-            subscriber.assertHasFailedWith(IOException.class, "boom");
+            subscriber.assertFailedWith(IOException.class, "boom");
             assertThat(spy.invoked()).isTrue();
             assertThat(spy.invocationCount()).isEqualTo(1);
             assertThat(spy.lastFailure()).isNotNull().isInstanceOf(IOException.class).hasMessage("boom");
@@ -361,7 +361,7 @@ class SpyTest {
                     IOException.class);
             AssertSubscriber<Object> subscriber = spy.subscribe().withSubscriber(AssertSubscriber.create(10));
 
-            subscriber.assertHasFailedWith(IOException.class, "boom");
+            subscriber.assertFailedWith(IOException.class, "boom");
             assertThat(spy.invoked()).isTrue();
             assertThat(spy.invocationCount()).isEqualTo(1);
             assertThat(spy.lastFailure()).isNotNull().isInstanceOf(IOException.class).hasMessage("boom");
@@ -378,7 +378,7 @@ class SpyTest {
                     IllegalStateException.class);
             AssertSubscriber<Object> subscriber = spy.subscribe().withSubscriber(AssertSubscriber.create(10));
 
-            subscriber.assertHasFailedWith(IOException.class, "boom");
+            subscriber.assertFailedWith(IOException.class, "boom");
             assertThat(spy.invoked()).isFalse();
             assertThat(spy.invocationCount()).isEqualTo(0);
             assertThat(spy.lastFailure()).isNull();
@@ -394,7 +394,7 @@ class SpyTest {
             MultiOnFailureSpy<Object> spy = Spy.onFailure(Multi.createFrom().failure(new IOException("boom")), t -> true);
             AssertSubscriber<Object> subscriber = spy.subscribe().withSubscriber(AssertSubscriber.create(10));
 
-            subscriber.assertHasFailedWith(IOException.class, "boom");
+            subscriber.assertFailedWith(IOException.class, "boom");
             assertThat(spy.invoked()).isTrue();
             assertThat(spy.invocationCount()).isEqualTo(1);
             assertThat(spy.lastFailure()).isNotNull().isInstanceOf(IOException.class).hasMessage("boom");
@@ -410,7 +410,7 @@ class SpyTest {
             MultiOnFailureSpy<Object> spy = Spy.onFailure(Multi.createFrom().failure(new IOException("boom")), t -> false);
             AssertSubscriber<Object> subscriber = spy.subscribe().withSubscriber(AssertSubscriber.create(10));
 
-            subscriber.assertHasFailedWith(IOException.class, "boom");
+            subscriber.assertFailedWith(IOException.class, "boom");
             assertThat(spy.invoked()).isFalse();
             assertThat(spy.invocationCount()).isEqualTo(0);
             assertThat(spy.lastFailure()).isNull();
@@ -426,8 +426,8 @@ class SpyTest {
             MultiOnItemSpy<Integer> spy = Spy.onItem(Multi.createFrom().items(1, 2, 3));
             AssertSubscriber<Integer> subscriber = spy.subscribe().withSubscriber(AssertSubscriber.create(10));
 
-            subscriber.assertCompletedSuccessfully();
-            assertThat(subscriber.items()).containsExactly(1, 2, 3);
+            subscriber.assertCompleted();
+            assertThat(subscriber.getItems()).containsExactly(1, 2, 3);
             assertThat(spy.invoked()).isTrue();
             assertThat(spy.invocationCount()).isEqualTo(3);
             assertThat(spy.items()).containsExactly(1, 2, 3);
@@ -443,8 +443,8 @@ class SpyTest {
             MultiOnItemSpy<Integer> spy = Spy.onItem(Multi.createFrom().items(1, 2, 3), true);
             AssertSubscriber<Integer> subscriber = spy.subscribe().withSubscriber(AssertSubscriber.create(10));
 
-            subscriber.assertCompletedSuccessfully();
-            assertThat(subscriber.items()).containsExactly(1, 2, 3);
+            subscriber.assertCompleted();
+            assertThat(subscriber.getItems()).containsExactly(1, 2, 3);
             assertThat(spy.invoked()).isTrue();
             assertThat(spy.invocationCount()).isEqualTo(3);
             assertThat(spy.items()).containsExactly(1, 2, 3);
@@ -460,8 +460,8 @@ class SpyTest {
             MultiOnItemSpy<Integer> spy = Spy.onItem(Multi.createFrom().items(1, 2, 3), false);
             AssertSubscriber<Integer> subscriber = spy.subscribe().withSubscriber(AssertSubscriber.create(10));
 
-            subscriber.assertCompletedSuccessfully();
-            assertThat(subscriber.items()).containsExactly(1, 2, 3);
+            subscriber.assertCompleted();
+            assertThat(subscriber.getItems()).containsExactly(1, 2, 3);
             assertThat(spy.invoked()).isTrue();
             assertThat(spy.invocationCount()).isEqualTo(3);
             assertThat(spy.items()).isEmpty();
@@ -477,8 +477,8 @@ class SpyTest {
             AssertSubscriber<Integer> subscriber = spy.subscribe().withSubscriber(AssertSubscriber.create(10));
             subscriber.request(5);
 
-            subscriber.assertCompletedSuccessfully();
-            assertThat(subscriber.items()).containsExactly(1, 2, 3);
+            subscriber.assertCompleted();
+            assertThat(subscriber.getItems()).containsExactly(1, 2, 3);
             assertThat(spy.invoked()).isTrue();
             assertThat(spy.invocationCount()).isEqualTo(2);
             assertThat(spy.requestedCount()).isEqualTo(15);
@@ -494,8 +494,8 @@ class SpyTest {
             MultiOnSubscribeSpy<Integer> spy = Spy.onSubscribe(Multi.createFrom().items(1, 2, 3));
             AssertSubscriber<Integer> subscriber = spy.subscribe().withSubscriber(AssertSubscriber.create(10));
 
-            subscriber.assertCompletedSuccessfully();
-            assertThat(subscriber.items()).containsExactly(1, 2, 3);
+            subscriber.assertCompleted();
+            assertThat(subscriber.getItems()).containsExactly(1, 2, 3);
             assertThat(spy.invoked()).isTrue();
             assertThat(spy.invocationCount()).isEqualTo(1);
             assertThat(spy.lastSubscription()).isNotNull();
@@ -515,8 +515,8 @@ class SpyTest {
 
             AssertSubscriber<Integer> subscriber = spy.subscribe().withSubscriber(AssertSubscriber.create(10));
 
-            subscriber.assertCompletedSuccessfully();
-            assertThat(subscriber.items()).containsExactly(69);
+            subscriber.assertCompleted();
+            assertThat(subscriber.getItems()).containsExactly(69);
             assertThat(spy.invoked()).isTrue();
             assertThat(spy.invocationCount()).isEqualTo(1);
             assertThat(spy.lastTerminationFailure()).isNull();
@@ -538,7 +538,7 @@ class SpyTest {
 
             AssertSubscriber<Integer> subscriber = spy.subscribe().withSubscriber(AssertSubscriber.create(10));
 
-            subscriber.assertHasFailedWith(IOException.class, "boom");
+            subscriber.assertFailedWith(IOException.class, "boom");
             assertThat(spy.invoked()).isTrue();
             assertThat(spy.invocationCount()).isEqualTo(1);
             assertThat(spy.lastTerminationFailure()).isNotNull().isInstanceOf(IOException.class).hasMessage("boom");
@@ -561,7 +561,7 @@ class SpyTest {
             AssertSubscriber<Integer> subscriber = spy.subscribe().withSubscriber(AssertSubscriber.create());
             subscriber.cancel();
 
-            subscriber.assertHasNotReceivedAnyItem().assertHasNotCompleted().assertHasNotFailed();
+            subscriber.assertHasNotReceivedAnyItem().assertNotTerminated();
             assertThat(spy.invoked()).isTrue();
             assertThat(spy.invocationCount()).isEqualTo(1);
             assertThat(spy.lastTerminationFailure()).isNull();
@@ -582,8 +582,8 @@ class SpyTest {
             subscriber.request(1);
             subscriber.request(10);
 
-            subscriber.assertCompletedSuccessfully();
-            assertThat(subscriber.items()).containsExactly(1, 2, 3);
+            subscriber.assertCompleted();
+            assertThat(subscriber.getItems()).containsExactly(1, 2, 3);
 
             assertThat(spy.onCancellationSpy().invoked()).isFalse();
             assertThat(spy.onCompletionSpy().invoked()).isTrue();

@@ -36,7 +36,7 @@ public class UniOnItemTransformTest {
 
         one.map(v -> v + 1).subscribe().withSubscriber(subscriber);
 
-        subscriber.assertCompletedSuccessfully()
+        subscriber.assertCompleted()
                 .assertItem(2);
     }
 
@@ -50,9 +50,9 @@ public class UniOnItemTransformTest {
         uni.subscribe().withSubscriber(s1);
         uni.subscribe().withSubscriber(s2);
 
-        s1.assertCompletedSuccessfully()
+        s1.assertCompleted()
                 .assertItem(2);
-        s2.assertCompletedSuccessfully()
+        s2.assertCompleted()
                 .assertItem(3);
     }
 
@@ -64,7 +64,7 @@ public class UniOnItemTransformTest {
             throw new RuntimeException("failure");
         }).subscribe().withSubscriber(subscriber);
 
-        subscriber.assertFailure(RuntimeException.class, "failure");
+        subscriber.assertFailedWith(RuntimeException.class, "failure");
     }
 
     @Test
@@ -75,7 +75,7 @@ public class UniOnItemTransformTest {
             throw new AssertionError("OH NO!");
         }).subscribe().withSubscriber(subscriber);
 
-        subscriber.assertFailure(AssertionError.class, "OH NO!");
+        subscriber.assertFailedWith(AssertionError.class, "OH NO!");
     }
 
     @Test
@@ -84,14 +84,14 @@ public class UniOnItemTransformTest {
 
         one.map(v -> null).subscribe().withSubscriber(subscriber);
 
-        subscriber.assertCompletedSuccessfully().assertItem(null);
+        subscriber.assertCompleted().assertItem(null);
     }
 
     @Test
     public void testThatMapperIsCalledWithNull() {
         UniAssertSubscriber<String> subscriber = UniAssertSubscriber.create();
         Uni.createFrom().item((String) null).map(x -> "foo").subscribe().withSubscriber(subscriber);
-        subscriber.assertCompletedSuccessfully().assertItem("foo");
+        subscriber.assertCompleted().assertItem("foo");
     }
 
     @Test
@@ -108,7 +108,7 @@ public class UniOnItemTransformTest {
                     })
                     .subscribe().withSubscriber(subscriber);
 
-            subscriber.await().assertCompletedSuccessfully().assertItem(2);
+            subscriber.await().assertCompleted().assertItem(2);
             assertThat(threadName).isNotNull().doesNotHaveValue("main");
             assertThat(subscriber.getOnItemThreadName()).isEqualTo(threadName.get());
         } finally {
@@ -126,7 +126,7 @@ public class UniOnItemTransformTest {
                     return x + 1;
                 }).subscribe().withSubscriber(subscriber);
 
-        subscriber.assertFailure(Exception.class, "boom");
+        subscriber.assertFailedWith(Exception.class, "boom");
         assertThat(called).isFalse();
     }
 
@@ -143,7 +143,7 @@ public class UniOnItemTransformTest {
                 .subscribe().withSubscriber(UniAssertSubscriber.create());
 
         assertThat(called).isFalse();
-        subscriber.assertNotCompleted().assertNoFailure().assertSubscribed();
+        subscriber.assertNotTerminated().assertSubscribed();
         subscriber.cancel();
         emitter.get().complete(1);
         assertThat(called).isFalse();
@@ -162,7 +162,7 @@ public class UniOnItemTransformTest {
                 .subscribe().withSubscriber(new UniAssertSubscriber<>(true));
 
         assertThat(called).isFalse();
-        subscriber.assertNotCompleted().assertNoFailure().assertSubscribed();
+        subscriber.assertNotTerminated().assertSubscribed();
         emitter.get().complete(1);
         assertThat(called).isFalse();
     }

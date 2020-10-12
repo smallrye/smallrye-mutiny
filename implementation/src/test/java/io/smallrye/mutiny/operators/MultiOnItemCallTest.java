@@ -28,7 +28,7 @@ public class MultiOnItemCallTest {
                     return Uni.createFrom().item(5);
                 })
                 .subscribe().withSubscriber(AssertSubscriber.create(10))
-                .assertReceived(1, 2, 3, 4).assertCompletedSuccessfully();
+                .assertItems(1, 2, 3, 4).assertCompleted();
         assertThat(counter).hasValue(4);
     }
 
@@ -41,7 +41,7 @@ public class MultiOnItemCallTest {
                     return Uni.createFrom().item(5);
                 })
                 .subscribe().withSubscriber(AssertSubscriber.create(10))
-                .assertReceived(1, 2, 3, 4).assertCompletedSuccessfully();
+                .assertItems(1, 2, 3, 4).assertCompleted();
         assertThat(counter).hasValue(4);
     }
 
@@ -54,7 +54,7 @@ public class MultiOnItemCallTest {
                     return Uni.createFrom().item(i);
                 })
                 .subscribe().withSubscriber(AssertSubscriber.create(10))
-                .assertReceived(1, 2, 3, 4).assertCompletedSuccessfully();
+                .assertItems(1, 2, 3, 4).assertCompleted();
         assertThat(counter).hasValue(4);
     }
 
@@ -67,7 +67,7 @@ public class MultiOnItemCallTest {
                     return Uni.createFrom().item(i);
                 })
                 .subscribe().withSubscriber(AssertSubscriber.create(10))
-                .assertReceived(1, 2, 3, 4).assertCompletedSuccessfully();
+                .assertItems(1, 2, 3, 4).assertCompleted();
         assertThat(counter).hasValue(4);
     }
 
@@ -80,7 +80,7 @@ public class MultiOnItemCallTest {
                     return Uni.createFrom().item(i);
                 })
                 .subscribe().withSubscriber(AssertSubscriber.create(10))
-                .assertReceived(1, 2, 3, 4).assertCompletedSuccessfully();
+                .assertItems(1, 2, 3, 4).assertCompleted();
         assertThat(counter).hasValue(4);
     }
 
@@ -93,7 +93,7 @@ public class MultiOnItemCallTest {
                     return Uni.createFrom().item(i);
                 })
                 .subscribe().withSubscriber(AssertSubscriber.create(10))
-                .assertReceived(1, 2, 3, 4).assertCompletedSuccessfully();
+                .assertItems(1, 2, 3, 4).assertCompleted();
         assertThat(counter).hasValue(4);
     }
 
@@ -106,7 +106,7 @@ public class MultiOnItemCallTest {
                     return Uni.createFrom().item(5);
                 })
                 .subscribe().withSubscriber(AssertSubscriber.create(10))
-                .assertReceived(1, 2, 3, 4).assertHasFailedWith(NoSuchElementException.class, null);
+                .assertItems(1, 2, 3, 4).assertFailedWith(NoSuchElementException.class, null);
         assertThat(counter).hasValue(4);
     }
 
@@ -119,7 +119,7 @@ public class MultiOnItemCallTest {
                     return Uni.createFrom().item(5);
                 })
                 .subscribe().withSubscriber(AssertSubscriber.create(10))
-                .assertReceived(1, 2, 3, 4).assertHasFailedWith(NoSuchElementException.class, null);
+                .assertItems(1, 2, 3, 4).assertFailedWith(NoSuchElementException.class, null);
         assertThat(counter).hasValue(4);
     }
 
@@ -132,7 +132,7 @@ public class MultiOnItemCallTest {
                     return Uni.createFrom().item(5);
                 })
                 .subscribe().withSubscriber(AssertSubscriber.create(10))
-                .assertHasNotReceivedAnyItem().assertCompletedSuccessfully();
+                .assertHasNotReceivedAnyItem().assertCompleted();
         assertThat(counter).hasValue(0);
     }
 
@@ -145,7 +145,7 @@ public class MultiOnItemCallTest {
                     return Uni.createFrom().item(5);
                 })
                 .subscribe().withSubscriber(AssertSubscriber.create(10))
-                .assertHasNotReceivedAnyItem().assertCompletedSuccessfully();
+                .assertHasNotReceivedAnyItem().assertCompleted();
         assertThat(counter).hasValue(0);
     }
 
@@ -237,7 +237,7 @@ public class MultiOnItemCallTest {
                     return Uni.createFrom().item(0);
                 })
                 .subscribe().withSubscriber(AssertSubscriber.create(10))
-                .assertReceived(1, 2).assertHasFailedWith(TestException.class, "boom");
+                .assertItems(1, 2).assertFailedWith(TestException.class, "boom");
         assertThat(counter).hasValue(3);
         assertThat(cancelled).isTrue();
     }
@@ -255,7 +255,7 @@ public class MultiOnItemCallTest {
                     return Uni.createFrom().item(i);
                 })
                 .subscribe().withSubscriber(AssertSubscriber.create(10))
-                .assertReceived(1, 2).assertHasFailedWith(TestException.class, "boom");
+                .assertItems(1, 2).assertFailedWith(TestException.class, "boom");
         assertThat(counter).hasValue(3);
         assertThat(cancelled).isTrue();
     }
@@ -273,7 +273,7 @@ public class MultiOnItemCallTest {
                     return Uni.createFrom().item(0);
                 })
                 .subscribe().withSubscriber(AssertSubscriber.create(10))
-                .assertReceived(1, 2).assertHasFailedWith(NullPointerException.class, "");
+                .assertItems(1, 2).assertFailedWith(NullPointerException.class, "");
         assertThat(counter).hasValue(3);
         assertThat(cancelled).isTrue();
     }
@@ -291,7 +291,7 @@ public class MultiOnItemCallTest {
                     return Uni.createFrom().item(0);
                 })
                 .subscribe().withSubscriber(AssertSubscriber.create(10))
-                .assertReceived(1, 2).assertHasFailedWith(NullPointerException.class, "");
+                .assertItems(1, 2).assertFailedWith(NullPointerException.class, "");
         assertThat(counter).hasValue(3);
         assertThat(cancelled).isTrue();
     }
@@ -309,7 +309,7 @@ public class MultiOnItemCallTest {
                     return Uni.createFrom().item(0);
                 })
                 .subscribe().withSubscriber(AssertSubscriber.create(10))
-                .assertReceived(1, 2).assertHasFailedWith(TestException.class, "boom");
+                .assertItems(1, 2).assertFailedWith(TestException.class, "boom");
         assertThat(counter).hasValue(3);
         assertThat(cancelled).isTrue();
     }
@@ -327,7 +327,7 @@ public class MultiOnItemCallTest {
                     return Uni.createFrom().item(0);
                 })
                 .subscribe().withSubscriber(AssertSubscriber.create(10))
-                .assertReceived(1, 2).assertHasFailedWith(TestException.class, "boom");
+                .assertItems(1, 2).assertFailedWith(TestException.class, "boom");
         assertThat(counter).hasValue(3);
         assertThat(cancelled).isTrue();
     }

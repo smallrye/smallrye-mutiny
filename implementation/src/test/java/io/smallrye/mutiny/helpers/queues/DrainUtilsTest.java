@@ -27,7 +27,7 @@ public class DrainUtilsTest {
         DrainUtils.postComplete(subscriber, queue, state, () -> false);
 
         subscriber.assertHasNotReceivedAnyItem()
-                .assertCompletedSuccessfully();
+                .assertCompleted();
 
     }
 
@@ -42,8 +42,8 @@ public class DrainUtilsTest {
         state.getAndIncrement();
         DrainUtils.postComplete(subscriber, queue, state, () -> false);
         subscriber
-                .assertCompletedSuccessfully()
-                .assertReceived(1);
+                .assertCompleted()
+                .assertItems(1);
     }
 
     @RepeatedTest(100)
@@ -87,7 +87,7 @@ public class DrainUtilsTest {
         runnables.forEach(r -> new Thread(r).start());
 
         done.await();
-        subscriber.assertReceived(1);
+        subscriber.assertItems(1);
     }
 
     @Test
@@ -128,8 +128,7 @@ public class DrainUtilsTest {
         DrainUtils.postComplete(subscriber, queue, state, subscriber::isCancelled);
         subscriber
                 .assertNotTerminated()
-                .assertReceived(1)
-                .assertHasNotFailed();
+                .assertItems(1);
     }
 
     @Test

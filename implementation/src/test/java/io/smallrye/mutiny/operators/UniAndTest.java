@@ -38,7 +38,7 @@ public class UniAndTest {
                 Uni.createFrom().item(1),
                 Uni.createFrom().<Integer> failure(new IOException("boom"))).asTuple()
                 .subscribe().withSubscriber(UniAssertSubscriber.create());
-        subscriber.assertFailure(IOException.class, "boom");
+        subscriber.assertFailedWith(IOException.class, "boom");
     }
 
     @Test
@@ -61,9 +61,9 @@ public class UniAndTest {
                 .collectFailures()
                 .asTuple()
                 .subscribe().withSubscriber(UniAssertSubscriber.create());
-        subscriber.assertCompletedWithFailure()
-                .assertFailure(CompositeException.class, "boom")
-                .assertFailure(CompositeException.class, "boom 2");
+        subscriber.assertFailed()
+                .assertFailedWith(CompositeException.class, "boom")
+                .assertFailedWith(CompositeException.class, "boom 2");
     }
 
     @Test
@@ -91,51 +91,51 @@ public class UniAndTest {
         Uni<Integer> uni10 = Uni.createFrom().item(10);
 
         uni1.and().uni(uni2).asTuple().subscribe().withSubscriber(UniAssertSubscriber.create())
-                .assertCompletedSuccessfully()
+                .assertCompleted()
                 .assertItem(Tuple2.of(1, 2));
 
         uni1.and().unis(uni2, uni3).asTuple().subscribe().withSubscriber(UniAssertSubscriber.create())
-                .assertCompletedSuccessfully()
+                .assertCompleted()
                 .assertItem(Tuple3.of(1, 2, 3));
 
         uni1.and().unis(uni2, uni3, uni4).asTuple().subscribe().withSubscriber(UniAssertSubscriber.create())
-                .assertCompletedSuccessfully()
+                .assertCompleted()
                 .assertItem(Tuple4.of(1, 2, 3, 4));
 
         uni1.and().unis(uni2, uni3, uni4, uni5).asTuple().subscribe().withSubscriber(UniAssertSubscriber.create())
-                .assertCompletedSuccessfully()
+                .assertCompleted()
                 .assertItem(Tuple5.of(1, 2, 3, 4, 5));
 
         uni1.and().unis(uni2, uni3, uni4, uni5, uni6).asTuple().subscribe().withSubscriber(UniAssertSubscriber.create())
-                .assertCompletedSuccessfully()
+                .assertCompleted()
                 .assertItem(Tuple6.of(1, 2, 3, 4, 5, 6));
 
         uni1.and().unis(uni2, uni3, uni4, uni5, uni6, uni7).asTuple()
                 .subscribe().withSubscriber(UniAssertSubscriber.create())
-                .assertCompletedSuccessfully()
+                .assertCompleted()
                 .assertItem(Tuple7.of(1, 2, 3, 4, 5, 6, 7));
 
         uni1.and().unis(uni2, uni3, uni4, uni5, uni6, uni7, uni8).asTuple()
                 .subscribe().withSubscriber(UniAssertSubscriber.create())
-                .assertCompletedSuccessfully()
+                .assertCompleted()
                 .assertItem(Tuple8.of(1, 2, 3, 4, 5, 6, 7, 8));
 
         uni1.and().unis(uni2, uni3, uni4, uni5, uni6, uni7, uni8, uni9).asTuple()
                 .subscribe().withSubscriber(UniAssertSubscriber.create())
-                .assertCompletedSuccessfully()
+                .assertCompleted()
                 .assertItem(Tuple9.of(1, 2, 3, 4, 5, 6, 7, 8, 9));
 
         //noinspection unchecked
         uni1.and().unis(uni2, uni3, uni4, uni5, uni6, uni7, uni8, uni9, uni10).combinedWith(l -> (List<Integer>) l)
                 .subscribe().withSubscriber(UniAssertSubscriber.create())
-                .assertCompletedSuccessfully()
+                .assertCompleted()
                 .assertItem(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
 
         //noinspection unchecked
         uni1.and().unis(Arrays.asList(uni2, uni3, uni4, uni5, uni6, uni7, uni8, uni9, uni10))
                 .combinedWith(l -> (List<Integer>) l)
                 .subscribe().withSubscriber(UniAssertSubscriber.create())
-                .assertCompletedSuccessfully()
+                .assertCompleted()
                 .assertItem(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
 
         UniAssertSubscriber<Integer> subscriber = uni1.and().unis(uni2, uni3)
@@ -150,7 +150,7 @@ public class UniAndTest {
                 .onItem().ignore().andContinueWithNull();
 
         uni.subscribe().withSubscriber(UniAssertSubscriber.create())
-                .assertCompletedSuccessfully()
+                .assertCompleted()
                 .assertItem(null);
     }
 
@@ -290,7 +290,7 @@ public class UniAndTest {
                 .withSubscriber(UniAssertSubscriber.create());
 
         subscriber
-                .assertCompletedSuccessfully()
+                .assertCompleted()
                 .assertItem(1 + 2 + 3 + 4 + 5 + 6 + 7 + 8 + 9);
     }
 
@@ -316,7 +316,7 @@ public class UniAndTest {
                 .withSubscriber(UniAssertSubscriber.create());
 
         subscriber
-                .assertCompletedSuccessfully()
+                .assertCompleted()
                 .assertItem(1 + 2 + 3 + 4 + 5 + 6 + 7 + 8 + 9);
     }
 
