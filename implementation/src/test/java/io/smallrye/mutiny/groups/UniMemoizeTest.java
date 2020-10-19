@@ -1,4 +1,4 @@
-package io.smallrye.mutiny.operators;
+package io.smallrye.mutiny.groups;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -12,6 +12,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BooleanSupplier;
 
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 
 import io.reactivex.Flowable;
@@ -19,10 +21,13 @@ import io.reactivex.processors.UnicastProcessor;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.helpers.spies.Spy;
 import io.smallrye.mutiny.helpers.spies.UniOnSubscribeSpy;
+import io.smallrye.mutiny.operators.UniAssertSubscriber;
+import io.smallrye.mutiny.operators.UniCache;
 import io.smallrye.mutiny.subscription.UniSubscriber;
 import io.smallrye.mutiny.subscription.UniSubscription;
 
-public class UniCacheTest {
+@DisplayName("Tests for the uni.memoize() group")
+class UniMemoizeTest {
 
     private static void race(Runnable candidate1, Runnable candidate2, Executor s) {
         final CountDownLatch latch = new CountDownLatch(2);
@@ -73,12 +78,14 @@ public class UniCacheTest {
     }
 
     @Test
+    @DisplayName("The upstream cannot be null")
     public void testThatSourceCannotBeNull() {
         assertThrows(IllegalArgumentException.class, () -> new UniCache<>(null));
     }
 
     @Test
-    public void testThatImmediateValueAreCached() {
+    @DisplayName("Test the deprecated uni.cache() method")
+    public void testDeprecatedUniCache() {
         AtomicInteger counter = new AtomicInteger();
         Uni<Integer> cache = Uni.createFrom().item(counter.incrementAndGet()).cache();
 
@@ -96,9 +103,29 @@ public class UniCacheTest {
     }
 
     @Test
-    public void testThatIFailureAreCached() {
+    @DisplayName("Test that uni.memoize().forever() caches immediate values")
+    public void testThatImmediateValueAreCached() {
         AtomicInteger counter = new AtomicInteger();
-        Uni<Object> cache = Uni.createFrom().failure(new Exception("" + counter.getAndIncrement())).cache();
+        Uni<Integer> cache = Uni.createFrom().item(counter.incrementAndGet()).memoize().forever();
+
+        UniAssertSubscriber<Integer> sub1 = UniAssertSubscriber.create();
+        UniAssertSubscriber<Integer> sub2 = UniAssertSubscriber.create();
+        UniAssertSubscriber<Integer> sub3 = UniAssertSubscriber.create();
+
+        cache.subscribe().withSubscriber(sub1);
+        cache.subscribe().withSubscriber(sub2);
+        cache.subscribe().withSubscriber(sub3);
+
+        sub1.assertCompleted().assertItem(1);
+        sub2.assertCompleted().assertItem(1);
+        sub3.assertCompleted().assertItem(1);
+    }
+
+    @Test
+    @DisplayName("Test that uni.memoize().forever() caches immediate failures")
+    public void testThatImmediateFailureAreCached() {
+        AtomicInteger counter = new AtomicInteger();
+        Uni<Object> cache = Uni.createFrom().failure(new Exception("" + counter.getAndIncrement())).memoize().forever();
 
         UniAssertSubscriber<Object> sub1 = UniAssertSubscriber.create();
         UniAssertSubscriber<Object> sub2 = UniAssertSubscriber.create();
@@ -114,9 +141,10 @@ public class UniCacheTest {
     }
 
     @Test
+    @DisplayName("Test that uni.memoize().forever() caches values emitted after the subscription")
     public void testThatValueEmittedAfterSubscriptionAreCached() {
         CompletableFuture<Integer> cs = new CompletableFuture<>();
-        Uni<Integer> cache = Uni.createFrom().completionStage(cs).cache();
+        Uni<Integer> cache = Uni.createFrom().completionStage(cs).memoize().forever();
 
         UniAssertSubscriber<Integer> sub1 = UniAssertSubscriber.create();
         UniAssertSubscriber<Integer> sub2 = UniAssertSubscriber.create();
@@ -135,9 +163,10 @@ public class UniCacheTest {
     }
 
     @Test
+    @DisplayName("Test that uni.memoize().forever() subscribers can cancel their subscription before receiving anything")
     public void testThatSubscriberCanCancelTheirSubscriptionBeforeReceivingAValue() {
         CompletableFuture<Integer> cs = new CompletableFuture<>();
-        Uni<Integer> cache = Uni.createFrom().completionStage(cs).cache();
+        Uni<Integer> cache = Uni.createFrom().completionStage(cs).memoize().forever();
 
         UniAssertSubscriber<Integer> sub1 = UniAssertSubscriber.create();
         UniAssertSubscriber<Integer> sub2 = UniAssertSubscriber.create();
@@ -158,9 +187,10 @@ public class UniCacheTest {
     }
 
     @Test
+    @DisplayName("Test that uni.memoize().forever() subscribers can cancel their subscription after having received something")
     public void testThatSubscriberCanCancelTheirSubscriptionAfterHavingReceivingAValue() {
         CompletableFuture<Integer> cs = new CompletableFuture<>();
-        Uni<Integer> cache = Uni.createFrom().completionStage(cs).cache();
+        Uni<Integer> cache = Uni.createFrom().completionStage(cs).memoize().forever();
 
         UniAssertSubscriber<Integer> sub1 = UniAssertSubscriber.create();
         UniAssertSubscriber<Integer> sub2 = UniAssertSubscriber.create();
@@ -180,9 +210,10 @@ public class UniCacheTest {
     }
 
     @Test
+    @DisplayName("Test that uni.memoize().forever() caches values emitted by a processor")
     public void assertCachingTheValueEmittedByAProcessor() {
         UnicastProcessor<Integer> processor = UnicastProcessor.create();
-        Uni<Integer> cached = Uni.createFrom().publisher(processor).cache();
+        Uni<Integer> cached = Uni.createFrom().publisher(processor).memoize().forever();
 
         UniAssertSubscriber<Integer> sub1 = new UniAssertSubscriber<>();
         UniAssertSubscriber<Integer> sub2 = new UniAssertSubscriber<>();
@@ -202,9 +233,10 @@ public class UniCacheTest {
     }
 
     @Test
+    @DisplayName("Test that uni.memoize().forever() allows the immediate cancellation when values are emitted by a processor")
     public void assertCancellingImmediately() {
         UnicastProcessor<Integer> processor = UnicastProcessor.create();
-        Uni<Integer> cached = Uni.createFrom().publisher(processor).cache();
+        Uni<Integer> cached = Uni.createFrom().publisher(processor).memoize().forever();
 
         UniAssertSubscriber<Integer> sub1 = new UniAssertSubscriber<>(true);
         UniAssertSubscriber<Integer> sub2 = new UniAssertSubscriber<>(true);
@@ -223,11 +255,12 @@ public class UniCacheTest {
         sub2.assertNotTerminated();
     }
 
-    @Test
+    @RepeatedTest(10)
+    @DisplayName("Test uni.memoize().forever() for race conditions on subscription and cancellation")
     public void testSubscribersRace() {
         for (int i = 0; i < 2000; i++) {
             Flowable<Integer> flowable = Flowable.just(1, 2, 3);
-            Uni<Integer> cached = Uni.createFrom().publisher(flowable).cache();
+            Uni<Integer> cached = Uni.createFrom().publisher(flowable).memoize().forever();
 
             UniAssertSubscriber<Integer> subscriber = new UniAssertSubscriber<>(false);
 
@@ -248,8 +281,9 @@ public class UniCacheTest {
     }
 
     @Test
+    @DisplayName("Test the double cancellation of a subscription to uni.memoize().forever()")
     public void testWithDoubleCancellation() {
-        Uni<Integer> uni = Uni.createFrom().item(23).cache();
+        Uni<Integer> uni = Uni.createFrom().item(23).memoize().forever();
         UniSubscriber<Integer> subscriber = new UniSubscriber<Integer>() {
             @Override
             public void onSubscribe(UniSubscription subscription) {
@@ -277,11 +311,12 @@ public class UniCacheTest {
     }
 
     @Test
+    @DisplayName("Test basic invalidations of uni.memoize().until(condition)")
     public void testBasicInvalidation() {
         AtomicInteger counter = new AtomicInteger(0);
         AtomicBoolean invalidate = new AtomicBoolean(false);
         UniOnSubscribeSpy<Integer> onSubscribeSpy = Spy.onSubscribe(Uni.createFrom().item(counter::getAndIncrement));
-        Uni<Integer> cachingUni = onSubscribeSpy.cacheUntil(invalidate::get);
+        Uni<Integer> cachingUni = onSubscribeSpy.memoize().until(invalidate::get);
 
         UniAssertSubscriber<Integer> subscriber = cachingUni.subscribe().withSubscriber(UniAssertSubscriber.create());
         subscriber.assertCompleted().assertItem(0);
@@ -309,10 +344,11 @@ public class UniCacheTest {
     }
 
     @Test
+    @DisplayName("Test basic invalidations of uni.memoize().during(duration)")
     public void testDurationInvalidation() throws InterruptedException {
         AtomicInteger counter = new AtomicInteger(0);
         UniOnSubscribeSpy<Integer> onSubscribeSpy = Spy.onSubscribe(Uni.createFrom().item(counter::getAndIncrement));
-        Uni<Integer> cachingUni = onSubscribeSpy.cacheFor(Duration.ofMillis(500));
+        Uni<Integer> cachingUni = onSubscribeSpy.memoize().during(Duration.ofMillis(250));
 
         UniAssertSubscriber<Integer> subscriber = cachingUni.subscribe().withSubscriber(UniAssertSubscriber.create());
         subscriber.assertCompleted().assertItem(0);
@@ -333,12 +369,13 @@ public class UniCacheTest {
         assertThat(onSubscribeSpy.invocationCount()).isEqualTo(2);
     }
 
-    @Test
+    @RepeatedTest(10)
+    @DisplayName("Test uni.memoize().until(duration) for race conditions on subscription and cancellation in presence of random guard invalidations")
     public void testSubscribersRaceWithRandomInvalidations() {
         for (int i = 0; i < 2000; i++) {
             Flowable<Integer> flowable = Flowable.just(1, 2, 3);
             BooleanSupplier invalidationGuard = () -> ThreadLocalRandom.current().nextBoolean();
-            Uni<Integer> cached = Uni.createFrom().publisher(flowable).cacheUntil(invalidationGuard);
+            Uni<Integer> cached = Uni.createFrom().publisher(flowable).memoize().until(invalidationGuard);
 
             UniAssertSubscriber<Integer> subscriber = new UniAssertSubscriber<>(false);
 

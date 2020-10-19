@@ -34,11 +34,11 @@ public class UniCache<I> extends UniOperator<I, I> implements UniSubscriber<I> {
     private volatile I item;
     private volatile Throwable failure;
 
-    UniCache(Uni<? extends I> upstream) {
+    public UniCache(Uni<? extends I> upstream) {
         this(upstream, () -> false);
     }
 
-    UniCache(Uni<? extends I> upstream, BooleanSupplier invalidationRequested) {
+    public UniCache(Uni<? extends I> upstream, BooleanSupplier invalidationRequested) {
         super(nonNull(upstream, "upstream"));
         this.invalidationRequested = invalidationRequested;
     }

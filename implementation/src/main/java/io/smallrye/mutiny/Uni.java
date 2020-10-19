@@ -8,6 +8,7 @@ import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Executor;
 import java.util.function.*;
 
+import io.smallrye.common.annotation.Experimental;
 import io.smallrye.mutiny.groups.*;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.subscription.UniEmitter;
@@ -383,33 +384,23 @@ public interface Uni<T> {
     Uni<T> runSubscriptionOn(Executor executor);
 
     /**
+     * Configure memoization of the {@link Uni} item or failure.
+     * 
+     * @return the object to configure memoization
+     */
+    @Experimental("Memoization is an experimental feature at this stage")
+    UniMemoize<T> memoize();
+
+    /**
      * Caches the events (item or failure) of this {@link Uni} and replays it for all further {@link UniSubscriber}.
      *
      * @return the new {@link Uni}. Unlike regular {@link Uni}, re-subscribing to this {@link Uni} does not re-compute
      *         the outcome but replayed the cached events.
+     * @deprecated Use {@link UniMemoize#forever()} instead
      */
-    Uni<T> cache();
-
-    // TODO
-    Uni<T> cacheUntil(BooleanSupplier invalidationGuard);
-
-    // TODO
-    default Uni<T> cacheFor(Duration duration) {
-        return cacheUntil(new BooleanSupplier() {
-            private volatile long startTime = -1;
-
-            @Override
-            public boolean getAsBoolean() {
-                if (startTime == -1) {
-                    startTime = System.currentTimeMillis();
-                }
-                boolean invalidates = (System.currentTimeMillis() - startTime) > duration.toMillis();
-                if (invalidates) {
-                    startTime = System.currentTimeMillis();
-                }
-                return invalidates;
-            }
-        });
+    @Deprecated
+    default Uni<T> cache() {
+        return memoize().forever();
     }
 
     /**
