@@ -9,7 +9,6 @@ import io.smallrye.common.annotation.Experimental;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.AbstractUni;
-import io.smallrye.mutiny.operators.UniCache;
 
 @Experimental("Memoization is an experimental feature at this stage")
 public class UniMemoize<T> {
@@ -32,7 +31,7 @@ public class UniMemoize<T> {
      * @return a new {@link Uni}
      */
     public Uni<T> until(BooleanSupplier invalidationGuard) {
-        return Infrastructure.onUniCreation(new UniCache<>(upstream, invalidationGuard));
+        return Infrastructure.onUniCreation(new io.smallrye.mutiny.operators.UniMemoize<>(upstream, invalidationGuard));
     }
 
     /**

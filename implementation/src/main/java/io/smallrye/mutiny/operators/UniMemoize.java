@@ -13,7 +13,7 @@ import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.subscription.UniSubscriber;
 import io.smallrye.mutiny.subscription.UniSubscription;
 
-public class UniCache<I> extends UniOperator<I, I> implements UniSubscriber<I> {
+public class UniMemoize<I> extends UniOperator<I, I> implements UniSubscriber<I> {
 
     private enum State {
         INIT,
@@ -34,11 +34,11 @@ public class UniCache<I> extends UniOperator<I, I> implements UniSubscriber<I> {
     private volatile I item;
     private volatile Throwable failure;
 
-    public UniCache(Uni<? extends I> upstream) {
+    public UniMemoize(Uni<? extends I> upstream) {
         this(upstream, () -> false);
     }
 
-    public UniCache(Uni<? extends I> upstream, BooleanSupplier invalidationRequested) {
+    public UniMemoize(Uni<? extends I> upstream, BooleanSupplier invalidationRequested) {
         super(nonNull(upstream, "upstream"));
         this.invalidationRequested = invalidationRequested;
     }

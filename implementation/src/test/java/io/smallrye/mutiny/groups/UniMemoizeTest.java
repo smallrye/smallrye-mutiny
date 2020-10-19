@@ -22,7 +22,7 @@ import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.helpers.spies.Spy;
 import io.smallrye.mutiny.helpers.spies.UniOnSubscribeSpy;
 import io.smallrye.mutiny.operators.UniAssertSubscriber;
-import io.smallrye.mutiny.operators.UniCache;
+import io.smallrye.mutiny.operators.UniMemoize;
 import io.smallrye.mutiny.subscription.UniSubscriber;
 import io.smallrye.mutiny.subscription.UniSubscription;
 
@@ -80,7 +80,7 @@ class UniMemoizeTest {
     @Test
     @DisplayName("The upstream cannot be null")
     public void testThatSourceCannotBeNull() {
-        assertThrows(IllegalArgumentException.class, () -> new UniCache<>(null));
+        assertThrows(IllegalArgumentException.class, () -> new UniMemoize<>(null));
     }
 
     @Test
