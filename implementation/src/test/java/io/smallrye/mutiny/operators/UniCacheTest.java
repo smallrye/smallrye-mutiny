@@ -12,14 +12,13 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BooleanSupplier;
 
-import io.smallrye.mutiny.helpers.spies.Spy;
-import io.smallrye.mutiny.helpers.spies.UniOnSubscribeSpy;
-import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 
 import io.reactivex.Flowable;
 import io.reactivex.processors.UnicastProcessor;
 import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.helpers.spies.Spy;
+import io.smallrye.mutiny.helpers.spies.UniOnSubscribeSpy;
 import io.smallrye.mutiny.subscription.UniSubscriber;
 import io.smallrye.mutiny.subscription.UniSubscription;
 
@@ -285,27 +284,27 @@ public class UniCacheTest {
         Uni<Integer> cachingUni = onSubscribeSpy.cacheUntil(invalidate::get);
 
         UniAssertSubscriber<Integer> subscriber = cachingUni.subscribe().withSubscriber(UniAssertSubscriber.create());
-        subscriber.assertCompletedSuccessfully().assertItem(0);
+        subscriber.assertCompleted().assertItem(0);
         assertThat(onSubscribeSpy.invocationCount()).isEqualTo(1);
 
         subscriber = cachingUni.subscribe().withSubscriber(UniAssertSubscriber.create());
-        subscriber.assertCompletedSuccessfully().assertItem(0);
+        subscriber.assertCompleted().assertItem(0);
         assertThat(onSubscribeSpy.invocationCount()).isEqualTo(1);
 
         invalidate.set(true);
 
         subscriber = cachingUni.subscribe().withSubscriber(UniAssertSubscriber.create());
-        subscriber.assertCompletedSuccessfully().assertItem(1);
+        subscriber.assertCompleted().assertItem(1);
         assertThat(onSubscribeSpy.invocationCount()).isEqualTo(2);
 
         subscriber = cachingUni.subscribe().withSubscriber(UniAssertSubscriber.create());
-        subscriber.assertCompletedSuccessfully().assertItem(2);
+        subscriber.assertCompleted().assertItem(2);
         assertThat(onSubscribeSpy.invocationCount()).isEqualTo(3);
 
         invalidate.set(false);
 
         subscriber = cachingUni.subscribe().withSubscriber(UniAssertSubscriber.create());
-        subscriber.assertCompletedSuccessfully().assertItem(2);
+        subscriber.assertCompleted().assertItem(2);
         assertThat(onSubscribeSpy.invocationCount()).isEqualTo(3);
     }
 
@@ -316,21 +315,21 @@ public class UniCacheTest {
         Uni<Integer> cachingUni = onSubscribeSpy.cacheFor(Duration.ofMillis(500));
 
         UniAssertSubscriber<Integer> subscriber = cachingUni.subscribe().withSubscriber(UniAssertSubscriber.create());
-        subscriber.assertCompletedSuccessfully().assertItem(0);
+        subscriber.assertCompleted().assertItem(0);
         assertThat(onSubscribeSpy.invocationCount()).isEqualTo(1);
 
         subscriber = cachingUni.subscribe().withSubscriber(UniAssertSubscriber.create());
-        subscriber.assertCompletedSuccessfully().assertItem(0);
+        subscriber.assertCompleted().assertItem(0);
         assertThat(onSubscribeSpy.invocationCount()).isEqualTo(1);
 
         Thread.sleep(500);
 
         subscriber = cachingUni.subscribe().withSubscriber(UniAssertSubscriber.create());
-        subscriber.assertCompletedSuccessfully().assertItem(1);
+        subscriber.assertCompleted().assertItem(1);
         assertThat(onSubscribeSpy.invocationCount()).isEqualTo(2);
 
         subscriber = cachingUni.subscribe().withSubscriber(UniAssertSubscriber.create());
-        subscriber.assertCompletedSuccessfully().assertItem(1);
+        subscriber.assertCompleted().assertItem(1);
         assertThat(onSubscribeSpy.invocationCount()).isEqualTo(2);
     }
 
