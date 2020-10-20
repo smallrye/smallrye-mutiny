@@ -7,15 +7,15 @@ import org.reactivestreams.Subscription;
 import org.reactivestreams.tck.TestEnvironment;
 import org.reactivestreams.tck.junit5.SubscriberWhiteboxVerification;
 
-import io.smallrye.mutiny.context.ContextPropagationMultiInterceptor;
+import io.smallrye.mutiny.context.DefaultContextPropagationMultiInterceptor;
 
 public class ContextPropagationSubscriberTckTest extends SubscriberWhiteboxVerification<Long> {
 
-    private final ContextPropagationMultiInterceptor interceptor;
+    private final DefaultContextPropagationMultiInterceptor interceptor;
 
     protected ContextPropagationSubscriberTckTest() {
         super(new TestEnvironment(100));
-        interceptor = new ContextPropagationMultiInterceptor();
+        interceptor = new DefaultContextPropagationMultiInterceptor();
     }
 
     @Override

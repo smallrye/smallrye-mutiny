@@ -3,7 +3,6 @@ package io.smallrye.mutiny.context;
 import java.util.concurrent.Executor;
 
 import org.eclipse.microprofile.context.ThreadContext;
-import org.eclipse.microprofile.context.spi.ContextManagerProvider;
 
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.infrastructure.UniInterceptor;
@@ -14,15 +13,13 @@ import io.smallrye.mutiny.subscription.UniSubscription;
 
 /**
  * Provides context propagation to Uni types.
+ * Subclasses need to override this to provide the Context Propagation ThreadContext.
  */
-public class ContextPropagationUniInterceptor implements UniInterceptor {
-
-    static final ThreadContext THREAD_CONTEXT = ContextManagerProvider.instance().getContextManager()
-            .newThreadContextBuilder().build();
+public abstract class ContextPropagationUniInterceptor implements UniInterceptor {
 
     @Override
     public <T> UniSubscriber<? super T> onSubscription(Uni<T> instance, UniSubscriber<? super T> subscriber) {
-        Executor executor = THREAD_CONTEXT.currentContextExecutor();
+        Executor executor = getThreadContext().currentContextExecutor();
         return new UniSubscriber<T>() {
 
             @Override
@@ -44,7 +41,7 @@ public class ContextPropagationUniInterceptor implements UniInterceptor {
 
     @Override
     public <T> Uni<T> onUniCreation(Uni<T> uni) {
-        Executor executor = THREAD_CONTEXT.currentContextExecutor();
+        Executor executor = getThreadContext().currentContextExecutor();
         return new AbstractUni<T>() {
             @Override
             protected void subscribing(UniSerializedSubscriber<? super T> subscriber) {
@@ -52,4 +49,13 @@ public class ContextPropagationUniInterceptor implements UniInterceptor {
             }
         };
     }
+
+    /**
+     * Gets the Context Propagation ThreadContext. External
+     * implementations may implement this method.
+     *
+     * @return the ThreadContext
+     * @see DefaultContextPropagationUniInterceptor#getThreadContext()
+     */
+    protected abstract ThreadContext getThreadContext();
 }
