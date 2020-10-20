@@ -20,19 +20,21 @@ import io.smallrye.mutiny.subscription.MultiSubscriber;
  */
 public class ContextPropagationMultiInterceptor implements MultiInterceptor {
 
-    static final ThreadContext THREAD_CONTEXT = ContextManagerProvider.instance().getContextManager()
-            .newThreadContextBuilder().build();
-
     @Override
     public <T> Subscriber<? super T> onSubscription(Publisher<? extends T> instance, Subscriber<? super T> subscriber) {
-        Executor executor = THREAD_CONTEXT.currentContextExecutor();
+        Executor executor = threadContext().currentContextExecutor();
         return new ContextPropagationSubscriber<>(executor, subscriber);
     }
 
     @Override
     public <T> Multi<T> onMultiCreation(Multi<T> multi) {
-        Executor executor = THREAD_CONTEXT.currentContextExecutor();
+        Executor executor = threadContext().currentContextExecutor();
         return new ContextPropagationMulti<>(executor, multi);
+    }
+
+    private static ThreadContext threadContext() {
+        return ContextManagerProvider.instance().getContextManager()
+                .newThreadContextBuilder().build();
     }
 
     private static class ContextPropagationMulti<T> extends AbstractMulti<T> {

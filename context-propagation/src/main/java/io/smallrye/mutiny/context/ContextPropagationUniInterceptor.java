@@ -17,12 +17,9 @@ import io.smallrye.mutiny.subscription.UniSubscription;
  */
 public class ContextPropagationUniInterceptor implements UniInterceptor {
 
-    static final ThreadContext THREAD_CONTEXT = ContextManagerProvider.instance().getContextManager()
-            .newThreadContextBuilder().build();
-
     @Override
     public <T> UniSubscriber<? super T> onSubscription(Uni<T> instance, UniSubscriber<? super T> subscriber) {
-        Executor executor = THREAD_CONTEXT.currentContextExecutor();
+        Executor executor = threadContext().currentContextExecutor();
         return new UniSubscriber<T>() {
 
             @Override
@@ -44,7 +41,7 @@ public class ContextPropagationUniInterceptor implements UniInterceptor {
 
     @Override
     public <T> Uni<T> onUniCreation(Uni<T> uni) {
-        Executor executor = THREAD_CONTEXT.currentContextExecutor();
+        Executor executor = threadContext().currentContextExecutor();
         return new AbstractUni<T>() {
             @Override
             protected void subscribing(UniSerializedSubscriber<? super T> subscriber) {
@@ -52,4 +49,10 @@ public class ContextPropagationUniInterceptor implements UniInterceptor {
             }
         };
     }
+
+    private static ThreadContext threadContext() {
+        return ContextManagerProvider.instance().getContextManager()
+                .newThreadContextBuilder().build();
+    }
+
 }
