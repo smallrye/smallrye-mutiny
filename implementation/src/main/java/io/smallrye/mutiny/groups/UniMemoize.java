@@ -9,6 +9,7 @@ import io.smallrye.common.annotation.Experimental;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.AbstractUni;
+import io.smallrye.mutiny.operators.UniMemoizeOp;
 
 @Experimental("Memoization is an experimental feature at this stage")
 public class UniMemoize<T> {
@@ -31,7 +32,7 @@ public class UniMemoize<T> {
      * @return a new {@link Uni}
      */
     public Uni<T> until(BooleanSupplier invalidationGuard) {
-        return Infrastructure.onUniCreation(new io.smallrye.mutiny.operators.UniMemoize<>(upstream, invalidationGuard));
+        return Infrastructure.onUniCreation(new UniMemoizeOp<>(upstream, invalidationGuard));
     }
 
     /**
@@ -44,7 +45,7 @@ public class UniMemoize<T> {
      * @param duration the memoization duration after having received the subscription from upstream
      * @return a new {@link Uni}
      */
-    public Uni<T> during(Duration duration) {
+    public Uni<T> atLeast(Duration duration) {
         return until(new BooleanSupplier() {
             private volatile long startTime = -1;
 
@@ -63,11 +64,11 @@ public class UniMemoize<T> {
     }
 
     /**
-     * Memoize the received item or failure forever.
+     * Memoize the received item or failure indefinitely.
      * 
      * @return a new {@link Uni}
      */
-    public Uni<T> forever() {
+    public Uni<T> indefinitely() {
         return this.until(() -> false);
     }
 }

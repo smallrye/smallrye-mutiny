@@ -2,7 +2,6 @@ package io.smallrye.mutiny;
 
 import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
 
-import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Executor;
@@ -396,11 +395,11 @@ public interface Uni<T> {
      *
      * @return the new {@link Uni}. Unlike regular {@link Uni}, re-subscribing to this {@link Uni} does not re-compute
      *         the outcome but replayed the cached events.
-     * @deprecated Use {@link UniMemoize#forever()} instead
+     * @deprecated Use {@link UniMemoize#indefinitely()} instead
      */
     @Deprecated
     default Uni<T> cache() {
-        return memoize().forever();
+        return memoize().indefinitely();
     }
 
     /**
