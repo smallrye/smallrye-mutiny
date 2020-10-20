@@ -107,8 +107,8 @@ public abstract class AbstractUni<T> implements Uni<T> {
     }
 
     @Override
-    public UniMemoize memoize() {
-        return new UniMemoize(this);
+    public UniMemoize<T> memoize() {
+        return new UniMemoize<T>(this);
     }
 
     @Override
