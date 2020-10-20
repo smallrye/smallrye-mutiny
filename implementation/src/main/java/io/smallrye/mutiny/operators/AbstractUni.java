@@ -107,8 +107,8 @@ public abstract class AbstractUni<T> implements Uni<T> {
     }
 
     @Override
-    public io.smallrye.mutiny.groups.UniMemoize memoize() {
-        return new io.smallrye.mutiny.groups.UniMemoize(this);
+    public UniMemoize memoize() {
+        return new UniMemoize(this);
     }
 
     @Override

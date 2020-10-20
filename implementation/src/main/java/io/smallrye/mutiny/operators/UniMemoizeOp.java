@@ -98,12 +98,12 @@ public class UniMemoizeOp<I> extends UniOperator<I, I> implements UniSubscriber<
                         case SUBSCRIBING:
                             break;
                         case SUBSCRIBED:
-                            subscriber.onSubscribe(() -> tryCancelSubscription(subscriber));
+                            subscriber.onSubscribe(() -> removeFromAwaitingLists(subscriber));
                             awaitingSubscription.remove(subscriber);
                             awaitingResult.add(subscriber);
                             break;
                         case CACHING:
-                            subscriber.onSubscribe(() -> tryCancelSubscription(subscriber));
+                            subscriber.onSubscribe(() -> removeFromAwaitingLists(subscriber));
                             if (currentFailure != null) {
                                 subscriber.onFailure(currentFailure);
                             } else {
@@ -145,7 +145,7 @@ public class UniMemoizeOp<I> extends UniOperator<I, I> implements UniSubscriber<
         }
     }
 
-    private void tryCancelSubscription(UniSerializedSubscriber<? super I> subscriber) {
+    private void removeFromAwaitingLists(UniSerializedSubscriber<? super I> subscriber) {
         awaitingSubscription.remove(subscriber);
         awaitingResult.remove(subscriber);
     }
