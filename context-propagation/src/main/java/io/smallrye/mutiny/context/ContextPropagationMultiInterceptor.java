@@ -4,7 +4,6 @@ import java.util.Objects;
 import java.util.concurrent.Executor;
 
 import org.eclipse.microprofile.context.ThreadContext;
-import org.eclipse.microprofile.context.spi.ContextManagerProvider;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
@@ -17,23 +16,30 @@ import io.smallrye.mutiny.subscription.MultiSubscriber;
 
 /**
  * Provides context propagation to Multi types.
+ * Subclasses need to override this to provide the Context Propagation ThreadContext.
  */
-public class ContextPropagationMultiInterceptor implements MultiInterceptor {
-
-    static final ThreadContext THREAD_CONTEXT = ContextManagerProvider.instance().getContextManager()
-            .newThreadContextBuilder().build();
+public abstract class ContextPropagationMultiInterceptor implements MultiInterceptor {
 
     @Override
     public <T> Subscriber<? super T> onSubscription(Publisher<? extends T> instance, Subscriber<? super T> subscriber) {
-        Executor executor = THREAD_CONTEXT.currentContextExecutor();
+        Executor executor = getThreadContext().currentContextExecutor();
         return new ContextPropagationSubscriber<>(executor, subscriber);
     }
 
     @Override
     public <T> Multi<T> onMultiCreation(Multi<T> multi) {
-        Executor executor = THREAD_CONTEXT.currentContextExecutor();
+        Executor executor = getThreadContext().currentContextExecutor();
         return new ContextPropagationMulti<>(executor, multi);
     }
+
+    /**
+     * Gets the Context Propagation ThreadContext. External
+     * implementations may implement this method.
+     *
+     * @return the ThreadContext
+     * @see DefaultContextPropagationMultiInterceptor#getThreadContext()
+     */
+    protected abstract ThreadContext getThreadContext();
 
     private static class ContextPropagationMulti<T> extends AbstractMulti<T> {
 

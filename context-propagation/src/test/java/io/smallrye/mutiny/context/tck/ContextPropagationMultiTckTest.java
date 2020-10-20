@@ -9,18 +9,18 @@ import org.reactivestreams.tck.TestEnvironment;
 import org.reactivestreams.tck.junit5.PublisherVerification;
 
 import io.smallrye.mutiny.Multi;
-import io.smallrye.mutiny.context.ContextPropagationMultiInterceptor;
+import io.smallrye.mutiny.context.DefaultContextPropagationMultiInterceptor;
 
 /**
  * Reactive Streams TCK for io.smallrye.mutiny.context.ContextPropagationMultiInterceptor.ContextPropagationMulti.
  */
 public class ContextPropagationMultiTckTest extends PublisherVerification<Long> {
 
-    private final ContextPropagationMultiInterceptor interceptor;
+    private final DefaultContextPropagationMultiInterceptor interceptor;
 
     public ContextPropagationMultiTckTest() {
         super(new TestEnvironment(100));
-        interceptor = new ContextPropagationMultiInterceptor();
+        interceptor = new DefaultContextPropagationMultiInterceptor();
     }
 
     @Override
