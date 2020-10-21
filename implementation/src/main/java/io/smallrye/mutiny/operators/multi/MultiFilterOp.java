@@ -1,6 +1,10 @@
 package io.smallrye.mutiny.operators.multi;
 
+import static io.smallrye.mutiny.helpers.Subscriptions.CANCELLED;
+
 import java.util.function.Predicate;
+
+import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.helpers.ParameterValidation;
@@ -31,6 +35,7 @@ public class MultiFilterOp<T> extends AbstractMultiOperator<T, T> {
     static final class MultiFilterProcessor<T> extends MultiOperatorProcessor<T, T> {
 
         private final Predicate<? super T> predicate;
+        private volatile boolean requestedMax = false;
 
         MultiFilterProcessor(MultiSubscriber<? super T> downstream, Predicate<? super T> predicate) {
             super(downstream);
@@ -55,6 +60,23 @@ public class MultiFilterOp<T> extends AbstractMultiOperator<T, T> {
                 downstream.onItem(t);
             } else {
                 request(1);
+            }
+        }
+
+        @Override
+        public void request(long numberOfItems) {
+            if (requestedMax) {
+                return;
+            }
+            Subscription subscription = upstream.get();
+            if (subscription != CANCELLED) {
+                if (numberOfItems <= 0) {
+                    onFailure(new IllegalArgumentException("Invalid number of request, must be greater than 0"));
+                }
+                if (numberOfItems == Long.MAX_VALUE) {
+                    requestedMax = true;
+                }
+                subscription.request(numberOfItems);
             }
         }
     }

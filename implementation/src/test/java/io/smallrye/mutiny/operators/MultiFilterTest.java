@@ -8,6 +8,7 @@ import static org.mockito.Mockito.verify;
 
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.LongAdder;
 import java.util.function.Predicate;
 
 import org.junit.jupiter.api.Test;
@@ -69,6 +70,19 @@ public class MultiFilterTest {
                 .filter(test)
                 .collectItems().asList()
                 .await().indefinitely()).containsExactly(1, 3);
+    }
+
+    @Test
+    public void testFilteringWithDownstreamRequestingMax() {
+        Predicate<Integer> test = x -> x % 2 != 0;
+        LongAdder numberOfRequests = new LongAdder();
+        AssertSubscriber<Integer> subscriber = Multi.createFrom().range(1, 100000)
+                .onRequest().invoke(numberOfRequests::increment)
+                .transform().byFilteringItemsWith(test)
+                .subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE));
+
+        subscriber.assertCompleted();
+        assertThat(numberOfRequests.longValue()).isEqualTo(1L);
     }
 
     @Test
