@@ -49,18 +49,19 @@ public class UniMemoize<T> {
      * @return a new {@link Uni}
      */
     public Uni<T> atLeast(Duration duration) {
-        Duration actual = validate(duration, "duration");
+        Duration validatedDuration = validate(duration, "duration");
         return until(new BooleanSupplier() {
             private volatile long startTime = -1;
 
             @Override
             public boolean getAsBoolean() {
+                long now = System.nanoTime();
                 if (startTime == -1) {
-                    startTime = System.currentTimeMillis();
+                    startTime = now;
                 }
-                boolean invalidates = (System.currentTimeMillis() - startTime) > actual.toMillis();
+                boolean invalidates = (now - startTime) > validatedDuration.toNanos();
                 if (invalidates) {
-                    startTime = System.currentTimeMillis();
+                    startTime = now;
                 }
                 return invalidates;
             }
