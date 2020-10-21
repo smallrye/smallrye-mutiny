@@ -6,15 +6,15 @@ import io.smallrye.mutiny.subscription.UniSubscriber;
 import io.smallrye.mutiny.subscription.UniSubscription;
 
 public class UniAssertSubscriber<T> implements UniSubscriber<T> {
-    private final boolean cancelImmediatelyOnSubscription;
-    private UniSubscription subscription;
-    private boolean gotSignal;
-    private T item;
-    private Throwable failure;
+    private volatile boolean cancelImmediatelyOnSubscription;
+    private volatile UniSubscription subscription;
+    private volatile boolean gotSignal;
+    private volatile T item;
+    private volatile Throwable failure;
     private final CompletableFuture<T> future = new CompletableFuture<>();
-    private String onResultThreadName;
-    private String onErrorThreadName;
-    private String onSubscribeThreadName;
+    private volatile String onResultThreadName;
+    private volatile String onErrorThreadName;
+    private volatile String onSubscribeThreadName;
 
     public UniAssertSubscriber(boolean cancelled) {
         this.cancelImmediatelyOnSubscription = cancelled;
@@ -156,7 +156,11 @@ public class UniAssertSubscriber<T> implements UniSubscriber<T> {
     }
 
     public void cancel() {
-        this.subscription.cancel();
+        if (subscription == null) {
+            cancelImmediatelyOnSubscription = true;
+        } else {
+            subscription.cancel();
+        }
     }
 
     public UniAssertSubscriber<T> assertTerminated() {

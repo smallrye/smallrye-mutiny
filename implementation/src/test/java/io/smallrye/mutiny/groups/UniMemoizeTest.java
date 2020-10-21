@@ -304,7 +304,7 @@ class UniMemoizeTest {
 
             Runnable r2 = () -> cached.subscribe().withSubscriber(new UniAssertSubscriber<>());
 
-            ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+            ExecutorService executor = Executors.newFixedThreadPool(2);
             try {
                 race(r1, r2, executor);
             } finally {
@@ -419,7 +419,7 @@ class UniMemoizeTest {
 
             Runnable r2 = () -> cached.subscribe().withSubscriber(new UniAssertSubscriber<>());
 
-            ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+            ExecutorService executor = Executors.newFixedThreadPool(2);
             try {
                 race(r1, r2, executor);
             } finally {

@@ -61,9 +61,8 @@ public class UniMemoizeOp<I> extends UniOperator<I, I> implements UniSubscriber<
 
     @Override
     public void onSubscribe(UniSubscription subscription) {
-        upstreamSubscription = subscription;
-        if (!state.compareAndSet(State.SUBSCRIBING, State.SUBSCRIBED)) {
-            throw new IllegalStateException("Current state is " + state.get() + " but should be " + State.SUBSCRIBING);
+        if (state.compareAndSet(State.SUBSCRIBING, State.SUBSCRIBED)) {
+            upstreamSubscription = subscription;
         }
         drain();
     }
@@ -148,34 +147,26 @@ public class UniMemoizeOp<I> extends UniOperator<I, I> implements UniSubscriber<
     private void removeFromAwaitingLists(UniSerializedSubscriber<? super I> subscriber) {
         awaitingSubscription.remove(subscriber);
         awaitingResult.remove(subscriber);
+        drain();
     }
 
     @Override
     public void onItem(I item) {
-        this.item = item;
-        this.failure = null;
-        checkStateCorrectness();
+        if (state.get() == State.SUBSCRIBED) {
+            this.item = item;
+            this.failure = null;
+            state.set(State.CACHING);
+        }
         drain();
     }
 
     @Override
     public void onFailure(Throwable failure) {
-        this.item = null;
-        this.failure = failure;
-        checkStateCorrectness();
-        drain();
-    }
-
-    private void checkStateCorrectness() {
-        switch (state.get()) {
-            case INIT:
-            case SUBSCRIBING:
-                return;
-            default:
-                // TODO maybe there's an issue with concurrent invalidations
-                if (!state.compareAndSet(State.SUBSCRIBED, State.CACHING)) {
-                    throw new IllegalStateException("Current state is " + state + " but should be " + State.SUBSCRIBED);
-                }
+        if (state.get() == State.SUBSCRIBED) {
+            this.item = null;
+            this.failure = failure;
+            state.set(State.CACHING);
         }
+        drain();
     }
 }
