@@ -7,6 +7,7 @@ import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Executor;
 import java.util.function.*;
 
+import io.smallrye.common.annotation.Experimental;
 import io.smallrye.mutiny.groups.*;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.subscription.UniEmitter;
@@ -382,12 +383,24 @@ public interface Uni<T> {
     Uni<T> runSubscriptionOn(Executor executor);
 
     /**
+     * Configure memoization of the {@link Uni} item or failure.
+     * 
+     * @return the object to configure memoization
+     */
+    @Experimental("Memoization is an experimental feature at this stage")
+    UniMemoize<T> memoize();
+
+    /**
      * Caches the events (item or failure) of this {@link Uni} and replays it for all further {@link UniSubscriber}.
      *
      * @return the new {@link Uni}. Unlike regular {@link Uni}, re-subscribing to this {@link Uni} does not re-compute
      *         the outcome but replayed the cached events.
+     * @deprecated Use {@link UniMemoize#indefinitely()} instead
      */
-    Uni<T> cache();
+    @Deprecated
+    default Uni<T> cache() {
+        return memoize().indefinitely();
+    }
 
     /**
      * Transforms the item (potentially null) emitted by this {@link Uni} by applying a (synchronous) function to it.
