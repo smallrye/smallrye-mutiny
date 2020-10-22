@@ -34,7 +34,7 @@ jobs:
           version: ${{ matrix.java.version }}
           source: ${{ matrix.java.source }}
       - name: Build with Maven
-        run: mvn -B clean install --file pom.xml
+        run: mvn -B clean install
 
   java15:
     runs-on: ubuntu-20.04
@@ -55,7 +55,7 @@ jobs:
           java-version: '15-ea'
           architecture: x64
       - name: Build with Maven
-        run: mvn -B clean install -Pcoverage --file pom.xml
+        run: mvn -B clean install -Pcoverage
 
   quality:
     needs: build
