@@ -11,6 +11,10 @@ coverage:
       default:
         threshold: 5%
 
+    patch:
+      default:
+        threshold: 5%
+
 parsers:
   gcov:
     branch_detection:
