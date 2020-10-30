@@ -386,6 +386,7 @@ public interface Uni<T> {
      * Configure memoization of the {@link Uni} item or failure.
      * 
      * @return the object to configure memoization
+     * @apiNote This is an experimental API
      */
     @Experimental("Memoization is an experimental feature at this stage")
     UniMemoize<T> memoize();

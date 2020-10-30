@@ -31,6 +31,7 @@ public class UniMemoize<T> {
      * @param invalidationGuard the invalidation guard, which evaluates to {@code false} for as long as the item or failure must
      *        be memoized, must not be {@code null}
      * @return a new {@link Uni}
+     * @apiNote This is an experimental API
      */
     public Uni<T> until(BooleanSupplier invalidationGuard) {
         BooleanSupplier actual = nonNull(invalidationGuard, "invalidationGuard");
@@ -47,6 +48,7 @@ public class UniMemoize<T> {
      * @param duration the memoization duration after having received the subscription from upstream, must not be
      *        {@code null}, must be strictly positive
      * @return a new {@link Uni}
+     * @apiNote This is an experimental API
      */
     public Uni<T> atLeast(Duration duration) {
         Duration validatedDuration = validate(duration, "duration");
@@ -72,6 +74,7 @@ public class UniMemoize<T> {
      * Memoize the received item or failure indefinitely.
      * 
      * @return a new {@link Uni}
+     * @apiNote This is an experimental API
      */
     public Uni<T> indefinitely() {
         return this.until(() -> false);
