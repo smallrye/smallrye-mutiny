@@ -17,12 +17,10 @@ jobs:
     steps:
       - uses: actions/cache@v2
         with:
-          path: |
-            ~/.m2/repository
-            !~/.m2/repository/**/*-SNAPSHOT/*
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          path: ~/.m2/repository
+          key: maven-${{ hashFiles('**/pom.xml') }}
           restore-keys: |
-            ${{ runner.os }}-maven-
+            maven-
       - uses: actions/checkout@v2
       - name: Install JDK ${{ matrix.java.version }} (OpenJDK)
         uses: AdoptOpenJDK/install-jdk@v1
@@ -30,7 +28,7 @@ jobs:
           version: ${{ matrix.java.version }}
           source: ${{ matrix.java.source }}
       - name: Build with Maven
-        run: mvn -B clean install -Pcoverage
+        run: mvn -B clean verify -Pcoverage
       - name: Codecov
         uses: codecov/codecov-action@v1.0.13
   java15:
@@ -39,12 +37,10 @@ jobs:
       steps:
         - uses: actions/cache@v2
           with:
-            path: |
-              ~/.m2/repository
-              !~/.m2/repository/**/*-SNAPSHOT/*
-            key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+            path: ~/.m2/repository
+            key: maven-${{ hashFiles('**/pom.xml') }}
             restore-keys: |
-              ${{ runner.os }}-maven-
+              maven-
         - uses: actions/checkout@v2
         - name: Install JDK 15 (Zulu)
           uses: actions/setup-java@v1.4.2
@@ -52,5 +48,5 @@ jobs:
             java-version: '15-ea'
             architecture: x64
         - name: Build with Maven
-          run: mvn -B clean install -Pcoverage
+          run: mvn -B clean verify
 
