@@ -8,12 +8,10 @@ jobs:
     steps:
       - uses: actions/cache@v2
         with:
-          path: |
-            ~/.m2/repository
-            !~/.m2/repository/**/*-SNAPSHOT/*
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          path: ~/.m2/repository
+          key: maven-${{ hashFiles('**/pom.xml') }}
           restore-keys: |
-            ${{ runner.os }}-maven-
+            maven-
       - uses: actions/checkout@v2
         with:
           ref: 'master'
