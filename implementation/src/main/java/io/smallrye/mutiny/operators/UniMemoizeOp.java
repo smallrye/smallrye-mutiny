@@ -10,6 +10,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BooleanSupplier;
 
 import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.helpers.EmptyUniSubscription;
 import io.smallrye.mutiny.subscription.UniSubscriber;
 import io.smallrye.mutiny.subscription.UniSubscription;
 
@@ -52,6 +53,18 @@ public class UniMemoizeOp<I> extends UniOperator<I, I> implements UniSubscriber<
                 upstreamSubscription.cancel();
             }
         }
+
+        if (state.get() == State.CACHING) {
+            awaitingSubscription.remove(subscriber);
+            subscriber.onSubscribe(EmptyUniSubscription.CANCELLED);
+            if (failure != null) {
+                subscriber.onFailure(failure);
+            } else {
+                subscriber.onItem(item);
+            }
+            return;
+        }
+
         if (state.compareAndSet(State.INIT, State.SUBSCRIBING)) {
             // This thread is performing the upstream subscription
             AbstractUni.subscribe(upstream(), this);
