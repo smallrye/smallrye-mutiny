@@ -10,6 +10,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BooleanSupplier;
 
 import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.helpers.EmptyUniSubscription;
 import io.smallrye.mutiny.subscription.UniSubscriber;
 import io.smallrye.mutiny.subscription.UniSubscription;
 
@@ -45,26 +46,37 @@ public class UniMemoizeOp<I> extends UniOperator<I, I> implements UniSubscriber<
 
     @Override
     protected void subscribing(UniSerializedSubscriber<? super I> subscriber) {
-        awaitingSubscription.add(subscriber);
         if (invalidationRequested.getAsBoolean() && state.get() != State.SUBSCRIBING) {
             state.set(State.INIT);
             if (upstreamSubscription != null) {
                 upstreamSubscription.cancel();
             }
         }
+
+        // Early exit with cached data
+        if (state.get() == State.CACHING) {
+            subscriber.onSubscribe(EmptyUniSubscription.CANCELLED);
+            if (failure != null) {
+                subscriber.onFailure(failure);
+            } else {
+                subscriber.onItem(item);
+            }
+            return;
+        }
+
+        awaitingSubscription.add(subscriber);
         if (state.compareAndSet(State.INIT, State.SUBSCRIBING)) {
             // This thread is performing the upstream subscription
             AbstractUni.subscribe(upstream(), this);
         }
-        drain();
     }
 
     @Override
     public void onSubscribe(UniSubscription subscription) {
         if (state.compareAndSet(State.SUBSCRIBING, State.SUBSCRIBED)) {
             upstreamSubscription = subscription;
+            drain();
         }
-        drain();
     }
 
     private void drain() {
@@ -156,8 +168,8 @@ public class UniMemoizeOp<I> extends UniOperator<I, I> implements UniSubscriber<
             this.item = item;
             this.failure = null;
             state.set(State.CACHING);
+            drain();
         }
-        drain();
     }
 
     @Override
@@ -166,7 +178,7 @@ public class UniMemoizeOp<I> extends UniOperator<I, I> implements UniSubscriber<
             this.item = null;
             this.failure = failure;
             state.set(State.CACHING);
+            drain();
         }
-        drain();
     }
 }
