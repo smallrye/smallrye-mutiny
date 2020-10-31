@@ -9,9 +9,7 @@ jobs:
       - uses: actions/cache@v2
         with:
           path: ~/.m2/repository
-          key: maven-${{ hashFiles('**/pom.xml') }}
-          restore-keys: |
-            maven-
+          key: maven-8
       - uses: actions/checkout@v2
         with:
           ref: 'master'

@@ -18,9 +18,7 @@ jobs:
       - uses: actions/cache@v2
         with:
           path: ~/.m2/repository
-          key: maven-${{ hashFiles('**/pom.xml') }}
-          restore-keys: |
-            maven-
+          key: maven-java-${{ matrix.java.version }}
       - uses: actions/checkout@v2
       - name: Install JDK ${{ matrix.java.version }} (OpenJDK)
         uses: AdoptOpenJDK/install-jdk@v1
@@ -38,9 +36,7 @@ jobs:
         - uses: actions/cache@v2
           with:
             path: ~/.m2/repository
-            key: maven-${{ hashFiles('**/pom.xml') }}
-            restore-keys: |
-              maven-
+            key: maven-java-15
         - uses: actions/checkout@v2
         - name: Install JDK 15 (Zulu)
           uses: actions/setup-java@v1.4.2
