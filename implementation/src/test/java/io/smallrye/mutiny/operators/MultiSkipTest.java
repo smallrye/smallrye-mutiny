@@ -10,15 +10,22 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.TestException;
+import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.multi.MultiSkipUntilPublisherOp;
 import io.smallrye.mutiny.subscription.MultiEmitter;
 import io.smallrye.mutiny.test.AssertSubscriber;
 
 public class MultiSkipTest {
+
+    @AfterEach
+    public void cleanup() {
+        Infrastructure.clearInterceptors();
+    }
 
     @Test
     public void testSimpleSkip() {
@@ -271,6 +278,23 @@ public class MultiSkipTest {
         assertThat(upstreamCancelled).isTrue();
         assertThat(otherCancelled).isTrue();
 
+    }
+
+    @Test
+    public void testItDoesNotRequest0() {
+        AtomicBoolean called = new AtomicBoolean();
+        Infrastructure.setDroppedExceptionHandler(t -> called.set(true));
+        Multi.createFrom().range(1, 10)
+                .transform().bySkippingFirstItems(3)
+                .transform().byFilteringItemsWith(n -> n % 2 == 0)
+                .onItem().transform(n -> n * 10)
+                .subscribe().withSubscriber(AssertSubscriber.create(100))
+
+                .await()
+                .assertCompleted()
+                .assertItems(40, 60, 80);
+
+        assertThat(called).isFalse();
     }
 
 }

@@ -43,7 +43,11 @@ public final class MultiSkipOp<T> extends AbstractMultiOperator<T, T> {
         public void onSubscribe(Subscription subscription) {
             if (upstream.compareAndSet(null, subscription)) {
                 downstream.onSubscribe(this);
-                subscription.request(remaining.get());
+                long l = remaining.get();
+                // Do not request 0
+                if (l > 0) {
+                    subscription.request(l);
+                }
             } else {
                 subscription.cancel();
             }
