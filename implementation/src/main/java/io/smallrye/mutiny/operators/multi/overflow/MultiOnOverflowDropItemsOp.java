@@ -70,22 +70,22 @@ public class MultiOnOverflowDropItemsOp<T> extends AbstractMultiOperator<T, T> {
             } else {
                 // no request, dropping.
                 if (dropConsumer != null) {
-                    notifyCallback(item);
+                    notifyOnOverflowInvoke(item);
                 } else if (dropUniMapper != null) {
-                    notifyUni(item);
+                    notifyOnOverflowCall(item);
                 }
             }
         }
 
-        private void notifyCallback(T item) {
+        private void notifyOnOverflowInvoke(T item) {
             try {
                 dropConsumer.accept(item);
             } catch (Throwable e) {
-                onFailure(e);
+                super.onFailure(e);
             }
         }
 
-        private void notifyUni(T item) {
+        private void notifyOnOverflowCall(T item) {
             try {
                 Uni<?> uni = nonNull(dropUniMapper.apply(item), "uni");
                 uni.subscribe().with(

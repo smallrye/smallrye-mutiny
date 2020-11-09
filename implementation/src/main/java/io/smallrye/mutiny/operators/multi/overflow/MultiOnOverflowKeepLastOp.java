@@ -128,24 +128,9 @@ public class MultiOnOverflowKeepLastOp<T> extends AbstractMultiOperator<T, T> {
                 if (req.get() == 0L && possiblyDropped != null && !done) {
                     // Item is being dropped
                     if (dropConsumer != null) {
-                        try {
-                            dropConsumer.accept(possiblyDropped);
-                        } catch (Throwable failure) {
-                            super.onFailure(failure);
-                            return;
-                        }
+                        notifyOnOverflowInvoke(possiblyDropped);
                     } else if (dropUniMapper != null) {
-                        // Some exceptions may be dropped because of cascading items being drops
-                        try {
-                            Uni<?> uni = nonNull(dropUniMapper.apply(possiblyDropped), "uni");
-                            uni.subscribe().with(
-                                    ignored -> {
-                                        // Nothing to do
-                                    }, super::onFailure);
-                        } catch (Throwable failure) {
-                            super.onFailure(failure);
-                            return;
-                        }
+                        notifyOnOverflowCall(possiblyDropped);
                     }
                 }
 
@@ -161,6 +146,27 @@ public class MultiOnOverflowKeepLastOp<T> extends AbstractMultiOperator<T, T> {
                 if (missed == 0) {
                     break;
                 }
+            }
+        }
+
+        private void notifyOnOverflowInvoke(T possiblyDropped) {
+            try {
+                dropConsumer.accept(possiblyDropped);
+            } catch (Throwable failure) {
+                super.onFailure(failure);
+            }
+        }
+
+        private void notifyOnOverflowCall(T possiblyDropped) {
+            // Some exceptions may be dropped in cascade
+            try {
+                Uni<?> uni = nonNull(dropUniMapper.apply(possiblyDropped), "uni");
+                uni.subscribe().with(
+                        ignored -> {
+                            // Nothing to do
+                        }, super::onFailure);
+            } catch (Throwable failure) {
+                super.onFailure(failure);
             }
         }
 

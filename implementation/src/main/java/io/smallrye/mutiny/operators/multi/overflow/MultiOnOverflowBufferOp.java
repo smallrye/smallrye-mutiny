@@ -1,6 +1,8 @@
 
 package io.smallrye.mutiny.operators.multi.overflow;
 
+import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
+
 import java.util.Queue;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -12,7 +14,6 @@ import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
-import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.helpers.Subscriptions;
 import io.smallrye.mutiny.helpers.queues.Queues;
 import io.smallrye.mutiny.operators.multi.AbstractMultiOperator;
@@ -76,32 +77,40 @@ public class MultiOnOverflowBufferOp<T> extends AbstractMultiOperator<T, T> {
             if (!queue.offer(t)) {
                 BackPressureFailure bpf = new BackPressureFailure("Buffer is full due to lack of downstream consumption");
                 if (dropUniMapper != null) {
-                    super.cancel();
-                    try {
-                        Uni<?> uni = ParameterValidation.nonNull(dropUniMapper.apply(t), "uni");
-                        uni.subscribe().with(
-                                ignored -> downstream.onFailure(bpf),
-                                failure -> {
-                                    bpf.addSuppressed(failure);
-                                    downstream.onFailure(bpf);
-                                });
-                    } catch (Throwable failure) {
-                        bpf.addSuppressed(failure);
-                        downstream.onFailure(bpf);
-                    }
+                    notifyOnOverflowCall(t, bpf);
                 } else {
-                    if (dropConsumer != null) {
-                        try {
-                            dropConsumer.accept(t);
-                        } catch (Throwable e) {
-                            bpf.addSuppressed(e);
-                        }
-                    }
-                    onFailure(bpf);
-                    return;
+                    notifyOnOverflowInvoke(t, bpf);
+                }
+            } else {
+                drain();
+            }
+        }
+
+        private void notifyOnOverflowInvoke(T t, BackPressureFailure bpf) {
+            if (dropConsumer != null) {
+                try {
+                    dropConsumer.accept(t);
+                } catch (Throwable e) {
+                    bpf.addSuppressed(e);
                 }
             }
-            drain();
+            onFailure(bpf);
+        }
+
+        private void notifyOnOverflowCall(T t, BackPressureFailure bpf) {
+            super.cancel();
+            try {
+                Uni<?> uni = nonNull(dropUniMapper.apply(t), "uni");
+                uni.subscribe().with(
+                        ignored -> downstream.onFailure(bpf),
+                        failure -> {
+                            bpf.addSuppressed(failure);
+                            downstream.onFailure(bpf);
+                        });
+            } catch (Throwable failure) {
+                bpf.addSuppressed(failure);
+                downstream.onFailure(bpf);
+            }
         }
 
         @Override
