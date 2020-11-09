@@ -20,7 +20,7 @@ public class MultiOnOverflowDropItemsOp<T> extends AbstractMultiOperator<T, T> {
     private final Consumer<T> dropConsumer;
     private final Function<T, Uni<?>> dropUniMapper;
 
-    private MultiOnOverflowDropItemsOp(Multi<? extends T> upstream, Consumer<T> dropConsumer,
+    public MultiOnOverflowDropItemsOp(Multi<? extends T> upstream, Consumer<T> dropConsumer,
             Function<T, Uni<?>> dropUniMapper) {
         super(upstream);
         this.dropConsumer = dropConsumer;
@@ -33,10 +33,6 @@ public class MultiOnOverflowDropItemsOp<T> extends AbstractMultiOperator<T, T> {
 
     public MultiOnOverflowDropItemsOp(Multi<T> upstream, Consumer<T> dropConsumer) {
         this(upstream, dropConsumer, null);
-    }
-
-    public MultiOnOverflowDropItemsOp(Multi<T> upstream, Function<T, Uni<?>> dropUniMapper) {
-        this(upstream, null, dropUniMapper);
     }
 
     @Override

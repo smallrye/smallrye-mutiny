@@ -46,7 +46,7 @@ public class MultiOverflow<T> {
                         false,
                         x -> {
                             // do nothing
-                        }));
+                        }, null));
     }
 
     /**

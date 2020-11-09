@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -419,5 +420,34 @@ public class MultiOnOverflowTest {
                 .assertCompleted()
                 .assertItems(2, 3, 5);
         assertThat(list).containsExactly(-1, -1);
+    }
+
+    @Test
+    public void testBufferInvokeWithBackPressure() {
+        AtomicInteger droppedItem = new AtomicInteger();
+
+        AssertSubscriber<Integer> sub = AssertSubscriber.create(5);
+        Multi.createFrom().range(1, 100)
+                .onOverflow().invoke(droppedItem::set).buffer(20)
+                .subscribe(sub);
+
+        sub.assertFailedWith(BackPressureFailure.class, null);
+        assertThat(droppedItem.get()).isEqualTo(26);
+    }
+
+    @Test
+    public void testBufferCallWithBackPressure() {
+        AtomicInteger droppedItem = new AtomicInteger();
+
+        AssertSubscriber<Integer> sub = AssertSubscriber.create(5);
+        Multi.createFrom().range(1, 100)
+                .onOverflow().call(item -> {
+                    droppedItem.set(item);
+                    return Uni.createFrom().voidItem();
+                }).buffer(20)
+                .subscribe(sub);
+
+        sub.assertFailedWith(BackPressureFailure.class, null);
+        assertThat(droppedItem.get()).isEqualTo(26);
     }
 }
