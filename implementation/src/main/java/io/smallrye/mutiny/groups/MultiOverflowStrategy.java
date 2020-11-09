@@ -9,6 +9,7 @@ import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.multi.overflow.MultiOnOverflowBufferOp;
 import io.smallrye.mutiny.operators.multi.overflow.MultiOnOverflowDropItemsOp;
+import io.smallrye.mutiny.operators.multi.overflow.MultiOnOverflowKeepLastOp;
 import io.smallrye.mutiny.subscription.BackPressureFailure;
 
 public class MultiOverflowStrategy<T> {
@@ -56,5 +57,14 @@ public class MultiOverflowStrategy<T> {
                 .onMultiCreation(new MultiOnOverflowBufferOp<>(upstream, ParameterValidation.positive(size, "size"),
                         false,
                         dropConsumer, dropUniMapper));
+    }
+
+    /**
+     * When the downstream cannot keep up with the upstream emissions, instruct to drop all previously buffered items.
+     *
+     * @return the new multi
+     */
+    public Multi<T> dropPreviousItems() {
+        return Infrastructure.onMultiCreation(new MultiOnOverflowKeepLastOp<>(upstream, dropConsumer, dropUniMapper));
     }
 }

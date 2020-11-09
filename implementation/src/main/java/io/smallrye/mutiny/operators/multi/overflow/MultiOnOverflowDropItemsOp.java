@@ -86,12 +86,16 @@ public class MultiOnOverflowDropItemsOp<T> extends AbstractMultiOperator<T, T> {
         }
 
         private void notifyUni(T item) {
-            Uni<?> uni = nonNull(dropUniMapper.apply(item), "uni");
-            uni.subscribe().with(
-                    ignored -> {
-                        // Just drop and ignore
-                    },
-                    super::onFailure);
+            try {
+                Uni<?> uni = nonNull(dropUniMapper.apply(item), "uni");
+                uni.subscribe().with(
+                        ignored -> {
+                            // Just drop and ignore
+                        },
+                        super::onFailure);
+            } catch (Throwable failure) {
+                super.onFailure(failure);
+            }
         }
 
         @Override

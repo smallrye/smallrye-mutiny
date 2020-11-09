@@ -77,13 +77,18 @@ public class MultiOnOverflowBufferOp<T> extends AbstractMultiOperator<T, T> {
                 BackPressureFailure bpf = new BackPressureFailure("Buffer is full due to lack of downstream consumption");
                 if (dropUniMapper != null) {
                     super.cancel();
-                    Uni<?> uni = ParameterValidation.nonNull(dropUniMapper.apply(t), "uni");
-                    uni.subscribe().with(
-                            ignored -> downstream.onFailure(bpf),
-                            failure -> {
-                                bpf.addSuppressed(failure);
-                                downstream.onFailure(bpf);
-                            });
+                    try {
+                        Uni<?> uni = ParameterValidation.nonNull(dropUniMapper.apply(t), "uni");
+                        uni.subscribe().with(
+                                ignored -> downstream.onFailure(bpf),
+                                failure -> {
+                                    bpf.addSuppressed(failure);
+                                    downstream.onFailure(bpf);
+                                });
+                    } catch (Throwable failure) {
+                        bpf.addSuppressed(failure);
+                        downstream.onFailure(bpf);
+                    }
                 } else {
                     if (dropConsumer != null) {
                         try {

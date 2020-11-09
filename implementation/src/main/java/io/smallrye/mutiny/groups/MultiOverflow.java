@@ -76,7 +76,7 @@ public class MultiOverflow<T> {
      * @return the new multi
      */
     public Multi<T> dropPreviousItems() {
-        return Infrastructure.onMultiCreation(new MultiOnOverflowKeepLastOp<>(upstream));
+        return Infrastructure.onMultiCreation(new MultiOnOverflowKeepLastOp<>(upstream, null, null));
     }
 
     public MultiOverflowStrategy<T> invoke(Consumer<T> consumer) {

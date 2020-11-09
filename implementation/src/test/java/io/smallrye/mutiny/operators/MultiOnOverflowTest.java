@@ -370,15 +370,6 @@ public class MultiOnOverflowTest {
     }
 
     @Test
-    public void testDropCallSupplyingNull() {
-        assertThatThrownBy(() -> Multi.createFrom().items(2, 3, 4)
-                .onOverflow().call(() -> null).drop()
-                .subscribe().withSubscriber(AssertSubscriber.create(0)),
-                "Uni must not be null", IllegalArgumentException.class);
-
-    }
-
-    @Test
     public void testDropCallCallbackMapper() {
         AssertSubscriber<Integer> sub = AssertSubscriber.create();
         AtomicReference<MultiEmitter<? super Integer>> emitter = new AtomicReference<>();
@@ -423,6 +414,34 @@ public class MultiOnOverflowTest {
     }
 
     @Test
+    public void testDropCallFailedUni() {
+        AssertSubscriber<Integer> sub = AssertSubscriber.create();
+        AtomicReference<MultiEmitter<? super Integer>> emitter = new AtomicReference<>();
+
+        Multi<Integer> multi = Multi.createFrom().emitter((Consumer<MultiEmitter<? super Integer>>) emitter::set)
+                .onOverflow().call(item -> Uni.createFrom().failure(new IOException("boom :: " + item))).drop();
+        multi.subscribe(sub);
+        emitter.get().emit(1);
+
+        sub.assertFailedWith(IOException.class, "boom :: 1");
+    }
+
+    @Test
+    public void testDropCallThrowing() {
+        AssertSubscriber<Integer> sub = AssertSubscriber.create();
+        AtomicReference<MultiEmitter<? super Integer>> emitter = new AtomicReference<>();
+
+        Multi<Integer> multi = Multi.createFrom().emitter((Consumer<MultiEmitter<? super Integer>>) emitter::set)
+                .onOverflow().call(item -> {
+                    throw new RuntimeException("boom :: " + item);
+                }).drop();
+        multi.subscribe(sub);
+        emitter.get().emit(1);
+
+        sub.assertFailedWith(RuntimeException.class, "boom :: 1");
+    }
+
+    @Test
     public void testBufferInvokeWithBackPressure() {
         AtomicInteger droppedItem = new AtomicInteger();
 
@@ -449,5 +468,96 @@ public class MultiOnOverflowTest {
 
         sub.assertFailedWith(BackPressureFailure.class, null);
         assertThat(droppedItem.get()).isEqualTo(26);
+    }
+
+    @Test
+    public void testBufferCallFailedWithBackPressure() {
+        AssertSubscriber<Integer> sub = AssertSubscriber.create(5);
+        Multi.createFrom().range(1, 100)
+                .onOverflow().call(() -> Uni.createFrom().failure(new IOException("boom"))).buffer(20)
+                .subscribe(sub);
+
+        sub.assertFailedWith(BackPressureFailure.class, "");
+        Throwable[] suppressed = sub.getFailure().getSuppressed();
+        assertThat(suppressed).hasSize(1);
+        assertThat(suppressed[0]).isInstanceOf(IOException.class).hasMessage("boom");
+    }
+
+    @Test
+    public void testBufferCallThrowingWithBackPressure() {
+        AssertSubscriber<Integer> sub = AssertSubscriber.create(5);
+        Multi.createFrom().range(1, 100)
+                .onOverflow().call(() -> {
+                    throw new RuntimeException("boom");
+                }).buffer(20)
+                .subscribe(sub);
+
+        sub.assertFailedWith(BackPressureFailure.class, "");
+        Throwable[] suppressed = sub.getFailure().getSuppressed();
+        assertThat(suppressed).hasSize(1);
+        assertThat(suppressed[0]).isInstanceOf(RuntimeException.class).hasMessage("boom");
+    }
+
+    @Test
+    public void testDropPreviousInvokeWithBackPressure() {
+        List<Integer> list = new CopyOnWriteArrayList<>();
+
+        AssertSubscriber<Integer> sub = AssertSubscriber.create(1);
+        Multi.createFrom().range(1, 6)
+                .onOverflow().invoke(list::add).dropPreviousItems()
+                .subscribe(sub);
+
+        sub.assertNotTerminated();
+        assertThat(sub.getItems()).containsExactly(1);
+
+        sub.request(10);
+        assertThat(sub.getItems()).containsExactly(1, 5);
+        sub.assertCompleted();
+
+        assertThat(list).containsExactly(2, 3, 4, 5);
+    }
+
+    @Test
+    public void testDropPreviousCallWithBackPressure() {
+        List<Integer> list = new CopyOnWriteArrayList<>();
+
+        AssertSubscriber<Integer> sub = AssertSubscriber.create(1);
+        Multi.createFrom().range(1, 6)
+                .onOverflow().call(item -> {
+                    list.add(item);
+                    return Uni.createFrom().voidItem();
+                }).dropPreviousItems()
+                .subscribe(sub);
+
+        sub.assertNotTerminated();
+        assertThat(sub.getItems()).containsExactly(1);
+
+        sub.request(10);
+        assertThat(sub.getItems()).containsExactly(1, 5);
+        sub.assertCompleted();
+
+        assertThat(list).containsExactly(2, 3, 4, 5);
+    }
+
+    @Test
+    public void testDropPreviousCallFailedWithBackPressure() {
+        AssertSubscriber<Integer> sub = AssertSubscriber.create(1);
+        Multi.createFrom().range(1, 6)
+                .onOverflow().call(item -> Uni.createFrom().failure(new IOException("boom :: " + item))).dropPreviousItems()
+                .subscribe(sub);
+
+        sub.assertFailedWith(IOException.class, "boom :: 2");
+    }
+
+    @Test
+    public void testDropPreviousCallThrowingWithBackPressure() {
+        AssertSubscriber<Integer> sub = AssertSubscriber.create(1);
+        Multi.createFrom().range(1, 6)
+                .onOverflow().call(item -> {
+                    throw new RuntimeException("boom :: " + item);
+                }).dropPreviousItems()
+                .subscribe(sub);
+
+        sub.assertFailedWith(RuntimeException.class, "boom :: 2");
     }
 }
