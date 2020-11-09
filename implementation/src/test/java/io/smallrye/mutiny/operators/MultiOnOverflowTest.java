@@ -455,6 +455,21 @@ public class MultiOnOverflowTest {
     }
 
     @Test
+    public void testBufferInvokeThrowingWithBackPressure() {
+        AssertSubscriber<Integer> sub = AssertSubscriber.create(5);
+        Multi.createFrom().range(1, 100)
+                .onOverflow().invoke(item -> {
+                    throw new RuntimeException("boom :: " + item);
+                }).buffer(20)
+                .subscribe(sub);
+
+        sub.assertFailedWith(BackPressureFailure.class, null);
+        Throwable[] suppressed = sub.getFailure().getSuppressed();
+        assertThat(suppressed).hasSize(1);
+        assertThat(suppressed[0]).isInstanceOf(RuntimeException.class).hasMessage("boom :: 26");
+    }
+
+    @Test
     public void testBufferCallWithBackPressure() {
         AtomicInteger droppedItem = new AtomicInteger();
 
@@ -515,6 +530,18 @@ public class MultiOnOverflowTest {
         sub.assertCompleted();
 
         assertThat(list).containsExactly(2, 3, 4, 5);
+    }
+
+    @Test
+    public void testDropPreviousInvokeThrowingWithBackPressure() {
+        AssertSubscriber<Integer> sub = AssertSubscriber.create(1);
+        Multi.createFrom().range(1, 6)
+                .onOverflow().invoke(item -> {
+                    throw new RuntimeException("boom :: " + item);
+                }).dropPreviousItems()
+                .subscribe(sub);
+
+        sub.assertFailedWith(RuntimeException.class, "boom :: 2");
     }
 
     @Test
