@@ -1,11 +1,15 @@
 package io.smallrye.mutiny.operators.multi.overflow;
 
+import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
+
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.Multi;
+import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.helpers.Subscriptions;
 import io.smallrye.mutiny.operators.multi.AbstractMultiOperator;
 import io.smallrye.mutiny.operators.multi.MultiOperatorProcessor;
@@ -13,31 +17,39 @@ import io.smallrye.mutiny.subscription.MultiSubscriber;
 
 public class MultiOnOverflowDropItemsOp<T> extends AbstractMultiOperator<T, T> {
 
-    private final Consumer<? super T> onItemDrop;
+    private final Consumer<T> dropConsumer;
+    private final Function<T, Uni<?>> dropUniMapper;
 
-    public MultiOnOverflowDropItemsOp(Multi<T> upstream) {
+    private MultiOnOverflowDropItemsOp(Multi<? extends T> upstream, Consumer<T> dropConsumer,
+            Function<T, Uni<?>> dropUniMapper) {
         super(upstream);
-        this.onItemDrop = null;
+        this.dropConsumer = dropConsumer;
+        this.dropUniMapper = dropUniMapper;
     }
 
-    public MultiOnOverflowDropItemsOp(Multi<T> upstream, Consumer<? super T> onItemDrop) {
-        super(upstream);
-        this.onItemDrop = onItemDrop;
+    public MultiOnOverflowDropItemsOp(Multi<T> upstream) {
+        this(upstream, null, null);
+    }
+
+    public MultiOnOverflowDropItemsOp(Multi<T> upstream, Consumer<T> dropConsumer) {
+        this(upstream, dropConsumer, null);
+    }
+
+    public MultiOnOverflowDropItemsOp(Multi<T> upstream, Function<T, Uni<?>> dropUniMapper) {
+        this(upstream, null, dropUniMapper);
     }
 
     @Override
     public void subscribe(MultiSubscriber<? super T> downstream) {
-        upstream.subscribe().withSubscriber(new MultiOnOverflowDropItemsProcessor<T>(downstream, onItemDrop));
+        upstream.subscribe().withSubscriber(new MultiOnOverflowDropItemsProcessor(downstream));
     }
 
-    static final class MultiOnOverflowDropItemsProcessor<T> extends MultiOperatorProcessor<T, T> {
+    class MultiOnOverflowDropItemsProcessor extends MultiOperatorProcessor<T, T> {
 
-        private final Consumer<? super T> onItemDrop;
         private final AtomicLong requested = new AtomicLong();
 
-        MultiOnOverflowDropItemsProcessor(MultiSubscriber<? super T> downstream, Consumer<? super T> onItemDrop) {
+        MultiOnOverflowDropItemsProcessor(MultiSubscriber<? super T> downstream) {
             super(downstream);
-            this.onItemDrop = onItemDrop;
         }
 
         @Override
@@ -61,18 +73,29 @@ public class MultiOnOverflowDropItemsOp<T> extends AbstractMultiOperator<T, T> {
                 Subscriptions.subtract(requested, 1);
             } else {
                 // no request, dropping.
-                drop(item);
+                if (dropConsumer != null) {
+                    notifyCallback(item);
+                } else if (dropUniMapper != null) {
+                    notifyUni(item);
+                }
             }
         }
 
-        private void drop(T item) {
-            if (onItemDrop != null) {
-                try {
-                    onItemDrop.accept(item);
-                } catch (Throwable e) {
-                    onFailure(e);
-                }
+        private void notifyCallback(T item) {
+            try {
+                dropConsumer.accept(item);
+            } catch (Throwable e) {
+                onFailure(e);
             }
+        }
+
+        private void notifyUni(T item) {
+            Uni<?> uni = nonNull(dropUniMapper.apply(item), "uni");
+            uni.subscribe().with(
+                    ignored -> {
+                        // Just drop and ignore
+                    },
+                    super::onFailure);
         }
 
         @Override

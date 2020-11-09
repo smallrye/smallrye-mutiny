@@ -3,8 +3,11 @@ package io.smallrye.mutiny.groups;
 import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
 
 import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 import io.smallrye.mutiny.Multi;
+import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.multi.overflow.MultiOnOverflowBufferOp;
@@ -74,5 +77,23 @@ public class MultiOverflow<T> {
      */
     public Multi<T> dropPreviousItems() {
         return Infrastructure.onMultiCreation(new MultiOnOverflowKeepLastOp<>(upstream));
+    }
+
+    public MultiOverflowStrategy<T> invoke(Consumer<T> consumer) {
+        return new MultiOverflowStrategy<>(upstream, nonNull(consumer, "consumer"), null);
+    }
+
+    public MultiOverflowStrategy<T> invoke(Runnable callback) {
+        Runnable actual = nonNull(callback, "callback");
+        return invoke(ignored -> actual.run());
+    }
+
+    public MultiOverflowStrategy<T> call(Supplier<Uni<?>> supplier) {
+        Supplier<Uni<?>> actual = nonNull(supplier, "supplier");
+        return call(ignored -> actual.get());
+    }
+
+    public MultiOverflowStrategy<T> call(Function<T, Uni<?>> mapper) {
+        return new MultiOverflowStrategy<>(upstream, null, nonNull(mapper, "mapper"));
     }
 }

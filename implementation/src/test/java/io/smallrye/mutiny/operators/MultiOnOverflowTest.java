@@ -1,7 +1,6 @@
 package io.smallrye.mutiny.operators;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.*;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
@@ -12,6 +11,8 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 import org.junit.jupiter.api.Test;
 import org.reactivestreams.Subscription;
@@ -288,4 +289,135 @@ public class MultiOnOverflowTest {
         assertThat(onCancellationSpy.isCancelled()).isTrue();
     }
 
+    @Test
+    public void testDropInvokeConsumer() {
+        AssertSubscriber<Integer> sub = AssertSubscriber.create();
+        AtomicReference<MultiEmitter<? super Integer>> emitter = new AtomicReference<>();
+        List<Integer> list = new CopyOnWriteArrayList<>();
+        Multi<Integer> multi = Multi.createFrom().emitter((Consumer<MultiEmitter<? super Integer>>) emitter::set)
+                .onOverflow().invoke(list::add).drop();
+        multi.subscribe(sub);
+        emitter.get().emit(1);
+        sub.request(2);
+        emitter.get().emit(2).emit(3).emit(4);
+        sub.request(1);
+        emitter.get().emit(5).complete();
+        sub
+                .assertCompleted()
+                .assertItems(2, 3, 5);
+        assertThat(list).containsExactly(1, 4);
+    }
+
+    @Test
+    public void testDropInvokeCallback() {
+        AssertSubscriber<Integer> sub = AssertSubscriber.create();
+        AtomicReference<MultiEmitter<? super Integer>> emitter = new AtomicReference<>();
+        List<Integer> list = new CopyOnWriteArrayList<>();
+        Multi<Integer> multi = Multi.createFrom().emitter((Consumer<MultiEmitter<? super Integer>>) emitter::set)
+                .onOverflow().invoke(() -> list.add(-1)).drop();
+        multi.subscribe(sub);
+        emitter.get().emit(1);
+        sub.request(2);
+        emitter.get().emit(2).emit(3).emit(4);
+        sub.request(1);
+        emitter.get().emit(5).complete();
+        sub
+                .assertCompleted()
+                .assertItems(2, 3, 5);
+        assertThat(list).containsExactly(-1, -1);
+    }
+
+    @Test
+    public void testDropInvokeWithNullConsumer() {
+        assertThatThrownBy(() -> Multi.createFrom().items(1, 2, 3)
+                .onOverflow().invoke((Consumer<Integer>) null).drop(),
+                "Null callbacks are forbidden", IllegalArgumentException.class);
+
+    }
+
+    @Test
+    public void testDropInvokeWithNullCallback() {
+        assertThatThrownBy(() -> Multi.createFrom().items(1, 2, 3)
+                .onOverflow().invoke((Runnable) null).drop(),
+                "Null callbacks are forbidden", IllegalArgumentException.class);
+
+    }
+
+    @Test
+    public void testDropInvokeConsumerThrowingException() {
+        Multi.createFrom().items(2, 3, 4)
+                .onOverflow().invoke(i -> {
+                    throw new IllegalStateException("boom");
+                }).drop()
+                .subscribe().withSubscriber(AssertSubscriber.create(0))
+                .assertFailedWith(IllegalStateException.class, "boom");
+
+    }
+
+    @Test
+    public void testDropCallWithNullMapper() {
+        assertThatThrownBy(() -> Multi.createFrom().items(1, 2, 3)
+                .onOverflow().call((Function<Integer, Uni<?>>) null).drop(),
+                "Null callbacks are forbidden", IllegalArgumentException.class);
+    }
+
+    @Test
+    public void testDropCallWithNullSupplier() {
+        assertThatThrownBy(() -> Multi.createFrom().items(1, 2, 3)
+                .onOverflow().call((Supplier<Uni<?>>) null).drop(),
+                "Null callbacks are forbidden", IllegalArgumentException.class);
+    }
+
+    @Test
+    public void testDropCallSupplyingNull() {
+        assertThatThrownBy(() -> Multi.createFrom().items(2, 3, 4)
+                .onOverflow().call(() -> null).drop()
+                .subscribe().withSubscriber(AssertSubscriber.create(0)),
+                "Uni must not be null", IllegalArgumentException.class);
+
+    }
+
+    @Test
+    public void testDropCallCallbackMapper() {
+        AssertSubscriber<Integer> sub = AssertSubscriber.create();
+        AtomicReference<MultiEmitter<? super Integer>> emitter = new AtomicReference<>();
+        List<Integer> list = new CopyOnWriteArrayList<>();
+        Multi<Integer> multi = Multi.createFrom().emitter((Consumer<MultiEmitter<? super Integer>>) emitter::set)
+                .onOverflow().call(item -> {
+                    list.add(item);
+                    return Uni.createFrom().voidItem();
+                }).drop();
+        multi.subscribe(sub);
+        emitter.get().emit(1);
+        sub.request(2);
+        emitter.get().emit(2).emit(3).emit(4);
+        sub.request(1);
+        emitter.get().emit(5).complete();
+        sub
+                .assertCompleted()
+                .assertItems(2, 3, 5);
+        assertThat(list).containsExactly(1, 4);
+    }
+
+    @Test
+    public void testDropCallCallbackSupplier() {
+        AssertSubscriber<Integer> sub = AssertSubscriber.create();
+        AtomicReference<MultiEmitter<? super Integer>> emitter = new AtomicReference<>();
+        List<Integer> list = new CopyOnWriteArrayList<>();
+        Multi<Integer> multi = Multi.createFrom().emitter((Consumer<MultiEmitter<? super Integer>>) emitter::set)
+                .onOverflow().call(() -> {
+                    list.add(-1);
+                    return Uni.createFrom().voidItem();
+                }).drop();
+        multi.subscribe(sub);
+        emitter.get().emit(1);
+        sub.request(2);
+        emitter.get().emit(2).emit(3).emit(4);
+        sub.request(1);
+        emitter.get().emit(5).complete();
+        sub
+                .assertCompleted()
+                .assertItems(2, 3, 5);
+        assertThat(list).containsExactly(-1, -1);
+    }
 }
