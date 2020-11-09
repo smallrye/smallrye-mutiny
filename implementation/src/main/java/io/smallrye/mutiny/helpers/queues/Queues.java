@@ -1,6 +1,7 @@
 package io.smallrye.mutiny.helpers.queues;
 
 import java.util.Queue;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.function.Supplier;
 
 @SuppressWarnings({ "rawtypes", "unchecked" })
@@ -97,4 +98,14 @@ public class Queues {
         return new MpscLinkedQueue<>();
     }
 
+    /**
+     * Create a queue of a strict fixed size.
+     * 
+     * @param size the queue size
+     * @param <T> the elements type
+     * @return a new queue
+     */
+    public static <T> Queue<T> createStrictSizeQueue(int size) {
+        return new ArrayBlockingQueue<>(size);
+    }
 }

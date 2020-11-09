@@ -4,7 +4,6 @@ package io.smallrye.mutiny.operators.multi.overflow;
 import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
 
 import java.util.Queue;
-import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
@@ -57,9 +56,7 @@ public class MultiOnOverflowBufferOp<T> extends AbstractMultiOperator<T, T> {
 
         OnOverflowBufferProcessor(MultiSubscriber<? super T> downstream, int bufferSize, boolean unbounded) {
             super(downstream);
-            // TODO: fix queue allocation with a strategy for strict fixed sizes
-            // this.queue = unbounded ? Queues.<T> unbounded(bufferSize).get() : Queues.<T> get(bufferSize).get();
-            this.queue = unbounded ? Queues.<T> unbounded(bufferSize).get() : new ArrayBlockingQueue<>(bufferSize);
+            this.queue = unbounded ? Queues.<T> unbounded(bufferSize).get() : Queues.createStrictSizeQueue(bufferSize);
         }
 
         @Override
