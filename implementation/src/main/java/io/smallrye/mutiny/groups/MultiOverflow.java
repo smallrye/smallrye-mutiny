@@ -8,11 +8,6 @@ import java.util.function.Supplier;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
-import io.smallrye.mutiny.helpers.ParameterValidation;
-import io.smallrye.mutiny.infrastructure.Infrastructure;
-import io.smallrye.mutiny.operators.multi.overflow.MultiOnOverflowBufferOp;
-import io.smallrye.mutiny.operators.multi.overflow.MultiOnOverflowDropItemsOp;
-import io.smallrye.mutiny.operators.multi.overflow.MultiOnOverflowKeepLastOp;
 import io.smallrye.mutiny.subscription.BackPressureFailure;
 
 public class MultiOverflow<T> {
@@ -29,7 +24,7 @@ public class MultiOverflow<T> {
      * @return the new multi
      */
     public Multi<T> buffer() {
-        return buffer(128);
+        return new MultiOverflowStrategy<>(upstream, null, null).buffer();
     }
 
     /**
@@ -41,12 +36,7 @@ public class MultiOverflow<T> {
      * @return the new multi
      */
     public Multi<T> buffer(int size) {
-        return Infrastructure
-                .onMultiCreation(new MultiOnOverflowBufferOp<>(upstream, ParameterValidation.positive(size, "size"),
-                        false,
-                        x -> {
-                            // do nothing
-                        }, null));
+        return new MultiOverflowStrategy<>(upstream, null, null).buffer(size);
     }
 
     /**
@@ -55,7 +45,7 @@ public class MultiOverflow<T> {
      * @return the new multi
      */
     public Multi<T> drop() {
-        return Infrastructure.onMultiCreation(new MultiOnOverflowDropItemsOp<>(upstream));
+        return new MultiOverflowStrategy<>(upstream, null, null).drop();
     }
 
     /**
@@ -64,10 +54,12 @@ public class MultiOverflow<T> {
      * @param callback a callback invoked when an item is dropped. The callback receives the item. Must not be
      *        {@code null}
      * @return the new multi
+     * @deprecated Use {@link Multi#invoke(Consumer)} and {@link MultiOverflowStrategy#drop()} as in
+     *             {@code multi.invoke(consumer).drop()}.
      */
+    @Deprecated
     public Multi<T> drop(Consumer<T> callback) {
-        return Infrastructure
-                .onMultiCreation(new MultiOnOverflowDropItemsOp<>(upstream, nonNull(callback, "callback")));
+        return new MultiOverflowStrategy<>(upstream, nonNull(callback, "callback"), null).drop();
     }
 
     /**
@@ -76,23 +68,47 @@ public class MultiOverflow<T> {
      * @return the new multi
      */
     public Multi<T> dropPreviousItems() {
-        return Infrastructure.onMultiCreation(new MultiOnOverflowKeepLastOp<>(upstream, null, null));
+        return new MultiOverflowStrategy<>(upstream, null, null).dropPreviousItems();
     }
 
+    /**
+     * Define an overflow callback.
+     * 
+     * @param consumer the dropped item consumer, must not be {@code null}, must not return {@code null}
+     * @return an object to select the overflow management strategy
+     */
     public MultiOverflowStrategy<T> invoke(Consumer<T> consumer) {
         return new MultiOverflowStrategy<>(upstream, nonNull(consumer, "consumer"), null);
     }
 
+    /**
+     * Define an overflow callback.
+     *
+     * @param callback a callback when overflow happens, must not be {@code null}, must not return {@code null}
+     * @return an object to select the overflow management strategy
+     */
     public MultiOverflowStrategy<T> invoke(Runnable callback) {
         Runnable actual = nonNull(callback, "callback");
         return invoke(ignored -> actual.run());
     }
 
+    /**
+     * Define an overflow callback to a {@link Uni}.
+     *
+     * @param supplier a supplier of a {@link Uni}, must not be {@code null}, must not return {@code null}
+     * @return an object to select the overflow management strategy
+     */
     public MultiOverflowStrategy<T> call(Supplier<Uni<?>> supplier) {
         Supplier<Uni<?>> actual = nonNull(supplier, "supplier");
         return call(ignored -> actual.get());
     }
 
+    /**
+     * Define an overflow dropped item mapper to a {@link Uni}.
+     *
+     * @param mapper a mapper of a dropped item to a {@link Uni}, must not be {@code null}, must not return {@code null}
+     * @return an object to select the overflow management strategy
+     */
     public MultiOverflowStrategy<T> call(Function<T, Uni<?>> mapper) {
         return new MultiOverflowStrategy<>(upstream, null, nonNull(mapper, "mapper"));
     }
