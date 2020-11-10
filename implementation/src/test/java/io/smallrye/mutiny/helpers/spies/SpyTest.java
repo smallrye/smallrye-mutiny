@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.groups.MultiOverflowStrategy;
 import io.smallrye.mutiny.operators.UniAssertSubscriber;
 import io.smallrye.mutiny.subscription.UniSubscription;
 import io.smallrye.mutiny.test.AssertSubscriber;
@@ -571,6 +572,54 @@ class SpyTest {
             assertThat(spy.invocationCount()).isEqualTo(0);
             assertThat(spy.lastTerminationWasCancelled()).isFalse();
             assertThat(spy.lastTerminationFailure()).isNull();
+        }
+
+        @Test
+        @DisplayName("Spy onOverflow() and track items")
+        void spyOnOverflowTrackItems() {
+            Multi<Integer> multi = Multi.createFrom().range(1, 10);
+            MultiOnOverflowSpy<Integer> spy = Spy.onOverflow(multi, MultiOverflowStrategy::drop);
+
+            assertThat(spy.invoked()).isFalse();
+            assertThat(spy.invocationCount()).isEqualTo(0);
+            assertThat(spy.droppedItems()).isEmpty();
+
+            AssertSubscriber<Integer> subscriber = spy.subscribe().withSubscriber(AssertSubscriber.create(5));
+
+            subscriber.assertCompleted().assertItems(1, 2, 3, 4, 5);
+
+            assertThat(spy.invoked()).isTrue();
+            assertThat(spy.invocationCount()).isEqualTo(4);
+            assertThat(spy.droppedItems()).containsExactly(6, 7, 8, 9);
+
+            spy.reset();
+            assertThat(spy.invoked()).isFalse();
+            assertThat(spy.invocationCount()).isEqualTo(0);
+            assertThat(spy.droppedItems()).isEmpty();
+        }
+
+        @Test
+        @DisplayName("Spy onOverflow() but do not track items")
+        void spyOnOverflowDoNotTrackItems() {
+            Multi<Integer> multi = Multi.createFrom().range(1, 10);
+            MultiOnOverflowSpy<Integer> spy = Spy.onOverflow(multi, false, MultiOverflowStrategy::drop);
+
+            assertThat(spy.invoked()).isFalse();
+            assertThat(spy.invocationCount()).isEqualTo(0);
+            assertThat(spy.droppedItems()).isEmpty();
+
+            AssertSubscriber<Integer> subscriber = spy.subscribe().withSubscriber(AssertSubscriber.create(5));
+
+            subscriber.assertCompleted().assertItems(1, 2, 3, 4, 5);
+
+            assertThat(spy.invoked()).isTrue();
+            assertThat(spy.invocationCount()).isEqualTo(4);
+            assertThat(spy.droppedItems()).isEmpty();
+
+            spy.reset();
+            assertThat(spy.invoked()).isFalse();
+            assertThat(spy.invocationCount()).isEqualTo(0);
+            assertThat(spy.droppedItems()).isEmpty();
         }
 
         @Test
