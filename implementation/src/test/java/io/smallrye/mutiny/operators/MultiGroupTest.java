@@ -885,4 +885,28 @@ public class MultiGroupTest {
         s2.assertFailedWith(TestException.class, "boom");
         subscriber.assertFailedWith(TestException.class, "boom");
     }
+
+    @Test
+    public void testGroupIntoListsWithMaximumDelay() {
+        Multi<Long> publisher = Multi.createFrom().ticks().every(Duration.ofMillis(10));
+
+        AssertSubscriber<List<Long>> subscriber = publisher.groupItems().intoLists().of(3, Duration.ofMillis(100))
+                .subscribe()
+                .withSubscriber(AssertSubscriber.create(10));
+
+        await().until(() -> subscriber.getItems().size() >= 9);
+        subscriber.cancel();
+
+        List<List<Long>> items = subscriber.getItems();
+
+        assertThat(items.get(0).size()).isEqualTo(3);
+        assertThat(items.get(1).size()).isEqualTo(3);
+        assertThat(items.get(2).size()).isEqualTo(3);
+        assertThat(items.get(3).size()).isEqualTo(1);
+
+        assertThat(items.get(4).size()).isEqualTo(3);
+        assertThat(items.get(5).size()).isEqualTo(3);
+        assertThat(items.get(6).size()).isEqualTo(3);
+        assertThat(items.get(7).size()).isEqualTo(1);
+    }
 }
