@@ -286,7 +286,7 @@ public class MultiOnOverflowTest {
         reference.get().onNext(4);
         reference.get().onNext(5);
 
-        subscriber.assertFailedWith(BackPressureFailure.class, "Buffer");
+        subscriber.assertFailedWith(BackPressureFailure.class, "The overflow buffer is full");
         assertThat(onCancellationSpy.isCancelled()).isTrue();
     }
 
