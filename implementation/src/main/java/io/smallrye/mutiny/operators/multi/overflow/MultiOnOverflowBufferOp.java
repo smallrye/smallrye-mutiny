@@ -1,14 +1,18 @@
 
 package io.smallrye.mutiny.operators.multi.overflow;
 
+import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
+
 import java.util.Queue;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.Multi;
+import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.helpers.Subscriptions;
 import io.smallrye.mutiny.helpers.queues.Queues;
 import io.smallrye.mutiny.operators.multi.AbstractMultiOperator;
@@ -20,27 +24,27 @@ public class MultiOnOverflowBufferOp<T> extends AbstractMultiOperator<T, T> {
 
     private final int bufferSize;
     private final boolean unbounded;
-    private final Consumer<T> onOverflow;
+    private final Consumer<T> dropConsumer;
+    private final Function<T, Uni<?>> dropUniMapper;
 
-    public MultiOnOverflowBufferOp(Multi<T> upstream, int bufferSize, boolean unbounded, Consumer<T> onOverflow) {
+    public MultiOnOverflowBufferOp(Multi<T> upstream, int bufferSize, boolean unbounded, Consumer<T> dropConsumer,
+            Function<T, Uni<?>> dropUniMapper) {
         super(upstream);
         this.bufferSize = bufferSize;
         this.unbounded = unbounded;
-        this.onOverflow = onOverflow;
+        this.dropConsumer = dropConsumer;
+        this.dropUniMapper = dropUniMapper;
     }
 
     @Override
     public void subscribe(MultiSubscriber<? super T> downstream) {
-        OnOverflowBufferProcessor<T> subscriber = new OnOverflowBufferProcessor<>(downstream,
-                bufferSize, unbounded,
-                onOverflow);
+        OnOverflowBufferProcessor subscriber = new OnOverflowBufferProcessor(downstream, bufferSize, unbounded);
         upstream.subscribe().withSubscriber(subscriber);
     }
 
-    static final class OnOverflowBufferProcessor<T> extends MultiOperatorProcessor<T, T> {
+    class OnOverflowBufferProcessor extends MultiOperatorProcessor<T, T> {
 
         private final Queue<T> queue;
-        private final Consumer<T> onOverflow;
 
         Throwable failure;
 
@@ -50,11 +54,9 @@ public class MultiOnOverflowBufferOp<T> extends AbstractMultiOperator<T, T> {
         volatile boolean cancelled;
         volatile boolean done;
 
-        OnOverflowBufferProcessor(MultiSubscriber<? super T> downstream, int bufferSize,
-                boolean unbounded, Consumer<T> onOverflow) {
+        OnOverflowBufferProcessor(MultiSubscriber<? super T> downstream, int bufferSize, boolean unbounded) {
             super(downstream);
-            this.onOverflow = onOverflow;
-            this.queue = unbounded ? Queues.<T> unbounded(bufferSize).get() : Queues.<T> get(bufferSize).get();
+            this.queue = unbounded ? Queues.<T> unbounded(bufferSize).get() : Queues.createStrictSizeQueue(bufferSize);
         }
 
         @Override
@@ -70,17 +72,42 @@ public class MultiOnOverflowBufferOp<T> extends AbstractMultiOperator<T, T> {
         @Override
         public void onItem(T t) {
             if (!queue.offer(t)) {
-                BackPressureFailure ex = new BackPressureFailure(
-                        "Buffer is full due to lack of downstream consumption");
-                try {
-                    onOverflow.accept(t);
-                } catch (Throwable e) {
-                    ex.initCause(e);
+                BackPressureFailure bpf = new BackPressureFailure("The overflow buffer is full, which is due to the upstream sending too many items w.r.t. the downstream capacity and/or the downstream not consuming items fast enough");
+                if (dropUniMapper != null) {
+                    notifyOnOverflowCall(t, bpf);
+                } else {
+                    notifyOnOverflowInvoke(t, bpf);
                 }
-                onFailure(ex);
-                return;
+            } else {
+                drain();
             }
-            drain();
+        }
+
+        private void notifyOnOverflowInvoke(T t, BackPressureFailure bpf) {
+            if (dropConsumer != null) {
+                try {
+                    dropConsumer.accept(t);
+                } catch (Throwable e) {
+                    bpf.addSuppressed(e);
+                }
+            }
+            onFailure(bpf);
+        }
+
+        private void notifyOnOverflowCall(T t, BackPressureFailure bpf) {
+            super.cancel();
+            try {
+                Uni<?> uni = nonNull(dropUniMapper.apply(t), "uni");
+                uni.subscribe().with(
+                        ignored -> downstream.onFailure(bpf),
+                        failure -> {
+                            bpf.addSuppressed(failure);
+                            downstream.onFailure(bpf);
+                        });
+            } catch (Throwable failure) {
+                bpf.addSuppressed(failure);
+                downstream.onFailure(bpf);
+            }
         }
 
         @Override

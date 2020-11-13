@@ -1,10 +1,14 @@
 package io.smallrye.mutiny.helpers.spies;
 
+import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
+
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 import io.smallrye.common.annotation.Experimental;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.groups.MultiOverflowStrategy;
 
 /**
  * Helpers for creating {@link Uni} and {@link Multi} spies to observe events.
@@ -234,7 +238,43 @@ public interface Spy {
     }
 
     /**
-     * Spy all {@link Multi} events.
+     * Spy {@link Multi#onOverflow()} events and track dropped items.
+     *
+     * @param upstream the uptream
+     * @param strategyMapper a function to define the drop strategy applied by the spy
+     * @param <T> the items type
+     * @return a new {@link Multi}
+     */
+    static <T> MultiOnOverflowSpy<T> onOverflow(Multi<T> upstream,
+            Function<MultiOverflowStrategy<? extends T>, Multi<? extends T>> strategyMapper) {
+        return onOverflow(upstream, true, strategyMapper);
+    }
+
+    /**
+     * Spy {@link Multi#onOverflow()} events and track dropped items.
+     *
+     * @param upstream the uptream
+     * @param trackItems {@code true} if items shall be tracked, {@code false} otherwise
+     * @param strategyMapper a function to define the drop strategy applied by the spy
+     * @param <T> the items type
+     * @return a new {@link Multi}
+     */
+    static <T> MultiOnOverflowSpy<T> onOverflow(Multi<T> upstream, boolean trackItems,
+            Function<MultiOverflowStrategy<? extends T>, Multi<? extends T>> strategyMapper) {
+        return (MultiOnOverflowSpy<T>) upstream.plug(multi -> {
+            Function<MultiOverflowStrategy<? extends T>, Multi<? extends T>> actual = nonNull(strategyMapper, "strategyMapper");
+            return new MultiOnOverflowSpy<>(upstream, trackItems, actual);
+        });
+    }
+
+    /**
+     * Spy all {@link Multi} events (except {@link Multi#onOverflow()}).
+     * 
+     * The overflow events are not being tracked because they cause the {@code upstream} to be requested {@link Long#MAX_VALUE}
+     * elements, so the behavior of a pipeline can be affected by introducing a {@link MultiOnOverflowSpy}.
+     * 
+     * If you want to track overflow events then you will need to explicitly wrap a {@link Multi} with
+     * {@link Spy#onOverflow(Multi, Function)}.
      *
      * @param upstream the upstream
      * @param <T> the items type

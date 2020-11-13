@@ -1,12 +1,17 @@
 package io.smallrye.mutiny.operators.multi.overflow;
 
+import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
+
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.Multi;
+import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.helpers.Subscriptions;
 import io.smallrye.mutiny.operators.multi.AbstractMultiOperator;
 import io.smallrye.mutiny.operators.multi.MultiOperatorProcessor;
@@ -14,16 +19,21 @@ import io.smallrye.mutiny.subscription.MultiSubscriber;
 
 public class MultiOnOverflowKeepLastOp<T> extends AbstractMultiOperator<T, T> {
 
-    public MultiOnOverflowKeepLastOp(Multi<T> upstream) {
+    private final Consumer<T> dropConsumer;
+    private final Function<T, Uni<?>> dropUniMapper;
+
+    public MultiOnOverflowKeepLastOp(Multi<? extends T> upstream, Consumer<T> dropConsumer, Function<T, Uni<?>> dropUniMapper) {
         super(upstream);
+        this.dropConsumer = dropConsumer;
+        this.dropUniMapper = dropUniMapper;
     }
 
     @Override
     public void subscribe(MultiSubscriber<? super T> downstream) {
-        upstream.subscribe().withSubscriber(new MultiOnOverflowLatestProcessor<T>(downstream));
+        upstream.subscribe().withSubscriber(new MultiOnOverflowLatestProcessor(downstream));
     }
 
-    static final class MultiOnOverflowLatestProcessor<T> extends MultiOperatorProcessor<T, T> {
+    class MultiOnOverflowLatestProcessor extends MultiOperatorProcessor<T, T> {
 
         private final AtomicInteger wip = new AtomicInteger();
         private Throwable failure;
@@ -114,6 +124,16 @@ public class MultiOnOverflowKeepLastOp<T> extends AbstractMultiOperator<T, T> {
                     emitted++;
                 }
 
+                T possiblyDropped = last.get();
+                if (req.get() == 0L && possiblyDropped != null && !done) {
+                    // Item is being dropped
+                    if (dropConsumer != null) {
+                        notifyOnOverflowInvoke(possiblyDropped);
+                    } else if (dropUniMapper != null) {
+                        notifyOnOverflowCall(possiblyDropped);
+                    }
+                }
+
                 if (emitted == req.get() && checkTerminated(done, last.get() == null)) {
                     return;
                 }
@@ -126,6 +146,27 @@ public class MultiOnOverflowKeepLastOp<T> extends AbstractMultiOperator<T, T> {
                 if (missed == 0) {
                     break;
                 }
+            }
+        }
+
+        private void notifyOnOverflowInvoke(T possiblyDropped) {
+            try {
+                dropConsumer.accept(possiblyDropped);
+            } catch (Throwable failure) {
+                super.onFailure(failure);
+            }
+        }
+
+        private void notifyOnOverflowCall(T possiblyDropped) {
+            // Some exceptions may be dropped in cascade
+            try {
+                Uni<?> uni = nonNull(dropUniMapper.apply(possiblyDropped), "uni");
+                uni.subscribe().with(
+                        ignored -> {
+                            // Nothing to do
+                        }, super::onFailure);
+            } catch (Throwable failure) {
+                super.onFailure(failure);
             }
         }
 
