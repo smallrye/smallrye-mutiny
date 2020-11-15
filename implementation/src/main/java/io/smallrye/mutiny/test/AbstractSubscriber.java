@@ -5,15 +5,34 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
+/**
+ * A convenient base class for a subscriber and subscription to extend in tests and that manages the subscription and
+ * requests.
+ * <p>
+ *
+ * Implementations shall override {@link AbstractSubscriber#onNext(Object)},
+ * {@link AbstractSubscriber#onError(Throwable)} and/or {@link AbstractSubscriber#onComplete()} to add test-specific
+ * custom logic.
+ *
+ * @param <T> the type of the items
+ */
 @SuppressWarnings("SubscriberImplementation")
 public class AbstractSubscriber<T> implements Subscriber<T>, Subscription {
 
     private final long upfrontRequest;
 
+    /**
+     * Creates a new {@link AbstractSubscriber} with 0 upfront requests.
+     */
     public AbstractSubscriber() {
         upfrontRequest = 0;
     }
 
+    /**
+     * Creates a new {@link AbstractSubscriber} with {@code req} upfront requests.
+     *
+     * @param req the number of upfront requests
+     */
     public AbstractSubscriber(long req) {
         upfrontRequest = req;
     }

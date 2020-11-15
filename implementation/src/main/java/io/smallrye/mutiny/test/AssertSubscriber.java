@@ -13,6 +13,11 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
+/**
+ * A {@link io.smallrye.mutiny.Multi} {@link Subscriber} for testing purposes that comes with useful assertion helpers.
+ * 
+ * @param <T> the type of the items
+ */
 @SuppressWarnings({ "ReactiveStreamsSubscriberImplementation", "ConstantConditions" })
 public class AssertSubscriber<T> implements Subscriber<T> {
 
@@ -70,36 +75,77 @@ public class AssertSubscriber<T> implements Subscriber<T> {
      */
     private boolean cancelled;
 
+    /**
+     * Creates a new {@link AssertSubscriber}.
+     *
+     * @param requested the number of initially requested items
+     * @param cancelled {@code true} if the subscription is immediately cancelled, {@code false} otherwise
+     */
     public AssertSubscriber(long requested, boolean cancelled) {
         this(null, requested, cancelled);
     }
 
+    /**
+     * Creates a new {@link AssertSubscriber}.
+     * 
+     * @param spy a subscriber to delegate the events to
+     * @param requested the number of initially requested items
+     * @param cancelled {@code true} if the subscription is immediately cancelled, {@code false} otherwise
+     */
     public AssertSubscriber(Subscriber<T> spy, long requested, boolean cancelled) {
         this.requested.set(requested);
         this.upfrontCancellation = cancelled;
         this.spy = spy;
     }
 
+    /**
+     * Creates a new {@link AssertSubscriber} with 0 requested items and no upfront cancellation.
+     *
+     * @param spy a subscriber to delegate the events to
+     */
     public AssertSubscriber(Subscriber<T> spy) {
         this(spy, 0, false);
     }
 
+    /**
+     * Creates a new {@link AssertSubscriber} with no upfront cancellation.
+     *
+     * @param requested the number of initially requested items
+     */
     public AssertSubscriber(long requested) {
         this(requested, false);
     }
 
+    /**
+     * Creates a new {@link AssertSubscriber} with 0 requested items and no upfront cancellation.
+     */
     public static <T> AssertSubscriber<T> create() {
         return new AssertSubscriber<>(0);
     }
 
+    /**
+     * Creates a new {@link AssertSubscriber} with no upfront cancellation.
+     *
+     * @param requested the number of initially requested items
+     */
     public static <T> AssertSubscriber<T> create(long requested) {
         return new AssertSubscriber<>(requested);
     }
 
+    /**
+     * Creates a new {@link AssertSubscriber} from a delegate.
+     *
+     * @param spy a subscriber to delegate the events to
+     */
     public static <T> AssertSubscriber<T> create(Subscriber<T> spy) {
         return new AssertSubscriber<>(spy);
     }
 
+    /**
+     * Assert that the stream has completed.
+     *
+     * @return this {@link AssertSubscriber}
+     */
     public AssertSubscriber<T> assertCompleted() {
         if (!completed.get()) {
             throw new AssertionError("The stream has not completed");
@@ -110,6 +156,13 @@ public class AssertSubscriber<T> implements Subscriber<T> {
         return this;
     }
 
+    /**
+     * Assert that the stream has failed.
+     *
+     * @param typeOfException the expected failure type
+     * @param message a message to be contained in the failure message, or {@code null} when any message is fine
+     * @return this {@link AssertSubscriber}
+     */
     public AssertSubscriber<T> assertFailedWith(Class<? extends Throwable> typeOfException, String message) {
         if (failure.get() == null) {
             throw new AssertionError("The multi didn't failed");
@@ -133,6 +186,11 @@ public class AssertSubscriber<T> implements Subscriber<T> {
         return this;
     }
 
+    /**
+     * Assert that no item has been received yet.
+     * 
+     * @return this {@link AssertSubscriber}
+     */
     public AssertSubscriber<T> assertHasNotReceivedAnyItem() {
         if (!items.isEmpty()) {
             throw new AssertionError("Items have been received");
@@ -140,6 +198,11 @@ public class AssertSubscriber<T> implements Subscriber<T> {
         return this;
     }
 
+    /**
+     * Assert that the stream has been subscribed.
+     * 
+     * @return this {@link AssertSubscriber}
+     */
     public AssertSubscriber<T> assertSubscribed() {
         if (numberOfSubscription != 1) {
             throw new AssertionError("Expected to be subscribed (number of subscriptions was " + numberOfSubscription + ")");
@@ -147,6 +210,11 @@ public class AssertSubscriber<T> implements Subscriber<T> {
         return this;
     }
 
+    /**
+     * Assert that the stream has not been subscribed.
+     * 
+     * @return this {@link AssertSubscriber}
+     */
     public AssertSubscriber<T> assertNotSubscribed() {
         if (numberOfSubscription != 0) {
             throw new AssertionError(
@@ -155,6 +223,11 @@ public class AssertSubscriber<T> implements Subscriber<T> {
         return this;
     }
 
+    /**
+     * Assert that the stream has been terminated.
+     *
+     * @return this {@link AssertSubscriber}
+     */
     public AssertSubscriber<T> assertTerminated() {
         if (latch.getCount() != 0) {
             throw new AssertionError("Expected to be terminated");
@@ -162,6 +235,11 @@ public class AssertSubscriber<T> implements Subscriber<T> {
         return this;
     }
 
+    /**
+     * Assert that the stream has not been terminated.
+     *
+     * @return this {@link AssertSubscriber}
+     */
     public AssertSubscriber<T> assertNotTerminated() {
         if (latch.getCount() == 0) {
             throw new AssertionError("Did not expect to be terminated");
@@ -169,6 +247,12 @@ public class AssertSubscriber<T> implements Subscriber<T> {
         return this;
     }
 
+    /**
+     * Assert that a sequence of items has been received (in whole and in exact order).
+     *
+     * @param expected a sequence of items
+     * @return this {@link AssertSubscriber}
+     */
     @SafeVarargs
     public final AssertSubscriber<T> assertItems(T... expected) {
         if (items.size() != expected.length) {
@@ -183,6 +267,11 @@ public class AssertSubscriber<T> implements Subscriber<T> {
         return this;
     }
 
+    /**
+     * Await for the stream to be terminated.
+     * 
+     * @return this {@link AssertSubscriber}
+     */
     public AssertSubscriber<T> await() {
         if (latch.getCount() == 0) {
             // We are done already.
@@ -197,6 +286,12 @@ public class AssertSubscriber<T> implements Subscriber<T> {
         return this;
     }
 
+    /**
+     * Await for the stream to be terminated.
+     *
+     * @param duration the timeout duration
+     * @return this {@link AssertSubscriber}
+     */
     public AssertSubscriber<T> await(Duration duration) {
         if (latch.getCount() == 0) {
             // We are done already.
@@ -213,6 +308,11 @@ public class AssertSubscriber<T> implements Subscriber<T> {
         return this;
     }
 
+    /**
+     * Cancel the subscription.
+     * 
+     * @return this {@link AssertSubscriber}
+     */
     public AssertSubscriber<T> cancel() {
         if (subscription.get() == null) {
             throw new AssertionError("There is not subscription");
@@ -222,6 +322,12 @@ public class AssertSubscriber<T> implements Subscriber<T> {
         return this;
     }
 
+    /**
+     * Request items.
+     * 
+     * @param req the number of items to request.
+     * @return this {@link AssertSubscriber}
+     */
     public AssertSubscriber<T> request(long req) {
         requested.addAndGet(req);
         if (subscription.get() != null) {
@@ -277,14 +383,30 @@ public class AssertSubscriber<T> implements Subscriber<T> {
         latch.countDown();
     }
 
+    /**
+     * The list of items that have been received.
+     *
+     * @return the list
+     */
     public List<T> getItems() {
         return items;
     }
 
+    /**
+     * The reported failure, if any.
+     *
+     * @return the failure or {@code null}
+     */
     public Throwable getFailure() {
         return failure.get();
     }
 
+    /**
+     * Run an action.
+     *
+     * @param action the action
+     * @return this {@link AssertSubscriber}
+     */
     public AssertSubscriber<T> run(Runnable action) {
         try {
             action.run();
@@ -296,10 +418,20 @@ public class AssertSubscriber<T> implements Subscriber<T> {
         return this;
     }
 
+    /**
+     * Check whether the subscription has been cancelled or not.
+     *
+     * @return a boolean
+     */
     public boolean isCancelled() {
         return cancelled;
     }
 
+    /**
+     * Check whether the stream has completed.
+     *
+     * @return a boolean
+     */
     public boolean hasCompleted() {
         return completed.get();
     }
