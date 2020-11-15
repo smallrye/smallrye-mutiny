@@ -17,6 +17,7 @@ import org.junit.jupiter.api.Test;
 import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.TimeoutException;
 import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.test.UniAssertSubscriber;
 import io.smallrye.mutiny.tuples.*;
 
 public class UniZipTest {

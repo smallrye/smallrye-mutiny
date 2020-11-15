@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.test.UniAssertSubscriber;
 
 @SuppressWarnings("ConstantConditions")
 public class MultiToUniTest {

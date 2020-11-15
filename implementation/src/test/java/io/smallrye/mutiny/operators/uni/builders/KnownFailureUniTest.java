@@ -8,7 +8,7 @@ import java.io.IOException;
 import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Uni;
-import io.smallrye.mutiny.operators.UniAssertSubscriber;
+import io.smallrye.mutiny.test.UniAssertSubscriber;
 
 public class KnownFailureUniTest {
 

@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import io.reactivex.BackpressureStrategy;
 import io.reactivex.Flowable;
 import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.test.UniAssertSubscriber;
 
 public class UniFromPublisherTest {
 

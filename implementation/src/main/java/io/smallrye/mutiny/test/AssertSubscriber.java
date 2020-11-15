@@ -1,8 +1,7 @@
 package io.smallrye.mutiny.test;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import java.time.Duration;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
@@ -102,8 +101,12 @@ public class AssertSubscriber<T> implements Subscriber<T> {
     }
 
     public AssertSubscriber<T> assertCompleted() {
-        assertThat(completed).isTrue();
-        assertThat(failure.get()).isNull();
+        if (!completed.get()) {
+            throw new AssertionError("The stream has not completed");
+        }
+        if (failure.get() != null) {
+            throw new AssertionError("The stream has not completed because of a failure", failure.get());
+        }
         return this;
     }
 
@@ -116,42 +119,67 @@ public class AssertSubscriber<T> implements Subscriber<T> {
         }
 
         Throwable throwable = failure.get();
-        assertThat(throwable).isInstanceOf(typeOfException);
+        if (!(typeOfException.isInstance(failure.get()))) {
+            throw new AssertionError("Expected the failure to be of type " + typeOfException.getCanonicalName() + " but was "
+                    + failure.get().getClass().getCanonicalName());
+        }
         if (message != null) {
-            assertThat(throwable).hasMessageContaining(message);
+            if (!throwable.getMessage().contains(message)) {
+                throw new AssertionError("Expected the failure message to contain \"" + message + "\" but was: \""
+                        + throwable.getMessage() + "\"");
+            }
         }
 
         return this;
     }
 
     public AssertSubscriber<T> assertHasNotReceivedAnyItem() {
-        assertThat(items).isEmpty();
+        if (!items.isEmpty()) {
+            throw new AssertionError("Items have been received");
+        }
         return this;
     }
 
     public AssertSubscriber<T> assertSubscribed() {
-        assertThat(numberOfSubscription).isEqualTo(1);
+        if (numberOfSubscription != 1) {
+            throw new AssertionError("Expected to be subscribed (number of subscriptions was " + numberOfSubscription + ")");
+        }
         return this;
     }
 
     public AssertSubscriber<T> assertNotSubscribed() {
-        assertThat(numberOfSubscription).isEqualTo(0);
+        if (numberOfSubscription != 0) {
+            throw new AssertionError(
+                    "Did not expect to be subscribed (number of subscriptions was " + numberOfSubscription + ")");
+        }
         return this;
     }
 
     public AssertSubscriber<T> assertTerminated() {
-        assertThat(latch.getCount()).isEqualTo(0);
+        if (latch.getCount() != 0) {
+            throw new AssertionError("Expected to be terminated");
+        }
         return this;
     }
 
     public AssertSubscriber<T> assertNotTerminated() {
-        assertThat(latch.getCount()).as("Multi did already complete").isGreaterThan(0);
+        if (latch.getCount() == 0) {
+            throw new AssertionError("Did not expect to be terminated");
+        }
         return this;
     }
 
     @SafeVarargs
     public final AssertSubscriber<T> assertItems(T... expected) {
-        assertThat(items).containsExactly(expected);
+        if (items.size() != expected.length) {
+            throw new AssertionError("Expected to have received: " + Arrays.toString(expected) + " but has received: " + items);
+        }
+        for (int i = 0; i < expected.length; i++) {
+            if (!expected[i].equals(items.get(i))) {
+                throw new AssertionError(
+                        "Expected to have received: " + Arrays.toString(expected) + " but has received: " + items);
+            }
+        }
         return this;
     }
 
@@ -186,7 +214,9 @@ public class AssertSubscriber<T> implements Subscriber<T> {
     }
 
     public AssertSubscriber<T> cancel() {
-        assertThat(subscription.get()).as("No subscription").isNotNull();
+        if (subscription.get() == null) {
+            throw new AssertionError("There is not subscription");
+        }
         subscription.get().cancel();
         cancelled = true;
         return this;

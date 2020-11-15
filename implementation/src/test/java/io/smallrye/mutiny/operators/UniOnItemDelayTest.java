@@ -15,6 +15,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.test.UniAssertSubscriber;
 
 public class UniOnItemDelayTest {
 

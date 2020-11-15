@@ -1,4 +1,4 @@
-package io.smallrye.mutiny.operators;
+package io.smallrye.mutiny.test;
 
 import java.util.concurrent.CompletableFuture;
 

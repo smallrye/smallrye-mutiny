@@ -9,6 +9,7 @@ import java.util.function.Supplier;
 import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.test.UniAssertSubscriber;
 
 public class UniCreateFromDeferredSupplierTest {
 
