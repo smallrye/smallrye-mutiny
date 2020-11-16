@@ -20,9 +20,9 @@ import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.Multi;
+import io.smallrye.mutiny.helpers.test.AbstractSubscriber;
+import io.smallrye.mutiny.helpers.test.AssertSubscriber;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
-import io.smallrye.mutiny.test.AbstractSubscriber;
-import io.smallrye.mutiny.test.AssertSubscriber;
 import io.smallrye.mutiny.test.Mocks;
 
 public class MultiFromIterableTest {

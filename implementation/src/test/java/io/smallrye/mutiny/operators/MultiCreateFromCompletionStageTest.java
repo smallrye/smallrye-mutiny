@@ -13,7 +13,7 @@ import java.util.function.Supplier;
 import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Multi;
-import io.smallrye.mutiny.test.AssertSubscriber;
+import io.smallrye.mutiny.helpers.test.AssertSubscriber;
 
 public class MultiCreateFromCompletionStageTest {
 

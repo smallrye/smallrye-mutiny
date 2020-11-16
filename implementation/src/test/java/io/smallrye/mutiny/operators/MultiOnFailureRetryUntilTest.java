@@ -9,8 +9,8 @@ import java.util.function.Predicate;
 import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Multi;
+import io.smallrye.mutiny.helpers.test.AssertSubscriber;
 import io.smallrye.mutiny.operators.multi.processors.UnicastProcessor;
-import io.smallrye.mutiny.test.AssertSubscriber;
 
 public class MultiOnFailureRetryUntilTest {
 

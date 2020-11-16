@@ -13,9 +13,9 @@ import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.helpers.MultiSubscribers;
+import io.smallrye.mutiny.helpers.test.AssertSubscriber;
 import io.smallrye.mutiny.operators.multi.MultiIgnoreOp;
 import io.smallrye.mutiny.subscription.MultiSubscriber;
-import io.smallrye.mutiny.test.AssertSubscriber;
 import io.smallrye.mutiny.test.Mocks;
 
 public class MultiIgnoreTest {

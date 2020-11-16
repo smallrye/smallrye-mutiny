@@ -17,6 +17,7 @@ import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.helpers.test.UniAssertSubscriber;
 import io.smallrye.mutiny.subscription.Cancellable;
 
 public class UniOnItemOrFailureInvokeTest {

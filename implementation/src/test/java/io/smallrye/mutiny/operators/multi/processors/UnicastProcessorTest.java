@@ -14,8 +14,8 @@ import org.junit.jupiter.api.Test;
 import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.helpers.queues.Queues;
+import io.smallrye.mutiny.helpers.test.AssertSubscriber;
 import io.smallrye.mutiny.subscription.BackPressureFailure;
-import io.smallrye.mutiny.test.AssertSubscriber;
 
 public class UnicastProcessorTest {
 

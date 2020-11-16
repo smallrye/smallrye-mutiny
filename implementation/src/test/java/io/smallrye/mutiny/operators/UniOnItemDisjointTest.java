@@ -14,7 +14,7 @@ import org.junit.jupiter.api.Test;
 import io.reactivex.Flowable;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
-import io.smallrye.mutiny.test.AssertSubscriber;
+import io.smallrye.mutiny.helpers.test.AssertSubscriber;
 
 public class UniOnItemDisjointTest {
 

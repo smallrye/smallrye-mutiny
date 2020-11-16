@@ -19,11 +19,11 @@ import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.helpers.test.AssertSubscriber;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.multi.MultiOnSubscribeCall;
 import io.smallrye.mutiny.operators.multi.MultiOnSubscribeInvokeOp;
 import io.smallrye.mutiny.subscription.UniEmitter;
-import io.smallrye.mutiny.test.AssertSubscriber;
 
 public class MultiOnSubscribeTest {
 

@@ -795,3 +795,29 @@ include::../../../src/test/java/snippets/PlugTest.java[tags=custom-operator]
 Custom operators are an advanced feature: when possible please use the existing operators and use helpers such as `stage` to write readable code.
 In the case of custom `Multi` operators it is wise to test them against the _Reactive Streams TCK_.
 ====
+
+== How can I write unit / integration tests?
+
+Mutiny provides subscribers for `Uni` and `Multi` offering helpful assertion methods.
+You can use them to test pipelines.
+
+Here is an example to test a `Uni`:
+
+[source,java,indent=0]
+----
+include::../../../src/test/java/snippets/TestSubscribersTest.java[tags=uni]
+----
+
+Testing a `Multi` pipeline is similar:
+
+[source,java,indent=0]
+----
+include::../../../src/test/java/snippets/TestSubscribersTest.java[tags=multi]
+----
+
+The assertions do not just focus on _good_ outcomes, you can also test failures as in:
+
+[source,java,indent=0]
+----
+include::../../../src/test/java/snippets/TestSubscribersTest.java[tags=failing]
+----

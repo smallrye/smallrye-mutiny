@@ -72,7 +72,8 @@ public class MultiOnOverflowBufferOp<T> extends AbstractMultiOperator<T, T> {
         @Override
         public void onItem(T t) {
             if (!queue.offer(t)) {
-                BackPressureFailure bpf = new BackPressureFailure("The overflow buffer is full, which is due to the upstream sending too many items w.r.t. the downstream capacity and/or the downstream not consuming items fast enough");
+                BackPressureFailure bpf = new BackPressureFailure(
+                        "The overflow buffer is full, which is due to the upstream sending too many items w.r.t. the downstream capacity and/or the downstream not consuming items fast enough");
                 if (dropUniMapper != null) {
                     notifyOnOverflowCall(t, bpf);
                 } else {

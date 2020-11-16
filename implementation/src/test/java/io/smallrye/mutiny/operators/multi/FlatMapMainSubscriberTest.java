@@ -12,9 +12,9 @@ import org.reactivestreams.Subscription;
 import io.reactivex.processors.PublishProcessor;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.helpers.queues.Queues;
+import io.smallrye.mutiny.helpers.test.AssertSubscriber;
 import io.smallrye.mutiny.operators.AbstractMulti;
 import io.smallrye.mutiny.subscription.BackPressureFailure;
-import io.smallrye.mutiny.test.AssertSubscriber;
 import io.smallrye.mutiny.test.Mocks;
 
 public class FlatMapMainSubscriberTest {

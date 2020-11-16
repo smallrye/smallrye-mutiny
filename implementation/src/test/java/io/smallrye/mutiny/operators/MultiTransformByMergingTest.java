@@ -14,7 +14,7 @@ import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
 
 import io.smallrye.mutiny.Multi;
-import io.smallrye.mutiny.test.AssertSubscriber;
+import io.smallrye.mutiny.helpers.test.AssertSubscriber;
 
 public class MultiTransformByMergingTest {
 

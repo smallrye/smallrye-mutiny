@@ -16,8 +16,8 @@ import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.helpers.test.AssertSubscriber;
 import io.smallrye.mutiny.operators.multi.MultiRetryWhenOp;
-import io.smallrye.mutiny.test.AssertSubscriber;
 import io.smallrye.mutiny.tuples.Tuple2;
 
 public class MultiOnFailureRetryWhenTest {

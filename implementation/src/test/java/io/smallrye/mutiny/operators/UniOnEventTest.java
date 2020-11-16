@@ -16,6 +16,7 @@ import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.helpers.test.UniAssertSubscriber;
 
 @SuppressWarnings("ConstantConditions")
 public class UniOnEventTest {
