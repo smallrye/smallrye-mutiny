@@ -1,4 +1,4 @@
-package io.smallrye.mutiny.test;
+package io.smallrye.mutiny.helpers.test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;

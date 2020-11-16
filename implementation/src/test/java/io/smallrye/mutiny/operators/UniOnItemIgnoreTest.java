@@ -11,7 +11,7 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Uni;
-import io.smallrye.mutiny.test.UniAssertSubscriber;
+import io.smallrye.mutiny.helpers.test.UniAssertSubscriber;
 
 @SuppressWarnings("ConstantConditions")
 public class UniOnItemIgnoreTest {

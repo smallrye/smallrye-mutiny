@@ -9,7 +9,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Uni;
-import io.smallrye.mutiny.test.UniAssertSubscriber;
+import io.smallrye.mutiny.helpers.test.UniAssertSubscriber;
 
 @SuppressWarnings({ "deprecation", "ConstantConditions" })
 public class UniOnItemProduceCompletionStageTest {

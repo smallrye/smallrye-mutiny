@@ -14,8 +14,8 @@ import io.reactivex.*;
 import io.reactivex.observers.TestObserver;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.converters.multi.MultiRxConverters;
+import io.smallrye.mutiny.helpers.test.AssertSubscriber;
 import io.smallrye.mutiny.subscription.MultiEmitter;
-import io.smallrye.mutiny.test.AssertSubscriber;
 
 @SuppressWarnings("ConstantConditions")
 public class MultiConvertToTest {

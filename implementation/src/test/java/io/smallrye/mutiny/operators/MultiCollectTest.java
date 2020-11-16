@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Multi;
-import io.smallrye.mutiny.test.UniAssertSubscriber;
+import io.smallrye.mutiny.helpers.test.UniAssertSubscriber;
 
 public class MultiCollectTest {
 

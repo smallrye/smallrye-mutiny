@@ -12,8 +12,8 @@ import org.junit.jupiter.api.*;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.helpers.test.AssertSubscriber;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
-import io.smallrye.mutiny.test.AssertSubscriber;
 
 public class MultiContextPropagationTest {
 

@@ -22,11 +22,11 @@ import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.helpers.spies.MultiOnCancellationSpy;
 import io.smallrye.mutiny.helpers.spies.Spy;
+import io.smallrye.mutiny.helpers.test.AssertSubscriber;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.subscription.BackPressureFailure;
 import io.smallrye.mutiny.subscription.MultiEmitter;
 import io.smallrye.mutiny.subscription.MultiSubscriber;
-import io.smallrye.mutiny.test.AssertSubscriber;
 
 public class MultiOnOverflowTest {
 

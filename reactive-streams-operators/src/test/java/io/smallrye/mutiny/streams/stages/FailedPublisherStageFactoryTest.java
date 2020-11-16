@@ -4,8 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.Test;
 
+import io.smallrye.mutiny.helpers.test.AssertSubscriber;
 import io.smallrye.mutiny.streams.operators.PublisherStage;
-import io.smallrye.mutiny.test.AssertSubscriber;
 
 /**
  * Checks the behavior of {@link FailedPublisherStageFactory}.

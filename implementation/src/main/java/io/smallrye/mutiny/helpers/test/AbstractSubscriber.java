@@ -1,4 +1,4 @@
-package io.smallrye.mutiny.test;
+package io.smallrye.mutiny.helpers.test;
 
 import java.util.concurrent.atomic.AtomicReference;
 

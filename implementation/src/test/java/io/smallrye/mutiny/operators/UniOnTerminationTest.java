@@ -12,8 +12,8 @@ import org.junit.jupiter.api.Test;
 import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.TestException;
 import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.helpers.test.UniAssertSubscriber;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
-import io.smallrye.mutiny.test.UniAssertSubscriber;
 
 @SuppressWarnings("ConstantConditions")
 public class UniOnTerminationTest {

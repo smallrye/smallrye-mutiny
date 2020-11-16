@@ -15,7 +15,7 @@ import org.junit.jupiter.api.Timeout;
 import io.smallrye.mutiny.TestException;
 import io.smallrye.mutiny.TimeoutException;
 import io.smallrye.mutiny.Uni;
-import io.smallrye.mutiny.test.UniAssertSubscriber;
+import io.smallrye.mutiny.helpers.test.UniAssertSubscriber;
 
 public class UniIfNoItemTest {
 

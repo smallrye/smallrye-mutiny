@@ -13,8 +13,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 
 import io.smallrye.mutiny.Multi;
+import io.smallrye.mutiny.helpers.test.AssertSubscriber;
 import io.smallrye.mutiny.subscription.BackPressureFailure;
-import io.smallrye.mutiny.test.AssertSubscriber;
 
 public class MultiCreateFromTimePeriodTest {
 

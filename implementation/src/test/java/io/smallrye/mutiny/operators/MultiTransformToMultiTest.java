@@ -24,11 +24,11 @@ import org.reactivestreams.Subscriber;
 import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.helpers.test.AssertSubscriber;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.multi.MultiFlatMapOp;
 import io.smallrye.mutiny.operators.multi.processors.BroadcastProcessor;
 import io.smallrye.mutiny.operators.multi.processors.UnicastProcessor;
-import io.smallrye.mutiny.test.AssertSubscriber;
 import io.smallrye.mutiny.test.Mocks;
 
 public class MultiTransformToMultiTest {

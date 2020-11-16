@@ -8,9 +8,9 @@ import org.junit.jupiter.api.Test;
 import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.Multi;
+import io.smallrye.mutiny.helpers.test.AssertSubscriber;
 import io.smallrye.mutiny.operators.AbstractMulti;
 import io.smallrye.mutiny.subscription.MultiSubscriber;
-import io.smallrye.mutiny.test.AssertSubscriber;
 
 class MultiReferenceCountSubscriberTest {
 

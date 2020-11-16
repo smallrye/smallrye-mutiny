@@ -13,10 +13,10 @@ import java.util.function.Supplier;
 import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.helpers.test.UniAssertSubscriber;
 import io.smallrye.mutiny.subscription.UniEmitter;
 import io.smallrye.mutiny.subscription.UniSubscriber;
 import io.smallrye.mutiny.subscription.UniSubscription;
-import io.smallrye.mutiny.test.UniAssertSubscriber;
 
 public class UniCreateFromEmitterTest {
     @Test

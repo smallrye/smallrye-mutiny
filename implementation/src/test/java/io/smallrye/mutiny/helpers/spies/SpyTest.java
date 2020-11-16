@@ -11,9 +11,9 @@ import org.junit.jupiter.api.Test;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.groups.MultiOverflowStrategy;
+import io.smallrye.mutiny.helpers.test.AssertSubscriber;
+import io.smallrye.mutiny.helpers.test.UniAssertSubscriber;
 import io.smallrye.mutiny.subscription.UniSubscription;
-import io.smallrye.mutiny.test.AssertSubscriber;
-import io.smallrye.mutiny.test.UniAssertSubscriber;
 
 class SpyTest {
 

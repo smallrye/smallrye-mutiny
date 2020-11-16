@@ -21,9 +21,9 @@ import org.reactivestreams.Subscription;
 import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.helpers.test.AssertSubscriber;
 import io.smallrye.mutiny.operators.multi.processors.BroadcastProcessor;
 import io.smallrye.mutiny.subscription.Cancellable;
-import io.smallrye.mutiny.test.AssertSubscriber;
 
 @SuppressWarnings("deprecation")
 public class MultiOnEventTest {

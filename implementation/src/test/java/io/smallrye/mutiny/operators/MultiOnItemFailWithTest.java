@@ -16,7 +16,7 @@ import io.smallrye.mutiny.TestException;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.helpers.spies.MultiOnCancellationSpy;
 import io.smallrye.mutiny.helpers.spies.Spy;
-import io.smallrye.mutiny.test.AssertSubscriber;
+import io.smallrye.mutiny.helpers.test.AssertSubscriber;
 
 public class MultiOnItemFailWithTest {
 

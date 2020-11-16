@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.reactivestreams.Subscription;
 
 import io.reactivex.internal.util.QueueDrainHelper;
-import io.smallrye.mutiny.test.AssertSubscriber;
+import io.smallrye.mutiny.helpers.test.AssertSubscriber;
 
 public class DrainUtilsTest {
 
