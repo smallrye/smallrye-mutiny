@@ -95,9 +95,9 @@ public interface Spy {
      *
      * @param upstream the upstream
      * @param <T> the item type
+     * @param predicate a predicate to match a failure type
      * @return a new {@link Uni}
      */
-
     static <T> UniOnFailureSpy<T> onFailure(Uni<T> upstream, Predicate<? super Throwable> predicate) {
         return (UniOnFailureSpy<T>) upstream.plug(uni -> new UniOnFailureSpy<>(upstream, predicate));
     }
@@ -107,6 +107,7 @@ public interface Spy {
      *
      * @param upstream the upstream
      * @param <T> the item type
+     * @param typeOfFailure the expected failure type
      * @return a new {@link Uni}
      */
     static <T> UniOnFailureSpy<T> onFailure(Uni<T> upstream, Class<? extends Throwable> typeOfFailure) {
@@ -164,6 +165,7 @@ public interface Spy {
      *
      * @param upstream the upstream
      * @param <T> the items type
+     * @param predicate a predicate to match a failure type
      * @return a new {@link Multi}
      */
     static <T> MultiOnFailureSpy<T> onFailure(Multi<T> upstream, Predicate<? super Throwable> predicate) {
@@ -175,6 +177,7 @@ public interface Spy {
      *
      * @param upstream the upstream
      * @param <T> the items type
+     * @param typeOfFailure the type of failure
      * @return a new {@link Multi}
      */
     static <T> MultiOnFailureSpy<T> onFailure(Multi<T> upstream, Class<? extends Throwable> typeOfFailure) {

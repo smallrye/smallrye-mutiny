@@ -39,6 +39,9 @@ public class UniAssertSubscriber<T> implements UniSubscriber<T> {
 
     /**
      * Create a new {@link UniAssertSubscriber} with no upfront cancellation.
+     * 
+     * @param <T> the type of the item
+     * @return a new subscriber
      */
     public static <T> UniAssertSubscriber<T> create() {
         return new UniAssertSubscriber<>();

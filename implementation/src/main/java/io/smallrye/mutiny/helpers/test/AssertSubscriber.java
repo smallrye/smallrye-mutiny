@@ -118,6 +118,9 @@ public class AssertSubscriber<T> implements Subscriber<T> {
 
     /**
      * Creates a new {@link AssertSubscriber} with 0 requested items and no upfront cancellation.
+     * 
+     * @param <T> the items type
+     * @return a new subscriber
      */
     public static <T> AssertSubscriber<T> create() {
         return new AssertSubscriber<>(0);
@@ -127,6 +130,8 @@ public class AssertSubscriber<T> implements Subscriber<T> {
      * Creates a new {@link AssertSubscriber} with no upfront cancellation.
      *
      * @param requested the number of initially requested items
+     * @param <T> the items type
+     * @return a new subscriber
      */
     public static <T> AssertSubscriber<T> create(long requested) {
         return new AssertSubscriber<>(requested);
@@ -136,6 +141,8 @@ public class AssertSubscriber<T> implements Subscriber<T> {
      * Creates a new {@link AssertSubscriber} from a delegate.
      *
      * @param spy a subscriber to delegate the events to
+     * @param <T> the items type
+     * @return a new subscriber
      */
     public static <T> AssertSubscriber<T> create(Subscriber<T> spy) {
         return new AssertSubscriber<>(spy);
