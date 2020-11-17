@@ -8,6 +8,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -23,14 +24,7 @@ import io.smallrye.mutiny.converters.MultiConverter;
 import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.AbstractMulti;
-import io.smallrye.mutiny.operators.multi.builders.CollectionBasedMulti;
-import io.smallrye.mutiny.operators.multi.builders.DeferredMulti;
-import io.smallrye.mutiny.operators.multi.builders.EmitterBasedMulti;
-import io.smallrye.mutiny.operators.multi.builders.EmptyMulti;
-import io.smallrye.mutiny.operators.multi.builders.FailedMulti;
-import io.smallrye.mutiny.operators.multi.builders.IterableBasedMulti;
-import io.smallrye.mutiny.operators.multi.builders.NeverMulti;
-import io.smallrye.mutiny.operators.multi.builders.StreamBasedMulti;
+import io.smallrye.mutiny.operators.multi.builders.*;
 import io.smallrye.mutiny.subscription.BackPressureStrategy;
 import io.smallrye.mutiny.subscription.MultiEmitter;
 import io.smallrye.mutiny.subscription.SafeSubscriber;
@@ -506,4 +500,29 @@ public class MultiCreate {
                 ParameterValidation.nonNull(streamSupplier, "streamSupplier"));
     }
 
+    /**
+     * Creates a {@link Multi} from on some initial state and a generator function.
+     * <p>
+     * The generator function accepts the current state and a {@link GeneratorEmitter} to emit items, failures and completion
+     * events.
+     * The function shall return the new state which will be used for the next item generation, if any.
+     * The state can be {@code null}, but emitted items cannot be {@code null}.
+     * A failure is propagated downstream if the function throws an exception.
+     * <p>
+     * Items are being generated based on subscription requests.
+     * Requesting {@link Long#MAX_VALUE} items can possibly make for an infinite stream unless the generator function calls
+     * {@link GeneratorEmitter#complete()} at some point.
+     * 
+     * @param initialStateSupplier a supplier for the initial state, must not be {@code null} but can supply {@code null}
+     * @param generator the generator function, returns the new state for the next item generation
+     * @param <S> the state type
+     * @param <T> the items type
+     * @return a new {@link Multi}
+     */
+    public <S, T> Multi<T> generator(Supplier<S> initialStateSupplier,
+            BiFunction<S, GeneratorEmitter<? super T>, S> generator) {
+        return new GeneratorBasedMulti<>(
+                nonNull(initialStateSupplier, "initialStateSupplier"),
+                nonNull(generator, "generator"));
+    }
 }
