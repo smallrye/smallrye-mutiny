@@ -206,6 +206,19 @@ public class MultiCreateFromGeneratorTest {
     }
 
     @Test
+    @DisplayName("Propagate failure to create an initial state downstream")
+    void handleThrowingInitialStateSupplier() {
+        AssertSubscriber<Object> sub = Multi.createFrom().generator(
+                () -> {
+                    throw new RuntimeException("boom");
+                },
+                (s, e) -> s)
+                .subscribe().withSubscriber(AssertSubscriber.create(10));
+
+        sub.assertFailedWith(RuntimeException.class, "boom");
+    }
+
+    @Test
     @DisplayName("Emitting a null item is incorrect")
     void emittingNullItemIsBad() {
         AssertSubscriber<? super Integer> sub = Multi

@@ -27,7 +27,13 @@ public class GeneratorBasedMulti<T, S> extends AbstractMulti<T> {
     @Override
     public void subscribe(MultiSubscriber<? super T> subscriber) {
         MultiSubscriber<? super T> downstream = nonNull(subscriber, "subscriber");
-        S initialState = initialStateSupplier.get();
+        S initialState;
+        try {
+            initialState = initialStateSupplier.get();
+        } catch (Throwable err) {
+            downstream.onFailure(err);
+            return;
+        }
         downstream.onSubscribe(new GeneratorSubscription(downstream, initialState));
     }
 
