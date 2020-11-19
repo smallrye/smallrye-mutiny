@@ -902,8 +902,7 @@ public class MultiGroupTest {
 		assertThat(batches.size()).isGreaterThanOrEqualTo(9);
 
 		for (List<Long> batch : batches) {
-			assertThat(batch.size()).isGreaterThan(0);
-			assertThat(batch.size()).isLessThanOrEqualTo(3);
+			assertThat(batch.size()).isBetween(1, 3);
 		}
     }
 }
