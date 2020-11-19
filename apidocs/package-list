@@ -6,6 +6,7 @@ io.smallrye.mutiny.groups
 io.smallrye.mutiny.helpers
 io.smallrye.mutiny.helpers.queues
 io.smallrye.mutiny.helpers.spies
+io.smallrye.mutiny.helpers.test
 io.smallrye.mutiny.infrastructure
 io.smallrye.mutiny.operators
 io.smallrye.mutiny.operators.multi
