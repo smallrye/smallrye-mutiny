@@ -80,4 +80,28 @@ public class MultiGroupIntoLists<T> {
                 MultiCollector.list(upstream, positive(size, "size"), positive(skip, "skip")));
     }
 
+    /**
+     * Creates a {@link Multi} that emits lists of items collected from the observed {@link Multi}.
+     * <p>
+     * The resulting {@link Multi} emits lists every {@code maximumDelay} duration and splits them into lists of {@code size}
+     * items.
+     * Therefore, the list may not always contain {@code size} items but it is guaranteed to emit a list every
+     * {@code maximumDelay}
+     * duration, if at least one element was emitted by the upstream.
+     * <p>
+     * When the upstream {@link Multi} sends the completion event, the produced {@link Multi} emits the current list,
+     * and sends the completion event. This last list may also not contain {@code size} items. If the upstream {@link Multi}
+     * sends the completion event before having emitted any event, the completion event is propagated immediately.
+     * <p>
+     * If the upstream {@link Multi} sends a failure, the failure is propagated immediately.
+     *
+     * @param size the maximum size of each collected list, must be positive
+     * @param maximumDelay the maximum delay between the upstream emitting an item and a list being emitted by the returned
+     *        {@link Multi}.
+     * @return a Multi emitting lists of at most {@code size} items from the upstream Multi.
+     */
+    public Multi<List<T>> of(int size, Duration maximumDelay) {
+        return upstream.groupItems().intoMultis().every(maximumDelay)
+                .flatMap(withTimeout -> withTimeout.groupItems().intoLists().of(size));
+    }
 }

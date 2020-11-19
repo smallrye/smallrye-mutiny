@@ -16,6 +16,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
@@ -884,5 +885,24 @@ public class MultiGroupTest {
         s1.assertFailedWith(TestException.class, "boom");
         s2.assertFailedWith(TestException.class, "boom");
         subscriber.assertFailedWith(TestException.class, "boom");
+    }
+
+    @Test
+    public void testGroupIntoListsWithMaximumDelay() {
+        Multi<Long> publisher = Multi.createFrom().ticks().every(Duration.ofMillis(10));
+
+        AssertSubscriber<List<Long>> subscriber = publisher.groupItems().intoLists().of(3, Duration.ofMillis(100))
+                .subscribe()
+                .withSubscriber(AssertSubscriber.create(10));
+
+        await().timeout(Duration.ofSeconds(2)).until(() -> subscriber.getItems().size() >= 9);
+        subscriber.cancel();
+
+        List<List<Long>> batches = subscriber.getItems();
+		assertThat(batches.size()).isGreaterThanOrEqualTo(9);
+
+		for (List<Long> batch : batches) {
+			assertThat(batch.size()).isBetween(1, 3);
+		}
     }
 }
