@@ -16,7 +16,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
@@ -899,10 +898,10 @@ public class MultiGroupTest {
         subscriber.cancel();
 
         List<List<Long>> batches = subscriber.getItems();
-		assertThat(batches.size()).isGreaterThanOrEqualTo(9);
+        assertThat(batches.size()).isGreaterThanOrEqualTo(9);
 
-		for (List<Long> batch : batches) {
-			assertThat(batch.size()).isBetween(1, 3);
-		}
+        for (List<Long> batch : batches) {
+            assertThat(batch.size()).isBetween(1, 3);
+        }
     }
 }
