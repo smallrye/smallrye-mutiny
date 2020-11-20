@@ -45,4 +45,19 @@ jobs:
             architecture: x64
         - name: Build with Maven
           run: mvn -B clean verify
-
+  compatibility:
+      runs-on: ubuntu-20.04
+      name: Compatibility Check
+      steps:
+        - uses: actions/cache@v2
+          with:
+            path: ~/.m2/repository
+            key: maven-java-11
+        - uses: actions/checkout@v2
+        - name: Install JDK 11 (OpenJDK)
+          uses: AdoptOpenJDK/install-jdk@v1
+          with:
+            version: 11
+            source: releases
+        - name: Compatibility Check
+          run: mvn -B install revapi:check@check-compatibility -DskipTests -fae

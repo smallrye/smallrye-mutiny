@@ -1,0 +1,51 @@
+[
+  {
+    "extension": "revapi.java",
+    "id": "java",
+    "configuration": {
+      "missing-classes": {
+        "behavior": "report",
+        "ignoreMissingAnnotations": false
+      },
+      "filter": {
+        "packages": {
+          "regex": true,
+          "include": [
+            "io\\.smallrye\\.mutiny\\..*"
+          ],
+          "exclude": [
+            "io\\.smallrye\\.mutiny\\.operators\\..*"
+          ]
+        }
+      }
+    }
+  },
+
+  {
+    "extension": "revapi.differences",
+    "id": "breaking-changes",
+    "configuration": {
+      "criticality": "highlight",
+      "differences": [
+        {
+          "code": "java.method.returnTypeChanged",
+          "old": "method <T> io.smallrye.mutiny.helpers.Subscriptions.SingleItemSubscription<T> io.smallrye.mutiny.helpers.Subscriptions::single(org.reactivestreams.Subscriber<T>, T)",
+          "new": "method <T> org.reactivestreams.Subscription io.smallrye.mutiny.helpers.Subscriptions::single(org.reactivestreams.Subscriber<T>, T)",
+          "justification": "[0.12.0] - SingleItemSubscription should not be exposed, and should be used as a regular Subscription"
+        }
+      ]
+    }
+  },
+
+  {
+    "extension": "revapi.reporter.json",
+    "configuration": {
+      "minSeverity": "POTENTIALLY_BREAKING",
+      "minCriticality": "documented",
+      "output": "target/compatibility.json",
+      "indent": true,
+      "append": false,
+      "keepEmptyFile": true
+    }
+  }
+]

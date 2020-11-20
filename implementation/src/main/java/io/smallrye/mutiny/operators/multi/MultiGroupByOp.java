@@ -266,13 +266,13 @@ public final class MultiGroupByOp<T, K, V> extends AbstractMultiOperator<T, Grou
         private final State<T, K> downstream;
         private final K key;
 
-        public static <T, K> GroupedUnicast<K, T> createWith(K key,
+        static <T, K> GroupedUnicast<K, T> createWith(K key,
                 MultiGroupByProcessor<?, K, T> parent) {
             State<T, K> state = new State<>(parent, key);
             return new GroupedUnicast<>(key, state);
         }
 
-        protected GroupedUnicast(K key, State<T, K> downstream) {
+        private GroupedUnicast(K key, State<T, K> downstream) {
             this.key = key;
             this.downstream = downstream;
         }

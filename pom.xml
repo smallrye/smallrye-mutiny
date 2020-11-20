@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -80,6 +81,8 @@
         <smallrye-common-annotation.version>1.5.0</smallrye-common-annotation.version>
 
         <junit.version>5.7.0</junit.version>
+
+        <revapi.skip>true</revapi.skip>
     </properties>
 
     <dependencyManagement>
@@ -249,6 +252,42 @@
                         <overwriteExistingFiles>true</overwriteExistingFiles>
                     </configuration>
                 </plugin>
+                <plugin>
+                    <groupId>org.revapi</groupId>
+                    <artifactId>revapi-maven-plugin</artifactId>
+                    <version>0.12.0</version>
+                    <dependencies>
+                        <dependency>
+                            <groupId>org.revapi</groupId>
+                            <artifactId>revapi-java</artifactId>
+                            <version>0.22.1</version>
+                        </dependency>
+                        <dependency>
+                            <groupId>org.revapi</groupId>
+                            <artifactId>revapi-reporter-json</artifactId>
+                            <version>0.2.1</version>
+                        </dependency>
+                        <dependency>
+                            <groupId>org.revapi</groupId>
+                            <artifactId>revapi-reporter-text</artifactId>
+                            <version>0.12.1</version>
+                        </dependency>
+                    </dependencies>
+                    <executions>
+                        <execution>
+                            <id>check-compatibility</id>
+                            <goals>
+                                <goal>check</goal>
+                            </goals>
+                            <configuration>
+                                <failSeverity>breaking</failSeverity>
+                                <analysisConfigurationFiles>
+                                    <file>${project.basedir}/revapi.json</file>
+                                </analysisConfigurationFiles>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
             </plugins>
         </pluginManagement>
         <plugins>
@@ -267,6 +306,14 @@
                         </configuration>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.revapi</groupId>
+                <artifactId>revapi-maven-plugin</artifactId>
+                <configuration>
+                    <!-- Do not compute compatibility on the documentation -->
+                    <skip>${revapi.skip}</skip>
+                </configuration>
             </plugin>
         </plugins>
     </build>

@@ -314,17 +314,17 @@ public class Subscriptions {
         return res;
     }
 
-    public static <T> SingleItemSubscription<T> single(Subscriber<T> downstream, T item) {
+    public static <T> Subscription single(Subscriber<T> downstream, T item) {
         return new SingleItemSubscription<>(downstream, item);
     }
 
-    private static final class SingleItemSubscription<T> implements Subscription {
+    public static final class SingleItemSubscription<T> implements Subscription {
 
         private final Subscriber<? super T> downstream;
 
         private final T item;
 
-        private AtomicBoolean requested = new AtomicBoolean();
+        private final AtomicBoolean requested = new AtomicBoolean();
 
         public SingleItemSubscription(Subscriber<? super T> actual, T item) {
             this.downstream = ParameterValidation.nonNull(actual, "actual");
