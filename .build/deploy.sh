@@ -21,6 +21,18 @@ deploy_snapshot() {
     mvn -B deploy -DskipTests -s maven-settings.xml
 }
 
+compatibility_extract() {
+  echo "Extracting compatibility report"
+  jbang .build/CompatibilityUtils.java extract
+}
+
+compatibility_clear() {
+  echo "Clearing difference justifications"
+  jbang .build/CompatibilityUtils.java clear
+  git commit -a -m "[POST-RELEASE] - Clearing breaking change justifications"
+  git push origin master
+}
+
 deploy_release() {
     export RELEASE_VERSION=""
     export BRANCH="HEAD"
@@ -83,7 +95,10 @@ elif [[ ${TARGET} == "release" ]]; then
     deploy_release
 
     echo "Executing post-release"
+    compatibility_extract
     .build/post-release.kts "${GITHUB_TOKEN}"
+
+    compatibility_clear
 else
     echo "Unknown environment: ${TARGET}"
 fi
