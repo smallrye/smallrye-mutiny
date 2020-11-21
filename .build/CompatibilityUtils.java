@@ -70,7 +70,7 @@ class CompatibilityUtils implements Callable<Integer> {
         buffer.append("### Breaking Changes\n\n");
 
         for (Difference difference : diff) {
-            buffer.append("* ").append(difference.toString()).append("\n");
+            buffer.append("  * ").append(difference.toString()).append("\n");
         }
         buffer.append("\n");
 
