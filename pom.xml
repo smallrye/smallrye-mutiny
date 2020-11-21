@@ -82,6 +82,11 @@
 
         <junit.version>5.7.0</junit.version>
 
+        <revapi-maven-plugin.version>0.12.0</revapi-maven-plugin.version>
+        <revapi-java.version>0.22.1</revapi-java.version>
+        <revapi-reporter-json.version>0.2.1</revapi-reporter-json.version>
+        <revapi-reporter-text.version>0.12.1</revapi-reporter-text.version>
+
         <revapi.skip>true</revapi.skip>
     </properties>
 
@@ -255,22 +260,22 @@
                 <plugin>
                     <groupId>org.revapi</groupId>
                     <artifactId>revapi-maven-plugin</artifactId>
-                    <version>0.12.0</version>
+                    <version>${revapi-maven-plugin.version}</version>
                     <dependencies>
                         <dependency>
                             <groupId>org.revapi</groupId>
                             <artifactId>revapi-java</artifactId>
-                            <version>0.22.1</version>
+                            <version>${revapi-java.version}</version>
                         </dependency>
                         <dependency>
                             <groupId>org.revapi</groupId>
                             <artifactId>revapi-reporter-json</artifactId>
-                            <version>0.2.1</version>
+                            <version>${revapi-reporter-json.version}</version>
                         </dependency>
                         <dependency>
                             <groupId>org.revapi</groupId>
                             <artifactId>revapi-reporter-text</artifactId>
-                            <version>0.12.1</version>
+                            <version>${revapi-reporter-text.version}</version>
                         </dependency>
                     </dependencies>
                     <executions>
