@@ -1,11 +1,6 @@
 package io.smallrye.mutiny.operators.multi.builders;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.reactivestreams.Subscription;
@@ -42,13 +37,13 @@ public class CollectionBasedMulti<T> extends AbstractMulti<T> {
         actual.onSubscribe(new CollectionSubscription<>(actual, collection));
     }
 
-    public static final class CollectionSubscription<T> implements Subscription {
+    private static final class CollectionSubscription<T> implements Subscription {
 
         private final MultiSubscriber<? super T> downstream;
         private final List<T> collection; // Immutable
         private int index;
 
-        AtomicBoolean cancelled = new AtomicBoolean();
+        private volatile boolean cancelled;
         AtomicLong requested = new AtomicLong();
 
         public CollectionSubscription(MultiSubscriber<? super T> downstream, Collection<T> collection) {
@@ -79,14 +74,14 @@ public class CollectionBasedMulti<T> extends AbstractMulti<T> {
             int emitted = 0;
 
             for (;;) {
-                if (cancelled.get()) {
+                if (cancelled) {
                     return;
                 }
 
                 while (current != size && emitted != n) {
                     downstream.onItem(items.get(current));
 
-                    if (cancelled.get()) {
+                    if (cancelled) {
                         return;
                     }
 
@@ -114,13 +109,13 @@ public class CollectionBasedMulti<T> extends AbstractMulti<T> {
 
         void produceWithoutBackPressure() {
             for (T item : collection) {
-                if (cancelled.get()) {
+                if (cancelled) {
                     return;
                 }
                 downstream.onItem(item);
             }
 
-            if (cancelled.get()) {
+            if (cancelled) {
                 return;
             }
             downstream.onCompletion();
@@ -128,7 +123,7 @@ public class CollectionBasedMulti<T> extends AbstractMulti<T> {
 
         @Override
         public void cancel() {
-            cancelled.set(true);
+            cancelled = true;
         }
     }
 

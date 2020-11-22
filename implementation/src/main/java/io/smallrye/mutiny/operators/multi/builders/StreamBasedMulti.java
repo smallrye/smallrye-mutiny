@@ -73,7 +73,7 @@ public class StreamBasedMulti<T> extends AbstractMulti<T> {
         private final AutoCloseable closeable;
         private final AtomicLong requested = new AtomicLong();
         private final MultiSubscriber<T> downstream;
-        volatile boolean cancelled;
+        private volatile boolean cancelled;
 
         StreamSubscription(MultiSubscriber<T> downstream, Iterator<? extends T> iterator, AutoCloseable closeable) {
             this.iterator = iterator;

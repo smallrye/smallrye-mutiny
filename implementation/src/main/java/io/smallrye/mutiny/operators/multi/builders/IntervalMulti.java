@@ -4,7 +4,6 @@ import java.time.Duration;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.reactivestreams.Subscription;
@@ -53,7 +52,7 @@ public class IntervalMulti extends AbstractMulti<Long> {
                         TimeUnit.MILLISECONDS);
             }
         } catch (RejectedExecutionException ree) {
-            if (!runnable.cancelled.get()) {
+            if (!runnable.cancelled) {
                 actual.onFailure(new RejectedExecutionException(ree));
             }
         }
@@ -62,7 +61,7 @@ public class IntervalMulti extends AbstractMulti<Long> {
     static final class IntervalRunnable implements Runnable, Subscription {
         private final MultiSubscriber<? super Long> actual;
         private final AtomicLong requested = new AtomicLong();
-        private final AtomicBoolean cancelled = new AtomicBoolean();
+        private volatile boolean cancelled;
 
         private final AtomicLong count = new AtomicLong();
 
@@ -72,7 +71,7 @@ public class IntervalMulti extends AbstractMulti<Long> {
 
         @Override
         public void run() {
-            if (!cancelled.get()) {
+            if (!cancelled) {
                 if (requested.get() != 0L) {
                     actual.onItem(count.getAndIncrement());
                     if (requested.get() != Long.MAX_VALUE) {
@@ -95,7 +94,7 @@ public class IntervalMulti extends AbstractMulti<Long> {
 
         @Override
         public void cancel() {
-            cancelled.set(true);
+            cancelled = true;
         }
     }
 }
