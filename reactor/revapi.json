@@ -1,0 +1,41 @@
+[
+  {
+    "extension": "revapi.java",
+    "id": "java",
+    "configuration": {
+      "missing-classes": {
+        "behavior": "report",
+        "ignoreMissingAnnotations": false
+      },
+      "filter": {
+        "packages": {
+          "regex": true,
+          "include": ["io\\.smallrye\\.mutiny\\..*"]
+        }
+      }
+    }
+  },
+
+  {
+    "extension": "revapi.differences",
+    "id": "breaking-changes",
+    "configuration": {
+      "criticality": "highlight",
+      "differences": [
+
+      ]
+    }
+  },
+
+  {
+    "extension": "revapi.reporter.json",
+    "configuration": {
+      "minSeverity": "POTENTIALLY_BREAKING",
+      "minCriticality": "documented",
+      "output": "target/compatibility.json",
+      "indent": true,
+      "append": false,
+      "keepEmptyFile": true
+    }
+  }
+]

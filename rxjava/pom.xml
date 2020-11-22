@@ -11,6 +11,9 @@
     <artifactId>mutiny-rxjava</artifactId>
     <name>SmallRye Mutiny integration with RxJava</name>
 
+    <properties>
+        <revapi.skip>false</revapi.skip>
+    </properties>
 
     <dependencies>
         <dependency>

@@ -56,6 +56,7 @@ if (nextMilestone != null) {
 }
 
 val issues = repository.getIssues(GHIssueState.CLOSED, milestone)
+
 val release = repository.createRelease(version)
         .name(version)
         .body(createReleaseDescription(issues))
@@ -73,15 +74,20 @@ fun GHIssue.markdown() : String {
 }
 
 fun createReleaseDescription(issues : List<GHIssue>) : String {
-    val desc = """### Major changes
-        |
-        |${issues.filter({ it.getLabels().find {it.getName() == "noteworthy-feature"} != null}).joinToString(separator="\n", transform={ "  * ${it.markdown()}" })}
-        |
-        |### Complete changelog
+    val file = File("target/differences.md")
+    var compatibility = ""
+    if (file.isFile) {
+        compatibility = file.readText(Charsets.UTF_8)
+    }
+    var desc = """### Changelog
         |
         |${issues.joinToString(separator="\n", transform={ "  * ${it.markdown()}" })}
         |
-        """.trimMargin("|");
+        |
+        """.trimMargin("|")
+
+    desc = desc.plus(compatibility).plus("\n")
+
     return desc
 }
 

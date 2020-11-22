@@ -33,7 +33,8 @@ jobs:
           curl -s "https://get.sdkman.io" | bash
           source ~/.sdkman/bin/sdkman-init.sh && \
             sdk install kotlin 1.3.61 && \
-            sdk install kscript 2.9.0
+            sdk install kscript 2.9.0 && \
+            sdk install jbang
 
           chmod +x .build/deploy.sh .build/decrypt-secrets.sh
 
