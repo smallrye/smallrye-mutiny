@@ -22,6 +22,7 @@ public class IterableBasedMulti<T> extends AbstractMulti<T> {
     public void subscribe(MultiSubscriber<? super T> downstream) {
         ParameterValidation.nonNullNpe(downstream, "subscriber");
         Iterator<? extends T> iterator;
+
         try {
             iterator = source.iterator();
         } catch (Throwable e) {
@@ -32,10 +33,10 @@ public class IterableBasedMulti<T> extends AbstractMulti<T> {
         subscribe(downstream, iterator);
     }
 
-    public static <T> void subscribe(MultiSubscriber<? super T> downstream, Iterator<? extends T> it) {
+    public static <T> void subscribe(MultiSubscriber<? super T> downstream, Iterator<? extends T> iterator) {
         boolean hasNext;
         try {
-            hasNext = it.hasNext();
+            hasNext = iterator.hasNext();
         } catch (Throwable e) {
             Subscriptions.fail(downstream, e);
             return;
@@ -45,17 +46,18 @@ public class IterableBasedMulti<T> extends AbstractMulti<T> {
             Subscriptions.complete(downstream);
             return;
         }
-        downstream.onSubscribe(new IteratorSubscription<T>(downstream, it));
+        downstream.onSubscribe(new IteratorSubscription<T>(downstream, iterator));
     }
 
-    abstract static class BaseRangeSubscription<T> implements Subscription {
-        protected final Iterator<? extends T> iterator;
-        protected final MultiSubscriber<? super T> downstream;
-        protected volatile boolean cancelled;
-        protected boolean once;
-        protected final AtomicLong requested = new AtomicLong();
+    private static final class IteratorSubscription<T> implements Subscription {
 
-        BaseRangeSubscription(MultiSubscriber<? super T> downstream, Iterator<? extends T> iterator) {
+        private final Iterator<? extends T> iterator;
+        private final MultiSubscriber<? super T> downstream;
+
+        private volatile boolean cancelled;
+        private final AtomicLong requested = new AtomicLong();
+
+        IteratorSubscription(MultiSubscriber<? super T> downstream, Iterator<? extends T> iterator) {
             this.downstream = downstream;
             this.iterator = iterator;
         }
@@ -80,19 +82,7 @@ public class IterableBasedMulti<T> extends AbstractMulti<T> {
             cancelled = true;
         }
 
-        abstract void fastPath();
-
-        abstract void slowPath(long r);
-    }
-
-    static final class IteratorSubscription<T> extends BaseRangeSubscription<T> {
-
-        IteratorSubscription(MultiSubscriber<? super T> actual, Iterator<? extends T> it) {
-            super(actual, it);
-        }
-
-        @Override
-        void fastPath() {
+        private void fastPath() {
             for (;;) {
                 if (cancelled) {
                     return;
@@ -140,8 +130,7 @@ public class IterableBasedMulti<T> extends AbstractMulti<T> {
             }
         }
 
-        @Override
-        void slowPath(long r) {
+        private void slowPath(long r) {
             long e = 0L;
             for (;;) {
 
