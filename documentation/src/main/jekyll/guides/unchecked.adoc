@@ -1,0 +1,40 @@
+:page-layout: guides
+:page-guide-id: unchecked
+:page-liquid:
+:page-show-toc: false
+:include_dir: ../../../../src/test/java/guides
+
+When implementing your reactive pipeline, you write lots of functions (`java.util.function.Function`), consumers (`java.util.function.Consumer`), suppliers (`java.util.function.Supplier`) and so on.
+By default, you cannot throw checked exceptions.
+
+When integrating libraries throwing checked exceptions (like `IOException`) it's not very convenient to add a `try/catch` block and wrap the thrown exception into a runtime exception:
+
+[source,java,indent=0]
+----
+include::{include_dir}/UncheckedTest.java[tag=rethrow]
+----
+
+Mutiny provides utilities to avoid having to do this manually.
+If your operation throws a _checked exception_, you can use the https://javadoc.io/doc/io.smallrye.reactive/mutiny/latest/io/smallrye/mutiny/unchecked/Unchecked.html[`io.smallrye.mutiny.unchecked.Unchecked`] wrappers.
+
+For example, if your synchronous transformation uses a method throwing a checked exception, wrap it using `Unchecked.function`:
+
+[source,java,indent=0]
+----
+include::{include_dir}/UncheckedTest.java[tag=transform]
+----
+
+You can also wrap consumers such as in:
+
+[source,java,indent=0]
+----
+include::{include_dir}/UncheckedTest.java[tag=invoke]
+----
+
+[TIP]
+.Static Import
+====
+You can add the following import statement to simplify the usage of the provided methods:
+
+`import static io.smallrye.mutiny.unchecked.Unchecked.*;`
+====

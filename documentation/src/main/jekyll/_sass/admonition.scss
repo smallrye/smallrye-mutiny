@@ -1,0 +1,66 @@
+.admonitionblock {
+    padding: 0.2em;
+    margin-bottom: 1em;
+    p {
+        font-size: .9375em;
+        line-height: 1.8em;
+        margin-bottom: .625rem;
+    }
+    strong {
+        display: block;
+        color: $font-color;
+        font-family: $font-highlight;
+        font-size: 1.133em;
+        font-weight: 500;
+        margin-bottom: .625rem;
+    }
+    .icon {
+        display: none;
+    }
+    .content .title {
+        display: block;
+        font-weight: 500;
+        color: $font-color;
+        font-family: $font-highlight;
+        font-size: 1em;
+        margin-bottom: .625rem;
+        text-decoration: none;
+        padding-left: 0;
+    }
+}
+
+.note {
+    background-color: #f2f8ff;
+    border: 1px solid #deedff;
+    border-radius: 5px;
+}
+
+.important {
+    background-color: #ffedeb;
+    border: 1px solid #ffdbd7;
+    border-radius: 5px;
+}
+
+.warning {
+    background-color: #fffae9;
+    border: 1px solid #ffeeb6;
+    border-radius: 5px;
+}
+
+.tip {
+    background-color: #eaffee;
+    border: 1px solid #cbffd5;
+    border-radius: 5px;
+}
+
+.admonitionblock>table td.content {
+    border-left: none;
+}
+
+.admonitionblock>table {
+    margin-bottom: initial;
+}
+
+.las {
+    font-size: larger;
+}

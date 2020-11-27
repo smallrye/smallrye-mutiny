@@ -562,3 +562,4 @@ Temporary Items
 
 # Cache folder
 **/.cache/
+**/.sass-cache/

@@ -1,0 +1,17 @@
+.container-footer {
+    height: 100%;
+    background: $footer-background-color;
+    padding: 3% 6%;
+
+}
+
+.footer {
+    background: $footer-background-color;
+    font-size: .875rem;
+    padding-top: 3rem;
+    padding-bottom: 4rem;
+    color: $footer-title-color;
+    .sep-right {
+        border-right: 1px solid $color-white;
+    }
+}

@@ -1,0 +1,24 @@
+@startuml
+
+skinparam dpi 300
+skinparam useBetaStyle true
+skinparam handwritten true
+skinparam StereotypeFontSize 0
+
+participant Multi.createFrom as m1 #D2B4DE
+participant onItem as m2 #FAE5D3
+participant onCompletion as m3 #FAE5D3
+participant "Subscriber" as subscriber #D2B4DE
+
+m1 --> m2 : item["hello"]
+m2 --> m3 : item["HELLO "]
+m3 --> subscriber: item["HELLO "]
+m1 --> m2 : item["world"]
+m2 --> m3 : item["WORLD "]
+m3 --> subscriber: item["WORLD "]
+m1 --> m2 : completion
+m2 --> m3 : completion
+m3 --> subscriber : item["!"]
+m3 --> subscriber : completion
+
+@enduml

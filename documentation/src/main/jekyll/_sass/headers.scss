@@ -1,0 +1,56 @@
+.header {
+    background-color: $navbar-background-color;
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+.mutiny {
+    letter-spacing: 1.9px;
+}
+
+.brand {
+    color: $navbar-link-color;
+    font-family: $font-logo;
+    font-weight: bold;
+    font-size: 2em;
+
+    text-decoration: none;
+    border-bottom: 0;
+
+    display: block;
+    padding: 0 0 0.2rem;
+    &:hover {
+        text-decoration: none;
+        color: $navbar-link-color;
+    }
+}
+
+.nav-item a {
+    padding: 0;
+    color: $navbar-link-color;
+    margin-right: 15px;
+    font-size: .875em;
+    font-weight: 500;
+    font-family: $font-highlight;
+    text-transform: uppercase;
+
+    transition: color .2s;
+    &:hover {
+        color: $navbar-link-hover-color;
+    }
+}
+
+.nav-link {
+    color: $navbar-link-color !important;
+    &:hover {
+        color: $navbar-link-hover-color !important;
+    }
+}
+
+.navbar-toggler-icon {
+    border-color: $color-white;
+}
+
+.getting-started-nav {
+    margin-right: 3rem;
+}

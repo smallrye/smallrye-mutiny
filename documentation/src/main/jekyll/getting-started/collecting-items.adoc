@@ -1,0 +1,91 @@
+:page-layout: getting-started
+:page-title: Collecting items from Multi
+:page-description: Learn how to collect items from a Multi
+:page-previous: Retrying on failure
+:page-previous-href: /getting-started/retry
+:page-next: Integrating other reactive libraries
+:page-next-href: /getting-started/converters
+:page-liquid: 
+
+== Collecting items
+
+There are cases where you want to accumulate the items from a `Multi` and produce a `Uni` as a final result.
+This is also called a _reduction_ in functional programming.
+
+The `Uni` fires its item when the `Multi` completes.
+Mutiny provides multiple operators to deal with that scenario.
+For example, you can store the items in a list, emit the list on completion, or use a Java `Collector` to customize the aggregation.
+
+IMPORTANT: Don't collect items from infinite streams or you will likely end with an out-of-memory failure!
+
+=== Collecting items into a list
+
+One of the most common approaches to collect items is to store them in a list (`Uni<List<T>>`)
+It emits the final list when the `Multi` completes.
+
+image::collect-as-list.png[Collecting items into a list, role="center"]
+
+How to achieve this with Mutiny?
+
+[source, java]
+----
+Multi<String> multi = ...;
+Uni<List<String>> uni = multi.collectItems().asList();
+----
+
+It's important to note that the returned type is a `Uni`.
+It emits the list when the multi completes.
+
+=== Collecting items into a map
+
+You can also collect the items into a `Map`.
+In this case, you need to provide a function to compute the key for each item:
+
+[source, java]
+----
+Multi<String> multi = ...;
+Uni<Map<String, String>> uni = 
+  multi.collectItems()
+    .asMap(item -> getKeyForItem(item))
+----
+
+If the key mapper function returns the same key for multiple items, the last one with that key is stored in the final `Map`.
+You can collect items in a _multimap_ to handle items with the same keys.
+
+=== Collecting items into a multimap
+
+A multimap is a `Map<K, List<T>>.` 
+In the case of a conflicting key, it stores all the items in a list associated with that key.
+
+[source, java]
+----
+Multi<String> multi = ...;
+Uni<Map<String, String>> uni = 
+  multi.collectItems()
+    .asMultiMap(item -> getKeyForItem(item));
+----
+
+=== Using a custom accumulator
+
+You can also use a custom _accumulator_ function:
+
+[source, java]
+----
+Multi<String> multi = ...;
+Uni<MyCollection> uni = multi.collectItems()
+  .in(MyCollection::new, (col, item) -> col.add(item));
+----
+
+The `in` method receives two arguments:
+
+1. a supplier providing the new instance of your collection/container
+2. the accumulator function
+
+You can also use a Java `Collector`.
+For example, in the next example, count the number of items, and produce the final count as item:
+
+[source, java]
+----
+Uni<Long> count = multi.collectItems()
+  .with(Collectors.counting());
+----

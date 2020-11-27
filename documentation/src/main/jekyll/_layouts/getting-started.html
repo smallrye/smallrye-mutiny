@@ -1,0 +1,57 @@
+--- 
+    layout: base 
+---
+
+<section class="hero gs">
+    <div class="hero-main container">
+        <div class="row">
+            <div class="hero-left col-12">
+                <div class="hero-slogan">
+                    <h1 class="hero-name">{{ page.title }}</h1>
+                </div>
+                <div class="hero-desc">
+                    {{ page.description}}
+                </div>
+                <div class="hero-buttons">
+                    {% if page.previous %}
+                    <a href="{{ page.previous-href | relative_url }}" class="getting-started-nav btn btn-rounded button button-dark button-rounded">
+                        <i class="las la-arrow-left left"></i>&nbsp;{{ page.previous }}</a>
+                    {% endif %} {% if page.next %}
+                    <a href="{{ page.next-href | relative_url }}" class="getting-started-nav btn btn-rounded button button-dark button-rounded">
+                {{ page.next }}&nbsp;<i class="las la-arrow-right"></i></a> {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="container page-content">
+    <div class="row">
+        <div class="col-md-9 content">
+            {{ content }}
+        </div>
+        <div class="col-md-3 col-md-offset-1 toc-container d-sm-none d-md-block">
+            <nav class="page-toc toc nav flex-column" id="toc">
+                {{ page.document | tocify_asciidoc }}
+            </nav>
+        </div>
+    </div>
+</div>
+
+
+
+<div class="footer-buttons gs ">
+    <div class="container ">
+        <div class="row ">
+            <div class="col-12 ">
+                {% if page.previous %}
+                <a href="{{ page.previous-href | relative_url }} " class="previous ">
+                    <i class="fas fa-arrow-left "></i>&nbsp;{{ page.previous }}</a>
+                {% endif %} {% if page.next %}
+                <a href="{{ page.next-href | relative_url }} " class="next ">
+    {{ page.next }}&nbsp;<i class="fas fa-arrow-right "></i></a> {% endif %}
+            </div>
+        </div>
+
+    </div>
+</div>

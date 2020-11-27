@@ -1,0 +1,53 @@
+--- 
+layout: base 
+---
+{% assign guide = site.data.guides[page.guide-id] %}
+
+<section class="hero gs">
+    <div class="hero-main container">
+        <div class="row">
+            <div class="hero-left col-12">
+                <div class="hero-slogan">
+                    <h1 class="hero-name">{{ guide.title }}</h1>
+                </div>
+                <div class="hero-desc">
+                    {{ guide.text}}
+                </div>
+                <!-- TODO Labels -->
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="container page-content">
+    <div class="row">
+        <div class="col-md-9 content">
+            {{ content }}
+        </div>
+        <div class="col-md-3 col-md-offset-1 toc-container d-sm-none d-md-block">
+            <nav class="page-toc toc nav flex-column" id="toc">
+                {% if page.show-toc != false %}
+                <h4>Table of Content</h4>
+                {{ page.document | tocify_asciidoc }}
+                {% endif %}
+
+                <h4>Related content</h4>
+                <ul>
+                    {% for g in guide.related %}
+                    <li>
+                        {% if g.guide %}
+                        <a href="{{ site.baseurl }}/guides/{{ g.guide }}">{{ site.data.guides[g.guide].title }}</a>
+                        {% endif %}
+                        {% if g.url %}
+                        <a href="{{ g.url }}">{{ g.text }}</a>
+                        {% endif %}
+                    </li>
+                    {% endfor %}
+                </ul>
+            </nav>
+
+
+        </div>
+    </div>
+</div>
+

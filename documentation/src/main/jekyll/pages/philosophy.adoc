@@ -1,0 +1,278 @@
+== Concepts & Philosophy
+
+Mutiny is a novel reactive programming library.
+
+It provides a simple but powerful asynchronous development model that lets you build reactive applications.
+
+Mutiny can be used in any Java application exhibiting asynchrony.
+From reactive microservices, data streaming, event processing to API gateways and network utilities, Mutiny is a great fit.
+
+=== Why is asynchronous important? 
+
+We are living in a distributed world. 
+
+Most of the applications built nowadays are distributed systems. 
+The Cloud, IoT, microservices, mobile application, even simple CRUD applications are distributed applications.
+
+Still, developing distributed systems is hard!
+
+.Distributed systems are asynchronous
+image::distributed-system-blueprint.png[role="left"]
+
+Communications in distributed systems are inherently asynchronous and unreliable.
+Anything can go wrong, anytime, and often with no prior notice.
+
+Network disruptions, unavailable services, software, or hardware failures are just a tiny subset of the wide variety of failures that can happen in distributed systems. 
+
+_Correctly_ building distributed applications is a considerable challenge, as it requires re-assessing almost everything we know from traditional software development.
+
+Most classic applications use a synchronous development model.
+Synchronous code is easy to reason about, more comfortable to write and read than asynchronous code, but it has some hidden cost.
+This cost emerges when building I/O intensive applications, quite common in distributed applications.
+
+In general, these traditional applications assign one thread per request, and so they handle multiple concurrent requests with multiple threads. 
+When the request processing needs to interact over the network, it uses that _worker_ thread, which blocks the thread until the response has been received.
+This response may never come, so you need to add watchdogs handling timeouts and other resilience patterns.
+And, to handle more requests concurrently, you need to create more threads.
+
+Threads come at a cost.
+Each thread requires memory, and the more threads you have, the more CPU cycles are used to handle the context switches. 
+Thus, this model ends up being costly, limits the deployment density, and on the Cloud means that you pay bigger bills.
+
+Fortunately, there is another way, and it relies on non-blocking I/O, an efficient way to handle I/O interactions that do not require additional threads. 
+While applications using non-blocking I/O are more efficient and better suited for the Cloud's distributed nature, they come with a considerable constraint: you must never block the I/O thread.   
+Thus, you need to implement your business logic using an asynchronous development model.
+
+I/O is not the only reason why asynchronous is essential in Today's systems. 
+Most of the interactions in the real world are asynchronous and event-driven. 
+Representing these interactions using synchronous processes is not only wrong; it also introduces fragility in your application. 
+
+Asynchronous is a significant shift. 
+Mutiny helps you to take the plunge.
+
+=== What's Reactive Programming?
+
+Mutiny is a reactive programming library.
+If you look on Wikipedia for reactive programming, you will find the following definition:
+
+[quote]
+Reactive Programming combines functional programming, the observer pattern, and the iterable pattern.
+
+While correct, we never found this definition very helpful.
+It does not convey clearly what's reactive programming is all about.
+So, let's make another definition, much more straightforward:
+
+[quote]
+Reactive programming is about programming with data streams.
+
+That's it.
+Reactive programming is about streams and especially, observing them.
+It pushes that idea to its limit: with reactive programming, everything is a data stream.
+
+With reactive programming, you observe streams and implement side-effects when _something_ flows in the stream:
+
+.Reactive programming is about observing streams
+image::streams.png[role="center"]
+
+It's asynchronous by nature as you don't know when the _data_ is going to be seen.
+Yet, reactive programming goes beyond this.
+It provides a toolbox to compose streams and process events.
+
+=== What makes Mutiny different?
+
+There are other reactive programming libraries out there. 
+In the Java world,  we can mention Project Reactor and Rx Java. 
+
+So, what makes Mutiny different from these two well-known libraries? 
+**The API!**
+
+As said above, asynchronous is hard to grasp for most developers, and for good reasons.
+Thus, the API must not require advanced knowledge or add cognitive overload.
+It should help you design your logic and still be intelligible in 6 months.
+
+To achieve this, Mutiny is built on three pillars:
+
+* **Event-Driven** - with Mutiny, you listen for _events_ and handle them,
+* **API Navigability** - based on the event-driven nature, the API is built around the type of events and drive the navigation based on the kind of event you want to handle,
+* **Simplicity** - Mutiny provides only two types (`Multi` and `Uni`), which can handle any kind of asynchronous interactions.
+
+=== Events?
+
+When you use Mutiny, you design a pipeline in which the events flow.
+Your code observes these events and react. 
+
+Each processing stage is a new pipe you append to the pipeline.
+This pipe may change the events, create new ones, drops, buffers, whatever you need. 
+
+In general, events flow from upstream to downstream, from source to sinks. 
+Some events can _swim_ upstream from the sinks to the source.
+
+Events going from upstream to downstream are published by `Publishers` and consumed by (downstream) `Subscribers,` which may also produce events for their own downstream, as illustrated by the following diagram:
+
+[plantuml,align=center]
+----
+include::plantuml/philosophy-chain.puml[]
+----
+
+Four types of events can flow in this direction:
+
+* **Subscribed** - indicate that the upstream has taken into account the subscription - more on this later,
+* **Items** - events containing some (business) _value_,
+* **Completion** - event indicating that the source won't emit any more items,
+* **Failure** - event telling that something terrible happened upstream and that the source cannot continue to emit items.
+
+`Failure` and `Completion` are terminal events.
+Once they are sent, no more items will flow.
+
+Three types of events flow in the opposite direction, _i.e._ from downstream to upstream:
+
+* **Subscription** - event sent by a _subscriber_ to indicate its interest for the events (such as items) emitted by upstream
+* **Requests** - event sent by a _subscriber_ indicating how many items event it can handle - this is related to back-pressure
+* **Cancellation** - event sent by a _subscriber_ to stop the reception of events.
+
+In a typical scenario, a subscriber:
+
+1. A subscriber _subscribes_ to the upstream - the upstream receive the subscription `subscription request`, and when initialized sends the `subscribed` event to the subscriber
+2. The subscriber gets the `subscribed` event with a _subscription_ used to emit the `requests` and `cancellation` events
+3. The subscriber sends a `request` event indicating how many items it can handle at this moment; it can request 1, _n_, or infinite.
+4. The publisher receiving the `request` event start emitting at most _n_ item events to the subscriber
+5. The subscriber can decide at any time to request more events or to cancel the subscription
+
+[plantuml,align=center]
+----
+include::plantuml/philosophy-protocol.puml[]
+----
+
+The `request` event is the cornerstone of the back-pressure protocol.
+A subscriber should not request more than what it can handle, and a publisher should not emit more items than the amount of request received.
+
+[NOTE]
+.Reactive Streams
+====
+Mutiny's back-pressure is based on Reactive Streams.
+====
+
+[IMPORTANT]
+.Don't forget to subscribe
+====
+If no subscriber _subscribes_, no items would be emitted.
+More importantly, nothing will ever happen.
+If your program does not do anything, check that it subscribes, it's a very common error.
+====
+
+=== An event-driven API?
+
+Mutiny is an event-driven API.
+
+For each type of event, there is an `on` associated method that lets you handle this specific event.
+For example:
+
+.The various types of events
+[source,java,indent=0]
+----
+include::{sourcedir}/EventsTest.java[tags=code]
+----
+
+Of course, the methods presented in this snippet are not very interesting, although they are quite useful to trace what's going on.
+
+You can see a common pattern emerging:
+```
+onEvent().invoke(event -> ...)
+```
+
+`invoke` is just one of the methods available. 
+Each _group_ proposes methods specific to the type of event. For example, `onFailure().recover`, `onCompletion().continueWith` and so on.
+
+=== Uni and Multi
+
+Mutiny defines two _reactive_ types:
+
+* `Multi` - represent streams of _0..*_ items (potentially unbounded)
+* `Uni` - represent streams receiving either an item or a failure
+
+TIP: The Mutiny name comes from the contraction of `Multi` and `Uni` names
+
+Both `Uni` and `Multi` are asynchronous types.
+They receive and fire events at any time.
+
+You may wonder why we make the distinction between `Uni` and `Multi.`
+Conceptually, a `Uni` is a `Multi,` right? 
+
+In practice, you don't use `Unis` and `Multis` the same way. 
+The use case and operations are different.
+
+* `Uni` does not need the complete ceremony presented above as the _request_ does not make sense.
+* The `subscribe` event expresses the interest and triggers the computation, no need for an additional _request_.
+* `Uni` can handle items having a `null` items (and has specific methods to handle this case).
+* `Multi` does not allow it (because the Reactive Streams specification forbids it).
+* Having a `Uni` implementing `Publisher` would be a bit like having `Optional` implementing `Iterable`.
+
+In other words, `Uni`:
+
+* can receive at most 1 `item` event, or a `failure` event
+* cannot receive a `completion` event (`null` in the case of 0 items)
+* cannot receive a `request` event
+
+The following snippet shows how you can use `Uni` and `Multi`:
+
+.Usage of Uni and Multi
+[source,java,indent=0]
+----
+include::{sourcedir}/UniMultiComparisonTest.java[tags=code]
+----
+
+// You can convert `Unis` to `Multis` and vice-versa:
+
+// [source,java,indent=0]
+// ----
+// include::{sourcedir}/UniMultiComparisonTest.java[tags=conversion]
+// ----
+
+// == Creating and Subscribing to Unis
+
+// There are many ways to create instances of `Unis`:
+
+// .Creating Unis
+// [source,java,indent=0]
+// ----
+// include::{sourcedir}/UniCreationTest.java[tags=code]
+// ----
+
+// Subscribing to `Unis` is done by method provided by `uni.subscribe()`:
+
+// .Subscribing to Unis
+// [source,java,indent=0]
+// ----
+// include::{sourcedir}/UniCreationTest.java[tags=subscription]
+// ----
+
+// == Creating and Subscribing to Multis
+
+// There are many ways to create instances of `Multis`:
+
+// .Creating Multis
+// [source,java,indent=0]
+// ----
+// include::{sourcedir}/MultiCreationTest.java[tags=code]
+// ----
+
+// Subscribing to `Multis` is done by method provided by `multi.subscribe()`:
+
+// .Subscribing to Multis
+// [source,java,indent=0]
+// ----
+// include::{sourcedir}/MultiCreationTest.java[tags=subscription]
+// ----
+
+// == Structuring the pipeline
+
+// It can be hard to structure your sequence of processing in a readable manner.
+// Mutiny provides the `stage` function to structure your pipeline:
+
+// .Structuring your pipeline with `stage`
+// [source,java,indent=0]
+// ----
+// include::{sourcedir}/StageTest.java[tags=code]
+// ----
+
+// `stage` can be used on `Multi` and `Uni` and let you group operations in a logical set.

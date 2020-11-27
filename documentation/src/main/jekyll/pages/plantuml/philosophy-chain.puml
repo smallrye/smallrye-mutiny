@@ -1,0 +1,23 @@
+@startuml
+
+skinparam dpi 200
+skinparam useBetaStyle true
+skinparam handwritten true
+skinparam StereotypeFontSize 0
+
+participant Source as m1 <<Publisher>> #D2B4DE
+participant "Processor A" as m2 <<Publisher, Subscriber>> #FAE5D3
+participant "Processor B" as m3 <<Publisher, Subscriber>> #FAE5D3
+participant "Sink" as subscriber <<Subscriber>>  #D2B4DE
+
+m1 --> m2 : item[...]
+m2 --> m3 : item[...]
+m3 --> subscriber: item[...]
+m1 --> m2 : item[...]
+m2 --> m3 : item[...]
+m3 --> subscriber: item[...]
+m1 --> m2 : completion
+m2 --> m3 : completion
+m3 --> subscriber : completion
+
+@enduml

@@ -1,0 +1,19 @@
+@startuml
+
+skinparam dpi 200
+skinparam useBetaStyle true
+skinparam handwritten true
+skinparam StereotypeFontSize 0
+
+participant Upstream as pub #D2B4DE
+participant "Disjoint" as proc #FAE5D3
+participant Downstream as sub  #D2B4DE
+
+pub -> proc: item:[a, b, c]
+proc -> sub: item:a
+proc -> sub: item:b
+proc -> sub: item:c
+pub -> proc: item:[d, e]
+proc -> sub: item:d
+proc -> sub: item:e
+@enduml

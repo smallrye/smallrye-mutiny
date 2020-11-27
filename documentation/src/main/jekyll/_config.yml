@@ -1,0 +1,66 @@
+title: SmallRye Mutiny
+description: >-
+  SmallRye Mutiny!
+
+google_analytics: TODO
+
+host: 127.0.0.1
+port: 4000
+baseurl: /mutiny-doc-sandbox
+
+destination: ../../../target/_site
+
+exclude:
+  - vendor
+  - scripts
+  - gemfile
+  - Gemfile.lock
+
+
+sass:
+  style: compressed  
+  sass_dir: _sass
+
+
+error_mode: strict
+highlighter: rouge
+markdown: kramdown
+kramdown:
+ input: GFM
+ auto_ids: true
+ hard_wrap: false
+ syntax_highlighter: rouge
+
+asciidoctor:
+  base_dir: :docdir
+  safe: unsafe
+  attributes:
+    imagesoutdir: assets/images
+    imagesdir: /mutiny-doc-sandbox/assets/images
+    source-highlighter: highlightjs
+    sectanchors: ''
+    icons: font
+    outfilesuffix: '' 
+    sourcedir: test/java/snippets
+    snippetdir:
+
+
+
+collections:
+  tooltips:
+    output: false
+
+defaults:
+  -
+    scope:
+      path: ""
+      type: "pages"
+    values:
+      layout: "page"
+      comments: true
+      search: true
+      sidebar: home_sidebar
+      topnav: topnav
+
+
+github: [metadata]

@@ -1,0 +1,36 @@
+:page-layout: guides
+:page-guide-id: filter
+:page-liquid:
+:page-show-toc: false
+:include_dir: ../../../../src/test/java/guides/operators
+
+When observing a `Multi`, you may want to not forward all the received items to your downstream.
+To _filter_ or _select_ items, you can use `multi.transform().byFilteringItemsWith(predicate)`:
+
+[source,java,indent=0]
+----
+include::{include_dir}/FilterTest.java[tag=filter]
+----
+
+`byFilteringItemsWith` accepts a predicate called for each item.
+If the predicate returns `true`, the item propagated downstream.
+Otherwise, it drops the item.
+
+The predicated passed to `byFilteringItemsWith` is synchronous.
+The `byTestingItemsWith` method provides an asynchronous version:
+
+[source,java,indent=0]
+----
+include::{include_dir}/FilterTest.java[tag=test]
+----
+
+`byFilteringItemsWith` accepts a function called for each item.
+Unlike `byFilteringItemsWith` where the predicate returns a boolean synchronously, the function returns a `Uni<Boolean>`.
+It forwards the item downstream if the `uni` produced by the function emits `true`.
+Otherwise, it drops the item.
+//
+//
+//
+//include::../../../src/test/java/snippets/HowToFilterTest.java[tags=take]
+//
+//include::../../../src/test/java/snippets/HowToFilterTest.java[tags=skip]

@@ -1,0 +1,51 @@
+.hero {
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+  background: $color-primary;
+  -webkit-clip-path: polygon(0 0,100% 0,100% calc(100% - 2vw),0 100%);
+  clip-path: polygon(0 0,100% 0,100% calc(100% - 2vw),0 100%);
+
+  .hljs {
+    background: $code-background-main;
+    color: #f8f8f2;
+    border-radius: 5px;
+  }
+}
+
+.hero-main {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.hero-slogan {
+  font-size: 2.8rem;
+  line-height: 0.8;
+}
+
+.hero-name {
+  font-family: $font-logo;
+  color: $color-white;
+}
+
+.hero-description {
+  font-family: $font-highlight;
+  font-size: xx-large;
+  color: $color-white;
+
+}
+
+.hero-buttons {
+  margin-top: 2.2rem;
+}
+
+.hero-code {
+  box-shadow: 5px 5px 5px 0 rgba(0, 0, 0, 0.2);
+  border-radius: .8rem;
+}
+
+.hero-desc {
+  color: $color-white;
+  font-size: x-large;
+}

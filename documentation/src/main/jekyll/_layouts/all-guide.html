@@ -1,0 +1,32 @@
+---
+layout: base
+---
+<!--{% assign guides = site.data.guides %}-->
+{% assign categories = site.data.categories %}
+<div class="guides">
+    {% for category in categories %}
+    <div class="container">
+        <h2>{{ category.name }}</h2>
+        <div class="row">
+            {% for guide in  category.guides %}
+            {% assign actual = site.data.guides[guide] %}
+            <div class="col-md-4">
+                <div class="card mb-4 shadow-sm guide">
+                    <div class="card-body">
+                        <h3><a href="{{ site.baseurl }}/guides/{{ guide }}">{{ actual.title }}</a></h3>
+                        <p class="card-text">{{ actual.text }}</p>
+                        <p>
+                        {% for label in actual.labels %}
+                            <span class="badge badge-light">{{ label }}</span>
+                        {% endfor %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+

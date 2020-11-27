@@ -1,0 +1,128 @@
+:page-layout: getting-started
+:page-title: Transforming items into Uni and Multi
+:page-description: Learn how to transform received item into asynchronous streams
+:page-previous: Transforming items
+:page-previous-href: /getting-started/transforming-items
+:page-next: Merging and Concatenating streams
+:page-next-href: /getting-started/merge-concat
+:page-liquid: 
+
+== Transforming items into streams
+
+The previous examples illustrated how to transform each item from a stream into another item. 
+Yet, there are cases where we need to go beyond this, for example:
+
+* Transforming an item into a `Uni` - any asynchronous processing such as calling a remote service, interacting with a database, etc
+* Transforming an item into a `Multi` - producing a multi-items stream based on the incoming item, filtering out items, etc
+
+Having the possibility to transform an item into a stream gives us many opportunities. 
+To implement such transformations, we use `onItem().transformToUni(Funcction<T, Uni<O>>` and `onItem().transformToMulti(Function<T, Multi<O>>)`
+
+image::transform-to-uni.png[Transforming items into Uni, role="center"]
+
+=== Uni - Transforming an item into a Uni
+
+Imagine you have a `Uni<String>`, and you want to call a remote service.
+
+Calling a remote service is an asynchronous action represented by a `Uni`, as in:
+
+[source, java, indent=0]
+----
+Uni<String> invokeRemoteGreetingService(String name);
+----
+
+To call this service, you need to transform the item received from the first `Uni` into the `Uni` returned by the service:
+
+[source, java, indent=0]
+----
+Uni<String> result = uni
+  .onItem().transformToUni(name -> invokeRemoteGreetingService(name));
+----
+
+This snippet _chains_ the first `Uni` with another one. 
+The returned `Uni` (`result`) emits the result from the remote service or a failure if anything wrong happened:
+
+[source, java, indent=0]
+----
+Uni<String> uni = Uni.createFrom().item("Cameron");
+Uni<String> result = uni
+  .onItem().transformToUni(name -> invokeRemoteGreetingService(name))
+  .subscribe().with(
+    item -> System.out.println(item) // Print "Hello Cameron",
+    fail -> fail.printStackTrace()); // Print the failure stack trace
+----
+
+=== Uni - Transforming an item into a Multi
+
+The previous example produced a single item.
+You may want to transform the received item into a stream which is... a `Multi`!
+
+[source, java, indent=0]
+----
+Uni<String> result = uni
+  .onItem().transformToMulti(item -> Multi.createFrom().items(item, item));
+----
+
+This code creates a stream of two elements, duplicating the received item. 
+
+[source, java, indent=0]
+----
+Uni<String> uni = Uni.createFrom().item("Cameron");
+Uni<String> result = uni
+  .onItem().transformToMulti(item -> Multi.createFrom().items(item, item))
+  .subscribe().with(
+    item -> System.out.println(item)); // Called twice   
+----
+
+image::uni-transform-to-multi.png[Transforming item into a Multi, role="center"]
+
+The produced `Multi` objects can of course be more complicated that that and emit items in an asynchronous fashion.
+
+=== Transforming items from Multi - the _merge_ vs _concatenate_ dilemma
+
+When transforming items emitted by an upstream `Multi,` we need to answer the following question: how are we going to _merge_ the produced items back?
+
+Let's take an example.
+Imagine a `Multi` emitting the `Cameron` and `Donna` items (in order), and you want to call the `invokeRemoteGreetingService` from above.
+It thus calls `invokeRemoteGreetingService("Cameron")` then `invokeRemoteGreetingService("Donna")`.
+
+The service does not have a constant response time (because of network latency or the load), which means that responses can be interleaved. 
+Indeed, you may receive `"Hello Donna"` before `"Hello Cameron"`.
+
+Now, how do you want to handle this case?
+Do you need to preserve the order and ensure that the downstream subscriber will always get `"Hello Cameron"` first, or do you accept interleaved responses?
+
+When transforming items from `Multi` into streams, you need to decide in which order the items emitted by the produced stream are going to be received by the downstream subscriber.
+Mutiny offers two possibilities:
+
+* _merge_ - it does not preserve the order and emits the items from the produced streams as they come,
+* _concatenate_ - it maintains and concatenates the streams produced for each item.
+
+=== Multi - Transforming an item into a Uni
+
+To implement the scenario from the last section, you will use `onItem().transformToUniAndMerge` or `onItem().transformToUniAndConcatenate()` depending on your ordering choice:
+
+[source, java, indent=0]
+----
+Multi<String> m = multi
+  .onItem().transformToUniAndMerge(name -> invokeRemoteGreetingService(name));
+
+Multi<String> m = multi
+  .onItem().transformToUniAndConcatenate(name -> invokeRemoteGreetingService(name));    
+----
+
+=== Multi - Transforming an item into a Multi
+
+`onItem().transformToMultiAndMerge` and `onItem().transformToMultiAndConcatenate` transform incoming items into `Multi` streams.
+The produced `Multi` objects are either _merged_ or _concatenated_:
+
+[source, java, indent=0]
+----
+Multi<String> m = multi
+  .onItem().transformToMultiAndMerge(item -> functionProducingAMulti(item));
+
+Multi<String> m = multi
+  .onItem().transformToUniAndConcatenate(item -> functionProducingAMulti(item));    
+----
+
+The next page gives more details about merge and concatenation.

@@ -1,0 +1,69 @@
+// Site global variables.
+
+$dark-value: 10%;
+$darker-value: 35%;
+$darkest-value: 60%;
+$light-value: 15%;
+$lighter-value: 30%;
+$lightest-value: 50%;
+
+$color-primary: #00a4b8;
+$color-primary-dark: darken($color-primary, $dark-value);
+$color-primary-darker: darken($color-primary, $darker-value);
+$color-primary-darkest: darken($color-primary, $darkest-value);
+$color-primary-light: lighten($color-primary, $light-value);
+$color-primary-lighter: lighten($color-primary, $lighter-value);
+$color-primary-lightest: lighten($color-primary, $lightest-value);
+
+
+$color-secondary: #ebedf0;
+$color-secondary-dark: darken($color-secondary, $dark-value);
+$color-secondary-darker: darken($color-secondary, $darker-value);
+$color-secondary-darkest: darken($color-secondary, $darkest-value);
+$color-secondary-light: lighten($color-secondary, $light-value);
+$color-secondary-lighter: lighten($color-secondary, $lighter-value);
+$color-secondary-lightest: lighten($color-secondary, $lightest-value);
+
+$color-white: #fff;
+$color-black: #000;
+$color-gray-0: $color-white;
+$color-gray-100: #f5f6f7;
+$color-gray-200: #ebedf0;
+$color-gray-300: #dadde1;
+$color-gray-400: #ccd0d5;
+$color-gray-500: #bec3c9;
+$color-gray-600: #8d949e;
+$color-gray-700: #606770;
+$color-gray-800: #444950;
+$color-gray-900: #1c1e21;
+$color-gray-1000: $color-black;
+
+$navbar-link-color: $color-white;
+$navbar-link-hover-color: darken($navbar-link-color, $dark-value);
+$navbar-background-color: $color-primary;
+
+$link-color: $color-primary;
+$link-color-hover: $color-primary;
+
+$font-color: #333;
+$font-code-color: #C0341D;
+$font-highlight: "Red Hat Display", sans-serif;
+$font-code: "Fira Code", monospace;
+$font-text: "Red Hat Text", sans-serif;
+$font-logo: 'Bangers', cursive;
+
+$footer-background-color: #303846;
+$footer-link-color: $color-gray-200;
+$footer-link-color: $color-secondary;
+$footer-title-color: $color-white;
+
+$button-background-color: $color-secondary;
+$button-background-color-hover: $color-secondary-dark;
+$button-border-color: $color-secondary-dark;
+$button-text-color: $color-primary;
+$button-text-color-hover: #303846;
+
+$code-background-main: linear-gradient(90deg,#2d3f50 17.71%,#000 65%);
+$code-background-dark: #2d3f50;
+
+$border-color: $color-primary;

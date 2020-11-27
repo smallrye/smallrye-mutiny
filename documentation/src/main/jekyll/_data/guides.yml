@@ -1,0 +1,46 @@
+reactive-to-imperative:
+  title: From reactive to imperative
+  text: Learn how to block until you get items.
+  labels:
+    - advanced
+  related:
+    - url: some-javadoc-url
+      text: The Uni Await group
+    - guide: imperative-to-reactive
+
+imperative-to-reactive:
+  title: Imperative to Reactive
+  text: Learn how to integrate blocking code.
+  labels:
+    - advanced
+  related:
+    - guide: reactive-to-imperative
+
+unchecked:
+  title: Dealing with checked exceptions
+  text: Learn how to handle <em>checked</em> exceptions
+  labels:
+    - intermediate
+  related:
+    - url: https://javadoc.io/doc/io.smallrye.reactive/mutiny/latest/io/smallrye/mutiny/unchecked/Unchecked.html
+      text: Unchecked Javadoc
+
+filter:
+  title: Filtering items from multi
+  text: Learn how to filter and select items from a multi
+  labels:
+    - beginner
+  related:
+    - guide: take-skip
+    - url: https://javadoc.io/doc/io.smallrye.reactive/mutiny/latest/io/smallrye/mutiny/groups/MultiTransform.html
+      text: <tt>MultiTransform</tt>
+
+take-skip:
+  title: Take or Skip the first or last items
+  text: Learn how to select or skip only the first or last items from a multi
+  labels:
+    - beginner
+  related:
+    - guide: filter
+    - url: https://javadoc.io/doc/io.smallrye.reactive/mutiny/latest/io/smallrye/mutiny/groups/MultiTransform.html
+      text: <tt>MultiTransform</tt>

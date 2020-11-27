@@ -1,0 +1,113 @@
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: $font-text;
+    color: $font-color;
+    background-color: $color-white;
+
+    line-height: 1.8;
+    font-size: 1.1em;
+}
+
+
+.global-container {
+    margin: 0;
+    padding: 0;
+}
+
+.characteristics {
+    background: $color-white;
+    padding-top: 3rem;
+    padding-bottom: 3rem;
+    .characteristic-item {
+        text-align: justify;
+        h5 {
+            margin-top: .8rem;
+            margin-bottom: 1.2rem;
+            display: block;
+            text-align: center;
+            font-family: $font-highlight;
+            font-size: large;
+            font-weight: bold;
+        }
+    }
+    .characteristic-item-icon {
+        text-align: center;
+        display: block;
+        font-size: xx-large;
+        color: $code-background-dark;
+        max-height: 73px;
+    }
+    .characteristic-quarkus-logo {
+        margin-top: 1rem;
+        margin-bottom: 1.2rem;
+        max-width: 40px;        
+    }
+}
+
+.code-404 {
+    margin-top: 3rem;
+    margin-bottom: 3rem;
+}
+
+.imageblock.left {
+    float: left;
+    max-width: 50%;
+}
+
+.gs {
+    .hero-name {
+        font-family: $font-highlight;
+    }
+}
+
+.footer-buttons {
+    margin-top: 1rem;
+    color: $color-white;
+    background-color: $color-primary;
+    a {
+        font-size: x-large;
+        border-bottom: 0;
+        padding: 0;
+        color: $color-white;
+        display: block;
+        text-align: center;
+        font-weight: 500;
+        font-family: $font-highlight;
+        text-decoration: none;
+    }
+    a.previous {
+        float: left;
+        &:hover {
+            color: $button-text-color-hover;
+        }
+    }
+    a.next {
+        float: right;
+        &:hover {
+            color: $button-text-color-hover;
+        }
+    }
+}
+
+.toc {
+    position: sticky;
+    top: 2rem;
+    height: calc(100vh - 2rem);
+    overflow-y: auto;
+}
+
+.toc-container {
+    width: 100%;
+    display: block;
+    margin-top: 10px;
+}
+
+.page-content .page-toc ul.sectlevel2 li.active {
+    font-weight: bolder;
+    border-left-width: 5px;
+    border-left-color: $color-gray-700;
+}

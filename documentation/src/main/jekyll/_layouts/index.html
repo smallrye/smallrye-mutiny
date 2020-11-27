@@ -1,0 +1,91 @@
+--- 
+    layout: base 
+---
+
+<section class="hero">
+    <div class="hero-main container">
+        <div class="row">
+            <div class="hero-left col-lg-6">
+                <div class="hero-slogan">
+                    <h1 class="hero-name mutiny">SmallRye Mutiny!&nbsp;</h1>
+                    <span class="hero-description">Intuitive Event-Driven Reactive Programming Library for Java</span>
+                </div>
+                <div class="hero-buttons">
+                    <a href="{{ '/getting-started/getting-started' | relative_url }}" class="btn btn-rounded button button-dark button-rounded">
+                Let's get started&nbsp;<i class="las la-arrow-right"></i></a>
+                </div>
+            </div>
+            <div class="hero-right col-lg-6">
+                <div class="hero-code">
+                    <div class="code-examples">
+                        <pre><code class="hljs java">
+Uni&lt;String&gt; request = (...)
+
+Uni&lt;String&gt; uni = request
+    .ifNoItem().after(ofSecond(1))
+        .fail(() -> new Exception("💥"))
+    .onFailure().recoverWithItem(fail -> "📦")
+    .subscribe()
+        .with(item -> log("👍 " + item))
+                    </code></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="characteristics">
+    <div class="characteristics-main container">
+        <div class="row">
+            <div class="characteristic-item col-lg-4">
+                <span class="characteristic-item-icon"><i class="las la-bolt la-2x"></i></span>
+                <h5>Event-Driven</h5>
+                <p>
+                    Mutiny places <em>events</em> at the core of its design. With Mutiny, you observe <em>events</em>, <em>react</em> to them, and create elegant and readable processing pipelines. A PhD in functional programming is not required.
+                </p>
+            </div>
+
+            <div class="characteristic-item col-lg-4">
+                <span class="characteristic-item-icon"><i class="las la-route la-2x"></i></span>
+                <h5>Navigable</h5>
+                <p>
+                    Even with smart code completion classes with hundred of methods are confusing. Mutiny provides a navigable and explicit API driving you towards the operator you need.
+                </p>
+            </div>
+
+            <div class="characteristic-item col-lg-4">
+                <span class="characteristic-item-icon"><i class="las la-cogs la-2x"></i></span>
+                <h5>Non-Blocking I/O</h5>
+                <p>
+                    Mutiny is the perfect companion to tame the asynchronous nature of applications with non-blocking I/O. Declaratively compose operations, transform data, enforce progress, recover from failures and more.
+                </p>
+            </div>
+        </div>
+        <div class="row">
+            <div class="characteristic-item col-lg-4">
+                <span class="characteristic-item-icon"><img class="characteristic-quarkus-logo" src="{{ '/assets/images/quarkus.png' | relative_url }}"/></span>
+                <h5>Not exclusive to Quarkus!</h5>
+                <p>
+                    Mutiny is integrated in Quarkus where every reactive API uses Mutiny. Mutiny is however an independent library that is not limited to Quarkus and that can be used in any Java application. A good example are the Eclipse Vert.x Mutiny API bindings.
+                </p>
+            </div>
+
+            <div class="characteristic-item col-lg-4">
+                <span class="characteristic-item-icon"><i class="las la-envelope-open la-2x"></i></span>
+                <h5>Made for an asynchronous world</h5>
+                <p>
+                    Mutiny can be used in any asynchronous application such as event-driven microservices, message-based applications, network utilities, data stream processing, and, of course, reactive applications.
+                </p>
+            </div>
+
+            <div class="characteristic-item col-lg-4">
+                <span class="characteristic-item-icon"><i class="las la-sync-alt la-2x"></i></span>
+                <h5>Reactive Converters Built-In</h5>
+                <p>
+                    Mutiny is based on the <em>Reactive Streams</em> specification, and so it can be integrated with any other reactive programming library. In addition, it proposes <em>converters</em> to interact with other popular libraries.
+                </p>
+            </div>
+        </div>
+    </div>
+</section>

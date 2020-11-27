@@ -1,0 +1,45 @@
+.page-content {
+    .page-toc {
+        ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+        ul li {
+            padding: 0;
+            padding-bottom: .625rem;
+            padding-left: 1.875rem;
+            a,
+            a:visited {
+                text-decoration: none;
+                color: inherit;
+                border-bottom: none;
+            }
+            a:hover {
+                color: $color-primary;
+            }
+        }
+    }
+    img {
+        width: 100%;
+        object-fit: contain;
+    }
+
+    a.anchor {
+        margin-top: -.35ex;
+        color: $color-gray-700;
+        text-decoration: none;
+        border: none;
+    }
+}
+
+.guide.card {
+    margin-top: 1rem;
+    padding-top: 0;
+    border-color: $color-primary;
+    border-bottom-width: 2px;
+
+    h3 {
+        margin: 0;
+    }
+}

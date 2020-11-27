@@ -1,0 +1,84 @@
+:page-layout: getting-started
+:page-title: Getting Started with Mutiny
+:page-description: To start using Mutiny, you just need to drop a JAR in your classpath
+:page-next: First lines of code
+:page-next-href: /getting-started/first-lines-of-code
+:page-liquid: 
+
+[[dependency]]
+=== Using Mutiny in a Java application
+
+Add the _dependency_ to your project:
+
+.Maven
+[source, xml]
+----
+<dependency>
+  <groupId>io.smallrye.reactive</groupId>
+  <artifactId>mutiny</artifactId>
+  <version>{{ site.data.versions.mutiny_version }}</version>
+</dependency>
+----
+
+.Gradle with Groovy
+[source, text]
+----
+implementation 'io.smallrye.reactive:mutiny:{{ site.data.versions.mutiny_version }}'
+----
+
+.Gradle with Kotlin
+[source, kotlin]
+----
+implementation("io.smallrye.reactive:mutiny:{{ site.data.versions.mutiny_version }}")
+----
+
+.JBang
+[source, java]
+----
+//DEPS io.smallrye.reactive:mutiny:{{ site.data.versions.mutiny_version }}
+----
+
+[[quarkus]]
+=== Using Mutiny with Quarkus
+
+Most of the Quarkus extensions with reactive capabilities already depend on Mutiny.
+You can also add the `quarkus-mutiny` dependency explicitly:
+
+[source, bash]
+----
+mvn quarkus:add-dependency -Dextensions=mutiny
+----
+
+Or directly add the dependency to your `pom.xml`
+
+[source, xml]
+----
+<dependency>
+  <groupId>io.quarkus</groupId>
+  <artifactId>quarkus-mutiny</artifactId>
+</dependency>
+----
+
+Follow the https://quarkus.io/guides/getting-started-reactive[Getting started with reactive] guide for more details.
+
+[[vertx]]
+=== Using Mutiny with Eclipse Vert.x
+
+API bindings for many popular modules and clients from the Vert.x stack are available from the https://github.com/smallrye/smallrye-reactive-utils[Smallrye Reactive Utilities project].
+
+Here is how to add a dependency to the Vert.x core library with Mutiny bindings:
+
+[source, xml]
+----
+<dependency>
+  <groupId>io.smallrye.reactive</groupId>
+  <artifactId>smallrye-mutiny-vertx-core</artifactId>
+  <version>{{ site.data.versions.vertx_mutiny_clients }}</version>
+</dependency>
+----
+
+
+[[download]]
+=== Direct Download
+
+You can also download the Mutiny JARs directly from https://search.maven.org/search?q=g:io.smallrye.reactive%20AND%20a:mutiny*%20AND%20v:{{ site.data.versions.mutiny_version }}[Maven Central].
