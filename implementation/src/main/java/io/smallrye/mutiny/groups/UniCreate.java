@@ -187,7 +187,7 @@ public class UniCreate {
      * <p>
      * If the supplier produces {@code null}, {@code null} is used as item event.
      * If the supplier throws an exception, a failure event with the exception is fired.
-     * If the supplier is {@code null}, a failure event containing a {@link NullPointerException} is fired.
+     * If the supplier is {@code null}, an {@link IllegalArgumentException} is thrown, synchronously.
      *
      * @param supplier the item supplier, must not be {@code null}, can produce {@code null}
      * @param <T> the type of item
