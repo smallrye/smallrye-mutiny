@@ -76,7 +76,7 @@
         <microprofile-reactive-streams.version>1.0.1</microprofile-reactive-streams.version>
         <microprofile-context-propagation.version>1.1</microprofile-context-propagation.version>
         <reactive-streams.version>1.0.3</reactive-streams.version>
-        <smallrye-context-propagation.version>1.0.19</smallrye-context-propagation.version>
+        <smallrye-context-propagation.version>1.0.20</smallrye-context-propagation.version>
         <smallrye-config.version>1.9.3</smallrye-config.version>
         <smallrye-common-annotation.version>1.5.0</smallrye-common-annotation.version>
 
