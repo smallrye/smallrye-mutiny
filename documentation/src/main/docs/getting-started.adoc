@@ -8,7 +8,7 @@ Mutiny implements the https://www.reactive-streams.org/[Reactive Streams] specif
 == Dependencies
 
 To use Mutiny, you just need the `io.smallrye.reactive:mutiny` artifact in your `CLASSPATH`.
-If you are using Maven, declare the following dependency in your `pom.xml`:
+If you are using https://maven.apache.org/[Apache Maven], declare the following dependency in your `pom.xml`:
 
 [source,xml,subs=attributes+]
 ----
@@ -19,7 +19,7 @@ If you are using Maven, declare the following dependency in your `pom.xml`:
 </dependency>
 ----
 
-If you are using Gradle, declare the following dependency in your project:
+If you are using https://gradle.org/[Gradle], declare the following dependency in your project:
 
 [source,groovy,subs=attributes+]
 ----

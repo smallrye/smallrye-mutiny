@@ -10,7 +10,7 @@
 
 Add the _dependency_ to your project:
 
-.Maven
+.https://maven.apache.org/[Maven]
 [source, xml]
 ----
 <dependency>
@@ -20,19 +20,19 @@ Add the _dependency_ to your project:
 </dependency>
 ----
 
-.Gradle with Groovy
+.https://gradle.org/[Gradle with Groovy]
 [source, text]
 ----
 implementation 'io.smallrye.reactive:mutiny:{{ site.data.versions.mutiny_version }}'
 ----
 
-.Gradle with Kotlin
+.https://gradle.org/[Gradle with Kotlin]
 [source, kotlin]
 ----
 implementation("io.smallrye.reactive:mutiny:{{ site.data.versions.mutiny_version }}")
 ----
 
-.JBang
+.https://github.com/jbangdev/jbang[JBang]
 [source, java]
 ----
 //DEPS io.smallrye.reactive:mutiny:{{ site.data.versions.mutiny_version }}
@@ -41,7 +41,7 @@ implementation("io.smallrye.reactive:mutiny:{{ site.data.versions.mutiny_version
 [[quarkus]]
 === Using Mutiny with Quarkus
 
-Most of the Quarkus extensions with reactive capabilities already depend on Mutiny.
+Most of the https://quarkus.io[Quarkus] extensions with reactive capabilities already depend on Mutiny.
 You can also add the `quarkus-mutiny` dependency explicitly:
 
 [source, bash]
@@ -64,7 +64,7 @@ Follow the https://quarkus.io/guides/getting-started-reactive[Getting started wi
 [[vertx]]
 === Using Mutiny with Eclipse Vert.x
 
-API bindings for many popular modules and clients from the Vert.x stack are available from the https://github.com/smallrye/smallrye-reactive-utils[Smallrye Reactive Utilities project].
+API bindings for many popular modules and clients from the https://vertx.io[Vert.x] stack are available from the https://github.com/smallrye/smallrye-reactive-utils[Smallrye Reactive Utilities project].
 
 Here is how to add a dependency to the Vert.x core library with Mutiny bindings:
 
