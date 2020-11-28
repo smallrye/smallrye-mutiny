@@ -46,7 +46,7 @@ take-skip:
       text: <tt>MultiTransform</tt>
 
 repetitions:
-  title: Elimites duplicates and repetitions
+  title: Eliminate duplicates and repetitions
   text: Learn how to drop duplicated and repeated items from a multi.
   labels:
     - beginner
