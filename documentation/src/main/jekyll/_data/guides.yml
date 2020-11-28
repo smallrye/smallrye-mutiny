@@ -54,3 +54,19 @@ repetitions:
     - guide: filter
     - url: https://javadoc.io/doc/io.smallrye.reactive/mutiny/latest/io/smallrye/mutiny/groups/MultiTransform.html
       text: <tt>MultiTransform</tt>
+
+rx:
+  title: Using map, flatMap and concatMap
+  text: Learn how to use the traditional Reactive eXtensions methods.
+  labels:
+    - advanced
+  related:
+    - guide: shortcuts
+
+shortcuts:
+  title: Shortcut methods
+  text: Learn the different shortcuts reducing verbosity.
+  labels:
+    - intermediate
+  related:
+    - guide: rx

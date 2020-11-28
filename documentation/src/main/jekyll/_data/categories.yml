@@ -3,6 +3,7 @@
     - filter
     - take-skip
     - repetitions
+    - shortcuts
 - name: Integration
   guides:
     - reactive-to-imperative
@@ -10,3 +11,4 @@
 - name: Misc
   guides:
     - unchecked
+    - rx

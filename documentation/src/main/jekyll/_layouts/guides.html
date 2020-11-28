@@ -31,6 +31,7 @@ layout: base
                 {{ page.document | tocify_asciidoc }}
                 {% endif %}
 
+                {% if guide.related.size > 0 %}
                 <h4>Related content</h4>
                 <ul>
                     {% for g in guide.related %}
@@ -44,6 +45,7 @@ layout: base
                     </li>
                     {% endfor %}
                 </ul>
+                {% endif %}
             </nav>
 
 

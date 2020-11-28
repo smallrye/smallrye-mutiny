@@ -16,7 +16,6 @@ public class MergeTest {
         Multi<Integer> multi2 = Multi.createFrom().range(3, 6);
         Multi<Integer> multi3 = Multi.createFrom().range(6, 9);
         // tag::code[]
-
         List<Integer> list1 = Multi.createBy().merging().streams(multi1, multi2, multi3)
                 .collectItems().asList()
                 .await().indefinitely();
