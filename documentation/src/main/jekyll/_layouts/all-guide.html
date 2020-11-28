@@ -3,29 +3,44 @@ layout: base
 ---
 <!--{% assign guides = site.data.guides %}-->
 {% assign categories = site.data.categories %}
-<div class="guides">
-    {% for category in categories %}
-    <div class="container">
-        <h2>{{ category.name }}</h2>
+
+<section class="hero">
+    <div class="hero-main container">
         <div class="row">
-            {% for guide in  category.guides %}
-            {% assign actual = site.data.guides[guide] %}
-            <div class="col-md-4">
-                <div class="card mb-4 shadow-sm guide">
-                    <div class="card-body">
-                        <h3><a href="{{ site.baseurl }}/guides/{{ guide }}">{{ actual.title }}</a></h3>
-                        <p class="card-text">{{ actual.text }}</p>
-                        <p>
-                        {% for label in actual.labels %}
-                            <span class="badge badge-light">{{ label }}</span>
-                        {% endfor %}
-                        </p>
-                    </div>
+            <div class="hero-left col-lg-9">
+                <div class="hero-slogan">
+                    <h1 class="hero-name mutiny">Guides</h1>
+                    <span class="hero-description">Learn Mutiny chunk by chunk at your pace.</span>
                 </div>
             </div>
-            {% endfor %}
         </div>
     </div>
+</section>
+
+<div class="guides">
+    {% for category in categories %}
+    <section id="{{ category.name }}" class="category mb6">
+        <div class="container">
+            <div>
+                <h2 class="category-name antialiased">{{ category.name }}</h2>
+<!--                <p class="category-description"> {{ categoy.description }}</p>-->
+            </div>
+            <section id="{{ category.name }}-list" class="row">
+                {% for guide in  category.guides %}
+                {% assign actual = site.data.guides[guide] %}
+                <div class="guide col-md-6">
+                    <h5 class="guide-title"><i class="las la-chevron-right"></i> <a href="{{ site.baseurl }}/guides/{{ guide }}">{{ actual.title }}</a></h5>
+                    <p class="guide-description">{{ actual.text }}</p>
+                    <p class="guide-labels">
+                        {% for label in actual.labels %}
+                        <span class="badge badge-light">{{ label }}</span>
+                        {% endfor %}
+                    </p>
+                </div>
+                {% endfor %}
+            </section>
+        </div>
+    </section>
     {% endfor %}
 </div>
 

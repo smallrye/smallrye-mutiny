@@ -33,13 +33,19 @@
     }
 }
 
-.guide.card {
+.guides {
+    h2 {
+        margin-bottom: 0;
+    }
+}
+
+.guide {
     margin-top: 1rem;
     padding-top: 0;
     border-color: $color-primary;
     border-bottom-width: 2px;
 
-    h3 {
+    h5 {
         margin: 0;
     }
 }
