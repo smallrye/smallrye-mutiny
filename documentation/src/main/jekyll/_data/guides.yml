@@ -18,7 +18,7 @@ imperative-to-reactive:
 
 unchecked:
   title: Dealing with checked exceptions
-  text: Learn how to handle <em>checked</em> exceptions
+  text: Learn how to handle <em>checked</em> exceptions.
   labels:
     - intermediate
   related:
@@ -27,7 +27,7 @@ unchecked:
 
 filter:
   title: Filtering items from multi
-  text: Learn how to filter and select items from a multi
+  text: Learn how to filter and select items from a multi.
   labels:
     - beginner
   related:
@@ -37,7 +37,17 @@ filter:
 
 take-skip:
   title: Take or Skip the first or last items
-  text: Learn how to select or skip only the first or last items from a multi
+  text: Learn how to select or skip only the first or last items from a multi.
+  labels:
+    - beginner
+  related:
+    - guide: filter
+    - url: https://javadoc.io/doc/io.smallrye.reactive/mutiny/latest/io/smallrye/mutiny/groups/MultiTransform.html
+      text: <tt>MultiTransform</tt>
+
+repetitions:
+  title: Elimites duplicates and repetitions
+  text: Learn how to drop duplicated and repeated items from a multi.
   labels:
     - beginner
   related:

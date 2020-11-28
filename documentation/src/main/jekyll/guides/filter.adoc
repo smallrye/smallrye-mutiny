@@ -28,9 +28,3 @@ include::{include_dir}/FilterTest.java[tag=test]
 Unlike `byFilteringItemsWith` where the predicate returns a boolean synchronously, the function returns a `Uni<Boolean>`.
 It forwards the item downstream if the `uni` produced by the function emits `true`.
 Otherwise, it drops the item.
-//
-//
-//
-//include::../../../src/test/java/snippets/HowToFilterTest.java[tags=take]
-//
-//include::../../../src/test/java/snippets/HowToFilterTest.java[tags=skip]

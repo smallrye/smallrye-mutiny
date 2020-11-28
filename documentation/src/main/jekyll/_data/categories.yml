@@ -2,6 +2,7 @@
   guides:
     - filter
     - take-skip
+    - repetitions
 - name: Integration
   guides:
     - reactive-to-imperative
