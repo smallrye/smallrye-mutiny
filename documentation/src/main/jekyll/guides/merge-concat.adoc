@@ -1,11 +1,8 @@
-:page-layout: getting-started
-:page-title: Merging and Concatenating Streams
-:page-description: Learn how to merge or concatenate streams
-:page-previous: Transforming items into streams
-:page-previous-href: /getting-started/transforming-items-async
-:page-next: Combining items from different streams
-:page-next-href: /getting-started/combining-items
-:page-liquid: 
+:page-layout: guides
+:page-guide-id: merge-concat
+:page-liquid:
+:include_dir: ../../../../src/test/java/guides/operators
+:imagesdir: ../assets/images
 
 == Merging and Concatenating Streams
 
@@ -21,7 +18,8 @@ Understanding the difference between _merge_ and _concatenate_ is essential.
 When _merging_ streams, it observes the different upstreams and emits the items as they come. 
 If the streams emit their items concurrently, the items from the different streams are interleaved.
 
-image::merge-streams.png[Merging streams, role="center"]
+[role=reduce]
+image::merge-streams.png[Merging streams]
 
 When using _merge_, failures are also propagated to the merged stream, and no more items are emitted after that failure.
 The _completion_ event is only emitted by the merged stream when all the observed streams are completed.
@@ -30,7 +28,8 @@ But if we want to keep the order of the observed stream, we need to _concatenate
 
 When _concatenating_, it waits for the first stream to complete before subscribing to the second one. Thus, it ensures that all the items from the first stream have been emitted before emitting the second stream items. It preserves an order corresponding to the source:
 
-image::concatenate-streams.png[Concatenating streams, role="center"]
+[role=reduce]
+image::concatenate-streams.png[Concatenating streams]
 
 When the first stream emits the completion event, it switches to the second stream, and so on.
 When the last stream completes, the concatenated stream sends the completion event.
@@ -42,39 +41,29 @@ To create a new `Multi` from the _merge_ of multiple `Multi` streams use:
 
 [source, java, indent=0]
 ----
-Multi<T> merged = Multi.createBy().merging().streams(first, second);
+include::{include_dir}/MergeConcatTest.java[tag=merge]
 ----
 
 For example, we can merge multiple streams emitting periodical events and look at the output:
 
 [source, java, indent=0]
 ----
-Multi<String> first = Multi.createFrom().ticks().every(Duration.ofMillis(10))
-  .onItem().transform(l -> "Stream A - " + l);
-
-Multi<String> second = Multi.createFrom().ticks().every(Duration.ofMillis(15))
-  .onItem().transform(l -> "Stream B - " + l);
-
-Multi.createBy().merging().streams(first, second)
-  .subscribe().with(s ->
-    System.out.println("Got item: " + s));
+include::{include_dir}/MergeConcatTest.java[tag=merge-ticks]
 ----
 
 [source, text]
 ----
-Got item: Stream A - 0
-Got item: Stream B - 0
-Got item: Stream A - 1
-Got item: Stream B - 1
-Got item: Stream A - 2
-Got item: Stream A - 3
-Got item: Stream B - 2
-Got item: Stream A - 4
-Got item: Stream B - 3
-Got item: Stream A - 5
-Got item: Stream A - 6
-Got item: Stream B - 4
-Got item: Stream A - 7
+Got item: Stream 1 - 0
+Got item: Stream 2 - 0
+Got item: Stream 3 - 0
+Got item: Stream 3 - 1
+Got item: Stream 1 - 1
+Got item: Stream 3 - 2
+Got item: Stream 2 - 1
+Got item: Stream 3 - 3
+Got item: Stream 1 - 2
+Got item: Stream 3 - 4
+Got item: Stream 3 - 5
 ....
 ----
 
@@ -84,22 +73,14 @@ To create a new `Multi` from the _concatenation_ of multiple `Multi` streams use
 
 [source, java, indent=0]
 ----
-Multi<T> merged = Multi.createBy().concatenating().streams(streamA, streamB);
+include::{include_dir}/MergeConcatTest.java[tag=concat]
 ----
 
 Don't forget that the streams order matters in this case, as `(streamA, streamB)` does not provide the same result as `(streamB, streamA)`:
 
-[source, java]
+[source, java, indent=0]
 ----
-Multi<String> first = Multi.createFrom().items("A1", "A2", "A3");
-
-Multi<String> second = Multi.createFrom().items("B1", "B2", "B3");
-
-Multi.createBy().concatenating().streams(first, second)
-  .subscribe().with(item -> System.out.print(item)); // Prints "A1A2A3B1B2B3"
-
-Multi.createBy().concatenating().streams(second, first)
-  .subscribe().with(item -> System.out.print(item)); // Prints "B1B2B3A1A2A3"        
+include::{include_dir}/MergeConcatTest.java[tag=concatenate-strings]
 ----
 
 IMPORTANT: If one of the concatenated streams is unbounded (infinite), the next streams in the list won't be consumed!

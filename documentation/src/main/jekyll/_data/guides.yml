@@ -70,3 +70,19 @@ shortcuts:
     - intermediate
   related:
     - guide: rx
+
+merge-concat:
+  title: Merging and Concatenating Streams
+  text: Learn how to merge or concatenate streams
+  labels:
+    - beginner
+  related:
+    - guide: combining-items
+
+combining-items:
+  title: Combining items from streams
+  text: Learn how to combine items from different streams.
+  labels:
+    - beginner
+  related:
+    - guide: merge-concat

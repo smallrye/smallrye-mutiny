@@ -1,8 +1,8 @@
 :page-layout: getting-started
 :page-title: Handling failures
 :page-description: Learn how you can recover from failures
-:page-previous: Combining items from different streams
-:page-previous-href: /getting-started/combining-items
+:page-previous: Transforming items into Uni and Multi
+:page-previous-href: /getting-started/transforming-items-async
 :page-next: Retrying on failures
 :page-next-href: /getting-started/retry
 :page-liquid: 

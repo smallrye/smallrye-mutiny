@@ -111,3 +111,9 @@ body {
     border-left-width: 5px;
     border-left-color: $color-gray-700;
 }
+
+.imageblock.reduce {
+    max-width: 66%;
+    margin-left: auto;
+    margin-right: auto;
+}

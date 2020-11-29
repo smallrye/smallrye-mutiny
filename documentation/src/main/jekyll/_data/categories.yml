@@ -1,5 +1,7 @@
 - name: Operators
   guides:
+    - merge-concat
+    - combining-items
     - filter
     - take-skip
     - repetitions

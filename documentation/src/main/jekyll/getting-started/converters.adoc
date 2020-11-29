@@ -3,8 +3,6 @@
 :page-description: Learn how to integrate Mutiny with RX Java or Reactor
 :page-previous: Collecting items from Multi
 :page-previous-href: /getting-started/collecting-items
-:page-next: From reactive to imperative
-:page-next-href: /getting-started/reactive-to-imperative
 :page-liquid:
 
 == Integrating others reactive libraries

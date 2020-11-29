@@ -3,8 +3,8 @@
 :page-description: Learn how to transform received item into asynchronous streams
 :page-previous: Transforming items
 :page-previous-href: /getting-started/transforming-items
-:page-next: Merging and Concatenating streams
-:page-next-href: /getting-started/merge-concat
+:page-next: Learn how you can recover from failures
+:page-next-href: /getting-started/handling-failures
 :page-liquid: 
 
 == Transforming items into streams
