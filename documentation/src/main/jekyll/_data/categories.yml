@@ -10,6 +10,7 @@
   guides:
     - reactive-to-imperative
     - imperative-to-reactive
+    - converters
 - name: Misc
   guides:
     - unchecked

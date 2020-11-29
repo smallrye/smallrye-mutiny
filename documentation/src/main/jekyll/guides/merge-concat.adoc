@@ -4,14 +4,12 @@
 :include_dir: ../../../../src/test/java/guides/operators
 :imagesdir: ../assets/images
 
-== Merging and Concatenating Streams
-
 Merging or concatenating streams is a frequent operation which consists in taking multiple streams and creating a new `Multi` out of them.
 Such an operation observes the items emitted by the different streams and produces a new `Multi` emitting the events.
 
 All the streams merged or concatenated this way should emit the same type of items.
 
-=== The difference between merge and concatenate
+== The difference between merge and concatenate
 
 Understanding the difference between _merge_ and _concatenate_ is essential.
 
@@ -35,7 +33,7 @@ When the first stream emits the completion event, it switches to the second stre
 When the last stream completes, the concatenated stream sends the completion event.
 As for _merge_, if a stream fails then there won't be further evebts.
 
-=== Merging Multis
+== Merging Multis
 
 To create a new `Multi` from the _merge_ of multiple `Multi` streams use:
 
@@ -67,7 +65,7 @@ Got item: Stream 3 - 5
 ....
 ----
 
-=== Concatenating Multis
+== Concatenating Multis
 
 To create a new `Multi` from the _concatenation_ of multiple `Multi` streams use:
 

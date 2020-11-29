@@ -70,6 +70,7 @@ shortcuts:
     - intermediate
   related:
     - guide: rx
+    - guide: converters
 
 merge-concat:
   title: Merging and Concatenating Streams
@@ -86,3 +87,11 @@ combining-items:
     - beginner
   related:
     - guide: merge-concat
+
+converters:
+  title: Using other reactive programming libraries
+  text: Learn how to integrate Mutiny with RX Java or Reactor.
+  labels:
+    - intermediate
+  related:
+    - guide: rx

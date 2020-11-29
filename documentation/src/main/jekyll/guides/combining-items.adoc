@@ -4,15 +4,13 @@
 :include_dir: ../../../../src/test/java/guides/operators
 :imagesdir: ../assets/images
 
-== Combining items from streams
-
 Combining items from various streams is an essential pattern in Reactive Programming.
 It associates the emitted items from multiple streams and emits an _aggregate_. 
 The downstream receives this _aggregates_ and can handle it smoothly.
 
 There are plenty of use cases, such as executing two tasks concurrently and waiting for both completions, getting the last items from different streams to build an always up-to-date view, and so on.
 
-=== Combining Unis
+== Combining Unis
 
 Imagine that you have two asynchronous operations to perform like 2 HTTP requests.
 You want to send these requests and be notified when both have completed with their responses ready to be consumed.
@@ -64,7 +62,7 @@ If you want another structure or deal with more than 10 `Uni` objects then use `
 include::{include_dir}/CombiningItemsTest.java[tag=combined-with]
 ----
 
-=== Combining Multis
+== Combining Multis
 
 Combining `Multis` consists of associating items from different stream per _index_:
 
@@ -90,7 +88,7 @@ The combined stream completes as soon as one of the observed stream sends the co
 
 NOTE: If one of the observed streams never emits any item then the combined stream will not emit anything.
 
-=== Combining the last items of Multis
+== Combining the last items of Multis
 
 It can be useful to combine multiple `Multi` streams and receive the _latest_ items from each stream on every emission:
 
