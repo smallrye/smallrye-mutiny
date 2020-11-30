@@ -1,4 +1,4 @@
 ---
-layout: all-guide
-title: SmallRye Mutiny!
+layout: all-guides
+title: Mutiny!
 ---

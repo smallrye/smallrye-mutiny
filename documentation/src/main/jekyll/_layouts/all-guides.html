@@ -18,12 +18,16 @@ layout: base
 </section>
 
 <div class="guides">
+
     {% for category in categories %}
     <section id="{{ category.name }}" class="category mb6">
+
+
+
         <div class="container">
             <div>
                 <h2 class="category-name antialiased">{{ category.name }}</h2>
-<!--                <p class="category-description"> {{ categoy.description }}</p>-->
+<!--                <p class="category-description"> {{ category.description }}</p>-->
             </div>
             <section id="{{ category.name }}-list" class="row">
                 {% for guide in  category.guides %}

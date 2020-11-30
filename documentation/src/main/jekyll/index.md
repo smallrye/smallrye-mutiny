@@ -1,4 +1,4 @@
 ---
 layout: index
-title: SmallRye Mutiny!
+title: Mutiny!
 ---
