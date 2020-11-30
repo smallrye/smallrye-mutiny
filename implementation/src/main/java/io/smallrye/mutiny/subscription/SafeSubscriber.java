@@ -1,7 +1,7 @@
 package io.smallrye.mutiny.subscription;
 
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
@@ -18,14 +18,22 @@ import io.smallrye.mutiny.infrastructure.Infrastructure;
  */
 @SuppressWarnings({ "ReactiveStreamsSubscriberImplementation" })
 public final class SafeSubscriber<T> implements Subscriber<T>, Subscription {
+
     /**
      * The actual Subscriber.
      */
     private final Subscriber<? super T> downstream;
+
     /**
      * The subscription.
      */
-    private final AtomicReference<Subscription> upstream = new AtomicReference<>();
+    private Subscription upstream;
+
+    /**
+     * Flag to check if we have already subscribed.
+     */
+    private final AtomicBoolean subscribed = new AtomicBoolean(false);
+
     /**
      * Indicates a terminal state.
      */
@@ -50,22 +58,23 @@ public final class SafeSubscriber<T> implements Subscriber<T>, Subscription {
     }
 
     @Override
-    public void onSubscribe(Subscription s) {
-        if (upstream.compareAndSet(null, s)) {
+    public void onSubscribe(Subscription subscription) {
+        if (subscribed.compareAndSet(false, true)) {
+            this.upstream = subscription;
             try {
                 downstream.onSubscribe(this);
             } catch (Throwable e) {
                 done = true;
                 // can't call onError because the actual's state may be corrupt at this point
                 try {
-                    s.cancel();
+                    subscription.cancel();
                 } catch (Throwable e1) {
                     // ignore it, nothing we can do.
                     Infrastructure.handleDroppedException(e1);
                 }
             }
         } else {
-            s.cancel();
+            subscription.cancel();
         }
     }
 
@@ -74,7 +83,7 @@ public final class SafeSubscriber<T> implements Subscriber<T>, Subscription {
         if (done) {
             return;
         }
-        if (upstream.get() == null) {
+        if (upstream == null) {
             onNextNoSubscription();
             return;
         }
@@ -94,7 +103,7 @@ public final class SafeSubscriber<T> implements Subscriber<T>, Subscription {
 
     private void cancelAndDispatch(Throwable ex) {
         try {
-            upstream.get().cancel();
+            upstream.cancel();
         } catch (Throwable e1) {
             onError(new CompositeException(ex, e1));
             return;
@@ -115,7 +124,7 @@ public final class SafeSubscriber<T> implements Subscriber<T>, Subscription {
         }
         done = true;
 
-        if (upstream.get() == null) {
+        if (upstream == null) {
             Throwable npe = new NullPointerException("Subscription not set!");
 
             try {
@@ -149,7 +158,7 @@ public final class SafeSubscriber<T> implements Subscriber<T>, Subscription {
         }
         done = true;
 
-        if (upstream.get() == null) {
+        if (upstream == null) {
             onCompleteNoSubscription();
             return;
         }
@@ -187,10 +196,10 @@ public final class SafeSubscriber<T> implements Subscriber<T>, Subscription {
     @Override
     public void request(long n) {
         try {
-            upstream.get().request(n);
+            upstream.request(n);
         } catch (Throwable e) {
             try {
-                upstream.get().cancel();
+                upstream.cancel();
             } catch (Throwable ex) {
                 // nothing we can do.
                 Infrastructure.handleDroppedException(new CompositeException(e, ex));
@@ -201,7 +210,7 @@ public final class SafeSubscriber<T> implements Subscriber<T>, Subscription {
     @Override
     public void cancel() {
         try {
-            upstream.get().cancel();
+            upstream.cancel();
         } catch (Throwable e) {
             // nothing we can do.
             Infrastructure.handleDroppedException(e);
