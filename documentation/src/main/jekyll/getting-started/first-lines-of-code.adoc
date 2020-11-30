@@ -1,26 +1,17 @@
 :page-layout: getting-started
 :page-liquid:
 :page-guide-id: first-lines-of-code
+:include_dir: ../../../../src/test/java/
+
 
 == Hello Mutiny!
 
 Once you made Mutiny available to your classpath, you can start writing code.
 Let's start with this simple program:
 
-[source, java]
+[source, java, indent=0]
 ----
-import io.smallrye.mutiny.Uni;
-
-public class FirstProgram {
-
-  public static void main(String[] args) {
-    Uni.createFrom().item("hello")
-      .onItem().transform(item -> item + " mutiny")
-      .onItem().transform(String::toUpperCase)
-      .subscribe().with(
-        item -> System.out.println(">> " + item));
-  }
-}
+include::{include_dir}/FirstProgram.java[]
 ----
 
 This program prints:
@@ -61,25 +52,16 @@ Appending a new _stage_ to a pipeline returns a new `Uni.`
 
 The previous program is equivalent to:
 
-[source, java]
+[source, java, indent=0]
 ----
-Uni<String> uni1 = Uni.createFrom().item("hello");
-Uni<String> uni2 = uni1.onItem().transform(item -> item + " mutiny");
-Uni<String> uni3 = uni2.onItem().transform(String::toUpperCase);
-
-uni3.subscribe().with(item -> System.out.println(">> " + item));
+include::{include_dir}/FirstProgramTest.java[tag=uni]
 ----
 
 It is fundamental to understand that this program is not equivalent to:
 
-[source, java]
+[source, java, indent=0]
 ----
-Uni<String> uni = Uni.createFrom().item("hello");
-
-uni.onItem().transform(item -> item + " mutiny");
-uni.onItem().transform(String::toUpperCase);
-
-uni.subscribe().with(item -> System.out.println(">> " + item));
+include::{include_dir}/FirstProgramTest.java[tag=uni2]
 ----
 
 This program just prints `">> hello"``, as it does not use the appended stages and the final subscriber consumes the first `Uni.`

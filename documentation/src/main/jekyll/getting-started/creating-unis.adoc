@@ -1,6 +1,7 @@
 :page-layout: getting-started
 :page-guide-id: creating-unis
-:page-liquid: 
+:page-liquid:
+:include_dir: ../../../../src/test/java/guides
 
 A `Uni` represents a _stream_ that can only emit either an item or a failure event.
 You rarely create instances of `Uni` yourself, but, instead, use a reactive client exposing a Mutiny API that provides `Unis.` 
@@ -29,10 +30,7 @@ The following snippet provides a simple example of pipeline using `Uni`:
 .Example of pipeline using Uni
 [source, java, indent=0]
 ----
-Uni.createFrom().item(1)
-  .onItem().transform(i -> "hello-" + i)
-  .onItem().delayIt().by(Duration.ofMillis(100))
-  .subscribe().with(System.out::println);
+include::{include_dir}/CreatingUniTest.java[tag=pipeline]
 ----
 
 You can see the `Uni` javadoc https://javadoc.io/static/io.smallrye.reactive/mutiny/{{ site.data.versions.mutiny_version }}/index.html?io/smallrye/mutiny/Uni.html[here].
@@ -46,10 +44,7 @@ When subscribing to a `Uni`, you can pass an item callback (invoked when the ite
 
 [source, java, indent=0]
 ----
-Cancellable cancellable = uni
-  .subscribe().with(
-    item -> System.out.println(item),
-    failure -> System.out.println("Failed with " + failure));
+include::{include_dir}/CreatingUniTest.java[tag=subscription]
 ----
 
 Note the returned `Cancellable`: this object allows canceling the operation if need be.
@@ -61,19 +56,18 @@ Use https://javadoc.io/static/io.smallrye.reactive/mutiny/{{ site.data.versions.
 
 You can, for instance, create a `Uni` from a known value:
 
-[source, java]
+[source, java, indent=0]
 ----
-Uni<Integer> uni = Uni.createFrom().item(1);
+include::{include_dir}/CreatingUniTest.java[tag=simple]
 ----
 
 Every subscriber receives the item `1` just after the subscription.
 
 You can also pass a `Supplier`:
 
-[source, java]
+[source, java, indent=0]
 ----
-AtomicInteger counter = new AtomicInteger();
-Uni<Integer> uni = Uni.createFrom().item(() -> counter.getAndIncrement());
+include::{include_dir}/CreatingUniTest.java[tag=supplier]
 ----
 
 The `Supplier` is called for every subscriber. 
@@ -85,13 +79,9 @@ Operations represented by `Unis` can also emit a failure event, indicating that 
 
 You can create failed `Uni` instances with:
 
-[source, java]
+[source, java, indent=0]
 ----
-// Pass an exception directly:
-Uni<Integer> failed1 = Uni.createFrom().failure(new Exception("boom"));
-
-// Pass a supplier called for every subscriber:
-Uni<Integer> failed2 = Uni.createFrom().failure(() -> new Exception("boom"));
+include::{include_dir}/CreatingUniTest.java[tag=failed]
 ----
 
 == Creating Uni<Void>
@@ -99,9 +89,9 @@ Uni<Integer> failed2 = Uni.createFrom().failure(() -> new Exception("boom"));
 When the represented operation to not produce a result, you still need a way to indicate the operation's completion.
 For this, you need to emit a `null` item:
 
-[source, java]
+[source, java, indent=0]
 ----
-Uni<Void> uni  = Uni.createFrom().nullItem();
+include::{include_dir}/CreatingUniTest.java[tag=null]
 ----
 
 == Creating Unis using an emitter (_advanced_)
@@ -109,12 +99,9 @@ Uni<Void> uni  = Uni.createFrom().nullItem();
 You can create a `Uni` using an emitter.
 This approach is useful when integrating callback-based APIs:
 
-[source, java]
+[source, java, indent=0]
 ----
-Uni.createFrom().emitter(em -> {
-  // When the result is available, emit it
-  em.complete(result);
-});
+include::{include_dir}/CreatingUniTest.java[tag=emitter]
 ----
 
 The emitter can also send a failure.
@@ -125,10 +112,9 @@ It can also get notified of cancellation to, for example, stop the work in progr
 You can also `Uni` objects from `CompletionStage` / `CompletableFuture`. 
 This is useful when integrating with APIs that are based on these types:
 
-[source, java]
+[source, java, indent=0]
 ----
-CompletionStage<T> stage = ...;
-Uni<T> = Uni.createFrom().completionStage(stage);
+include::{include_dir}/CreatingUniTest.java[tag=cs]
 ----
 
 [NOTE]
