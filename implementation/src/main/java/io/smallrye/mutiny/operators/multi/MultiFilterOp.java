@@ -35,7 +35,7 @@ public class MultiFilterOp<T> extends AbstractMultiOperator<T, T> {
     static final class MultiFilterProcessor<T> extends MultiOperatorProcessor<T, T> {
 
         private final Predicate<? super T> predicate;
-        private volatile boolean requestedMax = false;
+        private boolean requestedMax = false;
 
         MultiFilterProcessor(MultiSubscriber<? super T> downstream, Predicate<? super T> predicate) {
             super(downstream);
@@ -58,20 +58,18 @@ public class MultiFilterOp<T> extends AbstractMultiOperator<T, T> {
 
             if (passed) {
                 downstream.onItem(t);
-            } else {
+            } else if (!requestedMax) {
                 request(1);
             }
         }
 
         @Override
         public void request(long numberOfItems) {
-            if (requestedMax) {
-                return;
-            }
             Subscription subscription = upstream.get();
             if (subscription != CANCELLED) {
                 if (numberOfItems <= 0) {
                     onFailure(new IllegalArgumentException("Invalid number of request, must be greater than 0"));
+                    return;
                 }
                 if (numberOfItems == Long.MAX_VALUE) {
                     requestedMax = true;
