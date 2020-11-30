@@ -75,6 +75,44 @@ public class MultiCreateFromPublisherTest {
     }
 
     @Test
+    public void testWithRegularSafePublisher() {
+        AtomicLong requests = new AtomicLong();
+        AtomicInteger count = new AtomicInteger();
+        Flowable<Integer> flowable = Flowable.defer(() -> {
+            count.incrementAndGet();
+            return Flowable.just(1, 2, 3, 4);
+        }).doOnRequest(requests::addAndGet);
+
+        Multi<Integer> multi = Multi.createFrom().safePublisher(flowable);
+
+        multi.subscribe().withSubscriber(AssertSubscriber.create()).assertHasNotReceivedAnyItem()
+                .request(2)
+                .assertItems(1, 2)
+                .run(() -> assertThat(requests).hasValue(2))
+                .request(1)
+                .assertItems(1, 2, 3)
+                .request(1)
+                .assertItems(1, 2, 3, 4)
+                .run(() -> assertThat(requests).hasValue(4))
+                .assertCompleted();
+
+        assertThat(count).hasValue(1);
+
+        multi.subscribe().withSubscriber(AssertSubscriber.create()).assertHasNotReceivedAnyItem()
+                .request(2)
+                .assertItems(1, 2)
+                .request(1)
+                .assertItems(1, 2, 3)
+                .request(1)
+                .assertItems(1, 2, 3, 4)
+                .run(() -> assertThat(requests).hasValue(8))
+                .assertCompleted();
+
+        assertThat(count).hasValue(2);
+
+    }
+
+    @Test
     public void testThatCancellingTheMultiCancelThePublisher() {
         AtomicBoolean cancellation = new AtomicBoolean();
         Flowable<Integer> flowable = Flowable.just(1, 2, 3, 4).doOnCancel(() -> cancellation.set(true));

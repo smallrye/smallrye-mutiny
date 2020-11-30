@@ -135,6 +135,9 @@ public class MultiCreate {
     /**
      * Creates a {@link Multi} from the passed {@link Publisher}.
      * <p>
+     * It is assumed that the {@link Publisher} is fully compliant with the Reactive Streams protocol and passes the TCK.
+     * If this is not the case use {@link #publisher(Publisher)} instead.
+     * <p>
      * When a subscriber subscribes to the produced {@link Multi}, it subscribes to the {@link Publisher} and delegate
      * the requests. Note that each Multi's subscriber would produce a new subscription.
      * <p>
@@ -143,6 +146,35 @@ public class MultiCreate {
      * @param publisher the publisher, must not be {@code null}
      * @param <T> the type of item
      * @return the produced {@link Multi}
+     * @see #publisher(Publisher)
+     */
+    public <T> Multi<T> safePublisher(Publisher<T> publisher) {
+        Publisher<T> actual = nonNull(publisher, "publisher");
+
+        return Infrastructure.onMultiCreation(new AbstractMulti<T>() {
+            @Override
+            public void subscribe(Subscriber<? super T> subscriber) {
+                actual.subscribe(subscriber);
+            }
+        });
+    }
+
+    /**
+     * Creates a {@link Multi} from the passed {@link Publisher}.
+     * <p>
+     * The {@link Publisher} is not assumed to be fully compliant with the Reactive Streams TCK, hence it is wrapped
+     * around a subscriber that enforces the Reactive Streams protocol.
+     * If you know the {@link Publisher} is safe then you should use {@link #safePublisher(Publisher)} instead.
+     * <p>
+     * When a subscriber subscribes to the produced {@link Multi}, it subscribes to the {@link Publisher} and delegate
+     * the requests. Note that each Multi's subscriber would produce a new subscription.
+     * <p>
+     * If the Multi's observer cancels its subscription, the subscription to the {@link Publisher} is also cancelled.
+     *
+     * @param publisher the publisher, must not be {@code null}
+     * @param <T> the type of item
+     * @return the produced {@link Multi}
+     * @see #safePublisher(Publisher)
      */
     public <T> Multi<T> publisher(Publisher<T> publisher) {
         Publisher<T> actual = nonNull(publisher, "publisher");
