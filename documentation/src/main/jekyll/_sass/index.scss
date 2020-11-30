@@ -68,36 +68,16 @@ body {
     margin-top: 1rem;
     color: $color-white;
     background-color: $color-primary;
-    a {
-        font-size: x-large;
-        border-bottom: 0;
-        padding: 0;
-        color: $color-white;
-        display: block;
-        text-align: center;
-        font-weight: 500;
-        font-family: $font-highlight;
-        text-decoration: none;
-    }
-    a.previous {
-        float: left;
-        &:hover {
-            color: $button-text-color-hover;
-        }
-    }
-    a.next {
-        float: right;
-        &:hover {
-            color: $button-text-color-hover;
-        }
-    }
+    padding-top: 1rem;
 }
 
 .toc {
     position: sticky;
-    top: 2rem;
-    height: calc(100vh - 2rem);
     overflow-y: auto;
+
+    h4 {
+        margin-top: 0;
+    }
 }
 
 .toc-container {

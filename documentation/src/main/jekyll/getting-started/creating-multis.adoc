@@ -1,13 +1,6 @@
 :page-layout: getting-started
-:page-title: Creating Multis
-:page-description: Learn how to create Multi instances
-:page-previous: Creating Unis
-:page-previous-href: /getting-started/creating-unis
-:page-next: Transforming items
-:page-next-href: /getting-started/transforming-items
-:page-liquid: 
-
-== Creating Multis
+:page-liquid:
+:page-guide-id: creating-multis
 
 A `Multi` represents a _stream_ of data.
 A stream can emit 0, 1, n, or an infinite number of items.
@@ -15,7 +8,7 @@ A stream can emit 0, 1, n, or an infinite number of items.
 You will rarely create instances of `Multi` yourself but instead use a reactive client that exposes a Mutiny API.
 Still, just like `Uni` there exists a rich API for creating `Multi` objects.
 
-=== The Multi type
+== The Multi type
 
 A `Multi<T>` is a data stream that:
 
@@ -49,7 +42,7 @@ Multi.createFrom().items(1, 2, 3, 4, 5)
 
 You can see the `Multi` javadoc https://javadoc.io/static/io.smallrye.reactive/mutiny/{{ site.data.versions.mutiny_version }}/index.html?io/smallrye/mutiny/Multi.html[here].
 
-=== Subscribing to a Multi
+== Subscribing to a Multi
 
 Remember, if you don't subscribe, nothing is going to happen.
 Also, the pipeline is materialized for each _subscription_.
@@ -67,7 +60,7 @@ Cancellable cancellable = multi
 
 Note the returned `Cancellable`: this object allows canceling the stream if need be.
 
-=== Creating Multi from items
+== Creating Multi from items
 
 There are many ways to create `Multi` instances. 
 Use https://javadoc.io/static/io.smallrye.reactive/mutiny/{{ site.data.versions.mutiny_version }}/index.html?io/smallrye/mutiny/groups/MultiCreate.html[Multi.createFrom()] to see all the possibilities.
@@ -99,7 +92,7 @@ The `Supplier` is called for every subscriber, so each of them will get differen
 You can create ranges using `Multi.createFrom().range(start, end)`.
 ====
 
-=== Creating failing Multis
+== Creating failing Multis
 
 Streams can also fail.
 Failures are used to indicate to the downstream subscribers that the source encountered a terrible error and cannot continue emitting items.
@@ -114,7 +107,7 @@ Multi<Integer> failed1 = Multi.createFrom().failure(new Exception("boom"));
 Multi<Integer> failed2 = Multi.createFrom().failure(() -> new Exception("boom"));
 ----
 
-=== Creating empty Multis
+== Creating empty Multis
 
 Unlike `Uni,` `Multi` streams don't send `null` items (this is forbidden in _reactive streams_).
 
@@ -128,7 +121,7 @@ You can create such a stream using:
 Multi<T> multi = Multi.createFrom().empty();
 ----
 
-=== Creating Multis using an emitter (_advanced_)
+== Creating Multis using an emitter (_advanced_)
 
 You can create a `Multi` using an emitter.
 This approach is useful when integrating callback-based APIs:
@@ -146,7 +139,7 @@ Multi.createFrom().emitter(em -> {
 The emitter can also send a failure.
 It can also get notified of cancellation to, for example, stop the work in progress.
 
-=== Creating Multis from _ticks_ (_advanced_)
+== Creating Multis from _ticks_ (_advanced_)
 
 You can create a stream that emit a _ticks_ periodically:
 

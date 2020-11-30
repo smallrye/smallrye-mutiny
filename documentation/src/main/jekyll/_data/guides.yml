@@ -1,3 +1,56 @@
+download:
+  title: Getting Started with Mutiny
+  text: To start using Mutiny, you just need to drop a JAR in your classpath
+  url: getting-started/download
+  related:
+    - url: https://maven.apache.org
+      text: Apache Maven
+    - url: https://gradle.org/
+      text: Gradle
+    - url: https://www.jbang.dev/
+      text: JBang!
+
+first-lines-of-code:
+    title: First lines of code
+    text: Your first lines of code using Mutiny.
+    url: getting-started/first-lines-of-code
+
+creating-unis:
+  title: Creating Unis
+  text: Learn how to create Uni instances.
+  url: getting-started/creating-unis
+  related:
+    - guide: creating-multis
+
+creating-multis:
+  title: Creating Multis
+  text: Learn how to create Multi instances.
+  url: getting-started/creating-multis
+
+transforming-items:
+  title: Transforming items
+  text: Learn how to (synchronously) transform received item
+  url: getting-started/transforming-items
+  related:
+    - guide: transforming-items-async
+
+transforming-items-async:
+  title: Transforming items into Uni and Multi
+  text: Learn how to transform received item into asynchronous streams.
+  url: getting-started/transforming-items-async
+  related:
+    - guide: transforming-items
+
+handling-failures:
+  title: Handling failures
+  text: Learn how you can recover from failures.
+  url: getting-started/handling-failures
+
+retry:
+  title: Retrying on failures
+  text: Learn how you to retry on failures.
+  url: getting-started/retry
+
 reactive-to-imperative:
   title: From reactive to imperative
   text: Learn how to block until you get items.

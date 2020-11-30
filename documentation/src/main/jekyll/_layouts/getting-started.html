@@ -1,24 +1,49 @@
 --- 
     layout: base 
 ---
+{% assign guide = site.data.guides[page.guide-id] %}
+{% for cat in site.data.categories %}
+    {% assign _found = false %}
+    {% for current in cat.guides %}
+        {% if _found %}
+            {% assign _next = current %}
+            {% break %}
+        {% endif %}
+        {% if current == page.guide-id %}
+            {% assign _prev = _last %}
+            {% assign _found = true %}
+        {% endif %}
+        {% assign _last = current %}
+    {% endfor %}
+
+    {% if _found %}
+        {% break %}
+    {% endif %}
+{% endfor %}
+{% assign guide-prev = site.data.guides[_prev] %}
+{% assign guide-next = site.data.guides[_next] %}
 
 <section class="hero gs">
     <div class="hero-main container">
         <div class="row">
             <div class="hero-left col-12">
                 <div class="hero-slogan">
-                    <h1 class="hero-name">{{ page.title }}</h1>
+                    <h1 class="hero-name">{{ guide.title }}</h1>
                 </div>
                 <div class="hero-desc">
-                    {{ page.description}}
+                    {{ guide.text }}
                 </div>
                 <div class="hero-buttons">
-                    {% if page.previous %}
-                    <a href="{{ page.previous-href | relative_url }}" class="getting-started-nav btn btn-rounded button button-dark button-rounded">
-                        <i class="las la-arrow-left left"></i>&nbsp;{{ page.previous }}</a>
-                    {% endif %} {% if page.next %}
-                    <a href="{{ page.next-href | relative_url }}" class="getting-started-nav btn btn-rounded button button-dark button-rounded">
-                {{ page.next }}&nbsp;<i class="las la-arrow-right"></i></a> {% endif %}
+                    {% if guide-prev %}
+                    <a href="{{ guide-prev.url | relative_url }}" class="getting-started-nav btn btn-rounded button button-dark button-rounded">
+                        <i class="las la-arrow-left left"></i>&nbsp;{{ guide-prev.title }}</a>
+                    {% endif %}
+                    {% if guide-next %}
+                    <a href="{{ guide-next.url | relative_url }}" class="getting-started-nav btn btn-rounded button button-dark button-rounded">
+                        {{ guide-next.title }}&nbsp;<i class="las la-arrow-right"></i></a>
+                    {% else %}
+                    <a href="{{ '/guides' | relative_url }}" class="getting-started-nav btn btn-rounded button button-dark button-rounded">All Guides</a>
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -30,9 +55,33 @@
         <div class="col-md-9 content">
             {{ content }}
         </div>
-        <div class="col-md-3 col-md-offset-1 toc-container d-sm-none d-md-block">
-            <nav class="page-toc toc nav flex-column" id="toc">
+        <div class="col-md-3 toc-container d-sm-none d-md-block">
+            <nav class="page-toc toc nav sticky-top" id="toc">
+                {% if page.show-toc != false %}
+                <h4>Table of Content</h4>
                 {{ page.document | tocify_asciidoc }}
+                {% endif %}
+
+                {% if guide.related.size > 0 %}
+                <h4>Related content</h4>
+                <ul>
+                    {% for g in guide.related %}
+                    <li>
+                        {% if g.guide %}
+                            {% if site.data.guides[g.guide].url %}
+                                <a href="{{ site.data.guides[g.guide].url | relative_url }}">{{ site.data.guides[g.guide].title }}</a>
+                            {% else %}
+                                <a href="{{ site.baseurl }}/guides/{{ g.guide }}">{{ site.data.guides[g.guide].title }}</a>
+                            {% endif %}
+                        {% endif %}
+
+                        {% if g.url %}
+                        <a href="{{ g.url }}">{{ g.text }}</a>
+                        {% endif %}
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
             </nav>
         </div>
     </div>
@@ -41,15 +90,28 @@
 
 
 <div class="footer-buttons gs ">
-    <div class="container ">
-        <div class="row ">
-            <div class="col-12 ">
-                {% if page.previous %}
-                <a href="{{ page.previous-href | relative_url }} " class="previous ">
-                    <i class="fas fa-arrow-left "></i>&nbsp;{{ page.previous }}</a>
-                {% endif %} {% if page.next %}
-                <a href="{{ page.next-href | relative_url }} " class="next ">
-    {{ page.next }}&nbsp;<i class="fas fa-arrow-right "></i></a> {% endif %}
+    <div class="container">
+        <div class="row">
+                {% if guide-prev %}
+            <div class="col align-self-start">
+                <a href="{{ guide-prev.url | relative_url }}" class="btn btn-rounded button button-dark button-rounded">
+                    <i class="las la-arrow-left left"></i>&nbsp;{{ guide-prev.title }}</a>
+            </div>
+                {% else %}
+            <div class="col align-self-start">
+                &nbsp;
+            </div>
+                {% endif %}
+
+            <div class="col align-self-center text-center">
+                <a href="{{ '/guides' | relative_url }}" class="btn btn-rounded button button-dark button-rounded">All Guides</a>
+            </div>
+
+            <div class="col align-self-end">
+                {% if guide-next %}
+                <a href="{{ guide-next.url | relative_url }}" class="btn btn-rounded button button-dark button-rounded float-right">
+                    {{ guide-next.title }}&nbsp;<i class="las la-arrow-right"></i></a>
+                {% endif %}
             </div>
         </div>
 

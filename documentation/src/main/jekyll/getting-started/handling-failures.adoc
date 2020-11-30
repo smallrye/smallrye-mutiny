@@ -1,13 +1,6 @@
 :page-layout: getting-started
-:page-title: Handling failures
-:page-description: Learn how you can recover from failures
-:page-previous: Transforming items into Uni and Multi
-:page-previous-href: /getting-started/transforming-items-async
-:page-next: Retrying on failures
-:page-next-href: /getting-started/retry
-:page-liquid: 
-
-== Handling failures
+:page-guide-id: handling-failures
+:page-liquid:
 
 Mutiny provides several operators to handle failures.
 
@@ -23,7 +16,7 @@ When such an event is received, you can:
 
 If you don't handle the failure event, it is propagated downstream until a stage handles the failure or reaches the final subscriber. 
 
-=== Observing failures
+== Observing failures
 
 It can be useful to execute some custom action when a failure happens. 
 For example, you can log the failure:
@@ -40,7 +33,7 @@ Multi<String> m = multi
 TIP: You can also execute an asynchronous action using `onFailure().call(Function<Throwable, Uni<?>)`.
 The received failure will be propagated downstream when the `Uni` produced by the passed function emits its item.
 
-=== Transforming failures
+== Transforming failures
 
 Another useful action on failure is to transform the failure into a _more meaningfull_ failure.
 
@@ -53,7 +46,7 @@ Uni<String> u = uni
     new ServiceUnavailableException(failure));
 ----
 
-=== Recovering using fallback item(s)
+== Recovering using fallback item(s)
 
 In general, upon failure, you want to recover. 
 The first approach is to recover by replacing the failure with an item:
@@ -73,7 +66,7 @@ For the downstream, it didn't fail; it gets the fallback item instead.
 However, don't forget that failures are terminal!
 So for `Multi`, the downstream receives the fallback item followed by the completion signal, as no more items can be produced.
 
-=== Completing on failure
+== Completing on failure
 
 When observing a `Multi` you can replace the failure with the completion signal:
 
@@ -85,7 +78,7 @@ Multi<T> m = multi
 
 The downstream won't see the failure, just the completion event.
 
-=== Switching to another stream
+== Switching to another stream
 
 On failure, you may want to switch to an alternate stream.
 When the failure is received, it subscribes to this other stream and propagates the items from this stream instead:

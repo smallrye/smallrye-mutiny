@@ -1,13 +1,6 @@
 :page-layout: getting-started
-:page-title: Transforming items
-:page-description: Learn how to (synchronously) transform received item
-:page-previous: Creating Multis
-:page-previous-href: /getting-started/creating-multis
-:page-next: Transforming items into streams
-:page-next-href: /getting-started/transforming-items-async
-:page-liquid: 
-
-== Transforming items synchronously
+:page-guide-id: transforming-items
+:page-liquid:
 
 Both `Unis` and `Multis` emit _items_.
 One of the most common operations you will do is transforming these items using a synchronous 1-to-1 function.
@@ -17,7 +10,7 @@ It calls the passed function for each item and produces the result as an item wh
 
 image::transform-operator.png[Transforming items synchronously, role="center"]
 
-=== Transforming items produced by a Uni
+== Transforming items produced by a Uni
 
 Let's imagine you have a `Uni<String>,` and you want to capitalize the received `String`.
 Implementing this transformation is done as follows:
@@ -32,7 +25,7 @@ uni
     item -> System.out.println(item)); // Print HELLO 
 ----
 
-=== Transforming items produced by a Multi
+== Transforming items produced by a Multi
 
 The only difference for `Multi` is that the function is called for each item:
 
@@ -53,12 +46,12 @@ multi
     item -> System.out.println(item)); // Print A B C   
 ----
 
-=== What if the transformation failed?
+== What if the transformation failed?
 
 If the transformation throws an exception, that exception is caught and passed to the downstream subscriber as a _failure_ event.
 It also means that the subscriber won't get further item after that failure.
 
-=== Chaining multiple transformations
+== Chaining multiple transformations
 
 You can chain multiple transformations:
 

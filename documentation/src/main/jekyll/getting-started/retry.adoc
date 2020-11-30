@@ -1,11 +1,6 @@
 :page-layout: getting-started
-:page-title: Retrying on failure
-:page-description: Learn how you to retry on failures
-:page-previous: Handling failures
-:page-previous-href: /getting-started/handling-failures
-:page-next: Collecting items
-:page-next-href: /getting-started/collecting-items
-:page-liquid: 
+:page-guide-id: retry
+:page-liquid:
 
 == Retrying on failures
 

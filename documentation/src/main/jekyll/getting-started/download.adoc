@@ -1,12 +1,9 @@
 :page-layout: getting-started
-:page-title: Getting Started with Mutiny
-:page-description: To start using Mutiny, you just need to drop a JAR in your classpath
-:page-next: First lines of code
-:page-next-href: /getting-started/first-lines-of-code
+:page-guide-id: download
 :page-liquid: 
 
 [[dependency]]
-=== Using Mutiny in a Java application
+== Using Mutiny in a Java application
 
 Add the _dependency_ to your project:
 
@@ -62,7 +59,7 @@ Or directly add the dependency to your `pom.xml`
 Follow the https://quarkus.io/guides/getting-started-reactive[Getting started with reactive] guide for more details.
 
 [[vertx]]
-=== Using Mutiny with Eclipse Vert.x
+== Using Mutiny with Eclipse Vert.x
 
 API bindings for many popular modules and clients from the https://vertx.io[Vert.x] stack are available from the https://github.com/smallrye/smallrye-reactive-utils[Smallrye Reactive Utilities project].
 
@@ -79,6 +76,6 @@ Here is how to add a dependency to the Vert.x core library with Mutiny bindings:
 
 
 [[download]]
-=== Direct Download
+== Direct Download
 
 You can also download the Mutiny JARs directly from https://search.maven.org/search?q=g:io.smallrye.reactive%20AND%20a:mutiny*%20AND%20v:{{ site.data.versions.mutiny_version }}[Maven Central].

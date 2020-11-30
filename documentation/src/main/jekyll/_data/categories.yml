@@ -1,3 +1,14 @@
+- name: Getting Started
+  guides:
+    - download
+    - first-lines-of-code
+    - creating-unis
+    - creating-multis
+    - transforming-items
+    - transforming-items-async
+    - handling-failures
+    - retry
+
 - name: Operators
   guides:
     - merge-concat
