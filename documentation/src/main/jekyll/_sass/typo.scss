@@ -4,6 +4,7 @@ a {
   text-decoration: none;
   border-bottom: .0625em solid inherit;
   padding-bottom: .125em;
+
   &:hover {
     text-decoration: none;
     color: $link-color-hover;
@@ -46,4 +47,8 @@ h2,
   font-weight: 700;
   border-bottom: $border-color;
   padding-bottom: .5rem;
+}
+
+input {
+  margin: 2.9rem 0 .9375rem 0;
 }

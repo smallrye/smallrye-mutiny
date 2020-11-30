@@ -30,4 +30,15 @@
     <script src="https://cdn.jsdelivr.net/gh/cferdinandi/gumshoe@4/dist/gumshoe.polyfills.min.js"></script>
     <script src="{{ '/assets/js/hl.js' | relative_url }}" type="text/javascript"></script>
     <script src="{{ '/assets/js/scrollspy.js' | relative_url }}" type="text/javascript"></script>
+
+    <script>
+        $(document).ready(function(){
+            $("#search").on("keyup", function() {
+                var value = $(this).val().toLowerCase();
+                $(".guide").filter(function() {
+                    $(this).toggle($(this).attr("data-search").toLowerCase().indexOf(value) > -1)
+                });
+            });
+        });
+    </script>
 </footer>
