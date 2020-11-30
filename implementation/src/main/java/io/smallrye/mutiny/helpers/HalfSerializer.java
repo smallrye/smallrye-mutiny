@@ -27,7 +27,7 @@ public final class HalfSerializer {
      */
     public static <T> void onNext(Subscriber<? super T> subscriber, T item,
             AtomicInteger wip, AtomicReference<Throwable> container) {
-        if (wip.get() == 0 && wip.compareAndSet(0, 1)) {
+        if (wip.compareAndSet(0, 1)) {
             subscriber.onNext(item);
             if (wip.decrementAndGet() != 0) {
                 Throwable ex = Subscriptions.terminate(container);
