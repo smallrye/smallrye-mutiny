@@ -33,7 +33,11 @@ layout: base
                 {% for guide in  category.guides %}
                 {% assign actual = site.data.guides[guide] %}
                 <div class="guide col-md-6">
+                    {% if actual.url %}
+                    <h5 class="guide-title"><i class="las la-chevron-right"></i> <a href="{{ actual.url | relative_url }}">{{ actual.title }}</a></h5>
+                    {% else %}
                     <h5 class="guide-title"><i class="las la-chevron-right"></i> <a href="{{ site.baseurl }}/guides/{{ guide }}">{{ actual.title }}</a></h5>
+                    {% endif %}
                     <p class="guide-description">{{ actual.text }}</p>
                     <p class="guide-labels">
                         {% for label in actual.labels %}
