@@ -118,10 +118,9 @@ public class RxJavaTest<T> {
                 .converter(UniRxConverters.fromMaybe(), emptyMaybe);
         // end::rx-uni-create-single[]
 
-        s = multiFromCompletable
-                .onItem().transform(Object::toString)
+        Void v = multiFromCompletable
                 .await().indefinitely();
-        assertThat(s).isNull();
+        assertThat(v).isNull();
 
         s = multiFromSingle
                 .onItem().transform(Object::toString)
@@ -134,7 +133,7 @@ public class RxJavaTest<T> {
         assertThat(s).isEqualTo("a");
 
         s = multiFromEmptyMaybe
-                .onItem().transform(Object::toString)
+                .onItem().castTo(String.class)
                 .await().indefinitely();
         assertThat(s).isNull();
     }
