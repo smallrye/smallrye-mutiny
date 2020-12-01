@@ -1,8 +1,11 @@
 package guides;
 
+import guides.extension.SystemOut;
+import guides.extension.SystemOutCaptureExtension;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.subscription.Cancellable;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
@@ -11,22 +14,27 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.awaitility.Awaitility.await;
 
-@SuppressWarnings("ConstantConditions")
+@SuppressWarnings({ "ConstantConditions", "Convert2MethodRef" })
+@ExtendWith(SystemOutCaptureExtension.class)
 public class CreatingUniTest {
 
     @Test
-    void pipeline() {
+    void pipeline(SystemOut out) {
         // tag::pipeline[]
         Uni.createFrom().item(1)
                 .onItem().transform(i -> "hello-" + i)
                 .onItem().delayIt().by(Duration.ofMillis(100))
                 .subscribe().with(System.out::println);
         // end::pipeline[]
+        await().untilAsserted(() ->
+                assertThat(out.get()).contains("hello-1")
+        );
     }
 
     @Test
-    void subscription() {
+    void subscription(SystemOut out) {
         Uni<Integer> uni = Uni.createFrom().item(1);
         // tag::subscription[]
         Cancellable cancellable = uni
@@ -35,6 +43,7 @@ public class CreatingUniTest {
                         failure -> System.out.println("Failed with " + failure));
         // end::subscription[]
         assertThat(cancellable).isNotNull();
+        assertThat(out.get()).contains("1").doesNotContain("Failed");
     }
 
     @Test
@@ -74,7 +83,7 @@ public class CreatingUniTest {
 
         {
             // tag::null[]
-            Uni<Void> uni  = Uni.createFrom().nullItem();
+            Uni<Void> uni = Uni.createFrom().nullItem();
             // end::null[]
             assertThat(uni.await().indefinitely()).isNull();
         }

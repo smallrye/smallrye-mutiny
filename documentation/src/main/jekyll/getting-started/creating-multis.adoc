@@ -1,6 +1,8 @@
 :page-layout: getting-started
 :page-liquid:
 :page-guide-id: creating-multis
+:include_dir: ../../../../src/test/java/guides
+
 
 A `Multi` represents a _stream_ of data.
 A stream can emit 0, 1, n, or an infinite number of items.
@@ -33,11 +35,7 @@ The following snippet provides a simple example of pipeline using `Multi`:
 .Example of pipeline using Multi
 [source, java, indent=0]
 ----
-Multi.createFrom().items(1, 2, 3, 4, 5)
-  .onItem().transform(i -> i * 2)
-  .transform().byTakingFirstItems(3)
-  .onFailure().recoverWithItem(0)
-  .subscribe().with(System.out::println);
+include::{include_dir}/CreatingMultiTest.java[tag=pipeline]
 ----
 
 You can see the `Multi` javadoc https://javadoc.io/static/io.smallrye.reactive/mutiny/{{ site.data.versions.mutiny_version }}/index.html?io/smallrye/mutiny/Multi.html[here].
@@ -51,11 +49,7 @@ When subscribing to a `Multi,` you can pass an item callback (invoked when the i
 
 [source, java, indent=0]
 ----
-Cancellable cancellable = multi
-  .subscribe().with(
-    item -> System.out.println(item),
-    failure -> System.out.println("Failed with " + failure),
-    () -> System.out.println("Completed"));
+include::{include_dir}/CreatingMultiTest.java[tag=subscription]
 ----
 
 Note the returned `Cancellable`: this object allows canceling the stream if need be.
@@ -67,22 +61,18 @@ Use https://javadoc.io/static/io.smallrye.reactive/mutiny/{{ site.data.versions.
 
 For instance you can create a `Multi` from known items or from an `Iterable`:
 
-[source, java]
+[source, java, indent=0]
 ----
-Uni<Integer> uni = Uni.createFrom().items(1, 2, 3, 4);
-
-Multi.createFrom().iterable(Arrays.asList(1, 2, 3, 4, 5))
+include::{include_dir}/CreatingMultiTest.java[tag=simple]
 ----
 
 Every subscriber receives the same set of items (`1`, `2`... `5`) just after the subscription.
 
 You can also use `Suppliers`:
 
-[source, java]
+[source, java, indent=0]
 ----
-AtomicInteger counter = new AtomicInteger();
-Multi.createFrom().items(() ->
-  IntStream.range(counter.getAndIncrement(), counter.get() * 2).boxed())
+include::{include_dir}/CreatingMultiTest.java[tag=supplier]
 ----
 
 The `Supplier` is called for every subscriber, so each of them will get different values.
@@ -98,13 +88,9 @@ Streams can also fail.
 Failures are used to indicate to the downstream subscribers that the source encountered a terrible error and cannot continue emitting items.
 Create failed `Multi` instances with:
 
-[source, java]
+[source, java, indent=0]
 ----
-// Pass an exception directly:
-Multi<Integer> failed1 = Multi.createFrom().failure(new Exception("boom"));
-
-// Pass a supplier called for every subscriber:
-Multi<Integer> failed2 = Multi.createFrom().failure(() -> new Exception("boom"));
+include::{include_dir}/CreatingMultiTest.java[tag=failed]
 ----
 
 == Creating empty Multis
@@ -116,9 +102,9 @@ Of course, the completion event can happen even if there are no items, creating 
 
 You can create such a stream using:
 
-[source, java]
+[source, java, indent=0]
 ----
-Multi<T> multi = Multi.createFrom().empty();
+include::{include_dir}/CreatingMultiTest.java[tag=empty]
 ----
 
 == Creating Multis using an emitter (_advanced_)
@@ -126,14 +112,9 @@ Multi<T> multi = Multi.createFrom().empty();
 You can create a `Multi` using an emitter.
 This approach is useful when integrating callback-based APIs:
 
-[source, java]
+[source, java, indent=0]
 ----
-Multi.createFrom().emitter(em -> {
-  em.emit(1);
-  em.emit(2);
-  em.emit(3);
-  em.complete();
-});
+include::{include_dir}/CreatingMultiTest.java[tag=emitter]
 ----
 
 The emitter can also send a failure.
@@ -143,9 +124,9 @@ It can also get notified of cancellation to, for example, stop the work in progr
 
 You can create a stream that emit a _ticks_ periodically:
 
-[source, java]
+[source, java, indent=0]
 ----
-Multi<Long> ticks = Multi.createFrom().ticks().every(Duration.ofMillis(100));
+include::{include_dir}/CreatingMultiTest.java[tag=ticks]
 ----
 
 The downstream receives a `long,` which is a counter. 

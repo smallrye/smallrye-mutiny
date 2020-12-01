@@ -35,7 +35,7 @@ transforming-items:
     - guide: transforming-items-async
 
 transforming-items-async:
-  title: Transforming items into Uni and Multi
+  title: Transforming items to Uni/Multi
   text: Learn how to transform received item into asynchronous streams.
   url: getting-started/transforming-items-async
   related:

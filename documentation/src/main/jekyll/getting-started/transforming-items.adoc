@@ -1,6 +1,8 @@
 :page-layout: getting-started
 :page-guide-id: transforming-items
 :page-liquid:
+:include_dir: ../../../../src/test/java/guides
+
 
 Both `Unis` and `Multis` emit _items_.
 One of the most common operations you will do is transforming these items using a synchronous 1-to-1 function.
@@ -8,7 +10,8 @@ One of the most common operations you will do is transforming these items using 
 To achieve this, you use `onItem().transform(Function<T, U>)`.
 It calls the passed function for each item and produces the result as an item which is propagaed downstream.
 
-image::transform-operator.png[Transforming items synchronously, role="center"]
+[role=reduce]
+image::transform-operator.png[Transforming items synchronously]
 
 == Transforming items produced by a Uni
 
@@ -17,12 +20,7 @@ Implementing this transformation is done as follows:
 
 [source, java, indent=0]
 ----
-Uni<String> uni = Uni.createFrom().item("hello");
-
-uni
-  .onItem().transform(i -> i.toUpperCase())    
-  .subscribe().with(
-    item -> System.out.println(item)); // Print HELLO 
+include::{include_dir}/TransformItemsTest.java[tag=uni-transform]
 ----
 
 == Transforming items produced by a Multi
@@ -31,19 +29,14 @@ The only difference for `Multi` is that the function is called for each item:
 
 [source, java, indent=0]
 ----
-Multi<String> m = multi
-  .onItem().transform(i -> i.toUpperCase());
+include::{include_dir}/TransformItemsTest.java[tag=multi-transform]
 ----
 
 The produced items are passed to the downstream subscriber:
 
 [source, java, indent=0]
 ----
-Multi<String> multi = Multi.createFrom().items("a", "b", "c");
-multi
-  .onItem().transform(i -> i.toUpperCase())
-  .subscribe().with(
-    item -> System.out.println(item)); // Print A B C   
+include::{include_dir}/TransformItemsTest.java[tag=multi-transform-2]
 ----
 
 == What if the transformation failed?
@@ -57,7 +50,5 @@ You can chain multiple transformations:
 
 [source, java, indent=0]
 ----
-Uni<String> u = uni
-  .onItem().transform(i -> i.toUpperCase())
-  .onItem().transform(i -> i + "!");
+include::{include_dir}/TransformItemsTest.java[tag=chain]
 ----
