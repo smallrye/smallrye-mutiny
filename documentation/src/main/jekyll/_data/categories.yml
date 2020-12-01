@@ -12,6 +12,7 @@
 - name: Operators
   guides:
     - merge-concat
+    - collecting-items
     - combining-items
     - filter
     - take-skip

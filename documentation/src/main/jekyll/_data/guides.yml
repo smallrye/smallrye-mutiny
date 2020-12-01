@@ -40,7 +40,7 @@ transforming-items-async:
   url: getting-started/transforming-items-async
   related:
     - guide: transforming-items
-# Add merge - concat guide
+    - guide: merge-concat
 
 handling-failures:
   title: Handling failures
@@ -88,6 +88,16 @@ filter:
     - guide: take-skip
     - url: https://javadoc.io/doc/io.smallrye.reactive/mutiny/latest/io/smallrye/mutiny/groups/MultiTransform.html
       text: <tt>MultiTransform</tt>
+
+collecting-items:
+  title: Collecting items from Multi
+  text: Learn how to collect items from a multi.
+  labels:
+    - beginner
+  related:
+    - guide: filter
+    - url: https://javadoc.io/doc/io.smallrye.reactive/mutiny/latest/io/smallrye/mutiny/groups/MultiCollect.html
+      text: <tt>MultiCollect</tt>
 
 take-skip:
   title: Take or Skip the first or last items
