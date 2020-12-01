@@ -12,8 +12,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.entry;
+import static org.assertj.core.api.Assertions.*;
 
 @SuppressWarnings("Convert2MethodRef")
 public class CollectingItemsTest {
@@ -26,6 +25,14 @@ public class CollectingItemsTest {
        // end::list[]
 
        assertThat(uni.await().indefinitely()).containsExactly("a", "b", "c");
+
+       // tag::first[]
+       Uni<String> first = multi.collectItems().first();
+       Uni<String> last = multi.collectItems().last();
+       // end::first[]
+
+       assertThat(first.await().indefinitely()).isEqualTo("a");
+       assertThat(last.await().indefinitely()).isEqualTo("c");
    }
 
    @Test
@@ -34,10 +41,10 @@ public class CollectingItemsTest {
        Multi<String> multi = getMulti();
        Uni<Map<String, String>> uni =
                multi.collectItems()
-                       .asMap(item -> getKeyForItem(item));
+                       .asMap(item -> getUniqueKeyForItem(item));
        // end::map[]
 
-       assertThat(uni.await().indefinitely()).hasSize(2);
+       assertThat(uni.await().indefinitely()).hasSize(3);
    }
 
     @Test
@@ -76,6 +83,10 @@ public class CollectingItemsTest {
         } else {
             return "a";
         }
+    }
+
+    private String getUniqueKeyForItem(String item) {
+        return item;
     }
 
     private Multi<String> getMulti() {

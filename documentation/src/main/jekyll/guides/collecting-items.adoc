@@ -75,3 +75,12 @@ For example, in the next example, count the number of items, and produce the fin
 ----
 include::{include_dir}/CollectingItemsTest.java[tag=collector]
 ----
+
+== Getting the first and last items
+
+While they are not strictly speaking collecting items, the `collectItems().first()` and `collectItems().last()` allows retrieving the first and last item from a `Multi`:
+
+[source, java, indent=0]
+----
+include::{include_dir}/CollectingItemsTest.java[tag=first]
+----
