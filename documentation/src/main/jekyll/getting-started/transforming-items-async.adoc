@@ -1,6 +1,7 @@
 :page-layout: getting-started
 :page-guide-id: transforming-items-async
-:page-liquid: 
+:page-liquid:
+:include_dir: ../../../../src/test/java/guides
 
 The previous examples illustrated how to transform each item from a stream into another item. 
 Yet, there are cases where we need to go beyond this, for example:
@@ -11,7 +12,8 @@ Yet, there are cases where we need to go beyond this, for example:
 Having the possibility to transform an item into a stream gives us many opportunities. 
 To implement such transformations, we use `onItem().transformToUni(Funcction<T, Uni<O>>` and `onItem().transformToMulti(Function<T, Multi<O>>)`
 
-image::transform-to-uni.png[Transforming items into Uni, role="center"]
+[role=reduce]
+image::transform-to-uni.png[Transforming items into Uni]
 
 == Uni - Transforming an item into a Uni
 
@@ -21,15 +23,14 @@ Calling a remote service is an asynchronous action represented by a `Uni`, as in
 
 [source, java, indent=0]
 ----
-Uni<String> invokeRemoteGreetingService(String name);
+include::{include_dir}/TransformItemsAsyncTest.java[tag=service]
 ----
 
 To call this service, you need to transform the item received from the first `Uni` into the `Uni` returned by the service:
 
 [source, java, indent=0]
 ----
-Uni<String> result = uni
-  .onItem().transformToUni(name -> invokeRemoteGreetingService(name));
+include::{include_dir}/TransformItemsAsyncTest.java[tag=call]
 ----
 
 This snippet _chains_ the first `Uni` with another one. 
@@ -37,12 +38,7 @@ The returned `Uni` (`result`) emits the result from the remote service or a fail
 
 [source, java, indent=0]
 ----
-Uni<String> uni = Uni.createFrom().item("Cameron");
-Uni<String> result = uni
-  .onItem().transformToUni(name -> invokeRemoteGreetingService(name))
-  .subscribe().with(
-    item -> System.out.println(item) // Print "Hello Cameron",
-    fail -> fail.printStackTrace()); // Print the failure stack trace
+include::{include_dir}/TransformItemsAsyncTest.java[tag=chain]
 ----
 
 == Uni - Transforming an item into a Multi
@@ -52,22 +48,18 @@ You may want to transform the received item into a stream which is... a `Multi`!
 
 [source, java, indent=0]
 ----
-Uni<String> result = uni
-  .onItem().transformToMulti(item -> Multi.createFrom().items(item, item));
+include::{include_dir}/TransformItemsAsyncTest.java[tag=uni-to-multi]
 ----
 
 This code creates a stream of two elements, duplicating the received item. 
 
 [source, java, indent=0]
 ----
-Uni<String> uni = Uni.createFrom().item("Cameron");
-Uni<String> result = uni
-  .onItem().transformToMulti(item -> Multi.createFrom().items(item, item))
-  .subscribe().with(
-    item -> System.out.println(item)); // Called twice   
+include::{include_dir}/TransformItemsAsyncTest.java[tag=uni-to-multi-2]
 ----
 
-image::uni-transform-to-multi.png[Transforming item into a Multi, role="center"]
+[role=reduce]
+image::uni-transform-to-multi.png[Transforming item into a Multi]
 
 The produced `Multi` objects can of course be more complicated that that and emit items in an asynchronous fashion.
 
@@ -97,11 +89,7 @@ To implement the scenario from the last section, you will use `onItem().transfor
 
 [source, java, indent=0]
 ----
-Multi<String> m = multi
-  .onItem().transformToUniAndMerge(name -> invokeRemoteGreetingService(name));
-
-Multi<String> m = multi
-  .onItem().transformToUniAndConcatenate(name -> invokeRemoteGreetingService(name));    
+include::{include_dir}/TransformItemsAsyncTest.java[tag=merge-concat]
 ----
 
 == Multi - Transforming an item into a Multi
@@ -111,11 +99,5 @@ The produced `Multi` objects are either _merged_ or _concatenated_:
 
 [source, java, indent=0]
 ----
-Multi<String> m = multi
-  .onItem().transformToMultiAndMerge(item -> functionProducingAMulti(item));
-
-Multi<String> m = multi
-  .onItem().transformToUniAndConcatenate(item -> functionProducingAMulti(item));    
+include::{include_dir}/TransformItemsAsyncTest.java[tag=merge-concat-multi]
 ----
-
-The next page gives more details about merge and concatenation.

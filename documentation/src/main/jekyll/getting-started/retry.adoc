@@ -1,6 +1,7 @@
 :page-layout: getting-started
 :page-guide-id: retry
 :page-liquid:
+:include_dir: ../../../../src/test/java/guides
 
 == Retrying on failures
 
@@ -15,12 +16,9 @@ NOTE: If, despite multiple attempts, it still fails, the failure is propagated d
 
 To retry on failure, use `onFailure().retry()`:
 
-[source, java]
+[source, java, indent=0]
 ----
-Uni<T> u = uni
-  .onFailure().retry().atMost(3);
-Multi<T> m = multi
-  .onFailure().retry().atMost(3);
+include::{include_dir}/RetryTest.java[tag=retry-at-most]
 ----
 
 You pass the number of retries as a parameter.
@@ -35,19 +33,16 @@ When using remote services, it is often better to delay a bit the attempts.
 Mutiny provides a method to configure an exponential backoff: a growing delay between retries.
 Configure the exponential backoff as follows:
 
-[source, java]
+[source, java, indent=0]
 ----
-Uni<T> u = uni
-  .onFailure().retry()
-    .withBackOff(Duration.ofMillis(100), Duration.ofSeconds(5))
-    .atMost(10);
+include::{include_dir}/RetryTest.java[tag=retry-backoff]
 ----
 
 The backoff is configured with the initial and max delay.
 Optionally, you can also configure a jitter to add a pinch of randomness to the delay.
 
 When using exponential backoff, you may not want to configure the max number of attempts (`atMost`), but a deadline.
-To do so use either `expireIn` or `expireAt`.
+To do so, use either `expireIn` or `expireAt`.
 
 === Deciding to retry
 
@@ -57,10 +52,7 @@ This method accepts a predicate called after every failure.
 If the predicate returned `true,` it retries.
 Otherwise, it stops retrying and propagates the last failure downstream:
 
-[source, java]
+[source, java, indent=0]
 ----
-uni
-  .onFailure().retry()
-    .withBackOff(Duration.ofMillis(100), Duration.ofSeconds(5))
-    .until(f -> shouldWeRetry(f));
+include::{include_dir}/RetryTest.java[tag=retry-until]
 ----
