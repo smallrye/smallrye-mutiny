@@ -38,6 +38,8 @@
     &:hover {
         color: $navbar-link-hover-color;
     }
+
+
 }
 
 .nav-link {
@@ -45,6 +47,11 @@
     &:hover {
         color: $navbar-link-hover-color !important;
     }
+}
+
+.active {
+    font-weight: 900;
+    border-bottom: 2px solid $navbar-link-color;
 }
 
 .navbar-toggler-icon {

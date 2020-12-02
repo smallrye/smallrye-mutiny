@@ -1,3 +1,19 @@
+{% assign home-active="" %}
+{% assign philosophy-active="" %}
+{% assign getting-started-active="" %}
+{% assign guides-active="" %}
+{% if page.url == '/' %}
+    {% assign home-active="active" %}
+{% elsif page.url contains '/index.html' %}
+    {% assign home-active="active" %}
+{% elsif page.url contains 'philosophy' %}
+    {% assign philosophy-active="active" %}
+{% elsif page.url contains '/getting-started/' %}
+    {% assign getting-started-active="active" %}
+{% elsif page.url contains '/guides' %}
+    {% assign guides-active="active" %}
+{% endif %}
+
 <header class="header masthead mb-auto">
     <div class="container">
         <nav class="navbar navbar-dark navbar-expand-lg">
@@ -9,10 +25,10 @@
 
             <div class="collapse navbar-collapse" id="toggler">
                 <ul class="navbar-nav ml-auto mr-0 mt-2 mt-lg-0">
-                    <li class="nav-item active"><a class="nav-link" href="{{ '/index.html' | relative_url }}">Home</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{{ '/pages/philosophy' | relative_url }}">Philosophy</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{{ '/getting-started/download' | relative_url }}">Getting started</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{{ '/guides' | relative_url }}">Guides</a></li>
+                    <li class="nav-item"><a class="nav-link {{ home-active }}" href="{{ '/index.html' | relative_url }}">Home</a></li>
+                    <li class="nav-item"><a class="nav-link {{ philosophy-active }}" href="{{ '/pages/philosophy' | relative_url }}">Philosophy</a></li>
+                    <li class="nav-item"><a class="nav-link {{ getting-started-active }}" href="{{ '/getting-started/download' | relative_url }}">Getting started</a></li>
+                    <li class="nav-item"><a class="nav-link {{ guides-active }}" href="{{ '/guides' | relative_url }}">Guides</a></li>
                     <li class="nav-item"><a href="https://github.com/smallrye/smallrye-mutiny" target="_blank" title="Github"><i
                             class="lab la-github la-2x"></i></a></li>
                     <li class="nav-item"><a href="https://stackoverflow.com/questions/tagged/mutiny" target="_blank"
