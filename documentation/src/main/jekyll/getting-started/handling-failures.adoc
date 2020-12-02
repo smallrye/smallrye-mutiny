@@ -13,9 +13,12 @@ When such an event is received, you can:
 * propagate the failure downstream (default), or
 * transform the failure into another failure, or
 * recover from it by switching to another stream, passing a fallback item, or completing, or
-* retrying (cover in the /getting-started/retries[next guide])
+* retrying (covered in the next guide)
 
-If you don't handle the failure event, it is propagated downstream until a stage handles the failure or reaches the final subscriber. 
+If you don't handle the failure event, it is propagated downstream until a stage handles the failure or reaches the final subscriber.
+
+IMPORTANT: on `Multi`, a failure cancels the subscription, meaning you will not receive any more items.
+The `retry` operator lets you re-subscribe and continue the reception.
 
 == Observing failures
 

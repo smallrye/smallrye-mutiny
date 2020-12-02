@@ -119,6 +119,17 @@ repetitions:
     - url: https://javadoc.io/doc/io.smallrye.reactive/mutiny/latest/io/smallrye/mutiny/groups/MultiTransform.html
       text: <tt>MultiTransform</tt>
 
+handling-null:
+  title: How to handle null
+  text: Learn how to execute specific actions on <em>null</em> items
+  labels:
+    - beginner
+  related:
+    - url: https://javadoc.io/static/io.smallrye.reactive/mutiny/latest/io/smallrye/mutiny/groups/UniOnNull.html
+      text: <tt>UniOnNull</tt>
+    - url: https://javadoc.io/static/io.smallrye.reactive/mutiny/latest/io/smallrye/mutiny/groups/UniOnNotNull.html
+      text: <tt>UniOnNotNull</tt>
+
 rx:
   title: Using map, flatMap and concatMap
   text: Learn how to use the traditional Reactive eXtensions methods.

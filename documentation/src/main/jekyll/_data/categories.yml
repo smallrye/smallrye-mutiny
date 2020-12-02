@@ -18,11 +18,14 @@
     - take-skip
     - repetitions
     - shortcuts
+    - handling-null
+
 - name: Integration
   guides:
     - reactive-to-imperative
     - imperative-to-reactive
     - converters
+
 - name: Misc
   guides:
     - unchecked

@@ -20,7 +20,7 @@ public class UniFailureTest {
         // tag::code[]
 
         // Transform a failure in another type of failure
-        CompletableFuture<String> res0 = uni.onFailure().apply(failure -> new MyBusinessException("oh no!"))
+        CompletableFuture<String> res0 = uni.onFailure().transform(failure -> new MyBusinessException("oh no!"))
                 .subscribeAsCompletionStage();
 
         // Recover with an item
