@@ -12,7 +12,7 @@ include::../../../src/test/java/snippets/HowToTransformTest.java[tags=sync]
 
 [NOTE]
 ====
-If your operation throws a _checked exception_, you can use the `io.smallrye.mutiny.unchecked.Unchecked` wrappers to avoid having to catch the exception in the _callback_.
+If your operation throws a _checked exception_, you can use the `io.smallrye.mutiny.unchecked.Unchecked` wrapper to avoid having to catch the exception in the _callback_.
 
 [source,java,indent=0]
 ----
@@ -84,7 +84,7 @@ include::../../../src/test/java/snippets/HowToFilterTest.java[tags=repetition]
 == Where are my map, flatMap and concatMap methods?
 
 If you are a seasoned reactive developer, you may miss the infamous `map`, `flatMap`, `concatMap` methods.
-Mutiny also proposes there methods using the most-used variants of them.
+Mutiny also proposes three methods using the most-used variants of them.
 
 [source,java,indent=0]
 ----
@@ -528,7 +528,7 @@ include::../../../src/test/java/snippets/UniBlockingTest.java[tags=code]
 ----
 
 Create an `Uni` that will supply the item using a blocking call, here the `invokeRemoteServiceUsingBlockingIO` method.
-To avoid blocking the subscriber, use `runSubscriptionOn` which switch the thread and so call `invokeRemoteServiceUsingBlockingIO` on another thread.
+To avoid blocking the subscriber, use `runSubscriptionOn` which switches the thread and so call `invokeRemoteServiceUsingBlockingIO` on another thread.
 Here we pass the default worker thread pool, but you can use your own executor.
 
 Note that `runSubscriptionOn` does not subscribe to the `Uni`.

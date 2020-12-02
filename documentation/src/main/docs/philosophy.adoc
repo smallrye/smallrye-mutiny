@@ -26,7 +26,7 @@ An entity that is both a `Publisher` and a `Subscriber` is generally named a `Pr
 
 Four types of events can flow in this direction:
 
-* subscribed - indicate that the upstream has taken into account the subscription
+* subscribed - indicates that the upstream has taken into account the subscription
 * items - events containing some _value_
 * completion - event indicating that no more items will be emitted
 * failure - event indicating that a failure has been encountered, and no more items will be emitted
@@ -45,7 +45,7 @@ In a typical scenario, a subscriber:
 1. A subscriber _subscribes_ to the upstream - the upstream receives the subscription `subscription request`, and when initialized sends the `subscribed` event to the subscriber
 2. The subscriber receives the `subscribed` event with a _subscription_ used to emit the `requests` and `cancellation` events
 3. The subscriber sends a `request` event indicating how many items it can handle at the moment, it can indicate 1, _n_, or infinite.
-4. The publisher receiving the `request` event start emitting at most _n_ item events to the subscriber
+4. The publisher receiving the `request` event starts emitting at most _n_ item events to the subscriber
 5. The subscriber can decide at anytime to request more events, or cancel the subscription
 
 
