@@ -26,7 +26,7 @@ include::{include_dir}/ImperativeToReactiveTest.java[tag="uni-runSubscriptionOn"
 ----
 
 The code above creates a Uni that will supply the item using a blocking call, here the `invokeRemoteServiceUsingBlockingIO` method.
-To avoid blocking the subscriber thread, it uses `runSubscriptionOn` which switch the thread and call `invokeRemoteServiceUsingBlockingIO` on another thread.
+To avoid blocking the subscriber thread, it uses `runSubscriptionOn` which switches the thread and call `invokeRemoteServiceUsingBlockingIO` on another thread.
 Here we pass the default worker thread pool, but you can use your own executor.
 
 [TIP]

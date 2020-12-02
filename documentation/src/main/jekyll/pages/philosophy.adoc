@@ -1,3 +1,6 @@
+:include_dir: ../../../../src/test/java/guides
+
+
 == Concepts & Philosophy
 
 Mutiny is a novel reactive programming library.
@@ -116,7 +119,7 @@ include::plantuml/philosophy-chain.puml[]
 
 Four types of events can flow in this direction:
 
-* **Subscribed** - indicate that the upstream has taken into account the subscription - more on this later,
+* **Subscribed** - indicates that the upstream has taken into account the subscription - more on this later,
 * **Items** - events containing some (business) _value_,
 * **Completion** - event indicating that the source won't emit any more items,
 * **Failure** - event telling that something terrible happened upstream and that the source cannot continue to emit items.
@@ -135,7 +138,7 @@ In a typical scenario, a subscriber:
 1. A subscriber _subscribes_ to the upstream - the upstream receive the subscription `subscription request`, and when initialized sends the `subscribed` event to the subscriber
 2. The subscriber gets the `subscribed` event with a _subscription_ used to emit the `requests` and `cancellation` events
 3. The subscriber sends a `request` event indicating how many items it can handle at this moment; it can request 1, _n_, or infinite.
-4. The publisher receiving the `request` event start emitting at most _n_ item events to the subscriber
+4. The publisher receiving the `request` event starts emitting at most _n_ item events to the subscriber
 5. The subscriber can decide at any time to request more events or to cancel the subscription
 
 [plantuml,align=center]
@@ -170,15 +173,16 @@ For example:
 .The various types of events
 [source,java,indent=0]
 ----
-include::{sourcedir}/EventsTest.java[tags=code]
+include::{include_dir}/EventsTest.java[tags=code]
 ----
 
 Of course, the methods presented in this snippet are not very interesting, although they are quite useful to trace what's going on.
 
 You can see a common pattern emerging:
-```
+[source, java]
+----
 onEvent().invoke(event -> ...)
-```
+----
 
 `invoke` is just one of the methods available. 
 Each _group_ proposes methods specific to the type of event. For example, `onFailure().recover`, `onCompletion().continueWith` and so on.
@@ -218,7 +222,7 @@ The following snippet shows how you can use `Uni` and `Multi`:
 .Usage of Uni and Multi
 [source,java,indent=0]
 ----
-include::{sourcedir}/UniMultiComparisonTest.java[tags=code]
+include::{include_dir}/UniMultiComparisonTest.java[tags=code]
 ----
 
 // You can convert `Unis` to `Multis` and vice-versa:

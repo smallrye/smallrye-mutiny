@@ -1,4 +1,4 @@
-package snippets;
+package guides;
 
 import io.smallrye.mutiny.Uni;
 import org.junit.jupiter.api.Test;

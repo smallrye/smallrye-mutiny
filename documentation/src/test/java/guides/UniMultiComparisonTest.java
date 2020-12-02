@@ -1,4 +1,4 @@
-package snippets;
+package guides;
 
 import org.junit.jupiter.api.Test;
 
@@ -36,7 +36,7 @@ public class UniMultiComparisonTest {
           .toUni() 
             .subscribe().with(
               item -> System.out.println("Received: " + item),
-              failure -> System.out.println("Failed with " + failure);
+              failure -> System.out.println("Failed with " + failure));
 
         Uni.createFrom().item("a")
           .onItem().transform(String::toUpperCase)
@@ -45,7 +45,8 @@ public class UniMultiComparisonTest {
           .toMulti() 
           .subscribe().with(
             item -> System.out.println("Received: " + item),
-            failure -> System.out.println("Failed with " + failure);
+            failure -> System.out.println("Failed with " + failure)
+        );
 
         //end::conversion[]
     }

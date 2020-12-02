@@ -90,7 +90,7 @@ public class UniTimeoutTest {
     }
 
     private Uni<? extends String> someFallbackUni() {
-        return Uni.createFrom().item("hello");
+        return Uni.createFrom().item("fallback");
     }
 
 
