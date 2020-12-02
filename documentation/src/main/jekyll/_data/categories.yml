@@ -19,6 +19,7 @@
     - repetitions
     - shortcuts
     - handling-null
+    - timeout
 
 - name: Integration
   guides:

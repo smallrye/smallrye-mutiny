@@ -120,7 +120,7 @@ repetitions:
       text: <tt>MultiTransform</tt>
 
 handling-null:
-  title: How to handle null
+  title: How to handle null?
   text: Learn how to execute specific actions on <em>null</em> items
   labels:
     - beginner
@@ -129,6 +129,16 @@ handling-null:
       text: <tt>UniOnNull</tt>
     - url: https://javadoc.io/static/io.smallrye.reactive/mutiny/latest/io/smallrye/mutiny/groups/UniOnNotNull.html
       text: <tt>UniOnNotNull</tt>
+
+timeout:
+  title: How to handle timeout?
+  text: Learn how to timeouts and deadlines.
+  labels:
+    - beginner
+  related:
+    - url: https://javadoc.io/doc/io.smallrye.reactive/mutiny/latest/io/smallrye/mutiny/groups/UniOnTimeout.html
+      text: <tt>UniOnTimeout</tt>
+
 
 rx:
   title: Using map, flatMap and concatMap
