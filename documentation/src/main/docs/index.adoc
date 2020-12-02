@@ -19,9 +19,13 @@ ifdef::basebackend-html[toc::[]]
 :sectnumlevels: 4
 
 include::intro.adoc[]
-include::getting-started.adoc[]
-include::philosophy.adoc[]
-//include::sections/converters.adoc[]
-//include::sections/decision-table.adoc[]
-include::faq.adoc[]
 
+include::getting-started.adoc[]
+
+include::philosophy.adoc[]
+
+//include::sections/converters.adoc[]
+
+//include::sections/decision-table.adoc[]
+
+include::faq.adoc[]

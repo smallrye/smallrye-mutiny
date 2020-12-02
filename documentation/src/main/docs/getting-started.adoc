@@ -45,7 +45,7 @@ Here, this `Multi` is emitting two _item_ events `hello` and `world`.
 The `onItem` and `onCompletion` lines are processing respectively the _item_ and _completion_ events emitted by the upstream.
 As a result, they also return instances of `Multi` which depending on the events received from upstream would emit events downstream.
 
-In our example, every time the Multi emits an item, we apply a method to transform this item to uppercase, and emits the resulting value.
+In our example, every time the Multi emits an item, we apply a method to transform this item to uppercase, and emit the resulting value.
 Then, when the upstream sends the `completion` event (no more items to emit), we produce a last item: `!` and send it downstream.
 Finally, we _subscribe_ to the resulting stream and for each emitted item, print it on the console.
 
