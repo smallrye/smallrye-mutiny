@@ -1,0 +1,24 @@
+:page-layout: guides
+:page-guide-id: emission-threads
+:page-liquid:
+:page-show-toc: false
+:include_dir: ../../../../src/test/java/guides/operators
+
+Except indicated otherwise, Mutiny invokes the next _stage_ using the thread emitting the event from upstream.
+So, in the following code, the _transform_ stage is invoked from the thread emitting the event.
+
+[source,java,indent=0]
+----
+include::{include_dir}/EmitOnTest.java[tags=example]
+----
+
+You can switch to another thread using the `emitOn` operator.
+The `emitOn` operator lets you switch the thread used to dispatch (upstream -> downstream) events, so items, failure and completion events.
+Just pass the _executor_ you want to use.
+
+[source,java,indent=0]
+----
+include::{include_dir}/EmitOnTest.java[tags=code]
+----
+
+NOTE: You cannot pass a specific thread, but you can implement a simple `Executor` dispatching on that specific thread, or use a _single threaded executor_.

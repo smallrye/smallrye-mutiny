@@ -20,6 +20,7 @@
     - shortcuts
     - handling-null
     - timeout
+    - emission-threads
 
 - name: Integration
   guides:
