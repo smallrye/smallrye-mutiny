@@ -197,3 +197,31 @@ converters:
   related:
     - guide: rx
     - guide: completion-stages
+
+testing:
+  title: How can I write unit / integration tests?
+  text: Learn how to test your Mutiny applications.
+  labels:
+    - intermediate
+
+plug:
+  title: Can I have custom operators?
+  text: Learn how to implement your own operator.
+  labels:
+    - advanced
+
+dropped-exceptions:
+  title: Handling dropped exceptions?
+  text: Learn how you can deal with dropped exceptions.
+  labels:
+    - advanced
+  related:
+    - guide: infrastructure
+
+infrastructure:
+  title: How to integrate Mutiny with my framework?
+  text: Learn about the default executors used by Mutiny and how to configure them.
+  labels:
+    - advanced
+  relate:
+    - guide: dropped-exceptions

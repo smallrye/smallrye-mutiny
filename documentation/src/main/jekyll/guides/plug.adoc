@@ -1,0 +1,28 @@
+:page-layout: guides
+:page-guide-id: plug
+:page-liquid:
+:page-show-toc: false
+:include_dir: ../../../../src/test/java/guides
+
+Yes, but please write operators responsibly!
+
+Both `Uni` and `Multi` support custom operators using the `plug` operator.
+Here is an example where we use a custom `Multi` operator that randomly drops items:
+
+[source,java,indent=0]
+----
+include::{include_dir}/PlugTest.java[tags=plug]
+----
+
+with the operator defined as follows:
+
+[source,java,indent=0]
+----
+include::{include_dir}/PlugTest.java[tags=custom-operator]
+----
+
+[WARNING]
+====
+Custom operators are an advanced feature: when possible please use the existing operators and use helpers such as `stage` to write readable code.
+In the case of custom `Multi` operators it is wise to test them against the _Reactive Streams TCK_.
+====

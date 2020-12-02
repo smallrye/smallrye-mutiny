@@ -31,5 +31,12 @@
 
 - name: Misc
   guides:
+    - testing
     - unchecked
     - rx
+    - plug
+
+- name: Infrastructure
+  guides:
+    - infrastructure
+    - dropped-exceptions
