@@ -148,6 +148,14 @@ emission-threads:
     - guide: reactive-to-imperative
     - guide: imperative-to-reactive
 
+completion-stages:
+  title: How to deal with Completion Stages?
+  text: Learn how to interact with CompletionStages and CompletableFutures.
+  labels:
+    - intermediate
+  related:
+    - guide: converters
+
 rx:
   title: Using map, flatMap and concatMap
   text: Learn how to use the traditional Reactive eXtensions methods.
@@ -188,3 +196,4 @@ converters:
     - intermediate
   related:
     - guide: rx
+    - guide: completion-stages
