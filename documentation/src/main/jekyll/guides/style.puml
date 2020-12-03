@@ -1,0 +1,36 @@
+skinparam dpi 300
+skinparam useBetaStyle true
+skinparam handwritten true
+allow_mixing
+
+skinparam node {
+	ArrowColor aqua
+
+	borderColor #566573
+	backgroundColor #F9E79F
+	fontName Calibri
+	fontSize 17
+	fontColor #566573
+}
+
+skinparam database {
+	borderColor #566573
+	backgroundColor #D5F5E3
+}
+
+skinparam agent {
+    backgroundColor<<frontend>> #D2B4DE
+    backgroundColor<<application>> #FAE5D3
+}
+
+skinparam arrow {
+  fontName Calibri
+  color #FF6655
+  fontColor #777777
+  thickness 2
+  fontSize 11
+}
+
+skinparam class {
+  backgroundColor #FAE5D3
+}
