@@ -139,4 +139,36 @@ public class MultiOnCancellationCallTest {
         subscriber.cancel();
         assertThat(counter.get()).isEqualTo(1);
     }
+
+    @Test
+    public void testCancellationPropagatedBeforeCompletion() {
+        AtomicBoolean invokeCalled = new AtomicBoolean();
+        AtomicBoolean callCalled = new AtomicBoolean();
+
+        Multi<Integer> multi = Multi.createFrom().items(1, 2, 3)
+                .onCancellation().invoke(() -> invokeCalled.set(true))
+                .onCancellation().invoke(() -> callCalled.set(true));
+
+        AssertSubscriber<Integer> subscriber = multi.subscribe().withSubscriber(AssertSubscriber.create());
+        subscriber.cancel();
+        subscriber.assertNotTerminated();
+        assertThat(invokeCalled.get()).isTrue();
+        assertThat(callCalled.get()).isTrue();
+    }
+
+    @Test
+    public void testCancellationNotPropagatedAfterCompletion() {
+        AtomicBoolean invokeCalled = new AtomicBoolean();
+        AtomicBoolean callCalled = new AtomicBoolean();
+
+        Multi<Integer> multi = Multi.createFrom().items(1, 2, 3)
+                .onCancellation().invoke(() -> invokeCalled.set(true))
+                .onCancellation().invoke(() -> callCalled.set(true));
+
+        AssertSubscriber<Integer> subscriber = multi.subscribe().withSubscriber(AssertSubscriber.create(69L));
+        subscriber.assertCompleted().assertItems(1, 2, 3);
+        subscriber.cancel();
+        assertThat(invokeCalled.get()).isFalse();
+        assertThat(callCalled.get()).isFalse();
+    }
 }
