@@ -20,6 +20,7 @@
     - shortcuts
     - handling-null
     - timeout
+    - delay
     - emission-threads
 
 - name: Integration

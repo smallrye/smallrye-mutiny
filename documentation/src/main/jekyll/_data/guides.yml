@@ -139,6 +139,15 @@ timeout:
     - url: https://javadoc.io/doc/io.smallrye.reactive/mutiny/latest/io/smallrye/mutiny/groups/UniOnTimeout.html
       text: <tt>UniOnTimeout</tt>
 
+delay:
+  title: How to delay events?
+  text: Learn how to artifically delays event propagation and throttle emissions.
+  labels:
+    - intermediate
+  related:
+    - url: https://javadoc.io/doc/io.smallrye.reactive/mutiny/latest/io/smallrye/mutiny/groups/UniOnItemDelay.html
+      text: <tt>UniOnItemDelay</tt>
+
 emission-threads:
   title: How to change the emission thread?
   text: Learn how to control threads used to emit events.
