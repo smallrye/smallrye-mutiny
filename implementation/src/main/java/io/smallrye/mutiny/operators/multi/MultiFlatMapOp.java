@@ -18,8 +18,6 @@ import io.smallrye.mutiny.helpers.queues.Queues;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.subscription.BackPressureFailure;
 import io.smallrye.mutiny.subscription.MultiSubscriber;
-import io.smallrye.mutiny.subscription.SafeSubscriber;
-import io.smallrye.mutiny.subscription.SerializedSubscriber;
 
 public final class MultiFlatMapOp<I, O> extends AbstractMultiOperator<I, O> {
     private final Function<? super I, ? extends Publisher<? extends O>> mapper;
@@ -55,8 +53,7 @@ public final class MultiFlatMapOp<I, O> extends AbstractMultiOperator<I, O> {
                 mainQueueSupplier,
                 requests);
 
-        upstream.subscribe(
-                Infrastructure.onMultiSubscription(upstream, new SafeSubscriber<>(new SerializedSubscriber<>(sub))));
+        upstream.subscribe(Infrastructure.onMultiSubscription(upstream, sub));
     }
 
     public static final class FlatMapMainSubscriber<I, O> extends FlatMapManager<FlatMapInner<O>>
