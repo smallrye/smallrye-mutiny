@@ -31,6 +31,12 @@ public class MultiOnCancellationInvoke<T> extends AbstractMultiOperator<T, T> {
         }
 
         @Override
+        public void onCompletion() {
+            actionInvoked.set(true);
+            super.onCompletion();
+        }
+
+        @Override
         public void cancel() {
             if (actionInvoked.compareAndSet(false, true)) {
                 try {

@@ -32,6 +32,12 @@ public class MultiOnCancellationCall<T> extends AbstractMultiOperator<T, T> {
         }
 
         @Override
+        public void onCompletion() {
+            supplierInvoked.set(true);
+            super.onCompletion();
+        }
+
+        @Override
         public void cancel() {
             execute().subscribe().with(
                     ignoredItem -> super.cancel(),
