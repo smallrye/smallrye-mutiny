@@ -21,8 +21,10 @@
     - handling-null
     - timeout
     - delay
+    - polling
     - pagination
     - emission-threads
+    - emit-subscription
 
 - name: Integration
   guides:
@@ -30,11 +32,13 @@
     - imperative-to-reactive
     - completion-stages
     - converters
+    - unicast
 
 - name: Misc
   guides:
     - testing
     - unchecked
+    - hot-streams
     - rx
     - plug
 

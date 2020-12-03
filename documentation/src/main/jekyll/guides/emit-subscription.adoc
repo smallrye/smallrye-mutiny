@@ -1,0 +1,40 @@
+:page-layout: guides
+:page-guide-id: emit-subscription
+:page-show-toc: false
+:page-liquid:
+:include_dir: ../../../../src/test/java/guides/operators
+
+== emitOn vs. runSubscriptionOn
+
+The `emitOn` and `runSubscriptionOn` are 2 operators influencing on which threads the event are dispatched.
+However, they target different types of events and different directions.
+
+`emitOn` takes events coming from upstream (items, completion, failure) and replays them downstream on a thread from the given executor.
+Consequently, it affects where the subsequent operators execute (until another `emitOn` is used):
+
+[source,java,indent=0]
+----
+include::{include_dir}/RunSubscriptionOnTest.java[tags=emitOn]
+----
+
+The previous code produces the following sequence:
+
+[plantuml,align=center]
+----
+include::emitOn-sequence.puml[]
+----
+
+`runSubscriptionOn` applies to the subscription process.
+It requests the upstream to run its subscription (call of the `subscribe` method on its own upstream) on a thread from the given executor:
+
+[source,java,indent=0]
+----
+include::{include_dir}/RunSubscriptionOnTest.java[tags=runSubscriptionOn]
+----
+
+So, if we consider the previous code snippet, it produces the following sequence:
+
+[plantuml,align=center]
+----
+include::runSubscriptionOn-sequence.puml[]
+----

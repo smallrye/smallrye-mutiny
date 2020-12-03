@@ -1,6 +1,6 @@
 :page-layout: guides
 :page-guide-id: pagination
-:page-show-toc: true
+:page-show-toc: false
 :page-liquid:
 :include_dir: ../../../../src/test/java/guides/operators
 

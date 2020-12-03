@@ -154,8 +154,17 @@ pagination:
   labels:
     - intermediate
   related:
+    - guide: polling
     - url: https://quarkus.io/blog/mutiny-pagination/
       text: Handling paginated APIs with Mutiny
+
+polling:
+  title: How to use polling?
+  text: Learn how to consume items from pollable sources.
+  labels:
+    - intermediate
+  related:
+    - guide: pagination
 
 emission-threads:
   title: How to change the emission thread?
@@ -165,6 +174,17 @@ emission-threads:
   related:
     - guide: reactive-to-imperative
     - guide: imperative-to-reactive
+    - guide: emit-subscription
+
+emit-subscription:
+  title: What's the difference between emitOn and runSubscriptionOn?
+  text: Learn how to control threads subscription threads.
+  labels:
+    - advanced
+  related:
+    - guide: reactive-to-imperative
+    - guide: imperative-to-reactive
+    - guide: emission-threads
 
 completion-stages:
   title: How to deal with Completion Stages?
@@ -243,3 +263,19 @@ infrastructure:
     - advanced
   relate:
     - guide: dropped-exceptions
+
+hot-streams:
+  title: How to create a hot stream?
+  text: Learn how to brodcast items.
+  labels:
+    - intermediate
+  related:
+    - guide: unicast
+
+unicast:
+  title: How to create use create a Multi from a non reactive source?
+  text: Learn how to use the Unicast processor.
+  labels:
+    - advanced
+  related:
+    - guide: hot-streams

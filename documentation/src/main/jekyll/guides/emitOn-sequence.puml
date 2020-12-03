@@ -1,0 +1,17 @@
+@startuml
+
+skinparam dpi 300
+skinparam useBetaStyle true
+skinparam handwritten true
+skinparam StereotypeFontSize 0
+
+participant Source as m1 #D2B4DE
+participant "emitOn(executor)" as m2 #FAE5D3
+participant "some operation" as m3 #FAE5D3
+participant "Subscriber" as subscriber #D2B4DE
+
+m1 -> m2 : onItem("a") (called thread)
+m2 -[#EFBFCC]> m3 : onItem("a") (executor thread)
+m3 -[#EFBFCC]> subscriber: onItem("A") (executor thread)
+
+@enduml

@@ -1,0 +1,17 @@
+@startuml
+
+skinparam dpi 300
+skinparam useBetaStyle true
+skinparam handwritten true
+skinparam StereotypeFontSize 0
+
+participant Source as m1 #D2B4DE
+participant "Some Operation" as m2 #FAE5D3
+participant "runSubscriptionOn(executor)" as m3 #FAE5D3
+participant "Subscriber" as subscriber #D2B4DE
+
+subscriber -> m3 : subscribe (subscriber thread)
+m3 -[#EFBFCC]> m2 : subscribe (executor thread)
+m2 -[#EFBFCC]> m1 : subscribe (executor thread)
+
+@enduml
