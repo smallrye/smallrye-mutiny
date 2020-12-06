@@ -8,6 +8,11 @@ import org.reactivestreams.Publisher;
 
 import io.smallrye.mutiny.Multi;
 
+/**
+ * Converts the upstream into another reactive type.
+ *
+ * @param <T> the type of item emitted by the upstream.
+ */
 public class MultiConvert<T> {
 
     private final Multi<T> upstream;

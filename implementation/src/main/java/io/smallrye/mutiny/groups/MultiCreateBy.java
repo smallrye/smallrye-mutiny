@@ -2,6 +2,9 @@ package io.smallrye.mutiny.groups;
 
 import io.smallrye.mutiny.Multi;
 
+/**
+ * Allows the creation of instances of {@link Multi} by merging/combining/concatenating multiple upstreams.
+ */
 public class MultiCreateBy {
     public static final MultiCreateBy INSTANCE = new MultiCreateBy();
 
@@ -39,13 +42,13 @@ public class MultiCreateBy {
      * <p>
      * The resulting {@link Multi} can:
      * <ul>
-     * <li>collects an item of every observed streams and combine them. If one of the observed stream sends the
+     * <li>collects an item of every observed streams and combines them. If one of the observed stream sends the
      * completion event, the event is propagated in the produced stream, and no other combination are emitted.</li>
-     * <li>as soon as on of the observed stream emits an item, it combine it with the latest items for the other stream.
+     * <li>as soon as on of the observed stream emits an item, it combines it with the latest items emitted by other stream.
      * the completion event is sent when all the observed streams have completed (with a completion event).</li>
      * </ul>
      * <p>
-     * The combination also allows to collect the failures and propagate a failure when all observed streams have completed
+     * The combination also allows to collect the failures and propagates a failure when all observed streams have completed
      * (or failed) instead of propagating the failure immediately.
      *
      * @return the object to configure the combination

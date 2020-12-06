@@ -14,6 +14,14 @@ import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.operators.MultiCollector;
 
+/**
+ * Collects / aggregates items from the upstream and send the resulting <em>collection</em> / structure when the
+ * upstream completes. The resulting structure is emitted through a {@link Uni}.
+ *
+ * <strong>IMPORTANT:</strong> Do not use on unbounded streams, as it would lead to {@link OutOfMemoryError}.
+ *
+ * @param <T> the type of item sent by the upstream.
+ */
 public class MultiCollect<T> {
 
     private final Multi<T> upstream;

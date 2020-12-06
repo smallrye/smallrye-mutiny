@@ -28,18 +28,18 @@ public class MultiItemCombine9<T1, T2, T3, T4, T5, T6, T7, T8, T9> extends Multi
     }
 
     /**
-     * By default, the combination logic is called with one item of each observed stream. It <em>waits</em> until
-     * all the observed streams emit an item and call the combination logic. In other words, it associated the items
-     * from different stream having the same <em>index</em>. If one of the stream completes, the produced stream also
+     * By default, the combination logic is called with one item of each observed stream. It <em>waits</em> until all
+     * the upstreams emit an item, and it invokes the combination logic. In other words, it associated the items from
+     * different streams having the same <em>index</em>. If one of the streams completes, the produced stream also
      * completes.
-     *
      * <p>
-     * With this method, you can change this behavior and call the combination logic every time one of one of the observed
-     * streams emit an item. It would call the combination logic with this new item and the latest items emitted by the
-     * other streams. It wait until all the streams have emitted at least an item before calling the combination logic.
+     * With this method, you can change this behavior and call the combination logic when one of the observed streams
+     * emits an item. It calls the combination logic with this new item and the latest items emitted by the other
+     * streams.
      * <p>
-     * If one of the stream completes before having emitted a value, the produced streams also completes without emitting
-     * a value.
+     * It waits until all the streams have emitted at least one item before calling the combination logic.
+     * If one of the streams completes before emitting a value, the produced stream also completes without emitting an
+     * item.
      *
      * @return the current {@link MultiItemCombine9}
      */
