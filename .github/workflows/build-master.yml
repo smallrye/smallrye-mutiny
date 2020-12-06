@@ -58,10 +58,10 @@ jobs:
           path: ~/.m2/repository
           key: maven-11
       - uses: actions/checkout@v2
-      - name: Install JDK 1.8
+      - name: Install JDK 11
         uses: AdoptOpenJDK/install-jdk@v1
         with:
-          version: 8
+          version: 11
       - name: Coverage and Sonar
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
