@@ -1,7 +1,6 @@
 package io.smallrye.mutiny.operators;
 
 import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
-import static io.smallrye.mutiny.helpers.ParameterValidation.nonNullNpe;
 
 import java.util.Objects;
 import java.util.concurrent.Executor;
