@@ -7,6 +7,7 @@ import java.util.function.BiFunction;
 
 import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.subscription.UniSubscriber;
 import io.smallrye.mutiny.subscription.UniSubscription;
 
 public class UniOnItemOrFailureFlatMap<I, O> extends UniOperator<I, O> {
@@ -22,7 +23,7 @@ public class UniOnItemOrFailureFlatMap<I, O> extends UniOperator<I, O> {
     public static <I, O> void invokeAndSubstitute(BiFunction<? super I, Throwable, Uni<? extends O>> mapper,
             I item,
             Throwable failure,
-            UniSerializedSubscriber<? super O> subscriber,
+            UniSubscriber<? super O> subscriber,
             UniOnItemTransformToUni.FlatMapSubscription flatMapSubscription) {
         Uni<? extends O> outcome;
         try {
@@ -42,7 +43,7 @@ public class UniOnItemOrFailureFlatMap<I, O> extends UniOperator<I, O> {
     }
 
     @Override
-    protected void subscribing(UniSerializedSubscriber<? super O> subscriber) {
+    protected void subscribing(UniSubscriber<? super O> subscriber) {
         UniOnItemTransformToUni.FlatMapSubscription flatMapSubscription = new UniOnItemTransformToUni.FlatMapSubscription();
         // Subscribe to the source.
         AbstractUni.subscribe(upstream(), new UniDelegatingSubscriber<I, O>(subscriber) {

@@ -9,6 +9,7 @@ import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.subscription.Cancellable;
+import io.smallrye.mutiny.subscription.UniSubscriber;
 import io.smallrye.mutiny.subscription.UniSubscription;
 import io.smallrye.mutiny.tuples.Functions;
 
@@ -23,7 +24,7 @@ public class UniOnTerminationCall<I> extends UniOperator<I, I> {
     }
 
     @Override
-    protected void subscribing(UniSerializedSubscriber<? super I> subscriber) {
+    protected void subscribing(UniSubscriber<? super I> subscriber) {
         upstream().subscribe().withSubscriber(new UniDelegatingSubscriber<I, I>(subscriber) {
             private volatile Cancellable cancellable;
 

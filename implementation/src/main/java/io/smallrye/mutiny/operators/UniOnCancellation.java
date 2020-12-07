@@ -3,6 +3,7 @@ package io.smallrye.mutiny.operators;
 import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
 
 import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.subscription.UniSubscriber;
 import io.smallrye.mutiny.subscription.UniSubscription;
 
 public class UniOnCancellation<T> extends UniOperator<T, T> {
@@ -14,7 +15,7 @@ public class UniOnCancellation<T> extends UniOperator<T, T> {
     }
 
     @Override
-    protected void subscribing(UniSerializedSubscriber<? super T> subscriber) {
+    protected void subscribing(UniSubscriber<? super T> subscriber) {
         AbstractUni.subscribe(upstream(), new UniDelegatingSubscriber<T, T>(subscriber) {
             @Override
             public void onSubscribe(UniSubscription subscription) {

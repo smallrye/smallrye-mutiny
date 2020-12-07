@@ -20,7 +20,7 @@ public class UniRunSubscribeOn<I> extends UniOperator<I, I> {
     }
 
     @Override
-    protected void subscribing(UniSerializedSubscriber<? super I> subscriber) {
+    protected void subscribing(UniSubscriber<? super I> subscriber) {
         SubscribeOnUniSubscriber downstream = new SubscribeOnUniSubscriber(subscriber);
         try {
             executor.execute(downstream);
@@ -36,7 +36,7 @@ public class UniRunSubscribeOn<I> extends UniOperator<I, I> {
 
         final AtomicReference<UniSubscription> subscription = new AtomicReference<>();
 
-        SubscribeOnUniSubscriber(UniSerializedSubscriber<? super I> actual) {
+        SubscribeOnUniSubscriber(UniSubscriber<? super I> actual) {
             super(actual);
         }
 

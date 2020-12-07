@@ -4,6 +4,7 @@ import java.util.function.BiConsumer;
 
 import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.subscription.UniSubscriber;
 
 public class UniOnItemOrFailureConsume<T> extends UniOperator<T, T> {
 
@@ -16,7 +17,7 @@ public class UniOnItemOrFailureConsume<T> extends UniOperator<T, T> {
     }
 
     @Override
-    protected void subscribing(UniSerializedSubscriber<? super T> subscriber) {
+    protected void subscribing(UniSubscriber<? super T> subscriber) {
         AbstractUni.subscribe(upstream(), new UniDelegatingSubscriber<T, T>(subscriber) {
             @Override
             public void onItem(T item) {
@@ -34,7 +35,7 @@ public class UniOnItemOrFailureConsume<T> extends UniOperator<T, T> {
         });
     }
 
-    private boolean invokeCallback(T item, Throwable failure, UniSerializedSubscriber<? super T> subscriber) {
+    private boolean invokeCallback(T item, Throwable failure, UniSubscriber<? super T> subscriber) {
         try {
             callback.accept(item, failure);
             return true;

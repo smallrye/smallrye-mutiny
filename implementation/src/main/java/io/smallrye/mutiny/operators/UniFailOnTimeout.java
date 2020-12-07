@@ -33,7 +33,7 @@ public class UniFailOnTimeout<I> extends UniOperator<I, I> {
     }
 
     @Override
-    protected void subscribing(UniSerializedSubscriber<? super I> subscriber) {
+    protected void subscribing(UniSubscriber<? super I> subscriber) {
         AtomicBoolean doneOrCancelled = new AtomicBoolean();
         AtomicReference<ScheduledFuture<?>> task = new AtomicReference<>();
 
@@ -92,7 +92,7 @@ public class UniFailOnTimeout<I> extends UniOperator<I, I> {
         });
     }
 
-    private void sendTimeout(UniSerializedSubscriber<? super I> subscriber, UniSubscription subscription) {
+    private void sendTimeout(UniSubscriber<? super I> subscriber, UniSubscription subscription) {
 
         // Cancel the upstream subscription
         subscription.cancel();

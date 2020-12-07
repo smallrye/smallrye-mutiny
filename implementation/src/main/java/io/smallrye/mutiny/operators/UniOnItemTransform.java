@@ -4,6 +4,7 @@ import java.util.function.Function;
 
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.helpers.ParameterValidation;
+import io.smallrye.mutiny.subscription.UniSubscriber;
 
 public class UniOnItemTransform<I, O> extends UniOperator<I, O> {
 
@@ -15,7 +16,7 @@ public class UniOnItemTransform<I, O> extends UniOperator<I, O> {
     }
 
     @Override
-    protected void subscribing(UniSerializedSubscriber<? super O> subscriber) {
+    protected void subscribing(UniSubscriber<? super O> subscriber) {
         AbstractUni.subscribe(upstream(), new UniDelegatingSubscriber<I, O>(subscriber) {
 
             @Override

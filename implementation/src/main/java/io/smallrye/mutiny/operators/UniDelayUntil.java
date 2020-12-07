@@ -8,6 +8,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
 import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.subscription.UniSubscriber;
 import io.smallrye.mutiny.subscription.UniSubscription;
 
 public class UniDelayUntil<T> extends UniOperator<T, T> {
@@ -22,7 +23,7 @@ public class UniDelayUntil<T> extends UniOperator<T, T> {
     }
 
     @Override
-    protected void subscribing(UniSerializedSubscriber<? super T> subscriber) {
+    protected void subscribing(UniSubscriber<? super T> subscriber) {
         AtomicReference<UniSubscription> reference = new AtomicReference<>();
         AbstractUni.subscribe(upstream(), new UniDelegatingSubscriber<T, T>(subscriber) {
             @Override

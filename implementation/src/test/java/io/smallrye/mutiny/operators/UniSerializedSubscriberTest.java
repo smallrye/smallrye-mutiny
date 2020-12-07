@@ -91,7 +91,7 @@ public class UniSerializedSubscriberTest {
     public void testRogueUpstreamSendingFailureBeforeSubscription() {
         AbstractUni<Integer> rogue = new AbstractUni<Integer>() {
             @Override
-            protected void subscribing(UniSerializedSubscriber<? super Integer> subscriber) {
+            protected void subscribing(UniSubscriber<? super Integer> subscriber) {
                 subscriber.onFailure(new IOException("boom"));
                 subscriber.onSubscribe(() -> {
                 });
@@ -111,7 +111,7 @@ public class UniSerializedSubscriberTest {
     public void testRogueUpstreamSendingItemBeforeSubscription() {
         AbstractUni<Integer> rogue = new AbstractUni<Integer>() {
             @Override
-            protected void subscribing(UniSerializedSubscriber<? super Integer> subscriber) {
+            protected void subscribing(UniSubscriber<? super Integer> subscriber) {
                 subscriber.onItem(1);
                 subscriber.onSubscribe(() -> {
                 });
@@ -131,7 +131,7 @@ public class UniSerializedSubscriberTest {
     public void testInvalidStateWhenOnSubscribeIsCalled() {
         AbstractUni<Integer> rogue = new AbstractUni<Integer>() {
             @Override
-            protected void subscribing(UniSerializedSubscriber<? super Integer> subscriber) {
+            protected void subscribing(UniSubscriber<? super Integer> subscriber) {
                 // Do nothing
             }
         };
@@ -151,7 +151,7 @@ public class UniSerializedSubscriberTest {
     public void testRogueUpstreamSendingMultipleItems() {
         AbstractUni<Integer> rogue = new AbstractUni<Integer>() {
             @Override
-            protected void subscribing(UniSerializedSubscriber<? super Integer> subscriber) {
+            protected void subscribing(UniSubscriber<? super Integer> subscriber) {
                 subscriber.onSubscribe(() -> {
                 });
                 subscriber.onItem(1);
@@ -382,10 +382,10 @@ public class UniSerializedSubscriberTest {
         AtomicReference<Throwable> captured = new AtomicReference<>();
         Infrastructure.setDroppedExceptionHandler(captured::set);
 
-        AtomicReference<UniSerializedSubscriber<? super Integer>> sub = new AtomicReference<>();
+        AtomicReference<UniSubscriber<? super Integer>> sub = new AtomicReference<>();
         AbstractUni<Integer> uni = new AbstractUni<Integer>() {
             @Override
-            protected void subscribing(UniSerializedSubscriber<? super Integer> subscriber) {
+            protected void subscribing(UniSubscriber<? super Integer> subscriber) {
                 sub.set(subscriber);
             }
         };
@@ -424,10 +424,10 @@ public class UniSerializedSubscriberTest {
         AtomicReference<Throwable> captured = new AtomicReference<>();
         Infrastructure.setDroppedExceptionHandler(captured::set);
 
-        AtomicReference<UniSerializedSubscriber<? super Integer>> sub = new AtomicReference<>();
+        AtomicReference<UniSubscriber<? super Integer>> sub = new AtomicReference<>();
         AbstractUni<Integer> uni = new AbstractUni<Integer>() {
             @Override
-            protected void subscribing(UniSerializedSubscriber<? super Integer> subscriber) {
+            protected void subscribing(UniSubscriber<? super Integer> subscriber) {
                 sub.set(subscriber);
             }
         };
@@ -463,10 +463,10 @@ public class UniSerializedSubscriberTest {
         AtomicReference<Throwable> captured = new AtomicReference<>();
         Infrastructure.setDroppedExceptionHandler(captured::set);
 
-        AtomicReference<UniSerializedSubscriber<? super Integer>> sub = new AtomicReference<>();
+        AtomicReference<UniSubscriber<? super Integer>> sub = new AtomicReference<>();
         AbstractUni<Integer> uni = new AbstractUni<Integer>() {
             @Override
-            protected void subscribing(UniSerializedSubscriber<? super Integer> subscriber) {
+            protected void subscribing(UniSubscriber<? super Integer> subscriber) {
                 sub.set(subscriber);
             }
         };
@@ -488,7 +488,6 @@ public class UniSerializedSubscriberTest {
             }
         });
         sub.get().onSubscribe(mock(UniSubscription.class));
-        sub.get().cancel();
 
         sub.get().onFailure(new IllegalStateException("boom"));
         assertThat(captured.get()).isNotNull()

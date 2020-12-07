@@ -7,6 +7,7 @@ import java.util.function.Supplier;
 
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.helpers.ParameterValidation;
+import io.smallrye.mutiny.subscription.UniSubscriber;
 
 public class UniCreateFromDeferredSupplier<T> extends UniOperator<Void, T> {
     private final Supplier<Uni<? extends T>> supplier;
@@ -17,7 +18,7 @@ public class UniCreateFromDeferredSupplier<T> extends UniOperator<Void, T> {
     }
 
     @Override
-    protected void subscribing(UniSerializedSubscriber<? super T> subscriber) {
+    protected void subscribing(UniSubscriber<? super T> subscriber) {
         nonNull(subscriber, "subscriber");
         Uni<? extends T> uni;
         try {

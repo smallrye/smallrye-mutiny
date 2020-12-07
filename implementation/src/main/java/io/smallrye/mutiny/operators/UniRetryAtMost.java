@@ -23,7 +23,7 @@ public class UniRetryAtMost<T> extends UniOperator<T, T> {
     }
 
     @Override
-    protected void subscribing(UniSerializedSubscriber<? super T> subscriber) {
+    protected void subscribing(UniSubscriber<? super T> subscriber) {
         AtomicInteger numberOfSubscriptions = new AtomicInteger(0);
         UniSubscriber<T> retryingSubscriber = new UniSubscriber<T>() {
             final AtomicReference<UniSubscription> reference = new AtomicReference<>();
@@ -79,7 +79,7 @@ public class UniRetryAtMost<T> extends UniOperator<T, T> {
     }
 
     private boolean test(
-            UniSerializedSubscriber<? super T> subscriber, Throwable failure) {
+            UniSubscriber<? super T> subscriber, Throwable failure) {
         boolean pass;
         try {
             pass = predicate.test(failure);

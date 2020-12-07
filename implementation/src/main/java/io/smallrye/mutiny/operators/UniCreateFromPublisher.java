@@ -10,6 +10,7 @@ import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.infrastructure.Infrastructure;
+import io.smallrye.mutiny.subscription.UniSubscriber;
 
 public class UniCreateFromPublisher<O> extends UniOperator<Void, O> {
     private final Publisher<? extends O> publisher;
@@ -21,7 +22,7 @@ public class UniCreateFromPublisher<O> extends UniOperator<Void, O> {
 
     @SuppressWarnings("SubscriberImplementation")
     @Override
-    protected void subscribing(UniSerializedSubscriber<? super O> subscriber) {
+    protected void subscribing(UniSubscriber<? super O> subscriber) {
         AtomicReference<Subscription> reference = new AtomicReference<>();
         Subscriber<O> actual = new Subscriber<O>() {
             @Override

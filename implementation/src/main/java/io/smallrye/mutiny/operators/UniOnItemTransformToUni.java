@@ -24,7 +24,7 @@ public class UniOnItemTransformToUni<I, O> extends UniOperator<I, O> {
     }
 
     public static <I, O> void invokeAndSubstitute(Function<? super I, Uni<? extends O>> mapper, I input,
-            UniSerializedSubscriber<? super O> subscriber,
+            UniSubscriber<? super O> subscriber,
             FlatMapSubscription flatMapSubscription) {
         Uni<? extends O> outcome;
         try {
@@ -43,7 +43,7 @@ public class UniOnItemTransformToUni<I, O> extends UniOperator<I, O> {
         handleInnerSubscription(subscriber, flatMapSubscription, outcome);
     }
 
-    public static <O> void handleInnerSubscription(UniSerializedSubscriber<? super O> subscriber,
+    public static <O> void handleInnerSubscription(UniSubscriber<? super O> subscriber,
             UniOnItemTransformToUni.FlatMapSubscription flatMapSubscription, Uni<? extends O> outcome) {
         if (outcome == null) {
             subscriber.onFailure(new NullPointerException(MAPPER_RETURNED_NULL));
@@ -59,7 +59,7 @@ public class UniOnItemTransformToUni<I, O> extends UniOperator<I, O> {
     }
 
     @Override
-    protected void subscribing(UniSerializedSubscriber<? super O> subscriber) {
+    protected void subscribing(UniSubscriber<? super O> subscriber) {
         FlatMapSubscription flatMapSubscription = new FlatMapSubscription();
         // Subscribe to the source.
         AbstractUni.subscribe(upstream(), new UniDelegatingSubscriber<I, O>(subscriber) {

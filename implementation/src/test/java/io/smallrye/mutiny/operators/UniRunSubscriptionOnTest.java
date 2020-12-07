@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.helpers.test.UniAssertSubscriber;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
+import io.smallrye.mutiny.subscription.UniSubscriber;
 
 public class UniRunSubscriptionOnTest {
 
@@ -140,7 +141,7 @@ public class UniRunSubscriptionOnTest {
         UniAssertSubscriber<Integer> subscriber = new AbstractUni<Integer>() {
 
             @Override
-            protected void subscribing(UniSerializedSubscriber<? super Integer> subscriber) {
+            protected void subscribing(UniSubscriber<? super Integer> subscriber) {
                 throw new IllegalArgumentException("boom");
             }
         }

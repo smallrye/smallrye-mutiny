@@ -1,7 +1,7 @@
 package io.smallrye.mutiny.helpers.spies;
 
 import io.smallrye.mutiny.Uni;
-import io.smallrye.mutiny.operators.UniSerializedSubscriber;
+import io.smallrye.mutiny.subscription.UniSubscriber;
 import io.smallrye.mutiny.tuples.Tuple3;
 
 public class UniOnTerminationSpy<T> extends UniSpyBase<T> {
@@ -31,7 +31,7 @@ public class UniOnTerminationSpy<T> extends UniSpyBase<T> {
     }
 
     @Override
-    protected void subscribing(UniSerializedSubscriber<? super T> downstream) {
+    protected void subscribing(UniSubscriber<? super T> downstream) {
         upstream()
                 .onTermination().invoke((i, f, c) -> {
                     incrementInvocationCount();

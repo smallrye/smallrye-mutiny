@@ -4,7 +4,7 @@ import java.util.function.Predicate;
 
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.groups.UniOnFailure;
-import io.smallrye.mutiny.operators.UniSerializedSubscriber;
+import io.smallrye.mutiny.subscription.UniSubscriber;
 
 public class UniOnFailureSpy<T> extends UniSpyBase<T> {
 
@@ -38,7 +38,7 @@ public class UniOnFailureSpy<T> extends UniSpyBase<T> {
     }
 
     @Override
-    protected void subscribing(UniSerializedSubscriber<? super T> downstream) {
+    protected void subscribing(UniSubscriber<? super T> downstream) {
         UniOnFailure<? extends T> group;
         if (predicate != null) {
             group = upstream().onFailure(predicate);

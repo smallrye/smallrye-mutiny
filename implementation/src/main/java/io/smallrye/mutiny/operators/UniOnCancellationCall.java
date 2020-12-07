@@ -6,6 +6,7 @@ import java.util.function.Supplier;
 
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
+import io.smallrye.mutiny.subscription.UniSubscriber;
 import io.smallrye.mutiny.subscription.UniSubscription;
 
 public class UniOnCancellationCall<I> extends UniOperator<I, I> {
@@ -18,7 +19,7 @@ public class UniOnCancellationCall<I> extends UniOperator<I, I> {
     }
 
     @Override
-    protected void subscribing(UniSerializedSubscriber<? super I> subscriber) {
+    protected void subscribing(UniSubscriber<? super I> subscriber) {
         upstream().subscribe().withSubscriber(new UniDelegatingSubscriber<I, I>(subscriber) {
 
             @Override

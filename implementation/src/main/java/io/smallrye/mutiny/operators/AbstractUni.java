@@ -13,7 +13,7 @@ import io.smallrye.mutiny.tuples.Tuple2;
 
 public abstract class AbstractUni<T> implements Uni<T> {
 
-    protected abstract void subscribing(UniSerializedSubscriber<? super T> subscriber);
+    protected abstract void subscribing(UniSubscriber<? super T> subscriber);
 
     /**
      * Encapsulates subscription to slightly optimized the AbstractUni case.

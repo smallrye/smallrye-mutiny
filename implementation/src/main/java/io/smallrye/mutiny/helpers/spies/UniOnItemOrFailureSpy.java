@@ -1,7 +1,7 @@
 package io.smallrye.mutiny.helpers.spies;
 
 import io.smallrye.mutiny.Uni;
-import io.smallrye.mutiny.operators.UniSerializedSubscriber;
+import io.smallrye.mutiny.subscription.UniSubscriber;
 
 public class UniOnItemOrFailureSpy<T> extends UniSpyBase<T> {
 
@@ -32,7 +32,7 @@ public class UniOnItemOrFailureSpy<T> extends UniSpyBase<T> {
     }
 
     @Override
-    protected void subscribing(UniSerializedSubscriber<? super T> downstream) {
+    protected void subscribing(UniSubscriber<? super T> downstream) {
         upstream()
                 .onItemOrFailure().invoke((item, failure) -> {
                     synchronized (UniOnItemOrFailureSpy.this) {
