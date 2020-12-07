@@ -5,6 +5,7 @@ import java.util.function.Predicate;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.converters.uni.UniToMultiPublisher;
 import io.smallrye.mutiny.groups.*;
 import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
@@ -123,7 +124,7 @@ public abstract class AbstractUni<T> implements Uni<T> {
 
     @Override
     public Multi<T> toMulti() {
-        return Multi.createFrom().publisher(convert().toPublisher());
+        return Multi.createFrom().safePublisher(new UniToMultiPublisher<>(this));
     }
 
     @Override
