@@ -10,7 +10,13 @@
       "filter": {
         "packages": {
           "regex": true,
-          "include": ["io\\.smallrye\\.mutiny\\..*"]
+          "include": [
+            "io\\.smallrye\\.mutiny\\..*"
+          ],
+          "exclude": [
+            "io\\.smallrye\\.mutiny\\.operators\\.*",
+            "io\\.smallrye\\.mutiny\\.operators\\..*"
+          ]
         }
       }
     }
@@ -21,9 +27,7 @@
     "id": "breaking-changes",
     "configuration": {
       "criticality": "highlight",
-      "differences": [
-
-      ]
+      "differences": []
     }
   },
 

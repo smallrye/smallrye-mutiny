@@ -75,6 +75,12 @@
           "old": "parameter void io.smallrye.mutiny.helpers.spies.UniOnTerminationSpy<T>::subscribing(===io.smallrye.mutiny.operators.UniSerializedSubscriber<? super T>===)",
           "new": "parameter void io.smallrye.mutiny.helpers.spies.UniOnTerminationSpy<T>::subscribing(===io.smallrye.mutiny.subscription.UniSubscriber<? super T>===)",
           "justification": "subscribing(subscriber) is a protected method that is not used by regular consumers of the Mutiny public API"
+        },
+        {
+          "code": "java.method.parameterTypeChanged",
+          "old": "parameter void io.smallrye.mutiny.operators.AbstractUni<T>::subscribing(===io.smallrye.mutiny.operators.UniSerializedSubscriber<? super T>===)",
+          "new": "parameter void io.smallrye.mutiny.operators.AbstractUni<T>::subscribing(===io.smallrye.mutiny.subscription.UniSubscriber<? super T>===)",
+          "justification": "subscribing(subscriber) is a protected method that is not used by regular consumers of the Mutiny public API"
         }
       ]
     }
