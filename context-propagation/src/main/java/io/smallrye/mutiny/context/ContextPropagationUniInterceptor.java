@@ -7,7 +7,6 @@ import org.eclipse.microprofile.context.ThreadContext;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.infrastructure.UniInterceptor;
 import io.smallrye.mutiny.operators.AbstractUni;
-import io.smallrye.mutiny.operators.UniSerializedSubscriber;
 import io.smallrye.mutiny.subscription.UniSubscriber;
 import io.smallrye.mutiny.subscription.UniSubscription;
 
@@ -44,7 +43,7 @@ public abstract class ContextPropagationUniInterceptor implements UniInterceptor
         Executor executor = getThreadContext().currentContextExecutor();
         return new AbstractUni<T>() {
             @Override
-            protected void subscribing(UniSerializedSubscriber<? super T> subscriber) {
+            protected void subscribing(UniSubscriber<? super T> subscriber) {
                 executor.execute(() -> AbstractUni.subscribe(uni, subscriber));
             }
         };

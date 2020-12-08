@@ -8,6 +8,7 @@ import java.util.function.Predicate;
 
 import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.subscription.UniSubscriber;
 
 public class UniOnFailureTransform<I, O> extends UniOperator<I, O> {
 
@@ -23,7 +24,7 @@ public class UniOnFailureTransform<I, O> extends UniOperator<I, O> {
     }
 
     @Override
-    protected void subscribing(UniSerializedSubscriber<? super O> subscriber) {
+    protected void subscribing(UniSubscriber<? super O> subscriber) {
         AbstractUni.subscribe(upstream(), new UniDelegatingSubscriber<I, O>(subscriber) {
 
             @Override

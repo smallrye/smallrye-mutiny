@@ -2,7 +2,7 @@ package io.smallrye.mutiny.operators.uni.builders;
 
 import io.smallrye.mutiny.helpers.EmptyUniSubscription;
 import io.smallrye.mutiny.operators.AbstractUni;
-import io.smallrye.mutiny.operators.UniSerializedSubscriber;
+import io.smallrye.mutiny.subscription.UniSubscriber;
 
 /**
  * Specialized {@link io.smallrye.mutiny.Uni} implementation for the case where the item is known.
@@ -19,7 +19,7 @@ public class KnownItemUni<T> extends AbstractUni<T> {
     }
 
     @Override
-    protected void subscribing(UniSerializedSubscriber<? super T> subscriber) {
+    protected void subscribing(UniSubscriber<? super T> subscriber) {
         // No need to track cancellation, it's done by the serialized subscriber downstream.
         subscriber.onSubscribe(EmptyUniSubscription.CANCELLED);
         subscriber.onItem(item);

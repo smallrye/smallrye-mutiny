@@ -28,8 +28,8 @@ public class UniMemoizeOp<I> extends UniOperator<I, I> implements UniSubscriber<
     private final AtomicReference<State> state = new AtomicReference<>(State.INIT);
 
     private final AtomicInteger wip = new AtomicInteger();
-    private final List<UniSerializedSubscriber<? super I>> awaitingSubscription = synchronizedList(new ArrayList<>());
-    private final List<UniSerializedSubscriber<? super I>> awaitingResult = synchronizedList(new ArrayList<>());
+    private final List<UniSubscriber<? super I>> awaitingSubscription = synchronizedList(new ArrayList<>());
+    private final List<UniSubscriber<? super I>> awaitingResult = synchronizedList(new ArrayList<>());
 
     private volatile UniSubscription upstreamSubscription;
     private volatile I item;
@@ -45,7 +45,7 @@ public class UniMemoizeOp<I> extends UniOperator<I, I> implements UniSubscriber<
     }
 
     @Override
-    protected void subscribing(UniSerializedSubscriber<? super I> subscriber) {
+    protected void subscribing(UniSubscriber<? super I> subscriber) {
         if (invalidationRequested.getAsBoolean() && state.get() != State.SUBSCRIBING) {
             state.set(State.INIT);
             if (upstreamSubscription != null) {
@@ -89,7 +89,7 @@ public class UniMemoizeOp<I> extends UniOperator<I, I> implements UniSubscriber<
         int missed = 1;
         for (;;) {
 
-            ArrayList<UniSerializedSubscriber<? super I>> subscribers;
+            ArrayList<UniSubscriber<? super I>> subscribers;
             I currentItem;
             Throwable currentFailure;
 
@@ -100,7 +100,7 @@ public class UniMemoizeOp<I> extends UniOperator<I, I> implements UniSubscriber<
                 }
 
                 // Handle the subscribers that are awaiting a subscription
-                for (UniSerializedSubscriber<? super I> subscriber : subscribers) {
+                for (UniSubscriber<? super I> subscriber : subscribers) {
                     currentItem = item;
                     currentFailure = failure;
                     State state = this.state.get();
@@ -135,7 +135,7 @@ public class UniMemoizeOp<I> extends UniOperator<I, I> implements UniSubscriber<
                     subscribers = new ArrayList<>(awaitingResult);
                 }
                 // Handle the subscribers that are awaiting a result
-                for (UniSerializedSubscriber<? super I> subscriber : subscribers) {
+                for (UniSubscriber<? super I> subscriber : subscribers) {
                     currentItem = item;
                     currentFailure = failure;
                     if (state.get() == State.CACHING) {
@@ -156,7 +156,7 @@ public class UniMemoizeOp<I> extends UniOperator<I, I> implements UniSubscriber<
         }
     }
 
-    private void removeFromAwaitingLists(UniSerializedSubscriber<? super I> subscriber) {
+    private void removeFromAwaitingLists(UniSubscriber<? super I> subscriber) {
         awaitingSubscription.remove(subscriber);
         awaitingResult.remove(subscriber);
         drain();

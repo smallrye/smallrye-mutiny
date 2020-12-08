@@ -7,6 +7,7 @@ import java.util.function.Function;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.helpers.EmptyUniSubscription;
 import io.smallrye.mutiny.helpers.ParameterValidation;
+import io.smallrye.mutiny.subscription.UniSubscriber;
 import io.smallrye.mutiny.subscription.UniSubscription;
 
 public class UniOnSubscribeCall<T> extends UniOperator<T, T> {
@@ -20,7 +21,7 @@ public class UniOnSubscribeCall<T> extends UniOperator<T, T> {
     }
 
     @Override
-    protected void subscribing(UniSerializedSubscriber<? super T> subscriber) {
+    protected void subscribing(UniSubscriber<? super T> subscriber) {
         AbstractUni.subscribe(upstream(), new UniDelegatingSubscriber<T, T>(subscriber) {
 
             // As subscription might be delayed, we need to store the event provided by the upstream

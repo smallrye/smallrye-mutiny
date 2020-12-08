@@ -1,10 +1,13 @@
 package io.smallrye.mutiny.operators;
 
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiFunction;
 
 import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.helpers.ParameterValidation;
+import io.smallrye.mutiny.subscription.UniSubscriber;
+import io.smallrye.mutiny.subscription.UniSubscription;
 
 public class UniOnItemOrFailureMap<I, O> extends UniOperator<I, O> {
 
@@ -16,12 +19,22 @@ public class UniOnItemOrFailureMap<I, O> extends UniOperator<I, O> {
     }
 
     @Override
-    protected void subscribing(UniSerializedSubscriber<? super O> subscriber) {
-        AbstractUni.subscribe(upstream(), new UniDelegatingSubscriber<I, O>(subscriber) {
+    protected void subscribing(UniSubscriber<? super O> downstream) {
+        AbstractUni.subscribe(upstream(), new UniDelegatingSubscriber<I, O>(downstream) {
+
+            private final AtomicBoolean done = new AtomicBoolean();
+
+            @Override
+            public void onSubscribe(UniSubscription subscription) {
+                super.onSubscribe(() -> {
+                    done.set(true);
+                    subscription.cancel();
+                });
+            }
 
             @Override
             public void onItem(I item) {
-                if (!subscriber.isCancelledOrDone()) {
+                if (done.compareAndSet(false, true)) {
                     O outcome;
                     try {
                         outcome = mapper.apply(item, null);
@@ -29,17 +42,17 @@ public class UniOnItemOrFailureMap<I, O> extends UniOperator<I, O> {
                         // it would be caught and onFailure would be called. This would be illegal.
                     } catch (Throwable e) { // NOSONAR
                         // Be sure to not call the mapper again with the failure.
-                        subscriber.onFailure(e);
+                        downstream.onFailure(e);
                         return;
                     }
 
-                    subscriber.onItem(outcome);
+                    downstream.onItem(outcome);
                 }
             }
 
             @Override
             public void onFailure(Throwable failure) {
-                if (!subscriber.isCancelledOrDone()) {
+                if (done.compareAndSet(false, true)) {
                     O outcome;
                     try {
                         outcome = mapper.apply(null, failure);
@@ -47,11 +60,11 @@ public class UniOnItemOrFailureMap<I, O> extends UniOperator<I, O> {
                         // it would be caught and onFailure would be called. This would be illegal.
                     } catch (Throwable e) { // NOSONAR
                         // Be sure to not call the mapper again with the failure.
-                        subscriber.onFailure(new CompositeException(failure, e));
+                        downstream.onFailure(new CompositeException(failure, e));
                         return;
                     }
 
-                    subscriber.onItem(outcome);
+                    downstream.onItem(outcome);
                 }
             }
         });

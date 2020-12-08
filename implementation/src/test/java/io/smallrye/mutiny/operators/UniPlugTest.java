@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.helpers.test.UniAssertSubscriber;
+import io.smallrye.mutiny.subscription.UniSubscriber;
 
 class UniPlugTest {
 
@@ -57,7 +58,7 @@ class UniPlugTest {
         }
 
         @Override
-        protected void subscribing(UniSerializedSubscriber<? super String> subscriber) {
+        protected void subscribing(UniSubscriber<? super String> subscriber) {
             upstream().subscribe().withSubscriber(new UniDelegatingSubscriber<T, String>(subscriber) {
                 @Override
                 public void onItem(T item) {

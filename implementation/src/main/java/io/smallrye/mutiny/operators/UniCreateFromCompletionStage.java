@@ -7,6 +7,7 @@ import java.util.concurrent.CompletionStage;
 import java.util.function.Supplier;
 
 import io.smallrye.mutiny.helpers.ParameterValidation;
+import io.smallrye.mutiny.subscription.UniSubscriber;
 
 public class UniCreateFromCompletionStage<O> extends UniOperator<Void, O> {
     private final Supplier<? extends CompletionStage<? extends O>> supplier;
@@ -17,7 +18,7 @@ public class UniCreateFromCompletionStage<O> extends UniOperator<Void, O> {
     }
 
     private static <O> void forwardFromCompletionStage(CompletionStage<? extends O> stage,
-            UniSerializedSubscriber<? super O> subscriber) {
+            UniSubscriber<? super O> subscriber) {
         subscriber.onSubscribe(() -> stage.toCompletableFuture().cancel(false));
         stage.whenComplete((res, fail) -> {
             if (fail != null) {
@@ -33,7 +34,7 @@ public class UniCreateFromCompletionStage<O> extends UniOperator<Void, O> {
     }
 
     @Override
-    protected void subscribing(UniSerializedSubscriber<? super O> subscriber) {
+    protected void subscribing(UniSubscriber<? super O> subscriber) {
         CompletionStage<? extends O> stage;
         try {
             stage = supplier.get();

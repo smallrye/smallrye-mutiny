@@ -5,6 +5,7 @@ import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
 import java.util.function.Consumer;
 
 import io.smallrye.mutiny.subscription.UniEmitter;
+import io.smallrye.mutiny.subscription.UniSubscriber;
 
 public class UniCreateWithEmitter<T> extends AbstractUni<T> {
     private final Consumer<UniEmitter<? super T>> consumer;
@@ -14,7 +15,7 @@ public class UniCreateWithEmitter<T> extends AbstractUni<T> {
     }
 
     @Override
-    protected void subscribing(UniSerializedSubscriber<? super T> subscriber) {
+    protected void subscribing(UniSubscriber<? super T> subscriber) {
         DefaultUniEmitter<? super T> emitter = new DefaultUniEmitter<>(subscriber);
         subscriber.onSubscribe(emitter);
 

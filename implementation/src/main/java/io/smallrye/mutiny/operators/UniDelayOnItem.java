@@ -11,6 +11,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.subscription.UniSubscriber;
 import io.smallrye.mutiny.subscription.UniSubscription;
 
 public class UniDelayOnItem<T> extends UniOperator<T, T> {
@@ -24,7 +25,7 @@ public class UniDelayOnItem<T> extends UniOperator<T, T> {
     }
 
     @Override
-    protected void subscribing(UniSerializedSubscriber<? super T> subscriber) {
+    protected void subscribing(UniSubscriber<? super T> subscriber) {
         AtomicReference<ScheduledFuture<?>> holder = new AtomicReference<>();
         AtomicReference<UniSubscription> reference = new AtomicReference<>();
         AbstractUni.subscribe(upstream(), new UniDelegatingSubscriber<T, T>(subscriber) {

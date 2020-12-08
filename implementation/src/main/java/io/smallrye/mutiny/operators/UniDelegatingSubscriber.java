@@ -7,9 +7,9 @@ import io.smallrye.mutiny.subscription.UniSubscription;
 
 public class UniDelegatingSubscriber<I, O> implements UniSubscriber<I> {
 
-    private final UniSerializedSubscriber<? super O> delegate;
+    private final UniSubscriber<? super O> delegate;
 
-    public UniDelegatingSubscriber(UniSerializedSubscriber<? super O> subscriber) {
+    public UniDelegatingSubscriber(UniSubscriber<? super O> subscriber) {
         this.delegate = nonNull(subscriber, "delegate");
     }
 

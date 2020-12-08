@@ -5,6 +5,7 @@ import java.util.function.Predicate;
 
 import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.subscription.UniSubscriber;
 
 public class UniOnItemConsume<T> extends UniOperator<T, T> {
 
@@ -22,7 +23,7 @@ public class UniOnItemConsume<T> extends UniOperator<T, T> {
     }
 
     @Override
-    protected void subscribing(UniSerializedSubscriber<? super T> subscriber) {
+    protected void subscribing(UniSubscriber<? super T> subscriber) {
         AbstractUni.subscribe(upstream(), new UniDelegatingSubscriber<T, T>(subscriber) {
             @Override
             public void onItem(T item) {
@@ -55,7 +56,7 @@ public class UniOnItemConsume<T> extends UniOperator<T, T> {
     }
 
     private <E> boolean invokeEventHandler(Consumer<? super E> handler, E event, boolean wasCalledByOnFailure,
-            UniSerializedSubscriber<? super T> subscriber) {
+            UniSubscriber<? super T> subscriber) {
         if (handler != null) {
             try {
                 handler.accept(event);

@@ -33,7 +33,7 @@ public class UniOrCombination<T> extends UniOperator<Void, T> {
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
-    protected void subscribing(UniSerializedSubscriber<? super T> subscriber) {
+    protected void subscribing(UniSubscriber<? super T> subscriber) {
         if (challengers.isEmpty()) {
             subscriber.onSubscribe(EmptyUniSubscription.CANCELLED);
             subscriber.onItem(null);

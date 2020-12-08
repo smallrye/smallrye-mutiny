@@ -8,7 +8,6 @@ import org.junit.jupiter.api.Test;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.operators.AbstractUni;
 import io.smallrye.mutiny.operators.UniDelegatingSubscriber;
-import io.smallrye.mutiny.operators.UniSerializedSubscriber;
 import io.smallrye.mutiny.subscription.UniSubscriber;
 import io.smallrye.mutiny.subscription.UniSubscription;
 
@@ -62,7 +61,7 @@ public class UniInterceptorTest {
             public <T> Uni<T> onUniCreation(Uni<T> uni) {
                 return new AbstractUni<T>() {
                     @Override
-                    protected void subscribing(UniSerializedSubscriber<? super T> subscriber) {
+                    protected void subscribing(UniSubscriber<? super T> subscriber) {
                         assertThat(creationTime).isLessThan(System.nanoTime());
                         uni.subscribe().withSubscriber(new UniDelegatingSubscriber(subscriber) {
                             @Override
@@ -89,7 +88,7 @@ public class UniInterceptorTest {
             public <T> Uni<T> onUniCreation(Uni<T> uni) {
                 return new AbstractUni<T>() {
                     @Override
-                    protected void subscribing(UniSerializedSubscriber<? super T> subscriber) {
+                    protected void subscribing(UniSubscriber<? super T> subscriber) {
                         assertThat(creationTime).isLessThan(System.nanoTime());
                         uni.subscribe().withSubscriber(new UniDelegatingSubscriber(subscriber) {
                             @Override

@@ -5,6 +5,7 @@ import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
 import java.util.concurrent.Executor;
 
 import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.subscription.UniSubscriber;
 
 public class UniEmitOn<I> extends UniOperator<I, I> {
     private final Executor executor;
@@ -15,7 +16,7 @@ public class UniEmitOn<I> extends UniOperator<I, I> {
     }
 
     @Override
-    protected void subscribing(UniSerializedSubscriber<? super I> subscriber) {
+    protected void subscribing(UniSubscriber<? super I> subscriber) {
         AbstractUni.subscribe(upstream(), new UniDelegatingSubscriber<I, I>(subscriber) {
             @Override
             public void onItem(I item) {

@@ -7,6 +7,7 @@ import java.util.function.Predicate;
 
 import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.subscription.UniSubscriber;
 import io.smallrye.mutiny.subscription.UniSubscription;
 
 public class UniOnFailureFlatMap<I> extends UniOperator<I, I> {
@@ -23,7 +24,7 @@ public class UniOnFailureFlatMap<I> extends UniOperator<I, I> {
     }
 
     @Override
-    protected void subscribing(UniSerializedSubscriber<? super I> subscriber) {
+    protected void subscribing(UniSubscriber<? super I> subscriber) {
         UniOnItemTransformToUni.FlatMapSubscription flatMapSubscription = new UniOnItemTransformToUni.FlatMapSubscription();
         // Subscribe to the source.
         AbstractUni.subscribe(upstream(), new UniDelegatingSubscriber<I, I>(subscriber) {

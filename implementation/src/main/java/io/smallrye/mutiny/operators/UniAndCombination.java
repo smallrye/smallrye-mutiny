@@ -41,7 +41,7 @@ public class UniAndCombination<I, O> extends UniOperator<I, O> {
     }
 
     @Override
-    protected void subscribing(UniSerializedSubscriber<? super O> subscriber) {
+    protected void subscribing(UniSubscriber<? super O> subscriber) {
         AndSupervisor andSupervisor = new AndSupervisor(subscriber);
         subscriber.onSubscribe(andSupervisor);
         // Must wait until the subscriber get a subscription before subscribing to the sources.
@@ -51,11 +51,11 @@ public class UniAndCombination<I, O> extends UniOperator<I, O> {
     private class AndSupervisor implements UniSubscription {
 
         private final List<UniHandler> handlers = new ArrayList<>();
-        private final UniSerializedSubscriber<? super O> subscriber;
+        private final UniSubscriber<? super O> subscriber;
 
         AtomicBoolean cancelled = new AtomicBoolean();
 
-        AndSupervisor(UniSerializedSubscriber<? super O> sub) {
+        AndSupervisor(UniSubscriber<? super O> sub) {
             subscriber = sub;
 
             for (Uni u : unis) {
