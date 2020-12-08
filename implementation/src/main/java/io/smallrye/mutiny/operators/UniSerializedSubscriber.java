@@ -120,8 +120,4 @@ public class UniSerializedSubscriber<T> implements UniSubscriber<T>, UniSubscrip
             state.set(DONE);
         }
     }
-
-    public synchronized boolean isCancelledOrDone() {
-        return state.get() == DONE;
-    }
 }
