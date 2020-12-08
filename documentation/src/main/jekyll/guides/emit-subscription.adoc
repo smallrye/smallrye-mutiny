@@ -19,10 +19,9 @@ include::{include_dir}/RunSubscriptionOnTest.java[tags=emitOn]
 
 The previous code produces the following sequence:
 
-[plantuml,align=center]
-----
-include::emitOn-sequence.puml[]
-----
+[role=reduce]
+image::emitOn.png[]
+
 
 `runSubscriptionOn` applies to the subscription process.
 It requests the upstream to run its subscription (call of the `subscribe` method on its own upstream) on a thread from the given executor:
@@ -34,7 +33,5 @@ include::{include_dir}/RunSubscriptionOnTest.java[tags=runSubscriptionOn]
 
 So, if we consider the previous code snippet, it produces the following sequence:
 
-[plantuml,align=center]
-----
-include::runSubscriptionOn-sequence.puml[]
-----
+[role=reduce]
+image::runSubscriptionOn.png[]

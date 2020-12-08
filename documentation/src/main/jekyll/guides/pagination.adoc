@@ -24,10 +24,9 @@ However, we want the following stream: `"a", "b", "c", "d", "e"`.
 The `disjoint` method does exactly this.
 It gets the items from the lists and passes them downstream:
 
-[plantuml,align=center]
-----
-include::disjoint.puml[]
-----
+[role=reduce]
+image::disjoint.png[]
+
 
 `Multi.createBy().repeating()` lets you choose the number of iterations using:
 

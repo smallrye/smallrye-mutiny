@@ -112,10 +112,7 @@ Some events can _swim_ upstream from the sinks to the source.
 
 Events going from upstream to downstream are published by `Publishers` and consumed by (downstream) `Subscribers,` which may also produce events for their own downstream, as illustrated by the following diagram:
 
-[plantuml,align=center]
-----
-include::plantuml/philosophy-chain.puml[]
-----
+image::philosophy-chain.png[role="center"]
 
 Four types of events can flow in this direction:
 
@@ -141,10 +138,9 @@ In a typical scenario, a subscriber:
 4. The publisher receiving the `request` event starts emitting at most _n_ item events to the subscriber
 5. The subscriber can decide at any time to request more events or to cancel the subscription
 
-[plantuml,align=center]
-----
-include::plantuml/philosophy-protocol.puml[]
-----
+[role=reduce]
+image::philosophy-protocol.png[]
+
 
 The `request` event is the cornerstone of the back-pressure protocol.
 A subscriber should not request more than what it can handle, and a publisher should not emit more items than the amount of request received.
