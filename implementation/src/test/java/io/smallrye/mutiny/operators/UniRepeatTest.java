@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -13,7 +14,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.RepeatedTest;
 import org.reactivestreams.Subscriber;
 
 import io.smallrye.mutiny.Multi;
@@ -24,27 +25,27 @@ import io.smallrye.mutiny.test.Mocks;
 
 public class UniRepeatTest {
 
-    @Test
+    @RepeatedTest(10)
     public void testRepeatAtMost() {
         List<Integer> list = Uni.createFrom().item(1)
                 .repeat().atMost(3)
                 .collectItems().asList()
-                .await().indefinitely();
+                .await().atMost(Duration.ofSeconds(5));
         assertThat(list).hasSize(3).contains(1, 1, 1);
     }
 
-    @Test
+    @RepeatedTest(10)
     public void testRepeatUntil() {
         List<String> items = Arrays.asList("a", "b", "c", "d", "e", "f");
         Iterator<String> iterator = items.iterator();
         List<String> list = Uni.createFrom().item(iterator::next)
                 .repeat().until(v -> v.equalsIgnoreCase("d"))
                 .collectItems().asList()
-                .await().indefinitely();
+                .await().atMost(Duration.ofSeconds(5));
         assertThat(list).hasSize(3).contains("a", "b", "c");
     }
 
-    @Test
+    @RepeatedTest(10)
     public void testRepeatWhilst() {
         Page page1 = new Page(Arrays.asList(1, 2, 3), 1);
         Page page2 = new Page(Arrays.asList(4, 5, 6), 2);
@@ -62,7 +63,7 @@ public class UniRepeatTest {
                 .assertItems(1, 2, 3, 4, 5, 6, 7, 8);
     }
 
-    @Test
+    @RepeatedTest(10)
     public void testRepeat0() {
         assertThrows(IllegalArgumentException.class, () -> Uni.createFrom().item(0)
                 .repeat().atMost(0)
@@ -70,7 +71,7 @@ public class UniRepeatTest {
                 .await().indefinitely());
     }
 
-    @Test
+    @RepeatedTest(10)
     public void testRepeatUntilWithNullPredicate() {
         assertThrows(IllegalArgumentException.class, () -> Uni.createFrom().item(0)
                 .repeat().until(null)
@@ -78,7 +79,7 @@ public class UniRepeatTest {
                 .await().indefinitely());
     }
 
-    @Test
+    @RepeatedTest(10)
     public void testRepeatWhilstWithNullPredicate() {
         assertThrows(IllegalArgumentException.class, () -> Uni.createFrom().item(0)
                 .repeat().whilst(null)
@@ -86,69 +87,69 @@ public class UniRepeatTest {
                 .await().indefinitely());
     }
 
-    @Test
+    @RepeatedTest(10)
     public void testRepeat1() {
         AtomicInteger count = new AtomicInteger();
         List<Integer> list = Uni.createFrom().item(count::getAndIncrement)
                 .repeat().atMost(1)
                 .collectItems().asList()
-                .await().indefinitely();
+                .await().atMost(Duration.ofSeconds(5));
 
         assertThat(list).containsExactly(0);
         assertThat(count).hasValue(1);
     }
 
-    @Test
+    @RepeatedTest(10)
     public void testRepeatUntilOnlyOnce() {
         AtomicInteger count = new AtomicInteger();
         AtomicBoolean once = new AtomicBoolean();
         List<Integer> list = Uni.createFrom().item(count::getAndIncrement)
                 .repeat().until(x -> once.getAndSet(true))
                 .collectItems().asList()
-                .await().indefinitely();
+                .await().atMost(Duration.ofSeconds(5));
 
         assertThat(list).containsExactly(0);
         assertThat(count).hasValue(2); // the first element and the element breaking the loop.
     }
 
-    @Test
+    @RepeatedTest(10)
     public void testRepeatWhilstOnlyOnce() {
         AtomicInteger count = new AtomicInteger();
         AtomicBoolean once = new AtomicBoolean(true);
         List<Integer> list = Uni.createFrom().item(count::getAndIncrement)
                 .repeat().whilst(x -> once.getAndSet(false))
                 .collectItems().asList()
-                .await().indefinitely();
+                .await().atMost(Duration.ofSeconds(5));
 
         assertThat(list).containsExactly(0, 1);
         assertThat(count).hasValue(2);
     }
 
-    @Test
+    @RepeatedTest(10)
     public void testNoRepeatUntil() {
         AtomicInteger count = new AtomicInteger();
         List<Integer> list = Uni.createFrom().item(count::getAndIncrement)
                 .repeat().until(x -> true)
                 .collectItems().asList()
-                .await().indefinitely();
+                .await().atMost(Duration.ofSeconds(5));
 
         assertThat(list).isEmpty();
         assertThat(count).hasValue(1);
     }
 
-    @Test
+    @RepeatedTest(10)
     public void testNoRepeatWhilst() {
         AtomicInteger count = new AtomicInteger();
         List<Integer> list = Uni.createFrom().item(count::getAndIncrement)
                 .repeat().whilst(x -> false)
                 .collectItems().asList()
-                .await().indefinitely();
+                .await().atMost(Duration.ofSeconds(5));
 
         assertThat(list).containsExactly(0);
         assertThat(count).hasValue(1);
     }
 
-    @Test
+    @RepeatedTest(10)
     public void testRepeatCancelledWithTake() {
         int num = 10;
         final AtomicInteger count = new AtomicInteger();
@@ -157,12 +158,12 @@ public class UniRepeatTest {
                 .runSubscriptionOn(Infrastructure.getDefaultWorkerPool())
                 .transform().byTakingFirstItems(num)
                 .collectItems().last()
-                .await().indefinitely();
+                .await().atMost(Duration.ofSeconds(5));
         assertThat(num).isEqualTo(value);
         assertThat(count).hasValue(value);
     }
 
-    @Test
+    @RepeatedTest(10)
     public void testRepeatUntilCancelledWithTake() {
         int num = 10;
         final AtomicInteger invocations = new AtomicInteger();
@@ -175,13 +176,13 @@ public class UniRepeatTest {
                 .runSubscriptionOn(Infrastructure.getDefaultWorkerPool())
                 .transform().byTakingFirstItems(num)
                 .collectItems().last()
-                .await().indefinitely();
+                .await().atMost(Duration.ofSeconds(5));
         assertThat(num).isEqualTo(value);
         assertThat(count).hasValue(value);
         assertThat(invocations).hasValue(value);
     }
 
-    @Test
+    @RepeatedTest(10)
     public void testRepeatWhilstCancelledWithTake() {
         int num = 10;
         final AtomicInteger invocations = new AtomicInteger();
@@ -194,45 +195,45 @@ public class UniRepeatTest {
                 .runSubscriptionOn(Infrastructure.getDefaultWorkerPool())
                 .transform().byTakingFirstItems(num)
                 .collectItems().last()
-                .await().indefinitely();
+                .await().atMost(Duration.ofSeconds(5));
         assertThat(num).isEqualTo(value);
         assertThat(count).hasValue(value);
         assertThat(invocations).hasValue(value);
     }
 
-    @Test
+    @RepeatedTest(10)
     public void testNoStackOverflow() {
         int value = Uni.createFrom().item(1).repeat().indefinitely()
                 .runSubscriptionOn(Infrastructure.getDefaultWorkerPool())
                 .transform().byTakingFirstItems(100000L)
                 .collectItems().last()
-                .await().indefinitely();
+                .await().atMost(Duration.ofSeconds(5));
         assertThat(value).isEqualTo(1);
     }
 
-    @Test
+    @RepeatedTest(10)
     public void testNoStackOverflowWithRepeatUntil() {
         AtomicInteger count = new AtomicInteger();
         int value = Uni.createFrom().item(1).repeat().until(x -> count.incrementAndGet() > 100000000L)
                 .runSubscriptionOn(Infrastructure.getDefaultWorkerPool())
                 .transform().byTakingFirstItems(100000L)
                 .collectItems().last()
-                .await().indefinitely();
+                .await().atMost(Duration.ofSeconds(5));
         assertThat(value).isEqualTo(1);
     }
 
-    @Test
+    @RepeatedTest(10)
     public void testNoStackOverflowWithRepeatWhilst() {
         AtomicInteger count = new AtomicInteger();
         int value = Uni.createFrom().item(1).repeat().whilst(x -> count.incrementAndGet() < 100000000L)
                 .runSubscriptionOn(Infrastructure.getDefaultWorkerPool())
                 .transform().byTakingFirstItems(100000L)
                 .collectItems().last()
-                .await().indefinitely();
+                .await().atMost(Duration.ofSeconds(5));
         assertThat(value).isEqualTo(1);
     }
 
-    @Test
+    @RepeatedTest(10)
     public void testNumberOfRepeat() {
         Subscriber<Integer> subscriber = Mocks.subscriber();
 
@@ -245,7 +246,7 @@ public class UniRepeatTest {
         verify(subscriber, never()).onError(any(Throwable.class));
     }
 
-    @Test
+    @RepeatedTest(10)
     public void testFailurePropagation() {
         Subscriber<Integer> subscriber = Mocks.subscriber();
 
@@ -258,7 +259,7 @@ public class UniRepeatTest {
         verify(subscriber, never()).onNext(any());
     }
 
-    @Test
+    @RepeatedTest(10)
     public void testFailurePropagationWithRepeatUntil() {
         Subscriber<Integer> subscriber = Mocks.subscriber();
 
@@ -271,7 +272,7 @@ public class UniRepeatTest {
         verify(subscriber, never()).onNext(any());
     }
 
-    @Test
+    @RepeatedTest(10)
     public void testFailurePropagationWithRepeatWhilst() {
         Subscriber<Integer> subscriber = Mocks.subscriber();
 
@@ -284,7 +285,7 @@ public class UniRepeatTest {
         verify(subscriber, never()).onNext(any());
     }
 
-    @Test
+    @RepeatedTest(10)
     public void testRequestAndCancellation() {
         final AtomicInteger count = new AtomicInteger();
         AssertSubscriber<Integer> subscriber = Uni.createFrom().item(count::incrementAndGet)
@@ -321,7 +322,7 @@ public class UniRepeatTest {
                 });
     }
 
-    @Test
+    @RepeatedTest(10)
     public void testRequestAndCancellationWithRepeatUntil() {
         final AtomicInteger count = new AtomicInteger();
         AssertSubscriber<Integer> subscriber = Uni.createFrom().item(count::incrementAndGet)
@@ -358,7 +359,7 @@ public class UniRepeatTest {
                 });
     }
 
-    @Test
+    @RepeatedTest(10)
     public void testRequestAndCancellationWithRepeatWhilst() {
         final AtomicInteger count = new AtomicInteger();
         AssertSubscriber<Integer> subscriber = Uni.createFrom().item(count::incrementAndGet)
@@ -395,7 +396,7 @@ public class UniRepeatTest {
                 });
     }
 
-    @Test
+    @RepeatedTest(10)
     public void testRequestWithAtMost() {
         final AtomicInteger count = new AtomicInteger();
         AssertSubscriber<Integer> subscriber = Uni.createFrom().item(count::incrementAndGet)
@@ -421,7 +422,7 @@ public class UniRepeatTest {
                 .assertCompleted();
     }
 
-    @Test
+    @RepeatedTest(10)
     public void testFailurePropagationAfterFewRepeats() {
         AtomicInteger count = new AtomicInteger();
         AssertSubscriber<Integer> subscriber = Uni.createFrom().item(() -> {
@@ -441,7 +442,7 @@ public class UniRepeatTest {
         assertThat(subscriber.getItems()).hasSize(2);
     }
 
-    @Test
+    @RepeatedTest(10)
     public void testFailurePropagationAfterFewRepeatsWithRepeatUntil() {
         AtomicInteger count = new AtomicInteger();
         AssertSubscriber<Integer> subscriber = Uni.createFrom().item(() -> {
@@ -461,7 +462,7 @@ public class UniRepeatTest {
         assertThat(subscriber.getItems()).hasSize(2);
     }
 
-    @Test
+    @RepeatedTest(10)
     public void testFailurePropagationAfterFewRepeatsWithRepeatWhilst() {
         AtomicInteger count = new AtomicInteger();
         AssertSubscriber<Integer> subscriber = Uni.createFrom().item(() -> {
@@ -481,7 +482,7 @@ public class UniRepeatTest {
         assertThat(subscriber.getItems()).hasSize(2);
     }
 
-    @Test
+    @RepeatedTest(10)
     public void testFailurePropagationAfterMaxRepeats() {
         AtomicInteger count = new AtomicInteger();
         AssertSubscriber<Integer> subscriber = Uni.createFrom().item(() -> {
@@ -501,7 +502,7 @@ public class UniRepeatTest {
         assertThat(subscriber.getItems()).hasSize(2);
     }
 
-    @Test
+    @RepeatedTest(10)
     public void testEmptyUniOnceInAWhileWithAtMost() {
         AtomicInteger count = new AtomicInteger();
         AssertSubscriber<Integer> subscriber = Uni.createFrom().item(() -> {
@@ -521,7 +522,7 @@ public class UniRepeatTest {
         assertThat(count).hasValue(10);
     }
 
-    @Test
+    @RepeatedTest(10)
     public void testEmptyUniOnceInAWhileWithIndefinitely() {
         AtomicInteger count = new AtomicInteger();
         AssertSubscriber<Integer> subscriber = Uni.createFrom().item(() -> {
@@ -541,7 +542,7 @@ public class UniRepeatTest {
         assertThat(count).hasValue(14);
     }
 
-    @Test
+    @RepeatedTest(10)
     public void testPredicateFailureWithUntil() {
         AtomicInteger count = new AtomicInteger();
         AssertSubscriber<Integer> subscriber = Uni.createFrom().item(count::incrementAndGet)
@@ -559,7 +560,7 @@ public class UniRepeatTest {
         assertThat(count).hasValue(3);
     }
 
-    @Test
+    @RepeatedTest(10)
     public void testPredicateFailureWithWhilst() {
         AtomicInteger count = new AtomicInteger();
         AssertSubscriber<Integer> subscriber = Uni.createFrom().item(count::incrementAndGet)
@@ -577,7 +578,7 @@ public class UniRepeatTest {
         assertThat(count).hasValue(3);
     }
 
-    @Test
+    @RepeatedTest(10)
     public void testEmptyUniOnceInAWhileWithUntil() {
         AtomicInteger count = new AtomicInteger();
         AssertSubscriber<Integer> subscriber = Uni.createFrom().item(() -> {
@@ -597,7 +598,7 @@ public class UniRepeatTest {
         assertThat(count).hasValue(14);
     }
 
-    @Test
+    @RepeatedTest(10)
     public void testEmptyUniOnceInAWhileWithWhilst() {
         AtomicInteger count = new AtomicInteger();
         AssertSubscriber<Integer> subscriber = Uni.createFrom().item(() -> {
@@ -617,14 +618,14 @@ public class UniRepeatTest {
         assertThat(count).hasValue(14);
     }
 
-    @Test
+    @RepeatedTest(10)
     public void testRepetitionWithState() {
         List<Object> list = Uni.createFrom().emitter(
                 () -> new AtomicInteger(0),
                 (s, e) -> e.complete(s.getAndIncrement()))
                 .repeat().atMost(3)
                 .collectItems().asList()
-                .await().indefinitely();
+                .await().atMost(Duration.ofSeconds(5));
         assertThat(list).containsExactly(0, 1, 2);
     }
 

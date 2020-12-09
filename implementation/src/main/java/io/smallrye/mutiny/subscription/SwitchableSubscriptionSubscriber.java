@@ -192,7 +192,7 @@ public abstract class SwitchableSubscriptionSubscriber<O> implements MultiSubscr
                 newUpstream.request(r);
             }
         } else {
-            Subscription actual = currentUpstream.getAndSet(newUpstream);
+            Subscription actual = pendingSubscription.getAndSet(newUpstream);
             if (actual != null && cancelUpstreamOnSwitch()) {
                 actual.cancel();
             }
@@ -221,7 +221,6 @@ public abstract class SwitchableSubscriptionSubscriber<O> implements MultiSubscr
         Subscription requestTarget = null;
 
         for (;;) {
-
             Subscription nextUpstream = pendingSubscription.getAndSet(null);
             long pendingRequests = missedRequested.getAndSet(0L);
             long pendingItems = missedItems.getAndSet(0L);
