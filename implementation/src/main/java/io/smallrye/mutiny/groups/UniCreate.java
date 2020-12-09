@@ -17,13 +17,11 @@ import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.converters.UniConverter;
 import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
-import io.smallrye.mutiny.operators.UniCreateFromCompletionStage;
-import io.smallrye.mutiny.operators.UniCreateFromDeferredSupplier;
-import io.smallrye.mutiny.operators.UniCreateFromPublisher;
-import io.smallrye.mutiny.operators.UniCreateWithEmitter;
-import io.smallrye.mutiny.operators.UniNever;
+import io.smallrye.mutiny.operators.*;
 import io.smallrye.mutiny.operators.uni.builders.KnownFailureUni;
 import io.smallrye.mutiny.operators.uni.builders.KnownItemUni;
+import io.smallrye.mutiny.operators.uni.builders.StateSuppliedtemUni;
+import io.smallrye.mutiny.operators.uni.builders.SuppliedtemUni;
 import io.smallrye.mutiny.subscription.UniEmitter;
 import io.smallrye.mutiny.subscription.UniSubscriber;
 
@@ -195,17 +193,7 @@ public class UniCreate {
      */
     public <T> Uni<T> item(Supplier<? extends T> supplier) {
         Supplier<? extends T> actual = ParameterValidation.nonNull(supplier, "supplier");
-        return emitter(emitter -> {
-            T item;
-            try {
-                item = actual.get();
-            } catch (RuntimeException e) {
-                // Exception from the supplier, propagate it.
-                emitter.fail(e);
-                return;
-            }
-            emitter.complete(item);
-        });
+        return Infrastructure.onUniCreation(new SuppliedtemUni<>(actual));
     }
 
     /**
@@ -227,29 +215,10 @@ public class UniCreate {
      * @param <S> the type of the state
      * @return the produced {@link Uni}
      */
-    public <T, S> Uni<T> item(Supplier<S> stateSupplier,
-            Function<S, ? extends T> mapper) {
-        ParameterValidation.nonNull(stateSupplier, "stateSupplier");
-        ParameterValidation.nonNull(mapper, "mapper");
-        // Flag checking that the state supplier is only called once.
-        AtomicBoolean once = new AtomicBoolean();
-        // The shared state container.
-        AtomicReference<S> state = new AtomicReference<>();
-
-        return Uni.createFrom().deferred(() -> {
-            try {
-                invokeOnce(once, state, stateSupplier);
-            } catch (Throwable e) {
-                return Uni.createFrom().failure(e);
-            }
-
-            S sharedState = state.get();
-            if (sharedState == null) {
-                // The state supplier failed or produced null.
-                return Uni.createFrom().failure(new IllegalStateException("Invalid shared state"));
-            }
-            return Uni.createFrom().item(mapper.apply(sharedState));
-        });
+    public <T, S> Uni<T> item(Supplier<S> stateSupplier, Function<S, ? extends T> mapper) {
+        Supplier<S> actualSupplier = ParameterValidation.nonNull(stateSupplier, "stateSupplier");
+        Function<S, ? extends T> actualMapper = ParameterValidation.nonNull(mapper, "mapper");
+        return Infrastructure.onUniCreation(new StateSuppliedtemUni<>(actualSupplier, actualMapper));
     }
 
     /**
