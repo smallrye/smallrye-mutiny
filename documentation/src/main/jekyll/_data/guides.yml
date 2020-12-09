@@ -58,7 +58,7 @@ reactive-to-imperative:
   labels:
     - advanced
   related:
-    - url: some-javadoc-url
+    - url: https://javadoc.io/doc/io.smallrye.reactive/mutiny/latest/io/smallrye/mutiny/groups/UniAwait.html
       text: The Uni Await group
     - guide: imperative-to-reactive
 
