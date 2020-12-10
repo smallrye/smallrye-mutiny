@@ -2,11 +2,11 @@ title: SmallRye Mutiny
 description: >-
   SmallRye Mutiny!
 
-google_analytics: TODO
+google_analytics: G-FPQ70JF1EY
 
 host: 127.0.0.1
 port: 4000
-baseurl: /mutiny-doc-sandbox
+baseurl: /smallrye-mutiny
 
 destination: ../../../target/_site
 
