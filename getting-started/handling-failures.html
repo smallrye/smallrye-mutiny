@@ -1,0 +1,377 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <title></title>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="SmallRye Mutiny!">
+
+    <link rel="canonical" href="/getting-started/handling-failures.html">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.3.1/styles/default.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/components/icon.min.css" integrity="sha512-8Tb+T7SKUFQWOPIQCaLDWWe1K/SY8hvHl7brOH8Nz5z1VT8fnf8B+9neoUzmFY3OzkWMMs3OjrwZALgB1oXFBg==" crossorigin="anonymous" />
+    <link rel="shortcut icon" type="image/png" href="/smallrye-mutiny/assets/images/favicon.ico">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">
+    <link rel="stylesheet" href="/smallrye-mutiny/assets/css/main.css" />
+    <link rel="stylesheet" href="https://maxst.icons8.com/vue-static/landings/line-awesome/font-awesome-line-awesome/css/all.min.css">
+    <link rel="stylesheet" href="https://maxst.icons8.com/vue-static/landings/line-awesome/line-awesome/1.3.0/css/line-awesome.min.css">
+</head>
+
+<body>
+    <div class="container-fluid global-container">
+        
+
+
+
+
+
+<header class="header masthead mb-auto">
+    <div class="container">
+        <nav class="navbar navbar-dark navbar-expand-lg">
+            <a class="navbar-brand brand mutiny" href="/smallrye-mutiny/index.html"><strong>Mutiny!</strong></a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#toggler"
+                    aria-controls="toggler" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="toggler">
+                <ul class="navbar-nav ml-auto mr-0 mt-2 mt-lg-0">
+                    <li class="nav-item"><a class="nav-link " href="/smallrye-mutiny/index.html">Home</a></li>
+                    <li class="nav-item"><a class="nav-link " href="/smallrye-mutiny/pages/philosophy">Philosophy</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="/smallrye-mutiny/getting-started/download">Getting started</a></li>
+                    <li class="nav-item"><a class="nav-link " href="/smallrye-mutiny/guides">Guides</a></li>
+                    <li class="nav-item"><a href="https://github.com/smallrye/smallrye-mutiny" target="_blank" title="Github"><i
+                            class="lab la-github la-2x"></i></a></li>
+                    <li class="nav-item"><a href="https://groups.google.com/d/forum/smallrye" target="_blank" title="SmallRye Google Group"><i
+                            class="las la-at la-2x"></i></a></li>
+                    <li class="nav-item"><a href="https://stackoverflow.com/questions/tagged/mutiny" target="_blank"
+                                            title="Stack Overflow"><i
+                            class="lab la-stack-overflow la-2x"></i></a></li>
+                </ul>
+            </div>
+        </nav>
+    </div>
+</header>
+        <main>
+            <div class="content">
+                
+
+    
+    
+        
+        
+        
+    
+        
+        
+        
+    
+        
+        
+        
+    
+        
+        
+        
+    
+        
+        
+        
+    
+        
+        
+        
+    
+        
+        
+        
+    
+        
+            
+            
+
+    
+        
+
+
+
+<section class="hero gs">
+    <div class="hero-main container">
+        <div class="row">
+            <div class="hero-left col-12">
+                <div class="hero-slogan">
+                    <h1 class="hero-name">Handling failures</h1>
+                </div>
+                <div class="hero-desc">
+                    Learn how you can recover from failures.
+                </div>
+                <div class="hero-buttons">
+                    
+                    <a href="/smallrye-mutiny/getting-started/transforming-items-async" class="getting-started-nav btn btn-rounded button button-dark button-rounded">
+                        <i class="las la-arrow-left left"></i>&nbsp;Transforming items to Uni/Multi</a>
+                    
+                    
+                    <a href="/smallrye-mutiny/getting-started/retry" class="getting-started-nav btn btn-rounded button button-dark button-rounded">
+                        Retrying on failures&nbsp;<i class="las la-arrow-right"></i></a>
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="container page-content">
+    <div class="row">
+        <div class="col-md-9 content">
+            <div class="paragraph">
+<p>Mutiny provides several operators to handle failures.</p>
+</div>
+<div class="paragraph">
+<p>Remember, failures are terminal events sent by the observed stream, indicating that something <em>bad</em> happened.
+After a failure, no more items are being received.</p>
+</div>
+<div class="paragraph">
+<p>When such an event is received, you can:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>propagate the failure downstream (default), or</p>
+</li>
+<li>
+<p>transform the failure into another failure, or</p>
+</li>
+<li>
+<p>recover from it by switching to another stream, passing a fallback item, or completing, or</p>
+</li>
+<li>
+<p>retrying (covered in the next guide)</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>If you don&#8217;t handle the failure event, it is propagated downstream until a stage handles the failure or reaches the final subscriber.</p>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+on <code>Multi</code>, a failure cancels the subscription, meaning you will not receive any more items.
+The <code>retry</code> operator lets you re-subscribe and continue the reception.
+</td>
+</tr>
+</table>
+</div>
+<div class="sect1">
+<h2 id="observing-failures"><a class="anchor" href="#observing-failures"></a>Observing failures</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>It can be useful to execute some custom action when a failure happens.
+For example, you can log the failure:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Uni&lt;String&gt; u = uni
+        .onFailure().invoke(failure -&gt; log(failure));
+
+Multi&lt;String&gt; m = multi
+        .onFailure().invoke(failure -&gt; log(failure));</code></pre>
+</div>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+You can also execute an asynchronous action using <code>onFailure().call(Function&lt;Throwable, Uni&lt;?&gt;)</code>.
+The received failure will be propagated downstream when the <code>Uni</code> produced by the passed function emits its item.
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="transforming-failures"><a class="anchor" href="#transforming-failures"></a>Transforming failures</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Another useful action on failure is to transform the failure into a <em>more meaningful</em> failure.</p>
+</div>
+<div class="paragraph">
+<p>Typically, you can wrap a low-level failure (like an <code>IOException</code>) into a business failure (<code>ServiceUnavailableException</code>):</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Uni&lt;String&gt; u = uni
+        .onFailure().transform(failure -&gt;
+                new ServiceUnavailableException(failure));</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="recovering-using-fallback-items"><a class="anchor" href="#recovering-using-fallback-items"></a>Recovering using fallback item(s)</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>In general, upon failure, you want to recover.
+The first approach is to recover by replacing the failure with an item:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Uni&lt;String&gt; u1 = uni
+        .onFailure().recoverWithItem("hello");
+
+Uni&lt;String&gt; u2 = uni
+        .onFailure().recoverWithItem(f -&gt; getFallback(f));</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The second approach receives a <code>Supplier</code> to compute the fallback item.
+For the downstream, it didn&#8217;t fail; it gets the fallback item instead.</p>
+</div>
+<div class="paragraph">
+<p>However, don&#8217;t forget that failures are terminal!
+So for <code>Multi</code>, the downstream receives the fallback item followed by the completion signal, as no more items can be produced.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="completing-on-failure"><a class="anchor" href="#completing-on-failure"></a>Completing on failure</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>When observing a <code>Multi</code> you can replace the failure with the completion signal:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Multi&lt;String&gt; m = multi
+        .onFailure().recoverWithCompletion();</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The downstream won&#8217;t see the failure, just the completion event.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="switching-to-another-stream"><a class="anchor" href="#switching-to-another-stream"></a>Switching to another stream</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>On failure, you may want to switch to an alternate stream.
+When the failure is received, it subscribes to this other stream and propagates the items from this stream instead:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Uni&lt;String&gt; u = uni
+        .onFailure().recoverWithUni(f -&gt; getFallbackUni(f));
+
+Multi&lt;String&gt; m = multi
+        .onFailure().recoverWithMulti(f -&gt; getFallbackMulti(f));</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The <code>recoverWithUni</code> and <code>recoverWithMulti</code> methods replace the failed upstream with the returned stream.</p>
+</div>
+<div class="paragraph">
+<p>The fallback streams must produce the same type of event as the original upstream.</p>
+</div>
+</div>
+</div>
+        </div>
+        <div class="col-md-3 toc-container d-sm-none d-md-block">
+            <nav class="page-toc toc nav sticky-top" id="toc">
+                
+                <h4>Table of Content</h4>
+                <ul class="sectlevel1">
+<li><a href="#observing-failures">Observing failures</a></li>
+<li><a href="#transforming-failures">Transforming failures</a></li>
+<li><a href="#recovering-using-fallback-items">Recovering using fallback item(s)</a></li>
+<li><a href="#completing-on-failure">Completing on failure</a></li>
+<li><a href="#switching-to-another-stream">Switching to another stream</a></li>
+</ul>
+                
+
+                
+            </nav>
+        </div>
+    </div>
+</div>
+
+
+
+<div class="footer-buttons gs ">
+    <div class="container">
+        <div class="row">
+                
+            <div class="col align-self-start">
+                <a href="/smallrye-mutiny/getting-started/transforming-items-async" class="btn btn-rounded button button-dark button-rounded">
+                    <i class="las la-arrow-left left"></i>&nbsp;Transforming items to Uni/Multi</a>
+            </div>
+                
+
+            <div class="col align-self-center text-center">
+                <a href="/smallrye-mutiny/guides" class="btn btn-rounded button button-dark button-rounded">All Guides</a>
+            </div>
+
+            <div class="col align-self-end">
+                
+                <a href="/smallrye-mutiny/getting-started/retry" class="btn btn-rounded button button-dark button-rounded float-right">
+                    Retrying on failures&nbsp;<i class="las la-arrow-right"></i></a>
+                
+            </div>
+        </div>
+
+    </div>
+</div>
+            </div>
+        </main>
+        <footer class="footer">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-9 sep-right">
+                <p>
+                    SmallRye Mutiny is an open source project. All the code from this project is available under the <a href="https://raw.githubusercontent.com/smallrye/smallrye-mutiny/master/LICENSE">Apache Software License 2.0</a>.
+                </p>
+                <p>
+                    This website was built with <a href="https://jekyllrb.com/">Jekyll</a>, is hosted on Github Pages and is completely open source.
+                    You can <a href="https://github.com/smallrye/smallrye-mutiny">fork it</a> and propose enhancements through pull-requests.
+                </p>
+                <p>
+                    Something's wrong? Open an <a href="https://github.com/smallrye/smallrye-mutiny/issues">issue</a>.
+                </p>
+            </div>
+            <div class="col-lg-3">
+                <p>
+                     Site last generated: Dec 10, 2020
+                </p>
+            </div>
+        </div>
+    </div>
+    <!-- Javascript-->
+    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.3.1/highlight.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ho+j7jyWK8fNQe+A12Hb8AhRq26LrZ/JpcUGGOn+Y7RsweNrtN/tE3MoK7ZeZDyx" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/gh/cferdinandi/gumshoe@4/dist/gumshoe.polyfills.min.js"></script>
+    <script src="/smallrye-mutiny/assets/js/hl.js" type="text/javascript"></script>
+    <script src="/smallrye-mutiny/assets/js/scrollspy.js" type="text/javascript"></script>
+
+    <script>
+        $(document).ready(function(){
+            $("#search").on("keyup", function() {
+                var value = $(this).val().toLowerCase();
+                $(".guide").filter(function() {
+                    $(this).toggle($(this).attr("data-search").toLowerCase().indexOf(value) > -1)
+                });
+            });
+        });
+    </script>
+</footer>
+    </div>
+</body>
+
+</html>

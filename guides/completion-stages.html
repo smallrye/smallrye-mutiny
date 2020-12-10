@@ -1,0 +1,307 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <title></title>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="SmallRye Mutiny!">
+
+    <link rel="canonical" href="/guides/completion-stages.html">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.3.1/styles/default.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/components/icon.min.css" integrity="sha512-8Tb+T7SKUFQWOPIQCaLDWWe1K/SY8hvHl7brOH8Nz5z1VT8fnf8B+9neoUzmFY3OzkWMMs3OjrwZALgB1oXFBg==" crossorigin="anonymous" />
+    <link rel="shortcut icon" type="image/png" href="/smallrye-mutiny/assets/images/favicon.ico">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">
+    <link rel="stylesheet" href="/smallrye-mutiny/assets/css/main.css" />
+    <link rel="stylesheet" href="https://maxst.icons8.com/vue-static/landings/line-awesome/font-awesome-line-awesome/css/all.min.css">
+    <link rel="stylesheet" href="https://maxst.icons8.com/vue-static/landings/line-awesome/line-awesome/1.3.0/css/line-awesome.min.css">
+</head>
+
+<body>
+    <div class="container-fluid global-container">
+        
+
+
+
+
+
+<header class="header masthead mb-auto">
+    <div class="container">
+        <nav class="navbar navbar-dark navbar-expand-lg">
+            <a class="navbar-brand brand mutiny" href="/smallrye-mutiny/index.html"><strong>Mutiny!</strong></a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#toggler"
+                    aria-controls="toggler" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="toggler">
+                <ul class="navbar-nav ml-auto mr-0 mt-2 mt-lg-0">
+                    <li class="nav-item"><a class="nav-link " href="/smallrye-mutiny/index.html">Home</a></li>
+                    <li class="nav-item"><a class="nav-link " href="/smallrye-mutiny/pages/philosophy">Philosophy</a></li>
+                    <li class="nav-item"><a class="nav-link " href="/smallrye-mutiny/getting-started/download">Getting started</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="/smallrye-mutiny/guides">Guides</a></li>
+                    <li class="nav-item"><a href="https://github.com/smallrye/smallrye-mutiny" target="_blank" title="Github"><i
+                            class="lab la-github la-2x"></i></a></li>
+                    <li class="nav-item"><a href="https://groups.google.com/d/forum/smallrye" target="_blank" title="SmallRye Google Group"><i
+                            class="las la-at la-2x"></i></a></li>
+                    <li class="nav-item"><a href="https://stackoverflow.com/questions/tagged/mutiny" target="_blank"
+                                            title="Stack Overflow"><i
+                            class="lab la-stack-overflow la-2x"></i></a></li>
+                </ul>
+            </div>
+        </nav>
+    </div>
+</header>
+        <main>
+            <div class="content">
+                
+
+<section class="hero gs">
+    <div class="hero-main container">
+        <div class="row">
+            <div class="hero-left col-12">
+                <div class="hero-slogan">
+                    <h1 class="hero-name">How to deal with Completion Stages?</h1>
+                </div>
+                <div class="hero-desc">
+                    Learn how to interact with CompletionStages and CompletableFutures.
+                </div>
+                <!-- TODO Labels -->
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="container page-content">
+    <div class="row">
+        <div class="col-md-9 content">
+            <div class="paragraph">
+<p><code>CompletionStage</code> and <code>CompletableFuture</code> are classes provided by Java to represent asynchronous actions.</p>
+</div>
+<div class="sect1">
+<h2 id="differences-between-uni-and-completionstage"><a class="anchor" href="#differences-between-uni-and-completionstage"></a>Differences between Uni and CompletionStage</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>While <code>CompletionStage</code> and <code>CompletableFuture</code> are close to <code>Uni</code> in terms of use case, there are some fundamental differences.</p>
+</div>
+<div class="paragraph">
+<p><code>CompletionStage</code> are <em>eager</em>.
+When a method returns a <code>CompletionStage,</code> the operation has already been triggered.
+The outcome is used to complete the the returned <code>CompletionStage</code>.
+On the other side, <code>Unis</code> are lazy.
+The operation is only triggered once there is a subscription.</p>
+</div>
+<div class="paragraph">
+<p><code>CompletionStage</code> <em>caches</em> the outcome.
+So, once received, you can retrieve the result.
+Every retrieval will get the same result.
+With <code>Uni</code>, every subscription has the opportunity to re-trigger the operation and gets a different result.</p>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+You can also <em>cache</em> the outcome with <code>Uni.memoize().indefinitely()</code>.
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="from-uni-to-completionstage"><a class="anchor" href="#from-uni-to-completionstage"></a>From Uni to CompletionStage</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>You can create a <code>CompletionStage</code> from <code>Uni</code> using <code>uni.subscribeAsCompletionStage()</code>.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">CompletionStage&lt;String&gt; cs = uni.subscribeAsCompletionStage();</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>It&#8217;s important to understand that retrieving a <code>CompletionStage</code> subscribes to the <code>Uni</code>.
+If you do this operation twice, it subscribes to the <code>Uni</code> twice and re-trigger the operation.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">// Trigger the underlying operation twice:
+CompletionStage&lt;String&gt; cs1 = uni.subscribeAsCompletionStage();
+CompletionStage&lt;String&gt; cs2 = uni.subscribeAsCompletionStage();</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="creating-a-uni-from-a-completionstage"><a class="anchor" href="#creating-a-uni-from-a-completionstage"></a>Creating a Uni from a CompletionStage</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>To create a <code>Uni</code> from a <code>CompletionStage</code>, use <code>Uni.createFrom().completionStage(&#8230;&#8203;)</code>.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Uni&lt;String&gt; uni1 = Uni
+        // Create from a Completion Stage
+        .createFrom().completionStage(
+                CompletableFuture.supplyAsync(() -&gt; "hello", executor)
+        )
+        .onItem().transform(String::toUpperCase);
+
+Uni&lt;String&gt; uni2 = Uni
+        // Create from a Completion Stage supplier (recommended)
+        .createFrom().completionStage(
+                () -&gt; CompletableFuture.supplyAsync(() -&gt; "hello", executor)
+        )
+        .onItem().transform(String::toUpperCase);</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>As you can see, there are two versions.
+The first one receives the <code>CompletionStage</code> directly, while the second one gets a supplier.
+In the case of multiple subscriptions on the produced <code>Uni</code>, the supplier is called multiple times (once per subscription), and so can change the return <code>CompletionStage</code>.
+It also delays the creation of the <code>CompletionStage</code> until there is a subscription, which only triggers the operation at that time.
+If you pass the instance directly, it will always use the same one (even for multiple subscriptions) and triggers the operation even if there is no subscription.
+For these reasons, it is generally better to use the variant accepting a supplier.</p>
+</div>
+<div class="paragraph">
+<p>Note that if the completion stage produces a <code>null</code> value, the resulting <code>Uni</code> emits <code>null</code> as item.
+If the completion stages complete exceptionally, the failure is emitted by the resulting <code>Uni</code>.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="creating-a-multi-from-a-completionstage"><a class="anchor" href="#creating-a-multi-from-a-completionstage"></a>Creating a Multi from a CompletionStage</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>To create a <code>Multi</code> from a <code>CompletionStage</code>, use <code>Multi.createFrom().completionStage(&#8230;&#8203;)</code>.
+It produces:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>a multi emitting an item and completing - if the value produced by the completion stage is not <code>null</code>,</p>
+</li>
+<li>
+<p>an empty multi if the value produced by the completion stage is <code>null</code>,</p>
+</li>
+<li>
+<p>a failed multi is completion stage is completed exceptionally.</p>
+</li>
+</ul>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Multi&lt;String&gt; multi1 = Multi
+        .createFrom().completionStage(
+                CompletableFuture.supplyAsync(() -&gt; "hello", executor)
+        )
+        .onItem().transform(String::toUpperCase);
+
+Multi&lt;String&gt; multi2 = Multi
+        .createFrom().completionStage(() -&gt;
+                CompletableFuture.supplyAsync(() -&gt; "hello", executor)
+        )
+        .onItem().transform(String::toUpperCase);</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>For the same reason as for <code>Uni</code>, there are two versions:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>one accepting a <code>CompletionStage</code> directly</p>
+</li>
+<li>
+<p>one accepting a <code>Supplier&lt;CompletionStage&gt;</code>, called at subscription-time, for every subscription.</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>It is recommended to use the second version.</p>
+</div>
+</div>
+</div>
+        </div>
+        <div class="col-md-3 col-md-offset-1 toc-container d-sm-none d-md-block">
+            <nav class="page-toc toc nav sticky-top" id="toc">
+                
+                <h4>Table of Content</h4>
+                <ul class="sectlevel1">
+<li><a href="#differences-between-uni-and-completionstage">Differences between Uni and CompletionStage</a></li>
+<li><a href="#from-uni-to-completionstage">From Uni to CompletionStage</a></li>
+<li><a href="#creating-a-uni-from-a-completionstage">Creating a Uni from a CompletionStage</a></li>
+<li><a href="#creating-a-multi-from-a-completionstage">Creating a Multi from a CompletionStage</a></li>
+</ul>
+                
+
+                
+                <h4>Related content</h4>
+                <ul>
+                    
+                    <li>
+                        
+                        <a href="/smallrye-mutiny/guides/converters">Using other reactive programming libraries</a>
+                        
+                        
+                    </li>
+                    
+                </ul>
+                
+            </nav>
+        </div>
+    </div>
+</div>
+
+
+            </div>
+        </main>
+        <footer class="footer">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-9 sep-right">
+                <p>
+                    SmallRye Mutiny is an open source project. All the code from this project is available under the <a href="https://raw.githubusercontent.com/smallrye/smallrye-mutiny/master/LICENSE">Apache Software License 2.0</a>.
+                </p>
+                <p>
+                    This website was built with <a href="https://jekyllrb.com/">Jekyll</a>, is hosted on Github Pages and is completely open source.
+                    You can <a href="https://github.com/smallrye/smallrye-mutiny">fork it</a> and propose enhancements through pull-requests.
+                </p>
+                <p>
+                    Something's wrong? Open an <a href="https://github.com/smallrye/smallrye-mutiny/issues">issue</a>.
+                </p>
+            </div>
+            <div class="col-lg-3">
+                <p>
+                     Site last generated: Dec 10, 2020
+                </p>
+            </div>
+        </div>
+    </div>
+    <!-- Javascript-->
+    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.3.1/highlight.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ho+j7jyWK8fNQe+A12Hb8AhRq26LrZ/JpcUGGOn+Y7RsweNrtN/tE3MoK7ZeZDyx" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/gh/cferdinandi/gumshoe@4/dist/gumshoe.polyfills.min.js"></script>
+    <script src="/smallrye-mutiny/assets/js/hl.js" type="text/javascript"></script>
+    <script src="/smallrye-mutiny/assets/js/scrollspy.js" type="text/javascript"></script>
+
+    <script>
+        $(document).ready(function(){
+            $("#search").on("keyup", function() {
+                var value = $(this).val().toLowerCase();
+                $(".guide").filter(function() {
+                    $(this).toggle($(this).attr("data-search").toLowerCase().indexOf(value) > -1)
+                });
+            });
+        });
+    </script>
+</footer>
+    </div>
+</body>
+
+</html>

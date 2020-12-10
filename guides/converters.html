@@ -1,0 +1,497 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <title></title>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="SmallRye Mutiny!">
+
+    <link rel="canonical" href="/guides/converters.html">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.3.1/styles/default.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/components/icon.min.css" integrity="sha512-8Tb+T7SKUFQWOPIQCaLDWWe1K/SY8hvHl7brOH8Nz5z1VT8fnf8B+9neoUzmFY3OzkWMMs3OjrwZALgB1oXFBg==" crossorigin="anonymous" />
+    <link rel="shortcut icon" type="image/png" href="/smallrye-mutiny/assets/images/favicon.ico">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">
+    <link rel="stylesheet" href="/smallrye-mutiny/assets/css/main.css" />
+    <link rel="stylesheet" href="https://maxst.icons8.com/vue-static/landings/line-awesome/font-awesome-line-awesome/css/all.min.css">
+    <link rel="stylesheet" href="https://maxst.icons8.com/vue-static/landings/line-awesome/line-awesome/1.3.0/css/line-awesome.min.css">
+</head>
+
+<body>
+    <div class="container-fluid global-container">
+        
+
+
+
+
+
+<header class="header masthead mb-auto">
+    <div class="container">
+        <nav class="navbar navbar-dark navbar-expand-lg">
+            <a class="navbar-brand brand mutiny" href="/smallrye-mutiny/index.html"><strong>Mutiny!</strong></a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#toggler"
+                    aria-controls="toggler" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="toggler">
+                <ul class="navbar-nav ml-auto mr-0 mt-2 mt-lg-0">
+                    <li class="nav-item"><a class="nav-link " href="/smallrye-mutiny/index.html">Home</a></li>
+                    <li class="nav-item"><a class="nav-link " href="/smallrye-mutiny/pages/philosophy">Philosophy</a></li>
+                    <li class="nav-item"><a class="nav-link " href="/smallrye-mutiny/getting-started/download">Getting started</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="/smallrye-mutiny/guides">Guides</a></li>
+                    <li class="nav-item"><a href="https://github.com/smallrye/smallrye-mutiny" target="_blank" title="Github"><i
+                            class="lab la-github la-2x"></i></a></li>
+                    <li class="nav-item"><a href="https://groups.google.com/d/forum/smallrye" target="_blank" title="SmallRye Google Group"><i
+                            class="las la-at la-2x"></i></a></li>
+                    <li class="nav-item"><a href="https://stackoverflow.com/questions/tagged/mutiny" target="_blank"
+                                            title="Stack Overflow"><i
+                            class="lab la-stack-overflow la-2x"></i></a></li>
+                </ul>
+            </div>
+        </nav>
+    </div>
+</header>
+        <main>
+            <div class="content">
+                
+
+<section class="hero gs">
+    <div class="hero-main container">
+        <div class="row">
+            <div class="hero-left col-12">
+                <div class="hero-slogan">
+                    <h1 class="hero-name">Using other reactive programming libraries</h1>
+                </div>
+                <div class="hero-desc">
+                    Learn how to integrate Mutiny with RX Java or Reactor.
+                </div>
+                <!-- TODO Labels -->
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="container page-content">
+    <div class="row">
+        <div class="col-md-9 content">
+            <div class="paragraph">
+<p>You may need to integrate libraries exposing an API using other reactive programming libraries such as RX Java or Reactor.
+Mutiny has a built-in conversion mechanism to ease that integration.</p>
+</div>
+<div class="sect1">
+<h2 id="picking-the-right-dependency"><a class="anchor" href="#picking-the-right-dependency"></a>Picking the right dependency</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>You need to add another dependency to access the converters.
+Each artifact contains the converters for a specific reactive library.
+Pick the right one and add it to your project:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;!-- Mutiny &lt;-&gt; Reactor --&gt;
+&lt;dependency&gt;
+  &lt;groupId&gt;io.smallrye.reactive&lt;/groupId&gt;
+  &lt;artifactId&gt;mutiny-reactor&lt;/artifactId&gt;
+  &lt;version&gt;0.11.0&lt;/version&gt;
+&lt;/dependency&gt;
+
+&lt;!-- Mutiny &lt;-&gt; RX Java --&gt;
+&lt;dependency&gt;
+  &lt;groupId&gt;io.smallrye.reactive&lt;/groupId&gt;
+  &lt;artifactId&gt;mutiny-rxjava&lt;/artifactId&gt;
+  &lt;version&gt;0.11.0&lt;/version&gt;
+&lt;/dependency&gt;</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="integration-with-project-reactor"><a class="anchor" href="#integration-with-project-reactor"></a>Integration with Project Reactor</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p><a href="https://projectreactor.io/">Project Reactor</a> is a popular reactive programming library.
+It offers two types: <code>Mono</code> and <code>Flux,</code> both implementing Reactive Stream <code>Publisher</code>.</p>
+</div>
+<div class="paragraph">
+<p>To use the Reactor &lt;&#8594; Mutiny converter, add the following imports to your class:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">import io.smallrye.mutiny.converters.multi.MultiReactorConverters;
+import io.smallrye.mutiny.converters.uni.UniReactorConverters;</code></pre>
+</div>
+</div>
+<div class="sect2">
+<h3 id="converting-a-flux-or-a-mono-into-a-multi"><a class="anchor" href="#converting-a-flux-or-a-mono-into-a-multi"></a>Converting a Flux or a Mono into a Multi</h3>
+<div class="paragraph">
+<p>Both <code>Flux</code> and <code>Mono</code> implement <code>Publisher</code>.
+As a result, we can use the Reactive Streams interoperability to convert instances from <code>Flux&lt;T&gt;</code> and <code>Mono&lt;T&gt;</code> to <code>Multi&lt;T&gt;</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Multi&lt;T&gt; multiFromFlux = Multi.createFrom().publisher(flux);
+Multi&lt;T&gt; multiFromMono = Multi.createFrom().publisher(mono);</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="converting-a-flux-or-a-mono-into-a-uni"><a class="anchor" href="#converting-a-flux-or-a-mono-into-a-uni"></a>Converting a Flux or a Mono into a Uni</h3>
+<div class="paragraph">
+<p>As you can create <code>Uni</code> from a <code>Publisher</code>, the same approach can be used to create <code>Uni</code> instances:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Uni&lt;T&gt; uniFromFlux = Uni.createFrom().publisher(flux);
+Uni&lt;T&gt; uniFromMono = Uni.createFrom().publisher(mono);</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>When a <code>Flux</code> or <code>Mono</code> sends the <em>completion</em> event without having emitted any item, the resulting <code>Uni</code> emits <code>null</code>.</p>
+</div>
+<div class="paragraph">
+<p>When converting a <code>Flux</code> to <code>Uni</code>, the resulting <code>Uni</code> emits the first item.
+After that emission, it cancels the subscription to the <code>Flux</code>.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="converting-a-multi-into-a-flux-or-mono"><a class="anchor" href="#converting-a-multi-into-a-flux-or-mono"></a>Converting a Multi into a Flux or Mono</h3>
+<div class="paragraph">
+<p>Converting a <code>Multi</code> into a <code>Flux</code> or a <code>Mono</code> uses the Reactive Streams interoperability:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Flux&lt;T&gt; fluxFromMulti = Flux.from(multi);
+Mono&lt;T&gt; monoFromMulti = Mono.from(multi);</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="converting-a-uni-into-a-flux-or-mono"><a class="anchor" href="#converting-a-uni-into-a-flux-or-mono"></a>Converting a Uni into a Flux or Mono</h3>
+<div class="paragraph">
+<p>Converting a <code>Uni</code> into a <code>Flux</code> or a <code>Mono</code> requires a converter, as <code>Uni</code> does not implement Reactive Streams.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Flux&lt;T&gt; fluxFromUni = uni.convert().with(UniReactorConverters.toFlux());
+Mono&lt;T&gt; monoFromUni = uni.convert().with(UniReactorConverters.toMono());</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If the <code>Uni</code> emits <code>null</code>, it sends the <em>completion</em> event.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="using-converter-instead-of-reactive-streams"><a class="anchor" href="#using-converter-instead-of-reactive-streams"></a>Using converter instead of Reactive Streams</h3>
+<div class="paragraph">
+<p>While Reactive Streams interoperability is convenient, Mutiny also provides converters to create <code>Flux</code> and <code>Mono</code> from <code>Uni</code> and <code>Multi</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Mono&lt;String&gt; mono = uni.convert().with(UniReactorConverters.toMono());
+Flux&lt;String&gt; flux = uni.convert().with(UniReactorConverters.toFlux());
+Mono&lt;String&gt; mono = multi.convert().with(MultiReactorConverters.toMono());
+Flux&lt;String&gt; flux = multi.convert().with(MultiReactorConverters.toFlux());</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="integration-with-rx-java"><a class="anchor" href="#integration-with-rx-java"></a>Integration with RX Java</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>RxJava is another popular reactive programming library.
+It offers 5 types: <code>Completable</code> (no item), <code>Single</code> (one item), <code>Maybe</code> (0 or 1 item), <code>Observable</code> (multiple items), <code>Flowable</code> (multiple items, implements Reactive Stream <code>Publisher</code>).</p>
+</div>
+<div class="paragraph">
+<p>To use the RxJava &lt;&#8594; Mutiny converter, add the following imports to your class:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">import io.smallrye.mutiny.converters.multi.MultiRxConverters;
+import io.smallrye.mutiny.converters.uni.UniRxConverters;</code></pre>
+</div>
+</div>
+<div class="sect2">
+<h3 id="converting-an-observable-or-a-flowable-into-a-multi"><a class="anchor" href="#converting-an-observable-or-a-flowable-into-a-multi"></a>Converting an Observable or a Flowable into a Multi</h3>
+<div class="paragraph">
+<p>Both <code>Observable</code> and <code>Flowable</code> are item streams.
+However, <code>Observable</code> does not implement <code>Publisher</code> and so does not have back-pressure support.</p>
+</div>
+<div class="paragraph">
+<p>To create <code>Multi</code> from an <code>Observable,</code> you need a specific converter:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Multi&lt;T&gt; multiFromObservable = Multi.createFrom()
+        .converter(MultiRxConverters.fromObservable(), observable);</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Converting a <code>Flowable</code> is easier, as it&#8217;s a <code>Publisher</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Multi&lt;T&gt; multiFromFlowable = Multi.createFrom().publisher(flowable);</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="converting-a-completable-single-or-maybe-into-a-multi"><a class="anchor" href="#converting-a-completable-single-or-maybe-into-a-multi"></a>Converting a Completable, Single or Maybe into a Multi</h3>
+<div class="paragraph">
+<p>To create a <code>Multi</code> from a <code>Completable,</code> <code>Single</code> or <code>Maybe</code> you need specific converters, as none of these types implement Reactive Streams.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Multi&lt;Void&gt; multiFromCompletable = Multi.createFrom()
+        .converter(MultiRxConverters.fromCompletable(), completable);
+Multi&lt;T&gt; multiFromSingle = Multi.createFrom()
+        .converter(MultiRxConverters.fromSingle(), single);
+Multi&lt;T&gt; multiFromMaybe = Multi.createFrom()
+        .converter(MultiRxConverters.fromMaybe(), maybe);
+Multi&lt;T&gt; multiFromEmptyMaybe = Multi.createFrom()
+        .converter(MultiRxConverters.fromMaybe(), emptyMaybe);</code></pre>
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Creating a <code>Multi</code> from a <code>Completable</code> always produces a <code>Multi&lt;Void&gt;</code> that only emits the <em>completion</em> or <em>failure</em> event.</p>
+</li>
+<li>
+<p>Creating a <code>Multi</code> from a <code>Single</code> produces a <code>Multi</code>. That <code>Multi</code> emits the item and then completes it.</p>
+</li>
+<li>
+<p>Creating a <code>Multi</code> from a <code>Maybe</code> produces a <code>Multi</code>. That <code>Multi</code>  emits the item (if any) and then completes it.
+If the <code>Maybe</code> is empty, then the created <code>Multi</code> emits the <em>completion</em> event.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>When a <code>Completable,</code> <code>Single,</code> or <code>Maybe</code> emits a failure, then the resulting <code>Multi</code> emits that failure.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="converting-an-observable-or-a-flowable-into-a-uni"><a class="anchor" href="#converting-an-observable-or-a-flowable-into-a-uni"></a>Converting an Observable or a Flowable into a Uni</h3>
+<div class="paragraph">
+<p>To create a <code>Uni</code> from an <code>Observable,</code> you need to use a specific converter:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Uni&lt;T&gt; uniFromObservable = Uni.createFrom().converter(
+        UniRxConverters.fromObservable(), observable);</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The creation from a <code>Flowable</code> can be done using the Reactive Streams interoperability:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Uni&lt;T&gt; uniFromFlowable = Uni.createFrom().publisher(flowable);</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In both cases, it cancels the subscription to the <code>Flowable</code> or <code>Observable</code> after receiving the first item.
+If the <code>Flowable</code> or <code>Observable</code> completes without items, the <code>Uni</code> emits a <code>null</code> item.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="converting-a-completable-single-or-maybe-into-a-uni"><a class="anchor" href="#converting-a-completable-single-or-maybe-into-a-uni"></a>Converting a Completable, Single or Maybe into a Uni</h3>
+<div class="paragraph">
+<p>To create a <code>Uni</code> from a <code>Completable,</code> <code>Single,</code> or <code>Maybe</code>, you need to use a specific converter:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Uni&lt;Void&gt; multiFromCompletable = Uni.createFrom()
+        .converter(UniRxConverters.fromCompletable(), completable);
+Uni&lt;T&gt; multiFromSingle = Uni.createFrom()
+        .converter(UniRxConverters.fromSingle(), single);
+Uni&lt;T&gt; multiFromMaybe = Uni.createFrom()
+        .converter(UniRxConverters.fromMaybe(), maybe);
+Uni&lt;T&gt; multiFromEmptyMaybe = Uni.createFrom()
+        .converter(UniRxConverters.fromMaybe(), emptyMaybe);</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Converting a <code>Completable</code> to a <code>Uni</code> always produces a <code>Uni&lt;Void&gt;,</code> that emits either <code>null</code> once the <code>Completable</code> completes or the failure if it fails.
+The <code>Maybe</code> to <code>Uni</code> conversion emits a <code>null</code> item if the <code>Maybe</code> completes without an item.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="converting-a-multi-into-a-rx-java-objects"><a class="anchor" href="#converting-a-multi-into-a-rx-java-objects"></a>Converting a Multi into a RX Java objects</h3>
+<div class="paragraph">
+<p>The conversion from a <code>Multi</code> to the various RX Java objects is done using converters:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Completable completable = multi.convert()
+        .with(MultiRxConverters.toCompletable());
+Single&lt;Optional&lt;T&gt;&gt; single = multi.convert()
+        .with(MultiRxConverters.toSingle());
+Single&lt;T&gt; single2 = multi.convert()
+        .with(MultiRxConverters
+                .toSingle().onEmptyThrow(() -&gt; new Exception("D'oh!")));
+Maybe&lt;T&gt; maybe = multi.convert()
+        .with(MultiRxConverters.toMaybe());
+Observable&lt;T&gt; observable = multi.convert()
+        .with(MultiRxConverters.toObservable());
+Flowable&lt;T&gt; flowable = multi.convert()
+        .with(MultiRxConverters.toFlowable());</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The creation of a <code>Completable</code> from a <code>Multi</code> discards all the items emitted by the <code>Multi</code>.
+It only forwards the <em>completion</em> or <em>failure</em> event.</p>
+</div>
+<div class="paragraph">
+<p>Converting a <code>Multi</code> into a <code>Single</code> returns a <code>Single&lt;Optional&lt;T&gt;&gt;,</code> as the <code>Multi</code> may complete without items.
+You can also produce a <code>Single&lt;T&gt;</code> and emit a <em>failure</em> event if the <code>Multi</code> completes without items.
+You can configure the thrown exception using <code>onEmptyThrow.</code></p>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+You can also create a <code>Flowable</code> from a <code>Multi</code> using: <code>Flowable.fromPublisher(multi)</code>.
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="converting-a-uni-into-a-rx-java-type"><a class="anchor" href="#converting-a-uni-into-a-rx-java-type"></a>Converting a Uni into a RX Java type</h3>
+<div class="paragraph">
+<p>Similarly to the conversion from a <code>Multi</code> into an RX Type, converting a <code>Uni</code> requires a converter:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Completable completable = uni.convert().with(UniRxConverters.toCompletable());
+Single&lt;Optional&lt;T&gt;&gt; single = uni.convert().with(UniRxConverters.toSingle());
+Single&lt;T&gt; single2 = uni.convert().with(UniRxConverters.toSingle().failOnNull());
+Maybe&lt;T&gt; maybe = uni.convert().with(UniRxConverters.toMaybe());
+Observable&lt;T&gt; observable = uni.convert().with(UniRxConverters.toObservable());
+Flowable&lt;T&gt; flowable = uni.convert().with(UniRxConverters.toFlowable());</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The creation of a <code>Completable</code> from a <code>Uni</code> discards the item and sends the <em>completion</em> signal after emission.</p>
+</div>
+<div class="paragraph">
+<p>Converting a <code>Uni</code> into a <code>Single</code> returns a <code>Single&lt;Optional&lt;T&gt;&gt;,</code> as the <code>Uni</code> may emit <code>null.</code>
+You can also produce a <code>Single&lt;T&gt;</code> and emits a <em>failure</em> event if the <code>Uni</code> sends <code>null.</code>
+Configure the failure to forward using <code>failOnNull.</code></p>
+</div>
+<div class="paragraph">
+<p>The creation of a <code>Maybe,</code> <code>Flowable,</code> or an <code>Observable</code> from a <code>Uni</code> produces an empty <code>Maybe,</code> <code>Flowable,</code> or <code>Observable</code> if the <code>Uni</code> emits <code>null.</code>
+For <code>Flowable</code> and <code>Observable,</code> if the <code>Uni</code> emits a <em>non-null</em> item, that item is emitted, followed immediately by the <em>completion</em> signal.</p>
+</div>
+</div>
+</div>
+</div>
+        </div>
+        <div class="col-md-3 col-md-offset-1 toc-container d-sm-none d-md-block">
+            <nav class="page-toc toc nav sticky-top" id="toc">
+                
+                <h4>Table of Content</h4>
+                <ul class="sectlevel1">
+<li><a href="#picking-the-right-dependency">Picking the right dependency</a></li>
+<li><a href="#integration-with-project-reactor">Integration with Project Reactor</a>
+<ul class="sectlevel2">
+<li><a href="#converting-a-flux-or-a-mono-into-a-multi">Converting a Flux or a Mono into a Multi</a></li>
+<li><a href="#converting-a-flux-or-a-mono-into-a-uni">Converting a Flux or a Mono into a Uni</a></li>
+<li><a href="#converting-a-multi-into-a-flux-or-mono">Converting a Multi into a Flux or Mono</a></li>
+<li><a href="#converting-a-uni-into-a-flux-or-mono">Converting a Uni into a Flux or Mono</a></li>
+<li><a href="#using-converter-instead-of-reactive-streams">Using converter instead of Reactive Streams</a></li>
+</ul>
+</li>
+<li><a href="#integration-with-rx-java">Integration with RX Java</a>
+<ul class="sectlevel2">
+<li><a href="#converting-an-observable-or-a-flowable-into-a-multi">Converting an Observable or a Flowable into a Multi</a></li>
+<li><a href="#converting-a-completable-single-or-maybe-into-a-multi">Converting a Completable, Single or Maybe into a Multi</a></li>
+<li><a href="#converting-an-observable-or-a-flowable-into-a-uni">Converting an Observable or a Flowable into a Uni</a></li>
+<li><a href="#converting-a-completable-single-or-maybe-into-a-uni">Converting a Completable, Single or Maybe into a Uni</a></li>
+<li><a href="#converting-a-multi-into-a-rx-java-objects">Converting a Multi into a RX Java objects</a></li>
+<li><a href="#converting-a-uni-into-a-rx-java-type">Converting a Uni into a RX Java type</a></li>
+</ul>
+</li>
+</ul>
+                
+
+                
+                <h4>Related content</h4>
+                <ul>
+                    
+                    <li>
+                        
+                        <a href="/smallrye-mutiny/guides/rx">Using map, flatMap and concatMap</a>
+                        
+                        
+                    </li>
+                    
+                    <li>
+                        
+                        <a href="/smallrye-mutiny/guides/completion-stages">How to deal with Completion Stages?</a>
+                        
+                        
+                    </li>
+                    
+                </ul>
+                
+            </nav>
+        </div>
+    </div>
+</div>
+
+
+            </div>
+        </main>
+        <footer class="footer">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-9 sep-right">
+                <p>
+                    SmallRye Mutiny is an open source project. All the code from this project is available under the <a href="https://raw.githubusercontent.com/smallrye/smallrye-mutiny/master/LICENSE">Apache Software License 2.0</a>.
+                </p>
+                <p>
+                    This website was built with <a href="https://jekyllrb.com/">Jekyll</a>, is hosted on Github Pages and is completely open source.
+                    You can <a href="https://github.com/smallrye/smallrye-mutiny">fork it</a> and propose enhancements through pull-requests.
+                </p>
+                <p>
+                    Something's wrong? Open an <a href="https://github.com/smallrye/smallrye-mutiny/issues">issue</a>.
+                </p>
+            </div>
+            <div class="col-lg-3">
+                <p>
+                     Site last generated: Dec 10, 2020
+                </p>
+            </div>
+        </div>
+    </div>
+    <!-- Javascript-->
+    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.3.1/highlight.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ho+j7jyWK8fNQe+A12Hb8AhRq26LrZ/JpcUGGOn+Y7RsweNrtN/tE3MoK7ZeZDyx" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/gh/cferdinandi/gumshoe@4/dist/gumshoe.polyfills.min.js"></script>
+    <script src="/smallrye-mutiny/assets/js/hl.js" type="text/javascript"></script>
+    <script src="/smallrye-mutiny/assets/js/scrollspy.js" type="text/javascript"></script>
+
+    <script>
+        $(document).ready(function(){
+            $("#search").on("keyup", function() {
+                var value = $(this).val().toLowerCase();
+                $(".guide").filter(function() {
+                    $(this).toggle($(this).attr("data-search").toLowerCase().indexOf(value) > -1)
+                });
+            });
+        });
+    </script>
+</footer>
+    </div>
+</body>
+
+</html>

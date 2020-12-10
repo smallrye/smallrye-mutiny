@@ -1,0 +1,328 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <title></title>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="SmallRye Mutiny!">
+
+    <link rel="canonical" href="/getting-started/first-lines-of-code.html">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.3.1/styles/default.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/components/icon.min.css" integrity="sha512-8Tb+T7SKUFQWOPIQCaLDWWe1K/SY8hvHl7brOH8Nz5z1VT8fnf8B+9neoUzmFY3OzkWMMs3OjrwZALgB1oXFBg==" crossorigin="anonymous" />
+    <link rel="shortcut icon" type="image/png" href="/smallrye-mutiny/assets/images/favicon.ico">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">
+    <link rel="stylesheet" href="/smallrye-mutiny/assets/css/main.css" />
+    <link rel="stylesheet" href="https://maxst.icons8.com/vue-static/landings/line-awesome/font-awesome-line-awesome/css/all.min.css">
+    <link rel="stylesheet" href="https://maxst.icons8.com/vue-static/landings/line-awesome/line-awesome/1.3.0/css/line-awesome.min.css">
+</head>
+
+<body>
+    <div class="container-fluid global-container">
+        
+
+
+
+
+
+<header class="header masthead mb-auto">
+    <div class="container">
+        <nav class="navbar navbar-dark navbar-expand-lg">
+            <a class="navbar-brand brand mutiny" href="/smallrye-mutiny/index.html"><strong>Mutiny!</strong></a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#toggler"
+                    aria-controls="toggler" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="toggler">
+                <ul class="navbar-nav ml-auto mr-0 mt-2 mt-lg-0">
+                    <li class="nav-item"><a class="nav-link " href="/smallrye-mutiny/index.html">Home</a></li>
+                    <li class="nav-item"><a class="nav-link " href="/smallrye-mutiny/pages/philosophy">Philosophy</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="/smallrye-mutiny/getting-started/download">Getting started</a></li>
+                    <li class="nav-item"><a class="nav-link " href="/smallrye-mutiny/guides">Guides</a></li>
+                    <li class="nav-item"><a href="https://github.com/smallrye/smallrye-mutiny" target="_blank" title="Github"><i
+                            class="lab la-github la-2x"></i></a></li>
+                    <li class="nav-item"><a href="https://groups.google.com/d/forum/smallrye" target="_blank" title="SmallRye Google Group"><i
+                            class="las la-at la-2x"></i></a></li>
+                    <li class="nav-item"><a href="https://stackoverflow.com/questions/tagged/mutiny" target="_blank"
+                                            title="Stack Overflow"><i
+                            class="lab la-stack-overflow la-2x"></i></a></li>
+                </ul>
+            </div>
+        </nav>
+    </div>
+</header>
+        <main>
+            <div class="content">
+                
+
+    
+    
+        
+        
+        
+    
+        
+        
+        
+    
+        
+            
+            
+
+    
+        
+
+
+
+<section class="hero gs">
+    <div class="hero-main container">
+        <div class="row">
+            <div class="hero-left col-12">
+                <div class="hero-slogan">
+                    <h1 class="hero-name">First lines of code</h1>
+                </div>
+                <div class="hero-desc">
+                    Your first lines of code using Mutiny.
+                </div>
+                <div class="hero-buttons">
+                    
+                    <a href="/smallrye-mutiny/getting-started/download" class="getting-started-nav btn btn-rounded button button-dark button-rounded">
+                        <i class="las la-arrow-left left"></i>&nbsp;Getting Started with Mutiny</a>
+                    
+                    
+                    <a href="/smallrye-mutiny/getting-started/creating-unis" class="getting-started-nav btn btn-rounded button button-dark button-rounded">
+                        Creating Unis&nbsp;<i class="las la-arrow-right"></i></a>
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="container page-content">
+    <div class="row">
+        <div class="col-md-9 content">
+            <div class="sect1">
+<h2 id="hello-mutiny"><a class="anchor" href="#hello-mutiny"></a>Hello Mutiny!</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Once you made Mutiny available to your classpath, you can start writing code.
+Let&#8217;s start with this simple program:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">import io.smallrye.mutiny.Uni;
+
+public class FirstProgram {
+
+  public static void main(String[] args) {
+    Uni.createFrom().item("hello")
+      .onItem().transform(item -&gt; item + " mutiny")
+      .onItem().transform(String::toUpperCase)
+      .subscribe().with(
+        item -&gt; System.out.println("&gt;&gt; " + item));
+  }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This program prints:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-text hljs" data-lang="text">&gt;&gt; HELLO MUTINY</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="dissecting-the-pipeline"><a class="anchor" href="#dissecting-the-pipeline"></a>Dissecting the pipeline</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>What&#8217;s interesting is how this message is <em>built</em>.
+We described a processing pipeline taking an item, processing it and finally consuming it.</p>
+</div>
+<div class="paragraph">
+<p>First, we create a <code>Uni</code>, one of the two types with <code>Multi</code> that Mutiny provides.
+A <code>Uni</code> is a stream emitting either a single item or a failure.</p>
+</div>
+<div class="paragraph">
+<p>Here, we create a <code>Uni</code> emitting the <code>"hello"</code> item.
+This is the input of our pipeline.
+Then we process this item:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>we append <code>" mutiny"</code>, then</p>
+</li>
+<li>
+<p>we make it an uppercase string.</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>This forms the processing part of our pipeline, and then we finally <strong>subscribe</strong> to the pipeline.</p>
+</div>
+<div class="paragraph">
+<p>This last part is essential.
+If you don&#8217;t have a final subscriber, nothing is going to happen.
+Mutiny types are lazy, meaning that you need to express your interest.
+If you don&#8217;t the computation won&#8217;t even start.</p>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+If your program doesn&#8217;t do anything, verify that you didn&#8217;t forget to subscribe!
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="mutiny-uses-a-builder-api"><a class="anchor" href="#mutiny-uses-a-builder-api"></a>Mutiny uses a builder API!</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Another important aspect is the pipeline construction.
+Appending a new <em>stage</em> to a pipeline returns a new <code>Uni.</code></p>
+</div>
+<div class="paragraph">
+<p>The previous program is equivalent to:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Uni&lt;String&gt; uni1 = Uni.createFrom().item("hello");
+Uni&lt;String&gt; uni2 = uni1.onItem().transform(item -&gt; item + " mutiny");
+Uni&lt;String&gt; uni3 = uni2.onItem().transform(String::toUpperCase);
+
+uni3.subscribe().with(item -&gt; System.out.println("&gt;&gt; " + item));</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>It is fundamental to understand that this program is not equivalent to:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Uni&lt;String&gt; uni = Uni.createFrom().item("hello");
+
+uni.onItem().transform(item -&gt; item + " mutiny");
+uni.onItem().transform(String::toUpperCase);
+
+uni.subscribe().with(item -&gt; System.out.println("&gt;&gt; " + item));</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This program just prints <code>"&gt;&gt; hello"`</code>, as it does not use the appended stages and the final subscriber consumes the first <code>Uni.</code></p>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+Mutiny APIs are not fluent and each computation stage returns a new object.
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+        </div>
+        <div class="col-md-3 toc-container d-sm-none d-md-block">
+            <nav class="page-toc toc nav sticky-top" id="toc">
+                
+                <h4>Table of Content</h4>
+                <ul class="sectlevel1">
+<li><a href="#hello-mutiny">Hello Mutiny!</a></li>
+<li><a href="#dissecting-the-pipeline">Dissecting the pipeline</a></li>
+<li><a href="#mutiny-uses-a-builder-api">Mutiny uses a builder API!</a></li>
+</ul>
+                
+
+                
+            </nav>
+        </div>
+    </div>
+</div>
+
+
+
+<div class="footer-buttons gs ">
+    <div class="container">
+        <div class="row">
+                
+            <div class="col align-self-start">
+                <a href="/smallrye-mutiny/getting-started/download" class="btn btn-rounded button button-dark button-rounded">
+                    <i class="las la-arrow-left left"></i>&nbsp;Getting Started with Mutiny</a>
+            </div>
+                
+
+            <div class="col align-self-center text-center">
+                <a href="/smallrye-mutiny/guides" class="btn btn-rounded button button-dark button-rounded">All Guides</a>
+            </div>
+
+            <div class="col align-self-end">
+                
+                <a href="/smallrye-mutiny/getting-started/creating-unis" class="btn btn-rounded button button-dark button-rounded float-right">
+                    Creating Unis&nbsp;<i class="las la-arrow-right"></i></a>
+                
+            </div>
+        </div>
+
+    </div>
+</div>
+            </div>
+        </main>
+        <footer class="footer">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-9 sep-right">
+                <p>
+                    SmallRye Mutiny is an open source project. All the code from this project is available under the <a href="https://raw.githubusercontent.com/smallrye/smallrye-mutiny/master/LICENSE">Apache Software License 2.0</a>.
+                </p>
+                <p>
+                    This website was built with <a href="https://jekyllrb.com/">Jekyll</a>, is hosted on Github Pages and is completely open source.
+                    You can <a href="https://github.com/smallrye/smallrye-mutiny">fork it</a> and propose enhancements through pull-requests.
+                </p>
+                <p>
+                    Something's wrong? Open an <a href="https://github.com/smallrye/smallrye-mutiny/issues">issue</a>.
+                </p>
+            </div>
+            <div class="col-lg-3">
+                <p>
+                     Site last generated: Dec 10, 2020
+                </p>
+            </div>
+        </div>
+    </div>
+    <!-- Javascript-->
+    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.3.1/highlight.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ho+j7jyWK8fNQe+A12Hb8AhRq26LrZ/JpcUGGOn+Y7RsweNrtN/tE3MoK7ZeZDyx" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/gh/cferdinandi/gumshoe@4/dist/gumshoe.polyfills.min.js"></script>
+    <script src="/smallrye-mutiny/assets/js/hl.js" type="text/javascript"></script>
+    <script src="/smallrye-mutiny/assets/js/scrollspy.js" type="text/javascript"></script>
+
+    <script>
+        $(document).ready(function(){
+            $("#search").on("keyup", function() {
+                var value = $(this).val().toLowerCase();
+                $(".guide").filter(function() {
+                    $(this).toggle($(this).attr("data-search").toLowerCase().indexOf(value) > -1)
+                });
+            });
+        });
+    </script>
+</footer>
+    </div>
+</body>
+
+</html>

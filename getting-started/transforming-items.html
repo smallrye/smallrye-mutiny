@@ -1,0 +1,306 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <title></title>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="SmallRye Mutiny!">
+
+    <link rel="canonical" href="/getting-started/transforming-items.html">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.3.1/styles/default.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/components/icon.min.css" integrity="sha512-8Tb+T7SKUFQWOPIQCaLDWWe1K/SY8hvHl7brOH8Nz5z1VT8fnf8B+9neoUzmFY3OzkWMMs3OjrwZALgB1oXFBg==" crossorigin="anonymous" />
+    <link rel="shortcut icon" type="image/png" href="/smallrye-mutiny/assets/images/favicon.ico">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">
+    <link rel="stylesheet" href="/smallrye-mutiny/assets/css/main.css" />
+    <link rel="stylesheet" href="https://maxst.icons8.com/vue-static/landings/line-awesome/font-awesome-line-awesome/css/all.min.css">
+    <link rel="stylesheet" href="https://maxst.icons8.com/vue-static/landings/line-awesome/line-awesome/1.3.0/css/line-awesome.min.css">
+</head>
+
+<body>
+    <div class="container-fluid global-container">
+        
+
+
+
+
+
+<header class="header masthead mb-auto">
+    <div class="container">
+        <nav class="navbar navbar-dark navbar-expand-lg">
+            <a class="navbar-brand brand mutiny" href="/smallrye-mutiny/index.html"><strong>Mutiny!</strong></a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#toggler"
+                    aria-controls="toggler" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="toggler">
+                <ul class="navbar-nav ml-auto mr-0 mt-2 mt-lg-0">
+                    <li class="nav-item"><a class="nav-link " href="/smallrye-mutiny/index.html">Home</a></li>
+                    <li class="nav-item"><a class="nav-link " href="/smallrye-mutiny/pages/philosophy">Philosophy</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="/smallrye-mutiny/getting-started/download">Getting started</a></li>
+                    <li class="nav-item"><a class="nav-link " href="/smallrye-mutiny/guides">Guides</a></li>
+                    <li class="nav-item"><a href="https://github.com/smallrye/smallrye-mutiny" target="_blank" title="Github"><i
+                            class="lab la-github la-2x"></i></a></li>
+                    <li class="nav-item"><a href="https://groups.google.com/d/forum/smallrye" target="_blank" title="SmallRye Google Group"><i
+                            class="las la-at la-2x"></i></a></li>
+                    <li class="nav-item"><a href="https://stackoverflow.com/questions/tagged/mutiny" target="_blank"
+                                            title="Stack Overflow"><i
+                            class="lab la-stack-overflow la-2x"></i></a></li>
+                </ul>
+            </div>
+        </nav>
+    </div>
+</header>
+        <main>
+            <div class="content">
+                
+
+    
+    
+        
+        
+        
+    
+        
+        
+        
+    
+        
+        
+        
+    
+        
+        
+        
+    
+        
+        
+        
+    
+        
+            
+            
+
+    
+        
+
+
+
+<section class="hero gs">
+    <div class="hero-main container">
+        <div class="row">
+            <div class="hero-left col-12">
+                <div class="hero-slogan">
+                    <h1 class="hero-name">Transforming items</h1>
+                </div>
+                <div class="hero-desc">
+                    Learn how to (synchronously) transform received item
+                </div>
+                <div class="hero-buttons">
+                    
+                    <a href="/smallrye-mutiny/getting-started/creating-multis" class="getting-started-nav btn btn-rounded button button-dark button-rounded">
+                        <i class="las la-arrow-left left"></i>&nbsp;Creating Multis</a>
+                    
+                    
+                    <a href="/smallrye-mutiny/getting-started/transforming-items-async" class="getting-started-nav btn btn-rounded button button-dark button-rounded">
+                        Transforming items to Uni/Multi&nbsp;<i class="las la-arrow-right"></i></a>
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="container page-content">
+    <div class="row">
+        <div class="col-md-9 content">
+            <div class="paragraph">
+<p>Both <code>Unis</code> and <code>Multis</code> emit <em>items</em>.
+One of the most common operations you will do is transforming these items using a synchronous 1-to-1 function.</p>
+</div>
+<div class="paragraph">
+<p>To achieve this, you use <code>onItem().transform(Function&lt;T, U&gt;)</code>.
+It calls the passed function for each item and produces the result as an item which is propagaed downstream.</p>
+</div>
+<div class="imageblock reduce">
+<div class="content">
+<img src="/smallrye-mutiny/assets/images/transform-operator.png" alt="Transforming items synchronously">
+</div>
+</div>
+<div class="sect1">
+<h2 id="transforming-items-produced-by-a-uni"><a class="anchor" href="#transforming-items-produced-by-a-uni"></a>Transforming items produced by a Uni</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Let&#8217;s imagine you have a <code>Uni&lt;String&gt;,</code> and you want to capitalize the received <code>String</code>.
+Implementing this transformation is done as follows:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Uni&lt;String&gt; uni = Uni.createFrom().item("hello");
+uni
+        .onItem().transform(i -&gt; i.toUpperCase())
+        .subscribe().with(
+        item -&gt; System.out.println(item)); // Print HELLO</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="transforming-items-produced-by-a-multi"><a class="anchor" href="#transforming-items-produced-by-a-multi"></a>Transforming items produced by a Multi</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The only difference for <code>Multi</code> is that the function is called for each item:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Multi&lt;String&gt; m = multi
+        .onItem().transform(i -&gt; i.toUpperCase());</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The produced items are passed to the downstream subscriber:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Multi&lt;String&gt; multi = Multi.createFrom().items("a", "b", "c");
+multi
+        .onItem().transform(i -&gt; i.toUpperCase())
+        .subscribe().with(
+            item -&gt; System.out.println(item)); // Print A B C</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="what-if-the-transformation-failed"><a class="anchor" href="#what-if-the-transformation-failed"></a>What if the transformation failed?</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>If the transformation throws an exception, that exception is caught and passed to the downstream subscriber as a <em>failure</em> event.
+It also means that the subscriber won&#8217;t get further item after that failure.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="chaining-multiple-transformations"><a class="anchor" href="#chaining-multiple-transformations"></a>Chaining multiple transformations</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>You can chain multiple transformations:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Uni&lt;String&gt; u = uni
+        .onItem().transform(i -&gt; i.toUpperCase())
+        .onItem().transform(i -&gt; i + "!");</code></pre>
+</div>
+</div>
+</div>
+</div>
+        </div>
+        <div class="col-md-3 toc-container d-sm-none d-md-block">
+            <nav class="page-toc toc nav sticky-top" id="toc">
+                
+                <h4>Table of Content</h4>
+                <ul class="sectlevel1">
+<li><a href="#transforming-items-produced-by-a-uni">Transforming items produced by a Uni</a></li>
+<li><a href="#transforming-items-produced-by-a-multi">Transforming items produced by a Multi</a></li>
+<li><a href="#what-if-the-transformation-failed">What if the transformation failed?</a></li>
+<li><a href="#chaining-multiple-transformations">Chaining multiple transformations</a></li>
+</ul>
+                
+
+                
+                <h4>Related content</h4>
+                <ul>
+                    
+                    <li>
+                        
+                            
+                                <a href="/smallrye-mutiny/getting-started/transforming-items-async">Transforming items to Uni/Multi</a>
+                            
+                        
+
+                        
+                    </li>
+                    
+                </ul>
+                
+            </nav>
+        </div>
+    </div>
+</div>
+
+
+
+<div class="footer-buttons gs ">
+    <div class="container">
+        <div class="row">
+                
+            <div class="col align-self-start">
+                <a href="/smallrye-mutiny/getting-started/creating-multis" class="btn btn-rounded button button-dark button-rounded">
+                    <i class="las la-arrow-left left"></i>&nbsp;Creating Multis</a>
+            </div>
+                
+
+            <div class="col align-self-center text-center">
+                <a href="/smallrye-mutiny/guides" class="btn btn-rounded button button-dark button-rounded">All Guides</a>
+            </div>
+
+            <div class="col align-self-end">
+                
+                <a href="/smallrye-mutiny/getting-started/transforming-items-async" class="btn btn-rounded button button-dark button-rounded float-right">
+                    Transforming items to Uni/Multi&nbsp;<i class="las la-arrow-right"></i></a>
+                
+            </div>
+        </div>
+
+    </div>
+</div>
+            </div>
+        </main>
+        <footer class="footer">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-9 sep-right">
+                <p>
+                    SmallRye Mutiny is an open source project. All the code from this project is available under the <a href="https://raw.githubusercontent.com/smallrye/smallrye-mutiny/master/LICENSE">Apache Software License 2.0</a>.
+                </p>
+                <p>
+                    This website was built with <a href="https://jekyllrb.com/">Jekyll</a>, is hosted on Github Pages and is completely open source.
+                    You can <a href="https://github.com/smallrye/smallrye-mutiny">fork it</a> and propose enhancements through pull-requests.
+                </p>
+                <p>
+                    Something's wrong? Open an <a href="https://github.com/smallrye/smallrye-mutiny/issues">issue</a>.
+                </p>
+            </div>
+            <div class="col-lg-3">
+                <p>
+                     Site last generated: Dec 10, 2020
+                </p>
+            </div>
+        </div>
+    </div>
+    <!-- Javascript-->
+    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.3.1/highlight.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ho+j7jyWK8fNQe+A12Hb8AhRq26LrZ/JpcUGGOn+Y7RsweNrtN/tE3MoK7ZeZDyx" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/gh/cferdinandi/gumshoe@4/dist/gumshoe.polyfills.min.js"></script>
+    <script src="/smallrye-mutiny/assets/js/hl.js" type="text/javascript"></script>
+    <script src="/smallrye-mutiny/assets/js/scrollspy.js" type="text/javascript"></script>
+
+    <script>
+        $(document).ready(function(){
+            $("#search").on("keyup", function() {
+                var value = $(this).val().toLowerCase();
+                $(".guide").filter(function() {
+                    $(this).toggle($(this).attr("data-search").toLowerCase().indexOf(value) > -1)
+                });
+            });
+        });
+    </script>
+</footer>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <title></title>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="SmallRye Mutiny!">
+
+    <link rel="canonical" href="/guides/collecting-items.html">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.3.1/styles/default.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/components/icon.min.css" integrity="sha512-8Tb+T7SKUFQWOPIQCaLDWWe1K/SY8hvHl7brOH8Nz5z1VT8fnf8B+9neoUzmFY3OzkWMMs3OjrwZALgB1oXFBg==" crossorigin="anonymous" />
+    <link rel="shortcut icon" type="image/png" href="/smallrye-mutiny/assets/images/favicon.ico">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">
+    <link rel="stylesheet" href="/smallrye-mutiny/assets/css/main.css" />
+    <link rel="stylesheet" href="https://maxst.icons8.com/vue-static/landings/line-awesome/font-awesome-line-awesome/css/all.min.css">
+    <link rel="stylesheet" href="https://maxst.icons8.com/vue-static/landings/line-awesome/line-awesome/1.3.0/css/line-awesome.min.css">
+</head>
+
+<body>
+    <div class="container-fluid global-container">
+        
+
+
+
+
+
+<header class="header masthead mb-auto">
+    <div class="container">
+        <nav class="navbar navbar-dark navbar-expand-lg">
+            <a class="navbar-brand brand mutiny" href="/smallrye-mutiny/index.html"><strong>Mutiny!</strong></a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#toggler"
+                    aria-controls="toggler" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="toggler">
+                <ul class="navbar-nav ml-auto mr-0 mt-2 mt-lg-0">
+                    <li class="nav-item"><a class="nav-link " href="/smallrye-mutiny/index.html">Home</a></li>
+                    <li class="nav-item"><a class="nav-link " href="/smallrye-mutiny/pages/philosophy">Philosophy</a></li>
+                    <li class="nav-item"><a class="nav-link " href="/smallrye-mutiny/getting-started/download">Getting started</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="/smallrye-mutiny/guides">Guides</a></li>
+                    <li class="nav-item"><a href="https://github.com/smallrye/smallrye-mutiny" target="_blank" title="Github"><i
+                            class="lab la-github la-2x"></i></a></li>
+                    <li class="nav-item"><a href="https://groups.google.com/d/forum/smallrye" target="_blank" title="SmallRye Google Group"><i
+                            class="las la-at la-2x"></i></a></li>
+                    <li class="nav-item"><a href="https://stackoverflow.com/questions/tagged/mutiny" target="_blank"
+                                            title="Stack Overflow"><i
+                            class="lab la-stack-overflow la-2x"></i></a></li>
+                </ul>
+            </div>
+        </nav>
+    </div>
+</header>
+        <main>
+            <div class="content">
+                
+
+<section class="hero gs">
+    <div class="hero-main container">
+        <div class="row">
+            <div class="hero-left col-12">
+                <div class="hero-slogan">
+                    <h1 class="hero-name">Collecting items from Multi</h1>
+                </div>
+                <div class="hero-desc">
+                    Learn how to collect items from a multi.
+                </div>
+                <!-- TODO Labels -->
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="container page-content">
+    <div class="row">
+        <div class="col-md-9 content">
+            <div class="paragraph">
+<p>There are cases where you want to accumulate the items from a <code>Multi</code> and produce a <code>Uni</code> as a final result.
+This is also called a <em>reduction</em> in functional programming.</p>
+</div>
+<div class="paragraph">
+<p>The <code>Uni</code> fires its item when the <code>Multi</code> completes.
+Mutiny provides multiple operators to deal with that scenario.
+For example, you can store the items in a list, emit the list on completion, or use a Java <code>Collector</code> to customize the aggregation.</p>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+Don&#8217;t collect items from infinite streams or you will likely end with an out-of-memory failure!
+</td>
+</tr>
+</table>
+</div>
+<div class="sect1">
+<h2 id="collecting-items-into-a-list"><a class="anchor" href="#collecting-items-into-a-list"></a>Collecting items into a list</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>One of the most common approaches to collect items is to store them in a list (<code>Uni&lt;List&lt;T&gt;&gt;</code>)
+It emits the final list when the <code>Multi</code> completes.</p>
+</div>
+<div class="imageblock reduce">
+<div class="content">
+<img src="/smallrye-mutiny/assets/images/collect-as-list.png" alt="Collecting items into a list">
+</div>
+</div>
+<div class="paragraph">
+<p>How to achieve this with Mutiny?</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Multi&lt;String&gt; multi = getMulti();
+Uni&lt;List&lt;String&gt;&gt; uni = multi.collectItems().asList();</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>It&#8217;s important to note that the returned type is a <code>Uni</code>.
+It emits the list when the multi completes.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="collecting-items-into-a-map"><a class="anchor" href="#collecting-items-into-a-map"></a>Collecting items into a map</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>You can also collect the items into a <code>Map</code>.
+In this case, you need to provide a function to compute the key for each item:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Multi&lt;String&gt; multi = getMulti();
+Uni&lt;Map&lt;String, String&gt;&gt; uni =
+        multi.collectItems()
+                .asMap(item -&gt; getUniqueKeyForItem(item));</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If the key mapper function returns the same key for multiple items, the last one with that key is stored in the final <code>Map</code>.
+You can collect items in a <em>multimap</em> to handle items with the same keys.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="collecting-items-into-a-multimap"><a class="anchor" href="#collecting-items-into-a-multimap"></a>Collecting items into a multimap</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>A multimap is a <code>Map&lt;K, List&lt;T&gt;&gt;.</code>
+In the case of a conflicting key, it stores all the items in a list associated with that key.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Multi&lt;String&gt; multi = getMulti();
+Uni&lt;Map&lt;String, Collection&lt;String&gt;&gt;&gt; uni =
+        multi.collectItems()
+                .asMultiMap(item -&gt; getKeyForItem(item));</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="using-a-custom-accumulator"><a class="anchor" href="#using-a-custom-accumulator"></a>Using a custom accumulator</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>You can also use a custom <em>accumulator</em> function:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Multi&lt;String&gt; multi = getMulti();
+Uni&lt;MyCollection&gt; uni = multi.collectItems()
+        .in(MyCollection::new, (col, item) -&gt; col.add(item));</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The <code>in</code> method receives two arguments:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>a supplier providing the new instance of your collection/container</p>
+</li>
+<li>
+<p>the accumulator function</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>You can also use a Java <code>Collector</code>.
+For example, in the next example, count the number of items, and produce the final count as item:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Uni&lt;Long&gt; count = multi.collectItems()
+        .with(Collectors.counting());</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="getting-the-first-and-last-items"><a class="anchor" href="#getting-the-first-and-last-items"></a>Getting the first and last items</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>While they are not strictly speaking collecting items, the <code>collectItems().first()</code> and <code>collectItems().last()</code> allows retrieving the first and last item from a <code>Multi</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Uni&lt;String&gt; first = multi.collectItems().first();
+Uni&lt;String&gt; last = multi.collectItems().last();</code></pre>
+</div>
+</div>
+</div>
+</div>
+        </div>
+        <div class="col-md-3 col-md-offset-1 toc-container d-sm-none d-md-block">
+            <nav class="page-toc toc nav sticky-top" id="toc">
+                
+                <h4>Table of Content</h4>
+                <ul class="sectlevel1">
+<li><a href="#collecting-items-into-a-list">Collecting items into a list</a></li>
+<li><a href="#collecting-items-into-a-map">Collecting items into a map</a></li>
+<li><a href="#collecting-items-into-a-multimap">Collecting items into a multimap</a></li>
+<li><a href="#using-a-custom-accumulator">Using a custom accumulator</a></li>
+<li><a href="#getting-the-first-and-last-items">Getting the first and last items</a></li>
+</ul>
+                
+
+                
+                <h4>Related content</h4>
+                <ul>
+                    
+                    <li>
+                        
+                        <a href="/smallrye-mutiny/guides/filter">Filtering items from multi</a>
+                        
+                        
+                    </li>
+                    
+                    <li>
+                        
+                        
+                        <a href="https://javadoc.io/doc/io.smallrye.reactive/mutiny/latest/io/smallrye/mutiny/groups/MultiCollect.html"><tt>MultiCollect</tt></a>
+                        
+                    </li>
+                    
+                </ul>
+                
+            </nav>
+        </div>
+    </div>
+</div>
+
+
+            </div>
+        </main>
+        <footer class="footer">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-9 sep-right">
+                <p>
+                    SmallRye Mutiny is an open source project. All the code from this project is available under the <a href="https://raw.githubusercontent.com/smallrye/smallrye-mutiny/master/LICENSE">Apache Software License 2.0</a>.
+                </p>
+                <p>
+                    This website was built with <a href="https://jekyllrb.com/">Jekyll</a>, is hosted on Github Pages and is completely open source.
+                    You can <a href="https://github.com/smallrye/smallrye-mutiny">fork it</a> and propose enhancements through pull-requests.
+                </p>
+                <p>
+                    Something's wrong? Open an <a href="https://github.com/smallrye/smallrye-mutiny/issues">issue</a>.
+                </p>
+            </div>
+            <div class="col-lg-3">
+                <p>
+                     Site last generated: Dec 10, 2020
+                </p>
+            </div>
+        </div>
+    </div>
+    <!-- Javascript-->
+    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.3.1/highlight.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ho+j7jyWK8fNQe+A12Hb8AhRq26LrZ/JpcUGGOn+Y7RsweNrtN/tE3MoK7ZeZDyx" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/gh/cferdinandi/gumshoe@4/dist/gumshoe.polyfills.min.js"></script>
+    <script src="/smallrye-mutiny/assets/js/hl.js" type="text/javascript"></script>
+    <script src="/smallrye-mutiny/assets/js/scrollspy.js" type="text/javascript"></script>
+
+    <script>
+        $(document).ready(function(){
+            $("#search").on("keyup", function() {
+                var value = $(this).val().toLowerCase();
+                $(".guide").filter(function() {
+                    $(this).toggle($(this).attr("data-search").toLowerCase().indexOf(value) > -1)
+                });
+            });
+        });
+    </script>
+</footer>
+    </div>
+</body>
+
+</html>

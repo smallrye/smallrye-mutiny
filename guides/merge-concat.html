@@ -1,0 +1,293 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <title></title>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="SmallRye Mutiny!">
+
+    <link rel="canonical" href="/guides/merge-concat.html">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.3.1/styles/default.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/components/icon.min.css" integrity="sha512-8Tb+T7SKUFQWOPIQCaLDWWe1K/SY8hvHl7brOH8Nz5z1VT8fnf8B+9neoUzmFY3OzkWMMs3OjrwZALgB1oXFBg==" crossorigin="anonymous" />
+    <link rel="shortcut icon" type="image/png" href="/smallrye-mutiny/assets/images/favicon.ico">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">
+    <link rel="stylesheet" href="/smallrye-mutiny/assets/css/main.css" />
+    <link rel="stylesheet" href="https://maxst.icons8.com/vue-static/landings/line-awesome/font-awesome-line-awesome/css/all.min.css">
+    <link rel="stylesheet" href="https://maxst.icons8.com/vue-static/landings/line-awesome/line-awesome/1.3.0/css/line-awesome.min.css">
+</head>
+
+<body>
+    <div class="container-fluid global-container">
+        
+
+
+
+
+
+<header class="header masthead mb-auto">
+    <div class="container">
+        <nav class="navbar navbar-dark navbar-expand-lg">
+            <a class="navbar-brand brand mutiny" href="/smallrye-mutiny/index.html"><strong>Mutiny!</strong></a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#toggler"
+                    aria-controls="toggler" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="toggler">
+                <ul class="navbar-nav ml-auto mr-0 mt-2 mt-lg-0">
+                    <li class="nav-item"><a class="nav-link " href="/smallrye-mutiny/index.html">Home</a></li>
+                    <li class="nav-item"><a class="nav-link " href="/smallrye-mutiny/pages/philosophy">Philosophy</a></li>
+                    <li class="nav-item"><a class="nav-link " href="/smallrye-mutiny/getting-started/download">Getting started</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="/smallrye-mutiny/guides">Guides</a></li>
+                    <li class="nav-item"><a href="https://github.com/smallrye/smallrye-mutiny" target="_blank" title="Github"><i
+                            class="lab la-github la-2x"></i></a></li>
+                    <li class="nav-item"><a href="https://groups.google.com/d/forum/smallrye" target="_blank" title="SmallRye Google Group"><i
+                            class="las la-at la-2x"></i></a></li>
+                    <li class="nav-item"><a href="https://stackoverflow.com/questions/tagged/mutiny" target="_blank"
+                                            title="Stack Overflow"><i
+                            class="lab la-stack-overflow la-2x"></i></a></li>
+                </ul>
+            </div>
+        </nav>
+    </div>
+</header>
+        <main>
+            <div class="content">
+                
+
+<section class="hero gs">
+    <div class="hero-main container">
+        <div class="row">
+            <div class="hero-left col-12">
+                <div class="hero-slogan">
+                    <h1 class="hero-name">Merging and Concatenating Streams</h1>
+                </div>
+                <div class="hero-desc">
+                    Learn how to merge or concatenate streams
+                </div>
+                <!-- TODO Labels -->
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="container page-content">
+    <div class="row">
+        <div class="col-md-9 content">
+            <div class="paragraph">
+<p>Merging or concatenating streams is a frequent operation which consists in taking multiple streams and creating a new <code>Multi</code> out of them.
+Such an operation observes the items emitted by the different streams and produces a new <code>Multi</code> emitting the events.</p>
+</div>
+<div class="paragraph">
+<p>All the streams merged or concatenated this way should emit the same type of items.</p>
+</div>
+<div class="sect1">
+<h2 id="the-difference-between-merge-and-concatenate"><a class="anchor" href="#the-difference-between-merge-and-concatenate"></a>The difference between merge and concatenate</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Understanding the difference between <em>merge</em> and <em>concatenate</em> is essential.</p>
+</div>
+<div class="paragraph">
+<p>When <em>merging</em> streams, it observes the different upstreams and emits the items as they come.
+If the streams emit their items concurrently, the items from the different streams are interleaved.</p>
+</div>
+<div class="imageblock reduce">
+<div class="content">
+<img src="/smallrye-mutiny/assets/images/merge-streams.png" alt="Merging streams">
+</div>
+</div>
+<div class="paragraph">
+<p>When using <em>merge</em>, failures are also propagated to the merged stream, and no more items are emitted after that failure.
+The <em>completion</em> event is only emitted by the merged stream when all the observed streams are completed.</p>
+</div>
+<div class="paragraph">
+<p>But if we want to keep the order of the observed stream, we need to <em>concatenate</em>.</p>
+</div>
+<div class="paragraph">
+<p>When <em>concatenating</em>, it waits for the first stream to complete before subscribing to the second one. Thus, it ensures that all the items from the first stream have been emitted before emitting the second stream items. It preserves an order corresponding to the source:</p>
+</div>
+<div class="imageblock reduce">
+<div class="content">
+<img src="/smallrye-mutiny/assets/images/concatenate-streams.png" alt="Concatenating streams">
+</div>
+</div>
+<div class="paragraph">
+<p>When the first stream emits the completion event, it switches to the second stream, and so on.
+When the last stream completes, the concatenated stream sends the completion event.
+As for <em>merge</em>, if a stream fails then there won&#8217;t be further evebts.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="merging-multis"><a class="anchor" href="#merging-multis"></a>Merging Multis</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>To create a new <code>Multi</code> from the <em>merge</em> of multiple <code>Multi</code> streams use:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Multi&lt;T&gt; multi1 = getFirstMulti();
+Multi&lt;T&gt; multi2 = getSecondMulti();
+
+Multi&lt;T&gt; merged = Multi.createBy().merging().streams(multi1, multi2);</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>For example, we can merge multiple streams emitting periodical events and look at the output:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Multi&lt;String&gt; first = Multi.createFrom().ticks().every(Duration.ofMillis(10))
+        .onItem().transform(l -&gt; "Stream 1 - " + l);
+
+Multi&lt;String&gt; second = Multi.createFrom().ticks().every(Duration.ofMillis(15))
+        .onItem().transform(l -&gt; "Stream 2 - " + l);
+
+Multi&lt;String&gt; third = Multi.createFrom().ticks().every(Duration.ofMillis(5))
+        .onItem().transform(l -&gt; "Stream 3 - " + l);
+
+Cancellable cancellable = Multi.createBy().merging().streams(first, second, third)
+        .subscribe().with(s -&gt; System.out.println("Got item: " + s));</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-text hljs" data-lang="text">Got item: Stream 1 - 0
+Got item: Stream 2 - 0
+Got item: Stream 3 - 0
+Got item: Stream 3 - 1
+Got item: Stream 1 - 1
+Got item: Stream 3 - 2
+Got item: Stream 2 - 1
+Got item: Stream 3 - 3
+Got item: Stream 1 - 2
+Got item: Stream 3 - 4
+Got item: Stream 3 - 5
+....</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="concatenating-multis"><a class="anchor" href="#concatenating-multis"></a>Concatenating Multis</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>To create a new <code>Multi</code> from the <em>concatenation</em> of multiple <code>Multi</code> streams use:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Multi&lt;T&gt; multi1 = getFirstMulti();
+Multi&lt;T&gt; multi2 = getSecondMulti();
+
+Multi&lt;T&gt; concatenated = Multi.createBy().concatenating().streams(multi1, multi2);</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Don&#8217;t forget that the streams order matters in this case, as <code>(streamA, streamB)</code> does not provide the same result as <code>(streamB, streamA)</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Multi&lt;String&gt; first = Multi.createFrom().items("A1", "A2", "A3");
+Multi&lt;String&gt; second = Multi.createFrom().items("B1", "B2", "B3");
+
+Multi.createBy().concatenating().streams(first, second)
+        .subscribe().with(item -&gt; System.out.print(item)); // "A1A2A3B1B2B3"
+
+Multi.createBy().concatenating().streams(second, first)
+        .subscribe().with(item -&gt; System.out.print(item)); // "B1B2B3A1A2A3"</code></pre>
+</div>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+If one of the concatenated streams is unbounded (infinite), the next streams in the list won&#8217;t be consumed!
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+        </div>
+        <div class="col-md-3 col-md-offset-1 toc-container d-sm-none d-md-block">
+            <nav class="page-toc toc nav sticky-top" id="toc">
+                
+                <h4>Table of Content</h4>
+                <ul class="sectlevel1">
+<li><a href="#the-difference-between-merge-and-concatenate">The difference between merge and concatenate</a></li>
+<li><a href="#merging-multis">Merging Multis</a></li>
+<li><a href="#concatenating-multis">Concatenating Multis</a></li>
+</ul>
+                
+
+                
+                <h4>Related content</h4>
+                <ul>
+                    
+                    <li>
+                        
+                        <a href="/smallrye-mutiny/guides/combining-items">Combining items from streams</a>
+                        
+                        
+                    </li>
+                    
+                </ul>
+                
+            </nav>
+        </div>
+    </div>
+</div>
+
+
+            </div>
+        </main>
+        <footer class="footer">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-9 sep-right">
+                <p>
+                    SmallRye Mutiny is an open source project. All the code from this project is available under the <a href="https://raw.githubusercontent.com/smallrye/smallrye-mutiny/master/LICENSE">Apache Software License 2.0</a>.
+                </p>
+                <p>
+                    This website was built with <a href="https://jekyllrb.com/">Jekyll</a>, is hosted on Github Pages and is completely open source.
+                    You can <a href="https://github.com/smallrye/smallrye-mutiny">fork it</a> and propose enhancements through pull-requests.
+                </p>
+                <p>
+                    Something's wrong? Open an <a href="https://github.com/smallrye/smallrye-mutiny/issues">issue</a>.
+                </p>
+            </div>
+            <div class="col-lg-3">
+                <p>
+                     Site last generated: Dec 10, 2020
+                </p>
+            </div>
+        </div>
+    </div>
+    <!-- Javascript-->
+    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.3.1/highlight.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ho+j7jyWK8fNQe+A12Hb8AhRq26LrZ/JpcUGGOn+Y7RsweNrtN/tE3MoK7ZeZDyx" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/gh/cferdinandi/gumshoe@4/dist/gumshoe.polyfills.min.js"></script>
+    <script src="/smallrye-mutiny/assets/js/hl.js" type="text/javascript"></script>
+    <script src="/smallrye-mutiny/assets/js/scrollspy.js" type="text/javascript"></script>
+
+    <script>
+        $(document).ready(function(){
+            $("#search").on("keyup", function() {
+                var value = $(this).val().toLowerCase();
+                $(".guide").filter(function() {
+                    $(this).toggle($(this).attr("data-search").toLowerCase().indexOf(value) > -1)
+                });
+            });
+        });
+    </script>
+</footer>
+    </div>
+</body>
+
+</html>

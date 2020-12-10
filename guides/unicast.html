@@ -2,13 +2,13 @@
 <html lang="en">
 
 <head>
-    <title>Mutiny!</title>
+    <title></title>
 
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="description" content="SmallRye Mutiny!">
 
-    <link rel="canonical" href="/">
+    <link rel="canonical" href="/guides/unicast.html">
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.3.1/styles/default.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/components/icon.min.css" integrity="sha512-8Tb+T7SKUFQWOPIQCaLDWWe1K/SY8hvHl7brOH8Nz5z1VT8fnf8B+9neoUzmFY3OzkWMMs3OjrwZALgB1oXFBg==" crossorigin="anonymous" />
     <link rel="shortcut icon" type="image/png" href="/smallrye-mutiny/assets/images/favicon.ico">
@@ -37,10 +37,10 @@
 
             <div class="collapse navbar-collapse" id="toggler">
                 <ul class="navbar-nav ml-auto mr-0 mt-2 mt-lg-0">
-                    <li class="nav-item"><a class="nav-link active" href="/smallrye-mutiny/index.html">Home</a></li>
+                    <li class="nav-item"><a class="nav-link " href="/smallrye-mutiny/index.html">Home</a></li>
                     <li class="nav-item"><a class="nav-link " href="/smallrye-mutiny/pages/philosophy">Philosophy</a></li>
                     <li class="nav-item"><a class="nav-link " href="/smallrye-mutiny/getting-started/download">Getting started</a></li>
-                    <li class="nav-item"><a class="nav-link " href="/smallrye-mutiny/guides">Guides</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="/smallrye-mutiny/guides">Guides</a></li>
                     <li class="nav-item"><a href="https://github.com/smallrye/smallrye-mutiny" target="_blank" title="Github"><i
                             class="lab la-github la-2x"></i></a></li>
                     <li class="nav-item"><a href="https://groups.google.com/d/forum/smallrye" target="_blank" title="SmallRye Google Group"><i
@@ -55,101 +55,80 @@
 </header>
         <main>
             <div class="content">
-                <section class="hero">
+                
+
+<section class="hero gs">
     <div class="hero-main container">
         <div class="row">
-            <div class="hero-left col-lg-6">
+            <div class="hero-left col-12">
                 <div class="hero-slogan">
-                    <h1 class="hero-name mutiny">Mutiny!&nbsp;</h1>
-                    <span class="hero-description">Intuitive Event-Driven Reactive Programming Library for Java</span>
+                    <h1 class="hero-name">How to create use create a Multi from a non reactive source?</h1>
                 </div>
-                <div class="hero-buttons">
-                    <a href="https://search.maven.org/artifact/io.smallrye.reactive/mutiny/0.11.0/jar" target="_blank" class="btn btn-rounded button button-dark button-rounded">
-                    Last release: 0.11.0</a>
-                    &nbsp; &nbsp;
-                    <a href="/smallrye-mutiny/getting-started/download" class="btn btn-rounded button button-dark button-rounded">
-                Let's get started&nbsp;<i class="las la-arrow-right"></i></a>
+                <div class="hero-desc">
+                    Learn how to use the Unicast processor.
                 </div>
-            </div>
-            <div class="hero-right col-lg-6">
-                <div class="hero-code">
-                    <div class="code-examples">
-                        <pre><code class="hljs java">
-Uni&lt;String&gt; request = (...)
-
-Uni&lt;String&gt; uni = request
-    .ifNoItem().after(ofSecond(1))
-        .fail(() -> new Exception("💥"))
-    .onFailure().recoverWithItem(fail -> "📦")
-    .subscribe()
-        .with(item -> log("👍 " + item))
-                    </code></pre>
-                    </div>
-                </div>
+                <!-- TODO Labels -->
             </div>
         </div>
     </div>
 </section>
 
-<section class="characteristics">
-    <div class="characteristics-main container">
-        <div class="row">
-            <div class="characteristic-item col-lg-4">
-                <span class="characteristic-item-icon"><i class="las la-bolt la-2x"></i></span>
-                <h5>Event-Driven</h5>
-                <p>
-                    Mutiny places <em>events</em> at the core of its design.
-                    With Mutiny, you observe <em>events</em>, <em>react</em> to them, and create elegant and readable processing pipelines. A PhD in functional programming is not required.
-                </p>
-            </div>
+<div class="container page-content">
+    <div class="row">
+        <div class="col-md-9 content">
+            <div class="paragraph">
+<p>The <code>UnicastProcessor</code> is an implementation of <code>Multi</code> that lets you enqueue items in a queue.
+The items are then dispatched to the subscriber using the request protocol.
+While this pattern is against the idea of back-pressure, it lets you connect sources of data that do not support back-pressure with your subscriber.</p>
+</div>
+<div class="paragraph">
+<p>In the following example, the <code>UnicastProcessor</code> is used by a thread emitting items.
+These items are enqueued in the processor and replayed when the subscriber is connected, following the request protocol.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">UnicastProcessor&lt;String&gt; processor = UnicastProcessor.create();
+Multi&lt;String&gt; multi = processor
+        .onItem().transform(String::toUpperCase)
+        .onFailure().recoverWithItem("d'oh");
 
-            <div class="characteristic-item col-lg-4">
-                <span class="characteristic-item-icon"><i class="las la-route la-2x"></i></span>
-                <h5>Navigable</h5>
-                <p>
-                    Even with smart code completion classes with hundred of methods are confusing.
-                    Mutiny provides a navigable and explicit API driving you towards the operator you need.
-                </p>
-            </div>
-
-            <div class="characteristic-item col-lg-4">
-                <span class="characteristic-item-icon"><i class="las la-cogs la-2x"></i></span>
-                <h5>Non-Blocking I/O</h5>
-                <p>
-                    Mutiny is the perfect companion to tame the asynchronous nature of applications with non-blocking I/O.
-                    Declaratively compose operations, transform data, enforce progress, recover from failures and more.
-                </p>
-            </div>
+// Create a source of items that does not follow the request protocol
+new Thread(() -&gt; {
+    for (int i = 0; i &lt; 1000; i++) {
+        processor.onNext(Integer.toString(i));
+    }
+    processor.onComplete();
+}).start();</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>By default, the <code>UnicastProcessor</code> uses an unbounded queue.
+You can also pass a fixed size queue that would reject the items once full.</p>
+</div>
         </div>
-        <div class="row">
-            <div class="characteristic-item col-lg-4">
-                <span class="characteristic-item-icon"><img alt="quarkus" class="characteristic-quarkus-logo" src="/smallrye-mutiny/assets/images/quarkus.png"/></span>
-                <h5>Quarkus and Vert.x native</h5>
-                <p>
-                    Mutiny is integrated in <a href="https://quarkus.io">Quarkus</a> where every reactive API uses Mutiny, and <a href="https://vertx.io">Eclipse Vert.x</a> clients are made available using Mutiny bindings.
-                    Mutiny is however an independent library that can ultimately be used in any Java application. 
-                </p>
-            </div>
+        <div class="col-md-3 col-md-offset-1 toc-container d-sm-none d-md-block">
+            <nav class="page-toc toc nav sticky-top" id="toc">
+                
 
-            <div class="characteristic-item col-lg-4">
-                <span class="characteristic-item-icon"><i class="las la-envelope-open la-2x"></i></span>
-                <h5>Made for an asynchronous world</h5>
-                <p>
-                    Mutiny can be used in any asynchronous application such as event-driven microservices, message-based applications, network utilities, data stream processing, and of course... reactive applications!
-                </p>
-            </div>
-
-            <div class="characteristic-item col-lg-4">
-                <span class="characteristic-item-icon"><i class="las la-sync-alt la-2x"></i></span>
-                <h5>Reactive Converters Built-In</h5>
-                <p>
-                    Mutiny is based on the <em>Reactive Streams</em> specification, and so it can be integrated with any other reactive programming library.
-                    In addition, it proposes <em>converters</em> to interact with other popular libraries.
-                </p>
-            </div>
+                
+                <h4>Related content</h4>
+                <ul>
+                    
+                    <li>
+                        
+                        <a href="/smallrye-mutiny/guides/hot-streams">How to create a hot stream?</a>
+                        
+                        
+                    </li>
+                    
+                </ul>
+                
+            </nav>
         </div>
     </div>
-</section>
+</div>
+
+
             </div>
         </main>
         <footer class="footer">
