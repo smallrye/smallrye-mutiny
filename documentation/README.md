@@ -155,14 +155,12 @@ Once added to the `guides.yml` file, edit the `src/main/jekyll/_data/categories.
     - my-new-guide # use your id
 ``` 
 
-## Sandbox deployment
-
-The web site is deployed in a sandbox project until the official switch.
+## Deployment
 
 **IMPORTANT**: Before running the deployment, you must have a `GITHUB_TOKEN` declared in your environment: `export GITHUB_TOKEN=...`
 
-To deploy the web site to the sandbox, run:
+From the root directory, run:
 
 ```bash
-./deploy-to-sandbox.sh
+.build/deploy-site.sh
 ```
