@@ -52,7 +52,7 @@ cd src/main/jekyll
 bundle exec jekyll serve 
 ```
 
-You can browse the web site on http://127.0.0.1:4000/mutiny-doc-sandbox/.
+You can browse the website on http://127.0.0.1:4000/smallrye-mutiny/.
 
 
 ## Adding a guide
