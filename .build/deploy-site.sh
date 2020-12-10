@@ -9,7 +9,8 @@ cd target || exit
 git clone -b gh-pages "https://cescoffier:${GITHUB_TOKEN}@github.com/smallrye/smallrye-mutiny.git" site
 echo "🚧 Copy content"
 # shellcheck disable=SC2216
-yes | cp -R _site/* site
+rm -rf site/*
+cp -R _site/* site
 echo "🚧 Pushing documentation"
 cd site || exit
 git add -A
