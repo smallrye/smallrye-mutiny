@@ -1,0 +1,29 @@
+:page-layout: guides
+:page-guide-id: handling-null
+:page-liquid:
+:page-show-toc: false
+:include_dir: ../../../../src/test/java/guides
+
+The `Uni` type can emit `null` as item.
+While there are mixed feelings about `null`, it's part of the Java language and so handled in the `Uni` type.
+`Multi` does not support `null` items as it would break the compatibility with Reactive Streams.
+
+Emitting `null` is convenient when returning `Uni<Void>`.
+However, the downstream must expect `null` as item.
+
+Thus, `Uni` provides specific methods to handle `null` item.
+`uni.onItem().ifNull()` lets you decide what you want to do when the received item is `null`:
+
+[source,java,indent=0]
+----
+include::{include_dir}/UniNullTest.java[tags=code]
+----
+
+A symmetric group of methods is also available with `ifNotNull` which let you handle the case where the item is _not null_:
+
+[source,java,indent=0]
+----
+include::{include_dir}/UniNullTest.java[tags=code-not-null]
+----
+
+IMPORTANT: While supported, emitting `null` should be avoided except for `Uni<Void>`.

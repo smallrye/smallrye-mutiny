@@ -1,0 +1,281 @@
+download:
+  title: Getting Started with Mutiny
+  text: To start using Mutiny, you just need to drop a JAR in your classpath
+  url: getting-started/download
+  related:
+    - url: https://maven.apache.org
+      text: Apache Maven
+    - url: https://gradle.org/
+      text: Gradle
+    - url: https://www.jbang.dev/
+      text: JBang!
+
+first-lines-of-code:
+    title: First lines of code
+    text: Your first lines of code using Mutiny.
+    url: getting-started/first-lines-of-code
+
+creating-unis:
+  title: Creating Unis
+  text: Learn how to create Uni instances.
+  url: getting-started/creating-unis
+  related:
+    - guide: creating-multis
+
+creating-multis:
+  title: Creating Multis
+  text: Learn how to create Multi instances.
+  url: getting-started/creating-multis
+
+transforming-items:
+  title: Transforming items
+  text: Learn how to (synchronously) transform received item
+  url: getting-started/transforming-items
+  related:
+    - guide: transforming-items-async
+
+transforming-items-async:
+  title: Transforming items to Uni/Multi
+  text: Learn how to transform received item into asynchronous streams.
+  url: getting-started/transforming-items-async
+  related:
+    - guide: transforming-items
+    - guide: merge-concat
+
+handling-failures:
+  title: Handling failures
+  text: Learn how you can recover from failures.
+  url: getting-started/handling-failures
+
+retry:
+  title: Retrying on failures
+  text: Learn how you to retry on failures.
+  url: getting-started/retry
+
+reactive-to-imperative:
+  title: From reactive to imperative
+  text: Learn how to block until you get items.
+  labels:
+    - advanced
+  related:
+    - url: https://javadoc.io/doc/io.smallrye.reactive/mutiny/latest/io/smallrye/mutiny/groups/UniAwait.html
+      text: The Uni Await group
+    - guide: imperative-to-reactive
+
+imperative-to-reactive:
+  title: Imperative to Reactive
+  text: Learn how to integrate blocking code.
+  labels:
+    - advanced
+  related:
+    - guide: reactive-to-imperative
+
+unchecked:
+  title: Dealing with checked exceptions
+  text: Learn how to handle <em>checked</em> exceptions.
+  labels:
+    - intermediate
+  related:
+    - url: https://javadoc.io/doc/io.smallrye.reactive/mutiny/latest/io/smallrye/mutiny/unchecked/Unchecked.html
+      text: Unchecked Javadoc
+
+filter:
+  title: Filtering items from multi
+  text: Learn how to filter and select items from a multi.
+  labels:
+    - beginner
+  related:
+    - guide: take-skip
+    - url: https://javadoc.io/doc/io.smallrye.reactive/mutiny/latest/io/smallrye/mutiny/groups/MultiTransform.html
+      text: <tt>MultiTransform</tt>
+
+collecting-items:
+  title: Collecting items from Multi
+  text: Learn how to collect items from a multi.
+  labels:
+    - beginner
+  related:
+    - guide: filter
+    - url: https://javadoc.io/doc/io.smallrye.reactive/mutiny/latest/io/smallrye/mutiny/groups/MultiCollect.html
+      text: <tt>MultiCollect</tt>
+
+take-skip:
+  title: Take or Skip the first or last items
+  text: Learn how to select or skip only the first or last items from a multi.
+  labels:
+    - beginner
+  related:
+    - guide: filter
+    - url: https://javadoc.io/doc/io.smallrye.reactive/mutiny/latest/io/smallrye/mutiny/groups/MultiTransform.html
+      text: <tt>MultiTransform</tt>
+
+repetitions:
+  title: Eliminate duplicates and repetitions
+  text: Learn how to drop duplicated and repeated items from a multi.
+  labels:
+    - beginner
+  related:
+    - guide: filter
+    - url: https://javadoc.io/doc/io.smallrye.reactive/mutiny/latest/io/smallrye/mutiny/groups/MultiTransform.html
+      text: <tt>MultiTransform</tt>
+
+handling-null:
+  title: How to handle null?
+  text: Learn how to execute specific actions on <em>null</em> items
+  labels:
+    - beginner
+  related:
+    - url: https://javadoc.io/static/io.smallrye.reactive/mutiny/latest/io/smallrye/mutiny/groups/UniOnNull.html
+      text: <tt>UniOnNull</tt>
+    - url: https://javadoc.io/static/io.smallrye.reactive/mutiny/latest/io/smallrye/mutiny/groups/UniOnNotNull.html
+      text: <tt>UniOnNotNull</tt>
+
+timeout:
+  title: How to handle timeout?
+  text: Learn how to timeouts and deadlines.
+  labels:
+    - beginner
+  related:
+    - url: https://javadoc.io/doc/io.smallrye.reactive/mutiny/latest/io/smallrye/mutiny/groups/UniOnTimeout.html
+      text: <tt>UniOnTimeout</tt>
+
+delay:
+  title: How to delay events?
+  text: Learn how to artifically delays event propagation and throttle emissions.
+  labels:
+    - intermediate
+  related:
+    - url: https://javadoc.io/doc/io.smallrye.reactive/mutiny/latest/io/smallrye/mutiny/groups/UniOnItemDelay.html
+      text: <tt>UniOnItemDelay</tt>
+
+pagination:
+  title: How to use paginated API?
+  text: Learn how to consume APIs using pagination.
+  labels:
+    - intermediate
+  related:
+    - guide: polling
+    - url: https://quarkus.io/blog/mutiny-pagination/
+      text: Handling paginated APIs with Mutiny
+
+polling:
+  title: How to use polling?
+  text: Learn how to consume items from pollable sources.
+  labels:
+    - intermediate
+  related:
+    - guide: pagination
+
+emission-threads:
+  title: How to change the emission thread?
+  text: Learn how to control threads used to emit events.
+  labels:
+    - intermediate
+  related:
+    - guide: reactive-to-imperative
+    - guide: imperative-to-reactive
+    - guide: emit-subscription
+
+emit-subscription:
+  title: What's the difference between emitOn and runSubscriptionOn?
+  text: Learn how to control threads subscription threads.
+  labels:
+    - advanced
+  related:
+    - guide: reactive-to-imperative
+    - guide: imperative-to-reactive
+    - guide: emission-threads
+
+completion-stages:
+  title: How to deal with Completion Stages?
+  text: Learn how to interact with CompletionStages and CompletableFutures.
+  labels:
+    - intermediate
+  related:
+    - guide: converters
+
+rx:
+  title: Using map, flatMap and concatMap
+  text: Learn how to use the traditional Reactive eXtensions methods.
+  labels:
+    - advanced
+  related:
+    - guide: shortcuts
+
+shortcuts:
+  title: Shortcut methods
+  text: Learn the different shortcuts reducing verbosity.
+  labels:
+    - intermediate
+  related:
+    - guide: rx
+    - guide: converters
+
+merge-concat:
+  title: Merging and Concatenating Streams
+  text: Learn how to merge or concatenate streams
+  labels:
+    - beginner
+  related:
+    - guide: combining-items
+
+combining-items:
+  title: Combining items from streams
+  text: Learn how to combine items from different streams.
+  labels:
+    - beginner
+  related:
+    - guide: merge-concat
+
+converters:
+  title: Using other reactive programming libraries
+  text: Learn how to integrate Mutiny with RX Java or Reactor.
+  labels:
+    - intermediate
+  related:
+    - guide: rx
+    - guide: completion-stages
+
+testing:
+  title: How can I write unit / integration tests?
+  text: Learn how to test your Mutiny applications.
+  labels:
+    - intermediate
+
+plug:
+  title: Can I have custom operators?
+  text: Learn how to implement your own operator.
+  labels:
+    - advanced
+
+dropped-exceptions:
+  title: Handling dropped exceptions?
+  text: Learn how you can deal with dropped exceptions.
+  labels:
+    - advanced
+  related:
+    - guide: infrastructure
+
+infrastructure:
+  title: How to integrate Mutiny with my framework?
+  text: Learn about the default executors used by Mutiny and how to configure them.
+  labels:
+    - advanced
+  relate:
+    - guide: dropped-exceptions
+
+hot-streams:
+  title: How to create a hot stream?
+  text: Learn how to brodcast items.
+  labels:
+    - intermediate
+  related:
+    - guide: unicast
+
+unicast:
+  title: How to create use create a Multi from a non reactive source?
+  text: Learn how to use the Unicast processor.
+  labels:
+    - advanced
+  related:
+    - guide: hot-streams

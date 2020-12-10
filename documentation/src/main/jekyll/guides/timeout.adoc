@@ -1,0 +1,53 @@
+:page-layout: guides
+:page-guide-id: handling-null
+:page-liquid:
+:page-show-toc: false
+:include_dir: ../../../../src/test/java/guides
+
+Unis are often used to represent asynchronous operations, like making an HTTP call.
+So, it's not rare to need to add a timeout or a deadline on this kind of operation.
+If we don't get a response (receive an item in the Mutiny lingo) before that deadline, we consider that the operation failed.
+We can then recover from this failure by using a fallback value, retrying, or any other failure handling strategy.
+
+To configure a timeout use `Uni.ifNoItem().after(Duration)`:
+
+[source,java,indent=0]
+----
+include::{include_dir}/UniTimeoutTest.java[tags=code]
+----
+
+When the deadline is reached, you can do various actions.
+First you can simply fail:
+
+[source,java,indent=0]
+----
+include::{include_dir}/UniTimeoutTest.java[tags=fail]
+----
+
+A `TimeoutException` is propagated in this case.
+So you can handle it specifically in the downstream:
+
+[source,java,indent=0]
+----
+include::{include_dir}/UniTimeoutTest.java[tags=fail-recover]
+----
+
+You can also pass a custom exception:
+
+[source,java,indent=0]
+----
+include::{include_dir}/UniTimeoutTest.java[tags=fail-with]
+----
+
+Failing and recovering might be inconvenient.
+So, you can pass a fallback item or `Uni` directly:
+
+[source,java,indent=0]
+----
+include::{include_dir}/UniTimeoutTest.java[tags=fallback]
+----
+
+[source,java,indent=0]
+----
+include::{include_dir}/UniTimeoutTest.java[tags=fallback-uni]
+----

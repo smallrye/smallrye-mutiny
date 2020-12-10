@@ -1,0 +1,40 @@
+:page-layout: guides
+:page-guide-id: repetitions
+:page-liquid:
+:page-show-toc: true
+:include_dir: ../../../../src/test/java/guides/operators
+
+When observing a `Multi`, you may see duplicated items or repetitions.
+Mutiny has operators to removes these duplicates.
+
+== Removing duplicates
+
+The `.transform().byDroppingDuplicates()` operator removes all the duplicates.
+As a result, the downstream only contains distinct items:
+
+[source,java,indent=0]
+----
+include::{include_dir}/RepetitionsTest.java[tag=distinct]
+----
+
+If you have a stream emitting the {1, 1, 2, 3, 4, 5, 5, 6, 1, 4, 4} items.
+Applying `.transform().byDroppingDuplicates()` on such stream produces:
+{1, 2, 3, 4, 5, 6}.
+
+IMPORTANT: Do not use `.transform().byDroppingDuplicates()` on large or infinite streams.
+The operator keeps a reference on all the emitted items, and so, it could lead to memory issues if the stream contains too many distinct items.
+
+== Removing repetitions
+
+The `.transform().byDroppingRepetitions()` operator removes subsequent repetition of an item:
+
+[source,java,indent=0]
+----
+include::{include_dir}/RepetitionsTest.java[tag=repetition]
+----
+
+If you have a stream emitting the {1, 1, 2, 3, 4, 5, 5, 6, 1, 4, 4} items.
+Applying `.transform().byDroppingRepetitions()` on such stream produces:
+{1, 2, 3, 4, 5, 6, 1, 4}.
+
+Unlike `.transform().byDroppingDuplicates()`, you can use this operator on large or infinite streams.

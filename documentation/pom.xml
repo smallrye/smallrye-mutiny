@@ -12,12 +12,7 @@
     <name>SmallRye Mutiny Documentation</name>
 
     <properties>
-        <version.jruby>9.2.14.0</version.jruby>
-        <version.asciidoctorj>2.4.2</version.asciidoctorj>
-        <version.asciidoctorj.pdf>1.5.3</version.asciidoctorj.pdf>
-        <version.asciidoctorj.diagram>2.0.5</version.asciidoctorj.diagram>
         <site.dir>${project.build.directory}/generated-docs/</site.dir>
-
         <format.skip>true</format.skip>
     </properties>
 
@@ -80,63 +75,6 @@
                         </configuration>
                     </execution>
                 </executions>
-            </plugin>
-            <plugin>
-                <artifactId>maven-resources-plugin</artifactId>
-                <version>3.2.0</version>
-            </plugin>
-            <plugin>
-                <groupId>org.asciidoctor</groupId>
-                <artifactId>asciidoctor-maven-plugin</artifactId>
-                <version>2.1.0</version>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.jruby</groupId>
-                        <artifactId>jruby</artifactId>
-                        <version>${version.jruby}</version>
-                    </dependency>
-                    <dependency>
-                        <groupId>org.asciidoctor</groupId>
-                        <artifactId>asciidoctorj</artifactId>
-                        <version>${version.asciidoctorj}</version>
-                    </dependency>
-                    <dependency>
-                        <groupId>org.asciidoctor</groupId>
-                        <artifactId>asciidoctorj-pdf</artifactId>
-                        <version>${version.asciidoctorj.pdf}</version>
-                    </dependency>
-                    <dependency>
-                        <groupId>org.asciidoctor</groupId>
-                        <artifactId>asciidoctorj-diagram</artifactId>
-                        <version>${version.asciidoctorj.diagram}</version>
-                    </dependency>
-                </dependencies>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>process-asciidoc</goal>
-                        </goals>
-                        <phase>compile</phase>
-                    </execution>
-                </executions>
-                <configuration>
-                    <requires>
-                        <require>asciidoctor-diagram</require>​
-                    </requires>
-                    <preserveDirectories>true</preserveDirectories>
-                    <backend>html</backend>
-                    <attributes>
-                        <toc>left</toc>
-                        <version>${project.version}</version>
-                        <reactive.streams.version>${reactive-streams.version}</reactive.streams.version>
-                        <icons>font</icons>
-                        <source-highlighter>highlightjs</source-highlighter>
-                        <imagesdir>assets/images</imagesdir>
-                        <attribute-missing>warn</attribute-missing>
-                    </attributes>
-                    <sourceDirectory>src/main/docs</sourceDirectory>
-                    <outputDirectory>${site.dir}</outputDirectory>
-                </configuration>
             </plugin>
         </plugins>
     </build>

@@ -1,0 +1,66 @@
+.code-examples {
+  width: 100%;
+  border-radius: .8rem;
+  font-size: 15px;
+  line-height: 1.4;
+  color: white;
+}
+
+.hljs {
+  padding: 10px;
+  padding-left: 20px;
+  color: white;
+  background-color: $color-gray-700;
+  border-radius: 10px;
+  font-size: 16px;
+}
+
+.hljs-number,
+.hljs-string {
+  color: white;
+}
+
+pre {
+  overflow: auto;
+  margin: 0 0 1.25rem 0;
+  -webkit-overflow-scrolling: touch;
+}
+pre {
+  font-family: $font-code;
+  font-size: 1em;
+}
+pre.highlight,
+.hljs {
+  background: $code-background-dark;
+  color: #f8f8f2;
+  border-radius: 5px;
+}
+.listingblock {
+  color: $color-gray-700;
+}
+.title {
+  display: inline-block;
+  margin-top: .25rem;
+  margin-bottom: .25rem;
+  padding-left: .25rem;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+.hljs-string {
+  color: rgb(230, 219, 116);
+}
+.hljs-built_in {
+  color: #ffb86c;
+}
+.hljs-title {
+  color: #ffb86c;
+}
+.hljs-keyword {
+  color: rgb(255, 101, 65);
+}
+.hljs-meta {
+  color: rgb(248, 248, 242);
+}
+.hljs-comment {
+  color: rgb(92, 152, 205);
+}
