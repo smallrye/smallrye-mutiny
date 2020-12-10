@@ -64,18 +64,7 @@ deploy_release() {
     mvn -B clean deploy -DskipTests -Prelease -s maven-settings.xml
 
     echo "Deploying documentation"
-    cd documentation
-    echo "Cloning gh-pages"
-    cd target
-    git clone -b gh-pages "https://cescoffier:${GITHUB_TOKEN}@github.com/smallrye/smallrye-mutiny.git" site
-    echo "Copy content"
-    yes | cp -R generated-docs/* site
-    echo "Pushing documentation"
-    cd site
-    git add -A
-    git commit -m "update site"
-    git push origin gh-pages
-    cd ../../..
+    .build/deploy-site.sh
 }
 
 init_git
