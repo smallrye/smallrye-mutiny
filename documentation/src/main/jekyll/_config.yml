@@ -36,7 +36,7 @@ asciidoctor:
   safe: unsafe
   attributes:
     imagesoutdir: assets/images
-    imagesdir: /mutiny-doc-sandbox/assets/images
+    imagesdir: /smallrye-mutiny/assets/images
     source-highlighter: highlightjs
     sectanchors: ''
     icons: font
