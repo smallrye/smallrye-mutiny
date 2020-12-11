@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 echo "🚧 Building..."
 cd documentation || exit 1
-mvn clean test && cd src/main/jekyll  && bundle exec jekyll build  && cd - || exit 1
+mvn clean test && cd src/main/jekyll  && bundle install && bundle exec jekyll build  && cd - || exit 1
 echo "🍺 Site generated in 'target/_site'"
 
 echo "🚧 Cloning web site in target/site"
