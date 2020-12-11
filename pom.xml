@@ -6,7 +6,7 @@
     <parent>
         <groupId>io.smallrye</groupId>
         <artifactId>smallrye-parent</artifactId>
-        <version>23</version>
+        <version>25</version>
     </parent>
 
     <groupId>io.smallrye.reactive</groupId>
