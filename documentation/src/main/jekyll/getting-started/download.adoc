@@ -43,7 +43,7 @@ You can also add the `quarkus-mutiny` dependency explicitly:
 
 [source, bash]
 ----
-mvn quarkus:add-dependency -Dextensions=mutiny
+mvn quarkus:add-extension -Dextensions=mutiny
 ----
 
 Or directly add the dependency to your `pom.xml`
