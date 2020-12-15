@@ -27,6 +27,11 @@ creating-multis:
   text: Learn how to create Multi instances.
   url: getting-started/creating-multis
 
+observing-events:
+  title: Observing events
+  text: Learn how to observes the events emitted by Uni and Multi instances.
+  url: getting-started/observing-events
+
 transforming-items:
   title: Transforming items
   text: Learn how to (synchronously) transform received item
