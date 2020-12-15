@@ -6,20 +6,13 @@ import java.util.Arrays;
 
 import org.reactivestreams.Publisher;
 
-import io.smallrye.mutiny.operators.MultiItemCombine2;
-import io.smallrye.mutiny.operators.MultiItemCombine3;
-import io.smallrye.mutiny.operators.MultiItemCombine4;
-import io.smallrye.mutiny.operators.MultiItemCombine5;
-import io.smallrye.mutiny.operators.MultiItemCombine6;
-import io.smallrye.mutiny.operators.MultiItemCombine7;
-import io.smallrye.mutiny.operators.MultiItemCombine8;
-import io.smallrye.mutiny.operators.MultiItemCombine9;
-import io.smallrye.mutiny.operators.MultiItemCombineIterable;
+import io.smallrye.mutiny.Multi;
+import io.smallrye.mutiny.operators.*;
 
 public class MultiItemCombination {
 
     /**
-     * Combines 2 streams.
+     * Combines the items from 2 streams.
      *
      * @param a the first stream, must not be {@code null}
      * @param b the second stream, must not be {@code null}
@@ -32,7 +25,7 @@ public class MultiItemCombination {
     }
 
     /**
-     * Combines 3 streams.
+     * Combines the items from 3 streams.
      *
      * @param a the first stream, must not be {@code null}
      * @param b the second stream, must not be {@code null}
@@ -48,7 +41,7 @@ public class MultiItemCombination {
     }
 
     /**
-     * Combines 4 streams.
+     * Combines the items from 4 streams.
      *
      * @param a the first stream, must not be {@code null}
      * @param b the second stream, must not be {@code null}
@@ -67,7 +60,7 @@ public class MultiItemCombination {
     }
 
     /**
-     * Combines 5 streams.
+     * Combines the items from 5 streams.
      *
      * @param a the first stream, must not be {@code null}
      * @param b the second stream, must not be {@code null}
@@ -89,7 +82,7 @@ public class MultiItemCombination {
     }
 
     /**
-     * Combines 6 streams.
+     * Combines the items from 6 streams.
      *
      * @param a the first stream, must not be {@code null}
      * @param b the second stream, must not be {@code null}
@@ -114,7 +107,7 @@ public class MultiItemCombination {
     }
 
     /**
-     * Combines 7 streams.
+     * Combines the items from 7 streams.
      *
      * @param a the first stream, must not be {@code null}
      * @param b the second stream, must not be {@code null}
@@ -141,7 +134,7 @@ public class MultiItemCombination {
     }
 
     /**
-     * Combines 8 streams.
+     * Combines the items from 8 streams.
      *
      * @param a the first stream, must not be {@code null}
      * @param b the second stream, must not be {@code null}
@@ -163,14 +156,15 @@ public class MultiItemCombination {
      */
     public <T1, T2, T3, T4, T5, T6, T7, T8> MultiItemCombine8<T1, T2, T3, T4, T5, T6, T7, T8> streams( // NOSONAR
             Publisher<? extends T1> a, Publisher<? extends T2> b, Publisher<? extends T3> c, Publisher<? extends T4> d,
-            Publisher<? extends T5> e, Publisher<? extends T6> f, Publisher<? extends T7> g, Publisher<? extends T8> h) {
+            Publisher<? extends T5> e, Publisher<? extends T6> f, Publisher<? extends T7> g,
+            Publisher<? extends T8> h) {
         return new MultiItemCombine8<>(
                 Arrays.asList(nonNull(a, "a"), nonNull(b, "b"), nonNull(c, "c"), nonNull(d, "d"),
                         nonNull(e, "e"), nonNull(f, "f"), nonNull(g, "g"), nonNull(h, "h")));
     }
 
     /**
-     * Combines 9 streams.
+     * Combines the items from 9 streams.
      *
      * @param a the first stream, must not be {@code null}
      * @param b the second stream, must not be {@code null}
@@ -192,7 +186,8 @@ public class MultiItemCombination {
      * @param <T9> the type of item from the ninth stream
      * @return the object to configure the combination process
      */
-    public <T1, T2, T3, T4, T5, T6, T7, T8, T9> MultiItemCombine9<T1, T2, T3, T4, T5, T6, T7, T8, T9> streams( // NOSONAR
+    public <T1, T2, T3, T4, T5, T6, T7, T8, T9> MultiItemCombine9<T1, T2, T3, T4, T5, T6, T7, T8, T9> streams(
+            // NOSONAR
             Publisher<? extends T1> a, Publisher<? extends T2> b, Publisher<? extends T3> c, Publisher<? extends T4> d,
             Publisher<? extends T5> e, Publisher<? extends T6> f, Publisher<? extends T7> g, Publisher<? extends T8> h,
             Publisher<? extends T9> i) {
@@ -203,7 +198,16 @@ public class MultiItemCombination {
     }
 
     /**
-     * Combines multiple streams.
+     * Combines the items from multiple streams.
+     * <p>
+     * If you pass no {@code publishers}, the resulting {@link Multi} emits the completion event immediately after subscription.
+     * If you pass a single {@code publisher}, it calls the combination logic for every item from this stream (wrapped in
+     * a list of a single element). The resulting {@link Multi} emits the result from that combination logic.
+     * If you pass multiple {@code publishers}, it calls the combination logic for every group of items (1 per upstream
+     * {@code publisher}) wrapped in a list. The resulting {@link Multi} emits the result of that combination logic.
+     * <p>
+     * As soon as one of the {@code publisher} completes, the combination completes and the completion event is emitted.
+     * If any of the {@code publisher} emits a failure, the failure is passed downstream and the combination stops.
      *
      * @param iterable the iterable containing the streams to combine. Must not be {@code null}
      * @return the object to configure the combination process

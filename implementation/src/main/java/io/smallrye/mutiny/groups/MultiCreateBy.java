@@ -28,7 +28,7 @@ public class MultiCreateBy {
      * Creates a new instance of {@link Multi} by merging several
      * {@link Multi} or {@link org.reactivestreams.Publisher} instances.
      * <p>
-     * The concatenation reads the streams in parallel and emits the items as they come.
+     * The concatenation reads the streams concurrently and emits the items as they come.
      *
      * @return the object to configure the merge
      */

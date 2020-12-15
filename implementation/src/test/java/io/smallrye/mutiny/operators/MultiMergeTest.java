@@ -9,9 +9,54 @@ import org.junit.jupiter.api.Test;
 import io.reactivex.Flowable;
 import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Multi;
+import io.smallrye.mutiny.helpers.spies.MultiOnCancellationSpy;
+import io.smallrye.mutiny.helpers.spies.Spy;
 import io.smallrye.mutiny.helpers.test.AssertSubscriber;
 
 public class MultiMergeTest {
+
+    @Test
+    public void testMergeNothing() {
+        AssertSubscriber<?> subscriber = Multi.createBy().merging().streams()
+                .subscribe()
+                .withSubscriber(new AssertSubscriber<>(100));
+
+        subscriber.assertCompleted()
+                .assertHasNotReceivedAnyItem();
+    }
+
+    @Test
+    public void testMergeOne() {
+        AssertSubscriber<Integer> subscriber = Multi.createBy().merging().streams(Multi.createFrom().items(1, 2, 3))
+                .subscribe()
+                .withSubscriber(new AssertSubscriber<>(100));
+
+        subscriber.assertCompleted()
+                .assertItems(1, 2, 3);
+    }
+
+    @Test
+    public void testMergeOneButEmpty() {
+        AssertSubscriber<?> subscriber = Multi.createBy().merging().streams(Multi.createFrom().empty())
+                .subscribe()
+                .withSubscriber(new AssertSubscriber<>(100));
+
+        subscriber.assertCompleted()
+                .assertHasNotReceivedAnyItem();
+    }
+
+    @Test
+    public void testMergeOneButNever() {
+        MultiOnCancellationSpy<Object> spy = Spy.onCancellation(Multi.createFrom().nothing());
+        AssertSubscriber<?> subscriber = Multi.createBy().merging().streams(spy)
+                .subscribe()
+                .withSubscriber(new AssertSubscriber<>(100));
+
+        subscriber.assertNotTerminated()
+                .cancel();
+
+        assertThat(spy.isCancelled());
+    }
 
     @Test
     public void testMergeOfSeveralMultis() {
