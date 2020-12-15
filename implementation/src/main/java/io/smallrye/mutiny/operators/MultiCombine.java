@@ -19,6 +19,13 @@ public class MultiCombine {
     public static <T> Multi<T> merge(List<Publisher<T>> participants, boolean collectFailures, int requests,
             int concurrency) {
         List<Publisher<T>> candidates = ParameterValidation.doesNotContainNull(participants, "participants");
+
+        if (participants.isEmpty()) {
+            return Multi.createFrom().empty();
+        }
+        if (participants.size() == 1) {
+            return Multi.createFrom().publisher(participants.get(0));
+        }
         if (collectFailures) {
             return Infrastructure.onMultiCreation(new CollectionBasedMulti<>(candidates)
                     .onItem().transformToMulti(Function.identity()).collectFailures().withRequests(requests)

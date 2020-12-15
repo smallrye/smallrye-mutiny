@@ -17,12 +17,64 @@ import java.util.function.Function;
 import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Multi;
+import io.smallrye.mutiny.helpers.spies.MultiOnCancellationSpy;
+import io.smallrye.mutiny.helpers.spies.Spy;
 import io.smallrye.mutiny.helpers.test.AssertSubscriber;
 import io.smallrye.mutiny.subscription.MultiEmitter;
 import io.smallrye.mutiny.tuples.*;
 
 @SuppressWarnings("ConstantConditions")
 public class MultiCombineTest {
+
+    @Test
+    public void testCombiningNothing() {
+        AssertSubscriber<?> subscriber = Multi.createBy().combining().streams(Collections.emptyList())
+                .using(l -> l)
+                .onItem().disjoint()
+                .subscribe().withSubscriber(new AssertSubscriber<>(100));
+
+        subscriber.assertCompleted()
+                .assertHasNotReceivedAnyItem();
+    }
+
+    @Test
+    public void testCombiningOne() {
+        AssertSubscriber<Integer> subscriber = Multi.createBy().combining().streams(
+                Collections.singleton(Multi.createFrom().items(1, 2, 3)))
+                .using(l -> l)
+                .onItem().disjoint()
+                .onItem().castTo(Integer.class)
+                .subscribe()
+                .withSubscriber(new AssertSubscriber<>(100));
+
+        subscriber.assertCompleted()
+                .assertItems(1, 2, 3);
+    }
+
+    @Test
+    public void testCombiningOneButEmpty() {
+        AssertSubscriber<?> subscriber = Multi.createBy().combining().streams(Collections.singleton(Multi.createFrom().empty()))
+                .using(l -> l)
+                .onItem().disjoint()
+                .subscribe()
+                .withSubscriber(new AssertSubscriber<>(100));
+
+        subscriber.assertCompleted()
+                .assertHasNotReceivedAnyItem();
+    }
+
+    @Test
+    public void testMergeOneButNever() {
+        MultiOnCancellationSpy<Object> spy = Spy.onCancellation(Multi.createFrom().nothing());
+        AssertSubscriber<?> subscriber = Multi.createBy().merging().streams(spy)
+                .subscribe()
+                .withSubscriber(new AssertSubscriber<>(100));
+
+        subscriber.assertNotTerminated()
+                .cancel();
+
+        assertThat(spy.isCancelled());
+    }
 
     @Test
     public void combineIterableOfStreamsFollowedByAFlatMap() {

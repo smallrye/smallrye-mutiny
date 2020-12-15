@@ -9,9 +9,54 @@ import org.junit.jupiter.api.Test;
 import io.reactivex.Flowable;
 import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Multi;
+import io.smallrye.mutiny.helpers.spies.MultiOnCancellationSpy;
+import io.smallrye.mutiny.helpers.spies.Spy;
 import io.smallrye.mutiny.helpers.test.AssertSubscriber;
 
 public class MultiConcatTest {
+
+    @Test
+    public void testConcatenatingNothing() {
+        AssertSubscriber<?> subscriber = Multi.createBy().concatenating().streams()
+                .subscribe()
+                .withSubscriber(new AssertSubscriber<>(100));
+
+        subscriber.assertCompleted()
+                .assertHasNotReceivedAnyItem();
+    }
+
+    @Test
+    public void testConcatenatingOne() {
+        AssertSubscriber<Integer> subscriber = Multi.createBy().concatenating().streams(Multi.createFrom().items(1, 2, 3))
+                .subscribe()
+                .withSubscriber(new AssertSubscriber<>(100));
+
+        subscriber.assertCompleted()
+                .assertItems(1, 2, 3);
+    }
+
+    @Test
+    public void testConcatenatingOneButEmpty() {
+        AssertSubscriber<?> subscriber = Multi.createBy().concatenating().streams(Multi.createFrom().empty())
+                .subscribe()
+                .withSubscriber(new AssertSubscriber<>(100));
+
+        subscriber.assertCompleted()
+                .assertHasNotReceivedAnyItem();
+    }
+
+    @Test
+    public void testConcatenatingOneButNever() {
+        MultiOnCancellationSpy<Object> spy = Spy.onCancellation(Multi.createFrom().nothing());
+        AssertSubscriber<?> subscriber = Multi.createBy().concatenating().streams(spy)
+                .subscribe()
+                .withSubscriber(new AssertSubscriber<>(100));
+
+        subscriber.assertNotTerminated()
+                .cancel();
+
+        assertThat(spy.isCancelled());
+    }
 
     @Test
     public void testConcatenationOfSeveralMultis() {
@@ -90,14 +135,7 @@ public class MultiConcatTest {
     }
 
     @Test
-    public void testMergingEmpty() {
-        Multi.createBy().concatenating().streams(Multi.createFrom().empty())
-                .subscribe().withSubscriber(AssertSubscriber.create(1))
-                .assertCompleted().assertHasNotReceivedAnyItem();
-    }
-
-    @Test
-    public void testMergingWithEmpty() {
+    public void testConcatenatingWithEmpty() {
         Multi.createBy().concatenating().streams(Multi.createFrom().empty(), Multi.createFrom().item(2))
                 .subscribe().withSubscriber(AssertSubscriber.create(1))
                 .assertCompleted().assertItems(2);

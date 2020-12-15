@@ -17,7 +17,7 @@ public class MultiItemCombineIterable {
     private boolean collectFailures;
     private boolean latest;
 
-    private Iterable<? extends Publisher<?>> iterable;
+    private final Iterable<? extends Publisher<?>> iterable;
 
     public MultiItemCombineIterable(Iterable<? extends Publisher<?>> iterable) {
         this.iterable = iterable;

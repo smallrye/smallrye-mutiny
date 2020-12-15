@@ -26,10 +26,25 @@ public class MultiConcat {
     /**
      * Creates a new {@link Multi} concatenating the items emitted by the given {@link Multi multis} /
      * {@link Publisher publishers}.
+     * <p>
+     * If you pass no {@code publishers}, the resulting {@link Multi} emits the completion event immediately after subscription.
+     * If you pass a single {@code publisher}, the resulting {@link Multi} emits the events from that {@code publisher}.
+     * If you pass multiple {@code publishers}, the resulting {@link Multi} emits the events from the first {@code publisher}.
+     * When this one emits the completion event, it drops that event and emits the events from the next {@code publisher}
+     * and so on until it reaches the last {@code publisher}. When the last {@code publisher} is consumed, it sends the
+     * completion event.
+     * <p>
+     * If any of the {@code publisher} emits a failure, the failure is passed downstream and the concatenation stops.
+     * This behavior can be changed using {@link #collectFailures()}. In this case, the failures are accumulated and
+     * would be propagated instead of the final completion event. If multiple failures have been collected, the
+     * downstream receives a {@link CompositeException}, otherwise it receives the collected failure.
      *
-     * @param publishers the publishers, must not be empty, must not contain {@code null}
+     * <strong>IMPORTANT:</strong> The order of the {@code publisher} matters.
+     *
+     * @param publishers the publishers, can be empty, must not contain {@code null}
      * @param <T> the type of item
-     * @return the new {@link Multi} emitting the items from the given set of {@link Multi} using a concatenation
+     * @return the new {@link Multi} emitting the items from the given set of {@link Multi} concatenating the
+     *         passed {@code publishers}.
      */
     @SafeVarargs
     public final <T> Multi<T> streams(Publisher<T>... publishers) {
@@ -38,11 +53,26 @@ public class MultiConcat {
 
     /**
      * Creates a new {@link Multi} concatenating the items emitted by the given {@link Multi multis} /
-     * {@link Publisher publishers}..
+     * {@link Publisher publishers}.
+     * <p>
+     * If you pass no {@code publishers}, the resulting {@link Multi} emits the completion event immediately after subscription.
+     * If you pass a single {@code publisher}, the resulting {@link Multi} emits the events from that {@code publisher}.
+     * If you pass multiple {@code publishers}, the resulting {@link Multi} emits the events from the first {@code publisher}.
+     * When this one emits the completion event, it drops that event and emits the events from the second {@code publisher}
+     * and so on until it reaches the last {@code publisher}.
+     * When the last {@code publisher} is consumed, it sends the completion event.
+     * <p>
+     * If any of the {@code publisher} emits a failure, the failure is passed downstream and the concatenation stops.
+     * This behavior can be changed using {@link #collectFailures()}. In this case, the failures are accumulated and
+     * would be propagated instead of the final completion event. If multiple failures have been collected, the
+     * downstream receives a {@link CompositeException}, otherwise it receives the collected failure.
      *
-     * @param iterable the publishers, must not be empty, must not contain {@code null}, must not be {@code null}
+     * <strong>IMPORTANT:</strong> The order of the {@code publisher} matters.
+     *
+     * @param iterable the publishers, can be empty, must not contain {@code null}, must not be {@code null}
      * @param <T> the type of item
-     * @return the new {@link Multi} emitting the items from the given set of {@link Multi} using a concatenation
+     * @return the new {@link Multi} emitting the items from the given set of {@link Multi} concatenating the
+     *         passed {@code publishers}.
      */
     public <T> Multi<T> streams(Iterable<? extends Publisher<T>> iterable) {
         List<Publisher<T>> list = new ArrayList<>();
@@ -52,7 +82,7 @@ public class MultiConcat {
     }
 
     /**
-     * Indicates that the concatenation process should not propagate the first receive failure, but collect them until
+     * Indicates that the concatenation process should not propagate the first received failure, but collect them until
      * all the items from all (non-failing) participants have been emitted. Then, the failures are propagated downstream
      * (as a {@link CompositeException} if several failures have been received).
      *
