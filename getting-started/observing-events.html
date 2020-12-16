@@ -1,0 +1,462 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <title>SmallRye Mutiny</title>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="SmallRye Mutiny!">
+
+    <link rel="canonical" href="/getting-started/observing-events.html">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.3.1/styles/default.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/components/icon.min.css" integrity="sha512-8Tb+T7SKUFQWOPIQCaLDWWe1K/SY8hvHl7brOH8Nz5z1VT8fnf8B+9neoUzmFY3OzkWMMs3OjrwZALgB1oXFBg==" crossorigin="anonymous" />
+    <link rel="shortcut icon" type="image/png" href="/smallrye-mutiny/assets/images/favicon.ico">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">
+    <link rel="stylesheet" href="/smallrye-mutiny/assets/css/main.css" />
+    <link rel="stylesheet" href="https://maxst.icons8.com/vue-static/landings/line-awesome/font-awesome-line-awesome/css/all.min.css">
+    <link rel="stylesheet" href="https://maxst.icons8.com/vue-static/landings/line-awesome/line-awesome/1.3.0/css/line-awesome.min.css">
+</head>
+
+<body>
+    <div class="container-fluid global-container">
+        
+
+
+
+
+
+<header class="header masthead mb-auto">
+    <div class="container">
+        <nav class="navbar navbar-dark navbar-expand-lg">
+            <a class="navbar-brand brand mutiny" href="/smallrye-mutiny/index.html"><strong>Mutiny!</strong></a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#toggler"
+                    aria-controls="toggler" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="toggler">
+                <ul class="navbar-nav ml-auto mr-0 mt-2 mt-lg-0">
+                    <li class="nav-item"><a class="nav-link " href="/smallrye-mutiny/index.html">Home</a></li>
+                    <li class="nav-item"><a class="nav-link " href="/smallrye-mutiny/pages/philosophy">Philosophy</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="/smallrye-mutiny/getting-started/download">Getting started</a></li>
+                    <li class="nav-item"><a class="nav-link " href="/smallrye-mutiny/guides">Guides</a></li>
+                    <li class="nav-item"><a href="https://github.com/smallrye/smallrye-mutiny" target="_blank" title="Github"><i
+                            class="lab la-github la-2x"></i></a></li>
+                    <li class="nav-item"><a href="https://groups.google.com/d/forum/smallrye" target="_blank" title="SmallRye Google Group"><i
+                            class="las la-at la-2x"></i></a></li>
+                    <li class="nav-item"><a href="https://stackoverflow.com/questions/tagged/mutiny" target="_blank"
+                                            title="Stack Overflow"><i
+                            class="lab la-stack-overflow la-2x"></i></a></li>
+                </ul>
+            </div>
+        </nav>
+    </div>
+</header>
+        <main>
+            <div class="content">
+                
+
+    
+    
+        
+        
+        
+    
+        
+        
+        
+    
+        
+        
+        
+    
+        
+        
+        
+    
+        
+        
+        
+    
+        
+            
+            
+
+    
+        
+
+
+
+<section class="hero gs">
+    <div class="hero-main container">
+        <div class="row">
+            <div class="hero-left col-12">
+                <div class="hero-slogan">
+                    <h1 class="hero-name">Observing events</h1>
+                </div>
+                <div class="hero-desc">
+                    Learn how to observes the events emitted by Uni and Multi instances.
+                </div>
+                <div class="hero-buttons">
+                    
+                    <a href="/smallrye-mutiny/getting-started/creating-multis" class="getting-started-nav btn btn-rounded button button-dark button-rounded">
+                        <i class="las la-arrow-left left"></i>&nbsp;Creating Multis</a>
+                    
+                    
+                    <a href="/smallrye-mutiny/getting-started/transforming-items" class="getting-started-nav btn btn-rounded button button-dark button-rounded">
+                        Transforming items&nbsp;<i class="las la-arrow-right"></i></a>
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="container page-content">
+    <div class="row">
+        <div class="col-md-9 content">
+            <div class="sect1">
+<h2 id="events"><a class="anchor" href="#events"></a>Events</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p><code>Uni</code> and <code>Multi</code> emit <em>events</em>.
+Your code is going to observe and process these events.</p>
+</div>
+<div class="paragraph">
+<p>Most of the time, your code is only interested in item and failure events.
+But there are other kinds of events such as cancellation, request, completion, and so on:</p>
+</div>
+<table class="tableblock frame-all grid-all stripes-even stretch">
+<colgroup>
+<col style="width: 17.647%;">
+<col style="width: 17.647%;">
+<col style="width: 29.4117%;">
+<col style="width: 35.2943%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Event</th>
+<th class="tableblock halign-left valign-top">Uni / Multi</th>
+<th class="tableblock halign-left valign-top">Direction</th>
+<th class="tableblock halign-left valign-top">Note</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>item</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Uni and Multi</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">upstream &#8594; downstream</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The upstream sent an item.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>failure</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Uni and Multi</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">upstream &#8594; downstream</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The upstream failed.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>completion</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Multi only</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">upstream &#8594; downstream</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The upstream completed.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>subscribe</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Uni and Multi</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">downstream &#8594; upstream</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">A downstream subscriber is interested in the data.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>subscription</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Uni and Multi</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">upstream &#8594; downstream</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Even happening after a <code>subscribe</code> event to indicate that the upstream acknowledged the subscription.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>cancellation</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Uni and Multi</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">downstream &#8594; upstream</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">A downstream subscriber does not want any more event</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>overflow</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Multi only</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">upstream &#8594; downstream</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The upstream has emitted more than the downstream can handle</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>request</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Multi only</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">downstream &#8594; upstream</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The downstream indicates its capacity to handle <em>n</em> items</p></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph">
+<p>It’s not rare that you need to look at these various events to understand better what’s going on or implement specific side effects.
+For example, you may need to close a resource after a completion event or log a message on failure or cancellation.</p>
+</div>
+<div class="paragraph">
+<p>For each kind of event, there is an associated group providing the methods to handle that specific event: <code>onItem()</code>, <code>onFailure()</code>, <code>onCompletion()</code> and so on.
+These groups provide two methods to <em>peek</em> at the various events without impacting its distribution: <code>invoke(&#8230;&#8203;)</code> and <code>call(&#8230;&#8203;)</code>.
+It does not transform the received event; it notifies you that something happened and let you react.
+Once this <em>reaction</em> completes, the event is propagated downstream or upstream depending on the direction of the event.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="the-invoke-method"><a class="anchor" href="#the-invoke-method"></a>The invoke method</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The invoke method is synchronous and the passed callback does not return anything.
+Mutiny invokes the configured callback when the observed stream dispatches the event:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Uni&lt;String&gt; u = uni.onItem()
+    .invoke(i -&gt; System.out.println("Received item: " + i));
+Multi&lt;String&gt; m = multi.onItem()
+    .invoke(i -&gt; System.out.println("Received item: " + i));</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>As said above, <code>invoke</code> is synchronous.
+Mutiny invokes the callback and propagates the event downstream when the callback returns.
+It blocks the dispatching.</p>
+</div>
+<div class="imageblock reduce">
+<div class="content">
+<img src="/smallrye-mutiny/assets/images/event-invoke.png" alt="event invoke">
+</div>
+</div>
+<div class="paragraph">
+<p>Of course, we highly recommend you not to block.</p>
+</div>
+<div class="paragraph">
+<p>The following snippets show how you can log the different types of events.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">multi
+    .onSubscribe().invoke(() -&gt; System.out.println("⬇️ Subscribed"))
+    .onItem().invoke(i -&gt; System.out.println("⬇️ Received item: " + i))
+    .onFailure().invoke(f -&gt; System.out.println("⬇️ Failed with " + f))
+    .onCompletion().invoke(() -&gt; System.out.println("⬇️ Completed"))
+    .onCancellation().invoke(() -&gt; System.out.println("⬆️ Cancelled"))
+    .onRequest().invoke(l -&gt; System.out.println("⬆️ Requested: " + l));</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The arrows from the previous code snippet indicate if the event comes from the upstream (source) or downstream (consumer) (see the table above for more details).
+The <code>invoke</code> method does not change the event, except in one case.
+If the callback throws an exception, the downstream does not get the actual event but get a failure event instead.</p>
+</div>
+<div class="paragraph">
+<p>When observing the failure event, if the callback throws an exception, Mutiny propagates a <code>CompositeException</code> aggregating the original failure and the callback failure.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="the-call-method"><a class="anchor" href="#the-call-method"></a>The call method</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Unlike <code>invoke</code>, <code>call</code> is asynchronous, and the callback returns a <code>Uni&lt;?&gt;</code> object.</p>
+</div>
+<div class="paragraph">
+<p><code>call</code> is often used when you need to implement asynchronous side-effects, such as closing resources.</p>
+</div>
+<div class="imageblock reduce">
+<div class="content">
+<img src="/smallrye-mutiny/assets/images/event-call.png" alt="event call">
+</div>
+</div>
+<div class="paragraph">
+<p>Mutiny does not dispatch the original event downstream until the Uni returned by the callback emits an item:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">multi
+    .onItem().call(i -&gt;
+        Uni.createFrom().voidItem()
+            .onItem().delayIt().by(Duration.ofSeconds(1)
+    )
+);</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>As shown in the previous snippet, you can use this approach to delay items.
+But, the primary use case is about completing asynchronous actions such as calling an asynchronous <code>close</code> method on a resource:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">multi
+    .onCompletion().call(() -&gt; resource.close());</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Under the hood, Mutiny gets the <code>Uni</code> (by invoking the callback) and subscribes to it.
+It observes the item or failure event from that Uni.
+It discards the item value as only the emission matters in this case.</p>
+</div>
+<div class="paragraph">
+<p>If the callback throws an exception or the produced <code>Uni</code> produces a failure, Mutiny propagates that failure (or a <code>CompositeException</code>) downstream, replacing the original event.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="summary"><a class="anchor" href="#summary"></a>Summary</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The <code>invoke</code> and <code>call</code> methods are handy when you need to observe a <code>Uni</code> or a <code>Multi</code> without changing the transiting events.
+Use <code>invoke</code> for implementing synchronous side-effects or logging events.
+The asynchronous nature of <code>call</code> makes it perfect for implementing asynchronous side-effects, such as closing resources, flushing data, delay items, and so on.</p>
+</div>
+<div class="paragraph">
+<p>The following table highlights the key differences:</p>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 33.3333%;">
+<col style="width: 33.3333%;">
+<col style="width: 33.3334%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top"></th>
+<th class="tableblock halign-left valign-top"><code>invoke</code></th>
+<th class="tableblock halign-left valign-top"><code>call</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>Nature</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">synchronous</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">asynchronous</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>Return type</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>void</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Uni&lt;?&gt;</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><strong>Main Use cases</strong></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">logging, synchronous side-effect</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">closing resources, flushing data</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+        </div>
+        <div class="col-md-3 toc-container d-sm-none d-md-block">
+            <nav class="page-toc toc nav sticky-top" id="toc">
+                
+                <h4>Table of Content</h4>
+                <ul class="sectlevel1">
+<li><a href="#events">Events</a></li>
+<li><a href="#the-invoke-method">The invoke method</a></li>
+<li><a href="#the-call-method">The call method</a></li>
+<li><a href="#summary">Summary</a></li>
+</ul>
+                
+
+                
+            </nav>
+        </div>
+    </div>
+</div>
+
+
+
+<div class="footer-buttons gs ">
+    <div class="container">
+        <div class="row">
+                
+            <div class="col align-self-start">
+                <a href="/smallrye-mutiny/getting-started/creating-multis" class="btn btn-rounded button button-dark button-rounded">
+                    <i class="las la-arrow-left left"></i>&nbsp;Creating Multis</a>
+            </div>
+                
+
+            <div class="col align-self-center text-center">
+                <a href="/smallrye-mutiny/guides" class="btn btn-rounded button button-dark button-rounded">All Guides</a>
+            </div>
+
+            <div class="col align-self-end">
+                
+                <a href="/smallrye-mutiny/getting-started/transforming-items" class="btn btn-rounded button button-dark button-rounded float-right">
+                    Transforming items&nbsp;<i class="las la-arrow-right"></i></a>
+                
+            </div>
+        </div>
+
+    </div>
+</div>
+            </div>
+        </main>
+        <footer class="footer">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-9 sep-right">
+                <p>
+                    SmallRye Mutiny is an open source project. All the code from this project is available under the <a href="https://raw.githubusercontent.com/smallrye/smallrye-mutiny/master/LICENSE">Apache Software License 2.0</a>.
+                </p>
+                <p>
+                    This website was built with <a href="https://jekyllrb.com/">Jekyll</a>, is hosted on Github Pages and is completely open source.
+                    You can <a href="https://github.com/smallrye/smallrye-mutiny">fork it</a> and propose enhancements through pull-requests.
+                </p>
+                <p>
+                    Something's wrong? Open an <a href="https://github.com/smallrye/smallrye-mutiny/issues">issue</a>.
+                </p>
+            </div>
+            <div class="col-lg-3">
+                <p>
+                    Sponsored by
+                    <span class="redhat-logo">
+                        <a href="https://www.redhat.com/" target="_blank"><img src="/smallrye-mutiny/assets/images/redhat_reversed.svg"></a>
+                    </span>
+                </p>
+                <p>
+                    <i class="fab fa-creative-commons"></i><i class="fab fa-creative-commons-by"></i> <a href="https://creativecommons.org/licenses/by/3.0/" target="_blank">CC by 3.0</a>
+                    |
+                    <a href="https://www.redhat.com/en/about/privacy-policy">Privacy Policy</a>
+                </p>
+                <p>
+                     Site last generated: Dec 16, 2020
+                </p>
+            </div>
+        </div>
+    </div>
+    <!-- Javascript-->
+    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.3.1/highlight.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ho+j7jyWK8fNQe+A12Hb8AhRq26LrZ/JpcUGGOn+Y7RsweNrtN/tE3MoK7ZeZDyx" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/gh/cferdinandi/gumshoe@4/dist/gumshoe.polyfills.min.js"></script>
+    <script src="/smallrye-mutiny/assets/js/hl.js" type="text/javascript"></script>
+    <script src="/smallrye-mutiny/assets/js/scrollspy.js" type="text/javascript"></script>
+
+    <script>
+        $(document).ready(function(){
+            $("#search").on("keyup", function() {
+                var value = $(this).val().toLowerCase();
+                $(".guide").filter(function() {
+                    $(this).toggle($(this).attr("data-search").toLowerCase().indexOf(value) > -1)
+                });
+            });
+        });
+    </script>
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-FPQ70JF1EY"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'G-FPQ70JF1EY');
+    </script>
+</footer>
+    </div>
+</body>
+
+</html>
