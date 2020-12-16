@@ -42,6 +42,14 @@ jobs:
 
           .build/deploy.sh ${{ github.event.deployment.environment }}
 
+      - name: 'Setup Ruby'
+        uses: actions/setup-ruby@v1
+        with:
+          ruby-version: '2.6'
+
+      - name: 'Deploy the website'
+        run: .build/deploy-site.sh
+
       - name: update deploy status
         if: always()
         uses: unacast/actions-github-deployment-status@0.2

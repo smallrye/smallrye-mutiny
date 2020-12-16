@@ -65,9 +65,6 @@ deploy_release() {
 
     echo "Deploying release artifacts"
     mvn -B clean deploy -DskipTests -Prelease -s maven-settings.xml
-
-    echo "Deploying documentation"
-    .build/deploy-site.sh
 }
 
 init_git
