@@ -103,7 +103,7 @@ elif [[ ${TARGET} == "release" ]]; then
     sdk use java 11.0.9.hs-adpt
     compatibility_clear
 
-    sdk use java 8.0.275.hs-adp
+    sdk use java 8.0.275.hs-adpt
     # =--------------------------
 else
     echo "Unknown environment: ${TARGET}"
