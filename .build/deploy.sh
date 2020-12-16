@@ -87,6 +87,7 @@ elif [[ ${TARGET} == "release" ]]; then
     # =--------------------------
     echo "Install sdkman JDKs"
     source ~/.sdkman/bin/sdkman-init.sh
+    sed -ie 's/sdkman_auto_answer=false/sdkman_auto_answer=true/g' ~/.sdkman/etc/config
     sdk install java 11.0.9.hs-adpt
     sdk install java 8.0.275.hs-adpt
 
