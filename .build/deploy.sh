@@ -87,6 +87,10 @@ elif [[ ${TARGET} == "release" ]]; then
     compatibility_extract
     .build/post-release.kts "${GITHUB_TOKEN}"
 
+    # WE CAN DO BETTER THAN THIS
+    # The jbang script uses Java 11 APIs while the build is on Java 8
+    sdk install java 11.0.9.hs-adpt
+    sdk use java 11.0.9.hs-adpt
     compatibility_clear
 else
     echo "Unknown environment: ${TARGET}"
