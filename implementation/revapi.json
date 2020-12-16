@@ -1,100 +1,34 @@
-[
-  {
-    "extension": "revapi.java",
-    "id": "java",
-    "configuration": {
-      "missing-classes": {
-        "behavior": "report",
-        "ignoreMissingAnnotations": false
-      },
-      "filter": {
-        "packages": {
-          "regex": true,
-          "include": [
-            "io\\.smallrye\\.mutiny\\..*"
-          ],
-          "exclude": [
-            "io\\.smallrye\\.mutiny\\.operators\\.*",
-            "io\\.smallrye\\.mutiny\\.operators\\..*"
-          ]
-        }
+[ {
+  "extension" : "revapi.java",
+  "id" : "java",
+  "configuration" : {
+    "missing-classes" : {
+      "behavior" : "report",
+      "ignoreMissingAnnotations" : false
+    },
+    "filter" : {
+      "packages" : {
+        "regex" : true,
+        "include" : [ "io\\.smallrye\\.mutiny\\..*" ],
+        "exclude" : [ "io\\.smallrye\\.mutiny\\.operators\\.*", "io\\.smallrye\\.mutiny\\.operators\\..*" ]
       }
     }
-  },
-
-  {
-    "extension": "revapi.differences",
-    "id": "breaking-changes",
-    "configuration": {
-      "criticality": "highlight",
-      "differences": [
-        {
-          "code": "java.method.returnTypeChanged",
-          "old": "method <T> io.smallrye.mutiny.helpers.Subscriptions.SingleItemSubscription<T> io.smallrye.mutiny.helpers.Subscriptions::single(org.reactivestreams.Subscriber<T>, T)",
-          "new": "method <T> org.reactivestreams.Subscription io.smallrye.mutiny.helpers.Subscriptions::single(org.reactivestreams.Subscriber<T>, T)",
-          "justification": "SingleItemSubscription should not be exposed, and should be used as a regular Subscription"
-        },
-        {
-          "code": "java.method.parameterTypeChanged",
-          "old": "parameter void io.smallrye.mutiny.helpers.spies.UniGlobalSpy<T>::subscribing(===io.smallrye.mutiny.operators.UniSerializedSubscriber<? super T>===)",
-          "new": "parameter void io.smallrye.mutiny.helpers.spies.UniGlobalSpy<T>::subscribing(===io.smallrye.mutiny.subscription.UniSubscriber<? super T>===)",
-          "justification": "subscribing(subscriber) is a protected method that is not used by regular consumers of the Mutiny public API"
-        },
-        {
-          "code": "java.method.parameterTypeChanged",
-          "old": "parameter void io.smallrye.mutiny.helpers.spies.UniOnCancellationSpy<T>::subscribing(===io.smallrye.mutiny.operators.UniSerializedSubscriber<? super T>===)",
-          "new": "parameter void io.smallrye.mutiny.helpers.spies.UniOnCancellationSpy<T>::subscribing(===io.smallrye.mutiny.subscription.UniSubscriber<? super T>===)",
-          "justification": "subscribing(subscriber) is a protected method that is not used by regular consumers of the Mutiny public API"
-        },
-        {
-          "code": "java.method.parameterTypeChanged",
-          "old": "parameter void io.smallrye.mutiny.helpers.spies.UniOnFailureSpy<T>::subscribing(===io.smallrye.mutiny.operators.UniSerializedSubscriber<? super T>===)",
-          "new": "parameter void io.smallrye.mutiny.helpers.spies.UniOnFailureSpy<T>::subscribing(===io.smallrye.mutiny.subscription.UniSubscriber<? super T>===)",
-          "justification": "subscribing(subscriber) is a protected method that is not used by regular consumers of the Mutiny public API"
-        },
-        {
-          "code": "java.method.parameterTypeChanged",
-          "old": "parameter void io.smallrye.mutiny.helpers.spies.UniOnItemOrFailureSpy<T>::subscribing(===io.smallrye.mutiny.operators.UniSerializedSubscriber<? super T>===)",
-          "new": "parameter void io.smallrye.mutiny.helpers.spies.UniOnItemOrFailureSpy<T>::subscribing(===io.smallrye.mutiny.subscription.UniSubscriber<? super T>===)",
-          "justification": "subscribing(subscriber) is a protected method that is not used by regular consumers of the Mutiny public API"
-        },
-        {
-          "code": "java.method.parameterTypeChanged",
-          "old": "parameter void io.smallrye.mutiny.helpers.spies.UniOnItemSpy<T>::subscribing(===io.smallrye.mutiny.operators.UniSerializedSubscriber<? super T>===)",
-          "new": "parameter void io.smallrye.mutiny.helpers.spies.UniOnItemSpy<T>::subscribing(===io.smallrye.mutiny.subscription.UniSubscriber<? super T>===)",
-          "justification": "subscribing(subscriber) is a protected method that is not used by regular consumers of the Mutiny public API"
-        },
-        {
-          "code": "java.method.parameterTypeChanged",
-          "old": "parameter void io.smallrye.mutiny.helpers.spies.UniOnSubscribeSpy<T>::subscribing(===io.smallrye.mutiny.operators.UniSerializedSubscriber<? super T>===)",
-          "new": "parameter void io.smallrye.mutiny.helpers.spies.UniOnSubscribeSpy<T>::subscribing(===io.smallrye.mutiny.subscription.UniSubscriber<? super T>===)",
-          "justification": "subscribing(subscriber) is a protected method that is not used by regular consumers of the Mutiny public API"
-        },
-        {
-          "code": "java.method.parameterTypeChanged",
-          "old": "parameter void io.smallrye.mutiny.helpers.spies.UniOnTerminationSpy<T>::subscribing(===io.smallrye.mutiny.operators.UniSerializedSubscriber<? super T>===)",
-          "new": "parameter void io.smallrye.mutiny.helpers.spies.UniOnTerminationSpy<T>::subscribing(===io.smallrye.mutiny.subscription.UniSubscriber<? super T>===)",
-          "justification": "subscribing(subscriber) is a protected method that is not used by regular consumers of the Mutiny public API"
-        },
-        {
-          "code": "java.method.parameterTypeChanged",
-          "old": "parameter void io.smallrye.mutiny.operators.AbstractUni<T>::subscribing(===io.smallrye.mutiny.operators.UniSerializedSubscriber<? super T>===)",
-          "new": "parameter void io.smallrye.mutiny.operators.AbstractUni<T>::subscribing(===io.smallrye.mutiny.subscription.UniSubscriber<? super T>===)",
-          "justification": "subscribing(subscriber) is a protected method that is not used by regular consumers of the Mutiny public API"
-        }
-      ]
-    }
-  },
-
-  {
-    "extension": "revapi.reporter.json",
-    "configuration": {
-      "minSeverity": "POTENTIALLY_BREAKING",
-      "minCriticality": "documented",
-      "output": "target/compatibility.json",
-      "indent": true,
-      "append": false,
-      "keepEmptyFile": true
-    }
   }
-]
+}, {
+  "extension" : "revapi.differences",
+  "id" : "breaking-changes",
+  "configuration" : {
+    "criticality" : "highlight",
+    "differences" : [ ]
+  }
+}, {
+  "extension" : "revapi.reporter.json",
+  "configuration" : {
+    "minSeverity" : "POTENTIALLY_BREAKING",
+    "minCriticality" : "documented",
+    "output" : "target/compatibility.json",
+    "indent" : true,
+    "append" : false,
+    "keepEmptyFile" : true
+  }
+} ]
