@@ -55,6 +55,9 @@ deploy_release() {
     mvn -B versions:set -DnewVersion="${RELEASE_VERSION}" -DgenerateBackupPoms=false -s maven-settings.xml
     mvn -B clean verify -DskipTests -Prelease -s maven-settings.xml
 
+    echo "Update website version to ${RELEASE_VERSION}"
+    sed -ie "s/mutiny_version: .*/mutiny_version: ${RELEASE_VERSION}/g" documentation/src/main/jekyll/_data/versions.yml
+
     git commit -am "[RELEASE] - Bump version to ${RELEASE_VERSION}"
     git tag "${RELEASE_VERSION}"
     echo "Pushing tag to origin"
