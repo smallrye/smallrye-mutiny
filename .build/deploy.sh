@@ -83,23 +83,27 @@ elif [[ ${TARGET} == "release" ]]; then
 
     deploy_release
 
-    echo "Executing post-release"
-    compatibility_extract
-    .build/post-release.kts "${GITHUB_TOKEN}"
-
-    # WE CAN DO BETTER THAN THIS
-    # The jbang script uses Java 11 APIs while the build is on Java 8
-    # YES IT'S DIRTY AND WILL BE FIXED LATER
+    # FIXME This is dirty, we need to revamp the CI https://github.com/smallrye/smallrye-mutiny/issues/404
+    # =--------------------------
+    echo "Install sdkman JDKs"
     source ~/.sdkman/bin/sdkman-init.sh
     sdk install java 11.0.9.hs-adpt
-    sdk use java 11.0.9.hs-adpt
-    export JAVA_HOME=~/.sdkman/candidates/java/11.0.9.hs-adpt
-    export PATH=$JAVA_HOME/bin:$PATH
-    compatibility_clear
     sdk install java 8.0.275.hs-adpt
+
+    echo "Run compatibility_extract"
+    sdk use java 11.0.9.hs-adpt
+    compatibility_extract
+
     sdk use java 8.0.275.hs-adpt
-    export JAVA_HOME=~/.sdkman/candidates/java/8.0.275.hs-adpt
-    export PATH=$JAVA_HOME/bin:$PATH
+    echo "Executing post-release"
+    .build/post-release.kts "${GITHUB_TOKEN}"
+
+    echo "Run compatibility_clear"
+    sdk use java 11.0.9.hs-adpt
+    compatibility_clear
+
+    sdk use java 8.0.275.hs-adp
+    # =--------------------------
 else
     echo "Unknown environment: ${TARGET}"
 fi
