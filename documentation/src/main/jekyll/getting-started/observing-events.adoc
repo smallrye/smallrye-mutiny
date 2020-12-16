@@ -5,7 +5,7 @@
 
 == Events
 
-`Uni` and `Multi` emits _events_.
+`Uni` and `Multi` emit _events_.
 Your code is going to observe and process these events.
 
 Most of the time, your code is only interested in item and failure events.
