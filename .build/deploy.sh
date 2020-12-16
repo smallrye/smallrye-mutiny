@@ -89,9 +89,17 @@ elif [[ ${TARGET} == "release" ]]; then
 
     # WE CAN DO BETTER THAN THIS
     # The jbang script uses Java 11 APIs while the build is on Java 8
+    # YES IT'S DIRTY AND WILL BE FIXED LATER
+    source ~/.sdkman/bin/sdkman-init.sh
     sdk install java 11.0.9.hs-adpt
     sdk use java 11.0.9.hs-adpt
+    export JAVA_HOME=~/.sdkman/candidates/java/11.0.9.hs-adpt
+    export PATH=$JAVA_HOME/bin:$PATH
     compatibility_clear
+    sdk install java 8.0.275.hs-adpt
+    sdk use java 8.0.275.hs-adpt
+    export JAVA_HOME=~/.sdkman/candidates/java/8.0.275.hs-adpt
+    export PATH=$JAVA_HOME/bin:$PATH
 else
     echo "Unknown environment: ${TARGET}"
 fi
