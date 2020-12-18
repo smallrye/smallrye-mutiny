@@ -29,7 +29,8 @@ compatibility_extract() {
 compatibility_clear() {
   echo "Clearing difference justifications"
   jbang .build/CompatibilityUtils.java clear
-  git commit -a -m "[POST-RELEASE] - Clearing breaking change justifications"
+  git add -A
+  git commit -m "[POST-RELEASE] - Clearing breaking change justifications"
   git push origin master
 }
 
@@ -67,44 +68,44 @@ deploy_release() {
     mvn -B clean deploy -DskipTests -Prelease -s maven-settings.xml
 }
 
+# -------- SCRIPT START HERE -----------------
+
 init_git
 init_gpg
 
-export EXTRA_ARGS=""
+export EXTRA_PRE_ARGS=""
+export EXTRA_POST_ARGS=""
 if [[ ${MICRO_RELEASE} == "true" ]]; then
-  EXTRA_ARGS="--micro"
+  EXTRA_PRE_ARGS="--micro"
+fi
+
+if [[ ! -z "${USER_NAME}" ]]; then
+  EXTRA_PRE_ARGS="${EXTRA_PRE_ARGS} --username=${USER_NAME}"
+  EXTRA_POST_ARGS="--username=${USER_NAME}"
+fi
+
+if [[ ! -z "${RELEASE_VERSION}" ]]; then
+  EXTRA_PRE_ARGS="${EXTRA_PRE_ARGS} --release-version=${RELEASE_VERSION}"
 fi
 
 if [[ ${TARGET} == "snapshot" ]]; then
     deploy_snapshot
 elif [[ ${TARGET} == "release" ]]; then
-    echo "Checking release prerequisites with ${EXTRA_ARGS}"
-    .build/pre-release.kts "${GITHUB_TOKEN}" "${EXTRA_ARGS}"
+    jbang .build/PreRelease.java --token="${GITHUB_TOKEN}" "${EXTRA_PRE_ARGS}"
+
+    export RELEASE_VERSION=""
+    if [ -f /tmp/release-version ]; then
+      RELEASE_VERSION=$(cat /tmp/release-version)
+    else
+        echo "'/tmp/release-version' expected after pre-release"
+        exit 1
+    fi
 
     deploy_release
 
-    # FIXME This is dirty, we need to revamp the CI https://github.com/smallrye/smallrye-mutiny/issues/404
-    # =--------------------------
-    echo "Install sdkman JDKs"
-    source ~/.sdkman/bin/sdkman-init.sh
-    sed -ie 's/sdkman_auto_answer=false/sdkman_auto_answer=true/g' ~/.sdkman/etc/config
-    sdk install java 11.0.9.hs-adpt
-    sdk install java 8.0.275.hs-adpt
-
-    echo "Run compatibility_extract"
-    sdk use java 11.0.9.hs-adpt
     compatibility_extract
-
-    sdk use java 8.0.275.hs-adpt
-    echo "Executing post-release"
-    .build/post-release.kts "${GITHUB_TOKEN}"
-
-    echo "Run compatibility_clear"
-    sdk use java 11.0.9.hs-adpt
+    jbang .build/PostRelease.java --token="${GITHUB_TOKEN}" --release-version="${RELEASE_VERSION}" "${EXTRA_POST_ARGS}"
     compatibility_clear
-
-    sdk use java 8.0.275.hs-adpt
-    # =--------------------------
 else
     echo "Unknown environment: ${TARGET}"
 fi

@@ -14,16 +14,18 @@ jobs:
         with:
           ref: 'master'
           token: ${{ secrets.GITHUB_API_TOKEN }}
-      - name: Install JDK 1.8
+      - name: Install JDK 11
         uses: AdoptOpenJDK/install-jdk@v1
         with:
-          version: 8
+          version: 11
 
       - name: 'Run deployment for ${{ github.event.deployment.environment }}'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_API_TOKEN }}
           SECRET_FILES_PASSPHRASE: ${{ secrets.SECRET_FILES_PASSPHRASE }}
           MICRO_RELEASE: ${{ github.event.deployment.payload.micro }}
+          RELEASE_VERSION: ${{ github.event.deployment.payload.release-version }}
+          USER_NAME: ${{ github.event.deployment.payload.username }}
         run: |
           sudo apt-get update -o Dir::Etc::sourcelist="sources.list" \
             -o Dir::Etc::sourceparts="-" -o APT::Get::List-Cleanup="0"
@@ -32,8 +34,6 @@ jobs:
           echo Installing SDKMAN
           curl -s "https://get.sdkman.io" | bash
           source ~/.sdkman/bin/sdkman-init.sh && \
-            sdk install kotlin 1.3.61 && \
-            sdk install kscript 2.9.0 && \
             sdk install jbang
 
           chmod +x .build/deploy.sh .build/decrypt-secrets.sh

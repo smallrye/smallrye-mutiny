@@ -6,7 +6,7 @@ echo "🍺 Site generated in 'target/_site'"
 
 echo "🚧 Cloning web site in target/site"
 cd target || exit
-git clone -b gh-pages "https://cescoffier:${GITHUB_TOKEN}@github.com/smallrye/smallrye-mutiny.git" site
+git clone -b gh-pages "https://${GITHUB_ACTOR:-cescoffier}:${GITHUB_TOKEN}@github.com/smallrye/smallrye-mutiny.git" site
 echo "🚧 Copy content"
 # shellcheck disable=SC2216
 rm -rf site/*
