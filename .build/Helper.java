@@ -12,19 +12,19 @@ import java.util.function.Supplier;
 public class Helper {
 
     public static void info(String msg, Object... params) {
-        System.out.println("\uD83D\uDCAC   " + String.format(msg, params));
+        System.out.println("[INFO] " + String.format(msg, params));
     }
 
     public static void completed(String msg, Object... params) {
-        System.out.println("\uD83C\uDF7A   " + String.format(msg, params));
+        System.out.println("[DONE] " + String.format(msg, params));
     }
 
     public static void success(String msg, Object... params) {
-        System.out.println("\uD83C\uDD97   " + String.format(msg, params));
+        System.out.println("[WARN] " + String.format(msg, params));
     }
 
     public static void warn(String msg, Object... params) {
-        System.out.println("⚠️️   " + String.format(msg, params));
+        System.out.println("[WARN] " + String.format(msg, params));
     }
 
     public static void fail(String msg, Object... params) {
@@ -32,7 +32,7 @@ public class Helper {
     }
 
     public static void fail(String msg, int code) {
-        System.out.println("☠️   " + msg);
+        System.out.println("[FAIL] " + msg);
         System.exit(code);
     }
 
