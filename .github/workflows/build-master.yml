@@ -14,9 +14,9 @@ jobs:
     strategy:
       matrix:
         java: [
-        {'version': '8', 'source': 'releases'},
-        {'version': '11', 'source': 'releases'},
-        {'version': '14', 'source': 'releases'}
+          {'version': '8', 'source': 'releases'},
+          {'version': '11', 'source': 'releases'},
+          {'version': '14', 'source': 'releases'}
         ]
     name: Build with Java ${{ matrix.java.version }} (OpenJDK)
     steps:
@@ -48,6 +48,27 @@ jobs:
           architecture: x64
       - name: Build with Maven
         run: mvn -B clean verify
+
+  snapshot:
+    needs: build
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/cache@v2
+        with:
+          path: ~/.m2/repository
+          key: maven-11
+      - uses: actions/checkout@v2
+      - name: Install JDK 11
+        uses: AdoptOpenJDK/install-jdk@v1
+        with:
+          version: 11
+      - name: Deploy snapshots
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          chmod +x .build/deploy.sh .build/decrypt-secrets.sh
+          .build/decrypt-secrets.sh
+          .build/deploy.sh snapshot
 
   quality:
     needs: build
