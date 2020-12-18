@@ -88,6 +88,9 @@
         <revapi-reporter-text.version>0.12.1</revapi-reporter-text.version>
 
         <revapi.skip>true</revapi.skip>
+
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
     </properties>
 
     <dependencyManagement>
