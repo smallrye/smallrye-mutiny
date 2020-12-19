@@ -66,9 +66,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          chmod +x .build/deploy.sh .build/decrypt-secrets.sh
           .build/decrypt-secrets.sh
-          .build/deploy.sh snapshot
+          .build/deploy-snapshot.sh
 
   quality:
     needs: build

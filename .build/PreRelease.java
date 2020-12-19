@@ -20,7 +20,7 @@ import static helpers.Helper.*;
  * - the milestone has no opened issues
  * - the tag does not exist
  *
- * Run with `./PreRelease.java --token=GITHUB_TOKEN [--username=cescoffier] [--micro] [--release-version=version]
+ * Run with `./PreRelease.java --token=GITHUB_TOKEN [--micro] [--release-version=version]
  */
 @CommandLine.Command(name = "pre-release", mixinStandardHelpOptions = true, version = "0.1",
         description = "Pre-Release Check")
@@ -28,9 +28,6 @@ public class PreRelease implements Callable<Integer> {
 
     @CommandLine.Option(names = "--token", description = "The Github Token", required = true)
     private String token;
-
-    @CommandLine.Option(names = "--username", description = "The Github username associated with the token", defaultValue = "cescoffier")
-    private String username;
 
     @CommandLine.Option(names = "--micro", description = "To set the release to be a micro release", defaultValue = "false")
     private boolean micro;
@@ -53,7 +50,7 @@ public class PreRelease implements Callable<Integer> {
             info("Preparing release");
         }
 
-        GitHub gitHub = new GitHubBuilder().withOAuthToken(token, username).build();
+        GitHub gitHub = new GitHubBuilder().withOAuthToken(token).build();
         GHRepository repository = gitHub.getRepository(REPO);
 
         List<GHTag> tags = repository.listTags().toList();

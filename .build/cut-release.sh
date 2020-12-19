@@ -8,9 +8,6 @@ init_gpg() {
 init_git() {
     git config --global user.name "${GITHUB_ACTOR}"
     git config --global user.email "smallrye@googlegroups.com"
-
-    git update-index --assume-unchanged .build/deploy.sh
-    git update-index --assume-unchanged .build/decrypt-secrets.sh
 }
 
 # -------- SCRIPT START HERE -----------------
@@ -22,12 +19,12 @@ export VERSION=""
 export BRANCH="HEAD"
 export EXTRA_PRE_ARGS=""
 
-if [[ ${MICRO_RELEASE} == "true" ]]; then
-  EXTRA_PRE_ARGS="--micro"
+if [[ ${DRY_RUN} == "true" ]]; then
+  echo "[DRY RUN] - Dry Run Enabled - Git push will be skipped."
 fi
 
-if [[ ! -z "${USER_NAME}" ]]; then
-  EXTRA_PRE_ARGS="${EXTRA_PRE_ARGS} --username=${USER_NAME}"
+if [[ ${MICRO_RELEASE} == "true" ]]; then
+  EXTRA_PRE_ARGS="--micro"
 fi
 
 if [[ ! -z "${RELEASE_VERSION}" ]]; then
@@ -66,4 +63,8 @@ sed -ie "s/mutiny_version: .*/mutiny_version: ${VERSION}/g" documentation/src/ma
 git commit -am "[RELEASE] - Bump version to ${VERSION}"
 git tag "${VERSION}"
 echo "Pushing tag to origin"
-# git push origin "${VERSION}"
+if [[ ${DRY_RUN} == "true" ]]; then
+  echo "[DRY RUN] - Skipping push: git push origin ${VERSION}"
+else
+  git push origin "${VERSION}"
+fi
