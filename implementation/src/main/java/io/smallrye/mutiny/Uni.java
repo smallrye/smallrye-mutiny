@@ -81,7 +81,7 @@ public interface Uni<T> {
      * <p>
      * With `then` you can structure and chain groups of processing.
      *
-     * @param stage the function receiving the this {@link Uni} as parameter and producing the outcome (can be a
+     * @param stage the function receiving this {@link Uni} as parameter and producing the outcome (can be a
      *        {@link Uni} or something else), must not be {@code null}.
      * @param <O> the outcome type
      * @return the outcome of the function.
@@ -106,7 +106,7 @@ public interface Uni<T> {
      * <p>
      * With `stage` you can structure and chain groups of processing.
      *
-     * @param stage the function receiving the this {@link Uni} as parameter and producing the outcome (can be a
+     * @param stage the function receiving this {@link Uni} as parameter and producing the outcome (can be a
      *        {@link Uni} or something else), must not be {@code null}.
      * @param <O> the outcome type
      * @return the outcome of the function.
@@ -517,7 +517,7 @@ public interface Uni<T> {
      * This operation is generally named {@code flatMap}.
      * This method is a shortcut on {@link UniOnItem#transformToUni(Function)} onItem().transformToUni(mapper)}.
      *
-     * @param mapper the function called with the item of the this {@link Uni} and producing the {@link Uni},
+     * @param mapper the function called with the item of this {@link Uni} and producing the {@link Uni},
      *        must not be {@code null}, must not return {@code null}.
      * @param <O> the type of item
      * @return a new {@link Uni} that would fire events from the uni produced by the mapper function, possibly
@@ -548,7 +548,7 @@ public interface Uni<T> {
      * This operation is generally named {@code flatMap}.
      * This method is a shortcut for {@link UniOnItem#transformToUni(Function) onItem().transformToUni(mapper)}.
      *
-     * @param mapper the function called with the item of the this {@link Uni} and producing the {@link Uni},
+     * @param mapper the function called with the item of this {@link Uni} and producing the {@link Uni},
      *        must not be {@code null}, must not return {@code null}.
      * @param <O> the type of item
      * @return a new {@link Uni} that would fire events from the uni produced by the mapper function, possibly
@@ -614,7 +614,7 @@ public interface Uni<T> {
      * This method is a shortcut for {@link UniOnItem#transformToUni(Function)
      * onItem().transformToUni(ignored -> supplier.get())}.
      *
-     * @param supplier the function called when the item of the this {@link Uni} is emitted and producing the {@link Uni},
+     * @param supplier the function called when the item of this {@link Uni} is emitted and producing the {@link Uni},
      *        must not be {@code null}, must not return {@code null}.
      * @param <O> the type of item
      * @return a new {@link Uni} that would fire events from the uni produced by the mapper function, possibly
