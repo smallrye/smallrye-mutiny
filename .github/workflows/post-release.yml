@@ -37,12 +37,13 @@ jobs:
           source ~/.sdkman/bin/sdkman-init.sh && \
             sdk install jbang
 
+          mkdir target
           jbang .build/CompatibilityUtils.java extract
       - name: 'Post-Release Tasks'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_API_TOKEN }}
           REF: ${{ github.event.ref }}
         run: |
-          git checkout new-release-script # TODO Change it back to master
+          git checkout master
           source ~/.sdkman/bin/sdkman-init.sh && \
           jbang .build/PostRelease.java --release-version=${REF} --token=${GITHUB_TOKEN}

@@ -79,36 +79,94 @@ Also you need to check that:
 * there are no build in progress of the `ref` branch (`master`)
 * the last build of the `ref` branch (`master`) has been successful
 
-Snapshot deployment is triggered using:
+Multiple steps compose the release process
+
+### Release preparation
+
+The "prepare-release" workflow verifies that a release can be done. 
+Typically, it computes the target version if not set, and verifies that:
+
+1. a milestone with the release version as name exists and as no more open issues
+2. a tag with the release version as name does not already exist
+
+Then, it bumps the version, builds the project and pushed a tag.
+Finally, it clears the breaking change justifications.
+
+You can trigger a release using a _workflow dispatch_ events or directly from the Github Actions page.
+Parameters are the following:
+
+- `dry-run` - if `true` to not push anything to the remote git repository (default: `false`).
+- `release-version` - the target release version. If not set, it computes the release version by bumping the _minor_ version digit, or the _micro_ version digit is `micro` is set to `true`.
+The last version is the last pushed tag.
+- `micro` - when the `release-version` is not set, indicates that the version is a _micro_ (default: `false`).
+- `skip-tests` - if `true`, skips the tests during the project build (default: `false`)
+- `branch` - the branch from which the release must be cut (default: `master`)
+
+Check https://github.com/smallrye/smallrye-mutiny/actions to follow the progress.
+
+The workflow triggers the other steps automatically (upon the tag creation).
+
+### Web Site deployment
+
+When the "prepare-release" workflows pushes the tag, the "deploy-site" workflows starts (upon the tag creation event), and builds the website from the tag.
+It pushes the website, so once completed, the website is up to date.
+
+### Artifact deployment to Maven Central
+
+When the "prepare-release" workflows pushes the tag, the "deploy-release" workflows starts (upon the tag creation event), and builds the artifacts from the tag.
+It also deploys them to Maven Central.
+
+### Post-Release
+
+When the "prepare-release" workflows pushes the tag, the "post-release" workflows starts (upon the tag creation event), and creates the Github Release.
+It computes the changelog, collects the breaking changes and creates the release (if it does not exist).
+It also creates the next milestone (if it does not exist yet) and closes the previous one.
+
+The next milestone name is the current version with an increment to the minor version digit.
+
+The "post-release" workflow is idempotent.
+
+### Running the release process locally.
+
+It is possible to runs the release process locally using [https://github.com/nektos/act](act).
+In addition to `act`, you need a Github Token with push permission to the repository (stored in the `GITHUB_TOKEN` env variable), and the SmallRye GPG Key passphrase (stored in the `PASSPHRASE` env variable).
+
+Then, edit the `.build/mock-events/release-workflow-event.json` to adapt the execution:
+
+```json
+{
+  "inputs": {
+    "skip-tests": true,
+    "branch": "master",
+    "release-version": "0.12.5"
+  }
+}
+``` 
+
+Then, from the project root, runs:
 
 ```bash
-curl -X POST -H "Authorization: token $GITHUB_TOKEN" \
-    -H "Accept: application/vnd.github.ant-man-preview+json"  \
-    -H "Content-Type: application/json" \
-    https://api.github.com/repos/smallrye/smallrye-mutiny/deployments \
-    --data '{"ref": "master", "environment": "snapshot"}'
+act workflow_dispatch -e .build/mock-events/release-workflow-event.json \
+    -s GITHUB_API_TOKEN=${GITHUB_TOKEN} \ 
+    -s SECRET_FILES_PASSPHRASE=${PASSPHRASE} \
+    -P ubuntu-latest=nektos/act-environments-ubuntu:18.04 \
+    -r -a YOUR_GITHUB_NAME
 ```
+ 
+This would execute the release preparation. 
+Once completed, because it creates the tag, the other steps will start.
 
-For releases, run:
+If you need to run the other steps manually, edit the `.build/mock-events/tag-creation-event.json` to adapt it with the target tag.
+Then, runs:
 
 ```bash
-curl -X POST -H "Authorization: token $GITHUB_TOKEN" \
-    -H "Accept: application/vnd.github.ant-man-preview+json"  \
-    -H "Content-Type: application/json" \
-    https://api.github.com/repos/smallrye/smallrye-mutiny/deployments \
-    --data '{"ref": "master", "environment": "release"}'
+act create -e .build/mock-events/tag-creation-event.json \
+    -s GITHUB_API_TOKEN=${GITHUB_TOKEN} \ 
+    -s SECRET_FILES_PASSPHRASE=${PASSPHRASE} \
+    -P ubuntu-latest=nektos/act-environments-ubuntu:18.04 \
+    -r -a YOUR_GITHUB_NAME
 ```
 
-For micro-releases, use:
 
-```bash
-curl -X POST -H "Authorization: token $GITHUB_TOKEN" \
-    -H "Accept: application/vnd.github.ant-man-preview+json"  \
-    -H "Content-Type: application/json" \
-    https://api.github.com/repos/smallrye/smallrye-mutiny/deployments \
-    --data '{"ref": "master", "environment": "release", "payload": {"micro": true}}'
-```
 
-All these commands trigger GitHub _deployment_.
-Check https://github.com/smallrye/smallrye-mutiny/actions to follow the progress. 
 

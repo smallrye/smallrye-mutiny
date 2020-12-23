@@ -37,5 +37,5 @@ jobs:
             -o Dir::Etc::sourceparts="-" -o APT::Get::List-Cleanup="0"
           sudo apt-get install -y gnupg2 gnupg-agent
 
-          .build/decrypt-secrets.sh
-          .build/deploy-release.sh
+          sh .build/decrypt-secrets.sh
+          # .build/deploy-release.sh

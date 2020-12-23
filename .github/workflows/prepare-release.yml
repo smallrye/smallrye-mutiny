@@ -14,9 +14,10 @@ on:
         description: 'Whether to skip the tests before pushing the tag'
         required: false
         default: false
-      username:
-        description: 'The Github username (default is the github actor)'
+      branch:
+        description: 'The branch from which the release is cut'
         required: false
+        default: 'master'
       dry-run:
         description: 'Skip Git push'
         required: false
@@ -32,7 +33,7 @@ jobs:
           key: maven-11
       - uses: actions/checkout@v2
         with:
-          ref: master
+          ref: ${{ github.event.inputs.branch }}
           token: ${{ secrets.GITHUB_API_TOKEN }}
       - name: Install JDK 11
         uses: AdoptOpenJDK/install-jdk@v1
@@ -57,13 +58,12 @@ jobs:
           source ~/.sdkman/bin/sdkman-init.sh && \
             sdk install jbang
 
-          chmod +x .build/deploy.sh .build/decrypt-secrets.sh
-
-          .build/decrypt-secrets.sh
+          sh .build/decrypt-secrets.sh
           .build/cut-release.sh
       - name: 'Clear compatibility justifications'
         env:
           DRY_RUN: ${{ github.event.inputs.dry-run }}
+          BRANCH: ${{ github.event.inputs.branch }}
         run: |
           source ~/.sdkman/bin/sdkman-init.sh
 
@@ -72,7 +72,7 @@ jobs:
 
           git fetch origin
           git reset --hard
-          git checkout master
+          git checkout ${BRANCH}
           echo "Clearing difference justifications"
           jbang .build/CompatibilityUtils.java clear
           if [[ $(git diff --stat) != '' ]]; then
@@ -82,7 +82,7 @@ jobs:
             if [[ ${DRY_RUN} == "true" ]]; then
               echo "[DRY-RUN] - Skipping push"
             else
-              git push origin master
+              git push origin ${BRANCH}
             fi
           else
             echo "No justifications cleared"
