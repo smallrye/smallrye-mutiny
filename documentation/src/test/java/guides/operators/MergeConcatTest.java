@@ -1,10 +1,13 @@
 package guides.operators;
 
+import guides.extension.SystemOut;
+import guides.extension.SystemOutCaptureExtension;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.subscription.Cancellable;
 import org.awaitility.Awaitility;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.time.Duration;
 import java.util.List;
@@ -12,8 +15,10 @@ import java.util.Random;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 
 @SuppressWarnings({ "unchecked", "Convert2MethodRef" })
+@ExtendWith(SystemOutCaptureExtension.class)
 public class MergeConcatTest<T> {
 
     private final Random random = new Random();
@@ -29,7 +34,7 @@ public class MergeConcatTest<T> {
 
         List<Object> received = new CopyOnWriteArrayList<>();
         merged.subscribe().with(received::add);
-        Awaitility.await().until(() -> received.size() == 9);
+        await().until(() -> received.size() == 9);
         assertThat(received).contains(1, 2, 3, 4, 5, 6, 7, 8, 9);
     }
 
@@ -44,12 +49,12 @@ public class MergeConcatTest<T> {
 
         List<Object> received = new CopyOnWriteArrayList<>();
         concatenated.subscribe().with(received::add);
-        Awaitility.await().until(() -> received.size() == 9);
+        await().until(() -> received.size() == 9);
         assertThat(received).containsExactly(1, 2, 3, 4, 5, 6, 7, 8, 9);
     }
 
     @Test
-    public void testMergeTicks() throws InterruptedException {
+    public void testMergeTicks(SystemOut out) {
         // tag::merge-ticks[]
         Multi<String> first = Multi.createFrom().ticks().every(Duration.ofMillis(10))
                 .onItem().transform(l -> "Stream 1 - " + l);
@@ -64,12 +69,12 @@ public class MergeConcatTest<T> {
                 .subscribe().with(s -> System.out.println("Got item: " + s));
         // end::merge-ticks[]
 
-        Thread.sleep(50);
+        await().until(() -> out.get().contains("Got item: Stream 3 - 10"));
         cancellable.cancel();
     }
 
     @Test
-    public void testConcatenateStrings() {
+    public void testConcatenateStrings(SystemOut out) {
         // tag::concatenate-strings[]
         Multi<String> first = Multi.createFrom().items("A1", "A2", "A3");
         Multi<String> second = Multi.createFrom().items("B1", "B2", "B3");
@@ -80,6 +85,9 @@ public class MergeConcatTest<T> {
         Multi.createBy().concatenating().streams(second, first)
                 .subscribe().with(item -> System.out.print(item)); // "B1B2B3A1A2A3"
         // end::concatenate-strings[]
+
+        await().until(() -> out.get().contains("A1A2A3B1B2B3"));
+        await().until(() -> out.get().contains("B1B2B3A1A2A3"));
 
         assertThat(
                 Multi.createBy().concatenating().streams(first, second)

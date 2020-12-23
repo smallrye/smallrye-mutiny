@@ -1,10 +1,13 @@
 package guides.operators;
 
+import guides.extension.SystemOut;
+import guides.extension.SystemOutCaptureExtension;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.tuples.Tuple;
 import io.smallrye.mutiny.tuples.Tuple2;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.time.Duration;
 import java.util.LinkedHashMap;
@@ -15,12 +18,14 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 
 @SuppressWarnings({ "unchecked", "Convert2MethodRef" })
+@ExtendWith(SystemOutCaptureExtension.class)
 public class CombiningItemsTest<A, B> {
 
     @Test
-    public void testWithUni() throws InterruptedException {
+    public void testWithUni(SystemOut out) throws InterruptedException {
         // tag::invocations[]
         Uni<Response> uniA = invokeHttpServiceA();
         Uni<Response> uniB = invokeHttpServiceB();
@@ -38,6 +43,9 @@ public class CombiningItemsTest<A, B> {
             System.out.println("Response from B: " + tuple.getItem2());
         });
         // end::subscription[]
+
+        await().until(() -> out.get().contains("Response from A: Response{content='A'}"));
+        await().until(() -> out.get().contains("Response from B: Response{content='B'}"));
 
         // tag::combined-with[]
         Uni<Map<String, Response>> uni = Uni.combine()

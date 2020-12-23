@@ -1,14 +1,20 @@
 package guides;
 
+import guides.extension.SystemOut;
+import guides.extension.SystemOutCaptureExtension;
 import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
+import org.junit.jupiter.api.extension.ExtendWith;
 
+import static org.awaitility.Awaitility.await;
+
+@ExtendWith(SystemOutCaptureExtension.class)
 public class UniMultiComparisonTest {
 
     @Test
-    public void comparison() {
+    public void comparison(SystemOut out) {
         //tag::code[]
         Multi.createFrom().items("a", "b", "c")
           .onItem().transform(String::toUpperCase)
@@ -24,10 +30,12 @@ public class UniMultiComparisonTest {
             failure -> System.out.println("Failed with " + failure)
         );
         //end::code[]
+
+        await().until(() -> out.get().contains("Received: C"));
     }
 
     @Test
-    public void conversion() {
+    public void conversion(SystemOut out) {
         //tag::conversion[]
         Multi.createFrom().items("a", "b", "c")
           .onItem().transform(String::toUpperCase)
@@ -49,5 +57,7 @@ public class UniMultiComparisonTest {
         );
 
         //end::conversion[]
+
+        await().until(() -> out.get().contains("Received: A"));
     }
 }

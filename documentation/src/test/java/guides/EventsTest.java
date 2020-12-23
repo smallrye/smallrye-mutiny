@@ -1,18 +1,25 @@
 package guides;
 
+import guides.extension.SystemOut;
+import guides.extension.SystemOutCaptureExtension;
 import io.smallrye.mutiny.Uni;
 import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Multi;
+import org.junit.jupiter.api.extension.ExtendWith;
 
+import static org.awaitility.Awaitility.await;
+
+@ExtendWith(SystemOutCaptureExtension.class)
 public class EventsTest {
 
     private void log(String s) {
         System.out.println(s);
     }
 
+    @SuppressWarnings("Convert2MethodRef")
     @Test
-    public void test() {
+    public void test(SystemOut out) {
         // tag::code[]
         Multi<String> source = Multi.createFrom().items("a", "b", "c");
         source
@@ -41,6 +48,10 @@ public class EventsTest {
         multi.call(item -> executeAnAsyncAction(item));
         // end::call-uni[]
 
+        await().until(() -> out.get().contains("We are subscribed!"));
+        await().until(() -> out.get().contains("Downstream requested"));
+        await().until(() -> out.get().contains("Received item c"));
+        await().until(() -> out.get().contains("Completed"));
     }
 
     private Uni<?> executeAnAsyncAction(String item) {

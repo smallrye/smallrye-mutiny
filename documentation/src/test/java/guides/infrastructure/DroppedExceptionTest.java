@@ -1,24 +1,27 @@
 package guides.infrastructure;
 
+import guides.extension.SystemOut;
+import guides.extension.SystemOutCaptureExtension;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.subscription.Cancellable;
 import io.smallrye.mutiny.subscription.UniEmitter;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+@ExtendWith(SystemOutCaptureExtension.class)
 public class DroppedExceptionTest {
 
     @Test
-    public void droppedExceptionTest() {
-        Logger logger = Logger.getLogger(DroppedExceptionTest.class.getCanonicalName());
-
+    public void droppedExceptionTest(SystemOut out) {
         // tag::override-handler[]
         Infrastructure.setDroppedExceptionHandler(err ->
-                logger.log(Level.SEVERE, "Mutiny dropped exception", err)
+                log(Level.SEVERE, "Mutiny dropped exception", err)
         );
         // end::override-handler[]
 
@@ -30,6 +33,11 @@ public class DroppedExceptionTest {
 
         cancellable.cancel();
         // end::code[]
+        Assertions.assertThat(out.get()).contains("Mutiny dropped exception");
+    }
+
+    private void log(Level severe, String message, Throwable err) {
+        System.out.println(severe.getName() + ":" + message + " " + err.getMessage());
     }
 
     private void onFailure(Throwable t) {
