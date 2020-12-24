@@ -167,7 +167,7 @@ public class MultiCreateFromItemsTest {
     @Test
     public void testLimitOnMultiBasedOnStream() {
         Multi.createFrom().items(() -> IntStream.iterate(0, operand -> operand + 1).boxed())
-                .transform().byTakingFirstItems(10)
+                .select().first(10)
                 .subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE))
                 .assertCompleted()
                 .assertItems(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);

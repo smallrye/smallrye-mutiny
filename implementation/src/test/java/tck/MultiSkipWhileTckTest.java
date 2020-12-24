@@ -16,12 +16,12 @@ import org.reactivestreams.Publisher;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.helpers.test.AssertSubscriber;
 
-public class MultiSkipItemsWhileTckTest extends AbstractPublisherTck<Long> {
+public class MultiSkipWhileTckTest extends AbstractPublisherTck<Long> {
 
     @Test
     public void dropWhileStageShouldSupportDroppingElements() {
         assertEquals(await(Multi.createFrom().items(1, 2, 3, 4, 0)
-                .transform().bySkippingItemsWhile(i -> i < 3)
+                .skip().first(i -> i < 3)
                 .collect().asList()
                 .subscribeAsCompletionStage()), Arrays.asList(3, 4, 0));
     }
@@ -32,7 +32,7 @@ public class MultiSkipItemsWhileTckTest extends AbstractPublisherTck<Long> {
             CompletableFuture<Void> cancelled = new CompletableFuture<>();
             CompletionStage<List<Integer>> result = infiniteStream()
                     .onTermination().invoke(() -> cancelled.complete(null))
-                    .transform().bySkippingItemsWhile(i -> {
+                    .skip().first(i -> {
                         throw new QuietRuntimeException("failed");
                     })
                     .collect().asList()
@@ -46,7 +46,7 @@ public class MultiSkipItemsWhileTckTest extends AbstractPublisherTck<Long> {
     public void dropWhileStageShouldPropagateUpstreamErrorsWhileDropping() {
         assertThrows(QuietRuntimeException.class,
                 () -> await(Multi.createFrom().<Integer> failure(new QuietRuntimeException("failed"))
-                        .transform().bySkippingItemsWhile(i -> i < 3)
+                        .skip().first(i -> i < 3)
                         .collect().asList()
                         .subscribeAsCompletionStage()));
     }
@@ -59,7 +59,7 @@ public class MultiSkipItemsWhileTckTest extends AbstractPublisherTck<Long> {
                         throw new QuietRuntimeException("failed");
                     }
                 })
-                .transform().bySkippingItemsWhile(i -> i < 3)
+                .skip().first(i -> i < 3)
                 .collect().asList()
                 .subscribeAsCompletionStage()));
     }
@@ -67,7 +67,7 @@ public class MultiSkipItemsWhileTckTest extends AbstractPublisherTck<Long> {
     @Test
     public void dropWhileStageShouldNotRunPredicateOnceItsFinishedDropping() {
         assertEquals(await(Multi.createFrom().items(1, 2, 3, 4)
-                .transform().bySkippingItemsWhile(i -> {
+                .skip().first(i -> {
                     if (i < 3) {
                         return true;
                     } else if (i == 4) {
@@ -83,7 +83,7 @@ public class MultiSkipItemsWhileTckTest extends AbstractPublisherTck<Long> {
     @Test
     public void dropWhileStageShouldAllowCompletionWhileDropping() {
         assertEquals(await(Multi.createFrom().items(1, 1, 1, 1)
-                .transform().bySkippingItemsWhile(i -> i < 3)
+                .skip().first(i -> i < 3)
                 .collect().asList()
                 .subscribeAsCompletionStage()), Collections.emptyList());
     }
@@ -93,7 +93,7 @@ public class MultiSkipItemsWhileTckTest extends AbstractPublisherTck<Long> {
         CompletableFuture<Void> cancelled = new CompletableFuture<>();
         infiniteStream()
                 .onTermination().invoke(() -> cancelled.complete(null))
-                .transform().bySkippingItemsWhile(i -> i < 3)
+                .skip().first(i -> i < 3)
                 .subscribe().withSubscriber(new AssertSubscriber<>(10, true));
         await(cancelled);
     }
@@ -101,12 +101,12 @@ public class MultiSkipItemsWhileTckTest extends AbstractPublisherTck<Long> {
     @Override
     public Publisher<Long> createPublisher(long elements) {
         return upstream(elements)
-                .transform().bySkippingItemsWhile(i -> false);
+                .skip().first(i -> false);
     }
 
     @Override
     public Publisher<Long> createFailedPublisher() {
         return failedUpstream()
-                .transform().bySkippingItemsWhile(i -> false);
+                .skip().first(i -> false);
     }
 }

@@ -454,7 +454,7 @@ public class BroadcastProcessorTest {
     @Test
     public void testMakingTicksAHotStream() throws InterruptedException {
         Multi<Long> ticks = Multi.createFrom().ticks().every(Duration.ofMillis(1))
-                .transform().byTakingFirstItems(100);
+                .select().first(100);
         BroadcastProcessor<Long> processor = BroadcastProcessor.create();
         ticks.subscribe().withSubscriber(processor);
         Thread.sleep(50); // NOSONAR

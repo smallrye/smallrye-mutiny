@@ -66,7 +66,8 @@ public class MultiIfEmptyTest {
 
     @Test
     public void testIfEmptyBecauseOfSkipContinueWithOne() {
-        Multi.createFrom().items(1, 2, 3).transform().bySkippingFirstItems(5)
+        Multi.createFrom().items(1, 2, 3)
+                .skip().first(5)
                 .onCompletion().ifEmpty().continueWith(25)
                 .subscribe().withSubscriber(AssertSubscriber.create(7))
                 .assertCompleted()

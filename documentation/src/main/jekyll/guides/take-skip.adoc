@@ -11,84 +11,93 @@ Multi provides the ability to:
 * skip items from the beginning of the multi,
 * skip the last items.
 
-== Taking items
+These actions are available from the `multi.select()` and `multi.skip()` groups, allowing to, respectively, select and skip
+items from upstream.
 
-The `multi.transform().byTakingFirstItems` method forwards on the _n_ **first** items from the multi.
+== Selecting items
+
+The `multi.select().first` method forwards on the _n_ **first** items from the multi.
 It forwards that amount of items and then sends the completion signal.
 It also cancels the upstream subscription.
 
 [source,java,indent=0]
 ----
-include::{include_dir}/TakeTest.java[tag=take-first]
+include::{include_dir}/SelectAndSkipTest.java[tag=take-first]
 ----
+
+NOTE: The `select().first()` method selects only the first item.
 
 If the observed multi emits fewer items, it sends the completion event when the upstream completes.
 
-Similarly, The `multi.transform().byTakingLastItems` operator forwards on the _n_  **last** items from the multi.
+Similarly, The `multi.select().last` operator forwards on the _n_  **last** items from the multi.
 It discards all the items emitted beforehand.
 
 [source,java,indent=0]
 ----
-include::{include_dir}/TakeTest.java[tag=take-last]
+include::{include_dir}/SelectAndSkipTest.java[tag=take-last]
 ----
 
-The `multi.transform().byTakingItemsWhile` operator forwards the items while the passed predicate returns `true`:
+NOTE: The `select().last()` method selects only the last item.
+
+The `multi.select().first(Predicate)` operator forwards the items while the passed predicate returns `true`:
 
 [source,java,indent=0]
 ----
-include::{include_dir}/TakeTest.java[tag=take-while]
+include::{include_dir}/SelectAndSkipTest.java[tag=take-while]
 ----
 
 It calls the predicates for each item.
 Once the predicate returns `false`, it stops forwarding the items downstream.
 It also sends the completion event and cancels the upstream subscription.
 
-Finally,  `multi.transform().byTakingItemsFor` operator picks the first items for a given period.
+Finally,  `multi.select().first(Duration)` operator picks the first items emitted during a given period.
 Once the passed duration expires, it sends the completion event and cancels the upstream subscription.
 If the observes multi completes before the passed duration, it sends the completion event.
 
 [source,java,indent=0]
 ----
-include::{include_dir}/TakeTest.java[tag=take-for]
+include::{include_dir}/SelectAndSkipTest.java[tag=take-for]
 ----
 
 == Skipping items
 
-You can also skip items.
+You can also skip items using `multi.skip()`.
 
-The `multi.transform().bySkippingFirstItems` method skips the _n_ **first** items from the multi.
+The `multi.skip().first(n)` method skips the _n_ **first** items from the multi.
 It forwards all the remaining items and sends the completion event when the upstream multi completes.
 
 [source,java,indent=0]
 ----
-include::{include_dir}/TakeTest.java[tag=skip-first]
+include::{include_dir}/SelectAndSkipTest.java[tag=skip-first]
 ----
 
 If the observed multi emits fewer items, it sends the completion event without emitting any items.
 
-Similarly, The `multi.transform().bySkippingLastItems` operator skips on the _n_  **last** items from the multi:
+NOTE: `skip().last()` drops the very last item only.
+
+Similarly, The `multi.skip().last(n)` operator skips on the _n_  **last** items from the multi:
 
 [source,java,indent=0]
 ----
-include::{include_dir}/TakeTest.java[tag=skip-last]
+include::{include_dir}/SelectAndSkipTest.java[tag=skip-last]
 ----
 
-The `multi.transform().bySkippingItemsWhile` operator skips the items while the passed predicate returns `true`:
+The `multi.skip().first(Predicate)` operator skips the items while the passed predicate returns `true`:
 
 [source,java,indent=0]
 ----
-include::{include_dir}/TakeTest.java[tag=skip-while]
+include::{include_dir}/SelectAndSkipTest.java[tag=skip-while]
 ----
 
 It calls the predicates for each item.
 Once the predicate returns `false`, it stops discarding the items and starts forwarding downstream.
 
-Finally,  `multi.transform().bySkippingItemsFor` operator skips the first items for a given period.
+Finally,  `multi.skip().first(Duration)` operator skips the first items for a given period.
 Once the passed duration expires, it sends the items emitted after the deadline downstream.
 If the observes multi completes before the passed duration, it sends the completion event.
 
 [source,java,indent=0]
 ----
-include::{include_dir}/TakeTest.java[tag=skip-for]
+include::{include_dir}/SelectAndSkipTest.java[tag=skip-for]
 ----
 

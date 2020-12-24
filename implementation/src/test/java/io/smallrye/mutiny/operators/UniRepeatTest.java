@@ -156,7 +156,7 @@ public class UniRepeatTest {
         int value = Uni.createFrom().item(count::incrementAndGet)
                 .repeat().indefinitely()
                 .runSubscriptionOn(Infrastructure.getDefaultWorkerPool())
-                .transform().byTakingFirstItems(num)
+                .select().first(num)
                 .collect().last()
                 .await().atMost(Duration.ofSeconds(5));
         assertThat(num).isEqualTo(value);
@@ -174,7 +174,7 @@ public class UniRepeatTest {
                     return false;
                 })
                 .runSubscriptionOn(Infrastructure.getDefaultWorkerPool())
-                .transform().byTakingFirstItems(num)
+                .select().first(num)
                 .collect().last()
                 .await().atMost(Duration.ofSeconds(5));
         assertThat(num).isEqualTo(value);
@@ -193,7 +193,7 @@ public class UniRepeatTest {
                     return true;
                 })
                 .runSubscriptionOn(Infrastructure.getDefaultWorkerPool())
-                .transform().byTakingFirstItems(num)
+                .select().first(num)
                 .collect().last()
                 .await().atMost(Duration.ofSeconds(5));
         assertThat(num).isEqualTo(value);
@@ -205,7 +205,7 @@ public class UniRepeatTest {
     public void testNoStackOverflow() {
         int value = Uni.createFrom().item(1).repeat().indefinitely()
                 .runSubscriptionOn(Infrastructure.getDefaultWorkerPool())
-                .transform().byTakingFirstItems(100000L)
+                .select().first(100000)
                 .collect().last()
                 .await().atMost(Duration.ofSeconds(5));
         assertThat(value).isEqualTo(1);
@@ -216,7 +216,7 @@ public class UniRepeatTest {
         AtomicInteger count = new AtomicInteger();
         int value = Uni.createFrom().item(1).repeat().until(x -> count.incrementAndGet() > 100000000L)
                 .runSubscriptionOn(Infrastructure.getDefaultWorkerPool())
-                .transform().byTakingFirstItems(100000L)
+                .select().first(100000)
                 .collect().last()
                 .await().atMost(Duration.ofSeconds(5));
         assertThat(value).isEqualTo(1);
@@ -227,7 +227,7 @@ public class UniRepeatTest {
         AtomicInteger count = new AtomicInteger();
         int value = Uni.createFrom().item(1).repeat().whilst(x -> count.incrementAndGet() < 100000000L)
                 .runSubscriptionOn(Infrastructure.getDefaultWorkerPool())
-                .transform().byTakingFirstItems(100000L)
+                .select().first(100000)
                 .collect().last()
                 .await().atMost(Duration.ofSeconds(5));
         assertThat(value).isEqualTo(1);
@@ -238,7 +238,7 @@ public class UniRepeatTest {
         Subscriber<Integer> subscriber = Mocks.subscriber();
 
         Uni.createFrom().item(1).repeat().indefinitely()
-                .transform().byTakingFirstItems(10)
+                .select().first(10)
                 .subscribe(subscriber);
 
         verify(subscriber, times(10)).onNext(1);
@@ -251,7 +251,7 @@ public class UniRepeatTest {
         Subscriber<Integer> subscriber = Mocks.subscriber();
 
         Uni.createFrom().<Integer> failure(() -> new IOException("boom")).repeat().indefinitely()
-                .transform().byTakingFirstItems(10)
+                .select().first(10)
                 .subscribe(subscriber);
 
         verify(subscriber).onError(any(IOException.class));
@@ -264,7 +264,7 @@ public class UniRepeatTest {
         Subscriber<Integer> subscriber = Mocks.subscriber();
 
         Uni.createFrom().<Integer> failure(() -> new IOException("boom")).repeat().until(x -> false)
-                .transform().byTakingFirstItems(10)
+                .select().first(10)
                 .subscribe(subscriber);
 
         verify(subscriber).onError(any(IOException.class));
@@ -277,7 +277,7 @@ public class UniRepeatTest {
         Subscriber<Integer> subscriber = Mocks.subscriber();
 
         Uni.createFrom().<Integer> failure(() -> new IOException("boom")).repeat().whilst(x -> true)
-                .transform().byTakingFirstItems(10)
+                .select().first(10)
                 .subscribe(subscriber);
 
         verify(subscriber).onError(any(IOException.class));

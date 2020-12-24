@@ -16,27 +16,27 @@ import io.smallrye.mutiny.subscription.MultiSubscriber;
  *
  * @param <T> the type of item
  */
-public class MultiTakeLastOp<T> extends AbstractMultiOperator<T, T> {
+public class MultiSelectLastOp<T> extends AbstractMultiOperator<T, T> {
 
     private final int numberOfItems;
 
-    public MultiTakeLastOp(Multi<? extends T> upstream, int numberOfItems) {
+    public MultiSelectLastOp(Multi<? extends T> upstream, int numberOfItems) {
         super(upstream);
         this.numberOfItems = ParameterValidation.positiveOrZero(numberOfItems, "numberOfItems");
     }
 
     @Override
-    public void subscribe(MultiSubscriber<? super T> actual) {
+    public void subscribe(MultiSubscriber<? super T> subscriber) {
         if (numberOfItems == 0) {
-            upstream.subscribe().withSubscriber(new TakeLastZeroProcessor<>(actual));
+            upstream.subscribe(new TakeSelectLastZeroProcessor<>(subscriber));
         } else {
-            upstream.subscribe().withSubscriber(new TakeLastManyProcessor<>(actual, numberOfItems));
+            upstream.subscribe(new MultiSelectLastProcessor<>(subscriber, numberOfItems));
         }
     }
 
-    static final class TakeLastZeroProcessor<T> extends MultiOperatorProcessor<T, T> {
+    static final class TakeSelectLastZeroProcessor<T> extends MultiOperatorProcessor<T, T> {
 
-        TakeLastZeroProcessor(MultiSubscriber<? super T> downstream) {
+        TakeSelectLastZeroProcessor(MultiSubscriber<? super T> downstream) {
             super(downstream);
         }
 
@@ -58,7 +58,7 @@ public class MultiTakeLastOp<T> extends AbstractMultiOperator<T, T> {
         }
     }
 
-    static final class TakeLastManyProcessor<T> extends MultiOperatorProcessor<T, T> {
+    static final class MultiSelectLastProcessor<T> extends MultiOperatorProcessor<T, T> {
 
         private final int numberOfItems;
         private final ArrayDeque<T> queue;
@@ -66,7 +66,7 @@ public class MultiTakeLastOp<T> extends AbstractMultiOperator<T, T> {
         private final AtomicInteger wip = new AtomicInteger();
         volatile boolean upstreamCompleted;
 
-        TakeLastManyProcessor(MultiSubscriber<? super T> downstream, int numberOfItems) {
+        MultiSelectLastProcessor(MultiSubscriber<? super T> downstream, int numberOfItems) {
             super(downstream);
             this.numberOfItems = numberOfItems;
             this.queue = new ArrayDeque<>(numberOfItems);
@@ -74,10 +74,8 @@ public class MultiTakeLastOp<T> extends AbstractMultiOperator<T, T> {
 
         @Override
         public void request(long n) {
-            if (n > 0) {
-                Subscriptions.add(requested, n);
-                drain();
-            }
+            Subscriptions.add(requested, n);
+            drain();
         }
 
         @Override

@@ -26,7 +26,7 @@ public class CreatingMultiTest {
         // tag::pipeline[]
         Multi.createFrom().items(1, 2, 3, 4, 5)
                 .onItem().transform(i -> i * 2)
-                .transform().byTakingFirstItems(3)
+                .select().first(3)
                 .onFailure().recoverWithItem(0)
                 .subscribe().with(System.out::println);
         // end::pipeline[]
@@ -109,7 +109,7 @@ public class CreatingMultiTest {
             Multi<Long> ticks = Multi.createFrom().ticks().every(Duration.ofMillis(100));
             // end::ticks[]
             BlockingIterable<Long> longs = ticks
-                    .transform().byTakingFirstItems(3)
+                    .select().first(3)
                     .subscribe().asIterable();
             await().until(() -> longs.stream().count() == 3);
         }

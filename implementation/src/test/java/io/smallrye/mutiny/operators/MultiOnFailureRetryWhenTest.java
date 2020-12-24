@@ -140,8 +140,7 @@ public class MultiOnFailureRetryWhenTest {
                 .onSubscribe().invoke(sub -> sourceSubscribed.set(true));
 
         Multi<Integer> retry = source
-                .onFailure().retry().when(other -> other
-                        .transform().byTakingFirstItems(1));
+                .onFailure().retry().when(other -> other.select().first());
 
         AssertSubscriber<Integer> subscriber = retry.subscribe()
                 .withSubscriber(AssertSubscriber.create(10));

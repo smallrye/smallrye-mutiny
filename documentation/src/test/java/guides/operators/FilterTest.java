@@ -15,14 +15,14 @@ public class FilterTest {
         Multi<Integer> multi = Multi.createFrom().range(1, 11);
         // tag::filter[]
         List<Integer> list = multi
-                .transform().byFilteringItemsWith(i -> i > 6)
+                .select().where(i -> i > 6)
                 .collect().asList()
                 .await().indefinitely();
         // end::filter[]
 
         // tag::test[]
         List<Integer> list2 = multi
-                .transform().byTestingItemsWith(i -> Uni.createFrom().item(i > 6))
+                .select().when(i -> Uni.createFrom().item(i > 6))
                 .collect().asList()
                 .await().indefinitely();
         // end::test[]
@@ -36,17 +36,17 @@ public class FilterTest {
         Multi<Integer> multi = Multi.createFrom().range(1, 11);
         // tag::take[]
         List<Integer> list = multi
-                .transform().byTakingFirstItems(2)
+                .select().first(2)
                 .collect().asList()
                 .await().indefinitely();
 
         List<Integer> list2 = multi
-                .transform().byTakingItemsWhile(i -> i < 3)
+                .select().first(i -> i < 3)
                 .collect().asList()
                 .await().indefinitely();
 
         List<Integer> list3 = multi
-                .transform().byTakingLastItems(2)
+                .select().last(2)
                 .collect().asList()
                 .await().indefinitely();
         // end::take[]
@@ -60,17 +60,17 @@ public class FilterTest {
         Multi<Integer> multi = Multi.createFrom().range(1, 11);
         // tag::skip[]
         List<Integer> list = multi
-                .transform().bySkippingFirstItems(8)
+                .skip().first(8)
                 .collect().asList()
                 .await().indefinitely();
 
         List<Integer> list2 = multi
-                .transform().bySkippingItemsWhile(i -> i < 9)
+                .skip().first(i -> i < 9)
                 .collect().asList()
                 .await().indefinitely();
 
         List<Integer> list3 = multi
-                .transform().bySkippingLastItems(8)
+                .skip().last(8)
                 .collect().asList()
                 .await().indefinitely();
         // end::skip[]
@@ -84,14 +84,14 @@ public class FilterTest {
         Multi<Integer> multi = Multi.createFrom().items(1, 1, 2, 3, 4, 5, 5, 6);
         // tag::distinct[]
         List<Integer> list = multi
-                .transform().byDroppingDuplicates()
+                .select().distinct()
                 .collect().asList()
                 .await().indefinitely();
         // end::distinct[]
 
         // tag::repetition[]
         List<Integer> list2 = multi
-                .transform().byDroppingRepetitions()
+                .skip().repetitions()
                 .collect().asList()
                 .await().indefinitely();
         // end::repetition[]

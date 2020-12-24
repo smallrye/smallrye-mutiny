@@ -23,15 +23,17 @@ import io.smallrye.mutiny.subscription.MultiEmitter;
 public class MultiDistinctTest {
 
     @Test
-    public void testDistinctWithUpstreamFailure() {
-        Multi.createFrom().<Integer> failure(new IOException("boom"))
-                .transform().byDroppingDuplicates()
+    public void testDistinct() {
+        Multi.createFrom().items(1, 2, 3, 4, 2, 4, 2, 4)
+                .select().distinct()
                 .subscribe().withSubscriber(AssertSubscriber.create(10))
-                .assertFailedWith(IOException.class, "boom");
+                .assertCompleted()
+                .assertItems(1, 2, 3, 4);
     }
 
+    @SuppressWarnings("deprecation")
     @Test
-    public void testDistinct() {
+    public void testDistinctDeprecated() {
         Multi.createFrom().items(1, 2, 3, 4, 2, 4, 2, 4)
                 .transform().byDroppingDuplicates()
                 .subscribe().withSubscriber(AssertSubscriber.create(10))
@@ -39,33 +41,68 @@ public class MultiDistinctTest {
                 .assertItems(1, 2, 3, 4);
     }
 
+    @Test
+    public void testDistinctWithUpstreamFailure() {
+        Multi.createFrom().<Integer> failure(new IOException("boom"))
+                .select().distinct()
+                .subscribe().withSubscriber(AssertSubscriber.create(10))
+                .assertFailedWith(IOException.class, "boom");
+    }
+
+    @SuppressWarnings("deprecation")
+    @Test
+    public void testDistinctWithUpstreamFailureDeprecated() {
+        Multi.createFrom().<Integer> failure(new IOException("boom"))
+                .transform().byDroppingDuplicates()
+                .subscribe().withSubscriber(AssertSubscriber.create(10))
+                .assertFailedWith(IOException.class, "boom");
+    }
+
     @SuppressWarnings("ConstantConditions")
     @Test
-    public void testThatNullSubscriberAreRejected() {
+    public void testThatNullSubscriberAreRejectedDistinct() {
         assertThrows(NullPointerException.class, () -> Multi.createFrom().items(1, 2, 3, 4, 2, 4, 2, 4)
-                .transform().byDroppingDuplicates()
+                .select().distinct()
+                .subscribe(null));
+    }
+
+    @SuppressWarnings("ConstantConditions")
+    @Test
+    public void testThatNullSubscriberAreRejectedWithoutRepetitions() {
+        assertThrows(NullPointerException.class, () -> Multi.createFrom().items(1, 2, 3, 4, 2, 4, 2, 4)
+                .skip().repetitions()
                 .subscribe(null));
     }
 
     @Test
     public void testDistinctOnAStreamWithoutDuplicates() {
         Multi.createFrom().range(1, 5)
-                .transform().byDroppingDuplicates()
+                .select().distinct()
                 .subscribe().withSubscriber(AssertSubscriber.create(10))
                 .assertCompleted()
                 .assertItems(1, 2, 3, 4);
     }
 
     @Test
-    public void testDropRepetitionsWithUpstreamFailure() {
+    public void testWithoutRepetitionsWithUpstreamFailure() {
         Multi.createFrom().<Integer> failure(new IOException("boom"))
-                .transform().byDroppingRepetitions()
+                .skip().repetitions()
                 .subscribe().withSubscriber(AssertSubscriber.create(10))
                 .assertFailedWith(IOException.class, "boom");
     }
 
     @Test
-    public void testDropRepetitions() {
+    public void testWithoutRepetitions() {
+        Multi.createFrom().items(1, 2, 3, 4, 4, 2, 2, 4, 1, 1, 2, 4)
+                .skip().repetitions()
+                .subscribe().withSubscriber(AssertSubscriber.create(10))
+                .assertCompleted()
+                .assertItems(1, 2, 3, 4, 2, 4, 1, 2, 4);
+    }
+
+    @SuppressWarnings("deprecation")
+    @Test
+    public void testDroppedRepetitionsDeprecated() {
         Multi.createFrom().items(1, 2, 3, 4, 4, 2, 2, 4, 1, 1, 2, 4)
                 .transform().byDroppingRepetitions()
                 .subscribe().withSubscriber(AssertSubscriber.create(10))
@@ -74,7 +111,7 @@ public class MultiDistinctTest {
     }
 
     @Test
-    public void testDropRepetitionsWithCancellation() {
+    public void testWithoutRepetitionsWithCancellation() {
         AtomicLong count = new AtomicLong();
         AtomicBoolean cancelled = new AtomicBoolean();
         AssertSubscriber<Long> subscriber = Multi.createFrom().ticks().every(Duration.ofMillis(1))
@@ -86,7 +123,7 @@ public class MultiDistinctTest {
                         return l - 1;
                     }
                 })
-                .transform().byDroppingRepetitions()
+                .skip().repetitions()
                 .subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE));
 
         await().until(() -> subscriber.getItems().size() >= 10);
@@ -95,7 +132,7 @@ public class MultiDistinctTest {
     }
 
     @Test
-    public void testDropRepetitionsWithImmediateCancellation() {
+    public void testWithoutRepetitionsWithImmediateCancellation() {
         AtomicLong count = new AtomicLong();
         AtomicBoolean cancelled = new AtomicBoolean();
         Multi.createFrom().ticks().every(Duration.ofMillis(1))
@@ -107,7 +144,7 @@ public class MultiDistinctTest {
                         return l - 1;
                     }
                 })
-                .transform().byDroppingRepetitions()
+                .skip().repetitions()
                 .subscribe().withSubscriber(new AssertSubscriber<>(Long.MAX_VALUE, true));
 
         assertThat(cancelled).isTrue();
@@ -115,9 +152,9 @@ public class MultiDistinctTest {
     }
 
     @Test
-    public void testDropRepetitionsOnAStreamWithoutDuplicates() {
+    public void testWithoutRepetitionsOnAStreamWithoutDuplicates() {
         Multi.createFrom().range(1, 5)
-                .transform().byDroppingRepetitions()
+                .skip().repetitions()
                 .subscribe().withSubscriber(AssertSubscriber.create(10))
                 .assertCompleted()
                 .assertItems(1, 2, 3, 4);
@@ -128,7 +165,7 @@ public class MultiDistinctTest {
         AtomicReference<MultiEmitter<? super Integer>> emitter = new AtomicReference<>();
         AssertSubscriber<Integer> subscriber = Multi.createFrom().emitter(
                 (Consumer<MultiEmitter<? super Integer>>) emitter::set)
-                .transform().byDroppingDuplicates()
+                .select().distinct()
                 .subscribe().withSubscriber(AssertSubscriber.create(10));
 
         subscriber.assertSubscribed()
@@ -143,23 +180,42 @@ public class MultiDistinctTest {
     }
 
     @Test
-    public void testExceptionInComparator() {
-        AtomicReference<MultiEmitter<? super BadlyComparableStuff>> emitter = new AtomicReference<>();
-        AssertSubscriber<BadlyComparableStuff> subscriber = Multi.createFrom().emitter(
-                (Consumer<MultiEmitter<? super BadlyComparableStuff>>) emitter::set)
-                .transform().byDroppingDuplicates()
+    public void testDistinctExceptionInComparator() {
+        AtomicReference<MultiEmitter<? super BadlyComparableStuffOnHashCode>> emitter = new AtomicReference<>();
+        AssertSubscriber<BadlyComparableStuffOnHashCode> subscriber = Multi.createFrom().emitter(
+                (Consumer<MultiEmitter<? super BadlyComparableStuffOnHashCode>>) emitter::set)
+                .select().distinct()
                 .subscribe().withSubscriber(AssertSubscriber.create(10));
 
         subscriber.assertSubscribed()
                 .assertNotTerminated();
 
-        BadlyComparableStuff item1 = new BadlyComparableStuff();
-        BadlyComparableStuff item2 = new BadlyComparableStuff();
+        BadlyComparableStuffOnHashCode item1 = new BadlyComparableStuffOnHashCode();
+        BadlyComparableStuffOnHashCode item2 = new BadlyComparableStuffOnHashCode();
         emitter.get().emit(item1).emit(item2).complete();
         subscriber.assertFailedWith(TestException.class, "boom");
     }
 
-    private static class BadlyComparableStuff {
+    @Test
+    public void testWithoutRepetitionsExceptionInComparator() {
+        AtomicReference<MultiEmitter<? super BadlyComparableStuffOnEquals>> emitter = new AtomicReference<>();
+        AssertSubscriber<BadlyComparableStuffOnEquals> subscriber = Multi.createFrom().emitter(
+                (Consumer<MultiEmitter<? super BadlyComparableStuffOnEquals>>) emitter::set)
+                .skip().repetitions()
+                .subscribe().withSubscriber(AssertSubscriber.create(10));
+
+        subscriber.assertSubscribed()
+                .assertNotTerminated();
+
+        BadlyComparableStuffOnEquals item1 = new BadlyComparableStuffOnEquals();
+        BadlyComparableStuffOnEquals item2 = new BadlyComparableStuffOnEquals();
+        emitter.get().emit(item1).emit(item2).complete();
+        subscriber
+                .await()
+                .assertFailedWith(TestException.class, "boom");
+    }
+
+    private static class BadlyComparableStuffOnHashCode {
 
         @SuppressWarnings("EqualsWhichDoesntCheckParameterClass")
         @Override
@@ -169,6 +225,14 @@ public class MultiDistinctTest {
 
         @Override
         public int hashCode() {
+            throw new TestException("boom");
+        }
+    }
+
+    private static class BadlyComparableStuffOnEquals {
+
+        @Override
+        public boolean equals(Object obj) {
             throw new TestException("boom");
         }
     }

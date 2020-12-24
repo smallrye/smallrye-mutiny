@@ -108,7 +108,7 @@ public class MultiOnITemTransformToMultiAndConcatenateTckTest extends AbstractPu
                 .onItem()
                 .transformToMultiAndConcatenate(
                         i -> infiniteStream().onTermination().invoke(() -> innerCancelled.complete(null)))
-                .transform().byTakingFirstItems(5)
+                .select().first(5)
                 .collect().asList()
                 .subscribeAsCompletionStage());
 

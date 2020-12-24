@@ -12,25 +12,25 @@ import io.smallrye.mutiny.subscription.MultiSubscriber;
  *
  * @param <T> the type of item
  */
-public final class MultiTakeWhileOp<T> extends AbstractMultiOperator<T, T> {
+public final class MultiSelectFirstWhileOp<T> extends AbstractMultiOperator<T, T> {
 
     private final Predicate<? super T> predicate;
 
-    public MultiTakeWhileOp(Multi<? extends T> upstream, Predicate<? super T> predicate) {
+    public MultiSelectFirstWhileOp(Multi<? extends T> upstream, Predicate<? super T> predicate) {
         super(upstream);
         this.predicate = ParameterValidation.nonNull(predicate, "predicate");
     }
 
     @Override
-    public void subscribe(MultiSubscriber<? super T> actual) {
-        ParameterValidation.nonNullNpe(actual, "subscriber");
-        upstream.subscribe().withSubscriber(new TakeWhileProcessor<>(actual, predicate));
+    public void subscribe(MultiSubscriber<? super T> subscriber) {
+        ParameterValidation.nonNullNpe(subscriber, "subscriber");
+        upstream.subscribe(new MultiSelectFirstWhileProcessor<>(subscriber, predicate));
     }
 
-    static final class TakeWhileProcessor<T> extends MultiOperatorProcessor<T, T> {
+    static final class MultiSelectFirstWhileProcessor<T> extends MultiOperatorProcessor<T, T> {
         private final Predicate<? super T> predicate;
 
-        TakeWhileProcessor(MultiSubscriber<? super T> downstream, Predicate<? super T> predicate) {
+        MultiSelectFirstWhileProcessor(MultiSubscriber<? super T> downstream, Predicate<? super T> predicate) {
             super(downstream);
             this.predicate = predicate;
         }

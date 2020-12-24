@@ -7,26 +7,26 @@ import java.time.Duration;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class TakeTest {
+public class SelectAndSkipTest {
 
     @Test
-    public void testTake() {
+    public void testSelect() {
         Multi<Integer> multi = Multi.createFrom().items(1, 2, 3, 4, 5, 6, 7, 8, 9);
 
         // tag::take-first[]
-        Multi<Integer> firstThreeItems = multi.transform().byTakingFirstItems(3);
+        Multi<Integer> firstThreeItems = multi.select().first(3);
         // end::take-first[]
 
         // tag::take-last[]
-        Multi<Integer> lastThreeItems = multi.transform().byTakingLastItems(3);
+        Multi<Integer> lastThreeItems = multi.select().last(3);
         // end::take-last[]
 
         // tag::take-while[]
-        Multi<Integer> takeWhile = multi.transform().byTakingItemsWhile(i -> i < 4);
+        Multi<Integer> takeWhile = multi.select().first(i -> i < 4);
         // end::take-while[]
 
         // tag::take-for[]
-        Multi<Integer> takeForDuration = multi.transform().byTakingItemsFor(Duration.ofSeconds(1));
+        Multi<Integer> takeForDuration = multi.select().first(Duration.ofSeconds(1));
         // end::take-for[]
 
         assertThat(firstThreeItems.collect().asList().await().indefinitely()).containsExactly(1, 2, 3);
@@ -41,19 +41,19 @@ public class TakeTest {
         Multi<Integer> multi = Multi.createFrom().items(1, 2, 3, 4, 5, 6, 7, 8, 9);
 
         // tag::skip-first[]
-        Multi<Integer> skipThreeItems = multi.transform().bySkippingFirstItems(3);
+        Multi<Integer> skipThreeItems = multi.skip().first(3);
         // end::skip-first[]
 
         // tag::skip-last[]
-        Multi<Integer>  skipLastThreeItems = multi.transform().bySkippingLastItems(3);
+        Multi<Integer>  skipLastThreeItems = multi.skip().last(3);
         // end::skip-last[]
 
         // tag::skip-while[]
-        Multi<Integer> skipWhile = multi.transform().bySkippingItemsWhile(i -> i < 4);
+        Multi<Integer> skipWhile = multi.skip().first(i -> i < 4);
         // end::skip-while[]
 
         // tag::skip-for[]
-        Multi<Integer> skipForDuration = multi.transform().bySkippingItemsFor(Duration.ofSeconds(1));
+        Multi<Integer> skipForDuration = multi.skip().first(Duration.ofSeconds(1));
         // end::skip-for[]
 
         assertThat(skipThreeItems.collect().asList().await().indefinitely()).containsExactly(4, 5, 6, 7, 8, 9);

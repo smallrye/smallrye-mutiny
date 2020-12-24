@@ -33,7 +33,7 @@ public class DropWhileStageFactory implements ProcessingStageFactory<Stage.DropW
 
         @Override
         public Multi<I> apply(Multi<I> source) {
-            return source.transform().bySkippingItemsWhile(predicate);
+            return source.skip().first(predicate);
         }
     }
 }

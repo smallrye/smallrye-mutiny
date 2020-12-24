@@ -15,12 +15,12 @@ import org.reactivestreams.Publisher;
 
 import io.smallrye.mutiny.Multi;
 
-public class MultiTakeItemsWhileTckTest extends AbstractPublisherTck<Long> {
+public class MultiSelectWhileTckTest extends AbstractPublisherTck<Long> {
 
     @Test
     public void takeWhileStageShouldTakeWhileConditionIsTrue() {
         assertEquals(await(Multi.createFrom().items(1, 2, 3, 4, 5, 6, 1, 2)
-                .transform().byTakingItemsWhile(i -> i < 5)
+                .select().first(i -> i < 5)
                 .collect().asList()
                 .subscribeAsCompletionStage()), Arrays.asList(1, 2, 3, 4));
     }
@@ -28,7 +28,7 @@ public class MultiTakeItemsWhileTckTest extends AbstractPublisherTck<Long> {
     @Test
     public void takeWhileStageShouldEmitEmpty() {
         assertEquals(await(Multi.createFrom().items(1, 2, 3, 4, 5, 6)
-                .transform().byTakingItemsWhile(i -> false)
+                .select().first(i -> false)
                 .collect().asList()
                 .subscribeAsCompletionStage()), Collections.emptyList());
     }
@@ -38,7 +38,7 @@ public class MultiTakeItemsWhileTckTest extends AbstractPublisherTck<Long> {
         CompletableFuture<Void> cancelled = new CompletableFuture<>();
         infiniteStream()
                 .onTermination().invoke(() -> cancelled.complete(null))
-                .transform().byTakingItemsWhile(t -> false)
+                .select().first(t -> false)
                 .collect().asList()
                 .subscribeAsCompletionStage();
         await(cancelled);
@@ -55,7 +55,7 @@ public class MultiTakeItemsWhileTckTest extends AbstractPublisherTck<Long> {
                                 return Multi.createFrom().items(i);
                             }
                         })
-                        .transform().byTakingItemsWhile(t -> t < 3)
+                        .select().first(t -> t < 3)
                         .collect().asList()
                         .subscribeAsCompletionStage()),
                 Arrays.asList(1, 2));
@@ -67,7 +67,7 @@ public class MultiTakeItemsWhileTckTest extends AbstractPublisherTck<Long> {
             CompletableFuture<Void> cancelled = new CompletableFuture<>();
             CompletionStage<List<Integer>> result = infiniteStream()
                     .onTermination().invoke(() -> cancelled.complete(null))
-                    .transform().byTakingItemsWhile(i -> {
+                    .select().first(i -> {
                         throw new QuietRuntimeException("failed");
                     })
                     .collect().asList()
@@ -80,12 +80,12 @@ public class MultiTakeItemsWhileTckTest extends AbstractPublisherTck<Long> {
     @Override
     public Publisher<Long> createPublisher(long elements) {
         return upstream(elements)
-                .transform().byTakingItemsWhile(x -> true);
+                .select().first(x -> true);
     }
 
     @Override
     public Publisher<Long> createFailedPublisher() {
         return failedUpstream()
-                .transform().byTakingItemsWhile(x -> true);
+                .select().first(x -> true);
     }
 }

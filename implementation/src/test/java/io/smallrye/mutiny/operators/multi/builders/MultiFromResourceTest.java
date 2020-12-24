@@ -23,6 +23,7 @@ import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.helpers.test.AssertSubscriber;
 
+@SuppressWarnings("ConstantConditions")
 public class MultiFromResourceTest {
 
     @Test
@@ -450,7 +451,7 @@ public class MultiFromResourceTest {
         Multi<String> multi = Multi.createFrom().resource(() -> resource, FakeTransactionalResource::infinite)
                 .withFinalizer(FakeTransactionalResource::commit, FakeTransactionalResource::rollback,
                         FakeTransactionalResource::cancel)
-                .transform().byTakingFirstItems(3);
+                .select().first(3);
 
         multi.subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE))
                 .await()
@@ -470,7 +471,7 @@ public class MultiFromResourceTest {
         Multi<String> multi = Multi.createFrom().resource(() -> resource, FakeTransactionalResource::infinite)
                 .withFinalizer(FakeTransactionalResource::commit, FakeTransactionalResource::rollback,
                         r -> r.cancel().onItem().failWith(x -> new IOException("boom")))
-                .transform().byTakingFirstItems(3);
+                .select().first(3);
 
         multi.subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE))
                 .await()
@@ -490,7 +491,7 @@ public class MultiFromResourceTest {
         Multi<String> multi = Multi.createFrom().resource(() -> resource, FakeTransactionalResource::infinite)
                 .withFinalizer(FakeTransactionalResource::commit, FakeTransactionalResource::rollback,
                         r -> null)
-                .transform().byTakingFirstItems(3);
+                .select().first(3);
 
         multi.subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE))
                 .await()
@@ -511,7 +512,7 @@ public class MultiFromResourceTest {
                 .withFinalizer(r -> r.commit().onItem().failWith(x -> new IOException("boom")),
                         FakeTransactionalResource::rollback,
                         FakeTransactionalResource::cancel)
-                .transform().byTakingFirstItems(3);
+                .select().first(3);
 
         multi.subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE))
                 .await()
@@ -532,7 +533,7 @@ public class MultiFromResourceTest {
                 .withFinalizer(FakeTransactionalResource::commitFailure,
                         FakeTransactionalResource::rollback,
                         FakeTransactionalResource::cancel)
-                .transform().byTakingFirstItems(3);
+                .select().first(3);
 
         multi.subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE))
                 .await()
@@ -554,7 +555,7 @@ public class MultiFromResourceTest {
                         FakeTransactionalResource::commitReturningNull,
                         FakeTransactionalResource::rollback,
                         FakeTransactionalResource::cancel)
-                .transform().byTakingFirstItems(3);
+                .select().first(3);
 
         multi.subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE))
                 .await()
@@ -652,7 +653,7 @@ public class MultiFromResourceTest {
                             .onSubscribe().invoke(s -> subscribed.set(true))
                             .onItem().ignore().andContinueWithNull();
                 })
-                .transform().byTakingFirstItems(5);
+                .select().first(5);
         multi.subscribe().withSubscriber(AssertSubscriber.create(20))
                 .await()
                 .assertCompleted()

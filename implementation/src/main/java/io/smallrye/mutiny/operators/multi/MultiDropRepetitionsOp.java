@@ -8,9 +8,9 @@ import io.smallrye.mutiny.subscription.MultiSubscriber;
  *
  * @param <T> the type of items
  */
-public final class MultiDistinctUntilChangedOp<T> extends AbstractMultiOperator<T, T> {
+public final class MultiDropRepetitionsOp<T> extends AbstractMultiOperator<T, T> {
 
-    public MultiDistinctUntilChangedOp(Multi<? extends T> upstream) {
+    public MultiDropRepetitionsOp(Multi<? extends T> upstream) {
         super(upstream);
     }
 
@@ -32,12 +32,16 @@ public final class MultiDistinctUntilChangedOp<T> extends AbstractMultiOperator<
             if (isDone()) {
                 return;
             }
-            if (last == null || !last.equals(t)) {
-                last = t;
-                downstream.onItem(t);
-            } else {
-                // Request the next one, as that item is dropped.
-                request(1);
+            try {
+                if (last == null || !last.equals(t)) {
+                    last = t;
+                    downstream.onItem(t);
+                } else {
+                    // Request the next one, as that item is dropped.
+                    request(1);
+                }
+            } catch (Exception e) {
+                onFailure(e);
             }
         }
 

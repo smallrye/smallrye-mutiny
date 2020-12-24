@@ -2,18 +2,17 @@ package tck;
 
 import org.reactivestreams.Publisher;
 
-public class MultiDistinctUntilChangedTckTest extends AbstractPublisherTck<Long> {
+public class MultiSkipFirstItemsTckTest extends AbstractPublisherTck<Long> {
 
     @Override
     public Publisher<Long> createPublisher(long elements) {
         return upstream(elements)
-                .transform().byDroppingRepetitions();
+                .skip().first(0);
     }
 
     @Override
     public Publisher<Long> createFailedPublisher() {
         return failedUpstream()
-                .transform().byDroppingRepetitions();
+                .skip().first(0);
     }
-
 }

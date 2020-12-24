@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Multi;
 
-public class MultiFirstTckTest extends AbstractTck {
+public class MultiCollectFirstTckTest extends AbstractTck {
     @Test
     public void findFirstStageShouldFindTheFirstElement() {
         int res = await(

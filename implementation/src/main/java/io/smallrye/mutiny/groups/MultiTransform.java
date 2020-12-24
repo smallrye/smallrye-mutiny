@@ -1,8 +1,6 @@
 package io.smallrye.mutiny.groups;
 
 import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
-import static io.smallrye.mutiny.helpers.ParameterValidation.positiveOrZero;
-import static io.smallrye.mutiny.helpers.ParameterValidation.validate;
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -15,9 +13,6 @@ import org.reactivestreams.Publisher;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
-import io.smallrye.mutiny.infrastructure.Infrastructure;
-import io.smallrye.mutiny.operators.MultiTransformation;
-import io.smallrye.mutiny.operators.multi.MultiFilterOp;
 import io.smallrye.mutiny.operators.multi.processors.BroadcastProcessor;
 
 public class MultiTransform<T> {
@@ -29,47 +24,43 @@ public class MultiTransform<T> {
     }
 
     public Multi<T> bySkippingFirstItems(long number) {
-        return Infrastructure
-                .onMultiCreation(MultiTransformation.skipFirst(upstream, positiveOrZero(number, "number")));
+        return upstream.skip().first(number);
     }
 
     public Multi<T> bySkippingLastItems(int number) {
-        return Infrastructure.onMultiCreation(MultiTransformation.skipLast(upstream, positiveOrZero(number, "number")));
+        return upstream.skip().last(number);
     }
 
     public Multi<T> bySkippingItemsWhile(Predicate<? super T> predicate) {
-        return Infrastructure.onMultiCreation(MultiTransformation.skipWhile(upstream, nonNull(predicate, "predicate")));
+        return upstream.skip().first(predicate);
     }
 
     public Multi<T> bySkippingItemsFor(Duration duration) {
-        return Infrastructure
-                .onMultiCreation(MultiTransformation.skipForDuration(upstream, validate(duration, "duration")));
+        return upstream.skip().first(duration);
     }
 
     public Multi<T> byTakingFirstItems(long number) {
-        return Infrastructure
-                .onMultiCreation(MultiTransformation.takeFirst(upstream, positiveOrZero(number, "number")));
+        return upstream.select().first(number);
     }
 
     public Multi<T> byTakingLastItems(int number) {
-        return Infrastructure.onMultiCreation(MultiTransformation.takeLast(upstream, positiveOrZero(number, "number")));
+        return upstream.select().last(number);
     }
 
     public Multi<T> byTakingItemsFor(Duration duration) {
-        return Infrastructure
-                .onMultiCreation(MultiTransformation.takeForDuration(upstream, validate(duration, "duration")));
+        return upstream.select().first(duration);
     }
 
     public Multi<T> byTakingItemsWhile(Predicate<? super T> predicate) {
-        return Infrastructure.onMultiCreation(MultiTransformation.takeWhile(upstream, nonNull(predicate, "predicate")));
+        return upstream.select().first(predicate);
     }
 
     public Multi<T> byDroppingDuplicates() {
-        return Infrastructure.onMultiCreation(MultiTransformation.distinct(upstream));
+        return upstream.select().distinct();
     }
 
     public Multi<T> byDroppingRepetitions() {
-        return Infrastructure.onMultiCreation(MultiTransformation.dropRepetitions(upstream));
+        return upstream.skip().repetitions();
     }
 
     @SafeVarargs
@@ -94,7 +85,7 @@ public class MultiTransform<T> {
      * @return the produced {@link Multi}
      */
     public Multi<T> byFilteringItemsWith(Predicate<? super T> predicate) {
-        return Infrastructure.onMultiCreation(new MultiFilterOp<>(upstream, nonNull(predicate, "predicate")));
+        return upstream.select().where(predicate);
     }
 
     /**
@@ -106,17 +97,7 @@ public class MultiTransform<T> {
      * @return the produced {@link Multi}
      */
     public Multi<T> byTestingItemsWith(Function<? super T, Uni<Boolean>> tester) {
-        nonNull(tester, "tester");
-        return upstream.onItem().transformToMultiAndConcatenate(res -> {
-            Uni<Boolean> uni = tester.apply(res);
-            return uni.map(pass -> {
-                if (pass) {
-                    return res;
-                } else {
-                    return null;
-                }
-            }).toMulti();
-        });
+        return upstream.select().when(tester);
     }
 
     /**
@@ -125,14 +106,16 @@ public class MultiTransform<T> {
      * Late subscribers would only receive items emitted after their subscription.
      * If the upstream has already been terminated, the termination event (failure or completion) is forwarded to the
      * subscribers.
-     *
+     * <p>
      * Note that this operator consumes the upstream stream without back-pressure.
      * It still enforces downstream back-pressure.
      * If the subscriber is not ready to receive an item when the upstream emits an item, the subscriber gets a
      * {@link io.smallrye.mutiny.subscription.BackPressureFailure} failure.
      *
      * @return the new multi.
+     * @deprecated Use {@link Multi#toHotStream()} instead
      */
+    @Deprecated
     public Multi<T> toHotStream() {
         BroadcastProcessor<T> processor = BroadcastProcessor.create();
         upstream.subscribe(processor);

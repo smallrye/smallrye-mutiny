@@ -298,8 +298,24 @@ public interface Multi<T> extends Publisher<T> {
      * Transforms the streams by skipping, selecting, or merging.
      *
      * @return the object to configure the transformation.
+     * @deprecated Use {@link #select()} and {@link #skip()}instead
      */
+    @Deprecated
     MultiTransform<T> transform();
+
+    /**
+     * Selects items from this {@link Multi}.
+     *
+     * @return the object to configure the selection.
+     */
+    MultiSelect<T> select();
+
+    /**
+     * Skips items from this {@link Multi}.
+     *
+     * @return the object to configure the skip.
+     */
+    MultiSkip<T> skip();
 
     /**
      * Configures the back-pressure behavior when the consumer cannot keep up with the emissions from this
@@ -346,7 +362,7 @@ public interface Multi<T> extends Publisher<T> {
      * @return the new {@link Multi}
      */
     default Multi<T> filter(Predicate<? super T> predicate) {
-        return transform().byFilteringItemsWith(predicate);
+        return select().where(predicate);
     }
 
     /**
@@ -535,4 +551,21 @@ public interface Multi<T> extends Publisher<T> {
         Function<Multi<T>, Multi<R>> provider = nonNull(operatorProvider, "operatorProvider");
         return Infrastructure.onMultiCreation(nonNull(provider.apply(this), "multi"));
     }
+
+    /**
+     * Produces a new {@link Multi} transforming this {@code Multi} into a hot stream.
+     *
+     * With a hot stream, when no subscribers are present, emitted items are dropped.
+     * Late subscribers would only receive items emitted after their subscription.
+     * If the upstream has already been terminated, the termination event (failure or completion) is forwarded to the
+     * subscribers.
+     *
+     * Note that this operator consumes the upstream stream without back-pressure.
+     * It still enforces downstream back-pressure.
+     * If the subscriber is not ready to receive an item when the upstream emits an item, the subscriber gets a
+     * {@link io.smallrye.mutiny.subscription.BackPressureFailure} failure.
+     *
+     * @return the new multi.
+     */
+    Multi<T> toHotStream();
 }

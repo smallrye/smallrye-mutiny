@@ -35,6 +35,16 @@
         "code": "java.method.removed",
         "old": "method <T> io.smallrye.mutiny.helpers.test.AssertSubscriber<T> io.smallrye.mutiny.helpers.test.AssertSubscriber<T>::create(org.reactivestreams.Subscriber<T>)",
         "justification": "Provide the new test API, spy support has been removed, extend the class if needed."
+      },
+      {
+        "code": "java.class.externalClassExposedInAPI",
+        "new": "class io.smallrye.mutiny.groups.MultiSelect<T>",
+        "justification": "Addition of the new `select` group to Multi. If you are impacted by such a change, we recommend extending `AbstractMulti` instead of implementing `Multi` directly."
+      },
+      {
+        "code": "java.class.externalClassExposedInAPI",
+        "new": "class io.smallrye.mutiny.groups.MultiSkip<T>",
+        "justification": "Addition of the new `skip` group to Multi. If you are impacted by such a change, we recommend extending `AbstractMulti` instead of implementing `Multi` directly."
       }
     ]
   }

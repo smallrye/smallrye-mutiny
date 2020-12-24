@@ -16,6 +16,7 @@ import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.multi.MultiCacheOp;
 import io.smallrye.mutiny.operators.multi.MultiEmitOnOp;
 import io.smallrye.mutiny.operators.multi.MultiSubscribeOnOp;
+import io.smallrye.mutiny.operators.multi.processors.BroadcastProcessor;
 import io.smallrye.mutiny.subscription.MultiSubscriber;
 
 public abstract class AbstractMulti<T> implements Multi<T> {
@@ -92,6 +93,16 @@ public abstract class AbstractMulti<T> implements Multi<T> {
     }
 
     @Override
+    public MultiSelect<T> select() {
+        return new MultiSelect<>(this);
+    }
+
+    @Override
+    public MultiSkip<T> skip() {
+        return new MultiSkip<>(this);
+    }
+
+    @Override
     public MultiOverflow<T> onOverflow() {
         return new MultiOverflow<>(this);
     }
@@ -135,4 +146,11 @@ public abstract class AbstractMulti<T> implements Multi<T> {
     public MultiGroup<T> group() {
         return new MultiGroup<>(this);
     }
+
+    public Multi<T> toHotStream() {
+        BroadcastProcessor<T> processor = BroadcastProcessor.create();
+        this.subscribe(processor);
+        return processor;
+    }
+
 }

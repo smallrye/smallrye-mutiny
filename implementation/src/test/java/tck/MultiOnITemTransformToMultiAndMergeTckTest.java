@@ -106,7 +106,7 @@ public class MultiOnITemTransformToMultiAndMergeTckTest extends AbstractPublishe
                 .onTermination().invoke(() -> outerCancelled.complete(null))
                 .onItem().transformToMultiAndMerge(i -> infiniteStream().onTermination()
                         .invoke(() -> innerCancelled.complete(null)))
-                .transform().byTakingFirstItems(5)
+                .select().first(5)
                 .collect().asList()
                 .subscribeAsCompletionStage());
 

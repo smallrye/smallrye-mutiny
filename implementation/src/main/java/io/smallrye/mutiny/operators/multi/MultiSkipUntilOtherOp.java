@@ -20,11 +20,11 @@ import io.smallrye.mutiny.subscription.SerializedSubscriber;
  * @param <T> the type of items emitted by the upstream (and propagated downstream)
  * @param <U> the type of items emitted by the other publisher
  */
-public final class MultiSkipUntilPublisherOp<T, U> extends AbstractMultiOperator<T, T> {
+public final class MultiSkipUntilOtherOp<T, U> extends AbstractMultiOperator<T, T> {
 
     private final Publisher<U> other;
 
-    public MultiSkipUntilPublisherOp(Multi<? extends T> upstream, Publisher<U> other) {
+    public MultiSkipUntilOtherOp(Multi<? extends T> upstream, Publisher<U> other) {
         super(upstream);
         this.other = ParameterValidation.nonNull(other, "other");
     }
