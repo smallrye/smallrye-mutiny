@@ -3,6 +3,7 @@ package io.smallrye.mutiny.groups;
 import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
 
 import java.time.Duration;
+import java.util.Comparator;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -207,11 +208,32 @@ public class MultiSelect<T> {
      *
      * @return the resulting {@link Multi}.
      * @see MultiSkip#repetitions()
+     * @see #distinct(Comparator)
      */
     public Multi<T> distinct() {
         return Infrastructure.onMultiCreation(new MultiDistinctOp<>(upstream));
     }
 
-    // TODO distinct and distinctUntilChanged with comparator
+    /**
+     * Selects all the distinct items from the upstream.
+     * This methods uses the given comparator to compare the items.
+     * <p>
+     * Do NOT call this method on unbounded upstream, as it would lead to an {@link OutOfMemoryError}.
+     * <p>
+     * If the comparison throws an exception, the produced {@link Multi} fails.
+     * The produced {@link Multi} completes when the upstream sends the completion event.
+     * <p>
+     * Unlike {@link #distinct()} which uses a {@link java.util.HashSet} internally, this variant uses a
+     * {@link java.util.TreeSet} initialized with the given comparator. If the comparator is {@code null}, it uses a
+     * {@link java.util.HashSet} as backend.
+     *
+     * @param comparator the comparator used to compare items. If {@code null}, it will uses the item's {@code hashCode}
+     *        method.
+     * @return the resulting {@link Multi}.
+     * @see MultiSkip#repetitions()
+     */
+    public Multi<T> distinct(Comparator<? super T> comparator) {
+        return Infrastructure.onMultiCreation(new MultiDistinctOp<>(upstream, comparator));
+    }
 
 }

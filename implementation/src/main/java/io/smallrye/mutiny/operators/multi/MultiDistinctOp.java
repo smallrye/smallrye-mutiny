@@ -1,10 +1,9 @@
 package io.smallrye.mutiny.operators.multi;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Objects;
+import java.util.*;
 
 import io.smallrye.mutiny.Multi;
+import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.subscription.MultiSubscriber;
 
 /**
@@ -14,22 +13,33 @@ import io.smallrye.mutiny.subscription.MultiSubscriber;
  */
 public final class MultiDistinctOp<T> extends AbstractMultiOperator<T, T> {
 
+    private final Comparator<? super T> comparator;
+
     public MultiDistinctOp(Multi<? extends T> upstream) {
+        this(upstream, null);
+    }
+
+    public MultiDistinctOp(Multi<? extends T> upstream, Comparator<? super T> comparator) {
         super(upstream);
+        this.comparator = comparator;
     }
 
     @Override
-    public void subscribe(MultiSubscriber<? super T> actual) {
-        upstream.subscribe(new DistinctProcessor<>(Objects.requireNonNull(actual, "Subscriber must not be `null`")));
+    public void subscribe(MultiSubscriber<? super T> subscriber) {
+        upstream.subscribe(new DistinctProcessor<>(ParameterValidation.nonNullNpe(subscriber, "subscriber"), comparator));
     }
 
     static final class DistinctProcessor<T> extends MultiOperatorProcessor<T, T> {
 
         final Collection<T> collection;
 
-        DistinctProcessor(MultiSubscriber<? super T> downstream) {
+        DistinctProcessor(MultiSubscriber<? super T> downstream, Comparator<? super T> comparator) {
             super(downstream);
-            this.collection = new HashSet<>();
+            if (comparator == null) {
+                this.collection = new HashSet<>();
+            } else {
+                this.collection = new TreeSet<>(comparator);
+            }
         }
 
         @Override

@@ -4,6 +4,7 @@ import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
 import static io.smallrye.mutiny.helpers.ParameterValidation.positiveOrZero;
 
 import java.time.Duration;
+import java.util.Comparator;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -141,9 +142,31 @@ public class MultiSkip<T> {
      *
      * @return the resulting {@link Multi}
      * @see MultiSelect#distinct()
+     * @see MultiSkip#repetitions(Comparator)
      */
     public Multi<T> repetitions() {
-        return Infrastructure.onMultiCreation(new MultiDropRepetitionsOp<>(upstream));
+        return Infrastructure.onMultiCreation(new MultiSkipRepetitionsOp<>(upstream));
+    }
+
+    /**
+     * Skips repetitions from the upstream.
+     * So, if the upstream emits consecutively the same item twice, it drops the second occurrence.
+     * <p>
+     * The items are compared using the given comparator.
+     * <p>
+     * If the upstream emits a failure, the produced {@link Multi} emits a failure.
+     * If the comparison throws an exception, the produced {@link Multi} emits that exception as failure.
+     * The produces {@link Multi} completes when the upstream completes.
+     * <p>
+     * Unlike {@link MultiSelect#distinct()}, this method can be called on unbounded upstream, as it only keeps a
+     * reference on the last item.
+     *
+     * @return the resulting {@link Multi}
+     * @see MultiSelect#distinct()
+     * @see MultiSkip#repetitions()
+     */
+    public Multi<T> repetitions(Comparator<? super T> comparator) {
+        return Infrastructure.onMultiCreation(new MultiSkipRepetitionsOp<>(upstream, comparator));
     }
 
     /**
