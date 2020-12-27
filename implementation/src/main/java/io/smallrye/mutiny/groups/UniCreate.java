@@ -376,7 +376,7 @@ public class UniCreate {
      * {@link UniSubscriber}. The supplier is called at subscription time.
      * <p>
      * In practice, it defers the {@link Uni} creation at subscription time and allows each subscriber to get different
-     * {@link Uni}. So, it does not create the {@link Uni} until an {@link UniSubscriber subscriber} subscribes, and
+     * {@link Uni}. So, it does not create the {@link Uni} until a {@link UniSubscriber subscriber} subscribes, and
      * creates a fresh {@link Uni} for each subscriber.
      * <p>
      * Unlike {@link #item(Supplier)}, the supplier produces an {@link Uni} (and not an item).
@@ -398,7 +398,7 @@ public class UniCreate {
      * {@link UniSubscriber}. The supplier is called at subscription time.
      * <p>
      * In practice, it defers the {@link Uni} creation at subscription time and allows each subscriber to get different
-     * {@link Uni}. So, it does not create the {@link Uni} until an {@link UniSubscriber subscriber} subscribes, and
+     * {@link Uni}. So, it does not create the {@link Uni} until a {@link UniSubscriber subscriber} subscribes, and
      * creates a fresh {@link Uni} for each subscriber.
      * <p>
      * Unlike {@link #item(Supplier)}, the supplier produces an {@link Uni} (and not an item).
