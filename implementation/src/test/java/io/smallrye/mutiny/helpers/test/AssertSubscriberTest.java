@@ -29,6 +29,21 @@ public class AssertSubscriberTest {
 
         subscriber.assertItems("a", "b")
                 .assertCompleted();
+
+        assertThatThrownBy(() -> subscriber.assertItems("a", "B"))
+                .isInstanceOf(AssertionError.class);
+
+        assertThatThrownBy(subscriber::assertHasNotReceivedAnyItem)
+                .isInstanceOf(AssertionError.class);
+
+        assertThatThrownBy(() -> subscriber.assertItems("a", "B", "c"))
+                .isInstanceOf(AssertionError.class)
+                .hasMessageContaining("Expected <b> to be equal to <B>")
+                .hasMessageContaining("Missing expected item <c>");
+
+        assertThatThrownBy(() -> subscriber.assertItems("a"))
+                .isInstanceOf(AssertionError.class)
+                .hasMessageContaining("Expected the following items to be received");
     }
 
     @Test
@@ -49,6 +64,56 @@ public class AssertSubscriberTest {
     }
 
     @Test
+    public void testNotCompleted() {
+        AssertSubscriber<String> subscriber = AssertSubscriber.create();
+        Subscription subscription = mock(Subscription.class);
+
+        subscriber.onSubscribe(subscription);
+        subscriber.request(2);
+        verify(subscription).request(2);
+        subscriber.onNext("a");
+        subscriber.onNext("b");
+
+        subscriber.assertItems("a", "b")
+                .assertNotTerminated();
+
+        assertThatThrownBy(subscriber::assertCompleted)
+                .isInstanceOf(AssertionError.class)
+                .hasMessageContaining("completion");
+
+        subscriber.onError(new Exception("boom"));
+
+        assertThatThrownBy(subscriber::assertCompleted)
+                .isInstanceOf(AssertionError.class)
+                .hasMessageContaining("failure");
+    }
+
+    @Test
+    public void testNotFailed() {
+        AssertSubscriber<String> subscriber = AssertSubscriber.create();
+        Subscription subscription = mock(Subscription.class);
+
+        subscriber.onSubscribe(subscription);
+        subscriber.request(2);
+        verify(subscription).request(2);
+        subscriber.onNext("a");
+        subscriber.onNext("b");
+
+        subscriber.assertItems("a", "b")
+                .assertNotTerminated();
+
+        assertThatThrownBy(() -> subscriber.assertFailedWith(Exception.class, ""))
+                .isInstanceOf(AssertionError.class)
+                .hasMessageContaining("failure");
+
+        subscriber.onComplete();
+
+        assertThatThrownBy(() -> subscriber.assertFailedWith(Exception.class, ""))
+                .isInstanceOf(AssertionError.class)
+                .hasMessageContaining("completion event");
+    }
+
+    @Test
     public void testNoItems() {
         AssertSubscriber<String> subscriber = AssertSubscriber.create();
         Subscription subscription = mock(Subscription.class);
@@ -58,6 +123,9 @@ public class AssertSubscriberTest {
 
         subscriber.assertNotTerminated();
         subscriber.assertHasNotReceivedAnyItem();
+
+        assertThatThrownBy(() -> subscriber.assertItems("a"))
+                .isInstanceOf(AssertionError.class);
 
         subscriber.cancel();
     }
@@ -114,6 +182,14 @@ public class AssertSubscriberTest {
 
         subscriber.await();
         subscriber.assertFailedWith(Exception.class, "boom");
+
+        assertThatThrownBy(() -> subscriber.assertFailedWith(IllegalStateException.class, ""))
+                .isInstanceOf(AssertionError.class)
+                .hasMessageContaining("failure");
+
+        assertThatThrownBy(() -> subscriber.assertFailedWith(Exception.class, "nope"))
+                .isInstanceOf(AssertionError.class)
+                .hasMessageContaining("failure");
     }
 
     @Test
@@ -175,6 +251,54 @@ public class AssertSubscriberTest {
         assertThatThrownBy(() -> subscriber.run(() -> {
             throw new AssertionError("boom");
         })).isInstanceOf(AssertionError.class);
+    }
+
+    @Test
+    public void testCancelWithoutSubscription() {
+        AssertSubscriber<String> subscriber = AssertSubscriber.create();
+        assertThatThrownBy(subscriber::cancel)
+                .isInstanceOf(AssertionError.class)
+                .hasMessageContaining("subscription");
+    }
+
+    @Test
+    public void testMultipleSubscriptions() {
+        AssertSubscriber<String> subscriber = AssertSubscriber.create();
+
+        subscriber.assertNotSubscribed();
+        assertThatThrownBy(subscriber::assertSubscribed)
+                .isInstanceOf(AssertionError.class)
+                .hasMessageContaining("subscription");
+
+        subscriber.onSubscribe(mock(Subscription.class));
+        assertThatThrownBy(subscriber::assertNotSubscribed)
+                .isInstanceOf(AssertionError.class)
+                .hasMessageContaining("subscription");
+        subscriber.assertSubscribed();
+
+        subscriber.onSubscribe(mock(Subscription.class));
+        assertThatThrownBy(subscriber::assertNotSubscribed)
+                .isInstanceOf(AssertionError.class)
+                .hasMessageContaining("subscriptions")
+                .hasMessageContaining("2");
+        assertThatThrownBy(subscriber::assertSubscribed)
+                .isInstanceOf(AssertionError.class)
+                .hasMessageContaining("subscriptions")
+                .hasMessageContaining("2");
+    }
+
+    @Test
+    public void testTermination() {
+        AssertSubscriber<String> subscriber = AssertSubscriber.create();
+
+        subscriber.assertNotTerminated();
+        assertThatThrownBy(subscriber::assertTerminated)
+                .isInstanceOf(AssertionError.class);
+
+        subscriber.onComplete();
+        assertThatThrownBy(subscriber::assertNotTerminated)
+                .isInstanceOf(AssertionError.class);
+        subscriber.assertTerminated();
     }
 
 }

@@ -1,7 +1,8 @@
 package io.smallrye.mutiny.helpers.test;
 
+import static io.smallrye.mutiny.helpers.test.AssertionHelper.*;
+
 import java.time.Duration;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
@@ -18,7 +19,7 @@ import org.reactivestreams.Subscription;
  * 
  * @param <T> the type of the items
  */
-@SuppressWarnings({ "ReactiveStreamsSubscriberImplementation", "ConstantConditions" })
+@SuppressWarnings({ "ReactiveStreamsSubscriberImplementation" })
 public class AssertSubscriber<T> implements Subscriber<T> {
 
     /**
@@ -47,15 +48,10 @@ public class AssertSubscriber<T> implements Subscriber<T> {
     private final AtomicReference<Throwable> failure = new AtomicReference<>();
 
     /**
-     * Whether the stream completed successfully.
+     * 1
+     * Whether the multi completed successfully.
      */
     private final AtomicBoolean completed = new AtomicBoolean();
-
-    /**
-     * A subscriber on which we delegate the events.
-     * Useful to verify which method is called.
-     */
-    private final Subscriber<T> spy;
 
     /**
      * Number of subscription received from upstream.
@@ -82,29 +78,16 @@ public class AssertSubscriber<T> implements Subscriber<T> {
      * @param cancelled {@code true} if the subscription is immediately cancelled, {@code false} otherwise
      */
     public AssertSubscriber(long requested, boolean cancelled) {
-        this(null, requested, cancelled);
-    }
-
-    /**
-     * Creates a new {@link AssertSubscriber}.
-     * 
-     * @param spy a subscriber to delegate the events to
-     * @param requested the number of initially requested items
-     * @param cancelled {@code true} if the subscription is immediately cancelled, {@code false} otherwise
-     */
-    public AssertSubscriber(Subscriber<T> spy, long requested, boolean cancelled) {
         this.requested.set(requested);
         this.upfrontCancellation = cancelled;
-        this.spy = spy;
     }
 
     /**
      * Creates a new {@link AssertSubscriber} with 0 requested items and no upfront cancellation.
      *
-     * @param spy a subscriber to delegate the events to
      */
-    public AssertSubscriber(Subscriber<T> spy) {
-        this(spy, 0, false);
+    public AssertSubscriber() {
+        this(0, false);
     }
 
     /**
@@ -138,58 +121,25 @@ public class AssertSubscriber<T> implements Subscriber<T> {
     }
 
     /**
-     * Creates a new {@link AssertSubscriber} from a delegate.
-     *
-     * @param spy a subscriber to delegate the events to
-     * @param <T> the items type
-     * @return a new subscriber
-     */
-    public static <T> AssertSubscriber<T> create(Subscriber<T> spy) {
-        return new AssertSubscriber<>(spy);
-    }
-
-    /**
-     * Assert that the stream has completed.
+     * Assert that the multi has completed.
      *
      * @return this {@link AssertSubscriber}
      */
     public AssertSubscriber<T> assertCompleted() {
-        if (!completed.get()) {
-            throw new AssertionError("The stream has not completed");
-        }
-        if (failure.get() != null) {
-            throw new AssertionError("The stream has not completed because of a failure", failure.get());
-        }
+        shouldHaveCompleted(hasCompleted(), getFailure(), getItems());
         return this;
     }
 
     /**
-     * Assert that the stream has failed.
+     * Assert that the multi has failed.
      *
-     * @param typeOfException the expected failure type
-     * @param message a message to be contained in the failure message, or {@code null} when any message is fine
+     * @param expectedTypeOfFailure the expected failure type
+     * @param expectedFailureMessage a message to be contained in the failure message, or {@code null} when any message is fine
      * @return this {@link AssertSubscriber}
      */
-    public AssertSubscriber<T> assertFailedWith(Class<? extends Throwable> typeOfException, String message) {
-        if (failure.get() == null) {
-            throw new AssertionError("The multi didn't failed");
-        }
-        if (completed.get()) {
-            throw new AssertionError("The multi completed successfully");
-        }
-
-        Throwable throwable = failure.get();
-        if (!(typeOfException.isInstance(failure.get()))) {
-            throw new AssertionError("Expected the failure to be of type " + typeOfException.getCanonicalName() + " but was "
-                    + failure.get().getClass().getCanonicalName());
-        }
-        if (message != null) {
-            if (!throwable.getMessage().contains(message)) {
-                throw new AssertionError("Expected the failure message to contain \"" + message + "\" but was: \""
-                        + throwable.getMessage() + "\"");
-            }
-        }
-
+    public AssertSubscriber<T> assertFailedWith(Class<? extends Throwable> expectedTypeOfFailure,
+            String expectedFailureMessage) {
+        shouldHaveFailed(hasCompleted(), getFailure(), expectedTypeOfFailure, expectedFailureMessage);
         return this;
     }
 
@@ -199,58 +149,47 @@ public class AssertSubscriber<T> implements Subscriber<T> {
      * @return this {@link AssertSubscriber}
      */
     public AssertSubscriber<T> assertHasNotReceivedAnyItem() {
-        if (!items.isEmpty()) {
-            throw new AssertionError("Items have been received");
-        }
+        shouldHaveReceivedNoItems(items);
         return this;
     }
 
     /**
-     * Assert that the stream has been subscribed.
+     * Assert that the multi has been subscribed.
      * 
      * @return this {@link AssertSubscriber}
      */
     public AssertSubscriber<T> assertSubscribed() {
-        if (numberOfSubscription != 1) {
-            throw new AssertionError("Expected to be subscribed (number of subscriptions was " + numberOfSubscription + ")");
-        }
+        shouldBeSubscribed(numberOfSubscription);
         return this;
     }
 
     /**
-     * Assert that the stream has not been subscribed.
+     * Assert that the multi has not been subscribed.
      * 
      * @return this {@link AssertSubscriber}
      */
     public AssertSubscriber<T> assertNotSubscribed() {
-        if (numberOfSubscription != 0) {
-            throw new AssertionError(
-                    "Did not expect to be subscribed (number of subscriptions was " + numberOfSubscription + ")");
-        }
+        shouldNotBeSubscribed(numberOfSubscription);
         return this;
     }
 
     /**
-     * Assert that the stream has been terminated.
+     * Assert that the multi has been terminated.
      *
      * @return this {@link AssertSubscriber}
      */
     public AssertSubscriber<T> assertTerminated() {
-        if (latch.getCount() != 0) {
-            throw new AssertionError("Expected to be terminated");
-        }
+        shouldBeTerminated(hasCompleted(), getFailure());
         return this;
     }
 
     /**
-     * Assert that the stream has not been terminated.
+     * Assert that the multi has not been terminated.
      *
      * @return this {@link AssertSubscriber}
      */
     public AssertSubscriber<T> assertNotTerminated() {
-        if (latch.getCount() == 0) {
-            throw new AssertionError("Did not expect to be terminated");
-        }
+        shouldNotBeTerminated(hasCompleted(), getFailure());
         return this;
     }
 
@@ -262,39 +201,22 @@ public class AssertSubscriber<T> implements Subscriber<T> {
      */
     @SafeVarargs
     public final AssertSubscriber<T> assertItems(T... expected) {
-        if (items.size() != expected.length) {
-            throw new AssertionError("Expected to have received: " + Arrays.toString(expected) + " but has received: " + items);
-        }
-        for (int i = 0; i < expected.length; i++) {
-            if (!expected[i].equals(items.get(i))) {
-                throw new AssertionError(
-                        "Expected to have received: " + Arrays.toString(expected) + " but has received: " + items);
-            }
-        }
+        shouldHaveReceivedExactly(items, expected);
         return this;
     }
 
     /**
-     * Await for the stream to be terminated.
+     * Await for the multi to be terminated.
+     * Wait at most 10 seconds before failing.
      * 
      * @return this {@link AssertSubscriber}
      */
     public AssertSubscriber<T> await() {
-        if (latch.getCount() == 0) {
-            // We are done already.
-            return this;
-        }
-
-        try {
-            latch.await();
-        } catch (InterruptedException ex) {
-            Thread.currentThread().interrupt();
-        }
-        return this;
+        return await(Duration.ofSeconds(10));
     }
 
     /**
-     * Await for the stream to be terminated.
+     * Await for the multi to be terminated.
      *
      * @param duration the timeout duration
      * @return this {@link AssertSubscriber}
@@ -307,7 +229,7 @@ public class AssertSubscriber<T> implements Subscriber<T> {
 
         try {
             if (!latch.await(duration.toMillis(), TimeUnit.MILLISECONDS)) {
-                throw new AssertionError("Not terminated before timeout");
+                throw new AssertionError("Expected a terminal event before the timeout.");
             }
         } catch (InterruptedException ex) {
             Thread.currentThread().interrupt();
@@ -321,9 +243,7 @@ public class AssertSubscriber<T> implements Subscriber<T> {
      * @return this {@link AssertSubscriber}
      */
     public AssertSubscriber<T> cancel() {
-        if (subscription.get() == null) {
-            throw new AssertionError("There is not subscription");
-        }
+        shouldBeSubscribed(numberOfSubscription);
         subscription.get().cancel();
         cancelled = true;
         return this;
@@ -345,10 +265,6 @@ public class AssertSubscriber<T> implements Subscriber<T> {
 
     @Override
     public void onSubscribe(Subscription s) {
-        if (spy != null) {
-            spy.onSubscribe(s);
-        }
-
         numberOfSubscription++;
         subscription.set(s);
         if (upfrontCancellation) {
@@ -366,17 +282,11 @@ public class AssertSubscriber<T> implements Subscriber<T> {
 
     @Override
     public synchronized void onNext(T t) {
-        if (spy != null) {
-            spy.onNext(t);
-        }
         items.add(t);
     }
 
     @Override
     public void onError(Throwable t) {
-        if (spy != null) {
-            spy.onError(t);
-        }
         failure.set(t);
         latch.countDown();
     }
@@ -384,9 +294,6 @@ public class AssertSubscriber<T> implements Subscriber<T> {
     @Override
     public void onComplete() {
         completed.set(true);
-        if (spy != null) {
-            spy.onComplete();
-        }
         latch.countDown();
     }
 
@@ -435,7 +342,7 @@ public class AssertSubscriber<T> implements Subscriber<T> {
     }
 
     /**
-     * Check whether the stream has completed.
+     * Check whether the multi has completed.
      *
      * @return a boolean
      */

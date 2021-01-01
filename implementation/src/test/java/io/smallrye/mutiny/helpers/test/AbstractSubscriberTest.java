@@ -14,10 +14,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.awaitility.core.ConditionTimeoutException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
-import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
-
-import io.smallrye.mutiny.test.Mocks;
 
 @SuppressWarnings("ConstantConditions")
 public class AbstractSubscriberTest {
@@ -44,6 +41,7 @@ public class AbstractSubscriberTest {
         AbstractSubscriber<String> subscriber = new AbstractSubscriber<String>() {
             @Override
             public void onError(Throwable t) {
+                super.onError(t);
                 called.set(true);
             }
         };
@@ -139,54 +137,6 @@ public class AbstractSubscriberTest {
         subscriber.cancel();
         verify(subscription).cancel();
         assertThat(subscriber.isCancelled()).isTrue();
-    }
-
-    @Test
-    public void testSpyWithItemAndCompletion() {
-        Subscriber<Integer> spy = Mocks.subscriber(20);
-        AssertSubscriber<Integer> subscriber = AssertSubscriber.create(spy);
-
-        Subscription subscription = mock(Subscription.class);
-        subscriber.onSubscribe(subscription);
-        verify(spy).onSubscribe(subscription);
-        verify(subscription).request(20);
-
-        subscriber.onNext(1);
-        subscriber.onNext(2);
-        subscriber.onNext(3);
-        subscriber.onComplete();
-
-        verify(spy).onNext(1);
-        verify(spy).onNext(2);
-        verify(spy).onNext(3);
-        verify(spy).onComplete();
-        verify(spy, never()).onError(any(Throwable.class));
-
-        assertThat(subscriber.getFailure()).isNull();
-    }
-
-    @Test
-    public void testSpyWithItemAndFailure() {
-        Subscriber<Integer> spy = Mocks.subscriber(20);
-        AssertSubscriber<Integer> subscriber = AssertSubscriber.create(spy);
-
-        Subscription subscription = mock(Subscription.class);
-        subscriber.onSubscribe(subscription);
-        verify(spy).onSubscribe(subscription);
-        verify(subscription).request(20);
-
-        subscriber.onNext(1);
-        subscriber.onNext(2);
-        subscriber.onNext(3);
-        subscriber.onError(new IOException("boom"));
-
-        verify(spy).onNext(1);
-        verify(spy).onNext(2);
-        verify(spy).onNext(3);
-        verify(spy, never()).onComplete();
-        verify(spy).onError(any(IOException.class));
-
-        assertThat(subscriber.getFailure()).isInstanceOf(IOException.class);
     }
 
     @Test

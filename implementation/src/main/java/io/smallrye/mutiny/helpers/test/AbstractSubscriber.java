@@ -16,7 +16,7 @@ import org.reactivestreams.Subscription;
  *
  * @param <T> the type of the items
  */
-@SuppressWarnings("SubscriberImplementation")
+@SuppressWarnings({ "SubscriberImplementation", "ReactiveStreamsSubscriberImplementation" })
 public class AbstractSubscriber<T> implements Subscriber<T>, Subscription {
 
     private final long upfrontRequest;
@@ -37,7 +37,7 @@ public class AbstractSubscriber<T> implements Subscriber<T>, Subscription {
         upfrontRequest = req;
     }
 
-    private AtomicReference<Subscription> upstream = new AtomicReference<>();
+    private final AtomicReference<Subscription> upstream = new AtomicReference<>();
 
     @Override
     public void onSubscribe(Subscription s) {
