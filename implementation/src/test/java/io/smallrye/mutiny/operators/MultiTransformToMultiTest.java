@@ -101,7 +101,7 @@ public class MultiTransformToMultiTest {
                 .subscribe(subscriber);
 
         subscriber
-                .await()
+                .await(Duration.ofSeconds(60))
                 .assertCompleted();
 
         int current = 0;
@@ -123,7 +123,7 @@ public class MultiTransformToMultiTest {
                 .subscribe(subscriber);
 
         subscriber
-                .await()
+                .await(Duration.ofSeconds(60))
                 .assertCompleted();
 
         int current = 0;
@@ -151,7 +151,7 @@ public class MultiTransformToMultiTest {
                 .subscribe(subscriber);
 
         subscriber
-                .await()
+                .await(Duration.ofSeconds(60))
                 .assertFailedWith(CompositeException.class, "boom");
 
         assertThat(subscriber.getItems().size()).isEqualTo(100_000 - 2);
@@ -179,7 +179,7 @@ public class MultiTransformToMultiTest {
                 .subscribe(subscriber);
 
         subscriber
-                .await()
+                .await(Duration.ofSeconds(60))
                 .assertFailedWith(IllegalArgumentException.class, "boom");
 
         assertThat(subscriber.getItems().size()).isEqualTo(99000 - 1);
