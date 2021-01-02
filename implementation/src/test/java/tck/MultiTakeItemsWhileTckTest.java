@@ -21,7 +21,7 @@ public class MultiTakeItemsWhileTckTest extends AbstractPublisherTck<Long> {
     public void takeWhileStageShouldTakeWhileConditionIsTrue() {
         assertEquals(await(Multi.createFrom().items(1, 2, 3, 4, 5, 6, 1, 2)
                 .transform().byTakingItemsWhile(i -> i < 5)
-                .collectItems().asList()
+                .collect().asList()
                 .subscribeAsCompletionStage()), Arrays.asList(1, 2, 3, 4));
     }
 
@@ -29,7 +29,7 @@ public class MultiTakeItemsWhileTckTest extends AbstractPublisherTck<Long> {
     public void takeWhileStageShouldEmitEmpty() {
         assertEquals(await(Multi.createFrom().items(1, 2, 3, 4, 5, 6)
                 .transform().byTakingItemsWhile(i -> false)
-                .collectItems().asList()
+                .collect().asList()
                 .subscribeAsCompletionStage()), Collections.emptyList());
     }
 
@@ -39,7 +39,7 @@ public class MultiTakeItemsWhileTckTest extends AbstractPublisherTck<Long> {
         infiniteStream()
                 .onTermination().invoke(() -> cancelled.complete(null))
                 .transform().byTakingItemsWhile(t -> false)
-                .collectItems().asList()
+                .collect().asList()
                 .subscribeAsCompletionStage();
         await(cancelled);
     }
@@ -56,7 +56,7 @@ public class MultiTakeItemsWhileTckTest extends AbstractPublisherTck<Long> {
                             }
                         })
                         .transform().byTakingItemsWhile(t -> t < 3)
-                        .collectItems().asList()
+                        .collect().asList()
                         .subscribeAsCompletionStage()),
                 Arrays.asList(1, 2));
     }
@@ -70,7 +70,7 @@ public class MultiTakeItemsWhileTckTest extends AbstractPublisherTck<Long> {
                     .transform().byTakingItemsWhile(i -> {
                         throw new QuietRuntimeException("failed");
                     })
-                    .collectItems().asList()
+                    .collect().asList()
                     .subscribeAsCompletionStage();
             await(cancelled);
             await(result);

@@ -51,7 +51,7 @@ public class EmitOnTest {
                 .onItem()
                 .invoke(s -> System.out.println("Received item `" + s + "` on thread: "
                         + Thread.currentThread().getName()))
-                .collectItems().first()
+                .collect().first()
                 .await().indefinitely();
         // end::code[]
 

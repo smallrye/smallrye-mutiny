@@ -1,15 +1,14 @@
 package io.smallrye.mutiny.groups;
 
-import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
-import static io.smallrye.mutiny.helpers.ParameterValidation.positive;
-import static io.smallrye.mutiny.helpers.ParameterValidation.validate;
+import static io.smallrye.mutiny.helpers.ParameterValidation.*;
 
 import java.time.Duration;
 import java.util.List;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
-import io.smallrye.mutiny.operators.MultiCollector;
+import io.smallrye.mutiny.operators.multi.MultiBufferOp;
+import io.smallrye.mutiny.operators.multi.MultiBufferWithTimeoutOp;
 
 public class MultiGroupIntoLists<T> {
 
@@ -37,7 +36,9 @@ public class MultiGroupIntoLists<T> {
      *         window.
      */
     public Multi<List<T>> every(Duration duration) {
-        return Infrastructure.onMultiCreation(MultiCollector.list(upstream, validate(duration, "duration")));
+        return Infrastructure.onMultiCreation(new MultiBufferWithTimeoutOp<>(upstream, Integer.MAX_VALUE,
+                validate(duration, "duration"),
+                Infrastructure.getDefaultWorkerPool()));
     }
 
     /**
@@ -55,7 +56,7 @@ public class MultiGroupIntoLists<T> {
      * @return a Multi emitting lists of at most {@code size} items from the upstream Multi.
      */
     public Multi<List<T>> of(int size) {
-        return Infrastructure.onMultiCreation(MultiCollector.list(upstream, positive(size, "size")));
+        return Infrastructure.onMultiCreation(new MultiBufferOp<>(upstream, size, size));
     }
 
     /**
@@ -76,8 +77,8 @@ public class MultiGroupIntoLists<T> {
      *         {@code size} items
      */
     public Multi<List<T>> of(int size, int skip) {
-        return Infrastructure.onMultiCreation(
-                MultiCollector.list(upstream, positive(size, "size"), positive(skip, "skip")));
+        return Infrastructure.onMultiCreation(new MultiBufferOp<>(upstream,
+                positive(size, "size"), positive(skip, "skip")));
     }
 
     /**
@@ -101,7 +102,7 @@ public class MultiGroupIntoLists<T> {
      * @return a Multi emitting lists of at most {@code size} items from the upstream Multi.
      */
     public Multi<List<T>> of(int size, Duration maximumDelay) {
-        return upstream.groupItems().intoMultis().every(maximumDelay)
-                .flatMap(withTimeout -> withTimeout.groupItems().intoLists().of(size));
+        return upstream.group().intoMultis().every(maximumDelay)
+                .flatMap(withTimeout -> withTimeout.group().intoLists().of(size));
     }
 }

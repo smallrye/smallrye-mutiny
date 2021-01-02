@@ -58,7 +58,7 @@ public class MultiFilterTest {
         Predicate<Integer> test = x -> x % 2 != 0;
         assertThat(Multi.createFrom().range(1, 4)
                 .transform().byFilteringItemsWith(test)
-                .collectItems().asList()
+                .collect().asList()
                 .await().indefinitely()).containsExactly(1, 3);
     }
 
@@ -68,7 +68,7 @@ public class MultiFilterTest {
                 .transform()
                 .byTestingItemsWith(
                         x -> Uni.createFrom().completionStage(() -> CompletableFuture.supplyAsync(() -> x % 2 != 0)))
-                .collectItems().asList()
+                .collect().asList()
                 .await().indefinitely()).containsExactly(1, 3);
     }
 
@@ -77,7 +77,7 @@ public class MultiFilterTest {
         Predicate<Integer> test = x -> x % 2 != 0;
         assertThat(Multi.createFrom().range(1, 4)
                 .filter(test)
-                .collectItems().asList()
+                .collect().asList()
                 .await().indefinitely()).containsExactly(1, 3);
     }
 

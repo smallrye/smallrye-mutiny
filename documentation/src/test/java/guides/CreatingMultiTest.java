@@ -54,8 +54,8 @@ public class CreatingMultiTest {
             Multi<Integer> multiFromItems = Multi.createFrom().items(1, 2, 3, 4);
             Multi<Integer> multiFromIterable = Multi.createFrom().iterable(Arrays.asList(1, 2, 3, 4, 5));
             // end::simple[]
-            assertThat(multiFromItems.collectItems().asList().await().indefinitely()).containsExactly(1, 2, 3, 4);
-            assertThat(multiFromIterable.collectItems().asList().await().indefinitely()).containsExactly(1, 2, 3, 4, 5);
+            assertThat(multiFromItems.collect().asList().await().indefinitely()).containsExactly(1, 2, 3, 4);
+            assertThat(multiFromIterable.collect().asList().await().indefinitely()).containsExactly(1, 2, 3, 4, 5);
         }
 
         {
@@ -64,9 +64,9 @@ public class CreatingMultiTest {
             Multi<Integer> multi = Multi.createFrom().items(() ->
                     IntStream.range(counter.getAndIncrement(), counter.get() * 2).boxed());
             // end::supplier[]
-            assertThat(multi.collectItems().asList().await().indefinitely()).containsExactly(0, 1);
-            assertThat(multi.collectItems().asList().await().indefinitely()).containsExactly(1, 2, 3);
-            assertThat(multi.collectItems().asList().await().indefinitely()).containsExactly(2, 3, 4, 5);
+            assertThat(multi.collect().asList().await().indefinitely()).containsExactly(0, 1);
+            assertThat(multi.collect().asList().await().indefinitely()).containsExactly(1, 2, 3);
+            assertThat(multi.collect().asList().await().indefinitely()).containsExactly(2, 3, 4, 5);
         }
 
         {
@@ -101,7 +101,7 @@ public class CreatingMultiTest {
                 em.complete();
             });
             // end::emitter[]
-            assertThat(multi.collectItems().asList().await().indefinitely()).containsExactly(1, 2, 3);
+            assertThat(multi.collect().asList().await().indefinitely()).containsExactly(1, 2, 3);
         }
 
         {

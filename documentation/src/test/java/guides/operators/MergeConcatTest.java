@@ -91,13 +91,13 @@ public class MergeConcatTest<T> {
 
         assertThat(
                 Multi.createBy().concatenating().streams(first, second)
-                        .collectItems().in(StringBuffer::new, StringBuffer::append)
+                        .collect().in(StringBuffer::new, StringBuffer::append)
                         .await().indefinitely()
         ).isEqualToIgnoringCase("A1A2A3B1B2B3");
 
         assertThat(
                 Multi.createBy().concatenating().streams(second, first)
-                        .collectItems().in(StringBuffer::new, StringBuffer::append)
+                        .collect().in(StringBuffer::new, StringBuffer::append)
                         .await().indefinitely()
         ).isEqualToIgnoringCase("B1B2B3A1A2A3");
 

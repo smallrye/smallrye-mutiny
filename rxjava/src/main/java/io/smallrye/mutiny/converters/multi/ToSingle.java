@@ -9,6 +9,7 @@ import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.converters.uni.UniRxConverters;
 
 public class ToSingle<T> implements Function<Multi<T>, Single<Optional<T>>> {
+    @SuppressWarnings("rawtypes")
     public static final ToSingle INSTANCE = new ToSingle();
 
     private ToSingle() {
@@ -21,7 +22,7 @@ public class ToSingle<T> implements Function<Multi<T>, Single<Optional<T>>> {
 
     @Override
     public Single<Optional<T>> apply(Multi<T> multi) {
-        return multi.collectItems().first().convert().with(UniRxConverters.toSingle());
+        return multi.collect().first().convert().with(UniRxConverters.toSingle());
     }
 
 }

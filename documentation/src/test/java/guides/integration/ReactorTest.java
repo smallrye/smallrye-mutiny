@@ -27,12 +27,12 @@ public class ReactorTest<T> {
 
         List<String> list = multiFromFlux
                 .onItem().transform(Object::toString)
-                .collectItems().asList().await().indefinitely();
+                .collect().asList().await().indefinitely();
         assertThat(list).containsExactly("a", "b", "c");
 
         list = multiFromMono
                 .onItem().transform(Object::toString)
-                .collectItems().asList().await().indefinitely();
+                .collect().asList().await().indefinitely();
         assertThat(list).containsExactly("a");
 
     }

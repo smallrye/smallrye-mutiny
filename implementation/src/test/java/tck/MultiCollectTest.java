@@ -22,21 +22,21 @@ public class MultiCollectTest extends AbstractTck {
     @Test
     public void toListStageShouldReturnAList() {
         List<Integer> list = await(
-                Multi.createFrom().items(1, 2, 3).collectItems().asList().subscribeAsCompletionStage());
+                Multi.createFrom().items(1, 2, 3).collect().asList().subscribeAsCompletionStage());
         assertEquals(list, Arrays.asList(1, 2, 3));
     }
 
     @Test
     public void toListStageShouldReturnEmpty() {
         assertEquals(
-                await(Multi.createFrom().items().collectItems().asList().subscribeAsCompletionStage()),
+                await(Multi.createFrom().items().collect().asList().subscribeAsCompletionStage()),
                 Collections.emptyList());
     }
 
     @Test
     public void collectShouldAccumulateResult() {
         CompletableFuture<AtomicInteger> future = Multi.createFrom().items(1, 2, 3)
-                .collectItems().in(
+                .collect().in(
                         () -> new AtomicInteger(0),
                         AtomicInteger::addAndGet)
                 .subscribeAsCompletionStage();
@@ -45,7 +45,7 @@ public class MultiCollectTest extends AbstractTck {
 
     @Test
     public void collectShouldSupportEmptyStreams() {
-        CompletableFuture<AtomicInteger> future = Multi.createFrom().<Integer> empty().collectItems().in(
+        CompletableFuture<AtomicInteger> future = Multi.createFrom().<Integer> empty().collect().in(
                 () -> new AtomicInteger(42),
                 AtomicInteger::addAndGet)
                 .subscribeAsCompletionStage();
@@ -56,7 +56,7 @@ public class MultiCollectTest extends AbstractTck {
     public void collectShouldPropagateUpstreamErrors() {
         assertThrows(QuietRuntimeException.class, () -> await(Multi.createFrom()
                 .<Integer> failure(new QuietRuntimeException("failed"))
-                .collectItems().in(
+                .collect().in(
                         () -> new AtomicInteger(0),
                         AtomicInteger::addAndGet)
                 .subscribeAsCompletionStage()));
@@ -65,14 +65,14 @@ public class MultiCollectTest extends AbstractTck {
     @Test
     public void finisherFunctionShouldBeInvoked() {
         assertEquals(await(Multi.createFrom().items("1", "2", "3")
-                .collectItems().with(Collectors.joining(", ")).subscribeAsCompletionStage()), "1, 2, 3");
+                .collect().with(Collectors.joining(", ")).subscribeAsCompletionStage()), "1, 2, 3");
     }
 
     @Test
     public void toListStageShouldPropagateUpstreamErrors() {
         assertThrows(QuietRuntimeException.class, () -> await(Multi.createFrom()
                 .failure(new QuietRuntimeException("failed"))
-                .collectItems().asList()
+                .collect().asList()
                 .subscribeAsCompletionStage()));
     }
 
@@ -88,7 +88,7 @@ public class MultiCollectTest extends AbstractTck {
                                 cancelled.complete(null);
                             }
                         })
-                        .collectItems().with(Collector.<Integer, Integer, Integer> of(() -> {
+                        .collect().with(Collector.<Integer, Integer, Integer> of(() -> {
                             throw new QuietRuntimeException("failed");
                         }, (a, b) -> {
                         }, Integer::sum, Function.identity()))
@@ -109,7 +109,7 @@ public class MultiCollectTest extends AbstractTck {
 
             CompletionStage<String> result = infiniteStream()
                     .onTermination().invoke(() -> cancelled.complete(null))
-                    .collectItems().with(Collector.of(() -> "", (a, b) -> {
+                    .collect().with(Collector.of(() -> "", (a, b) -> {
                         throw new QuietRuntimeException("failed");
                     }, (a, b) -> a + b, Function.identity()))
                     .subscribeAsCompletionStage();
@@ -122,7 +122,7 @@ public class MultiCollectTest extends AbstractTck {
     public void collectStageShouldPropagateErrorsFromFinisher() {
         assertThrows(QuietRuntimeException.class, () -> {
             CompletionStage<Integer> result = Multi.createFrom().items(1, 2, 3)
-                    .collectItems().with(Collector.<Integer, Integer, Integer> of(() -> 0, (a, b) -> {
+                    .collect().with(Collector.<Integer, Integer, Integer> of(() -> 0, (a, b) -> {
                     },
                             Integer::sum,
                             r -> {

@@ -41,7 +41,7 @@ public class MultiFlatMapTckTest extends AbstractPublisherTck<Long> {
         assertEquals(await(Multi.createFrom().items(1, 2, 3)
                 .emitOn(executor)
                 .flatMap(n -> Multi.createFrom().items(n, n, n))
-                .collectItems().asList()
+                .collect().asList()
                 .subscribeAsCompletionStage()), Arrays.asList(1, 1, 1, 2, 2, 2, 3, 3, 3));
     }
 
@@ -49,7 +49,7 @@ public class MultiFlatMapTckTest extends AbstractPublisherTck<Long> {
     public void flatMapStageShouldAllowEmptySubStreams() {
         assertEquals(await(Multi.createFrom().items(Multi.createFrom().empty(), Multi.createFrom().items(1, 2))
                 .flatMap(Function.identity())
-                .collectItems().asList()
+                .collect().asList()
                 .subscribeAsCompletionStage()), Arrays.asList(1, 2));
     }
 
@@ -66,7 +66,7 @@ public class MultiFlatMapTckTest extends AbstractPublisherTck<Long> {
                     .flatMap(foo -> {
                         throw new QuietRuntimeException("failed");
                     })
-                    .collectItems().asList()
+                    .collect().asList()
                     .subscribeAsCompletionStage();
             await(cancelled);
             await(result);
@@ -78,7 +78,7 @@ public class MultiFlatMapTckTest extends AbstractPublisherTck<Long> {
         assertThrows(QuietRuntimeException.class,
                 () -> await(Multi.createFrom().failure(new QuietRuntimeException("failed"))
                         .flatMap(x -> Multi.createFrom().item(x))
-                        .collectItems().asList()
+                        .collect().asList()
                         .subscribeAsCompletionStage()));
     }
 
@@ -89,7 +89,7 @@ public class MultiFlatMapTckTest extends AbstractPublisherTck<Long> {
             CompletionStage<List<Object>> result = infiniteStream()
                     .onTermination().invoke(() -> cancelled.complete(null))
                     .flatMap(f -> Multi.createFrom().failure(new QuietRuntimeException("failed")))
-                    .collectItems().asList()
+                    .collect().asList()
                     .subscribeAsCompletionStage();
             await(cancelled);
             await(result);
@@ -103,7 +103,7 @@ public class MultiFlatMapTckTest extends AbstractPublisherTck<Long> {
         CompletionStage<List<Integer>> result = Multi.createFrom().items(1, 2, 3, 4, 5)
                 .concatMap(id -> Multi.createFrom()
                         .publisher(new ScheduledPublisher(id, activePublishers, this::getExecutor)))
-                .collectItems().asList()
+                .collect().asList()
                 .subscribeAsCompletionStage();
 
         assertEquals(result.toCompletableFuture().get(2, TimeUnit.SECONDS),
@@ -118,7 +118,7 @@ public class MultiFlatMapTckTest extends AbstractPublisherTck<Long> {
                 .onTermination().invoke(() -> outerCancelled.complete(null))
                 .flatMap(i -> infiniteStream().onTermination().invoke(() -> innerCancelled.complete(null)))
                 .transform().byTakingFirstItems(5)
-                .collectItems().asList()
+                .collect().asList()
                 .subscribeAsCompletionStage());
 
         await(outerCancelled);

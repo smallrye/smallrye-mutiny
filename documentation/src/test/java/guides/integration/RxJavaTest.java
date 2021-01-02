@@ -33,12 +33,12 @@ public class RxJavaTest<T> {
 
         List<String> list = multiFromObservable
                 .onItem().transform(Object::toString)
-                .collectItems().asList().await().indefinitely();
+                .collect().asList().await().indefinitely();
         assertThat(list).containsExactly("a", "b", "c");
 
         list = multiFromFlowable
                 .onItem().transform(Object::toString)
-                .collectItems().asList().await().indefinitely();
+                .collect().asList().await().indefinitely();
         assertThat(list).containsExactly("a", "b", "c");
 
         Completable completable = getCompletable();
@@ -59,22 +59,22 @@ public class RxJavaTest<T> {
 
         list = multiFromCompletable
                 .onItem().transform(Object::toString)
-                .collectItems().asList().await().indefinitely();
+                .collect().asList().await().indefinitely();
         assertThat(list).isEmpty();
 
         list = multiFromSingle
                 .onItem().transform(Object::toString)
-                .collectItems().asList().await().indefinitely();
+                .collect().asList().await().indefinitely();
         assertThat(list).containsExactly("a");
 
         list = multiFromMaybe
                 .onItem().transform(Object::toString)
-                .collectItems().asList().await().indefinitely();
+                .collect().asList().await().indefinitely();
         assertThat(list).containsExactly("a");
 
         list = multiFromEmptyMaybe
                 .onItem().transform(Object::toString)
-                .collectItems().asList().await().indefinitely();
+                .collect().asList().await().indefinitely();
         assertThat(list).isEmpty();
     }
 

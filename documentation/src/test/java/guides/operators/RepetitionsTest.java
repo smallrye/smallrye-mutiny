@@ -15,14 +15,14 @@ public class RepetitionsTest {
         // tag::distinct[]
         List<Integer> list = multi
                 .transform().byDroppingDuplicates()
-                .collectItems().asList()
+                .collect().asList()
                 .await().indefinitely();
         // end::distinct[]
 
         // tag::repetition[]
         List<Integer> list2 = multi
                 .transform().byDroppingRepetitions()
-                .collectItems().asList()
+                .collect().asList()
                 .await().indefinitely();
         // end::repetition[]
         assertThat(list).containsExactly(1, 2, 3, 4, 5, 6);

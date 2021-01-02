@@ -25,7 +25,7 @@ public class UniOnItemDisjointTest {
     public void testDisjointWithArray() {
         List<String> r = array
                 .onItem().<String> disjoint()
-                .collectItems().asList()
+                .collect().asList()
                 .await().indefinitely();
         assertThat(r).containsExactly("a", "b", "c");
     }
@@ -34,7 +34,7 @@ public class UniOnItemDisjointTest {
     public void testDisjointWithEmptyArray() {
         List<String> r = Uni.createFrom().item(new String[0])
                 .onItem().<String> disjoint()
-                .collectItems().asList()
+                .collect().asList()
                 .await().indefinitely();
         assertThat(r).isEmpty();
     }
@@ -43,7 +43,7 @@ public class UniOnItemDisjointTest {
     public void testDisjointFromFailure() {
         assertThatThrownBy(() -> failed
                 .onItem().<String> disjoint()
-                .collectItems().asList()
+                .collect().asList()
                 .await().indefinitely()).hasCauseInstanceOf(IOException.class);
     }
 
@@ -51,7 +51,7 @@ public class UniOnItemDisjointTest {
     public void testDisjointFromInvalidItemType() {
         assertThatThrownBy(() -> Uni.createFrom().item("hello")
                 .onItem().<String> disjoint()
-                .collectItems().asList()
+                .collect().asList()
                 .await().indefinitely()).isInstanceOf(IllegalArgumentException.class);
     }
 
@@ -59,7 +59,7 @@ public class UniOnItemDisjointTest {
     public void testDisjointFromNull() {
         List<String> list = Uni.createFrom().nullItem()
                 .onItem().<String> disjoint()
-                .collectItems().asList()
+                .collect().asList()
                 .await().indefinitely();
 
         assertThat(list).isEmpty();
@@ -69,7 +69,7 @@ public class UniOnItemDisjointTest {
     public void testDisjointWithPublisher() {
         List<String> r = Uni.createFrom().item(Flowable.just("a", "b", "c"))
                 .onItem().<String> disjoint()
-                .collectItems().asList()
+                .collect().asList()
                 .await().indefinitely();
         assertThat(r).containsExactly("a", "b", "c");
     }
@@ -78,7 +78,7 @@ public class UniOnItemDisjointTest {
     public void testDisjointWithEmptyPublisher() {
         List<String> r = Uni.createFrom().item(Flowable.empty())
                 .onItem().<String> disjoint()
-                .collectItems().asList()
+                .collect().asList()
                 .await().indefinitely();
         assertThat(r).isEmpty();
     }
@@ -87,7 +87,7 @@ public class UniOnItemDisjointTest {
     public void testDisjointWithMulti() {
         List<String> r = Uni.createFrom().item(Multi.createFrom().items("a", "b", "c"))
                 .onItem().<String> disjoint()
-                .collectItems().asList()
+                .collect().asList()
                 .await().indefinitely();
         assertThat(r).containsExactly("a", "b", "c");
     }
@@ -96,7 +96,7 @@ public class UniOnItemDisjointTest {
     public void testDisjointWithEmptyMulti() {
         List<String> r = Uni.createFrom().item(Multi.createFrom().empty())
                 .onItem().<String> disjoint()
-                .collectItems().asList()
+                .collect().asList()
                 .await().indefinitely();
         assertThat(r).isEmpty();
     }
@@ -105,7 +105,7 @@ public class UniOnItemDisjointTest {
     public void testDisjointWithIterable() {
         List<String> r = Uni.createFrom().item(Arrays.asList("a", "b", "c"))
                 .onItem().<String> disjoint()
-                .collectItems().asList()
+                .collect().asList()
                 .await().indefinitely();
         assertThat(r).containsExactly("a", "b", "c");
     }
@@ -114,7 +114,7 @@ public class UniOnItemDisjointTest {
     public void testDisjointWithEmptyIterable() {
         List<String> r = Uni.createFrom().item(Collections.emptyList())
                 .onItem().<String> disjoint()
-                .collectItems().asList()
+                .collect().asList()
                 .await().indefinitely();
         assertThat(r).isEmpty();
     }

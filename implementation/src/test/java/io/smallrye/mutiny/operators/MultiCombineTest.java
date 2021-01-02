@@ -97,7 +97,7 @@ public class MultiCombineTest {
     public void testCombinationOfTwoStreamsAsTuple() {
         List<Tuple2<Integer, Integer>> list = Multi.createBy()
                 .combining().streams(Multi.createFrom().range(1, 4), Multi.createFrom().range(2, 5)).asTuple()
-                .collectItems().asList().await().indefinitely();
+                .collect().asList().await().indefinitely();
         assertThat(list).hasSize(3).containsExactly(Tuple2.of(1, 2), Tuple2.of(2, 3), Tuple2.of(3, 4));
     }
 
@@ -107,7 +107,7 @@ public class MultiCombineTest {
 
         List<Tuple2<Integer, Integer>> list = Multi.createBy()
                 .combining().streams(stream, stream).asTuple()
-                .collectItems().asList().await().indefinitely();
+                .collect().asList().await().indefinitely();
         assertThat(list).hasSize(4).containsExactly(Tuple2.of(1, 1), Tuple2.of(2, 2),
                 Tuple2.of(3, 3), Tuple2.of(4, 4));
     }
@@ -119,7 +119,7 @@ public class MultiCombineTest {
         Multi<Integer> s3 = Multi.createFrom().range(3, 6);
         List<Tuple3<Integer, Integer, Integer>> list = Multi.createBy()
                 .combining().streams(s1, s2, s3).asTuple()
-                .collectItems().asList().await().indefinitely();
+                .collect().asList().await().indefinitely();
         assertThat(list).hasSize(3).containsExactly(Tuple3.of(1, 2, 3), Tuple3.of(2, 3, 4), Tuple3.of(3, 4, 5));
     }
 
@@ -131,7 +131,7 @@ public class MultiCombineTest {
         Multi<Integer> s4 = Multi.createFrom().range(4, 7);
         List<Tuple4<Integer, Integer, Integer, Integer>> list = Multi.createBy()
                 .combining().streams(s1, s2, s3, s4).asTuple()
-                .collectItems().asList().await().indefinitely();
+                .collect().asList().await().indefinitely();
         assertThat(list).hasSize(3)
                 .containsExactly(Tuple4.of(1, 2, 3, 4), Tuple4.of(2, 3, 4, 5),
                         Tuple4.of(3, 4, 5, 6));
@@ -146,7 +146,7 @@ public class MultiCombineTest {
         Multi<Integer> s5 = Multi.createFrom().range(5, 8);
         List<Tuple5<Integer, Integer, Integer, Integer, Integer>> list = Multi.createBy()
                 .combining().streams(s1, s2, s3, s4, s5).asTuple()
-                .collectItems().asList().await().indefinitely();
+                .collect().asList().await().indefinitely();
         assertThat(list).hasSize(3)
                 .containsExactly(Tuple5.of(1, 2, 3, 4, 5),
                         Tuple5.of(2, 3, 4, 5, 6),
@@ -163,7 +163,7 @@ public class MultiCombineTest {
         Multi<Integer> s6 = Multi.createFrom().range(6, 9);
         List<Tuple6<Integer, Integer, Integer, Integer, Integer, Integer>> list = Multi.createBy()
                 .combining().streams(s1, s2, s3, s4, s5, s6).asTuple()
-                .collectItems().asList().await().indefinitely();
+                .collect().asList().await().indefinitely();
         assertThat(list).hasSize(3)
                 .containsExactly(
                         Tuple6.of(1, 2, 3, 4, 5, 6),
@@ -182,7 +182,7 @@ public class MultiCombineTest {
         Multi<Integer> s7 = Multi.createFrom().range(7, 10);
         List<Tuple7<Integer, Integer, Integer, Integer, Integer, Integer, Integer>> list = Multi.createBy()
                 .combining().streams(s1, s2, s3, s4, s5, s6, s7).asTuple()
-                .collectItems().asList().await().indefinitely();
+                .collect().asList().await().indefinitely();
         assertThat(list).hasSize(3)
                 .containsExactly(
                         Tuple7.of(1, 2, 3, 4, 5, 6, 7),
@@ -202,7 +202,7 @@ public class MultiCombineTest {
         Multi<Integer> s8 = Multi.createFrom().range(8, 11);
         List<Tuple8<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer>> list = Multi.createBy()
                 .combining().streams(s1, s2, s3, s4, s5, s6, s7, s8).asTuple()
-                .collectItems().asList().await().indefinitely();
+                .collect().asList().await().indefinitely();
         assertThat(list).hasSize(3)
                 .containsExactly(
                         Tuple8.of(1, 2, 3, 4, 5, 6, 7, 8),
@@ -224,7 +224,7 @@ public class MultiCombineTest {
         List<Tuple9<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer>> list = Multi
                 .createBy()
                 .combining().streams(s1, s2, s3, s4, s5, s6, s7, s8, s9).asTuple()
-                .collectItems().asList().await().indefinitely();
+                .collect().asList().await().indefinitely();
         assertThat(list).hasSize(3)
                 .containsExactly(
                         Tuple9.of(1, 2, 3, 4, 5, 6, 7, 8, 9),
@@ -256,13 +256,13 @@ public class MultiCombineTest {
 
         List<Tuple2<Integer, Integer>> list = Multi.createBy()
                 .combining().streams(stream1, stream2).asTuple()
-                .collectItems().asList().await().indefinitely();
+                .collect().asList().await().indefinitely();
         assertThat(list).hasSize(4).containsExactly(Tuple2.of(1, 1), Tuple2.of(2, 2),
                 Tuple2.of(3, 3), Tuple2.of(4, 4));
 
         list = Multi.createBy()
                 .combining().streams(stream2, stream1).asTuple()
-                .collectItems().asList().await().indefinitely();
+                .collect().asList().await().indefinitely();
         assertThat(list).hasSize(4).containsExactly(Tuple2.of(1, 1), Tuple2.of(2, 2),
                 Tuple2.of(3, 3), Tuple2.of(4, 4));
     }
@@ -274,13 +274,13 @@ public class MultiCombineTest {
 
         List<Tuple2<Integer, Integer>> list = Multi.createBy()
                 .combining().streams(stream1, stream2).latestItems().asTuple()
-                .collectItems().asList().await().indefinitely();
+                .collect().asList().await().indefinitely();
         assertThat(list).hasSize(7).containsExactly(Tuple2.of(4, 1), Tuple2.of(4, 2),
                 Tuple2.of(4, 3), Tuple2.of(4, 4), Tuple2.of(4, 5), Tuple2.of(4, 6), Tuple2.of(4, 7));
 
         list = Multi.createBy()
                 .combining().streams(stream2, stream1).latestItems().asTuple()
-                .collectItems().asList().await().indefinitely();
+                .collect().asList().await().indefinitely();
         assertThat(list).hasSize(4).containsExactly(Tuple2.of(7, 1), Tuple2.of(7, 2),
                 Tuple2.of(7, 3), Tuple2.of(7, 4));
     }
@@ -444,7 +444,7 @@ public class MultiCombineTest {
 
             Multi.createBy()
                     .combining().streams(stream, fail).asTuple()
-                    .collectItems().asList().await().indefinitely();
+                    .collect().asList().await().indefinitely();
         });
     }
 
@@ -605,15 +605,15 @@ public class MultiCombineTest {
 
         List<Tuple2<Integer, Integer>> list = Multi.createBy().combining().streams(stream, stream).latestItems()
                 .asTuple()
-                .collectItems().asList().await().indefinitely();
+                .collect().asList().await().indefinitely();
         assertThat(list).containsExactly(Tuple2.of(3, 1), Tuple2.of(3, 2), Tuple2.of(3, 3));
 
         List<Integer> list2 = Multi.createBy().combining().streams(stream, stream).latestItems().using((a, b) -> a)
-                .collectItems().asList().await().indefinitely();
+                .collect().asList().await().indefinitely();
         assertThat(list2).containsExactly(3, 3, 3);
 
         list2 = Multi.createBy().combining().streams(stream, stream).latestItems().using((a, b) -> b)
-                .collectItems().asList().await().indefinitely();
+                .collect().asList().await().indefinitely();
         assertThat(list2).containsExactly(1, 2, 3);
     }
 
@@ -622,7 +622,7 @@ public class MultiCombineTest {
         Multi<Integer> stream = Multi.createFrom().items(1, 2, 3);
         List<Integer> list = Multi.createBy().combining().streams(Collections.singletonList(stream))
                 .using(l -> (Integer) l.get(0))
-                .collectItems().asList()
+                .collect().asList()
                 .await().indefinitely();
         assertThat(list).containsExactly(1, 2, 3);
     }
@@ -634,7 +634,7 @@ public class MultiCombineTest {
 
         List<Tuple2<Integer, Integer>> list = Multi.createBy().combining().streams(stream, empty).latestItems()
                 .asTuple()
-                .collectItems().asList().await().indefinitely();
+                .collect().asList().await().indefinitely();
         assertThat(list).isEmpty();
     }
 
@@ -646,7 +646,7 @@ public class MultiCombineTest {
 
         List<Tuple3<Integer, Integer, Integer>> list = Multi.createBy().combining().streams(one, two, three)
                 .latestItems().asTuple()
-                .collectItems().asList().await().indefinitely();
+                .collect().asList().await().indefinitely();
 
         assertThat(list).containsExactly(Tuple3.of(1, 2, 3), Tuple3.of(1, 2, 4));
     }
@@ -660,12 +660,12 @@ public class MultiCombineTest {
 
         List<Tuple4<Integer, Integer, Integer, Integer>> list = Multi.createBy().combining()
                 .streams(one, two, three, four).latestItems().asTuple()
-                .collectItems().asList().await().indefinitely();
+                .collect().asList().await().indefinitely();
 
         assertThat(list).containsExactly(Tuple4.of(1, 2, 4, 5));
 
         list = Multi.createBy().combining().streams(one, two, four, three).latestItems().asTuple()
-                .collectItems().asList().await().indefinitely();
+                .collect().asList().await().indefinitely();
 
         assertThat(list).containsExactly(Tuple4.of(1, 2, 5, 3), Tuple4.of(1, 2, 5, 4));
     }
@@ -680,18 +680,18 @@ public class MultiCombineTest {
 
         List<Tuple5<Integer, Integer, Integer, Integer, Integer>> list = Multi.createBy().combining()
                 .streams(one, two, three, four, five).latestItems().asTuple()
-                .collectItems().asList().await().indefinitely();
+                .collect().asList().await().indefinitely();
 
         assertThat(list).containsExactly(Tuple5.of(1, 2, 4, 5, 6));
 
         list = Multi.createBy().combining().streams(one, two, four, five, three).latestItems().asTuple()
-                .collectItems().asList().await().indefinitely();
+                .collect().asList().await().indefinitely();
 
         assertThat(list).containsExactly(Tuple5.of(1, 2, 5, 6, 3), Tuple5.of(1, 2, 5, 6, 4));
 
         list = Multi.createBy().combining().streams(one, two, four, Multi.createFrom().<Integer> empty(), three)
                 .latestItems().asTuple()
-                .collectItems().asList().await().indefinitely();
+                .collect().asList().await().indefinitely();
         assertThat(list).isEmpty();
     }
 
@@ -706,18 +706,18 @@ public class MultiCombineTest {
 
         List<Tuple6<Integer, Integer, Integer, Integer, Integer, Integer>> list = Multi.createBy().combining()
                 .streams(one, two, three, four, five, six).latestItems().asTuple()
-                .collectItems().asList().await().indefinitely();
+                .collect().asList().await().indefinitely();
 
         assertThat(list).containsExactly(Tuple6.of(1, 2, 4, 5, 6, 7));
 
         list = Multi.createBy().combining().streams(one, two, four, five, six, three).latestItems().asTuple()
-                .collectItems().asList().await().indefinitely();
+                .collect().asList().await().indefinitely();
 
         assertThat(list).containsExactly(Tuple6.of(1, 2, 5, 6, 7, 3), Tuple6.of(1, 2, 5, 6, 7, 4));
 
         list = Multi.createBy().combining().streams(one, two, four, Multi.createFrom().<Integer> empty(), six, three)
                 .latestItems().asTuple()
-                .collectItems().asList().await().indefinitely();
+                .collect().asList().await().indefinitely();
         assertThat(list).isEmpty();
     }
 
@@ -733,12 +733,12 @@ public class MultiCombineTest {
 
         List<Tuple7<Integer, Integer, Integer, Integer, Integer, Integer, Integer>> list = Multi.createBy().combining()
                 .streams(one, two, three, four, five, six, seven).latestItems().asTuple()
-                .collectItems().asList().await().indefinitely();
+                .collect().asList().await().indefinitely();
 
         assertThat(list).containsExactly(Tuple7.of(1, 2, 4, 5, 6, 7, 8));
 
         list = Multi.createBy().combining().streams(one, two, four, five, six, seven, three).latestItems().asTuple()
-                .collectItems().asList().await().indefinitely();
+                .collect().asList().await().indefinitely();
 
         assertThat(list).containsExactly(Tuple7.of(1, 2, 5, 6, 7, 8, 3),
                 Tuple7.of(1, 2, 5, 6, 7, 8, 4));
@@ -746,7 +746,7 @@ public class MultiCombineTest {
         list = Multi.createBy().combining()
                 .streams(one, two, four, Multi.createFrom().<Integer> empty(), six, three, seven)
                 .latestItems().asTuple()
-                .collectItems().asList().await().indefinitely();
+                .collect().asList().await().indefinitely();
         assertThat(list).isEmpty();
     }
 
@@ -764,13 +764,13 @@ public class MultiCombineTest {
         List<Tuple8<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer>> list = Multi.createBy()
                 .combining()
                 .streams(one, two, three, four, five, six, seven, eight).latestItems().asTuple()
-                .collectItems().asList().await().indefinitely();
+                .collect().asList().await().indefinitely();
 
         assertThat(list).containsExactly(Tuple8.of(1, 2, 4, 5, 6, 7, 8, 9));
 
         list = Multi.createBy().combining().streams(one, two, four, five, six, seven, eight, three).latestItems()
                 .asTuple()
-                .collectItems().asList().await().indefinitely();
+                .collect().asList().await().indefinitely();
 
         assertThat(list).containsExactly(Tuple8.of(1, 2, 5, 6, 7, 8, 9, 3),
                 Tuple8.of(1, 2, 5, 6, 7, 8, 9, 4));
@@ -778,7 +778,7 @@ public class MultiCombineTest {
         list = Multi.createBy().combining()
                 .streams(one, two, four, Multi.createFrom().<Integer> empty(), six, three, seven, eight)
                 .latestItems().asTuple()
-                .collectItems().asList().await().indefinitely();
+                .collect().asList().await().indefinitely();
         assertThat(list).isEmpty();
     }
 
@@ -798,13 +798,13 @@ public class MultiCombineTest {
                 .createBy()
                 .combining()
                 .streams(one, two, three, four, five, six, seven, eight, nine).latestItems().asTuple()
-                .collectItems().asList().await().indefinitely();
+                .collect().asList().await().indefinitely();
 
         assertThat(list).containsExactly(Tuple9.of(1, 2, 4, 5, 6, 7, 8, 9, 10));
 
         list = Multi.createBy().combining().streams(one, two, four, five, six, seven, eight, nine, three).latestItems()
                 .asTuple()
-                .collectItems().asList().await().indefinitely();
+                .collect().asList().await().indefinitely();
 
         assertThat(list).containsExactly(Tuple9.of(1, 2, 5, 6, 7, 8, 9, 10, 3),
                 Tuple9.of(1, 2, 5, 6, 7, 8, 9, 10, 4));
@@ -812,7 +812,7 @@ public class MultiCombineTest {
         list = Multi.createBy().combining()
                 .streams(one, two, four, Multi.createFrom().<Integer> empty(), six, three, seven, eight, nine)
                 .latestItems().asTuple()
-                .collectItems().asList().await().indefinitely();
+                .collect().asList().await().indefinitely();
         assertThat(list).isEmpty();
     }
 

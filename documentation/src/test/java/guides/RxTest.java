@@ -26,17 +26,17 @@ public class RxTest {
 
         List<Integer> list = multi
                 .map(i -> i + 1)
-                .collectItems().asList()
+                .collect().asList()
                 .await().indefinitely();
 
         List<Integer> list2 = multi
                 .flatMap(i -> Multi.createFrom().items(i, i))
-                .collectItems().asList()
+                .collect().asList()
                 .await().indefinitely();
 
         List<Integer> list3 = multi
                 .concatMap(i -> Multi.createFrom().items(i, i))
-                .collectItems().asList()
+                .collect().asList()
                 .await().indefinitely();
 
         // end::rx[]
@@ -68,31 +68,31 @@ public class RxTest {
 
         List<Integer> list = multi
                 .onItem().transform(i -> i + 1)
-                .collectItems().asList()
+                .collect().asList()
                 .await().indefinitely();
 
         List<Integer> list2 = multi
                 .onItem().transformToMultiAndMerge(i -> Multi.createFrom().items(i, i))
-                .collectItems().asList()
+                .collect().asList()
                 .await().indefinitely();
 
         // Equivalent to transformToMultiAndMerge but let you configure the flattening process,
         // failure management, concurrency...
         List<Integer> list3 = multi
                 .onItem().transformToMulti(i -> Multi.createFrom().items(i, i)).merge()
-                .collectItems().asList()
+                .collect().asList()
                 .await().indefinitely();
 
         List<Integer> list4 = multi
                 .onItem().transformToMultiAndConcatenate(i -> Multi.createFrom().items(i, i))
-                .collectItems().asList()
+                .collect().asList()
                 .await().indefinitely();
 
         // Equivalent to transformToMultiAndConcatenate but let you configure the flattening process,
         // failure management...
         List<Integer> list5 = multi
                 .onItem().transformToMulti(i -> Multi.createFrom().items(i, i)).concatenate()
-                .collectItems().asList()
+                .collect().asList()
                 .await().indefinitely();
 
 

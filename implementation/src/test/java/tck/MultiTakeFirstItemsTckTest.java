@@ -19,7 +19,7 @@ public class MultiTakeFirstItemsTckTest extends AbstractPublisherTck<Long> {
     public void limitStageShouldLimitTheOutputElements() {
         assertEquals(await(infiniteStream()
                 .transform().byTakingFirstItems(3)
-                .collectItems().asList()
+                .collect().asList()
                 .subscribeAsCompletionStage()), Arrays.asList(1, 2, 3));
     }
 
@@ -27,7 +27,7 @@ public class MultiTakeFirstItemsTckTest extends AbstractPublisherTck<Long> {
     public void limitStageShouldAllowLimitingToZero() {
         assertEquals(await(infiniteStream()
                 .transform().byTakingFirstItems(0)
-                .collectItems().asList()
+                .collect().asList()
                 .subscribeAsCompletionStage()), Collections.emptyList());
     }
 
@@ -42,7 +42,7 @@ public class MultiTakeFirstItemsTckTest extends AbstractPublisherTck<Long> {
             public void cancel() {
             }
         })).transform().byTakingFirstItems(0)
-                .collectItems().asList()
+                .collect().asList()
                 .subscribeAsCompletionStage()), Collections.emptyList());
     }
 
@@ -52,7 +52,7 @@ public class MultiTakeFirstItemsTckTest extends AbstractPublisherTck<Long> {
         infiniteStream()
                 .onTermination().invoke(() -> cancelled.complete(null))
                 .transform().byTakingFirstItems(1)
-                .collectItems().asList()
+                .collect().asList()
                 .subscribeAsCompletionStage();
         await(cancelled);
     }
@@ -69,7 +69,7 @@ public class MultiTakeFirstItemsTckTest extends AbstractPublisherTck<Long> {
                             }
                         })
                         .transform().byTakingFirstItems(3)
-                        .collectItems().asList()
+                        .collect().asList()
                         .subscribeAsCompletionStage()),
                 Arrays.asList(1, 2, 3));
     }
@@ -87,7 +87,7 @@ public class MultiTakeFirstItemsTckTest extends AbstractPublisherTck<Long> {
                         })
                         .transform().byTakingFirstItems(100)
                         .transform().byTakingFirstItems(3)
-                        .collectItems().asList()
+                        .collect().asList()
                         .subscribeAsCompletionStage());
         await(cancelled);
     }

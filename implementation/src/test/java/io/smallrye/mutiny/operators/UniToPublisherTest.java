@@ -218,6 +218,6 @@ public class UniToPublisherTest {
     public void testUniOfVoid() {
         Uni<Void> uni = Uni.createFrom().voidItem();
         Multi<Void> publisher = uni.toMulti();
-        assertThat(publisher.collectItems().asList().await().indefinitely()).isEmpty();
+        assertThat(publisher.collect().asList().await().indefinitely()).isEmpty();
     }
 }

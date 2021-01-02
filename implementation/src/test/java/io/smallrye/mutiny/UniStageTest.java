@@ -71,7 +71,7 @@ public class UniStageTest {
                 .stage(self -> self
                         .onItem().transform(i -> i + 1)
                         .onItem().transform(i -> Integer.toString(i)))
-                .stage(self -> self.collectItems().first())
+                .stage(self -> self.collect().first())
                 .stage(self -> self.await().indefinitely());
         assertThat(result).isEqualTo("24");
     }

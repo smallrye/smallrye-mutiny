@@ -18,7 +18,7 @@ public class ToSingleFailOnNull<T> implements Function<Multi<T>, Single<T>> {
 
     @Override
     public Single<T> apply(Multi<T> multi) {
-        return multi.collectItems().first()
+        return multi.collect().first()
                 .onItem().ifNull().failWith(supplier)
                 .convert().with(UniRxConverters.toSingle())
                 .map(Optional::get);

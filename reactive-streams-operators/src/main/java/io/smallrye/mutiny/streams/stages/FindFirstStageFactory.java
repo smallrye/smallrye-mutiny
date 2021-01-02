@@ -20,7 +20,7 @@ public class FindFirstStageFactory implements TerminalStageFactory<Stage.FindFir
     private static final TerminalStage<?, Optional<?>> INSTANCE = source -> {
         CompletableFuture<Optional<?>> future = new CompletableFuture<>();
         source
-                .collectItems().first()
+                .collect().first()
                 .subscribe().with(
                         item -> future.complete(Optional.ofNullable(item)),
                         future::completeExceptionally);

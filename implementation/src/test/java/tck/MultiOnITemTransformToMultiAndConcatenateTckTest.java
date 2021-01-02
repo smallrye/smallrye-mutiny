@@ -42,7 +42,7 @@ public class MultiOnITemTransformToMultiAndConcatenateTckTest extends AbstractPu
         assertEquals(await(Multi.createFrom().items(1, 2, 3)
                 .emitOn(executor)
                 .onItem().transformToMultiAndConcatenate(n -> Multi.createFrom().items(n, n, n))
-                .collectItems().asList()
+                .collect().asList()
                 .subscribeAsCompletionStage()), Arrays.asList(1, 1, 1, 2, 2, 2, 3, 3, 3));
     }
 
@@ -50,7 +50,7 @@ public class MultiOnITemTransformToMultiAndConcatenateTckTest extends AbstractPu
     public void flatMapStageShouldAllowEmptySubStreams() {
         assertEquals(await(Multi.createFrom().items(Multi.createFrom().empty(), Multi.createFrom().items(1, 2))
                 .onItem().transformToMultiAndConcatenate(Function.identity())
-                .collectItems().asList()
+                .collect().asList()
                 .subscribeAsCompletionStage()), Arrays.asList(1, 2));
     }
 
@@ -67,7 +67,7 @@ public class MultiOnITemTransformToMultiAndConcatenateTckTest extends AbstractPu
                     .onItem().transformToMultiAndConcatenate(foo -> {
                         throw new QuietRuntimeException("failed");
                     })
-                    .collectItems().asList()
+                    .collect().asList()
                     .subscribeAsCompletionStage();
             await(cancelled);
             await(result);
@@ -79,7 +79,7 @@ public class MultiOnITemTransformToMultiAndConcatenateTckTest extends AbstractPu
         assertThrows(QuietRuntimeException.class,
                 () -> await(Multi.createFrom().failure(new QuietRuntimeException("failed"))
                         .onItem().transformToMultiAndConcatenate(x -> Multi.createFrom().item(x))
-                        .collectItems().asList()
+                        .collect().asList()
                         .subscribeAsCompletionStage()));
     }
 
@@ -92,7 +92,7 @@ public class MultiOnITemTransformToMultiAndConcatenateTckTest extends AbstractPu
                     .onItem()
                     .transformToMultiAndConcatenate(
                             f -> Multi.createFrom().failure(new QuietRuntimeException("failed")))
-                    .collectItems().asList()
+                    .collect().asList()
                     .subscribeAsCompletionStage();
             await(cancelled);
             await(result);
@@ -109,7 +109,7 @@ public class MultiOnITemTransformToMultiAndConcatenateTckTest extends AbstractPu
                 .transformToMultiAndConcatenate(
                         i -> infiniteStream().onTermination().invoke(() -> innerCancelled.complete(null)))
                 .transform().byTakingFirstItems(5)
-                .collectItems().asList()
+                .collect().asList()
                 .subscribeAsCompletionStage());
 
         await(outerCancelled);

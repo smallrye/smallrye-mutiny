@@ -25,7 +25,7 @@ public class RetryTest {
                 .onFailure().retry().atMost(3);
         // end::retry-at-most[]
         assertThatThrownBy(() -> u.await().indefinitely()).hasMessageContaining("boom");
-        assertThatThrownBy(() -> m.collectItems().asList()
+        assertThatThrownBy(() -> m.collect().asList()
                 .await().indefinitely()).hasMessageContaining("boom");
     }
 

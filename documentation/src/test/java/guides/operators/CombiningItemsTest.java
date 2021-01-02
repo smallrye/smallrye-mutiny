@@ -113,10 +113,10 @@ public class CombiningItemsTest<A, B> {
                 .latestItems().using(list -> combineItems(list));
         // end::combine-last[]
 
-        List<Tuple2<A, B>> list = multi1.collectItems().asList().await().indefinitely();
+        List<Tuple2<A, B>> list = multi1.collect().asList().await().indefinitely();
         assertThat(list).hasSize(3);
         assertThat(list.toString()).contains("a3", "b1", "b2", "b3").doesNotContain("a1", "a2");
-        List<String> strings = multi2.collectItems().asList().await().indefinitely();
+        List<String> strings = multi2.collect().asList().await().indefinitely();
         assertThat(strings).hasSize(3).containsExactly("a3b1", "a3b2", "a3b3");
     }
 

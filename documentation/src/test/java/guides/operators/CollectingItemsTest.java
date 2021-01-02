@@ -21,14 +21,14 @@ public class CollectingItemsTest {
     public void testList() {
        // tag::list[]
        Multi<String> multi = getMulti();
-       Uni<List<String>> uni = multi.collectItems().asList();
+       Uni<List<String>> uni = multi.collect().asList();
        // end::list[]
 
        assertThat(uni.await().indefinitely()).containsExactly("a", "b", "c");
 
        // tag::first[]
-       Uni<String> first = multi.collectItems().first();
-       Uni<String> last = multi.collectItems().last();
+       Uni<String> first = multi.collect().first();
+       Uni<String> last = multi.collect().last();
        // end::first[]
 
        assertThat(first.await().indefinitely()).isEqualTo("a");
@@ -40,7 +40,7 @@ public class CollectingItemsTest {
        // tag::map[]
        Multi<String> multi = getMulti();
        Uni<Map<String, String>> uni =
-               multi.collectItems()
+               multi.collect()
                        .asMap(item -> getUniqueKeyForItem(item));
        // end::map[]
 
@@ -52,7 +52,7 @@ public class CollectingItemsTest {
         // tag::multimap[]
         Multi<String> multi = getMulti();
         Uni<Map<String, Collection<String>>> uni =
-                multi.collectItems()
+                multi.collect()
                         .asMultiMap(item -> getKeyForItem(item));
         // end::multimap[]
 
@@ -63,14 +63,14 @@ public class CollectingItemsTest {
     public void testCustomAccumulator() {
         // tag::accumulator[]
         Multi<String> multi = getMulti();
-        Uni<MyCollection> uni = multi.collectItems()
+        Uni<MyCollection> uni = multi.collect()
                 .in(MyCollection::new, (col, item) -> col.add(item));
         // end::accumulator[]
 
         assertThat(uni.await().indefinitely()).hasSize(3);
 
         // tag::collector[]
-        Uni<Long> count = multi.collectItems()
+        Uni<Long> count = multi.collect()
                 .with(Collectors.counting());
         // end::collector[]
 

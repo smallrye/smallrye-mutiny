@@ -2,6 +2,7 @@ package io.smallrye.mutiny.groups;
 
 import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -9,10 +10,13 @@ import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
-import io.smallrye.mutiny.operators.MultiCollector;
+import io.smallrye.mutiny.infrastructure.Infrastructure;
+import io.smallrye.mutiny.operators.multi.MultiCollectorOp;
+import io.smallrye.mutiny.operators.multi.MultiLastItemOp;
 
 /**
  * Collects / aggregates items from the upstream and send the resulting <em>collection</em> / structure when the
@@ -39,7 +43,7 @@ public class MultiCollect<T> {
      * @return the produced uni
      */
     public Uni<T> first() {
-        return MultiCollector.first(upstream);
+        return Uni.createFrom().multi(upstream);
     }
 
     /**
@@ -53,7 +57,7 @@ public class MultiCollect<T> {
      * @return the produced uni
      */
     public Uni<T> last() {
-        return MultiCollector.last(upstream);
+        return Uni.createFrom().publisher(Infrastructure.onMultiCreation(new MultiLastItemOp<>(upstream)));
     }
 
     /**
@@ -63,7 +67,7 @@ public class MultiCollect<T> {
      * @return the {@link Uni} emitting the list of items from this {@link Multi}.
      */
     public Uni<List<T>> asList() {
-        return MultiCollector.list(upstream);
+        return collector(upstream, Collectors.toList(), false);
     }
 
     /**
@@ -76,7 +80,7 @@ public class MultiCollect<T> {
      * @return a {@link Uni} emitted the collected object as item, when the {@link Multi} completes
      */
     public <X, A> Uni<X> with(Collector<? super T, A, ? extends X> collector) {
-        return MultiCollector.collector(upstream, collector, true);
+        return collector(upstream, collector, true);
     }
 
     /**
@@ -99,7 +103,9 @@ public class MultiCollect<T> {
      * @return a {@link Uni} emitting the collected container as item when this {@link Multi} completes
      */
     public <X> Uni<X> in(Supplier<X> supplier, BiConsumer<X, T> accumulator) {
-        return MultiCollector.collectInto(upstream, supplier, accumulator);
+        Collector<? super T, X, X> collector = Collector.of(supplier, accumulator, (r, r2) -> r,
+                Collector.Characteristics.IDENTITY_FINISH);
+        return collector(upstream, collector, false);
     }
 
     /**
@@ -138,9 +144,10 @@ public class MultiCollect<T> {
      * @return a {@link Uni} emitting an item with the collected {@link Map}. The uni emits the item when this
      *         {@link Multi} completes
      */
-    public <K, V> Uni<Map<K, V>> asMap(Function<? super T, ? extends K> keyMapper,
+    public <K, V> Uni<Map<K, V>> asMap(
+            Function<? super T, ? extends K> keyMapper,
             Function<? super T, ? extends V> valueMapper) {
-        return MultiCollector.map(upstream, keyMapper, valueMapper);
+        return collector(upstream, Collectors.toMap(keyMapper, valueMapper), false);
     }
 
     /**
@@ -161,9 +168,21 @@ public class MultiCollect<T> {
      * @return a {@link Uni} emitting an item with the collected {@link Map}. The uni emits the item when this
      *         {@link Multi} completes
      */
-    public <K, V> Uni<Map<K, Collection<V>>> asMultiMap(Function<? super T, ? extends K> keyMapper,
+    public <K, V> Uni<Map<K, Collection<V>>> asMultiMap(
+            Function<? super T, ? extends K> keyMapper,
             Function<? super T, ? extends V> valueMapper) {
-        return MultiCollector.multimap(upstream, keyMapper, valueMapper);
+        return collector(upstream, Collectors.toMap(
+                keyMapper,
+                res -> {
+                    List<V> list = new ArrayList<>();
+                    V mapped = valueMapper.apply(res);
+                    list.add(mapped);
+                    return list;
+                },
+                (vs, vs2) -> {
+                    vs.addAll(vs2);
+                    return vs;
+                }), false);
     }
 
     /**
@@ -181,7 +200,14 @@ public class MultiCollect<T> {
      *         {@link Multi} completes
      */
     public <K> Uni<Map<K, Collection<T>>> asMultiMap(Function<? super T, ? extends K> keyMapper) {
-        return MultiCollector.multimap(upstream, keyMapper, Function.identity());
+        return asMultiMap(keyMapper, Function.identity());
+    }
+
+    private static <T, A, R> Uni<R> collector(Multi<T> upstream, Collector<? super T, A, ? extends R> collector,
+            boolean acceptNullAsInitialValue) {
+        Multi<R> multi = Infrastructure
+                .onMultiCreation(new MultiCollectorOp<>(upstream, collector, acceptNullAsInitialValue));
+        return Uni.createFrom().publisher(multi);
     }
 
 }

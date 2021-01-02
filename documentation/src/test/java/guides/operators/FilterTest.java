@@ -16,14 +16,14 @@ public class FilterTest {
         // tag::filter[]
         List<Integer> list = multi
                 .transform().byFilteringItemsWith(i -> i > 6)
-                .collectItems().asList()
+                .collect().asList()
                 .await().indefinitely();
         // end::filter[]
 
         // tag::test[]
         List<Integer> list2 = multi
                 .transform().byTestingItemsWith(i -> Uni.createFrom().item(i > 6))
-                .collectItems().asList()
+                .collect().asList()
                 .await().indefinitely();
         // end::test[]
 
@@ -37,17 +37,17 @@ public class FilterTest {
         // tag::take[]
         List<Integer> list = multi
                 .transform().byTakingFirstItems(2)
-                .collectItems().asList()
+                .collect().asList()
                 .await().indefinitely();
 
         List<Integer> list2 = multi
                 .transform().byTakingItemsWhile(i -> i < 3)
-                .collectItems().asList()
+                .collect().asList()
                 .await().indefinitely();
 
         List<Integer> list3 = multi
                 .transform().byTakingLastItems(2)
-                .collectItems().asList()
+                .collect().asList()
                 .await().indefinitely();
         // end::take[]
         assertThat(list).containsExactly(1, 2);
@@ -61,17 +61,17 @@ public class FilterTest {
         // tag::skip[]
         List<Integer> list = multi
                 .transform().bySkippingFirstItems(8)
-                .collectItems().asList()
+                .collect().asList()
                 .await().indefinitely();
 
         List<Integer> list2 = multi
                 .transform().bySkippingItemsWhile(i -> i < 9)
-                .collectItems().asList()
+                .collect().asList()
                 .await().indefinitely();
 
         List<Integer> list3 = multi
                 .transform().bySkippingLastItems(8)
-                .collectItems().asList()
+                .collect().asList()
                 .await().indefinitely();
         // end::skip[]
         assertThat(list).containsExactly(9, 10);
@@ -85,14 +85,14 @@ public class FilterTest {
         // tag::distinct[]
         List<Integer> list = multi
                 .transform().byDroppingDuplicates()
-                .collectItems().asList()
+                .collect().asList()
                 .await().indefinitely();
         // end::distinct[]
 
         // tag::repetition[]
         List<Integer> list2 = multi
                 .transform().byDroppingRepetitions()
-                .collectItems().asList()
+                .collect().asList()
                 .await().indefinitely();
         // end::repetition[]
         assertThat(list).containsExactly(1, 2, 3, 4, 5, 6);

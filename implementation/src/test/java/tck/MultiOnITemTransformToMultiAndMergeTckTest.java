@@ -42,7 +42,7 @@ public class MultiOnITemTransformToMultiAndMergeTckTest extends AbstractPublishe
         assertEquals(await(Multi.createFrom().items(1, 2, 3)
                 .emitOn(executor)
                 .onItem().transformToMultiAndMerge(n -> Multi.createFrom().items(n, n, n))
-                .collectItems().asList()
+                .collect().asList()
                 .subscribeAsCompletionStage()), Arrays.asList(1, 1, 1, 2, 2, 2, 3, 3, 3));
     }
 
@@ -50,7 +50,7 @@ public class MultiOnITemTransformToMultiAndMergeTckTest extends AbstractPublishe
     public void flatMapStageShouldAllowEmptySubStreams() {
         assertEquals(await(Multi.createFrom().items(Multi.createFrom().empty(), Multi.createFrom().items(1, 2))
                 .onItem().transformToMultiAndMerge(Function.identity())
-                .collectItems().asList()
+                .collect().asList()
                 .subscribeAsCompletionStage()), Arrays.asList(1, 2));
     }
 
@@ -67,7 +67,7 @@ public class MultiOnITemTransformToMultiAndMergeTckTest extends AbstractPublishe
                     .onItem().transformToMultiAndMerge(foo -> {
                         throw new QuietRuntimeException("failed");
                     })
-                    .collectItems().asList()
+                    .collect().asList()
                     .subscribeAsCompletionStage();
             await(cancelled);
             await(result);
@@ -79,7 +79,7 @@ public class MultiOnITemTransformToMultiAndMergeTckTest extends AbstractPublishe
         assertThrows(QuietRuntimeException.class,
                 () -> await(Multi.createFrom().failure(new QuietRuntimeException("failed"))
                         .onItem().transformToMultiAndMerge(x -> Multi.createFrom().item(x))
-                        .collectItems().asList()
+                        .collect().asList()
                         .subscribeAsCompletionStage()));
     }
 
@@ -91,7 +91,7 @@ public class MultiOnITemTransformToMultiAndMergeTckTest extends AbstractPublishe
                     .onTermination().invoke(() -> cancelled.complete(null))
                     .onItem()
                     .transformToMultiAndMerge(f -> Multi.createFrom().failure(new QuietRuntimeException("failed")))
-                    .collectItems().asList()
+                    .collect().asList()
                     .subscribeAsCompletionStage();
             await(cancelled);
             await(result);
@@ -107,7 +107,7 @@ public class MultiOnITemTransformToMultiAndMergeTckTest extends AbstractPublishe
                 .onItem().transformToMultiAndMerge(i -> infiniteStream().onTermination()
                         .invoke(() -> innerCancelled.complete(null)))
                 .transform().byTakingFirstItems(5)
-                .collectItems().asList()
+                .collect().asList()
                 .subscribeAsCompletionStage());
 
         await(outerCancelled);

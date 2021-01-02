@@ -9,6 +9,7 @@ This is also called a _reduction_ in functional programming.
 
 The `Uni` fires its item when the `Multi` completes.
 Mutiny provides multiple operators to deal with that scenario.
+They are available from the `collect()` group.
 For example, you can store the items in a list, emit the list on completion, or use a Java `Collector` to customize the aggregation.
 
 IMPORTANT: Don't collect items from infinite streams or you will likely end with an out-of-memory failure!
@@ -78,7 +79,7 @@ include::{include_dir}/CollectingItemsTest.java[tag=collector]
 
 == Getting the first and last items
 
-While they are not strictly speaking collecting items, the `collectItems().first()` and `collectItems().last()` allows retrieving the first and last item from a `Multi`:
+While they are not strictly speaking collecting items, the `collect().first()` and `collect().last()` allows retrieving the first and last item from a `Multi`:
 
 [source, java, indent=0]
 ----
