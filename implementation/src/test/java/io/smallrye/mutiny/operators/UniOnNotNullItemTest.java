@@ -235,18 +235,18 @@ public class UniOnNotNullItemTest {
     public void testTransformToMulti() {
         assertThat(Uni.createFrom().item("hello")
                 .onItem().ifNotNull().transformToMulti(x -> Multi.createFrom().item(x.toUpperCase()))
-                .collectItems().first()
+                .collect().first()
                 .await().indefinitely()).isEqualTo("HELLO");
 
         assertThat(Uni.createFrom().item(() -> (String) null)
                 .onItem().ifNotNull().transformToMulti(x -> Multi.createFrom().item(x.toUpperCase()))
-                .collectItems().first()
+                .collect().first()
                 .onItem().ifNull().continueWith("yolo")
                 .await().indefinitely()).isEqualTo("yolo");
 
         assertThatThrownBy(() -> Uni.createFrom().<String> failure(new Exception("boom"))
                 .onItem().ifNotNull().transformToMulti(x -> Multi.createFrom().item(x.toUpperCase()))
-                .collectItems().first()
+                .collect().first()
                 .onItem().ifNull().continueWith("yolo")
                 .await().indefinitely()).hasMessageContaining("boom");
     }
@@ -256,18 +256,18 @@ public class UniOnNotNullItemTest {
     public void testProduceMultiDeprecated() {
         assertThat(Uni.createFrom().item("hello")
                 .onItem().ifNotNull().produceMulti(x -> Multi.createFrom().item(x.toUpperCase()))
-                .collectItems().first()
+                .collect().first()
                 .await().indefinitely()).isEqualTo("HELLO");
 
         assertThat(Uni.createFrom().item(() -> (String) null)
                 .onItem().ifNotNull().produceMulti(x -> Multi.createFrom().item(x.toUpperCase()))
-                .collectItems().first()
+                .collect().first()
                 .onItem().ifNull().continueWith("yolo")
                 .await().indefinitely()).isEqualTo("yolo");
 
         assertThatThrownBy(() -> Uni.createFrom().<String> failure(new Exception("boom"))
                 .onItem().ifNotNull().produceMulti(x -> Multi.createFrom().item(x.toUpperCase()))
-                .collectItems().first()
+                .collect().first()
                 .onItem().ifNull().continueWith("yolo")
                 .await().indefinitely()).hasMessageContaining("boom");
     }

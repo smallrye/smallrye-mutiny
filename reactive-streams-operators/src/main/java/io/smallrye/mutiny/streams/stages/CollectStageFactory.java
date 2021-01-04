@@ -37,7 +37,7 @@ public class CollectStageFactory implements TerminalStageFactory<Stage.Collect> 
 
         @Override
         public CompletionStage<O> apply(Multi<I> source) {
-            return source.collectItems().with(collector).subscribeAsCompletionStage();
+            return source.collect().with(collector).subscribeAsCompletionStage();
         }
     }
 

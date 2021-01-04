@@ -20,7 +20,7 @@ public class MultiConcatTckTest extends AbstractPublisherTck<Long> {
                 Multi.createBy().concatenating().streams(
                         Multi.createFrom().items(1, 2, 3),
                         Multi.createFrom().items(4, 5, 6))
-                        .collectItems().asList()
+                        .collect().asList()
                         .subscribeAsCompletionStage()),
                 Arrays.asList(1, 2, 3, 4, 5, 6));
     }
@@ -30,7 +30,7 @@ public class MultiConcatTckTest extends AbstractPublisherTck<Long> {
         assertThrows(QuietRuntimeException.class, () -> await(
                 Multi.createBy().concatenating().streams(
                         Multi.createFrom().items(1, 2, 3),
-                        Multi.createFrom().failure(new QuietRuntimeException("failed"))).collectItems().asList()
+                        Multi.createFrom().failure(new QuietRuntimeException("failed"))).collect().asList()
                         .subscribeAsCompletionStage()));
     }
 
@@ -40,7 +40,7 @@ public class MultiConcatTckTest extends AbstractPublisherTck<Long> {
                 Multi.createBy().concatenating().streams(
                         Multi.createFrom().empty(),
                         Multi.createFrom().items(1, 2, 3))
-                        .collectItems().asList()
+                        .collect().asList()
                         .subscribeAsCompletionStage()),
                 Arrays.asList(1, 2, 3));
     }
@@ -51,7 +51,7 @@ public class MultiConcatTckTest extends AbstractPublisherTck<Long> {
                 Multi.createBy().concatenating().streams(
                         Multi.createFrom().items(1, 2, 3),
                         Multi.createFrom().empty())
-                        .collectItems().asList()
+                        .collect().asList()
                         .subscribeAsCompletionStage()),
                 Arrays.asList(1, 2, 3));
     }
@@ -62,7 +62,7 @@ public class MultiConcatTckTest extends AbstractPublisherTck<Long> {
                 Multi.createBy().concatenating().streams(
                         Multi.createFrom().empty(),
                         Multi.createFrom().empty())
-                        .collectItems().asList()
+                        .collect().asList()
                         .subscribeAsCompletionStage()),
                 Collections.emptyList());
     }
@@ -77,7 +77,7 @@ public class MultiConcatTckTest extends AbstractPublisherTck<Long> {
                         Multi.createBy().concatenating().streams(
                                 Multi.createFrom().items(7, 8, 9),
                                 Multi.createFrom().items(10, 11, 12)))
-                        .collectItems().asList()
+                        .collect().asList()
                         .subscribeAsCompletionStage()),
                 Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12));
     }

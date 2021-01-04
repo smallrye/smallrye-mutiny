@@ -29,10 +29,10 @@ public class TakeTest {
         Multi<Integer> takeForDuration = multi.transform().byTakingItemsFor(Duration.ofSeconds(1));
         // end::take-for[]
 
-        assertThat(firstThreeItems.collectItems().asList().await().indefinitely()).containsExactly(1, 2, 3);
-        assertThat(takeWhile.collectItems().asList().await().indefinitely()).containsExactly(1, 2, 3);
-        assertThat(lastThreeItems.collectItems().asList().await().indefinitely()).containsExactly(7, 8, 9);
-        assertThat(takeForDuration.collectItems().asList().await().indefinitely()).containsExactly(1, 2, 3, 4, 5, 6, 7, 8, 9);
+        assertThat(firstThreeItems.collect().asList().await().indefinitely()).containsExactly(1, 2, 3);
+        assertThat(takeWhile.collect().asList().await().indefinitely()).containsExactly(1, 2, 3);
+        assertThat(lastThreeItems.collect().asList().await().indefinitely()).containsExactly(7, 8, 9);
+        assertThat(takeForDuration.collect().asList().await().indefinitely()).containsExactly(1, 2, 3, 4, 5, 6, 7, 8, 9);
 
     }
 
@@ -56,10 +56,10 @@ public class TakeTest {
         Multi<Integer> skipForDuration = multi.transform().bySkippingItemsFor(Duration.ofSeconds(1));
         // end::skip-for[]
 
-        assertThat(skipThreeItems.collectItems().asList().await().indefinitely()).containsExactly(4, 5, 6, 7, 8, 9);
-        assertThat(skipLastThreeItems.collectItems().asList().await().indefinitely()).containsExactly(1, 2, 3, 4 ,5, 6);
-        assertThat(skipWhile.collectItems().asList().await().indefinitely()).containsExactly(4, 5, 6, 7, 8, 9);
-        assertThat(skipForDuration.collectItems().asList().await().indefinitely()).isEmpty();
+        assertThat(skipThreeItems.collect().asList().await().indefinitely()).containsExactly(4, 5, 6, 7, 8, 9);
+        assertThat(skipLastThreeItems.collect().asList().await().indefinitely()).containsExactly(1, 2, 3, 4 ,5, 6);
+        assertThat(skipWhile.collect().asList().await().indefinitely()).containsExactly(4, 5, 6, 7, 8, 9);
+        assertThat(skipForDuration.collect().asList().await().indefinitely()).isEmpty();
 
     }
 }

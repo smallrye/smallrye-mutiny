@@ -22,7 +22,7 @@ public class MultiSkipItemsWhileTckTest extends AbstractPublisherTck<Long> {
     public void dropWhileStageShouldSupportDroppingElements() {
         assertEquals(await(Multi.createFrom().items(1, 2, 3, 4, 0)
                 .transform().bySkippingItemsWhile(i -> i < 3)
-                .collectItems().asList()
+                .collect().asList()
                 .subscribeAsCompletionStage()), Arrays.asList(3, 4, 0));
     }
 
@@ -35,7 +35,7 @@ public class MultiSkipItemsWhileTckTest extends AbstractPublisherTck<Long> {
                     .transform().bySkippingItemsWhile(i -> {
                         throw new QuietRuntimeException("failed");
                     })
-                    .collectItems().asList()
+                    .collect().asList()
                     .subscribeAsCompletionStage();
             await(cancelled);
             await(result);
@@ -47,7 +47,7 @@ public class MultiSkipItemsWhileTckTest extends AbstractPublisherTck<Long> {
         assertThrows(QuietRuntimeException.class,
                 () -> await(Multi.createFrom().<Integer> failure(new QuietRuntimeException("failed"))
                         .transform().bySkippingItemsWhile(i -> i < 3)
-                        .collectItems().asList()
+                        .collect().asList()
                         .subscribeAsCompletionStage()));
     }
 
@@ -60,7 +60,7 @@ public class MultiSkipItemsWhileTckTest extends AbstractPublisherTck<Long> {
                     }
                 })
                 .transform().bySkippingItemsWhile(i -> i < 3)
-                .collectItems().asList()
+                .collect().asList()
                 .subscribeAsCompletionStage()));
     }
 
@@ -76,7 +76,7 @@ public class MultiSkipItemsWhileTckTest extends AbstractPublisherTck<Long> {
                         return false;
                     }
                 })
-                .collectItems().asList()
+                .collect().asList()
                 .subscribeAsCompletionStage()), Arrays.asList(3, 4));
     }
 
@@ -84,7 +84,7 @@ public class MultiSkipItemsWhileTckTest extends AbstractPublisherTck<Long> {
     public void dropWhileStageShouldAllowCompletionWhileDropping() {
         assertEquals(await(Multi.createFrom().items(1, 1, 1, 1)
                 .transform().bySkippingItemsWhile(i -> i < 3)
-                .collectItems().asList()
+                .collect().asList()
                 .subscribeAsCompletionStage()), Collections.emptyList());
     }
 

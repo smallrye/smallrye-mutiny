@@ -480,7 +480,7 @@ public class MultiTransformToMultiTest {
         List<Integer> list = Multi.createFrom().range(1, 4)
                 .onItem().produceCompletionStage(i -> CompletableFuture.supplyAsync(() -> i + 1))
                 .merge()
-                .collectItems().asList().await().indefinitely();
+                .collect().asList().await().indefinitely();
 
         assertThat(list).hasSize(3).contains(2, 3, 4);
     }
@@ -492,7 +492,7 @@ public class MultiTransformToMultiTest {
             Multi.createFrom().range(1, 4)
                     .onItem().produceCompletionStage(i -> CompletableFuture.supplyAsync(() -> null))
                     .merge()
-                    .collectItems().asList().await().indefinitely();
+                    .collect().asList().await().indefinitely();
         }).isInstanceOf(NullPointerException.class);
     }
 
@@ -507,7 +507,7 @@ public class MultiTransformToMultiTest {
                         return cs;
                     })
                     .merge()
-                    .collectItems().asList().await().indefinitely();
+                    .collect().asList().await().indefinitely();
         }).isInstanceOf(IllegalStateException.class)
                 .hasMessage("boom");
     }
@@ -521,7 +521,7 @@ public class MultiTransformToMultiTest {
                         throw new IllegalStateException("boom");
                     })
                     .merge()
-                    .collectItems().asList().await().indefinitely();
+                    .collect().asList().await().indefinitely();
         }).isInstanceOf(IllegalStateException.class)
                 .hasMessage("boom");
     }
@@ -535,7 +535,7 @@ public class MultiTransformToMultiTest {
                         return null;
                     })
                     .merge()
-                    .collectItems().asList().await().indefinitely();
+                    .collect().asList().await().indefinitely();
         }).isInstanceOf(NullPointerException.class);
     }
 
@@ -545,7 +545,7 @@ public class MultiTransformToMultiTest {
                 .onItem()
                 .transformToUni(i -> Uni.createFrom().completionStage(CompletableFuture.supplyAsync(() -> i + 1)))
                 .merge()
-                .collectItems().asList().await().indefinitely();
+                .collect().asList().await().indefinitely();
 
         assertThat(list).hasSize(3).contains(2, 3, 4);
     }
@@ -556,7 +556,7 @@ public class MultiTransformToMultiTest {
         List<Integer> list = Multi.createFrom().range(1, 4)
                 .onItem().produceIterable(i -> Arrays.asList(i, i + 1))
                 .merge()
-                .collectItems().asList().await().indefinitely();
+                .collect().asList().await().indefinitely();
 
         assertThat(list).hasSize(6).containsExactlyInAnyOrder(1, 2, 2, 3, 3, 4);
     }
@@ -565,7 +565,7 @@ public class MultiTransformToMultiTest {
     public void testTransformToIterable() {
         List<Integer> list = Multi.createFrom().range(1, 4)
                 .onItem().transformToIterable(i -> Arrays.asList(i, i + 1))
-                .collectItems().asList().await().indefinitely();
+                .collect().asList().await().indefinitely();
         assertThat(list).hasSize(6).containsExactlyInAnyOrder(1, 2, 2, 3, 3, 4);
     }
 
@@ -576,7 +576,7 @@ public class MultiTransformToMultiTest {
                     .onItem().<Integer> transformToIterable(i -> {
                         throw new IllegalStateException("boom");
                     })
-                    .collectItems().asList().await().indefinitely();
+                    .collect().asList().await().indefinitely();
         })
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessage("boom");
@@ -587,7 +587,7 @@ public class MultiTransformToMultiTest {
         assertThatThrownBy(() -> {
             Multi.createFrom().range(1, 4)
                     .onItem().<Integer> transformToIterable(i -> null)
-                    .collectItems().asList().await().indefinitely();
+                    .collect().asList().await().indefinitely();
         })
                 .isInstanceOf(NullPointerException.class);
     }
@@ -597,7 +597,7 @@ public class MultiTransformToMultiTest {
         assertThatThrownBy(() -> {
             Multi.createFrom().range(1, 4)
                     .onItem().<Integer> produceIterable(i -> null).concatenate()
-                    .collectItems().asList().await().indefinitely();
+                    .collect().asList().await().indefinitely();
         })
                 .isInstanceOf(NullPointerException.class);
     }
@@ -931,7 +931,7 @@ public class MultiTransformToMultiTest {
     @RepeatedTest(10)
     public void testThatConcurrencyDontMissItems() {
         int max = 10000;
-        List<Integer> expected = Multi.createFrom().range(0, max).collectItems().asList().await().indefinitely();
+        List<Integer> expected = Multi.createFrom().range(0, max).collect().asList().await().indefinitely();
         AssertSubscriber<Integer> subscriber = Multi.createFrom().range(0, max)
                 .onItem()
                 .transformToMulti(
@@ -948,7 +948,7 @@ public class MultiTransformToMultiTest {
     @RepeatedTest(10)
     public void testThatConcatenateDontMissItemsAndPreserveOrder() {
         int max = 10000;
-        List<Integer> expected = Multi.createFrom().range(0, max).collectItems().asList().await().indefinitely();
+        List<Integer> expected = Multi.createFrom().range(0, max).collect().asList().await().indefinitely();
         AssertSubscriber<Integer> subscriber = Multi.createFrom().range(0, max)
                 .onItem()
                 .transformToMulti(

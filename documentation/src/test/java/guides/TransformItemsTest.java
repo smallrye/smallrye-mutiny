@@ -32,7 +32,7 @@ public class TransformItemsTest {
         Multi<String> m = multi
                 .onItem().transform(i -> i.toUpperCase());
         // end::multi-transform[]
-        assertThat(m.collectItems().asList().await().indefinitely()).containsExactly("A", "B", "C");
+        assertThat(m.collect().asList().await().indefinitely()).containsExactly("A", "B", "C");
     }
 
     @Test

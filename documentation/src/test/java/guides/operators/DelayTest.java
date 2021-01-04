@@ -47,7 +47,7 @@ public class DelayTest {
                 Uni.createFrom().nullItem().onItem().delayIt().by(Duration.ofMillis(10))
             );
         // end::delay-multi[]
-        assertThat(delayed.collectItems().asList().await().indefinitely()).containsExactly(1, 2, 3, 4, 5);
+        assertThat(delayed.collect().asList().await().indefinitely()).containsExactly(1, 2, 3, 4, 5);
     }
 
     @Test
@@ -60,7 +60,7 @@ public class DelayTest {
         Multi<Integer> delayed = Multi.createBy().combining().streams(ticks, multi)
                 .using((x, item) -> item);
         // end::throttling-multi[]
-        assertThat(delayed.collectItems().asList().await().indefinitely()).containsExactly(1, 2, 3, 4, 5);
+        assertThat(delayed.collect().asList().await().indefinitely()).containsExactly(1, 2, 3, 4, 5);
     }
 
     @Test
@@ -73,7 +73,7 @@ public class DelayTest {
                     return Uni.createFrom().nullItem().onItem().delayIt().by(delay);
                 });
         // end::delay-multi-random[]
-        assertThat(delayed.collectItems().asList()
+        assertThat(delayed.collect().asList()
                 .await().indefinitely())
                 .containsExactlyInAnyOrder(1, 2, 3, 4, 5);
     }

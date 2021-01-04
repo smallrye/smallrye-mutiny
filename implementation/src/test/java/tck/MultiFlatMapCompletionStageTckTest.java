@@ -25,7 +25,7 @@ public class MultiFlatMapCompletionStageTckTest extends AbstractPublisherTck<Lon
         CompletableFuture<Integer> three = new CompletableFuture<>();
         CompletionStage<List<Integer>> result = Multi.createFrom().<CompletionStage<Integer>> items(one, two, three)
                 .onItem().transformToUni(i -> Uni.createFrom().completionStage(i)).merge()
-                .collectItems().asList()
+                .collect().asList()
                 .subscribeAsCompletionStage();
         one.complete(1);
         two.complete(2);
@@ -56,7 +56,7 @@ public class MultiFlatMapCompletionStageTckTest extends AbstractPublisherTck<Lon
         CompletableFuture<Integer> three = new CompletableFuture<>();
         CompletionStage<List<Integer>> result = Multi.createFrom().<CompletionStage<Integer>> items(one, two, three)
                 .onItem().transformToUni(i -> Uni.createFrom().completionStage(i)).merge(1)
-                .collectItems().asList()
+                .collect().asList()
                 .subscribeAsCompletionStage();
         three.complete(3);
         Thread.sleep(100L); //NOSONAR
@@ -77,7 +77,7 @@ public class MultiFlatMapCompletionStageTckTest extends AbstractPublisherTck<Lon
                     assertEquals(1, concurrentMaps.incrementAndGet());
                     return Uni.createFrom().completionStage(cs);
                 }).merge(1)
-                .collectItems().asList()
+                .collect().asList()
                 .subscribeAsCompletionStage();
         Thread.sleep(100L); // NOSONAR
         concurrentMaps.decrementAndGet();
@@ -98,7 +98,7 @@ public class MultiFlatMapCompletionStageTckTest extends AbstractPublisherTck<Lon
                         .onItem().transformToUni(
                                 i -> Uni.createFrom().completionStage(CompletableFuture.completedFuture(i)))
                         .merge()
-                        .collectItems().asList()
+                        .collect().asList()
                         .subscribeAsCompletionStage()));
     }
 
@@ -111,7 +111,7 @@ public class MultiFlatMapCompletionStageTckTest extends AbstractPublisherTck<Lon
                     .onItem().transformToUni(i -> {
                         throw new QuietRuntimeException("failed");
                     }).merge()
-                    .collectItems().asList()
+                    .collect().asList()
                     .subscribeAsCompletionStage();
             await(cancelled);
             await(result);
@@ -129,7 +129,7 @@ public class MultiFlatMapCompletionStageTckTest extends AbstractPublisherTck<Lon
                         failed.completeExceptionally(new QuietRuntimeException("failed"));
                         return Uni.createFrom().completionStage(failed);
                     }).merge()
-                    .collectItems().asList()
+                    .collect().asList()
                     .subscribeAsCompletionStage();
             await(cancelled);
             await(result);
@@ -146,7 +146,7 @@ public class MultiFlatMapCompletionStageTckTest extends AbstractPublisherTck<Lon
                     .transformToUni(i -> Uni.createFrom().completionStage(CompletableFuture.completedFuture(null))
                             .onItem().ifNull().failWith(new NullPointerException()))
                     .merge()
-                    .collectItems().asList()
+                    .collect().asList()
                     .subscribeAsCompletionStage();
             await(cancelled);
             await(result);

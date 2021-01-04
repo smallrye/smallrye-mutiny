@@ -72,16 +72,6 @@ public abstract class AbstractMulti<T> implements Multi<T> {
     }
 
     @Override
-    public MultiCollect<T> collectItems() {
-        return new MultiCollect<>(this);
-    }
-
-    @Override
-    public MultiGroup<T> groupItems() {
-        return new MultiGroup<>(this);
-    }
-
-    @Override
     public Multi<T> emitOn(Executor executor) {
         return Infrastructure.onMultiCreation(new MultiEmitOnOp<>(this, nonNull(executor, "executor")));
     }
@@ -136,4 +126,13 @@ public abstract class AbstractMulti<T> implements Multi<T> {
         return new MultiOnRequest<>(this);
     }
 
+    @Override
+    public MultiCollect<T> collect() {
+        return new MultiCollect<>(this);
+    }
+
+    @Override
+    public MultiGroup<T> group() {
+        return new MultiGroup<>(this);
+    }
 }

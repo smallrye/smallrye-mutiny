@@ -25,7 +25,7 @@ public class MultiOnFailureResumeTest {
                     exception.set(err);
                     return "foo";
                 })
-                .collectItems().asList();
+                .collect().asList();
         assertEquals(await(uni.subscribeAsCompletionStage()), Collections.singletonList("foo"));
         assertEquals(exception.get().getMessage(), "failed");
     }
@@ -38,7 +38,7 @@ public class MultiOnFailureResumeTest {
                     exception.set(err);
                     return Multi.createFrom().items("foo", "bar");
                 })
-                .collectItems().asList()
+                .collect().asList()
                 .subscribeAsCompletionStage()), Arrays.asList("foo", "bar"));
         assertEquals(exception.get().getMessage(), "failed");
     }
@@ -57,7 +57,7 @@ public class MultiOnFailureResumeTest {
                     exception.set(err);
                     return "foo";
                 })
-                .collectItems().asList()
+                .collect().asList()
                 .subscribeAsCompletionStage()), Arrays.asList("A", "foo"));
         assertEquals(exception.get().getMessage(), "failed");
     }
@@ -76,7 +76,7 @@ public class MultiOnFailureResumeTest {
                     exception.set(err);
                     return Multi.createFrom().items("foo", "bar");
                 })
-                .collectItems().asList()
+                .collect().asList()
                 .subscribeAsCompletionStage()), Arrays.asList("A", "foo", "bar"));
         assertEquals(exception.get().getMessage(), "failed");
     }
@@ -88,7 +88,7 @@ public class MultiOnFailureResumeTest {
                         .onFailure().recoverWithMulti(t -> {
                             throw new QuietRuntimeException("failed");
                         })
-                        .collectItems().asList()
+                        .collect().asList()
                         .subscribeAsCompletionStage()));
     }
 
@@ -99,7 +99,7 @@ public class MultiOnFailureResumeTest {
                         .onFailure().recoverWithItem(t -> {
                             throw new QuietRuntimeException("failed");
                         })
-                        .collectItems().asList()
+                        .collect().asList()
                         .subscribeAsCompletionStage()));
     }
 
@@ -109,7 +109,7 @@ public class MultiOnFailureResumeTest {
                 () -> await(Multi.createFrom().<String> failure(new QuietRuntimeException("failed"))
                         .onFailure()
                         .recoverWithMulti(err -> Multi.createFrom().failure(new QuietRuntimeException("boom")))
-                        .collectItems().asList()
+                        .collect().asList()
                         .subscribeAsCompletionStage()));
     }
 }

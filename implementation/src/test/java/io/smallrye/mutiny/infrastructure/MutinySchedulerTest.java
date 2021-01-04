@@ -104,7 +104,7 @@ public class MutinySchedulerTest {
                     thread.set(Thread.currentThread().getName());
                     return s.toUpperCase();
                 })
-                .collectItems().first()
+                .collect().first()
                 .await().indefinitely();
 
         assertThat(res).isEqualTo("HELLO");
@@ -128,7 +128,7 @@ public class MutinySchedulerTest {
                     thread.set(Thread.currentThread().getName());
                     return s.toUpperCase();
                 })
-                .collectItems().first()
+                .collect().first()
                 .await().indefinitely();
 
         assertThat(res).isEqualTo("HELLO");
@@ -140,7 +140,7 @@ public class MutinySchedulerTest {
         AtomicReference<String> thread = new AtomicReference<>();
         List<Long> list = Multi.createFrom().ticks().every(Duration.ofMillis(10))
                 .transform().byTakingFirstItems(5)
-                .collectItems().asList()
+                .collect().asList()
                 .onItem().invoke(l -> thread.set(Thread.currentThread().getName()))
                 .await().indefinitely();
 
@@ -152,9 +152,9 @@ public class MutinySchedulerTest {
     public void testCollectionBasedOnDuration() {
         AtomicReference<String> thread = new AtomicReference<>();
         Multi.createFrom().ticks().every(Duration.ofMillis(10))
-                .groupItems().intoLists().every(Duration.ofMillis(10))
+                .group().intoLists().every(Duration.ofMillis(10))
                 .transform().byTakingFirstItems(5)
-                .collectItems().asList()
+                .collect().asList()
                 .onItem().invoke(l -> thread.set(Thread.currentThread().getName()))
                 .await().indefinitely();
         assertThat(thread.get()).startsWith("my-thread-");

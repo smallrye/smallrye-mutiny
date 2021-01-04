@@ -23,7 +23,7 @@ public class MultiTakeTest {
     @Test
     public void testSimpleTake() {
         List<Integer> list = Multi.createFrom().range(1, 5).transform().byTakingFirstItems(1)
-                .collectItems().asList().await().indefinitely();
+                .collect().asList().await().indefinitely();
 
         assertThat(list).containsExactly(1);
     }
@@ -31,7 +31,7 @@ public class MultiTakeTest {
     @Test
     public void testTakeZero() {
         List<Integer> list = Multi.createFrom().range(1, 5).transform().byTakingFirstItems(0)
-                .collectItems().asList().await().indefinitely();
+                .collect().asList().await().indefinitely();
 
         assertThat(list).isEmpty();
     }
@@ -39,7 +39,7 @@ public class MultiTakeTest {
     @Test
     public void testSimpleTakeLast() {
         List<Integer> list = Multi.createFrom().range(1, 5).transform().byTakingLastItems(1)
-                .collectItems().asList().await().indefinitely();
+                .collect().asList().await().indefinitely();
 
         assertThat(list).containsExactly(4);
     }
@@ -47,7 +47,7 @@ public class MultiTakeTest {
     @Test
     public void testSimpleTakeZeroLast() {
         List<Integer> list = Multi.createFrom().range(1, 5).transform().byTakingLastItems(0)
-                .collectItems().asList().await().indefinitely();
+                .collect().asList().await().indefinitely();
 
         assertThat(list).isEmpty();
     }

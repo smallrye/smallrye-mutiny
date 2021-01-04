@@ -14,7 +14,7 @@ public class MultiFirstTckTest extends AbstractTck {
     public void findFirstStageShouldFindTheFirstElement() {
         int res = await(
                 Multi.createFrom().items(1, 2, 3)
-                        .collectItems().first()
+                        .collect().first()
                         .subscribeAsCompletionStage());
         assertEquals(res, 1);
     }
@@ -22,14 +22,14 @@ public class MultiFirstTckTest extends AbstractTck {
     @Test
     public void findFirstStageShouldFindTheFirstElementInSingleElementStream() {
         int result = await(Multi.createFrom().item(1)
-                .collectItems().first().subscribeAsCompletionStage());
+                .collect().first().subscribeAsCompletionStage());
         assertEquals(result, 1);
     }
 
     @Test
     public void findFirstStageShouldReturnEmptyForEmptyStream() {
         assertNull(await(Multi.createFrom().items()
-                .collectItems().first().subscribeAsCompletionStage()));
+                .collect().first().subscribeAsCompletionStage()));
     }
 
     @Test
@@ -37,7 +37,7 @@ public class MultiFirstTckTest extends AbstractTck {
         CompletableFuture<Void> cancelled = new CompletableFuture<>();
         int result = await(infiniteStream()
                 .onTermination().invoke(() -> cancelled.complete(null))
-                .collectItems().first().subscribeAsCompletionStage());
+                .collect().first().subscribeAsCompletionStage());
         assertEquals(result, 1);
         await(cancelled);
     }
@@ -46,13 +46,13 @@ public class MultiFirstTckTest extends AbstractTck {
     public void findFirstStageShouldPropagateErrors() {
         assertThrows(QuietRuntimeException.class,
                 () -> await(Multi.createFrom().failure(new QuietRuntimeException("failed"))
-                        .collectItems().first().subscribeAsCompletionStage()));
+                        .collect().first().subscribeAsCompletionStage()));
     }
 
     @Test
     public void findFirstStageShouldBeReusable() {
         int result = await(Multi.createFrom().items(1, 2, 3)
-                .collectItems().first().subscribeAsCompletionStage());
+                .collect().first().subscribeAsCompletionStage());
         assertEquals(result, 1);
     }
 }

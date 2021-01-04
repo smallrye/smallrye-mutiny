@@ -125,7 +125,7 @@ public class MultiContextPropagationTest {
             } catch (Throwable t) {
                 emitter.fail(t);
             }
-        }).start()).collectItems().asList();
+        }).start()).collect().asList();
 
         List<Integer> result = latch.await().indefinitely();
         assertThat(result).hasSize(3).allSatisfy(i -> assertThat(i).isEqualTo(2));
@@ -151,7 +151,7 @@ public class MultiContextPropagationTest {
             return r;
         });
 
-        int result = multi.collectItems().first().await().indefinitely();
+        int result = multi.collect().first().await().indefinitely();
         assertThat(result).isEqualTo(2);
     }
 

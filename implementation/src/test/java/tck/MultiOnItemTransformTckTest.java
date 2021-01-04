@@ -21,7 +21,7 @@ public class MultiOnItemTransformTckTest extends AbstractPublisherTck<Long> {
     public void mapStageShouldMapElements() {
         assertEquals(await(Multi.createFrom().items(1, 2, 3)
                 .map(Object::toString)
-                .collectItems().asList()
+                .collect().asList()
                 .subscribeAsCompletionStage()), Arrays.asList("1", "2", "3"));
     }
 
@@ -34,7 +34,7 @@ public class MultiOnItemTransformTckTest extends AbstractPublisherTck<Long> {
                     .map(foo -> {
                         throw new QuietRuntimeException("failed");
                     })
-                    .collectItems().asList()
+                    .collect().asList()
                     .subscribeAsCompletionStage();
             await(cancelled);
             await(result);
@@ -46,7 +46,7 @@ public class MultiOnItemTransformTckTest extends AbstractPublisherTck<Long> {
         assertThrows(QuietRuntimeException.class,
                 () -> await(Multi.createFrom().failure(new QuietRuntimeException("failed"))
                         .map(Function.identity())
-                        .collectItems().asList()
+                        .collect().asList()
                         .subscribeAsCompletionStage()));
     }
 
@@ -57,7 +57,7 @@ public class MultiOnItemTransformTckTest extends AbstractPublisherTck<Long> {
             CompletionStage<List<Object>> result = infiniteStream()
                     .onTermination().invoke(() -> cancelled.complete(null))
                     .map(t -> null)
-                    .collectItems().asList().subscribeAsCompletionStage();
+                    .collect().asList().subscribeAsCompletionStage();
             await(cancelled);
             await(result);
         });

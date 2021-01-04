@@ -36,6 +36,23 @@ public class MultiCollectTest {
     public void testCollectFirstAndLast() {
         Multi<Integer> items = Multi.createFrom().items(1, 2, 3);
         items
+                .collect().first()
+                .subscribe().withSubscriber(UniAssertSubscriber.create())
+                .await()
+                .assertItem(1);
+
+        items
+                .collect().last()
+                .subscribe().withSubscriber(UniAssertSubscriber.create())
+                .await()
+                .assertItem(3);
+    }
+
+    @SuppressWarnings("deprecation")
+    @Test
+    public void testCollectFirstAndLastDeprecated() {
+        Multi<Integer> items = Multi.createFrom().items(1, 2, 3);
+        items
                 .collectItems().first()
                 .subscribe().withSubscriber(UniAssertSubscriber.create())
                 .await()
@@ -52,13 +69,13 @@ public class MultiCollectTest {
     public void testCollectWithEmpty() {
         Multi<Integer> items = Multi.createFrom().empty();
         items
-                .collectItems().first()
+                .collect().first()
                 .subscribe().withSubscriber(UniAssertSubscriber.create())
                 .await()
                 .assertItem(null);
 
         items
-                .collectItems().last()
+                .collect().last()
                 .subscribe().withSubscriber(UniAssertSubscriber.create())
                 .await()
                 .assertItem(null);
@@ -68,13 +85,13 @@ public class MultiCollectTest {
     public void testCollectFirstAndLastOnFailure() {
         Multi<Integer> failing = Multi.createFrom().failure(new IOException("boom"));
         failing
-                .collectItems().first()
+                .collect().first()
                 .subscribe().withSubscriber(UniAssertSubscriber.create())
                 .await()
                 .assertFailedWith(IOException.class, "boom");
 
         failing
-                .collectItems().last()
+                .collect().last()
                 .subscribe().withSubscriber(UniAssertSubscriber.create())
                 .await()
                 .assertFailedWith(IOException.class, "boom");
@@ -83,7 +100,7 @@ public class MultiCollectTest {
     @Test
     public void testAsList() {
         UniAssertSubscriber<List<Integer>> subscriber = Multi.createFrom().items(1, 2, 3)
-                .collectItems().asList()
+                .collect().asList()
                 .subscribe().withSubscriber(UniAssertSubscriber.create())
                 .await();
 
@@ -93,7 +110,7 @@ public class MultiCollectTest {
     @Test
     public void testCollectIn() {
         UniAssertSubscriber<LinkedList<Integer>> subscriber = Multi.createFrom().range(1, 10)
-                .collectItems().in(LinkedList<Integer>::new, LinkedList::add)
+                .collect().in(LinkedList<Integer>::new, LinkedList::add)
                 .subscribe().withSubscriber(UniAssertSubscriber.create())
                 .await();
 
@@ -103,7 +120,7 @@ public class MultiCollectTest {
     @Test
     public void testCollectInWithSupplierThrowingException() {
         Multi.createFrom().range(1, 10)
-                .collectItems().in(() -> {
+                .collect().in(() -> {
                     throw new IllegalArgumentException("boom");
                 }, (x, y) -> {
                 })
@@ -114,7 +131,7 @@ public class MultiCollectTest {
     @Test
     public void testCollectInWithAccumulatorThrowingException() {
         Multi.createFrom().range(1, 10)
-                .collectItems().in(LinkedList<Integer>::new, (list, res) -> {
+                .collect().in(LinkedList<Integer>::new, (list, res) -> {
                     list.add(res);
                     if (res == 5) {
                         throw new IllegalArgumentException("boom");
@@ -127,7 +144,7 @@ public class MultiCollectTest {
     @Test
     public void testCollectInWithSupplierReturningNull() {
         Multi.createFrom().range(1, 10)
-                .collectItems().in(() -> null, (x, y) -> {
+                .collect().in(() -> null, (x, y) -> {
                 })
                 .subscribe().withSubscriber(UniAssertSubscriber.create())
                 .assertFailedWith(NullPointerException.class, "supplier");
@@ -136,7 +153,7 @@ public class MultiCollectTest {
     @Test
     public void testCollectInWithAccumulatorSupplierReturningNull() {
         Multi.createFrom().range(1, 10)
-                .collectItems().with(new Collector<Integer, Integer, Integer>() {
+                .collect().with(new Collector<Integer, Integer, Integer>() {
                     @Override
                     public Supplier<Integer> supplier() {
                         return () -> 0;
@@ -169,7 +186,7 @@ public class MultiCollectTest {
     @Test
     public void testCollectIntoMap() {
         UniAssertSubscriber<Map<String, Person>> subscriber = persons
-                .collectItems().asMap(p -> p.firstName)
+                .collect().asMap(p -> p.firstName)
                 .subscribe().withSubscriber(UniAssertSubscriber.create())
                 .assertCompleted();
 
@@ -185,7 +202,7 @@ public class MultiCollectTest {
     @Test
     public void testCollectAsMapWithEmpty() {
         UniAssertSubscriber<Map<String, Person>> subscriber = Multi.createFrom().<Person> empty()
-                .collectItems().asMap(p -> p.firstName)
+                .collect().asMap(p -> p.firstName)
                 .subscribe().withSubscriber(UniAssertSubscriber.create())
                 .assertCompleted();
 
@@ -195,7 +212,7 @@ public class MultiCollectTest {
     @Test
     public void testCollectAsMultiMap() {
         UniAssertSubscriber<Map<String, Collection<Person>>> subscriber = personsWithDuplicates
-                .collectItems().asMultiMap(p -> p.firstName)
+                .collect().asMultiMap(p -> p.firstName)
                 .subscribe().withSubscriber(new UniAssertSubscriber<>())
                 .assertCompleted();
 
@@ -209,7 +226,7 @@ public class MultiCollectTest {
     @Test
     public void testCollectAsMultiMapWithValueMapper() {
         UniAssertSubscriber<Map<String, Collection<Long>>> subscriber = personsWithDuplicates
-                .collectItems().asMultiMap(p -> p.firstName, p -> p.id)
+                .collect().asMultiMap(p -> p.firstName, p -> p.id)
                 .subscribe().withSubscriber(new UniAssertSubscriber<>())
                 .assertCompleted();
 
@@ -222,7 +239,7 @@ public class MultiCollectTest {
     @Test
     public void testCollectAsMultiMapOnEmpty() {
         UniAssertSubscriber<Map<String, Collection<Person>>> subscriber = Multi.createFrom().<Person> empty()
-                .collectItems().asMultiMap(p -> p.firstName)
+                .collect().asMultiMap(p -> p.firstName)
                 .subscribe().withSubscriber(new UniAssertSubscriber<>())
                 .assertCompleted();
         assertThat(subscriber.getItem()).hasSize(0);
@@ -231,7 +248,7 @@ public class MultiCollectTest {
 
     @Test
     public void testSumCollector() {
-        Multi.createFrom().range(1, 5).collectItems().with(Collectors.summingInt(value -> value))
+        Multi.createFrom().range(1, 5).collect().with(Collectors.summingInt(value -> value))
                 .subscribe().withSubscriber(new UniAssertSubscriber<>()).assertCompleted().assertItem(10);
     }
 
@@ -240,7 +257,7 @@ public class MultiCollectTest {
         List<String> list = new ArrayList<>();
         Multi.createFrom().items("a", "b", "c")
                 .map(String::toUpperCase)
-                .collectItems().with(Collector.of(() -> null, (n, t) -> list.add(t), (X, y) -> null, x -> null))
+                .collect().with(Collector.of(() -> null, (n, t) -> list.add(t), (X, y) -> null, x -> null))
                 .await().indefinitely();
         assertThat(list).containsExactly("A", "B", "C");
     }

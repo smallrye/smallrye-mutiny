@@ -140,7 +140,7 @@ public interface Multi<T> extends Publisher<T> {
     /**
      * Configures the action to execute when the observed {@link Multi} sends a {@link Subscription}.
      * The downstream don't have a subscription yet. It will be passed once the configured action completes.
-     *
+     * <p>
      * For example:
      *
      * <pre>
@@ -190,15 +190,42 @@ public interface Multi<T> extends Publisher<T> {
     Multi<T> cache();
 
     /**
-     * Produces {@link Multi} or {@link Uni} collecting items from this {@link Multi}. You can accumulate the items
-     * into a {@link java.util.List} ({@link MultiCollect#asList()}), {@link java.util.Map}
-     * ({@link MultiCollect#asMap(Function)}...
+     * Produces {@link Uni} collecting/aggregating items from this {@link Multi}.
+     * It allows accumulating the items emitted by this {@code multi} into a structure such as a into a
+     * {@link java.util.List} ({@link MultiCollect#asList()}), a {@link java.util.Map}
+     * ({@link MultiCollect#asMap(Function)}, or a custom collector.
+     * When this {@code multi} sends the completion signal, the structure is emitted by the returned {@link Uni}.
      * <p>
-     * You can also retrieve the first and list items using {@link MultiCollect#first()} and {@link MultiCollect#last()}.
+     * If this {@link Multi} emits a failure, the produced {@link Uni} produces the same failure and the aggregated items
+     * are discarded.
+     * <p>
+     * You can also retrieve the first and last items using {@link MultiCollect#first()} and {@link MultiCollect#last()}.
+     * Be aware to not used method collecting items on unbounded / infinite {@link Multi}.
+     *
+     * @return the object to configure the collection process.
+     * @deprecated Use {@link #collect()} instead
+     */
+    @Deprecated
+    default MultiCollect<T> collectItems() {
+        return collect();
+    }
+
+    /**
+     * Produces {@link Uni} collecting/aggregating items from this {@link Multi}.
+     * It allows accumulating the items emitted by this {@code multi} into a structure such as a into a
+     * {@link java.util.List} ({@link MultiCollect#asList()}), a {@link java.util.Map}
+     * ({@link MultiCollect#asMap(Function)}, or a custom collector.
+     * When this {@code multi} sends the completion signal, the structure is emitted by the returned {@link Uni}.
+     * <p>
+     * If this {@link Multi} emits a failure, the produced {@link Uni} produces the same failure and the aggregated items
+     * are discarded.
+     * <p>
+     * You can also retrieve the first and last items using {@link MultiCollect#first()} and {@link MultiCollect#last()}.
+     * Be aware to not used method collecting items on unbounded / infinite {@link Multi}.
      *
      * @return the object to configure the collection process.
      */
-    MultiCollect<T> collectItems();
+    MultiCollect<T> collect();
 
     /**
      * Produces {@link Multi} grouping items from this {@link Multi} into various "form of chunks" (list, {@link Multi}).
@@ -207,7 +234,20 @@ public interface Multi<T> extends Publisher<T> {
      *
      * @return the object to configure the grouping.
      */
-    MultiGroup<T> groupItems();
+    MultiGroup<T> group();
+
+    /**
+     * Produces {@link Multi} grouping items from this {@link Multi} into various "form of chunks" (list, {@link Multi}).
+     * The grouping can be done linearly ({@link MultiGroup#intoLists()} and {@link MultiGroup#intoMultis()}, or based
+     * on a grouping function ({@link MultiGroup#by(Function)})
+     *
+     * @return the object to configure the grouping.
+     * @deprecated Use {@link #group()} instead
+     */
+    @Deprecated
+    default MultiGroup<T> groupItems() {
+        return group();
+    }
 
     /**
      * Produces a new {@link Multi} invoking the {@code onItem}, {@code onFailure} and {@code onCompletion} methods
@@ -464,14 +504,14 @@ public interface Multi<T> extends Publisher<T> {
 
     /**
      * Configures actions when this {@link Multi} terminates on completion, on failure or on subscriber cancellation.
-     * 
+     *
      * @return the object to configure the termination actions
      */
     MultiOnTerminate<T> onTermination();
 
     /**
      * Configures actions when the subscriber cancels the subscription.
-     * 
+     *
      * @return the object to configure the cancellation actions
      */
     MultiOnCancel<T> onCancellation();

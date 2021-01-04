@@ -26,7 +26,7 @@ public class HandlingFailuresTest {
                 .onFailure().invoke(failure -> log(failure));
         // end::invoke[]
         assertThatThrownBy(() -> u.await().indefinitely()).hasMessageContaining("boom");
-        assertThatThrownBy(() -> m.collectItems().asList()
+        assertThatThrownBy(() -> m.collect().asList()
                 .await().indefinitely()).hasMessageContaining("boom");
         assertThat(out.get()).contains("boom");
     }
@@ -64,7 +64,7 @@ public class HandlingFailuresTest {
         Multi<String> m = multi
                 .onFailure().recoverWithCompletion();
         // end::recover-completion[]
-        assertThat(m.collectItems().asList().await().indefinitely()).isEmpty();
+        assertThat(m.collect().asList().await().indefinitely()).isEmpty();
     }
 
     @Test
@@ -79,7 +79,7 @@ public class HandlingFailuresTest {
                 .onFailure().recoverWithMulti(f -> getFallbackMulti(f));
         // end::recover-switch[]
         assertThat(u.await().indefinitely()).isEqualTo("hello");
-        assertThat(m.collectItems().asList().await().indefinitely()).containsExactly("hey");
+        assertThat(m.collect().asList().await().indefinitely()).containsExactly("hey");
     }
 
     private Multi<? extends String> getFallbackMulti(Throwable f) {

@@ -139,13 +139,13 @@ public class MultiCreateFromItemsTest {
     public void testThatStreamCannotBeReused() {
         Stream<Integer> stream = Stream.of(1, 2, 3, 4);
         List<Integer> list = Multi.createFrom().items(stream)
-                .collectItems().asList()
+                .collect().asList()
                 .await().indefinitely();
 
         assertThat(list).containsExactly(1, 2, 3, 4);
 
         assertThatThrownBy(() -> Multi.createFrom().items(stream)
-                .collectItems().asList()
+                .collect().asList()
                 .await().indefinitely()).isInstanceOf(IllegalStateException.class);
     }
 
@@ -154,13 +154,13 @@ public class MultiCreateFromItemsTest {
         Stream<Integer> stream = Stream.of(1, 2, 3, 4);
         Multi<Integer> multi = Multi.createFrom().items(stream);
         List<Integer> list = multi
-                .collectItems().asList()
+                .collect().asList()
                 .await().indefinitely();
 
         assertThat(list).containsExactly(1, 2, 3, 4);
 
         assertThatThrownBy(() -> multi
-                .collectItems().asList()
+                .collect().asList()
                 .await().indefinitely()).isInstanceOf(IllegalStateException.class);
     }
 

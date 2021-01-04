@@ -15,7 +15,7 @@ public class MultiConvertTest {
     @Test
     public void testMultiConvertWithCustomConverter() {
         Multi<String> multi = Multi.createFrom().items(1, 2, 3).convert().with(m -> m.map(i -> Integer.toString(i)));
-        List<String> list = multi.collectItems().asList().await().indefinitely();
+        List<String> list = multi.collect().asList().await().indefinitely();
         assertThat(list).containsExactly("1", "2", "3");
     }
 

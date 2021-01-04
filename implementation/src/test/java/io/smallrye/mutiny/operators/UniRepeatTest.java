@@ -29,7 +29,7 @@ public class UniRepeatTest {
     public void testRepeatAtMost() {
         List<Integer> list = Uni.createFrom().item(1)
                 .repeat().atMost(3)
-                .collectItems().asList()
+                .collect().asList()
                 .await().atMost(Duration.ofSeconds(5));
         assertThat(list).hasSize(3).contains(1, 1, 1);
     }
@@ -40,7 +40,7 @@ public class UniRepeatTest {
         Iterator<String> iterator = items.iterator();
         List<String> list = Uni.createFrom().item(iterator::next)
                 .repeat().until(v -> v.equalsIgnoreCase("d"))
-                .collectItems().asList()
+                .collect().asList()
                 .await().atMost(Duration.ofSeconds(5));
         assertThat(list).hasSize(3).contains("a", "b", "c");
     }
@@ -67,7 +67,7 @@ public class UniRepeatTest {
     public void testRepeat0() {
         assertThrows(IllegalArgumentException.class, () -> Uni.createFrom().item(0)
                 .repeat().atMost(0)
-                .collectItems().asList()
+                .collect().asList()
                 .await().indefinitely());
     }
 
@@ -75,7 +75,7 @@ public class UniRepeatTest {
     public void testRepeatUntilWithNullPredicate() {
         assertThrows(IllegalArgumentException.class, () -> Uni.createFrom().item(0)
                 .repeat().until(null)
-                .collectItems().asList()
+                .collect().asList()
                 .await().indefinitely());
     }
 
@@ -83,7 +83,7 @@ public class UniRepeatTest {
     public void testRepeatWhilstWithNullPredicate() {
         assertThrows(IllegalArgumentException.class, () -> Uni.createFrom().item(0)
                 .repeat().whilst(null)
-                .collectItems().asList()
+                .collect().asList()
                 .await().indefinitely());
     }
 
@@ -92,7 +92,7 @@ public class UniRepeatTest {
         AtomicInteger count = new AtomicInteger();
         List<Integer> list = Uni.createFrom().item(count::getAndIncrement)
                 .repeat().atMost(1)
-                .collectItems().asList()
+                .collect().asList()
                 .await().atMost(Duration.ofSeconds(5));
 
         assertThat(list).containsExactly(0);
@@ -105,7 +105,7 @@ public class UniRepeatTest {
         AtomicBoolean once = new AtomicBoolean();
         List<Integer> list = Uni.createFrom().item(count::getAndIncrement)
                 .repeat().until(x -> once.getAndSet(true))
-                .collectItems().asList()
+                .collect().asList()
                 .await().atMost(Duration.ofSeconds(5));
 
         assertThat(list).containsExactly(0);
@@ -118,7 +118,7 @@ public class UniRepeatTest {
         AtomicBoolean once = new AtomicBoolean(true);
         List<Integer> list = Uni.createFrom().item(count::getAndIncrement)
                 .repeat().whilst(x -> once.getAndSet(false))
-                .collectItems().asList()
+                .collect().asList()
                 .await().atMost(Duration.ofSeconds(5));
 
         assertThat(list).containsExactly(0, 1);
@@ -130,7 +130,7 @@ public class UniRepeatTest {
         AtomicInteger count = new AtomicInteger();
         List<Integer> list = Uni.createFrom().item(count::getAndIncrement)
                 .repeat().until(x -> true)
-                .collectItems().asList()
+                .collect().asList()
                 .await().atMost(Duration.ofSeconds(5));
 
         assertThat(list).isEmpty();
@@ -142,7 +142,7 @@ public class UniRepeatTest {
         AtomicInteger count = new AtomicInteger();
         List<Integer> list = Uni.createFrom().item(count::getAndIncrement)
                 .repeat().whilst(x -> false)
-                .collectItems().asList()
+                .collect().asList()
                 .await().atMost(Duration.ofSeconds(5));
 
         assertThat(list).containsExactly(0);
@@ -157,7 +157,7 @@ public class UniRepeatTest {
                 .repeat().indefinitely()
                 .runSubscriptionOn(Infrastructure.getDefaultWorkerPool())
                 .transform().byTakingFirstItems(num)
-                .collectItems().last()
+                .collect().last()
                 .await().atMost(Duration.ofSeconds(5));
         assertThat(num).isEqualTo(value);
         assertThat(count).hasValue(value);
@@ -175,7 +175,7 @@ public class UniRepeatTest {
                 })
                 .runSubscriptionOn(Infrastructure.getDefaultWorkerPool())
                 .transform().byTakingFirstItems(num)
-                .collectItems().last()
+                .collect().last()
                 .await().atMost(Duration.ofSeconds(5));
         assertThat(num).isEqualTo(value);
         assertThat(count).hasValue(value);
@@ -194,7 +194,7 @@ public class UniRepeatTest {
                 })
                 .runSubscriptionOn(Infrastructure.getDefaultWorkerPool())
                 .transform().byTakingFirstItems(num)
-                .collectItems().last()
+                .collect().last()
                 .await().atMost(Duration.ofSeconds(5));
         assertThat(num).isEqualTo(value);
         assertThat(count).hasValue(value);
@@ -206,7 +206,7 @@ public class UniRepeatTest {
         int value = Uni.createFrom().item(1).repeat().indefinitely()
                 .runSubscriptionOn(Infrastructure.getDefaultWorkerPool())
                 .transform().byTakingFirstItems(100000L)
-                .collectItems().last()
+                .collect().last()
                 .await().atMost(Duration.ofSeconds(5));
         assertThat(value).isEqualTo(1);
     }
@@ -217,7 +217,7 @@ public class UniRepeatTest {
         int value = Uni.createFrom().item(1).repeat().until(x -> count.incrementAndGet() > 100000000L)
                 .runSubscriptionOn(Infrastructure.getDefaultWorkerPool())
                 .transform().byTakingFirstItems(100000L)
-                .collectItems().last()
+                .collect().last()
                 .await().atMost(Duration.ofSeconds(5));
         assertThat(value).isEqualTo(1);
     }
@@ -228,7 +228,7 @@ public class UniRepeatTest {
         int value = Uni.createFrom().item(1).repeat().whilst(x -> count.incrementAndGet() < 100000000L)
                 .runSubscriptionOn(Infrastructure.getDefaultWorkerPool())
                 .transform().byTakingFirstItems(100000L)
-                .collectItems().last()
+                .collect().last()
                 .await().atMost(Duration.ofSeconds(5));
         assertThat(value).isEqualTo(1);
     }
@@ -624,7 +624,7 @@ public class UniRepeatTest {
                 () -> new AtomicInteger(0),
                 (s, e) -> e.complete(s.getAndIncrement()))
                 .repeat().atMost(3)
-                .collectItems().asList()
+                .collect().asList()
                 .await().atMost(Duration.ofSeconds(5));
         assertThat(list).containsExactly(0, 1, 2);
     }

@@ -67,7 +67,7 @@ public class TransformItemsAsyncTest {
         Multi<String> result = uni
             .onItem().transformToMulti(item -> Multi.createFrom().items(item, item));
         // end::uni-to-multi[]
-        assertThat(result.collectItems().asList().await().indefinitely()).containsExactly("Cameron", "Cameron");
+        assertThat(result.collect().asList().await().indefinitely()).containsExactly("Cameron", "Cameron");
 
         // tag::uni-to-multi-2[]
         uni
@@ -90,8 +90,8 @@ public class TransformItemsAsyncTest {
             .onItem().transformToUniAndConcatenate(name -> invokeRemoteGreetingService(name));
         // end::merge-concat[]
 
-        assertThat(merged.collectItems().asList().await().indefinitely()).containsExactly("a", "b");
-        assertThat(concat.collectItems().asList().await().indefinitely()).containsExactly("a", "b");
+        assertThat(merged.collect().asList().await().indefinitely()).containsExactly("a", "b");
+        assertThat(concat.collect().asList().await().indefinitely()).containsExactly("a", "b");
     }
 
     @Test
@@ -106,8 +106,8 @@ public class TransformItemsAsyncTest {
             .onItem().transformToMultiAndConcatenate(item -> someMulti(item));
         // end::merge-concat-multi[]
 
-        assertThat(merged.collectItems().asList().await().indefinitely()).containsExactly("a", "b");
-        assertThat(concat.collectItems().asList().await().indefinitely()).containsExactly("a", "b");
+        assertThat(merged.collect().asList().await().indefinitely()).containsExactly("a", "b");
+        assertThat(concat.collect().asList().await().indefinitely()).containsExactly("a", "b");
     }
 
     private Multi<String> someMulti(String item) {

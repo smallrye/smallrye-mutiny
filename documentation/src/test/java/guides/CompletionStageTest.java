@@ -70,8 +70,8 @@ public class CompletionStageTest {
                 .onItem().transform(String::toUpperCase);
         // end::create-multi[]
 
-        assertThat(multi1.collectItems().asList().await().indefinitely()).containsExactly("HELLO");
-        assertThat(multi2.collectItems().asList().await().indefinitely()).containsExactly("HELLO");
+        assertThat(multi1.collect().asList().await().indefinitely()).containsExactly("HELLO");
+        assertThat(multi2.collect().asList().await().indefinitely()).containsExactly("HELLO");
 
     }
 }

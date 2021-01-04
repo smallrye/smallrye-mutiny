@@ -21,7 +21,7 @@ public class MultiStageTest {
                         .onItem().transform(i -> i + 1)
                         .onFailure().retry().indefinitely())
                 .stage(m -> m.onItem().transform(i -> Integer.toString(i)))
-                .stage(m -> m.collectItems().asList())
+                .stage(m -> m.collect().asList())
                 .await().indefinitely();
         assertThat(result).containsExactly("2", "3", "4");
     }
@@ -37,7 +37,7 @@ public class MultiStageTest {
                         .onItem().apply(i -> i + 1)
                         .onFailure().retry().indefinitely())
                 .then(m -> m.onItem().apply(i -> Integer.toString(i)))
-                .then(m -> m.collectItems().asList())
+                .then(m -> m.collect().asList())
                 .await().indefinitely();
         assertThat(result).containsExactly("2", "3", "4");
     }
@@ -66,7 +66,7 @@ public class MultiStageTest {
                 .stage(self -> self.onItem().transformToUni(i -> Uni.createFrom().item(Integer.toString(i)))
                         .concatenate())
                 .stage(self -> {
-                    String r = self.collectItems().first().await().indefinitely();
+                    String r = self.collect().first().await().indefinitely();
                     result.set(r);
                     return null; // void
                 });
@@ -80,7 +80,7 @@ public class MultiStageTest {
                 .stage(self -> self
                         .onItem().transform(i -> i + 1)
                         .onItem().transform(i -> Integer.toString(i)))
-                .stage(self -> self.collectItems().first())
+                .stage(self -> self.collect().first())
                 .stage(self -> self.await().indefinitely());
         assertThat(result).isEqualTo("24");
     }
@@ -91,7 +91,7 @@ public class MultiStageTest {
                 .then(self -> self
                         .onItem().apply(i -> i + 1)
                         .onItem().apply(i -> Integer.toString(i)))
-                .then(self -> self.collectItems().first())
+                .then(self -> self.collect().first())
                 .then(self -> self.await().indefinitely());
         assertThat(result).isEqualTo("24");
     }

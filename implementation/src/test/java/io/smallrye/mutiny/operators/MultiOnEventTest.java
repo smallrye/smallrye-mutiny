@@ -639,7 +639,7 @@ public class MultiOnEventTest {
             res.set(i);
             return sub.onItem().invoke(c -> twoGotCalled.incrementAndGet());
         })
-                .collectItems().asList().await().indefinitely();
+                .collect().asList().await().indefinitely();
 
         assertThat(r).containsExactly(1, 2);
         assertThat(twoGotCalled).hasValue(2);
@@ -655,7 +655,7 @@ public class MultiOnEventTest {
             res.set(i);
             return sub.invoke(c -> twoGotCalled.incrementAndGet());
         })
-                .collectItems().asList().await().indefinitely();
+                .collect().asList().await().indefinitely();
 
         assertThat(r).containsExactly(1, 2);
         assertThat(twoGotCalled).hasValue(2);
@@ -672,7 +672,7 @@ public class MultiOnEventTest {
                     res.set(i);
                     return sub.onItem().invoke(c -> twoGotCalled.incrementAndGet());
                 })
-                .collectItems().asList().await().indefinitely())
+                .collect().asList().await().indefinitely())
                         .isInstanceOf(CompletionException.class)
                         .hasCauseInstanceOf(IOException.class)
                         .hasMessageContaining("boom");
@@ -692,7 +692,7 @@ public class MultiOnEventTest {
             }
             return Uni.createFrom().nullItem();
         })
-                .collectItems().asList()
+                .collect().asList()
                 .await().indefinitely()).isInstanceOf(RuntimeException.class).hasMessageContaining("boom");
 
         assertThat(res).hasValue(2);
@@ -709,7 +709,7 @@ public class MultiOnEventTest {
             }
             return Uni.createFrom().nullItem();
         })
-                .collectItems().asList()
+                .collect().asList()
                 .await().indefinitely()).isInstanceOf(NullPointerException.class).hasMessageContaining("null");
         assertThat(res).hasValue(2);
     }
@@ -729,7 +729,7 @@ public class MultiOnEventTest {
             }
             return Uni.createFrom().nullItem();
         })
-                .collectItems().asList()
+                .collect().asList()
                 .await().indefinitely()).isInstanceOf(IllegalStateException.class).hasMessageContaining("boom-2");
 
         assertThat(twoGotCalled).hasValue(23);
@@ -756,7 +756,7 @@ public class MultiOnEventTest {
         AtomicInteger res = new AtomicInteger();
 
         List<Integer> r = numbers.invoke(res::set)
-                .collectItems().asList().await().indefinitely();
+                .collect().asList().await().indefinitely();
 
         assertThat(r).containsExactly(1, 2);
         assertThat(res).hasValue(2);
