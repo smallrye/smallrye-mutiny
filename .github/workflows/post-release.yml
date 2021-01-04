@@ -1,0 +1,49 @@
+---
+name: Post-Release
+on:
+  create:
+    branches:
+      - "!*"
+    tags:
+      - '[0-9]+.[0-9]+.[0-9]+*'
+
+jobs:
+  post-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/cache@v2
+        with:
+          path: ~/.m2/repository
+          key: maven-11
+      - uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.ref }}
+          token: ${{ secrets.GITHUB_API_TOKEN }}
+      - name: Install JDK 11
+        uses: AdoptOpenJDK/install-jdk@v1
+        with:
+          version: 11
+      - name: 'Collect Compatibility Justification'
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_API_TOKEN }}
+          SECRET_FILES_PASSPHRASE: ${{ secrets.SECRET_FILES_PASSPHRASE }}
+        run: |
+          sudo apt-get update -o Dir::Etc::sourcelist="sources.list" \
+            -o Dir::Etc::sourceparts="-" -o APT::Get::List-Cleanup="0"
+          sudo apt-get install -y gnupg2 gnupg-agent
+
+          curl -s "https://get.sdkman.io" | bash
+          source ~/.sdkman/bin/sdkman-init.sh && \
+            sdk install jbang
+
+          mkdir target
+          jbang .build/CompatibilityUtils.java extract
+      - name: 'Post-Release Tasks'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_API_TOKEN }}
+          REF: ${{ github.event.ref }}
+        run: |
+          git checkout master
+          source ~/.sdkman/bin/sdkman-init.sh && \
+          jbang .build/PostRelease.java --release-version=${REF} --token=${GITHUB_TOKEN}

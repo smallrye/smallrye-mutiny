@@ -1,0 +1,46 @@
+---
+name: Web Site
+on:
+  create:
+    branches:
+      - "!*"
+    tags:
+      - '[0-9]+.[0-9]+.[0-9]+*'
+
+jobs:
+  deploy-web-site:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/cache@v2
+        with:
+          path: ~/.m2/repository
+          key: maven-11
+      - uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.ref }}
+          token: ${{ secrets.GITHUB_API_TOKEN }}
+      - name: Install JDK 11
+        uses: AdoptOpenJDK/install-jdk@v1
+        with:
+          version: 11
+      - name: 'Setup Ruby'
+        uses: actions/setup-ruby@v1
+        with:
+          ruby-version: '2.6'
+      - name: 'Web Site'
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_API_TOKEN }}
+          REF: ${{ github.event.ref }}
+          SECRET_FILES_PASSPHRASE: ${{ secrets.SECRET_FILES_PASSPHRASE }}
+        run: |
+
+          echo "Deploying web site for tag ${REF}"
+
+          sudo apt-get update -o Dir::Etc::sourcelist="sources.list" \
+            -o Dir::Etc::sourceparts="-" -o APT::Get::List-Cleanup="0"
+          sudo apt-get install -y gnupg2 gnupg-agent
+
+          git config --global user.name "${GITHUB_ACTOR}"
+          git config --global user.email "smallrye@googlegroups.com"
+          .build/deploy-site.sh
