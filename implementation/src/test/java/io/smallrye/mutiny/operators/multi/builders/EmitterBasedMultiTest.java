@@ -275,4 +275,78 @@ public class EmitterBasedMultiTest {
         subscriber.await().assertFailedWith(Exception.class, "boom");
         service.shutdown();
     }
+
+    @Test
+    public void testEmissionAfterCancellation() {
+        Multi.createFrom().emitter(e -> e.emit("x"), BackPressureStrategy.IGNORE)
+                .subscribe().withSubscriber(new AssertSubscriber<>(1, true))
+                .assertNotTerminated()
+                .assertHasNotReceivedAnyItem();
+
+        Multi.createFrom().emitter(e -> e.emit("x"), BackPressureStrategy.BUFFER)
+                .subscribe().withSubscriber(new AssertSubscriber<>(1, true))
+                .assertNotTerminated()
+                .assertHasNotReceivedAnyItem();
+
+        Multi.createFrom().emitter(e -> e.emit("x"), BackPressureStrategy.DROP)
+                .subscribe().withSubscriber(new AssertSubscriber<>(1, true))
+                .assertNotTerminated()
+                .assertHasNotReceivedAnyItem();
+
+        Multi.createFrom().emitter(e -> e.emit("x"), BackPressureStrategy.ERROR)
+                .subscribe().withSubscriber(new AssertSubscriber<>(1, true))
+                .assertNotTerminated()
+                .assertHasNotReceivedAnyItem();
+
+        Multi.createFrom().emitter(e -> e.emit("x"), BackPressureStrategy.LATEST)
+                .subscribe().withSubscriber(new AssertSubscriber<>(1, true))
+                .assertNotTerminated()
+                .assertHasNotReceivedAnyItem();
+    }
+
+    @Test
+    public void testEmittingNull() {
+        Multi.createFrom().emitter(e -> e.emit(null), BackPressureStrategy.IGNORE)
+                .subscribe().withSubscriber(AssertSubscriber.create(1))
+                .assertFailedWith(NullPointerException.class, "emit");
+
+        Multi.createFrom().emitter(e -> e.emit(null), BackPressureStrategy.BUFFER)
+                .subscribe().withSubscriber(AssertSubscriber.create(1))
+                .assertFailedWith(NullPointerException.class, "emit");
+
+        Multi.createFrom().emitter(e -> e.emit(null), BackPressureStrategy.DROP)
+                .subscribe().withSubscriber(AssertSubscriber.create(1))
+                .assertFailedWith(NullPointerException.class, "emit");
+
+        Multi.createFrom().emitter(e -> e.emit(null), BackPressureStrategy.ERROR)
+                .subscribe().withSubscriber(AssertSubscriber.create(1))
+                .assertFailedWith(NullPointerException.class, "emit");
+
+        Multi.createFrom().emitter(e -> e.emit(null), BackPressureStrategy.LATEST)
+                .subscribe().withSubscriber(AssertSubscriber.create(1))
+                .assertFailedWith(NullPointerException.class, "emit");
+    }
+
+    @Test
+    public void testFailWithNull() {
+        Multi.createFrom().emitter(e -> e.fail(null), BackPressureStrategy.IGNORE)
+                .subscribe().withSubscriber(AssertSubscriber.create(1))
+                .assertFailedWith(NullPointerException.class, "fail");
+
+        Multi.createFrom().emitter(e -> e.fail(null), BackPressureStrategy.BUFFER)
+                .subscribe().withSubscriber(AssertSubscriber.create(1))
+                .assertFailedWith(NullPointerException.class, "fail");
+
+        Multi.createFrom().emitter(e -> e.fail(null), BackPressureStrategy.DROP)
+                .subscribe().withSubscriber(AssertSubscriber.create(1))
+                .assertFailedWith(NullPointerException.class, "fail");
+
+        Multi.createFrom().emitter(e -> e.fail(null), BackPressureStrategy.ERROR)
+                .subscribe().withSubscriber(AssertSubscriber.create(1))
+                .assertFailedWith(NullPointerException.class, "fail");
+
+        Multi.createFrom().emitter(e -> e.fail(null), BackPressureStrategy.LATEST)
+                .subscribe().withSubscriber(AssertSubscriber.create(1))
+                .assertFailedWith(NullPointerException.class, "fail");
+    }
 }

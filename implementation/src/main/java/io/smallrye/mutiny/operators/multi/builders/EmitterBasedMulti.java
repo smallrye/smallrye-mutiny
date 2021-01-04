@@ -64,16 +64,7 @@ public final class EmitterBasedMulti<T> extends AbstractMulti<T> {
 
         @Override
         public MultiEmitter<T> emit(T item) {
-            if (isCancelled()) {
-                return this;
-            }
-
-            if (item != null) {
-                downstream.onItem(item);
-            } else {
-                fail(new NullPointerException("`emit` called with `null`."));
-                return this;
-            }
+            downstream.onItem(item);
 
             for (;;) {
                 long r = requested.get();
@@ -93,16 +84,6 @@ public final class EmitterBasedMulti<T> extends AbstractMulti<T> {
 
         @Override
         public final MultiEmitter<T> emit(T t) {
-            if (isCancelled()) {
-                return this;
-            }
-
-            if (t == null) {
-                fail(new NullPointerException(
-                        "`emit` called with `null`."));
-                return this;
-            }
-
             if (requested.get() != 0) {
                 downstream.onItem(t);
                 Subscriptions.produced(requested, 1);
@@ -154,14 +135,6 @@ public final class EmitterBasedMulti<T> extends AbstractMulti<T> {
 
         @Override
         public MultiEmitter<T> emit(T t) {
-            if (done || isCancelled()) {
-                return this;
-            }
-
-            if (t == null) {
-                failed(new NullPointerException("onNext called with null."));
-                return this;
-            }
             queue.set(t);
             drain();
             return this;
@@ -169,12 +142,6 @@ public final class EmitterBasedMulti<T> extends AbstractMulti<T> {
 
         @Override
         public void failed(Throwable e) {
-            if (done || isCancelled()) {
-                return;
-            }
-            if (e == null) {
-                super.failed(new NullPointerException("onError called with null."));
-            }
             failure = e;
             done = true;
             drain();

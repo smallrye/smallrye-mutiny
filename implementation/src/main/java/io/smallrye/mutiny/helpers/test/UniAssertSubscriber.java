@@ -1,5 +1,7 @@
 package io.smallrye.mutiny.helpers.test;
 
+import static io.smallrye.mutiny.helpers.test.AssertionHelper.*;
+
 import java.util.concurrent.CompletableFuture;
 
 import io.smallrye.mutiny.subscription.UniSubscriber;
@@ -13,9 +15,9 @@ import io.smallrye.mutiny.subscription.UniSubscription;
 public class UniAssertSubscriber<T> implements UniSubscriber<T> {
     private volatile boolean cancelImmediatelyOnSubscription;
     private volatile UniSubscription subscription;
-    private volatile boolean gotSignal;
     private volatile T item;
     private volatile Throwable failure;
+    private volatile boolean completed;
     private final CompletableFuture<T> future = new CompletableFuture<>();
     private volatile String onResultThreadName;
     private volatile String onErrorThreadName;
@@ -61,7 +63,7 @@ public class UniAssertSubscriber<T> implements UniSubscriber<T> {
 
     @Override
     public synchronized void onItem(T item) {
-        this.gotSignal = true;
+        this.completed = true;
         this.item = item;
         this.onResultThreadName = Thread.currentThread().getName();
         this.future.complete(item);
@@ -69,7 +71,6 @@ public class UniAssertSubscriber<T> implements UniSubscriber<T> {
 
     @Override
     public synchronized void onFailure(Throwable failure) {
-        this.gotSignal = true;
         this.failure = failure;
         this.onErrorThreadName = Thread.currentThread().getName();
         this.future.completeExceptionally(failure);
@@ -99,16 +100,7 @@ public class UniAssertSubscriber<T> implements UniSubscriber<T> {
      * @return this {@link UniAssertSubscriber}
      */
     public synchronized UniAssertSubscriber<T> assertCompleted() {
-        if (!this.future.isDone()) {
-            throw new IllegalStateException("Not done yet");
-        }
-
-        if (future.isCompletedExceptionally()) {
-            throw new AssertionError("The uni didn't completed successfully: " + failure);
-        }
-        if (future.isCancelled()) {
-            throw new AssertionError("The uni didn't completed successfully, it was cancelled");
-        }
+        shouldHaveCompleted(completed, failure, null);
         return this;
     }
 
@@ -118,16 +110,7 @@ public class UniAssertSubscriber<T> implements UniSubscriber<T> {
      * @return this {@link UniAssertSubscriber}
      */
     public synchronized UniAssertSubscriber<T> assertFailed() {
-        if (!this.future.isDone()) {
-            throw new IllegalStateException("Not done yet");
-        }
-
-        if (!future.isCompletedExceptionally()) {
-            throw new AssertionError("The uni completed successfully: " + item);
-        }
-        if (future.isCancelled()) {
-            throw new AssertionError("The uni didn't completed successfully, it was cancelled");
-        }
+        shouldHaveFailed(completed, failure, null, null);
         return this;
     }
 
@@ -137,9 +120,6 @@ public class UniAssertSubscriber<T> implements UniSubscriber<T> {
      * @return the item or {@code null}
      */
     public synchronized T getItem() {
-        if (!this.future.isDone()) {
-            throw new IllegalStateException("Not done yet");
-        }
         return item;
     }
 
@@ -149,9 +129,6 @@ public class UniAssertSubscriber<T> implements UniSubscriber<T> {
      * @return the failure or {@code null}
      */
     public synchronized Throwable getFailure() {
-        if (!this.future.isDone()) {
-            throw new IllegalStateException("Not done yet");
-        }
         return failure;
     }
 
@@ -162,41 +139,20 @@ public class UniAssertSubscriber<T> implements UniSubscriber<T> {
      * @return this {@link UniAssertSubscriber}
      */
     public UniAssertSubscriber<T> assertItem(T expected) {
-        T item = getItem();
-        if (item == null && expected != null) {
-            throw new AssertionError("Expected: " + expected + " but was `null`");
-        }
-        if (item != null && !item.equals(expected)) {
-            throw new AssertionError("Expected: " + expected + " but was " + item);
-        }
-        if (failure != null) {
-            throw new AssertionError("Got item and failure " + failure);
-        }
+        shouldHaveCompleted(completed, failure, null);
+        shouldHaveReceived(getItem(), expected);
         return this;
     }
 
     /**
      * Assert that the {@link io.smallrye.mutiny.Uni} has failed.
      *
-     * @param typeOfException the expected failure type
-     * @param message a message that is expected to be contained in the failure message
+     * @param expectedTypeOfFailure the expected failure type
+     * @param expectedMessage a message that is expected to be contained in the failure message
      * @return this {@link UniAssertSubscriber}
      */
-    public UniAssertSubscriber<T> assertFailedWith(Class<? extends Throwable> typeOfException, String message) {
-        Throwable failure = getFailure();
-
-        if (failure == null) {
-            throw new AssertionError("Expected a failure, but the Uni completed with an item");
-        }
-        if (!typeOfException.isInstance(failure)) {
-            throw new AssertionError(
-                    "Expected a failure of type " + typeOfException + ", but it was a " + failure.getClass());
-        }
-        if (!failure.getMessage().contains(message)) {
-            throw new AssertionError(
-                    "Expected a failure with a message containing '" + message + "', but it was '" + failure
-                            .getMessage() + "'");
-        }
+    public UniAssertSubscriber<T> assertFailedWith(Class<? extends Throwable> expectedTypeOfFailure, String expectedMessage) {
+        shouldHaveFailed(completed, failure, expectedTypeOfFailure, expectedMessage);
         return this;
     }
 
@@ -244,11 +200,8 @@ public class UniAssertSubscriber<T> implements UniSubscriber<T> {
      * @return this {@link UniAssertSubscriber}
      */
     public UniAssertSubscriber<T> assertTerminated() {
-        if (gotSignal) {
-            return this;
-        } else {
-            throw new AssertionError("The uni didn't sent a signal");
-        }
+        shouldBeTerminated(completed, failure);
+        return this;
     }
 
     /**
@@ -257,11 +210,8 @@ public class UniAssertSubscriber<T> implements UniSubscriber<T> {
      * @return this {@link UniAssertSubscriber}
      */
     public UniAssertSubscriber<T> assertNotTerminated() {
-        if (!gotSignal) {
-            return this;
-        } else {
-            throw new AssertionError("The uni completed");
-        }
+        shouldNotBeTerminated(completed, failure);
+        return this;
     }
 
     /**
@@ -270,9 +220,7 @@ public class UniAssertSubscriber<T> implements UniSubscriber<T> {
      * @return this {@link UniAssertSubscriber}
      */
     public UniAssertSubscriber<T> assertSubscribed() {
-        if (subscription == null) {
-            throw new AssertionError("Expected to have a subscription");
-        }
+        shouldBeSubscribed(subscription == null ? 0 : 1);
         return this;
     }
 
@@ -282,9 +230,7 @@ public class UniAssertSubscriber<T> implements UniSubscriber<T> {
      * @return this {@link UniAssertSubscriber}
      */
     public UniAssertSubscriber<T> assertNotSubscribed() {
-        if (subscription != null) {
-            throw new AssertionError("Expected to not have a subscription");
-        }
+        shouldNotBeSubscribed(subscription == null ? 0 : 1);
         return this;
     }
 }

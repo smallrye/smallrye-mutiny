@@ -133,12 +133,18 @@ public class SerializedMultiEmitter<T> implements MultiEmitter<T>, MultiSubscrib
 
     @Override
     public MultiEmitter<T> emit(T item) {
+        if (item == null) {
+            fail(new NullPointerException("`emit` called with `null`."));
+        }
         onItem(item);
         return this;
     }
 
     @Override
     public void fail(Throwable failure) {
+        if (failure == null) {
+            fail(new NullPointerException("`fail` called with `null`."));
+        }
         onFailure(failure);
     }
 

@@ -20,6 +20,12 @@ class UniAssertSubscriberTest {
         subscriber.assertCompleted().assertItem(123);
         Assertions.assertThat(subscriber.getItem()).isEqualTo(123);
         Assertions.assertThat(subscriber.getFailure()).isNull();
+
+        Assertions.assertThatThrownBy(() -> subscriber.assertItem(2))
+                .isInstanceOf(AssertionError.class);
+
+        Assertions.assertThatThrownBy(() -> subscriber.assertItem(null))
+                .isInstanceOf(AssertionError.class);
     }
 
     @Test
@@ -65,5 +71,26 @@ class UniAssertSubscriberTest {
         subscriber.assertSubscribed();
         emitterRef.get().complete("abc");
         subscriber.assertCompleted().assertItem("abc");
+    }
+
+    @Test
+    public void testCancellationWithoutSubscription() {
+        UniAssertSubscriber<String> subscriber = UniAssertSubscriber.create();
+        subscriber.assertNotSubscribed();
+        subscriber.cancel();
+
+        Uni.createFrom().item("x")
+                .subscribe().withSubscriber(subscriber);
+        subscriber.assertNotTerminated();
+    }
+
+    @Test
+    public void testCancellationAfterEmission() {
+        UniAssertSubscriber<String> subscriber = UniAssertSubscriber.create();
+        subscriber.assertNotSubscribed();
+        Uni.createFrom().item("x")
+                .subscribe().withSubscriber(subscriber);
+        subscriber.cancel();
+        subscriber.assertCompleted();
     }
 }

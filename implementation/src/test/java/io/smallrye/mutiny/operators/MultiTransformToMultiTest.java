@@ -2,6 +2,7 @@ package io.smallrye.mutiny.operators;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -100,7 +101,7 @@ public class MultiTransformToMultiTest {
                 .subscribe(subscriber);
 
         subscriber
-                .await()
+                .await(Duration.ofSeconds(60))
                 .assertCompleted();
 
         int current = 0;
@@ -122,7 +123,7 @@ public class MultiTransformToMultiTest {
                 .subscribe(subscriber);
 
         subscriber
-                .await()
+                .await(Duration.ofSeconds(60))
                 .assertCompleted();
 
         int current = 0;
@@ -150,7 +151,7 @@ public class MultiTransformToMultiTest {
                 .subscribe(subscriber);
 
         subscriber
-                .await()
+                .await(Duration.ofSeconds(60))
                 .assertFailedWith(CompositeException.class, "boom");
 
         assertThat(subscriber.getItems().size()).isEqualTo(100_000 - 2);
@@ -178,7 +179,7 @@ public class MultiTransformToMultiTest {
                 .subscribe(subscriber);
 
         subscriber
-                .await()
+                .await(Duration.ofSeconds(60))
                 .assertFailedWith(IllegalArgumentException.class, "boom");
 
         assertThat(subscriber.getItems().size()).isEqualTo(99000 - 1);
@@ -913,11 +914,9 @@ public class MultiTransformToMultiTest {
                 .merge(maxConcurrency);
 
         Subscriber<Integer> mock = Mocks.subscriber();
-        AssertSubscriber<Integer> subscriber = AssertSubscriber.create(mock);
-        multi.subscribe().withSubscriber(subscriber);
+        multi.subscribe().withSubscriber(mock);
 
-        subscriber.await()
-                .assertCompleted();
+        await().untilAsserted(() -> verify(mock).onComplete());
 
         verify(mock, never()).onNext(1);
         verify(mock, never()).onNext(2);

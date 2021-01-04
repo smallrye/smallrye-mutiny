@@ -284,7 +284,7 @@ public class MultiBroadcastTest {
     }
 
     @Test
-    public void testRequestsd() {
+    public void testRequests() {
         Multi<Integer> multi = Multi.createFrom().range(0, 1000)
                 .broadcast().toAtLeast(2);
 
