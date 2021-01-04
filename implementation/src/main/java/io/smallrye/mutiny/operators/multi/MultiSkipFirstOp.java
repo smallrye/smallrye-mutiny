@@ -12,11 +12,11 @@ import io.smallrye.mutiny.subscription.MultiSubscriber;
  * Skips the first N items from upstream.
  * Failures and completions are propagated.
  */
-public final class MultiSkipOp<T> extends AbstractMultiOperator<T, T> {
+public final class MultiSkipFirstOp<T> extends AbstractMultiOperator<T, T> {
 
     private final long numberOfItems;
 
-    public MultiSkipOp(Multi<? extends T> upstream, long numberOfItems) {
+    public MultiSkipFirstOp(Multi<? extends T> upstream, long numberOfItems) {
         super(upstream);
         this.numberOfItems = ParameterValidation.positiveOrZero(numberOfItems, "numberOfItems");
     }
@@ -24,17 +24,18 @@ public final class MultiSkipOp<T> extends AbstractMultiOperator<T, T> {
     @Override
     public void subscribe(MultiSubscriber<? super T> actual) {
         if (numberOfItems == 0) {
-            upstream.subscribe().withSubscriber(actual);
+            // Pass-through 
+            upstream.subscribe(actual);
         } else {
-            upstream.subscribe().withSubscriber(new SkipProcessor<>(actual, numberOfItems));
+            upstream.subscribe(new SkipFirstProcessor<>(actual, numberOfItems));
         }
     }
 
-    static final class SkipProcessor<T> extends MultiOperatorProcessor<T, T> {
+    static final class SkipFirstProcessor<T> extends MultiOperatorProcessor<T, T> {
 
         private final AtomicLong remaining;
 
-        SkipProcessor(MultiSubscriber<? super T> downstream, long items) {
+        SkipFirstProcessor(MultiSubscriber<? super T> downstream, long items) {
             super(downstream);
             this.remaining = new AtomicLong(items);
         }

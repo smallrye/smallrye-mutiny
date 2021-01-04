@@ -38,6 +38,7 @@ public class MultiSubscribeTest {
 
     }
 
+    @SuppressWarnings("ConstantConditions")
     @Test
     public void testSubscribeWithItemFailureAndCompletion() {
         List<Long> items = new CopyOnWriteArrayList<>();
@@ -45,7 +46,7 @@ public class MultiSubscribeTest {
         AtomicReference<Throwable> failure = new AtomicReference<>();
 
         Multi.createFrom().ticks().every(Duration.ofMillis(10))
-                .transform().byTakingFirstItems(10)
+                .select().first(10)
                 .subscribe().with(items::add, failure::set, () -> completion.set(true));
 
         await().until(() -> items.size() > 5);

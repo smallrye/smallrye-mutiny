@@ -18,6 +18,6 @@ public class SkipStageFactory implements ProcessingStageFactory<Stage.Skip> {
     @Override
     public <I, O> ProcessingStage<I, O> create(Engine engine, Stage.Skip stage) {
         long skip = stage.getSkip();
-        return source -> (Multi<O>) source.transform().bySkippingFirstItems(skip);
+        return source -> (Multi<O>) source.skip().first(skip);
     }
 }

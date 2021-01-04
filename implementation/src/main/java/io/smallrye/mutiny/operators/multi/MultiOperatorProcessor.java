@@ -81,6 +81,7 @@ public abstract class MultiOperatorProcessor<I, O> implements MultiSubscriber<I>
         if (subscription != CANCELLED) {
             if (numberOfItems <= 0) {
                 onFailure(new IllegalArgumentException("Invalid number of request, must be greater than 0"));
+                return;
             }
             subscription.request(numberOfItems);
         }

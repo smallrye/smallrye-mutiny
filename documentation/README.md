@@ -95,14 +95,14 @@ public class RepetitionsTest {
         Multi<Integer> multi = Multi.createFrom().items(1, 1, 2, 3, 4, 5, 5, 6,  1, 4, 4);
         // tag::distinct[]
         List<Integer> list = multi
-                .transform().byDroppingDuplicates()
+                .select().distinct()
                 .collect().asList()
                 .await().indefinitely();
         // end::distinct[]
 
         // tag::repetition[]
         List<Integer> list2 = multi
-                .transform().byDroppingRepetitions()
+                .skip().repetitions()
                 .collect().asList()
                 .await().indefinitely();
         // end::repetition[]

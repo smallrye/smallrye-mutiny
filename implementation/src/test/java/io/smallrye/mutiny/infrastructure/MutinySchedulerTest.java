@@ -139,7 +139,7 @@ public class MutinySchedulerTest {
     public void testTicks() {
         AtomicReference<String> thread = new AtomicReference<>();
         List<Long> list = Multi.createFrom().ticks().every(Duration.ofMillis(10))
-                .transform().byTakingFirstItems(5)
+                .select().first(5)
                 .collect().asList()
                 .onItem().invoke(l -> thread.set(Thread.currentThread().getName()))
                 .await().indefinitely();
@@ -153,7 +153,7 @@ public class MutinySchedulerTest {
         AtomicReference<String> thread = new AtomicReference<>();
         Multi.createFrom().ticks().every(Duration.ofMillis(10))
                 .group().intoLists().every(Duration.ofMillis(10))
-                .transform().byTakingFirstItems(5)
+                .select().first(5)
                 .collect().asList()
                 .onItem().invoke(l -> thread.set(Thread.currentThread().getName()))
                 .await().indefinitely();

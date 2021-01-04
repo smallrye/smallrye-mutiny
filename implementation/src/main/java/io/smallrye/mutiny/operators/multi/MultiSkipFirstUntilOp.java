@@ -11,27 +11,27 @@ import io.smallrye.mutiny.subscription.MultiSubscriber;
  *
  * @param <T> the type of item
  */
-public final class MultiSkipUntilOp<T> extends AbstractMultiOperator<T, T> {
+public final class MultiSkipFirstUntilOp<T> extends AbstractMultiOperator<T, T> {
 
     private final Predicate<? super T> predicate;
 
-    public MultiSkipUntilOp(Multi<? extends T> upstream, Predicate<? super T> predicate) {
+    public MultiSkipFirstUntilOp(Multi<? extends T> upstream, Predicate<? super T> predicate) {
         super(upstream);
         this.predicate = ParameterValidation.nonNull(predicate, "predicate");
     }
 
     @Override
-    public void subscribe(MultiSubscriber<? super T> actual) {
-        ParameterValidation.nonNullNpe(actual, "subscriber");
-        upstream.subscribe().withSubscriber(new SkipUntilProcessor<>(actual, predicate));
+    public void subscribe(MultiSubscriber<? super T> subscriber) {
+        ParameterValidation.nonNullNpe(subscriber, "subscriber");
+        upstream.subscribe(new MultiSkipFirstUntilProcessor<>(subscriber, predicate));
     }
 
-    static final class SkipUntilProcessor<T> extends MultiOperatorProcessor<T, T> {
+    static final class MultiSkipFirstUntilProcessor<T> extends MultiOperatorProcessor<T, T> {
 
         private final Predicate<? super T> predicate;
         private boolean gateOpen = false;
 
-        SkipUntilProcessor(MultiSubscriber<? super T> downstream, Predicate<? super T> predicate) {
+        MultiSkipFirstUntilProcessor(MultiSubscriber<? super T> downstream, Predicate<? super T> predicate) {
             super(downstream);
             this.predicate = predicate;
         }

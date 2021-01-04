@@ -18,6 +18,6 @@ public class LimitStageFactory implements ProcessingStageFactory<Stage.Limit> {
     @Override
     public <I, O> ProcessingStage<I, O> create(Engine engine, Stage.Limit stage) {
         long limit = stage.getLimit();
-        return source -> (Multi<O>) source.transform().byTakingFirstItems(limit);
+        return source -> (Multi<O>) source.select().first(limit);
     }
 }

@@ -42,7 +42,7 @@ public class MultiCreateFromGeneratorTest {
                     emitter.emit(n);
                     return counter;
                 })
-                .transform().byTakingFirstItems(6)
+                .select().first(6)
                 .subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE));
 
         sub.assertCompleted();
@@ -59,7 +59,7 @@ public class MultiCreateFromGeneratorTest {
                     emitter.emit(n);
                     return counter;
                 })
-                .transform().byTakingFirstItems(6)
+                .select().first(6)
                 .subscribe().withSubscriber(AssertSubscriber.create());
 
         sub.assertNotTerminated();
@@ -89,7 +89,7 @@ public class MultiCreateFromGeneratorTest {
                     emitter.emit(n);
                     return counter;
                 })
-                .transform().byTakingFirstItems(6)
+                .select().first(6)
                 .subscribe().withSubscriber(AssertSubscriber.create());
 
         sub.cancel();
@@ -108,7 +108,7 @@ public class MultiCreateFromGeneratorTest {
                     emitter.emit(n);
                     return counter;
                 })
-                .transform().byTakingFirstItems(6)
+                .select().first(6)
                 .subscribe().withSubscriber(AssertSubscriber.create());
 
         sub.request(0);
@@ -125,7 +125,7 @@ public class MultiCreateFromGeneratorTest {
                     emitter.emit(n);
                     return counter;
                 })
-                .transform().byTakingFirstItems(6)
+                .select().first(6)
                 .subscribe().withSubscriber(AssertSubscriber.create());
 
         sub.request(-10);

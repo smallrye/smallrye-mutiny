@@ -227,7 +227,7 @@ public class MultiFromIterableTest {
 
         };
         Multi.createFrom().iterable(iterable)
-                .transform().byTakingFirstItems(1)
+                .select().first(1)
                 .subscribe().withSubscriber(AssertSubscriber.create(10));
         assertFalse(called.get());
     }

@@ -117,7 +117,7 @@ public class MultiFlatMapTckTest extends AbstractPublisherTck<Long> {
         await(infiniteStream()
                 .onTermination().invoke(() -> outerCancelled.complete(null))
                 .flatMap(i -> infiniteStream().onTermination().invoke(() -> innerCancelled.complete(null)))
-                .transform().byTakingFirstItems(5)
+                .select().first(5)
                 .collect().asList()
                 .subscribeAsCompletionStage());
 

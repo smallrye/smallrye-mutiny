@@ -19,7 +19,7 @@ import org.reactivestreams.Subscription;
  * 
  * @param <T> the type of the items
  */
-@SuppressWarnings({ "ReactiveStreamsSubscriberImplementation" })
+@SuppressWarnings({ "ReactiveStreamsSubscriberImplementation"})
 public class AssertSubscriber<T> implements Subscriber<T> {
 
     /**

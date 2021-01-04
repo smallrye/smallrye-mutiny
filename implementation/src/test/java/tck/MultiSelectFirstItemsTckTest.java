@@ -13,12 +13,12 @@ import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.Multi;
 
-public class MultiTakeFirstItemsTckTest extends AbstractPublisherTck<Long> {
+public class MultiSelectFirstItemsTckTest extends AbstractPublisherTck<Long> {
 
     @Test
     public void limitStageShouldLimitTheOutputElements() {
         assertEquals(await(infiniteStream()
-                .transform().byTakingFirstItems(3)
+                .select().first(3)
                 .collect().asList()
                 .subscribeAsCompletionStage()), Arrays.asList(1, 2, 3));
     }
@@ -26,7 +26,7 @@ public class MultiTakeFirstItemsTckTest extends AbstractPublisherTck<Long> {
     @Test
     public void limitStageShouldAllowLimitingToZero() {
         assertEquals(await(infiniteStream()
-                .transform().byTakingFirstItems(0)
+                .select().first(0)
                 .collect().asList()
                 .subscribeAsCompletionStage()), Collections.emptyList());
     }
@@ -41,7 +41,8 @@ public class MultiTakeFirstItemsTckTest extends AbstractPublisherTck<Long> {
             @Override
             public void cancel() {
             }
-        })).transform().byTakingFirstItems(0)
+        }))
+                .select().first(0)
                 .collect().asList()
                 .subscribeAsCompletionStage()), Collections.emptyList());
     }
@@ -51,7 +52,7 @@ public class MultiTakeFirstItemsTckTest extends AbstractPublisherTck<Long> {
         CompletableFuture<Void> cancelled = new CompletableFuture<>();
         infiniteStream()
                 .onTermination().invoke(() -> cancelled.complete(null))
-                .transform().byTakingFirstItems(1)
+                .select().first(1)
                 .collect().asList()
                 .subscribeAsCompletionStage();
         await(cancelled);
@@ -68,7 +69,7 @@ public class MultiTakeFirstItemsTckTest extends AbstractPublisherTck<Long> {
                                 return Multi.createFrom().item(i);
                             }
                         })
-                        .transform().byTakingFirstItems(3)
+                        .select().first(3)
                         .collect().asList()
                         .subscribeAsCompletionStage()),
                 Arrays.asList(1, 2, 3));
@@ -85,8 +86,8 @@ public class MultiTakeFirstItemsTckTest extends AbstractPublisherTck<Long> {
                                 cancelled.completeExceptionally(new RuntimeException("Was not cancelled"));
                             }
                         })
-                        .transform().byTakingFirstItems(100)
-                        .transform().byTakingFirstItems(3)
+                        .select().first(100)
+                        .select().first(3)
                         .collect().asList()
                         .subscribeAsCompletionStage());
         await(cancelled);
@@ -95,12 +96,12 @@ public class MultiTakeFirstItemsTckTest extends AbstractPublisherTck<Long> {
     @Override
     public Publisher<Long> createPublisher(long elements) {
         return upstream(elements)
-                .transform().byTakingFirstItems(Long.MAX_VALUE);
+                .select().first(Long.MAX_VALUE);
     }
 
     @Override
     public Publisher<Long> createFailedPublisher() {
         return failedUpstream()
-                .transform().byTakingFirstItems(Long.MAX_VALUE);
+                .select().first(Long.MAX_VALUE);
     }
 }

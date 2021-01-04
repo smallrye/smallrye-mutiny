@@ -17,11 +17,11 @@ import io.smallrye.mutiny.subscription.MultiSubscriber;
  *
  * @param <T> the type of item
  */
-public final class MultiTakeOp<T> extends AbstractMultiOperator<T, T> {
+public final class MultiSelectFirstOp<T> extends AbstractMultiOperator<T, T> {
 
     private final long numberOfItems;
 
-    public MultiTakeOp(Multi<? extends T> upstream, long numberOfItems) {
+    public MultiSelectFirstOp(Multi<? extends T> upstream, long numberOfItems) {
         super(upstream);
         this.numberOfItems = ParameterValidation.positiveOrZero(numberOfItems, "numberOfItems");
     }
@@ -29,16 +29,16 @@ public final class MultiTakeOp<T> extends AbstractMultiOperator<T, T> {
     @Override
     public void subscribe(MultiSubscriber<? super T> downstream) {
         ParameterValidation.nonNullNpe(downstream, "subscriber");
-        upstream.subscribe().withSubscriber(new TakeProcessor<>(downstream, numberOfItems));
+        upstream.subscribe(new MultiSelectFirstProcessor<>(downstream, numberOfItems));
     }
 
-    static final class TakeProcessor<T> extends MultiOperatorProcessor<T, T> {
+    static final class MultiSelectFirstProcessor<T> extends MultiOperatorProcessor<T, T> {
 
         private final long numberOfItems;
         private long remaining;
-        private AtomicInteger wip = new AtomicInteger();
+        private final AtomicInteger wip = new AtomicInteger();
 
-        TakeProcessor(MultiSubscriber<? super T> downstream, long numberOfItems) {
+        MultiSelectFirstProcessor(MultiSubscriber<? super T> downstream, long numberOfItems) {
             super(downstream);
             this.numberOfItems = numberOfItems;
             this.remaining = numberOfItems;
@@ -82,10 +82,6 @@ public final class MultiTakeOp<T> extends AbstractMultiOperator<T, T> {
 
         @Override
         public void request(long n) {
-            if (n <= 0) {
-                downstream.onFailure(Subscriptions.getInvalidRequestException());
-                return;
-            }
             Subscription actual = upstream.get();
             if (wip.compareAndSet(0, 1)) {
                 if (n >= this.numberOfItems) {

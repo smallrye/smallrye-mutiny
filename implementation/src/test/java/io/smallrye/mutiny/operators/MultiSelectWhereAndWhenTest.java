@@ -16,30 +16,38 @@ import org.reactivestreams.Subscriber;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.helpers.spies.MultiOnCancellationSpy;
+import io.smallrye.mutiny.helpers.spies.Spy;
 import io.smallrye.mutiny.helpers.test.AssertSubscriber;
-import io.smallrye.mutiny.operators.multi.MultiFilterOp;
+import io.smallrye.mutiny.operators.multi.MultiSelectWhereOp;
 import io.smallrye.mutiny.operators.multi.processors.BroadcastProcessor;
 import io.smallrye.mutiny.test.Mocks;
 
-public class MultiFilterTest {
+public class MultiSelectWhereAndWhenTest {
 
     @Test
     public void testThatPredicateCannotBeNull() {
         assertThrows(IllegalArgumentException.class, () -> Multi.createFrom().range(1, 4)
-                .transform().byFilteringItemsWith(null));
+                .select().where(null));
+    }
+
+    @Test
+    public void testThatLimitCannotBeNegative() {
+        assertThrows(IllegalArgumentException.class, () -> Multi.createFrom().range(1, 4)
+                .select().where(x -> x == 2, -1));
     }
 
     @Test
     public void testThatFunctionCannotBeNull() {
         assertThrows(IllegalArgumentException.class, () -> Multi.createFrom().range(1, 4)
-                .transform().byTestingItemsWith(null));
+                .select().when(null));
     }
 
     @Test
     public void testThatSubscriberCannotBeNull() {
         assertThrows(NullPointerException.class, () -> {
             Multi<Integer> multi = Multi.createFrom().range(1, 4);
-            MultiFilterOp<Integer> filter = new MultiFilterOp<>(multi, x -> x % 2 == 0);
+            MultiSelectWhereOp<Integer> filter = new MultiSelectWhereOp<>(multi, x -> x % 2 == 0);
             filter.subscribe(null);
         });
     }
@@ -57,6 +65,38 @@ public class MultiFilterTest {
     public void testFilteringWithPredicate() {
         Predicate<Integer> test = x -> x % 2 != 0;
         assertThat(Multi.createFrom().range(1, 4)
+                .select().where(test)
+                .collectItems().asList()
+                .await().indefinitely()).containsExactly(1, 3);
+    }
+
+    @Test
+    public void testFilteringWithPredicateAndLimit() {
+        Predicate<Integer> test = x -> x % 2 != 0;
+        MultiOnCancellationSpy<Integer> spy = Spy
+                .onCancellation(Multi.createFrom().range(1, 10));
+        assertThat(spy
+                .select().where(test, 2)
+                .collectItems().asList()
+                .await().indefinitely()).containsExactly(1, 3);
+
+        assertThat(spy.isCancelled()).isTrue();
+    }
+
+    @Test
+    public void testFilteringWithPredicateAndZeroAsLimit() {
+        Predicate<Integer> test = x -> x % 2 != 0;
+        assertThat(Multi.createFrom().range(1, 10)
+                .select().where(test, 0)
+                .collectItems().asList()
+                .await().indefinitely()).isEmpty();
+    }
+
+    @Test
+    @SuppressWarnings("deprecation")
+    public void testFilteringWithPredicateDeprecated() {
+        Predicate<Integer> test = x -> x % 2 != 0;
+        assertThat(Multi.createFrom().range(1, 4)
                 .transform().byFilteringItemsWith(test)
                 .collect().asList()
                 .await().indefinitely()).containsExactly(1, 3);
@@ -65,8 +105,17 @@ public class MultiFilterTest {
     @Test
     public void testFilteringWithUni() {
         assertThat(Multi.createFrom().range(1, 4)
-                .transform()
-                .byTestingItemsWith(
+                .select().when(
+                        x -> Uni.createFrom().completionStage(() -> CompletableFuture.supplyAsync(() -> x % 2 != 0)))
+                .collectItems().asList()
+                .await().indefinitely()).containsExactly(1, 3);
+    }
+
+    @SuppressWarnings("deprecation")
+    @Test
+    public void testFilteringWithUniDeprecated() {
+        assertThat(Multi.createFrom().range(1, 4)
+                .transform().byTestingItemsWith(
                         x -> Uni.createFrom().completionStage(() -> CompletableFuture.supplyAsync(() -> x % 2 != 0)))
                 .collect().asList()
                 .await().indefinitely()).containsExactly(1, 3);
@@ -87,7 +136,7 @@ public class MultiFilterTest {
         LongAdder numberOfRequests = new LongAdder();
         AssertSubscriber<Integer> subscriber = Multi.createFrom().range(1, 100000)
                 .onRequest().invoke(numberOfRequests::increment)
-                .transform().byFilteringItemsWith(test)
+                .select().where(test)
                 .subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE));
 
         subscriber.assertCompleted();
@@ -97,7 +146,7 @@ public class MultiFilterTest {
     @Test
     public void testNoEmissionAfterCompletion() {
         BroadcastProcessor<Integer> processor = BroadcastProcessor.create();
-        MultiFilterOp<Integer> filter = new MultiFilterOp<>(processor, x -> x % 2 == 0);
+        MultiSelectWhereOp<Integer> filter = new MultiSelectWhereOp<>(processor, x -> x % 2 == 0);
         Subscriber<Integer> subscriber = Mocks.subscriber();
         filter.subscribe(subscriber);
 
@@ -120,7 +169,7 @@ public class MultiFilterTest {
     @Test
     public void testNoEmissionAfterFailure() {
         BroadcastProcessor<Integer> processor = BroadcastProcessor.create();
-        MultiFilterOp<Integer> filter = new MultiFilterOp<>(processor, x -> x % 2 == 0);
+        MultiSelectWhereOp<Integer> filter = new MultiSelectWhereOp<>(processor, x -> x % 2 == 0);
         Subscriber<Integer> subscriber = Mocks.subscriber();
         filter.subscribe(subscriber);
 
@@ -143,7 +192,7 @@ public class MultiFilterTest {
     @Test
     public void testNoEmissionAfterCancellation() {
         BroadcastProcessor<Integer> processor = BroadcastProcessor.create();
-        AssertSubscriber<Integer> subscriber = processor.transform().byFilteringItemsWith(x -> x % 2 == 0)
+        AssertSubscriber<Integer> subscriber = processor.select().where(x -> x % 2 == 0)
                 .subscribe().withSubscriber(AssertSubscriber.create(20));
 
         processor.onNext(1);
@@ -161,7 +210,7 @@ public class MultiFilterTest {
     @Test
     public void testWithPredicateThrowingException() {
         BroadcastProcessor<Integer> processor = BroadcastProcessor.create();
-        AssertSubscriber<Integer> subscriber = processor.transform().byFilteringItemsWith(x -> {
+        AssertSubscriber<Integer> subscriber = processor.select().where(x -> {
             if (x == 3) {
                 throw new IllegalArgumentException("boom");
             }

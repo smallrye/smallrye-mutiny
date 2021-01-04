@@ -1,8 +1,8 @@
 package io.smallrye.mutiny.operators;
 
 import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
+import static io.smallrye.mutiny.helpers.ParameterValidation.nonNullNpe;
 
-import java.util.Objects;
 import java.util.concurrent.Executor;
 import java.util.function.Predicate;
 
@@ -16,6 +16,7 @@ import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.multi.MultiCacheOp;
 import io.smallrye.mutiny.operators.multi.MultiEmitOnOp;
 import io.smallrye.mutiny.operators.multi.MultiSubscribeOnOp;
+import io.smallrye.mutiny.operators.multi.processors.BroadcastProcessor;
 import io.smallrye.mutiny.subscription.MultiSubscriber;
 
 public abstract class AbstractMulti<T> implements Multi<T> {
@@ -24,11 +25,16 @@ public abstract class AbstractMulti<T> implements Multi<T> {
         this.subscribe(Infrastructure.onMultiSubscription(this, subscriber));
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public void subscribe(Subscriber<? super T> subscriber) {
-        // NOTE The Reactive Streams TCK mandates throwing an NPE.
-        Objects.requireNonNull(subscriber, "Subscriber is `null`");
-        this.subscribe(new StrictMultiSubscriber<>(subscriber));
+        if (subscriber instanceof MultiOperator || subscriber instanceof StrictMultiSubscriber) {
+            this.subscribe((MultiSubscriber<? super T>) subscriber);
+        } else {
+            // NOTE The Reactive Streams TCK mandates throwing an NPE.
+            nonNullNpe(subscriber, "subscriber");
+            this.subscribe(new StrictMultiSubscriber<>(subscriber));
+        }
     }
 
     @Override
@@ -92,6 +98,16 @@ public abstract class AbstractMulti<T> implements Multi<T> {
     }
 
     @Override
+    public MultiSelect<T> select() {
+        return new MultiSelect<>(this);
+    }
+
+    @Override
+    public MultiSkip<T> skip() {
+        return new MultiSkip<>(this);
+    }
+
+    @Override
     public MultiOverflow<T> onOverflow() {
         return new MultiOverflow<>(this);
     }
@@ -135,4 +151,11 @@ public abstract class AbstractMulti<T> implements Multi<T> {
     public MultiGroup<T> group() {
         return new MultiGroup<>(this);
     }
+
+    public Multi<T> toHotStream() {
+        BroadcastProcessor<T> processor = BroadcastProcessor.create();
+        this.subscribe(processor);
+        return processor;
+    }
+
 }

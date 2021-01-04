@@ -5,11 +5,11 @@
 :include_dir: ../../../../src/test/java/guides/operators
 
 When observing a `Multi`, you may see duplicated items or repetitions.
-Mutiny has operators to removes these duplicates.
+The `multi.select()` and `multi.skip()` groups provide methods to only select distinct items or drop repetitions.
 
-== Removing duplicates
+== Selecting distinct
 
-The `.transform().byDroppingDuplicates()` operator removes all the duplicates.
+The `.select().distinct()` operator removes all the duplicates.
 As a result, the downstream only contains distinct items:
 
 [source,java,indent=0]
@@ -18,15 +18,18 @@ include::{include_dir}/RepetitionsTest.java[tag=distinct]
 ----
 
 If you have a stream emitting the {1, 1, 2, 3, 4, 5, 5, 6, 1, 4, 4} items.
-Applying `.transform().byDroppingDuplicates()` on such stream produces:
+Applying `.select().distinct()` on such stream produces:
 {1, 2, 3, 4, 5, 6}.
 
-IMPORTANT: Do not use `.transform().byDroppingDuplicates()` on large or infinite streams.
+IMPORTANT: Do not use `.select().distinct()` on large or infinite streams.
 The operator keeps a reference on all the emitted items, and so, it could lead to memory issues if the stream contains too many distinct items.
 
-== Removing repetitions
+TIP: By default, `select().distinct()` uses the `hashCode` method from the item's class.
+You can pass a custom comparator for more advanced checks.
 
-The `.transform().byDroppingRepetitions()` operator removes subsequent repetition of an item:
+== Skipping repetitions
+
+The `.skip().repetitions()` operator removes subsequent repetitions of an item:
 
 [source,java,indent=0]
 ----
@@ -34,7 +37,10 @@ include::{include_dir}/RepetitionsTest.java[tag=repetition]
 ----
 
 If you have a stream emitting the {1, 1, 2, 3, 4, 5, 5, 6, 1, 4, 4} items.
-Applying `.transform().byDroppingRepetitions()` on such stream produces:
+Applying `.skip().repetitions()` on such stream produces:
 {1, 2, 3, 4, 5, 6, 1, 4}.
 
-Unlike `.transform().byDroppingDuplicates()`, you can use this operator on large or infinite streams.
+Unlike `.skip().repetitions())`, you can use this operator on large or infinite streams.
+
+TIP: By default, `skip().repetitions()` uses the `equals` method from the item's class.
+You can pass a custom comparator for more advanced checks.

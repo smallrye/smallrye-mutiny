@@ -21,11 +21,11 @@ import io.smallrye.mutiny.subscription.SerializedSubscriber;
  * @param <T> the type of item from upstream
  * @param <U> the type of item from the other publisher
  */
-public final class MultiTakeUntilOtherOp<T, U> extends AbstractMultiOperator<T, T> {
+public final class MultiSelectFirstUntilOtherOp<T, U> extends AbstractMultiOperator<T, T> {
 
     private final Publisher<U> other;
 
-    public MultiTakeUntilOtherOp(Multi<? extends T> upstream, Publisher<U> other) {
+    public MultiSelectFirstUntilOtherOp(Multi<? extends T> upstream, Publisher<U> other) {
         super(upstream);
         this.other = ParameterValidation.nonNull(other, "other");
     }

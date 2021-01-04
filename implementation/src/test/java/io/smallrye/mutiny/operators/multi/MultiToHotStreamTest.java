@@ -20,6 +20,34 @@ public class MultiToHotStreamTest {
     public void testWithTwoSubscribers() {
         UnicastProcessor<String> processor = UnicastProcessor.create();
 
+        Multi<String> multi = processor.map(s -> s).toHotStream();
+        AssertSubscriber<String> subscriber1 = multi.subscribe()
+                .withSubscriber(AssertSubscriber.create(10));
+
+        processor.onNext("one");
+        processor.onNext("two");
+        processor.onNext("three");
+
+        AssertSubscriber<String> subscriber2 = multi.subscribe()
+                .withSubscriber(AssertSubscriber.create(10));
+
+        processor.onNext("four");
+        processor.onComplete();
+
+        subscriber1
+                .assertItems("one", "two", "three", "four")
+                .assertCompleted();
+
+        subscriber2
+                .assertItems("four")
+                .assertCompleted();
+    }
+
+    @SuppressWarnings("deprecation")
+    @Test
+    public void testWithTwoSubscribersDeprecated() {
+        UnicastProcessor<String> processor = UnicastProcessor.create();
+
         Multi<String> multi = processor.map(s -> s).transform().toHotStream();
         AssertSubscriber<String> subscriber1 = multi.subscribe()
                 .withSubscriber(AssertSubscriber.create(10));
@@ -47,7 +75,7 @@ public class MultiToHotStreamTest {
     public void testSubscriptionAfterCompletion() {
         BroadcastProcessor<String> processor = BroadcastProcessor.create();
 
-        Multi<String> multi = processor.map(s -> s).transform().toHotStream();
+        Multi<String> multi = processor.map(s -> s).toHotStream();
         AssertSubscriber<String> subscriber1 = multi.subscribe()
                 .withSubscriber(AssertSubscriber.create(10));
 
@@ -79,7 +107,7 @@ public class MultiToHotStreamTest {
     @Test
     public void testSubscriptionAfterFailure() {
         BroadcastProcessor<String> processor = BroadcastProcessor.create();
-        Multi<String> multi = processor.map(s -> s).transform().toHotStream();
+        Multi<String> multi = processor.map(s -> s).toHotStream();
 
         AssertSubscriber<String> subscriber1 = multi.subscribe()
                 .withSubscriber(AssertSubscriber.create(10));
@@ -112,7 +140,7 @@ public class MultiToHotStreamTest {
     @Test
     public void testFailureAfterCompletion() {
         BroadcastProcessor<Integer> processor = BroadcastProcessor.create();
-        Multi<Integer> multi = processor.map(s -> s).transform().toHotStream();
+        Multi<Integer> multi = processor.map(s -> s).toHotStream();
 
         AssertSubscriber<Integer> subscriber = multi.subscribe()
                 .withSubscriber(AssertSubscriber.create(10));
@@ -128,7 +156,7 @@ public class MultiToHotStreamTest {
     @Test
     public void testNoItemAfterCancellation() {
         BroadcastProcessor<String> processor = BroadcastProcessor.create();
-        Multi<String> multi = processor.map(s -> s).transform().toHotStream();
+        Multi<String> multi = processor.map(s -> s).toHotStream();
 
         AssertSubscriber<String> subscriber1 = multi.subscribe()
                 .withSubscriber(AssertSubscriber.create(10));
@@ -166,7 +194,7 @@ public class MultiToHotStreamTest {
     @Test
     public void testResubscription() {
         BroadcastProcessor<String> processor = BroadcastProcessor.create();
-        Multi<String> multi = processor.map(s -> s).transform().toHotStream();
+        Multi<String> multi = processor.map(s -> s).toHotStream();
 
         AssertSubscriber<String> subscriber1 = multi.subscribe()
                 .withSubscriber(AssertSubscriber.create(10));
@@ -191,7 +219,7 @@ public class MultiToHotStreamTest {
     @Test
     public void testResubscriptionAfterCompletion() {
         BroadcastProcessor<String> processor = BroadcastProcessor.create();
-        Multi<String> multi = processor.map(s -> s).transform().toHotStream();
+        Multi<String> multi = processor.map(s -> s).toHotStream();
 
         AssertSubscriber<String> subscriber1 = multi.subscribe()
                 .withSubscriber(AssertSubscriber.create(10));
@@ -213,7 +241,7 @@ public class MultiToHotStreamTest {
     @Test
     public void testResubscriptionAfterFailure() {
         BroadcastProcessor<String> processor = BroadcastProcessor.create();
-        Multi<String> multi = processor.map(s -> s).transform().toHotStream();
+        Multi<String> multi = processor.map(s -> s).toHotStream();
 
         AssertSubscriber<String> subscriber1 = multi.subscribe()
                 .withSubscriber(AssertSubscriber.create(10));
@@ -236,7 +264,7 @@ public class MultiToHotStreamTest {
     @Test
     public void testWhenSubscriberDoesNotHaveRequestedEnough() {
         BroadcastProcessor<Integer> processor = BroadcastProcessor.create();
-        Multi<Integer> multi = processor.map(s -> s).transform().toHotStream();
+        Multi<Integer> multi = processor.map(s -> s).toHotStream();
 
         AssertSubscriber<Integer> s1 = multi.subscribe()
                 .withSubscriber(AssertSubscriber.create(10));
@@ -257,7 +285,7 @@ public class MultiToHotStreamTest {
     @Test
     public void testWithTransformToMultiAndMerge() {
         BroadcastProcessor<Integer> processor = BroadcastProcessor.create();
-        Multi<Integer> multi = processor.map(s -> s).transform().toHotStream();
+        Multi<Integer> multi = processor.map(s -> s).toHotStream();
 
         AssertSubscriber<Integer> subscriber = AssertSubscriber.create(10);
 
@@ -278,8 +306,8 @@ public class MultiToHotStreamTest {
     @Test
     public void testMakingTicksAHotStream() throws InterruptedException {
         Multi<Long> ticks = Multi.createFrom().ticks().every(Duration.ofMillis(1))
-                .transform().byTakingFirstItems(100)
-                .transform().toHotStream();
+                .select().first(100)
+                .toHotStream();
         Thread.sleep(50); // NOSONAR
 
         AssertSubscriber<Long> subscriber = ticks.subscribe()

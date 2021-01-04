@@ -21,6 +21,6 @@ public class TakeWhileStageFactory implements ProcessingStageFactory<Stage.TakeW
     @Override
     public <I, O> ProcessingStage<I, O> create(Engine engine, Stage.TakeWhile stage) {
         Predicate<I> predicate = (Predicate<I>) Objects.requireNonNull(stage.getPredicate());
-        return source -> (Multi<O>) source.transform().byTakingItemsWhile(predicate);
+        return source -> (Multi<O>) source.select().first(predicate);
     }
 }

@@ -20,6 +20,6 @@ public class DistinctStageFactory implements ProcessingStageFactory<Stage.Distin
     @Override
     public <I, O> ProcessingStage<I, O> create(Engine engine, Stage.Distinct stage) {
         Objects.requireNonNull(stage);
-        return source -> (Multi<O>) source.transform().byDroppingDuplicates();
+        return source -> (Multi<O>) source.select().distinct();
     }
 }

@@ -105,7 +105,7 @@ public class UniOnFailureRetryTest {
                 e.complete("done");
             }
         })
-                .onFailure().retry().when(stream -> stream.transform().byTakingFirstItems(1))
+                .onFailure().retry().when(stream -> stream.select().first())
                 .await().atMost(Duration.ofSeconds(5));
         assertThat(value).isNull();
     }

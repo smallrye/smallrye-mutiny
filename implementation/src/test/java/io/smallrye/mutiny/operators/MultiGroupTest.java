@@ -200,7 +200,7 @@ public class MultiGroupTest {
     @Test
     public void testAsListsWithDurationWithCompletion() {
         Multi<Long> publisher = Multi.createFrom().publisher(Multi.createFrom().ticks().every(Duration.ofMillis(2)))
-                .transform().byTakingFirstItems(10);
+                .select().first(10);
         AssertSubscriber<List<Long>> subscriber = publisher.group().intoLists().every(Duration.ofMillis(100))
                 .subscribe()
                 .withSubscriber(AssertSubscriber.create(100));
@@ -211,7 +211,7 @@ public class MultiGroupTest {
     @Test
     public void testAsListsWithDurationWithFailure() {
         Multi<Long> publisher = Multi.createFrom().publisher(Multi.createFrom().ticks().every(Duration.ofMillis(2)))
-                .transform().byTakingFirstItems(10)
+                .select().first(10)
                 .onCompletion().failWith(new IOException("boom"));
         AssertSubscriber<List<Long>> subscriber = publisher.group().intoLists().every(Duration.ofMillis(100))
                 .subscribe()
