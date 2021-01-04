@@ -65,6 +65,7 @@ jobs:
       - name: Deploy snapshots
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SECRET_FILES_PASSPHRASE: ${{ secrets.SECRET_FILES_PASSPHRASE }}
         run: |
           .build/decrypt-secrets.sh
           .build/deploy-snapshot.sh
