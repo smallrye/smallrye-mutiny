@@ -78,26 +78,26 @@
         <div class="col-md-9 content">
             <div class="paragraph">
 <p>When observing a <code>Multi</code>, you may see duplicated items or repetitions.
-Mutiny has operators to removes these duplicates.</p>
+The <code>multi.select()</code> and <code>multi.skip()</code> groups provide methods to only select distinct items or drop repetitions.</p>
 </div>
 <div class="sect1">
-<h2 id="removing-duplicates"><a class="anchor" href="#removing-duplicates"></a>Removing duplicates</h2>
+<h2 id="selecting-distinct"><a class="anchor" href="#selecting-distinct"></a>Selecting distinct</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>The <code>.transform().byDroppingDuplicates()</code> operator removes all the duplicates.
+<p>The <code>.select().distinct()</code> operator removes all the duplicates.
 As a result, the downstream only contains distinct items:</p>
 </div>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">List&lt;Integer&gt; list = multi
-        .transform().byDroppingDuplicates()
-        .collectItems().asList()
+        .select().distinct()
+        .collect().asList()
         .await().indefinitely();</code></pre>
 </div>
 </div>
 <div class="paragraph">
 <p>If you have a stream emitting the {1, 1, 2, 3, 4, 5, 5, 6, 1, 4, 4} items.
-Applying <code>.transform().byDroppingDuplicates()</code> on such stream produces:
+Applying <code>.select().distinct()</code> on such stream produces:
 {1, 2, 3, 4, 5, 6}.</p>
 </div>
 <div class="admonitionblock important">
@@ -107,8 +107,21 @@ Applying <code>.transform().byDroppingDuplicates()</code> on such stream produce
 <i class="fa icon-important" title="Important"></i>
 </td>
 <td class="content">
-Do not use <code>.transform().byDroppingDuplicates()</code> on large or infinite streams.
+Do not use <code>.select().distinct()</code> on large or infinite streams.
 The operator keeps a reference on all the emitted items, and so, it could lead to memory issues if the stream contains too many distinct items.
+</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+By default, <code>select().distinct()</code> uses the <code>hashCode</code> method from the item&#8217;s class.
+You can pass a custom comparator for more advanced checks.
 </td>
 </tr>
 </table>
@@ -116,26 +129,39 @@ The operator keeps a reference on all the emitted items, and so, it could lead t
 </div>
 </div>
 <div class="sect1">
-<h2 id="removing-repetitions"><a class="anchor" href="#removing-repetitions"></a>Removing repetitions</h2>
+<h2 id="skipping-repetitions"><a class="anchor" href="#skipping-repetitions"></a>Skipping repetitions</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>The <code>.transform().byDroppingRepetitions()</code> operator removes subsequent repetition of an item:</p>
+<p>The <code>.skip().repetitions()</code> operator removes subsequent repetitions of an item:</p>
 </div>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">List&lt;Integer&gt; list2 = multi
-        .transform().byDroppingRepetitions()
-        .collectItems().asList()
+        .skip().repetitions()
+        .collect().asList()
         .await().indefinitely();</code></pre>
 </div>
 </div>
 <div class="paragraph">
 <p>If you have a stream emitting the {1, 1, 2, 3, 4, 5, 5, 6, 1, 4, 4} items.
-Applying <code>.transform().byDroppingRepetitions()</code> on such stream produces:
+Applying <code>.skip().repetitions()</code> on such stream produces:
 {1, 2, 3, 4, 5, 6, 1, 4}.</p>
 </div>
 <div class="paragraph">
-<p>Unlike <code>.transform().byDroppingDuplicates()</code>, you can use this operator on large or infinite streams.</p>
+<p>Unlike <code>.skip().repetitions())</code>, you can use this operator on large or infinite streams.</p>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+By default, <code>skip().repetitions()</code> uses the <code>equals</code> method from the item&#8217;s class.
+You can pass a custom comparator for more advanced checks.
+</td>
+</tr>
+</table>
 </div>
 </div>
 </div>
@@ -145,8 +171,8 @@ Applying <code>.transform().byDroppingRepetitions()</code> on such stream produc
                 
                 <h4>Table of Content</h4>
                 <ul class="sectlevel1">
-<li><a href="#removing-duplicates">Removing duplicates</a></li>
-<li><a href="#removing-repetitions">Removing repetitions</a></li>
+<li><a href="#selecting-distinct">Selecting distinct</a></li>
+<li><a href="#skipping-repetitions">Skipping repetitions</a></li>
 </ul>
                 
 
@@ -206,7 +232,7 @@ Applying <code>.transform().byDroppingRepetitions()</code> on such stream produc
                     <a href="https://www.redhat.com/en/about/privacy-policy">Privacy Policy</a>
                 </p>
                 <p>
-                     Site last generated: Dec 23, 2020
+                     Site last generated: Jan 5, 2021
                 </p>
             </div>
         </div>

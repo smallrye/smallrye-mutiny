@@ -170,7 +170,7 @@ To trigger the computation, you must subscribe.</p>
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Multi.createFrom().items(1, 2, 3, 4, 5)
         .onItem().transform(i -&gt; i * 2)
-        .transform().byTakingFirstItems(3)
+        .select().first(3)
         .onFailure().recoverWithItem(0)
         .subscribe().with(System.out::println);</code></pre>
 </div>
@@ -409,7 +409,7 @@ For the first tick, it&#8217;s 0, then 1, then 2, and so on.</p>
                     <a href="https://www.redhat.com/en/about/privacy-policy">Privacy Policy</a>
                 </p>
                 <p>
-                     Site last generated: Dec 23, 2020
+                     Site last generated: Jan 5, 2021
                 </p>
             </div>
         </div>

@@ -78,36 +78,37 @@
         <div class="col-md-9 content">
             <div class="paragraph">
 <p>When observing a <code>Multi</code>, you may want to not forward all the received items to your downstream.
-To <em>filter</em> or <em>select</em> items, you can use <code>multi.transform().byFilteringItemsWith(predicate)</code>:</p>
+Use the <code>multi.select()</code> group to select items.
+To <em>select</em> items passing a given predicate, use <code>multi.select().where(predicate)</code>:</p>
 </div>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">List&lt;Integer&gt; list = multi
-        .transform().byFilteringItemsWith(i -&gt; i &gt; 6)
-        .collectItems().asList()
+        .select().where(i -&gt; i &gt; 6)
+        .collect().asList()
         .await().indefinitely();</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p><code>byFilteringItemsWith</code> accepts a predicate called for each item.
+<p><code>where</code> accepts a predicate called for each item.
 If the predicate returns <code>true</code>, the item propagated downstream.
 Otherwise, it drops the item.</p>
 </div>
 <div class="paragraph">
-<p>The predicated passed to <code>byFilteringItemsWith</code> is synchronous.
-The <code>byTestingItemsWith</code> method provides an asynchronous version:</p>
+<p>The predicated passed to <code>where</code> is synchronous.
+The <code>when</code> method provides an asynchronous version:</p>
 </div>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">List&lt;Integer&gt; list2 = multi
-        .transform().byTestingItemsWith(i -&gt; Uni.createFrom().item(i &gt; 6))
-        .collectItems().asList()
+        .select().when(i -&gt; Uni.createFrom().item(i &gt; 6))
+        .collect().asList()
         .await().indefinitely();</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p><code>byFilteringItemsWith</code> accepts a function called for each item.
-Unlike <code>byFilteringItemsWith</code> where the predicate returns a boolean synchronously, the function returns a <code>Uni&lt;Boolean&gt;</code>.
+<p><code>when</code> accepts a function called for each item.
+Unlike <code>when</code> where the predicate returns a boolean synchronously, the function returns a <code>Uni&lt;Boolean&gt;</code>.
 It forwards the item downstream if the <code>uni</code> produced by the function emits <code>true</code>.
 Otherwise, it drops the item.</p>
 </div>
@@ -172,7 +173,7 @@ Otherwise, it drops the item.</p>
                     <a href="https://www.redhat.com/en/about/privacy-policy">Privacy Policy</a>
                 </p>
                 <p>
-                     Site last generated: Dec 23, 2020
+                     Site last generated: Jan 5, 2021
                 </p>
             </div>
         </div>

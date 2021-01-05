@@ -95,37 +95,65 @@
 </li>
 </ul>
 </div>
+<div class="paragraph">
+<p>These actions are available from the <code>multi.select()</code> and <code>multi.skip()</code> groups, allowing to, respectively, select and skip
+items from upstream.</p>
+</div>
 <div class="sect1">
-<h2 id="taking-items"><a class="anchor" href="#taking-items"></a>Taking items</h2>
+<h2 id="selecting-items"><a class="anchor" href="#selecting-items"></a>Selecting items</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>The <code>multi.transform().byTakingFirstItems</code> method forwards on the <em>n</em> <strong>first</strong> items from the multi.
+<p>The <code>multi.select().first</code> method forwards on the <em>n</em> <strong>first</strong> items from the multi.
 It forwards that amount of items and then sends the completion signal.
 It also cancels the upstream subscription.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Multi&lt;Integer&gt; firstThreeItems = multi.transform().byTakingFirstItems(3);</code></pre>
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Multi&lt;Integer&gt; firstThreeItems = multi.select().first(3);</code></pre>
 </div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+The <code>select().first()</code> method selects only the first item.
+</td>
+</tr>
+</table>
 </div>
 <div class="paragraph">
 <p>If the observed multi emits fewer items, it sends the completion event when the upstream completes.</p>
 </div>
 <div class="paragraph">
-<p>Similarly, The <code>multi.transform().byTakingLastItems</code> operator forwards on the <em>n</em>  <strong>last</strong> items from the multi.
+<p>Similarly, The <code>multi.select().last</code> operator forwards on the <em>n</em>  <strong>last</strong> items from the multi.
 It discards all the items emitted beforehand.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Multi&lt;Integer&gt; lastThreeItems = multi.transform().byTakingLastItems(3);</code></pre>
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Multi&lt;Integer&gt; lastThreeItems = multi.select().last(3);</code></pre>
 </div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+The <code>select().last()</code> method selects only the last item.
+</td>
+</tr>
+</table>
 </div>
 <div class="paragraph">
-<p>The <code>multi.transform().byTakingItemsWhile</code> operator forwards the items while the passed predicate returns <code>true</code>:</p>
+<p>The <code>multi.select().first(Predicate)</code> operator forwards the items while the passed predicate returns <code>true</code>:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Multi&lt;Integer&gt; takeWhile = multi.transform().byTakingItemsWhile(i -&gt; i &lt; 4);</code></pre>
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Multi&lt;Integer&gt; takeWhile = multi.select().first(i -&gt; i &lt; 4);</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -134,13 +162,13 @@ Once the predicate returns <code>false</code>, it stops forwarding the items dow
 It also sends the completion event and cancels the upstream subscription.</p>
 </div>
 <div class="paragraph">
-<p>Finally,  <code>multi.transform().byTakingItemsFor</code> operator picks the first items for a given period.
+<p>Finally,  <code>multi.select().first(Duration)</code> operator picks the first items emitted during a given period.
 Once the passed duration expires, it sends the completion event and cancels the upstream subscription.
 If the observes multi completes before the passed duration, it sends the completion event.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Multi&lt;Integer&gt; takeForDuration = multi.transform().byTakingItemsFor(Duration.ofSeconds(1));</code></pre>
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Multi&lt;Integer&gt; takeForDuration = multi.select().first(Duration.ofSeconds(1));</code></pre>
 </div>
 </div>
 </div>
@@ -149,34 +177,46 @@ If the observes multi completes before the passed duration, it sends the complet
 <h2 id="skipping-items"><a class="anchor" href="#skipping-items"></a>Skipping items</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>You can also skip items.</p>
+<p>You can also skip items using <code>multi.skip()</code>.</p>
 </div>
 <div class="paragraph">
-<p>The <code>multi.transform().bySkippingFirstItems</code> method skips the <em>n</em> <strong>first</strong> items from the multi.
+<p>The <code>multi.skip().first(n)</code> method skips the <em>n</em> <strong>first</strong> items from the multi.
 It forwards all the remaining items and sends the completion event when the upstream multi completes.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Multi&lt;Integer&gt; skipThreeItems = multi.transform().bySkippingFirstItems(3);</code></pre>
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Multi&lt;Integer&gt; skipThreeItems = multi.skip().first(3);</code></pre>
 </div>
 </div>
 <div class="paragraph">
 <p>If the observed multi emits fewer items, it sends the completion event without emitting any items.</p>
 </div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<code>skip().last()</code> drops the very last item only.
+</td>
+</tr>
+</table>
+</div>
 <div class="paragraph">
-<p>Similarly, The <code>multi.transform().bySkippingLastItems</code> operator skips on the <em>n</em>  <strong>last</strong> items from the multi:</p>
+<p>Similarly, The <code>multi.skip().last(n)</code> operator skips on the <em>n</em>  <strong>last</strong> items from the multi:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Multi&lt;Integer&gt;  skipLastThreeItems = multi.transform().bySkippingLastItems(3);</code></pre>
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Multi&lt;Integer&gt;  skipLastThreeItems = multi.skip().last(3);</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>The <code>multi.transform().bySkippingItemsWhile</code> operator skips the items while the passed predicate returns <code>true</code>:</p>
+<p>The <code>multi.skip().first(Predicate)</code> operator skips the items while the passed predicate returns <code>true</code>:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Multi&lt;Integer&gt; skipWhile = multi.transform().bySkippingItemsWhile(i -&gt; i &lt; 4);</code></pre>
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Multi&lt;Integer&gt; skipWhile = multi.skip().first(i -&gt; i &lt; 4);</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -184,13 +224,13 @@ It forwards all the remaining items and sends the completion event when the upst
 Once the predicate returns <code>false</code>, it stops discarding the items and starts forwarding downstream.</p>
 </div>
 <div class="paragraph">
-<p>Finally,  <code>multi.transform().bySkippingItemsFor</code> operator skips the first items for a given period.
+<p>Finally,  <code>multi.skip().first(Duration)</code> operator skips the first items for a given period.
 Once the passed duration expires, it sends the items emitted after the deadline downstream.
 If the observes multi completes before the passed duration, it sends the completion event.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Multi&lt;Integer&gt; skipForDuration = multi.transform().bySkippingItemsFor(Duration.ofSeconds(1));</code></pre>
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Multi&lt;Integer&gt; skipForDuration = multi.skip().first(Duration.ofSeconds(1));</code></pre>
 </div>
 </div>
 </div>
@@ -201,7 +241,7 @@ If the observes multi completes before the passed duration, it sends the complet
                 
                 <h4>Table of Content</h4>
                 <ul class="sectlevel1">
-<li><a href="#taking-items">Taking items</a></li>
+<li><a href="#selecting-items">Selecting items</a></li>
 <li><a href="#skipping-items">Skipping items</a></li>
 </ul>
                 
@@ -262,7 +302,7 @@ If the observes multi completes before the passed duration, it sends the complet
                     <a href="https://www.redhat.com/en/about/privacy-policy">Privacy Policy</a>
                 </p>
                 <p>
-                     Site last generated: Dec 23, 2020
+                     Site last generated: Jan 5, 2021
                 </p>
             </div>
         </div>

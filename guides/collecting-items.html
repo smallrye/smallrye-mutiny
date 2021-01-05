@@ -83,6 +83,7 @@ This is also called a <em>reduction</em> in functional programming.</p>
 <div class="paragraph">
 <p>The <code>Uni</code> fires its item when the <code>Multi</code> completes.
 Mutiny provides multiple operators to deal with that scenario.
+They are available from the <code>collect()</code> group.
 For example, you can store the items in a list, emit the list on completion, or use a Java <code>Collector</code> to customize the aggregation.</p>
 </div>
 <div class="admonitionblock important">
@@ -115,7 +116,7 @@ It emits the final list when the <code>Multi</code> completes.</p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Multi&lt;String&gt; multi = getMulti();
-Uni&lt;List&lt;String&gt;&gt; uni = multi.collectItems().asList();</code></pre>
+Uni&lt;List&lt;String&gt;&gt; uni = multi.collect().asList();</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -135,7 +136,7 @@ In this case, you need to provide a function to compute the key for each item:</
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Multi&lt;String&gt; multi = getMulti();
 Uni&lt;Map&lt;String, String&gt;&gt; uni =
-        multi.collectItems()
+        multi.collect()
                 .asMap(item -&gt; getUniqueKeyForItem(item));</code></pre>
 </div>
 </div>
@@ -156,7 +157,7 @@ In the case of a conflicting key, it stores all the items in a list associated w
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Multi&lt;String&gt; multi = getMulti();
 Uni&lt;Map&lt;String, Collection&lt;String&gt;&gt;&gt; uni =
-        multi.collectItems()
+        multi.collect()
                 .asMultiMap(item -&gt; getKeyForItem(item));</code></pre>
 </div>
 </div>
@@ -171,7 +172,7 @@ Uni&lt;Map&lt;String, Collection&lt;String&gt;&gt;&gt; uni =
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Multi&lt;String&gt; multi = getMulti();
-Uni&lt;MyCollection&gt; uni = multi.collectItems()
+Uni&lt;MyCollection&gt; uni = multi.collect()
         .in(MyCollection::new, (col, item) -&gt; col.add(item));</code></pre>
 </div>
 </div>
@@ -194,7 +195,7 @@ For example, in the next example, count the number of items, and produce the fin
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Uni&lt;Long&gt; count = multi.collectItems()
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Uni&lt;Long&gt; count = multi.collect()
         .with(Collectors.counting());</code></pre>
 </div>
 </div>
@@ -204,12 +205,12 @@ For example, in the next example, count the number of items, and produce the fin
 <h2 id="getting-the-first-and-last-items"><a class="anchor" href="#getting-the-first-and-last-items"></a>Getting the first and last items</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>While they are not strictly speaking collecting items, the <code>collectItems().first()</code> and <code>collectItems().last()</code> allows retrieving the first and last item from a <code>Multi</code>:</p>
+<p>While they are not strictly speaking collecting items, the <code>collect().first()</code> and <code>collect().last()</code> allows retrieving the first and last item from a <code>Multi</code>:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Uni&lt;String&gt; first = multi.collectItems().first();
-Uni&lt;String&gt; last = multi.collectItems().last();</code></pre>
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Uni&lt;String&gt; first = multi.collect().first();
+Uni&lt;String&gt; last = multi.collect().last();</code></pre>
 </div>
 </div>
 </div>
@@ -284,7 +285,7 @@ Uni&lt;String&gt; last = multi.collectItems().last();</code></pre>
                     <a href="https://www.redhat.com/en/about/privacy-policy">Privacy Policy</a>
                 </p>
                 <p>
-                     Site last generated: Dec 23, 2020
+                     Site last generated: Jan 5, 2021
                 </p>
             </div>
         </div>

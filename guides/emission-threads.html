@@ -111,7 +111,7 @@ String res1 = multi.emitOn(executor)
         .onItem()
         .invoke(s -&gt; System.out.println("Received item `" + s + "` on thread: "
                 + Thread.currentThread().getName()))
-        .collectItems().first()
+        .collect().first()
         .await().indefinitely();</code></pre>
 </div>
 </div>
@@ -195,7 +195,7 @@ You cannot pass a specific thread, but you can implement a simple <code>Executor
                     <a href="https://www.redhat.com/en/about/privacy-policy">Privacy Policy</a>
                 </p>
                 <p>
-                     Site last generated: Dec 23, 2020
+                     Site last generated: Jan 5, 2021
                 </p>
             </div>
         </div>
