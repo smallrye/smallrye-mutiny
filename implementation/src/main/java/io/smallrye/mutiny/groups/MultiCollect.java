@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
@@ -201,6 +202,38 @@ public class MultiCollect<T> {
      */
     public <K> Uni<Map<K, Collection<T>>> asMultiMap(Function<? super T, ? extends K> keyMapper) {
         return asMultiMap(keyMapper, Function.identity());
+    }
+
+    /**
+     * Collects only the items from the upstream that passes the given predicate.
+     * This method is equivalent to {@code upstream.select().when(predicate).collect()}.
+     *
+     * For each item, it calls the predicate. If the predicate returns {@code true}, it collects the item, otherwise
+     * it discards the item. If the predicate throws an exception, it propagates that exception as failure.
+     *
+     * @param predicate the predicate, must not be {@code null}.
+     * @return the object to configure the item collection.
+     */
+    public MultiCollect<T> where(Predicate<T> predicate) {
+        return new MultiCollect<>(upstream.select().where(predicate));
+    }
+
+    /**
+     * Collects only the items from the upstream that passes the given predicate.
+     * Unlike {@link #where(Predicate)}, the predicate returns a {@link Uni Uni&lt;Boolean&gt;}, which support asynchronous
+     * tests.
+     *
+     * This method is equivalent to {@code upstream.select().where(predicate).collect()}.
+     *
+     * For each item, it calls the predicate. If the predicate emits the item {@code true}, it collects the item, otherwise
+     * it discards the item. If the predicate throws an exception or emits a failure, it propagates that exception as
+     * failure.
+     *
+     * @param predicate the predicate, must not be {@code null}.
+     * @return the object to configure the item collection.
+     */
+    public MultiCollect<T> when(Function<? super T, Uni<Boolean>> predicate) {
+        return new MultiCollect<>(upstream.select().when(predicate));
     }
 
     private static <T, A, R> Uni<R> collector(Multi<T> upstream, Collector<? super T, A, ? extends R> collector,
