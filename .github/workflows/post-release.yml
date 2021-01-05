@@ -3,7 +3,7 @@ name: Post-Release
 on:
   create:
     branches:
-      - "!**"
+      - '!refs/heads/*'
     tags:
       - '[0-9]+.[0-9]+.[0-9]+*'
 
