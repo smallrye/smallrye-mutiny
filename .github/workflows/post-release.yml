@@ -1,9 +1,9 @@
 ---
 name: Post-Release
 on:
-  create:
+  push:
     branches:
-      - '!refs/heads/*'
+      - "!*"
     tags:
       - '[0-9]+.[0-9]+.[0-9]+*'
 
