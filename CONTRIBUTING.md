@@ -74,12 +74,12 @@ This project is an open source project, please act responsibly, be nice, polite 
 ## Deployment and Release
 
 First you need an environment variable named `GITHUB_TOKEN` with a token allowing access to the GitHub API and having push permission.
-Also you need to check that:
+Also, you need to check that:
 
 * there are no build in progress of the `ref` branch (`master`)
 * the last build of the `ref` branch (`master`) has been successful
 
-Multiple steps compose the release process
+Multiple steps compose the release process.
 
 ### Release preparation
 
@@ -160,7 +160,7 @@ If you need to run the other steps manually, edit the `.build/mock-events/tag-cr
 Then, runs:
 
 ```bash
-act create -e .build/mock-events/tag-creation-event.json \
+act push -e .build/mock-events/tag-creation-event.json \
     -s GITHUB_API_TOKEN=${GITHUB_TOKEN} \ 
     -s SECRET_FILES_PASSPHRASE=${PASSPHRASE} \
     -P ubuntu-latest=nektos/act-environments-ubuntu:18.04 \

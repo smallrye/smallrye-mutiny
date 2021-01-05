@@ -39,4 +39,4 @@ jobs:
           sudo apt-get install -y gnupg2 gnupg-agent
 
           sh .build/decrypt-secrets.sh
-          # .build/deploy-release.sh
+          sh .build/deploy-release.sh
