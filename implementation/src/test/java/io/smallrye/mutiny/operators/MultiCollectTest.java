@@ -1,9 +1,9 @@
 package io.smallrye.mutiny.operators;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.entry;
+import static org.assertj.core.api.Assertions.*;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.BinaryOperator;
@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Multi;
+import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.helpers.test.UniAssertSubscriber;
 
 public class MultiCollectTest {
@@ -260,6 +261,94 @@ public class MultiCollectTest {
                 .collect().with(Collector.of(() -> null, (n, t) -> list.add(t), (X, y) -> null, x -> null))
                 .await().indefinitely();
         assertThat(list).containsExactly("A", "B", "C");
+    }
+
+    @Test
+    public void testCollectWhere() {
+        Uni<List<Integer>> uni = Multi.createFrom().items(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
+                .collect().where(i -> i % 2 == 0)
+                .asList();
+
+        List<Integer> integers = uni.await().atMost(Duration.ofSeconds(1));
+        assertThat(integers).containsExactly(2, 4, 6, 8, 10);
+    }
+
+    @Test
+    public void testCollectWhereEmpty() {
+        Uni<List<Integer>> uni = Multi.createFrom().<Integer> empty()
+                .collect().where(i -> i % 2 == 0)
+                .asList();
+
+        List<Integer> integers = uni.await().atMost(Duration.ofSeconds(1));
+        assertThat(integers).isEmpty();
+    }
+
+    @Test
+    public void testCollectWhereWithException() {
+        Uni<List<Integer>> uni = Multi.createFrom().items(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
+                .collect().where(i -> {
+                    if (i == 3) {
+                        throw new IllegalArgumentException("boom");
+                    }
+                    return i % 2 == 0;
+                })
+                .asList();
+
+        assertThatThrownBy(() -> uni.await().atMost(Duration.ofSeconds(1)))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("boom");
+    }
+
+    @Test
+    public void testCollectWhen() {
+        Uni<List<Integer>> uni = Multi.createFrom().items(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
+                .collect().when(i -> Uni.createFrom().item(i % 2 == 0))
+                .asList();
+
+        List<Integer> integers = uni.await().atMost(Duration.ofSeconds(1));
+        assertThat(integers).containsExactly(2, 4, 6, 8, 10);
+    }
+
+    @Test
+    public void testCollectWhenEmpty() {
+        Uni<List<Integer>> uni = Multi.createFrom().<Integer> empty()
+                .collect().when(i -> Uni.createFrom().item(i % 2 == 0))
+                .asList();
+
+        List<Integer> integers = uni.await().atMost(Duration.ofSeconds(1));
+        assertThat(integers).isEmpty();
+    }
+
+    @Test
+    public void testCollectWhenWithException() {
+        Uni<List<Integer>> uni = Multi.createFrom().items(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
+                .collect().when(i -> {
+                    if (i == 3) {
+                        throw new IllegalArgumentException("boom");
+                    }
+                    return Uni.createFrom().item(i % 2 == 0);
+                })
+                .asList();
+
+        assertThatThrownBy(() -> uni.await().atMost(Duration.ofSeconds(1)))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("boom");
+    }
+
+    @Test
+    public void testCollectWhenWithFailure() {
+        Uni<List<Integer>> uni = Multi.createFrom().items(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
+                .collect().when(i -> Uni.createFrom().<Boolean> emitter(e -> {
+                    if (i == 3) {
+                        e.fail(new IllegalArgumentException("boom"));
+                    }
+                    e.complete(i % 2 == 0);
+                }))
+                .asList();
+
+        assertThatThrownBy(() -> uni.await().atMost(Duration.ofSeconds(1)))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("boom");
     }
 
     static class Person {
