@@ -46,6 +46,9 @@ public interface MultiEmitter<T> {
      * or when the emitter has emitted either a {@code completion} or {@code failure} event.
      * <p>
      * This method allows cleanup resources once the emitter can be disposed (has reached a terminal state).
+     * <p>
+     * If the registration of the {@code onTermination} callback is done after the termination, it invokes the callback
+     * immediately.
      *
      * @param onTermination the action to run on termination, must not be {@code null}
      * @return this emitter
