@@ -2,14 +2,19 @@ package io.smallrye.mutiny.operators;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
+import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
+import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Uni;
@@ -18,6 +23,7 @@ import io.smallrye.mutiny.subscription.UniEmitter;
 import io.smallrye.mutiny.subscription.UniSubscriber;
 import io.smallrye.mutiny.subscription.UniSubscription;
 
+@SuppressWarnings("ConstantConditions")
 public class UniCreateFromEmitterTest {
     @Test
     public void testThatConsumerCannotBeNull() {
@@ -270,5 +276,143 @@ public class UniCreateFromEmitterTest {
     public void testThatFunctionCannotBeNull() {
         assertThrows(IllegalArgumentException.class, () -> Uni.createFrom().emitter(() -> "hello",
                 null));
+    }
+
+    @Test
+    public void testLateRegistrationOfOnTerminationAfterCompletion() {
+        AtomicBoolean called = new AtomicBoolean();
+        AtomicReference<UniEmitter<? super Integer>> reference = new AtomicReference<>();
+        UniAssertSubscriber<Integer> subscriber = Uni.createFrom().<Integer> emitter(reference::set)
+                .subscribe().withSubscriber(UniAssertSubscriber.create());
+
+        subscriber.assertSubscribed()
+                .assertNotTerminated();
+
+        reference.get().complete(1);
+
+        subscriber
+                .assertItem(1)
+                .assertCompleted();
+
+        reference.get().onTermination(() -> called.set(true));
+        assertThat(called).isTrue();
+    }
+
+    @Test
+    public void testLateRegistrationOfOnTerminationAfterFailure() {
+        AtomicBoolean called = new AtomicBoolean();
+        AtomicReference<UniEmitter<? super Integer>> reference = new AtomicReference<>();
+        UniAssertSubscriber<Integer> subscriber = Uni.createFrom().<Integer> emitter(reference::set)
+                .subscribe().withSubscriber(UniAssertSubscriber.create());
+
+        subscriber.assertSubscribed()
+                .assertNotTerminated();
+
+        reference.get().fail(new Exception("boom"));
+        subscriber.assertFailedWith(Exception.class, "boom");
+
+        reference.get().onTermination(() -> called.set(true));
+        assertThat(called).isTrue();
+    }
+
+    @Test
+    public void testLateRegistrationOfOnTerminationAfterCancellation() {
+        AtomicBoolean called = new AtomicBoolean();
+        AtomicReference<UniEmitter<? super Integer>> reference = new AtomicReference<>();
+        UniAssertSubscriber<Integer> subscriber = Uni.createFrom().<Integer> emitter(reference::set)
+                .subscribe().withSubscriber(UniAssertSubscriber.create());
+
+        subscriber.assertSubscribed()
+                .assertNotTerminated();
+
+        subscriber.cancel();
+
+        reference.get().onTermination(() -> called.set(true));
+        assertThat(called).isTrue();
+    }
+
+    @Test
+    public void testLateReplacementOfOnTerminationAfterCompletion() {
+        AtomicBoolean called1 = new AtomicBoolean();
+        AtomicBoolean called2 = new AtomicBoolean();
+        AtomicReference<UniEmitter<? super Integer>> reference = new AtomicReference<>();
+        UniAssertSubscriber<Integer> subscriber = Uni.createFrom().<Integer> emitter(e -> {
+            e.onTermination(() -> called1.set(true));
+            reference.set(e);
+        })
+                .subscribe().withSubscriber(UniAssertSubscriber.create());
+
+        subscriber.assertSubscribed()
+                .assertNotTerminated();
+
+        reference.get().complete(1);
+        subscriber
+                .assertItem(1)
+                .assertCompleted();
+        assertThat(called1).isTrue();
+        assertThat(called2).isFalse();
+        reference.get().onTermination(() -> called2.set(true));
+        assertThat(called2).isTrue();
+    }
+
+    @Test
+    public void testReplacementOfOnTerminationBeforeCompletion() {
+        AtomicBoolean called1 = new AtomicBoolean();
+        AtomicBoolean called2 = new AtomicBoolean();
+        AtomicReference<UniEmitter<? super Integer>> reference = new AtomicReference<>();
+        UniAssertSubscriber<Integer> subscriber = Uni.createFrom().<Integer> emitter(e -> {
+            e.onTermination(() -> called1.set(true));
+            reference.set(e);
+        })
+                .subscribe().withSubscriber(UniAssertSubscriber.create());
+
+        subscriber.assertSubscribed()
+                .assertNotTerminated();
+
+        reference.get().onTermination(() -> called2.set(true));
+
+        reference.get().complete(1);
+        subscriber
+                .assertItem(1)
+                .assertCompleted();
+        assertThat(called1).isFalse();
+        assertThat(called2).isTrue();
+    }
+
+    @RepeatedTest(100)
+    public void testRegistrationOfOnTerminationAndCompletionRace() {
+        AtomicBoolean called = new AtomicBoolean();
+        AtomicReference<UniEmitter<? super Integer>> reference = new AtomicReference<>();
+        UniAssertSubscriber<Integer> subscriber = Uni.createFrom().<Integer> emitter(reference::set)
+                .subscribe().withSubscriber(UniAssertSubscriber.create());
+
+        subscriber.assertSubscribed()
+                .assertNotTerminated();
+
+        List<Runnable> runnables = new ArrayList<>();
+        runnables.add(() -> reference.get().complete(1));
+        runnables.add(() -> reference.get().onTermination(() -> called.set(true)));
+
+        Collections.shuffle(runnables);
+
+        runnables.forEach(r -> new Thread(r).start());
+
+        await().untilAsserted(() -> {
+            subscriber
+                    .assertItem(1)
+                    .assertCompleted();
+            assertThat(called).isTrue();
+        });
+    }
+
+    @Test
+    public void testThatOnTerminationCallbackCannotBeNull() {
+        UniAssertSubscriber<Integer> subscriber = Uni.createFrom().<Integer> emitter(e -> {
+            e.onTermination(null);
+        })
+                .subscribe().withSubscriber(UniAssertSubscriber.create());
+
+        subscriber.assertFailedWith(IllegalArgumentException.class, "onTermination");
+
     }
 }

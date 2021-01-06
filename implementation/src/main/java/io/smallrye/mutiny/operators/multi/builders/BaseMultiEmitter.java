@@ -1,10 +1,12 @@
 package io.smallrye.mutiny.operators.multi.builders;
 
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.reactivestreams.Subscription;
 
+import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.helpers.Subscriptions;
 import io.smallrye.mutiny.subscription.MultiEmitter;
 import io.smallrye.mutiny.subscription.MultiSubscriber;
@@ -16,6 +18,7 @@ abstract class BaseMultiEmitter<T>
     protected final MultiSubscriber<? super T> downstream;
 
     private final AtomicReference<Runnable> onTermination;
+    private final AtomicBoolean disposed = new AtomicBoolean();
 
     private static final Runnable CLEARED = () -> {
     };
@@ -53,6 +56,7 @@ abstract class BaseMultiEmitter<T>
     }
 
     private void cleanup() {
+        disposed.set(true);
         Runnable action = onTermination.getAndSet(CLEARED);
         if (action != null && action != CLEARED) {
             action.run();
@@ -102,9 +106,15 @@ abstract class BaseMultiEmitter<T>
 
     @Override
     public MultiEmitter<T> onTermination(Runnable onTermination) {
-        Runnable runnable = this.onTermination.getAndSet(onTermination);
-        if (runnable != null) {
-            runnable.run();
+        ParameterValidation.nonNull(onTermination, "onTermination");
+        if (!disposed.get()) {
+            this.onTermination.set(onTermination);
+            // Re-check if the termination didn't happen in the meantime
+            if (disposed.get()) {
+                onTermination.run();
+            }
+        } else {
+            onTermination.run();
         }
         return this;
     }

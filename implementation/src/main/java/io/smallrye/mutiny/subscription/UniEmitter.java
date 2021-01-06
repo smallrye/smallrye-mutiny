@@ -33,6 +33,9 @@ public interface UniEmitter<T> {
      * or when the emitter has emitted either an {@code item} or {@code failure} event.
      * <p>
      * This method allows cleanup resources once the emitter can be disposed (has reached a terminal state).
+     * <p>
+     * If the registration of the {@code onTermination} callback is done after the termination, it invokes the callback
+     * immediately.
      *
      * @param onTermination the action to run on termination, must not be {@code null}
      * @return this emitter

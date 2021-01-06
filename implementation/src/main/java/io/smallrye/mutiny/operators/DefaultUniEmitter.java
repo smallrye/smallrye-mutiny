@@ -55,14 +55,16 @@ public class DefaultUniEmitter<T> implements UniEmitter<T>, UniSubscription {
     }
 
     @Override
-    public UniEmitter<T> onTermination(Runnable callback) {
-        Runnable actual = nonNull(callback, "callback");
+    public UniEmitter<T> onTermination(Runnable onTermination) {
+        Runnable actual = nonNull(onTermination, "onTermination");
         if (!disposed.get()) {
             this.onTermination.set(actual);
             // Re-check if the termination didn't happen in the meantime
             if (disposed.get()) {
                 terminate();
             }
+        } else {
+            onTermination.run();
         }
         return this;
     }

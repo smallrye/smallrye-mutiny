@@ -4,12 +4,16 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Multi;
@@ -348,5 +352,167 @@ public class EmitterBasedMultiTest {
         Multi.createFrom().emitter(e -> e.fail(null), BackPressureStrategy.LATEST)
                 .subscribe().withSubscriber(AssertSubscriber.create(1))
                 .assertFailedWith(NullPointerException.class, "fail");
+    }
+
+    @Test
+    public void testLateRegistrationOfOnTerminationAfterCompletion() {
+        AtomicBoolean called = new AtomicBoolean();
+        AtomicReference<MultiEmitter<? super Integer>> reference = new AtomicReference<>();
+        AssertSubscriber<Integer> subscriber = Multi.createFrom().<Integer> emitter(reference::set)
+                .subscribe().withSubscriber(AssertSubscriber.create(2));
+
+        subscriber.assertSubscribed()
+                .assertNotTerminated();
+
+        reference.get().emit(1);
+        reference.get().emit(2);
+
+        subscriber.assertItems(1, 2)
+                .assertNotTerminated();
+
+        reference.get().complete();
+        subscriber.assertCompleted();
+
+        reference.get().onTermination(() -> called.set(true));
+        assertThat(called).isTrue();
+    }
+
+    @Test
+    public void testLateRegistrationOfOnTerminationAfterFailure() {
+        AtomicBoolean called = new AtomicBoolean();
+        AtomicReference<MultiEmitter<? super Integer>> reference = new AtomicReference<>();
+        AssertSubscriber<Integer> subscriber = Multi.createFrom().<Integer> emitter(reference::set)
+                .subscribe().withSubscriber(AssertSubscriber.create(2));
+
+        subscriber.assertSubscribed()
+                .assertNotTerminated();
+
+        reference.get().emit(1);
+        reference.get().emit(2);
+
+        subscriber.assertItems(1, 2)
+                .assertNotTerminated();
+
+        reference.get().fail(new Exception("boom"));
+        subscriber.assertFailedWith(Exception.class, "boom");
+
+        reference.get().onTermination(() -> called.set(true));
+        assertThat(called).isTrue();
+    }
+
+    @Test
+    public void testLateRegistrationOfOnTerminationAfterCancellation() {
+        AtomicBoolean called = new AtomicBoolean();
+        AtomicReference<MultiEmitter<? super Integer>> reference = new AtomicReference<>();
+        AssertSubscriber<Integer> subscriber = Multi.createFrom().<Integer> emitter(reference::set)
+                .subscribe().withSubscriber(AssertSubscriber.create(2));
+
+        subscriber.assertSubscribed()
+                .assertNotTerminated();
+
+        reference.get().emit(1);
+        reference.get().emit(2);
+
+        subscriber.assertItems(1, 2)
+                .assertNotTerminated();
+
+        subscriber.cancel();
+
+        reference.get().onTermination(() -> called.set(true));
+        assertThat(called).isTrue();
+    }
+
+    @Test
+    public void testLateReplacementOfOnTerminationAfterCompletion() {
+        AtomicBoolean called1 = new AtomicBoolean();
+        AtomicBoolean called2 = new AtomicBoolean();
+        AtomicReference<MultiEmitter<? super Integer>> reference = new AtomicReference<>();
+        AssertSubscriber<Integer> subscriber = Multi.createFrom().<Integer> emitter(e -> {
+            e.onTermination(() -> called1.set(true));
+            reference.set(e);
+        })
+                .subscribe().withSubscriber(AssertSubscriber.create(2));
+
+        subscriber.assertSubscribed()
+                .assertNotTerminated();
+
+        reference.get().emit(1);
+        reference.get().emit(2);
+
+        subscriber.assertItems(1, 2)
+                .assertNotTerminated();
+
+        assertThat(called1).isFalse();
+        reference.get().complete();
+        subscriber.assertCompleted();
+        assertThat(called1).isTrue();
+        assertThat(called2).isFalse();
+        reference.get().onTermination(() -> called2.set(true));
+        assertThat(called2).isTrue();
+    }
+
+    @Test
+    public void testReplacementOfOnTerminationBeforeCompletion() {
+        AtomicBoolean called1 = new AtomicBoolean();
+        AtomicBoolean called2 = new AtomicBoolean();
+        AtomicReference<MultiEmitter<? super Integer>> reference = new AtomicReference<>();
+        AssertSubscriber<Integer> subscriber = Multi.createFrom().<Integer> emitter(e -> {
+            e.onTermination(() -> called1.set(true));
+            reference.set(e);
+        })
+                .subscribe().withSubscriber(AssertSubscriber.create(2));
+
+        subscriber.assertSubscribed()
+                .assertNotTerminated();
+
+        reference.get().emit(1);
+        reference.get().emit(2);
+
+        subscriber.assertItems(1, 2)
+                .assertNotTerminated();
+
+        assertThat(called1).isFalse();
+        reference.get().onTermination(() -> called2.set(true));
+        reference.get().complete();
+        subscriber.assertCompleted();
+        assertThat(called1).isFalse();
+        assertThat(called2).isTrue();
+    }
+
+    @RepeatedTest(100)
+    public void testRegistrationOfOnTerminationAndCompletionRace() {
+        AtomicBoolean called = new AtomicBoolean();
+        AtomicReference<MultiEmitter<? super Integer>> reference = new AtomicReference<>();
+        AssertSubscriber<Integer> subscriber = Multi.createFrom().<Integer> emitter(reference::set)
+                .subscribe().withSubscriber(AssertSubscriber.create(2));
+
+        subscriber.assertSubscribed()
+                .assertNotTerminated();
+
+        List<Runnable> runnables = new ArrayList<>();
+        runnables.add(() -> reference.get().emit(1).complete());
+        runnables.add(() -> reference.get().onTermination(() -> called.set(true)));
+
+        Collections.shuffle(runnables);
+
+        runnables.forEach(r -> new Thread(r).start());
+
+        await().untilAsserted(() -> {
+            subscriber
+                    .assertItems(1)
+                    .assertCompleted();
+            assertThat(called).isTrue();
+        });
+    }
+
+    @Test
+    public void testThatOnTerminationCallbackCannotBeNull() {
+        AssertSubscriber<Integer> subscriber = Multi.createFrom().<Integer> emitter(e -> {
+            e.onTermination(null);
+        })
+                .subscribe().withSubscriber(AssertSubscriber.create());
+
+        subscriber.assertFailedWith(IllegalArgumentException.class, "onTermination");
+
     }
 }
