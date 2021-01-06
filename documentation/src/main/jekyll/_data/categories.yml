@@ -34,6 +34,7 @@
     - completion-stages
     - converters
     - unicast
+    - kotlin
 
 - name: Misc
   guides:

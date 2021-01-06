@@ -46,6 +46,13 @@
         </dependency>
         <dependency>
             <groupId>io.smallrye.reactive</groupId>
+            <artifactId>mutiny-kotlin</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>io.smallrye.reactive</groupId>
             <artifactId>mutiny-reactor</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -72,6 +79,22 @@
                             <includeGroupIds>io.smallrye.reactive</includeGroupIds>
                             <includeClassifiers>javadoc</includeClassifiers>
                             <outputDirectory>${site.dir}apidocs</outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.jetbrains.kotlin</groupId>
+                <artifactId>kotlin-maven-plugin</artifactId>
+                <version>${kotlin.version}</version>
+                <executions>
+                    <execution>
+                        <id>test-compile</id>
+                        <goals>
+                            <goal>test-compile</goal>
+                        </goals>
+                        <configuration>
+                            <sourceDirs>${project.basedir}/src/test/kotlin</sourceDirs>
                         </configuration>
                     </execution>
                 </executions>
