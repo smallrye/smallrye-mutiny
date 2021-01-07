@@ -1,4 +1,4 @@
-package io.smallrye.mutiny.operators;
+package io.smallrye.mutiny.operators.uni.builders;
 
 import static io.smallrye.mutiny.helpers.EmptyUniSubscription.CANCELLED;
 import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
@@ -7,14 +7,14 @@ import java.util.function.Supplier;
 
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.helpers.ParameterValidation;
+import io.smallrye.mutiny.operators.AbstractUni;
 import io.smallrye.mutiny.subscription.UniSubscriber;
 
-public class UniCreateFromDeferredSupplier<T> extends UniOperator<Void, T> {
+public class UniCreateFromDeferredSupplier<T> extends AbstractUni<T> {
     private final Supplier<Uni<? extends T>> supplier;
 
     public UniCreateFromDeferredSupplier(Supplier<Uni<? extends T>> supplier) {
-        super(null);
-        this.supplier = supplier; // Already checked
+        this.supplier = supplier;
     }
 
     @Override

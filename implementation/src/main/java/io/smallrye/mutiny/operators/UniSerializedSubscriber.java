@@ -45,8 +45,12 @@ public class UniSerializedSubscriber<T> implements UniSubscriber<T>, UniSubscrip
 
     public static <T> void subscribe(AbstractUni<T> source, UniSubscriber<? super T> subscriber) {
         UniSubscriber<? super T> actual = Infrastructure.onUniSubscription(source, subscriber);
-        UniSerializedSubscriber<T> wrapped = new UniSerializedSubscriber<>(source, actual);
-        wrapped.subscribe();
+        if (subscriber instanceof UniSerializedSubscriber) {
+            source.subscribing(subscriber);
+        } else {
+            UniSerializedSubscriber<T> wrapped = new UniSerializedSubscriber<>(source, actual);
+            wrapped.subscribe();
+        }
     }
 
     private void subscribe() {
