@@ -1,9 +1,10 @@
-package io.smallrye.mutiny.operators;
+package io.smallrye.mutiny.operators.uni.builders;
 
 import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
 
 import java.util.function.Consumer;
 
+import io.smallrye.mutiny.operators.AbstractUni;
 import io.smallrye.mutiny.subscription.UniEmitter;
 import io.smallrye.mutiny.subscription.UniSubscriber;
 

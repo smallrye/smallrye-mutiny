@@ -1,4 +1,4 @@
-package io.smallrye.mutiny.operators;
+package io.smallrye.mutiny.operators.uni.builders;
 
 import static io.smallrye.mutiny.helpers.EmptyUniSubscription.CANCELLED;
 import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
@@ -10,21 +10,21 @@ import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.infrastructure.Infrastructure;
+import io.smallrye.mutiny.operators.AbstractUni;
 import io.smallrye.mutiny.subscription.UniSubscriber;
 
-public class UniCreateFromPublisher<O> extends UniOperator<Void, O> {
-    private final Publisher<? extends O> publisher;
+public class UniCreateFromPublisher<T> extends AbstractUni<T> {
+    private final Publisher<? extends T> publisher;
 
-    public UniCreateFromPublisher(Publisher<? extends O> publisher) {
-        super(null);
+    public UniCreateFromPublisher(Publisher<? extends T> publisher) {
         this.publisher = nonNull(publisher, "publisher");
     }
 
-    @SuppressWarnings("SubscriberImplementation")
+    @SuppressWarnings("ReactiveStreamsSubscriberImplementation")
     @Override
-    protected void subscribing(UniSubscriber<? super O> subscriber) {
+    protected void subscribing(UniSubscriber<? super T> subscriber) {
         AtomicReference<Subscription> reference = new AtomicReference<>();
-        Subscriber<O> actual = new Subscriber<O>() {
+        Subscriber<T> actual = new Subscriber<T>() {
             @Override
             public void onSubscribe(Subscription s) {
                 if (reference.compareAndSet(null, s)) {
@@ -41,7 +41,7 @@ public class UniCreateFromPublisher<O> extends UniOperator<Void, O> {
             }
 
             @Override
-            public void onNext(O o) {
+            public void onNext(T o) {
                 Subscription sub = reference.getAndSet(CANCELLED);
                 if (sub == CANCELLED) {
                     // Already cancelled, do nothing
@@ -61,7 +61,7 @@ public class UniCreateFromPublisher<O> extends UniOperator<Void, O> {
                 subscriber.onItem(null);
             }
         };
-        Subscriber<? super O> sub = Infrastructure.onMultiSubscription(publisher, actual);
+        Subscriber<? super T> sub = Infrastructure.onMultiSubscription(publisher, actual);
         publisher.subscribe(sub);
     }
 }

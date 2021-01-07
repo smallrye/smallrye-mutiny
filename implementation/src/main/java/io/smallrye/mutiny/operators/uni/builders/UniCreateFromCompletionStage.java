@@ -1,4 +1,4 @@
-package io.smallrye.mutiny.operators;
+package io.smallrye.mutiny.operators.uni.builders;
 
 import static io.smallrye.mutiny.helpers.EmptyUniSubscription.propagateFailureEvent;
 
@@ -6,18 +6,17 @@ import java.util.concurrent.CompletionException;
 import java.util.concurrent.CompletionStage;
 import java.util.function.Supplier;
 
-import io.smallrye.mutiny.helpers.ParameterValidation;
+import io.smallrye.mutiny.operators.AbstractUni;
 import io.smallrye.mutiny.subscription.UniSubscriber;
 
-public class UniCreateFromCompletionStage<O> extends UniOperator<Void, O> {
-    private final Supplier<? extends CompletionStage<? extends O>> supplier;
+public class UniCreateFromCompletionStage<T> extends AbstractUni<T> {
+    private final Supplier<? extends CompletionStage<? extends T>> supplier;
 
-    public UniCreateFromCompletionStage(Supplier<? extends CompletionStage<? extends O>> supplier) {
-        super(null);
-        this.supplier = ParameterValidation.nonNull(supplier, "supplier");
+    public UniCreateFromCompletionStage(Supplier<? extends CompletionStage<? extends T>> supplier) {
+        this.supplier = supplier; // Already checked
     }
 
-    private static <O> void forwardFromCompletionStage(CompletionStage<? extends O> stage,
+    static <O> void forwardFromCompletionStage(CompletionStage<? extends O> stage,
             UniSubscriber<? super O> subscriber) {
         subscriber.onSubscribe(() -> stage.toCompletableFuture().cancel(false));
         stage.whenComplete((res, fail) -> {
@@ -34,8 +33,8 @@ public class UniCreateFromCompletionStage<O> extends UniOperator<Void, O> {
     }
 
     @Override
-    protected void subscribing(UniSubscriber<? super O> subscriber) {
-        CompletionStage<? extends O> stage;
+    protected void subscribing(UniSubscriber<? super T> subscriber) {
+        CompletionStage<? extends T> stage;
         try {
             stage = supplier.get();
         } catch (Throwable e) {
@@ -44,7 +43,7 @@ public class UniCreateFromCompletionStage<O> extends UniOperator<Void, O> {
         }
 
         if (stage == null) {
-            propagateFailureEvent(subscriber, new NullPointerException("The produced completion stage is `null`"));
+            propagateFailureEvent(subscriber, new NullPointerException("The produced CompletionStage is `null`"));
             return;
         }
 

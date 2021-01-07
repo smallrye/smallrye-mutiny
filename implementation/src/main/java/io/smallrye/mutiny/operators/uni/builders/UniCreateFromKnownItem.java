@@ -5,22 +5,23 @@ import io.smallrye.mutiny.operators.AbstractUni;
 import io.smallrye.mutiny.subscription.UniSubscriber;
 
 /**
- * Specialized {@link io.smallrye.mutiny.Uni} implementation for the case where the failure is known.
- * The failure cannot be {@code null}.
+ * Specialized {@link io.smallrye.mutiny.Uni} implementation for the case where the item is known.
+ * The item can be {@code null}.
  *
  * @param <T> the type of the item
  */
-public class KnownFailureUni<T> extends AbstractUni<T> {
+public class UniCreateFromKnownItem<T> extends AbstractUni<T> {
 
-    private final Throwable failure;
+    private final T item;
 
-    public KnownFailureUni(Throwable failure) {
-        this.failure = failure;
+    public UniCreateFromKnownItem(T item) {
+        this.item = item;
     }
 
     @Override
     protected void subscribing(UniSubscriber<? super T> subscriber) {
+        // No need to track cancellation, it's done by the serialized subscriber downstream.
         subscriber.onSubscribe(EmptyUniSubscription.CANCELLED);
-        subscriber.onFailure(failure);
+        subscriber.onItem(item);
     }
 }

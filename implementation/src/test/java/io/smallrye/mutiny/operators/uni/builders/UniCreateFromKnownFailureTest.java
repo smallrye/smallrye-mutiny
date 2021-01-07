@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.helpers.test.UniAssertSubscriber;
 
-public class KnownFailureUniTest {
+public class UniCreateFromKnownFailureTest {
 
     @Test
     public void testCreationWithFailure() {

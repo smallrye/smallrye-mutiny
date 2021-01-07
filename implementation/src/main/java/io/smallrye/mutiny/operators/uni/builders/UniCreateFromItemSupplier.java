@@ -7,16 +7,16 @@ import io.smallrye.mutiny.operators.AbstractUni;
 import io.smallrye.mutiny.subscription.UniSubscriber;
 
 /**
- * Specialized {@link io.smallrye.mutiny.Uni} implementation for the case where items are from a supplier.
+ * Specialized {@link io.smallrye.mutiny.Uni} implementation for the case where the item is produced by a supplier.
  * The supplied item can be {@code null}.
  *
  * @param <T> the type of the item
  */
-public class SuppliedtemUni<T> extends AbstractUni<T> {
+public class UniCreateFromItemSupplier<T> extends AbstractUni<T> {
 
     private final Supplier<? extends T> supplier;
 
-    public SuppliedtemUni(Supplier<? extends T> supplier) {
+    public UniCreateFromItemSupplier(Supplier<? extends T> supplier) {
         this.supplier = supplier;
     }
 

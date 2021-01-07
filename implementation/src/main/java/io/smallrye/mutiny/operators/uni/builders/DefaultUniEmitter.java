@@ -1,4 +1,4 @@
-package io.smallrye.mutiny.operators;
+package io.smallrye.mutiny.operators.uni.builders;
 
 import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
 
