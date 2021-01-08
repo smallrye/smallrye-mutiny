@@ -99,7 +99,13 @@ public class MultiRepeatUntilOp<T> extends AbstractMultiOperator<T, T> implement
 
         @Override
         public void onItem(T t) {
-            passed = !predicate.test(t);
+            try {
+                passed = !predicate.test(t);
+            } catch (Throwable failure) {
+                cancel();
+                downstream.onFailure(failure);
+                return;
+            }
             if (passed) {
                 emitted++;
                 downstream.onNext(t);

@@ -37,7 +37,13 @@ public class MultiRepeatWhilstOp<T> extends AbstractMultiOperator<T, T> implemen
 
         @Override
         public void onItem(T t) {
-            stop = !predicate.test(t);
+            try {
+                stop = !predicate.test(t);
+            } catch (Throwable failure) {
+                cancel();
+                downstream.onError(failure);
+                return;
+            }
             emitted++;
             downstream.onNext(t);
         }

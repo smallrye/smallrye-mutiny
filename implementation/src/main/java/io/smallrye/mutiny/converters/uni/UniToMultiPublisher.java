@@ -73,12 +73,7 @@ public class UniToMultiPublisher<T> implements Publisher<T> {
         public void onItem(T item) {
             if (upstream.getAndSet(CANCELLED) != CANCELLED) {
                 if (item != null) {
-                    try {
-                        downstream.onNext(item);
-                    } catch (Throwable failure) {
-                        downstream.onError(failure);
-                        return;
-                    }
+                    downstream.onNext(item);
                 }
                 downstream.onComplete();
             }
