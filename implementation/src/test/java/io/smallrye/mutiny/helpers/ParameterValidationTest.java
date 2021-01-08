@@ -24,4 +24,22 @@ public class ParameterValidationTest {
                 .hasMessageContaining("list");
     }
 
+    @Test
+    public void testNullArray() {
+        assertThatThrownBy(() -> ParameterValidation.doesNotContainNull((Object[]) null, "array"))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    public void testArrayNoNullValue() {
+        ParameterValidation.doesNotContainNull(new String[] { "foo", "bar", "baz" }, "array");
+    }
+
+    @Test
+    public void testArrayWithNullValue() {
+        String[] array = { "foo", "bar", null };
+        assertThatThrownBy(() -> ParameterValidation.doesNotContainNull(array, "array"))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
+
 }

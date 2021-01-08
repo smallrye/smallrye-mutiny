@@ -1,7 +1,6 @@
 package io.smallrye.mutiny.helpers;
 
 import java.time.Duration;
-import java.util.Arrays;
 import java.util.Collection;
 
 /**
@@ -152,11 +151,11 @@ public class ParameterValidation {
      */
     public static <T> T[] doesNotContainNull(T[] array, String name) {
         nonNull(array, name);
-        Arrays.stream(array).forEach(m -> {
-            if (m == null) {
+        for (int i = 0; i < array.length; i++) {
+            if (array[i] == null) {
                 throw new IllegalArgumentException(String.format("`%s` contains a `null` value", name));
             }
-        });
+        }
         return array;
     }
 

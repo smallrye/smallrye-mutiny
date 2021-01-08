@@ -62,7 +62,6 @@ public class UniSerializedSubscriber<T> implements UniSubscriber<T>, UniSubscrip
     @Override
     public void onSubscribe(UniSubscription subscription) {
         ParameterValidation.nonNull(subscription, "subscription");
-
         if (state.compareAndSet(SUBSCRIBED, HAS_SUBSCRIPTION)) {
             this.subscription = subscription;
             this.downstream.onSubscribe(this);
@@ -81,31 +80,31 @@ public class UniSerializedSubscriber<T> implements UniSubscriber<T>, UniSubscrip
 
     @Override
     public void onItem(T item) {
-        if (state.compareAndSet(SUBSCRIBED, DONE)) {
-            failure.set(new IllegalStateException(
-                    "Invalid transition, expected to be in the HAS_SUBSCRIPTION states but was in SUBSCRIBED and received onItem("
-                            + item + ")"));
-        } else if (state.compareAndSet(HAS_SUBSCRIPTION, DONE)) {
+        if (state.compareAndSet(HAS_SUBSCRIPTION, DONE)) {
             try {
                 downstream.onItem(item);
             } catch (Throwable e) {
                 Infrastructure.handleDroppedException(e);
                 throw e; // Rethrow in case of synchronous emission
             }
+        } else if (state.compareAndSet(SUBSCRIBED, DONE)) {
+            failure.set(new IllegalStateException(
+                    "Invalid transition, expected to be in the HAS_SUBSCRIPTION states but was in SUBSCRIBED and received onItem("
+                            + item + ")"));
         }
     }
 
     @Override
     public void onFailure(Throwable throwable) {
-        if (state.compareAndSet(SUBSCRIBED, DONE)) {
-            failure.set(throwable);
-        } else if (state.compareAndSet(HAS_SUBSCRIPTION, DONE)) {
+        if (state.compareAndSet(HAS_SUBSCRIPTION, DONE)) {
             try {
                 downstream.onFailure(throwable);
             } catch (Throwable e) {
                 Infrastructure.handleDroppedException(new CompositeException(throwable, e));
                 throw e; // Rethrow in case of synchronous emission
             }
+        } else if (state.compareAndSet(SUBSCRIBED, DONE)) {
+            failure.set(throwable);
         } else {
             Infrastructure.handleDroppedException(throwable);
         }

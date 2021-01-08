@@ -1,8 +1,8 @@
 package io.smallrye.mutiny.operators;
 
 import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
-import static io.smallrye.mutiny.helpers.ParameterValidation.nonNullNpe;
 
+import java.util.Objects;
 import java.util.concurrent.Executor;
 import java.util.function.Predicate;
 
@@ -25,16 +25,18 @@ public abstract class AbstractMulti<T> implements Multi<T> {
         this.subscribe(Infrastructure.onMultiSubscription(this, subscriber));
     }
 
-    @SuppressWarnings("unchecked")
     @Override
+    @SuppressWarnings("unchecked")
     public void subscribe(Subscriber<? super T> subscriber) {
-        if (subscriber instanceof MultiOperator || subscriber instanceof StrictMultiSubscriber) {
-            this.subscribe((MultiSubscriber<? super T>) subscriber);
+        // NOTE The Reactive Streams TCK mandates throwing an NPE.
+        Objects.requireNonNull(subscriber, "Subscriber is `null`");
+        MultiSubscriber<? super T> actual;
+        if (subscriber instanceof MultiSubscriber) {
+            actual = (MultiSubscriber<? super T>) subscriber;
         } else {
-            // NOTE The Reactive Streams TCK mandates throwing an NPE.
-            nonNullNpe(subscriber, "subscriber");
-            this.subscribe(new StrictMultiSubscriber<>(subscriber));
+            actual = new StrictMultiSubscriber<>(subscriber);
         }
+        this.subscribe(actual);
     }
 
     @Override

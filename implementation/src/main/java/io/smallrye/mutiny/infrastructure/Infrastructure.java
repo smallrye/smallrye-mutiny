@@ -85,6 +85,9 @@ public class Infrastructure {
     }
 
     public static <T> Uni<T> onUniCreation(Uni<T> instance) {
+        if (UNI_INTERCEPTORS.isEmpty()) {
+            return instance;
+        }
         Uni<T> current = instance;
         for (UniInterceptor itcp : UNI_INTERCEPTORS) {
             current = itcp.onUniCreation(current);
@@ -93,6 +96,9 @@ public class Infrastructure {
     }
 
     public static <T> Multi<T> onMultiCreation(Multi<T> instance) {
+        if (MULTI_INTERCEPTORS.isEmpty()) {
+            return instance;
+        }
         Multi<T> current = instance;
         for (MultiInterceptor interceptor : MULTI_INTERCEPTORS) {
             current = interceptor.onMultiCreation(current);
@@ -101,6 +107,9 @@ public class Infrastructure {
     }
 
     public static <T> UniSubscriber<? super T> onUniSubscription(Uni<T> instance, UniSubscriber<? super T> subscriber) {
+        if (UNI_INTERCEPTORS.isEmpty()) {
+            return subscriber;
+        }
         UniSubscriber<? super T> current = subscriber;
         for (UniInterceptor interceptor : UNI_INTERCEPTORS) {
             current = interceptor.onSubscription(instance, current);
@@ -110,6 +119,9 @@ public class Infrastructure {
 
     public static <T> Subscriber<? super T> onMultiSubscription(Publisher<? extends T> instance,
             Subscriber<? super T> subscriber) {
+        if (MULTI_INTERCEPTORS.isEmpty()) {
+            return subscriber;
+        }
         Subscriber<? super T> current = subscriber;
         for (MultiInterceptor itcp : MULTI_INTERCEPTORS) {
             current = itcp.onSubscription(instance, current);

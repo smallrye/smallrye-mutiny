@@ -48,7 +48,15 @@ public class CollectionBasedMulti<T> extends AbstractMulti<T> {
 
         public CollectionSubscription(MultiSubscriber<? super T> downstream, Collection<T> collection) {
             this.downstream = downstream;
-            this.collection = new ArrayList<>(collection);
+            this.collection = wrapIfNotList(collection);
+        }
+
+        private List<T> wrapIfNotList(Collection<T> collection) {
+            if (collection instanceof List) {
+                return (List<T>) collection;
+            } else {
+                return new ArrayList<>(collection);
+            }
         }
 
         @Override
