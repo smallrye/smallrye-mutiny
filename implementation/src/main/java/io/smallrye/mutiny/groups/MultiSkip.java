@@ -161,6 +161,7 @@ public class MultiSkip<T> {
      * Unlike {@link MultiSelect#distinct()}, this method can be called on unbounded upstream, as it only keeps a
      * reference on the last item.
      *
+     * @param comparator the comparator, must not be {@code null}
      * @return the resulting {@link Multi}
      * @see MultiSelect#distinct()
      * @see MultiSkip#repetitions()
