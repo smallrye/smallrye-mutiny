@@ -77,6 +77,16 @@
         "code": "java.method.addedToInterface",
         "new": "method io.smallrye.mutiny.Multi<T> io.smallrye.mutiny.Multi<T>::toHotStream()",
         "justification": "New method to create a _hot_ stream, replace `multi.transform().toHotStream()`. If you are impacted by such a change, we recommend extending `AbstractMulti` instead of implementing `Multi` directly."
+      },
+      {
+        "code": "java.method.removed",
+        "old": "method io.smallrye.mutiny.Multi<T> io.smallrye.mutiny.Multi<T>::subscribeOn(java.util.concurrent.Executor)",
+        "justification": "Remove the deprecated `subscribeOn` method, use `runSubscriptionOn` instead"
+      },
+      {
+        "code": "java.method.removed",
+        "old": "method io.smallrye.mutiny.Uni<T> io.smallrye.mutiny.Uni<T>::subscribeOn(java.util.concurrent.Executor)",
+        "justification": "Remove the deprecated `subscribeOn` method, use `runSubscriptionOn` instead"
       }
     ]
   }

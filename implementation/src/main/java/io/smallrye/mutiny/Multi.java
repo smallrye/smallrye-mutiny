@@ -15,7 +15,7 @@ import org.reactivestreams.Subscription;
 import io.smallrye.mutiny.groups.*;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 
-@SuppressWarnings("PublisherImplementation")
+@SuppressWarnings({ "ReactiveStreamsPublisherImplementation" })
 public interface Multi<T> extends Publisher<T> {
 
     static MultiCreate createFrom() {
@@ -262,20 +262,6 @@ public interface Multi<T> extends Publisher<T> {
      * @return a new {@link Multi}
      */
     Multi<T> emitOn(Executor executor);
-
-    /**
-     * When a subscriber subscribes to this {@link Multi}, execute the subscription to the upstream {@link Multi} on a
-     * thread from the given executor. As a result, the {@link Subscriber#onSubscribe(Subscription)} method will be called
-     * on this thread (except mentioned otherwise)
-     *
-     * @param executor the executor to use, must not be {@code null}
-     * @return a new {@link Multi}
-     * @deprecated Use {@link #runSubscriptionOn(Executor)} instead.
-     */
-    @Deprecated
-    default Multi<T> subscribeOn(Executor executor) {
-        return runSubscriptionOn(executor);
-    }
 
     /**
      * When a subscriber subscribes to this {@link Multi}, execute the subscription to the upstream {@link Multi} on a
