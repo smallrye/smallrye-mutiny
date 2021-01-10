@@ -9,7 +9,7 @@
     "filter" : {
       "packages" : {
         "regex" : true,
-        "include" : [ "io\\.smallrye\\.mutiny\\..*" ],
+        "include" : [ "io\\.smallrye\\.mutiny\\..*", "io\\.smallrye\\.mutiny\\.*" ],
         "exclude" : [ "io\\.smallrye\\.mutiny\\.operators\\.*", "io\\.smallrye\\.mutiny\\.operators\\..*" ]
       }
     }
@@ -52,6 +52,31 @@
         "code": "java.class.externalClassExposedInAPI",
         "new": "class io.smallrye.mutiny.groups.MultiCollect<T>",
         "justification": "Addition of the `collect` group"
+      },
+      {
+        "code": "java.method.addedToInterface",
+        "new": "method io.smallrye.mutiny.groups.MultiCollect<T> io.smallrye.mutiny.Multi<T>::collect()",
+        "justification": "Replace the `collectItems` group. If you are impacted by such a change, we recommend extending `AbstractMulti` instead of implementing `Multi` directly."
+      },
+      {
+        "code": "java.method.addedToInterface",
+        "new": "method io.smallrye.mutiny.groups.MultiGroup<T> io.smallrye.mutiny.Multi<T>::group()",
+        "justification": "Replace the `groupItems` group. If you are impacted by such a change, we recommend extending `AbstractMulti` instead of implementing `Multi` directly."
+      },
+      {
+        "code": "java.method.addedToInterface",
+        "new": "method io.smallrye.mutiny.groups.MultiSelect<T> io.smallrye.mutiny.Multi<T>::select()",
+        "justification": "New _select_ group, replace `multi.transform().first/test/filter`. If you are impacted by such a change, we recommend extending `AbstractMulti` instead of implementing `Multi` directly."
+      },
+      {
+        "code": "java.method.addedToInterface",
+        "new": "method io.smallrye.mutiny.groups.MultiSkip<T> io.smallrye.mutiny.Multi<T>::skip()",
+        "justification": "New _skip_ group, replace `multi.transform().skipX(...)`. If you are impacted by such a change, we recommend extending `AbstractMulti` instead of implementing `Multi` directly."
+      },
+      {
+        "code": "java.method.addedToInterface",
+        "new": "method io.smallrye.mutiny.Multi<T> io.smallrye.mutiny.Multi<T>::toHotStream()",
+        "justification": "New method to create a _hot_ stream, replace `multi.transform().toHotStream()`. If you are impacted by such a change, we recommend extending `AbstractMulti` instead of implementing `Multi` directly."
       }
     ]
   }
