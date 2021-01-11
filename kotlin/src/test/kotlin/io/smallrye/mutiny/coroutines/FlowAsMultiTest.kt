@@ -1,15 +1,11 @@
 package io.smallrye.mutiny.coroutines
 
 import io.smallrye.mutiny.helpers.test.AssertSubscriber
-import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
-import java.util.UUID
+import java.util.*
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.test.Test
 
@@ -100,9 +96,14 @@ class FlowAsMultiTest {
         runBlocking(Dispatchers.IO) {
             // Given
             val counter = AtomicInteger()
+            var exitException: Throwable? = null
             val flow = flow {
-                while (true) {
-                    emit(counter.incrementAndGet())
+                try {
+                    while (true) {
+                        emit(counter.incrementAndGet())
+                    }
+                } catch (err: Throwable) {
+                    exitException  = err
                 }
             }
 
@@ -118,6 +119,7 @@ class FlowAsMultiTest {
             subscriber.assertItems(*(1..42).toList().toTypedArray())
             subscriber.assertNotTerminated()
             assertThat(subscriber.isCancelled).isTrue()
+            assertThat(exitException).isNotNull().isInstanceOf(CancellationException::class.java)
         }
     }
 }
