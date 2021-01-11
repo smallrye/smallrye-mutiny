@@ -11,11 +11,7 @@
         "packages": {
           "regex": true,
           "include": [
-            "io\\.smallrye\\.mutiny\\..*"
-          ],
-          "exclude": [
-            "io\\.smallrye\\.mutiny\\.operators\\.*",
-            "io\\.smallrye\\.mutiny\\.operators\\..*"
+            "io\\.smallrye\\.mutiny\\.converters\\.*",  "io\\.smallrye\\.mutiny\\.converters\\..*"
           ]
         }
       }
