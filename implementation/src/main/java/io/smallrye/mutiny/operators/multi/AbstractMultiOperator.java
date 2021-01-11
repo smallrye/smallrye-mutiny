@@ -25,4 +25,11 @@ public abstract class AbstractMultiOperator<I, O> extends AbstractMulti<O> imple
     public AbstractMultiOperator(Multi<? extends I> upstream) {
         this.upstream = ParameterValidation.nonNull(upstream, "upstream");
     }
+
+    /**
+     * @return the upstream.
+     */
+    public Multi<? extends I> upstream() {
+        return upstream;
+    }
 }

@@ -19,6 +19,8 @@
   "id" : "breaking-changes",
   "configuration" : {
     "criticality" : "highlight",
+    "minSeverity" : "POTENTIALLY_BREAKING",
+    "minCriticality" : "documented",
     "differences" : [
       {
         "code": "java.method.numberOfParametersChanged",
@@ -45,6 +47,11 @@
         "code": "java.class.externalClassExposedInAPI",
         "new": "class io.smallrye.mutiny.groups.MultiSkip<T>",
         "justification": "Addition of the new `skip` group to Multi. If you are impacted by such a change, we recommend extending `AbstractMulti` instead of implementing `Multi` directly."
+      },
+      {
+        "code": "java.class.externalClassExposedInAPI",
+        "new": "class io.smallrye.mutiny.groups.MultiCollect<T>",
+        "justification": "Addition of the `collect` group"
       }
     ]
   }
