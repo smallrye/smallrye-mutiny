@@ -49,11 +49,6 @@ public class MultiReceiveItemOnTest {
     }
 
     @Test
-    public void testThatSubscribeOnExecutorCannotBeNull() {
-        assertThrows(IllegalArgumentException.class, () -> Multi.createFrom().item(1).subscribeOn(null));
-    }
-
-    @Test
     public void testThatRunSubscriptionOnExecutorCannotBeNull() {
         assertThrows(IllegalArgumentException.class, () -> Multi.createFrom().item(1).runSubscriptionOn(null));
     }
@@ -114,15 +109,6 @@ public class MultiReceiveItemOnTest {
             assertThat(i).isGreaterThan(current);
             current = i;
         }
-    }
-
-    @Test
-    public void testSubscribeOn() {
-        Multi.createFrom().items(1, 2, 3, 4)
-                .subscribeOn(executor)
-                .subscribe().withSubscriber(AssertSubscriber.create(4))
-                .await()
-                .assertItems(1, 2, 3, 4);
     }
 
     @Test

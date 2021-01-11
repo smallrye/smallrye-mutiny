@@ -29,16 +29,6 @@ public class UniRunSubscriptionOnTest {
     }
 
     @Test
-    public void testRunSubscriptionOnWithSupplierWithDeprecatedMethod() {
-        UniAssertSubscriber<Integer> subscriber = UniAssertSubscriber.create();
-        Uni.createFrom().item(() -> 1)
-                .subscribeOn(ForkJoinPool.commonPool())
-                .subscribe().withSubscriber(subscriber);
-        subscriber.await().assertItem(1);
-        assertThat(subscriber.getOnSubscribeThreadName()).isNotEqualTo(Thread.currentThread().getName());
-    }
-
-    @Test
     public void testWithWithImmediateValue() {
         UniAssertSubscriber<Integer> subscriber = UniAssertSubscriber.create();
 
@@ -109,9 +99,7 @@ public class UniRunSubscriptionOnTest {
     @Test
     public void testCancellation() {
         AtomicBoolean called = new AtomicBoolean();
-        UniAssertSubscriber<Integer> subscriber = Uni.createFrom().<Integer> emitter(e -> {
-            called.set(true);
-        })
+        UniAssertSubscriber<Integer> subscriber = Uni.createFrom().<Integer> emitter(e -> called.set(true))
                 .runSubscriptionOn(Infrastructure.getDefaultExecutor())
                 .subscribe().withSubscriber(new UniAssertSubscriber<>(true));
 
@@ -125,9 +113,7 @@ public class UniRunSubscriptionOnTest {
         ExecutorService pool = Executors.newSingleThreadExecutor();
         pool.shutdown();
         AtomicBoolean called = new AtomicBoolean();
-        UniAssertSubscriber<Integer> subscriber = Uni.createFrom().<Integer> emitter(e -> {
-            called.set(true);
-        })
+        UniAssertSubscriber<Integer> subscriber = Uni.createFrom().<Integer> emitter(e -> called.set(true))
                 .runSubscriptionOn(pool)
                 .subscribe().withSubscriber(UniAssertSubscriber.create());
         assertThat(called).isFalse();
