@@ -22,9 +22,9 @@ import kotlin.coroutines.resumeWithException
 suspend fun <T> Uni<T>.awaitSuspending() = suspendCancellableCoroutine<T> { continuation ->
     subscribe().with(
         /* onItemCallback = */ { item ->
-            // An exception can raise if a coroutine cancellation and the Unis item event are racing.
-            // That's intentional as Uni simply drops the Exception and cancels the subscription.
-            continuation.resume(item)
+            suppressCancellationException {
+                continuation.resume(item)
+            }
         },
         /* onFailureCallback = */ { failure ->
             continuation.resumeWithException(failure)

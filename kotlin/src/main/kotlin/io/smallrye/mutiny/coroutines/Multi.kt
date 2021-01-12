@@ -28,8 +28,10 @@ suspend fun <T> Multi<T>.asFlow(): Flow<T> = channelFlow<T> {
     val terminationLock = Mutex(locked = true)
     val subscription = subscribe().with(
         /* onItem = */ { item ->
-            runBlocking(parentCtx) {
-                channel.send(item)
+            suppressCancellationException {
+                runBlocking(parentCtx) {
+                    channel.send(item)
+                }
             }
         },
         /* onFailure = */ { failure ->
