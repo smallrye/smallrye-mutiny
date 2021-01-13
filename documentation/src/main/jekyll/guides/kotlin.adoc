@@ -1,0 +1,76 @@
+:page-layout: guides
+:page-guide-id: kotlin
+:page-show-toc: true
+:page-liquid:
+:include_dir: ../../../../src/test/kotlin/guides
+
+The module `mutiny-kotlin` provides an integration with Kotlin coroutines.
+
+There are currently four extension methods available for converting between Mutiny and Kotlin coroutine types offered in a separate package.
+For implementation details please have also a look to these methods documentation.
+
+== Dependency coordinates
+
+The extension functions are shipped in the package `io.smallrye.mutiny.coroutines`:
+
+[source,kotlin,indent=0]
+----
+include::{include_dir}/Coroutines.kt[tags=importStatements]
+----
+
+You need to add the following dependency to your project:
+
+=== Maven
+
+[source,xml]
+----
+<dependency>
+    <groupId>io.smallrye.reactive</groupId>
+    <artifactId>mutiny-kotlin</artifactId>
+    <version>${mutiny.version}</version>
+</dependency>
+----
+
+=== Gradle
+
+[source,groovy]
+----
+compile "io.smallrye.reactive:mutiny-kotlin:$mutinyVersion"
+----
+
+== Awaiting a Uni in coroutines
+
+Within a coroutine or suspend function you can easily await Uni events in a suspended way:
+
+[source,kotlin,indent=0]
+----
+include::{include_dir}/Coroutines.kt[tags=uniAwaitSuspending]
+----
+
+== Processing a Multi as Flow
+
+The coroutine Flow type matches Multi semantically, even though it isn't a feature complete reactive streams implementation.
+You can process a Multi as Flow as follows:
+
+[source,kotlin,indent=0]
+----
+include::{include_dir}/Coroutines.kt[tags=multiAsFlow]
+----
+
+== Providing a Deferred value as Uni
+
+The other way around is also possible, let a Deferred become a Uni:
+
+[source,kotlin,indent=0]
+----
+include::{include_dir}/Coroutines.kt[tags=deferredAsUni]
+----
+
+== Creating a Multi from a Flow
+
+Finally, creating a Multi from a Flow is also possible:
+
+[source,kotlin,indent=0]
+----
+include::{include_dir}/Coroutines.kt[tags=flowAsMulti]
+----

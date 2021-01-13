@@ -284,3 +284,12 @@ unicast:
     - advanced
   related:
     - guide: hot-streams
+
+kotlin:
+  title: How to interact with Kotlin coroutines?
+  text: Learn how Mutiny and Kotlin coroutines come together
+  labels:
+    - intermediate
+  related:
+    - url: https://kotlinlang.org/docs/reference/coroutines-overview.html
+      text: Coroutines for asynchronous programming and more
