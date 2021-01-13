@@ -3,11 +3,17 @@ package io.smallrye.mutiny.infrastructure;
 import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ServiceLoader;
-import java.util.concurrent.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.UnaryOperator;
@@ -34,16 +40,17 @@ public class Infrastructure {
 
         // Interceptor
         ServiceLoader<UniInterceptor> uniItcp = ServiceLoader.load(UniInterceptor.class);
-        List<UniInterceptor> interceptors = new ArrayList<>();
+        ArrayList<UniInterceptor> interceptors = new ArrayList<>();
         uniItcp.iterator().forEachRemaining(interceptors::add);
         interceptors.sort(Comparator.comparingInt(UniInterceptor::ordinal));
-        UNI_INTERCEPTORS = interceptors;
+        interceptors.trimToSize();
+        UNI_INTERCEPTORS = interceptors.toArray(new UniInterceptor[0]);
 
         ServiceLoader<MultiInterceptor> multiItcp = ServiceLoader.load(MultiInterceptor.class);
-        List<MultiInterceptor> interceptors2 = new ArrayList<>();
+        ArrayList<MultiInterceptor> interceptors2 = new ArrayList<>();
         multiItcp.iterator().forEachRemaining(interceptors2::add);
         interceptors2.sort(Comparator.comparingInt(MultiInterceptor::ordinal));
-        MULTI_INTERCEPTORS = interceptors2;
+        MULTI_INTERCEPTORS = interceptors2.toArray(new MultiInterceptor[0]);
 
         resetCanCallerThreadBeBlockedSupplier();
     }
@@ -58,8 +65,8 @@ public class Infrastructure {
 
     private static ScheduledExecutorService DEFAULT_SCHEDULER;
     private static Executor DEFAULT_EXECUTOR;
-    private static final List<UniInterceptor> UNI_INTERCEPTORS;
-    private static final List<MultiInterceptor> MULTI_INTERCEPTORS;
+    private static UniInterceptor[] UNI_INTERCEPTORS;
+    private static MultiInterceptor[] MULTI_INTERCEPTORS;
     private static UnaryOperator<CompletableFuture<?>> completableFutureWrapper;
     private static Consumer<Throwable> droppedExceptionHandler = Infrastructure::printAndDump;
     private static BooleanSupplier canCallerThreadBeBlockedSupplier;
@@ -85,9 +92,6 @@ public class Infrastructure {
     }
 
     public static <T> Uni<T> onUniCreation(Uni<T> instance) {
-        if (UNI_INTERCEPTORS.isEmpty()) {
-            return instance;
-        }
         Uni<T> current = instance;
         for (UniInterceptor itcp : UNI_INTERCEPTORS) {
             current = itcp.onUniCreation(current);
@@ -96,9 +100,6 @@ public class Infrastructure {
     }
 
     public static <T> Multi<T> onMultiCreation(Multi<T> instance) {
-        if (MULTI_INTERCEPTORS.isEmpty()) {
-            return instance;
-        }
         Multi<T> current = instance;
         for (MultiInterceptor interceptor : MULTI_INTERCEPTORS) {
             current = interceptor.onMultiCreation(current);
@@ -107,9 +108,6 @@ public class Infrastructure {
     }
 
     public static <T> UniSubscriber<? super T> onUniSubscription(Uni<T> instance, UniSubscriber<? super T> subscriber) {
-        if (UNI_INTERCEPTORS.isEmpty()) {
-            return subscriber;
-        }
         UniSubscriber<? super T> current = subscriber;
         for (UniInterceptor interceptor : UNI_INTERCEPTORS) {
             current = interceptor.onSubscription(instance, current);
@@ -119,9 +117,6 @@ public class Infrastructure {
 
     public static <T> Subscriber<? super T> onMultiSubscription(Publisher<? extends T> instance,
             Subscriber<? super T> subscriber) {
-        if (MULTI_INTERCEPTORS.isEmpty()) {
-            return subscriber;
-        }
         Subscriber<? super T> current = subscriber;
         for (MultiInterceptor itcp : MULTI_INTERCEPTORS) {
             current = itcp.onSubscription(instance, current);
@@ -129,8 +124,9 @@ public class Infrastructure {
         return current;
     }
 
+    // For testing purpose only
     static List<UniInterceptor> getUniInterceptors() {
-        return UNI_INTERCEPTORS;
+        return Arrays.asList(UNI_INTERCEPTORS);
     }
 
     public static void setCompletableFutureWrapper(UnaryOperator<CompletableFuture<?>> wrapper) {
@@ -181,8 +177,11 @@ public class Infrastructure {
 
     // For testing purpose only
     static void registerUniInterceptor(UniInterceptor e) {
-        UNI_INTERCEPTORS.add(e);
-        UNI_INTERCEPTORS.sort(Comparator.comparingInt(UniInterceptor::ordinal));
+        ArrayList<UniInterceptor> uniInterceptors = new ArrayList<>();
+        Collections.addAll(uniInterceptors, UNI_INTERCEPTORS);
+        uniInterceptors.add(e);
+        uniInterceptors.sort(Comparator.comparingInt(UniInterceptor::ordinal));
+        UNI_INTERCEPTORS = uniInterceptors.toArray(UNI_INTERCEPTORS);
     }
 
     // For testing purpose only
@@ -191,7 +190,10 @@ public class Infrastructure {
         List<UniInterceptor> interceptors = new ArrayList<>();
         interceptorLoader.iterator().forEachRemaining(interceptors::add);
         interceptors.sort(Comparator.comparingInt(UniInterceptor::ordinal));
-        UNI_INTERCEPTORS.addAll(interceptors);
+        ArrayList<UniInterceptor> uniInterceptors = new ArrayList<>();
+        Collections.addAll(uniInterceptors, UNI_INTERCEPTORS);
+        uniInterceptors.addAll(interceptors);
+        UNI_INTERCEPTORS = uniInterceptors.toArray(UNI_INTERCEPTORS);
     }
 
     // For testing purpose only
@@ -200,13 +202,16 @@ public class Infrastructure {
         List<MultiInterceptor> interceptors = new ArrayList<>();
         interceptorLoader.iterator().forEachRemaining(interceptors::add);
         interceptors.sort(Comparator.comparingInt(MultiInterceptor::ordinal));
-        MULTI_INTERCEPTORS.addAll(interceptors);
+        final ArrayList<MultiInterceptor> multiInterceptors = new ArrayList<>();
+        Collections.addAll(multiInterceptors, MULTI_INTERCEPTORS);
+        multiInterceptors.addAll(interceptors);
+        MULTI_INTERCEPTORS = multiInterceptors.toArray(MULTI_INTERCEPTORS);
     }
 
     // For testing purpose only
     public static void clearInterceptors() {
-        UNI_INTERCEPTORS.clear();
-        MULTI_INTERCEPTORS.clear();
+        UNI_INTERCEPTORS = new UniInterceptor[0];
+        MULTI_INTERCEPTORS = new MultiInterceptor[0];
     }
 
     // For testing purpose only
