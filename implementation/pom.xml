@@ -10,7 +10,8 @@
     </parent>
 
     <artifactId>mutiny</artifactId>
-    <name>SmallRye Mutiny</name>
+    <name>SmallRye Mutiny :: Core library</name>
+    <description>Intuitive Event-Driven Reactive Programming Library for Java</description>
 
     <properties>
         <revapi.skip>false</revapi.skip>

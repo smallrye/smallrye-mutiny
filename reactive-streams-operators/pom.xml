@@ -10,7 +10,7 @@
     </parent>
 
     <artifactId>mutiny-reactive-streams-operators</artifactId>
-    <name>SmallRye Mutiny - MicroProfile Reactive Streams Operators Implementation</name>
+    <name>SmallRye Mutiny :: MicroProfile Reactive Streams Operators implementation</name>
 
     <dependencies>
         <dependency>

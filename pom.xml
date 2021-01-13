@@ -14,8 +14,8 @@
     <version>999-SNAPSHOT</version>
     <packaging>pom</packaging>
 
-    <name>SmallRye Mutiny Project</name>
-    <description>A library to build reactive APIs</description>
+    <name>SmallRye Mutiny :: Parent</name>
+    <description>Intuitive Event-Driven Reactive Programming Library for Java</description>
 
     <inceptionYear>2019</inceptionYear>
     <organization>

@@ -9,7 +9,7 @@
     </parent>
 
     <artifactId>mutiny-documentation</artifactId>
-    <name>SmallRye Mutiny Documentation</name>
+    <name>SmallRye Mutiny :: Documentation</name>
 
     <properties>
         <site.dir>${project.build.directory}/generated-docs/</site.dir>
