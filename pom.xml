@@ -83,10 +83,10 @@
 
         <junit.version>5.7.0</junit.version>
 
-        <revapi-maven-plugin.version>0.13.1</revapi-maven-plugin.version>
-        <revapi-java.version>0.23.1</revapi-java.version>
-        <revapi-reporter-json.version>0.3.1</revapi-reporter-json.version>
-        <revapi-reporter-text.version>0.13.1</revapi-reporter-text.version>
+        <revapi-maven-plugin.version>0.13.2</revapi-maven-plugin.version>
+        <revapi-java.version>0.23.2</revapi-java.version>
+        <revapi-reporter-json.version>0.3.2</revapi-reporter-json.version>
+        <revapi-reporter-text.version>0.13.2</revapi-reporter-text.version>
 
         <revapi.skip>true</revapi.skip>
 
