@@ -44,6 +44,5 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_API_TOKEN }}
           REF: ${{ github.event.ref }}
         run: |
-          git checkout master
           source ~/.sdkman/bin/sdkman-init.sh && \
           jbang .build/PostRelease.java --release-version=${REF} --token=${GITHUB_TOKEN}
