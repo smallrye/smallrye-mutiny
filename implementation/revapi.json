@@ -21,74 +21,7 @@
     "criticality" : "highlight",
     "minSeverity" : "POTENTIALLY_BREAKING",
     "minCriticality" : "documented",
-    "differences" : [
-      {
-        "code": "java.method.numberOfParametersChanged",
-        "old": "method void io.smallrye.mutiny.helpers.test.AssertSubscriber<T>::<init>(org.reactivestreams.Subscriber<T>)",
-        "new": "method void io.smallrye.mutiny.helpers.test.AssertSubscriber<T>::<init>()",
-        "justification": "Provide the new test API"
-      },
-      {
-        "code": "java.method.removed",
-        "old": "method void io.smallrye.mutiny.helpers.test.AssertSubscriber<T>::<init>(org.reactivestreams.Subscriber<T>, long, boolean)",
-        "justification": "Provide the new test API"
-      },
-      {
-        "code": "java.method.removed",
-        "old": "method <T> io.smallrye.mutiny.helpers.test.AssertSubscriber<T> io.smallrye.mutiny.helpers.test.AssertSubscriber<T>::create(org.reactivestreams.Subscriber<T>)",
-        "justification": "Provide the new test API, spy support has been removed, extend the class if needed."
-      },
-      {
-        "code": "java.class.externalClassExposedInAPI",
-        "new": "class io.smallrye.mutiny.groups.MultiSelect<T>",
-        "justification": "Addition of the new `select` group to Multi. If you are impacted by such a change, we recommend extending `AbstractMulti` instead of implementing `Multi` directly."
-      },
-      {
-        "code": "java.class.externalClassExposedInAPI",
-        "new": "class io.smallrye.mutiny.groups.MultiSkip<T>",
-        "justification": "Addition of the new `skip` group to Multi. If you are impacted by such a change, we recommend extending `AbstractMulti` instead of implementing `Multi` directly."
-      },
-      {
-        "code": "java.class.externalClassExposedInAPI",
-        "new": "class io.smallrye.mutiny.groups.MultiCollect<T>",
-        "justification": "Addition of the `collect` group"
-      },
-      {
-        "code": "java.method.addedToInterface",
-        "new": "method io.smallrye.mutiny.groups.MultiCollect<T> io.smallrye.mutiny.Multi<T>::collect()",
-        "justification": "Replace the `collectItems` group. If you are impacted by such a change, we recommend extending `AbstractMulti` instead of implementing `Multi` directly."
-      },
-      {
-        "code": "java.method.addedToInterface",
-        "new": "method io.smallrye.mutiny.groups.MultiGroup<T> io.smallrye.mutiny.Multi<T>::group()",
-        "justification": "Replace the `groupItems` group. If you are impacted by such a change, we recommend extending `AbstractMulti` instead of implementing `Multi` directly."
-      },
-      {
-        "code": "java.method.addedToInterface",
-        "new": "method io.smallrye.mutiny.groups.MultiSelect<T> io.smallrye.mutiny.Multi<T>::select()",
-        "justification": "New _select_ group, replace `multi.transform().first/test/filter`. If you are impacted by such a change, we recommend extending `AbstractMulti` instead of implementing `Multi` directly."
-      },
-      {
-        "code": "java.method.addedToInterface",
-        "new": "method io.smallrye.mutiny.groups.MultiSkip<T> io.smallrye.mutiny.Multi<T>::skip()",
-        "justification": "New _skip_ group, replace `multi.transform().skipX(...)`. If you are impacted by such a change, we recommend extending `AbstractMulti` instead of implementing `Multi` directly."
-      },
-      {
-        "code": "java.method.addedToInterface",
-        "new": "method io.smallrye.mutiny.Multi<T> io.smallrye.mutiny.Multi<T>::toHotStream()",
-        "justification": "New method to create a _hot_ stream, replace `multi.transform().toHotStream()`. If you are impacted by such a change, we recommend extending `AbstractMulti` instead of implementing `Multi` directly."
-      },
-      {
-        "code": "java.method.removed",
-        "old": "method io.smallrye.mutiny.Multi<T> io.smallrye.mutiny.Multi<T>::subscribeOn(java.util.concurrent.Executor)",
-        "justification": "Remove the deprecated `subscribeOn` method, use `runSubscriptionOn` instead"
-      },
-      {
-        "code": "java.method.removed",
-        "old": "method io.smallrye.mutiny.Uni<T> io.smallrye.mutiny.Uni<T>::subscribeOn(java.util.concurrent.Executor)",
-        "justification": "Remove the deprecated `subscribeOn` method, use `runSubscriptionOn` instead"
-      }
-    ]
+    "differences" : [ ]
   }
 }, {
   "extension" : "revapi.reporter.json",
