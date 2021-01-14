@@ -37,7 +37,7 @@ jobs:
           source ~/.sdkman/bin/sdkman-init.sh && \
             sdk install jbang
 
-          mkdir target
+          mkdir -p target
           jbang .build/CompatibilityUtils.java extract
       - name: 'Post-Release Tasks'
         env:
