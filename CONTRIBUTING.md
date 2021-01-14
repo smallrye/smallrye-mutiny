@@ -128,7 +128,7 @@ The "post-release" workflow is idempotent.
 
 ### Running the release process locally.
 
-It is possible to runs the release process locally using [https://github.com/nektos/act](act).
+It is possible to runs the release process locally using [https://github.com/nektos/act](https://github.com/nektos/act).
 In addition to `act`, you need a Github Token with push permission to the repository (stored in the `GITHUB_TOKEN` env variable), and the SmallRye GPG Key passphrase (stored in the `PASSPHRASE` env variable).
 
 Then, edit the `.build/mock-events/release-workflow-event.json` to adapt the execution:
