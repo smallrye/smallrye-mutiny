@@ -41,6 +41,13 @@ else
     exit 1
 fi
 
+echo "Update website version to ${VERSION}"
+sed -ie "s/mutiny_version: .*/mutiny_version: ${VERSION}/g" documentation/src/main/jekyll/_data/versions.yml
+rm -f documentation/src/main/jekyll/_data/versions.ymle
+git add documentation/src/main/jekyll/_data/versions.yml
+git commit -m "Bumping the website version to ${VERSION}"
+git push
+
 echo "Cutting release ${VERSION}"
 mvn -B -fn clean
 git checkout ${BRANCH}
@@ -56,9 +63,6 @@ if [[ ${SKIP_TESTS} == "true" ]]; then
 else
   mvn -B clean verify -Prelease -s maven-settings.xml
 fi
-
-echo "Update website version to ${VERSION}"
-sed -ie "s/mutiny_version: .*/mutiny_version: ${VERSION}/g" documentation/src/main/jekyll/_data/versions.yml
 
 git commit -am "[RELEASE] - Bump version to ${VERSION}"
 git tag "${VERSION}"
