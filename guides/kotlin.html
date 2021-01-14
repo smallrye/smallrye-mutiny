@@ -8,7 +8,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="description" content="SmallRye Mutiny!">
 
-    <link rel="canonical" href="/guides/combining-items.html">
+    <link rel="canonical" href="/guides/kotlin.html">
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.3.1/styles/default.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/components/icon.min.css" integrity="sha512-8Tb+T7SKUFQWOPIQCaLDWWe1K/SY8hvHl7brOH8Nz5z1VT8fnf8B+9neoUzmFY3OzkWMMs3OjrwZALgB1oXFBg==" crossorigin="anonymous" />
     <link rel="shortcut icon" type="image/png" href="/smallrye-mutiny/assets/images/favicon.ico">
@@ -62,10 +62,10 @@
         <div class="row">
             <div class="hero-left col-12">
                 <div class="hero-slogan">
-                    <h1 class="hero-name">Combining items from streams</h1>
+                    <h1 class="hero-name">How to interact with Kotlin coroutines?</h1>
                 </div>
                 <div class="hero-desc">
-                    Learn how to combine items from different streams.
+                    Learn how Mutiny and Kotlin coroutines come together
                 </div>
                 <!-- TODO Labels -->
             </div>
@@ -77,176 +77,109 @@
     <div class="row">
         <div class="col-md-9 content">
             <div class="paragraph">
-<p>Combining items from various streams is an essential pattern in Reactive Programming.
-It associates the emitted items from multiple streams and emits an <em>aggregate</em>.
-The downstream receives this <em>aggregates</em> and can handle it smoothly.</p>
+<p>The module <code>mutiny-kotlin</code> provides an integration with Kotlin coroutines.</p>
 </div>
 <div class="paragraph">
-<p>There are plenty of use cases, such as executing two tasks concurrently and waiting for both completions, getting the last items from different streams to build an always up-to-date view, and so on.</p>
+<p>There are currently four extension methods available for converting between Mutiny and Kotlin coroutine types offered in a separate package.
+For implementation details please have also a look to these methods documentation.</p>
 </div>
 <div class="sect1">
-<h2 id="combining-unis"><a class="anchor" href="#combining-unis"></a>Combining Unis</h2>
+<h2 id="dependency-coordinates"><a class="anchor" href="#dependency-coordinates"></a>Dependency coordinates</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Imagine that you have two asynchronous operations to perform like 2 HTTP requests.
-You want to send these requests and be notified when both have completed with their responses ready to be consumed.</p>
-</div>
-<div class="paragraph">
-<p>Of course, you could send the first request, wait for the response, and then send the second request.
-If both requests are independent, we can do something better: send both concurrently and await for both completions!</p>
-</div>
-<div class="imageblock reduce">
-<div class="content">
-<img src="/smallrye-mutiny/assets/images/uni-combine.png" alt="Combining Unis">
-</div>
-</div>
-<div class="paragraph">
-<p>How can you achieve this with Mutiny?</p>
-</div>
-<div class="paragraph">
-<p>First, each request is a <code>Uni</code>, so we have:</p>
+<p>The extension functions are shipped in the package <code>io.smallrye.mutiny.coroutines</code>:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Uni&lt;Response&gt; uniA = invokeHttpServiceA();
-Uni&lt;Response&gt; uniB = invokeHttpServiceB();</code></pre>
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">import io.smallrye.mutiny.coroutines.asFlow
+import io.smallrye.mutiny.coroutines.asMulti
+import io.smallrye.mutiny.coroutines.asUni
+import io.smallrye.mutiny.coroutines.awaitSuspending</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>Then, we want to combine both <em>responses</em>:</p>
+<p>You need to add the following dependency to your project:</p>
 </div>
+<div class="sect2">
+<h3 id="maven"><a class="anchor" href="#maven"></a>Maven</h3>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Uni&lt;Tuple2&lt;Response, Response&gt;&gt; responses = Uni.combine()
-        .all().unis(uniA, uniB).asTuple();</code></pre>
+<pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;dependency&gt;
+    &lt;groupId&gt;io.smallrye.reactive&lt;/groupId&gt;
+    &lt;artifactId&gt;mutiny-kotlin&lt;/artifactId&gt;
+    &lt;version&gt;${mutiny.version}&lt;/version&gt;
+&lt;/dependency&gt;</code></pre>
 </div>
 </div>
-<div class="paragraph">
-<p>This code creates a new <code>Uni</code> produced by combining <code>uniA</code> and <code>uniB</code>.
-The responses are aggregated inside a <code>Tuple</code>:</p>
 </div>
+<div class="sect2">
+<h3 id="gradle"><a class="anchor" href="#gradle"></a>Gradle</h3>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Uni.combine().all().unis(uniA, uniB).asTuple()
-        .subscribe().with(tuple -&gt; {
-    System.out.println("Response from A: " + tuple.getItem1());
-    System.out.println("Response from B: " + tuple.getItem2());
-});</code></pre>
+<pre class="highlightjs highlight"><code class="language-groovy hljs" data-lang="groovy">compile "io.smallrye.reactive:mutiny-kotlin:$mutinyVersion"</code></pre>
 </div>
-</div>
-<div class="paragraph">
-<p>The <code>tuple</code> aggregates the responses in the same order as the <code>Uni</code> sequence.</p>
-</div>
-<div class="paragraph">
-<p>If one of the <code>Uni</code> fails, so does the combination and you recieve the failure:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Uni&lt;Response&gt; uniA = invokeHttpServiceA();
-Uni&lt;Response&gt; uniB = invokeHttpServiceB();
-Uni&lt;Tuple2&lt;Response, Response&gt;&gt; responses = Uni.combine()
-        .all().unis(uniA, uniB).asTuple();
-Uni.combine().all().unis(uniA, uniB).asTuple()
-        .subscribe().with(tuple -&gt; {
-    System.out.println("Response from A: " + tuple.getItem1());
-    System.out.println("Response from B: " + tuple.getItem2());
-});</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Using tuples is convenient but only works if you have less than 10 <code>Uni</code> objects.
-If you want another structure or deal with more than 10 <code>Uni</code> objects then use <code>combineWith</code>:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Uni&lt;Map&lt;String, Response&gt;&gt; uni = Uni.combine()
-        .all().unis(uniA, uniB).combinedWith(
-                listOfResponses -&gt; {
-                    Map&lt;String, Response&gt; map = new LinkedHashMap&lt;&gt;();
-                    map.put("A", (Response) listOfResponses.get(0));
-                    map.put("B", (Response) listOfResponses.get(1));
-                    return map;
-                }
-        );</code></pre>
 </div>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="combining-multis"><a class="anchor" href="#combining-multis"></a>Combining Multis</h2>
+<h2 id="awaiting-a-uni-in-coroutines"><a class="anchor" href="#awaiting-a-uni-in-coroutines"></a>Awaiting a Uni in coroutines</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Combining <code>Multis</code> consists of associating items from different stream per <em>index</em>:</p>
-</div>
-<div class="imageblock reduce">
-<div class="content">
-<img src="/smallrye-mutiny/assets/images/multi-combine.png" alt="Combining Multis">
-</div>
-</div>
-<div class="paragraph">
-<p>It associates the first items from the combined streams, then the second items:</p>
+<p>Within a coroutine or suspend function you can easily await Uni events in a suspended way:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Multi&lt;Tuple2&lt;A, B&gt;&gt; combined = Multi.createBy().combining()
-        .streams(multiA, multiB).asTuple();</code></pre>
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">val uni: Uni&lt;String&gt; = Uni.createFrom().item("Mutiny ❤ Kotlin")
+try {
+    // Available within suspend function and CoroutineScope
+    val item: String = uni.awaitSuspending()
+} catch (failure: Throwable) {
+    // onFailure event happened
+}</code></pre>
 </div>
-</div>
-<div class="paragraph">
-<p>As for <code>Uni</code>, you can aggregate the item into tuples (up to 9 items) or combine with a combinator function:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Multi.createBy().combining()
-        .streams(multiA, multiB).using(list -&gt; combineItems(list))
-        .subscribe().with(x -&gt; {
-            // do something with the combined items
-        });</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>If one of the streams fails, the combined stream propagates the failure and stops the emission.
-The combined stream completes as soon as one of the observed stream sends the completion event.</p>
-</div>
-<div class="admonitionblock note">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-note" title="Note"></i>
-</td>
-<td class="content">
-If one of the observed streams never emits any item then the combined stream will not emit anything.
-</td>
-</tr>
-</table>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="combining-the-last-items-of-multis"><a class="anchor" href="#combining-the-last-items-of-multis"></a>Combining the last items of Multis</h2>
+<h2 id="processing-a-multi-as-flow"><a class="anchor" href="#processing-a-multi-as-flow"></a>Processing a Multi as Flow</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>It can be useful to combine multiple <code>Multi</code> streams and receive the <em>latest</em> items from each stream on every emission:</p>
-</div>
-<div class="imageblock reduce">
-<div class="content">
-<img src="/smallrye-mutiny/assets/images/multi-combine-latest.png" alt="Combining Multis to always gets the latest items from every stream">
-</div>
-</div>
-<div class="paragraph">
-<p>This is achieved using <code>latest()</code>:</p>
+<p>The coroutine Flow type matches Multi semantically, even though it isn&#8217;t a feature complete reactive streams implementation.
+You can process a Multi as Flow as follows:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">        Multi&lt;Tuple2&lt;A, B&gt;&gt; multi1 = Multi.createBy().combining()
-                .streams(multiA, multiB)
-                .latestItems().asTuple();
-
-        // or
-
-        Multi&lt;String&gt; multi2 = Multi.createBy().combining()
-                .streams(multiA, multiB)
-                .latestItems().using(list -&gt; combineItems(list));</code></pre>
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">val multi: Multi&lt;String&gt; = Multi.createFrom().items("Mutiny", "❤", "Kotlin")
+val flow: Flow&lt;String&gt; = multi.asFlow()</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="providing-a-deferred-value-as-uni"><a class="anchor" href="#providing-a-deferred-value-as-uni"></a>Providing a Deferred value as Uni</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The other way around is also possible, let a Deferred become a Uni:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">val deferred: Deferred&lt;String&gt; = GlobalScope.async { "Kotlin ❤ Mutiny" }
+val uni: Uni&lt;String&gt; = deferred.asUni()</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="creating-a-multi-from-a-flow"><a class="anchor" href="#creating-a-multi-from-a-flow"></a>Creating a Multi from a Flow</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Finally, creating a Multi from a Flow is also possible:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">val flow: Flow&lt;String&gt; = flowOf("Kotlin", "❤", "Mutiny")
+val multi: Multi&lt;String&gt; = flow.asMulti()</code></pre>
 </div>
 </div>
 </div>
@@ -257,9 +190,16 @@ If one of the observed streams never emits any item then the combined stream wil
                 
                 <h4>Table of Content</h4>
                 <ul class="sectlevel1">
-<li><a href="#combining-unis">Combining Unis</a></li>
-<li><a href="#combining-multis">Combining Multis</a></li>
-<li><a href="#combining-the-last-items-of-multis">Combining the last items of Multis</a></li>
+<li><a href="#dependency-coordinates">Dependency coordinates</a>
+<ul class="sectlevel2">
+<li><a href="#maven">Maven</a></li>
+<li><a href="#gradle">Gradle</a></li>
+</ul>
+</li>
+<li><a href="#awaiting-a-uni-in-coroutines">Awaiting a Uni in coroutines</a></li>
+<li><a href="#processing-a-multi-as-flow">Processing a Multi as Flow</a></li>
+<li><a href="#providing-a-deferred-value-as-uni">Providing a Deferred value as Uni</a></li>
+<li><a href="#creating-a-multi-from-a-flow">Creating a Multi from a Flow</a></li>
 </ul>
                 
 
@@ -269,8 +209,8 @@ If one of the observed streams never emits any item then the combined stream wil
                     
                     <li>
                         
-                        <a href="/smallrye-mutiny/guides/merge-concat">Merging and Concatenating Streams</a>
                         
+                        <a href="https://kotlinlang.org/docs/reference/coroutines-overview.html">Coroutines for asynchronous programming and more</a>
                         
                     </li>
                     
