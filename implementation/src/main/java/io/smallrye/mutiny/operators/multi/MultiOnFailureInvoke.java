@@ -19,8 +19,8 @@ public class MultiOnFailureInvoke<T> extends AbstractMultiOperator<T, T> {
 
     public MultiOnFailureInvoke(Multi<? extends T> upstream, Consumer<Throwable> callback,
             Predicate<? super Throwable> predicate) {
-        super(nonNull(upstream, "upstream"));
-        this.callback = nonNull(callback, "callback");
+        super(upstream);
+        this.callback = callback;
         this.predicate = predicate;
     }
 

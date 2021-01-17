@@ -6,7 +6,6 @@ import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
 import io.smallrye.mutiny.Multi;
-import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.helpers.Subscriptions;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.subscription.MultiSubscriber;
@@ -20,8 +19,8 @@ public final class MultiScanWithSeedOp<T, R> extends AbstractMultiOperator<T, R>
 
     public MultiScanWithSeedOp(Multi<? extends T> upstream, Supplier<R> seed, BiFunction<R, ? super T, R> accumulator) {
         super(upstream);
-        this.seed = ParameterValidation.nonNull(seed, "seed");
-        this.accumulator = ParameterValidation.nonNull(accumulator, "accumulator");
+        this.seed = seed;
+        this.accumulator = accumulator;
     }
 
     @Override

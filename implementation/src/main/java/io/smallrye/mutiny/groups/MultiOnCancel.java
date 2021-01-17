@@ -27,7 +27,8 @@ public class MultiOnCancel<T> {
      * @return a new {@link Multi}
      */
     public Multi<T> invoke(Runnable action) {
-        return Infrastructure.onMultiCreation(new MultiOnCancellationInvoke<>(upstream, nonNull(action, "action")));
+        Runnable runnable = Infrastructure.decorate(nonNull(action, "action"));
+        return Infrastructure.onMultiCreation(new MultiOnCancellationInvoke<>(upstream, runnable));
     }
 
     /**
@@ -40,7 +41,8 @@ public class MultiOnCancel<T> {
      * @return a new {@link Multi}
      */
     public Multi<T> call(Supplier<Uni<?>> supplier) {
-        return Infrastructure.onMultiCreation(new MultiOnCancellationCall<>(upstream, nonNull(supplier, "supplier")));
+        Supplier<Uni<?>> actual = Infrastructure.decorate(nonNull(supplier, "supplier"));
+        return Infrastructure.onMultiCreation(new MultiOnCancellationCall<>(upstream, actual));
     }
 
     /**
@@ -48,13 +50,14 @@ public class MultiOnCancel<T> {
      * The upstream is not cancelled yet, but will be cancelled when the returned {@link Uni} completes.
      * The supplier must not return {@code null}.
      * Note that the result or the failure of the {@link Uni} will be discarded.
-     * 
+     *
      * @param supplier the {@link Uni} supplier, must not return {@code null}.
      * @return a new {@link Multi}
      * @deprecated Use {@link #call(Supplier)}
      */
     @Deprecated
     public Multi<T> invokeUni(Supplier<Uni<?>> supplier) {
+        // Decoration happens in `call`
         return call(supplier);
     }
 }

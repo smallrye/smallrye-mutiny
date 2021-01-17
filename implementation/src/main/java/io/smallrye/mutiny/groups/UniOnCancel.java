@@ -27,7 +27,8 @@ public class UniOnCancel<T> {
      * @return a new {@link Uni}
      */
     public Uni<T> invoke(Runnable action) {
-        return Infrastructure.onUniCreation(new UniOnCancellation<>(upstream, nonNull(action, "action")));
+        Runnable actual = Infrastructure.decorate(nonNull(action, "action"));
+        return Infrastructure.onUniCreation(new UniOnCancellation<>(upstream, actual));
     }
 
     /**
@@ -42,6 +43,7 @@ public class UniOnCancel<T> {
      */
     @Deprecated
     public Uni<T> invokeUni(Supplier<Uni<?>> supplier) {
+        // Decoration happens in `call`
         return call(supplier);
     }
 
@@ -55,6 +57,7 @@ public class UniOnCancel<T> {
      * @return a new {@link Uni}
      */
     public Uni<T> call(Supplier<Uni<?>> supplier) {
-        return Infrastructure.onUniCreation(new UniOnCancellationCall<>(upstream, nonNull(supplier, "supplier")));
+        Supplier<Uni<?>> actual = Infrastructure.decorate(nonNull(supplier, "supplier"));
+        return Infrastructure.onUniCreation(new UniOnCancellationCall<>(upstream, actual));
     }
 }

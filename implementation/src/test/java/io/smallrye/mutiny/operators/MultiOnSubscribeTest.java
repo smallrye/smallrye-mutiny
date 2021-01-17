@@ -112,6 +112,31 @@ public class MultiOnSubscribeTest {
     }
 
     @Test
+    public void testCallWithSupplier() {
+        AtomicInteger count = new AtomicInteger();
+        AtomicReference<Subscription> sub = new AtomicReference<>();
+        Multi<Integer> multi = Multi.createFrom().items(1, 2, 3)
+                .onSubscribe().call(() -> {
+                    count.incrementAndGet();
+                    return Uni.createFrom().nullItem()
+                            .onSubscribe().invoke(sub::set);
+                });
+
+        AssertSubscriber<Integer> subscriber = AssertSubscriber.create(10);
+
+        assertThat(count).hasValue(0);
+
+        multi.subscribe().withSubscriber(subscriber).assertCompleted().assertItems(1, 2, 3);
+
+        assertThat(count).hasValue(1);
+
+        AssertSubscriber<Integer> subscriber2 = AssertSubscriber.create(10);
+        multi.subscribe().withSubscriber(subscriber2).assertCompleted().assertItems(1, 2, 3);
+
+        assertThat(count).hasValue(2);
+    }
+
+    @Test
     public void testInvokeThrowingException() {
         Multi<Integer> multi = Multi.createFrom().items(1, 2, 3)
                 .onSubscribe().invoke(s -> {

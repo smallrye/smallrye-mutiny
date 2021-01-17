@@ -1,8 +1,5 @@
 package io.smallrye.mutiny.operators;
 
-import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
-import static io.smallrye.mutiny.helpers.ParameterValidation.validate;
-
 import java.time.Duration;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ScheduledExecutorService;
@@ -26,9 +23,9 @@ public class UniFailOnTimeout<I> extends UniOperator<I, I> {
 
     public UniFailOnTimeout(Uni<I> upstream, Duration timeout, Supplier<? extends Throwable> supplier,
             ScheduledExecutorService executor) {
-        super(nonNull(upstream, "upstream"));
-        this.timeout = validate(timeout, "onTimeout");
-        this.supplier = nonNull(supplier, "supplier");
+        super(upstream);
+        this.timeout = timeout;
+        this.supplier = supplier;
         this.executor = executor == null ? Infrastructure.getDefaultWorkerPool() : executor;
     }
 

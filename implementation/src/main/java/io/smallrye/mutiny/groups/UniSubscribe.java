@@ -65,8 +65,8 @@ public class UniSubscribe<T> {
      */
     public Cancellable with(Consumer<? super T> onItemCallback, Consumer<? super Throwable> onFailureCallback) {
         UniCallbackSubscriber<T> subscriber = new UniCallbackSubscriber<>(
-                ParameterValidation.nonNull(onItemCallback, "onItemCallback"),
-                ParameterValidation.nonNull(onFailureCallback, "onFailureCallback"));
+                Infrastructure.decorate(ParameterValidation.nonNull(onItemCallback, "onItemCallback")),
+                Infrastructure.decorate(ParameterValidation.nonNull(onFailureCallback, "onFailureCallback")));
         withSubscriber(subscriber);
         return subscriber;
     }
@@ -86,7 +86,7 @@ public class UniSubscribe<T> {
      */
     public Cancellable with(Consumer<? super T> onItemCallback) {
         UniCallbackSubscriber<T> subscriber = new UniCallbackSubscriber<>(
-                ParameterValidation.nonNull(onItemCallback, "onItemCallback"),
+                Infrastructure.decorate(ParameterValidation.nonNull(onItemCallback, "onItemCallback")),
                 Infrastructure::handleDroppedException);
         withSubscriber(subscriber);
         return subscriber;

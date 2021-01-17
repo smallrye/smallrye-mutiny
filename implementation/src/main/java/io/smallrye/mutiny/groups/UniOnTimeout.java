@@ -55,8 +55,8 @@ public class UniOnTimeout<T> {
 
     public Uni<T> failWith(Supplier<? extends Throwable> supplier) {
         validate(timeout, "timeout");
-        nonNull(supplier, "supplier");
-        return Infrastructure.onUniCreation(new UniFailOnTimeout<>(failure, timeout, supplier, executor));
+        Supplier<? extends Throwable> actual = Infrastructure.decorate(nonNull(supplier, "supplier"));
+        return Infrastructure.onUniCreation(new UniFailOnTimeout<>(failure, timeout, actual, executor));
     }
 
     /**
@@ -81,6 +81,7 @@ public class UniOnTimeout<T> {
      * @return the new {@link Uni}
      */
     public Uni<T> recoverWithItem(Supplier<T> supplier) {
+        // Decoration happens in `recoverWithItem`
         return fail().onFailure(TimeoutException.class).recoverWithItem(supplier);
     }
 
@@ -93,6 +94,7 @@ public class UniOnTimeout<T> {
      * @return the new {@link Uni}
      */
     public Uni<T> recoverWithUni(Supplier<Uni<? extends T>> supplier) {
+        // Decoration happens in `recoverWithUni`
         return fail().onFailure(TimeoutException.class).recoverWithUni(supplier);
     }
 

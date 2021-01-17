@@ -4,7 +4,6 @@ import java.util.function.Consumer;
 
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.helpers.EmptyUniSubscription;
-import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.subscription.UniSubscriber;
 import io.smallrye.mutiny.subscription.UniSubscription;
 
@@ -14,7 +13,7 @@ public class UniOnSubscribeInvoke<T> extends UniOperator<T, T> {
 
     public UniOnSubscribeInvoke(Uni<? extends T> upstream,
             Consumer<? super UniSubscription> callback) {
-        super(ParameterValidation.nonNull(upstream, "upstream"));
+        super(upstream);
         this.callback = callback;
     }
 

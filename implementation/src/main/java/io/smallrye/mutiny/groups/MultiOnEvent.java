@@ -41,7 +41,8 @@ public class MultiOnEvent<T> {
      */
     @Deprecated
     public Multi<T> subscribed(Consumer<? super Subscription> callback) {
-        return Infrastructure.onMultiCreation(new MultiOnSubscribeInvokeOp<>(upstream, callback));
+        Consumer<? super Subscription> actual = Infrastructure.decorate(nonNull(callback, "callback"));
+        return Infrastructure.onMultiCreation(new MultiOnSubscribeInvokeOp<>(upstream, actual));
     }
 
     /**
@@ -54,6 +55,7 @@ public class MultiOnEvent<T> {
      */
     @Deprecated
     public Multi<T> cancellation(Runnable callback) {
+        // Decoration happens in `invoke`
         return upstream.onCancellation().invoke(callback);
     }
 
@@ -86,6 +88,7 @@ public class MultiOnEvent<T> {
      */
     @Deprecated
     public Multi<T> termination(BiConsumer<Throwable, Boolean> callback) {
+        // Decoration happens in `invoke`
         return upstream.onTermination().invoke(callback);
     }
 
@@ -101,6 +104,7 @@ public class MultiOnEvent<T> {
      */
     @Deprecated
     public Multi<T> termination(Runnable action) {
+        // Decoration happens in `invoke`
         return upstream.onTermination().invoke(action);
     }
 
@@ -110,7 +114,7 @@ public class MultiOnEvent<T> {
      * <p>
      * Examples:
      * </p>
-     * 
+     *
      * <pre>
      * {@code
      * Multi<T> multi = ...;
@@ -166,7 +170,8 @@ public class MultiOnEvent<T> {
      */
     @Deprecated
     public MultiOnFailure<T> failure(Predicate<? super Throwable> predicate) {
-        return upstream.onFailure(predicate);
+        Predicate<? super Throwable> actual = Infrastructure.decorate(nonNull(predicate, "predicate"));
+        return upstream.onFailure(actual);
     }
 
     /**
@@ -197,12 +202,13 @@ public class MultiOnEvent<T> {
      */
     @Deprecated
     public Multi<T> completion(Runnable callback) {
+        // Decoration happens in `invoke`
         return upstream.onCompletion().invoke(callback);
     }
 
     /**
      * Configure actions when receiving a subscription.
-     * 
+     *
      * @return the object to configure the actions
      * @deprecated Use {@link Multi#onSubscribe()} instead
      */
@@ -224,7 +230,7 @@ public class MultiOnEvent<T> {
 
     /**
      * Configures actions when the {@link Multi} terminates on either a completion, a failure or a cancellation.
-     * 
+     *
      * @return the object to configure the actions
      * @deprecated Use {@link Multi#onTermination()} instead
      */

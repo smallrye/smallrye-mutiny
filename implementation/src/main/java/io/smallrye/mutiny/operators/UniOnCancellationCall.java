@@ -14,8 +14,8 @@ public class UniOnCancellationCall<I> extends UniOperator<I, I> {
     private final Supplier<Uni<?>> supplier;
 
     public UniOnCancellationCall(Uni<? extends I> upstream, Supplier<Uni<?>> supplier) {
-        super(nonNull(upstream, "upstream"));
-        this.supplier = nonNull(supplier, "supplier");
+        super(upstream);
+        this.supplier = supplier;
     }
 
     @Override

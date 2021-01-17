@@ -44,12 +44,12 @@ public class MultiIfEmpty<T> {
      * @return the new {@link Multi}
      */
     public Multi<T> failWith(Supplier<? extends Throwable> supplier) {
-        nonNull(supplier, "supplier");
-
-        return switchToEmitter(createMultiFromFailureSupplier(supplier));
+        Supplier<? extends Throwable> actual = Infrastructure.decorate(nonNull(supplier, "supplier"));
+        return switchToEmitter(createMultiFromFailureSupplier(actual));
     }
 
     static <T> Consumer<MultiEmitter<? super T>> createMultiFromFailureSupplier(Supplier<? extends Throwable> supplier) {
+        // supplier already decorated.
         return emitter -> {
             Throwable throwable;
             try {
@@ -87,8 +87,8 @@ public class MultiIfEmpty<T> {
      * @return the new {@link Multi}
      */
     public Multi<T> switchToEmitter(Consumer<MultiEmitter<? super T>> consumer) {
-        nonNull(consumer, "consumer");
-        return switchTo(() -> Multi.createFrom().emitter(consumer));
+        Consumer<MultiEmitter<? super T>> actual = Infrastructure.decorate(nonNull(consumer, "consumer"));
+        return switchTo(() -> Multi.createFrom().emitter(actual));
     }
 
     /**
@@ -112,7 +112,8 @@ public class MultiIfEmpty<T> {
      * @return the new {@link Uni}
      */
     public Multi<T> switchTo(Supplier<Publisher<? extends T>> supplier) {
-        return Infrastructure.onMultiCreation(new MultiSwitchOnEmpty<>(upstream, nonNull(supplier, "supplier")));
+        Supplier<Publisher<? extends T>> actual = Infrastructure.decorate(nonNull(supplier, "supplier"));
+        return Infrastructure.onMultiCreation(new MultiSwitchOnEmpty<>(upstream, actual));
     }
 
     /**
@@ -148,8 +149,8 @@ public class MultiIfEmpty<T> {
      * @return the new {@link Multi}
      */
     public Multi<T> continueWith(Supplier<? extends Iterable<? extends T>> supplier) {
-        nonNull(supplier, "supplier");
-        return switchTo(() -> createMultiFromIterableSupplier(supplier));
+        Supplier<? extends Iterable<? extends T>> actual = Infrastructure.decorate(nonNull(supplier, "supplier"));
+        return switchTo(() -> createMultiFromIterableSupplier(actual));
     }
 
     static <T> Publisher<? extends T> createMultiFromIterableSupplier(Supplier<? extends Iterable<? extends T>> supplier) {

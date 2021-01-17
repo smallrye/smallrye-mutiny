@@ -76,7 +76,8 @@ public class MultiSkip<T> {
      * @return the resulting {@link Multi}
      */
     public Multi<T> first(Predicate<? super T> predicate) {
-        return Infrastructure.onMultiCreation(new MultiSkipFirstUntilOp<>(upstream, nonNull(predicate, "predicate")));
+        Predicate<? super T> actual = Infrastructure.decorate(nonNull(predicate, "predicate"));
+        return Infrastructure.onMultiCreation(new MultiSkipFirstUntilOp<>(upstream, actual));
     }
 
     /**
@@ -192,7 +193,8 @@ public class MultiSkip<T> {
      * @see MultiSelect#where(Predicate)
      */
     public Multi<T> where(Predicate<? super T> predicate) {
-        return upstream.select().where(nonNull(predicate, "predicate").negate());
+        Predicate<? super T> actual = Infrastructure.decorate(nonNull(predicate, "predicate"));
+        return upstream.select().where(actual.negate());
     }
 
     /**
@@ -221,9 +223,9 @@ public class MultiSkip<T> {
      * @return the resulting {@link Multi}
      */
     public Multi<T> when(Function<? super T, Uni<Boolean>> predicate) {
-        nonNull(predicate, "predicate");
+        Function<? super T, Uni<Boolean>> actual = Infrastructure.decorate(nonNull(predicate, "predicate"));
         return upstream.onItem().transformToMultiAndConcatenate(res -> {
-            Uni<Boolean> uni = predicate.apply(res);
+            Uni<Boolean> uni = actual.apply(res);
             return uni.map(pass -> pass ? null : res).toMulti();
         });
     }

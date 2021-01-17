@@ -1,7 +1,6 @@
 package io.smallrye.mutiny.operators;
 
 import static io.smallrye.mutiny.helpers.ParameterValidation.MAPPER_RETURNED_NULL;
-import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
 
 import java.util.Objects;
 import java.util.function.Function;
@@ -20,9 +19,9 @@ public class MultiFlatMapOnFailure<T> extends MultiOperator<T, T> {
 
     public MultiFlatMapOnFailure(Multi<T> upstream, Predicate<? super Throwable> predicate,
             Function<? super Throwable, Multi<? extends T>> mapper) {
-        super(nonNull(upstream, "upstream"));
+        super(upstream);
         this.predicate = predicate == null ? x -> true : predicate;
-        this.mapper = nonNull(mapper, "mapper");
+        this.mapper = mapper;
     }
 
     @Override

@@ -6,6 +6,7 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.subscription.UniSubscriber;
 import io.smallrye.mutiny.subscription.UniSubscription;
 import io.smallrye.mutiny.tuples.Functions;
@@ -38,6 +39,7 @@ public class UniOnEvent<T> {
      */
     @Deprecated
     public Uni<T> subscribed(Consumer<? super UniSubscription> consumer) {
+        // Decoration happens in `invoke`
         return upstream.onSubscribe().invoke(consumer);
     }
 
@@ -51,6 +53,7 @@ public class UniOnEvent<T> {
      */
     @Deprecated
     public Uni<T> cancellation(Runnable runnable) {
+        // Decoration happens in `invoke`
         return upstream.onCancellation().invoke(runnable);
     }
 
@@ -68,6 +71,7 @@ public class UniOnEvent<T> {
      */
     @Deprecated
     public Uni<T> termination(Functions.TriConsumer<T, Throwable, Boolean> consumer) {
+        // Decoration happens in `invoke`
         return upstream.onTermination().invoke(consumer);
     }
 
@@ -82,6 +86,7 @@ public class UniOnEvent<T> {
      */
     @Deprecated
     public Uni<T> termination(Runnable action) {
+        // Decoration happens in `invoke`
         return upstream.onTermination().invoke(action);
     }
 
@@ -137,7 +142,8 @@ public class UniOnEvent<T> {
      */
     @Deprecated
     public UniOnFailure<T> failure(Predicate<? super Throwable> predicate) {
-        return upstream.onFailure(predicate);
+        Predicate<? super Throwable> actual = Infrastructure.decorate(nonNull(predicate, "predicate"));
+        return upstream.onFailure(actual);
     }
 
     /**

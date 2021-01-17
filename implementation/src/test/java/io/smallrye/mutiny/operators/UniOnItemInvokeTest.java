@@ -80,6 +80,17 @@ public class UniOnItemInvokeTest {
     }
 
     @Test
+    public void testInvokeOnItemWithRunnableShortcut() {
+        AtomicInteger res = new AtomicInteger();
+
+        int r = one.invoke(res::incrementAndGet)
+                .await().indefinitely();
+
+        assertThat(r).isEqualTo(1);
+        assertThat(res).hasValue(1);
+    }
+
+    @Test
     public void testInvokeOnFailure() {
         AtomicInteger res = new AtomicInteger(-1);
 
@@ -102,6 +113,7 @@ public class UniOnItemInvokeTest {
         assertThat(res).hasValue(1);
     }
 
+    @SuppressWarnings("deprecation")
     @Test
     public void testDeprecatedInvokeUniOnItem() {
         AtomicInteger res = new AtomicInteger();
@@ -116,6 +128,15 @@ public class UniOnItemInvokeTest {
         assertThat(r).isEqualTo(1);
         assertThat(twoGotCalled).hasValue(2);
         assertThat(res).hasValue(1);
+
+        twoGotCalled.set(0);
+        Integer integer = one
+                .invokeUni(i -> Uni.createFrom().item(2)
+                        .onItem().invoke(() -> twoGotCalled.set(1)))
+                .await().indefinitely();
+
+        assertThat(integer).isEqualTo(1);
+        assertThat(twoGotCalled).hasValue(1);
     }
 
     @Test
@@ -159,6 +180,22 @@ public class UniOnItemInvokeTest {
         assertThat(r).isEqualTo(1);
         assertThat(twoGotCalled).hasValue(2);
         assertThat(res).hasValue(1);
+    }
+
+    @Test
+    public void testCallOnItemWithSupplierShortcut() {
+        AtomicInteger res = new AtomicInteger();
+        AtomicInteger twoGotCalled = new AtomicInteger();
+
+        int r = one.call(() -> {
+            res.set(23);
+            return two.invoke(twoGotCalled::set);
+        })
+                .await().indefinitely();
+
+        assertThat(r).isEqualTo(1);
+        assertThat(twoGotCalled).hasValue(2);
+        assertThat(res).hasValue(23);
     }
 
     @Test

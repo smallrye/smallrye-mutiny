@@ -28,11 +28,6 @@ public class UniOnItemOrFailureMapTest {
     }
 
     @Test
-    public void testThatSourceMustNotBeNull() {
-        assertThrows(IllegalArgumentException.class, () -> new UniOnItemOrFailureMap<>(null, (x, f) -> x));
-    }
-
-    @Test
     public void testMappingOnItem() {
         UniAssertSubscriber<Integer> subscriber = UniAssertSubscriber.create();
 

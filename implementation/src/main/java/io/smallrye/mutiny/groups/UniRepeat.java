@@ -5,6 +5,7 @@ import java.util.function.Predicate;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.helpers.ParameterValidation;
+import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.multi.MultiRepeatUntilOp;
 import io.smallrye.mutiny.operators.multi.MultiRepeatWhilstOp;
 
@@ -84,7 +85,8 @@ public class UniRepeat<T> {
      *         returns {@code true}.
      */
     public Multi<T> until(Predicate<T> predicate) {
-        return new MultiRepeatUntilOp<>(upstream.toMulti(), ParameterValidation.nonNull(predicate, "predicate"));
+        Predicate<T> actual = Infrastructure.decorate(ParameterValidation.nonNull(predicate, "predicate"));
+        return new MultiRepeatUntilOp<>(upstream.toMulti(), actual);
     }
 
     /**
@@ -107,7 +109,8 @@ public class UniRepeat<T> {
      *         returns {@code true}.
      */
     public Multi<T> whilst(Predicate<T> predicate) {
-        return new MultiRepeatWhilstOp<>(upstream.toMulti(), ParameterValidation.nonNull(predicate, "predicate"));
+        Predicate<T> actual = Infrastructure.decorate(ParameterValidation.nonNull(predicate, "predicate"));
+        return new MultiRepeatWhilstOp<>(upstream.toMulti(), actual);
     }
 
 }

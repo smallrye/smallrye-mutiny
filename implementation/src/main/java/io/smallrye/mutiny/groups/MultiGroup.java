@@ -42,14 +42,14 @@ public class MultiGroup<T> {
     // TODO grouping can also have prefetch and failure collection delay.
 
     public <K> Multi<GroupedMulti<K, T>> by(Function<? super T, ? extends K> keyMapper) {
-        Function<? super T, ? extends K> mapper = nonNull(keyMapper, "keyMapper");
+        Function<? super T, ? extends K> mapper = Infrastructure.decorate(nonNull(keyMapper, "keyMapper"));
         return Infrastructure.onMultiCreation(new MultiGroupByOp<>(upstream, mapper, x -> x));
     }
 
     public <K, V> Multi<GroupedMulti<K, V>> by(Function<? super T, ? extends K> keyMapper,
             Function<? super T, ? extends V> valueMapper) {
-        Function<? super T, ? extends K> k = nonNull(keyMapper, "keyMapper");
-        Function<? super T, ? extends V> v = nonNull(valueMapper, "valueMapper");
+        Function<? super T, ? extends K> k = Infrastructure.decorate(nonNull(keyMapper, "keyMapper"));
+        Function<? super T, ? extends V> v = Infrastructure.decorate(nonNull(valueMapper, "valueMapper"));
         return Infrastructure.onMultiCreation(new MultiGroupByOp<>(upstream, k, v));
     }
 }

@@ -11,7 +11,6 @@ import java.util.function.Supplier;
 import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
-import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.MultiFlatMapOnFailure;
 import io.smallrye.mutiny.operators.MultiOnFailureTransform;
@@ -60,9 +59,8 @@ public class MultiOnFailure<T> {
      * @return the new {@link Multi}
      */
     public Multi<T> invoke(Consumer<Throwable> callback) {
-        nonNull(callback, "callback");
-        nonNull(predicate, "predicate");
-        return Infrastructure.onMultiCreation(new MultiOnFailureInvoke<>(upstream, callback, predicate));
+        Consumer<Throwable> actual = Infrastructure.decorate(nonNull(callback, "callback"));
+        return Infrastructure.onMultiCreation(new MultiOnFailureInvoke<>(upstream, actual, predicate));
     }
 
     /**
@@ -76,6 +74,7 @@ public class MultiOnFailure<T> {
      * @return the new {@link Multi}
      */
     public Multi<T> invoke(Runnable callback) {
+        // The decoration happens in invoke.
         Runnable actual = nonNull(callback, "callback");
         return invoke(ignored -> actual.run());
     }
@@ -98,9 +97,9 @@ public class MultiOnFailure<T> {
      * @return the new {@link Multi}
      */
     public Multi<T> call(Function<Throwable, Uni<?>> action) {
-        ParameterValidation.nonNull(action, "action");
+        Function<Throwable, Uni<?>> actual = Infrastructure.decorate(nonNull(action, "action"));
         return recoverWithMulti(failure -> {
-            Uni<?> uni = action.apply(failure);
+            Uni<?> uni = actual.apply(failure);
             if (uni == null) {
                 throw new NullPointerException("The `action` produced a `null` Uni");
             }
@@ -135,7 +134,7 @@ public class MultiOnFailure<T> {
      * @return the new {@link Multi}
      */
     public Multi<T> call(Supplier<Uni<?>> action) {
-        Supplier<Uni<?>> actual = nonNull(action, "action");
+        Supplier<Uni<?>> actual = Infrastructure.decorate(nonNull(action, "action"));
         return call(ignored -> actual.get());
     }
 
@@ -159,6 +158,7 @@ public class MultiOnFailure<T> {
      */
     @Deprecated
     public Multi<T> invokeUni(Function<Throwable, Uni<?>> action) {
+        // Decoration happens in `call`
         return call(action);
     }
 
@@ -172,6 +172,7 @@ public class MultiOnFailure<T> {
      */
     @Deprecated
     public Multi<T> apply(Function<? super Throwable, ? extends Throwable> mapper) {
+        // Decoration happens in `transform`
         return transform(mapper);
     }
 
@@ -183,7 +184,8 @@ public class MultiOnFailure<T> {
      * @return the new {@link Multi}
      */
     public Multi<T> transform(Function<? super Throwable, ? extends Throwable> mapper) {
-        return Infrastructure.onMultiCreation(new MultiOnFailureTransform<>(upstream, predicate, mapper));
+        Function<? super Throwable, ? extends Throwable> actual = Infrastructure.decorate(nonNull(mapper, "mapper"));
+        return Infrastructure.onMultiCreation(new MultiOnFailureTransform<>(upstream, predicate, actual));
     }
 
     /**
@@ -208,9 +210,9 @@ public class MultiOnFailure<T> {
      * @return the new {@link Multi} that would emit the produced item in case the upstream sends a failure.
      */
     public Multi<T> recoverWithItem(Supplier<T> supplier) {
-        nonNull(supplier, "supplier");
+        Supplier<T> actual = Infrastructure.decorate(nonNull(supplier, "supplier"));
         return recoverWithItem(ignored -> {
-            T t = supplier.get();
+            T t = actual.get();
             if (t == null) {
                 throw new NullPointerException(SUPPLIER_PRODUCED_NULL);
             } else {
@@ -230,9 +232,9 @@ public class MultiOnFailure<T> {
      * @return the new {@link Multi} that would emit the produced item in case the upstream sends a failure.
      */
     public Multi<T> recoverWithItem(Function<? super Throwable, ? extends T> function) {
-        nonNull(function, "function");
+        Function<? super Throwable, ? extends T> actual = Infrastructure.decorate(nonNull(function, "function"));
         return Infrastructure.onMultiCreation(new MultiFlatMapOnFailure<>(upstream, predicate, failure -> {
-            T newResult = function.apply(failure);
+            T newResult = actual.apply(failure);
             return Multi.createFrom().item(newResult);
         }));
     }
@@ -261,8 +263,8 @@ public class MultiOnFailure<T> {
      *         upstream sends a failure.
      */
     public Multi<T> recoverWithMulti(Function<? super Throwable, Multi<? extends T>> function) {
-        return Infrastructure.onMultiCreation(new MultiFlatMapOnFailure<>(upstream, predicate,
-                nonNull(function, "function")));
+        Function<? super Throwable, Multi<? extends T>> actual = Infrastructure.decorate(nonNull(function, "function"));
+        return Infrastructure.onMultiCreation(new MultiFlatMapOnFailure<>(upstream, predicate, actual));
     }
 
     /**
@@ -279,7 +281,8 @@ public class MultiOnFailure<T> {
      *         upstream sends a failure.
      */
     public Multi<T> recoverWithMulti(Supplier<Multi<? extends T>> supplier) {
-        return recoverWithMulti(ignored -> supplier.get());
+        Supplier<Multi<? extends T>> actual = Infrastructure.decorate(nonNull(supplier, "supplier"));
+        return recoverWithMulti(ignored -> actual.get());
     }
 
     /**

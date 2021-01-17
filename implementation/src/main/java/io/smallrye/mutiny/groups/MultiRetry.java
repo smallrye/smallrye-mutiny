@@ -148,7 +148,7 @@ public class MultiRetry<T> {
      * @return the new {@code Multi} instance
      */
     public Multi<T> until(Predicate<? super Throwable> predicate) {
-        ParameterValidation.nonNull(predicate, "predicate");
+        Predicate<? super Throwable> actual = Infrastructure.decorate(nonNull(predicate, "predicate"));
         if (backOffConfigured) {
             throw new IllegalArgumentException(
                     "Invalid retry configuration, `until` cannot be used with a back-off configuration");
@@ -156,7 +156,7 @@ public class MultiRetry<T> {
         Function<Multi<Throwable>, Publisher<Long>> whenStreamFactory = stream -> stream.onItem()
                 .transformToUni(failure -> Uni.createFrom().<Long> emitter(emitter -> {
                     try {
-                        if (predicate.test(failure)) {
+                        if (actual.test(failure)) {
                             emitter.complete(1L);
                         } else {
                             emitter.fail(failure);
@@ -186,7 +186,9 @@ public class MultiRetry<T> {
             throw new IllegalArgumentException(
                     "Invalid retry configuration, `when` cannot be used with a back-off configuration");
         }
-        return Infrastructure.onMultiCreation(new MultiRetryWhenOp<>(upstream, whenStreamFactory));
+        Function<Multi<Throwable>, ? extends Publisher<?>> actual = Infrastructure
+                .decorate(nonNull(whenStreamFactory, "whenStreamFactory"));
+        return Infrastructure.onMultiCreation(new MultiRetryWhenOp<>(upstream, actual));
     }
 
     /**

@@ -12,8 +12,8 @@ public class MultiOnRequestInvoke<T> extends AbstractMultiOperator<T, T> {
     private final LongConsumer consumer;
 
     public MultiOnRequestInvoke(Multi<? extends T> upstream, LongConsumer consumer) {
-        super(nonNull(upstream, "upstream"));
-        this.consumer = nonNull(consumer, "consumer");
+        super(upstream);
+        this.consumer = consumer;
     }
 
     @Override

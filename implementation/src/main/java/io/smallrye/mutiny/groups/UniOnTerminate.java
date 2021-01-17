@@ -5,7 +5,6 @@ import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
 import java.util.function.Supplier;
 
 import io.smallrye.mutiny.Uni;
-import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.UniOnTermination;
 import io.smallrye.mutiny.operators.UniOnTerminationCall;
@@ -31,7 +30,8 @@ public class UniOnTerminate<T> {
      * @return the new {@link Uni}
      */
     public Uni<T> invoke(Functions.TriConsumer<T, Throwable, Boolean> consumer) {
-        return Infrastructure.onUniCreation(new UniOnTermination<>(upstream, nonNull(consumer, "consumer")));
+        Functions.TriConsumer<T, Throwable, Boolean> actual = Infrastructure.decorate(nonNull(consumer, "consumer"));
+        return Infrastructure.onUniCreation(new UniOnTermination<>(upstream, actual));
     }
 
     /**
@@ -44,7 +44,7 @@ public class UniOnTerminate<T> {
      * @return the new {@link Uni}
      */
     public Uni<T> invoke(Runnable action) {
-        Runnable runnable = nonNull(action, "action");
+        Runnable runnable = Infrastructure.decorate(nonNull(action, "action"));
         return Infrastructure.onUniCreation(new UniOnTermination<>(upstream, (i, f, c) -> runnable.run()));
     }
 
@@ -61,8 +61,9 @@ public class UniOnTerminate<T> {
      * @return the new {@link Uni}
      */
     public Uni<T> call(Functions.Function3<? super T, Throwable, Boolean, Uni<?>> mapper) {
+        Functions.Function3<? super T, Throwable, Boolean, Uni<?>> actual = Infrastructure.decorate(nonNull(mapper, "mapper"));
         return Infrastructure
-                .onUniCreation(new UniOnTerminationCall<>(upstream, ParameterValidation.nonNull(mapper, "mapper")));
+                .onUniCreation(new UniOnTerminationCall<>(upstream, actual));
     }
 
     /**
@@ -74,8 +75,8 @@ public class UniOnTerminate<T> {
      * @return the new {@link Uni}
      */
     public Uni<T> call(Supplier<Uni<?>> supplier) {
-        nonNull(supplier, "supplier");
-        return call((i, f, c) -> supplier.get());
+        Supplier<Uni<?>> actual = Infrastructure.decorate(nonNull(supplier, "supplier"));
+        return call((i, f, c) -> actual.get());
     }
 
     /**
@@ -93,6 +94,7 @@ public class UniOnTerminate<T> {
      */
     @Deprecated
     public Uni<T> invokeUni(Functions.Function3<? super T, Throwable, Boolean, Uni<?>> mapper) {
+        // Decoration happens in `call`
         return call(mapper);
     }
 
@@ -107,6 +109,7 @@ public class UniOnTerminate<T> {
      */
     @Deprecated
     public Uni<T> invokeUni(Supplier<Uni<?>> supplier) {
+        // Decoration happens in `call`
         return call(supplier);
     }
 }

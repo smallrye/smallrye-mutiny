@@ -267,6 +267,30 @@ class UniMemoizeTest {
         sub2.assertCompleted().assertItem(23);
     }
 
+    @SuppressWarnings("deprecation")
+    @Test
+    @DisplayName("Test that uni.cache() caches values emitted by a processor")
+    void assertCachingTheValueEmittedByAProcessorUsingDeprecatedUniCache() {
+        UnicastProcessor<Integer> processor = UnicastProcessor.create();
+        Uni<Integer> cached = Uni.createFrom().publisher(processor).cache();
+
+        UniAssertSubscriber<Integer> sub1 = new UniAssertSubscriber<>();
+        UniAssertSubscriber<Integer> sub2 = new UniAssertSubscriber<>();
+
+        cached.subscribe().withSubscriber(sub1);
+        cached.subscribe().withSubscriber(sub2);
+
+        sub1.assertNotTerminated();
+        sub2.assertNotTerminated();
+
+        processor.onNext(23);
+        processor.onNext(42);
+        processor.onComplete();
+
+        sub1.assertCompleted().assertItem(23);
+        sub2.assertCompleted().assertItem(23);
+    }
+
     @Test
     @DisplayName("Test that uni.memoize().indefinitely() allows the immediate cancellation when values are emitted by a processor")
     void assertCancellingImmediately() {

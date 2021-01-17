@@ -73,6 +73,29 @@ public class UniOnNotNullItemTest {
     }
 
     @Test
+    public void testInvokeWithRunnable() {
+        AtomicBoolean invoked = new AtomicBoolean();
+        assertThat(Uni.createFrom().item("hello")
+                .onItem().ifNotNull().invoke(() -> invoked.set(true))
+                .await().indefinitely()).isEqualTo("hello");
+        assertThat(invoked).isTrue();
+
+        invoked.set(false);
+        assertThat(Uni.createFrom().item(() -> (String) null)
+                .onItem().ifNotNull().invoke(() -> invoked.set(true))
+                .onItem().ifNull().continueWith("yolo")
+                .await().indefinitely()).isEqualTo("yolo");
+        assertThat(invoked).isFalse();
+
+        assertThatThrownBy(() -> Uni.createFrom().<String> failure(new Exception("boom"))
+                .onItem().ifNotNull().invoke(() -> invoked.set(true))
+                .onItem().ifNull().continueWith("yolo")
+                .await().indefinitely()).hasMessageContaining("boom");
+
+        assertThat(invoked).isFalse();
+    }
+
+    @Test
     public void testCall() {
         AtomicBoolean invoked = new AtomicBoolean();
         AtomicReference<String> called = new AtomicReference<>();
@@ -100,6 +123,43 @@ public class UniOnNotNullItemTest {
         assertThatThrownBy(() -> Uni.createFrom().<String> failure(new Exception("boom"))
                 .onItem().ifNotNull().call(s -> {
                     invoked.set(s.equals("hello"));
+                    return Uni.createFrom().item("something").onItem().invoke(called::set);
+                })
+                .onItem().ifNull().continueWith("yolo")
+                .await().indefinitely()).hasMessageContaining("boom");
+
+        assertThat(invoked).isFalse();
+        assertThat(called).hasValue(null);
+    }
+
+    @Test
+    public void testCallWithSupplier() {
+        AtomicBoolean invoked = new AtomicBoolean();
+        AtomicReference<String> called = new AtomicReference<>();
+        assertThat(Uni.createFrom().item("hello")
+                .onItem().ifNotNull().call(() -> {
+                    invoked.set(true);
+                    return Uni.createFrom().item("something").onItem().invoke(called::set);
+                })
+                .await().indefinitely()).isEqualTo("hello");
+        assertThat(invoked).isTrue();
+        assertThat(called).hasValue("something");
+
+        invoked.set(false);
+        called.set(null);
+        assertThat(Uni.createFrom().nullItem()
+                .onItem().ifNotNull().call(s -> {
+                    invoked.set(true);
+                    return Uni.createFrom().item("something").onItem().invoke(called::set);
+                })
+                .onItem().ifNull().continueWith("yolo")
+                .await().indefinitely()).isEqualTo("yolo");
+        assertThat(invoked).isFalse();
+        assertThat(called).hasValue(null);
+
+        assertThatThrownBy(() -> Uni.createFrom().<String> failure(new Exception("boom"))
+                .onItem().ifNotNull().call(s -> {
+                    invoked.set(true);
                     return Uni.createFrom().item("something").onItem().invoke(called::set);
                 })
                 .onItem().ifNull().continueWith("yolo")

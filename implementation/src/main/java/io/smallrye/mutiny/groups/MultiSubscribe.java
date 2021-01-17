@@ -208,9 +208,9 @@ public class MultiSubscribe<T> {
      * @return the cancellable object to cancel the subscription
      */
     public Cancellable with(Consumer<? super T> onItem) {
-        nonNull(onItem, "onItem");
+        Consumer<? super T> actual = Infrastructure.decorate(nonNull(onItem, "onItem"));
         CancellableSubscriber<? super T> subscriber = Subscribers.from(
-                nonNull(onItem, "onItem"),
+                actual,
                 NO_ON_FAILURE,
                 null,
                 s -> s.request(Long.MAX_VALUE));
@@ -269,6 +269,7 @@ public class MultiSubscribe<T> {
      * @return a blocking iterable used to consume the items emitted by the upstream {@link Multi}.
      */
     public BlockingIterable<T> asIterable(int batchSize, Supplier<Queue<T>> supplier) {
+        // No interception of the queue supplier.
         return new BlockingIterable<>(upstream, batchSize, supplier);
     }
 
@@ -287,6 +288,7 @@ public class MultiSubscribe<T> {
      * @return a blocking stream used to consume the items from {@link Multi}
      */
     public Stream<T> asStream(int batchSize, Supplier<Queue<T>> supplier) {
+        // No interception of the queue supplier.
         return asIterable(batchSize, supplier).stream();
     }
 

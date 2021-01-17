@@ -13,7 +13,6 @@ import org.reactivestreams.Publisher;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
-import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.UniOnItemConsume;
 import io.smallrye.mutiny.operators.UniOnItemTransform;
@@ -39,8 +38,9 @@ public class UniOnItem<T> {
      * @return the new {@link Uni}
      */
     public Uni<T> invoke(Consumer<? super T> callback) {
+        Consumer<? super T> actual = Infrastructure.decorate(nonNull(callback, "callback"));
         return Infrastructure.onUniCreation(
-                new UniOnItemConsume<>(upstream, nonNull(callback, "callback"), null, null));
+                new UniOnItemConsume<>(upstream, actual, null, null));
     }
 
     /**
@@ -53,6 +53,7 @@ public class UniOnItem<T> {
      */
     public Uni<T> invoke(Runnable callback) {
         Runnable actual = nonNull(callback, "callback");
+        // Decoration happens in `invoke`
         return invoke(ignored -> actual.run());
     }
 
@@ -72,6 +73,7 @@ public class UniOnItem<T> {
      */
     @Deprecated
     public Uni<T> invokeUni(Function<? super T, Uni<?>> action) {
+        // Decoration happens in `call`
         return call(action);
     }
 
@@ -89,9 +91,9 @@ public class UniOnItem<T> {
      * @return the new {@link Uni}
      */
     public Uni<T> call(Function<? super T, Uni<?>> action) {
-        ParameterValidation.nonNull(action, "action");
+        Function<? super T, Uni<?>> actual = Infrastructure.decorate(nonNull(action, "action"));
         return transformToUni(item -> {
-            Uni<?> uni = Objects.requireNonNull(action.apply(item), "The callback produced a `null` uni");
+            Uni<?> uni = Objects.requireNonNull(actual.apply(item), "The callback produced a `null` uni");
             return uni
                     .onItem().transform(ignored -> item);
         });
@@ -109,7 +111,7 @@ public class UniOnItem<T> {
      * @return the new {@link Uni}
      */
     public Uni<T> call(Supplier<Uni<?>> action) {
-        Supplier<Uni<?>> actual = nonNull(action, "action");
+        Supplier<Uni<?>> actual = Infrastructure.decorate(nonNull(action, "action"));
         return call(ignored -> actual.get());
     }
 
@@ -127,6 +129,7 @@ public class UniOnItem<T> {
      */
     @Deprecated
     public <R> Uni<R> apply(Function<? super T, ? extends R> mapper) {
+        // Decoration happens in `transform`
         return transform(mapper);
     }
 
@@ -142,7 +145,8 @@ public class UniOnItem<T> {
      * @return the new {@link Uni}
      */
     public <R> Uni<R> transform(Function<? super T, ? extends R> mapper) {
-        return Infrastructure.onUniCreation(new UniOnItemTransform<>(upstream, mapper));
+        Function<? super T, ? extends R> actual = Infrastructure.decorate(nonNull(mapper, "mapper"));
+        return Infrastructure.onUniCreation(new UniOnItemTransform<>(upstream, actual));
     }
 
     /**
@@ -162,7 +166,8 @@ public class UniOnItem<T> {
      *         in an asynchronous manner.
      */
     public <R> Uni<R> transformToUni(Function<? super T, Uni<? extends R>> mapper) {
-        return Infrastructure.onUniCreation(new UniOnItemTransformToUni<>(upstream, mapper));
+        Function<? super T, Uni<? extends R>> actual = Infrastructure.decorate(nonNull(mapper, "mapper"));
+        return Infrastructure.onUniCreation(new UniOnItemTransformToUni<>(upstream, actual));
     }
 
     /**
@@ -184,6 +189,7 @@ public class UniOnItem<T> {
      */
     @Deprecated
     public <R> Uni<R> produceUni(Function<? super T, Uni<? extends R>> mapper) {
+        // Decoration happens in `transformToUni`
         return transformToUni(mapper);
     }
 
@@ -202,7 +208,9 @@ public class UniOnItem<T> {
      * @return the multi
      */
     public <R> Multi<R> transformToMulti(Function<? super T, ? extends Publisher<? extends R>> mapper) {
-        return Infrastructure.onMultiCreation(new UniOnItemTransformToMulti<>(upstream, mapper));
+        Function<? super T, ? extends Publisher<? extends R>> actual = Infrastructure
+                .decorate(nonNull(mapper, "mapper"));
+        return Infrastructure.onMultiCreation(new UniOnItemTransformToMulti<>(upstream, actual));
     }
 
     /**
@@ -222,6 +230,7 @@ public class UniOnItem<T> {
      */
     @Deprecated
     public <R> Multi<R> produceMulti(Function<? super T, ? extends Publisher<? extends R>> mapper) {
+        // Decoration happens in `transformToMulti`
         return transformToMulti(mapper);
     }
 
@@ -245,9 +254,10 @@ public class UniOnItem<T> {
      */
     @Deprecated
     public <R> Uni<R> produceCompletionStage(Function<? super T, ? extends CompletionStage<? extends R>> mapper) {
-        nonNull(mapper, "mapper");
+        Function<? super T, ? extends CompletionStage<? extends R>> actual = Infrastructure
+                .decorate(nonNull(mapper, "mapper"));
         return transformToUni(item -> {
-            CompletionStage<? extends R> stage = Objects.requireNonNull(mapper.apply(item),
+            CompletionStage<? extends R> stage = Objects.requireNonNull(actual.apply(item),
                     "The mapper produces a `null` completion stage");
             return Uni.createFrom().completionStage(stage);
         });
@@ -267,8 +277,8 @@ public class UniOnItem<T> {
      *         in an asynchronous manner.
      */
     public <R> Uni<R> transformToUni(BiConsumer<? super T, UniEmitter<? super R>> consumer) {
-        nonNull(consumer, "consumer");
-        return this.transformToUni(x -> Uni.createFrom().emitter(emitter -> consumer.accept(x, emitter)));
+        BiConsumer<? super T, UniEmitter<? super R>> actual = Infrastructure.decorate(nonNull(consumer, "consumer"));
+        return this.transformToUni(it -> Uni.createFrom().emitter(emitter -> actual.accept(it, emitter)));
     }
 
     /**
@@ -287,6 +297,7 @@ public class UniOnItem<T> {
      */
     @Deprecated
     public <R> Uni<R> produceUni(BiConsumer<? super T, UniEmitter<? super R>> consumer) {
+        // Decoration happens in `transformToUni`
         return transformToUni(consumer);
     }
 
@@ -333,9 +344,9 @@ public class UniOnItem<T> {
      * @return the new {@link Uni}
      */
     public Uni<T> failWith(Function<? super T, ? extends Throwable> mapper) {
-        nonNull(mapper, "mapper");
+        Function<? super T, ? extends Throwable> actual = Infrastructure.decorate(nonNull(mapper, "mapper"));
         return Infrastructure.onUniCreation(transformToUni(t -> {
-            Throwable failure = Objects.requireNonNull(mapper.apply(t), MAPPER_RETURNED_NULL);
+            Throwable failure = Objects.requireNonNull(actual.apply(t), MAPPER_RETURNED_NULL);
             return Uni.createFrom().failure(failure);
         }));
     }
@@ -348,9 +359,9 @@ public class UniOnItem<T> {
      * @return the new {@link Uni}
      */
     public Uni<T> failWith(Supplier<? extends Throwable> supplier) {
-        nonNull(supplier, "supplier");
+        Supplier<? extends Throwable> actual = Infrastructure.decorate(nonNull(supplier, "supplier"));
         return Infrastructure.onUniCreation(transformToUni(ignored -> {
-            Throwable failure = Objects.requireNonNull(supplier.get(), SUPPLIER_PRODUCED_NULL);
+            Throwable failure = Objects.requireNonNull(actual.get(), SUPPLIER_PRODUCED_NULL);
             return Uni.createFrom().failure(failure);
         }));
     }

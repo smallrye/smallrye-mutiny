@@ -48,8 +48,9 @@ public class UniOnSubscribe<T> {
      * @return the new {@link Uni}
      */
     public Uni<T> invoke(Consumer<? super UniSubscription> callback) {
+        Consumer<? super UniSubscription> actual = Infrastructure.decorate(nonNull(callback, "callback"));
         return Infrastructure.onUniCreation(
-                new UniOnSubscribeInvoke<>(upstream, nonNull(callback, "callback")));
+                new UniOnSubscribeInvoke<>(upstream, actual));
     }
 
     /**
@@ -63,6 +64,7 @@ public class UniOnSubscribe<T> {
      */
     public Uni<T> invoke(Runnable callback) {
         Runnable actual = nonNull(callback, "callback");
+        // Decoration happens in `invoke`
         return invoke(ignored -> actual.run());
     }
 
@@ -78,8 +80,9 @@ public class UniOnSubscribe<T> {
      * @return the new {@link Uni}
      */
     public Uni<T> call(Function<? super UniSubscription, Uni<?>> action) {
+        Function<? super UniSubscription, Uni<?>> actual = Infrastructure.decorate(nonNull(action, "action"));
         return Infrastructure.onUniCreation(
-                new UniOnSubscribeCall<>(upstream, nonNull(action, "action")));
+                new UniOnSubscribeCall<>(upstream, actual));
     }
 
     /**
@@ -94,7 +97,7 @@ public class UniOnSubscribe<T> {
      * @return the new {@link Uni}
      */
     public Uni<T> call(Supplier<Uni<?>> action) {
-        Supplier<Uni<?>> actual = nonNull(action, "action");
+        Supplier<Uni<?>> actual = Infrastructure.decorate(nonNull(action, "action"));
         return call(ignored -> actual.get());
     }
 
@@ -112,6 +115,7 @@ public class UniOnSubscribe<T> {
      */
     @Deprecated
     public Uni<T> invokeUni(Function<? super UniSubscription, Uni<?>> action) {
+        // Decoration happens in `call`
         return call(action);
     }
 

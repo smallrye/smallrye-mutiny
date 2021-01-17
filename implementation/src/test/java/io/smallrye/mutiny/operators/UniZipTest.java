@@ -24,7 +24,6 @@ public class UniZipTest {
 
     @Test
     public void testWithTwoSimpleUnis() {
-
         Uni<Integer> uni = Uni.createFrom().item(1);
         Uni<Integer> uni2 = Uni.createFrom().item(2);
 
@@ -33,6 +32,20 @@ public class UniZipTest {
                 .withSubscriber(UniAssertSubscriber.create());
 
         assertThat(subscriber.getItem().asList()).containsExactly(1, 2);
+    }
+
+    @Test
+    public void testWithTwoSimpleUnisCombine() {
+        Uni<Integer> uni = Uni.createFrom().item(1);
+        Uni<Integer> uni2 = Uni.createFrom().item(2);
+
+        UniAssertSubscriber<Integer> subscriber = Uni.combine().all().unis(uni, uni2)
+                .collectFailures()
+                .combinedWith(Integer::sum)
+                .subscribe()
+                .withSubscriber(UniAssertSubscriber.create());
+
+        subscriber.assertItem(3);
     }
 
     @Test
@@ -415,6 +428,132 @@ public class UniZipTest {
         assertThat(cancellations).allSatisfy(bool -> assertThat(bool).isFalse());
         subscriber.cancel();
         assertThat(subscriptions).allSatisfy(bool -> assertThat(bool).isTrue());
+    }
+
+    @Test
+    public void testCombineWith3() {
+        Uni<Integer> uni = Uni.createFrom().item(1);
+        Uni<Integer> uni2 = Uni.createFrom().item(2);
+        Uni<Integer> uni3 = Uni.createFrom().item(3);
+
+        UniAssertSubscriber<Integer> subscriber = Uni.combine().all().unis(uni, uni2, uni3)
+                .collectFailures()
+                .combinedWith((a, b, c) -> a + b + c)
+                .subscribe()
+                .withSubscriber(UniAssertSubscriber.create());
+
+        subscriber.assertItem(6);
+    }
+
+    @Test
+    public void testCombineWith4() {
+        Uni<Integer> uni = Uni.createFrom().item(1);
+        Uni<Integer> uni2 = Uni.createFrom().item(2);
+        Uni<Integer> uni3 = Uni.createFrom().item(3);
+        Uni<Integer> uni4 = Uni.createFrom().item(4);
+
+        UniAssertSubscriber<Integer> subscriber = Uni.combine().all().unis(uni, uni2, uni3, uni4)
+                .collectFailures()
+                .combinedWith((a, b, c, d) -> a + b + c + d)
+                .subscribe()
+                .withSubscriber(UniAssertSubscriber.create());
+
+        subscriber.assertItem(10);
+    }
+
+    @Test
+    public void testCombineWith5() {
+        Uni<Integer> uni = Uni.createFrom().item(1);
+        Uni<Integer> uni2 = Uni.createFrom().item(2);
+        Uni<Integer> uni3 = Uni.createFrom().item(3);
+        Uni<Integer> uni4 = Uni.createFrom().item(4);
+        Uni<Integer> uni5 = Uni.createFrom().item(5);
+
+        UniAssertSubscriber<Integer> subscriber = Uni.combine().all().unis(uni, uni2, uni3, uni4, uni5)
+                .collectFailures()
+                .combinedWith((a, b, c, d, e) -> a + b + c + d + e)
+                .subscribe()
+                .withSubscriber(UniAssertSubscriber.create());
+
+        subscriber.assertItem(15);
+    }
+
+    @Test
+    public void testCombineWith6() {
+        Uni<Integer> uni = Uni.createFrom().item(1);
+        Uni<Integer> uni2 = Uni.createFrom().item(2);
+        Uni<Integer> uni3 = Uni.createFrom().item(3);
+        Uni<Integer> uni4 = Uni.createFrom().item(4);
+        Uni<Integer> uni5 = Uni.createFrom().item(5);
+        Uni<Integer> uni6 = Uni.createFrom().item(6);
+
+        UniAssertSubscriber<Integer> subscriber = Uni.combine().all().unis(uni, uni2, uni3, uni4, uni5, uni6)
+                .collectFailures()
+                .combinedWith((a, b, c, d, e, f) -> a + b + c + d + e + f)
+                .subscribe()
+                .withSubscriber(UniAssertSubscriber.create());
+
+        subscriber.assertItem(21);
+    }
+
+    @Test
+    public void testCombineWith7() {
+        Uni<Integer> uni = Uni.createFrom().item(1);
+        Uni<Integer> uni2 = Uni.createFrom().item(2);
+        Uni<Integer> uni3 = Uni.createFrom().item(3);
+        Uni<Integer> uni4 = Uni.createFrom().item(4);
+        Uni<Integer> uni5 = Uni.createFrom().item(5);
+        Uni<Integer> uni6 = Uni.createFrom().item(6);
+        Uni<Integer> uni7 = Uni.createFrom().item(7);
+
+        UniAssertSubscriber<Integer> subscriber = Uni.combine().all().unis(uni, uni2, uni3, uni4, uni5, uni6, uni7)
+                .collectFailures()
+                .combinedWith((a, b, c, d, e, f, g) -> a + b + c + d + e + f + g)
+                .subscribe()
+                .withSubscriber(UniAssertSubscriber.create());
+
+        subscriber.assertItem(28);
+    }
+
+    @Test
+    public void testCombineWith8() {
+        Uni<Integer> uni = Uni.createFrom().item(1);
+        Uni<Integer> uni2 = Uni.createFrom().item(2);
+        Uni<Integer> uni3 = Uni.createFrom().item(3);
+        Uni<Integer> uni4 = Uni.createFrom().item(4);
+        Uni<Integer> uni5 = Uni.createFrom().item(5);
+        Uni<Integer> uni6 = Uni.createFrom().item(6);
+        Uni<Integer> uni7 = Uni.createFrom().item(7);
+        Uni<Integer> uni8 = Uni.createFrom().item(8);
+
+        UniAssertSubscriber<Integer> subscriber = Uni.combine().all().unis(uni, uni2, uni3, uni4, uni5, uni6, uni7, uni8)
+                .collectFailures()
+                .combinedWith((a, b, c, d, e, f, g, h) -> a + b + c + d + e + f + g + h)
+                .subscribe()
+                .withSubscriber(UniAssertSubscriber.create());
+
+        subscriber.assertItem(36);
+    }
+
+    @Test
+    public void testCombineWith9() {
+        Uni<Integer> uni = Uni.createFrom().item(1);
+        Uni<Integer> uni2 = Uni.createFrom().item(2);
+        Uni<Integer> uni3 = Uni.createFrom().item(3);
+        Uni<Integer> uni4 = Uni.createFrom().item(4);
+        Uni<Integer> uni5 = Uni.createFrom().item(5);
+        Uni<Integer> uni6 = Uni.createFrom().item(6);
+        Uni<Integer> uni7 = Uni.createFrom().item(7);
+        Uni<Integer> uni8 = Uni.createFrom().item(8);
+        Uni<Integer> uni9 = Uni.createFrom().item(9);
+
+        UniAssertSubscriber<Integer> subscriber = Uni.combine().all().unis(uni, uni2, uni3, uni4, uni5, uni6, uni7, uni8, uni9)
+                .collectFailures()
+                .combinedWith((a, b, c, d, e, f, g, h, i) -> a + b + c + d + e + f + g + h + i)
+                .subscribe()
+                .withSubscriber(UniAssertSubscriber.create());
+
+        subscriber.assertItem(45);
     }
 
 }

@@ -1,6 +1,5 @@
 package io.smallrye.mutiny.operators;
 
-import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
 import static io.smallrye.mutiny.operators.UniOnItemTransformToUni.handleInnerSubscription;
 
 import java.util.function.BiFunction;
@@ -16,8 +15,8 @@ public class UniOnItemOrFailureFlatMap<I, O> extends UniOperator<I, O> {
 
     public UniOnItemOrFailureFlatMap(Uni<I> upstream,
             BiFunction<? super I, Throwable, Uni<? extends O>> mapper) {
-        super(nonNull(upstream, "upstream"));
-        this.mapper = nonNull(mapper, "mapper");
+        super(upstream);
+        this.mapper = mapper;
     }
 
     public static <I, O> void invokeAndSubstitute(BiFunction<? super I, Throwable, Uni<? extends O>> mapper,

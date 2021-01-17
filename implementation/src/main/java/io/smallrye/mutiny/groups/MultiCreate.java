@@ -21,7 +21,6 @@ import org.reactivestreams.Subscriber;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.converters.MultiConverter;
-import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.AbstractMulti;
 import io.smallrye.mutiny.operators.multi.builders.*;
@@ -104,11 +103,12 @@ public class MultiCreate {
      * @return the produced {@link Multi}
      */
     public <T> Multi<T> completionStage(Supplier<? extends CompletionStage<? extends T>> supplier) {
-        nonNull(supplier, "supplier");
+        Supplier<? extends CompletionStage<? extends T>> actual = Infrastructure
+                .decorate(nonNull(supplier, "supplier"));
         return emitter(emitter -> {
             CompletionStage<? extends T> stage;
             try {
-                stage = supplier.get();
+                stage = actual.get();
             } catch (Throwable e) {
                 emitter.fail(e);
                 return;
@@ -226,7 +226,8 @@ public class MultiCreate {
      * @return the new {@link Multi}
      */
     public <T> Multi<T> item(Supplier<? extends T> supplier) {
-        Supplier<? extends T> actual = nonNull(supplier, "supplier");
+        Supplier<? extends T> actual = Infrastructure.decorate(nonNull(supplier, "supplier"));
+
         return emitter(emitter -> {
             T item;
             try {
@@ -260,7 +261,7 @@ public class MultiCreate {
      * @return the new {@link Multi}
      */
     public <T> Multi<T> items(Supplier<? extends Stream<? extends T>> supplier) {
-        Supplier<? extends Stream<? extends T>> actual = nonNull(supplier, "supplier");
+        Supplier<? extends Stream<? extends T>> actual = Infrastructure.decorate(nonNull(supplier, "supplier"));
         return Infrastructure.onMultiCreation(new StreamBasedMulti<>(actual));
     }
 
@@ -362,7 +363,7 @@ public class MultiCreate {
      * @return the new {@link Multi}
      */
     public <T> Multi<T> optional(Supplier<Optional<T>> supplier) {
-        Supplier<Optional<T>> actual = nonNull(supplier, "supplier");
+        Supplier<Optional<T>> actual = Infrastructure.decorate(nonNull(supplier, "supplier"));
         return item(() -> actual.get().orElse(null));
     }
 
@@ -377,6 +378,7 @@ public class MultiCreate {
      * @return the produced {@link Multi}
      */
     public <T> Multi<T> emitter(Consumer<MultiEmitter<? super T>> consumer) {
+        // Decoration happens in `emitter`
         return emitter(consumer, BackPressureStrategy.BUFFER);
     }
 
@@ -404,7 +406,7 @@ public class MultiCreate {
      * @return the produced {@link Multi}
      */
     public <T> Multi<T> emitter(Consumer<MultiEmitter<? super T>> consumer, BackPressureStrategy strategy) {
-        Consumer<MultiEmitter<? super T>> actual = nonNull(consumer, "consumer");
+        Consumer<MultiEmitter<? super T>> actual = Infrastructure.decorate(nonNull(consumer, "consumer"));
         return Infrastructure.onMultiCreation(new EmitterBasedMulti<>(actual, nonNull(strategy, "strategy")));
     }
 
@@ -426,7 +428,8 @@ public class MultiCreate {
      * @return the produced {@link Multi}
      */
     public <T> Multi<T> deferred(Supplier<Multi<? extends T>> supplier) {
-        return Infrastructure.onMultiCreation(new DeferredMulti<>(nonNull(supplier, "supplier")));
+        Supplier<Multi<? extends T>> actual = Infrastructure.decorate(nonNull(supplier, "supplier"));
+        return Infrastructure.onMultiCreation(new DeferredMulti<>(actual));
     }
 
     /**
@@ -454,7 +457,8 @@ public class MultiCreate {
      * @return the produced {@link Multi}
      */
     public <T> Multi<T> failure(Supplier<Throwable> supplier) {
-        return Infrastructure.onMultiCreation(new FailedMulti<>(supplier));
+        Supplier<Throwable> actual = Infrastructure.decorate(nonNull(supplier, "supplier"));
+        return Infrastructure.onMultiCreation(new FailedMulti<>(actual));
     }
 
     /**
@@ -528,8 +532,10 @@ public class MultiCreate {
      */
     public <R, I> MultiResource<R, I> resource(Supplier<? extends R> resourceSupplier,
             Function<? super R, ? extends Publisher<I>> streamSupplier) {
-        return new MultiResource<>(ParameterValidation.nonNull(resourceSupplier, "resourceSupplier"),
-                ParameterValidation.nonNull(streamSupplier, "streamSupplier"));
+        Supplier<? extends R> actual = Infrastructure.decorate(nonNull(resourceSupplier, "resourceSupplier"));
+        Function<? super R, ? extends Publisher<I>> actualStreamSupplier = Infrastructure
+                .decorate(nonNull(streamSupplier, "streamSupplier"));
+        return new MultiResource<>(actual, actualStreamSupplier);
     }
 
     /**
@@ -553,8 +559,10 @@ public class MultiCreate {
      */
     public <S, T> Multi<T> generator(Supplier<S> initialStateSupplier,
             BiFunction<S, GeneratorEmitter<? super T>, S> generator) {
-        return new GeneratorBasedMulti<>(
-                nonNull(initialStateSupplier, "initialStateSupplier"),
-                nonNull(generator, "generator"));
+        Supplier<S> actualStateSupplier = Infrastructure
+                .decorate(nonNull(initialStateSupplier, "initialStateSupplier"));
+        BiFunction<S, GeneratorEmitter<? super T>, S> actualGenerator = Infrastructure
+                .decorate(nonNull(generator, "generator"));
+        return new GeneratorBasedMulti<>(actualStateSupplier, actualGenerator);
     }
 }

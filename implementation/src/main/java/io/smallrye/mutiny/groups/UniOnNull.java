@@ -36,7 +36,7 @@ public class UniOnNull<T> {
      * @return the new {@link Uni}
      */
     public Uni<T> failWith(Supplier<? extends Throwable> supplier) {
-        nonNull(supplier, "supplier");
+        Supplier<? extends Throwable> actual = Infrastructure.decorate(nonNull(supplier, "supplier"));
 
         return Infrastructure.onUniCreation(upstream.onItem().transformToUni((item, emitter) -> {
             if (item != null) {
@@ -45,7 +45,7 @@ public class UniOnNull<T> {
             }
             Throwable throwable;
             try {
-                throwable = supplier.get();
+                throwable = actual.get();
             } catch (Throwable e) {
                 emitter.fail(e);
                 return;
@@ -87,7 +87,7 @@ public class UniOnNull<T> {
      * @return the new {@link Uni}
      */
     public Uni<T> switchTo(Supplier<Uni<? extends T>> supplier) {
-        nonNull(supplier, "supplier");
+        Supplier<Uni<? extends T>> actual = Infrastructure.decorate(nonNull(supplier, "supplier"));
 
         Uni<T> uni = upstream.onItem().transformToUni(res -> {
             if (res != null) {
@@ -95,7 +95,7 @@ public class UniOnNull<T> {
             } else {
                 Uni<? extends T> produced;
                 try {
-                    produced = supplier.get();
+                    produced = actual.get();
                 } catch (Throwable e) {
                     return Uni.createFrom().failure(e);
                 }
@@ -129,12 +129,12 @@ public class UniOnNull<T> {
      * @return the new {@link Uni}
      */
     public Uni<T> continueWith(Supplier<? extends T> supplier) {
-        nonNull(supplier, "supplier");
-        return Infrastructure.onUniCreation(upstream.onItem().apply(res -> {
+        Supplier<? extends T> actual = Infrastructure.decorate(nonNull(supplier, "supplier"));
+        return Infrastructure.onUniCreation(upstream.onItem().transform(res -> {
             if (res != null) {
                 return res;
             }
-            T outcome = supplier.get();
+            T outcome = actual.get();
             if (outcome == null) {
                 throw new NullPointerException(SUPPLIER_PRODUCED_NULL);
             }

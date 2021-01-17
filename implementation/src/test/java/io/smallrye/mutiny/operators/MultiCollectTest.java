@@ -201,6 +201,22 @@ public class MultiCollectTest {
     }
 
     @Test
+    public void testCollectIntoMapWithKeyAndValueMappers() {
+        UniAssertSubscriber<Map<String, String>> subscriber = persons
+                .collect().asMap(p -> p.firstName, v -> v.firstName.toUpperCase())
+                .subscribe().withSubscriber(UniAssertSubscriber.create())
+                .assertCompleted();
+
+        assertThat(subscriber.getItem())
+                .hasSize(4)
+                .contains(
+                        entry("bob", "BOB"),
+                        entry("alice", "ALICE"),
+                        entry("rob", "ROB"),
+                        entry("matt", "MATT"));
+    }
+
+    @Test
     public void testCollectAsMapWithEmpty() {
         UniAssertSubscriber<Map<String, Person>> subscriber = Multi.createFrom().<Person> empty()
                 .collect().asMap(p -> p.firstName)

@@ -5,7 +5,6 @@ import java.util.function.BiFunction;
 
 import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Uni;
-import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.subscription.UniSubscriber;
 import io.smallrye.mutiny.subscription.UniSubscription;
 
@@ -13,9 +12,9 @@ public class UniOnItemOrFailureMap<I, O> extends UniOperator<I, O> {
 
     private final BiFunction<? super I, Throwable, ? extends O> mapper;
 
-    public UniOnItemOrFailureMap(Uni<I> source, BiFunction<? super I, Throwable, ? extends O> mapper) {
-        super(ParameterValidation.nonNull(source, "source"));
-        this.mapper = ParameterValidation.nonNull(mapper, "mapper");
+    public UniOnItemOrFailureMap(Uni<I> upstream, BiFunction<? super I, Throwable, ? extends O> mapper) {
+        super(upstream);
+        this.mapper = mapper;
     }
 
     @Override

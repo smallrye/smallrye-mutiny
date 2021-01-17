@@ -1,5 +1,6 @@
 package io.smallrye.mutiny.groups;
 
+import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
 import static io.smallrye.mutiny.helpers.ParameterValidation.validate;
 
 import java.time.Duration;
@@ -176,7 +177,9 @@ public class UniRetry<T> {
             throw new IllegalArgumentException(
                     "Invalid retry configuration, `when` cannot be used with a back-off configuration");
         }
-        return upstream.toMulti().onFailure().retry().when(whenStreamFactory).toUni();
+        Function<Multi<Throwable>, ? extends Publisher<?>> actual = Infrastructure
+                .decorate(nonNull(whenStreamFactory, "whenStreamFactory"));
+        return upstream.toMulti().onFailure().retry().when(actual).toUni();
     }
 
     /**

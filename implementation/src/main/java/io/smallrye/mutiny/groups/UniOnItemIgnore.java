@@ -5,6 +5,7 @@ import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
 import java.util.function.Supplier;
 
 import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.infrastructure.Infrastructure;
 
 public class UniOnItemIgnore<T> {
 
@@ -32,8 +33,8 @@ public class UniOnItemIgnore<T> {
      * @return the new {@link Uni}
      */
     public Uni<T> andFail(Supplier<Throwable> supplier) {
-        nonNull(supplier, "supplier");
-        return onItem.transformToUni(ignored -> Uni.createFrom().failure(supplier));
+        Supplier<Throwable> actual = Infrastructure.decorate(nonNull(supplier, "supplier"));
+        return onItem.transformToUni(ignored -> Uni.createFrom().failure(actual.get()));
     }
 
     /**
@@ -77,7 +78,7 @@ public class UniOnItemIgnore<T> {
      * @return the new {@link Uni}
      */
     public Uni<T> andContinueWith(T fallback) {
-        return onItem.apply(ignored -> fallback);
+        return onItem.transform(ignored -> fallback);
     }
 
     /**
@@ -86,7 +87,7 @@ public class UniOnItemIgnore<T> {
      * @return the new {@link Uni}
      */
     public Uni<Void> andContinueWithNull() {
-        return onItem.apply(ignored -> null);
+        return onItem.transform(ignored -> null);
     }
 
     /**
@@ -97,8 +98,8 @@ public class UniOnItemIgnore<T> {
      * @return the new {@link Uni}
      */
     public Uni<T> andContinueWith(Supplier<? extends T> supplier) {
-        nonNull(supplier, "supplier");
-        return onItem.apply(ignored -> supplier.get());
+        Supplier<? extends T> actual = Infrastructure.decorate(nonNull(supplier, "supplier"));
+        return onItem.transform(ignored -> actual.get());
     }
 
 }

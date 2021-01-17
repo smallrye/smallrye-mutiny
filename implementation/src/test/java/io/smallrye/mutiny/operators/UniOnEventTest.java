@@ -636,9 +636,12 @@ public class UniOnEventTest {
         assertThat(terminate.get()).isInstanceOf(IOException.class).hasMessageContaining("boom");
     }
 
+    @SuppressWarnings("deprecation")
     @Test
     public void testActionsOnTerminationWithCancellation() {
         AtomicBoolean called = new AtomicBoolean();
+        AtomicBoolean calledWithSupplier = new AtomicBoolean();
+
         AtomicBoolean terminated = new AtomicBoolean();
         AtomicBoolean upstreamCancelled = new AtomicBoolean();
         UniAssertSubscriber<? super Integer> subscriber = Uni.createFrom().emitter(e -> {
@@ -650,6 +653,10 @@ public class UniOnEventTest {
                     return Uni.createFrom().item(100);
                 })
                 .onCancellation().invoke(() -> called.set(true))
+                .onCancellation().invokeUni(() -> {
+                    calledWithSupplier.set(true);
+                    return Uni.createFrom().item(0);
+                })
                 .subscribe().withSubscriber(new UniAssertSubscriber<>());
 
         subscriber.assertNotTerminated();
@@ -657,6 +664,7 @@ public class UniOnEventTest {
         subscriber.cancel();
 
         assertThat(called).isTrue();
+        assertThat(calledWithSupplier).isTrue();
         assertThat(terminated).isTrue();
         assertThat(upstreamCancelled).isTrue();
     }

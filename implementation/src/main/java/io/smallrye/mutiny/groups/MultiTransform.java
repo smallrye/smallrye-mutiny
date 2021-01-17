@@ -89,15 +89,16 @@ public class MultiTransform<T> {
     }
 
     /**
-     * Produces a {@link Multi} containing the items from this {@link Multi} passing the {@code tester}
+     * Produces a {@link Multi} containing the items from this {@link Multi} passing the {@code predicate}
      * asynchronous test. Unlike {@link #byFilteringItemsWith(Predicate)}, the test is asynchronous. Note that this method
      * preserves ordering of the items, even if the test is asynchronous.
      *
-     * @param tester the predicate, must not be {@code null}, must not produce {@code null}
+     * @param predicate the predicate, must not be {@code null}, must not produce {@code null}
      * @return the produced {@link Multi}
      */
-    public Multi<T> byTestingItemsWith(Function<? super T, Uni<Boolean>> tester) {
-        return upstream.select().when(tester);
+    public Multi<T> byTestingItemsWith(Function<? super T, Uni<Boolean>> predicate) {
+        // Decoration happens in `when`
+        return upstream.select().when(predicate);
     }
 
     /**

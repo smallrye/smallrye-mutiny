@@ -10,6 +10,7 @@ import org.reactivestreams.Publisher;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.helpers.ParameterValidation;
+import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.multi.builders.ResourceMulti;
 
 /**
@@ -39,9 +40,9 @@ public class MultiResource<R, I> {
      * @return the multi
      */
     public Multi<I> withFinalizer(Consumer<? super R> finalizer) {
-        ParameterValidation.nonNull(finalizer, "finalizer");
+        Consumer<? super R> callback = Infrastructure.decorate(ParameterValidation.nonNull(finalizer, "finalizer"));
         Function<? super R, Uni<Void>> actual = r -> {
-            finalizer.accept(r);
+            callback.accept(r);
             return Uni.createFrom().voidItem();
         };
         return withFinalizer(actual, (r, ignored) -> actual.apply(r), actual);
@@ -64,7 +65,7 @@ public class MultiResource<R, I> {
      * @return the multi
      */
     public Multi<I> withFinalizer(Function<? super R, Uni<Void>> finalizer) {
-        Function<? super R, Uni<Void>> actual = ParameterValidation.nonNull(finalizer, "finalizer");
+        Function<? super R, Uni<Void>> actual = Infrastructure.decorate(ParameterValidation.nonNull(finalizer, "finalizer"));
         return withFinalizer(actual, (r, ignored) -> actual.apply(r), actual);
     }
 
@@ -95,9 +96,12 @@ public class MultiResource<R, I> {
             Function<? super R, Uni<Void>> onCompletion,
             BiFunction<? super R, ? super Throwable, Uni<Void>> onFailure,
             Function<? super R, Uni<Void>> onCancellation) {
-        return new ResourceMulti<>(resourceSupplier, streamSupplier,
-                ParameterValidation.nonNull(onCompletion, "onCompletion"),
-                ParameterValidation.nonNull(onFailure, "onFailure"),
-                ParameterValidation.nonNull(onCancellation, "onCancellation"));
+        Function<? super R, Uni<Void>> actualOnCompletion = Infrastructure
+                .decorate(ParameterValidation.nonNull(onCompletion, "onCompletion"));
+        BiFunction<? super R, ? super Throwable, Uni<Void>> actualOnFailure = Infrastructure
+                .decorate(ParameterValidation.nonNull(onFailure, "onFailure"));
+        Function<? super R, Uni<Void>> actualOnCancellation = Infrastructure
+                .decorate(ParameterValidation.nonNull(onCancellation, "onCancellation"));
+        return new ResourceMulti<>(resourceSupplier, streamSupplier, actualOnCompletion, actualOnFailure, actualOnCancellation);
     }
 }
