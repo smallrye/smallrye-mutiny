@@ -57,7 +57,7 @@ public final class MultiScanOp<T> extends AbstractMultiOperator<T, T> {
             }
 
             current = result;
-            downstream.onItem(item);
+            downstream.onItem(result);
 
         }
 
