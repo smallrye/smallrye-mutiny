@@ -11,20 +11,7 @@ import io.smallrye.mutiny.Multi;
  * Implementations are expected to be exposed as SPI, and so the implementation class must be declared in the
  * {@code META-INF/services/io.smallrye.mutiny.infrastructure.MultiInterceptor} file.
  */
-public interface MultiInterceptor {
-
-    /**
-     * Default ordinal value.
-     */
-    int DEFAULT_ORDINAL = 100;
-
-    /**
-     * @return the interceptor ordinal. The ordinal is used to sort the interceptor. Lower value are executed first.
-     *         Default is 100.
-     */
-    default int ordinal() {
-        return DEFAULT_ORDINAL;
-    }
+public interface MultiInterceptor extends MutinyInterceptor {
 
     /**
      * Method called when a new instance of {@link Multi} is created. If can return a new {@code Multi},

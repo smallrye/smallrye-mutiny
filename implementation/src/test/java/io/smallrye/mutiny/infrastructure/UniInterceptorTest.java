@@ -18,8 +18,6 @@ public class UniInterceptorTest {
         Infrastructure.clearInterceptors();
     }
 
-    // Test on events
-
     @Test
     public void testOrdering() {
         UniInterceptor interceptor1 = new UniInterceptor() {
@@ -36,24 +34,24 @@ public class UniInterceptorTest {
             }
         };
 
-        Infrastructure.registerUniInterceptor(interceptor1);
-        Infrastructure.registerUniInterceptor(interceptor2);
+        InfrastructureHelper.registerUniInterceptor(interceptor1);
+        InfrastructureHelper.registerUniInterceptor(interceptor2);
 
-        assertThat(Infrastructure.getUniInterceptors()).hasSize(2);
-        assertThat(Infrastructure.getUniInterceptors().get(0)).isEqualTo(interceptor1);
-        assertThat(Infrastructure.getUniInterceptors().get(1)).isEqualTo(interceptor2);
+        assertThat(InfrastructureHelper.getUniInterceptors()).hasSize(2);
+        assertThat(InfrastructureHelper.getUniInterceptors().get(0)).isEqualTo(interceptor1);
+        assertThat(InfrastructureHelper.getUniInterceptors().get(1)).isEqualTo(interceptor2);
 
         Infrastructure.clearInterceptors();
-        Infrastructure.registerUniInterceptor(interceptor2);
-        Infrastructure.registerUniInterceptor(interceptor1);
-        assertThat(Infrastructure.getUniInterceptors().get(0)).isEqualTo(interceptor1);
-        assertThat(Infrastructure.getUniInterceptors().get(1)).isEqualTo(interceptor2);
+        InfrastructureHelper.registerUniInterceptor(interceptor2);
+        InfrastructureHelper.registerUniInterceptor(interceptor1);
+        assertThat(InfrastructureHelper.getUniInterceptors().get(0)).isEqualTo(interceptor1);
+        assertThat(InfrastructureHelper.getUniInterceptors().get(1)).isEqualTo(interceptor2);
     }
 
     @Test
     @SuppressWarnings("unchecked")
     public void testCreationInterception() {
-        Infrastructure.registerUniInterceptor(new UniInterceptor() {
+        InfrastructureHelper.registerUniInterceptor(new UniInterceptor() {
 
             final long creationTime = System.nanoTime();
 
@@ -80,7 +78,7 @@ public class UniInterceptorTest {
     @Test
     @SuppressWarnings("unchecked")
     public void testCreationInterceptionWithMap() {
-        Infrastructure.registerUniInterceptor(new UniInterceptor() {
+        InfrastructureHelper.registerUniInterceptor(new UniInterceptor() {
 
             final long creationTime = System.nanoTime();
 
@@ -132,7 +130,7 @@ public class UniInterceptorTest {
             }
         };
 
-        Infrastructure.registerUniInterceptor(interceptor);
+        InfrastructureHelper.registerUniInterceptor(interceptor);
 
         int result = Uni.createFrom().item(23).map(i -> i * 2).await().indefinitely();
         assertThat(result).isEqualTo(23 * 2 + 1 + 1 + 1); // 3 subscribers: item, map and the subscriber

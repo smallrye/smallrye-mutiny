@@ -3,8 +3,6 @@ package io.smallrye.mutiny.infrastructure;
 import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
@@ -14,9 +12,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.function.BooleanSupplier;
-import java.util.function.Consumer;
-import java.util.function.UnaryOperator;
+import java.util.function.*;
 
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
@@ -25,6 +21,7 @@ import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.subscription.UniSubscriber;
+import io.smallrye.mutiny.tuples.Functions;
 
 public class Infrastructure {
 
@@ -38,21 +35,26 @@ public class Infrastructure {
             setDefaultExecutor();
         }
 
-        // Interceptor
-        ServiceLoader<UniInterceptor> uniItcp = ServiceLoader.load(UniInterceptor.class);
-        ArrayList<UniInterceptor> interceptors = new ArrayList<>();
-        uniItcp.iterator().forEachRemaining(interceptors::add);
-        interceptors.sort(Comparator.comparingInt(UniInterceptor::ordinal));
-        interceptors.trimToSize();
-        UNI_INTERCEPTORS = interceptors.toArray(new UniInterceptor[0]);
-
-        ServiceLoader<MultiInterceptor> multiItcp = ServiceLoader.load(MultiInterceptor.class);
-        ArrayList<MultiInterceptor> interceptors2 = new ArrayList<>();
-        multiItcp.iterator().forEachRemaining(interceptors2::add);
-        interceptors2.sort(Comparator.comparingInt(MultiInterceptor::ordinal));
-        MULTI_INTERCEPTORS = interceptors2.toArray(new MultiInterceptor[0]);
+        reload();
 
         resetCanCallerThreadBeBlockedSupplier();
+    }
+
+    private static ScheduledExecutorService DEFAULT_SCHEDULER;
+
+    private static Executor DEFAULT_EXECUTOR;
+    private static UniInterceptor[] UNI_INTERCEPTORS;
+    private static MultiInterceptor[] MULTI_INTERCEPTORS;
+    private static CallbackDecorator[] CALLBACK_DECORATORS;
+    private static UnaryOperator<CompletableFuture<?>> completableFutureWrapper;
+    private static Consumer<Throwable> droppedExceptionHandler = Infrastructure::printAndDump;
+    private static BooleanSupplier canCallerThreadBeBlockedSupplier;
+
+    public static void reload() {
+        clearInterceptors();
+        reloadUniInterceptors();
+        reloadMultiInterceptors();
+        reloadCallbackDecorators();
     }
 
     /**
@@ -62,14 +64,6 @@ public class Infrastructure {
         ExecutorService scheduler = ForkJoinPool.commonPool();
         setDefaultExecutor(scheduler);
     }
-
-    private static ScheduledExecutorService DEFAULT_SCHEDULER;
-    private static Executor DEFAULT_EXECUTOR;
-    private static UniInterceptor[] UNI_INTERCEPTORS;
-    private static MultiInterceptor[] MULTI_INTERCEPTORS;
-    private static UnaryOperator<CompletableFuture<?>> completableFutureWrapper;
-    private static Consumer<Throwable> droppedExceptionHandler = Infrastructure::printAndDump;
-    private static BooleanSupplier canCallerThreadBeBlockedSupplier;
 
     public static void setDefaultExecutor(Executor s) {
         if (s == DEFAULT_EXECUTOR) {
@@ -124,9 +118,139 @@ public class Infrastructure {
         return current;
     }
 
-    // For testing purpose only
-    static List<UniInterceptor> getUniInterceptors() {
-        return Arrays.asList(UNI_INTERCEPTORS);
+    public static <T> Supplier<T> decorate(Supplier<T> supplier) {
+        Supplier<T> current = supplier;
+        for (CallbackDecorator interceptor : CALLBACK_DECORATORS) {
+            current = interceptor.decorate(current);
+        }
+        return current;
+    }
+
+    public static <T> Consumer<T> decorate(Consumer<T> consumer) {
+        Consumer<T> current = consumer;
+        for (CallbackDecorator interceptor : CALLBACK_DECORATORS) {
+            current = interceptor.decorate(current);
+        }
+        return current;
+    }
+
+    public static LongConsumer decorate(LongConsumer consumer) {
+        LongConsumer current = consumer;
+        for (CallbackDecorator interceptor : CALLBACK_DECORATORS) {
+            current = interceptor.decorate(current);
+        }
+        return current;
+    }
+
+    public static Runnable decorate(Runnable runnable) {
+        Runnable current = runnable;
+        for (CallbackDecorator interceptor : CALLBACK_DECORATORS) {
+            current = interceptor.decorate(current);
+        }
+        return current;
+    }
+
+    public static <T1, T2> BiConsumer<T1, T2> decorate(BiConsumer<T1, T2> consumer) {
+        BiConsumer<T1, T2> current = consumer;
+        for (CallbackDecorator interceptor : CALLBACK_DECORATORS) {
+            current = interceptor.decorate(current);
+        }
+        return current;
+    }
+
+    public static <I1, I2, I3, O> Functions.Function3<I1, I2, I3, O> decorate(Functions.Function3<I1, I2, I3, O> function) {
+        Functions.Function3<I1, I2, I3, O> current = function;
+        for (CallbackDecorator interceptor : CALLBACK_DECORATORS) {
+            current = interceptor.decorate(current);
+        }
+        return current;
+    }
+
+    public static <I1, I2, I3, I4, O> Functions.Function4<I1, I2, I3, I4, O> decorate(
+            Functions.Function4<I1, I2, I3, I4, O> function) {
+        Functions.Function4<I1, I2, I3, I4, O> current = function;
+        for (CallbackDecorator interceptor : CALLBACK_DECORATORS) {
+            current = interceptor.decorate(current);
+        }
+        return current;
+    }
+
+    public static <I1, I2, I3, I4, I5, O> Functions.Function5<I1, I2, I3, I4, I5, O> decorate(
+            Functions.Function5<I1, I2, I3, I4, I5, O> function) {
+        Functions.Function5<I1, I2, I3, I4, I5, O> current = function;
+        for (CallbackDecorator interceptor : CALLBACK_DECORATORS) {
+            current = interceptor.decorate(current);
+        }
+        return current;
+    }
+
+    public static <I1, I2, I3, I4, I5, I6, O> Functions.Function6<I1, I2, I3, I4, I5, I6, O> decorate(
+            Functions.Function6<I1, I2, I3, I4, I5, I6, O> function) {
+        Functions.Function6<I1, I2, I3, I4, I5, I6, O> current = function;
+        for (CallbackDecorator interceptor : CALLBACK_DECORATORS) {
+            current = interceptor.decorate(current);
+        }
+        return current;
+    }
+
+    public static <I1, I2, I3, I4, I5, I6, I7, O> Functions.Function7<I1, I2, I3, I4, I5, I6, I7, O> decorate(
+            Functions.Function7<I1, I2, I3, I4, I5, I6, I7, O> function) {
+        Functions.Function7<I1, I2, I3, I4, I5, I6, I7, O> current = function;
+        for (CallbackDecorator interceptor : CALLBACK_DECORATORS) {
+            current = interceptor.decorate(current);
+        }
+        return current;
+    }
+
+    public static <I1, I2, I3, I4, I5, I6, I7, I8, O> Functions.Function8<I1, I2, I3, I4, I5, I6, I7, I8, O> decorate(
+            Functions.Function8<I1, I2, I3, I4, I5, I6, I7, I8, O> function) {
+        Functions.Function8<I1, I2, I3, I4, I5, I6, I7, I8, O> current = function;
+        for (CallbackDecorator interceptor : CALLBACK_DECORATORS) {
+            current = interceptor.decorate(current);
+        }
+        return current;
+    }
+
+    public static <I1, I2, I3, I4, I5, I6, I7, I8, I9, O> Functions.Function9<I1, I2, I3, I4, I5, I6, I7, I8, I9, O> decorate(
+            Functions.Function9<I1, I2, I3, I4, I5, I6, I7, I8, I9, O> function) {
+        Functions.Function9<I1, I2, I3, I4, I5, I6, I7, I8, I9, O> current = function;
+        for (CallbackDecorator interceptor : CALLBACK_DECORATORS) {
+            current = interceptor.decorate(current);
+        }
+        return current;
+    }
+
+    public static <I, O> Function<I, O> decorate(Function<I, O> function) {
+        Function<I, O> current = function;
+        for (CallbackDecorator interceptor : CALLBACK_DECORATORS) {
+            current = interceptor.decorate(current);
+        }
+        return current;
+    }
+
+    public static <I1, I2, O> BiFunction<I1, I2, O> decorate(BiFunction<I1, I2, O> function) {
+        BiFunction<I1, I2, O> current = function;
+        for (CallbackDecorator interceptor : CALLBACK_DECORATORS) {
+            current = interceptor.decorate(current);
+        }
+        return current;
+    }
+
+    public static <T> BinaryOperator<T> decorate(BinaryOperator<T> operator) {
+        BinaryOperator<T> current = operator;
+        for (CallbackDecorator interceptor : CALLBACK_DECORATORS) {
+            current = interceptor.decorate(current);
+        }
+        return current;
+    }
+
+    public static <T1, T2, T3> Functions.TriConsumer<T1, T2, T3> decorate(
+            Functions.TriConsumer<T1, T2, T3> consumer) {
+        Functions.TriConsumer<T1, T2, T3> current = consumer;
+        for (CallbackDecorator interceptor : CALLBACK_DECORATORS) {
+            current = interceptor.decorate(current);
+        }
+        return current;
     }
 
     public static void setCompletableFutureWrapper(UnaryOperator<CompletableFuture<?>> wrapper) {
@@ -175,43 +299,34 @@ public class Infrastructure {
         System.err.println("[------------------------------------------------]");
     }
 
-    // For testing purpose only
-    static void registerUniInterceptor(UniInterceptor e) {
-        ArrayList<UniInterceptor> uniInterceptors = new ArrayList<>();
-        Collections.addAll(uniInterceptors, UNI_INTERCEPTORS);
-        uniInterceptors.add(e);
-        uniInterceptors.sort(Comparator.comparingInt(UniInterceptor::ordinal));
-        UNI_INTERCEPTORS = uniInterceptors.toArray(UNI_INTERCEPTORS);
-    }
-
-    // For testing purpose only
     public static void reloadUniInterceptors() {
-        ServiceLoader<UniInterceptor> interceptorLoader = ServiceLoader.load(UniInterceptor.class);
+        ServiceLoader<UniInterceptor> loader = ServiceLoader.load(UniInterceptor.class);
         List<UniInterceptor> interceptors = new ArrayList<>();
-        interceptorLoader.iterator().forEachRemaining(interceptors::add);
-        interceptors.sort(Comparator.comparingInt(UniInterceptor::ordinal));
-        ArrayList<UniInterceptor> uniInterceptors = new ArrayList<>();
-        Collections.addAll(uniInterceptors, UNI_INTERCEPTORS);
-        uniInterceptors.addAll(interceptors);
-        UNI_INTERCEPTORS = uniInterceptors.toArray(UNI_INTERCEPTORS);
+        loader.forEach(interceptors::add);
+        interceptors.sort(Comparator.comparingInt(MutinyInterceptor::ordinal));
+        UNI_INTERCEPTORS = interceptors.toArray(UNI_INTERCEPTORS);
     }
 
-    // For testing purpose only
     public static void reloadMultiInterceptors() {
-        ServiceLoader<MultiInterceptor> interceptorLoader = ServiceLoader.load(MultiInterceptor.class);
+        ServiceLoader<MultiInterceptor> loader = ServiceLoader.load(MultiInterceptor.class);
         List<MultiInterceptor> interceptors = new ArrayList<>();
-        interceptorLoader.iterator().forEachRemaining(interceptors::add);
-        interceptors.sort(Comparator.comparingInt(MultiInterceptor::ordinal));
-        final ArrayList<MultiInterceptor> multiInterceptors = new ArrayList<>();
-        Collections.addAll(multiInterceptors, MULTI_INTERCEPTORS);
-        multiInterceptors.addAll(interceptors);
-        MULTI_INTERCEPTORS = multiInterceptors.toArray(MULTI_INTERCEPTORS);
+        loader.forEach(interceptors::add);
+        interceptors.sort(Comparator.comparingInt(MutinyInterceptor::ordinal));
+        MULTI_INTERCEPTORS = interceptors.toArray(MULTI_INTERCEPTORS);
     }
 
-    // For testing purpose only
+    public static void reloadCallbackDecorators() {
+        ServiceLoader<CallbackDecorator> loader = ServiceLoader.load(CallbackDecorator.class);
+        ArrayList<CallbackDecorator> interceptors = new ArrayList<>();
+        loader.forEach(interceptors::add);
+        interceptors.sort(Comparator.comparingInt(MutinyInterceptor::ordinal));
+        CALLBACK_DECORATORS = interceptors.toArray(CALLBACK_DECORATORS);
+    }
+
     public static void clearInterceptors() {
         UNI_INTERCEPTORS = new UniInterceptor[0];
         MULTI_INTERCEPTORS = new MultiInterceptor[0];
+        CALLBACK_DECORATORS = new CallbackDecorator[0];
     }
 
     // For testing purpose only
@@ -226,5 +341,21 @@ public class Infrastructure {
 
     private Infrastructure() {
         // Avoid direct instantiation.
+    }
+
+    public static BooleanSupplier decorate(BooleanSupplier supplier) {
+        BooleanSupplier current = supplier;
+        for (CallbackDecorator interceptor : CALLBACK_DECORATORS) {
+            current = interceptor.decorate(current);
+        }
+        return current;
+    }
+
+    public static <T> Predicate<T> decorate(Predicate<T> predicate) {
+        Predicate<T> current = predicate;
+        for (CallbackDecorator interceptor : CALLBACK_DECORATORS) {
+            current = interceptor.decorate(current);
+        }
+        return current;
     }
 }

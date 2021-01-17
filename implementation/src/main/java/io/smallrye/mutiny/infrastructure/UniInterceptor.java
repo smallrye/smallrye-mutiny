@@ -10,20 +10,7 @@ import io.smallrye.mutiny.subscription.UniSubscriber;
  * Implementations are expected to be exposed as SPI, and so the implementation class must be declared in the
  * {@code META-INF/services/io.smallrye.mutiny.infrastructure.UniInterceptor} file.
  */
-public interface UniInterceptor {
-
-    /**
-     * Default interceptor ordinal ({@code 100}).
-     */
-    int DEFAULT_ORDINAL = 100;
-
-    /**
-     * @return the interceptor ordinal. The ordinal is used to sort the interceptor. Lower value are executed first.
-     *         Default is 100.
-     */
-    default int ordinal() {
-        return DEFAULT_ORDINAL;
-    }
+public interface UniInterceptor extends MutinyInterceptor {
 
     /**
      * Method called when a new instance of {@link Uni} is created. If can return a new {@code Uni},
@@ -53,5 +40,4 @@ public interface UniInterceptor {
     default <T> UniSubscriber<? super T> onSubscription(Uni<T> instance, UniSubscriber<? super T> subscriber) {
         return subscriber;
     }
-
 }
