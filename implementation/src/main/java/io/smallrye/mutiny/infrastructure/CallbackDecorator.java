@@ -5,12 +5,12 @@ import java.util.function.*;
 import io.smallrye.mutiny.tuples.Functions;
 
 /**
- * Intercept user's callbacks.
- * Decorators are called when the user pass a callback to Mutiny and so decorators can modify the passed callback.
+ * Intercept user callbacks.
+ * Decorators are called when the user passes a callback to Mutiny and so decorators can modify the passed callback.
  * <p>
- * The default behavior is to returns the user's callback unchanged.
+ * The default behavior is to returns the user's callback, unchanged.
  * <p>
- * Decorators must not transform a user's callback into {@code null}.
+ * Decorators must not transform a user callback into {@code null}.
  */
 public interface CallbackDecorator extends MutinyInterceptor {
 

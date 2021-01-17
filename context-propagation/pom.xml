@@ -10,8 +10,8 @@
         <version>999-SNAPSHOT</version>
     </parent>
 
-    <artifactId>mutiny-context-propagation</artifactId>
-    <name>SmallRye Mutiny :: Integration with MicroProfile Context Propagation</name>
+    <artifactId>mutiny-smallrye-context-propagation</artifactId>
+    <name>SmallRye Mutiny :: Integration with SmallRye Context Propagation</name>
 
     <dependencies>
         <dependency>
@@ -35,7 +35,7 @@
         <dependency>
             <groupId>io.smallrye</groupId>
             <artifactId>smallrye-context-propagation</artifactId>
-            <scope>test</scope>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>io.smallrye.config</groupId>
