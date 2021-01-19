@@ -7,7 +7,7 @@ import java.util.Optional;
 
 import io.smallrye.mutiny.TimeoutException;
 import io.smallrye.mutiny.Uni;
-import io.smallrye.mutiny.operators.UniBlockingAwait;
+import io.smallrye.mutiny.operators.uni.UniBlockingAwait;
 
 /**
  * Likes {@link UniAwait} but wrapping the item event into an {@link Optional}. This optional is empty if the

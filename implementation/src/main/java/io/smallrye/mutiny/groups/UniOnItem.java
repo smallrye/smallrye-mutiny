@@ -14,10 +14,10 @@ import org.reactivestreams.Publisher;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
-import io.smallrye.mutiny.operators.UniOnItemConsume;
-import io.smallrye.mutiny.operators.UniOnItemTransform;
-import io.smallrye.mutiny.operators.UniOnItemTransformToMulti;
-import io.smallrye.mutiny.operators.UniOnItemTransformToUni;
+import io.smallrye.mutiny.operators.uni.UniOnItemConsume;
+import io.smallrye.mutiny.operators.uni.UniOnItemTransform;
+import io.smallrye.mutiny.operators.uni.UniOnItemTransformToMulti;
+import io.smallrye.mutiny.operators.uni.UniOnItemTransformToUni;
 import io.smallrye.mutiny.subscription.UniEmitter;
 
 public class UniOnItem<T> {

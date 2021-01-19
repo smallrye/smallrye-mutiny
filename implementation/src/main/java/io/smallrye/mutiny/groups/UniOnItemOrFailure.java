@@ -9,9 +9,9 @@ import java.util.function.Supplier;
 import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
-import io.smallrye.mutiny.operators.UniOnItemOrFailureConsume;
-import io.smallrye.mutiny.operators.UniOnItemOrFailureFlatMap;
-import io.smallrye.mutiny.operators.UniOnItemOrFailureMap;
+import io.smallrye.mutiny.operators.uni.UniOnItemOrFailureConsume;
+import io.smallrye.mutiny.operators.uni.UniOnItemOrFailureFlatMap;
+import io.smallrye.mutiny.operators.uni.UniOnItemOrFailureMap;
 import io.smallrye.mutiny.subscription.UniEmitter;
 import io.smallrye.mutiny.tuples.Functions;
 

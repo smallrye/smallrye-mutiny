@@ -12,9 +12,9 @@ import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
-import io.smallrye.mutiny.operators.MultiFlatMapOnFailure;
-import io.smallrye.mutiny.operators.MultiOnFailureTransform;
+import io.smallrye.mutiny.operators.multi.MultiFlatMapOnFailure;
 import io.smallrye.mutiny.operators.multi.MultiOnFailureInvoke;
+import io.smallrye.mutiny.operators.multi.MultiOnFailureTransform;
 import io.smallrye.mutiny.subscription.Cancellable;
 
 /**

@@ -9,8 +9,8 @@
     "filter" : {
       "packages" : {
         "regex" : true,
-        "include" : [ "io\\.smallrye\\.mutiny\\..*", "io\\.smallrye\\.mutiny\\.*" ],
-        "exclude" : [ "io\\.smallrye\\.mutiny\\.operators\\.*", "io\\.smallrye\\.mutiny\\.operators\\..*" ]
+        "include" : [ "io\\.smallrye\\.mutiny(\\..+)?" ],
+        "exclude" : [ "io\\.smallrye\\.mutiny\\.operators(\\..+)?" ]
       }
     }
   }

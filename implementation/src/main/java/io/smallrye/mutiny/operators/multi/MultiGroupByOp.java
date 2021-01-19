@@ -261,7 +261,7 @@ public final class MultiGroupByOp<T, K, V> extends AbstractMultiOperator<T, Grou
         }
     }
 
-    static final class GroupedUnicast<K, T> extends AbstractMulti<T> implements GroupedMulti<K, T> {
+    public static final class GroupedUnicast<K, T> extends AbstractMulti<T> implements GroupedMulti<K, T> {
 
         private final State<T, K> downstream;
         private final K key;

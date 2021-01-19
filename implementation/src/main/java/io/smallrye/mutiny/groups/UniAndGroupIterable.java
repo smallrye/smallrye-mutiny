@@ -9,7 +9,7 @@ import java.util.stream.StreamSupport;
 
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
-import io.smallrye.mutiny.operators.UniAndCombination;
+import io.smallrye.mutiny.operators.uni.UniAndCombination;
 
 public class UniAndGroupIterable<T1> {
 

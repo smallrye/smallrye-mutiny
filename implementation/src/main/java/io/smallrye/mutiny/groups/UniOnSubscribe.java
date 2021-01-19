@@ -8,8 +8,8 @@ import java.util.function.Supplier;
 
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
-import io.smallrye.mutiny.operators.UniOnSubscribeCall;
-import io.smallrye.mutiny.operators.UniOnSubscribeInvoke;
+import io.smallrye.mutiny.operators.uni.UniOnSubscribeCall;
+import io.smallrye.mutiny.operators.uni.UniOnSubscribeInvoke;
 import io.smallrye.mutiny.subscription.UniSubscription;
 
 /**

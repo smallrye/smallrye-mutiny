@@ -10,7 +10,7 @@ import io.smallrye.common.annotation.Experimental;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.AbstractUni;
-import io.smallrye.mutiny.operators.UniMemoizeOp;
+import io.smallrye.mutiny.operators.uni.UniMemoizeOp;
 
 @Experimental("Memoization is an experimental feature at this stage")
 public class UniMemoize<T> {
