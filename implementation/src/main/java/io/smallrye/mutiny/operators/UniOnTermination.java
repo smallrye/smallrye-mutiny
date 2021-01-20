@@ -1,7 +1,5 @@
 package io.smallrye.mutiny.operators;
 
-import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
-
 import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.subscription.UniSubscriber;
@@ -12,8 +10,8 @@ public class UniOnTermination<T> extends UniOperator<T, T> {
     private final Functions.TriConsumer<T, Throwable, Boolean> callback;
 
     public UniOnTermination(Uni<T> upstream, Functions.TriConsumer<T, Throwable, Boolean> callback) {
-        super(nonNull(upstream, "upstream"));
-        this.callback = nonNull(callback, "callback");
+        super(upstream);
+        this.callback = callback;
     }
 
     @Override

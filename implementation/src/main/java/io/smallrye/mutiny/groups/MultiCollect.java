@@ -104,7 +104,9 @@ public class MultiCollect<T> {
      * @return a {@link Uni} emitting the collected container as item when this {@link Multi} completes
      */
     public <X> Uni<X> in(Supplier<X> supplier, BiConsumer<X, T> accumulator) {
-        Collector<? super T, X, X> collector = Collector.of(supplier, accumulator, (r, r2) -> r,
+        Supplier<X> actualSupplier = Infrastructure.decorate(nonNull(supplier, "supplier"));
+        BiConsumer<X, T> actualAccumulator = Infrastructure.decorate(nonNull(accumulator, "accumulator"));
+        Collector<? super T, X, X> collector = Collector.of(actualSupplier, actualAccumulator, (r, r2) -> r,
                 Collector.Characteristics.IDENTITY_FINISH);
         return collector(upstream, collector, false);
     }
@@ -124,7 +126,8 @@ public class MultiCollect<T> {
      *         {@link Multi} completes
      */
     public <K> Uni<Map<K, T>> asMap(Function<? super T, ? extends K> keyMapper) {
-        return asMap(keyMapper, Function.identity());
+        Function<? super T, ? extends K> actualKM = Infrastructure.decorate(nonNull(keyMapper, "keyMapper"));
+        return collector(upstream, Collectors.toMap(actualKM, Function.identity()), false);
     }
 
     /**
@@ -148,7 +151,9 @@ public class MultiCollect<T> {
     public <K, V> Uni<Map<K, V>> asMap(
             Function<? super T, ? extends K> keyMapper,
             Function<? super T, ? extends V> valueMapper) {
-        return collector(upstream, Collectors.toMap(keyMapper, valueMapper), false);
+        Function<? super T, ? extends K> actualKM = Infrastructure.decorate(nonNull(keyMapper, "keyMapper"));
+        Function<? super T, ? extends V> actualVM = Infrastructure.decorate(nonNull(valueMapper, "valueMapper"));
+        return collector(upstream, Collectors.toMap(actualKM, actualVM), false);
     }
 
     /**
@@ -172,11 +177,13 @@ public class MultiCollect<T> {
     public <K, V> Uni<Map<K, Collection<V>>> asMultiMap(
             Function<? super T, ? extends K> keyMapper,
             Function<? super T, ? extends V> valueMapper) {
+        Function<? super T, ? extends K> actualKM = Infrastructure.decorate(nonNull(keyMapper, "keyMapper"));
+        Function<? super T, ? extends V> actualVM = Infrastructure.decorate(nonNull(valueMapper, "valueMapper"));
         return collector(upstream, Collectors.toMap(
-                keyMapper,
+                actualKM,
                 res -> {
                     List<V> list = new ArrayList<>();
-                    V mapped = valueMapper.apply(res);
+                    V mapped = actualVM.apply(res);
                     list.add(mapped);
                     return list;
                 },
@@ -201,7 +208,18 @@ public class MultiCollect<T> {
      *         {@link Multi} completes
      */
     public <K> Uni<Map<K, Collection<T>>> asMultiMap(Function<? super T, ? extends K> keyMapper) {
-        return asMultiMap(keyMapper, Function.identity());
+        Function<? super T, ? extends K> actualKM = Infrastructure.decorate(nonNull(keyMapper, "keyMapper"));
+        return collector(upstream, Collectors.toMap(
+                actualKM,
+                res -> {
+                    List<T> list = new ArrayList<>();
+                    list.add(res);
+                    return list;
+                },
+                (vs, vs2) -> {
+                    vs.addAll(vs2);
+                    return vs;
+                }), false);
     }
 
     /**
@@ -215,6 +233,7 @@ public class MultiCollect<T> {
      * @return the object to configure the item collection.
      */
     public MultiCollect<T> where(Predicate<T> predicate) {
+        // Decoration happens in where.
         return new MultiCollect<>(upstream.select().where(predicate));
     }
 
@@ -233,6 +252,7 @@ public class MultiCollect<T> {
      * @return the object to configure the item collection.
      */
     public MultiCollect<T> when(Function<? super T, Uni<Boolean>> predicate) {
+        // Decoration happens in `when`
         return new MultiCollect<>(upstream.select().when(predicate));
     }
 

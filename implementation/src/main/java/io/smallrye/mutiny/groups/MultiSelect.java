@@ -105,7 +105,8 @@ public class MultiSelect<T> {
      * @return the resulting {@link Multi}
      */
     public Multi<T> first(Predicate<? super T> predicate) {
-        return Infrastructure.onMultiCreation(new MultiSelectFirstWhileOp<>(upstream, nonNull(predicate, "predicate")));
+        Predicate<? super T> actual = Infrastructure.decorate(nonNull(predicate, "predicate"));
+        return Infrastructure.onMultiCreation(new MultiSelectFirstWhileOp<>(upstream, actual));
     }
 
     /**
@@ -146,7 +147,8 @@ public class MultiSelect<T> {
      * @see #when(Function)
      */
     public Multi<T> where(Predicate<? super T> predicate) {
-        return Infrastructure.onMultiCreation(new MultiSelectWhereOp<>(upstream, nonNull(predicate, "predicate")));
+        Predicate<? super T> actual = Infrastructure.decorate(nonNull(predicate, "predicate"));
+        return Infrastructure.onMultiCreation(new MultiSelectWhereOp<>(upstream, actual));
     }
 
     /**
@@ -158,6 +160,7 @@ public class MultiSelect<T> {
      * @see #when(Function)
      */
     public Multi<T> where(Predicate<? super T> predicate, int limit) {
+        // Decoration happens in where.
         return where(predicate)
                 .select().first(limit);
     }
@@ -190,9 +193,9 @@ public class MultiSelect<T> {
      * @return the resulting {@link Multi}
      */
     public Multi<T> when(Function<? super T, Uni<Boolean>> predicate) {
-        nonNull(predicate, "predicate");
+        Function<? super T, Uni<Boolean>> actual = Infrastructure.decorate(nonNull(predicate, "predicate"));
         return upstream.onItem().transformToMultiAndConcatenate(res -> {
-            Uni<Boolean> uni = predicate.apply(res);
+            Uni<Boolean> uni = actual.apply(res);
             return uni.map(pass -> pass ? res : null).toMulti();
         });
     }

@@ -1,7 +1,6 @@
 package io.smallrye.mutiny.operators;
 
 import static io.smallrye.mutiny.helpers.EmptyUniSubscription.CANCELLED;
-import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
 
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicReference;
@@ -17,9 +16,9 @@ public class UniDelayUntil<T> extends UniOperator<T, T> {
 
     public UniDelayUntil(Uni<T> upstream, Function<? super T, Uni<?>> function,
             ScheduledExecutorService executor) {
-        super(nonNull(upstream, "upstream"));
-        this.function = nonNull(function, "function");
-        this.executor = nonNull(executor, "executor");
+        super(upstream);
+        this.function = function;
+        this.executor = executor;
     }
 
     @Override

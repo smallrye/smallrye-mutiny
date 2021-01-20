@@ -29,7 +29,8 @@ public class MultiOnRequest<T> {
      * @return the new {@link Multi}
      */
     public Multi<T> invoke(LongConsumer consumer) {
-        return Infrastructure.onMultiCreation(new MultiOnRequestInvoke<>(upstream, nonNull(consumer, "consumer")));
+        LongConsumer actual = Infrastructure.decorate(nonNull(consumer, "consumer"));
+        return Infrastructure.onMultiCreation(new MultiOnRequestInvoke<>(upstream, actual));
     }
 
     /**
@@ -42,6 +43,7 @@ public class MultiOnRequest<T> {
      */
     public Multi<T> invoke(Runnable action) {
         Runnable actual = nonNull(action, "action");
+        // Decoration happens in `invoke`
         return invoke(ignored -> actual.run());
     }
 
@@ -70,7 +72,7 @@ public class MultiOnRequest<T> {
      * @return the new {@link Multi}
      */
     public Multi<T> call(Supplier<Uni<?>> supplier) {
-        Supplier<Uni<?>> actual = nonNull(supplier, "supplier");
+        Supplier<Uni<?>> actual = Infrastructure.decorate(nonNull(supplier, "supplier"));
         return call(ignored -> actual.get());
     }
 

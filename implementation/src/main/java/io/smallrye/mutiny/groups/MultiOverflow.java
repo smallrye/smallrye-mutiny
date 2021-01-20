@@ -8,6 +8,7 @@ import java.util.function.Supplier;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.subscription.BackPressureFailure;
 
 public class MultiOverflow<T> {
@@ -59,7 +60,8 @@ public class MultiOverflow<T> {
      */
     @Deprecated
     public Multi<T> drop(Consumer<T> callback) {
-        return new MultiOverflowStrategy<>(upstream, nonNull(callback, "callback"), null).drop();
+        Consumer<T> actual = Infrastructure.decorate(nonNull(callback, "callback"));
+        return new MultiOverflowStrategy<>(upstream, actual, null).drop();
     }
 
     /**
@@ -78,7 +80,8 @@ public class MultiOverflow<T> {
      * @return an object to select the overflow management strategy
      */
     public MultiOverflowStrategy<T> invoke(Consumer<T> consumer) {
-        return new MultiOverflowStrategy<>(upstream, nonNull(consumer, "consumer"), null);
+        Consumer<T> actual = Infrastructure.decorate(nonNull(consumer, "consumer"));
+        return new MultiOverflowStrategy<>(upstream, actual, null);
     }
 
     /**
@@ -89,6 +92,7 @@ public class MultiOverflow<T> {
      */
     public MultiOverflowStrategy<T> invoke(Runnable callback) {
         Runnable actual = nonNull(callback, "callback");
+        // Decoration happens in `invoke`
         return invoke(ignored -> actual.run());
     }
 
@@ -99,7 +103,7 @@ public class MultiOverflow<T> {
      * @return an object to select the overflow management strategy
      */
     public MultiOverflowStrategy<T> call(Supplier<Uni<?>> supplier) {
-        Supplier<Uni<?>> actual = nonNull(supplier, "supplier");
+        Supplier<Uni<?>> actual = Infrastructure.decorate(nonNull(supplier, "supplier"));
         return call(ignored -> actual.get());
     }
 
@@ -110,6 +114,7 @@ public class MultiOverflow<T> {
      * @return an object to select the overflow management strategy
      */
     public MultiOverflowStrategy<T> call(Function<T, Uni<?>> mapper) {
-        return new MultiOverflowStrategy<>(upstream, null, nonNull(mapper, "mapper"));
+        Function<T, Uni<?>> actual = Infrastructure.decorate(nonNull(mapper, "mapper"));
+        return new MultiOverflowStrategy<>(upstream, null, actual);
     }
 }

@@ -12,7 +12,7 @@ public class UniOnItemTransform<I, O> extends UniOperator<I, O> {
 
     public UniOnItemTransform(Uni<I> source, Function<? super I, ? extends O> mapper) {
         super(ParameterValidation.nonNull(source, "source"));
-        this.mapper = ParameterValidation.nonNull(mapper, "mapper");
+        this.mapper = mapper;
     }
 
     @Override

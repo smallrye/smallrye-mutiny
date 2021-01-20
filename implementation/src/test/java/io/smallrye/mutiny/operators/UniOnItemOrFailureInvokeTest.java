@@ -34,11 +34,6 @@ public class UniOnItemOrFailureInvokeTest {
     }
 
     @Test
-    public void testThatSourceMustNotBeNull() {
-        assertThrows(IllegalArgumentException.class, () -> new UniOnItemOrFailureMap<>(null, (x, f) -> x));
-    }
-
-    @Test
     public void testThatCallbackMustNotBeNullWithCall() {
         assertThrows(IllegalArgumentException.class,
                 () -> Uni.createFrom().item(1).onItemOrFailure().call((Supplier<Uni<?>>) null));

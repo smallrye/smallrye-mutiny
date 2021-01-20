@@ -1,7 +1,6 @@
 package io.smallrye.mutiny.operators;
 
 import static io.smallrye.mutiny.helpers.ParameterValidation.MAPPER_RETURNED_NULL;
-import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
 
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
@@ -19,8 +18,8 @@ public class UniOnItemTransformToUni<I, O> extends UniOperator<I, O> {
     private final Function<? super I, Uni<? extends O>> mapper;
 
     public UniOnItemTransformToUni(Uni<I> upstream, Function<? super I, Uni<? extends O>> mapper) {
-        super(nonNull(upstream, "upstream"));
-        this.mapper = nonNull(mapper, "mapper");
+        super(upstream);
+        this.mapper = mapper;
     }
 
     public static <I, O> void invokeAndSubstitute(Function<? super I, Uni<? extends O>> mapper, I input,

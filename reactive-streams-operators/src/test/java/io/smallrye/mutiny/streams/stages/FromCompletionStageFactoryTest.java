@@ -38,7 +38,7 @@ public class FromCompletionStageFactoryTest extends StageTestBase {
 
         try {
             ReactiveStreams.fromCompletionStage(cs).findFirst().run().toCompletableFuture().join();
-            fail("Exception expected");
+            fail("It should have failed");
         } catch (Exception e) {
             assertThat(e).hasMessageContaining("Expected");
         }

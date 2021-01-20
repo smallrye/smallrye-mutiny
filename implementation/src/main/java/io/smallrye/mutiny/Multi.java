@@ -364,7 +364,7 @@ public interface Multi<T> extends Publisher<T> {
      * @return the new {@link Multi}
      */
     default <O> Multi<O> map(Function<? super T, ? extends O> mapper) {
-        return onItem().transform(nonNull(mapper, "mapper"));
+        return onItem().transform(mapper);
     }
 
     /**

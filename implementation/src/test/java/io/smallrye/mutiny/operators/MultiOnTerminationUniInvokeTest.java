@@ -14,8 +14,11 @@ import org.reactivestreams.Subscription;
 import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.helpers.spies.Spy;
+import io.smallrye.mutiny.helpers.spies.UniOnSubscribeSpy;
 import io.smallrye.mutiny.helpers.test.AssertSubscriber;
 
+@SuppressWarnings("ConstantConditions")
 public class MultiOnTerminationUniInvokeTest {
 
     @Test
@@ -378,5 +381,24 @@ public class MultiOnTerminationUniInvokeTest {
         assertThat(subItem.get()).isNull();
         assertThat(subException.get()).isNull();
         assertThat(subCancellation.get()).isTrue();
+    }
+
+    @Test
+    public void testOnTerminationWithSupplier() {
+        AtomicBoolean called = new AtomicBoolean();
+        UniOnSubscribeSpy<Integer> uni = Spy.onSubscribe(Uni.createFrom().item(3));
+        AssertSubscriber<Integer> subscriber = Multi.createFrom().items(1, 2)
+                .onTermination().call(() -> {
+                    called.set(true);
+                    return uni;
+                })
+                .subscribe().withSubscriber(AssertSubscriber.create(5));
+
+        subscriber
+                .assertItems(1, 2)
+                .assertCompleted();
+
+        assertThat(uni.lastSubscription()).isNotNull();
+        assertThat(called).isTrue();
     }
 }

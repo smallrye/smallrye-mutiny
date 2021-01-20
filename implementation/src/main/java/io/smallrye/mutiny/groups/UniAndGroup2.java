@@ -1,5 +1,7 @@
 package io.smallrye.mutiny.groups;
 
+import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.function.BiFunction;
@@ -7,6 +9,7 @@ import java.util.function.Function;
 
 import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.tuples.Tuple2;
 import io.smallrye.mutiny.tuples.Tuples;
 
@@ -38,7 +41,7 @@ public class UniAndGroup2<T1, T2> extends UniAndGroupIterable<T1> {
      * @return the resulting {@link Uni}. The items are combined into a {@link Tuple2 Tuple2&lt;T1, T2&gt;}.
      */
     public Uni<Tuple2<T1, T2>> asTuple() {
-        return combinedWith(Tuple2::of);
+        return combine(Tuple2::of);
     }
 
     /**
@@ -48,8 +51,13 @@ public class UniAndGroup2<T1, T2> extends UniAndGroupIterable<T1> {
      * @param <O> the type of item
      * @return the resulting {@link Uni}. The items are combined into a {@link Tuple2 Tuple2&lt;T1, T2&gt;}.
      */
-    @SuppressWarnings("unchecked")
     public <O> Uni<O> combinedWith(BiFunction<T1, T2, O> combinator) {
+        BiFunction<T1, T2, O> actual = Infrastructure.decorate(nonNull(combinator, "combinator"));
+        return combine(actual);
+    }
+
+    @SuppressWarnings("unchecked")
+    private <O> Uni<O> combine(BiFunction<T1, T2, O> combinator) {
         Function<List<?>, O> function = list -> {
             Tuples.ensureArity(list, 2);
             T1 item1 = (T1) list.get(0);

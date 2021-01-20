@@ -1,10 +1,13 @@
 package io.smallrye.mutiny.groups;
 
+import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
 
 import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.tuples.Functions;
 import io.smallrye.mutiny.tuples.Tuple3;
 import io.smallrye.mutiny.tuples.Tuples;
@@ -21,11 +24,16 @@ public class UniAndGroup3<T1, T2, T3> extends UniAndGroupIterable<T1> {
     }
 
     public Uni<Tuple3<T1, T2, T3>> asTuple() {
-        return combinedWith(Tuple3::of);
+        return combine(Tuple3::of);
+    }
+
+    public <O> Uni<O> combinedWith(Functions.Function3<T1, T2, T3, O> combinator) {
+        Functions.Function3<T1, T2, T3, O> actual = Infrastructure.decorate(nonNull(combinator, "combinator"));
+        return combine(actual);
     }
 
     @SuppressWarnings("unchecked")
-    public <O> Uni<O> combinedWith(Functions.Function3<T1, T2, T3, O> combinator) {
+    private <O> Uni<O> combine(Functions.Function3<T1, T2, T3, O> combinator) {
         Function<List<?>, O> function = list -> {
             Tuples.ensureArity(list, 3);
             T1 item1 = (T1) list.get(0);

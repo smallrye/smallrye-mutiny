@@ -9,7 +9,6 @@ import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.Multi;
-import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.helpers.Subscriptions;
 import io.smallrye.mutiny.operators.AbstractMulti;
 import io.smallrye.mutiny.operators.multi.processors.UnicastProcessor;
@@ -32,7 +31,7 @@ public final class MultiRetryWhenOp<T> extends AbstractMultiOperator<T, T> {
     public MultiRetryWhenOp(Multi<? extends T> upstream,
             Function<? super Multi<Throwable>, ? extends Publisher<?>> triggerStreamFactory) {
         super(upstream);
-        this.triggerStreamFactory = ParameterValidation.nonNull(triggerStreamFactory, "triggerStreamFactory");
+        this.triggerStreamFactory = triggerStreamFactory;
     }
 
     private static <T> void subscribe(MultiSubscriber<? super T> downstream,

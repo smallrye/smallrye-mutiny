@@ -21,15 +21,13 @@ public class MultiContextPropagationTest {
 
     @BeforeEach
     public void initContext() {
-        Infrastructure.clearInterceptors();
-        Infrastructure.reloadUniInterceptors();
-        Infrastructure.reloadMultiInterceptors();
+        Infrastructure.reload();
         MyContext.init();
     }
 
     @AfterEach
     public void clearContext() {
-        Infrastructure.clearInterceptors();
+        Infrastructure.reload();
         MyContext.clear();
     }
 
@@ -49,12 +47,12 @@ public class MultiContextPropagationTest {
         assertThat(ctx).isNotNull();
         Multi<Integer> multi = Multi.createFrom()
                 .item(() -> {
-                    assertThat(ctx).isEqualTo(MyContext.get());
+                    assertThat(ctx).isSameAs(MyContext.get());
                     return 2;
                 })
                 .runSubscriptionOn(executor)
                 .map(r -> {
-                    assertThat(ctx).isEqualTo(MyContext.get());
+                    assertThat(ctx).isSameAs(MyContext.get());
                     return r;
                 });
 
@@ -78,12 +76,12 @@ public class MultiContextPropagationTest {
         assertThat(ctx).isNotNull();
         Multi<Integer> multi = Multi.createFrom()
                 .item(() -> {
-                    assertThat(ctx).isEqualTo(MyContext.get());
+                    assertThat(ctx).isSameAs(MyContext.get());
                     return 2;
                 })
                 .runSubscriptionOn(executor)
                 .map(r -> {
-                    assertThat(ctx).isEqualTo(MyContext.get());
+                    assertThat(ctx).isSameAs(MyContext.get());
                     return r;
                 });
 
@@ -106,12 +104,12 @@ public class MultiContextPropagationTest {
         assertThat(ctx).isNotNull();
         Multi<Integer> multi = Multi.createFrom()
                 .item(() -> {
-                    assertThat(ctx).isEqualTo(MyContext.get());
+                    assertThat(ctx).isSameAs(MyContext.get());
                     return 2;
                 })
                 .runSubscriptionOn(executor)
                 .map(r -> {
-                    assertThat(ctx).isEqualTo(MyContext.get());
+                    assertThat(ctx).isSameAs(MyContext.get());
                     return r;
                 });
 
@@ -136,7 +134,7 @@ public class MultiContextPropagationTest {
         MyContext ctx = MyContext.get();
         assertThat(ctx).isNotNull();
         Multi<Integer> multi = Multi.createFrom().<Integer> emitter(emitter -> {
-            assertThat(ctx).isEqualTo(MyContext.get());
+            assertThat(ctx).isSameAs(MyContext.get());
             new Thread(() -> {
                 try {
                     emitter.emit(2);
@@ -147,7 +145,7 @@ public class MultiContextPropagationTest {
                 }
             }).start();
         }).map(r -> {
-            assertThat(ctx).isEqualTo(MyContext.get());
+            assertThat(ctx).isSameAs(MyContext.get());
             return r;
         });
 
@@ -160,7 +158,7 @@ public class MultiContextPropagationTest {
         MyContext ctx = MyContext.get();
         assertThat(ctx).isNotNull();
         Multi<Integer> multi = Multi.createFrom().<Integer> emitter(emitter -> {
-            assertThat(ctx).isEqualTo(MyContext.get());
+            assertThat(ctx).isSameAs(MyContext.get());
             new Thread(() -> {
                 try {
                     emitter.emit(2);
@@ -171,13 +169,13 @@ public class MultiContextPropagationTest {
                 }
             }).start();
         }).map(r -> {
-            assertThat(ctx).isEqualTo(MyContext.get());
+            assertThat(ctx).isSameAs(MyContext.get());
             return r;
         }).broadcast().toAtLeast(2);
 
         AssertSubscriber<Integer> sub1 = multi
                 .map(i -> {
-                    assertThat(ctx).isEqualTo(MyContext.get());
+                    assertThat(ctx).isSameAs(MyContext.get());
                     return i;
                 })
                 .subscribe().withSubscriber(AssertSubscriber.create(10));
@@ -194,7 +192,7 @@ public class MultiContextPropagationTest {
         MyContext ctx = MyContext.get();
         assertThat(ctx).isNotNull();
         Multi<Integer> multi = Multi.createFrom().emitter(emitter -> {
-            assertThat(ctx).isEqualTo(MyContext.get());
+            assertThat(ctx).isSameAs(MyContext.get());
             new Thread(() -> {
                 try {
                     assertThat(ctx).isNotNull();
@@ -212,7 +210,7 @@ public class MultiContextPropagationTest {
         MyContext ctx2 = new MyContext();
         MyContext.set(ctx2);
         CompletableFuture<Integer> cs2 = cs.thenApply(r -> {
-            assertThat(ctx2).isEqualTo(MyContext.get());
+            assertThat(ctx2).isSameAs(MyContext.get());
             return r;
         });
 
@@ -230,5 +228,70 @@ public class MultiContextPropagationTest {
         fire.countDown();
         int result = cf.get();
         assertThat(result).isEqualTo(2);
+    }
+
+    @Test
+    public void testOnSubscribe() {
+        MyContext ctx = MyContext.get();
+        assertThat(ctx).isNotNull();
+
+        AssertSubscriber<Long> subscriber = Multi.createFrom().ticks().every(Duration.ofMillis(1))
+                .select().first(5)
+                .onSubscribe().invoke(() -> {
+                    assertThat(ctx).isSameAs(MyContext.get());
+                    MyContext.get().set("test");
+                })
+                .onRequest().invoke(l -> {
+                    assertThat(l).isGreaterThan(0);
+                    assertThat(ctx).isSameAs(MyContext.get());
+                    assertThat(MyContext.get().getReqId()).isEqualTo("test");
+                })
+                .onItem().invoke(() -> {
+                    assertThat(ctx).isSameAs(MyContext.get());
+                    assertThat(MyContext.get().getReqId()).isEqualTo("test");
+                })
+                .subscribe().withSubscriber(AssertSubscriber.create(20));
+
+        subscriber.await()
+                .assertItems(0L, 1L, 2L, 3L, 4L);
+
+    }
+
+    @Test
+    public void testSelectWhere() {
+        MyContext ctx = MyContext.get();
+        assertThat(ctx).isNotNull();
+
+        AssertSubscriber<Long> subscriber = Multi.createFrom().ticks().every(Duration.ofMillis(1))
+                .select().first(5)
+                .select().where(l -> {
+                    assertThat(ctx).isSameAs(MyContext.get());
+                    return l % 2 == 0;
+                })
+                .subscribe().withSubscriber(AssertSubscriber.create(20));
+
+        subscriber.await()
+                .assertItems(0L, 2L, 4L);
+
+    }
+
+    @Test
+    public void testScan() {
+        MyContext ctx = MyContext.get();
+        assertThat(ctx).isNotNull();
+
+        AssertSubscriber<Integer> subscriber = Multi.createFrom().ticks().every(Duration.ofMillis(1))
+                .onItem().scan((acc, it) -> {
+                    assertThat(ctx).isSameAs(MyContext.get());
+                    return acc + it;
+                })
+                .onItem().transform(Long::intValue)
+                .select().first(10)
+                .subscribe().withSubscriber(AssertSubscriber.create(10));
+
+        subscriber.await()
+                .assertCompleted()
+                .assertItems(0, 1, 3, 6, 10, 15, 21, 28, 36, 45);
+
     }
 }

@@ -8,7 +8,6 @@ import java.util.function.Supplier;
 
 import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Uni;
-import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.UniOnItemOrFailureConsume;
 import io.smallrye.mutiny.operators.UniOnItemOrFailureFlatMap;
@@ -33,8 +32,9 @@ public class UniOnItemOrFailure<T> {
      * @return the new {@link Uni}
      */
     public Uni<T> invoke(BiConsumer<? super T, Throwable> callback) {
+        BiConsumer<? super T, Throwable> actual = Infrastructure.decorate(nonNull(callback, "callback"));
         return Infrastructure.onUniCreation(
-                new UniOnItemOrFailureConsume<>(upstream, nonNull(callback, "callback")));
+                new UniOnItemOrFailureConsume<>(upstream, actual));
     }
 
     /**
@@ -46,6 +46,7 @@ public class UniOnItemOrFailure<T> {
      */
     public Uni<T> invoke(Runnable callback) {
         Runnable actual = nonNull(callback, "callback");
+        // Decoration happens in `invoke`
         return invoke((ignoredItem, ignoredFailure) -> actual.run());
     }
 
@@ -58,9 +59,9 @@ public class UniOnItemOrFailure<T> {
      * @return the new {@link Uni}
      */
     public Uni<T> call(BiFunction<? super T, Throwable, Uni<?>> callback) {
-        ParameterValidation.nonNull(callback, "callback");
+        BiFunction<? super T, Throwable, Uni<?>> actual = Infrastructure.decorate(nonNull(callback, "callback"));
         return transformToUni((res, fail) -> {
-            Uni<?> uni = callback.apply(res, fail);
+            Uni<?> uni = actual.apply(res, fail);
             if (uni == null) {
                 throw new NullPointerException("The callback produced a `null` uni");
             }
@@ -87,7 +88,7 @@ public class UniOnItemOrFailure<T> {
      * @return the new {@link Uni}
      */
     public Uni<T> call(Supplier<Uni<?>> callback) {
-        Supplier<Uni<?>> actual = nonNull(callback, "callback");
+        Supplier<Uni<?>> actual = Infrastructure.decorate(nonNull(callback, "callback"));
         return call((ignoredItem, ignoredFailure) -> actual.get());
     }
 
@@ -102,6 +103,7 @@ public class UniOnItemOrFailure<T> {
      */
     @Deprecated
     public Uni<T> invokeUni(BiFunction<? super T, Throwable, Uni<?>> callback) {
+        // Decoration happens in `call`
         return call(callback);
     }
 
@@ -122,6 +124,7 @@ public class UniOnItemOrFailure<T> {
      */
     @Deprecated
     public <R> Uni<R> apply(BiFunction<? super T, Throwable, ? extends R> mapper) {
+        // Decoration happens in `transform`
         return transform(mapper);
     }
 
@@ -140,7 +143,8 @@ public class UniOnItemOrFailure<T> {
      * @return the new {@link Uni}
      */
     public <R> Uni<R> transform(BiFunction<? super T, Throwable, ? extends R> mapper) {
-        return Infrastructure.onUniCreation(new UniOnItemOrFailureMap<>(upstream, mapper));
+        BiFunction<? super T, Throwable, ? extends R> actual = Infrastructure.decorate(nonNull(mapper, "mapper"));
+        return Infrastructure.onUniCreation(new UniOnItemOrFailureMap<>(upstream, actual));
     }
 
     /**
@@ -163,7 +167,8 @@ public class UniOnItemOrFailure<T> {
      *         in an asynchronous manner.
      */
     public <R> Uni<R> transformToUni(BiFunction<? super T, Throwable, Uni<? extends R>> mapper) {
-        return Infrastructure.onUniCreation(new UniOnItemOrFailureFlatMap<>(upstream, mapper));
+        BiFunction<? super T, Throwable, Uni<? extends R>> actual = Infrastructure.decorate(nonNull(mapper, "mapper"));
+        return Infrastructure.onUniCreation(new UniOnItemOrFailureFlatMap<>(upstream, actual));
     }
 
     /**
@@ -188,6 +193,7 @@ public class UniOnItemOrFailure<T> {
      */
     @Deprecated
     public <R> Uni<R> produceUni(BiFunction<? super T, Throwable, Uni<? extends R>> mapper) {
+        // Decoration happens in `transformToUni`
         return transformToUni(mapper);
     }
 
@@ -208,10 +214,11 @@ public class UniOnItemOrFailure<T> {
      *         in an asynchronous manner.
      */
     public <R> Uni<R> transformToUni(Functions.TriConsumer<? super T, Throwable, UniEmitter<? super R>> consumer) {
-        nonNull(consumer, "consumer");
+        Functions.TriConsumer<? super T, Throwable, UniEmitter<? super R>> actual = Infrastructure
+                .decorate(nonNull(consumer, "consumer"));
         return this.transformToUni((item, failure) -> Uni.createFrom().emitter(emitter -> {
             try {
-                consumer.accept(item, failure, emitter);
+                actual.accept(item, failure, emitter);
             } catch (Throwable e) {
                 if (failure != null) {
                     emitter.fail(new CompositeException(failure, e));
@@ -241,6 +248,7 @@ public class UniOnItemOrFailure<T> {
      */
     @Deprecated
     public <R> Uni<R> produceUni(Functions.TriConsumer<? super T, Throwable, UniEmitter<? super R>> consumer) {
+        // Decoration happens in `transformToUni`
         return transformToUni(consumer);
     }
 

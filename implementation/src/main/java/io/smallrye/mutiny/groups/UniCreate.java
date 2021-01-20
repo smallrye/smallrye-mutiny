@@ -1,5 +1,7 @@
 package io.smallrye.mutiny.groups;
 
+import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
+
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
@@ -99,10 +101,10 @@ public class UniCreate {
      */
     public <T, S> Uni<T> completionStage(Supplier<S> stateSupplier,
             Function<S, ? extends CompletionStage<? extends T>> mapper) {
-        ParameterValidation.nonNull(stateSupplier, "stateSupplier");
-        ParameterValidation.nonNull(mapper, "mapper");
+        Supplier<S> actualStateSupplier = Infrastructure.decorate(nonNull(stateSupplier, "stateSupplier"));
+        Function<S, ? extends CompletionStage<? extends T>> actualMapper = Infrastructure.decorate(nonNull(mapper, "mapper"));
         return Infrastructure
-                .onUniCreation(new UniCreateFromCompletionStageWithState<>(stateSupplier, mapper));
+                .onUniCreation(new UniCreateFromCompletionStageWithState<>(actualStateSupplier, actualMapper));
     }
 
     /**
@@ -128,8 +130,9 @@ public class UniCreate {
      * @return the produced {@link Uni}
      */
     public <T> Uni<T> completionStage(Supplier<? extends CompletionStage<? extends T>> supplier) {
+        Supplier<? extends CompletionStage<? extends T>> actual = Infrastructure.decorate(nonNull(supplier, "supplier"));
         return Infrastructure
-                .onUniCreation(new UniCreateFromCompletionStage<>(ParameterValidation.nonNull(supplier, "supplier")));
+                .onUniCreation(new UniCreateFromCompletionStage<>(actual));
     }
 
     /**
@@ -169,7 +172,7 @@ public class UniCreate {
      * @return the new {@link Uni}
      */
     public <T> Uni<T> item(Supplier<? extends T> supplier) {
-        Supplier<? extends T> actual = ParameterValidation.nonNull(supplier, "supplier");
+        Supplier<? extends T> actual = Infrastructure.decorate(ParameterValidation.nonNull(supplier, "supplier"));
         return Infrastructure.onUniCreation(new UniCreateFromItemSupplier<>(actual));
     }
 
@@ -193,8 +196,8 @@ public class UniCreate {
      * @return the produced {@link Uni}
      */
     public <T, S> Uni<T> item(Supplier<S> stateSupplier, Function<S, ? extends T> mapper) {
-        Supplier<S> actualSupplier = ParameterValidation.nonNull(stateSupplier, "stateSupplier");
-        Function<S, ? extends T> actualMapper = ParameterValidation.nonNull(mapper, "mapper");
+        Supplier<S> actualSupplier = Infrastructure.decorate(ParameterValidation.nonNull(stateSupplier, "stateSupplier"));
+        Function<S, ? extends T> actualMapper = Infrastructure.decorate(ParameterValidation.nonNull(mapper, "mapper"));
         return Infrastructure.onUniCreation(new UniCreateFromItemWithState<>(actualSupplier, actualMapper));
     }
 
@@ -257,7 +260,7 @@ public class UniCreate {
      * @return the new {@link Uni}
      */
     public <T> Uni<T> optional(Supplier<Optional<T>> supplier) {
-        Supplier<Optional<T>> actual = ParameterValidation.nonNull(supplier, "supplier");
+        Supplier<Optional<T>> actual = Infrastructure.decorate(ParameterValidation.nonNull(supplier, "supplier"));
         return item(() -> actual.get().orElse(null));
     }
 
@@ -280,7 +283,7 @@ public class UniCreate {
      * @return the produced {@link Uni}
      */
     public <T> Uni<T> emitter(Consumer<UniEmitter<? super T>> consumer) {
-        Consumer<UniEmitter<? super T>> actual = ParameterValidation.nonNull(consumer, "consumer");
+        Consumer<UniEmitter<? super T>> actual = Infrastructure.decorate(ParameterValidation.nonNull(consumer, "consumer"));
         return Infrastructure.onUniCreation(new UniCreateWithEmitter<>(actual));
     }
 
@@ -312,10 +315,11 @@ public class UniCreate {
      * @return the produced {@link Uni}
      */
     public <T, S> Uni<T> emitter(Supplier<S> stateSupplier, BiConsumer<S, UniEmitter<? super T>> consumer) {
-        BiConsumer<S, UniEmitter<? super T>> actual = ParameterValidation.nonNull(consumer, "consumer");
-        ParameterValidation.nonNull(stateSupplier, "stateSupplier");
+        BiConsumer<S, UniEmitter<? super T>> actual = Infrastructure
+                .decorate(ParameterValidation.nonNull(consumer, "consumer"));
+        Supplier<S> supplier = Infrastructure.decorate(ParameterValidation.nonNull(stateSupplier, "stateSupplier"));
         return Infrastructure
-                .onUniCreation(new UniCreateFromEmitterWithState<>(stateSupplier, actual));
+                .onUniCreation(new UniCreateFromEmitterWithState<>(supplier, actual));
     }
 
     /**
@@ -336,7 +340,7 @@ public class UniCreate {
      * @return the produced {@link Uni}
      */
     public <T> Uni<T> deferred(Supplier<Uni<? extends T>> supplier) {
-        Supplier<Uni<? extends T>> actual = ParameterValidation.nonNull(supplier, "supplier");
+        Supplier<Uni<? extends T>> actual = Infrastructure.decorate(ParameterValidation.nonNull(supplier, "supplier"));
         return Infrastructure.onUniCreation(new UniCreateFromDeferredSupplier<>(actual));
     }
 
@@ -368,10 +372,10 @@ public class UniCreate {
      * @return the produced {@link Uni}
      */
     public <T, S> Uni<T> deferred(Supplier<S> stateSupplier, Function<S, Uni<? extends T>> mapper) {
-        ParameterValidation.nonNull(stateSupplier, "stateSupplier");
-        ParameterValidation.nonNull(mapper, "mapper");
+        Supplier<S> actualSupplier = Infrastructure.decorate(nonNull(stateSupplier, "stateSupplier"));
+        Function<S, Uni<? extends T>> actualProducer = Infrastructure.decorate(nonNull(mapper, "mapper"));
         return Infrastructure
-                .onUniCreation(new UniCreateFromDeferredSupplierWithState<>(stateSupplier, mapper));
+                .onUniCreation(new UniCreateFromDeferredSupplierWithState<>(actualSupplier, actualProducer));
     }
 
     /**
@@ -398,7 +402,7 @@ public class UniCreate {
      * @return the produced {@link Uni}
      */
     public <T> Uni<T> failure(Supplier<Throwable> supplier) {
-        Supplier<Throwable> actual = ParameterValidation.nonNull(supplier, "supplier");
+        Supplier<Throwable> actual = Infrastructure.decorate(ParameterValidation.nonNull(supplier, "supplier"));
         return Infrastructure.onUniCreation(new UniCreateFromFailureSupplier<>(actual));
     }
 

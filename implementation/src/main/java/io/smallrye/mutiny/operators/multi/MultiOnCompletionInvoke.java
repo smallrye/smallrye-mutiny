@@ -12,8 +12,8 @@ public class MultiOnCompletionInvoke<T> extends AbstractMultiOperator<T, T> {
     private final Runnable action;
 
     public MultiOnCompletionInvoke(Multi<? extends T> upstream, Runnable action) {
-        super(nonNull(upstream, "upstream"));
-        this.action = nonNull(action, "action");
+        super(upstream);
+        this.action = action;
     }
 
     @Override

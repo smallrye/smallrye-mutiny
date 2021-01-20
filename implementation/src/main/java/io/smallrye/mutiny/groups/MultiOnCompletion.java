@@ -33,7 +33,8 @@ public class MultiOnCompletion<T> {
      * @return the new {@link Multi}
      */
     public Multi<T> invoke(Runnable action) {
-        return Infrastructure.onMultiCreation(new MultiOnCompletionInvoke<>(upstream, action));
+        Runnable runnable = Infrastructure.decorate(nonNull(action, "action"));
+        return Infrastructure.onMultiCreation(new MultiOnCompletionInvoke<>(upstream, runnable));
     }
 
     /**
@@ -46,6 +47,7 @@ public class MultiOnCompletion<T> {
      */
     @Deprecated
     public Multi<T> invokeUni(Supplier<Uni<?>> supplier) {
+        // Decoration happens in `call`
         return call(supplier);
     }
 
@@ -57,7 +59,8 @@ public class MultiOnCompletion<T> {
      * @return the new {@link Multi}
      */
     public Multi<T> call(Supplier<Uni<?>> supplier) {
-        return Infrastructure.onMultiCreation(new MultiOnCompletionCall<>(upstream, supplier));
+        Supplier<Uni<?>> actual = Infrastructure.decorate(nonNull(supplier, "supplier"));
+        return Infrastructure.onMultiCreation(new MultiOnCompletionCall<>(upstream, actual));
     }
 
     /**
@@ -78,9 +81,8 @@ public class MultiOnCompletion<T> {
      * @return the new {@link Multi}
      */
     public Multi<T> failWith(Supplier<Throwable> supplier) {
-        nonNull(supplier, "supplier");
-
-        return switchToEmitter(MultiIfEmpty.createMultiFromFailureSupplier(supplier));
+        Supplier<Throwable> actual = Infrastructure.decorate(nonNull(supplier, "supplier"));
+        return switchToEmitter(MultiIfEmpty.createMultiFromFailureSupplier(actual));
     }
 
     /**
@@ -103,8 +105,8 @@ public class MultiOnCompletion<T> {
      * @return the new {@link Multi}
      */
     public Multi<T> switchToEmitter(Consumer<MultiEmitter<? super T>> consumer) {
-        nonNull(consumer, "consumer");
-        return switchTo(() -> Multi.createFrom().emitter(consumer));
+        Consumer<MultiEmitter<? super T>> actual = Infrastructure.decorate(nonNull(consumer, "consumer"));
+        return switchTo(() -> Multi.createFrom().emitter(actual));
     }
 
     /**
@@ -128,7 +130,8 @@ public class MultiOnCompletion<T> {
      * @return the new {@link Uni}
      */
     public Multi<T> switchTo(Supplier<Publisher<? extends T>> supplier) {
-        return Infrastructure.onMultiCreation(new MultiSwitchOnCompletion<>(upstream, nonNull(supplier, "supplier")));
+        Supplier<Publisher<? extends T>> actual = Infrastructure.decorate(nonNull(supplier, "supplier"));
+        return Infrastructure.onMultiCreation(new MultiSwitchOnCompletion<>(upstream, actual));
     }
 
     /**
@@ -163,8 +166,8 @@ public class MultiOnCompletion<T> {
      * @return the new {@link Multi}
      */
     public Multi<T> continueWith(Supplier<? extends Iterable<? extends T>> supplier) {
-        nonNull(supplier, "supplier");
-        return switchTo(() -> MultiIfEmpty.createMultiFromIterableSupplier(supplier));
+        Supplier<? extends Iterable<? extends T>> actual = Infrastructure.decorate(nonNull(supplier, "supplier"));
+        return switchTo(() -> MultiIfEmpty.createMultiFromIterableSupplier(actual));
     }
 
     public MultiIfEmpty<T> ifEmpty() {

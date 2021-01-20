@@ -30,6 +30,7 @@ public class MultiConvert<T> {
      * @throws RuntimeException if the conversion fails.
      */
     public <R> R with(Function<Multi<T>, R> converter) {
+        // No interception for converters.
         nonNull(converter, "converter");
         return converter.apply(upstream);
     }

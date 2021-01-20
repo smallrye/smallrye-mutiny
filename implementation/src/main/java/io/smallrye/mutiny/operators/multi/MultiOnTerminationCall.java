@@ -18,8 +18,8 @@ public class MultiOnTerminationCall<T> extends AbstractMultiOperator<T, T> {
     private final BiFunction<Throwable, Boolean, Uni<?>> mapper;
 
     public MultiOnTerminationCall(Multi<? extends T> upstream, BiFunction<Throwable, Boolean, Uni<?>> mapper) {
-        super(nonNull(upstream, "upstream"));
-        this.mapper = nonNull(mapper, "mapper");
+        super(upstream);
+        this.mapper = mapper;
     }
 
     @Override

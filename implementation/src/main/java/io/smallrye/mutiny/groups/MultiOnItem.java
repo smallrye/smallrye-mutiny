@@ -10,7 +10,6 @@ import org.reactivestreams.Publisher;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
-import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.multi.*;
 import io.smallrye.mutiny.subscription.BackPressureStrategy;
@@ -37,6 +36,7 @@ public class MultiOnItem<T> {
      */
     @Deprecated
     public <R> Multi<R> apply(Function<? super T, ? extends R> mapper) {
+        // Decoration happens in `transform`
         return transform(mapper);
     }
 
@@ -52,7 +52,8 @@ public class MultiOnItem<T> {
      * @return the new {@link Multi}
      */
     public <R> Multi<R> transform(Function<? super T, ? extends R> mapper) {
-        return Infrastructure.onMultiCreation(new MultiMapOp<>(upstream, nonNull(mapper, "mapper")));
+        Function<? super T, ? extends R> actual = Infrastructure.decorate(nonNull(mapper, "mapper"));
+        return Infrastructure.onMultiCreation(new MultiMapOp<>(upstream, actual));
     }
 
     /**
@@ -67,7 +68,8 @@ public class MultiOnItem<T> {
      * @return the new {@link Multi}
      */
     public Multi<T> invoke(Consumer<? super T> callback) {
-        return Infrastructure.onMultiCreation(new MultiOnItemInvoke<>(upstream, callback));
+        Consumer<? super T> actual = Infrastructure.decorate(nonNull(callback, "callback"));
+        return Infrastructure.onMultiCreation(new MultiOnItemInvoke<>(upstream, actual));
     }
 
     /**
@@ -82,6 +84,7 @@ public class MultiOnItem<T> {
      */
     public Multi<T> invoke(Runnable callback) {
         Runnable actual = nonNull(callback, "callback");
+        // The decoration happens in invoke.
         return invoke(ignored -> actual.run());
     }
 
@@ -102,9 +105,9 @@ public class MultiOnItem<T> {
      * @return the new {@link Multi}
      */
     public Multi<T> call(Function<? super T, Uni<?>> action) {
-        ParameterValidation.nonNull(action, "action");
+        Function<? super T, Uni<?>> actual = Infrastructure.decorate(nonNull(action, "action"));
         return transformToUni(i -> {
-            Uni<?> uni = action.apply(i);
+            Uni<?> uni = actual.apply(i);
             if (uni == null) {
                 throw new NullPointerException("The `action` produced a `null` Uni");
             }
@@ -135,7 +138,7 @@ public class MultiOnItem<T> {
      * @return the new {@link Multi}
      */
     public Multi<T> call(Supplier<Uni<?>> action) {
-        Supplier<Uni<?>> actual = nonNull(action, "action");
+        Supplier<Uni<?>> actual = Infrastructure.decorate(nonNull(action, "action"));
         return call(ignored -> actual.get());
     }
 
@@ -158,6 +161,7 @@ public class MultiOnItem<T> {
      */
     @Deprecated
     public Multi<T> invokeUni(Function<? super T, Uni<?>> action) {
+        // Decoration happens in `call`
         return call(action);
     }
 
@@ -205,6 +209,7 @@ public class MultiOnItem<T> {
      */
     @Deprecated
     public <O> MultiFlatten<T, O> produceMulti(Function<? super T, ? extends Publisher<? extends O>> mapper) {
+        // Decoration happens in `transformToMulti`
         return transformToMulti(mapper);
     }
 
@@ -218,7 +223,9 @@ public class MultiOnItem<T> {
      * @return the object to configure the flatten behavior.
      */
     public <O> MultiFlatten<T, O> transformToMulti(Function<? super T, ? extends Publisher<? extends O>> mapper) {
-        return new MultiFlatten<>(upstream, nonNull(mapper, "mapper"), 1, false);
+        Function<? super T, ? extends Publisher<? extends O>> actual = Infrastructure
+                .decorate(nonNull(mapper, "mapper"));
+        return new MultiFlatten<>(upstream, actual, 1, false);
     }
 
     /**
@@ -226,14 +233,14 @@ public class MultiOnItem<T> {
      * {@link Publisher}. The events emitted by the returned {@link Publisher} are propagated downstream using a
      * {@code concatenation}, meaning that it does not interleaved the items produced by the different
      * {@link Publisher Publishers}.
-     *
+     * <p>
      * For example, let's imagine an upstream multi {a, b, c} and a mapper emitting the 3 items with some delays
      * between them. For example a -&gt; {a1, a2, a3}, b -&gt; {b1, b2, b3} and c -&gt; {c1, c2, c3}. Using this method
      * on the multi {a, b c} with that mapper may produce the following multi {a1, a2, a3, b1, b2, b3, c1, c2, c3}.
      * So produced multis are concatenated.
-     *
+     * <p>
      * This operation is often called <em>concatMap</em>.
-     *
+     * <p>
      * If the mapper throws an exception, the failure is propagated downstream. No more items will be emitted.
      * If one of the produced {@link Publisher} propagates a failure, the failure is propagated downstream and no
      * more items will be emitted.
@@ -243,6 +250,7 @@ public class MultiOnItem<T> {
      * @return the resulting multi
      */
     public <O> Multi<O> transformToMultiAndConcatenate(Function<? super T, ? extends Publisher<? extends O>> mapper) {
+        // Decoration happens in `transformToMulti`
         return transformToMulti(mapper).concatenate();
     }
 
@@ -250,15 +258,15 @@ public class MultiOnItem<T> {
      * For each items emitted by the upstream, the given {@code mapper} is invoked. This {@code mapper} returns a
      * {@link Publisher}. The events emitted by the returned {@link Publisher} are propagated using a {@code merge},
      * meaning that it may interleave events produced by the different {@link Publisher Publishers}.
-     *
+     * <p>
      * For example, let's imagine an upstream multi {a, b, c} and a mapper emitting the 3 items with some delays
      * between them. For example a -&gt; {a1, a2, a3}, b -&gt; {b1, b2, b3} and c -&gt; {c1, c2, c3}. Using this method
      * on the multi {a, b c} with that mapper may produce the following multi {a1, b1, a2, c1, b2, c2, a3, b3, c3}.
      * So the items from the produced multis are interleaved and are emitted as soon as they are emitted (respecting
      * the downstream request).
-     *
+     * <p>
      * This operation is often called <em>flatMap</em>.
-     *
+     * <p>
      * If the mapper throws an exception, the failure is propagated downstream. No more items will be emitted.
      * If one of the produced {@link Publisher} propagates a failure, the failure is propagated downstream and no
      * more items will be emitted.
@@ -268,6 +276,7 @@ public class MultiOnItem<T> {
      * @return the resulting multi
      */
     public <O> Multi<O> transformToMultiAndMerge(Function<? super T, ? extends Publisher<? extends O>> mapper) {
+        // Decoration happens in `transformToMulti`
         return transformToMulti(mapper).merge();
     }
 
@@ -283,6 +292,7 @@ public class MultiOnItem<T> {
      */
     @Deprecated
     public <O> MultiFlatten<T, O> producePublisher(Function<? super T, ? extends Publisher<? extends O>> mapper) {
+        // Decoration happens in `transformToMulti`
         return transformToMulti(mapper);
     }
 
@@ -296,9 +306,9 @@ public class MultiOnItem<T> {
      * @return the object to configure the flatten behavior.
      */
     public <O> Multi<O> transformToIterable(Function<? super T, ? extends Iterable<O>> mapper) {
-        nonNull(mapper, "mapper");
+        Function<? super T, ? extends Iterable<O>> actual = Infrastructure.decorate(nonNull(mapper, "mapper"));
         return transformToMultiAndConcatenate((x -> {
-            Iterable<O> iterable = mapper.apply(x);
+            Iterable<O> iterable = actual.apply(x);
             if (iterable == null) {
                 return Multi.createFrom().failure(new NullPointerException(MAPPER_RETURNED_NULL));
             } else {
@@ -318,9 +328,10 @@ public class MultiOnItem<T> {
      */
     @Deprecated
     public <O> MultiFlatten<T, O> produceIterable(Function<? super T, ? extends Iterable<? extends O>> mapper) {
-        nonNull(mapper, "mapper");
+        Function<? super T, ? extends Iterable<? extends O>> actual = Infrastructure
+                .decorate(nonNull(mapper, "mapper"));
         return transformToMulti((x -> {
-            Iterable<? extends O> iterable = mapper.apply(x);
+            Iterable<? extends O> iterable = actual.apply(x);
             if (iterable == null) {
                 return Multi.createFrom().failure(new NullPointerException(MAPPER_RETURNED_NULL));
             } else {
@@ -339,8 +350,8 @@ public class MultiOnItem<T> {
      * @return the object to configure the flatten behavior.
      */
     public <O> MultiFlatten<T, O> transformToUni(Function<? super T, Uni<? extends O>> mapper) {
-        nonNull(mapper, "mapper");
-        Function<? super T, ? extends Publisher<? extends O>> wrapper = res -> mapper.apply(res).toMulti();
+        Function<? super T, Uni<? extends O>> actual = Infrastructure.decorate(nonNull(mapper, "mapper"));
+        Function<? super T, ? extends Publisher<? extends O>> wrapper = res -> actual.apply(res).toMulti();
         return new MultiFlatten<>(upstream, wrapper, 1, false);
     }
 
@@ -349,15 +360,15 @@ public class MultiOnItem<T> {
      * {@link Uni}. The events emitted by the returned {@link Uni} are emitted downstream. Items emitted
      * by the returned {@link Uni Unis} are emitted downstream using a {@code merge}, meaning that it
      * may interleave events produced by the different {@link Uni Uni}.
-     *
+     * <p>
      * For example, let's imagine an upstream multi {a, b, c} and a mapper emitting 1 items. This emission may be
      * delayed for various reasons. For example a -&gt; a1 without delay, b -&gt; b1 after some delay and c -&gt; c1 without
      * delay. Using this method on the multi {a, b c} with that mapper would produce the following multi {a1, c1, b1}.
      * Indeed, the b1 item is emitted after c1. So the items from the produced unis are interleaved and are emitted as
      * soon as they are emitted (respecting the downstream request).
-     *
+     * <p>
      * This operation is often called <em>flatMapSingle</em>.
-     *
+     * <p>
      * If the mapper throws an exception, the failure is propagated downstream. No more items will be emitted.
      * If one of the produced {@link Uni} propagates a failure, the failure is propagated downstream and no
      * more items will be emitted.
@@ -367,6 +378,7 @@ public class MultiOnItem<T> {
      * @return the resulting multi
      */
     public <O> Multi<O> transformToUniAndConcatenate(Function<? super T, Uni<? extends O>> mapper) {
+        // Decoration happens in `transformToUni`
         return transformToUni(mapper).concatenate();
     }
 
@@ -375,15 +387,15 @@ public class MultiOnItem<T> {
      * {@link Uni}. The events emitted by the returned {@link Uni} are emitted downstream. Items emitted
      * by the returned {@link Uni Unis} are emitted downstream using a {@code concatenation}, meaning the the returned
      * {@link Multi} contains the items in the same order as the upstream.
-     *
+     * <p>
      * For example, let's imagine an upstream multi {a, b, c} and a mapper emitting 1 items. This emission may be
      * delayed for various reasons. For example a -&gt; a1 without delay, b -&gt; b1 after some delay and c -&gt; c1 without
      * delay. Using this method on the multi {a, b c} with that mapper would produce the following multi {a1, b1, c1}.
      * Indeed, even if c1 could be emitted before b1, this method preserves the order. So the items from the produced
      * unis are concatenated.
-     *
+     * <p>
      * This operation is often called <em>concatMapSingle</em>.
-     *
+     * <p>
      * If the mapper throws an exception, the failure is propagated downstream. No more items will be emitted.
      * If one of the produced {@link Uni} propagates a failure, the failure is propagated downstream and no
      * more items will be emitted.
@@ -393,6 +405,7 @@ public class MultiOnItem<T> {
      * @return the resulting multi
      */
     public <O> Multi<O> transformToUniAndMerge(Function<? super T, Uni<? extends O>> mapper) {
+        // Decoration happens in `transformToUni`
         return transformToUni(mapper).merge();
     }
 
@@ -408,9 +421,8 @@ public class MultiOnItem<T> {
      */
     @Deprecated
     public <O> MultiFlatten<T, O> produceUni(Function<? super T, Uni<? extends O>> mapper) {
-        nonNull(mapper, "mapper");
-        Function<? super T, ? extends Publisher<? extends O>> wrapper = res -> mapper.apply(res).toMulti();
-        return new MultiFlatten<>(upstream, wrapper, 1, false);
+        // Decoration happens in `transformToUni`
+        return transformToUni(mapper);
     }
 
     /**
@@ -425,11 +437,12 @@ public class MultiOnItem<T> {
     @Deprecated
     public <O> MultiFlatten<T, O> produceCompletionStage(
             Function<? super T, ? extends CompletionStage<? extends O>> mapper) {
-        nonNull(mapper, "mapper");
+        Function<? super T, ? extends CompletionStage<? extends O>> actual = Infrastructure
+                .decorate(nonNull(mapper, "mapper"));
         Function<? super T, ? extends Publisher<? extends O>> wrapper = res -> Multi.createFrom().emitter(emitter -> {
             CompletionStage<? extends O> stage;
             try {
-                stage = mapper.apply(res);
+                stage = actual.apply(res);
             } catch (Throwable e) {
                 emitter.fail(e);
                 return;
@@ -502,7 +515,10 @@ public class MultiOnItem<T> {
      * @return the produced {@link Multi}
      */
     public <S> Multi<S> scan(Supplier<S> initialStateProducer, BiFunction<S, ? super T, S> accumulator) {
-        return Infrastructure.onMultiCreation(new MultiScanWithSeedOp<>(upstream, initialStateProducer, accumulator));
+        Supplier<S> actualSupplier = Infrastructure
+                .decorate(nonNull(initialStateProducer, "initialStateProducer"));
+        BiFunction<S, ? super T, S> actualAccumulator = Infrastructure.decorate(nonNull(accumulator, "accumulator"));
+        return Infrastructure.onMultiCreation(new MultiScanWithSeedOp<>(upstream, actualSupplier, actualAccumulator));
     }
 
     /**
@@ -518,23 +534,24 @@ public class MultiOnItem<T> {
      * @return the produced {@link Multi}
      */
     public Multi<T> scan(BinaryOperator<T> accumulator) {
-        return Infrastructure.onMultiCreation(new MultiScanOp<>(upstream, accumulator));
+        BinaryOperator<T> actual = Infrastructure.decorate(nonNull(accumulator, "accumulator"));
+        return Infrastructure.onMultiCreation(new MultiScanOp<>(upstream, actual));
     }
 
     /**
      * Produces a new {@link Multi} invoking the given function when the current {@link Multi} fires an item (only once).
      * The function transforms the received item into a failure that will be fired by the produced {@link Multi}.
      * For asynchronous composition, see {@link #transformToUni(Function)}}.
-     *
+     * <p>
      * The upstream subscription is cancelled after the emission of the first item, as a failure is propagated downstream.
      *
      * @param mapper the mapper function, must not be {@code null}, must not return {@code null}
      * @return the new {@link Multi}
      */
     public Multi<T> failWith(Function<? super T, ? extends Throwable> mapper) {
-        nonNull(mapper, "mapper");
+        Function<? super T, ? extends Throwable> actual = Infrastructure.decorate(nonNull(mapper, "mapper"));
         return Infrastructure.onMultiCreation(transformToUniAndConcatenate(t -> {
-            Throwable failure = Objects.requireNonNull(mapper.apply(t), MAPPER_RETURNED_NULL);
+            Throwable failure = Objects.requireNonNull(actual.apply(t), MAPPER_RETURNED_NULL);
             return Uni.createFrom().failure(failure);
         }));
     }
@@ -542,16 +559,16 @@ public class MultiOnItem<T> {
     /**
      * Produces a new {@link Multi} invoking the given supplier when the current {@link Uni} fires an item.
      * The supplier produce the received item into a failure that will be fired by the produced {@link Multi}.
-     *
+     * <p>
      * The upstream subscription is cancelled after the emission of the first item, as a failure is propagated downstream.
      *
      * @param supplier the supplier to produce the failure, must not be {@code null}, must not produce {@code null}
      * @return the new {@link Multi}
      */
     public Multi<T> failWith(Supplier<? extends Throwable> supplier) {
-        nonNull(supplier, "supplier");
+        Supplier<? extends Throwable> actual = Infrastructure.decorate(nonNull(supplier, "supplier"));
         return Infrastructure.onMultiCreation(transformToUniAndConcatenate(ignored -> {
-            Throwable failure = Objects.requireNonNull(supplier.get(), SUPPLIER_PRODUCED_NULL);
+            Throwable failure = Objects.requireNonNull(actual.get(), SUPPLIER_PRODUCED_NULL);
             return Uni.createFrom().failure(failure);
         }));
     }

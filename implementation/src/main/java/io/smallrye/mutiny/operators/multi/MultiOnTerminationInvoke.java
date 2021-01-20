@@ -15,8 +15,8 @@ public class MultiOnTerminationInvoke<T> extends AbstractMultiOperator<T, T> {
     private final BiConsumer<Throwable, Boolean> callback;
 
     public MultiOnTerminationInvoke(Multi<? extends T> upstream, BiConsumer<Throwable, Boolean> callback) {
-        super(nonNull(upstream, "upstream"));
-        this.callback = nonNull(callback, "callback");
+        super(upstream);
+        this.callback = callback;
     }
 
     @Override

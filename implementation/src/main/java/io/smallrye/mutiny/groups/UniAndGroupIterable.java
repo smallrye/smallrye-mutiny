@@ -45,8 +45,9 @@ public class UniAndGroupIterable<T1> {
     }
 
     public <O> Uni<O> combinedWith(Function<List<?>, O> function) {
+        Function<List<?>, O> actual = Infrastructure.decorate(nonNull(function, "function"));
         return Infrastructure
-                .onUniCreation(new UniAndCombination<>(source, unis, nonNull(function, "function"), collectFailures));
+                .onUniCreation(new UniAndCombination<>(source, unis, actual, collectFailures));
     }
 
     /**

@@ -28,8 +28,8 @@ public class UniConvert<T> {
      * @throws RuntimeException if the conversion fails.
      */
     public <R> R with(Function<Uni<T>, R> converter) {
-        nonNull(converter, "converter");
-        return converter.apply(upstream);
+        // No interception for converters
+        return nonNull(converter, "converter").apply(upstream);
     }
 
     public CompletionStage<T> toCompletionStage() {

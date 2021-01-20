@@ -1,5 +1,7 @@
 package io.smallrye.mutiny.groups;
 
+import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
+
 import java.util.concurrent.CompletionStage;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -7,7 +9,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import io.smallrye.mutiny.Uni;
-import io.smallrye.mutiny.helpers.ParameterValidation;
+import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.subscription.UniEmitter;
 
 public class MultiRepetition {
@@ -23,6 +25,7 @@ public class MultiRepetition {
      * @return the object to configure the repetition
      */
     public <S, T> UniRepeat<T> uni(Supplier<S> stateSupplier, Function<S, Uni<? extends T>> producer) {
+        // Decoration happens in "deferred"
         Uni<T> upstream = Uni.createFrom().deferred(stateSupplier, producer);
         return new UniRepeat<>(upstream);
     }
@@ -35,6 +38,7 @@ public class MultiRepetition {
      * @return the object to configure the repetition
      */
     public <T> UniRepeat<T> uni(Supplier<Uni<? extends T>> uniSupplier) {
+        // Decoration happens in "deferred"
         Uni<T> upstream = Uni.createFrom().deferred(uniSupplier);
         return new UniRepeat<>(upstream);
     }
@@ -51,8 +55,10 @@ public class MultiRepetition {
      */
     public <S, T> UniRepeat<T> completionStage(Supplier<S> stateSupplier,
             Function<S, ? extends CompletionStage<? extends T>> producer) {
-        ParameterValidation.nonNull(producer, "producer");
-        return uni(stateSupplier, s -> Uni.createFrom().completionStage(producer.apply(s)));
+        Function<S, ? extends CompletionStage<? extends T>> actual = Infrastructure
+                .decorate(nonNull(producer, "producer"));
+        // stateSupplier decoration happens in `uni`
+        return uni(stateSupplier, s -> Uni.createFrom().completionStage(actual.apply(s)));
     }
 
     /**
@@ -63,7 +69,8 @@ public class MultiRepetition {
      * @return the object to configure the repetition
      */
     public <T> UniRepeat<T> completionStage(Supplier<? extends CompletionStage<? extends T>> supplier) {
-        ParameterValidation.nonNull(supplier, "supplier");
+        nonNull(supplier, "supplier");
+        // Decoration happens in `uni`
         return uni(() -> Uni.createFrom().completionStage(supplier));
     }
 
@@ -79,8 +86,9 @@ public class MultiRepetition {
      */
     public <S, T> UniRepeat<T> uni(Supplier<S> stateSupplier,
             BiConsumer<S, UniEmitter<? super T>> consumer) {
-        ParameterValidation.nonNull(consumer, "consumer");
-        return uni(stateSupplier, s -> Uni.createFrom().emitter(e -> consumer.accept(s, e)));
+        BiConsumer<S, UniEmitter<? super T>> actual = Infrastructure
+                .decorate(nonNull(consumer, "consumer"));
+        return uni(stateSupplier, s -> Uni.createFrom().emitter(e -> actual.accept(s, e)));
     }
 
     /**
@@ -92,8 +100,8 @@ public class MultiRepetition {
      * @return the object to configure the repetition
      */
     public <T> UniRepeat<T> uni(Consumer<UniEmitter<? super T>> consumer) {
-        ParameterValidation.nonNull(consumer, "consumer");
-        return uni(() -> Uni.createFrom().emitter(consumer));
+        Consumer<UniEmitter<? super T>> actual = Infrastructure.decorate(nonNull(consumer, "consumer"));
+        return uni(() -> Uni.createFrom().emitter(actual));
     }
 
     /**
@@ -105,6 +113,7 @@ public class MultiRepetition {
      * @return the object to configure the repetition
      */
     public <T> UniRepeat<T> supplier(Supplier<? extends T> supplier) {
+        // Decoration happens in `item`
         return new UniRepeat<>(Uni.createFrom().item(supplier));
     }
 
@@ -119,6 +128,7 @@ public class MultiRepetition {
      * @return the object to configure the repetition
      */
     public <S, T> UniRepeat<T> supplier(Supplier<S> stateSupplier, Function<S, ? extends T> producer) {
+        // Decoration happens in "uni"
         return uni(stateSupplier, s -> Uni.createFrom().item(() -> producer.apply(s)));
     }
 }

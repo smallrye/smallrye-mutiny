@@ -1,7 +1,5 @@
 package io.smallrye.mutiny.operators.uni.builders;
 
-import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
-
 import java.util.function.Consumer;
 
 import io.smallrye.mutiny.operators.AbstractUni;
@@ -12,7 +10,7 @@ public class UniCreateWithEmitter<T> extends AbstractUni<T> {
     private final Consumer<UniEmitter<? super T>> consumer;
 
     public UniCreateWithEmitter(Consumer<UniEmitter<? super T>> consumer) {
-        this.consumer = nonNull(consumer, "consumer");
+        this.consumer = consumer;
     }
 
     @Override

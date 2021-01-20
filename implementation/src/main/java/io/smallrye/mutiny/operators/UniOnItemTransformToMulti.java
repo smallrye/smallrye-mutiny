@@ -1,7 +1,6 @@
 package io.smallrye.mutiny.operators;
 
 import static io.smallrye.mutiny.helpers.ParameterValidation.MAPPER_RETURNED_NULL;
-import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
 
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
@@ -24,8 +23,8 @@ public class UniOnItemTransformToMulti<I, O> extends AbstractMulti<O> {
     private final Uni<I> upstream;
 
     public UniOnItemTransformToMulti(Uni<I> upstream, Function<? super I, ? extends Publisher<? extends O>> mapper) {
-        this.upstream = nonNull(upstream, "upstream");
-        this.mapper = nonNull(mapper, "mapper");
+        this.upstream = upstream;
+        this.mapper = mapper;
     }
 
     @Override

@@ -763,6 +763,17 @@ public class MultiOnEventTest {
     }
 
     @Test
+    public void testInvokeOnItemWithRunnableShortcut() {
+        AtomicInteger called = new AtomicInteger();
+
+        List<Integer> r = numbers.invoke(called::incrementAndGet)
+                .collect().asList().await().indefinitely();
+
+        assertThat(r).containsExactly(1, 2);
+        assertThat(called).hasValue(2);
+    }
+
+    @Test
     public void testThatInvokeConsumerMustNotBeNull() {
         assertThrows(IllegalArgumentException.class,
                 () -> Multi.createFrom().item(1).onItem().invoke((Consumer<? super Integer>) null));

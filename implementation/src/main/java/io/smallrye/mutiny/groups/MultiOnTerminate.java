@@ -31,7 +31,8 @@ public class MultiOnTerminate<T> {
      * @return the new {@link Multi}
      */
     public Multi<T> invoke(BiConsumer<Throwable, Boolean> callback) {
-        return Infrastructure.onMultiCreation(new MultiOnTerminationInvoke<>(upstream, nonNull(callback, "callback")));
+        BiConsumer<Throwable, Boolean> actual = Infrastructure.decorate(nonNull(callback, "callback"));
+        return Infrastructure.onMultiCreation(new MultiOnTerminationInvoke<>(upstream, actual));
     }
 
     /**
@@ -44,7 +45,7 @@ public class MultiOnTerminate<T> {
      * @return the new {@link Multi}
      */
     public Multi<T> invoke(Runnable action) {
-        Runnable runnable = nonNull(action, "action");
+        Runnable runnable = Infrastructure.decorate(nonNull(action, "action"));
         return Infrastructure.onMultiCreation(new MultiOnTerminationInvoke<>(upstream, (f, c) -> runnable.run()));
     }
 
@@ -58,7 +59,9 @@ public class MultiOnTerminate<T> {
      * @return the new {@link Multi}
      */
     public Multi<T> call(BiFunction<Throwable, Boolean, Uni<?>> mapper) {
-        return Infrastructure.onMultiCreation(new MultiOnTerminationCall<>(upstream, mapper));
+        BiFunction<Throwable, Boolean, Uni<?>> actual = Infrastructure
+                .decorate(Infrastructure.decorate(nonNull(mapper, "mapper")));
+        return Infrastructure.onMultiCreation(new MultiOnTerminationCall<>(upstream, actual));
     }
 
     /**
@@ -69,7 +72,7 @@ public class MultiOnTerminate<T> {
      * @return the new {@link Multi}
      */
     public Multi<T> call(Supplier<Uni<?>> supplier) {
-        Supplier<Uni<?>> actual = nonNull(supplier, "supplier");
+        Supplier<Uni<?>> actual = Infrastructure.decorate(nonNull(supplier, "supplier"));
         return call((ignoredFailure, ignoredCancellation) -> actual.get());
     }
 
@@ -85,6 +88,7 @@ public class MultiOnTerminate<T> {
      */
     @Deprecated
     public Multi<T> invokeUni(BiFunction<Throwable, Boolean, Uni<?>> mapper) {
+        // Decoration happens in `call`
         return call(mapper);
     }
 }

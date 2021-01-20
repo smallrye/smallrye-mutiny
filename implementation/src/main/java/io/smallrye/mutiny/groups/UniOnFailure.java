@@ -10,7 +10,6 @@ import java.util.function.Supplier;
 
 import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Uni;
-import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.UniOnFailureFlatMap;
 import io.smallrye.mutiny.operators.UniOnFailureTransform;
@@ -57,8 +56,9 @@ public class UniOnFailure<T> {
      * @return the new {@link Uni}
      */
     public Uni<T> invoke(Consumer<Throwable> callback) {
+        Consumer<Throwable> actual = Infrastructure.decorate(nonNull(callback, "callback"));
         return Infrastructure.onUniCreation(
-                new UniOnItemConsume<>(upstream, null, nonNull(callback, "callback"), predicate));
+                new UniOnItemConsume<>(upstream, null, actual, predicate));
     }
 
     /**
@@ -73,6 +73,7 @@ public class UniOnFailure<T> {
      */
     public Uni<T> invoke(Runnable callback) {
         Runnable actual = nonNull(callback, "callback");
+        // Decoration happens in `invoke`
         return invoke(ignored -> actual.run());
     }
 
@@ -94,6 +95,7 @@ public class UniOnFailure<T> {
      */
     @Deprecated
     public Uni<T> invokeUni(Function<Throwable, Uni<?>> action) {
+        // Decoration happens in `call`
         return call(action);
     }
 
@@ -113,9 +115,9 @@ public class UniOnFailure<T> {
      * @return the new {@link Uni}
      */
     public Uni<T> call(Function<Throwable, Uni<?>> action) {
-        ParameterValidation.nonNull(action, "action");
+        Function<Throwable, Uni<?>> actual = Infrastructure.decorate(nonNull(action, "action"));
         return recoverWithUni(failure -> {
-            Uni<?> uni = Objects.requireNonNull(action.apply(failure), "The `action` produced a `null` uni");
+            Uni<?> uni = Objects.requireNonNull(actual.apply(failure), "The `action` produced a `null` uni");
             //noinspection unchecked
             return (Uni<T>) uni
                     .onItem().failWith(ignored -> failure)
@@ -138,7 +140,7 @@ public class UniOnFailure<T> {
      * @return the new {@link Uni}
      */
     public Uni<T> call(Supplier<Uni<?>> supplier) {
-        Supplier<Uni<?>> actual = nonNull(supplier, "supplier");
+        Supplier<Uni<?>> actual = Infrastructure.decorate(nonNull(supplier, "supplier"));
         return call(ignored -> actual.get());
     }
 
@@ -152,6 +154,7 @@ public class UniOnFailure<T> {
      */
     @Deprecated
     public Uni<T> apply(Function<? super Throwable, ? extends Throwable> mapper) {
+        // Decoration happens in `transform`
         return transform(mapper);
     }
 
@@ -163,7 +166,8 @@ public class UniOnFailure<T> {
      * @return the new {@link Uni}
      */
     public Uni<T> transform(Function<? super Throwable, ? extends Throwable> mapper) {
-        return Infrastructure.onUniCreation(new UniOnFailureTransform<>(upstream, predicate, mapper));
+        Function<? super Throwable, ? extends Throwable> actual = Infrastructure.decorate(nonNull(mapper, "mapper"));
+        return Infrastructure.onUniCreation(new UniOnFailureTransform<>(upstream, predicate, actual));
     }
 
     /**
@@ -187,8 +191,8 @@ public class UniOnFailure<T> {
      * @return the new {@link Uni} that would emit the produced item in case the upstream sends a failure.
      */
     public Uni<T> recoverWithItem(Supplier<T> supplier) {
-        nonNull(supplier, "supplier");
-        return recoverWithItem(ignored -> supplier.get());
+        Supplier<T> actual = Infrastructure.decorate(nonNull(supplier, "supplier"));
+        return recoverWithItem(ignored -> actual.get());
     }
 
     /**
@@ -202,9 +206,9 @@ public class UniOnFailure<T> {
      * @return the new {@link Uni} that would emit the produced item in case the upstream sends a failure.
      */
     public Uni<T> recoverWithItem(Function<? super Throwable, ? extends T> function) {
-        nonNull(function, "function");
+        Function<? super Throwable, ? extends T> actual = Infrastructure.decorate(nonNull(function, "function"));
         return Infrastructure.onUniCreation(new UniOnFailureFlatMap<>(upstream, predicate, failure -> {
-            T newResult = function.apply(failure);
+            T newResult = actual.apply(failure);
             return Uni.createFrom().item(newResult);
         }));
     }
@@ -222,8 +226,9 @@ public class UniOnFailure<T> {
      *         upstream sends a failure.
      */
     public Uni<T> recoverWithUni(Function<? super Throwable, Uni<? extends T>> function) {
+        Function<? super Throwable, Uni<? extends T>> actual = Infrastructure.decorate(nonNull(function, "function"));
         return Infrastructure.onUniCreation(
-                new UniOnFailureFlatMap<>(upstream, predicate, nonNull(function, "function")));
+                new UniOnFailureFlatMap<>(upstream, predicate, actual));
     }
 
     /**
@@ -239,7 +244,8 @@ public class UniOnFailure<T> {
      *         upstream sends a failure.
      */
     public Uni<T> recoverWithUni(Supplier<Uni<? extends T>> supplier) {
-        return recoverWithUni(ignored -> supplier.get());
+        Supplier<Uni<? extends T>> actual = Infrastructure.decorate(nonNull(supplier, "supplier"));
+        return recoverWithUni(ignored -> actual.get());
     }
 
     /**

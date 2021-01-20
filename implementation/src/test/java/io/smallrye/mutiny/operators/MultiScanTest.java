@@ -38,6 +38,19 @@ public class MultiScanTest {
     }
 
     @Test
+    public void testWithAddition() {
+        AssertSubscriber<Integer> subscriber = AssertSubscriber.create(10);
+
+        Multi.createFrom().range(1, 10)
+                .onItem().scan(Integer::sum)
+                .subscribe().withSubscriber(subscriber);
+
+        subscriber
+                .assertCompleted()
+                .assertItems(1, 3, 6, 10, 15, 21, 28, 36, 45);
+    }
+
+    @Test
     public void testWithSimplerScannerWithSupplier() {
         AssertSubscriber<Integer> subscriber = AssertSubscriber.create(Long.MAX_VALUE);
 

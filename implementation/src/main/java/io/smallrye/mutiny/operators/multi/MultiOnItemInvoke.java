@@ -13,8 +13,8 @@ public class MultiOnItemInvoke<T> extends AbstractMultiOperator<T, T> {
     private final Consumer<? super T> callback;
 
     public MultiOnItemInvoke(Multi<? extends T> upstream, Consumer<? super T> callback) {
-        super(nonNull(upstream, "upstream"));
-        this.callback = nonNull(callback, "callback");
+        super(upstream);
+        this.callback = callback;
     }
 
     @Override

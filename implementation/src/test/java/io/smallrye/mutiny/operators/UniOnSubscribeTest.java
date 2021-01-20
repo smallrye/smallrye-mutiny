@@ -291,12 +291,6 @@ public class UniOnSubscribeTest {
     }
 
     @Test
-    public void testThatInvokeUpstreamCannotBeNull() {
-        assertThrows(IllegalArgumentException.class, () -> new UniOnSubscribeInvoke<>(null, s -> {
-        }));
-    }
-
-    @Test
     public void testThatCallUpstreamCannotBeNull() {
         assertThrows(IllegalArgumentException.class,
                 () -> new UniOnSubscribeCall<>(null, s -> Uni.createFrom().nullItem()));

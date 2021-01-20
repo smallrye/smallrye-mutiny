@@ -48,8 +48,9 @@ public class MultiOnSubscribe<T> {
      * @return the new {@link Multi}
      */
     public Multi<T> invoke(Consumer<? super Subscription> callback) {
+        Consumer<? super Subscription> actual = Infrastructure.decorate(nonNull(callback, "callback"));
         return Infrastructure.onMultiCreation(
-                new MultiOnSubscribeInvokeOp<>(upstream, nonNull(callback, "callback")));
+                new MultiOnSubscribeInvokeOp<>(upstream, actual));
     }
 
     /**
@@ -63,6 +64,7 @@ public class MultiOnSubscribe<T> {
      */
     public Multi<T> invoke(Runnable callback) {
         Runnable actual = nonNull(callback, "callback");
+        // Decoration happens in `invoke`
         return invoke(ignored -> actual.run());
     }
 
@@ -78,8 +80,9 @@ public class MultiOnSubscribe<T> {
      * @return the new {@link Multi}
      */
     public Multi<T> call(Function<? super Subscription, Uni<?>> action) {
+        Function<? super Subscription, Uni<?>> actual = Infrastructure.decorate(nonNull(action, "action"));
         return Infrastructure.onMultiCreation(
-                new MultiOnSubscribeCall<>(upstream, nonNull(action, "action")));
+                new MultiOnSubscribeCall<>(upstream, actual));
     }
 
     /**
@@ -94,7 +97,7 @@ public class MultiOnSubscribe<T> {
      * @return the new {@link Multi}
      */
     public Multi<T> call(Supplier<Uni<?>> action) {
-        Supplier<Uni<?>> actual = nonNull(action, "action");
+        Supplier<Uni<?>> actual = Infrastructure.decorate(nonNull(action, "action"));
         return call(ignored -> actual.get());
     }
 
@@ -112,6 +115,7 @@ public class MultiOnSubscribe<T> {
      */
     @Deprecated
     public Multi<T> invokeUni(Function<? super Subscription, Uni<?>> action) {
+        // Decoration happens in `call`
         return call(action);
     }
 }

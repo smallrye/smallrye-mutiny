@@ -14,7 +14,7 @@ public class DeferredMulti<T> extends AbstractMulti<T> {
     private final Supplier<? extends Publisher<? extends T>> supplier;
 
     public DeferredMulti(Supplier<? extends Publisher<? extends T>> supplier) {
-        this.supplier = ParameterValidation.nonNull(supplier, "supplier");
+        this.supplier = supplier;
     }
 
     @Override
