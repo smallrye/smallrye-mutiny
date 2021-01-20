@@ -90,7 +90,7 @@ public class MultiRepeatUntilOp<T> extends AbstractMultiOperator<T, T> implement
          * Access does not need to be synchronized as it is only accessed in onItem and onCompletion which cannot be
          * called concurrently.
          */
-        private boolean passed;
+        private boolean passed = true;
 
         public RepeatUntilProcessor(Multi<? extends T> upstream, MultiSubscriber<? super T> downstream,
                 long times, Predicate<T> predicate) {

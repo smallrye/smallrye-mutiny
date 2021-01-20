@@ -32,7 +32,7 @@ public class UniRepeat<T> {
      * <p>
      * The produced {@link Multi} contains the items emitted by the upstream {@link Uni}. After every emission,
      * another subscription is performed on the {@link Uni}, and the item is then propagated. If the {@link Uni}
-     * fires a failure, the failure is propagated. If the {@link Uni} fires an empty items, it resubscribes.
+     * fires a failure, the failure is propagated. If the {@link Uni} emits `null` as item, it resubscribes.
      *
      * @return the {@link Multi} containing the items from the upstream {@link Uni}, resubscribed indefinitely.
      */
@@ -52,7 +52,7 @@ public class UniRepeat<T> {
      * <p>
      * The produced {@link Multi} contains the items emitted by the upstream {@link Uni}. After every emission,
      * another subscription is performed on the {@link Uni}, and the item is then propagated. If the {@link Uni}
-     * fires a failure, the failure is propagated. If the {@link Uni} fires an empty items, it resubscribes.
+     * fires a failure, the failure is propagated. If the {@link Uni} emits `null` as item, it resubscribes.
      * <p>
      * This method is named {@code atMost} because the repeating re-subscription can be stopped if the subscriber
      * cancels its subscription to the produced {@link Multi}.

@@ -7,14 +7,13 @@ import static org.mockito.Mockito.*;
 
 import java.io.IOException;
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Supplier;
 
 import org.junit.jupiter.api.RepeatedTest;
+import org.junit.jupiter.api.Test;
 import org.reactivestreams.Subscriber;
 
 import io.smallrye.mutiny.Multi;
@@ -637,6 +636,79 @@ public class UniRepeatTest {
             this.items.addAll(items);
             this.next = next;
         }
+    }
+
+    @Test // https://github.com/smallrye/smallrye-mutiny/issues/447
+    void testThatRepetitionIsStoppedOnFailure() {
+        class TestSupplier implements Supplier<Integer> {
+            private final AtomicInteger iter = new AtomicInteger();
+
+            @Override
+            public Integer get() {
+                if (iter.incrementAndGet() < 5) {
+                    throw new NoSuchElementException();
+                } else {
+                    return 123;
+                }
+            }
+        }
+
+        Integer result = Multi.createBy()
+                .repeating().supplier(new TestSupplier()).indefinitely()
+                .onFailure(NoSuchElementException.class).retry().indefinitely()
+                .collect().first()
+                .await().atMost(Duration.ofSeconds(10));
+
+        assertThat(result).isEqualTo(123);
+    }
+
+    @Test // https://github.com/smallrye/smallrye-mutiny/issues/447
+    void testThatRepetitionContinueIfUniEmitsNull() {
+        class TestSupplier implements Supplier<Integer> {
+            private final AtomicInteger iter = new AtomicInteger();
+
+            @Override
+            public Integer get() {
+                if (iter.incrementAndGet() < 5) {
+                    return null;
+                } else {
+                    return 123;
+                }
+            }
+        }
+
+        Integer result = Multi.createBy()
+                .repeating().supplier(new TestSupplier()).indefinitely()
+                .collect().first()
+                .await().atMost(Duration.ofSeconds(10));
+
+        assertThat(result).isEqualTo(123);
+
+    }
+
+    @Test // https://github.com/smallrye/smallrye-mutiny/issues/447
+    void testThatRepetitionContinueIfUniEmitsNullInTheMiuddleOfTheSequence() {
+        class TestSupplier implements Supplier<Integer> {
+            private final AtomicInteger iter = new AtomicInteger();
+
+            @Override
+            public Integer get() {
+                if (iter.incrementAndGet() == 3) {
+                    return null;
+                } else {
+                    return iter.get();
+                }
+            }
+        }
+
+        List<Integer> list = Multi.createBy()
+                .repeating().supplier(new TestSupplier()).indefinitely()
+                .select().first(5)
+                .collect().asList()
+                .await().atMost(Duration.ofSeconds(10));
+
+        assertThat(list).containsExactly(1, 2, 4, 5, 6);
+
     }
 
 }
