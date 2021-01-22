@@ -7,8 +7,8 @@ import java.util.function.Supplier;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
-import io.smallrye.mutiny.operators.UniOnCancellation;
-import io.smallrye.mutiny.operators.UniOnCancellationCall;
+import io.smallrye.mutiny.operators.uni.UniOnCancellation;
+import io.smallrye.mutiny.operators.uni.UniOnCancellationCall;
 
 public class UniOnCancel<T> {
 

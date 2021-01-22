@@ -7,7 +7,6 @@ import java.util.Arrays;
 import org.reactivestreams.Publisher;
 
 import io.smallrye.mutiny.Multi;
-import io.smallrye.mutiny.operators.*;
 
 public class MultiItemCombination {
 

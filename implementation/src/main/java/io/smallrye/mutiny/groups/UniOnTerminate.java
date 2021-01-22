@@ -6,8 +6,8 @@ import java.util.function.Supplier;
 
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
-import io.smallrye.mutiny.operators.UniOnTermination;
-import io.smallrye.mutiny.operators.UniOnTerminationCall;
+import io.smallrye.mutiny.operators.uni.UniOnTermination;
+import io.smallrye.mutiny.operators.uni.UniOnTerminationCall;
 import io.smallrye.mutiny.tuples.Functions;
 
 public class UniOnTerminate<T> {

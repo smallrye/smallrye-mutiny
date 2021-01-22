@@ -11,9 +11,9 @@ import java.util.function.Supplier;
 import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
-import io.smallrye.mutiny.operators.UniOnFailureFlatMap;
-import io.smallrye.mutiny.operators.UniOnFailureTransform;
-import io.smallrye.mutiny.operators.UniOnItemConsume;
+import io.smallrye.mutiny.operators.uni.UniOnFailureFlatMap;
+import io.smallrye.mutiny.operators.uni.UniOnFailureTransform;
+import io.smallrye.mutiny.operators.uni.UniOnItemConsume;
 
 /**
  * Configures the failure handler.

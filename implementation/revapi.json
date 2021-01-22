@@ -1,36 +1,162 @@
-[ {
-  "extension" : "revapi.java",
-  "id" : "java",
-  "configuration" : {
-    "missing-classes" : {
-      "behavior" : "report",
-      "ignoreMissingAnnotations" : false
-    },
-    "filter" : {
-      "packages" : {
-        "regex" : true,
-        "include" : [ "io\\.smallrye\\.mutiny\\..*", "io\\.smallrye\\.mutiny\\.*" ],
-        "exclude" : [ "io\\.smallrye\\.mutiny\\.operators\\.*", "io\\.smallrye\\.mutiny\\.operators\\..*" ]
+[
+  {
+    "extension": "revapi.java",
+    "id": "java",
+    "configuration": {
+      "missing-classes": {
+        "behavior": "report",
+        "ignoreMissingAnnotations": false
+      },
+      "filter": {
+        "packages": {
+          "regex": true,
+          "include": [
+            "io\\.smallrye\\.mutiny(\\..+)?"
+          ],
+          "exclude": [
+            "io\\.smallrye\\.mutiny\\.operators(\\..+)?"
+          ]
+        }
       }
     }
+  },
+  {
+    "extension": "revapi.differences",
+    "id": "breaking-changes",
+    "configuration": {
+      "criticality": "highlight",
+      "minSeverity": "POTENTIALLY_BREAKING",
+      "minCriticality": "documented",
+      "differences": [
+        {
+          "ignore": true,
+          "code": "java.method.returnTypeChanged",
+          "old": "method io.smallrye.mutiny.operators.MultiItemCombineIterable io.smallrye.mutiny.groups.MultiItemCombination::streams(java.lang.Iterable<? extends org.reactivestreams.Publisher<?>>)",
+          "new": "method io.smallrye.mutiny.groups.MultiItemCombineIterable io.smallrye.mutiny.groups.MultiItemCombination::streams(java.lang.Iterable<? extends org.reactivestreams.Publisher<?>>)",
+          "justification": "API-exposed class has been moved to a public API package"
+        },
+        {
+          "ignore": true,
+          "code": "java.method.returnTypeChanged",
+          "old": "method <T1, T2> io.smallrye.mutiny.operators.MultiItemCombine2<T1, T2> io.smallrye.mutiny.groups.MultiItemCombination::streams(org.reactivestreams.Publisher<? extends T1>, org.reactivestreams.Publisher<? extends T2>)",
+          "new": "method <T1, T2> io.smallrye.mutiny.groups.MultiItemCombine2<T1, T2> io.smallrye.mutiny.groups.MultiItemCombination::streams(org.reactivestreams.Publisher<? extends T1>, org.reactivestreams.Publisher<? extends T2>)",
+          "justification": "API-exposed class has been moved to a public API package"
+        },
+        {
+          "ignore": true,
+          "code": "java.method.returnTypeChanged",
+          "old": "method <T1, T2, T3> io.smallrye.mutiny.operators.MultiItemCombine3<T1, T2, T3> io.smallrye.mutiny.groups.MultiItemCombination::streams(org.reactivestreams.Publisher<? extends T1>, org.reactivestreams.Publisher<? extends T2>, org.reactivestreams.Publisher<? extends T3>)",
+          "new": "method <T1, T2, T3> io.smallrye.mutiny.groups.MultiItemCombine3<T1, T2, T3> io.smallrye.mutiny.groups.MultiItemCombination::streams(org.reactivestreams.Publisher<? extends T1>, org.reactivestreams.Publisher<? extends T2>, org.reactivestreams.Publisher<? extends T3>)",
+          "justification": "API-exposed class has been moved to a public API package"
+        },
+        {
+          "ignore": true,
+          "code": "java.method.returnTypeChanged",
+          "old": "method <T1, T2, T3, T4> io.smallrye.mutiny.operators.MultiItemCombine4<T1, T2, T3, T4> io.smallrye.mutiny.groups.MultiItemCombination::streams(org.reactivestreams.Publisher<? extends T1>, org.reactivestreams.Publisher<? extends T2>, org.reactivestreams.Publisher<? extends T3>, org.reactivestreams.Publisher<? extends T4>)",
+          "new": "method <T1, T2, T3, T4> io.smallrye.mutiny.groups.MultiItemCombine4<T1, T2, T3, T4> io.smallrye.mutiny.groups.MultiItemCombination::streams(org.reactivestreams.Publisher<? extends T1>, org.reactivestreams.Publisher<? extends T2>, org.reactivestreams.Publisher<? extends T3>, org.reactivestreams.Publisher<? extends T4>)",
+          "justification": "API-exposed class has been moved to a public API package"
+        },
+        {
+          "ignore": true,
+          "code": "java.method.returnTypeChanged",
+          "old": "method <T1, T2, T3, T4, T5> io.smallrye.mutiny.operators.MultiItemCombine5<T1, T2, T3, T4, T5> io.smallrye.mutiny.groups.MultiItemCombination::streams(org.reactivestreams.Publisher<? extends T1>, org.reactivestreams.Publisher<? extends T2>, org.reactivestreams.Publisher<? extends T3>, org.reactivestreams.Publisher<? extends T4>, org.reactivestreams.Publisher<? extends T5>)",
+          "new": "method <T1, T2, T3, T4, T5> io.smallrye.mutiny.groups.MultiItemCombine5<T1, T2, T3, T4, T5> io.smallrye.mutiny.groups.MultiItemCombination::streams(org.reactivestreams.Publisher<? extends T1>, org.reactivestreams.Publisher<? extends T2>, org.reactivestreams.Publisher<? extends T3>, org.reactivestreams.Publisher<? extends T4>, org.reactivestreams.Publisher<? extends T5>)",
+          "justification": "API-exposed class has been moved to a public API package"
+        },
+        {
+          "ignore": true,
+          "code": "java.method.returnTypeChanged",
+          "old": "method <T1, T2, T3, T4, T5, T6> io.smallrye.mutiny.operators.MultiItemCombine6<T1, T2, T3, T4, T5, T6> io.smallrye.mutiny.groups.MultiItemCombination::streams(org.reactivestreams.Publisher<? extends T1>, org.reactivestreams.Publisher<? extends T2>, org.reactivestreams.Publisher<? extends T3>, org.reactivestreams.Publisher<? extends T4>, org.reactivestreams.Publisher<? extends T5>, org.reactivestreams.Publisher<? extends T6>)",
+          "new": "method <T1, T2, T3, T4, T5, T6> io.smallrye.mutiny.groups.MultiItemCombine6<T1, T2, T3, T4, T5, T6> io.smallrye.mutiny.groups.MultiItemCombination::streams(org.reactivestreams.Publisher<? extends T1>, org.reactivestreams.Publisher<? extends T2>, org.reactivestreams.Publisher<? extends T3>, org.reactivestreams.Publisher<? extends T4>, org.reactivestreams.Publisher<? extends T5>, org.reactivestreams.Publisher<? extends T6>)",
+          "justification": "API-exposed class has been moved to a public API package"
+        },
+        {
+          "ignore": true,
+          "code": "java.method.returnTypeChanged",
+          "old": "method <T1, T2, T3, T4, T5, T6, T7> io.smallrye.mutiny.operators.MultiItemCombine7<T1, T2, T3, T4, T5, T6, T7> io.smallrye.mutiny.groups.MultiItemCombination::streams(org.reactivestreams.Publisher<? extends T1>, org.reactivestreams.Publisher<? extends T2>, org.reactivestreams.Publisher<? extends T3>, org.reactivestreams.Publisher<? extends T4>, org.reactivestreams.Publisher<? extends T5>, org.reactivestreams.Publisher<? extends T6>, org.reactivestreams.Publisher<? extends T7>)",
+          "new": "method <T1, T2, T3, T4, T5, T6, T7> io.smallrye.mutiny.groups.MultiItemCombine7<T1, T2, T3, T4, T5, T6, T7> io.smallrye.mutiny.groups.MultiItemCombination::streams(org.reactivestreams.Publisher<? extends T1>, org.reactivestreams.Publisher<? extends T2>, org.reactivestreams.Publisher<? extends T3>, org.reactivestreams.Publisher<? extends T4>, org.reactivestreams.Publisher<? extends T5>, org.reactivestreams.Publisher<? extends T6>, org.reactivestreams.Publisher<? extends T7>)",
+          "justification": "API-exposed class has been moved to a public API package"
+        },
+        {
+          "ignore": true,
+          "code": "java.method.returnTypeChanged",
+          "old": "method <T1, T2, T3, T4, T5, T6, T7, T8> io.smallrye.mutiny.operators.MultiItemCombine8<T1, T2, T3, T4, T5, T6, T7, T8> io.smallrye.mutiny.groups.MultiItemCombination::streams(org.reactivestreams.Publisher<? extends T1>, org.reactivestreams.Publisher<? extends T2>, org.reactivestreams.Publisher<? extends T3>, org.reactivestreams.Publisher<? extends T4>, org.reactivestreams.Publisher<? extends T5>, org.reactivestreams.Publisher<? extends T6>, org.reactivestreams.Publisher<? extends T7>, org.reactivestreams.Publisher<? extends T8>)",
+          "new": "method <T1, T2, T3, T4, T5, T6, T7, T8> io.smallrye.mutiny.groups.MultiItemCombine8<T1, T2, T3, T4, T5, T6, T7, T8> io.smallrye.mutiny.groups.MultiItemCombination::streams(org.reactivestreams.Publisher<? extends T1>, org.reactivestreams.Publisher<? extends T2>, org.reactivestreams.Publisher<? extends T3>, org.reactivestreams.Publisher<? extends T4>, org.reactivestreams.Publisher<? extends T5>, org.reactivestreams.Publisher<? extends T6>, org.reactivestreams.Publisher<? extends T7>, org.reactivestreams.Publisher<? extends T8>)",
+          "justification": "API-exposed class has been moved to a public API package"
+        },
+        {
+          "ignore": true,
+          "code": "java.method.returnTypeChanged",
+          "old": "method <T1, T2, T3, T4, T5, T6, T7, T8, T9> io.smallrye.mutiny.operators.MultiItemCombine9<T1, T2, T3, T4, T5, T6, T7, T8, T9> io.smallrye.mutiny.groups.MultiItemCombination::streams(org.reactivestreams.Publisher<? extends T1>, org.reactivestreams.Publisher<? extends T2>, org.reactivestreams.Publisher<? extends T3>, org.reactivestreams.Publisher<? extends T4>, org.reactivestreams.Publisher<? extends T5>, org.reactivestreams.Publisher<? extends T6>, org.reactivestreams.Publisher<? extends T7>, org.reactivestreams.Publisher<? extends T8>, org.reactivestreams.Publisher<? extends T9>)",
+          "new": "method <T1, T2, T3, T4, T5, T6, T7, T8, T9> io.smallrye.mutiny.groups.MultiItemCombine9<T1, T2, T3, T4, T5, T6, T7, T8, T9> io.smallrye.mutiny.groups.MultiItemCombination::streams(org.reactivestreams.Publisher<? extends T1>, org.reactivestreams.Publisher<? extends T2>, org.reactivestreams.Publisher<? extends T3>, org.reactivestreams.Publisher<? extends T4>, org.reactivestreams.Publisher<? extends T5>, org.reactivestreams.Publisher<? extends T6>, org.reactivestreams.Publisher<? extends T7>, org.reactivestreams.Publisher<? extends T8>, org.reactivestreams.Publisher<? extends T9>)",
+          "justification": "API-exposed class has been moved to a public API package"
+        },
+        {
+          "ignore": true,
+          "code": "java.class.removed",
+          "old": "class io.smallrye.mutiny.operators.MultiItemCombine2<T1, T2>",
+          "justification": "API-exposed class has been moved to a public API package"
+        },
+        {
+          "ignore": true,
+          "code": "java.class.removed",
+          "old": "class io.smallrye.mutiny.operators.MultiItemCombine3<T1, T2, T3>",
+          "justification": "API-exposed class has been moved to a public API package"
+        },
+        {
+          "ignore": true,
+          "code": "java.class.removed",
+          "old": "class io.smallrye.mutiny.operators.MultiItemCombine4<T1, T2, T3, T4>",
+          "justification": "API-exposed class has been moved to a public API package"
+        },
+        {
+          "ignore": true,
+          "code": "java.class.removed",
+          "old": "class io.smallrye.mutiny.operators.MultiItemCombine5<T1, T2, T3, T4, T5>",
+          "justification": "API-exposed class has been moved to a public API package"
+        },
+        {
+          "ignore": true,
+          "code": "java.class.removed",
+          "old": "class io.smallrye.mutiny.operators.MultiItemCombine6<T1, T2, T3, T4, T5, T6>",
+          "justification": "API-exposed class has been moved to a public API package"
+        },
+        {
+          "ignore": true,
+          "code": "java.class.removed",
+          "old": "class io.smallrye.mutiny.operators.MultiItemCombine7<T1, T2, T3, T4, T5, T6, T7>",
+          "justification": "API-exposed class has been moved to a public API package"
+        },
+        {
+          "ignore": true,
+          "code": "java.class.removed",
+          "old": "class io.smallrye.mutiny.operators.MultiItemCombine8<T1, T2, T3, T4, T5, T6, T7, T8>",
+          "justification": "API-exposed class has been moved to a public API package"
+        },
+        {
+          "ignore": true,
+          "code": "java.class.removed",
+          "old": "class io.smallrye.mutiny.operators.MultiItemCombine9<T1, T2, T3, T4, T5, T6, T7, T8, T9>",
+          "justification": "API-exposed class has been moved to a public API package"
+        },
+        {
+          "ignore": true,
+          "code": "java.class.removed",
+          "old": "class io.smallrye.mutiny.operators.MultiItemCombineIterable",
+          "justification": "API-exposed class has been moved to a public API package"
+        }
+      ]
+    }
+  },
+  {
+    "extension": "revapi.reporter.json",
+    "configuration": {
+      "minSeverity": "POTENTIALLY_BREAKING",
+      "minCriticality": "documented",
+      "output": "target/compatibility.json",
+      "indent": true,
+      "append": false,
+      "keepEmptyFile": true
+    }
   }
-}, {
-  "extension" : "revapi.differences",
-  "id" : "breaking-changes",
-  "configuration" : {
-    "criticality" : "highlight",
-    "minSeverity" : "POTENTIALLY_BREAKING",
-    "minCriticality" : "documented",
-    "differences" : [ ]
-  }
-}, {
-  "extension" : "revapi.reporter.json",
-  "configuration" : {
-    "minSeverity" : "POTENTIALLY_BREAKING",
-    "minCriticality" : "documented",
-    "output" : "target/compatibility.json",
-    "indent" : true,
-    "append" : false,
-    "keepEmptyFile" : true
-  }
-} ]
+]

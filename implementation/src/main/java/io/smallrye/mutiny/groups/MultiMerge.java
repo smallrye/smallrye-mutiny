@@ -8,7 +8,7 @@ import org.reactivestreams.Publisher;
 
 import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Multi;
-import io.smallrye.mutiny.operators.MultiCombine;
+import io.smallrye.mutiny.operators.multi.MultiCombine;
 
 /**
  * Creates new {@link Multi} by merging several {@link Multi} or {@link Publisher}.

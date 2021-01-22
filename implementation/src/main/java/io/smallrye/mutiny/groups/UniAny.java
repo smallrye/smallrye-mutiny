@@ -8,7 +8,7 @@ import java.util.concurrent.Executor;
 
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
-import io.smallrye.mutiny.operators.UniOrCombination;
+import io.smallrye.mutiny.operators.uni.UniOrCombination;
 
 public class UniAny {
 

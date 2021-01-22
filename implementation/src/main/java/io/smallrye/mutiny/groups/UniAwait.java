@@ -7,7 +7,7 @@ import java.util.Optional;
 
 import io.smallrye.mutiny.TimeoutException;
 import io.smallrye.mutiny.Uni;
-import io.smallrye.mutiny.operators.UniBlockingAwait;
+import io.smallrye.mutiny.operators.uni.UniBlockingAwait;
 
 /**
  * Waits and returns the item emitted by the {@link Uni}. If the {@link Uni} receives a failure, the failure is thrown.

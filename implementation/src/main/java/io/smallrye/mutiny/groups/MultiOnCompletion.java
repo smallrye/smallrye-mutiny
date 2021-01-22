@@ -13,9 +13,9 @@ import org.reactivestreams.Publisher;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
-import io.smallrye.mutiny.operators.MultiSwitchOnCompletion;
 import io.smallrye.mutiny.operators.multi.MultiOnCompletionCall;
 import io.smallrye.mutiny.operators.multi.MultiOnCompletionInvoke;
+import io.smallrye.mutiny.operators.multi.MultiSwitchOnCompletion;
 import io.smallrye.mutiny.subscription.MultiEmitter;
 
 public class MultiOnCompletion<T> {

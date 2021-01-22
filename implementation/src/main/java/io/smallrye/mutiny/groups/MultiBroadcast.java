@@ -7,7 +7,7 @@ import java.time.Duration;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
-import io.smallrye.mutiny.operators.MultiBroadcaster;
+import io.smallrye.mutiny.operators.multi.MultiBroadcaster;
 
 /**
  * Makes the upstream {@link Multi} be able to broadcast its events ({@code items}, {@code failure}, and

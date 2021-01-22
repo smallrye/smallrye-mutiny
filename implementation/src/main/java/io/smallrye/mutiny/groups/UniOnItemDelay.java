@@ -8,8 +8,8 @@ import java.util.function.Function;
 
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
-import io.smallrye.mutiny.operators.UniDelayOnItem;
-import io.smallrye.mutiny.operators.UniDelayUntil;
+import io.smallrye.mutiny.operators.uni.UniDelayOnItem;
+import io.smallrye.mutiny.operators.uni.UniDelayUntil;
 
 /**
  * Configures the delay applied to the item emission.

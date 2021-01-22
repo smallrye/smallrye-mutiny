@@ -14,7 +14,7 @@ import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.helpers.ExponentialBackoff;
 import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
-import io.smallrye.mutiny.operators.UniRetryAtMost;
+import io.smallrye.mutiny.operators.uni.UniRetryAtMost;
 
 // TODO This method should be renamed to UniOnFailureRetry, however it's a breaking change.
 public class UniRetry<T> {

@@ -10,7 +10,7 @@ import java.util.function.Supplier;
 import io.smallrye.mutiny.TimeoutException;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
-import io.smallrye.mutiny.operators.UniFailOnTimeout;
+import io.smallrye.mutiny.operators.uni.UniFailOnTimeout;
 
 public class UniOnTimeout<T> {
 
