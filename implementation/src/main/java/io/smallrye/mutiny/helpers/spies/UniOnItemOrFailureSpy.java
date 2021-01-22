@@ -32,7 +32,7 @@ public class UniOnItemOrFailureSpy<T> extends UniSpyBase<T> {
     }
 
     @Override
-    protected void subscribing(UniSubscriber<? super T> downstream) {
+    public void subscribe(UniSubscriber<? super T> downstream) {
         upstream()
                 .onItemOrFailure().invoke((item, failure) -> {
                     synchronized (UniOnItemOrFailureSpy.this) {

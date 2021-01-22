@@ -28,7 +28,7 @@ public class UniDelayOnItem<T> extends UniOperator<T, T> {
     }
 
     @Override
-    protected void subscribing(UniSubscriber<? super T> subscriber) {
+    public void subscribe(UniSubscriber<? super T> subscriber) {
         AtomicReference<ScheduledFuture<?>> holder = new AtomicReference<>();
         AtomicReference<UniSubscription> reference = new AtomicReference<>();
         AbstractUni.subscribe(upstream(), new UniDelegatingSubscriber<T, T>(subscriber) {

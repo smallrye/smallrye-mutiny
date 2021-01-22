@@ -12,12 +12,13 @@ import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.uni.UniEmitOn;
 import io.smallrye.mutiny.operators.uni.UniMemoizeOp;
 import io.smallrye.mutiny.operators.uni.UniRunSubscribeOn;
+import io.smallrye.mutiny.subscription.UniSerializedSubscriber;
 import io.smallrye.mutiny.subscription.UniSubscriber;
 import io.smallrye.mutiny.tuples.Tuple2;
 
 public abstract class AbstractUni<T> implements Uni<T> {
 
-    protected abstract void subscribing(UniSubscriber<? super T> subscriber);
+    public abstract void subscribe(UniSubscriber<? super T> subscriber);
 
     /**
      * Encapsulates subscription to slightly optimized the AbstractUni case.

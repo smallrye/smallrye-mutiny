@@ -27,7 +27,7 @@ public class UniOnFailureTransform<I, O> extends UniOperator<I, O> {
     }
 
     @Override
-    protected void subscribing(UniSubscriber<? super O> subscriber) {
+    public void subscribe(UniSubscriber<? super O> subscriber) {
         AbstractUni.subscribe(upstream(), new UniDelegatingSubscriber<I, O>(subscriber) {
 
             @Override

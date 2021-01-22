@@ -22,7 +22,7 @@ public class UniCreateFromDeferredSupplierWithState<S, T> extends AbstractUni<T>
     }
 
     @Override
-    protected void subscribing(UniSubscriber<? super T> subscriber) {
+    public void subscribe(UniSubscriber<? super T> subscriber) {
         nonNull(subscriber, "subscriber");
 
         S state;

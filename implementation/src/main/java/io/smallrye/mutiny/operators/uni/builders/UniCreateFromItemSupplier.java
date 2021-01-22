@@ -21,7 +21,7 @@ public class UniCreateFromItemSupplier<T> extends AbstractUni<T> {
     }
 
     @Override
-    protected void subscribing(UniSubscriber<? super T> subscriber) {
+    public void subscribe(UniSubscriber<? super T> subscriber) {
         // No need to track cancellation, it's done by the serialized subscriber downstream.
         subscriber.onSubscribe(EmptyUniSubscription.CANCELLED);
         try {

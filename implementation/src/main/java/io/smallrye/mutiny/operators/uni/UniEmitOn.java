@@ -19,7 +19,7 @@ public class UniEmitOn<I> extends UniOperator<I, I> {
     }
 
     @Override
-    protected void subscribing(UniSubscriber<? super I> subscriber) {
+    public void subscribe(UniSubscriber<? super I> subscriber) {
         AbstractUni.subscribe(upstream(), new UniDelegatingSubscriber<I, I>(subscriber) {
             @Override
             public void onItem(I item) {

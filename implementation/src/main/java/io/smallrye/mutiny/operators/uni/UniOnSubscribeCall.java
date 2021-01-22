@@ -24,7 +24,7 @@ public class UniOnSubscribeCall<T> extends UniOperator<T, T> {
     }
 
     @Override
-    protected void subscribing(UniSubscriber<? super T> subscriber) {
+    public void subscribe(UniSubscriber<? super T> subscriber) {
         AbstractUni.subscribe(upstream(), new UniDelegatingSubscriber<T, T>(subscriber) {
 
             // As subscription might be delayed, we need to store the event provided by the upstream

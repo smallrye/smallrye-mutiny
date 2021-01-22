@@ -23,7 +23,7 @@ public class UniRunSubscribeOn<I> extends UniOperator<I, I> {
     }
 
     @Override
-    protected void subscribing(UniSubscriber<? super I> subscriber) {
+    public void subscribe(UniSubscriber<? super I> subscriber) {
         SubscribeOnUniSubscriber downstream = new SubscribeOnUniSubscriber(subscriber);
         try {
             executor.execute(downstream);

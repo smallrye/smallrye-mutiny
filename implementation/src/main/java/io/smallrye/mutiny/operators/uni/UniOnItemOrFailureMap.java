@@ -21,7 +21,7 @@ public class UniOnItemOrFailureMap<I, O> extends UniOperator<I, O> {
     }
 
     @Override
-    protected void subscribing(UniSubscriber<? super O> downstream) {
+    public void subscribe(UniSubscriber<? super O> downstream) {
         AbstractUni.subscribe(upstream(), new UniDelegatingSubscriber<I, O>(downstream) {
 
             private final AtomicBoolean done = new AtomicBoolean();

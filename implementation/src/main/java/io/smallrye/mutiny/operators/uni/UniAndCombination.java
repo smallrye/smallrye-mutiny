@@ -43,7 +43,7 @@ public class UniAndCombination<I, O> extends UniOperator<I, O> {
     }
 
     @Override
-    protected void subscribing(UniSubscriber<? super O> subscriber) {
+    public void subscribe(UniSubscriber<? super O> subscriber) {
         AndSupervisor andSupervisor = new AndSupervisor(subscriber);
         subscriber.onSubscribe(andSupervisor);
         // Must wait until the subscriber get a subscription before subscribing to the sources.

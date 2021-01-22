@@ -47,7 +47,7 @@ public class UniMemoizeOp<I> extends UniOperator<I, I> implements UniSubscriber<
     }
 
     @Override
-    protected void subscribing(UniSubscriber<? super I> subscriber) {
+    public void subscribe(UniSubscriber<? super I> subscriber) {
         if (invalidationRequested.getAsBoolean() && state.get() != State.SUBSCRIBING) {
             state.set(State.INIT);
             if (upstreamSubscription != null) {

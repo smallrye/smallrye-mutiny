@@ -127,7 +127,7 @@ public class UniRunSubscriptionOnTest {
         UniAssertSubscriber<Integer> subscriber = new AbstractUni<Integer>() {
 
             @Override
-            protected void subscribing(UniSubscriber<? super Integer> subscriber) {
+            public void subscribe(UniSubscriber<? super Integer> subscriber) {
                 throw new IllegalArgumentException("boom");
             }
         }

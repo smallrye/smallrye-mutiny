@@ -26,7 +26,7 @@ public class UniCreateFromItemWithState<T, S> extends AbstractUni<T> {
     }
 
     @Override
-    protected void subscribing(UniSubscriber<? super T> subscriber) {
+    public void subscribe(UniSubscriber<? super T> subscriber) {
         subscriber.onSubscribe(EmptyUniSubscription.CANCELLED);
         S state;
         try {

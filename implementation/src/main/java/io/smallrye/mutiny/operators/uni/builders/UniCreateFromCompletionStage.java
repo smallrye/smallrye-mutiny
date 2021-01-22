@@ -33,7 +33,7 @@ public class UniCreateFromCompletionStage<T> extends AbstractUni<T> {
     }
 
     @Override
-    protected void subscribing(UniSubscriber<? super T> subscriber) {
+    public void subscribe(UniSubscriber<? super T> subscriber) {
         CompletionStage<? extends T> stage;
         try {
             stage = supplier.get();

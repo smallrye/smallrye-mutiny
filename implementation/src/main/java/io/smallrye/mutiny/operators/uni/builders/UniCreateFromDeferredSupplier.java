@@ -18,7 +18,7 @@ public class UniCreateFromDeferredSupplier<T> extends AbstractUni<T> {
     }
 
     @Override
-    protected void subscribing(UniSubscriber<? super T> subscriber) {
+    public void subscribe(UniSubscriber<? super T> subscriber) {
         nonNull(subscriber, "subscriber");
         Uni<? extends T> uni;
         try {

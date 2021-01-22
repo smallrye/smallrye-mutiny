@@ -31,7 +31,7 @@ public class UniCreateFromCompletionStageWithState<T, S> extends AbstractUni<T> 
     }
 
     @Override
-    protected void subscribing(UniSubscriber<? super T> subscriber) {
+    public void subscribe(UniSubscriber<? super T> subscriber) {
         S state;
         try {
             state = holder.get();

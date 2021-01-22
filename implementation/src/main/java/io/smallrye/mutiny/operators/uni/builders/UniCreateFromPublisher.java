@@ -22,7 +22,7 @@ public class UniCreateFromPublisher<T> extends AbstractUni<T> {
 
     @SuppressWarnings("ReactiveStreamsSubscriberImplementation")
     @Override
-    protected void subscribing(UniSubscriber<? super T> subscriber) {
+    public void subscribe(UniSubscriber<? super T> subscriber) {
         AtomicReference<Subscription> reference = new AtomicReference<>();
         Subscriber<T> actual = new Subscriber<T>() {
             @Override

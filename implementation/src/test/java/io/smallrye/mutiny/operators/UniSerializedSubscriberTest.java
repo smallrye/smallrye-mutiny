@@ -21,6 +21,7 @@ import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.helpers.test.UniAssertSubscriber;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.subscription.UniEmitter;
+import io.smallrye.mutiny.subscription.UniSerializedSubscriber;
 import io.smallrye.mutiny.subscription.UniSubscriber;
 import io.smallrye.mutiny.subscription.UniSubscription;
 
@@ -91,7 +92,7 @@ public class UniSerializedSubscriberTest {
     public void testRogueUpstreamSendingFailureBeforeSubscription() {
         AbstractUni<Integer> rogue = new AbstractUni<Integer>() {
             @Override
-            protected void subscribing(UniSubscriber<? super Integer> subscriber) {
+            public void subscribe(UniSubscriber<? super Integer> subscriber) {
                 subscriber.onFailure(new IOException("boom"));
                 subscriber.onSubscribe(() -> {
                 });
@@ -111,7 +112,7 @@ public class UniSerializedSubscriberTest {
     public void testRogueUpstreamSendingItemBeforeSubscription() {
         AbstractUni<Integer> rogue = new AbstractUni<Integer>() {
             @Override
-            protected void subscribing(UniSubscriber<? super Integer> subscriber) {
+            public void subscribe(UniSubscriber<? super Integer> subscriber) {
                 subscriber.onItem(1);
                 subscriber.onSubscribe(() -> {
                 });
@@ -131,7 +132,7 @@ public class UniSerializedSubscriberTest {
     public void testInvalidStateWhenOnSubscribeIsCalled() {
         AbstractUni<Integer> rogue = new AbstractUni<Integer>() {
             @Override
-            protected void subscribing(UniSubscriber<? super Integer> subscriber) {
+            public void subscribe(UniSubscriber<? super Integer> subscriber) {
                 // Do nothing
             }
         };
@@ -151,7 +152,7 @@ public class UniSerializedSubscriberTest {
     public void testRogueUpstreamSendingMultipleItems() {
         AbstractUni<Integer> rogue = new AbstractUni<Integer>() {
             @Override
-            protected void subscribing(UniSubscriber<? super Integer> subscriber) {
+            public void subscribe(UniSubscriber<? super Integer> subscriber) {
                 subscriber.onSubscribe(() -> {
                 });
                 subscriber.onItem(1);
@@ -385,7 +386,7 @@ public class UniSerializedSubscriberTest {
         AtomicReference<UniSubscriber<? super Integer>> sub = new AtomicReference<>();
         AbstractUni<Integer> uni = new AbstractUni<Integer>() {
             @Override
-            protected void subscribing(UniSubscriber<? super Integer> subscriber) {
+            public void subscribe(UniSubscriber<? super Integer> subscriber) {
                 sub.set(subscriber);
             }
         };
@@ -427,7 +428,7 @@ public class UniSerializedSubscriberTest {
         AtomicReference<UniSubscriber<? super Integer>> sub = new AtomicReference<>();
         AbstractUni<Integer> uni = new AbstractUni<Integer>() {
             @Override
-            protected void subscribing(UniSubscriber<? super Integer> subscriber) {
+            public void subscribe(UniSubscriber<? super Integer> subscriber) {
                 sub.set(subscriber);
             }
         };
@@ -466,7 +467,7 @@ public class UniSerializedSubscriberTest {
         AtomicReference<UniSubscriber<? super Integer>> sub = new AtomicReference<>();
         AbstractUni<Integer> uni = new AbstractUni<Integer>() {
             @Override
-            protected void subscribing(UniSubscriber<? super Integer> subscriber) {
+            public void subscribe(UniSubscriber<? super Integer> subscriber) {
                 sub.set(subscriber);
             }
         };
