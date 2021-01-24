@@ -60,30 +60,3 @@ jobs:
 
           sh .build/decrypt-secrets.sh
           .build/cut-release.sh
-      - name: 'Clear compatibility justifications'
-        env:
-          DRY_RUN: ${{ github.event.inputs.dry-run }}
-          BRANCH: ${{ github.event.inputs.branch }}
-        run: |
-          source ~/.sdkman/bin/sdkman-init.sh
-
-          git config --global user.name "${GITHUB_ACTOR}"
-          git config --global user.email "smallrye@googlegroups.com"
-
-          git fetch origin
-          git reset --hard
-          git checkout ${BRANCH}
-          echo "Clearing difference justifications"
-          jbang .build/CompatibilityUtils.java clear
-          if [[ $(git diff --stat) != '' ]]; then
-            git add -A
-            git status
-            git commit -m "[POST-RELEASE] - Clearing breaking change justifications"
-            if [[ ${DRY_RUN} == "true" ]]; then
-              echo "[DRY-RUN] - Skipping push"
-            else
-              git push origin ${BRANCH}
-            fi
-          else
-            echo "No justifications cleared"
-          fi
