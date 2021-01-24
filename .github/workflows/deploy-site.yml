@@ -43,4 +43,14 @@ jobs:
 
           git config --global user.name "${GITHUB_ACTOR}"
           git config --global user.email "smallrye@googlegroups.com"
+
+          curl -s "https://get.sdkman.io" | bash
+            source ~/.sdkman/bin/sdkman-init.sh && \
+            sdk install jbang
+
+          echo "Waiting for artifacts to be available from Maven Central"
+          jbang .build/WaitForCentral.java \
+            --artifacts=io.smallrye.reactive:mutiny,io.smallrye.reactive:mutiny-context-propagation,io.smallrye.reactive:mutiny-test-utils,io.smallrye.reactive:mutiny-kotlin,io.smallrye.reactive:mutiny-reactor,io.smallrye.reactive:mutiny-rxjava \
+            --expected-version="${REF}"
+
           .build/deploy-site.sh
