@@ -33,7 +33,7 @@ public class UniCreateFromEmitterWithState<T, S> extends AbstractUni<T> {
             state = holder.get();
             // get() throws an NPE is the produced state is null.
         } catch (Exception e) {
-            subscriber.onSubscribe(EmptyUniSubscription.CANCELLED);
+            subscriber.onSubscribe(EmptyUniSubscription.DONE);
             subscriber.onFailure(e);
             return;
         }

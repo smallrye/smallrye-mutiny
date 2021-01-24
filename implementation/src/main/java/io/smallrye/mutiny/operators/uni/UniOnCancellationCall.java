@@ -6,10 +6,9 @@ import java.util.function.Supplier;
 
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
+import io.smallrye.mutiny.operators.AbstractUni;
 import io.smallrye.mutiny.operators.UniOperator;
-import io.smallrye.mutiny.subscription.UniDelegatingSubscriber;
 import io.smallrye.mutiny.subscription.UniSubscriber;
-import io.smallrye.mutiny.subscription.UniSubscription;
 
 public class UniOnCancellationCall<I> extends UniOperator<I, I> {
 
@@ -22,31 +21,31 @@ public class UniOnCancellationCall<I> extends UniOperator<I, I> {
 
     @Override
     public void subscribe(UniSubscriber<? super I> subscriber) {
-        upstream().subscribe().withSubscriber(new UniDelegatingSubscriber<I, I>(subscriber) {
+        AbstractUni.subscribe(upstream(), new UniOnCancellationCallProcessor(subscriber));
+    }
 
-            @Override
-            public void onSubscribe(UniSubscription subscription) {
-                subscriber.onSubscribe(new UniSubscription() {
+    private class UniOnCancellationCallProcessor extends UniOperatorProcessor<I, I> {
 
-                    @Override
-                    public void cancel() {
-                        execute().subscribe().with(
-                                ignoredItem -> subscription.cancel(),
-                                ignoredException -> {
-                                    Infrastructure.handleDroppedException(ignoredException);
-                                    subscription.cancel();
-                                });
-                    }
+        public UniOnCancellationCallProcessor(UniSubscriber<? super I> downstream) {
+            super(downstream);
+        }
 
-                    private Uni<?> execute() {
-                        try {
-                            return nonNull(supplier.get(), "uni");
-                        } catch (Throwable err) {
-                            return Uni.createFrom().failure(err);
-                        }
-                    }
-                });
+        @Override
+        public void cancel() {
+            execute().subscribe().with(
+                    ignoredItem -> super.cancel(),
+                    ignoredException -> {
+                        Infrastructure.handleDroppedException(ignoredException);
+                        super.cancel();
+                    });
+        }
+
+        private Uni<?> execute() {
+            try {
+                return nonNull(supplier.get(), "uni");
+            } catch (Throwable err) {
+                return Uni.createFrom().failure(err);
             }
-        });
+        }
     }
 }

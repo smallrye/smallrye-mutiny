@@ -7,7 +7,6 @@ import java.util.concurrent.Executor;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.operators.AbstractUni;
 import io.smallrye.mutiny.operators.UniOperator;
-import io.smallrye.mutiny.subscription.UniDelegatingSubscriber;
 import io.smallrye.mutiny.subscription.UniSubscriber;
 
 public class UniEmitOn<I> extends UniOperator<I, I> {
@@ -20,16 +19,27 @@ public class UniEmitOn<I> extends UniOperator<I, I> {
 
     @Override
     public void subscribe(UniSubscriber<? super I> subscriber) {
-        AbstractUni.subscribe(upstream(), new UniDelegatingSubscriber<I, I>(subscriber) {
-            @Override
-            public void onItem(I item) {
-                executor.execute(() -> subscriber.onItem(item));
-            }
+        AbstractUni.subscribe(upstream(), new UniEmitOnProcessor(subscriber));
+    }
 
-            @Override
-            public void onFailure(Throwable failure) {
-                executor.execute(() -> subscriber.onFailure(failure));
+    private class UniEmitOnProcessor extends UniOperatorProcessor<I, I> {
+
+        public UniEmitOnProcessor(UniSubscriber<? super I> downstream) {
+            super(downstream);
+        }
+
+        @Override
+        public void onItem(I item) {
+            if (!isCancelled()) {
+                executor.execute(() -> downstream.onItem(item));
             }
-        });
+        }
+
+        @Override
+        public void onFailure(Throwable failure) {
+            if (!isCancelled()) {
+                executor.execute(() -> downstream.onFailure(failure));
+            }
+        }
     }
 }

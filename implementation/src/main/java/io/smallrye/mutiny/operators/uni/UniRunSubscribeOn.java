@@ -1,17 +1,14 @@
 package io.smallrye.mutiny.operators.uni;
 
-import static io.smallrye.mutiny.helpers.EmptyUniSubscription.CANCELLED;
+import static io.smallrye.mutiny.helpers.EmptyUniSubscription.DONE;
 import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
 
 import java.util.concurrent.Executor;
-import java.util.concurrent.atomic.AtomicReference;
 
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.operators.AbstractUni;
 import io.smallrye.mutiny.operators.UniOperator;
-import io.smallrye.mutiny.subscription.UniDelegatingSubscriber;
 import io.smallrye.mutiny.subscription.UniSubscriber;
-import io.smallrye.mutiny.subscription.UniSubscription;
 
 public class UniRunSubscribeOn<I> extends UniOperator<I, I> {
 
@@ -24,48 +21,29 @@ public class UniRunSubscribeOn<I> extends UniOperator<I, I> {
 
     @Override
     public void subscribe(UniSubscriber<? super I> subscriber) {
-        SubscribeOnUniSubscriber downstream = new SubscribeOnUniSubscriber(subscriber);
         try {
-            executor.execute(downstream);
-        } catch (Throwable e) {
-            subscriber.onSubscribe(CANCELLED);
-            subscriber.onFailure(e);
+            executor.execute(() -> {
+                try {
+                    AbstractUni.subscribe(upstream(), new UniRunSubscribeOnProcessor(subscriber));
+                } catch (Throwable woops) {
+                    forwardFailure(subscriber, woops);
+                }
+            });
+        } catch (Throwable err) {
+            forwardFailure(subscriber, err);
         }
-
     }
 
-    class SubscribeOnUniSubscriber extends UniDelegatingSubscriber<I, I>
-            implements Runnable, UniSubscriber<I>, UniSubscription {
+    private void forwardFailure(UniSubscriber<? super I> subscriber, Throwable failure) {
+        subscriber.onSubscribe(DONE);
+        subscriber.onFailure(failure);
+    }
 
-        final AtomicReference<UniSubscription> subscription = new AtomicReference<>();
-
-        SubscribeOnUniSubscriber(UniSubscriber<? super I> actual) {
-            super(actual);
-        }
-
-        @Override
-        public void run() {
-            try {
-                AbstractUni.subscribe(upstream(), this);
-            } catch (Exception e) {
-                super.onSubscribe(CANCELLED);
-                super.onFailure(e);
-            }
-        }
-
-        @Override
-        public void onSubscribe(UniSubscription s) {
-            if (subscription.compareAndSet(null, s)) {
-                super.onSubscribe(this);
-            }
-        }
-
-        @Override
-        public void cancel() {
-            UniSubscription upstream = subscription.getAndSet(CANCELLED);
-            if (upstream != null && upstream != CANCELLED) {
-                upstream.cancel();
-            }
+    // Note we plug a UniOperatorProcessor for ensuring an unwrapped subscription.
+    // This may be revisited in future iterations.
+    private class UniRunSubscribeOnProcessor extends UniOperatorProcessor<I, I> {
+        public UniRunSubscribeOnProcessor(UniSubscriber<? super I> downstream) {
+            super(downstream);
         }
     }
 }

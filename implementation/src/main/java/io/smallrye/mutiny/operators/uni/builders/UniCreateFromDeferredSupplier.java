@@ -1,6 +1,6 @@
 package io.smallrye.mutiny.operators.uni.builders;
 
-import static io.smallrye.mutiny.helpers.EmptyUniSubscription.CANCELLED;
+import static io.smallrye.mutiny.helpers.EmptyUniSubscription.DONE;
 import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
 
 import java.util.function.Supplier;
@@ -24,13 +24,13 @@ public class UniCreateFromDeferredSupplier<T> extends AbstractUni<T> {
         try {
             uni = supplier.get();
         } catch (Throwable e) {
-            subscriber.onSubscribe(CANCELLED);
+            subscriber.onSubscribe(DONE);
             subscriber.onFailure(e);
             return;
         }
 
         if (uni == null) {
-            subscriber.onSubscribe(CANCELLED);
+            subscriber.onSubscribe(DONE);
             subscriber.onFailure(new NullPointerException(ParameterValidation.SUPPLIER_PRODUCED_NULL));
         } else {
             AbstractUni.subscribe(uni, subscriber);

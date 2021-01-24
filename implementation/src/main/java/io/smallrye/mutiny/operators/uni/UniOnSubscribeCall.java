@@ -9,7 +9,6 @@ import io.smallrye.mutiny.helpers.EmptyUniSubscription;
 import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.operators.AbstractUni;
 import io.smallrye.mutiny.operators.UniOperator;
-import io.smallrye.mutiny.subscription.UniDelegatingSubscriber;
 import io.smallrye.mutiny.subscription.UniSubscriber;
 import io.smallrye.mutiny.subscription.UniSubscription;
 
@@ -25,70 +24,76 @@ public class UniOnSubscribeCall<T> extends UniOperator<T, T> {
 
     @Override
     public void subscribe(UniSubscriber<? super T> subscriber) {
-        AbstractUni.subscribe(upstream(), new UniDelegatingSubscriber<T, T>(subscriber) {
+        AbstractUni.subscribe(upstream(), new UniOnSubscribeCallProcessor(subscriber));
+    }
 
-            // As subscription might be delayed, we need to store the event provided by the upstream
-            // until the uni provides a item or failure event. It would be illegal to forward these events before a
-            // subscription.
+    private class UniOnSubscribeCallProcessor extends UniOperatorProcessor<T, T> {
 
-            volatile T item;
-            volatile Throwable failure;
+        public UniOnSubscribeCallProcessor(UniSubscriber<? super T> downstream) {
+            super(downstream);
+        }
 
-            final AtomicBoolean done = new AtomicBoolean();
+        // As subscription might be delayed, we need to store the event provided by the upstream
+        // until the uni provides a item or failure event. It would be illegal to forward these events before a
+        // subscription.
 
-            @Override
-            public void onSubscribe(UniSubscription subscription) {
-                // Invoke producer
-                Uni<?> uni;
-                try {
-                    uni = Objects.requireNonNull(callback.apply(subscription), "The produced Uni must not be `null`");
-                } catch (Throwable e) {
-                    // If the functions fails or returns null, propagates a failure.
-                    super.onSubscribe(EmptyUniSubscription.CANCELLED);
-                    super.onFailure(e);
-                    return;
-                }
+        private volatile T item;
+        private volatile Throwable failure;
 
-                uni.subscribe().with(
-                        ignored -> {
-                            // Once the uni produces its item, propagates the subscription downstream
-                            super.onSubscribe(subscription);
-                            if (done.compareAndSet(false, true)) {
-                                forwardPendingEvent();
-                            }
-                        },
-                        failed -> {
-                            // On failure, propagates the failure
-                            super.onSubscribe(EmptyUniSubscription.CANCELLED);
-                            super.onFailure(failed);
-                        });
+        private final AtomicBoolean done = new AtomicBoolean();
+
+        @Override
+        public void onSubscribe(UniSubscription subscription) {
+            // Invoke producer
+            Uni<?> uni;
+            try {
+                uni = Objects.requireNonNull(callback.apply(subscription), "The produced Uni must not be `null`");
+            } catch (Throwable e) {
+                // If the functions fails or returns null, propagates a failure.
+                downstream.onSubscribe(EmptyUniSubscription.DONE);
+                downstream.onFailure(e);
+                return;
             }
 
-            private void forwardPendingEvent() {
-                if (item != null) {
-                    super.onItem(item);
-                } else if (failure != null) {
-                    super.onFailure(failure);
-                }
-            }
+            uni.subscribe().with(
+                    ignored -> {
+                        // Once the uni produces its item, propagates the subscription downstream
+                        downstream.onSubscribe(subscription);
+                        if (done.compareAndSet(false, true)) {
+                            forwardPendingEvent();
+                        }
+                    },
+                    failed -> {
+                        // On failure, propagates the failure
+                        downstream.onSubscribe(EmptyUniSubscription.DONE);
+                        downstream.onFailure(failed);
+                    });
+        }
 
-            @Override
-            public void onItem(T item) {
-                if (done.get()) {
-                    super.onItem(item);
-                } else {
-                    this.item = item;
-                }
+        private void forwardPendingEvent() {
+            if (item != null) {
+                downstream.onItem(item);
+            } else if (failure != null) {
+                downstream.onFailure(failure);
             }
+        }
 
-            @Override
-            public void onFailure(Throwable failure) {
-                if (done.get()) {
-                    super.onFailure(failure);
-                } else {
-                    this.failure = failure;
-                }
+        @Override
+        public void onItem(T item) {
+            if (done.get()) {
+                downstream.onItem(item);
+            } else {
+                this.item = item;
             }
-        });
+        }
+
+        @Override
+        public void onFailure(Throwable failure) {
+            if (done.get()) {
+                downstream.onFailure(failure);
+            } else {
+                this.failure = failure;
+            }
+        }
     }
 }

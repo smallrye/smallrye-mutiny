@@ -20,7 +20,7 @@ public class UniCreateFromKnownFailure<T> extends AbstractUni<T> {
 
     @Override
     public void subscribe(UniSubscriber<? super T> subscriber) {
-        subscriber.onSubscribe(EmptyUniSubscription.CANCELLED);
+        subscriber.onSubscribe(EmptyUniSubscription.DONE);
         subscriber.onFailure(failure);
     }
 }

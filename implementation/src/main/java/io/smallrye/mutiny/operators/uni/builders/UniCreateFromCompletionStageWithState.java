@@ -37,7 +37,7 @@ public class UniCreateFromCompletionStageWithState<T, S> extends AbstractUni<T> 
             state = holder.get();
             // get() throws an NPE is the produced state is null.
         } catch (Exception e) {
-            subscriber.onSubscribe(EmptyUniSubscription.CANCELLED);
+            subscriber.onSubscribe(EmptyUniSubscription.DONE);
             subscriber.onFailure(e);
             return;
         }
@@ -47,7 +47,7 @@ public class UniCreateFromCompletionStageWithState<T, S> extends AbstractUni<T> 
             stage = mapper.apply(state);
             Objects.requireNonNull(stage, "The produced CompletionStage is `null`");
         } catch (Throwable err) {
-            subscriber.onSubscribe(EmptyUniSubscription.CANCELLED);
+            subscriber.onSubscribe(EmptyUniSubscription.DONE);
             subscriber.onFailure(err);
             return;
         }

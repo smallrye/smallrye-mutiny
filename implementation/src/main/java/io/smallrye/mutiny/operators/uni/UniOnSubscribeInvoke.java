@@ -6,7 +6,6 @@ import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.helpers.EmptyUniSubscription;
 import io.smallrye.mutiny.operators.AbstractUni;
 import io.smallrye.mutiny.operators.UniOperator;
-import io.smallrye.mutiny.subscription.UniDelegatingSubscriber;
 import io.smallrye.mutiny.subscription.UniSubscriber;
 import io.smallrye.mutiny.subscription.UniSubscription;
 
@@ -22,22 +21,29 @@ public class UniOnSubscribeInvoke<T> extends UniOperator<T, T> {
 
     @Override
     public void subscribe(UniSubscriber<? super T> subscriber) {
-        AbstractUni.subscribe(upstream(), new UniDelegatingSubscriber<T, T>(subscriber) {
-            @Override
-            public void onSubscribe(UniSubscription subscription) {
-                // Invoke callback
-                try {
-                    callback.accept(subscription);
-                } catch (Throwable e) {
-                    super.onSubscribe(EmptyUniSubscription.CANCELLED);
-                    super.onFailure(e);
-                    return;
-                }
+        AbstractUni.subscribe(upstream(), new UniOnSubscribeInvokeProcessor(subscriber));
+    }
 
-                // Pass the subscription downstream
-                // Cannot be done in the try block as it may propagates 2 subscriptions.
-                super.onSubscribe(subscription);
+    private class UniOnSubscribeInvokeProcessor extends UniOperatorProcessor<T, T> {
+
+        public UniOnSubscribeInvokeProcessor(UniSubscriber<? super T> downstream) {
+            super(downstream);
+        }
+
+        @Override
+        public void onSubscribe(UniSubscription subscription) {
+            // Invoke callback
+            try {
+                callback.accept(subscription);
+            } catch (Throwable e) {
+                downstream.onSubscribe(EmptyUniSubscription.DONE);
+                downstream.onFailure(e);
+                return;
             }
-        });
+
+            // Pass the subscription downstream
+            // Cannot be done in the try block as it may propagates 2 subscriptions.
+            super.onSubscribe(subscription);
+        }
     }
 }

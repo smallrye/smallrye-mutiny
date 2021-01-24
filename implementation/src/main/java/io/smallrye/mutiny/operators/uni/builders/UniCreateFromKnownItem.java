@@ -21,7 +21,7 @@ public class UniCreateFromKnownItem<T> extends AbstractUni<T> {
     @Override
     public void subscribe(UniSubscriber<? super T> subscriber) {
         // No need to track cancellation, it's done by the serialized subscriber downstream.
-        subscriber.onSubscribe(EmptyUniSubscription.CANCELLED);
+        subscriber.onSubscribe(EmptyUniSubscription.DONE);
         subscriber.onItem(item);
     }
 }

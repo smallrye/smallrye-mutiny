@@ -8,6 +8,7 @@ import io.smallrye.mutiny.helpers.EmptyUniSubscription;
 import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.AbstractUni;
+import io.smallrye.mutiny.operators.uni.UniOperatorProcessor;
 
 /**
  * An implementation of {@link UniSubscriber} and {@link UniSubscription} making sure event handlers are only called once.
@@ -44,12 +45,18 @@ public class UniSerializedSubscriber<T> implements UniSubscriber<T>, UniSubscrip
 
     public static <T> void subscribe(AbstractUni<T> source, UniSubscriber<? super T> subscriber) {
         UniSubscriber<? super T> actual = Infrastructure.onUniSubscription(source, subscriber);
-        if (subscriber instanceof UniSerializedSubscriber) {
+        if (canBeSubscribedDirectly(subscriber)) {
             source.subscribe(actual);
         } else {
             UniSerializedSubscriber<T> wrapped = new UniSerializedSubscriber<>(source, actual);
             wrapped.subscribe();
         }
+    }
+
+    private static <T> boolean canBeSubscribedDirectly(UniSubscriber<? super T> subscriber) {
+        return (subscriber instanceof UniSerializedSubscriber)
+                || (subscriber instanceof UniOperatorProcessor)
+                || (subscriber == EmptyUniSubscription.DONE);
     }
 
     private void subscribe() {

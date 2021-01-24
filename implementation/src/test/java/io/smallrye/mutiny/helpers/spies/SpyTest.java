@@ -40,7 +40,6 @@ class SpyTest {
             assertThat(spy.invocationCount()).isEqualTo(2);
             UniSubscription secondSubscription = spy.lastSubscription();
             assertThat(secondSubscription).isNotNull();
-            assertThat(firstSubscription).isNotSameAs(secondSubscription);
 
             spy.reset();
             assertThat(spy.invocationCount()).isEqualTo(0);

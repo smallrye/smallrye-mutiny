@@ -3,9 +3,7 @@ package io.smallrye.mutiny.operators.uni;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.operators.AbstractUni;
 import io.smallrye.mutiny.operators.UniOperator;
-import io.smallrye.mutiny.subscription.UniDelegatingSubscriber;
 import io.smallrye.mutiny.subscription.UniSubscriber;
-import io.smallrye.mutiny.subscription.UniSubscription;
 
 public class UniOnCancellation<T> extends UniOperator<T, T> {
     private final Runnable callback;
@@ -17,14 +15,19 @@ public class UniOnCancellation<T> extends UniOperator<T, T> {
 
     @Override
     public void subscribe(UniSubscriber<? super T> subscriber) {
-        AbstractUni.subscribe(upstream(), new UniDelegatingSubscriber<T, T>(subscriber) {
-            @Override
-            public void onSubscribe(UniSubscription subscription) {
-                super.onSubscribe(() -> {
-                    callback.run();
-                    subscription.cancel();
-                });
-            }
-        });
+        AbstractUni.subscribe(upstream(), new UniOnCancellationProcessor(subscriber));
+    }
+
+    private class UniOnCancellationProcessor extends UniOperatorProcessor<T, T> {
+
+        public UniOnCancellationProcessor(UniSubscriber<? super T> downstream) {
+            super(downstream);
+        }
+
+        @Override
+        public void cancel() {
+            callback.run();
+            super.cancel();
+        }
     }
 }
