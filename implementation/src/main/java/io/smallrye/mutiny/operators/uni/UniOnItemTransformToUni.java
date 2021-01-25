@@ -30,20 +30,44 @@ public class UniOnItemTransformToUni<I, O> extends UniOperator<I, O> {
         AbstractUni.subscribe(upstream(), new UniOnItemTransformToUniProcessor(subscriber));
     }
 
+    // Note: serves as a subscription/subscriber for both the upstream and the Uni.
+    // There was an earlier design with a nested processor, but this requires an extra allocation.
     private class UniOnItemTransformToUniProcessor extends UniOperatorProcessor<I, O> {
 
-        private volatile UniProcessor uniProcessor;
+        private volatile UniSubscription innerSubscription;
 
         public UniOnItemTransformToUniProcessor(UniSubscriber<? super O> downstream) {
             super(downstream);
         }
 
         @Override
+        public void onSubscribe(UniSubscription subscription) {
+            if (upstream.get() == null) {
+                super.onSubscribe(subscription);
+            } else if (innerSubscription == null) {
+                this.innerSubscription = subscription;
+            } else {
+                subscription.cancel();
+            }
+        }
+
+        @Override
+        @SuppressWarnings("unchecked")
         public void onItem(I item) {
             if (isCancelled()) {
                 return;
             }
+            if (innerSubscription == null) {
+                // Input item from upstream
+                performInnerSubscription(item);
+            } else {
+                // Output item from the inner Uni
+                downstream.onItem((O) item); // not a pretty cast
+            }
+        }
 
+        @SuppressWarnings("unchecked")
+        private void performInnerSubscription(I item) {
             Uni<? extends O> uni;
             try {
                 uni = mapper.apply(item);
@@ -55,36 +79,19 @@ public class UniOnItemTransformToUni<I, O> extends UniOperator<I, O> {
                 }
                 return;
             }
-
             if (uni == null) {
                 downstream.onFailure(new NullPointerException(MAPPER_RETURNED_NULL));
                 return;
             }
-            uniProcessor = new UniProcessor(downstream);
-            AbstractUni.subscribe(uni, uniProcessor);
+            AbstractUni.subscribe(uni, (UniSubscriber) this); // not a pretty cast
         }
 
         @Override
         public void cancel() {
-            if (uniProcessor != null) {
-                uniProcessor.cancel();
+            if (innerSubscription != null) {
+                innerSubscription.cancel();
             }
             super.cancel();
-        }
-
-        private class UniProcessor extends UniOperatorProcessor<O, O> {
-
-            public UniProcessor(UniSubscriber<? super O> downstream) {
-                super(downstream);
-            }
-
-            @Override
-            public void onSubscribe(UniSubscription uniSubscription) {
-                // Just do not forward the subscription to the downstream
-                if (!upstream.compareAndSet(null, uniSubscription)) {
-                    uniSubscription.cancel();
-                }
-            }
         }
     }
 
