@@ -38,8 +38,14 @@ public class UniRetryAtMost<T> extends UniOperator<T, T> {
 
         @Override
         public void onSubscribe(UniSubscription subscription) {
-            counter.incrementAndGet();
-            super.onSubscribe(subscription);
+            int count = counter.incrementAndGet();
+            if (upstream.compareAndSet(null, subscription)) {
+                if (count == 1) {
+                    downstream.onSubscribe(this);
+                }
+            } else {
+                subscription.cancel();
+            }
         }
 
         @Override
