@@ -5,6 +5,7 @@ import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
+import java.util.concurrent.Future;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -133,6 +134,63 @@ public class UniCreate {
         Supplier<? extends CompletionStage<? extends T>> actual = Infrastructure.decorate(nonNull(supplier, "supplier"));
         return Infrastructure
                 .onUniCreation(new UniCreateFromCompletionStage<>(actual));
+    }
+
+    /**
+     * Creates a {@link Uni} from the given {@link Future}.
+     * <p>
+     * The produced {@code Uni} emits the item produced by the {@link Future}.
+     * Because {@link Future#get()} is blocking, creating a {@link Uni} from a {@link Future} requires blocking a thread 
+     * until the future produces a value, a failure, or the subscriber cancels. As a consequence, a thread from the
+     * {@link Infrastructure#getDefaultExecutor()} is used, and waits until the passed future produces an outcome.
+     * If the {@link Future} never completes (or fails), the produced {@link Uni} will not emit any item or failure,
+     * but it would also keep the thread blocked. So, make sure your {@link Future} are always completing or failing.
+     * <p>
+     * Cancelling the subscription on the produced {@link Uni} cancels the passed {@link Future}
+     * (calling {@link Future#cancel(boolean)}).
+     * <p>
+     * If the produced future has already been completed (or failed), the produced {@link Uni} sends the item or failure
+     * immediately after subscription. If it's not the case the callbacks of the subscriber are called on the thread used to
+     * wait the result (a thread from the Mutiny infrastructure default executor).
+     * <p>
+     * 
+     * @param future the future, must not be {@code null}
+     * @param <T> the type of item
+     * @return the produced {@link Uni}
+     */
+    public <T> Uni<T> future(Future<? extends T> future) {
+        Future<? extends T> actual = ParameterValidation.nonNull(future, "future");
+        return new UniCreateFromFuture<>(() -> actual);
+    }
+
+    /**
+     * Creates a {@link Uni} from the given {@link Future}. The future is created by invoking the passed
+     * {@link Supplier} <strong>lazily</strong> at subscription time.
+     * <p>
+     * The produced {@code Uni} emits the item produced by the {@link Future} supplied by the given {@link Supplier}.
+     * Because {@link Future#get()} is blocking, creating a {@link Uni} from a {@link Future} requires blocking a thread 
+     * until the future produces a value, a failure, or the subscriber cancels. A thread from the
+     * {@link Infrastructure#getDefaultExecutor()} is used, and waits until the passed future produces an outcome.
+     * If the {@link Future} never completes (or fails), the produced {@link Uni} will not emit an item or a failure,
+     * but it would also keep the thread blocked. So, make sure your {@link Future} are always completing or failing.
+     * <p>
+     * Cancelling the subscription on the produced {@link Uni} cancels the passed {@link Future}
+     * (calling {@link Future#cancel(boolean)}).
+     * <p>
+     * If the produced future has already been completed (or failed), the produced {@link Uni} sends the item or failure
+     * immediately after subscription. If it's not the case the subscriber's callbacks are called on the thread used to
+     * wait for the result (so a thread from the default executor).
+     * <p>
+     * If the supplier throws an exception, a failure event with the exception is fired. If the supplier produces
+     * {@code null}, a failure event containing a {@link NullPointerException} is fired.
+     *
+     * @param supplier the supplier, must not be {@code null}, must not produce {@code null}
+     * @param <T> the type of item
+     * @return the produced {@link Uni}
+     */
+    public <T> Uni<T> future(Supplier<Future<? extends T>> supplier) {
+        Supplier<Future<? extends T>> actual = Infrastructure.decorate(ParameterValidation.nonNull(supplier, "supplier"));
+        return new UniCreateFromFuture<>(actual);
     }
 
     /**
