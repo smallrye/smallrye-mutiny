@@ -50,7 +50,7 @@ public abstract class UniOperatorProcessor<I, O> implements UniSubscriber<I>, Un
     @Override
     public void cancel() {
         UniSubscription subscription = upstream.getAndSet(CANCELLED);
-        if (subscription != CANCELLED && subscription != DONE) {
+        if (subscription != null && subscription != CANCELLED && subscription != DONE) {
             subscription.cancel();
         }
     }
