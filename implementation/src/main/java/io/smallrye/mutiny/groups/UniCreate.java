@@ -140,18 +140,18 @@ public class UniCreate {
      * Creates a {@link Uni} from the given {@link Future}.
      * <p>
      * The produced {@code Uni} emits the item produced by the {@link Future}.
-     * Because {@link Future#get()} is blocking, creating a {@link Uni} from a {@link Future} requires a thread blocked
-     * until the future produce a value, a failure, or the subscriber cancels. As a consequence, a thread from the
-     * {@link Infrastructure#getDefaultExecutor()} is used, and waits until the passed future produce an outcome.
-     * If the {@link Future} never completes (or failed), the produced {@link Uni} would not emit an item or a failure,
+     * Because {@link Future#get()} is blocking, creating a {@link Uni} from a {@link Future} requires blocking a thread 
+     * until the future produces a value, a failure, or the subscriber cancels. As a consequence, a thread from the
+     * {@link Infrastructure#getDefaultExecutor()} is used, and waits until the passed future produces an outcome.
+     * If the {@link Future} never completes (or fails), the produced {@link Uni} will not emit any item or failure,
      * but it would also keep the thread blocked. So, make sure your {@link Future} are always completing or failing.
      * <p>
      * Cancelling the subscription on the produced {@link Uni} cancels the passed {@link Future}
      * (calling {@link Future#cancel(boolean)}).
      * <p>
      * If the produced future has already been completed (or failed), the produced {@link Uni} sends the item or failure
-     * immediately after subscription. If it's not the case the subscriber's callbacks are called on the thread used to
-     * wait the result (so a thread from the default executor).
+     * immediately after subscription. If it's not the case the callbacks of the subscriber are called on the thread used to
+     * wait the result (a thread from the Mutiny infrastructure default executor).
      * <p>
      * 
      * @param future the future, must not be {@code null}
@@ -168,10 +168,10 @@ public class UniCreate {
      * {@link Supplier} <strong>lazily</strong> at subscription time.
      * <p>
      * The produced {@code Uni} emits the item produced by the {@link Future} supplied by the given {@link Supplier}.
-     * Because {@link Future#get()} is blocking, creating a {@link Uni} from a {@link Future} requires a thread blocked
-     * until the future produce a value, a failure, or the subscriber cancels. As a consequence, a thread from the
-     * {@link Infrastructure#getDefaultExecutor()} is used, and waits until the passed future produce an outcome.
-     * If the {@link Future} never completes (or failed), the produced {@link Uni} would not emit an item or a failure,
+     * Because {@link Future#get()} is blocking, creating a {@link Uni} from a {@link Future} requires blocking a thread 
+     * until the future produces a value, a failure, or the subscriber cancels. A thread from the
+     * {@link Infrastructure#getDefaultExecutor()} is used, and waits until the passed future produces an outcome.
+     * If the {@link Future} never completes (or fails), the produced {@link Uni} will not emit an item or a failure,
      * but it would also keep the thread blocked. So, make sure your {@link Future} are always completing or failing.
      * <p>
      * Cancelling the subscription on the produced {@link Uni} cancels the passed {@link Future}
@@ -179,7 +179,7 @@ public class UniCreate {
      * <p>
      * If the produced future has already been completed (or failed), the produced {@link Uni} sends the item or failure
      * immediately after subscription. If it's not the case the subscriber's callbacks are called on the thread used to
-     * wait the result (so a thread from the default executor).
+     * wait for the result (so a thread from the default executor).
      * <p>
      * If the supplier throws an exception, a failure event with the exception is fired. If the supplier produces
      * {@code null}, a failure event containing a {@link NullPointerException} is fired.
