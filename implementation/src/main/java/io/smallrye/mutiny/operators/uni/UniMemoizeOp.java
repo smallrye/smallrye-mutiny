@@ -57,7 +57,7 @@ public class UniMemoizeOp<I> extends UniOperator<I, I> implements UniSubscriber<
 
         // Early exit with cached data
         if (state.get() == State.CACHING) {
-            subscriber.onSubscribe(EmptyUniSubscription.CANCELLED);
+            subscriber.onSubscribe(EmptyUniSubscription.DONE);
             if (failure != null) {
                 subscriber.onFailure(failure);
             } else {

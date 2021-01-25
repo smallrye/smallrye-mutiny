@@ -36,7 +36,7 @@ public class EmptyUniSubscription implements UniSubscription {
      * @param <T> the expected item type
      */
     public static <T> void propagateFailureEvent(UniSubscriber<T> subscriber, Throwable failure) {
-        subscriber.onSubscribe(CANCELLED);
+        subscriber.onSubscribe(DONE);
         subscriber.onFailure(failure);
     }
 

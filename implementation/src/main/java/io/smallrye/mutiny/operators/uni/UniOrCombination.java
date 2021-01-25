@@ -37,7 +37,7 @@ public class UniOrCombination<T> extends UniOperator<Void, T> {
     @Override
     public void subscribe(UniSubscriber<? super T> subscriber) {
         if (challengers.isEmpty()) {
-            subscriber.onSubscribe(EmptyUniSubscription.CANCELLED);
+            subscriber.onSubscribe(EmptyUniSubscription.DONE);
             subscriber.onItem(null);
             return;
         }
