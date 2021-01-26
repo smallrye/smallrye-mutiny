@@ -3,6 +3,7 @@ package io.smallrye.mutiny.operators.multi.builders;
 import java.time.Duration;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -39,34 +40,48 @@ public class IntervalMulti extends AbstractMulti<Long> {
 
     @Override
     public void subscribe(MultiSubscriber<? super Long> actual) {
-        IntervalRunnable runnable = new IntervalRunnable(actual);
+        IntervalRunnable runnable = new IntervalRunnable(actual, period, initialDelay, executor);
 
         actual.onSubscribe(runnable);
+        runnable.start();
 
-        try {
-            if (initialDelay != null) {
-                executor.scheduleAtFixedRate(runnable, initialDelay.toMillis(), period.toMillis(),
-                        TimeUnit.MILLISECONDS);
-            } else {
-                executor.scheduleAtFixedRate(runnable, 0, period.toMillis(),
-                        TimeUnit.MILLISECONDS);
-            }
-        } catch (RejectedExecutionException ree) {
-            if (!runnable.cancelled) {
-                actual.onFailure(new RejectedExecutionException(ree));
-            }
-        }
     }
 
     static final class IntervalRunnable implements Runnable, Subscription {
         private final MultiSubscriber<? super Long> actual;
         private final AtomicLong requested = new AtomicLong();
+        private final Duration period;
+        private final Duration initialDelay;
+        private final ScheduledExecutorService executor;
         private volatile boolean cancelled;
 
         private final AtomicLong count = new AtomicLong();
+        private ScheduledFuture<?> future;
 
-        IntervalRunnable(MultiSubscriber<? super Long> actual) {
+        IntervalRunnable(MultiSubscriber<? super Long> actual,
+                Duration period, Duration initial, ScheduledExecutorService executor) {
             this.actual = actual;
+            this.period = period;
+            this.initialDelay = initial;
+            this.executor = executor;
+        }
+
+        public void start() {
+            try {
+                synchronized (this) {
+                    if (initialDelay != null) {
+                        future = executor.scheduleAtFixedRate(this, initialDelay.toMillis(), period.toMillis(),
+                                TimeUnit.MILLISECONDS);
+                    } else {
+                        future = executor.scheduleAtFixedRate(this, 0, period.toMillis(),
+                                TimeUnit.MILLISECONDS);
+                    }
+                }
+            } catch (RejectedExecutionException ree) {
+                if (!cancelled) {
+                    actual.onFailure(new RejectedExecutionException(ree));
+                }
+            }
         }
 
         @Override
@@ -93,8 +108,13 @@ public class IntervalMulti extends AbstractMulti<Long> {
         }
 
         @Override
-        public void cancel() {
+        public synchronized void cancel() {
             cancelled = true;
+            if (future != null) {
+                future.cancel(false);
+            }
         }
+
     }
+
 }
