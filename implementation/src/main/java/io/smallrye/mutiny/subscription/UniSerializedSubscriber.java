@@ -6,6 +6,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.helpers.EmptyUniSubscription;
 import io.smallrye.mutiny.helpers.ParameterValidation;
+import io.smallrye.mutiny.helpers.UniCallbackSubscriber;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.AbstractUni;
 import io.smallrye.mutiny.operators.uni.UniOperatorProcessor;
@@ -55,7 +56,8 @@ public class UniSerializedSubscriber<T> implements UniSubscriber<T>, UniSubscrip
 
     private static <T> boolean canBeSubscribedDirectly(UniSubscriber<? super T> subscriber) {
         return (subscriber instanceof UniSerializedSubscriber)
-                || (subscriber instanceof UniOperatorProcessor);
+                || (subscriber instanceof UniOperatorProcessor)
+                || (subscriber instanceof UniCallbackSubscriber);
     }
 
     private void subscribe() {
