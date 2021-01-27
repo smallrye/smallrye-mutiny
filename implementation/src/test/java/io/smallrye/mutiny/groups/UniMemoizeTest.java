@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BooleanSupplier;
 
 import org.junit.jupiter.api.DisplayName;
@@ -18,11 +19,13 @@ import org.junit.jupiter.api.Test;
 
 import io.reactivex.processors.UnicastProcessor;
 import io.smallrye.mutiny.Multi;
+import io.smallrye.mutiny.TimeoutException;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.helpers.spies.Spy;
 import io.smallrye.mutiny.helpers.spies.UniOnSubscribeSpy;
 import io.smallrye.mutiny.helpers.test.UniAssertSubscriber;
 import io.smallrye.mutiny.operators.uni.UniMemoizeOp;
+import io.smallrye.mutiny.subscription.Cancellable;
 import io.smallrye.mutiny.subscription.UniSubscriber;
 import io.smallrye.mutiny.subscription.UniSubscription;
 
@@ -463,4 +466,31 @@ class UniMemoizeTest {
                 .subscribe().withSubscriber(UniAssertSubscriber.create()).await();
 
     }
+
+    /**
+     * Test reproducing https://github.com/smallrye/smallrye-mutiny/issues/460
+     */
+    @SuppressWarnings("ConstantConditions")
+    @RepeatedTest(10)
+    public void testTimeoutOfSecondSubscriber() {
+        Uni<String> uni = Uni.createFrom().item("hello")
+                .onItem().delayIt().by(Duration.ofMillis(500))
+                .memoize().indefinitely();
+
+        AtomicReference<String> reference = new AtomicReference<>();
+        AtomicBoolean cancelled = new AtomicBoolean();
+        Cancellable cancellable = uni
+                .onCancellation().invoke(() -> cancelled.set(true))
+                .subscribe().with(reference::set);
+
+        uni
+                .ifNoItem().after(Duration.ofMillis(100)).fail()
+                .onFailure(TimeoutException.class).invoke(failure -> cancellable.cancel())
+                .onFailure().recoverWithItem(() -> null)
+                .await().indefinitely();
+
+        assertThat(reference).hasValue(null);
+        assertThat(cancelled).isTrue();
+    }
+
 }

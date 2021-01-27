@@ -71,6 +71,7 @@ public class UniMemoizeOp<I> extends UniOperator<I, I> implements UniSubscriber<
             // This thread is performing the upstream subscription
             AbstractUni.subscribe(upstream(), this);
         }
+        drain();
     }
 
     @Override
