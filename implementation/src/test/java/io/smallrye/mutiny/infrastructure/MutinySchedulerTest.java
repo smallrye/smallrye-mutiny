@@ -1,6 +1,7 @@
 package io.smallrye.mutiny.infrastructure;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -146,6 +147,28 @@ public class MutinySchedulerTest {
 
         assertThat(list).hasSize(5);
         assertThat(thread.get()).startsWith("my-thread-");
+    }
+
+    /**
+     * This test verifies that tasks are not kept in the scheduler queue.
+     */
+    @Test
+    public void testTaskCancellation() {
+        MutinyScheduler scheduler = (MutinyScheduler) Infrastructure.getDefaultWorkerPool();
+        long begin = scheduler.getCompletedTaskCount();
+        AtomicInteger counter = new AtomicInteger();
+        for (int i = 0; i < 1000; i++) {
+            Multi.createFrom().ticks().every(Duration.ofMillis(100))
+                    .select().first(5)
+                    .subscribe().with(x -> {
+                        counter.incrementAndGet();
+                    });
+        }
+
+        await().until(() -> counter.get() == 5000);
+        assertThat(scheduler.getCompletedTaskCount()).isEqualTo(begin + 5000);
+        assertThat(scheduler.getQueue()).isEmpty();
+        assertThat(scheduler.getActiveCount()).isEqualTo(0);
     }
 
     @Test
