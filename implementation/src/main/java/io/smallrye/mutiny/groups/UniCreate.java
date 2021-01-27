@@ -140,7 +140,7 @@ public class UniCreate {
      * Creates a {@link Uni} from the given {@link Future}.
      * <p>
      * The produced {@code Uni} emits the item produced by the {@link Future}.
-     * Because {@link Future#get()} is blocking, creating a {@link Uni} from a {@link Future} requires blocking a thread 
+     * Because {@link Future#get()} is blocking, creating a {@link Uni} from a {@link Future} requires blocking a thread
      * until the future produces a value, a failure, or the subscriber cancels. As a consequence, a thread from the
      * {@link Infrastructure#getDefaultExecutor()} is used, and waits until the passed future produces an outcome.
      * If the {@link Future} never completes (or fails), the produced {@link Uni} will not emit any item or failure,
@@ -168,7 +168,7 @@ public class UniCreate {
      * {@link Supplier} <strong>lazily</strong> at subscription time.
      * <p>
      * The produced {@code Uni} emits the item produced by the {@link Future} supplied by the given {@link Supplier}.
-     * Because {@link Future#get()} is blocking, creating a {@link Uni} from a {@link Future} requires blocking a thread 
+     * Because {@link Future#get()} is blocking, creating a {@link Uni} from a {@link Future} requires blocking a thread
      * until the future produces a value, a failure, or the subscriber cancels. A thread from the
      * {@link Infrastructure#getDefaultExecutor()} is used, and waits until the passed future produces an outcome.
      * If the {@link Future} never completes (or fails), the produced {@link Uni} will not emit an item or a failure,
