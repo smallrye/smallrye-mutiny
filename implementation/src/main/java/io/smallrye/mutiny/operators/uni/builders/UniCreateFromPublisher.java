@@ -12,6 +12,7 @@ import org.reactivestreams.Subscription;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.AbstractUni;
 import io.smallrye.mutiny.subscription.UniSubscriber;
+import io.smallrye.mutiny.subscription.UniSubscription;
 
 public class UniCreateFromPublisher<T> extends AbstractUni<T> {
     private final Publisher<? extends T> publisher;
@@ -23,45 +24,68 @@ public class UniCreateFromPublisher<T> extends AbstractUni<T> {
     @SuppressWarnings("ReactiveStreamsSubscriberImplementation")
     @Override
     public void subscribe(UniSubscriber<? super T> subscriber) {
-        AtomicReference<Subscription> reference = new AtomicReference<>();
-        Subscriber<T> actual = new Subscriber<T>() {
-            @Override
-            public void onSubscribe(Subscription s) {
-                if (reference.compareAndSet(null, s)) {
-                    subscriber.onSubscribe(() -> {
-                        Subscription old = reference.getAndSet(CANCELLED);
-                        if (old != null) {
-                            old.cancel();
-                        }
-                    });
-                    s.request(1);
-                } else {
-                    s.cancel();
-                }
-            }
+        new PublisherSubscriber(subscriber).forward();
+    }
 
-            @Override
-            public void onNext(T o) {
-                Subscription sub = reference.getAndSet(CANCELLED);
-                if (sub == CANCELLED) {
-                    // Already cancelled, do nothing
-                    return;
-                }
+    private class PublisherSubscriber implements UniSubscription, Subscriber<T> {
+
+        private final UniSubscriber<? super T> subscriber;
+        AtomicReference<Subscription> subscription = new AtomicReference<>();
+
+        private PublisherSubscriber(UniSubscriber<? super T> subscriber) {
+            this.subscriber = subscriber;
+        }
+
+        private void forward() {
+            subscriber.onSubscribe(this);
+            Subscriber<? super T> sub = Infrastructure.onMultiSubscription(publisher, this);
+            publisher.subscribe(sub);
+        }
+
+        // ---- UniSubscription
+
+        @Override
+        public void cancel() {
+            Subscription old = subscription.getAndSet(CANCELLED);
+            if (old != null) {
+                old.cancel();
+            }
+        }
+
+        // ---- Subscriber
+
+        @Override
+        public void onSubscribe(Subscription s) {
+            if (subscription.compareAndSet(null, s)) {
+                s.request(1L);
+            } else {
+                s.cancel();
+            }
+        }
+
+        @Override
+        public void onNext(T item) {
+            Subscription sub = subscription.getAndSet(CANCELLED);
+            if (sub != CANCELLED) {
                 sub.cancel();
-                subscriber.onItem(o);
+                subscriber.onItem(item);
             }
+        }
 
-            @Override
-            public void onError(Throwable t) {
-                subscriber.onFailure(t);
+        @Override
+        public void onError(Throwable failure) {
+            Subscription sub = subscription.getAndSet(CANCELLED);
+            if (sub != CANCELLED) {
+                subscriber.onFailure(failure);
             }
+        }
 
-            @Override
-            public void onComplete() {
+        @Override
+        public void onComplete() {
+            Subscription sub = subscription.getAndSet(CANCELLED);
+            if (sub != CANCELLED) {
                 subscriber.onItem(null);
             }
-        };
-        Subscriber<? super T> sub = Infrastructure.onMultiSubscription(publisher, actual);
-        publisher.subscribe(sub);
+        }
     }
 }

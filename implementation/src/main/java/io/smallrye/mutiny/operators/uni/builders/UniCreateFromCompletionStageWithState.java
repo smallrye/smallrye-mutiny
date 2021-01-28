@@ -1,7 +1,5 @@
 package io.smallrye.mutiny.operators.uni.builders;
 
-import static io.smallrye.mutiny.operators.uni.builders.UniCreateFromCompletionStage.forwardFromCompletionStage;
-
 import java.util.Objects;
 import java.util.concurrent.CompletionStage;
 import java.util.function.Function;
@@ -52,6 +50,6 @@ public class UniCreateFromCompletionStageWithState<T, S> extends AbstractUni<T> 
             return;
         }
 
-        forwardFromCompletionStage(stage, subscriber);
+        new UniCreateFromCompletionStage.CompletionStageUniSubscription<T>(subscriber, stage).forward();
     }
 }
