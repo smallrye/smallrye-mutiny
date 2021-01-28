@@ -55,9 +55,9 @@ public class UniSerializedSubscriber<T> implements UniSubscriber<T>, UniSubscrip
     }
 
     private static <T> boolean canBeSubscribedDirectly(UniSubscriber<? super T> subscriber) {
-        return (subscriber instanceof UniSerializedSubscriber)
+        return true /*|| (subscriber instanceof UniSerializedSubscriber)
                 || (subscriber instanceof UniOperatorProcessor)
-                || (subscriber instanceof UniCallbackSubscriber);
+                || (subscriber instanceof UniCallbackSubscriber)*/;
     }
 
     private void subscribe() {
