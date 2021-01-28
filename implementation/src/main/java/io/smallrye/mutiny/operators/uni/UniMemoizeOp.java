@@ -10,7 +10,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BooleanSupplier;
 
 import io.smallrye.mutiny.Uni;
-import io.smallrye.mutiny.helpers.EmptyUniSubscription;
 import io.smallrye.mutiny.operators.AbstractUni;
 import io.smallrye.mutiny.operators.UniOperator;
 import io.smallrye.mutiny.subscription.UniSubscriber;
@@ -30,8 +29,7 @@ public class UniMemoizeOp<I> extends UniOperator<I, I> implements UniSubscriber<
     private final AtomicReference<State> state = new AtomicReference<>(State.INIT);
 
     private final AtomicInteger wip = new AtomicInteger();
-    private final List<UniSubscriber<? super I>> awaitingSubscription = synchronizedList(new ArrayList<>());
-    private final List<UniSubscriber<? super I>> awaitingResult = synchronizedList(new ArrayList<>());
+    private final List<UniSubscriberWrapper<? super I>> subscribers = synchronizedList(new ArrayList<>());
 
     private volatile UniSubscription upstreamSubscription;
     private volatile I item;
@@ -55,18 +53,24 @@ public class UniMemoizeOp<I> extends UniOperator<I, I> implements UniSubscriber<
             }
         }
 
+        // Wrap the subscriber
+        UniSubscriberWrapper<? super I> wrapper = new UniSubscriberWrapper<>(subscriber);
+
         // Early exit with cached data
         if (state.get() == State.CACHING) {
-            subscriber.onSubscribe(EmptyUniSubscription.DONE);
-            if (failure != null) {
-                subscriber.onFailure(failure);
-            } else {
-                subscriber.onItem(item);
+            subscriber.onSubscribe(wrapper::markCancelled);
+            if (!wrapper.isCancelled()) {
+                if (failure != null) {
+                    subscriber.onFailure(failure);
+                } else {
+                    subscriber.onItem(item);
+                }
             }
             return;
         }
 
-        awaitingSubscription.add(subscriber);
+        subscribers.add(wrapper);
+
         if (state.compareAndSet(State.INIT, State.SUBSCRIBING)) {
             // This thread is performing the upstream subscription
             AbstractUni.subscribe(upstream(), this);
@@ -79,6 +83,8 @@ public class UniMemoizeOp<I> extends UniOperator<I, I> implements UniSubscriber<
         if (state.compareAndSet(State.SUBSCRIBING, State.SUBSCRIBED)) {
             upstreamSubscription = subscription;
             drain();
+        } else {
+            subscription.cancel();
         }
     }
 
@@ -91,63 +97,58 @@ public class UniMemoizeOp<I> extends UniOperator<I, I> implements UniSubscriber<
         // Big loop
         int missed = 1;
         for (;;) {
-
-            ArrayList<UniSubscriber<? super I>> subscribers;
+            ArrayList<UniSubscriberWrapper<? super I>> wrappers;
             I currentItem;
             Throwable currentFailure;
 
-            if (!awaitingSubscription.isEmpty()) {
-                // Make a safe copy of the subscribers awaiting for a subscription
-                synchronized (awaitingSubscription) {
-                    subscribers = new ArrayList<>(awaitingSubscription);
+            if (!subscribers.isEmpty()) {
+                // Thread-safe copy
+                synchronized (subscribers) {
+                    wrappers = new ArrayList<>(subscribers);
                 }
 
-                // Handle the subscribers that are awaiting a subscription
-                for (UniSubscriber<? super I> subscriber : subscribers) {
+                // Handle subscribers
+                for (UniSubscriberWrapper<? super I> wrapper : wrappers) {
+                    if (wrapper.isCancelled()) {
+                        subscribers.remove(wrapper);
+                        continue;
+                    }
+
                     currentItem = item;
                     currentFailure = failure;
                     State state = this.state.get();
-                    switch (state) {
-                        case INIT:
-                        case SUBSCRIBING:
-                            break;
-                        case SUBSCRIBED:
-                            subscriber.onSubscribe(() -> removeFromAwaitingLists(subscriber));
-                            awaitingSubscription.remove(subscriber);
-                            awaitingResult.add(subscriber);
-                            break;
-                        case CACHING:
-                            subscriber.onSubscribe(() -> removeFromAwaitingLists(subscriber));
-                            if (currentFailure != null) {
-                                subscriber.onFailure(currentFailure);
-                            } else {
-                                subscriber.onItem(currentItem);
-                            }
-                            awaitingSubscription.remove(subscriber);
-                            awaitingResult.remove(subscriber);
-                            break;
-                        default:
-                            throw new IllegalStateException("Current state is " + state);
-                    }
-                }
-            }
 
-            if (!awaitingResult.isEmpty()) {
-                // Make a safe copy of the subscribers awaiting a result
-                synchronized (awaitingResult) {
-                    subscribers = new ArrayList<>(awaitingResult);
-                }
-                // Handle the subscribers that are awaiting a result
-                for (UniSubscriber<? super I> subscriber : subscribers) {
-                    currentItem = item;
-                    currentFailure = failure;
-                    if (state.get() == State.CACHING) {
-                        if (failure != null) {
-                            subscriber.onFailure(currentFailure);
-                        } else {
-                            subscriber.onItem(currentItem);
+                    if (wrapper.isAwaitingSubscription()) {
+                        switch (state) {
+                            case INIT:
+                            case SUBSCRIBING:
+                                break;
+                            case SUBSCRIBED:
+                                wrapper.subscriber.onSubscribe(wrapper::markCancelled);
+                                wrapper.markSubscribed();
+                                break;
+                            case CACHING:
+                                wrapper.subscriber.onSubscribe(wrapper::markCancelled);
+                                wrapper.markSubscribed();
+                                if (!wrapper.isCancelled()) {
+                                    if (currentFailure != null) {
+                                        wrapper.subscriber.onFailure(currentFailure);
+                                    } else {
+                                        wrapper.subscriber.onItem(currentItem);
+                                    }
+                                }
+                                subscribers.remove(wrapper);
+                                break;
+                            default:
+                                throw new IllegalStateException("Current state is " + state);
                         }
-                        awaitingResult.remove(subscriber);
+                    } else if (state == State.CACHING && wrapper.isAwaitingResult()) {
+                        if (failure != null) {
+                            wrapper.subscriber.onFailure(currentFailure);
+                        } else {
+                            wrapper.subscriber.onItem(currentItem);
+                        }
+                        subscribers.remove(wrapper);
                     }
                 }
             }
@@ -157,12 +158,6 @@ public class UniMemoizeOp<I> extends UniOperator<I, I> implements UniSubscriber<
                 break;
             }
         }
-    }
-
-    private void removeFromAwaitingLists(UniSubscriber<? super I> subscriber) {
-        awaitingSubscription.remove(subscriber);
-        awaitingResult.remove(subscriber);
-        drain();
     }
 
     @Override
@@ -182,6 +177,42 @@ public class UniMemoizeOp<I> extends UniOperator<I, I> implements UniSubscriber<
             this.failure = failure;
             state.set(State.CACHING);
             drain();
+        }
+    }
+
+    private static class UniSubscriberWrapper<I> {
+
+        enum Status {
+            AWAITING_SUBSCRIPTION,
+            AWAITING_RESULT,
+            CANCELLED
+        }
+
+        final UniSubscriber<? super I> subscriber;
+        final AtomicReference<Status> status = new AtomicReference<>(Status.AWAITING_SUBSCRIPTION);
+
+        UniSubscriberWrapper(UniSubscriber<? super I> subscriber) {
+            this.subscriber = subscriber;
+        }
+
+        void markCancelled() {
+            status.set(Status.CANCELLED);
+        }
+
+        void markSubscribed() {
+            status.compareAndSet(Status.AWAITING_SUBSCRIPTION, Status.AWAITING_RESULT);
+        }
+
+        boolean isCancelled() {
+            return status.get() == Status.CANCELLED;
+        }
+
+        boolean isAwaitingSubscription() {
+            return status.get() == Status.AWAITING_SUBSCRIPTION;
+        }
+
+        boolean isAwaitingResult() {
+            return status.get() == Status.AWAITING_RESULT;
         }
     }
 }
