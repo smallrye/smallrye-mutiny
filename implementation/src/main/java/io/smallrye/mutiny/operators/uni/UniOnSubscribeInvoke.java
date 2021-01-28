@@ -36,6 +36,7 @@ public class UniOnSubscribeInvoke<T> extends UniOperator<T, T> {
             try {
                 callback.accept(subscription);
             } catch (Throwable e) {
+                subscription.cancel();
                 downstream.onSubscribe(EmptyUniSubscription.DONE);
                 downstream.onFailure(e);
                 return;

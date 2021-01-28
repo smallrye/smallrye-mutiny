@@ -65,6 +65,8 @@ public class UniOnSubscribeCall<T> extends UniOperator<T, T> {
                     },
                     failed -> {
                         // On failure, propagates the failure
+                        done.set(true);
+                        subscription.cancel();
                         downstream.onSubscribe(EmptyUniSubscription.DONE);
                         downstream.onFailure(failed);
                     });
