@@ -13,7 +13,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 
@@ -26,7 +25,6 @@ import io.smallrye.mutiny.subscription.UniSerializedSubscriber;
 import io.smallrye.mutiny.subscription.UniSubscriber;
 import io.smallrye.mutiny.subscription.UniSubscription;
 
-@Disabled // TODO temporary, the API + tests need to be adapted for a new subscription model
 public class UniSerializedSubscriberTest {
 
     @AfterEach
@@ -295,13 +293,11 @@ public class UniSerializedSubscriberTest {
 
         await(done);
 
-        if (cancelled.get()) {
-            subscriber.assertNotTerminated();
+        if (subscriber.getItem() != null) {
+            assertThat(cancelled).isFalse();
+            subscriber.assertCompleted().assertItem(1);
         } else {
-            subscriber
-                    .await()
-                    .assertCompleted()
-                    .assertItem(1);
+            subscriber.assertNotTerminated();
         }
     }
 
