@@ -130,14 +130,17 @@ public class UniMemoizeOp<I> extends UniOperator<I, I> implements UniSubscriber<
                             case CACHING:
                                 wrapper.subscriber.onSubscribe(wrapper::markCancelled);
                                 wrapper.markSubscribed();
-                                if (!wrapper.isCancelled()) {
-                                    if (currentFailure != null) {
-                                        wrapper.subscriber.onFailure(currentFailure);
-                                    } else {
-                                        wrapper.subscriber.onItem(currentItem);
+                                try {
+                                    if (!wrapper.isCancelled()) {
+                                        if (currentFailure != null) {
+                                            wrapper.subscriber.onFailure(currentFailure);
+                                        } else {
+                                            wrapper.subscriber.onItem(currentItem);
+                                        }
                                     }
+                                } finally {
+                                    subscribers.remove(wrapper);
                                 }
-                                subscribers.remove(wrapper);
                                 break;
                             default:
                                 throw new IllegalStateException("Current state is " + state);
