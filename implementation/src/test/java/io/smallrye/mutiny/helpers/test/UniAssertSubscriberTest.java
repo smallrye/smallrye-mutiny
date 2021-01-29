@@ -1,6 +1,10 @@
 package io.smallrye.mutiny.helpers.test;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
 import java.io.IOException;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
@@ -18,13 +22,13 @@ class UniAssertSubscriberTest {
                 .subscribe().withSubscriber(new UniAssertSubscriber<>());
 
         subscriber.assertCompleted().assertItem(123);
-        Assertions.assertThat(subscriber.getItem()).isEqualTo(123);
-        Assertions.assertThat(subscriber.getFailure()).isNull();
+        assertThat(subscriber.getItem()).isEqualTo(123);
+        assertThat(subscriber.getFailure()).isNull();
 
-        Assertions.assertThatThrownBy(() -> subscriber.assertItem(2))
+        assertThatThrownBy(() -> subscriber.assertItem(2))
                 .isInstanceOf(AssertionError.class);
 
-        Assertions.assertThatThrownBy(() -> subscriber.assertItem(null))
+        assertThatThrownBy(() -> subscriber.assertItem(null))
                 .isInstanceOf(AssertionError.class);
     }
 
@@ -45,8 +49,8 @@ class UniAssertSubscriberTest {
                 .subscribe().withSubscriber(new UniAssertSubscriber<>(true));
 
         subscriber.assertNotTerminated();
-        Assertions.assertThat(subscriber.getItem()).isNull();
-        Assertions.assertThat(subscriber.getFailure()).isNull();
+        assertThat(subscriber.getItem()).isNull();
+        assertThat(subscriber.getFailure()).isNull();
     }
 
     @Test
@@ -57,8 +61,8 @@ class UniAssertSubscriberTest {
         subscriber
                 .assertFailed()
                 .assertFailedWith(IOException.class, "boom");
-        Assertions.assertThat(subscriber.getItem()).isNull();
-        Assertions.assertThat(subscriber.getFailure()).isNotNull().isInstanceOf(IOException.class).hasMessage("boom");
+        assertThat(subscriber.getItem()).isNull();
+        assertThat(subscriber.getFailure()).isNotNull().isInstanceOf(IOException.class).hasMessage("boom");
     }
 
     @Test
@@ -92,5 +96,139 @@ class UniAssertSubscriberTest {
                 .subscribe().withSubscriber(subscriber);
         subscriber.cancel();
         subscriber.assertCompleted();
+    }
+
+    @Test
+    public void testCorrectSignalsOrder_1() {
+        UniAssertSubscriber<String> subscriber = UniAssertSubscriber.create();
+        subscriber.onSubscribe(() -> {
+        });
+        subscriber.onItem("Yo");
+        subscriber.cancel();
+        subscriber.assertSignalsReceivedInOrder();
+
+        List<UniSignal> signals = subscriber.getSignals();
+        assertThat(signals).hasSize(3);
+        assertThat(signals.get(1)).isInstanceOf(OnItemUniSignal.class);
+        assertThat(signals.get(1).value()).isEqualTo("Yo");
+    }
+
+    @Test
+    public void testCorrectSignalsOrder_2() {
+        UniAssertSubscriber<String> subscriber = UniAssertSubscriber.create();
+        subscriber.onSubscribe(() -> {
+        });
+        subscriber.onFailure(new RuntimeException("Yo"));
+        subscriber.cancel();
+        subscriber.assertSignalsReceivedInOrder();
+
+        List<UniSignal> signals = subscriber.getSignals();
+        assertThat(signals).hasSize(3);
+        assertThat(signals.get(1).value()).isInstanceOf(RuntimeException.class);
+    }
+
+    @Test
+    public void testCorrectSignalsOrder_3() {
+        UniAssertSubscriber<String> subscriber = UniAssertSubscriber.create();
+        subscriber.onSubscribe(() -> {
+        });
+        subscriber.cancel();
+        subscriber.assertSignalsReceivedInOrder();
+    }
+
+    @Test
+    public void testCorrectSignalsOrder_4() {
+        UniAssertSubscriber<String> subscriber = UniAssertSubscriber.create();
+        subscriber.assertSignalsReceivedInOrder();
+    }
+
+    @Test
+    public void testOnSubscribeAfterFailure() {
+        UniAssertSubscriber<String> subscriber = UniAssertSubscriber.create();
+        subscriber.onFailure(new RuntimeException("Yo"));
+        subscriber.onSubscribe(() -> {
+        });
+
+        assertThatThrownBy(subscriber::assertSignalsReceivedInOrder)
+                .isInstanceOf(AssertionError.class)
+                .hasMessageContaining("The first signal is neither onSubscribe nor cancel");
+    }
+
+    @Test
+    public void testOnSubscribeAfterItem() {
+        UniAssertSubscriber<String> subscriber = UniAssertSubscriber.create();
+        subscriber.onItem("Yo");
+        subscriber.onSubscribe(() -> {
+        });
+
+        assertThatThrownBy(subscriber::assertSignalsReceivedInOrder)
+                .isInstanceOf(AssertionError.class)
+                .hasMessageContaining("The first signal is neither onSubscribe nor cancel");
+    }
+
+    @Test
+    public void testSignalsWithImmediateCancellation() {
+        UniAssertSubscriber<String> subscriber = UniAssertSubscriber.create();
+        subscriber.cancel();
+        Uni.createFrom().item("yolo").subscribe().withSubscriber(subscriber).assertSignalsReceivedInOrder();
+    }
+
+    @Test
+    public void testSignalsWithoutImmediateCancellation() {
+        UniAssertSubscriber<String> subscriber = UniAssertSubscriber.create();
+        Uni.createFrom().item("yolo").subscribe().withSubscriber(subscriber).assertSignalsReceivedInOrder();
+    }
+
+    @Test
+    public void testDoubleOnSubscribe() {
+        UniAssertSubscriber<String> subscriber = UniAssertSubscriber.create();
+        subscriber.onSubscribe(() -> {
+        });
+        subscriber.onFailure(new RuntimeException("Yo"));
+        subscriber.onSubscribe(() -> {
+        });
+
+        assertThatThrownBy(subscriber::assertSignalsReceivedInOrder)
+                .isInstanceOf(AssertionError.class)
+                .hasMessageContaining("There are more than 1 onSubscribe signals");
+    }
+
+    @Test
+    public void testDoubleOnItem() {
+        UniAssertSubscriber<String> subscriber = UniAssertSubscriber.create();
+        subscriber.onSubscribe(() -> {
+        });
+        subscriber.onItem("Yo");
+        subscriber.onItem("Yo");
+
+        assertThatThrownBy(subscriber::assertSignalsReceivedInOrder)
+                .isInstanceOf(AssertionError.class)
+                .hasMessageContaining("There are more than 1 onItem signals");
+    }
+
+    @Test
+    public void testDoubleOnFailure() {
+        UniAssertSubscriber<String> subscriber = UniAssertSubscriber.create();
+        subscriber.onSubscribe(() -> {
+        });
+        subscriber.onFailure(new RuntimeException("Yo"));
+        subscriber.onFailure(new RuntimeException("Yo"));
+
+        assertThatThrownBy(subscriber::assertSignalsReceivedInOrder)
+                .isInstanceOf(AssertionError.class)
+                .hasMessageContaining("There are more than 1 onFailure signals");
+    }
+
+    @Test
+    public void testBothOnFailureAndOnItem() {
+        UniAssertSubscriber<String> subscriber = UniAssertSubscriber.create();
+        subscriber.onSubscribe(() -> {
+        });
+        subscriber.onItem("Yo");
+        subscriber.onFailure(new RuntimeException("Yo"));
+
+        assertThatThrownBy(subscriber::assertSignalsReceivedInOrder)
+                .isInstanceOf(AssertionError.class)
+                .hasMessageContaining("There are both onItem and onFailure");
     }
 }
