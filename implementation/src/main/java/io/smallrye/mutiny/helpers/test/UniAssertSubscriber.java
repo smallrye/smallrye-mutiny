@@ -2,6 +2,9 @@ package io.smallrye.mutiny.helpers.test;
 
 import static io.smallrye.mutiny.helpers.test.AssertionHelper.*;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 import io.smallrye.mutiny.subscription.UniSubscriber;
@@ -22,6 +25,7 @@ public class UniAssertSubscriber<T> implements UniSubscriber<T> {
     private volatile String onResultThreadName;
     private volatile String onErrorThreadName;
     private volatile String onSubscribeThreadName;
+    private final List<UniSignal> signals = new ArrayList<>(4);
 
     /**
      * Create a new {@link UniAssertSubscriber}.
@@ -51,6 +55,7 @@ public class UniAssertSubscriber<T> implements UniSubscriber<T> {
 
     @Override
     public synchronized void onSubscribe(UniSubscription subscription) {
+        signals.add(new OnSubscribeUniSignal(subscription));
         onSubscribeThreadName = Thread.currentThread().getName();
         if (this.cancelImmediatelyOnSubscription) {
             this.subscription = subscription;
@@ -63,6 +68,7 @@ public class UniAssertSubscriber<T> implements UniSubscriber<T> {
 
     @Override
     public synchronized void onItem(T item) {
+        signals.add(new OnItemUniSignal(item));
         this.completed = true;
         this.item = item;
         this.onResultThreadName = Thread.currentThread().getName();
@@ -71,6 +77,7 @@ public class UniAssertSubscriber<T> implements UniSubscriber<T> {
 
     @Override
     public synchronized void onFailure(Throwable failure) {
+        signals.add(new OnFailureUniSignal(failure));
         this.failure = failure;
         this.onErrorThreadName = Thread.currentThread().getName();
         this.future.completeExceptionally(failure);
@@ -187,6 +194,7 @@ public class UniAssertSubscriber<T> implements UniSubscriber<T> {
      * Cancel the subscription.
      */
     public void cancel() {
+        signals.add(new OnCancellationUniSignal());
         if (subscription == null) {
             cancelImmediatelyOnSubscription = true;
         } else {
@@ -231,6 +239,57 @@ public class UniAssertSubscriber<T> implements UniSubscriber<T> {
      */
     public UniAssertSubscriber<T> assertNotSubscribed() {
         shouldNotBeSubscribed(subscription == null ? 0 : 1);
+        return this;
+    }
+
+    /**
+     * Get the {@link UniSignal} audit trail for this subscriber.
+     * 
+     * @return the signals in receive order
+     */
+    public List<UniSignal> getSignals() {
+        return Collections.unmodifiableList(signals);
+    }
+
+    /**
+     * Assert that signals have been received in correct order.
+     * <p>
+     * An example of an legal sequence would be receiving {@code onSubscribe -> onItem}.
+     * An example of an illegal sequence would be receiving {@code onItem -> onSubscribe}.
+     *
+     * @return this {@link UniAssertSubscriber}
+     */
+    public UniAssertSubscriber<T> assertSignalsReceivedInOrder() {
+        if (signals.isEmpty()) {
+            return this;
+        }
+        UniSignal firstSignal = signals.get(0);
+        if (!(firstSignal instanceof OnSubscribeUniSignal)
+                && !(firstSignal instanceof OnCancellationUniSignal)) {
+            throw new AssertionError("The first signal is neither onSubscribe nor cancel but " + firstSignal);
+        }
+        int[] occurrences = new int[3]; // onSubscribe | onItem | onFailure
+        for (UniSignal signal : signals) {
+            if (signal instanceof OnSubscribeUniSignal) {
+                occurrences[0]++;
+            } else if (signal instanceof OnItemUniSignal) {
+                occurrences[1]++;
+            } else if (signal instanceof OnFailureUniSignal) {
+                occurrences[2]++;
+            }
+        }
+        if (occurrences[0] > 1) {
+            throw new AssertionError("There are more than 1 onSubscribe signals in " + signals);
+        }
+        if (occurrences[1] > 1) {
+            throw new AssertionError("There are more than 1 onItem signals in " + signals);
+        }
+        if (occurrences[2] > 1) {
+            throw new AssertionError("There are more than 1 onFailure signals in " + signals);
+        }
+        if (occurrences[1] == 1 && occurrences[2] == 1) {
+            throw new AssertionError("There are both onItem and onFailure signals in " + signals);
+        }
         return this;
     }
 }
