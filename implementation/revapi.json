@@ -144,6 +144,48 @@
           "code": "java.class.removed",
           "old": "class io.smallrye.mutiny.operators.MultiItemCombineIterable",
           "justification": "API-exposed class has been moved to a public API package"
+        },
+        {
+          "ignore": true,
+          "code": "java.method.removed",
+          "old": "method void io.smallrye.mutiny.helpers.spies.UniGlobalSpy<T>::subscribing(io.smallrye.mutiny.subscription.UniSubscriber<? super T>)",
+          "justification": "AbstractUni now exposes a public subscribe method instead of the protected subscribing method (not to be consumed by users of the library anyway), this refactoring aligns with the Multi API"
+        },
+        {
+          "ignore": true,
+          "code": "java.method.removed",
+          "old": "method void io.smallrye.mutiny.helpers.spies.UniOnCancellationSpy<T>::subscribing(io.smallrye.mutiny.subscription.UniSubscriber<? super T>)",
+          "justification": "AbstractUni now exposes a public subscribe method instead of the protected subscribing method (not to be consumed by users of the library anyway), this refactoring aligns with the Multi API"
+        },
+        {
+          "ignore": true,
+          "code": "java.method.removed",
+          "old": "method void io.smallrye.mutiny.helpers.spies.UniOnFailureSpy<T>::subscribing(io.smallrye.mutiny.subscription.UniSubscriber<? super T>)",
+          "justification": "AbstractUni now exposes a public subscribe method instead of the protected subscribing method (not to be consumed by users of the library anyway), this refactoring aligns with the Multi API"
+        },
+        {
+          "ignore": true,
+          "code": "java.method.removed",
+          "old": "method void io.smallrye.mutiny.helpers.spies.UniOnItemOrFailureSpy<T>::subscribing(io.smallrye.mutiny.subscription.UniSubscriber<? super T>)",
+          "justification": "AbstractUni now exposes a public subscribe method instead of the protected subscribing method (not to be consumed by users of the library anyway), this refactoring aligns with the Multi API"
+        },
+        {
+          "ignore": true,
+          "code": "java.method.removed",
+          "old": "method void io.smallrye.mutiny.helpers.spies.UniOnItemSpy<T>::subscribing(io.smallrye.mutiny.subscription.UniSubscriber<? super T>)",
+          "justification": "AbstractUni now exposes a public subscribe method instead of the protected subscribing method (not to be consumed by users of the library anyway), this refactoring aligns with the Multi API"
+        },
+        {
+          "ignore": true,
+          "code": "java.method.removed",
+          "old": "method void io.smallrye.mutiny.helpers.spies.UniOnSubscribeSpy<T>::subscribing(io.smallrye.mutiny.subscription.UniSubscriber<? super T>)",
+          "justification": "AbstractUni now exposes a public subscribe method instead of the protected subscribing method (not to be consumed by users of the library anyway), this refactoring aligns with the Multi API"
+        },
+        {
+          "ignore": true,
+          "code": "java.method.removed",
+          "old": "method void io.smallrye.mutiny.helpers.spies.UniOnTerminationSpy<T>::subscribing(io.smallrye.mutiny.subscription.UniSubscriber<? super T>)",
+          "justification": "AbstractUni now exposes a public subscribe method instead of the protected subscribing method (not to be consumed by users of the library anyway), this refactoring aligns with the Multi API"
         }
       ]
     }
