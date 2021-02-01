@@ -70,9 +70,6 @@
                             <includes>
                                 <include>**/tck/ReactiveStreamsEngineImplTck</include>
                             </includes>
-                            <excludes>
-                                <exclude>**/tck/SubscriberWhitebox*</exclude>
-                            </excludes>
                             <junitArtifactName>none:none</junitArtifactName>
                             <properties>
                                 <property>
