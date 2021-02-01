@@ -49,7 +49,8 @@ public class UniSerializedSubscriberTest {
 
         subscriber
                 .assertCompleted()
-                .assertItem(1);
+                .assertItem(1)
+                .assertSignalsReceivedInOrder();
     }
 
     @Test
@@ -65,7 +66,8 @@ public class UniSerializedSubscriberTest {
 
         reference.get().fail(new IOException("boom"));
         subscriber
-                .assertFailedWith(IOException.class, "boom");
+                .assertFailedWith(IOException.class, "boom")
+                .assertSignalsReceivedInOrder();
     }
 
     @Test
@@ -85,7 +87,8 @@ public class UniSerializedSubscriberTest {
 
         subscriber
                 .assertCompleted()
-                .assertItem(null);
+                .assertItem(null)
+                .assertSignalsReceivedInOrder();
     }
 
     @Test
@@ -104,8 +107,8 @@ public class UniSerializedSubscriberTest {
 
         subscriber
                 .assertSubscribed()
-                .assertFailedWith(IOException.class, "boom");
-
+                .assertFailedWith(IOException.class, "boom")
+                .assertSignalsReceivedInOrder();
     }
 
     @Test
@@ -124,7 +127,8 @@ public class UniSerializedSubscriberTest {
 
         subscriber
                 .assertSubscribed()
-                .assertFailedWith(IllegalStateException.class, "Invalid");
+                .assertFailedWith(IllegalStateException.class, "Invalid")
+                .assertSignalsReceivedInOrder();
 
     }
 
@@ -144,7 +148,8 @@ public class UniSerializedSubscriberTest {
         });
         subscriber
                 .assertSubscribed()
-                .assertFailedWith(IllegalStateException.class, "Invalid transition");
+                .assertFailedWith(IllegalStateException.class, "Invalid transition")
+                .assertSignalsReceivedInOrder();
 
     }
 
@@ -165,12 +170,13 @@ public class UniSerializedSubscriberTest {
 
         subscriber
                 .assertSubscribed()
-                .assertItem(1);
+                .assertItem(1)
+                .assertSignalsReceivedInOrder();
 
     }
 
     @RepeatedTest(100)
-    public void testRaceBetweenItemAndFailure() {
+    public void testRaceBetweenItemAndFailureWithoutUniserializedSubscriber() {
         AtomicReference<UniEmitter<? super Integer>> reference = new AtomicReference<>();
         Uni<Integer> uni = Uni.createFrom().<Integer> emitter(reference::set);
 
@@ -207,10 +213,52 @@ public class UniSerializedSubscriberTest {
             subscriber.assertCompleted()
                     .assertItem(1);
         }
+        subscriber.assertSignalsReceivedInOrder();
     }
 
     @RepeatedTest(100)
-    public void testRaceBetweenMultipleItems() {
+    public void testRaceBetweenItemAndFailureWithUniserializedSubscriber() {
+        AtomicReference<UniEmitter<? super Integer>> reference = new AtomicReference<>();
+        Uni<Integer> uni = Uni.createFrom().<Integer> emitter(reference::set);
+
+        UniAssertSubscriber<Integer> subscriber = UniAssertSubscriber.create();
+        uni.subscribe().withSerializedSubscriber(subscriber);
+
+        subscriber.assertSubscribed();
+
+        CountDownLatch start = new CountDownLatch(2);
+
+        Runnable runnable1 = () -> {
+            start.countDown();
+            await(start);
+            reference.get().complete(1);
+        };
+
+        Runnable runnable2 = () -> {
+            start.countDown();
+            await(start);
+            reference.get().fail(new IOException("boom"));
+        };
+
+        List<Runnable> runnables = Arrays.asList(runnable1, runnable2);
+        Collections.shuffle(runnables);
+
+        runnables.forEach(r -> new Thread(r).start());
+
+        subscriber.await();
+
+        if (subscriber.getFailure() != null) {
+            subscriber.assertFailed()
+                    .assertFailedWith(IOException.class, "boom");
+        } else {
+            subscriber.assertCompleted()
+                    .assertItem(1);
+        }
+        subscriber.assertSignalsReceivedInOrder();
+    }
+
+    @RepeatedTest(100)
+    public void testRaceBetweenMultipleItemsWithoutUniserializedSubscriber() {
         AtomicReference<UniEmitter<? super Integer>> reference = new AtomicReference<>();
         Uni<Integer> uni = Uni.createFrom().<Integer> emitter(reference::set);
 
@@ -247,10 +295,52 @@ public class UniSerializedSubscriberTest {
         subscriber.await();
         subscriber.assertCompleted();
         assertThat(subscriber.getItem()).isBetween(1, 3);
+        subscriber.assertSignalsReceivedInOrder();
     }
 
     @RepeatedTest(100)
-    public void testRaceBetweenItemAndCancellation() {
+    public void testRaceBetweenMultipleItemsWithUniserializedSubscriber() {
+        AtomicReference<UniEmitter<? super Integer>> reference = new AtomicReference<>();
+        Uni<Integer> uni = Uni.createFrom().<Integer> emitter(reference::set);
+
+        UniAssertSubscriber<Integer> subscriber = UniAssertSubscriber.create();
+        uni.subscribe().withSerializedSubscriber(subscriber);
+
+        subscriber.assertSubscribed();
+
+        CountDownLatch start = new CountDownLatch(3);
+
+        Runnable runnable1 = () -> {
+            start.countDown();
+            await(start);
+            reference.get().complete(1);
+        };
+
+        Runnable runnable2 = () -> {
+            start.countDown();
+            await(start);
+            reference.get().complete(2);
+        };
+
+        Runnable runnable3 = () -> {
+            start.countDown();
+            await(start);
+            reference.get().complete(3);
+        };
+
+        List<Runnable> runnables = Arrays.asList(runnable1, runnable2, runnable3);
+        Collections.shuffle(runnables);
+
+        runnables.forEach(r -> new Thread(r).start());
+
+        subscriber.await();
+        subscriber.assertCompleted();
+        assertThat(subscriber.getItem()).isBetween(1, 3);
+        subscriber.assertSignalsReceivedInOrder();
+    }
+
+    @RepeatedTest(100)
+    public void testRaceBetweenItemAndCancellationWithoutUniserializedSubscriber() {
         AtomicReference<UniEmitter<? super Integer>> reference = new AtomicReference<>();
         AtomicBoolean cancelled = new AtomicBoolean();
         Uni<Integer> uni = Uni.createFrom().<Integer> emitter(reference::set)
@@ -299,6 +389,60 @@ public class UniSerializedSubscriberTest {
         } else {
             subscriber.assertNotTerminated();
         }
+        subscriber.assertSignalsReceivedInOrder();
+    }
+
+    @RepeatedTest(100)
+    public void testRaceBetweenItemAndCancellationWithUniserializedSubscriber() {
+        AtomicReference<UniEmitter<? super Integer>> reference = new AtomicReference<>();
+        AtomicBoolean cancelled = new AtomicBoolean();
+        Uni<Integer> uni = Uni.createFrom().<Integer> emitter(reference::set)
+                .onCancellation().invoke(() -> cancelled.set(true));
+
+        UniAssertSubscriber<Integer> subscriber = UniAssertSubscriber.create();
+        uni.subscribe().withSerializedSubscriber(subscriber);
+
+        subscriber.assertSubscribed();
+
+        CountDownLatch start = new CountDownLatch(2);
+        CountDownLatch done = new CountDownLatch(2);
+
+        Runnable runnable1 = () -> {
+            try {
+                start.countDown();
+                await(start);
+                reference.get().complete(1);
+                done.countDown();
+            } catch (Throwable e) {
+                e.printStackTrace();
+            }
+        };
+
+        Runnable runnable2 = () -> {
+            try {
+                start.countDown();
+                await(start);
+                subscriber.cancel();
+                done.countDown();
+            } catch (Throwable e) {
+                e.printStackTrace();
+            }
+        };
+
+        List<Runnable> runnables = Arrays.asList(runnable1, runnable2);
+        Collections.shuffle(runnables);
+
+        runnables.forEach(r -> new Thread(r).start());
+
+        await(done);
+
+        if (subscriber.getItem() != null) {
+            assertThat(cancelled).isFalse();
+            subscriber.assertCompleted().assertItem(1);
+        } else {
+            subscriber.assertNotTerminated();
+        }
+        subscriber.assertSignalsReceivedInOrder();
     }
 
     @Test
