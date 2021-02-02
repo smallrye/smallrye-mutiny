@@ -9,6 +9,7 @@ import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.operators.AbstractUni;
 import io.smallrye.mutiny.subscription.UniSubscriber;
 import io.smallrye.mutiny.subscription.UniSubscription;
 
@@ -57,7 +58,7 @@ public class UniToMultiPublisher<T> implements Publisher<T> {
                 if (upstream.get() == CANCELLED) {
                     return;
                 }
-                uni.subscribe().withSubscriber(this);
+                AbstractUni.subscribe(uni, this);
             }
         }
 
