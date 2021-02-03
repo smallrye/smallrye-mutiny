@@ -58,6 +58,46 @@ Or directly add the dependency to your `pom.xml`
 
 Follow the https://quarkus.io/guides/getting-started-reactive[Getting started with reactive] guide for more details.
 
+
+[[bom]]
+=== Using the Mutiny BOM
+
+Mutiny provides a https://maven.apache.org/guides/introduction/introduction-to-dependency-mechanism.html#bill-of-materials-bom-poms[BOM] to avoid having to declare the version of each module you depend on.
+
+In Maven, use it as follows:
+
+[source, xml]
+----
+<dependencyManagement>
+    <dependencies>
+        <dependency>
+            <groupId>io.smallrye.reactive</groupId>
+            <artifactId>mutiny-bom</artifactId>
+            <version>{{ site.data.versions.mutiny_version }}</version>
+            <type>pom</type>
+            <scope>import</scope>
+        </dependency>
+    </dependencies>
+</dependencyManagement>
+
+<dependencies>
+    <dependency>
+        <groupId>io.smallrye.reactive</groupId>
+        <artifactId>mutiny</artifactId>
+    </dependency>
+</dependencies>
+----
+
+In Gradle, add:
+
+[source, kotlin]
+----
+dependencies {
+  implementation platform("io.smallrye.reactive:mutiny-bom:{{ site.data.versions.mutiny_version }}")
+  implementation("io.smallrye.reactive:mutiny")
+}
+----
+
 [[vertx]]
 == Using Mutiny with Eclipse Vert.x
 
