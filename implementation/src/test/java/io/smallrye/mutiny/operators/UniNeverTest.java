@@ -13,6 +13,5 @@ public class UniNeverTest {
         Uni.createFrom().<Void> nothing()
                 .subscribe().withSubscriber(subscriber);
         subscriber.assertSubscribed().assertNotTerminated();
-        ;
     }
 }

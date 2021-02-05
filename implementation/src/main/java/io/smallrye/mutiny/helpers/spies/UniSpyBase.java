@@ -7,7 +7,7 @@ import io.smallrye.mutiny.operators.UniOperator;
 
 abstract class UniSpyBase<T> extends UniOperator<T, T> {
 
-    private AtomicLong invocationCount = new AtomicLong();
+    private final AtomicLong invocationCount = new AtomicLong();
 
     protected void incrementInvocationCount() {
         invocationCount.incrementAndGet();

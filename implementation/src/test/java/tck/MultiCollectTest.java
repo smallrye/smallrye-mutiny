@@ -88,7 +88,7 @@ public class MultiCollectTest extends AbstractTck {
                                 cancelled.complete(null);
                             }
                         })
-                        .collect().with(Collector.<Integer, Integer, Integer> of(() -> {
+                        .collect().with(Collector.of(() -> {
                             throw new QuietRuntimeException("failed");
                         }, (a, b) -> {
                         }, Integer::sum, Function.identity()))

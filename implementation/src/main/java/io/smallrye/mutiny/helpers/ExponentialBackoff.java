@@ -41,7 +41,7 @@ public class ExponentialBackoff {
                 .onItem().transformToUni(failure -> {
                     int iteration = index.incrementAndGet();
                     if (iteration >= numRetries) {
-                        return Uni.createFrom().<Long> failure(
+                        return Uni.createFrom().failure(
                                 new IllegalStateException("Retries exhausted: " + iteration + "/" + numRetries,
                                         failure));
                     }
@@ -110,7 +110,7 @@ public class ExponentialBackoff {
 
                     long checkTime = System.currentTimeMillis() + delay.toMillis();
                     if (checkTime > expireAt) {
-                        return Uni.createFrom().<Long> failure(
+                        return Uni.createFrom().failure(
                                 new IllegalStateException(
                                         "Retries exhausted : " + iteration + " attempts against " + checkTime + "/" + expireAt
                                                 + " expiration",

@@ -354,7 +354,7 @@ public class MultiCollectTest {
     @Test
     public void testCollectWhenWithFailure() {
         Uni<List<Integer>> uni = Multi.createFrom().items(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
-                .collect().when(i -> Uni.createFrom().<Boolean> emitter(e -> {
+                .collect().when(i -> Uni.createFrom().emitter(e -> {
                     if (i == 3) {
                         e.fail(new IllegalArgumentException("boom"));
                     }

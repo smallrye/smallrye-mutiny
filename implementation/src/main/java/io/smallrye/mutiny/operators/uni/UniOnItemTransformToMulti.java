@@ -40,8 +40,8 @@ public class UniOnItemTransformToMulti<I, O> extends AbstractMulti<O> {
     @SuppressWarnings("SubscriberImplementation")
     static final class FlatMapPublisherSubscriber<I, O> implements Subscriber<O>, UniSubscriber<I>, Subscription {
 
-        private AtomicReference<Subscription> secondUpstream;
-        private AtomicReference<UniSubscription> firstUpstream;
+        private final AtomicReference<Subscription> secondUpstream;
+        private final AtomicReference<UniSubscription> firstUpstream;
         private final Subscriber<? super O> downstream;
         private final Function<? super I, ? extends Publisher<? extends O>> mapper;
         private final AtomicLong requested = new AtomicLong();

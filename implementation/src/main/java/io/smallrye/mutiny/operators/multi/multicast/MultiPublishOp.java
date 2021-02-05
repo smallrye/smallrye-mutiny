@@ -539,7 +539,7 @@ public final class MultiPublishOp<T> extends ConnectableMulti<T> {
          * The parent subscriber-to-source used to allow removing the child in case of
          * child cancellation.
          */
-        private AtomicReference<PublishSubscriber<T>> parent = new AtomicReference<>();
+        private final AtomicReference<PublishSubscriber<T>> parent = new AtomicReference<>();
 
         /**
          * Track the number of emitted items (avoids decrementing the request counter).
