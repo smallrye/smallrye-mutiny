@@ -17,22 +17,6 @@ public class UniCreateFromCompletionStage<T> extends AbstractUni<T> {
         this.supplier = supplier; // Already checked
     }
 
-    static <O> void forwardFromCompletionStage(CompletionStage<? extends O> stage,
-            UniSubscriber<? super O> subscriber) {
-        subscriber.onSubscribe(() -> stage.toCompletableFuture().cancel(false));
-        stage.whenComplete((res, fail) -> {
-            if (fail != null) {
-                if (fail instanceof CompletionException) {
-                    subscriber.onFailure(fail.getCause());
-                } else {
-                    subscriber.onFailure(fail);
-                }
-            } else {
-                subscriber.onItem(res);
-            }
-        });
-    }
-
     @Override
     public void subscribe(UniSubscriber<? super T> subscriber) {
         CompletionStage<? extends T> stage;
