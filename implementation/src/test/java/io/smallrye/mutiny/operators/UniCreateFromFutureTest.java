@@ -10,6 +10,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
+import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Uni;
@@ -221,7 +222,7 @@ public class UniCreateFromFutureTest {
         subscriber.assertNotTerminated();
     }
 
-    @Test
+    @RepeatedTest(10)
     public void testThatSubscriberCanCancelBeforeEmissionWithSupplier() {
         UniAssertSubscriber<Integer> subscriber = UniAssertSubscriber.create();
         CompletableFuture<Integer> cs = new CompletableFuture<>();

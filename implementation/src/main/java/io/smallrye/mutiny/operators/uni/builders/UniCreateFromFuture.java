@@ -4,6 +4,7 @@ import static io.smallrye.mutiny.helpers.EmptyUniSubscription.DONE;
 
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
 import io.smallrye.mutiny.infrastructure.Infrastructure;
@@ -66,16 +67,26 @@ public class UniCreateFromFuture<T> extends AbstractUni<T> {
     }
 
     private void dispatchDeferredResult(Future<? extends T> future, UniSubscriber<? super T> downstream) {
-        downstream.onSubscribe(() -> future.cancel(false));
+        AtomicBoolean cancelled = new AtomicBoolean(false);
+        downstream.onSubscribe(() -> {
+            cancelled.set(true);
+            future.cancel(false);
+        });
         // Because future.get is blocking, we must use a separated thread.
         Infrastructure.getDefaultExecutor().execute(() -> {
             try {
                 T item = future.get();
-                downstream.onItem(item);
+                if (!cancelled.get()) {
+                    downstream.onItem(item);
+                }
             } catch (ExecutionException e) {
-                downstream.onFailure(e.getCause());
+                if (!cancelled.get()) {
+                    downstream.onFailure(e.getCause());
+                }
             } catch (Exception e) {
-                downstream.onFailure(e);
+                if (!cancelled.get()) {
+                    downstream.onFailure(e);
+                }
             }
         });
     }
