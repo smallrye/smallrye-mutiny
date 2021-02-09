@@ -22,7 +22,7 @@ public class UniOnItemSpy<T> extends UniSpyBase<T> {
     }
 
     @Override
-    protected void subscribing(UniSubscriber<? super T> downstream) {
+    public void subscribe(UniSubscriber<? super T> downstream) {
         upstream()
                 .onItem().invoke(item -> {
                     this.lastItem = item;

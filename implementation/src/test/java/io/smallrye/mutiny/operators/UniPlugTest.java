@@ -59,7 +59,7 @@ class UniPlugTest {
         }
 
         @Override
-        protected void subscribing(UniSubscriber<? super String> subscriber) {
+        public void subscribe(UniSubscriber<? super String> subscriber) {
             upstream().subscribe().withSubscriber(new UniDelegatingSubscriber<T, String>(subscriber) {
                 @Override
                 public void onItem(T item) {

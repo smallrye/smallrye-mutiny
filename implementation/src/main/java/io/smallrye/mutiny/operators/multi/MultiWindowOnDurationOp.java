@@ -262,7 +262,7 @@ public class MultiWindowOnDurationOp<T> extends AbstractMultiOperator<T, Multi<T
     }
 
     private static class TaskHolder {
-        private AtomicReference<Future<?>> container = new AtomicReference<>();
+        private final AtomicReference<Future<?>> container = new AtomicReference<>();
 
         static final Future<?> NONE = new CompletableFuture<>();
 

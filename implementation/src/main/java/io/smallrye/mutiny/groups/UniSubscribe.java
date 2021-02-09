@@ -8,9 +8,9 @@ import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.helpers.UniCallbackSubscriber;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.AbstractUni;
-import io.smallrye.mutiny.operators.UniSerializedSubscriber;
 import io.smallrye.mutiny.operators.uni.UniSubscribeToCompletionStage;
 import io.smallrye.mutiny.subscription.Cancellable;
+import io.smallrye.mutiny.subscription.UniSerializedSubscriber;
 import io.smallrye.mutiny.subscription.UniSubscriber;
 import io.smallrye.mutiny.subscription.UniSubscription;
 
@@ -47,6 +47,26 @@ public class UniSubscribe<T> {
      * @return the passed subscriber
      */
     public <S extends UniSubscriber<? super T>> S withSubscriber(S subscriber) {
+        AbstractUni.subscribe(upstream, ParameterValidation.nonNull(subscriber, "subscriber"));
+        return subscriber;
+    }
+
+    /**
+     * Requests the {@link Uni} to start computing the item, but wraps the provided subscriber in a
+     * {@link UniSerializedSubscriber} instance that enforces correct events ordering.
+     * <p>
+     * This is a "factory method" and can be called multiple times, each time starting a new {@link UniSubscription}.
+     * Each {@link UniSubscription} will work for only a single {@link UniSubscriber}. A {@link UniSubscriber} should
+     * only subscribe once to a single {@link Uni}.
+     * <p>
+     * If the {@link Uni} rejects the subscription attempt or otherwise fails it will fire a {@code failure} event
+     * receiving by {@link UniSubscriber#onFailure(Throwable)}.
+     *
+     * @param subscriber the subscriber, must not be {@code null}
+     * @param <S> the type of subscriber returned
+     * @return the passed subscriber
+     */
+    public <S extends UniSubscriber<? super T>> S withSerializedSubscriber(S subscriber) {
         UniSerializedSubscriber.subscribe(upstream, ParameterValidation.nonNull(subscriber, "subscriber"));
         return subscriber;
     }

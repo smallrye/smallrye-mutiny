@@ -111,7 +111,7 @@ public class UniOnItemTransformToMultiTest {
         Uni.createFrom().item(1)
                 .onCancellation().invoke(() -> calledUni.set(true))
                 .onItem().transformToMulti(i -> Multi.createFrom().nothing()
-                        .on().cancellation(() -> called.set(true)))
+                        .onCancellation().invoke(() -> called.set(true)))
                 .subscribe().withSubscriber(AssertSubscriber.create(10))
                 .assertNotTerminated()
                 .assertHasNotReceivedAnyItem()

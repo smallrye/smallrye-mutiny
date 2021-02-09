@@ -5,9 +5,9 @@ import java.util.function.Predicate;
 
 import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.AbstractUni;
 import io.smallrye.mutiny.operators.UniOperator;
-import io.smallrye.mutiny.subscription.UniDelegatingSubscriber;
 import io.smallrye.mutiny.subscription.UniSubscriber;
 
 public class UniOnItemConsume<T> extends UniOperator<T, T> {
@@ -26,52 +26,65 @@ public class UniOnItemConsume<T> extends UniOperator<T, T> {
     }
 
     @Override
-    protected void subscribing(UniSubscriber<? super T> subscriber) {
-        AbstractUni.subscribe(upstream(), new UniDelegatingSubscriber<T, T>(subscriber) {
-            @Override
-            public void onItem(T item) {
-                if (invokeEventHandler(onItemCallback, item, false, subscriber)) {
-                    subscriber.onItem(item);
+    public void subscribe(UniSubscriber<? super T> subscriber) {
+        AbstractUni.subscribe(upstream(), new UniOnItemComsumeProcessor(subscriber));
+    }
+
+    private class UniOnItemComsumeProcessor extends UniOperatorProcessor<T, T> {
+
+        public UniOnItemComsumeProcessor(UniSubscriber<? super T> downstream) {
+            super(downstream);
+        }
+
+        @Override
+        public void onItem(T item) {
+            if (!isCancelled()) {
+                if (invokeEventHandler(onItemCallback, item, false, downstream)) {
+                    downstream.onItem(item);
                 }
             }
+        }
 
-            @Override
-            public void onFailure(Throwable failure) {
+        @Override
+        public void onFailure(Throwable failure) {
+            if (!isCancelled()) {
                 if (onFailurePredicate != null) {
                     try {
                         if (onFailurePredicate.test(failure)) {
-                            if (invokeEventHandler(onFailureCallback, failure, true, subscriber)) {
-                                subscriber.onFailure(failure);
+                            if (invokeEventHandler(onFailureCallback, failure, true, downstream)) {
+                                downstream.onFailure(failure);
                             }
                         } else {
-                            subscriber.onFailure(failure);
+                            downstream.onFailure(failure);
                         }
                     } catch (Throwable e) {
-                        subscriber.onFailure(new CompositeException(failure, e));
+                        downstream.onFailure(new CompositeException(failure, e));
                     }
                 } else {
-                    if (invokeEventHandler(onFailureCallback, failure, true, subscriber)) {
-                        subscriber.onFailure(failure);
+                    if (invokeEventHandler(onFailureCallback, failure, true, downstream)) {
+                        downstream.onFailure(failure);
                     }
                 }
-            }
-        });
-    }
-
-    private <E> boolean invokeEventHandler(Consumer<? super E> handler, E event, boolean wasCalledByOnFailure,
-            UniSubscriber<? super T> subscriber) {
-        if (handler != null) {
-            try {
-                handler.accept(event);
-            } catch (Throwable e) {
-                if (wasCalledByOnFailure) {
-                    subscriber.onFailure(new CompositeException((Throwable) event, e));
-                } else {
-                    subscriber.onFailure(e);
-                }
-                return false;
+            } else {
+                Infrastructure.handleDroppedException(failure);
             }
         }
-        return true;
+
+        private <E> boolean invokeEventHandler(Consumer<? super E> handler, E event, boolean wasCalledByOnFailure,
+                UniSubscriber<? super T> subscriber) {
+            if (handler != null) {
+                try {
+                    handler.accept(event);
+                } catch (Throwable e) {
+                    if (wasCalledByOnFailure) {
+                        subscriber.onFailure(new CompositeException((Throwable) event, e));
+                    } else {
+                        subscriber.onFailure(e);
+                    }
+                    return false;
+                }
+            }
+            return true;
+        }
     }
 }

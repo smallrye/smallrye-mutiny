@@ -1,4 +1,4 @@
-package io.smallrye.mutiny.operators;
+package io.smallrye.mutiny.subscription;
 
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
@@ -7,8 +7,7 @@ import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.helpers.EmptyUniSubscription;
 import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
-import io.smallrye.mutiny.subscription.UniSubscriber;
-import io.smallrye.mutiny.subscription.UniSubscription;
+import io.smallrye.mutiny.operators.AbstractUni;
 
 /**
  * An implementation of {@link UniSubscriber} and {@link UniSubscription} making sure event handlers are only called once.
@@ -38,24 +37,20 @@ public class UniSerializedSubscriber<T> implements UniSubscriber<T>, UniSubscrip
     private volatile UniSubscription subscription;
     private final AtomicReference<Throwable> failure = new AtomicReference<>();
 
-    UniSerializedSubscriber(AbstractUni<T> upstream, UniSubscriber<? super T> subscriber) {
+    public UniSerializedSubscriber(AbstractUni<T> upstream, UniSubscriber<? super T> subscriber) {
         this.upstream = ParameterValidation.nonNull(upstream, "source");
         this.downstream = ParameterValidation.nonNull(subscriber, "subscriber` must not be `null`");
     }
 
     public static <T> void subscribe(AbstractUni<T> source, UniSubscriber<? super T> subscriber) {
         UniSubscriber<? super T> actual = Infrastructure.onUniSubscription(source, subscriber);
-        if (subscriber instanceof UniSerializedSubscriber) {
-            source.subscribing(actual);
-        } else {
-            UniSerializedSubscriber<T> wrapped = new UniSerializedSubscriber<>(source, actual);
-            wrapped.subscribe();
-        }
+        UniSerializedSubscriber<T> wrapped = new UniSerializedSubscriber<>(source, actual);
+        wrapped.subscribe();
     }
 
     private void subscribe() {
         if (state.compareAndSet(INIT, SUBSCRIBED)) {
-            upstream.subscribing(this);
+            upstream.subscribe(this);
         }
     }
 

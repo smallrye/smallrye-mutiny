@@ -17,10 +17,10 @@ import io.smallrye.mutiny.tuples.Tuple2;
 
 public abstract class AbstractUni<T> implements Uni<T> {
 
-    protected abstract void subscribing(UniSubscriber<? super T> subscriber);
+    public abstract void subscribe(UniSubscriber<? super T> subscriber);
 
     /**
-     * Encapsulates subscription to slightly optimized the AbstractUni case.
+     * Encapsulates subscription to slightly optimize the AbstractUni case.
      *
      * In the case of AbstractUni, it avoid creating the UniSubscribe group instance.
      *
@@ -28,10 +28,12 @@ public abstract class AbstractUni<T> implements Uni<T> {
      * @param subscriber the subscriber, must not be {@code null} (not checked)
      * @param <T> the type of item
      */
+    @SuppressWarnings("unchecked")
     public static <T> void subscribe(Uni<? extends T> upstream, UniSubscriber<? super T> subscriber) {
         if (upstream instanceof AbstractUni) {
-            //noinspection unchecked
-            UniSerializedSubscriber.subscribe((AbstractUni<? extends T>) upstream, subscriber);
+            AbstractUni abstractUni = (AbstractUni) upstream;
+            UniSubscriber actualSubscriber = Infrastructure.onUniSubscription(upstream, subscriber);
+            abstractUni.subscribe(actualSubscriber);
         } else {
             upstream.subscribe().withSubscriber(subscriber);
         }

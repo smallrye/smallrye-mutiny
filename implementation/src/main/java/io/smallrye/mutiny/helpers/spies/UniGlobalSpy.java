@@ -68,7 +68,7 @@ public class UniGlobalSpy<T> extends UniSpyBase<T> {
     }
 
     @Override
-    protected void subscribing(UniSubscriber<? super T> downstream) {
+    public void subscribe(UniSubscriber<? super T> downstream) {
         onTerminationSpy.subscribe().withSubscriber(downstream);
     }
 

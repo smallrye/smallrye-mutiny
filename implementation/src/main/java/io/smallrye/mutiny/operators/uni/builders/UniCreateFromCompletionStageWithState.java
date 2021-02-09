@@ -1,7 +1,5 @@
 package io.smallrye.mutiny.operators.uni.builders;
 
-import static io.smallrye.mutiny.operators.uni.builders.UniCreateFromCompletionStage.forwardFromCompletionStage;
-
 import java.util.Objects;
 import java.util.concurrent.CompletionStage;
 import java.util.function.Function;
@@ -31,13 +29,13 @@ public class UniCreateFromCompletionStageWithState<T, S> extends AbstractUni<T> 
     }
 
     @Override
-    protected void subscribing(UniSubscriber<? super T> subscriber) {
+    public void subscribe(UniSubscriber<? super T> subscriber) {
         S state;
         try {
             state = holder.get();
             // get() throws an NPE is the produced state is null.
         } catch (Exception e) {
-            subscriber.onSubscribe(EmptyUniSubscription.CANCELLED);
+            subscriber.onSubscribe(EmptyUniSubscription.DONE);
             subscriber.onFailure(e);
             return;
         }
@@ -47,11 +45,11 @@ public class UniCreateFromCompletionStageWithState<T, S> extends AbstractUni<T> 
             stage = mapper.apply(state);
             Objects.requireNonNull(stage, "The produced CompletionStage is `null`");
         } catch (Throwable err) {
-            subscriber.onSubscribe(EmptyUniSubscription.CANCELLED);
+            subscriber.onSubscribe(EmptyUniSubscription.DONE);
             subscriber.onFailure(err);
             return;
         }
 
-        forwardFromCompletionStage(stage, subscriber);
+        new UniCreateFromCompletionStage.CompletionStageUniSubscription<T>(subscriber, stage).forward();
     }
 }

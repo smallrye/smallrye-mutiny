@@ -11,7 +11,8 @@ import org.junit.jupiter.api.Test;
 
 public class Tuple7Test {
 
-    private Tuple7<Integer, Integer, Integer, Integer, Integer, Integer, Integer> someTuple = new Tuple7<>(1, 2, 3, 4, 5, 6, 7);
+    private final Tuple7<Integer, Integer, Integer, Integer, Integer, Integer, Integer> someTuple = new Tuple7<>(1, 2, 3, 4, 5,
+            6, 7);
 
     @Test
     public void assertNullValues() {

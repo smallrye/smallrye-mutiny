@@ -11,7 +11,8 @@ import org.junit.jupiter.api.Test;
 
 public class Tuple9Test {
 
-    private Tuple9<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer> someTuple = new Tuple9<>(1,
+    private final Tuple9<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer> someTuple = new Tuple9<>(
+            1,
             2, 3, 4, 5, 6, 7, 8, 9);
 
     @Test

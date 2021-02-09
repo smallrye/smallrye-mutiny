@@ -27,13 +27,13 @@ public class UniCreateFromEmitterWithState<T, S> extends AbstractUni<T> {
     }
 
     @Override
-    protected void subscribing(UniSubscriber<? super T> subscriber) {
+    public void subscribe(UniSubscriber<? super T> subscriber) {
         S state;
         try {
             state = holder.get();
             // get() throws an NPE is the produced state is null.
         } catch (Exception e) {
-            subscriber.onSubscribe(EmptyUniSubscription.CANCELLED);
+            subscriber.onSubscribe(EmptyUniSubscription.DONE);
             subscriber.onFailure(e);
             return;
         }

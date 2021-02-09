@@ -8,6 +8,7 @@ import java.util.function.Supplier;
 
 import io.smallrye.mutiny.operators.AbstractUni;
 import io.smallrye.mutiny.subscription.UniSubscriber;
+import io.smallrye.mutiny.subscription.UniSubscription;
 
 public class UniCreateFromCompletionStage<T> extends AbstractUni<T> {
     private final Supplier<? extends CompletionStage<? extends T>> supplier;
@@ -16,24 +17,8 @@ public class UniCreateFromCompletionStage<T> extends AbstractUni<T> {
         this.supplier = supplier; // Already checked
     }
 
-    static <O> void forwardFromCompletionStage(CompletionStage<? extends O> stage,
-            UniSubscriber<? super O> subscriber) {
-        subscriber.onSubscribe(() -> stage.toCompletableFuture().cancel(false));
-        stage.whenComplete((res, fail) -> {
-            if (fail != null) {
-                if (fail instanceof CompletionException) {
-                    subscriber.onFailure(fail.getCause());
-                } else {
-                    subscriber.onFailure(fail);
-                }
-            } else {
-                subscriber.onItem(res);
-            }
-        });
-    }
-
     @Override
-    protected void subscribing(UniSubscriber<? super T> subscriber) {
+    public void subscribe(UniSubscriber<? super T> subscriber) {
         CompletionStage<? extends T> stage;
         try {
             stage = supplier.get();
@@ -47,6 +32,43 @@ public class UniCreateFromCompletionStage<T> extends AbstractUni<T> {
             return;
         }
 
-        forwardFromCompletionStage(stage, subscriber);
+        new CompletionStageUniSubscription<T>(subscriber, stage).forward();
+    }
+
+    static class CompletionStageUniSubscription<T> implements UniSubscription {
+
+        private final UniSubscriber<? super T> subscriber;
+        private final CompletionStage<? extends T> stage;
+        private volatile boolean cancelled = false;
+
+        CompletionStageUniSubscription(UniSubscriber<? super T> subscriber, CompletionStage<? extends T> stage) {
+            this.subscriber = subscriber;
+            this.stage = stage;
+        }
+
+        public void forward() {
+            subscriber.onSubscribe(this);
+            stage.whenComplete(this::forwardResult);
+        }
+
+        private void forwardResult(T res, Throwable fail) {
+            if (!cancelled) {
+                if (fail != null) {
+                    if (fail instanceof CompletionException) {
+                        subscriber.onFailure(fail.getCause());
+                    } else {
+                        subscriber.onFailure(fail);
+                    }
+                } else {
+                    subscriber.onItem(res);
+                }
+            }
+        }
+
+        @Override
+        public void cancel() {
+            cancelled = true;
+            stage.toCompletableFuture().cancel(false);
+        }
     }
 }

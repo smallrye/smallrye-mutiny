@@ -8,9 +8,9 @@ import java.util.function.Predicate;
 
 import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.AbstractUni;
 import io.smallrye.mutiny.operators.UniOperator;
-import io.smallrye.mutiny.subscription.UniDelegatingSubscriber;
 import io.smallrye.mutiny.subscription.UniSubscriber;
 
 public class UniOnFailureTransform<I, O> extends UniOperator<I, O> {
@@ -27,16 +27,24 @@ public class UniOnFailureTransform<I, O> extends UniOperator<I, O> {
     }
 
     @Override
-    protected void subscribing(UniSubscriber<? super O> subscriber) {
-        AbstractUni.subscribe(upstream(), new UniDelegatingSubscriber<I, O>(subscriber) {
+    public void subscribe(UniSubscriber<? super O> subscriber) {
+        AbstractUni.subscribe(upstream(), new UniOnFailureTransformProcessor(subscriber));
+    }
 
-            @Override
-            public void onFailure(Throwable failure) {
+    private class UniOnFailureTransformProcessor extends UniOperatorProcessor<I, O> {
+
+        public UniOnFailureTransformProcessor(UniSubscriber<? super O> downstream) {
+            super(downstream);
+        }
+
+        @Override
+        public void onFailure(Throwable failure) {
+            if (!isCancelled()) {
                 boolean test;
                 try {
                     test = predicate.test(failure);
                 } catch (RuntimeException e) {
-                    subscriber.onFailure(new CompositeException(failure, e));
+                    downstream.onFailure(new CompositeException(failure, e));
                     return;
                 }
 
@@ -47,19 +55,20 @@ public class UniOnFailureTransform<I, O> extends UniOperator<I, O> {
                         // We cannot call onFailure here, as if onFailure would throw an exception
                         // it would be caught and onFailure would be called. This would be illegal.
                     } catch (Throwable e) {
-                        subscriber.onFailure(e);
+                        downstream.onFailure(e);
                         return;
                     }
                     if (outcome == null) {
-                        subscriber.onFailure(new NullPointerException(SUPPLIER_PRODUCED_NULL));
+                        downstream.onFailure(new NullPointerException(SUPPLIER_PRODUCED_NULL));
                     } else {
-                        subscriber.onFailure(outcome);
+                        downstream.onFailure(outcome);
                     }
                 } else {
-                    subscriber.onFailure(failure);
+                    downstream.onFailure(failure);
                 }
+            } else {
+                Infrastructure.handleDroppedException(failure);
             }
-
-        });
+        }
     }
 }

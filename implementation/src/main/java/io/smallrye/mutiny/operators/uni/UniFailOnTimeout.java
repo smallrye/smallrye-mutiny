@@ -1,17 +1,17 @@
 package io.smallrye.mutiny.operators.uni;
 
+import static io.smallrye.mutiny.helpers.EmptyUniSubscription.CANCELLED;
+
 import java.time.Duration;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
 import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.helpers.EmptyUniSubscription;
 import io.smallrye.mutiny.helpers.ParameterValidation;
-import io.smallrye.mutiny.helpers.Subscriptions;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.AbstractUni;
 import io.smallrye.mutiny.operators.UniOperator;
@@ -32,81 +32,83 @@ public class UniFailOnTimeout<I> extends UniOperator<I, I> {
     }
 
     @Override
-    protected void subscribing(UniSubscriber<? super I> subscriber) {
-        AtomicBoolean doneOrCancelled = new AtomicBoolean();
-        AtomicReference<ScheduledFuture<?>> task = new AtomicReference<>();
-
-        AbstractUni.subscribe(upstream(), new UniSubscriber<I>() {
-            @Override
-            public void onSubscribe(UniSubscription subscription) {
-                // Configure the watch dog at subscription time.
-                try {
-                    task.set(executor.schedule(() -> {
-                        if (doneOrCancelled.compareAndSet(false, true)) {
-                            sendTimeout(subscriber, subscription);
-                        }
-                    }, timeout.toMillis(), TimeUnit.MILLISECONDS));
-                } catch (RejectedExecutionException e) {
-                    // Executor out of service.
-                    subscriber.onSubscribe(Subscriptions.CANCELLED);
-                    subscriber.onFailure(e);
-                    return;
-                }
-
-                subscriber.onSubscribe(() -> {
-                    if (doneOrCancelled.compareAndSet(false, true)) {
-                        // cancelling
-                        subscription.cancel();
-                        ScheduledFuture<?> future = task.getAndSet(null);
-                        if (future != null) {
-                            future.cancel(false);
-                        }
-                    }
-                });
-            }
-
-            @Override
-            public void onItem(I item) {
-                if (doneOrCancelled.compareAndSet(false, true)) {
-                    ScheduledFuture<?> future = task.getAndSet(null);
-                    if (future != null) {
-                        future.cancel(false);
-                    }
-                    subscriber.onItem(item);
-                }
-            }
-
-            @Override
-            public void onFailure(Throwable failure) {
-                if (doneOrCancelled.compareAndSet(false, true)) {
-                    ScheduledFuture<?> future = task.getAndSet(null);
-                    if (future != null) {
-                        future.cancel(false);
-                    }
-                    subscriber.onFailure(failure);
-                } else {
-                    Infrastructure.handleDroppedException(failure);
-                }
-            }
-        });
+    public void subscribe(UniSubscriber<? super I> subscriber) {
+        AbstractUni.subscribe(upstream(), new UniFailOnTimeoutProcessor(subscriber));
     }
 
-    private void sendTimeout(UniSubscriber<? super I> subscriber, UniSubscription subscription) {
+    private class UniFailOnTimeoutProcessor extends UniOperatorProcessor<I, I> {
 
-        // Cancel the upstream subscription
-        subscription.cancel();
+        private volatile ScheduledFuture<?> timeoutFuture;
 
-        Throwable throwable;
-        try {
-            throwable = supplier.get();
-        } catch (Throwable e) {
-            subscriber.onFailure(e);
-            return;
+        public UniFailOnTimeoutProcessor(UniSubscriber<? super I> downstream) {
+            super(downstream);
         }
-        if (throwable == null) {
-            subscriber.onFailure(new NullPointerException(ParameterValidation.SUPPLIER_PRODUCED_NULL));
-        } else {
-            subscriber.onFailure(throwable);
+
+        @Override
+        public void onSubscribe(UniSubscription subscription) {
+            try {
+                timeoutFuture = executor.schedule(this::doTimeout, timeout.toMillis(), TimeUnit.MILLISECONDS);
+            } catch (RejectedExecutionException e) {
+                // Executor out of service.
+                upstream.set(CANCELLED);
+                subscription.cancel();
+                downstream.onSubscribe(EmptyUniSubscription.DONE);
+                downstream.onFailure(e);
+                return;
+            }
+            super.onSubscribe(subscription);
+        }
+
+        @Override
+        public void onItem(I item) {
+            UniSubscription sub = upstream.getAndSet(CANCELLED);
+            if (sub != CANCELLED) {
+                if (timeoutFuture != null) {
+                    timeoutFuture.cancel(false);
+                }
+                downstream.onItem(item);
+            }
+        }
+
+        @Override
+        public void onFailure(Throwable failure) {
+            UniSubscription sub = upstream.getAndSet(CANCELLED);
+            if (sub != CANCELLED) {
+                if (timeoutFuture != null) {
+                    timeoutFuture.cancel(false);
+                }
+                downstream.onFailure(failure);
+            } else {
+                Infrastructure.handleDroppedException(failure);
+            }
+        }
+
+        @Override
+        public void cancel() {
+            if (timeoutFuture != null) {
+                timeoutFuture.cancel(false);
+            }
+            super.cancel();
+        }
+
+        private void doTimeout() {
+            if (isCancelled()) {
+                return;
+            }
+            super.cancel();
+
+            Throwable throwable;
+            try {
+                throwable = supplier.get();
+            } catch (Throwable e) {
+                downstream.onFailure(e);
+                return;
+            }
+            if (throwable == null) {
+                downstream.onFailure(new NullPointerException(ParameterValidation.SUPPLIER_PRODUCED_NULL));
+            } else {
+                downstream.onFailure(throwable);
+            }
         }
     }
 }

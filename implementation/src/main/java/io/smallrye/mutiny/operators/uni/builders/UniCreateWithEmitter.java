@@ -14,7 +14,7 @@ public class UniCreateWithEmitter<T> extends AbstractUni<T> {
     }
 
     @Override
-    protected void subscribing(UniSubscriber<? super T> subscriber) {
+    public void subscribe(UniSubscriber<? super T> subscriber) {
         DefaultUniEmitter<? super T> emitter = new DefaultUniEmitter<>(subscriber);
         subscriber.onSubscribe(emitter);
 

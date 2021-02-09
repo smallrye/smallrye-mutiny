@@ -17,8 +17,6 @@ import org.junit.jupiter.api.Test;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.helpers.test.UniAssertSubscriber;
 
-;
-
 public class UniOrTest {
 
     private final ScheduledExecutorService executor = Executors.newScheduledThreadPool(4);

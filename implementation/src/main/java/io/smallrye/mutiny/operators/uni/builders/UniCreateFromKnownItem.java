@@ -1,8 +1,8 @@
 package io.smallrye.mutiny.operators.uni.builders;
 
-import io.smallrye.mutiny.helpers.EmptyUniSubscription;
 import io.smallrye.mutiny.operators.AbstractUni;
 import io.smallrye.mutiny.subscription.UniSubscriber;
+import io.smallrye.mutiny.subscription.UniSubscription;
 
 /**
  * Specialized {@link io.smallrye.mutiny.Uni} implementation for the case where the item is known.
@@ -19,9 +19,29 @@ public class UniCreateFromKnownItem<T> extends AbstractUni<T> {
     }
 
     @Override
-    protected void subscribing(UniSubscriber<? super T> subscriber) {
-        // No need to track cancellation, it's done by the serialized subscriber downstream.
-        subscriber.onSubscribe(EmptyUniSubscription.CANCELLED);
-        subscriber.onItem(item);
+    public void subscribe(UniSubscriber<? super T> subscriber) {
+        new KnownItemSubscription(subscriber).forward();
+    }
+
+    private class KnownItemSubscription implements UniSubscription {
+
+        private final UniSubscriber<? super T> subscriber;
+        private volatile boolean cancelled = false;
+
+        private KnownItemSubscription(UniSubscriber<? super T> subscriber) {
+            this.subscriber = subscriber;
+        }
+
+        private void forward() {
+            subscriber.onSubscribe(this);
+            if (!cancelled) {
+                subscriber.onItem(item);
+            }
+        }
+
+        @Override
+        public void cancel() {
+            cancelled = true;
+        }
     }
 }

@@ -2,17 +2,12 @@ package io.smallrye.mutiny.operators.uni;
 
 import static io.smallrye.mutiny.helpers.ParameterValidation.MAPPER_RETURNED_NULL;
 
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
-
-import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Uni;
-import io.smallrye.mutiny.helpers.EmptyUniSubscription;
 import io.smallrye.mutiny.operators.AbstractUni;
 import io.smallrye.mutiny.operators.UniOperator;
-import io.smallrye.mutiny.subscription.UniDelegatingSubscriber;
 import io.smallrye.mutiny.subscription.UniSubscriber;
 import io.smallrye.mutiny.subscription.UniSubscription;
 
@@ -25,90 +20,73 @@ public class UniOnItemTransformToUni<I, O> extends UniOperator<I, O> {
         this.mapper = mapper;
     }
 
-    public static <I, O> void invokeAndSubstitute(Function<? super I, Uni<? extends O>> mapper, I input,
-            UniSubscriber<? super O> subscriber,
-            FlatMapSubscription flatMapSubscription) {
-        Uni<? extends O> outcome;
-        try {
-            outcome = mapper.apply(input);
-            // We cannot call onItem here, as if onItem would throw an exception
-            // it would be caught and onFailure would be called. This would be illegal.
-        } catch (Throwable e) {
-            if (input instanceof Throwable) {
-                subscriber.onFailure(new CompositeException((Throwable) input, e));
-            } else {
-                subscriber.onFailure(e);
-            }
-            return;
-        }
-
-        handleInnerSubscription(subscriber, flatMapSubscription, outcome);
-    }
-
-    public static <O> void handleInnerSubscription(UniSubscriber<? super O> subscriber,
-            UniOnItemTransformToUni.FlatMapSubscription flatMapSubscription, Uni<? extends O> outcome) {
-        if (outcome == null) {
-            subscriber.onFailure(new NullPointerException(MAPPER_RETURNED_NULL));
-        } else {
-            UniSubscriber<O> delegate = new UniDelegatingSubscriber<O, O>(subscriber) {
-                @Override
-                public void onSubscribe(UniSubscription secondSubscription) {
-                    flatMapSubscription.replace(secondSubscription);
-                }
-            };
-            AbstractUni.subscribe(outcome, delegate);
-        }
-    }
-
     @Override
-    protected void subscribing(UniSubscriber<? super O> subscriber) {
-        FlatMapSubscription flatMapSubscription = new FlatMapSubscription();
-        // Subscribe to the source.
-        AbstractUni.subscribe(upstream(), new UniDelegatingSubscriber<I, O>(subscriber) {
-            @Override
-            public void onSubscribe(UniSubscription subscription) {
-                flatMapSubscription.setInitialUpstream(subscription);
-                subscriber.onSubscribe(flatMapSubscription);
-            }
-
-            @Override
-            public void onItem(I item) {
-                invokeAndSubstitute(mapper, item, subscriber, flatMapSubscription);
-            }
-
-        });
+    public void subscribe(UniSubscriber<? super O> subscriber) {
+        AbstractUni.subscribe(upstream(), new UniOnItemTransformToUniProcessor(subscriber));
     }
 
-    protected static class FlatMapSubscription implements UniSubscription {
+    // Note: serves as a subscription/subscriber for both the upstream and the Uni.
+    // There was an earlier design with a nested processor, but this requires an extra allocation.
+    private class UniOnItemTransformToUniProcessor extends UniOperatorProcessor<I, O> {
 
-        private final AtomicReference<Subscription> upstream = new AtomicReference<>();
+        private volatile UniSubscription innerSubscription;
+
+        public UniOnItemTransformToUniProcessor(UniSubscriber<? super O> downstream) {
+            super(downstream);
+        }
+
+        @Override
+        public void onSubscribe(UniSubscription subscription) {
+            if (upstream.get() == null) {
+                super.onSubscribe(subscription);
+            } else if (innerSubscription == null) {
+                this.innerSubscription = subscription;
+            } else {
+                subscription.cancel();
+            }
+        }
+
+        @Override
+        @SuppressWarnings("unchecked")
+        public void onItem(I item) {
+            if (isCancelled()) {
+                return;
+            }
+            if (innerSubscription == null) {
+                // Input item from upstream
+                performInnerSubscription(item);
+            } else {
+                // Output item from the inner Uni
+                downstream.onItem((O) item); // not a pretty cast
+            }
+        }
+
+        @SuppressWarnings("unchecked")
+        private void performInnerSubscription(I item) {
+            Uni<? extends O> uni;
+            try {
+                uni = mapper.apply(item);
+            } catch (Throwable e) {
+                if (item instanceof Throwable) {
+                    downstream.onFailure(new CompositeException((Throwable) item, e));
+                } else {
+                    downstream.onFailure(e);
+                }
+                return;
+            }
+            if (uni == null) {
+                downstream.onFailure(new NullPointerException(MAPPER_RETURNED_NULL));
+                return;
+            }
+            AbstractUni.subscribe(uni, (UniSubscriber) this); // not a pretty cast
+        }
 
         @Override
         public void cancel() {
-            Subscription previous = upstream.getAndSet(EmptyUniSubscription.CANCELLED);
-            if (previous != null) {
-                // We can call cancelled on CANCELLED, it's a no-op
-                previous.cancel();
+            if (innerSubscription != null) {
+                innerSubscription.cancel();
             }
-        }
-
-        void setInitialUpstream(Subscription up) {
-            if (!upstream.compareAndSet(null, up)) {
-                throw new IllegalStateException("Invalid upstream Subscription state, was expected none but got one");
-            }
-        }
-
-        void replace(Subscription up) {
-            Subscription previous = upstream.getAndSet(up);
-            if (previous == null) {
-                throw new IllegalStateException("Invalid upstream Subscription state, was expected one but got none");
-            } else if (previous == EmptyUniSubscription.CANCELLED) {
-                // cancelled was called, cancelling up and releasing reference
-                upstream.set(null);
-                up.cancel();
-            }
-            // We don't have to cancel the previous subscription as replace is called once the upstream
-            // has emitted an item event, so it's already disposed.
+            super.cancel();
         }
     }
 }

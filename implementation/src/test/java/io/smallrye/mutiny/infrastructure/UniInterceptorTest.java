@@ -59,7 +59,7 @@ public class UniInterceptorTest {
             public <T> Uni<T> onUniCreation(Uni<T> uni) {
                 return new AbstractUni<T>() {
                     @Override
-                    protected void subscribing(UniSubscriber<? super T> subscriber) {
+                    public void subscribe(UniSubscriber<? super T> subscriber) {
                         assertThat(creationTime).isLessThan(System.nanoTime());
                         uni.subscribe().withSubscriber(new UniDelegatingSubscriber(subscriber) {
                             @Override
@@ -86,7 +86,7 @@ public class UniInterceptorTest {
             public <T> Uni<T> onUniCreation(Uni<T> uni) {
                 return new AbstractUni<T>() {
                     @Override
-                    protected void subscribing(UniSubscriber<? super T> subscriber) {
+                    public void subscribe(UniSubscriber<? super T> subscriber) {
                         assertThat(creationTime).isLessThan(System.nanoTime());
                         uni.subscribe().withSubscriber(new UniDelegatingSubscriber(subscriber) {
                             @Override

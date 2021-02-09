@@ -10,10 +10,18 @@ import io.smallrye.mutiny.subscription.UniSubscription;
 public class EmptyUniSubscription implements UniSubscription {
 
     /**
+     * A subscription that has been cancelled.
      * The instance that can be shared.
      * Calling {@link #cancel()} is a no-op.
      */
     public static final UniSubscription CANCELLED = new EmptyUniSubscription();
+
+    /**
+     * A subscription that has been done.
+     * The instance that can be shared.
+     * Calling {@link #cancel()} is a no-op.
+     */
+    public static final UniSubscription DONE = new EmptyUniSubscription();
 
     private EmptyUniSubscription() {
         // Avoid direct instantiation.
@@ -28,7 +36,7 @@ public class EmptyUniSubscription implements UniSubscription {
      * @param <T> the expected item type
      */
     public static <T> void propagateFailureEvent(UniSubscriber<T> subscriber, Throwable failure) {
-        subscriber.onSubscribe(CANCELLED);
+        subscriber.onSubscribe(DONE);
         subscriber.onFailure(failure);
     }
 
