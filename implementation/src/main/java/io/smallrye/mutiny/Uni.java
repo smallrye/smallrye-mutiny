@@ -804,4 +804,9 @@ public interface Uni<T> {
     default Uni<T> replaceWithNull() {
         return onItem().transform(ignore -> null);
     }
+
+    // TODO
+    Uni<T> log(String identifier);
+
+    Uni<T> log();
 }

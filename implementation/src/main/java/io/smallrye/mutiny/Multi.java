@@ -554,4 +554,9 @@ public interface Multi<T> extends Publisher<T> {
      * @return the new multi.
      */
     Multi<T> toHotStream();
+
+    // TODO
+    Multi<T> log(String identifier);
+
+    Multi<T> log();
 }

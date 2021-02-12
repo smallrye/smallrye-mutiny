@@ -6,6 +6,7 @@ import java.util.Objects;
 import java.util.concurrent.Executor;
 import java.util.function.Predicate;
 
+import io.smallrye.mutiny.operators.multi.MultiLogger;
 import org.reactivestreams.Subscriber;
 
 import io.smallrye.mutiny.Multi;
@@ -158,6 +159,16 @@ public abstract class AbstractMulti<T> implements Multi<T> {
         BroadcastProcessor<T> processor = BroadcastProcessor.create();
         this.subscribe(processor);
         return processor;
+    }
+
+    @Override
+    public Multi<T> log(String identifier) {
+        return new MultiLogger<>(this, identifier);
+    }
+
+    @Override
+    public Multi<T> log() {
+        return log("Multi." + this.getClass().getSimpleName());
     }
 
 }
