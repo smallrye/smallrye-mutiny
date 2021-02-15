@@ -266,8 +266,9 @@ infrastructure:
   text: Learn about the default executors used by Mutiny and how to configure them.
   labels:
     - advanced
-  relate:
+  related:
     - guide: dropped-exceptions
+    - guide: logging
 
 hot-streams:
   title: How to create a hot stream?
@@ -293,3 +294,11 @@ kotlin:
   related:
     - url: https://kotlinlang.org/docs/reference/coroutines-overview.html
       text: Coroutines for asynchronous programming and more
+
+logging:
+  title: Logging operators
+  text: Learn how to log operator events.
+  labels:
+    - beginner
+  related:
+    - guide: infrastructure

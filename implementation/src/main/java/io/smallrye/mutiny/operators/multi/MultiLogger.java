@@ -4,10 +4,11 @@ import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
 
 import java.util.concurrent.atomic.AtomicLong;
 
+import org.reactivestreams.Subscription;
+
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.subscription.MultiSubscriber;
-import org.reactivestreams.Subscription;
 
 public class MultiLogger<T> extends AbstractMultiOperator<T, T> {
 

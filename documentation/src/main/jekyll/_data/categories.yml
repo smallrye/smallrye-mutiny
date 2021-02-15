@@ -26,6 +26,7 @@
     - pagination
     - emission-threads
     - emit-subscription
+    - logging
 
 - name: Integration
   guides:

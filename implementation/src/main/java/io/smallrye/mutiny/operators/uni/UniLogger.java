@@ -1,15 +1,15 @@
 package io.smallrye.mutiny.operators.uni;
 
+import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
+
+import java.util.concurrent.atomic.AtomicLong;
+
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.AbstractUni;
 import io.smallrye.mutiny.operators.UniOperator;
 import io.smallrye.mutiny.subscription.UniSubscriber;
 import io.smallrye.mutiny.subscription.UniSubscription;
-
-import java.util.concurrent.atomic.AtomicLong;
-
-import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
 
 public class UniLogger<T> extends UniOperator<T, T> {
 

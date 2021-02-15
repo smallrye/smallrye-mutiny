@@ -6,7 +6,6 @@ import java.util.Objects;
 import java.util.concurrent.Executor;
 import java.util.function.Predicate;
 
-import io.smallrye.mutiny.operators.multi.MultiLogger;
 import org.reactivestreams.Subscriber;
 
 import io.smallrye.mutiny.Multi;
@@ -16,6 +15,7 @@ import io.smallrye.mutiny.helpers.StrictMultiSubscriber;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.multi.MultiCacheOp;
 import io.smallrye.mutiny.operators.multi.MultiEmitOnOp;
+import io.smallrye.mutiny.operators.multi.MultiLogger;
 import io.smallrye.mutiny.operators.multi.MultiSubscribeOnOp;
 import io.smallrye.mutiny.operators.multi.processors.BroadcastProcessor;
 import io.smallrye.mutiny.subscription.MultiSubscriber;

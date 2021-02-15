@@ -2,8 +2,6 @@ package io.smallrye.mutiny.infrastructure;
 
 import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
 
-import java.io.PrintStream;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -362,7 +360,16 @@ public class Infrastructure {
         return current;
     }
 
-    // TODO
+    /**
+     * Log from an operator.
+     *
+     * This method should never be called directly but only from {@link Multi#log(String)} and {@link Uni#log(String)}.
+     *
+     * @param identifier the event identifier
+     * @param event the event as a string
+     * @param value the value, if any or {@code null}
+     * @param failure the failure, if any or {@code null}
+     */
     public static void logFromOperator(String identifier, String event, Object value, Throwable failure) {
         operatorLogger.log(identifier, event, value, failure);
     }
@@ -381,6 +388,11 @@ public class Infrastructure {
         System.out.println(message);
     }
 
+    /**
+     * Defines operator logging behavior for {@link Multi#log(String)} and {@link Uni#log(String)}.
+     * 
+     * @param operatorLogger the new operator logger
+     */
     public static void setOperatorLogger(OperatorLogger operatorLogger) {
         Infrastructure.operatorLogger = ParameterValidation.nonNull(operatorLogger, "operatorLogger");
     }
@@ -390,8 +402,20 @@ public class Infrastructure {
         Infrastructure.operatorLogger = Infrastructure::printOperatorEvent;
     }
 
+    /**
+     * An operator logger for {@link Multi#log(String)} and {@link Uni#log(String)}.
+     */
     @FunctionalInterface
     public interface OperatorLogger {
+
+        /**
+         * Actual logging behavior.
+         * 
+         * @param identifier the event identifier
+         * @param event the event as a string
+         * @param value the value, if any or {@code null}
+         * @param failure the failure, if any or {@code null}
+         */
         void log(String identifier, String event, Object value, Throwable failure);
     }
 }
