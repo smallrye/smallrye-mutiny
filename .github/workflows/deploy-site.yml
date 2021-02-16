@@ -34,8 +34,8 @@ jobs:
           REF: ${{ github.event.ref }}
           SECRET_FILES_PASSPHRASE: ${{ secrets.SECRET_FILES_PASSPHRASE }}
         run: |
-
-          echo "Deploying web site for tag ${REF}"
+          MUTINY_VERSION=$(cat documentation/src/main/jekyll/_data/versions.yml | grep mutiny_version | awk '{print $2}')
+          echo "Deploying web site for Mutiny ${MUTINY_VERSION}"
 
           sudo apt-get update -o Dir::Etc::sourcelist="sources.list" \
             -o Dir::Etc::sourceparts="-" -o APT::Get::List-Cleanup="0"
@@ -49,9 +49,9 @@ jobs:
             sdk install jbang
 
           echo "Waiting for artifacts to be available from Maven Central"
-          MUTINY_VERSION=$(cat documentation/src/main/jekyll/_data/versions.yml | grep mutiny_version | awk '{print $2}')
           jbang .build/WaitForCentral.java \
             --artifacts=io.smallrye.reactive:mutiny,io.smallrye.reactive:mutiny-smallrye-context-propagation,io.smallrye.reactive:mutiny-test-utils,io.smallrye.reactive:mutiny-kotlin,io.smallrye.reactive:mutiny-reactor,io.smallrye.reactive:mutiny-rxjava \
             --expected-version="${MUTINY_VERSION}"
 
+          echo "Run the deployment script"
           .build/deploy-site.sh
