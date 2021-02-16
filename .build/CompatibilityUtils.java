@@ -168,6 +168,8 @@ class CompatibilityUtils implements Callable<Integer> {
         public String newMethod;
         public String justification;
 
+        public boolean ignore;
+
         @java.lang.Override
         public java.lang.String toString() {
             if (isNotBlank(oldMethod)  && isNotBlank(newMethod)) {
