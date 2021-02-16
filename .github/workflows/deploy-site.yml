@@ -49,8 +49,9 @@ jobs:
             sdk install jbang
 
           echo "Waiting for artifacts to be available from Maven Central"
+          MUTINY_VERSION=$(cat documentation/src/main/jekyll/_data/versions.yml | grep mutiny_version | awk '{print $2}')
           jbang .build/WaitForCentral.java \
-            --artifacts=io.smallrye.reactive:mutiny,io.smallrye.reactive:mutiny-context-propagation,io.smallrye.reactive:mutiny-test-utils,io.smallrye.reactive:mutiny-kotlin,io.smallrye.reactive:mutiny-reactor,io.smallrye.reactive:mutiny-rxjava \
-            --expected-version="${REF}"
+            --artifacts=io.smallrye.reactive:mutiny,io.smallrye.reactive:mutiny-smallrye-context-propagation,io.smallrye.reactive:mutiny-test-utils,io.smallrye.reactive:mutiny-kotlin,io.smallrye.reactive:mutiny-reactor,io.smallrye.reactive:mutiny-rxjava \
+            --expected-version="${MUTINY_VERSION}"
 
           .build/deploy-site.sh
