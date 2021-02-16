@@ -24,7 +24,7 @@ jobs:
         with:
           version: 11
       - name: 'Setup Ruby'
-        uses: actions/setup-ruby@v1
+        uses: ruby/setup-ruby@v1
         with:
           ruby-version: '2.6'
       - name: 'Web Site'
