@@ -87,7 +87,7 @@ class WaitForCentral implements Callable<Integer> {
         if (! done) {
             return -1;
         }
-        return 1;
+        return 0;
     }
 
     static class Result {
