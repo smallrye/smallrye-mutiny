@@ -15,6 +15,7 @@ import io.smallrye.mutiny.helpers.StrictMultiSubscriber;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.multi.MultiCacheOp;
 import io.smallrye.mutiny.operators.multi.MultiEmitOnOp;
+import io.smallrye.mutiny.operators.multi.MultiLogger;
 import io.smallrye.mutiny.operators.multi.MultiSubscribeOnOp;
 import io.smallrye.mutiny.operators.multi.processors.BroadcastProcessor;
 import io.smallrye.mutiny.subscription.MultiSubscriber;
@@ -158,6 +159,16 @@ public abstract class AbstractMulti<T> implements Multi<T> {
         BroadcastProcessor<T> processor = BroadcastProcessor.create();
         this.subscribe(processor);
         return processor;
+    }
+
+    @Override
+    public Multi<T> log(String identifier) {
+        return new MultiLogger<>(this, identifier);
+    }
+
+    @Override
+    public Multi<T> log() {
+        return log("Multi." + this.getClass().getSimpleName());
     }
 
 }

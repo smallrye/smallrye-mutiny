@@ -554,4 +554,29 @@ public interface Multi<T> extends Publisher<T> {
      * @return the new multi.
      */
     Multi<T> toHotStream();
+
+    /**
+     * Log events (onSubscribe, onItem, ...) as they come from the upstream or the subscriber.
+     *
+     * Events will be logged as long as the {@link Multi} hasn't been cancelled or terminated.
+     * Logging is framework-agnostic and can be configured in the {@link Infrastructure} class.
+     *
+     * @param identifier an identifier of this operator to be used in log events
+     * @return a new {@link Multi}
+     * @see Infrastructure#setOperatorLogger(Infrastructure.OperatorLogger)
+     */
+    Multi<T> log(String identifier);
+
+    /**
+     * Log events (onSubscribe, onItem, ...) as they come from the upstream or the subscriber, and derives the identifier from
+     * the upstream operator class "simple name".
+     * 
+     * Events will be logged as long as the {@link Multi} hasn't been cancelled or terminated.
+     * Logging is framework-agnostic and can be configured in the {@link Infrastructure} class.
+     * 
+     * @return a new {@link Multi}
+     * @see Multi#log(String)
+     * @see Infrastructure#setOperatorLogger(Infrastructure.OperatorLogger)
+     */
+    Multi<T> log();
 }

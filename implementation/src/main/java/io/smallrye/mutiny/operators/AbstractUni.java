@@ -10,6 +10,7 @@ import io.smallrye.mutiny.groups.*;
 import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.uni.UniEmitOn;
+import io.smallrye.mutiny.operators.uni.UniLogger;
 import io.smallrye.mutiny.operators.uni.UniMemoizeOp;
 import io.smallrye.mutiny.operators.uni.UniRunSubscribeOn;
 import io.smallrye.mutiny.subscription.UniSubscriber;
@@ -150,5 +151,15 @@ public abstract class AbstractUni<T> implements Uni<T> {
     @Override
     public UniOnCancel<T> onCancellation() {
         return new UniOnCancel<>(this);
+    }
+
+    @Override
+    public Uni<T> log(String identifier) {
+        return new UniLogger<>(this, identifier);
+    }
+
+    @Override
+    public Uni<T> log() {
+        return log("Uni." + this.getClass().getSimpleName());
     }
 }
