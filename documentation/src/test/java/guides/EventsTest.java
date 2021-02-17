@@ -29,11 +29,11 @@ public class EventsTest {
             .invoke(failure -> log("Failed with " + failure))
           .onCompletion() // Called when the stream completes
             .invoke(() -> log("Completed"))
-          .onSubscribe() // Called the the upstream is ready
+          .onSubscribe() // Called when the upstream is ready
             .invoke(subscription -> log("We are subscribed!"))
           .onCancellation() // Called when the downstream cancels
             .invoke(() -> log("Cancelled :-("))
-          .onRequest() // Call on downstream requests
+          .onRequest() // Called on downstream requests
             .invoke(n -> log("Downstream requested " + n + " items"))
           .subscribe()
             .with(item -> log("Subscriber received " + item));
