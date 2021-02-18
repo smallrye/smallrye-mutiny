@@ -130,9 +130,9 @@ Three types of events flow in the opposite direction, _i.e._ from downstream to 
 * **Requests** - event sent by a _subscriber_ indicating how many items event it can handle - this is related to back-pressure
 * **Cancellation** - event sent by a _subscriber_ to stop the reception of events.
 
-In a typical scenario, a subscriber:
+In a typical scenario:
 
-1. A subscriber _subscribes_ to the upstream - the upstream receive the subscription `subscription request`, and when initialized sends the `subscribed` event to the subscriber
+1. A subscriber _subscribes_ to the upstream - the upstream receive the `subscription request`, and when initialized sends the `subscribed` event to the subscriber
 2. The subscriber gets the `subscribed` event with a _subscription_ used to emit the `requests` and `cancellation` events
 3. The subscriber sends a `request` event indicating how many items it can handle at this moment; it can request 1, _n_, or infinite.
 4. The publisher receiving the `request` event starts emitting at most _n_ item events to the subscriber
@@ -187,8 +187,8 @@ Each _group_ proposes methods specific to the type of event. For example, `onFai
 
 Mutiny defines two _reactive_ types:
 
-* `Multi` - represent streams of _0..*_ items (potentially unbounded)
-* `Uni` - represent streams receiving either an item or a failure
+* `Multi` - represents streams of _0..*_ items (potentially unbounded)
+* `Uni` - represents streams receiving either an item or a failure
 
 TIP: The Mutiny name comes from the contraction of `Multi` and `Uni` names
 
@@ -199,11 +199,11 @@ You may wonder why we make the distinction between `Uni` and `Multi.`
 Conceptually, a `Uni` is a `Multi,` right? 
 
 In practice, you don't use `Unis` and `Multis` the same way. 
-The use case and operations are different.
+The use cases and operations are different.
 
 * `Uni` does not need the complete ceremony presented above as the _request_ does not make sense.
 * The `subscribe` event expresses the interest and triggers the computation, no need for an additional _request_.
-* `Uni` can handle items having a `null` items (and has specific methods to handle this case).
+* `Uni` can handle items having a `null` value (and has specific methods to handle this case).
 * `Multi` does not allow it (because the Reactive Streams specification forbids it).
 * Having a `Uni` implementing `Publisher` would be a bit like having `Optional` implementing `Iterable`.
 
