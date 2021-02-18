@@ -8,7 +8,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="description" content="SmallRye Mutiny!">
 
-    <link rel="canonical" href="/guides/filter.html">
+    <link rel="canonical" href="/guides/logging.html">
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.3.1/styles/default.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/components/icon.min.css" integrity="sha512-8Tb+T7SKUFQWOPIQCaLDWWe1K/SY8hvHl7brOH8Nz5z1VT8fnf8B+9neoUzmFY3OzkWMMs3OjrwZALgB1oXFBg==" crossorigin="anonymous" />
     <link rel="shortcut icon" type="image/png" href="/smallrye-mutiny/assets/images/favicon.ico">
@@ -62,10 +62,10 @@
         <div class="row">
             <div class="hero-left col-12">
                 <div class="hero-slogan">
-                    <h1 class="hero-name">Filtering items from multi</h1>
+                    <h1 class="hero-name">Logging operators</h1>
                 </div>
                 <div class="hero-desc">
-                    Learn how to filter and select items from a multi.
+                    Learn how to log operator events.
                 </div>
                 <!-- TODO Labels -->
             </div>
@@ -76,41 +76,108 @@
 <div class="container page-content">
     <div class="row">
         <div class="col-md-9 content">
-            <div class="paragraph">
-<p>When observing a <code>Multi</code>, you may want to not forward all the received items to your downstream.
-Use the <code>multi.select()</code> group to select items.
-To <em>select</em> items passing a given predicate, use <code>multi.select().where(predicate)</code>:</p>
+            <div class="sect1">
+<h2 id="logging-operators"><a class="anchor" href="#logging-operators"></a>Logging operators</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Both <code>Uni</code> and <code>Multi</code> offer a <code>log</code> operator that can be used to trace events as they flow through operators.
+Mutiny does not make any assumption on <em>how</em> logging is defined, and does not rely on any specific logging API.</p>
+</div>
+<div class="sect2">
+<h3 id="using-a-logging-operator"><a class="anchor" href="#using-a-logging-operator"></a>Using a logging operator</h3>
+<div class="paragraph">
+<p>The <code>log</code> method comes in 2 forms: one that takes an identifier and one that derives the identifier from the upstream class:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">List&lt;Integer&gt; list = multi
-        .select().where(i -&gt; i &gt; 6)
-        .collect().asList()
-        .await().indefinitely();</code></pre>
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Multi.createFrom().items(1, 2, 3)
+        .onItem().transform(n -&gt; n * 10)
+        .log()
+        .subscribe().with(item -&gt; System.out.println("&gt;&gt;&gt; " + item));</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p><code>where</code> accepts a predicate called for each item.
-If the predicate returns <code>true</code>, the item propagated downstream.
-Otherwise, it drops the item.</p>
-</div>
-<div class="paragraph">
-<p>The predicated passed to <code>where</code> is synchronous.
-The <code>when</code> method provides an asynchronous version:</p>
+<p>Here the <code>log</code> operator traces all events between the <code>onItem().transform(&#8230;&#8203;)</code> operator and the subscriber, as in the following output:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">List&lt;Integer&gt; list2 = multi
-        .select().when(i -&gt; Uni.createFrom().item(i &gt; 6))
-        .collect().asList()
-        .await().indefinitely();</code></pre>
+<pre class="highlightjs highlight"><code class="language-text hljs" data-lang="text">11:01:48.709 [main] INFO Multi.MultiMapOp.0 - onSubscribe()
+11:01:48.711 [main] INFO Multi.MultiMapOp.0 - request(9223372036854775807)
+11:01:48.711 [main] INFO Multi.MultiMapOp.0 - onItem(10)
+&gt;&gt;&gt; 10
+11:01:48.711 [main] INFO Multi.MultiMapOp.0 - onItem(20)
+&gt;&gt;&gt; 20
+11:01:48.711 [main] INFO Multi.MultiMapOp.0 - onItem(30)
+&gt;&gt;&gt; 30
+11:01:48.711 [main] INFO Multi.MultiMapOp.0 - onCompletion()</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p><code>when</code> accepts a function called for each item.
-Unlike <code>when</code> where the predicate returns a boolean synchronously, the function returns a <code>Uni&lt;Boolean&gt;</code>.
-It forwards the item downstream if the <code>uni</code> produced by the function emits <code>true</code>.
-Otherwise, it drops the item.</p>
+<p>There are a few things to note here:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>we are logging on a <code>Multi</code>, so the logging event is prefixed with <code>Multi</code> (and <code>Uni</code> in the case of a&#8230;&#8203; <code>Uni</code>), and</p>
+</li>
+<li>
+<p>since we did not specify any identifier in the <code>log</code> method call, <code>MultiMapOp</code> has been derived from the preceding operator (non-qualified) class name, and</p>
+</li>
+<li>
+<p>since there can be multiple subscriptions an integer is appended to the identifier (<code>0</code>, <code>1</code>, <code>2</code>, &#8230;&#8203;).</p>
+</li>
+</ol>
+</div>
+</div>
+<div class="sect2">
+<h3 id="defining-logging"><a class="anchor" href="#defining-logging"></a>Defining logging</h3>
+<div class="paragraph">
+<p>What happens when events are being logged is defined with the <code>Infrastructure</code> class.
+Events are written by default to the standard console output in a format similar to:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-text hljs" data-lang="text">[--&gt; Multi.MultiMapOp.0 | onSubscribe()
+[--&gt; Multi.MultiMapOp.0 | request(9223372036854775807)
+[--&gt; Multi.MultiMapOp.0 | onItem(10)
+[--&gt; Multi.MultiMapOp.0 | onItem(20)
+[--&gt; Multi.MultiMapOp.0 | onItem(30)
+[--&gt; Multi.MultiMapOp.0 | onCompletion()</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The following is an example of configuring logging with <a href="http://www.slf4j.org">SLF4J</a>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Infrastructure.setOperatorLogger((id, event, value, err) -&gt; {
+    Logger logger = LoggerFactory.getLogger(id);
+    if (err != null) {
+        logger.info(event + "(" + err.getClass() + "(" + err.getMessage() + "))");
+    } else {
+        if (value != null) {
+            logger.info(event + "(" + value + ")");
+        } else {
+            logger.info(event + "()");
+        }
+    }
+});</code></pre>
+</div>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+Note that this is only useful to do when embedding Mutiny in your own stack, some frameworks like <a href="https://quarkus.io">Quarkus</a> will already have defined the correct logging strategy.
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
 </div>
         </div>
         <div class="col-md-3 col-md-offset-1 toc-container d-sm-none d-md-block">
@@ -123,15 +190,8 @@ Otherwise, it drops the item.</p>
                     
                     <li>
                         
-                        <a href="/smallrye-mutiny/guides/take-skip">Take or Skip the first or last items</a>
+                        <a href="/smallrye-mutiny/guides/infrastructure">How to integrate Mutiny with my framework?</a>
                         
-                        
-                    </li>
-                    
-                    <li>
-                        
-                        
-                        <a href="https://javadoc.io/doc/io.smallrye.reactive/mutiny/latest/io/smallrye/mutiny/groups/MultiTransform.html"><tt>MultiTransform</tt></a>
                         
                     </li>
                     

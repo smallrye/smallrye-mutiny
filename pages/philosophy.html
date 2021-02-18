@@ -265,12 +265,12 @@ Once they are sent, no more items will flow.</p>
 </ul>
 </div>
 <div class="paragraph">
-<p>In a typical scenario, a subscriber:</p>
+<p>In a typical scenario:</p>
 </div>
 <div class="olist arabic">
 <ol class="arabic">
 <li>
-<p>A subscriber <em>subscribes</em> to the upstream - the upstream receive the subscription <code>subscription request</code>, and when initialized sends the <code>subscribed</code> event to the subscriber</p>
+<p>A subscriber <em>subscribes</em> to the upstream - the upstream receive the <code>subscription request</code>, and when initialized sends the <code>subscribed</code> event to the subscriber</p>
 </li>
 <li>
 <p>The subscriber gets the <code>subscribed</code> event with a <em>subscription</em> used to emit the <code>requests</code> and <code>cancellation</code> events</p>
@@ -348,11 +348,11 @@ source
     .invoke(failure -&gt; log("Failed with " + failure))
   .onCompletion() // Called when the stream completes
     .invoke(() -&gt; log("Completed"))
-  .onSubscribe() // Called the the upstream is ready
+  .onSubscribe() // Called when the upstream is ready
     .invoke(subscription -&gt; log("We are subscribed!"))
   .onCancellation() // Called when the downstream cancels
     .invoke(() -&gt; log("Cancelled :-("))
-  .onRequest() // Call on downstream requests
+  .onRequest() // Called on downstream requests
     .invoke(n -&gt; log("Downstream requested " + n + " items"))
   .subscribe()
     .with(item -&gt; log("Subscriber received " + item));</code></pre>
@@ -382,10 +382,10 @@ Each <em>group</em> proposes methods specific to the type of event. For example,
 <div class="ulist">
 <ul>
 <li>
-<p><code>Multi</code> - represent streams of <em>0..*</em> items (potentially unbounded)</p>
+<p><code>Multi</code> - represents streams of <em>0..*</em> items (potentially unbounded)</p>
 </li>
 <li>
-<p><code>Uni</code> - represent streams receiving either an item or a failure</p>
+<p><code>Uni</code> - represents streams receiving either an item or a failure</p>
 </li>
 </ul>
 </div>
@@ -411,7 +411,7 @@ Conceptually, a <code>Uni</code> is a <code>Multi,</code> right?</p>
 </div>
 <div class="paragraph">
 <p>In practice, you don&#8217;t use <code>Unis</code> and <code>Multis</code> the same way.
-The use case and operations are different.</p>
+The use cases and operations are different.</p>
 </div>
 <div class="ulist">
 <ul>
@@ -422,7 +422,7 @@ The use case and operations are different.</p>
 <p>The <code>subscribe</code> event expresses the interest and triggers the computation, no need for an additional <em>request</em>.</p>
 </li>
 <li>
-<p><code>Uni</code> can handle items having a <code>null</code> items (and has specific methods to handle this case).</p>
+<p><code>Uni</code> can handle items having a <code>null</code> value (and has specific methods to handle this case).</p>
 </li>
 <li>
 <p><code>Multi</code> does not allow it (because the Reactive Streams specification forbids it).</p>
@@ -523,7 +523,7 @@ Uni.createFrom().item("a")
                     <a href="https://www.redhat.com/en/about/privacy-policy">Privacy Policy</a>
                 </p>
                 <p>
-                     Site last generated: Feb 16, 2021
+                     Site last generated: Feb 18, 2021
                 </p>
             </div>
         </div>
