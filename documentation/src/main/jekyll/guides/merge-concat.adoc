@@ -31,7 +31,7 @@ image::concatenate-streams.png[Concatenating streams]
 
 When the first stream emits the completion event, it switches to the second stream, and so on.
 When the last stream completes, the concatenated stream sends the completion event.
-As for _merge_, if a stream fails then there won't be further evebts.
+As for _merge_, if a stream fails then there won't be further events.
 
 == Merging Multis
 

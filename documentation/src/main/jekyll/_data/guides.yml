@@ -272,14 +272,14 @@ infrastructure:
 
 hot-streams:
   title: How to create a hot stream?
-  text: Learn how to brodcast items.
+  text: Learn how to broadcast items.
   labels:
     - intermediate
   related:
     - guide: unicast
 
 unicast:
-  title: How to create use create a Multi from a non reactive source?
+  title: How to create a Multi from a non reactive source?
   text: Learn how to use the Unicast processor.
   labels:
     - advanced

@@ -12,7 +12,7 @@ While `CompletionStage` and `CompletableFuture` are close to `Uni` in terms of u
 
 `CompletionStage` are _eager_.
 When a method returns a `CompletionStage,` the operation has already been triggered.
-The outcome is used to complete the the returned `CompletionStage`.
+The outcome is used to complete the returned `CompletionStage`.
 On the other side, `Unis` are lazy.
 The operation is only triggered once there is a subscription.
 

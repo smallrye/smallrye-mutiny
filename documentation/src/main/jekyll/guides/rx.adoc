@@ -5,7 +5,7 @@
 :include_dir: ../../../../src/test/java/guides/
 
 If you are a seasoned reactive developer, you may miss the `map`, `flatMap`, `concatMap` methods.
-Mutiny API is quite different from the _ standard_ reactive eXtensions API.
+Mutiny API is quite different from the _standard_ reactive eXtensions API.
 There are multiple reasons for this choice.
 Typically, _flatMap_ is not necessarily well understood by every developer, leading to potentially catastrophic consequences.
 

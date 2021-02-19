@@ -61,7 +61,7 @@ include::{include_dir}/TransformItemsAsyncTest.java[tag=uni-to-multi-2]
 [role=reduce]
 image::uni-transform-to-multi.png[Transforming item into a Multi]
 
-The produced `Multi` objects can of course be more complicated that that and emit items in an asynchronous fashion.
+The produced `Multi` objects can of course be more complicated than that and emit items in an asynchronous fashion.
 
 == Transforming items from Multi - the _merge_ vs _concatenate_ dilemma
 
