@@ -79,7 +79,7 @@ include::{include_dir}/CollectingItemsTest.java[tag=collector]
 
 == Getting the first and last items
 
-While they are not strictly speaking collecting items, the `collect().first()` and `collect().last()` allows retrieving the first and last item from a `Multi`:
+While they are not strictly speaking collecting items, `collect().first()` and `collect().last()` allow retrieving the first and last item from a `Multi`:
 
 [source, java, indent=0]
 ----

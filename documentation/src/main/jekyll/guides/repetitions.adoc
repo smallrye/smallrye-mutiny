@@ -40,7 +40,7 @@ If you have a stream emitting the {1, 1, 2, 3, 4, 5, 5, 6, 1, 4, 4} items.
 Applying `.skip().repetitions()` on such stream produces:
 {1, 2, 3, 4, 5, 6, 1, 4}.
 
-Unlike `.skip().repetitions())`, you can use this operator on large or infinite streams.
+Unlike `.select().distinct()`, you can use this operator on large or infinite streams.
 
 TIP: By default, `skip().repetitions()` uses the `equals` method from the item's class.
 You can pass a custom comparator for more advanced checks.

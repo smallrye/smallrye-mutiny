@@ -385,7 +385,7 @@ public class MultiOnItem<T> {
     /**
      * For each items emitted by the upstream, the given {@code mapper} is invoked. This {@code mapper} returns a
      * {@link Uni}. The events emitted by the returned {@link Uni} are emitted downstream. Items emitted
-     * by the returned {@link Uni Unis} are emitted downstream using a {@code concatenation}, meaning the the returned
+     * by the returned {@link Uni Unis} are emitted downstream using a {@code concatenation}, meaning that the returned
      * {@link Multi} contains the items in the same order as the upstream.
      * <p>
      * For example, let's imagine an upstream multi {a, b, c} and a mapper emitting 1 items. This emission may be

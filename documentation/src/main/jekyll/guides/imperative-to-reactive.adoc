@@ -5,7 +5,7 @@
 
 If you use Mutiny, there is a good chance you may want to avoid blocking the caller thread.
 In a _pure_ reactive application, the application logic is executed on one of the few I/O threads, and blocking one of these would have dramatic consequences.
-So, here is the big question: _how to you deal with blocking code?_
+So, here is the big question: _how do you deal with blocking code?_
 
 Let's imagine you have blocking code (e.g., connecting to a database using JDBC, reading a file from the file system...), and you want to integrate that into your reactive pipelines while avoiding blocking.
 You would need to isolate such blocking parts of your code and run these parts on worker threads.

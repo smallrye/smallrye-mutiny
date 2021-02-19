@@ -32,14 +32,14 @@ include::{include_dir}/ReactiveToImperativeTest.java[tag=atMost]
 == Iterating over Multi's items
 
 When dealing with a `Multi,` you may want to iterate over the items using a simple "foreach."
-You can achieve this using `multi.subscribe().asBlockingIterable()`:
+You can achieve this using `multi.subscribe().asIterable()`:
 
 [source, java, indent=0]
 ----
 include::{include_dir}/ReactiveToImperativeTest.java[tag=iterable]
 ----
 
-The returns `iterable` is blocking.
+The returned `iterable` is blocking.
 It waits for the next items, and during that time, blocks the caller thread.
 
 The iteration ends once the last item is consumed.
