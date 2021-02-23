@@ -1,10 +1,10 @@
 package io.smallrye.mutiny.operators.multi.builders;
 
+import java.nio.BufferOverflowException;
 import java.util.Queue;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import io.smallrye.mutiny.helpers.Subscriptions;
-import io.smallrye.mutiny.helpers.queues.Queues;
 import io.smallrye.mutiny.subscription.MultiEmitter;
 import io.smallrye.mutiny.subscription.MultiSubscriber;
 
@@ -15,9 +15,9 @@ public class BufferItemMultiEmitter<T> extends BaseMultiEmitter<T> {
     private volatile boolean done;
     private final AtomicInteger wip = new AtomicInteger();
 
-    BufferItemMultiEmitter(MultiSubscriber<? super T> actual, int capacityHint) {
+    BufferItemMultiEmitter(MultiSubscriber<? super T> actual, Queue<T> queue) {
         super(actual);
-        this.queue = Queues.<T> unbounded(capacityHint).get();
+        this.queue = queue;
     }
 
     @Override
@@ -30,9 +30,18 @@ public class BufferItemMultiEmitter<T> extends BaseMultiEmitter<T> {
             fail(new NullPointerException("`emit` called with `null`."));
             return this;
         }
-        queue.offer(t);
-        drain();
+        if (queue.offer(t)) {
+            drain();
+        } else {
+            fail(new EmitterBufferOverflowException());
+        }
         return this;
+    }
+
+    @Override
+    protected void cleanup() {
+        queue.clear();
+        super.cleanup();
     }
 
     @Override
@@ -140,5 +149,14 @@ public class BufferItemMultiEmitter<T> extends BaseMultiEmitter<T> {
 
             missed = wip.addAndGet(-missed);
         } while (missed != 0);
+    }
+
+    public static class EmitterBufferOverflowException extends BufferOverflowException {
+
+        @Override
+        public String getMessage() {
+            return "The buffer used by the emitter is full, because the downstream consumer did not request enough items.";
+        }
+
     }
 }

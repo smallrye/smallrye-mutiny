@@ -55,7 +55,7 @@ abstract class BaseMultiEmitter<T>
         return onTermination.get() == CLEARED;
     }
 
-    private void cleanup() {
+    protected void cleanup() {
         disposed.set(true);
         Runnable action = onTermination.getAndSet(CLEARED);
         if (action != null && action != CLEARED) {

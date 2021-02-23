@@ -1,8 +1,11 @@
 package io.smallrye.mutiny.operators;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.awaitility.Awaitility.await;
 
 import java.io.IOException;
+import java.nio.BufferOverflowException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -363,7 +366,8 @@ public class MultiCreateFromEmitterTest {
 
     @Test
     public void testDropBackPressureBehavior() {
-        Multi<Integer> multi = Multi.createFrom().emitter(e -> e.emit(1).emit(2).emit(3).complete(), BackPressureStrategy.DROP);
+        Multi<Integer> multi = Multi.createFrom()
+                .emitter(e -> e.emit(1).emit(2).emit(3).complete(), BackPressureStrategy.DROP);
 
         multi.subscribe().withSubscriber(AssertSubscriber.create(1))
                 .assertSubscribed()
@@ -500,5 +504,126 @@ public class MultiCreateFromEmitterTest {
         subscriber1.assertCompleted();
         subscriber2.assertCompleted();
 
+    }
+
+    @Test
+    public void testEmitterWithNegativeBufferSize() {
+        assertThatThrownBy(() -> {
+            Multi.createFrom().emitter(e -> {
+            }, -1);
+        }).isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    public void testEmitterWithZeroAsBufferSize() {
+        assertThatThrownBy(() -> {
+            Multi.createFrom().emitter(e -> {
+            }, 0);
+        }).isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    public void testEmitterWithBufferSize() {
+        AssertSubscriber<Object> subscriber = Multi.createFrom().emitter(emitter -> {
+            emitter.emit(1);
+            emitter.emit(2);
+            emitter.emit(3);
+            emitter.complete();
+        }, 5)
+                .subscribe().withSubscriber(AssertSubscriber.create(0));
+
+        subscriber.assertSubscribed()
+                .request(2)
+                .assertItems(1, 2)
+                .request(1)
+                .assertItems(1, 2, 3)
+                .assertCompleted();
+    }
+
+    @Test
+    public void testEmitterWithBufferSizeAndOverflow() {
+        int bufferSize = 5;
+
+        AssertSubscriber<Object> subscriber = Multi.createFrom().emitter(emitter -> {
+            emitter.emit(1);
+            emitter.emit(2);
+            emitter.emit(3);
+            emitter.emit(4);
+            emitter.emit(5);
+            // Overflow:
+            emitter.emit(6);
+
+            emitter.emit(7);
+
+            emitter.complete();
+        }, bufferSize)
+                .subscribe().withSubscriber(AssertSubscriber.create(0));
+
+        subscriber.assertSubscribed()
+                .assertNotTerminated()
+                .request(10)
+                .assertItems(1, 2, 3, 4, 5)
+                .assertFailedWith(BufferOverflowException.class, "emitter");
+    }
+
+    @Test
+    public void testEmitterWithBufferSizeAndOverflowEndingWithFailure() {
+        int bufferSize = 5;
+
+        AssertSubscriber<Object> subscriber = Multi.createFrom().emitter(emitter -> {
+            emitter.emit(1);
+            emitter.emit(2);
+            emitter.emit(3);
+            emitter.emit(4);
+            emitter.emit(5);
+            // Overflow:
+            emitter.emit(6);
+
+            emitter.emit(7);
+
+            emitter.fail(new Exception("boom"));
+        }, bufferSize)
+                .subscribe().withSubscriber(AssertSubscriber.create(0));
+
+        subscriber.assertSubscribed()
+                .assertNotTerminated()
+                .request(10)
+                .assertItems(1, 2, 3, 4, 5)
+                .assertFailedWith(BufferOverflowException.class, "emitter");
+    }
+
+    @Test
+    public void testBufferOverflowWhenUsingRequest() {
+        int bufferSize = 5;
+        AtomicReference<MultiEmitter<? super Integer>> reference = new AtomicReference<>();
+        AssertSubscriber<Integer> subscriber = Multi.createFrom().<Integer> emitter(reference::set, bufferSize)
+                .subscribe().withSubscriber(AssertSubscriber.create(0));
+
+        await().until(() -> reference.get() != null);
+
+        reference.get().emit(1);
+        reference.get().emit(2);
+        reference.get().emit(3);
+
+        subscriber.assertSubscribed()
+                .assertNotTerminated()
+                .assertHasNotReceivedAnyItem();
+
+        // Buffer size: 3
+
+        subscriber.request(3)
+                .assertItems(1, 2, 3);
+
+        // Buffer size: 0
+
+        reference.get().emit(4).emit(5).emit(6);
+        subscriber.assertNotTerminated();
+
+        // Buffer size: 3
+        reference.get().emit(7).emit(8).emit(9);
+
+        // The failure is appended, so the subscriber won't get it before consuming everything first.
+        subscriber.request(10);
+        subscriber.assertFailedWith(BufferOverflowException.class, "emitter");
     }
 }

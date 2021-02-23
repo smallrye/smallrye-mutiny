@@ -5,6 +5,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 import io.smallrye.mutiny.helpers.Subscriptions;
+import io.smallrye.mutiny.helpers.queues.Queues;
 import io.smallrye.mutiny.operators.AbstractMulti;
 import io.smallrye.mutiny.subscription.BackPressureFailure;
 import io.smallrye.mutiny.subscription.BackPressureStrategy;
@@ -13,12 +14,19 @@ import io.smallrye.mutiny.subscription.MultiSubscriber;
 
 public final class EmitterBasedMulti<T> extends AbstractMulti<T> {
 
+    public static final int HINT = 16;
     private final Consumer<MultiEmitter<? super T>> consumer;
     private final BackPressureStrategy backpressure;
+    private final int bufferSize;
 
     public EmitterBasedMulti(Consumer<MultiEmitter<? super T>> consumer, BackPressureStrategy backpressure) {
+        this(consumer, backpressure, -1);
+    }
+
+    public EmitterBasedMulti(Consumer<MultiEmitter<? super T>> consumer, BackPressureStrategy backpressure, int bufferSize) {
         this.consumer = consumer;
         this.backpressure = backpressure;
+        this.bufferSize = bufferSize;
     }
 
     @Override
@@ -43,7 +51,11 @@ public final class EmitterBasedMulti<T> extends AbstractMulti<T> {
                 break;
 
             default:
-                emitter = new BufferItemMultiEmitter<>(downstream, 16);
+                if (bufferSize == -1) {
+                    emitter = new BufferItemMultiEmitter<>(downstream, Queues.<T> unbounded(HINT).get());
+                } else {
+                    emitter = new BufferItemMultiEmitter<>(downstream, Queues.createStrictSizeQueue(bufferSize));
+                }
                 break;
 
         }
