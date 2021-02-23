@@ -100,7 +100,7 @@
         <kotlin.compiler.languageVersion>1.3</kotlin.compiler.languageVersion>
         <coroutines.version>1.4.2</coroutines.version>
         <kotlin.compiler.jvmTarget>${maven.compiler.target}</kotlin.compiler.jvmTarget>
-        <dokka.version>1.4.20</dokka.version>
+        <dokka.version>1.4.20-dev-65</dokka.version>
     </properties>
 
     <dependencyManagement>
