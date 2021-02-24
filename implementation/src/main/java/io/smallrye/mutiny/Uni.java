@@ -806,6 +806,20 @@ public interface Uni<T> {
     }
 
     /**
+     * Ignore the item emitted by this {@link Uni} and replace it with {@code null} and type {@link Void}.
+     * <p>
+     * This method is in effect similar to {@link Uni#replaceWithNull()}, except that it returns a {@code Uni<Void>}
+     * instead of a {@code Uni<T>}.
+     * <p>
+     * This is a shortcut for {@code uni.onItem().transform(ignored -> null)}.
+     * 
+     * @return the new {@link Uni}
+     */
+    default Uni<Void> replaceWithVoid() {
+        return onItem().transform(ignored -> null);
+    }
+
+    /**
      * Log events (onSubscribe, onItem, ...) as they come from the upstream or the subscriber.
      *
      * Events will be logged as long as the {@link Uni} hasn't been cancelled or terminated.

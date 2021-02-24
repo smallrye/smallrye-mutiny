@@ -51,4 +51,15 @@ class UniReplaceWithTest {
 
         subscriber.assertCompleted().assertItem(null);
     }
+
+    @Test
+    @DisplayName("Replace with void")
+    void replaceWithVoid() {
+        UniAssertSubscriber<Void> subscriber = Uni.createFrom()
+                .item(69)
+                .replaceWithVoid()
+                .subscribe().withSubscriber(UniAssertSubscriber.create());
+
+        subscriber.assertCompleted().assertItem(null);
+    }
 }
