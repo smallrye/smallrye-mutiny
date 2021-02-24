@@ -1,7 +1,6 @@
 package io.smallrye.mutiny.groups;
 
-import static io.smallrye.mutiny.helpers.ParameterValidation.SUPPLIER_PRODUCED_NULL;
-import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
+import static io.smallrye.mutiny.helpers.ParameterValidation.*;
 
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -380,6 +379,25 @@ public class MultiCreate {
     public <T> Multi<T> emitter(Consumer<MultiEmitter<? super T>> consumer) {
         // Decoration happens in `emitter`
         return emitter(consumer, BackPressureStrategy.BUFFER);
+    }
+
+    /**
+     * Like {@link #emitter(Consumer)} with the {@link BackPressureStrategy#BUFFER} strategy and the given buffer size.
+     *
+     * Note that to create hot streams, you should use a
+     * {@link io.smallrye.mutiny.operators.multi.processors.BroadcastProcessor}.
+     *
+     * If the buffer is full, a {@link java.nio.BufferOverflowException} in propagated downstream.
+     *
+     * @param consumer the consumer receiving the emitter, must not be {@code null}
+     * @param bufferSize the buffer size, must be strictly positive
+     * @param <T> the type of item emitted by the produced Multi
+     * @return the produced {@link Multi}
+     */
+    public <T> Multi<T> emitter(Consumer<MultiEmitter<? super T>> consumer, int bufferSize) {
+        Consumer<MultiEmitter<? super T>> actual = Infrastructure.decorate(nonNull(consumer, "consumer"));
+        return Infrastructure.onMultiCreation(new EmitterBasedMulti<>(actual, BackPressureStrategy.BUFFER,
+                positive(bufferSize, "bufferSize")));
     }
 
     /**
