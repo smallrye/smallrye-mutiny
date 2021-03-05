@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.*;
+import java.util.concurrent.CancellationException;
 import java.util.stream.Collectors;
 
 public class AssertionHelper {
@@ -76,6 +77,15 @@ public class AssertionHelper {
         if (completed) {
             fail("%nExpected no terminal event, but received a completion event.");
         } else if (failure != null) {
+            fail("%nExpected no terminal event, but received a failure event: <%s>:%n<%s>",
+                    failure, getStackTrace(failure));
+        }
+    }
+
+    static void shouldNotBeTerminatedUni(boolean completed, Throwable failure) {
+        if (completed) {
+            fail("%nExpected no terminal event, but received a completion event.");
+        } else if (failure != null && !(failure instanceof CancellationException)) {
             fail("%nExpected no terminal event, but received a failure event: <%s>:%n<%s>",
                     failure, getStackTrace(failure));
         }
