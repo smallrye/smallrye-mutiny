@@ -102,7 +102,7 @@ public class MultiGroupIntoLists<T> {
      * @return a Multi emitting lists of at most {@code size} items from the upstream Multi.
      */
     public Multi<List<T>> of(int size, Duration maximumDelay) {
-        return upstream.group().intoMultis().every(maximumDelay)
-                .flatMap(withTimeout -> withTimeout.group().intoLists().of(size));
+        return Infrastructure.onMultiCreation(new MultiBufferWithTimeoutOp<>(upstream, positive(size, "size"),
+                validate(maximumDelay, "maximumDelay"), Infrastructure.getDefaultWorkerPool()));
     }
 }
