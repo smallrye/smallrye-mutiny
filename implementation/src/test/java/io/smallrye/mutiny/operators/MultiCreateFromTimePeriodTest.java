@@ -1,7 +1,6 @@
 package io.smallrye.mutiny.operators;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.awaitility.Awaitility.await;
 
 import java.time.Duration;
 import java.util.List;
@@ -37,8 +36,8 @@ public class MultiCreateFromTimePeriodTest {
                 .onItem().transform(l -> System.currentTimeMillis())
                 .subscribe().withSubscriber(subscriber);
 
-        await().until(() -> subscriber.getItems().size() >= 10);
-        subscriber.cancel();
+        subscriber.awaitNextItems(10)
+                .cancel();
 
         subscriber.assertNotTerminated();
 
@@ -64,8 +63,8 @@ public class MultiCreateFromTimePeriodTest {
                 .onItem().transform(l -> System.currentTimeMillis())
                 .subscribe().withSubscriber(subscriber);
 
-        await().until(() -> subscriber.getItems().size() >= 10);
-        subscriber.cancel();
+        subscriber.awaitNextItems(10)
+                .cancel();
 
         subscriber.assertNotTerminated();
 
@@ -90,8 +89,11 @@ public class MultiCreateFromTimePeriodTest {
 
         subscriber
                 .request(2) // request only 2
-                .await() // wait until failure
-                .assertFailedWith(BackPressureFailure.class, "lack of requests");
+                .awaitFailure(t -> { // wait until failure, and validate
+                    assertThat(t)
+                            .isInstanceOf(BackPressureFailure.class)
+                            .hasMessageContaining("lack of requests");
+                });
     }
 
 }

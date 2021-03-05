@@ -228,9 +228,10 @@ public class MultiOnSubscribeTest {
 
         subscriber.assertNotSubscribed();
         latch.countDown();
-        subscriber.await()
-                .assertSubscribed()
-                .assertCompleted().assertItems(1, 2, 3);
+        subscriber
+                .awaitSubscription()
+                .awaitCompletion()
+                .assertItems(1, 2, 3);
     }
 
     @Test
@@ -246,9 +247,10 @@ public class MultiOnSubscribeTest {
         await().until(() -> emitter.get() != null);
         emitter.get().complete(12345);
 
-        subscriber.await()
-                .assertSubscribed()
-                .assertCompleted().assertItems(1, 2, 3);
+        subscriber
+                .awaitSubscription()
+                .awaitCompletion()
+                .assertItems(1, 2, 3);
 
     }
 
@@ -266,9 +268,10 @@ public class MultiOnSubscribeTest {
         await().until(() -> emitter.get() != null);
         emitter.get().complete(12345);
 
-        subscriber.await()
-                .assertSubscribed()
-                .assertCompleted().assertItems(1, 2, 3);
+        subscriber
+                .awaitSubscription()
+                .awaitCompletion()
+                .assertItems(1, 2, 3);
 
     }
 
@@ -280,9 +283,8 @@ public class MultiOnSubscribeTest {
 
         subscriber
                 .request(1)
-                .await()
-                .assertItems(1, 2, 3)
-                .assertCompleted();
+                .awaitCompletion()
+                .assertItems(1, 2, 3);
     }
 
     @Test

@@ -106,7 +106,7 @@ public class UniOrTest {
                 .of(Uni.createFrom().item("foo").onItem().delayIt().onExecutor(executor).by(Duration.ofMillis(10)),
                         Uni.createFrom().item("bar").onItem().delayIt().onExecutor(executor).by(Duration.ofMillis(100)))
                 .subscribe().withSubscriber(subscriber2);
-        subscriber2.await().assertCompleted().assertItem("foo");
+        assertThat(subscriber2.awaitItem().getItem()).isEqualTo("foo");
     }
 
     @RepeatedTest(100)
@@ -172,6 +172,7 @@ public class UniOrTest {
         assertThat(c3.await().indefinitely()).isEqualTo("foo");
     }
 
+    @SuppressWarnings("deprecation")
     @Test
     public void testUniOrWithDelayedUniAndDeprecatedApis() {
         Uni<String> first = Uni.createFrom().item("foo").onItem().delayIt().onExecutor(executor)

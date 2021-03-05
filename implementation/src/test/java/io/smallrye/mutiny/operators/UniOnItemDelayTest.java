@@ -51,7 +51,7 @@ public class UniOnItemDelayTest {
                 .onItem().delayIt()
                 .by(Duration.ofMillis(100)).subscribe().withSubscriber(subscriber);
 
-        subscriber.await();
+        subscriber.awaitItem();
         long end = System.currentTimeMillis();
         assertThat(end - begin).isGreaterThanOrEqualTo(100);
         subscriber.assertCompleted().assertItem(null);
@@ -77,7 +77,7 @@ public class UniOnItemDelayTest {
         long begin = System.currentTimeMillis();
         UniAssertSubscriber<Void> subscriber = UniAssertSubscriber.create();
         delayed.subscribe().withSubscriber(subscriber);
-        subscriber.await();
+        subscriber.awaitItem();
         long end = System.currentTimeMillis();
         assertThat(end - begin).isGreaterThanOrEqualTo(100);
         subscriber.assertCompleted().assertItem(null);
@@ -91,10 +91,10 @@ public class UniOnItemDelayTest {
         Uni.createFrom().<Void> failure(new Exception("boom")).onItem().delayIt()
                 .onExecutor(executor)
                 .by(Duration.ofMillis(100)).subscribe().withSubscriber(subscriber);
-        subscriber.await();
+        subscriber.awaitFailure();
         long end = System.currentTimeMillis();
         assertThat(end - begin).isLessThan(100);
-        subscriber.assertFailed().assertFailedWith(Exception.class, "boom");
+        subscriber.assertFailedWith(Exception.class, "boom");
     }
 
     @Test

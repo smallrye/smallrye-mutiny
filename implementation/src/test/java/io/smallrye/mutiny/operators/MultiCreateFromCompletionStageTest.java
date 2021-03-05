@@ -41,7 +41,7 @@ public class MultiCreateFromCompletionStageTest {
         AssertSubscriber<String> subscriber = Multi.createFrom()
                 .completionStage(CompletableFuture.supplyAsync(() -> "hello")).subscribe()
                 .withSubscriber(AssertSubscriber.create(1));
-        subscriber.await().assertCompleted().assertItems("hello");
+        subscriber.awaitCompletion().assertItems("hello");
     }
 
     @Test
@@ -58,7 +58,7 @@ public class MultiCreateFromCompletionStageTest {
         AssertSubscriber<Void> subscriber = Multi.createFrom()
                 .completionStage(CompletableFuture.runAsync(() -> called.set(true))).subscribe()
                 .withSubscriber(AssertSubscriber.create(1));
-        subscriber.await().assertCompleted().assertHasNotReceivedAnyItem();
+        subscriber.awaitCompletion().assertHasNotReceivedAnyItem();
         assertThat(called).isTrue();
     }
 

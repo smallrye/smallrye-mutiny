@@ -241,8 +241,7 @@ public class MultiTransformToMultiTest {
                 .subscribe(subscriber);
 
         subscriber
-                .await()
-                .assertCompleted();
+                .awaitCompletion();
         assertThat(subscriber.getItems()).containsExactlyInAnyOrder(1, 1, 2, 2, 3, 3);
     }
 
@@ -259,8 +258,7 @@ public class MultiTransformToMultiTest {
                 .subscribe(subscriber);
 
         subscriber
-                .await()
-                .assertCompleted();
+                .awaitCompletion();
         assertThat(subscriber.getItems()).containsExactly(1, 1, 2, 2, 3, 3);
     }
 
@@ -276,9 +274,7 @@ public class MultiTransformToMultiTest {
                 })
                 .subscribe(subscriber);
 
-        subscriber
-                .await()
-                .assertCompleted();
+        subscriber.awaitCompletion();
         assertThat(subscriber.getItems()).containsExactlyInAnyOrder(1, 1, 2, 2, 3, 3);
     }
 
@@ -295,8 +291,7 @@ public class MultiTransformToMultiTest {
                 .subscribe(subscriber);
 
         subscriber
-                .await()
-                .assertCompleted();
+                .awaitCompletion();
         assertThat(subscriber.getItems()).containsExactlyInAnyOrder(1, 1, 2, 2, 3, 3);
     }
 
@@ -309,8 +304,8 @@ public class MultiTransformToMultiTest {
                 .subscribe(subscriber);
 
         subscriber
-                .await()
-                .assertItems(1, 1, 2, 2, 3, 3).assertCompleted();
+                .awaitCompletion()
+                .assertItems(1, 1, 2, 2, 3, 3);
     }
 
     @Test
@@ -451,7 +446,7 @@ public class MultiTransformToMultiTest {
                 .merge(25)
                 .subscribe(subscriber);
 
-        subscriber.await().assertCompleted();
+        subscriber.awaitCompletion();
         assertThat(subscriber.getItems()).hasSize(10000);
     }
 
@@ -881,8 +876,7 @@ public class MultiTransformToMultiTest {
         AssertSubscriber<Object> subscriber = AssertSubscriber.create(Long.MAX_VALUE);
         multi.subscribe().withSubscriber(subscriber);
 
-        subscriber.await()
-                .assertCompleted();
+        subscriber.awaitCompletion();
 
         List<Integer> expected = new ArrayList<>();
         for (int i = 0; i <= 99; i++) {
@@ -939,8 +933,7 @@ public class MultiTransformToMultiTest {
                 .merge(8)
                 .subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE));
 
-        subscriber.await()
-                .assertCompleted();
+        subscriber.awaitCompletion();
 
         assertThat(subscriber.getItems()).containsExactlyInAnyOrderElementsOf(expected);
     }
@@ -956,8 +949,7 @@ public class MultiTransformToMultiTest {
                 .concatenate()
                 .subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE));
 
-        subscriber.await()
-                .assertCompleted();
+        subscriber.awaitCompletion();
 
         assertThat(subscriber.getItems()).containsExactlyElementsOf(expected);
     }
@@ -967,8 +959,7 @@ public class MultiTransformToMultiTest {
         AssertSubscriber<Integer> subscriber = Multi.createFrom().range(1, 1001)
                 .flatMap(i -> Multi.createFrom().item(i).runSubscriptionOn(Infrastructure.getDefaultExecutor()))
                 .subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE));
-        subscriber.await()
-                .assertCompleted();
+        subscriber.awaitCompletion();
         assertThat(subscriber.getItems()).hasSize(1000);
     }
 
@@ -978,8 +969,7 @@ public class MultiTransformToMultiTest {
                 .flatMap(i -> Multi.createFrom().items(i + 1, i + 2))
                 .subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE));
 
-        subscriber.await()
-                .assertCompleted();
+        subscriber.awaitCompletion();
         assertThat(subscriber.getItems()).hasSize(4);
     }
 
@@ -995,8 +985,7 @@ public class MultiTransformToMultiTest {
                 })
                 .subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE));
 
-        subscriber.await()
-                .assertCompleted();
+        subscriber.awaitCompletion();
         assertThat(subscriber.getItems()).hasSize(512);
     }
 
@@ -1012,8 +1001,7 @@ public class MultiTransformToMultiTest {
                 })
                 .subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE));
 
-        subscriber.await()
-                .assertCompleted();
+        subscriber.awaitCompletion();
         assertThat(subscriber.getItems()).hasSize(512);
     }
 
@@ -1029,8 +1017,7 @@ public class MultiTransformToMultiTest {
                 })
                 .subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE));
 
-        subscriber.await()
-                .assertCompleted();
+        subscriber.awaitCompletion();
         assertThat(subscriber.getItems()).hasSize(512);
     }
 
@@ -1049,8 +1036,7 @@ public class MultiTransformToMultiTest {
                 .runSubscriptionOn(Infrastructure.getDefaultExecutor())
                 .subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE));
 
-        subscriber.await(Duration.ofSeconds(5))
-                .assertCompleted();
+        subscriber.awaitCompletion(Duration.ofSeconds(5));
         assertThat(subscriber.getItems()).hasSize(max / 2);
     }
 
@@ -1067,7 +1053,8 @@ public class MultiTransformToMultiTest {
                 })
                 .subscribe().withSubscriber(AssertSubscriber.create(10));
 
-        subscriber.await()
+        subscriber
+                .awaitFailure()
                 .assertFailedWith(IllegalArgumentException.class, "boom");
         assertThat(cancelled).hasValue(1);
     }
@@ -1087,7 +1074,8 @@ public class MultiTransformToMultiTest {
                 .merge()
                 .subscribe().withSubscriber(AssertSubscriber.create(10));
 
-        subscriber.await()
+        subscriber
+                .awaitFailure()
                 .assertFailedWith(CompositeException.class, "boom");
         assertThat(cancelled).hasValue(0);
     }
@@ -1106,7 +1094,8 @@ public class MultiTransformToMultiTest {
                 .merge()
                 .subscribe().withSubscriber(AssertSubscriber.create(10));
 
-        subscriber.await()
+        subscriber
+                .awaitFailure()
                 .assertFailedWith(IllegalArgumentException.class, "boom");
         assertThat(cancelled).hasValue(1);
     }
@@ -1126,7 +1115,8 @@ public class MultiTransformToMultiTest {
                 .concatenate()
                 .subscribe().withSubscriber(AssertSubscriber.create(10));
 
-        subscriber.await()
+        subscriber
+                .awaitFailure()
                 .assertFailedWith(CompositeException.class, "boom");
         assertThat(cancelled).hasValue(0);
     }
@@ -1145,7 +1135,8 @@ public class MultiTransformToMultiTest {
                 .concatenate()
                 .subscribe().withSubscriber(AssertSubscriber.create(10));
 
-        subscriber.await()
+        subscriber
+                .awaitFailure()
                 .assertFailedWith(IllegalArgumentException.class, "boom");
         assertThat(cancelled).hasValue(1);
     }
@@ -1283,7 +1274,7 @@ public class MultiTransformToMultiTest {
                 }).merge(1)
                 .subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE));
 
-        subscriber.await().assertCompleted();
+        subscriber.awaitCompletion();
         assertThat(subscriber.getItems()).hasSize(20);
         assertThat(subscriber.getItems())
                 .containsExactlyInAnyOrder(0, 1, 2, 3, 4, -5, 6, 7, 8, 9, -10, 11, 12, 13, 14, -15, 16, 17, 18, 19);
@@ -1299,7 +1290,7 @@ public class MultiTransformToMultiTest {
                 }).merge(5)
                 .subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE));
 
-        subscriber.await().assertCompleted();
+        subscriber.awaitCompletion();
         assertThat(subscriber.getItems()).hasSize(20);
         assertThat(subscriber.getItems())
                 .containsExactlyInAnyOrder(0, 1, 2, 3, 4, -5, 6, 7, 8, 9, -10, 11, 12, 13, 14, -15, 16, 17, 18, 19);
@@ -1318,7 +1309,7 @@ public class MultiTransformToMultiTest {
                 }).concatenate()
                 .subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE));
 
-        subscriber.await().assertCompleted();
+        subscriber.awaitCompletion();
         assertThat(subscriber.getItems()).hasSize(20);
         assertThat(subscriber.getItems())
                 .containsExactly(0, 1, 2, 3, 4, -5, 6, 7, 8, 9, -10, 11, 12, 13, 14, -15, 16, 17, 18, 19);

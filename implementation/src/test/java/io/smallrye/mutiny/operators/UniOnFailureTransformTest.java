@@ -101,7 +101,7 @@ public class UniOnFailureTransformTest {
                     })
                     .subscribe().withSubscriber(subscriber);
 
-            subscriber.await().assertFailedWith(BoomException.class, "BoomException");
+            subscriber.awaitFailure().assertFailedWith(BoomException.class, "BoomException");
             assertThat(threadName).isNotNull().doesNotHaveValue("main");
             assertThat(subscriber.getOnFailureThreadName()).isEqualTo(threadName.get());
         } finally {

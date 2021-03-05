@@ -110,7 +110,7 @@ public class UniOnItemTransformTest {
                     })
                     .subscribe().withSubscriber(subscriber);
 
-            subscriber.await().assertCompleted().assertItem(2);
+            assertThat(subscriber.awaitItem().getItem()).isEqualTo(2);
             assertThat(threadName).isNotNull().doesNotHaveValue("main");
             assertThat(subscriber.getOnItemThreadName()).isEqualTo(threadName.get());
         } finally {

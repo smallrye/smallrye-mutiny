@@ -28,7 +28,7 @@ public class UnicastProcessorTest {
         // end::code[]
         AssertSubscriber<String> subscriber = AssertSubscriber.create(Long.MAX_VALUE);
         multi.subscribe().withSubscriber(subscriber)
-                .await()
+                .awaitCompletion()
                 .run(() -> assertThat(subscriber.getItems()).hasSize(1000));
     }
 }

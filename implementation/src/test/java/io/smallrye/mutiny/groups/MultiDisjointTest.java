@@ -1,7 +1,6 @@
 package io.smallrye.mutiny.groups;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.awaitility.Awaitility.await;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -159,16 +158,16 @@ public class MultiDisjointTest {
                 .subscribe().withSubscriber(AssertSubscriber.create(0));
 
         subscriber
-                .assertSubscribed()
+                .awaitSubscription()
                 .assertHasNotReceivedAnyItem()
                 .request(1);
 
-        await().until(() -> subscriber.getItems().contains("A"));
-
-        subscriber.request(2);
-        await().until(() -> subscriber.getItems().contains("B") && subscriber.getItems().contains("C"));
+        subscriber.awaitNextItem()
+                .request(2)
+                .awaitNextItems(2)
+                .assertItems("A", "B", "C");
 
         subscriber.request(100);
-        subscriber.await().assertCompleted();
+        subscriber.awaitCompletion();
     }
 }

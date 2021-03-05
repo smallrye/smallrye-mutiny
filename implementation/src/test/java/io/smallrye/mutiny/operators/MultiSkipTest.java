@@ -342,8 +342,7 @@ public class MultiSkipTest {
                 .onItem().transform(n -> n * 10)
                 .subscribe().withSubscriber(AssertSubscriber.create(100))
 
-                .await()
-                .assertCompleted()
+                .awaitCompletion()
                 .assertItems(40, 60, 80);
 
         assertThat(called).isFalse();

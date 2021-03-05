@@ -26,7 +26,7 @@ class FlowAsMultiTest {
 
             // Then
             assertThat(collectedItems).containsExactly(item)
-            subscriber.await().assertItems(item)
+            subscriber.awaitCompletion().assertItems(item)
         }
     }
 
@@ -45,7 +45,7 @@ class FlowAsMultiTest {
 
             // Then
             assertThat(collectedItems).containsExactly(*items)
-            subscriber.await().assertItems(*items)
+            subscriber.awaitCompletion().assertItems(*items)
         }
     }
 
@@ -62,7 +62,8 @@ class FlowAsMultiTest {
             flow.asMulti().subscribe().withSubscriber(subscriber)
 
             // Then
-            subscriber.await().assertFailedWith(IllegalStateException::class.java, "boom")
+            subscriber.awaitFailure()
+                    .assertFailedWith(IllegalStateException::class.java, "boom")
         }
     }
 
@@ -87,7 +88,7 @@ class FlowAsMultiTest {
             Thread.sleep(350)
 
             // Then
-            subscriber.await().assertFailedWith(CancellationException::class.java, "abort")
+            subscriber.awaitFailure().assertFailedWith(CancellationException::class.java, "abort")
         }
     }
 

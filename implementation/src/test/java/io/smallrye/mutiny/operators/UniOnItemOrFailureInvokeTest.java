@@ -178,7 +178,7 @@ public class UniOnItemOrFailureInvokeTest {
                     .onItemOrFailure().invoke((i, f) -> threadName.set(Thread.currentThread().getName()))
                     .subscribe().withSubscriber(subscriber);
 
-            subscriber.await().assertCompleted().assertItem(1);
+            assertThat(subscriber.awaitItem().getItem()).isEqualTo(1);
             assertThat(threadName).isNotNull().doesNotHaveValue("main");
             assertThat(subscriber.getOnItemThreadName()).isEqualTo(threadName.get());
         } finally {
@@ -202,7 +202,7 @@ public class UniOnItemOrFailureInvokeTest {
                     .onFailure().recoverWithItem(1)
                     .subscribe().withSubscriber(subscriber);
 
-            subscriber.await().assertCompleted().assertItem(1);
+            assertThat(subscriber.awaitItem().getItem()).isEqualTo(1);
             assertThat(threadName).isNotNull().doesNotHaveValue("main");
             assertThat(subscriber.getOnItemThreadName()).isEqualTo(threadName.get());
         } finally {

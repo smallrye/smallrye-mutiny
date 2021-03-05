@@ -75,7 +75,7 @@ public class UniAndTest {
         UniAssertSubscriber<Integer> subscriber = Uni.combine().all().unis(uni1, uni2, uni3)
                 .combinedWith((i1, i2, i3) -> i1 + i2 + i3)
                 .subscribe().withSubscriber(UniAssertSubscriber.create());
-        subscriber.await().assertItem(6);
+        subscriber.awaitItem().assertItem(6);
     }
 
     @Test
@@ -142,7 +142,7 @@ public class UniAndTest {
         UniAssertSubscriber<Integer> subscriber = uni1.and().unis(uni2, uni3)
                 .combinedWith((i1, i2, i3) -> i1 + i2 + i3)
                 .subscribe().withSubscriber(UniAssertSubscriber.create());
-        subscriber.await().assertItem(6);
+        subscriber.awaitItem().assertItem(6);
     }
 
     @Test

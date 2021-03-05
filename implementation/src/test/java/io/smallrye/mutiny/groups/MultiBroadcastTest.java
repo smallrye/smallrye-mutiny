@@ -298,9 +298,9 @@ public class MultiBroadcastTest {
 
         subscriber2.request(1000);
 
-        subscriber1.await().assertCompleted();
+        subscriber1.awaitCompletion();
         assertThat(subscriber1.getItems()).hasSize(1000);
-        subscriber2.await().assertCompleted();
+        subscriber2.awaitCompletion();
         assertThat(subscriber2.getItems()).hasSize(1000);
     }
 }

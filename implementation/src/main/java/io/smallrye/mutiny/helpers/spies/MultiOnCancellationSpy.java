@@ -23,4 +23,16 @@ public class MultiOnCancellationSpy<T> extends MultiSpyBase<T> {
     public String toString() {
         return "MultiOnCancellationSpy{} " + super.toString();
     }
+
+    public void assertCancelled() {
+        if (!isCancelled()) {
+            throw new AssertionError("Expected downstream cancellation, but it did not happen");
+        }
+    }
+
+    public void assertNotCancelled() {
+        if (isCancelled()) {
+            throw new AssertionError("Did not expect to receive a downstream cancellation");
+        }
+    }
 }

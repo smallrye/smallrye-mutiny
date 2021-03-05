@@ -30,9 +30,8 @@ public class SerializedProcessorTest {
         processor.onNext("hello");
         processor.onComplete();
 
-        subscriber.await()
-                .assertItems("hello")
-                .assertCompleted();
+        subscriber.awaitCompletion()
+                .assertItems("hello");
     }
 
     @Test
@@ -44,9 +43,8 @@ public class SerializedProcessorTest {
 
         AssertSubscriber<Integer> subscriber = AssertSubscriber.create(1);
         serialized.subscribe(subscriber);
-        subscriber.await()
-                .assertItems(1)
-                .assertCompleted();
+        subscriber.awaitCompletion()
+                .assertItems(1);
     }
 
     @Test
@@ -57,9 +55,8 @@ public class SerializedProcessorTest {
 
         AssertSubscriber<Integer> subscriber = AssertSubscriber.create(1);
         serialized.subscribe(subscriber);
-        subscriber.await()
-                .assertHasNotReceivedAnyItem()
-                .assertCompleted();
+        subscriber.awaitCompletion()
+                .assertHasNotReceivedAnyItem();
     }
 
     @Test
@@ -71,7 +68,7 @@ public class SerializedProcessorTest {
 
         AssertSubscriber<Integer> subscriber = AssertSubscriber.create(1);
         serialized.subscribe(subscriber);
-        subscriber.await()
+        subscriber.awaitFailure()
                 .assertItems(1)
                 .assertFailedWith(Exception.class, "boom");
     }
@@ -147,8 +144,8 @@ public class SerializedProcessorTest {
         });
 
         subscriber
-                .await()
-                .assertSubscribed()
+                .awaitSubscription()
+                .awaitFailure()
                 .assertFailedWith(Exception.class, "boom");
     }
 
@@ -202,10 +199,7 @@ public class SerializedProcessorTest {
             new Thread(r).start();
         });
 
-        subscriber.await();
-        subscriber
-                .assertSubscribed()
-                .assertCompleted();
+        subscriber.awaitSubscription().awaitCompletion();
 
         if (subscriber.getItems().size() != 0) {
             assertThat(subscriber.getItems()).containsExactly(1);
@@ -230,10 +224,7 @@ public class SerializedProcessorTest {
             new Thread(r).start();
         });
 
-        subscriber.await();
-        subscriber
-                .assertSubscribed()
-                .assertCompleted();
+        subscriber.awaitSubscription().awaitCompletion();
 
         if (subscriber.getItems().size() != 0) {
             assertThat(subscriber.getItems()).containsExactly(1);
@@ -241,7 +232,7 @@ public class SerializedProcessorTest {
     }
 
     @RepeatedTest(100)
-    public void verifyOnSubscribeOnSubscribeThreadSafety() throws InterruptedException {
+    public void verifyOnSubscribeOnSubscribeThreadSafety() {
         final Processor<Integer, Integer> processor = UnicastProcessor.<Integer> create().serialized();
         AssertSubscriber<Integer> subscriber = AssertSubscriber.create(100);
         processor.subscribe(subscriber);
@@ -258,14 +249,9 @@ public class SerializedProcessorTest {
 
         List<Runnable> runnables = Arrays.asList(r1, r2);
         Collections.shuffle(runnables);
-        runnables.forEach(r -> {
-            new Thread(r).start();
-        });
+        runnables.forEach(r -> new Thread(r).start());
 
-        latch.await();
-
-        subscriber
-                .assertSubscribed();
+        subscriber.awaitSubscription();
     }
 
     @RepeatedTest(100)
@@ -286,10 +272,9 @@ public class SerializedProcessorTest {
             new Thread(r).start();
         });
 
-        subscriber.await();
-        subscriber
-                .assertSubscribed()
-                .assertTerminated();
+        subscriber.awaitSubscription();
+
+        await().untilAsserted(subscriber::assertTerminated);
 
         if (subscriber.getItems().size() != 0) {
             assertThat(subscriber.getItems()).containsExactly(1);
@@ -311,10 +296,9 @@ public class SerializedProcessorTest {
             new Thread(r).start();
         });
 
-        subscriber.await();
         subscriber
-                .assertSubscribed()
-                .assertTerminated()
+                .awaitSubscription()
+                .awaitFailure()
                 .assertFailedWith(Exception.class, "boom");
     }
 
@@ -348,10 +332,7 @@ public class SerializedProcessorTest {
             new Thread(r).start();
         });
 
-        subscriber.await();
-        subscriber
-                .assertSubscribed()
-                .assertCompleted();
+        subscriber.awaitSubscription().awaitCompletion();
 
         if (subscriber.getItems().size() != 0) {
             assertThat(subscriber.getItems()).contains(1);
@@ -380,10 +361,7 @@ public class SerializedProcessorTest {
             new Thread(r).start();
         });
 
-        subscriber.await();
-        subscriber
-                .assertSubscribed()
-                .assertCompleted();
+        subscriber.awaitSubscription().awaitCompletion();
 
         if (subscriber.getItems().size() != 0) {
             assertThat(subscriber.getItems()).containsExactly(1, 2, 3, 4, 5);

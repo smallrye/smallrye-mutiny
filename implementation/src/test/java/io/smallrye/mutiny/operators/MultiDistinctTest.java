@@ -1,7 +1,6 @@
 package io.smallrye.mutiny.operators;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 
@@ -19,6 +18,8 @@ import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.TestException;
+import io.smallrye.mutiny.helpers.spies.MultiOnCancellationSpy;
+import io.smallrye.mutiny.helpers.spies.Spy;
 import io.smallrye.mutiny.helpers.test.AssertSubscriber;
 import io.smallrye.mutiny.subscription.MultiEmitter;
 
@@ -189,9 +190,9 @@ public class MultiDistinctTest {
     @Test
     public void testSkipRepetitionsWithCancellation() {
         AtomicLong count = new AtomicLong();
-        AtomicBoolean cancelled = new AtomicBoolean();
-        AssertSubscriber<Long> subscriber = Multi.createFrom().ticks().every(Duration.ofMillis(1))
-                .onCancellation().invoke(() -> cancelled.set(true))
+        MultiOnCancellationSpy<Long> multi = Spy
+                .onCancellation(Multi.createFrom().ticks().every(Duration.ofMillis(1)));
+        AssertSubscriber<Long> subscriber = multi
                 .onItem().transform(l -> {
                     if (count.getAndIncrement() % 2 == 0) {
                         return l;
@@ -202,9 +203,9 @@ public class MultiDistinctTest {
                 .skip().repetitions()
                 .subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE));
 
-        await().until(() -> subscriber.getItems().size() >= 10);
-        subscriber.cancel();
-        assertThat(cancelled).isTrue();
+        multi.assertNotCancelled();
+        subscriber.awaitNextItems(10).cancel();
+        multi.assertCancelled();
     }
 
     @Test
@@ -304,8 +305,9 @@ public class MultiDistinctTest {
         BadlyComparableStuffOnEquals item2 = new BadlyComparableStuffOnEquals();
         emitter.get().emit(item1).emit(item2).complete();
         subscriber
-                .await()
-                .assertFailedWith(TestException.class, "boom");
+                .awaitFailure(t -> assertThat(t)
+                        .isInstanceOf(TestException.class)
+                        .hasMessageContaining("boom"));
     }
 
     @Test
@@ -323,8 +325,9 @@ public class MultiDistinctTest {
 
         emitter.get().emit(1).emit(2).complete();
         subscriber
-                .await()
-                .assertFailedWith(TestException.class, "boom");
+                .awaitFailure(t -> assertThat(t)
+                        .isInstanceOf(TestException.class)
+                        .hasMessageContaining("boom"));
     }
 
     @Test

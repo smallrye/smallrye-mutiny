@@ -121,7 +121,13 @@ public class UniOnFailure<T> {
             //noinspection unchecked
             return (Uni<T>) uni
                     .onItem().failWith(ignored -> failure)
-                    .onFailure().apply(subFailure -> new CompositeException(failure, subFailure));
+                    .onFailure().transform(subFailure -> {
+                        if (subFailure != failure) {
+                            return new CompositeException(failure, subFailure);
+                        } else {
+                            return subFailure;
+                        }
+                    });
         });
     }
 

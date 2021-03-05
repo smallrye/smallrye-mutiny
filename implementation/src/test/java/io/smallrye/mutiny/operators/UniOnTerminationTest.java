@@ -36,7 +36,8 @@ public class UniOnTerminationTest {
                 .onTermination().invoke((r, f, c) -> terminate.set(r))
                 .subscribe().withSubscriber(UniAssertSubscriber.create());
         subscriber
-                .await()
+                .awaitSubscription()
+                .awaitItem()
                 .assertItem(1);
         assertThat(terminate).hasValue(1);
     }
@@ -58,7 +59,7 @@ public class UniOnTerminationTest {
                 .emitOn(Infrastructure.getDefaultExecutor())
                 .onTermination().invoke(() -> terminate.set(true))
                 .subscribe().withSubscriber(UniAssertSubscriber.create());
-        subscriber.await().assertItem(1);
+        subscriber.awaitItem().assertItem(1);
         assertThat(terminate).isTrue();
     }
 
@@ -79,7 +80,7 @@ public class UniOnTerminationTest {
                 .emitOn(Infrastructure.getDefaultExecutor())
                 .onTermination().invoke((r, f, c) -> terminate.set(f))
                 .subscribe().withSubscriber(UniAssertSubscriber.create());
-        subscriber.await().assertFailedWith(TestException.class, "boom");
+        subscriber.awaitFailure().assertFailedWith(TestException.class, "boom");
         assertThat(terminate.get()).hasMessageContaining("boom").isInstanceOf(TestException.class);
     }
 
@@ -100,7 +101,7 @@ public class UniOnTerminationTest {
                 .emitOn(Infrastructure.getDefaultExecutor())
                 .onTermination().invoke(() -> terminate.set(true))
                 .subscribe().withSubscriber(UniAssertSubscriber.create());
-        subscriber.await().assertFailedWith(TestException.class, "boom");
+        subscriber.awaitFailure().assertFailedWith(TestException.class, "boom");
         assertThat(terminate).isTrue();
     }
 

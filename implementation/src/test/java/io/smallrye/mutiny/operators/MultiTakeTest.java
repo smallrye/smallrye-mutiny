@@ -18,6 +18,7 @@ import io.smallrye.mutiny.helpers.test.AssertSubscriber;
 import io.smallrye.mutiny.subscription.MultiEmitter;
 import io.smallrye.mutiny.subscription.MultiSubscriber;
 
+@SuppressWarnings("deprecation")
 public class MultiTakeTest {
 
     @Test
@@ -207,8 +208,7 @@ public class MultiTakeTest {
         Multi.createFrom().ticks().every(Duration.ofMillis(2))
                 .transform().byTakingFirstItems(5)
                 .subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE))
-                .await()
-                .assertCompleted()
+                .awaitCompletion()
                 .assertItems(0L, 1L, 2L, 3L, 4L);
     }
 
@@ -217,8 +217,7 @@ public class MultiTakeTest {
         AssertSubscriber<Integer> subscriber = Multi.createFrom().range(1, 100).transform()
                 .byTakingItemsFor(Duration.ofMillis(1000))
                 .subscribe().withSubscriber(AssertSubscriber.create(10))
-                .await()
-                .assertCompleted();
+                .awaitCompletion();
 
         assertThat(subscriber.getItems()).hasSize(10);
     }
@@ -232,7 +231,7 @@ public class MultiTakeTest {
         AssertSubscriber<Integer> subscriber = multi
                 .transform().byTakingItemsFor(Duration.ofMillis(1000))
                 .subscribe().withSubscriber(AssertSubscriber.create(100))
-                .await()
+                .awaitFailure()
                 .assertFailedWith(TestException.class, "boom");
 
         assertThat(subscriber.getItems()).hasSize(4);
@@ -282,8 +281,7 @@ public class MultiTakeTest {
         AssertSubscriber<Integer> subscriber = rogue
                 .transform().byTakingItemsFor(Duration.ofMillis(1000))
                 .subscribe().withSubscriber(AssertSubscriber.create(100))
-                .await()
-                .assertCompleted();
+                .awaitCompletion();
 
         assertThat(subscriber.getItems()).hasSize(2);
     }
@@ -303,7 +301,7 @@ public class MultiTakeTest {
         AssertSubscriber<Integer> subscriber = rogue
                 .transform().byTakingItemsFor(Duration.ofMillis(1000))
                 .subscribe().withSubscriber(AssertSubscriber.create(100))
-                .await()
+                .awaitFailure()
                 .assertFailedWith(IOException.class, "boom");
 
         assertThat(subscriber.getItems()).hasSize(2);

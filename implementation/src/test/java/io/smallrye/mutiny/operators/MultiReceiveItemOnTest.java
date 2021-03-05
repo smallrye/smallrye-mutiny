@@ -62,8 +62,7 @@ public class MultiReceiveItemOnTest {
                 .onItem().invoke(i -> itemThread.add(Thread.currentThread().getName()))
                 .onCompletion().invoke(() -> completionThread.add(Thread.currentThread().getName()))
                 .subscribe().withSubscriber(AssertSubscriber.create(4))
-                .await()
-                .assertCompleted();
+                .awaitCompletion();
 
         await().until(() -> subscriber.getItems().size() == 4);
         assertThat(itemThread).allSatisfy(s -> assertThat(s).startsWith("test-"));
@@ -79,7 +78,7 @@ public class MultiReceiveItemOnTest {
                 .onItem().invoke(i -> itemThread.add(Thread.currentThread().getName()))
                 .onFailure().invoke(f -> failureThread.add(Thread.currentThread().getName()))
                 .subscribe().withSubscriber(AssertSubscriber.create(4))
-                .await()
+                .awaitFailure()
                 .assertFailedWith(IOException.class, "boom");
 
         assertThat(itemThread).isEmpty();
@@ -91,7 +90,7 @@ public class MultiReceiveItemOnTest {
         Multi.createFrom().items(1, 2, 3, 4)
                 .emitOn(Runnable::run)
                 .subscribe().withSubscriber(AssertSubscriber.create(4))
-                .await()
+                .awaitCompletion()
                 .assertItems(1, 2, 3, 4);
     }
 
@@ -100,8 +99,7 @@ public class MultiReceiveItemOnTest {
         AssertSubscriber<Integer> subscriber = Multi.createFrom().range(0, 100_000)
                 .emitOn(executor)
                 .subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE))
-                .await()
-                .assertCompleted();
+                .awaitCompletion();
 
         assertThat(subscriber.getItems()).hasSize(100_000);
         int current = -1;
@@ -116,7 +114,7 @@ public class MultiReceiveItemOnTest {
         Multi.createFrom().items(1, 2, 3, 4)
                 .runSubscriptionOn(executor)
                 .subscribe().withSubscriber(AssertSubscriber.create(4))
-                .await()
+                .awaitCompletion()
                 .assertItems(1, 2, 3, 4);
     }
 

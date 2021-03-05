@@ -1,5 +1,6 @@
 package io.smallrye.mutiny.operators;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.mockito.Mockito.mock;
 
@@ -37,12 +38,12 @@ public class MultiEmitOnTest {
                 .emitOn(executor)
                 .subscribe().withSubscriber(AssertSubscriber.create());
 
-        subscriber.request(2);
-        await().until(() -> subscriber.getItems().size() == 2);
-        subscriber.assertItems(1, 2);
-        subscriber.request(20);
-        await().until(() -> subscriber.getItems().size() == 10);
-        subscriber.assertItems(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
+        subscriber.request(2)
+                .awaitNextItems(2)
+                .assertItems(1, 2)
+                .request(20)
+                .awaitNextItems(8)
+                .assertItems(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
     }
 
     @Test
@@ -52,8 +53,9 @@ public class MultiEmitOnTest {
                 .subscribe().withSubscriber(AssertSubscriber.create());
 
         subscriber.request(0);
-        subscriber.await()
-                .assertFailedWith(IllegalArgumentException.class, "request");
+        subscriber.awaitFailure(t -> assertThat(t)
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("request"));
     }
 
     @Test

@@ -136,15 +136,13 @@ public class UniToMultiTest {
         Multi<Integer> multi = Uni.createFrom()
                 .completionStage(() -> CompletableFuture.supplyAsync(count::incrementAndGet)).toMulti();
         multi.subscribe().withSubscriber(AssertSubscriber.create(1))
-                .await()
-                .assertItems(1)
-                .assertCompleted();
+                .awaitCompletion()
+                .assertItems(1);
         multi.subscribe().withSubscriber(AssertSubscriber.create(0)).assertNotTerminated()
                 .assertHasNotReceivedAnyItem()
                 .request(1)
-                .await()
-                .assertItems(2)
-                .assertCompleted();
+                .awaitCompletion()
+                .assertItems(2);
     }
 
     @Test
@@ -153,15 +151,13 @@ public class UniToMultiTest {
         Multi<Integer> multi = Multi.createFrom().uni(Uni.createFrom()
                 .completionStage(() -> CompletableFuture.supplyAsync(count::incrementAndGet)));
         multi.subscribe().withSubscriber(AssertSubscriber.create(1))
-                .await()
-                .assertItems(1)
-                .assertCompleted();
+                .awaitCompletion()
+                .assertItems(1);
         multi.subscribe().withSubscriber(AssertSubscriber.create(0)).assertNotTerminated()
                 .assertHasNotReceivedAnyItem()
                 .request(1)
-                .await()
-                .assertItems(2)
-                .assertCompleted();
+                .awaitCompletion()
+                .assertItems(2);
     }
 
     @Test
@@ -169,15 +165,13 @@ public class UniToMultiTest {
         Multi<Integer> multi = Uni.createFrom()
                 .completionStage(() -> CompletableFuture.<Integer> supplyAsync(() -> null)).toMulti();
         multi.subscribe().withSubscriber(AssertSubscriber.create(1))
-                .await()
-                .assertHasNotReceivedAnyItem()
-                .assertCompleted();
+                .awaitCompletion()
+                .assertHasNotReceivedAnyItem();
         multi.subscribe().withSubscriber(AssertSubscriber.create(0))
                 .assertNotTerminated()
                 .request(1)
-                .await()
-                .assertHasNotReceivedAnyItem()
-                .assertCompleted();
+                .awaitCompletion()
+                .assertHasNotReceivedAnyItem();
     }
 
     @Test
@@ -185,14 +179,12 @@ public class UniToMultiTest {
         Multi<Integer> multi = Multi.createFrom()
                 .uni(Uni.createFrom().completionStage(() -> CompletableFuture.supplyAsync(() -> null)));
         multi.subscribe().withSubscriber(AssertSubscriber.create(1))
-                .await()
-                .assertHasNotReceivedAnyItem()
-                .assertCompleted();
+                .awaitCompletion()
+                .assertHasNotReceivedAnyItem();
         multi.subscribe().withSubscriber(AssertSubscriber.create(0))
                 .assertNotTerminated()
                 .request(1)
-                .await()
-                .assertHasNotReceivedAnyItem()
-                .assertCompleted();
+                .awaitCompletion()
+                .assertHasNotReceivedAnyItem();
     }
 }
