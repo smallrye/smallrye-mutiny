@@ -228,6 +228,29 @@ public class AssertSubscriber<T> implements Subscriber<T> {
     }
 
     /**
+     * @return get the last received item, potentially {@code null} is no items have been received.
+     */
+    public T getLastItem() {
+        if (items.isEmpty()) {
+            return null;
+        } else {
+            return items.get(items.size() - 1);
+        }
+    }
+
+    /**
+     * Asserts that the last received item is equal to {@code expected}.
+     * The assertion fails if no items have been received.
+     *
+     * @param expected the expected item, must not be {@code null}
+     * @return this {@link AssertSubscriber}
+     */
+    public AssertSubscriber<T> assertLastItem(T expected) {
+        shouldHaveReceived(getLastItem(), expected);
+        return this;
+    }
+
+    /**
      * Await for the multi to be terminated.
      * It waits at most {@link #DEFAULT_TIMEOUT}.
      *
@@ -238,6 +261,274 @@ public class AssertSubscriber<T> implements Subscriber<T> {
     public AssertSubscriber<T> await() {
         return await(DEFAULT_TIMEOUT);
     }
+
+    /**
+     * Awaits for the next item.
+     * If no item have been received before the default timeout, an {@link AssertionError} is thrown.
+     *
+     * @return this {@link AssertSubscriber}
+     */
+    public AssertSubscriber<T> awaitNextItem() {
+        return awaitNextItems(1);
+    }
+
+    /**
+     * Awaits for the next item.
+     * If no item have been received before the given timeout, an {@link AssertionError} is thrown.
+     *
+     * @param duration the timeout, must not be {@code null}
+     * @return this {@link AssertSubscriber}
+     */
+    public AssertSubscriber<T> awaitNextItem(Duration duration) {
+        return awaitNextItems(1, duration);
+    }
+
+    /**
+     * Awaits for the next {@code number} items.
+     * If not enough items have been received before the default timeout, an {@link AssertionError} is thrown.
+     *
+     * @param number the number of item to expect, must not be 0 or negative.
+     * @return this {@link AssertSubscriber}
+     */
+    public AssertSubscriber<T> awaitNextItems(int number) {
+        return awaitNextItems(number, DEFAULT_TIMEOUT);
+    }
+
+    /**
+     * Awaits for the next {@code number} items.
+     * If not enough items have been received before the given timeout, an {@link AssertionError} is thrown.
+     *
+     * @param number the number of item to expect, must not be 0 or negative.
+     * @param duration the timeout, must not be {@code null}
+     * @return this {@link AssertSubscriber}
+     */
+    public AssertSubscriber<T> awaitNextItems(int number, Duration duration) {
+        if (hasCompleted() || getFailure() != null) {
+            if (hasCompleted()) {
+                throw new AssertionError("Expecting a next items, but a completion event has already being received");
+            } else {
+                throw new AssertionError(
+                        "Expecting a next items, but a failure event has already being received: " + getFailure());
+            }
+        }
+        try {
+            awaitNextItemEvents(number, duration);
+        } catch (ItemTimeoutException e) {
+            if (hasCompleted()) {
+                throw new AssertionError("Expected " + number + " item event(s) in the last " + duration.toMillis()
+                        + " ms, but only " + e.received
+                        + " item event(s) have been received, however the completion event has been received.");
+            }
+            if (getFailure() != null) {
+                throw new AssertionError("Expected an item event in the last " + duration.toMillis() + " ms, but only "
+                        + e.received + " item event(s) have been received, however a failure event has been received: "
+                        + getFailure());
+            }
+
+            throw new AssertionError(
+                    "Expected an item event in the last " + duration.toMillis() + " ms, but only " + e.received
+                            + " item event(s) have been received.");
+        }
+
+        return this;
+    }
+
+    /**
+     * Awaits for a completion event.
+     * It waits at most {@link #DEFAULT_TIMEOUT}.
+     * <p>
+     * If the timeout expired, or if a failure event is received instead of the expected completion, the check fails.
+     *
+     * @return this {@link AssertSubscriber}
+     */
+    public AssertSubscriber<T> awaitCompletion() {
+        return awaitCompletion(DEFAULT_TIMEOUT);
+    }
+
+    /**
+     * Awaits for a completion event at most {@code duration}.
+     * <p>
+     * If the timeout expired, or if a failure event is received instead of the expected completion, the check fails.
+     *
+     * @param duration the duration, must not be {@code null}
+     * @return this {@link AssertSubscriber}
+     */
+    public AssertSubscriber<T> awaitCompletion(Duration duration) {
+        try {
+            awaitEvent(terminal, duration);
+        } catch (TimeoutException e) {
+            throw new AssertionError(
+                    "No completion (or failure) event received in the last " + duration.toMillis() + " ms");
+        }
+
+        if (completed.get()) {
+            return this;
+        }
+
+        final Throwable throwable = failure.get();
+        if (throwable != null) {
+            throw new AssertionError("Expected a completion event but got a failure: " + throwable);
+        }
+
+        if (isCancelled()) {
+            throw new AssertionError(
+                    "Expected a completion event, but got a cancellation event instead");
+        }
+
+        // We have been interrupted.
+        return this;
+
+    }
+
+    /**
+     * Awaits for a failure event.
+     * It waits at most {@link #DEFAULT_TIMEOUT}.
+     * <p>
+     * If the timeout expired, or if a completion event is received instead of the expected failure, the check fails.
+     *
+     * @return this {@link AssertSubscriber}
+     */
+    public AssertSubscriber<T> awaitFailure() {
+        return awaitFailure(t -> {
+        });
+    }
+
+    /**
+     * Awaits for a failure event and validate it.
+     * It waits at most {@link #DEFAULT_TIMEOUT}.
+     * <p>
+     * If the timeout expired, or if a completion event is received instead of the expected failure, the check fails.
+     * The received failure is validated using the {@code assertion} consumer. The code of the consumer is expected to
+     * throw an {@link AssertionError} to indicate that the failure didn't pass the validation. The consumer is not
+     * called if no failures are received.
+     *
+     * @param assertion a check validating the received failure (if any). Must not be {@code null}
+     * @return this {@link AssertSubscriber}
+     */
+    public AssertSubscriber<T> awaitFailure(Consumer<Throwable> assertion) {
+        return awaitFailure(assertion, DEFAULT_TIMEOUT);
+    }
+
+    /**
+     * Awaits for a failure event.
+     * It waits at most {@code duration}.
+     * <p>
+     * If the timeout expired, or if a completion event is received instead of the expected failure, the check fails.
+     *
+     * @return this {@link AssertSubscriber}
+     */
+    public AssertSubscriber<T> awaitFailure(Duration duration) {
+        return awaitFailure(t -> {
+        }, duration);
+    }
+
+    /**
+     * Awaits for a failure event and validate it.
+     * It waits at most {@code duration}.
+     * <p>
+     * If the timeout expired, or if a completion event is received instead of the expected failure, the check fails.
+     * The received failure is validated using the {@code assertion} consumer. The code of the consumer is expected to
+     * throw an {@link AssertionError} to indicate that the failure didn't pass the validation. The consumer is not
+     * called if no failures are received.
+     *
+     * @param assertion a check validating the received failure (if any). Must not be {@code null}
+     * @return this {@link AssertSubscriber}
+     */
+    public AssertSubscriber<T> awaitFailure(Consumer<Throwable> assertion, Duration duration) {
+        try {
+            awaitEvent(terminal, duration);
+        } catch (TimeoutException e) {
+            throw new AssertionError(
+                    "No completion (or failure) event received in the last " + duration.toMillis() + " ms");
+        }
+
+        if (completed.get()) {
+            throw new AssertionError("Expected a failure event but got a completion event.");
+        }
+
+        final Throwable throwable = failure.get();
+        if (throwable == null) {
+            throw new AssertionError("Expected a failure event, but didn't get a terminal event");
+        }
+
+        try {
+            assertion.accept(throwable);
+            return this;
+        } catch (AssertionError e) {
+            throw new AssertionError("Received a failure event, but that failure did not pass the validation: " + e, e);
+        }
+
+    }
+
+    /**
+     * Awaits for a subscription event (the subscriber receives a {@link Subscription} from the upstream.
+     * It waits at most {@link #DEFAULT_TIMEOUT}.
+     * <p>
+     * If the timeout expired, the check fails.
+     *
+     * @return this {@link AssertSubscriber}
+     */
+    public AssertSubscriber<T> awaitSubscription() {
+        return awaitSubscription(DEFAULT_TIMEOUT);
+    }
+
+    /**
+     * Awaits for a subscription event (the subscriber receives a {@link Subscription} from the upstream.
+     * It waits at most {@code duration}.
+     * <p>
+     * If the timeout expired, the check fails.
+     *
+     * @param duration the duration, must not be {@code null}
+     * @return this {@link AssertSubscriber}
+     */
+    public AssertSubscriber<T> awaitSubscription(Duration duration) {
+        try {
+            awaitEvent(subscribed, duration);
+        } catch (TimeoutException e) {
+            throw new AssertionError(
+                    "Expecting a subscription event in the last " + duration.toMillis() + " ms, but did not get it");
+        }
+        return this;
+    }
+
+    private void awaitEvent(CountDownLatch latch, Duration duration) throws TimeoutException {
+        // Are we already done?
+        if (latch.getCount() == 0) {
+            return;
+        }
+        try {
+            if (!latch.await(duration.toMillis(), TimeUnit.MILLISECONDS)) {
+                throw new TimeoutException();
+            }
+        } catch (InterruptedException ex) {
+            Thread.currentThread().interrupt();
+        }
+    }
+
+    private final List<CountDownLatch> eventListeners = new CopyOnWriteArrayList<>();
+
+    private void awaitNextItemEvents(int number, Duration duration) throws ItemTimeoutException {
+        CountDownLatch latch = new CountDownLatch(number);
+        eventListeners.add(latch);
+        try {
+            if (!latch.await(duration.toMillis(), TimeUnit.MILLISECONDS)) {
+                throw new ItemTimeoutException(number - (int) latch.getCount(), number);
+            }
+        } catch (InterruptedException ex) {
+            Thread.currentThread().interrupt();
+        } finally {
+            eventListeners.remove(latch);
+        }
+    }
+
+    static class ItemTimeoutException extends TimeoutException {
+        public final int received;
+        public final int expected;
+
+        public ItemTimeoutException(int received, int expected) {
+            this.received = received;
+            this.expected = expected;
+        }
     }
 
     /**
@@ -245,7 +536,9 @@ public class AssertSubscriber<T> implements Subscriber<T> {
      *
      * @param duration the timeout duration
      * @return this {@link AssertSubscriber}
+     * @deprecated Use {@link #awaitFailure()} or {@link #awaitCompletion()} instead
      */
+    @Deprecated
     public AssertSubscriber<T> await(Duration duration) {
         if (terminal.getCount() == 0) {
             // We are done already.
@@ -288,6 +581,16 @@ public class AssertSubscriber<T> implements Subscriber<T> {
         return this;
     }
 
+    private void fire() {
+        for (CountDownLatch latch : eventListeners) {
+            try {
+                latch.countDown();
+            } catch (Exception e) {
+                // Ignored cancellation and other exceptions.
+            }
+        }
+    }
+
     @Override
     public void onSubscribe(Subscription s) {
         numberOfSubscription++;
@@ -308,6 +611,7 @@ public class AssertSubscriber<T> implements Subscriber<T> {
     @Override
     public synchronized void onNext(T t) {
         items.add(t);
+        fire();
     }
 
     @Override
