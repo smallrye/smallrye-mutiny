@@ -37,9 +37,17 @@ public class AssertionHelper {
                     failure, expectedFailureType, getStackTrace(failure));
         }
 
-        if (expectedMessage != null && !failure.getMessage().contains(expectedMessage)) {
-            fail("%nReceived a failure event, but expecting:%n  <%s>%nto contain:%n  <%s>%nbut was:%n  <%s>",
-                    failure.getMessage(), expectedMessage, getStackTrace(failure));
+        if (expectedMessage != null) {
+            final String msg = failure.getMessage();
+            if (msg == null) {
+                fail("%nReceived a failure event, but expecting:%n  <%s>%nto contain:%n  <%s>%nbut was:%n  <%s>",
+                        msg, expectedMessage, getStackTrace(failure));
+            } else {
+                if (!msg.contains(expectedMessage)) {
+                    fail("%nReceived a failure event, but expecting:%n  <%s>%nto contain:%n  <%s>%nbut was:%n  <%s>",
+                            msg, expectedMessage, getStackTrace(failure));
+                }
+            }
         }
     }
 
