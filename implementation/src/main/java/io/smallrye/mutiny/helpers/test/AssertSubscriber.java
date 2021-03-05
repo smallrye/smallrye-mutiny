@@ -7,25 +7,37 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
 /**
  * A {@link io.smallrye.mutiny.Multi} {@link Subscriber} for testing purposes that comes with useful assertion helpers.
- * 
+ *
  * @param <T> the type of the items
  */
 @SuppressWarnings({ "ReactiveStreamsSubscriberImplementation" })
 public class AssertSubscriber<T> implements Subscriber<T> {
 
     /**
-     * Latch waiting for the completion of failure event.
+     * The default timeout used by {@code await} method.
      */
-    private final CountDownLatch latch = new CountDownLatch(1);
+    public static Duration DEFAULT_TIMEOUT = Duration.ofSeconds(10);
+
+    /**
+     * Latch waiting for the completion or failure event.
+     */
+    private final CountDownLatch terminal = new CountDownLatch(1);
+
+    /**
+     * Latch waiting for the subscription event.
+     */
+    private final CountDownLatch subscribed = new CountDownLatch(1);
 
     /**
      * The subscription received from upstream.
@@ -84,7 +96,6 @@ public class AssertSubscriber<T> implements Subscriber<T> {
 
     /**
      * Creates a new {@link AssertSubscriber} with 0 requested items and no upfront cancellation.
-     *
      */
     public AssertSubscriber() {
         this(0, false);
@@ -101,7 +112,7 @@ public class AssertSubscriber<T> implements Subscriber<T> {
 
     /**
      * Creates a new {@link AssertSubscriber} with 0 requested items and no upfront cancellation.
-     * 
+     *
      * @param <T> the items type
      * @return a new subscriber
      */
@@ -144,8 +155,19 @@ public class AssertSubscriber<T> implements Subscriber<T> {
     }
 
     /**
+     * Assert that the multi has failed.
+     *
+     * @param expectedTypeOfFailure the expected failure type
+     * @return this {@link AssertSubscriber}
+     */
+    public AssertSubscriber<T> assertFailedWith(Class<? extends Throwable> expectedTypeOfFailure) {
+        shouldHaveFailed(hasCompleted(), getFailure(), expectedTypeOfFailure, null);
+        return this;
+    }
+
+    /**
      * Assert that no item has been received yet.
-     * 
+     *
      * @return this {@link AssertSubscriber}
      */
     public AssertSubscriber<T> assertHasNotReceivedAnyItem() {
@@ -155,7 +177,7 @@ public class AssertSubscriber<T> implements Subscriber<T> {
 
     /**
      * Assert that the multi has been subscribed.
-     * 
+     *
      * @return this {@link AssertSubscriber}
      */
     public AssertSubscriber<T> assertSubscribed() {
@@ -165,7 +187,7 @@ public class AssertSubscriber<T> implements Subscriber<T> {
 
     /**
      * Assert that the multi has not been subscribed.
-     * 
+     *
      * @return this {@link AssertSubscriber}
      */
     public AssertSubscriber<T> assertNotSubscribed() {
@@ -174,7 +196,7 @@ public class AssertSubscriber<T> implements Subscriber<T> {
     }
 
     /**
-     * Assert that the multi has been terminated.
+     * Assert that the multi has been terminated, i.e. received a failure or a completion event.
      *
      * @return this {@link AssertSubscriber}
      */
@@ -184,7 +206,7 @@ public class AssertSubscriber<T> implements Subscriber<T> {
     }
 
     /**
-     * Assert that the multi has not been terminated.
+     * Assert that the multi has not been terminated, i.e. did not received a failure or a completion event.
      *
      * @return this {@link AssertSubscriber}
      */
@@ -207,12 +229,15 @@ public class AssertSubscriber<T> implements Subscriber<T> {
 
     /**
      * Await for the multi to be terminated.
-     * Wait at most 10 seconds before failing.
-     * 
+     * It waits at most {@link #DEFAULT_TIMEOUT}.
+     *
      * @return this {@link AssertSubscriber}
+     * @deprecated Use {@link #awaitCompletion()} or {@link #awaitFailure()} instead
      */
+    @Deprecated
     public AssertSubscriber<T> await() {
-        return await(Duration.ofSeconds(10));
+        return await(DEFAULT_TIMEOUT);
+    }
     }
 
     /**
@@ -222,13 +247,13 @@ public class AssertSubscriber<T> implements Subscriber<T> {
      * @return this {@link AssertSubscriber}
      */
     public AssertSubscriber<T> await(Duration duration) {
-        if (latch.getCount() == 0) {
+        if (terminal.getCount() == 0) {
             // We are done already.
             return this;
         }
 
         try {
-            if (!latch.await(duration.toMillis(), TimeUnit.MILLISECONDS)) {
+            if (!terminal.await(duration.toMillis(), TimeUnit.MILLISECONDS)) {
                 throw new AssertionError("Expected a terminal event before the timeout.");
             }
         } catch (InterruptedException ex) {
@@ -239,7 +264,7 @@ public class AssertSubscriber<T> implements Subscriber<T> {
 
     /**
      * Cancel the subscription.
-     * 
+     *
      * @return this {@link AssertSubscriber}
      */
     public AssertSubscriber<T> cancel() {
@@ -251,7 +276,7 @@ public class AssertSubscriber<T> implements Subscriber<T> {
 
     /**
      * Request items.
-     * 
+     *
      * @param req the number of items to request.
      * @return this {@link AssertSubscriber}
      */
@@ -267,12 +292,12 @@ public class AssertSubscriber<T> implements Subscriber<T> {
     public void onSubscribe(Subscription s) {
         numberOfSubscription++;
         subscription.set(s);
+        subscribed.countDown();
         if (upfrontCancellation) {
             s.cancel();
             cancelled = true;
             // Do not request is cancelled.
             return;
-
         }
         if (requested.get() > 0) {
             s.request(requested.get());
@@ -288,13 +313,13 @@ public class AssertSubscriber<T> implements Subscriber<T> {
     @Override
     public void onError(Throwable t) {
         failure.set(t);
-        latch.countDown();
+        terminal.countDown();
     }
 
     @Override
     public void onComplete() {
         completed.set(true);
-        latch.countDown();
+        terminal.countDown();
     }
 
     /**
