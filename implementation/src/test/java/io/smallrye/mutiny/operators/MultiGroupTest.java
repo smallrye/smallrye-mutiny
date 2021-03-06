@@ -16,6 +16,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
@@ -869,7 +870,7 @@ public class MultiGroupTest {
         assertThat(subscriber.assertNotTerminated().isCancelled()).isTrue();
     }
 
-    @Test
+    @RepeatedTest(10)
     public void testGroupByWithUpstreamFailure() {
         AtomicReference<MultiEmitter<? super Long>> emitter = new AtomicReference<>();
 
@@ -882,7 +883,7 @@ public class MultiGroupTest {
                 .subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE));
 
         subscriber.assertSubscribed();
-        subscriber.awaitNextItems(2);
+        await().until(() -> subscriber.getItems().size() == 2);
         AssertSubscriber<Long> s1 = subscriber.getItems().get(0).subscribe()
                 .withSubscriber(AssertSubscriber.create(Long.MAX_VALUE));
         s1.assertSubscribed();
