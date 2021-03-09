@@ -3,7 +3,7 @@ name: Continuous Integration Build
 on:
   push:
     branches:
-      - master
+      - main
     paths-ignore:
       - '.build/**'
       - '.github/workflows/deployment.yml'

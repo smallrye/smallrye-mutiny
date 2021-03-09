@@ -76,8 +76,8 @@ This project is an open source project, please act responsibly, be nice, polite 
 First you need an environment variable named `GITHUB_TOKEN` with a token allowing access to the GitHub API and having push permission.
 Also, you need to check that:
 
-* there are no build in progress of the `ref` branch (`master`)
-* the last build of the `ref` branch (`master`) has been successful
+* there are no build in progress of the `ref` branch (`main`)
+* the last build of the `ref` branch (`main`) has been successful
 
 Multiple steps compose the release process.
 
@@ -100,7 +100,7 @@ Parameters are the following:
 The last version is the last pushed tag.
 - `micro` - when the `release-version` is not set, indicates that the version is a _micro_ (default: `false`).
 - `skip-tests` - if `true`, skips the tests during the project build (default: `false`)
-- `branch` - the branch from which the release must be cut (default: `master`)
+- `branch` - the branch from which the release must be cut (default: `main`)
 
 Check https://github.com/smallrye/smallrye-mutiny/actions to follow the progress.
 
@@ -137,7 +137,7 @@ Then, edit the `.build/mock-events/release-workflow-event.json` to adapt the exe
 {
   "inputs": {
     "skip-tests": true,
-    "branch": "master",
+    "branch": "main",
     "release-version": "0.12.5"
   }
 }

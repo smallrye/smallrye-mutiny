@@ -61,15 +61,15 @@ jobs:
             --artifacts=io.smallrye.reactive:mutiny,io.smallrye.reactive:mutiny-context-propagation,io.smallrye.reactive:mutiny-test-utils,io.smallrye.reactive:mutiny-kotlin,io.smallrye.reactive:mutiny-reactor,io.smallrye.reactive:mutiny-rxjava \
             --expected-version="${REF}"
 
-          git clone -b master "https://${GITHUB_ACTOR}:${GITHUB_TOKEN}@github.com/smallrye/smallrye-mutiny.git" new-master
-          cd new-master
+          git clone -b main "https://${GITHUB_ACTOR}:${GITHUB_TOKEN}@github.com/smallrye/smallrye-mutiny.git" new-main
+          cd new-main
           echo "Clearing difference justifications"
           jbang .build/CompatibilityUtils.java clear
           if [[ $(git diff --stat) != '' ]]; then
             git add -A
             git status
             git commit -m "[POST-RELEASE] - Clearing breaking change justifications"
-            git push origin master
+            git push origin main
           else
             echo "No justifications cleared"
           fi
