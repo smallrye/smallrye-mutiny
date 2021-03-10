@@ -3,17 +3,20 @@ package io.smallrye.mutiny.operators.multi;
 import java.util.function.Predicate;
 
 import io.smallrye.mutiny.Multi;
+import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.subscription.MultiSubscriber;
 
 public class MultiRepeatWhilstOp<T> extends AbstractMultiOperator<T, T> implements Multi<T> {
     private final Predicate<T> predicate;
     private final long times;
+    private final Uni<?> delay;
 
-    public MultiRepeatWhilstOp(Multi<T> upstream, Predicate<T> predicate) {
+    public MultiRepeatWhilstOp(Multi<T> upstream, Predicate<T> predicate, Uni<?> delay) {
         super(upstream);
         this.predicate = predicate;
         this.times = Long.MAX_VALUE;
+        this.delay = delay;
     }
 
     @Override
@@ -21,7 +24,7 @@ public class MultiRepeatWhilstOp<T> extends AbstractMultiOperator<T, T> implemen
         ParameterValidation.nonNullNpe(downstream, "downstream");
         RepeatWhilstProcessor<T> processor = new RepeatWhilstProcessor<>(upstream, downstream,
                 times != Long.MAX_VALUE ? times - 1 : Long.MAX_VALUE,
-                predicate);
+                predicate, delay);
         downstream.onSubscribe(processor);
         upstream.subscribe(processor);
     }
@@ -31,8 +34,8 @@ public class MultiRepeatWhilstOp<T> extends AbstractMultiOperator<T, T> implemen
         private boolean stop = false;
 
         public RepeatWhilstProcessor(Multi<? extends T> upstream, MultiSubscriber<? super T> downstream,
-                long times, Predicate<T> predicate) {
-            super(upstream, downstream, times, predicate);
+                long times, Predicate<T> predicate, Uni<?> delay) {
+            super(upstream, downstream, times, predicate, delay);
         }
 
         @Override
