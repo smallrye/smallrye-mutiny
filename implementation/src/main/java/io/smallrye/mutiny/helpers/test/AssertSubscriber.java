@@ -226,7 +226,7 @@ public class AssertSubscriber<T> implements Subscriber<T> {
     }
 
     /**
-     * @return get the last received item, potentially {@code null} is no items have been received.
+     * @return get the last received item, potentially {@code null} if no items have been received.
      */
     public T getLastItem() {
         if (items.isEmpty()) {
