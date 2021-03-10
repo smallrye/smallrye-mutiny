@@ -249,8 +249,7 @@ public class MultiSelectFirstOrLast {
         Multi.createFrom().ticks().every(Duration.ofMillis(2))
                 .select().first(5)
                 .subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE))
-                .await()
-                .assertCompleted()
+                .awaitCompletion()
                 .assertItems(0L, 1L, 2L, 3L, 4L);
     }
 
@@ -265,8 +264,7 @@ public class MultiSelectFirstOrLast {
         AssertSubscriber<Integer> subscriber = Multi.createFrom().range(1, 100)
                 .select().first(Duration.ofMillis(1000))
                 .subscribe().withSubscriber(AssertSubscriber.create(10))
-                .await()
-                .assertCompleted();
+                .awaitCompletion();
 
         assertThat(subscriber.getItems()).hasSize(10);
     }
@@ -280,7 +278,7 @@ public class MultiSelectFirstOrLast {
         AssertSubscriber<Integer> subscriber = multi
                 .select().first(Duration.ofMillis(1000))
                 .subscribe().withSubscriber(AssertSubscriber.create(100))
-                .await()
+                .awaitFailure()
                 .assertFailedWith(TestException.class, "boom");
 
         assertThat(subscriber.getItems()).hasSize(4);
@@ -330,8 +328,7 @@ public class MultiSelectFirstOrLast {
         AssertSubscriber<Integer> subscriber = rogue
                 .select().first(Duration.ofMillis(1000))
                 .subscribe().withSubscriber(AssertSubscriber.create(100))
-                .await()
-                .assertCompleted();
+                .awaitCompletion();
 
         assertThat(subscriber.getItems()).hasSize(2);
     }
@@ -351,7 +348,7 @@ public class MultiSelectFirstOrLast {
         AssertSubscriber<Integer> subscriber = rogue
                 .select().first(Duration.ofMillis(1000))
                 .subscribe().withSubscriber(AssertSubscriber.create(100))
-                .await()
+                .awaitFailure()
                 .assertFailedWith(IOException.class, "boom");
 
         assertThat(subscriber.getItems()).hasSize(2);

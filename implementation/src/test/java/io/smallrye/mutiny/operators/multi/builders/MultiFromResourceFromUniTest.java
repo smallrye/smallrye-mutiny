@@ -396,9 +396,8 @@ public class MultiFromResourceFromUniTest {
                         FakeTransactionalResource::cancel);
 
         multi.subscribe().withSubscriber(AssertSubscriber.create(20))
-                .await()
-                .assertItems("in transaction")
-                .assertCompleted();
+                .awaitCompletion()
+                .assertItems("in transaction");
 
         assertThat(FakeTransactionalResource.last.subscribed).isTrue();
         assertThat(FakeTransactionalResource.last.onCompleteSubscribed).isTrue();
@@ -474,9 +473,8 @@ public class MultiFromResourceFromUniTest {
                 .select().first(3);
 
         multi.subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE))
-                .await()
-                .assertItems("0", "1", "2")
-                .assertCompleted();
+                .awaitCompletion()
+                .assertItems("0", "1", "2");
 
         assertThat(FakeTransactionalResource.last.subscribed).isTrue();
         assertThat(FakeTransactionalResource.last.onCompleteSubscribed).isFalse();
@@ -486,17 +484,15 @@ public class MultiFromResourceFromUniTest {
 
     @Test
     public void testThatCancellationFailureAreNotPropagated() {
-
         Multi<String> multi = Multi.createFrom()
-                .resourceFromUni(() -> FakeTransactionalResource.create(), FakeTransactionalResource::infinite)
+                .resourceFromUni(FakeTransactionalResource::create, FakeTransactionalResource::infinite)
                 .withFinalizer(FakeTransactionalResource::commit, FakeTransactionalResource::rollback,
                         r -> r.cancel().onItem().failWith(x -> new IOException("boom")))
                 .select().first(3);
 
         multi.subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE))
-                .await()
-                .assertItems("0", "1", "2")
-                .assertCompleted();
+                .awaitCompletion()
+                .assertItems("0", "1", "2");
 
         assertThat(FakeTransactionalResource.last.subscribed).isTrue();
         assertThat(FakeTransactionalResource.last.onCompleteSubscribed).isFalse();
@@ -507,15 +503,14 @@ public class MultiFromResourceFromUniTest {
     @Test
     public void testThatCancellationReturningNullAreNotPropagated() {
         Multi<String> multi = Multi.createFrom()
-                .resourceFromUni(() -> FakeTransactionalResource.create(), FakeTransactionalResource::infinite)
+                .resourceFromUni(FakeTransactionalResource::create, FakeTransactionalResource::infinite)
                 .withFinalizer(FakeTransactionalResource::commit, FakeTransactionalResource::rollback,
                         r -> null)
                 .select().first(3);
 
         multi.subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE))
-                .await()
-                .assertItems("0", "1", "2")
-                .assertCompleted();
+                .awaitCompletion()
+                .assertItems("0", "1", "2");
 
         assertThat(FakeTransactionalResource.last.subscribed).isTrue();
         assertThat(FakeTransactionalResource.last.onCompleteSubscribed).isFalse();
@@ -533,7 +528,7 @@ public class MultiFromResourceFromUniTest {
                 .select().first(3);
 
         multi.subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE))
-                .await()
+                .awaitFailure()
                 .assertItems("in transaction")
                 .assertFailedWith(IOException.class, "boom");
 
@@ -553,7 +548,7 @@ public class MultiFromResourceFromUniTest {
                 .select().first(3);
 
         multi.subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE))
-                .await()
+                .awaitFailure()
                 .assertItems("in transaction")
                 .assertFailedWith(IOException.class, "commit failed");
 
@@ -574,7 +569,7 @@ public class MultiFromResourceFromUniTest {
                 .select().first(3);
 
         multi.subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE))
-                .await()
+                .awaitFailure()
                 .assertItems("in transaction")
                 .assertFailedWith(NullPointerException.class, "`null`");
 
@@ -592,7 +587,7 @@ public class MultiFromResourceFromUniTest {
                         FakeTransactionalResource::cancel);
 
         multi.subscribe().withSubscriber(AssertSubscriber.create(20))
-                .await()
+                .awaitFailure()
                 .assertFailedWith(CompositeException.class, "boom")
                 .assertFailedWith(CompositeException.class, "rollback failed");
 
@@ -611,7 +606,7 @@ public class MultiFromResourceFromUniTest {
                         FakeTransactionalResource::cancel);
 
         multi.subscribe().withSubscriber(AssertSubscriber.create(20))
-                .await()
+                .awaitFailure()
                 .assertFailedWith(CompositeException.class, "boom")
                 .assertFailedWith(CompositeException.class, "`null`");
 
@@ -668,8 +663,7 @@ public class MultiFromResourceFromUniTest {
                 })
                 .select().first(5);
         multi.subscribe().withSubscriber(AssertSubscriber.create(20))
-                .await()
-                .assertCompleted()
+                .awaitCompletion()
                 .assertItems(0L, 1L, 2L, 3L, 4L);
         assertThat(subscribed).isTrue();
     }
@@ -684,8 +678,7 @@ public class MultiFromResourceFromUniTest {
                         FakeTransactionalResource::cancel)
                 .subscribe(subscriber);
         subscriber
-                .await()
-                .assertCompleted()
+                .awaitCompletion()
                 .cancel();
 
         assertThat(FakeTransactionalResource.last.onCompleteSubscribed).isTrue();
@@ -704,7 +697,7 @@ public class MultiFromResourceFromUniTest {
                         FakeTransactionalResource::cancel)
                 .subscribe(subscriber);
         subscriber
-                .await()
+                .awaitFailure()
                 .assertFailedWith(IOException.class, "boom")
                 .cancel();
 

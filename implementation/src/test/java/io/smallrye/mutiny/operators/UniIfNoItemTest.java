@@ -27,7 +27,7 @@ public class UniIfNoItemTest {
                 .ifNoItem().after(Duration.ofMillis(10)).recoverWithUni(Uni.createFrom().nothing())
                 .subscribe().withSubscriber(subscriber);
 
-        subscriber.await().assertCompleted().assertItem(1);
+        assertThat(subscriber.awaitItem().getItem()).isEqualTo(1);
     }
 
     @Test
@@ -39,7 +39,7 @@ public class UniIfNoItemTest {
                 .ifNoItem().after(Duration.ofMillis(1)).fail()
                 .subscribe().withSubscriber(subscriber);
 
-        subscriber.await().assertFailed();
+        subscriber.awaitFailure();
         assertThat(subscriber.getFailure()).isInstanceOf(TimeoutException.class);
     }
 
@@ -58,7 +58,7 @@ public class UniIfNoItemTest {
                 .ifNoItem().after(Duration.ofMillis(1)).fail()
                 .subscribe().withSubscriber(subscriber);
 
-        subscriber.await().assertFailed();
+        subscriber.awaitFailure();
         assertThat(subscriber.getFailure()).isInstanceOf(TimeoutException.class);
     }
 
@@ -78,7 +78,7 @@ public class UniIfNoItemTest {
                 .ifNoItem().after(Duration.ofMillis(10000)).fail()
                 .subscribe().withSubscriber(subscriber);
 
-        subscriber.await().assertFailed();
+        subscriber.awaitFailure();
         assertThat(subscriber.getFailure()).isInstanceOf(TestException.class);
     }
 
@@ -87,7 +87,7 @@ public class UniIfNoItemTest {
         UniAssertSubscriber<Integer> subscriber = Uni.createFrom().<Integer> nothing()
                 .ifNoItem().after(Duration.ofMillis(10)).recoverWithItem(5)
                 .subscribe().withSubscriber(UniAssertSubscriber.create());
-        subscriber.await().assertItem(5);
+        subscriber.awaitItem().assertItem(5);
     }
 
     @Test
@@ -95,7 +95,7 @@ public class UniIfNoItemTest {
         UniAssertSubscriber<Integer> subscriber = Uni.createFrom().<Integer> nothing()
                 .ifNoItem().after(Duration.ofMillis(10)).recoverWithItem(() -> 23)
                 .subscribe().withSubscriber(UniAssertSubscriber.create());
-        subscriber.await().assertItem(23);
+        subscriber.awaitItem().assertItem(23);
     }
 
     @Test
@@ -103,7 +103,7 @@ public class UniIfNoItemTest {
         UniAssertSubscriber<Integer> subscriber = Uni.createFrom().<Integer> nothing()
                 .ifNoItem().after(Duration.ofMillis(10)).recoverWithUni(() -> Uni.createFrom().item(15))
                 .subscribe().withSubscriber(UniAssertSubscriber.create());
-        subscriber.await().assertItem(15);
+        subscriber.awaitItem().assertItem(15);
     }
 
     @Test
@@ -111,7 +111,7 @@ public class UniIfNoItemTest {
         UniAssertSubscriber<Integer> subscriber = Uni.createFrom().<Integer> nothing()
                 .ifNoItem().after(Duration.ofMillis(10)).failWith(new IOException("boom"))
                 .subscribe().withSubscriber(UniAssertSubscriber.create());
-        subscriber.await().assertFailedWith(IOException.class, "boom");
+        subscriber.awaitFailure().assertFailedWith(IOException.class, "boom");
     }
 
     @Test
@@ -140,8 +140,7 @@ public class UniIfNoItemTest {
                 .subscribe().withSubscriber(UniAssertSubscriber.create());
 
         subscriber
-                .await()
-                .assertFailed()
+                .awaitFailure()
                 .assertFailedWith(RejectedExecutionException.class, "");
     }
 
@@ -184,7 +183,7 @@ public class UniIfNoItemTest {
                 })
                 .subscribe().withSubscriber(subscriber);
 
-        subscriber.await().assertFailed();
+        subscriber.awaitFailure();
         assertThat(subscriber.getFailure()).isInstanceOf(IllegalArgumentException.class);
     }
 

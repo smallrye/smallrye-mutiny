@@ -16,6 +16,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
@@ -24,6 +25,8 @@ import io.smallrye.mutiny.GroupedMulti;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.TestException;
 import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.helpers.spies.MultiOnCancellationSpy;
+import io.smallrye.mutiny.helpers.spies.Spy;
 import io.smallrye.mutiny.helpers.test.AssertSubscriber;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.subscription.BackPressureFailure;
@@ -188,13 +191,14 @@ public class MultiGroupTest {
 
     @Test
     public void testAsListsWithDuration() {
-        Multi<Long> publisher = Multi.createFrom().publisher(Multi.createFrom().ticks().every(Duration.ofMillis(2)));
+        MultiOnCancellationSpy<Long> publisher = Spy
+                .onCancellation(Multi.createFrom().publisher(Multi.createFrom().ticks().every(Duration.ofMillis(2))));
         AssertSubscriber<List<Long>> subscriber = publisher.group().intoLists().every(Duration.ofMillis(100))
                 .subscribe()
                 .withSubscriber(AssertSubscriber.create(100));
 
-        await().until(() -> subscriber.getItems().size() > 3);
-        subscriber.cancel();
+        subscriber.awaitNextItems(3).cancel();
+        publisher.assertCancelled();
     }
 
     @Test
@@ -204,8 +208,7 @@ public class MultiGroupTest {
         AssertSubscriber<List<Long>> subscriber = publisher.group().intoLists().every(Duration.ofMillis(100))
                 .subscribe()
                 .withSubscriber(AssertSubscriber.create(100));
-        subscriber.await();
-        subscriber.assertCompleted();
+        subscriber.awaitCompletion();
     }
 
     @Test
@@ -216,7 +219,7 @@ public class MultiGroupTest {
         AssertSubscriber<List<Long>> subscriber = publisher.group().intoLists().every(Duration.ofMillis(100))
                 .subscribe()
                 .withSubscriber(AssertSubscriber.create(100));
-        subscriber.await();
+        subscriber.awaitFailure();
         subscriber.assertFailedWith(IOException.class, "boom");
     }
 
@@ -230,7 +233,8 @@ public class MultiGroupTest {
                 .subscribe()
                 .withSubscriber(AssertSubscriber.create(2));
 
-        subscriber.await()
+        subscriber
+                .awaitFailure()
                 .assertFailedWith(BackPressureFailure.class, "");
         assertThat(cancelled).isTrue();
     }
@@ -380,8 +384,7 @@ public class MultiGroupTest {
                 .subscribe()
                 .withSubscriber(AssertSubscriber.create(100));
 
-        await().until(() -> subscriber.getItems().size() > 3);
-        subscriber.cancel();
+        subscriber.awaitNextItems(3).cancel();
     }
 
     @Test
@@ -405,7 +408,7 @@ public class MultiGroupTest {
                 .onItem().transformToMultiAndConcatenate(m -> m);
 
         multi.subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE))
-                .await()
+                .awaitFailure()
                 .assertItems(1, 2, 3, 4, 5, 6)
                 .assertFailedWith(IOException.class, "boom");
     }
@@ -418,10 +421,9 @@ public class MultiGroupTest {
                 .onItem().transformToUniAndMerge(m -> m.collect().asList())
                 .subscribe().withSubscriber(subscriber);
 
-        await().until(() -> subscriber.getItems().size() == 3);
+        subscriber.awaitNextItems(3).cancel();
         List<List<Object>> items = subscriber.getItems();
         assertThat(items).hasSize(3).allSatisfy(list -> assertThat(list).isEmpty());
-        subscriber.cancel();
     }
 
     @Test
@@ -812,8 +814,9 @@ public class MultiGroupTest {
                 .group().by(l -> l % 2)
                 .subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE));
 
-        subscriber.assertSubscribed();
-        await().until(() -> subscriber.getItems().size() == 2);
+        subscriber.awaitSubscription();
+        subscriber.awaitNextItems(2).cancel();
+
         AssertSubscriber<Long> s1 = subscriber.getItems().get(0).subscribe()
                 .withSubscriber(AssertSubscriber.create(Long.MAX_VALUE));
         s1.assertSubscribed();
@@ -839,7 +842,7 @@ public class MultiGroupTest {
                 .subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE));
 
         subscriber.assertSubscribed();
-        await().until(() -> subscriber.getItems().size() == 2);
+        subscriber.awaitNextItems(2);
         AssertSubscriber<Long> s1 = subscriber.getItems().get(0).subscribe()
                 .withSubscriber(AssertSubscriber.create(Long.MAX_VALUE));
         s1.assertSubscribed();
@@ -867,7 +870,7 @@ public class MultiGroupTest {
         assertThat(subscriber.assertNotTerminated().isCancelled()).isTrue();
     }
 
-    @Test
+    @RepeatedTest(10)
     public void testGroupByWithUpstreamFailure() {
         AtomicReference<MultiEmitter<? super Long>> emitter = new AtomicReference<>();
 

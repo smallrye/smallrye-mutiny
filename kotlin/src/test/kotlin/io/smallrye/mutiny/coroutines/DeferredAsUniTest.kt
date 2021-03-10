@@ -7,6 +7,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
+import org.assertj.core.api.Assertions.assertThat
 import java.util.UUID
 import kotlin.test.Test
 
@@ -25,7 +26,7 @@ class DeferredAsUniTest {
             deferred.asUni().subscribe().withSubscriber(subscriber)
 
             // Then
-            subscriber.await().assertItem(value)
+            assertThat(subscriber.awaitItem().item).isEqualTo(value)
         }
     }
 
@@ -40,7 +41,7 @@ class DeferredAsUniTest {
             deferred.asUni().subscribe().withSubscriber(subscriber)
 
             // Then
-            subscriber.await().assertFailedWith(IllegalStateException::class.java, "kaboom")
+            subscriber.awaitFailure().assertFailedWith(IllegalStateException::class.java, "kaboom")
         }
     }
 
@@ -59,7 +60,7 @@ class DeferredAsUniTest {
             deferred.cancel(CancellationException("abort"))
 
             // Then
-            subscriber.await().assertFailedWith(CancellationException::class.java, "abort")
+            subscriber.awaitFailure().assertFailedWith(CancellationException::class.java, "abort")
         }
     }
 
@@ -74,7 +75,7 @@ class DeferredAsUniTest {
             deferred.asUni().subscribe().withSubscriber(subscriber)
 
             // Then
-            subscriber.await().assertItem(null)
+            assertThat(subscriber.awaitItem().item).isNull()
         }
     }
 }

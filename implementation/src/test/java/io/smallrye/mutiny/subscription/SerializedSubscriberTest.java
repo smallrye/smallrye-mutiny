@@ -10,6 +10,7 @@ import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.awaitility.Awaitility;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.RepeatedTest;
@@ -296,7 +297,7 @@ public class SerializedSubscriberTest {
         };
         Arrays.asList(runnable, runnable).forEach(r -> new Thread(r).start());
 
-        subscriber.await().assertCompleted();
+        subscriber.awaitCompletion();
     }
 
     @RepeatedTest(10)
@@ -324,7 +325,7 @@ public class SerializedSubscriberTest {
         Collections.shuffle(runnables);
         runnables.forEach(r -> new Thread(r).start());
 
-        subscriber.await().assertCompleted();
+        subscriber.awaitCompletion();
         assertThat(subscriber.getItems()).hasSizeBetween(0, 1);
     }
 
@@ -353,7 +354,7 @@ public class SerializedSubscriberTest {
         Collections.shuffle(runnables);
         runnables.forEach(r -> new Thread(r).start());
 
-        subscriber.await().assertFailedWith(TestException.class, "boom");
+        subscriber.awaitFailure().assertFailedWith(TestException.class, "boom");
         assertThat(subscriber.getItems()).hasSizeBetween(0, 1);
     }
 
@@ -382,7 +383,7 @@ public class SerializedSubscriberTest {
         Collections.shuffle(runnables);
         runnables.forEach(r -> new Thread(r).start());
 
-        subscriber.await();
+        Awaitility.await().until(() -> subscriber.hasCompleted() || subscriber.getFailure() != null);
         if (subscriber.hasCompleted()) {
             subscriber.assertCompleted().assertHasNotReceivedAnyItem();
         } else {

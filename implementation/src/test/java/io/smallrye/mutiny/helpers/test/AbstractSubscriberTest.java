@@ -139,6 +139,7 @@ public class AbstractSubscriberTest {
         assertThat(subscriber.isCancelled()).isTrue();
     }
 
+    @SuppressWarnings("deprecation")
     @Test
     public void testAwaitWithTimeout() {
         AssertSubscriber<Integer> subscriber = AssertSubscriber.create(10);
@@ -147,16 +148,22 @@ public class AbstractSubscriberTest {
 
         assertThatThrownBy(() -> await()
                 .pollDelay(Duration.ofMillis(1))
-                .atMost(Duration.ofMillis(2)).untilAsserted(subscriber::await)).isInstanceOf(ConditionTimeoutException.class);
+                .atMost(Duration.ofMillis(2)).untilAsserted(subscriber::await))
+                        .isInstanceOf(ConditionTimeoutException.class);
+
+        assertThatThrownBy(() -> await()
+                .pollDelay(Duration.ofMillis(1))
+                .atMost(Duration.ofMillis(2)).untilAsserted(subscriber::awaitCompletion))
+                        .isInstanceOf(ConditionTimeoutException.class);
     }
 
     @Test
-    public void testAwaitWithInterruption() {
+    public void testAwaitCompletionWithInterruption() {
         AssertSubscriber<Integer> subscriber = AssertSubscriber.create(10);
 
         AtomicBoolean unblocked = new AtomicBoolean();
         Thread thread = new Thread(() -> {
-            subscriber.await(Duration.ofSeconds(100));
+            subscriber.awaitCompletion(Duration.ofSeconds(100));
             unblocked.set(true);
         });
         thread.start();
@@ -166,7 +173,7 @@ public class AbstractSubscriberTest {
 
         unblocked.set(false);
         thread = new Thread(() -> {
-            subscriber.await();
+            subscriber.awaitCompletion();
             unblocked.set(true);
         });
         thread.start();
@@ -181,11 +188,8 @@ public class AbstractSubscriberTest {
         AssertSubscriber<Integer> subscriber = AssertSubscriber.create(10);
         subscriber.onComplete();
 
-        subscriber.await(Duration.ofSeconds(100));
-        subscriber.await();
-
-        subscriber.assertCompleted();
-
+        subscriber.awaitCompletion(Duration.ofSeconds(100));
+        subscriber.awaitCompletion();
     }
 
     @Test
@@ -194,11 +198,10 @@ public class AbstractSubscriberTest {
         AssertSubscriber<Integer> subscriber = AssertSubscriber.create(10);
         subscriber.onError(new IOException("boom"));
 
-        subscriber.await(Duration.ofSeconds(100));
-        subscriber.await();
+        subscriber.awaitFailure(Duration.ofSeconds(100));
+        subscriber.awaitFailure();
 
         subscriber.assertFailedWith(IOException.class, "boom");
 
     }
-
 }

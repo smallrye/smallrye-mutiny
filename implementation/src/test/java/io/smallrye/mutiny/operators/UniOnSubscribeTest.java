@@ -315,8 +315,8 @@ public class UniOnSubscribeTest {
 
         subscriber.assertNotSubscribed();
         latch.countDown();
-        subscriber.await()
-                .assertSubscribed()
+        subscriber.awaitSubscription()
+                .awaitItem()
                 .assertCompleted().assertItem(1);
     }
 
@@ -333,8 +333,8 @@ public class UniOnSubscribeTest {
         await().until(() -> emitter.get() != null);
         emitter.get().complete(12345);
 
-        subscriber.await()
-                .assertSubscribed()
+        subscriber.awaitSubscription()
+                .awaitItem()
                 .assertCompleted().assertItem(1);
 
     }
@@ -353,8 +353,8 @@ public class UniOnSubscribeTest {
         await().until(() -> emitter.get() != null);
         emitter.get().complete(12345);
 
-        subscriber.await()
-                .assertSubscribed()
+        subscriber.awaitSubscription()
+                .awaitItem()
                 .assertCompleted().assertItem(1);
 
     }

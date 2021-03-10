@@ -92,7 +92,7 @@ public class UniOnItemDelayUntilTest {
         await().until(() -> reference.get() != null);
         subscriber.assertNotTerminated();
         reference.get().complete(null);
-        subscriber.await().assertItem(1);
+        subscriber.awaitItem().assertItem(1);
     }
 
     @Test

@@ -39,13 +39,13 @@ public class MultiCollectTest {
         items
                 .collect().first()
                 .subscribe().withSubscriber(UniAssertSubscriber.create())
-                .await()
+                .awaitItem()
                 .assertItem(1);
 
         items
                 .collect().last()
                 .subscribe().withSubscriber(UniAssertSubscriber.create())
-                .await()
+                .awaitItem()
                 .assertItem(3);
     }
 
@@ -56,13 +56,13 @@ public class MultiCollectTest {
         items
                 .collectItems().first()
                 .subscribe().withSubscriber(UniAssertSubscriber.create())
-                .await()
+                .awaitItem()
                 .assertItem(1);
 
         items
                 .collectItems().last()
                 .subscribe().withSubscriber(UniAssertSubscriber.create())
-                .await()
+                .awaitItem()
                 .assertItem(3);
     }
 
@@ -72,13 +72,13 @@ public class MultiCollectTest {
         items
                 .collect().first()
                 .subscribe().withSubscriber(UniAssertSubscriber.create())
-                .await()
+                .awaitItem()
                 .assertItem(null);
 
         items
                 .collect().last()
                 .subscribe().withSubscriber(UniAssertSubscriber.create())
-                .await()
+                .awaitItem()
                 .assertItem(null);
     }
 
@@ -88,13 +88,13 @@ public class MultiCollectTest {
         failing
                 .collect().first()
                 .subscribe().withSubscriber(UniAssertSubscriber.create())
-                .await()
+                .awaitFailure()
                 .assertFailedWith(IOException.class, "boom");
 
         failing
                 .collect().last()
                 .subscribe().withSubscriber(UniAssertSubscriber.create())
-                .await()
+                .awaitFailure()
                 .assertFailedWith(IOException.class, "boom");
     }
 
@@ -103,7 +103,7 @@ public class MultiCollectTest {
         UniAssertSubscriber<List<Integer>> subscriber = Multi.createFrom().items(1, 2, 3)
                 .collect().asList()
                 .subscribe().withSubscriber(UniAssertSubscriber.create())
-                .await();
+                .awaitItem();
 
         assertThat(subscriber.getItem()).containsExactly(1, 2, 3);
     }
@@ -113,7 +113,7 @@ public class MultiCollectTest {
         UniAssertSubscriber<LinkedList<Integer>> subscriber = Multi.createFrom().range(1, 10)
                 .collect().in(LinkedList<Integer>::new, LinkedList::add)
                 .subscribe().withSubscriber(UniAssertSubscriber.create())
-                .await();
+                .awaitItem();
 
         assertThat(subscriber.getItem()).containsExactly(1, 2, 3, 4, 5, 6, 7, 8, 9).isInstanceOf(LinkedList.class);
     }

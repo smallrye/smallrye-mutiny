@@ -435,7 +435,7 @@ public class UniRepeatTest {
                 .subscribe().withSubscriber(AssertSubscriber.create());
 
         subscriber.request(10)
-                .await()
+                .awaitFailure()
                 .assertItems(1, 2)
                 .assertFailedWith(IllegalStateException.class, "boom");
         assertThat(subscriber.getItems()).hasSize(2);
@@ -455,7 +455,7 @@ public class UniRepeatTest {
                 .subscribe().withSubscriber(AssertSubscriber.create());
 
         subscriber.request(10)
-                .await()
+                .awaitFailure()
                 .assertItems(1, 2)
                 .assertFailedWith(IllegalStateException.class, "boom");
         assertThat(subscriber.getItems()).hasSize(2);
@@ -475,7 +475,7 @@ public class UniRepeatTest {
                 .subscribe().withSubscriber(AssertSubscriber.create());
 
         subscriber.request(10)
-                .await()
+                .awaitFailure()
                 .assertItems(1, 2)
                 .assertFailedWith(IllegalStateException.class, "boom");
         assertThat(subscriber.getItems()).hasSize(2);
@@ -495,9 +495,8 @@ public class UniRepeatTest {
                 .subscribe().withSubscriber(AssertSubscriber.create());
 
         subscriber.request(10)
-                .await()
-                .assertItems(1, 2)
-                .assertCompleted();
+                .awaitCompletion()
+                .assertItems(1, 2);
         assertThat(subscriber.getItems()).hasSize(2);
     }
 
@@ -515,9 +514,8 @@ public class UniRepeatTest {
                 .subscribe().withSubscriber(AssertSubscriber.create());
 
         subscriber.request(100)
-                .await()
-                .assertItems(1, 2, 4, 5, 7, 8, 10)
-                .assertCompleted();
+                .awaitCompletion()
+                .assertItems(1, 2, 4, 5, 7, 8, 10);
         assertThat(count).hasValue(10);
     }
 

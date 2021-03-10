@@ -83,7 +83,7 @@ public class MultiOnOverflowTest {
         Multi.createFrom().range(1, 10)
                 .onOverflow().drop()
                 .subscribe(sub);
-        sub.await().assertCompleted().assertHasNotReceivedAnyItem();
+        sub.awaitCompletion().assertHasNotReceivedAnyItem();
     }
 
     @Test

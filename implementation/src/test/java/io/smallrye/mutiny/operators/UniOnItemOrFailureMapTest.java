@@ -167,7 +167,7 @@ public class UniOnItemOrFailureMapTest {
                     })
                     .subscribe().withSubscriber(subscriber);
 
-            subscriber.await().assertCompleted().assertItem(2);
+            assertThat(subscriber.awaitItem().getItem()).isEqualTo(2);
             assertThat(threadName).isNotNull().doesNotHaveValue("main");
             assertThat(subscriber.getOnItemThreadName()).isEqualTo(threadName.get());
         } finally {
@@ -191,7 +191,7 @@ public class UniOnItemOrFailureMapTest {
                     })
                     .subscribe().withSubscriber(subscriber);
 
-            subscriber.await().assertCompleted().assertItem(1);
+            assertThat(subscriber.awaitItem().getItem()).isEqualTo(1);
             assertThat(threadName).isNotNull().doesNotHaveValue("main");
             assertThat(subscriber.getOnItemThreadName()).isEqualTo(threadName.get());
         } finally {

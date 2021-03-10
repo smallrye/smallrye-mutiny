@@ -12,6 +12,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.awaitility.Awaitility;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
@@ -204,13 +205,14 @@ public class UniSerializedSubscriberTest {
 
         runnables.forEach(r -> new Thread(r).start());
 
-        subscriber.await();
+        Awaitility.await().untilAsserted(subscriber::assertTerminated);
 
         if (subscriber.getFailure() != null) {
             subscriber.assertFailed()
                     .assertFailedWith(IOException.class, "boom");
         } else {
-            subscriber.assertCompleted()
+            subscriber
+                    .assertCompleted()
                     .assertItem(1);
         }
         subscriber.assertSignalsReceivedInOrder();
@@ -245,7 +247,7 @@ public class UniSerializedSubscriberTest {
 
         runnables.forEach(r -> new Thread(r).start());
 
-        subscriber.await();
+        Awaitility.await().untilAsserted(subscriber::assertTerminated);
 
         if (subscriber.getFailure() != null) {
             subscriber.assertFailed()
@@ -292,8 +294,7 @@ public class UniSerializedSubscriberTest {
 
         runnables.forEach(r -> new Thread(r).start());
 
-        subscriber.await();
-        subscriber.assertCompleted();
+        subscriber.awaitItem();
         assertThat(subscriber.getItem()).isBetween(1, 3);
         subscriber.assertSignalsReceivedInOrder();
     }
@@ -333,8 +334,7 @@ public class UniSerializedSubscriberTest {
 
         runnables.forEach(r -> new Thread(r).start());
 
-        subscriber.await();
-        subscriber.assertCompleted();
+        subscriber.awaitItem();
         assertThat(subscriber.getItem()).isBetween(1, 3);
         subscriber.assertSignalsReceivedInOrder();
     }

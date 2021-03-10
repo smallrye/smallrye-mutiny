@@ -252,7 +252,7 @@ public class MultiContextPropagationTest {
                 })
                 .subscribe().withSubscriber(AssertSubscriber.create(20));
 
-        subscriber.await()
+        subscriber.awaitCompletion()
                 .assertItems(0L, 1L, 2L, 3L, 4L);
 
     }
@@ -270,7 +270,7 @@ public class MultiContextPropagationTest {
                 })
                 .subscribe().withSubscriber(AssertSubscriber.create(20));
 
-        subscriber.await()
+        subscriber.awaitCompletion()
                 .assertItems(0L, 2L, 4L);
 
     }
@@ -289,8 +289,7 @@ public class MultiContextPropagationTest {
                 .select().first(10)
                 .subscribe().withSubscriber(AssertSubscriber.create(10));
 
-        subscriber.await()
-                .assertCompleted()
+        subscriber.awaitCompletion()
                 .assertItems(0, 1, 3, 6, 10, 15, 21, 28, 36, 45);
 
     }

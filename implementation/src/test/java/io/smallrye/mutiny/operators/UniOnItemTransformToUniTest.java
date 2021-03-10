@@ -98,7 +98,8 @@ public class UniOnItemTransformToUniTest {
                 .transformToUni(
                         v -> Uni.createFrom().emitter(emitter -> new Thread(() -> emitter.complete(42)).start()));
         uni.subscribe().withSubscriber(test);
-        test.await().assertCompleted().assertItem(42);
+        assertThat(test.awaitItem().getItem()).isEqualTo(42);
+
     }
 
     @Test
@@ -107,7 +108,7 @@ public class UniOnItemTransformToUniTest {
         Uni<Integer> uni = Uni.createFrom().item(1).onItem().transformToUni(v -> Uni.createFrom()
                 .emitter(emitter -> new Thread(() -> emitter.fail(new IOException("boom"))).start()));
         uni.subscribe().withSubscriber(test);
-        test.await().assertFailed().assertFailedWith(IOException.class, "boom");
+        test.awaitFailure().assertFailedWith(IOException.class, "boom");
     }
 
     @Test
@@ -118,7 +119,7 @@ public class UniOnItemTransformToUniTest {
             called.set(true);
             return Uni.createFrom().item(2);
         }).subscribe().withSubscriber(test);
-        test.await().assertFailed().assertFailedWith(Exception.class, "boom");
+        test.awaitFailure().assertFailedWith(Exception.class, "boom");
         assertThat(called).isFalse();
     }
 
@@ -132,7 +133,7 @@ public class UniOnItemTransformToUniTest {
                     throw new IllegalStateException("boom");
                 })
                 .subscribe().withSubscriber(test);
-        test.await().assertFailed().assertFailedWith(IllegalStateException.class, "boom");
+        test.awaitFailure().assertFailedWith(IllegalStateException.class, "boom");
         assertThat(called).isTrue();
     }
 
@@ -145,7 +146,7 @@ public class UniOnItemTransformToUniTest {
                     called.set(true);
                     return null;
                 }).subscribe().withSubscriber(test);
-        test.await().assertFailed().assertFailedWith(NullPointerException.class, "");
+        test.awaitFailure().assertFailedWith(NullPointerException.class, "");
         assertThat(called).isTrue();
     }
 

@@ -26,7 +26,7 @@ public class UniCreateFromFutureTest {
         Uni.createFrom().future(cs).subscribe().withSubscriber(subscriber);
         cs.complete(null);
         subscriber
-                .await()
+                .awaitItem()
                 .assertCompleted().assertItem(null);
     }
 
@@ -47,8 +47,9 @@ public class UniCreateFromFutureTest {
         CompletableFuture<String> cs = new CompletableFuture<>();
         cs.cancel(false);
         Uni.createFrom().future(cs).subscribe().withSubscriber(subscriber);
-        // No await - immediate failure
+
         subscriber
+                .awaitFailure()
                 .assertFailedWith(CancellationException.class, null);
     }
 
@@ -59,7 +60,7 @@ public class UniCreateFromFutureTest {
         Uni.createFrom().future(cs).subscribe().withSubscriber(subscriber);
         cs.complete("1");
         subscriber
-                .await()
+                .awaitItem()
                 .assertCompleted().assertItem("1");
     }
 
@@ -70,7 +71,7 @@ public class UniCreateFromFutureTest {
         Uni.createFrom().future(cs).subscribe().withSubscriber(subscriber);
         cs.completeExceptionally(new IOException("boom"));
         subscriber
-                .await()
+                .awaitFailure()
                 .assertFailedWith(IOException.class, "boom");
     }
 
@@ -96,7 +97,7 @@ public class UniCreateFromFutureTest {
                 })).subscribe().withSubscriber(subscriber);
         cs.complete("bonjour");
         subscriber
-                .await()
+                .awaitFailure()
                 .assertFailedWith(IllegalStateException.class, "boom");
     }
 
@@ -115,7 +116,7 @@ public class UniCreateFromFutureTest {
         Uni.createFrom().future(() -> cs).subscribe().withSubscriber(subscriber);
         cs.complete("1");
         subscriber
-                .await()
+                .awaitItem()
                 .assertCompleted().assertItem("1");
     }
 
@@ -126,7 +127,7 @@ public class UniCreateFromFutureTest {
         Uni.createFrom().future(() -> cs).subscribe().withSubscriber(subscriber);
         cs.completeExceptionally(new IOException("boom"));
         subscriber
-                .await()
+                .awaitFailure()
                 .assertFailedWith(IOException.class, "boom");
     }
 
@@ -244,7 +245,7 @@ public class UniCreateFromFutureTest {
 
         uni.subscribe().withSubscriber(subscriber);
         cs.complete(1);
-        subscriber.await();
+        subscriber.awaitItem();
         subscriber.cancel();
         assertThat(called).isTrue();
         subscriber.assertItem(1);
@@ -259,7 +260,7 @@ public class UniCreateFromFutureTest {
         uni.subscribe().withSubscriber(subscriber);
         cs.complete(1);
         subscriber
-                .await()
+                .awaitItem()
                 .cancel();
 
         subscriber.assertItem(1);
@@ -292,7 +293,7 @@ public class UniCreateFromFutureTest {
         Uni.createFrom().future(cs).subscribe().withSubscriber(subscriber);
         cs.cancel(true);
         subscriber
-                .await()
+                .awaitFailure()
                 .assertFailedWith(CancellationException.class, null);
     }
 

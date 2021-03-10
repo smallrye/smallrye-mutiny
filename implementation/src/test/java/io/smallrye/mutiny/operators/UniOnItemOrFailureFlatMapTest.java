@@ -72,7 +72,7 @@ public class UniOnItemOrFailureFlatMapTest {
             return Uni.createFrom().item(2);
         }).subscribe().withSubscriber(test);
 
-        test.await().assertCompleted().assertItem(2);
+        assertThat(test.awaitItem().getItem()).isEqualTo(2);
         assertThat(count).hasValue(1);
     }
 
@@ -114,7 +114,7 @@ public class UniOnItemOrFailureFlatMapTest {
             return Uni.createFrom().item(2);
         }).subscribe().withSubscriber(test);
 
-        test.await().assertCompleted().assertItem(2);
+        assertThat(test.awaitItem().getItem()).isEqualTo(2);
         assertThat(count).hasValue(1);
     }
 
@@ -154,7 +154,7 @@ public class UniOnItemOrFailureFlatMapTest {
             throw new IllegalStateException("kaboom");
         }).subscribe().withSubscriber(test);
 
-        test.await().assertFailedWith(IllegalStateException.class, "kaboom");
+        test.awaitFailure().assertFailedWith(IllegalStateException.class, "kaboom");
         assertThat(count).hasValue(1);
     }
 
@@ -168,7 +168,7 @@ public class UniOnItemOrFailureFlatMapTest {
             throw new IllegalStateException("kaboom");
         }).subscribe().withSubscriber(test);
 
-        test.await().assertFailedWith(IllegalStateException.class, "kaboom");
+        test.awaitFailure().assertFailedWith(IllegalStateException.class, "kaboom");
         assertThat(count).hasValue(1);
     }
 
@@ -183,8 +183,8 @@ public class UniOnItemOrFailureFlatMapTest {
             throw new IllegalStateException("kaboom");
         }).subscribe().withSubscriber(test);
 
-        test.await().assertFailedWith(CompositeException.class, "kaboom");
-        test.await().assertFailedWith(CompositeException.class, "boom");
+        test.awaitFailure().assertFailedWith(CompositeException.class, "kaboom");
+        test.awaitFailure().assertFailedWith(CompositeException.class, "boom");
         assertThat(count).hasValue(1);
     }
 
@@ -197,7 +197,7 @@ public class UniOnItemOrFailureFlatMapTest {
                     called.set(true);
                     return null;
                 }).subscribe().withSubscriber(test);
-        test.await().assertFailed().assertFailedWith(NullPointerException.class, "");
+        test.awaitFailure().assertFailedWith(NullPointerException.class, "");
         assertThat(called).isTrue();
     }
 
@@ -211,7 +211,7 @@ public class UniOnItemOrFailureFlatMapTest {
                     called.set(true);
                     return null;
                 }).subscribe().withSubscriber(test);
-        test.await().assertFailed().assertFailedWith(NullPointerException.class, "");
+        test.awaitFailure().assertFailedWith(NullPointerException.class, "");
         assertThat(called).isTrue();
     }
 
@@ -244,7 +244,7 @@ public class UniOnItemOrFailureFlatMapTest {
             e.complete(2);
         }).subscribe().withSubscriber(test);
 
-        test.await().assertItem(2).assertCompleted();
+        test.awaitItem().assertItem(2).assertCompleted();
     }
 
     @Test
@@ -257,7 +257,7 @@ public class UniOnItemOrFailureFlatMapTest {
             e.complete(2);
         }).subscribe().withSubscriber(test);
 
-        test.await().assertItem(2).assertCompleted();
+        test.awaitItem().assertItem(2).assertCompleted();
     }
 
     @Test
@@ -269,7 +269,7 @@ public class UniOnItemOrFailureFlatMapTest {
             e.complete(2);
         }).subscribe().withSubscriber(test);
 
-        test.await().assertItem(2).assertCompleted();
+        test.awaitItem().assertItem(2).assertCompleted();
     }
 
     @Test
@@ -281,7 +281,7 @@ public class UniOnItemOrFailureFlatMapTest {
             e.complete(2);
         }).subscribe().withSubscriber(test);
 
-        test.await().assertItem(2).assertCompleted();
+        test.awaitItem().assertItem(2).assertCompleted();
     }
 
     @Test
@@ -293,7 +293,7 @@ public class UniOnItemOrFailureFlatMapTest {
             throw new IllegalStateException("bing");
         }).subscribe().withSubscriber(test);
 
-        test.await().assertFailedWith(IllegalStateException.class, "bing");
+        test.awaitFailure().assertFailedWith(IllegalStateException.class, "bing");
     }
 
     @Test
@@ -303,8 +303,8 @@ public class UniOnItemOrFailureFlatMapTest {
             throw new IllegalStateException("bing");
         }).subscribe().withSubscriber(test);
 
-        test.await().assertFailedWith(CompositeException.class, "bing");
-        test.await().assertFailedWith(CompositeException.class, "boom");
+        test.awaitFailure().assertFailedWith(CompositeException.class, "bing");
+        test.awaitFailure().assertFailedWith(CompositeException.class, "boom");
     }
 
 }

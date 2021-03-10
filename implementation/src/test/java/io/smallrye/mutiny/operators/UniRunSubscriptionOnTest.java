@@ -24,7 +24,7 @@ public class UniRunSubscriptionOnTest {
         Uni.createFrom().item(() -> 1)
                 .runSubscriptionOn(ForkJoinPool.commonPool())
                 .subscribe().withSubscriber(subscriber);
-        subscriber.await().assertItem(1);
+        subscriber.awaitItem().assertItem(1);
         assertThat(subscriber.getOnSubscribeThreadName()).isNotEqualTo(Thread.currentThread().getName());
     }
 
@@ -36,7 +36,7 @@ public class UniRunSubscriptionOnTest {
                 .runSubscriptionOn(ForkJoinPool.commonPool())
                 .subscribe().withSubscriber(subscriber);
 
-        subscriber.await().assertItem(1);
+        subscriber.awaitItem().assertItem(1);
         assertThat(subscriber.getOnSubscribeThreadName()).isNotEqualTo(Thread.currentThread().getName());
     }
 
@@ -58,7 +58,7 @@ public class UniRunSubscriptionOnTest {
                 .runSubscriptionOn(executorService)
                 .subscribe().withSubscriber(subscriber);
 
-        subscriber.await().assertItem(1);
+        subscriber.awaitItem().assertItem(1);
 
         executorService.shutdownNow();
     }
@@ -71,7 +71,7 @@ public class UniRunSubscriptionOnTest {
                 .runSubscriptionOn(ForkJoinPool.commonPool());
 
         assertThat(count).hasValue(0);
-        uni.subscribe().withSubscriber(UniAssertSubscriber.create()).await();
+        uni.subscribe().withSubscriber(UniAssertSubscriber.create()).awaitItem();
         assertThat(count).hasValue(1);
     }
 
@@ -80,7 +80,7 @@ public class UniRunSubscriptionOnTest {
         Uni.createFrom().<Void> failure(new IOException("boom"))
                 .runSubscriptionOn(Infrastructure.getDefaultExecutor())
                 .subscribe().withSubscriber(UniAssertSubscriber.create())
-                .await()
+                .awaitFailure()
                 .assertFailedWith(IOException.class, "boom");
     }
 
@@ -117,7 +117,7 @@ public class UniRunSubscriptionOnTest {
                 .runSubscriptionOn(pool)
                 .subscribe().withSubscriber(UniAssertSubscriber.create());
         assertThat(called).isFalse();
-        subscriber.await()
+        subscriber.awaitFailure()
                 .assertFailedWith(RejectedExecutionException.class, "");
     }
 
@@ -135,7 +135,7 @@ public class UniRunSubscriptionOnTest {
                 .subscribe().withSubscriber(UniAssertSubscriber.create());
         assertThat(called).isFalse();
         subscriber
-                .await()
+                .awaitFailure()
                 .assertFailedWith(IllegalArgumentException.class, "boom");
     }
 

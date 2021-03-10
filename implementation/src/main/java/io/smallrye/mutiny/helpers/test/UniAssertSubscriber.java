@@ -1,11 +1,14 @@
 package io.smallrye.mutiny.helpers.test;
 
+import static io.smallrye.mutiny.helpers.test.AssertSubscriber.DEFAULT_TIMEOUT;
 import static io.smallrye.mutiny.helpers.test.AssertionHelper.*;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.*;
+import java.util.function.Consumer;
 
 import io.smallrye.mutiny.subscription.UniSubscriber;
 import io.smallrye.mutiny.subscription.UniSubscription;
@@ -17,14 +20,23 @@ import io.smallrye.mutiny.subscription.UniSubscription;
  */
 public class UniAssertSubscriber<T> implements UniSubscriber<T> {
     private volatile boolean cancelImmediatelyOnSubscription;
+
+    // Writable from the subscribers
+    private final CompletableFuture<T> completion = new CompletableFuture<>();
+    private final CompletableFuture<UniSubscription> subscribed = new CompletableFuture<>();
+
+    // Readable from the assertions
+    private final CompletableFuture<T> hasCompleted;
+    private final CompletableFuture<UniSubscription> hasSubscription;
+
     private volatile UniSubscription subscription;
     private volatile T item;
     private volatile Throwable failure;
-    private volatile boolean completed;
-    private final CompletableFuture<T> future = new CompletableFuture<>();
+    private volatile boolean hasCompletedSuccessfully;
     private volatile String onResultThreadName;
     private volatile String onErrorThreadName;
     private volatile String onSubscribeThreadName;
+
     private final List<UniSignal> signals = new ArrayList<>(4);
 
     /**
@@ -33,6 +45,22 @@ public class UniAssertSubscriber<T> implements UniSubscriber<T> {
      * @param cancelled {@code true} when the subscription shall be cancelled upfront, {@code false} otherwise
      */
     public UniAssertSubscriber(boolean cancelled) {
+        hasCompleted = completion.whenComplete((item, failure) -> {
+            if (failure == null) {
+                this.onResultThreadName = Thread.currentThread().getName();
+                this.hasCompletedSuccessfully = true;
+                this.item = item;
+            } else {
+                this.onErrorThreadName = Thread.currentThread().getName();
+                this.failure = failure;
+            }
+        }).toCompletableFuture();
+        hasSubscription = subscribed.thenApply(s -> {
+            this.onSubscribeThreadName = Thread.currentThread().getName();
+            this.subscription = s;
+            return s;
+        }).toCompletableFuture();
+
         this.cancelImmediatelyOnSubscription = cancelled;
     }
 
@@ -45,7 +73,7 @@ public class UniAssertSubscriber<T> implements UniSubscriber<T> {
 
     /**
      * Create a new {@link UniAssertSubscriber} with no upfront cancellation.
-     * 
+     *
      * @param <T> the type of the item
      * @return a new subscriber
      */
@@ -56,48 +84,195 @@ public class UniAssertSubscriber<T> implements UniSubscriber<T> {
     @Override
     public synchronized void onSubscribe(UniSubscription subscription) {
         signals.add(new OnSubscribeUniSignal(subscription));
-        onSubscribeThreadName = Thread.currentThread().getName();
+        subscribed.complete(subscription);
         if (this.cancelImmediatelyOnSubscription) {
-            this.subscription = subscription;
             subscription.cancel();
-            future.cancel(false);
-            return;
+            completion.cancel(false);
         }
-        this.subscription = subscription;
     }
 
     @Override
     public synchronized void onItem(T item) {
-        signals.add(new OnItemUniSignal(item));
-        this.completed = true;
-        this.item = item;
-        this.onResultThreadName = Thread.currentThread().getName();
-        this.future.complete(item);
+        signals.add(new OnItemUniSignal<T>(item));
+        this.completion.complete(item);
     }
 
     @Override
     public synchronized void onFailure(Throwable failure) {
         signals.add(new OnFailureUniSignal(failure));
-        this.failure = failure;
-        this.onErrorThreadName = Thread.currentThread().getName();
-        this.future.completeExceptionally(failure);
+        this.completion.completeExceptionally(failure);
+    }
+
+    /**
+     * Awaits for an item event.
+     * It waits at most {@link AssertSubscriber#DEFAULT_TIMEOUT}.
+     * <p>
+     * If the timeout expired, or if a failure event is received instead of the expected completion, the check fails.
+     *
+     * @return this {@link UniAssertSubscriber}
+     */
+    public UniAssertSubscriber<T> awaitItem() {
+        return awaitItem(DEFAULT_TIMEOUT);
+    }
+
+    /**
+     * Awaits for a item event at most {@code duration}.
+     * <p>
+     * If the timeout expired, or if a failure event is received instead of the expected completion, the check fails.
+     *
+     * @param duration the duration, must not be {@code null}
+     * @return this {@link UniAssertSubscriber}
+     */
+    public UniAssertSubscriber<T> awaitItem(Duration duration) {
+        try {
+            awaitEvent(hasCompleted, duration);
+        } catch (TimeoutException e) {
+            throw new AssertionError(
+                    "No item (or failure) event received in the last " + duration.toMillis() + " ms");
+        }
+
+        if (failure == null) {
+            return this;
+        } else {
+            throw new AssertionError("Expected an item event but got a failure: " + failure);
+        }
+    }
+
+    /**
+     * Awaits for a failure event.
+     * It waits at most {@link AssertSubscriber#DEFAULT_TIMEOUT}.
+     * <p>
+     * If the timeout expired, or if an item event is received instead of the expected failure, the check fails.
+     *
+     * @return this {@link UniAssertSubscriber}
+     */
+    public UniAssertSubscriber<T> awaitFailure() {
+        return awaitFailure(t -> {
+        });
+    }
+
+    /**
+     * Awaits for a failure event and validate it.
+     * It waits at most {@link AssertSubscriber#DEFAULT_TIMEOUT}.
+     * <p>
+     * If the timeout expired, or if an item event is received instead of the expected failure, the check fails.
+     * The received failure is validated using the {@code assertion} consumer. The code of the consumer is expected to
+     * throw an {@link AssertionError} to indicate that the failure didn't pass the validation. The consumer is not
+     * called if no failures are received.
+     *
+     * @param assertion a check validating the received failure (if any). Must not be {@code null}
+     * @return this {@link UniAssertSubscriber}
+     */
+    public UniAssertSubscriber<T> awaitFailure(Consumer<Throwable> assertion) {
+        return awaitFailure(assertion, DEFAULT_TIMEOUT);
+    }
+
+    /**
+     * Awaits for a failure event.
+     * It waits at most {@code duration}.
+     * <p>
+     * If the timeout expired, or if an item event is received instead of the expected failure, the check fails.
+     *
+     * @return this {@link UniAssertSubscriber}
+     */
+    public UniAssertSubscriber<T> awaitFailure(Duration duration) {
+        return awaitFailure(t -> {
+        }, duration);
+    }
+
+    /**
+     * Awaits for a failure event and validate it.
+     * It waits at most {@code duration}.
+     * <p>
+     * If the timeout expired, or if an item event is received instead of the expected failure, the check fails.
+     * The received failure is validated using the {@code assertion} consumer. The code of the consumer is expected to
+     * throw an {@link AssertionError} to indicate that the failure didn't pass the validation. The consumer is not
+     * called if no failures are received.
+     *
+     * @param assertion a check validating the received failure (if any). Must not be {@code null}
+     * @return this {@link UniAssertSubscriber}
+     */
+    public UniAssertSubscriber<T> awaitFailure(Consumer<Throwable> assertion, Duration duration) {
+        try {
+            awaitEvent(hasCompleted, duration);
+        } catch (TimeoutException e) {
+            throw new AssertionError(
+                    "No item (or failure) event received in the last " + duration.toMillis() + " ms");
+        }
+
+        if (failure == null) {
+            throw new AssertionError("Expected a failure event but got an item event: " + item);
+        }
+
+        try {
+            assertion.accept(failure);
+            return this;
+        } catch (AssertionError e) {
+            throw new AssertionError("Received a failure event, but that failure did not pass the validation: " + e, e);
+        }
+
+    }
+
+    /**
+     * Awaits for a subscription event (the subscriber receives a {@link UniSubscription} from the upstream.
+     * It waits at most {@link AssertSubscriber#DEFAULT_TIMEOUT}.
+     * <p>
+     * If the timeout expired, the check fails.
+     *
+     * @return this {@link UniAssertSubscriber}
+     */
+    public UniAssertSubscriber<T> awaitSubscription() {
+        return awaitSubscription(DEFAULT_TIMEOUT);
+    }
+
+    /**
+     * Awaits for a subscription event (the subscriber receives a {@link UniSubscription} from the upstream.
+     * It waits at most {@code duration}.
+     * <p>
+     * If the timeout expired, the check fails.
+     *
+     * @param duration the UniAssertSubscriber, must not be {@code null}
+     * @return this {@link AssertSubscriber}
+     */
+    public UniAssertSubscriber<T> awaitSubscription(Duration duration) {
+        try {
+            awaitEvent(hasSubscription, duration);
+        } catch (TimeoutException e) {
+            throw new AssertionError(
+                    "Expecting a subscription event in the last " + duration.toMillis() + " ms, but did not get it");
+        }
+        return this;
+    }
+
+    private void awaitEvent(CompletableFuture<?> future, Duration duration) throws TimeoutException {
+        // Are we already done?
+        if (future.isDone()) {
+            return;
+        }
+        try {
+            future.get(duration.toMillis(), TimeUnit.MILLISECONDS);
+        } catch (InterruptedException ex) {
+            Thread.currentThread().interrupt();
+        } catch (ExecutionException e) {
+            // Completed exceptionally, but completed anyway.
+        }
     }
 
     /**
      * Await for termination.
      *
      * @return this {@link UniAssertSubscriber}
+     * @deprecated Use {@link #awaitFailure()} or {@link #awaitItem()} instead.
      */
+    @Deprecated
     public UniAssertSubscriber<T> await() {
-        CompletableFuture<T> fut;
-        synchronized (this) {
-            fut = this.future;
-        }
         try {
-            fut.join();
-        } catch (Exception e) {
-            // Error already caught.
+            awaitEvent(hasCompleted, DEFAULT_TIMEOUT);
+        } catch (TimeoutException e) {
+            throw new AssertionError("Expected item or failure event in the last "
+                    + DEFAULT_TIMEOUT.toMillis() + " ms, but didn't get any event.");
         }
+
         return this;
     }
 
@@ -107,7 +282,7 @@ public class UniAssertSubscriber<T> implements UniSubscriber<T> {
      * @return this {@link UniAssertSubscriber}
      */
     public synchronized UniAssertSubscriber<T> assertCompleted() {
-        shouldHaveCompleted(completed, failure, null);
+        shouldHaveCompleted(hasCompletedSuccessfully, failure, null);
         return this;
     }
 
@@ -117,7 +292,7 @@ public class UniAssertSubscriber<T> implements UniSubscriber<T> {
      * @return this {@link UniAssertSubscriber}
      */
     public synchronized UniAssertSubscriber<T> assertFailed() {
-        shouldHaveFailed(completed, failure, null, null);
+        shouldHaveFailed(hasCompletedSuccessfully, failure, null, null);
         return this;
     }
 
@@ -136,6 +311,9 @@ public class UniAssertSubscriber<T> implements UniSubscriber<T> {
      * @return the failure or {@code null}
      */
     public synchronized Throwable getFailure() {
+        if (failure instanceof CancellationException) {
+            return null;
+        }
         return failure;
     }
 
@@ -146,7 +324,7 @@ public class UniAssertSubscriber<T> implements UniSubscriber<T> {
      * @return this {@link UniAssertSubscriber}
      */
     public UniAssertSubscriber<T> assertItem(T expected) {
-        shouldHaveCompleted(completed, failure, null);
+        shouldHaveCompleted(hasCompletedSuccessfully, failure, null);
         shouldHaveReceived(getItem(), expected);
         return this;
     }
@@ -158,8 +336,20 @@ public class UniAssertSubscriber<T> implements UniSubscriber<T> {
      * @param expectedMessage a message that is expected to be contained in the failure message
      * @return this {@link UniAssertSubscriber}
      */
-    public UniAssertSubscriber<T> assertFailedWith(Class<? extends Throwable> expectedTypeOfFailure, String expectedMessage) {
-        shouldHaveFailed(completed, failure, expectedTypeOfFailure, expectedMessage);
+    public UniAssertSubscriber<T> assertFailedWith(Class<? extends Throwable> expectedTypeOfFailure,
+            String expectedMessage) {
+        shouldHaveFailed(hasCompletedSuccessfully, failure, expectedTypeOfFailure, expectedMessage);
+        return this;
+    }
+
+    /**
+     * Assert that the {@link io.smallrye.mutiny.Uni} has failed.
+     *
+     * @param expectedTypeOfFailure the expected failure type
+     * @return this {@link UniAssertSubscriber}
+     */
+    public UniAssertSubscriber<T> assertFailedWith(Class<? extends Throwable> expectedTypeOfFailure) {
+        shouldHaveFailed(hasCompletedSuccessfully, failure, expectedTypeOfFailure, null);
         return this;
     }
 
@@ -208,7 +398,7 @@ public class UniAssertSubscriber<T> implements UniSubscriber<T> {
      * @return this {@link UniAssertSubscriber}
      */
     public UniAssertSubscriber<T> assertTerminated() {
-        shouldBeTerminated(completed, failure);
+        shouldBeTerminated(hasCompletedSuccessfully, failure);
         return this;
     }
 
@@ -218,7 +408,7 @@ public class UniAssertSubscriber<T> implements UniSubscriber<T> {
      * @return this {@link UniAssertSubscriber}
      */
     public UniAssertSubscriber<T> assertNotTerminated() {
-        shouldNotBeTerminated(completed, failure);
+        shouldNotBeTerminatedUni(hasCompletedSuccessfully, failure);
         return this;
     }
 
@@ -244,7 +434,7 @@ public class UniAssertSubscriber<T> implements UniSubscriber<T> {
 
     /**
      * Get the {@link UniSignal} audit trail for this subscriber.
-     * 
+     *
      * @return the signals in receive order
      */
     public List<UniSignal> getSignals() {

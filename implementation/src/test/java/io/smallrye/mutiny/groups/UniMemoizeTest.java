@@ -461,9 +461,9 @@ class UniMemoizeTest {
     public void testDrainBlockedByAwait() {
         Uni<Integer> uni = Uni.createFrom().item(() -> 1)
                 .memoize().indefinitely();
-        uni
+        assertThat(uni
                 .onItem().transform(x -> uni.await().indefinitely())
-                .subscribe().withSubscriber(UniAssertSubscriber.create()).await();
+                .subscribe().withSubscriber(UniAssertSubscriber.create()).awaitItem().getItem()).isEqualTo(1);
 
     }
 

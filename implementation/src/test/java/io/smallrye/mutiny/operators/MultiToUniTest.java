@@ -114,12 +114,12 @@ public class MultiToUniTest {
                 .completionStage(() -> CompletableFuture.supplyAsync(count::incrementAndGet));
 
         multi.toUni().subscribe().withSubscriber(UniAssertSubscriber.create())
-                .await()
+                .awaitItem()
                 .assertItem(1)
                 .assertCompleted();
 
         Uni.createFrom().multi(multi).subscribe().withSubscriber(UniAssertSubscriber.create())
-                .await()
+                .awaitItem()
                 .assertItem(2)
                 .assertCompleted();
     }

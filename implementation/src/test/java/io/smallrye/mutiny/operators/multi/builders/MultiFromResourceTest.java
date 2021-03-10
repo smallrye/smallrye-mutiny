@@ -454,9 +454,8 @@ public class MultiFromResourceTest {
                 .select().first(3);
 
         multi.subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE))
-                .await()
-                .assertItems("0", "1", "2")
-                .assertCompleted();
+                .awaitCompletion()
+                .assertItems("0", "1", "2");
 
         assertThat(resource.subscribed).isTrue();
         assertThat(resource.onCompleteSubscribed).isFalse();
@@ -474,9 +473,8 @@ public class MultiFromResourceTest {
                 .select().first(3);
 
         multi.subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE))
-                .await()
-                .assertItems("0", "1", "2")
-                .assertCompleted();
+                .awaitCompletion()
+                .assertItems("0", "1", "2");
 
         assertThat(resource.subscribed).isTrue();
         assertThat(resource.onCompleteSubscribed).isFalse();
@@ -494,9 +492,8 @@ public class MultiFromResourceTest {
                 .select().first(3);
 
         multi.subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE))
-                .await()
-                .assertItems("0", "1", "2")
-                .assertCompleted();
+                .awaitCompletion()
+                .assertItems("0", "1", "2");
 
         assertThat(resource.subscribed).isTrue();
         assertThat(resource.onCompleteSubscribed).isFalse();
@@ -515,7 +512,7 @@ public class MultiFromResourceTest {
                 .select().first(3);
 
         multi.subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE))
-                .await()
+                .awaitFailure()
                 .assertItems("in transaction")
                 .assertFailedWith(IOException.class, "boom");
 
@@ -536,7 +533,7 @@ public class MultiFromResourceTest {
                 .select().first(3);
 
         multi.subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE))
-                .await()
+                .awaitFailure()
                 .assertItems("in transaction")
                 .assertFailedWith(IOException.class, "commit failed");
 
@@ -558,7 +555,7 @@ public class MultiFromResourceTest {
                 .select().first(3);
 
         multi.subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE))
-                .await()
+                .awaitFailure()
                 .assertItems("in transaction")
                 .assertFailedWith(NullPointerException.class, "`null`");
 
@@ -578,7 +575,7 @@ public class MultiFromResourceTest {
                         FakeTransactionalResource::cancel);
 
         multi.subscribe().withSubscriber(AssertSubscriber.create(20))
-                .await()
+                .awaitFailure()
                 .assertFailedWith(CompositeException.class, "boom")
                 .assertFailedWith(CompositeException.class, "rollback failed");
 
@@ -599,7 +596,7 @@ public class MultiFromResourceTest {
                         FakeTransactionalResource::cancel);
 
         multi.subscribe().withSubscriber(AssertSubscriber.create(20))
-                .await()
+                .awaitFailure()
                 .assertFailedWith(CompositeException.class, "boom")
                 .assertFailedWith(CompositeException.class, "`null`");
 
@@ -655,8 +652,7 @@ public class MultiFromResourceTest {
                 })
                 .select().first(5);
         multi.subscribe().withSubscriber(AssertSubscriber.create(20))
-                .await()
-                .assertCompleted()
+                .awaitCompletion()
                 .assertItems(0L, 1L, 2L, 3L, 4L);
         assertThat(subscribed).isTrue();
     }
@@ -672,8 +668,7 @@ public class MultiFromResourceTest {
                         FakeTransactionalResource::cancel)
                 .subscribe(subscriber);
         subscriber
-                .await()
-                .assertCompleted()
+                .awaitCompletion()
                 .cancel();
 
         assertThat(resource.onCompleteSubscribed).isTrue();
@@ -692,7 +687,7 @@ public class MultiFromResourceTest {
                         FakeTransactionalResource::cancel)
                 .subscribe(subscriber);
         subscriber
-                .await()
+                .awaitFailure()
                 .assertFailedWith(IOException.class, "boom")
                 .cancel();
 

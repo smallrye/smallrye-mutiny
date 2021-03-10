@@ -4,12 +4,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 import org.junit.jupiter.api.Test;
 
+import io.smallrye.mutiny.TestException;
+import io.smallrye.mutiny.TimeoutException;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.subscription.UniEmitter;
 
@@ -31,15 +34,16 @@ class UniAssertSubscriberTest {
                 .isInstanceOf(AssertionError.class);
     }
 
+    @SuppressWarnings("deprecation")
     @Test
     void testAwait() {
         UniAssertSubscriber<Integer> subscriber = Uni.createFrom().item(123)
                 .subscribe().withSubscriber(new UniAssertSubscriber<>());
 
+        assertThat(subscriber.awaitItem().getItem()).isEqualTo(123);
         subscriber.await();
         subscriber.assertCompleted();
         subscriber.assertTerminated();
-        subscriber.assertItem(123);
     }
 
     @Test
@@ -197,8 +201,8 @@ class UniAssertSubscriberTest {
         UniAssertSubscriber<String> subscriber = UniAssertSubscriber.create();
         subscriber.onSubscribe(() -> {
         });
-        subscriber.onItem("Yo");
-        subscriber.onItem("Yo");
+        subscriber.onItem("Yo1");
+        subscriber.onItem("Yo2");
 
         assertThatThrownBy(subscriber::assertSignalsReceivedInOrder)
                 .isInstanceOf(AssertionError.class)
@@ -210,8 +214,8 @@ class UniAssertSubscriberTest {
         UniAssertSubscriber<String> subscriber = UniAssertSubscriber.create();
         subscriber.onSubscribe(() -> {
         });
-        subscriber.onFailure(new RuntimeException("Yo"));
-        subscriber.onFailure(new RuntimeException("Yo"));
+        subscriber.onFailure(new RuntimeException("Yo1"));
+        subscriber.onFailure(new RuntimeException("Yo2"));
 
         assertThatThrownBy(subscriber::assertSignalsReceivedInOrder)
                 .isInstanceOf(AssertionError.class)
@@ -229,5 +233,114 @@ class UniAssertSubscriberTest {
         assertThatThrownBy(subscriber::assertSignalsReceivedInOrder)
                 .isInstanceOf(AssertionError.class)
                 .hasMessageContaining("There are both onItem and onFailure");
+    }
+
+    @Test
+    public void testAwaitSubscription() {
+        // already subscribed
+        UniAssertSubscriber<Integer> subscriber = Uni.createFrom().item(1)
+                .subscribe().withSubscriber(UniAssertSubscriber.create());
+        assertThat(subscriber.awaitSubscription()).isSameAs(subscriber);
+
+        // Delay
+        subscriber = Uni.createFrom().item(1)
+                .onSubscribe().call(x -> Uni.createFrom().item(x).onItem().delayIt().by(Duration.ofSeconds(1)))
+                .subscribe().withSubscriber(UniAssertSubscriber.create());
+        assertThat(subscriber.awaitSubscription()).isSameAs(subscriber);
+
+        subscriber = Uni.createFrom().item(1)
+                .onSubscribe().call(x -> Uni.createFrom().item(x).onItem().delayIt().by(Duration.ofSeconds(1)))
+                .subscribe().withSubscriber(UniAssertSubscriber.create());
+        assertThat(subscriber.awaitSubscription(Duration.ofSeconds(5))).isSameAs(subscriber);
+
+        // timeout
+        subscriber = Uni.createFrom().item(1)
+                .onSubscribe().call(x -> Uni.createFrom().item(x).onItem().delayIt().by(Duration.ofSeconds(10)))
+                .subscribe().withSubscriber(UniAssertSubscriber.create());
+        UniAssertSubscriber<Integer> tmp = subscriber;
+        assertThatThrownBy(() -> tmp.awaitSubscription(Duration.ofMillis(100))).isInstanceOf(AssertionError.class)
+                .hasMessageContaining("subscription").hasMessageContaining("100 ms");
+    }
+
+    @Test
+    public void testAwaitItem() {
+        UniAssertSubscriber<Integer> subscriber = Uni.createFrom().item(1)
+                .subscribe().withSubscriber(UniAssertSubscriber.create());
+        assertThat(subscriber.awaitItem().getItem()).isEqualTo(1);
+
+        // Delay
+        subscriber = Uni.createFrom().item(1)
+                .onItem().call(() -> Uni.createFrom().voidItem()
+                        .onItem().delayIt().by(Duration.ofSeconds(1)))
+                .subscribe().withSubscriber(UniAssertSubscriber.create());
+        assertThat(subscriber.awaitItem().getItem()).isEqualTo(1);
+
+        subscriber = Uni.createFrom().item(1)
+                .onItem().call(() -> Uni.createFrom().voidItem()
+                        .onItem().delayIt().by(Duration.ofSeconds(1)))
+                .subscribe().withSubscriber(UniAssertSubscriber.create());
+        assertThat(subscriber.awaitItem(Duration.ofSeconds(5)).getItem()).isEqualTo(1);
+
+        // timeout
+        subscriber = Uni.createFrom().item(1)
+                .onItem().call(() -> Uni.createFrom().voidItem()
+                        .onItem().delayIt().by(Duration.ofSeconds(10)))
+                .subscribe().withSubscriber(UniAssertSubscriber.create());
+        UniAssertSubscriber<Integer> tmp = subscriber;
+        assertThatThrownBy(() -> tmp.awaitItem(Duration.ofMillis(100))).isInstanceOf(AssertionError.class)
+                .hasMessageContaining("item").hasMessageContaining("100 ms");
+    }
+
+    @Test
+    public void testAwaitFailure() {
+        UniAssertSubscriber<Integer> subscriber = Uni.createFrom().<Integer> failure(new TestException())
+                .subscribe().withSubscriber(UniAssertSubscriber.create());
+        assertThat(subscriber.awaitFailure()).isSameAs(subscriber);
+
+        assertThat(
+                subscriber.awaitFailure(t -> assertThat(t).isInstanceOf(TestException.class))).isSameAs(subscriber);
+
+        UniAssertSubscriber<Integer> tmp = subscriber;
+        Consumer<Throwable> failedValidation = t -> assertThat(t).isInstanceOf(IOException.class);
+        Consumer<Throwable> passedValidation = t -> assertThat(t).isInstanceOf(TestException.class);
+
+        assertThatThrownBy(() -> tmp.awaitFailure(failedValidation))
+                .isInstanceOf(AssertionError.class).hasMessageContaining("validation");
+
+        // Delay
+        subscriber = Uni.createFrom().<Integer> failure(new TestException())
+                .onFailure().call(() -> Uni.createFrom().voidItem()
+                        .onItem().delayIt().by(Duration.ofSeconds(1)))
+                .subscribe().withSubscriber(UniAssertSubscriber.create());
+        assertThat(subscriber.awaitFailure()).isSameAs(subscriber);
+
+        subscriber = Uni.createFrom().<Integer> failure(new TestException())
+                .onFailure().call(() -> Uni.createFrom().item(0)
+                        .onItem().delayIt().by(Duration.ofSeconds(1)))
+                .subscribe().withSubscriber(UniAssertSubscriber.create());
+        assertThat(subscriber.awaitFailure(passedValidation)).isSameAs(subscriber);
+
+        subscriber = Uni.createFrom().<Integer> failure(new TestException())
+                .onFailure().call(() -> Uni.createFrom().voidItem()
+                        .onItem().delayIt().by(Duration.ofSeconds(1)))
+                .subscribe().withSubscriber(UniAssertSubscriber.create());
+        assertThat(subscriber.awaitFailure(Duration.ofSeconds(5))).isSameAs(subscriber);
+
+        // timeout
+        subscriber = Uni.createFrom().<Integer> failure(new TestException())
+                .onFailure().call(() -> Uni.createFrom().voidItem()
+                        .onItem().delayIt().by(Duration.ofSeconds(10)))
+                .subscribe().withSubscriber(UniAssertSubscriber.create());
+        UniAssertSubscriber<Integer> tmp2 = subscriber;
+        assertThatThrownBy(() -> tmp2.awaitFailure(Duration.ofMillis(100))).isInstanceOf(AssertionError.class)
+                .hasMessageContaining("failure").hasMessageContaining("100 ms");
+    }
+
+    @Test
+    public void testFailureWithNoMessage() {
+        Uni.createFrom().failure(new TimeoutException())
+                .subscribe().withSubscriber(UniAssertSubscriber.create())
+                .awaitFailure()
+                .assertFailedWith(TimeoutException.class);
     }
 }

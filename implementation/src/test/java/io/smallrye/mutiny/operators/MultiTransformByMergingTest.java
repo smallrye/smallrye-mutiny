@@ -68,7 +68,7 @@ public class MultiTransformByMergingTest {
         AssertSubscriber<Integer> subscriber = merged.subscribe()
                 .withSubscriber(AssertSubscriber.create(1000));
 
-        subscriber.await();
+        subscriber.awaitCompletion();
         List<Integer> items = subscriber.getItems();
         assertThat(Collections.singleton(items)).noneSatisfy(list -> assertThat(list).isSorted());
     }
