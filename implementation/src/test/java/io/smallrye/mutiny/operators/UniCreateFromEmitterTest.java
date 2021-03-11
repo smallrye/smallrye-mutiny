@@ -139,7 +139,7 @@ public class UniCreateFromEmitterTest {
 
         subscriber.assertCompleted();
         assertThat(reference.get()).isInstanceOf(DefaultUniEmitter.class)
-                .satisfies(e -> ((DefaultUniEmitter<? super Void>) e).isTerminated());
+                .satisfies(e -> assertThat(((DefaultUniEmitter<? super Void>) e).isTerminated()).isTrue());
     }
 
     @Test

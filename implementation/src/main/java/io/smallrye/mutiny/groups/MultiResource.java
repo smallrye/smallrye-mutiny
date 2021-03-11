@@ -40,12 +40,16 @@ public class MultiResource<R, I> {
      * @return the multi
      */
     public Multi<I> withFinalizer(Consumer<? super R> finalizer) {
+        Function<? super R, Uni<Void>> actual = getUniFunction(finalizer);
+        return withFinalizer(actual, (r, ignored) -> actual.apply(r), actual);
+    }
+
+    static <R> Function<? super R, Uni<Void>> getUniFunction(Consumer<? super R> finalizer) {
         Consumer<? super R> callback = Infrastructure.decorate(ParameterValidation.nonNull(finalizer, "finalizer"));
-        Function<? super R, Uni<Void>> actual = r -> {
+        return r -> {
             callback.accept(r);
             return Uni.createFrom().voidItem();
         };
-        return withFinalizer(actual, (r, ignored) -> actual.apply(r), actual);
     }
 
     /**

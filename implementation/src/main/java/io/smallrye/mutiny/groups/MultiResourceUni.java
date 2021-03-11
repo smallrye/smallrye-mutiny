@@ -1,5 +1,7 @@
 package io.smallrye.mutiny.groups;
 
+import static io.smallrye.mutiny.groups.MultiResource.getUniFunction;
+
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -41,11 +43,7 @@ public class MultiResourceUni<R, I> {
      * @return the multi
      */
     public Multi<I> withFinalizer(Consumer<? super R> finalizer) {
-        Consumer<? super R> callback = Infrastructure.decorate(ParameterValidation.nonNull(finalizer, "finalizer"));
-        Function<? super R, Uni<Void>> actual = r -> {
-            callback.accept(r);
-            return Uni.createFrom().voidItem();
-        };
+        Function<? super R, Uni<Void>> actual = getUniFunction(finalizer);
         return withFinalizer(actual, (r, ignored) -> actual.apply(r), actual);
     }
 
