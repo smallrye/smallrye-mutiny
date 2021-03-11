@@ -1,6 +1,7 @@
 package io.smallrye.mutiny.operators;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
@@ -34,6 +35,24 @@ public class UniRepeatTest {
     }
 
     @RepeatedTest(10)
+    public void testRepeatAtMostWithDelay() {
+        List<Long> times = new ArrayList<>();
+        Uni<Integer> uni = Uni.createFrom().item(1)
+                .onItem().invoke(() -> times.add(System.currentTimeMillis()));
+        Duration delay = Duration.ofMillis(100);
+        List<Integer> list = uni
+                .repeat().withDelay(delay)
+                .atMost(3)
+                .collect().asList()
+                .await().atMost(Duration.ofSeconds(5));
+        assertThat(list).hasSize(3).contains(1, 1, 1);
+
+        assertThat(times).hasSize(3);
+        assertThat(times.get(0) + delay.toMillis()).isLessThanOrEqualTo(times.get(1));
+        assertThat(times.get(1) + delay.toMillis()).isLessThanOrEqualTo(times.get(2));
+    }
+
+    @RepeatedTest(10)
     public void testRepeatUntil() {
         List<String> items = Arrays.asList("a", "b", "c", "d", "e", "f");
         Iterator<String> iterator = items.iterator();
@@ -42,6 +61,26 @@ public class UniRepeatTest {
                 .collect().asList()
                 .await().atMost(Duration.ofSeconds(5));
         assertThat(list).hasSize(3).contains("a", "b", "c");
+    }
+
+    @RepeatedTest(10)
+    public void testRepeatUntilWithDelay() {
+        List<Long> times = new ArrayList<>();
+        List<String> items = Arrays.asList("a", "b", "c", "d", "e", "f");
+        Iterator<String> iterator = items.iterator();
+        Uni<String> uni = Uni.createFrom().item(iterator::next)
+                .onItem().invoke(() -> times.add(System.currentTimeMillis()));
+        Duration delay = Duration.ofMillis(100);
+
+        List<String> list = uni
+                .repeat().withDelay(delay).until(v -> v.equalsIgnoreCase("d"))
+                .collect().asList()
+                .await().atMost(Duration.ofSeconds(5));
+        assertThat(list).hasSize(3).contains("a", "b", "c");
+        assertThat(times).hasSize(4); // d has been emitted.
+        assertThat(times.get(0) + delay.toMillis()).isLessThanOrEqualTo(times.get(1));
+        assertThat(times.get(1) + delay.toMillis()).isLessThanOrEqualTo(times.get(2));
+        assertThat(times.get(2) + delay.toMillis()).isLessThanOrEqualTo(times.get(3));
     }
 
     @RepeatedTest(10)
@@ -63,6 +102,33 @@ public class UniRepeatTest {
     }
 
     @RepeatedTest(10)
+    public void testRepeatWhilstWithDelay() {
+        List<Long> times = new ArrayList<>();
+        Duration delay = Duration.ofMillis(100);
+
+        Page page1 = new Page(Arrays.asList(1, 2, 3), 1);
+        Page page2 = new Page(Arrays.asList(4, 5, 6), 2);
+        Page page3 = new Page(Arrays.asList(7, 8), -1);
+
+        Page[] pages = new Page[] { page1, page2, page3 };
+        AtomicInteger cursor = new AtomicInteger();
+        AssertSubscriber<Integer> subscriber = Multi.createBy().repeating()
+                .uni(() -> Uni.createFrom().item(pages[cursor.getAndIncrement()]).onItem()
+                        .invoke(() -> times.add(System.currentTimeMillis())))
+                .withDelay(delay).whilst(p -> p.next != -1)
+                .onItem().transformToMulti(p -> Multi.createFrom().iterable(p.items)).concatenate()
+                .subscribe().withSubscriber(AssertSubscriber.create(50));
+
+        subscriber.await()
+                .assertItems(1, 2, 3, 4, 5, 6, 7, 8);
+
+        assertThat(times).hasSize(3);
+        for (int i = 0; i < times.size() - 1; i++) {
+            assertThat(times.get(i) + delay.toMillis()).isLessThanOrEqualTo(times.get(i + 1));
+        }
+    }
+
+    @Test
     public void testRepeat0() {
         assertThrows(IllegalArgumentException.class, () -> Uni.createFrom().item(0)
                 .repeat().atMost(0)
@@ -70,7 +136,7 @@ public class UniRepeatTest {
                 .await().indefinitely());
     }
 
-    @RepeatedTest(10)
+    @Test
     public void testRepeatUntilWithNullPredicate() {
         assertThrows(IllegalArgumentException.class, () -> Uni.createFrom().item(0)
                 .repeat().until(null)
@@ -78,7 +144,7 @@ public class UniRepeatTest {
                 .await().indefinitely());
     }
 
-    @RepeatedTest(10)
+    @Test
     public void testRepeatWhilstWithNullPredicate() {
         assertThrows(IllegalArgumentException.class, () -> Uni.createFrom().item(0)
                 .repeat().whilst(null)
@@ -636,7 +702,8 @@ public class UniRepeatTest {
         }
     }
 
-    @Test // https://github.com/smallrye/smallrye-mutiny/issues/447
+    @Test
+    // https://github.com/smallrye/smallrye-mutiny/issues/447
     void testThatRepetitionIsStoppedOnFailure() {
         class TestSupplier implements Supplier<Integer> {
             private final AtomicInteger iter = new AtomicInteger();
@@ -660,7 +727,8 @@ public class UniRepeatTest {
         assertThat(result).isEqualTo(123);
     }
 
-    @Test // https://github.com/smallrye/smallrye-mutiny/issues/447
+    @Test
+    // https://github.com/smallrye/smallrye-mutiny/issues/447
     void testThatRepetitionContinueIfUniEmitsNull() {
         class TestSupplier implements Supplier<Integer> {
             private final AtomicInteger iter = new AtomicInteger();
@@ -684,7 +752,8 @@ public class UniRepeatTest {
 
     }
 
-    @Test // https://github.com/smallrye/smallrye-mutiny/issues/447
+    @Test
+    // https://github.com/smallrye/smallrye-mutiny/issues/447
     void testThatRepetitionContinueIfUniEmitsNullInTheMiuddleOfTheSequence() {
         class TestSupplier implements Supplier<Integer> {
             private final AtomicInteger iter = new AtomicInteger();
@@ -707,6 +776,35 @@ public class UniRepeatTest {
 
         assertThat(list).containsExactly(1, 2, 4, 5, 6);
 
+    }
+
+    @Test
+    public void testDelayAndCancellationWhileWaiting() throws InterruptedException {
+        AssertSubscriber<Integer> subscriber = Multi.createBy().repeating().supplier(() -> 1)
+                .withDelay(Duration.ofSeconds(1))
+                .atMost(2)
+                .subscribe().withSubscriber(AssertSubscriber.create(2));
+
+        await().until(() -> subscriber.getItems().size() == 1);
+        subscriber.cancel();
+
+        Thread.sleep(1500);
+        assertThat(subscriber.getItems()).hasSize(1);
+    }
+
+    @Test
+    public void testInvalidDelays() {
+        assertThatThrownBy(() -> Multi.createBy().repeating().supplier(() -> 1)
+                .withDelay(Duration.ofSeconds(0))
+                .atMost(2)).isInstanceOf(IllegalArgumentException.class).hasMessageContaining("delay");
+
+        assertThatThrownBy(() -> Multi.createBy().repeating().supplier(() -> 1)
+                .withDelay(Duration.ofSeconds(-1))
+                .atMost(2)).isInstanceOf(IllegalArgumentException.class).hasMessageContaining("delay");
+
+        assertThatThrownBy(() -> Multi.createBy().repeating().supplier(() -> 1)
+                .withDelay(null)
+                .atMost(2)).isInstanceOf(IllegalArgumentException.class).hasMessageContaining("delay");
     }
 
 }
