@@ -1,14 +1,14 @@
 package io.smallrye.mutiny.groups;
 
+import java.time.Duration;
+import java.util.function.Predicate;
+
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.multi.MultiRepeatUntilOp;
 import io.smallrye.mutiny.operators.multi.MultiRepeatWhilstOp;
-
-import java.time.Duration;
-import java.util.function.Predicate;
 
 /**
  * Repeatedly subscribes to a given {@link Uni} to generate a {@link Multi}.
@@ -79,7 +79,7 @@ public class UniRepeat<T> {
      *
      * @param times the number of re-subscription, must be strictly positive, 1 is equivalent to {@link Uni#toMulti()}
      * @return the {@link Multi} containing the items from the upstream {@link Uni}, resubscribed at most {@code times}
-     * times.
+     *         times.
      */
     public Multi<T> atMost(long times) {
         long actual = ParameterValidation.positive(times, "times");
@@ -101,7 +101,7 @@ public class UniRepeat<T> {
      *
      * @param predicate the predicate, must not be {@code null}
      * @return the {@link Multi} containing the items from the upstream {@link Uni}, resubscribed until the predicate
-     * returns {@code true}.
+     *         returns {@code true}.
      */
     public Multi<T> until(Predicate<T> predicate) {
         Predicate<T> actual = Infrastructure.decorate(ParameterValidation.nonNull(predicate, "predicate"));
@@ -125,7 +125,7 @@ public class UniRepeat<T> {
      *
      * @param predicate the predicate, must not be {@code null}
      * @return the {@link Multi} containing the items from the upstream {@link Uni}, resubscribed until the predicate
-     * returns {@code true}.
+     *         returns {@code true}.
      */
     public Multi<T> whilst(Predicate<T> predicate) {
         Predicate<T> actual = Infrastructure.decorate(ParameterValidation.nonNull(predicate, "predicate"));

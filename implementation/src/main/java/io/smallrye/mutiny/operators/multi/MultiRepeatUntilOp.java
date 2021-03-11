@@ -68,37 +68,33 @@ public class MultiRepeatUntilOp<T> extends AbstractMultiOperator<T, T> implement
          * Subscribes to the source again via trampolining.
          */
         protected void subscribeNext() {
-            delay(() -> {
-                if (wip.getAndIncrement() == 0) {
-                    int missed = 1;
-                    while (!isCancelled()) {
-                        long p = emitted;
-                        if (p != 0L) {
-                            emitted = 0L;
-                            emitted(p);
-                        }
-                        upstream.subscribe(this);
-
-                        missed = wip.addAndGet(-missed);
-                        if (missed == 0) {
-                            break;
-                        }
-                    }
-                }
-            });
-        }
-
-        private void delay(Runnable actionToRunAfterDelay) {
             if (delay == null) {
-                actionToRunAfterDelay.run();
+                drainLoop();
             } else {
                 delay.subscribe().with(
-                        ignored -> actionToRunAfterDelay.run(),
+                        ignored -> drainLoop(),
                         f -> {
-                            System.out.println("Failed with " + f);
                             cancel();
                             downstream.onFailure(f);
                         });
+            }
+        }
+
+        private void drainLoop() {
+            if (wip.getAndIncrement() == 0) {
+                int missed = 1;
+                while (!isCancelled()) {
+                    long p = emitted;
+                    if (p != 0L) {
+                        emitted = 0L;
+                        emitted(p);
+                    }
+                    upstream.subscribe(this);
+                    missed = wip.addAndGet(-missed);
+                    if (missed == 0) {
+                        break;
+                    }
+                }
             }
         }
     }
