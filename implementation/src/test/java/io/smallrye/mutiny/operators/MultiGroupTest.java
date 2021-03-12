@@ -896,8 +896,12 @@ public class MultiGroupTest {
 
         emitter.get().fail(new TestException("boom"));
 
-        s1.assertFailedWith(TestException.class, "boom");
-        s2.assertFailedWith(TestException.class, "boom");
+        s1
+                .awaitFailure()
+                .assertFailedWith(TestException.class, "boom");
+        s2
+                .awaitFailure()
+                .assertFailedWith(TestException.class, "boom");
         subscriber.assertFailedWith(TestException.class, "boom");
     }
 
