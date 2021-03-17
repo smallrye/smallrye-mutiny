@@ -16,7 +16,8 @@ jobs:
         java: [
           {'version': '8', 'source': 'releases'},
           {'version': '11', 'source': 'releases'},
-          {'version': '14', 'source': 'releases'}
+          {'version': '15', 'source': 'releases'},
+          {'version': '16', 'source': 'nightly'}
         ]
     name: Build with Java ${{ matrix.java.version }} (OpenJDK)
     steps:
@@ -29,23 +30,6 @@ jobs:
         with:
           version: ${{ matrix.java.version }}
           source: ${{ matrix.java.source }}
-      - name: Build with Maven
-        run: mvn -B clean verify
-
-  java15:
-    runs-on: ubuntu-20.04
-    name: Build with Java 15 (Zulu)
-    steps:
-      - uses: actions/cache@v2
-        with:
-          path: ~/.m2/repository
-          key: maven-java-15
-      - uses: actions/checkout@v2
-      - name: Install JDK 15
-        uses: actions/setup-java@v1.4.3
-        with:
-          java-version: '15-ea'
-          architecture: x64
       - name: Build with Maven
         run: mvn -B clean verify
 
