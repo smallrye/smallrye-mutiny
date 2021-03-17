@@ -31,6 +31,8 @@ jobs:
           version: ${{ matrix.java.version }}
           source: ${{ matrix.java.source }}
       - name: Build with Maven
+        env:
+          MAVEN_OPTS: ${{ matrix.java.opts }}
         run: mvn -B clean verify
 
   snapshot:
