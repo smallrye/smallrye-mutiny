@@ -10,6 +10,7 @@ import java.util.concurrent.RejectedExecutionException;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.reactivestreams.Subscription;
 
@@ -32,17 +33,16 @@ public class MultiEmitOnTest {
         executor.shutdown();
     }
 
-    @Test
+    @RepeatedTest(10)
     public void testWithSequenceOfItems() {
         AssertSubscriber<Integer> subscriber = Multi.createFrom().items(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
                 .emitOn(executor)
                 .subscribe().withSubscriber(AssertSubscriber.create());
 
-        subscriber.request(2)
-                .awaitNextItems(2)
+        subscriber
+                .awaitNextItems(2, 2)
                 .assertItems(1, 2)
-                .request(20)
-                .awaitNextItems(8)
+                .awaitNextItems(8, 20)
                 .assertItems(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
     }
 

@@ -487,12 +487,34 @@ public class AssertSubscriberTest {
                 .awaitNextItems(2)).isInstanceOf(AssertionError.class)
                         .hasMessageContaining("completion").hasMessageContaining("item");
 
+        assertThatThrownBy(() -> Multi.createFrom().empty()
+                .subscribe().withSubscriber(AssertSubscriber.create(1))
+                .awaitNextItems(2, 1)).isInstanceOf(AssertionError.class)
+                .hasMessageContaining("completion").hasMessageContaining("item");
+
+        assertThatThrownBy(() -> Multi.createFrom().empty()
+                .subscribe().withSubscriber(AssertSubscriber.create(1))
+                .awaitNextItems(2, 1, Duration.ofSeconds(1))).isInstanceOf(AssertionError.class)
+                .hasMessageContaining("completion").hasMessageContaining("item");
+
         // Already failed
         assertThatThrownBy(() -> Multi.createFrom().failure(new TestException())
                 .subscribe().withSubscriber(AssertSubscriber.create(1))
                 .awaitNextItems(2)).isInstanceOf(AssertionError.class)
                         .hasMessageContaining("failure").hasMessageContaining("item")
                         .hasMessageContaining(TestException.class.getName());
+
+        assertThatThrownBy(() -> Multi.createFrom().failure(new TestException())
+                .subscribe().withSubscriber(AssertSubscriber.create(1))
+                .awaitNextItems(2, 1)).isInstanceOf(AssertionError.class)
+                .hasMessageContaining("failure").hasMessageContaining("item")
+                .hasMessageContaining(TestException.class.getName());
+
+        assertThatThrownBy(() -> Multi.createFrom().failure(new TestException())
+                .subscribe().withSubscriber(AssertSubscriber.create(1))
+                .awaitNextItems(2, 1, Duration.ofSeconds(1))).isInstanceOf(AssertionError.class)
+                .hasMessageContaining("failure").hasMessageContaining("item")
+                .hasMessageContaining(TestException.class.getName());
 
         // Completion instead of item
         assertThatThrownBy(() -> Multi.createFrom().emitter(e -> e.emit(1).complete())
