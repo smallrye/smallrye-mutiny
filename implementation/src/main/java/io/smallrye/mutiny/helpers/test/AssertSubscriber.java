@@ -263,8 +263,11 @@ public class AssertSubscriber<T> implements Subscriber<T> {
     /**
      * Awaits for the next item.
      * If no item have been received before the default timeout, an {@link AssertionError} is thrown.
+     * <p>
+Note that it requests one item from the upstream.
      *
      * @return this {@link AssertSubscriber}
+     * @see #awaitNextItems(int, int)
      */
     public AssertSubscriber<T> awaitNextItem() {
         return awaitNextItems(1);
@@ -273,20 +276,26 @@ public class AssertSubscriber<T> implements Subscriber<T> {
     /**
      * Awaits for the next item.
      * If no item have been received before the given timeout, an {@link AssertionError} is thrown.
+     * <p>
+     * Note that it requests one item from the upstream.
      *
      * @param duration the timeout, must not be {@code null}
      * @return this {@link AssertSubscriber}
+     * @see #awaitNextItems(int, int)
      */
     public AssertSubscriber<T> awaitNextItem(Duration duration) {
-        return awaitNextItems(1, duration);
+        return awaitNextItems(1, 1, duration);
     }
 
     /**
      * Awaits for the next {@code number} items.
      * If not enough items have been received before the default timeout, an {@link AssertionError} is thrown.
+     * <p>
+     * This method requests {@code number} items the upstream.
      *
-     * @param number the number of item to expect, must not be 0 or negative.
+     * @param number the number of items to expect, must be neither 0 nor negative.
      * @return this {@link AssertSubscriber}
+     * @see #awaitNextItems(int, int)
      */
     public AssertSubscriber<T> awaitNextItems(int number) {
         return awaitNextItems(number, DEFAULT_TIMEOUT);
@@ -294,13 +303,40 @@ public class AssertSubscriber<T> implements Subscriber<T> {
 
     /**
      * Awaits for the next {@code number} items.
-     * If not enough items have been received before the given timeout, an {@link AssertionError} is thrown.
+     * If not enough items have been received before the default timeout, an {@link AssertionError} is thrown.
      *
-     * @param number the number of item to expect, must not be 0 or negative.
+     * @param number the number of items to expect, must neither be 0 nor negative.
+     * @param request if not 0, the number of items to request upstream.
+     * @return this {@link AssertSubscriber}
+     */
+    public AssertSubscriber<T> awaitNextItems(int number, int request) {
+        return awaitNextItems(number, request, DEFAULT_TIMEOUT);
+    }
+
+    /**
+     * Awaits for the next {@code number} items.
+     * If not enough items have been received before the given timeout, an {@link AssertionError} is thrown.
+     * <p>
+     * This method requests {@code number} items upstream.
+     *
+     * @param number the number of items to expect, must be neither 0 nor negative.
      * @param duration the timeout, must not be {@code null}
      * @return this {@link AssertSubscriber}
      */
     public AssertSubscriber<T> awaitNextItems(int number, Duration duration) {
+        return awaitNextItems(number, number, duration);
+    }
+
+    /**
+     * Awaits for the next {@code number} items.
+     * If not enough items have been received before the given timeout, an {@link AssertionError} is thrown.
+     *
+     * @param number the number of items to expect, must be neither 0 nor negative.
+     * @param request if not 0, the number of items to request upstream.
+     * @param duration the timeout, must not be {@code null}
+     * @return this {@link AssertSubscriber}
+     */
+    public AssertSubscriber<T> awaitNextItems(int number, int request, Duration duration) {
         if (hasCompleted() || getFailure() != null) {
             if (hasCompleted()) {
                 throw new AssertionError("Expecting a next items, but a completion event has already being received");
@@ -310,7 +346,7 @@ public class AssertSubscriber<T> implements Subscriber<T> {
             }
         }
 
-        awaitNextItemEvents(number, duration);
+        awaitNextItemEvents(number, request, duration);
 
         return this;
     }
@@ -320,7 +356,9 @@ public class AssertSubscriber<T> implements Subscriber<T> {
      * this method).
      * If not enough items have been received before the default timeout, an {@link AssertionError} is thrown.
      *
-     * @param number the number of item to expect, must not be 0 or negative.
+     * Unlike {@link #awaitNextItems(int, int)}, this method does not request items from the upstream.
+     *
+     * @param number the number of items to expect, must be neither 0 nor negative.
      * @return this {@link AssertSubscriber}
      */
     public AssertSubscriber<T> awaitItems(int number) {
@@ -332,7 +370,9 @@ public class AssertSubscriber<T> implements Subscriber<T> {
      * this method).
      * If not enough items have been received before the given timeout, an {@link AssertionError} is thrown.
      *
-     * @param number the number of item to expect, must not be 0 or negative.
+     * Unlike {@link #awaitNextItems(int, int)}, this method does not requests items from the upstream.
+     *
+     * @param number the number of items to expect, must be neither 0 nor negative.
      * @param duration the timeout, must not be {@code null}
      * @return this {@link AssertSubscriber}
      */
@@ -521,11 +561,15 @@ public class AssertSubscriber<T> implements Subscriber<T> {
 
     private final List<EventListener> eventListeners = new CopyOnWriteArrayList<>();
 
-    private void awaitNextItemEvents(int number, Duration duration) {
+    private void awaitNextItemEvents(int number, int request, Duration duration) {
         NextItemTask<T> task = new NextItemTask<>(number, this);
+        CompletableFuture<Void> future = task.future();
+        if (request > 0) {
+            request(request);
+        }
         int size = items.size();
         try {
-            task.future().get(duration.toMillis(), TimeUnit.MILLISECONDS);
+            future.get(duration.toMillis(), TimeUnit.MILLISECONDS);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         } catch (ExecutionException e) {
@@ -533,7 +577,8 @@ public class AssertSubscriber<T> implements Subscriber<T> {
             int received = items.size() - size;
             if (isCancelled()) {
                 throw new AssertionError(
-                        "Expected " + number + " items, but received a cancellation event while waiting. Only " + received
+                        "Expected " + number + " items, but received a cancellation event while waiting. Only "
+                                + received
                                 + " item(s) have been received.");
             } else if (hasCompleted()) {
                 throw new AssertionError(
@@ -541,7 +586,8 @@ public class AssertSubscriber<T> implements Subscriber<T> {
                                 + " item(s) have been received.");
             } else {
                 throw new AssertionError(
-                        "Expected " + number + " items, but received a failure event while waiting: " + getFailure() + ". Only "
+                        "Expected " + number + " items, but received a failure event while waiting: " + getFailure()
+                                + ". Only "
                                 + received + " item(s) have been received.");
             }
         } catch (TimeoutException e) {
@@ -563,11 +609,13 @@ public class AssertSubscriber<T> implements Subscriber<T> {
             // Terminal event received
             if (isCancelled()) {
                 throw new AssertionError(
-                        "Expected " + expected + " items, but received a cancellation event while waiting. Only " + items.size()
+                        "Expected " + expected + " items, but received a cancellation event while waiting. Only "
+                                + items.size()
                                 + " items have been received.");
             } else if (hasCompleted()) {
                 throw new AssertionError(
-                        "Expected " + expected + " items, but received a completion event while waiting. Only " + items.size()
+                        "Expected " + expected + " items, but received a completion event while waiting. Only " + items
+                                .size()
                                 + " items have been received.");
             } else {
                 throw new AssertionError(
