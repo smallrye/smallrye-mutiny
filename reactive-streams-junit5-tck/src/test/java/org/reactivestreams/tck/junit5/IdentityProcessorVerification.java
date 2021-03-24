@@ -13,8 +13,10 @@ package org.reactivestreams.tck.junit5;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.reactivestreams.tck.TestEnvironment;
 
+@ExtendWith(TestngSkippingExtension.class)
 public abstract class IdentityProcessorVerification<T>
         extends org.reactivestreams.tck.IdentityProcessorVerification<T> {
 
