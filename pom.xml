@@ -76,7 +76,7 @@
         <rxjava2.version>2.2.21</rxjava2.version>
         <reactor-core.version>3.4.4</reactor-core.version>
         <microprofile-reactive-streams.version>1.0.1</microprofile-reactive-streams.version>
-        <microprofile-context-propagation.version>1.1</microprofile-context-propagation.version>
+        <microprofile-context-propagation.version>1.2</microprofile-context-propagation.version>
         <reactive-streams.version>1.0.3</reactive-streams.version>
         <smallrye-context-propagation.version>1.1.0</smallrye-context-propagation.version>
         <smallrye-config.version>1.10.0</smallrye-config.version>
