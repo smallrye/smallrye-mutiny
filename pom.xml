@@ -69,6 +69,7 @@
         <module>context-propagation</module>
         <module>reactive-streams-junit5-tck</module>
         <module>kotlin</module>
+        <module>zero</module>
         <module>bom</module>
     </modules>
 
