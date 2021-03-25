@@ -2,11 +2,15 @@ package io.smallrye.mutiny.zero;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Supplier;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.reactivestreams.Publisher;
 
 import io.smallrye.mutiny.helpers.test.AssertSubscriber;
 
@@ -154,4 +158,59 @@ class ZeroPublisherTest {
             sub.assertFailedWith(NullPointerException.class, "null value");
         }
     }
+
+    @Nested
+    @DisplayName("Publisher from streams")
+    class Streams {
+
+        @Test
+        @DisplayName("Items from a null stream")
+        void fromNull() {
+            Assertions.assertThrows(NullPointerException.class, () -> ZeroPublisher.fromStream(null));
+        }
+
+        @Test
+        @DisplayName("Items from a stream (unbounded)")
+        void unbounded() {
+            Supplier<Stream<Integer>> supplier = () -> IntStream.range(1, 5).boxed();
+            Publisher<Integer> publisher = ZeroPublisher.fromStream(supplier);
+
+            for (int i = 0; i < 3; i++) {
+                AssertSubscriber<Object> sub = AssertSubscriber.create(Long.MAX_VALUE);
+                publisher.subscribe(sub);
+                sub.assertItems(1, 2, 3, 4);
+                sub.assertCompleted();
+            }
+        }
+
+        @Test
+        @DisplayName("Items from a stream (request batches)")
+        void batches() {
+            AssertSubscriber<Object> sub = AssertSubscriber.create();
+            Supplier<Stream<Integer>> supplier = () -> IntStream.range(1, 5).boxed();
+            ZeroPublisher.fromStream(supplier).subscribe(sub);
+
+            sub.request(2L);
+            sub.assertItems(1, 2);
+            sub.request(1L);
+            sub.assertItems(1, 2, 3);
+            sub.request(Long.MAX_VALUE);
+            sub.assertItems(1, 2, 3, 4);
+        }
+
+        @Test
+        @DisplayName("Items from a stream (cancellation)")
+        void cancellation() {
+            AssertSubscriber<Object> sub = AssertSubscriber.create();
+            Supplier<Stream<Integer>> supplier = () -> IntStream.range(1, 5).boxed();
+            ZeroPublisher.fromStream(supplier).subscribe(sub);
+
+            sub.request(2L);
+            sub.assertItems(1, 2);
+            sub.cancel();
+            sub.assertItems(1, 2);
+            sub.assertNotTerminated();
+        }
+    }
+
 }
