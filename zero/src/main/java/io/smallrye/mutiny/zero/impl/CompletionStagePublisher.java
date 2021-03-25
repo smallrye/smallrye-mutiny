@@ -26,8 +26,12 @@ public class CompletionStagePublisher<T> implements Publisher<T> {
             subscriber.onSubscribe(new AlreadyCompletedSubscription());
             try {
                 T value = completableFuture.get();
-                subscriber.onNext(value);
-                subscriber.onComplete();
+                if (value == null) {
+                    subscriber.onError(new NullPointerException("The CompletionStage produced a null value"));
+                } else {
+                    subscriber.onNext(value);
+                    subscriber.onComplete();
+                }
             } catch (InterruptedException e) {
                 subscriber.onError(e);
             } catch (ExecutionException e) {
@@ -60,6 +64,8 @@ public class CompletionStagePublisher<T> implements Publisher<T> {
                     if (cancelled.compareAndSet(false, true)) {
                         if (err != null) {
                             subscriber.onError(err);
+                        } else if (value == null) {
+                            subscriber.onError(new NullPointerException("The CompletionStage produced a null value"));
                         } else {
                             subscriber.onNext(value);
                             subscriber.onComplete();

@@ -67,7 +67,13 @@ public class IterablePublisher<T> implements Publisher<T> {
 
                 while (emitted != n) {
                     if (iterator.hasNext()) {
-                        subscriber.onNext(iterator.next());
+                        T next = iterator.next();
+                        if (next == null) {
+                            cancelled = true;
+                            subscriber.onError(new NullPointerException("The iterable has a null value"));
+                            return;
+                        }
+                        subscriber.onNext(next);
                         emitted++;
                     } else {
                         subscriber.onComplete();
@@ -91,7 +97,13 @@ public class IterablePublisher<T> implements Publisher<T> {
                 if (cancelled) {
                     return;
                 }
-                subscriber.onNext(iterator.next());
+                T next = iterator.next();
+                if (next == null) {
+                    cancelled = true;
+                    subscriber.onError(new NullPointerException("The iterable has a null value"));
+                    return;
+                }
+                subscriber.onNext(next);
             }
             if (cancelled) {
                 return;

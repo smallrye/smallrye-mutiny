@@ -64,6 +64,15 @@ class ZeroPublisherTest {
             sub.cancel();
             sub.assertNotTerminated();
         }
+
+        @Test
+        @DisplayName("Items from a collection (unbounded initial request, presence of a null value)")
+        void fromItemsUnboundedWithNull() {
+            AssertSubscriber<Object> sub = AssertSubscriber.create(Long.MAX_VALUE);
+            ZeroPublisher.fromItems(1, null, 3).subscribe(sub);
+
+            sub.assertFailedWith(NullPointerException.class, "null value");
+        }
     }
 
     @Nested
@@ -99,7 +108,7 @@ class ZeroPublisherTest {
         }
 
         @Test
-        @DisplayName("Resolved CompletionStage (value)")
+        @DisplayName("Deferred CompletionStage (value)")
         void fromDeferredValue() {
             CompletableFuture<Integer> future = CompletableFuture.supplyAsync(() -> {
                 try {
@@ -115,6 +124,34 @@ class ZeroPublisherTest {
             sub.awaitNextItem();
             sub.assertItems(63);
             sub.assertCompleted();
+        }
+
+        @Test
+        @DisplayName("Resolved CompletionStage (null value)")
+        void fromResolvedNullValue() {
+            CompletableFuture<Object> future = CompletableFuture.completedFuture(null);
+            AssertSubscriber<Object> sub = AssertSubscriber.create(10);
+            ZeroPublisher.fromCompletionStage(future).subscribe(sub);
+
+            sub.assertFailedWith(NullPointerException.class, "null value");
+        }
+
+        @Test
+        @DisplayName("Deferred CompletionStage (null value)")
+        void fromDeferredNullValue() {
+            CompletableFuture<Object> future = CompletableFuture.supplyAsync(() -> {
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                return null;
+            });
+            AssertSubscriber<Object> sub = AssertSubscriber.create(10);
+            ZeroPublisher.fromCompletionStage(future).subscribe(sub);
+
+            sub.awaitFailure();
+            sub.assertFailedWith(NullPointerException.class, "null value");
         }
     }
 }
