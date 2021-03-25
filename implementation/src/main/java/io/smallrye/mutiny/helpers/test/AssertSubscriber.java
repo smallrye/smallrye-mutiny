@@ -264,7 +264,7 @@ public class AssertSubscriber<T> implements Subscriber<T> {
      * Awaits for the next item.
      * If no item have been received before the default timeout, an {@link AssertionError} is thrown.
      * <p>
-Note that it requests one item from the upstream.
+     * Note that it requests one item from the upstream.
      *
      * @return this {@link AssertSubscriber}
      * @see #awaitNextItems(int, int)
