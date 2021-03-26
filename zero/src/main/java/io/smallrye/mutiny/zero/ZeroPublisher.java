@@ -16,6 +16,7 @@ import io.smallrye.mutiny.zero.impl.StreamPublisher;
 
 public interface ZeroPublisher {
 
+    @SafeVarargs
     static <T> Publisher<T> fromItems(T... items) {
         requireNonNull(items, "The items array cannot be null");
         return fromIterable(Arrays.asList(items));

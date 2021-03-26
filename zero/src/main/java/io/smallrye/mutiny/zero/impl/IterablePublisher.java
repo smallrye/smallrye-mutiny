@@ -20,7 +20,7 @@ public class IterablePublisher<T> implements Publisher<T> {
             subscriber.onSubscribe(new AlreadyCompletedSubscription());
             subscriber.onComplete();
         } else {
-            subscriber.onSubscribe(new IteratorSubscription(iterable.iterator(), subscriber));
+            subscriber.onSubscribe(new IteratorSubscription<>(iterable.iterator(), subscriber));
         }
     }
 

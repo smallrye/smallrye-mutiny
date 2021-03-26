@@ -11,8 +11,8 @@ class IteratorSubscription<T> implements Subscription {
     private final Subscriber<? super T> subscriber;
 
     private volatile boolean cancelled = false;
-    private Iterator<T> iterator;
-    private AtomicLong requested = new AtomicLong();
+    private final Iterator<T> iterator;
+    private final AtomicLong requested = new AtomicLong();
 
     IteratorSubscription(Iterator<T> iterator, Subscriber<? super T> subscriber) {
         this.subscriber = subscriber;
