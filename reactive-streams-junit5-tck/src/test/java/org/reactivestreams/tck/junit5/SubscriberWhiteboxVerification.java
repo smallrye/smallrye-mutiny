@@ -14,6 +14,7 @@ package org.reactivestreams.tck.junit5;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.reactivestreams.tck.TestEnvironment;
 
 /**
@@ -23,6 +24,7 @@ import org.reactivestreams.tck.TestEnvironment;
  * @see org.reactivestreams.Subscriber
  * @see org.reactivestreams.Subscription
  */
+@ExtendWith(TestngSkippingExtension.class)
 public abstract class SubscriberWhiteboxVerification<T>
         extends org.reactivestreams.tck.SubscriberWhiteboxVerification<T> {
 

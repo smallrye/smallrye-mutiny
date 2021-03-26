@@ -13,12 +13,14 @@ package org.reactivestreams.tck.junit5;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 /**
  * Provides tests for verifying {@code Publisher} specification rules.
  *
  * @see org.reactivestreams.Publisher
  */
+@ExtendWith(TestngSkippingExtension.class)
 public abstract class PublisherVerification<T> extends org.reactivestreams.tck.PublisherVerification<T> {
 
     public PublisherVerification(org.reactivestreams.tck.TestEnvironment env) {
