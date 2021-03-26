@@ -57,6 +57,17 @@ class ZeroPublisherTest {
         }
 
         @Test
+        @DisplayName("Items from an array (unbounded initial request)")
+        void fromArrayUnbounded() {
+            AssertSubscriber<Object> sub = AssertSubscriber.create(Long.MAX_VALUE);
+            Integer[] array = {1, 2, 3};
+            ZeroPublisher.fromItems(array).subscribe(sub);
+
+            sub.assertItems(1, 2, 3);
+            sub.assertCompleted();
+        }
+
+        @Test
         @DisplayName("Items from a collection (midway cancellation)")
         void fromItemsCancellation() {
             AssertSubscriber<Object> sub = AssertSubscriber.create();
