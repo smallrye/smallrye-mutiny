@@ -2,7 +2,7 @@ package io.smallrye.mutiny.zero.impl;
 
 import java.util.concurrent.atomic.AtomicLong;
 
-public class Helper {
+class Helper {
 
     public static IllegalArgumentException negativeRequest(long n) {
         return new IllegalArgumentException("Requested " + n + " items (must be > 0L)");

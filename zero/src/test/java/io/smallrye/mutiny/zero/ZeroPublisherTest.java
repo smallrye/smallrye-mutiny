@@ -1,5 +1,6 @@
 package io.smallrye.mutiny.zero;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
@@ -210,6 +211,26 @@ class ZeroPublisherTest {
             sub.cancel();
             sub.assertItems(1, 2);
             sub.assertNotTerminated();
+        }
+    }
+
+    @Nested
+    @DisplayName("Publisher from failure")
+    class Failures {
+
+        @Test
+        @DisplayName("Null CompletionStage")
+        void fromNull() {
+            Assertions.assertThrows(NullPointerException.class, () -> ZeroPublisher.fromFailure(null));
+        }
+
+        @Test
+        @DisplayName("Failure")
+        void failure() {
+            AssertSubscriber<Object> sub = AssertSubscriber.create(Long.MAX_VALUE);
+            ZeroPublisher.fromFailure(new IOException("boom")).subscribe(sub);
+
+            sub.assertFailedWith(IOException.class, "boom");
         }
     }
 

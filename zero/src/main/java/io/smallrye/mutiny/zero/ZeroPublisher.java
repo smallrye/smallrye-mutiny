@@ -10,6 +10,7 @@ import java.util.stream.Stream;
 import org.reactivestreams.Publisher;
 
 import io.smallrye.mutiny.zero.impl.CompletionStagePublisher;
+import io.smallrye.mutiny.zero.impl.FailurePublisher;
 import io.smallrye.mutiny.zero.impl.IterablePublisher;
 import io.smallrye.mutiny.zero.impl.StreamPublisher;
 
@@ -32,6 +33,11 @@ public interface ZeroPublisher {
 
     static <T> Publisher<T> fromCompletionStage(CompletionStage<T> completionStage) {
         requireNonNull(completionStage, "The CompletionStage cannot be null");
-        return new CompletionStagePublisher(completionStage);
+        return new CompletionStagePublisher<>(completionStage);
+    }
+
+    static <T> Publisher<T> fromFailure(Throwable failure) {
+        requireNonNull(failure, "The failure cannot be null");
+        return new FailurePublisher<>(failure);
     }
 }
