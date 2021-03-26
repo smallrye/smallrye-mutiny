@@ -1,4 +1,4 @@
-package io.smallrye.mutiny.zero.impl;
+package mutiny.zero.internal;
 
 import static java.util.Objects.requireNonNull;
 

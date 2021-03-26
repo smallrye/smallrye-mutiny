@@ -1,4 +1,4 @@
-package io.smallrye.mutiny.zero;
+package mutiny.zero;
 
 import java.io.IOException;
 import java.util.List;
@@ -60,7 +60,7 @@ class ZeroPublisherTest {
         @DisplayName("Items from an array (unbounded initial request)")
         void fromArrayUnbounded() {
             AssertSubscriber<Object> sub = AssertSubscriber.create(Long.MAX_VALUE);
-            Integer[] array = {1, 2, 3};
+            Integer[] array = { 1, 2, 3 };
             ZeroPublisher.fromItems(array).subscribe(sub);
 
             sub.assertItems(1, 2, 3);

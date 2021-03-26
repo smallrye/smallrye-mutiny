@@ -1,4 +1,4 @@
-module io.smallrye.mutiny.zero {
+module mutiny.zero {
     requires org.reactivestreams;
-    exports io.smallrye.mutiny.zero;
+    exports mutiny.zero;
 }

@@ -1,4 +1,4 @@
-package io.smallrye.mutiny.zero;
+package mutiny.zero;
 
 import static java.util.Objects.requireNonNull;
 
@@ -9,10 +9,10 @@ import java.util.stream.Stream;
 
 import org.reactivestreams.Publisher;
 
-import io.smallrye.mutiny.zero.impl.CompletionStagePublisher;
-import io.smallrye.mutiny.zero.impl.FailurePublisher;
-import io.smallrye.mutiny.zero.impl.IterablePublisher;
-import io.smallrye.mutiny.zero.impl.StreamPublisher;
+import mutiny.zero.internal.CompletionStagePublisher;
+import mutiny.zero.internal.FailurePublisher;
+import mutiny.zero.internal.IterablePublisher;
+import mutiny.zero.internal.StreamPublisher;
 
 public interface ZeroPublisher {
 

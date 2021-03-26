@@ -1,4 +1,4 @@
-package io.smallrye.mutiny.zero.impl;
+package mutiny.zero.internal;
 
 import java.util.concurrent.atomic.AtomicLong;
 

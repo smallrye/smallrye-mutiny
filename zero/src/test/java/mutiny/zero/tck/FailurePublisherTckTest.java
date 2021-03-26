@@ -1,4 +1,4 @@
-package io.smallrye.mutiny.zero.tck;
+package mutiny.zero.tck;
 
 import java.io.IOException;
 import java.util.stream.LongStream;
@@ -7,7 +7,7 @@ import org.reactivestreams.Publisher;
 import org.reactivestreams.tck.TestEnvironment;
 import org.reactivestreams.tck.junit5.PublisherVerification;
 
-import io.smallrye.mutiny.zero.ZeroPublisher;
+import mutiny.zero.ZeroPublisher;
 
 public class FailurePublisherTckTest extends PublisherVerification<Long> {
 
