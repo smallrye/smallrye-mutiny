@@ -368,4 +368,17 @@ class ZeroPublisherTest {
         }
     }
 
+    @Nested
+    @DisplayName("Empty publisher")
+    class Empty {
+
+        @Test
+        @DisplayName("Empty Publisher")
+        void empty() {
+            AssertSubscriber<Object> sub = AssertSubscriber.create();
+            ZeroPublisher.empty().subscribe(sub);
+
+            sub.assertItems().assertCompleted();
+        }
+    }
 }

@@ -15,6 +15,8 @@ import mutiny.zero.internal.*;
 
 public interface ZeroPublisher {
 
+    // ---- "Iterate over something" ---- //
+
     @SafeVarargs
     static <T> Publisher<T> fromItems(T... items) {
         requireNonNull(items, "The items array cannot be null");
@@ -37,13 +39,21 @@ public interface ZeroPublisher {
         return new GeneratorPublisher<>(stateSupplier, generator);
     }
 
+    // ---- CompletionStage integration ---- //
+
     static <T> Publisher<T> fromCompletionStage(CompletionStage<T> completionStage) {
         requireNonNull(completionStage, "The CompletionStage cannot be null");
         return new CompletionStagePublisher<>(completionStage);
     }
 
+    // ---- Special cases ---- //
+
     static <T> Publisher<T> fromFailure(Throwable failure) {
         requireNonNull(failure, "The failure cannot be null");
         return new FailurePublisher<>(failure);
+    }
+
+    static <T> Publisher<T> empty() {
+        return new EmptyPublisher<>();
     }
 }
