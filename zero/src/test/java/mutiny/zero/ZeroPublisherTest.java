@@ -1,6 +1,7 @@
 package mutiny.zero;
 
 import java.io.IOException;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
@@ -222,6 +223,128 @@ class ZeroPublisherTest {
             sub.cancel();
             sub.assertItems(1, 2);
             sub.assertNotTerminated();
+        }
+    }
+
+    @Nested
+    @DisplayName("Publisher from generator")
+    class Generators {
+
+        @Test
+        @DisplayName("Null values")
+        void fromNull() {
+            Iterator<String> infiniteYolo = new Iterator<String>() {
+                @Override
+                public boolean hasNext() {
+                    return true;
+                }
+
+                @Override
+                public String next() {
+                    return "yolo";
+                }
+            };
+
+            Assertions.assertThrows(NullPointerException.class, () -> ZeroPublisher.fromGenerator(null, null));
+            Assertions.assertThrows(NullPointerException.class, () -> ZeroPublisher.fromGenerator(() -> "yolo", null));
+            Assertions.assertThrows(NullPointerException.class, () -> ZeroPublisher.fromGenerator(null, s -> infiniteYolo));
+
+            AssertSubscriber<String> sub = AssertSubscriber.create(3);
+            ZeroPublisher.fromGenerator(() -> null, s -> infiniteYolo).subscribe(sub);
+            sub.assertItems("yolo", "yolo", "yolo");
+        }
+
+        @Test
+        @DisplayName("Sequence of naturally increasing integers")
+        void integers() {
+            AssertSubscriber<Integer> sub = AssertSubscriber.create();
+            ZeroPublisher.fromGenerator(() -> 5, max -> new Iterator<Integer>() {
+                int current = 0;
+
+                @Override
+                public boolean hasNext() {
+                    return current < max;
+                }
+
+                @Override
+                public Integer next() {
+                    return current++;
+                }
+            }).subscribe(sub);
+
+            sub.request(10);
+            sub.assertCompleted().assertItems(0, 1, 2, 3, 4);
+        }
+
+        @Test
+        @DisplayName("Sequence of naturally increasing integers failing at the second request")
+        void failingIntegers() {
+            AssertSubscriber<Integer> sub = AssertSubscriber.create();
+            ZeroPublisher.fromGenerator(() -> null, max -> new Iterator<Integer>() {
+                int counter;
+
+                @Override
+                public boolean hasNext() {
+                    return true;
+                }
+
+                @Override
+                public Integer next() {
+                    if (counter == 1) {
+                        throw new RuntimeException("boom");
+                    } else {
+                        return counter++;
+                    }
+                }
+            }).subscribe(sub);
+
+            sub.request(10);
+            sub.assertFailedWith(RuntimeException.class, "boom");
+        }
+
+        @Test
+        @DisplayName("Sequence of naturally increasing integers with a null value at the second request")
+        void nullInStream() {
+            AssertSubscriber<Integer> sub = AssertSubscriber.create();
+            ZeroPublisher.fromGenerator(() -> null, max -> new Iterator<Integer>() {
+                int counter;
+
+                @Override
+                public boolean hasNext() {
+                    return true;
+                }
+
+                @Override
+                public Integer next() {
+                    if (counter == 1) {
+                        return null;
+                    } else {
+                        return counter++;
+                    }
+                }
+            }).subscribe(sub);
+
+            sub.request(10);
+            sub.assertFailedWith(NullPointerException.class, "null value");
+        }
+
+        @Test
+        @DisplayName("Already completed Publisher from a generator")
+        void alreadyCompleted() {
+            AssertSubscriber<String> sub = AssertSubscriber.create();
+            ZeroPublisher.fromGenerator(() -> null, s -> new Iterator<String>() {
+                @Override
+                public boolean hasNext() {
+                    return false;
+                }
+
+                @Override
+                public String next() {
+                    return "123";
+                }
+            }).subscribe(sub);
+
+            sub.assertCompleted().assertItems();
         }
     }
 

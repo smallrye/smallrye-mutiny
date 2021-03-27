@@ -45,7 +45,13 @@ class IteratorSubscription<T> implements Subscription {
 
             while (emitted != n) {
                 if (iterator.hasNext()) {
-                    T next = iterator.next();
+                    T next;
+                    try {
+                        next = iterator.next();
+                    } catch (Throwable err) {
+                        subscriber.onError(err);
+                        return;
+                    }
                     if (next == null) {
                         cancelled = true;
                         subscriber.onError(new NullPointerException("The iterable has a null value"));

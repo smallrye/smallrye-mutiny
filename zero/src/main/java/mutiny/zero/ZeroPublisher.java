@@ -3,16 +3,15 @@ package mutiny.zero;
 import static java.util.Objects.requireNonNull;
 
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.concurrent.CompletionStage;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import org.reactivestreams.Publisher;
 
-import mutiny.zero.internal.CompletionStagePublisher;
-import mutiny.zero.internal.FailurePublisher;
-import mutiny.zero.internal.IterablePublisher;
-import mutiny.zero.internal.StreamPublisher;
+import mutiny.zero.internal.*;
 
 public interface ZeroPublisher {
 
@@ -30,6 +29,12 @@ public interface ZeroPublisher {
     static <T> Publisher<T> fromStream(Supplier<Stream<T>> supplier) {
         requireNonNull(supplier, "The supplier cannot be null");
         return new StreamPublisher<>(supplier);
+    }
+
+    static <S, T> Publisher<T> fromGenerator(Supplier<S> stateSupplier, Function<S, Iterator<T>> generator) {
+        requireNonNull(stateSupplier, "The state supplier cannot be null");
+        requireNonNull(generator, "The generator supplier cannot be null");
+        return new GeneratorPublisher<>(stateSupplier, generator);
     }
 
     static <T> Publisher<T> fromCompletionStage(CompletionStage<T> completionStage) {
