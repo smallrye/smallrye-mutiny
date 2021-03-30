@@ -15,6 +15,8 @@ gem "minima", "~> 2.0"
 
 gem 'coderay', '1.1.0'
 gem "kramdown-parser-gfm"
+gem "kramdown", ">= 2.3.1"
+
 
 
 # If you want to use GitHub Pages, remove the "gem "jekyll"" above and
