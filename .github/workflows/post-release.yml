@@ -44,8 +44,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_API_TOKEN }}
           REF: ${{ github.event.ref }}
         run: |
+          TAG=$(echo ${REF} | sed -e 's%refs/tags/%%g')
           source ~/.sdkman/bin/sdkman-init.sh && \
-          jbang .build/PostRelease.java --release-version=${REF} --token=${GITHUB_TOKEN}
+          jbang .build/PostRelease.java --release-version=${TAG} --token=${GITHUB_TOKEN}
       - name: 'Clear compatibility justifications'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_API_TOKEN }}
@@ -56,10 +57,11 @@ jobs:
           git config --global user.name "${GITHUB_ACTOR}"
           git config --global user.email "smallrye@googlegroups.com"
 
+          TAG=$(echo ${REF} | sed -e 's%refs/tags/%%g')
           echo "Waiting for artifacts to be available from Maven Central, otherwise the build will fail during the compatibility verification"
           jbang .build/WaitForCentral.java \
             --artifacts=io.smallrye.reactive:mutiny,io.smallrye.reactive:mutiny-context-propagation,io.smallrye.reactive:mutiny-test-utils,io.smallrye.reactive:mutiny-kotlin,io.smallrye.reactive:mutiny-reactor,io.smallrye.reactive:mutiny-rxjava \
-            --expected-version="${REF}"
+            --expected-version="${TAG}"
 
           git clone -b main "https://${GITHUB_ACTOR}:${GITHUB_TOKEN}@github.com/smallrye/smallrye-mutiny.git" new-main
           cd new-main
