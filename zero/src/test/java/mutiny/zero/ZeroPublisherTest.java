@@ -1,9 +1,14 @@
 package mutiny.zero;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.*;
+
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Supplier;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -379,6 +384,161 @@ class ZeroPublisherTest {
             ZeroPublisher.empty().subscribe(sub);
 
             sub.assertItems().assertCompleted();
+        }
+    }
+
+    @Nested
+    @DisplayName("Dropping tube publishers")
+    class DroppingTubes {
+
+        @Test
+        @DisplayName("Tube dropping on back-pressure")
+        void dropping() {
+            AssertSubscriber<Integer> sub = AssertSubscriber.create(3);
+            ZeroPublisher.<Integer> create(BackpressureStrategy.DROP, -1, tube -> {
+                for (int i = 1; i < 20; i++) {
+                    tube.send(i);
+                }
+                tube.complete();
+            }).subscribe(sub);
+
+            sub.assertCompleted();
+            sub.assertItems(1, 2, 3);
+        }
+
+        @Test
+        @DisplayName("Tube dropping on back-pressure with error")
+        void droppingError() {
+            AssertSubscriber<Integer> sub = AssertSubscriber.create(10);
+            ZeroPublisher.<Integer> create(BackpressureStrategy.DROP, -1, tube -> {
+                tube.send(1);
+                tube.fail(new IOException("boom"));
+            }).subscribe(sub);
+
+            sub.assertItems(1);
+            sub.assertFailedWith(IOException.class, "boom");
+        }
+
+        @Test
+        @DisplayName("Tube dropping cancel")
+        void droppingCancel() {
+            AtomicBoolean step1 = new AtomicBoolean(false);
+            AtomicBoolean step2 = new AtomicBoolean(false);
+
+            AtomicLong requested = new AtomicLong();
+            AtomicBoolean cancelled = new AtomicBoolean();
+            AtomicBoolean terminated = new AtomicBoolean();
+
+            AssertSubscriber<Integer> sub = AssertSubscriber.create(3);
+            ZeroPublisher.<Integer> create(BackpressureStrategy.DROP, -1, tube -> {
+                new Thread(() -> {
+                    step1.set(true);
+                    tube.whenRequested(requested::addAndGet);
+                    tube.whenCancelled(() -> cancelled.set(true));
+                    tube.whenTerminates(() -> terminated.set(true));
+                    await().untilTrue(step2);
+                    for (int i = 1; i < 20; i++) {
+                        tube.send(i);
+                    }
+                    tube.complete();
+                }).start();
+            }).subscribe(sub);
+
+            await().untilTrue(step1);
+            sub.cancel();
+            step2.set(true);
+            sub.assertHasNotReceivedAnyItem().assertNotTerminated();
+
+            assertThat(requested).hasValue(3L);
+            assertThat(cancelled).isTrue();
+            assertThat(terminated).isTrue();
+        }
+
+        @Test
+        @DisplayName("Tube dropping on back-pressure (pause then refill)")
+        void droppingPauseInMiddle() {
+            AtomicBoolean step1 = new AtomicBoolean(false);
+            AtomicBoolean step2 = new AtomicBoolean(false);
+            AtomicBoolean step3 = new AtomicBoolean(false);
+
+            AssertSubscriber<Integer> sub = AssertSubscriber.create(3);
+            ZeroPublisher.<Integer> create(BackpressureStrategy.DROP, -1, tube -> {
+                new Thread(() -> {
+                    for (int i = 1; i < 10; i++) {
+                        tube.send(i);
+                    }
+                    step1.set(true);
+                    await().untilTrue(step2);
+                    for (int i = 10; i < 20; i++) {
+                        tube.send(i);
+                    }
+                    tube.complete();
+                    step3.set(true);
+                }).start();
+            }).subscribe(sub);
+
+            await().untilTrue(step1);
+            sub.assertItems(1, 2, 3);
+            sub.request(3);
+            step2.set(true);
+            await().untilTrue(step3);
+            sub.assertItems(1, 2, 3, 10, 11, 12);
+            sub.assertCompleted();
+        }
+    }
+
+    @Nested
+    @DisplayName("Back-pressure erroring tube publishers")
+    class ErrorTubes {
+
+        @Test
+        @DisplayName("Tube error after 3 items")
+        void failAfter3() {
+            AssertSubscriber<Integer> sub = AssertSubscriber.create(3);
+            ZeroPublisher.<Integer> create(BackpressureStrategy.ERROR, -1, tube -> {
+                for (int i = 1; i < 20; i++) {
+                    tube.send(i);
+                }
+                tube.complete();
+            }).subscribe(sub);
+
+            sub.assertItems(1, 2, 3);
+            sub.assertFailedWith(IllegalStateException.class, "there is no demand");
+        }
+
+        @Test
+        @DisplayName("Tube that don't fail")
+        void dontFail() {
+            AssertSubscriber<Integer> sub = AssertSubscriber.create(Long.MAX_VALUE);
+            ZeroPublisher.<Integer> create(BackpressureStrategy.ERROR, -1, tube -> {
+                for (int i = 1; i < 4; i++) {
+                    tube.send(i);
+                }
+                tube.complete();
+            }).subscribe(sub);
+
+            sub.assertItems(1, 2, 3);
+            sub.assertCompleted();
+        }
+    }
+
+    @Nested
+    @DisplayName("Back-pressure ignoring tube publishers")
+    class IgnoringTubes {
+
+        @Test
+        @DisplayName("Tube that doesn't care")
+        void yolo() {
+            AssertSubscriber<Integer> sub = AssertSubscriber.create(3);
+            ZeroPublisher.<Integer> create(BackpressureStrategy.IGNORE, -1, tube -> {
+                for (int i = 1; i < 6; i++) {
+                    tube.send(i);
+                }
+                tube.complete();
+            }).subscribe(sub);
+
+            sub.assertItems(1, 2, 3, 4, 5);
+            sub.assertCompleted();
         }
     }
 }

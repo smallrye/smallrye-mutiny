@@ -5,6 +5,7 @@ import static java.util.Objects.requireNonNull;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.concurrent.CompletionStage;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -55,5 +56,17 @@ public interface ZeroPublisher {
 
     static <T> Publisher<T> empty() {
         return new EmptyPublisher<>();
+    }
+
+    // ---- Tube / DIY ---- //
+
+    static <T> Publisher<T> create(BackpressureStrategy backpressureStrategy, int bufferSize, Consumer<Tube<T>> tubeConsumer) {
+        requireNonNull(backpressureStrategy, "The backpressure strategy cannot be null");
+        requireNonNull(tubeConsumer, "The tube consumer cannot be null");
+        if ((backpressureStrategy == BackpressureStrategy.BUFFER)
+                || (backpressureStrategy == BackpressureStrategy.LATEST) && bufferSize <= 0) {
+            throw new IllegalArgumentException("The buffer size must be strictly positive");
+        }
+        return new TubePublisher<>(backpressureStrategy, bufferSize, tubeConsumer);
     }
 }
