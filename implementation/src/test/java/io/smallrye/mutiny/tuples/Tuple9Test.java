@@ -119,4 +119,10 @@ public class Tuple9Test {
             assertThat(someTuple.toString()).contains("item" + i + "=" + someTuple.nth(i - 1));
         }
     }
+
+    @Test
+    public void ensureArity() {
+        Tuples.ensureArity(Arrays.asList(1, 2, 3), 3);
+        assertThrows(IllegalArgumentException.class, () -> Tuples.ensureArity(Arrays.asList(1, 2, 3), 5));
+    }
 }
