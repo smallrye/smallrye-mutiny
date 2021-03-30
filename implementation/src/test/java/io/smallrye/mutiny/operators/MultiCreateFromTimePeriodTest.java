@@ -1,6 +1,7 @@
 package io.smallrye.mutiny.operators;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 
 import java.time.Duration;
 import java.util.List;
@@ -46,6 +47,24 @@ public class MultiCreateFromTimePeriodTest {
             long delta = list.get(i + 1) - list.get(i);
             assertThat(delta).isBetween(20L, 350L);
         }
+    }
+
+    @Test
+    public void testThatTicksStartAfterRequest() {
+        AssertSubscriber<Long> subscriber = AssertSubscriber.create();
+
+        Multi.createFrom().ticks()
+                .every(Duration.ofMillis(100))
+                .onItem().transform(l -> System.currentTimeMillis())
+                .subscribe().withSubscriber(subscriber);
+
+        await().pollDelay(Duration.ofMillis(500)).untilAsserted(subscriber::assertNotTerminated);
+
+        subscriber.request(100);
+        subscriber.awaitNextItems(10)
+                .cancel();
+
+        subscriber.assertNotTerminated();
     }
 
     @Test

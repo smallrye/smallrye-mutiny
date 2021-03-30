@@ -41,10 +41,8 @@ public class IntervalMulti extends AbstractMulti<Long> {
     @Override
     public void subscribe(MultiSubscriber<? super Long> actual) {
         IntervalRunnable runnable = new IntervalRunnable(actual, period, initialDelay, executor);
-
         actual.onSubscribe(runnable);
-        runnable.start();
-
+        // Only start the ticks when we get the first request.
     }
 
     static final class IntervalRunnable implements Runnable, Subscription {
@@ -54,6 +52,7 @@ public class IntervalMulti extends AbstractMulti<Long> {
         private final Duration initialDelay;
         private final ScheduledExecutorService executor;
         private volatile boolean cancelled;
+        private volatile boolean once = true;
 
         private final AtomicLong count = new AtomicLong();
         private ScheduledFuture<?> future;
@@ -104,6 +103,10 @@ public class IntervalMulti extends AbstractMulti<Long> {
         public void request(long n) {
             if (n > 0) {
                 Subscriptions.add(requested, n);
+            }
+            if (once) {
+                start();
+                once = false;
             }
         }
 

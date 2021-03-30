@@ -368,7 +368,7 @@ public class MultiCreate {
 
     /**
      * Like {@link #emitter(Consumer, BackPressureStrategy)} with the {@link BackPressureStrategy#BUFFER} strategy.
-     *
+     * <p>
      * Note that to create hot streams, you should use a
      * {@link io.smallrye.mutiny.operators.multi.processors.BroadcastProcessor}.
      *
@@ -383,10 +383,10 @@ public class MultiCreate {
 
     /**
      * Like {@link #emitter(Consumer)} with the {@link BackPressureStrategy#BUFFER} strategy and the given buffer size.
-     *
+     * <p>
      * Note that to create hot streams, you should use a
      * {@link io.smallrye.mutiny.operators.multi.processors.BroadcastProcessor}.
-     *
+     * <p>
      * If the buffer is full, a {@link java.nio.BufferOverflowException} in propagated downstream.
      *
      * @param consumer the consumer receiving the emitter, must not be {@code null}
@@ -412,7 +412,7 @@ public class MultiCreate {
      * to unregister the listener on cancellation.
      * <p>
      * If the consumer throws an exception, a failure event with the exception is fired.
-     *
+     * <p>
      * Note that to create hot streams, you should use a
      * {@link io.smallrye.mutiny.operators.multi.processors.BroadcastProcessor}.
      *
@@ -504,6 +504,9 @@ public class MultiCreate {
      * Creates a {@link Multi} that emits {@code long} items (ticks) starting with 0 and incrementing at
      * specified time intervals.
      * <p>
+     * The <em>timer</em> starts at the first request. Once this request is received, the produced stream is a hot
+     * stream.
+     * <p>
      * Be aware that if the subscriber does not request enough items in time, a back pressure failure is fired.
      * The produced {@link Multi} never completes until cancellation by the subscriber.
      * <p>
@@ -539,7 +542,7 @@ public class MultiCreate {
      * completes, fails or when the subscriber cancels the subscription, a finalizer is called to <em>close</em> the
      * resource. This cleanup process can be either synchronous and asynchronous, as well as distinct for each type of
      * event.
-     *
+     * <p>
      * This method can be seen as a reactive version of the "try/finally" construct.
      *
      * @param resourceSupplier a supplier called for each subscriber to generate the resource, must not be {@code null}.
@@ -568,11 +571,11 @@ public class MultiCreate {
      * items from this {@link Publisher}. When the stream completes, fails or when the subscriber cancels the
      * subscription, a finalizer is called to <em>close</em> the resource. This cleanup process can be either
      * synchronous and asynchronous, as well as distinct for each type of event.
-     *
+     * <p>
      * If the Uni produced by the {@code resourceSupplier} emits a failure, the failure is propagated downstream.
      * If the Uni produced by the {@code resourceSupplier} does not emit an item before downstream cancellation, the
      * resource creation is cancelled.
-     *
+     * <p>
      * This method can be seen as a reactive version of the "try/finally" construct.
      *
      * @param resourceSupplier a supplier called for each subscriber to generate the resource, must not be {@code null}.
@@ -602,7 +605,7 @@ public class MultiCreate {
      * Items are being generated based on subscription requests.
      * Requesting {@link Long#MAX_VALUE} items can possibly make for an infinite stream unless the generator function calls
      * {@link GeneratorEmitter#complete()} at some point.
-     * 
+     *
      * @param initialStateSupplier a supplier for the initial state, must not be {@code null} but can supply {@code null}
      * @param generator the generator function, returns the new state for the next item generation
      * @param <S> the state type
