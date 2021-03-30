@@ -95,7 +95,7 @@ If the predicate returns <code>true</code>, the item propagated downstream.
 Otherwise, it drops the item.</p>
 </div>
 <div class="paragraph">
-<p>The predicated passed to <code>where</code> is synchronous.
+<p>The predicate passed to <code>where</code> is synchronous.
 The <code>when</code> method provides an asynchronous version:</p>
 </div>
 <div class="listingblock">
@@ -108,7 +108,7 @@ The <code>when</code> method provides an asynchronous version:</p>
 </div>
 <div class="paragraph">
 <p><code>when</code> accepts a function called for each item.
-Unlike <code>when</code> where the predicate returns a boolean synchronously, the function returns a <code>Uni&lt;Boolean&gt;</code>.
+Unlike <code>where</code> where the predicate returns a boolean synchronously, the function returns a <code>Uni&lt;Boolean&gt;</code>.
 It forwards the item downstream if the <code>uni</code> produced by the function emits <code>true</code>.
 Otherwise, it drops the item.</p>
 </div>
@@ -150,7 +150,7 @@ Otherwise, it drops the item.</p>
         <div class="row">
             <div class="col-lg-9 sep-right">
                 <p>
-                    SmallRye Mutiny is an open source project. All the code from this project is available under the <a href="https://raw.githubusercontent.com/smallrye/smallrye-mutiny/master/LICENSE">Apache Software License 2.0</a>.
+                    SmallRye Mutiny is an open source project. All the code from this project is available under the <a href="https://raw.githubusercontent.com/smallrye/smallrye-mutiny/main/LICENSE">Apache Software License 2.0</a>.
                 </p>
                 <p>
                     This website was built with <a href="https://jekyllrb.com/">Jekyll</a>, is hosted on Github Pages and is completely open source.
@@ -173,7 +173,7 @@ Otherwise, it drops the item.</p>
                     <a href="https://www.redhat.com/en/about/privacy-policy">Privacy Policy</a>
                 </p>
                 <p>
-                     Site last generated: Feb 18, 2021
+                     Site last generated: Mar 30, 2021
                 </p>
             </div>
         </div>

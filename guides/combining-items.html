@@ -79,7 +79,7 @@
             <div class="paragraph">
 <p>Combining items from various streams is an essential pattern in Reactive Programming.
 It associates the emitted items from multiple streams and emits an <em>aggregate</em>.
-The downstream receives this <em>aggregates</em> and can handle it smoothly.</p>
+The downstream receives this <em>aggregate</em> and can handle it smoothly.</p>
 </div>
 <div class="paragraph">
 <p>There are plenty of use cases, such as executing two tasks concurrently and waiting for both completions, getting the last items from different streams to build an always up-to-date view, and so on.</p>
@@ -155,7 +155,7 @@ Uni.combine().all().unis(uniA, uniB).asTuple()
 </div>
 <div class="paragraph">
 <p>Using tuples is convenient but only works if you have less than 10 <code>Uni</code> objects.
-If you want another structure or deal with more than 10 <code>Uni</code> objects then use <code>combineWith</code>:</p>
+If you want another structure or deal with 10 <code>Uni</code> objects or more then use <code>combineWith</code>:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -223,7 +223,7 @@ If one of the observed streams never emits any item then the combined stream wil
 </div>
 </div>
 <div class="sect1">
-<h2 id="combining-the-last-items-of-multis"><a class="anchor" href="#combining-the-last-items-of-multis"></a>Combining the last items of Multis</h2>
+<h2 id="combining-the-latest-items-of-multis"><a class="anchor" href="#combining-the-latest-items-of-multis"></a>Combining the latest items of Multis</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>It can be useful to combine multiple <code>Multi</code> streams and receive the <em>latest</em> items from each stream on every emission:</p>
@@ -259,7 +259,7 @@ If one of the observed streams never emits any item then the combined stream wil
                 <ul class="sectlevel1">
 <li><a href="#combining-unis">Combining Unis</a></li>
 <li><a href="#combining-multis">Combining Multis</a></li>
-<li><a href="#combining-the-last-items-of-multis">Combining the last items of Multis</a></li>
+<li><a href="#combining-the-latest-items-of-multis">Combining the latest items of Multis</a></li>
 </ul>
                 
 
@@ -289,7 +289,7 @@ If one of the observed streams never emits any item then the combined stream wil
         <div class="row">
             <div class="col-lg-9 sep-right">
                 <p>
-                    SmallRye Mutiny is an open source project. All the code from this project is available under the <a href="https://raw.githubusercontent.com/smallrye/smallrye-mutiny/master/LICENSE">Apache Software License 2.0</a>.
+                    SmallRye Mutiny is an open source project. All the code from this project is available under the <a href="https://raw.githubusercontent.com/smallrye/smallrye-mutiny/main/LICENSE">Apache Software License 2.0</a>.
                 </p>
                 <p>
                     This website was built with <a href="https://jekyllrb.com/">Jekyll</a>, is hosted on Github Pages and is completely open source.
@@ -312,7 +312,7 @@ If one of the observed streams never emits any item then the combined stream wil
                     <a href="https://www.redhat.com/en/about/privacy-policy">Privacy Policy</a>
                 </p>
                 <p>
-                     Site last generated: Feb 18, 2021
+                     Site last generated: Mar 30, 2021
                 </p>
             </div>
         </div>

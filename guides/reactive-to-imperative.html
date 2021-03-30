@@ -114,7 +114,7 @@ When the deadline is reached, a <code>TimeoutException</code> is thrown:</p>
 <div class="sectionbody">
 <div class="paragraph">
 <p>When dealing with a <code>Multi,</code> you may want to iterate over the items using a simple "foreach."
-You can achieve this using <code>multi.subscribe().asBlockingIterable()</code>:</p>
+You can achieve this using <code>multi.subscribe().asIterable()</code>:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -125,7 +125,7 @@ for (T item : iterable) {
 </div>
 </div>
 <div class="paragraph">
-<p>The returns <code>iterable</code> is blocking.
+<p>The returned <code>iterable</code> is blocking.
 It waits for the next items, and during that time, blocks the caller thread.</p>
 </div>
 <div class="paragraph">
@@ -187,7 +187,7 @@ stream.forEach(this::doSomethingWithItem);</code></pre>
         <div class="row">
             <div class="col-lg-9 sep-right">
                 <p>
-                    SmallRye Mutiny is an open source project. All the code from this project is available under the <a href="https://raw.githubusercontent.com/smallrye/smallrye-mutiny/master/LICENSE">Apache Software License 2.0</a>.
+                    SmallRye Mutiny is an open source project. All the code from this project is available under the <a href="https://raw.githubusercontent.com/smallrye/smallrye-mutiny/main/LICENSE">Apache Software License 2.0</a>.
                 </p>
                 <p>
                     This website was built with <a href="https://jekyllrb.com/">Jekyll</a>, is hosted on Github Pages and is completely open source.
@@ -210,7 +210,7 @@ stream.forEach(this::doSomethingWithItem);</code></pre>
                     <a href="https://www.redhat.com/en/about/privacy-policy">Privacy Policy</a>
                 </p>
                 <p>
-                     Site last generated: Feb 18, 2021
+                     Site last generated: Mar 30, 2021
                 </p>
             </div>
         </div>
