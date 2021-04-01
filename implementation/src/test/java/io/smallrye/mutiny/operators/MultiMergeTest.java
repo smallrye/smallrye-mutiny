@@ -3,6 +3,7 @@ package io.smallrye.mutiny.operators;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Arrays;
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
@@ -97,11 +98,11 @@ public class MultiMergeTest {
 
     @Test
     public void testMergeOfSeveralMultisAsIterable() {
-        AssertSubscriber<Integer> subscriber = Multi.createBy().merging().streams(
-                Arrays.asList(
-                        Multi.createFrom().item(5),
-                        Multi.createFrom().range(1, 3),
-                        Multi.createFrom().items(8, 9, 10).onItem().transform(i -> i + 1)))
+        final List<Multi<Integer>> multis = Arrays.asList(
+                Multi.createFrom().item(5),
+                Multi.createFrom().range(1, 3),
+                Multi.createFrom().items(8, 9, 10).onItem().transform(i -> i + 1));
+        AssertSubscriber<Integer> subscriber = Multi.createBy().merging().streams(multis)
                 .subscribe().withSubscriber(new AssertSubscriber<>(100));
 
         subscriber.assertCompleted()

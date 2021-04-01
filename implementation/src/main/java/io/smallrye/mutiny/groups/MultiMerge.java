@@ -78,7 +78,7 @@ public class MultiMerge {
      * @param <T> the type of item
      * @return the new {@link Multi} emitting the items from the given set of {@link Publisher}
      */
-    public <T> Multi<T> streams(Iterable<Publisher<T>> iterable) {
+    public <T> Multi<T> streams(Iterable<? extends Publisher<T>> iterable) {
         List<Publisher<T>> list = new ArrayList<>();
         iterable.forEach(list::add);
         return MultiCombine.merge(list, collectFailures, requests, concurrency);
