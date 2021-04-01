@@ -21,7 +21,16 @@
     "criticality" : "highlight",
     "minSeverity" : "POTENTIALLY_BREAKING",
     "minCriticality" : "documented",
-    "differences" : [ ]
+    "differences" : [
+      {
+        "ignore": true,
+        "code": "java.method.parameterTypeParameterChanged",
+        "old": "parameter <T> io.smallrye.mutiny.Multi<T> io.smallrye.mutiny.groups.MultiMerge::streams(===java.lang.Iterable<org.reactivestreams.Publisher<T>>===)",
+        "new": "parameter <T> io.smallrye.mutiny.Multi<T> io.smallrye.mutiny.groups.MultiMerge::streams(===java.lang.Iterable<? extends org.reactivestreams.Publisher<T>>===)",
+        "parameterIndex": "0",
+        "justification": "Align concatenation and merge APIs"
+      }
+    ]
   }
 }, {
   "extension" : "revapi.reporter.json",
