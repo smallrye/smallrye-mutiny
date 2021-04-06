@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -35,6 +36,15 @@ class ZeroPublisherTest {
 
             List<?> collection = null;
             Assertions.assertThrows(NullPointerException.class, () -> ZeroPublisher.fromIterable(collection));
+        }
+
+        @Test
+        @DisplayName("Empty collection")
+        void fromEmpty() {
+            AssertSubscriber<Object> sub = AssertSubscriber.create();
+            ZeroPublisher.fromIterable(Collections.emptyList()).subscribe(sub);
+
+            sub.assertHasNotReceivedAnyItem().assertCompleted();
         }
 
         @Test
@@ -185,6 +195,10 @@ class ZeroPublisherTest {
         @DisplayName("Items from a null stream")
         void fromNull() {
             Assertions.assertThrows(NullPointerException.class, () -> ZeroPublisher.fromStream(null));
+
+            AssertSubscriber<Object> sub = AssertSubscriber.create(10L);
+            ZeroPublisher.fromStream(() -> null).subscribe(sub);
+            sub.assertFailedWith(NullPointerException.class, "cannot be null");
         }
 
         @Test
@@ -257,6 +271,10 @@ class ZeroPublisherTest {
             AssertSubscriber<String> sub = AssertSubscriber.create(3);
             ZeroPublisher.fromGenerator(() -> null, s -> infiniteYolo).subscribe(sub);
             sub.assertItems("yolo", "yolo", "yolo");
+
+            sub = AssertSubscriber.create(3);
+            ZeroPublisher.<String, String> fromGenerator(() -> "yolo", s -> null).subscribe(sub);
+            sub.assertFailedWith(IllegalArgumentException.class, "null iterator");
         }
 
         @Test
@@ -540,6 +558,70 @@ class ZeroPublisherTest {
             sub.assertItems(1, 2, 3, 4, 5);
             sub.assertCompleted();
         }
+
+        @Test
+        @DisplayName("Tube that completes twice")
+        void completeTwice() {
+            Assertions.assertThrows(IllegalStateException.class, () -> {
+                AssertSubscriber<Integer> sub = AssertSubscriber.create(Long.MAX_VALUE);
+                ZeroPublisher.<Integer> create(BackpressureStrategy.IGNORE, -1, tube -> {
+                    for (int i = 1; i < 6; i++) {
+                        tube.send(i);
+                    }
+                    tube.complete();
+                    tube.complete();
+                }).subscribe(sub);
+            }, "Already completed");
+        }
+
+        @Test
+        @DisplayName("Send a null")
+        void sendNull() {
+            AssertSubscriber<Integer> sub = AssertSubscriber.create(3);
+            ZeroPublisher.<Integer> create(BackpressureStrategy.IGNORE, -1, tube -> {
+                for (int i = 1; i < 6; i++) {
+                    if (i == 3) {
+                        tube.send(null);
+                    } else {
+                        tube.send(i);
+                    }
+                }
+                tube.complete();
+            }).subscribe(sub);
+
+            sub.assertItems(1, 2);
+            sub.assertFailedWith(NullPointerException.class, "item is null");
+        }
+
+        @Test
+        @DisplayName("Cancel in the middle")
+        void cancelInTheMiddle() {
+            AtomicBoolean step1 = new AtomicBoolean();
+            AtomicBoolean step2 = new AtomicBoolean();
+
+            AssertSubscriber<Integer> sub = AssertSubscriber.create(10L);
+            ZeroPublisher.<Integer> create(BackpressureStrategy.IGNORE, -1, tube -> {
+                new Thread(() -> {
+                    for (int i = 1; i < 20; i++) {
+                        tube.send(i);
+                        if (i == 5) {
+                            step1.set(true);
+                            await().untilTrue(step2);
+                        }
+                    }
+                    tube.complete();
+                }).start();
+            }).subscribe(sub);
+
+            await().untilTrue(step1);
+            sub.cancel();
+            sub.request(150L);
+            sub.cancel();
+            step2.set(true);
+
+            sub.assertNotTerminated();
+            sub.assertItems(1, 2, 3, 4, 5);
+        }
     }
 
     @Nested
@@ -680,6 +762,25 @@ class ZeroPublisherTest {
                     () -> ZeroPublisher.create(BackpressureStrategy.LATEST, 0, tube -> {
                         // Nothing here
                     }));
+        }
+
+        @Test
+        @DisplayName("Bad request")
+        void badReq() {
+            Publisher<Object> publisher = ZeroPublisher.create(BackpressureStrategy.DROP, -1, tube -> {
+                // Nothing here
+            });
+
+            AssertSubscriber<Object> sub = AssertSubscriber.create();
+            publisher.subscribe(sub);
+            sub.request(0L);
+            sub.assertFailedWith(IllegalArgumentException.class, "must be > 0L");
+
+            sub = AssertSubscriber.create();
+            publisher.subscribe(sub);
+            sub.request(-100L);
+            sub.assertFailedWith(IllegalArgumentException.class, "must be > 0L");
+
         }
 
         @Test

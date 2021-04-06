@@ -97,11 +97,11 @@ public abstract class TubeBase<T> implements Tube<T>, Subscription {
 
     @Override
     public void complete() {
-        if (cancelled) {
-            return;
-        }
         if (completed) {
             throw new IllegalStateException("Already completed");
+        }
+        if (cancelled) {
+            return;
         }
         completed = true;
         drainLoop();
