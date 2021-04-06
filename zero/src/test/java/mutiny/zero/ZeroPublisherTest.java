@@ -9,6 +9,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Supplier;
 import java.util.stream.IntStream;
@@ -20,6 +21,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
 
+import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.helpers.test.AssertSubscriber;
 
 class ZeroPublisherTest {
@@ -184,6 +186,38 @@ class ZeroPublisherTest {
 
             sub.awaitFailure();
             sub.assertFailedWith(NullPointerException.class, "null value");
+        }
+
+        @Test
+        @DisplayName("Publisher to CompletionStage (value)")
+        void publisherToCompletionStageOk() {
+            AtomicInteger counter = new AtomicInteger();
+            Multi<Integer> publisher = Multi.createFrom()
+                    .range(58, 69)
+                    .onItem().invoke(counter::incrementAndGet);
+
+            ZeroPublisher.toCompletionStage(publisher)
+                    .whenComplete((n, throwable) -> {
+                        assertThat(n).isEqualTo(58);
+                        assertThat(throwable).isNull();
+                        assertThat(counter).hasValue(1);
+                    });
+        }
+
+        @Test
+        @DisplayName("Publisher to CompletionStage (error)")
+        void publisherToCompletionStageKo() {
+            AtomicInteger counter = new AtomicInteger();
+            Multi<Object> publisher = Multi.createFrom()
+                    .failure(new IOException("boom"))
+                    .onItem().invoke(counter::incrementAndGet);
+
+            ZeroPublisher.toCompletionStage(publisher)
+                    .whenComplete((obj, throwable) -> {
+                        assertThat(obj).isNull();
+                        assertThat(throwable).isInstanceOf(IOException.class).hasMessage("boom");
+                        assertThat(counter).hasValue(0);
+                    });
         }
     }
 

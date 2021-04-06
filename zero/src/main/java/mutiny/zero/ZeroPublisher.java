@@ -4,6 +4,7 @@ import static java.util.Objects.requireNonNull;
 
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -45,6 +46,13 @@ public interface ZeroPublisher {
     static <T> Publisher<T> fromCompletionStage(CompletionStage<T> completionStage) {
         requireNonNull(completionStage, "The CompletionStage cannot be null");
         return new CompletionStagePublisher<>(completionStage);
+    }
+
+    static <T> CompletionStage<T> toCompletionStage(Publisher<T> publisher) {
+        requireNonNull(publisher, "The publisher cannot be null");
+        CompletableFuture<T> future = new CompletableFuture<>();
+        publisher.subscribe(new PublisherToCompletionStageSubscriber(future));
+        return future;
     }
 
     // ---- Special cases ---- //
