@@ -1,19 +1,20 @@
 package mutiny.zero.internal;
 
-import java.util.concurrent.BlockingDeque;
-import java.util.concurrent.LinkedBlockingDeque;
+import java.util.Queue;
 
 import org.reactivestreams.Subscriber;
 
 public abstract class BufferingTubeBase<T> extends TubeBase<T> {
 
-    protected final BlockingDeque<T> overflowQueue;
+    private final int bufferSize;
     protected boolean delayedComplete = false;
 
     public BufferingTubeBase(Subscriber<? super T> subscriber, int bufferSize) {
         super(subscriber);
-        overflowQueue = new LinkedBlockingDeque<>(bufferSize);
+        this.bufferSize = bufferSize;
     }
+
+    abstract Queue<T> overflowQueue();
 
     @Override
     public void request(long n) {
@@ -24,7 +25,7 @@ public abstract class BufferingTubeBase<T> extends TubeBase<T> {
             fail(Helper.negativeRequest(n));
         } else {
 
-            if (overflowQueue.isEmpty()) {
+            if (overflowQueue().isEmpty()) {
                 super.request(n);
                 return;
             }
@@ -32,7 +33,7 @@ public abstract class BufferingTubeBase<T> extends TubeBase<T> {
             long remaining = n;
             T bufferedItem;
             do {
-                bufferedItem = overflowQueue.poll();
+                bufferedItem = overflowQueue().poll();
                 if (bufferedItem != null) {
                     dispatchQueue.offer(bufferedItem);
                     remaining--;
@@ -42,7 +43,7 @@ public abstract class BufferingTubeBase<T> extends TubeBase<T> {
             Helper.add(requested, n);
             requestConsumer.accept(n);
 
-            completed = delayedComplete && overflowQueue.isEmpty();
+            completed = delayedComplete && overflowQueue().isEmpty();
         }
 
         drainLoop();
@@ -50,7 +51,7 @@ public abstract class BufferingTubeBase<T> extends TubeBase<T> {
 
     @Override
     public void complete() {
-        if (overflowQueue.isEmpty()) {
+        if (overflowQueue().isEmpty()) {
             super.complete();
         } else {
             delayedComplete = true;

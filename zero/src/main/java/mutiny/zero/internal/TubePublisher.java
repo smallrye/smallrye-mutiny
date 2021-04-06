@@ -30,6 +30,9 @@ public class TubePublisher<T> implements Publisher<T> {
             case BUFFER:
                 tube = new BufferingTube<>(subscriber, bufferSize);
                 break;
+            case UNBOUNDED_BUFFER:
+                tube = new UnbounbedBufferingTube<>(subscriber);
+                break;
             case DROP:
                 tube = new DroppingTube<>(subscriber);
                 break;
@@ -42,8 +45,6 @@ public class TubePublisher<T> implements Publisher<T> {
             case LATEST:
                 tube = new LatestTube<>(subscriber, bufferSize);
                 break;
-            default:
-                throw new IllegalStateException("Unexpected backpressure strategy: " + backpressureStrategy);
         }
         subscriber.onSubscribe(tube);
         tubeConsumer.accept(tube);

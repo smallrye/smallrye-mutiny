@@ -778,6 +778,30 @@ class ZeroPublisherTest {
                     11, 12, 13, 14, 15, 16, 17, 18, 19);
             sub.assertCompleted();
         }
+
+        @Test
+        @DisplayName("Unbounded buffer")
+        void unbounded() {
+            AssertSubscriber<Integer> sub = AssertSubscriber.create(5);
+
+            ZeroPublisher.<Integer> create(BackpressureStrategy.UNBOUNDED_BUFFER, -1, tube -> {
+                for (int i = 1; i < 101; i++) {
+                    tube.send(i);
+                }
+                tube.complete();
+            }).subscribe(sub);
+
+            sub.assertItems(1, 2, 3, 4, 5);
+            sub.assertNotTerminated();
+
+            sub.request(50);
+            sub.assertNotTerminated();
+            assertThat(sub.getItems()).hasSize(55).endsWith(53, 54, 55);
+
+            sub.request(Long.MAX_VALUE);
+            sub.assertCompleted();
+            assertThat(sub.getItems()).hasSize(100).endsWith(98, 99, 100);
+        }
     }
 
     @Nested
