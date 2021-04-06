@@ -1,7 +1,7 @@
 package mutiny.zero;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.awaitility.Awaitility.*;
+import static org.awaitility.Awaitility.await;
 
 import java.io.IOException;
 import java.util.Iterator;
@@ -538,6 +538,128 @@ class ZeroPublisherTest {
             }).subscribe(sub);
 
             sub.assertItems(1, 2, 3, 4, 5);
+            sub.assertCompleted();
+        }
+    }
+
+    @Nested
+    @DisplayName("Buffering tube publishers")
+    class BufferingTubes {
+
+        @Test
+        @DisplayName("Bad initialization parameters")
+        void badInit() {
+            Assertions.assertThrows(IllegalArgumentException.class,
+                    () -> ZeroPublisher.create(BackpressureStrategy.BUFFER, -1, tube -> {
+                        // Nothing here
+                    }));
+
+            Assertions.assertThrows(IllegalArgumentException.class,
+                    () -> ZeroPublisher.create(BackpressureStrategy.BUFFER, 0, tube -> {
+                        // Nothing here
+                    }));
+        }
+
+        @Test
+        @DisplayName("No overflow")
+        void noOverflow() {
+            AssertSubscriber<Integer> sub = AssertSubscriber.create(10);
+            ZeroPublisher.<Integer> create(BackpressureStrategy.BUFFER, 256, tube -> {
+                for (int i = 1; i < 6; i++) {
+                    tube.send(i);
+                }
+                tube.complete();
+            }).subscribe(sub);
+
+            sub.assertItems(1, 2, 3, 4, 5);
+            sub.assertCompleted();
+        }
+
+        @Test
+        @DisplayName("Overflow within the buffer bounds")
+        void overflowOk() {
+            AssertSubscriber<Integer> sub = AssertSubscriber.create(5);
+            ZeroPublisher.<Integer> create(BackpressureStrategy.BUFFER, 256, tube -> {
+                for (int i = 1; i < 100; i++) {
+                    tube.send(i);
+                }
+                tube.complete();
+            }).subscribe(sub);
+
+            sub.assertItems(1, 2, 3, 4, 5);
+            sub.assertNotTerminated();
+        }
+
+        @Test
+        @DisplayName("Overflow outside the buffer bounds")
+        void overflowKo() {
+            AssertSubscriber<Integer> sub = AssertSubscriber.create(5);
+            ZeroPublisher.<Integer> create(BackpressureStrategy.BUFFER, 256, tube -> {
+                for (int i = 1; i < 512; i++) {
+                    tube.send(i);
+                }
+                tube.complete();
+            }).subscribe(sub);
+
+            sub.assertItems(1, 2, 3, 4, 5);
+            sub.assertFailedWith(IllegalStateException.class, "there is no demand and the overflow buffer is full: 262");
+        }
+
+        @Test
+        @DisplayName("Overflow then drain")
+        void overflowThenDrain() {
+            AssertSubscriber<Integer> sub = AssertSubscriber.create(5);
+            ZeroPublisher.<Integer> create(BackpressureStrategy.BUFFER, 10, tube -> {
+                for (int i = 1; i < 11; i++) {
+                    tube.send(i);
+                }
+                tube.complete();
+            }).subscribe(sub);
+
+            sub.assertItems(1, 2, 3, 4, 5);
+            sub.assertNotTerminated();
+
+            sub.request(100L);
+            sub.assertItems(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
+            sub.assertCompleted();
+        }
+
+        @Test
+        @DisplayName("Overflow then drain then refill")
+        void overflowThenDrainThenRefill() {
+            AssertSubscriber<Integer> sub = AssertSubscriber.create();
+            AtomicBoolean step0 = new AtomicBoolean();
+            AtomicBoolean step1 = new AtomicBoolean();
+            AtomicBoolean step2 = new AtomicBoolean();
+
+            ZeroPublisher.<Integer> create(BackpressureStrategy.BUFFER, 256, tube -> {
+                new Thread(() -> {
+                    for (int i = 1; i < 20; i++) {
+                        tube.send(i);
+                    }
+                    step0.set(true);
+                    await().untilTrue(step1);
+                    for (int i = 1; i < 20; i++) {
+                        tube.send(i);
+                    }
+                    tube.complete();
+                    step2.set(true);
+                }).start();
+            }).subscribe(sub);
+
+            await().untilTrue(step0);
+            sub.request(10L);
+
+            sub.assertNotTerminated();
+            sub.assertItems(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
+
+            step1.set(true);
+            sub.request(5L);
+            await().untilTrue(step2);
+            sub.request(100L);
+
+            sub.assertItems(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
+                    11, 12, 13, 14, 15, 16, 17, 18, 19);
             sub.assertCompleted();
         }
     }

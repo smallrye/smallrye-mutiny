@@ -2,9 +2,9 @@ package mutiny.zero.internal;
 
 import org.reactivestreams.Subscriber;
 
-public class ErrorTube<T> extends TubeBase<T> {
+public class ErroringTube<T> extends TubeBase<T> {
 
-    protected ErrorTube(Subscriber<? super T> subscriber) {
+    protected ErroringTube(Subscriber<? super T> subscriber) {
         super(subscriber);
     }
 

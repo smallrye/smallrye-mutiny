@@ -28,12 +28,13 @@ public class TubePublisher<T> implements Publisher<T> {
         TubeBase<T> tube = null;
         switch (backpressureStrategy) {
             case BUFFER:
+                tube = new BufferingTube<>(subscriber, bufferSize);
                 break;
             case DROP:
                 tube = new DroppingTube<>(subscriber);
                 break;
             case ERROR:
-                tube = new ErrorTube<>(subscriber);
+                tube = new ErroringTube<>(subscriber);
                 break;
             case IGNORE:
                 tube = new IgnoringTube<>(subscriber);

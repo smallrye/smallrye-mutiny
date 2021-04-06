@@ -63,8 +63,8 @@ public interface ZeroPublisher {
     static <T> Publisher<T> create(BackpressureStrategy backpressureStrategy, int bufferSize, Consumer<Tube<T>> tubeConsumer) {
         requireNonNull(backpressureStrategy, "The backpressure strategy cannot be null");
         requireNonNull(tubeConsumer, "The tube consumer cannot be null");
-        if ((backpressureStrategy == BackpressureStrategy.BUFFER)
-                || (backpressureStrategy == BackpressureStrategy.LATEST) && bufferSize <= 0) {
+        if (((backpressureStrategy == BackpressureStrategy.BUFFER)
+                || (backpressureStrategy == BackpressureStrategy.LATEST)) && bufferSize <= 0) {
             throw new IllegalArgumentException("The buffer size must be strictly positive");
         }
         return new TubePublisher<>(backpressureStrategy, bufferSize, tubeConsumer);
