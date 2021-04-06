@@ -2,9 +2,9 @@ package mutiny.zero.internal;
 
 import org.reactivestreams.Subscriber;
 
-public class BufferingTube<T> extends BufferingTubeBase<T> {
+public class LatestTube<T> extends BufferingTubeBase<T> {
 
-    public BufferingTube(Subscriber<? super T> subscriber, int bufferSize) {
+    public LatestTube(Subscriber<? super T> subscriber, int bufferSize) {
         super(subscriber, bufferSize);
     }
 
@@ -14,9 +14,8 @@ public class BufferingTube<T> extends BufferingTubeBase<T> {
             dispatchQueue.offer(item);
             drainLoop();
         } else if (!overflowQueue.offer(item)) {
-            fail(new IllegalStateException(
-                    "The following item cannot be propagated because there is no demand and the overflow buffer is full: "
-                            + item));
+            overflowQueue.remove();
+            overflowQueue.offer(item);
         }
     }
 }

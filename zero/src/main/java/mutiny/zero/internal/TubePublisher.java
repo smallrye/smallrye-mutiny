@@ -40,6 +40,7 @@ public class TubePublisher<T> implements Publisher<T> {
                 tube = new IgnoringTube<>(subscriber);
                 break;
             case LATEST:
+                tube = new LatestTube<>(subscriber, bufferSize);
                 break;
             default:
                 throw new IllegalStateException("Unexpected backpressure strategy: " + backpressureStrategy);

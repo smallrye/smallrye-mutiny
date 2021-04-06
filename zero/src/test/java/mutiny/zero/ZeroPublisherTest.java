@@ -663,4 +663,69 @@ class ZeroPublisherTest {
             sub.assertCompleted();
         }
     }
+
+    @Nested
+    @DisplayName("Latest tube publishers")
+    class LatestTubes {
+
+        @Test
+        @DisplayName("Bad initialization parameters")
+        void badInit() {
+            Assertions.assertThrows(IllegalArgumentException.class,
+                    () -> ZeroPublisher.create(BackpressureStrategy.LATEST, -1, tube -> {
+                        // Nothing here
+                    }));
+
+            Assertions.assertThrows(IllegalArgumentException.class,
+                    () -> ZeroPublisher.create(BackpressureStrategy.LATEST, 0, tube -> {
+                        // Nothing here
+                    }));
+        }
+
+        @Test
+        @DisplayName("No overflow")
+        void noOverflow() {
+            AssertSubscriber<Integer> sub = AssertSubscriber.create(10);
+            ZeroPublisher.<Integer> create(BackpressureStrategy.LATEST, 256, tube -> {
+                for (int i = 1; i < 6; i++) {
+                    tube.send(i);
+                }
+                tube.complete();
+            }).subscribe(sub);
+
+            sub.assertItems(1, 2, 3, 4, 5);
+            sub.assertCompleted();
+        }
+
+        @Test
+        @DisplayName("Overflow within the buffer bounds")
+        void overflowWithin() {
+            AssertSubscriber<Integer> sub = AssertSubscriber.create(5);
+            ZeroPublisher.<Integer> create(BackpressureStrategy.LATEST, 256, tube -> {
+                for (int i = 1; i < 100; i++) {
+                    tube.send(i);
+                }
+                tube.complete();
+            }).subscribe(sub);
+
+            sub.assertItems(1, 2, 3, 4, 5);
+            sub.assertNotTerminated();
+        }
+
+        @Test
+        @DisplayName("Overflow outside the buffer bounds")
+        void overflowOver() {
+            AssertSubscriber<Integer> sub = AssertSubscriber.create();
+            ZeroPublisher.<Integer> create(BackpressureStrategy.LATEST, 5, tube -> {
+                for (int i = 1; i < 500; i++) {
+                    tube.send(i);
+                }
+                tube.complete();
+            }).subscribe(sub);
+
+            sub.request(Long.MAX_VALUE);
+            sub.assertItems(495, 496, 497, 498, 499);
+            sub.assertCompleted();
+        }
+    }
 }
