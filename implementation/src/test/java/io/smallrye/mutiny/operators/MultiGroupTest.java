@@ -815,7 +815,7 @@ public class MultiGroupTest {
                 .subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE));
 
         subscriber.awaitSubscription();
-        subscriber.awaitItems(2).cancel();
+        subscriber.awaitNextItems(2).cancel();
 
         AssertSubscriber<Long> s1 = subscriber.getItems().get(0).subscribe()
                 .withSubscriber(AssertSubscriber.create(Long.MAX_VALUE));
