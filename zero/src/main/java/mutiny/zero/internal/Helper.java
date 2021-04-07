@@ -2,7 +2,7 @@ package mutiny.zero.internal;
 
 import java.util.concurrent.atomic.AtomicLong;
 
-class Helper {
+public class Helper {
 
     public static IllegalArgumentException negativeRequest(long n) {
         return new IllegalArgumentException("Requested " + n + " items (must be > 0L)");

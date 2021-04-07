@@ -15,19 +15,7 @@ public class DroppingTubePublisherTckTest extends PublisherVerification<Long> {
 
     @Override
     public Publisher<Long> createPublisher(long elements) {
-        return ZeroPublisher.create(BackpressureStrategy.DROP, -1, tube -> {
-            new Thread(() -> {
-                long n = 0L;
-                while (n < elements && !tube.cancelled()) {
-                    if (tube.outstandingRequests() > 0L) {
-                        tube.send(n++);
-                    }
-                }
-                if (!tube.cancelled()) {
-                    tube.complete();
-                }
-            }).start();
-        });
+        return ZeroPublisher.create(BackpressureStrategy.DROP, -1, tube -> TubeEmitLoop.loop(tube, elements));
     }
 
     @Override
