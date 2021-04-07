@@ -1,5 +1,6 @@
 package mutiny.zero.internal;
 
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -8,11 +9,11 @@ import org.reactivestreams.Subscription;
 
 public class PublisherToCompletionStageSubscriber<T> implements Subscriber<T> {
 
-    private final CompletableFuture<T> future;
+    private final CompletableFuture<Optional<T>> future;
     private final AtomicBoolean completed = new AtomicBoolean();
     private Subscription subscription;
 
-    public PublisherToCompletionStageSubscriber(CompletableFuture<T> future) {
+    public PublisherToCompletionStageSubscriber(CompletableFuture<Optional<T>> future) {
         this.future = future;
     }
 
@@ -26,7 +27,7 @@ public class PublisherToCompletionStageSubscriber<T> implements Subscriber<T> {
     public void onNext(T value) {
         if (completed.compareAndSet(false, true)) {
             subscription.cancel();
-            future.complete(value);
+            future.complete(Optional.of(value));
         }
     }
 
@@ -40,6 +41,8 @@ public class PublisherToCompletionStageSubscriber<T> implements Subscriber<T> {
 
     @Override
     public void onComplete() {
-        // Ignore
+        if (completed.compareAndSet(false, true)) {
+            future.complete(Optional.empty());
+        }
     }
 }

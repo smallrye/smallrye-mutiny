@@ -198,7 +198,22 @@ class ZeroPublisherTest {
 
             ZeroPublisher.toCompletionStage(publisher)
                     .whenComplete((n, throwable) -> {
-                        assertThat(n).isEqualTo(58);
+                        assertThat(n).isPresent().isEqualTo(58);
+                        assertThat(throwable).isNull();
+                        assertThat(counter).hasValue(1);
+                    });
+        }
+
+        @Test
+        @DisplayName("Publisher to CompletionStage (empty)")
+        void publisherToCompletionStageOkEmpty() {
+            AtomicInteger counter = new AtomicInteger();
+            Multi<Object> publisher = Multi.createFrom().empty()
+                    .onItem().invoke(counter::incrementAndGet);
+
+            ZeroPublisher.toCompletionStage(publisher)
+                    .whenComplete((n, throwable) -> {
+                        assertThat(n).isNotNull().isNotPresent();
                         assertThat(throwable).isNull();
                         assertThat(counter).hasValue(1);
                     });
