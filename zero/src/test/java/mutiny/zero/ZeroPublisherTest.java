@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -144,20 +145,12 @@ class ZeroPublisherTest {
         @Test
         @DisplayName("Deferred CompletionStage (value)")
         void fromDeferredValue() {
-            CompletableFuture<Integer> future = CompletableFuture.supplyAsync(() -> {
-                try {
-                    Thread.sleep(100);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                return 63;
-            });
+            CompletableFuture<Integer> future = CompletableFuture.supplyAsync(() -> 63);
             AssertSubscriber<Object> sub = AssertSubscriber.create(10);
             ZeroPublisher.fromCompletionStage(future).subscribe(sub);
 
-            sub.awaitNextItem();
-            sub.assertItems(63);
-            sub.assertCompleted();
+            sub.awaitCompletion(Duration.ofSeconds(5));
+            sub.assertItems(63).assertCompleted();
         }
 
         @Test
@@ -173,18 +166,11 @@ class ZeroPublisherTest {
         @Test
         @DisplayName("Deferred CompletionStage (null value)")
         void fromDeferredNullValue() {
-            CompletableFuture<Object> future = CompletableFuture.supplyAsync(() -> {
-                try {
-                    Thread.sleep(100);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                return null;
-            });
+            CompletableFuture<Object> future = CompletableFuture.supplyAsync(() -> null);
             AssertSubscriber<Object> sub = AssertSubscriber.create(10);
             ZeroPublisher.fromCompletionStage(future).subscribe(sub);
 
-            sub.awaitFailure();
+            sub.awaitFailure(Duration.ofSeconds(5));
             sub.assertFailedWith(NullPointerException.class, "null value");
         }
 
