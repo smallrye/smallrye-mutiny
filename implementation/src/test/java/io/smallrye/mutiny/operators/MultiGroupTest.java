@@ -197,7 +197,7 @@ public class MultiGroupTest {
                 .subscribe()
                 .withSubscriber(AssertSubscriber.create(100));
 
-        subscriber.awaitNextItems(3).cancel();
+        subscriber.awaitItems(3).cancel();
         publisher.assertCancelled();
     }
 
@@ -384,7 +384,7 @@ public class MultiGroupTest {
                 .subscribe()
                 .withSubscriber(AssertSubscriber.create(100));
 
-        subscriber.awaitNextItems(3).cancel();
+        subscriber.awaitItems(3).cancel();
     }
 
     @Test
@@ -421,7 +421,7 @@ public class MultiGroupTest {
                 .onItem().transformToUniAndMerge(m -> m.collect().asList())
                 .subscribe().withSubscriber(subscriber);
 
-        subscriber.awaitNextItems(3).cancel();
+        subscriber.awaitItems(3).cancel();
         List<List<Object>> items = subscriber.getItems();
         assertThat(items).hasSize(3).allSatisfy(list -> assertThat(list).isEmpty());
     }
@@ -811,11 +811,11 @@ public class MultiGroupTest {
     @Test
     public void testCancellationOnUpstream() {
         AssertSubscriber<GroupedMulti<Long, Long>> subscriber = Multi.createFrom().ticks().every(Duration.ofMillis(2))
+                .onOverflow().drop()
                 .group().by(l -> l % 2)
                 .subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE));
 
-        subscriber.awaitSubscription();
-        subscriber.awaitNextItems(2).cancel();
+        subscriber.awaitSubscription().awaitItems(2).cancel();
 
         AssertSubscriber<Long> s1 = subscriber.getItems().get(0).subscribe()
                 .withSubscriber(AssertSubscriber.create(Long.MAX_VALUE));
@@ -841,8 +841,7 @@ public class MultiGroupTest {
                 .group().by(l -> l % 2)
                 .subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE));
 
-        subscriber.assertSubscribed();
-        subscriber.awaitNextItems(2);
+        subscriber.assertSubscribed().awaitItems(2, Duration.ofSeconds(1));
         AssertSubscriber<Long> s1 = subscriber.getItems().get(0).subscribe()
                 .withSubscriber(AssertSubscriber.create(Long.MAX_VALUE));
         s1.assertSubscribed();
