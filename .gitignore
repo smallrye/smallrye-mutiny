@@ -562,4 +562,7 @@ Temporary Items
 
 # Cache folder
 **/.cache/
-**/.sass-cache/documentation/src/main/jekyll/.ruby-version
+**/.sass-cache
+
+# Ruby version
+documentation/src/main/jekyll/.ruby-version
