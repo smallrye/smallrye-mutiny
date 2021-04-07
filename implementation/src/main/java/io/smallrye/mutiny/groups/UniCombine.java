@@ -31,7 +31,6 @@ public class UniCombine {
      * contained in the {@code iterable} are also cancelled.
      *
      * @return the object to enlist the candidates
-     * @see Uni#or <code>Uni.or()</code> for the equivalent operator on Uni instances
      */
     public UniAny any() {
         return UniAny.INSTANCE;
@@ -52,7 +51,6 @@ public class UniCombine {
      * {@link UniZip#unis(Iterable)}.
      *
      * @return the object to configure the join
-     * @see Uni#and <code>Uni.and()</code> for the equivalent operator on Uni instances
      */
     public UniZip all() {
         return UniZip.INSTANCE;

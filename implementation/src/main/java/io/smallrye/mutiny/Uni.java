@@ -13,9 +13,6 @@ import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.subscription.UniEmitter;
 import io.smallrye.mutiny.subscription.UniSubscriber;
 import io.smallrye.mutiny.subscription.UniSubscription;
-import io.smallrye.mutiny.tuples.Tuple;
-import io.smallrye.mutiny.tuples.Tuple2;
-import io.smallrye.mutiny.tuples.Tuple9;
 
 /**
  * A {@link Uni} represents a lazy asynchronous action. It follows the subscription pattern, meaning that the action
@@ -232,63 +229,6 @@ public interface Uni<T> {
      * @return the object to configure the action to execute when an item is emitted or when a failure is propagated.
      */
     UniOnItemOrFailure<T> onItemOrFailure();
-
-    /**
-     * Combines a set of {@link Uni unis} into a joined item. This item can be a {@code Tuple} or the item of a
-     * combinator function.
-     * <p>
-     * If one of the combine {@link Uni} fire a failure, the other unis are cancelled, and the resulting
-     * {@link Uni} fires the failure. If {@code collectFailures()} is called,
-     * it waits for the completion of all the {@link Uni unis} before propagating the failure event. If more than one
-     * {@link Uni} failed, a {@link CompositeException} is fired, wrapping the different collected failures.
-     * <p>
-     * Depending on the number of participants, the produced {@link Tuple} is
-     * different from {@link Tuple2} to {@link Tuple9}. For more participants,
-     * use {@link UniAndGroup#unis(Uni[])} or
-     * {@link UniAndGroup#unis(Iterable)}.
-     *
-     * @return the object to configure the join
-     * @see UniCombine#all() <code>Uni.all()</code> for the equivalent static operator
-     * @deprecated Use {@link #combine()}
-     */
-    @Deprecated
-    UniAndGroup<T> and();
-
-    /**
-     * Combines the item of this {@link Uni} with the item of {@code other} into a {@link Tuple2}.
-     * If {@code this} or {@code other} fails, the other resolution is cancelled.
-     *
-     * @param other the other {@link Uni}, must not be {@code null}
-     * @param <T2> the type to pair
-     * @return the combination of the pair combining the two items.
-     * @see #and() <code>and</code> for more options on the combination of items
-     * @see UniCombine#all() <code>Uni.all()</code> for the equivalent static operator
-     * @deprecated Use {@link #combine()}
-     */
-    @Deprecated
-    <T2> Uni<Tuple2<T, T2>> and(Uni<T2> other);
-
-    /**
-     * Composes this {@link Uni} with a set of {@link Uni} passed to
-     * {@link UniOr#unis(Uni[])} to produce a new {@link Uni} forwarding the first event
-     * (item or failure). It behaves like the fastest of these competing unis.
-     * <p>
-     * The process subscribes to the set of {@link Uni}. When one of the {@link Uni} fires an item or a failure,
-     * the event is propagated downstream. Also the other subscriptions are cancelled.
-     * <p>
-     * Note that the callback from the subscriber are called on the thread used to fire the winning {@link Uni}.
-     * Use {@link #emitOn(Executor)} to change the thread.
-     * <p>
-     * If the subscription to the returned {@link Uni} is cancelled, the subscription to the {@link Uni unis} from the
-     * {@code iterable} are also cancelled.
-     *
-     * @return the object to enlist the participants
-     * @see UniCombine#any() <code>Uni.any</code> for a static version of this operator, like
-     *      <code>Uni first = Uni.any().of(uni1, uni2);</code>
-     * @deprecated Use {@link #combine()}
-     */
-    @Deprecated
-    UniOr<T> or();
 
     /**
      * Like {@link #onFailure(Predicate)} but applied to all failures fired by the upstream uni.
