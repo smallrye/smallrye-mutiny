@@ -680,8 +680,15 @@ class ZeroPublisherTest {
         @Test
         @DisplayName("No overflow")
         void noOverflow() {
-            AssertSubscriber<Integer> sub = AssertSubscriber.create(10);
+            AtomicLong requested = new AtomicLong();
+            AtomicBoolean cancelled = new AtomicBoolean();
+            AtomicBoolean terminated = new AtomicBoolean();
+
+            AssertSubscriber<Integer> sub = AssertSubscriber.create(10L);
             ZeroPublisher.<Integer> create(BackpressureStrategy.BUFFER, 256, tube -> {
+                tube.whenRequested(requested::addAndGet)
+                        .whenTerminates(() -> terminated.set(true))
+                        .whenCancelled(() -> cancelled.set(true));
                 for (int i = 1; i < 6; i++) {
                     tube.send(i);
                 }
@@ -690,6 +697,10 @@ class ZeroPublisherTest {
 
             sub.assertItems(1, 2, 3, 4, 5);
             sub.assertCompleted();
+
+            assertThat(cancelled).isFalse();
+            assertThat(terminated).isTrue();
+            assertThat(requested).hasValue(10L);
         }
 
         @Test
