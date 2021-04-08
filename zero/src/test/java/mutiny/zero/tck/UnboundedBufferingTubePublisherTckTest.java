@@ -7,9 +7,9 @@ import org.reactivestreams.tck.junit5.PublisherVerification;
 import mutiny.zero.BackpressureStrategy;
 import mutiny.zero.ZeroPublisher;
 
-public class UnboundedBufferringTubePublisherTckTest extends PublisherVerification<Long> {
+public class UnboundedBufferingTubePublisherTckTest extends PublisherVerification<Long> {
 
-    public UnboundedBufferringTubePublisherTckTest() {
+    public UnboundedBufferingTubePublisherTckTest() {
         super(new TestEnvironment());
     }
 
