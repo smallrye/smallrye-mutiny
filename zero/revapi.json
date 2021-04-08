@@ -7,6 +7,13 @@
         "behavior": "report",
         "ignoreMissingAnnotations": false
       }
+    },
+    "filter" : {
+      "packages" : {
+        "regex" : false,
+        "include" : [ "mutiny.zero" ],
+        "exclude" : [ "mutiny.zero.internal" ]
+      }
     }
   },
   {
