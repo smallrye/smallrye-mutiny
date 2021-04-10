@@ -4,6 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <properties>
         <awaitility.version>4.0.3</awaitility.version>
+        <jbang-maven-plugin.version>0.0.7-SNAPSHOT</jbang-maven-plugin.version>
     </properties>
 
     <parent>
@@ -104,8 +105,25 @@
                 </executions>
             </plugin>
             <plugin>
-                <groupId>org.jboss.jandex</groupId>
-                <artifactId>jandex-maven-plugin</artifactId>
+                <groupId>dev.jbang</groupId>
+                <artifactId>jbang-maven-plugin</artifactId>
+                <version>${jbang-maven-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>flowify</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <script>scripts/flowify.java</script>
+                            <args>
+                                <arg>${project.build.directory}/${project.artifactId}-${project.version}.jar</arg>
+                                <arg>${project.build.directory}/${project.artifactId}-${project.version}-jdk-flow.jar</arg>
+                            </args>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
             <plugin>
                 <groupId>org.revapi</groupId>
@@ -139,6 +157,27 @@
                             <release>8</release>
                             <detectJavaApiLink>false</detectJavaApiLink>
                         </configuration>
+                    </plugin>
+                    <plugin>
+                        <groupId>dev.jbang</groupId>
+                        <artifactId>jbang-maven-plugin</artifactId>
+                        <version>${jbang-maven-plugin.version}</version>
+                        <executions>
+                            <execution>
+                                <id>smoke-test</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <script>scripts/smoke_test.java</script>
+                                    <runArgs>
+                                        <runArg>--cp</runArg>
+                                        <arg>${project.build.directory}/${project.artifactId}-${project.version}-jdk-flow.jar</arg>
+                                    </runArgs>
+                                </configuration>
+                            </execution>
+                        </executions>
                     </plugin>
                 </plugins>
             </build>
