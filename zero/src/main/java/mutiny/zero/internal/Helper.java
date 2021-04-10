@@ -5,7 +5,7 @@ import java.util.concurrent.atomic.AtomicLong;
 public class Helper {
 
     public static IllegalArgumentException negativeRequest(long n) {
-        return new IllegalArgumentException("Requested " + n + " items (must be > 0L)");
+        return new IllegalArgumentException("Requested " + n + " items (non-positive subscription request)");
     }
 
     public static long add(AtomicLong requested, long requests) {

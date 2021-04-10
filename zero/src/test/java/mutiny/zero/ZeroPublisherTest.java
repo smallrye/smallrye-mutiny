@@ -844,12 +844,12 @@ class ZeroPublisherTest {
             AssertSubscriber<Object> sub = AssertSubscriber.create();
             publisher.subscribe(sub);
             sub.request(0L);
-            sub.assertFailedWith(IllegalArgumentException.class, "must be > 0L");
+            sub.assertFailedWith(IllegalArgumentException.class, "non-positive subscription request");
 
             sub = AssertSubscriber.create();
             publisher.subscribe(sub);
             sub.request(-100L);
-            sub.assertFailedWith(IllegalArgumentException.class, "must be > 0L");
+            sub.assertFailedWith(IllegalArgumentException.class, "non-positive subscription request");
 
         }
 
