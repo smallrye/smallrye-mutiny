@@ -117,7 +117,7 @@
                             <goal>run</goal>
                         </goals>
                         <configuration>
-                            <script>scripts/flowify.java</script>
+                            <script>zero/scripts/flowify.java</script>
                             <args>
                                 <arg>${project.build.directory}/${project.artifactId}-${project.version}.jar</arg>
                                 <arg>${project.build.directory}/${project.artifactId}-${project.version}-jdk-flow.jar</arg>
@@ -194,7 +194,7 @@
                                     <goal>run</goal>
                                 </goals>
                                 <configuration>
-                                    <script>scripts/smoke_test.java</script>
+                                    <script>zero/scripts/smoke_test.java</script>
                                     <jbangargs>
                                         <jbangarg>--cp</jbangarg>
                                         <jbangarg>${project.build.directory}/${project.artifactId}-${project.version}-jdk-flow.jar</jbangarg>
