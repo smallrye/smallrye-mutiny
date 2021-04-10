@@ -6,6 +6,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Supplier;
 
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
@@ -13,15 +14,22 @@ import org.reactivestreams.Subscription;
 
 public class CompletionStagePublisher<T> implements Publisher<T> {
 
-    private final CompletableFuture<T> completableFuture;
+    private final Supplier<CompletionStage<T>> completionStageSupplier;
 
-    public CompletionStagePublisher(CompletionStage<T> completionStage) {
-        this.completableFuture = completionStage.toCompletableFuture();
+    public CompletionStagePublisher(Supplier<CompletionStage<T>> completionStageSupplier) {
+        this.completionStageSupplier = completionStageSupplier;
     }
 
     @Override
     public void subscribe(Subscriber<? super T> subscriber) {
         requireNonNull(subscriber, "The subscriber cannot be null");
+        CompletionStage<T> cs = completionStageSupplier.get();
+        if (cs == null) {
+            subscriber.onSubscribe(new AlreadyCompletedSubscription());
+            subscriber.onError(new NullPointerException("The completion stage is null"));
+            return;
+        }
+        CompletableFuture<T> completableFuture = cs.toCompletableFuture();
         if (completableFuture.isDone()) {
             subscriber.onSubscribe(new AlreadyCompletedSubscription());
             try {
@@ -38,17 +46,19 @@ public class CompletionStagePublisher<T> implements Publisher<T> {
                 subscriber.onError(e.getCause());
             }
         } else {
-            subscriber.onSubscribe(new CompletionStageSubscription(subscriber));
+            subscriber.onSubscribe(new CompletionStageSubscription(subscriber, completableFuture));
         }
     }
 
     private class CompletionStageSubscription implements Subscription {
 
         private final Subscriber<? super T> subscriber;
+        private final CompletableFuture<T> completableFuture;
         private final AtomicBoolean cancelled = new AtomicBoolean();
 
-        private CompletionStageSubscription(Subscriber<? super T> subscriber) {
+        private CompletionStageSubscription(Subscriber<? super T> subscriber, CompletableFuture<T> completableFuture) {
             this.subscriber = subscriber;
+            this.completableFuture = completableFuture;
         }
 
         @Override

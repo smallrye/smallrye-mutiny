@@ -117,15 +117,15 @@ class ZeroPublisherTest {
         @Test
         @DisplayName("Null CompletionStage")
         void fromNull() {
-            Assertions.assertThrows(NullPointerException.class, () -> ZeroPublisher.fromCompletionStage(null));
+            Assertions.assertThrows(NullPointerException.class,
+                    () -> ZeroPublisher.fromCompletionStage(null));
         }
 
         @Test
         @DisplayName("Resolved CompletionStage (value)")
         void fromResolvedValue() {
-            CompletableFuture<Integer> future = CompletableFuture.completedFuture(58);
             AssertSubscriber<Object> sub = AssertSubscriber.create(10);
-            ZeroPublisher.fromCompletionStage(future).subscribe(sub);
+            ZeroPublisher.fromCompletionStage(() -> CompletableFuture.completedFuture(58)).subscribe(sub);
 
             sub.assertCompleted();
             sub.assertItems(58);
@@ -137,7 +137,7 @@ class ZeroPublisherTest {
             CompletableFuture<Integer> future = new CompletableFuture<>();
             future.completeExceptionally(new RuntimeException("boom"));
             AssertSubscriber<Object> sub = AssertSubscriber.create(10);
-            ZeroPublisher.fromCompletionStage(future).subscribe(sub);
+            ZeroPublisher.fromCompletionStage(() -> future).subscribe(sub);
 
             sub.assertFailedWith(RuntimeException.class, "boom");
         }
@@ -147,7 +147,7 @@ class ZeroPublisherTest {
         void fromDeferredValue() {
             CompletableFuture<Integer> future = CompletableFuture.supplyAsync(() -> 63);
             AssertSubscriber<Object> sub = AssertSubscriber.create(10);
-            ZeroPublisher.fromCompletionStage(future).subscribe(sub);
+            ZeroPublisher.fromCompletionStage(() -> future).subscribe(sub);
 
             sub.awaitCompletion(Duration.ofSeconds(5));
             sub.assertItems(63).assertCompleted();
@@ -158,7 +158,7 @@ class ZeroPublisherTest {
         void fromResolvedNullValue() {
             CompletableFuture<Object> future = CompletableFuture.completedFuture(null);
             AssertSubscriber<Object> sub = AssertSubscriber.create(10);
-            ZeroPublisher.fromCompletionStage(future).subscribe(sub);
+            ZeroPublisher.fromCompletionStage(() -> future).subscribe(sub);
 
             sub.assertFailedWith(NullPointerException.class, "null value");
         }
@@ -168,7 +168,7 @@ class ZeroPublisherTest {
         void fromDeferredNullValue() {
             CompletableFuture<Object> future = CompletableFuture.supplyAsync(() -> null);
             AssertSubscriber<Object> sub = AssertSubscriber.create(10);
-            ZeroPublisher.fromCompletionStage(future).subscribe(sub);
+            ZeroPublisher.fromCompletionStage(() -> future).subscribe(sub);
 
             sub.awaitFailure(Duration.ofSeconds(5));
             sub.assertFailedWith(NullPointerException.class, "null value");

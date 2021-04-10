@@ -17,15 +17,16 @@ public class CompletionStageTckPublisherTest extends PublisherVerification<Long>
 
     @Override
     public Publisher<Long> createPublisher(long elements) {
-        CompletableFuture<Long> future = CompletableFuture.supplyAsync(() -> 69L);
-        return ZeroPublisher.fromCompletionStage(future);
+        return ZeroPublisher.fromCompletionStage(() -> CompletableFuture.supplyAsync(() -> 69L));
     }
 
     @Override
     public Publisher<Long> createFailedPublisher() {
-        CompletableFuture<Long> future = new CompletableFuture<>();
-        future.completeExceptionally(new IOException("boom"));
-        return ZeroPublisher.fromCompletionStage(future);
+        return ZeroPublisher.fromCompletionStage(() -> {
+            CompletableFuture<Long> future = new CompletableFuture<>();
+            future.completeExceptionally(new IOException("boom"));
+            return future;
+        });
     }
 
     @Override

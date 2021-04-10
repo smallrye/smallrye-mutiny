@@ -95,14 +95,14 @@ public interface ZeroPublisher {
 
     /**
      * Create a {@link org.reactivestreams.Publisher} from a {@link CompletionStage}.
-     * 
-     * @param completionStage the completion stage, cannot be {@code null}
+     *
+     * @param completionStageSupplier the completion stage supplier, cannot be {@code null}, cannot yield {@code null}
      * @param <T> the item type
      * @return a new {@link org.reactivestreams.Publisher}
      */
-    static <T> Publisher<T> fromCompletionStage(CompletionStage<T> completionStage) {
-        requireNonNull(completionStage, "The CompletionStage cannot be null");
-        return new CompletionStagePublisher<>(completionStage);
+    static <T> Publisher<T> fromCompletionStage(Supplier<CompletionStage<T>> completionStageSupplier) {
+        requireNonNull(completionStageSupplier, "The CompletionStage supplier cannot be null");
+        return new CompletionStagePublisher<>(completionStageSupplier);
     }
 
     /**
