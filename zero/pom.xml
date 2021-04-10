@@ -5,6 +5,7 @@
     <properties>
         <awaitility.version>4.0.3</awaitility.version>
         <jbang-maven-plugin.version>0.0.7-SNAPSHOT</jbang-maven-plugin.version>
+        <build-helper-maven-plugin.version>3.2.0</build-helper-maven-plugin.version>
     </properties>
 
     <parent>
@@ -126,6 +127,29 @@
                 </executions>
             </plugin>
             <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>${build-helper-maven-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>attach-artifacts</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>attach-artifact</goal>
+                        </goals>
+                        <configuration>
+                            <artifacts>
+                                <artifact>
+                                    <file>${project.build.directory}/${project.artifactId}-${project.version}-jdk-flow.jar</file>
+                                    <type>jar</type>
+                                    <classifier>jdk-flow</classifier>
+                                </artifact>
+                            </artifacts>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <groupId>org.revapi</groupId>
                 <artifactId>revapi-maven-plugin</artifactId>
             </plugin>
@@ -171,10 +195,10 @@
                                 </goals>
                                 <configuration>
                                     <script>scripts/smoke_test.java</script>
-                                    <runArgs>
-                                        <runArg>--cp</runArg>
-                                        <arg>${project.build.directory}/${project.artifactId}-${project.version}-jdk-flow.jar</arg>
-                                    </runArgs>
+                                    <jbangargs>
+                                        <jbangarg>--cp</jbangarg>
+                                        <jbangarg>${project.build.directory}/${project.artifactId}-${project.version}-jdk-flow.jar</jbangarg>
+                                    </jbangargs>
                                 </configuration>
                             </execution>
                         </executions>
