@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <properties>
         <awaitility.version>4.0.3</awaitility.version>
-        <jbang-maven-plugin.version>0.0.7-SNAPSHOT</jbang-maven-plugin.version>
+        <jbang-maven-plugin.version>0.0.7</jbang-maven-plugin.version>
         <build-helper-maven-plugin.version>3.2.0</build-helper-maven-plugin.version>
     </properties>
 
