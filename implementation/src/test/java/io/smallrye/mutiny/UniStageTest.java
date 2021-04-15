@@ -23,17 +23,6 @@ public class UniStageTest {
     }
 
     @Test
-    public void testChainThenWithDeprecatedApplyAndThen() {
-        String result = Uni.createFrom().completionStage(CompletableFuture.supplyAsync(() -> 23))
-                .then(self -> self
-                        .onItem().apply(i -> i + 1)
-                        .onFailure().retry().indefinitely())
-                .then(self -> self.onItem().transformToUni(i -> Uni.createFrom().item(Integer.toString(i))))
-                .await().indefinitely();
-        assertThat(result).isEqualTo("24");
-    }
-
-    @Test
     public void testThatFunctionMustNotBeNull() {
         assertThrows(IllegalArgumentException.class, () -> Uni.createFrom().item(1)
                 .stage(null));

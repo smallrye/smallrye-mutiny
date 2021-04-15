@@ -32,24 +32,6 @@ public class MultiOnItem<T> {
      * @param mapper the mapper function, must not be {@code null}
      * @param <R> the type of item produced by the mapper function
      * @return the new {@link Multi}
-     * @deprecated Use {@link #transform(Function)}
-     */
-    @Deprecated
-    public <R> Multi<R> apply(Function<? super T, ? extends R> mapper) {
-        // Decoration happens in `transform`
-        return transform(mapper);
-    }
-
-    /**
-     * Produces a new {@link Multi} invoking the given function for each item emitted by the upstream {@link Multi}.
-     * <p>
-     * The function receives the received item as parameter, and can transform it. The returned object is sent
-     * downstream as {@code item} event.
-     * <p>
-     *
-     * @param mapper the mapper function, must not be {@code null}
-     * @param <R> the type of item produced by the mapper function
-     * @return the new {@link Multi}
      */
     public <R> Multi<R> transform(Function<? super T, ? extends R> mapper) {
         Function<? super T, ? extends R> actual = Infrastructure.decorate(nonNull(mapper, "mapper"));

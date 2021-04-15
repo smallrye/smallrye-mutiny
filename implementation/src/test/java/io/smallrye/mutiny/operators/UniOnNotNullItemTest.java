@@ -16,23 +16,6 @@ import io.smallrye.mutiny.subscription.Cancellable;
 public class UniOnNotNullItemTest {
 
     @Test
-    public void testDeprecatedApply() {
-        assertThat(Uni.createFrom().item("hello")
-                .onItem().ifNotNull().apply(String::toUpperCase)
-                .await().indefinitely()).isEqualTo("HELLO");
-
-        assertThat(Uni.createFrom().item(() -> (String) null)
-                .onItem().ifNotNull().apply(String::toUpperCase)
-                .onItem().ifNull().continueWith("yolo")
-                .await().indefinitely()).isEqualTo("yolo");
-
-        assertThatThrownBy(() -> Uni.createFrom().<String> failure(new Exception("boom"))
-                .onItem().ifNotNull().apply(String::toUpperCase)
-                .onItem().ifNull().continueWith("yolo")
-                .await().indefinitely()).hasMessageContaining("boom");
-    }
-
-    @Test
     public void testTransform() {
         assertThat(Uni.createFrom().item("hello")
                 .onItem().ifNotNull().transform(String::toUpperCase)

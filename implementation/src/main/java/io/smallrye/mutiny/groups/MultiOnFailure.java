@@ -168,20 +168,6 @@ public class MultiOnFailure<T> {
      *
      * @param mapper the mapper function, must not be {@code null}, must not return {@code null}
      * @return the new {@link Multi}
-     * @deprecated use {@link #transform(Function)}
-     */
-    @Deprecated
-    public Multi<T> apply(Function<? super Throwable, ? extends Throwable> mapper) {
-        // Decoration happens in `transform`
-        return transform(mapper);
-    }
-
-    /**
-     * Produces a new {@link Multi} invoking the given function when the current {@link Multi} propagates a failure. The
-     * function can transform the received failure into another exception that will be fired as failure downstream.
-     *
-     * @param mapper the mapper function, must not be {@code null}, must not return {@code null}
-     * @return the new {@link Multi}
      */
     public Multi<T> transform(Function<? super Throwable, ? extends Throwable> mapper) {
         Function<? super Throwable, ? extends Throwable> actual = Infrastructure.decorate(nonNull(mapper, "mapper"));

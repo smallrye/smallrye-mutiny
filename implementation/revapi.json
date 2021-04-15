@@ -47,6 +47,54 @@
         "code": "java.method.removed",
         "old": "method io.smallrye.mutiny.groups.UniOr<T> io.smallrye.mutiny.Uni<T>::or()",
         "justification": "Deprecated API removal"
+      },
+      {
+        "ignore": true,
+        "code": "java.method.removed",
+        "old": "method <O> O io.smallrye.mutiny.Multi<T>::then(java.util.function.Function<io.smallrye.mutiny.Multi<T>, O>)",
+        "justification": "Deprecated API removal"
+      },
+      {
+        "ignore": true,
+        "code": "java.method.removed",
+        "old": "method <O> O io.smallrye.mutiny.Uni<T>::then(java.util.function.Function<io.smallrye.mutiny.Uni<T>, O>)",
+        "justification": "Deprecated API removal"
+      },
+      {
+        "ignore": true,
+        "code": "java.method.removed",
+        "old": "method io.smallrye.mutiny.Multi<T> io.smallrye.mutiny.groups.MultiOnFailure<T>::apply(java.util.function.Function<? super java.lang.Throwable, ? extends java.lang.Throwable>)",
+        "justification": "Deprecated API removal"
+      },
+      {
+        "ignore": true,
+        "code": "java.method.removed",
+        "old": "method <R> io.smallrye.mutiny.Multi<R> io.smallrye.mutiny.groups.MultiOnItem<T>::apply(java.util.function.Function<? super T, ? extends R>)",
+        "justification": "Deprecated API removal"
+      },
+      {
+        "ignore": true,
+        "code": "java.method.removed",
+        "old": "method io.smallrye.mutiny.Uni<T> io.smallrye.mutiny.groups.UniOnFailure<T>::apply(java.util.function.Function<? super java.lang.Throwable, ? extends java.lang.Throwable>)",
+        "justification": "Deprecated API removal"
+      },
+      {
+        "ignore": true,
+        "code": "java.method.removed",
+        "old": "method <R> io.smallrye.mutiny.Uni<R> io.smallrye.mutiny.groups.UniOnItem<T>::apply(java.util.function.Function<? super T, ? extends R>)",
+        "justification": "Deprecated API removal"
+      },
+      {
+        "ignore": true,
+        "code": "java.method.removed",
+        "old": "method <R> io.smallrye.mutiny.Uni<R> io.smallrye.mutiny.groups.UniOnItemOrFailure<T>::apply(java.util.function.BiFunction<? super T, java.lang.Throwable, ? extends R>)",
+        "justification": "Deprecated API removal"
+      },
+      {
+        "ignore": true,
+        "code": "java.method.removed",
+        "old": "method <R> io.smallrye.mutiny.Uni<R> io.smallrye.mutiny.groups.UniOnNotNull<T>::apply(java.util.function.Function<? super T, ? extends R>)",
+        "justification": "Deprecated API removal"
       }
     ]
   }

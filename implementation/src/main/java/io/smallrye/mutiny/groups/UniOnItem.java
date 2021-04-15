@@ -125,24 +125,6 @@ public class UniOnItem<T> {
      * @param mapper the mapper function, must not be {@code null}
      * @param <R> the type of Uni item
      * @return the new {@link Uni}
-     * @deprecated use {@link #transform(Function)}
-     */
-    @Deprecated
-    public <R> Uni<R> apply(Function<? super T, ? extends R> mapper) {
-        // Decoration happens in `transform`
-        return transform(mapper);
-    }
-
-    /**
-     * Produces a new {@link Uni} invoking the given function when the current {@link Uni} fires the {@code item} event.
-     * The function receives the item as parameter, and can transform it. The returned object is sent downstream
-     * as {@code item}.
-     * <p>
-     * For asynchronous composition, see {@link #transformToUni(Function)}.
-     *
-     * @param mapper the mapper function, must not be {@code null}
-     * @param <R> the type of Uni item
-     * @return the new {@link Uni}
      */
     public <R> Uni<R> transform(Function<? super T, ? extends R> mapper) {
         Function<? super T, ? extends R> actual = Infrastructure.decorate(nonNull(mapper, "mapper"));
@@ -375,7 +357,7 @@ public class UniOnItem<T> {
      */
     public <O> Uni<O> castTo(Class<O> target) {
         nonNull(target, "target");
-        return apply(target::cast);
+        return transform(target::cast);
     }
 
     /**
