@@ -37,6 +37,11 @@ public final class MultiLastItemOp<T> extends AbstractMultiOperator<T, T> {
         }
 
         @Override
+        public void request(long numberOfItems) {
+            // Ignored, we already requested Long.MAX
+        }
+
+        @Override
         public void onItem(T item) {
             last = item;
         }
