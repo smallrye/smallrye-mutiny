@@ -116,7 +116,10 @@ public class CollectionBasedMulti<T> extends AbstractMulti<T> {
         }
 
         void produceWithoutBackPressure() {
-            for (T item : collection) {
+            // We must be sure we don't replay already send item, so we must skip "index" items
+            int size = collection.size();
+            for (int i = index; i < size; i++) {
+                T item = collection.get(i);
                 if (cancelled) {
                     return;
                 }
