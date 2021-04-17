@@ -473,6 +473,7 @@ public class AssertSubscriber<T> implements Subscriber<T> {
      * <p>
      * If the timeout expired, or if a completion event is received instead of the expected failure, the check fails.
      *
+     * @param duration the max duration to wait, must not be {@code null}
      * @return this {@link AssertSubscriber}
      */
     public AssertSubscriber<T> awaitFailure(Duration duration) {
@@ -490,6 +491,7 @@ public class AssertSubscriber<T> implements Subscriber<T> {
      * called if no failures are received.
      *
      * @param assertion a check validating the received failure (if any). Must not be {@code null}
+     * @param duration the max duration to wait, must not be {@code null}
      * @return this {@link AssertSubscriber}
      */
     public AssertSubscriber<T> awaitFailure(Consumer<Throwable> assertion, Duration duration) {
@@ -600,12 +602,15 @@ public class AssertSubscriber<T> implements Subscriber<T> {
     }
 
     private void awaitItemEvents(int expected, Duration duration) {
-        ItemTask<T> task = new ItemTask<>(expected, this);
+        ItemTask<T> task = new ItemTask<>(expected, duration.toMillis(), this);
         try {
             task.future().get(duration.toMillis(), TimeUnit.MILLISECONDS);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         } catch (ExecutionException e) {
+            if (expected == items.size()) {
+                return;
+            }
             // Terminal event received
             if (isCancelled()) {
                 throw new AssertionError(
@@ -617,16 +622,22 @@ public class AssertSubscriber<T> implements Subscriber<T> {
                         "Expected " + expected + " items, but received a completion event while waiting. Only " + items
                                 .size()
                                 + " items have been received.");
-            } else {
+            } else if (getFailure() != null) {
                 throw new AssertionError(
                         "Expected " + expected + " items, but received a failure event while waiting: " + getFailure()
                                 + ". Only " + items.size() + " items have been received.");
+            } else {
+                System.out.println(e);
+                throw new AssertionError(
+                        "Expected " + expected + " items.  Only " + items.size() + " items have been received.");
             }
         } catch (TimeoutException e) {
-            // Timeout
+            // Timeout, but verify we didn't get event while timing out.
+            if (items.size() >= expected) {
+                return;
+            }
             throw new AssertionError(
-                    "Expected " + expected + " items in " + duration.toMillis() + " ms, but only received "
-                            + items.size() + " items.");
+                    "Expected " + expected + " items.  Only " + items.size() + " items have been received.");
         }
     }
 
@@ -852,28 +863,39 @@ public class AssertSubscriber<T> implements Subscriber<T> {
 
         private final int expected;
         private final AssertSubscriber<T> subscriber;
+        private final long duration;
 
-        public ItemTask(int expected, AssertSubscriber<T> subscriber) {
+        public ItemTask(int expected, long duration, AssertSubscriber<T> subscriber) {
             this.expected = expected;
             this.subscriber = subscriber;
+            this.duration = duration;
         }
 
         public CompletableFuture<Void> future() {
             CompletableFuture<Void> future = new CompletableFuture<>();
-            EventListener listener = event -> {
-                if (event.isItem()) {
+            long timeout = System.currentTimeMillis() + duration;
+            new Thread(() -> {
+                while (System.currentTimeMillis() < timeout) {
                     if (subscriber.items.size() >= expected) {
                         future.complete(null);
+                        return;
                     }
-                } else if (event.isCancellation() || event.isFailure() || event.isCompletion()) {
-                    future.completeExceptionally(
-                            new NoSuchElementException("Received a terminal event while waiting for items"));
+                    if (subscriber.isCancelled() || subscriber.getFailure() != null
+                            || subscriber.hasCompleted()) {
+                        future.completeExceptionally(
+                                new NoSuchElementException("Received a terminal event while waiting for items"));
+                        return;
+                    }
+                    try {
+                        //noinspection BusyWait
+                        Thread.sleep(100);
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                    }
                 }
-                // Else wait for timeout or next event.
-            };
-            subscriber.registerListener(listener);
-            return future
-                    .whenComplete((x, f) -> subscriber.unregisterListener(listener));
+                future.completeExceptionally(new TimeoutException());
+            }).start();
+            return future;
         }
     }
 
