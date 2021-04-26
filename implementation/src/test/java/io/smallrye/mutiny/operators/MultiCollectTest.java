@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.*;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
@@ -365,6 +366,28 @@ public class MultiCollectTest {
         assertThatThrownBy(() -> uni.await().atMost(Duration.ofSeconds(1)))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("boom");
+    }
+
+    @Test
+    public void testThatLastEmitASingleRequest() {
+        AtomicInteger counter = new AtomicInteger();
+        Multi.createFrom().items("a", "b", "c")
+                .onRequest().invoke(counter::incrementAndGet)
+                .collect().last()
+                .await().indefinitely();
+
+        assertThat(counter).hasValue(1);
+    }
+
+    @Test
+    public void testThatFirstEmitASingleRequest() {
+        AtomicInteger counter = new AtomicInteger();
+        Multi.createFrom().items("a", "b", "c")
+                .onRequest().invoke(counter::incrementAndGet)
+                .collect().first()
+                .await().indefinitely();
+
+        assertThat(counter).hasValue(1);
     }
 
     static class Person {

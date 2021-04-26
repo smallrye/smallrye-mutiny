@@ -10,9 +10,11 @@ import static org.mockito.Mockito.verify;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
@@ -25,27 +27,40 @@ import io.smallrye.mutiny.subscription.MultiSubscriber;
 
 public class MultiSelectFirstOrLast {
 
+    private AtomicInteger counter;
+
+    @BeforeEach
+    public void init() {
+        counter = new AtomicInteger();
+    }
+
     @Test
     public void testSelectFirstWithLimit() {
-        List<Integer> list = Multi.createFrom().range(1, 5).select().first(2)
-                .collectItems().asList().await().indefinitely();
+        List<Integer> list = Multi.createFrom().range(1, 5)
+                .onRequest().invoke(() -> counter.incrementAndGet())
+                .select().first(2)
+                .collect().asList().await().indefinitely();
 
         assertThat(list).containsExactly(1, 2);
+        assertThat(counter).hasValue(1);
     }
 
     @Test
     public void testSelectFirst() {
-        List<Integer> list = Multi.createFrom().range(1, 5).select().first(1)
-                .collectItems().asList().await().indefinitely();
+        List<Integer> list = Multi.createFrom().range(1, 5)
+                .onRequest().invoke(() -> counter.incrementAndGet())
+                .select().first(1)
+                .collect().asList().await().indefinitely();
 
         assertThat(list).containsExactly(1);
+        assertThat(counter).hasValue(1);
     }
 
     @SuppressWarnings("deprecation")
     @Test
     public void testSelectFirstDeprecated() {
         List<Integer> list = Multi.createFrom().range(1, 5).transform().byTakingFirstItems(2)
-                .collectItems().asList().await().indefinitely();
+                .collect().asList().await().indefinitely();
 
         assertThat(list).containsExactly(1, 2);
     }
@@ -53,23 +68,26 @@ public class MultiSelectFirstOrLast {
     @Test
     public void testSelectFirst0() {
         List<Integer> list = Multi.createFrom().range(1, 5).select().first(0)
-                .collectItems().asList().await().indefinitely();
+                .collect().asList().await().indefinitely();
 
         assertThat(list).isEmpty();
     }
 
     @Test
     public void testSelectLastWithLimit() {
-        List<Integer> list = Multi.createFrom().range(1, 5).select().last(2)
-                .collectItems().asList().await().indefinitely();
+        List<Integer> list = Multi.createFrom().range(1, 5)
+                .onRequest().invoke(() -> counter.incrementAndGet())
+                .select().last(2)
+                .collect().asList().await().indefinitely();
 
         assertThat(list).containsExactly(3, 4);
+        assertThat(counter).hasValue(1);
     }
 
     @Test
     public void testSelectLast() {
         List<Integer> list = Multi.createFrom().range(1, 5).select().last()
-                .collectItems().asList().await().indefinitely();
+                .collect().asList().await().indefinitely();
 
         assertThat(list).containsExactly(4);
     }
@@ -78,7 +96,7 @@ public class MultiSelectFirstOrLast {
     @Test
     public void testSelectLastDeprecated() {
         List<Integer> list = Multi.createFrom().range(1, 5).transform().byTakingLastItems(2)
-                .collectItems().asList().await().indefinitely();
+                .collect().asList().await().indefinitely();
 
         assertThat(list).containsExactly(3, 4);
     }
@@ -87,7 +105,7 @@ public class MultiSelectFirstOrLast {
     public void testSelectLastWith0() {
         List<Integer> list = Multi.createFrom().range(1, 5)
                 .select().last(0)
-                .collectItems().asList().await().indefinitely();
+                .collect().asList().await().indefinitely();
 
         assertThat(list).isEmpty();
     }
