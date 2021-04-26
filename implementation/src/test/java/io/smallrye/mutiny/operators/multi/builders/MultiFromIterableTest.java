@@ -46,6 +46,25 @@ public class MultiFromIterableTest {
         verify(subscriber, times(1)).onComplete();
     }
 
+    @Test
+    public void testSwitchFromRequestToUnbounded() {
+        Multi<Integer> multi = Multi.createFrom().items(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
+        AssertSubscriber<Integer> subscriber = multi.subscribe()
+                .withSubscriber(AssertSubscriber.create(0));
+
+        subscriber.request(1)
+                .awaitItems(1)
+                .assertItems(1);
+
+        subscriber.request(1)
+                .awaitItems(2)
+                .assertItems(1, 2);
+
+        subscriber.request(Long.MAX_VALUE)
+                .awaitCompletion()
+                .assertItems(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
+    }
+
     /**
      * This tests the path that can not optimize based on size so must use setProducer.
      */
