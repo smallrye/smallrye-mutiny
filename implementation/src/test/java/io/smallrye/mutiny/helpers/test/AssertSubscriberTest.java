@@ -10,6 +10,7 @@ import java.time.Duration;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
+import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.reactivestreams.Subscription;
 
@@ -21,7 +22,7 @@ import io.smallrye.mutiny.infrastructure.Infrastructure;
 
 public class AssertSubscriberTest {
 
-    private final Duration SMALL = Duration.ofMillis(100);
+    private final Duration SMALL = Duration.ofMillis(200);
     private final Duration MEDIUM = Duration.ofMillis(1000);
 
     private final Uni<Void> smallDelay = Uni.createFrom().voidItem()
@@ -555,7 +556,7 @@ public class AssertSubscriberTest {
                         .hasMessageContaining(SMALL.toMillis() + " ms");
     }
 
-    @Test
+    @RepeatedTest(10)
     public void testAwaitItems() {
         // Already completed
         assertThatThrownBy(() -> Multi.createFrom().empty()
@@ -573,14 +574,14 @@ public class AssertSubscriberTest {
         assertThatThrownBy(() -> Multi.createFrom().emitter(e -> e.emit(1).complete())
                 .onCompletion().call(() -> smallDelay)
                 .subscribe().withSubscriber(AssertSubscriber.create(1))
-                .awaitItems(2, SMALL.multipliedBy(2))).isInstanceOf(AssertionError.class)
+                .awaitItems(2, SMALL.multipliedBy(100))).isInstanceOf(AssertionError.class)
                         .hasMessageContaining("completion").hasMessageContaining("item").hasMessageContaining("1");
 
         // Failure instead of item
         assertThatThrownBy(() -> Multi.createFrom().emitter(e -> e.emit(1).fail(new TestException()))
                 .onFailure().call(() -> smallDelay)
                 .subscribe().withSubscriber(AssertSubscriber.create(1))
-                .awaitItems(2, SMALL.multipliedBy(2))).isInstanceOf(AssertionError.class)
+                .awaitItems(2, SMALL.multipliedBy(100))).isInstanceOf(AssertionError.class)
                         .hasMessageContaining("failure").hasMessageContaining("item").hasMessageContaining("1");
 
         // Item
@@ -604,8 +605,7 @@ public class AssertSubscriberTest {
                 .runSubscriptionOn(Infrastructure.getDefaultExecutor())
                 .subscribe().withSubscriber(AssertSubscriber.create(3))
                 .awaitItems(3, SMALL)).isInstanceOf(AssertionError.class)
-                        .hasMessageContaining("item")
-                        .hasMessageContaining(SMALL.toMillis() + " ms");
+                        .hasMessageContaining("item");
 
         // Have received more items than expected.
         assertThatThrownBy(() -> Multi.createFrom().items(1, 2, 3)

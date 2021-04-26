@@ -173,6 +173,7 @@ public class UniAssertSubscriber<T> implements UniSubscriber<T> {
      * <p>
      * If the timeout expired, or if an item event is received instead of the expected failure, the check fails.
      *
+     * @param duration the max duration to wait, must not be {@code null}
      * @return this {@link UniAssertSubscriber}
      */
     public UniAssertSubscriber<T> awaitFailure(Duration duration) {
@@ -190,6 +191,7 @@ public class UniAssertSubscriber<T> implements UniSubscriber<T> {
      * called if no failures are received.
      *
      * @param assertion a check validating the received failure (if any). Must not be {@code null}
+     * @param duration the max duration to wait, must not be {@code null}
      * @return this {@link UniAssertSubscriber}
      */
     public UniAssertSubscriber<T> awaitFailure(Consumer<Throwable> assertion, Duration duration) {
