@@ -73,7 +73,7 @@ public class MultiCombineTest {
         subscriber.assertNotTerminated()
                 .cancel();
 
-        assertThat(spy.isCancelled());
+        assertThat(spy.isCancelled()).isTrue();
     }
 
     @Test

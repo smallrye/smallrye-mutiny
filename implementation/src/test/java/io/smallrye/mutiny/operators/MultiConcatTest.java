@@ -55,7 +55,7 @@ public class MultiConcatTest {
         subscriber.assertNotTerminated()
                 .cancel();
 
-        assertThat(spy.isCancelled());
+        assertThat(spy.isCancelled()).isTrue();
     }
 
     @Test
