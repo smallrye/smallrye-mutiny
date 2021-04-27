@@ -81,7 +81,7 @@
 Most operators relying on such capacity let you pass either a <code>ScheduledExecutorService</code> or an <code>ExecutorService</code>.</p>
 </div>
 <div class="paragraph">
-<p>Mutiny uses the <a href="https://www.oracle.com/technical-resources/articles/java/fork-join.html">fork-join</a> pool as default executor.
+<p>By default, Mutiny uses the a <em>cached</em> thread pool as default executor, that creates new threads as needed, but reuse previously constructed threads when they are available.
 A <code>ScheduledExecutorService</code> is also created but delegates the execution of the delayed/scheduled tasks to the default executor.</p>
 </div>
 <div class="paragraph">
@@ -179,7 +179,7 @@ If you are using Quarkus, the default executor is already configured to use the 
                     <a href="https://www.redhat.com/en/about/privacy-policy">Privacy Policy</a>
                 </p>
                 <p>
-                     Site last generated: Mar 30, 2021
+                     Site last generated: Apr 27, 2021
                 </p>
             </div>
         </div>
