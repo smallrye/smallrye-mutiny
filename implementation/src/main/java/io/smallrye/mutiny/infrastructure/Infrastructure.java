@@ -7,11 +7,7 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ServiceLoader;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.ForkJoinPool;
-import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.*;
 import java.util.function.*;
 
 import org.reactivestreams.Publisher;
@@ -62,7 +58,7 @@ public class Infrastructure {
      * Configure or reset the executors.
      */
     public static void setDefaultExecutor() {
-        ExecutorService scheduler = ForkJoinPool.commonPool();
+        ExecutorService scheduler = Executors.newCachedThreadPool();
         setDefaultExecutor(scheduler);
     }
 
