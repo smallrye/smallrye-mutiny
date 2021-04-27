@@ -56,7 +56,7 @@ public class MultiMergeTest {
         subscriber.assertNotTerminated()
                 .cancel();
 
-        assertThat(spy.isCancelled());
+        assertThat(spy.isCancelled()).isTrue();
     }
 
     @Test
