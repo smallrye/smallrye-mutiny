@@ -160,6 +160,7 @@ class CompatibilityUtils implements Callable<Integer> {
         return !s.trim().isEmpty();
     }
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     static class Difference {
         public String code;
         @JsonProperty("old")
