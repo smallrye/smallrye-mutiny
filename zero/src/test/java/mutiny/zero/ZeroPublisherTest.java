@@ -66,6 +66,21 @@ class ZeroPublisherTest {
         }
 
         @Test
+        @DisplayName("Items from a collection (initial request then unbounded)")
+        void fromItemsBoundedThenUnbounded() {
+            AssertSubscriber<Object> sub = AssertSubscriber.create();
+            ZeroPublisher.fromItems(1, 2, 3, 4, 5).subscribe(sub);
+
+            sub.assertNotTerminated();
+            sub.request(3);
+            sub.assertItems(1, 2, 3);
+            sub.assertNotTerminated();
+            sub.request(Long.MAX_VALUE);
+            sub.assertItems(1, 2, 3, 4, 5);
+            sub.assertCompleted();
+        }
+
+        @Test
         @DisplayName("Items from a collection (unbounded initial request)")
         void fromItemsUnbounded() {
             AssertSubscriber<Object> sub = AssertSubscriber.create(Long.MAX_VALUE);
