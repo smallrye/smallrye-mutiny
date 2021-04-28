@@ -32,8 +32,8 @@ public class UniCreateFromItemWithState<T, S> extends AbstractUni<T> {
         try {
             state = holder.get();
             // get() throws an NPE is the produced state is null.
-        } catch (Exception e) {
-            subscriber.onFailure(e);
+        } catch (Throwable err) {
+            subscriber.onFailure(err);
             return;
         }
 

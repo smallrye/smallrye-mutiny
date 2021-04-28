@@ -1,5 +1,6 @@
 package io.smallrye.mutiny.operators;
 
+import static io.smallrye.mutiny.helpers.SneakyThrow.sneakyThrow;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -77,6 +78,16 @@ public class MultiCreateFromItemsTest {
         multi.subscribe().withSubscriber(AssertSubscriber.create())
                 .assertHasNotReceivedAnyItem()
                 .assertFailedWith(IllegalStateException.class, "boom");
+    }
+
+    @Test
+    public void testCreationWithCheckedExceptionThrownBySupplier() {
+        Multi<Integer> multi = Multi.createFrom().item(() -> {
+            throw sneakyThrow(new Exception("boom"));
+        });
+        multi.subscribe().withSubscriber(AssertSubscriber.create())
+                .assertHasNotReceivedAnyItem()
+                .assertFailedWith(Exception.class, "boom");
     }
 
     @Test

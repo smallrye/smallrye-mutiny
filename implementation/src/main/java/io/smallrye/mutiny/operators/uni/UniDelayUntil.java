@@ -40,8 +40,8 @@ public class UniDelayUntil<T> extends UniOperator<T, T> {
                         return;
                     }
                     uni.runSubscriptionOn(executor).subscribe().with(ignored -> super.onItem(item), super::onFailure);
-                } catch (RuntimeException e) {
-                    super.onFailure(e);
+                } catch (Throwable err) {
+                    super.onFailure(err);
                 }
             }
         }

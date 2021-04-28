@@ -43,8 +43,8 @@ public class UniOnFailureTransform<I, O> extends UniOperator<I, O> {
                 boolean test;
                 try {
                     test = predicate.test(failure);
-                } catch (RuntimeException e) {
-                    downstream.onFailure(new CompositeException(failure, e));
+                } catch (Throwable err) {
+                    downstream.onFailure(new CompositeException(failure, err));
                     return;
                 }
 

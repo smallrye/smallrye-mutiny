@@ -52,7 +52,7 @@ public class UniDelayOnItem<T> extends UniOperator<T, T> {
                 try {
                     Runnable dispatch = () -> downstream.onItem(item);
                     scheduledFuture = executor.schedule(dispatch, duration.toMillis(), TimeUnit.MILLISECONDS);
-                } catch (RuntimeException err) {
+                } catch (Throwable err) {
                     downstream.onFailure(err);
                 }
             }

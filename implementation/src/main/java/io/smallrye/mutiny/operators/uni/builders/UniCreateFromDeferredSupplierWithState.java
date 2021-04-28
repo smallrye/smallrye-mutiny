@@ -28,18 +28,18 @@ public class UniCreateFromDeferredSupplierWithState<S, T> extends AbstractUni<T>
         try {
             state = holder.get();
             // get() throws an NPE is the produced state is null.
-        } catch (Exception e) {
+        } catch (Throwable err) {
             subscriber.onSubscribe(DONE);
-            subscriber.onFailure(e);
+            subscriber.onFailure(err);
             return;
         }
 
         Uni<? extends T> uni;
         try {
             uni = mapper.apply(state);
-        } catch (Throwable e) {
+        } catch (Throwable err) {
             subscriber.onSubscribe(DONE);
-            subscriber.onFailure(e);
+            subscriber.onFailure(err);
             return;
         }
 

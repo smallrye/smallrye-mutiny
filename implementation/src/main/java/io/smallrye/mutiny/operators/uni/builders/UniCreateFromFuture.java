@@ -57,7 +57,7 @@ public class UniCreateFromFuture<T> extends AbstractUni<T> {
             downstream.onSubscribe(DONE);
             downstream.onFailure(e.getCause());
             return;
-        } catch (Exception err) {
+        } catch (Throwable err) {
             if (err instanceof InterruptedException) {
                 Thread.currentThread().interrupt();
             }
