@@ -32,7 +32,7 @@ public class UniCreateFromFailureSupplier<T> extends AbstractUni<T> {
             } else {
                 subscriber.onFailure(failure);
             }
-        } catch (RuntimeException err) {
+        } catch (Throwable err) {
             subscriber.onFailure(err);
         }
     }

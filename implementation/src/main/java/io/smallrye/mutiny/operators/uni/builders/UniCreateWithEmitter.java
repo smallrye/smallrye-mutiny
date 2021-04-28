@@ -20,10 +20,10 @@ public class UniCreateWithEmitter<T> extends AbstractUni<T> {
 
         try {
             consumer.accept(emitter);
-        } catch (RuntimeException e) {
+        } catch (Throwable err) {
             // we use the emitter to be sure that if the failure happens after the first event being fired, it
             // will be dropped.
-            emitter.fail(e);
+            emitter.fail(err);
         }
     }
 }

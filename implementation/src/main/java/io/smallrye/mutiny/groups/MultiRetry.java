@@ -114,8 +114,8 @@ public class MultiRetry<T> {
                         } else {
                             emitter.fail(throwable);
                         }
-                    } catch (RuntimeException e) {
-                        emitter.fail(e);
+                    } catch (Throwable err) {
+                        emitter.fail(err);
                     }
                 })).concatenate());
     }

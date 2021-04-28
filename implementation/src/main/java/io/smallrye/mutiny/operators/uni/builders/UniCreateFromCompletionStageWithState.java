@@ -34,9 +34,9 @@ public class UniCreateFromCompletionStageWithState<T, S> extends AbstractUni<T> 
         try {
             state = holder.get();
             // get() throws an NPE is the produced state is null.
-        } catch (Exception e) {
+        } catch (Throwable err) {
             subscriber.onSubscribe(EmptyUniSubscription.DONE);
-            subscriber.onFailure(e);
+            subscriber.onFailure(err);
             return;
         }
 

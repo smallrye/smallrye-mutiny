@@ -32,9 +32,9 @@ public class UniCreateFromEmitterWithState<T, S> extends AbstractUni<T> {
         try {
             state = holder.get();
             // get() throws an NPE is the produced state is null.
-        } catch (Exception e) {
+        } catch (Throwable err) {
             subscriber.onSubscribe(EmptyUniSubscription.DONE);
-            subscriber.onFailure(e);
+            subscriber.onFailure(err);
             return;
         }
 
@@ -42,10 +42,10 @@ public class UniCreateFromEmitterWithState<T, S> extends AbstractUni<T> {
         subscriber.onSubscribe(emitter);
         try {
             consumer.accept(state, emitter);
-        } catch (RuntimeException e) {
+        } catch (Throwable err) {
             // we use the emitter to be sure that if the failure happens after the first event being fired, it
             // will be dropped.
-            emitter.fail(e);
+            emitter.fail(err);
         }
 
     }

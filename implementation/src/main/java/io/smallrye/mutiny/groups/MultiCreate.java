@@ -231,9 +231,9 @@ public class MultiCreate {
             T item;
             try {
                 item = actual.get();
-            } catch (RuntimeException e) {
+            } catch (Throwable err) {
                 // Exception from the supplier, propagate it.
-                emitter.fail(e);
+                emitter.fail(err);
                 return;
             }
             if (item != null) {

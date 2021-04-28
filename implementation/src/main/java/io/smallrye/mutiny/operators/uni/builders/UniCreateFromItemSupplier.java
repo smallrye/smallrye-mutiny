@@ -27,7 +27,7 @@ public class UniCreateFromItemSupplier<T> extends AbstractUni<T> {
         try {
             T item = supplier.get();
             subscriber.onItem(item);
-        } catch (RuntimeException err) {
+        } catch (Throwable err) {
             subscriber.onFailure(err);
         }
     }
