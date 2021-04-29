@@ -223,8 +223,7 @@ public class MultiGroupTest {
         subscriber.assertFailedWith(IOException.class, "boom");
     }
 
-    @SuppressWarnings("ConstantConditions")
-    @Test
+    @RepeatedTest(5)
     public void testAsListsWithDurationAndLackOfRequests() {
         AtomicBoolean cancelled = new AtomicBoolean();
         Multi<Long> publisher = Multi.createFrom().publisher(Multi.createFrom().ticks().every(Duration.ofMillis(2)))

@@ -21,12 +21,12 @@ public class UniCreateFromPublisher<T> extends AbstractUni<T> {
         this.publisher = nonNull(publisher, "publisher");
     }
 
-    @SuppressWarnings("ReactiveStreamsSubscriberImplementation")
     @Override
     public void subscribe(UniSubscriber<? super T> subscriber) {
         new PublisherSubscriber(subscriber).forward();
     }
 
+    @SuppressWarnings("ReactiveStreamsSubscriberImplementation")
     private class PublisherSubscriber implements UniSubscription, Subscriber<T> {
 
         private final UniSubscriber<? super T> subscriber;

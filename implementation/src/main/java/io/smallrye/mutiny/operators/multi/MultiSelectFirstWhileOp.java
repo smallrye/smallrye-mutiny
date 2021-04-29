@@ -49,13 +49,14 @@ public final class MultiSelectFirstWhileOp<T> extends AbstractMultiOperator<T, T
                 return;
             }
 
+            MultiSubscriber<? super T> subscriber = downstream;
             if (!pass) {
                 cancel();
-                downstream.onCompletion();
+                subscriber.onCompletion();
                 return;
             }
 
-            downstream.onItem(t);
+            subscriber.onItem(t);
         }
     }
 }

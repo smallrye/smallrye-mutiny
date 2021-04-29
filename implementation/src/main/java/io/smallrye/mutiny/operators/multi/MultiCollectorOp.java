@@ -87,18 +87,19 @@ public final class MultiCollectorOp<T, A, R> extends AbstractMultiOperator<T, R>
             if (subscription != Subscriptions.CANCELLED) {
                 R result;
 
+                MultiSubscriber<? super R> subscriber = downstream;
                 try {
                     result = finisher.apply(intermediate);
                 } catch (Throwable ex) {
-                    downstream.onFailure(ex);
+                    subscriber.onFailure(ex);
                     return;
                 }
 
                 intermediate = null;
                 if (result != null) {
-                    downstream.onItem(result);
+                    subscriber.onItem(result);
                 }
-                downstream.onCompletion();
+                subscriber.onCompletion();
             }
         }
 

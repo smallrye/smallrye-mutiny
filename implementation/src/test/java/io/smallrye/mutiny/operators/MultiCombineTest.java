@@ -23,7 +23,6 @@ import io.smallrye.mutiny.helpers.test.AssertSubscriber;
 import io.smallrye.mutiny.subscription.MultiEmitter;
 import io.smallrye.mutiny.tuples.*;
 
-@SuppressWarnings("ConstantConditions")
 public class MultiCombineTest {
 
     @Test

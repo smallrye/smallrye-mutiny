@@ -96,18 +96,19 @@ public class MultiOnOverflowBufferOp<T> extends AbstractMultiOperator<T, T> {
         }
 
         private void notifyOnOverflowCall(T t, BackPressureFailure bpf) {
+            MultiSubscriber<? super T> subscriber = this.downstream;
             super.cancel();
             try {
                 Uni<?> uni = nonNull(dropUniMapper.apply(t), "uni");
                 uni.subscribe().with(
-                        ignored -> downstream.onFailure(bpf),
+                        ignored -> subscriber.onFailure(bpf),
                         failure -> {
                             bpf.addSuppressed(failure);
-                            downstream.onFailure(bpf);
+                            subscriber.onFailure(bpf);
                         });
             } catch (Throwable failure) {
                 bpf.addSuppressed(failure);
-                downstream.onFailure(bpf);
+                subscriber.onFailure(bpf);
             }
         }
 
@@ -202,8 +203,9 @@ public class MultiOnOverflowBufferOp<T> extends AbstractMultiOperator<T, T> {
                 if (failure != null) {
                     queue.clear();
                     if (failure instanceof BackPressureFailure) {
+                        MultiSubscriber<? super T> subscriber = this.downstream;
                         super.cancel();
-                        downstream.onFailure(failure);
+                        subscriber.onFailure(failure);
                     } else {
                         super.onFailure(failure);
                     }

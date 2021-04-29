@@ -57,11 +57,12 @@ public final class MultiLastItemOp<T> extends AbstractMultiOperator<T, T> {
             Subscription subscription = upstream.getAndSet(CANCELLED);
             if (subscription != CANCELLED) {
                 T item = last;
+                MultiSubscriber<? super T> subscriber = downstream;
                 if (item != null) {
                     last = null; // release before calling the callback.
-                    downstream.onItem(item);
+                    subscriber.onItem(item);
                 }
-                downstream.onCompletion();
+                subscriber.onCompletion();
             }
         }
     }
