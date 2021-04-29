@@ -136,13 +136,14 @@ public final class MultiBufferWithTimeoutOp<T> extends AbstractMultiOperator<T, 
 
             if (flush) {
                 long req = requested.get();
+                MultiSubscriber<? super List<T>> subscriber = downstream;
                 if (req != 0L) {
                     if (req != Long.MAX_VALUE) {
                         long next;
                         for (;;) {
                             next = req - 1;
                             if (requested.compareAndSet(req, next)) {
-                                downstream.onItem(cur);
+                                subscriber.onItem(cur);
                                 return;
                             }
 
@@ -152,13 +153,13 @@ public final class MultiBufferWithTimeoutOp<T> extends AbstractMultiOperator<T, 
                             }
                         }
                     } else {
-                        downstream.onItem(cur);
+                        subscriber.onItem(cur);
                         return;
                     }
                 }
 
                 cancel();
-                downstream.onFailure(new BackPressureFailure("Cannot emit item due to lack of requests"));
+                subscriber.onFailure(new BackPressureFailure("Cannot emit item due to lack of requests"));
             }
         }
 

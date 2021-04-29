@@ -14,7 +14,8 @@ import io.smallrye.mutiny.subscription.MultiSubscriber;
 
 public abstract class MultiOperatorProcessor<I, O> implements MultiSubscriber<I>, Subscription {
 
-    protected final MultiSubscriber<? super O> downstream;
+    // Cannot be final, the TCK checks it gets released.
+    protected volatile MultiSubscriber<? super O> downstream;
     protected AtomicReference<Subscription> upstream = new AtomicReference<>();
     AtomicBoolean hasDownstreamCancelled = new AtomicBoolean();
 
@@ -91,7 +92,12 @@ public abstract class MultiOperatorProcessor<I, O> implements MultiSubscriber<I>
     public void cancel() {
         if (hasDownstreamCancelled.compareAndSet(false, true)) {
             Subscriptions.cancel(upstream);
+            cleanup();
         }
+    }
+
+    protected void cleanup() {
+        downstream = null;
     }
 
 }

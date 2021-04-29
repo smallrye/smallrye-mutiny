@@ -23,7 +23,6 @@ import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.helpers.test.AssertSubscriber;
 
-@SuppressWarnings("ConstantConditions")
 public class MultiFromResourceTest {
 
     @Test
