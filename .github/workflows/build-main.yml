@@ -33,7 +33,7 @@ jobs:
       - name: Build with Maven
         env:
           MAVEN_OPTS: ${{ matrix.java.opts }}
-        run: mvn -B clean verify
+        run: mvn -s .build/maven-ci-settings.xml -B clean verify
 
   snapshot:
     needs: build
@@ -74,8 +74,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_LOGIN }}
         run: |
-          mvn verify -Pcoverage
-          mvn sonar:sonar \
+          mvn -s .build/maven-ci-settings.xml verify -Pcoverage
+          mvn -s .build/maven-ci-settings.xml sonar:sonar \
             -Dsonar.projectKey=smallrye_smallrye-mutiny \
             -Dsonar.projectName="SmallRye Mutiny" \
             -Dsonar.organization=smallrye \
@@ -100,4 +100,4 @@ jobs:
           version: 11
           source: releases
       - name: Compatibility Check
-        run: mvn -B install revapi:check@check-compatibility -DskipTests -fae
+        run: mvn -s .build/maven-ci-settings.xml -B install revapi:check@check-compatibility -DskipTests -fae

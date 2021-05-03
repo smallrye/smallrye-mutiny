@@ -49,7 +49,7 @@ git commit -m "Bumping the website version to ${VERSION}"
 git push
 
 echo "Cutting release ${VERSION}"
-mvn -B -fn clean
+mvn -s .build/maven-ci-settings.xml -B -fn clean
 git checkout ${BRANCH}
 HASH=$(git rev-parse --verify $BRANCH)
 echo "Last commit is ${HASH} - creating detached branch"
