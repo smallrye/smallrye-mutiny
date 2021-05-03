@@ -38,6 +38,7 @@ public class MultiOnFailureInvoke<T> extends AbstractMultiOperator<T, T> {
         @Override
         public void onFailure(Throwable failure) {
             Subscription up = upstream.getAndSet(Subscriptions.CANCELLED);
+            MultiSubscriber<? super T> subscriber = downstream;
             if (up != Subscriptions.CANCELLED) {
                 try {
                     if (predicate.test(failure)) {
@@ -46,7 +47,7 @@ public class MultiOnFailureInvoke<T> extends AbstractMultiOperator<T, T> {
                 } catch (Throwable e) {
                     failure = new CompositeException(failure, e);
                 }
-                downstream.onFailure(failure);
+                subscriber.onFailure(failure);
             }
         }
     }
