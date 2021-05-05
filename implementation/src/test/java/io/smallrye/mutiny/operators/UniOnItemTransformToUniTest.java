@@ -27,14 +27,6 @@ public class UniOnItemTransformToUniTest {
     }
 
     @Test
-    @SuppressWarnings("deprecation")
-    public void testProduceUniWithImmediateValueDeprecated() {
-        UniAssertSubscriber<Integer> test = UniAssertSubscriber.create();
-        Uni.createFrom().item(1).onItem().produceUni(v -> Uni.createFrom().item(2)).subscribe().withSubscriber(test);
-        test.assertCompleted().assertItem(2);
-    }
-
-    @Test
     public void testTransformToUniShortcutFlatmap() {
         UniAssertSubscriber<Integer> test = UniAssertSubscriber.create();
         Uni.createFrom().item(1).flatMap(v -> Uni.createFrom().item(2)).subscribe().withSubscriber(test);

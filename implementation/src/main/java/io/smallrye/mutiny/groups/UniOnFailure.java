@@ -91,28 +91,6 @@ public class UniOnFailure<T> {
      *
      * @param action the callback, must not be {@code null}
      * @return the new {@link Uni}
-     * @deprecated Use {@link #call(Function)}
-     */
-    @Deprecated
-    public Uni<T> invokeUni(Function<Throwable, Uni<?>> action) {
-        // Decoration happens in `call`
-        return call(action);
-    }
-
-    /**
-     * Produces a new {@link Uni} invoking the given function when the current {@link Uni} propagates a failure
-     * (matching the predicate if set). The function can transform the received failure into another exception that will
-     * be fired as failure downstream.
-     *
-     * Produces a new {@link Uni} invoking the given @{code action} when the {@code failure} event is received.
-     * <p>
-     * Unlike {@link #invoke(Consumer)}, the passed function returns a {@link Uni}. When the produced {@code Uni} sends
-     * its item, this item is discarded, and the original {@code failure} is forwarded downstream. If the produced
-     * {@code Uni} fails, a composite failure containing both the original failure and the failure from the executed
-     * action is propagated downstream.
-     *
-     * @param action the callback, must not be {@code null}
-     * @return the new {@link Uni}
      */
     public Uni<T> call(Function<Throwable, Uni<?>> action) {
         Function<Throwable, Uni<?>> actual = Infrastructure.decorate(nonNull(action, "action"));

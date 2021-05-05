@@ -68,26 +68,6 @@ public class MultiOnRequestTest {
     }
 
     @Test
-    public void testDeprecatedInvokeUni() {
-        AssertSubscriber<Integer> subscriber = AssertSubscriber.create();
-
-        AtomicLong requested = new AtomicLong();
-
-        Multi.createFrom().item(1)
-                .onRequest().invokeUni(count -> {
-                    requested.set(count);
-                    return Uni.createFrom().item("ok");
-                })
-                .subscribe().withSubscriber(subscriber);
-
-        subscriber.request(10);
-
-        subscriber.assertCompleted();
-        assertThat(subscriber.getItems()).containsExactly(1);
-        assertThat(requested.get()).isEqualTo(10);
-    }
-
-    @Test
     public void testCall() {
         AssertSubscriber<Integer> subscriber = AssertSubscriber.create();
 

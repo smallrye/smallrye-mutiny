@@ -101,22 +101,4 @@ public class UniOnSubscribe<T> {
         return call(ignored -> actual.get());
     }
 
-    /**
-     * Produces a new {@link Uni} invoking the given @{code action} when the {@code subscription} event is received.
-     * <p>
-     * Unlike {@link #invoke(Consumer)}, the passed function returns a {@link Uni}. When the produced {@code Uni} sends
-     * the subscription, the function is called. The subscription event is passed downstream only when the {@link Uni}
-     * completes. If the produced {@code Uni} fails or if the function throws an exception, the failure is propagated
-     * downstream.
-     *
-     * @param action the callback, must not be {@code null}
-     * @return the new {@link Uni}
-     * @deprecated Use {@link #call(Function)}
-     */
-    @Deprecated
-    public Uni<T> invokeUni(Function<? super UniSubscription, Uni<?>> action) {
-        // Decoration happens in `call`
-        return call(action);
-    }
-
 }

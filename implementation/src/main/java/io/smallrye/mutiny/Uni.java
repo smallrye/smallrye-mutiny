@@ -387,27 +387,6 @@ public interface Uni<T> {
     }
 
     /**
-     * Produces a new {@link Uni} invoking the given @{code action} when the {@code item} event is received. Note that
-     * the received item can be {@code null}.
-     * <p>
-     * Unlike {@link #invoke(Consumer)}, the passed function returns a {@link Uni}. When the produced {@code Uni} sends
-     * its item, this item is discarded, and the original {@code item} is forwarded downstream. If the produced
-     * {@code Uni} fails, the failure is propagated downstream. If the callback throws an exception, this exception
-     * is propagated downstream as failure.
-     * <p>
-     * This method is a shortcut on {@link UniOnItem#call(Function)}
-     *
-     * @param action the function taking the item and returning a {@link Uni}, must not be {@code null}, must not return
-     *        {@code null}
-     * @return the new {@link Uni}
-     * @deprecated Use {@link #call(Function)} instead
-     */
-    @Deprecated
-    default Uni<T> invokeUni(Function<? super T, Uni<?>> action) {
-        return onItem().invokeUni(action);
-    }
-
-    /**
      * Transforms the received item asynchronously, forwarding the events emitted by another {@link Uni} produced by
      * the given {@code mapper}.
      * <p>

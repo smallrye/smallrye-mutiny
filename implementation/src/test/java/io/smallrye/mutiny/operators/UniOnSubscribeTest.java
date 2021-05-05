@@ -155,39 +155,6 @@ public class UniOnSubscribeTest {
     }
 
     @Test
-    public void testInvokeUniDeprecated() {
-        AtomicInteger count = new AtomicInteger();
-        AtomicReference<UniSubscription> reference = new AtomicReference<>();
-        AtomicReference<UniSubscription> sub = new AtomicReference<>();
-        Uni<Integer> uni = Uni.createFrom().item(1)
-                .onSubscribe().invokeUni(s -> {
-                    reference.set(s);
-                    count.incrementAndGet();
-                    return Uni.createFrom().nullItem()
-                            .onSubscribe().invoke(sub::set);
-                });
-
-        UniAssertSubscriber<Integer> subscriber = UniAssertSubscriber.create();
-
-        assertThat(count).hasValue(0);
-        assertThat(reference).hasValue(null);
-        assertThat(sub).hasValue(null);
-
-        uni.subscribe().withSubscriber(subscriber);
-
-        assertThat(count).hasValue(1);
-        assertThat(reference).doesNotHaveValue(null);
-        assertThat(sub).doesNotHaveValue(null);
-
-        uni.subscribe().withSubscriber(subscriber);
-
-        assertThat(count).hasValue(2);
-        assertThat(reference).doesNotHaveValue(null);
-        assertThat(sub).doesNotHaveValue(null);
-
-    }
-
-    @Test
     public void testDelayedCallAfterFailure() {
         AtomicInteger count = new AtomicInteger();
         AtomicReference<UniSubscription> reference = new AtomicReference<>();

@@ -53,7 +53,7 @@ public class UniOnItemOrFailureInvokeTest {
                     count.incrementAndGet();
                 })
                 .onItemOrFailure().invoke(() -> invokedRunnable.set(true))
-                .onItemOrFailure().invokeUni((i, r) -> {
+                .onItemOrFailure().call((i, r) -> {
                     invokedUni.set(true);
                     return Uni.createFrom().item(69);
                 })

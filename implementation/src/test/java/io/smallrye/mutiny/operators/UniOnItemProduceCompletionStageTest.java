@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Function;
 
 import org.junit.jupiter.api.Test;
 
@@ -17,8 +18,9 @@ public class UniOnItemProduceCompletionStageTest {
     @Test
     public void testProduceCompletionStageWithImmediateValue() {
         UniAssertSubscriber<Integer> test = UniAssertSubscriber.create();
-        Uni.createFrom().item(1).onItem().produceCompletionStage(v -> CompletableFuture.completedFuture(2)).subscribe()
-                .withSubscriber(test);
+        Uni.createFrom().item(1)
+                .onItem().transformToUni(n -> Uni.createFrom().completionStage(CompletableFuture.completedFuture(2)))
+                .subscribe().withSubscriber(test);
         test.assertCompleted().assertItem(2);
     }
 
@@ -26,9 +28,9 @@ public class UniOnItemProduceCompletionStageTest {
     public void testWithImmediateCancellation() {
         UniAssertSubscriber<Integer> test = new UniAssertSubscriber<>(true);
         AtomicBoolean called = new AtomicBoolean();
-        Uni.createFrom().item(1).onItem().produceCompletionStage(v -> {
+        Uni.createFrom().item(1).onItem().transformToUni(v -> {
             called.set(true);
-            return CompletableFuture.completedFuture(2);
+            return Uni.createFrom().completionStage(CompletableFuture.completedFuture(2));
         }).subscribe().withSubscriber(test);
         test.assertNotTerminated();
         assertThat(called).isFalse();
@@ -38,7 +40,7 @@ public class UniOnItemProduceCompletionStageTest {
     public void testWithACompletionStageResolvedAsynchronously() {
         UniAssertSubscriber<Integer> test = UniAssertSubscriber.create();
         Uni<Integer> uni = Uni.createFrom().item(1).onItem()
-                .produceCompletionStage(v -> CompletableFuture.supplyAsync(() -> 42));
+                .transformToUni(v -> Uni.createFrom().completionStage(CompletableFuture.supplyAsync(() -> 42)));
         uni.subscribe().withSubscriber(test);
         assertThat(test.awaitItem().getItem()).isEqualTo(42);
     }
@@ -46,10 +48,10 @@ public class UniOnItemProduceCompletionStageTest {
     @Test
     public void testWithACompletionStageResolvedAsynchronouslyWithAFailure() {
         UniAssertSubscriber<Integer> test = UniAssertSubscriber.create();
-        Uni<Integer> uni = Uni.createFrom().item(1).onItem().produceCompletionStage(
-                v -> CompletableFuture.supplyAsync(() -> {
+        Uni<Integer> uni = Uni.createFrom().item(1).onItem().transformToUni(
+                v -> Uni.createFrom().completionStage(CompletableFuture.supplyAsync(() -> {
                     throw new IllegalStateException("boom");
-                }));
+                })));
         uni.subscribe().withSubscriber(test);
         test.awaitFailure().assertFailedWith(IllegalStateException.class, "boom");
     }
@@ -58,9 +60,9 @@ public class UniOnItemProduceCompletionStageTest {
     public void testThatMapperIsNotCalledOnUpstreamFailure() {
         UniAssertSubscriber<Integer> test = UniAssertSubscriber.create();
         AtomicBoolean called = new AtomicBoolean();
-        Uni.createFrom().failure(new Exception("boom")).onItem().produceCompletionStage(v -> {
+        Uni.createFrom().failure(new Exception("boom")).onItem().transformToUni(v -> {
             called.set(true);
-            return CompletableFuture.completedFuture(2);
+            return Uni.createFrom().completionStage(CompletableFuture.completedFuture(2));
         }).subscribe().withSubscriber(test);
         test.awaitFailure().assertFailedWith(Exception.class, "boom");
         assertThat(called).isFalse();
@@ -71,7 +73,7 @@ public class UniOnItemProduceCompletionStageTest {
         UniAssertSubscriber<Integer> test = UniAssertSubscriber.create();
         AtomicBoolean called = new AtomicBoolean();
         Uni.createFrom().item(1)
-                .onItem().<Integer> produceCompletionStage(v -> {
+                .onItem().<Integer> transformToUni(v -> {
                     called.set(true);
                     throw new IllegalStateException("boom");
                 })
@@ -85,7 +87,7 @@ public class UniOnItemProduceCompletionStageTest {
         UniAssertSubscriber<Integer> test = UniAssertSubscriber.create();
         AtomicBoolean called = new AtomicBoolean();
         Uni.createFrom().item(1)
-                .onItem().<Integer> produceCompletionStage(v -> {
+                .onItem().<Integer> transformToUni(v -> {
                     called.set(true);
                     return null;
                 }).subscribe().withSubscriber(test);
@@ -95,7 +97,8 @@ public class UniOnItemProduceCompletionStageTest {
 
     @Test
     public void testThatTheMapperCannotBeNull() {
-        assertThrows(IllegalArgumentException.class, () -> Uni.createFrom().item(1).onItem().produceCompletionStage(null));
+        assertThrows(IllegalArgumentException.class,
+                () -> Uni.createFrom().item(1).onItem().transformToUni((Function<? super Integer, Uni<?>>) null));
     }
 
     @Test
@@ -110,7 +113,7 @@ public class UniOnItemProduceCompletionStageTest {
             }
         };
 
-        Uni<Integer> uni = Uni.createFrom().item(1).onItem().produceCompletionStage(v -> future);
+        Uni<Integer> uni = Uni.createFrom().item(1).onItem().transformToUni(v -> Uni.createFrom().completionStage(future));
         uni.subscribe().withSubscriber(test);
         test.cancel();
         test.assertNotTerminated();

@@ -553,29 +553,6 @@ public class UniOnEventTest {
     }
 
     @Test
-    public void testActionsOnTerminationInvokeUniWithResultDeprecated() {
-        AtomicInteger Item = new AtomicInteger();
-        AtomicReference<Throwable> failure = new AtomicReference<>();
-        AtomicReference<Subscription> subscription = new AtomicReference<>();
-        AtomicBoolean terminate = new AtomicBoolean();
-        UniAssertSubscriber<? super Integer> subscriber = Uni.createFrom().item(1)
-                .onItem().invoke(Item::set)
-                .onFailure().invoke(failure::set)
-                .onSubscribe().invoke(subscription::set)
-                .onTermination().invokeUni(() -> {
-                    terminate.set(true);
-                    return Uni.createFrom().item(100);
-                })
-                .subscribe().withSubscriber(UniAssertSubscriber.create());
-
-        subscriber.assertItem(1);
-        assertThat(Item).hasValue(1);
-        assertThat(failure.get()).isNull();
-        assertThat(subscription.get()).isNotNull();
-        assertThat(terminate).isTrue();
-    }
-
-    @Test
     public void testActionsOnTerminationWithSupplierOnFailure() {
         AtomicInteger Item = new AtomicInteger();
         AtomicReference<Throwable> failure = new AtomicReference<>();
@@ -625,7 +602,6 @@ public class UniOnEventTest {
         assertThat(terminate.get()).isInstanceOf(IOException.class).hasMessageContaining("boom");
     }
 
-    @SuppressWarnings("deprecation")
     @Test
     public void testActionsOnTerminationWithCancellation() {
         AtomicBoolean called = new AtomicBoolean();
@@ -642,7 +618,7 @@ public class UniOnEventTest {
                     return Uni.createFrom().item(100);
                 })
                 .onCancellation().invoke(() -> called.set(true))
-                .onCancellation().invokeUni(() -> {
+                .onCancellation().call(() -> {
                     calledWithSupplier.set(true);
                     return Uni.createFrom().item(0);
                 })

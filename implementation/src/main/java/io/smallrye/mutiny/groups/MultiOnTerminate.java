@@ -76,19 +76,4 @@ public class MultiOnTerminate<T> {
         return call((ignoredFailure, ignoredCancellation) -> actual.get());
     }
 
-    /**
-     * Attaches an action that is executed when the {@link Multi} mits a completion or a failure or when the subscriber
-     * cancels the subscription.
-     *
-     * @param mapper the function to execute where the first argument is a non-{@code null} exception on failure, and
-     *        the second argument is a boolean which is {@code true} when the subscriber cancels the subscription.
-     *        The function returns a {@link Uni}.
-     * @return the new {@link Multi}
-     * @deprecated Use {@link #call(BiFunction)}
-     */
-    @Deprecated
-    public Multi<T> invokeUni(BiFunction<Throwable, Boolean, Uni<?>> mapper) {
-        // Decoration happens in `call`
-        return call(mapper);
-    }
 }

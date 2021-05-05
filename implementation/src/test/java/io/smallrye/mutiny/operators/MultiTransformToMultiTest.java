@@ -66,30 +66,6 @@ public class MultiTransformToMultiTest {
     }
 
     @Test
-    @SuppressWarnings("deprecation")
-    public void testProduceMultiDeprecated() {
-        AssertSubscriber<Integer> subscriber = AssertSubscriber.create(Long.MAX_VALUE);
-
-        Multi.createFrom().range(1, 4)
-                .onItem().produceMulti(i -> Multi.createFrom().items(i, i)).concatenate()
-                .subscribe(subscriber);
-
-        subscriber.assertItems(1, 1, 2, 2, 3, 3).assertCompleted();
-    }
-
-    @Test
-    @SuppressWarnings("deprecation")
-    public void testProducePublisherDeprecated() {
-        AssertSubscriber<Integer> subscriber = AssertSubscriber.create(Long.MAX_VALUE);
-
-        Multi.createFrom().range(1, 4)
-                .onItem().producePublisher(i -> Multi.createFrom().items(i, i)).concatenate()
-                .subscribe(subscriber);
-
-        subscriber.assertItems(1, 1, 2, 2, 3, 3).assertCompleted();
-    }
-
-    @Test
     @Timeout(60)
     public void testConcatMapWithLotsOfItems() {
         AssertSubscriber<Integer> subscriber = AssertSubscriber.create(Long.MAX_VALUE);
@@ -470,71 +446,6 @@ public class MultiTransformToMultiTest {
     }
 
     @Test
-    @SuppressWarnings("deprecation")
-    public void testProduceCompletionStageDeprecated() {
-        List<Integer> list = Multi.createFrom().range(1, 4)
-                .onItem().produceCompletionStage(i -> CompletableFuture.supplyAsync(() -> i + 1))
-                .merge()
-                .collect().asList().await().indefinitely();
-
-        assertThat(list).hasSize(3).contains(2, 3, 4);
-    }
-
-    @Test
-    @SuppressWarnings("deprecation")
-    public void testProduceCompletionStageRedeemingNullDeprecated() {
-        assertThatThrownBy(() -> {
-            Multi.createFrom().range(1, 4)
-                    .onItem().produceCompletionStage(i -> CompletableFuture.supplyAsync(() -> null))
-                    .merge()
-                    .collect().asList().await().indefinitely();
-        }).isInstanceOf(NullPointerException.class);
-    }
-
-    @Test
-    @SuppressWarnings("deprecation")
-    public void testProduceCompletionStageRedeemingFailureDeprecated() {
-        assertThatThrownBy(() -> {
-            Multi.createFrom().range(1, 4)
-                    .onItem().produceCompletionStage(i -> {
-                        CompletableFuture<Integer> cs = new CompletableFuture<>();
-                        cs.completeExceptionally(new IllegalStateException("boom"));
-                        return cs;
-                    })
-                    .merge()
-                    .collect().asList().await().indefinitely();
-        }).isInstanceOf(IllegalStateException.class)
-                .hasMessage("boom");
-    }
-
-    @Test
-    @SuppressWarnings("deprecation")
-    public void testProduceCompletionStageWithMapperThrowingExceptionDeprecated() {
-        assertThatThrownBy(() -> {
-            Multi.createFrom().range(1, 4)
-                    .onItem().<Integer> produceCompletionStage(i -> {
-                        throw new IllegalStateException("boom");
-                    })
-                    .merge()
-                    .collect().asList().await().indefinitely();
-        }).isInstanceOf(IllegalStateException.class)
-                .hasMessage("boom");
-    }
-
-    @Test
-    @SuppressWarnings("deprecation")
-    public void testProduceCompletionStageWithMapperReturningNullDeprecated() {
-        assertThatThrownBy(() -> {
-            Multi.createFrom().range(1, 4)
-                    .onItem().<Integer> produceCompletionStage(i -> {
-                        return null;
-                    })
-                    .merge()
-                    .collect().asList().await().indefinitely();
-        }).isInstanceOf(NullPointerException.class);
-    }
-
-    @Test
     public void testProduceCompletionStageAlternative() {
         List<Integer> list = Multi.createFrom().range(1, 4)
                 .onItem()
@@ -543,17 +454,6 @@ public class MultiTransformToMultiTest {
                 .collect().asList().await().indefinitely();
 
         assertThat(list).hasSize(3).contains(2, 3, 4);
-    }
-
-    @Test
-    @SuppressWarnings("deprecation")
-    public void testProduceIterableDeprecated() {
-        List<Integer> list = Multi.createFrom().range(1, 4)
-                .onItem().produceIterable(i -> Arrays.asList(i, i + 1))
-                .merge()
-                .collect().asList().await().indefinitely();
-
-        assertThat(list).hasSize(6).containsExactlyInAnyOrder(1, 2, 2, 3, 3, 4);
     }
 
     @Test
@@ -582,16 +482,6 @@ public class MultiTransformToMultiTest {
         assertThatThrownBy(() -> {
             Multi.createFrom().range(1, 4)
                     .onItem().<Integer> transformToIterable(i -> null)
-                    .collect().asList().await().indefinitely();
-        })
-                .isInstanceOf(NullPointerException.class);
-    }
-
-    @Test
-    public void testProduceIterableWithMapperReturningNullDeprecated() {
-        assertThatThrownBy(() -> {
-            Multi.createFrom().range(1, 4)
-                    .onItem().<Integer> produceIterable(i -> null).concatenate()
                     .collect().asList().await().indefinitely();
         })
                 .isInstanceOf(NullPointerException.class);

@@ -139,30 +139,6 @@ public class MultiOnFailure<T> {
     }
 
     /**
-     * Produces a new {@link Multi} invoking the given @{code action} when a {@code failure} event is received.
-     * <p>
-     * Unlike {@link #invoke(Consumer)}, the passed function returns a {@link Uni}. When the produced {@code Uni} sends
-     * its result, the result is discarded, and the original {@code failure} is forwarded downstream. If the produced
-     * {@code Uni} fails, a {@link io.smallrye.mutiny.CompositeException} composed by the original failure and the
-     * caught failure is propagated downstream.
-     * <p>
-     * If the asynchronous action throws an exception, this exception is propagated downstream as a
-     * {@link io.smallrye.mutiny.CompositeException} composed with the original failure and the caught exception.
-     * <p>
-     * This method preserves the order of the items, meaning that the downstream received the items in the same order
-     * as the upstream has emitted them.
-     *
-     * @param action the function taking the failure and returning a {@link Uni}, must not be {@code null}
-     * @return the new {@link Multi}
-     * @deprecated Use {@link #call(Function)}
-     */
-    @Deprecated
-    public Multi<T> invokeUni(Function<Throwable, Uni<?>> action) {
-        // Decoration happens in `call`
-        return call(action);
-    }
-
-    /**
      * Produces a new {@link Multi} invoking the given function when the current {@link Multi} propagates a failure. The
      * function can transform the received failure into another exception that will be fired as failure downstream.
      *

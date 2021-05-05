@@ -53,7 +53,7 @@ public class MultiOnEventTest {
                     calledOnItemSupplier.set(true);
                     return Uni.createFrom().item("yo");
                 })
-                .onItem().invokeUni(ignored -> {
+                .onItem().call(ignored -> {
                     invokedOnItemSupplier.set(true);
                     return Uni.createFrom().item("yo");
                 })

@@ -28,16 +28,6 @@ public class UniOnItemTransformToUniWithEmitterTest {
     }
 
     @Test
-    @SuppressWarnings("deprecation")
-    public void testProduceUniWithImmediateValueDeprecated() {
-        UniAssertSubscriber<Integer> test = UniAssertSubscriber.create();
-        Uni.createFrom().item(1).onItem().<Integer> produceUni(
-                (v, e) -> e.complete(2))
-                .subscribe().withSubscriber(test);
-        test.assertCompleted().assertItem(2);
-    }
-
-    @Test
     public void testWithImmediateCancellation() {
         UniAssertSubscriber<Integer> test = new UniAssertSubscriber<>(true);
         AtomicBoolean called = new AtomicBoolean();

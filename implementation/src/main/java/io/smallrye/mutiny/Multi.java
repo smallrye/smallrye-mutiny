@@ -424,28 +424,6 @@ public interface Multi<T> extends Publisher<T> {
     }
 
     /**
-     * Produces a new {@link Multi} invoking the given @{code action} when an {@code item} event is received. Note that
-     * the received item cannot be {@code null}.
-     * <p>
-     * Unlike {@link #invoke(Consumer)}, the passed function returns a {@link Uni}. When the produced {@code Uni} sends
-     * its result, the result is discarded, and the original {@code item} is forwarded downstream. If the produced
-     * {@code Uni} fails, the failure is propagated downstream. If the action throws an exception, this exception is
-     * propagated downstream as failure.
-     * <p>
-     * This method preserves the order of the items, meaning that the downstream received the items in the same order
-     * as the upstream has emitted them.
-     *
-     * @param action the function taking the item and returning a {@link Uni}, must not be {@code null}, must not return
-     *        {@code null}
-     * @return the new {@link Multi}
-     * @deprecated Use {@link #call(Function)}
-     */
-    @Deprecated
-    default Multi<T> invokeUni(Function<? super T, Uni<?>> action) {
-        return onItem().call(nonNull(action, "action"));
-    }
-
-    /**
      * Produces a {@link Multi} containing the items from {@link Publisher} produced by the {@code mapper} for each
      * item emitted by this {@link Multi}.
      * <p>

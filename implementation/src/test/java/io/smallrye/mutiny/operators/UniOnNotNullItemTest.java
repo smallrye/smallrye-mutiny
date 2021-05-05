@@ -2,7 +2,6 @@ package io.smallrye.mutiny.operators;
 
 import static org.assertj.core.api.Assertions.*;
 
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -187,24 +186,6 @@ public class UniOnNotNullItemTest {
     }
 
     @Test
-    @SuppressWarnings("deprecation")
-    public void testProduceUniDeprecated() {
-        assertThat(Uni.createFrom().item("hello")
-                .onItem().ifNotNull().produceUni(s -> Uni.createFrom().item(s.toUpperCase()))
-                .await().indefinitely()).isEqualTo("HELLO");
-
-        assertThat(Uni.createFrom().item(() -> (String) null)
-                .onItem().ifNotNull().produceUni(s -> Uni.createFrom().item(s.toUpperCase()))
-                .onItem().ifNull().continueWith("yolo")
-                .await().indefinitely()).isEqualTo("yolo");
-
-        assertThatThrownBy(() -> Uni.createFrom().<String> failure(new Exception("boom"))
-                .onItem().ifNotNull().produceUni(s -> Uni.createFrom().item(s.toUpperCase()))
-                .onItem().ifNull().continueWith("yolo")
-                .await().indefinitely()).hasMessageContaining("boom");
-    }
-
-    @Test
     public void testProduceUni() {
         assertThat(Uni.createFrom().item("hello")
                 .onItem().ifNotNull().transformToUni(s -> Uni.createFrom().item(s.toUpperCase()))
@@ -217,24 +198,6 @@ public class UniOnNotNullItemTest {
 
         assertThatThrownBy(() -> Uni.createFrom().<String> failure(new Exception("boom"))
                 .onItem().ifNotNull().transformToUni(s -> Uni.createFrom().item(s.toUpperCase()))
-                .onItem().ifNull().continueWith("yolo")
-                .await().indefinitely()).hasMessageContaining("boom");
-    }
-
-    @Test
-    @SuppressWarnings("deprecation")
-    public void testProduceUniWithEmitterDeprecated() {
-        assertThat(Uni.createFrom().item("hello")
-                .onItem().ifNotNull().produceUni((s, e) -> e.complete(s.toUpperCase()))
-                .await().indefinitely()).isEqualTo("HELLO");
-
-        assertThat(Uni.createFrom().item(() -> (String) null)
-                .onItem().ifNotNull().produceUni((s, e) -> e.complete(s.toUpperCase()))
-                .onItem().ifNull().continueWith("yolo")
-                .await().indefinitely()).isEqualTo("yolo");
-
-        assertThatThrownBy(() -> Uni.createFrom().<String> failure(new Exception("boom"))
-                .onItem().ifNotNull().produceUni((s, e) -> e.complete(s.toUpperCase()))
                 .onItem().ifNull().continueWith("yolo")
                 .await().indefinitely()).hasMessageContaining("boom");
     }
@@ -257,24 +220,6 @@ public class UniOnNotNullItemTest {
     }
 
     @Test
-    @SuppressWarnings("deprecation")
-    public void testProduceCompletionStageDeprecated() {
-        assertThat(Uni.createFrom().item("hello")
-                .onItem().ifNotNull().produceCompletionStage(x -> CompletableFuture.completedFuture(x.toUpperCase()))
-                .await().indefinitely()).isEqualTo("HELLO");
-
-        assertThat(Uni.createFrom().item(() -> (String) null)
-                .onItem().ifNotNull().produceCompletionStage(x -> CompletableFuture.completedFuture(x.toUpperCase()))
-                .onItem().ifNull().continueWith("yolo")
-                .await().indefinitely()).isEqualTo("yolo");
-
-        assertThatThrownBy(() -> Uni.createFrom().<String> failure(new Exception("boom"))
-                .onItem().ifNotNull().produceCompletionStage(x -> CompletableFuture.completedFuture(x.toUpperCase()))
-                .onItem().ifNull().continueWith("yolo")
-                .await().indefinitely()).hasMessageContaining("boom");
-    }
-
-    @Test
     public void testTransformToMulti() {
         assertThat(Uni.createFrom().item("hello")
                 .onItem().ifNotNull().transformToMulti(x -> Multi.createFrom().item(x.toUpperCase()))
@@ -289,27 +234,6 @@ public class UniOnNotNullItemTest {
 
         assertThatThrownBy(() -> Uni.createFrom().<String> failure(new Exception("boom"))
                 .onItem().ifNotNull().transformToMulti(x -> Multi.createFrom().item(x.toUpperCase()))
-                .collect().first()
-                .onItem().ifNull().continueWith("yolo")
-                .await().indefinitely()).hasMessageContaining("boom");
-    }
-
-    @Test
-    @SuppressWarnings("deprecation")
-    public void testProduceMultiDeprecated() {
-        assertThat(Uni.createFrom().item("hello")
-                .onItem().ifNotNull().produceMulti(x -> Multi.createFrom().item(x.toUpperCase()))
-                .collect().first()
-                .await().indefinitely()).isEqualTo("HELLO");
-
-        assertThat(Uni.createFrom().item(() -> (String) null)
-                .onItem().ifNotNull().produceMulti(x -> Multi.createFrom().item(x.toUpperCase()))
-                .collect().first()
-                .onItem().ifNull().continueWith("yolo")
-                .await().indefinitely()).isEqualTo("yolo");
-
-        assertThatThrownBy(() -> Uni.createFrom().<String> failure(new Exception("boom"))
-                .onItem().ifNotNull().produceMulti(x -> Multi.createFrom().item(x.toUpperCase()))
                 .collect().first()
                 .onItem().ifNull().continueWith("yolo")
                 .await().indefinitely()).hasMessageContaining("boom");
