@@ -533,6 +533,12 @@
         "code": "java.method.removed",
         "old": "method io.smallrye.mutiny.Uni<T> io.smallrye.mutiny.groups.UniOnTerminate<T>::invokeUni(java.util.function.Supplier<io.smallrye.mutiny.Uni<?>>)",
         "justification": "Deprecated API removal"
+      },
+      {
+        "ignore": true,
+        "code": "java.method.removed",
+        "old": "method <O> io.smallrye.mutiny.Uni<O> io.smallrye.mutiny.Uni<T>::then(java.util.function.Supplier<io.smallrye.mutiny.Uni<? extends O>>)",
+        "justification": "Deprecated API removal"
       }
     ]
   }

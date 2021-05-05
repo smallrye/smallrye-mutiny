@@ -433,7 +433,7 @@ public interface Uni<T> {
      * @param <O> the type of item
      * @return a new {@link Uni} that would fire events from the uni produced by the mapper function, possibly
      *         in an asynchronous manner.
-     * @see #then(Supplier)
+     * @see #chain(Supplier)
      */
     default <O> Uni<O> chain(Function<? super T, Uni<? extends O>> mapper) {
         Function<? super T, Uni<? extends O>> actual = nonNull(mapper, "mapper");
@@ -465,46 +465,11 @@ public interface Uni<T> {
      * @param <O> the type of item
      * @return a new {@link Uni} that would fire events from the uni produced by the mapper function, possibly
      *         in an asynchronous manner.
-     * @see #then(Supplier)
+     * @see #chain(Supplier)
      */
     default <O> Uni<O> chain(Supplier<Uni<? extends O>> supplier) {
         Supplier<Uni<? extends O>> actual = nonNull(supplier, "supplier");
         return onItem().transformToUni(ignored -> actual.get());
-    }
-
-    /**
-     * Once the observed {@code Uni} emits an item, execute the given {@code supplier}. Unlike {@link #chain(Function)},
-     * the received item is not required to run the {@code supplier}, and so omitted. The supplier produces another
-     * {@code Uni}. The downstream receives the events emitted by this produced {@code Uni}.
-     *
-     * This operation allows <em>chaining</em> asynchronous operation when you don't need the previous result: when the
-     * upstream completes with an item, run the supplier and emits the item (or failure) sent by the produced
-     * {@code Uni}:
-     *
-     * <pre>
-     * {@code
-     * String id = ...;
-     * Session session = getSomeSession();
-     * session.find(Fruit.class, id)
-     *        .chain(fruit -> session.remove(fruit)
-     *        .then(() -> session.flush());
-     * }
-     * </pre>
-     *
-     * This method is a shortcut for {@link UniOnItem#transformToUni(Function)
-     * onItem().transformToUni(ignored -> supplier.get())}.
-     *
-     * @param supplier the function called when the item of this {@link Uni} is emitted and producing the {@link Uni},
-     *        must not be {@code null}, must not return {@code null}.
-     * @param <O> the type of item
-     * @return a new {@link Uni} that would fire events from the uni produced by the mapper function, possibly
-     *         in an asynchronous manner.
-     * @see #chain(Function)
-     * @deprecated Use {@link #chain(Supplier)} instead
-     */
-    @Deprecated
-    default <O> Uni<O> then(Supplier<Uni<? extends O>> supplier) {
-        return chain(supplier);
     }
 
     /**
