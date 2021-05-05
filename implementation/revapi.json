@@ -95,6 +95,132 @@
         "code": "java.method.removed",
         "old": "method <R> io.smallrye.mutiny.Uni<R> io.smallrye.mutiny.groups.UniOnNotNull<T>::apply(java.util.function.Function<? super T, ? extends R>)",
         "justification": "Deprecated API removal"
+      },
+      {
+        "ignore": true,
+        "code": "java.method.removed",
+        "old": "method io.smallrye.mutiny.groups.UniAndGroup<T> io.smallrye.mutiny.operators.AbstractUni<T>::and() @ io.smallrye.mutiny.helpers.spies.UniGlobalSpy<T>",
+        "justification": "Deprecated API removal"
+      },
+      {
+        "ignore": true,
+        "code": "java.method.removed",
+        "old": "method <T2> io.smallrye.mutiny.Uni<io.smallrye.mutiny.tuples.Tuple2<T, T2>> io.smallrye.mutiny.operators.AbstractUni<T>::and(io.smallrye.mutiny.Uni<T2>) @ io.smallrye.mutiny.helpers.spies.UniGlobalSpy<T>",
+        "justification": "Deprecated API removal"
+      },
+      {
+        "ignore": true,
+        "code": "java.method.removed",
+        "old": "method io.smallrye.mutiny.groups.UniOr<T> io.smallrye.mutiny.operators.AbstractUni<T>::or() @ io.smallrye.mutiny.helpers.spies.UniGlobalSpy<T>",
+        "justification": "Deprecated API removal"
+      },
+      {
+        "ignore": true,
+        "code": "java.method.removed",
+        "old": "method io.smallrye.mutiny.groups.UniAndGroup<T> io.smallrye.mutiny.operators.AbstractUni<T>::and() @ io.smallrye.mutiny.helpers.spies.UniOnCancellationSpy<T>",
+        "justification": "Deprecated API removal"
+      },
+      {
+        "ignore": true,
+        "code": "java.method.removed",
+        "old": "method <T2> io.smallrye.mutiny.Uni<io.smallrye.mutiny.tuples.Tuple2<T, T2>> io.smallrye.mutiny.operators.AbstractUni<T>::and(io.smallrye.mutiny.Uni<T2>) @ io.smallrye.mutiny.helpers.spies.UniOnCancellationSpy<T>",
+        "justification": "Deprecated API removal"
+      },
+      {
+        "ignore": true,
+        "code": "java.method.removed",
+        "old": "method io.smallrye.mutiny.groups.UniOr<T> io.smallrye.mutiny.operators.AbstractUni<T>::or() @ io.smallrye.mutiny.helpers.spies.UniOnCancellationSpy<T>",
+        "justification": "Deprecated API removal"
+      },
+      {
+        "ignore": true,
+        "code": "java.method.removed",
+        "old": "method io.smallrye.mutiny.groups.UniAndGroup<T> io.smallrye.mutiny.operators.AbstractUni<T>::and() @ io.smallrye.mutiny.helpers.spies.UniOnFailureSpy<T>",
+        "justification": "Deprecated API removal"
+      },
+      {
+        "ignore": true,
+        "code": "java.method.removed",
+        "old": "method <T2> io.smallrye.mutiny.Uni<io.smallrye.mutiny.tuples.Tuple2<T, T2>> io.smallrye.mutiny.operators.AbstractUni<T>::and(io.smallrye.mutiny.Uni<T2>) @ io.smallrye.mutiny.helpers.spies.UniOnFailureSpy<T>",
+        "justification": "Deprecated API removal"
+      },
+      {
+        "ignore": true,
+        "code": "java.method.removed",
+        "old": "method io.smallrye.mutiny.groups.UniOr<T> io.smallrye.mutiny.operators.AbstractUni<T>::or() @ io.smallrye.mutiny.helpers.spies.UniOnFailureSpy<T>",
+        "justification": "Deprecated API removal"
+      },
+      {
+        "ignore": true,
+        "code": "java.method.removed",
+        "old": "method io.smallrye.mutiny.groups.UniAndGroup<T> io.smallrye.mutiny.operators.AbstractUni<T>::and() @ io.smallrye.mutiny.helpers.spies.UniOnItemOrFailureSpy<T>",
+        "justification": "Deprecated API removal"
+      },
+      {
+        "ignore": true,
+        "code": "java.method.removed",
+        "old": "method <T2> io.smallrye.mutiny.Uni<io.smallrye.mutiny.tuples.Tuple2<T, T2>> io.smallrye.mutiny.operators.AbstractUni<T>::and(io.smallrye.mutiny.Uni<T2>) @ io.smallrye.mutiny.helpers.spies.UniOnItemOrFailureSpy<T>",
+        "justification": "Deprecated API removal"
+      },
+      {
+        "ignore": true,
+        "code": "java.method.removed",
+        "old": "method io.smallrye.mutiny.groups.UniOr<T> io.smallrye.mutiny.operators.AbstractUni<T>::or() @ io.smallrye.mutiny.helpers.spies.UniOnItemOrFailureSpy<T>",
+        "justification": "Deprecated API removal"
+      },
+      {
+        "ignore": true,
+        "code": "java.method.removed",
+        "old": "method io.smallrye.mutiny.groups.UniAndGroup<T> io.smallrye.mutiny.operators.AbstractUni<T>::and() @ io.smallrye.mutiny.helpers.spies.UniOnItemSpy<T>",
+        "justification": "Deprecated API removal"
+      },
+      {
+        "ignore": true,
+        "code": "java.method.removed",
+        "old": "method <T2> io.smallrye.mutiny.Uni<io.smallrye.mutiny.tuples.Tuple2<T, T2>> io.smallrye.mutiny.operators.AbstractUni<T>::and(io.smallrye.mutiny.Uni<T2>) @ io.smallrye.mutiny.helpers.spies.UniOnItemSpy<T>",
+        "justification": "Deprecated API removal"
+      },
+      {
+        "ignore": true,
+        "code": "java.method.removed",
+        "old": "method io.smallrye.mutiny.groups.UniOr<T> io.smallrye.mutiny.operators.AbstractUni<T>::or() @ io.smallrye.mutiny.helpers.spies.UniOnItemSpy<T>",
+        "justification": "Deprecated API removal"
+      },
+      {
+        "ignore": true,
+        "code": "java.method.removed",
+        "old": "method io.smallrye.mutiny.groups.UniAndGroup<T> io.smallrye.mutiny.operators.AbstractUni<T>::and() @ io.smallrye.mutiny.helpers.spies.UniOnSubscribeSpy<T>",
+        "justification": "Deprecated API removal"
+      },
+      {
+        "ignore": true,
+        "code": "java.method.removed",
+        "old": "method <T2> io.smallrye.mutiny.Uni<io.smallrye.mutiny.tuples.Tuple2<T, T2>> io.smallrye.mutiny.operators.AbstractUni<T>::and(io.smallrye.mutiny.Uni<T2>) @ io.smallrye.mutiny.helpers.spies.UniOnSubscribeSpy<T>",
+        "justification": "Deprecated API removal"
+      },
+      {
+        "ignore": true,
+        "code": "java.method.removed",
+        "old": "method io.smallrye.mutiny.groups.UniOr<T> io.smallrye.mutiny.operators.AbstractUni<T>::or() @ io.smallrye.mutiny.helpers.spies.UniOnSubscribeSpy<T>",
+        "justification": "Deprecated API removal"
+      },
+      {
+        "ignore": true,
+        "code": "java.method.removed",
+        "old": "method io.smallrye.mutiny.groups.UniAndGroup<T> io.smallrye.mutiny.operators.AbstractUni<T>::and() @ io.smallrye.mutiny.helpers.spies.UniOnTerminationSpy<T>",
+        "justification": "Deprecated API removal"
+      },
+      {
+        "ignore": true,
+        "code": "java.method.removed",
+        "old": "method <T2> io.smallrye.mutiny.Uni<io.smallrye.mutiny.tuples.Tuple2<T, T2>> io.smallrye.mutiny.operators.AbstractUni<T>::and(io.smallrye.mutiny.Uni<T2>) @ io.smallrye.mutiny.helpers.spies.UniOnTerminationSpy<T>",
+        "justification": "Deprecated API removal"
+      },
+      {
+        "ignore": true,
+        "code": "java.method.removed",
+        "old": "method io.smallrye.mutiny.groups.UniOr<T> io.smallrye.mutiny.operators.AbstractUni<T>::or() @ io.smallrye.mutiny.helpers.spies.UniOnTerminationSpy<T>",
+        "justification": "Deprecated API removal"
       }
     ]
   }
