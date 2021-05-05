@@ -146,17 +146,6 @@ public interface Multi<T> extends Publisher<T> {
     MultiOnFailure<T> onFailure(Class<? extends Throwable> typeOfFailure);
 
     /**
-     * Allows adding behavior when various type of events are emitted by the current {@link Multi} (item, failure,
-     * completion) or by the subscriber (cancellation, request, subscription)
-     *
-     * @return the object to configure the action to execute when events happen
-     * @deprecated Use the specialized groups in {@link Multi}, e.g. {@link Multi#onItem()} or {@link Multi#onSubscribe()}
-     *             instead
-     */
-    @Deprecated
-    MultiOnEvent<T> on();
-
-    /**
      * Creates a new {@link Multi} that subscribes to this upstream and caches all of its events and replays them, to
      * all the downstream subscribers.
      *

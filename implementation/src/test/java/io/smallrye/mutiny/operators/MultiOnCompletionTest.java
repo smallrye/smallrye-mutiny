@@ -329,22 +329,6 @@ public class MultiOnCompletionTest {
     }
 
     @Test
-    public void testOnCompletionDeprecated() {
-        AtomicBoolean called = new AtomicBoolean();
-
-        Multi.createFrom().range(1, 5)
-                .on().completion().call(() -> {
-                    called.set(true);
-                    return Uni.createFrom().item(69);
-                })
-                .subscribe().withSubscriber(AssertSubscriber.create(7))
-                .assertCompleted()
-                .assertItems(1, 2, 3, 4);
-
-        assertThat(called).isTrue();
-    }
-
-    @Test
     public void testCallThatHasFailed() {
         AtomicBoolean called = new AtomicBoolean();
 

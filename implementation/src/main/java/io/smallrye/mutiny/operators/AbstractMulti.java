@@ -71,11 +71,6 @@ public abstract class AbstractMulti<T> implements Multi<T> {
     }
 
     @Override
-    public MultiOnEvent<T> on() {
-        return new MultiOnEvent<>(this);
-    }
-
-    @Override
     public Multi<T> cache() {
         return Infrastructure.onMultiCreation(new MultiCacheOp<>(this));
     }

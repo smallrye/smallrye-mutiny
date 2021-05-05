@@ -48,10 +48,10 @@ public class UniOnEventTest {
         AtomicReference<Subscription> subscription = new AtomicReference<>();
         AtomicInteger terminate = new AtomicInteger();
         UniAssertSubscriber<? super Integer> subscriber = Uni.createFrom().item(1)
-                .on().item().invoke(item::set)
-                .on().failure().invoke(failure::set)
-                .on().subscribe().invoke(subscription::set)
-                .on().termination().invoke((r, f, c) -> terminate.set(r))
+                .onItem().invoke(item::set)
+                .onFailure().invoke(failure::set)
+                .onSubscribe().invoke(subscription::set)
+                .onTermination().invoke((r, f, c) -> terminate.set(r))
                 .subscribe().withSubscriber(UniAssertSubscriber.create());
 
         subscriber.assertItem(1);
@@ -231,17 +231,6 @@ public class UniOnEventTest {
                 }).subscribe().withSubscriber(UniAssertSubscriber.create());
 
         subscriber.assertFailedWith(IllegalStateException.class, "boom");
-    }
-
-    @Test
-    public void testOnCancelWithImmediateCancellationAndDeprecatedAPI() {
-        AtomicBoolean called = new AtomicBoolean();
-        UniAssertSubscriber<? super Integer> subscriber = Uni.createFrom().item(1)
-                .on().cancellation(() -> called.set(true))
-                .subscribe().withSubscriber(new UniAssertSubscriber<>(true));
-
-        subscriber.assertNotTerminated();
-        assertThat(called).isTrue();
     }
 
     @Test

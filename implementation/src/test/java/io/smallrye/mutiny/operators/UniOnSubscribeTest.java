@@ -68,16 +68,14 @@ public class UniOnSubscribeTest {
         assertThat(count).hasValue(2);
     }
 
-    @SuppressWarnings("deprecation")
     @Test
-    public void testDeprecatedOnSubscribed() {
+    public void testOnSubscribed() {
         AtomicInteger count = new AtomicInteger();
         AtomicReference<UniSubscription> reference = new AtomicReference<>();
-        Uni<Integer> uni = Uni.createFrom().item(1)
-                .on().subscribed(s -> {
-                    reference.set(s);
-                    count.incrementAndGet();
-                });
+        Uni<Integer> uni = Uni.createFrom().item(1).onSubscribe().invoke(s -> {
+            reference.set(s);
+            count.incrementAndGet();
+        });
 
         UniAssertSubscriber<Integer> subscriber = UniAssertSubscriber.create();
 

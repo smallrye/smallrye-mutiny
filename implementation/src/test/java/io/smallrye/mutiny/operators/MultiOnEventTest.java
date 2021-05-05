@@ -45,9 +45,9 @@ public class MultiOnEventTest {
         AtomicBoolean cancellation = new AtomicBoolean();
 
         Multi.createFrom().item(1)
-                .on().subscribed(subscription::set)
-                .on().item().invoke(item::set)
-                .on().failure().invoke(failure::set)
+                .onSubscribe().invoke(subscription::set)
+                .onItem().invoke(item::set)
+                .onFailure().invoke(failure::set)
                 .onItem().invoke(() -> invokedOnItemRunnable.set(true))
                 .onItem().call(() -> {
                     calledOnItemSupplier.set(true);
@@ -96,14 +96,14 @@ public class MultiOnEventTest {
         AtomicBoolean cancellation = new AtomicBoolean();
 
         Multi.createFrom().item(1)
-                .on().subscribe().invoke(subscription::set)
-                .on().item().invoke(item::set)
-                .on().failure().invoke(failure::set)
-                .on().termination().invoke(() -> completion.set(true))
-                .on().termination().invoke((f, c) -> termination.set(f == null && !c))
-                .on().termination().invoke(() -> termination2.set(true))
-                .on().request().invoke(requests::set)
-                .on().cancellation().invoke(() -> cancellation.set(true))
+                .onSubscribe().invoke(subscription::set)
+                .onItem().invoke(item::set)
+                .onFailure().invoke(failure::set)
+                .onTermination().invoke(() -> completion.set(true))
+                .onTermination().invoke((f, c) -> termination.set(f == null && !c))
+                .onTermination().invoke(() -> termination2.set(true))
+                .onRequest().invoke(requests::set)
+                .onCancellation().invoke(() -> cancellation.set(true))
                 .subscribe(subscriber);
 
         subscriber
@@ -135,53 +135,14 @@ public class MultiOnEventTest {
         AtomicBoolean cancellation = new AtomicBoolean();
 
         Multi.createFrom().item(1)
-                .on().subscribed(subscription::set)
-                .on().item().invoke(item::set)
-                .on().failure().invoke(failure::set)
-                .on().completion(() -> completion.set(true))
+                .onSubscribe().invoke(subscription::set)
+                .onItem().invoke(item::set)
+                .onFailure().invoke(failure::set)
+                .onCompletion().invoke(() -> completion.set(true))
                 .onTermination().invoke((f, c) -> termination.set(f == null && !c))
                 .onTermination().invoke(() -> termination2.set(true))
-                .on().request(requests::set)
-                .on().cancellation(() -> cancellation.set(true))
-                .subscribe(subscriber);
-
-        subscriber
-                .request(20)
-                .assertCompleted()
-                .assertItems(1);
-
-        assertThat(subscription.get()).isNotNull();
-        assertThat(item.get()).isEqualTo(1);
-        assertThat(failure.get()).isNull();
-        assertThat(completion.get()).isTrue();
-        assertThat(termination.get()).isTrue();
-        assertThat(termination2.get()).isTrue();
-        assertThat(requests.get()).isEqualTo(20);
-        assertThat(cancellation.get()).isFalse();
-    }
-
-    @Test
-    public void testCallbacksWhenItemIsEmittedWithDeprecatedOnTermination() {
-        AssertSubscriber<Integer> subscriber = AssertSubscriber.create();
-
-        AtomicReference<Subscription> subscription = new AtomicReference<>();
-        AtomicReference<Integer> item = new AtomicReference<>();
-        AtomicReference<Throwable> failure = new AtomicReference<>();
-        AtomicBoolean completion = new AtomicBoolean();
-        AtomicLong requests = new AtomicLong();
-        AtomicBoolean termination = new AtomicBoolean();
-        AtomicBoolean termination2 = new AtomicBoolean();
-        AtomicBoolean cancellation = new AtomicBoolean();
-
-        Multi.createFrom().item(1)
-                .on().subscribed(subscription::set)
-                .on().item().invoke(item::set)
-                .on().failure().invoke(failure::set)
-                .on().completion(() -> completion.set(true))
-                .on().termination((f, c) -> termination.set(f == null && !c))
-                .on().termination(() -> termination2.set(true))
-                .on().request(requests::set)
-                .on().cancellation(() -> cancellation.set(true))
+                .onRequest().invoke(requests::set)
+                .onCancellation().invoke(() -> cancellation.set(true))
                 .subscribe(subscriber);
 
         subscriber
@@ -211,47 +172,14 @@ public class MultiOnEventTest {
         AtomicBoolean cancellation = new AtomicBoolean();
 
         Multi.createFrom().<Integer> failure(new IOException("boom"))
-                .on().subscribed(subscription::set)
-                .on().item().invoke(item::set)
-                .on().failure().invoke(failure::set)
+                .onSubscribe().invoke(subscription::set)
+                .onItem().invoke(item::set)
+                .onFailure().invoke(failure::set)
                 .onCompletion().invoke(() -> completion.set(true))
                 .onTermination().invoke((f, c) -> termination.set(f != null))
                 .onTermination().invoke(() -> termination2.set(true))
                 .onRequest().invoke(requests::set)
                 .onCancellation().invoke(() -> cancellation.set(true))
-                .subscribe().withSubscriber(AssertSubscriber.create())
-                .assertFailedWith(IOException.class, "boom");
-
-        assertThat(subscription.get()).isNotNull();
-        assertThat(item.get()).isNull();
-        assertThat(failure.get()).isInstanceOf(IOException.class).hasMessageContaining("boom");
-        assertThat(completion.get()).isFalse();
-        assertThat(termination.get()).isTrue();
-        assertThat(termination2.get()).isTrue();
-        assertThat(requests.get()).isEqualTo(0);
-        assertThat(cancellation.get()).isFalse();
-    }
-
-    @Test
-    public void testCallbacksOnFailureWithDeprecatedOnTermination() {
-        AtomicReference<Subscription> subscription = new AtomicReference<>();
-        AtomicReference<Integer> item = new AtomicReference<>();
-        AtomicReference<Throwable> failure = new AtomicReference<>();
-        AtomicBoolean completion = new AtomicBoolean();
-        AtomicLong requests = new AtomicLong();
-        AtomicBoolean termination = new AtomicBoolean();
-        AtomicBoolean termination2 = new AtomicBoolean();
-        AtomicBoolean cancellation = new AtomicBoolean();
-
-        Multi.createFrom().<Integer> failure(new IOException("boom"))
-                .on().subscribed(subscription::set)
-                .on().item().invoke(item::set)
-                .on().failure().invoke(failure::set)
-                .on().completion(() -> completion.set(true))
-                .on().termination((f, c) -> termination.set(f != null))
-                .on().termination(() -> termination2.set(true))
-                .on().request(requests::set)
-                .on().cancellation(() -> cancellation.set(true))
                 .subscribe().withSubscriber(AssertSubscriber.create())
                 .assertFailedWith(IOException.class, "boom");
 
@@ -276,13 +204,13 @@ public class MultiOnEventTest {
         AtomicBoolean cancellation = new AtomicBoolean();
 
         Multi.createFrom().<Integer> failure(new IOException("boom"))
-                .on().subscribed(subscription::set)
-                .on().item().invoke(item::set)
-                .on().failure(IOException.class).invoke(failure::set)
+                .onSubscribe().invoke(subscription::set)
+                .onItem().invoke(item::set)
+                .onFailure(IOException.class).invoke(failure::set)
                 .onCompletion().invoke(() -> completion.set(true))
                 .onTermination().invoke((f, c) -> termination.set(f != null))
                 .onRequest().invoke(requests::set)
-                .on().cancellation(() -> cancellation.set(true))
+                .onCancellation().invoke(() -> cancellation.set(true))
                 .subscribe().withSubscriber(AssertSubscriber.create())
                 .assertFailedWith(IOException.class, "boom");
 
@@ -306,9 +234,9 @@ public class MultiOnEventTest {
         AtomicBoolean cancellation = new AtomicBoolean();
 
         Multi.createFrom().<Integer> failure(new IOException("boom"))
-                .on().subscribed(subscription::set)
-                .on().item().invoke(item::set)
-                .on().failure(f -> f.getMessage().contains("missing")).invoke(failure::set)
+                .onSubscribe().invoke(subscription::set)
+                .onItem().invoke(item::set)
+                .onFailure(f -> f.getMessage().contains("missing")).invoke(failure::set)
                 .onCompletion().invoke(() -> completion.set(true))
                 .onTermination().invoke((f, c) -> termination.set(f != null))
                 .onRequest().invoke(requests::set)
@@ -340,9 +268,9 @@ public class MultiOnEventTest {
         };
 
         Multi.createFrom().<Integer> failure(new IOException("smallboom"))
-                .on().subscribed(subscription::set)
-                .on().item().invoke(item::set)
-                .on().failure(boom).invoke(failure::set)
+                .onSubscribe().invoke(subscription::set)
+                .onItem().invoke(item::set)
+                .onFailure(boom).invoke(failure::set)
                 .onCompletion().invoke(() -> completion.set(true))
                 .onTermination().invoke((f, c) -> termination.set(f != null))
                 .onRequest().invoke(requests::set)
@@ -372,9 +300,9 @@ public class MultiOnEventTest {
         AtomicBoolean cancellation = new AtomicBoolean();
 
         Multi.createFrom().<Integer> empty()
-                .on().subscribed(subscription::set)
-                .on().item().invoke(item::set)
-                .on().failure().invoke(failure::set)
+                .onSubscribe().invoke(subscription::set)
+                .onItem().invoke(item::set)
+                .onFailure().invoke(failure::set)
                 .onCompletion().invoke(() -> completion.set(true))
                 .onTermination().invoke((f, c) -> termination.set(f == null && !c))
                 .onTermination().invoke(() -> termination2.set(true))
@@ -406,9 +334,9 @@ public class MultiOnEventTest {
         AtomicBoolean cancellation = new AtomicBoolean();
 
         AssertSubscriber<Integer> subscriber = Multi.createFrom().<Integer> nothing()
-                .on().subscribed(subscription::set)
-                .on().item().invoke(item::set)
-                .on().failure().invoke(failure::set)
+                .onSubscribe().invoke(subscription::set)
+                .onItem().invoke(item::set)
+                .onFailure().invoke(failure::set)
                 .onCompletion().invoke(() -> completion.set(true))
                 .onTermination().invoke((f, c) -> termination.set(f == null && c))
                 .onTermination().invoke(() -> termination2.set(true))
@@ -438,7 +366,7 @@ public class MultiOnEventTest {
         AssertSubscriber<Integer> subscriber = AssertSubscriber.create(1);
 
         Multi.createFrom().item(1)
-                .on().item().invoke(i -> {
+                .onItem().invoke(i -> {
                     throw new IllegalArgumentException("boom");
                 })
                 .subscribe().withSubscriber(subscriber)
@@ -451,7 +379,7 @@ public class MultiOnEventTest {
         AssertSubscriber<Integer> subscriber = AssertSubscriber.create(1);
 
         Multi.createFrom().<Integer> failure(new IOException("source"))
-                .on().failure().invoke(f -> {
+                .onFailure().invoke(f -> {
                     throw new IllegalArgumentException("boom");
                 })
                 .subscribe().withSubscriber(subscriber)
@@ -480,9 +408,9 @@ public class MultiOnEventTest {
     @Test
     public void testWhenBothOnItemAndOnFailureThrowsException() {
         Multi.createFrom().item(1)
-                .on().item().invoke(i -> {
+                .onItem().invoke(i -> {
                     throw new IllegalArgumentException("boom1");
-                }).on().failure().invoke(t -> {
+                }).onFailure().invoke(t -> {
                     throw new IllegalArgumentException("boom2");
                 }).subscribe().withSubscriber(AssertSubscriber.create(1))
                 .assertTerminated()

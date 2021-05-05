@@ -143,7 +143,7 @@ public class UniOnItemDisjointTest {
     public void testDisjointWithNothing() {
         AtomicBoolean cancelled = new AtomicBoolean();
         AssertSubscriber<String> subscriber = Uni.createFrom()
-                .item(Multi.createFrom().nothing().on().cancellation(() -> cancelled.set(true)))
+                .item(Multi.createFrom().nothing().onCancellation().invoke(() -> cancelled.set(true)))
                 .onItem().<String> disjoint()
                 .subscribe().withSubscriber(AssertSubscriber.create(10));
 

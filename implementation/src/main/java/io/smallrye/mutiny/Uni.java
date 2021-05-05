@@ -623,16 +623,6 @@ public interface Uni<T> {
     Multi<T> toMulti();
 
     /**
-     * Allows adding behavior when various type of events are emitted by the current {@link Uni} (item, failure) or
-     * by the subscriber (cancellation, subscription)
-     *
-     * @return the object to configure the action to execute when events happen
-     * @deprecated Use the specialized groups in {@link Uni} instead, e.g. {@link Uni#onItem()} or {@link Uni#onTermination()}.
-     */
-    @Deprecated
-    UniOnEvent<T> on();
-
-    /**
      * Allows configuring repeating behavior.
      * Repeating allow transforming a {@link Uni} into a {@link Multi} either a specific amount of times or indefinitely.
      * Each time, a new subscription is attempted on the {@link Uni}.

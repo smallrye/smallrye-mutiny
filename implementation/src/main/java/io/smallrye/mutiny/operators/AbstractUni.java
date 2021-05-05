@@ -117,11 +117,6 @@ public abstract class AbstractUni<T> implements Uni<T> {
     }
 
     @Override
-    public UniOnEvent<T> on() {
-        return new UniOnEvent<>(this);
-    }
-
-    @Override
     public UniRepeat<T> repeat() {
         return new UniRepeat<>(this);
     }

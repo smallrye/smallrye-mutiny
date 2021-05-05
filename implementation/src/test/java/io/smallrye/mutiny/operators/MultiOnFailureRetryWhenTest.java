@@ -51,7 +51,7 @@ public class MultiOnFailureRetryWhenTest {
     public void testThatCancellingTheStreamCancelTheProducedWhenStream() {
         AtomicInteger cancelled = new AtomicInteger(0);
         Multi<Integer> when = Multi.createFrom().range(1, 10)
-                .on().cancellation(cancelled::incrementAndGet);
+                .onCancellation().invoke(cancelled::incrementAndGet);
 
         AssertSubscriber<Integer> subscriber = failingAfter1
                 .onFailure().retry().when(x -> when)
@@ -72,7 +72,7 @@ public class MultiOnFailureRetryWhenTest {
         AtomicBoolean cancelled = new AtomicBoolean();
         Multi<Integer> multi = failingAfter1
                 .onSubscribe().invoke(sub -> subscribed.set(true))
-                .on().cancellation(() -> cancelled.set(true));
+                .onCancellation().invoke(() -> cancelled.set(true));
 
         AssertSubscriber<Integer> subscriber = multi
                 .onFailure().retry().when(other -> Multi.createFrom().failure(new IllegalStateException("boom")))
@@ -93,7 +93,7 @@ public class MultiOnFailureRetryWhenTest {
         AtomicBoolean cancelled = new AtomicBoolean();
         Multi<Integer> multi = failingAfter1
                 .onSubscribe().invoke(sub -> subscribed.set(true))
-                .on().cancellation(() -> cancelled.set(true));
+                .onCancellation().invoke(() -> cancelled.set(true));
 
         AtomicInteger count = new AtomicInteger();
         Multi<Integer> retry = multi
@@ -118,7 +118,7 @@ public class MultiOnFailureRetryWhenTest {
         AtomicBoolean cancelled = new AtomicBoolean();
         Multi<Integer> source = failingAfter1
                 .onSubscribe().invoke(sub -> subscribed.set(true))
-                .on().cancellation(() -> cancelled.set(true));
+                .onCancellation().invoke(() -> cancelled.set(true));
 
         Multi<Integer> retry = source
                 .onFailure().retry().when(other -> Multi.createFrom().empty());
