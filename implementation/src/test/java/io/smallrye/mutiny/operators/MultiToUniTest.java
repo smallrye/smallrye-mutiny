@@ -85,7 +85,7 @@ public class MultiToUniTest {
     @Test
     public void testWithNoEvents() {
         AtomicBoolean called = new AtomicBoolean();
-        Multi<Void> multi = Multi.createFrom().<Void> nothing().on().cancellation(() -> called.set(true));
+        Multi<Void> multi = Multi.createFrom().<Void> nothing().onCancellation().invoke(() -> called.set(true));
 
         Uni.createFrom().multi(multi).subscribe().withSubscriber(UniAssertSubscriber.create())
                 .assertNotTerminated()
@@ -97,7 +97,7 @@ public class MultiToUniTest {
     @Test
     public void testWithNoEvents2() {
         AtomicBoolean called = new AtomicBoolean();
-        Multi<Void> multi = Multi.createFrom().<Void> nothing().on().cancellation(() -> called.set(true));
+        Multi<Void> multi = Multi.createFrom().<Void> nothing().onCancellation().invoke(() -> called.set(true));
 
         multi.toUni().subscribe().withSubscriber(UniAssertSubscriber.create())
                 .assertNotTerminated()

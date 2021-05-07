@@ -45,24 +45,6 @@ public class UniOnItemOrFailureMapTest {
     }
 
     @Test
-    @SuppressWarnings("deprecation")
-    public void testMappingOnItemDeprecated() {
-        UniAssertSubscriber<Integer> ts = UniAssertSubscriber.create();
-
-        AtomicInteger count = new AtomicInteger();
-        one.onItemOrFailure().apply((i, f) -> {
-            assertThat(f).isNull();
-            count.incrementAndGet();
-            return i + 1;
-        }).subscribe().withSubscriber(ts);
-
-        ts.assertCompleted()
-                .assertItem(2);
-
-        assertThat(count).hasValue(1);
-    }
-
-    @Test
     public void testMappingOnNullItem() {
         UniAssertSubscriber<Integer> subscriber = UniAssertSubscriber.create();
 

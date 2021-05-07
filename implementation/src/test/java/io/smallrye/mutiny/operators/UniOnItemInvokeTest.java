@@ -113,32 +113,6 @@ public class UniOnItemInvokeTest {
         assertThat(res).hasValue(1);
     }
 
-    @SuppressWarnings("deprecation")
-    @Test
-    public void testDeprecatedInvokeUniOnItem() {
-        AtomicInteger res = new AtomicInteger();
-        AtomicInteger twoGotCalled = new AtomicInteger();
-
-        int r = one.onItem().invokeUni(i -> {
-            res.set(i);
-            return two.onItem().invoke(twoGotCalled::set);
-        })
-                .await().indefinitely();
-
-        assertThat(r).isEqualTo(1);
-        assertThat(twoGotCalled).hasValue(2);
-        assertThat(res).hasValue(1);
-
-        twoGotCalled.set(0);
-        Integer integer = one
-                .invokeUni(i -> Uni.createFrom().item(2)
-                        .onItem().invoke(() -> twoGotCalled.set(1)))
-                .await().indefinitely();
-
-        assertThat(integer).isEqualTo(1);
-        assertThat(twoGotCalled).hasValue(1);
-    }
-
     @Test
     public void testCallOnItem() {
         AtomicInteger res = new AtomicInteger();

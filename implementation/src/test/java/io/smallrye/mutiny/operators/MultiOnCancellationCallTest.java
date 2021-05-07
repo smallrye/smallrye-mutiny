@@ -38,29 +38,6 @@ public class MultiOnCancellationCallTest {
     }
 
     @Test
-    public void testCancellationWithNoRequestedItemDeprecated() {
-        AssertSubscriber<Integer> subscriber = AssertSubscriber.create();
-
-        AtomicReference<Integer> item = new AtomicReference<>();
-        AtomicBoolean cancellation = new AtomicBoolean();
-
-        Multi.createFrom().item(1)
-                .onItem().invoke(item::set)
-                .onCancellation().invokeUni(() -> {
-                    cancellation.set(true);
-                    return Uni.createFrom().item("value");
-                })
-                .subscribe().withSubscriber(subscriber);
-
-        subscriber.cancel()
-                .assertHasNotReceivedAnyItem()
-                .assertNotTerminated();
-
-        assertThat(item.get()).isNull();
-        assertThat(cancellation.get()).isTrue();
-    }
-
-    @Test
     public void testCancellationWithNoRequestedItemAndFailedUni() {
         AssertSubscriber<Integer> subscriber = AssertSubscriber.create();
 

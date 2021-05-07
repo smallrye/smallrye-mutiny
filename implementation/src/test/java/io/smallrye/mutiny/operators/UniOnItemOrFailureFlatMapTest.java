@@ -48,21 +48,6 @@ public class UniOnItemOrFailureFlatMapTest {
     }
 
     @Test
-    @SuppressWarnings("deprecation")
-    public void testWithProduceUniDeprecated() {
-        UniAssertSubscriber<Integer> test = UniAssertSubscriber.create();
-        AtomicInteger count = new AtomicInteger();
-        one.onItemOrFailure().produceUni((v, f) -> {
-            assertThat(f).isNull();
-            count.incrementAndGet();
-            return Uni.createFrom().item(2);
-        }).subscribe().withSubscriber(test);
-
-        test.assertCompleted().assertItem(2);
-        assertThat(count).hasValue(1);
-    }
-
-    @Test
     public void testWithDelayedItem() {
         UniAssertSubscriber<Integer> test = UniAssertSubscriber.create();
         AtomicInteger count = new AtomicInteger();
@@ -239,19 +224,6 @@ public class UniOnItemOrFailureFlatMapTest {
     public void testWithEmitterOnItem() {
         UniAssertSubscriber<Integer> test = UniAssertSubscriber.create();
         one.onItemOrFailure().<Integer> transformToUni((i, f, e) -> {
-            assertThat(i).isEqualTo(1);
-            assertThat(f).isNull();
-            e.complete(2);
-        }).subscribe().withSubscriber(test);
-
-        test.awaitItem().assertItem(2).assertCompleted();
-    }
-
-    @Test
-    @SuppressWarnings("deprecation")
-    public void testProduceUniWithEmitterOnItemDeprecated() {
-        UniAssertSubscriber<Integer> test = UniAssertSubscriber.create();
-        one.onItemOrFailure().<Integer> produceUni((i, f, e) -> {
             assertThat(i).isEqualTo(1);
             assertThat(f).isNull();
             e.complete(2);

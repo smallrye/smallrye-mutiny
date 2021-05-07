@@ -27,22 +27,6 @@ public class MultiStageTest {
     }
 
     @Test
-    @SuppressWarnings("deprecation")
-    public void testChainWithDeprecatedThenAndApply() {
-        List<String> result = Multi.createFrom().items(1, 2, 3)
-                .then(self -> self.onItem()
-                        .transformToUni(i -> Uni.createFrom().completionStage(CompletableFuture.supplyAsync(() -> i)))
-                        .concatenate())
-                .then(self -> self
-                        .onItem().apply(i -> i + 1)
-                        .onFailure().retry().indefinitely())
-                .then(m -> m.onItem().apply(i -> Integer.toString(i)))
-                .then(m -> m.collect().asList())
-                .await().indefinitely();
-        assertThat(result).containsExactly("2", "3", "4");
-    }
-
-    @Test
     public void testThatFunctionMustNotBeNull() {
         assertThrows(IllegalArgumentException.class, () -> Multi.createFrom().item(1)
                 .stage(null));
@@ -84,16 +68,4 @@ public class MultiStageTest {
                 .stage(self -> self.await().indefinitely());
         assertThat(result).isEqualTo("24");
     }
-
-    @Test
-    public void testChainingUniWithDeprecatedApplyAndThen() {
-        String result = Multi.createFrom().completionStage(CompletableFuture.supplyAsync(() -> 23))
-                .then(self -> self
-                        .onItem().apply(i -> i + 1)
-                        .onItem().apply(i -> Integer.toString(i)))
-                .then(self -> self.collect().first())
-                .then(self -> self.await().indefinitely());
-        assertThat(result).isEqualTo("24");
-    }
-
 }

@@ -76,20 +76,4 @@ public class MultiOnRequest<T> {
         return call(ignored -> actual.get());
     }
 
-    /**
-     * Action when items are being requested.
-     * The request is propagated upstream when the {@link Uni} has completed.
-     * If the {@link Uni} fails then the error is forwarded downstream.
-     * Also the {@link Uni} will receive a tentative cancellation event if the subscription of this {@link Multi} is
-     * being cancelled.
-     * 
-     * @param mapper the action, returns a non-{@code null} {@link Uni}
-     * @return the new {@link Multi}
-     * @deprecated Use {@link #call(LongFunction)}
-     */
-    @Deprecated
-    public Multi<T> invokeUni(LongFunction<Uni<?>> mapper) {
-        return call(mapper);
-    }
-
 }

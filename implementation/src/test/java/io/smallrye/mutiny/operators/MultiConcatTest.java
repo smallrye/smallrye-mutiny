@@ -84,19 +84,6 @@ public class MultiConcatTest {
     }
 
     @Test
-    public void testConcatenationOfSeveralMultisWithConcurrencyAndDeprecatedApply() {
-        AssertSubscriber<Integer> subscriber = Multi.createBy().concatenating()
-                .streams(
-                        Multi.createFrom().item(5),
-                        Multi.createFrom().range(1, 3),
-                        Multi.createFrom().items(8, 9, 10).onItem().apply(i -> i + 1))
-                .subscribe().withSubscriber(new AssertSubscriber<>(100));
-
-        subscriber.assertCompleted()
-                .assertItems(5, 1, 2, 9, 10, 11);
-    }
-
-    @Test
     public void testConcatenationOfSeveralMultisAsIterable() {
         AssertSubscriber<Integer> subscriber = Multi.createBy().concatenating().streams(
                 Arrays.asList(

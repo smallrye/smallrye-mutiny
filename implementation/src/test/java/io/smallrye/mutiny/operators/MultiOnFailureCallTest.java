@@ -23,22 +23,6 @@ public class MultiOnFailureCallTest {
     private final Uni<Void> sub = Uni.createFrom().nullItem();
 
     @Test
-    public void testDeprecatedInvokeUniOnItem() {
-        AtomicReference<Throwable> failure = new AtomicReference<>();
-        AtomicInteger twoGotCalled = new AtomicInteger();
-
-        AssertSubscriber<Integer> subscriber = numbers.onFailure().invokeUni(i -> {
-            failure.set(i);
-            return sub.onItem().invoke(c -> twoGotCalled.incrementAndGet());
-        }).subscribe().withSubscriber(AssertSubscriber.create(10));
-
-        subscriber.assertCompleted()
-                .assertItems(1, 2);
-        assertThat(twoGotCalled).hasValue(0);
-        assertThat(failure).hasValue(null);
-    }
-
-    @Test
     public void testCallOnItem() {
         AtomicReference<Throwable> failure = new AtomicReference<>();
         AtomicInteger twoGotCalled = new AtomicInteger();
@@ -52,22 +36,6 @@ public class MultiOnFailureCallTest {
                 .assertItems(1, 2);
         assertThat(twoGotCalled).hasValue(0);
         assertThat(failure).hasValue(null);
-    }
-
-    @Test
-    public void testDeprecatedInvokeUniOnFailure() {
-        AtomicReference<Throwable> failure = new AtomicReference<>();
-        AtomicInteger twoGotCalled = new AtomicInteger();
-
-        AssertSubscriber<Integer> subscriber = failed.onFailure().invokeUni(i -> {
-            failure.set(i);
-            return sub.onItem().invoke(c -> twoGotCalled.incrementAndGet());
-        }).subscribe().withSubscriber(AssertSubscriber.create(10));
-
-        subscriber.assertFailedWith(IOException.class, "boom")
-                .assertItems(1, 2);
-        assertThat(twoGotCalled).hasValue(1);
-        assertThat(failure).hasValue(BOOM);
     }
 
     @Test

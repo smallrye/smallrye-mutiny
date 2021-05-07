@@ -13,9 +13,6 @@ import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.subscription.UniEmitter;
 import io.smallrye.mutiny.subscription.UniSubscriber;
 import io.smallrye.mutiny.subscription.UniSubscription;
-import io.smallrye.mutiny.tuples.Tuple;
-import io.smallrye.mutiny.tuples.Tuple2;
-import io.smallrye.mutiny.tuples.Tuple9;
 
 /**
  * A {@link Uni} represents a lazy asynchronous action. It follows the subscription pattern, meaning that the action
@@ -65,31 +62,6 @@ public interface Uni<T> {
      */
     static UniCreate createFrom() {
         return UniCreate.INSTANCE;
-    }
-
-    /**
-     * Allows structuring the pipeline by creating a logic separation:
-     *
-     * <pre>
-     * {@code
-     *     Uni uni = upstream
-     *      .then(u -> { ...})
-     *      .then(u -> { ...})
-     *      .then(u -> { ...})
-     * }
-     * </pre>
-     * <p>
-     * With `then` you can structure and chain groups of processing.
-     *
-     * @param stage the function receiving this {@link Uni} as parameter and producing the outcome (can be a
-     *        {@link Uni} or something else), must not be {@code null}.
-     * @param <O> the outcome type
-     * @return the outcome of the function.
-     * @deprecated use {@link #stage(Function)}
-     */
-    @Deprecated
-    default <O> O then(Function<Uni<T>, O> stage) {
-        return stage(stage);
     }
 
     /**
@@ -232,63 +204,6 @@ public interface Uni<T> {
      * @return the object to configure the action to execute when an item is emitted or when a failure is propagated.
      */
     UniOnItemOrFailure<T> onItemOrFailure();
-
-    /**
-     * Combines a set of {@link Uni unis} into a joined item. This item can be a {@code Tuple} or the item of a
-     * combinator function.
-     * <p>
-     * If one of the combine {@link Uni} fire a failure, the other unis are cancelled, and the resulting
-     * {@link Uni} fires the failure. If {@code collectFailures()} is called,
-     * it waits for the completion of all the {@link Uni unis} before propagating the failure event. If more than one
-     * {@link Uni} failed, a {@link CompositeException} is fired, wrapping the different collected failures.
-     * <p>
-     * Depending on the number of participants, the produced {@link Tuple} is
-     * different from {@link Tuple2} to {@link Tuple9}. For more participants,
-     * use {@link UniAndGroup#unis(Uni[])} or
-     * {@link UniAndGroup#unis(Iterable)}.
-     *
-     * @return the object to configure the join
-     * @see UniCombine#all() <code>Uni.all()</code> for the equivalent static operator
-     * @deprecated Use {@link #combine()}
-     */
-    @Deprecated
-    UniAndGroup<T> and();
-
-    /**
-     * Combines the item of this {@link Uni} with the item of {@code other} into a {@link Tuple2}.
-     * If {@code this} or {@code other} fails, the other resolution is cancelled.
-     *
-     * @param other the other {@link Uni}, must not be {@code null}
-     * @param <T2> the type to pair
-     * @return the combination of the pair combining the two items.
-     * @see #and() <code>and</code> for more options on the combination of items
-     * @see UniCombine#all() <code>Uni.all()</code> for the equivalent static operator
-     * @deprecated Use {@link #combine()}
-     */
-    @Deprecated
-    <T2> Uni<Tuple2<T, T2>> and(Uni<T2> other);
-
-    /**
-     * Composes this {@link Uni} with a set of {@link Uni} passed to
-     * {@link UniOr#unis(Uni[])} to produce a new {@link Uni} forwarding the first event
-     * (item or failure). It behaves like the fastest of these competing unis.
-     * <p>
-     * The process subscribes to the set of {@link Uni}. When one of the {@link Uni} fires an item or a failure,
-     * the event is propagated downstream. Also the other subscriptions are cancelled.
-     * <p>
-     * Note that the callback from the subscriber are called on the thread used to fire the winning {@link Uni}.
-     * Use {@link #emitOn(Executor)} to change the thread.
-     * <p>
-     * If the subscription to the returned {@link Uni} is cancelled, the subscription to the {@link Uni unis} from the
-     * {@code iterable} are also cancelled.
-     *
-     * @return the object to enlist the participants
-     * @see UniCombine#any() <code>Uni.any</code> for a static version of this operator, like
-     *      <code>Uni first = Uni.any().of(uni1, uni2);</code>
-     * @deprecated Use {@link #combine()}
-     */
-    @Deprecated
-    UniOr<T> or();
 
     /**
      * Like {@link #onFailure(Predicate)} but applied to all failures fired by the upstream uni.
@@ -472,27 +387,6 @@ public interface Uni<T> {
     }
 
     /**
-     * Produces a new {@link Uni} invoking the given @{code action} when the {@code item} event is received. Note that
-     * the received item can be {@code null}.
-     * <p>
-     * Unlike {@link #invoke(Consumer)}, the passed function returns a {@link Uni}. When the produced {@code Uni} sends
-     * its item, this item is discarded, and the original {@code item} is forwarded downstream. If the produced
-     * {@code Uni} fails, the failure is propagated downstream. If the callback throws an exception, this exception
-     * is propagated downstream as failure.
-     * <p>
-     * This method is a shortcut on {@link UniOnItem#call(Function)}
-     *
-     * @param action the function taking the item and returning a {@link Uni}, must not be {@code null}, must not return
-     *        {@code null}
-     * @return the new {@link Uni}
-     * @deprecated Use {@link #call(Function)} instead
-     */
-    @Deprecated
-    default Uni<T> invokeUni(Function<? super T, Uni<?>> action) {
-        return onItem().invokeUni(action);
-    }
-
-    /**
      * Transforms the received item asynchronously, forwarding the events emitted by another {@link Uni} produced by
      * the given {@code mapper}.
      * <p>
@@ -539,7 +433,7 @@ public interface Uni<T> {
      * @param <O> the type of item
      * @return a new {@link Uni} that would fire events from the uni produced by the mapper function, possibly
      *         in an asynchronous manner.
-     * @see #then(Supplier)
+     * @see #chain(Supplier)
      */
     default <O> Uni<O> chain(Function<? super T, Uni<? extends O>> mapper) {
         Function<? super T, Uni<? extends O>> actual = nonNull(mapper, "mapper");
@@ -571,46 +465,11 @@ public interface Uni<T> {
      * @param <O> the type of item
      * @return a new {@link Uni} that would fire events from the uni produced by the mapper function, possibly
      *         in an asynchronous manner.
-     * @see #then(Supplier)
+     * @see #chain(Supplier)
      */
     default <O> Uni<O> chain(Supplier<Uni<? extends O>> supplier) {
         Supplier<Uni<? extends O>> actual = nonNull(supplier, "supplier");
         return onItem().transformToUni(ignored -> actual.get());
-    }
-
-    /**
-     * Once the observed {@code Uni} emits an item, execute the given {@code supplier}. Unlike {@link #chain(Function)},
-     * the received item is not required to run the {@code supplier}, and so omitted. The supplier produces another
-     * {@code Uni}. The downstream receives the events emitted by this produced {@code Uni}.
-     *
-     * This operation allows <em>chaining</em> asynchronous operation when you don't need the previous result: when the
-     * upstream completes with an item, run the supplier and emits the item (or failure) sent by the produced
-     * {@code Uni}:
-     *
-     * <pre>
-     * {@code
-     * String id = ...;
-     * Session session = getSomeSession();
-     * session.find(Fruit.class, id)
-     *        .chain(fruit -> session.remove(fruit)
-     *        .then(() -> session.flush());
-     * }
-     * </pre>
-     *
-     * This method is a shortcut for {@link UniOnItem#transformToUni(Function)
-     * onItem().transformToUni(ignored -> supplier.get())}.
-     *
-     * @param supplier the function called when the item of this {@link Uni} is emitted and producing the {@link Uni},
-     *        must not be {@code null}, must not return {@code null}.
-     * @param <O> the type of item
-     * @return a new {@link Uni} that would fire events from the uni produced by the mapper function, possibly
-     *         in an asynchronous manner.
-     * @see #chain(Function)
-     * @deprecated Use {@link #chain(Supplier)} instead
-     */
-    @Deprecated
-    default <O> Uni<O> then(Supplier<Uni<? extends O>> supplier) {
-        return chain(supplier);
     }
 
     /**
@@ -706,16 +565,6 @@ public interface Uni<T> {
      * @return the produced {@link Multi}, never {@code null}
      */
     Multi<T> toMulti();
-
-    /**
-     * Allows adding behavior when various type of events are emitted by the current {@link Uni} (item, failure) or
-     * by the subscriber (cancellation, subscription)
-     *
-     * @return the object to configure the action to execute when events happen
-     * @deprecated Use the specialized groups in {@link Uni} instead, e.g. {@link Uni#onItem()} or {@link Uni#onTermination()}.
-     */
-    @Deprecated
-    UniOnEvent<T> on();
 
     /**
      * Allows configuring repeating behavior.

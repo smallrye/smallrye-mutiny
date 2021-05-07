@@ -14,7 +14,6 @@ import io.smallrye.mutiny.operators.uni.UniLogger;
 import io.smallrye.mutiny.operators.uni.UniMemoizeOp;
 import io.smallrye.mutiny.operators.uni.UniRunSubscribeOn;
 import io.smallrye.mutiny.subscription.UniSubscriber;
-import io.smallrye.mutiny.tuples.Tuple2;
 
 public abstract class AbstractUni<T> implements Uni<T> {
 
@@ -81,22 +80,6 @@ public abstract class AbstractUni<T> implements Uni<T> {
     }
 
     @Override
-    public UniAndGroup<T> and() {
-        return new UniAndGroup<>(this);
-    }
-
-    @Override
-    public <T2> Uni<Tuple2<T, T2>> and(Uni<T2> other) {
-        return Infrastructure.onUniCreation(
-                new UniAndGroup<>(this).uni(ParameterValidation.nonNull(other, "other")).asTuple());
-    }
-
-    @Override
-    public UniOr<T> or() {
-        return new UniOr<>(this);
-    }
-
-    @Override
     public UniAwait<T> await() {
         return new UniAwait<>(this);
     }
@@ -131,11 +114,6 @@ public abstract class AbstractUni<T> implements Uni<T> {
     @Override
     public Multi<T> toMulti() {
         return Multi.createFrom().safePublisher(new UniToMultiPublisher<>(this));
-    }
-
-    @Override
-    public UniOnEvent<T> on() {
-        return new UniOnEvent<>(this);
     }
 
     @Override

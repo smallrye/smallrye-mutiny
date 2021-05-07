@@ -3,7 +3,6 @@ package io.smallrye.mutiny.groups;
 import static io.smallrye.mutiny.helpers.ParameterValidation.*;
 
 import java.util.Objects;
-import java.util.concurrent.CompletionStage;
 import java.util.function.*;
 
 import org.reactivestreams.Publisher;
@@ -12,7 +11,6 @@ import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.multi.*;
-import io.smallrye.mutiny.subscription.BackPressureStrategy;
 
 public class MultiOnItem<T> {
 
@@ -20,24 +18,6 @@ public class MultiOnItem<T> {
 
     public MultiOnItem(Multi<T> upstream) {
         this.upstream = nonNull(upstream, "upstream");
-    }
-
-    /**
-     * Produces a new {@link Multi} invoking the given function for each item emitted by the upstream {@link Multi}.
-     * <p>
-     * The function receives the received item as parameter, and can transform it. The returned object is sent
-     * downstream as {@code item} event.
-     * <p>
-     *
-     * @param mapper the mapper function, must not be {@code null}
-     * @param <R> the type of item produced by the mapper function
-     * @return the new {@link Multi}
-     * @deprecated Use {@link #transform(Function)}
-     */
-    @Deprecated
-    public <R> Multi<R> apply(Function<? super T, ? extends R> mapper) {
-        // Decoration happens in `transform`
-        return transform(mapper);
     }
 
     /**
@@ -143,29 +123,6 @@ public class MultiOnItem<T> {
     }
 
     /**
-     * Produces a new {@link Multi} invoking the given @{code action} when an {@code item} event is received. Note that
-     * the received item cannot be {@code null}.
-     * <p>
-     * Unlike {@link #invoke(Consumer)}, the passed function returns a {@link Uni}. When the produced {@code Uni} sends
-     * its result, the result is discarded, and the original {@code item} is forwarded downstream. If the produced
-     * {@code Uni} fails, the failure is propagated downstream.
-     * <p>
-     * If the asynchronous action throws an exception, this exception is propagated downstream.
-     * <p>
-     * This method preserves the order of the items, meaning that the downstream received the items in the same order
-     * as the upstream has emitted them.
-     *
-     * @param action the function taking the item and returning a {@link Uni}, must not be {@code null}
-     * @return the new {@link Multi}
-     * @deprecated Use {@link #call(Function)}
-     */
-    @Deprecated
-    public Multi<T> invokeUni(Function<? super T, Uni<?>> action) {
-        // Decoration happens in `call`
-        return call(action);
-    }
-
-    /**
      * Takes the items from the upstream {@link Multi} that are either {@link Publisher Publisher&lt;O&gt;},
      * {@link java.lang.reflect.Array O[]}, {@link Iterable Iterable&lt;O&gt;} or {@link Multi Multi&lt;O&gt;} and
      * disjoint the items to obtain a {@link Multi Multi&lt;O&gt;}.
@@ -195,22 +152,6 @@ public class MultiOnItem<T> {
                         "Invalid parameter - cannot disjoint instance of " + x.getClass().getName()));
             }
         });
-    }
-
-    /**
-     * On each item received from upstream, invoke the given mapper. This mapper return a {@link Publisher} or
-     * a {@link Multi}. The return object lets you configure the flattening process, i.e. how the items produced
-     * by the returned {@link Publisher Publishers or Multis} are propagated to the downstream.
-     *
-     * @param mapper the mapper, must not be {@code null}, must not produce {@code null}
-     * @param <O> the type of item emitted by the {@link Multi} produced by the mapper.
-     * @return the object to configure the flatten behavior.
-     * @deprecated Use {@link #transformToMulti(Function)} instead
-     */
-    @Deprecated
-    public <O> MultiFlatten<T, O> produceMulti(Function<? super T, ? extends Publisher<? extends O>> mapper) {
-        // Decoration happens in `transformToMulti`
-        return transformToMulti(mapper);
     }
 
     /**
@@ -281,22 +222,6 @@ public class MultiOnItem<T> {
     }
 
     /**
-     * On each item received from upstream, invoke the given mapper. This mapper return a {@link Publisher} or
-     * a {@link Multi}. The return object lets you configure the flattening process, i.e. how the items produced
-     * by the returned {@link Publisher Publishers or Multis} are propagated to the downstream.
-     *
-     * @param mapper the mapper, must not be {@code null}, must not produce {@code null}
-     * @param <O> the type of item emitted by the {@link Multi} produced by the mapper.
-     * @return the object to configure the flatten behavior.
-     * @deprecated Use {@link #transformToMulti(Function)} instead.
-     */
-    @Deprecated
-    public <O> MultiFlatten<T, O> producePublisher(Function<? super T, ? extends Publisher<? extends O>> mapper) {
-        // Decoration happens in `transformToMulti`
-        return transformToMulti(mapper);
-    }
-
-    /**
      * On each item received from the upstream, call the given mapper. The mapper returns an {@link Iterable}.
      * The items from the returned {@link Iterable} are propagated downstream (one by one). As {@link Iterable} is
      * a synchronous construct, this method concatenates the items produced by the different returns iterables.
@@ -309,29 +234,6 @@ public class MultiOnItem<T> {
         Function<? super T, ? extends Iterable<O>> actual = Infrastructure.decorate(nonNull(mapper, "mapper"));
         return transformToMultiAndConcatenate((x -> {
             Iterable<O> iterable = actual.apply(x);
-            if (iterable == null) {
-                return Multi.createFrom().failure(new NullPointerException(MAPPER_RETURNED_NULL));
-            } else {
-                return Multi.createFrom().iterable(iterable);
-            }
-        }));
-    }
-
-    /**
-     * Configures the <em>mapper</em> of the <em>flatMap</em> operation.
-     * The mapper returns a {@link Iterable iterable} and is called for each item emitted by the upstream {@link Multi}.
-     *
-     * @param mapper the mapper, must not be {@code null}, must not produce {@code null}
-     * @param <O> the type of item contained by the {@link Iterable} produced by the mapper.
-     * @return the object to configure the flatten behavior.
-     * @deprecated Use {@link #transformToIterable(Function)} instead
-     */
-    @Deprecated
-    public <O> MultiFlatten<T, O> produceIterable(Function<? super T, ? extends Iterable<? extends O>> mapper) {
-        Function<? super T, ? extends Iterable<? extends O>> actual = Infrastructure
-                .decorate(nonNull(mapper, "mapper"));
-        return transformToMulti((x -> {
-            Iterable<? extends O> iterable = actual.apply(x);
             if (iterable == null) {
                 return Multi.createFrom().failure(new NullPointerException(MAPPER_RETURNED_NULL));
             } else {
@@ -407,65 +309,6 @@ public class MultiOnItem<T> {
     public <O> Multi<O> transformToUniAndMerge(Function<? super T, Uni<? extends O>> mapper) {
         // Decoration happens in `transformToUni`
         return transformToUni(mapper).merge();
-    }
-
-    /**
-     * On each item received from upstream, invoke the given mapper. This mapper return {@link Uni Uni&lt;T&gt;}.
-     * The return object lets you configure the flattening process, i.e. how the items produced
-     * by the returned {@link Uni Unis} are propagated to the downstream.
-     *
-     * @param mapper the mapper, must not be {@code null}, must not produce {@code null}
-     * @param <O> the type of item emitted by the {@link Multi} produced by the mapper.
-     * @return the object to configure the flatten behavior.
-     * @deprecated Use {@link #transformToUni(Function)} instead
-     */
-    @Deprecated
-    public <O> MultiFlatten<T, O> produceUni(Function<? super T, Uni<? extends O>> mapper) {
-        // Decoration happens in `transformToUni`
-        return transformToUni(mapper);
-    }
-
-    /**
-     * Configures the <em>mapper</em> of the <em>flatMap</em> operation.
-     * The mapper returns a {@link CompletionStage} and is called for each item emitted by the upstream {@link Multi}.
-     *
-     * @param mapper the mapper, must not be {@code null}, must not produce {@code null}
-     * @param <O> the type of item emitted by the {@link CompletionStage} produced by the mapper.
-     * @return the object to configure the flatten behavior.
-     * @deprecated Use {@link #transformToUni(Function)} and creates a new Uni from the {@link CompletionStage}
-     */
-    @Deprecated
-    public <O> MultiFlatten<T, O> produceCompletionStage(
-            Function<? super T, ? extends CompletionStage<? extends O>> mapper) {
-        Function<? super T, ? extends CompletionStage<? extends O>> actual = Infrastructure
-                .decorate(nonNull(mapper, "mapper"));
-        Function<? super T, ? extends Publisher<? extends O>> wrapper = res -> Multi.createFrom().emitter(emitter -> {
-            CompletionStage<? extends O> stage;
-            try {
-                stage = actual.apply(res);
-            } catch (Throwable e) {
-                emitter.fail(e);
-                return;
-            }
-            if (stage == null) {
-                throw new NullPointerException(SUPPLIER_PRODUCED_NULL);
-            }
-
-            emitter.onTermination(() -> stage.toCompletableFuture().cancel(false));
-            stage.whenComplete((r, f) -> {
-                if (f != null) {
-                    emitter.fail(f);
-                } else if (r != null) {
-                    emitter.emit(r);
-                    emitter.complete();
-                } else {
-                    // failure on `null`
-                    emitter.fail(new NullPointerException("The completion stage redeemed `null`"));
-                }
-            });
-        }, BackPressureStrategy.LATEST);
-
-        return new MultiFlatten<>(upstream, wrapper, 1, false);
     }
 
     /**

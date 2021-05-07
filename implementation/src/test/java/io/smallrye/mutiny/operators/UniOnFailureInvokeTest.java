@@ -42,7 +42,7 @@ public class UniOnFailureInvokeTest {
         int res = failure
                 .onFailure().invoke(container::set)
                 .onFailure().invoke(() -> invokedRunnable.set(true))
-                .onFailure().invokeUni(ignored -> {
+                .onFailure().call(ignored -> {
                     invokedUni.set(true);
                     return Uni.createFrom().item(69);
                 })

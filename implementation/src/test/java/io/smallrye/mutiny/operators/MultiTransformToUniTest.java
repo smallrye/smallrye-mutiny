@@ -212,15 +212,4 @@ public class MultiTransformToUniTest {
 
         assertThat(list).containsExactly(1, 3, 5);
     }
-
-    @Test
-    @SuppressWarnings("deprecation")
-    public void testProduceUniDeprecated() {
-        List<Integer> list = Multi.createFrom().range(1, 4)
-                .onItem().produceUni(i -> Uni.createFrom().completionStage(CompletableFuture.supplyAsync(() -> i + 1)))
-                .concatenate()
-                .collect().asList().await().indefinitely();
-
-        assertThat(list).containsExactly(2, 3, 4);
-    }
 }

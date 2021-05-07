@@ -171,24 +171,4 @@ public class UniOrTest {
         assertThat(c2.await().indefinitely()).isEqualTo("foo");
         assertThat(c3.await().indefinitely()).isEqualTo("foo");
     }
-
-    @SuppressWarnings("deprecation")
-    @Test
-    public void testUniOrWithDelayedUniAndDeprecatedApis() {
-        Uni<String> first = Uni.createFrom().item("foo").onItem().delayIt().onExecutor(executor)
-                .by(Duration.ofMillis(10));
-        Uni<String> second = Uni.createFrom().item("bar").onItem().delayIt().onExecutor(executor)
-                .by(Duration.ofMillis(1000));
-        Uni<String> third = Uni.createFrom().item("baz").onItem().delayIt().onExecutor(executor)
-                .by(Duration.ofMillis(10000));
-
-        Uni<String> c1 = third.or().unis(first, second);
-        Uni<String> c2 = second.or().unis(third, first);
-        Uni<String> c3 = first.or().unis(third, second);
-
-        assertThat(c1.await().indefinitely()).isEqualTo("foo");
-        assertThat(c2.await().indefinitely()).isEqualTo("foo");
-        assertThat(c3.await().indefinitely()).isEqualTo("foo");
-    }
-
 }

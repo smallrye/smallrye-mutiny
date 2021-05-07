@@ -39,8 +39,8 @@ public class MultiOnTerminationUniInvokeTest {
 
         Multi.createFrom().failure(new IOException("boom"))
                 .onSubscribe().invoke(subscription::set)
-                .on().item().invoke(item::set)
-                .on().failure().invoke(failure::set)
+                .onItem().invoke(item::set)
+                .onFailure().invoke(failure::set)
                 .onCompletion().invoke(() -> completion.set(true))
                 .onTermination().call((t, c) -> {
                     termination.set(true);
@@ -87,8 +87,8 @@ public class MultiOnTerminationUniInvokeTest {
 
         Multi.createFrom().item(1)
                 .onSubscribe().invoke(subscription::set)
-                .on().item().invoke(item::set)
-                .on().failure().invoke(failure::set)
+                .onItem().invoke(item::set)
+                .onFailure().invoke(failure::set)
                 .onCompletion().invoke(() -> completion.set(true))
                 .onTermination().call((t, c) -> {
                     termination.set(true);
@@ -134,8 +134,8 @@ public class MultiOnTerminationUniInvokeTest {
 
         Multi.createFrom().item(1)
                 .onSubscribe().invoke(subscription::set)
-                .on().item().invoke(item::set)
-                .on().failure().invoke(failure::set)
+                .onItem().invoke(item::set)
+                .onFailure().invoke(failure::set)
                 .onCompletion().invoke(() -> completion.set(true))
                 .onTermination().call((t, c) -> {
                     termination.set(true);
@@ -181,8 +181,8 @@ public class MultiOnTerminationUniInvokeTest {
 
         Multi.createFrom().failure(new IOException("boom"))
                 .onSubscribe().invoke(subscription::set)
-                .on().item().invoke(item::set)
-                .on().failure().invoke(failure::set)
+                .onItem().invoke(item::set)
+                .onFailure().invoke(failure::set)
                 .onCompletion().invoke(() -> completion.set(true))
                 .onTermination().call((t, c) -> {
                     termination.set(true);
@@ -234,8 +234,8 @@ public class MultiOnTerminationUniInvokeTest {
 
         Multi.createFrom().failure(new IOException("boom"))
                 .onSubscribe().invoke(subscription::set)
-                .on().item().invoke(item::set)
-                .on().failure().invoke(failure::set)
+                .onItem().invoke(item::set)
+                .onFailure().invoke(failure::set)
                 .onCompletion().invoke(() -> completion.set(true))
                 .onTermination().call((t, c) -> {
                     termination.set(true);
@@ -287,7 +287,7 @@ public class MultiOnTerminationUniInvokeTest {
         AtomicBoolean subCancellation = new AtomicBoolean();
 
         Multi.createFrom().item(1)
-                .on().item().invoke(item::set)
+                .onItem().invoke(item::set)
                 .onTermination().call((t, c) -> {
                     termination.set(true);
                     terminationException.set(t);

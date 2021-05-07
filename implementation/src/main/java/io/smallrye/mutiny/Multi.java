@@ -52,31 +52,6 @@ public interface Multi<T> extends Publisher<T> {
      * <pre>
      * {@code
      *     Multi multi = upstream
-     *      .then(m -> { ...})
-     *      .then(m -> { ...})
-     *      .then(m -> { ...})
-     * }
-     * </pre>
-     * <p>
-     * With `then` you can structure and chain groups of processing.
-     *
-     * @param stage the function receiving this {@link Multi} as parameter and producing the outcome (can be a
-     *        {@link Multi} or something else), must not be {@code null}.
-     * @param <O> the outcome type
-     * @return the outcome of the function.
-     * @deprecated use {@link #stage(Function)}
-     */
-    @Deprecated
-    default <O> O then(Function<Multi<T>, O> stage) {
-        return stage(stage);
-    }
-
-    /**
-     * Allows structuring the pipeline by creating a logic separation:
-     *
-     * <pre>
-     * {@code
-     *     Multi multi = upstream
      *      .stage(m -> { ...})
      *      .stage(m -> { ...})
      *      .stage(m -> { ...})
@@ -169,17 +144,6 @@ public interface Multi<T> extends Publisher<T> {
      * @return a MultiOnFailure configured with the given predicate on which you can specify the on failure action
      */
     MultiOnFailure<T> onFailure(Class<? extends Throwable> typeOfFailure);
-
-    /**
-     * Allows adding behavior when various type of events are emitted by the current {@link Multi} (item, failure,
-     * completion) or by the subscriber (cancellation, request, subscription)
-     *
-     * @return the object to configure the action to execute when events happen
-     * @deprecated Use the specialized groups in {@link Multi}, e.g. {@link Multi#onItem()} or {@link Multi#onSubscribe()}
-     *             instead
-     */
-    @Deprecated
-    MultiOnEvent<T> on();
 
     /**
      * Creates a new {@link Multi} that subscribes to this upstream and caches all of its events and replays them, to
@@ -457,28 +421,6 @@ public interface Multi<T> extends Publisher<T> {
      */
     default Multi<T> invoke(Runnable callback) {
         return onItem().invoke(callback);
-    }
-
-    /**
-     * Produces a new {@link Multi} invoking the given @{code action} when an {@code item} event is received. Note that
-     * the received item cannot be {@code null}.
-     * <p>
-     * Unlike {@link #invoke(Consumer)}, the passed function returns a {@link Uni}. When the produced {@code Uni} sends
-     * its result, the result is discarded, and the original {@code item} is forwarded downstream. If the produced
-     * {@code Uni} fails, the failure is propagated downstream. If the action throws an exception, this exception is
-     * propagated downstream as failure.
-     * <p>
-     * This method preserves the order of the items, meaning that the downstream received the items in the same order
-     * as the upstream has emitted them.
-     *
-     * @param action the function taking the item and returning a {@link Uni}, must not be {@code null}, must not return
-     *        {@code null}
-     * @return the new {@link Multi}
-     * @deprecated Use {@link #call(Function)}
-     */
-    @Deprecated
-    default Multi<T> invokeUni(Function<? super T, Uni<?>> action) {
-        return onItem().call(nonNull(action, "action"));
     }
 
     /**

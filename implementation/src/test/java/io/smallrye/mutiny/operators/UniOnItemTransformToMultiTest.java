@@ -33,16 +33,6 @@ public class UniOnItemTransformToMultiTest {
     }
 
     @Test
-    @SuppressWarnings("deprecation")
-    public void testTransformToMultiWithItemDeprecated() {
-        Uni.createFrom().item(1)
-                .onItem().produceMulti(i -> Multi.createFrom().range(i, 5))
-                .subscribe().withSubscriber(AssertSubscriber.create(10))
-                .awaitCompletion()
-                .assertItems(1, 2, 3, 4);
-    }
-
-    @Test
     public void testTransformToMultiWithNull() {
         Uni.createFrom().voidItem()
                 .onItem().transformToMulti(x -> Multi.createFrom().range(1, 5))

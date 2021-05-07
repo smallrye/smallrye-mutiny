@@ -72,32 +72,6 @@ public class MultiOnItemCallTest {
     }
 
     @Test
-    public void testOnItemWithFunctionDeprecatedShortcut() {
-        AtomicInteger counter = new AtomicInteger();
-        Multi.createFrom().items(1, 2, 3, 4)
-                .invokeUni(i -> {
-                    counter.incrementAndGet();
-                    return Uni.createFrom().item(i);
-                })
-                .subscribe().withSubscriber(AssertSubscriber.create(10))
-                .assertItems(1, 2, 3, 4).assertCompleted();
-        assertThat(counter).hasValue(4);
-    }
-
-    @Test
-    public void testOnItemWithFunctionDeprecated() {
-        AtomicInteger counter = new AtomicInteger();
-        Multi.createFrom().items(1, 2, 3, 4)
-                .onItem().invokeUni(i -> {
-                    counter.incrementAndGet();
-                    return Uni.createFrom().item(i);
-                })
-                .subscribe().withSubscriber(AssertSubscriber.create(10))
-                .assertItems(1, 2, 3, 4).assertCompleted();
-        assertThat(counter).hasValue(4);
-    }
-
-    @Test
     public void testOnFailureWithSupplier() {
         AtomicInteger counter = new AtomicInteger();
         Multi.createFrom().items(1, 2, 3, 4).onCompletion().fail()

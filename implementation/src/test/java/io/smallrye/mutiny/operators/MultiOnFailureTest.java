@@ -152,19 +152,6 @@ public class MultiOnFailureTest {
     }
 
     @Test
-    public void testOnFailureTransformWithDeprecatedApiApply() {
-        AssertSubscriber<Integer> subscriber = AssertSubscriber.create();
-
-        Multi.createFrom().<Integer> failure(new IllegalStateException("boom"))
-                .onFailure().apply(f -> new IOException("kaboom!"))
-                .subscribe().withSubscriber(subscriber);
-
-        subscriber.assertHasNotReceivedAnyItem()
-                .assertTerminated()
-                .assertFailedWith(IOException.class, "kaboom!");
-    }
-
-    @Test
     public void testRequestOnTheMultiReturnedByRecoverWithMulti() {
         AssertSubscriber<Integer> subscriber = AssertSubscriber.create(0);
 

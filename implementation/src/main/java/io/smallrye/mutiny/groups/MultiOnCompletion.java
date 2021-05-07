@@ -40,20 +40,6 @@ public class MultiOnCompletion<T> {
     /**
      * Creates a new {@link Multi} executing the given {@link Uni} action when this {@link Multi} completes.
      * The completion notification is sent downstream when the {@link Uni} has completed.
-     * 
-     * @param supplier the supplier, must return a non-{@code null} {@link Uni}
-     * @return the new {@link Multi}
-     * @deprecated Use {@link #call(Supplier)}
-     */
-    @Deprecated
-    public Multi<T> invokeUni(Supplier<Uni<?>> supplier) {
-        // Decoration happens in `call`
-        return call(supplier);
-    }
-
-    /**
-     * Creates a new {@link Multi} executing the given {@link Uni} action when this {@link Multi} completes.
-     * The completion notification is sent downstream when the {@link Uni} has completed.
      *
      * @param supplier the supplier, must return a non-{@code null} {@link Uni}
      * @return the new {@link Multi}

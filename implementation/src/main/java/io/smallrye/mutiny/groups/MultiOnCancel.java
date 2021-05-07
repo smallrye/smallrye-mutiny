@@ -44,20 +44,4 @@ public class MultiOnCancel<T> {
         Supplier<Uni<?>> actual = Infrastructure.decorate(nonNull(supplier, "supplier"));
         return Infrastructure.onMultiCreation(new MultiOnCancellationCall<>(upstream, actual));
     }
-
-    /**
-     * Attaches an action executed when the subscription is cancelled.
-     * The upstream is not cancelled yet, but will be cancelled when the returned {@link Uni} completes.
-     * The supplier must not return {@code null}.
-     * Note that the result or the failure of the {@link Uni} will be discarded.
-     *
-     * @param supplier the {@link Uni} supplier, must not return {@code null}.
-     * @return a new {@link Multi}
-     * @deprecated Use {@link #call(Supplier)}
-     */
-    @Deprecated
-    public Multi<T> invokeUni(Supplier<Uni<?>> supplier) {
-        // Decoration happens in `call`
-        return call(supplier);
-    }
 }
