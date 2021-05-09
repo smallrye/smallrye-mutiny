@@ -70,6 +70,7 @@
         <module>reactive-streams-junit5-tck</module>
         <module>kotlin</module>
         <module>bom</module>
+        <module>math</module>
     </modules>
 
     <properties>
