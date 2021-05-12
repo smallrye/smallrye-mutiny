@@ -44,6 +44,14 @@ public class UniAndGroupIterable<T1> {
         return this;
     }
 
+    /**
+     * Combine the items emitted by the {@link Uni unis}, and emit the result when all {@link Uni unis} have
+     * successfully completed. In case of failure, the failure is propagated.
+     * 
+     * @param function the combination function
+     * @param <O> the combination value type
+     * @return the new {@link Uni}
+     */
     public <O> Uni<O> combinedWith(Function<List<?>, O> function) {
         Function<List<?>, O> actual = Infrastructure.decorate(nonNull(function, "function"));
         return Infrastructure
@@ -51,8 +59,27 @@ public class UniAndGroupIterable<T1> {
     }
 
     /**
+     * Combine the items emitted by the {@link Uni unis}, and emit the result when all {@link Uni unis} have
+     * successfully completed. In case of failure, the failure is propagated.
+     * <p>
+     * This method is a convenience wrapper for {@link #combinedWith(Function)} but with the assumption that all items
+     * have {@code I} as a super type, which saves you a cast in the combination function.
+     * If the cast fails then the returned {@link Uni} fails with a {@link ClassCastException}.
+     * 
+     * @param superType the super type of all items
+     * @param function the combination function
+     * @param <O> the combination value type
+     * @param <I> the super type of all items
+     * @return the new {@link Uni}
+     */
+    @SuppressWarnings("unchecked")
+    public <O, I> Uni<O> combinedWith(Class<I> superType, Function<List<? extends I>, O> function) {
+        return combinedWith((Function) function);
+    }
+
+    /**
      * Discards the items emitted by the combined {@link Uni unis}, and just emits {@code null} when all the
-     * {@link Uni unis} have completed successfully. In the case of failure, the failure is propagated.
+     * {@link Uni unis} have successfully completed. In case of failure, the failure is propagated.
      *
      * @return the {@code Uni Uni<Void>} emitting {@code null} when all the {@link Uni unis} have completed, or propagating
      *         the failure.
