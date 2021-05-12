@@ -3,19 +3,76 @@ image:https://sonarcloud.io/api/project_badges/measure?project=smallrye_smallrye
 image:https://img.shields.io/github/license/smallrye/smallrye-mutiny.svg["License", link="http://www.apache.org/licenses/LICENSE-2.0"]
 image:https://img.shields.io/maven-central/v/io.smallrye.reactive/mutiny?color=green[Maven Central]
 
-== SmallRye Mutiny
+== ⚡️ Mutiny, an Intuitive Event-Driven Reactive Programming Library for Java
 
-Mutiny reactive types implementation.
+https://smallrye.io/smallrye-mutiny/[Mutiny is a novel reactive programming library].
 
-=== Instructions
+Mutiny provides a simple but powerful asynchronous development model that lets you build reactive applications.
 
-Compile and install this project:
+=== 🚀 Overview
+
+Mutiny can be used in any Java application exhibiting asynchrony.
+
+From reactive microservices, data streaming, event processing to API gateways and network utilities, Mutiny is a great fit.
+
+==== Event-Driven
+
+Mutiny places events at the core of its design.
+With Mutiny, you observe events, react to them, and create elegant and readable processing pipelines.
+
+TIP: A PhD in functional programming is not required.
+
+==== Navigable
+
+Even with smart code completion, classes with hundred of methods are confusing.
+
+Mutiny provides a navigable and explicit API driving you towards the operator you need.
+
+==== Non-Blocking I/O
+
+Mutiny is the perfect companion to tame the asynchronous nature of applications with non-blocking I/O.
+
+Declaratively compose operations, transform data, enforce progress, recover from failures and more.
+
+==== Quarkus and Vert.x native
+
+Mutiny is integrated in https://quarkus.io[Quarkus] where every reactive API uses Mutiny, and https://vertx.io[Eclipse Vert.x] clients are made available using https://github.com/smallrye/smallrye-reactive-utils[Mutiny bindings].
+
+Mutiny is however an independent library that can ultimately be used in any Java application.
+
+==== Reactive Converters Built-In
+
+Mutiny is based on the Reactive Streams specification, and so it can be integrated with any other reactive programming library.
+
+In addition, Mutiny offers converters to interact with other popular libraries and https://kotlinlang.org/[Kotlin].
+
+=== 📦  Build instructions
+
+Mutiny is built with Apache Maven, so all you need is:
 
 [source,bash]
 ----
-mvn clean install
+mvn install
 ----
 
-==== Links
+We currently support Java 8 and beyond.
 
-* https://smallrye.io/smallrye-mutiny[Documentation]
+Mutiny passes the https://github.com/reactive-streams/reactive-streams-jvm[Reactive Streams TCK].
+
+=== ✨ Contributing
+
+See link:CONTRIBUTING.md[the contributing guidelines]
+
+Mutiny is an open project, feel-free to:
+
+* https://github.com/smallrye/smallrye-mutiny/issues[report issues], and
+* https://github.com/smallrye/smallrye-mutiny/pulls[propose enhancements via pull-requests].
+
+=== 👋 Discussions and support
+
+For anything related to the usage of Mutiny in Quarkus, please refer to the https://quarkus.io/support/[Quarkus support]
+
+For more general discussions about Mutiny, you can: 
+
+* https://stackoverflow.com/questions/tagged/mutiny[use the `mutiny` tag on StackOverflow], and
+* https://github.com/smallrye/smallrye-mutiny/discussions[start a new discussion thread on GitHub].
