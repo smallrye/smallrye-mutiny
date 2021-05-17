@@ -134,7 +134,7 @@ public interface Multi<T> extends Publisher<T> {
 
     /**
      * Configures the action to execute when the observed {@link Multi} sends a {@link Subscription}.
-     * The downstream don't have a subscription yet. It will be passed once the configured action completes.
+     * The downstream does not have a subscription yet. It will be passed once the configured action completes.
      * <p>
      * For example:
      *
