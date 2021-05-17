@@ -71,7 +71,7 @@ public abstract class AbstractUni<T> implements Uni<T> {
 
     @Override
     public UniOnSubscribe<T> onSubscribe() {
-        return new UniOnSubscribe<>(this);
+        return onSubscription();
     }
 
     @Override
