@@ -28,7 +28,7 @@ public class UniOnSubscribeTest {
         AtomicInteger count = new AtomicInteger();
         AtomicReference<UniSubscription> reference = new AtomicReference<>();
         Uni<Integer> uni = Uni.createFrom().item(1)
-                .onSubscribe().invoke(s -> {
+                .onSubscription().invoke(s -> {
                     reference.set(s);
                     count.incrementAndGet();
                 });
@@ -53,7 +53,7 @@ public class UniOnSubscribeTest {
     public void testInvokeRunnable() {
         AtomicInteger count = new AtomicInteger();
         Uni<Integer> uni = Uni.createFrom().item(1)
-                .onSubscribe().invoke(count::incrementAndGet);
+                .onSubscription().invoke(count::incrementAndGet);
 
         UniAssertSubscriber<Integer> subscriber = UniAssertSubscriber.create();
 
@@ -72,7 +72,7 @@ public class UniOnSubscribeTest {
     public void testOnSubscribed() {
         AtomicInteger count = new AtomicInteger();
         AtomicReference<UniSubscription> reference = new AtomicReference<>();
-        Uni<Integer> uni = Uni.createFrom().item(1).onSubscribe().invoke(s -> {
+        Uni<Integer> uni = Uni.createFrom().item(1).onSubscription().invoke(s -> {
             reference.set(s);
             count.incrementAndGet();
         });
@@ -99,11 +99,11 @@ public class UniOnSubscribeTest {
         AtomicReference<UniSubscription> reference = new AtomicReference<>();
         AtomicReference<UniSubscription> sub = new AtomicReference<>();
         Uni<Integer> uni = Uni.createFrom().item(1)
-                .onSubscribe().call(s -> {
+                .onSubscription().call(s -> {
                     reference.set(s);
                     count.incrementAndGet();
                     return Uni.createFrom().nullItem()
-                            .onSubscribe().invoke(sub::set);
+                            .onSubscription().invoke(sub::set);
                 });
 
         UniAssertSubscriber<Integer> subscriber = UniAssertSubscriber.create();
@@ -131,10 +131,10 @@ public class UniOnSubscribeTest {
         AtomicInteger count = new AtomicInteger();
         AtomicReference<UniSubscription> sub = new AtomicReference<>();
         Uni<Integer> uni = Uni.createFrom().item(1)
-                .onSubscribe().call(() -> {
+                .onSubscription().call(() -> {
                     count.incrementAndGet();
                     return Uni.createFrom().nullItem()
-                            .onSubscribe().invoke(sub::set);
+                            .onSubscription().invoke(sub::set);
                 });
 
         UniAssertSubscriber<Integer> subscriber = UniAssertSubscriber.create();
@@ -160,7 +160,7 @@ public class UniOnSubscribeTest {
         AtomicReference<UniSubscription> reference = new AtomicReference<>();
         AtomicReference<UniSubscription> sub = new AtomicReference<>();
         Uni<Object> uni = Uni.createFrom().failure(new IOException("boom"))
-                .onSubscribe().call(s -> {
+                .onSubscription().call(s -> {
                     reference.set(s);
                     count.incrementAndGet();
                     return Uni.createFrom().emitter(e -> {
@@ -169,7 +169,7 @@ public class UniOnSubscribeTest {
                             e.complete("yo");
                         }).start();
                     })
-                            .onSubscribe().invoke(sub::set);
+                            .onSubscription().invoke(sub::set);
                 });
 
         UniAssertSubscriber<Object> subscriber = UniAssertSubscriber.create();
@@ -195,7 +195,7 @@ public class UniOnSubscribeTest {
     @Test
     public void testInvokeThrowingException() {
         Uni<Integer> uni = Uni.createFrom().item(1)
-                .onSubscribe().invoke(s -> {
+                .onSubscription().invoke(s -> {
                     throw new IllegalStateException("boom");
                 });
 
@@ -209,7 +209,7 @@ public class UniOnSubscribeTest {
     @Test
     public void testCallThrowingException() {
         Uni<Integer> uni = Uni.createFrom().item(1)
-                .onSubscribe().call(s -> {
+                .onSubscription().call(s -> {
                     throw new IllegalStateException("boom");
                 });
 
@@ -223,7 +223,7 @@ public class UniOnSubscribeTest {
     @Test
     public void testCallProvidingFailure() {
         Uni<Integer> uni = Uni.createFrom().item(1)
-                .onSubscribe().call(s -> Uni.createFrom().failure(new IOException("boom")));
+                .onSubscription().call(s -> Uni.createFrom().failure(new IOException("boom")));
 
         UniAssertSubscriber<Integer> subscriber = UniAssertSubscriber.create();
 
@@ -235,7 +235,7 @@ public class UniOnSubscribeTest {
     @Test
     public void testCallReturningNullUni() {
         Uni<Integer> uni = Uni.createFrom().item(1)
-                .onSubscribe().call(s -> null);
+                .onSubscription().call(s -> null);
 
         UniAssertSubscriber<Integer> subscriber = UniAssertSubscriber.create();
 
@@ -247,13 +247,13 @@ public class UniOnSubscribeTest {
     @Test
     public void testThatInvokeConsumerCannotBeNull() {
         assertThrows(IllegalArgumentException.class, () -> Uni.createFrom().item(1)
-                .onSubscribe().invoke((Consumer<? super UniSubscription>) null));
+                .onSubscription().invoke((Consumer<? super UniSubscription>) null));
     }
 
     @Test
     public void testThatCallFunctionCannotBeNull() {
         assertThrows(IllegalArgumentException.class, () -> Uni.createFrom().item(1)
-                .onSubscribe().call((Function<? super UniSubscription, Uni<?>>) null));
+                .onSubscription().call((Function<? super UniSubscription, Uni<?>>) null));
     }
 
     @Test
@@ -267,7 +267,7 @@ public class UniOnSubscribeTest {
     public void testThatSubscriptionIsNotPassedDownstreamUntilInvokeCallbackCompletes() {
         CountDownLatch latch = new CountDownLatch(1);
         UniAssertSubscriber<Integer> subscriber = Uni.createFrom().item(1)
-                .onSubscribe().invoke(s -> {
+                .onSubscription().invoke(s -> {
                     try {
                         latch.await();
                     } catch (InterruptedException e) {
@@ -289,7 +289,7 @@ public class UniOnSubscribeTest {
     public void testThatSubscriptionIsNotPassedDownstreamUntilProducedUniCompletes() {
         AtomicReference<UniEmitter<? super Integer>> emitter = new AtomicReference<>();
         UniAssertSubscriber<Integer> subscriber = Uni.createFrom().item(() -> 1)
-                .onSubscribe()
+                .onSubscription()
                 .call(s -> Uni.createFrom().emitter((Consumer<UniEmitter<? super Integer>>) emitter::set))
                 .subscribe().withSubscriber(UniAssertSubscriber.create());
 
@@ -308,7 +308,7 @@ public class UniOnSubscribeTest {
     public void testThatSubscriptionIsNotPassedDownstreamUntilProducedUniCompletesWithDifferentThread() {
         AtomicReference<UniEmitter<? super Integer>> emitter = new AtomicReference<>();
         UniAssertSubscriber<Integer> subscriber = Uni.createFrom().item(() -> 1)
-                .onSubscribe()
+                .onSubscription()
                 .call(s -> Uni.createFrom().emitter((Consumer<UniEmitter<? super Integer>>) emitter::set))
                 .runSubscriptionOn(Infrastructure.getDefaultExecutor())
                 .subscribe().withSubscriber(UniAssertSubscriber.create());

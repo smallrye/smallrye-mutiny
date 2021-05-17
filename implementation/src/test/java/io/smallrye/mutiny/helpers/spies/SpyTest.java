@@ -23,7 +23,7 @@ class SpyTest {
     @Nested
     class SpyUni {
         @Test
-        @DisplayName("Spy onSubscribe()")
+        @DisplayName("Spy onSubscription()")
         void spyOnSubscribeSpy() {
             UniOnSubscribeSpy<Integer> spy = Spy.onSubscribe(Uni.createFrom().item(69));
             UniAssertSubscriber<Integer> subscriber = spy.subscribe().withSubscriber(UniAssertSubscriber.create());
@@ -489,7 +489,7 @@ class SpyTest {
         }
 
         @Test
-        @DisplayName("Spy onSubscribe()")
+        @DisplayName("Spy onSubscription()")
         void spyOnSubscribe() {
             MultiOnSubscribeSpy<Integer> spy = Spy.onSubscribe(Multi.createFrom().items(1, 2, 3));
             AssertSubscriber<Integer> subscriber = spy.subscribe().withSubscriber(AssertSubscriber.create(10));

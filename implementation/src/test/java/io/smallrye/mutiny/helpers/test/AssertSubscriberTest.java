@@ -323,18 +323,18 @@ public class AssertSubscriberTest {
 
         // Delay
         subscriber = Multi.createFrom().items(1)
-                .onSubscribe().call(x -> smallDelay)
+                .onSubscription().call(x -> smallDelay)
                 .subscribe().withSubscriber(AssertSubscriber.create(0));
         assertThat(subscriber.awaitSubscription()).isSameAs(subscriber);
 
         subscriber = Multi.createFrom().items(1)
-                .onSubscribe().call(x -> smallDelay)
+                .onSubscription().call(x -> smallDelay)
                 .subscribe().withSubscriber(AssertSubscriber.create(0));
         assertThat(subscriber.awaitSubscription(MEDIUM)).isSameAs(subscriber);
 
         // timeout
         subscriber = Multi.createFrom().items(1)
-                .onSubscribe().call(x -> mediumDelay)
+                .onSubscription().call(x -> mediumDelay)
                 .subscribe().withSubscriber(AssertSubscriber.create(0));
         AssertSubscriber<Integer> tmp = subscriber;
         assertThatThrownBy(() -> tmp.awaitSubscription(SMALL)).isInstanceOf(AssertionError.class)

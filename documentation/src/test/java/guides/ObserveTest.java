@@ -40,7 +40,7 @@ public class ObserveTest {
         Multi<String> multi = Multi.createFrom().items("a", "b", "c");
         // tag::invoke-all[]
         multi
-            .onSubscribe().invoke(() -> System.out.println("⬇️ Subscribed"))
+            .onSubscription().invoke(() -> System.out.println("⬇️ Subscribed"))
             .onItem().invoke(i -> System.out.println("⬇️ Received item: " + i))
             .onFailure().invoke(f -> System.out.println("⬇️ Failed with " + f))
             .onCompletion().invoke(() -> System.out.println("⬇️ Completed"))

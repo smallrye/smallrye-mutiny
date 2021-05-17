@@ -25,7 +25,7 @@ public interface Spy {
     // --------------------------------------------------------------------- //
 
     /**
-     * Spy {@link Uni#onSubscribe()} events.
+     * Spy {@link Uni#onSubscription()} events.
      * 
      * @param upstream the upstream
      * @param <T> the item type
@@ -219,7 +219,7 @@ public interface Spy {
     }
 
     /**
-     * Spy {@link Multi#onSubscribe()} events.
+     * Spy {@link Multi#onSubscription()} events.
      *
      * @param upstream the upstream
      * @param <T> the items type

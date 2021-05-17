@@ -21,7 +21,20 @@
     "criticality" : "highlight",
     "minSeverity" : "POTENTIALLY_BREAKING",
     "minCriticality" : "documented",
-    "differences" : [ ]
+    "differences" : [
+      {
+        "ignore": true,
+        "code": "java.method.addedToInterface",
+        "new": "method io.smallrye.mutiny.groups.MultiOnSubscribe<T> io.smallrye.mutiny.Multi<T>::onSubscription()",
+        "justification": "Deprecated API"
+      },
+      {
+        "ignore": true,
+        "code": "java.method.addedToInterface",
+        "new": "method io.smallrye.mutiny.groups.UniOnSubscribe<T> io.smallrye.mutiny.Uni<T>::onSubscription()",
+        "justification": "Deprecated API"
+      }
+    ]
   }
 }, {
   "extension" : "revapi.reporter.json",

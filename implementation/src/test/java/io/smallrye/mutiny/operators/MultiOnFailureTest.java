@@ -320,7 +320,7 @@ public class MultiOnFailureTest {
         AtomicInteger subscribed = new AtomicInteger();
         Multi<Integer> fallback = Multi.createFrom()
                 .<Integer> emitter(s -> s.emit(42).emit(43).complete())
-                .onSubscribe().invoke(s -> subscribed.incrementAndGet());
+                .onSubscription().invoke(s -> subscribed.incrementAndGet());
 
         multi.onFailure()
                 .recoverWithMulti(fallback)
@@ -349,7 +349,7 @@ public class MultiOnFailureTest {
         AtomicInteger subscribed = new AtomicInteger();
         Multi<Integer> fallback = Multi.createFrom()
                 .item(0)
-                .onSubscribe().invoke(s -> subscribed.incrementAndGet());
+                .onSubscription().invoke(s -> subscribed.incrementAndGet());
 
         multi.onFailure()
                 .recoverWithMulti(fallback)

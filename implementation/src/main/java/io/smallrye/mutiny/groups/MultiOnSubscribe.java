@@ -22,9 +22,9 @@ import io.smallrye.mutiny.operators.multi.MultiOnSubscribeInvokeOp;
  *
  * <pre>
  * {@code
- * multi.onSubscribe().invoke(sub -> System.out.println("subscribed"));
+ * multi.onSubscription().invoke(sub -> System.out.println("subscribed"));
  * // Delay the subscription by 1 second (or until an asynchronous action completes)
- * multi.onSubscribe().call(sub -> Uni.createFrom(1).onItem().delayIt().by(Duration.ofSecond(1)));
+ * multi.onSubscription().call(sub -> Uni.createFrom(1).onItem().delayIt().by(Duration.ofSecond(1)));
  * }
  * </pre>
  *

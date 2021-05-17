@@ -237,7 +237,7 @@ public class MultiContextPropagationTest {
 
         AssertSubscriber<Long> subscriber = Multi.createFrom().ticks().every(Duration.ofMillis(1))
                 .select().first(5)
-                .onSubscribe().invoke(() -> {
+                .onSubscription().invoke(() -> {
                     assertThat(ctx).isSameAs(MyContext.get());
                     MyContext.get().set("test");
                 })

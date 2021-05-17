@@ -26,7 +26,7 @@ public class MultiDisjointTest {
                 Multi.createFrom().items("d", "e"),
                 Multi.createFrom().empty(),
                 Multi.createFrom().items("f", "g")
-                        .onSubscribe().invoke(() -> subscribed.set(true)))
+                        .onSubscription().invoke(() -> subscribed.set(true)))
                 .onItem().<String> disjoint()
                 .subscribe().withSubscriber(AssertSubscriber.create(4));
         assertThat(subscribed).isFalse();
@@ -95,7 +95,7 @@ public class MultiDisjointTest {
                 Multi.createFrom().items("d", "e"),
                 Multi.createFrom().failure(new IOException("boom")),
                 Multi.createFrom().items("f", "g")
-                        .onSubscribe().invoke(() -> subscribed.set(true)))
+                        .onSubscription().invoke(() -> subscribed.set(true)))
                 .onItem().<String> disjoint()
                 .subscribe().withSubscriber(AssertSubscriber.create(4));
         assertThat(subscribed).isFalse();
@@ -116,7 +116,7 @@ public class MultiDisjointTest {
                     e.fail(new IOException("boom"));
                 }),
                 Multi.createFrom().items("g")
-                        .onSubscribe().invoke(() -> subscribed.set(true)))
+                        .onSubscription().invoke(() -> subscribed.set(true)))
                 .onItem().<String> disjoint()
                 .subscribe().withSubscriber(AssertSubscriber.create(4));
         assertThat(subscribed).isFalse();

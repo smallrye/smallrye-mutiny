@@ -749,7 +749,7 @@ public class MultiTransformToMultiTest {
         final AtomicInteger subscriptionTracker = new AtomicInteger();
         Multi<Integer> multi = Multi.createFrom().range(0, 100)
                 .onItem().transformToMulti(i -> Multi.createFrom().items(i + 1, i + 2, i + 3)
-                        .onSubscribe().invoke(s -> {
+                        .onSubscription().invoke(s -> {
                             int n = subscriptionTracker.getAndIncrement();
                             if (n >= maxConcurrency) {
                                 Assertions.fail("Too many subscriptions: " + n);
@@ -783,7 +783,7 @@ public class MultiTransformToMultiTest {
         final AtomicInteger subscriptionTracker = new AtomicInteger();
         Multi<Integer> multi = Multi.createFrom().items(1, 2, 3)
                 .onItem().transformToMulti(i -> Multi.createFrom().items(4, 5, 6)
-                        .onSubscribe().invoke(s -> {
+                        .onSubscription().invoke(s -> {
                             int n = subscriptionTracker.getAndIncrement();
                             if (n >= maxConcurrency) {
                                 Assertions.fail("Too many subscriptions: " + n);

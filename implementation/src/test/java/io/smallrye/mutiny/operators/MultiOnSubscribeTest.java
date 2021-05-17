@@ -32,7 +32,7 @@ public class MultiOnSubscribeTest {
         AtomicInteger count = new AtomicInteger();
         AtomicReference<Subscription> reference = new AtomicReference<>();
         Multi<Integer> multi = Multi.createFrom().items(1, 2, 3)
-                .onSubscribe().invoke(s -> {
+                .onSubscription().invoke(s -> {
                     reference.set(s);
                     count.incrementAndGet();
                 });
@@ -59,7 +59,7 @@ public class MultiOnSubscribeTest {
         AtomicInteger count = new AtomicInteger();
         AtomicReference<Subscription> reference = new AtomicReference<>();
         Multi<Integer> multi = Multi.createFrom().items(1, 2, 3)
-                .onSubscribe().invoke(s -> {
+                .onSubscription().invoke(s -> {
                     reference.set(s);
                     count.incrementAndGet();
                 });
@@ -87,11 +87,11 @@ public class MultiOnSubscribeTest {
         AtomicReference<Subscription> reference = new AtomicReference<>();
         AtomicReference<Subscription> sub = new AtomicReference<>();
         Multi<Integer> multi = Multi.createFrom().items(1, 2, 3)
-                .onSubscribe().call(s -> {
+                .onSubscription().call(s -> {
                     reference.set(s);
                     count.incrementAndGet();
                     return Uni.createFrom().nullItem()
-                            .onSubscribe().invoke(sub::set);
+                            .onSubscription().invoke(sub::set);
                 });
 
         AssertSubscriber<Integer> subscriber = AssertSubscriber.create(10);
@@ -116,10 +116,10 @@ public class MultiOnSubscribeTest {
         AtomicInteger count = new AtomicInteger();
         AtomicReference<Subscription> sub = new AtomicReference<>();
         Multi<Integer> multi = Multi.createFrom().items(1, 2, 3)
-                .onSubscribe().call(() -> {
+                .onSubscription().call(() -> {
                     count.incrementAndGet();
                     return Uni.createFrom().nullItem()
-                            .onSubscribe().invoke(sub::set);
+                            .onSubscription().invoke(sub::set);
                 });
 
         AssertSubscriber<Integer> subscriber = AssertSubscriber.create(10);
@@ -139,7 +139,7 @@ public class MultiOnSubscribeTest {
     @Test
     public void testInvokeThrowingException() {
         Multi<Integer> multi = Multi.createFrom().items(1, 2, 3)
-                .onSubscribe().invoke(s -> {
+                .onSubscription().invoke(s -> {
                     throw new IllegalStateException("boom");
                 });
 
@@ -153,7 +153,7 @@ public class MultiOnSubscribeTest {
     @Test
     public void testCallThrowingException() {
         Multi<Integer> multi = Multi.createFrom().items(1, 2, 3)
-                .onSubscribe().call(s -> {
+                .onSubscription().call(s -> {
                     throw new IllegalStateException("boom");
                 });
 
@@ -167,7 +167,7 @@ public class MultiOnSubscribeTest {
     @Test
     public void testCallProvidingFailure() {
         Multi<Integer> multi = Multi.createFrom().items(1, 2, 3)
-                .onSubscribe().call(s -> Uni.createFrom().failure(new IOException("boom")));
+                .onSubscription().call(s -> Uni.createFrom().failure(new IOException("boom")));
 
         AssertSubscriber<Integer> subscriber = AssertSubscriber.create();
 
@@ -179,7 +179,7 @@ public class MultiOnSubscribeTest {
     @Test
     public void testCallReturningNullUni() {
         Multi<Integer> multi = Multi.createFrom().items(1, 2, 3)
-                .onSubscribe().call(s -> null);
+                .onSubscription().call(s -> null);
 
         AssertSubscriber<Integer> subscriber = AssertSubscriber.create();
 
@@ -190,13 +190,13 @@ public class MultiOnSubscribeTest {
     @Test
     public void testThatInvokeConsumerCannotBeNull() {
         assertThrows(IllegalArgumentException.class, () -> Multi.createFrom().items(1, 2, 3)
-                .onSubscribe().invoke((Consumer<? super Subscription>) null));
+                .onSubscription().invoke((Consumer<? super Subscription>) null));
     }
 
     @Test
     public void testThatCallFunctionCannotBeNull() {
         assertThrows(IllegalArgumentException.class, () -> Multi.createFrom().items(1, 2, 3)
-                .onSubscribe().call((Function<? super Subscription, Uni<?>>) null));
+                .onSubscription().call((Function<? super Subscription, Uni<?>>) null));
     }
 
     @Test
@@ -215,7 +215,7 @@ public class MultiOnSubscribeTest {
     public void testThatSubscriptionIsNotPassedDownstreamUntilInvokeCallbackCompletes() {
         CountDownLatch latch = new CountDownLatch(1);
         AssertSubscriber<Integer> subscriber = Multi.createFrom().items(1, 2, 3)
-                .onSubscribe().invoke(s -> {
+                .onSubscription().invoke(s -> {
                     try {
                         latch.await();
                     } catch (InterruptedException e) {
@@ -238,7 +238,7 @@ public class MultiOnSubscribeTest {
     public void testThatSubscriptionIsNotPassedDownstreamUntilProducedUniCompletes() {
         AtomicReference<UniEmitter<? super Integer>> emitter = new AtomicReference<>();
         AssertSubscriber<Integer> subscriber = Multi.createFrom().items(1, 2, 3)
-                .onSubscribe()
+                .onSubscription()
                 .call(s -> Uni.createFrom().emitter((Consumer<UniEmitter<? super Integer>>) emitter::set))
                 .subscribe().withSubscriber(AssertSubscriber.create(3));
 
@@ -258,7 +258,7 @@ public class MultiOnSubscribeTest {
     public void testThatSubscriptionIsNotPassedDownstreamUntilProducedUniCompletesWithDifferentThread() {
         AtomicReference<UniEmitter<? super Integer>> emitter = new AtomicReference<>();
         AssertSubscriber<Integer> subscriber = Multi.createFrom().items(1, 2, 3)
-                .onSubscribe()
+                .onSubscription()
                 .call(s -> Uni.createFrom().emitter((Consumer<UniEmitter<? super Integer>>) emitter::set))
                 .runSubscriptionOn(Infrastructure.getDefaultExecutor())
                 .subscribe().withSubscriber(AssertSubscriber.create(3));

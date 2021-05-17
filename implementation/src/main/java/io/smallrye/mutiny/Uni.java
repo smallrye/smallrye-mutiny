@@ -194,8 +194,30 @@ public interface Uni<T> {
      * </pre>
      *
      * @return the object to configure the action to execution on subscription.
+     * @deprecated use {@link #onSubscription()} instead
      */
+    @Deprecated
     UniOnSubscribe<T> onSubscribe();
+
+    /**
+     * Configures the action to execute when the observed {@link Uni} sends a {@link UniSubscription}.
+     * The downstream does not have a subscription yet. It will be passed once the configured action completes.
+     *
+     * <p>
+     * Example:
+     * </p>
+     *
+     * <pre>
+     * {@code
+     * uni.onSubscription().invoke(sub -> System.out.println("subscribed"));
+     * // Delay the subscription by 1 second (or until an asynchronous action completes)
+     * uni.onSubscription().call(sub -> Uni.createFrom(1).onItem().delayIt().by(Duration.ofSecond(1)));
+     * }
+     * </pre>
+     *
+     * @return the object to configure the action to execution on subscription.
+     */
+    UniOnSubscribe<T> onSubscription();
 
     /**
      * Configures the action to execute when the observed {@link Uni} emits either an item (potentially {@code null}))

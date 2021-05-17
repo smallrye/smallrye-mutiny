@@ -112,6 +112,11 @@ public abstract class AbstractMulti<T> implements Multi<T> {
 
     @Override
     public MultiOnSubscribe<T> onSubscribe() {
+        return onSubscription();
+    }
+
+    @Override
+    public MultiOnSubscribe<T> onSubscription() {
         return new MultiOnSubscribe<>(this);
     }
 
