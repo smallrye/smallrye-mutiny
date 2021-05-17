@@ -38,7 +38,7 @@ public class MultiOnTerminationUniInvokeTest {
         AtomicBoolean terminationCancelledFlag = new AtomicBoolean();
 
         Multi.createFrom().failure(new IOException("boom"))
-                .onSubscribe().invoke(subscription::set)
+                .onSubscription().invoke(subscription::set)
                 .onItem().invoke(item::set)
                 .onFailure().invoke(failure::set)
                 .onCompletion().invoke(() -> completion.set(true))
@@ -86,7 +86,7 @@ public class MultiOnTerminationUniInvokeTest {
         AtomicBoolean terminationCancelledFlag = new AtomicBoolean();
 
         Multi.createFrom().item(1)
-                .onSubscribe().invoke(subscription::set)
+                .onSubscription().invoke(subscription::set)
                 .onItem().invoke(item::set)
                 .onFailure().invoke(failure::set)
                 .onCompletion().invoke(() -> completion.set(true))
@@ -133,7 +133,7 @@ public class MultiOnTerminationUniInvokeTest {
         AtomicBoolean terminationCancelledFlag = new AtomicBoolean();
 
         Multi.createFrom().item(1)
-                .onSubscribe().invoke(subscription::set)
+                .onSubscription().invoke(subscription::set)
                 .onItem().invoke(item::set)
                 .onFailure().invoke(failure::set)
                 .onCompletion().invoke(() -> completion.set(true))
@@ -180,7 +180,7 @@ public class MultiOnTerminationUniInvokeTest {
         AtomicBoolean terminationCancelledFlag = new AtomicBoolean();
 
         Multi.createFrom().failure(new IOException("boom"))
-                .onSubscribe().invoke(subscription::set)
+                .onSubscription().invoke(subscription::set)
                 .onItem().invoke(item::set)
                 .onFailure().invoke(failure::set)
                 .onCompletion().invoke(() -> completion.set(true))
@@ -233,7 +233,7 @@ public class MultiOnTerminationUniInvokeTest {
         AtomicBoolean terminationCancelledFlag = new AtomicBoolean();
 
         Multi.createFrom().failure(new IOException("boom"))
-                .onSubscribe().invoke(subscription::set)
+                .onSubscription().invoke(subscription::set)
                 .onItem().invoke(item::set)
                 .onFailure().invoke(failure::set)
                 .onCompletion().invoke(() -> completion.set(true))

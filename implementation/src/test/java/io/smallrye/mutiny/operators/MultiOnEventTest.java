@@ -45,7 +45,7 @@ public class MultiOnEventTest {
         AtomicBoolean cancellation = new AtomicBoolean();
 
         Multi.createFrom().item(1)
-                .onSubscribe().invoke(subscription::set)
+                .onSubscription().invoke(subscription::set)
                 .onItem().invoke(item::set)
                 .onFailure().invoke(failure::set)
                 .onItem().invoke(() -> invokedOnItemRunnable.set(true))
@@ -96,7 +96,7 @@ public class MultiOnEventTest {
         AtomicBoolean cancellation = new AtomicBoolean();
 
         Multi.createFrom().item(1)
-                .onSubscribe().invoke(subscription::set)
+                .onSubscription().invoke(subscription::set)
                 .onItem().invoke(item::set)
                 .onFailure().invoke(failure::set)
                 .onTermination().invoke(() -> completion.set(true))
@@ -135,7 +135,7 @@ public class MultiOnEventTest {
         AtomicBoolean cancellation = new AtomicBoolean();
 
         Multi.createFrom().item(1)
-                .onSubscribe().invoke(subscription::set)
+                .onSubscription().invoke(subscription::set)
                 .onItem().invoke(item::set)
                 .onFailure().invoke(failure::set)
                 .onCompletion().invoke(() -> completion.set(true))
@@ -172,7 +172,7 @@ public class MultiOnEventTest {
         AtomicBoolean cancellation = new AtomicBoolean();
 
         Multi.createFrom().<Integer> failure(new IOException("boom"))
-                .onSubscribe().invoke(subscription::set)
+                .onSubscription().invoke(subscription::set)
                 .onItem().invoke(item::set)
                 .onFailure().invoke(failure::set)
                 .onCompletion().invoke(() -> completion.set(true))
@@ -204,7 +204,7 @@ public class MultiOnEventTest {
         AtomicBoolean cancellation = new AtomicBoolean();
 
         Multi.createFrom().<Integer> failure(new IOException("boom"))
-                .onSubscribe().invoke(subscription::set)
+                .onSubscription().invoke(subscription::set)
                 .onItem().invoke(item::set)
                 .onFailure(IOException.class).invoke(failure::set)
                 .onCompletion().invoke(() -> completion.set(true))
@@ -234,7 +234,7 @@ public class MultiOnEventTest {
         AtomicBoolean cancellation = new AtomicBoolean();
 
         Multi.createFrom().<Integer> failure(new IOException("boom"))
-                .onSubscribe().invoke(subscription::set)
+                .onSubscription().invoke(subscription::set)
                 .onItem().invoke(item::set)
                 .onFailure(f -> f.getMessage().contains("missing")).invoke(failure::set)
                 .onCompletion().invoke(() -> completion.set(true))
@@ -268,7 +268,7 @@ public class MultiOnEventTest {
         };
 
         Multi.createFrom().<Integer> failure(new IOException("smallboom"))
-                .onSubscribe().invoke(subscription::set)
+                .onSubscription().invoke(subscription::set)
                 .onItem().invoke(item::set)
                 .onFailure(boom).invoke(failure::set)
                 .onCompletion().invoke(() -> completion.set(true))
@@ -300,7 +300,7 @@ public class MultiOnEventTest {
         AtomicBoolean cancellation = new AtomicBoolean();
 
         Multi.createFrom().<Integer> empty()
-                .onSubscribe().invoke(subscription::set)
+                .onSubscription().invoke(subscription::set)
                 .onItem().invoke(item::set)
                 .onFailure().invoke(failure::set)
                 .onCompletion().invoke(() -> completion.set(true))
@@ -334,7 +334,7 @@ public class MultiOnEventTest {
         AtomicBoolean cancellation = new AtomicBoolean();
 
         AssertSubscriber<Integer> subscriber = Multi.createFrom().<Integer> nothing()
-                .onSubscribe().invoke(subscription::set)
+                .onSubscription().invoke(subscription::set)
                 .onItem().invoke(item::set)
                 .onFailure().invoke(failure::set)
                 .onCompletion().invoke(() -> completion.set(true))

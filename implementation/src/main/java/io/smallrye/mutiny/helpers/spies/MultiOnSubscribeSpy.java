@@ -25,7 +25,7 @@ public class MultiOnSubscribeSpy<T> extends MultiSpyBase<T> {
 
     @Override
     public void subscribe(MultiSubscriber<? super T> downstream) {
-        upstream.onSubscribe().invoke(subscription -> {
+        upstream.onSubscription().invoke(subscription -> {
             incrementInvocationCount();
             lastSubscription = subscription;
         }).subscribe().withSubscriber(downstream);

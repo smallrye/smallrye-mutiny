@@ -94,7 +94,7 @@ public class MultiOnRequestTest {
 
         Multi.createFrom().item(1)
                 .onRequest().call(() -> Uni.createFrom().item("ok")
-                        .onSubscribe().invoke(() -> called.set(true)))
+                        .onSubscription().invoke(() -> called.set(true)))
                 .subscribe().withSubscriber(subscriber);
 
         subscriber.request(10);

@@ -22,7 +22,7 @@ Here the `log` operator traces all events between the `onItem().transform(...)` 
 
 [source,text]
 ----
-11:01:48.709 [main] INFO Multi.MultiMapOp.0 - onSubscribe()
+11:01:48.709 [main] INFO Multi.MultiMapOp.0 - onSubscription()
 11:01:48.711 [main] INFO Multi.MultiMapOp.0 - request(9223372036854775807)
 11:01:48.711 [main] INFO Multi.MultiMapOp.0 - onItem(10)
 >>> 10
@@ -46,7 +46,7 @@ Events are written by default to the standard console output in a format similar
 
 [source,text]
 ----
-[--> Multi.MultiMapOp.0 | onSubscribe()
+[--> Multi.MultiMapOp.0 | onSubscription()
 [--> Multi.MultiMapOp.0 | request(9223372036854775807)
 [--> Multi.MultiMapOp.0 | onItem(10)
 [--> Multi.MultiMapOp.0 | onItem(20)

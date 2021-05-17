@@ -25,7 +25,7 @@ public class UniOnSubscribeSpy<T> extends UniSpyBase<T> {
     @Override
     public void subscribe(UniSubscriber<? super T> downstream) {
         upstream()
-                .onSubscribe().invoke(uniSubscription -> {
+                .onSubscription().invoke(uniSubscription -> {
                     incrementInvocationCount();
                     lastSubscription = uniSubscription;
                 })

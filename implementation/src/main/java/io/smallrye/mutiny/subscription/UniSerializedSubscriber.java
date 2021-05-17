@@ -109,7 +109,7 @@ public class UniSerializedSubscriber<T> implements UniSubscriber<T>, UniSubscrip
     public void cancel() {
         if (state.compareAndSet(HAS_SUBSCRIPTION, DONE)) {
             while (subscription == null) {
-                // We are in the middle of a race condition with onSubscribe()
+                // We are in the middle of a race condition with onSubscription()
             }
             if (subscription != null) { // May have been cancelled already by another thread.
                 subscription.cancel();

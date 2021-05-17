@@ -25,7 +25,7 @@ public class MultiOnFailureRetryTest {
         numberOfSubscriptions = new AtomicInteger();
         failing = Multi.createFrom()
                 .<Integer> emitter(emitter -> emitter.emit(1).emit(2).emit(3).fail(new IOException("boom")))
-                .onSubscribe().invoke(s -> numberOfSubscriptions.incrementAndGet());
+                .onSubscription().invoke(s -> numberOfSubscriptions.incrementAndGet());
     }
 
     @Test

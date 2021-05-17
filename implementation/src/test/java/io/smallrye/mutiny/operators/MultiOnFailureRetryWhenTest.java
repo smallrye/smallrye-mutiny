@@ -31,7 +31,7 @@ public class MultiOnFailureRetryWhenTest {
         numberOfSubscriptions = new AtomicInteger();
         failingAfter2 = Multi.createFrom()
                 .<Integer> emitter(emitter -> emitter.emit(1).emit(2).fail(new IOException("boom")))
-                .onSubscribe().invoke(s -> numberOfSubscriptions.incrementAndGet());
+                .onSubscription().invoke(s -> numberOfSubscriptions.incrementAndGet());
 
         failingAfter1 = Multi.createBy().concatenating()
                 .streams(Multi.createFrom().item(1), Multi.createFrom().failure(new RuntimeException("boom")));
@@ -71,7 +71,7 @@ public class MultiOnFailureRetryWhenTest {
         AtomicBoolean subscribed = new AtomicBoolean();
         AtomicBoolean cancelled = new AtomicBoolean();
         Multi<Integer> multi = failingAfter1
-                .onSubscribe().invoke(sub -> subscribed.set(true))
+                .onSubscription().invoke(sub -> subscribed.set(true))
                 .onCancellation().invoke(() -> cancelled.set(true));
 
         AssertSubscriber<Integer> subscriber = multi
@@ -92,7 +92,7 @@ public class MultiOnFailureRetryWhenTest {
         AtomicBoolean subscribed = new AtomicBoolean();
         AtomicBoolean cancelled = new AtomicBoolean();
         Multi<Integer> multi = failingAfter1
-                .onSubscribe().invoke(sub -> subscribed.set(true))
+                .onSubscription().invoke(sub -> subscribed.set(true))
                 .onCancellation().invoke(() -> cancelled.set(true));
 
         AtomicInteger count = new AtomicInteger();
@@ -117,7 +117,7 @@ public class MultiOnFailureRetryWhenTest {
         AtomicBoolean subscribed = new AtomicBoolean();
         AtomicBoolean cancelled = new AtomicBoolean();
         Multi<Integer> source = failingAfter1
-                .onSubscribe().invoke(sub -> subscribed.set(true))
+                .onSubscription().invoke(sub -> subscribed.set(true))
                 .onCancellation().invoke(() -> cancelled.set(true));
 
         Multi<Integer> retry = source
@@ -137,7 +137,7 @@ public class MultiOnFailureRetryWhenTest {
     public void testAfterOnRetryAndCompletion() {
         AtomicBoolean sourceSubscribed = new AtomicBoolean();
         Multi<Integer> source = failingAfter1
-                .onSubscribe().invoke(sub -> sourceSubscribed.set(true));
+                .onSubscription().invoke(sub -> sourceSubscribed.set(true));
 
         Multi<Integer> retry = source
                 .onFailure().retry().when(other -> other.select().first());

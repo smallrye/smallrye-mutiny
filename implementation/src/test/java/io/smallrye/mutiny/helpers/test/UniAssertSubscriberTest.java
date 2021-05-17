@@ -244,18 +244,18 @@ class UniAssertSubscriberTest {
 
         // Delay
         subscriber = Uni.createFrom().item(1)
-                .onSubscribe().call(x -> Uni.createFrom().item(x).onItem().delayIt().by(Duration.ofSeconds(1)))
+                .onSubscription().call(x -> Uni.createFrom().item(x).onItem().delayIt().by(Duration.ofSeconds(1)))
                 .subscribe().withSubscriber(UniAssertSubscriber.create());
         assertThat(subscriber.awaitSubscription()).isSameAs(subscriber);
 
         subscriber = Uni.createFrom().item(1)
-                .onSubscribe().call(x -> Uni.createFrom().item(x).onItem().delayIt().by(Duration.ofSeconds(1)))
+                .onSubscription().call(x -> Uni.createFrom().item(x).onItem().delayIt().by(Duration.ofSeconds(1)))
                 .subscribe().withSubscriber(UniAssertSubscriber.create());
         assertThat(subscriber.awaitSubscription(Duration.ofSeconds(5))).isSameAs(subscriber);
 
         // timeout
         subscriber = Uni.createFrom().item(1)
-                .onSubscribe().call(x -> Uni.createFrom().item(x).onItem().delayIt().by(Duration.ofSeconds(10)))
+                .onSubscription().call(x -> Uni.createFrom().item(x).onItem().delayIt().by(Duration.ofSeconds(10)))
                 .subscribe().withSubscriber(UniAssertSubscriber.create());
         UniAssertSubscriber<Integer> tmp = subscriber;
         assertThatThrownBy(() -> tmp.awaitSubscription(Duration.ofMillis(100))).isInstanceOf(AssertionError.class)
