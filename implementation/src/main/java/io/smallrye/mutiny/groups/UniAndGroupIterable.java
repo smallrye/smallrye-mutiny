@@ -73,7 +73,7 @@ public class UniAndGroupIterable<T1> {
      * @return the new {@link Uni}
      */
     @SuppressWarnings("unchecked")
-    public <O, I> Uni<O> combinedWith(Class<I> superType, Function<List<? extends I>, O> function) {
+    public <O, I> Uni<O> combinedWith(Class<I> superType, Function<List<I>, O> function) {
         return combinedWith((Function) function);
     }
 
