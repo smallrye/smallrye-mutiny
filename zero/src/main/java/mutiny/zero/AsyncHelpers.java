@@ -29,6 +29,7 @@ public interface AsyncHelpers {
      * @return the mapped completion stage.
      */
     static <T> CompletionStage<T> applyExceptionally(CompletionStage<T> upstream, Function<Throwable, Throwable> mapper) {
+        Objects.requireNonNull(mapper, "The mapper cannot be null");
         CompletableFuture<T> future = new CompletableFuture<>();
         upstream.whenComplete((res, failure) -> {
             if (failure == null) {
@@ -57,6 +58,7 @@ public interface AsyncHelpers {
      */
     static <T> CompletionStage<T> composeExceptionally(CompletionStage<T> upstream,
             Function<Throwable, CompletionStage<T>> mapper) {
+        Objects.requireNonNull(mapper, "The mapper cannot be null");
         CompletableFuture<T> future = new CompletableFuture<>();
         upstream.whenComplete((res, failure) -> {
             if (failure == null) {
@@ -79,21 +81,5 @@ public interface AsyncHelpers {
             }
         });
         return future;
-    }
-
-    /**
-     * Forwards the signals to the given completable future.
-     *
-     * @param result the result
-     * @param failure the failure
-     * @param future the future
-     * @param <T> the type of result
-     */
-    static <T> void forward(T result, Throwable failure, CompletableFuture<T> future) {
-        if (failure != null) {
-            future.completeExceptionally(failure);
-        } else {
-            future.complete(result);
-        }
     }
 }
