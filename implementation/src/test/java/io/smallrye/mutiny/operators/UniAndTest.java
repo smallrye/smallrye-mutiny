@@ -9,6 +9,8 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Test;
 
@@ -213,6 +215,61 @@ public class UniAndTest {
         subscriber
                 .assertCompleted()
                 .assertItem(1 + 2 + 3 + 4 + 5 + 6 + 7 + 8 + 9);
+    }
+
+    @Test
+    public void testWithListOfUnisWithCast() {
+        Uni<Integer> uni1 = Uni.createFrom().item(1);
+        Uni<Long> uni2 = Uni.createFrom().item(2L);
+        Uni<Integer> uni3 = Uni.createFrom().item(3);
+        Uni<Double> uni4 = Uni.createFrom().item(4.0d);
+
+        List<Uni<? extends Number>> list = Arrays.asList(uni1, uni2, uni3, uni4);
+
+        UniAssertSubscriber<List<Long>> subscriber = Uni
+                .combine().all().unis(list)
+                .combinedWith(Number.class, numbers -> numbers.stream().map(Number::longValue).collect(Collectors.toList()))
+                .subscribe().withSubscriber(UniAssertSubscriber.create());
+
+        subscriber
+                .assertCompleted()
+                .assertItem(Arrays.asList(1L, 2L, 3L, 4L));
+    }
+
+    @Test
+    public void testWithListOfUnisWithBadCast() {
+        Uni<Integer> uni1 = Uni.createFrom().item(1);
+        Uni<Long> uni2 = Uni.createFrom().item(2L);
+        Uni<Integer> uni3 = Uni.createFrom().item(3);
+        Uni<Double> uni4 = Uni.createFrom().item(4.0d);
+
+        List<Uni<? extends Number>> list = Arrays.asList(uni1, uni2, uni3, uni4);
+
+        UniAssertSubscriber<String> subscriber = Uni
+                .combine().all().unis(list)
+                .combinedWith(String.class, strings -> String.join("", strings))
+                .subscribe().withSubscriber(UniAssertSubscriber.create());
+
+        subscriber
+                .assertFailedWith(ClassCastException.class, "cannot be cast");
+    }
+
+    @Test
+    public void testWithListOfUnisWithCastToList() {
+        Uni<Integer> uni1 = Uni.createFrom().item(1);
+        Uni<Long> uni2 = Uni.createFrom().item(2L);
+        Uni<Integer> uni3 = Uni.createFrom().item(3);
+        Uni<Double> uni4 = Uni.createFrom().item(4.0d);
+
+        List<Uni<? extends Number>> list = Arrays.asList(uni1, uni2, uni3, uni4);
+
+        UniAssertSubscriber<List<Number>> subscriber = Uni
+                .combine().all().unis(list)
+                .combinedWith(Number.class, Function.identity())
+                .subscribe().withSubscriber(UniAssertSubscriber.create());
+
+        List<Number> result = subscriber.assertCompleted().getItem();
+        assertThat(result).containsExactly(1, 2L, 3, 4.0d);
     }
 
     @Test
