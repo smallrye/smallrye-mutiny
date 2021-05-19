@@ -43,8 +43,8 @@
                     <li class="nav-item"><a class="nav-link active" href="/smallrye-mutiny/guides">Guides</a></li>
                     <li class="nav-item"><a href="https://github.com/smallrye/smallrye-mutiny" target="_blank" title="Github"><i
                             class="lab la-github la-2x"></i></a></li>
-                    <li class="nav-item"><a href="https://groups.google.com/d/forum/smallrye" target="_blank" title="SmallRye Google Group"><i
-                            class="las la-at la-2x"></i></a></li>
+                    <li class="nav-item"><a href="https://github.com/smallrye/smallrye-mutiny/discussions" target="_blank" title="Discussions on GitHub"><i
+                            class="las la-comments la-2x"></i></a></li>
                     <li class="nav-item"><a href="https://stackoverflow.com/questions/tagged/mutiny" target="_blank"
                                             title="Stack Overflow"><i
                             class="lab la-stack-overflow la-2x"></i></a></li>
@@ -101,7 +101,7 @@ Mutiny does not make any assumption on <em>how</em> logging is defined, and does
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-text hljs" data-lang="text">11:01:48.709 [main] INFO Multi.MultiMapOp.0 - onSubscribe()
+<pre class="highlightjs highlight"><code class="language-text hljs" data-lang="text">11:01:48.709 [main] INFO Multi.MultiMapOp.0 - onSubscription()
 11:01:48.711 [main] INFO Multi.MultiMapOp.0 - request(9223372036854775807)
 11:01:48.711 [main] INFO Multi.MultiMapOp.0 - onItem(10)
 &gt;&gt;&gt; 10
@@ -137,7 +137,7 @@ Events are written by default to the standard console output in a format similar
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-text hljs" data-lang="text">[--&gt; Multi.MultiMapOp.0 | onSubscribe()
+<pre class="highlightjs highlight"><code class="language-text hljs" data-lang="text">[--&gt; Multi.MultiMapOp.0 | onSubscription()
 [--&gt; Multi.MultiMapOp.0 | request(9223372036854775807)
 [--&gt; Multi.MultiMapOp.0 | onItem(10)
 [--&gt; Multi.MultiMapOp.0 | onItem(20)
@@ -233,7 +233,7 @@ Note that this is only useful to do when embedding Mutiny in your own stack, som
                     <a href="https://www.redhat.com/en/about/privacy-policy">Privacy Policy</a>
                 </p>
                 <p>
-                     Site last generated: May 10, 2021
+                     Site last generated: May 19, 2021
                 </p>
             </div>
         </div>
