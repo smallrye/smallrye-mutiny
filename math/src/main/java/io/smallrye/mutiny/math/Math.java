@@ -14,6 +14,9 @@ import io.smallrye.mutiny.tuples.Tuple2;
  */
 public class Math {
 
+    private Math() {
+    }
+
     /**
      * Emits the number of items emitted by the upstream.
      * On each received item, the new count is emitted downstream.

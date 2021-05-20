@@ -51,8 +51,8 @@ public class StatisticOperatorTest {
                         assertThat(s.getStandardDeviation()).isNaN();
                         assertThat(s.getSkewness()).isNaN();
                         assertThat(s.getKurtosis()).isNaN();
-                        assertThat(s.getMin()).isEqualTo(1L);
-                        assertThat(s.getMax()).isEqualTo(1L);
+                        assertThat(s.getMin()).isEqualTo(1);
+                        assertThat(s.getMax()).isEqualTo(1);
                     });
                     assertThat(subscriber.getItems().get(1)).satisfies(s -> {
                         assertThat(s.getCount()).isEqualTo(2);
@@ -61,8 +61,8 @@ public class StatisticOperatorTest {
                         assertThat(s.getStandardDeviation()).isCloseTo(0.707107, Offset.offset(0.001));
                         assertThat(s.getSkewness()).isEqualTo(0.0);
                         assertThat(s.getKurtosis()).isEqualTo(-2);
-                        assertThat(s.getMin()).isEqualTo(1L);
-                        assertThat(s.getMax()).isEqualTo(2L);
+                        assertThat(s.getMin()).isEqualTo(1);
+                        assertThat(s.getMax()).isEqualTo(2);
                     });
                     assertThat(subscriber.getItems().get(2)).satisfies(s -> {
                         assertThat(s.getCount()).isEqualTo(3);
@@ -71,8 +71,8 @@ public class StatisticOperatorTest {
                         assertThat(s.getStandardDeviation()).isEqualTo(1.0);
                         assertThat(s.getSkewness()).isEqualTo(0.0);
                         assertThat(s.getKurtosis()).isEqualTo(-1.5);
-                        assertThat(s.getMin()).isEqualTo(1L);
-                        assertThat(s.getMax()).isEqualTo(3L);
+                        assertThat(s.getMin()).isEqualTo(1);
+                        assertThat(s.getMax()).isEqualTo(3);
                     });
                 })
                 .request(10)
