@@ -1,16 +1,18 @@
 package mutiny.zero;
 
+import static java.util.Objects.requireNonNull;
+
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.function.Function;
 
-import org.reactivestreams.Processor;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
+
+import mutiny.zero.internal.MapOperator;
 
 public interface PublisherHelpers {
 
@@ -58,45 +60,9 @@ public interface PublisherHelpers {
      * @return the mapped publisher.
      */
     static <I, O> Publisher<O> map(Publisher<I> source, Function<I, O> mapper) {
-        return new Processor<I, O>() {
-
-            private Subscription upstream;
-            private Subscriber<? super O> downstream;
-
-            @Override
-            public void onSubscribe(Subscription subscription) {
-                upstream = subscription;
-                downstream.onSubscribe(subscription);
-            }
-
-            @Override
-            public void onNext(I i) {
-                O res;
-                try {
-                    res = Objects.requireNonNull(mapper.apply(i));
-                } catch (Exception e) {
-                    upstream.cancel();
-                    onError(e);
-                    return;
-                }
-                downstream.onNext(res);
-            }
-
-            @Override
-            public void onError(Throwable throwable) {
-                downstream.onError(throwable);
-            }
-
-            @Override
-            public void onComplete() {
-                downstream.onComplete();
-            }
-
-            @Override
-            public void subscribe(Subscriber<? super O> subscriber) {
-                this.downstream = subscriber;
-                source.subscribe(this);
-            }
-        };
+        requireNonNull(source, "The source cannot be null");
+        requireNonNull(mapper, "The mapper cannot be null");
+        return new MapOperator<>(source, mapper);
     }
+
 }

@@ -116,7 +116,8 @@ class AsyncHelpersTest {
 
             CompletableFuture<Integer> future = CompletableFuture.completedFuture(58);
             AsyncHelpers
-                    .composeExceptionally(future, err -> AsyncHelpers.failedFuture(new RuntimeException("!!! " + err.getMessage())))
+                    .composeExceptionally(future,
+                            err -> AsyncHelpers.failedFuture(new RuntimeException("!!! " + err.getMessage())))
                     .whenComplete((n, err) -> {
                         value.set(n);
                         error.set(err);
@@ -134,7 +135,8 @@ class AsyncHelpersTest {
 
             CompletionStage<Object> future = AsyncHelpers.failedFuture(new IOException("boom"));
             AsyncHelpers
-                    .composeExceptionally(future, err -> AsyncHelpers.failedFuture(new RuntimeException("!!! " + err.getMessage())))
+                    .composeExceptionally(future,
+                            err -> AsyncHelpers.failedFuture(new RuntimeException("!!! " + err.getMessage())))
                     .whenComplete((n, err) -> {
                         value.set(n);
                         error.set(err);
