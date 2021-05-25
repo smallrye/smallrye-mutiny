@@ -68,8 +68,7 @@ public class MaxOperatorTest {
         subscriber.awaitItems(3)
                 .assertItems("a", "b", "c")
                 .request(10)
-                .awaitItems(6)
-                .assertItems("a", "b", "c", "e", "q", "x")
-                .awaitFailure();
+                .awaitFailure()
+                .assertItems("a", "b", "c", "e", "q", "x");
     }
 }

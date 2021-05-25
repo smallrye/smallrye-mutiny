@@ -69,9 +69,8 @@ public class CountOperatorTest {
         subscriber.awaitItems(3)
                 .assertItems(1L, 2L, 3L)
                 .request(10)
-                .awaitItems(5)
-                .assertItems(1L, 2L, 3L, 4L, 5L)
-                .awaitFailure();
+                .awaitFailure()
+                .assertItems(1L, 2L, 3L, 4L, 5L);
     }
 
 }
