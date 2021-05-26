@@ -1,6 +1,7 @@
 package io.smallrye.mutiny.math;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Multi;
@@ -58,7 +59,7 @@ public class IndexOperatorTest {
         Assertions.assertEquals(Tuple2.of(4L, "e"), index);
     }
 
-    @Test
+    @RepeatedTest(1000)
     public void testWithItemsAndFailure() {
         AssertSubscriber<Tuple2<Long, String>> subscriber = Multi.createBy().concatenating().streams(
                 Multi.createFrom().items("a", "b", "c", "d", "e"),

@@ -1,6 +1,7 @@
 package io.smallrye.mutiny.math;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Multi;
@@ -84,7 +85,7 @@ public class SumOperatorTest {
                 .assertItems(1.1, 3.1, 6.6, 10.6, 15.6, 21.6);
     }
 
-    @Test
+    @RepeatedTest(1000)
     public void testWithItemsAndFailure() {
         AssertSubscriber<Double> subscriber = Multi.createBy().concatenating().streams(
                 Multi.createFrom().items(1, 2, 3, 4, 5, 6),

@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Multi;
@@ -104,7 +105,7 @@ public class MedianOperatorTest {
                 .assertItems(6.0, 3.5, 2.0, 3.5, 3.0, 2.5);
     }
 
-    @Test
+    @RepeatedTest(1000)
     public void testWithItemsAndFailure() {
         AssertSubscriber<Double> subscriber = Multi.createBy().concatenating().streams(
                 Multi.createFrom().items(6, 1, 2, 5, 3, 1),

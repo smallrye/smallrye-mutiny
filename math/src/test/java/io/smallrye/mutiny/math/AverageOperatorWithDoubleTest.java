@@ -1,6 +1,7 @@
 package io.smallrye.mutiny.math;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Multi;
@@ -56,7 +57,7 @@ public class AverageOperatorWithDoubleTest {
         Assertions.assertEquals(17.0 / 6, average);
     }
 
-    @Test
+    @RepeatedTest(1000)
     public void testWithItemsAndFailure() {
         AssertSubscriber<Double> subscriber = Multi.createBy().concatenating().streams(
                 Multi.createFrom().items(1.0, 2.0, 3.0, 4.0, 2.0),
