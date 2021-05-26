@@ -70,9 +70,8 @@ public class IndexOperatorTest {
         subscriber.awaitItems(3)
                 .assertItems(Tuple2.of(0L, "a"), Tuple2.of(1L, "b"), Tuple2.of(2L, "c"))
                 .request(10)
-                .awaitItems(5)
+                .awaitFailure()
                 .assertItems(Tuple2.of(0L, "a"), Tuple2.of(1L, "b"), Tuple2.of(2L, "c"),
-                        Tuple2.of(3L, "d"), Tuple2.of(4L, "e"))
-                .awaitFailure();
+                        Tuple2.of(3L, "d"), Tuple2.of(4L, "e"));
     }
 }

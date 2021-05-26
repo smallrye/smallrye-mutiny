@@ -89,9 +89,6 @@ public class TopOperatorTest {
         subscriber.awaitItems(3)
                 .assertItems(list("a"), list("b", "a"), list("e", "b", "a"))
                 .request(10)
-                .awaitItems(6)
-                .assertItems(list("a"), list("b", "a"), list("e", "b", "a"), list("f", "e", "b"),
-                        list("g", "f", "e"), list("z", "g", "f"))
                 .awaitFailure();
     }
 

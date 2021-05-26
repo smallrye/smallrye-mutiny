@@ -125,7 +125,7 @@ public class StatisticOperatorTest {
 
         subscriber.awaitItems(3)
                 .request(10)
-                .awaitItems(5)
-                .awaitFailure();
+                .awaitFailure()
+                .run(() -> assertThat(subscriber.getItems()).hasSize(5));
     }
 }

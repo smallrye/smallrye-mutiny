@@ -68,8 +68,8 @@ public class AverageOperatorTest {
         subscriber.awaitItems(3)
                 .assertItems(1.0, 1.5, 2.0)
                 .request(10)
-                .awaitItems(5)
-                .assertItems(1.0, 1.5, 2.0, 10.0 / 4, 12.0 / 5)
-                .awaitFailure();
+                .awaitFailure()
+                .assertItems(1.0, 1.5, 2.0, 10.0 / 4.0, 12.0 / 5.0);
+
     }
 }
