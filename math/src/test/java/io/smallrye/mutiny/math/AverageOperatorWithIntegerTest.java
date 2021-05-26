@@ -69,6 +69,6 @@ public class AverageOperatorWithIntegerTest {
                 .assertItems(1.0, 1.5, 2.0)
                 .request(10)
                 .awaitFailure()
-                .assertItems(1.0, 1.5, 2.0, 10.0 / 4, 12.0 / 5);
+                .assertItems(1.0, 1.5, 2.0, 10.0 / 4.0, 12.0 / 5.0);
     }
 }
