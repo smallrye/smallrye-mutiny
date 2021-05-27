@@ -1,6 +1,7 @@
 package io.smallrye.mutiny.math;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Multi;
@@ -57,7 +58,7 @@ public class CountOperatorTest {
         Assertions.assertEquals(5, count);
     }
 
-    @Test
+    @RepeatedTest(1000)
     public void testWithItemsAndFailure() {
         AssertSubscriber<Long> subscriber = Multi.createBy().concatenating().streams(
                 Multi.createFrom().items("a", "b", "c", "d", "e"),

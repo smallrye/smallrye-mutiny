@@ -1,6 +1,7 @@
 package io.smallrye.mutiny.math;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Multi;
@@ -56,12 +57,11 @@ public class MinOperatorTest {
         Assertions.assertEquals("a", min);
     }
 
-    @Test
+    @RepeatedTest(1000)
     public void testWithItemsAndFailure() {
-        AssertSubscriber<String> subscriber = Multi.createBy().concatenating().streams(
-                Multi.createFrom().items("e", "b", "c", "c", "a", "e", "a", "v", "x"),
-                Multi.createFrom().failure(new Exception("boom")))
-                .runSubscriptionOn(Infrastructure.getDefaultExecutor())
+        AssertSubscriber<String> subscriber = Multi.createFrom().items("e", "b", "c", "c", "a", "e", "a", "v", "x")
+                .emitOn(Infrastructure.getDefaultExecutor())
+                .onCompletion().failWith(new Exception("boom"))
                 .plug(Math.min())
                 .subscribe().withSubscriber(AssertSubscriber.create(3));
 

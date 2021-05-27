@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Multi;
@@ -114,7 +115,7 @@ public class StatisticOperatorTest {
         assertThat(statistics.getKurtosis()).isCloseTo(-1.152, Offset.offset(0.001));
     }
 
-    @Test
+    @RepeatedTest(1000)
     public void testWithItemsAndFailure() {
         AssertSubscriber<Statistic<Long>> subscriber = Multi.createBy().concatenating().streams(
                 Multi.createFrom().items(1L, 2L, 3L, 4L, 2L),

@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Multi;
@@ -77,7 +78,7 @@ public class TopOperatorTest {
                 .assertItems(list("a"), list("b", "a"), list("c", "b", "a"));
     }
 
-    @Test
+    @RepeatedTest(1000)
     public void testWithItemsAndFailure() {
         AssertSubscriber<List<String>> subscriber = Multi.createBy().concatenating().streams(
                 Multi.createFrom().items("a", "b", "a", "e", "f", "b", "g", "g", "e", "z"),

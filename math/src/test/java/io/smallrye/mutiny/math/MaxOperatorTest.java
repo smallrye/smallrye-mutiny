@@ -1,11 +1,14 @@
 package io.smallrye.mutiny.math;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.helpers.test.AssertSubscriber;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class MaxOperatorTest {
 
@@ -56,19 +59,20 @@ public class MaxOperatorTest {
         Assertions.assertEquals("g", max);
     }
 
-    @Test
+    @RepeatedTest(1000)
     public void testWithItemsAndFailure() {
-        AssertSubscriber<String> subscriber = Multi.createBy().concatenating().streams(
-                Multi.createFrom().items("a", "b", "c", "c", "a", "e", "a", "q", "x"),
-                Multi.createFrom().failure(new Exception("boom")))
+        AssertSubscriber<String> subscriber = Multi.createFrom().items("a", "b", "c", "c", "a", "c", "e", "a", "q", "x")
                 .runSubscriptionOn(Infrastructure.getDefaultExecutor())
+                .onCompletion().failWith(new Exception("boom"))
                 .plug(Math.max())
                 .subscribe().withSubscriber(AssertSubscriber.create(3));
 
         subscriber.awaitItems(3)
                 .assertItems("a", "b", "c")
                 .request(10)
-                .awaitFailure()
-                .assertItems("a", "b", "c", "e", "q", "x");
+                .awaitFailure();
+
+        // We can't be completely deterministic as the failure is sent immediately (not following the request and emission)
+        assertThat(subscriber.getItems()).startsWith("a", "b", "c").hasSizeGreaterThanOrEqualTo(5);
     }
 }
