@@ -1,10 +1,9 @@
 package io.smallrye.mutiny.math;
 
-import io.smallrye.mutiny.Multi;
-
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
-import java.util.function.UnaryOperator;
+
+import io.smallrye.mutiny.Multi;
 
 /**
  * Max operator emitting the max of the emitted items from upstream.

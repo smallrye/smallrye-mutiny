@@ -1,5 +1,7 @@
 package io.smallrye.mutiny.math;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
@@ -7,8 +9,6 @@ import org.junit.jupiter.api.Test;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.helpers.test.AssertSubscriber;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 public class MaxOperatorTest {
 
