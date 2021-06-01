@@ -1,8 +1,8 @@
 package io.smallrye.mutiny.math;
 
 import java.util.Comparator;
-import java.util.PriorityQueue;
 import java.util.Queue;
+import java.util.concurrent.PriorityBlockingQueue;
 import java.util.function.Function;
 
 import io.smallrye.mutiny.Multi;
@@ -14,16 +14,11 @@ import io.smallrye.mutiny.Multi;
  * If the stream emits the completion event without having emitting any item before, the completion event is emitted.
  * If the upstream emits a failure, then, the failure is propagated.
  */
-public class MedianOperator<T extends Number & Comparable<T>>
-        implements Function<Multi<T>, Multi<Double>> {
+public class MedianOperator<T extends Number & Comparable<T>> implements Function<Multi<T>, Multi<Double>> {
 
-    private final Queue<T> minHeap;
-    private final Queue<T> maxHeap;
-
-    public MedianOperator() {
-        minHeap = new PriorityQueue<>();
-        maxHeap = new PriorityQueue<>(Comparator.reverseOrder());
-    }
+    // Using the same initial capacity 11 as PriorityQueue
+    private final Queue<T> minHeap = new PriorityBlockingQueue<>(11);
+    private final Queue<T> maxHeap = new PriorityBlockingQueue<>(11, Comparator.reverseOrder());
 
     @Override
     public Multi<Double> apply(Multi<T> multi) {

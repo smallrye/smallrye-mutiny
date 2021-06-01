@@ -1,5 +1,6 @@
 package io.smallrye.mutiny.math;
 
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
 import io.smallrye.mutiny.Multi;
@@ -14,20 +15,28 @@ import io.smallrye.mutiny.Multi;
  *
  * @param <T> type of the incoming items.
  */
-public class MinOperator<T extends Comparable<T>>
-        implements Function<Multi<T>, Multi<T>> {
+public class MinOperator<T extends Comparable<T>> implements Function<Multi<T>, Multi<T>> {
 
-    private T min = null;
+    private final AtomicReference<T> min = new AtomicReference<>();
 
     @Override
     public Multi<T> apply(Multi<T> multi) {
         return multi
                 .onItem().transformToMultiAndConcatenate(item -> {
-                    if (min == null || min.compareTo(item) > 0) {
-                        min = item;
-                        return Multi.createFrom().item(min);
+                    if (min.compareAndSet(null, item)) {
+                        return Multi.createFrom().item(item);
                     }
+
+                    if (item == min.updateAndGet(t -> {
+                        if (t.compareTo(item) > 0) {
+                            return item;
+                        }
+                        return t;
+                    })) {
+                        return Multi.createFrom().item(item);
+                    }
+
                     return Multi.createFrom().empty();
-                });
+                }).skip().repetitions();
     }
 }

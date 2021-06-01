@@ -31,13 +31,13 @@ import java.util.Objects;
  */
 public class Statistic<T> {
 
-    private final long n;
-    private final double m1;
-    private final double m2;
-    private final double m3;
-    private final double m4;
-    private final T min;
-    private final T max;
+    final long n;
+    final double m1;
+    final double m2;
+    final double m3;
+    final double m4;
+    final T min;
+    final T max;
 
     public Statistic(long n, double m1, double m2, double m3, double m4, T min, T max) {
         this.n = n;

@@ -1,5 +1,6 @@
 package io.smallrye.mutiny.math;
 
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
 
 import io.smallrye.mutiny.Multi;
@@ -16,11 +17,11 @@ import io.smallrye.mutiny.tuples.Tuple2;
 public class IndexOperator<T>
         implements Function<Multi<T>, Multi<Tuple2<Long, T>>> {
 
-    private long index = 0L;
+    private final AtomicLong index = new AtomicLong();
 
     @Override
     public Multi<Tuple2<Long, T>> apply(Multi<T> multi) {
         return multi
-                .onItem().transform(x -> Tuple2.of(index++, x));
+                .onItem().transform(x -> Tuple2.of(index.getAndIncrement(), x));
     }
 }
