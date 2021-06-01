@@ -7,6 +7,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+import io.smallrye.common.annotation.Experimental;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.uni.UniAndCombination;
@@ -73,6 +74,7 @@ public class UniAndGroupIterable<T1> {
      * @return the new {@link Uni}
      */
     @SuppressWarnings("unchecked")
+    @Experimental("This is an experimental API")
     public <O, I> Uni<O> combinedWith(Class<I> superType, Function<List<I>, O> function) {
         return combinedWith((Function) function);
     }
