@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.time.Duration;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -556,4 +557,54 @@ public class UniZipTest {
         subscriber.assertItem(45);
     }
 
+    @Test
+    public void nullUniArray() {
+        Uni<?>[] unis = null;
+        assertThatThrownBy(() -> Uni.combine().all().unis(unis))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("The Uni array is null");
+    }
+
+    @Test
+    public void emptyArray() {
+        assertThatThrownBy(() -> Uni.combine().all().unis())
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("The Uni set is empty");
+    }
+
+    @Test
+    public void withNullUniArray() {
+        Uni<?>[] unis = new Uni[] {
+                Uni.createFrom().item(58),
+                null
+        };
+        assertThatThrownBy(() -> Uni.combine().all().unis(unis))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("The Uni at index 1 is null");
+    }
+
+    @Test
+    public void nullUniList() {
+        List<Uni<?>> unis = null;
+        assertThatThrownBy(() -> Uni.combine().all().unis(unis))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("The Uni array is null");
+    }
+
+    @Test
+    public void emptyList() {
+        assertThatThrownBy(() -> Uni.combine().all().unis(Collections.emptyList()))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("The Uni set is empty");
+    }
+
+    @Test
+    public void withNullUniIterable() {
+        List<Uni<Integer>> unis = Arrays.asList(
+                Uni.createFrom().item(58),
+                null);
+        assertThatThrownBy(() -> Uni.combine().all().unis(unis))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("The Uni at index 1 is null");
+    }
 }

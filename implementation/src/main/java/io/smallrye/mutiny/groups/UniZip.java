@@ -277,6 +277,9 @@ public class UniZip {
      * @return an {@link UniAndGroupIterable} to configure the combination
      */
     public <O> UniAndGroupIterable<O> unis(Uni<?>... unis) {
+        if (unis == null) {
+            throw new IllegalArgumentException("The Uni array is null");
+        }
         return unis(Arrays.asList(unis));
     }
 
@@ -295,6 +298,19 @@ public class UniZip {
      * @return an {@link UniAndGroupIterable} to configure the combination
      */
     public <O> UniAndGroupIterable<O> unis(Iterable<? extends Uni<?>> unis) {
+        if (unis == null) {
+            throw new IllegalArgumentException("The Uni array is null");
+        }
+        int i = 0;
+        for (Uni<?> uni : unis) {
+            if (uni == null) {
+                throw new IllegalArgumentException("The Uni at index " + i + " is null");
+            }
+            i++;
+        }
+        if (i == 0) {
+            throw new IllegalArgumentException("The Uni set is empty");
+        }
         return new UniAndGroupIterable<>(unis);
     }
 
