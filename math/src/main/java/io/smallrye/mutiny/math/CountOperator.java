@@ -1,5 +1,6 @@
 package io.smallrye.mutiny.math;
 
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
 
 import io.smallrye.mutiny.Multi;
@@ -13,18 +14,14 @@ import io.smallrye.mutiny.Multi;
  *
  * @param <T> type of the incoming items.
  */
-public class CountOperator<T>
-        implements Function<Multi<T>, Multi<Long>> {
+public class CountOperator<T> implements Function<Multi<T>, Multi<Long>> {
 
-    private long count = 0L;
+    private final AtomicLong count = new AtomicLong();
 
     @Override
     public Multi<Long> apply(Multi<T> multi) {
         return multi
-                .onItem().transform(x -> {
-                    count = count + 1L;
-                    return count;
-                })
+                .onItem().transform(x -> count.incrementAndGet())
                 .onCompletion().ifEmpty().continueWith(0L);
     }
 }

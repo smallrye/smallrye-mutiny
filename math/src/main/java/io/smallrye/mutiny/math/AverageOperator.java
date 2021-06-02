@@ -1,5 +1,6 @@
 package io.smallrye.mutiny.math;
 
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
 import io.smallrye.mutiny.Multi;
@@ -12,19 +13,31 @@ import io.smallrye.mutiny.Multi;
  * completion event.
  * If the upstream emits a failure, then, the failure is propagated.
  */
-public class AverageOperator<T extends Number>
-        implements Function<Multi<T>, Multi<Double>> {
+public class AverageOperator<T extends Number> implements Function<Multi<T>, Multi<Double>> {
 
-    private double sum = 0.0d;
-    private long count = 0L;
+    private final AtomicReference<State> state = new AtomicReference<>();
+
+    private static class State {
+        double sum = 0.0d;
+        long count = 0L;
+
+        State(double sum, long count) {
+            this.sum = sum;
+            this.count = count;
+        }
+    }
 
     @Override
     public Multi<Double> apply(Multi<T> multi) {
         return multi
                 .onItem().transform(x -> {
-                    count = count + 1L;
-                    sum = sum + x.doubleValue();
-                    return sum / count;
+                    State newState = this.state.updateAndGet(s -> {
+                        if (s == null) {
+                            return new State(x.doubleValue(), 1L);
+                        }
+                        return new State(x.doubleValue() + s.sum, s.count + 1L);
+                    });
+                    return newState.sum / (double) newState.count;
                 })
                 .onCompletion().ifEmpty().continueWith(0.0d);
     }

@@ -1,5 +1,6 @@
 package io.smallrye.mutiny.math;
 
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
 import io.smallrye.mutiny.Multi;
@@ -13,18 +14,14 @@ import io.smallrye.mutiny.Multi;
  *
  * @param <T> type of the incoming items, must be a {@link Number}.
  */
-public class SumOperator<T extends Number>
-        implements Function<Multi<T>, Multi<Double>> {
+public class SumOperator<T extends Number> implements Function<Multi<T>, Multi<Double>> {
 
-    private double sum = 0.0d;
+    private final AtomicReference<Double> sum = new AtomicReference<>(0.0d);
 
     @Override
     public Multi<Double> apply(Multi<T> multi) {
         return multi
-                .onItem().transform(x -> {
-                    sum = sum + x.doubleValue();
-                    return sum;
-                })
+                .onItem().transform(x -> sum.updateAndGet(cur -> cur + x.doubleValue()))
                 .onCompletion().ifEmpty().continueWith(0.0d);
     }
 }

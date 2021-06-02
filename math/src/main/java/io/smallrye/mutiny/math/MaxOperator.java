@@ -15,8 +15,7 @@ import io.smallrye.mutiny.Multi;
  *
  * @param <T> type of the incoming items.
  */
-public class MaxOperator<T extends Comparable<T>>
-        implements Function<Multi<T>, Multi<T>> {
+public class MaxOperator<T extends Comparable<T>> implements Function<Multi<T>, Multi<T>> {
 
     private final AtomicReference<T> max = new AtomicReference<>();
 
