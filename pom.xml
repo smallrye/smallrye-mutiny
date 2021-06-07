@@ -88,7 +88,7 @@
         <revapi-maven-plugin.version>0.14.2</revapi-maven-plugin.version>
         <revapi-java.version>0.24.1</revapi-java.version>
         <revapi-reporter-json.version>0.4.1</revapi-reporter-json.version>
-        <revapi-reporter-text.version>0.14.1</revapi-reporter-text.version>
+        <revapi-reporter-text.version>0.14.2</revapi-reporter-text.version>
 
         <revapi.skip>true</revapi.skip>
 
