@@ -101,7 +101,7 @@ dependencies {
 [[vertx]]
 == Using Mutiny with Eclipse Vert.x
 
-API bindings for many popular modules and clients from the https://vertx.io[Vert.x] stack are available from the https://github.com/smallrye/smallrye-reactive-utils[Smallrye Reactive Utilities project].
+API bindings for many popular modules and clients from the https://vertx.io[Vert.x] stack are available from the https://smallrye.io/smallrye-mutiny-vertx-bindings[Smallrye Mutiny Vert.x Bindings project].
 
 Here is how to add a dependency to the Vert.x core library with Mutiny bindings:
 
@@ -113,6 +113,8 @@ Here is how to add a dependency to the Vert.x core library with Mutiny bindings:
   <version>{{ site.data.versions.vertx_mutiny_clients }}</version>
 </dependency>
 ----
+
+See https://smallrye.io/smallrye-mutiny-vertx-bindings[https://smallrye.io/smallrye-mutiny-vertx-bindings] for the complete documentation and instructions.
 
 
 [[download]]
