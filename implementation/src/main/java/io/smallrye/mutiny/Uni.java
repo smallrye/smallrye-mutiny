@@ -691,6 +691,30 @@ public interface Uni<T> {
     }
 
     /**
+     * When this {@link Uni} emits {@code null}, replace with the value provided by the given {@link Supplier}.
+     *
+     * This is a shortcut for {@code uni.onItem().ifNull().continueWith(supplier)}
+     *
+     * @param supplier the supplier
+     * @return the new {@link Uni}
+     */
+    default Uni<T> replaceIfNullWith(Supplier<T> supplier) {
+        return onItem().ifNull().continueWith(supplier);
+    }
+
+    /**
+     * When this {@link Uni} emits {@code null}, replace with the provided value.
+     *
+     * This is a shortcut for {@code uni.onItem().ifNull().continueWith(value)}
+     *
+     * @param value the value
+     * @return the new {@link Uni}
+     */
+    default Uni<T> replaceIfNullWith(T value) {
+        return onItem().ifNull().continueWith(value);
+    }
+
+    /**
      * Log events (onSubscribe, onItem, ...) as they come from the upstream or the subscriber.
      *
      * Events will be logged as long as the {@link Uni} hasn't been cancelled or terminated.

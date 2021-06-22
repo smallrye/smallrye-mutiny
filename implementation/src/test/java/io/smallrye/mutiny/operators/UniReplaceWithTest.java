@@ -62,4 +62,24 @@ class UniReplaceWithTest {
 
         subscriber.assertCompleted().assertItem(null);
     }
+
+    @Test
+    @DisplayName("replaceIfNullWith supplier shortcut")
+    void replaceIfNullWithSupplier() {
+        UniAssertSubscriber<Object> subscriber = Uni.createFrom().nullItem()
+                .replaceIfNullWith(() -> 58)
+                .subscribe().withSubscriber(UniAssertSubscriber.create());
+
+        subscriber.assertCompleted().assertItem(58);
+    }
+
+    @Test
+    @DisplayName("replaceIfNullWith value shortcut")
+    void replaceIfNullWithValue() {
+        UniAssertSubscriber<Object> subscriber = Uni.createFrom().nullItem()
+                .replaceIfNullWith(63)
+                .subscribe().withSubscriber(UniAssertSubscriber.create());
+
+        subscriber.assertCompleted().assertItem(63);
+    }
 }
