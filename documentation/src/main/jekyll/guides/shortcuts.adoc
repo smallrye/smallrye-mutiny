@@ -55,4 +55,13 @@ The following table lists the available shortcuts available by the `Uni` class:
 
 |`uni.eventually(() -> uni2)`
 |`uni.onItemOrFailure().call((ignoredItem, ignoredException) -> uni2)`
+
+|`uni.replaceWith(x)`
+|`uni.onItem().transform(ignored -> x)`
+
+|`uni.replaceWith(uni2)`
+|`uni.onItem().transformToUni(ignored -> uni2)`
+
+|`uni.replaceIfNullWith(x)`
+|`uni.onItem().ifNull().continueWith(x)`
 |===
