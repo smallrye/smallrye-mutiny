@@ -152,6 +152,18 @@ This is useful to execute an asynchronous action without modifying incoming item
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>uni.eventually(() &#8594; uni2)</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>uni.onItemOrFailure().call((ignoredItem, ignoredException) &#8594; uni2)</code></p></td>
 </tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>uni.replaceWith(x)</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>uni.onItem().transform(ignored &#8594; x)</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>uni.replaceWith(uni2)</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>uni.onItem().transformToUni(ignored &#8594; uni2)</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>uni.replaceIfNullWith(x)</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>uni.onItem().ifNull().continueWith(x)</code></p></td>
+</tr>
 </tbody>
 </table>
         </div>
@@ -215,7 +227,7 @@ This is useful to execute an asynchronous action without modifying incoming item
                     <a href="https://www.redhat.com/en/about/privacy-policy">Privacy Policy</a>
                 </p>
                 <p>
-                     Site last generated: Jun 10, 2021
+                     Site last generated: Jun 28, 2021
                 </p>
             </div>
         </div>
