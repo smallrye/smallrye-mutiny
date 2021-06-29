@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
+import io.smallrye.mutiny.groups.UniJoin;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -27,6 +28,20 @@ class UniJoinTest {
             Uni<Integer> c = Uni.createFrom().item(3);
 
             Uni<List<Integer>> uni = Uni.join().all(a, b, c);
+
+            UniAssertSubscriber<List<Integer>> sub = uni.subscribe().withSubscriber(UniAssertSubscriber.create());
+            sub.assertCompleted().assertItem(Arrays.asList(1, 2, 3));
+        }
+
+        @Test
+        void joinBuilder() {
+            Uni<Integer> a = Uni.createFrom().item(1);
+            Uni<Integer> b = Uni.createFrom().item(2);
+            Uni<Integer> c = Uni.createFrom().item(3);
+
+            UniJoin.UniJoinBuilder<Integer> builder = Uni.join().builder();
+            builder.add(a).add(b).add(c);
+            Uni<List<Integer>> uni = builder.joinAll();
 
             UniAssertSubscriber<List<Integer>> sub = uni.subscribe().withSubscriber(UniAssertSubscriber.create());
             sub.assertCompleted().assertItem(Arrays.asList(1, 2, 3));
