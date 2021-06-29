@@ -9,6 +9,7 @@ import java.util.List;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.uni.builders.UniJoinAll;
+import io.smallrye.mutiny.operators.uni.builders.UniJoinFirst;
 
 public class UniJoin {
 
@@ -18,6 +19,21 @@ public class UniJoin {
     }
 
     public final <T> Uni<List<T>> all(List<Uni<? extends T>> unis) {
+        checkNoneNull(unis);
+        return Infrastructure.onUniCreation(new UniJoinAll<>(unis));
+    }
+
+    @SafeVarargs
+    public final <T> Uni<T> first(Uni<? extends T>... unis) {
+        return first(asList(nonNull(unis, "unis")));
+    }
+
+    public final <T> Uni<T> first(List<Uni<? extends T>> unis) {
+        checkNoneNull(unis);
+        return Infrastructure.onUniCreation(new UniJoinFirst<>(unis));
+    }
+
+    private <T> void checkNoneNull(List<Uni<? extends T>> unis) {
         nonNull(unis, "unis");
         int index = 0;
         for (Uni<? extends T> uni : unis) {
@@ -26,7 +42,6 @@ public class UniJoin {
             }
             index++;
         }
-        return Infrastructure.onUniCreation(new UniJoinAll<>(unis));
     }
 
     public <T> UniJoinBuilder<T> builder() {
@@ -44,6 +59,10 @@ public class UniJoin {
 
         public Uni<List<T>> joinAll() {
             return UniJoin.this.all(unis);
+        }
+
+        public Uni<T> joinFirst() {
+            return UniJoin.this.first(unis);
         }
     }
 }
