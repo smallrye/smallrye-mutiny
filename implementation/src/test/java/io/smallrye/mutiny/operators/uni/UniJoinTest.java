@@ -1,22 +1,61 @@
 package io.smallrye.mutiny.operators.uni;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
-
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
-
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.groups.UniJoin;
 import io.smallrye.mutiny.helpers.spies.Spy;
 import io.smallrye.mutiny.helpers.spies.UniOnCancellationSpy;
 import io.smallrye.mutiny.helpers.spies.UniOnItemSpy;
 import io.smallrye.mutiny.helpers.test.UniAssertSubscriber;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class UniJoinTest {
+
+    @Nested
+    class Nulls {
+
+        @Test
+        void allNull() {
+            assertThatThrownBy(() -> Uni.join().all((Uni<?>) null))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessage("The uni at index 0 is null");
+
+            assertThatThrownBy(() -> Uni.join().all((List<Uni<?>>) null))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessage("`unis` must not be `null`");
+        }
+
+        @Test
+        void firstNull() {
+            assertThatThrownBy(() -> Uni.join().first((Uni<?>) null))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessage("The uni at index 0 is null");
+
+            assertThatThrownBy(() -> Uni.join().first((List<Uni<?>>) null))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessage("`unis` must not be `null`");
+        }
+
+        @Test
+        void oneIsNull() {
+            List<Uni<?>> unis = Arrays.asList(Uni.createFrom().item(1), null, Uni.createFrom().item("3"));
+
+            assertThatThrownBy(() -> Uni.join().all(unis))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessage("The uni at index 1 is null");
+
+            assertThatThrownBy(() -> Uni.join().first(unis))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessage("The uni at index 1 is null");
+        }
+    }
 
     @Nested
     class JoinAll {
