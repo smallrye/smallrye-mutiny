@@ -42,7 +42,7 @@ public class UniJoinFirst<T> extends AbstractUni<T> {
                 Uni<? extends T> uni = unis.get(i);
                 uni.onSubscription()
                         .invoke(subscription -> subscriptions.set(index, subscription))
-                        .subscribe().with(item -> this.onItem(index, item), this::onFailure);
+                        .subscribe().with(this::onItem, this::onFailure);
             }
         }
 
@@ -61,7 +61,7 @@ public class UniJoinFirst<T> extends AbstractUni<T> {
             }
         }
 
-        private void onItem(int index, T item) {
+        private void onItem(T item) {
             if (cancelled.compareAndSet(false, true)) {
                 cancelSubscriptions();
                 subscriber.onItem(item);
