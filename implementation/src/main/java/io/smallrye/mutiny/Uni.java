@@ -740,6 +740,6 @@ public interface Uni<T> {
     Uni<T> log();
 
     static UniJoin join() {
-        return new UniJoin();
+        return UniJoin.SHARED_INSTANCE;
     }
 }

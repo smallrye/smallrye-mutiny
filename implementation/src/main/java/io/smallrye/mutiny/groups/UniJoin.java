@@ -13,6 +13,12 @@ import io.smallrye.mutiny.operators.uni.builders.UniJoinFirst;
 
 public class UniJoin {
 
+    public static final UniJoin SHARED_INSTANCE = new UniJoin();
+
+    private UniJoin() {
+        // Do nothing
+    }
+
     @SafeVarargs
     public final <T> Uni<List<T>> all(Uni<? extends T>... unis) {
         return all(asList(nonNull(unis, "unis")));
