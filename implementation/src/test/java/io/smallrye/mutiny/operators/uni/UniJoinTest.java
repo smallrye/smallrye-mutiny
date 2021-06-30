@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
+import io.smallrye.mutiny.CompositeException;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -193,6 +194,51 @@ class UniJoinTest {
 
             UniAssertSubscriber<Integer> sub = uni.subscribe().withSubscriber(UniAssertSubscriber.create());
             sub.assertCompleted().assertItem(1);
+        }
+
+        @Test
+        void joinItemsWithItem() {
+            Uni<Integer> a = Uni.createFrom().failure(new IOException("boom #1"));
+            Uni<Integer> b = Uni.createFrom().failure(new IOException("boom #2"));
+            Uni<Integer> c = Uni.createFrom().item(3);
+
+            Uni<Integer> uni = Uni.join().firstWithItem(a, b, c);
+
+            UniAssertSubscriber<Integer> sub = uni.subscribe().withSubscriber(UniAssertSubscriber.create());
+            sub.assertCompleted().assertItem(3);
+        }
+
+        @Test
+        void joinItemsWithItemBuilder() {
+            Uni<Integer> a = Uni.createFrom().failure(new IOException("boom #1"));
+            Uni<Integer> b = Uni.createFrom().failure(new IOException("boom #2"));
+            Uni<Integer> c = Uni.createFrom().item(3);
+
+            UniJoin.UniJoinBuilder<Integer> builder = Uni.join().builder();
+            builder.add(a).add(b).add(c);
+            Uni<Integer> uni = builder.joinFirstWithItem();
+
+            UniAssertSubscriber<Integer> sub = uni.subscribe().withSubscriber(UniAssertSubscriber.create());
+            sub.assertCompleted().assertItem(3);
+        }
+
+        @Test
+        void joinItemsWithItemAndFailure() {
+            Uni<Integer> a = Uni.createFrom().failure(new IOException("boom #1"));
+            Uni<Integer> b = Uni.createFrom().failure(new IOException("boom #2"));
+            Uni<Integer> c = Uni.createFrom().failure(new IOException("boom #3"));
+
+            Uni<Integer> uni = Uni.join().firstWithItem(a, b, c);
+
+            UniAssertSubscriber<Integer> sub = uni.subscribe().withSubscriber(UniAssertSubscriber.create());
+            sub.assertFailedWith(CompositeException.class);
+            CompositeException failures = (CompositeException) sub.getFailure();
+            assertThat(failures.getCauses())
+                    .hasSize(3)
+                    .allMatch(err -> err instanceof IOException)
+                    .anyMatch(err -> err.getMessage().equals("boom #1"))
+                    .anyMatch(err -> err.getMessage().equals("boom #2"))
+                    .anyMatch(err -> err.getMessage().equals("boom #3"));
         }
 
         @Test

@@ -1,21 +1,31 @@
 package io.smallrye.mutiny.operators.uni.builders;
 
-import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReferenceArray;
-
+import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.AbstractUni;
 import io.smallrye.mutiny.subscription.UniSubscriber;
 import io.smallrye.mutiny.subscription.UniSubscription;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReferenceArray;
+
 public class UniJoinFirst<T> extends AbstractUni<T> {
 
-    private final List<Uni<? extends T>> unis;
+    public enum Mode {
+        FIRST_TO_EMIT,
+        FIRST_WITH_ITEM
+    }
 
-    public UniJoinFirst(List<Uni<? extends T>> unis) {
+    private final List<Uni<? extends T>> unis;
+    private final Mode mode;
+
+    public UniJoinFirst(List<Uni<? extends T>> unis, Mode mode) {
         this.unis = unis;
+        this.mode = mode;
     }
 
     @Override
@@ -68,12 +78,25 @@ public class UniJoinFirst<T> extends AbstractUni<T> {
             }
         }
 
+        private final List<Throwable> failures = Collections.synchronizedList(new ArrayList<>());
+
         private void onFailure(Throwable failure) {
-            if (cancelled.compareAndSet(false, true)) {
-                cancelSubscriptions();
-                subscriber.onFailure(failure);
-            } else {
-                Infrastructure.handleDroppedException(failure);
+            switch (mode) {
+                case FIRST_TO_EMIT:
+                    if (cancelled.compareAndSet(false, true)) {
+                        cancelSubscriptions();
+                        subscriber.onFailure(failure);
+                    } else {
+                        Infrastructure.handleDroppedException(failure);
+                    }
+                    break;
+                case FIRST_WITH_ITEM:
+                    failures.add(failure);
+                    if (failures.size() == unis.size()) {
+                        cancelled.set(true);
+                        subscriber.onFailure(new CompositeException(failures));
+                    }
+                    break;
             }
         }
     }

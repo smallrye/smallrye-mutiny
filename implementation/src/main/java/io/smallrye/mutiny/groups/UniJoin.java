@@ -36,7 +36,17 @@ public class UniJoin {
 
     public final <T> Uni<T> first(List<Uni<? extends T>> unis) {
         checkNoneNull(unis);
-        return Infrastructure.onUniCreation(new UniJoinFirst<>(unis));
+        return Infrastructure.onUniCreation(new UniJoinFirst<>(unis, UniJoinFirst.Mode.FIRST_TO_EMIT));
+    }
+
+    @SafeVarargs
+    public final <T> Uni<T> firstWithItem(Uni<? extends T>... unis) {
+        return firstWithItem(asList(nonNull(unis, "unis")));
+    }
+
+    public final <T> Uni<T> firstWithItem(List<Uni<? extends T>> unis) {
+        checkNoneNull(unis);
+        return Infrastructure.onUniCreation(new UniJoinFirst<>(unis, UniJoinFirst.Mode.FIRST_WITH_ITEM));
     }
 
     private <T> void checkNoneNull(List<Uni<? extends T>> unis) {
@@ -69,6 +79,10 @@ public class UniJoin {
 
         public Uni<T> joinFirst() {
             return UniJoin.this.first(unis);
+        }
+
+        public Uni<T> joinFirstWithItem() {
+            return UniJoin.this.firstWithItem(unis);
         }
     }
 }
