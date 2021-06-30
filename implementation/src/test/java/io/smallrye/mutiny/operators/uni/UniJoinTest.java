@@ -226,6 +226,22 @@ class UniJoinTest {
         }
 
         @Test
+        void joinFailure() {
+            Uni<Integer> a = Uni.createFrom().emitter(emitter -> {
+                // Do nothing
+            });
+            Uni<Integer> b = Uni.createFrom().failure(new IOException("boom"));
+            Uni<Integer> c = Uni.createFrom().emitter(emitter -> {
+                // Do nothing
+            });
+
+            Uni<Integer> uni = Uni.join().first(a, b, c);
+
+            UniAssertSubscriber<Integer> sub = uni.subscribe().withSubscriber(UniAssertSubscriber.create());
+            sub.assertFailedWith(IOException.class, "boom");
+        }
+
+        @Test
         void earlyCancellation() {
             Uni<Integer> a = Uni.createFrom().item(1);
             Uni<Integer> b = Uni.createFrom().item(2);
