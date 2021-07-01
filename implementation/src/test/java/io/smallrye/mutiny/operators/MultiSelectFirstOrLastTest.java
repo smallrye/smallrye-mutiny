@@ -21,11 +21,12 @@ import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.TestException;
+import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.helpers.test.AssertSubscriber;
 import io.smallrye.mutiny.subscription.MultiEmitter;
 import io.smallrye.mutiny.subscription.MultiSubscriber;
 
-public class MultiSelectFirstOrLast {
+public class MultiSelectFirstOrLastTest {
 
     private AtomicInteger counter;
 
@@ -518,6 +519,25 @@ public class MultiSelectFirstOrLast {
                 .request(1)
                 .assertCompleted()
                 .assertItems(1, 2);
+    }
+
+    /**
+     * Reproducer for https://github.com/smallrye/smallrye-mutiny/issues/605.
+     */
+    @Test
+    public void testThatCompletionEventCanBeSentAfterCancellation() {
+        Uni<Object> stepOne = Multi.createFrom().items(new Object())
+                .select()
+                .first()
+                .toUni();
+
+        Uni<String> stringUni = stepOne
+                .toMulti()
+                .filter(o -> !(o instanceof Uni))
+                .map(Object::toString)
+                .toUni();
+
+        assertThat(stringUni.await().indefinitely()).isNotNull();
     }
 
 }

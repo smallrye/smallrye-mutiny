@@ -64,11 +64,13 @@ public final class MultiSelectFirstOp<T> extends AbstractMultiOperator<T, T> {
                 return;
             }
 
+            MultiSubscriber<? super T> actual = downstream;
+
             long r = remaining;
 
             if (r == 0) {
                 upstream.getAndSet(Subscriptions.CANCELLED).cancel();
-                downstream.onCompletion();
+                actual.onCompletion();
                 return;
             }
 
@@ -76,7 +78,7 @@ public final class MultiSelectFirstOp<T> extends AbstractMultiOperator<T, T> {
             downstream.onItem(t);
             if (r == 0L) {
                 upstream.getAndSet(Subscriptions.CANCELLED).cancel();
-                downstream.onCompletion();
+                actual.onCompletion();
             }
         }
 
