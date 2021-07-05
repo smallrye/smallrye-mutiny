@@ -17,7 +17,6 @@
     <name>SmallRye Mutiny :: BOM</name>
     <description>Bill of materials that list all the Mutiny modules.</description>
 
-
     <dependencyManagement>
         <dependencies>
             <dependency>

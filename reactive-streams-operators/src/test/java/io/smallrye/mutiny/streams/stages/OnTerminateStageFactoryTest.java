@@ -13,7 +13,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.eclipse.microprofile.reactive.streams.operators.ReactiveStreams;
-import org.junit.After;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Multi;
@@ -29,7 +29,7 @@ public class OnTerminateStageFactoryTest extends StageTestBase {
 
     private ExecutorService executor = Executors.newFixedThreadPool(4);
 
-    @After
+    @AfterEach
     public void shutdown() {
         executor.shutdown();
     }

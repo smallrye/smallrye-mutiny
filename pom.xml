@@ -5,8 +5,8 @@
 
     <parent>
         <groupId>io.smallrye</groupId>
-        <artifactId>smallrye-parent</artifactId>
-        <version>28</version>
+        <artifactId>smallrye-build-parent</artifactId>
+        <version>29-SNAPSHOT</version>
     </parent>
 
     <groupId>io.smallrye.reactive</groupId>
@@ -84,6 +84,10 @@
         <smallrye-common-annotation.version>1.6.0</smallrye-common-annotation.version>
 
         <junit.version>5.7.2</junit.version>
+        <assertj-core.version>3.20.2</assertj-core.version>
+        <junit4.version>4.13.2</junit4.version>
+        <awaitility.version>4.1.0</awaitility.version>
+        <testng.version>6.14.3</testng.version>
 
         <revapi-maven-plugin.version>0.14.3</revapi-maven-plugin.version>
         <revapi-java.version>0.24.3</revapi-java.version>
@@ -167,27 +171,44 @@
                 <version>${junit.version}</version>
                 <scope>test</scope>
             </dependency>
+            <dependency>
+                <groupId>org.junit.jupiter</groupId>
+                <artifactId>junit-jupiter-api</artifactId>
+                <version>${junit.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.junit.jupiter</groupId>
+                <artifactId>junit-jupiter-engine</artifactId>
+                <version>${junit.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.assertj</groupId>
+                <artifactId>assertj-core</artifactId>
+                <version>${assertj-core.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>junit</groupId>
+                <artifactId>junit</artifactId>
+                <version>${junit4.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.awaitility</groupId>
+                <artifactId>awaitility</artifactId>
+                <version>${awaitility.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.testng</groupId>
+                <artifactId>testng</artifactId>
+                <version>${testng.version}</version>
+                <scope>test</scope>
+            </dependency>
         </dependencies>
     </dependencyManagement>
-
-    <dependencies>
-        <!-- testing -->
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.assertj</groupId>
-            <artifactId>assertj-core</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.awaitility</groupId>
-            <artifactId>awaitility</artifactId>
-            <scope>test</scope>
-        </dependency>
-    </dependencies>
 
     <repositories>
         <repository>
