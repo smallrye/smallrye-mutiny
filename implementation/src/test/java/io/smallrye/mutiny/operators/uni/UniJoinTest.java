@@ -26,7 +26,7 @@ class UniJoinTest {
         void allNull() {
             assertThatThrownBy(() -> Uni.join().all((Uni<?>) null))
                     .isInstanceOf(IllegalArgumentException.class)
-                    .hasMessage("The uni at index 0 is null");
+                    .hasMessage("`unis` contains a `null` value");
 
             assertThatThrownBy(() -> Uni.join().all((List<Uni<?>>) null))
                     .isInstanceOf(IllegalArgumentException.class)
@@ -37,7 +37,7 @@ class UniJoinTest {
         void firstNull() {
             assertThatThrownBy(() -> Uni.join().first((Uni<?>) null))
                     .isInstanceOf(IllegalArgumentException.class)
-                    .hasMessage("The uni at index 0 is null");
+                    .hasMessage("`unis` contains a `null` value");
 
             assertThatThrownBy(() -> Uni.join().first((List<Uni<?>>) null))
                     .isInstanceOf(IllegalArgumentException.class)
@@ -50,11 +50,11 @@ class UniJoinTest {
 
             assertThatThrownBy(() -> Uni.join().all(unis))
                     .isInstanceOf(IllegalArgumentException.class)
-                    .hasMessage("The uni at index 1 is null");
+                    .hasMessage("`unis` contains a `null` value");
 
             assertThatThrownBy(() -> Uni.join().first(unis))
                     .isInstanceOf(IllegalArgumentException.class)
-                    .hasMessage("The uni at index 1 is null");
+                    .hasMessage("`unis` contains a `null` value");
         }
     }
 

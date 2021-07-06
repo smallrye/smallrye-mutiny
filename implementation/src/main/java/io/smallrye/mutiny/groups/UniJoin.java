@@ -1,5 +1,6 @@
 package io.smallrye.mutiny.groups;
 
+import static io.smallrye.mutiny.helpers.ParameterValidation.doesNotContainNull;
 import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
 import static java.util.Arrays.asList;
 
@@ -25,8 +26,7 @@ public class UniJoin {
     }
 
     public final <T> UniJoinAllStrategy<T> all(List<Uni<? extends T>> unis) {
-        checkNoneNull(unis);
-        return new UniJoinAllStrategy<>(unis);
+        return new UniJoinAllStrategy<>(doesNotContainNull(unis, "unis"));
     }
 
     public static class UniJoinAllStrategy<T> {
@@ -52,8 +52,7 @@ public class UniJoin {
     }
 
     public final <T> UniJoinFirstStrategy<T> first(List<Uni<? extends T>> unis) {
-        checkNoneNull(unis);
-        return new UniJoinFirstStrategy<>(unis);
+        return new UniJoinFirstStrategy<>(doesNotContainNull(unis, "unis"));
     }
 
     public static class UniJoinFirstStrategy<T> {
@@ -92,17 +91,6 @@ public class UniJoin {
 
         public UniJoinFirstStrategy<T> joinFirst() {
             return UniJoin.this.first(unis);
-        }
-    }
-
-    private <T> void checkNoneNull(List<Uni<? extends T>> unis) {
-        nonNull(unis, "unis");
-        int index = 0;
-        for (Uni<? extends T> uni : unis) {
-            if (uni == null) {
-                throw new IllegalArgumentException("The uni at index " + index + " is null");
-            }
-            index++;
         }
     }
 }
