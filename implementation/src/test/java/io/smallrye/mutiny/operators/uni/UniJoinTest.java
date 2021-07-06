@@ -252,7 +252,7 @@ class UniJoinTest {
             Uni<Integer> b = Uni.createFrom().item(2);
             Uni<Integer> c = Uni.createFrom().item(3);
 
-            Uni<Integer> uni = Uni.join().first(a, b, c).toEmit();
+            Uni<Integer> uni = Uni.join().first(a, b, c).toTerminate();
 
             UniAssertSubscriber<Integer> sub = uni.subscribe().withSubscriber(UniAssertSubscriber.create());
             sub.assertCompleted().assertItem(1);
@@ -311,7 +311,7 @@ class UniJoinTest {
 
             UniJoin.UniJoinBuilder<Integer> builder = Uni.join().builder();
             builder.add(a).add(b).add(c);
-            Uni<Integer> uni = builder.joinFirst().toEmit();
+            Uni<Integer> uni = builder.joinFirst().toTerminate();
 
             UniAssertSubscriber<Integer> sub = uni.subscribe().withSubscriber(UniAssertSubscriber.create());
             sub.assertCompleted().assertItem(1);
@@ -327,7 +327,7 @@ class UniJoinTest {
                 // Do nothing
             });
 
-            Uni<Integer> uni = Uni.join().first(a, b, c).toEmit();
+            Uni<Integer> uni = Uni.join().first(a, b, c).toTerminate();
 
             UniAssertSubscriber<Integer> sub = uni.subscribe().withSubscriber(UniAssertSubscriber.create());
             sub.assertCompleted().assertItem(2);
@@ -343,7 +343,7 @@ class UniJoinTest {
                 // Do nothing
             });
 
-            Uni<Integer> uni = Uni.join().first(a, b, c).toEmit();
+            Uni<Integer> uni = Uni.join().first(a, b, c).toTerminate();
 
             UniAssertSubscriber<Integer> sub = uni.subscribe().withSubscriber(UniAssertSubscriber.create());
             sub.assertFailedWith(IOException.class, "boom");
@@ -355,7 +355,7 @@ class UniJoinTest {
             Uni<Integer> b = Uni.createFrom().item(2);
             Uni<Integer> c = Uni.createFrom().item(3);
 
-            Uni<Integer> uni = Uni.join().first(a, b, c).toEmit();
+            Uni<Integer> uni = Uni.join().first(a, b, c).toTerminate();
             UniOnItemSpy<Integer> spy = Spy.onItem(uni);
 
             UniAssertSubscriber<Integer> sub = new UniAssertSubscriber<>(true);
@@ -381,7 +381,7 @@ class UniJoinTest {
             UniOnCancellationSpy<Integer> sb = Spy.onCancellation(b);
             UniOnCancellationSpy<Integer> sc = Spy.onCancellation(c);
 
-            Uni<Integer> uni = Uni.join().first(sa, sb, sc).toEmit();
+            Uni<Integer> uni = Uni.join().first(sa, sb, sc).toTerminate();
 
             UniAssertSubscriber<Integer> sub = uni.subscribe().withSubscriber(UniAssertSubscriber.create());
             sub.assertNotTerminated();

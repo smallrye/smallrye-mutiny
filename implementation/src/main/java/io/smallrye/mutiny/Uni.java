@@ -739,6 +739,21 @@ public interface Uni<T> {
      */
     Uni<T> log();
 
+    /**
+     * Join the results from multiple {@link Uni} (e.g., collect all values, pick the first to respond, etc).
+     * <p>
+     * Here is an example where several {@link Uni} are joined, and result in a {@code Uni<List<Number>>}:
+     * 
+     * <pre>
+     * Uni<Number> a = Uni.createFrom().item(1);
+     * Uni<Number> b = Uni.createFrom().item(2L);
+     * Uni<Number> c = Uni.createFrom().item(3);
+     *
+     * Uni<List<Number>> uni = Uni.join().all(a, b, c).andCollectFailures();
+     * </pre>
+     *
+     * @return the object to configure the join behavior.
+     */
     static UniJoin join() {
         return UniJoin.SHARED_INSTANCE;
     }
