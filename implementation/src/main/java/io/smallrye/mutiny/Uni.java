@@ -745,11 +745,11 @@ public interface Uni<T> {
      * Here is an example where several {@link Uni} are joined, and result in a {@code Uni<List<Number>>}:
      * 
      * <pre>
-     * Uni<Number> a = Uni.createFrom().item(1);
-     * Uni<Number> b = Uni.createFrom().item(2L);
-     * Uni<Number> c = Uni.createFrom().item(3);
+     * Uni&lt;Number&gt; a = Uni.createFrom().item(1);
+     * Uni&lt;Number&gt; b = Uni.createFrom().item(2L);
+     * Uni&lt;Number&gt; c = Uni.createFrom().item(3);
      *
-     * Uni<List<Number>> uni = Uni.join().all(a, b, c).andCollectFailures();
+     * Uni&lt;List&lt;Number&gt;&gt; uni = Uni.join().all(a, b, c).andCollectFailures();
      * </pre>
      *
      * @return the object to configure the join behavior.
