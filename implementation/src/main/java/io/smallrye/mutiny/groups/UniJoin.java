@@ -20,13 +20,30 @@ public class UniJoin {
     }
 
     @SafeVarargs
-    public final <T> Uni<List<T>> all(Uni<? extends T>... unis) {
+    public final <T> UniJoinAllStrategy<T> all(Uni<? extends T>... unis) {
         return all(asList(nonNull(unis, "unis")));
     }
 
-    public final <T> Uni<List<T>> all(List<Uni<? extends T>> unis) {
+    public final <T> UniJoinAllStrategy<T> all(List<Uni<? extends T>> unis) {
         checkNoneNull(unis);
-        return Infrastructure.onUniCreation(new UniJoinAll<>(unis));
+        return new UniJoinAllStrategy<>(unis);
+    }
+
+    public static class UniJoinAllStrategy<T> {
+
+        private final List<Uni<? extends T>> unis;
+
+        private UniJoinAllStrategy(List<Uni<? extends T>> unis) {
+            this.unis = unis;
+        }
+
+        public Uni<List<T>> andCollectFailures() {
+            return Infrastructure.onUniCreation(new UniJoinAll<>(unis, UniJoinAll.Mode.COLLECT_FAILURES));
+        }
+
+        public Uni<List<T>> andFailFast() {
+            return Infrastructure.onUniCreation(new UniJoinAll<>(unis, UniJoinAll.Mode.FAIL_FAST));
+        }
     }
 
     @SafeVarargs
@@ -49,17 +66,6 @@ public class UniJoin {
         return Infrastructure.onUniCreation(new UniJoinFirst<>(unis, UniJoinFirst.Mode.FIRST_WITH_ITEM));
     }
 
-    private <T> void checkNoneNull(List<Uni<? extends T>> unis) {
-        nonNull(unis, "unis");
-        int index = 0;
-        for (Uni<? extends T> uni : unis) {
-            if (uni == null) {
-                throw new IllegalArgumentException("The uni at index " + index + " is null");
-            }
-            index++;
-        }
-    }
-
     public <T> UniJoinBuilder<T> builder() {
         return new UniJoinBuilder<>();
     }
@@ -73,7 +79,7 @@ public class UniJoin {
             return this;
         }
 
-        public Uni<List<T>> joinAll() {
+        public UniJoinAllStrategy<T> joinAll() {
             return UniJoin.this.all(unis);
         }
 
@@ -83,6 +89,17 @@ public class UniJoin {
 
         public Uni<T> joinFirstWithItem() {
             return UniJoin.this.firstWithItem(unis);
+        }
+    }
+
+    private <T> void checkNoneNull(List<Uni<? extends T>> unis) {
+        nonNull(unis, "unis");
+        int index = 0;
+        for (Uni<? extends T> uni : unis) {
+            if (uni == null) {
+                throw new IllegalArgumentException("The uni at index " + index + " is null");
+            }
+            index++;
         }
     }
 }

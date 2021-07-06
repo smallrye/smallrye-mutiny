@@ -91,10 +91,14 @@ public class UniJoinFirst<T> extends AbstractUni<T> {
                     }
                     break;
                 case FIRST_WITH_ITEM:
-                    failures.add(failure);
-                    if (failures.size() == unis.size()) {
-                        cancelled.set(true);
-                        subscriber.onFailure(new CompositeException(failures));
+                    if (!cancelled.get()) {
+                        failures.add(failure);
+                        if (failures.size() == unis.size()) {
+                            cancelled.set(true);
+                            subscriber.onFailure(new CompositeException(failures));
+                        }
+                    } else {
+                        Infrastructure.handleDroppedException(failure);
                     }
                     break;
             }

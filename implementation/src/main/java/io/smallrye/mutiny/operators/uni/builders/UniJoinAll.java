@@ -1,11 +1,13 @@
 package io.smallrye.mutiny.operators.uni.builders;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReferenceArray;
 
+import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.AbstractUni;
@@ -14,10 +16,17 @@ import io.smallrye.mutiny.subscription.UniSubscription;
 
 public class UniJoinAll<T> extends AbstractUni<List<T>> {
 
-    private final List<Uni<? extends T>> unis;
+    public enum Mode {
+        COLLECT_FAILURES,
+        FAIL_FAST
+    }
 
-    public UniJoinAll(List<Uni<? extends T>> unis) {
+    private final List<Uni<? extends T>> unis;
+    private final Mode mode;
+
+    public UniJoinAll(List<Uni<? extends T>> unis, Mode mode) {
         this.unis = unis;
+        this.mode = mode;
     }
 
     @Override
@@ -35,7 +44,8 @@ public class UniJoinAll<T> extends AbstractUni<List<T>> {
         private final AtomicBoolean cancelled = new AtomicBoolean();
 
         private final AtomicReferenceArray<T> items = new AtomicReferenceArray<>(unis.size());
-        private final AtomicInteger itemsCount = new AtomicInteger();
+        private final List<Throwable> failures = Collections.synchronizedList(new ArrayList<>());
+        private final AtomicInteger signalsCount = new AtomicInteger();
 
         public UniJoinAllSubscription(UniSubscriber<? super List<T>> subscriber) {
             this.subscriber = subscriber;
@@ -69,23 +79,43 @@ public class UniJoinAll<T> extends AbstractUni<List<T>> {
         private void onItem(int index, T item) {
             if (!cancelled.get()) {
                 items.set(index, item);
-                if (itemsCount.incrementAndGet() == unis.size()) {
-                    cancelled.set(true);
+                forwardSignalWhenComplete();
+            }
+        }
+
+        private void forwardSignalWhenComplete() {
+            if (signalsCount.incrementAndGet() == unis.size()) {
+                cancelled.set(true);
+                if (failures.isEmpty()) {
                     ArrayList<T> result = new ArrayList<>(unis.size());
                     for (int i = 0; i < unis.size(); i++) {
                         result.add(items.get(i));
                     }
                     subscriber.onItem(result);
+                } else {
+                    subscriber.onFailure(new CompositeException(failures));
                 }
             }
         }
 
         private void onFailure(Throwable failure) {
-            if (cancelled.compareAndSet(false, true)) {
-                cancelSubscriptions();
-                subscriber.onFailure(failure);
-            } else {
-                Infrastructure.handleDroppedException(failure);
+            switch (mode) {
+                case COLLECT_FAILURES:
+                    if (!cancelled.get()) {
+                        failures.add(failure);
+                        forwardSignalWhenComplete();
+                    } else {
+                        Infrastructure.handleDroppedException(failure);
+                    }
+                    break;
+                case FAIL_FAST:
+                    if (cancelled.compareAndSet(false, true)) {
+                        cancelSubscriptions();
+                        subscriber.onFailure(failure);
+                    } else {
+                        Infrastructure.handleDroppedException(failure);
+                    }
+                    break;
             }
         }
     }
