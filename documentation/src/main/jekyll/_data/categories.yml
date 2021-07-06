@@ -12,6 +12,7 @@
 
 - name: Operators
   guides:
+    - joining-unis
     - merge-concat
     - collecting-items
     - combining-items

@@ -154,8 +154,8 @@ public class UniJoin {
      * @param <T> the type of the {@link Uni} values
      * @return a new builder
      */
-    public <T> UniJoinBuilder<T> builder() {
-        return new UniJoinBuilder<>();
+    public <T> Builder<T> builder() {
+        return new Builder<>();
     }
 
     /**
@@ -163,7 +163,7 @@ public class UniJoin {
      *
      * @param <T> the type of the {@link Uni} values
      */
-    public class UniJoinBuilder<T> {
+    public class Builder<T> {
 
         private final List<Uni<? extends T>> unis = new ArrayList<>();
 
@@ -173,7 +173,7 @@ public class UniJoin {
          * @param uni a {@link Uni}
          * @return this builder instance
          */
-        public UniJoinBuilder<T> add(Uni<? extends T> uni) {
+        public Builder<T> add(Uni<? extends T> uni) {
             unis.add(uni);
             return this;
         }

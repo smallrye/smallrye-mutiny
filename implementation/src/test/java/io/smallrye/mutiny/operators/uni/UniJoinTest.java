@@ -91,7 +91,7 @@ class UniJoinTest {
             Uni<Integer> b = Uni.createFrom().item(2);
             Uni<Integer> c = Uni.createFrom().item(3);
 
-            UniJoin.UniJoinBuilder<Integer> builder = Uni.join().builder();
+            UniJoin.Builder<Integer> builder = Uni.join().builder();
             builder.add(a).add(b).add(c);
             Uni<List<Integer>> uni = builder.joinAll().andCollectFailures();
 
@@ -105,7 +105,7 @@ class UniJoinTest {
             Uni<Integer> b = Uni.createFrom().item(2);
             Uni<Integer> c = Uni.createFrom().item(3);
 
-            UniJoin.UniJoinBuilder<Integer> builder = Uni.join().builder();
+            UniJoin.Builder<Integer> builder = Uni.join().builder();
             builder.add(a).add(b).add(c);
             Uni<List<Integer>> uni = builder.joinAll().andFailFast();
 
@@ -276,7 +276,7 @@ class UniJoinTest {
             Uni<Integer> b = Uni.createFrom().failure(new IOException("boom #2"));
             Uni<Integer> c = Uni.createFrom().item(3);
 
-            UniJoin.UniJoinBuilder<Integer> builder = Uni.join().builder();
+            UniJoin.Builder<Integer> builder = Uni.join().builder();
             builder.add(a).add(b).add(c);
             Uni<Integer> uni = builder.joinFirst().withItem();
 
@@ -309,7 +309,7 @@ class UniJoinTest {
             Uni<Integer> b = Uni.createFrom().item(2);
             Uni<Integer> c = Uni.createFrom().item(3);
 
-            UniJoin.UniJoinBuilder<Integer> builder = Uni.join().builder();
+            UniJoin.Builder<Integer> builder = Uni.join().builder();
             builder.add(a).add(b).add(c);
             Uni<Integer> uni = builder.joinFirst().toTerminate();
 

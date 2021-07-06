@@ -231,6 +231,16 @@ combining-items:
     - beginner
   related:
     - guide: merge-concat
+    - guide: joining-unis
+
+joining-unis:
+  title: Joining several unis
+  text: Learn how to join several unis, collect results or pick the first one.
+  labels:
+    - beginner
+  related:
+    - guide: combining-items
+    - guide: merge-concat
 
 converters:
   title: Using other reactive programming libraries
