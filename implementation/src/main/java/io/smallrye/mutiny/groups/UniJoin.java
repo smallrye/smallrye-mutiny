@@ -47,23 +47,30 @@ public class UniJoin {
     }
 
     @SafeVarargs
-    public final <T> Uni<T> first(Uni<? extends T>... unis) {
+    public final <T> UniJoinFirstStrategy<T> first(Uni<? extends T>... unis) {
         return first(asList(nonNull(unis, "unis")));
     }
 
-    public final <T> Uni<T> first(List<Uni<? extends T>> unis) {
+    public final <T> UniJoinFirstStrategy<T> first(List<Uni<? extends T>> unis) {
         checkNoneNull(unis);
-        return Infrastructure.onUniCreation(new UniJoinFirst<>(unis, UniJoinFirst.Mode.FIRST_TO_EMIT));
+        return new UniJoinFirstStrategy<>(unis);
     }
 
-    @SafeVarargs
-    public final <T> Uni<T> firstWithItem(Uni<? extends T>... unis) {
-        return firstWithItem(asList(nonNull(unis, "unis")));
-    }
+    public static class UniJoinFirstStrategy<T> {
 
-    public final <T> Uni<T> firstWithItem(List<Uni<? extends T>> unis) {
-        checkNoneNull(unis);
-        return Infrastructure.onUniCreation(new UniJoinFirst<>(unis, UniJoinFirst.Mode.FIRST_WITH_ITEM));
+        private final List<Uni<? extends T>> unis;
+
+        private UniJoinFirstStrategy(List<Uni<? extends T>> unis) {
+            this.unis = unis;
+        }
+
+        public Uni<T> toEmit() {
+            return Infrastructure.onUniCreation(new UniJoinFirst<>(unis, UniJoinFirst.Mode.FIRST_TO_EMIT));
+        }
+
+        public Uni<T> withItem() {
+            return Infrastructure.onUniCreation(new UniJoinFirst<>(unis, UniJoinFirst.Mode.FIRST_WITH_ITEM));
+        }
     }
 
     public <T> UniJoinBuilder<T> builder() {
@@ -83,12 +90,8 @@ public class UniJoin {
             return UniJoin.this.all(unis);
         }
 
-        public Uni<T> joinFirst() {
+        public UniJoinFirstStrategy<T> joinFirst() {
             return UniJoin.this.first(unis);
-        }
-
-        public Uni<T> joinFirstWithItem() {
-            return UniJoin.this.firstWithItem(unis);
         }
     }
 
