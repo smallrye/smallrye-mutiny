@@ -7,6 +7,7 @@ import static java.util.Arrays.asList;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.smallrye.common.annotation.Experimental;
 import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
@@ -16,6 +17,7 @@ import io.smallrye.mutiny.operators.uni.builders.UniJoinFirst;
 /**
  * Join multiple {@link Uni}.
  */
+@Experimental("New API based on observations that Uni.combine() is often used with homogeneous types, and combination often just a mapping to a collection.")
 public class UniJoin {
 
     public static final UniJoin SHARED_INSTANCE = new UniJoin();

@@ -754,6 +754,7 @@ public interface Uni<T> {
      *
      * @return the object to configure the join behavior.
      */
+    @Experimental("New API based on observations that Uni.combine() is often used with homogeneous types, and combination often just a mapping to a collection.")
     static UniJoin join() {
         return UniJoin.SHARED_INSTANCE;
     }
