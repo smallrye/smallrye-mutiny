@@ -307,7 +307,7 @@ public interface Uni<T> {
 
     /**
      * Configure memoization of the {@link Uni} item or failure.
-     * 
+     *
      * @return the object to configure memoization
      * @apiNote This is an experimental API
      */
@@ -432,7 +432,7 @@ public interface Uni<T> {
     /**
      * Once the observed {@code Uni} emits an item, execute the given {@code mapper}. This mapper produces another
      * {@code Uni}. The downstream receives the events emitted by this produced {@code Uni}.
-     *
+     * <p>
      * This operation allows <em>chaining</em> asynchronous operations: when the upstream completes with an item, run
      * the mapper and emits the item (or failure) sent by the produced {@code Uni}:
      *
@@ -442,7 +442,7 @@ public interface Uni<T> {
      *         .chain(session -&gt; session.flush())
      *         .map(x -&gt; Response.ok(fruit).status(201).build());
      * </pre>
-     *
+     * <p>
      * The mapper is called with the item event of the current {@link Uni} and produces an {@link Uni}, possibly
      * using another type of item ({@code O}). The events fired by produced {@link Uni} are forwarded to the
      * {@link Uni} returned by this method.
@@ -465,7 +465,7 @@ public interface Uni<T> {
     /**
      * Once the observed {@code Uni} emits an item, execute the given {@code supplier}. This supplier produces another
      * {@code Uni}. The downstream receives the events emitted by this produced {@code Uni}.
-     *
+     * <p>
      * This operation allows <em>chaining</em> asynchronous operations: when the upstream completes with an item, run
      * the supplier and emits the item (or failure) sent by the produced {@code Uni}:
      *
@@ -475,7 +475,7 @@ public interface Uni<T> {
      *         .chain(session -&gt; session.flush())
      *         .chain(() -&gt; server.close());
      * </pre>
-     *
+     * <p>
      * The supplier ignores the item event of the current {@link Uni} and produces an {@link Uni}, possibly
      * using another type of item ({@code O}). The events fired by produced {@link Uni} are forwarded to the
      * {@link Uni} returned by this method.
@@ -601,21 +601,21 @@ public interface Uni<T> {
     /**
      * Configures actions to be performed on termination, that is, on item, on failure, or when the subscriber cancels
      * the subscription.
-     * 
+     *
      * @return the object to configure the termination actions.
      */
     UniOnTerminate<T> onTermination();
 
     /**
      * Configures actions to be performed when the subscriber cancels the subscription.
-     * 
+     *
      * @return the object to configure the cancellation actions.
      */
     UniOnCancel<T> onCancellation();
 
     /**
      * Plug a user-defined operator that does not belong to the existing Mutiny API.
-     * 
+     *
      * @param operatorProvider a function to create and bind a new operator instance, taking {@code this} {@link Uni} as a
      *        parameter and returning a new {@link Uni}. Must neither be {@code null} nor return {@code null}.
      * @param <R> the output type
@@ -630,7 +630,7 @@ public interface Uni<T> {
      * Ignore the item emitted by this {@link Uni} and replace it with another value.
      * <p>
      * This is a shortcut for {@code uni.onItem().transform(ignore -> item)}.
-     * 
+     *
      * @param item the replacement value
      * @param <O> the output type
      * @return the new {@link Uni}
@@ -669,7 +669,7 @@ public interface Uni<T> {
      * Ignore the item emitted by this {@link Uni} and replace it with {@code null}.
      * <p>
      * This is a shortcut for {@code uni.onItem().transform(ignore -> null)}.
-     * 
+     *
      * @return the new {@link Uni}
      */
     default Uni<T> replaceWithNull() {
@@ -683,7 +683,7 @@ public interface Uni<T> {
      * instead of a {@code Uni<T>}.
      * <p>
      * This is a shortcut for {@code uni.onItem().transform(ignored -> null)}.
-     * 
+     *
      * @return the new {@link Uni}
      */
     default Uni<Void> replaceWithVoid() {
@@ -692,7 +692,7 @@ public interface Uni<T> {
 
     /**
      * When this {@link Uni} emits {@code null}, replace with the value provided by the given {@link Supplier}.
-     *
+     * <p>
      * This is a shortcut for {@code uni.onItem().ifNull().continueWith(supplier)}
      *
      * @param supplier the supplier
@@ -704,7 +704,7 @@ public interface Uni<T> {
 
     /**
      * When this {@link Uni} emits {@code null}, replace with the provided value.
-     *
+     * <p>
      * This is a shortcut for {@code uni.onItem().ifNull().continueWith(value)}
      *
      * @param value the value
@@ -716,7 +716,7 @@ public interface Uni<T> {
 
     /**
      * Log events (onSubscribe, onItem, ...) as they come from the upstream or the subscriber.
-     *
+     * <p>
      * Events will be logged as long as the {@link Uni} hasn't been cancelled or terminated.
      * Logging is framework-agnostic and can be configured in the {@link Infrastructure} class.
      *
@@ -729,7 +729,7 @@ public interface Uni<T> {
     /**
      * Log events (onSubscribe, onItem, ...) as they come from the upstream or the subscriber, and derives the identifier from
      * the upstream operator class "simple name".
-     *
+     * <p>
      * Events will be logged as long as the {@link Uni} hasn't been cancelled or terminated.
      * Logging is framework-agnostic and can be configured in the {@link Infrastructure} class.
      *
@@ -738,4 +738,24 @@ public interface Uni<T> {
      * @see Infrastructure#setOperatorLogger(Infrastructure.OperatorLogger)
      */
     Uni<T> log();
+
+    /**
+     * Join the results from multiple {@link Uni} (e.g., collect all values, pick the first to respond, etc).
+     * <p>
+     * Here is an example where several {@link Uni} are joined, and result in a {@code Uni<List<Number>>}:
+     * 
+     * <pre>
+     * Uni&lt;Number&gt; a = Uni.createFrom().item(1);
+     * Uni&lt;Number&gt; b = Uni.createFrom().item(2L);
+     * Uni&lt;Number&gt; c = Uni.createFrom().item(3);
+     *
+     * Uni&lt;List&lt;Number&gt;&gt; uni = Uni.join().all(a, b, c).andCollectFailures();
+     * </pre>
+     *
+     * @return the object to configure the join behavior.
+     */
+    @Experimental("New API based on observations that Uni.combine() is often used with homogeneous types, and combination often just a mapping to a collection.")
+    static UniJoin join() {
+        return UniJoin.SHARED_INSTANCE;
+    }
 }
