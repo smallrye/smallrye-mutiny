@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 
 import org.eclipse.microprofile.reactive.streams.operators.ReactiveStreams;
 import org.eclipse.microprofile.reactive.streams.operators.tck.spi.QuietRuntimeException;
-import org.junit.After;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Multi;
@@ -33,7 +33,7 @@ public class CollectStageFactoryTest extends StageTestBase {
 
     private final ExecutorService computation = Executors.newFixedThreadPool(4);
 
-    @After
+    @AfterEach
     public void cleanup() {
         computation.shutdown();
     }

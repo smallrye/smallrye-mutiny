@@ -11,7 +11,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import org.eclipse.microprofile.reactive.streams.operators.ReactiveStreams;
-import org.junit.After;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Multi;
@@ -27,7 +27,7 @@ public class PeekStageFactoryTest extends StageTestBase {
 
     private ExecutorService executor = Executors.newFixedThreadPool(4);
 
-    @After
+    @AfterEach
     public void shutdown() {
         executor.shutdown();
     }

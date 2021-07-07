@@ -11,7 +11,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.eclipse.microprofile.reactive.streams.operators.ReactiveStreams;
-import org.junit.After;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Multi;
@@ -26,7 +26,7 @@ public class OnErrorResumeWithStageFactoryTest extends StageTestBase {
     private final OnErrorResumeStageFactory factory = new OnErrorResumeStageFactory();
     private final ExecutorService executor = Executors.newFixedThreadPool(2);
 
-    @After
+    @AfterEach
     public void cleanup() {
         executor.shutdown();
     }

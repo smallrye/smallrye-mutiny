@@ -23,7 +23,7 @@ import org.eclipse.microprofile.reactive.streams.operators.ProcessorBuilder;
 import org.eclipse.microprofile.reactive.streams.operators.PublisherBuilder;
 import org.eclipse.microprofile.reactive.streams.operators.ReactiveStreams;
 import org.eclipse.microprofile.reactive.streams.operators.SubscriberBuilder;
-import org.junit.After;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.reactivestreams.Processor;
 import org.reactivestreams.Publisher;
@@ -37,7 +37,7 @@ public class APITest {
 
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
-    @After
+    @AfterEach
     public void cleanup() {
         executor.shutdown();
     }

@@ -13,7 +13,7 @@ import java.util.concurrent.Executors;
 
 import org.eclipse.microprofile.reactive.streams.operators.PublisherBuilder;
 import org.eclipse.microprofile.reactive.streams.operators.ReactiveStreams;
-import org.junit.After;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Multi;
@@ -31,7 +31,7 @@ public class FlatMapStageFactoryTest extends StageTestBase {
 
     private ExecutorService computation = Executors.newFixedThreadPool(100);
 
-    @After
+    @AfterEach
     public void cleanup() {
         computation.shutdown();
         executor.shutdown();
