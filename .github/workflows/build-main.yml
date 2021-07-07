@@ -100,4 +100,4 @@ jobs:
           version: 11
           source: releases
       - name: Compatibility Check
-        run: mvn -s .build/maven-ci-settings.xml -B install revapi:check@check-compatibility -DskipTests -fae
+        run: mvn -s .build/maven-ci-settings.xml -pl '!bom' -B install revapi:check@check-compatibility -DskipTests -fae
