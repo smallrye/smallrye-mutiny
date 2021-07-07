@@ -8,7 +8,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="description" content="SmallRye Mutiny!">
 
-    <link rel="canonical" href="/getting-started/download.html">
+    <link rel="canonical" href="/guides/joining-unis.html">
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.3.1/styles/default.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/components/icon.min.css" integrity="sha512-8Tb+T7SKUFQWOPIQCaLDWWe1K/SY8hvHl7brOH8Nz5z1VT8fnf8B+9neoUzmFY3OzkWMMs3OjrwZALgB1oXFBg==" crossorigin="anonymous" />
     <link rel="shortcut icon" type="image/png" href="/smallrye-mutiny/assets/images/favicon.ico">
@@ -39,8 +39,8 @@
                 <ul class="navbar-nav ml-auto mr-0 mt-2 mt-lg-0">
                     <li class="nav-item"><a class="nav-link " href="/smallrye-mutiny/index.html">Home</a></li>
                     <li class="nav-item"><a class="nav-link " href="/smallrye-mutiny/pages/philosophy">Philosophy</a></li>
-                    <li class="nav-item"><a class="nav-link active" href="/smallrye-mutiny/getting-started/download">Getting started</a></li>
-                    <li class="nav-item"><a class="nav-link " href="/smallrye-mutiny/guides">Guides</a></li>
+                    <li class="nav-item"><a class="nav-link " href="/smallrye-mutiny/getting-started/download">Getting started</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="/smallrye-mutiny/guides">Guides</a></li>
                     <li class="nav-item"><a href="https://github.com/smallrye/smallrye-mutiny" target="_blank" title="Github"><i
                             class="lab la-github la-2x"></i></a></li>
                     <li class="nav-item"><a href="https://github.com/smallrye/smallrye-mutiny/discussions" target="_blank" title="Discussions on GitHub"><i
@@ -57,38 +57,17 @@
             <div class="content">
                 
 
-    
-    
-        
-        
-        
-    
-        
-            
-            
-
-    
-        
-
-
-
 <section class="hero gs">
     <div class="hero-main container">
         <div class="row">
             <div class="hero-left col-12">
                 <div class="hero-slogan">
-                    <h1 class="hero-name">Getting Started with Mutiny</h1>
+                    <h1 class="hero-name">Joining several unis</h1>
                 </div>
                 <div class="hero-desc">
-                    To start using Mutiny, you just need to drop a JAR in your classpath
+                    Learn how to join several unis, collect results or pick the first one.
                 </div>
-                <div class="hero-buttons">
-                    
-                    
-                    <a href="/smallrye-mutiny/getting-started/first-lines-of-code" class="getting-started-nav btn btn-rounded button button-dark button-rounded">
-                        First lines of code&nbsp;<i class="las la-arrow-right"></i></a>
-                    
-                </div>
+                <!-- TODO Labels -->
             </div>
         </div>
     </div>
@@ -97,155 +76,113 @@
 <div class="container page-content">
     <div class="row">
         <div class="col-md-9 content">
-            <div class="sect1">
-<h2 id="dependency"><a class="anchor" href="#dependency"></a>Using Mutiny in a Java application</h2>
+            <div class="paragraph">
+<p>A <code>Uni</code> represents an operation that either emits a value or a failure.
+Examples of operations that fit into a <code>Uni</code> include: HTTP client requests, database <code>insert</code> queries, sending messages to a broker, etc.</p>
+</div>
+<div class="paragraph">
+<p>It is common to trigger several <em>concurrent</em> operations, then <em>join</em> on the results.
+For instance you can make HTTP requests to 3 different HTTP APIs, then collect all HTTP responses.
+Or you can just take the response from the one who was the fastest.</p>
+</div>
+<div class="paragraph">
+<p><code>Uni</code> offers the <code>join</code> group to assemble all results from a list of <code>Uni</code>, pick the first one that terminates, or pick the first one that terminates with a value.</p>
+</div>
+<div class="sect1">
+<h2 id="joining-multiple-unis"><a class="anchor" href="#joining-multiple-unis"></a>Joining multiple unis</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Add the <em>dependency</em> to your project:</p>
-</div>
-<div class="listingblock">
-<div class="title"><a href="https://maven.apache.org/">Maven</a></div>
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;dependency&gt;
-  &lt;groupId&gt;io.smallrye.reactive&lt;/groupId&gt;
-  &lt;artifactId&gt;mutiny&lt;/artifactId&gt;
-  &lt;version&gt;0.19.0&lt;/version&gt;
-&lt;/dependency&gt;</code></pre>
-</div>
-</div>
-<div class="listingblock">
-<div class="title"><a href="https://gradle.org/">Gradle with Groovy</a></div>
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-text hljs" data-lang="text">implementation 'io.smallrye.reactive:mutiny:0.19.0'</code></pre>
-</div>
-</div>
-<div class="listingblock">
-<div class="title"><a href="https://gradle.org/">Gradle with Kotlin</a></div>
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">implementation("io.smallrye.reactive:mutiny:0.19.0")</code></pre>
-</div>
-</div>
-<div class="listingblock">
-<div class="title"><a href="https://github.com/jbangdev/jbang">JBang</a></div>
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">//DEPS io.smallrye.reactive:mutiny:0.19.0</code></pre>
-</div>
-</div>
-<div class="sect2">
-<h3 id="quarkus"><a class="anchor" href="#quarkus"></a>Using Mutiny with Quarkus</h3>
-<div class="paragraph">
-<p>Most of the <a href="https://quarkus.io">Quarkus</a> extensions with reactive capabilities already depend on Mutiny.
-You can also add the <code>quarkus-mutiny</code> dependency explicitly:</p>
+<p>Given multiple <code>Uni</code>, you can join them all and obtain a <code>Uni</code> that emits a list of values:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">mvn quarkus:add-extension -Dextensions=mutiny</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Or directly add the dependency to your <code>pom.xml</code></p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;dependency&gt;
-  &lt;groupId&gt;io.quarkus&lt;/groupId&gt;
-  &lt;artifactId&gt;quarkus-mutiny&lt;/artifactId&gt;
-&lt;/dependency&gt;</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Follow the <a href="https://quarkus.io/guides/getting-started-reactive">Getting started with reactive</a> guide for more details.</p>
-</div>
-</div>
-<div class="sect2">
-<h3 id="bom"><a class="anchor" href="#bom"></a>Using the Mutiny BOM</h3>
-<div class="paragraph">
-<p>Mutiny provides a <a href="https://maven.apache.org/guides/introduction/introduction-to-dependency-mechanism.html#bill-of-materials-bom-poms">BOM</a> to avoid having to declare the version of each module you depend on.</p>
-</div>
-<div class="paragraph">
-<p>In Maven, use it as follows:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;dependencyManagement&gt;
-    &lt;dependencies&gt;
-        &lt;dependency&gt;
-            &lt;groupId&gt;io.smallrye.reactive&lt;/groupId&gt;
-            &lt;artifactId&gt;mutiny-bom&lt;/artifactId&gt;
-            &lt;version&gt;0.19.0&lt;/version&gt;
-            &lt;type&gt;pom&lt;/type&gt;
-            &lt;scope&gt;import&lt;/scope&gt;
-        &lt;/dependency&gt;
-    &lt;/dependencies&gt;
-&lt;/dependencyManagement&gt;
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Uni&lt;Integer&gt; a = Uni.createFrom().item(1);
+Uni&lt;Integer&gt; b = Uni.createFrom().item(2);
+Uni&lt;Integer&gt; c = Uni.createFrom().item(3);
 
-&lt;dependencies&gt;
-    &lt;dependency&gt;
-        &lt;groupId&gt;io.smallrye.reactive&lt;/groupId&gt;
-        &lt;artifactId&gt;mutiny&lt;/artifactId&gt;
-    &lt;/dependency&gt;
-&lt;/dependencies&gt;</code></pre>
+Uni&lt;List&lt;Integer&gt;&gt; res = Uni.join().all(a, b, c).andCollectFailures();</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>In Gradle, add:</p>
+<p>The assembled values are in the same order as the list of unis.
+The last call to <code>.andCollectFailures()</code> specifies that if one or several <code>Uni</code> fail, then the failures are assembled in a <code>CompositeException</code>.</p>
+</div>
+<div class="paragraph">
+<p>Sometimes you just want to <em>fail fast</em> if any of the <code>Uni</code> fails, and not wait for all unis to terminate:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-kotlin hljs" data-lang="kotlin">dependencies {
-  implementation platform("io.smallrye.reactive:mutiny-bom:0.19.0")
-  implementation("io.smallrye.reactive:mutiny")
-}</code></pre>
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">res = Uni.join().all(a, b, c).andFailFast();</code></pre>
 </div>
 </div>
+<div class="paragraph">
+<p>When any <code>Uni</code> fails, then the failure is directly forwarded as a failure of <code>res</code>.</p>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="vertx"><a class="anchor" href="#vertx"></a>Using Mutiny with Eclipse Vert.x</h2>
+<h2 id="joining-on-the-first-uni"><a class="anchor" href="#joining-on-the-first-uni"></a>Joining on the first Uni</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>API bindings for many popular modules and clients from the <a href="https://vertx.io">Vert.x</a> stack are available from the <a href="https://smallrye.io/smallrye-mutiny-vertx-bindings">Smallrye Mutiny Vert.x Bindings project</a>.</p>
+<p>In some cases you do not want to have all the results but just that of the first <code>Uni</code> to respond.
+There are actually 2 different cases, depending on whether you want the result of the first <code>Uni</code> that emits a value, or just the result of the first <code>Uni</code> to terminate.</p>
 </div>
 <div class="paragraph">
-<p>Here is how to add a dependency to the Vert.x core library with Mutiny bindings:</p>
+<p>If you want to get the first <code>Uni</code> that terminates:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-xml hljs" data-lang="xml">&lt;dependency&gt;
-  &lt;groupId&gt;io.smallrye.reactive&lt;/groupId&gt;
-  &lt;artifactId&gt;smallrye-mutiny-vertx-core&lt;/artifactId&gt;
-  &lt;version&gt;2.6.0&lt;/version&gt;
-&lt;/dependency&gt;</code></pre>
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Uni&lt;Integer&gt; res = Uni.join().first(a, b, c).toTerminate();</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>See <a href="https://smallrye.io/smallrye-mutiny-vertx-bindings">https://smallrye.io/smallrye-mutiny-vertx-bindings</a> for the complete documentation and instructions.</p>
+<p>If you want to have the first <code>Uni</code> that emits a value (and forget the first failures), then:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">res = Uni.join().first(a, b, c).withItem();</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>When all unis fail then <code>res</code> fails with a <code>CompositeException</code> that reports all failures.</p>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="download"><a class="anchor" href="#download"></a>Direct Download</h2>
+<h2 id="using-a-builder-object"><a class="anchor" href="#using-a-builder-object"></a>Using a builder object</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>You can also download the Mutiny JARs directly from <a href="https://search.maven.org/search?q=g:io.smallrye.reactive%20AND%20a:mutiny*%20AND%20v:0.19.0">Maven Central</a>.</p>
+<p>There are situations where it can be more convenient to gather the unis to join in an iterative fashion.
+For this purpose you can use a builder object, as in:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">UniJoin.Builder&lt;Integer&gt; builder = Uni.join().builder();
+
+while (someCondition) {
+    Uni&lt;Integer&gt; uni = supplier.get();
+    builder.add(uni);
+}
+
+Uni&lt;List&lt;Integer&gt;&gt; all = builder.joinAll().andFailFast();
+
+Uni&lt;Integer&gt; first = builder.joinFirst().withItem();</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The builder offers <code>joinAll()</code> and <code>joinFirst()</code> methods.</p>
 </div>
 </div>
 </div>
         </div>
-        <div class="col-md-3 toc-container d-sm-none d-md-block">
+        <div class="col-md-3 col-md-offset-1 toc-container d-sm-none d-md-block">
             <nav class="page-toc toc nav sticky-top" id="toc">
                 
                 <h4>Table of Content</h4>
                 <ul class="sectlevel1">
-<li><a href="#dependency">Using Mutiny in a Java application</a>
-<ul class="sectlevel2">
-<li><a href="#quarkus">Using Mutiny with Quarkus</a></li>
-<li><a href="#bom">Using the Mutiny BOM</a></li>
-</ul>
-</li>
-<li><a href="#vertx">Using Mutiny with Eclipse Vert.x</a></li>
-<li><a href="#download">Direct Download</a></li>
+<li><a href="#joining-multiple-unis">Joining multiple unis</a></li>
+<li><a href="#joining-on-the-first-uni">Joining on the first Uni</a></li>
+<li><a href="#using-a-builder-object">Using a builder object</a></li>
 </ul>
                 
 
@@ -255,25 +192,15 @@ You can also add the <code>quarkus-mutiny</code> dependency explicitly:</p>
                     
                     <li>
                         
-
+                        <a href="/smallrye-mutiny/guides/combining-items">Combining items from streams</a>
                         
-                        <a href="https://maven.apache.org">Apache Maven</a>
-                        
-                    </li>
-                    
-                    <li>
-                        
-
-                        
-                        <a href="https://gradle.org/">Gradle</a>
                         
                     </li>
                     
                     <li>
                         
-
+                        <a href="/smallrye-mutiny/guides/merge-concat">Merging and Concatenating Streams</a>
                         
-                        <a href="https://www.jbang.dev/">JBang!</a>
                         
                     </li>
                     
@@ -285,30 +212,6 @@ You can also add the <code>quarkus-mutiny</code> dependency explicitly:</p>
 </div>
 
 
-
-<div class="footer-buttons gs ">
-    <div class="container">
-        <div class="row">
-                
-            <div class="col align-self-start">
-                &nbsp;
-            </div>
-                
-
-            <div class="col align-self-center text-center">
-                <a href="/smallrye-mutiny/guides" class="btn btn-rounded button button-dark button-rounded">All Guides</a>
-            </div>
-
-            <div class="col align-self-end">
-                
-                <a href="/smallrye-mutiny/getting-started/first-lines-of-code" class="btn btn-rounded button button-dark button-rounded float-right">
-                    First lines of code&nbsp;<i class="las la-arrow-right"></i></a>
-                
-            </div>
-        </div>
-
-    </div>
-</div>
             </div>
         </main>
         <footer class="footer">
