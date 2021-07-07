@@ -57,6 +57,7 @@ git checkout -b "r${VERSION}" "${HASH}"
 
 echo "Update version to ${VERSION}"
 mvn -B versions:set -DnewVersion="${VERSION}" -DgenerateBackupPoms=false -s maven-settings.xml
+mvn -B versions:set -DnewVersion="${VERSION}" -DgenerateBackupPoms=false -s maven-settings.xml -pl bom
 
 if [[ ${SKIP_TESTS} == "true" ]]; then
   mvn -B clean verify -Prelease -DskipTests -s maven-settings.xml
