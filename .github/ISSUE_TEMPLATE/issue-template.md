@@ -1,6 +1,6 @@
 ---
 name: Issue template
-about: Helper users report issues
+about: Help users report issues
 title: ''
 labels: ''
 assignees: ''
