@@ -103,7 +103,7 @@ public class UniOnNotNull<T> {
      * For asynchronous composition, see {@link #transformToUni(Function)}.
      *
      * @param mapper the mapper function, must not be {@code null}
-     * @param <R>    the type of Uni item
+     * @param <R> the type of Uni item
      * @return the new {@link Uni}
      */
     public <R> Uni<R> transform(Function<? super T, ? extends R> mapper) {
@@ -130,10 +130,10 @@ public class UniOnNotNull<T> {
      * This operation is generally named {@code flatMap}.
      *
      * @param mapper the function called with the item of this {@link Uni} and producing the {@link Uni},
-     *               must not be {@code null}, must not return {@code null}.
-     * @param <R>    the type of item
+     *        must not be {@code null}, must not return {@code null}.
+     * @param <R> the type of item
      * @return a new {@link Uni} that would fire events from the uni produced by the mapper function, possibly
-     * in an asynchronous manner.
+     *         in an asynchronous manner.
      */
     public <R> Uni<R> transformToUni(Function<? super T, Uni<? extends R>> mapper) {
         Function<? super T, Uni<? extends R>> actual = Infrastructure.decorate(nonNull(mapper, "mapper"));
@@ -159,7 +159,7 @@ public class UniOnNotNull<T> {
      * This operation is generally named {@code flatMapPublisher}.
      *
      * @param mapper the mapper, must not be {@code null}, may expect to receive {@code null} as item.
-     * @param <R>    the type of item produced by the resulting {@link Multi}
+     * @param <R> the type of item produced by the resulting {@link Multi}
      * @return the multi
      */
     public <R> Multi<R> transformToMulti(Function<? super T, ? extends Publisher<? extends R>> mapper) {
@@ -185,10 +185,10 @@ public class UniOnNotNull<T> {
      * downstream.
      *
      * @param consumer the function called with the item of the this {@link Uni} and an {@link UniEmitter}.
-     *                 It must not be {@code null}.
-     * @param <R>      the type of item emitted by the emitter
+     *        It must not be {@code null}.
+     * @param <R> the type of item emitted by the emitter
      * @return a new {@link Uni} that would fire events from the emitter consumed by the mapper function, possibly
-     * in an asynchronous manner.
+     *         in an asynchronous manner.
      */
     public <R> Uni<R> transformToUni(BiConsumer<? super T, UniEmitter<? super R>> consumer) {
         BiConsumer<? super T, UniEmitter<? super R>> actual = Infrastructure.decorate(nonNull(consumer, "consumer"));
