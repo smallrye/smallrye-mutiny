@@ -1,7 +1,9 @@
 package io.smallrye.mutiny.groups;
 
+import static io.smallrye.mutiny.helpers.ParameterValidation.SUPPLIER_PRODUCED_NULL;
 import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
 
+import java.util.Objects;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -198,4 +200,29 @@ public class UniOnNotNull<T> {
         });
     }
 
+    /**
+     * If the current {@link Uni} contains a item, the produced {@link Uni} emits a failure produced
+     * using the given {@link Supplier}.
+     *
+     * @param supplier the supplier to produce the failure, must not be {@code null}, must not produce {@code null}
+     * @return the new {@link Uni}
+     */
+    public Uni<T> failWith(Supplier<? extends Throwable> supplier) {
+        Supplier<? extends Throwable> actual = Infrastructure.decorate(nonNull(supplier, "supplier"));
+        return Infrastructure.onUniCreation(transformToUni(ignored -> {
+            Throwable failure = Objects.requireNonNull(actual.get(), SUPPLIER_PRODUCED_NULL);
+            return Uni.createFrom().failure(failure);
+        }));
+    }
+
+    /**
+     * If the current {@link Uni} contains a item, the produced {@link Uni} emits the passed failure.
+     *
+     * @param failure the exception to fire if the current {@link Uni} contains a item.
+     * @return the new {@link Uni}
+     */
+    public Uni<T> failWith(Throwable failure) {
+        nonNull(failure, "failure");
+        return failWith(() -> failure);
+    }
 }
