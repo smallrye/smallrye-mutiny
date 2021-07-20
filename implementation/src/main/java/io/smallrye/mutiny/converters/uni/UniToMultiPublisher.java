@@ -4,16 +4,16 @@ import static io.smallrye.mutiny.helpers.EmptyUniSubscription.CANCELLED;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.operators.AbstractMulti;
 import io.smallrye.mutiny.operators.AbstractUni;
 import io.smallrye.mutiny.subscription.UniSubscriber;
 import io.smallrye.mutiny.subscription.UniSubscription;
 
-public class UniToMultiPublisher<T> implements Publisher<T> {
+public final class UniToMultiPublisher<T> extends AbstractMulti<T> {
 
     private final Uni<T> uni;
 

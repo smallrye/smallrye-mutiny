@@ -21,7 +21,23 @@
     "criticality" : "highlight",
     "minSeverity" : "POTENTIALLY_BREAKING",
     "minCriticality" : "documented",
-    "differences" : [ ]
+    "differences" : [
+      {
+        "ignore": true,
+        "code": "java.class.nowFinal",
+        "old": "class io.smallrye.mutiny.converters.uni.UniToMultiPublisher<T>",
+        "new": "class io.smallrye.mutiny.converters.uni.UniToMultiPublisher<T>",
+        "justification": "Internal API optimization"
+      },
+      {
+        "ignore": true,
+        "code": "java.class.nonFinalClassInheritsFromNewClass",
+        "old": "class io.smallrye.mutiny.converters.uni.UniToMultiPublisher<T>",
+        "new": "class io.smallrye.mutiny.converters.uni.UniToMultiPublisher<T>",
+        "superClass": "io.smallrye.mutiny.operators.AbstractMulti<T>",
+        "justification": "Internal API optimization"
+      }
+    ]
   }
 }, {
   "extension" : "revapi.reporter.json",
