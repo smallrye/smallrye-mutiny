@@ -118,7 +118,7 @@ public abstract class AbstractUni<T> implements Uni<T> {
 
     @Override
     public Multi<T> toMulti() {
-        return new UniToMultiPublisher<>(this);
+        return Multi.createFrom().safePublisher(new UniToMultiPublisher<>(this));
     }
 
     @Override
