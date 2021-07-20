@@ -4,16 +4,16 @@ import static io.smallrye.mutiny.helpers.EmptyUniSubscription.CANCELLED;
 
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.Uni;
-import io.smallrye.mutiny.operators.AbstractMulti;
 import io.smallrye.mutiny.operators.AbstractUni;
 import io.smallrye.mutiny.subscription.UniSubscriber;
 import io.smallrye.mutiny.subscription.UniSubscription;
 
-public final class UniToMultiPublisher<T> extends AbstractMulti<T> {
+public final class UniToMultiPublisher<T> implements Publisher<T> {
 
     private final Uni<T> uni;
 
@@ -30,6 +30,7 @@ public final class UniToMultiPublisher<T> extends AbstractMulti<T> {
 
         private final Uni<T> uni;
         private final Subscriber<? super T> downstream;
+
         private final AtomicReference<UniSubscription> upstream = new AtomicReference<>();
 
         private UniToMultiSubscription(Uni<T> uni, Subscriber<? super T> downstream) {
@@ -39,10 +40,7 @@ public final class UniToMultiPublisher<T> extends AbstractMulti<T> {
 
         @Override
         public void cancel() {
-            UniSubscription sub;
-            synchronized (upstream) {
-                sub = upstream.getAndSet(CANCELLED);
-            }
+            UniSubscription sub = upstream.getAndSet(CANCELLED);
             if (sub != null) {
                 sub.cancel();
             }
@@ -50,16 +48,14 @@ public final class UniToMultiPublisher<T> extends AbstractMulti<T> {
 
         @Override
         public void request(long n) {
-            synchronized (upstream) {
-                if (n <= 0L) {
-                    downstream.onError(new IllegalArgumentException("Invalid request"));
-                    return;
-                }
-                if (upstream.get() == CANCELLED) {
-                    return;
-                }
-                AbstractUni.subscribe(uni, this);
+            if (n <= 0L) {
+                downstream.onError(new IllegalArgumentException("Invalid request"));
+                return;
             }
+            if (upstream.get() == CANCELLED) {
+                return;
+            }
+            AbstractUni.subscribe(uni, this);
         }
 
         @Override
