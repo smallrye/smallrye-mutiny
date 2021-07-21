@@ -1,7 +1,5 @@
 package io.smallrye.mutiny.context;
 
-import org.eclipse.microprofile.context.spi.ContextManagerProvider;
-
 import io.smallrye.context.SmallRyeThreadContext;
 
 /**
@@ -9,12 +7,8 @@ import io.smallrye.context.SmallRyeThreadContext;
  */
 public class DefaultContextPropagationInterceptor extends BaseContextPropagationInterceptor {
 
-    static final SmallRyeThreadContext THREAD_CONTEXT = (SmallRyeThreadContext) ContextManagerProvider.instance()
-            .getContextManager()
-            .newThreadContextBuilder().build();
-
     @Override
     protected SmallRyeThreadContext getThreadContext() {
-        return THREAD_CONTEXT;
+        return SmallRyeThreadContext.getCurrentThreadContextOrPropagatedContexts();
     }
 }
