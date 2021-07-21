@@ -214,7 +214,7 @@ public class UniOnNotNull<T> {
     }
 
     /**
-     * If the current {@link Uni} contains an item, the produced {@link Uni} emits the passed failure.
+     * If the current {@link Uni} emits an item, the produced {@link Uni} emits the given failure.
      *
      * @param failure the exception to fire if the current {@link Uni} contains a item.
      * @return the new {@link Uni}
