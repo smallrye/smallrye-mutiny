@@ -208,7 +208,7 @@ public class UniOnNotNull<T> {
     public Uni<T> failWith(Supplier<? extends Throwable> supplier) {
         Supplier<? extends Throwable> actual = Infrastructure.decorate(nonNull(supplier, "supplier"));
         return transformToUni(ignored -> {
-            Throwable failure = ParameterValidation.nonNull(actual.get(), "suplier");
+            Throwable failure = ParameterValidation.nonNull(actual.get(), "supplier");
             return Uni.createFrom().failure(failure);
         });
     }
