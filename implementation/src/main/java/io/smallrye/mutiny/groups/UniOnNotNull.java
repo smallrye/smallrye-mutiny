@@ -216,7 +216,7 @@ public class UniOnNotNull<T> {
     /**
      * If the current {@link Uni} emits an item, the produced {@link Uni} emits the given failure.
      *
-     * @param failure the exception to fire if the current {@link Uni} contains a item.
+     * @param failure the exception to fire if the current {@link Uni} emits an item. Must not be {@code null}.
      * @return the new {@link Uni}
      */
     public Uni<T> failWith(Throwable failure) {
