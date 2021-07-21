@@ -199,7 +199,7 @@ public class UniOnNotNull<T> {
     }
 
     /**
-     * If the current {@link Uni} emits an item, the produced {@link Uni} emits the retrieved failure.
+     * If the current {@link Uni} emits an item, the produced {@link Uni} emits the retrieved failure
      * using the given {@link Supplier}.
      *
      * @param supplier the supplier to produce the failure, must not be {@code null}, must not produce {@code null}
