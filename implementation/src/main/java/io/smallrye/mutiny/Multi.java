@@ -341,7 +341,7 @@ public interface Multi<T> extends Publisher<T> {
      * The function receives the received item as parameter, and can transform it. The returned object is sent
      * downstream as {@code item} event.
      * <p>
-     * This method is a shortcut for {@code multi.onItem().apply(mapper)}.
+     * This method is a shortcut for {@code multi.onItem().transform(mapper)}.
      *
      * @param mapper the mapper function, must not be {@code null}
      * @param <O> the type of item produced by the mapper function
