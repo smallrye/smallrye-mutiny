@@ -1,18 +1,18 @@
 package io.smallrye.mutiny.groups;
 
-import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
+import io.smallrye.mutiny.Multi;
+import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.helpers.ParameterValidation;
+import io.smallrye.mutiny.infrastructure.Infrastructure;
+import io.smallrye.mutiny.subscription.UniEmitter;
+import org.reactivestreams.Publisher;
 
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import org.reactivestreams.Publisher;
-
-import io.smallrye.mutiny.Multi;
-import io.smallrye.mutiny.Uni;
-import io.smallrye.mutiny.infrastructure.Infrastructure;
-import io.smallrye.mutiny.subscription.UniEmitter;
+import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
 
 public class UniOnNotNull<T> {
 
@@ -198,4 +198,29 @@ public class UniOnNotNull<T> {
         });
     }
 
+    /**
+     * If the current {@link Uni} emits an item, the produced {@link Uni} emits the retrieved failure
+     * using the given {@link Supplier}.
+     *
+     * @param supplier the supplier to produce the failure, must not be {@code null}, must not produce {@code null}
+     * @return the new {@link Uni}
+     */
+    public Uni<T> failWith(Supplier<? extends Throwable> supplier) {
+        Supplier<? extends Throwable> actual = Infrastructure.decorate(nonNull(supplier, "supplier"));
+        return transformToUni(ignored -> {
+            Throwable failure = ParameterValidation.nonNull(actual.get(), "supplier");
+            return Uni.createFrom().failure(failure);
+        });
+    }
+
+    /**
+     * If the current {@link Uni} emits an item, the produced {@link Uni} emits the given failure.
+     *
+     * @param failure the exception to fire if the current {@link Uni} emits an item. Must not be {@code null}.
+     * @return the new {@link Uni}
+     */
+    public Uni<T> failWith(Throwable failure) {
+        nonNull(failure, "failure");
+        return failWith(() -> failure);
+    }
 }

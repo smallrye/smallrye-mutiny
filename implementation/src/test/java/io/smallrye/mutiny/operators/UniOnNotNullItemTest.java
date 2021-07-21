@@ -1,9 +1,11 @@
 package io.smallrye.mutiny.operators;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Supplier;
 
 import org.junit.jupiter.api.Test;
 
@@ -237,5 +239,41 @@ public class UniOnNotNullItemTest {
                 .collect().first()
                 .onItem().ifNull().continueWith("yolo")
                 .await().indefinitely()).hasMessageContaining("boom");
+    }
+
+    @Test
+    public void testFailWithExceptionSupplier() {
+        assertThrows(IllegalStateException.class,
+                () -> Uni.createFrom().item("hello")
+                        .onItem().ifNotNull().failWith(() ->  new IllegalStateException("boom"))
+                        .await().indefinitely()
+        );
+    }
+
+    @Test
+    public void testFailWithException() {
+        assertThrows(IllegalStateException.class,
+                () -> Uni.createFrom().item("hello")
+                        .onItem().ifNotNull().failWith(new IllegalStateException("boom"))
+                        .await().indefinitely()
+        );
+    }
+
+    @Test
+    public void testFailWithExceptionSupplierNull() {
+        assertThrows(IllegalArgumentException.class,
+                () -> Uni.createFrom().item("hello")
+                        .onItem().ifNotNull().failWith((Supplier<Throwable>) null)
+                        .await().indefinitely()
+        );
+    }
+
+    @Test
+    public void testFailWithExceptionNull() {
+        assertThrows(IllegalArgumentException.class,
+                () -> Uni.createFrom().item("hello")
+                        .onItem().ifNotNull().failWith((Exception) null)
+                        .await().indefinitely()
+        );
     }
 }
