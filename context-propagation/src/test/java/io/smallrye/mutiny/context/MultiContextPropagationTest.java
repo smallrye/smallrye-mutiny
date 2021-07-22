@@ -8,8 +8,11 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.concurrent.*;
 
+import org.eclipse.microprofile.context.ThreadContext;
 import org.junit.jupiter.api.*;
 
+import io.smallrye.context.CleanAutoCloseable;
+import io.smallrye.context.SmallRyeThreadContext;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.helpers.test.AssertSubscriber;
@@ -292,5 +295,40 @@ public class MultiContextPropagationTest {
         subscriber.awaitCompletion()
                 .assertItems(0, 1, 3, 6, 10, 15, 21, 28, 36, 45);
 
+    }
+
+    @Test
+    public void testContextOverride() {
+        MyContext ctx = MyContext.get();
+        assertThat(ctx).isNotNull();
+        SmallRyeThreadContext emptyContext = SmallRyeThreadContext.builder().cleared(ThreadContext.ALL_REMAINING)
+                .propagated(ThreadContext.NONE).build();
+        Multi<Integer> multi;
+        // remove context propagation in this scope
+        try (CleanAutoCloseable ac = SmallRyeThreadContext.withThreadContext(emptyContext)) {
+            multi = Multi.createFrom()
+                    .item(() -> {
+                        assertThat(MyContext.get()).isNull();
+                        return 2;
+                    })
+                    .runSubscriptionOn(executor)
+                    .map(r -> {
+                        assertThat(MyContext.get()).isNull();
+                        return r;
+                    });
+        }
+
+        Uni<Integer> latch = Multi.createFrom().<Integer> emitter(emitter -> new Thread(() -> {
+            try {
+                int result = multi.toUni().await().indefinitely();
+                emitter.emit(result);
+                emitter.complete();
+            } catch (Throwable t) {
+                emitter.fail(t);
+            }
+        }).start()).toUni();
+
+        int result = latch.await().indefinitely();
+        assertThat(result).isEqualTo(2);
     }
 }

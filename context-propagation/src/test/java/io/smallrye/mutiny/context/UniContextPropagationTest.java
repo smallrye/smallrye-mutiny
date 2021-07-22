@@ -10,8 +10,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
+import org.eclipse.microprofile.context.ThreadContext;
 import org.junit.jupiter.api.*;
 
+import io.smallrye.context.CleanAutoCloseable;
+import io.smallrye.context.SmallRyeThreadContext;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.subscription.Cancellable;
@@ -436,4 +439,37 @@ public class UniContextPropagationTest {
         assertThat(uni.await().atMost(Duration.ofMillis(100))).isEqualTo(4);
     }
 
+    @Test
+    public void testContextOverride() {
+        MyContext ctx = MyContext.get();
+        assertThat(ctx).isNotNull();
+        SmallRyeThreadContext emptyContext = SmallRyeThreadContext.builder().cleared(ThreadContext.ALL_REMAINING)
+                .propagated(ThreadContext.NONE).build();
+        Uni<Integer> uni;
+        // remove context propagation in this scope
+        try (CleanAutoCloseable ac = SmallRyeThreadContext.withThreadContext(emptyContext)) {
+            uni = Uni.createFrom()
+                    .item(() -> {
+                        assertThat(MyContext.get()).isNull();
+                        return 2;
+                    })
+                    .runSubscriptionOn(executor)
+                    .map(r -> {
+                        assertThat(MyContext.get()).isNull();
+                        return r;
+                    });
+        }
+
+        Uni<Integer> latch = Uni.createFrom().emitter(emitter -> new Thread(() -> {
+            try {
+                int result = uni.await().indefinitely();
+                emitter.complete(result);
+            } catch (Throwable t) {
+                emitter.fail(t);
+            }
+        }).start());
+
+        int result = latch.await().indefinitely();
+        assertThat(result).isEqualTo(2);
+    }
 }
