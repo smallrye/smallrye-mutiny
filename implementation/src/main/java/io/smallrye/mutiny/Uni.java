@@ -328,7 +328,7 @@ public interface Uni<T> {
 
     /**
      * Transforms the item (potentially null) emitted by this {@link Uni} by applying a (synchronous) function to it.
-     * This method is equivalent to {@code uni.onItem().apply(x -> ...)}
+     * This method is equivalent to {@code uni.onItem().transform(x -> ...)}
      * For asynchronous composition, look at flatMap.
      *
      * @param mapper the mapper function, must not be {@code null}
