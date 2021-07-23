@@ -15,7 +15,7 @@
         <site.dir>${project.build.directory}/generated-docs/</site.dir>
         <format.skip>true</format.skip>
         <maven-dependency-plugin.version>3.2.0</maven-dependency-plugin.version>
-        <logback-classic.version>1.2.4</logback-classic.version>
+        <logback-classic.version>1.2.4-groovyless</logback-classic.version>
     </properties>
 
     <dependencies>
