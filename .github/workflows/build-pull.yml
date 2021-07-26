@@ -11,7 +11,6 @@ jobs:
         java: [
           { 'version': '8', 'source': 'releases', opts: '' },
           { 'version': '11', 'source': 'releases', opts: '' },
-          { 'version': '15', 'source': 'releases', opts: '' },
           { 'version': '16', 'source': 'nightly', 'opts': '--illegal-access=permit'  }  # required for kotlin on java 16
         ]
     name: Build with Java ${{ matrix.java.version }}
