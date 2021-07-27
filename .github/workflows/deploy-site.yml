@@ -1,5 +1,5 @@
 ---
-name: Web Site
+name: Website deployment
 on:
   workflow_dispatch:
   push:
