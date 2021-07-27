@@ -245,9 +245,8 @@ public class UniOnNotNullItemTest {
     public void testFailWithExceptionSupplier() {
         assertThrows(IllegalStateException.class,
                 () -> Uni.createFrom().item("hello")
-                        .onItem().ifNotNull().failWith(() ->  new IllegalStateException("boom"))
-                        .await().indefinitely()
-        );
+                        .onItem().ifNotNull().failWith(() -> new IllegalStateException("boom"))
+                        .await().indefinitely());
     }
 
     @Test
@@ -255,8 +254,7 @@ public class UniOnNotNullItemTest {
         assertThrows(IllegalStateException.class,
                 () -> Uni.createFrom().item("hello")
                         .onItem().ifNotNull().failWith(new IllegalStateException("boom"))
-                        .await().indefinitely()
-        );
+                        .await().indefinitely());
     }
 
     @Test
@@ -264,8 +262,7 @@ public class UniOnNotNullItemTest {
         assertThrows(IllegalArgumentException.class,
                 () -> Uni.createFrom().item("hello")
                         .onItem().ifNotNull().failWith((Supplier<Throwable>) null)
-                        .await().indefinitely()
-        );
+                        .await().indefinitely());
     }
 
     @Test
@@ -273,7 +270,6 @@ public class UniOnNotNullItemTest {
         assertThrows(IllegalArgumentException.class,
                 () -> Uni.createFrom().item("hello")
                         .onItem().ifNotNull().failWith((Exception) null)
-                        .await().indefinitely()
-        );
+                        .await().indefinitely());
     }
 }

@@ -1,18 +1,19 @@
 package io.smallrye.mutiny.groups;
 
-import io.smallrye.mutiny.Multi;
-import io.smallrye.mutiny.Uni;
-import io.smallrye.mutiny.helpers.ParameterValidation;
-import io.smallrye.mutiny.infrastructure.Infrastructure;
-import io.smallrye.mutiny.subscription.UniEmitter;
-import org.reactivestreams.Publisher;
+import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
 
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
+import org.reactivestreams.Publisher;
+
+import io.smallrye.mutiny.Multi;
+import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.helpers.ParameterValidation;
+import io.smallrye.mutiny.infrastructure.Infrastructure;
+import io.smallrye.mutiny.subscription.UniEmitter;
 
 public class UniOnNotNull<T> {
 
