@@ -10,8 +10,8 @@
 
     <packaging>pom</packaging>
 
-    <name>SmallRye Mutiny :: BOM</name>
-    <description>Bill of materials that list all the Mutiny modules.</description>
+    <name>SmallRye Mutiny - BOM</name>
+    <description>Bill of materials that lists all the Mutiny modules</description>
     <url>https://smallrye.io/smallrye-mutiny</url>
 
     <inceptionYear>2019</inceptionYear>

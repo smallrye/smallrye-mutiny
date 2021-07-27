@@ -11,7 +11,7 @@
     </parent>
 
     <artifactId>mutiny-smallrye-context-propagation</artifactId>
-    <name>SmallRye Mutiny :: Integration with SmallRye Context Propagation</name>
+    <name>SmallRye Mutiny - Integration with SmallRye Context Propagation</name>
 
     <dependencies>
         <dependency>
