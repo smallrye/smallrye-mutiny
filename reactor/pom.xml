@@ -9,7 +9,7 @@
     </parent>
 
     <artifactId>mutiny-reactor</artifactId>
-    <name>SmallRye Mutiny :: Integration with Reactor</name>
+    <name>SmallRye Mutiny - Integration with Reactor</name>
 
     <properties>
         <revapi.skip>false</revapi.skip>

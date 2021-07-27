@@ -14,7 +14,7 @@
     <version>999-SNAPSHOT</version>
     <packaging>pom</packaging>
 
-    <name>SmallRye Mutiny :: Parent</name>
+    <name>SmallRye Mutiny - Parent</name>
     <description>Intuitive Event-Driven Reactive Programming Library for Java</description>
     <url>https://smallrye.io/smallrye-mutiny</url>
 

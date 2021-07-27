@@ -9,7 +9,7 @@
     </parent>
 
     <artifactId>mutiny-test-utils</artifactId>
-    <name>SmallRye Mutiny :: Testing Utilities</name>
+    <name>SmallRye Mutiny - Testing utilities</name>
 
     <dependencies>
         <dependency>
