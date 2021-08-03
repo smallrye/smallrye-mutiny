@@ -1,5 +1,5 @@
 ---
-name: Post-Release
+name: Post release work
 on:
   push:
     branches:

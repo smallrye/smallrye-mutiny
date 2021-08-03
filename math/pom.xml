@@ -10,7 +10,8 @@
         <version>999-SNAPSHOT</version>
     </parent>
 
-    <name>SmallRye Mutiny :: Math Operators</name>
+    <name>SmallRye Mutiny - Math operators</name>
+    <description>Math operators</description>
     <artifactId>mutiny-math</artifactId>
 
     <dependencies>

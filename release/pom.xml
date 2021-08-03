@@ -10,7 +10,7 @@
 
     <artifactId>smallrye-mutiny-release</artifactId>
 
-    <name>SmallRye Mutiny :: (empty - Maven bug avoidance)</name>
+    <name>SmallRye Mutiny - (empty - Maven bug avoidance)</name>
     <description>Empty Release Project to Avoid Maven Bug</description>
 
     <packaging>pom</packaging>

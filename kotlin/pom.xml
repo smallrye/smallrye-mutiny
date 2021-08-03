@@ -10,7 +10,7 @@
     </parent>
 
     <artifactId>mutiny-kotlin</artifactId>
-    <name>SmallRye Mutiny :: Kotlin Extensions</name>
+    <name>SmallRye Mutiny - Kotlin Extensions</name>
 
     <dependencyManagement>
         <dependencies>

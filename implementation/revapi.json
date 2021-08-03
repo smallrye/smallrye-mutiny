@@ -21,15 +21,7 @@
     "criticality" : "highlight",
     "minSeverity" : "POTENTIALLY_BREAKING",
     "minCriticality" : "documented",
-    "differences" : [
-      {
-        "ignore": true,
-        "code": "java.class.nowFinal",
-        "old": "class io.smallrye.mutiny.converters.uni.UniToMultiPublisher<T>",
-        "new": "class io.smallrye.mutiny.converters.uni.UniToMultiPublisher<T>",
-        "justification": "Internal API optimization"
-      }
-    ]
+    "differences" : [ ]
   }
 }, {
   "extension" : "revapi.reporter.json",

@@ -12,7 +12,7 @@
 
     <artifactId>reactive-streams-junit5-tck</artifactId>
 
-    <name>SmallRye Mutiny :: Reactive Streams TCK with JUnit5</name>
+    <name>SmallRye Mutiny - Reactive Streams TCK with JUnit5</name>
     <description>The Reactive Streams TCK using JUnit 5 instead of TestNG</description>
 
     <dependencies>

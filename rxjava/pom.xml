@@ -9,7 +9,7 @@
     </parent>
 
     <artifactId>mutiny-rxjava</artifactId>
-    <name>SmallRye Mutiny :: Integration with RxJava</name>
+    <name>SmallRye Mutiny - Integration with RxJava</name>
 
     <properties>
         <revapi.skip>false</revapi.skip>

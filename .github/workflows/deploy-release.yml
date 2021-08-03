@@ -1,5 +1,5 @@
 ---
-name: Maven Central
+name: Deploy releases to Maven Central
 on:
   push:
     branches:
