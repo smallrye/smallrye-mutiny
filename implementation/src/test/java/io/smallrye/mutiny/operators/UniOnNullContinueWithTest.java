@@ -78,14 +78,6 @@ public class UniOnNullContinueWithTest {
     }
 
     @Test
-    public void testThatContinueWithSupplierCannotReturnNull() {
-        assertThrows(NullPointerException.class, () -> Uni.createFrom().item(23)
-                .map(x -> null)
-                .onItem().ifNull().continueWith(() -> null)
-                .await().indefinitely());
-    }
-
-    @Test
     public void testThatContinueWithSupplierCannotBeNull() {
         assertThrows(IllegalArgumentException.class, () -> Uni.createFrom().item(23)
                 .onItem().castTo(Integer.class)

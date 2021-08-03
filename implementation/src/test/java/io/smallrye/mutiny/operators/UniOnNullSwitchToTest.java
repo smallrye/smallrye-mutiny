@@ -75,14 +75,14 @@ public class UniOnNullSwitchToTest {
 
     @Test
     public void testSwitchToNull() {
-        assertThrows(NullPointerException.class, () -> Uni.createFrom().item((Object) null).onItem().castTo(Integer.class)
+        assertThrows(IllegalArgumentException.class, () -> Uni.createFrom().item((Object) null).onItem().castTo(Integer.class)
                 .onItem().ifNull().switchTo((Uni<Integer>) null)
                 .await().indefinitely());
     }
 
     @Test
     public void testSwitchToNullSupplier() {
-        assertThrows(NullPointerException.class, () -> Uni.createFrom().item((Object) null).onItem().castTo(Integer.class)
+        assertThrows(IllegalArgumentException.class, () -> Uni.createFrom().item((Object) null).onItem().castTo(Integer.class)
                 .onItem().ifNull().switchTo((Uni<? extends Integer>) null)
                 .await().indefinitely());
     }

@@ -1,9 +1,9 @@
 package io.smallrye.mutiny.groups;
 
-import static io.smallrye.mutiny.helpers.ParameterValidation.SUPPLIER_PRODUCED_NULL;
 import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
 
 import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.function.Supplier;
 
 import io.smallrye.mutiny.Uni;
@@ -11,10 +11,10 @@ import io.smallrye.mutiny.infrastructure.Infrastructure;
 
 public class UniOnNull<T> {
 
-    private final Uni<T> upstream;
+    private final UniOnPredicate<T> uniOnPredicate;
 
     public UniOnNull(Uni<T> upstream) {
-        this.upstream = nonNull(upstream, "upstream");
+        this.uniOnPredicate = new UniOnPredicate<>(nonNull(upstream, "upstream"), Objects::isNull);
     }
 
     /**
@@ -24,8 +24,7 @@ public class UniOnNull<T> {
      * @return the new {@link Uni}
      */
     public Uni<T> failWith(Throwable failure) {
-        nonNull(failure, "failure");
-        return failWith(() -> failure);
+        return uniOnPredicate.failWith(failure);
     }
 
     /**
@@ -36,27 +35,7 @@ public class UniOnNull<T> {
      * @return the new {@link Uni}
      */
     public Uni<T> failWith(Supplier<? extends Throwable> supplier) {
-        Supplier<? extends Throwable> actual = Infrastructure.decorate(nonNull(supplier, "supplier"));
-
-        return Infrastructure.onUniCreation(upstream.onItem().transformToUni((item, emitter) -> {
-            if (item != null) {
-                emitter.complete(item);
-                return;
-            }
-            Throwable throwable;
-            try {
-                throwable = actual.get();
-            } catch (Throwable e) {
-                emitter.fail(e);
-                return;
-            }
-
-            if (throwable == null) {
-                emitter.fail(new NullPointerException(SUPPLIER_PRODUCED_NULL));
-            } else {
-                emitter.fail(throwable);
-            }
-        }));
+        return uniOnPredicate.failWith(supplier);
     }
 
     /**
@@ -65,7 +44,7 @@ public class UniOnNull<T> {
      * @return the new {@link Uni}
      */
     public Uni<T> fail() {
-        return failWith(NoSuchElementException::new);
+        return uniOnPredicate.failWith(NoSuchElementException::new);
     }
 
     /**
@@ -76,7 +55,8 @@ public class UniOnNull<T> {
      * @return the new {@link Uni}
      */
     public Uni<T> switchTo(Uni<? extends T> other) {
-        return switchTo(() -> other);
+        nonNull(other, "other");
+        return uniOnPredicate.transformToUniElse(ignore -> other, item -> Uni.createFrom().item(item));
     }
 
     /**
@@ -88,26 +68,7 @@ public class UniOnNull<T> {
      */
     public Uni<T> switchTo(Supplier<Uni<? extends T>> supplier) {
         Supplier<Uni<? extends T>> actual = Infrastructure.decorate(nonNull(supplier, "supplier"));
-
-        Uni<T> uni = upstream.onItem().transformToUni(res -> {
-            if (res != null) {
-                return Uni.createFrom().item(res);
-            } else {
-                Uni<? extends T> produced;
-                try {
-                    produced = actual.get();
-                } catch (Throwable e) {
-                    return Uni.createFrom().failure(e);
-                }
-
-                if (produced == null) {
-                    return Uni.createFrom().failure(new NullPointerException(SUPPLIER_PRODUCED_NULL));
-                } else {
-                    return produced;
-                }
-            }
-        });
-        return Infrastructure.onUniCreation(uni);
+        return uniOnPredicate.transformToUniElse(ignore -> actual.get(), item -> Uni.createFrom().item(item));
     }
 
     /**
@@ -118,7 +79,7 @@ public class UniOnNull<T> {
      */
     public Uni<T> continueWith(T fallback) {
         nonNull(fallback, "fallback");
-        return continueWith(() -> fallback);
+        return uniOnPredicate.transformElse(ignore -> fallback, item -> item);
     }
 
     /**
@@ -130,16 +91,7 @@ public class UniOnNull<T> {
      */
     public Uni<T> continueWith(Supplier<? extends T> supplier) {
         Supplier<? extends T> actual = Infrastructure.decorate(nonNull(supplier, "supplier"));
-        return Infrastructure.onUniCreation(upstream.onItem().transform(res -> {
-            if (res != null) {
-                return res;
-            }
-            T outcome = actual.get();
-            if (outcome == null) {
-                throw new NullPointerException(SUPPLIER_PRODUCED_NULL);
-            }
-            return outcome;
-        }));
+        return uniOnPredicate.transformElse(ignore -> actual.get(), item -> item);
     }
 
 }

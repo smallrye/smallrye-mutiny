@@ -3,10 +3,7 @@ package io.smallrye.mutiny.groups;
 import static io.smallrye.mutiny.helpers.ParameterValidation.*;
 
 import java.util.Objects;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Supplier;
+import java.util.function.*;
 
 import org.reactivestreams.Publisher;
 
@@ -272,13 +269,26 @@ public class UniOnItem<T> {
     }
 
     /**
-     * Adds specific behavior when the observed {@link Uni} fies a {@code non-null} item. If the item is {@code null},
+     * Adds specific behavior when the observed {@link Uni} fires a {@code non-null} item. If the item is {@code null},
      * default fallbacks are used.
      *
      * @return the object to configure the behavior when receiving a {@code non-null} item
      */
     public UniOnNotNull<T> ifNotNull() {
         return new UniOnNotNull<>(upstream);
+    }
+
+    /**
+     * Adds a specific behavior when the observed {@link Uni} fires an item that matches the given {@code predicate}.
+     * <p>
+     * This allows to perform different actions such as {@code call}, {@code invoke} or {@code transform} conditionally
+     * depending on whether the predicate is matched or not.
+     *
+     * @param predicate the predicate that the emitted item should match
+     * @return the object to configure the behavior when receiving an item
+     */
+    public UniOnPredicate<T> when(Predicate<T> predicate) {
+        return new UniOnPredicate<>(upstream, predicate);
     }
 
     /**

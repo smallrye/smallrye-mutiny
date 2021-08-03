@@ -1,25 +1,25 @@
 package io.smallrye.mutiny.groups;
 
-import io.smallrye.mutiny.Multi;
-import io.smallrye.mutiny.Uni;
-import io.smallrye.mutiny.helpers.ParameterValidation;
-import io.smallrye.mutiny.infrastructure.Infrastructure;
-import io.smallrye.mutiny.subscription.UniEmitter;
-import org.reactivestreams.Publisher;
+import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
 
+import java.util.Objects;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
+import org.reactivestreams.Publisher;
+
+import io.smallrye.mutiny.Multi;
+import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.subscription.UniEmitter;
 
 public class UniOnNotNull<T> {
 
-    private final Uni<T> upstream;
+    private final UniOnPredicate<T> uniOnPredicate;
 
     public UniOnNotNull(Uni<T> upstream) {
-        this.upstream = nonNull(upstream, "upstream");
+        this.uniOnPredicate = new UniOnPredicate<>(nonNull(upstream, "upstream"), Objects::nonNull);
     }
 
     /**
@@ -30,13 +30,7 @@ public class UniOnNotNull<T> {
      * @return the new {@link Uni}
      */
     public Uni<T> invoke(Consumer<? super T> callback) {
-        Consumer<? super T> actual = Infrastructure.decorate(nonNull(callback, "callback"));
-        // Decoration happens in `invoke`
-        return upstream.onItem().invoke(item -> {
-            if (item != null) {
-                actual.accept(item);
-            }
-        });
+        return uniOnPredicate.invoke(callback);
     }
 
     /**
@@ -47,9 +41,7 @@ public class UniOnNotNull<T> {
      * @return the new {@link Uni}
      */
     public Uni<T> invoke(Runnable callback) {
-        Runnable runnable = nonNull(callback, "callback");
-        // Decoration happens in `invoke`
-        return invoke(x -> runnable.run());
+        return uniOnPredicate.invoke(callback);
     }
 
     /**
@@ -64,14 +56,7 @@ public class UniOnNotNull<T> {
      * @return the new {@link Uni}
      */
     public Uni<T> call(Function<? super T, Uni<?>> action) {
-        Function<? super T, Uni<?>> actual = Infrastructure.decorate(nonNull(action, "action"));
-        return upstream.onItem().call(item -> {
-            if (item != null) {
-                return actual.apply(item);
-            } else {
-                return Uni.createFrom().nullItem();
-            }
-        });
+        return uniOnPredicate.call(action);
     }
 
     /**
@@ -86,8 +71,7 @@ public class UniOnNotNull<T> {
      * @return the new {@link Uni}
      */
     public Uni<T> call(Supplier<Uni<?>> action) {
-        Supplier<Uni<?>> actual = Infrastructure.decorate(nonNull(action, "action"));
-        return call(ignored -> actual.get());
+        return uniOnPredicate.call(action);
     }
 
     /**
@@ -104,14 +88,7 @@ public class UniOnNotNull<T> {
      * @return the new {@link Uni}
      */
     public <R> Uni<R> transform(Function<? super T, ? extends R> mapper) {
-        Function<? super T, ? extends R> actual = Infrastructure.decorate(nonNull(mapper, "mapper"));
-        return upstream.onItem().transform(item -> {
-            if (item != null) {
-                return actual.apply(item);
-            } else {
-                return null;
-            }
-        });
+        return uniOnPredicate.transform(mapper);
     }
 
     /**
@@ -133,14 +110,7 @@ public class UniOnNotNull<T> {
      *         in an asynchronous manner.
      */
     public <R> Uni<R> transformToUni(Function<? super T, Uni<? extends R>> mapper) {
-        Function<? super T, Uni<? extends R>> actual = Infrastructure.decorate(nonNull(mapper, "mapper"));
-        return upstream.onItem().transformToUni(item -> {
-            if (item != null) {
-                return actual.apply(item);
-            } else {
-                return Uni.createFrom().nullItem();
-            }
-        });
+        return uniOnPredicate.transformToUni(mapper);
     }
 
     /**
@@ -160,15 +130,7 @@ public class UniOnNotNull<T> {
      * @return the multi
      */
     public <R> Multi<R> transformToMulti(Function<? super T, ? extends Publisher<? extends R>> mapper) {
-        Function<? super T, ? extends Publisher<? extends R>> actual = Infrastructure
-                .decorate(nonNull(mapper, "mapper"));
-        return upstream.onItem().transformToMulti(item -> {
-            if (item != null) {
-                return actual.apply(item);
-            } else {
-                return Multi.createFrom().empty();
-            }
-        });
+        return uniOnPredicate.transformToMulti(mapper);
     }
 
     /**
@@ -188,14 +150,7 @@ public class UniOnNotNull<T> {
      *         in an asynchronous manner.
      */
     public <R> Uni<R> transformToUni(BiConsumer<? super T, UniEmitter<? super R>> consumer) {
-        BiConsumer<? super T, UniEmitter<? super R>> actual = Infrastructure.decorate(nonNull(consumer, "consumer"));
-        return upstream.onItem().transformToUni((item, emitter) -> {
-            if (item != null) {
-                actual.accept(item, emitter);
-            } else {
-                emitter.complete(null);
-            }
-        });
+        return uniOnPredicate.transformToUni(consumer);
     }
 
     /**
@@ -206,11 +161,7 @@ public class UniOnNotNull<T> {
      * @return the new {@link Uni}
      */
     public Uni<T> failWith(Supplier<? extends Throwable> supplier) {
-        Supplier<? extends Throwable> actual = Infrastructure.decorate(nonNull(supplier, "supplier"));
-        return transformToUni(ignored -> {
-            Throwable failure = ParameterValidation.nonNull(actual.get(), "supplier");
-            return Uni.createFrom().failure(failure);
-        });
+        return uniOnPredicate.failWith(supplier);
     }
 
     /**
@@ -220,7 +171,6 @@ public class UniOnNotNull<T> {
      * @return the new {@link Uni}
      */
     public Uni<T> failWith(Throwable failure) {
-        nonNull(failure, "failure");
-        return failWith(() -> failure);
+        return uniOnPredicate.failWith(failure);
     }
 }
