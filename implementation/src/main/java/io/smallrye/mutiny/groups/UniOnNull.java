@@ -1,5 +1,6 @@
 package io.smallrye.mutiny.groups;
 
+import static io.smallrye.mutiny.helpers.ParameterValidation.SUPPLIER_PRODUCED_NULL;
 import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
 
 import java.util.NoSuchElementException;
@@ -55,8 +56,7 @@ public class UniOnNull<T> {
      * @return the new {@link Uni}
      */
     public Uni<T> switchTo(Uni<? extends T> other) {
-        nonNull(other, "other");
-        return uniOnPredicate.transformToUniElse(ignore -> other, item -> Uni.createFrom().item(item));
+        return this.switchTo(() -> other);
     }
 
     /**
@@ -68,7 +68,20 @@ public class UniOnNull<T> {
      */
     public Uni<T> switchTo(Supplier<Uni<? extends T>> supplier) {
         Supplier<Uni<? extends T>> actual = Infrastructure.decorate(nonNull(supplier, "supplier"));
-        return uniOnPredicate.transformToUniElse(ignore -> actual.get(), item -> Uni.createFrom().item(item));
+        return uniOnPredicate.transformToUniElse(ignore -> {
+            Uni<? extends T> produced;
+            try {
+                produced = actual.get();
+            } catch (Throwable e) {
+                return Uni.createFrom().failure(e);
+            }
+
+            if (produced == null) {
+                return Uni.createFrom().failure(new NullPointerException(SUPPLIER_PRODUCED_NULL));
+            } else {
+                return produced;
+            }
+        }, item -> Uni.createFrom().item(item));
     }
 
     /**
@@ -79,7 +92,7 @@ public class UniOnNull<T> {
      */
     public Uni<T> continueWith(T fallback) {
         nonNull(fallback, "fallback");
-        return uniOnPredicate.transformElse(ignore -> fallback, item -> item);
+        return this.continueWith(() -> fallback);
     }
 
     /**
@@ -91,7 +104,13 @@ public class UniOnNull<T> {
      */
     public Uni<T> continueWith(Supplier<? extends T> supplier) {
         Supplier<? extends T> actual = Infrastructure.decorate(nonNull(supplier, "supplier"));
-        return uniOnPredicate.transformElse(ignore -> actual.get(), item -> item);
+        return uniOnPredicate.transformElse(ignore -> {
+            T outcome = actual.get();
+            if (outcome == null) {
+                throw new NullPointerException(SUPPLIER_PRODUCED_NULL);
+            }
+            return outcome;
+        }, item -> item);
     }
 
 }
