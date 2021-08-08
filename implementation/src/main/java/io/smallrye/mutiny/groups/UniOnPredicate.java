@@ -157,6 +157,11 @@ public class UniOnPredicate<T> {
      * ambiguous type information, {@code null} is returned instead. If you want to have a different behavior for this
      * case, please use {@link #transformElse(Function, Function)}.
      * <p>
+     * Therefore, this method is equivalent to the following:
+     * <pre>
+     * uni.onItem().transform(item -> predicate.test(item) ? item : null)
+     *    .onItem().ifNotNull().transform(mapper);
+     * </pre>
      * For asynchronous composition, see {@link #transformToUni(Function)}.
      *
      * @param mapper the mapper function called if the item matches the predicate, must not be {@code null}
@@ -209,6 +214,11 @@ public class UniOnPredicate<T> {
      * ambiguous type information, {@code null} is returned instead. If you want to have a different behavior for this
      * case, please use {@link #transformToUniElse(Function, Function)}.
      * <p>
+     * Therefore, this method is equivalent to the following:
+     * <pre>
+     * uni.onItem().transform(item -> predicate.test(item) ? item : null)
+     *    .onItem().ifNotNull().transformToUni(mapper);
+     * </pre>
      * This operation is generally named {@code flatMap}.
      *
      * @param mapper the function called with the item of this {@link Uni} and producing the {@link Uni},
@@ -270,6 +280,11 @@ public class UniOnPredicate<T> {
      * ambiguous type information, an empty {@link Multi} is returned instead. If you want to have a different behavior
      * for this case, please use {@link #transformToMultiElse(Function, Function)}.
      * <p>
+     * Therefore, this method is equivalent to the following:
+     * <pre>
+     * uni.onItem().transform(item -> predicate.test(item) ? item : null)
+     *    .onItem().ifNotNull().transformToMulti(mapper);
+     * </pre>
      * This operation is generally named {@code flatMapPublisher}.
      *
      * @param mapper the mapper, must not be {@code null}, may expect to receive {@code null} as item.
@@ -329,6 +344,12 @@ public class UniOnPredicate<T> {
      * not be of the same type as the result of the mapper function. Therefore, to avoid having a pipeline with
      * ambiguous type information, {@code null} is returned instead.. If you want to have a different behavior
      * for this case, please use {@link #transformToUniElse(BiConsumer, BiConsumer)}.
+     * <p>
+     * Therefore, this method is equivalent to the following:
+     * <pre>
+     * uni.onItem().transform(item -> predicate.test(item) ? item : null)
+     *    .onItem().ifNotNull().transformToUni(consumer);
+     * </pre>
      *
      * @param consumer the function called with the item of the this {@link Uni} and an {@link UniEmitter} if the item
      *                 matches the predicate, must not be {@code null}
