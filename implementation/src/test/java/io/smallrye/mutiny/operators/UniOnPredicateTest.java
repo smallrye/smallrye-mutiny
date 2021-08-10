@@ -394,7 +394,7 @@ public class UniOnPredicateTest {
     public void testFailWithExceptionNotCalledOnItem() {
         assertThat(Uni.createFrom().item(1).onItem().when(Objects::isNull).failWith(new IOException("boom")).await()
                 .indefinitely())
-                .isEqualTo(1);
+                        .isEqualTo(1);
     }
 
     @Test
@@ -409,6 +409,6 @@ public class UniOnPredicateTest {
     public void testFailWithExceptionSupplierNotCalledOnItem() {
         assertThat(Uni.createFrom().item(1).onItem().when(Objects::isNull).failWith(new IOException("boom")).await()
                 .indefinitely())
-                .isEqualTo(1);
+                        .isEqualTo(1);
     }
 }

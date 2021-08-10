@@ -158,10 +158,14 @@ public class UniOnPredicate<T> {
      * case, please use {@link #transformElse(Function, Function)}.
      * <p>
      * Therefore, this method is equivalent to the following:
+     * 
      * <pre>
+     * {@code
      * uni.onItem().transform(item -> predicate.test(item) ? item : null)
      *    .onItem().ifNotNull().transform(mapper);
+     * }
      * </pre>
+     * 
      * For asynchronous composition, see {@link #transformToUni(Function)}.
      *
      * @param mapper the mapper function called if the item matches the predicate, must not be {@code null}
@@ -215,10 +219,14 @@ public class UniOnPredicate<T> {
      * case, please use {@link #transformToUniElse(Function, Function)}.
      * <p>
      * Therefore, this method is equivalent to the following:
+     * 
      * <pre>
+     * {@code
      * uni.onItem().transform(item -> predicate.test(item) ? item : null)
      *    .onItem().ifNotNull().transformToUni(mapper);
+     * }
      * </pre>
+     * 
      * This operation is generally named {@code flatMap}.
      *
      * @param mapper the function called with the item of this {@link Uni} and producing the {@link Uni},
@@ -245,9 +253,9 @@ public class UniOnPredicate<T> {
      * This operation is generally named {@code flatMap}.
      *
      * @param mapper the function called with the item of this {@link Uni} and producing the {@link Uni} if the item
-     *               matches the predicate, must not be {@code null}, must not return {@code null}
+     *        matches the predicate, must not be {@code null}, must not return {@code null}
      * @param elseMapper the function with the item of this {@link Uni} and producing the {@link Uni} in case the
-     *                   predicate is not matched, must not be {@code null}, must not return {@code null}
+     *        predicate is not matched, must not be {@code null}, must not return {@code null}
      * @param <R> the type of item
      * @return a new {@link Uni} that would fire events from the uni produced by the mapper function, possibly
      *         in an asynchronous manner.
@@ -281,10 +289,14 @@ public class UniOnPredicate<T> {
      * for this case, please use {@link #transformToMultiElse(Function, Function)}.
      * <p>
      * Therefore, this method is equivalent to the following:
+     * 
      * <pre>
+     * {@code
      * uni.onItem().transform(item -> predicate.test(item) ? item : null)
      *    .onItem().ifNotNull().transformToMulti(mapper);
+     * }
      * </pre>
+     * 
      * This operation is generally named {@code flatMapPublisher}.
      *
      * @param mapper the mapper, must not be {@code null}, may expect to receive {@code null} as item.
@@ -309,9 +321,9 @@ public class UniOnPredicate<T> {
      * This operation is generally named {@code flatMapPublisher}.
      *
      * @param mapper the mapper function called if the item matches the predicate, must not be {@code null}, may expect
-     *               to receive {@code null} as item
+     *        to receive {@code null} as item
      * @param elseMapper the mapper function in case the predicate is not matched, must not be {@code null}, may expect
-     *                   to receive {@code null} as item
+     *        to receive {@code null} as item
      * @param <R> the type of item produced by the resulting {@link Multi}
      * @return the multi
      */
@@ -346,13 +358,16 @@ public class UniOnPredicate<T> {
      * for this case, please use {@link #transformToUniElse(BiConsumer, BiConsumer)}.
      * <p>
      * Therefore, this method is equivalent to the following:
+     * 
      * <pre>
+     * {@code
      * uni.onItem().transform(item -> predicate.test(item) ? item : null)
      *    .onItem().ifNotNull().transformToUni(consumer);
+     * }
      * </pre>
      *
      * @param consumer the function called with the item of the this {@link Uni} and an {@link UniEmitter} if the item
-     *                 matches the predicate, must not be {@code null}
+     *        matches the predicate, must not be {@code null}
      * @param <R> the type of item emitted by the emitter
      * @return a new {@link Uni} that would fire events from the emitter consumed by the mapper function, possibly
      *         in an asynchronous manner.
@@ -373,9 +388,9 @@ public class UniOnPredicate<T> {
      * not.
      *
      * @param consumer the function called with the item of the this {@link Uni} and an {@link UniEmitter} if the item
-     *                 matches the predicate, must not be {@code null}
+     *        matches the predicate, must not be {@code null}
      * @param elseConsumer the function called with the item of the this {@link Uni} and an {@link UniEmitter} in case
-     *                     the item does not match the predicate, must not be {@code null}
+     *        the item does not match the predicate, must not be {@code null}
      * @param <R> the type of item emitted by the emitter
      * @return a new {@link Uni} that would fire events from the emitter consumed by the mapper function, possibly
      *         in an asynchronous manner.
