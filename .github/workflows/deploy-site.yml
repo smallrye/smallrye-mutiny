@@ -20,9 +20,10 @@ jobs:
           ref: ${{ github.event.ref }}
           token: ${{ secrets.GITHUB_API_TOKEN }}
       - name: Install JDK 11
-        uses: AdoptOpenJDK/install-jdk@v1
+        uses: actions/setup-java@v2
         with:
-          version: 11
+          java-version: 11
+          distribution: adopt
       - name: 'Setup Ruby'
         uses: ruby/setup-ruby@v1
         with:
