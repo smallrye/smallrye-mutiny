@@ -23,7 +23,7 @@ jobs:
         uses: actions/setup-java@v2
         with:
           java-version: 11
-          distribution: adopt
+          distribution: temurin
       - name: 'Collect Compatibility Justification'
         env:
           GITHUB_CONTEXT: ${{ toJson(github) }}

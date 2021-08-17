@@ -29,7 +29,7 @@ jobs:
       - uses: actions/setup-java@v2
         name: set up jdk ${{matrix.java.version}}
         with:
-          distribution: adopt
+          distribution: temurin
           java-version: ${{matrix.java.version}}
       - name: Build with Maven
         env:
@@ -48,7 +48,7 @@ jobs:
       - uses: actions/setup-java@v2
         with:
           java-version: 11
-          distribution: adopt
+          distribution: temurin
       - name: Deploy snapshots
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -69,7 +69,7 @@ jobs:
       - uses: actions/setup-java@v2
         with:
           java-version: 11
-          distribution: adopt
+          distribution: temurin
       - name: Coverage and Sonar
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -98,6 +98,6 @@ jobs:
       - uses: actions/setup-java@v2
         with:
           java-version: 11
-          distribution: adopt
+          distribution: temurin
       - name: Compatibility Check
         run: mvn -s .build/maven-ci-settings.xml -pl '!bom' -B install revapi:check@check-compatibility -DskipTests -fae
