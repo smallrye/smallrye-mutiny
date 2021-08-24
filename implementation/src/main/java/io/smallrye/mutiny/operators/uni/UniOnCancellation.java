@@ -54,7 +54,7 @@ public class UniOnCancellation<T> extends UniOperator<T, T> {
         @Override
         public void cancel() {
             if (state.compareAndSet(State.INIT, State.CANCELLED)) {
-                UniSubscription sub = upstream.getAndSet(CANCELLED);
+                UniSubscription sub = getAndSetUpstreamSubscription(CANCELLED);
                 callback.run();
                 if (sub != null) {
                     sub.cancel();

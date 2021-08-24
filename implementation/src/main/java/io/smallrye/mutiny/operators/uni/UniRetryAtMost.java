@@ -39,7 +39,7 @@ public class UniRetryAtMost<T> extends UniOperator<T, T> {
         @Override
         public void onSubscribe(UniSubscription subscription) {
             int count = counter.incrementAndGet();
-            if (upstream.compareAndSet(null, subscription)) {
+            if (compareAndSetUpstreamSubscription(null, subscription)) {
                 if (count == 1) {
                     downstream.onSubscribe(this);
                 }
@@ -61,7 +61,7 @@ public class UniRetryAtMost<T> extends UniOperator<T, T> {
                 downstream.onFailure(failure);
                 return;
             }
-            UniSubscription previousSubscription = upstream.getAndSet(null);
+            UniSubscription previousSubscription = getAndSetUpstreamSubscription(null);
             if (previousSubscription != null) {
                 previousSubscription.cancel();
             }
