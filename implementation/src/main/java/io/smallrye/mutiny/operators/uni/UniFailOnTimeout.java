@@ -50,7 +50,7 @@ public class UniFailOnTimeout<I> extends UniOperator<I, I> {
                 timeoutFuture = executor.schedule(this::doTimeout, timeout.toMillis(), TimeUnit.MILLISECONDS);
             } catch (RejectedExecutionException e) {
                 // Executor out of service.
-                upstream.set(CANCELLED);
+                getAndSetUpstreamSubscription(CANCELLED);
                 subscription.cancel();
                 downstream.onSubscribe(EmptyUniSubscription.DONE);
                 downstream.onFailure(e);
@@ -61,7 +61,7 @@ public class UniFailOnTimeout<I> extends UniOperator<I, I> {
 
         @Override
         public void onItem(I item) {
-            UniSubscription sub = upstream.getAndSet(CANCELLED);
+            UniSubscription sub = getAndSetUpstreamSubscription(CANCELLED);
             if (sub != CANCELLED) {
                 if (timeoutFuture != null) {
                     timeoutFuture.cancel(false);
@@ -72,7 +72,7 @@ public class UniFailOnTimeout<I> extends UniOperator<I, I> {
 
         @Override
         public void onFailure(Throwable failure) {
-            UniSubscription sub = upstream.getAndSet(CANCELLED);
+            UniSubscription sub = getAndSetUpstreamSubscription(CANCELLED);
             if (sub != CANCELLED) {
                 if (timeoutFuture != null) {
                     timeoutFuture.cancel(false);

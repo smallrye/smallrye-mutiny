@@ -37,7 +37,7 @@ public class UniOnItemTransformToUni<I, O> extends UniOperator<I, O> {
 
         @Override
         public void onSubscribe(UniSubscription subscription) {
-            if (upstream.get() == null) {
+            if (getCurrentUpstreamSubscription() == null) {
                 super.onSubscribe(subscription);
             } else if (innerSubscription == null) {
                 this.innerSubscription = subscription;

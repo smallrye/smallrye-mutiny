@@ -14,9 +14,10 @@ public abstract class UniOperatorProcessor<I, O> implements UniSubscriber<I>, Un
 
     protected final UniSubscriber<? super O> downstream;
 
-    private static final AtomicReferenceFieldUpdater<UniOperatorProcessor,UniSubscription> updater = AtomicReferenceFieldUpdater.newUpdater(UniOperatorProcessor.class, UniSubscription.class, "upstream");
+    private static final AtomicReferenceFieldUpdater<UniOperatorProcessor, UniSubscription> updater = AtomicReferenceFieldUpdater
+            .newUpdater(UniOperatorProcessor.class, UniSubscription.class, "upstream");
 
-    protected volatile UniSubscription upstream;
+    private volatile UniSubscription upstream;
 
     public UniOperatorProcessor(UniSubscriber<? super O> downstream) {
         this.downstream = ParameterValidation.nonNull(downstream, "downstream");
@@ -61,4 +62,17 @@ public abstract class UniOperatorProcessor<I, O> implements UniSubscriber<I>, Un
     public boolean isCancelled() {
         return upstream == CANCELLED;
     }
+
+    protected final UniSubscription getCurrentUpstreamSubscription() {
+        return upstream;
+    }
+
+    protected final UniSubscription getAndSetUpstreamSubscription(UniSubscription newValue) {
+        return updater.getAndSet(this, newValue);
+    }
+
+    protected final boolean compareAndSetUpstreamSubscription(UniSubscription expect, UniSubscription update) {
+        return updater.compareAndSet(this, expect, update);
+    }
+
 }
