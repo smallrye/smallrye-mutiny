@@ -25,7 +25,7 @@ public abstract class UniOperatorProcessor<I, O> implements UniSubscriber<I>, Un
 
     @Override
     public void onSubscribe(UniSubscription subscription) {
-        if (updater.compareAndSet(this, null, subscription)) {
+        if (compareAndSetUpstreamSubscription(null, subscription)) {
             downstream.onSubscribe(this);
         } else {
             subscription.cancel();
@@ -35,7 +35,7 @@ public abstract class UniOperatorProcessor<I, O> implements UniSubscriber<I>, Un
     @Override
     @SuppressWarnings("unchecked")
     public void onItem(I item) {
-        UniSubscription subscription = updater.getAndSet(this, CANCELLED);
+        UniSubscription subscription = getAndSetUpstreamSubscription(CANCELLED);
         if (subscription != CANCELLED) {
             downstream.onItem((O) item);
         }
@@ -43,7 +43,7 @@ public abstract class UniOperatorProcessor<I, O> implements UniSubscriber<I>, Un
 
     @Override
     public void onFailure(Throwable failure) {
-        UniSubscription subscription = updater.getAndSet(this, CANCELLED);
+        UniSubscription subscription = getAndSetUpstreamSubscription(CANCELLED);
         if (subscription != CANCELLED) {
             downstream.onFailure(failure);
         } else {
@@ -53,7 +53,7 @@ public abstract class UniOperatorProcessor<I, O> implements UniSubscriber<I>, Un
 
     @Override
     public void cancel() {
-        UniSubscription subscription = updater.getAndSet(this, CANCELLED);
+        UniSubscription subscription = getAndSetUpstreamSubscription(CANCELLED);
         if (subscription != null && subscription != CANCELLED && subscription != DONE) {
             subscription.cancel();
         }
