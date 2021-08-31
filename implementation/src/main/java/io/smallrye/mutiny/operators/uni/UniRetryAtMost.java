@@ -3,7 +3,7 @@ package io.smallrye.mutiny.operators.uni;
 import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
 import static io.smallrye.mutiny.helpers.ParameterValidation.positive;
 
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 import java.util.function.Predicate;
 
 import io.smallrye.mutiny.Uni;
@@ -25,21 +25,26 @@ public class UniRetryAtMost<T> extends UniOperator<T, T> {
 
     @Override
     public void subscribe(UniSubscriber<? super T> subscriber) {
-        AbstractUni.subscribe(upstream(), new UniRetryAtMostProcessor(subscriber));
+        AbstractUni.subscribe(upstream(), new UniRetryAtMostProcessor<T>(this, subscriber));
     }
 
-    private class UniRetryAtMostProcessor extends UniOperatorProcessor<T, T> {
+    private static class UniRetryAtMostProcessor<T> extends UniOperatorProcessor<T, T> {
 
-        private final AtomicInteger counter = new AtomicInteger(0);
+        private final UniRetryAtMost<T> uniRetryAtMost;
 
-        public UniRetryAtMostProcessor(UniSubscriber<? super T> downstream) {
+        private volatile int counter = 0;
+        private static final AtomicIntegerFieldUpdater<UniRetryAtMostProcessor> counterUpdater = AtomicIntegerFieldUpdater
+                .newUpdater(UniRetryAtMostProcessor.class, "counter");
+
+        public UniRetryAtMostProcessor(UniRetryAtMost<T> uniRetryAtMost, UniSubscriber<? super T> downstream) {
             super(downstream);
+            this.uniRetryAtMost = uniRetryAtMost;
         }
 
         @Override
         public void onSubscribe(UniSubscription subscription) {
-            int count = counter.incrementAndGet();
-            if (upstream.compareAndSet(null, subscription)) {
+            int count = counterUpdater.incrementAndGet(this);
+            if (compareAndSetUpstreamSubscription(null, subscription)) {
                 if (count == 1) {
                     downstream.onSubscribe(this);
                 }
@@ -57,21 +62,21 @@ public class UniRetryAtMost<T> extends UniOperator<T, T> {
             if (!testPredicate(failure)) {
                 return;
             }
-            if (counter.get() > maxAttempts) {
+            if (counter > uniRetryAtMost.maxAttempts) {
                 downstream.onFailure(failure);
                 return;
             }
-            UniSubscription previousSubscription = upstream.getAndSet(null);
+            UniSubscription previousSubscription = getAndSetUpstreamSubscription(null);
             if (previousSubscription != null) {
                 previousSubscription.cancel();
             }
-            AbstractUni.subscribe(upstream(), this);
+            AbstractUni.subscribe(uniRetryAtMost.upstream(), this);
         }
 
         private boolean testPredicate(Throwable failure) {
             boolean passes;
             try {
-                passes = predicate.test(failure);
+                passes = uniRetryAtMost.predicate.test(failure);
             } catch (Throwable e) {
                 downstream.onFailure(e);
                 return false;

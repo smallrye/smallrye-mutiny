@@ -3,7 +3,7 @@ package io.smallrye.mutiny.operators.uni;
 import static io.smallrye.mutiny.helpers.EmptyUniSubscription.CANCELLED;
 import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
 
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import java.util.function.Supplier;
 
 import io.smallrye.mutiny.Uni;
@@ -24,7 +24,7 @@ public class UniOnCancellationCall<I> extends UniOperator<I, I> {
 
     @Override
     public void subscribe(UniSubscriber<? super I> subscriber) {
-        AbstractUni.subscribe(upstream(), new UniOnCancellationCallProcessor(subscriber));
+        AbstractUni.subscribe(upstream(), new UniOnCancellationCallProcessor<I>(supplier, subscriber));
     }
 
     private enum State {
@@ -33,32 +33,37 @@ public class UniOnCancellationCall<I> extends UniOperator<I, I> {
         CANCELLED
     }
 
-    private class UniOnCancellationCallProcessor extends UniOperatorProcessor<I, I> {
+    private static class UniOnCancellationCallProcessor<I> extends UniOperatorProcessor<I, I> {
 
-        public UniOnCancellationCallProcessor(UniSubscriber<? super I> downstream) {
+        private final Supplier<Uni<?>> supplier;
+
+        private volatile State state = State.INIT;
+        private static final AtomicReferenceFieldUpdater<UniOnCancellationCallProcessor, State> stateUpdater = AtomicReferenceFieldUpdater
+                .newUpdater(UniOnCancellationCallProcessor.class, State.class, "state");
+
+        public UniOnCancellationCallProcessor(Supplier<Uni<?>> supplier, UniSubscriber<? super I> downstream) {
             super(downstream);
+            this.supplier = supplier;
         }
-
-        private final AtomicReference<State> state = new AtomicReference<>(State.INIT);
 
         @Override
         public void onItem(I item) {
-            if (state.compareAndSet(State.INIT, State.DONE)) {
+            if (stateUpdater.compareAndSet(this, State.INIT, State.DONE)) {
                 downstream.onItem(item);
             }
         }
 
         @Override
         public void onFailure(Throwable failure) {
-            if (state.compareAndSet(State.INIT, State.DONE)) {
+            if (stateUpdater.compareAndSet(this, State.INIT, State.DONE)) {
                 downstream.onFailure(failure);
             }
         }
 
         @Override
         public void cancel() {
-            if (state.compareAndSet(State.INIT, State.CANCELLED)) {
-                UniSubscription sub = upstream.getAndSet(CANCELLED);
+            if (stateUpdater.compareAndSet(this, State.INIT, State.CANCELLED)) {
+                UniSubscription sub = getAndSetUpstreamSubscription(CANCELLED);
                 execute().subscribe().with(
                         ignoredItem -> {
                             if (sub != null) {

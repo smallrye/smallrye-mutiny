@@ -41,7 +41,7 @@ public class UniOnFailureFlatMap<I> extends UniOperator<I, I> {
 
         @Override
         public void onSubscribe(UniSubscription subscription) {
-            if (upstream.get() == null) {
+            if (getCurrentUpstreamSubscription() == null) {
                 super.onSubscribe(subscription);
             } else if (innerSubscription == null) {
                 this.innerSubscription = subscription;
