@@ -21,6 +21,9 @@ import io.smallrye.mutiny.tuples.Functions;
 
 public class Infrastructure {
 
+    private static final String DISABLE_CALLBACK_DECORATORS_PROP_NAME = "mutiny.disableCallBackDecorators";
+    private static final boolean DISABLE_CALLBACK_DECORATORS = Boolean.getBoolean(DISABLE_CALLBACK_DECORATORS_PROP_NAME);
+
     static {
         ServiceLoader<ExecutorConfiguration> executorLoader = ServiceLoader.load(ExecutorConfiguration.class);
         Iterator<ExecutorConfiguration> iterator = executorLoader.iterator();
@@ -313,11 +316,13 @@ public class Infrastructure {
     }
 
     public static void reloadCallbackDecorators() {
-        ServiceLoader<CallbackDecorator> loader = ServiceLoader.load(CallbackDecorator.class);
-        ArrayList<CallbackDecorator> interceptors = new ArrayList<>();
-        loader.forEach(interceptors::add);
-        interceptors.sort(Comparator.comparingInt(MutinyInterceptor::ordinal));
-        CALLBACK_DECORATORS = interceptors.toArray(CALLBACK_DECORATORS);
+        if (!DISABLE_CALLBACK_DECORATORS) {
+            ServiceLoader<CallbackDecorator> loader = ServiceLoader.load(CallbackDecorator.class);
+            ArrayList<CallbackDecorator> interceptors = new ArrayList<>();
+            loader.forEach(interceptors::add);
+            interceptors.sort(Comparator.comparingInt(MutinyInterceptor::ordinal));
+            CALLBACK_DECORATORS = interceptors.toArray(CALLBACK_DECORATORS);
+        }
     }
 
     public static void clearInterceptors() {
