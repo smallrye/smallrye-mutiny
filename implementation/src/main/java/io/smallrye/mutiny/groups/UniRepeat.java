@@ -88,10 +88,10 @@ public class UniRepeat<T> {
 
     /**
      * Generates a stream, containing the items from the upstream {@link Uni}, resubscribed until the given predicate
-     * returns {@code true}. The predicate is called on the item produced by the {@link Uni}. If it does not pass, the
+     * returns {@code true}. The predicate is called on the item produced by the {@link Uni}. If it passes, the
      * item is not propagated downstream and the repetition is stopped.
      * <p>
-     * Unlike {@link #whilst(Predicate)}, the checked item is only propagated downstream if it passed the predicate.
+     * Unlike {@link #whilst(Predicate)}, the checked item is only propagated downstream if it did not pass the predicate.
      * For example, if you use an API returning "null" or an empty set once you reach the end, you can stop the
      * repetition when this case is detected.
      * <p>
