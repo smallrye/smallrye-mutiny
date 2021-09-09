@@ -39,7 +39,7 @@ public class ExponentialBackoff {
         AtomicInteger index = new AtomicInteger();
         return t -> t
                 .onItem().transformToUni(failure -> {
-                    int iteration = index.incrementAndGet();
+                    int iteration = index.getAndIncrement();
                     if (iteration >= numRetries) {
                         return Uni.createFrom().failure(
                                 new IllegalStateException("Retries exhausted: " + iteration + "/" + numRetries,

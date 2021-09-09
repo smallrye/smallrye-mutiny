@@ -11,7 +11,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Multi;
@@ -87,7 +86,6 @@ public class MultiOnFailureRetryWhenTest {
     }
 
     @Test
-    @Disabled("To be investigated - the switch to the strict serializer broken the cancellation check")
     public void testWhatTheWhenStreamFailsTheUpstreamIsCancelled() {
         AtomicBoolean subscribed = new AtomicBoolean();
         AtomicBoolean cancelled = new AtomicBoolean();
@@ -318,9 +316,9 @@ public class MultiOnFailureRetryWhenTest {
                 .onFailure().retry().withBackOff(Duration.ofMillis(10), Duration.ofHours(1)).withJitter(0.1)
                 .atMost(4)
                 .subscribe().withSubscriber(AssertSubscriber.create(100));
-        await().until(() -> subscriber.getItems().size() >= 8);
+        await().until(() -> subscriber.getItems().size() >= 10);
         subscriber
-                .assertItems(0, 1, 0, 1, 0, 1, 0, 1)
+                .assertItems(0, 1, 0, 1, 0, 1, 0, 1, 0, 1) // Initial subscription + 4 retries
                 .assertFailedWith(IllegalStateException.class, "Retries exhausted");
 
     }
@@ -335,9 +333,9 @@ public class MultiOnFailureRetryWhenTest {
                 .atMost(4)
                 .subscribe().withSubscriber(AssertSubscriber.create(100));
 
-        await().until(() -> subscriber.getItems().size() >= 8);
+        await().until(() -> subscriber.getItems().size() >= 10);
         subscriber
-                .assertItems(0, 1, 0, 1, 0, 1, 0, 1)
+                .assertItems(0, 1, 0, 1, 0, 1, 0, 1, 0, 1) // Initial subscription + 4 retries
                 .assertFailedWith(IllegalStateException.class, "Retries exhausted: 4/4");
     }
 
@@ -352,9 +350,9 @@ public class MultiOnFailureRetryWhenTest {
 
         await()
                 .atMost(1, TimeUnit.MINUTES)
-                .until(() -> subscriber.getItems().size() >= 8);
+                .until(() -> subscriber.getItems().size() >= 10);
         subscriber
-                .assertItems(0, 1, 0, 1, 0, 1, 0, 1)
+                .assertItems(0, 1, 0, 1, 0, 1, 0, 1, 0, 1) // Initial subscription + 4 retries
                 .assertFailedWith(IllegalStateException.class, "Retries exhausted: 4/4");
     }
 
