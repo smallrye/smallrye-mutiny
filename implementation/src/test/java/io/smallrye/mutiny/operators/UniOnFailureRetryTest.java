@@ -1,5 +1,6 @@
 package io.smallrye.mutiny.operators;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.concurrent.atomic.AtomicInteger;
@@ -83,5 +84,20 @@ public class UniOnFailureRetryTest {
                 .onFailure().retry().atMost(2)
                 .subscribe().withSubscriber(UniAssertSubscriber.create())
                 .assertItem(1);
+    }
+
+    @Test
+    public void testThatNumberOfRetryIfCorrect() {
+        AtomicInteger calls = new AtomicInteger();
+
+        UniAssertSubscriber<Integer> subscriber = Uni.createFrom().<Integer> item(() -> {
+            calls.incrementAndGet();
+            throw new RuntimeException("boom");
+        })
+                .onFailure().retry().atMost(3)
+                .subscribe().withSubscriber(UniAssertSubscriber.create());
+
+        subscriber.awaitFailure();
+        assertThat(calls).hasValue(4); // initial subscription + 3 retries
     }
 }
