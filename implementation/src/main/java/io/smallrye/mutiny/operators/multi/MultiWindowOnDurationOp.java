@@ -66,7 +66,7 @@ public class MultiWindowOnDurationOp<T> extends AbstractMultiOperator<T, Multi<T
 
         @Override
         public void onSubscribe(Subscription s) {
-            if (upstream.compareAndSet(null, s)) {
+            if (compareAndSetUpstreamSubscription(null, s)) {
                 downstream.onSubscribe(this);
 
                 if (isCancelled()) {
@@ -127,7 +127,7 @@ public class MultiWindowOnDurationOp<T> extends AbstractMultiOperator<T, Multi<T
 
         @Override
         public void onFailure(Throwable t) {
-            Subscription subscription = upstream.getAndSet(CANCELLED);
+            Subscription subscription = getAndSetUpstreamSubscription(CANCELLED);
             if (subscription != CANCELLED) {
                 done = true;
                 failure = t;
@@ -144,7 +144,7 @@ public class MultiWindowOnDurationOp<T> extends AbstractMultiOperator<T, Multi<T
 
         @Override
         public void onCompletion() {
-            Subscription subscription = upstream.getAndSet(CANCELLED);
+            Subscription subscription = getAndSetUpstreamSubscription(CANCELLED);
             if (subscription != CANCELLED) {
                 done = true;
                 if (canStartWork()) {

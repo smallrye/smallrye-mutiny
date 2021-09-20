@@ -50,9 +50,9 @@ public class MultiOnOverflowDropItemsOp<T> extends AbstractMultiOperator<T, T> {
 
         @Override
         public void onSubscribe(Subscription subscription) {
-            if (upstream.compareAndSet(null, subscription)) {
+            if (compareAndSetUpstreamSubscription(null, subscription)) {
                 downstream.onSubscribe(this);
-                upstream.get().request(Long.MAX_VALUE);
+                getUpstreamSubscription().request(Long.MAX_VALUE);
             } else {
                 subscription.cancel();
             }

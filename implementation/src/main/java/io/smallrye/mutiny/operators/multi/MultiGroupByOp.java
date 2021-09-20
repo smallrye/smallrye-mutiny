@@ -77,7 +77,7 @@ public final class MultiGroupByOp<T, K, V> extends AbstractMultiOperator<T, Grou
 
         @Override
         public void onSubscribe(Subscription subscription) {
-            if (upstream.compareAndSet(null, subscription)) {
+            if (compareAndSetUpstreamSubscription(null, subscription)) {
                 // Propagate subscription to downstream.
                 downstream.onSubscribe(this);
                 subscription.request(128);
@@ -136,7 +136,7 @@ public final class MultiGroupByOp<T, K, V> extends AbstractMultiOperator<T, Grou
 
         @Override
         public void onFailure(Throwable throwable) {
-            Subscription subscription = upstream.getAndSet(CANCELLED);
+            Subscription subscription = getAndSetUpstreamSubscription(CANCELLED);
             if (subscription != CANCELLED) {
                 done = true;
                 groups.values().forEach(group -> group.onFailure(throwable));
@@ -151,7 +151,7 @@ public final class MultiGroupByOp<T, K, V> extends AbstractMultiOperator<T, Grou
 
         @Override
         public void onCompletion() {
-            Subscription subscription = upstream.getAndSet(CANCELLED);
+            Subscription subscription = getAndSetUpstreamSubscription(CANCELLED);
             if (subscription != CANCELLED) {
                 done = true;
                 groups.values().forEach(GroupedUnicast::onComplete);
@@ -175,7 +175,7 @@ public final class MultiGroupByOp<T, K, V> extends AbstractMultiOperator<T, Grou
             // but running groups still require new values
             if (cancelled.compareAndSet(false, true)) {
                 if (groupCount.decrementAndGet() == 0) {
-                    Subscriptions.cancel(upstream);
+                    cancelUpstream();
                 }
             }
         }
@@ -184,7 +184,7 @@ public final class MultiGroupByOp<T, K, V> extends AbstractMultiOperator<T, Grou
             Object mapKey = key != null ? key : NO_KEY;
             groups.remove(mapKey);
             if (groupCount.decrementAndGet() == 0) {
-                Subscriptions.cancel(upstream);
+                cancelUpstream();
 
                 if (wip.getAndIncrement() == 0) {
                     queue.clear();
@@ -410,7 +410,7 @@ public final class MultiGroupByOp<T, K, V> extends AbstractMultiOperator<T, Grou
                         if (r != Long.MAX_VALUE) {
                             requested.addAndGet(-e);
                         }
-                        parent.upstream.get().request(e);
+                        parent.getUpstreamSubscription().request(e);
                     }
                 }
 
@@ -431,7 +431,7 @@ public final class MultiGroupByOp<T, K, V> extends AbstractMultiOperator<T, Grou
                     emitted++;
                 }
                 if (emitted != 0) {
-                    parent.upstream.get().request(emitted);
+                    parent.getUpstreamSubscription().request(emitted);
                 }
                 return true;
             }

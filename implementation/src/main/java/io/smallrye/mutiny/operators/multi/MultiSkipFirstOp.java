@@ -42,7 +42,7 @@ public final class MultiSkipFirstOp<T> extends AbstractMultiOperator<T, T> {
 
         @Override
         public void onSubscribe(Subscription subscription) {
-            if (upstream.compareAndSet(null, subscription)) {
+            if (compareAndSetUpstreamSubscription(null, subscription)) {
                 downstream.onSubscribe(this);
                 long l = remaining.get();
                 // Do not request 0

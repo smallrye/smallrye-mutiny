@@ -84,7 +84,7 @@ public class MultiBufferOp<T> extends AbstractMultiOperator<T, List<T>> {
 
         @Override
         public void request(long n) {
-            Subscription subscription = upstream.get();
+            Subscription subscription = getUpstreamSubscription();
             if (subscription != CANCELLED) {
                 subscription.request(Subscriptions.multiply(n, size));
             }
@@ -110,7 +110,7 @@ public class MultiBufferOp<T> extends AbstractMultiOperator<T, List<T>> {
 
         @Override
         public void onCompletion() {
-            Subscription subscription = upstream.getAndSet(CANCELLED);
+            Subscription subscription = getAndSetUpstreamSubscription(CANCELLED);
             if (subscription != CANCELLED) {
                 List<T> buffer = current;
                 if (buffer != null && !buffer.isEmpty()) {
@@ -179,7 +179,7 @@ public class MultiBufferOp<T> extends AbstractMultiOperator<T, List<T>> {
 
         @Override
         public void onFailure(Throwable t) {
-            Subscription subscription = upstream.getAndSet(CANCELLED);
+            Subscription subscription = getAndSetUpstreamSubscription(CANCELLED);
             if (subscription != CANCELLED) {
                 current = null;
                 downstream.onFailure(t);
@@ -190,7 +190,7 @@ public class MultiBufferOp<T> extends AbstractMultiOperator<T, List<T>> {
 
         @Override
         public void onCompletion() {
-            Subscription subscription = upstream.getAndSet(CANCELLED);
+            Subscription subscription = getAndSetUpstreamSubscription(CANCELLED);
             if (subscription != CANCELLED) {
                 List<T> buffer = current;
                 current = null;
@@ -277,7 +277,7 @@ public class MultiBufferOp<T> extends AbstractMultiOperator<T, List<T>> {
 
         @Override
         public void onFailure(Throwable t) {
-            Subscription subscription = upstream.getAndSet(CANCELLED);
+            Subscription subscription = getAndSetUpstreamSubscription(CANCELLED);
             if (subscription != CANCELLED) {
                 downstream.onFailure(t);
             } else {
@@ -287,7 +287,7 @@ public class MultiBufferOp<T> extends AbstractMultiOperator<T, List<T>> {
 
         @Override
         public void onCompletion() {
-            Subscription subscription = upstream.getAndSet(CANCELLED);
+            Subscription subscription = getAndSetUpstreamSubscription(CANCELLED);
             if (subscription != CANCELLED) {
                 long p = produced;
                 if (p != 0L) {

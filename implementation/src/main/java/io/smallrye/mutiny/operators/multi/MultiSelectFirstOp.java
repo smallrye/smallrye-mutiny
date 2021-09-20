@@ -1,5 +1,7 @@
 package io.smallrye.mutiny.operators.multi;
 
+import static io.smallrye.mutiny.helpers.Subscriptions.CANCELLED;
+
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.reactivestreams.Subscription;
@@ -46,9 +48,9 @@ public final class MultiSelectFirstOp<T> extends AbstractMultiOperator<T, T> {
 
         @Override
         public void onSubscribe(Subscription s) {
-            if (upstream.compareAndSet(null, s)) {
+            if (compareAndSetUpstreamSubscription(null, s)) {
                 if (numberOfItems == 0) {
-                    upstream.getAndSet(Subscriptions.CANCELLED).cancel();
+                    getAndSetUpstreamSubscription(CANCELLED).cancel();
                     Subscriptions.complete(downstream);
                 } else {
                     downstream.onSubscribe(this);
@@ -60,7 +62,7 @@ public final class MultiSelectFirstOp<T> extends AbstractMultiOperator<T, T> {
 
         @Override
         public void onItem(T t) {
-            if (upstream.get() == Subscriptions.CANCELLED) {
+            if (getUpstreamSubscription() == Subscriptions.CANCELLED) {
                 return;
             }
 
@@ -69,7 +71,7 @@ public final class MultiSelectFirstOp<T> extends AbstractMultiOperator<T, T> {
             long r = remaining;
 
             if (r == 0) {
-                upstream.getAndSet(Subscriptions.CANCELLED).cancel();
+                getAndSetUpstreamSubscription(CANCELLED).cancel();
                 actual.onCompletion();
                 return;
             }
@@ -77,14 +79,14 @@ public final class MultiSelectFirstOp<T> extends AbstractMultiOperator<T, T> {
             remaining = --r;
             downstream.onItem(t);
             if (r == 0L) {
-                upstream.getAndSet(Subscriptions.CANCELLED).cancel();
+                getAndSetUpstreamSubscription(CANCELLED).cancel();
                 actual.onCompletion();
             }
         }
 
         @Override
         public void request(long n) {
-            Subscription actual = upstream.get();
+            Subscription actual = getUpstreamSubscription();
             if (wip.compareAndSet(0, 1)) {
                 if (n >= this.numberOfItems) {
                     actual.request(Long.MAX_VALUE);

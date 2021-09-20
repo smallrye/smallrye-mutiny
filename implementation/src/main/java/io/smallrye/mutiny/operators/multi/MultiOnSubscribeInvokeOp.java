@@ -1,5 +1,7 @@
 package io.smallrye.mutiny.operators.multi;
 
+import static io.smallrye.mutiny.helpers.Subscriptions.CANCELLED;
+
 import java.util.Objects;
 import java.util.function.Consumer;
 
@@ -42,12 +44,12 @@ public final class MultiOnSubscribeInvokeOp<T> extends AbstractMultiOperator<T, 
 
         @Override
         public void onSubscribe(Subscription s) {
-            if (upstream.compareAndSet(null, s)) {
+            if (compareAndSetUpstreamSubscription(null, s)) {
                 try {
                     onSubscribe.accept(s);
                 } catch (Throwable e) {
                     Subscriptions.fail(downstream, e);
-                    upstream.getAndSet(Subscriptions.CANCELLED).cancel();
+                    getAndSetUpstreamSubscription(CANCELLED).cancel();
                     return;
                 }
                 downstream.onSubscribe(this);

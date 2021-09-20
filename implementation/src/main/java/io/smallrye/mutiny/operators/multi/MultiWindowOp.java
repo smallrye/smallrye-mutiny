@@ -104,7 +104,7 @@ public class MultiWindowOp<T> extends AbstractMultiOperator<T, Multi<T>> {
                 count.getAndIncrement();
                 proc = UnicastProcessor.create(supplier.get(), () -> {
                     if (count.decrementAndGet() == 0) {
-                        upstream.get().cancel();
+                        getUpstreamSubscription().cancel();
                     }
                 });
 
@@ -127,7 +127,7 @@ public class MultiWindowOp<T> extends AbstractMultiOperator<T, Multi<T>> {
 
         @Override
         public void onFailure(Throwable failure) {
-            Subscription subscription = upstream.getAndSet(CANCELLED);
+            Subscription subscription = getAndSetUpstreamSubscription(CANCELLED);
             if (subscription != CANCELLED) {
                 UnicastProcessor<T> proc = processor;
                 if (proc != null) {
@@ -142,7 +142,7 @@ public class MultiWindowOp<T> extends AbstractMultiOperator<T, Multi<T>> {
 
         @Override
         public void onCompletion() {
-            Subscription subscription = upstream.getAndSet(CANCELLED);
+            Subscription subscription = getAndSetUpstreamSubscription(CANCELLED);
             if (subscription != CANCELLED) {
                 UnicastProcessor<T> proc = processor;
                 if (proc != null) {
@@ -164,7 +164,7 @@ public class MultiWindowOp<T> extends AbstractMultiOperator<T, Multi<T>> {
         public void cancel() {
             if (hasDownstreamCancelled.compareAndSet(false, true)) {
                 if (count.decrementAndGet() == 0) {
-                    upstream.get().cancel();
+                    getUpstreamSubscription().cancel();
                 }
             }
         }
@@ -205,7 +205,7 @@ public class MultiWindowOp<T> extends AbstractMultiOperator<T, Multi<T>> {
                 count.getAndIncrement();
                 proc = UnicastProcessor.create(supplier.get(), () -> {
                     if (count.decrementAndGet() == 0) {
-                        upstream.get().cancel();
+                        getUpstreamSubscription().cancel();
                     }
                 });
                 processor = proc;
@@ -234,7 +234,7 @@ public class MultiWindowOp<T> extends AbstractMultiOperator<T, Multi<T>> {
 
         @Override
         public void onFailure(Throwable failure) {
-            Subscription subscription = upstream.getAndSet(CANCELLED);
+            Subscription subscription = getAndSetUpstreamSubscription(CANCELLED);
             if (subscription != CANCELLED) {
                 Processor<T, T> proc = processor;
                 if (proc != null) {
@@ -249,7 +249,7 @@ public class MultiWindowOp<T> extends AbstractMultiOperator<T, Multi<T>> {
 
         @Override
         public void onCompletion() {
-            Subscription subscription = upstream.getAndSet(CANCELLED);
+            Subscription subscription = getAndSetUpstreamSubscription(CANCELLED);
             if (subscription != CANCELLED) {
                 Processor<T, T> proc = processor;
                 if (proc != null) {
@@ -278,7 +278,7 @@ public class MultiWindowOp<T> extends AbstractMultiOperator<T, Multi<T>> {
         public void cancel() {
             if (hasDownstreamCancelled.compareAndSet(false, true)) {
                 if (count.decrementAndGet() == 0) {
-                    upstream.get().cancel();
+                    getUpstreamSubscription().cancel();
                 }
             }
         }
@@ -357,7 +357,7 @@ public class MultiWindowOp<T> extends AbstractMultiOperator<T, Multi<T>> {
 
         @Override
         public void onFailure(Throwable f) {
-            Subscription subscription = upstream.getAndSet(CANCELLED);
+            Subscription subscription = getAndSetUpstreamSubscription(CANCELLED);
             if (subscription != CANCELLED) {
                 for (UnicastProcessor<T> proc : processors) {
                     proc.onError(f);
@@ -372,7 +372,7 @@ public class MultiWindowOp<T> extends AbstractMultiOperator<T, Multi<T>> {
 
         @Override
         public void onCompletion() {
-            Subscription subscription = upstream.getAndSet(CANCELLED);
+            Subscription subscription = getAndSetUpstreamSubscription(CANCELLED);
             if (subscription != CANCELLED) {
                 for (UnicastProcessor<T> proc : processors) {
                     proc.onComplete();
@@ -475,7 +475,7 @@ public class MultiWindowOp<T> extends AbstractMultiOperator<T, Multi<T>> {
         @Override
         public void run() {
             if (count.decrementAndGet() == 0) {
-                upstream.get().cancel();
+                getUpstreamSubscription().cancel();
             }
         }
     }
