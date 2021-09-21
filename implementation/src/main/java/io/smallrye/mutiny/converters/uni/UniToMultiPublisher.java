@@ -2,6 +2,7 @@ package io.smallrye.mutiny.converters.uni;
 
 import static io.smallrye.mutiny.helpers.EmptyUniSubscription.CANCELLED;
 
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.reactivestreams.Publisher;
@@ -32,6 +33,7 @@ public final class UniToMultiPublisher<T> implements Publisher<T> {
         private final Subscriber<? super T> downstream;
 
         private final AtomicReference<UniSubscription> upstream = new AtomicReference<>();
+        private final AtomicBoolean uniSubscriptionRequested = new AtomicBoolean(false);
 
         private UniToMultiSubscription(Uni<T> uni, Subscriber<? super T> downstream) {
             this.uni = uni;
@@ -55,12 +57,15 @@ public final class UniToMultiPublisher<T> implements Publisher<T> {
             if (upstream.get() == CANCELLED) {
                 return;
             }
-            AbstractUni.subscribe(uni, this);
+            if (uniSubscriptionRequested.compareAndSet(false, true)) {
+                AbstractUni.subscribe(uni, this);
+            }
         }
 
         @Override
         public void onSubscribe(UniSubscription subscription) {
             if (!upstream.compareAndSet(null, subscription)) {
+                subscription.cancel();
                 downstream.onError(new IllegalStateException(
                         "Invalid subscription state - already have a subscription for upstream"));
             }
