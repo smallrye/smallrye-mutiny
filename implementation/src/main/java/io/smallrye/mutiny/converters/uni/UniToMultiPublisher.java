@@ -1,8 +1,6 @@
 package io.smallrye.mutiny.converters.uni;
 
-import static io.smallrye.mutiny.helpers.EmptyUniSubscription.CANCELLED;
-
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
@@ -31,7 +29,17 @@ public final class UniToMultiPublisher<T> implements Publisher<T> {
         private final Uni<T> uni;
         private final Subscriber<? super T> downstream;
 
-        private final AtomicReference<UniSubscription> upstream = new AtomicReference<>();
+        enum State {
+            INIT,
+            UNI_REQUESTED,
+            DONE
+        }
+
+        private volatile UniSubscription upstream;
+        private volatile State state = State.INIT;
+
+        private static final AtomicReferenceFieldUpdater<UniToMultiSubscription, State> STATE_UPDATER = AtomicReferenceFieldUpdater
+                .newUpdater(UniToMultiSubscription.class, State.class, "state");
 
         private UniToMultiSubscription(Uni<T> uni, Subscriber<? super T> downstream) {
             this.uni = uni;
@@ -40,9 +48,8 @@ public final class UniToMultiPublisher<T> implements Publisher<T> {
 
         @Override
         public void cancel() {
-            UniSubscription sub = upstream.getAndSet(CANCELLED);
-            if (sub != null) {
-                sub.cancel();
+            if (upstream != null) {
+                upstream.cancel();
             }
         }
 
@@ -52,15 +59,17 @@ public final class UniToMultiPublisher<T> implements Publisher<T> {
                 downstream.onError(new IllegalArgumentException("Invalid request"));
                 return;
             }
-            if (upstream.get() == CANCELLED) {
-                return;
+            if (STATE_UPDATER.compareAndSet(this, State.INIT, State.UNI_REQUESTED)) {
+                AbstractUni.subscribe(uni, this);
             }
-            AbstractUni.subscribe(uni, this);
         }
 
         @Override
         public void onSubscribe(UniSubscription subscription) {
-            if (!upstream.compareAndSet(null, subscription)) {
+            if (upstream == null) {
+                upstream = subscription;
+            } else {
+                subscription.cancel();
                 downstream.onError(new IllegalStateException(
                         "Invalid subscription state - already have a subscription for upstream"));
             }
@@ -68,7 +77,7 @@ public final class UniToMultiPublisher<T> implements Publisher<T> {
 
         @Override
         public void onItem(T item) {
-            if (upstream.getAndSet(CANCELLED) != CANCELLED) {
+            if (STATE_UPDATER.compareAndSet(this, State.UNI_REQUESTED, State.DONE)) {
                 if (item != null) {
                     downstream.onNext(item);
                 }
@@ -78,7 +87,8 @@ public final class UniToMultiPublisher<T> implements Publisher<T> {
 
         @Override
         public void onFailure(Throwable failure) {
-            if (upstream.getAndSet(CANCELLED) != CANCELLED) {
+            if (STATE_UPDATER.compareAndSet(this, UniToMultiSubscription.State.UNI_REQUESTED,
+                    UniToMultiSubscription.State.DONE)) {
                 downstream.onError(failure);
             }
         }

@@ -149,12 +149,12 @@ public abstract class SwitchableSubscriptionSubscriber<O> implements MultiSubscr
                     unbounded = true;
                 }
             }
-            Subscription actual = currentUpstream.get();
 
             if (wip.decrementAndGet() != 0) {
                 drainLoop();
             }
 
+            Subscription actual = currentUpstream.get();
             if (actual != null) {
                 actual.request(n);
             }

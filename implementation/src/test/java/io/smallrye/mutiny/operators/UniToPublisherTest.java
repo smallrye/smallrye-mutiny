@@ -4,10 +4,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
 import java.io.IOException;
+import java.util.concurrent.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
@@ -16,6 +18,7 @@ import io.reactivex.Flowable;
 import io.reactivex.subscribers.TestSubscriber;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.helpers.test.AssertSubscriber;
 
 public class UniToPublisherTest {
 
@@ -219,5 +222,32 @@ public class UniToPublisherTest {
         Uni<Void> uni = Uni.createFrom().voidItem();
         Multi<Void> publisher = uni.toMulti();
         assertThat(publisher.collect().asList().await().indefinitely()).isEmpty();
+    }
+
+    @RepeatedTest(1000)
+    public void multipleConcurrentRequests() throws InterruptedException {
+        final int n = 8;
+        CountDownLatch start = new CountDownLatch(n);
+
+        Multi<Integer> multi = Uni.createFrom()
+                .completionStage(() -> CompletableFuture.supplyAsync(() -> 63))
+                .toMulti();
+        AssertSubscriber<Integer> subscriber = multi.subscribe().withSubscriber(AssertSubscriber.create());
+
+        for (int i = 0; i < n; i++) {
+            ForkJoinPool.commonPool().execute(() -> {
+                try {
+                    start.await();
+                    subscriber.request(10L);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                    throw new RuntimeException(e);
+                }
+            });
+            start.countDown();
+        }
+
+        subscriber.awaitCompletion();
+        assertThat(subscriber.getItems()).hasSize(1).containsExactly(63);
     }
 }
