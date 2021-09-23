@@ -16,7 +16,7 @@ public abstract class MultiOperatorProcessor<I, O> implements MultiSubscriber<I>
     // Cannot be final, the TCK checks it gets released.
     protected volatile MultiSubscriber<? super O> downstream;
     protected volatile Subscription upstream = null;
-    AtomicBoolean hasDownstreamCancelled = new AtomicBoolean();
+    protected AtomicBoolean hasDownstreamCancelled = new AtomicBoolean();
 
     private static final AtomicReferenceFieldUpdater<MultiOperatorProcessor, Subscription> UPSTREAM_UPDATER = AtomicReferenceFieldUpdater
             .newUpdater(MultiOperatorProcessor.class, Subscription.class, "upstream");
