@@ -9,10 +9,9 @@ jobs:
     strategy:
       matrix:
         java: [
-          { 'version': '8', 'source': 'releases', opts: '' },
-          { 'version': '11', 'source': 'releases', opts: '' },
-          { 'version': '16', 'source': 'nightly', 'opts': '--illegal-access=permit'  },  # required for kotlin on java 16
-          { 'version': '17-ea', 'opts': '--illegal-access=permit' }  # required for kotlin on java 17
+          { 'version': '8', opts: '' },
+          { 'version': '11', opts: '' },
+          { 'version': '17', 'opts': '' }
         ]
     name: Build with Java ${{ matrix.java.version }}
     steps:
@@ -24,7 +23,7 @@ jobs:
       - uses: actions/setup-java@v2
         name: set up jdk ${{matrix.java.version}}
         with:
-          distribution: adopt
+          distribution: temurin
           java-version: ${{matrix.java.version}}
       - name: Build with Maven
         env:
@@ -33,17 +32,17 @@ jobs:
       - name: Codecov
         uses: codecov/codecov-action@v1.0.13
   compatibility:
-      runs-on: ubuntu-20.04
-      name: Compatibility Check
-      steps:
-        - uses: actions/cache@v2
-          with:
-            path: ~/.m2/repository
-            key: maven-java-11
-        - uses: actions/checkout@v2
-        - uses: actions/setup-java@v2
-          with:
-            java-version: 11
-            distribution: adopt
-        - name: Compatibility Check
-          run: mvn -s .build/maven-ci-settings.xml -pl '!bom' -B install revapi:check@check-compatibility -DskipTests -fae
+    runs-on: ubuntu-20.04
+    name: Compatibility Check
+    steps:
+      - uses: actions/cache@v2
+        with:
+          path: ~/.m2/repository
+          key: maven-java-11
+      - uses: actions/checkout@v2
+      - uses: actions/setup-java@v2
+        with:
+          java-version: 11
+          distribution: temurin
+      - name: Compatibility Check
+        run: mvn -s .build/maven-ci-settings.xml -pl '!bom' -B install revapi:check@check-compatibility -DskipTests -fae
