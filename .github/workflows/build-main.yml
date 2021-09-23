@@ -16,7 +16,7 @@ jobs:
         java: [
           { 'version': '8', opts: '' },
           { 'version': '11', opts: '' },
-          # { 'version': '17', 'opts': '--illegal-access=permit'  }  # required for kotlin on java 17
+          { 'version': '17', 'opts': '' }
         ]
     name: Build with Java ${{ matrix.java.version }} (OpenJDK)
     steps:
