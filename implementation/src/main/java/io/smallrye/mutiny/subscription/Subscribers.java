@@ -3,7 +3,7 @@ package io.smallrye.mutiny.subscription;
 import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
 
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import java.util.function.Consumer;
 
 import org.reactivestreams.Subscription;
@@ -26,7 +26,10 @@ public class Subscribers {
 
     public static class CallbackBasedSubscriber<T> implements CancellableSubscriber<T>, Subscription {
 
-        private final AtomicReference<Subscription> subscription = new AtomicReference<>();
+        private volatile Subscription subscription;
+        private static final AtomicReferenceFieldUpdater<CallbackBasedSubscriber, Subscription> SUBSCRIPTION_UPDATER = AtomicReferenceFieldUpdater
+                .newUpdater(CallbackBasedSubscriber.class, Subscription.class, "subscription");
+
         private final Consumer<? super T> onItem;
         private final Consumer<? super Throwable> onFailure;
         private final Runnable onCompletion;
@@ -45,7 +48,7 @@ public class Subscribers {
 
         @Override
         public void onSubscribe(Subscription s) {
-            if (subscription.compareAndSet(null, s)) {
+            if (SUBSCRIPTION_UPDATER.compareAndSet(this, null, s)) {
                 try {
                     // onSubscription cannot be null
                     onSubscription.accept(this);
@@ -61,12 +64,12 @@ public class Subscribers {
         @Override
         public void onItem(T item) {
             Objects.requireNonNull(item);
-            if (subscription.get() != Subscriptions.CANCELLED) {
+            if (SUBSCRIPTION_UPDATER.get(this) != Subscriptions.CANCELLED) {
                 try {
                     // onItem cannot be null.
                     onItem.accept(item);
                 } catch (Throwable e) {
-                    subscription.getAndSet(Subscriptions.CANCELLED).cancel();
+                    SUBSCRIPTION_UPDATER.getAndSet(this, Subscriptions.CANCELLED).cancel();
                     Infrastructure.handleDroppedException(e);
                 }
             }
@@ -75,7 +78,7 @@ public class Subscribers {
         @Override
         public void onFailure(Throwable t) {
             Objects.requireNonNull(t);
-            if (subscription.getAndSet(Subscriptions.CANCELLED) != Subscriptions.CANCELLED) {
+            if (SUBSCRIPTION_UPDATER.getAndSet(this, Subscriptions.CANCELLED) != Subscriptions.CANCELLED) {
                 if (onFailure != null) {
                     try {
                         onFailure.accept(t);
@@ -92,7 +95,7 @@ public class Subscribers {
 
         @Override
         public void onCompletion() {
-            if (subscription.getAndSet(Subscriptions.CANCELLED) != Subscriptions.CANCELLED) {
+            if (SUBSCRIPTION_UPDATER.getAndSet(this, Subscriptions.CANCELLED) != Subscriptions.CANCELLED) {
                 if (onCompletion != null) {
                     onCompletion.run();
                 }
@@ -101,12 +104,12 @@ public class Subscribers {
 
         @Override
         public void request(long n) {
-            subscription.get().request(n);
+            SUBSCRIPTION_UPDATER.get(this).request(n);
         }
 
         @Override
         public void cancel() {
-            Subscription prev = subscription.getAndSet(Subscriptions.CANCELLED);
+            Subscription prev = SUBSCRIPTION_UPDATER.getAndSet(this, Subscriptions.CANCELLED);
             if (prev != null && prev != Subscriptions.CANCELLED) {
                 prev.cancel();
             }

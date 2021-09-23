@@ -3,7 +3,7 @@ package io.smallrye.mutiny.helpers;
 import static io.smallrye.mutiny.helpers.EmptyUniSubscription.CANCELLED;
 import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
 
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import java.util.function.Consumer;
 
 import org.reactivestreams.Subscription;
@@ -21,7 +21,10 @@ import io.smallrye.mutiny.subscription.UniSubscription;
  */
 public class UniCallbackSubscriber<T> implements UniSubscriber<T>, UniSubscription {
 
-    private final AtomicReference<UniSubscription> subscription = new AtomicReference<>();
+    private volatile UniSubscription subscription;
+    private static final AtomicReferenceFieldUpdater<UniCallbackSubscriber, UniSubscription> SUBSCRIPTION_UPDATER = AtomicReferenceFieldUpdater
+            .newUpdater(UniCallbackSubscriber.class, UniSubscription.class, "subscription");
+
     private final Consumer<? super T> onResultCallback;
     private final Consumer<? super Throwable> onFailureCallback;
 
@@ -40,7 +43,7 @@ public class UniCallbackSubscriber<T> implements UniSubscriber<T>, UniSubscripti
 
     @Override
     public final void onSubscribe(UniSubscription sub) {
-        if (!subscription.compareAndSet(null, sub)) {
+        if (!SUBSCRIPTION_UPDATER.compareAndSet(this, null, sub)) {
             // cancelling this second subscription
             // because we already add a subscription (maybe CANCELLED)
             sub.cancel();
@@ -49,7 +52,7 @@ public class UniCallbackSubscriber<T> implements UniSubscriber<T>, UniSubscripti
 
     @Override
     public final void onFailure(Throwable t) {
-        UniSubscription sub = subscription.getAndSet(CANCELLED);
+        UniSubscription sub = SUBSCRIPTION_UPDATER.getAndSet(this, CANCELLED);
         if (sub == CANCELLED) {
             // Already cancelled, do nothing
             return;
@@ -59,7 +62,7 @@ public class UniCallbackSubscriber<T> implements UniSubscriber<T>, UniSubscripti
 
     @Override
     public final void onItem(T x) {
-        Subscription sub = subscription.getAndSet(CANCELLED);
+        Subscription sub = SUBSCRIPTION_UPDATER.getAndSet(this, CANCELLED);
         if (sub == CANCELLED) {
             // Already cancelled, do nothing
             return;
@@ -74,7 +77,7 @@ public class UniCallbackSubscriber<T> implements UniSubscriber<T>, UniSubscripti
 
     @Override
     public void cancel() {
-        Subscription sub = subscription.getAndSet(CANCELLED);
+        Subscription sub = SUBSCRIPTION_UPDATER.getAndSet(this, CANCELLED);
         if (sub != null) {
             sub.cancel();
         }
