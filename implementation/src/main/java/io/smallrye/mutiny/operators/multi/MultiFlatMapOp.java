@@ -2,9 +2,7 @@ package io.smallrye.mutiny.operators.multi;
 
 import java.util.Objects;
 import java.util.Queue;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.atomic.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -566,7 +564,9 @@ public final class MultiFlatMapOp<I, O> extends AbstractMultiOperator<I, O> {
 
         final int limit;
 
-        final AtomicReference<Subscription> subscription = new AtomicReference<>();
+        volatile Subscription subscription = null;
+        private static final AtomicReferenceFieldUpdater<FlatMapInner, Subscription> SUBSCRIPTION_UPDATER = AtomicReferenceFieldUpdater
+                .newUpdater(FlatMapInner.class, Subscription.class, "subscription");
 
         long produced;
 
@@ -585,7 +585,7 @@ public final class MultiFlatMapOp<I, O> extends AbstractMultiOperator<I, O> {
         @Override
         public void onSubscribe(Subscription s) {
             Objects.requireNonNull(s);
-            if (subscription.compareAndSet(null, s)) {
+            if (SUBSCRIPTION_UPDATER.compareAndSet(this, null, s)) {
                 s.request(Subscriptions.unboundedOrRequests(requests));
             }
         }
@@ -613,7 +613,7 @@ public final class MultiFlatMapOp<I, O> extends AbstractMultiOperator<I, O> {
             long p = produced + n;
             if (p >= limit) {
                 produced = 0L;
-                subscription.get().request(p);
+                subscription.request(p);
             } else {
                 produced = p;
             }
@@ -626,7 +626,7 @@ public final class MultiFlatMapOp<I, O> extends AbstractMultiOperator<I, O> {
 
         public void cancel(boolean doNotCancel) {
             if (!doNotCancel) {
-                Subscription last = subscription.getAndSet(Subscriptions.CANCELLED);
+                Subscription last = SUBSCRIPTION_UPDATER.getAndSet(this, Subscriptions.CANCELLED);
                 if (last != null) {
                     last.cancel();
                 }
