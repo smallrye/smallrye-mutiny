@@ -6,8 +6,10 @@ import static org.mockito.Mockito.mock;
 
 import java.io.IOException;
 import java.util.Queue;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
@@ -100,6 +102,37 @@ public class UnicastProcessorTest {
         subscriber.assertNotTerminated()
                 .assertSubscribed()
                 .assertHasNotReceivedAnyItem();
+    }
+
+    @RepeatedTest(10)
+    public void testWithConcurrentCancellations() {
+        AtomicInteger counter = new AtomicInteger();
+        Queue<Integer> queue = Queues.<Integer> get(1).get();
+        UnicastProcessor<Integer> processor = UnicastProcessor.create(queue, counter::incrementAndGet);
+
+        AssertSubscriber<Integer> sub = processor.subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE));
+
+        ExecutorService pool = Executors.newFixedThreadPool(10);
+        CountDownLatch start = new CountDownLatch(10);
+        CountDownLatch done = new CountDownLatch(10);
+        for (int i = 0; i < 10; i++) {
+            pool.execute(() -> {
+                start.countDown();
+                try {
+                    start.await();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                processor.cancel();
+                done.countDown();
+            });
+        }
+
+        await().until(() -> done.getCount() == 0);
+        sub.assertSubscribed().assertHasNotReceivedAnyItem().assertNotTerminated();
+        assertThat(counter).hasValue(1);
+
+        pool.shutdownNow();
     }
 
     @Test

@@ -2,10 +2,9 @@ package io.smallrye.mutiny.operators.multi.processors;
 
 import java.util.Objects;
 import java.util.Queue;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 
 import org.reactivestreams.Processor;
 import org.reactivestreams.Subscriber;
@@ -32,12 +31,17 @@ public class UnicastProcessor<T> extends AbstractMulti<T> implements Processor<T
     private final Runnable onTermination;
     private final Queue<T> queue;
 
-    private final AtomicBoolean done = new AtomicBoolean();
-    private final AtomicReference<Throwable> failure = new AtomicReference<>();
-    private final AtomicBoolean cancelled = new AtomicBoolean();
+    private volatile boolean done = false;
+    private volatile Throwable failure = null;
+    private volatile boolean cancelled = false;
+
+    private volatile Subscriber<? super T> downstream = null;
+    private static final AtomicReferenceFieldUpdater<UnicastProcessor, Subscriber> DOWNSTREAM_UPDATER = AtomicReferenceFieldUpdater
+            .newUpdater(UnicastProcessor.class, Subscriber.class, "downstream");
+
     private final AtomicInteger wip = new AtomicInteger();
     private final AtomicLong requested = new AtomicLong();
-    private final AtomicReference<Subscriber<? super T>> downstream = new AtomicReference<>();
+
     private volatile boolean hasUpstream;
 
     /**
@@ -84,12 +88,11 @@ public class UnicastProcessor<T> extends AbstractMulti<T> implements Processor<T
             long e = 0L;
 
             while (r != e) {
-                boolean d = done.get();
 
                 T t = q.poll();
                 boolean empty = t == null;
 
-                if (isCancelledOrDone(d, empty)) {
+                if (isCancelledOrDone(done, empty)) {
                     return;
                 }
 
@@ -103,7 +106,7 @@ public class UnicastProcessor<T> extends AbstractMulti<T> implements Processor<T
             }
 
             if (r == e) {
-                if (isCancelledOrDone(done.get(), q.isEmpty())) {
+                if (isCancelledOrDone(done, q.isEmpty())) {
                     return;
                 }
             }
@@ -126,7 +129,7 @@ public class UnicastProcessor<T> extends AbstractMulti<T> implements Processor<T
 
         int missed = 1;
         for (;;) {
-            Subscriber<? super T> actual = downstream.get();
+            Subscriber<? super T> actual = downstream;
             if (actual != null) {
                 drainWithDownstream(actual);
                 return;
@@ -139,13 +142,13 @@ public class UnicastProcessor<T> extends AbstractMulti<T> implements Processor<T
     }
 
     private boolean isCancelledOrDone(boolean isDone, boolean isEmpty) {
-        Subscriber<? super T> subscriber = downstream.get();
-        if (cancelled.get()) {
+        Subscriber<? super T> subscriber = downstream;
+        if (cancelled) {
             queue.clear();
             return true;
         }
         if (isDone && isEmpty) {
-            Throwable failed = failure.get();
+            Throwable failed = failure;
             if (failed != null) {
                 subscriber.onError(failed);
             } else {
@@ -174,9 +177,9 @@ public class UnicastProcessor<T> extends AbstractMulti<T> implements Processor<T
     @Override
     public void subscribe(MultiSubscriber<? super T> downstream) {
         ParameterValidation.nonNull(downstream, "downstream");
-        if (this.downstream.compareAndSet(null, downstream)) {
+        if (DOWNSTREAM_UPDATER.compareAndSet(this, null, downstream)) {
             downstream.onSubscribe(this);
-            if (!cancelled.get()) {
+            if (!cancelled) {
                 drain();
             }
         } else {
@@ -198,7 +201,7 @@ public class UnicastProcessor<T> extends AbstractMulti<T> implements Processor<T
     }
 
     private boolean isDoneOrCancelled() {
-        return done.get() || cancelled.get();
+        return done || cancelled;
     }
 
     @Override
@@ -209,8 +212,8 @@ public class UnicastProcessor<T> extends AbstractMulti<T> implements Processor<T
         }
 
         onTerminate();
-        this.failure.set(failure);
-        this.done.set(true);
+        this.failure = failure;
+        this.done = true;
 
         drain();
     }
@@ -221,7 +224,7 @@ public class UnicastProcessor<T> extends AbstractMulti<T> implements Processor<T
             return;
         }
         onTerminate();
-        this.done.set(true);
+        this.done = true;
         drain();
     }
 
@@ -235,12 +238,15 @@ public class UnicastProcessor<T> extends AbstractMulti<T> implements Processor<T
 
     @Override
     public void cancel() {
-        if (cancelled.compareAndSet(false, true)) {
+        if (cancelled) {
+            return;
+        }
+        this.cancelled = true;
+        if (DOWNSTREAM_UPDATER.getAndSet(this, null) != null) {
             onTerminate();
             if (wip.getAndIncrement() == 0) {
                 queue.clear();
             }
-            downstream.set(null);
         }
     }
 
@@ -251,7 +257,7 @@ public class UnicastProcessor<T> extends AbstractMulti<T> implements Processor<T
      * @return {@code true} if there is a subscriber, {@code false} otherwise
      */
     public boolean hasSubscriber() {
-        return downstream.get() != null;
+        return downstream != null;
     }
 
     public SerializedProcessor<T, T> serialized() {
