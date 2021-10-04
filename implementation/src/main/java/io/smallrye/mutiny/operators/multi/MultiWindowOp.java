@@ -162,7 +162,7 @@ public class MultiWindowOp<T> extends AbstractMultiOperator<T, Multi<T>> {
 
         @Override
         public void cancel() {
-            if (hasDownstreamCancelled.compareAndSet(false, true)) {
+            if (atomicallyFlipDownstreamHasCancelled()) {
                 if (count.decrementAndGet() == 0) {
                     getUpstreamSubscription().cancel();
                 }
@@ -276,7 +276,7 @@ public class MultiWindowOp<T> extends AbstractMultiOperator<T, Multi<T>> {
 
         @Override
         public void cancel() {
-            if (hasDownstreamCancelled.compareAndSet(false, true)) {
+            if (atomicallyFlipDownstreamHasCancelled()) {
                 if (count.decrementAndGet() == 0) {
                     getUpstreamSubscription().cancel();
                 }
@@ -467,7 +467,7 @@ public class MultiWindowOp<T> extends AbstractMultiOperator<T, Multi<T>> {
 
         @Override
         public void cancel() {
-            if (hasDownstreamCancelled.compareAndSet(false, true)) {
+            if (atomicallyFlipDownstreamHasCancelled()) {
                 run();
             }
         }

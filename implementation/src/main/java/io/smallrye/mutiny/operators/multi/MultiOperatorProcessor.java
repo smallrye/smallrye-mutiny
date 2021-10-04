@@ -2,7 +2,7 @@ package io.smallrye.mutiny.operators.multi;
 
 import static io.smallrye.mutiny.helpers.Subscriptions.CANCELLED;
 
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 
 import org.reactivestreams.Subscription;
@@ -16,10 +16,13 @@ public abstract class MultiOperatorProcessor<I, O> implements MultiSubscriber<I>
     // Cannot be final, the TCK checks it gets released.
     protected volatile MultiSubscriber<? super O> downstream;
     protected volatile Subscription upstream = null;
-    protected AtomicBoolean hasDownstreamCancelled = new AtomicBoolean();
+    private volatile int hasDownstreamCancelled = 0;
 
     private static final AtomicReferenceFieldUpdater<MultiOperatorProcessor, Subscription> UPSTREAM_UPDATER = AtomicReferenceFieldUpdater
             .newUpdater(MultiOperatorProcessor.class, Subscription.class, "upstream");
+
+    private static final AtomicIntegerFieldUpdater<MultiOperatorProcessor> DOWNSTREAM_CANCELLED_UPDATER = AtomicIntegerFieldUpdater
+            .newUpdater(MultiOperatorProcessor.class, "hasDownstreamCancelled");
 
     public MultiOperatorProcessor(MultiSubscriber<? super O> downstream) {
         this.downstream = ParameterValidation.nonNull(downstream, "downstream");
@@ -50,7 +53,7 @@ public abstract class MultiOperatorProcessor<I, O> implements MultiSubscriber<I>
     }
 
     protected boolean isCancelled() {
-        return hasDownstreamCancelled.get();
+        return hasDownstreamCancelled == 1;
     }
 
     @Override
@@ -104,10 +107,14 @@ public abstract class MultiOperatorProcessor<I, O> implements MultiSubscriber<I>
 
     @Override
     public void cancel() {
-        if (hasDownstreamCancelled.compareAndSet(false, true)) {
+        if (atomicallyFlipDownstreamHasCancelled()) {
             cancelUpstream();
             cleanup();
         }
+    }
+
+    protected final boolean atomicallyFlipDownstreamHasCancelled() {
+        return DOWNSTREAM_CANCELLED_UPDATER.compareAndSet(this, 0, 1);
     }
 
     protected void cancelUpstream() {
