@@ -20,16 +20,13 @@ jobs:
         ]
     name: Build with Java ${{ matrix.java.version }} (OpenJDK)
     steps:
-      - uses: actions/cache@v2
-        with:
-          path: ~/.m2/repository
-          key: maven-java-${{ matrix.java.version }}
       - uses: actions/checkout@v2
       - uses: actions/setup-java@v2
         name: set up jdk ${{matrix.java.version}}
         with:
           distribution: temurin
           java-version: ${{matrix.java.version}}
+          cache: maven
       - name: Build with Maven
         env:
           MAVEN_OPTS: ${{ matrix.java.opts }}
@@ -39,15 +36,12 @@ jobs:
     needs: build
     runs-on: ubuntu-20.04
     steps:
-      - uses: actions/cache@v2
-        with:
-          path: ~/.m2/repository
-          key: maven-11
       - uses: actions/checkout@v2
       - uses: actions/setup-java@v2
         with:
           java-version: 11
           distribution: temurin
+          cache: maven
       - name: Deploy snapshots
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -60,15 +54,12 @@ jobs:
     needs: build
     runs-on: ubuntu-20.04
     steps:
-      - uses: actions/cache@v2
-        with:
-          path: ~/.m2/repository
-          key: maven-11
       - uses: actions/checkout@v2
       - uses: actions/setup-java@v2
         with:
           java-version: 11
           distribution: temurin
+          cache: maven
       - name: Coverage and Sonar
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -89,14 +80,11 @@ jobs:
     runs-on: ubuntu-20.04
     name: Compatibility Check
     steps:
-      - uses: actions/cache@v2
-        with:
-          path: ~/.m2/repository
-          key: maven-java-11
       - uses: actions/checkout@v2
       - uses: actions/setup-java@v2
         with:
           java-version: 11
           distribution: temurin
+          cache: maven
       - name: Compatibility Check
         run: mvn -s .build/maven-ci-settings.xml -pl '!bom' -B install revapi:check@check-compatibility -DskipTests -fae

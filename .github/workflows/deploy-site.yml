@@ -11,10 +11,6 @@ jobs:
   deploy-web-site:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/cache@v2
-        with:
-          path: ~/.m2/repository
-          key: maven-11
       - uses: actions/checkout@v2
         with:
           ref: ${{ github.event.ref }}
@@ -24,6 +20,7 @@ jobs:
         with:
           java-version: 11
           distribution: temurin
+          cache: maven
       - name: 'Setup Ruby'
         uses: ruby/setup-ruby@v1
         with:
