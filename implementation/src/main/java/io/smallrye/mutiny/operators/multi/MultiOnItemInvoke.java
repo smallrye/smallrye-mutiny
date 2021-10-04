@@ -30,7 +30,7 @@ public class MultiOnItemInvoke<T> extends AbstractMultiOperator<T, T> {
 
         @Override
         public void onItem(T item) {
-            if (upstream.get() != Subscriptions.CANCELLED) {
+            if (getUpstreamSubscription() != Subscriptions.CANCELLED) {
                 MultiSubscriber<? super T> subscriber = this.downstream;
                 try {
                     callback.accept(item);

@@ -25,7 +25,7 @@ public class MultiIgnoreOp<T> extends AbstractMultiOperator<T, Void> {
 
         @Override
         public void onSubscribe(Subscription subscription) {
-            if (upstream.compareAndSet(null, subscription)) {
+            if (compareAndSetUpstreamSubscription(null, subscription)) {
                 // Propagate subscription to downstream.
                 downstream.onSubscribe(this);
                 subscription.request(Long.MAX_VALUE);

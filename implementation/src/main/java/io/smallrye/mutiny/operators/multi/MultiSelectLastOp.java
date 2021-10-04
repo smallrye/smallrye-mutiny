@@ -42,7 +42,7 @@ public class MultiSelectLastOp<T> extends AbstractMultiOperator<T, T> {
 
         @Override
         public void onSubscribe(Subscription subscription) {
-            if (upstream.compareAndSet(null, subscription)) {
+            if (compareAndSetUpstreamSubscription(null, subscription)) {
                 // Propagate subscription to downstream.
                 downstream.onSubscribe(this);
                 // Dropping all values.
@@ -80,7 +80,7 @@ public class MultiSelectLastOp<T> extends AbstractMultiOperator<T, T> {
 
         @Override
         public void onSubscribe(Subscription subscription) {
-            if (upstream.compareAndSet(null, subscription)) {
+            if (compareAndSetUpstreamSubscription(null, subscription)) {
                 // Propagate subscription to downstream.
                 downstream.onSubscribe(this);
                 subscription.request(Long.MAX_VALUE);
@@ -108,14 +108,14 @@ public class MultiSelectLastOp<T> extends AbstractMultiOperator<T, T> {
             if (wip.getAndIncrement() == 0) {
                 long req = requested.get();
                 do {
-                    if (upstream.get() == Subscriptions.CANCELLED) {
+                    if (getUpstreamSubscription() == Subscriptions.CANCELLED) {
                         return;
                     }
                     if (upstreamCompleted) {
                         long count = 0L;
 
                         while (count != req) {
-                            if (upstream.get() == Subscriptions.CANCELLED) {
+                            if (getUpstreamSubscription() == Subscriptions.CANCELLED) {
                                 return;
                             }
                             T item = queue.poll();

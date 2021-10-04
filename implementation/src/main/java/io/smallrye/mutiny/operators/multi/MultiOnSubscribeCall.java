@@ -1,5 +1,7 @@
 package io.smallrye.mutiny.operators.multi;
 
+import static io.smallrye.mutiny.helpers.Subscriptions.CANCELLED;
+
 import java.util.Objects;
 import java.util.function.Function;
 
@@ -44,7 +46,7 @@ public final class MultiOnSubscribeCall<T> extends AbstractMultiOperator<T, T> {
 
         @Override
         public void onSubscribe(Subscription s) {
-            if (upstream.compareAndSet(null, s)) {
+            if (compareAndSetUpstreamSubscription(null, s)) {
                 try {
                     Uni<?> uni = Objects.requireNonNull(onSubscribe.apply(s), "The produced Uni must not be `null`");
                     uni
@@ -52,11 +54,11 @@ public final class MultiOnSubscribeCall<T> extends AbstractMultiOperator<T, T> {
                                     ignored -> downstream.onSubscribe(this),
                                     failure -> {
                                         Subscriptions.fail(downstream, failure);
-                                        upstream.getAndSet(Subscriptions.CANCELLED).cancel();
+                                        getAndSetUpstreamSubscription(CANCELLED).cancel();
                                     });
                 } catch (Throwable e) {
                     Subscriptions.fail(downstream, e);
-                    upstream.getAndSet(Subscriptions.CANCELLED).cancel();
+                    getAndSetUpstreamSubscription(CANCELLED).cancel();
                 }
             } else {
                 s.cancel();

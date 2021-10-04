@@ -28,7 +28,7 @@ public final class MultiLastItemOp<T> extends AbstractMultiOperator<T, T> {
 
         @Override
         public void onSubscribe(Subscription subscription) {
-            if (upstream.compareAndSet(null, subscription)) {
+            if (compareAndSetUpstreamSubscription(null, subscription)) {
                 downstream.onSubscribe(this);
                 subscription.request(Long.MAX_VALUE);
             } else {
@@ -54,7 +54,7 @@ public final class MultiLastItemOp<T> extends AbstractMultiOperator<T, T> {
 
         @Override
         public void onCompletion() {
-            Subscription subscription = upstream.getAndSet(CANCELLED);
+            Subscription subscription = getAndSetUpstreamSubscription(CANCELLED);
             if (subscription != CANCELLED) {
                 T item = last;
                 MultiSubscriber<? super T> subscriber = downstream;

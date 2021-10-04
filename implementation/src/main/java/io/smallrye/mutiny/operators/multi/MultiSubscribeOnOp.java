@@ -58,7 +58,7 @@ public class MultiSubscribeOnOp<T> extends AbstractMultiOperator<T, T> {
 
         @Override
         public void onSubscribe(Subscription subscription) {
-            if (upstream.compareAndSet(null, subscription)) {
+            if (compareAndSetUpstreamSubscription(null, subscription)) {
                 downstream.onSubscribe(this);
             } else {
                 subscription.cancel();
@@ -91,7 +91,7 @@ public class MultiSubscribeOnOp<T> extends AbstractMultiOperator<T, T> {
         @Override
         public void request(long n) {
             if (n > 0) {
-                Subscription subscription = upstream.get();
+                Subscription subscription = getUpstreamSubscription();
                 requestUpstream(n, subscription);
             }
         }

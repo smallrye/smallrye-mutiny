@@ -2,9 +2,7 @@ package io.smallrye.mutiny.operators.multi;
 
 import java.util.Objects;
 import java.util.Queue;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.atomic.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -75,7 +73,9 @@ public final class MultiFlatMapOp<I, O> extends AbstractMultiOperator<I, O> {
         volatile boolean done;
         volatile boolean cancelled;
 
-        final AtomicReference<Subscription> upstream = new AtomicReference<>();
+        volatile Subscription upstream = null;
+        private static final AtomicReferenceFieldUpdater<FlatMapMainSubscriber, Subscription> UPSTREAM_UPDATER = AtomicReferenceFieldUpdater
+                .newUpdater(FlatMapMainSubscriber.class, Subscription.class, "upstream");
 
         AtomicLong requested = new AtomicLong();
 
@@ -150,7 +150,7 @@ public final class MultiFlatMapOp<I, O> extends AbstractMultiOperator<I, O> {
 
                 if (wip.getAndIncrement() == 0) {
                     clearQueue();
-                    upstream.getAndSet(Subscriptions.CANCELLED).cancel();
+                    UPSTREAM_UPDATER.getAndSet(this, Subscriptions.CANCELLED).cancel();
                     unsubscribe();
                 }
             }
@@ -158,7 +158,7 @@ public final class MultiFlatMapOp<I, O> extends AbstractMultiOperator<I, O> {
 
         @Override
         public void onSubscribe(Subscription s) {
-            if (upstream.compareAndSet(null, s)) {
+            if (UPSTREAM_UPDATER.compareAndSet(this, null, s)) {
                 downstream.onSubscribe(this);
                 s.request(Subscriptions.unboundedOrRequests(maxConcurrency));
             }
@@ -447,7 +447,7 @@ public final class MultiFlatMapOp<I, O> extends AbstractMultiOperator<I, O> {
                 }
 
                 if (replenishMain != 0L && !done && !cancelled) {
-                    upstream.get().request(replenishMain);
+                    upstream.request(replenishMain);
                 }
 
                 if (again) {
@@ -463,7 +463,7 @@ public final class MultiFlatMapOp<I, O> extends AbstractMultiOperator<I, O> {
 
         private void cancelUpstream(boolean fromOnError) {
             clearQueue();
-            Subscription subscription = upstream.getAndSet(Subscriptions.CANCELLED);
+            Subscription subscription = UPSTREAM_UPDATER.getAndSet(this, Subscriptions.CANCELLED);
             if (subscription != null) {
                 subscription.cancel();
             }
@@ -566,7 +566,9 @@ public final class MultiFlatMapOp<I, O> extends AbstractMultiOperator<I, O> {
 
         final int limit;
 
-        final AtomicReference<Subscription> subscription = new AtomicReference<>();
+        volatile Subscription subscription = null;
+        private static final AtomicReferenceFieldUpdater<FlatMapInner, Subscription> SUBSCRIPTION_UPDATER = AtomicReferenceFieldUpdater
+                .newUpdater(FlatMapInner.class, Subscription.class, "subscription");
 
         long produced;
 
@@ -585,7 +587,7 @@ public final class MultiFlatMapOp<I, O> extends AbstractMultiOperator<I, O> {
         @Override
         public void onSubscribe(Subscription s) {
             Objects.requireNonNull(s);
-            if (subscription.compareAndSet(null, s)) {
+            if (SUBSCRIPTION_UPDATER.compareAndSet(this, null, s)) {
                 s.request(Subscriptions.unboundedOrRequests(requests));
             }
         }
@@ -613,7 +615,7 @@ public final class MultiFlatMapOp<I, O> extends AbstractMultiOperator<I, O> {
             long p = produced + n;
             if (p >= limit) {
                 produced = 0L;
-                subscription.get().request(p);
+                subscription.request(p);
             } else {
                 produced = p;
             }
@@ -626,7 +628,7 @@ public final class MultiFlatMapOp<I, O> extends AbstractMultiOperator<I, O> {
 
         public void cancel(boolean doNotCancel) {
             if (!doNotCancel) {
-                Subscription last = subscription.getAndSet(Subscriptions.CANCELLED);
+                Subscription last = SUBSCRIPTION_UPDATER.getAndSet(this, Subscriptions.CANCELLED);
                 if (last != null) {
                     last.cancel();
                 }

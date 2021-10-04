@@ -84,7 +84,7 @@ public class MultiEmitOnOp<T> extends AbstractMultiOperator<T, T> {
 
         @Override
         public void onSubscribe(Subscription subscription) {
-            if (upstream.compareAndSet(null, subscription)) {
+            if (compareAndSetUpstreamSubscription(null, subscription)) {
                 downstream.onSubscribe(this);
                 subscription.request(16);
             } else {
@@ -102,7 +102,7 @@ public class MultiEmitOnOp<T> extends AbstractMultiOperator<T, T> {
             if (!queue.offer(t)) {
                 // queue full, this is a failure.
                 // onError will schedule.
-                Subscriptions.cancel(upstream); // cancel upstream
+                cancelUpstream(); // cancel upstream
                 onFailure(new BackPressureFailure("Queue is full, the upstream didn't enforce the requests"));
                 done = true;
             } else {
@@ -145,7 +145,7 @@ public class MultiEmitOnOp<T> extends AbstractMultiOperator<T, T> {
                 return;
             }
             cancelled = true;
-            Subscriptions.cancel(upstream);
+            cancelUpstream();
             if (wip.getAndIncrement() == 0) {
                 // nothing was currently dispatched, clearing the queue.
                 queue.clear();
@@ -161,10 +161,10 @@ public class MultiEmitOnOp<T> extends AbstractMultiOperator<T, T> {
             try {
                 executor.execute(this);
             } catch (RejectedExecutionException rejected) {
-                Subscription s = upstream.getAndSet(CANCELLED);
-                if (s != CANCELLED) {
+                Subscription subscription = getAndSetUpstreamSubscription(CANCELLED);
+                if (subscription != CANCELLED) {
                     done = true;
-                    Subscriptions.cancel(upstream);
+                    cancelUpstream();
                     queue.clear();
                     downstream.onFailure(rejected);
                     super.cancel();

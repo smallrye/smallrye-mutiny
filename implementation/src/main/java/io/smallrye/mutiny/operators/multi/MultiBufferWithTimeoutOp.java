@@ -245,7 +245,7 @@ public final class MultiBufferWithTimeoutOp<T> extends AbstractMultiOperator<T, 
 
         @Override
         public void onSubscribe(Subscription subscription) {
-            if (upstream.compareAndSet(null, subscription)) {
+            if (compareAndSetUpstreamSubscription(null, subscription)) {
                 doOnSubscribe();
                 downstream.onSubscribe(this);
             } else {

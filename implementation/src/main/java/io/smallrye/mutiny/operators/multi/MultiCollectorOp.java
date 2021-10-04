@@ -72,7 +72,7 @@ public final class MultiCollectorOp<T, A, R> extends AbstractMultiOperator<T, R>
 
         @Override
         public void onItem(T item) {
-            if (upstream.get() != CANCELLED) {
+            if (getUpstreamSubscription() != CANCELLED) {
                 try {
                     accumulator.accept(intermediate, item);
                 } catch (Throwable ex) {
@@ -83,7 +83,7 @@ public final class MultiCollectorOp<T, A, R> extends AbstractMultiOperator<T, R>
 
         @Override
         public void onCompletion() {
-            Subscription subscription = upstream.getAndSet(Subscriptions.CANCELLED);
+            Subscription subscription = getAndSetUpstreamSubscription(Subscriptions.CANCELLED);
             if (subscription != Subscriptions.CANCELLED) {
                 R result;
 
