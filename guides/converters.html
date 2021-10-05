@@ -94,14 +94,21 @@ Pick the right one and add it to your project:</p>
 &lt;dependency&gt;
   &lt;groupId&gt;io.smallrye.reactive&lt;/groupId&gt;
   &lt;artifactId&gt;mutiny-reactor&lt;/artifactId&gt;
-  &lt;version&gt;1.0.0&lt;/version&gt;
+  &lt;version&gt;1.1.0&lt;/version&gt;
 &lt;/dependency&gt;
 
-&lt;!-- Mutiny &lt;-&gt; RX Java --&gt;
+&lt;!-- Mutiny &lt;-&gt; RX Java 2 --&gt;
 &lt;dependency&gt;
   &lt;groupId&gt;io.smallrye.reactive&lt;/groupId&gt;
   &lt;artifactId&gt;mutiny-rxjava&lt;/artifactId&gt;
-  &lt;version&gt;1.0.0&lt;/version&gt;
+  &lt;version&gt;1.1.0&lt;/version&gt;
+&lt;/dependency&gt;
+
+&lt;!-- Mutiny &lt;-&gt; RX Java 3 --&gt;
+&lt;dependency&gt;
+  &lt;groupId&gt;io.smallrye.reactive&lt;/groupId&gt;
+  &lt;artifactId&gt;mutiny-rxjava3&lt;/artifactId&gt;
+  &lt;version&gt;1.1.0&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -199,19 +206,23 @@ Flux&lt;String&gt; flux = multi.convert().with(MultiReactorConverters.toFlux());
 </div>
 </div>
 <div class="sect1">
-<h2 id="integration-with-rx-java"><a class="anchor" href="#integration-with-rx-java"></a>Integration with RX Java</h2>
+<h2 id="integration-with-rx-java-2-and-rx-java-3"><a class="anchor" href="#integration-with-rx-java-2-and-rx-java-3"></a>Integration with RX Java 2 and RX Java 3</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>RxJava is another popular reactive programming library.
 It offers 5 types: <code>Completable</code> (no item), <code>Single</code> (one item), <code>Maybe</code> (0 or 1 item), <code>Observable</code> (multiple items), <code>Flowable</code> (multiple items, implements Reactive Stream <code>Publisher</code>).</p>
 </div>
 <div class="paragraph">
-<p>To use the RxJava &lt;&#8594; Mutiny converter, add the following imports to your class:</p>
+<p>To use the RxJava &lt;&#8594; Mutiny converters, add the following imports to your class:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">import io.smallrye.mutiny.converters.multi.MultiRxConverters;
-import io.smallrye.mutiny.converters.uni.UniRxConverters;</code></pre>
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">// RX Java 2 - provided by mutiny-rxjava
+import io.smallrye.mutiny.converters.multi.MultiRxConverters;
+import io.smallrye.mutiny.converters.uni.UniRxConverters;
+// RX Java 3 - provided by mutiny-rxjava3
+import io.smallrye.mutiny.converters.multi.MultiRx3Converters;
+import io.smallrye.mutiny.converters.uni.UniRx3Converters;</code></pre>
 </div>
 </div>
 <div class="sect2">
@@ -409,7 +420,7 @@ For <code>Flowable</code> and <code>Observable,</code> if the <code>Uni</code> e
 <li><a href="#using-converter-instead-of-reactive-streams">Using converter instead of Reactive Streams</a></li>
 </ul>
 </li>
-<li><a href="#integration-with-rx-java">Integration with RX Java</a>
+<li><a href="#integration-with-rx-java-2-and-rx-java-3">Integration with RX Java 2 and RX Java 3</a>
 <ul class="sectlevel2">
 <li><a href="#converting-an-observable-or-a-flowable-into-a-multi">Converting an Observable or a Flowable into a Multi</a></li>
 <li><a href="#converting-a-completable-single-or-maybe-into-a-multi">Converting a Completable, Single or Maybe into a Multi</a></li>
@@ -478,7 +489,7 @@ For <code>Flowable</code> and <code>Observable,</code> if the <code>Uni</code> e
                     <a href="https://www.redhat.com/en/about/privacy-policy">Privacy Policy</a>
                 </p>
                 <p>
-                     Site last generated: Jul 27, 2021
+                     Site last generated: Oct 5, 2021
                 </p>
             </div>
         </div>
