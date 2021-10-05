@@ -30,7 +30,7 @@ jobs:
       - uses: actions/checkout@v2
         with:
           ref: ${{ github.event.inputs.branch }}
-          token: ${{ secrets.GITHUB_API_TOKEN }}
+          token: ${{ secrets.RELEASE_TOKEN }}
       - name: Install JDK 11
         uses: actions/setup-java@v2
         with:
@@ -40,7 +40,7 @@ jobs:
       - name: 'Prepare'
         env:
           GITHUB_CONTEXT: ${{ toJson(github) }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_API_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
           SECRET_FILES_PASSPHRASE: ${{ secrets.SECRET_FILES_PASSPHRASE }}
           MICRO_RELEASE: ${{ github.event.inputs.micro }}
           RELEASE_VERSION: ${{ github.event.inputs.release-version }}
