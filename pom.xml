@@ -93,7 +93,7 @@
         <testng.version>7.4.0</testng.version>
 
         <revapi-maven-plugin.version>0.14.3</revapi-maven-plugin.version>
-        <revapi-java.version>0.24.4</revapi-java.version>
+        <revapi-java.version>0.25.0</revapi-java.version>
         <revapi-reporter-json.version>0.4.2</revapi-reporter-json.version>
         <revapi-reporter-text.version>0.14.2</revapi-reporter-text.version>
 
