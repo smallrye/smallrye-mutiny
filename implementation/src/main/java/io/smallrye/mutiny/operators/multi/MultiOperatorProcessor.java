@@ -13,16 +13,21 @@ import io.smallrye.mutiny.subscription.MultiSubscriber;
 
 public abstract class MultiOperatorProcessor<I, O> implements MultiSubscriber<I>, Subscription {
 
-    // Cannot be final, the TCK checks it gets released.
+    /*
+     * We used to have an interpretation of the RS TCK that it had to be null on cancellation to release the subscriber.
+     * It's actually not necessary (and NPE-prone) since operators are instantiated per-subscription, so the *publisher*
+     * does not actually keep references on cancelled subscribers.
+     */
     protected volatile MultiSubscriber<? super O> downstream;
+
     protected volatile Subscription upstream = null;
-    private volatile int hasDownstreamCancelled = 0;
+    private volatile int cancellationRequested = 0;
 
     private static final AtomicReferenceFieldUpdater<MultiOperatorProcessor, Subscription> UPSTREAM_UPDATER = AtomicReferenceFieldUpdater
             .newUpdater(MultiOperatorProcessor.class, Subscription.class, "upstream");
 
-    private static final AtomicIntegerFieldUpdater<MultiOperatorProcessor> DOWNSTREAM_CANCELLED_UPDATER = AtomicIntegerFieldUpdater
-            .newUpdater(MultiOperatorProcessor.class, "hasDownstreamCancelled");
+    private static final AtomicIntegerFieldUpdater<MultiOperatorProcessor> CANCELLATION_REQUESTED_UPDATER = AtomicIntegerFieldUpdater
+            .newUpdater(MultiOperatorProcessor.class, "cancellationRequested");
 
     public MultiOperatorProcessor(MultiSubscriber<? super O> downstream) {
         this.downstream = ParameterValidation.nonNull(downstream, "downstream");
@@ -53,7 +58,7 @@ public abstract class MultiOperatorProcessor<I, O> implements MultiSubscriber<I>
     }
 
     protected boolean isCancelled() {
-        return hasDownstreamCancelled == 1;
+        return cancellationRequested == 1;
     }
 
     @Override
@@ -107,25 +112,20 @@ public abstract class MultiOperatorProcessor<I, O> implements MultiSubscriber<I>
 
     @Override
     public void cancel() {
-        if (atomicallyFlipDownstreamHasCancelled()) {
+        if (compareAndSwapDownstreamCancellationRequest()) {
             cancelUpstream();
-            cleanup();
         }
     }
 
-    protected final boolean atomicallyFlipDownstreamHasCancelled() {
-        return DOWNSTREAM_CANCELLED_UPDATER.compareAndSet(this, 0, 1);
+    protected final boolean compareAndSwapDownstreamCancellationRequest() {
+        return CANCELLATION_REQUESTED_UPDATER.compareAndSet(this, 0, 1);
     }
 
     protected void cancelUpstream() {
+        this.cancellationRequested = 1;
         Subscription actual = UPSTREAM_UPDATER.getAndSet(this, CANCELLED);
         if (actual != null && actual != CANCELLED) {
             actual.cancel();
         }
     }
-
-    protected void cleanup() {
-        downstream = null;
-    }
-
 }
