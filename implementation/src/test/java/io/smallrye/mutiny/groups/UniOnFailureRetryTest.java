@@ -1,6 +1,7 @@
 package io.smallrye.mutiny.groups;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -172,24 +173,22 @@ public class UniOnFailureRetryTest {
 
     @Test
     public void testRetryWithBackOffReachingMaxAttempt() {
-        assertThrows(IllegalStateException.class, () -> {
+        assertThatThrownBy(() -> {
             AtomicInteger count = new AtomicInteger();
-            Uni.createFrom().<String> emitter(e -> {
-                e.fail(new Exception("boom " + count.getAndIncrement()));
-            })
+            Uni.createFrom().<String> emitter(e -> e.fail(new Exception("boom " + count.getAndIncrement())))
                     .onFailure().retry().withBackOff(Duration.ofMillis(10), Duration.ofSeconds(20)).withJitter(1.0)
                     .atMost(4)
                     .await().atMost(Duration.ofSeconds(5));
-        });
+        }).getCause() // Expected exception is wrapped in a java.util.concurrent.CompletionException
+                .hasMessageContaining("boom")
+                .hasSuppressedException(new IllegalStateException("Retries exhausted: 4/4"));
     }
 
     @Test
     public void testRetryWithBackOffReachingExpiresIn() {
         assertThrows(IllegalStateException.class, () -> {
             AtomicInteger count = new AtomicInteger();
-            Uni.createFrom().<String> emitter(e -> {
-                e.fail(new Exception("boom " + count.getAndIncrement()));
-            })
+            Uni.createFrom().<String> emitter(e -> e.fail(new Exception("boom " + count.getAndIncrement())))
                     .onFailure().retry().withBackOff(Duration.ofMillis(10), Duration.ofSeconds(20)).withJitter(1.0)
                     .expireIn(90L)
                     .await().atMost(Duration.ofSeconds(5));

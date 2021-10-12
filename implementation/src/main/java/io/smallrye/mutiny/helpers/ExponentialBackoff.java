@@ -41,14 +41,14 @@ public class ExponentialBackoff {
                 .onItem().transformToUni(failure -> {
                     int iteration = index.getAndIncrement();
                     if (iteration >= numRetries) {
-                        return Uni.createFrom().failure(
-                                new IllegalStateException("Retries exhausted: " + iteration + "/" + numRetries,
-                                        failure));
+                        failure.addSuppressed(
+                                new IllegalStateException("Retries exhausted: " + iteration + "/" + numRetries, failure));
+                        return Uni.createFrom().failure(failure);
+                    } else {
+                        Duration delay = getNextDelay(firstBackoff, maxBackoff, jitterFactor, iteration);
+                        return Uni.createFrom().item((long) iteration).onItem().delayIt()
+                                .onExecutor(executor).by(delay);
                     }
-
-                    Duration delay = getNextDelay(firstBackoff, maxBackoff, jitterFactor, iteration);
-                    return Uni.createFrom().item((long) iteration).onItem().delayIt()
-                            .onExecutor(executor).by(delay);
                 }).concatenate();
     }
 

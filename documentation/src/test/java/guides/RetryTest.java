@@ -38,7 +38,10 @@ public class RetryTest {
                 .withBackOff(Duration.ofMillis(100), Duration.ofSeconds(1))
                 .atMost(3);
         // end::retry-backoff[]
-        assertThatThrownBy(() -> u.await().indefinitely()).hasMessageContaining("3/3");
+        assertThatThrownBy(() -> u.await().indefinitely())
+                .getCause() // Expected exception is wrapped in a java.util.concurrent.CompletionException
+                .hasMessageContaining("boom")
+                .hasSuppressedException(new IllegalStateException("Retries exhausted: 3/3"));
     }
 
     @Test

@@ -299,7 +299,7 @@ public class MultiOnFailureRetryWhenTest {
                 .subscribe().withSubscriber(AssertSubscriber.create(100));
 
         subscriber
-                .await(Duration.ofSeconds(10))
+                .awaitCompletion(Duration.ofSeconds(10))
                 .assertItems("hey")
                 .assertCompleted();
     }
@@ -319,7 +319,14 @@ public class MultiOnFailureRetryWhenTest {
         await().until(() -> subscriber.getItems().size() >= 10);
         subscriber
                 .assertItems(0, 1, 0, 1, 0, 1, 0, 1, 0, 1) // Initial subscription + 4 retries
-                .assertFailedWith(IllegalStateException.class, "Retries exhausted");
+                .assertFailedWith(IOException.class, "boom retry")
+                .awaitFailure(t -> {
+                    // expecting an IllegalStateException with an info about the retries made
+                    Throwable[] suppressed = exception.getSuppressed();
+                    assertThat(suppressed.length).isEqualTo(1);
+                    assertThat(suppressed).anyMatch(s -> s instanceof IllegalStateException &&
+                            s.getMessage().equals("Retries exhausted: 4/4"));
+                });
 
     }
 
@@ -336,7 +343,14 @@ public class MultiOnFailureRetryWhenTest {
         await().until(() -> subscriber.getItems().size() >= 10);
         subscriber
                 .assertItems(0, 1, 0, 1, 0, 1, 0, 1, 0, 1) // Initial subscription + 4 retries
-                .assertFailedWith(IllegalStateException.class, "Retries exhausted: 4/4");
+                .assertFailedWith(IOException.class, "boom retry")
+                .awaitFailure(t -> {
+                    // expecting an IllegalStateException with an info about the retries made
+                    Throwable[] suppressed = exception.getSuppressed();
+                    assertThat(suppressed.length).isEqualTo(1);
+                    assertThat(suppressed).anyMatch(s -> s instanceof IllegalStateException &&
+                            s.getMessage().equals("Retries exhausted: 4/4"));
+                });
     }
 
     @Test
@@ -353,7 +367,14 @@ public class MultiOnFailureRetryWhenTest {
                 .until(() -> subscriber.getItems().size() >= 10);
         subscriber
                 .assertItems(0, 1, 0, 1, 0, 1, 0, 1, 0, 1) // Initial subscription + 4 retries
-                .assertFailedWith(IllegalStateException.class, "Retries exhausted: 4/4");
+                .assertFailedWith(IOException.class, "boom retry")
+                .awaitFailure(t -> {
+                    // expecting an IllegalStateException with an info about the retries made
+                    Throwable[] suppressed = exception.getSuppressed();
+                    assertThat(suppressed.length).isEqualTo(1);
+                    assertThat(suppressed).anyMatch(s -> s instanceof IllegalStateException &&
+                            s.getMessage().equals("Retries exhausted: 4/4"));
+                });
     }
 
 }
