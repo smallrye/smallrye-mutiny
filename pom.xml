@@ -84,7 +84,7 @@
         <reactive-streams.version>1.0.3</reactive-streams.version>
         <smallrye-context-propagation.version>1.2.2</smallrye-context-propagation.version>
         <smallrye-config.version>1.10.0</smallrye-config.version>
-        <smallrye-common-annotation.version>1.6.0</smallrye-common-annotation.version>
+        <smallrye-common-annotation.version>1.7.1</smallrye-common-annotation.version>
 
         <junit.version>5.8.1</junit.version>
         <assertj-core.version>3.21.0</assertj-core.version>
