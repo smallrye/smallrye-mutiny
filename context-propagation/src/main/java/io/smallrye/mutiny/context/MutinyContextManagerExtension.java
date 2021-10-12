@@ -17,7 +17,7 @@ public class MutinyContextManagerExtension implements ContextManagerExtension {
         Infrastructure.setCompletableFutureWrapper(new UnaryOperator<CompletableFuture<?>>() {
             @Override
             public CompletableFuture<?> apply(CompletableFuture<?> t) {
-                ThreadContext threadContext = SmallRyeThreadContext.getCurrentThreadContextOrPropagatedContexts();
+                ThreadContext threadContext = SmallRyeThreadContext.getCurrentThreadContextOrDefaultContexts();
                 return threadContext.withContextCapture(t);
             }
         });

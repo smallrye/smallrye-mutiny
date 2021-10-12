@@ -9,6 +9,6 @@ public class DefaultContextPropagationInterceptor extends BaseContextPropagation
 
     @Override
     protected SmallRyeThreadContext getThreadContext() {
-        return SmallRyeThreadContext.getCurrentThreadContextOrPropagatedContexts();
+        return SmallRyeThreadContext.getCurrentThreadContextOrDefaultContexts();
     }
 }
