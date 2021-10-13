@@ -8,6 +8,7 @@ import java.util.function.Function;
 import org.reactivestreams.Publisher;
 
 import io.smallrye.mutiny.Multi;
+import io.smallrye.mutiny.helpers.CheckReturnValue;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.multi.MultiCombineLatestOp;
 import io.smallrye.mutiny.operators.multi.MultiZipOp;
@@ -29,6 +30,7 @@ public class MultiItemCombineIterable {
      *
      * @return the current {@link MultiItemCombineIterable}
      */
+    @CheckReturnValue
     public MultiItemCombineIterable collectFailures() {
         this.collectFailures = true;
         return this;
@@ -50,6 +52,7 @@ public class MultiItemCombineIterable {
      *
      * @return the current {@link MultiItemCombineIterable}
      */
+    @CheckReturnValue
     public MultiItemCombineIterable latestItems() {
         this.latest = true;
         return this;
@@ -63,11 +66,13 @@ public class MultiItemCombineIterable {
      * @param <O> the type of item produced by the returned {@link Multi} (the return type of the combinator)
      * @return the new {@link Multi}
      */
+    @CheckReturnValue
     public <O> Multi<O> using(Function<List<?>, O> combinator) {
         nonNull(combinator, "combinator");
         return combine(combinator);
     }
 
+    @CheckReturnValue
     <O> Multi<O> combine(Function<List<?>, ? extends O> combinator) {
         if (latest) {
             if (collectFailures) {

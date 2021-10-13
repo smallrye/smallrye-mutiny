@@ -12,6 +12,7 @@ import org.reactivestreams.Publisher;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.helpers.CheckReturnValue;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.uni.UniOnItemConsume;
 import io.smallrye.mutiny.operators.uni.UniOnItemTransform;
@@ -36,6 +37,7 @@ public class UniOnItem<T> {
      * @param callback the callback, must not be {@code null}
      * @return the new {@link Uni}
      */
+    @CheckReturnValue
     public Uni<T> invoke(Consumer<? super T> callback) {
         Consumer<? super T> actual = Infrastructure.decorate(nonNull(callback, "callback"));
         return Infrastructure.onUniCreation(
@@ -50,6 +52,7 @@ public class UniOnItem<T> {
      * @param callback the callback, must not be {@code null}
      * @return the new {@link Uni}
      */
+    @CheckReturnValue
     public Uni<T> invoke(Runnable callback) {
         Runnable actual = nonNull(callback, "callback");
         // Decoration happens in `invoke`
@@ -69,6 +72,7 @@ public class UniOnItem<T> {
      *        {@code null}
      * @return the new {@link Uni}
      */
+    @CheckReturnValue
     public Uni<T> call(Function<? super T, Uni<?>> action) {
         Function<? super T, Uni<?>> actual = Infrastructure.decorate(nonNull(action, "action"));
         return transformToUni(item -> {
@@ -89,6 +93,7 @@ public class UniOnItem<T> {
      * @param action the action returning a {@link Uni}, must not be {@code null}, must not return {@code null}
      * @return the new {@link Uni}
      */
+    @CheckReturnValue
     public Uni<T> call(Supplier<Uni<?>> action) {
         Supplier<Uni<?>> actual = Infrastructure.decorate(nonNull(action, "action"));
         return call(ignored -> actual.get());
@@ -105,6 +110,7 @@ public class UniOnItem<T> {
      * @param <R> the type of Uni item
      * @return the new {@link Uni}
      */
+    @CheckReturnValue
     public <R> Uni<R> transform(Function<? super T, ? extends R> mapper) {
         Function<? super T, ? extends R> actual = Infrastructure.decorate(nonNull(mapper, "mapper"));
         return Infrastructure.onUniCreation(new UniOnItemTransform<>(upstream, actual));
@@ -126,6 +132,7 @@ public class UniOnItem<T> {
      * @return a new {@link Uni} that would fire events from the uni produced by the mapper function, possibly
      *         in an asynchronous manner.
      */
+    @CheckReturnValue
     public <R> Uni<R> transformToUni(Function<? super T, Uni<? extends R>> mapper) {
         Function<? super T, Uni<? extends R>> actual = Infrastructure.decorate(nonNull(mapper, "mapper"));
         return Infrastructure.onUniCreation(new UniOnItemTransformToUni<>(upstream, actual));
@@ -145,6 +152,7 @@ public class UniOnItem<T> {
      * @param <R> the type of item produced by the resulting {@link Multi}
      * @return the multi
      */
+    @CheckReturnValue
     public <R> Multi<R> transformToMulti(Function<? super T, ? extends Publisher<? extends R>> mapper) {
         Function<? super T, ? extends Publisher<? extends R>> actual = Infrastructure
                 .decorate(nonNull(mapper, "mapper"));
@@ -164,6 +172,7 @@ public class UniOnItem<T> {
      * @return a new {@link Uni} that would fire events from the emitter consumed by the mapper function, possibly
      *         in an asynchronous manner.
      */
+    @CheckReturnValue
     public <R> Uni<R> transformToUni(BiConsumer<? super T, UniEmitter<? super R>> consumer) {
         BiConsumer<? super T, UniEmitter<? super R>> actual = Infrastructure.decorate(nonNull(consumer, "consumer"));
         return this.transformToUni(it -> Uni.createFrom().emitter(emitter -> actual.accept(it, emitter)));
@@ -175,6 +184,7 @@ public class UniOnItem<T> {
      *
      * @return the object to configure the delay.
      */
+    @CheckReturnValue
     public UniOnItemDelay<T> delayIt() {
         return new UniOnItemDelay<>(upstream, null);
     }
@@ -199,6 +209,7 @@ public class UniOnItem<T> {
      *
      * @return the object to configure the continuation logic.
      */
+    @CheckReturnValue
     public UniOnItemIgnore<T> ignore() {
         return new UniOnItemIgnore<>(this);
     }
@@ -211,6 +222,7 @@ public class UniOnItem<T> {
      * @param mapper the mapper function, must not be {@code null}, must not return {@code null}
      * @return the new {@link Uni}
      */
+    @CheckReturnValue
     public Uni<T> failWith(Function<? super T, ? extends Throwable> mapper) {
         Function<? super T, ? extends Throwable> actual = Infrastructure.decorate(nonNull(mapper, "mapper"));
         return Infrastructure.onUniCreation(transformToUni(t -> {
@@ -226,6 +238,7 @@ public class UniOnItem<T> {
      * @param supplier the supplier to produce the failure, must not be {@code null}, must not produce {@code null}
      * @return the new {@link Uni}
      */
+    @CheckReturnValue
     public Uni<T> failWith(Supplier<? extends Throwable> supplier) {
         Supplier<? extends Throwable> actual = Infrastructure.decorate(nonNull(supplier, "supplier"));
         return Infrastructure.onUniCreation(transformToUni(ignored -> {
@@ -241,6 +254,7 @@ public class UniOnItem<T> {
      * @param <O> the type of item emitted by the produced uni
      * @return the new Uni
      */
+    @CheckReturnValue
     public <O> Uni<O> castTo(Class<O> target) {
         nonNull(target, "target");
         return transform(target::cast);
@@ -267,6 +281,7 @@ public class UniOnItem<T> {
      *
      * @return the object to configure the behavior when receiving {@code null}
      */
+    @CheckReturnValue
     public UniOnNull<T> ifNull() {
         return new UniOnNull<>(upstream);
     }
@@ -277,6 +292,7 @@ public class UniOnItem<T> {
      *
      * @return the object to configure the behavior when receiving a {@code non-null} item
      */
+    @CheckReturnValue
     public UniOnNotNull<T> ifNotNull() {
         return new UniOnNotNull<>(upstream);
     }
@@ -298,6 +314,7 @@ public class UniOnItem<T> {
      * @param <O> the type of the upstream item.
      * @return the resulting multi
      */
+    @CheckReturnValue
     public <O> Multi<O> disjoint() {
         return upstream.toMulti()
                 .onItem().disjoint();

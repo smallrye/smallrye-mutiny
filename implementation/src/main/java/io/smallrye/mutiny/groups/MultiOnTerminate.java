@@ -8,6 +8,7 @@ import java.util.function.Supplier;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.helpers.CheckReturnValue;
 import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.multi.MultiOnTerminationCall;
@@ -30,6 +31,7 @@ public class MultiOnTerminate<T> {
      *        be {@code null}.
      * @return the new {@link Multi}
      */
+    @CheckReturnValue
     public Multi<T> invoke(BiConsumer<Throwable, Boolean> callback) {
         BiConsumer<Throwable, Boolean> actual = Infrastructure.decorate(nonNull(callback, "callback"));
         return Infrastructure.onMultiCreation(new MultiOnTerminationInvoke<>(upstream, actual));
@@ -44,6 +46,7 @@ public class MultiOnTerminate<T> {
      *        not be {@code null}.
      * @return the new {@link Multi}
      */
+    @CheckReturnValue
     public Multi<T> invoke(Runnable action) {
         Runnable runnable = Infrastructure.decorate(nonNull(action, "action"));
         return Infrastructure.onMultiCreation(new MultiOnTerminationInvoke<>(upstream, (f, c) -> runnable.run()));
@@ -58,6 +61,7 @@ public class MultiOnTerminate<T> {
      *        The function returns a {@link Uni} and must not be {@code null}.
      * @return the new {@link Multi}
      */
+    @CheckReturnValue
     public Multi<T> call(BiFunction<Throwable, Boolean, Uni<?>> mapper) {
         BiFunction<Throwable, Boolean, Uni<?>> actual = Infrastructure
                 .decorate(Infrastructure.decorate(nonNull(mapper, "mapper")));
@@ -71,6 +75,7 @@ public class MultiOnTerminate<T> {
      * @param supplier the supplier returns a {@link Uni} and must not be {@code null}.
      * @return the new {@link Multi}
      */
+    @CheckReturnValue
     public Multi<T> call(Supplier<Uni<?>> supplier) {
         Supplier<Uni<?>> actual = Infrastructure.decorate(nonNull(supplier, "supplier"));
         return call((ignoredFailure, ignoredCancellation) -> actual.get());

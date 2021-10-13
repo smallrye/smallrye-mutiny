@@ -5,6 +5,7 @@ import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
 import java.util.function.Supplier;
 
 import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.helpers.CheckReturnValue;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 
 public class UniOnItemIgnore<T> {
@@ -21,6 +22,7 @@ public class UniOnItemIgnore<T> {
      * @param failure the exception to propagate
      * @return the new {@link Uni}
      */
+    @CheckReturnValue
     public Uni<T> andFail(Throwable failure) {
         nonNull(failure, "failure");
         return andFail(() -> failure);
@@ -32,6 +34,7 @@ public class UniOnItemIgnore<T> {
      * @param supplier the supplier to produce the failure, must not be {@code null}, must not produce {@code null}
      * @return the new {@link Uni}
      */
+    @CheckReturnValue
     public Uni<T> andFail(Supplier<Throwable> supplier) {
         Supplier<Throwable> actual = Infrastructure.decorate(nonNull(supplier, "supplier"));
         return onItem.transformToUni(ignored -> Uni.createFrom().failure(actual.get()));
@@ -42,6 +45,7 @@ public class UniOnItemIgnore<T> {
      *
      * @return the new {@link Uni}
      */
+    @CheckReturnValue
     public Uni<T> andFail() {
         return andFail(new Exception("Ignored and Failed"));
     }
@@ -53,6 +57,7 @@ public class UniOnItemIgnore<T> {
      * @param <O> the type of the new Uni
      * @return the new Uni
      */
+    @CheckReturnValue
     public <O> Uni<O> andSwitchTo(Uni<? extends O> other) {
         nonNull(other, "other");
         return onItem.transformToUni(ignored -> other);
@@ -65,6 +70,7 @@ public class UniOnItemIgnore<T> {
      * @param <O> the type of the new Uni
      * @return the new Uni
      */
+    @CheckReturnValue
     public <O> Uni<O> andSwitchTo(Supplier<Uni<? extends O>> supplier) {
         nonNull(supplier, "supplier");
         return onItem.transformToUni(ignored -> supplier.get());
@@ -77,6 +83,7 @@ public class UniOnItemIgnore<T> {
      * @param fallback the value to continue with, can be {@code null}
      * @return the new {@link Uni}
      */
+    @CheckReturnValue
     public Uni<T> andContinueWith(T fallback) {
         return onItem.transform(ignored -> fallback);
     }
@@ -86,6 +93,7 @@ public class UniOnItemIgnore<T> {
      *
      * @return the new {@link Uni}
      */
+    @CheckReturnValue
     public Uni<Void> andContinueWithNull() {
         return onItem.transform(ignored -> null);
     }
@@ -97,6 +105,7 @@ public class UniOnItemIgnore<T> {
      * @param supplier the default value, must not be {@code null}, can produce {@code null}
      * @return the new {@link Uni}
      */
+    @CheckReturnValue
     public Uni<T> andContinueWith(Supplier<? extends T> supplier) {
         Supplier<? extends T> actual = Infrastructure.decorate(nonNull(supplier, "supplier"));
         return onItem.transform(ignored -> actual.get());

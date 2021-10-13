@@ -8,6 +8,7 @@ import java.util.function.BiFunction;
 import org.reactivestreams.Publisher;
 
 import io.smallrye.mutiny.Multi;
+import io.smallrye.mutiny.helpers.CheckReturnValue;
 import io.smallrye.mutiny.tuples.Tuple2;
 
 public class MultiItemCombine2<T1, T2> extends MultiItemCombineIterable {
@@ -45,6 +46,7 @@ public class MultiItemCombine2<T1, T2> extends MultiItemCombineIterable {
      * @return the current {@link MultiItemCombine2}
      */
     @Override
+    @CheckReturnValue
     public MultiItemCombine2<T1, T2> latestItems() {
         super.latestItems();
         return this;
@@ -53,6 +55,7 @@ public class MultiItemCombine2<T1, T2> extends MultiItemCombineIterable {
     /**
      * @return the resulting {@link Multi}. The items are combined into a {@link Tuple2 Tuple2&lt;T1, T2&gt;}.
      */
+    @CheckReturnValue
     public Multi<Tuple2<T1, T2>> asTuple() {
         return using(Tuple2::of);
     }
@@ -65,6 +68,7 @@ public class MultiItemCombine2<T1, T2> extends MultiItemCombineIterable {
      * @return the resulting {@link Multi}.
      */
     @SuppressWarnings("unchecked")
+    @CheckReturnValue
     public <O> Multi<O> using(BiFunction<T1, T2, O> combinator) {
         nonNull(combinator, "combinator");
         return super.combine(args -> {

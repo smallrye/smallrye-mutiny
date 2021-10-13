@@ -7,6 +7,7 @@ import java.util.function.Function;
 import org.reactivestreams.Publisher;
 
 import io.smallrye.mutiny.Multi;
+import io.smallrye.mutiny.helpers.CheckReturnValue;
 
 /**
  * Converts the upstream into another reactive type.
@@ -42,6 +43,7 @@ public class MultiConvert<T> {
      *
      * @return the publisher
      */
+    @CheckReturnValue
     public Publisher<T> toPublisher() {
         return upstream;
     }

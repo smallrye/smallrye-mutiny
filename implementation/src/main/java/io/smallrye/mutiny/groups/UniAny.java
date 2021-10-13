@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.concurrent.Executor;
 
 import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.helpers.CheckReturnValue;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.uni.UniOrCombination;
 
@@ -26,6 +27,7 @@ public class UniAny {
      * @return the produced {@link Uni}
      */
     @SafeVarargs
+    @CheckReturnValue
     public final <T> Uni<T> of(Uni<? super T>... unis) {
         List<Uni<? super T>> list = Arrays.asList(nonNull(unis, "unis"));
         return of(list);
@@ -49,6 +51,7 @@ public class UniAny {
      * @param <T> the type of item emitted by the different unis.
      * @return the produced {@link Uni}
      */
+    @CheckReturnValue
     public <T> Uni<T> of(Iterable<? extends Uni<? super T>> iterable) {
         return Infrastructure.onUniCreation(new UniOrCombination<>(iterable));
     }

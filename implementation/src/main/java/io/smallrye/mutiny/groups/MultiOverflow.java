@@ -8,6 +8,7 @@ import java.util.function.Supplier;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.helpers.CheckReturnValue;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.subscription.BackPressureFailure;
 
@@ -24,6 +25,7 @@ public class MultiOverflow<T> {
      *
      * @return the new multi
      */
+    @CheckReturnValue
     public Multi<T> buffer() {
         return new MultiOverflowStrategy<>(upstream, null, null).buffer();
     }
@@ -36,6 +38,7 @@ public class MultiOverflow<T> {
      * @param size the size of the buffer, must be strictly positive
      * @return the new multi
      */
+    @CheckReturnValue
     public Multi<T> buffer(int size) {
         return new MultiOverflowStrategy<>(upstream, null, null).buffer(size);
     }
@@ -45,6 +48,7 @@ public class MultiOverflow<T> {
      *
      * @return the new multi
      */
+    @CheckReturnValue
     public Multi<T> drop() {
         return new MultiOverflowStrategy<>(upstream, null, null).drop();
     }
@@ -59,6 +63,7 @@ public class MultiOverflow<T> {
      *             {@code multi.invoke(consumer).drop()}.
      */
     @Deprecated
+    @CheckReturnValue
     public Multi<T> drop(Consumer<T> callback) {
         Consumer<T> actual = Infrastructure.decorate(nonNull(callback, "callback"));
         return new MultiOverflowStrategy<>(upstream, actual, null).drop();
@@ -69,6 +74,7 @@ public class MultiOverflow<T> {
      *
      * @return the new multi
      */
+    @CheckReturnValue
     public Multi<T> dropPreviousItems() {
         return new MultiOverflowStrategy<>(upstream, null, null).dropPreviousItems();
     }
@@ -79,6 +85,7 @@ public class MultiOverflow<T> {
      * @param consumer the dropped item consumer, must not be {@code null}, must not return {@code null}
      * @return an object to select the overflow management strategy
      */
+    @CheckReturnValue
     public MultiOverflowStrategy<T> invoke(Consumer<T> consumer) {
         Consumer<T> actual = Infrastructure.decorate(nonNull(consumer, "consumer"));
         return new MultiOverflowStrategy<>(upstream, actual, null);
@@ -90,6 +97,7 @@ public class MultiOverflow<T> {
      * @param callback a callback when overflow happens, must not be {@code null}, must not return {@code null}
      * @return an object to select the overflow management strategy
      */
+    @CheckReturnValue
     public MultiOverflowStrategy<T> invoke(Runnable callback) {
         Runnable actual = nonNull(callback, "callback");
         // Decoration happens in `invoke`
@@ -102,6 +110,7 @@ public class MultiOverflow<T> {
      * @param supplier a supplier of a {@link Uni}, must not be {@code null}, must not return {@code null}
      * @return an object to select the overflow management strategy
      */
+    @CheckReturnValue
     public MultiOverflowStrategy<T> call(Supplier<Uni<?>> supplier) {
         Supplier<Uni<?>> actual = Infrastructure.decorate(nonNull(supplier, "supplier"));
         return call(ignored -> actual.get());
@@ -113,6 +122,7 @@ public class MultiOverflow<T> {
      * @param mapper a mapper of a dropped item to a {@link Uni}, must not be {@code null}, must not return {@code null}
      * @return an object to select the overflow management strategy
      */
+    @CheckReturnValue
     public MultiOverflowStrategy<T> call(Function<T, Uni<?>> mapper) {
         Function<T, Uni<?>> actual = Infrastructure.decorate(nonNull(mapper, "mapper"));
         return new MultiOverflowStrategy<>(upstream, null, actual);

@@ -8,6 +8,7 @@ import java.util.function.BooleanSupplier;
 
 import io.smallrye.common.annotation.Experimental;
 import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.helpers.CheckReturnValue;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.AbstractUni;
 import io.smallrye.mutiny.operators.uni.UniMemoizeOp;
@@ -33,6 +34,7 @@ public class UniMemoize<T> {
      * @return a new {@link Uni}
      * @apiNote This is an experimental API
      */
+    @CheckReturnValue
     public Uni<T> until(BooleanSupplier invalidationGuard) {
         BooleanSupplier actual = Infrastructure.decorate(nonNull(invalidationGuard, "invalidationGuard"));
         return Infrastructure.onUniCreation(new UniMemoizeOp<>(upstream, actual));
@@ -50,6 +52,7 @@ public class UniMemoize<T> {
      * @return a new {@link Uni}
      * @apiNote This is an experimental API
      */
+    @CheckReturnValue
     public Uni<T> atLeast(Duration duration) {
         Duration validatedDuration = validate(duration, "duration");
         return until(new BooleanSupplier() {
@@ -76,6 +79,7 @@ public class UniMemoize<T> {
      * @return a new {@link Uni}
      * @apiNote This is an experimental API
      */
+    @CheckReturnValue
     public Uni<T> indefinitely() {
         return this.until(() -> false);
     }

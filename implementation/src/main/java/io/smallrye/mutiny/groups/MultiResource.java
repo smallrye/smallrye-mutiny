@@ -9,6 +9,7 @@ import org.reactivestreams.Publisher;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.helpers.CheckReturnValue;
 import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.multi.builders.ResourceMulti;
@@ -39,6 +40,7 @@ public class MultiResource<R, I> {
      * @param finalizer the finalizer, must not be {@code null}
      * @return the multi
      */
+    @CheckReturnValue
     public Multi<I> withFinalizer(Consumer<? super R> finalizer) {
         Function<? super R, Uni<Void>> actual = getUniFunction(finalizer);
         return withFinalizer(actual, (r, ignored) -> actual.apply(r), actual);
@@ -68,6 +70,7 @@ public class MultiResource<R, I> {
      * @param finalizer the finalizer, must not be {@code null}
      * @return the multi
      */
+    @CheckReturnValue
     public Multi<I> withFinalizer(Function<? super R, Uni<Void>> finalizer) {
         Function<? super R, Uni<Void>> actual = Infrastructure.decorate(ParameterValidation.nonNull(finalizer, "finalizer"));
         return withFinalizer(actual, (r, ignored) -> actual.apply(r), actual);
@@ -96,6 +99,7 @@ public class MultiResource<R, I> {
      *        be {@code null}.
      * @return the multi
      */
+    @CheckReturnValue
     public Multi<I> withFinalizer(
             Function<? super R, Uni<Void>> onCompletion,
             BiFunction<? super R, ? super Throwable, Uni<Void>> onFailure,

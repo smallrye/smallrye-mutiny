@@ -11,6 +11,7 @@ import org.reactivestreams.Publisher;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.helpers.CheckReturnValue;
 import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.subscription.UniEmitter;
@@ -30,6 +31,7 @@ public class UniOnNotNull<T> {
      * @param callback the callback, must not be {@code null}
      * @return the new {@link Uni}
      */
+    @CheckReturnValue
     public Uni<T> invoke(Consumer<? super T> callback) {
         Consumer<? super T> actual = Infrastructure.decorate(nonNull(callback, "callback"));
         // Decoration happens in `invoke`
@@ -47,6 +49,7 @@ public class UniOnNotNull<T> {
      * @param callback the callback, must not be {@code null}
      * @return the new {@link Uni}
      */
+    @CheckReturnValue
     public Uni<T> invoke(Runnable callback) {
         Runnable runnable = nonNull(callback, "callback");
         // Decoration happens in `invoke`
@@ -64,6 +67,7 @@ public class UniOnNotNull<T> {
      * @param action the callback, must not be {@code null}
      * @return the new {@link Uni}
      */
+    @CheckReturnValue
     public Uni<T> call(Function<? super T, Uni<?>> action) {
         Function<? super T, Uni<?>> actual = Infrastructure.decorate(nonNull(action, "action"));
         return upstream.onItem().call(item -> {
@@ -86,6 +90,7 @@ public class UniOnNotNull<T> {
      * @param action the callback, must not be {@code null} and must not return {@code null}
      * @return the new {@link Uni}
      */
+    @CheckReturnValue
     public Uni<T> call(Supplier<Uni<?>> action) {
         Supplier<Uni<?>> actual = Infrastructure.decorate(nonNull(action, "action"));
         return call(ignored -> actual.get());
@@ -104,6 +109,7 @@ public class UniOnNotNull<T> {
      * @param <R> the type of Uni item
      * @return the new {@link Uni}
      */
+    @CheckReturnValue
     public <R> Uni<R> transform(Function<? super T, ? extends R> mapper) {
         Function<? super T, ? extends R> actual = Infrastructure.decorate(nonNull(mapper, "mapper"));
         return upstream.onItem().transform(item -> {
@@ -133,6 +139,7 @@ public class UniOnNotNull<T> {
      * @return a new {@link Uni} that would fire events from the uni produced by the mapper function, possibly
      *         in an asynchronous manner.
      */
+    @CheckReturnValue
     public <R> Uni<R> transformToUni(Function<? super T, Uni<? extends R>> mapper) {
         Function<? super T, Uni<? extends R>> actual = Infrastructure.decorate(nonNull(mapper, "mapper"));
         return upstream.onItem().transformToUni(item -> {
@@ -160,6 +167,7 @@ public class UniOnNotNull<T> {
      * @param <R> the type of item produced by the resulting {@link Multi}
      * @return the multi
      */
+    @CheckReturnValue
     public <R> Multi<R> transformToMulti(Function<? super T, ? extends Publisher<? extends R>> mapper) {
         Function<? super T, ? extends Publisher<? extends R>> actual = Infrastructure
                 .decorate(nonNull(mapper, "mapper"));
@@ -188,6 +196,7 @@ public class UniOnNotNull<T> {
      * @return a new {@link Uni} that would fire events from the emitter consumed by the mapper function, possibly
      *         in an asynchronous manner.
      */
+    @CheckReturnValue
     public <R> Uni<R> transformToUni(BiConsumer<? super T, UniEmitter<? super R>> consumer) {
         BiConsumer<? super T, UniEmitter<? super R>> actual = Infrastructure.decorate(nonNull(consumer, "consumer"));
         return upstream.onItem().transformToUni((item, emitter) -> {
@@ -206,6 +215,7 @@ public class UniOnNotNull<T> {
      * @param supplier the supplier to produce the failure, must not be {@code null}, must not produce {@code null}
      * @return the new {@link Uni}
      */
+    @CheckReturnValue
     public Uni<T> failWith(Supplier<? extends Throwable> supplier) {
         Supplier<? extends Throwable> actual = Infrastructure.decorate(nonNull(supplier, "supplier"));
         return transformToUni(ignored -> {
@@ -220,6 +230,7 @@ public class UniOnNotNull<T> {
      * @param failure the exception to fire if the current {@link Uni} emits an item. Must not be {@code null}.
      * @return the new {@link Uni}
      */
+    @CheckReturnValue
     public Uni<T> failWith(Throwable failure) {
         nonNull(failure, "failure");
         return failWith(() -> failure);

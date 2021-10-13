@@ -8,6 +8,7 @@ import org.reactivestreams.Publisher;
 
 import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Multi;
+import io.smallrye.mutiny.helpers.CheckReturnValue;
 import io.smallrye.mutiny.helpers.queues.Queues;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.multi.MultiFlatMapOp;
@@ -44,6 +45,7 @@ public class MultiFlatten<I, O> {
      *
      * @return this {@link MultiFlatten}
      */
+    @CheckReturnValue
     public MultiFlatten<I, O> collectFailures() {
         return new MultiFlatten<>(upstream, mapper, requests, true);
     }
@@ -54,6 +56,7 @@ public class MultiFlatten<I, O> {
      * @param requests the requests, must be strictly positive
      * @return this {@link MultiFlatten}
      */
+    @CheckReturnValue
     public MultiFlatten<I, O> withRequests(int requests) {
         return new MultiFlatten<>(upstream, mapper, positive(requests, "requests"), collectFailureUntilCompletion);
     }
@@ -72,6 +75,7 @@ public class MultiFlatten<I, O> {
      *
      * @return the object to configure the {@code flatMap} operation.
      */
+    @CheckReturnValue
     public Multi<O> merge() {
         return merge(Queues.BUFFER_S);
     }
@@ -93,6 +97,7 @@ public class MultiFlatten<I, O> {
      * @param concurrency the concurrency
      * @return the object to configure the {@code flatMap} operation.
      */
+    @CheckReturnValue
     public Multi<O> merge(int concurrency) {
         return Infrastructure.onMultiCreation(
                 new MultiFlatMapOp<>(upstream, mapper, collectFailureUntilCompletion, concurrency, requests));
@@ -112,6 +117,7 @@ public class MultiFlatten<I, O> {
      *
      * @return the object to configure the {@code concatMap} operation.
      */
+    @CheckReturnValue
     public Multi<O> concatenate() {
         return Infrastructure.onMultiCreation(
                 new MultiFlatMapOp<>(upstream, mapper, collectFailureUntilCompletion, 1, requests));

@@ -13,6 +13,7 @@ import org.reactivestreams.Publisher;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.helpers.CheckReturnValue;
 import io.smallrye.mutiny.operators.multi.processors.BroadcastProcessor;
 
 public class MultiTransform<T> {
@@ -23,47 +24,58 @@ public class MultiTransform<T> {
         this.upstream = upstream;
     }
 
+    @CheckReturnValue
     public Multi<T> bySkippingFirstItems(long number) {
         return upstream.skip().first(number);
     }
 
+    @CheckReturnValue
     public Multi<T> bySkippingLastItems(int number) {
         return upstream.skip().last(number);
     }
 
+    @CheckReturnValue
     public Multi<T> bySkippingItemsWhile(Predicate<? super T> predicate) {
         return upstream.skip().first(predicate);
     }
 
+    @CheckReturnValue
     public Multi<T> bySkippingItemsFor(Duration duration) {
         return upstream.skip().first(duration);
     }
 
+    @CheckReturnValue
     public Multi<T> byTakingFirstItems(long number) {
         return upstream.select().first(number);
     }
 
+    @CheckReturnValue
     public Multi<T> byTakingLastItems(int number) {
         return upstream.select().last(number);
     }
 
+    @CheckReturnValue
     public Multi<T> byTakingItemsFor(Duration duration) {
         return upstream.select().first(duration);
     }
 
+    @CheckReturnValue
     public Multi<T> byTakingItemsWhile(Predicate<? super T> predicate) {
         return upstream.select().first(predicate);
     }
 
+    @CheckReturnValue
     public Multi<T> byDroppingDuplicates() {
         return upstream.select().distinct();
     }
 
+    @CheckReturnValue
     public Multi<T> byDroppingRepetitions() {
         return upstream.skip().repetitions();
     }
 
     @SafeVarargs
+    @CheckReturnValue
     public final Multi<T> byMergingWith(Publisher<T>... publishers) {
         List<Publisher<T>> list = new ArrayList<>();
         list.add(upstream);
@@ -71,6 +83,7 @@ public class MultiTransform<T> {
         return Multi.createBy().merging().streams(list);
     }
 
+    @CheckReturnValue
     public Multi<T> byMergingWith(Iterable<Publisher<T>> iterable) {
         List<Publisher<T>> list = new ArrayList<>();
         list.add(upstream);
@@ -84,6 +97,7 @@ public class MultiTransform<T> {
      * @param predicate the predicate, must not be {@code null}
      * @return the produced {@link Multi}
      */
+    @CheckReturnValue
     public Multi<T> byFilteringItemsWith(Predicate<? super T> predicate) {
         return upstream.select().where(predicate);
     }
@@ -96,6 +110,7 @@ public class MultiTransform<T> {
      * @param predicate the predicate, must not be {@code null}, must not produce {@code null}
      * @return the produced {@link Multi}
      */
+    @CheckReturnValue
     public Multi<T> byTestingItemsWith(Function<? super T, Uni<Boolean>> predicate) {
         // Decoration happens in `when`
         return upstream.select().when(predicate);
@@ -117,6 +132,7 @@ public class MultiTransform<T> {
      * @deprecated Use {@link Multi#toHotStream()} instead
      */
     @Deprecated
+    @CheckReturnValue
     public Multi<T> toHotStream() {
         BroadcastProcessor<T> processor = BroadcastProcessor.create();
         upstream.subscribe(processor);

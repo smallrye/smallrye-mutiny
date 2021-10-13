@@ -13,11 +13,13 @@ import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.groups.*;
+import io.smallrye.mutiny.helpers.CheckReturnValue;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 
 @SuppressWarnings({ "ReactiveStreamsPublisherImplementation" })
 public interface Multi<T> extends Publisher<T> {
 
+    @CheckReturnValue
     static MultiCreate createFrom() {
         return MultiCreate.INSTANCE;
     }
@@ -28,6 +30,7 @@ public interface Multi<T> extends Publisher<T> {
      *
      * @return the object to configure the creation process.
      */
+    @CheckReturnValue
     static MultiCreateBy createBy() {
         return MultiCreateBy.INSTANCE;
     }
@@ -37,6 +40,7 @@ public interface Multi<T> extends Publisher<T> {
      *
      * @return the object to configure the subscriber
      */
+    @CheckReturnValue
     MultiSubscribe<T> subscribe();
 
     /**
@@ -44,6 +48,7 @@ public interface Multi<T> extends Publisher<T> {
      *
      * @return the object to configure the behavior.
      */
+    @CheckReturnValue
     MultiOnItem<T> onItem();
 
     /**
@@ -65,6 +70,7 @@ public interface Multi<T> extends Publisher<T> {
      * @param <O> the outcome type
      * @return the outcome of the function.
      */
+    @CheckReturnValue
     default <O> O stage(Function<Multi<T>, O> stage) {
         return nonNull(stage, "stage").apply(this);
     }
@@ -87,6 +93,7 @@ public interface Multi<T> extends Publisher<T> {
      *
      * @return the produced {@link Uni}
      */
+    @CheckReturnValue
     Uni<T> toUni();
 
     /**
@@ -95,6 +102,7 @@ public interface Multi<T> extends Publisher<T> {
      *
      * @return a MultiOnFailure on which you can specify the on failure action
      */
+    @CheckReturnValue
     MultiOnFailure<T> onFailure();
 
     /**
@@ -110,6 +118,7 @@ public interface Multi<T> extends Publisher<T> {
      * @param predicate the predicate, {@code null} means applied to all failures
      * @return a MultiOnFailure configured with the given predicate on which you can specify the on failure action
      */
+    @CheckReturnValue
     MultiOnFailure<T> onFailure(Predicate<? super Throwable> predicate);
 
     /**
@@ -130,6 +139,7 @@ public interface Multi<T> extends Publisher<T> {
      * @deprecated use {@link #onSubscription()} instead
      */
     @Deprecated
+    @CheckReturnValue
     MultiOnSubscribe<T> onSubscribe();
 
     /**
@@ -148,6 +158,7 @@ public interface Multi<T> extends Publisher<T> {
      *
      * @return the object to configure the action to execution on subscription.
      */
+    @CheckReturnValue
     MultiOnSubscribe<T> onSubscription();
 
     /**
@@ -163,6 +174,7 @@ public interface Multi<T> extends Publisher<T> {
      * @param typeOfFailure the class of exception, must not be {@code null}
      * @return a MultiOnFailure configured with the given predicate on which you can specify the on failure action
      */
+    @CheckReturnValue
     MultiOnFailure<T> onFailure(Class<? extends Throwable> typeOfFailure);
 
     /**
@@ -171,6 +183,7 @@ public interface Multi<T> extends Publisher<T> {
      *
      * @return a multi replaying the events from the upstream.
      */
+    @CheckReturnValue
     Multi<T> cache();
 
     /**
@@ -190,6 +203,7 @@ public interface Multi<T> extends Publisher<T> {
      * @deprecated Use {@link #collect()} instead
      */
     @Deprecated
+    @CheckReturnValue
     default MultiCollect<T> collectItems() {
         return collect();
     }
@@ -209,6 +223,7 @@ public interface Multi<T> extends Publisher<T> {
      *
      * @return the object to configure the collection process.
      */
+    @CheckReturnValue
     MultiCollect<T> collect();
 
     /**
@@ -218,6 +233,7 @@ public interface Multi<T> extends Publisher<T> {
      *
      * @return the object to configure the grouping.
      */
+    @CheckReturnValue
     MultiGroup<T> group();
 
     /**
@@ -229,6 +245,7 @@ public interface Multi<T> extends Publisher<T> {
      * @deprecated Use {@link #group()} instead
      */
     @Deprecated
+    @CheckReturnValue
     default MultiGroup<T> groupItems() {
         return group();
     }
@@ -245,6 +262,7 @@ public interface Multi<T> extends Publisher<T> {
      * @param executor the executor to use, must not be {@code null}
      * @return a new {@link Multi}
      */
+    @CheckReturnValue
     Multi<T> emitOn(Executor executor);
 
     /**
@@ -255,6 +273,7 @@ public interface Multi<T> extends Publisher<T> {
      * @param executor the executor to use, must not be {@code null}
      * @return a new {@link Multi}
      */
+    @CheckReturnValue
     Multi<T> runSubscriptionOn(Executor executor);
 
     /**
@@ -262,6 +281,7 @@ public interface Multi<T> extends Publisher<T> {
      *
      * @return the object to configure the action.
      */
+    @CheckReturnValue
     MultiOnCompletion<T> onCompletion();
 
     /**
@@ -271,6 +291,7 @@ public interface Multi<T> extends Publisher<T> {
      * @deprecated Use {@link #select()} and {@link #skip()}instead
      */
     @Deprecated
+    @CheckReturnValue
     MultiTransform<T> transform();
 
     /**
@@ -278,6 +299,7 @@ public interface Multi<T> extends Publisher<T> {
      *
      * @return the object to configure the selection.
      */
+    @CheckReturnValue
     MultiSelect<T> select();
 
     /**
@@ -285,6 +307,7 @@ public interface Multi<T> extends Publisher<T> {
      *
      * @return the object to configure the skip.
      */
+    @CheckReturnValue
     MultiSkip<T> skip();
 
     /**
@@ -293,6 +316,7 @@ public interface Multi<T> extends Publisher<T> {
      *
      * @return the object to configure the overflow strategy
      */
+    @CheckReturnValue
     MultiOverflow<T> onOverflow();
 
     /**
@@ -301,6 +325,7 @@ public interface Multi<T> extends Publisher<T> {
      *
      * @return the object to configure the broadcast
      */
+    @CheckReturnValue
     MultiBroadcast<T> broadcast();
 
     /**
@@ -319,6 +344,7 @@ public interface Multi<T> extends Publisher<T> {
      * @return the object to convert an {@link Multi} instance
      * @see MultiConvert
      */
+    @CheckReturnValue
     MultiConvert<T> convert();
 
     /**
@@ -331,6 +357,7 @@ public interface Multi<T> extends Publisher<T> {
      * @param predicate a predicate, must not be {@code null}
      * @return the new {@link Multi}
      */
+    @CheckReturnValue
     default Multi<T> filter(Predicate<? super T> predicate) {
         return select().where(predicate);
     }
@@ -347,6 +374,7 @@ public interface Multi<T> extends Publisher<T> {
      * @param <O> the type of item produced by the mapper function
      * @return the new {@link Multi}
      */
+    @CheckReturnValue
     default <O> Multi<O> map(Function<? super T, ? extends O> mapper) {
         return onItem().transform(mapper);
     }
@@ -369,6 +397,7 @@ public interface Multi<T> extends Publisher<T> {
      * @param <O> the type of item emitted by the {@link Publisher} produced by the {@code mapper}
      * @return the produced {@link Multi}
      */
+    @CheckReturnValue
     default <O> Multi<O> flatMap(Function<? super T, ? extends Publisher<? extends O>> mapper) {
         return onItem().transformToMultiAndMerge(mapper);
     }
@@ -389,6 +418,7 @@ public interface Multi<T> extends Publisher<T> {
      * @param action the function taking the item and returning a {@link Uni}, must not be {@code null}
      * @return the new {@link Multi}
      */
+    @CheckReturnValue
     default Multi<T> call(Function<? super T, Uni<?>> action) {
         return onItem().call(action);
     }
@@ -409,6 +439,7 @@ public interface Multi<T> extends Publisher<T> {
      * @param action the function taking the item and returning a {@link Uni}, must not be {@code null}
      * @return the new {@link Multi}
      */
+    @CheckReturnValue
     default Multi<T> call(Supplier<Uni<?>> action) {
         return onItem().call(action);
     }
@@ -425,6 +456,7 @@ public interface Multi<T> extends Publisher<T> {
      * @param callback the callback, must not be {@code null}
      * @return the new {@link Multi}
      */
+    @CheckReturnValue
     default Multi<T> invoke(Consumer<? super T> callback) {
         return onItem().invoke(nonNull(callback, "callback"));
     }
@@ -439,6 +471,7 @@ public interface Multi<T> extends Publisher<T> {
      * @param callback the callback, must not be {@code null}
      * @return the new {@link Multi}
      */
+    @CheckReturnValue
     default Multi<T> invoke(Runnable callback) {
         return onItem().invoke(callback);
     }
@@ -462,6 +495,7 @@ public interface Multi<T> extends Publisher<T> {
      * @param <O> the type of item emitted by the {@link Publisher} produced by the {@code mapper}
      * @return the produced {@link Multi}
      */
+    @CheckReturnValue
     default <O> Multi<O> concatMap(Function<? super T, ? extends Publisher<? extends O>> mapper) {
         return onItem().transformToMultiAndConcatenate(mapper);
     }
@@ -471,6 +505,7 @@ public interface Multi<T> extends Publisher<T> {
      *
      * @return the object to configure the termination actions
      */
+    @CheckReturnValue
     MultiOnTerminate<T> onTermination();
 
     /**
@@ -478,6 +513,7 @@ public interface Multi<T> extends Publisher<T> {
      *
      * @return the object to configure the cancellation actions
      */
+    @CheckReturnValue
     MultiOnCancel<T> onCancellation();
 
     /**
@@ -485,6 +521,7 @@ public interface Multi<T> extends Publisher<T> {
      *
      * @return the object to configure the actions
      */
+    @CheckReturnValue
     MultiOnRequest<T> onRequest();
 
     /**
@@ -495,6 +532,7 @@ public interface Multi<T> extends Publisher<T> {
      * @param <R> the output type
      * @return the new {@link Multi}
      */
+    @CheckReturnValue
     default <R> Multi<R> plug(Function<Multi<T>, Multi<R>> operatorProvider) {
         Function<Multi<T>, Multi<R>> provider = nonNull(operatorProvider, "operatorProvider");
         return Infrastructure.onMultiCreation(nonNull(provider.apply(this), "multi"));
@@ -515,6 +553,7 @@ public interface Multi<T> extends Publisher<T> {
      *
      * @return the new multi.
      */
+    @CheckReturnValue
     Multi<T> toHotStream();
 
     /**
@@ -527,6 +566,7 @@ public interface Multi<T> extends Publisher<T> {
      * @return a new {@link Multi}
      * @see Infrastructure#setOperatorLogger(Infrastructure.OperatorLogger)
      */
+    @CheckReturnValue
     Multi<T> log(String identifier);
 
     /**
@@ -540,5 +580,6 @@ public interface Multi<T> extends Publisher<T> {
      * @see Multi#log(String)
      * @see Infrastructure#setOperatorLogger(Infrastructure.OperatorLogger)
      */
+    @CheckReturnValue
     Multi<T> log();
 }

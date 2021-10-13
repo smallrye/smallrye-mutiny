@@ -5,6 +5,7 @@ import java.util.function.Predicate;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.helpers.CheckReturnValue;
 import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.multi.MultiRepeatUntilOp;
@@ -36,6 +37,7 @@ public class UniRepeat<T> {
      * @param delay the delay, must be not {@code null}, must be positive
      * @return the {@link UniRepeat} configured with the delay.
      */
+    @CheckReturnValue
     public UniRepeat<T> withDelay(Duration delay) {
         ParameterValidation.validate(delay, "delay");
         return new UniRepeat<>(upstream, Uni.createFrom().voidItem().onItem().delayIt().by(delay));
@@ -56,6 +58,7 @@ public class UniRepeat<T> {
      *
      * @return the {@link Multi} containing the items from the upstream {@link Uni}, resubscribed indefinitely.
      */
+    @CheckReturnValue
     public Multi<T> indefinitely() {
         return atMost(Long.MAX_VALUE);
     }
@@ -81,6 +84,7 @@ public class UniRepeat<T> {
      * @return the {@link Multi} containing the items from the upstream {@link Uni}, resubscribed at most {@code times}
      *         times.
      */
+    @CheckReturnValue
     public Multi<T> atMost(long times) {
         long actual = ParameterValidation.positive(times, "times");
         return new MultiRepeatUntilOp<>(upstream.toMulti(), actual, delay);
@@ -103,6 +107,7 @@ public class UniRepeat<T> {
      * @return the {@link Multi} containing the items from the upstream {@link Uni}, resubscribed until the predicate
      *         returns {@code true}.
      */
+    @CheckReturnValue
     public Multi<T> until(Predicate<T> predicate) {
         Predicate<T> actual = Infrastructure.decorate(ParameterValidation.nonNull(predicate, "predicate"));
         return new MultiRepeatUntilOp<>(upstream.toMulti(), actual, delay);
@@ -127,6 +132,7 @@ public class UniRepeat<T> {
      * @return the {@link Multi} containing the items from the upstream {@link Uni}, resubscribed until the predicate
      *         returns {@code true}.
      */
+    @CheckReturnValue
     public Multi<T> whilst(Predicate<T> predicate) {
         Predicate<T> actual = Infrastructure.decorate(ParameterValidation.nonNull(predicate, "predicate"));
         return new MultiRepeatWhilstOp<>(upstream.toMulti(), actual, delay);

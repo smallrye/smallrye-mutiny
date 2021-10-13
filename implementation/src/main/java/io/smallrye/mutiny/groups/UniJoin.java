@@ -10,6 +10,7 @@ import java.util.List;
 import io.smallrye.common.annotation.Experimental;
 import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.helpers.CheckReturnValue;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.uni.builders.UniJoinAll;
 import io.smallrye.mutiny.operators.uni.builders.UniJoinFirst;
@@ -35,6 +36,7 @@ public class UniJoin {
      * @return the object to configure the failure management strategy
      */
     @SafeVarargs
+    @CheckReturnValue
     public final <T> JoinAllStrategy<T> all(Uni<? extends T>... unis) {
         return all(asList(nonNull(unis, "unis")));
     }
@@ -50,6 +52,7 @@ public class UniJoin {
      * @param <T> the type of the {@link Uni} values
      * @return the object to configure the failure management strategy
      */
+    @CheckReturnValue
     public final <T> JoinAllStrategy<T> all(List<Uni<? extends T>> unis) {
         return new JoinAllStrategy<>(doesNotContainNull(unis, "unis"));
     }
@@ -73,6 +76,7 @@ public class UniJoin {
          *
          * @return a new {@link Uni}
          */
+        @CheckReturnValue
         public Uni<List<T>> andCollectFailures() {
             return Infrastructure.onUniCreation(new UniJoinAll<>(unis, UniJoinAll.Mode.COLLECT_FAILURES));
         }
@@ -83,6 +87,7 @@ public class UniJoin {
          *
          * @return a new {@link Uni}
          */
+        @CheckReturnValue
         public Uni<List<T>> andFailFast() {
             return Infrastructure.onUniCreation(new UniJoinAll<>(unis, UniJoinAll.Mode.FAIL_FAST));
         }
@@ -97,6 +102,7 @@ public class UniJoin {
      * @return the object to configure the failure management strategy
      */
     @SafeVarargs
+    @CheckReturnValue
     public final <T> JoinFirstStrategy<T> first(Uni<? extends T>... unis) {
         return first(asList(nonNull(unis, "unis")));
     }
@@ -111,6 +117,7 @@ public class UniJoin {
      * @param <T> the type of the {@link Uni} values
      * @return the object to configure the failure management strategy
      */
+    @CheckReturnValue
     public final <T> JoinFirstStrategy<T> first(List<Uni<? extends T>> unis) {
         return new JoinFirstStrategy<>(doesNotContainNull(unis, "unis"));
     }
@@ -133,6 +140,7 @@ public class UniJoin {
          *
          * @return a new {@link Uni}
          */
+        @CheckReturnValue
         public Uni<T> toTerminate() {
             return Infrastructure.onUniCreation(new UniJoinFirst<>(unis, UniJoinFirst.Mode.FIRST_TO_EMIT));
         }
@@ -145,6 +153,7 @@ public class UniJoin {
          *
          * @return a new {@link Uni}
          */
+        @CheckReturnValue
         public Uni<T> withItem() {
             return Infrastructure.onUniCreation(new UniJoinFirst<>(unis, UniJoinFirst.Mode.FIRST_WITH_ITEM));
         }
@@ -156,6 +165,7 @@ public class UniJoin {
      * @param <T> the type of the {@link Uni} values
      * @return a new builder
      */
+    @CheckReturnValue
     public <T> Builder<T> builder() {
         return new Builder<>();
     }
@@ -175,6 +185,7 @@ public class UniJoin {
          * @param uni a {@link Uni}
          * @return this builder instance
          */
+        @CheckReturnValue
         public Builder<T> add(Uni<? extends T> uni) {
             unis.add(uni);
             return this;
@@ -185,6 +196,7 @@ public class UniJoin {
          *
          * @return the object to configure the failure management strategy
          */
+        @CheckReturnValue
         public JoinAllStrategy<T> joinAll() {
             return UniJoin.this.all(unis);
         }
@@ -194,6 +206,7 @@ public class UniJoin {
          *
          * @return the object to configure the failure management strategy
          */
+        @CheckReturnValue
         public JoinFirstStrategy<T> joinFirst() {
             return UniJoin.this.first(unis);
         }

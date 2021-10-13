@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.helpers.CheckReturnValue;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.uni.UniOrCombination;
 
@@ -19,6 +20,7 @@ public class UniOr<T> {
     }
 
     @SafeVarargs
+    @CheckReturnValue
     public final Uni<T> unis(Uni<T>... other) {
         List<Uni<T>> list = new ArrayList<>();
         list.add(upstream);

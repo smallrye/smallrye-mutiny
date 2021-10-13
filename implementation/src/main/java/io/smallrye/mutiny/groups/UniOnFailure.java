@@ -10,6 +10,7 @@ import java.util.function.Supplier;
 
 import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.helpers.CheckReturnValue;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.uni.UniOnFailureFlatMap;
 import io.smallrye.mutiny.operators.uni.UniOnFailureTransform;
@@ -55,6 +56,7 @@ public class UniOnFailure<T> {
      * @param callback the callback, must not be {@code null}
      * @return the new {@link Uni}
      */
+    @CheckReturnValue
     public Uni<T> invoke(Consumer<Throwable> callback) {
         Consumer<Throwable> actual = Infrastructure.decorate(nonNull(callback, "callback"));
         return Infrastructure.onUniCreation(
@@ -71,6 +73,7 @@ public class UniOnFailure<T> {
      * @param callback the callback, must not be {@code null}
      * @return the new {@link Uni}
      */
+    @CheckReturnValue
     public Uni<T> invoke(Runnable callback) {
         Runnable actual = nonNull(callback, "callback");
         // Decoration happens in `invoke`
@@ -92,6 +95,7 @@ public class UniOnFailure<T> {
      * @param action the callback, must not be {@code null}
      * @return the new {@link Uni}
      */
+    @CheckReturnValue
     public Uni<T> call(Function<Throwable, Uni<?>> action) {
         Function<Throwable, Uni<?>> actual = Infrastructure.decorate(nonNull(action, "action"));
         return recoverWithUni(failure -> {
@@ -123,6 +127,7 @@ public class UniOnFailure<T> {
      * @param supplier the supplier, must not be {@code null}
      * @return the new {@link Uni}
      */
+    @CheckReturnValue
     public Uni<T> call(Supplier<Uni<?>> supplier) {
         Supplier<Uni<?>> actual = Infrastructure.decorate(nonNull(supplier, "supplier"));
         return call(ignored -> actual.get());
@@ -135,6 +140,7 @@ public class UniOnFailure<T> {
      * @param mapper the mapper function, must not be {@code null}, must not return {@code null}
      * @return the new {@link Uni}
      */
+    @CheckReturnValue
     public Uni<T> transform(Function<? super Throwable, ? extends Throwable> mapper) {
         Function<? super Throwable, ? extends Throwable> actual = Infrastructure.decorate(nonNull(mapper, "mapper"));
         return Infrastructure.onUniCreation(new UniOnFailureTransform<>(upstream, predicate, actual));
@@ -146,6 +152,7 @@ public class UniOnFailure<T> {
      * @param fallback the fallback, can be {@code null}
      * @return the new {@link Uni} that would emit the given fallback in case the upstream sends us a failure.
      */
+    @CheckReturnValue
     public Uni<T> recoverWithItem(T fallback) {
         return recoverWithItem(() -> fallback);
     }
@@ -160,6 +167,7 @@ public class UniOnFailure<T> {
      * @param supplier the supplier providing the fallback item. Must not be {@code null}, can return {@code null}.
      * @return the new {@link Uni} that would emit the produced item in case the upstream sends a failure.
      */
+    @CheckReturnValue
     public Uni<T> recoverWithItem(Supplier<T> supplier) {
         Supplier<T> actual = Infrastructure.decorate(nonNull(supplier, "supplier"));
         return recoverWithItem(ignored -> actual.get());
@@ -175,6 +183,7 @@ public class UniOnFailure<T> {
      * @param function the function providing the fallback item. Must not be {@code null}, can return {@code null}.
      * @return the new {@link Uni} that would emit the produced item in case the upstream sends a failure.
      */
+    @CheckReturnValue
     public Uni<T> recoverWithItem(Function<? super Throwable, ? extends T> function) {
         Function<? super Throwable, ? extends T> actual = Infrastructure.decorate(nonNull(function, "function"));
         return Infrastructure.onUniCreation(new UniOnFailureFlatMap<>(upstream, predicate, failure -> {
@@ -195,6 +204,7 @@ public class UniOnFailure<T> {
      * @return the new {@link Uni} that would emit events from the uni produced by the given function in case the
      *         upstream sends a failure.
      */
+    @CheckReturnValue
     public Uni<T> recoverWithUni(Function<? super Throwable, Uni<? extends T>> function) {
         Function<? super Throwable, Uni<? extends T>> actual = Infrastructure.decorate(nonNull(function, "function"));
         return Infrastructure.onUniCreation(
@@ -213,6 +223,7 @@ public class UniOnFailure<T> {
      * @return the new {@link Uni} that would emits events from the uni produced by the given supplier in case the
      *         upstream sends a failure.
      */
+    @CheckReturnValue
     public Uni<T> recoverWithUni(Supplier<Uni<? extends T>> supplier) {
         Supplier<Uni<? extends T>> actual = Infrastructure.decorate(nonNull(supplier, "supplier"));
         return recoverWithUni(ignored -> actual.get());
@@ -225,6 +236,7 @@ public class UniOnFailure<T> {
      * @param fallback the fallbakc uni, must not be {@code null}
      * @return the new {@link Uni} that would emit events from the uni in case the upstream sends a failure.
      */
+    @CheckReturnValue
     public Uni<T> recoverWithUni(Uni<? extends T> fallback) {
         return recoverWithUni(() -> fallback);
     }
@@ -234,6 +246,7 @@ public class UniOnFailure<T> {
      *
      * @return the object to configure the retry.
      */
+    @CheckReturnValue
     public UniRetry<T> retry() {
         return new UniRetry<>(upstream, predicate);
     }
@@ -243,6 +256,7 @@ public class UniOnFailure<T> {
      *
      * @return the new {@link Uni} that emits {@code null} on failure
      */
+    @CheckReturnValue
     public Uni<T> recoverWithNull() {
         return recoverWithItem(failure -> null);
     }

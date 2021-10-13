@@ -9,6 +9,7 @@ import java.util.function.Predicate;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.helpers.CheckReturnValue;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.multi.*;
 
@@ -35,6 +36,7 @@ public class MultiSelect<T> {
      *
      * @return the resulting {@link Multi}
      */
+    @CheckReturnValue
     public Multi<T> first() {
         return first(1);
     }
@@ -49,6 +51,7 @@ public class MultiSelect<T> {
      *
      * @return the resulting {@link Multi}
      */
+    @CheckReturnValue
     public Multi<T> last() {
         return last(1);
     }
@@ -65,6 +68,7 @@ public class MultiSelect<T> {
      * @param n the number of items to select, must be positive. If 0, the resulting {@link Multi} is empty.
      * @return the resulting {@link Multi}
      */
+    @CheckReturnValue
     public Multi<T> first(long n) {
         return Infrastructure.onMultiCreation(new MultiSelectFirstOp<>(upstream, n));
     }
@@ -81,6 +85,7 @@ public class MultiSelect<T> {
      * @param n the number of items to select, must be positive. If 0, the resulting {@link Multi} is empty.
      * @return the resulting {@link Multi}
      */
+    @CheckReturnValue
     public Multi<T> last(int n) {
         return Infrastructure.onMultiCreation(new MultiSelectLastOp<>(upstream, n));
     }
@@ -104,6 +109,7 @@ public class MultiSelect<T> {
      * @param predicate the predicate to test the items, must not be {@code null}
      * @return the resulting {@link Multi}
      */
+    @CheckReturnValue
     public Multi<T> first(Predicate<? super T> predicate) {
         Predicate<? super T> actual = Infrastructure.decorate(nonNull(predicate, "predicate"));
         return Infrastructure.onMultiCreation(new MultiSelectFirstWhileOp<>(upstream, actual));
@@ -124,6 +130,7 @@ public class MultiSelect<T> {
      * @param duration the duration, must not be {@code null}, must be strictly positive.
      * @return the resulting {@link Multi}
      */
+    @CheckReturnValue
     public Multi<T> first(Duration duration) {
         Multi<Long> ticks = Multi.createFrom().ticks().startingAfter(duration).every(duration);
         return Infrastructure.onMultiCreation(new MultiSelectFirstUntilOtherOp<>(upstream, ticks));
@@ -146,6 +153,7 @@ public class MultiSelect<T> {
      * @return the resulting {@link Multi}
      * @see #when(Function)
      */
+    @CheckReturnValue
     public Multi<T> where(Predicate<? super T> predicate) {
         Predicate<? super T> actual = Infrastructure.decorate(nonNull(predicate, "predicate"));
         return Infrastructure.onMultiCreation(new MultiSelectWhereOp<>(upstream, actual));
@@ -159,6 +167,7 @@ public class MultiSelect<T> {
      * @return the resulting {@link Multi}
      * @see #when(Function)
      */
+    @CheckReturnValue
     public Multi<T> where(Predicate<? super T> predicate, int limit) {
         // Decoration happens in where.
         return where(predicate)
@@ -192,6 +201,7 @@ public class MultiSelect<T> {
      * @param predicate the function to test the items, must not be {@code null}, must not produced {@code null}
      * @return the resulting {@link Multi}
      */
+    @CheckReturnValue
     public Multi<T> when(Function<? super T, Uni<Boolean>> predicate) {
         Function<? super T, Uni<Boolean>> actual = Infrastructure.decorate(nonNull(predicate, "predicate"));
         return upstream.onItem().transformToMultiAndConcatenate(res -> {
@@ -213,6 +223,7 @@ public class MultiSelect<T> {
      * @see MultiSkip#repetitions()
      * @see #distinct(Comparator)
      */
+    @CheckReturnValue
     public Multi<T> distinct() {
         return Infrastructure.onMultiCreation(new MultiDistinctOp<>(upstream));
     }
@@ -235,6 +246,7 @@ public class MultiSelect<T> {
      * @return the resulting {@link Multi}.
      * @see MultiSkip#repetitions()
      */
+    @CheckReturnValue
     public Multi<T> distinct(Comparator<? super T> comparator) {
         return Infrastructure.onMultiCreation(new MultiDistinctOp<>(upstream, comparator));
     }

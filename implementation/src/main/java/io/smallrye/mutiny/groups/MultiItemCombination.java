@@ -7,6 +7,7 @@ import java.util.Arrays;
 import org.reactivestreams.Publisher;
 
 import io.smallrye.mutiny.Multi;
+import io.smallrye.mutiny.helpers.CheckReturnValue;
 
 public class MultiItemCombination {
 
@@ -19,6 +20,7 @@ public class MultiItemCombination {
      * @param <T2> the type of item from the second stream
      * @return the object to configure the combination process
      */
+    @CheckReturnValue
     public <T1, T2> MultiItemCombine2<T1, T2> streams(Publisher<? extends T1> a, Publisher<? extends T2> b) {
         return new MultiItemCombine2<>(Arrays.asList(nonNull(a, "a"), nonNull(b, "b")));
     }
@@ -34,6 +36,7 @@ public class MultiItemCombination {
      * @param <T3> the type of item from the third stream
      * @return the object to configure the combination process
      */
+    @CheckReturnValue
     public <T1, T2, T3> MultiItemCombine3<T1, T2, T3> streams(Publisher<? extends T1> a, Publisher<? extends T2> b,
             Publisher<? extends T3> c) {
         return new MultiItemCombine3<>(Arrays.asList(nonNull(a, "a"), nonNull(b, "b"), nonNull(c, "c")));
@@ -52,6 +55,7 @@ public class MultiItemCombination {
      * @param <T4> the type of item from the fourth stream
      * @return the object to configure the combination process
      */
+    @CheckReturnValue
     public <T1, T2, T3, T4> MultiItemCombine4<T1, T2, T3, T4> streams(Publisher<? extends T1> a,
             Publisher<? extends T2> b, Publisher<? extends T3> c, Publisher<? extends T4> d) {
         return new MultiItemCombine4<>(
@@ -73,6 +77,7 @@ public class MultiItemCombination {
      * @param <T5> the type of item from the fifth stream
      * @return the object to configure the combination process
      */
+    @CheckReturnValue
     public <T1, T2, T3, T4, T5> MultiItemCombine5<T1, T2, T3, T4, T5> streams(Publisher<? extends T1> a,
             Publisher<? extends T2> b, Publisher<? extends T3> c, Publisher<? extends T4> d,
             Publisher<? extends T5> e) {
@@ -97,6 +102,7 @@ public class MultiItemCombination {
      * @param <T6> the type of item from the sixth stream
      * @return the object to configure the combination process
      */
+    @CheckReturnValue
     public <T1, T2, T3, T4, T5, T6> MultiItemCombine6<T1, T2, T3, T4, T5, T6> streams(Publisher<? extends T1> a,
             Publisher<? extends T2> b, Publisher<? extends T3> c, Publisher<? extends T4> d,
             Publisher<? extends T5> e, Publisher<? extends T6> f) {
@@ -124,6 +130,7 @@ public class MultiItemCombination {
      * @param <T7> the type of item from the seventh stream
      * @return the object to configure the combination process
      */
+    @CheckReturnValue
     public <T1, T2, T3, T4, T5, T6, T7> MultiItemCombine7<T1, T2, T3, T4, T5, T6, T7> streams( // NOSONAR
             Publisher<? extends T1> a, Publisher<? extends T2> b, Publisher<? extends T3> c, Publisher<? extends T4> d,
             Publisher<? extends T5> e, Publisher<? extends T6> f, Publisher<? extends T7> g) {
@@ -153,6 +160,7 @@ public class MultiItemCombination {
      * @param <T8> the type of item from the eighth stream
      * @return the object to configure the combination process
      */
+    @CheckReturnValue
     public <T1, T2, T3, T4, T5, T6, T7, T8> MultiItemCombine8<T1, T2, T3, T4, T5, T6, T7, T8> streams( // NOSONAR
             Publisher<? extends T1> a, Publisher<? extends T2> b, Publisher<? extends T3> c, Publisher<? extends T4> d,
             Publisher<? extends T5> e, Publisher<? extends T6> f, Publisher<? extends T7> g,
@@ -185,6 +193,7 @@ public class MultiItemCombination {
      * @param <T9> the type of item from the ninth stream
      * @return the object to configure the combination process
      */
+    @CheckReturnValue
     public <T1, T2, T3, T4, T5, T6, T7, T8, T9> MultiItemCombine9<T1, T2, T3, T4, T5, T6, T7, T8, T9> streams(
             // NOSONAR
             Publisher<? extends T1> a, Publisher<? extends T2> b, Publisher<? extends T3> c, Publisher<? extends T4> d,
@@ -211,6 +220,7 @@ public class MultiItemCombination {
      * @param iterable the iterable containing the streams to combine. Must not be {@code null}
      * @return the object to configure the combination process
      */
+    @CheckReturnValue
     public MultiItemCombineIterable streams(Iterable<? extends Publisher<?>> iterable) {
         return new MultiItemCombineIterable(nonNull(iterable, "iterable"));
     }

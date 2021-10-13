@@ -7,6 +7,7 @@ import org.reactivestreams.Publisher;
 
 import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Multi;
+import io.smallrye.mutiny.helpers.CheckReturnValue;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.multi.MultiConcatOp;
 
@@ -47,6 +48,7 @@ public class MultiConcat {
      *         passed {@code publishers}.
      */
     @SafeVarargs
+    @CheckReturnValue
     public final <T> Multi<T> streams(Publisher<T>... publishers) {
         return Infrastructure.onMultiCreation(new MultiConcatOp<>(collectFailures, publishers));
     }
@@ -74,6 +76,7 @@ public class MultiConcat {
      * @return the new {@link Multi} emitting the items from the given set of {@link Multi} concatenating the
      *         passed {@code publishers}.
      */
+    @CheckReturnValue
     public <T> Multi<T> streams(Iterable<? extends Publisher<T>> iterable) {
         List<Publisher<T>> list = new ArrayList<>();
         iterable.forEach(list::add);
@@ -88,6 +91,7 @@ public class MultiConcat {
      *
      * @return this {@link MultiConcat} configured to collect the failures.
      */
+    @CheckReturnValue
     public MultiConcat collectFailures() {
         this.collectFailures = true;
         return this;

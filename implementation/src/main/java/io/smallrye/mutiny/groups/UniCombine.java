@@ -4,6 +4,7 @@ import java.util.concurrent.Executor;
 
 import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.helpers.CheckReturnValue;
 import io.smallrye.mutiny.tuples.Tuple;
 import io.smallrye.mutiny.tuples.Tuple2;
 import io.smallrye.mutiny.tuples.Tuple5;
@@ -32,6 +33,7 @@ public class UniCombine {
      *
      * @return the object to enlist the candidates
      */
+    @CheckReturnValue
     public UniAny any() {
         return UniAny.INSTANCE;
     }
@@ -52,6 +54,7 @@ public class UniCombine {
      *
      * @return the object to configure the join
      */
+    @CheckReturnValue
     public UniZip all() {
         return UniZip.INSTANCE;
     }

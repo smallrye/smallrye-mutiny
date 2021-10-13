@@ -13,6 +13,7 @@ import org.reactivestreams.Publisher;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.helpers.CheckReturnValue;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.multi.MultiSwitchOnEmpty;
 import io.smallrye.mutiny.subscription.MultiEmitter;
@@ -31,6 +32,7 @@ public class MultiIfEmpty<T> {
      * @param failure the failure
      * @return the new {@link Multi}
      */
+    @CheckReturnValue
     public Multi<T> failWith(Throwable failure) {
         nonNull(failure, "failure");
         return failWith(() -> failure);
@@ -43,6 +45,7 @@ public class MultiIfEmpty<T> {
      * @param supplier the supplier to produce the failure, must not be {@code null}, must not produce {@code null}
      * @return the new {@link Multi}
      */
+    @CheckReturnValue
     public Multi<T> failWith(Supplier<? extends Throwable> supplier) {
         Supplier<? extends Throwable> actual = Infrastructure.decorate(nonNull(supplier, "supplier"));
         return switchToEmitter(createMultiFromFailureSupplier(actual));
@@ -72,6 +75,7 @@ public class MultiIfEmpty<T> {
      *
      * @return the new {@link Multi}
      */
+    @CheckReturnValue
     public Multi<T> fail() {
         return failWith(NoSuchElementException::new);
     }
@@ -86,6 +90,7 @@ public class MultiIfEmpty<T> {
      *        in this function propagates a failure downstream.
      * @return the new {@link Multi}
      */
+    @CheckReturnValue
     public Multi<T> switchToEmitter(Consumer<MultiEmitter<? super T>> consumer) {
         Consumer<MultiEmitter<? super T>> actual = Infrastructure.decorate(nonNull(consumer, "consumer"));
         return switchTo(() -> Multi.createFrom().emitter(actual));
@@ -100,6 +105,7 @@ public class MultiIfEmpty<T> {
      * @param other the stream to switch to when the upstream completes.
      * @return the new {@link Multi}
      */
+    @CheckReturnValue
     public Multi<T> switchTo(Publisher<? extends T> other) {
         return switchTo(() -> other);
     }
@@ -111,6 +117,7 @@ public class MultiIfEmpty<T> {
      * @param supplier the supplier to use to produce the publisher, must not be {@code null}, must not return {@code null}s
      * @return the new {@link Uni}
      */
+    @CheckReturnValue
     public Multi<T> switchTo(Supplier<Publisher<? extends T>> supplier) {
         Supplier<Publisher<? extends T>> actual = Infrastructure.decorate(nonNull(supplier, "supplier"));
         return Infrastructure.onMultiCreation(new MultiSwitchOnEmpty<>(upstream, actual));
@@ -123,6 +130,7 @@ public class MultiIfEmpty<T> {
      * @return the new {@link Multi}
      */
     @SafeVarargs
+    @CheckReturnValue
     public final Multi<T> continueWith(T... items) {
         nonNull(items, "items");
         doesNotContainNull(items, "items");
@@ -135,6 +143,7 @@ public class MultiIfEmpty<T> {
      * @param items the items, must not be {@code null}, must not contain {@code null}
      * @return the new {@link Multi}
      */
+    @CheckReturnValue
     public Multi<T> continueWith(Iterable<T> items) {
         nonNull(items, "items");
         doesNotContainNull(items, "items");
@@ -148,6 +157,7 @@ public class MultiIfEmpty<T> {
      * @param supplier the supplier to produce the items, must not be {@code null}, must not produce {@code null}
      * @return the new {@link Multi}
      */
+    @CheckReturnValue
     public Multi<T> continueWith(Supplier<? extends Iterable<? extends T>> supplier) {
         Supplier<? extends Iterable<? extends T>> actual = Infrastructure.decorate(nonNull(supplier, "supplier"));
         return switchTo(() -> createMultiFromIterableSupplier(actual));

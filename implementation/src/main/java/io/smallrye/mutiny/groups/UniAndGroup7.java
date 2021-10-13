@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.function.Function;
 
 import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.helpers.CheckReturnValue;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.tuples.*;
 
@@ -19,15 +20,18 @@ public class UniAndGroup7<T1, T2, T3, T4, T5, T6, T7> extends UniAndGroupIterabl
     }
 
     @Override
+    @CheckReturnValue
     public UniAndGroup7<T1, T2, T3, T4, T5, T6, T7> collectFailures() {
         super.collectFailures();
         return this;
     }
 
+    @CheckReturnValue
     public Uni<Tuple7<T1, T2, T3, T4, T5, T6, T7>> asTuple() {
         return combinedWith(Tuple7::of);
     }
 
+    @CheckReturnValue
     public <O> Uni<O> combinedWith(Functions.Function7<T1, T2, T3, T4, T5, T6, T7, O> combinator) {
         Functions.Function7<T1, T2, T3, T4, T5, T6, T7, O> actual = Infrastructure
                 .decorate(nonNull(combinator, "combinator"));

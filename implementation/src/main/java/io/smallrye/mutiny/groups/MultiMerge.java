@@ -8,6 +8,7 @@ import org.reactivestreams.Publisher;
 
 import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Multi;
+import io.smallrye.mutiny.helpers.CheckReturnValue;
 import io.smallrye.mutiny.operators.multi.MultiCombine;
 
 /**
@@ -52,6 +53,7 @@ public class MultiMerge {
      *         {@code publishers}.
      */
     @SafeVarargs
+    @CheckReturnValue
     public final <T> Multi<T> streams(Publisher<T>... publishers) {
         return MultiCombine.merge(Arrays.asList(publishers), collectFailures, requests, concurrency);
     }
@@ -78,6 +80,7 @@ public class MultiMerge {
      * @param <T> the type of item
      * @return the new {@link Multi} emitting the items from the given set of {@link Publisher}
      */
+    @CheckReturnValue
     public <T> Multi<T> streams(Iterable<? extends Publisher<T>> iterable) {
         List<Publisher<T>> list = new ArrayList<>();
         iterable.forEach(list::add);
@@ -91,6 +94,7 @@ public class MultiMerge {
      *
      * @return a new {@link MultiMerge} collecting failures
      */
+    @CheckReturnValue
     public MultiMerge collectFailures() {
         return new MultiMerge(true, this.requests, this.concurrency);
     }
@@ -101,6 +105,7 @@ public class MultiMerge {
      * @param requests the request
      * @return a new {@link MultiMerge} configured with the given requests
      */
+    @CheckReturnValue
     public MultiMerge withRequests(int requests) {
         return new MultiMerge(this.collectFailures, requests, this.concurrency);
     }
@@ -112,6 +117,7 @@ public class MultiMerge {
      * @param concurrency the concurrency
      * @return a new {@link MultiMerge} configured with the given concurrency
      */
+    @CheckReturnValue
     public MultiMerge withConcurrency(int concurrency) {
         return new MultiMerge(this.collectFailures, this.requests, concurrency);
     }
