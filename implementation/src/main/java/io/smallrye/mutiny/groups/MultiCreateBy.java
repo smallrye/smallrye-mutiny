@@ -1,5 +1,6 @@
 package io.smallrye.mutiny.groups;
 
+import io.smallrye.common.annotation.CheckReturnValue;
 import io.smallrye.mutiny.Multi;
 
 /**
@@ -20,6 +21,7 @@ public class MultiCreateBy {
      *
      * @return the object to configure the concatenation
      */
+    @CheckReturnValue
     public MultiConcat concatenating() {
         return new MultiConcat(false);
     }
@@ -32,6 +34,7 @@ public class MultiCreateBy {
      *
      * @return the object to configure the merge
      */
+    @CheckReturnValue
     public MultiMerge merging() {
         return new MultiMerge(false, 128, 128);
     }
@@ -53,6 +56,7 @@ public class MultiCreateBy {
      *
      * @return the object to configure the combination
      */
+    @CheckReturnValue
     public MultiItemCombination combining() {
         return new MultiItemCombination();
     }
@@ -63,6 +67,7 @@ public class MultiCreateBy {
      *
      * @return the object to configure the repetition
      */
+    @CheckReturnValue
     public MultiRepetition repeating() {
         return new MultiRepetition();
     }

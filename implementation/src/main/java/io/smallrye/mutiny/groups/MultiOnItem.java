@@ -7,6 +7,7 @@ import java.util.function.*;
 
 import org.reactivestreams.Publisher;
 
+import io.smallrye.common.annotation.CheckReturnValue;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
@@ -31,6 +32,7 @@ public class MultiOnItem<T> {
      * @param <R> the type of item produced by the mapper function
      * @return the new {@link Multi}
      */
+    @CheckReturnValue
     public <R> Multi<R> transform(Function<? super T, ? extends R> mapper) {
         Function<? super T, ? extends R> actual = Infrastructure.decorate(nonNull(mapper, "mapper"));
         return Infrastructure.onMultiCreation(new MultiMapOp<>(upstream, actual));
@@ -47,6 +49,7 @@ public class MultiOnItem<T> {
      * @param callback the callback, must not be {@code null}
      * @return the new {@link Multi}
      */
+    @CheckReturnValue
     public Multi<T> invoke(Consumer<? super T> callback) {
         Consumer<? super T> actual = Infrastructure.decorate(nonNull(callback, "callback"));
         return Infrastructure.onMultiCreation(new MultiOnItemInvoke<>(upstream, actual));
@@ -62,6 +65,7 @@ public class MultiOnItem<T> {
      * @param callback the callback, must not be {@code null}
      * @return the new {@link Multi}
      */
+    @CheckReturnValue
     public Multi<T> invoke(Runnable callback) {
         Runnable actual = nonNull(callback, "callback");
         // The decoration happens in invoke.
@@ -84,6 +88,7 @@ public class MultiOnItem<T> {
      * @param action the function taking the item and returning a {@link Uni}, must not be {@code null}
      * @return the new {@link Multi}
      */
+    @CheckReturnValue
     public Multi<T> call(Function<? super T, Uni<?>> action) {
         Function<? super T, Uni<?>> actual = Infrastructure.decorate(nonNull(action, "action"));
         return transformToUni(i -> {
@@ -117,6 +122,7 @@ public class MultiOnItem<T> {
      * @param action the function taking the item and returning a {@link Uni}, must not be {@code null}
      * @return the new {@link Multi}
      */
+    @CheckReturnValue
     public Multi<T> call(Supplier<Uni<?>> action) {
         Supplier<Uni<?>> actual = Infrastructure.decorate(nonNull(action, "action"));
         return call(ignored -> actual.get());
@@ -136,6 +142,7 @@ public class MultiOnItem<T> {
      * @return the resulting multi
      */
     @SuppressWarnings("unchecked")
+    @CheckReturnValue
     public <O> Multi<O> disjoint() {
         return upstream.onItem().transformToMultiAndConcatenate(x -> {
             if (x instanceof Iterable) {
@@ -163,6 +170,7 @@ public class MultiOnItem<T> {
      * @param <O> the type of item emitted by the {@link Multi} produced by the mapper.
      * @return the object to configure the flatten behavior.
      */
+    @CheckReturnValue
     public <O> MultiFlatten<T, O> transformToMulti(Function<? super T, ? extends Publisher<? extends O>> mapper) {
         Function<? super T, ? extends Publisher<? extends O>> actual = Infrastructure
                 .decorate(nonNull(mapper, "mapper"));
@@ -190,6 +198,7 @@ public class MultiOnItem<T> {
      * @param <O> the type of item emitted by the {@link Multi} produced by the mapper.
      * @return the resulting multi
      */
+    @CheckReturnValue
     public <O> Multi<O> transformToMultiAndConcatenate(Function<? super T, ? extends Publisher<? extends O>> mapper) {
         // Decoration happens in `transformToMulti`
         return transformToMulti(mapper).concatenate();
@@ -216,6 +225,7 @@ public class MultiOnItem<T> {
      * @param <O> the type of item emitted by the {@link Multi} produced by the mapper.
      * @return the resulting multi
      */
+    @CheckReturnValue
     public <O> Multi<O> transformToMultiAndMerge(Function<? super T, ? extends Publisher<? extends O>> mapper) {
         // Decoration happens in `transformToMulti`
         return transformToMulti(mapper).merge();
@@ -230,6 +240,7 @@ public class MultiOnItem<T> {
      * @param <O> the type of item contained by the {@link Iterable} produced by the mapper.
      * @return the object to configure the flatten behavior.
      */
+    @CheckReturnValue
     public <O> Multi<O> transformToIterable(Function<? super T, ? extends Iterable<O>> mapper) {
         Function<? super T, ? extends Iterable<O>> actual = Infrastructure.decorate(nonNull(mapper, "mapper"));
         return transformToMultiAndConcatenate((x -> {
@@ -251,6 +262,7 @@ public class MultiOnItem<T> {
      * @param <O> the type of item emitted by the {@link Multi} produced by the mapper.
      * @return the object to configure the flatten behavior.
      */
+    @CheckReturnValue
     public <O> MultiFlatten<T, O> transformToUni(Function<? super T, Uni<? extends O>> mapper) {
         Function<? super T, Uni<? extends O>> actual = Infrastructure.decorate(nonNull(mapper, "mapper"));
         Function<? super T, ? extends Publisher<? extends O>> wrapper = res -> actual.apply(res).toMulti();
@@ -279,6 +291,7 @@ public class MultiOnItem<T> {
      * @param <O> the type of item emitted by the {@link Multi} produced by the mapper.
      * @return the resulting multi
      */
+    @CheckReturnValue
     public <O> Multi<O> transformToUniAndConcatenate(Function<? super T, Uni<? extends O>> mapper) {
         // Decoration happens in `transformToUni`
         return transformToUni(mapper).concatenate();
@@ -306,6 +319,7 @@ public class MultiOnItem<T> {
      * @param <O> the type of item emitted by the {@link Multi} produced by the mapper.
      * @return the resulting multi
      */
+    @CheckReturnValue
     public <O> Multi<O> transformToUniAndMerge(Function<? super T, Uni<? extends O>> mapper) {
         // Decoration happens in `transformToUni`
         return transformToUni(mapper).merge();
@@ -316,6 +330,7 @@ public class MultiOnItem<T> {
      *
      * @return the new multi
      */
+    @CheckReturnValue
     public Multi<Void> ignore() {
         return Infrastructure.onMultiCreation(new MultiIgnoreOp<>(upstream));
     }
@@ -324,8 +339,9 @@ public class MultiOnItem<T> {
      * Ignores the passed items. The resulting {@link Uni} will only be completed with {@code null} when the stream
      * completes or with a failure if the upstream emits a failure..
      *
-     * @return the new multi
+     * @return the new {@link Uni}
      */
+    @CheckReturnValue
     public Uni<Void> ignoreAsUni() {
         return ignore().toUni();
     }
@@ -335,8 +351,9 @@ public class MultiOnItem<T> {
      *
      * @param target the target class
      * @param <O> the type of item emitted by the produced uni
-     * @return the new Uni
+     * @return the new {@link Multi}
      */
+    @CheckReturnValue
     public <O> Multi<O> castTo(Class<O> target) {
         nonNull(target, "target");
         return transform(target::cast);
@@ -357,6 +374,7 @@ public class MultiOnItem<T> {
      *        {@code accumulator} operation.
      * @return the produced {@link Multi}
      */
+    @CheckReturnValue
     public <S> Multi<S> scan(Supplier<S> initialStateProducer, BiFunction<S, ? super T, S> accumulator) {
         Supplier<S> actualSupplier = Infrastructure
                 .decorate(nonNull(initialStateProducer, "initialStateProducer"));
@@ -376,6 +394,7 @@ public class MultiOnItem<T> {
      *        The method is called for every item emitted by this Multi.
      * @return the produced {@link Multi}
      */
+    @CheckReturnValue
     public Multi<T> scan(BinaryOperator<T> accumulator) {
         BinaryOperator<T> actual = Infrastructure.decorate(nonNull(accumulator, "accumulator"));
         return Infrastructure.onMultiCreation(new MultiScanOp<>(upstream, actual));
@@ -391,6 +410,7 @@ public class MultiOnItem<T> {
      * @param mapper the mapper function, must not be {@code null}, must not return {@code null}
      * @return the new {@link Multi}
      */
+    @CheckReturnValue
     public Multi<T> failWith(Function<? super T, ? extends Throwable> mapper) {
         Function<? super T, ? extends Throwable> actual = Infrastructure.decorate(nonNull(mapper, "mapper"));
         return Infrastructure.onMultiCreation(transformToUniAndConcatenate(t -> {
@@ -408,6 +428,7 @@ public class MultiOnItem<T> {
      * @param supplier the supplier to produce the failure, must not be {@code null}, must not produce {@code null}
      * @return the new {@link Multi}
      */
+    @CheckReturnValue
     public Multi<T> failWith(Supplier<? extends Throwable> supplier) {
         Supplier<? extends Throwable> actual = Infrastructure.decorate(nonNull(supplier, "supplier"));
         return Infrastructure.onMultiCreation(transformToUniAndConcatenate(ignored -> {

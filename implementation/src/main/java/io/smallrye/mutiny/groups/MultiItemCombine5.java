@@ -5,6 +5,7 @@ import static io.smallrye.mutiny.helpers.ParameterValidation.size;
 
 import org.reactivestreams.Publisher;
 
+import io.smallrye.common.annotation.CheckReturnValue;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.tuples.Functions;
 import io.smallrye.mutiny.tuples.Tuple5;
@@ -22,6 +23,7 @@ public class MultiItemCombine5<T1, T2, T3, T4, T5> extends MultiItemCombineItera
      * @return the current {@link MultiItemCombine5}
      */
     @Override
+    @CheckReturnValue
     public MultiItemCombine5<T1, T2, T3, T4, T5> collectFailures() {
         super.collectFailures();
         return this;
@@ -44,6 +46,7 @@ public class MultiItemCombine5<T1, T2, T3, T4, T5> extends MultiItemCombineItera
      * @return the current {@link MultiItemCombine5}
      */
     @Override
+    @CheckReturnValue
     public MultiItemCombine5<T1, T2, T3, T4, T5> latestItems() {
         super.latestItems();
         return this;
@@ -52,6 +55,7 @@ public class MultiItemCombine5<T1, T2, T3, T4, T5> extends MultiItemCombineItera
     /**
      * @return the resulting {@link Multi}. The items are combined into a {@link Tuple5 Tuple5&lt;T1, T2, T3, T4, T5&gt;}.
      */
+    @CheckReturnValue
     public Multi<Tuple5<T1, T2, T3, T4, T5>> asTuple() {
         return using(Tuple5::of);
     }
@@ -64,6 +68,7 @@ public class MultiItemCombine5<T1, T2, T3, T4, T5> extends MultiItemCombineItera
      * @return the resulting {@link Multi}.
      */
     @SuppressWarnings("unchecked")
+    @CheckReturnValue
     public <O> Multi<O> using(Functions.Function5<T1, T2, T3, T4, T5, O> combinator) {
         nonNull(combinator, "combinator");
         return super.combine(args -> {

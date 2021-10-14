@@ -6,6 +6,7 @@ import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
+import io.smallrye.common.annotation.CheckReturnValue;
 import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
@@ -31,6 +32,7 @@ public class UniOnItemOrFailure<T> {
      * @param callback the callback, must not be {@code null}
      * @return the new {@link Uni}
      */
+    @CheckReturnValue
     public Uni<T> invoke(BiConsumer<? super T, Throwable> callback) {
         BiConsumer<? super T, Throwable> actual = Infrastructure.decorate(nonNull(callback, "callback"));
         return Infrastructure.onUniCreation(
@@ -44,6 +46,7 @@ public class UniOnItemOrFailure<T> {
      * @param callback the callback, must not be {@code null}
      * @return the new {@link Uni}
      */
+    @CheckReturnValue
     public Uni<T> invoke(Runnable callback) {
         Runnable actual = nonNull(callback, "callback");
         // Decoration happens in `invoke`
@@ -58,6 +61,7 @@ public class UniOnItemOrFailure<T> {
      * @param callback the callback, must not be {@code null}
      * @return the new {@link Uni}
      */
+    @CheckReturnValue
     public Uni<T> call(BiFunction<? super T, Throwable, Uni<?>> callback) {
         BiFunction<? super T, Throwable, Uni<?>> actual = Infrastructure.decorate(nonNull(callback, "callback"));
         return transformToUni((res, fail) -> {
@@ -87,6 +91,7 @@ public class UniOnItemOrFailure<T> {
      * @param callback the callback, must not be {@code null}
      * @return the new {@link Uni}
      */
+    @CheckReturnValue
     public Uni<T> call(Supplier<Uni<?>> callback) {
         Supplier<Uni<?>> actual = Infrastructure.decorate(nonNull(callback, "callback"));
         return call((ignoredItem, ignoredFailure) -> actual.get());
@@ -106,6 +111,7 @@ public class UniOnItemOrFailure<T> {
      * @param <R> the type of Uni item
      * @return the new {@link Uni}
      */
+    @CheckReturnValue
     public <R> Uni<R> transform(BiFunction<? super T, Throwable, ? extends R> mapper) {
         BiFunction<? super T, Throwable, ? extends R> actual = Infrastructure.decorate(nonNull(mapper, "mapper"));
         return Infrastructure.onUniCreation(new UniOnItemOrFailureMap<>(upstream, actual));
@@ -130,6 +136,7 @@ public class UniOnItemOrFailure<T> {
      * @return a new {@link Uni} that would fire events from the uni produced by the mapper function, possibly
      *         in an asynchronous manner.
      */
+    @CheckReturnValue
     public <R> Uni<R> transformToUni(BiFunction<? super T, Throwable, Uni<? extends R>> mapper) {
         BiFunction<? super T, Throwable, Uni<? extends R>> actual = Infrastructure.decorate(nonNull(mapper, "mapper"));
         return Infrastructure.onUniCreation(new UniOnItemOrFailureFlatMap<>(upstream, actual));
@@ -151,6 +158,7 @@ public class UniOnItemOrFailure<T> {
      * @return a new {@link Uni} that would fire events from the emitter consumed by the mapper function, possibly
      *         in an asynchronous manner.
      */
+    @CheckReturnValue
     public <R> Uni<R> transformToUni(Functions.TriConsumer<? super T, Throwable, UniEmitter<? super R>> consumer) {
         Functions.TriConsumer<? super T, Throwable, UniEmitter<? super R>> actual = Infrastructure
                 .decorate(nonNull(consumer, "consumer"));

@@ -6,6 +6,7 @@ import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
 import java.util.NoSuchElementException;
 import java.util.function.Supplier;
 
+import io.smallrye.common.annotation.CheckReturnValue;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 
@@ -23,6 +24,7 @@ public class UniOnNull<T> {
      * @param failure the exception to fire if the current {@link Uni} fires {@code null} as item.
      * @return the new {@link Uni}
      */
+    @CheckReturnValue
     public Uni<T> failWith(Throwable failure) {
         nonNull(failure, "failure");
         return failWith(() -> failure);
@@ -35,6 +37,7 @@ public class UniOnNull<T> {
      * @param supplier the supplier to produce the failure, must not be {@code null}, must not produce {@code null}
      * @return the new {@link Uni}
      */
+    @CheckReturnValue
     public Uni<T> failWith(Supplier<? extends Throwable> supplier) {
         Supplier<? extends Throwable> actual = Infrastructure.decorate(nonNull(supplier, "supplier"));
 
@@ -64,6 +67,7 @@ public class UniOnNull<T> {
      *
      * @return the new {@link Uni}
      */
+    @CheckReturnValue
     public Uni<T> fail() {
         return failWith(NoSuchElementException::new);
     }
@@ -75,6 +79,7 @@ public class UniOnNull<T> {
      * @param other the unit to switch to, must not be {@code null}
      * @return the new {@link Uni}
      */
+    @CheckReturnValue
     public Uni<T> switchTo(Uni<? extends T> other) {
         return switchTo(() -> other);
     }
@@ -86,6 +91,7 @@ public class UniOnNull<T> {
      * @param supplier the supplier to use to produce the uni, must not be {@code null}, must not return {@code null}s
      * @return the new {@link Uni}
      */
+    @CheckReturnValue
     public Uni<T> switchTo(Supplier<Uni<? extends T>> supplier) {
         Supplier<Uni<? extends T>> actual = Infrastructure.decorate(nonNull(supplier, "supplier"));
 
@@ -116,6 +122,7 @@ public class UniOnNull<T> {
      * @param fallback the default item, must not be {@code null}
      * @return the new {@link Uni}
      */
+    @CheckReturnValue
     public Uni<T> continueWith(T fallback) {
         nonNull(fallback, "fallback");
         return continueWith(() -> fallback);
@@ -128,6 +135,7 @@ public class UniOnNull<T> {
      * @param supplier the supplier to produce the new item, must not be {@code null}, must not produce {@code null}
      * @return the new {@link Uni}
      */
+    @CheckReturnValue
     public Uni<T> continueWith(Supplier<? extends T> supplier) {
         Supplier<? extends T> actual = Infrastructure.decorate(nonNull(supplier, "supplier"));
         return Infrastructure.onUniCreation(upstream.onItem().transform(res -> {

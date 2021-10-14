@@ -4,6 +4,7 @@ import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
 
 import java.util.function.Supplier;
 
+import io.smallrye.common.annotation.CheckReturnValue;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.uni.UniOnTermination;
@@ -29,6 +30,7 @@ public class UniOnTerminate<T> {
      *        due to a failure.
      * @return the new {@link Uni}
      */
+    @CheckReturnValue
     public Uni<T> invoke(Functions.TriConsumer<T, Throwable, Boolean> consumer) {
         Functions.TriConsumer<T, Throwable, Boolean> actual = Infrastructure.decorate(nonNull(consumer, "consumer"));
         return Infrastructure.onUniCreation(new UniOnTermination<>(upstream, actual));
@@ -43,6 +45,7 @@ public class UniOnTerminate<T> {
      * @param action the action to run, must not be {@code null}
      * @return the new {@link Uni}
      */
+    @CheckReturnValue
     public Uni<T> invoke(Runnable action) {
         Runnable runnable = Infrastructure.decorate(nonNull(action, "action"));
         return Infrastructure.onUniCreation(new UniOnTermination<>(upstream, (i, f, c) -> runnable.run()));
@@ -60,6 +63,7 @@ public class UniOnTerminate<T> {
      *        The function must return a non-{@code null} {@link Uni}.
      * @return the new {@link Uni}
      */
+    @CheckReturnValue
     public Uni<T> call(Functions.Function3<? super T, Throwable, Boolean, Uni<?>> mapper) {
         Functions.Function3<? super T, Throwable, Boolean, Uni<?>> actual = Infrastructure.decorate(nonNull(mapper, "mapper"));
         return Infrastructure
@@ -74,6 +78,7 @@ public class UniOnTerminate<T> {
      * @param supplier must return a non-{@code null} {@link Uni}.
      * @return the new {@link Uni}
      */
+    @CheckReturnValue
     public Uni<T> call(Supplier<Uni<?>> supplier) {
         Supplier<Uni<?>> actual = Infrastructure.decorate(nonNull(supplier, "supplier"));
         return call((i, f, c) -> actual.get());

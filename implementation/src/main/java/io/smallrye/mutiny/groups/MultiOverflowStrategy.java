@@ -5,6 +5,7 @@ import static io.smallrye.mutiny.helpers.ParameterValidation.positive;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import io.smallrye.common.annotation.CheckReturnValue;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
@@ -31,6 +32,7 @@ public class MultiOverflowStrategy<T> {
      *
      * @return the new multi
      */
+    @CheckReturnValue
     public Multi<T> drop() {
         return Infrastructure.onMultiCreation(new MultiOnOverflowDropItemsOp<>(upstream, dropConsumer, dropUniMapper));
     }
@@ -41,6 +43,7 @@ public class MultiOverflowStrategy<T> {
      *
      * @return the new multi
      */
+    @CheckReturnValue
     public Multi<T> buffer() {
         return buffer(128);
     }
@@ -53,6 +56,7 @@ public class MultiOverflowStrategy<T> {
      * @param size the size of the buffer, must be strictly positive
      * @return the new multi
      */
+    @CheckReturnValue
     public Multi<T> buffer(int size) {
         return Infrastructure.onMultiCreation(new MultiOnOverflowBufferOp<>(upstream, positive(size, "size"),
                 false, dropConsumer, dropUniMapper));
@@ -63,6 +67,7 @@ public class MultiOverflowStrategy<T> {
      *
      * @return the new multi
      */
+    @CheckReturnValue
     public Multi<T> dropPreviousItems() {
         return Infrastructure.onMultiCreation(new MultiOnOverflowKeepLastOp<>(upstream, dropConsumer, dropUniMapper));
     }

@@ -8,6 +8,7 @@ import java.util.function.Supplier;
 
 import org.reactivestreams.Subscription;
 
+import io.smallrye.common.annotation.CheckReturnValue;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
@@ -47,6 +48,7 @@ public class MultiOnSubscribe<T> {
      * @param callback the callback, must not be {@code null}.
      * @return the new {@link Multi}
      */
+    @CheckReturnValue
     public Multi<T> invoke(Consumer<? super Subscription> callback) {
         Consumer<? super Subscription> actual = Infrastructure.decorate(nonNull(callback, "callback"));
         return Infrastructure.onMultiCreation(
@@ -62,6 +64,7 @@ public class MultiOnSubscribe<T> {
      * @param callback the callback, must not be {@code null}.
      * @return the new {@link Multi}
      */
+    @CheckReturnValue
     public Multi<T> invoke(Runnable callback) {
         Runnable actual = nonNull(callback, "callback");
         // Decoration happens in `invoke`
@@ -79,6 +82,7 @@ public class MultiOnSubscribe<T> {
      * @param action the callback, must not be {@code null}
      * @return the new {@link Multi}
      */
+    @CheckReturnValue
     public Multi<T> call(Function<? super Subscription, Uni<?>> action) {
         Function<? super Subscription, Uni<?>> actual = Infrastructure.decorate(nonNull(action, "action"));
         return Infrastructure.onMultiCreation(
@@ -96,6 +100,7 @@ public class MultiOnSubscribe<T> {
      * @param action the callback, must not be {@code null}
      * @return the new {@link Multi}
      */
+    @CheckReturnValue
     public Multi<T> call(Supplier<Uni<?>> action) {
         Supplier<Uni<?>> actual = Infrastructure.decorate(nonNull(action, "action"));
         return call(ignored -> actual.get());

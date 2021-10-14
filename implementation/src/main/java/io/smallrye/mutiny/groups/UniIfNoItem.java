@@ -5,6 +5,7 @@ import static io.smallrye.mutiny.helpers.ParameterValidation.validate;
 
 import java.time.Duration;
 
+import io.smallrye.common.annotation.CheckReturnValue;
 import io.smallrye.mutiny.Uni;
 
 public class UniIfNoItem<T> {
@@ -21,6 +22,7 @@ public class UniIfNoItem<T> {
      * @param timeout the timeout, must not be {@code null}, must be strictly positive.
      * @return a new {@link UniIfNoItem}
      */
+    @CheckReturnValue
     public UniOnTimeout<T> after(Duration timeout) {
         return new UniOnTimeout<>(upstream, validate(timeout, "timeout"), null);
     }

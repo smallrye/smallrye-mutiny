@@ -6,6 +6,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import io.smallrye.common.annotation.CheckReturnValue;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.uni.UniOnSubscribeCall;
@@ -47,6 +48,7 @@ public class UniOnSubscribe<T> {
      * @param callback the callback, must not be {@code null}.
      * @return the new {@link Uni}
      */
+    @CheckReturnValue
     public Uni<T> invoke(Consumer<? super UniSubscription> callback) {
         Consumer<? super UniSubscription> actual = Infrastructure.decorate(nonNull(callback, "callback"));
         return Infrastructure.onUniCreation(
@@ -62,6 +64,7 @@ public class UniOnSubscribe<T> {
      * @param callback the callback, must not be {@code null}.
      * @return the new {@link Uni}
      */
+    @CheckReturnValue
     public Uni<T> invoke(Runnable callback) {
         Runnable actual = nonNull(callback, "callback");
         // Decoration happens in `invoke`
@@ -79,6 +82,7 @@ public class UniOnSubscribe<T> {
      * @param action the callback, must not be {@code null}
      * @return the new {@link Uni}
      */
+    @CheckReturnValue
     public Uni<T> call(Function<? super UniSubscription, Uni<?>> action) {
         Function<? super UniSubscription, Uni<?>> actual = Infrastructure.decorate(nonNull(action, "action"));
         return Infrastructure.onUniCreation(
@@ -96,6 +100,7 @@ public class UniOnSubscribe<T> {
      * @param action the callback, must not be {@code null}
      * @return the new {@link Uni}
      */
+    @CheckReturnValue
     public Uni<T> call(Supplier<Uni<?>> action) {
         Supplier<Uni<?>> actual = Infrastructure.decorate(nonNull(action, "action"));
         return call(ignored -> actual.get());

@@ -4,6 +4,7 @@ import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
 
 import java.util.function.Supplier;
 
+import io.smallrye.common.annotation.CheckReturnValue;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
@@ -26,6 +27,7 @@ public class UniOnCancel<T> {
      * @param action the action, must not be {@code null}
      * @return a new {@link Uni}
      */
+    @CheckReturnValue
     public Uni<T> invoke(Runnable action) {
         Runnable actual = Infrastructure.decorate(nonNull(action, "action"));
         return Infrastructure.onUniCreation(new UniOnCancellation<>(upstream, actual));
@@ -40,6 +42,7 @@ public class UniOnCancel<T> {
      * @param supplier the {@link Uni} supplier, must not return {@code null}.
      * @return a new {@link Uni}
      */
+    @CheckReturnValue
     public Uni<T> call(Supplier<Uni<?>> supplier) {
         Supplier<Uni<?>> actual = Infrastructure.decorate(nonNull(supplier, "supplier"));
         return Infrastructure.onUniCreation(new UniOnCancellationCall<>(upstream, actual));

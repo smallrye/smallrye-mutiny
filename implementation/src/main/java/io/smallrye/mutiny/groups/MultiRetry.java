@@ -9,6 +9,7 @@ import java.util.function.Predicate;
 
 import org.reactivestreams.Publisher;
 
+import io.smallrye.common.annotation.CheckReturnValue;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.helpers.ExponentialBackoff;
@@ -39,6 +40,7 @@ public class MultiRetry<T> {
      *
      * @return the {@link Multi}
      */
+    @CheckReturnValue
     public Multi<T> indefinitely() {
         return atMost(Long.MAX_VALUE);
     }
@@ -53,6 +55,7 @@ public class MultiRetry<T> {
      * @return a new {@link Multi} retrying at most {@code numberOfAttempts} times to subscribe to the current
      *         {@link Multi} until it gets an item. When the number of attempt is reached, the last failure is propagated.
      */
+    @CheckReturnValue
     public Multi<T> atMost(long numberOfAttempts) {
         ParameterValidation.positive(numberOfAttempts, "numberOfAttempts");
         if (backOffConfigured) {
@@ -86,6 +89,7 @@ public class MultiRetry<T> {
      *
      * @throws IllegalArgumentException if back off not configured,
      */
+    @CheckReturnValue
     public Multi<T> expireAt(long expireAt) {
         if (!backOffConfigured) {
             throw new IllegalArgumentException(
@@ -134,6 +138,7 @@ public class MultiRetry<T> {
      *
      * @throws IllegalArgumentException if back off not configured,
      */
+    @CheckReturnValue
     public Multi<T> expireIn(long expireIn) {
         return expireAt(System.currentTimeMillis() + expireIn);
     }
@@ -147,6 +152,7 @@ public class MultiRetry<T> {
      *        re-subscription is attempted.
      * @return the new {@code Multi} instance
      */
+    @CheckReturnValue
     public Multi<T> until(Predicate<? super Throwable> predicate) {
         Predicate<? super Throwable> actual = Infrastructure.decorate(nonNull(predicate, "predicate"));
         if (backOffConfigured) {
@@ -181,6 +187,7 @@ public class MultiRetry<T> {
      * @return a new {@link Multi} retrying re-subscribing to the current {@link Multi} when the companion stream,
      *         produced by {@code whenStreamFactory} emits an item.
      */
+    @CheckReturnValue
     public Multi<T> when(Function<Multi<Throwable>, ? extends Publisher<?>> whenStreamFactory) {
         if (backOffConfigured) {
             throw new IllegalArgumentException(
@@ -198,6 +205,7 @@ public class MultiRetry<T> {
      * @param initialBackOff the initial back-off duration, must not be {@code null}, must not be negative.
      * @return this object to configure the retry policy.
      */
+    @CheckReturnValue
     public MultiRetry<T> withBackOff(Duration initialBackOff) {
         return withBackOff(initialBackOff, ExponentialBackoff.MAX_BACKOFF);
     }
@@ -210,6 +218,7 @@ public class MultiRetry<T> {
      * @param maxBackOff the max back-off duration, must not be {@code null}, must not be negative.
      * @return this object to configure the retry policy.
      */
+    @CheckReturnValue
     public MultiRetry<T> withBackOff(Duration initialBackOff, Duration maxBackOff) {
         this.backOffConfigured = true;
         this.initialBackOff = validate(initialBackOff, "initialBackOff");
@@ -223,6 +232,7 @@ public class MultiRetry<T> {
      * @param jitter the jitter. Must be in [0.0, 1.0]
      * @return this object to configure the retry policy.
      */
+    @CheckReturnValue
     public MultiRetry<T> withJitter(double jitter) {
         if (jitter < 0 || jitter > 1.0) {
             throw new IllegalArgumentException("Invalid `jitter`, the value must be in [0.0, 1.0]");

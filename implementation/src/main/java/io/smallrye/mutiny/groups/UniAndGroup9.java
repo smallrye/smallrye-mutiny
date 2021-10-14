@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
 
+import io.smallrye.common.annotation.CheckReturnValue;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.tuples.Functions;
@@ -21,15 +22,18 @@ public class UniAndGroup9<T1, T2, T3, T4, T5, T6, T7, T8, T9> extends UniAndGrou
     }
 
     @Override
+    @CheckReturnValue
     public UniAndGroup9<T1, T2, T3, T4, T5, T6, T7, T8, T9> collectFailures() {
         super.collectFailures();
         return this;
     }
 
+    @CheckReturnValue
     public Uni<Tuple9<T1, T2, T3, T4, T5, T6, T7, T8, T9>> asTuple() {
         return combine(Tuple9::of);
     }
 
+    @CheckReturnValue
     public <O> Uni<O> combinedWith(Functions.Function9<T1, T2, T3, T4, T5, T6, T7, T8, T9, O> combinator) {
         Functions.Function9<T1, T2, T3, T4, T5, T6, T7, T8, T9, O> actual = Infrastructure
                 .decorate(nonNull(combinator, "combinator"));

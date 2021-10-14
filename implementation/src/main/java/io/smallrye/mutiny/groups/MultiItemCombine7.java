@@ -5,6 +5,7 @@ import static io.smallrye.mutiny.helpers.ParameterValidation.size;
 
 import org.reactivestreams.Publisher;
 
+import io.smallrye.common.annotation.CheckReturnValue;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.tuples.Functions;
 import io.smallrye.mutiny.tuples.Tuple7;
@@ -22,6 +23,7 @@ public class MultiItemCombine7<T1, T2, T3, T4, T5, T6, T7> extends MultiItemComb
      * @return the current {@link MultiItemCombine7}
      */
     @Override
+    @CheckReturnValue
     public MultiItemCombine7<T1, T2, T3, T4, T5, T6, T7> collectFailures() {
         super.collectFailures();
         return this;
@@ -44,6 +46,7 @@ public class MultiItemCombine7<T1, T2, T3, T4, T5, T6, T7> extends MultiItemComb
      * @return the current {@link MultiItemCombine7}
      */
     @Override
+    @CheckReturnValue
     public MultiItemCombine7<T1, T2, T3, T4, T5, T6, T7> latestItems() {
         super.latestItems();
         return this;
@@ -53,6 +56,7 @@ public class MultiItemCombine7<T1, T2, T3, T4, T5, T6, T7> extends MultiItemComb
      * @return the resulting {@link Multi}. The items are combined into a {@link Tuple7 Tuple7&lt;T1, T2, T3, T4, T5, T6,
      *         T7&gt;}.
      */
+    @CheckReturnValue
     public Multi<Tuple7<T1, T2, T3, T4, T5, T6, T7>> asTuple() {
         return using(Tuple7::of);
     }
@@ -65,6 +69,7 @@ public class MultiItemCombine7<T1, T2, T3, T4, T5, T6, T7> extends MultiItemComb
      * @return the resulting {@link Multi}.
      */
     @SuppressWarnings("unchecked")
+    @CheckReturnValue
     public <O> Multi<O> using(Functions.Function7<T1, T2, T3, T4, T5, T6, T7, O> combinator) {
         nonNull(combinator, "combinator");
         return super.combine(args -> {

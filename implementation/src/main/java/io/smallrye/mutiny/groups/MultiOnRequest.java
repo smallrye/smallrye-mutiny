@@ -6,6 +6,7 @@ import java.util.function.LongConsumer;
 import java.util.function.LongFunction;
 import java.util.function.Supplier;
 
+import io.smallrye.common.annotation.CheckReturnValue;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
@@ -28,6 +29,7 @@ public class MultiOnRequest<T> {
      * @param consumer the action
      * @return the new {@link Multi}
      */
+    @CheckReturnValue
     public Multi<T> invoke(LongConsumer consumer) {
         LongConsumer actual = Infrastructure.decorate(nonNull(consumer, "consumer"));
         return Infrastructure.onMultiCreation(new MultiOnRequestInvoke<>(upstream, actual));
@@ -41,6 +43,7 @@ public class MultiOnRequest<T> {
      * @param action the action
      * @return the new {@link Multi}
      */
+    @CheckReturnValue
     public Multi<T> invoke(Runnable action) {
         Runnable actual = nonNull(action, "action");
         // Decoration happens in `invoke`
@@ -57,6 +60,7 @@ public class MultiOnRequest<T> {
      * @param mapper the action, returns a non-{@code null} {@link Uni}
      * @return the new {@link Multi}
      */
+    @CheckReturnValue
     public Multi<T> call(LongFunction<Uni<?>> mapper) {
         return Infrastructure.onMultiCreation(new MultiOnRequestCall<>(upstream, nonNull(mapper, "mapper")));
     }
@@ -71,6 +75,7 @@ public class MultiOnRequest<T> {
      * @param supplier the action, returns a non-{@code null} {@link Uni}
      * @return the new {@link Multi}
      */
+    @CheckReturnValue
     public Multi<T> call(Supplier<Uni<?>> supplier) {
         Supplier<Uni<?>> actual = Infrastructure.decorate(nonNull(supplier, "supplier"));
         return call(ignored -> actual.get());

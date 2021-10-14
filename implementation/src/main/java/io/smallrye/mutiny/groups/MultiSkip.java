@@ -8,6 +8,7 @@ import java.util.Comparator;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
+import io.smallrye.common.annotation.CheckReturnValue;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
@@ -39,6 +40,7 @@ public class MultiSkip<T> {
      * @param n the number of item to skip, must be positive.
      * @return the resulting {@link Multi}
      */
+    @CheckReturnValue
     public Multi<T> first(long n) {
         return Infrastructure.onMultiCreation(new MultiSkipFirstOp<>(upstream, positiveOrZero(n, "n")));
     }
@@ -53,6 +55,7 @@ public class MultiSkip<T> {
      *
      * @return the resulting {@link Multi}
      */
+    @CheckReturnValue
     public Multi<T> first() {
         return first(1);
     }
@@ -75,6 +78,7 @@ public class MultiSkip<T> {
      *        and all the remaining items are propagated downstream.
      * @return the resulting {@link Multi}
      */
+    @CheckReturnValue
     public Multi<T> first(Predicate<? super T> predicate) {
         Predicate<? super T> actual = Infrastructure.decorate(nonNull(predicate, "predicate"));
         return Infrastructure.onMultiCreation(new MultiSkipFirstUntilOp<>(upstream, actual));
@@ -92,6 +96,7 @@ public class MultiSkip<T> {
      * @param duration the duration for which the items from upstream are skipped. Must be strictly positive.
      * @return the resulting {@link Multi}
      */
+    @CheckReturnValue
     public Multi<T> first(Duration duration) {
         Multi<Long> ticks = Multi.createFrom().ticks().startingAfter(duration).every(duration);
         return Infrastructure.onMultiCreation(new MultiSkipUntilOtherOp<>(upstream, ticks));
@@ -111,6 +116,7 @@ public class MultiSkip<T> {
      * @param n the number of item to skip, must be positive.
      * @return the resulting {@link Multi}
      */
+    @CheckReturnValue
     public Multi<T> last(int n) {
         return Infrastructure.onMultiCreation(new MultiSkipLastOp<>(upstream, n));
     }
@@ -124,6 +130,7 @@ public class MultiSkip<T> {
      *
      * @return the resulting {@link Multi}
      */
+    @CheckReturnValue
     public Multi<T> last() {
         return last(1);
     }
@@ -145,6 +152,7 @@ public class MultiSkip<T> {
      * @see MultiSelect#distinct()
      * @see MultiSkip#repetitions(Comparator)
      */
+    @CheckReturnValue
     public Multi<T> repetitions() {
         return Infrastructure.onMultiCreation(new MultiSkipRepetitionsOp<>(upstream));
     }
@@ -167,6 +175,7 @@ public class MultiSkip<T> {
      * @see MultiSelect#distinct()
      * @see MultiSkip#repetitions()
      */
+    @CheckReturnValue
     public Multi<T> repetitions(Comparator<? super T> comparator) {
         return Infrastructure.onMultiCreation(new MultiSkipRepetitionsOp<>(upstream, comparator));
     }
@@ -192,6 +201,7 @@ public class MultiSkip<T> {
      * @see #when(Function)
      * @see MultiSelect#where(Predicate)
      */
+    @CheckReturnValue
     public Multi<T> where(Predicate<? super T> predicate) {
         Predicate<? super T> actual = Infrastructure.decorate(nonNull(predicate, "predicate"));
         return upstream.select().where(actual.negate());
@@ -222,6 +232,7 @@ public class MultiSkip<T> {
      * @param predicate the function to test the items, must not be {@code null}, must not produced {@code null}
      * @return the resulting {@link Multi}
      */
+    @CheckReturnValue
     public Multi<T> when(Function<? super T, Uni<Boolean>> predicate) {
         Function<? super T, Uni<Boolean>> actual = Infrastructure.decorate(nonNull(predicate, "predicate"));
         return upstream.onItem().transformToMultiAndConcatenate(res -> {

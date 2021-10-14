@@ -9,6 +9,7 @@ import java.util.function.Predicate;
 
 import org.reactivestreams.Publisher;
 
+import io.smallrye.common.annotation.CheckReturnValue;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.helpers.ExponentialBackoff;
@@ -39,6 +40,7 @@ public class UniRetry<T> {
      *
      * @return the {@link Uni}
      */
+    @CheckReturnValue
     public Uni<T> indefinitely() {
         return atMost(Long.MAX_VALUE);
     }
@@ -54,6 +56,7 @@ public class UniRetry<T> {
      *         until it gets an item. When the number of attempt is reached, the last failure is propagated. If the back-off
      *         has been configured, a delay is introduced between the attempts.
      */
+    @CheckReturnValue
     public Uni<T> atMost(long numberOfAttempts) {
         if (!backOffConfigured) {
             return Infrastructure.onUniCreation(new UniRetryAtMost<>(upstream, predicate, numberOfAttempts));
@@ -83,6 +86,7 @@ public class UniRetry<T> {
      *
      * @throws IllegalArgumentException if back off not configured,
      */
+    @CheckReturnValue
     public Uni<T> expireAt(long expireAt) {
         if (!backOffConfigured) {
             throw new IllegalArgumentException(
@@ -128,6 +132,7 @@ public class UniRetry<T> {
      *
      * @throws IllegalArgumentException if back off not configured,
      */
+    @CheckReturnValue
     public Uni<T> expireIn(long expireIn) {
         return expireAt(System.currentTimeMillis() + expireIn);
     }
@@ -141,6 +146,7 @@ public class UniRetry<T> {
      *        re-subscription is attempted.
      * @return the new {@code Uni} instance
      */
+    @CheckReturnValue
     public Uni<T> until(Predicate<? super Throwable> predicate) {
         ParameterValidation.nonNull(predicate, "predicate");
         Function<Multi<Throwable>, Publisher<Long>> whenStreamFactory = stream -> stream.onItem()
@@ -172,6 +178,7 @@ public class UniRetry<T> {
      * @return a new {@link Uni} retrying re-subscribing to the current {@link Multi} when the companion stream,
      *         produced by {@code whenStreamFactory} emits an item.
      */
+    @CheckReturnValue
     public Uni<T> when(Function<Multi<Throwable>, ? extends Publisher<?>> whenStreamFactory) {
         if (backOffConfigured) {
             throw new IllegalArgumentException(
@@ -189,6 +196,7 @@ public class UniRetry<T> {
      * @param initialBackOff the initial back-off duration, must not be {@code null}, must not be negative.
      * @return this object to configure the retry policy.
      */
+    @CheckReturnValue
     public UniRetry<T> withBackOff(Duration initialBackOff) {
         return withBackOff(initialBackOff, ExponentialBackoff.MAX_BACKOFF);
     }
@@ -201,6 +209,7 @@ public class UniRetry<T> {
      * @param maxBackOff the max back-off duration, must not be {@code null}, must not be negative.
      * @return this object to configure the retry policy.
      */
+    @CheckReturnValue
     public UniRetry<T> withBackOff(Duration initialBackOff, Duration maxBackOff) {
         this.backOffConfigured = true;
         this.initialBackOffDuration = validate(initialBackOff, "initialBackOff");
@@ -214,6 +223,7 @@ public class UniRetry<T> {
      * @param jitter the jitter. Must be in [0.0, 1.0]
      * @return this object to configure the retry policy.
      */
+    @CheckReturnValue
     public UniRetry<T> withJitter(double jitter) {
         if (jitter < 0 || jitter > 1.0) {
             throw new IllegalArgumentException("Invalid `jitter`, the value must be in [0.0, 1.0]");

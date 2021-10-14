@@ -8,6 +8,7 @@ import java.util.function.Function;
 
 import org.reactivestreams.Publisher;
 
+import io.smallrye.common.annotation.CheckReturnValue;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.converters.uni.BuiltinConverters;
 
@@ -32,14 +33,17 @@ public class UniConvert<T> {
         return nonNull(converter, "converter").apply(upstream);
     }
 
+    @CheckReturnValue
     public CompletionStage<T> toCompletionStage() {
         return with(BuiltinConverters.toCompletionStage());
     }
 
+    @CheckReturnValue
     public CompletableFuture<T> toCompletableFuture() {
         return with(BuiltinConverters.toCompletableFuture());
     }
 
+    @CheckReturnValue
     public Publisher<T> toPublisher() {
         return with(BuiltinConverters.toPublisher());
     }

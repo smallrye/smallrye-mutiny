@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
+import io.smallrye.common.annotation.CheckReturnValue;
 import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
@@ -32,6 +33,7 @@ public class UniAndGroup2<T1, T2> extends UniAndGroupIterable<T1> {
      *
      * @return the current {@link UniAndGroup2}
      */
+    @CheckReturnValue
     public UniAndGroup2<T1, T2> collectFailures() {
         super.collectFailures();
         return this;
@@ -40,6 +42,7 @@ public class UniAndGroup2<T1, T2> extends UniAndGroupIterable<T1> {
     /**
      * @return the resulting {@link Uni}. The items are combined into a {@link Tuple2 Tuple2&lt;T1, T2&gt;}.
      */
+    @CheckReturnValue
     public Uni<Tuple2<T1, T2>> asTuple() {
         return combine(Tuple2::of);
     }
@@ -51,6 +54,7 @@ public class UniAndGroup2<T1, T2> extends UniAndGroupIterable<T1> {
      * @param <O> the type of item
      * @return the resulting {@link Uni}. The items are combined into a {@link Tuple2 Tuple2&lt;T1, T2&gt;}.
      */
+    @CheckReturnValue
     public <O> Uni<O> combinedWith(BiFunction<T1, T2, O> combinator) {
         BiFunction<T1, T2, O> actual = Infrastructure.decorate(nonNull(combinator, "combinator"));
         return combine(actual);

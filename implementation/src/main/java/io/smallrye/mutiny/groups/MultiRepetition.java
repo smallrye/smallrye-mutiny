@@ -8,6 +8,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import io.smallrye.common.annotation.CheckReturnValue;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.subscription.UniEmitter;
@@ -24,6 +25,7 @@ public class MultiRepetition {
      * @param <T> the type of emitted item
      * @return the object to configure the repetition
      */
+    @CheckReturnValue
     public <S, T> UniRepeat<T> uni(Supplier<S> stateSupplier, Function<S, Uni<? extends T>> producer) {
         // Decoration happens in "deferred"
         Uni<T> upstream = Uni.createFrom().deferred(stateSupplier, producer);
@@ -37,6 +39,7 @@ public class MultiRepetition {
      * @param <T> the type of emitted item
      * @return the object to configure the repetition
      */
+    @CheckReturnValue
     public <T> UniRepeat<T> uni(Supplier<Uni<? extends T>> uniSupplier) {
         // Decoration happens in "deferred"
         Uni<T> upstream = Uni.createFrom().deferred(uniSupplier);
@@ -53,6 +56,7 @@ public class MultiRepetition {
      * @param <T> the type of emitted item
      * @return the object to configure the repetition
      */
+    @CheckReturnValue
     public <S, T> UniRepeat<T> completionStage(Supplier<S> stateSupplier,
             Function<S, ? extends CompletionStage<? extends T>> producer) {
         Function<S, ? extends CompletionStage<? extends T>> actual = Infrastructure
@@ -68,6 +72,7 @@ public class MultiRepetition {
      * @param <T> the type of emitted item
      * @return the object to configure the repetition
      */
+    @CheckReturnValue
     public <T> UniRepeat<T> completionStage(Supplier<? extends CompletionStage<? extends T>> supplier) {
         nonNull(supplier, "supplier");
         // Decoration happens in `uni`
@@ -84,6 +89,7 @@ public class MultiRepetition {
      * @param <T> the type of emitted item
      * @return the object to configure the repetition
      */
+    @CheckReturnValue
     public <S, T> UniRepeat<T> uni(Supplier<S> stateSupplier,
             BiConsumer<S, UniEmitter<? super T>> consumer) {
         BiConsumer<S, UniEmitter<? super T>> actual = Infrastructure
@@ -99,6 +105,7 @@ public class MultiRepetition {
      * @param <T> the type of emitted item
      * @return the object to configure the repetition
      */
+    @CheckReturnValue
     public <T> UniRepeat<T> uni(Consumer<UniEmitter<? super T>> consumer) {
         Consumer<UniEmitter<? super T>> actual = Infrastructure.decorate(nonNull(consumer, "consumer"));
         return uni(() -> Uni.createFrom().emitter(actual));
@@ -112,6 +119,7 @@ public class MultiRepetition {
      * @param <T> the type of emitted item
      * @return the object to configure the repetition
      */
+    @CheckReturnValue
     public <T> UniRepeat<T> supplier(Supplier<? extends T> supplier) {
         // Decoration happens in `item`
         return new UniRepeat<>(Uni.createFrom().item(supplier));
@@ -127,6 +135,7 @@ public class MultiRepetition {
      * @param <T> the type of emitted item
      * @return the object to configure the repetition
      */
+    @CheckReturnValue
     public <S, T> UniRepeat<T> supplier(Supplier<S> stateSupplier, Function<S, ? extends T> producer) {
         // Decoration happens in "uni"
         return uni(stateSupplier, s -> Uni.createFrom().item(() -> producer.apply(s)));

@@ -13,6 +13,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
+import io.smallrye.common.annotation.CheckReturnValue;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
@@ -43,6 +44,7 @@ public class MultiCollect<T> {
      *
      * @return the produced uni
      */
+    @CheckReturnValue
     public Uni<T> first() {
         return Uni.createFrom().multi(upstream);
     }
@@ -57,6 +59,7 @@ public class MultiCollect<T> {
      *
      * @return the produced uni
      */
+    @CheckReturnValue
     public Uni<T> last() {
         return Uni.createFrom().publisher(Infrastructure.onMultiCreation(new MultiLastItemOp<>(upstream)));
     }
@@ -67,6 +70,7 @@ public class MultiCollect<T> {
      *
      * @return the {@link Uni} emitting the list of items from this {@link Multi}.
      */
+    @CheckReturnValue
     public Uni<List<T>> asList() {
         return collector(upstream, Collectors.toList(), false);
     }
@@ -80,6 +84,7 @@ public class MultiCollect<T> {
      * @param <X> the item type
      * @return a {@link Uni} emitted the collected object as item, when the {@link Multi} completes
      */
+    @CheckReturnValue
     public <X, A> Uni<X> with(Collector<? super T, A, ? extends X> collector) {
         return collector(upstream, collector, true);
     }
@@ -103,6 +108,7 @@ public class MultiCollect<T> {
      * @param <X> the type of the container produced by the supplier.
      * @return a {@link Uni} emitting the collected container as item when this {@link Multi} completes
      */
+    @CheckReturnValue
     public <X> Uni<X> in(Supplier<X> supplier, BiConsumer<X, T> accumulator) {
         Supplier<X> actualSupplier = Infrastructure.decorate(nonNull(supplier, "supplier"));
         BiConsumer<X, T> actualAccumulator = Infrastructure.decorate(nonNull(accumulator, "accumulator"));
@@ -125,6 +131,7 @@ public class MultiCollect<T> {
      * @return a {@link Uni} emitting an item with the collected {@link Map}. The uni emits the item when this
      *         {@link Multi} completes
      */
+    @CheckReturnValue
     public <K> Uni<Map<K, T>> asMap(Function<? super T, ? extends K> keyMapper) {
         Function<? super T, ? extends K> actualKM = Infrastructure.decorate(nonNull(keyMapper, "keyMapper"));
         return collector(upstream, Collectors.toMap(actualKM, Function.identity()), false);
@@ -148,6 +155,7 @@ public class MultiCollect<T> {
      * @return a {@link Uni} emitting an item with the collected {@link Map}. The uni emits the item when this
      *         {@link Multi} completes
      */
+    @CheckReturnValue
     public <K, V> Uni<Map<K, V>> asMap(
             Function<? super T, ? extends K> keyMapper,
             Function<? super T, ? extends V> valueMapper) {
@@ -174,6 +182,7 @@ public class MultiCollect<T> {
      * @return a {@link Uni} emitting an item with the collected {@link Map}. The uni emits the item when this
      *         {@link Multi} completes
      */
+    @CheckReturnValue
     public <K, V> Uni<Map<K, Collection<V>>> asMultiMap(
             Function<? super T, ? extends K> keyMapper,
             Function<? super T, ? extends V> valueMapper) {
@@ -207,6 +216,7 @@ public class MultiCollect<T> {
      * @return a {@link Uni} emitting an item with the collected {@link Map}. The uni emits the item when this
      *         {@link Multi} completes
      */
+    @CheckReturnValue
     public <K> Uni<Map<K, Collection<T>>> asMultiMap(Function<? super T, ? extends K> keyMapper) {
         Function<? super T, ? extends K> actualKM = Infrastructure.decorate(nonNull(keyMapper, "keyMapper"));
         return collector(upstream, Collectors.toMap(
@@ -232,6 +242,7 @@ public class MultiCollect<T> {
      * @param predicate the predicate, must not be {@code null}.
      * @return the object to configure the item collection.
      */
+    @CheckReturnValue
     public MultiCollect<T> where(Predicate<T> predicate) {
         // Decoration happens in where.
         return new MultiCollect<>(upstream.select().where(predicate));
@@ -251,6 +262,7 @@ public class MultiCollect<T> {
      * @param predicate the predicate, must not be {@code null}.
      * @return the object to configure the item collection.
      */
+    @CheckReturnValue
     public MultiCollect<T> when(Function<? super T, Uni<Boolean>> predicate) {
         // Decoration happens in `when`
         return new MultiCollect<>(upstream.select().when(predicate));

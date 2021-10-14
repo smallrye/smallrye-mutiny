@@ -13,6 +13,7 @@ import java.util.function.Supplier;
 
 import org.reactivestreams.Publisher;
 
+import io.smallrye.common.annotation.CheckReturnValue;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.converters.UniConverter;
@@ -45,6 +46,7 @@ public class UniCreate {
      * @param <T> the type for the {@link Uni}
      * @return created {@link Uni}
      */
+    @CheckReturnValue
     public <I, T> Uni<T> converter(UniConverter<I, T> converter, I instance) {
         return converter.from(instance);
     }
@@ -67,6 +69,7 @@ public class UniCreate {
      * @param <T> the type of item
      * @return the produced {@link Uni}
      */
+    @CheckReturnValue
     public <T> Uni<T> completionStage(CompletionStage<? extends T> stage) {
         CompletionStage<? extends T> actual = ParameterValidation.nonNull(stage, "stage");
         return completionStage(() -> actual);
@@ -100,6 +103,7 @@ public class UniCreate {
      * @param <S> the type of the state
      * @return the produced {@link Uni}
      */
+    @CheckReturnValue
     public <T, S> Uni<T> completionStage(Supplier<S> stateSupplier,
             Function<S, ? extends CompletionStage<? extends T>> mapper) {
         Supplier<S> actualStateSupplier = Infrastructure.decorate(nonNull(stateSupplier, "stateSupplier"));
@@ -130,6 +134,7 @@ public class UniCreate {
      * @param <T> the type of item
      * @return the produced {@link Uni}
      */
+    @CheckReturnValue
     public <T> Uni<T> completionStage(Supplier<? extends CompletionStage<? extends T>> supplier) {
         Supplier<? extends CompletionStage<? extends T>> actual = Infrastructure.decorate(nonNull(supplier, "supplier"));
         return Infrastructure
@@ -158,6 +163,7 @@ public class UniCreate {
      * @param <T> the type of item
      * @return the produced {@link Uni}
      */
+    @CheckReturnValue
     public <T> Uni<T> future(Future<? extends T> future) {
         Future<? extends T> actual = ParameterValidation.nonNull(future, "future");
         return new UniCreateFromFuture<>(() -> actual);
@@ -188,6 +194,7 @@ public class UniCreate {
      * @param <T> the type of item
      * @return the produced {@link Uni}
      */
+    @CheckReturnValue
     public <T> Uni<T> future(Supplier<Future<? extends T>> supplier) {
         Supplier<Future<? extends T>> actual = Infrastructure.decorate(ParameterValidation.nonNull(supplier, "supplier"));
         return new UniCreateFromFuture<>(actual);
@@ -211,6 +218,7 @@ public class UniCreate {
      * @param <T> the type of item
      * @return the produced {@link Uni}
      */
+    @CheckReturnValue
     public <T> Uni<T> publisher(Publisher<? extends T> publisher) {
         Publisher<? extends T> actual = ParameterValidation.nonNull(publisher, "publisher");
         return Infrastructure.onUniCreation(new UniCreateFromPublisher<>(actual));
@@ -229,6 +237,7 @@ public class UniCreate {
      * @param <T> the type of item
      * @return the new {@link Uni}
      */
+    @CheckReturnValue
     public <T> Uni<T> item(Supplier<? extends T> supplier) {
         Supplier<? extends T> actual = Infrastructure.decorate(ParameterValidation.nonNull(supplier, "supplier"));
         return Infrastructure.onUniCreation(new UniCreateFromItemSupplier<>(actual));
@@ -253,6 +262,7 @@ public class UniCreate {
      * @param <S> the type of the state
      * @return the produced {@link Uni}
      */
+    @CheckReturnValue
     public <T, S> Uni<T> item(Supplier<S> stateSupplier, Function<S, ? extends T> mapper) {
         Supplier<S> actualSupplier = Infrastructure.decorate(ParameterValidation.nonNull(stateSupplier, "stateSupplier"));
         Function<S, ? extends T> actualMapper = Infrastructure.decorate(ParameterValidation.nonNull(mapper, "mapper"));
@@ -267,6 +277,7 @@ public class UniCreate {
      * @param <T> the type of item
      * @return the new {@link Uni}
      */
+    @CheckReturnValue
     public <T> Uni<T> item(T item) {
         return Infrastructure.onUniCreation(new UniCreateFromKnownItem<>(item));
     }
@@ -276,6 +287,7 @@ public class UniCreate {
      *
      * @return the new {@link Uni} with a {@code null} item
      */
+    @CheckReturnValue
     public Uni<Void> voidItem() {
         return nullItem();
     }
@@ -287,6 +299,7 @@ public class UniCreate {
      * @return the new {@link Uni} with a {@code null} item
      */
     @SuppressWarnings("unchecked")
+    @CheckReturnValue
     public <T> Uni<T> nullItem() {
         return UNI_OF_NULL;
     }
@@ -300,6 +313,7 @@ public class UniCreate {
      * @return the new {@link Uni}
      */
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+    @CheckReturnValue
     public <T> Uni<T> optional(Optional<T> optional) {
         Optional<T> actual = ParameterValidation.nonNull(optional, "optional");
         return optional(() -> actual);
@@ -317,6 +331,7 @@ public class UniCreate {
      * @param <T> the type of the produced item
      * @return the new {@link Uni}
      */
+    @CheckReturnValue
     public <T> Uni<T> optional(Supplier<Optional<T>> supplier) {
         Supplier<Optional<T>> actual = Infrastructure.decorate(ParameterValidation.nonNull(supplier, "supplier"));
         return item(() -> actual.get().orElse(null));
@@ -340,6 +355,7 @@ public class UniCreate {
      * @param <T> the type of item
      * @return the produced {@link Uni}
      */
+    @CheckReturnValue
     public <T> Uni<T> emitter(Consumer<UniEmitter<? super T>> consumer) {
         Consumer<UniEmitter<? super T>> actual = Infrastructure.decorate(ParameterValidation.nonNull(consumer, "consumer"));
         return Infrastructure.onUniCreation(new UniCreateWithEmitter<>(actual));
@@ -372,6 +388,7 @@ public class UniCreate {
      * @param <S> the type of the state
      * @return the produced {@link Uni}
      */
+    @CheckReturnValue
     public <T, S> Uni<T> emitter(Supplier<S> stateSupplier, BiConsumer<S, UniEmitter<? super T>> consumer) {
         BiConsumer<S, UniEmitter<? super T>> actual = Infrastructure
                 .decorate(ParameterValidation.nonNull(consumer, "consumer"));
@@ -397,6 +414,7 @@ public class UniCreate {
      * @param <T> the type of item
      * @return the produced {@link Uni}
      */
+    @CheckReturnValue
     public <T> Uni<T> deferred(Supplier<Uni<? extends T>> supplier) {
         Supplier<Uni<? extends T>> actual = Infrastructure.decorate(ParameterValidation.nonNull(supplier, "supplier"));
         return Infrastructure.onUniCreation(new UniCreateFromDeferredSupplier<>(actual));
@@ -429,6 +447,7 @@ public class UniCreate {
      * @param <S> the type of the state
      * @return the produced {@link Uni}
      */
+    @CheckReturnValue
     public <T, S> Uni<T> deferred(Supplier<S> stateSupplier, Function<S, Uni<? extends T>> mapper) {
         Supplier<S> actualSupplier = Infrastructure.decorate(nonNull(stateSupplier, "stateSupplier"));
         Function<S, Uni<? extends T>> actualProducer = Infrastructure.decorate(nonNull(mapper, "mapper"));
@@ -444,6 +463,7 @@ public class UniCreate {
      *        {@code Uni.<String>failed(exception);}
      * @return the produced {@link Uni}
      */
+    @CheckReturnValue
     public <T> Uni<T> failure(Throwable failure) {
         return Infrastructure.onUniCreation(new UniCreateFromKnownFailure<>(ParameterValidation.nonNull(failure, "failure")));
     }
@@ -459,6 +479,7 @@ public class UniCreate {
      *        {@code Uni.<String>failed(exception);}
      * @return the produced {@link Uni}
      */
+    @CheckReturnValue
     public <T> Uni<T> failure(Supplier<Throwable> supplier) {
         Supplier<Throwable> actual = Infrastructure.decorate(ParameterValidation.nonNull(supplier, "supplier"));
         return Infrastructure.onUniCreation(new UniCreateFromFailureSupplier<>(actual));
@@ -471,6 +492,7 @@ public class UniCreate {
      * @return a never completing {@link Uni}
      */
     @SuppressWarnings("unchecked")
+    @CheckReturnValue
     public <T> Uni<T> nothing() {
         return (Uni<T>) UniNever.INSTANCE;
     }
@@ -495,6 +517,7 @@ public class UniCreate {
      * @param <T> the type of item
      * @return the produced {@link Uni}
      */
+    @CheckReturnValue
     public <T> Uni<T> multi(Multi<T> multi) {
         ParameterValidation.nonNull(multi, "multi");
         return multi.toUni();

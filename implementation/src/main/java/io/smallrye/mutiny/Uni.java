@@ -7,6 +7,7 @@ import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Executor;
 import java.util.function.*;
 
+import io.smallrye.common.annotation.CheckReturnValue;
 import io.smallrye.common.annotation.Experimental;
 import io.smallrye.mutiny.groups.*;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
@@ -60,6 +61,7 @@ public interface Uni<T> {
      * @return the factory used to create {@link Uni} instances.
      * @see UniCreate
      */
+    @CheckReturnValue
     static UniCreate createFrom() {
         return UniCreate.INSTANCE;
     }
@@ -83,6 +85,7 @@ public interface Uni<T> {
      * @param <O> the outcome type
      * @return the outcome of the function.
      */
+    @CheckReturnValue
     default <O> O stage(Function<Uni<T>, O> stage) {
         return nonNull(stage, "stage").apply(this);
     }
@@ -92,6 +95,7 @@ public interface Uni<T> {
      *
      * @return the factory use to combine the uni instances
      */
+    @CheckReturnValue
     static UniCombine combine() {
         return UniCombine.INSTANCE;
     }
@@ -125,6 +129,7 @@ public interface Uni<T> {
      * @return the object to configure the subscription.
      * @see #await() <code>uni.await() </code>for waiting (blocking the caller thread) until the resolution of the observed Uni.
      */
+    @CheckReturnValue
     UniSubscribe<T> subscribe();
 
     /**
@@ -132,6 +137,7 @@ public interface Uni<T> {
      *
      * @return the completion stage receiving the items emitted by this {@link Uni}
      */
+    @CheckReturnValue
     default CompletableFuture<T> subscribeAsCompletionStage() {
         return subscribe().asCompletionStage();
     }
@@ -156,6 +162,7 @@ public interface Uni<T> {
      *
      * @return the object to configure the retrieval.
      */
+    @CheckReturnValue
     UniAwait<T> await();
 
     /**
@@ -175,6 +182,7 @@ public interface Uni<T> {
      *
      * @return the object to configure the action to execute when an item is emitted
      */
+    @CheckReturnValue
     UniOnItem<T> onItem();
 
     /**
@@ -197,6 +205,7 @@ public interface Uni<T> {
      * @deprecated use {@link #onSubscription()} instead
      */
     @Deprecated
+    @CheckReturnValue
     UniOnSubscribe<T> onSubscribe();
 
     /**
@@ -217,6 +226,7 @@ public interface Uni<T> {
      *
      * @return the object to configure the action to execution on subscription.
      */
+    @CheckReturnValue
     UniOnSubscribe<T> onSubscription();
 
     /**
@@ -225,6 +235,7 @@ public interface Uni<T> {
      *
      * @return the object to configure the action to execute when an item is emitted or when a failure is propagated.
      */
+    @CheckReturnValue
     UniOnItemOrFailure<T> onItemOrFailure();
 
     /**
@@ -233,6 +244,7 @@ public interface Uni<T> {
      *
      * @return a UniOnFailure on which you can specify the on failure action
      */
+    @CheckReturnValue
     UniOnFailure<T> onFailure();
 
     /**
@@ -248,6 +260,7 @@ public interface Uni<T> {
      * @param predicate the predicate, {@code null} means applied to all failures
      * @return a UniOnFailure configured with the given predicate on which you can specify the on failure action
      */
+    @CheckReturnValue
     UniOnFailure<T> onFailure(Predicate<? super Throwable> predicate);
 
     /**
@@ -263,6 +276,7 @@ public interface Uni<T> {
      * @param typeOfFailure the class of exception, must not be {@code null}
      * @return a UniOnFailure configured with the given predicate on which you can specify the on failure action
      */
+    @CheckReturnValue
     UniOnFailure<T> onFailure(Class<? extends Throwable> typeOfFailure);
 
     /**
@@ -281,6 +295,7 @@ public interface Uni<T> {
      *
      * @return the on timeout group
      */
+    @CheckReturnValue
     UniIfNoItem<T> ifNoItem();
 
     /**
@@ -293,6 +308,7 @@ public interface Uni<T> {
      * @param executor the executor to use, must not be {@code null}
      * @return a new {@link Uni}
      */
+    @CheckReturnValue
     Uni<T> emitOn(Executor executor);
 
     /**
@@ -303,6 +319,7 @@ public interface Uni<T> {
      * @param executor the executor to use, must not be {@code null}
      * @return a new {@link Uni}
      */
+    @CheckReturnValue
     Uni<T> runSubscriptionOn(Executor executor);
 
     /**
@@ -312,6 +329,7 @@ public interface Uni<T> {
      * @apiNote This is an experimental API
      */
     @Experimental("Memoization is an experimental feature at this stage")
+    @CheckReturnValue
     UniMemoize<T> memoize();
 
     /**
@@ -322,6 +340,7 @@ public interface Uni<T> {
      * @deprecated Use {@link UniMemoize#indefinitely()} instead
      */
     @Deprecated
+    @CheckReturnValue
     default Uni<T> cache() {
         return memoize().indefinitely();
     }
@@ -335,6 +354,7 @@ public interface Uni<T> {
      * @param <O> the output type
      * @return a new {@link Uni} computing an item of type {@code <O>}.
      */
+    @CheckReturnValue
     default <O> Uni<O> map(Function<? super T, ? extends O> mapper) {
         return onItem().transform(nonNull(mapper, "mapper"));
     }
@@ -350,6 +370,7 @@ public interface Uni<T> {
      * @param callback the callback, must not be {@code null}
      * @return the new {@link Uni}
      */
+    @CheckReturnValue
     default Uni<T> invoke(Consumer<? super T> callback) {
         Consumer<? super T> actual = nonNull(callback, "callback");
         return onItem().invoke(actual);
@@ -365,6 +386,7 @@ public interface Uni<T> {
      * @param callback the callback, must not be {@code null}
      * @return the new {@link Uni}
      */
+    @CheckReturnValue
     default Uni<T> invoke(Runnable callback) {
         Runnable actual = nonNull(callback, "callback");
         return onItem().invoke(actual);
@@ -385,6 +407,7 @@ public interface Uni<T> {
      *        {@code null}
      * @return the new {@link Uni}
      */
+    @CheckReturnValue
     default Uni<T> call(Function<? super T, Uni<?>> function) {
         return onItem().call(function);
     }
@@ -404,6 +427,7 @@ public interface Uni<T> {
      *        {@code null}
      * @return the new {@link Uni}
      */
+    @CheckReturnValue
     default Uni<T> call(Supplier<Uni<?>> supplier) {
         return onItem().call(supplier);
     }
@@ -425,6 +449,7 @@ public interface Uni<T> {
      * @return a new {@link Uni} that would fire events from the uni produced by the mapper function, possibly
      *         in an asynchronous manner.
      */
+    @CheckReturnValue
     default <O> Uni<O> flatMap(Function<? super T, Uni<? extends O>> mapper) {
         return onItem().transformToUni(nonNull(mapper, "mapper"));
     }
@@ -457,6 +482,7 @@ public interface Uni<T> {
      *         in an asynchronous manner.
      * @see #chain(Supplier)
      */
+    @CheckReturnValue
     default <O> Uni<O> chain(Function<? super T, Uni<? extends O>> mapper) {
         Function<? super T, Uni<? extends O>> actual = nonNull(mapper, "mapper");
         return onItem().transformToUni(actual);
@@ -489,6 +515,7 @@ public interface Uni<T> {
      *         in an asynchronous manner.
      * @see #chain(Supplier)
      */
+    @CheckReturnValue
     default <O> Uni<O> chain(Supplier<Uni<? extends O>> supplier) {
         Supplier<Uni<? extends O>> actual = nonNull(supplier, "supplier");
         return onItem().transformToUni(ignored -> actual.get());
@@ -516,6 +543,7 @@ public interface Uni<T> {
      * @return a new {@link Uni} that emits events once the action has completed.
      * @see #onItemOrFailure()
      */
+    @CheckReturnValue
     default Uni<T> eventually(Runnable action) {
         return onItemOrFailure().invoke((item, err) -> nonNull(action, "action").run());
     }
@@ -544,6 +572,7 @@ public interface Uni<T> {
      * @return a new {@link Uni} that emits events once the supplied {@link Uni} emits an item or a failure.
      * @see #onItemOrFailure()
      */
+    @CheckReturnValue
     default <O> Uni<T> eventually(Supplier<Uni<? extends O>> supplier) {
         Supplier<Uni<? extends O>> actual = nonNull(supplier, "supplier");
         return onItemOrFailure().call((item, err) -> actual.get());
@@ -567,6 +596,7 @@ public interface Uni<T> {
      * @return the object to convert an {@link Uni} instance
      * @see UniConvert
      */
+    @CheckReturnValue
     UniConvert<T> convert();
 
     /**
@@ -586,6 +616,7 @@ public interface Uni<T> {
      *
      * @return the produced {@link Multi}, never {@code null}
      */
+    @CheckReturnValue
     Multi<T> toMulti();
 
     /**
@@ -596,6 +627,7 @@ public interface Uni<T> {
      *
      * @return the object to configure the repeating behavior.
      */
+    @CheckReturnValue
     UniRepeat<T> repeat();
 
     /**
@@ -604,6 +636,7 @@ public interface Uni<T> {
      *
      * @return the object to configure the termination actions.
      */
+    @CheckReturnValue
     UniOnTerminate<T> onTermination();
 
     /**
@@ -611,6 +644,7 @@ public interface Uni<T> {
      *
      * @return the object to configure the cancellation actions.
      */
+    @CheckReturnValue
     UniOnCancel<T> onCancellation();
 
     /**
@@ -621,6 +655,7 @@ public interface Uni<T> {
      * @param <R> the output type
      * @return the new {@link Uni}
      */
+    @CheckReturnValue
     default <R> Uni<R> plug(Function<Uni<T>, Uni<R>> operatorProvider) {
         Function<Uni<T>, Uni<R>> provider = nonNull(operatorProvider, "operatorProvider");
         return Infrastructure.onUniCreation(nonNull(provider.apply(this), "uni"));
@@ -635,6 +670,7 @@ public interface Uni<T> {
      * @param <O> the output type
      * @return the new {@link Uni}
      */
+    @CheckReturnValue
     default <O> Uni<O> replaceWith(O item) {
         return onItem().transform(ignore -> item);
     }
@@ -648,6 +684,7 @@ public interface Uni<T> {
      * @param <O> the output type
      * @return the new {@link Uni}
      */
+    @CheckReturnValue
     default <O> Uni<O> replaceWith(Supplier<O> supplier) {
         return onItem().transform(ignore -> supplier.get());
     }
@@ -661,6 +698,7 @@ public interface Uni<T> {
      * @param <O> the output type
      * @return the new {@link Uni}
      */
+    @CheckReturnValue
     default <O> Uni<O> replaceWith(Uni<O> uni) {
         return onItem().transformToUni(ignore -> uni);
     }
@@ -672,6 +710,7 @@ public interface Uni<T> {
      *
      * @return the new {@link Uni}
      */
+    @CheckReturnValue
     default Uni<T> replaceWithNull() {
         return onItem().transform(ignore -> null);
     }
@@ -686,6 +725,7 @@ public interface Uni<T> {
      *
      * @return the new {@link Uni}
      */
+    @CheckReturnValue
     default Uni<Void> replaceWithVoid() {
         return onItem().transform(ignored -> null);
     }
@@ -698,6 +738,7 @@ public interface Uni<T> {
      * @param supplier the supplier
      * @return the new {@link Uni}
      */
+    @CheckReturnValue
     default Uni<T> replaceIfNullWith(Supplier<T> supplier) {
         return onItem().ifNull().continueWith(supplier);
     }
@@ -710,6 +751,7 @@ public interface Uni<T> {
      * @param value the value
      * @return the new {@link Uni}
      */
+    @CheckReturnValue
     default Uni<T> replaceIfNullWith(T value) {
         return onItem().ifNull().continueWith(value);
     }
@@ -724,6 +766,7 @@ public interface Uni<T> {
      * @return a new {@link Uni}
      * @see Infrastructure#setOperatorLogger(Infrastructure.OperatorLogger)
      */
+    @CheckReturnValue
     Uni<T> log(String identifier);
 
     /**
@@ -737,6 +780,7 @@ public interface Uni<T> {
      * @see Uni#log(String)
      * @see Infrastructure#setOperatorLogger(Infrastructure.OperatorLogger)
      */
+    @CheckReturnValue
     Uni<T> log();
 
     /**
@@ -755,6 +799,7 @@ public interface Uni<T> {
      * @return the object to configure the join behavior.
      */
     @Experimental("New API based on observations that Uni.combine() is often used with homogeneous types, and combination often just a mapping to a collection.")
+    @CheckReturnValue
     static UniJoin join() {
         return UniJoin.SHARED_INSTANCE;
     }

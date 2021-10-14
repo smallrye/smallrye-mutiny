@@ -5,6 +5,7 @@ import static io.smallrye.mutiny.helpers.ParameterValidation.validate;
 
 import java.time.Duration;
 
+import io.smallrye.common.annotation.CheckReturnValue;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.multi.MultiBroadcaster;
@@ -33,6 +34,7 @@ public class MultiBroadcast<T> {
      *
      * @return the {@link Multi} accepting several subscribers
      */
+    @CheckReturnValue
     public Multi<T> toAllSubscribers() {
         return Infrastructure.onMultiCreation(
                 MultiBroadcaster.publish(upstream, 0, cancelWhenNoOneIsListening, delayAfterLastDeparture));
@@ -47,6 +49,7 @@ public class MultiBroadcast<T> {
      *        dispatching the events. Must be strictly positive.
      * @return the {@link Multi} accepting several subscribers
      */
+    @CheckReturnValue
     public Multi<T> toAtLeast(int numberOfSubscribers) {
         positive(numberOfSubscribers, "numberOfSubscribers");
         return Infrastructure.onMultiCreation(
@@ -59,6 +62,7 @@ public class MultiBroadcast<T> {
      *
      * @return this {@link MultiBroadcast}.
      */
+    @CheckReturnValue
     public MultiBroadcast<T> withCancellationAfterLastSubscriberDeparture() {
         cancelWhenNoOneIsListening = true;
         return this;
@@ -72,6 +76,7 @@ public class MultiBroadcast<T> {
      * @param delay the delay, must not be {@code null}, must be positive
      * @return this {@link MultiBroadcast}.
      */
+    @CheckReturnValue
     public MultiBroadcast<T> withCancellationAfterLastSubscriberDeparture(Duration delay) {
         this.delayAfterLastDeparture = validate(delay, "delay");
         withCancellationAfterLastSubscriberDeparture();

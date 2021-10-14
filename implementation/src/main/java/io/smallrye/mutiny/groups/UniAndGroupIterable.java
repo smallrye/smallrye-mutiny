@@ -7,6 +7,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+import io.smallrye.common.annotation.CheckReturnValue;
 import io.smallrye.common.annotation.Experimental;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
@@ -40,6 +41,7 @@ public class UniAndGroupIterable<T1> {
         this.collectFailures = collectFailures;
     }
 
+    @CheckReturnValue
     public UniAndGroupIterable<T1> collectFailures() {
         collectFailures = true;
         return this;
@@ -53,6 +55,7 @@ public class UniAndGroupIterable<T1> {
      * @param <O> the combination value type
      * @return the new {@link Uni}
      */
+    @CheckReturnValue
     public <O> Uni<O> combinedWith(Function<List<?>, O> function) {
         Function<List<?>, O> actual = Infrastructure.decorate(nonNull(function, "function"));
         return Infrastructure
@@ -75,6 +78,7 @@ public class UniAndGroupIterable<T1> {
      */
     @SuppressWarnings("unchecked")
     @Experimental("This is an experimental API")
+    @CheckReturnValue
     public <O, I> Uni<O> combinedWith(Class<I> superType, Function<List<I>, O> function) {
         return combinedWith((Function) function);
     }
@@ -86,6 +90,7 @@ public class UniAndGroupIterable<T1> {
      * @return the {@code Uni Uni<Void>} emitting {@code null} when all the {@link Uni unis} have completed, or propagating
      *         the failure.
      */
+    @CheckReturnValue
     public Uni<Void> discardItems() {
         return Infrastructure
                 .onUniCreation(new UniAndCombination<>(source, unis, x -> null, collectFailures));

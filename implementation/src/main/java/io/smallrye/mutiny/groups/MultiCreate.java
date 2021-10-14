@@ -17,6 +17,7 @@ import java.util.stream.Stream;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 
+import io.smallrye.common.annotation.CheckReturnValue;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.converters.MultiConverter;
@@ -39,14 +40,15 @@ public class MultiCreate {
     }
 
     /**
-     * Creates a new {@link Uni} from the passed instance with the passed converter.
+     * Creates a new {@link Multi} from the passed instance with the passed converter.
      *
      * @param converter performs the type conversion
      * @param instance instance to convert from
      * @param <I> the type being converted from
-     * @param <T> the type for the {@link Uni}
-     * @return created {@link Uni}
+     * @param <T> the type for the {@link Multi}
+     * @return the created {@link Multi}
      */
+    @CheckReturnValue
     public <I, T> Multi<T> converter(MultiConverter<I, T> converter, I instance) {
         return Infrastructure.onMultiCreation(converter.from(instance));
     }
@@ -70,6 +72,7 @@ public class MultiCreate {
      * @param <T> the type of item
      * @return the produced {@link Multi}
      */
+    @CheckReturnValue
     public <T> Multi<T> completionStage(CompletionStage<? extends T> stage) {
         CompletionStage<? extends T> actual = nonNull(stage, "stage");
         return completionStage(() -> actual);
@@ -101,6 +104,7 @@ public class MultiCreate {
      * @param <T> the type of item
      * @return the produced {@link Multi}
      */
+    @CheckReturnValue
     public <T> Multi<T> completionStage(Supplier<? extends CompletionStage<? extends T>> supplier) {
         Supplier<? extends CompletionStage<? extends T>> actual = Infrastructure
                 .decorate(nonNull(supplier, "supplier"));
@@ -147,6 +151,7 @@ public class MultiCreate {
      * @return the produced {@link Multi}
      * @see #publisher(Publisher)
      */
+    @CheckReturnValue
     public <T> Multi<T> safePublisher(Publisher<T> publisher) {
         Publisher<T> actual = nonNull(publisher, "publisher");
 
@@ -175,6 +180,7 @@ public class MultiCreate {
      * @return the produced {@link Multi}
      * @see #safePublisher(Publisher)
      */
+    @CheckReturnValue
     public <T> Multi<T> publisher(Publisher<T> publisher) {
         Publisher<T> actual = nonNull(publisher, "publisher");
 
@@ -205,6 +211,7 @@ public class MultiCreate {
      * @param <T> the type of item emitted by the resulting {@link Multi} / passed {@link Uni}
      * @return the produced {@link Multi}, never {@code null}
      */
+    @CheckReturnValue
     public <T> Multi<T> uni(Uni<T> uni) {
         return nonNull(uni, "uni").toMulti();
     }
@@ -224,6 +231,7 @@ public class MultiCreate {
      * @param <T> the type of item emitted by the produced Multi
      * @return the new {@link Multi}
      */
+    @CheckReturnValue
     public <T> Multi<T> item(Supplier<? extends T> supplier) {
         Supplier<? extends T> actual = Infrastructure.decorate(nonNull(supplier, "supplier"));
 
@@ -259,6 +267,7 @@ public class MultiCreate {
      * @param <T> the type of item emitted by the produced Multi
      * @return the new {@link Multi}
      */
+    @CheckReturnValue
     public <T> Multi<T> items(Supplier<? extends Stream<? extends T>> supplier) {
         Supplier<? extends Stream<? extends T>> actual = Infrastructure.decorate(nonNull(supplier, "supplier"));
         return Infrastructure.onMultiCreation(new StreamBasedMulti<>(actual));
@@ -274,6 +283,7 @@ public class MultiCreate {
      * @param <T> the type of item emitted by the produced Multi
      * @return the new {@link Multi}
      */
+    @CheckReturnValue
     public <T> Multi<T> item(T item) {
         return item(() -> item);
     }
@@ -292,6 +302,7 @@ public class MultiCreate {
      * @return the new {@link Multi}
      */
     @SafeVarargs
+    @CheckReturnValue
     public final <T> Multi<T> items(T... items) {
         return Infrastructure.onMultiCreation(new CollectionBasedMulti<>(nonNull(items, "items")));
     }
@@ -309,6 +320,7 @@ public class MultiCreate {
      * @param <T> the type of item emitted by the produced Multi
      * @return the new {@link Multi}
      */
+    @CheckReturnValue
     public <T> Multi<T> iterable(Iterable<T> iterable) {
         return Infrastructure.onMultiCreation(new IterableBasedMulti<>(nonNull(iterable, "iterable")));
     }
@@ -327,6 +339,7 @@ public class MultiCreate {
      * @param <T> the type of item emitted by the produced Multi
      * @return the new {@link Multi}
      */
+    @CheckReturnValue
     public <T> Multi<T> items(Stream<T> items) {
         Stream<T> stream = nonNull(items, "items");
         return items(() -> stream);
@@ -341,6 +354,7 @@ public class MultiCreate {
      * @return the new {@link Multi}
      */
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+    @CheckReturnValue
     public <T> Multi<T> optional(Optional<T> optional) {
         Optional<T> actual = nonNull(optional, "optional");
         return item(() -> actual.orElse(null));
@@ -361,6 +375,7 @@ public class MultiCreate {
      * @param <T> the type of the produced item
      * @return the new {@link Multi}
      */
+    @CheckReturnValue
     public <T> Multi<T> optional(Supplier<Optional<T>> supplier) {
         Supplier<Optional<T>> actual = Infrastructure.decorate(nonNull(supplier, "supplier"));
         return item(() -> actual.get().orElse(null));
@@ -376,6 +391,7 @@ public class MultiCreate {
      * @param <T> the type of item emitted by the produced Multi
      * @return the produced {@link Multi}
      */
+    @CheckReturnValue
     public <T> Multi<T> emitter(Consumer<MultiEmitter<? super T>> consumer) {
         // Decoration happens in `emitter`
         return emitter(consumer, BackPressureStrategy.BUFFER);
@@ -394,6 +410,7 @@ public class MultiCreate {
      * @param <T> the type of item emitted by the produced Multi
      * @return the produced {@link Multi}
      */
+    @CheckReturnValue
     public <T> Multi<T> emitter(Consumer<MultiEmitter<? super T>> consumer, int bufferSize) {
         Consumer<MultiEmitter<? super T>> actual = Infrastructure.decorate(nonNull(consumer, "consumer"));
         return Infrastructure.onMultiCreation(new EmitterBasedMulti<>(actual, BackPressureStrategy.BUFFER,
@@ -423,6 +440,7 @@ public class MultiCreate {
      * @param <T> the type of items emitted by the emitter. Must not be {@code null}
      * @return the produced {@link Multi}
      */
+    @CheckReturnValue
     public <T> Multi<T> emitter(Consumer<MultiEmitter<? super T>> consumer, BackPressureStrategy strategy) {
         Consumer<MultiEmitter<? super T>> actual = Infrastructure.decorate(nonNull(consumer, "consumer"));
         return Infrastructure.onMultiCreation(new EmitterBasedMulti<>(actual, nonNull(strategy, "strategy")));
@@ -445,6 +463,7 @@ public class MultiCreate {
      * @param <T> the type of item
      * @return the produced {@link Multi}
      */
+    @CheckReturnValue
     public <T> Multi<T> deferred(Supplier<Multi<? extends T>> supplier) {
         Supplier<Multi<? extends T>> actual = Infrastructure.decorate(nonNull(supplier, "supplier"));
         return Infrastructure.onMultiCreation(new DeferredMulti<>(actual));
@@ -458,6 +477,7 @@ public class MultiCreate {
      *        {@code Multi.<String>failed(exception);}
      * @return the produced {@link Multi}
      */
+    @CheckReturnValue
     public <T> Multi<T> failure(Throwable failure) {
         Throwable exception = nonNull(failure, "failure");
         return failure(() -> exception);
@@ -474,6 +494,7 @@ public class MultiCreate {
      *        {@code Multi.<String>failed(exception);}
      * @return the produced {@link Multi}
      */
+    @CheckReturnValue
     public <T> Multi<T> failure(Supplier<Throwable> supplier) {
         Supplier<Throwable> actual = Infrastructure.decorate(nonNull(supplier, "supplier"));
         return Infrastructure.onMultiCreation(new FailedMulti<>(actual));
@@ -485,6 +506,7 @@ public class MultiCreate {
      * @param <T> the virtual type of item
      * @return a never emitting {@link Multi}
      */
+    @CheckReturnValue
     public <T> Multi<T> nothing() {
         return Infrastructure.onMultiCreation(NeverMulti.never());
     }
@@ -496,6 +518,7 @@ public class MultiCreate {
      * @param <T> the virtual type of item
      * @return an empty {@link Multi}
      */
+    @CheckReturnValue
     public <T> Multi<T> empty() {
         return Infrastructure.onMultiCreation(EmptyMulti.empty());
     }
@@ -514,6 +537,7 @@ public class MultiCreate {
      *
      * @return the object to configure the time period (initial delay, executor, interval)
      */
+    @CheckReturnValue
     public MultiTimePeriod ticks() {
         return new MultiTimePeriod();
     }
@@ -526,6 +550,7 @@ public class MultiCreate {
      * @param endExclusive the end integer (exclusive)
      * @return the {@link Multi} emitting the items
      */
+    @CheckReturnValue
     public Multi<Integer> range(int startInclusive, int endExclusive) {
         if (endExclusive <= startInclusive) {
             throw new IllegalArgumentException("end must be greater than start");
@@ -551,6 +576,7 @@ public class MultiCreate {
      * @param <I> the type of items emitted by the stream produced by the {@code streamSupplier}.
      * @return an object to configure the <em>finalizers</em>.
      */
+    @CheckReturnValue
     public <R, I> MultiResource<R, I> resource(Supplier<? extends R> resourceSupplier,
             Function<? super R, ? extends Publisher<I>> streamSupplier) {
         Supplier<? extends R> actual = Infrastructure.decorate(nonNull(resourceSupplier, "resourceSupplier"));
@@ -585,6 +611,7 @@ public class MultiCreate {
      * @param <I> the type of items emitted by the stream produced by the {@code streamSupplier}.
      * @return an object to configure the <em>finalizers</em>.
      */
+    @CheckReturnValue
     public <R, I> MultiResourceUni<R, I> resourceFromUni(Supplier<Uni<R>> resourceSupplier,
             Function<? super R, ? extends Publisher<I>> streamSupplier) {
         Supplier<Uni<R>> actual = Infrastructure.decorate(nonNull(resourceSupplier, "resourceSupplier"));
@@ -612,6 +639,7 @@ public class MultiCreate {
      * @param <T> the items type
      * @return a new {@link Multi}
      */
+    @CheckReturnValue
     public <S, T> Multi<T> generator(Supplier<S> initialStateSupplier,
             BiFunction<S, GeneratorEmitter<? super T>, S> generator) {
         Supplier<S> actualStateSupplier = Infrastructure

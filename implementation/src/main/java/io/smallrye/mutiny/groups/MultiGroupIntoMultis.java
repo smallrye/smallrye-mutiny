@@ -6,6 +6,7 @@ import static io.smallrye.mutiny.helpers.ParameterValidation.validate;
 
 import java.time.Duration;
 
+import io.smallrye.common.annotation.CheckReturnValue;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.multi.MultiWindowOnDurationOp;
@@ -36,6 +37,7 @@ public class MultiGroupIntoMultis<T> {
      * @return a Multi that emits every {@code duration} with the items emitted by the upstream multi during the time
      *         window.
      */
+    @CheckReturnValue
     public Multi<Multi<T>> every(Duration duration) {
         return Infrastructure
                 .onMultiCreation(new MultiWindowOnDurationOp<>(upstream, validate(duration, "duration"),
@@ -58,6 +60,7 @@ public class MultiGroupIntoMultis<T> {
      * @param size the max number of item in each emitted {@link Multi}, must be positive
      * @return a Multi emitting multis of at most {@code size} items from the upstream Multi.
      */
+    @CheckReturnValue
     public Multi<Multi<T>> of(int size) {
         int validated = positive(size, "size");
         return Infrastructure.onMultiCreation(new MultiWindowOp<>(upstream, validated, validated));
@@ -81,6 +84,7 @@ public class MultiGroupIntoMultis<T> {
      *        this operation is similar to {@link #of(int)}. Must be positive and non-0
      * @return a Multi emitting multis of at most {@code size} items from the upstream Multi.
      */
+    @CheckReturnValue
     public Multi<Multi<T>> of(int size, int skip) {
         return Infrastructure.onMultiCreation(new MultiWindowOp<>(upstream,
                 positive(size, "size"),

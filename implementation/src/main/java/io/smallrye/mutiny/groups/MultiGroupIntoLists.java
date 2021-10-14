@@ -5,6 +5,7 @@ import static io.smallrye.mutiny.helpers.ParameterValidation.*;
 import java.time.Duration;
 import java.util.List;
 
+import io.smallrye.common.annotation.CheckReturnValue;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.multi.MultiBufferOp;
@@ -35,6 +36,7 @@ public class MultiGroupIntoLists<T> {
      * @return a Multi that emits every {@code duration} with the items emitted by the upstream multi during the time
      *         window.
      */
+    @CheckReturnValue
     public Multi<List<T>> every(Duration duration) {
         return Infrastructure.onMultiCreation(new MultiBufferWithTimeoutOp<>(upstream, Integer.MAX_VALUE,
                 validate(duration, "duration"),
@@ -55,6 +57,7 @@ public class MultiGroupIntoLists<T> {
      * @param size the size of each collected list, must be positive
      * @return a Multi emitting lists of at most {@code size} items from the upstream Multi.
      */
+    @CheckReturnValue
     public Multi<List<T>> of(int size) {
         return Infrastructure.onMultiCreation(new MultiBufferOp<>(upstream, size, size));
     }
@@ -76,6 +79,7 @@ public class MultiGroupIntoLists<T> {
      * @return a Multi emitting lists for every {@code skip} items from the upstream Multi. Each list contains at most
      *         {@code size} items
      */
+    @CheckReturnValue
     public Multi<List<T>> of(int size, int skip) {
         return Infrastructure.onMultiCreation(new MultiBufferOp<>(upstream,
                 positive(size, "size"), positive(skip, "skip")));
@@ -101,6 +105,7 @@ public class MultiGroupIntoLists<T> {
      *        {@link Multi}.
      * @return a Multi emitting lists of at most {@code size} items from the upstream Multi.
      */
+    @CheckReturnValue
     public Multi<List<T>> of(int size, Duration maximumDelay) {
         return Infrastructure.onMultiCreation(new MultiBufferWithTimeoutOp<>(upstream, positive(size, "size"),
                 validate(maximumDelay, "maximumDelay"), Infrastructure.getDefaultWorkerPool()));

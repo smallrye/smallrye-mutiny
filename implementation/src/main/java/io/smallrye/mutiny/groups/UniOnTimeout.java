@@ -7,6 +7,7 @@ import java.time.Duration;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.function.Supplier;
 
+import io.smallrye.common.annotation.CheckReturnValue;
 import io.smallrye.mutiny.TimeoutException;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
@@ -30,6 +31,7 @@ public class UniOnTimeout<T> {
      * @param timeout the timeout, must not be {@code null}, must be strictly positive.
      * @return a new {@link UniOnTimeout}
      */
+    @CheckReturnValue
     public UniOnTimeout<T> after(Duration timeout) {
         return new UniOnTimeout<>(failure, validate(timeout, "timeout"), executor);
     }
@@ -41,18 +43,22 @@ public class UniOnTimeout<T> {
      * @param executor the executor to use, must not be {@code null}
      * @return a new {@link UniOnTimeout}
      */
+    @CheckReturnValue
     public UniOnTimeout<T> on(ScheduledExecutorService executor) {
         return new UniOnTimeout<>(failure, timeout, nonNull(executor, "executor"));
     }
 
+    @CheckReturnValue
     public Uni<T> fail() {
         return Infrastructure.onUniCreation(failWith(TimeoutException::new));
     }
 
+    @CheckReturnValue
     public Uni<T> failWith(Throwable failure) {
         return failWith(() -> failure);
     }
 
+    @CheckReturnValue
     public Uni<T> failWith(Supplier<? extends Throwable> supplier) {
         validate(timeout, "timeout");
         Supplier<? extends Throwable> actual = Infrastructure.decorate(nonNull(supplier, "supplier"));
@@ -68,6 +74,7 @@ public class UniOnTimeout<T> {
      * @param fallback the fallback value, may be {@code null}
      * @return the new {@link Uni}
      */
+    @CheckReturnValue
     public Uni<T> recoverWithItem(T fallback) {
         return fail().onFailure(TimeoutException.class).recoverWithItem(fallback);
     }
@@ -80,6 +87,7 @@ public class UniOnTimeout<T> {
      * @param supplier the fallback supplier, may be {@code null}
      * @return the new {@link Uni}
      */
+    @CheckReturnValue
     public Uni<T> recoverWithItem(Supplier<T> supplier) {
         // Decoration happens in `recoverWithItem`
         return fail().onFailure(TimeoutException.class).recoverWithItem(supplier);
@@ -93,6 +101,7 @@ public class UniOnTimeout<T> {
      * @param supplier the fallback supplier, must not be {@code null}, must not produce {@code null}
      * @return the new {@link Uni}
      */
+    @CheckReturnValue
     public Uni<T> recoverWithUni(Supplier<Uni<? extends T>> supplier) {
         // Decoration happens in `recoverWithUni`
         return fail().onFailure(TimeoutException.class).recoverWithUni(supplier);
@@ -105,6 +114,7 @@ public class UniOnTimeout<T> {
      * @param fallback the fallback {@link Uni}, must not be {@code null}
      * @return the new {@link Uni}
      */
+    @CheckReturnValue
     public Uni<T> recoverWithUni(Uni<? extends T> fallback) {
         return fail().onFailure(TimeoutException.class).recoverWithUni(fallback);
     }

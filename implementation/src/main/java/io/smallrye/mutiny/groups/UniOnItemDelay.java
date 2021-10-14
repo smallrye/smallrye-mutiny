@@ -6,6 +6,7 @@ import java.time.Duration;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.function.Function;
 
+import io.smallrye.common.annotation.CheckReturnValue;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.uni.UniDelayOnItem;
@@ -39,6 +40,7 @@ public class UniOnItemDelay<T> {
      * @param executor the executor, must not be {@code null}
      * @return this {@code UniOnItemDelay}.
      */
+    @CheckReturnValue
     public UniOnItemDelay<T> onExecutor(ScheduledExecutorService executor) {
         this.executor = nonNull(executor, "executor");
         return this;
@@ -50,6 +52,7 @@ public class UniOnItemDelay<T> {
      * @param duration the duration of the delay, must not be {@code null}, must be strictly positive.
      * @return the produced {@link Uni}
      */
+    @CheckReturnValue
     public Uni<T> by(Duration duration) {
         return Infrastructure.onUniCreation(new UniDelayOnItem<>(upstream, duration, executor));
     }
@@ -65,6 +68,7 @@ public class UniOnItemDelay<T> {
      * @param function the function, must not be {@code null}
      * @return the produced {@link Uni}.
      */
+    @CheckReturnValue
     public Uni<T> until(Function<? super T, Uni<?>> function) {
         Function<? super T, Uni<?>> actual = Infrastructure.decorate(nonNull(function, "function"));
         return Infrastructure.onUniCreation(new UniDelayUntil<>(upstream, actual, executor));

@@ -12,6 +12,7 @@ import java.util.stream.Stream;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
+import io.smallrye.common.annotation.CheckReturnValue;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.helpers.BlockingIterable;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
@@ -257,6 +258,7 @@ public class MultiSubscribe<T> {
     /**
      * @return a blocking iterable used to consume the items emitted by the upstream {@link Multi}.
      */
+    @CheckReturnValue
     public BlockingIterable<T> asIterable() {
         return asIterable(256, () -> new ArrayBlockingQueue<>(256));
     }
@@ -268,6 +270,7 @@ public class MultiSubscribe<T> {
      * @param supplier the supplier of queue used internally, must not be {@code null}, must not return {@code null}
      * @return a blocking iterable used to consume the items emitted by the upstream {@link Multi}.
      */
+    @CheckReturnValue
     public BlockingIterable<T> asIterable(int batchSize, Supplier<Queue<T>> supplier) {
         // No interception of the queue supplier.
         return new BlockingIterable<>(upstream, batchSize, supplier);
@@ -276,6 +279,7 @@ public class MultiSubscribe<T> {
     /**
      * @return a <strong>blocking</strong> stream to consume the items from the upstream {@link Multi}.
      */
+    @CheckReturnValue
     public Stream<T> asStream() {
         return asStream(256, () -> new ArrayBlockingQueue<>(256));
     }
@@ -287,6 +291,7 @@ public class MultiSubscribe<T> {
      * @param supplier the supplier of queue used internally, must not be {@code null}, must not return {@code null}
      * @return a blocking stream used to consume the items from {@link Multi}
      */
+    @CheckReturnValue
     public Stream<T> asStream(int batchSize, Supplier<Queue<T>> supplier) {
         // No interception of the queue supplier.
         return asIterable(batchSize, supplier).stream();
