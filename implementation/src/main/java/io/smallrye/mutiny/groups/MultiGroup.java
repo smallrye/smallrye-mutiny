@@ -4,9 +4,9 @@ import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
 
 import java.util.function.Function;
 
+import io.smallrye.common.annotation.CheckReturnValue;
 import io.smallrye.mutiny.GroupedMulti;
 import io.smallrye.mutiny.Multi;
-import io.smallrye.mutiny.helpers.CheckReturnValue;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.multi.MultiGroupByOp;
 

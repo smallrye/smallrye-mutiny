@@ -1,7 +1,7 @@
 package io.smallrye.mutiny.groups;
 
+import io.smallrye.common.annotation.CheckReturnValue;
 import io.smallrye.mutiny.Multi;
-import io.smallrye.mutiny.helpers.CheckReturnValue;
 
 /**
  * Allows the creation of instances of {@link Multi} by merging/combining/concatenating multiple upstreams.

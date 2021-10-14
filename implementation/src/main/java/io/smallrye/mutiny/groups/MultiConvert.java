@@ -6,8 +6,8 @@ import java.util.function.Function;
 
 import org.reactivestreams.Publisher;
 
+import io.smallrye.common.annotation.CheckReturnValue;
 import io.smallrye.mutiny.Multi;
-import io.smallrye.mutiny.helpers.CheckReturnValue;
 
 /**
  * Converts the upstream into another reactive type.

@@ -8,9 +8,9 @@ import java.util.function.Function;
 
 import org.reactivestreams.Publisher;
 
+import io.smallrye.common.annotation.CheckReturnValue;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.converters.uni.BuiltinConverters;
-import io.smallrye.mutiny.helpers.CheckReturnValue;
 
 public class UniConvert<T> {
 

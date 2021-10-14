@@ -5,9 +5,9 @@ import static io.smallrye.mutiny.helpers.ParameterValidation.positive;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import io.smallrye.common.annotation.CheckReturnValue;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
-import io.smallrye.mutiny.helpers.CheckReturnValue;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.multi.overflow.MultiOnOverflowBufferOp;
 import io.smallrye.mutiny.operators.multi.overflow.MultiOnOverflowDropItemsOp;

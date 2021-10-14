@@ -10,9 +10,9 @@ import java.util.function.Supplier;
 
 import org.reactivestreams.Publisher;
 
+import io.smallrye.common.annotation.CheckReturnValue;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
-import io.smallrye.mutiny.helpers.CheckReturnValue;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.multi.MultiOnCompletionCall;
 import io.smallrye.mutiny.operators.multi.MultiOnCompletionInvoke;

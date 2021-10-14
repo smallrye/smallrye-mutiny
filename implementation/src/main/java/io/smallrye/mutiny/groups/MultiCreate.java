@@ -17,10 +17,10 @@ import java.util.stream.Stream;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 
+import io.smallrye.common.annotation.CheckReturnValue;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.converters.MultiConverter;
-import io.smallrye.mutiny.helpers.CheckReturnValue;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.AbstractMulti;
 import io.smallrye.mutiny.operators.multi.builders.*;

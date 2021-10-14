@@ -4,9 +4,9 @@ import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
 
 import java.util.Arrays;
 
+import io.smallrye.common.annotation.CheckReturnValue;
 import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Uni;
-import io.smallrye.mutiny.helpers.CheckReturnValue;
 import io.smallrye.mutiny.tuples.*;
 
 /**

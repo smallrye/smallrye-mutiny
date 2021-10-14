@@ -8,9 +8,9 @@ import java.util.Comparator;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
+import io.smallrye.common.annotation.CheckReturnValue;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
-import io.smallrye.mutiny.helpers.CheckReturnValue;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.multi.*;
 

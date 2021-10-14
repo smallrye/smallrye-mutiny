@@ -7,8 +7,8 @@ import java.util.function.BiFunction;
 
 import org.reactivestreams.Publisher;
 
+import io.smallrye.common.annotation.CheckReturnValue;
 import io.smallrye.mutiny.Multi;
-import io.smallrye.mutiny.helpers.CheckReturnValue;
 import io.smallrye.mutiny.tuples.Tuple2;
 
 public class MultiItemCombine2<T1, T2> extends MultiItemCombineIterable {

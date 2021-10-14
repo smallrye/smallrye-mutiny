@@ -5,8 +5,8 @@ import static io.smallrye.mutiny.helpers.ParameterValidation.*;
 import java.time.Duration;
 import java.util.List;
 
+import io.smallrye.common.annotation.CheckReturnValue;
 import io.smallrye.mutiny.Multi;
-import io.smallrye.mutiny.helpers.CheckReturnValue;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.multi.MultiBufferOp;
 import io.smallrye.mutiny.operators.multi.MultiBufferWithTimeoutOp;

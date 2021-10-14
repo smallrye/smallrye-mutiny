@@ -7,10 +7,10 @@ import static java.util.Arrays.asList;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.smallrye.common.annotation.CheckReturnValue;
 import io.smallrye.common.annotation.Experimental;
 import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Uni;
-import io.smallrye.mutiny.helpers.CheckReturnValue;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.uni.builders.UniJoinAll;
 import io.smallrye.mutiny.operators.uni.builders.UniJoinFirst;

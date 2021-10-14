@@ -6,8 +6,8 @@ import java.time.Duration;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.function.Function;
 
+import io.smallrye.common.annotation.CheckReturnValue;
 import io.smallrye.mutiny.Uni;
-import io.smallrye.mutiny.helpers.CheckReturnValue;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.uni.UniDelayOnItem;
 import io.smallrye.mutiny.operators.uni.UniDelayUntil;

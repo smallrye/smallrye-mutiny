@@ -12,8 +12,8 @@ import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
+import io.smallrye.common.annotation.CheckReturnValue;
 import io.smallrye.mutiny.groups.*;
-import io.smallrye.mutiny.helpers.CheckReturnValue;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 
 @SuppressWarnings({ "ReactiveStreamsPublisherImplementation" })

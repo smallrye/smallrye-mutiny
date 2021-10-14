@@ -6,9 +6,9 @@ import java.util.function.Function;
 
 import org.reactivestreams.Publisher;
 
+import io.smallrye.common.annotation.CheckReturnValue;
 import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Multi;
-import io.smallrye.mutiny.helpers.CheckReturnValue;
 import io.smallrye.mutiny.helpers.queues.Queues;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.multi.MultiFlatMapOp;

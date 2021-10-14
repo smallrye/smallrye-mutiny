@@ -6,8 +6,8 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import io.smallrye.common.annotation.CheckReturnValue;
 import io.smallrye.mutiny.Uni;
-import io.smallrye.mutiny.helpers.CheckReturnValue;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.uni.UniOnSubscribeCall;
 import io.smallrye.mutiny.operators.uni.UniOnSubscribeInvoke;

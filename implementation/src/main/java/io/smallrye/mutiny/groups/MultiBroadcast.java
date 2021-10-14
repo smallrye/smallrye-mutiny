@@ -5,8 +5,8 @@ import static io.smallrye.mutiny.helpers.ParameterValidation.validate;
 
 import java.time.Duration;
 
+import io.smallrye.common.annotation.CheckReturnValue;
 import io.smallrye.mutiny.Multi;
-import io.smallrye.mutiny.helpers.CheckReturnValue;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.multi.MultiBroadcaster;
 

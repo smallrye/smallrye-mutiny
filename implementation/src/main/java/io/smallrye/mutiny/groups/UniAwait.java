@@ -5,9 +5,9 @@ import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
 import java.time.Duration;
 import java.util.Optional;
 
+import io.smallrye.common.annotation.CheckReturnValue;
 import io.smallrye.mutiny.TimeoutException;
 import io.smallrye.mutiny.Uni;
-import io.smallrye.mutiny.helpers.CheckReturnValue;
 import io.smallrye.mutiny.operators.uni.UniBlockingAwait;
 
 /**

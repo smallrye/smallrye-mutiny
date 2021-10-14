@@ -4,8 +4,8 @@ import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
 
 import java.util.function.Supplier;
 
+import io.smallrye.common.annotation.CheckReturnValue;
 import io.smallrye.mutiny.Uni;
-import io.smallrye.mutiny.helpers.CheckReturnValue;
 import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.uni.UniOnCancellation;

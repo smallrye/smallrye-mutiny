@@ -24,7 +24,7 @@
     "differences" : [
       {
         "code": "java.annotation.added",
-        "annotation": "@io.smallrye.mutiny.helpers.CheckReturnValue",
+        "annotation": "@io.smallrye.common.annotation.CheckReturnValue",
         "justification": "This is a marker interface for static code analysis tools"
       }
     ]

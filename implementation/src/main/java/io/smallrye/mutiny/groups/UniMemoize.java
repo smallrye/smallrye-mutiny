@@ -6,9 +6,9 @@ import static io.smallrye.mutiny.helpers.ParameterValidation.validate;
 import java.time.Duration;
 import java.util.function.BooleanSupplier;
 
+import io.smallrye.common.annotation.CheckReturnValue;
 import io.smallrye.common.annotation.Experimental;
 import io.smallrye.mutiny.Uni;
-import io.smallrye.mutiny.helpers.CheckReturnValue;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.AbstractUni;
 import io.smallrye.mutiny.operators.uni.UniMemoizeOp;

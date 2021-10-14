@@ -7,9 +7,9 @@ import java.time.Duration;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.function.Supplier;
 
+import io.smallrye.common.annotation.CheckReturnValue;
 import io.smallrye.mutiny.TimeoutException;
 import io.smallrye.mutiny.Uni;
-import io.smallrye.mutiny.helpers.CheckReturnValue;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.uni.UniFailOnTimeout;
 

@@ -6,9 +6,9 @@ import java.util.function.LongConsumer;
 import java.util.function.LongFunction;
 import java.util.function.Supplier;
 
+import io.smallrye.common.annotation.CheckReturnValue;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
-import io.smallrye.mutiny.helpers.CheckReturnValue;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.multi.MultiOnRequestCall;
 import io.smallrye.mutiny.operators.multi.MultiOnRequestInvoke;

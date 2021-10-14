@@ -2,9 +2,9 @@ package io.smallrye.mutiny.groups;
 
 import java.util.Arrays;
 
+import io.smallrye.common.annotation.CheckReturnValue;
 import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Uni;
-import io.smallrye.mutiny.helpers.CheckReturnValue;
 import io.smallrye.mutiny.tuples.*;
 
 /**
