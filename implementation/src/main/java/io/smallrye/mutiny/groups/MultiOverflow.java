@@ -60,7 +60,7 @@ public class MultiOverflow<T> {
      *        {@code null}
      * @return the new multi
      * @deprecated Use {@link Multi#invoke(Consumer)} and {@link MultiOverflowStrategy#drop()} as in
-     *             {@code multi.invoke(consumer).drop()}.
+     *             {@code multi.onOverflow().invoke(consumer).drop()}.
      */
     @Deprecated
     @CheckReturnValue
