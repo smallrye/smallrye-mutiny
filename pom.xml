@@ -89,7 +89,7 @@
         <junit.version>5.8.1</junit.version>
         <assertj-core.version>3.21.0</assertj-core.version>
         <junit4.version>4.13.2</junit4.version>
-        <awaitility.version>4.1.0</awaitility.version>
+        <awaitility.version>4.1.1</awaitility.version>
         <testng.version>7.4.0</testng.version>
 
         <revapi-maven-plugin.version>0.14.5</revapi-maven-plugin.version>
