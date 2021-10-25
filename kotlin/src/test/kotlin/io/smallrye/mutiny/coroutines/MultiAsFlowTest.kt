@@ -10,6 +10,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.buffer
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -291,5 +292,42 @@ class MultiAsFlowTest {
 
         // Then
         assertThat(ticks.get()).isBetween(4, 6)
+    }
+
+    @Test
+    fun `verify that Flow abortion cancels the subscription on a ticking Multi`() {
+        // Given
+        val multi = Multi.createFrom().ticks().every(Duration.ofMillis(1))
+
+        // When
+        val tick = runBlocking {
+            multi.asFlow().first()
+        }
+
+        // Then
+        assertThat(tick).isEqualTo(0)
+    }
+
+    @Test
+    fun `verify that Flow abortion cancels the subscription on an emitting Multi`() {
+        // Given
+        val multi = Multi.createFrom().emitter<Int> { em ->
+            (1..100).forEach {
+                if (!em.isCancelled) {
+                    Thread.sleep(500)
+                    em.emit(it)
+                }
+            }
+        }
+
+        // When
+        val start = System.currentTimeMillis()
+        val tick = runBlocking {
+            multi.asFlow().first()
+        }
+
+        // Then
+        assertThat(tick).isEqualTo(1)
+        assertThat(System.currentTimeMillis() - start).isLessThan(1500)
     }
 }
