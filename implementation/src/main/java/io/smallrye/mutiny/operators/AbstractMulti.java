@@ -71,6 +71,11 @@ public abstract class AbstractMulti<T> implements Multi<T> {
     }
 
     @Override
+    public MultiIfNoItem<T> ifNoItem() {
+        return new MultiIfNoItem<>(this);
+    }
+
+    @Override
     public Multi<T> cache() {
         return Infrastructure.onMultiCreation(new MultiCacheOp<>(this));
     }

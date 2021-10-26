@@ -26,6 +26,11 @@
         "code": "java.annotation.added",
         "annotation": "@io.smallrye.common.annotation.CheckReturnValue",
         "justification": "This is a marker interface for static code analysis tools"
+      },
+      {
+        "code": "java.method.addedToInterface",
+        "classQualifiedName": "io.smallrye.mutiny.Multi",
+        "justification": "Addition of the `ifNoItem` group."
       }
     ]
   }

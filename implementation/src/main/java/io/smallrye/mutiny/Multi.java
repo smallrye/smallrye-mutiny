@@ -8,6 +8,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
+import io.smallrye.common.annotation.Experimental;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
@@ -176,6 +177,25 @@ public interface Multi<T> extends Publisher<T> {
      */
     @CheckReturnValue
     MultiOnFailure<T> onFailure(Class<? extends Throwable> typeOfFailure);
+
+    /**
+     * Produces a {@link Multi} reacting when no item event is fired by the upstream multi for the specified length
+     * of time.
+     * <p>
+     * This {@link Multi} detects if this {@link Multi} does not emit an item for the configured length of time.
+     * <p>
+     * Examples:
+     * <code>
+     * multi.ifNoItem().after(Duration.ofMillis(1000)).fail() // Propagate a TimeoutException
+     * multi.ifNoItem().after(Duration.ofMillis(1000)).recoverWithCompletion() // Complete the event on timeout
+     * multi.ifNoItem().after(Duration.ofMillis(1000)).on(myExecutor)... // Configure the executor calling on timeout actions
+     * </code>
+     *
+     * @return the on item timeout group
+     */
+    @Experimental("Multi timeouts are an experimental feature.")
+    @CheckReturnValue
+    MultiIfNoItem<T> ifNoItem();
 
     /**
      * Creates a new {@link Multi} that subscribes to this upstream and caches all of its events and replays them, to
