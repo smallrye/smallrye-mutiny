@@ -9,6 +9,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
@@ -50,18 +51,16 @@ suspend fun <T> Multi<T>.asFlow(): Flow<T> = channelFlow<T> {
         }
 
         override fun onItem(item: T) {
-            try {
-                runBlocking(parentCtx) {
+            if (parentCtx.isActive) {
+                runBlocking {
                     channel.send(item)
                 }
-            } catch (e: CancellationException) {
-                // Coroutine was cancelled either regularly or by failure
-                // in case of a regular cancellation, e.g. by Flow abortion (happens also by Flow.first())
-                // in case of a failure, 'invokeOnClose' is called with a reason - setting a terminatinoFailure is not necessary here
-                if (terminationLock.isLocked) {
-                    subscription.get()?.cancel()
-                    terminationLock.unlock()
-                }
+            } else if (terminationLock.isLocked) {
+                // Coroutine is completed or was cancelled:
+                // regular cancellation may happen by Flow abortion like with Flow.first(), no failure must be thrown
+                // in case of a failure, 'invokeOnClose' is called with a reason separately - setting a terminatinoFailure is also not necessary here
+                subscription.get()?.cancel()
+                terminationLock.unlock()
             }
         }
 

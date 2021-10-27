@@ -3,6 +3,7 @@ package io.smallrye.mutiny.coroutines
 import io.smallrye.mutiny.Uni
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.TimeoutCancellationException
+import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -11,6 +12,7 @@ import org.assertj.core.api.Assertions.assertThat
 import java.time.Duration
 import java.time.Instant
 import java.util.UUID
+import java.util.concurrent.Executors
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -125,5 +127,19 @@ class UniAwaitSuspendingTest {
                 }
             }
         }
+    }
+
+    @Test
+    fun `verify that Uni emission is not blocked by the caller`() {
+        // Given
+        val uni = Uni.createFrom().item(23)
+
+        // When
+        val item = runBlocking(Executors.newSingleThreadExecutor().asCoroutineDispatcher()) {
+            uni.awaitSuspending()
+        }
+
+        // Then
+        assertThat(item).isEqualTo(23)
     }
 }

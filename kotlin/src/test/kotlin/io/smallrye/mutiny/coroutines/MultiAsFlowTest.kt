@@ -6,6 +6,7 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.TimeoutCancellationException
+import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.buffer
@@ -18,6 +19,7 @@ import kotlinx.coroutines.withTimeout
 import org.assertj.core.api.Assertions.assertThat
 import java.time.Duration
 import java.time.Instant
+import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicReference
 import kotlin.system.measureTimeMillis
@@ -329,5 +331,19 @@ class MultiAsFlowTest {
         // Then
         assertThat(tick).isEqualTo(1)
         assertThat(System.currentTimeMillis() - start).isLessThan(1500)
+    }
+
+    @Test
+    fun `verify that Multi emission is not blocked by the caller`() {
+        // Given
+        val multi = Multi.createFrom().items(3, 2, 1)
+
+        // When
+        val list = runBlocking(Executors.newSingleThreadExecutor().asCoroutineDispatcher()) {
+            multi.asFlow().toList()
+        }
+
+        // Then
+        assertThat(list).containsExactly(3, 2, 1)
     }
 }
