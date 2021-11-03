@@ -796,6 +796,8 @@ public interface Uni<T> {
      * Uni&lt;List&lt;Number&gt;&gt; uni = Uni.join().all(a, b, c).andCollectFailures();
      * </pre>
      *
+     * The list of {@code Unis} must not be empty, as in that case, no event will be sent.
+     *
      * @return the object to configure the join behavior.
      */
     @Experimental("New API based on observations that Uni.combine() is often used with homogeneous types, and combination often just a mapping to a collection.")

@@ -1,7 +1,6 @@
 package io.smallrye.mutiny.groups;
 
-import static io.smallrye.mutiny.helpers.ParameterValidation.doesNotContainNull;
-import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
+import static io.smallrye.mutiny.helpers.ParameterValidation.*;
 import static java.util.Arrays.asList;
 
 import java.util.ArrayList;
@@ -16,7 +15,12 @@ import io.smallrye.mutiny.operators.uni.builders.UniJoinAll;
 import io.smallrye.mutiny.operators.uni.builders.UniJoinFirst;
 
 /**
- * Join multiple {@link Uni}.
+ * Join multiple {@link Uni Unis}.
+ * <p>
+ * <strong>Note about emptiness:</strong> If the set of Unis is empty, the set is rejected. Joining an empty set would
+ * not propagate any event as it would not subscribe to anything. As a result, you cannot join empty sets of Unis. An
+ * {@link IllegalArgumentException} will be thrown in this case.
+ * </p>
  */
 @Experimental("New API based on observations that Uni.combine() is often used with homogeneous types, and combination often just a mapping to a collection.")
 public class UniJoin {
@@ -30,8 +34,11 @@ public class UniJoin {
     /**
      * Join multiple {@link Uni} references and emit a list of values, this is a convenience delegate method for
      * {@link #all(List)}.
+     * <p>
+     * The list of {@code Unis} must not be {@code null}, empty, or contain {@code null} objects.
      *
-     * @param unis the list of {@link Uni} to join, must not be {@code null}, must not contain any {@code null} reference
+     * @param unis the list of {@link Uni} to join, must not be {@code null} or empty, must not contain any {@code null}
+     *        reference.
      * @param <T> the type of the {@link Uni} values
      * @return the object to configure the failure management strategy
      */
@@ -47,6 +54,8 @@ public class UniJoin {
      * The resulting list of values is in order of the list of {@link Uni}.
      * What happens when any of the {@link Uni} emits a failure rather than a value is specified by a subsequent call
      * to any of the methods in {@link JoinAllStrategy}.
+     * <p>
+     * The list of {@code Unis} must not be {@code null}, empty, or contain {@code null} objects.
      *
      * @param unis the list of {@link Uni} to join, must not be {@code null}, must not contain any {@code null} reference
      * @param <T> the type of the {@link Uni} values
@@ -54,7 +63,9 @@ public class UniJoin {
      */
     @CheckReturnValue
     public final <T> JoinAllStrategy<T> all(List<Uni<? extends T>> unis) {
-        return new JoinAllStrategy<>(doesNotContainNull(unis, "unis"));
+        doesNotContainNull(unis, "unis");
+        isNotEmpty(unis, "unis");
+        return new JoinAllStrategy<>(unis);
     }
 
     /**
@@ -96,8 +107,11 @@ public class UniJoin {
     /**
      * Join multiple {@link Uni} and emit the result from the first one to emit a signal, or the first one with a value.
      * This is a convenience delegate method for {@link #first(List)}.
+     * <p>
+     * The list of {@code Unis} must not be {@code null}, empty, or contain {@code null} objects.
      *
-     * @param unis the list of {@link Uni} to join, must not be {@code null}, must not contain any {@code null} reference
+     * @param unis the list of {@link Uni} to join, must not be {@code null}, empty and must not contain any
+     *        {@code null} reference
      * @param <T> the type of the {@link Uni} values
      * @return the object to configure the failure management strategy
      */
@@ -112,14 +126,19 @@ public class UniJoin {
      * <p>
      * What happens when any of the {@link Uni} emits a failure rather than a value is specified by a subsequent call
      * to any of the methods in {@link JoinFirstStrategy}.
+     * <p>
+     * The list of {@code Unis} must not be {@code null}, empty, or contain {@code null} objects.
      *
-     * @param unis the list of {@link Uni} to join, must not be {@code null}, must not contain any {@code null} reference
+     * @param unis the list of {@link Uni} to join, must not be {@code null}, empty, must not contain any
+     *        {@code null} reference
      * @param <T> the type of the {@link Uni} values
      * @return the object to configure the failure management strategy
      */
     @CheckReturnValue
     public final <T> JoinFirstStrategy<T> first(List<Uni<? extends T>> unis) {
-        return new JoinFirstStrategy<>(doesNotContainNull(unis, "unis"));
+        doesNotContainNull(unis, "unis");
+        isNotEmpty(unis, "unis");
+        return new JoinFirstStrategy<>(unis);
     }
 
     /**

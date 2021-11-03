@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.*;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.junit.jupiter.api.Nested;
@@ -20,6 +21,7 @@ import io.smallrye.mutiny.helpers.test.UniAssertSubscriber;
 class UniJoinTest {
 
     @Nested
+    @SuppressWarnings("ResultOfMethodCallIgnored")
     class Nulls {
 
         @Test
@@ -55,6 +57,32 @@ class UniJoinTest {
             assertThatThrownBy(() -> Uni.join().first(unis))
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessage("`unis` contains a `null` value");
+        }
+    }
+
+    @Nested
+    @SuppressWarnings("ResultOfMethodCallIgnored")
+    class Empty {
+        @Test
+        void emptyArrays() {
+            assertThatThrownBy(() -> Uni.join().all(new Uni[0]))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .satisfies(e -> assertThat(((Throwable) e).getMessage()).contains("empty"));
+
+            assertThatThrownBy(() -> Uni.join().first(new Uni[0]))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .satisfies(e -> assertThat(((Throwable) e).getMessage()).contains("empty"));
+        }
+
+        @Test
+        void emptyLists() {
+            assertThatThrownBy(() -> Uni.join().all(Collections.emptyList()))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .satisfies(e -> assertThat(((Throwable) e).getMessage()).contains("empty"));
+
+            assertThatThrownBy(() -> Uni.join().first(Collections.emptyList()))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .satisfies(e -> assertThat(((Throwable) e).getMessage()).contains("empty"));
         }
     }
 

@@ -160,6 +160,22 @@ public class ParameterValidation {
     }
 
     /**
+     * Ensures that the given cllection is not empty.
+     *
+     * @param collection the collection to check
+     * @param name the name of the parameter, must not be {@code null}
+     * @param <T> the type of the item contained in the array
+     * @return the instance if the validation passes
+     */
+    public static <T extends Collection<?>> T isNotEmpty(T collection, String name) {
+        nonNull(collection, name);
+        if (collection.size() == 0) {
+            throw new IllegalArgumentException(String.format("`%s` must not be empty", name));
+        }
+        return collection;
+    }
+
+    /**
      * Validates that the given collection {@code instance} has size matching the {@code expectedSize}
      *
      * @param instance the instance
