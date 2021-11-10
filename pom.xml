@@ -78,7 +78,7 @@
     <properties>
         <rxjava2.version>2.2.21</rxjava2.version>
         <rxjava3.version>3.1.2</rxjava3.version>
-        <reactor-core.version>3.4.11</reactor-core.version>
+        <reactor-core.version>3.4.12</reactor-core.version>
         <microprofile-reactive-streams.version>2.0</microprofile-reactive-streams.version>
         <microprofile-context-propagation.version>1.2</microprofile-context-propagation.version>
         <reactive-streams.version>1.0.3</reactive-streams.version>
