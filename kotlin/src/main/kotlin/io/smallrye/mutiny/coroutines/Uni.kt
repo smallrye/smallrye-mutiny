@@ -45,7 +45,14 @@ fun <T> Deferred<T>.asUni(): Uni<T> = Uni.createFrom().emitter { em: UniEmitter<
         try {
             em.complete(getCompleted())
         } catch (th: Throwable) {
+            // Fail the Uni if the Deferred fails or is cancelled.
             em.fail(th)
+        }
+    }
+    // Cancel the Deferred if the Uni is cancelled.
+    em.onTermination {
+        if (this.isActive) {
+            this.cancel()
         }
     }
 }
