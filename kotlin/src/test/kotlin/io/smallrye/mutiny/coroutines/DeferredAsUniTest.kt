@@ -2,10 +2,14 @@ package io.smallrye.mutiny.coroutines
 
 import io.smallrye.mutiny.helpers.test.UniAssertSubscriber
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import org.assertj.core.api.Assertions.assertThat
 import java.util.UUID
 import java.util.concurrent.CountDownLatch
@@ -20,7 +24,7 @@ class DeferredAsUniTest {
         runBlocking {
             // Given
             val value = UUID.randomUUID()
-            val deferred = async { value }
+            val deferred = GlobalScope.async { value }
 
             // When
             val subscriber = UniAssertSubscriber.create<UUID>()
@@ -35,7 +39,7 @@ class DeferredAsUniTest {
     fun `test immediate failure`() {
         runBlocking {
             // Given
-            val deferred = async { error("kaboom") }
+            val deferred = GlobalScope.async { error("kaboom") }
 
             // When
             val subscriber = UniAssertSubscriber<Any>()
@@ -50,7 +54,7 @@ class DeferredAsUniTest {
     fun `test coroutine cancellation before value is computed`() {
         runBlocking {
             // Given
-            val deferred = async {
+            val deferred = GlobalScope.async {
                 delay(250)
                 UUID.randomUUID()
             }
@@ -69,7 +73,7 @@ class DeferredAsUniTest {
     fun `test null item`() {
         runBlocking {
             // Given
-            val deferred = async { null }
+            val deferred = GlobalScope.async { null }
 
             // When
             val subscriber = UniAssertSubscriber.create<Any>()
@@ -85,7 +89,7 @@ class DeferredAsUniTest {
         runBlocking {
             // Given
             val deferredLatch = CountDownLatch(1)
-            val deferred = async {
+            val deferred = GlobalScope.async {
                 delay(10_000) // simulate long running job
                 "Hello, World!"
             }
@@ -102,15 +106,83 @@ class DeferredAsUniTest {
             subscriber.cancel()
 
             // Then
-            assertThat(uniLatch.await(2, TimeUnit.SECONDS))
-                .`as`("Check that uni is cancelled within 2 seconds")
-                .isTrue()
-            assertThat(deferredLatch.await(2, TimeUnit.SECONDS))
-                .`as`("Check that deferred is cancelled within 2 seconds")
-                .isTrue()
+            awaitLatch("Uni", uniLatch)
+            awaitLatch("Deferred", deferredLatch)
             assertThat(deferred.isCancelled)
                 .`as`("Check that Deferred is cancelled")
                 .isTrue()
         }
     }
+
+    @Test
+    fun `test cancelling deferred does not impact siblings`() {
+        runBlocking {
+            // Start before async.
+            val child1Latch = CountDownLatch(1)
+            val child1 = launch {
+                delay(1000)
+            }
+            child1.invokeOnCompletion { exception ->
+                child1Latch.countDown()
+                assertThat(exception).isNull()
+            }
+
+            // Start async & cancel it after 100ms.
+            val deferredLatch = CountDownLatch(1)
+            val deferred = async {
+                delay(10_000)
+                "Hello, world!"
+            }
+            deferred.invokeOnCompletion { exception ->
+                deferredLatch.countDown()
+                assertThat(exception)
+                    .isNotNull()
+                    .isInstanceOf(CancellationException::class.java)
+            }
+
+            val uniLatch = CountDownLatch(1)
+            val uni = deferred.asUni()
+                .onCancellation().invoke { uniLatch.countDown() }
+
+            val subscriber = UniAssertSubscriber.create<String>()
+            uni.subscribe().withSubscriber(subscriber)
+            subscriber.cancel()
+
+            // Start after cancelling async.
+            val child2Latch = CountDownLatch(1)
+            val child2 = launch {
+                delay(1500)
+            }
+            child2.invokeOnCompletion { exception ->
+                child2Latch.countDown()
+                assertThat(exception).isNull()
+            }
+
+            withContext(Dispatchers.IO) {
+                awaitLatch("Child 1", child1Latch)
+                assertThat(child1.isCompleted)
+                    .`as`("Check that child 1 completed")
+                    .isTrue()
+
+                awaitLatch("Uni", uniLatch)
+                awaitLatch("Deferred", deferredLatch)
+                assertThat(deferred)
+                    .`as`("Check that Deferred was set")
+                    .isNotNull
+                assertThat(deferred.isCancelled)
+                    .`as`("Check that Deferred was cancelled")
+                    .isTrue()
+                awaitLatch("Sibling 2", child2Latch)
+                assertThat(child2.isCompleted)
+                    .`as`("Check that child 2 completed")
+                    .isTrue()
+            }
+        }
+    }
+}
+
+private fun awaitLatch(name: String, latch: CountDownLatch) {
+    assertThat(latch.await(2, TimeUnit.SECONDS))
+        .`as`("Check that $name completes within 2s")
+        .isTrue()
 }
