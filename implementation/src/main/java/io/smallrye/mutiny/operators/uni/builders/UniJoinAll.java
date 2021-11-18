@@ -21,10 +21,10 @@ public class UniJoinAll<T> extends AbstractUni<List<T>> {
         FAIL_FAST
     }
 
-    private final List<Uni<? extends T>> unis;
+    private final List<Uni<T>> unis;
     private final Mode mode;
 
-    public UniJoinAll(List<Uni<? extends T>> unis, Mode mode) {
+    public UniJoinAll(List<Uni<T>> unis, Mode mode) {
         this.unis = unis;
         this.mode = mode;
     }

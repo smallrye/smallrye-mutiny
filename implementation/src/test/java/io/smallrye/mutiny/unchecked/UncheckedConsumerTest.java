@@ -84,7 +84,7 @@ public class UncheckedConsumerTest {
             reference.set(s);
         }));
 
-        await().until(() -> reference.get() != null);
+        await().pollInSameThread().until(() -> reference.get() != null);
         assertThat(reference).hasValue("hey");
     }
 

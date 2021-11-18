@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -74,5 +75,19 @@ class BugReproducersTest {
         assertThat(threadFailure.get()).isNull();
         sub.assertNotTerminated();
         threadPool.shutdownNow();
+    }
+
+    @Test
+    void reproducer_quarkus_21528() {
+        // From https://github.com/quarkusio/quarkus/issues/21528
+        // Generic bounds make the API harder to use than it should be
+
+        Uni<String> c = Uni.createFrom().item("C");
+        Uni<String> d = Uni.createFrom().item("D");
+        List<Uni<String>> asList = new ArrayList<>();
+        asList.add(c);
+        asList.add(d);
+
+        Uni.join().first(asList).withItem();
     }
 }

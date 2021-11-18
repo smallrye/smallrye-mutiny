@@ -26,29 +26,29 @@ class UniJoinTest {
 
         @Test
         void allNull() {
-            assertThatThrownBy(() -> Uni.join().all((Uni<?>) null))
+            assertThatThrownBy(() -> Uni.join().all((Uni<Object>) null))
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessage("`unis` contains a `null` value");
 
-            assertThatThrownBy(() -> Uni.join().all((List<Uni<?>>) null))
+            assertThatThrownBy(() -> Uni.join().all((List<Uni<Object>>) null))
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessage("`unis` must not be `null`");
         }
 
         @Test
         void firstNull() {
-            assertThatThrownBy(() -> Uni.join().first((Uni<?>) null))
+            assertThatThrownBy(() -> Uni.join().first((Uni<Object>) null))
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessage("`unis` contains a `null` value");
 
-            assertThatThrownBy(() -> Uni.join().first((List<Uni<?>>) null))
+            assertThatThrownBy(() -> Uni.join().first((List<Uni<Object>>) null))
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessage("`unis` must not be `null`");
         }
 
         @Test
         void oneIsNull() {
-            List<Uni<?>> unis = Arrays.asList(Uni.createFrom().item(1), null, Uni.createFrom().item("3"));
+            List<Uni<Object>> unis = Arrays.asList(Uni.createFrom().item(1), null, Uni.createFrom().item("3"));
 
             assertThatThrownBy(() -> Uni.join().all(unis))
                     .isInstanceOf(IllegalArgumentException.class)
