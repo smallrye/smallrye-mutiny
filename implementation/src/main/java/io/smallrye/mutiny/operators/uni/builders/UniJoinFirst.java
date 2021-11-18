@@ -20,10 +20,10 @@ public class UniJoinFirst<T> extends AbstractUni<T> {
         FIRST_WITH_ITEM
     }
 
-    private final List<Uni<? extends T>> unis;
+    private final List<Uni<T>> unis;
     private final Mode mode;
 
-    public UniJoinFirst(List<Uni<? extends T>> unis, Mode mode) {
+    public UniJoinFirst(List<Uni<T>> unis, Mode mode) {
         this.unis = unis;
         this.mode = mode;
     }

@@ -44,7 +44,7 @@ public class UniJoin {
      */
     @SafeVarargs
     @CheckReturnValue
-    public final <T> JoinAllStrategy<T> all(Uni<? extends T>... unis) {
+    public final <T> JoinAllStrategy<T> all(Uni<T>... unis) {
         return all(asList(nonNull(unis, "unis")));
     }
 
@@ -62,7 +62,7 @@ public class UniJoin {
      * @return the object to configure the failure management strategy
      */
     @CheckReturnValue
-    public final <T> JoinAllStrategy<T> all(List<Uni<? extends T>> unis) {
+    public final <T> JoinAllStrategy<T> all(List<Uni<T>> unis) {
         doesNotContainNull(unis, "unis");
         isNotEmpty(unis, "unis");
         return new JoinAllStrategy<>(unis);
@@ -75,9 +75,9 @@ public class UniJoin {
      */
     public static class JoinAllStrategy<T> {
 
-        private final List<Uni<? extends T>> unis;
+        private final List<Uni<T>> unis;
 
-        private JoinAllStrategy(List<Uni<? extends T>> unis) {
+        private JoinAllStrategy(List<Uni<T>> unis) {
             this.unis = unis;
         }
 
@@ -117,7 +117,7 @@ public class UniJoin {
      */
     @SafeVarargs
     @CheckReturnValue
-    public final <T> JoinFirstStrategy<T> first(Uni<? extends T>... unis) {
+    public final <T> JoinFirstStrategy<T> first(Uni<T>... unis) {
         return first(asList(nonNull(unis, "unis")));
     }
 
@@ -135,7 +135,7 @@ public class UniJoin {
      * @return the object to configure the failure management strategy
      */
     @CheckReturnValue
-    public final <T> JoinFirstStrategy<T> first(List<Uni<? extends T>> unis) {
+    public final <T> JoinFirstStrategy<T> first(List<Uni<T>> unis) {
         doesNotContainNull(unis, "unis");
         isNotEmpty(unis, "unis");
         return new JoinFirstStrategy<>(unis);
@@ -148,9 +148,9 @@ public class UniJoin {
      */
     public static class JoinFirstStrategy<T> {
 
-        private final List<Uni<? extends T>> unis;
+        private final List<Uni<T>> unis;
 
-        private JoinFirstStrategy(List<Uni<? extends T>> unis) {
+        private JoinFirstStrategy(List<Uni<T>> unis) {
             this.unis = unis;
         }
 
@@ -196,7 +196,7 @@ public class UniJoin {
      */
     public class Builder<T> {
 
-        private final List<Uni<? extends T>> unis = new ArrayList<>();
+        private final List<Uni<T>> unis = new ArrayList<>();
 
         /**
          * Add a {@link Uni}.
@@ -205,7 +205,7 @@ public class UniJoin {
          * @return this builder instance
          */
         @CheckReturnValue
-        public Builder<T> add(Uni<? extends T> uni) {
+        public Builder<T> add(Uni<T> uni) {
             unis.add(uni);
             return this;
         }

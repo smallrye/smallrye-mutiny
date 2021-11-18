@@ -9,9 +9,9 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
-import io.smallrye.common.annotation.Experimental;
 import org.reactivestreams.Subscription;
 
+import io.smallrye.common.annotation.Experimental;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.helpers.EmptyUniSubscription;
 import io.smallrye.mutiny.helpers.ParameterValidation;
