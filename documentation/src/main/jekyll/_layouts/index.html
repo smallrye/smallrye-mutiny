@@ -24,12 +24,10 @@
                         <pre><code class="hljs java">
 Uni&lt;String&gt; request = (...)
 
-Uni&lt;String&gt; uni = request
-    .ifNoItem().after(ofSecond(1))
-        .fail(() -> new Exception("💥"))
+request.ifNoItem().after(ofMillis(100))
+    .failWith(new Exception("💥"))
     .onFailure().recoverWithItem(fail -> "📦")
-    .subscribe()
-        .with(item -> log("👍 " + item))
+    .subscribe().with(item -> log("👍 " + item));
                     </code></pre>
                     </div>
                 </div>
