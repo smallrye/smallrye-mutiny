@@ -566,3 +566,7 @@ Temporary Items
 
 # Ruby version
 documentation/src/main/jekyll/.ruby-version
+
+# Eclipse / VSCode Java
+.project
+.classpath
