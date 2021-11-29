@@ -49,20 +49,20 @@ git commit -m "Bumping the website version to ${VERSION}"
 git push
 
 echo "Cutting release ${VERSION}"
-mvn -s .build/maven-ci-settings.xml -B -fn clean
+./mvnw -s .build/maven-ci-settings.xml -B -fn clean
 git checkout ${BRANCH}
 HASH=$(git rev-parse --verify $BRANCH)
 echo "Last commit is ${HASH} - creating detached branch"
 git checkout -b "r${VERSION}" "${HASH}"
 
 echo "Update version to ${VERSION}"
-mvn -B versions:set -DnewVersion="${VERSION}" -DgenerateBackupPoms=false -s maven-settings.xml
-mvn -B versions:set -DnewVersion="${VERSION}" -DgenerateBackupPoms=false -s maven-settings.xml -pl bom
+./mvnw -B versions:set -DnewVersion="${VERSION}" -DgenerateBackupPoms=false -s maven-settings.xml
+./mvnw -B versions:set -DnewVersion="${VERSION}" -DgenerateBackupPoms=false -s maven-settings.xml -pl bom
 
 if [[ ${SKIP_TESTS} == "true" ]]; then
-  mvn -B clean verify -Prelease -DskipTests -s maven-settings.xml
+  ./mvnw -B clean verify -Prelease -DskipTests -s maven-settings.xml
 else
-  mvn -B clean verify -Prelease -s maven-settings.xml
+  ./mvnw -B clean verify -Prelease -s maven-settings.xml
 fi
 
 git commit -am "[RELEASE] - Bump version to ${VERSION}"
