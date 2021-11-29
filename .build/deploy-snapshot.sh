@@ -18,5 +18,5 @@ init_gpg
 git fetch origin --tags
 git reset --hard
 git checkout main
-mvn -B clean deploy -DskipTests -Prelease -s maven-settings.xml
+./mvnw -B clean deploy -DskipTests -Prelease -s maven-settings.xml
 

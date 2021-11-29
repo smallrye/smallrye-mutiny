@@ -25,7 +25,7 @@ jobs:
       - name: Build with Maven
         env:
           MAVEN_OPTS: ${{ matrix.java.opts }}
-        run: mvn -s .build/maven-ci-settings.xml -B clean verify -Pcoverage
+        run: ./mvnw -s .build/maven-ci-settings.xml -B clean verify -Pcoverage
       - name: Codecov
         uses: codecov/codecov-action@v1.0.13
   compatibility:
@@ -39,4 +39,4 @@ jobs:
           distribution: temurin
           cache: maven
       - name: Compatibility Check
-        run: mvn -s .build/maven-ci-settings.xml -pl '!bom' -B install revapi:check@check-compatibility -DskipTests -fae
+        run: ./mvnw -s .build/maven-ci-settings.xml -pl '!bom' -B install revapi:check@check-compatibility -DskipTests -fae
