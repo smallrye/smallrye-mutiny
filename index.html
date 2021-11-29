@@ -64,8 +64,8 @@
                     <span class="hero-description">Intuitive Event-Driven Reactive Programming Library for Java</span>
                 </div>
                 <div class="hero-buttons">
-                    <a href="https://search.maven.org/artifact/io.smallrye.reactive/mutiny/1.1.2/jar" target="_blank" class="btn btn-rounded button button-dark button-rounded">
-                    Last release: 1.1.2</a>
+                    <a href="https://search.maven.org/artifact/io.smallrye.reactive/mutiny/1.2.0/jar" target="_blank" class="btn btn-rounded button button-dark button-rounded">
+                    Last release: 1.2.0</a>
                     &nbsp; &nbsp;
                     <a href="/smallrye-mutiny/getting-started/download" class="btn btn-rounded button button-dark button-rounded">
                 Let's get started&nbsp;<i class="las la-arrow-right"></i></a>
@@ -77,12 +77,10 @@
                         <pre><code class="hljs java">
 Uni&lt;String&gt; request = (...)
 
-Uni&lt;String&gt; uni = request
-    .ifNoItem().after(ofSecond(1))
-        .fail(() -> new Exception("💥"))
+request.ifNoItem().after(ofMillis(100))
+    .failWith(new Exception("💥"))
     .onFailure().recoverWithItem(fail -> "📦")
-    .subscribe()
-        .with(item -> log("👍 " + item))
+    .subscribe().with(item -> log("👍 " + item));
                     </code></pre>
                     </div>
                 </div>
@@ -180,7 +178,7 @@ Uni&lt;String&gt; uni = request
                     <a href="https://www.redhat.com/en/about/privacy-policy">Privacy Policy</a>
                 </p>
                 <p>
-                     Site last generated: Oct 13, 2021
+                     Site last generated: Nov 29, 2021
                 </p>
             </div>
         </div>
