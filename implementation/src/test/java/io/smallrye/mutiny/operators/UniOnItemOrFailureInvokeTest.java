@@ -170,7 +170,7 @@ public class UniOnItemOrFailureInvokeTest {
     @Test
     public void testThatCallbackIsCalledOnTheRightExecutorOnItem() {
         UniAssertSubscriber<Integer> subscriber = new UniAssertSubscriber<>();
-        ExecutorService executor = Executors.newSingleThreadExecutor();
+        ExecutorService executor = Executors.newFixedThreadPool(1);
         try {
             AtomicReference<String> threadName = new AtomicReference<>();
             one
@@ -189,7 +189,7 @@ public class UniOnItemOrFailureInvokeTest {
     @Test
     public void testThatCallbackIsCalledOnTheRightExecutorOnFailure() {
         UniAssertSubscriber<Integer> subscriber = new UniAssertSubscriber<>();
-        ExecutorService executor = Executors.newSingleThreadExecutor();
+        ExecutorService executor = Executors.newFixedThreadPool(1);
         try {
             AtomicReference<String> threadName = new AtomicReference<>();
             failed

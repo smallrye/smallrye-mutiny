@@ -23,7 +23,7 @@ public class MultiCreateFromTimePeriodTest {
 
     @BeforeEach
     public void prepare() {
-        executor = Executors.newSingleThreadScheduledExecutor();
+        executor = Executors.newScheduledThreadPool(1);
     }
 
     @AfterEach

@@ -114,7 +114,7 @@ public class MultiOnFailureInvokeTest {
         AtomicBoolean onFailureEntered = new AtomicBoolean();
         AtomicBoolean cancelled = new AtomicBoolean();
 
-        ExecutorService executor = Executors.newSingleThreadExecutor();
+        ExecutorService executor = Executors.newFixedThreadPool(1);
         AssertSubscriber<Integer> subscriber = failed
                 .emitOn(executor)
                 .onFailure().invoke(i -> {

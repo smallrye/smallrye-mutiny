@@ -147,7 +147,7 @@ public class UniToPublisherTest {
     @Test
     public void testCancellationBetweenRequestAndValue() {
         // TODO This is a very broken implementation of "delay" - to be replace once delay is implemented
-        executor = Executors.newSingleThreadExecutor();
+        executor = Executors.newFixedThreadPool(1);
         Publisher<Integer> publisher = Uni.createFrom().item(1).emitOn(executor).map(x -> {
             try {
                 Thread.sleep(100);
@@ -183,7 +183,7 @@ public class UniToPublisherTest {
 
     @Test
     public void testWithAsyncValue() {
-        executor = Executors.newSingleThreadScheduledExecutor();
+        executor = Executors.newScheduledThreadPool(1);
         Publisher<Integer> publisher = Uni.createFrom().item(1).emitOn(executor).convert().toPublisher();
         assertThat(publisher).isNotNull();
         int first = Flowable.fromPublisher(publisher).blockingFirst();
@@ -192,7 +192,7 @@ public class UniToPublisherTest {
 
     @Test
     public void testWithAsyncNullValue() {
-        executor = Executors.newSingleThreadScheduledExecutor();
+        executor = Executors.newScheduledThreadPool(1);
 
         Publisher<Integer> publisher = Uni.createFrom().item((Integer) null)
                 .emitOn(executor)
@@ -205,7 +205,7 @@ public class UniToPublisherTest {
     @SuppressWarnings("ResultOfMethodCallIgnored")
     @Test
     public void testWithAsyncFailure() {
-        executor = Executors.newSingleThreadScheduledExecutor();
+        executor = Executors.newScheduledThreadPool(1);
         Publisher<Integer> publisher = Uni.createFrom().<Integer> failure(new IOException("boom"))
                 .emitOn(executor).convert().toPublisher();
         assertThat(publisher).isNotNull();

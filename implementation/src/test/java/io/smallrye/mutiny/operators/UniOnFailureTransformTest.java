@@ -90,7 +90,7 @@ public class UniOnFailureTransformTest {
     @Test
     public void testThatMapperIsCalledOnTheRightExecutor() {
         UniAssertSubscriber<Integer> subscriber = new UniAssertSubscriber<>();
-        ExecutorService executor = Executors.newSingleThreadExecutor();
+        ExecutorService executor = Executors.newFixedThreadPool(1);
         try {
             AtomicReference<String> threadName = new AtomicReference<>();
             failure

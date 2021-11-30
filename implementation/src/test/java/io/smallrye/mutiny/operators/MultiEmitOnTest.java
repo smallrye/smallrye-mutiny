@@ -60,7 +60,7 @@ public class MultiEmitOnTest {
 
     @Test
     public void testWithShutdownExecutor() {
-        ExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+        ExecutorService executor = Executors.newScheduledThreadPool(1);
         executor.shutdownNow();
 
         AssertSubscriber<Integer> subscriber = Multi.createFrom().items(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)

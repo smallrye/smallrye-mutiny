@@ -131,7 +131,7 @@ public class UniIfNoItemTest {
 
     @Test
     public void testFailingOnTimeoutWithShutdownExecutor() {
-        ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+        ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
         executor.shutdown();
         UniAssertSubscriber<Object> subscriber = Uni.createFrom().emitter(e -> {
             // To nothing
@@ -146,7 +146,7 @@ public class UniIfNoItemTest {
 
     @Test
     public void testFailingOnTimeoutWithImmediateCancellation() {
-        ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+        ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
         UniAssertSubscriber<Object> subscriber = Uni.createFrom().emitter(e -> {
             // To nothing
         })
@@ -159,7 +159,7 @@ public class UniIfNoItemTest {
 
     @Test
     public void testFailingOnTimeoutWithCancellation() {
-        ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+        ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
         UniAssertSubscriber<Object> subscriber = Uni.createFrom().emitter(e -> {
             // To nothing
         })
