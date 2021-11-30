@@ -163,7 +163,6 @@ public class MultiDisjointTest {
                 .request(1);
 
         subscriber.awaitNextItem()
-                .request(2)
                 .awaitNextItems(2)
                 .assertItems("A", "B", "C");
 
