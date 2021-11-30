@@ -11,6 +11,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 
@@ -19,7 +20,12 @@ import io.smallrye.mutiny.helpers.test.UniAssertSubscriber;
 
 public class UniOrTest {
 
-    private final ScheduledExecutorService executor = Executors.newScheduledThreadPool(4);
+    private ScheduledExecutorService executor;
+
+    @BeforeEach
+    public void prepare() {
+        executor = Executors.newScheduledThreadPool(4);
+    }
 
     @AfterEach
     public void shutdown() {

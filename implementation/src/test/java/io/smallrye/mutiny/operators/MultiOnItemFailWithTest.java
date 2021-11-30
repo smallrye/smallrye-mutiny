@@ -9,6 +9,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Multi;
@@ -20,8 +21,14 @@ import io.smallrye.mutiny.helpers.test.AssertSubscriber;
 
 public class MultiOnItemFailWithTest {
 
-    private final MultiOnCancellationSpy<Integer> items = Spy.onCancellation(Multi.createFrom().items(1, 2));
-    private final MultiOnCancellationSpy<Integer> nothing = Spy.onCancellation(Multi.createFrom().nothing());
+    private MultiOnCancellationSpy<Integer> items;
+    private MultiOnCancellationSpy<Integer> nothing;
+
+    @BeforeEach
+    public void prepare() {
+        items = Spy.onCancellation(Multi.createFrom().items(1, 2));
+        nothing = Spy.onCancellation(Multi.createFrom().nothing());
+    }
 
     @Test
     public void testWithNullSupplierOrFunction() {
