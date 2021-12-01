@@ -15,6 +15,8 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.ResourceAccessMode;
+import org.junit.jupiter.api.parallel.ResourceLock;
 import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.Multi;
@@ -24,7 +26,9 @@ import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.multi.MultiOnSubscribeCall;
 import io.smallrye.mutiny.operators.multi.MultiOnSubscribeInvokeOp;
 import io.smallrye.mutiny.subscription.UniEmitter;
+import junit5.support.InfrastructureResource;
 
+@ResourceLock(value = InfrastructureResource.NAME, mode = ResourceAccessMode.READ)
 public class MultiOnSubscribeTest {
 
     @Test

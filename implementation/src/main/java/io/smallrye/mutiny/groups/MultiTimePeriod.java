@@ -14,7 +14,7 @@ import io.smallrye.mutiny.operators.multi.builders.IntervalMulti;
 public class MultiTimePeriod {
 
     private Duration initialDelay;
-    private ScheduledExecutorService executor = Infrastructure.getDefaultWorkerPool();
+    private ScheduledExecutorService executor;
 
     @CheckReturnValue
     public MultiTimePeriod startingAfter(Duration duration) {
@@ -31,10 +31,14 @@ public class MultiTimePeriod {
     @CheckReturnValue
     public Multi<Long> every(Duration duration) {
         validate(duration, "duration");
+        ScheduledExecutorService executorService = this.executor;
+        if (executorService == null) {
+            executorService = Infrastructure.getDefaultWorkerPool();
+        }
         if (initialDelay != null) {
-            return Infrastructure.onMultiCreation(new IntervalMulti(initialDelay, duration, executor));
+            return Infrastructure.onMultiCreation(new IntervalMulti(initialDelay, duration, executorService));
         } else {
-            return Infrastructure.onMultiCreation(new IntervalMulti(duration, executor));
+            return Infrastructure.onMultiCreation(new IntervalMulti(duration, executorService));
         }
     }
 

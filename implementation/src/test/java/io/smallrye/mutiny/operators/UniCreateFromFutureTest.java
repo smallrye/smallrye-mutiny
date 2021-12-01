@@ -12,11 +12,15 @@ import java.util.function.Supplier;
 
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.ResourceAccessMode;
+import org.junit.jupiter.api.parallel.ResourceLock;
 
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.helpers.test.UniAssertSubscriber;
+import junit5.support.InfrastructureResource;
 
 @SuppressWarnings("ConstantConditions")
+@ResourceLock(value = InfrastructureResource.NAME, mode = ResourceAccessMode.READ)
 public class UniCreateFromFutureTest {
 
     @Test

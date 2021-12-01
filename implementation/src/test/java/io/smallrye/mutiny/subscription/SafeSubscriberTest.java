@@ -10,6 +10,8 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.ResourceAccessMode;
+import org.junit.jupiter.api.parallel.ResourceLock;
 import org.mockito.internal.stubbing.answers.ThrowsException;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
@@ -19,8 +21,10 @@ import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.helpers.Subscriptions;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.test.Mocks;
+import junit5.support.InfrastructureResource;
 
 @SuppressWarnings("unchecked")
+@ResourceLock(value = InfrastructureResource.NAME, mode = ResourceAccessMode.READ_WRITE)
 public class SafeSubscriberTest {
 
     @AfterEach
