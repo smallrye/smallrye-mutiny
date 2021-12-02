@@ -51,8 +51,8 @@ We even accept pull requests just containing tests or documentation.
 If you have not done so on this machine, you need to:
  
 * Install Git and configure your GitHub access
-* Install Java SDK (OpenJDK recommended)
-* Install Apache Maven
+* Install Java SDK (OpenJDK recommended, see https://adoptium.net/)
+* Install Apache Maven (or use the `mvnw` wrapper scripts instead of `mvn`)
 
 ## Build
 
@@ -66,6 +66,21 @@ cd smallrye-mutiny
 mvn clean install
 # Wait... success!
 ```
+
+### Faster builds
+
+Tests account for the majority of the build time.
+
+There are 2 Maven profiles that you can activate to speed up the build of the Mutiny core library (in `implementation/`):
+
+- `-Pskip-rs-tck` to avoid running the Reactive Streams TCK
+- `-Pparallel-tests` to run the JUnit5 tests in parallel
+
+The 2 profiles can be activated at the same time if you want to benefit from parallel tests and skip the Reactive Streams TCK.
+This is mostly useful to have fast development feedback loops.
+
+Note that parallel tests are not activated by default (yet) because some tests may randomly fail if your system is under load, or if it has constrained resources.
+The Reactive Streams TCK is a good example as it uses some time-sensitive checks.
 
 ## The small print
 
