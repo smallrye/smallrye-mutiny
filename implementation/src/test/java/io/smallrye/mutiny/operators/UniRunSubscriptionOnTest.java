@@ -42,7 +42,7 @@ public class UniRunSubscriptionOnTest {
 
     @Test
     public void testWithTimeout() {
-        ExecutorService executorService = Executors.newSingleThreadExecutor();
+        ExecutorService executorService = Executors.newFixedThreadPool(1);
         UniAssertSubscriber<Integer> subscriber = UniAssertSubscriber.create();
 
         Uni.createFrom().item(() -> {
@@ -110,7 +110,7 @@ public class UniRunSubscriptionOnTest {
 
     @Test
     public void testRejectedTask() {
-        ExecutorService pool = Executors.newSingleThreadExecutor();
+        ExecutorService pool = Executors.newFixedThreadPool(1);
         pool.shutdown();
         AtomicBoolean called = new AtomicBoolean();
         UniAssertSubscriber<Integer> subscriber = Uni.createFrom().<Integer> emitter(e -> called.set(true))

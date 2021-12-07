@@ -9,6 +9,7 @@ import java.util.Queue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.RepeatedTest;
@@ -34,7 +35,7 @@ public class UnicastProcessorTest {
     }
 
     @RepeatedTest(100)
-    public void testWithMultithreadedUpstream() {
+    public void testWithMultithreadedUpstream() throws InterruptedException {
         UnicastProcessor<String> processor = UnicastProcessor.create();
         ExecutorService executor = Executors.newFixedThreadPool(5);
         for (int i = 0; i < 5; i++) {
@@ -50,15 +51,19 @@ public class UnicastProcessorTest {
         AssertSubscriber<Object> subscriber = AssertSubscriber.create(Long.MAX_VALUE);
         processor.subscribe(subscriber);
 
-        await().until(() -> subscriber.getItems().size() == 5 * 1000);
+        executor.shutdown();
+        if (!executor.awaitTermination(10, TimeUnit.SECONDS)) {
+            throw new IllegalStateException("The executor shall have terminated");
+        }
+
         processor.onComplete();
+
+        assertThat(subscriber.getItems().size()).isEqualTo(5 * 1000);
         for (int i = 0; i < 5; i++) {
             for (int j = 0; j < 1000; j++) {
                 assertThat(subscriber.getItems()).contains(i + "-" + j);
             }
         }
-
-        executor.shutdownNow();
     }
 
     @Test

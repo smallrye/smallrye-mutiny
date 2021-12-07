@@ -138,7 +138,7 @@ public class UniOnItemOrFailureMapTest {
     @Test
     public void testThatMapperIsCalledOnTheRightExecutorOnItem() {
         UniAssertSubscriber<Integer> subscriber = new UniAssertSubscriber<>();
-        ExecutorService executor = Executors.newSingleThreadExecutor();
+        ExecutorService executor = Executors.newFixedThreadPool(1);
         try {
             AtomicReference<String> threadName = new AtomicReference<>();
             one
@@ -160,7 +160,7 @@ public class UniOnItemOrFailureMapTest {
     @Test
     public void testThatMapperIsCalledOnTheRightExecutorOnFailure() {
         UniAssertSubscriber<Integer> subscriber = new UniAssertSubscriber<>();
-        ExecutorService executor = Executors.newSingleThreadExecutor();
+        ExecutorService executor = Executors.newFixedThreadPool(1);
         try {
             AtomicReference<String> threadName = new AtomicReference<>();
             failed

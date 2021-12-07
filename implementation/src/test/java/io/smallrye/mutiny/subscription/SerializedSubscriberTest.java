@@ -383,7 +383,7 @@ public class SerializedSubscriberTest {
         Collections.shuffle(runnables);
         runnables.forEach(r -> new Thread(r).start());
 
-        Awaitility.await().pollInSameThread().until(() -> subscriber.hasCompleted() || subscriber.getFailure() != null);
+        Awaitility.await().until(() -> subscriber.hasCompleted() || subscriber.getFailure() != null);
         if (subscriber.hasCompleted()) {
             subscriber.assertCompleted().assertHasNotReceivedAnyItem();
         } else {

@@ -145,7 +145,7 @@ public class MultiIfNoItemTest {
 
     @Test
     public void testFailingOnTimeoutWithShutdownExecutor() {
-        ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+        ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
         executor.shutdown();
         AssertSubscriber<Object> subscriber = Multi.createFrom().nothing()
                 .ifNoItem().after(Duration.ofMillis(10)).on(executor).fail()
@@ -158,7 +158,7 @@ public class MultiIfNoItemTest {
 
     @Test
     public void testFailingOnItemWithShutdownExecutor() {
-        ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+        ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
         AssertSubscriber<Object> subscriber = Multi.createFrom().ticks().every(Duration.ofMillis(10))
                 .ifNoItem().after(Duration.ofMillis(20)).on(executor).fail()
                 .subscribe().withSubscriber(AssertSubscriber.create(10));
@@ -172,7 +172,7 @@ public class MultiIfNoItemTest {
 
     @Test
     public void testFailingOnTimeoutWithImmediateCancellation() {
-        ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+        ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
         AssertSubscriber<Object> subscriber = Multi.createFrom().nothing()
                 .ifNoItem().after(Duration.ofMillis(10)).on(executor).fail()
                 .subscribe().withSubscriber(new AssertSubscriber<>(1, true));
@@ -183,7 +183,7 @@ public class MultiIfNoItemTest {
 
     @Test
     public void testFailingOnTimeoutWithCancellation() {
-        ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+        ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
         AssertSubscriber<Object> subscriber = Multi.createFrom().nothing()
                 .ifNoItem().after(Duration.ofMillis(1000)).on(executor).fail()
                 .subscribe().withSubscriber(new AssertSubscriber<>(1, false));

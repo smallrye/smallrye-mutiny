@@ -289,7 +289,7 @@ public class MultiOnSubscribeTest {
 
     @Test
     public void testRunSubscriptionOnShutdownExecutor() {
-        ExecutorService executor = Executors.newSingleThreadExecutor();
+        ExecutorService executor = Executors.newFixedThreadPool(1);
         executor.shutdownNow();
 
         AssertSubscriber<Integer> subscriber = Multi.createFrom().items(1, 2, 3)
@@ -301,7 +301,7 @@ public class MultiOnSubscribeTest {
 
     @Test
     public void testRunSubscriptionOnShutdownExecutorRequests() {
-        ExecutorService executor = Executors.newSingleThreadExecutor();
+        ExecutorService executor = Executors.newFixedThreadPool(1);
 
         AssertSubscriber<Integer> subscriber = Multi.createFrom().items(1, 2, 3)
                 .runSubscriptionOn(executor)

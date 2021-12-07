@@ -9,6 +9,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 
@@ -18,7 +19,12 @@ import io.smallrye.mutiny.subscription.BackPressureFailure;
 
 public class MultiCreateFromTimePeriodTest {
 
-    private final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+    private ScheduledExecutorService executor;
+
+    @BeforeEach
+    public void prepare() {
+        executor = Executors.newScheduledThreadPool(1);
+    }
 
     @AfterEach
     public void cleanup() {

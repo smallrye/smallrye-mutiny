@@ -107,7 +107,7 @@ public class UniSubscribeAsCompletionStageTest {
 
     @Test
     public void testCancellationWithAsyncValue() {
-        executor = Executors.newSingleThreadScheduledExecutor();
+        executor = Executors.newScheduledThreadPool(1);
         AtomicInteger value = new AtomicInteger(-1);
         CompletableFuture<Integer> future = Uni.createFrom().item(1)
                 .onItem().delayIt().onExecutor(executor).by(Duration.ofMillis(100))
@@ -121,7 +121,7 @@ public class UniSubscribeAsCompletionStageTest {
 
     @Test
     public void testWithAsyncValue() {
-        executor = Executors.newSingleThreadScheduledExecutor();
+        executor = Executors.newScheduledThreadPool(1);
         CompletableFuture<Integer> future = Uni.createFrom().item(1)
                 .emitOn(executor).subscribe().asCompletionStage();
         await().until(future::isDone);
@@ -130,7 +130,7 @@ public class UniSubscribeAsCompletionStageTest {
 
     @Test
     public void testWithAsyncVoidItem() {
-        executor = Executors.newSingleThreadScheduledExecutor();
+        executor = Executors.newScheduledThreadPool(1);
         CompletableFuture<Void> future = Uni.createFrom().voidItem().emitOn(executor)
                 .subscribe().asCompletionStage();
         await().until(future::isDone);
@@ -139,7 +139,7 @@ public class UniSubscribeAsCompletionStageTest {
 
     @Test
     public void testWithAsyncNullItem() {
-        executor = Executors.newSingleThreadScheduledExecutor();
+        executor = Executors.newScheduledThreadPool(1);
         CompletableFuture<String> future = Uni.createFrom().<String> nullItem().emitOn(executor)
                 .subscribe().asCompletionStage();
         await().until(future::isDone);
@@ -148,7 +148,7 @@ public class UniSubscribeAsCompletionStageTest {
 
     @Test
     public void testWithAsyncFailure() {
-        executor = Executors.newSingleThreadScheduledExecutor();
+        executor = Executors.newScheduledThreadPool(1);
         CompletableFuture<Integer> future = Uni.createFrom().<Integer> failure(new IOException("boom"))
                 .emitOn(executor).subscribe().asCompletionStage();
         await().until(future::isDone);
