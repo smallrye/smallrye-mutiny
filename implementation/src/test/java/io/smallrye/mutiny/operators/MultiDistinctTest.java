@@ -13,6 +13,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.ResourceAccessMode;
+import org.junit.jupiter.api.parallel.ResourceLock;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
@@ -22,8 +24,10 @@ import io.smallrye.mutiny.helpers.spies.MultiOnCancellationSpy;
 import io.smallrye.mutiny.helpers.spies.Spy;
 import io.smallrye.mutiny.helpers.test.AssertSubscriber;
 import io.smallrye.mutiny.subscription.MultiEmitter;
+import junit5.support.InfrastructureResource;
 
 @SuppressWarnings("ConstantConditions")
+@ResourceLock(value = InfrastructureResource.NAME, mode = ResourceAccessMode.READ)
 public class MultiDistinctTest {
 
     @Test

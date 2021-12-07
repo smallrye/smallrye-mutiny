@@ -10,14 +10,18 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.ResourceAccessMode;
+import org.junit.jupiter.api.parallel.ResourceLock;
 
 import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.helpers.test.UniAssertSubscriber;
 import io.smallrye.mutiny.subscription.UniEmitter;
 import io.smallrye.mutiny.tuples.Functions;
+import junit5.support.InfrastructureResource;
 
 @SuppressWarnings("ConstantConditions")
+@ResourceLock(value = InfrastructureResource.NAME, mode = ResourceAccessMode.READ)
 public class UniOnItemOrFailureFlatMapTest {
 
     private final Uni<Integer> one = Uni.createFrom().item(1);

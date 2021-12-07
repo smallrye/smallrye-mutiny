@@ -15,11 +15,15 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.ResourceAccessMode;
+import org.junit.jupiter.api.parallel.ResourceLock;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
+import junit5.support.InfrastructureResource;
 
 @SuppressWarnings("ConstantConditions")
+@ResourceLock(value = InfrastructureResource.NAME, mode = ResourceAccessMode.READ_WRITE)
 public class MutinySchedulerTest {
 
     @BeforeAll

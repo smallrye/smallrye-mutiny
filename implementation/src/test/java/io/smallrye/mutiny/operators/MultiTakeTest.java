@@ -11,14 +11,18 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.ResourceAccessMode;
+import org.junit.jupiter.api.parallel.ResourceLock;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.TestException;
 import io.smallrye.mutiny.helpers.test.AssertSubscriber;
 import io.smallrye.mutiny.subscription.MultiEmitter;
 import io.smallrye.mutiny.subscription.MultiSubscriber;
+import junit5.support.InfrastructureResource;
 
 @SuppressWarnings("deprecation")
+@ResourceLock(value = InfrastructureResource.NAME, mode = ResourceAccessMode.READ)
 public class MultiTakeTest {
 
     @Test

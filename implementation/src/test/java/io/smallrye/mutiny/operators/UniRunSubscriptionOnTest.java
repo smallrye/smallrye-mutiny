@@ -10,12 +10,16 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.ResourceAccessMode;
+import org.junit.jupiter.api.parallel.ResourceLock;
 
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.helpers.test.UniAssertSubscriber;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.subscription.UniSubscriber;
+import junit5.support.InfrastructureResource;
 
+@ResourceLock(value = InfrastructureResource.NAME, mode = ResourceAccessMode.READ)
 public class UniRunSubscriptionOnTest {
 
     @Test

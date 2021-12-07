@@ -16,13 +16,17 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.ResourceAccessMode;
+import org.junit.jupiter.api.parallel.ResourceLock;
 import org.reactivestreams.Publisher;
 
 import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.helpers.test.AssertSubscriber;
+import junit5.support.InfrastructureResource;
 
+@ResourceLock(value = InfrastructureResource.NAME, mode = ResourceAccessMode.READ)
 public class MultiFromResourceTest {
 
     @Test

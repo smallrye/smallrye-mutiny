@@ -13,6 +13,8 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.ResourceAccessMode;
+import org.junit.jupiter.api.parallel.ResourceLock;
 
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.helpers.test.UniAssertSubscriber;
@@ -20,7 +22,9 @@ import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.uni.UniOnSubscribeCall;
 import io.smallrye.mutiny.subscription.UniEmitter;
 import io.smallrye.mutiny.subscription.UniSubscription;
+import junit5.support.InfrastructureResource;
 
+@ResourceLock(value = InfrastructureResource.NAME, mode = ResourceAccessMode.READ)
 public class UniOnSubscribeTest {
 
     @Test

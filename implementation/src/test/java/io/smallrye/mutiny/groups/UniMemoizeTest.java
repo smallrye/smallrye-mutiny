@@ -16,6 +16,8 @@ import java.util.function.BooleanSupplier;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.ResourceAccessMode;
+import org.junit.jupiter.api.parallel.ResourceLock;
 
 import io.reactivex.processors.UnicastProcessor;
 import io.smallrye.mutiny.Multi;
@@ -28,8 +30,10 @@ import io.smallrye.mutiny.operators.uni.UniMemoizeOp;
 import io.smallrye.mutiny.subscription.Cancellable;
 import io.smallrye.mutiny.subscription.UniSubscriber;
 import io.smallrye.mutiny.subscription.UniSubscription;
+import junit5.support.InfrastructureResource;
 
 @DisplayName("Tests for the uni.memoize() group")
+@ResourceLock(value = InfrastructureResource.NAME, mode = ResourceAccessMode.READ)
 class UniMemoizeTest {
 
     private static void race(Runnable candidate1, Runnable candidate2, Executor s) {

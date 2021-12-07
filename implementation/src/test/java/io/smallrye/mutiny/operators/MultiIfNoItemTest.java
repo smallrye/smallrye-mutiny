@@ -12,13 +12,17 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
+import org.junit.jupiter.api.parallel.ResourceAccessMode;
+import org.junit.jupiter.api.parallel.ResourceLock;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.TestException;
 import io.smallrye.mutiny.TimeoutException;
 import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.helpers.test.AssertSubscriber;
+import junit5.support.InfrastructureResource;
 
+@ResourceLock(value = InfrastructureResource.NAME, mode = ResourceAccessMode.READ)
 public class MultiIfNoItemTest {
 
     @Test

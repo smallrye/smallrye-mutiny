@@ -8,13 +8,17 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.ResourceAccessMode;
+import org.junit.jupiter.api.parallel.ResourceLock;
 import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
+import junit5.support.InfrastructureResource;
 
 @SuppressWarnings("ConstantConditions")
+@ResourceLock(value = InfrastructureResource.NAME, mode = ResourceAccessMode.READ_WRITE)
 public class CallbackBasedSubscriberTest {
 
     @AfterEach

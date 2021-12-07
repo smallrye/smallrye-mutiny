@@ -13,6 +13,8 @@ import java.util.function.Predicate;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.ResourceAccessMode;
+import org.junit.jupiter.api.parallel.ResourceLock;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.TestException;
@@ -20,12 +22,15 @@ import io.smallrye.mutiny.helpers.test.AssertSubscriber;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.multi.MultiSkipUntilOtherOp;
 import io.smallrye.mutiny.subscription.MultiEmitter;
+import junit5.support.InfrastructureResource;
 
+@ResourceLock(value = InfrastructureResource.NAME, mode = ResourceAccessMode.READ_WRITE)
 public class MultiSkipTest {
 
     @AfterEach
     public void cleanup() {
         Infrastructure.clearInterceptors();
+        Infrastructure.resetDroppedExceptionHandler();
     }
 
     @Test

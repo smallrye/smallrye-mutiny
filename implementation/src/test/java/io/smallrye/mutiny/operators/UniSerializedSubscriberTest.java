@@ -16,6 +16,8 @@ import org.awaitility.Awaitility;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.ResourceAccessMode;
+import org.junit.jupiter.api.parallel.ResourceLock;
 
 import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Uni;
@@ -25,7 +27,9 @@ import io.smallrye.mutiny.subscription.UniEmitter;
 import io.smallrye.mutiny.subscription.UniSerializedSubscriber;
 import io.smallrye.mutiny.subscription.UniSubscriber;
 import io.smallrye.mutiny.subscription.UniSubscription;
+import junit5.support.InfrastructureResource;
 
+@ResourceLock(value = InfrastructureResource.NAME, mode = ResourceAccessMode.READ_WRITE)
 public class UniSerializedSubscriberTest {
 
     @AfterEach

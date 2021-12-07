@@ -5,13 +5,17 @@ import static org.mockito.Mockito.mock;
 import java.io.IOException;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.ResourceAccessMode;
+import org.junit.jupiter.api.parallel.ResourceLock;
 import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.helpers.test.AssertSubscriber;
 import io.smallrye.mutiny.operators.AbstractMulti;
 import io.smallrye.mutiny.subscription.MultiSubscriber;
+import junit5.support.InfrastructureResource;
 
+@ResourceLock(value = InfrastructureResource.NAME, mode = ResourceAccessMode.READ)
 class MultiReferenceCountSubscriberTest {
 
     @Test

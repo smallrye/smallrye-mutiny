@@ -14,10 +14,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
+import org.junit.jupiter.api.parallel.ResourceAccessMode;
+import org.junit.jupiter.api.parallel.ResourceLock;
 
 import io.smallrye.mutiny.TimeoutException;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
+import junit5.support.InfrastructureResource;
 
 public class UniAwaitTest {
 
@@ -150,6 +153,7 @@ public class UniAwaitTest {
     }
 
     @Nested
+    @ResourceLock(value = InfrastructureResource.NAME, mode = ResourceAccessMode.READ_WRITE)
     class ThreadBlockingTest {
 
         @BeforeEach
