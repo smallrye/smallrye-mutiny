@@ -1,6 +1,4 @@
-module io.smallrye.mutiny.math {
-    requires org.reactivestreams;
-    requires io.smallrye.mutiny;
+open module io.smallrye.mutiny.math {
 
-    exports io.smallrye.mutiny.math;
+    requires transitive io.smallrye.mutiny;
 }
