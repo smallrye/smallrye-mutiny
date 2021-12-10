@@ -108,9 +108,7 @@
         <profile>
             <id>dokka</id>
             <activation>
-                <!-- Dokka is currently broken -->
-                <!-- <activeByDefault>true</activeByDefault> -->
-                <jdk>[8,15)</jdk>
+                <activeByDefault>true</activeByDefault>
             </activation>
             <build>
                 <plugins>
