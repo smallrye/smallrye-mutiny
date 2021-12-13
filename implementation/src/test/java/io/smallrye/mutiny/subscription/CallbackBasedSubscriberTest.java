@@ -13,6 +13,7 @@ import org.junit.jupiter.api.parallel.ResourceLock;
 import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.CompositeException;
+import io.smallrye.mutiny.Context;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import junit5.support.InfrastructureResource;
@@ -125,7 +126,7 @@ public class CallbackBasedSubscriberTest {
         Infrastructure.setDroppedExceptionHandler(captured::set);
         Multi.createFrom().failure(new IOException("I/O"))
                 .onCancellation().invoke(() -> cancelled.set(true))
-                .subscribe().withSubscriber(new Subscribers.CallbackBasedSubscriber<>(i -> {
+                .subscribe().withSubscriber(new Subscribers.CallbackBasedSubscriber<>(Context.empty(), i -> {
                 },
                         null, null, s -> {
                         }));

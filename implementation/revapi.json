@@ -21,7 +21,50 @@
     "criticality" : "highlight",
     "minSeverity" : "POTENTIALLY_BREAKING",
     "minCriticality" : "documented",
-    "differences" : [ ]
+    "differences" : [
+      {
+        "ignore": true,
+        "code": "java.method.numberOfParametersChanged",
+        "old": "method void io.smallrye.mutiny.groups.UniAwait<T>::<init>(io.smallrye.mutiny.Uni<T>)",
+        "new": "method void io.smallrye.mutiny.groups.UniAwait<T>::<init>(io.smallrye.mutiny.Uni<T>, io.smallrye.mutiny.Context)",
+        "justification": "Private API impacted by the new Mutiny context support"
+      },
+      {
+        "ignore": true,
+        "code": "java.method.numberOfParametersChanged",
+        "old": "method void io.smallrye.mutiny.groups.UniAwaitOptional<T>::<init>(io.smallrye.mutiny.Uni<T>)",
+        "new": "method void io.smallrye.mutiny.groups.UniAwaitOptional<T>::<init>(io.smallrye.mutiny.Uni<T>, io.smallrye.mutiny.Context)",
+        "justification": "Private API impacted by the new Mutiny context support"
+      },
+      {
+        "ignore": true,
+        "code": "java.method.numberOfParametersChanged",
+        "old": "method void io.smallrye.mutiny.helpers.BlockingIterable<T>::<init>(org.reactivestreams.Publisher<? extends T>, int, java.util.function.Supplier<java.util.Queue<T>>)",
+        "new": "method void io.smallrye.mutiny.helpers.BlockingIterable<T>::<init>(io.smallrye.mutiny.Multi<? extends T>, int, java.util.function.Supplier<java.util.Queue<T>>, java.util.function.Supplier<io.smallrye.mutiny.Context>)",
+        "justification": "Private API impacted by the new Mutiny context support"
+      },
+      {
+        "ignore": true,
+        "code": "java.method.numberOfParametersChanged",
+        "old": "method void io.smallrye.mutiny.helpers.UniCallbackSubscriber<T>::<init>(java.util.function.Consumer<? super T>, java.util.function.Consumer<? super java.lang.Throwable>)",
+        "new": "method void io.smallrye.mutiny.helpers.UniCallbackSubscriber<T>::<init>(java.util.function.Consumer<? super T>, java.util.function.Consumer<? super java.lang.Throwable>, io.smallrye.mutiny.Context)",
+        "justification": "Private API impacted by the new Mutiny context support"
+      },
+      {
+        "ignore": true,
+        "code": "java.method.numberOfParametersChanged",
+        "old": "method void io.smallrye.mutiny.subscription.Subscribers.CallbackBasedSubscriber<T>::<init>(java.util.function.Consumer<? super T>, java.util.function.Consumer<? super java.lang.Throwable>, java.lang.Runnable, java.util.function.Consumer<? super org.reactivestreams.Subscription>)",
+        "new": "method void io.smallrye.mutiny.subscription.Subscribers.CallbackBasedSubscriber<T>::<init>(io.smallrye.mutiny.Context, java.util.function.Consumer<? super T>, java.util.function.Consumer<? super java.lang.Throwable>, java.lang.Runnable, java.util.function.Consumer<? super org.reactivestreams.Subscription>)",
+        "justification": "Private API impacted by the new Mutiny context support"
+      },
+      {
+        "ignore": true,
+        "code": "java.method.numberOfParametersChanged",
+        "old": "method <T> io.smallrye.mutiny.subscription.CancellableSubscriber<T> io.smallrye.mutiny.subscription.Subscribers::from(java.util.function.Consumer<? super T>, java.util.function.Consumer<? super java.lang.Throwable>, java.lang.Runnable, java.util.function.Consumer<? super org.reactivestreams.Subscription>)",
+        "new": "method <T> io.smallrye.mutiny.subscription.CancellableSubscriber<T> io.smallrye.mutiny.subscription.Subscribers::from(io.smallrye.mutiny.Context, java.util.function.Consumer<? super T>, java.util.function.Consumer<? super java.lang.Throwable>, java.lang.Runnable, java.util.function.Consumer<? super org.reactivestreams.Subscription>)",
+        "justification": "Private API impacted by the new Mutiny context support"
+      }
+    ]
   }
 }, {
   "extension" : "revapi.reporter.json",

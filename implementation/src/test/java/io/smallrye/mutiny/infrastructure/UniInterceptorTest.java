@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.ResourceAccessMode;
 import org.junit.jupiter.api.parallel.ResourceLock;
 
+import io.smallrye.mutiny.Context;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.operators.AbstractUni;
 import io.smallrye.mutiny.subscription.UniDelegatingSubscriber;
@@ -113,6 +114,11 @@ public class UniInterceptorTest {
             public <T> UniSubscriber<? super T> onSubscription(Uni<T> instance,
                     UniSubscriber<? super T> subscriber) {
                 return new UniSubscriber<T>() {
+                    @Override
+                    public Context context() {
+                        return Context.empty();
+                    }
+
                     @Override
                     public void onSubscribe(UniSubscription subscription) {
                         subscriber.onSubscribe(subscription);

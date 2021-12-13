@@ -8,10 +8,12 @@ import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
+import io.smallrye.mutiny.Context;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.helpers.Subscriptions;
 import io.smallrye.mutiny.operators.AbstractMulti;
 import io.smallrye.mutiny.operators.multi.processors.UnicastProcessor;
+import io.smallrye.mutiny.subscription.ContextSupport;
 import io.smallrye.mutiny.subscription.MultiSubscriber;
 import io.smallrye.mutiny.subscription.SerializedSubscriber;
 import io.smallrye.mutiny.subscription.SwitchableSubscriptionSubscriber;
@@ -148,9 +150,10 @@ public final class MultiRetryWhenOp<T> extends AbstractMultiOperator<T, T> {
 
     @SuppressWarnings({ "SubscriberImplementation" })
     static final class TriggerSubscriber extends AbstractMulti<Throwable>
-            implements Multi<Throwable>, Subscriber<Object> {
+            implements Multi<Throwable>, Subscriber<Object>, ContextSupport {
         RetryWhenOperator<?> operator;
         private final Processor<Throwable, Throwable> processor = UnicastProcessor.<Throwable> create().serialized();
+        private Context context;
 
         @Override
         public void onSubscribe(Subscription s) {
@@ -174,7 +177,17 @@ public final class MultiRetryWhenOp<T> extends AbstractMultiOperator<T, T> {
 
         @Override
         public void subscribe(Subscriber<? super Throwable> actual) {
+            if (actual instanceof ContextSupport) {
+                this.context = ((ContextSupport) actual).context();
+            } else {
+                this.context = Context.empty();
+            }
             processor.subscribe(actual);
+        }
+
+        @Override
+        public Context context() {
+            return this.context;
         }
     }
 

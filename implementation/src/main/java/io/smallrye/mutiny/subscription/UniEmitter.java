@@ -8,7 +8,7 @@ import io.smallrye.mutiny.Uni;
  *
  * @param <T> the expected type of item.
  */
-public interface UniEmitter<T> {
+public interface UniEmitter<T> extends ContextSupport {
 
     /**
      * Emits the {@code item} event downstream with the given (potentially {@code null}) item.

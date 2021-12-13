@@ -9,8 +9,10 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
+import io.smallrye.mutiny.Context;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.helpers.Subscriptions;
+import io.smallrye.mutiny.subscription.ContextSupport;
 import io.smallrye.mutiny.subscription.MultiSubscriber;
 
 /**
@@ -20,7 +22,7 @@ import io.smallrye.mutiny.subscription.MultiSubscriber;
  * @param <T> the type of item
  */
 @SuppressWarnings("SubscriberImplementation")
-public class MultiCacheOp<T> extends AbstractMultiOperator<T, T> implements Subscriber<T> {
+public class MultiCacheOp<T> extends AbstractMultiOperator<T, T> implements Subscriber<T>, ContextSupport {
 
     /**
      * Stores whether we already subscribed to the upstream.
@@ -34,6 +36,8 @@ public class MultiCacheOp<T> extends AbstractMultiOperator<T, T> implements Subs
     private volatile boolean terminated;
 
     private final CopyOnWriteArrayList<Node<T>> history = new CopyOnWriteArrayList<>();
+
+    private volatile Context context;
 
     /**
      * If the upstream has terminated with a failure, this stores the failure.
@@ -56,6 +60,11 @@ public class MultiCacheOp<T> extends AbstractMultiOperator<T, T> implements Subs
         addDownstreamSubscription(consumer);
 
         if (hasSubscribedToUpstream.compareAndSet(false, true)) {
+            if (downstream instanceof ContextSupport) {
+                this.context = ((ContextSupport) downstream).context();
+            } else {
+                this.context = Context.empty();
+            }
             upstream.subscribe().withSubscriber(this);
         } else {
             // replay
@@ -108,6 +117,11 @@ public class MultiCacheOp<T> extends AbstractMultiOperator<T, T> implements Subs
         for (CacheSubscription<T> consumer : subscribers) {
             consumer.replay();
         }
+    }
+
+    @Override
+    public Context context() {
+        return this.context;
     }
 
     /**

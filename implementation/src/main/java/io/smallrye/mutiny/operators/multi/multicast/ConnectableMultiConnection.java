@@ -4,6 +4,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 import io.smallrye.mutiny.subscription.Cancellable;
+import io.smallrye.mutiny.subscription.MultiSubscriber;
 
 public class ConnectableMultiConnection implements Runnable, Consumer<Cancellable> {
 
@@ -12,14 +13,16 @@ public class ConnectableMultiConnection implements Runnable, Consumer<Cancellabl
     };
 
     private final MultiReferenceCount<?> parent;
+    private final MultiSubscriber<?> subscriber;
     private final AtomicReference<Cancellable> onCancellation = new AtomicReference<>();
 
     private Cancellable timer;
     private long subscriberCount;
     private boolean connected;
 
-    ConnectableMultiConnection(MultiReferenceCount<?> parent) {
+    ConnectableMultiConnection(MultiReferenceCount<?> parent, MultiSubscriber<?> subscriber) {
         this.parent = parent;
+        this.subscriber = subscriber;
     }
 
     @Override
@@ -97,5 +100,9 @@ public class ConnectableMultiConnection implements Runnable, Consumer<Cancellabl
             timer.cancel();
         }
         this.timer = cancellable;
+    }
+
+    public MultiSubscriber<?> getSubscriber() {
+        return subscriber;
     }
 }

@@ -15,13 +15,16 @@ import java.util.function.Consumer;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
+import io.smallrye.mutiny.Context;
+import io.smallrye.mutiny.subscription.ContextSupport;
+
 /**
  * A {@link io.smallrye.mutiny.Multi} {@link Subscriber} for testing purposes that comes with useful assertion helpers.
  *
  * @param <T> the type of the items
  */
 @SuppressWarnings({ "ReactiveStreamsSubscriberImplementation" })
-public class AssertSubscriber<T> implements Subscriber<T> {
+public class AssertSubscriber<T> implements Subscriber<T>, ContextSupport {
 
     /**
      * The default timeout used by {@code await} method.
@@ -82,21 +85,38 @@ public class AssertSubscriber<T> implements Subscriber<T> {
     private boolean cancelled;
 
     /**
+     * The subscription context.
+     */
+    private final Context context;
+
+    /**
+     * Creates a new {@link AssertSubscriber}.
+     *
+     * @param context the context
+     * @param requested the number of initially requested items
+     * @param cancelled {@code true} if the subscription is immediately cancelled, {@code false} otherwise
+     */
+    public AssertSubscriber(Context context, long requested, boolean cancelled) {
+        this.context = context;
+        this.requested.set(requested);
+        this.upfrontCancellation = cancelled;
+    }
+
+    /**
      * Creates a new {@link AssertSubscriber}.
      *
      * @param requested the number of initially requested items
      * @param cancelled {@code true} if the subscription is immediately cancelled, {@code false} otherwise
      */
     public AssertSubscriber(long requested, boolean cancelled) {
-        this.requested.set(requested);
-        this.upfrontCancellation = cancelled;
+        this(Context.empty(), requested, cancelled);
     }
 
     /**
      * Creates a new {@link AssertSubscriber} with 0 requested items and no upfront cancellation.
      */
     public AssertSubscriber() {
-        this(0, false);
+        this(Context.empty(), 0, false);
     }
 
     /**
@@ -105,7 +125,7 @@ public class AssertSubscriber<T> implements Subscriber<T> {
      * @param requested the number of initially requested items
      */
     public AssertSubscriber(long requested) {
-        this(requested, false);
+        this(Context.empty(), requested, false);
     }
 
     /**
@@ -127,6 +147,34 @@ public class AssertSubscriber<T> implements Subscriber<T> {
      */
     public static <T> AssertSubscriber<T> create(long requested) {
         return new AssertSubscriber<>(requested);
+    }
+
+    /**
+     * Creates a new {@link AssertSubscriber} with 0 requested items and no upfront cancellation.
+     *
+     * @param context the context
+     * @param <T> the items type
+     * @return a new subscriber
+     */
+    public static <T> AssertSubscriber<T> create(Context context) {
+        return new AssertSubscriber<>(context, 0, false);
+    }
+
+    /**
+     * Creates a new {@link AssertSubscriber} with no upfront cancellation.
+     *
+     * @param context the context
+     * @param requested the number of initially requested items
+     * @param <T> the items type
+     * @return a new subscriber
+     */
+    public static <T> AssertSubscriber<T> create(Context context, long requested) {
+        return new AssertSubscriber<>(context, requested, false);
+    }
+
+    @Override
+    public Context context() {
+        return context;
     }
 
     /**

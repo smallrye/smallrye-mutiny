@@ -7,6 +7,7 @@ import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.CompositeException;
+import io.smallrye.mutiny.Context;
 import io.smallrye.mutiny.helpers.Subscriptions;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 
@@ -17,7 +18,7 @@ import io.smallrye.mutiny.infrastructure.Infrastructure;
  * @param <T> the value type
  */
 @SuppressWarnings({ "ReactiveStreamsSubscriberImplementation" })
-public final class SafeSubscriber<T> implements Subscriber<T>, Subscription {
+public final class SafeSubscriber<T> implements Subscriber<T>, Subscription, ContextSupport {
 
     /**
      * The actual Subscriber.
@@ -214,6 +215,15 @@ public final class SafeSubscriber<T> implements Subscriber<T>, Subscription {
         } catch (Throwable e) {
             // nothing we can do.
             Infrastructure.handleDroppedException(e);
+        }
+    }
+
+    @Override
+    public Context context() {
+        if (downstream instanceof ContextSupport) {
+            return ((ContextSupport) downstream).context();
+        } else {
+            return Context.empty();
         }
     }
 }

@@ -9,6 +9,7 @@ import java.util.function.Consumer;
 import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.CompositeException;
+import io.smallrye.mutiny.Context;
 import io.smallrye.mutiny.helpers.Subscriptions;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 
@@ -18,32 +19,41 @@ public class Subscribers {
     public static final Consumer<? super Throwable> NO_ON_FAILURE = failure -> new Exception(
             "Missing onFailure/onError handler in the subscriber", failure).printStackTrace(); // NOSONAR
 
-    public static <T> CancellableSubscriber<T> from(Consumer<? super T> onItem, Consumer<? super Throwable> onFailure,
+    public static <T> CancellableSubscriber<T> from(Context context, Consumer<? super T> onItem,
+            Consumer<? super Throwable> onFailure,
             Runnable onCompletion,
             Consumer<? super Subscription> onSubscription) {
-        return new CallbackBasedSubscriber<>(onItem, onFailure, onCompletion, onSubscription);
+        return new CallbackBasedSubscriber<>(context, onItem, onFailure, onCompletion, onSubscription);
     }
 
-    public static class CallbackBasedSubscriber<T> implements CancellableSubscriber<T>, Subscription {
+    public static class CallbackBasedSubscriber<T> implements CancellableSubscriber<T>, Subscription, ContextSupport {
 
         private volatile Subscription subscription;
         private static final AtomicReferenceFieldUpdater<CallbackBasedSubscriber, Subscription> SUBSCRIPTION_UPDATER = AtomicReferenceFieldUpdater
                 .newUpdater(CallbackBasedSubscriber.class, Subscription.class, "subscription");
 
+        private final Context context;
         private final Consumer<? super T> onItem;
         private final Consumer<? super Throwable> onFailure;
         private final Runnable onCompletion;
         private final Consumer<? super Subscription> onSubscription;
 
         public CallbackBasedSubscriber(
+                Context context,
                 Consumer<? super T> onItem,
                 Consumer<? super Throwable> onFailure,
                 Runnable onCompletion,
                 Consumer<? super Subscription> onSubscription) {
+            this.context = context;
             this.onItem = nonNull(onItem, "onItem");
             this.onFailure = onFailure;
             this.onCompletion = onCompletion;
             this.onSubscription = nonNull(onSubscription, "onSubscription");
+        }
+
+        @Override
+        public Context context() {
+            return this.context;
         }
 
         @Override

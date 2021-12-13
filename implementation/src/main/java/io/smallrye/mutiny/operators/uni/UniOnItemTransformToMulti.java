@@ -10,11 +10,13 @@ import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
+import io.smallrye.mutiny.Context;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.helpers.EmptyUniSubscription;
 import io.smallrye.mutiny.helpers.Subscriptions;
 import io.smallrye.mutiny.operators.AbstractMulti;
 import io.smallrye.mutiny.operators.AbstractUni;
+import io.smallrye.mutiny.subscription.ContextSupport;
 import io.smallrye.mutiny.subscription.MultiSubscriber;
 import io.smallrye.mutiny.subscription.UniSubscriber;
 import io.smallrye.mutiny.subscription.UniSubscription;
@@ -38,7 +40,8 @@ public class UniOnItemTransformToMulti<I, O> extends AbstractMulti<O> {
     }
 
     @SuppressWarnings("SubscriberImplementation")
-    static final class FlatMapPublisherSubscriber<I, O> implements Subscriber<O>, UniSubscriber<I>, Subscription {
+    static final class FlatMapPublisherSubscriber<I, O>
+            implements Subscriber<O>, UniSubscriber<I>, Subscription, ContextSupport {
 
         private final AtomicReference<Subscription> secondUpstream;
         private final AtomicReference<UniSubscription> firstUpstream;
@@ -81,6 +84,15 @@ public class UniOnItemTransformToMulti<I, O> extends AbstractMulti<O> {
                 subscription.cancel();
             }
             Subscriptions.cancel(secondUpstream);
+        }
+
+        @Override
+        public Context context() {
+            if (downstream instanceof ContextSupport) {
+                return ((ContextSupport) downstream).context();
+            } else {
+                return Context.empty();
+            }
         }
 
         /**

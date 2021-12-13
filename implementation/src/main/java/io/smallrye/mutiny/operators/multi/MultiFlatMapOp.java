@@ -9,12 +9,14 @@ import java.util.function.Supplier;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscription;
 
+import io.smallrye.mutiny.Context;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.helpers.Subscriptions;
 import io.smallrye.mutiny.helpers.queues.Queues;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.subscription.BackPressureFailure;
+import io.smallrye.mutiny.subscription.ContextSupport;
 import io.smallrye.mutiny.subscription.MultiSubscriber;
 
 public final class MultiFlatMapOp<I, O> extends AbstractMultiOperator<I, O> {
@@ -55,7 +57,7 @@ public final class MultiFlatMapOp<I, O> extends AbstractMultiOperator<I, O> {
     }
 
     public static final class FlatMapMainSubscriber<I, O> extends FlatMapManager<FlatMapInner<O>>
-            implements MultiSubscriber<I>, Subscription {
+            implements MultiSubscriber<I>, Subscription, ContextSupport {
 
         final boolean delayError;
         final int maxConcurrency;
@@ -556,9 +558,17 @@ public final class MultiFlatMapOp<I, O> extends AbstractMultiOperator<I, O> {
             return q;
         }
 
+        @Override
+        public Context context() {
+            if (downstream instanceof ContextSupport) {
+                return ((ContextSupport) downstream).context();
+            } else {
+                return Context.empty();
+            }
+        }
     }
 
-    static final class FlatMapInner<O> implements Subscription, MultiSubscriber<O> {
+    static final class FlatMapInner<O> implements Subscription, MultiSubscriber<O>, ContextSupport {
 
         final FlatMapMainSubscriber<?, O> parent;
 
@@ -637,6 +647,11 @@ public final class MultiFlatMapOp<I, O> extends AbstractMultiOperator<I, O> {
                 queue.clear();
                 queue = null;
             }
+        }
+
+        @Override
+        public Context context() {
+            return parent.context();
         }
     }
 }

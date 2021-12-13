@@ -6,6 +6,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
+import io.smallrye.mutiny.Context;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 
 /**
@@ -16,7 +17,7 @@ import io.smallrye.mutiny.infrastructure.Infrastructure;
  *
  * @param <T> the type of items
  */
-public final class SerializedSubscriber<T> implements Subscription, MultiSubscriber<T> {
+public final class SerializedSubscriber<T> implements Subscription, MultiSubscriber<T>, ContextSupport {
 
     private final Subscriber<? super T> downstream;
 
@@ -213,6 +214,15 @@ public final class SerializedSubscriber<T> implements Subscription, MultiSubscri
                 actual.onComplete();
                 return;
             }
+        }
+    }
+
+    @Override
+    public Context context() {
+        if (downstream instanceof ContextSupport) {
+            return ((ContextSupport) downstream).context();
+        } else {
+            return Context.empty();
         }
     }
 

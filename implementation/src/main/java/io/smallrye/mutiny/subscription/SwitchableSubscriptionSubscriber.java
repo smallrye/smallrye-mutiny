@@ -7,6 +7,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.reactivestreams.Subscription;
 
+import io.smallrye.mutiny.Context;
 import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.helpers.Subscriptions;
 
@@ -18,7 +19,7 @@ import io.smallrye.mutiny.helpers.Subscriptions;
  *
  * @param <O> outgoing item type
  */
-public abstract class SwitchableSubscriptionSubscriber<O> implements MultiSubscriber<O>, Subscription {
+public abstract class SwitchableSubscriptionSubscriber<O> implements MultiSubscriber<O>, Subscription, ContextSupport {
 
     /**
      * The downstream subscriber
@@ -70,6 +71,15 @@ public abstract class SwitchableSubscriptionSubscriber<O> implements MultiSubscr
 
     public SwitchableSubscriptionSubscriber(MultiSubscriber<? super O> downstream) {
         this.downstream = downstream;
+    }
+
+    @Override
+    public Context context() {
+        if (downstream instanceof ContextSupport) {
+            return ((ContextSupport) downstream).context();
+        } else {
+            return Context.empty();
+        }
     }
 
     @Override

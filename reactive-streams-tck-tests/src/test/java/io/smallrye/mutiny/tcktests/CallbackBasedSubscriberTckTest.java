@@ -2,12 +2,15 @@ package io.smallrye.mutiny.tcktests;
 
 import org.reactivestreams.Subscriber;
 
+import io.smallrye.mutiny.Context;
 import io.smallrye.mutiny.subscription.Subscribers;
 
 public class CallbackBasedSubscriberTckTest extends AbstractWhiteBoxSubscriberTck {
+
     @Override
     public Subscriber<Integer> createSubscriber(WhiteboxSubscriberProbe<Integer> probe) {
         return new Subscribers.CallbackBasedSubscriber<>(
+                Context.empty(),
                 probe::registerOnNext,
                 probe::registerOnError,
                 probe::registerOnComplete,

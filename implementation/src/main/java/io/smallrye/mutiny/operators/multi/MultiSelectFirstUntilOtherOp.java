@@ -7,10 +7,12 @@ import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
+import io.smallrye.mutiny.Context;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.helpers.Subscriptions;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
+import io.smallrye.mutiny.subscription.ContextSupport;
 import io.smallrye.mutiny.subscription.MultiSubscriber;
 import io.smallrye.mutiny.subscription.SerializedSubscriber;
 
@@ -38,7 +40,7 @@ public final class MultiSelectFirstUntilOtherOp<T, U> extends AbstractMultiOpera
         upstream.subscribe(Infrastructure.onMultiSubscription(upstream, mainSubscriber));
     }
 
-    public static final class TakeUntilOtherSubscriber<U> implements MultiSubscriber<U> {
+    public static final class TakeUntilOtherSubscriber<U> implements MultiSubscriber<U>, ContextSupport {
         final TakeUntilMainProcessor<?> main;
         boolean once;
 
@@ -74,6 +76,11 @@ public final class MultiSelectFirstUntilOtherOp<T, U> extends AbstractMultiOpera
             }
             once = true;
             main.onOtherCompletion();
+        }
+
+        @Override
+        public Context context() {
+            return main.context();
         }
     }
 

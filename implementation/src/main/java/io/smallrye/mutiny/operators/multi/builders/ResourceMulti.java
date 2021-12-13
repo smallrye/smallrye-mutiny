@@ -10,11 +10,13 @@ import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.CompositeException;
+import io.smallrye.mutiny.Context;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.helpers.Subscriptions;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.AbstractMulti;
+import io.smallrye.mutiny.subscription.ContextSupport;
 import io.smallrye.mutiny.subscription.MultiSubscriber;
 
 public class ResourceMulti<R, I> extends AbstractMulti<I> {
@@ -80,7 +82,7 @@ public class ResourceMulti<R, I> extends AbstractMulti<I> {
         stream.subscribe(us);
     }
 
-    private static class ResourceSubscriber<I, R> implements Subscription, MultiSubscriber<I> {
+    private static class ResourceSubscriber<I, R> implements Subscription, MultiSubscriber<I>, ContextSupport {
 
         private final MultiSubscriber<? super I> downstream;
         private final R resource;
@@ -195,6 +197,15 @@ public class ResourceMulti<R, I> extends AbstractMulti<I> {
                         },
                         Infrastructure::handleDroppedException // ignore the failure, we have cancelled anyway.
                 );
+            }
+        }
+
+        @Override
+        public Context context() {
+            if (downstream instanceof ContextSupport) {
+                return ((ContextSupport) downstream).context();
+            } else {
+                return Context.empty();
             }
         }
     }

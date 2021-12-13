@@ -9,8 +9,10 @@ import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
+import io.smallrye.mutiny.Context;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.AbstractUni;
+import io.smallrye.mutiny.subscription.ContextSupport;
 import io.smallrye.mutiny.subscription.UniSubscriber;
 import io.smallrye.mutiny.subscription.UniSubscription;
 
@@ -27,7 +29,7 @@ public class UniCreateFromPublisher<T> extends AbstractUni<T> {
     }
 
     @SuppressWarnings("ReactiveStreamsSubscriberImplementation")
-    private class PublisherSubscriber implements UniSubscription, Subscriber<T> {
+    private class PublisherSubscriber implements UniSubscription, Subscriber<T>, ContextSupport {
 
         private final UniSubscriber<? super T> subscriber;
         AtomicReference<Subscription> subscription = new AtomicReference<>();
@@ -86,6 +88,11 @@ public class UniCreateFromPublisher<T> extends AbstractUni<T> {
             if (sub != CANCELLED) {
                 subscriber.onItem(null);
             }
+        }
+
+        @Override
+        public Context context() {
+            return subscriber.context();
         }
     }
 }

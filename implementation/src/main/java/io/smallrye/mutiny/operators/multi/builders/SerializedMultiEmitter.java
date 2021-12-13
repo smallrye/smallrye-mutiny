@@ -8,8 +8,10 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.reactivestreams.Subscription;
 
+import io.smallrye.mutiny.Context;
 import io.smallrye.mutiny.helpers.queues.Queues;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
+import io.smallrye.mutiny.subscription.ContextSupport;
 import io.smallrye.mutiny.subscription.MultiEmitter;
 import io.smallrye.mutiny.subscription.MultiSubscriber;
 
@@ -18,7 +20,7 @@ import io.smallrye.mutiny.subscription.MultiSubscriber;
  *
  * @param <T> the type of item
  */
-public class SerializedMultiEmitter<T> implements MultiEmitter<T>, MultiSubscriber<T> {
+public class SerializedMultiEmitter<T> implements MultiEmitter<T>, MultiSubscriber<T>, ContextSupport {
 
     private final AtomicInteger wip = new AtomicInteger();
     private final BaseMultiEmitter<T> downstream;
@@ -167,5 +169,14 @@ public class SerializedMultiEmitter<T> implements MultiEmitter<T>, MultiSubscrib
     @Override
     public long requested() {
         return downstream.requested();
+    }
+
+    @Override
+    public Context context() {
+        if (downstream instanceof ContextSupport) {
+            return ((ContextSupport) downstream).context();
+        } else {
+            return Context.empty();
+        }
     }
 }

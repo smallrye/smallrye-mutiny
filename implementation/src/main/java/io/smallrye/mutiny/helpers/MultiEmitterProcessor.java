@@ -8,6 +8,7 @@ import org.reactivestreams.Processor;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
+import io.smallrye.mutiny.Context;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.operators.multi.processors.UnicastProcessor;
 import io.smallrye.mutiny.subscription.MultiEmitter;
@@ -131,5 +132,10 @@ public class MultiEmitterProcessor<T> implements Processor<T, T>, MultiEmitter<T
 
     public Multi<T> toMulti() {
         return Multi.createFrom().publisher(this);
+    }
+
+    @Override
+    public Context context() {
+        throw new UnsupportedOperationException("This class is used in tests");
     }
 }

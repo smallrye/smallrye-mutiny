@@ -9,6 +9,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BooleanSupplier;
 
+import io.smallrye.mutiny.Context;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.operators.AbstractUni;
 import io.smallrye.mutiny.operators.UniOperator;
@@ -34,6 +35,7 @@ public class UniMemoizeOp<I> extends UniOperator<I, I> implements UniSubscriber<
     private volatile UniSubscription upstreamSubscription;
     private volatile I item;
     private volatile Throwable failure;
+    private volatile Context lastContextInUse;
 
     public UniMemoizeOp(Uni<? extends I> upstream) {
         this(upstream, () -> false);
@@ -42,6 +44,11 @@ public class UniMemoizeOp<I> extends UniOperator<I, I> implements UniSubscriber<
     public UniMemoizeOp(Uni<? extends I> upstream, BooleanSupplier invalidationRequested) {
         super(nonNull(upstream, "upstream"));
         this.invalidationRequested = invalidationRequested;
+    }
+
+    @Override
+    public Context context() {
+        return lastContextInUse;
     }
 
     @Override
@@ -73,6 +80,7 @@ public class UniMemoizeOp<I> extends UniOperator<I, I> implements UniSubscriber<
 
         if (state.compareAndSet(State.INIT, State.SUBSCRIBING)) {
             // This thread is performing the upstream subscription
+            this.lastContextInUse = subscriber.context();
             AbstractUni.subscribe(upstream(), this);
         }
         drain();

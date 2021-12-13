@@ -6,13 +6,15 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.reactivestreams.Subscription;
 
+import io.smallrye.mutiny.Context;
 import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.helpers.Subscriptions;
+import io.smallrye.mutiny.subscription.ContextSupport;
 import io.smallrye.mutiny.subscription.MultiEmitter;
 import io.smallrye.mutiny.subscription.MultiSubscriber;
 
 abstract class BaseMultiEmitter<T>
-        implements MultiEmitter<T>, Subscription {
+        implements MultiEmitter<T>, Subscription, ContextSupport {
 
     protected final AtomicLong requested = new AtomicLong();
     protected final MultiSubscriber<? super T> downstream;
@@ -26,6 +28,15 @@ abstract class BaseMultiEmitter<T>
     BaseMultiEmitter(MultiSubscriber<? super T> downstream) {
         this.downstream = downstream;
         this.onTermination = new AtomicReference<>();
+    }
+
+    @Override
+    public Context context() {
+        if (downstream instanceof ContextSupport) {
+            return ((ContextSupport) downstream).context();
+        } else {
+            return Context.empty();
+        }
     }
 
     @Override

@@ -3,10 +3,7 @@ package io.smallrye.mutiny;
 import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
 
 import java.util.concurrent.Executor;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.function.Supplier;
+import java.util.function.*;
 
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
@@ -560,12 +557,12 @@ public interface Multi<T> extends Publisher<T> {
 
     /**
      * Produces a new {@link Multi} transforming this {@code Multi} into a hot stream.
-     *
+     * <p>
      * With a hot stream, when no subscribers are present, emitted items are dropped.
      * Late subscribers would only receive items emitted after their subscription.
      * If the upstream has already been terminated, the termination event (failure or completion) is forwarded to the
      * subscribers.
-     *
+     * <p>
      * Note that this operator consumes the upstream stream without back-pressure.
      * It still enforces downstream back-pressure.
      * If the subscriber is not ready to receive an item when the upstream emits an item, the subscriber gets a
@@ -578,7 +575,7 @@ public interface Multi<T> extends Publisher<T> {
 
     /**
      * Log events (onSubscribe, onItem, ...) as they come from the upstream or the subscriber.
-     *
+     * <p>
      * Events will be logged as long as the {@link Multi} hasn't been cancelled or terminated.
      * Logging is framework-agnostic and can be configured in the {@link Infrastructure} class.
      *
@@ -592,14 +589,63 @@ public interface Multi<T> extends Publisher<T> {
     /**
      * Log events (onSubscribe, onItem, ...) as they come from the upstream or the subscriber, and derives the identifier from
      * the upstream operator class "simple name".
-     * 
+     * <p>
      * Events will be logged as long as the {@link Multi} hasn't been cancelled or terminated.
      * Logging is framework-agnostic and can be configured in the {@link Infrastructure} class.
-     * 
+     *
      * @return a new {@link Multi}
      * @see Multi#log(String)
      * @see Infrastructure#setOperatorLogger(Infrastructure.OperatorLogger)
      */
     @CheckReturnValue
     Multi<T> log();
+
+    /**
+     * Materialize the subscriber {@link Context} for a sub-pipeline.
+     *
+     * <p>
+     * The provided function takes this {@link Multi} and the {@link Context} as parameters, and returns a {@link Multi}
+     * to build the sub-pipeline, as in:
+     * 
+     * <pre>
+     * {@code
+     * someMulti.withContext((multi, ctx) -> multi.onItem().transform(n -> n + "::" + ctx.getOrElse("foo", () -> "yolo")));
+     * }
+     * </pre>
+     *
+     * <p>
+     * Note that the {@code builder} function is called <strong>at subscription time</strong>, so it cannot see
+     * context updates from upstream operators yet.
+     *
+     * @param builder the function that builds the sub-pipeline from this {@link Multi} and the {@link Context},
+     *        must not be {@code null}, must not return {@code null}.
+     * @param <R> the resulting {@link Multi} type
+     * @return the resulting {@link Multi}
+     */
+    @Experimental("Context support is a new experimental API introduced in Mutiny 1.3.0")
+    @CheckReturnValue
+    default <R> Multi<R> withContext(BiFunction<Multi<T>, Context, Multi<R>> builder) {
+        throw new UnsupportedOperationException("Default method added to limit binary incompatibility");
+    }
+
+    /**
+     * Materialize the context by attaching it to items using the {@link ItemWithContext} wrapper class.
+     *
+     * <p>
+     * This is a shortcut for:
+     * 
+     * <pre>
+     * {@code
+     * someMulti.withContext((multi, ctx) -> multi.onItem().transform(item -> new ItemWithContext<>(ctx, item)));
+     * }
+     * </pre>
+     *
+     * @return the resulting {@link Multi}
+     * @see #withContext(BiFunction)
+     */
+    @Experimental("Context support is a new experimental API introduced in Mutiny 1.3.0")
+    @CheckReturnValue
+    default Multi<ItemWithContext<T>> attachContext() {
+        return this.withContext((multi, ctx) -> multi.onItem().transform(item -> new ItemWithContext<>(ctx, item)));
+    }
 }

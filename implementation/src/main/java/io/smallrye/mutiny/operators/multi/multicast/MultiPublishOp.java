@@ -10,12 +10,14 @@ import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
+import io.smallrye.mutiny.Context;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.helpers.Subscriptions;
 import io.smallrye.mutiny.helpers.queues.Queues;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.subscription.BackPressureFailure;
 import io.smallrye.mutiny.subscription.Cancellable;
+import io.smallrye.mutiny.subscription.ContextSupport;
 import io.smallrye.mutiny.subscription.MultiSubscriber;
 
 /**
@@ -73,7 +75,14 @@ public final class MultiPublishOp<T> extends ConnectableMulti<T> {
             // if there is none yet or the current has been disposed
             if (ps == null || ps.cancelled.get()) {
                 // create a new subscriber-to-source
-                PublishSubscriber<T> u = new PublishSubscriber<T>(current, bufferSize);
+                MultiSubscriber<?> subscriber = connection.getSubscriber();
+                Context context;
+                if (subscriber instanceof ContextSupport) {
+                    context = ((ContextSupport) subscriber).context();
+                } else {
+                    context = Context.empty();
+                }
+                PublishSubscriber<T> u = new PublishSubscriber<T>(current, bufferSize, context);
                 // try setting it as the current subscriber-to-source
                 if (!current.compareAndSet(ps, u)) {
                     // did not work, perhaps a new subscriber arrived
@@ -98,7 +107,7 @@ public final class MultiPublishOp<T> extends ConnectableMulti<T> {
     }
 
     @SuppressWarnings({ "rawtypes", "SubscriberImplementation" })
-    static final class PublishSubscriber<T> implements Cancellable, MultiSubscriber<T> {
+    static final class PublishSubscriber<T> implements Cancellable, MultiSubscriber<T>, ContextSupport {
 
         /**
          * Indicates an empty array of inner subscribers.
@@ -143,9 +152,12 @@ public final class MultiPublishOp<T> extends ConnectableMulti<T> {
 
         private final AtomicInteger wip = new AtomicInteger();
 
+        private final Context context;
+
         @SuppressWarnings("unchecked")
         PublishSubscriber(AtomicReference<PublishSubscriber<T>> current,
-                int bufferSize) {
+                int bufferSize, Context context) {
+            this.context = context;
             this.subscribers = new AtomicReference<>(EMPTY);
             this.current = current;
             this.shouldConnect = new AtomicBoolean();
@@ -516,6 +528,11 @@ public final class MultiPublishOp<T> extends ConnectableMulti<T> {
                 ps = subscribers.get();
             }
         }
+
+        @Override
+        public Context context() {
+            return this.context;
+        }
     }
 
     /**
@@ -597,6 +614,12 @@ public final class MultiPublishOp<T> extends ConnectableMulti<T> {
 
         @Override
         public void subscribe(Subscriber<? super T> child) {
+            Context context;
+            if (child instanceof ContextSupport) {
+                context = ((ContextSupport) child).context();
+            } else {
+                context = Context.empty();
+            }
             InnerSubscriber<T> inner = new InnerSubscriber<>(child);
             child.onSubscribe(inner);
             // concurrent connection/disconnection may change the state,
@@ -607,7 +630,7 @@ public final class MultiPublishOp<T> extends ConnectableMulti<T> {
                 // if there isn't one or it is cancelled/disposed
                 if (r == null || r.cancelled.get()) {
                     // create a new subscriber to source
-                    PublishSubscriber<T> u = new PublishSubscriber<>(curr, bufferSize);
+                    PublishSubscriber<T> u = new PublishSubscriber<>(curr, bufferSize, context);
                     // let's try setting it as the current subscriber-to-source
                     if (!curr.compareAndSet(r, u)) {
                         // didn't work, maybe someone else did it or the current subscriber
