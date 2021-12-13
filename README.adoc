@@ -1,7 +1,8 @@
 image:https://github.com/smallrye/smallrye-mutiny/workflows/Continuous%20Integration%20Build/badge.svg[Build Status]
 image:https://sonarcloud.io/api/project_badges/measure?project=smallrye_smallrye-mutiny&metric=alert_status["Quality Gate Status", link="https://sonarcloud.io/dashboard?id=smallrye_smallrye-mutiny"]
-image:https://img.shields.io/github/license/smallrye/smallrye-mutiny.svg["License", link="http://www.apache.org/licenses/LICENSE-2.0"]
+image:https://img.shields.io/github/license/smallrye/smallrye-mutiny.svg["License", link="https://www.apache.org/licenses/LICENSE-2.0"]
 image:https://img.shields.io/maven-central/v/io.smallrye.reactive/mutiny?color=green[Maven Central]
+image:https://javadoc.io/badge2/io.smallrye.reactive/mutiny/javadoc.svg["Javadoc", link="https://javadoc.io/doc/io.smallrye.reactive/mutiny"]
 
 == ⚡️ Mutiny, an Intuitive Event-Driven Reactive Programming Library for Java
 
