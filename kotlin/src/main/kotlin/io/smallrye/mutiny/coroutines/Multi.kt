@@ -3,7 +3,6 @@ package io.smallrye.mutiny.coroutines
 import io.smallrye.mutiny.Multi
 import io.smallrye.mutiny.subscription.MultiEmitter
 import io.smallrye.mutiny.subscription.MultiSubscriber
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -94,18 +93,26 @@ suspend fun <T> Multi<T>.asFlow(): Flow<T> = channelFlow<T> {
 suspend fun <T> Flow<T>.asMulti(): Multi<T> {
     val parentCtx = coroutineContext
     return Multi.createFrom().emitter { em: MultiEmitter<in T> ->
-        CoroutineScope(parentCtx).launch {
+        val job = CoroutineScope(parentCtx).launch {
             try {
                 collect { item ->
                     if (em.isCancelled) {
-                        throw CancellationException("Multi subscription cancelled")
+                        throw NonPropagatingCancellationException()
                     }
                     em.emit(item)
                 }
                 em.complete()
             } catch (th: Throwable) {
-                em.fail(th)
+                when (th) {
+                    is NonPropagatingCancellationException -> em.complete()
+                    else -> em.fail(th)
+                }
             }
+        }
+        em.onTermination {
+            job.cancel(NonPropagatingCancellationException())
         }
     }
 }
+
+private class NonPropagatingCancellationException : kotlin.coroutines.cancellation.CancellationException()

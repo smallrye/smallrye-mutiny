@@ -2,10 +2,13 @@ package io.smallrye.mutiny.coroutines
 
 import io.smallrye.mutiny.helpers.test.AssertSubscriber
 import kotlinx.coroutines.*
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import org.assertj.core.api.Assertions.assertThat
 import java.util.*
+import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.test.Test
 
@@ -121,6 +124,38 @@ class FlowAsMultiTest {
             subscriber.assertNotTerminated()
             assertThat(subscriber.isCancelled).isTrue()
             assertThat(exitException).isNotNull().isInstanceOf(CancellationException::class.java)
+        }
+    }
+
+    @ExperimentalCoroutinesApi
+    @Test
+    fun `verify that callbackFlow cancels on Multi subscription cancellation`() {
+        runBlocking(Dispatchers.IO) {
+            // Given
+            val closed = AtomicBoolean(false)
+            val flow = callbackFlow<Int> {
+                // Real code would set up their callback handler here
+                // and call ProducerScope.trySendBlocking or
+                // ProducerScope.channel.close() as needed
+
+                // Do nothing to simulate no incoming callbacks
+
+                awaitClose {
+                    closed.set(true)
+                }
+            }
+
+            // When
+            val subscriber = AssertSubscriber.create<Int>(42)
+            flow.asMulti().subscribe().withSubscriber(subscriber)
+            delay(50)
+            subscriber.cancel()
+            delay(50)
+
+            // Then
+            subscriber.assertNotTerminated()
+            assertThat(subscriber.isCancelled).isTrue()
+            assertThat(closed).isTrue
         }
     }
 }
