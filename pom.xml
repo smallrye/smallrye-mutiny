@@ -92,7 +92,7 @@
         <junit4.version>4.13.2</junit4.version>
         <awaitility.version>4.1.1</awaitility.version>
         <testng.version>7.4.0</testng.version>
-        <mockito-core.version>4.1.0</mockito-core.version>
+        <mockito-core.version>4.2.0</mockito-core.version>
 
         <revapi-maven-plugin.version>0.14.6</revapi-maven-plugin.version>
         <revapi-java.version>0.26.1</revapi-java.version>
