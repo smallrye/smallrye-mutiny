@@ -107,7 +107,7 @@
         <kotlin.version>1.6.10</kotlin.version>
         <kotlin.compiler.apiVersion>1.4</kotlin.compiler.apiVersion>
         <kotlin.compiler.languageVersion>1.4</kotlin.compiler.languageVersion>
-        <coroutines.version>1.5.2</coroutines.version>
+        <coroutines.version>1.6.0</coroutines.version>
         <kotlin.compiler.jvmTarget>${maven.compiler.target}</kotlin.compiler.jvmTarget>
         <dokka.version>1.6.0</dokka.version>
 
