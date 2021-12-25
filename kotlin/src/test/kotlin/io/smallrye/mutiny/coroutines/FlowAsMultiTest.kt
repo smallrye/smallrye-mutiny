@@ -1,22 +1,24 @@
 package io.smallrye.mutiny.coroutines
 
 import io.smallrye.mutiny.helpers.test.AssertSubscriber
-import kotlinx.coroutines.*
-import kotlinx.coroutines.channels.awaitClose
-import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOf
-import org.assertj.core.api.Assertions.assertThat
-import java.util.*
+import java.util.UUID
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.test.Test
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.launch
+import org.assertj.core.api.Assertions.assertThat
 
 class FlowAsMultiTest {
 
     @Test
     fun `test immediate item`() {
-        runBlocking(Dispatchers.Default) {
+        testBlocking {
             // Given
             val item = UUID.randomUUID()
             val flow = flowOf(item)
@@ -35,7 +37,7 @@ class FlowAsMultiTest {
 
     @Test
     fun `test immediate items`() {
-        runBlocking(Dispatchers.Default) {
+        testBlocking {
             // Given
             val items = arrayOf(5, 23, 42)
             val flow = flowOf(*items)
@@ -54,7 +56,7 @@ class FlowAsMultiTest {
 
     @Test
     fun `test immediate failure`() {
-        runBlocking(Dispatchers.Default) {
+        testBlocking {
             // Given
             val flow = flow<Any> {
                 error("boom")
@@ -66,13 +68,13 @@ class FlowAsMultiTest {
 
             // Then
             subscriber.awaitFailure()
-                    .assertFailedWith(IllegalStateException::class.java, "boom")
+                .assertFailedWith(IllegalStateException::class.java, "boom")
         }
     }
 
     @Test
     fun `verify that coroutine cancellation result in failure`() {
-        runBlocking(Dispatchers.Default) {
+        testBlocking {
             // Given
             val flow = flow<UUID> {
                 delay(200)
@@ -81,13 +83,11 @@ class FlowAsMultiTest {
             val subscriber = AssertSubscriber.create<UUID>(1)
 
             // When
-            runBlocking {
-                val job = launch {
-                    flow.asMulti().subscribe().withSubscriber(subscriber)
-                }
-                delay(50)
-                job.cancel(CancellationException("abort"))
+            val job = launch {
+                flow.asMulti().subscribe().withSubscriber(subscriber)
             }
+            delay(50)
+            job.cancel(CancellationException("abort"))
             Thread.sleep(350)
 
             // Then
@@ -97,7 +97,7 @@ class FlowAsMultiTest {
 
     @Test
     fun `verify that Flow cancels on Multi subscription cancellation`() {
-        runBlocking(Dispatchers.IO) {
+        testBlocking {
             // Given
             val counter = AtomicInteger()
             var exitException: Throwable? = null
@@ -107,7 +107,7 @@ class FlowAsMultiTest {
                         emit(counter.incrementAndGet())
                     }
                 } catch (err: Throwable) {
-                    exitException  = err
+                    exitException = err
                 }
             }
 
@@ -122,15 +122,14 @@ class FlowAsMultiTest {
             assertThat(counter.get()).isGreaterThan(0)
             subscriber.assertItems(*(1..42).toList().toTypedArray())
             subscriber.assertNotTerminated()
-            assertThat(subscriber.isCancelled).isTrue()
-            assertThat(exitException).isNotNull().isInstanceOf(CancellationException::class.java)
+            assertThat(subscriber.isCancelled).isTrue
+            assertThat(exitException).isNotNull.isInstanceOf(CancellationException::class.java)
         }
     }
 
-    @ExperimentalCoroutinesApi
     @Test
     fun `verify that callbackFlow cancels on Multi subscription cancellation`() {
-        runBlocking(Dispatchers.IO) {
+        testBlocking {
             // Given
             val closed = AtomicBoolean(false)
             val flow = callbackFlow<Int> {
@@ -154,7 +153,7 @@ class FlowAsMultiTest {
 
             // Then
             subscriber.assertNotTerminated()
-            assertThat(subscriber.isCancelled).isTrue()
+            assertThat(subscriber.isCancelled).isTrue
             assertThat(closed).isTrue
         }
     }

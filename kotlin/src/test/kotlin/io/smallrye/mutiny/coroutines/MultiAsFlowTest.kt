@@ -2,21 +2,6 @@ package io.smallrye.mutiny.coroutines
 
 import io.smallrye.mutiny.Multi
 import io.smallrye.mutiny.subscription.MultiEmitter
-import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.TimeoutCancellationException
-import kotlinx.coroutines.asCoroutineDispatcher
-import kotlinx.coroutines.async
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.buffer
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.toList
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withTimeout
-import org.assertj.core.api.Assertions.assertThat
 import java.time.Duration
 import java.time.Instant
 import java.util.concurrent.Executors
@@ -28,6 +13,19 @@ import kotlin.test.assertFails
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 import kotlin.test.fail
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.TimeoutCancellationException
+import kotlinx.coroutines.asCoroutineDispatcher
+import kotlinx.coroutines.async
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.buffer
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeout
+import org.assertj.core.api.Assertions.assertThat
 
 @ExperimentalCoroutinesApi
 class MultiAsFlowTest {
@@ -67,7 +65,7 @@ class MultiAsFlowTest {
         val items = arrayOf(5, 23, 42)
         val delayMillis = 50L
         val multi = Multi.createFrom().emitter { em: MultiEmitter<in Int> ->
-            GlobalScope.launch {
+            embeddedScope().launch {
                 items.forEach {
                     delay(delayMillis)
                     em.emit(it)
@@ -91,7 +89,7 @@ class MultiAsFlowTest {
         // Given
         val delayMillis = 100L
         val multi = Multi.createFrom().emitter { em: MultiEmitter<in Int> ->
-            GlobalScope.launch {
+            embeddedScope().launch {
                 delay(delayMillis)
                 em.fail(Exception("boom"))
             }
@@ -144,7 +142,7 @@ class MultiAsFlowTest {
                     flow.collect { eventItems.add(it) }
                 }
             }
-            GlobalScope.launch {
+            embeddedScope().launch {
                 // yield thread and wait shortly for ensuring emitter got set
                 delay(100)
                 emit()
@@ -194,7 +192,7 @@ class MultiAsFlowTest {
 
         // When
         var retrieveError: Throwable? = null
-        runBlocking {
+        testBlocking {
             val job = launch {
                 try {
                     multi.asFlow().collect {
@@ -211,8 +209,8 @@ class MultiAsFlowTest {
         Thread.sleep(100)
 
         // Then
-        assertThat(counter.get()).isGreaterThan(0)
         assertThat(retrieveError).isInstanceOf(CancellationException::class.java)
+        assertThat(counter.get()).isGreaterThan(0)
     }
 
     @Test
@@ -222,7 +220,7 @@ class MultiAsFlowTest {
 
         // When & Then
         assertFailsWith<TimeoutCancellationException> {
-            runBlocking {
+            testBlocking {
                 withTimeout(100) {
                     multi.asFlow().toList()
                 }
@@ -232,7 +230,7 @@ class MultiAsFlowTest {
 
     @Test
     fun `test empty Multi`() {
-        runBlocking {
+        testBlocking {
             // Given
             val multi = Multi.createFrom().empty<Any>()
 
@@ -246,7 +244,7 @@ class MultiAsFlowTest {
 
     @Test
     fun `test null item`() {
-        runBlocking {
+        testBlocking {
             // Given
             val multi = Multi.createFrom().item { null }
 
@@ -260,7 +258,7 @@ class MultiAsFlowTest {
 
     @Test
     fun `test buffered flow`() {
-        runBlocking {
+        testBlocking {
             // Given
             val items = (1..10_000).toList()
             val multi = Multi.createFrom().iterable(items)
@@ -282,7 +280,7 @@ class MultiAsFlowTest {
         // When
         val ticks = AtomicInteger()
         assertFailsWith<TimeoutCancellationException> {
-            runBlocking {
+            testBlocking {
                 withTimeout(300) {
                     multi.asFlow().buffer(5).collect {
                         ticks.incrementAndGet()
@@ -302,7 +300,7 @@ class MultiAsFlowTest {
         val multi = Multi.createFrom().ticks().every(Duration.ofMillis(1))
 
         // When
-        val tick = runBlocking {
+        val tick = testBlocking {
             multi.asFlow().first()
         }
 
@@ -324,7 +322,7 @@ class MultiAsFlowTest {
 
         // When
         val start = System.currentTimeMillis()
-        val tick = runBlocking {
+        val tick = testBlocking {
             multi.asFlow().first()
         }
 
@@ -339,7 +337,7 @@ class MultiAsFlowTest {
         val multi = Multi.createFrom().items(3, 2, 1)
 
         // When
-        val list = runBlocking(Executors.newSingleThreadExecutor().asCoroutineDispatcher()) {
+        val list = testBlocking(Executors.newSingleThreadExecutor().asCoroutineDispatcher()) {
             multi.asFlow().toList()
         }
 

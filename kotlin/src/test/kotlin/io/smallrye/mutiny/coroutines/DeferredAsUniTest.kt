@@ -1,30 +1,28 @@
 package io.smallrye.mutiny.coroutines
 
 import io.smallrye.mutiny.helpers.test.UniAssertSubscriber
-import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.async
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withContext
-import org.assertj.core.api.Assertions.assertThat
 import java.util.UUID
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import kotlin.test.Test
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.async
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import org.assertj.core.api.Assertions.assertThat
 
 @ExperimentalCoroutinesApi
 class DeferredAsUniTest {
 
     @Test
     fun `test immediate value`() {
-        runBlocking {
+        testBlocking {
             // Given
             val value = UUID.randomUUID()
-            val deferred = GlobalScope.async { value }
+            val deferred = embeddedScope().async { value }
 
             // When
             val subscriber = UniAssertSubscriber.create<UUID>()
@@ -37,9 +35,9 @@ class DeferredAsUniTest {
 
     @Test
     fun `test immediate failure`() {
-        runBlocking {
-            // Given
-            val deferred = GlobalScope.async { error("kaboom") }
+        testBlocking {
+            // Given an error produced by a Deferred created in an isolated CoroutineScope
+            val deferred = embeddedScope().async { error("kaboom") }
 
             // When
             val subscriber = UniAssertSubscriber<Any>()
@@ -52,9 +50,9 @@ class DeferredAsUniTest {
 
     @Test
     fun `test coroutine cancellation before value is computed`() {
-        runBlocking {
+        testBlocking {
             // Given
-            val deferred = GlobalScope.async {
+            val deferred = embeddedScope().async {
                 delay(250)
                 UUID.randomUUID()
             }
@@ -71,9 +69,9 @@ class DeferredAsUniTest {
 
     @Test
     fun `test null item`() {
-        runBlocking {
+        testBlocking {
             // Given
-            val deferred = GlobalScope.async { null }
+            val deferred = embeddedScope().async { null }
 
             // When
             val subscriber = UniAssertSubscriber.create<Any>()
@@ -86,10 +84,10 @@ class DeferredAsUniTest {
 
     @Test
     fun `test uni cancellation before deferred completes`() {
-        runBlocking {
+        testBlocking {
             // Given
             val deferredLatch = CountDownLatch(1)
-            val deferred = GlobalScope.async {
+            val deferred = embeddedScope().async {
                 delay(10_000) // simulate long running job
                 "Hello, World!"
             }
@@ -110,13 +108,13 @@ class DeferredAsUniTest {
             awaitLatch("Deferred", deferredLatch)
             assertThat(deferred.isCancelled)
                 .`as`("Check that Deferred is cancelled")
-                .isTrue()
+                .isTrue
         }
     }
 
     @Test
     fun `test cancelling deferred does not impact siblings`() {
-        runBlocking {
+        testBlocking {
             // Start before async.
             val child1Latch = CountDownLatch(1)
             val child1 = launch {
@@ -136,7 +134,7 @@ class DeferredAsUniTest {
             deferred.invokeOnCompletion { exception ->
                 deferredLatch.countDown()
                 assertThat(exception)
-                    .isNotNull()
+                    .isNotNull
                     .isInstanceOf(CancellationException::class.java)
             }
 
@@ -162,7 +160,7 @@ class DeferredAsUniTest {
                 awaitLatch("Child 1", child1Latch)
                 assertThat(child1.isCompleted)
                     .`as`("Check that child 1 completed")
-                    .isTrue()
+                    .isTrue
 
                 awaitLatch("Uni", uniLatch)
                 awaitLatch("Deferred", deferredLatch)
@@ -171,11 +169,11 @@ class DeferredAsUniTest {
                     .isNotNull
                 assertThat(deferred.isCancelled)
                     .`as`("Check that Deferred was cancelled")
-                    .isTrue()
+                    .isTrue
                 awaitLatch("Sibling 2", child2Latch)
                 assertThat(child2.isCompleted)
                     .`as`("Check that child 2 completed")
-                    .isTrue()
+                    .isTrue
             }
         }
     }
@@ -184,5 +182,5 @@ class DeferredAsUniTest {
 private fun awaitLatch(name: String, latch: CountDownLatch) {
     assertThat(latch.await(2, TimeUnit.SECONDS))
         .`as`("Check that $name completes within 2s")
-        .isTrue()
+        .isTrue
 }

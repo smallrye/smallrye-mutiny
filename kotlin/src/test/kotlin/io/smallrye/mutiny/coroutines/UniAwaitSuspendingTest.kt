@@ -1,14 +1,6 @@
 package io.smallrye.mutiny.coroutines
 
 import io.smallrye.mutiny.Uni
-import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.TimeoutCancellationException
-import kotlinx.coroutines.asCoroutineDispatcher
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withTimeout
-import org.assertj.core.api.Assertions.assertThat
 import java.time.Duration
 import java.time.Instant
 import java.util.UUID
@@ -19,12 +11,19 @@ import kotlin.test.assertFailsWith
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import kotlin.test.fail
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.TimeoutCancellationException
+import kotlinx.coroutines.asCoroutineDispatcher
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeout
+import org.assertj.core.api.Assertions.assertThat
 
 class UniAwaitSuspendingTest {
 
     @Test
     fun `test immediate onItem event`() {
-        runBlocking {
+        testBlocking {
             // Given
             val item = UUID.randomUUID()
             val uni = Uni.createFrom().item(item)
@@ -39,7 +38,7 @@ class UniAwaitSuspendingTest {
 
     @Test
     fun `test delayed onItem event`() {
-        runBlocking {
+        testBlocking {
             // Given
             val item = UUID.randomUUID()
             val delayed = Duration.ofMillis(250)
@@ -58,7 +57,7 @@ class UniAwaitSuspendingTest {
 
     @Test
     fun `test null item`() {
-        runBlocking {
+        testBlocking {
             // Given
             val uni = Uni.createFrom().nullItem<Any>()
 
@@ -76,7 +75,7 @@ class UniAwaitSuspendingTest {
         val uni = Uni.createFrom().failure<Any>(RuntimeException("boom"))
 
         // When & Then
-        assertFailsWith<RuntimeException>("boom") { runBlocking { uni.awaitSuspending() } }
+        assertFailsWith<RuntimeException>("boom") { testBlocking { uni.awaitSuspending() } }
     }
 
     @Test
@@ -85,7 +84,7 @@ class UniAwaitSuspendingTest {
         val uni = Uni.createFrom().failure<Any>(Exception("kaboom"))
 
         // When & Then
-        assertFailsWith<Exception>("kaboom") { runBlocking { uni.awaitSuspending() } }
+        assertFailsWith<Exception>("kaboom") { testBlocking { uni.awaitSuspending() } }
     }
 
     @Test
@@ -95,7 +94,7 @@ class UniAwaitSuspendingTest {
 
         // When
         var retrieveError: Throwable? = null
-        runBlocking {
+        testBlocking {
             val job = launch {
                 try {
                     uni.awaitSuspending()
@@ -120,7 +119,7 @@ class UniAwaitSuspendingTest {
 
         // When & Then
         assertFailsWith<TimeoutCancellationException> {
-            runBlocking {
+            testBlocking {
                 withTimeout(50) {
                     uni.awaitSuspending()
                     fail()
@@ -135,7 +134,7 @@ class UniAwaitSuspendingTest {
         val uni = Uni.createFrom().item(23)
 
         // When
-        val item = runBlocking(Executors.newSingleThreadExecutor().asCoroutineDispatcher()) {
+        val item = testBlocking(Executors.newSingleThreadExecutor().asCoroutineDispatcher()) {
             uni.awaitSuspending()
         }
 
