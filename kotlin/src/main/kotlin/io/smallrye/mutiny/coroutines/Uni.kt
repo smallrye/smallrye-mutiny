@@ -2,11 +2,11 @@ package io.smallrye.mutiny.coroutines
 
 import io.smallrye.mutiny.Uni
 import io.smallrye.mutiny.subscription.UniEmitter
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.suspendCancellableCoroutine
-import kotlin.coroutines.resume
-import kotlin.coroutines.resumeWithException
 
 /**
  * Awaits the result of this [Uni] while suspending the surrounding coroutine.
