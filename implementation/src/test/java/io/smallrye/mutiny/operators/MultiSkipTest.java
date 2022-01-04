@@ -51,15 +51,6 @@ public class MultiSkipTest {
         assertThat(list).containsExactly(2, 3, 4);
     }
 
-    @SuppressWarnings("deprecation")
-    @Test
-    public void testSimpleSkipDeprecated() {
-        List<Integer> list = Multi.createFrom().range(1, 5).transform().bySkippingFirstItems(1)
-                .collect().asList().await().indefinitely();
-
-        assertThat(list).containsExactly(2, 3, 4);
-    }
-
     @Test
     public void testSkipFirstZero() {
         List<Integer> list = Multi.createFrom().range(1, 5)
@@ -74,16 +65,6 @@ public class MultiSkipTest {
         List<Integer> list = Multi.createFrom().range(1, 5)
                 .skip().last(1)
                 .collect().asList().await().indefinitely();
-
-        assertThat(list).containsExactly(1, 2, 3);
-    }
-
-    @SuppressWarnings("deprecation")
-    @Test
-    public void testSimpleSkipLastDeprecated() {
-        List<Integer> list = Multi.createFrom().range(1, 5)
-                .transform().bySkippingLastItems(1)
-                .collectItems().asList().await().indefinitely();
 
         assertThat(list).containsExactly(1, 2, 3);
     }

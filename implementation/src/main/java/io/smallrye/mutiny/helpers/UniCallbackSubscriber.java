@@ -36,14 +36,14 @@ public class UniCallbackSubscriber<T> implements UniSubscriber<T>, UniSubscripti
      *
      * @param onResultCallback callback invoked on item event, must not be {@code null}
      * @param onFailureCallback callback invoked on failure event, must not be {@code null}
-     * @param context
+     * @param context the subscriber context, must not be {@code null}
      */
     public UniCallbackSubscriber(Consumer<? super T> onResultCallback,
             Consumer<? super Throwable> onFailureCallback,
             Context context) {
         this.onResultCallback = nonNull(onResultCallback, "onResultCallback");
         this.onFailureCallback = nonNull(onFailureCallback, "onFailureCallback");
-        this.context = context;
+        this.context = nonNull(context, "context");
     }
 
     @Override

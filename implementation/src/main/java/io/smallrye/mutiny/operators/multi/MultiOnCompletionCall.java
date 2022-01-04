@@ -37,7 +37,7 @@ public class MultiOnCompletionCall<T> extends AbstractMultiOperator<T, T> {
         public void onCompletion() {
             cancellable = execute().subscribe().with(
                     ignored -> super.onCompletion(),
-                    err -> super.onFailure(err));
+                    super::onFailure);
         }
 
         @Override

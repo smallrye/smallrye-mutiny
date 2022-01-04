@@ -76,8 +76,7 @@ public class MultiGroupTest {
     @SuppressWarnings("deprecation")
     @Test
     public void testGroupIntoListsOfTwoElementsDeprecated() {
-        AssertSubscriber<List<Integer>> subscriber = Multi.createFrom().range(1, 10)
-                .groupItems().intoLists().of(2)
+        AssertSubscriber<List<Integer>> subscriber = Multi.createFrom().range(1, 10).group().intoLists().of(2)
                 .subscribe().withSubscriber(AssertSubscriber.create(100));
         subscriber.assertCompleted();
         assertThat(subscriber.getItems()).containsExactly(

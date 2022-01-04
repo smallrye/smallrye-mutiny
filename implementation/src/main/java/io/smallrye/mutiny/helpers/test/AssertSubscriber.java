@@ -675,7 +675,7 @@ public class AssertSubscriber<T> implements Subscriber<T>, ContextSupport {
                         "Expected " + expected + " items, but received a failure event while waiting: " + getFailure()
                                 + ". Only " + items.size() + " items have been received.");
             } else {
-                System.out.println(e);
+                e.printStackTrace();
                 throw new AssertionError(
                         "Expected " + expected + " items.  Only " + items.size() + " items have been received.");
             }

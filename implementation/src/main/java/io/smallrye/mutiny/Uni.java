@@ -372,19 +372,6 @@ public interface Uni<T> {
     UniMemoize<T> memoize();
 
     /**
-     * Caches the events (item or failure) of this {@link Uni} and replays it for all further {@link UniSubscriber}.
-     *
-     * @return the new {@link Uni}. Unlike regular {@link Uni}, re-subscribing to this {@link Uni} does not re-compute
-     *         the outcome but replayed the cached events.
-     * @deprecated Use {@link UniMemoize#indefinitely()} instead
-     */
-    @Deprecated
-    @CheckReturnValue
-    default Uni<T> cache() {
-        return memoize().indefinitely();
-    }
-
-    /**
      * Transforms the item (potentially null) emitted by this {@link Uni} by applying a (synchronous) function to it.
      * This method is equivalent to {@code uni.onItem().transform(x -> ...)}
      * For asynchronous composition, look at flatMap.

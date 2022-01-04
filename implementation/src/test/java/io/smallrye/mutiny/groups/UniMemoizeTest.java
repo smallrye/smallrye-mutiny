@@ -129,7 +129,7 @@ class UniMemoizeTest {
     @DisplayName("Test the deprecated uni.cache() method")
     void testDeprecatedUniCache() {
         AtomicInteger counter = new AtomicInteger();
-        Uni<Integer> cache = Uni.createFrom().item(counter.incrementAndGet()).cache();
+        Uni<Integer> cache = Uni.createFrom().item(counter.incrementAndGet()).memoize().indefinitely();
 
         UniAssertSubscriber<Integer> sub1 = UniAssertSubscriber.create();
         UniAssertSubscriber<Integer> sub2 = UniAssertSubscriber.create();
@@ -280,7 +280,7 @@ class UniMemoizeTest {
     @DisplayName("Test that uni.cache() caches values emitted by a processor")
     void assertCachingTheValueEmittedByAProcessorUsingDeprecatedUniCache() {
         UnicastProcessor<Integer> processor = UnicastProcessor.create();
-        Uni<Integer> cached = Uni.createFrom().publisher(processor).cache();
+        Uni<Integer> cached = Uni.createFrom().publisher(processor).memoize().indefinitely();
 
         UniAssertSubscriber<Integer> sub1 = new UniAssertSubscriber<>();
         UniAssertSubscriber<Integer> sub2 = new UniAssertSubscriber<>();

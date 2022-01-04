@@ -41,8 +41,7 @@ public class MultiSkipWhereAndWhenTest {
     public void testFilteringWithPredicate() {
         Predicate<Integer> test = x -> x % 2 != 0;
         assertThat(Multi.createFrom().range(1, 4)
-                .skip().where(test)
-                .collectItems().asList()
+                .skip().where(test).collect().asList()
                 .await().indefinitely()).containsExactly(2);
     }
 
@@ -51,7 +50,7 @@ public class MultiSkipWhereAndWhenTest {
         assertThat(Multi.createFrom().range(1, 4)
                 .skip().when(
                         x -> Uni.createFrom().completionStage(() -> CompletableFuture.supplyAsync(() -> x % 2 != 0)))
-                .collectItems().asList()
+                .collect().asList()
                 .await().indefinitely()).containsExactly(2);
     }
 

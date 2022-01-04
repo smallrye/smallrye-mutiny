@@ -61,15 +61,6 @@ public class MultiSelectFirstOrLastTest {
         assertThat(counter).hasValue(1);
     }
 
-    @SuppressWarnings("deprecation")
-    @Test
-    public void testSelectFirstDeprecated() {
-        List<Integer> list = Multi.createFrom().range(1, 5).transform().byTakingFirstItems(2)
-                .collect().asList().await().indefinitely();
-
-        assertThat(list).containsExactly(1, 2);
-    }
-
     @Test
     public void testSelectFirst0() {
         List<Integer> list = Multi.createFrom().range(1, 5).select().first(0)
@@ -95,15 +86,6 @@ public class MultiSelectFirstOrLastTest {
                 .collect().asList().await().indefinitely();
 
         assertThat(list).containsExactly(4);
-    }
-
-    @SuppressWarnings("deprecation")
-    @Test
-    public void testSelectLastDeprecated() {
-        List<Integer> list = Multi.createFrom().range(1, 5).transform().byTakingLastItems(2)
-                .collect().asList().await().indefinitely();
-
-        assertThat(list).containsExactly(3, 4);
     }
 
     @Test

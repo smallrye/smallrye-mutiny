@@ -1,79 +1,177 @@
-[ {
-  "extension" : "revapi.java",
-  "id" : "java",
-  "configuration" : {
-    "missing-classes" : {
-      "behavior" : "report",
-      "ignoreMissingAnnotations" : false
-    },
-    "filter" : {
-      "packages" : {
-        "regex" : true,
-        "include" : [ "io\\.smallrye\\.mutiny(\\..+)?" ],
-        "exclude" : [ "io\\.smallrye\\.mutiny\\.operators(\\..+)?" ]
+[
+  {
+    "extension": "revapi.java",
+    "id": "java",
+    "configuration": {
+      "missing-classes": {
+        "behavior": "report",
+        "ignoreMissingAnnotations": false
+      },
+      "filter": {
+        "packages": {
+          "regex": true,
+          "include": [
+            "io\\.smallrye\\.mutiny(\\..+)?"
+          ],
+          "exclude": [
+            "io\\.smallrye\\.mutiny\\.operators(\\..+)?"
+          ]
+        }
       }
     }
+  },
+  {
+    "extension": "revapi.differences",
+    "id": "breaking-changes",
+    "configuration": {
+      "criticality": "highlight",
+      "minSeverity": "POTENTIALLY_BREAKING",
+      "minCriticality": "documented",
+      "differences": [
+        {
+          "ignore": true,
+          "code": "java.method.numberOfParametersChanged",
+          "old": "method void io.smallrye.mutiny.groups.UniAwait<T>::<init>(io.smallrye.mutiny.Uni<T>)",
+          "new": "method void io.smallrye.mutiny.groups.UniAwait<T>::<init>(io.smallrye.mutiny.Uni<T>, io.smallrye.mutiny.Context)",
+          "justification": "Private API impacted by the new Mutiny context support"
+        },
+        {
+          "ignore": true,
+          "code": "java.method.numberOfParametersChanged",
+          "old": "method void io.smallrye.mutiny.groups.UniAwaitOptional<T>::<init>(io.smallrye.mutiny.Uni<T>)",
+          "new": "method void io.smallrye.mutiny.groups.UniAwaitOptional<T>::<init>(io.smallrye.mutiny.Uni<T>, io.smallrye.mutiny.Context)",
+          "justification": "Private API impacted by the new Mutiny context support"
+        },
+        {
+          "ignore": true,
+          "code": "java.method.numberOfParametersChanged",
+          "old": "method void io.smallrye.mutiny.helpers.BlockingIterable<T>::<init>(org.reactivestreams.Publisher<? extends T>, int, java.util.function.Supplier<java.util.Queue<T>>)",
+          "new": "method void io.smallrye.mutiny.helpers.BlockingIterable<T>::<init>(io.smallrye.mutiny.Multi<? extends T>, int, java.util.function.Supplier<java.util.Queue<T>>, java.util.function.Supplier<io.smallrye.mutiny.Context>)",
+          "justification": "Private API impacted by the new Mutiny context support"
+        },
+        {
+          "ignore": true,
+          "code": "java.method.numberOfParametersChanged",
+          "old": "method void io.smallrye.mutiny.helpers.UniCallbackSubscriber<T>::<init>(java.util.function.Consumer<? super T>, java.util.function.Consumer<? super java.lang.Throwable>)",
+          "new": "method void io.smallrye.mutiny.helpers.UniCallbackSubscriber<T>::<init>(java.util.function.Consumer<? super T>, java.util.function.Consumer<? super java.lang.Throwable>, io.smallrye.mutiny.Context)",
+          "justification": "Private API impacted by the new Mutiny context support"
+        },
+        {
+          "ignore": true,
+          "code": "java.method.numberOfParametersChanged",
+          "old": "method void io.smallrye.mutiny.subscription.Subscribers.CallbackBasedSubscriber<T>::<init>(java.util.function.Consumer<? super T>, java.util.function.Consumer<? super java.lang.Throwable>, java.lang.Runnable, java.util.function.Consumer<? super org.reactivestreams.Subscription>)",
+          "new": "method void io.smallrye.mutiny.subscription.Subscribers.CallbackBasedSubscriber<T>::<init>(io.smallrye.mutiny.Context, java.util.function.Consumer<? super T>, java.util.function.Consumer<? super java.lang.Throwable>, java.lang.Runnable, java.util.function.Consumer<? super org.reactivestreams.Subscription>)",
+          "justification": "Private API impacted by the new Mutiny context support"
+        },
+        {
+          "ignore": true,
+          "code": "java.method.numberOfParametersChanged",
+          "old": "method <T> io.smallrye.mutiny.subscription.CancellableSubscriber<T> io.smallrye.mutiny.subscription.Subscribers::from(java.util.function.Consumer<? super T>, java.util.function.Consumer<? super java.lang.Throwable>, java.lang.Runnable, java.util.function.Consumer<? super org.reactivestreams.Subscription>)",
+          "new": "method <T> io.smallrye.mutiny.subscription.CancellableSubscriber<T> io.smallrye.mutiny.subscription.Subscribers::from(io.smallrye.mutiny.Context, java.util.function.Consumer<? super T>, java.util.function.Consumer<? super java.lang.Throwable>, java.lang.Runnable, java.util.function.Consumer<? super org.reactivestreams.Subscription>)",
+          "justification": "Private API impacted by the new Mutiny context support"
+        },
+        {
+          "ignore": true,
+          "code": "java.method.removed",
+          "old": "method io.smallrye.mutiny.groups.MultiCollect<T> io.smallrye.mutiny.Multi<T>::collectItems()",
+          "justification": "Deprecated API removal (~1 year old)"
+        },
+        {
+          "ignore": true,
+          "code": "java.method.removed",
+          "old": "method io.smallrye.mutiny.groups.MultiGroup<T> io.smallrye.mutiny.Multi<T>::groupItems()",
+          "justification": "Deprecated API removal (~1 year old)"
+        },
+        {
+          "ignore": true,
+          "code": "java.method.removed",
+          "old": "method io.smallrye.mutiny.groups.MultiTransform<T> io.smallrye.mutiny.Multi<T>::transform()",
+          "justification": "Deprecated API removal (~1 year old)"
+        },
+        {
+          "ignore": true,
+          "code": "java.method.removed",
+          "old": "method io.smallrye.mutiny.Uni<T> io.smallrye.mutiny.Uni<T>::cache()",
+          "justification": "Deprecated API removal (~1 year old)"
+        },
+        {
+          "ignore": true,
+          "code": "java.method.removed",
+          "old": "method io.smallrye.mutiny.Multi<T> io.smallrye.mutiny.groups.MultiOverflow<T>::drop(java.util.function.Consumer<T>)",
+          "justification": "Deprecated API removal (~1 year old)"
+        },
+        {
+          "ignore": true,
+          "code": "java.class.removed",
+          "old": "class io.smallrye.mutiny.groups.MultiTransform<T>",
+          "justification": "Deprecated API removal (~1 year old)"
+        },
+        {
+          "ignore": true,
+          "code": "java.method.removed",
+          "old": "method io.smallrye.mutiny.groups.MultiTransform<T> io.smallrye.mutiny.operators.AbstractMulti<T>::transform() @ io.smallrye.mutiny.helpers.spies.MultiGlobalSpy<T>",
+          "justification": "Deprecated API removal (~1 year old)"
+        },
+        {
+          "ignore": true,
+          "code": "java.method.removed",
+          "old": "method io.smallrye.mutiny.groups.MultiTransform<T> io.smallrye.mutiny.operators.AbstractMulti<T>::transform() @ io.smallrye.mutiny.helpers.spies.MultiOnCancellationSpy<T>",
+          "justification": "Deprecated API removal (~1 year old)"
+        },
+        {
+          "ignore": true,
+          "code": "java.method.removed",
+          "old": "method io.smallrye.mutiny.groups.MultiTransform<T> io.smallrye.mutiny.operators.AbstractMulti<T>::transform() @ io.smallrye.mutiny.helpers.spies.MultiOnCompletionSpy<T>",
+          "justification": "Deprecated API removal (~1 year old)"
+        },
+        {
+          "ignore": true,
+          "code": "java.method.removed",
+          "old": "method io.smallrye.mutiny.groups.MultiTransform<T> io.smallrye.mutiny.operators.AbstractMulti<T>::transform() @ io.smallrye.mutiny.helpers.spies.MultiOnFailureSpy<T>",
+          "justification": "Deprecated API removal (~1 year old)"
+        },
+        {
+          "ignore": true,
+          "code": "java.method.removed",
+          "old": "method io.smallrye.mutiny.groups.MultiTransform<T> io.smallrye.mutiny.operators.AbstractMulti<T>::transform() @ io.smallrye.mutiny.helpers.spies.MultiOnItemSpy<T>",
+          "justification": "Deprecated API removal (~1 year old)"
+        },
+        {
+          "ignore": true,
+          "code": "java.method.removed",
+          "old": "method io.smallrye.mutiny.groups.MultiTransform<T> io.smallrye.mutiny.operators.AbstractMulti<T>::transform() @ io.smallrye.mutiny.helpers.spies.MultiOnOverflowSpy<T>",
+          "justification": "Deprecated API removal (~1 year old)"
+        },
+        {
+          "ignore": true,
+          "code": "java.method.removed",
+          "old": "method io.smallrye.mutiny.groups.MultiTransform<T> io.smallrye.mutiny.operators.AbstractMulti<T>::transform() @ io.smallrye.mutiny.helpers.spies.MultiOnRequestSpy<T>",
+          "justification": "Deprecated API removal (~1 year old)"
+        },
+        {
+          "ignore": true,
+          "code": "java.method.removed",
+          "old": "method io.smallrye.mutiny.groups.MultiTransform<T> io.smallrye.mutiny.operators.AbstractMulti<T>::transform() @ io.smallrye.mutiny.helpers.spies.MultiOnSubscribeSpy<T>",
+          "justification": "Deprecated API removal (~1 year old)"
+        },
+        {
+          "ignore": true,
+          "code": "java.method.removed",
+          "old": "method io.smallrye.mutiny.groups.MultiTransform<T> io.smallrye.mutiny.operators.AbstractMulti<T>::transform() @ io.smallrye.mutiny.helpers.spies.MultiOnTerminationSpy<T>",
+          "justification": "Deprecated API removal (~1 year old)"
+        }
+      ]
+    }
+  },
+  {
+    "extension": "revapi.reporter.json",
+    "configuration": {
+      "minSeverity": "POTENTIALLY_BREAKING",
+      "minCriticality": "documented",
+      "output": "target/compatibility.json",
+      "indent": true,
+      "append": false,
+      "keepEmptyFile": true
+    }
   }
-}, {
-  "extension" : "revapi.differences",
-  "id" : "breaking-changes",
-  "configuration" : {
-    "criticality" : "highlight",
-    "minSeverity" : "POTENTIALLY_BREAKING",
-    "minCriticality" : "documented",
-    "differences" : [
-      {
-        "ignore": true,
-        "code": "java.method.numberOfParametersChanged",
-        "old": "method void io.smallrye.mutiny.groups.UniAwait<T>::<init>(io.smallrye.mutiny.Uni<T>)",
-        "new": "method void io.smallrye.mutiny.groups.UniAwait<T>::<init>(io.smallrye.mutiny.Uni<T>, io.smallrye.mutiny.Context)",
-        "justification": "Private API impacted by the new Mutiny context support"
-      },
-      {
-        "ignore": true,
-        "code": "java.method.numberOfParametersChanged",
-        "old": "method void io.smallrye.mutiny.groups.UniAwaitOptional<T>::<init>(io.smallrye.mutiny.Uni<T>)",
-        "new": "method void io.smallrye.mutiny.groups.UniAwaitOptional<T>::<init>(io.smallrye.mutiny.Uni<T>, io.smallrye.mutiny.Context)",
-        "justification": "Private API impacted by the new Mutiny context support"
-      },
-      {
-        "ignore": true,
-        "code": "java.method.numberOfParametersChanged",
-        "old": "method void io.smallrye.mutiny.helpers.BlockingIterable<T>::<init>(org.reactivestreams.Publisher<? extends T>, int, java.util.function.Supplier<java.util.Queue<T>>)",
-        "new": "method void io.smallrye.mutiny.helpers.BlockingIterable<T>::<init>(io.smallrye.mutiny.Multi<? extends T>, int, java.util.function.Supplier<java.util.Queue<T>>, java.util.function.Supplier<io.smallrye.mutiny.Context>)",
-        "justification": "Private API impacted by the new Mutiny context support"
-      },
-      {
-        "ignore": true,
-        "code": "java.method.numberOfParametersChanged",
-        "old": "method void io.smallrye.mutiny.helpers.UniCallbackSubscriber<T>::<init>(java.util.function.Consumer<? super T>, java.util.function.Consumer<? super java.lang.Throwable>)",
-        "new": "method void io.smallrye.mutiny.helpers.UniCallbackSubscriber<T>::<init>(java.util.function.Consumer<? super T>, java.util.function.Consumer<? super java.lang.Throwable>, io.smallrye.mutiny.Context)",
-        "justification": "Private API impacted by the new Mutiny context support"
-      },
-      {
-        "ignore": true,
-        "code": "java.method.numberOfParametersChanged",
-        "old": "method void io.smallrye.mutiny.subscription.Subscribers.CallbackBasedSubscriber<T>::<init>(java.util.function.Consumer<? super T>, java.util.function.Consumer<? super java.lang.Throwable>, java.lang.Runnable, java.util.function.Consumer<? super org.reactivestreams.Subscription>)",
-        "new": "method void io.smallrye.mutiny.subscription.Subscribers.CallbackBasedSubscriber<T>::<init>(io.smallrye.mutiny.Context, java.util.function.Consumer<? super T>, java.util.function.Consumer<? super java.lang.Throwable>, java.lang.Runnable, java.util.function.Consumer<? super org.reactivestreams.Subscription>)",
-        "justification": "Private API impacted by the new Mutiny context support"
-      },
-      {
-        "ignore": true,
-        "code": "java.method.numberOfParametersChanged",
-        "old": "method <T> io.smallrye.mutiny.subscription.CancellableSubscriber<T> io.smallrye.mutiny.subscription.Subscribers::from(java.util.function.Consumer<? super T>, java.util.function.Consumer<? super java.lang.Throwable>, java.lang.Runnable, java.util.function.Consumer<? super org.reactivestreams.Subscription>)",
-        "new": "method <T> io.smallrye.mutiny.subscription.CancellableSubscriber<T> io.smallrye.mutiny.subscription.Subscribers::from(io.smallrye.mutiny.Context, java.util.function.Consumer<? super T>, java.util.function.Consumer<? super java.lang.Throwable>, java.lang.Runnable, java.util.function.Consumer<? super org.reactivestreams.Subscription>)",
-        "justification": "Private API impacted by the new Mutiny context support"
-      }
-    ]
-  }
-}, {
-  "extension" : "revapi.reporter.json",
-  "configuration" : {
-    "minSeverity" : "POTENTIALLY_BREAKING",
-    "minCriticality" : "documented",
-    "output" : "target/compatibility.json",
-    "indent" : true,
-    "append" : false,
-    "keepEmptyFile" : true
-  }
-} ]
+]
