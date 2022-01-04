@@ -82,7 +82,7 @@ public final class MultiPublishOp<T> extends ConnectableMulti<T> {
                 } else {
                     context = Context.empty();
                 }
-                PublishSubscriber<T> u = new PublishSubscriber<T>(current, bufferSize, context);
+                PublishSubscriber<T> u = new PublishSubscriber<>(current, bufferSize, context);
                 // try setting it as the current subscriber-to-source
                 if (!current.compareAndSet(ps, u)) {
                     // did not work, perhaps a new subscriber arrived

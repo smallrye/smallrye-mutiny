@@ -217,28 +217,6 @@ public interface Multi<T> extends Publisher<T> {
      * Be aware to not used method collecting items on unbounded / infinite {@link Multi}.
      *
      * @return the object to configure the collection process.
-     * @deprecated Use {@link #collect()} instead
-     */
-    @Deprecated
-    @CheckReturnValue
-    default MultiCollect<T> collectItems() {
-        return collect();
-    }
-
-    /**
-     * Produces {@link Uni} collecting/aggregating items from this {@link Multi}.
-     * It allows accumulating the items emitted by this {@code multi} into a structure such as a into a
-     * {@link java.util.List} ({@link MultiCollect#asList()}), a {@link java.util.Map}
-     * ({@link MultiCollect#asMap(Function)}, or a custom collector.
-     * When this {@code multi} sends the completion signal, the structure is emitted by the returned {@link Uni}.
-     * <p>
-     * If this {@link Multi} emits a failure, the produced {@link Uni} produces the same failure and the aggregated items
-     * are discarded.
-     * <p>
-     * You can also retrieve the first and last items using {@link MultiCollect#first()} and {@link MultiCollect#last()}.
-     * Be aware to not used method collecting items on unbounded / infinite {@link Multi}.
-     *
-     * @return the object to configure the collection process.
      */
     @CheckReturnValue
     MultiCollect<T> collect();
@@ -252,20 +230,6 @@ public interface Multi<T> extends Publisher<T> {
      */
     @CheckReturnValue
     MultiGroup<T> group();
-
-    /**
-     * Produces {@link Multi} grouping items from this {@link Multi} into various "form of chunks" (list, {@link Multi}).
-     * The grouping can be done linearly ({@link MultiGroup#intoLists()} and {@link MultiGroup#intoMultis()}, or based
-     * on a grouping function ({@link MultiGroup#by(Function)})
-     *
-     * @return the object to configure the grouping.
-     * @deprecated Use {@link #group()} instead
-     */
-    @Deprecated
-    @CheckReturnValue
-    default MultiGroup<T> groupItems() {
-        return group();
-    }
 
     /**
      * Produces a new {@link Multi} invoking the {@code onItem}, {@code onFailure} and {@code onCompletion} methods
@@ -300,16 +264,6 @@ public interface Multi<T> extends Publisher<T> {
      */
     @CheckReturnValue
     MultiOnCompletion<T> onCompletion();
-
-    /**
-     * Transforms the streams by skipping, selecting, or merging.
-     *
-     * @return the object to configure the transformation.
-     * @deprecated Use {@link #select()} and {@link #skip()}instead
-     */
-    @Deprecated
-    @CheckReturnValue
-    MultiTransform<T> transform();
 
     /**
      * Selects items from this {@link Multi}.

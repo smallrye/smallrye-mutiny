@@ -90,7 +90,8 @@ public class UniSubscribeAsCompletionStageTest {
     @Test
     public void testThatTwoSubscribersWithCache() {
         AtomicInteger count = new AtomicInteger(1);
-        Uni<Integer> cached = Uni.createFrom().deferred(() -> Uni.createFrom().item(count.getAndIncrement())).cache();
+        Uni<Integer> cached = Uni.createFrom().deferred(() -> Uni.createFrom().item(count.getAndIncrement())).memoize()
+                .indefinitely();
         CompletionStage<Integer> cs1 = cached.subscribe().asCompletionStage();
         CompletionStage<Integer> cs2 = cached.subscribe().asCompletionStage();
         assertThat(cs1).isNotNull();

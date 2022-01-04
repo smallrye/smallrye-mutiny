@@ -121,7 +121,7 @@ public class UniAssertSubscriber<T> implements UniSubscriber<T> {
 
     @Override
     public synchronized void onItem(T item) {
-        signals.add(new OnItemUniSignal<T>(item));
+        signals.add(new OnItemUniSignal<>(item));
         this.completion.complete(item);
     }
 

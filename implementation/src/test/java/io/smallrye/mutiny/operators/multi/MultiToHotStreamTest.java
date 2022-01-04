@@ -52,7 +52,7 @@ public class MultiToHotStreamTest {
     public void testWithTwoSubscribersDeprecated() {
         UnicastProcessor<String> processor = UnicastProcessor.create();
 
-        Multi<String> multi = processor.map(s -> s).transform().toHotStream();
+        Multi<String> multi = processor.map(s -> s).toHotStream();
         AssertSubscriber<String> subscriber1 = multi.subscribe()
                 .withSubscriber(AssertSubscriber.create(10));
 

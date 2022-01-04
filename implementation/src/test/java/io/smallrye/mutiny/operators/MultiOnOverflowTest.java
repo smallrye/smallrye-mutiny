@@ -36,7 +36,8 @@ public class MultiOnOverflowTest {
 
     @Test
     public void testThatDropCallbackCannotBeNull() {
-        assertThrows(IllegalArgumentException.class, () -> Multi.createFrom().item(1).onOverflow().drop(null));
+        assertThrows(IllegalArgumentException.class,
+                () -> Multi.createFrom().item(1).onOverflow().invoke((Consumer<Integer>) null).drop());
     }
 
     @Test
@@ -86,7 +87,7 @@ public class MultiOnOverflowTest {
         AtomicReference<MultiEmitter<? super Integer>> emitter = new AtomicReference<>();
         List<Integer> list = new CopyOnWriteArrayList<>();
         Multi<Integer> multi = Multi.createFrom().emitter((Consumer<MultiEmitter<? super Integer>>) emitter::set)
-                .onOverflow().drop(list::add);
+                .onOverflow().invoke(list::add).drop();
         multi.subscribe(sub);
         emitter.get().emit(1);
         sub.request(2);
@@ -119,9 +120,9 @@ public class MultiOnOverflowTest {
     @Test
     public void testDropStrategyWithCallbackThrowingAnException() {
         Multi.createFrom().items(2, 3, 4)
-                .onOverflow().drop(i -> {
+                .onOverflow().invoke(i -> {
                     throw new IllegalStateException("boom");
-                })
+                }).drop()
                 .subscribe().withSubscriber(AssertSubscriber.create(0))
                 .assertFailedWith(IllegalStateException.class, "boom");
 

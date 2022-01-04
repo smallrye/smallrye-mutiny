@@ -54,22 +54,6 @@ public class MultiOverflow<T> {
     }
 
     /**
-     * When the downstream cannot keep up with the upstream emissions, instruct to drop the item.
-     *
-     * @param callback a callback invoked when an item is dropped. The callback receives the item. Must not be
-     *        {@code null}
-     * @return the new multi
-     * @deprecated Use {@link Multi#invoke(Consumer)} and {@link MultiOverflowStrategy#drop()} as in
-     *             {@code multi.onOverflow().invoke(consumer).drop()}.
-     */
-    @Deprecated
-    @CheckReturnValue
-    public Multi<T> drop(Consumer<T> callback) {
-        Consumer<T> actual = Infrastructure.decorate(nonNull(callback, "callback"));
-        return new MultiOverflowStrategy<>(upstream, actual, null).drop();
-    }
-
-    /**
      * When the downstream cannot keep up with the upstream emissions, instruct to drop all previously buffered items.
      *
      * @return the new multi

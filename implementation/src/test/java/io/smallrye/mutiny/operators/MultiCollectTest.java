@@ -54,14 +54,12 @@ public class MultiCollectTest {
     @Test
     public void testCollectFirstAndLastDeprecated() {
         Multi<Integer> items = Multi.createFrom().items(1, 2, 3);
-        items
-                .collectItems().first()
+        items.collect().first()
                 .subscribe().withSubscriber(UniAssertSubscriber.create())
                 .awaitItem()
                 .assertItem(1);
 
-        items
-                .collectItems().last()
+        items.collect().last()
                 .subscribe().withSubscriber(UniAssertSubscriber.create())
                 .awaitItem()
                 .assertItem(3);

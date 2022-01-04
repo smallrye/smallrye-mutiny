@@ -76,16 +76,6 @@ public class MultiDistinctTest {
                 .assertItems(1, 2, 3, 4, 2, 4, 2, 4);
     }
 
-    @SuppressWarnings("deprecation")
-    @Test
-    public void testDistinctDeprecated() {
-        Multi.createFrom().items(1, 2, 3, 4, 2, 4, 2, 4)
-                .transform().byDroppingDuplicates()
-                .subscribe().withSubscriber(AssertSubscriber.create(10))
-                .assertCompleted()
-                .assertItems(1, 2, 3, 4);
-    }
-
     @Test
     public void testDistinctWithUpstreamFailure() {
         Multi.createFrom().<Integer> failure(new IOException("boom"))
@@ -98,15 +88,6 @@ public class MultiDistinctTest {
     public void testDistinctWithComparatorWithUpstreamFailure() {
         Multi.createFrom().<Integer> failure(new IOException("boom"))
                 .select().distinct(Integer::compareTo)
-                .subscribe().withSubscriber(AssertSubscriber.create(10))
-                .assertFailedWith(IOException.class, "boom");
-    }
-
-    @SuppressWarnings("deprecation")
-    @Test
-    public void testDistinctWithUpstreamFailureDeprecated() {
-        Multi.createFrom().<Integer> failure(new IOException("boom"))
-                .transform().byDroppingDuplicates()
                 .subscribe().withSubscriber(AssertSubscriber.create(10))
                 .assertFailedWith(IOException.class, "boom");
     }
@@ -181,11 +162,10 @@ public class MultiDistinctTest {
                 .assertItems(1, 2, 3, 4, 4, 2, 2, 4, 1, 1, 2, 4);
     }
 
-    @SuppressWarnings("deprecation")
     @Test
-    public void testDroppedRepetitionsDeprecated() {
+    public void testDroppedRepetitions() {
         Multi.createFrom().items(1, 2, 3, 4, 4, 2, 2, 4, 1, 1, 2, 4)
-                .transform().byDroppingRepetitions()
+                .skip().repetitions()
                 .subscribe().withSubscriber(AssertSubscriber.create(10))
                 .assertCompleted()
                 .assertItems(1, 2, 3, 4, 2, 4, 1, 2, 4);

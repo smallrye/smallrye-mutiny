@@ -65,8 +65,7 @@ public class MultiSelectWhereAndWhenTest {
     public void testFilteringWithPredicate() {
         Predicate<Integer> test = x -> x % 2 != 0;
         assertThat(Multi.createFrom().range(1, 4)
-                .select().where(test)
-                .collectItems().asList()
+                .select().where(test).collect().asList()
                 .await().indefinitely()).containsExactly(1, 3);
     }
 
@@ -76,8 +75,7 @@ public class MultiSelectWhereAndWhenTest {
         MultiOnCancellationSpy<Integer> spy = Spy
                 .onCancellation(Multi.createFrom().range(1, 10));
         assertThat(spy
-                .select().where(test, 2)
-                .collectItems().asList()
+                .select().where(test, 2).collect().asList()
                 .await().indefinitely()).containsExactly(1, 3);
 
         assertThat(spy.isCancelled()).isTrue();
@@ -87,35 +85,14 @@ public class MultiSelectWhereAndWhenTest {
     public void testFilteringWithPredicateAndZeroAsLimit() {
         Predicate<Integer> test = x -> x % 2 != 0;
         assertThat(Multi.createFrom().range(1, 10)
-                .select().where(test, 0)
-                .collectItems().asList()
+                .select().where(test, 0).collect().asList()
                 .await().indefinitely()).isEmpty();
-    }
-
-    @Test
-    @SuppressWarnings("deprecation")
-    public void testFilteringWithPredicateDeprecated() {
-        Predicate<Integer> test = x -> x % 2 != 0;
-        assertThat(Multi.createFrom().range(1, 4)
-                .transform().byFilteringItemsWith(test)
-                .collect().asList()
-                .await().indefinitely()).containsExactly(1, 3);
     }
 
     @Test
     public void testFilteringWithUni() {
         assertThat(Multi.createFrom().range(1, 4)
                 .select().when(
-                        x -> Uni.createFrom().completionStage(() -> CompletableFuture.supplyAsync(() -> x % 2 != 0)))
-                .collectItems().asList()
-                .await().indefinitely()).containsExactly(1, 3);
-    }
-
-    @SuppressWarnings("deprecation")
-    @Test
-    public void testFilteringWithUniDeprecated() {
-        assertThat(Multi.createFrom().range(1, 4)
-                .transform().byTestingItemsWith(
                         x -> Uni.createFrom().completionStage(() -> CompletableFuture.supplyAsync(() -> x % 2 != 0)))
                 .collect().asList()
                 .await().indefinitely()).containsExactly(1, 3);

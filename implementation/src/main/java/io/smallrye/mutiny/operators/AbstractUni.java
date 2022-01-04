@@ -108,10 +108,9 @@ public abstract class AbstractUni<T> implements Uni<T> {
 
     @Override
     public UniMemoize<T> memoize() {
-        return new UniMemoize<T>(this);
+        return new UniMemoize<>(this);
     }
 
-    @Override
     public Uni<T> cache() {
         return Infrastructure.onUniCreation(new UniMemoizeOp<>(this));
     }

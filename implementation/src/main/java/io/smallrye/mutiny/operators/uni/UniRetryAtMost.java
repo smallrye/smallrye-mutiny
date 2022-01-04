@@ -25,7 +25,7 @@ public class UniRetryAtMost<T> extends UniOperator<T, T> {
 
     @Override
     public void subscribe(UniSubscriber<? super T> subscriber) {
-        AbstractUni.subscribe(upstream(), new UniRetryAtMostProcessor<T>(this, subscriber));
+        AbstractUni.subscribe(upstream(), new UniRetryAtMostProcessor<>(this, subscriber));
     }
 
     private static class UniRetryAtMostProcessor<T> extends UniOperatorProcessor<T, T> {

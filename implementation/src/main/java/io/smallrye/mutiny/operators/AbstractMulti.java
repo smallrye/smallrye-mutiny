@@ -95,11 +95,6 @@ public abstract class AbstractMulti<T> implements Multi<T> {
     }
 
     @Override
-    public MultiTransform<T> transform() {
-        return new MultiTransform<>(this);
-    }
-
-    @Override
     public MultiSelect<T> select() {
         return new MultiSelect<>(this);
     }

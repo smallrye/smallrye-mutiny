@@ -72,7 +72,7 @@ public class UniOnTerminate<T> {
 
     /**
      * Attaches an action that is executed when the {@link Uni} emits an item or a failure or when the subscriber
-     * cancels the subscription. Unlike {@link #call(Supplier)} (Functions.Function3)} the supplier does not receive the
+     * cancels the subscription. Unlike {@link #call(Functions.Function3)} the supplier does not receive the
      * item, failure or cancellation.
      *
      * @param supplier must return a non-{@code null} {@link Uni}.

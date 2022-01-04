@@ -123,7 +123,8 @@ public class UniToPublisherTest {
     public void testThatTwoSubscribersWithCache() {
         AtomicInteger count = new AtomicInteger(1);
         Publisher<Integer> publisher = Uni.createFrom()
-                .deferred(() -> Uni.createFrom().item(count.getAndIncrement())).cache().convert().toPublisher();
+                .deferred(() -> Uni.createFrom().item(count.getAndIncrement())).memoize().indefinitely().convert()
+                .toPublisher();
         assertThat(publisher).isNotNull();
         Flowable<Integer> flow = Flowable.fromPublisher(publisher);
         int first = flow.blockingFirst();
