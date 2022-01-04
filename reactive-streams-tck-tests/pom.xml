@@ -78,6 +78,27 @@
                 </plugins>
             </build>
         </profile>
+        <profile>
+            <id>parallel-tests</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <configuration>
+                            <properties>
+                                <configurationParameters>
+                                    testng.useDefaultListeners = true
+                                    testng.outputDirectory = ${project.build.directory}/testng-reports
+                                    testng.verbose = 2
+                                    testng.parallel = classes
+                                </configurationParameters>
+                            </properties>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
     </profiles>
 
 </project>
