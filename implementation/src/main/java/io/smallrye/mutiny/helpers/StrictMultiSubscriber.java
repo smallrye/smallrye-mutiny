@@ -9,6 +9,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
+import io.smallrye.mutiny.Context;
+import io.smallrye.mutiny.subscription.ContextSupport;
 import io.smallrye.mutiny.subscription.MultiSubscriber;
 
 /**
@@ -24,7 +26,7 @@ import io.smallrye.mutiny.subscription.MultiSubscriber;
  * @param <T> the type of item
  */
 public class StrictMultiSubscriber<T>
-        implements MultiSubscriber<T>, Subscription {
+        implements MultiSubscriber<T>, Subscription, ContextSupport {
 
     private final AtomicInteger wip = new AtomicInteger();
 
@@ -93,5 +95,14 @@ public class StrictMultiSubscriber<T>
     public void onCompletion() {
         done = true;
         HalfSerializer.onComplete(downstream, wip, failure);
+    }
+
+    @Override
+    public Context context() {
+        if (downstream instanceof ContextSupport) {
+            return ((ContextSupport) downstream).context();
+        } else {
+            return Context.empty();
+        }
     }
 }

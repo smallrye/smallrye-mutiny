@@ -5,6 +5,7 @@ import static io.smallrye.mutiny.helpers.EmptyUniSubscription.DONE;
 
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 
+import io.smallrye.mutiny.Context;
 import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.subscription.UniSubscriber;
@@ -21,6 +22,11 @@ public abstract class UniOperatorProcessor<I, O> implements UniSubscriber<I>, Un
 
     public UniOperatorProcessor(UniSubscriber<? super O> downstream) {
         this.downstream = ParameterValidation.nonNull(downstream, "downstream");
+    }
+
+    @Override
+    public Context context() {
+        return this.downstream.context();
     }
 
     @Override

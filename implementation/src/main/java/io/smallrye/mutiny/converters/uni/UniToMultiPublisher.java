@@ -6,8 +6,10 @@ import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
+import io.smallrye.mutiny.Context;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.operators.AbstractUni;
+import io.smallrye.mutiny.subscription.ContextSupport;
 import io.smallrye.mutiny.subscription.UniSubscriber;
 import io.smallrye.mutiny.subscription.UniSubscription;
 
@@ -24,7 +26,7 @@ public final class UniToMultiPublisher<T> implements Publisher<T> {
         downstream.onSubscribe(new UniToMultiSubscription<>(uni, downstream));
     }
 
-    private static class UniToMultiSubscription<T> implements UniSubscription, Subscription, UniSubscriber<T> {
+    private static class UniToMultiSubscription<T> implements UniSubscription, Subscription, UniSubscriber<T>, ContextSupport {
 
         private final Uni<T> uni;
         private final Subscriber<? super T> downstream;
@@ -44,6 +46,15 @@ public final class UniToMultiPublisher<T> implements Publisher<T> {
         private UniToMultiSubscription(Uni<T> uni, Subscriber<? super T> downstream) {
             this.uni = uni;
             this.downstream = downstream;
+        }
+
+        @Override
+        public Context context() {
+            if (downstream instanceof ContextSupport) {
+                return ((ContextSupport) downstream).context();
+            } else {
+                return Context.empty();
+            }
         }
 
         @Override

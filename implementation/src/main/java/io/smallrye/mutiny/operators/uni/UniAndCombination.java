@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.CompositeException;
+import io.smallrye.mutiny.Context;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.helpers.EmptyUniSubscription;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
@@ -60,8 +61,9 @@ public class UniAndCombination<I, O> extends UniOperator<I, O> {
         AndSupervisor(UniSubscriber<? super O> sub) {
             subscriber = sub;
 
-            for (Uni u : unis) {
-                UniHandler result = new UniHandler(this, u);
+            Context context = subscriber.context();
+            for (Uni uni : unis) {
+                UniHandler result = new UniHandler(this, uni, context);
                 handlers.add(result);
             }
 
@@ -152,12 +154,19 @@ public class UniAndCombination<I, O> extends UniOperator<I, O> {
         final AtomicReference<UniSubscription> subscription = new AtomicReference<>();
         private final AndSupervisor supervisor;
         private final Uni uni;
+        private final Context context;
         Object item = SENTINEL;
         Throwable failure;
 
-        UniHandler(AndSupervisor supervisor, Uni observed) {
+        UniHandler(AndSupervisor supervisor, Uni observed, Context context) {
             this.supervisor = supervisor;
             this.uni = observed;
+            this.context = context;
+        }
+
+        @Override
+        public Context context() {
+            return context;
         }
 
         @Override

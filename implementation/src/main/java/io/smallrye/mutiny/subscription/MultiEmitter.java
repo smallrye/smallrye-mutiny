@@ -13,7 +13,7 @@ import io.smallrye.mutiny.Multi;
  *
  * @param <T> the expected type of items.
  */
-public interface MultiEmitter<T> {
+public interface MultiEmitter<T> extends ContextSupport {
 
     /**
      * Emits an {@code item} event downstream.

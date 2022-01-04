@@ -5,6 +5,7 @@ import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
+import io.smallrye.mutiny.Context;
 import io.smallrye.mutiny.subscription.UniEmitter;
 import io.smallrye.mutiny.subscription.UniSubscriber;
 import io.smallrye.mutiny.subscription.UniSubscription;
@@ -78,5 +79,10 @@ public class DefaultUniEmitter<T> implements UniEmitter<T>, UniSubscription {
 
     public boolean isTerminated() {
         return disposed.get();
+    }
+
+    @Override
+    public Context context() {
+        return downstream.context();
     }
 }

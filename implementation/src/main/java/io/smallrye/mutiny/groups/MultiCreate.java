@@ -18,6 +18,8 @@ import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 
 import io.smallrye.common.annotation.CheckReturnValue;
+import io.smallrye.common.annotation.Experimental;
+import io.smallrye.mutiny.Context;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.converters.MultiConverter;
@@ -467,6 +469,23 @@ public class MultiCreate {
     public <T> Multi<T> deferred(Supplier<Multi<? extends T>> supplier) {
         Supplier<Multi<? extends T>> actual = Infrastructure.decorate(nonNull(supplier, "supplier"));
         return Infrastructure.onMultiCreation(new DeferredMulti<>(actual));
+    }
+
+    /**
+     * Creates a {@link Multi} using {@link Function#apply(Object)} on the subscription-bound {@link Context}
+     * (the mapper is called at subscription time).
+     * <p>
+     * This method is semantically equivalent to {@link #deferred(Supplier)}, except that it passes a context.
+     *
+     * @param mapper the mapper, must not be {@code null}, must not produce {@code null}
+     * @param <T> the type of the item
+     * @return the produced {@link Multi}
+     */
+    @Experimental("Context support is a new experimental API introduced in Mutiny 1.3.0")
+    @CheckReturnValue
+    public <T> Multi<T> context(Function<Context, Multi<? extends T>> mapper) {
+        Function<Context, Multi<? extends T>> actual = Infrastructure.decorate(nonNull(mapper, "mapper"));
+        return Infrastructure.onMultiCreation(new DeferredMultiWithContext<>(actual));
     }
 
     /**

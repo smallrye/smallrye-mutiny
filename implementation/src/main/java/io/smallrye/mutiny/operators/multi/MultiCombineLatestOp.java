@@ -11,11 +11,13 @@ import java.util.function.Function;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscription;
 
+import io.smallrye.mutiny.Context;
 import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.helpers.Subscriptions;
 import io.smallrye.mutiny.helpers.queues.SpscLinkedArrayQueue;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.MultiOperator;
+import io.smallrye.mutiny.subscription.ContextSupport;
 import io.smallrye.mutiny.subscription.MultiSubscriber;
 
 /**
@@ -93,8 +95,16 @@ public class MultiCombineLatestOp<I, O> extends MultiOperator<I, O> {
                 int bufferSize, boolean delayErrors) {
             this.downstream = downstream;
             this.combinator = combinator;
+
+            Context context;
+            if (downstream instanceof ContextSupport) {
+                context = ((ContextSupport) downstream).context();
+            } else {
+                context = Context.empty();
+            }
+
             for (int i = 0; i < size; i++) {
-                subscribers.add(new CombineLatestInnerSubscriber<>(this, i, bufferSize));
+                subscribers.add(new CombineLatestInnerSubscriber<>(context, this, i, bufferSize));
             }
             this.latest = new Object[size];
             this.queue = new SpscLinkedArrayQueue<>(bufferSize);
@@ -294,16 +304,18 @@ public class MultiCombineLatestOp<I, O> extends MultiOperator<I, O> {
         }
     }
 
-    private static final class CombineLatestInnerSubscriber<T> implements MultiSubscriber<T> {
+    private static final class CombineLatestInnerSubscriber<T> implements MultiSubscriber<T>, ContextSupport {
 
         private final AtomicReference<Subscription> upstream = new AtomicReference<>();
+        private final Context context;
         private final CombineLatestCoordinator<T, ?> parent;
         private final int index;
         private final int prefetch;
         private final int limit;
         int produced;
 
-        CombineLatestInnerSubscriber(CombineLatestCoordinator<T, ?> parent, int index, int prefetch) {
+        CombineLatestInnerSubscriber(Context context, CombineLatestCoordinator<T, ?> parent, int index, int prefetch) {
+            this.context = context;
             this.parent = parent;
             this.index = index;
             this.prefetch = prefetch;
@@ -347,6 +359,11 @@ public class MultiCombineLatestOp<I, O> extends MultiOperator<I, O> {
             } else {
                 produced = p;
             }
+        }
+
+        @Override
+        public Context context() {
+            return this.context;
         }
     }
 }

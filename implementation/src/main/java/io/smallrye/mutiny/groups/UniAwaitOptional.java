@@ -5,6 +5,7 @@ import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
 import java.time.Duration;
 import java.util.Optional;
 
+import io.smallrye.mutiny.Context;
 import io.smallrye.mutiny.TimeoutException;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.operators.uni.UniBlockingAwait;
@@ -19,9 +20,11 @@ import io.smallrye.mutiny.operators.uni.UniBlockingAwait;
 public class UniAwaitOptional<T> {
 
     private final Uni<T> upstream;
+    private final Context context;
 
-    public UniAwaitOptional(Uni<T> upstream) {
+    public UniAwaitOptional(Uni<T> upstream, Context context) {
         this.upstream = nonNull(upstream, "upstream");
+        this.context = context;
     }
 
     /**
@@ -58,7 +61,7 @@ public class UniAwaitOptional<T> {
      * @return the item from the {@link Uni}, potentially {@code null}
      */
     public Optional<T> atMost(Duration duration) {
-        return Optional.ofNullable(UniBlockingAwait.await(upstream, duration));
+        return Optional.ofNullable(UniBlockingAwait.await(upstream, duration, context));
     }
 
 }

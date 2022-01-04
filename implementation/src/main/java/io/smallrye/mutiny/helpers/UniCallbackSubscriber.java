@@ -8,6 +8,7 @@ import java.util.function.Consumer;
 
 import org.reactivestreams.Subscription;
 
+import io.smallrye.mutiny.Context;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.subscription.UniSubscriber;
@@ -27,6 +28,7 @@ public class UniCallbackSubscriber<T> implements UniSubscriber<T>, UniSubscripti
 
     private final Consumer<? super T> onResultCallback;
     private final Consumer<? super Throwable> onFailureCallback;
+    private final Context context;
 
     /**
      * Creates a {@link UniSubscriber} consuming the item and failure of a
@@ -34,11 +36,14 @@ public class UniCallbackSubscriber<T> implements UniSubscriber<T>, UniSubscripti
      *
      * @param onResultCallback callback invoked on item event, must not be {@code null}
      * @param onFailureCallback callback invoked on failure event, must not be {@code null}
+     * @param context
      */
     public UniCallbackSubscriber(Consumer<? super T> onResultCallback,
-            Consumer<? super Throwable> onFailureCallback) {
+            Consumer<? super Throwable> onFailureCallback,
+            Context context) {
         this.onResultCallback = nonNull(onResultCallback, "onResultCallback");
         this.onFailureCallback = nonNull(onFailureCallback, "onFailureCallback");
+        this.context = context;
     }
 
     @Override
@@ -81,5 +86,10 @@ public class UniCallbackSubscriber<T> implements UniSubscriber<T>, UniSubscripti
         if (sub != null) {
             sub.cancel();
         }
+    }
+
+    @Override
+    public Context context() {
+        return context;
     }
 }

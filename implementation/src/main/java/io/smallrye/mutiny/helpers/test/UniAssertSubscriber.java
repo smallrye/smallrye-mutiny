@@ -1,5 +1,6 @@
 package io.smallrye.mutiny.helpers.test;
 
+import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
 import static io.smallrye.mutiny.helpers.test.AssertSubscriber.DEFAULT_TIMEOUT;
 import static io.smallrye.mutiny.helpers.test.AssertionHelper.*;
 
@@ -10,6 +11,7 @@ import java.util.List;
 import java.util.concurrent.*;
 import java.util.function.Consumer;
 
+import io.smallrye.mutiny.Context;
 import io.smallrye.mutiny.subscription.UniSubscriber;
 import io.smallrye.mutiny.subscription.UniSubscription;
 
@@ -20,6 +22,7 @@ import io.smallrye.mutiny.subscription.UniSubscription;
  */
 public class UniAssertSubscriber<T> implements UniSubscriber<T> {
     private volatile boolean cancelImmediatelyOnSubscription;
+    private final Context context;
 
     // Writable from the subscribers
     private final CompletableFuture<T> completion = new CompletableFuture<>();
@@ -42,9 +45,11 @@ public class UniAssertSubscriber<T> implements UniSubscriber<T> {
     /**
      * Create a new {@link UniAssertSubscriber}.
      *
+     * @param context the subscription context, cannot be {@code null}
      * @param cancelled {@code true} when the subscription shall be cancelled upfront, {@code false} otherwise
      */
-    public UniAssertSubscriber(boolean cancelled) {
+    public UniAssertSubscriber(Context context, boolean cancelled) {
+        this.context = nonNull(context, "context");
         hasCompleted = completion.whenComplete((item, failure) -> {
             if (failure == null) {
                 this.onResultThreadName = Thread.currentThread().getName();
@@ -65,20 +70,43 @@ public class UniAssertSubscriber<T> implements UniSubscriber<T> {
     }
 
     /**
-     * Create a new {@link UniAssertSubscriber} with no upfront cancellation.
+     * Create a new {@link UniAssertSubscriber} with an upfront cancellation configuration and an empty {@link Context}.
+     */
+    public UniAssertSubscriber(boolean cancelled) {
+        this(Context.empty(), cancelled);
+    }
+
+    /**
+     * Create a new {@link UniAssertSubscriber} with no upfront cancellation and an empty {@link Context}.
      */
     public UniAssertSubscriber() {
         this(false);
     }
 
     /**
-     * Create a new {@link UniAssertSubscriber} with no upfront cancellation.
+     * Create a new {@link UniAssertSubscriber} with no upfront cancellation and an empty {@link Context}.
      *
      * @param <T> the type of the item
      * @return a new subscriber
      */
     public static <T> UniAssertSubscriber<T> create() {
         return new UniAssertSubscriber<>();
+    }
+
+    /**
+     * Create a new {@link UniAssertSubscriber} with no upfront cancellation and a {@link Context}.
+     *
+     * @param <T> the type of the item
+     * @param context the context, cannot be {@code null}
+     * @return a new subscriber
+     */
+    public static <T> UniAssertSubscriber<T> create(Context context) {
+        return new UniAssertSubscriber<>(context, false);
+    }
+
+    @Override
+    public Context context() {
+        return this.context;
     }
 
     @Override

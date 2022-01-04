@@ -24,15 +24,6 @@ public class UniOrCombination<T> extends UniOperator<Void, T> {
                 .forEach(u -> challengers.add(nonNull(u, "iterable` must not contain a `null` value")));
     }
 
-    public UniOrCombination(Uni<? super T>[] array) {
-        super(null);
-        nonNull(array, "array");
-        this.challengers = new ArrayList<>();
-        for (Uni<? super T> u : array) {
-            challengers.add(nonNull(u, "array` must not contain a `null` value"));
-        }
-    }
-
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     public void subscribe(UniSubscriber<? super T> subscriber) {
@@ -54,7 +45,7 @@ public class UniOrCombination<T> extends UniOperator<Void, T> {
 
         List<CompletableFuture<? super T>> futures = new ArrayList<>();
         challengers.forEach(uni -> {
-            CompletableFuture<? super T> future = uni.subscribe().asCompletionStage();
+            CompletableFuture<? super T> future = uni.subscribe().asCompletionStage(subscriber.context());
             futures.add(future);
         });
 

@@ -14,6 +14,8 @@ import java.util.function.Supplier;
 import org.reactivestreams.Publisher;
 
 import io.smallrye.common.annotation.CheckReturnValue;
+import io.smallrye.common.annotation.Experimental;
+import io.smallrye.mutiny.Context;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.converters.UniConverter;
@@ -418,6 +420,23 @@ public class UniCreate {
     public <T> Uni<T> deferred(Supplier<Uni<? extends T>> supplier) {
         Supplier<Uni<? extends T>> actual = Infrastructure.decorate(ParameterValidation.nonNull(supplier, "supplier"));
         return Infrastructure.onUniCreation(new UniCreateFromDeferredSupplier<>(actual));
+    }
+
+    /**
+     * Creates a {@link Uni} using {@link Function#apply(Object)} on the subscription-bound {@link Context}
+     * (the mapper is called at subscription time).
+     * <p>
+     * This method is semantically equivalent to {@link #deferred(Supplier)}, except that it passes a context.
+     *
+     * @param mapper the mapper, must not be {@code null}, must not produce {@code null}
+     * @param <T> the type of the item
+     * @return the produced {@link Uni}
+     */
+    @Experimental("Context support is a new experimental API introduced in Mutiny 1.3.0")
+    @CheckReturnValue
+    public <T> Uni<T> context(Function<Context, Uni<? extends T>> mapper) {
+        Function<Context, Uni<? extends T>> actual = Infrastructure.decorate(nonNull(mapper, "mapper"));
+        return Infrastructure.onUniCreation(new DeferredUniWithContext<>(actual));
     }
 
     /**

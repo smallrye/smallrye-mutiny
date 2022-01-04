@@ -143,6 +143,18 @@ public interface Uni<T> {
     }
 
     /**
+     * Shortcut for {@link UniSubscribe#asCompletionStage(Context)}.
+     *
+     * @param context the context, cannot {@code null}
+     * @return the completion stage receiving the items emitted by this {@link Uni}
+     */
+    @CheckReturnValue
+    @Experimental("Context support is a new experimental API introduced in Mutiny 1.3.0")
+    default CompletableFuture<T> subscribeAsCompletionStage(Context context) {
+        return subscribe().asCompletionStage(context);
+    }
+
+    /**
      * Awaits (blocking the caller thread) until the item or a failure is emitted by the observed {@link Uni}.
      * If the observed uni fails, the failure is thrown. In the case of a checked exception, the exception is wrapped
      * into a {@link java.util.concurrent.CompletionException}.
@@ -164,6 +176,33 @@ public interface Uni<T> {
      */
     @CheckReturnValue
     UniAwait<T> await();
+
+    /**
+     * Awaits (blocking the caller thread) until the item or a failure is emitted by the observed {@link Uni}.
+     * If the observed uni fails, the failure is thrown. In the case of a checked exception, the exception is wrapped
+     * into a {@link java.util.concurrent.CompletionException}.
+     *
+     * <p>
+     * Examples:
+     * </p>
+     *
+     * <pre>
+     * {@code
+     * Uni<T> uni = ...;
+     * T res = uni.awaitUsing(context).indefinitely(); // Await indefinitely until it get the item.
+     * T res = uni.awaitUsing(context).atMost(Duration.ofMillis(1000)); // Awaits at most 1s. After that, a TimeoutException is thrown
+     * Optional<T> res = uni.awaitUsing(context).asOptional().indefinitely(); // Retrieves the item as an Optional, empty if the item is null
+     * }
+     * </pre>
+     *
+     * @param context the context, cannot be {@code null}
+     * @return the object to configure the retrieval.
+     */
+    @CheckReturnValue
+    @Experimental("Context support is a new experimental API introduced in Mutiny 1.3.0")
+    default UniAwait<T> awaitUsing(Context context) {
+        throw new UnsupportedOperationException("Default method added to limit binary incompatibility");
+    }
 
     /**
      * Configures the action to execute when the observed {@link Uni} emits the item (potentially {@code null}).
@@ -787,7 +826,7 @@ public interface Uni<T> {
      * Join the results from multiple {@link Uni} (e.g., collect all values, pick the first to respond, etc).
      * <p>
      * Here is an example where several {@link Uni} are joined, and result in a {@code Uni<List<Number>>}:
-     * 
+     *
      * <pre>
      * Uni&lt;Number&gt; a = Uni.createFrom().item(1);
      * Uni&lt;Number&gt; b = Uni.createFrom().item(2L);
@@ -795,7 +834,7 @@ public interface Uni<T> {
      *
      * Uni&lt;List&lt;Number&gt;&gt; uni = Uni.join().all(a, b, c).andCollectFailures();
      * </pre>
-     *
+     * <p>
      * The list of {@code Unis} must not be empty, as in that case, no event will be sent.
      *
      * @return the object to configure the join behavior.
@@ -804,5 +843,54 @@ public interface Uni<T> {
     @CheckReturnValue
     static UniJoin join() {
         return UniJoin.SHARED_INSTANCE;
+    }
+
+    /**
+     * Materialize the subscriber {@link Context} for a sub-pipeline.
+     *
+     * <p>
+     * The provided function takes this {@link Uni} and the {@link Context} as parameters, and returns a {@link Uni}
+     * to build the sub-pipeline, as in:
+     *
+     * <pre>
+     * {@code
+     * someUni.withContext((uni, ctx) -> uni.onItem().transform(n -> n + "::" + ctx.getOrElse("foo", () -> "yolo")));
+     * }
+     * </pre>
+     *
+     * <p>
+     * Note that the {@code builder} function is called <strong>at subscription time</strong>, so it cannot see
+     * context updates from upstream operators yet.
+     *
+     * @param builder the function that builds the sub-pipeline from this {@link Uni} and the {@link Context},
+     *        must not be {@code null}, must not return {@code null}.
+     * @param <R> the resulting {@link Uni} type
+     * @return the resulting {@link Uni}
+     */
+    @Experimental("Context support is a new experimental API introduced in Mutiny 1.3.0")
+    @CheckReturnValue
+    default <R> Uni<R> withContext(BiFunction<Uni<T>, Context, Uni<R>> builder) {
+        throw new UnsupportedOperationException("Default method added to limit binary incompatibility");
+    }
+
+    /**
+     * Materialize the context by attaching it to items using the {@link ItemWithContext} wrapper class.
+     *
+     * <p>
+     * This is a shortcut for:
+     *
+     * <pre>
+     * {@code
+     * someUni.withContext((uni, ctx) -> uni.onItem().transform(item -> new ItemWithContext<>(ctx, item)));
+     * }
+     * </pre>
+     *
+     * @return the resulting {@link Uni}
+     * @see #withContext(BiFunction)
+     */
+    @Experimental("Context support is a new experimental API introduced in Mutiny 1.3.0")
+    @CheckReturnValue
+    default Uni<ItemWithContext<T>> attachContext() {
+        return this.withContext((uni, ctx) -> uni.onItem().transform(item -> new ItemWithContext<>(ctx, item)));
     }
 }

@@ -312,3 +312,10 @@ logging:
     - beginner
   related:
     - guide: infrastructure
+
+context-passing:
+  title: Context passing
+  text: Learn how to pass an implicit context between operators
+  labels:
+    - intermediate
+    - advanced

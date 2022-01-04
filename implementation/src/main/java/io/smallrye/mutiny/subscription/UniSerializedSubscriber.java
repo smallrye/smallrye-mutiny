@@ -4,6 +4,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 import io.smallrye.mutiny.CompositeException;
+import io.smallrye.mutiny.Context;
 import io.smallrye.mutiny.helpers.EmptyUniSubscription;
 import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
@@ -52,6 +53,11 @@ public class UniSerializedSubscriber<T> implements UniSubscriber<T>, UniSubscrip
         if (state.compareAndSet(INIT, SUBSCRIBED)) {
             upstream.subscribe(this);
         }
+    }
+
+    @Override
+    public Context context() {
+        return downstream.context();
     }
 
     @Override

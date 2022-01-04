@@ -17,6 +17,7 @@ import java.util.function.Supplier;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 
+import io.smallrye.mutiny.Context;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.helpers.test.UniAssertSubscriber;
 import io.smallrye.mutiny.operators.uni.builders.DefaultUniEmitter;
@@ -166,6 +167,11 @@ public class UniCreateFromEmitterTest {
                 .subscribe().withSubscriber(new UniSubscriber<Integer>() {
 
                     @Override
+                    public Context context() {
+                        return Context.empty();
+                    }
+
+                    @Override
                     public void onSubscribe(UniSubscription subscription) {
 
                     }
@@ -198,6 +204,10 @@ public class UniCreateFromEmitterTest {
             }
         })
                 .subscribe().withSubscriber(new UniSubscriber<Integer>() {
+                    @Override
+                    public Context context() {
+                        return Context.empty();
+                    }
 
                     @Override
                     public void onSubscribe(UniSubscription subscription) {

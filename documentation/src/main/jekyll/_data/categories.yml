@@ -28,6 +28,7 @@
     - emission-threads
     - emit-subscription
     - logging
+    - context-passing
 
 - name: Integration
   guides:

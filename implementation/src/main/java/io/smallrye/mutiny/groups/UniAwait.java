@@ -6,6 +6,7 @@ import java.time.Duration;
 import java.util.Optional;
 
 import io.smallrye.common.annotation.CheckReturnValue;
+import io.smallrye.mutiny.Context;
 import io.smallrye.mutiny.TimeoutException;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.operators.uni.UniBlockingAwait;
@@ -21,9 +22,11 @@ import io.smallrye.mutiny.operators.uni.UniBlockingAwait;
 public class UniAwait<T> {
 
     private final Uni<T> upstream;
+    private final Context context;
 
-    public UniAwait(Uni<T> upstream) {
+    public UniAwait(Uni<T> upstream, Context context) {
         this.upstream = nonNull(upstream, "upstream");
+        this.context = context;
     }
 
     /**
@@ -59,7 +62,7 @@ public class UniAwait<T> {
      * @return the item from the {@link Uni}, potentially {@code null}
      */
     public T atMost(Duration duration) {
-        return UniBlockingAwait.await(upstream, duration);
+        return UniBlockingAwait.await(upstream, duration, context);
     }
 
     /**
@@ -70,7 +73,7 @@ public class UniAwait<T> {
      */
     @CheckReturnValue
     public UniAwaitOptional<T> asOptional() {
-        return new UniAwaitOptional<>(upstream);
+        return new UniAwaitOptional<>(upstream, context);
     }
 
 }

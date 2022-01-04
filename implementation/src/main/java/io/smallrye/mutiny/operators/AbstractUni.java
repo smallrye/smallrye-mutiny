@@ -1,18 +1,18 @@
 package io.smallrye.mutiny.operators;
 
+import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
+
 import java.util.concurrent.Executor;
+import java.util.function.BiFunction;
 import java.util.function.Predicate;
 
+import io.smallrye.mutiny.Context;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.converters.uni.UniToMultiPublisher;
 import io.smallrye.mutiny.groups.*;
-import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
-import io.smallrye.mutiny.operators.uni.UniEmitOn;
-import io.smallrye.mutiny.operators.uni.UniLogger;
-import io.smallrye.mutiny.operators.uni.UniMemoizeOp;
-import io.smallrye.mutiny.operators.uni.UniRunSubscribeOn;
+import io.smallrye.mutiny.operators.uni.*;
 import io.smallrye.mutiny.subscription.UniSubscriber;
 
 public abstract class AbstractUni<T> implements Uni<T> {
@@ -86,13 +86,18 @@ public abstract class AbstractUni<T> implements Uni<T> {
 
     @Override
     public UniAwait<T> await() {
-        return new UniAwait<>(this);
+        return awaitUsing(null);
+    }
+
+    @Override
+    public UniAwait<T> awaitUsing(Context context) {
+        return new UniAwait<>(this, context);
     }
 
     @Override
     public Uni<T> emitOn(Executor executor) {
         return Infrastructure.onUniCreation(
-                new UniEmitOn<>(this, ParameterValidation.nonNull(executor, "executor")));
+                new UniEmitOn<>(this, nonNull(executor, "executor")));
     }
 
     @Override
@@ -138,11 +143,16 @@ public abstract class AbstractUni<T> implements Uni<T> {
 
     @Override
     public Uni<T> log(String identifier) {
-        return new UniLogger<>(this, identifier);
+        return Infrastructure.onUniCreation(new UniLogger<>(this, identifier));
     }
 
     @Override
     public Uni<T> log() {
         return log("Uni." + this.getClass().getSimpleName());
+    }
+
+    @Override
+    public <R> Uni<R> withContext(BiFunction<Uni<T>, Context, Uni<R>> builder) {
+        return Infrastructure.onUniCreation(new UniWithContext<>(this, nonNull(builder, "builder")));
     }
 }

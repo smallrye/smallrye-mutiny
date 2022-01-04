@@ -22,7 +22,7 @@ import io.smallrye.mutiny.groups.UniSubscribe;
  *
  * @param <T> the expected type of item
  */
-public interface UniSubscriber<T> {
+public interface UniSubscriber<T> extends ContextSupport {
 
     /**
      * Event handler called once the subscribed {@link Uni} has taken into account the subscription. The {@link Uni}

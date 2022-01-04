@@ -12,10 +12,12 @@ import java.util.function.Function;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscription;
 
+import io.smallrye.mutiny.Context;
 import io.smallrye.mutiny.helpers.Subscriptions;
 import io.smallrye.mutiny.helpers.queues.Queues;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.AbstractMulti;
+import io.smallrye.mutiny.subscription.ContextSupport;
 import io.smallrye.mutiny.subscription.MultiSubscriber;
 
 public final class MultiZipOp<O> extends AbstractMulti<O> {
@@ -68,9 +70,16 @@ public final class MultiZipOp<O> extends AbstractMulti<O> {
             this.combinator = combinator;
             this.collectFailures = collectFailures;
 
+            Context context;
+            if (downstream instanceof ContextSupport) {
+                context = ((ContextSupport) downstream).context();
+            } else {
+                context = Context.empty();
+            }
+
             subscribers = new ArrayList<>();
             for (int i = 0; i < n; i++) {
-                subscribers.add(new ZipSubscriber<>(this, prefetch));
+                subscribers.add(new ZipSubscriber<>(context, this, prefetch));
             }
             this.current = new FixedSizeArrayList<>(n);
         }
@@ -237,17 +246,19 @@ public final class MultiZipOp<O> extends AbstractMulti<O> {
         }
     }
 
-    static final class ZipSubscriber<R> implements MultiSubscriber<Object>, Subscription {
+    static final class ZipSubscriber<R> implements MultiSubscriber<Object>, Subscription, ContextSupport {
 
         private final AtomicReference<Subscription> upstream = new AtomicReference<>();
         private final ZipCoordinator<R> parent;
         private final int prefetch;
         private final int limit;
+        private final Context context;
         private Queue<Object> queue;
         private long produced;
         private volatile boolean done;
 
-        ZipSubscriber(ZipCoordinator<R> parent, int prefetch) {
+        ZipSubscriber(Context context, ZipCoordinator<R> parent, int prefetch) {
+            this.context = context;
             this.parent = parent;
             this.prefetch = prefetch;
             this.limit = prefetch - (prefetch >> 2);
@@ -292,6 +303,11 @@ public final class MultiZipOp<O> extends AbstractMulti<O> {
             } else {
                 produced = p;
             }
+        }
+
+        @Override
+        public Context context() {
+            return context;
         }
     }
 

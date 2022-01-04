@@ -20,6 +20,7 @@ import org.junit.jupiter.api.parallel.ResourceAccessMode;
 import org.junit.jupiter.api.parallel.ResourceLock;
 
 import io.smallrye.mutiny.CompositeException;
+import io.smallrye.mutiny.Context;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.helpers.test.UniAssertSubscriber;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
@@ -459,6 +460,12 @@ public class UniSerializedSubscriberTest {
                 reference::set);
 
         UniSerializedSubscriber.subscribe(uni, new UniSubscriber<Integer>() {
+
+            @Override
+            public Context context() {
+                return Context.empty();
+            }
+
             @Override
             public void onSubscribe(UniSubscription subscription) {
                 // Do nothing
@@ -496,6 +503,11 @@ public class UniSerializedSubscriberTest {
                 reference::set);
 
         UniSerializedSubscriber.subscribe(uni, new UniSubscriber<Integer>() {
+            @Override
+            public Context context() {
+                return Context.empty();
+            }
+
             @Override
             public void onSubscribe(UniSubscription subscription) {
                 // Do nothing
@@ -539,6 +551,11 @@ public class UniSerializedSubscriberTest {
 
         UniSerializedSubscriber.subscribe(uni, new UniSubscriber<Integer>() {
             @Override
+            public Context context() {
+                return Context.empty();
+            }
+
+            @Override
             public void onSubscribe(UniSubscription subscription) {
                 // Do nothing
             }
@@ -581,6 +598,11 @@ public class UniSerializedSubscriberTest {
 
         UniSerializedSubscriber.subscribe(uni, new UniSubscriber<Integer>() {
             @Override
+            public Context context() {
+                return Context.empty();
+            }
+
+            @Override
             public void onSubscribe(UniSubscription subscription) {
                 // Do nothing
             }
@@ -619,6 +641,11 @@ public class UniSerializedSubscriberTest {
         };
 
         UniSerializedSubscriber.subscribe(uni, new UniSubscriber<Integer>() {
+            @Override
+            public Context context() {
+                return Context.empty();
+            }
+
             @Override
             public void onSubscribe(UniSubscription subscription) {
                 subscription.cancel();

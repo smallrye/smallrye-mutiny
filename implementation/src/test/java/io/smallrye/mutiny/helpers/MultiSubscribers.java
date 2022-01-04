@@ -3,6 +3,8 @@ package io.smallrye.mutiny.helpers;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
+import io.smallrye.mutiny.Context;
+import io.smallrye.mutiny.subscription.ContextSupport;
 import io.smallrye.mutiny.subscription.MultiSubscriber;
 
 public class MultiSubscribers {
@@ -15,12 +17,21 @@ public class MultiSubscribers {
         return new MultiSubscriberWrapper<>(subscriber);
     }
 
-    private static class MultiSubscriberWrapper<T> implements MultiSubscriber<T> {
+    private static class MultiSubscriberWrapper<T> implements MultiSubscriber<T>, ContextSupport {
 
         private final Subscriber<T> delegate;
 
         private MultiSubscriberWrapper(Subscriber<T> delegate) {
             this.delegate = delegate;
+        }
+
+        @Override
+        public Context context() {
+            if (delegate instanceof ContextSupport) {
+                return ((ContextSupport) delegate).context();
+            } else {
+                return Context.empty();
+            }
         }
 
         @Override

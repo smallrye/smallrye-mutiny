@@ -7,10 +7,12 @@ import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
+import io.smallrye.mutiny.Context;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.helpers.Subscriptions;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
+import io.smallrye.mutiny.subscription.ContextSupport;
 import io.smallrye.mutiny.subscription.MultiSubscriber;
 import io.smallrye.mutiny.subscription.SerializedSubscriber;
 
@@ -38,7 +40,7 @@ public final class MultiSkipUntilOtherOp<T, U> extends AbstractMultiOperator<T, 
     }
 
     @SuppressWarnings("SubscriberImplementation")
-    static final class OtherStreamTracker<U> implements MultiSubscriber<U> {
+    static final class OtherStreamTracker<U> implements MultiSubscriber<U>, ContextSupport {
 
         private final SkipUntilMainProcessor<?> main;
 
@@ -68,6 +70,10 @@ public final class MultiSkipUntilOtherOp<T, U> extends AbstractMultiOperator<T, 
             main.open();
         }
 
+        @Override
+        public Context context() {
+            return main.context();
+        }
     }
 
     static final class SkipUntilMainProcessor<T> extends MultiOperatorProcessor<T, T> {
