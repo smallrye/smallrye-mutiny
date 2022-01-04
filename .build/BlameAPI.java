@@ -1,13 +1,8 @@
 ///usr/bin/env jbang "$0" "$@" ; exit $?
-//DEPS info.picocli:picocli:4.5.0
-//DEPS org.eclipse.jgit:org.eclipse.jgit:5.10.0.202012080955-r
-//DEPS com.google.guava:guava:30.1-jre
-//DEPS org.slf4j:slf4j-simple:1.7.30
-
-
-import picocli.CommandLine;
-import picocli.CommandLine.Command;
-import picocli.CommandLine.Parameters;
+//DEPS info.picocli:picocli:4.6.2
+//DEPS org.eclipse.jgit:org.eclipse.jgit:6.0.0.202111291000-r
+//DEPS com.google.guava:guava:31.0-jre
+//DEPS org.slf4j:slf4j-simple:1.7.32
 
 import java.io.File;
 import java.io.IOException;
@@ -19,8 +14,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
 import java.util.concurrent.Callable;
 
 import com.google.common.base.Charsets;
@@ -33,22 +26,34 @@ import org.eclipse.jgit.api.BlameCommand;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.blame.BlameResult;
 import org.eclipse.jgit.errors.NoWorkTreeException;
-import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
+import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
+
+import picocli.CommandLine;
+import picocli.CommandLine.Command;
+import picocli.CommandLine.Option;
 
 
-@Command(name = "GitBlameDeprecated", mixinStandardHelpOptions = true, version = "GitBlameDeprecated 0.1",
-        description = "Find the (Java) deprecated methods in a local Git repository. Usage: jbang GitBlameDeprecated path-to-repository")
-class GitBlameDeprecated implements Callable<Integer> {
+@Command(name = "BlameAPI", mixinStandardHelpOptions = true, version = "BlameAPI 0.2",
+        description = "Find the Java deprecated or experimental methods in a local Git repository.")
+class BlameAPI implements Callable<Integer> {
 
-    @Parameters(index = "0", description = "The root of the git directory", defaultValue = ".")
+	enum Target {
+		deprecated,
+		experimental
+	}
+
+    @Option(names = "--root", description = "The root of the git directory.", defaultValue = ".")
 	private File directory;
+
+	@Option(names = "--target", description = "The search target in [deprecation, experimental].", defaultValue = "deprecated")
+	private Target target;
 
 	private Map<File, BlameResult> cache = new HashMap<>();
 
 	public static void main(String... args) {
-        int exitCode = new CommandLine(new GitBlameDeprecated()).execute(args);
+        int exitCode = new CommandLine(new BlameAPI()).execute(args);
         System.exit(exitCode);
     }
 
@@ -56,34 +61,34 @@ class GitBlameDeprecated implements Callable<Integer> {
 	public Integer call() throws Exception {
 		var repository = openRepository();
 
-		List<Deprecation> list = new ArrayList<>();
-		// Collect deprecations
-		var deprecations = getDeprecations();
+		List<BlameTarget> list = new ArrayList<>();
+		// Collect blameTargets
+		var blameTargets = getBlameTargets();
 
-		// Retrieve the commit related to these deprecations.
-		for (var entry : deprecations.asMap().entrySet()) {
+		// Retrieve the commit related to these blameTargets.
+		for (var entry : blameTargets.asMap().entrySet()) {
 			for (var d : entry.getValue()) {
 				extractBlame(repository, d);
 				list.add(d);
 			}
 		}
 
-		// Sort deprecation by dates (oldest first)
+		// Sort blameTarget by dates (oldest first)
 		Collections.sort(list);
 
 		// Print report
-		for(Deprecation deprecation : list) {
-			System.out.println(deprecation);
+		for(BlameTarget blameTarget : list) {
+			System.out.println(blameTarget);
 		}
 
         return 0;
 	}
 
 
-	private void extractBlame(Repository repository, Deprecation deprecation) throws GitAPIException, NoWorkTreeException, IOException {
-		BlameResult blame = cache.computeIfAbsent(deprecation.file, f -> {
+	private void extractBlame(Repository repository, BlameTarget blameTarget) throws GitAPIException, NoWorkTreeException, IOException {
+		BlameResult blame = cache.computeIfAbsent(blameTarget.file, f -> {
 			BlameCommand blamer = new BlameCommand(repository);
-			blamer.setFilePath(deprecation.file.getAbsolutePath()
+			blamer.setFilePath(blameTarget.file.getAbsolutePath()
 				.substring(directory.getAbsolutePath().length() +1));
 			try {
 				return blamer.call();
@@ -94,19 +99,19 @@ class GitBlameDeprecated implements Callable<Integer> {
 		});  
 
 		if (blame == null) {
-			deprecation.author = "unknown";
-			deprecation.commit = "commit not found";
-			deprecation.date = Integer.MAX_VALUE;
+			blameTarget.author = "unknown";
+			blameTarget.commit = "commit not found";
+			blameTarget.date = Integer.MAX_VALUE;
 			return;
 		}
 
-		RevCommit commit = blame.getSourceCommit(deprecation.line);
-		deprecation.commit = commit.getShortMessage();
-		deprecation.date = commit.getCommitTime();
-		deprecation.author = commit.getAuthorIdent().getName();
+		RevCommit commit = blame.getSourceCommit(blameTarget.line);
+		blameTarget.commit = commit.getShortMessage();
+		blameTarget.date = commit.getCommitTime();
+		blameTarget.author = commit.getAuthorIdent().getName();
 	}
 
-	static class Deprecation implements Comparable<Deprecation> {
+	static class BlameTarget implements Comparable<BlameTarget> {
 		String signature;
 		int line;
 		File file;
@@ -115,7 +120,7 @@ class GitBlameDeprecated implements Callable<Integer> {
 		String author;
 
 		@Override
-		public int compareTo(Deprecation o) {
+		public int compareTo(BlameTarget o) {
 			return Integer.compare(date, o.date);
 		}
 
@@ -140,9 +145,9 @@ class GitBlameDeprecated implements Callable<Integer> {
 		}
 	}
 	
-	public Multimap<File, Deprecation> getDeprecations() throws IOException {
+	public Multimap<File, BlameTarget> getBlameTargets() throws IOException {
 		Iterable<Path> path = MoreFiles.fileTraverser().breadthFirst(directory.toPath());
-		Multimap<File, Deprecation> map = ArrayListMultimap.create();
+		Multimap<File, BlameTarget> map = ArrayListMultimap.create();
 
 		for(Path p : path) {
 			File file = p.toFile();
@@ -150,11 +155,11 @@ class GitBlameDeprecated implements Callable<Integer> {
 				List<String> result = Files.readLines(file, Charsets.UTF_8);
 				for (int i = 0; i < result.size(); i++) {
 					if (isDeprecated(result.get(i))) {
-						Deprecation deprecation = new Deprecation();
-						deprecation.line = i;
-						deprecation.signature = result.get(i + 1).trim();
-						deprecation.file = file;
-						map.put(file, deprecation);
+						BlameTarget blameTarget = new BlameTarget();
+						blameTarget.line = i;
+						blameTarget.signature = result.get(i + 1).trim();
+						blameTarget.file = file;
+						map.put(file, blameTarget);
 					}
 				}
 			}
@@ -163,7 +168,8 @@ class GitBlameDeprecated implements Callable<Integer> {
 	}
 
 	private boolean isDeprecated(String l) {
-		return l.trim().equalsIgnoreCase("@Deprecated");
+		var annotation = (target == Target.deprecated) ? "@Deprecated" : "@Experimental";
+		return l.trim().contains(annotation);
 	}
 
 	public Repository openRepository() throws IOException {
