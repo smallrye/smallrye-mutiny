@@ -367,7 +367,6 @@ public interface Uni<T> {
      * @return the object to configure memoization
      * @apiNote This is an experimental API
      */
-    @Experimental("Memoization is an experimental feature at this stage")
     @CheckReturnValue
     UniMemoize<T> memoize();
 

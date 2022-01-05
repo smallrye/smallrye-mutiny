@@ -159,6 +159,22 @@
           "code": "java.method.removed",
           "old": "method io.smallrye.mutiny.groups.MultiTransform<T> io.smallrye.mutiny.operators.AbstractMulti<T>::transform() @ io.smallrye.mutiny.helpers.spies.MultiOnTerminationSpy<T>",
           "justification": "Deprecated API removal (~1 year old)"
+        },
+        {
+          "ignore": true,
+          "code": "java.annotation.removed",
+          "old": "method io.smallrye.mutiny.groups.UniMemoize<T> io.smallrye.mutiny.Uni<T>::memoize()",
+          "new": "method io.smallrye.mutiny.groups.UniMemoize<T> io.smallrye.mutiny.Uni<T>::memoize()",
+          "annotation": "@io.smallrye.common.annotation.Experimental(\"Memoization is an experimental feature at this stage\")",
+          "justification": "Experimental API has been promoted"
+        },
+        {
+          "ignore": true,
+          "code": "java.annotation.removed",
+          "old": "class io.smallrye.mutiny.groups.UniMemoize<T>",
+          "new": "class io.smallrye.mutiny.groups.UniMemoize<T>",
+          "annotation": "@io.smallrye.common.annotation.Experimental(\"Memoization is an experimental feature at this stage\")",
+          "justification": "Experimental API has been promoted"
         }
       ]
     }
