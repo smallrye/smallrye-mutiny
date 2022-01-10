@@ -6,17 +6,19 @@
       "missing-classes": {
         "behavior": "report",
         "ignoreMissingAnnotations": false
-      },
-      "filter": {
-        "packages": {
-          "regex": true,
-          "include": [
-            "io\\.smallrye\\.mutiny(\\..+)?"
-          ],
-          "exclude": [
-            "io\\.smallrye\\.mutiny\\.operators(\\..+)?"
-          ]
-        }
+      }
+    }
+  },
+  {
+    "extension": "revapi.filter",
+    "configuration": {
+      "elements": {
+        "include": [
+          "io\\.smallrye\\.mutiny(\\..+)?"
+        ],
+        "exclude": [
+          "io\\.smallrye\\.mutiny\\.operators(\\..+)?"
+        ]
       }
     }
   },
@@ -188,6 +190,14 @@
       "indent": true,
       "append": false,
       "keepEmptyFile": true
+    }
+  },
+  {
+    "extension": "revapi.reporter.text",
+    "configuration": {
+      "minSeverity": "POTENTIALLY_BREAKING",
+      "minCriticality": "documented",
+      "output": "out"
     }
   }
 ]
