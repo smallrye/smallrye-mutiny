@@ -64,6 +64,7 @@
         <module>test-utils</module>
         <module>implementation</module>
         <module>reactive-streams-tck-tests</module>
+        <module>reactive-streams-junit5-tck</module>
         <module>rxjava</module>
         <module>rxjava3</module>
         <module>reactor</module>
