@@ -6,7 +6,7 @@
       "missing-classes": {
         "behavior": "report",
         "ignoreMissingAnnotations": false
-      },
+      }
     }
   },
   {
