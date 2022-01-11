@@ -8,7 +8,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="description" content="SmallRye Mutiny!">
 
-    <link rel="canonical" href="/guides/reactive-to-imperative.html">
+    <link rel="canonical" href="/guides/context-passing.html">
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.3.1/styles/default.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/components/icon.min.css" integrity="sha512-8Tb+T7SKUFQWOPIQCaLDWWe1K/SY8hvHl7brOH8Nz5z1VT8fnf8B+9neoUzmFY3OzkWMMs3OjrwZALgB1oXFBg==" crossorigin="anonymous" />
     <link rel="shortcut icon" type="image/png" href="/smallrye-mutiny/assets/images/favicon.ico">
@@ -62,10 +62,10 @@
         <div class="row">
             <div class="hero-left col-12">
                 <div class="hero-slogan">
-                    <h1 class="hero-name">From reactive to imperative</h1>
+                    <h1 class="hero-name">Context passing</h1>
                 </div>
                 <div class="hero-desc">
-                    Learn how to block until you get items.
+                    Learn how to pass an implicit context between operators
                 </div>
                 <!-- TODO Labels -->
             </div>
@@ -76,69 +76,155 @@
 <div class="container page-content">
     <div class="row">
         <div class="col-md-9 content">
-            <div class="paragraph">
-<p>There are use cases where you need the items in an imperative manner instead of asynchronous.
-Typically, when you serve an HTTP request from a worker thread, you can block.
-Mutiny provides the ability to block until you get the items.</p>
-</div>
-<div class="sect1">
-<h2 id="awaiting-on-unis-item"><a class="anchor" href="#awaiting-on-unis-item"></a>Awaiting on Uni&#8217;s item</h2>
+            <div class="sect1">
+<h2 id="context-passing"><a class="anchor" href="#context-passing"></a>Context passing</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>When dealing with a <code>Uni,</code> you can block and await the item using:</p>
+<p>Mutiny reactive pipelines let data flow from publishers to subscribers.</p>
+</div>
+<div class="paragraph">
+<p>In the vast majority of cases a publisher shall have <em>all</em> required data, and operators shall perform processing based on item values.
+For instance a network request shall be made with all request data known in advance, and response processing shall only depend on the response payload.</p>
+</div>
+<div class="paragraph">
+<p>That being said there are cases were this is not sufficient, and some data has to be carried along with items.
+For instance one intermediary operator in a pipeline may have to make another networked request from which we need to extract some correlation identifier which will be used by another operator down the pipeline.
+In such cases one will be tempted to forward tuples consisting of some item value plus some "extra" data.</p>
+</div>
+<div class="paragraph">
+<p>For such cases Mutiny offers a <em>subscriber-provided context</em>, so all operators involved in a subscription can share some form of <em>implicit data</em>.</p>
+</div>
+<div class="sect2">
+<h3 id="whats-in-a-context"><a class="anchor" href="#whats-in-a-context"></a>What&#8217;s in a context?</h3>
+<div class="paragraph">
+<p>A context is a simple key / value, in-memory storage.
+Data can be queried, added and deleted from a context, as shown in the following snippet:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">T t = uni.await().indefinitely();</code></pre>
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">// Create a context using key / value pairs
+Context context = Context.of(
+        "X-CUSTOMER-ID", "1234",
+        "X-SPAN-ID", "foo-bar-baz"
+);
+
+// Get an entry
+System.out.println(
+        context.&lt;String&gt;get("X-SPAN-ID"));
+
+// Get an entry, use a supplier for a default value if the key is not present
+System.out.println(
+        context.getOrElse("X-SPAN-ID", () -&gt; "&lt;no id&gt;"));
+
+// Add an entry
+context.put("foo", "bar");
+
+// Remove an entry
+context.delete("foo");</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>This method blocks the caller thread until the observed <code>uni</code> emits the item.
-Note that the returned item can be <code>null</code> if the <code>uni</code> emits <code>null.</code>
-If the <code>uni</code> fails, it throws the exception, wrapped in the <code>CompletionException</code> for <em>checked</em> exception.</p>
+<p><code>Context</code> objects are thread-safe, and can be created from sequences of key / value pairs (as shown above), from a Java <code>Map</code>, or they can be created empty.</p>
 </div>
 <div class="paragraph">
-<p>Blocking forever may not be a great idea.
-You can use <code>uni.await().atMost(Duration)</code> to pass a deadline.
-When the deadline is reached, a <code>TimeoutException</code> is thrown:</p>
+<p>Note that an empty-created context defers its internal storage allocation until the first call to <code>put</code>.
+You can see <code>Context</code> as a glorified <code>ConcurrentHashMap</code> delegate, although this is an implementation detail and Mutiny might explore various internal storage strategies in the future.</p>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>Contexts shall be primarily used to share transient data used for networked I/O processing such as correlation identifiers, tokens, etc.
+They should not be used as general-purpose data structures that are frequently updated and that hold large amounts of data.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="how-to-access-a-context"><a class="anchor" href="#how-to-access-a-context"></a>How to access a context?</h3>
+<div class="paragraph">
+<p>Given a <code>Uni</code> or a <code>Multi</code>, a context can be accessed using the <code>withContext</code> operator, as in:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">T t = uni.await().atMost(Duration.ofSeconds(1));</code></pre>
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Context context = Context.of("X-CUSTOMER-ID", customerId);
+
+pipeline.withContext((multi, ctx) -&gt; multi.onItem().transformToUniAndMerge(item -&gt; makeRequest(item, ctx.get("X-CUSTOMER-ID"))))
+        .subscribe().with(context, item -&gt; handleResponse(item), err -&gt; handleFailure(err));</code></pre>
 </div>
 </div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="iterating-over-multis-items"><a class="anchor" href="#iterating-over-multis-items"></a>Iterating over Multi&#8217;s items</h2>
-<div class="sectionbody">
 <div class="paragraph">
-<p>When dealing with a <code>Multi,</code> you may want to iterate over the items using a simple "foreach."
-You can achieve this using <code>multi.subscribe().asIterable()</code>:</p>
+<p>This operator builds a sub-pipeline using 2 parameters: the current <code>Uni</code> or <code>Multi</code> and the context.</p>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>The function passed to <code>withContext</code> is called at subscription time.
+This means that the context has not had a chance to be updated by upstream operators yet, so be careful with what you do in the body of that function.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>There is another way to access the context by using the <code>attachContext</code> method:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Iterable&lt;T&gt; iterable = multi.subscribe().asIterable();
-for (T item : iterable) {
-    doSomethingWithItem(item);
-}</code></pre>
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Context context = Context.of("X-CUSTOMER-ID", customerId);
+
+pipeline.attachContext()
+        .onItem().transformToUniAndMerge(item -&gt; makeRequest(item.get(), item.context().get("X-CUSTOMER-ID")))
+        .subscribe().with(context, item -&gt; handleResponse(item), err -&gt; handleFailure(err));</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>The returned <code>iterable</code> is blocking.
-It waits for the next items, and during that time, blocks the caller thread.</p>
+<p>This method materializes the context in the regular pipeline items using the wrapper <code>ItemWithContext</code> class.
+The <code>get</code> method provides the item while the <code>context</code> method provides the context.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="how-to-access-a-context-at-the-pipeline-source"><a class="anchor" href="#how-to-access-a-context-at-the-pipeline-source"></a>How to access a context at the pipeline source?</h3>
+<div class="paragraph">
+<p>The <code>Uni</code> and <code>Multi</code> <em>builder</em> methods like <code>Multi.createFrom()</code> provide publishers, not operators, so they don&#8217;t have the <code>withContext</code> method.</p>
 </div>
 <div class="paragraph">
-<p>The iteration ends once the last item is consumed.
-If the <code>multi</code> emits a failure, an exception is thrown.</p>
-</div>
-<div class="paragraph">
-<p>Similar to <code>asIterable()</code>, the <code>asStream</code> method lets you retrieve a <code>java.util.stream.Stream</code>:</p>
+<p>The first option is to use the <code>Uni.createFrom().context(&#8230;&#8203;)</code> or <code>Multi.createFrom().context(&#8230;&#8203;)</code> general purpose method to materialize the context:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Stream&lt;T&gt; stream = multi.subscribe().asStream();
-stream.forEach(this::doSomethingWithItem);</code></pre>
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Uni.createFrom().context(ctx -&gt; makeRequest("db1", ctx.get("X-SPAN-ID")))
+        .subscribe().with(context, item -&gt; handleResponse(item), err -&gt; handleFailure(err));</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The <code>context</code> method takes a function that accepts a <code>Context</code> and returns a pipeline.
+This is very similar to the <code>deferred</code> builder.</p>
+</div>
+<div class="paragraph">
+<p>If you use an <code>emitter</code> builder then for both <code>Uni</code> and <code>Multi</code> cases the emitter object offers a <code>context</code> method to access the context:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Multi.createFrom().emitter(emitter -&gt; {
+    String customerId = emitter.context().get("X-SPAN-ID");
+    for (int i = 0; i &lt; 10; i++) {
+        emitter.emit("@" + i + " [" + customerId + "]");
+    }
+    emitter.complete();
+});</code></pre>
+</div>
 </div>
 </div>
 </div>
@@ -149,30 +235,16 @@ stream.forEach(this::doSomethingWithItem);</code></pre>
                 
                 <h4>Table of Content</h4>
                 <ul class="sectlevel1">
-<li><a href="#awaiting-on-unis-item">Awaiting on Uni&#8217;s item</a></li>
-<li><a href="#iterating-over-multis-items">Iterating over Multi&#8217;s items</a></li>
+<li><a href="#context-passing">Context passing</a>
+<ul class="sectlevel2">
+<li><a href="#whats-in-a-context">What&#8217;s in a context?</a></li>
+<li><a href="#how-to-access-a-context">How to access a context?</a></li>
+<li><a href="#how-to-access-a-context-at-the-pipeline-source">How to access a context at the pipeline source?</a></li>
+</ul>
+</li>
 </ul>
                 
 
-                
-                <h4>Related content</h4>
-                <ul>
-                    
-                    <li>
-                        
-                        
-                        <a href="https://javadoc.io/doc/io.smallrye.reactive/mutiny/latest/io/smallrye/mutiny/groups/UniAwait.html">The Uni Await group</a>
-                        
-                    </li>
-                    
-                    <li>
-                        
-                        <a href="/smallrye-mutiny/guides/imperative-to-reactive">Imperative to Reactive</a>
-                        
-                        
-                    </li>
-                    
-                </ul>
                 
             </nav>
         </div>
