@@ -3,6 +3,9 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
+    <properties>
+        <deprecated.reactive-streams-junit5-tck.version>1.2.0</deprecated.reactive-streams-junit5-tck.version>
+    </properties>
 
     <parent>
         <groupId>io.smallrye.reactive</groupId>
@@ -51,7 +54,7 @@
         <dependency>
             <groupId>io.smallrye.reactive</groupId>
             <artifactId>reactive-streams-junit5-tck</artifactId>
-            <version>${project.version}</version>
+            <version>${deprecated.reactive-streams-junit5-tck.version}</version>
             <classifier>tests</classifier>
             <type>test-jar</type>
             <scope>test</scope>
