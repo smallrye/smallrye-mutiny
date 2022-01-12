@@ -1,7 +1,10 @@
 ---
 name: Check pull requests
-
 on: pull_request
+
+concurrency:
+  group: "check-pull-request-${{ github.event.ref }}"
+  cancel-in-progress: true
 
 jobs:
   build:

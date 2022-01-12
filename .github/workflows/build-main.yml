@@ -4,9 +4,10 @@ on:
   push:
     branches:
       - main
-    paths-ignore:
-      - '.build/**'
-      - '.github/workflows/deployment.yml'
+
+concurrency:
+  group: "ci-cd-${{ github.event.ref }}"
+  cancel-in-progress: true
 
 jobs:
   build:
