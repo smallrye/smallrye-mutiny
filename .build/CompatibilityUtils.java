@@ -62,6 +62,20 @@ class CompatibilityUtils implements Callable<Integer> {
         return 1;
     }
 
+    private String shorten(String s) {
+        if (s != null) {
+            return s.replace("io.smallrye.mutiny.groups.", "")
+                    .replace("io.smallrye.mutiny.operators.", "")
+                    .replace("io.smallrye.mutiny.helpers.spies.", "")
+                    .replace("io.smallrye.mutiny.helpers.", "")
+                    .replace("io.smallrye.mutiny.", "")
+                    .replace("java.util.function.", "")
+                    .replace("java.util.", "")
+                    .replace("java.lang.", "");
+        }
+        return "";
+    }
+
     private void writeDifferences(List<Difference> diff, File file) {
         if (file.isFile()) {
             file.delete();
@@ -69,8 +83,15 @@ class CompatibilityUtils implements Callable<Integer> {
         StringBuilder buffer = new StringBuilder();
         buffer.append("### Breaking Changes\n\n");
 
+        buffer.append("| Change                                | New API                                 | Justification  |\n"
+                    + "| ------------------------------------- | --------------------------------------- | -------------- |\n");
+
+
         for (Difference difference : diff) {
-            buffer.append("  * ").append(difference.toString()).append("\n");
+            buffer.append("| ")
+                    .append(shorten(difference.change())).append(" | ")
+                    .append(shorten(difference.newMethod)).append(" | ")
+                    .append(difference.justification).append(" |\n");
         }
         buffer.append("\n");
 
@@ -170,6 +191,19 @@ class CompatibilityUtils implements Callable<Integer> {
         public String justification;
 
         public boolean ignore;
+
+        public String change() {
+            if (isNotBlank(oldMethod)  && isNotBlank(newMethod)) {
+                return "`" + oldMethod + "` updated to `" + newMethod + "`";
+            }
+            if (isNotBlank(oldMethod)) {
+                return "`" + oldMethod + "` has been removed";
+            }
+            if (isNotBlank(newMethod)) {
+                return "`" + newMethod + "` has been introduced";
+            }
+            return code;
+        }
 
         @java.lang.Override
         public java.lang.String toString() {
