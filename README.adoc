@@ -10,7 +10,7 @@ https://smallrye.io/smallrye-mutiny/[Mutiny is a novel reactive programming libr
 
 Mutiny provides a simple but powerful asynchronous development model that lets you build reactive applications.
 
-=== 🚀 Overview
+=== 🚀  Overview
 
 Mutiny can be used in any Java application exhibiting asynchrony.
 
@@ -60,7 +60,7 @@ We currently support Java 8 and beyond.
 
 Mutiny passes the https://github.com/reactive-streams/reactive-streams-jvm[Reactive Streams TCK].
 
-=== ✨ Contributing
+=== ✨  Contributing
 
 See link:CONTRIBUTING.md[the contributing guidelines]
 
@@ -69,11 +69,11 @@ Mutiny is an open project, feel-free to:
 * https://github.com/smallrye/smallrye-mutiny/issues[report issues], and
 * https://github.com/smallrye/smallrye-mutiny/pulls[propose enhancements via pull-requests].
 
-=== 👋 Discussions and support
+=== 👋   Discussions and support
 
 For anything related to the usage of Mutiny in Quarkus, please refer to the https://quarkus.io/support/[Quarkus support]
 
 For more general discussions about Mutiny, you can: 
 
-* https://stackoverflow.com/questions/tagged/mutiny[use the `mutiny` tag on StackOverflow], and
-* https://github.com/smallrye/smallrye-mutiny/discussions[start a new discussion thread on GitHub].
+* https://github.com/smallrye/smallrye-mutiny/discussions[start a new discussion thread in GitHub Discussions (preferred option)], or
+* https://stackoverflow.com/questions/tagged/mutiny[use the `mutiny` tag on StackOverflow].
