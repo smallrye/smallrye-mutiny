@@ -221,58 +221,11 @@ The following snippet shows how you can use `Uni` and `Multi`:
 include::{include_dir}/UniMultiComparisonTest.java[tags=code]
 ----
 
-// You can convert `Unis` to `Multis` and vice-versa:
+=== Publications
 
-// [source,java,indent=0]
-// ----
-// include::{sourcedir}/UniMultiComparisonTest.java[tags=conversion]
-// ----
+The following paper discusses the performance and costs of Mutiny and friends:
 
-// == Creating and Subscribing to Unis
-
-// There are many ways to create instances of `Unis`:
-
-// .Creating Unis
-// [source,java,indent=0]
-// ----
-// include::{sourcedir}/UniCreationTest.java[tags=code]
-// ----
-
-// Subscribing to `Unis` is done by method provided by `uni.subscribe()`:
-
-// .Subscribing to Unis
-// [source,java,indent=0]
-// ----
-// include::{sourcedir}/UniCreationTest.java[tags=subscription]
-// ----
-
-// == Creating and Subscribing to Multis
-
-// There are many ways to create instances of `Multis`:
-
-// .Creating Multis
-// [source,java,indent=0]
-// ----
-// include::{sourcedir}/MultiCreationTest.java[tags=code]
-// ----
-
-// Subscribing to `Multis` is done by method provided by `multi.subscribe()`:
-
-// .Subscribing to Multis
-// [source,java,indent=0]
-// ----
-// include::{sourcedir}/MultiCreationTest.java[tags=subscription]
-// ----
-
-// == Structuring the pipeline
-
-// It can be hard to structure your sequence of processing in a readable manner.
-// Mutiny provides the `stage` function to structure your pipeline:
-
-// .Structuring your pipeline with `stage`
-// [source,java,indent=0]
-// ----
-// include::{sourcedir}/StageTest.java[tags=code]
-// ----
-
-// `stage` can be used on `Multi` and `Uni` and let you group operations in a logical set.
+Julien Ponge, Arthur Navarro, Clément Escoffier, and Frédéric Le Mouël. 2021.
+**https://doi.org/10.1145/3486605.3486788[Analysing the Performance and Costs of Reactive Programming Libraries in Java].**
+_In Proceedings of the 8th ACM SIGPLAN International Workshop on Reactive and Event-Based Languages and Systems (REBLS ’21)_, October 18, 2021, Chicago, IL, USA. ACM, New York, NY, USA, 10 pages.
+https://hal.inria.fr/hal-03409277/document[(PDF)]
