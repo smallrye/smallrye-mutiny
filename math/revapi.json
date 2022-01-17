@@ -14,7 +14,10 @@
     "configuration": {
       "elements": {
         "include": [
-          "io\\.smallrye\\.mutiny\\.math(\\..+)?"
+          {
+            "matcher": "java-package",
+            "match": "/io\\.smallrye\\.mutiny\\.math(\\..+)?/"
+          }
         ]
       }
     }

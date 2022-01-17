@@ -14,10 +14,16 @@
     "configuration": {
       "elements": {
         "include": [
-          "io\\.smallrye\\.mutiny(\\..+)?"
+          {
+            "matcher": "java-package",
+            "match": "/io\\.smallrye\\.mutiny(\\..+)?/"
+          }
         ],
         "exclude": [
-          "io\\.smallrye\\.mutiny\\.operators(\\..+)?"
+          {
+            "matcher": "java-package",
+            "match": "/io\\.smallrye\\.mutiny\\.operators(\\..+)?/"
+          }
         ]
       }
     }

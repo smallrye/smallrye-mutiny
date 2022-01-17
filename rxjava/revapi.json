@@ -14,8 +14,14 @@
     "configuration": {
       "elements": {
         "include": [
-          "io\\.smallrye\\.mutiny\\.converters\\.*",
-          "io\\.smallrye\\.mutiny\\.converters\\..*"
+          {
+            "matcher": "java-package",
+            "match": "/io\\.smallrye\\.mutiny\\.converters\\.*/"
+          },
+          {
+            "matcher": "java-package",
+            "match": "/io\\.smallrye\\.mutiny\\.converters\\..*/"
+          }
         ]
       }
     }
