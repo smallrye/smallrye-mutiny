@@ -41,10 +41,6 @@ public class MutinySchedulerTest {
 
     @AfterAll
     public static void reset() {
-        Executor current = Infrastructure.getDefaultExecutor();
-        if (current instanceof ExecutorService) {
-            ((ExecutorService) current).shutdownNow();
-        }
         Infrastructure.setDefaultExecutor();
     }
 
