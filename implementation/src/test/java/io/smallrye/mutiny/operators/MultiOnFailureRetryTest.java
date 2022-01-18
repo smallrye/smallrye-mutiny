@@ -13,9 +13,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.ResourceAccessMode;
 import org.junit.jupiter.api.parallel.ResourceLock;
 
+import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.groups.MultiRetry;
 import io.smallrye.mutiny.helpers.test.AssertSubscriber;
+import io.smallrye.mutiny.unchecked.Unchecked;
 import junit5.support.InfrastructureResource;
 
 @ResourceLock(value = InfrastructureResource.NAME, mode = ResourceAccessMode.READ)
@@ -166,6 +168,294 @@ public class MultiOnFailureRetryTest {
     public void testJitterValidation() {
         assertThrows(IllegalArgumentException.class, () -> Multi.createFrom().item("hello")
                 .onFailure().retry().withJitter(2));
+    }
+
+    @Test
+    public void checkThatItDoesOnlyRetryOnMatchingExceptionWithRetryAtMost() {
+        AtomicInteger count = new AtomicInteger();
+
+        Multi.createFrom().items(1, 2, 3, 4)
+                .onItem().invoke(i -> {
+                    if (count.getAndIncrement() < 2) {
+                        throw new MyRuntimeException("boom");
+                    }
+                })
+                .onFailure(MyRuntimeException.class).retry().atMost(2)
+                .subscribe().withSubscriber(AssertSubscriber.create(10))
+                .assertCompleted()
+                .assertItems(1, 2, 3, 4);
+
+        count.set(0);
+
+        Multi.createFrom().items(1, 2, 3, 4)
+                .onItem().invoke(Unchecked.consumer(i -> {
+                    if (count.getAndIncrement() < 2) {
+                        throw new MyException("boom");
+                    }
+                }))
+                .onFailure(t -> t.getMessage().contains("boom")).retry().atMost(2)
+                .subscribe().withSubscriber(AssertSubscriber.create(10))
+                .assertCompleted()
+                .assertItems(1, 2, 3, 4);
+
+        count.set(0);
+
+        Multi.createFrom().items(1, 2, 3, 4)
+                .onItem().invoke(Unchecked.consumer(i -> {
+                    if (count.getAndIncrement() < 2) {
+                        throw new MyException("boom");
+                    }
+                }))
+                .onFailure(ArithmeticException.class).retry().atMost(2)
+                .subscribe().withSubscriber(AssertSubscriber.create(10))
+                .assertFailedWith(RuntimeException.class, "boom");
+
+        count.set(0);
+
+        Multi.createFrom().items(1, 2, 3, 4)
+                .onItem().invoke(Unchecked.consumer(i -> {
+                    if (count.getAndIncrement() < 2) {
+                        throw new MyException("boom");
+                    }
+                }))
+                .onFailure(t -> t.getMessage().equalsIgnoreCase("wrong")).retry().atMost(2)
+                .subscribe().withSubscriber(AssertSubscriber.create(10))
+                .assertFailedWith(RuntimeException.class, "boom");
+
+        count.set(0);
+
+        Multi.createFrom().items(1, 2, 3, 4)
+                .onItem().invoke(Unchecked.consumer(i -> {
+                    if (count.getAndIncrement() < 2) {
+                        throw new MyException("boom");
+                    }
+                }))
+                .onFailure(t -> {
+                    throw new RuntimeException("expected");
+                }).retry().atMost(2)
+                .subscribe().withSubscriber(AssertSubscriber.create(10))
+                .assertFailedWith(CompositeException.class, "expected");
+    }
+
+    @Test
+    public void checkThatItDoesOnlyRetryOnMatchingExceptionWithRetryAtMostAndBackOff() {
+        AtomicInteger count = new AtomicInteger();
+
+        Multi.createFrom().items(1, 2, 3, 4)
+                .onItem().invoke(i -> {
+                    if (count.getAndIncrement() < 2) {
+                        throw new MyRuntimeException("boom");
+                    }
+                })
+                .onFailure(MyRuntimeException.class).retry().withBackOff(Duration.ofMillis(2)).atMost(2)
+                .subscribe().withSubscriber(AssertSubscriber.create(10))
+                .awaitCompletion()
+                .assertItems(1, 2, 3, 4);
+
+        count.set(0);
+
+        Multi.createFrom().items(1, 2, 3, 4)
+                .onItem().invoke(Unchecked.consumer(i -> {
+                    if (count.getAndIncrement() < 2) {
+                        throw new MyException("boom");
+                    }
+                }))
+                .onFailure(t -> t.getMessage().contains("boom")).retry().withBackOff(Duration.ofMillis(2)).atMost(2)
+                .subscribe().withSubscriber(AssertSubscriber.create(10))
+                .awaitCompletion()
+                .assertItems(1, 2, 3, 4);
+
+        count.set(0);
+
+        Multi.createFrom().items(1, 2, 3, 4)
+                .onItem().invoke(Unchecked.consumer(i -> {
+                    if (count.getAndIncrement() < 2) {
+                        throw new MyException("boom");
+                    }
+                }))
+                .onFailure(ArithmeticException.class).retry().withBackOff(Duration.ofMillis(2)).atMost(2)
+                .subscribe().withSubscriber(AssertSubscriber.create(10))
+                .awaitFailure()
+                .assertFailedWith(RuntimeException.class, "boom");
+
+        count.set(0);
+
+        Multi.createFrom().items(1, 2, 3, 4)
+                .onItem().invoke(Unchecked.consumer(i -> {
+                    if (count.getAndIncrement() < 2) {
+                        throw new MyException("boom");
+                    }
+                }))
+                .onFailure(t -> t.getMessage().equalsIgnoreCase("wrong")).retry()
+                .withBackOff(Duration.ofMillis(2)).atMost(2)
+                .subscribe().withSubscriber(AssertSubscriber.create(10))
+                .awaitFailure()
+                .assertFailedWith(RuntimeException.class, "boom");
+
+        count.set(0);
+
+        Multi.createFrom().items(1, 2, 3, 4)
+                .onItem().invoke(Unchecked.consumer(i -> {
+                    if (count.getAndIncrement() < 2) {
+                        throw new MyException("boom");
+                    }
+                }))
+                .onFailure(t -> {
+                    throw new RuntimeException("expected");
+                }).retry().withBackOff(Duration.ofMillis(2)).atMost(2)
+                .subscribe().withSubscriber(AssertSubscriber.create(10))
+                .awaitFailure()
+                .assertFailedWith(CompositeException.class, "expected");
+    }
+
+    @Test
+    public void checkThatItDoesOnlyRetryOnMatchingExceptionWithRetryWhen() {
+        AtomicInteger count = new AtomicInteger();
+
+        Multi.createFrom().items(1, 2, 3, 4)
+                .onItem().invoke(i -> {
+                    if (count.getAndIncrement() < 2) {
+                        throw new MyRuntimeException("boom");
+                    }
+                })
+                .onFailure(MyRuntimeException.class).retry().when(t -> Multi.createFrom().items(1, 1, 1, 1))
+                .subscribe().withSubscriber(AssertSubscriber.create(10))
+                .assertCompleted()
+                .assertItems(1, 2, 3, 4);
+
+        count.set(0);
+
+        Multi.createFrom().items(1, 2, 3, 4)
+                .onItem().invoke(Unchecked.consumer(i -> {
+                    if (count.getAndIncrement() < 2) {
+                        throw new MyException("boom");
+                    }
+                }))
+                .onFailure(t -> t.getMessage().contains("boom")).retry().when(t -> Multi.createFrom().items(1, 1, 1, 1))
+                .subscribe().withSubscriber(AssertSubscriber.create(10))
+                .assertCompleted()
+                .assertItems(1, 2, 3, 4);
+
+        count.set(0);
+
+        Multi.createFrom().items(1, 2, 3, 4)
+                .onItem().invoke(Unchecked.consumer(i -> {
+                    if (count.getAndIncrement() < 2) {
+                        throw new MyException("boom");
+                    }
+                }))
+                .onFailure(ArithmeticException.class).retry().when(t -> Multi.createFrom().items(1, 1, 1, 1))
+                .subscribe().withSubscriber(AssertSubscriber.create(10))
+                .assertFailedWith(RuntimeException.class, "boom");
+
+        count.set(0);
+
+        Multi.createFrom().items(1, 2, 3, 4)
+                .onItem().invoke(Unchecked.consumer(i -> {
+                    if (count.getAndIncrement() < 2) {
+                        throw new MyException("boom");
+                    }
+                }))
+                .onFailure(t -> t.getMessage().equalsIgnoreCase("wrong"))
+                .retry().when(t -> Multi.createFrom().items(1, 1, 1, 1))
+                .subscribe().withSubscriber(AssertSubscriber.create(10))
+                .assertFailedWith(RuntimeException.class, "boom");
+
+        count.set(0);
+
+        Multi.createFrom().items(1, 2, 3, 4)
+                .onItem().invoke(Unchecked.consumer(i -> {
+                    if (count.getAndIncrement() < 2) {
+                        throw new MyException("boom");
+                    }
+                }))
+                .onFailure(t -> {
+                    throw new RuntimeException("expected");
+                }).retry().when(t -> Multi.createFrom().items(1, 1, 1, 1))
+                .subscribe().withSubscriber(AssertSubscriber.create(10))
+                .assertFailedWith(CompositeException.class, "expected");
+    }
+
+    @Test
+    public void checkThatItDoesOnlyRetryOnMatchingExceptionWithRetryUntil() {
+        AtomicInteger count = new AtomicInteger();
+
+        Multi.createFrom().items(1, 2, 3, 4)
+                .onItem().invoke(i -> {
+                    if (count.getAndIncrement() < 2) {
+                        throw new MyRuntimeException("boom");
+                    }
+                })
+                .onFailure(MyRuntimeException.class).retry().until(t -> true)
+                .subscribe().withSubscriber(AssertSubscriber.create(10))
+                .assertCompleted()
+                .assertItems(1, 2, 3, 4);
+
+        count.set(0);
+
+        Multi.createFrom().items(1, 2, 3, 4)
+                .onItem().invoke(Unchecked.consumer(i -> {
+                    if (count.getAndIncrement() < 2) {
+                        throw new MyException("boom");
+                    }
+                }))
+                .onFailure(t -> t.getMessage().contains("boom")).retry().until(t -> true)
+                .subscribe().withSubscriber(AssertSubscriber.create(10))
+                .assertCompleted()
+                .assertItems(1, 2, 3, 4);
+
+        count.set(0);
+
+        Multi.createFrom().items(1, 2, 3, 4)
+                .onItem().invoke(Unchecked.consumer(i -> {
+                    if (count.getAndIncrement() < 2) {
+                        throw new MyException("boom");
+                    }
+                }))
+                .onFailure(ArithmeticException.class).retry().until(t -> true)
+                .subscribe().withSubscriber(AssertSubscriber.create(10))
+                .assertFailedWith(RuntimeException.class, "boom");
+
+        count.set(0);
+
+        Multi.createFrom().items(1, 2, 3, 4)
+                .onItem().invoke(Unchecked.consumer(i -> {
+                    if (count.getAndIncrement() < 2) {
+                        throw new MyException("boom");
+                    }
+                }))
+                .onFailure(t -> t.getMessage().equalsIgnoreCase("wrong"))
+                .retry().until(t -> true)
+                .subscribe().withSubscriber(AssertSubscriber.create(10))
+                .assertFailedWith(RuntimeException.class, "boom");
+
+        count.set(0);
+
+        Multi.createFrom().items(1, 2, 3, 4)
+                .onItem().invoke(Unchecked.consumer(i -> {
+                    if (count.getAndIncrement() < 2) {
+                        throw new MyException("boom");
+                    }
+                }))
+                .onFailure(t -> {
+                    throw new RuntimeException("expected");
+                }).retry().until(t -> true)
+                .subscribe().withSubscriber(AssertSubscriber.create(10))
+                .assertFailedWith(CompositeException.class, "expected");
+    }
+
+    public static class MyException extends Exception {
+
+        public MyException(String m) {
+            super(m);
+        }
+    }
+
+    public static class MyRuntimeException extends RuntimeException {
+
+        public MyRuntimeException(String m) {
+            super(m);
+        }
     }
 
 }

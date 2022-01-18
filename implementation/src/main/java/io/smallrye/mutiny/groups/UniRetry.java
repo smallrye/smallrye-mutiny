@@ -21,7 +21,7 @@ import io.smallrye.mutiny.operators.uni.UniRetryAtMost;
 public class UniRetry<T> {
 
     private final Uni<T> upstream;
-    private final Predicate<? super Throwable> predicate;
+    private final Predicate<? super Throwable> onFailurePredicate;
 
     private Duration initialBackOffDuration = Duration.ofSeconds(1);
     private Duration maxBackoffDuration = ExponentialBackoff.MAX_BACKOFF;
@@ -29,9 +29,9 @@ public class UniRetry<T> {
 
     private boolean backOffConfigured = false;
 
-    public UniRetry(Uni<T> upstream, Predicate<? super Throwable> predicate) {
+    public UniRetry(Uni<T> upstream, Predicate<? super Throwable> onFailurePredicate) {
         this.upstream = upstream;
-        this.predicate = predicate;
+        this.onFailurePredicate = onFailurePredicate;
     }
 
     /**
@@ -59,17 +59,12 @@ public class UniRetry<T> {
     @CheckReturnValue
     public Uni<T> atMost(long numberOfAttempts) {
         if (!backOffConfigured) {
-            return Infrastructure.onUniCreation(new UniRetryAtMost<>(upstream, predicate, numberOfAttempts));
+            return Infrastructure.onUniCreation(new UniRetryAtMost<>(upstream, onFailurePredicate, numberOfAttempts));
         } else {
             Function<Multi<Throwable>, Publisher<Long>> factory = ExponentialBackoff
                     .randomExponentialBackoffFunction(numberOfAttempts,
                             initialBackOffDuration, maxBackoffDuration, jitter, Infrastructure.getDefaultWorkerPool());
-
-            if (predicate != null) {
-                factory = addPredicateToBackoffFactory(factory);
-            }
-
-            return upstream.toMulti().onFailure().retry().when(factory).toUni();
+            return upstream.toMulti().onFailure(onFailurePredicate).retry().when(factory).toUni();
         }
     }
 
@@ -83,7 +78,6 @@ public class UniRetry<T> {
      * @param expireAt absolute time in millis that specifies when to give up
      * @return a new {@link Uni} retrying to subscribe to the current {@link Uni} until it gets an item or until
      *         expiration {@code expireAt}. When the expiration is reached, the last failure is propagated.
-     *
      * @throws IllegalArgumentException if back off not configured,
      */
     @CheckReturnValue
@@ -95,28 +89,7 @@ public class UniRetry<T> {
         Function<Multi<Throwable>, Publisher<Long>> factory = ExponentialBackoff
                 .randomExponentialBackoffFunctionExpireAt(expireAt,
                         initialBackOffDuration, maxBackoffDuration, jitter, Infrastructure.getDefaultWorkerPool());
-
-        if (predicate != null) {
-            factory = addPredicateToBackoffFactory(factory);
-        }
-
-        return upstream.toMulti().onFailure().retry().when(factory).toUni();
-    }
-
-    private Function<Multi<Throwable>, Publisher<Long>> addPredicateToBackoffFactory(
-            Function<Multi<Throwable>, Publisher<Long>> factory) {
-        return factory.compose(value -> value.onItem()
-                .transformToUni(throwable -> Uni.createFrom().<Throwable> emitter(emitter -> {
-                    try {
-                        if (predicate.test(throwable)) {
-                            emitter.complete(throwable);
-                        } else {
-                            emitter.fail(throwable);
-                        }
-                    } catch (Throwable err) {
-                        emitter.fail(err);
-                    }
-                })).concatenate());
+        return upstream.toMulti().onFailure(onFailurePredicate).retry().when(factory).toUni();
     }
 
     /**
@@ -129,7 +102,6 @@ public class UniRetry<T> {
      * @param expireIn relative time in millis that specifies when to give up
      * @return a new {@link Uni} retrying to subscribe to the current {@link Uni} until it gets an item or until
      *         expiration {@code expireIn}. When the expiration is reached, the last failure is propagated.
-     *
      * @throws IllegalArgumentException if back off not configured,
      */
     @CheckReturnValue
@@ -186,7 +158,7 @@ public class UniRetry<T> {
         }
         Function<Multi<Throwable>, ? extends Publisher<?>> actual = Infrastructure
                 .decorate(nonNull(whenStreamFactory, "whenStreamFactory"));
-        return upstream.toMulti().onFailure().retry().when(actual).toUni();
+        return upstream.toMulti().onFailure(this.onFailurePredicate).retry().when(actual).toUni();
     }
 
     /**

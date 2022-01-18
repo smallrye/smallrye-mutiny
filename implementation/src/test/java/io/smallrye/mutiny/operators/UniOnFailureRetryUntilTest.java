@@ -5,13 +5,16 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
 import java.time.Duration;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 
 import org.junit.jupiter.api.Test;
 
+import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.TestException;
 import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.helpers.test.UniAssertSubscriber;
 
 public class UniOnFailureRetryUntilTest {
 
@@ -171,6 +174,44 @@ public class UniOnFailureRetryUntilTest {
     public void testThatYouCannotUseUntilIfBackoffIsConfigured() {
         assertThrows(IllegalArgumentException.class, () -> Uni.createFrom().item("hello")
                 .onFailure().retry().withBackOff(Duration.ofSeconds(1)).until(t -> true));
+    }
+
+    /**
+     * Reproducer for https://github.com/smallrye/smallrye-mutiny/discussions/814.
+     */
+    @Test
+    public void checkThatThePredicateIsUsedWithOnFailureUntil() {
+        AtomicBoolean first = new AtomicBoolean();
+        AtomicBoolean second = new AtomicBoolean();
+        UniAssertSubscriber<Void> subscriber = Uni.createFrom().failure(new MultiOnFailureRetryTest.MyException(""))
+                .replaceWithVoid()
+                .onFailure(e -> !(e instanceof MultiOnFailureRetryTest.MyException)).retry().until(x -> {
+                    first.set(true);
+                    return false;
+                })
+                .onFailure(MultiOnFailureRetryTest.MyException.class).retry().until(x -> {
+                    second.set(true);
+                    return false;
+                })
+                .subscribe().withSubscriber(UniAssertSubscriber.create());
+        subscriber.awaitFailure(t -> assertThat(t).isInstanceOf(MultiOnFailureRetryTest.MyException.class));
+        assertThat(first).isFalse();
+        assertThat(second).isTrue();
+    }
+
+    @Test
+    public void testRetryWhenOnFailurePredicateFails() {
+        AtomicInteger count = new AtomicInteger();
+        UniAssertSubscriber<Void> subscriber = Uni.createFrom()
+                .failure(() -> new MultiOnFailureRetryTest.MyException("BOOM " + count.getAndIncrement()))
+                .replaceWithVoid()
+                .onFailure(t -> {
+                    throw new RuntimeException("expected");
+                }).retry().until(x -> false)
+                .subscribe().withSubscriber(UniAssertSubscriber.create());
+
+        subscriber.awaitFailure(t -> assertThat(t).isInstanceOf(CompositeException.class).hasMessageContaining("expected"));
+        assertThat(count).hasValue(1);
     }
 
 }

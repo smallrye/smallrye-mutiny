@@ -2,12 +2,14 @@ package io.smallrye.mutiny.operators.multi;
 
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 import org.reactivestreams.Processor;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
+import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Context;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.helpers.Subscriptions;
@@ -29,14 +31,16 @@ import io.smallrye.mutiny.subscription.SwitchableSubscriptionSubscriber;
 public final class MultiRetryWhenOp<T> extends AbstractMultiOperator<T, T> {
 
     private final Function<? super Multi<Throwable>, ? extends Publisher<?>> triggerStreamFactory;
+    private final Predicate<? super Throwable> onFailurePredicate;
 
-    public MultiRetryWhenOp(Multi<? extends T> upstream,
+    public MultiRetryWhenOp(Multi<? extends T> upstream, Predicate<? super Throwable> onFailurePredicate,
             Function<? super Multi<Throwable>, ? extends Publisher<?>> triggerStreamFactory) {
         super(upstream);
+        this.onFailurePredicate = onFailurePredicate;
         this.triggerStreamFactory = triggerStreamFactory;
     }
 
-    private static <T> void subscribe(MultiSubscriber<? super T> downstream,
+    private static <T> void subscribe(MultiSubscriber<? super T> downstream, Predicate<? super Throwable> onFailurePredicate,
             Function<? super Multi<Throwable>, ? extends Publisher<?>> triggerStreamFactory,
             Multi<? extends T> upstream) {
         TriggerSubscriber other = new TriggerSubscriber();
@@ -44,7 +48,7 @@ public final class MultiRetryWhenOp<T> extends AbstractMultiOperator<T, T> {
         signaller.onSubscribe(Subscriptions.empty());
         MultiSubscriber<T> serialized = new SerializedSubscriber<>(downstream);
 
-        RetryWhenOperator<T> operator = new RetryWhenOperator<>(upstream, serialized, signaller);
+        RetryWhenOperator<T> operator = new RetryWhenOperator<>(upstream, onFailurePredicate, serialized, signaller);
         other.operator = operator;
 
         serialized.onSubscribe(operator);
@@ -69,7 +73,7 @@ public final class MultiRetryWhenOp<T> extends AbstractMultiOperator<T, T> {
 
     @Override
     public void subscribe(MultiSubscriber<? super T> downstream) {
-        subscribe(downstream, triggerStreamFactory, upstream);
+        subscribe(downstream, onFailurePredicate, triggerStreamFactory, upstream);
     }
 
     static final class RetryWhenOperator<T> extends SwitchableSubscriptionSubscriber<T> {
@@ -78,12 +82,15 @@ public final class MultiRetryWhenOp<T> extends AbstractMultiOperator<T, T> {
         private final AtomicInteger wip = new AtomicInteger();
         private final Subscriber<Throwable> signaller;
         private final Subscriptions.DeferredSubscription arbiter = new Subscriptions.DeferredSubscription();
+        private final Predicate<? super Throwable> onFailurePredicate;
 
         long produced;
 
-        RetryWhenOperator(Publisher<? extends T> upstream, MultiSubscriber<? super T> downstream,
+        RetryWhenOperator(Publisher<? extends T> upstream, Predicate<? super Throwable> onFailurePredicate,
+                MultiSubscriber<? super T> downstream,
                 Subscriber<Throwable> signaller) {
             super(downstream);
+            this.onFailurePredicate = onFailurePredicate;
             this.upstream = upstream;
             this.signaller = signaller;
         }
@@ -109,6 +116,10 @@ public final class MultiRetryWhenOp<T> extends AbstractMultiOperator<T, T> {
 
         @Override
         public void onFailure(Throwable t) {
+            if (testOnFailurePredicate(t)) {
+                return;
+            }
+
             long p = produced;
             if (p != 0L) {
                 produced = 0;
@@ -116,6 +127,20 @@ public final class MultiRetryWhenOp<T> extends AbstractMultiOperator<T, T> {
             }
             arbiter.request(1);
             signaller.onNext(t);
+        }
+
+        private boolean testOnFailurePredicate(Throwable t) {
+            try {
+                if (!onFailurePredicate.test(t)) {
+                    arbiter.cancel();
+                    downstream.onFailure(t);
+                }
+            } catch (Throwable e) {
+                arbiter.cancel();
+                downstream.onFailure(new CompositeException(e, t));
+                return true;
+            }
+            return false;
         }
 
         @Override

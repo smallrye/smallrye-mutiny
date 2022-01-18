@@ -6,6 +6,7 @@ import static io.smallrye.mutiny.helpers.ParameterValidation.positive;
 import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 import java.util.function.Predicate;
 
+import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.AbstractUni;
@@ -78,7 +79,7 @@ public class UniRetryAtMost<T> extends UniOperator<T, T> {
             try {
                 passes = uniRetryAtMost.predicate.test(failure);
             } catch (Throwable e) {
-                downstream.onFailure(e);
+                downstream.onFailure(new CompositeException(e, failure));
                 return false;
             }
             if (!passes) {

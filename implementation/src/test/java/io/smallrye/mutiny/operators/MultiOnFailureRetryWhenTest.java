@@ -42,7 +42,7 @@ public class MultiOnFailureRetryWhenTest {
 
     @Test
     public void testThatUpstreamCannotBeNull() {
-        assertThrows(IllegalArgumentException.class, () -> new MultiRetryWhenOp<>(null, v -> v));
+        assertThrows(IllegalArgumentException.class, () -> new MultiRetryWhenOp<>(null, null, v -> v));
     }
 
     @Test
