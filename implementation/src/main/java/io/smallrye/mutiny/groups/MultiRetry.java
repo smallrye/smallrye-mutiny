@@ -21,15 +21,16 @@ import io.smallrye.mutiny.operators.multi.MultiRetryWhenOp;
 public class MultiRetry<T> {
 
     private final Multi<T> upstream;
-    private final Predicate<? super Throwable> predicate;
+    private final Predicate<? super Throwable> onFailurePredicate;
     private Duration initialBackOff = Duration.ofSeconds(1);
     private Duration maxBackoff = ExponentialBackoff.MAX_BACKOFF;
     private double jitter = ExponentialBackoff.DEFAULT_JITTER;
     private boolean backOffConfigured = false;
 
-    public MultiRetry(Multi<T> upstream, Predicate<? super Throwable> predicate) {
+    public MultiRetry(Multi<T> upstream,
+            Predicate<? super Throwable> onFailurePredicate) {
         this.upstream = nonNull(upstream, "upstream");
-        this.predicate = predicate;
+        this.onFailurePredicate = nonNull(onFailurePredicate, "onFailurePredicate");
     }
 
     /**
@@ -63,14 +64,10 @@ public class MultiRetry<T> {
                     .randomExponentialBackoffFunction(numberOfAttempts, initialBackOff, maxBackoff, jitter,
                             Infrastructure.getDefaultWorkerPool());
 
-            if (predicate != null) {
-                whenStreamFactory = addPredicateToBackoffFactory(whenStreamFactory);
-            }
-
             return Infrastructure.onMultiCreation(
-                    new MultiRetryWhenOp<>(upstream, whenStreamFactory));
+                    new MultiRetryWhenOp<>(upstream, onFailurePredicate, whenStreamFactory));
         } else {
-            return Infrastructure.onMultiCreation(new MultiRetryOp<>(upstream, numberOfAttempts));
+            return Infrastructure.onMultiCreation(new MultiRetryOp<>(upstream, onFailurePredicate, numberOfAttempts));
         }
 
     }
@@ -100,28 +97,8 @@ public class MultiRetry<T> {
                         initialBackOff, maxBackoff, jitter,
                         Infrastructure.getDefaultWorkerPool());
 
-        if (predicate != null) {
-            whenStreamFactory = addPredicateToBackoffFactory(whenStreamFactory);
-        }
-
         return Infrastructure.onMultiCreation(
-                new MultiRetryWhenOp<>(upstream, whenStreamFactory));
-    }
-
-    private Function<Multi<Throwable>, Publisher<Long>> addPredicateToBackoffFactory(
-            Function<Multi<Throwable>, Publisher<Long>> whenStreamFactory) {
-        return whenStreamFactory.compose(value -> value.onItem()
-                .transformToUni(throwable -> Uni.createFrom().<Throwable> emitter(emitter -> {
-                    try {
-                        if (predicate.test(throwable)) {
-                            emitter.complete(throwable);
-                        } else {
-                            emitter.fail(throwable);
-                        }
-                    } catch (Throwable err) {
-                        emitter.fail(err);
-                    }
-                })).concatenate());
+                new MultiRetryWhenOp<>(upstream, onFailurePredicate, whenStreamFactory));
     }
 
     /**
@@ -172,7 +149,8 @@ public class MultiRetry<T> {
                     }
                 }))
                 .concatenate();
-        return Infrastructure.onMultiCreation(new MultiRetryWhenOp<>(upstream, whenStreamFactory));
+        return Infrastructure
+                .onMultiCreation(new MultiRetryWhenOp<>(upstream, onFailurePredicate, whenStreamFactory));
     }
 
     /**
@@ -195,7 +173,7 @@ public class MultiRetry<T> {
         }
         Function<Multi<Throwable>, ? extends Publisher<?>> actual = Infrastructure
                 .decorate(nonNull(whenStreamFactory, "whenStreamFactory"));
-        return Infrastructure.onMultiCreation(new MultiRetryWhenOp<>(upstream, actual));
+        return Infrastructure.onMultiCreation(new MultiRetryWhenOp<>(upstream, onFailurePredicate, actual));
     }
 
     /**

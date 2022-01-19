@@ -35,7 +35,15 @@
       "criticality": "highlight",
       "minSeverity": "POTENTIALLY_BREAKING",
       "minCriticality": "documented",
-      "differences": []
+      "differences": [
+        {
+          "ignore": true,
+          "code": "java.method.numberOfParametersChanged",
+          "old": "method void io.smallrye.mutiny.groups.MultiRetry<T>::<init>(io.smallrye.mutiny.Multi<T>, java.util.function.Predicate<? super java.lang.Throwable>)",
+          "new": "method void io.smallrye.mutiny.groups.MultiRetry<T>::<init>(io.smallrye.mutiny.Multi<T>, java.util.function.Predicate<? super java.lang.Throwable>, java.util.function.Predicate<? super java.lang.Throwable>)",
+          "justification": "MultiRetry is an operator class (not user facing). The change adds support for the onFailure predicate"
+        }
+      ]
     }
   },
   {

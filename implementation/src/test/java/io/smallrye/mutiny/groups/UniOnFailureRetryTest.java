@@ -18,8 +18,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.ResourceAccessMode;
 import org.junit.jupiter.api.parallel.ResourceLock;
 
+import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.helpers.test.UniAssertSubscriber;
+import io.smallrye.mutiny.operators.MultiOnFailureRetryTest;
+import io.smallrye.mutiny.unchecked.Unchecked;
 import junit5.support.InfrastructureResource;
 
 @ResourceLock(value = InfrastructureResource.NAME, mode = ResourceAccessMode.READ)
@@ -269,6 +273,282 @@ public class UniOnFailureRetryTest {
         public boolean test(Throwable throwable) {
             throw new RuntimeException();
         }
+    }
+
+    @Test
+    public void checkThatItDoesOnlyRetryOnMatchingExceptionWithRetryAtMost() {
+        AtomicInteger count = new AtomicInteger();
+
+        Uni.createFrom().item(1)
+                .onItem().invoke(i -> {
+                    if (count.getAndIncrement() == 0) {
+                        throw new MultiOnFailureRetryTest.MyRuntimeException("boom");
+                    }
+                })
+                .onFailure(MultiOnFailureRetryTest.MyRuntimeException.class).retry().atMost(2)
+                .subscribe().withSubscriber(UniAssertSubscriber.create())
+                .assertItem(1);
+
+        count.set(0);
+
+        Uni.createFrom().item(1)
+                .onItem().invoke(Unchecked.consumer(i -> {
+                    if (count.getAndIncrement() == 0) {
+                        throw new MultiOnFailureRetryTest.MyException("boom");
+                    }
+                }))
+                .onFailure(t -> t.getMessage().contains("boom")).retry().atMost(2)
+                .subscribe().withSubscriber(UniAssertSubscriber.create())
+                .assertCompleted()
+                .assertItem(1);
+
+        count.set(0);
+
+        Uni.createFrom().item(1)
+                .onItem().invoke(Unchecked.consumer(i -> {
+                    if (count.getAndIncrement() == 0) {
+                        throw new MultiOnFailureRetryTest.MyException("boom");
+                    }
+                }))
+                .onFailure(ArithmeticException.class).retry().atMost(2)
+                .subscribe().withSubscriber(UniAssertSubscriber.create())
+                .assertFailedWith(RuntimeException.class, "boom");
+
+        count.set(0);
+
+        Uni.createFrom().item(1)
+                .onItem().invoke(Unchecked.consumer(i -> {
+                    if (count.getAndIncrement() == 0) {
+                        throw new MultiOnFailureRetryTest.MyException("boom");
+                    }
+                }))
+                .onFailure(t -> t.getMessage().equalsIgnoreCase("wrong")).retry().atMost(2)
+                .subscribe().withSubscriber(UniAssertSubscriber.create())
+                .assertFailedWith(RuntimeException.class, "boom");
+
+        count.set(0);
+
+        Uni.createFrom().item(1)
+                .onItem().invoke(Unchecked.consumer(i -> {
+                    if (count.getAndIncrement() == 0) {
+                        throw new MultiOnFailureRetryTest.MyException("boom");
+                    }
+                }))
+                .onFailure(t -> {
+                    throw new RuntimeException("expected");
+                }).retry().atMost(2)
+                .subscribe().withSubscriber(UniAssertSubscriber.create())
+                .assertFailedWith(CompositeException.class, "expected");
+    }
+
+    @Test
+    public void checkThatItDoesOnlyRetryOnMatchingExceptionWithRetryAtMostWithBackoff() {
+        AtomicInteger count = new AtomicInteger();
+
+        Uni.createFrom().item(1)
+                .onItem().invoke(i -> {
+                    if (count.getAndIncrement() == 0) {
+                        throw new MultiOnFailureRetryTest.MyRuntimeException("boom");
+                    }
+                })
+                .onFailure(MultiOnFailureRetryTest.MyRuntimeException.class).retry()
+                .withBackOff(Duration.ofMillis(2)).atMost(2)
+                .subscribe().withSubscriber(UniAssertSubscriber.create())
+                .awaitItem().assertItem(1);
+
+        count.set(0);
+
+        Uni.createFrom().item(1)
+                .onItem().invoke(Unchecked.consumer(i -> {
+                    if (count.getAndIncrement() == 0) {
+                        throw new MultiOnFailureRetryTest.MyException("boom");
+                    }
+                }))
+                .onFailure(t -> t.getMessage().contains("boom")).retry()
+                .withBackOff(Duration.ofMillis(2)).atMost(2)
+                .subscribe().withSubscriber(UniAssertSubscriber.create())
+                .awaitItem()
+                .assertItem(1);
+
+        count.set(0);
+
+        Uni.createFrom().item(1)
+                .onItem().invoke(Unchecked.consumer(i -> {
+                    if (count.getAndIncrement() == 0) {
+                        throw new MultiOnFailureRetryTest.MyException("boom");
+                    }
+                }))
+                .onFailure(ArithmeticException.class).retry()
+                .withBackOff(Duration.ofMillis(2)).atMost(2)
+                .subscribe().withSubscriber(UniAssertSubscriber.create())
+                .assertFailedWith(RuntimeException.class, "boom");
+
+        count.set(0);
+
+        Uni.createFrom().item(1)
+                .onItem().invoke(Unchecked.consumer(i -> {
+                    if (count.getAndIncrement() == 0) {
+                        throw new MultiOnFailureRetryTest.MyException("boom");
+                    }
+                }))
+                .onFailure(t -> t.getMessage().equalsIgnoreCase("wrong")).retry()
+                .withBackOff(Duration.ofMillis(2)).atMost(2)
+                .subscribe().withSubscriber(UniAssertSubscriber.create())
+                .assertFailedWith(RuntimeException.class, "boom");
+
+        count.set(0);
+
+        Uni.createFrom().item(1)
+                .onItem().invoke(Unchecked.consumer(i -> {
+                    if (count.getAndIncrement() == 0) {
+                        throw new MultiOnFailureRetryTest.MyException("boom");
+                    }
+                }))
+                .onFailure(t -> {
+                    throw new RuntimeException("expected");
+                }).retry()
+                .withBackOff(Duration.ofMillis(2)).atMost(2)
+                .subscribe().withSubscriber(UniAssertSubscriber.create())
+                .assertFailedWith(CompositeException.class, "expected");
+    }
+
+    @Test
+    public void checkThatItDoesOnlyRetryOnMatchingExceptionWithRetryAtMostWithExpireAt() {
+        AtomicInteger count = new AtomicInteger();
+
+        Uni.createFrom().item(1)
+                .onItem().invoke(i -> {
+                    if (count.getAndIncrement() == 0) {
+                        throw new MultiOnFailureRetryTest.MyRuntimeException("boom");
+                    }
+                })
+                .onFailure(MultiOnFailureRetryTest.MyRuntimeException.class).retry()
+                .withBackOff(Duration.ofMillis(2)).expireAt(System.currentTimeMillis() + 10000)
+                .subscribe().withSubscriber(UniAssertSubscriber.create())
+                .awaitItem().assertItem(1);
+
+        count.set(0);
+
+        Uni.createFrom().item(1)
+                .onItem().invoke(Unchecked.consumer(i -> {
+                    if (count.getAndIncrement() == 0) {
+                        throw new MultiOnFailureRetryTest.MyException("boom");
+                    }
+                }))
+                .onFailure(t -> t.getMessage().contains("boom")).retry()
+                .withBackOff(Duration.ofMillis(2)).expireAt(System.currentTimeMillis() + 10000)
+                .subscribe().withSubscriber(UniAssertSubscriber.create())
+                .awaitItem()
+                .assertItem(1);
+
+        count.set(0);
+
+        Uni.createFrom().item(1)
+                .onItem().invoke(Unchecked.consumer(i -> {
+                    if (count.getAndIncrement() == 0) {
+                        throw new MultiOnFailureRetryTest.MyException("boom");
+                    }
+                }))
+                .onFailure(ArithmeticException.class).retry()
+                .withBackOff(Duration.ofMillis(2)).expireAt(System.currentTimeMillis() + 10000)
+                .subscribe().withSubscriber(UniAssertSubscriber.create())
+                .assertFailedWith(RuntimeException.class, "boom");
+
+        count.set(0);
+
+        Uni.createFrom().item(1)
+                .onItem().invoke(Unchecked.consumer(i -> {
+                    if (count.getAndIncrement() == 0) {
+                        throw new MultiOnFailureRetryTest.MyException("boom");
+                    }
+                }))
+                .onFailure(t -> t.getMessage().equalsIgnoreCase("wrong")).retry()
+                .withBackOff(Duration.ofMillis(2)).expireAt(System.currentTimeMillis() + 10000)
+                .subscribe().withSubscriber(UniAssertSubscriber.create())
+                .assertFailedWith(RuntimeException.class, "boom");
+
+        count.set(0);
+
+        Uni.createFrom().item(1)
+                .onItem().invoke(Unchecked.consumer(i -> {
+                    if (count.getAndIncrement() == 0) {
+                        throw new MultiOnFailureRetryTest.MyException("boom");
+                    }
+                }))
+                .onFailure(t -> {
+                    throw new RuntimeException("expected");
+                }).retry()
+                .withBackOff(Duration.ofMillis(2)).expireAt(System.currentTimeMillis() + 10000)
+                .subscribe().withSubscriber(UniAssertSubscriber.create())
+                .assertFailedWith(CompositeException.class, "expected");
+    }
+
+    @Test
+    public void checkThatItDoesOnlyRetryOnMatchingExceptionWithRetryWhen() {
+        AtomicInteger count = new AtomicInteger();
+
+        Uni.createFrom().item(1)
+                .onItem().invoke(i -> {
+                    if (count.getAndIncrement() == 0) {
+                        throw new MultiOnFailureRetryTest.MyRuntimeException("boom");
+                    }
+                })
+                .onFailure(MultiOnFailureRetryTest.MyRuntimeException.class).retry()
+                .when(t -> Multi.createFrom().items(1, 1, 1, 1))
+                .subscribe().withSubscriber(UniAssertSubscriber.create())
+                .assertItem(1);
+
+        count.set(0);
+
+        Uni.createFrom().item(1)
+                .onItem().invoke(Unchecked.consumer(i -> {
+                    if (count.getAndIncrement() == 0) {
+                        throw new MultiOnFailureRetryTest.MyException("boom");
+                    }
+                }))
+                .onFailure(t -> t.getMessage().contains("boom")).retry().when(t -> Multi.createFrom().items(1, 1, 1, 1))
+                .subscribe().withSubscriber(UniAssertSubscriber.create())
+                .assertCompleted()
+                .assertItem(1);
+
+        count.set(0);
+
+        Uni.createFrom().item(1)
+                .onItem().invoke(Unchecked.consumer(i -> {
+                    if (count.getAndIncrement() == 0) {
+                        throw new MultiOnFailureRetryTest.MyException("boom");
+                    }
+                }))
+                .onFailure(ArithmeticException.class).retry().when(t -> Multi.createFrom().items(1, 1, 1, 1))
+                .subscribe().withSubscriber(UniAssertSubscriber.create())
+                .assertFailedWith(RuntimeException.class, "boom");
+
+        count.set(0);
+
+        Uni.createFrom().item(1)
+                .onItem().invoke(Unchecked.consumer(i -> {
+                    if (count.getAndIncrement() == 0) {
+                        throw new MultiOnFailureRetryTest.MyException("boom");
+                    }
+                }))
+                .onFailure(t -> t.getMessage().equalsIgnoreCase("wrong")).retry()
+                .when(t -> Multi.createFrom().items(1, 1, 1, 1))
+                .subscribe().withSubscriber(UniAssertSubscriber.create())
+                .assertFailedWith(RuntimeException.class, "boom");
+
+        count.set(0);
+
+        Uni.createFrom().item(1)
+                .onItem().invoke(Unchecked.consumer(i -> {
+                    if (count.getAndIncrement() == 0) {
+                        throw new MultiOnFailureRetryTest.MyException("boom");
+                    }
+                }))
+                .onFailure(t -> {
+                    throw new RuntimeException("expected");
+                }).retry().when(t -> Multi.createFrom().items(1, 1, 1, 1))
+                .subscribe().withSubscriber(UniAssertSubscriber.create())
+                .assertFailedWith(CompositeException.class, "expected");
     }
 
 }

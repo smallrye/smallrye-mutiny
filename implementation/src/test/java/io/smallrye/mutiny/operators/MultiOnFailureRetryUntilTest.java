@@ -73,7 +73,7 @@ public class MultiOnFailureRetryUntilTest {
                 .onFailure().retry().until(retryTwice)
                 .subscribe().withSubscriber(subscriber);
 
-        subscriber.assertItems(0, 1, 0, 1, 0, 1).assertFailedWith(Exception.class, "boom");
+        subscriber.assertFailedWith(Exception.class, "boom").assertItems(0, 1, 0, 1, 0, 1);
     }
 
     @Test
