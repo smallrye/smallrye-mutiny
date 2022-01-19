@@ -73,6 +73,9 @@ public class Infrastructure {
         if (existing instanceof ExecutorService) {
             ((ExecutorService) existing).shutdownNow();
         }
+        if (DEFAULT_SCHEDULER != null) {
+            DEFAULT_SCHEDULER.shutdownNow();
+        }
         DEFAULT_EXECUTOR = s;
         DEFAULT_SCHEDULER = new MutinyScheduler(s);
     }
