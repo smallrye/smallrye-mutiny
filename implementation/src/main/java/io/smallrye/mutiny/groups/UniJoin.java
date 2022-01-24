@@ -70,11 +70,37 @@ public class UniJoin {
     }
 
     /**
+     * Terminal interface for {@link UniJoin#all(List)}
+     *
+     * @param <T> the type of the {@link Uni} values
+     */
+    public interface JoinAllStrategyTerminal<T> {
+
+        /**
+         * Wait for all {@link Uni} references to terminate, and collect all failures in a
+         * {@link io.smallrye.mutiny.CompositeException}.
+         *
+         * @return a new {@link Uni}
+         */
+        @CheckReturnValue
+        Uni<List<T>> andCollectFailures();
+
+        /**
+         * Immediately forward the first failure from any of the {@link Uni}, and cancel the remaining {@link Uni}
+         * subscriptions, ignoring eventual subsequent failures.
+         *
+         * @return a new {@link Uni}
+         */
+        @CheckReturnValue
+        Uni<List<T>> andFailFast();
+    }
+
+    /**
      * Defines how to deal with failures while joining {@link Uni} references with {@link UniJoin#all(List)}.
      *
      * @param <T> the type of the {@link Uni} values
      */
-    public static class JoinAllStrategy<T> {
+    public static class JoinAllStrategy<T> implements JoinAllStrategyTerminal<T> {
 
         private final List<Uni<T>> unis;
         private int concurrency = -1;
@@ -85,16 +111,13 @@ public class UniJoin {
 
         // TODO
         @CheckReturnValue
-        public JoinAllStrategy<T> withConcurrencyLimit(int limit) {
+        public JoinAllStrategyTerminal<T> withConcurrencyLimit(int limit) {
             this.concurrency = ParameterValidation.positive(limit, "limit");
             return this;
         }
 
         /**
-         * Wait for all {@link Uni} references to terminate, and collect all failures in a
-         * {@link io.smallrye.mutiny.CompositeException}.
-         *
-         * @return a new {@link Uni}
+         * {@inheritDoc}
          */
         @CheckReturnValue
         public Uni<List<T>> andCollectFailures() {
@@ -102,10 +125,7 @@ public class UniJoin {
         }
 
         /**
-         * Immediately forward the first failure from any of the {@link Uni}, and cancel the remaining {@link Uni}
-         * subscriptions, ignoring eventual subsequent failures.
-         *
-         * @return a new {@link Uni}
+         * {@inheritDoc}
          */
         @CheckReturnValue
         public Uni<List<T>> andFailFast() {
@@ -151,11 +171,38 @@ public class UniJoin {
     }
 
     /**
+     * Terminal interface for {@link UniJoin#first(List)}
+     *
+     * @param <T> the type of the {@link Uni} values
+     */
+    public interface JoinFirstStrategyTerminal<T> {
+
+        /**
+         * Forward the value or failure from the first {@link Uni} to terminate.
+         *
+         * @return a new {@link Uni}
+         */
+        @CheckReturnValue
+        Uni<T> toTerminate();
+
+        /**
+         * Forward the value from the first {@link Uni} to terminate with a value.
+         * <p>
+         * When all {@link Uni} references fail then failures are collected into a {@link CompositeException},
+         * which is then forwarded by the returned {@link Uni}.
+         *
+         * @return a new {@link Uni}
+         */
+        @CheckReturnValue
+        Uni<T> withItem();
+    }
+
+    /**
      * Defines how to deal with failures while joining {@link Uni} references with {@link UniJoin#first(List)}}.
      *
      * @param <T> the type of the {@link Uni} values
      */
-    public static class JoinFirstStrategy<T> {
+    public static class JoinFirstStrategy<T> implements JoinFirstStrategyTerminal<T> {
 
         private final List<Uni<T>> unis;
         private int concurrency = -1;
@@ -166,15 +213,13 @@ public class UniJoin {
 
         // TODO
         @CheckReturnValue
-        public JoinFirstStrategy<T> withConcurrencyLimit(int limit) {
+        public JoinFirstStrategyTerminal<T> withConcurrencyLimit(int limit) {
             this.concurrency = ParameterValidation.positive(limit, "limit");
             return this;
         }
 
         /**
-         * Forward the value or failure from the first {@link Uni} to terminate.
-         *
-         * @return a new {@link Uni}
+         * {@inheritDoc}
          */
         @CheckReturnValue
         public Uni<T> toTerminate() {
@@ -182,12 +227,7 @@ public class UniJoin {
         }
 
         /**
-         * Forward the value from the first {@link Uni} to terminate with a value.
-         * <p>
-         * When all {@link Uni} references fail then failures are collected into a {@link CompositeException},
-         * which is then forwarded by the returned {@link Uni}.
-         *
-         * @return a new {@link Uni}
+         * {@inheritDoc}
          */
         @CheckReturnValue
         public Uni<T> withItem() {
