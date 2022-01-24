@@ -13,6 +13,8 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import org.assertj.core.api.Assertions.assertThat
+import org.awaitility.Awaitility
+import org.awaitility.Awaitility.await
 
 class FlowAsMultiTest {
 
@@ -75,8 +77,12 @@ class FlowAsMultiTest {
     @Test
     fun `verify that coroutine cancellation result in failure`() {
         testBlocking {
+            Awaitility.pollInSameThread()
+            val ready = AtomicBoolean()
+
             // Given
             val flow = flow<UUID> {
+                ready.set(true)
                 delay(200)
                 emit(UUID.randomUUID())
             }
@@ -86,9 +92,8 @@ class FlowAsMultiTest {
             val job = launch {
                 flow.asMulti().subscribe().withSubscriber(subscriber)
             }
-            delay(50)
+            await().untilTrue(ready)
             job.cancel(CancellationException("abort"))
-            Thread.sleep(350)
 
             // Then
             subscriber.awaitFailure().assertFailedWith(CancellationException::class.java, "abort")
