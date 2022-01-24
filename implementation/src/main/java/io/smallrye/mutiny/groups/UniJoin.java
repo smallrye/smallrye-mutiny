@@ -10,6 +10,7 @@ import io.smallrye.common.annotation.CheckReturnValue;
 import io.smallrye.common.annotation.Experimental;
 import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.uni.builders.UniJoinAll;
 import io.smallrye.mutiny.operators.uni.builders.UniJoinFirst;
@@ -76,9 +77,17 @@ public class UniJoin {
     public static class JoinAllStrategy<T> {
 
         private final List<Uni<T>> unis;
+        private int concurrency = -1;
 
         private JoinAllStrategy(List<Uni<T>> unis) {
             this.unis = unis;
+        }
+
+        // TODO
+        @CheckReturnValue
+        public JoinAllStrategy<T> withConcurrencyLimit(int limit) {
+            this.concurrency = ParameterValidation.positive(limit, "limit");
+            return this;
         }
 
         /**
@@ -89,7 +98,7 @@ public class UniJoin {
          */
         @CheckReturnValue
         public Uni<List<T>> andCollectFailures() {
-            return Infrastructure.onUniCreation(new UniJoinAll<>(unis, UniJoinAll.Mode.COLLECT_FAILURES));
+            return Infrastructure.onUniCreation(new UniJoinAll<>(unis, UniJoinAll.Mode.COLLECT_FAILURES, concurrency));
         }
 
         /**
@@ -100,7 +109,7 @@ public class UniJoin {
          */
         @CheckReturnValue
         public Uni<List<T>> andFailFast() {
-            return Infrastructure.onUniCreation(new UniJoinAll<>(unis, UniJoinAll.Mode.FAIL_FAST));
+            return Infrastructure.onUniCreation(new UniJoinAll<>(unis, UniJoinAll.Mode.FAIL_FAST, concurrency));
         }
     }
 
@@ -149,9 +158,17 @@ public class UniJoin {
     public static class JoinFirstStrategy<T> {
 
         private final List<Uni<T>> unis;
+        private int concurrency = -1;
 
         private JoinFirstStrategy(List<Uni<T>> unis) {
             this.unis = unis;
+        }
+
+        // TODO
+        @CheckReturnValue
+        public JoinFirstStrategy<T> withConcurrencyLimit(int limit) {
+            this.concurrency = ParameterValidation.positive(limit, "limit");
+            return this;
         }
 
         /**
@@ -161,7 +178,7 @@ public class UniJoin {
          */
         @CheckReturnValue
         public Uni<T> toTerminate() {
-            return Infrastructure.onUniCreation(new UniJoinFirst<>(unis, UniJoinFirst.Mode.FIRST_TO_EMIT));
+            return Infrastructure.onUniCreation(new UniJoinFirst<>(unis, UniJoinFirst.Mode.FIRST_TO_EMIT, concurrency));
         }
 
         /**
@@ -174,7 +191,7 @@ public class UniJoin {
          */
         @CheckReturnValue
         public Uni<T> withItem() {
-            return Infrastructure.onUniCreation(new UniJoinFirst<>(unis, UniJoinFirst.Mode.FIRST_WITH_ITEM));
+            return Infrastructure.onUniCreation(new UniJoinFirst<>(unis, UniJoinFirst.Mode.FIRST_WITH_ITEM, concurrency));
         }
     }
 

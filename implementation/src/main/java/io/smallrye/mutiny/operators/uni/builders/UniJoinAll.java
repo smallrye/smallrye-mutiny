@@ -23,10 +23,12 @@ public class UniJoinAll<T> extends AbstractUni<List<T>> {
 
     private final List<Uni<T>> unis;
     private final Mode mode;
+    private final int concurrency;
 
-    public UniJoinAll(List<Uni<T>> unis, Mode mode) {
+    public UniJoinAll(List<Uni<T>> unis, Mode mode, int concurrency) {
         this.unis = unis;
         this.mode = mode;
+        this.concurrency = concurrency;
     }
 
     @Override
@@ -45,20 +47,31 @@ public class UniJoinAll<T> extends AbstractUni<List<T>> {
 
         private final AtomicReferenceArray<T> items = new AtomicReferenceArray<>(unis.size());
         private final List<Throwable> failures = Collections.synchronizedList(new ArrayList<>());
-        private final AtomicInteger signalsCount = new AtomicInteger();
+        private final AtomicInteger completionSignalsCount = new AtomicInteger();
+
+        private AtomicInteger nextSubscriptionIndex;
 
         public UniJoinAllSubscription(UniSubscriber<? super List<T>> subscriber) {
             this.subscriber = subscriber;
         }
 
         public void triggerSubscriptions() {
-            for (int i = 0; i < unis.size() && !cancelled.get(); i++) {
-                int index = i;
-                Uni<? extends T> uni = unis.get(i);
-                uni.onSubscription()
-                        .invoke(subscription -> subscriptions.set(index, subscription))
-                        .subscribe().with(subscriber.context(), item -> this.onItem(index, item), this::onFailure);
+            int limit;
+            if (concurrency != -1) {
+                limit = Math.min(concurrency, unis.size());
+                nextSubscriptionIndex = new AtomicInteger(concurrency - 1);
+            } else {
+                limit = unis.size();
             }
+            for (int index = 0; index < limit && !cancelled.get(); index++) {
+                performSubscription(index, unis.get(index));
+            }
+        }
+
+        private void performSubscription(int index, Uni<? extends T> uni) {
+            uni.onSubscription()
+                    .invoke(subscription -> this.onSubscribe(index, subscription))
+                    .subscribe().with(subscriber.context(), item -> this.onItem(index, item), this::onFailure);
         }
 
         @Override
@@ -76,15 +89,23 @@ public class UniJoinAll<T> extends AbstractUni<List<T>> {
             }
         }
 
-        private void onItem(int index, T item) {
+        private void onSubscribe(int index, UniSubscription subscription) {
             if (!cancelled.get()) {
-                items.set(index, item);
-                forwardSignalWhenComplete();
+                subscriptions.set(index, subscription);
+            } else {
+                subscription.cancel();
             }
         }
 
-        private void forwardSignalWhenComplete() {
-            if (signalsCount.incrementAndGet() == unis.size()) {
+        private void onItem(int index, T item) {
+            if (!cancelled.get()) {
+                items.set(index, item);
+                forwardSignalWhenCompleteOrSubscribeNext();
+            }
+        }
+
+        private void forwardSignalWhenCompleteOrSubscribeNext() {
+            if (completionSignalsCount.incrementAndGet() == unis.size()) {
                 cancelled.set(true);
                 if (failures.isEmpty()) {
                     ArrayList<T> result = new ArrayList<>(unis.size());
@@ -95,6 +116,11 @@ public class UniJoinAll<T> extends AbstractUni<List<T>> {
                 } else {
                     subscriber.onFailure(new CompositeException(failures));
                 }
+            } else if (concurrency != -1) {
+                int nextIndex = nextSubscriptionIndex.incrementAndGet();
+                if (nextIndex < unis.size()) {
+                    performSubscription(nextIndex, unis.get(nextIndex));
+                }
             }
         }
 
@@ -103,7 +129,7 @@ public class UniJoinAll<T> extends AbstractUni<List<T>> {
                 case COLLECT_FAILURES:
                     if (!cancelled.get()) {
                         failures.add(failure);
-                        forwardSignalWhenComplete();
+                        forwardSignalWhenCompleteOrSubscribeNext();
                     } else {
                         Infrastructure.handleDroppedException(failure);
                     }

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReferenceArray;
 
 import io.smallrye.mutiny.CompositeException;
@@ -22,10 +23,12 @@ public class UniJoinFirst<T> extends AbstractUni<T> {
 
     private final List<Uni<T>> unis;
     private final Mode mode;
+    private final int concurrency;
 
-    public UniJoinFirst(List<Uni<T>> unis, Mode mode) {
+    public UniJoinFirst(List<Uni<T>> unis, Mode mode, int concurrency) {
         this.unis = unis;
         this.mode = mode;
+        this.concurrency = concurrency;
     }
 
     @Override
@@ -42,17 +45,37 @@ public class UniJoinFirst<T> extends AbstractUni<T> {
         private final AtomicReferenceArray<UniSubscription> subscriptions = new AtomicReferenceArray<>(unis.size());
         private final AtomicBoolean cancelled = new AtomicBoolean();
 
+        private AtomicInteger nextSubscriptionIndex;
+
         public UniJoinFirstSubscription(UniSubscriber<? super T> subscriber) {
             this.subscriber = subscriber;
         }
 
         public void triggerSubscriptions() {
-            for (int i = 0; i < unis.size() && !cancelled.get(); i++) {
-                int index = i;
-                Uni<? extends T> uni = unis.get(i);
-                uni.onSubscription()
-                        .invoke(subscription -> subscriptions.set(index, subscription))
-                        .subscribe().with(subscriber.context(), this::onItem, this::onFailure);
+            int limit;
+            if (concurrency != -1) {
+                limit = Math.min(concurrency, unis.size());
+                nextSubscriptionIndex = new AtomicInteger(concurrency - 1);
+            } else {
+                limit = unis.size();
+            }
+            for (int i = 0; i < limit && !cancelled.get(); i++) {
+                performSubscription(i);
+            }
+        }
+
+        private void performSubscription(int index) {
+            Uni<? extends T> uni = unis.get(index);
+            uni.onSubscription()
+                    .invoke(subscription -> this.onSubscribe(index, subscription))
+                    .subscribe().with(subscriber.context(), this::onItem, this::onFailure);
+        }
+
+        private void onSubscribe(int index, UniSubscription subscription) {
+            if (!cancelled.get()) {
+                subscriptions.set(index, subscription);
+            } else {
+                subscription.cancel();
             }
         }
 
@@ -96,6 +119,11 @@ public class UniJoinFirst<T> extends AbstractUni<T> {
                         if (failures.size() == unis.size()) {
                             cancelled.set(true);
                             subscriber.onFailure(new CompositeException(failures));
+                        } else if (concurrency != -1) {
+                            int nextIndex = nextSubscriptionIndex.incrementAndGet();
+                            if (nextIndex < unis.size()) {
+                                performSubscription(nextIndex);
+                            }
                         }
                     } else {
                         Infrastructure.handleDroppedException(failure);

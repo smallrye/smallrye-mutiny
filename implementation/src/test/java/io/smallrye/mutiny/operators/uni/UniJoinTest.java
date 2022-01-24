@@ -6,9 +6,14 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Uni;
@@ -424,6 +429,170 @@ class UniJoinTest {
             assertThat(sa.invocationCount()).isEqualTo(1L);
             assertThat(sb.invocationCount()).isEqualTo(1L);
             assertThat(sc.invocationCount()).isEqualTo(1L);
+        }
+    }
+
+    @Nested
+    class ConcurrencyLimit {
+
+        @Test
+        void joinAllItemsAndCollectSmokeTest() {
+            Uni<Integer> a = Uni.createFrom().item(1);
+            Uni<Integer> b = Uni.createFrom().item(2);
+            Uni<Integer> c = Uni.createFrom().item(3);
+
+            Uni<List<Integer>> uni = Uni.join().all(a, b, c).withConcurrencyLimit(1).andCollectFailures();
+
+            UniAssertSubscriber<List<Integer>> sub = uni.subscribe().withSubscriber(UniAssertSubscriber.create());
+            sub.assertCompleted().assertItem(Arrays.asList(1, 2, 3));
+        }
+
+        @Test
+        void joinFirstWithItemSmokeTest() {
+            Uni<Integer> a = Uni.createFrom().failure(new IOException("boom"));
+            Uni<Integer> b = Uni.createFrom().failure(new IOException("bam"));
+            Uni<Integer> c = Uni.createFrom().item(3);
+
+            Uni<Integer> uni = Uni.join().first(a, b, c).withConcurrencyLimit(1).withItem();
+
+            UniAssertSubscriber<Integer> sub = uni.subscribe().withSubscriber(UniAssertSubscriber.create());
+            sub.assertCompleted().assertItem(3);
+
+            uni = Uni.join().first(a, b, c).withConcurrencyLimit(1).toTerminate();
+            sub = uni.subscribe().withSubscriber(UniAssertSubscriber.create());
+            sub.assertFailedWith(IOException.class, "boom");
+        }
+
+        @ParameterizedTest(name = "poolSize={0}, delays={1}, limit={2}, minTime={3}")
+        @CsvSource(value = {
+                "4, 100, 1, 400",
+                "4, 100, 2, 200",
+                "4, 100, 16, 100",
+                "2, 100, 1, 400"
+        })
+        void joinAllItemsAndCheckConcurrency(int poolSize, int delays, int limit, int minTime) {
+            ScheduledExecutorService pool = Executors.newScheduledThreadPool(poolSize);
+
+            Uni<String> a = Uni.createFrom().future(() -> pool.schedule(() -> "a", delays, TimeUnit.MILLISECONDS));
+            Uni<String> b = Uni.createFrom().future(() -> pool.schedule(() -> "b", delays, TimeUnit.MILLISECONDS));
+            Uni<String> c = Uni.createFrom().future(() -> pool.schedule(() -> "c", delays, TimeUnit.MILLISECONDS));
+            Uni<String> d = Uni.createFrom().future(() -> pool.schedule(() -> "d", delays, TimeUnit.MILLISECONDS));
+
+            Uni<List<String>> uni = Uni.join().all(a, b, c, d).withConcurrencyLimit(limit).andCollectFailures();
+
+            long start = System.currentTimeMillis();
+            UniAssertSubscriber<List<String>> sub = uni.subscribe().withSubscriber(UniAssertSubscriber.create());
+
+            sub.awaitItem().assertCompleted().assertItem(Arrays.asList("a", "b", "c", "d"));
+            assertThat(System.currentTimeMillis() - start).isGreaterThanOrEqualTo(minTime);
+
+            pool.shutdownNow();
+        }
+
+        @ParameterizedTest(name = "poolSize={0}, delays={1}, limit={2}, minTime={3}")
+        @CsvSource(value = {
+                "4, 100, 1, 300",
+                "4, 100, 2, 200",
+                "4, 100, 16, 100",
+                "2, 100, 1, 300"
+        })
+        void joinAllItemsAndCheckConcurrencyCollectFailures(int poolSize, int delays, int limit, int minTime) {
+            ScheduledExecutorService pool = Executors.newScheduledThreadPool(poolSize);
+
+            Uni<String> a = Uni.createFrom().future(() -> pool.schedule(() -> "a", delays, TimeUnit.MILLISECONDS));
+            Uni<String> b = Uni.createFrom().future(() -> pool.schedule(() -> "b", delays, TimeUnit.MILLISECONDS));
+            Uni<String> c = Uni.createFrom().failure(() -> new IOException("boom"));
+            Uni<String> d = Uni.createFrom().future(() -> pool.schedule(() -> "d", delays, TimeUnit.MILLISECONDS));
+
+            Uni<List<String>> uni = Uni.join().all(a, b, c, d).withConcurrencyLimit(limit).andCollectFailures();
+
+            long start = System.currentTimeMillis();
+            UniAssertSubscriber<List<String>> sub = uni.subscribe().withSubscriber(UniAssertSubscriber.create());
+
+            sub.awaitFailure().assertFailedWith(CompositeException.class);
+            assertThat(System.currentTimeMillis() - start).isGreaterThanOrEqualTo(minTime);
+
+            pool.shutdownNow();
+        }
+
+        @ParameterizedTest(name = "poolSize={0}, delays={1}, limit={2}, minTime={3}")
+        @CsvSource(value = {
+                "4, 100, 1, 200",
+                "4, 100, 2, 100",
+                "4, 100, 16, 0",
+                "2, 100, 1, 200"
+        })
+        void joinAllItemsAndCheckConcurrencyFailFast(int poolSize, int delays, int limit, int minTime) {
+            ScheduledExecutorService pool = Executors.newScheduledThreadPool(poolSize);
+
+            Uni<String> a = Uni.createFrom().future(() -> pool.schedule(() -> "a", delays, TimeUnit.MILLISECONDS));
+            Uni<String> b = Uni.createFrom().future(() -> pool.schedule(() -> "b", delays, TimeUnit.MILLISECONDS));
+            Uni<String> c = Uni.createFrom().failure(() -> new IOException("boom"));
+            Uni<String> d = Uni.createFrom().future(() -> pool.schedule(() -> "d", delays, TimeUnit.MILLISECONDS));
+
+            Uni<List<String>> uni = Uni.join().all(a, b, c, d).withConcurrencyLimit(limit).andFailFast();
+
+            long start = System.currentTimeMillis();
+            UniAssertSubscriber<List<String>> sub = uni.subscribe().withSubscriber(UniAssertSubscriber.create());
+
+            sub.awaitFailure().assertFailedWith(IOException.class);
+            assertThat(System.currentTimeMillis() - start).isGreaterThanOrEqualTo(minTime);
+
+            pool.shutdownNow();
+        }
+
+        @ParameterizedTest(name = "poolSize={0}, delays={1}, limit={2}, minTime={3}")
+        @CsvSource(value = {
+                "4, 100, 1, 300",
+                "4, 100, 4, 100"
+        })
+        void joinFirstWithItemCheckConcurrency(int poolSize, int delays, int limit, int minTime) {
+            ScheduledExecutorService pool = Executors.newScheduledThreadPool(poolSize);
+
+            Uni<String> a = Uni.createFrom().future(() -> pool.schedule(() -> {
+                throw new RuntimeException("boom");
+            }, delays * 2L, TimeUnit.MILLISECONDS));
+            Uni<String> b = Uni.createFrom().future(() -> pool.schedule(() -> "b", delays, TimeUnit.MILLISECONDS));
+            Uni<String> c = Uni.createFrom().failure(() -> new IOException("boom"));
+            Uni<String> d = Uni.createFrom().failure(() -> new IOException("boom"));
+
+            Uni<String> uni = Uni.join().first(a, b, c, d).withConcurrencyLimit(limit).withItem();
+
+            long start = System.currentTimeMillis();
+            UniAssertSubscriber<String> sub = uni.subscribe().withSubscriber(UniAssertSubscriber.create());
+
+            sub.awaitItem().assertCompleted().assertItem("b");
+            assertThat(System.currentTimeMillis() - start).isGreaterThanOrEqualTo(minTime);
+
+            pool.shutdownNow();
+        }
+
+        @ParameterizedTest(name = "poolSize={0}, delays={1}, limit={2}, minTime={3}, shallFail={4}")
+        @CsvSource(value = {
+                "4, 100, 1, 200, true",
+                "4, 100, 16, 100, false"
+        })
+        void joinFirstToSignalCheckConcurrency(int poolSize, int delays, int limit, int minTime, boolean shallFail) {
+            ScheduledExecutorService pool = Executors.newScheduledThreadPool(poolSize);
+
+            Uni<String> a = Uni.createFrom().future(() -> pool.schedule(() -> {
+                throw new RuntimeException("boom");
+            }, delays * 2L, TimeUnit.MILLISECONDS));
+            Uni<String> b = Uni.createFrom().future(() -> pool.schedule(() -> "b", delays, TimeUnit.MILLISECONDS));
+
+            Uni<String> uni = Uni.join().first(a, b).withConcurrencyLimit(limit).toTerminate();
+
+            long start = System.currentTimeMillis();
+            UniAssertSubscriber<String> sub = uni.subscribe().withSubscriber(UniAssertSubscriber.create());
+
+            if (shallFail) {
+                sub.awaitFailure().assertFailed();
+            } else {
+                sub.awaitItem().assertCompleted().assertItem("b");
+            }
+            assertThat(System.currentTimeMillis() - start).isGreaterThanOrEqualTo(minTime);
+
+            pool.shutdownNow();
         }
     }
 }
