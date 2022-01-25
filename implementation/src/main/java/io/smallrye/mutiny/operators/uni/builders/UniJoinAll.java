@@ -116,7 +116,7 @@ public class UniJoinAll<T> extends AbstractUni<List<T>> {
                 } else {
                     subscriber.onFailure(new CompositeException(failures));
                 }
-            } else if (concurrency != -1) {
+            } else if (concurrency != -1 && !cancelled.get()) {
                 int nextIndex = nextSubscriptionIndex.incrementAndGet();
                 if (nextIndex < unis.size()) {
                     performSubscription(nextIndex, unis.get(nextIndex));

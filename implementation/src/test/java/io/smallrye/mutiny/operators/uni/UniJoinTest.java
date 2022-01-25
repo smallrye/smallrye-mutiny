@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -23,6 +25,7 @@ import io.smallrye.mutiny.helpers.spies.Spy;
 import io.smallrye.mutiny.helpers.spies.UniOnCancellationSpy;
 import io.smallrye.mutiny.helpers.spies.UniOnItemSpy;
 import io.smallrye.mutiny.helpers.test.UniAssertSubscriber;
+import io.smallrye.mutiny.subscription.UniSubscription;
 
 class UniJoinTest {
 
@@ -612,6 +615,52 @@ class UniJoinTest {
             assertThat(System.currentTimeMillis() - start).isGreaterThanOrEqualTo(minTime);
 
             pool.shutdownNow();
+        }
+
+        @Test
+        void joinAllShallNotSubscribeWhenCancelled() {
+            AtomicBoolean probe1 = new AtomicBoolean();
+            AtomicBoolean probe2 = new AtomicBoolean();
+            AtomicReference<UniSubscription> joinSubscription = new AtomicReference<>();
+
+            Uni<Integer> uni1 = Uni.createFrom().item(1)
+                    .onSubscription().invoke(() -> {
+                        probe1.set(true);
+                        joinSubscription.get().cancel();
+                    });
+            Uni<Integer> uni2 = Uni.createFrom().item(2)
+                    .onSubscription().invoke(() -> probe2.set(true));
+
+            UniAssertSubscriber<List<Integer>> sub = Uni.join().all(uni1, uni2).usingConcurrencyOf(1).andFailFast()
+                    .onSubscription().invoke(joinSubscription::set)
+                    .subscribe().withSubscriber(UniAssertSubscriber.create());
+
+            sub.assertNotTerminated();
+            assertThat(probe1).isTrue();
+            assertThat(probe2).isFalse();
+        }
+
+        @Test
+        void joinFirstShallNotSubscribeWhenCancelled() {
+            AtomicBoolean probe1 = new AtomicBoolean();
+            AtomicBoolean probe2 = new AtomicBoolean();
+            AtomicReference<UniSubscription> joinSubscription = new AtomicReference<>();
+
+            Uni<Integer> uni1 = Uni.createFrom().<Integer> failure(new IOException("boom"))
+                    .onSubscription().invoke(() -> {
+                        probe1.set(true);
+                        joinSubscription.get().cancel();
+                    });
+            Uni<Integer> uni2 = Uni.createFrom().item(2)
+                    .onSubscription().invoke(() -> probe2.set(true));
+
+            UniAssertSubscriber<Integer> sub = Uni.join().first(uni1, uni2).usingConcurrencyOf(1).withItem()
+                    .onSubscription().invoke(joinSubscription::set)
+                    .subscribe().withSubscriber(UniAssertSubscriber.create());
+
+            sub.assertNotTerminated();
+            assertThat(probe1).isTrue();
+            assertThat(probe2).isFalse();
         }
     }
 }
