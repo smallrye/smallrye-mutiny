@@ -441,7 +441,7 @@ class UniJoinTest {
             Uni<Integer> b = Uni.createFrom().item(2);
             Uni<Integer> c = Uni.createFrom().item(3);
 
-            Uni<List<Integer>> uni = Uni.join().all(a, b, c).withConcurrencyLimit(1).andCollectFailures();
+            Uni<List<Integer>> uni = Uni.join().all(a, b, c).usingConcurrencyOf(1).andCollectFailures();
 
             UniAssertSubscriber<List<Integer>> sub = uni.subscribe().withSubscriber(UniAssertSubscriber.create());
             sub.assertCompleted().assertItem(Arrays.asList(1, 2, 3));
@@ -453,12 +453,12 @@ class UniJoinTest {
             Uni<Integer> b = Uni.createFrom().failure(new IOException("bam"));
             Uni<Integer> c = Uni.createFrom().item(3);
 
-            Uni<Integer> uni = Uni.join().first(a, b, c).withConcurrencyLimit(1).withItem();
+            Uni<Integer> uni = Uni.join().first(a, b, c).usingConcurrencyOf(1).withItem();
 
             UniAssertSubscriber<Integer> sub = uni.subscribe().withSubscriber(UniAssertSubscriber.create());
             sub.assertCompleted().assertItem(3);
 
-            uni = Uni.join().first(a, b, c).withConcurrencyLimit(1).toTerminate();
+            uni = Uni.join().first(a, b, c).usingConcurrencyOf(1).toTerminate();
             sub = uni.subscribe().withSubscriber(UniAssertSubscriber.create());
             sub.assertFailedWith(IOException.class, "boom");
         }
@@ -478,7 +478,7 @@ class UniJoinTest {
             Uni<String> c = Uni.createFrom().future(() -> pool.schedule(() -> "c", delays, TimeUnit.MILLISECONDS));
             Uni<String> d = Uni.createFrom().future(() -> pool.schedule(() -> "d", delays, TimeUnit.MILLISECONDS));
 
-            Uni<List<String>> uni = Uni.join().all(a, b, c, d).withConcurrencyLimit(limit).andCollectFailures();
+            Uni<List<String>> uni = Uni.join().all(a, b, c, d).usingConcurrencyOf(limit).andCollectFailures();
 
             long start = System.currentTimeMillis();
             UniAssertSubscriber<List<String>> sub = uni.subscribe().withSubscriber(UniAssertSubscriber.create());
@@ -504,7 +504,7 @@ class UniJoinTest {
             Uni<String> c = Uni.createFrom().failure(() -> new IOException("boom"));
             Uni<String> d = Uni.createFrom().future(() -> pool.schedule(() -> "d", delays, TimeUnit.MILLISECONDS));
 
-            Uni<List<String>> uni = Uni.join().all(a, b, c, d).withConcurrencyLimit(limit).andCollectFailures();
+            Uni<List<String>> uni = Uni.join().all(a, b, c, d).usingConcurrencyOf(limit).andCollectFailures();
 
             long start = System.currentTimeMillis();
             UniAssertSubscriber<List<String>> sub = uni.subscribe().withSubscriber(UniAssertSubscriber.create());
@@ -530,7 +530,7 @@ class UniJoinTest {
             Uni<String> c = Uni.createFrom().failure(() -> new IOException("boom"));
             Uni<String> d = Uni.createFrom().future(() -> pool.schedule(() -> "d", delays, TimeUnit.MILLISECONDS));
 
-            Uni<List<String>> uni = Uni.join().all(a, b, c, d).withConcurrencyLimit(limit).andFailFast();
+            Uni<List<String>> uni = Uni.join().all(a, b, c, d).usingConcurrencyOf(limit).andFailFast();
 
             long start = System.currentTimeMillis();
             UniAssertSubscriber<List<String>> sub = uni.subscribe().withSubscriber(UniAssertSubscriber.create());
@@ -556,7 +556,7 @@ class UniJoinTest {
             Uni<String> c = Uni.createFrom().failure(() -> new IOException("boom"));
             Uni<String> d = Uni.createFrom().failure(() -> new IOException("boom"));
 
-            Uni<String> uni = Uni.join().first(a, b, c, d).withConcurrencyLimit(limit).withItem();
+            Uni<String> uni = Uni.join().first(a, b, c, d).usingConcurrencyOf(limit).withItem();
 
             long start = System.currentTimeMillis();
             UniAssertSubscriber<String> sub = uni.subscribe().withSubscriber(UniAssertSubscriber.create());
@@ -580,7 +580,7 @@ class UniJoinTest {
             }, delays * 2L, TimeUnit.MILLISECONDS));
             Uni<String> b = Uni.createFrom().future(() -> pool.schedule(() -> "b", delays, TimeUnit.MILLISECONDS));
 
-            Uni<String> uni = Uni.join().first(a, b).withConcurrencyLimit(limit).toTerminate();
+            Uni<String> uni = Uni.join().first(a, b).usingConcurrencyOf(limit).toTerminate();
 
             long start = System.currentTimeMillis();
             UniAssertSubscriber<String> sub = uni.subscribe().withSubscriber(UniAssertSubscriber.create());

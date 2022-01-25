@@ -109,9 +109,19 @@ public class UniJoin {
             this.unis = unis;
         }
 
-        // TODO
+        /**
+         * Limit the number of concurrent upstream subscriptions.
+         * <p>
+         * When not specified all upstream {@link Uni} are being subscribed when the joining {@link Uni} is subscribed.
+         * <p>
+         * Setting a limit is useful when you have a large number of {@link Uni} to join and their simultaneous
+         * subscriptions might overwhelm resources (e.g., database connections, etc).
+         *
+         * @param limit the concurrency limit, must be strictly positive
+         * @return an object to conclude the join strategy
+         */
         @CheckReturnValue
-        public JoinAllStrategyTerminal<T> withConcurrencyLimit(int limit) {
+        public JoinAllStrategyTerminal<T> usingConcurrencyOf(int limit) {
             this.concurrency = ParameterValidation.positive(limit, "limit");
             return this;
         }
@@ -211,9 +221,19 @@ public class UniJoin {
             this.unis = unis;
         }
 
-        // TODO
+        /**
+         * Limit the number of concurrent upstream subscriptions.
+         * <p>
+         * When not specified all upstream {@link Uni} are being subscribed when the joining {@link Uni} is subscribed.
+         * <p>
+         * Setting a limit is useful when you have a large number of {@link Uni} to join and their simultaneous
+         * subscriptions might overwhelm resources (e.g., database connections, etc).
+         *
+         * @param limit the concurrency limit, must be strictly positive
+         * @return an object to conclude the join strategy
+         */
         @CheckReturnValue
-        public JoinFirstStrategyTerminal<T> withConcurrencyLimit(int limit) {
+        public JoinFirstStrategyTerminal<T> usingConcurrencyOf(int limit) {
             this.concurrency = ParameterValidation.positive(limit, "limit");
             return this;
         }
