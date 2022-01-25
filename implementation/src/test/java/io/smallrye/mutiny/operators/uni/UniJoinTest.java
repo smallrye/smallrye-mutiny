@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Uni;
@@ -434,6 +435,24 @@ class UniJoinTest {
 
     @Nested
     class ConcurrencyLimit {
+
+        @ParameterizedTest
+        @ValueSource(ints = { -69, 0 })
+        void rejectBadConcurrencyInJoinAll(int level) {
+            Uni<Integer> uni = Uni.createFrom().item(1);
+            assertThatThrownBy(() -> Uni.join().all(uni).usingConcurrencyOf(level))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("must be greater than zero");
+        }
+
+        @ParameterizedTest
+        @ValueSource(ints = { -69, 0 })
+        void rejectBadConcurrencyInJoinFirst(int level) {
+            Uni<Integer> uni = Uni.createFrom().item(1);
+            assertThatThrownBy(() -> Uni.join().first(uni).usingConcurrencyOf(level))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("must be greater than zero");
+        }
 
         @Test
         void joinAllItemsAndCollectSmokeTest() {
