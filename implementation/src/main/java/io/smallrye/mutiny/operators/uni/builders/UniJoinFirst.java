@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReferenceArray;
 
 import io.smallrye.mutiny.CompositeException;
@@ -22,10 +23,12 @@ public class UniJoinFirst<T> extends AbstractUni<T> {
 
     private final List<Uni<T>> unis;
     private final Mode mode;
+    private final int concurrency;
 
-    public UniJoinFirst(List<Uni<T>> unis, Mode mode) {
+    public UniJoinFirst(List<Uni<T>> unis, Mode mode, int concurrency) {
         this.unis = unis;
         this.mode = mode;
+        this.concurrency = concurrency;
     }
 
     @Override
@@ -42,17 +45,43 @@ public class UniJoinFirst<T> extends AbstractUni<T> {
         private final AtomicReferenceArray<UniSubscription> subscriptions = new AtomicReferenceArray<>(unis.size());
         private final AtomicBoolean cancelled = new AtomicBoolean();
 
+        private AtomicInteger nextSubscriptionIndex;
+
         public UniJoinFirstSubscription(UniSubscriber<? super T> subscriber) {
             this.subscriber = subscriber;
         }
 
         public void triggerSubscriptions() {
-            for (int i = 0; i < unis.size() && !cancelled.get(); i++) {
-                int index = i;
-                Uni<? extends T> uni = unis.get(i);
+            int limit;
+            if (concurrency != -1) {
+                limit = Math.min(concurrency, unis.size());
+                nextSubscriptionIndex = new AtomicInteger(concurrency - 1);
+            } else {
+                limit = unis.size();
+            }
+            for (int i = 0; i < limit; i++) {
+                if (!trySubscribe(i)) {
+                    break;
+                }
+            }
+        }
+
+        private boolean trySubscribe(int index) {
+            boolean proceed = !this.cancelled.get();
+            if (proceed) {
+                Uni<? extends T> uni = unis.get(index);
                 uni.onSubscription()
-                        .invoke(subscription -> subscriptions.set(index, subscription))
+                        .invoke(subscription -> this.onSubscribe(index, subscription))
                         .subscribe().with(subscriber.context(), this::onItem, this::onFailure);
+            }
+            return proceed;
+        }
+
+        private void onSubscribe(int index, UniSubscription subscription) {
+            if (!cancelled.get()) {
+                subscriptions.set(index, subscription);
+            } else {
+                subscription.cancel();
             }
         }
 
@@ -81,6 +110,9 @@ public class UniJoinFirst<T> extends AbstractUni<T> {
         private final List<Throwable> failures = Collections.synchronizedList(new ArrayList<>());
 
         private void onFailure(Throwable failure) {
+            if (cancelled.get()) {
+                return;
+            }
             switch (mode) {
                 case FIRST_TO_EMIT:
                     if (cancelled.compareAndSet(false, true)) {
@@ -91,11 +123,17 @@ public class UniJoinFirst<T> extends AbstractUni<T> {
                     }
                     break;
                 case FIRST_WITH_ITEM:
-                    if (!cancelled.get()) {
-                        failures.add(failure);
-                        if (failures.size() == unis.size()) {
-                            cancelled.set(true);
+                    failures.add(failure);
+                    if (failures.size() == unis.size()) {
+                        if (cancelled.compareAndSet(false, true)) {
                             subscriber.onFailure(new CompositeException(failures));
+                        } else {
+                            Infrastructure.handleDroppedException(failure);
+                        }
+                    } else if (concurrency != -1) {
+                        int nextIndex = nextSubscriptionIndex.incrementAndGet();
+                        if (nextIndex < unis.size()) {
+                            trySubscribe(nextIndex);
                         }
                     } else {
                         Infrastructure.handleDroppedException(failure);

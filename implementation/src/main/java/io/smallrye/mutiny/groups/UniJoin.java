@@ -10,6 +10,7 @@ import io.smallrye.common.annotation.CheckReturnValue;
 import io.smallrye.common.annotation.Experimental;
 import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.uni.builders.UniJoinAll;
 import io.smallrye.mutiny.operators.uni.builders.UniJoinFirst;
@@ -69,17 +70,11 @@ public class UniJoin {
     }
 
     /**
-     * Defines how to deal with failures while joining {@link Uni} references with {@link UniJoin#all(List)}.
+     * Terminal interface for {@link UniJoin#all(List)}
      *
      * @param <T> the type of the {@link Uni} values
      */
-    public static class JoinAllStrategy<T> {
-
-        private final List<Uni<T>> unis;
-
-        private JoinAllStrategy(List<Uni<T>> unis) {
-            this.unis = unis;
-        }
+    public interface JoinAllStrategyTerminal<T> {
 
         /**
          * Wait for all {@link Uni} references to terminate, and collect all failures in a
@@ -88,9 +83,7 @@ public class UniJoin {
          * @return a new {@link Uni}
          */
         @CheckReturnValue
-        public Uni<List<T>> andCollectFailures() {
-            return Infrastructure.onUniCreation(new UniJoinAll<>(unis, UniJoinAll.Mode.COLLECT_FAILURES));
-        }
+        Uni<List<T>> andCollectFailures();
 
         /**
          * Immediately forward the first failure from any of the {@link Uni}, and cancel the remaining {@link Uni}
@@ -99,8 +92,54 @@ public class UniJoin {
          * @return a new {@link Uni}
          */
         @CheckReturnValue
+        Uni<List<T>> andFailFast();
+    }
+
+    /**
+     * Defines how to deal with failures while joining {@link Uni} references with {@link UniJoin#all(List)}.
+     *
+     * @param <T> the type of the {@link Uni} values
+     */
+    public static class JoinAllStrategy<T> implements JoinAllStrategyTerminal<T> {
+
+        private final List<Uni<T>> unis;
+        private int concurrency = -1;
+
+        private JoinAllStrategy(List<Uni<T>> unis) {
+            this.unis = unis;
+        }
+
+        /**
+         * Limit the number of concurrent upstream subscriptions.
+         * <p>
+         * When not specified all upstream {@link Uni} are being subscribed when the joining {@link Uni} is subscribed.
+         * <p>
+         * Setting a limit is useful when you have a large number of {@link Uni} to join and their simultaneous
+         * subscriptions might overwhelm resources (e.g., database connections, etc).
+         *
+         * @param limit the concurrency limit, must be strictly positive
+         * @return an object to conclude the join strategy
+         */
+        @CheckReturnValue
+        public JoinAllStrategyTerminal<T> usingConcurrencyOf(int limit) {
+            this.concurrency = ParameterValidation.positive(limit, "limit");
+            return this;
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @CheckReturnValue
+        public Uni<List<T>> andCollectFailures() {
+            return Infrastructure.onUniCreation(new UniJoinAll<>(unis, UniJoinAll.Mode.COLLECT_FAILURES, concurrency));
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @CheckReturnValue
         public Uni<List<T>> andFailFast() {
-            return Infrastructure.onUniCreation(new UniJoinAll<>(unis, UniJoinAll.Mode.FAIL_FAST));
+            return Infrastructure.onUniCreation(new UniJoinAll<>(unis, UniJoinAll.Mode.FAIL_FAST, concurrency));
         }
     }
 
@@ -142,17 +181,11 @@ public class UniJoin {
     }
 
     /**
-     * Defines how to deal with failures while joining {@link Uni} references with {@link UniJoin#first(List)}}.
+     * Terminal interface for {@link UniJoin#first(List)}
      *
      * @param <T> the type of the {@link Uni} values
      */
-    public static class JoinFirstStrategy<T> {
-
-        private final List<Uni<T>> unis;
-
-        private JoinFirstStrategy(List<Uni<T>> unis) {
-            this.unis = unis;
-        }
+    public interface JoinFirstStrategyTerminal<T> {
 
         /**
          * Forward the value or failure from the first {@link Uni} to terminate.
@@ -160,9 +193,7 @@ public class UniJoin {
          * @return a new {@link Uni}
          */
         @CheckReturnValue
-        public Uni<T> toTerminate() {
-            return Infrastructure.onUniCreation(new UniJoinFirst<>(unis, UniJoinFirst.Mode.FIRST_TO_EMIT));
-        }
+        Uni<T> toTerminate();
 
         /**
          * Forward the value from the first {@link Uni} to terminate with a value.
@@ -173,8 +204,54 @@ public class UniJoin {
          * @return a new {@link Uni}
          */
         @CheckReturnValue
+        Uni<T> withItem();
+    }
+
+    /**
+     * Defines how to deal with failures while joining {@link Uni} references with {@link UniJoin#first(List)}}.
+     *
+     * @param <T> the type of the {@link Uni} values
+     */
+    public static class JoinFirstStrategy<T> implements JoinFirstStrategyTerminal<T> {
+
+        private final List<Uni<T>> unis;
+        private int concurrency = -1;
+
+        private JoinFirstStrategy(List<Uni<T>> unis) {
+            this.unis = unis;
+        }
+
+        /**
+         * Limit the number of concurrent upstream subscriptions.
+         * <p>
+         * When not specified all upstream {@link Uni} are being subscribed when the joining {@link Uni} is subscribed.
+         * <p>
+         * Setting a limit is useful when you have a large number of {@link Uni} to join and their simultaneous
+         * subscriptions might overwhelm resources (e.g., database connections, etc).
+         *
+         * @param limit the concurrency limit, must be strictly positive
+         * @return an object to conclude the join strategy
+         */
+        @CheckReturnValue
+        public JoinFirstStrategyTerminal<T> usingConcurrencyOf(int limit) {
+            this.concurrency = ParameterValidation.positive(limit, "limit");
+            return this;
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @CheckReturnValue
+        public Uni<T> toTerminate() {
+            return Infrastructure.onUniCreation(new UniJoinFirst<>(unis, UniJoinFirst.Mode.FIRST_TO_EMIT, concurrency));
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @CheckReturnValue
         public Uni<T> withItem() {
-            return Infrastructure.onUniCreation(new UniJoinFirst<>(unis, UniJoinFirst.Mode.FIRST_WITH_ITEM));
+            return Infrastructure.onUniCreation(new UniJoinFirst<>(unis, UniJoinFirst.Mode.FIRST_WITH_ITEM, concurrency));
         }
     }
 
