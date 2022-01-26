@@ -63,15 +63,21 @@ public class UniJoinAll<T> extends AbstractUni<List<T>> {
             } else {
                 limit = unis.size();
             }
-            for (int index = 0; index < limit && !cancelled.get(); index++) {
-                performSubscription(index, unis.get(index));
+            for (int index = 0; index < limit; index++) {
+                if (!trySubscribe(index, unis.get(index))) {
+                    break;
+                }
             }
         }
 
-        private void performSubscription(int index, Uni<? extends T> uni) {
-            uni.onSubscription()
-                    .invoke(subscription -> this.onSubscribe(index, subscription))
-                    .subscribe().with(subscriber.context(), item -> this.onItem(index, item), this::onFailure);
+        private boolean trySubscribe(int index, Uni<? extends T> uni) {
+            boolean proceed = !this.cancelled.get();
+            if (proceed) {
+                uni.onSubscription()
+                        .invoke(subscription -> this.onSubscribe(index, subscription))
+                        .subscribe().with(subscriber.context(), item -> this.onItem(index, item), this::onFailure);
+            }
+            return proceed;
         }
 
         @Override
@@ -116,10 +122,10 @@ public class UniJoinAll<T> extends AbstractUni<List<T>> {
                 } else {
                     subscriber.onFailure(new CompositeException(failures));
                 }
-            } else if (concurrency != -1 && !cancelled.get()) {
+            } else if (concurrency != -1) {
                 int nextIndex = nextSubscriptionIndex.incrementAndGet();
                 if (nextIndex < unis.size()) {
-                    performSubscription(nextIndex, unis.get(nextIndex));
+                    trySubscribe(nextIndex, unis.get(nextIndex));
                 }
             }
         }

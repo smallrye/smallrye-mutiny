@@ -59,16 +59,22 @@ public class UniJoinFirst<T> extends AbstractUni<T> {
             } else {
                 limit = unis.size();
             }
-            for (int i = 0; i < limit && !cancelled.get(); i++) {
-                performSubscription(i);
+            for (int i = 0; i < limit; i++) {
+                if (!trySubscribe(i)) {
+                    break;
+                }
             }
         }
 
-        private void performSubscription(int index) {
-            Uni<? extends T> uni = unis.get(index);
-            uni.onSubscription()
-                    .invoke(subscription -> this.onSubscribe(index, subscription))
-                    .subscribe().with(subscriber.context(), this::onItem, this::onFailure);
+        private boolean trySubscribe(int index) {
+            boolean proceed = !this.cancelled.get();
+            if (proceed) {
+                Uni<? extends T> uni = unis.get(index);
+                uni.onSubscription()
+                        .invoke(subscription -> this.onSubscribe(index, subscription))
+                        .subscribe().with(subscriber.context(), this::onItem, this::onFailure);
+            }
+            return proceed;
         }
 
         private void onSubscribe(int index, UniSubscription subscription) {
@@ -104,6 +110,9 @@ public class UniJoinFirst<T> extends AbstractUni<T> {
         private final List<Throwable> failures = Collections.synchronizedList(new ArrayList<>());
 
         private void onFailure(Throwable failure) {
+            if (cancelled.get()) {
+                return;
+            }
             switch (mode) {
                 case FIRST_TO_EMIT:
                     if (cancelled.compareAndSet(false, true)) {
@@ -114,16 +123,17 @@ public class UniJoinFirst<T> extends AbstractUni<T> {
                     }
                     break;
                 case FIRST_WITH_ITEM:
-                    if (!cancelled.get()) {
-                        failures.add(failure);
-                        if (failures.size() == unis.size()) {
-                            cancelled.set(true);
+                    failures.add(failure);
+                    if (failures.size() == unis.size()) {
+                        if (cancelled.compareAndSet(false, true)) {
                             subscriber.onFailure(new CompositeException(failures));
-                        } else if (concurrency != -1) {
-                            int nextIndex = nextSubscriptionIndex.incrementAndGet();
-                            if (nextIndex < unis.size()) {
-                                performSubscription(nextIndex);
-                            }
+                        } else {
+                            Infrastructure.handleDroppedException(failure);
+                        }
+                    } else if (concurrency != -1) {
+                        int nextIndex = nextSubscriptionIndex.incrementAndGet();
+                        if (nextIndex < unis.size()) {
+                            trySubscribe(nextIndex);
                         }
                     } else {
                         Infrastructure.handleDroppedException(failure);
