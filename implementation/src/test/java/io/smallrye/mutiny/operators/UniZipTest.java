@@ -2,6 +2,8 @@ package io.smallrye.mutiny.operators;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.InstanceOfAssertFactories.LIST;
+import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
@@ -11,14 +13,22 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletionException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.TimeoutException;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.helpers.test.UniAssertSubscriber;
+import io.smallrye.mutiny.subscription.UniSubscription;
 import io.smallrye.mutiny.tuples.*;
 
 public class UniZipTest {
@@ -606,5 +616,120 @@ public class UniZipTest {
         assertThatThrownBy(() -> Uni.combine().all().unis(unis))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("The Uni at index 1 is null");
+    }
+
+    @Nested
+    class ConcurrencyLimitTest {
+
+        @Test
+        void combineAllSmokeTest() {
+            Uni<Integer> a = Uni.createFrom().item(1);
+            Uni<Integer> b = Uni.createFrom().item(2);
+            Uni<Integer> c = Uni.createFrom().item(3);
+            Uni<Integer> d = Uni.createFrom().item(4);
+
+            UniAssertSubscriber<? extends List<?>> sub = Uni.combine().all().unis(a, b, c, d)
+                    .usingConcurrencyOf(1)
+                    .combinedWith(unis -> unis)
+                    .subscribe().withSubscriber(UniAssertSubscriber.create());
+
+            sub.assertCompleted();
+            assertThat(sub.getItem()).asInstanceOf(LIST).containsExactly(1, 2, 3, 4);
+        }
+
+        @ParameterizedTest
+        @CsvSource({
+                "1, 100, 1, 400",
+                "4, 100, 1, 400",
+                "4, 100, 2, 200",
+                "4, 100, 16, 100"
+        })
+        void combineAllSTestWithDelays(int poolSize, long delay, int concurrency, long minTime) {
+            ScheduledExecutorService pool = Executors.newScheduledThreadPool(poolSize);
+
+            Uni<Integer> a = Uni.createFrom().future(() -> pool.schedule(() -> 1, delay, TimeUnit.MILLISECONDS));
+            Uni<Integer> b = Uni.createFrom().future(() -> pool.schedule(() -> 2, delay, TimeUnit.MILLISECONDS));
+            Uni<Integer> c = Uni.createFrom().future(() -> pool.schedule(() -> 3, delay, TimeUnit.MILLISECONDS));
+            Uni<Integer> d = Uni.createFrom().future(() -> pool.schedule(() -> 4, delay, TimeUnit.MILLISECONDS));
+
+            long start = System.currentTimeMillis();
+
+            UniAssertSubscriber<? extends List<?>> sub = Uni.combine().all().unis(a, b, c, d)
+                    .usingConcurrencyOf(concurrency)
+                    .combinedWith(unis -> unis)
+                    .subscribe().withSubscriber(UniAssertSubscriber.create());
+
+            sub.awaitItem();
+            long stop = System.currentTimeMillis();
+
+            sub.assertCompleted();
+            assertThat(sub.getItem()).asInstanceOf(LIST).containsExactly(1, 2, 3, 4);
+            assertThat(stop - start).isGreaterThanOrEqualTo(minTime);
+
+            pool.shutdownNow();
+        }
+
+        @ParameterizedTest
+        @CsvSource({
+                "1, 100, 1, 300",
+                "4, 100, 1, 300",
+                "4, 100, 2, 100",
+                "4, 100, 16, 0",
+        })
+        void combineAllSTestWithDelaysAndError(int poolSize, long delay, int concurrency, long minTime) {
+            ScheduledExecutorService pool = Executors.newScheduledThreadPool(poolSize);
+
+            Uni<Integer> a = Uni.createFrom().future(() -> pool.schedule(() -> 1, delay, TimeUnit.MILLISECONDS));
+            Uni<Integer> b = Uni.createFrom().future(() -> pool.schedule(() -> 2, delay, TimeUnit.MILLISECONDS));
+            Uni<Integer> c = Uni.createFrom().future(() -> pool.schedule(() -> 3, delay, TimeUnit.MILLISECONDS));
+            Uni<Integer> d = Uni.createFrom().failure(new IOException("yolo"));
+
+            long start = System.currentTimeMillis();
+
+            UniAssertSubscriber<? extends List<?>> sub = Uni.combine().all().unis(a, b, c, d)
+                    .usingConcurrencyOf(concurrency)
+                    .combinedWith(unis -> unis)
+                    .subscribe().withSubscriber(UniAssertSubscriber.create());
+
+            sub.awaitFailure();
+            long stop = System.currentTimeMillis();
+
+            sub.assertFailedWith(IOException.class, "yolo");
+            assertThat(stop - start).isGreaterThanOrEqualTo(minTime);
+
+            pool.shutdownNow();
+        }
+
+        @Test
+        void combineAllCancellation() {
+            ScheduledExecutorService pool = Executors.newScheduledThreadPool(4);
+
+            AtomicReference<UniSubscription> box = new AtomicReference<>();
+            AtomicBoolean subscribedToA = new AtomicBoolean();
+            AtomicBoolean subscribedToB = new AtomicBoolean();
+            AtomicBoolean cancelled = new AtomicBoolean();
+
+            Uni<Integer> a = Uni.createFrom().future(() -> pool.schedule(() -> 63, 500, TimeUnit.MILLISECONDS))
+                    .onItem().invoke(() -> {
+                        box.get().cancel();
+                        cancelled.set(true);
+                    })
+                    .onCancellation().invoke(() -> cancelled.set(true))
+                    .onSubscription().invoke(() -> subscribedToA.set(true));
+            Uni<Integer> b = Uni.createFrom().future(() -> pool.schedule(() -> 69, 10, TimeUnit.MILLISECONDS))
+                    .onSubscription().invoke(() -> subscribedToB.set(true));
+
+            Uni.combine().all().unis(a, b)
+                    .usingConcurrencyOf(1)
+                    .combinedWith(list -> list)
+                    .onSubscription().invoke(box::set)
+                    .subscribe().withSubscriber(UniAssertSubscriber.create());
+
+            await().untilTrue(cancelled);
+            assertThat(subscribedToA).isTrue();
+            assertThat(subscribedToB).isFalse();
+
+            pool.shutdownNow();
+        }
     }
 }
