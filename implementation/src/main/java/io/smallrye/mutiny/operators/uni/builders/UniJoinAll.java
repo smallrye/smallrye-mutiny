@@ -9,7 +9,6 @@ import java.util.concurrent.atomic.AtomicReferenceArray;
 
 import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Uni;
-import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.AbstractUni;
 import io.smallrye.mutiny.subscription.UniSubscriber;
 import io.smallrye.mutiny.subscription.UniSubscription;
@@ -136,16 +135,12 @@ public class UniJoinAll<T> extends AbstractUni<List<T>> {
                     if (!cancelled.get()) {
                         failures.add(failure);
                         forwardSignalWhenCompleteOrSubscribeNext();
-                    } else {
-                        Infrastructure.handleDroppedException(failure);
                     }
                     break;
                 case FAIL_FAST:
                     if (cancelled.compareAndSet(false, true)) {
                         cancelSubscriptions();
                         subscriber.onFailure(failure);
-                    } else {
-                        Infrastructure.handleDroppedException(failure);
                     }
                     break;
             }
