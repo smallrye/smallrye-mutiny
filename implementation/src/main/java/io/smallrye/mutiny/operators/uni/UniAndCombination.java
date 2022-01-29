@@ -3,6 +3,7 @@ package io.smallrye.mutiny.operators.uni;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -26,11 +27,13 @@ public class UniAndCombination<I, O> extends UniOperator<I, O> {
     private final Function<List<?>, O> combinator;
     private final List<Uni<?>> unis;
     private final boolean collectAllFailureBeforeFiring;
+    private final int concurrency;
 
     public UniAndCombination(Uni<? extends I> upstream, List<? extends Uni<?>> others,
             Function<List<?>, O> combinator,
-            boolean collectAllFailureBeforeFiring) {
+            boolean collectAllFailureBeforeFiring, int concurrency) {
         super(upstream);
+        this.concurrency = concurrency;
 
         this.unis = new ArrayList<>();
         // upstream can be null when using the all (static) operator.
@@ -57,6 +60,7 @@ public class UniAndCombination<I, O> extends UniOperator<I, O> {
         private final UniSubscriber<? super O> subscriber;
 
         AtomicBoolean cancelled = new AtomicBoolean();
+        AtomicInteger nextIndex = new AtomicInteger();
 
         AndSupervisor(UniSubscriber<? super O> sub) {
             subscriber = sub;
@@ -70,7 +74,19 @@ public class UniAndCombination<I, O> extends UniOperator<I, O> {
         }
 
         private void run() {
-            handlers.forEach(UniHandler::subscribe);
+            int upperBound;
+            if (concurrency == -1) {
+                upperBound = handlers.size();
+            } else {
+                upperBound = Math.min(handlers.size(), concurrency);
+                nextIndex = new AtomicInteger(upperBound);
+            }
+            for (int i = 0; i < upperBound; i++) {
+                if (cancelled.get()) {
+                    break;
+                }
+                handlers.get(i).subscribe();
+            }
         }
 
         @Override
@@ -116,6 +132,12 @@ public class UniAndCombination<I, O> extends UniOperator<I, O> {
                 }
             }
 
+            if (concurrency != -1 && !cancelled.get()) {
+                int nextIndex = this.nextIndex.getAndIncrement();
+                if (nextIndex < unis.size()) {
+                    handlers.get(nextIndex).subscribe();
+                }
+            }
         }
 
         private void computeAndFireTheOutcome(List<Throwable> failures, List<Object> items) {
