@@ -9,7 +9,6 @@ import java.util.concurrent.atomic.AtomicReferenceArray;
 
 import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Uni;
-import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.AbstractUni;
 import io.smallrye.mutiny.subscription.UniSubscriber;
 import io.smallrye.mutiny.subscription.UniSubscription;
@@ -29,6 +28,7 @@ public class UniJoinFirst<T> extends AbstractUni<T> {
         this.unis = unis;
         this.mode = mode;
         this.concurrency = concurrency;
+        assert (mode == Mode.FIRST_WITH_ITEM || (mode == Mode.FIRST_TO_EMIT && concurrency == -1)); // Invariant enforced by the caller DSL
     }
 
     @Override
@@ -118,8 +118,6 @@ public class UniJoinFirst<T> extends AbstractUni<T> {
                     if (cancelled.compareAndSet(false, true)) {
                         cancelSubscriptions();
                         subscriber.onFailure(failure);
-                    } else {
-                        Infrastructure.handleDroppedException(failure);
                     }
                     break;
                 case FIRST_WITH_ITEM:
@@ -127,16 +125,12 @@ public class UniJoinFirst<T> extends AbstractUni<T> {
                     if (failures.size() == unis.size()) {
                         if (cancelled.compareAndSet(false, true)) {
                             subscriber.onFailure(new CompositeException(failures));
-                        } else {
-                            Infrastructure.handleDroppedException(failure);
                         }
                     } else if (concurrency != -1) {
                         int nextIndex = nextSubscriptionIndex.incrementAndGet();
                         if (nextIndex < unis.size()) {
                             trySubscribe(nextIndex);
                         }
-                    } else {
-                        Infrastructure.handleDroppedException(failure);
                     }
                     break;
             }

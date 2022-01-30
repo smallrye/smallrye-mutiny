@@ -188,14 +188,6 @@ public class UniJoin {
     public interface JoinFirstStrategyTerminal<T> {
 
         /**
-         * Forward the value or failure from the first {@link Uni} to terminate.
-         *
-         * @return a new {@link Uni}
-         */
-        @CheckReturnValue
-        Uni<T> toTerminate();
-
-        /**
          * Forward the value from the first {@link Uni} to terminate with a value.
          * <p>
          * When all {@link Uni} references fail then failures are collected into a {@link CompositeException},
@@ -239,7 +231,9 @@ public class UniJoin {
         }
 
         /**
-         * {@inheritDoc}
+         * Forward the value or failure from the first {@link Uni} to terminate.
+         *
+         * @return a new {@link Uni}
          */
         @CheckReturnValue
         public Uni<T> toTerminate() {
