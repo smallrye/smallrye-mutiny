@@ -30,7 +30,7 @@ public class UniAndGroupIterable<T1> {
         this(source, iterable, false);
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     public UniAndGroupIterable(Uni<? extends T1> source, Iterable<? extends Uni<?>> iterable, boolean collectFailures) {
         this.source = source;
         List<? extends Uni<?>> others;
@@ -71,7 +71,7 @@ public class UniAndGroupIterable<T1> {
      * successfully completed. In case of failure, the failure is propagated.
      *
      * @param function the combination function
-     * @param <O>      the combination value type
+     * @param <O> the combination value type
      * @return the new {@link Uni}
      */
     @CheckReturnValue
@@ -90,9 +90,9 @@ public class UniAndGroupIterable<T1> {
      * If the cast fails then the returned {@link Uni} fails with a {@link ClassCastException}.
      *
      * @param superType the super type of all items
-     * @param function  the combination function
-     * @param <O>       the combination value type
-     * @param <I>       the super type of all items
+     * @param function the combination function
+     * @param <O> the combination value type
+     * @param <I> the super type of all items
      * @return the new {@link Uni}
      */
     @SuppressWarnings("unchecked")
@@ -107,7 +107,7 @@ public class UniAndGroupIterable<T1> {
      * {@link Uni unis} have successfully completed. In case of failure, the failure is propagated.
      *
      * @return the {@code Uni Uni<Void>} emitting {@code null} when all the {@link Uni unis} have completed, or propagating
-     * the failure.
+     *         the failure.
      */
     @CheckReturnValue
     public Uni<Void> discardItems() {
