@@ -1,50 +1,86 @@
-[ {
-  "extension" : "revapi.java",
-  "id" : "java",
-  "configuration" : {
-    "missing-classes" : {
-      "behavior" : "report",
-      "ignoreMissingAnnotations" : false
+[
+  {
+    "extension": "revapi.java",
+    "id": "java",
+    "configuration": {
+      "missing-classes": {
+        "behavior": "report",
+        "ignoreMissingAnnotations": false
+      }
+    }
+  },
+  {
+    "extension": "revapi.filter",
+    "configuration": {
+      "elements": {
+        "include": [
+          {
+            "matcher": "java-package",
+            "match": "io.smallrye.mutiny"
+          },
+          {
+            "matcher": "java-package",
+            "match": "io.smallrye.mutiny.groups"
+          },
+          {
+            "matcher": "java-package",
+            "match": "io.smallrye.mutiny.helpers.spies"
+          },
+          {
+            "matcher": "java-package",
+            "match": "io.smallrye.mutiny.helpers.test"
+          },
+          {
+            "matcher": "java-package",
+            "match": "io.smallrye.mutiny.infrastructure"
+          },
+          {
+            "matcher": "java-package",
+            "match": "io.smallrye.mutiny.operators"
+          },
+          {
+            "matcher": "java-package",
+            "match": "io.smallrye.mutiny.subscription"
+          },
+          {
+            "matcher": "java-package",
+            "match": "io.smallrye.mutiny.tuples"
+          },
+          {
+            "matcher": "java-package",
+            "match": "io.smallrye.mutiny.unchecked"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "extension": "revapi.differences",
+    "id": "breaking-changes",
+    "configuration": {
+      "criticality": "highlight",
+      "minSeverity": "POTENTIALLY_BREAKING",
+      "minCriticality": "documented",
+      "differences": []
+    }
+  },
+  {
+    "extension": "revapi.reporter.json",
+    "configuration": {
+      "minSeverity": "POTENTIALLY_BREAKING",
+      "minCriticality": "documented",
+      "output": "target/compatibility.json",
+      "indent": true,
+      "append": false,
+      "keepEmptyFile": true
+    }
+  },
+  {
+    "extension": "revapi.reporter.text",
+    "configuration": {
+      "minSeverity": "POTENTIALLY_BREAKING",
+      "minCriticality": "documented",
+      "output": "out"
     }
   }
-}, {
-  "extension" : "revapi.filter",
-  "configuration" : {
-    "elements" : {
-      "include" : [ {
-        "matcher" : "java-package",
-        "match" : "/io\\.smallrye\\.mutiny(\\..+)?/"
-      } ],
-      "exclude" : [ {
-        "matcher" : "java-package",
-        "match" : "/io\\.smallrye\\.mutiny\\.operators(\\..+)?/"
-      } ]
-    }
-  }
-}, {
-  "extension" : "revapi.differences",
-  "id" : "breaking-changes",
-  "configuration" : {
-    "criticality" : "highlight",
-    "minSeverity" : "POTENTIALLY_BREAKING",
-    "minCriticality" : "documented",
-    "differences" : [ ]
-  }
-}, {
-  "extension" : "revapi.reporter.json",
-  "configuration" : {
-    "minSeverity" : "POTENTIALLY_BREAKING",
-    "minCriticality" : "documented",
-    "output" : "target/compatibility.json",
-    "indent" : true,
-    "append" : false,
-    "keepEmptyFile" : true
-  }
-}, {
-  "extension" : "revapi.reporter.text",
-  "configuration" : {
-    "minSeverity" : "POTENTIALLY_BREAKING",
-    "minCriticality" : "documented",
-    "output" : "out"
-  }
-} ]
+]
