@@ -1,6 +1,6 @@
 ---
-name: Issue template (new users)
-about: Help new users report issues
+name: "New users"
+about: "Template and instructions to help new users report issues 👋"
 title: ''
 labels: ''
 assignees: ''

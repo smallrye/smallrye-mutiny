@@ -1,6 +1,6 @@
 ---
-name: Issue template (returning users)
-about: Issue template for returning users who know the Mutiny project
+name: "Returning users"
+about: "Simple canvas for returning users 👍"
 title: ''
 labels: ''
 assignees: ''
