@@ -91,6 +91,19 @@
                         </goals>
                     </execution>
                 </executions>
+                <configuration>
+                    <sourceFileIncludes>
+                        <sourceFileInclude>io/smallrye/mutiny/*.java</sourceFileInclude>
+                        <sourceFileInclude>io/smallrye/mutiny/groups/*.java</sourceFileInclude>
+                        <sourceFileInclude>io/smallrye/mutiny/helpers/spies/*.java</sourceFileInclude>
+                        <sourceFileInclude>io/smallrye/mutiny/helpers/test/*.java</sourceFileInclude>
+                        <sourceFileInclude>io/smallrye/mutiny/infrastructure/*.java</sourceFileInclude>
+                        <sourceFileInclude>io/smallrye/mutiny/operators/*.java</sourceFileInclude>
+                        <sourceFileInclude>io/smallrye/mutiny/subscription/*.java</sourceFileInclude>
+                        <sourceFileInclude>io/smallrye/mutiny/tuples/*.java</sourceFileInclude>
+                        <sourceFileInclude>io/smallrye/mutiny/unchecked/*.java</sourceFileInclude>
+                    </sourceFileIncludes>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.moditect</groupId>
