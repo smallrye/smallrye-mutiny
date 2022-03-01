@@ -76,6 +76,14 @@
                         <configuration>
                             <!-- Disable TestNG -->
                             <testNGArtifactName>none:none</testNGArtifactName>
+                            <!-- Global settings, might be replaced in profiles (e.g., parallel-tests, etc) -->
+                            <properties>
+                                <configurationParameters>
+                                    junit.jupiter.extensions.autodetection.enabled=true
+                                    junit.jupiter.testinstance.lifecycle.default = per_class
+                                    junit.jupiter.testclass.order.default = org.junit.jupiter.api.ClassOrderer$Random
+                                </configurationParameters>
+                            </properties>
                         </configuration>
                     </execution>
                 </executions>
@@ -175,6 +183,7 @@
                                 <configurationParameters>
                                     junit.jupiter.extensions.autodetection.enabled=true
                                     junit.jupiter.testinstance.lifecycle.default = per_class
+                                    junit.jupiter.testclass.order.default = org.junit.jupiter.api.ClassOrderer$Random
                                     junit.jupiter.execution.parallel.enabled = true
                                     junit.jupiter.execution.parallel.mode.default = same_thread
                                     junit.jupiter.execution.parallel.mode.classes.default = concurrent
