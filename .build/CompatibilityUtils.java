@@ -1,6 +1,6 @@
 ///usr/bin/env jbang "$0" "$@" ; exit $? # (1)
 //DEPS io.vertx:vertx-core:3.9.4
-//DEPS info.picocli:picocli:4.5.0
+//DEPS info.picocli:picocli:4.6.3
 
 
 import java.io.*;
@@ -12,6 +12,7 @@ import java.nio.file.*;
 import io.vertx.core.json.*;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
+import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
 
 import java.util.concurrent.Callable;
@@ -24,6 +25,12 @@ class CompatibilityUtils implements Callable<Integer> {
 
     @Parameters(index = "0", description = "Command among 'extract' and 'clear'")
     private String command;
+
+    @Option(names = "--do-not-clear-version-prefix", description = "Do not clear if the version starts with the prefix (e.g., `1.2`, `1.`, etc)")
+    private String[] clearExcludes = new String[0];
+
+    @Option(names = "--version", description = "The release version")
+    private String version = "";
 
     public static void main(String... args) {
         int exitCode = new CommandLine(new CompatibilityUtils()).execute(args);
@@ -50,6 +57,12 @@ class CompatibilityUtils implements Callable<Integer> {
         }
 
         if (command.equalsIgnoreCase("clear")) {
+            for (String exclude : clearExcludes) {
+                if (version.startsWith(exclude)) {
+                    System.out.println("Not clearing for version " + version + " (starts with `" + exclude + "`)");
+                    return 0;
+                }
+            }
             for (File f : files) {
                 System.out.println("\uD83D\uDD0E Clearing differences from revapi.json file: " + f.getAbsolutePath());
                 JsonArray json = new JsonArray(read(f));
