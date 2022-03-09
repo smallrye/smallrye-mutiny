@@ -4,6 +4,7 @@ import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
 import static io.smallrye.mutiny.helpers.ParameterValidation.validate;
 
 import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.function.BooleanSupplier;
 
 import io.smallrye.common.annotation.CheckReturnValue;
@@ -62,6 +63,13 @@ public class UniMemoize<T> {
                 if (startTime == -1) {
                     startTime = now;
                 }
+
+                // Avoid arithmetic overflow when retrieving the nanos of the FOREVER duration
+                if (validatedDuration == ChronoUnit.FOREVER.getDuration()) {
+                    startTime = now;
+                    return false;
+                }
+
                 boolean invalidates = (now - startTime) > validatedDuration.toNanos();
                 if (invalidates) {
                     startTime = now;

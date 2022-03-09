@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -480,7 +481,6 @@ class UniMemoizeTest {
     /**
      * Test reproducing https://github.com/smallrye/smallrye-mutiny/issues/460
      */
-    @SuppressWarnings("ConstantConditions")
     @RepeatedTest(10)
     public void testTimeoutOfSecondSubscriber() {
         Uni<String> uni = Uni.createFrom().item("hello")
@@ -501,6 +501,22 @@ class UniMemoizeTest {
 
         assertThat(reference).hasValue(null);
         assertThat(cancelled).isTrue();
+    }
+
+    @RepeatedTest(3)
+    void testMemoizeForever() {
+        AtomicInteger count = new AtomicInteger();
+        Uni<String> uni = Uni.createFrom().item(() -> {
+            int i = count.incrementAndGet();
+            return "hello-" + i;
+        })
+                .onItem().delayIt().by(Duration.ofMillis(500))
+                .memoize().atLeast(ChronoUnit.FOREVER.getDuration());
+        UniAssertSubscriber<String> subscriber1 = uni.subscribe().withSubscriber(UniAssertSubscriber.create());
+        UniAssertSubscriber<String> subscriber2 = uni.subscribe().withSubscriber(UniAssertSubscriber.create());
+
+        subscriber1.awaitItem().assertItem("hello-1");
+        subscriber2.awaitItem().assertItem("hello-1");
     }
 
 }
