@@ -319,3 +319,9 @@ context-passing:
   labels:
     - intermediate
     - advanced
+
+replaying-multis:
+  title: Replaying Multis
+  text: Learn how multiple subscribers can replay from a Multi
+  labels:
+    - advanced
