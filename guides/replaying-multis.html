@@ -8,7 +8,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="description" content="SmallRye Mutiny!">
 
-    <link rel="canonical" href="/getting-started/first-lines-of-code.html">
+    <link rel="canonical" href="/guides/replaying-multis.html">
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.3.1/styles/default.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/components/icon.min.css" integrity="sha512-8Tb+T7SKUFQWOPIQCaLDWWe1K/SY8hvHl7brOH8Nz5z1VT8fnf8B+9neoUzmFY3OzkWMMs3OjrwZALgB1oXFBg==" crossorigin="anonymous" />
     <link rel="shortcut icon" type="image/png" href="/smallrye-mutiny/assets/images/favicon.ico">
@@ -39,8 +39,8 @@
                 <ul class="navbar-nav ml-auto mr-0 mt-2 mt-lg-0">
                     <li class="nav-item"><a class="nav-link " href="/smallrye-mutiny/index.html">Home</a></li>
                     <li class="nav-item"><a class="nav-link " href="/smallrye-mutiny/pages/philosophy">Philosophy</a></li>
-                    <li class="nav-item"><a class="nav-link active" href="/smallrye-mutiny/getting-started/download">Getting started</a></li>
-                    <li class="nav-item"><a class="nav-link " href="/smallrye-mutiny/guides">Guides</a></li>
+                    <li class="nav-item"><a class="nav-link " href="/smallrye-mutiny/getting-started/download">Getting started</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="/smallrye-mutiny/guides">Guides</a></li>
                     <li class="nav-item"><a href="https://github.com/smallrye/smallrye-mutiny" target="_blank" title="Github"><i
                             class="lab la-github la-2x"></i></a></li>
                     <li class="nav-item"><a href="https://github.com/smallrye/smallrye-mutiny/discussions" target="_blank" title="Discussions on GitHub"><i
@@ -57,45 +57,17 @@
             <div class="content">
                 
 
-    
-    
-        
-        
-        
-    
-        
-        
-        
-    
-        
-            
-            
-
-    
-        
-
-
-
 <section class="hero gs">
     <div class="hero-main container">
         <div class="row">
             <div class="hero-left col-12">
                 <div class="hero-slogan">
-                    <h1 class="hero-name">First lines of code</h1>
+                    <h1 class="hero-name">Replaying Multis</h1>
                 </div>
                 <div class="hero-desc">
-                    Your first lines of code using Mutiny.
+                    Learn how multiple subscribers can replay from a Multi
                 </div>
-                <div class="hero-buttons">
-                    
-                    <a href="/smallrye-mutiny/getting-started/download" class="getting-started-nav btn btn-rounded button button-dark button-rounded">
-                        <i class="las la-arrow-left left"></i>&nbsp;Getting Started with Mutiny</a>
-                    
-                    
-                    <a href="/smallrye-mutiny/getting-started/creating-unis" class="getting-started-nav btn btn-rounded button button-dark button-rounded">
-                        Creating Unis&nbsp;<i class="las la-arrow-right"></i></a>
-                    
-                </div>
+                <!-- TODO Labels -->
             </div>
         </div>
     </div>
@@ -104,73 +76,45 @@
 <div class="container page-content">
     <div class="row">
         <div class="col-md-9 content">
-            <div class="sect1">
-<h2 id="hello-mutiny"><a class="anchor" href="#hello-mutiny"></a>Hello Mutiny!</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>Once you made Mutiny available to your classpath, you can start writing code.
-Let&#8217;s start with this simple program:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">import io.smallrye.mutiny.Uni;
-
-public class FirstProgram {
-
-  public static void main(String[] args) {
-    Uni.createFrom().item("hello")
-      .onItem().transform(item -&gt; item + " mutiny")
-      .onItem().transform(String::toUpperCase)
-      .subscribe().with(
-        item -&gt; System.out.println("&gt;&gt; " + item));
-  }
-}</code></pre>
-</div>
+            <div class="paragraph">
+<p>A <code>Multi</code> is a <em>cold-source</em>: no processing happens until you subscribe.</p>
 </div>
 <div class="paragraph">
-<p>This program prints:</p>
+<p>While the <code>broadcast</code> operator can be used so that multiple subscribers consume a <code>Multi</code> events <em>at the same time</em>, it does not support replaying items for <em>late subscribers</em>: when a subscriber joins after the <code>Multi</code> has completed (or failed), then it won&#8217;t receive any item.</p>
 </div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-text hljs" data-lang="text">&gt;&gt; HELLO MUTINY</code></pre>
-</div>
-</div>
-</div>
+<div class="paragraph">
+<p>This is where <em>replaying</em> can be useful.</p>
 </div>
 <div class="sect1">
-<h2 id="dissecting-the-pipeline"><a class="anchor" href="#dissecting-the-pipeline"></a>Dissecting the pipeline</h2>
+<h2 id="replaying-all-events"><a class="anchor" href="#replaying-all-events"></a>Replaying all events</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>What&#8217;s interesting is how this message is <em>built</em>.
-We described a processing pipeline taking an item, processing it and finally consuming it.</p>
+<p>Replaying all events from an upstream <code>Multi</code> works as follows:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Multi&lt;Integer&gt; upstream = Multi.createFrom().range(0, 10);
+
+Multi&lt;Integer&gt; replay = Multi.createBy().replaying().ofMulti(upstream);
+
+List&lt;Integer&gt; items_1 = replay.collect().asList().await().indefinitely();
+List&lt;Integer&gt; items_2 = replay.collect().asList().await().indefinitely();</code></pre>
+</div>
 </div>
 <div class="paragraph">
-<p>First, we create a <code>Uni</code>, one of the two types with <code>Multi</code> that Mutiny provides.
-A <code>Uni</code> is a stream emitting either a single item or a failure.</p>
+<p>Both <code>item_1</code> and <code>item_2</code> trigger new subscriptions, and both lists contain the following elements:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]</pre>
+</div>
 </div>
 <div class="paragraph">
-<p>Here, we create a <code>Uni</code> emitting the <code>"hello"</code> item.
-This is the input of our pipeline.
-Then we process this item:</p>
-</div>
-<div class="olist arabic">
-<ol class="arabic">
-<li>
-<p>we append <code>" mutiny"</code>, then</p>
-</li>
-<li>
-<p>we make it an uppercase string.</p>
-</li>
-</ol>
+<p>Replaying works by turning <code>upstream</code> into a <em>hot-stream</em>, meaning that it gets requested <code>Long.MAX_VALUE</code> elements.
+This is done when the first subscription happens.</p>
 </div>
 <div class="paragraph">
-<p>This forms the processing part of our pipeline, and then we finally <strong>subscribe</strong> to the pipeline.</p>
-</div>
-<div class="paragraph">
-<p>This last part is essential.
-If you don&#8217;t have a final subscriber, nothing is going to happen.
-Mutiny types are lazy, meaning that you need to express your interest.
-If you don&#8217;t the computation won&#8217;t even start.</p>
+<p>The replay operator stores the items in an internal <em>replay log</em>, and then each subscriber gets to replay them.</p>
 </div>
 <div class="admonitionblock important">
 <table>
@@ -179,7 +123,11 @@ If you don&#8217;t the computation won&#8217;t even start.</p>
 <i class="fa icon-important" title="Important"></i>
 </td>
 <td class="content">
-If your program doesn&#8217;t do anything, verify that you didn&#8217;t forget to subscribe!
+<div class="paragraph">
+<p>Subscribers demand and cancellation requests are honored while replaying, but <code>upstream</code> cannot be cancelled.
+Be careful with unbounded streams as you can exhaust memory!
+In such cases or when you need to replay large amounts of data, you might opt to use some eventing middleware rather than Mutiny replays.</p>
+</div>
 </td>
 </tr>
 </table>
@@ -187,63 +135,109 @@ If your program doesn&#8217;t do anything, verify that you didn&#8217;t forget t
 </div>
 </div>
 <div class="sect1">
-<h2 id="mutiny-uses-a-builder-api"><a class="anchor" href="#mutiny-uses-a-builder-api"></a>Mutiny uses a builder API!</h2>
+<h2 id="replaying-the-last-n-events"><a class="anchor" href="#replaying-the-last-n-events"></a>Replaying the last 'n' events</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Another important aspect is the pipeline construction.
-Appending a new <em>stage</em> to a pipeline returns a new <code>Uni.</code></p>
-</div>
-<div class="paragraph">
-<p>The previous program is equivalent to:</p>
+<p>You can limit the number of elements to replay by using the <code>upTo</code> method:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Uni&lt;String&gt; uni1 = Uni.createFrom().item("hello");
-Uni&lt;String&gt; uni2 = uni1.onItem().transform(item -&gt; item + " mutiny");
-Uni&lt;String&gt; uni3 = uni2.onItem().transform(String::toUpperCase);
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Multi&lt;Integer&gt; upstream = Multi.createFrom().range(0, 10);
 
-uni3.subscribe().with(item -&gt; System.out.println("&gt;&gt; " + item));</code></pre>
+Multi&lt;Integer&gt; replay = Multi.createBy().replaying().upTo(3).ofMulti(upstream);
+
+List&lt;Integer&gt; items_1 = replay.collect().asList().await().indefinitely();
+List&lt;Integer&gt; items_2 = replay.collect().asList().await().indefinitely();</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>It is fundamental to understand that this program is not equivalent to:</p>
+<p>Each new subscriber gets to replay the last <code>n</code> elements from where the replay log is at subscription time.
+For instance the first subscriber can observe all events, while a subscriber that joins 2 seconds later might not observe the earlier events.</p>
+</div>
+<div class="paragraph">
+<p>Since <code>Multi.createFrom().range(0, 10)</code> is an <em>immediate</em> stream, both <code>item_1</code> and <code>item_2</code> lists contain the last items:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Uni&lt;String&gt; uni = Uni.createFrom().item("hello");
+<pre>[7, 8, 9]</pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="prepending-with-seed-data"><a class="anchor" href="#prepending-with-seed-data"></a>Prepending with seed data</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>In some cases you might want to prepend some <em>seed</em> data that will be available for replay before the upstream starts emitting.</p>
+</div>
+<div class="paragraph">
+<p>You can do so using an <code>Iterable</code> to provide such seed data:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Multi&lt;Integer&gt; upstream = Multi.createFrom().range(0, 10);
+Iterable&lt;Integer&gt; seed = Arrays.asList(-10, -5, -1);
 
-uni.onItem().transform(item -&gt; item + " mutiny");
-uni.onItem().transform(String::toUpperCase);
+Multi&lt;Integer&gt; replay = Multi.createBy().replaying().ofSeedAndMulti(seed, upstream);
 
-uni.subscribe().with(item -&gt; System.out.println("&gt;&gt; " + item));</code></pre>
+List&lt;Integer&gt; items_1 = replay.collect().asList().await().indefinitely();
+List&lt;Integer&gt; items_2 = replay.collect().asList().await().indefinitely();</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>This program just prints <code>"&gt;&gt; hello"`</code>, as it does not use the appended stages and the final subscriber consumes the first <code>Uni.</code></p>
+<p>In which case subscribers can observe the following events:</p>
 </div>
-<div class="admonitionblock important">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-important" title="Important"></i>
-</td>
-<td class="content">
-Mutiny APIs are not fluent and each computation stage returns a new object.
-</td>
-</tr>
-</table>
+<div class="listingblock">
+<div class="content">
+<pre>[-10, -5, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9]</pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="replay-of-failures-and-completions"><a class="anchor" href="#replay-of-failures-and-completions"></a>Replay of failures and completions</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Subscribers get to observe not just items but also the failure and completion events:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Multi&lt;Integer&gt; upstream = Multi.createBy().concatenating().streams(
+        Multi.createFrom().range(0, 10),
+        Multi.createFrom().failure(() -&gt; new IOException("boom"))
+);
+
+Multi&lt;Integer&gt; replay = Multi.createBy().replaying().upTo(3).ofMulti(upstream);
+
+replay.subscribe().with(
+        n -&gt; System.out.println(" -&gt; " + n),
+        failure -&gt; System.out.println("Failed: " + failure.getMessage()),
+        () -&gt; System.out.println("Completed"));</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Running this code yields the following output for any subscriber:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre> -&gt; 7
+ -&gt; 8
+ -&gt; 9
+Failed: boom</pre>
+</div>
 </div>
 </div>
 </div>
         </div>
-        <div class="col-md-3 toc-container d-sm-none d-md-block">
+        <div class="col-md-3 col-md-offset-1 toc-container d-sm-none d-md-block">
             <nav class="page-toc toc nav sticky-top" id="toc">
                 
                 <h4>Table of Content</h4>
                 <ul class="sectlevel1">
-<li><a href="#hello-mutiny">Hello Mutiny!</a></li>
-<li><a href="#dissecting-the-pipeline">Dissecting the pipeline</a></li>
-<li><a href="#mutiny-uses-a-builder-api">Mutiny uses a builder API!</a></li>
+<li><a href="#replaying-all-events">Replaying all events</a></li>
+<li><a href="#replaying-the-last-n-events">Replaying the last 'n' events</a></li>
+<li><a href="#prepending-with-seed-data">Prepending with seed data</a></li>
+<li><a href="#replay-of-failures-and-completions">Replay of failures and completions</a></li>
 </ul>
                 
 
@@ -254,31 +248,6 @@ Mutiny APIs are not fluent and each computation stage returns a new object.
 </div>
 
 
-
-<div class="footer-buttons gs ">
-    <div class="container">
-        <div class="row">
-                
-            <div class="col align-self-start">
-                <a href="/smallrye-mutiny/getting-started/download" class="btn btn-rounded button button-dark button-rounded">
-                    <i class="las la-arrow-left left"></i>&nbsp;Getting Started with Mutiny</a>
-            </div>
-                
-
-            <div class="col align-self-center text-center">
-                <a href="/smallrye-mutiny/guides" class="btn btn-rounded button button-dark button-rounded">All Guides</a>
-            </div>
-
-            <div class="col align-self-end">
-                
-                <a href="/smallrye-mutiny/getting-started/creating-unis" class="btn btn-rounded button button-dark button-rounded float-right">
-                    Creating Unis&nbsp;<i class="las la-arrow-right"></i></a>
-                
-            </div>
-        </div>
-
-    </div>
-</div>
             </div>
         </main>
         <footer class="footer">
