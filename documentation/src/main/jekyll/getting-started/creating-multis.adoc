@@ -132,3 +132,22 @@ include::{include_dir}/CreatingMultiTest.java[tag=ticks]
 The downstream receives a `long,` which is a counter. 
 For the first tick, it's 0, then 1, then 2, and so on.
 
+== Creating Multis from a generator (_advanced_)
+
+You can create a stream from some _initial state_, and a _generator function_:
+
+[source, java, indent=0]
+----
+include::{include_dir}/CreatingMultiTest.java[tag=generator]
+----
+
+The initial state is given through a supplier (here `() -> 1`).
+The generator function accepts 2 arguments:
+
+. the current state,
+. an emitter that can emit a new item, emit a failure, or emit a completion.
+
+The generator function return value is the next _current state_.
+Running the previous example gives the following numbers suite: `{2, 4, 7, 11, 17, 26, 40, 61}`.
+
+

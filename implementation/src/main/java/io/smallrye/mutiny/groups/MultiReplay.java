@@ -48,7 +48,8 @@ public class MultiReplay {
      * </ol>
      * <p>
      * Replaying a large number of elements can be costly, as items have to be kept in-memory.
-     * It is <strong>NOT</strong> recommended using this operator with unbounded streams, especially as they can't be canceled (the subscribers
+     * It is <strong>NOT</strong> recommended using this operator with unbounded streams, especially as they can't be canceled
+     * (the subscribers
      * can cancel replays, though).
      * In such cases and especially when you have to keep replay data around for a long time then some eventing middleware might
      * be a better fit.

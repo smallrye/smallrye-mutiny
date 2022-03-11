@@ -17,7 +17,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.awaitility.Awaitility.await;
 
-@SuppressWarnings({ "Convert2MethodRef" })
+@SuppressWarnings({"Convert2MethodRef"})
 @ExtendWith(SystemOutCaptureExtension.class)
 public class CreatingMultiTest {
 
@@ -35,7 +35,7 @@ public class CreatingMultiTest {
 
     @Test
     void subscription(SystemOut out) {
-        Multi<Integer> multi  = Multi.createFrom().item(1);
+        Multi<Integer> multi = Multi.createFrom().item(1);
         // tag::subscription[]
         Cancellable cancellable = multi
                 .subscribe().with(
@@ -112,6 +112,22 @@ public class CreatingMultiTest {
                     .select().first(3)
                     .subscribe().asIterable();
             await().until(() -> longs.stream().count() == 3);
+        }
+
+        {
+            // tag::generator[]
+            Multi<Object> sequence = Multi.createFrom().generator(() -> 1, (n, emitter) -> {
+                int next = n + (n / 2) + 1;
+                if (n < 50) {
+                    emitter.emit(next);
+
+                } else {
+                    emitter.complete();
+                }
+                return next;
+            });
+            // end::generator[]
+            assertThat(sequence.collect().asList().await().indefinitely()).containsExactly(2, 4, 7, 11, 17, 26, 40, 61);
         }
     }
 
