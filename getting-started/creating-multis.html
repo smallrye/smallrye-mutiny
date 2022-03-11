@@ -331,6 +331,46 @@ For the first tick, it&#8217;s 0, then 1, then 2, and so on.</p>
 </div>
 </div>
 </div>
+<div class="sect1">
+<h2 id="creating-multis-from-a-generator-advanced"><a class="anchor" href="#creating-multis-from-a-generator-advanced"></a>Creating Multis from a generator (<em>advanced</em>)</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>You can create a stream from some <em>initial state</em>, and a <em>generator function</em>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Multi&lt;Object&gt; sequence = Multi.createFrom().generator(() -&gt; 1, (n, emitter) -&gt; {
+    int next = n + (n / 2) + 1;
+    if (n &lt; 50) {
+        emitter.emit(next);
+
+    } else {
+        emitter.complete();
+    }
+    return next;
+});</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The initial state is given through a supplier (here <code>() &#8594; 1</code>).
+The generator function accepts 2 arguments:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>the current state,</p>
+</li>
+<li>
+<p>an emitter that can emit a new item, emit a failure, or emit a completion.</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>The generator function return value is the next <em>current state</em>.
+Running the previous example gives the following numbers suite: <code>{2, 4, 7, 11, 17, 26, 40, 61}</code>.</p>
+</div>
+</div>
+</div>
         </div>
         <div class="col-md-3 toc-container d-sm-none d-md-block">
             <nav class="page-toc toc nav sticky-top" id="toc">
@@ -344,6 +384,7 @@ For the first tick, it&#8217;s 0, then 1, then 2, and so on.</p>
 <li><a href="#creating-empty-multis">Creating empty Multis</a></li>
 <li><a href="#creating-multis-using-an-emitter-advanced">Creating Multis using an emitter (<em>advanced</em>)</a></li>
 <li><a href="#creating-multis-from-ticks-advanced">Creating Multis from <em>ticks</em> (<em>advanced</em>)</a></li>
+<li><a href="#creating-multis-from-a-generator-advanced">Creating Multis from a generator (<em>advanced</em>)</a></li>
 </ul>
                 
 
@@ -409,7 +450,7 @@ For the first tick, it&#8217;s 0, then 1, then 2, and so on.</p>
                     <a href="https://www.redhat.com/en/about/privacy-policy">Privacy Policy</a>
                 </p>
                 <p>
-                     Site last generated: Mar 10, 2022
+                     Site last generated: Mar 11, 2022
                 </p>
             </div>
         </div>
