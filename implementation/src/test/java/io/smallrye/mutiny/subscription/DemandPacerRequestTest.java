@@ -3,6 +3,7 @@ package io.smallrye.mutiny.subscription;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -35,5 +36,12 @@ class DemandPacerRequestTest {
         assertThatThrownBy(() -> new DemandPacer.Request(10L, Duration.ofSeconds(-10L)))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("`delay` must be greater than zero");
+    }
+
+    @Test
+    void rejectDurationOfForever() {
+        assertThatThrownBy(() -> new DemandPacer.Request(100L, ChronoUnit.FOREVER.getDuration()))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("ChronoUnit.FOREVER is not a correct delay value");
     }
 }

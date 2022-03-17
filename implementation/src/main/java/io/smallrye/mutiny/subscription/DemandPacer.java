@@ -4,6 +4,7 @@ import static io.smallrye.mutiny.helpers.ParameterValidation.positive;
 import static io.smallrye.mutiny.helpers.ParameterValidation.validate;
 
 import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 
 import io.smallrye.common.annotation.Experimental;
 import io.smallrye.mutiny.Multi;
@@ -39,6 +40,9 @@ public interface DemandPacer {
         public Request(long demand, Duration delay) {
             this.demand = positive(demand, "demand");
             this.delay = validate(delay, "delay");
+            if (delay == ChronoUnit.FOREVER.getDuration()) {
+                throw new IllegalArgumentException("ChronoUnit.FOREVER is not a correct delay value");
+            }
         }
 
         /**
