@@ -56,6 +56,9 @@ public class MultiDemandPacer<T> extends AbstractMultiOperator<T, T> {
         }
 
         private void demandAndSchedule(ScheduledExecutorService executor) {
+            if (upstream == Subscriptions.CANCELLED) {
+                return;
+            }
             long demand = currentRequest.demand();
             long delay = currentRequest.delay().toNanos();
             scheduledFuture = executor.schedule(this::tick, delay, TimeUnit.NANOSECONDS);
@@ -84,19 +87,23 @@ public class MultiDemandPacer<T> extends AbstractMultiOperator<T, T> {
 
         @Override
         public void onSubscribe(Subscription subscription) {
-            super.onSubscribe(subscription);
-            try {
-                currentRequest = pacer.initial();
-            } catch (Throwable failure) {
-                cancel();
-                downstream.onFailure(failure);
-                return;
-            }
-            if (currentRequest == null) {
-                cancel();
-                downstream.onFailure(new NullPointerException("The pacer provided a null initial request"));
+            if (compareAndSetUpstreamSubscription(null, subscription)) {
+                downstream.onSubscribe(this);
+                try {
+                    currentRequest = pacer.initial();
+                } catch (Throwable failure) {
+                    cancel();
+                    downstream.onFailure(failure);
+                    return;
+                }
+                if (currentRequest == null) {
+                    cancel();
+                    downstream.onFailure(new NullPointerException("The pacer provided a null initial request"));
+                } else {
+                    demandAndSchedule(executor);
+                }
             } else {
-                demandAndSchedule(executor);
+                subscription.cancel();
             }
         }
 
@@ -106,7 +113,7 @@ public class MultiDemandPacer<T> extends AbstractMultiOperator<T, T> {
                 return;
             }
             itemsCounter.incrementAndGet();
-            downstream.onNext(item);
+            downstream.onItem(item);
         }
 
         @Override
@@ -115,7 +122,7 @@ public class MultiDemandPacer<T> extends AbstractMultiOperator<T, T> {
                 return;
             }
             cancel();
-            downstream.onError(failure);
+            downstream.onFailure(failure);
         }
 
         @Override
@@ -124,7 +131,7 @@ public class MultiDemandPacer<T> extends AbstractMultiOperator<T, T> {
                 return;
             }
             cancel();
-            downstream.onComplete();
+            downstream.onCompletion();
         }
 
         @Override
