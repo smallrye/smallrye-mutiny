@@ -85,6 +85,12 @@
           "new": "method io.smallrye.mutiny.groups.MultiReplay io.smallrye.mutiny.groups.MultiReplay::upTo(long)",
           "annotation": "@io.smallrye.common.annotation.CheckReturnValue",
           "justification": "Not breaking. The annotation was missing and has now be added."
+        },
+        {
+          "ignore": true,
+          "code": "java.method.addedToInterface",
+          "new": "method io.smallrye.mutiny.groups.MultiDemandPacing<T> io.smallrye.mutiny.Multi<T>::paceDemand()",
+          "justification": "New Multi paceDemand experimental operator"
         }
       ]
     }

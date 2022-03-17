@@ -30,6 +30,7 @@
     - logging
     - context-passing
     - replaying-multis
+    - controlling-demand
 
 - name: Integration
   guides:

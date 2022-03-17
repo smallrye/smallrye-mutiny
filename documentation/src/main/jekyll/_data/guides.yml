@@ -325,3 +325,9 @@ replaying-multis:
   text: Learn how multiple subscribers can replay from a Multi
   labels:
     - advanced
+
+controlling-demand:
+  title: Controlling the demand
+  text: Learn about custom operators for controlling the upstream demand
+  labels:
+    - advanced
