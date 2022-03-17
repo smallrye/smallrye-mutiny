@@ -61,7 +61,32 @@
       "criticality": "highlight",
       "minSeverity": "POTENTIALLY_BREAKING",
       "minCriticality": "documented",
-      "differences": []
+      "differences": [
+        {
+          "ignore": true,
+          "code": "java.annotation.added",
+          "old": "method <T> io.smallrye.mutiny.Multi<T> io.smallrye.mutiny.groups.MultiReplay::ofMulti(io.smallrye.mutiny.Multi<T>)",
+          "new": "method <T> io.smallrye.mutiny.Multi<T> io.smallrye.mutiny.groups.MultiReplay::ofMulti(io.smallrye.mutiny.Multi<T>)",
+          "annotation": "@io.smallrye.common.annotation.CheckReturnValue",
+          "justification": "Not breaking. The annotation was missing and has now be added."
+        },
+        {
+          "ignore": true,
+          "code": "java.annotation.added",
+          "old": "method <T> io.smallrye.mutiny.Multi<T> io.smallrye.mutiny.groups.MultiReplay::ofSeedAndMulti(java.lang.Iterable<T>, io.smallrye.mutiny.Multi<T>)",
+          "new": "method <T> io.smallrye.mutiny.Multi<T> io.smallrye.mutiny.groups.MultiReplay::ofSeedAndMulti(java.lang.Iterable<T>, io.smallrye.mutiny.Multi<T>)",
+          "annotation": "@io.smallrye.common.annotation.CheckReturnValue",
+          "justification": "Not breaking. The annotation was missing and has now be added."
+        },
+        {
+          "ignore": true,
+          "code": "java.annotation.added",
+          "old": "method io.smallrye.mutiny.groups.MultiReplay io.smallrye.mutiny.groups.MultiReplay::upTo(long)",
+          "new": "method io.smallrye.mutiny.groups.MultiReplay io.smallrye.mutiny.groups.MultiReplay::upTo(long)",
+          "annotation": "@io.smallrye.common.annotation.CheckReturnValue",
+          "justification": "Not breaking. The annotation was missing and has now be added."
+        }
+      ]
     }
   },
   {
