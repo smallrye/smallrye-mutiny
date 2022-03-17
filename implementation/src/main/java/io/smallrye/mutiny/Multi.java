@@ -617,7 +617,7 @@ public interface Multi<T> extends Publisher<T> {
      *         .paceDemand().on(Infrastructure.getDefaultWorkerPool()).using(pacer);
      * </pre>
      *
-     * <strong>Important: this operator is not compliant with the reactive streams specification.</strong>
+     * <strong>Important: this operator is NOT compliant with the reactive streams specification.</strong>
      * Downstream demand requests are being ignored, so it is possible that this operator requests more than what the downstream
      * subscriber would want, depending on the {@link io.smallrye.mutiny.subscription.DemandPacer}
      * object in use.
