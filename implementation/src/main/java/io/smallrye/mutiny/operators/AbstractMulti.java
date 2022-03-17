@@ -174,4 +174,10 @@ public abstract class AbstractMulti<T> implements Multi<T> {
     public <R> Multi<R> withContext(BiFunction<Multi<T>, Context, Multi<R>> builder) {
         return Infrastructure.onMultiCreation(new MultiWithContext<>(this, nonNull(builder, "builder")));
     }
+
+    @Override
+    public MultiDemandPacing<T> paceDemand() {
+        return new MultiDemandPacing<>(this);
+    }
+
 }

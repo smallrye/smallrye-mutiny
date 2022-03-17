@@ -1,0 +1,28 @@
+:page-layout: guides
+:page-guide-id: controlling-demand
+:page-liquid:
+:page-show-toc: false
+:include_dir: ../../../../src/test/java/guides/operators
+
+A subscription is used for 2 purposes: cancelling a request and demanding batches of items.
+
+The `Multi.paceDemand()` operator can be used to automatically issue requests at certain points in time.
+
+The following example issues requests of 25 items every 100ms:
+
+[source,java,indent=0]
+----
+include::{include_dir}/ControlDemandTest.java[tags=pacing]
+----
+
+`FixedDemandPacer` is a simple _pacer_ with a fixed demand and a fixed delay.
+
+You can create more elaborated pacers by implementing the `DemandPacer` interface.
+To do so you provide an initial request and a function to evaluate the next request which is evaluated based on the previous request and the number of items emitted since the last request:
+
+[source,java,indent=0]
+----
+include::{include_dir}/ControlDemandTest.java[tags=custom-pacer]
+----
+
+The previous example is a custom pacer that doubles the demand and increases the delay for each new request.
