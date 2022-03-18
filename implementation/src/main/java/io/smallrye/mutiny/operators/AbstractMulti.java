@@ -5,6 +5,7 @@ import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
 import java.util.Objects;
 import java.util.concurrent.Executor;
 import java.util.function.BiFunction;
+import java.util.function.LongFunction;
 import java.util.function.Predicate;
 
 import org.reactivestreams.Subscriber;
@@ -178,6 +179,11 @@ public abstract class AbstractMulti<T> implements Multi<T> {
     @Override
     public MultiDemandPacing<T> paceDemand() {
         return new MultiDemandPacing<>(this);
+    }
+
+    @Override
+    public Multi<T> capDemandsUsing(LongFunction<Long> function) {
+        return Infrastructure.onMultiCreation(new MultiDemandCapping<>(this, nonNull(function, "function")));
     }
 
 }
