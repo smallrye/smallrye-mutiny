@@ -47,7 +47,7 @@ class BlameAPI implements Callable<Integer> {
     @Option(names = "--root", description = "The root of the git directory.", defaultValue = ".")
 	private File directory;
 
-	@Option(names = "--target", description = "The search target in [deprecation, experimental].", defaultValue = "deprecated")
+	@Option(names = "--target", description = "The search target in [deprecated, experimental].", defaultValue = "deprecated")
 	private Target target;
 
 	private Map<File, BlameResult> cache = new HashMap<>();
@@ -151,7 +151,7 @@ class BlameAPI implements Callable<Integer> {
 
 		for(Path p : path) {
 			File file = p.toFile();
-			if (file.getName().endsWith(".java")) {
+			if (file.getName().endsWith(".java") && !file.getName().equals("BlameAPI.java")) {
 				List<String> result = Files.readLines(file, Charsets.UTF_8);
 				for (int i = 0; i < result.size(); i++) {
 					if (isDeprecated(result.get(i))) {
