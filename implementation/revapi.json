@@ -91,6 +91,12 @@
           "code": "java.method.addedToInterface",
           "new": "method io.smallrye.mutiny.groups.MultiDemandPacing<T> io.smallrye.mutiny.Multi<T>::paceDemand()",
           "justification": "New Multi paceDemand experimental operator"
+        },
+        {
+          "ignore": true,
+          "code": "java.method.addedToInterface",
+          "new": "method io.smallrye.mutiny.Multi<T> io.smallrye.mutiny.Multi<T>::capDemandsUsing(java.util.function.LongFunction<java.lang.Long>)",
+          "justification": "New Multi capDemandsUsing experimental operator"
         }
       ]
     }

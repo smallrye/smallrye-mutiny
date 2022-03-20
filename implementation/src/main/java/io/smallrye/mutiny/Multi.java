@@ -1,6 +1,7 @@
 package io.smallrye.mutiny;
 
 import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
+import static io.smallrye.mutiny.helpers.ParameterValidation.positive;
 
 import java.util.concurrent.Executor;
 import java.util.function.*;
@@ -610,7 +611,7 @@ public interface Multi<T> extends Publisher<T> {
      * items that have been observed since the previous request.
      * <p>
      * In the following example a demand of 25 is issued every 100ms, using the default worker pool to perform requests:
-     * 
+     *
      * <pre>
      * var pacer = new FixedDemandPacer(25L, Duration.ofMillis(100L));
      * var multi = Multi.createFrom().range(0, 100)
@@ -628,4 +629,36 @@ public interface Multi<T> extends Publisher<T> {
     @CheckReturnValue
     MultiDemandPacing<T> paceDemand();
 
+    /**
+     * Cap all downstream subscriber requests to a maximum value.
+     * <p>
+     * This is a shortcut for:
+     * 
+     * <pre>
+     * multi.capDemandsUsing(request -&gt; Math.min(request, actual))
+     * </pre>
+     *
+     * @param max the maximum demand
+     * @return the new {@link Multi}
+     */
+    @Experimental("Demand capping is a new experimental API introduced in Mutiny 1.5.0")
+    @CheckReturnValue
+    default Multi<T> capDemandsTo(long max) {
+        long actual = positive(max, "max");
+        return capDemandsUsing(request -> Math.min(request, actual));
+    }
+
+    /**
+     * Cap all downstream subscriber requests to a value computed by a function.
+     * <p>
+     * The function must return a valid demand which is strictly positive and below or equal to that of the subscriber request.
+     * The function argument is the subscriber request.
+     *
+     * @param function the function, must not be {@code null}, must not return {@code null}, must return a long such that
+     *        {@code (0 < n <= request)} where {@code request} is initial the subscriber request
+     * @return the new {@link Multi}
+     */
+    @Experimental("Demand capping is a new experimental API introduced in Mutiny 1.5.0")
+    @CheckReturnValue
+    Multi<T> capDemandsUsing(LongFunction<Long> function);
 }

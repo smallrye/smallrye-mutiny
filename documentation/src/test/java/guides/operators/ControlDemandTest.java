@@ -45,4 +45,47 @@ class ControlDemandTest {
         };
         // end::custom-pacer[]
     }
+
+    @Test
+    void capping() {
+        // tag::capConstant[]
+        AssertSubscriber<Integer> sub = AssertSubscriber.create();
+
+        sub = Multi.createFrom().range(0, 100)
+                .capDemandsTo(50L)
+                .subscribe().withSubscriber(sub);
+
+        sub.request(Long.MAX_VALUE).assertNotTerminated();
+        assertThat(sub.getItems()).hasSize(50);
+
+        sub.request(Long.MAX_VALUE).assertCompleted();
+        assertThat(sub.getItems()).hasSize(100);
+        // end::capConstant[]
+    }
+
+    @Test
+    void cappingFunction() {
+        // tag::capFunction[]
+        AssertSubscriber<Integer> sub = AssertSubscriber.create();
+
+        sub = Multi.createFrom().range(0, 100)
+                .capDemandsUsing(n -> {
+                    if (n > 1) {
+                        return (long) (((double) n) * 0.75d);
+                    } else {
+                        return n;
+                    }
+                })
+                .subscribe().withSubscriber(sub);
+
+        sub.request(100L).assertNotTerminated();
+        assertThat(sub.getItems()).hasSize(75);
+
+        sub.request(1L).assertNotTerminated();
+        assertThat(sub.getItems()).hasSize(76);
+
+        sub.request(Long.MAX_VALUE).assertCompleted();
+        assertThat(sub.getItems()).hasSize(100);
+        // end::capFunction[]
+    }
 }
