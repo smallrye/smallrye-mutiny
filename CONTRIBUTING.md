@@ -31,7 +31,7 @@ To contribute, use GitHub Pull Requests, from your **own** fork.
 
 We require Git commits to be *[verified on GitHub](https://docs.github.com/en/authentication/managing-commit-signature-verification/about-commit-signature-verification)*, so please:
 - [use a valid user name and email in your commits](https://docs.github.com/en/account-and-profile/setting-up-and-managing-your-github-user-account/managing-email-preferences/setting-your-commit-email-address), and
-- [sign your commits](https://docs.github.com/en/authentication/managing-commit-signature-verification/signing-commits) with a GnuPG key that is tied to oyur GitHub account. 
+- [sign your commits](https://docs.github.com/en/authentication/managing-commit-signature-verification/signing-commits) with a GnuPG key that is tied to your GitHub account. 
 
 ### Code reviews
 
