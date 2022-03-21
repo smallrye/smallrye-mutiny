@@ -5,7 +5,6 @@ import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-import io.smallrye.common.annotation.Experimental;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.groups.MultiOverflowStrategy;
@@ -19,7 +18,6 @@ import io.smallrye.mutiny.groups.MultiOverflowStrategy;
  * 
  * It is important to note that spies observe and report events for all subscribers, not just one in particular.
  */
-@Experimental("We are experimenting with spies for diagnosis and testing")
 public interface Spy {
 
     // --------------------------------------------------------------------- //
