@@ -1,6 +1,8 @@
 package io.smallrye.mutiny.operators;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -13,6 +15,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Multi;
@@ -213,6 +216,67 @@ public class MultiCollectTest {
                         entry("alice", "ALICE"),
                         entry("rob", "ROB"),
                         entry("matt", "MATT"));
+    }
+
+    @Test
+    public void testCollectIntoMapWithNullMergeFunction() {
+
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class,
+                () ->  Multi.createFrom().items(
+                                new TestObject("key1", 5),
+                                new TestObject("key2", 3),
+                                new TestObject("key3", 2),
+                                new TestObject("key1", 8))
+                        .collect().asMap(
+                                TestObject::getKey,
+                                Function.identity(),
+                                null));
+
+        assertEquals("`mergeFunction` must not be `null`", exception.getMessage());
+    }
+
+    @Test
+    public void testCollectIntoMapWithConflicts() {
+        UniAssertSubscriber<Map<String, TestObject>> subscriber = Multi.createFrom().items(
+                        new TestObject("key1", 5),
+                        new TestObject("key2", 3),
+                        new TestObject("key3", 2),
+                        new TestObject("key1", 8))
+                .collect().asMap(
+                        TestObject::getKey,
+                        Function.identity(),
+                        (test1, test2) -> test1.addValue(test2.value))
+                .subscribe().withSubscriber(UniAssertSubscriber.create())
+                .assertCompleted();
+
+        assertThat(subscriber.getItem())
+                .hasSize(3)
+                .contains(
+                        entry("key1", new TestObject("key1", 13)),
+                        entry("key2", new TestObject("key2", 3)),
+                        entry("key3", new TestObject("key3", 2)));
+    }
+
+    @Test
+    public void testCollectIntoMapWithMergeFunctionReturningNull() {
+        UniAssertSubscriber<Map<String, TestObject>> subscriber = Multi.createFrom().items(
+                        new TestObject("key1", 5),
+                        new TestObject("key2", 3),
+                        new TestObject("key3", 2),
+                        new TestObject("key1", 8))
+                .collect().asMap(
+                        TestObject::getKey,
+                        Function.identity(),
+                        (test1, test2) -> null)
+                .subscribe().withSubscriber(UniAssertSubscriber.create())
+                .assertCompleted();
+
+        assertThat(subscriber.getItem())
+                .hasSize(2)
+                .contains(
+                        entry("key2", new TestObject("key2", 3)),
+                        entry("key3", new TestObject("key3", 2)));
     }
 
     @Test
@@ -417,6 +481,48 @@ public class MultiCollectTest {
             return Objects.hash(firstName, id);
         }
 
+    }
+
+    static class TestObject {
+
+        public String key;
+        public Integer value;
+
+        public TestObject(String key, Integer value) {
+            this.key = key;
+            this.value = value;
+        }
+
+        public String getKey() {
+            return this.key;
+        }
+
+        public Integer getValue() {
+            return this.value;
+        }
+
+        public TestObject addValue(Integer value) {
+            this.value += value;
+            return this;
+        }
+
+        public String toString() {
+            return String.format("[key = %s, value = %s]", this.key, this.value);
+        }
+
+        public boolean equals(Object object) {
+            if(object instanceof TestObject) {
+                TestObject test = (TestObject) object;
+                return test.key.equals(this.key) &&
+                        test.value.equals(this.value);
+            }
+
+            return false;
+        }
+
+        public int hashCode() {
+            return Objects.hash(this.key, this.value);
+        }
     }
 
 }
