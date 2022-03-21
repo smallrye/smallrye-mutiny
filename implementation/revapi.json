@@ -101,6 +101,14 @@
           "code": "java.method.addedToInterface",
           "new": "method io.smallrye.mutiny.Multi<T> io.smallrye.mutiny.Multi<T>::capDemandsUsing(java.util.function.LongFunction<java.lang.Long>)",
           "justification": "New Multi capDemandsUsing experimental operator"
+        },
+        {
+          "ignore": true,
+          "code": "java.annotation.removed",
+          "old": "interface io.smallrye.mutiny.helpers.spies.Spy",
+          "new": "interface io.smallrye.mutiny.helpers.spies.Spy",
+          "annotation": "@io.smallrye.common.annotation.Experimental(\"We are experimenting with spies for diagnosis and testing\")",
+          "justification": "Not breaking. Experimental promotion. "
         }
       ]
     }
