@@ -7,6 +7,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
+import java.util.function.BinaryOperator;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -162,6 +163,38 @@ public class MultiCollect<T> {
         Function<? super T, ? extends K> actualKM = Infrastructure.decorate(nonNull(keyMapper, "keyMapper"));
         Function<? super T, ? extends V> actualVM = Infrastructure.decorate(nonNull(valueMapper, "valueMapper"));
         return collector(upstream, Collectors.toMap(actualKM, actualVM), false);
+    }
+
+    /**
+     * Produces an {@link Uni} emitting a {@link Map} of <code>key -&gt; mapped item</code> for each item emitted by
+     * this {@link Multi}. The collected map is emitted by the produced {@link Uni} when the {@link Multi} fires the
+     * completion event.
+     * <p>
+     * The key is extracted from each item by applying the {@code keyMapper} function.
+     * In case of conflict {@code mergeFunction} is used to choose which item should be emitted.
+     * The value is computed by applying the {@code valueMapper} function.
+     *
+     * @param keyMapper a {@link Function} to map item to a key for the {@link Map}. Must not be {@code null},
+     *        must not produce {@code null}
+     * @param valueMapper a {@link Function} to map item to a value for the {@link Map}. Must not be {@code null},
+     *        must not produce {@code null}
+     * @param mergeFunction a {@link BinaryOperator} used to resolve collisions between values associated
+     *        with the same key. Must not be {@code null}.
+     *        In case it returns null the owner key will be removed from the {@link Map}
+     * @param <K> the type of the key extracted from each item emitted by this {@link Multi}
+     * @param <V> the type of the value extracted from each item emitted by this {@link Multi}
+     * @return a {@link Uni} emitting an item with the collected {@link Map}. The uni emits the item when this
+     *         {@link Multi} completes
+     */
+    @CheckReturnValue
+    public <K, V> Uni<Map<K, V>> asMap(
+            Function<? super T, ? extends K> keyMapper,
+            Function<? super T, ? extends V> valueMapper,
+            BinaryOperator<V> mergeFunction) {
+        Function<? super T, ? extends K> actualKM = Infrastructure.decorate(nonNull(keyMapper, "keyMapper"));
+        Function<? super T, ? extends V> actualVM = Infrastructure.decorate(nonNull(valueMapper, "valueMapper"));
+        BinaryOperator<V> actualMF = Infrastructure.decorate(nonNull(mergeFunction, "mergeFunction"));
+        return collector(upstream, Collectors.toMap(actualKM, actualVM, actualMF), false);
     }
 
     /**
