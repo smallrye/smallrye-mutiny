@@ -40,6 +40,10 @@
           },
           {
             "matcher": "java-package",
+            "match": "io.smallrye.mutiny.operators.multi.processors"
+          },
+          {
+            "matcher": "java-package",
             "match": "io.smallrye.mutiny.subscription"
           },
           {
