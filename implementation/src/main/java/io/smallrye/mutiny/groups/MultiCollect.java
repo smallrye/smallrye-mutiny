@@ -302,7 +302,7 @@ public class MultiCollect<T> {
     }
 
     private static <T, A, R> Uni<R> collector(Multi<T> upstream, Collector<? super T, A, ? extends R> collector,
-                                              boolean acceptNullAsInitialValue) {
+            boolean acceptNullAsInitialValue) {
         Multi<R> multi = Infrastructure
                 .onMultiCreation(new MultiCollectorOp<>(upstream, collector, acceptNullAsInitialValue));
         return Uni.createFrom().publisher(multi);
