@@ -635,7 +635,7 @@ public interface Multi<T> extends Publisher<T> {
      * This is a shortcut for:
      * 
      * <pre>
-     * multi.capDemandsUsing(request -&gt; Math.min(request, actual))
+     * multi.capDemandsUsing(outstanding -&gt; Math.min(outstanding, actual))
      * </pre>
      *
      * @param max the maximum demand
@@ -645,17 +645,19 @@ public interface Multi<T> extends Publisher<T> {
     @CheckReturnValue
     default Multi<T> capDemandsTo(long max) {
         long actual = positive(max, "max");
-        return capDemandsUsing(request -> Math.min(request, actual));
+        return capDemandsUsing(outstanding -> Math.min(outstanding, actual));
     }
 
     /**
      * Cap all downstream subscriber requests to a value computed by a function.
      * <p>
-     * The function must return a valid demand which is strictly positive and below or equal to that of the subscriber request.
-     * The function argument is the subscriber request.
+     * The function must return a valid demand which is strictly positive and below or equal to that of the current outstanding
+     * demand.
+     * The function argument is the current outstanding demand.
      *
-     * @param function the function, must not be {@code null}, must not return {@code null}, must return a long such that
-     *        {@code (0 < n <= request)} where {@code request} is initial the subscriber request
+     * @param function the function, must not be {@code null}, must not return {@code null}, must return a {@code long} such
+     *        that
+     *        {@code (0 < n <= outstanding)} where {@code outstanding} is the current outstanding demand
      * @return the new {@link Multi}
      */
     @Experimental("Demand capping is a new experimental API introduced in Mutiny 1.5.0")
