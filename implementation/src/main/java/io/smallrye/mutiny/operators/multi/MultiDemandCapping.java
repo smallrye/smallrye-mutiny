@@ -2,6 +2,7 @@ package io.smallrye.mutiny.operators.multi;
 
 import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
 
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.LongFunction;
 
 import org.reactivestreams.Subscription;
@@ -27,6 +28,8 @@ public class MultiDemandCapping<T> extends MultiOperator<T, T> {
 
     private class MultiDemandCappingProcessor extends MultiOperatorProcessor<T, T> {
 
+        private final AtomicLong demand = new AtomicLong();
+
         MultiDemandCappingProcessor(MultiSubscriber<? super T> downstream) {
             super(downstream);
         }
@@ -42,16 +45,19 @@ public class MultiDemandCapping<T> extends MultiOperator<T, T> {
                 return;
             }
             try {
-                long actualDemand = nonNull(function.apply(numberOfItems), "actualDemand");
+                Subscriptions.add(demand, numberOfItems);
+                long currentDemand = demand.get();
+                long actualDemand = nonNull(function.apply(currentDemand), "actualDemand");
                 if (actualDemand <= 0) {
                     onFailure(new IllegalArgumentException("Invalid number of request, must be greater than 0"));
                     return;
                 }
-                if (actualDemand > numberOfItems) {
+                if (actualDemand > currentDemand) {
                     onFailure(new IllegalStateException("The demand capping function computed a request of " + actualDemand
-                            + " elements while the downstream request is of " + numberOfItems + " elements"));
+                            + " elements while the outstanding demand is of " + numberOfItems + " elements"));
                     return;
                 }
+                Subscriptions.produced(demand, actualDemand);
                 subscription.request(actualDemand);
             } catch (Throwable failure) {
                 onFailure(failure);

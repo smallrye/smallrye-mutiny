@@ -14,7 +14,7 @@ import io.smallrye.mutiny.helpers.test.AssertSubscriber;
 class MultiDemandCappingTest {
 
     @Test
-    void capToConstant() {
+    void capToConstantAndCheckDemandAccumulation() {
         AssertSubscriber<Integer> sub = Multi.createFrom().range(0, 100)
                 .capDemandsTo(25)
                 .subscribe().withSubscriber(AssertSubscriber.create());
@@ -28,9 +28,12 @@ class MultiDemandCappingTest {
         assertThat(sub.getItems()).hasSize(50).contains(25, 30).doesNotContain(75);
 
         sub.request(1L);
-        sub.request(2L);
         sub.assertNotTerminated();
-        assertThat(sub.getItems()).hasSize(53);
+        assertThat(sub.getItems()).hasSize(75);
+
+        sub.request(2L);
+        sub.assertCompleted();
+        assertThat(sub.getItems()).hasSize(100);
     }
 
     @Test
@@ -67,7 +70,7 @@ class MultiDemandCappingTest {
 
         sub.request(10L);
         sub.assertFailedWith(IllegalStateException.class,
-                "computed a request of 20 elements while the downstream request is of 10 elements");
+                "The demand capping function computed a request of 20 elements while the outstanding demand is of 10 elements");
     }
 
     @Test

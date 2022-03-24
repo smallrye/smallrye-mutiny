@@ -55,10 +55,12 @@ class ControlDemandTest {
                 .capDemandsTo(50L)
                 .subscribe().withSubscriber(sub);
 
-        sub.request(Long.MAX_VALUE).assertNotTerminated();
+        // A first batch of 50 (capped), 25 remain outstanding
+        sub.request(75L).assertNotTerminated();
         assertThat(sub.getItems()).hasSize(50);
 
-        sub.request(Long.MAX_VALUE).assertCompleted();
+        // Second batch: 25 + 25 = 50
+        sub.request(25L).assertCompleted();
         assertThat(sub.getItems()).hasSize(100);
         // end::capConstant[]
     }
@@ -82,7 +84,7 @@ class ControlDemandTest {
         assertThat(sub.getItems()).hasSize(75);
 
         sub.request(1L).assertNotTerminated();
-        assertThat(sub.getItems()).hasSize(76);
+        assertThat(sub.getItems()).hasSize(94);
 
         sub.request(Long.MAX_VALUE).assertCompleted();
         assertThat(sub.getItems()).hasSize(100);

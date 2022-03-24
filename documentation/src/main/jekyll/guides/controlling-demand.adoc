@@ -41,6 +41,8 @@ include::{include_dir}/ControlDemandTest.java[tags=capConstant]
 ----
 
 Here we cap requests to 50 items, so it takes 2 requests to get all 100 items of the upstream range.
+The first request of 75 items is capped to a request of 50 items, leaving an outstanding demand of 25 items.
+The second request of 25 items is added to the outstanding demand, resulting in a request of 50 items and completing the stream.
 
 You can also define a custom function that provides a capping value based on a custom formula, or based on earlier demand observations:
 
