@@ -92,7 +92,7 @@
         <assertj-core.version>3.22.0</assertj-core.version>
         <junit4.version>4.13.2</junit4.version>
         <awaitility.version>4.2.0</awaitility.version>
-        <version.surefire.plugin>3.0.0-M5</version.surefire.plugin>
+        <version.surefire.plugin>3.0.0-M6</version.surefire.plugin>
         <testng.version>7.5</testng.version>
         <testng-junit5-engine.version>1.0.1</testng-junit5-engine.version>
         <mockito-core.version>4.4.0</mockito-core.version>
