@@ -50,8 +50,8 @@ The following table lists the available shortcuts available by the `Uni` class:
 |`uni.call(x -> uni2)`
 |`uni.onItem().call(x -> uni2)`
 
-|`uni.eventually(() -> System.out.println("eventually"))`
-|`uni.onItemOrFailure().invoke((ignoredItem, ignoredException) -> System.out.println("eventually"))`
+|`uni.eventually\(() -> System.out.println("eventually"))`
+|`uni.onItemOrFailure().invoke\((ignoredItem, ignoredException) -> System.out.println("eventually"))`
 
 |`uni.eventually(() -> uni2)`
 |`uni.onItemOrFailure().call((ignoredItem, ignoredException) -> uni2)`
