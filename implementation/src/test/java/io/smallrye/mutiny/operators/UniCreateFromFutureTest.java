@@ -4,9 +4,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
@@ -58,6 +60,29 @@ public class UniCreateFromFutureTest {
     }
 
     @Test
+    public void testWithAnAlreadySuccessfullyCompletedFutureWithTimeout() {
+        UniAssertSubscriber<String> subscriber = UniAssertSubscriber.create();
+        CompletableFuture<String> cs = new CompletableFuture<>();
+        cs.complete("1");
+        Uni.createFrom().future(cs, Duration.ofSeconds(1)).subscribe().withSubscriber(subscriber);
+        // No await - immediate emission
+        subscriber
+                .assertCompleted().assertItem("1");
+    }
+
+    @Test
+    public void testWithAnAlreadyCancelledFutureWithTimeout() {
+        UniAssertSubscriber<String> subscriber = UniAssertSubscriber.create();
+        CompletableFuture<String> cs = new CompletableFuture<>();
+        cs.cancel(false);
+        Uni.createFrom().future(() -> cs, Duration.ofSeconds(1)).subscribe().withSubscriber(subscriber);
+
+        subscriber
+                .awaitFailure()
+                .assertFailedWith(CancellationException.class, null);
+    }
+
+    @Test
     public void testWithNonNullValue() {
         UniAssertSubscriber<String> subscriber = UniAssertSubscriber.create();
         CompletableFuture<String> cs = new CompletableFuture<>();
@@ -77,6 +102,19 @@ public class UniCreateFromFutureTest {
         subscriber
                 .awaitFailure()
                 .assertFailedWith(IOException.class, "boom");
+    }
+
+    @Test
+    public void testWithTimeoutException() throws InterruptedException {
+        UniAssertSubscriber<String> subscriber = UniAssertSubscriber.create();
+        CompletableFuture<String> cs = new CompletableFuture<>();
+        Uni.createFrom().future(cs, Duration.ofMillis(1)).subscribe().withSubscriber(subscriber);
+        // synthetic delay
+        Thread.sleep(50);
+        cs.complete("1");
+        subscriber
+                .awaitFailure()
+                .assertFailedWith(TimeoutException.class);
     }
 
     @Test
@@ -279,6 +317,45 @@ public class UniCreateFromFutureTest {
     public void testThatCompletionStageSupplierCannotBeNull() {
         assertThrows(IllegalArgumentException.class,
                 () -> Uni.createFrom().future((Supplier<Future<?>>) null));
+    }
+
+    @Test
+    public void testThatTimeoutForCompletionStageCannotBeNull() {
+        CompletableFuture<Integer> cs = new CompletableFuture<>();
+        assertThrows(IllegalArgumentException.class, () -> Uni.createFrom().future(cs, null));
+    }
+
+    @Test
+    public void testThatTimeoutForCompletionStageSupplierCannotBeNull() {
+        CompletableFuture<Integer> cs = new CompletableFuture<>();
+        assertThrows(IllegalArgumentException.class,
+                () -> Uni.createFrom().future(() -> cs, null));
+    }
+
+    @Test
+    public void testThatTimeoutForCompletionStageCannotBeZero() {
+        CompletableFuture<Integer> cs = new CompletableFuture<>();
+        assertThrows(IllegalArgumentException.class, () -> Uni.createFrom().future(cs, Duration.ZERO));
+    }
+
+    @Test
+    public void testThatTimeoutForCompletionStageSupplierCannotBeZero() {
+        CompletableFuture<Integer> cs = new CompletableFuture<>();
+        assertThrows(IllegalArgumentException.class,
+                () -> Uni.createFrom().future(() -> cs, Duration.ZERO));
+    }
+
+    @Test
+    public void testThatTimeoutForCompletionStageCannotBeNegative() {
+        CompletableFuture<Integer> cs = new CompletableFuture<>();
+        assertThrows(IllegalArgumentException.class, () -> Uni.createFrom().future(cs, Duration.ofSeconds(-1)));
+    }
+
+    @Test
+    public void testThatTimeoutForCompletionStageSupplierCannotBeNegative() {
+        CompletableFuture<Integer> cs = new CompletableFuture<>();
+        assertThrows(IllegalArgumentException.class,
+                () -> Uni.createFrom().future(() -> cs, Duration.ofSeconds(-1)));
     }
 
     @Test
