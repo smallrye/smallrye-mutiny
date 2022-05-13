@@ -2,8 +2,10 @@ package io.smallrye.mutiny.operators.uni.builders;
 
 import static io.smallrye.mutiny.helpers.EmptyUniSubscription.DONE;
 
+import java.time.Duration;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
@@ -14,9 +16,15 @@ import io.smallrye.mutiny.subscription.UniSubscriber;
 public class UniCreateFromFuture<T> extends AbstractUni<T> {
 
     private final Supplier<? extends Future<? extends T>> supplier;
+    private final Duration timeout;
 
     public UniCreateFromFuture(Supplier<? extends Future<? extends T>> supplier) {
+        this(supplier, null);
+    }
+
+    public UniCreateFromFuture(Supplier<? extends Future<? extends T>> supplier, Duration timeout) {
         this.supplier = supplier; // Already checked
+        this.timeout = timeout; // Already checked
     }
 
     @Override
@@ -78,7 +86,12 @@ public class UniCreateFromFuture<T> extends AbstractUni<T> {
         // Because future.get is blocking, we must use a separated thread.
         Infrastructure.getDefaultExecutor().execute(() -> {
             try {
-                T item = future.get();
+                T item;
+                if (this.timeout != null) {
+                    item = future.get(timeout.toMillis(), TimeUnit.MILLISECONDS);
+                } else {
+                    item = future.get();
+                }
                 if (!cancelled.get()) {
                     downstream.onItem(item);
                 }
