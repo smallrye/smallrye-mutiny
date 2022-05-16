@@ -46,9 +46,9 @@ public class Infrastructure {
     private static MultiInterceptor[] MULTI_INTERCEPTORS;
     private static CallbackDecorator[] CALLBACK_DECORATORS;
     private static UnaryOperator<CompletableFuture<?>> completableFutureWrapper;
-    private static Consumer<Throwable> droppedExceptionHandler = Infrastructure::printAndDump;
+    private static Consumer<Throwable> droppedExceptionHandler = PrintAndDumpThrowableConsumer.INSTANCE;
     private static BooleanSupplier canCallerThreadBeBlockedSupplier;
-    private static OperatorLogger operatorLogger = Infrastructure::printOperatorEvent;
+    private static OperatorLogger operatorLogger = PrintOperatorEventOperatorLogger.INSTANCE;
 
     public static void reload() {
         clearInterceptors();
@@ -294,38 +294,33 @@ public class Infrastructure {
         droppedExceptionHandler = handler;
     }
 
-    private static void printAndDump(Throwable throwable) {
-        System.err.println("[-- Mutiny had to drop the following exception --]");
-        StackTraceElement element = Thread.currentThread().getStackTrace()[3];
-        System.err.println("Exception received by: " + element.toString());
-        throwable.printStackTrace();
-        System.err.println("[------------------------------------------------]");
-    }
-
     public static void reloadUniInterceptors() {
         ServiceLoader<UniInterceptor> loader = ServiceLoader.load(UniInterceptor.class);
-        List<UniInterceptor> interceptors = new ArrayList<>();
-        loader.forEach(interceptors::add);
-        interceptors.sort(Comparator.comparingInt(MutinyInterceptor::ordinal));
+        List<UniInterceptor> interceptors = toInterceptorList(loader);
         UNI_INTERCEPTORS = interceptors.toArray(UNI_INTERCEPTORS);
     }
 
     public static void reloadMultiInterceptors() {
         ServiceLoader<MultiInterceptor> loader = ServiceLoader.load(MultiInterceptor.class);
-        List<MultiInterceptor> interceptors = new ArrayList<>();
-        loader.forEach(interceptors::add);
-        interceptors.sort(Comparator.comparingInt(MutinyInterceptor::ordinal));
+        List<MultiInterceptor> interceptors = toInterceptorList(loader);
         MULTI_INTERCEPTORS = interceptors.toArray(MULTI_INTERCEPTORS);
     }
 
     public static void reloadCallbackDecorators() {
         if (!DISABLE_CALLBACK_DECORATORS) {
             ServiceLoader<CallbackDecorator> loader = ServiceLoader.load(CallbackDecorator.class);
-            ArrayList<CallbackDecorator> interceptors = new ArrayList<>();
-            loader.forEach(interceptors::add);
-            interceptors.sort(Comparator.comparingInt(MutinyInterceptor::ordinal));
+            List<CallbackDecorator> interceptors = toInterceptorList(loader);
             CALLBACK_DECORATORS = interceptors.toArray(CALLBACK_DECORATORS);
         }
+    }
+
+    private static <T extends MutinyInterceptor> List<T> toInterceptorList(ServiceLoader<T> loader) {
+        List<T> interceptors = new ArrayList<>();
+        for (T item : loader) {
+            interceptors.add(item);
+        }
+        interceptors.sort(MutinyInterceptorComparator.INSTANCE);
+        return interceptors;
     }
 
     public static void clearInterceptors() {
@@ -336,12 +331,12 @@ public class Infrastructure {
 
     // For testing purpose only
     public static void resetDroppedExceptionHandler() {
-        droppedExceptionHandler = Infrastructure::printAndDump;
+        droppedExceptionHandler = PrintAndDumpThrowableConsumer.INSTANCE;
     }
 
     // For testing purpose only
     public static void resetCanCallerThreadBeBlockedSupplier() {
-        canCallerThreadBeBlockedSupplier = () -> true;
+        canCallerThreadBeBlockedSupplier = AlwaysTrueBooleanSupplier.INSTANCE;
     }
 
     private Infrastructure() {
@@ -378,20 +373,6 @@ public class Infrastructure {
         operatorLogger.log(identifier, event, value, failure);
     }
 
-    private static void printOperatorEvent(String identifier, String event, Object value, Throwable failure) {
-        String message = "[--> " + identifier + " | " + event;
-        if (failure == null) {
-            if (value != null) {
-                message = message + "(" + value + ")";
-            } else {
-                message = message + "()";
-            }
-        } else {
-            message = message + "(" + failure.getClass().getName() + "(\"" + failure.getMessage() + "\"))";
-        }
-        System.out.println(message);
-    }
-
     /**
      * Defines operator logging behavior for {@link Multi#log(String)} and {@link Uni#log(String)}.
      * 
@@ -403,7 +384,7 @@ public class Infrastructure {
 
     // For testing purpose only
     public static void resetOperatorLogger() {
-        Infrastructure.operatorLogger = Infrastructure::printOperatorEvent;
+        Infrastructure.operatorLogger = PrintOperatorEventOperatorLogger.INSTANCE;
     }
 
     /**
@@ -422,4 +403,59 @@ public class Infrastructure {
          */
         void log(String identifier, String event, Object value, Throwable failure);
     }
+
+    private static class MutinyInterceptorComparator implements Comparator<MutinyInterceptor> {
+
+        private static final MutinyInterceptorComparator INSTANCE = new MutinyInterceptorComparator();
+
+        @Override
+        public int compare(MutinyInterceptor o1, MutinyInterceptor o2) {
+            return Integer.compare(o1.ordinal(), o2.ordinal());
+        }
+    }
+
+    private static class AlwaysTrueBooleanSupplier implements BooleanSupplier {
+
+        private static final AlwaysTrueBooleanSupplier INSTANCE = new AlwaysTrueBooleanSupplier();
+
+        @Override
+        public boolean getAsBoolean()  {
+            return true;
+        }
+    }
+
+    private static class PrintAndDumpThrowableConsumer implements Consumer<Throwable> {
+
+        private static final PrintAndDumpThrowableConsumer INSTANCE = new PrintAndDumpThrowableConsumer();
+
+        @Override
+        public void accept(Throwable throwable) {
+            System.err.println("[-- Mutiny had to drop the following exception --]");
+            StackTraceElement element = Thread.currentThread().getStackTrace()[3];
+            System.err.println("Exception received by: " + element.toString());
+            throwable.printStackTrace();
+            System.err.println("[------------------------------------------------]");
+        }
+    }
+
+    private static class PrintOperatorEventOperatorLogger implements OperatorLogger {
+
+        private static final PrintOperatorEventOperatorLogger INSTANCE = new PrintOperatorEventOperatorLogger();
+
+        @Override
+        public void log(String identifier, String event, Object value, Throwable failure) {
+            String message = "[--> " + identifier + " | " + event;
+            if (failure == null) {
+                if (value != null) {
+                    message = message + "(" + value + ")";
+                } else {
+                    message = message + "()";
+                }
+            } else {
+                message = message + "(" + failure.getClass().getName() + "(\"" + failure.getMessage() + "\"))";
+            }
+            System.out.println(message);
+        }
+    }
+
 }
