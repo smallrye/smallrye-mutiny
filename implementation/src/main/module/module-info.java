@@ -1,7 +1,7 @@
 open module io.smallrye.mutiny {
 
     requires transitive org.reactivestreams;
-    requires transitive smallrye.common.annotation;
+    requires transitive io.smallrye.common.annotation;
 
     exports io.smallrye.mutiny;
     exports io.smallrye.mutiny.groups;
