@@ -419,7 +419,7 @@ public class Infrastructure {
         private static final AlwaysTrueBooleanSupplier INSTANCE = new AlwaysTrueBooleanSupplier();
 
         @Override
-        public boolean getAsBoolean()  {
+        public boolean getAsBoolean() {
             return true;
         }
     }
