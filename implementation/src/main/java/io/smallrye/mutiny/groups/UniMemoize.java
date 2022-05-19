@@ -50,9 +50,27 @@ public class UniMemoize<T> {
      *        {@code null}, must be strictly positive
      * @return a new {@link Uni}
      * @apiNote This is an experimental API
+     * @deprecated use {@link forDuration(Duration)} instead
      */
     @CheckReturnValue
     public Uni<T> atLeast(Duration duration) {
+        return forDuration(duration);
+    }
+
+    /**
+     * Memoize the received item or failure for a duration after the upstream subscription has been received.
+     * <p>
+     * New subscribers will receive the memoized item or failure.
+     * When duration has elapsed then the first subscription causes a new upstream subscription, and the next
+     * subscribers get a chance to observe new values.
+     *
+     * @param duration the memoization duration after having received the subscription from upstream, must not be
+     *        {@code null}, must be strictly positive
+     * @return a new {@link Uni}
+     * @apiNote This is an experimental API
+     */
+    @CheckReturnValue
+    public Uni<T> forDuration(Duration duration) {
         Duration validatedDuration = validate(duration, "duration");
         return until(new BooleanSupplier() {
             private volatile long startTime = -1;
