@@ -1,135 +1,73 @@
-[
-  {
-    "extension": "revapi.java",
-    "id": "java",
-    "configuration": {
-      "missing-classes": {
-        "behavior": "report",
-        "ignoreMissingAnnotations": false
-      }
-    }
-  },
-  {
-    "extension": "revapi.filter",
-    "configuration": {
-      "elements": {
-        "include": [
-          {
-            "matcher": "java-package",
-            "match": "io.smallrye.mutiny"
-          },
-          {
-            "matcher": "java-package",
-            "match": "io.smallrye.mutiny.groups"
-          },
-          {
-            "matcher": "java-package",
-            "match": "io.smallrye.mutiny.helpers.spies"
-          },
-          {
-            "matcher": "java-package",
-            "match": "io.smallrye.mutiny.helpers.test"
-          },
-          {
-            "matcher": "java-package",
-            "match": "io.smallrye.mutiny.infrastructure"
-          },
-          {
-            "matcher": "java-package",
-            "match": "io.smallrye.mutiny.operators"
-          },
-          {
-            "matcher": "java-package",
-            "match": "io.smallrye.mutiny.operators.multi.processors"
-          },
-          {
-            "matcher": "java-package",
-            "match": "io.smallrye.mutiny.subscription"
-          },
-          {
-            "matcher": "java-package",
-            "match": "io.smallrye.mutiny.tuples"
-          },
-          {
-            "matcher": "java-package",
-            "match": "io.smallrye.mutiny.unchecked"
-          }
-        ]
-      }
-    }
-  },
-  {
-    "extension": "revapi.differences",
-    "id": "breaking-changes",
-    "configuration": {
-      "criticality": "highlight",
-      "minSeverity": "POTENTIALLY_BREAKING",
-      "minCriticality": "documented",
-      "differences": [
-        {
-          "ignore": true,
-          "code": "java.annotation.added",
-          "old": "method <T> io.smallrye.mutiny.Multi<T> io.smallrye.mutiny.groups.MultiReplay::ofMulti(io.smallrye.mutiny.Multi<T>)",
-          "new": "method <T> io.smallrye.mutiny.Multi<T> io.smallrye.mutiny.groups.MultiReplay::ofMulti(io.smallrye.mutiny.Multi<T>)",
-          "annotation": "@io.smallrye.common.annotation.CheckReturnValue",
-          "justification": "Not breaking. The annotation was missing and has now be added."
-        },
-        {
-          "ignore": true,
-          "code": "java.annotation.added",
-          "old": "method <T> io.smallrye.mutiny.Multi<T> io.smallrye.mutiny.groups.MultiReplay::ofSeedAndMulti(java.lang.Iterable<T>, io.smallrye.mutiny.Multi<T>)",
-          "new": "method <T> io.smallrye.mutiny.Multi<T> io.smallrye.mutiny.groups.MultiReplay::ofSeedAndMulti(java.lang.Iterable<T>, io.smallrye.mutiny.Multi<T>)",
-          "annotation": "@io.smallrye.common.annotation.CheckReturnValue",
-          "justification": "Not breaking. The annotation was missing and has now be added."
-        },
-        {
-          "ignore": true,
-          "code": "java.annotation.added",
-          "old": "method io.smallrye.mutiny.groups.MultiReplay io.smallrye.mutiny.groups.MultiReplay::upTo(long)",
-          "new": "method io.smallrye.mutiny.groups.MultiReplay io.smallrye.mutiny.groups.MultiReplay::upTo(long)",
-          "annotation": "@io.smallrye.common.annotation.CheckReturnValue",
-          "justification": "Not breaking. The annotation was missing and has now be added."
-        },
-        {
-          "ignore": true,
-          "code": "java.method.addedToInterface",
-          "new": "method io.smallrye.mutiny.groups.MultiDemandPacing<T> io.smallrye.mutiny.Multi<T>::paceDemand()",
-          "justification": "New Multi paceDemand experimental operator"
-        },
-        {
-          "ignore": true,
-          "code": "java.method.addedToInterface",
-          "new": "method io.smallrye.mutiny.Multi<T> io.smallrye.mutiny.Multi<T>::capDemandsUsing(java.util.function.LongFunction<java.lang.Long>)",
-          "justification": "New Multi capDemandsUsing experimental operator"
-        },
-        {
-          "ignore": true,
-          "code": "java.annotation.removed",
-          "old": "interface io.smallrye.mutiny.helpers.spies.Spy",
-          "new": "interface io.smallrye.mutiny.helpers.spies.Spy",
-          "annotation": "@io.smallrye.common.annotation.Experimental(\"We are experimenting with spies for diagnosis and testing\")",
-          "justification": "Not breaking. Experimental promotion. "
-        }
-      ]
-    }
-  },
-  {
-    "extension": "revapi.reporter.json",
-    "configuration": {
-      "minSeverity": "POTENTIALLY_BREAKING",
-      "minCriticality": "documented",
-      "output": "target/compatibility.json",
-      "indent": true,
-      "append": false,
-      "keepEmptyFile": true
-    }
-  },
-  {
-    "extension": "revapi.reporter.text",
-    "configuration": {
-      "minSeverity": "POTENTIALLY_BREAKING",
-      "minCriticality": "documented",
-      "output": "out"
+[ {
+  "extension" : "revapi.java",
+  "id" : "java",
+  "configuration" : {
+    "missing-classes" : {
+      "behavior" : "report",
+      "ignoreMissingAnnotations" : false
     }
   }
-]
+}, {
+  "extension" : "revapi.filter",
+  "configuration" : {
+    "elements" : {
+      "include" : [ {
+        "matcher" : "java-package",
+        "match" : "io.smallrye.mutiny"
+      }, {
+        "matcher" : "java-package",
+        "match" : "io.smallrye.mutiny.groups"
+      }, {
+        "matcher" : "java-package",
+        "match" : "io.smallrye.mutiny.helpers.spies"
+      }, {
+        "matcher" : "java-package",
+        "match" : "io.smallrye.mutiny.helpers.test"
+      }, {
+        "matcher" : "java-package",
+        "match" : "io.smallrye.mutiny.infrastructure"
+      }, {
+        "matcher" : "java-package",
+        "match" : "io.smallrye.mutiny.operators"
+      }, {
+        "matcher" : "java-package",
+        "match" : "io.smallrye.mutiny.operators.multi.processors"
+      }, {
+        "matcher" : "java-package",
+        "match" : "io.smallrye.mutiny.subscription"
+      }, {
+        "matcher" : "java-package",
+        "match" : "io.smallrye.mutiny.tuples"
+      }, {
+        "matcher" : "java-package",
+        "match" : "io.smallrye.mutiny.unchecked"
+      } ]
+    }
+  }
+}, {
+  "extension" : "revapi.differences",
+  "id" : "breaking-changes",
+  "configuration" : {
+    "criticality" : "highlight",
+    "minSeverity" : "POTENTIALLY_BREAKING",
+    "minCriticality" : "documented",
+    "differences" : [ ]
+  }
+}, {
+  "extension" : "revapi.reporter.json",
+  "configuration" : {
+    "minSeverity" : "POTENTIALLY_BREAKING",
+    "minCriticality" : "documented",
+    "output" : "target/compatibility.json",
+    "indent" : true,
+    "append" : false,
+    "keepEmptyFile" : true
+  }
+}, {
+  "extension" : "revapi.reporter.text",
+  "configuration" : {
+    "minSeverity" : "POTENTIALLY_BREAKING",
+    "minCriticality" : "documented",
+    "output" : "out"
+  }
+} ]
