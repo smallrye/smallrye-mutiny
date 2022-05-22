@@ -8,7 +8,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="description" content="SmallRye Mutiny!">
 
-    <link rel="canonical" href="/guides/emission-threads.html">
+    <link rel="canonical" href="/guides/controlling-demand.html">
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.3.1/styles/default.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/components/icon.min.css" integrity="sha512-8Tb+T7SKUFQWOPIQCaLDWWe1K/SY8hvHl7brOH8Nz5z1VT8fnf8B+9neoUzmFY3OzkWMMs3OjrwZALgB1oXFBg==" crossorigin="anonymous" />
     <link rel="shortcut icon" type="image/png" href="/smallrye-mutiny/assets/images/favicon.ico">
@@ -63,10 +63,10 @@
         <div class="row">
             <div class="hero-left col-12">
                 <div class="hero-slogan">
-                    <h1 class="hero-name">How to change the emission thread?</h1>
+                    <h1 class="hero-name">Controlling the demand</h1>
                 </div>
                 <div class="hero-desc">
-                    Learn how to control threads used to emit events.
+                    Learn about custom operators for controlling the upstream demand
                 </div>
                 <!-- TODO Labels -->
             </div>
@@ -77,88 +77,125 @@
 <div class="container page-content">
     <div class="row">
         <div class="col-md-9 content">
-            <div class="paragraph">
-<p>Except indicated otherwise, Mutiny invokes the next <em>stage</em> using the thread emitting the event from upstream.
-So, in the following code, the <em>transform</em> stage is invoked from the thread emitting the event.</p>
+            <div class="sect1">
+<h2 id="pacing-the-demand"><a class="anchor" href="#pacing-the-demand"></a>Pacing the demand</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>A subscription is used for 2 purposes: cancelling a request and demanding batches of items.</p>
+</div>
+<div class="paragraph">
+<p>The <code>Multi.paceDemand()</code> operator can be used to automatically issue requests at certain points in time.</p>
+</div>
+<div class="paragraph">
+<p>The following example issues requests of 25 items every 100ms:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Uni&lt;String&gt; uni = Uni.createFrom().&lt;String&gt;emitter(emitter -&gt;
-        new Thread(() -&gt;
-                emitter.complete("hello from "
-                        + Thread.currentThread().getName())
-        ).start()
-)
-        .onItem().transform(item -&gt; {
-            // Called on the emission thread.
-            return item.toUpperCase();
-        });</code></pre>
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">FixedDemandPacer pacer = new FixedDemandPacer(25L, Duration.ofMillis(100L));
+
+Multi&lt;Integer&gt; multi = Multi.createFrom().range(0, 100)
+        .paceDemand().on(Infrastructure.getDefaultWorkerPool()).using(pacer);</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>You can switch to another thread using the <code>emitOn</code> operator.
-The <code>emitOn</code> operator lets you switch the thread used to dispatch (upstream &#8594; downstream) events, so items, failure and completion events.
-Just pass the <em>executor</em> you want to use.</p>
+<p><code>FixedDemandPacer</code> is a simple <em>pacer</em> with a fixed demand and a fixed delay.</p>
+</div>
+<div class="paragraph">
+<p>You can create more elaborated pacers by implementing the <code>DemandPacer</code> interface.
+To do so you provide an initial request and a function to evaluate the next request which is evaluated based on the previous request and the number of items emitted since the last request:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">String res0 = uni.emitOn(executor)
-        .onItem()
-        .invoke(s -&gt; System.out.println("Received item `" + s + "` on thread: "
-                + Thread.currentThread().getName()))
-        .await().indefinitely();
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">DemandPacer pacer = new DemandPacer() {
 
-String res1 = multi.emitOn(executor)
-        .onItem()
-        .invoke(s -&gt; System.out.println("Received item `" + s + "` on thread: "
-                + Thread.currentThread().getName()))
-        .collect().first()
-        .await().indefinitely();</code></pre>
+    @Override
+    public Request initial() {
+        return new Request(10L, Duration.ofMillis(100L));
+    }
+
+    @Override
+    public Request apply(Request previousRequest, long observedItemsCount) {
+        return new Request(previousRequest.demand() * 2, previousRequest.delay().plus(10, ChronoUnit.MILLIS));
+    }
+};</code></pre>
 </div>
 </div>
-<div class="admonitionblock note">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-note" title="Note"></i>
-</td>
-<td class="content">
-You cannot pass a specific thread, but you can implement a simple <code>Executor</code> dispatching on that specific thread, or use a <em>single threaded executor</em>.
-</td>
-</tr>
-</table>
+<div class="paragraph">
+<p>The previous example is a custom pacer that doubles the demand and increases the delay for each new request.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="capping-the-demand-requests"><a class="anchor" href="#capping-the-demand-requests"></a>Capping the demand requests</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The <code>capDemandsTo</code> and <code>capDemandUsing</code> operators can be used to cap the demand from downstream subscribers.</p>
+</div>
+<div class="paragraph">
+<p>The <code>capDemandTo</code> operator defines a maximum demand that can flow:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">AssertSubscriber&lt;Integer&gt; sub = AssertSubscriber.create();
+
+sub = Multi.createFrom().range(0, 100)
+        .capDemandsTo(50L)
+        .subscribe().withSubscriber(sub);
+
+// A first batch of 50 (capped), 25 remain outstanding
+sub.request(75L).assertNotTerminated();
+assertThat(sub.getItems()).hasSize(50);
+
+// Second batch: 25 + 25 = 50
+sub.request(25L).assertCompleted();
+assertThat(sub.getItems()).hasSize(100);</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Here we cap requests to 50 items, so it takes 2 requests to get all 100 items of the upstream range.
+The first request of 75 items is capped to a request of 50 items, leaving an outstanding demand of 25 items.
+The second request of 25 items is added to the outstanding demand, resulting in a request of 50 items and completing the stream.</p>
+</div>
+<div class="paragraph">
+<p>You can also define a custom function that provides a capping value based on a custom formula, or based on earlier demand observations:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">AssertSubscriber&lt;Integer&gt; sub = AssertSubscriber.create();
+
+sub = Multi.createFrom().range(0, 100)
+        .capDemandsUsing(n -&gt; {
+            if (n &gt; 1) {
+                return (long) (((double) n) * 0.75d);
+            } else {
+                return n;
+            }
+        })
+        .subscribe().withSubscriber(sub);
+
+sub.request(100L).assertNotTerminated();
+assertThat(sub.getItems()).hasSize(75);
+
+sub.request(1L).assertNotTerminated();
+assertThat(sub.getItems()).hasSize(94);
+
+sub.request(Long.MAX_VALUE).assertCompleted();
+assertThat(sub.getItems()).hasSize(100);</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Here we have a function that requests 75% of the downstream requests.</p>
+</div>
+<div class="paragraph">
+<p>Note that the function must return a value <code>n</code> that satisfies <code>(0 &lt; n &leq; requested)</code> where <code>requested</code> is the downstream demand.</p>
+</div>
+</div>
 </div>
         </div>
         <div class="col-md-3 col-md-offset-1 toc-container d-sm-none d-md-block">
             <nav class="page-toc toc nav sticky-top" id="toc">
                 
 
-                
-                <h4>Related content</h4>
-                <ul>
-                    
-                    <li>
-                        
-                        <a href="/smallrye-mutiny/guides/reactive-to-imperative">From reactive to imperative</a>
-                        
-                        
-                    </li>
-                    
-                    <li>
-                        
-                        <a href="/smallrye-mutiny/guides/imperative-to-reactive">Imperative to Reactive</a>
-                        
-                        
-                    </li>
-                    
-                    <li>
-                        
-                        <a href="/smallrye-mutiny/guides/emit-subscription">What's the difference between emitOn and runSubscriptionOn?</a>
-                        
-                        
-                    </li>
-                    
-                </ul>
                 
             </nav>
         </div>
