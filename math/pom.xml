@@ -88,24 +88,6 @@
                 </executions>
             </plugin>
             <plugin>
-                <groupId>org.moditect</groupId>
-                <artifactId>moditect-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>add-module-infos</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>add-module-info</goal>
-                        </goals>
-                        <configuration>
-                            <module>
-                                <moduleInfoFile>src/main/module/module-info.java</moduleInfoFile>
-                            </module>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
                 <groupId>org.jboss.jandex</groupId>
                 <artifactId>jandex-maven-plugin</artifactId>
             </plugin>
@@ -119,9 +101,9 @@
     <profiles>
         <profile>
             <activation>
-                <jdk>[9,)</jdk>
+                <jdk>[11,)</jdk>
             </activation>
-            <id>java-9+</id>
+            <id>java-11+</id>
             <build>
                 <plugins>
                     <plugin>
@@ -137,8 +119,8 @@
                         </executions>
                         <configuration>
                             <!-- wonderful reliability of javadoc used with modules breaking on non exposed packages -->
-                            <source>8</source>
-                            <release>8</release>
+                            <source>11</source>
+                            <release>11</release>
                             <detectJavaApiLink>false</detectJavaApiLink>
                         </configuration>
                     </plugin>
