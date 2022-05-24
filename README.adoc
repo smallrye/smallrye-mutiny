@@ -1,4 +1,5 @@
 image:https://github.com/smallrye/smallrye-mutiny/actions/workflows/build-main.yml/badge.svg[Build Status]
+image:https://github.com/smallrye/smallrye-mutiny/actions/workflows/build-1.x.yml/badge.svg[Build status (1.x branch)]
 image:https://sonarcloud.io/api/project_badges/measure?project=smallrye_smallrye-mutiny&metric=alert_status["Quality Gate Status", link="https://sonarcloud.io/dashboard?id=smallrye_smallrye-mutiny"]
 image:https://img.shields.io/github/license/smallrye/smallrye-mutiny.svg["License", link="https://www.apache.org/licenses/LICENSE-2.0"]
 image:https://img.shields.io/maven-central/v/io.smallrye.reactive/mutiny?color=green[Maven Central]
