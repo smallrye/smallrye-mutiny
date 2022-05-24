@@ -3,10 +3,10 @@ name: Main branch continuous integration and snapshots deployment
 on:
   push:
     branches:
-      - main
+      - "main"
 
 concurrency:
-  group: "ci-cd-${{ github.event.ref }}"
+  group: "ci-cd-${{ github.workflow }}-${{ github.ref }}"
   cancel-in-progress: true
 
 jobs:
@@ -15,7 +15,6 @@ jobs:
     strategy:
       matrix:
         java: [
-          { 'version': '8', opts: '' },
           { 'version': '11', opts: '' },
           { 'version': '17', 'opts': '' }
         ]

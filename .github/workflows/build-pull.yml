@@ -3,7 +3,7 @@ name: Check pull requests
 on: pull_request
 
 concurrency:
-  group: "check-pull-request-${{ github.event.ref }}"
+  group: "check-pull-request-${{ github.workflow }}-${{ github.ref }}"
   cancel-in-progress: true
 
 jobs:
@@ -12,7 +12,6 @@ jobs:
     strategy:
       matrix:
         java: [
-          { 'version': '8', opts: '' },
           { 'version': '11', opts: '' },
           { 'version': '17', 'opts': '' }
         ]

@@ -1,0 +1,26 @@
+---
+name: 1.x branch continuous integration
+on:
+  push:
+    branches:
+      - "1.x"
+
+concurrency:
+  group: "ci-1.x-${{ github.workflow }}-${{ github.ref }}"
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+    name: Build with Java 8 (OpenJDK)
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-java@v2
+        name: set up jdk 8
+        with:
+          distribution: temurin
+          java-version: 8
+          cache: maven
+      - name: Build with Maven
+        run: ./mvnw -s .build/maven-ci-settings.xml -B clean verify
+

@@ -64,7 +64,7 @@ jobs:
           git clone -b main "https://${GITHUB_ACTOR}:${GITHUB_TOKEN}@github.com/smallrye/smallrye-mutiny.git" new-main
           cd new-main
           echo "Clearing difference justifications"
-          jbang .build/CompatibilityUtils.java clear
+          jbang .build/CompatibilityUtils.java clear --do-not-clear-version-prefix=1.
           if [[ $(git diff --stat) != '' ]]; then
             git add -A
             git status
