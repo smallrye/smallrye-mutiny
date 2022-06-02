@@ -1,12 +1,10 @@
 package guides.integration;
 
-import io.reactivex.*;
+import io.reactivex.rxjava3.core.*;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
-// tag::rx-import[]
-import io.smallrye.mutiny.converters.multi.MultiRxConverters;
-import io.smallrye.mutiny.converters.uni.UniRxConverters;
-// end::rx-import[]
+import io.smallrye.mutiny.converters.multi.MultiRx3Converters;
+import io.smallrye.mutiny.converters.uni.UniRx3Converters;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -24,7 +22,7 @@ public class RxJavaTest<T> {
 
         // tag::rx-multi-create-observable[]
         Multi<T> multiFromObservable = Multi.createFrom()
-                .converter(MultiRxConverters.fromObservable(), observable);
+                .converter(MultiRx3Converters.fromObservable(), observable);
         // end::rx-multi-create-observable[]
 
         // tag::rx-multi-create-flowable[]
@@ -48,13 +46,13 @@ public class RxJavaTest<T> {
 
         // tag::rx-multi-create-single[]
         Multi<Void> multiFromCompletable = Multi.createFrom()
-                .converter(MultiRxConverters.fromCompletable(), completable);
+                .converter(MultiRx3Converters.fromCompletable(), completable);
         Multi<T> multiFromSingle = Multi.createFrom()
-                .converter(MultiRxConverters.fromSingle(), single);
+                .converter(MultiRx3Converters.fromSingle(), single);
         Multi<T> multiFromMaybe = Multi.createFrom()
-                .converter(MultiRxConverters.fromMaybe(), maybe);
+                .converter(MultiRx3Converters.fromMaybe(), maybe);
         Multi<T> multiFromEmptyMaybe = Multi.createFrom()
-                .converter(MultiRxConverters.fromMaybe(), emptyMaybe);
+                .converter(MultiRx3Converters.fromMaybe(), emptyMaybe);
         // end::rx-multi-create-single[]
 
         list = multiFromCompletable
@@ -85,7 +83,7 @@ public class RxJavaTest<T> {
 
         // tag::rx-uni-create-observable[]
         Uni<T> uniFromObservable = Uni.createFrom().converter(
-                UniRxConverters.fromObservable(), observable);
+                UniRx3Converters.fromObservable(), observable);
         // end::rx-uni-create-observable[]
 
         // tag::rx-uni-create-flowable[]
@@ -109,13 +107,13 @@ public class RxJavaTest<T> {
 
         // tag::rx-uni-create-single[]
         Uni<Void> multiFromCompletable = Uni.createFrom()
-                .converter(UniRxConverters.fromCompletable(), completable);
+                .converter(UniRx3Converters.fromCompletable(), completable);
         Uni<T> multiFromSingle = Uni.createFrom()
-                .converter(UniRxConverters.fromSingle(), single);
+                .converter(UniRx3Converters.fromSingle(), single);
         Uni<T> multiFromMaybe = Uni.createFrom()
-                .converter(UniRxConverters.fromMaybe(), maybe);
+                .converter(UniRx3Converters.fromMaybe(), maybe);
         Uni<T> multiFromEmptyMaybe = Uni.createFrom()
-                .converter(UniRxConverters.fromMaybe(), emptyMaybe);
+                .converter(UniRx3Converters.fromMaybe(), emptyMaybe);
         // end::rx-uni-create-single[]
 
         Void v = multiFromCompletable
@@ -144,18 +142,18 @@ public class RxJavaTest<T> {
 
         // tag::create-rx-from-multi[]
         Completable completable = multi.convert()
-                .with(MultiRxConverters.toCompletable());
+                .with(MultiRx3Converters.toCompletable());
         Single<Optional<T>> single = multi.convert()
-                .with(MultiRxConverters.toSingle());
+                .with(MultiRx3Converters.toSingle());
         Single<T> single2 = multi.convert()
-                .with(MultiRxConverters
+                .with(MultiRx3Converters
                         .toSingle().onEmptyThrow(() -> new Exception("D'oh!")));
         Maybe<T> maybe = multi.convert()
-                .with(MultiRxConverters.toMaybe());
+                .with(MultiRx3Converters.toMaybe());
         Observable<T> observable = multi.convert()
-                .with(MultiRxConverters.toObservable());
+                .with(MultiRx3Converters.toObservable());
         Flowable<T> flowable = multi.convert()
-                .with(MultiRxConverters.toFlowable());
+                .with(MultiRx3Converters.toFlowable());
         // end::create-rx-from-multi[]
 
         completable.blockingAwait();
@@ -171,12 +169,12 @@ public class RxJavaTest<T> {
         Uni<T> uni = getUni();
 
         // tag::create-rx-from-uni[]
-        Completable completable = uni.convert().with(UniRxConverters.toCompletable());
-        Single<Optional<T>> single = uni.convert().with(UniRxConverters.toSingle());
-        Single<T> single2 = uni.convert().with(UniRxConverters.toSingle().failOnNull());
-        Maybe<T> maybe = uni.convert().with(UniRxConverters.toMaybe());
-        Observable<T> observable = uni.convert().with(UniRxConverters.toObservable());
-        Flowable<T> flowable = uni.convert().with(UniRxConverters.toFlowable());
+        Completable completable = uni.convert().with(UniRx3Converters.toCompletable());
+        Single<Optional<T>> single = uni.convert().with(UniRx3Converters.toSingle());
+        Single<T> single2 = uni.convert().with(UniRx3Converters.toSingle().failOnNull());
+        Maybe<T> maybe = uni.convert().with(UniRx3Converters.toMaybe());
+        Observable<T> observable = uni.convert().with(UniRx3Converters.toObservable());
+        Flowable<T> flowable = uni.convert().with(UniRx3Converters.toFlowable());
         // end::create-rx-from-uni[]
 
         completable.blockingAwait();
@@ -191,12 +189,12 @@ public class RxJavaTest<T> {
     public void uniExportToRx() {
         Uni<String> uni = Uni.createFrom().item("hello");
         // tag::uni-export[]
-        Completable completable = uni.convert().with(UniRxConverters.toCompletable());
-        Single<Optional<String>> single = uni.convert().with(UniRxConverters.toSingle());
-        Single<String> single2 = uni.convert().with(UniRxConverters.toSingle().failOnNull());
-        Maybe<String> maybe = uni.convert().with(UniRxConverters.toMaybe());
-        Observable<String> observable = uni.convert().with(UniRxConverters.toObservable());
-        Flowable<String> flowable = uni.convert().with(UniRxConverters.toFlowable());
+        Completable completable = uni.convert().with(UniRx3Converters.toCompletable());
+        Single<Optional<String>> single = uni.convert().with(UniRx3Converters.toSingle());
+        Single<String> single2 = uni.convert().with(UniRx3Converters.toSingle().failOnNull());
+        Maybe<String> maybe = uni.convert().with(UniRx3Converters.toMaybe());
+        Observable<String> observable = uni.convert().with(UniRx3Converters.toObservable());
+        Flowable<String> flowable = uni.convert().with(UniRx3Converters.toFlowable());
         // end::uni-export[]
 
         completable.test().assertComplete();
@@ -212,17 +210,17 @@ public class RxJavaTest<T> {
         Multi<String> multi = Multi.createFrom().items("hello", "bonjour");
         // tag::multi-export[]
         Completable completable = multi.convert()
-                .with(MultiRxConverters.toCompletable());
+                .with(MultiRx3Converters.toCompletable());
         Single<Optional<String>> single = multi.convert()
-                .with(MultiRxConverters.toSingle());
+                .with(MultiRx3Converters.toSingle());
         Single<String> single2 = multi.convert()
-                .with(MultiRxConverters.toSingle().onEmptyThrow(() -> new Exception("D'oh!")));
+                .with(MultiRx3Converters.toSingle().onEmptyThrow(() -> new Exception("D'oh!")));
         Maybe<String> maybe = multi.convert()
-                .with(MultiRxConverters.toMaybe());
+                .with(MultiRx3Converters.toMaybe());
         Observable<String> observable = multi.convert()
-                .with(MultiRxConverters.toObservable());
+                .with(MultiRx3Converters.toObservable());
         Flowable<String> flowable = multi.convert()
-                .with(MultiRxConverters.toFlowable());
+                .with(MultiRx3Converters.toFlowable());
         // end::multi-export[]
 
         completable.test().assertComplete();

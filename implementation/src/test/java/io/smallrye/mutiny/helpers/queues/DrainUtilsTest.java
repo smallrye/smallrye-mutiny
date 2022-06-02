@@ -11,7 +11,7 @@ import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.reactivestreams.Subscription;
 
-import io.reactivex.internal.util.QueueDrainHelper;
+import io.reactivex.rxjava3.internal.util.QueueDrainHelper;
 import io.smallrye.mutiny.helpers.test.AssertSubscriber;
 
 public class DrainUtilsTest {

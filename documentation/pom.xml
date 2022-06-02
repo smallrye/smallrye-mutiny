@@ -46,7 +46,7 @@
 
         <dependency>
             <groupId>io.smallrye.reactive</groupId>
-            <artifactId>mutiny-rxjava</artifactId>
+            <artifactId>mutiny-rxjava3</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>

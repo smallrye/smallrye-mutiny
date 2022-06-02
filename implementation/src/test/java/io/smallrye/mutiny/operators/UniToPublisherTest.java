@@ -14,8 +14,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
 
-import io.reactivex.Flowable;
-import io.reactivex.subscribers.TestSubscriber;
+import io.reactivex.rxjava3.core.Flowable;
+import io.reactivex.rxjava3.subscribers.TestSubscriber;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.helpers.test.AssertSubscriber;
@@ -66,7 +66,7 @@ public class UniToPublisherTest {
         Publisher<Integer> publisher = Uni.createFrom().item(1).convert().toPublisher();
         assertThat(publisher).isNotNull();
         TestSubscriber<Integer> test = Flowable.fromPublisher(publisher).test(0);
-        test.assertSubscribed();
+        assertThat(test.hasSubscription()).isTrue();
         test.request(1);
         test.assertResult(1);
         test.assertComplete();
@@ -77,7 +77,7 @@ public class UniToPublisherTest {
         Publisher<Integer> publisher = Uni.createFrom().item(1).convert().toPublisher();
         assertThat(publisher).isNotNull();
         TestSubscriber<Integer> test = Flowable.fromPublisher(publisher).test(0);
-        test.assertSubscribed();
+        assertThat(test.hasSubscription()).isTrue();
         test.request(20);
         test.assertResult(1);
         test.assertComplete();
@@ -88,10 +88,10 @@ public class UniToPublisherTest {
         Publisher<Integer> publisher = Uni.createFrom().item(1).convert().toPublisher();
         assertThat(publisher).isNotNull();
         TestSubscriber<Integer> test = Flowable.fromPublisher(publisher).test(0);
-        test.assertSubscribed();
+        assertThat(test.hasSubscription()).isTrue();
         test.request(0);
         test.assertError(IllegalArgumentException.class);
-        test.assertTerminated();
+        test.assertNotComplete();
     }
 
     @Test
@@ -99,10 +99,10 @@ public class UniToPublisherTest {
         Publisher<Integer> publisher = Uni.createFrom().item(1).convert().toPublisher();
         assertThat(publisher).isNotNull();
         TestSubscriber<Integer> test = Flowable.fromPublisher(publisher).test(1, true);
-        test.assertSubscribed();
+        assertThat(test.hasSubscription()).isTrue();
         assertThat(test.isCancelled()).isTrue();
-        test.assertNotTerminated();
-        test.assertNever(1);
+        test.assertNotComplete();
+        test.assertNoValues();
     }
 
     @Test
@@ -138,11 +138,11 @@ public class UniToPublisherTest {
         Publisher<Integer> publisher = Uni.createFrom().item(1).convert().toPublisher();
         assertThat(publisher).isNotNull();
         TestSubscriber<Integer> test = Flowable.fromPublisher(publisher).test(0);
-        test.assertSubscribed();
+        assertThat(test.hasSubscription()).isTrue();
         test.cancel();
         assertThat(test.isCancelled()).isTrue();
-        test.assertNotTerminated();
-        test.assertNever(1);
+        test.assertNotComplete();
+        test.assertNoValues();
     }
 
     @Test
@@ -160,12 +160,12 @@ public class UniToPublisherTest {
 
         assertThat(publisher).isNotNull();
         TestSubscriber<Integer> test = Flowable.fromPublisher(publisher).test(0);
-        test.assertSubscribed();
+        assertThat(test.hasSubscription()).isTrue();
         test.request(1);
         test.cancel();
         assertThat(test.isCancelled()).isTrue();
-        test.assertNotTerminated();
-        test.assertNever(1);
+        test.assertNotComplete();
+        test.assertNoValues();
     }
 
     @Test
@@ -173,7 +173,7 @@ public class UniToPublisherTest {
         Publisher<Integer> publisher = Uni.createFrom().item(1).convert().toPublisher();
         assertThat(publisher).isNotNull();
         TestSubscriber<Integer> test = Flowable.fromPublisher(publisher).test(0);
-        test.assertSubscribed();
+        assertThat(test.hasSubscription()).isTrue();
         test.request(1);
         // Immediate emission, so cancel is called after the emission.
         test.cancel();
