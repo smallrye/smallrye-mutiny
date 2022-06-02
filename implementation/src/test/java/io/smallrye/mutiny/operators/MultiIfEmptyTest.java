@@ -11,7 +11,7 @@ import java.util.function.Supplier;
 import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
 
-import io.reactivex.Flowable;
+import io.reactivex.rxjava3.core.Flowable;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.helpers.test.AssertSubscriber;
 

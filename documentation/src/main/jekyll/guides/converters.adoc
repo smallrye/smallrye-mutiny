@@ -22,13 +22,6 @@ Pick the right one and add it to your project:
   <version>{{ site.data.versions.mutiny_version }}</version>
 </dependency>
 
-<!-- Mutiny <-> RX Java 2 -->
-<dependency>
-  <groupId>io.smallrye.reactive</groupId>
-  <artifactId>mutiny-rxjava</artifactId>
-  <version>{{ site.data.versions.mutiny_version }}</version>
-</dependency>
-
 <!-- Mutiny <-> RX Java 3 -->
 <dependency>
   <groupId>io.smallrye.reactive</groupId>
@@ -104,7 +97,7 @@ include::{include_dir}/ReactorTest.java[tag=uni-export]
 include::{include_dir}/ReactorTest.java[tag=multi-export]
 ----
 
-== Integration with RX Java 2 and RX Java 3
+== Integration with RX Java 3
 
 RxJava is another popular reactive programming library.
 It offers 5 types: `Completable` (no item), `Single` (one item), `Maybe` (0 or 1 item), `Observable` (multiple items), `Flowable` (multiple items, implements Reactive Stream `Publisher`).
@@ -113,10 +106,6 @@ To use the RxJava <-> Mutiny converters, add the following imports to your class
 
 [source, java, indent=0]
 ----
-// RX Java 2 - provided by mutiny-rxjava
-import io.smallrye.mutiny.converters.multi.MultiRxConverters;
-import io.smallrye.mutiny.converters.uni.UniRxConverters;
-// RX Java 3 - provided by mutiny-rxjava3
 import io.smallrye.mutiny.converters.multi.MultiRx3Converters;
 import io.smallrye.mutiny.converters.uni.UniRx3Converters;
 ----

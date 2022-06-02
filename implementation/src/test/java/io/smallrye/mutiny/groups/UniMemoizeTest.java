@@ -20,7 +20,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.ResourceAccessMode;
 import org.junit.jupiter.api.parallel.ResourceLock;
 
-import io.reactivex.processors.UnicastProcessor;
+import io.reactivex.rxjava3.processors.UnicastProcessor;
 import io.smallrye.mutiny.Context;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.TimeoutException;

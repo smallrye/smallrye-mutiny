@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
-import io.reactivex.processors.PublishProcessor;
+import io.reactivex.rxjava3.processors.PublishProcessor;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.helpers.queues.Queues;
 import io.smallrye.mutiny.helpers.test.AssertSubscriber;
