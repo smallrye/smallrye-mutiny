@@ -1,6 +1,11 @@
 package io.smallrye.mutiny.infrastructure;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -162,5 +167,33 @@ public class UniInterceptorTest {
         };
 
         assertThat(itcp.ordinal()).isEqualTo(25);
+    }
+
+    @Test
+    public void workerPoolNoInterceptor() {
+        AtomicInteger probe = new AtomicInteger();
+        Infrastructure.getDefaultWorkerPool().submit(probe::incrementAndGet);
+        await().atMost(1, TimeUnit.SECONDS).untilAtomic(probe, greaterThanOrEqualTo(1));
+        assertThat(probe).hasValue(1);
+    }
+
+    @Test
+    public void workerPoolWithInterceptor() {
+        AtomicInteger decoratorProbe = new AtomicInteger();
+        AtomicInteger runnableProbe = new AtomicInteger();
+        InfrastructureHelper.registerCallbackDecorator(new CallbackDecorator() {
+            @Override
+            public Runnable decorate(Runnable runnable) {
+                return () -> {
+                    runnable.run();
+                    decoratorProbe.incrementAndGet();
+                };
+            }
+        });
+        Infrastructure.getDefaultWorkerPool().execute(runnableProbe::incrementAndGet);
+        await().atMost(1, TimeUnit.SECONDS).untilAtomic(runnableProbe, greaterThanOrEqualTo(1));
+        await().atMost(1, TimeUnit.SECONDS).untilAtomic(decoratorProbe, greaterThanOrEqualTo(1));
+        assertThat(runnableProbe).hasValue(1);
+        assertThat(decoratorProbe).hasValue(1);
     }
 }

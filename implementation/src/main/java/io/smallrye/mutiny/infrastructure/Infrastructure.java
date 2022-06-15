@@ -153,6 +153,14 @@ public class Infrastructure {
         return current;
     }
 
+    public static <V> Callable<V> decorate(Callable<V> callable) {
+        Callable<V> current = callable;
+        for (CallbackDecorator interceptor : CALLBACK_DECORATORS) {
+            current = interceptor.decorate(current);
+        }
+        return current;
+    }
+
     public static <T1, T2> BiConsumer<T1, T2> decorate(BiConsumer<T1, T2> consumer) {
         BiConsumer<T1, T2> current = consumer;
         for (CallbackDecorator interceptor : CALLBACK_DECORATORS) {
@@ -286,7 +294,7 @@ public class Infrastructure {
 
     /**
      * Defines a custom dropped exception handler.
-     * 
+     *
      * @param handler the handler, must not be {@code null} and must not throw an exception or it will also be lost.
      */
     public static void setDroppedExceptionHandler(Consumer<Throwable> handler) {
@@ -361,7 +369,7 @@ public class Infrastructure {
 
     /**
      * Log from an operator.
-     *
+     * <p>
      * This method should never be called directly but only from {@link Multi#log(String)} and {@link Uni#log(String)}.
      *
      * @param identifier the event identifier
@@ -375,7 +383,7 @@ public class Infrastructure {
 
     /**
      * Defines operator logging behavior for {@link Multi#log(String)} and {@link Uni#log(String)}.
-     * 
+     *
      * @param operatorLogger the new operator logger
      */
     public static void setOperatorLogger(OperatorLogger operatorLogger) {
@@ -395,7 +403,7 @@ public class Infrastructure {
 
         /**
          * Actual logging behavior.
-         * 
+         *
          * @param identifier the event identifier
          * @param event the event as a string
          * @param value the value, if any or {@code null}

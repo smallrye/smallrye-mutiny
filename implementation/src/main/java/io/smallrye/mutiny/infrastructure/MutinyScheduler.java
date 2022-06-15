@@ -1,6 +1,9 @@
 package io.smallrye.mutiny.infrastructure;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.*;
+import java.util.stream.Collectors;
 
 /**
  * Implementation of {@link ScheduledThreadPoolExecutor} delegating the execution of the task to a configured
@@ -26,6 +29,58 @@ public class MutinyScheduler extends ScheduledThreadPoolExecutor {
     @Override
     protected <V> RunnableScheduledFuture<V> decorateTask(Callable<V> callable, RunnableScheduledFuture<V> task) {
         return new DecoratedRunnableTask<>(task, executor);
+    }
+
+    @Override
+    public ScheduledFuture<?> schedule(Runnable command, long delay, TimeUnit unit) {
+        return super.schedule(Infrastructure.decorate(command), delay, unit);
+    }
+
+    @Override
+    public <V> ScheduledFuture<V> schedule(Callable<V> callable, long delay, TimeUnit unit) {
+        return super.schedule(Infrastructure.decorate(callable), delay, unit);
+    }
+
+    // Not overriding the `submit` methods from `ScheduledThreadPoolExecutor` as they delegate to `schedule`,
+    // hence we could have double interceptors.
+
+    @Override
+    public ScheduledFuture<?> scheduleAtFixedRate(Runnable command, long initialDelay, long period, TimeUnit unit) {
+        return super.scheduleAtFixedRate(Infrastructure.decorate(command), initialDelay, period, unit);
+    }
+
+    @Override
+    public ScheduledFuture<?> scheduleWithFixedDelay(Runnable command, long initialDelay, long delay, TimeUnit unit) {
+        return super.scheduleWithFixedDelay(Infrastructure.decorate(command), initialDelay, delay, unit);
+    }
+
+    @Override
+    public <T> T invokeAny(Collection<? extends Callable<T>> tasks) throws InterruptedException, ExecutionException {
+        return super.invokeAny(decorateTasks(tasks));
+    }
+
+    private <T> List<Callable<T>> decorateTasks(Collection<? extends Callable<T>> tasks) {
+        return tasks
+                .stream()
+                .map(Infrastructure::decorate)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public <T> T invokeAny(Collection<? extends Callable<T>> tasks, long timeout, TimeUnit unit)
+            throws InterruptedException, ExecutionException, TimeoutException {
+        return super.invokeAny(decorateTasks(tasks), timeout, unit);
+    }
+
+    @Override
+    public <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks) throws InterruptedException {
+        return super.invokeAll(decorateTasks(tasks));
+    }
+
+    @Override
+    public <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks, long timeout, TimeUnit unit)
+            throws InterruptedException {
+        return super.invokeAll(decorateTasks(tasks), timeout, unit);
     }
 
     static class DecoratedRunnableTask<V> implements RunnableScheduledFuture<V> {
@@ -55,7 +110,9 @@ public class MutinyScheduler extends ScheduledThreadPoolExecutor {
 
         @Override
         public void run() {
-            executor.execute(origin);
+            if (!isCancelled()) {
+                executor.execute(origin);
+            }
         }
 
         @Override
