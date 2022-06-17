@@ -77,7 +77,7 @@ public class Infrastructure {
             DEFAULT_SCHEDULER.shutdownNow();
         }
         DEFAULT_EXECUTOR = s;
-        DEFAULT_SCHEDULER = new MutinyScheduler(s);
+        DEFAULT_SCHEDULER = (s instanceof ScheduledExecutorService) ? (ScheduledExecutorService) s : new MutinyScheduler(s);
     }
 
     public static ScheduledExecutorService getDefaultWorkerPool() {
@@ -286,7 +286,7 @@ public class Infrastructure {
 
     /**
      * Defines a custom dropped exception handler.
-     * 
+     *
      * @param handler the handler, must not be {@code null} and must not throw an exception or it will also be lost.
      */
     public static void setDroppedExceptionHandler(Consumer<Throwable> handler) {
@@ -361,7 +361,7 @@ public class Infrastructure {
 
     /**
      * Log from an operator.
-     *
+     * <p>
      * This method should never be called directly but only from {@link Multi#log(String)} and {@link Uni#log(String)}.
      *
      * @param identifier the event identifier
@@ -375,7 +375,7 @@ public class Infrastructure {
 
     /**
      * Defines operator logging behavior for {@link Multi#log(String)} and {@link Uni#log(String)}.
-     * 
+     *
      * @param operatorLogger the new operator logger
      */
     public static void setOperatorLogger(OperatorLogger operatorLogger) {
@@ -395,7 +395,7 @@ public class Infrastructure {
 
         /**
          * Actual logging behavior.
-         * 
+         *
          * @param identifier the event identifier
          * @param event the event as a string
          * @param value the value, if any or {@code null}
