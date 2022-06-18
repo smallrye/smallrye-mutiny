@@ -153,6 +153,14 @@ public class Infrastructure {
         return current;
     }
 
+    public static <V> Callable<V> decorate(Callable<V> callable) {
+        Callable<V> current = callable;
+        for (CallbackDecorator interceptor : CALLBACK_DECORATORS) {
+            current = interceptor.decorate(current);
+        }
+        return current;
+    }
+
     public static <T1, T2> BiConsumer<T1, T2> decorate(BiConsumer<T1, T2> consumer) {
         BiConsumer<T1, T2> current = consumer;
         for (CallbackDecorator interceptor : CALLBACK_DECORATORS) {
