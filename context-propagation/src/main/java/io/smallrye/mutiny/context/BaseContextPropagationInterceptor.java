@@ -1,5 +1,6 @@
 package io.smallrye.mutiny.context;
 
+import java.util.concurrent.Callable;
 import java.util.concurrent.Executor;
 import java.util.function.*;
 
@@ -66,6 +67,15 @@ public abstract class BaseContextPropagationInterceptor implements CallbackDecor
             return runnable;
         }
         return context.contextualRunnable(runnable);
+    }
+
+    @Override
+    public <V> Callable<V> decorate(Callable<V> callable) {
+        SmallRyeThreadContext context = getThreadContext();
+        if (context.isContextualized(callable)) {
+            return callable;
+        }
+        return context.contextualCallable(callable);
     }
 
     @Override

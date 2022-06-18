@@ -1,5 +1,6 @@
 package io.smallrye.mutiny.infrastructure;
 
+import java.util.concurrent.Callable;
 import java.util.function.*;
 
 import io.smallrye.mutiny.tuples.Functions;
@@ -8,7 +9,7 @@ import io.smallrye.mutiny.tuples.Functions;
  * Intercept user callbacks.
  * Decorators are called when the user passes a callback to Mutiny and so decorators can modify the passed callback.
  * <p>
- * The default behavior is to returns the user's callback, unchanged.
+ * The default behavior is to return the user's callback, unchanged.
  * <p>
  * Decorators must not transform a user callback into {@code null}.
  */
@@ -54,6 +55,17 @@ public interface CallbackDecorator extends MutinyInterceptor {
      */
     default Runnable decorate(Runnable runnable) {
         return runnable;
+    }
+
+    /**
+     * Allows decorating a {@link Callable}.
+     *
+     * @param callable the callable
+     * @return the decorated callable
+     * @param <V> the callable return type
+     */
+    default <V> Callable<V> decorate(Callable<V> callable) {
+        return callable;
     }
 
     /**
