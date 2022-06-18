@@ -48,7 +48,14 @@ Mutiny is based on the Reactive Streams specification, and so it can be integrat
 
 In addition, Mutiny offers converters to interact with other popular libraries and https://kotlinlang.org/[Kotlin].
 
-=== ✅ Branching policy
+=== 📦  Build instructions
+
+Mutiny is built with Apache Maven, so all you need is:
+
+[source,bash]
+----
+./mvnw install
+----
 
 [cols="4", options="header"]
 |===
@@ -56,19 +63,6 @@ In addition, Mutiny offers converters to interact with other popular libraries a
 | `main` | 2.x _(in development)_ | Java 11, Reactive Streams 1.0.4 | Reactive Streams TCK 1.0.4
 | `1.x` | 1.6.x _(backports, bug fixes)_ | Java 8, Reactive Streams 1.0.4 | Reactive Streams TCK 1.0.4
 |===
-
-=== 📦  Build instructions
-
-Mutiny is built with Apache Maven, so all you need is:
-
-[source,bash]
-----
-mvn install
-----
-
-We currently support Java 8 and beyond.
-
-Mutiny passes the https://github.com/reactive-streams/reactive-streams-jvm[Reactive Streams TCK].
 
 === ✨  Contributing
 
