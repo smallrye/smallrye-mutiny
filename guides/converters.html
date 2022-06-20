@@ -95,21 +95,14 @@ Pick the right one and add it to your project:</p>
 &lt;dependency&gt;
   &lt;groupId&gt;io.smallrye.reactive&lt;/groupId&gt;
   &lt;artifactId&gt;mutiny-reactor&lt;/artifactId&gt;
-  &lt;version&gt;1.5.0&lt;/version&gt;
-&lt;/dependency&gt;
-
-&lt;!-- Mutiny &lt;-&gt; RX Java 2 --&gt;
-&lt;dependency&gt;
-  &lt;groupId&gt;io.smallrye.reactive&lt;/groupId&gt;
-  &lt;artifactId&gt;mutiny-rxjava&lt;/artifactId&gt;
-  &lt;version&gt;1.5.0&lt;/version&gt;
+  &lt;version&gt;1.6.0&lt;/version&gt;
 &lt;/dependency&gt;
 
 &lt;!-- Mutiny &lt;-&gt; RX Java 3 --&gt;
 &lt;dependency&gt;
   &lt;groupId&gt;io.smallrye.reactive&lt;/groupId&gt;
   &lt;artifactId&gt;mutiny-rxjava3&lt;/artifactId&gt;
-  &lt;version&gt;1.5.0&lt;/version&gt;
+  &lt;version&gt;1.6.0&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -207,7 +200,7 @@ Flux&lt;String&gt; flux = multi.convert().with(MultiReactorConverters.toFlux());
 </div>
 </div>
 <div class="sect1">
-<h2 id="integration-with-rx-java-2-and-rx-java-3"><a class="anchor" href="#integration-with-rx-java-2-and-rx-java-3"></a>Integration with RX Java 2 and RX Java 3</h2>
+<h2 id="integration-with-rx-java-3"><a class="anchor" href="#integration-with-rx-java-3"></a>Integration with RX Java 3</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>RxJava is another popular reactive programming library.
@@ -218,11 +211,7 @@ It offers 5 types: <code>Completable</code> (no item), <code>Single</code> (one 
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">// RX Java 2 - provided by mutiny-rxjava
-import io.smallrye.mutiny.converters.multi.MultiRxConverters;
-import io.smallrye.mutiny.converters.uni.UniRxConverters;
-// RX Java 3 - provided by mutiny-rxjava3
-import io.smallrye.mutiny.converters.multi.MultiRx3Converters;
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">import io.smallrye.mutiny.converters.multi.MultiRx3Converters;
 import io.smallrye.mutiny.converters.uni.UniRx3Converters;</code></pre>
 </div>
 </div>
@@ -238,7 +227,7 @@ However, <code>Observable</code> does not implement <code>Publisher</code> and s
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Multi&lt;T&gt; multiFromObservable = Multi.createFrom()
-        .converter(MultiRxConverters.fromObservable(), observable);</code></pre>
+        .converter(MultiRx3Converters.fromObservable(), observable);</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -258,13 +247,13 @@ However, <code>Observable</code> does not implement <code>Publisher</code> and s
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Multi&lt;Void&gt; multiFromCompletable = Multi.createFrom()
-        .converter(MultiRxConverters.fromCompletable(), completable);
+        .converter(MultiRx3Converters.fromCompletable(), completable);
 Multi&lt;T&gt; multiFromSingle = Multi.createFrom()
-        .converter(MultiRxConverters.fromSingle(), single);
+        .converter(MultiRx3Converters.fromSingle(), single);
 Multi&lt;T&gt; multiFromMaybe = Multi.createFrom()
-        .converter(MultiRxConverters.fromMaybe(), maybe);
+        .converter(MultiRx3Converters.fromMaybe(), maybe);
 Multi&lt;T&gt; multiFromEmptyMaybe = Multi.createFrom()
-        .converter(MultiRxConverters.fromMaybe(), emptyMaybe);</code></pre>
+        .converter(MultiRx3Converters.fromMaybe(), emptyMaybe);</code></pre>
 </div>
 </div>
 <div class="ulist">
@@ -293,7 +282,7 @@ If the <code>Maybe</code> is empty, then the created <code>Multi</code> emits th
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Uni&lt;T&gt; uniFromObservable = Uni.createFrom().converter(
-        UniRxConverters.fromObservable(), observable);</code></pre>
+        UniRx3Converters.fromObservable(), observable);</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -317,13 +306,13 @@ If the <code>Flowable</code> or <code>Observable</code> completes without items,
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Uni&lt;Void&gt; multiFromCompletable = Uni.createFrom()
-        .converter(UniRxConverters.fromCompletable(), completable);
+        .converter(UniRx3Converters.fromCompletable(), completable);
 Uni&lt;T&gt; multiFromSingle = Uni.createFrom()
-        .converter(UniRxConverters.fromSingle(), single);
+        .converter(UniRx3Converters.fromSingle(), single);
 Uni&lt;T&gt; multiFromMaybe = Uni.createFrom()
-        .converter(UniRxConverters.fromMaybe(), maybe);
+        .converter(UniRx3Converters.fromMaybe(), maybe);
 Uni&lt;T&gt; multiFromEmptyMaybe = Uni.createFrom()
-        .converter(UniRxConverters.fromMaybe(), emptyMaybe);</code></pre>
+        .converter(UniRx3Converters.fromMaybe(), emptyMaybe);</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -339,18 +328,18 @@ The <code>Maybe</code> to <code>Uni</code> conversion emits a <code>null</code> 
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Completable completable = multi.convert()
-        .with(MultiRxConverters.toCompletable());
+        .with(MultiRx3Converters.toCompletable());
 Single&lt;Optional&lt;T&gt;&gt; single = multi.convert()
-        .with(MultiRxConverters.toSingle());
+        .with(MultiRx3Converters.toSingle());
 Single&lt;T&gt; single2 = multi.convert()
-        .with(MultiRxConverters
+        .with(MultiRx3Converters
                 .toSingle().onEmptyThrow(() -&gt; new Exception("D'oh!")));
 Maybe&lt;T&gt; maybe = multi.convert()
-        .with(MultiRxConverters.toMaybe());
+        .with(MultiRx3Converters.toMaybe());
 Observable&lt;T&gt; observable = multi.convert()
-        .with(MultiRxConverters.toObservable());
+        .with(MultiRx3Converters.toObservable());
 Flowable&lt;T&gt; flowable = multi.convert()
-        .with(MultiRxConverters.toFlowable());</code></pre>
+        .with(MultiRx3Converters.toFlowable());</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -382,12 +371,12 @@ You can also create a <code>Flowable</code> from a <code>Multi</code> using: <co
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Completable completable = uni.convert().with(UniRxConverters.toCompletable());
-Single&lt;Optional&lt;T&gt;&gt; single = uni.convert().with(UniRxConverters.toSingle());
-Single&lt;T&gt; single2 = uni.convert().with(UniRxConverters.toSingle().failOnNull());
-Maybe&lt;T&gt; maybe = uni.convert().with(UniRxConverters.toMaybe());
-Observable&lt;T&gt; observable = uni.convert().with(UniRxConverters.toObservable());
-Flowable&lt;T&gt; flowable = uni.convert().with(UniRxConverters.toFlowable());</code></pre>
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">Completable completable = uni.convert().with(UniRx3Converters.toCompletable());
+Single&lt;Optional&lt;T&gt;&gt; single = uni.convert().with(UniRx3Converters.toSingle());
+Single&lt;T&gt; single2 = uni.convert().with(UniRx3Converters.toSingle().failOnNull());
+Maybe&lt;T&gt; maybe = uni.convert().with(UniRx3Converters.toMaybe());
+Observable&lt;T&gt; observable = uni.convert().with(UniRx3Converters.toObservable());
+Flowable&lt;T&gt; flowable = uni.convert().with(UniRx3Converters.toFlowable());</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -421,7 +410,7 @@ For <code>Flowable</code> and <code>Observable,</code> if the <code>Uni</code> e
 <li><a href="#using-converter-instead-of-reactive-streams">Using converter instead of Reactive Streams</a></li>
 </ul>
 </li>
-<li><a href="#integration-with-rx-java-2-and-rx-java-3">Integration with RX Java 2 and RX Java 3</a>
+<li><a href="#integration-with-rx-java-3">Integration with RX Java 3</a>
 <ul class="sectlevel2">
 <li><a href="#converting-an-observable-or-a-flowable-into-a-multi">Converting an Observable or a Flowable into a Multi</a></li>
 <li><a href="#converting-a-completable-single-or-maybe-into-a-multi">Converting a Completable, Single or Maybe into a Multi</a></li>
@@ -490,7 +479,7 @@ For <code>Flowable</code> and <code>Observable,</code> if the <code>Uni</code> e
                     <a href="https://www.redhat.com/en/about/privacy-policy">Privacy Policy</a>
                 </p>
                 <p>
-                     Site last generated: May 22, 2022
+                     Site last generated: Jun 20, 2022
                 </p>
             </div>
         </div>
