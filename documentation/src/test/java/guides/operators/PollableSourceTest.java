@@ -21,7 +21,7 @@ public class PollableSourceTest {
 
     @Test
     public void test(SystemOut out) { // NOSONAR
-        // tag::code[]
+        // <code>
         PollableDataSource source = new PollableDataSource();
         // First creates a uni that emit the polled item.
         // Because `poll` blocks, let's use a specific executor
@@ -31,20 +31,20 @@ public class PollableSourceTest {
         Multi<String> stream = pollItemFromSource.repeat().indefinitely();
 
         Cancellable cancellable = stream.subscribe().with(item -> System.out.println("Polled item: " + item));
-        // end::code[]
+        // </code>
         await().until(() -> source.counter.get() >= 4);
-        // tag::code[]
+        // <code>
         // ... later ..
         // when you don't want the items anymore, cancel the subscription and close the source if needed.
         cancellable.cancel();
         source.close();
-        // end::code[]
+        // </code>
     }
 
     @SuppressWarnings("Convert2MethodRef")
     @Test
     public void test2(SystemOut out) { // NOSONAR
-        // tag::code2[]
+        // <code2>
         PollableDataSource source = new PollableDataSource();
         Multi<String> stream = Multi.createBy().repeating()
                     .supplier(source::poll)
@@ -52,7 +52,7 @@ public class PollableSourceTest {
                 .runSubscriptionOn(executor);
 
         stream.subscribe().with(item -> System.out.println("Polled item: " + item));
-        // end::code2[]
+        // </code2>
         await().until(() -> source.counter.get() >= 5);
     }
 

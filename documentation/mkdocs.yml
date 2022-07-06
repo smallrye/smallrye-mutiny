@@ -1,0 +1,139 @@
+site_name: SmallRye Mutiny
+repo_url: https://github.com/smallrye/smallrye-mutiny
+docs_dir: docs
+edit_uri: edit/main/documentation/docs
+
+nav:
+  - 'index.md'
+  - 'Tutorials':
+      - 'tutorials/getting-mutiny.md'
+      - 'tutorials/hello-mutiny.md'
+      - 'tutorials/creating-uni-pipelines.md'
+      - 'tutorials/creating-multi-pipelines.md'
+      - 'tutorials/observing-events.md'
+      - 'tutorials/transforming-items.md'
+      - 'tutorials/transforming-items-asynchronously.md'
+      - 'tutorials/handling-failures.md'
+      - 'tutorials/retrying.md'
+  - 'Guides':
+      - 'guides/imperative-to-reactive.md'
+      - 'guides/reactive-to-imperative.md'
+      - 'guides/unchecked-exceptions.md'
+      - 'guides/filtering-items.md'
+      - 'guides/collecting-items.md'
+      - 'guides/take-skip-items.md'
+      - 'guides/eliminate-duplicates-and-repetitions.md'
+      - 'guides/handling-null.md'
+      - 'guides/handling-timeouts.md'
+      - 'guides/delaying-events.md'
+      - 'guides/pagination.md'
+      - 'guides/polling.md'
+      - 'guides/emission-threads.md'
+      - 'guides/emit-on-vs-run-subscription-on.md'
+      - 'guides/completion-stage.md'
+      - 'guides/rx.md'
+      - 'guides/shortcut-methods.md'
+      - 'guides/merging-and-concatenating-streams.md'
+      - 'guides/combining-items.md'
+      - 'guides/joining-unis.md'
+      - 'guides/converters.md'
+      - 'guides/testing.md'
+      - 'guides/custom-operators.md'
+      - 'guides/dropped-exceptions.md'
+      - 'guides/framework-integration.md'
+      - 'guides/hot-streams.md'
+      - 'guides/integrate-a-non-reactive-source.md'
+      - 'guides/kotlin.md'
+      - 'guides/logging.md'
+      - 'guides/context-passing.md'
+      - 'guides/replaying-multis.md'
+      - 'guides/controlling-demand.md'
+  - 'Reference':
+      - 'reference/why-is-asynchronous-important.md'
+      - 'reference/what-is-reactive-programming.md'
+      - 'reference/what-makes-mutiny-different.md'
+      - 'reference/uni-and-multi.md'
+      - 'reference/publications.md'
+      - 'Tags index': 'tags-index.md'
+  - 'API': 'https://javadoc.io/doc/io.smallrye.reactive/mutiny/latest/index.html'
+  - 'Discussions/Questions': 'https://github.com/smallrye/smallrye-mutiny/discussions'
+
+theme:
+  name: material
+  logo: assets/logo-white.svg
+  font:
+    text: Roboto
+    code: JetBrains Mono
+  icon:
+    repo: fontawesome/brands/github
+  favicon: assets/logo-white.svg
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: cyan
+      accent: red
+      toggle:
+        icon: material/lightbulb-night
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: black
+      accent: orange
+      toggle:
+        icon: material/lightbulb-on
+        name: Switch to light mode
+  features:
+    - navigation.instant
+    - navigation.indexes
+    - navigation.sections
+    - navigation.tracking
+    - navigation.tabs
+    - navigation.tabs.sticky
+  custom_dir: mkdocs-customizations/overrides
+
+markdown_extensions:
+  - toc:
+      permalink: '#'
+  - admonition
+  - smarty
+  - attr_list
+  - md_in_html
+  - meta
+  - tables
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.snippets
+  - pymdownx.inlinehilite
+  - pymdownx.details
+  - pymdownx.smartsymbols
+  - pymdownx.betterem
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.emoji:
+      emoji_index: !!python/name:materialx.emoji.twemoji
+      emoji_generator: !!python/name:materialx.emoji.to_svg
+
+plugins:
+  - tags:
+      tags_file: tags-index.md
+  - search
+  - macros:
+      verbose: true
+      module_name: mkdocs-customizations/macros/docissimo
+      include_dir: mkdocs-customizations/macros
+
+extra_css:
+  - assets/extra.css
+
+extra:
+  snippet_dir: src/test
+  attributes_path: attributes.yaml
+  javadoc_artifact: io.smallrye.reactive/smallrye-mutiny
+  manifest: manifest.webmanifest
+  version:
+    provider: mike

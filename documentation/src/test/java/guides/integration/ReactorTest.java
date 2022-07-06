@@ -20,10 +20,10 @@ public class ReactorTest<T> {
         Flux<T> flux = getFlux();
         Mono<T> mono = getMono();
 
-        // tag::reactor-multi-create[]
+        // <reactor-multi-create>
         Multi<T> multiFromFlux = Multi.createFrom().publisher(flux);
         Multi<T> multiFromMono = Multi.createFrom().publisher(mono);
-        // end::reactor-multi-create[]
+        // </reactor-multi-create>
 
         List<String> list = multiFromFlux
                 .onItem().transform(Object::toString)
@@ -42,10 +42,10 @@ public class ReactorTest<T> {
         Flux<T> flux = getFlux();
         Mono<T> mono = getMono();
 
-        // tag::reactor-uni-create[]
+        // <reactor-uni-create>
         Uni<T> uniFromFlux = Uni.createFrom().publisher(flux);
         Uni<T> uniFromMono = Uni.createFrom().publisher(mono);
-        // end::reactor-uni-create[]
+        // </reactor-uni-create>
 
         String s = uniFromFlux
                 .onItem().transform(Object::toString)
@@ -62,10 +62,10 @@ public class ReactorTest<T> {
     public void testCreationFromMulti() {
         Multi<T> multi = getMulti();
 
-        // tag::reactor-create-multi[]
+        // <reactor-create-multi>
         Flux<T> fluxFromMulti = Flux.from(multi);
         Mono<T> monoFromMulti = Mono.from(multi);
-        // end::reactor-create-multi[]
+        // </reactor-create-multi>
 
         List<String> list = fluxFromMulti
                 .map(Object::toString)
@@ -83,10 +83,10 @@ public class ReactorTest<T> {
     public void testCreationFromUni() {
         Uni<T> uni = getUni();
 
-        // tag::reactor-create-uni[]
+        // <reactor-create-uni>
         Flux<T> fluxFromUni = uni.convert().with(UniReactorConverters.toFlux());
         Mono<T> monoFromUni = uni.convert().with(UniReactorConverters.toMono());
-        // end::reactor-create-uni[]
+        // </reactor-create-uni>
 
         List<String> list = fluxFromUni
                 .map(Object::toString)
@@ -123,10 +123,10 @@ public class ReactorTest<T> {
     @Test
     public void uniExportToReactor() {
         Uni<String> uni = Uni.createFrom().item("hello");
-        // tag::uni-export[]
+        // <uni-export>
         Mono<String> mono = uni.convert().with(UniReactorConverters.toMono());
         Flux<String> flux = uni.convert().with(UniReactorConverters.toFlux());
-        // end::uni-export[]
+        // </uni-export>
 
         assertThat(mono.block()).isEqualTo("hello");
         assertThat(flux.blockFirst()).isEqualTo("hello");
@@ -135,10 +135,10 @@ public class ReactorTest<T> {
     @Test
     public void multiExportToReactor() {
         Multi<String> multi = Multi.createFrom().items("hello", "bonjour");
-        // tag::multi-export[]
+        // <multi-export>
         Mono<String> mono = multi.convert().with(MultiReactorConverters.toMono());
         Flux<String> flux = multi.convert().with(MultiReactorConverters.toFlux());
-        // end::multi-export[]
+        // </multi-export>
 
         assertThat(mono.block()).isEqualTo("hello");
         assertThat(flux.toIterable()).containsExactly("hello", "bonjour");

@@ -15,7 +15,7 @@ public class UniMultiComparisonTest {
 
     @Test
     public void comparison(SystemOut out) {
-        //tag::code[]
+        //<code>
         Multi.createFrom().items("a", "b", "c")
           .onItem().transform(String::toUpperCase)
           .subscribe().with(
@@ -29,14 +29,14 @@ public class UniMultiComparisonTest {
             item -> System.out.println("Received: " + item),
             failure -> System.out.println("Failed with " + failure)
         );
-        //end::code[]
+        //</code>
 
         await().until(() -> out.get().contains("Received: C"));
     }
 
     @Test
     public void conversion(SystemOut out) {
-        //tag::conversion[]
+        //<conversion>
         Multi.createFrom().items("a", "b", "c")
           .onItem().transform(String::toUpperCase)
           // Convert the multi to uni
@@ -56,7 +56,7 @@ public class UniMultiComparisonTest {
             failure -> System.out.println("Failed with " + failure)
         );
 
-        //end::conversion[]
+        //</conversion>
 
         await().until(() -> out.get().contains("Received: A"));
     }

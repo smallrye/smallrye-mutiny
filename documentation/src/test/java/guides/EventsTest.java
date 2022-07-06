@@ -20,7 +20,7 @@ public class EventsTest {
     @SuppressWarnings("Convert2MethodRef")
     @Test
     public void test(SystemOut out) {
-        // tag::code[]
+        // <code>
         Multi<String> source = Multi.createFrom().items("a", "b", "c");
         source
           .onItem() // Called for every item
@@ -37,16 +37,16 @@ public class EventsTest {
             .invoke(n -> log("Downstream requested " + n + " items"))
           .subscribe()
             .with(item -> log("Subscriber received " + item));
-        // end::code[]
+        // </code>
 
-        // tag::shortcut[]
+        // <shortcut>
         Multi<String> multi = Multi.createFrom().items("a", "b", "c");
         multi.invoke(item -> System.out.println("Received item " + item));
-        // end::shortcut[]
+        // </shortcut>
 
-        // tag::call-uni[]
+        // <call-uni>
         multi.call(item -> executeAnAsyncAction(item));
-        // end::call-uni[]
+        // </call-uni>
 
         await().until(() -> out.get().contains("We are subscribed!"));
         await().until(() -> out.get().contains("Downstream requested"));

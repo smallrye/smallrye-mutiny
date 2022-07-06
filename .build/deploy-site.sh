@@ -1,21 +1,14 @@
-#!/usr/bin/env bash
+#!/bin/bash
+set -euo pipefail
+IFS=$'\n\t'
+
 echo "🚧 Building..."
-cd documentation || exit 1
-cd src/main/jekyll && gem install bundler && bundle install && JEKYLL_ENV=production bundle exec jekyll build  && cd - || exit 1
-echo "🍺 Site generated in 'target/_site'"
 
-echo "🚧 Cloning web site in target/site"
-cd target || exit
-git clone -b gh-pages "https://${GITHUB_ACTOR}:${GITHUB_TOKEN}@github.com/smallrye/smallrye-mutiny.git" site
-echo "🚧 Copy content"
-# shellcheck disable=SC2216
-rm -rf site/*
-cp -R _site/* site
-echo "🚧 Pushing documentation"
-cd site || exit
-git add -A
-git commit -m "update site"
-git push origin gh-pages
+cd documentation
+PROJECT_VERSION=$(yq '.attributes.versions.mutiny' attributes.yaml)
+
+pipenv shell
+mike deploy --push --update-aliases $PROJECT_VERSION latest
+mike set-default --push latest
+
 echo "🍺 Site updated!"
-cd ../../..
-

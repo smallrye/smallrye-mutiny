@@ -14,7 +14,7 @@ public class InfrastructureTest {
 
     @Test
     public void test() {
-        // tag::infra[]
+        // <infra>
         Uni<Integer> uni1 = Uni.createFrom().item(1)
                 .emitOn(Infrastructure.getDefaultExecutor());
 
@@ -22,16 +22,16 @@ public class InfrastructureTest {
                 .onItem().delayIt()
                     .onExecutor(Infrastructure.getDefaultWorkerPool())
                     .by(Duration.ofMillis(10));
-        // end::infra[]
+        // </infra>
 
         assertThat(uni1.await().indefinitely()).isEqualTo(1);
         assertThat(uni2.await().indefinitely()).isEqualTo(2);
 
 
         Executor executor = Runnable::run;
-        // tag::set-infra[]
+        // <set-infra>
         Infrastructure.setDefaultExecutor(executor);
-        // end::set-infra[]
+        // </set-infra>
 
         assertThat(Infrastructure.getDefaultExecutor()).isEqualTo(executor);
         assertThat(Infrastructure.getDefaultWorkerPool()).isInstanceOf(MutinyScheduler.class);

@@ -11,7 +11,7 @@ public class UnicastProcessorTest {
 
     @Test
     public void test() {
-        // tag::code[]
+        // <code>
         UnicastProcessor<String> processor = UnicastProcessor.create();
         Multi<String> multi = processor
                 .onItem().transform(String::toUpperCase)
@@ -25,7 +25,7 @@ public class UnicastProcessorTest {
             processor.onComplete();
         }).start();
 
-        // end::code[]
+        // </code>
         AssertSubscriber<String> subscriber = AssertSubscriber.create(Long.MAX_VALUE);
         multi.subscribe().withSubscriber(subscriber)
                 .awaitCompletion()

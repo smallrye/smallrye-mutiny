@@ -18,7 +18,7 @@ public class EmitOnTest {
 
     @Test
     public void testEmitOn() {
-        // tag::example[]
+        // <example>
         Uni<String> uni = Uni.createFrom().<String>emitter(emitter ->
                 new Thread(() ->
                         emitter.complete("hello from "
@@ -29,7 +29,7 @@ public class EmitOnTest {
                     // Called on the emission thread.
                     return item.toUpperCase();
                 });
-        // end::example[]
+        // </example>
 
         assertThat(uni.await().indefinitely()).startsWith("HELLO FROM").doesNotContain("MAIN");
     }
@@ -40,7 +40,7 @@ public class EmitOnTest {
         Multi<String> multi = Multi.createFrom().items("a", "b", "c");
 
         ExecutorService executor = Executors.newFixedThreadPool(4);
-        // tag::code[]
+        // <code>
         String res0 = uni.emitOn(executor)
                 .onItem()
                 .invoke(s -> System.out.println("Received item `" + s + "` on thread: "
@@ -53,7 +53,7 @@ public class EmitOnTest {
                         + Thread.currentThread().getName()))
                 .collect().first()
                 .await().indefinitely();
-        // end::code[]
+        // </code>
 
         assertThat(out.get()).doesNotContain("main").contains("pool-").contains("hello", "a");
         assertThat(res0).isEqualTo("hello");

@@ -25,12 +25,12 @@ public class MergeConcatTest<T> {
 
     @Test
     public void testMerge() {
-        // tag::merge[]
+        // <merge>
         Multi<T> multi1 = getFirstMulti();
         Multi<T> multi2 = getSecondMulti();
 
         Multi<T> merged = Multi.createBy().merging().streams(multi1, multi2);
-        // end::merge[]
+        // </merge>
 
         List<Object> received = new CopyOnWriteArrayList<>();
         merged.subscribe().with(received::add);
@@ -40,12 +40,12 @@ public class MergeConcatTest<T> {
 
     @Test
     public void testConcat() {
-        // tag::concat[]
+        // <concat>
         Multi<T> multi1 = getFirstMulti();
         Multi<T> multi2 = getSecondMulti();
 
         Multi<T> concatenated = Multi.createBy().concatenating().streams(multi1, multi2);
-        // end::concat[]
+        // </concat>
 
         List<Object> received = new CopyOnWriteArrayList<>();
         concatenated.subscribe().with(received::add);
@@ -55,7 +55,7 @@ public class MergeConcatTest<T> {
 
     @Test
     public void testMergeTicks(SystemOut out) {
-        // tag::merge-ticks[]
+        // <merge-ticks>
         Multi<String> first = Multi.createFrom().ticks().every(Duration.ofMillis(10))
                 .onItem().transform(l -> "Stream 1 - " + l);
 
@@ -67,7 +67,7 @@ public class MergeConcatTest<T> {
 
         Cancellable cancellable = Multi.createBy().merging().streams(first, second, third)
                 .subscribe().with(s -> System.out.println("Got item: " + s));
-        // end::merge-ticks[]
+        // </merge-ticks>
 
         await().until(() -> out.get().contains("Got item: Stream 3 - 10"));
         cancellable.cancel();
@@ -75,7 +75,7 @@ public class MergeConcatTest<T> {
 
     @Test
     public void testConcatenateStrings(SystemOut out) {
-        // tag::concatenate-strings[]
+        // <concatenate-strings>
         Multi<String> first = Multi.createFrom().items("A1", "A2", "A3");
         Multi<String> second = Multi.createFrom().items("B1", "B2", "B3");
 
@@ -84,7 +84,7 @@ public class MergeConcatTest<T> {
 
         Multi.createBy().concatenating().streams(second, first)
                 .subscribe().with(item -> System.out.print(item)); // "B1B2B3A1A2A3"
-        // end::concatenate-strings[]
+        // </concatenate-strings>
 
         await().until(() -> out.get().contains("A1A2A3B1B2B3"));
         await().until(() -> out.get().contains("B1B2B3A1A2A3"));

@@ -10,7 +10,7 @@ public class ContextPassingTest {
 
     void contextManipulation() {
 
-        // tag::contextManipulation[]
+        // <contextManipulation>
         // Create a context using key / value pairs
         Context context = Context.of(
                 "X-CUSTOMER-ID", "1234",
@@ -30,7 +30,7 @@ public class ContextPassingTest {
 
         // Remove an entry
         context.delete("foo");
-        // end::contextManipulation[]
+        // </contextManipulation>
     }
 
     @Test
@@ -38,12 +38,12 @@ public class ContextPassingTest {
         Multi<Integer> pipeline = Multi.createFrom().range(1, 10);
         String customerId = "1234";
 
-        // tag::contextSampleUsage[]
+        // <contextSampleUsage>
         Context context = Context.of("X-CUSTOMER-ID", customerId);
 
         pipeline.withContext((multi, ctx) -> multi.onItem().transformToUniAndMerge(item -> makeRequest(item, ctx.get("X-CUSTOMER-ID"))))
                 .subscribe().with(context, item -> handleResponse(item), err -> handleFailure(err));
-        // end::contextSampleUsage[]
+        // </contextSampleUsage>
     }
 
     @Test
@@ -51,30 +51,30 @@ public class ContextPassingTest {
         Multi<Integer> pipeline = Multi.createFrom().range(1, 10);
         String customerId = "1234";
 
-        // tag::contextAttachedSampleUsage[]
+        // <contextAttachedSampleUsage>
         Context context = Context.of("X-CUSTOMER-ID", customerId);
 
         pipeline.attachContext()
                 .onItem().transformToUniAndMerge(item -> makeRequest(item.get(), item.context().get("X-CUSTOMER-ID")))
                 .subscribe().with(context, item -> handleResponse(item), err -> handleFailure(err));
-        // end::contextAttachedSampleUsage[]
+        // </contextAttachedSampleUsage>
     }
 
     @Test
     void builderUsage() {
         Context context = Context.of("X-SPAN-ID", "1234");
 
-        // tag::builderUsage[]
+        // <builderUsage>
         Uni.createFrom().context(ctx -> makeRequest("db1", ctx.get("X-SPAN-ID")))
                 .subscribe().with(context, item -> handleResponse(item), err -> handleFailure(err));
-        // end::builderUsage[]
+        // </builderUsage>
     }
 
     @Test
     void emitterUsage() {
         Context context = Context.of("X-SPAN-ID", "1234");
 
-        // tag::emitterUsage[]
+        // <emitterUsage>
         Multi.createFrom().emitter(emitter -> {
             String customerId = emitter.context().get("X-SPAN-ID");
             for (int i = 0; i < 10; i++) {
@@ -82,7 +82,7 @@ public class ContextPassingTest {
             }
             emitter.complete();
         });
-        // end::emitterUsage[]
+        // </emitterUsage>
     }
 
     private void handleFailure(Throwable err) {

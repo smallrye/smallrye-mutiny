@@ -22,7 +22,7 @@ public class RunSubscriptionOnTest {
     public void testRunSubscriptionOn(SystemOut out) {
         Executor executor = Infrastructure.getDefaultExecutor();
         AtomicBoolean completed = new AtomicBoolean();
-        //tag::runSubscriptionOn[]
+        //<runSubscriptionOn>
         Multi.createFrom().items(() -> {
             // called on a thread from the executor
             return retrieveItemsFromSource();
@@ -34,7 +34,7 @@ public class RunSubscriptionOnTest {
                 Throwable::printStackTrace,
                 () -> completed.set(true)
         );
-        //end::runSubscriptionOn[]
+        //</runSubscriptionOn>
 
         await().untilAtomic(completed, is(true));
     }
@@ -43,7 +43,7 @@ public class RunSubscriptionOnTest {
     public void testEmitOn(SystemOut out) {
         Executor executor = Infrastructure.getDefaultExecutor();
         AtomicBoolean completed = new AtomicBoolean();
-        //tag::emitOn[]
+        //<emitOn>
         Multi.createFrom().items(this::retrieveItemsFromSource)
                 .emitOn(executor)
                 .onItem().transform(this::applySomeOperation)
@@ -52,7 +52,7 @@ public class RunSubscriptionOnTest {
                 Throwable::printStackTrace,
                 () -> completed.set(true)
         );
-        //end::emitOn[]
+        //</emitOn>
 
         await().untilAtomic(completed, is(true));
     }

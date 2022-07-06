@@ -12,19 +12,19 @@ public class TestSubscribersTest {
 
     @Test
     void uni() {
-        // tag::uni[]
+        // <uni>
         Uni<Integer> uni = Uni.createFrom().item(63);
 
         UniAssertSubscriber<Integer> subscriber = uni
                 .subscribe().withSubscriber(UniAssertSubscriber.create());
 
         subscriber.assertCompleted().assertItem(63);
-        // end::uni[]
+        // </uni>
     }
 
     @Test
     void multi() {
-        // tag::multi[]
+        // <multi>
         Multi<Integer> multi = Multi.createFrom().range(1, 5)
                 .onItem().transform(n -> n * 10);
 
@@ -32,18 +32,18 @@ public class TestSubscribersTest {
 
         subscriber.assertCompleted()
                 .assertItems(10, 20, 30, 40);
-        // end::multi[]
+        // </multi>
     }
 
     @Test
     void failing() {
-        // tag::failing[]
+        // <failing>
         Multi<Object> multi = Multi.createFrom().failure(() -> new IOException("Boom"));
 
         AssertSubscriber<Object> subscriber = multi
                 .subscribe().withSubscriber(AssertSubscriber.create(10));
 
         subscriber.assertFailedWith(IOException.class, "Boom");
-        // end::failing[]
+        // </failing>
     }
 }

@@ -16,9 +16,9 @@ public class ReactiveToImperativeTest<T> {
     public void testAwait() {
         Uni<T> uni = (Uni<T>) Uni.createFrom().item(() -> 1);
 
-        // tag::await[]
+        // <await>
         T t = uni.await().indefinitely();
-        // end::await[]
+        // </await>
 
         assertThat(t).isEqualTo(1);
     }
@@ -27,9 +27,9 @@ public class ReactiveToImperativeTest<T> {
     public void testAwaitAtMost() {
         Uni<T> uni = (Uni<T>) Uni.createFrom().item(() -> 1);
 
-        // tag::atMost[]
+        // <atMost>
         T t = uni.await().atMost(Duration.ofSeconds(1));
-        // end::atMost[]
+        // </atMost>
 
         assertThat(t).isEqualTo(1);
     }
@@ -38,17 +38,17 @@ public class ReactiveToImperativeTest<T> {
     public void test() {
         Multi<T> multi = (Multi<T>) Multi.createFrom().items(1, 2, 3);
 
-        // tag::iterable[]
+        // <iterable>
         Iterable<T> iterable = multi.subscribe().asIterable();
         for (T item : iterable) {
             doSomethingWithItem(item);
         }
-        // end::iterable[]
+        // </iterable>
 
-        // tag::stream[]
+        // <stream>
         Stream<T> stream = multi.subscribe().asStream();
         stream.forEach(this::doSomethingWithItem);
-        // end::stream[]
+        // </stream>
     }
 
     private void doSomethingWithItem(T item) {

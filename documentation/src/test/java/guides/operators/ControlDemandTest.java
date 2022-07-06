@@ -16,12 +16,12 @@ class ControlDemandTest {
 
     @Test
     void pacing() {
-        // tag::pacing[]
+        // <pacing>
         FixedDemandPacer pacer = new FixedDemandPacer(25L, Duration.ofMillis(100L));
 
         Multi<Integer> multi = Multi.createFrom().range(0, 100)
                 .paceDemand().on(Infrastructure.getDefaultWorkerPool()).using(pacer);
-        // end::pacing[]
+        // </pacing>
 
         AssertSubscriber<Integer> sub = multi.subscribe().withSubscriber(AssertSubscriber.create());
         sub.awaitCompletion();
@@ -30,7 +30,7 @@ class ControlDemandTest {
 
     @Test
     void customPacer() {
-        // tag::custom-pacer[]
+        // <custom-pacer>
         DemandPacer pacer = new DemandPacer() {
 
             @Override
@@ -43,12 +43,12 @@ class ControlDemandTest {
                 return new Request(previousRequest.demand() * 2, previousRequest.delay().plus(10, ChronoUnit.MILLIS));
             }
         };
-        // end::custom-pacer[]
+        // </custom-pacer>
     }
 
     @Test
     void capping() {
-        // tag::capConstant[]
+        // <capConstant>
         AssertSubscriber<Integer> sub = AssertSubscriber.create();
 
         sub = Multi.createFrom().range(0, 100)
@@ -62,12 +62,12 @@ class ControlDemandTest {
         // Second batch: 25 + 25 = 50
         sub.request(25L).assertCompleted();
         assertThat(sub.getItems()).hasSize(100);
-        // end::capConstant[]
+        // </capConstant>
     }
 
     @Test
     void cappingFunction() {
-        // tag::capFunction[]
+        // <capFunction>
         AssertSubscriber<Integer> sub = AssertSubscriber.create();
 
         sub = Multi.createFrom().range(0, 100)
@@ -88,6 +88,6 @@ class ControlDemandTest {
 
         sub.request(Long.MAX_VALUE).assertCompleted();
         assertThat(sub.getItems()).hasSize(100);
-        // end::capFunction[]
+        // </capFunction>
     }
 }

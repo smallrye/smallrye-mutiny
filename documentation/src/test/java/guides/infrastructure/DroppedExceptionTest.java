@@ -19,20 +19,20 @@ public class DroppedExceptionTest {
 
     @Test
     public void droppedExceptionTest(SystemOut out) {
-        // tag::override-handler[]
+        // <override-handler>
         Infrastructure.setDroppedExceptionHandler(err ->
                 log(Level.SEVERE, "Mutiny dropped exception", err)
         );
-        // end::override-handler[]
+        // </override-handler>
 
-        // tag::code[]
+        // <code>
         Cancellable cancellable = Uni.createFrom()
                 .emitter(this::emitter)
                 .onCancellation().call(() -> Uni.createFrom().failure(new IOException("boom")))
                 .subscribe().with(this::onItem, this::onFailure);
 
         cancellable.cancel();
-        // end::code[]
+        // </code>
         Assertions.assertThat(out.get()).contains("Mutiny dropped exception");
     }
 

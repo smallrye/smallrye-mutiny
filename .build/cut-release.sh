@@ -42,11 +42,15 @@ else
 fi
 
 echo "Update website version to ${VERSION}"
-sed -ie "s/mutiny_version: .*/mutiny_version: ${VERSION}/g" documentation/src/main/jekyll/_data/versions.yml
-rm -f documentation/src/main/jekyll/_data/versions.ymle
-git add documentation/src/main/jekyll/_data/versions.yml
-git commit -m "Bumping the website version to ${VERSION}"
-git push
+.build/UpdateDocsAttributesFiles.java --mutiny-version=${VERSION}
+if [[ $(git diff --stat) != '' ]]; then
+    git add documentation/attributes.yaml
+    git commit -m "Bumping the website version to ${VERSION}"
+    git push
+    echo "Version updated"
+else
+  echo "The version was already correct"
+fi
 
 echo "Cutting release ${VERSION}"
 ./mvnw -s .build/maven-ci-settings.xml -B -fn clean
