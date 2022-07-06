@@ -64,6 +64,8 @@ theme:
   font:
     text: Roboto
     code: JetBrains Mono
+  icon:
+    repo: fontawesome/brands/github
   favicon: assets/logo-white.svg
   palette:
     - media: "(prefers-color-scheme: light)"
