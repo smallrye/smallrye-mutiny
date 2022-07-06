@@ -11,7 +11,7 @@ public class OperatorLoggingTest {
 
     @Test
     public void test() {
-        // tag::set-logger[]
+        // <set-logger>
         Infrastructure.setOperatorLogger((id, event, value, err) -> {
             Logger logger = LoggerFactory.getLogger(id);
             if (err != null) {
@@ -24,13 +24,13 @@ public class OperatorLoggingTest {
                 }
             }
         });
-        // end::set-logger[]
+        // </set-logger>
 
-        // tag::log[]
+        // <log>
         Multi.createFrom().items(1, 2, 3)
                 .onItem().transform(n -> n * 10)
                 .log()
                 .subscribe().with(item -> System.out.println(">>> " + item));
-        // end::log[]
+        // </log>
     }
 }

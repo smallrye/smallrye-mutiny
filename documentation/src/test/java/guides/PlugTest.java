@@ -20,17 +20,17 @@ public class PlugTest {
 
     @Test
     public void plug(SystemOut out) {
-        // tag::plug[]
+        // <plug>
         Multi.createFrom()
                 .range(1, 101)
                 .plug(RandomDrop::new)
                 .subscribe().with(System.out::println);
-        // end::plug[]
+        // </plug>
 
         assertThat(out.get()).isNotBlank();
     }
 
-    // tag::custom-operator[]
+    // <custom-operator>
     public class RandomDrop<T> extends AbstractMultiOperator<T, T> {
         public RandomDrop(Multi<? extends T> upstream) {
             super(upstream);
@@ -54,5 +54,5 @@ public class PlugTest {
             }
         }
     }
-    // end::custom-operator[]
+    // </custom-operator>
 }

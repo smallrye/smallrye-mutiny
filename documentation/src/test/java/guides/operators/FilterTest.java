@@ -13,19 +13,19 @@ public class FilterTest {
     @Test
     public void filter() {
         Multi<Integer> multi = Multi.createFrom().range(1, 11);
-        // tag::filter[]
+        // <filter>
         List<Integer> list = multi
                 .select().where(i -> i > 6)
                 .collect().asList()
                 .await().indefinitely();
-        // end::filter[]
+        // </filter>
 
-        // tag::test[]
+        // <test>
         List<Integer> list2 = multi
                 .select().when(i -> Uni.createFrom().item(i > 6))
                 .collect().asList()
                 .await().indefinitely();
-        // end::test[]
+        // </test>
 
         assertThat(list).containsExactly(7, 8, 9, 10);
         assertThat(list2).containsExactly(7, 8, 9, 10);
@@ -34,7 +34,7 @@ public class FilterTest {
     @Test
     public void take() {
         Multi<Integer> multi = Multi.createFrom().range(1, 11);
-        // tag::take[]
+        // <take>
         List<Integer> list = multi
                 .select().first(2)
                 .collect().asList()
@@ -49,7 +49,7 @@ public class FilterTest {
                 .select().last(2)
                 .collect().asList()
                 .await().indefinitely();
-        // end::take[]
+        // </take>
         assertThat(list).containsExactly(1, 2);
         assertThat(list2).containsExactly(1, 2);
         assertThat(list3).containsExactly(9, 10);
@@ -58,7 +58,7 @@ public class FilterTest {
     @Test
     public void skip() {
         Multi<Integer> multi = Multi.createFrom().range(1, 11);
-        // tag::skip[]
+        // <skip>
         List<Integer> list = multi
                 .skip().first(8)
                 .collect().asList()
@@ -73,7 +73,7 @@ public class FilterTest {
                 .skip().last(8)
                 .collect().asList()
                 .await().indefinitely();
-        // end::skip[]
+        // </skip>
         assertThat(list).containsExactly(9, 10);
         assertThat(list2).containsExactly(9, 10);
         assertThat(list3).containsExactly(1, 2);
@@ -82,19 +82,19 @@ public class FilterTest {
     @Test
     public void distinct() {
         Multi<Integer> multi = Multi.createFrom().items(1, 1, 2, 3, 4, 5, 5, 6);
-        // tag::distinct[]
+        // <distinct>
         List<Integer> list = multi
                 .select().distinct()
                 .collect().asList()
                 .await().indefinitely();
-        // end::distinct[]
+        // </distinct>
 
-        // tag::repetition[]
+        // <repetition>
         List<Integer> list2 = multi
                 .skip().repetitions()
                 .collect().asList()
                 .await().indefinitely();
-        // end::repetition[]
+        // </repetition>
         assertThat(list).containsExactly(1, 2, 3, 4, 5, 6);
         assertThat(list2).containsExactly(1, 2, 3, 4, 5, 6);
     }

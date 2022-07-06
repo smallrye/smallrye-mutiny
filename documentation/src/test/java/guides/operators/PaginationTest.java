@@ -17,7 +17,7 @@ public class PaginationTest {
     @SuppressWarnings("Convert2MethodRef")
     @Test
     public void test() {
-        // tag::code[]
+        // <code>
         PaginatedApi api = new PaginatedApi();
 
         Multi<String> stream = Multi.createBy().repeating()
@@ -26,7 +26,7 @@ public class PaginationTest {
                         state -> api.getPage(state.getAndIncrement()))
                 .until(list -> list.isEmpty())
                 .onItem().disjoint();
-        // end::code[]
+        // </code>
         stream.subscribe().withSubscriber(AssertSubscriber.create(10))
                 .assertCompleted()
                 .assertItems("a", "b", "c", "d", "e", "f", "g", "h");
@@ -36,7 +36,7 @@ public class PaginationTest {
     @SuppressWarnings("Convert2MethodRef")
     @Test
     public void test2() {
-        // tag::code2[]
+        // <code2>
         PaginatedApi api = new PaginatedApi();
 
         Multi<Page> stream = Multi.createBy().repeating()
@@ -44,7 +44,7 @@ public class PaginationTest {
                         () -> new AtomicInteger(),
                         state -> api.retrieve(state.getAndIncrement()))
                 .whilst(page -> page.hasNext());
-        // end::code2[]
+        // </code2>
         AssertSubscriber<Page> subscriber = stream.subscribe()
                 .withSubscriber(AssertSubscriber.create(10))
                 .assertCompleted();

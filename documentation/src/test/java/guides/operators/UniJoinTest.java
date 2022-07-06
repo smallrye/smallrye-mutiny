@@ -12,33 +12,33 @@ class UniJoinTest {
 
     @Test
     void joinAll() {
-        // tag::join-all[]
+        // <join-all>
         Uni<Integer> a = Uni.createFrom().item(1);
         Uni<Integer> b = Uni.createFrom().item(2);
         Uni<Integer> c = Uni.createFrom().item(3);
 
         Uni<List<Integer>> res = Uni.join().all(a, b, c).andCollectFailures();
-        // end::join-all[]
+        // </join-all>
 
-        // tag::join-all-ff[]
+        // <join-all-ff>
         res = Uni.join().all(a, b, c).andFailFast();
-        // end::join-all-ff[]
+        // </join-all-ff>
     }
 
     void joinFirst(Uni<Integer> a, Uni<Integer> b, Uni<Integer> c) {
 
-        // tag::join-first[]
+        // <join-first>
         Uni<Integer> res = Uni.join().first(a, b, c).toTerminate();
-        // end::join-first[]
+        // </join-first>
 
-        // tag::join-first-withitem[]
+        // <join-first-withitem>
         res = Uni.join().first(a, b, c).withItem();
-        // end::join-first-withitem[]
+        // </join-first-withitem>
 
         Supplier<Uni<Integer>> supplier = () -> Uni.createFrom().item(63);
         boolean someCondition = false;
 
-        // tag::builder[]
+        // <builder>
         UniJoin.Builder<Integer> builder = Uni.join().builder();
 
         while (someCondition) {
@@ -49,6 +49,6 @@ class UniJoinTest {
         Uni<List<Integer>> all = builder.joinAll().andFailFast();
 
         Uni<Integer> first = builder.joinFirst().withItem();
-        // end::builder[]
+        // </builder>
     }
 }

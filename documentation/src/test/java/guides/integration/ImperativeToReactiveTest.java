@@ -15,11 +15,11 @@ public class ImperativeToReactiveTest {
 
     @Test
     public void uniRunSubscriptionOn() {
-        // tag::uni-runSubscriptionOn[]
+        // <uni-runSubscriptionOn>
         Uni<String> uni = Uni.createFrom()
                 .item(this::invokeRemoteServiceUsingBlockingIO)
                 .runSubscriptionOn(Infrastructure.getDefaultWorkerPool());
-        // end::uni-runSubscriptionOn[]
+        // </uni-runSubscriptionOn>
 
         String res  = uni.await().indefinitely();
         assertThat(res).isEqualTo("Hello");
@@ -27,11 +27,11 @@ public class ImperativeToReactiveTest {
 
     @Test
     public void multiEmitOn() {
-        // tag::multi-emitOn[]
+        // <multi-emitOn>
         Multi<String> multi = Multi.createFrom().items("john", "jack", "sue")
                 .emitOn(Infrastructure.getDefaultWorkerPool())
                 .onItem().transform(this::invokeRemoteServiceUsingBlockingIO);
-        // end::multi-emitOn[]
+        // </multi-emitOn>
 
         List<String> strings = multi.subscribe().asStream().collect(Collectors.toList());
         assertThat(strings).containsExactly("JOHN", "JACK", "SUE");

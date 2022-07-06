@@ -19,17 +19,17 @@ public class CollectingItemsTest {
 
    @Test
     public void testList() {
-       // tag::list[]
+       // <list>
        Multi<String> multi = getMulti();
        Uni<List<String>> uni = multi.collect().asList();
-       // end::list[]
+       // </list>
 
        assertThat(uni.await().indefinitely()).containsExactly("a", "b", "c");
 
-       // tag::first[]
+       // <first>
        Uni<String> first = multi.collect().first();
        Uni<String> last = multi.collect().last();
-       // end::first[]
+       // </first>
 
        assertThat(first.await().indefinitely()).isEqualTo("a");
        assertThat(last.await().indefinitely()).isEqualTo("c");
@@ -37,42 +37,42 @@ public class CollectingItemsTest {
 
    @Test
     public void testMap() {
-       // tag::map[]
+       // <map>
        Multi<String> multi = getMulti();
        Uni<Map<String, String>> uni =
                multi.collect()
                        .asMap(item -> getUniqueKeyForItem(item));
-       // end::map[]
+       // </map>
 
        assertThat(uni.await().indefinitely()).hasSize(3);
    }
 
     @Test
     public void testMultiMap() {
-        // tag::multimap[]
+        // <multimap>
         Multi<String> multi = getMulti();
         Uni<Map<String, Collection<String>>> uni =
                 multi.collect()
                         .asMultiMap(item -> getKeyForItem(item));
-        // end::multimap[]
+        // </multimap>
 
         assertThat(uni.await().indefinitely()).hasSize(2);
     }
 
     @Test
     public void testCustomAccumulator() {
-        // tag::accumulator[]
+        // <accumulator>
         Multi<String> multi = getMulti();
         Uni<MyCollection> uni = multi.collect()
                 .in(MyCollection::new, (col, item) -> col.add(item));
-        // end::accumulator[]
+        // </accumulator>
 
         assertThat(uni.await().indefinitely()).hasSize(3);
 
-        // tag::collector[]
+        // <collector>
         Uni<Long> count = multi.collect()
                 .with(Collectors.counting());
-        // end::collector[]
+        // </collector>
 
         assertThat(count.await().indefinitely()).isEqualTo(3);
     }

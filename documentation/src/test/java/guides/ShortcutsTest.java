@@ -10,14 +10,14 @@ public class ShortcutsTest {
     @Test
     public void test() {
 
-        // tag::invoke[]
+        // <invoke>
         Multi<String> multi = Multi.createFrom().items("a", "b", "c");
         multi.invoke(item -> System.out.println("Received item " + item));
-        // end::invoke[]
+        // </invoke>
 
-        // tag::call[]
+        // <call>
         multi.call(item -> executeAnAsyncAction(item));
-        // end::call[]
+        // </call>
 
         multi.subscribe().with(x -> {});
     }

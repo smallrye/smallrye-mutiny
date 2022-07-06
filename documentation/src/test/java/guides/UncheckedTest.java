@@ -16,7 +16,7 @@ public class UncheckedTest {
     public void rethrow() {
         Uni<Integer> item = Uni.createFrom().item(1);
 
-        // tag::rethrow[]
+        // <rethrow>
         Uni<Integer> uni = item.onItem().transform(i -> {
             try {
                 return methodThrowingIoException(i);
@@ -24,7 +24,7 @@ public class UncheckedTest {
                 throw new UncheckedIOException(e);
             }
         });
-        // end::rethrow[]
+        // </rethrow>
 
         assertThatThrownBy(() -> uni.await().indefinitely())
                 .isInstanceOf(RuntimeException.class).hasCauseInstanceOf(IOException.class);
@@ -35,12 +35,12 @@ public class UncheckedTest {
     public void transformExample() {
         Uni<Integer> item = Uni.createFrom().item(1);
 
-        // tag::transform[]
+        // <transform>
         Uni<Integer> uni = item.onItem().transform(Unchecked.function(i -> {
             // Can throw checked exception
             return methodThrowingIoException(i);
         }));
-        // end::transform[]
+        // </transform>
 
         assertThatThrownBy(() -> uni.await().indefinitely())
                 .isInstanceOf(RuntimeException.class).hasCauseInstanceOf(IOException.class);
@@ -51,12 +51,12 @@ public class UncheckedTest {
     public void invokeExample() {
         Uni<Integer> item = Uni.createFrom().item(1);
 
-        // tag::invoke[]
+        // <invoke>
         Uni<Integer> uni = item.onItem().invoke(Unchecked.consumer(i -> {
             // Can throw checked exception
             throw new IOException("boom");
         }));
-        // end::invoke[]
+        // </invoke>
 
         assertThatThrownBy(() -> uni.await().indefinitely())
                 .isInstanceOf(RuntimeException.class).hasCauseInstanceOf(IOException.class);
