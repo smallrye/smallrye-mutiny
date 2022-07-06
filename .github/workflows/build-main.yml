@@ -60,7 +60,7 @@ jobs:
           java-version: 11
           distribution: temurin
           cache: maven
-      - name: Coverage and Sonar
+      - name: Test coverage
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: ./mvnw -s .build/maven-ci-settings.xml verify -Pcoverage
