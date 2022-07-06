@@ -102,12 +102,6 @@
     <profiles>
         <profile>
             <id>coverage</id>
-            <activation>
-                <property>
-                    <name>sonar.organization</name>
-                    <value>smallrye</value>
-                </property>
-            </activation>
             <properties>
                 <argLine>@{jacocoArgLine}</argLine>
             </properties>

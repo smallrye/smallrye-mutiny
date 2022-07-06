@@ -60,19 +60,10 @@ jobs:
           java-version: 11
           distribution: temurin
           cache: maven
-      - name: Coverage and Sonar
+      - name: Test coverage
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.SONAR_LOGIN }}
-        run: |
-          ./mvnw -s .build/maven-ci-settings.xml verify -Pcoverage
-          ./mvnw -s .build/maven-ci-settings.xml sonar:sonar \
-            -Dsonar.projectKey=smallrye_smallrye-mutiny \
-            -Dsonar.projectName="SmallRye Mutiny" \
-            -Dsonar.organization=smallrye \
-            -Dsonar.host.url=https://sonarcloud.io \
-            -Dsonar.login=$SONAR_LOGIN \
-            -Dsonar.coverage.jacoco.xmlReportPaths=target/jacoco.xml
+        run: ./mvnw -s .build/maven-ci-settings.xml verify -Pcoverage
       - name: Codecov
         uses: codecov/codecov-action@v1.0.13
 
