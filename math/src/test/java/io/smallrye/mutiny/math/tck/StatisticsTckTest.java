@@ -3,9 +3,9 @@ package io.smallrye.mutiny.math.tck;
 import static io.smallrye.mutiny.math.tck.TckHelper.iterate;
 
 import org.reactivestreams.Publisher;
+import org.reactivestreams.tck.PublisherVerification;
 import org.reactivestreams.tck.TestEnvironment;
 import org.reactivestreams.tck.flow.support.TestException;
-import org.reactivestreams.tck.junit5.PublisherVerification;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.math.Math;
