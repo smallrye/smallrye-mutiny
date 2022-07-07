@@ -3,4 +3,4 @@ attributes:
     project-version: 1.6.0
     versions:
         mutiny: 1.6.0
-        vertx_bindings: 2.23.0
+        vertx_bindings: 2.24.0
