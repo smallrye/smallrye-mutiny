@@ -132,7 +132,9 @@ public class AppendOnlyReplayList {
         if (itemsToReplay != Long.MAX_VALUE && !(item instanceof Terminal)) {
             numberOfItemsRecorded++;
             if (numberOfItemsRecorded > itemsToReplay) {
-                head = head.next;
+                synchronized (this) {
+                    head = head.next;
+                }
             }
         }
     }

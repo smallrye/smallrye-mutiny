@@ -76,22 +76,22 @@ class UniJoinTest {
         void emptyArrays() {
             assertThatThrownBy(() -> Uni.join().all(new Uni[0]))
                     .isInstanceOf(IllegalArgumentException.class)
-                    .satisfies(e -> assertThat(((Throwable) e).getMessage()).contains("empty"));
+                    .satisfies(e -> assertThat(e.getMessage()).contains("empty"));
 
             assertThatThrownBy(() -> Uni.join().first(new Uni[0]))
                     .isInstanceOf(IllegalArgumentException.class)
-                    .satisfies(e -> assertThat(((Throwable) e).getMessage()).contains("empty"));
+                    .satisfies(e -> assertThat(e.getMessage()).contains("empty"));
         }
 
         @Test
         void emptyLists() {
             assertThatThrownBy(() -> Uni.join().all(Collections.emptyList()))
                     .isInstanceOf(IllegalArgumentException.class)
-                    .satisfies(e -> assertThat(((Throwable) e).getMessage()).contains("empty"));
+                    .satisfies(e -> assertThat(e.getMessage()).contains("empty"));
 
             assertThatThrownBy(() -> Uni.join().first(Collections.emptyList()))
                     .isInstanceOf(IllegalArgumentException.class)
-                    .satisfies(e -> assertThat(((Throwable) e).getMessage()).contains("empty"));
+                    .satisfies(e -> assertThat(e.getMessage()).contains("empty"));
         }
     }
 
@@ -412,7 +412,6 @@ class UniJoinTest {
             Uni<Integer> c = Uni.createFrom().emitter(e -> {
                 // Do nothing
             });
-            ;
 
             UniOnCancellationSpy<Integer> sa = Spy.onCancellation(a);
             UniOnCancellationSpy<Integer> sb = Spy.onCancellation(b);

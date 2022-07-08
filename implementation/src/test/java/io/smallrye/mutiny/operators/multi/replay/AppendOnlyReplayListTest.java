@@ -19,7 +19,7 @@ import org.junit.jupiter.api.Test;
 
 class AppendOnlyReplayListTest {
 
-    private Random random = new Random();
+    private final Random random = new Random();
 
     @Test
     void checkReadyAtStart() {
