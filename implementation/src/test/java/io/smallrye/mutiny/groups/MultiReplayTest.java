@@ -23,7 +23,7 @@ import io.smallrye.mutiny.subscription.MultiSubscriber;
 
 class MultiReplayTest {
 
-    private Random random = new Random();
+    private final Random random = new Random();
 
     @Test
     void rejectBadBuilderArguments() {

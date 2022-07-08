@@ -104,7 +104,7 @@ public class UncheckedFunctionTest {
                 .andThen(Integer::valueOf)
                 .andThen(this::validate)
                 .andThen(i -> Integer.toString(i))
-                .compose(x -> x.toString() + x.toString());
+                .compose(x -> x.toString() + x);
 
         String res = function.toFunction().apply(1);
         assertThat(res).isEqualTo("11");
