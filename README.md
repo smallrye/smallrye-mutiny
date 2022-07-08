@@ -57,7 +57,7 @@ Mutiny is built with Apache Maven, so all you need is:
 
 | Git branch | Versions                       | Baseline                        | Compliance                 |
 |------------|--------------------------------|---------------------------------|----------------------------|
-| `main`     | 2.x *(in development)*         | Java 11, Reactive Streams 1.0.4 | Reactive Streams TCK 1.0.4 |
+| `main`     | 2.x *(in development)*         | Java 11                         | Reactive Streams TCK 1.0.4 |
 | `1.x`      | 1.6.x *(backports, bug fixes)* | Java 8, Reactive Streams 1.0.4  | Reactive Streams TCK 1.0.4 |
 
 ## ✨ Contributing
