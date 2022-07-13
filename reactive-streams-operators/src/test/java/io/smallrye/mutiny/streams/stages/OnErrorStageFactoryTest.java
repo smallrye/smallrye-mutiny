@@ -15,6 +15,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Multi;
+import mutiny.zero.flow.adapters.AdaptersToReactiveStreams;
 
 /**
  * Checks the behavior of the {@link OnErrorStageFactory}.
@@ -38,7 +39,7 @@ public class OnErrorStageFactoryTest extends StageTestBase {
                 .emitOn(executor);
 
         AtomicReference<Throwable> error = new AtomicReference<>();
-        ReactiveStreams.fromPublisher(publisher)
+        ReactiveStreams.fromPublisher(AdaptersToReactiveStreams.publisher(publisher))
                 .filter(i -> i < 4)
                 .map(this::squareOrFailed)
                 .onError(error::set)

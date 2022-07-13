@@ -4,12 +4,11 @@ package io.smallrye.mutiny.operators.multi.overflow;
 import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
 
 import java.util.Queue;
+import java.util.concurrent.Flow.Subscription;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 import java.util.function.Function;
-
-import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;

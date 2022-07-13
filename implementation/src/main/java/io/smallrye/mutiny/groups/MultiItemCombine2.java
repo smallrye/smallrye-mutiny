@@ -3,9 +3,8 @@ package io.smallrye.mutiny.groups;
 import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
 import static io.smallrye.mutiny.helpers.ParameterValidation.size;
 
+import java.util.concurrent.Flow.Publisher;
 import java.util.function.BiFunction;
-
-import org.reactivestreams.Publisher;
 
 import io.smallrye.common.annotation.CheckReturnValue;
 import io.smallrye.mutiny.Multi;

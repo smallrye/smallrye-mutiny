@@ -58,6 +58,12 @@ As a result, we can use the Reactive Streams interoperability to convert instanc
 {{ insert('java/guides/integration/ReactorTest.java', 'reactor-multi-create') }}
 ```
 
+!!! attention
+    
+    Reactor still uses the legacy Reactive Streams APIs instead of `java.util.concurrent.Flow`, so you need to perform an adaptation.
+    
+    We recommend using the [Mutiny Zero Flow Adapters library](https://smallrye.io/smallrye-mutiny-zero/) as in these examples (Maven coordinates `io.smallrye.reactive:mutiny-zero-flow-adapters`).
+
 ### Converting a Flux or a Mono into a Uni
 
 As you can create `Uni` from a `Publisher`, the same approach can be used to create `Uni` instances:
@@ -127,6 +133,10 @@ Converting a `Flowable` is easier, as it's a `Publisher`:
 {{ insert('java/guides/integration/RxJavaTest.java', 'rx-multi-create-flowable') }}
 ```
 
+!!! attention
+
+    Like Reactor, RxJava still uses the legacy Reactive Streams APIs instead of `java.util.concurrent.Flow`, so you need to perform an adaptation.
+    
 ### Converting a Completable, Single or Maybe into a Multi
 
 To create a `Multi` from a `Completable,` `Single` or `Maybe` you need specific converters, as none of these types implement Reactive Streams.

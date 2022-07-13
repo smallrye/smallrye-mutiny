@@ -2,8 +2,7 @@ package io.smallrye.mutiny.groups;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import org.reactivestreams.Publisher;
+import java.util.concurrent.Flow.Publisher;
 
 import io.smallrye.common.annotation.CheckReturnValue;
 import io.smallrye.mutiny.CompositeException;

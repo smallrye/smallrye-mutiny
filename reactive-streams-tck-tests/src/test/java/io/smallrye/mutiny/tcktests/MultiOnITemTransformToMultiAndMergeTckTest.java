@@ -2,13 +2,9 @@ package io.smallrye.mutiny.tcktests;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.*;
 import java.util.function.Function;
 
-import org.reactivestreams.Publisher;
 import org.testng.Assert;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
@@ -112,13 +108,13 @@ public class MultiOnITemTransformToMultiAndMergeTckTest extends AbstractPublishe
     }
 
     @Override
-    public Publisher<Long> createPublisher(long elements) {
+    public Flow.Publisher<Long> createFlowPublisher(long elements) {
         return upstream(elements)
                 .onItem().transformToMultiAndMerge(x -> Multi.createFrom().item(x));
     }
 
     @Override
-    public Publisher<Long> createFailedPublisher() {
+    public Flow.Publisher<Long> createFailedFlowPublisher() {
         return failedUpstream()
                 .onItem().transformToMultiAndMerge(x -> Multi.createFrom().item(x));
     }

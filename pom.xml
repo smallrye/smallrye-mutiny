@@ -75,6 +75,7 @@
     </modules>
 
     <properties>
+        <mutiny-zero.version>0.4.3</mutiny-zero.version>
         <reactive-streams.version>1.0.4</reactive-streams.version>
         <rxjava3.version>3.1.5</rxjava3.version>
         <reactor-core.version>3.4.19</reactor-core.version>
@@ -121,6 +122,11 @@
                 <groupId>io.smallrye.reactive</groupId>
                 <artifactId>mutiny</artifactId>
                 <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.smallrye.reactive</groupId>
+                <artifactId>mutiny-zero-flow-adapters</artifactId>
+                <version>${mutiny-zero.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.reactivestreams</groupId>

@@ -1,10 +1,9 @@
 package io.smallrye.mutiny.subscription;
 
 import java.util.Objects;
+import java.util.concurrent.Flow.Subscriber;
+import java.util.concurrent.Flow.Subscription;
 import java.util.concurrent.atomic.AtomicBoolean;
-
-import org.reactivestreams.Subscriber;
-import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Context;

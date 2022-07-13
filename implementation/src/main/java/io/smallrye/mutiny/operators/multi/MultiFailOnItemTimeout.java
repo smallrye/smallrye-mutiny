@@ -3,13 +3,12 @@ package io.smallrye.mutiny.operators.multi;
 import static io.smallrye.mutiny.helpers.Subscriptions.CANCELLED;
 
 import java.time.Duration;
+import java.util.concurrent.Flow.Subscription;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
-
-import org.reactivestreams.Subscription;
 
 import io.smallrye.common.annotation.Experimental;
 import io.smallrye.mutiny.Multi;

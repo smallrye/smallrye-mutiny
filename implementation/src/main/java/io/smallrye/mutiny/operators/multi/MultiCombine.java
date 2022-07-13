@@ -1,9 +1,8 @@
 package io.smallrye.mutiny.operators.multi;
 
 import java.util.List;
+import java.util.concurrent.Flow.Publisher;
 import java.util.function.Function;
-
-import org.reactivestreams.Publisher;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.helpers.ParameterValidation;

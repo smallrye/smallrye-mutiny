@@ -1,10 +1,9 @@
 package io.smallrye.mutiny.subscription;
 
 import java.util.Objects;
+import java.util.concurrent.Flow;
+import java.util.concurrent.Flow.Subscription;
 import java.util.concurrent.atomic.AtomicReference;
-
-import org.reactivestreams.Subscriber;
-import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.Context;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
@@ -19,7 +18,7 @@ import io.smallrye.mutiny.infrastructure.Infrastructure;
  */
 public final class SerializedSubscriber<T> implements Subscription, MultiSubscriber<T>, ContextSupport {
 
-    private final Subscriber<? super T> downstream;
+    private final Flow.Subscriber<? super T> downstream;
 
     private boolean emitting;
 
@@ -37,7 +36,7 @@ public final class SerializedSubscriber<T> implements Subscription, MultiSubscri
 
     private final AtomicReference<Subscription> upstream = new AtomicReference<>();
 
-    public SerializedSubscriber(Subscriber<? super T> downstream) {
+    public SerializedSubscriber(Flow.Subscriber<? super T> downstream) {
         this.downstream = downstream;
     }
 
@@ -155,7 +154,7 @@ public final class SerializedSubscriber<T> implements Subscription, MultiSubscri
         }
     }
 
-    void serializedDrainLoop(Subscriber<? super T> actual) {
+    void serializedDrainLoop(Flow.Subscriber<? super T> actual) {
         for (;;) {
 
             if (cancelled) {

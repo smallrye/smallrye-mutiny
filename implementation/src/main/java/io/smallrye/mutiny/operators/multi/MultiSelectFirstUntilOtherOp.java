@@ -1,11 +1,10 @@
 package io.smallrye.mutiny.operators.multi;
 
 import java.util.Objects;
+import java.util.concurrent.Flow;
+import java.util.concurrent.Flow.Publisher;
+import java.util.concurrent.Flow.Subscription;
 import java.util.concurrent.atomic.AtomicReference;
-
-import org.reactivestreams.Publisher;
-import org.reactivestreams.Subscriber;
-import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.Context;
 import io.smallrye.mutiny.Multi;
@@ -88,7 +87,7 @@ public final class MultiSelectFirstUntilOtherOp<T, U> extends AbstractMultiOpera
 
         private final AtomicReference<Subscription> other = new AtomicReference<>();
 
-        public TakeUntilMainProcessor(Subscriber<? super T> downstream) {
+        public TakeUntilMainProcessor(Flow.Subscriber<? super T> downstream) {
             super(new SerializedSubscriber<>(downstream));
         }
 

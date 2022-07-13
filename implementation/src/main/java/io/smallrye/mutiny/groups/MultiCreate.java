@@ -3,19 +3,15 @@ package io.smallrye.mutiny.groups;
 import static io.smallrye.mutiny.helpers.ParameterValidation.*;
 
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
-import java.util.concurrent.CompletionStage;
-import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.*;
+import java.util.concurrent.Flow.Publisher;
+import java.util.concurrent.Flow.Subscriber;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
-
-import org.reactivestreams.Publisher;
-import org.reactivestreams.Subscriber;
 
 import io.smallrye.common.annotation.CheckReturnValue;
 import io.smallrye.common.annotation.Experimental;

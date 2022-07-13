@@ -5,8 +5,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
+import java.util.concurrent.Flow;
 
-import org.reactivestreams.Publisher;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -77,13 +77,13 @@ public class MultiSelectDistinctTckTest extends AbstractPublisherTck<Long> {
     }
 
     @Override
-    public Publisher<Long> createPublisher(long elements) {
+    public Flow.Publisher<Long> createFlowPublisher(long elements) {
         return upstream(elements)
                 .select().distinct();
     }
 
     @Override
-    public Publisher<Long> createFailedPublisher() {
+    public Flow.Publisher<Long> createFailedFlowPublisher() {
         return failedUpstream()
                 .select().distinct();
     }

@@ -1,21 +1,20 @@
 package io.smallrye.mutiny.tcktests;
 
+import java.util.concurrent.Flow.Publisher;
 import java.util.stream.LongStream;
-
-import org.reactivestreams.Publisher;
 
 import io.smallrye.mutiny.Multi;
 
 public class MultiDisjointTckTest extends AbstractPublisherTck<Long> {
     @Override
-    public Publisher<Long> createPublisher(long elements) {
+    public Publisher<Long> createFlowPublisher(long elements) {
         Long[] list = LongStream.rangeClosed(1, elements).boxed().toArray(Long[]::new);
         return Multi.createFrom().item(() -> list)
                 .onItem().disjoint();
     }
 
     @Override
-    public Publisher<Long> createFailedPublisher() {
+    public Publisher<Long> createFailedFlowPublisher() {
         return failedUpstream()
                 .onItem().disjoint();
     }

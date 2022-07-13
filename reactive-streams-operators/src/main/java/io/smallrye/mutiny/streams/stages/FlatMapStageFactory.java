@@ -11,6 +11,7 @@ import io.smallrye.mutiny.streams.Engine;
 import io.smallrye.mutiny.streams.operators.ProcessingStage;
 import io.smallrye.mutiny.streams.operators.ProcessingStageFactory;
 import io.smallrye.mutiny.streams.utils.Casts;
+import mutiny.zero.flow.adapters.AdaptersToFlow;
 
 /**
  * Implementation of the {@link Stage.FlatMap} stage. Be aware it behaves as a RX `concatMap`.
@@ -39,7 +40,7 @@ public class FlatMapStageFactory implements ProcessingStageFactory<Stage.FlatMap
             return source
                     .onItem().transformToMultiAndConcatenate(item -> {
                         Graph graph = mapper.apply(item);
-                        return engine.buildPublisher(Objects.requireNonNull(graph));
+                        return AdaptersToFlow.publisher(engine.buildPublisher(Objects.requireNonNull(graph)));
                     });
         }
     }

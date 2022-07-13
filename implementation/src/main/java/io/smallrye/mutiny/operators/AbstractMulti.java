@@ -4,11 +4,10 @@ import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
 
 import java.util.Objects;
 import java.util.concurrent.Executor;
+import java.util.concurrent.Flow;
 import java.util.function.BiFunction;
 import java.util.function.LongFunction;
 import java.util.function.Predicate;
-
-import org.reactivestreams.Subscriber;
 
 import io.smallrye.mutiny.Context;
 import io.smallrye.mutiny.Multi;
@@ -28,7 +27,7 @@ public abstract class AbstractMulti<T> implements Multi<T> {
 
     @Override
     @SuppressWarnings("unchecked")
-    public void subscribe(Subscriber<? super T> subscriber) {
+    public void subscribe(Flow.Subscriber<? super T> subscriber) {
         // NOTE The Reactive Streams TCK mandates throwing an NPE.
         Objects.requireNonNull(subscriber, "Subscriber is `null`");
         MultiSubscriber<? super T> actual;

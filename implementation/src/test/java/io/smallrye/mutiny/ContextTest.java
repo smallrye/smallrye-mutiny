@@ -8,6 +8,8 @@ import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Flow;
+import java.util.concurrent.Flow.Subscription;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
@@ -16,8 +18,6 @@ import java.util.stream.Stream;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.reactivestreams.Subscriber;
-import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.helpers.BlockingIterable;
 import io.smallrye.mutiny.helpers.test.AssertSubscriber;
@@ -1128,7 +1128,7 @@ class ContextTest {
     }
 }
 
-class AlienSubscriber<T> implements Subscriber<T> {
+class AlienSubscriber<T> implements Flow.Subscriber<T> {
     private final ArrayList<T> items;
     private final AtomicReference<Throwable> error;
     private final AtomicBoolean completed;

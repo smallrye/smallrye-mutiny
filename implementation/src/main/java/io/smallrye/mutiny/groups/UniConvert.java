@@ -4,9 +4,8 @@ import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
+import java.util.concurrent.Flow;
 import java.util.function.Function;
-
-import org.reactivestreams.Publisher;
 
 import io.smallrye.common.annotation.CheckReturnValue;
 import io.smallrye.mutiny.Uni;
@@ -44,7 +43,7 @@ public class UniConvert<T> {
     }
 
     @CheckReturnValue
-    public Publisher<T> toPublisher() {
+    public Flow.Publisher<T> toPublisher() {
         return with(BuiltinConverters.toPublisher());
     }
 

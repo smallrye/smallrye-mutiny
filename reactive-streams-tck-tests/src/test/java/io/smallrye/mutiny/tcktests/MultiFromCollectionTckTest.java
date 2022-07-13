@@ -2,14 +2,13 @@ package io.smallrye.mutiny.tcktests;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import org.reactivestreams.Publisher;
+import java.util.concurrent.Flow.Publisher;
 
 import io.smallrye.mutiny.Multi;
 
 public class MultiFromCollectionTckTest extends AbstractPublisherTck<Long> {
     @Override
-    public Publisher<Long> createPublisher(long elements) {
+    public Publisher<Long> createFlowPublisher(long elements) {
         List<Long> list = new ArrayList<>();
         for (int i = 0; i < elements; i++) {
             list.add((long) i);

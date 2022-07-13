@@ -9,6 +9,7 @@ import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.streams.Engine;
 import io.smallrye.mutiny.streams.operators.PublisherStage;
 import io.smallrye.mutiny.streams.operators.PublisherStageFactory;
+import mutiny.zero.flow.adapters.AdaptersToFlow;
 
 /**
  * Implementation of the {@link Stage.PublisherStage} stage.
@@ -21,6 +22,6 @@ public class FromPublisherStageFactory implements PublisherStageFactory<Stage.Pu
     @Override
     public <O> PublisherStage<O> create(Engine engine, Stage.PublisherStage stage) {
         Publisher<O> publisher = (Publisher<O>) Objects.requireNonNull(Objects.requireNonNull(stage.getRsPublisher()));
-        return () -> Multi.createFrom().publisher(publisher);
+        return () -> Multi.createFrom().publisher(AdaptersToFlow.publisher(publisher));
     }
 }

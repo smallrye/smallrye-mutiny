@@ -43,7 +43,7 @@ Mutiny is however an independent library that can ultimately be used in any Java
 
 ### Reactive Converters Built-In
 
-Mutiny is based on the [Reactive Streams specification](https://www.reactive-streams.org/), and so it can be integrated with any other reactive programming library.
+Mutiny is based on the [Reactive Streams protocol](https://www.reactive-streams.org/), and so it can be integrated with any other reactive programming library.
 
 In addition, Mutiny offers converters to interact with other popular libraries and [Kotlin](https://kotlinlang.org/).
 
@@ -55,10 +55,10 @@ Mutiny is built with Apache Maven, so all you need is:
 ./mvnw install
 ```
 
-| Git branch | Versions                       | Baseline                        | Compliance                 |
-|------------|--------------------------------|---------------------------------|----------------------------|
-| `main`     | 2.x *(in development)*         | Java 11                         | Reactive Streams TCK 1.0.4 |
-| `1.x`      | 1.6.x *(backports, bug fixes)* | Java 8, Reactive Streams 1.0.4  | Reactive Streams TCK 1.0.4 |
+| Git branch | Versions                       | Baseline                              | Compliance                 |
+|------------|--------------------------------|---------------------------------------|----------------------------|
+| `main`     | 2.x *(in development)*         | Java 11, `java.util.concurrent.Flow ` | Reactive Streams TCK 1.0.4 |
+| `1.x`      | 1.6.x *(backports, bug fixes)* | Java 8, Reactive Streams 1.0.4        | Reactive Streams TCK 1.0.4 |
 
 ## ✨ Contributing
 

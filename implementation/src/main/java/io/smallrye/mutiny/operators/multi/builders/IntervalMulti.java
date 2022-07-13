@@ -1,13 +1,8 @@
 package io.smallrye.mutiny.operators.multi.builders;
 
 import java.time.Duration;
-import java.util.concurrent.RejectedExecutionException;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicLong;
-
-import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.helpers.Subscriptions;
@@ -45,7 +40,7 @@ public class IntervalMulti extends AbstractMulti<Long> {
         // Only start the ticks when we get the first request.
     }
 
-    static final class IntervalRunnable implements Runnable, Subscription {
+    static final class IntervalRunnable implements Runnable, Flow.Subscription {
         private final MultiSubscriber<? super Long> actual;
         private final AtomicLong requested = new AtomicLong();
         private final Duration period;

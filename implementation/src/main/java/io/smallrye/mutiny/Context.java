@@ -5,6 +5,7 @@ import static java.util.Objects.requireNonNull;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Flow;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
@@ -14,7 +15,7 @@ import io.smallrye.common.annotation.Experimental;
  * A context allows sharing key / value entries along with a subscriber in a Mutiny pipeline, so all operators can
  * share implicit data for a given subscription.
  * <p>
- * A context is provided by a {@link io.smallrye.mutiny.subscription.UniSubscriber} or {@link org.reactivestreams.Subscriber}
+ * A context is provided by a {@link io.smallrye.mutiny.subscription.UniSubscriber} or {@link Flow.Subscriber}
  * that implements {@link io.smallrye.mutiny.subscription.ContextSupport}.
  * <p>
  * Context keys are represented as {@link String} while values can be from heterogeneous types.

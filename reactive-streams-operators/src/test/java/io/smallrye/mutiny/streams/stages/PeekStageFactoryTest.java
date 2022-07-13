@@ -15,6 +15,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Multi;
+import mutiny.zero.flow.adapters.AdaptersToReactiveStreams;
 
 /**
  * Checks the behavior of the {@link PeekStageFactory}.
@@ -39,7 +40,7 @@ public class PeekStageFactoryTest extends StageTestBase {
 
         List<Integer> squares = new ArrayList<>();
         List<String> strings = new ArrayList<>();
-        List<String> list = ReactiveStreams.fromPublisher(publisher)
+        List<String> list = ReactiveStreams.fromPublisher(AdaptersToReactiveStreams.publisher(publisher))
                 .filter(i -> i < 4)
                 .map(this::square)
                 .peek(squares::add)

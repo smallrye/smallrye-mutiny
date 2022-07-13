@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.Flow;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
@@ -18,7 +19,6 @@ import java.util.function.Supplier;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.ResourceAccessMode;
 import org.junit.jupiter.api.parallel.ResourceLock;
-import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
@@ -262,7 +262,7 @@ public class MultiOnOverflowTest {
         AbstractMulti<Integer> rogue = new AbstractMulti<Integer>() {
             @Override
             public void subscribe(MultiSubscriber<? super Integer> subscriber) {
-                subscriber.onSubscribe(mock(Subscription.class));
+                subscriber.onSubscribe(mock(Flow.Subscription.class));
                 reference.set(subscriber);
             }
         };

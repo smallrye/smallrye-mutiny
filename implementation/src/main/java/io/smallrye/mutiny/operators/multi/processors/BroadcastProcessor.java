@@ -3,12 +3,11 @@ package io.smallrye.mutiny.operators.multi.processors;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.Flow.Processor;
+import java.util.concurrent.Flow.Subscriber;
+import java.util.concurrent.Flow.Subscription;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
-
-import org.reactivestreams.Processor;
-import org.reactivestreams.Subscriber;
-import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.helpers.Subscriptions;
@@ -17,7 +16,7 @@ import io.smallrye.mutiny.subscription.BackPressureFailure;
 import io.smallrye.mutiny.subscription.MultiSubscriber;
 
 /**
- * Implementation of {@link org.reactivestreams.Processor} that broadcast all subsequently observed items to its current
+ * Implementation of {@link Processor} that broadcast all subsequently observed items to its current
  * {@link Subscriber}s.
  * <p>
  * This processor does not coordinate back-pressure between different subscribers and between the upstream source and a

@@ -13,7 +13,7 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
-import org.reactivestreams.Subscription
+import java.util.concurrent.Flow.Subscription
 
 /**
  * Subscribe to this [Multi] and provide the items as [Flow].

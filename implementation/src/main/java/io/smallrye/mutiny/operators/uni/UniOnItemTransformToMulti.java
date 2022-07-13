@@ -2,13 +2,11 @@ package io.smallrye.mutiny.operators.uni;
 
 import static io.smallrye.mutiny.helpers.ParameterValidation.MAPPER_RETURNED_NULL;
 
+import java.util.concurrent.Flow;
+import java.util.concurrent.Flow.Subscriber;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
-
-import org.reactivestreams.Publisher;
-import org.reactivestreams.Subscriber;
-import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.Context;
 import io.smallrye.mutiny.Uni;
@@ -23,10 +21,10 @@ import io.smallrye.mutiny.subscription.UniSubscription;
 
 public class UniOnItemTransformToMulti<I, O> extends AbstractMulti<O> {
 
-    private final Function<? super I, ? extends Publisher<? extends O>> mapper;
+    private final Function<? super I, ? extends Flow.Publisher<? extends O>> mapper;
     private final Uni<I> upstream;
 
-    public UniOnItemTransformToMulti(Uni<I> upstream, Function<? super I, ? extends Publisher<? extends O>> mapper) {
+    public UniOnItemTransformToMulti(Uni<I> upstream, Function<? super I, ? extends Flow.Publisher<? extends O>> mapper) {
         this.upstream = upstream;
         this.mapper = mapper;
     }
@@ -41,16 +39,16 @@ public class UniOnItemTransformToMulti<I, O> extends AbstractMulti<O> {
 
     @SuppressWarnings("SubscriberImplementation")
     static final class FlatMapPublisherSubscriber<I, O>
-            implements Subscriber<O>, UniSubscriber<I>, Subscription, ContextSupport {
+            implements Subscriber<O>, UniSubscriber<I>, Flow.Subscription, ContextSupport {
 
-        private final AtomicReference<Subscription> secondUpstream;
+        private final AtomicReference<Flow.Subscription> secondUpstream;
         private final AtomicReference<UniSubscription> firstUpstream;
         private final Subscriber<? super O> downstream;
-        private final Function<? super I, ? extends Publisher<? extends O>> mapper;
+        private final Function<? super I, ? extends Flow.Publisher<? extends O>> mapper;
         private final AtomicLong requested = new AtomicLong();
 
         FlatMapPublisherSubscriber(Subscriber<? super O> downstream,
-                Function<? super I, ? extends Publisher<? extends O>> mapper) {
+                Function<? super I, ? extends Flow.Publisher<? extends O>> mapper) {
             this.downstream = downstream;
             this.mapper = mapper;
             this.firstUpstream = new AtomicReference<>();
@@ -108,12 +106,12 @@ public class UniOnItemTransformToMulti<I, O> extends AbstractMulti<O> {
         }
 
         /**
-         * Called after we produced the {@link Publisher} and subscribe on it.
+         * Called after we produced the {@link Flow.Publisher} and subscribe on it.
          *
-         * @param subscription the subscription from the produced {@link Publisher}
+         * @param subscription the subscription from the produced {@link Flow.Publisher}
          */
         @Override
-        public void onSubscribe(Subscription subscription) {
+        public void onSubscribe(Flow.Subscription subscription) {
             if (secondUpstream.compareAndSet(null, subscription)) {
                 long r = requested.getAndSet(0L);
                 if (r != 0L) {
@@ -124,7 +122,7 @@ public class UniOnItemTransformToMulti<I, O> extends AbstractMulti<O> {
 
         @Override
         public void onItem(I item) {
-            Publisher<? extends O> publisher;
+            Flow.Publisher<? extends O> publisher;
 
             try {
                 publisher = mapper.apply(item);

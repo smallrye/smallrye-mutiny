@@ -1,9 +1,8 @@
 package io.smallrye.mutiny.operators.multi;
 
+import java.util.concurrent.Flow.Subscription;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
-
-import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;

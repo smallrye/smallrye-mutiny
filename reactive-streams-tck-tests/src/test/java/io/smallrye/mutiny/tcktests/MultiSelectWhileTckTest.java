@@ -8,8 +8,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
+import java.util.concurrent.Flow.Publisher;
 
-import org.reactivestreams.Publisher;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -78,13 +78,13 @@ public class MultiSelectWhileTckTest extends AbstractPublisherTck<Long> {
     }
 
     @Override
-    public Publisher<Long> createPublisher(long elements) {
+    public Publisher<Long> createFlowPublisher(long elements) {
         return upstream(elements)
                 .select().first(x -> true);
     }
 
     @Override
-    public Publisher<Long> createFailedPublisher() {
+    public Publisher<Long> createFailedFlowPublisher() {
         return failedUpstream()
                 .select().first(x -> true);
     }

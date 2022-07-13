@@ -1,6 +1,7 @@
 package io.smallrye.mutiny.tcktests;
 
-import org.reactivestreams.Publisher;
+import java.util.concurrent.Flow;
+
 import org.testng.annotations.Ignore;
 
 import io.smallrye.mutiny.Multi;
@@ -8,7 +9,7 @@ import io.smallrye.mutiny.Multi;
 public class MultiReplayTckTest extends AbstractPublisherTck<Long> {
 
     @Override
-    public Publisher<Long> createPublisher(long elements) {
+    public Flow.Publisher<Long> createFlowPublisher(long elements) {
         Multi<Long> upstream = upstream(elements);
         return Multi.createBy().replaying().ofMulti(upstream);
     }

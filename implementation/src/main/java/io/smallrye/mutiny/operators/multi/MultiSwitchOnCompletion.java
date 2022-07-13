@@ -2,10 +2,9 @@ package io.smallrye.mutiny.operators.multi;
 
 import static io.smallrye.mutiny.helpers.ParameterValidation.SUPPLIER_PRODUCED_NULL;
 
+import java.util.concurrent.Flow;
+import java.util.concurrent.Flow.Publisher;
 import java.util.function.Supplier;
-
-import org.reactivestreams.Publisher;
-import org.reactivestreams.Subscriber;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
@@ -20,7 +19,7 @@ public class MultiSwitchOnCompletion<T> extends MultiOperator<T, T> {
     }
 
     @Override
-    public void subscribe(Subscriber<? super T> subscriber) {
+    public void subscribe(Flow.Subscriber<? super T> subscriber) {
         if (subscriber == null) {
             throw new NullPointerException("The subscriber must not be `null`");
         }

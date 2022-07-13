@@ -3,9 +3,9 @@ package io.smallrye.mutiny.tcktests;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Flow.Publisher;
+import java.util.concurrent.Flow.Subscription;
 
-import org.reactivestreams.Publisher;
-import org.reactivestreams.Subscription;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -92,13 +92,13 @@ public class MultiSelectFirstItemsTckTest extends AbstractPublisherTck<Long> {
     }
 
     @Override
-    public Publisher<Long> createPublisher(long elements) {
+    public Publisher<Long> createFlowPublisher(long elements) {
         return upstream(elements)
                 .select().first(Long.MAX_VALUE);
     }
 
     @Override
-    public Publisher<Long> createFailedPublisher() {
+    public Publisher<Long> createFailedFlowPublisher() {
         return failedUpstream()
                 .select().first(Long.MAX_VALUE);
     }

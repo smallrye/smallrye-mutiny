@@ -1,9 +1,8 @@
 package io.smallrye.mutiny.operators.multi.builders;
 
 import java.util.*;
+import java.util.concurrent.Flow;
 import java.util.concurrent.atomic.AtomicLong;
-
-import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.helpers.Subscriptions;
@@ -37,7 +36,7 @@ public class CollectionBasedMulti<T> extends AbstractMulti<T> {
         actual.onSubscribe(new CollectionSubscription<>(actual, collection));
     }
 
-    private static final class CollectionSubscription<T> implements Subscription {
+    private static final class CollectionSubscription<T> implements Flow.Subscription {
 
         private final MultiSubscriber<? super T> downstream;
         private final List<T> collection; // Immutable

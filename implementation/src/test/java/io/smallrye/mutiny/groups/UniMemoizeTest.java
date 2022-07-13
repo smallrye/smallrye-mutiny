@@ -33,6 +33,7 @@ import io.smallrye.mutiny.subscription.Cancellable;
 import io.smallrye.mutiny.subscription.UniSubscriber;
 import io.smallrye.mutiny.subscription.UniSubscription;
 import junit5.support.InfrastructureResource;
+import mutiny.zero.flow.adapters.AdaptersToFlow;
 
 @DisplayName("Tests for the uni.memoize() group")
 @ResourceLock(value = InfrastructureResource.NAME, mode = ResourceAccessMode.READ)
@@ -257,7 +258,7 @@ class UniMemoizeTest {
     @DisplayName("Test that uni.memoize().indefinitely() caches values emitted by a processor")
     void assertCachingTheValueEmittedByAProcessor() {
         UnicastProcessor<Integer> processor = UnicastProcessor.create();
-        Uni<Integer> cached = Uni.createFrom().publisher(processor).memoize().indefinitely();
+        Uni<Integer> cached = Uni.createFrom().publisher(AdaptersToFlow.publisher(processor)).memoize().indefinitely();
 
         UniAssertSubscriber<Integer> sub1 = new UniAssertSubscriber<>();
         UniAssertSubscriber<Integer> sub2 = new UniAssertSubscriber<>();
@@ -281,7 +282,7 @@ class UniMemoizeTest {
     @DisplayName("Test that uni.cache() caches values emitted by a processor")
     void assertCachingTheValueEmittedByAProcessorUsingDeprecatedUniCache() {
         UnicastProcessor<Integer> processor = UnicastProcessor.create();
-        Uni<Integer> cached = Uni.createFrom().publisher(processor).memoize().indefinitely();
+        Uni<Integer> cached = Uni.createFrom().publisher(AdaptersToFlow.publisher(processor)).memoize().indefinitely();
 
         UniAssertSubscriber<Integer> sub1 = new UniAssertSubscriber<>();
         UniAssertSubscriber<Integer> sub2 = new UniAssertSubscriber<>();
@@ -304,7 +305,7 @@ class UniMemoizeTest {
     @DisplayName("Test that uni.memoize().indefinitely() allows the immediate cancellation when values are emitted by a processor")
     void assertCancellingImmediately() {
         UnicastProcessor<Integer> processor = UnicastProcessor.create();
-        Uni<Integer> cached = Uni.createFrom().publisher(processor).memoize().indefinitely();
+        Uni<Integer> cached = Uni.createFrom().publisher(AdaptersToFlow.publisher(processor)).memoize().indefinitely();
 
         UniAssertSubscriber<Integer> sub1 = new UniAssertSubscriber<>(true);
         UniAssertSubscriber<Integer> sub2 = new UniAssertSubscriber<>(true);

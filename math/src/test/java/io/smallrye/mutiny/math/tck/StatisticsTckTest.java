@@ -2,22 +2,23 @@ package io.smallrye.mutiny.math.tck;
 
 import static io.smallrye.mutiny.math.tck.TckHelper.iterate;
 
-import org.reactivestreams.Publisher;
-import org.reactivestreams.tck.PublisherVerification;
+import java.util.concurrent.Flow.Publisher;
+
 import org.reactivestreams.tck.TestEnvironment;
+import org.reactivestreams.tck.flow.FlowPublisherVerification;
 import org.reactivestreams.tck.flow.support.TestException;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.math.Math;
 import io.smallrye.mutiny.math.Statistic;
 
-public class StatisticsTckTest extends PublisherVerification<Statistic<Long>> {
+public class StatisticsTckTest extends FlowPublisherVerification<Statistic<Long>> {
     public StatisticsTckTest() {
         super(new TestEnvironment(100));
     }
 
     @Override
-    public Publisher<Statistic<Long>> createPublisher(long elements) {
+    public Publisher<Statistic<Long>> createFlowPublisher(long elements) {
         Multi<Long> multi = Multi.createFrom().iterable(iterate(elements));
         return multi
                 .plug(Math.statistics())
@@ -25,7 +26,7 @@ public class StatisticsTckTest extends PublisherVerification<Statistic<Long>> {
     }
 
     @Override
-    public Publisher<Statistic<Long>> createFailedPublisher() {
+    public Publisher<Statistic<Long>> createFailedFlowPublisher() {
         return Multi.createFrom().<Long> failure(new TestException())
                 .plug(Math.statistics())
                 .skip().where(s -> s.getMin() == null);

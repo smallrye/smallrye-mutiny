@@ -12,6 +12,7 @@ import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.streams.Engine;
 import io.smallrye.mutiny.streams.operators.TerminalStage;
 import io.smallrye.mutiny.streams.operators.TerminalStageFactory;
+import mutiny.zero.flow.adapters.AdaptersToFlow;
 
 /**
  * Implementation of {@link Stage.Cancel}. It subscribes and disposes the stream immediately.
@@ -25,7 +26,7 @@ public class CancelStageFactory implements TerminalStageFactory<Stage.Cancel> {
         Objects.requireNonNull(stage);
         return (Multi<I> flow) -> {
             //noinspection SubscriberImplementation
-            flow.subscribe(new Subscriber<I>() {
+            flow.subscribe(AdaptersToFlow.subscriber(new Subscriber<I>() {
                 @Override
                 public void onSubscribe(Subscription s) {
                     s.cancel();
@@ -45,7 +46,7 @@ public class CancelStageFactory implements TerminalStageFactory<Stage.Cancel> {
                 public void onComplete() {
                     // Do nothing.
                 }
-            });
+            }));
             return Infrastructure.wrapCompletableFuture(CompletableFuture.completedFuture(null));
         };
     }

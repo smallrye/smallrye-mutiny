@@ -1,9 +1,8 @@
 package io.smallrye.mutiny.helpers;
 
+import java.util.concurrent.Flow.Subscriber;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
-
-import org.reactivestreams.Subscriber;
 
 /**
  * Methods to implement <em>half-serialization</em>: a form of serialization where {@code onNext} is guaranteed to be

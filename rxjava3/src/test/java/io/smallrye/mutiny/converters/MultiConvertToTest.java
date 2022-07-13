@@ -12,9 +12,9 @@ import org.junit.jupiter.api.Test;
 
 import io.reactivex.rxjava3.core.*;
 import io.reactivex.rxjava3.observers.TestObserver;
+import io.reactivex.rxjava3.subscribers.TestSubscriber;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.converters.multi.MultiRx3Converters;
-import io.smallrye.mutiny.helpers.test.AssertSubscriber;
 import io.smallrye.mutiny.subscription.MultiEmitter;
 
 @SuppressWarnings("ConstantConditions")
@@ -202,15 +202,15 @@ public class MultiConvertToTest {
     @Test
     public void testCreatingAFlowableWithRequest() {
         AtomicBoolean called = new AtomicBoolean();
-        AssertSubscriber<Integer> subscriber = Multi.createFrom()
+        TestSubscriber<Integer> subscriber = Multi.createFrom()
                 .deferred(() -> Multi.createFrom().item(1).onItem().invoke((item) -> called.set(true)))
                 .convert().with(MultiRx3Converters.toFlowable())
-                .subscribeWith(AssertSubscriber.create(0));
+                .subscribeWith(TestSubscriber.create(0));
 
         assertThat(called).isFalse();
-        subscriber.assertHasNotReceivedAnyItem().assertSubscribed();
+        subscriber.assertNoValues();
         subscriber.request(1);
-        subscriber.assertCompleted().assertItems(1);
+        subscriber.assertComplete().assertValue(1);
         assertThat(called).isTrue();
     }
 

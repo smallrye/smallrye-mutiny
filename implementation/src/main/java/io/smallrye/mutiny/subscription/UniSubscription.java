@@ -1,6 +1,6 @@
 package io.smallrye.mutiny.subscription;
 
-import org.reactivestreams.Subscription;
+import java.util.concurrent.Flow.Subscription;
 
 import io.smallrye.mutiny.Uni;
 

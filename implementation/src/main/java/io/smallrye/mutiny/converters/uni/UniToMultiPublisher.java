@@ -1,10 +1,9 @@
 package io.smallrye.mutiny.converters.uni;
 
+import java.util.concurrent.Flow;
+import java.util.concurrent.Flow.Subscriber;
+import java.util.concurrent.Flow.Subscription;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
-
-import org.reactivestreams.Publisher;
-import org.reactivestreams.Subscriber;
-import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.Context;
 import io.smallrye.mutiny.Uni;
@@ -13,7 +12,7 @@ import io.smallrye.mutiny.subscription.ContextSupport;
 import io.smallrye.mutiny.subscription.UniSubscriber;
 import io.smallrye.mutiny.subscription.UniSubscription;
 
-public final class UniToMultiPublisher<T> implements Publisher<T> {
+public final class UniToMultiPublisher<T> implements Flow.Publisher<T> {
 
     private final Uni<T> uni;
 

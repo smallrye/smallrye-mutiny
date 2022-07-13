@@ -17,6 +17,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Multi;
+import mutiny.zero.flow.adapters.AdaptersToReactiveStreams;
 
 /**
  * Checks the behavior of the {@link FlatMapIterableStageFactory}.
@@ -42,7 +43,7 @@ public class FlatMapIterableStageFactoryTest extends StageTestBase {
         Multi<Integer> publisher = Multi.createFrom().items(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
                 .emitOn(executor);
 
-        List<String> list = ReactiveStreams.fromPublisher(publisher)
+        List<String> list = ReactiveStreams.fromPublisher(AdaptersToReactiveStreams.publisher(publisher))
                 .filter(i -> i < 4)
                 .flatMapIterable(this::duplicate)
                 .flatMapCompletionStage(this::asString)

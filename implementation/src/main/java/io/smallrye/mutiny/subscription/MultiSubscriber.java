@@ -1,8 +1,8 @@
 package io.smallrye.mutiny.subscription;
 
-import org.reactivestreams.Publisher;
-import org.reactivestreams.Subscriber;
-import org.reactivestreams.Subscription;
+import java.util.concurrent.Flow.Publisher;
+import java.util.concurrent.Flow.Subscriber;
+import java.util.concurrent.Flow.Subscription;
 
 /**
  * A {@link Subscriber} receiving calls to {@link #onSubscribe(Subscription)} once after passing an instance of

@@ -16,10 +16,9 @@
 package io.smallrye.mutiny.operators.multi;
 
 import java.util.concurrent.Executor;
+import java.util.concurrent.Flow;
+import java.util.concurrent.Flow.Subscription;
 import java.util.concurrent.RejectedExecutionException;
-
-import org.reactivestreams.Subscriber;
-import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.helpers.ParameterValidation;
@@ -73,7 +72,7 @@ public class MultiSubscribeOnOp<T> extends AbstractMultiOperator<T, T> {
             }
         }
 
-        void scheduleSubscription(Multi<? extends T> upstream, Subscriber<? super T> downstream) {
+        void scheduleSubscription(Multi<? extends T> upstream, Flow.Subscriber<? super T> downstream) {
             try {
                 executor.execute(() -> upstream.subscribe().withSubscriber(this));
             } catch (RejectedExecutionException rejected) {

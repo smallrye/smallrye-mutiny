@@ -10,11 +10,11 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Flow;
+import java.util.concurrent.Flow.Processor;
 
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
-import org.reactivestreams.Processor;
-import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.helpers.Subscriptions;
@@ -306,7 +306,7 @@ public class SerializedProcessorTest {
     public void testSubscriptionAfterTerminalEvent() {
         final Processor<Integer, Integer> processor = UnicastProcessor.<Integer> create().serialized();
         processor.onComplete();
-        Subscription subscription = mock(Subscription.class);
+        Flow.Subscription subscription = mock(Flow.Subscription.class);
         processor.onSubscribe(subscription);
         verify(subscription).cancel();
     }
@@ -381,7 +381,7 @@ public class SerializedProcessorTest {
         assertThat(processor.emitting).isTrue();
         assertThat(processor.done).isFalse();
 
-        processor.onSubscribe(mock(Subscription.class));
+        processor.onSubscribe(mock(Flow.Subscription.class));
 
         assertThat(processor.emitting).isTrue();
         assertThat(processor.done).isFalse();
@@ -401,7 +401,7 @@ public class SerializedProcessorTest {
         assertThat(processor.emitting).isTrue();
         assertThat(processor.done).isTrue();
 
-        processor.onSubscribe(mock(Subscription.class));
+        processor.onSubscribe(mock(Flow.Subscription.class));
 
         assertThat(processor.emitting).isTrue();
         assertThat(processor.done).isTrue();
@@ -421,7 +421,7 @@ public class SerializedProcessorTest {
         assertThat(processor.emitting).isTrue();
         assertThat(processor.done).isTrue();
 
-        processor.onSubscribe(mock(Subscription.class));
+        processor.onSubscribe(mock(Flow.Subscription.class));
 
         assertThat(processor.emitting).isTrue();
         assertThat(processor.done).isTrue();

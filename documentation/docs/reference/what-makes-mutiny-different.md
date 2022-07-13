@@ -110,7 +110,7 @@ A subscriber should not request more than what it can handle, and a publisher sh
 
 !!! note
     
-    Mutiny uses the [Reactive Streams](https://www.reactive-streams.org/) protocol for back-pressure management.
+    Mutiny uses the [Reactive Streams](https://www.reactive-streams.org/) protocol for back-pressure management and the [Java Flow APIs](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/concurrent/Flow.html).
 
 !!! important
     

@@ -4,9 +4,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
+import java.util.concurrent.Flow;
 import java.util.function.Function;
 
-import org.reactivestreams.Publisher;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -61,13 +61,13 @@ public class MultiOnItemTransformTckTest extends AbstractPublisherTck<Long> {
     }
 
     @Override
-    public Publisher<Long> createPublisher(long elements) {
+    public Flow.Publisher<Long> createFlowPublisher(long elements) {
         return upstream(elements)
                 .map(Function.identity());
     }
 
     @Override
-    public Publisher<Long> createFailedPublisher() {
+    public Flow.Publisher<Long> createFailedFlowPublisher() {
         return failedUpstream()
                 .map(Function.identity());
     }

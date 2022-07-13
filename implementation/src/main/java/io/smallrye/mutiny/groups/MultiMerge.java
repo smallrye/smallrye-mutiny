@@ -3,8 +3,7 @@ package io.smallrye.mutiny.groups;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import org.reactivestreams.Publisher;
+import java.util.concurrent.Flow;
 
 import io.smallrye.common.annotation.CheckReturnValue;
 import io.smallrye.mutiny.CompositeException;
@@ -12,7 +11,7 @@ import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.operators.multi.MultiCombine;
 
 /**
- * Creates new {@link Multi} by merging several {@link Multi} or {@link Publisher}.
+ * Creates new {@link Multi} by merging several {@link Multi} or {@link Flow.Publisher}.
  * <p>
  * This class allows configuring how the merge is executed. Unlike a concatenation, a merge emits the items as they
  * come, so the items may be interleaved.
@@ -31,7 +30,7 @@ public class MultiMerge {
 
     /**
      * Creates a new {@link Multi} merging the items emitted by the given {@link Multi multis} /
-     * {@link Publisher publishers}.
+     * {@link Flow.Publisher publishers}.
      * <p>
      * If you pass no {@code publishers}, the resulting {@link Multi} emits the completion event immediately after subscription.
      * If you pass a single {@code publisher}, the resulting {@link Multi} emits the events from that {@code publisher}.
@@ -54,13 +53,13 @@ public class MultiMerge {
      */
     @SafeVarargs
     @CheckReturnValue
-    public final <T> Multi<T> streams(Publisher<T>... publishers) {
+    public final <T> Multi<T> streams(Flow.Publisher<T>... publishers) {
         return MultiCombine.merge(Arrays.asList(publishers), collectFailures, requests, concurrency);
     }
 
     /**
-     * Creates a new {@link Multi} merging the items emitted by the given {@link Publisher publishers} /
-     * {@link Publisher publishers}.
+     * Creates a new {@link Multi} merging the items emitted by the given {@link Flow.Publisher publishers} /
+     * {@link Flow.Publisher publishers}.
      * <p>
      * If you pass no {@code publishers}, the resulting {@link Multi} emits the completion event immediately after subscription.
      * If you pass a single {@code publisher}, the resulting {@link Multi} emits the events from that {@code publisher}.
@@ -78,11 +77,11 @@ public class MultiMerge {
      *
      * @param iterable the published, must not be empty, must not contain {@code null}, must not be {@code null}
      * @param <T> the type of item
-     * @return the new {@link Multi} emitting the items from the given set of {@link Publisher}
+     * @return the new {@link Multi} emitting the items from the given set of {@link Flow.Publisher}
      */
     @CheckReturnValue
-    public <T> Multi<T> streams(Iterable<? extends Publisher<T>> iterable) {
-        List<Publisher<T>> list = new ArrayList<>();
+    public <T> Multi<T> streams(Iterable<? extends Flow.Publisher<T>> iterable) {
+        List<Flow.Publisher<T>> list = new ArrayList<>();
         iterable.forEach(list::add);
         return MultiCombine.merge(list, collectFailures, requests, concurrency);
     }

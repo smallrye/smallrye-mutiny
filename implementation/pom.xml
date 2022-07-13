@@ -19,25 +19,25 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.reactivestreams</groupId>
-            <artifactId>reactive-streams</artifactId>
+            <groupId>io.smallrye.common</groupId>
+            <artifactId>smallrye-common-annotation</artifactId>
+            <version>${smallrye-common-annotation.version}</version>
         </dependency>
+
         <dependency>
             <groupId>io.reactivex.rxjava3</groupId>
             <artifactId>rxjava</artifactId>
             <scope>test</scope>
         </dependency>
-
+        <dependency>
+            <groupId>io.smallrye.reactive</groupId>
+            <artifactId>mutiny-zero-flow-adapters</artifactId>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>io.smallrye.reactive</groupId>
             <artifactId>mutiny-test-utils</artifactId>
             <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>io.smallrye.common</groupId>
-            <artifactId>smallrye-common-annotation</artifactId>
-            <version>${smallrye-common-annotation.version}</version>
         </dependency>
 
         <dependency>

@@ -10,6 +10,7 @@ import io.smallrye.mutiny.streams.Engine;
 import io.smallrye.mutiny.streams.operators.PublisherStage;
 import io.smallrye.mutiny.streams.operators.PublisherStageFactory;
 import io.smallrye.mutiny.streams.utils.CancellablePublisher;
+import mutiny.zero.flow.adapters.AdaptersToFlow;
 
 /**
  * Implementation of the {@link Stage.Concat} stage. Because both streams can emits on different thread,
@@ -43,7 +44,8 @@ public class ConcatStageFactory implements PublisherStageFactory<Stage.Concat> {
         @Override
         public Multi<O> get() {
             CancellablePublisher<O> cancellable = new CancellablePublisher<>(engine.buildPublisher(second));
-            return Multi.createBy().concatenating().streams(engine.buildPublisher(first), cancellable)
+            return Multi.createBy().concatenating()
+                    .streams(AdaptersToFlow.publisher(engine.buildPublisher(first)), AdaptersToFlow.publisher(cancellable))
                     .onTermination().invoke(cancellable::cancelIfNotSubscribed);
         }
     }

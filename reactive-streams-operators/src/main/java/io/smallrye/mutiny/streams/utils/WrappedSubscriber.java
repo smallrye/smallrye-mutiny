@@ -11,6 +11,8 @@ import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.helpers.StrictMultiSubscriber;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
+import mutiny.zero.flow.adapters.AdaptersToFlow;
+import mutiny.zero.flow.adapters.AdaptersToReactiveStreams;
 
 /**
  * @author <a href="http://escoffier.me">Clement Escoffier</a>
@@ -23,7 +25,7 @@ public class WrappedSubscriber<T> implements Subscriber<T> {
     private final AtomicBoolean subscribed = new AtomicBoolean(false);
 
     public WrappedSubscriber(Subscriber<T> delegate) {
-        this.source = new StrictMultiSubscriber<>(delegate);
+        this.source = AdaptersToReactiveStreams.subscriber(new StrictMultiSubscriber<>(AdaptersToFlow.subscriber(delegate)));
     }
 
     public CompletionStage<Void> future() {

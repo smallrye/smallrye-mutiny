@@ -3,9 +3,8 @@ package io.smallrye.mutiny.operators.multi;
 import static io.smallrye.mutiny.helpers.Subscriptions.CANCELLED;
 
 import java.util.Objects;
+import java.util.concurrent.Flow.Subscription;
 import java.util.function.Consumer;
-
-import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.helpers.Subscriptions;

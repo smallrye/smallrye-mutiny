@@ -1,6 +1,6 @@
 package io.smallrye.mutiny.helpers.spies;
 
-import org.reactivestreams.Subscription;
+import java.util.concurrent.Flow.Subscription;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.subscription.MultiSubscriber;

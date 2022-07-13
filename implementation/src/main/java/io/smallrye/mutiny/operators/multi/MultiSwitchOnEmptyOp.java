@@ -1,8 +1,7 @@
 package io.smallrye.mutiny.operators.multi;
 
 import java.util.Objects;
-
-import org.reactivestreams.Publisher;
+import java.util.concurrent.Flow.Publisher;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.infrastructure.Infrastructure;

@@ -3,11 +3,10 @@ package io.smallrye.mutiny.operators.multi.builders;
 import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
 import static io.smallrye.mutiny.helpers.ParameterValidation.nonNullNpe;
 
+import java.util.concurrent.Flow;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
-
-import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.groups.GeneratorEmitter;
 import io.smallrye.mutiny.helpers.Subscriptions;
@@ -37,7 +36,7 @@ public class GeneratorBasedMulti<T, S> extends AbstractMulti<T> {
         downstream.onSubscribe(new GeneratorSubscription(downstream, initialState));
     }
 
-    class GeneratorSubscription implements Subscription, GeneratorEmitter<T> {
+    class GeneratorSubscription implements Flow.Subscription, GeneratorEmitter<T> {
 
         private final MultiSubscriber<? super T> downstream;
         private S state;

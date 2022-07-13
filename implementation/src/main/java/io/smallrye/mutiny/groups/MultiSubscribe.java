@@ -5,12 +5,11 @@ import static io.smallrye.mutiny.subscription.Subscribers.NO_ON_FAILURE;
 
 import java.util.Queue;
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.Flow.Subscriber;
+import java.util.concurrent.Flow.Subscription;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
-
-import org.reactivestreams.Subscriber;
-import org.reactivestreams.Subscription;
 
 import io.smallrye.common.annotation.CheckReturnValue;
 import io.smallrye.common.annotation.Experimental;

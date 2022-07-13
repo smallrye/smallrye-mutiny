@@ -2,9 +2,8 @@ package io.smallrye.mutiny.groups;
 
 import static io.smallrye.mutiny.helpers.ParameterValidation.positive;
 
+import java.util.concurrent.Flow.Publisher;
 import java.util.function.Function;
-
-import org.reactivestreams.Publisher;
 
 import io.smallrye.common.annotation.CheckReturnValue;
 import io.smallrye.mutiny.CompositeException;

@@ -2,6 +2,7 @@ package io.smallrye.mutiny.converters.multi;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.converters.MultiConverter;
+import mutiny.zero.flow.adapters.AdaptersToFlow;
 import reactor.core.publisher.Flux;
 
 public class FromFlux<T> implements MultiConverter<Flux<T>, T> {
@@ -14,6 +15,6 @@ public class FromFlux<T> implements MultiConverter<Flux<T>, T> {
 
     @Override
     public Multi<T> from(Flux<T> instance) {
-        return Multi.createFrom().publisher(instance);
+        return Multi.createFrom().publisher(AdaptersToFlow.publisher(instance));
     }
 }

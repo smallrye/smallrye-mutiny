@@ -1,10 +1,9 @@
 package io.smallrye.mutiny.operators.multi;
 
 import java.util.ArrayDeque;
+import java.util.concurrent.Flow;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
-
-import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.helpers.ParameterValidation;
@@ -41,7 +40,7 @@ public class MultiSelectLastOp<T> extends AbstractMultiOperator<T, T> {
         }
 
         @Override
-        public void onSubscribe(Subscription subscription) {
+        public void onSubscribe(Flow.Subscription subscription) {
             if (compareAndSetUpstreamSubscription(null, subscription)) {
                 // Propagate subscription to downstream.
                 downstream.onSubscribe(this);
@@ -79,7 +78,7 @@ public class MultiSelectLastOp<T> extends AbstractMultiOperator<T, T> {
         }
 
         @Override
-        public void onSubscribe(Subscription subscription) {
+        public void onSubscribe(Flow.Subscription subscription) {
             if (compareAndSetUpstreamSubscription(null, subscription)) {
                 // Propagate subscription to downstream.
                 downstream.onSubscribe(this);

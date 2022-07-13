@@ -1,13 +1,11 @@
 package io.smallrye.mutiny.operators.multi;
 
+import java.util.concurrent.Flow;
+import java.util.concurrent.Flow.Publisher;
+import java.util.concurrent.Flow.Subscriber;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.function.Predicate;
-
-import org.reactivestreams.Processor;
-import org.reactivestreams.Publisher;
-import org.reactivestreams.Subscriber;
-import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Context;
@@ -104,7 +102,7 @@ public final class MultiRetryWhenOp<T> extends AbstractMultiOperator<T, T> {
 
         }
 
-        public void setWhen(Subscription w) {
+        public void setWhen(Flow.Subscription w) {
             arbiter.set(w);
         }
 
@@ -177,11 +175,11 @@ public final class MultiRetryWhenOp<T> extends AbstractMultiOperator<T, T> {
     static final class TriggerSubscriber extends AbstractMulti<Throwable>
             implements Multi<Throwable>, Subscriber<Object>, ContextSupport {
         RetryWhenOperator<?> operator;
-        private final Processor<Throwable, Throwable> processor = UnicastProcessor.<Throwable> create().serialized();
+        private final Flow.Processor<Throwable, Throwable> processor = UnicastProcessor.<Throwable> create().serialized();
         private Context context;
 
         @Override
-        public void onSubscribe(Subscription s) {
+        public void onSubscribe(Flow.Subscription s) {
             operator.setWhen(s);
         }
 

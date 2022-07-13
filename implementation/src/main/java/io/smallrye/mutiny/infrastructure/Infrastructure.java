@@ -8,10 +8,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ServiceLoader;
 import java.util.concurrent.*;
+import java.util.concurrent.Flow.Subscriber;
 import java.util.function.*;
-
-import org.reactivestreams.Publisher;
-import org.reactivestreams.Subscriber;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
@@ -112,7 +110,7 @@ public class Infrastructure {
         return current;
     }
 
-    public static <T> Subscriber<? super T> onMultiSubscription(Publisher<? extends T> instance,
+    public static <T> Subscriber<? super T> onMultiSubscription(Flow.Publisher<? extends T> instance,
             Subscriber<? super T> subscriber) {
         Subscriber<? super T> current = subscriber;
         for (MultiInterceptor itcp : MULTI_INTERCEPTORS) {

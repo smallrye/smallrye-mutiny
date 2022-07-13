@@ -2,12 +2,11 @@ package io.smallrye.mutiny.groups;
 
 import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
 
+import java.util.concurrent.Flow.Publisher;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
-
-import org.reactivestreams.Publisher;
 
 import io.smallrye.common.annotation.CheckReturnValue;
 import io.smallrye.mutiny.Multi;

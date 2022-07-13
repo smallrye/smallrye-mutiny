@@ -3,11 +3,10 @@ package io.smallrye.mutiny.operators.multi;
 import static io.smallrye.mutiny.helpers.EmptyUniSubscription.CANCELLED;
 import static io.smallrye.mutiny.helpers.ParameterValidation.SUPPLIER_PRODUCED_NULL;
 
+import java.util.concurrent.Flow;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.stream.Collector;
-
-import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.helpers.Subscriptions;
@@ -83,7 +82,7 @@ public final class MultiCollectorOp<T, A, R> extends AbstractMultiOperator<T, R>
 
         @Override
         public void onCompletion() {
-            Subscription subscription = getAndSetUpstreamSubscription(Subscriptions.CANCELLED);
+            Flow.Subscription subscription = getAndSetUpstreamSubscription(Subscriptions.CANCELLED);
             if (subscription != Subscriptions.CANCELLED) {
                 R result;
 

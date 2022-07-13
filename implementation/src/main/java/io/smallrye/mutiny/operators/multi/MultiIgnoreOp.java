@@ -1,8 +1,7 @@
 package io.smallrye.mutiny.operators.multi;
 
 import java.util.Objects;
-
-import org.reactivestreams.Subscription;
+import java.util.concurrent.Flow;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.subscription.MultiSubscriber;
@@ -24,7 +23,7 @@ public class MultiIgnoreOp<T> extends AbstractMultiOperator<T, Void> {
         }
 
         @Override
-        public void onSubscribe(Subscription subscription) {
+        public void onSubscribe(Flow.Subscription subscription) {
             if (compareAndSetUpstreamSubscription(null, subscription)) {
                 // Propagate subscription to downstream.
                 downstream.onSubscribe(this);

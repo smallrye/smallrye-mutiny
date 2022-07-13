@@ -14,6 +14,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Multi;
+import mutiny.zero.flow.adapters.AdaptersToReactiveStreams;
 
 /**
  * Checks the behavior of the {@link DistinctStageFactory}.
@@ -37,7 +38,7 @@ public class DistinctStageFactoryTest extends StageTestBase {
                 .items(1, 2, 1, 4, 3, 2, 5, 3, 6, 6, 4, 8, 7, 4, 5, 6, 7, 8, 9, 9, 10)
                 .emitOn(executor);
 
-        List<String> list = ReactiveStreams.fromPublisher(publisher)
+        List<String> list = ReactiveStreams.fromPublisher(AdaptersToReactiveStreams.publisher(publisher))
                 .filter(i -> i < 4)
                 .distinct()
                 .map(this::asString)

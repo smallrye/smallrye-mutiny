@@ -22,6 +22,7 @@ import org.reactivestreams.Subscriber;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.helpers.Subscriptions;
+import mutiny.zero.flow.adapters.AdaptersToReactiveStreams;
 
 /**
  * Checks the behavior of the {@link FlatMapCompletionStageFactory}.
@@ -45,7 +46,7 @@ public class FlatMapCompletionStageFactoryTest extends StageTestBase {
         Multi<Integer> publisher = Multi.createFrom().items(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
                 .emitOn(executor);
 
-        List<String> list = ReactiveStreams.fromPublisher(publisher)
+        List<String> list = ReactiveStreams.fromPublisher(AdaptersToReactiveStreams.publisher(publisher))
                 .filter(i -> i < 4)
                 .flatMapCompletionStage(this::square)
                 .flatMapCompletionStage(this::asString)
@@ -82,7 +83,7 @@ public class FlatMapCompletionStageFactoryTest extends StageTestBase {
         AtomicReference<Subscriber<? super String>> reference = new AtomicReference<>();
         Publisher<String> publisher = s -> {
             reference.set(s);
-            s.onSubscribe(Subscriptions.empty());
+            s.onSubscribe(AdaptersToReactiveStreams.subscription(Subscriptions.empty()));
         };
 
         CompletableFuture<List<String>> future = ReactiveStreams.fromPublisher(publisher)
@@ -106,7 +107,7 @@ public class FlatMapCompletionStageFactoryTest extends StageTestBase {
         AtomicReference<Subscriber<? super String>> reference = new AtomicReference<>();
         Publisher<String> publisher = s -> {
             reference.set(s);
-            s.onSubscribe(Subscriptions.empty());
+            s.onSubscribe(AdaptersToReactiveStreams.subscription(Subscriptions.empty()));
         };
 
         ReactiveStreams.fromPublisher(publisher)

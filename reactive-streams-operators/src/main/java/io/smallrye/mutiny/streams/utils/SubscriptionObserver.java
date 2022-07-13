@@ -9,6 +9,7 @@ import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.helpers.Subscriptions;
+import mutiny.zero.flow.adapters.AdaptersToReactiveStreams;
 
 /**
  * Represents a subscription between a source and a sink. Inform another {@link SubscriptionObserver} on cancellation,
@@ -160,7 +161,7 @@ class SubscriptionObserver<X> {
             if (obs.state.get() == State.FAILED) {
                 state.set(State.FAILED);
                 apply(downstream, d -> {
-                    d.onSubscribe(new Subscriptions.EmptySubscription());
+                    d.onSubscribe(AdaptersToReactiveStreams.subscription(new Subscriptions.EmptySubscription()));
                     d.onError(obs.failure());
                 });
                 sub.cancel();
@@ -169,7 +170,7 @@ class SubscriptionObserver<X> {
             if (obs.state.get() == State.COMPLETED) {
                 state.set(State.COMPLETED);
                 apply(downstream, d -> {
-                    d.onSubscribe(new Subscriptions.EmptySubscription());
+                    d.onSubscribe(AdaptersToReactiveStreams.subscription(new Subscriptions.EmptySubscription()));
                     d.onComplete();
                 });
                 sub.cancel();

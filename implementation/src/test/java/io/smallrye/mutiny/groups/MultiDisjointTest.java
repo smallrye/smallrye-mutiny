@@ -17,6 +17,7 @@ import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.helpers.test.AssertSubscriber;
 import junit5.support.InfrastructureResource;
+import mutiny.zero.flow.adapters.AdaptersToFlow;
 
 @SuppressWarnings("ConstantConditions")
 @ResourceLock(value = InfrastructureResource.NAME, mode = ResourceAccessMode.READ)
@@ -45,11 +46,11 @@ public class MultiDisjointTest {
     public void testWithPublishers() {
         AtomicBoolean subscribed = new AtomicBoolean();
         AssertSubscriber<String> subscriber = Multi.createFrom().items(
-                Flowable.just("a", "b", "c"),
-                Flowable.just("d", "e"),
-                Flowable.empty(),
-                Flowable.just("f", "g")
-                        .doOnSubscribe(s -> subscribed.set(true)))
+                AdaptersToFlow.publisher(Flowable.just("a", "b", "c")),
+                AdaptersToFlow.publisher(Flowable.just("d", "e")),
+                AdaptersToFlow.publisher(Flowable.empty()),
+                AdaptersToFlow.publisher(Flowable.just("f", "g")
+                        .doOnSubscribe(s -> subscribed.set(true))))
                 .onItem().<String> disjoint()
                 .subscribe().withSubscriber(AssertSubscriber.create(4));
         assertThat(subscribed).isFalse();

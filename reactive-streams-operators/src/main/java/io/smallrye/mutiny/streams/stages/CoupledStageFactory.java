@@ -12,6 +12,8 @@ import io.smallrye.mutiny.streams.Engine;
 import io.smallrye.mutiny.streams.operators.ProcessingStage;
 import io.smallrye.mutiny.streams.operators.ProcessingStageFactory;
 import io.smallrye.mutiny.streams.utils.CouplingProcessor;
+import mutiny.zero.flow.adapters.AdaptersToFlow;
+import mutiny.zero.flow.adapters.AdaptersToReactiveStreams;
 
 /**
  * Implementation of the {@link Stage.Coupled} stage.
@@ -27,7 +29,7 @@ public class CoupledStageFactory implements ProcessingStageFactory<Stage.Coupled
         Publisher<O> publisher = engine.buildPublisher(source);
         SubscriberWithCompletionStage<I, ?> subscriber = engine.buildSubscriber(sink);
 
-        return upstream -> Multi.createFrom().publisher(
-                new CouplingProcessor<>(upstream, subscriber.getSubscriber(), publisher));
+        return upstream -> Multi.createFrom().publisher(AdaptersToFlow.publisher(
+                new CouplingProcessor<>(AdaptersToReactiveStreams.publisher(upstream), subscriber.getSubscriber(), publisher)));
     }
 }

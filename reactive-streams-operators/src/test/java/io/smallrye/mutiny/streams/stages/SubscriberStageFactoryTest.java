@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.streams.Engine;
+import mutiny.zero.flow.adapters.AdaptersToReactiveStreams;
 
 /**
  * Checks the behavior of the {@link SubscriberStageFactory}.
@@ -38,7 +39,8 @@ public class SubscriberStageFactoryTest extends StageTestBase {
 
         SubscriberBuilder<Integer, Optional<Integer>> builder = ReactiveStreams.<Integer> builder().findFirst();
 
-        Optional<Integer> optional = ReactiveStreams.fromPublisher(publisher).filter(i -> i > 5)
+        Optional<Integer> optional = ReactiveStreams.fromPublisher(AdaptersToReactiveStreams.publisher(publisher))
+                .filter(i -> i > 5)
                 .to(builder).run().toCompletableFuture().join();
 
         assertThat(optional).contains(6);

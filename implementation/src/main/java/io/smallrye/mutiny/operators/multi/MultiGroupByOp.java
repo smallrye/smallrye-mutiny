@@ -6,15 +6,12 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Flow;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
-
-import org.reactivestreams.Publisher;
-import org.reactivestreams.Subscriber;
-import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.GroupedMulti;
 import io.smallrye.mutiny.Multi;
@@ -76,7 +73,7 @@ public final class MultiGroupByOp<T, K, V> extends AbstractMultiOperator<T, Grou
         }
 
         @Override
-        public void onSubscribe(Subscription subscription) {
+        public void onSubscribe(Flow.Subscription subscription) {
             if (compareAndSetUpstreamSubscription(null, subscription)) {
                 // Propagate subscription to downstream.
                 downstream.onSubscribe(this);
@@ -136,7 +133,7 @@ public final class MultiGroupByOp<T, K, V> extends AbstractMultiOperator<T, Grou
 
         @Override
         public void onFailure(Throwable throwable) {
-            Subscription subscription = getAndSetUpstreamSubscription(CANCELLED);
+            Flow.Subscription subscription = getAndSetUpstreamSubscription(CANCELLED);
             if (subscription != CANCELLED) {
                 done = true;
                 groups.values().forEach(group -> group.onFailure(throwable));
@@ -151,7 +148,7 @@ public final class MultiGroupByOp<T, K, V> extends AbstractMultiOperator<T, Grou
 
         @Override
         public void onCompletion() {
-            Subscription subscription = getAndSetUpstreamSubscription(CANCELLED);
+            Flow.Subscription subscription = getAndSetUpstreamSubscription(CANCELLED);
             if (subscription != CANCELLED) {
                 done = true;
                 groups.values().forEach(GroupedUnicast::onComplete);
@@ -301,9 +298,9 @@ public final class MultiGroupByOp<T, K, V> extends AbstractMultiOperator<T, Grou
     }
 
     @SuppressWarnings({ "ReactiveStreamsPublisherImplementation" })
-    private static final class State<T, K> implements Subscription, Publisher<T> {
+    private static final class State<T, K> implements Flow.Subscription, Flow.Publisher<T> {
 
-        private final AtomicReference<Subscriber<? super T>> downstream = new AtomicReference<>();
+        private final AtomicReference<Flow.Subscriber<? super T>> downstream = new AtomicReference<>();
         private final AtomicBoolean cancelled = new AtomicBoolean();
         private final AtomicLong requested = new AtomicLong();
         private final AtomicBoolean done = new AtomicBoolean();
@@ -339,7 +336,7 @@ public final class MultiGroupByOp<T, K, V> extends AbstractMultiOperator<T, Grou
         }
 
         @Override
-        public void subscribe(Subscriber<? super T> s) {
+        public void subscribe(Flow.Subscriber<? super T> s) {
             if (downstream.compareAndSet(null, s)) {
                 s.onSubscribe(this);
                 drain();
@@ -378,7 +375,7 @@ public final class MultiGroupByOp<T, K, V> extends AbstractMultiOperator<T, Grou
             int missed = 1;
 
             final Queue<T> q = queue;
-            Subscriber<? super T> actual = downstream.get();
+            Flow.Subscriber<? super T> actual = downstream.get();
             for (;;) {
                 if (actual != null) {
                     long r = requested.get();

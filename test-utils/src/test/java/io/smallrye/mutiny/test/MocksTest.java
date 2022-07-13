@@ -2,16 +2,17 @@ package io.smallrye.mutiny.test;
 
 import static org.mockito.Mockito.*;
 
+import java.util.concurrent.Flow;
+import java.util.concurrent.Flow.Subscription;
+
 import org.junit.jupiter.api.Test;
-import org.reactivestreams.Subscriber;
-import org.reactivestreams.Subscription;
 
 public class MocksTest {
 
     @Test
     public void subscriber() {
         Subscription subscription = mock(Subscription.class);
-        Subscriber<Object> subscriber = Mocks.subscriber();
+        Flow.Subscriber<Object> subscriber = Mocks.subscriber();
         subscriber.onSubscribe(subscription);
         verify(subscription).request(Long.MAX_VALUE);
     }
@@ -19,7 +20,7 @@ public class MocksTest {
     @Test
     public void subscriberWithRequests() {
         Subscription subscription = mock(Subscription.class);
-        Subscriber<Object> subscriber = Mocks.subscriber(20);
+        Flow.Subscriber<Object> subscriber = Mocks.subscriber(20);
         subscriber.onSubscribe(subscription);
         verify(subscription).request(20);
     }
@@ -27,7 +28,7 @@ public class MocksTest {
     @Test
     public void subscriberWithZeroRequest() {
         Subscription subscription = mock(Subscription.class);
-        Subscriber<Object> subscriber = Mocks.subscriber(0);
+        Flow.Subscriber<Object> subscriber = Mocks.subscriber(0);
         subscriber.onSubscribe(subscription);
         verify(subscription, never()).request(anyLong());
     }

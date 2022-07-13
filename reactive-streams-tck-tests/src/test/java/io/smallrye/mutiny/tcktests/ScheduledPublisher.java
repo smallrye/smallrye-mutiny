@@ -1,14 +1,13 @@
 package io.smallrye.mutiny.tcktests;
 
+import java.util.concurrent.Flow;
+import java.util.concurrent.Flow.Publisher;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
-import org.reactivestreams.Publisher;
-import org.reactivestreams.Subscriber;
-import org.reactivestreams.Subscription;
 import org.testng.Assert;
 
 /**
@@ -30,9 +29,9 @@ class ScheduledPublisher implements Publisher<Integer> {
     }
 
     @Override
-    public void subscribe(Subscriber<? super Integer> subscriber) {
+    public void subscribe(Flow.Subscriber<? super Integer> subscriber) {
         Assert.assertEquals(activePublishers.incrementAndGet(), 1);
-        subscriber.onSubscribe(new Subscription() {
+        subscriber.onSubscribe(new Flow.Subscription() {
             @Override
             public void request(long n) {
                 if (published.compareAndSet(false, true)) {

@@ -20,15 +20,19 @@
             <groupId>io.smallrye.reactive</groupId>
             <artifactId>mutiny</artifactId>
         </dependency>
-
         <dependency>
             <groupId>io.projectreactor</groupId>
             <artifactId>reactor-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.smallrye.reactive</groupId>
+            <artifactId>mutiny-zero-flow-adapters</artifactId>
         </dependency>
 
         <dependency>
             <groupId>io.smallrye.reactive</groupId>
             <artifactId>mutiny-test-utils</artifactId>
+            <scope>test</scope>
         </dependency>
 
         <dependency>

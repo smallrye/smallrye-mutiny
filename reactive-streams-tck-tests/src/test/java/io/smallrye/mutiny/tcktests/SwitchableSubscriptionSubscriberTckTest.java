@@ -1,9 +1,9 @@
 package io.smallrye.mutiny.tcktests;
 
 import java.util.Objects;
+import java.util.concurrent.Flow.Subscriber;
+import java.util.concurrent.Flow.Subscription;
 
-import org.reactivestreams.Subscriber;
-import org.reactivestreams.Subscription;
 import org.reactivestreams.tck.SubscriberWhiteboxVerification;
 
 import io.smallrye.mutiny.subscription.MultiSubscriber;
@@ -12,7 +12,7 @@ import io.smallrye.mutiny.subscription.SwitchableSubscriptionSubscriber;
 public class SwitchableSubscriptionSubscriberTckTest extends AbstractWhiteBoxSubscriberTck {
 
     @Override
-    public Subscriber<Integer> createSubscriber(SubscriberWhiteboxVerification.WhiteboxSubscriberProbe<Integer> probe) {
+    public Subscriber<Integer> createFlowSubscriber(SubscriberWhiteboxVerification.WhiteboxSubscriberProbe<Integer> probe) {
         MultiSubscriber<? super Integer> downstream = createReportingDownstreamSubscriber(probe);
         return new SwitchableSubscriptionSubscriber<Integer>(downstream) {
 

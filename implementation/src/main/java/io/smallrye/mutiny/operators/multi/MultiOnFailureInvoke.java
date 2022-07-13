@@ -3,10 +3,9 @@ package io.smallrye.mutiny.operators.multi;
 import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
 import static io.smallrye.mutiny.helpers.Subscriptions.CANCELLED;
 
+import java.util.concurrent.Flow;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
-
-import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Multi;
@@ -38,7 +37,7 @@ public class MultiOnFailureInvoke<T> extends AbstractMultiOperator<T, T> {
 
         @Override
         public void onFailure(Throwable failure) {
-            Subscription up = getAndSetUpstreamSubscription(CANCELLED);
+            Flow.Subscription up = getAndSetUpstreamSubscription(CANCELLED);
             MultiSubscriber<? super T> subscriber = downstream;
             if (up != Subscriptions.CANCELLED) {
                 try {
