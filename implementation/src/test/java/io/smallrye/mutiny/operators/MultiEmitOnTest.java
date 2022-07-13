@@ -6,13 +6,13 @@ import static org.mockito.Mockito.mock;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Flow;
 import java.util.concurrent.RejectedExecutionException;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
-import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.helpers.test.AssertSubscriber;
@@ -75,7 +75,7 @@ public class MultiEmitOnTest {
         Multi<Integer> rogue = new AbstractMulti<Integer>() {
             @Override
             public void subscribe(MultiSubscriber<? super Integer> subscriber) {
-                subscriber.onSubscribe(mock(Subscription.class));
+                subscriber.onSubscribe(mock(Flow.Subscription.class));
                 for (int i = 0; i < 10000; i++) {
                     subscriber.onItem(i);
                 }

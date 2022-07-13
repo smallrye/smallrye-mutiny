@@ -9,12 +9,12 @@ import java.io.IOException;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Flow.Subscription;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.awaitility.core.ConditionTimeoutException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
-import org.reactivestreams.Subscription;
 
 @SuppressWarnings("ConstantConditions")
 public class AbstractSubscriberTest {

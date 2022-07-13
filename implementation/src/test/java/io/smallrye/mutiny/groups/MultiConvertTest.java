@@ -4,9 +4,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.List;
+import java.util.concurrent.Flow;
 
 import org.junit.jupiter.api.Test;
-import org.reactivestreams.Publisher;
 
 import io.smallrye.mutiny.Multi;
 
@@ -22,7 +22,7 @@ public class MultiConvertTest {
     @Test
     public void testMultiConvertToPublisher() {
         Multi<Integer> items = Multi.createFrom().items(1, 2, 3);
-        Publisher<Integer> publisher = items.convert().toPublisher();
+        Flow.Publisher<Integer> publisher = items.convert().toPublisher();
         assertThat(items).isSameAs(publisher);
     }
 

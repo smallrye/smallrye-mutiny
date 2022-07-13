@@ -7,6 +7,7 @@ import static org.mockito.Mockito.mock;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.Objects;
+import java.util.concurrent.Flow;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
@@ -15,8 +16,6 @@ import java.util.function.Consumer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.ResourceAccessMode;
 import org.junit.jupiter.api.parallel.ResourceLock;
-import org.reactivestreams.Subscriber;
-import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.TestException;
@@ -316,11 +315,11 @@ public class MultiDistinctTest {
 
     @Test
     public void testOnItemAfterCancellation() {
-        AtomicReference<Subscriber<? super Integer>> ref = new AtomicReference<>();
+        AtomicReference<Flow.Subscriber<? super Integer>> ref = new AtomicReference<>();
         AbstractMulti<Integer> upstream = new AbstractMulti<Integer>() {
             @Override
-            public void subscribe(Subscriber<? super Integer> subscriber) {
-                subscriber.onSubscribe(mock(Subscription.class));
+            public void subscribe(Flow.Subscriber<? super Integer> subscriber) {
+                subscriber.onSubscribe(mock(Flow.Subscription.class));
                 ref.set(subscriber);
             }
         };

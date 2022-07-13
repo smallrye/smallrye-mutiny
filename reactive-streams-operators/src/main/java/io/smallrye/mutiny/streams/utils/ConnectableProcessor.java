@@ -9,6 +9,8 @@ import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.helpers.StrictMultiSubscriber;
 import io.smallrye.mutiny.helpers.Subscriptions;
+import mutiny.zero.flow.adapters.AdaptersToFlow;
+import mutiny.zero.flow.adapters.AdaptersToReactiveStreams;
 
 /**
  * A processor forwarding to a subscriber. This is used to connect a "next to be" producer.
@@ -41,8 +43,9 @@ public class ConnectableProcessor<T> implements Processor<T, T> {
         Objects.requireNonNull(subscriber);
 
         // Set the subscriber, if we already have one report an error as we do not support multicasting.
-        if (!this.subscriber.compareAndSet(null, new StrictMultiSubscriber<>(subscriber))) {
-            Subscriptions.fail(subscriber, new IllegalStateException("Multicasting not supported"));
+        if (!this.subscriber.compareAndSet(null,
+                AdaptersToReactiveStreams.subscriber(new StrictMultiSubscriber<>(AdaptersToFlow.subscriber(subscriber))))) {
+            Subscriptions.fail(AdaptersToFlow.subscriber(subscriber), new IllegalStateException("Multicasting not supported"));
             return;
         }
 
@@ -74,7 +77,8 @@ public class ConnectableProcessor<T> implements Processor<T, T> {
         // However, we could complete of failed in the meantime.
         subscriber.onSubscribe(
                 new WrappedSubscription(subscription.get(),
-                        () -> this.subscriber.set(new Subscriptions.CancelledSubscriber<>())));
+                        () -> this.subscriber
+                                .set(AdaptersToReactiveStreams.subscriber(new Subscriptions.CancelledSubscriber<>()))));
         if (!state.compareAndSet(State.HAS_SUBSCRIPTION, State.PROCESSING)) {
             if (state.get() == State.FAILED) {
                 subscriber.onError(failure.get());
@@ -88,11 +92,11 @@ public class ConnectableProcessor<T> implements Processor<T, T> {
     }
 
     private void manageSubscribeInCompleteState(Subscriber<? super T> subscriber) {
-        Subscriptions.complete(subscriber);
+        Subscriptions.complete(AdaptersToFlow.subscriber(subscriber));
     }
 
     private void manageSubscribeInFailedState(Subscriber<? super T> subscriber) {
-        Subscriptions.fail(subscriber, failure.get());
+        Subscriptions.fail(AdaptersToFlow.subscriber(subscriber), failure.get());
     }
 
     @Override
@@ -108,7 +112,7 @@ public class ConnectableProcessor<T> implements Processor<T, T> {
         if (!state.compareAndSet(State.IDLE, State.HAS_SUBSCRIPTION)) {
             state.set(State.PROCESSING);
             subscriber.get().onSubscribe(new WrappedSubscription(subscription,
-                    () -> subscriber.set(new Subscriptions.CancelledSubscriber<>())));
+                    () -> subscriber.set(AdaptersToReactiveStreams.subscriber(new Subscriptions.CancelledSubscriber<>()))));
         }
     }
 

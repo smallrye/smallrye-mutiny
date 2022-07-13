@@ -1,8 +1,7 @@
 package io.smallrye.mutiny.operators.multi;
 
 import java.util.ArrayDeque;
-
-import org.reactivestreams.Subscription;
+import java.util.concurrent.Flow.Subscription;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.helpers.ParameterValidation;

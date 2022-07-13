@@ -1,9 +1,8 @@
 package io.smallrye.mutiny.operators.multi.builders;
 
 import java.util.Iterator;
+import java.util.concurrent.Flow.Subscription;
 import java.util.concurrent.atomic.AtomicLong;
-
-import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.helpers.Subscriptions;

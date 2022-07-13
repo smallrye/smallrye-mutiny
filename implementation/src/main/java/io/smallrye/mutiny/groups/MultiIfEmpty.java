@@ -6,10 +6,9 @@ import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
 
 import java.util.Arrays;
 import java.util.NoSuchElementException;
+import java.util.concurrent.Flow;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
-
-import org.reactivestreams.Publisher;
 
 import io.smallrye.common.annotation.CheckReturnValue;
 import io.smallrye.mutiny.Multi;
@@ -98,7 +97,7 @@ public class MultiIfEmpty<T> {
 
     /**
      * When the upstream {@link Multi} completes without having emitted items, it continues with the events fired by the
-     * passed {@link org.reactivestreams.Publisher} / {@link Multi}.
+     * passed {@link Flow.Publisher} / {@link Multi}.
      * <p>
      * If the upstream {@link Multi} fails, the switch does not apply.
      *
@@ -106,20 +105,20 @@ public class MultiIfEmpty<T> {
      * @return the new {@link Multi}
      */
     @CheckReturnValue
-    public Multi<T> switchTo(Publisher<? extends T> other) {
+    public Multi<T> switchTo(Flow.Publisher<? extends T> other) {
         return switchTo(() -> other);
     }
 
     /**
      * When the upstream {@link Multi} completes without having emitted items, it continues with the events fired by a
-     * {@link Publisher} produces with the given {@link Supplier}.
+     * {@link Flow.Publisher} produces with the given {@link Supplier}.
      *
      * @param supplier the supplier to use to produce the publisher, must not be {@code null}, must not return {@code null}s
      * @return the new {@link Uni}
      */
     @CheckReturnValue
-    public Multi<T> switchTo(Supplier<Publisher<? extends T>> supplier) {
-        Supplier<Publisher<? extends T>> actual = Infrastructure.decorate(nonNull(supplier, "supplier"));
+    public Multi<T> switchTo(Supplier<Flow.Publisher<? extends T>> supplier) {
+        Supplier<Flow.Publisher<? extends T>> actual = Infrastructure.decorate(nonNull(supplier, "supplier"));
         return Infrastructure.onMultiCreation(new MultiSwitchOnEmpty<>(upstream, actual));
     }
 
@@ -163,7 +162,7 @@ public class MultiIfEmpty<T> {
         return switchTo(() -> createMultiFromIterableSupplier(actual));
     }
 
-    static <T> Publisher<? extends T> createMultiFromIterableSupplier(Supplier<? extends Iterable<? extends T>> supplier) {
+    static <T> Flow.Publisher<? extends T> createMultiFromIterableSupplier(Supplier<? extends Iterable<? extends T>> supplier) {
         Iterable<? extends T> iterable;
         try {
             iterable = supplier.get();

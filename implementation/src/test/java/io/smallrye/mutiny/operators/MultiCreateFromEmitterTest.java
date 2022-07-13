@@ -8,14 +8,14 @@ import java.io.IOException;
 import java.nio.BufferOverflowException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Flow;
+import java.util.concurrent.Flow.Subscription;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.Test;
-import org.reactivestreams.Subscriber;
-import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.helpers.test.AssertSubscriber;
@@ -251,7 +251,7 @@ public class MultiCreateFromEmitterTest {
         });
 
         //noinspection SubscriberImplementation
-        source.subscribe(new Subscriber<Integer>() {
+        source.subscribe(new Flow.Subscriber<Integer>() {
             @Override
             public void onSubscribe(Subscription s) {
                 s.request(10);

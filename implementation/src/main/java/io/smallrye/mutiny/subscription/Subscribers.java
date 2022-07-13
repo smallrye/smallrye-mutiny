@@ -3,10 +3,9 @@ package io.smallrye.mutiny.subscription;
 import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
 
 import java.util.Objects;
+import java.util.concurrent.Flow.Subscription;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import java.util.function.Consumer;
-
-import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Context;

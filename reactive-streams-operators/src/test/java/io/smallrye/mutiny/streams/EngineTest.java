@@ -16,6 +16,7 @@ import org.eclipse.microprofile.reactive.streams.operators.spi.UnsupportedStageE
 import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Multi;
+import mutiny.zero.flow.adapters.AdaptersToReactiveStreams;
 
 /**
  * Checks the behavior of the {@link Engine} class.
@@ -77,7 +78,7 @@ public class EngineTest {
     public void testValidCompletion() {
         engine = new Engine();
         List<Stage> stages = new ArrayList<>();
-        stages.add((Stage.PublisherStage) () -> Multi.createFrom().empty());
+        stages.add((Stage.PublisherStage) () -> AdaptersToReactiveStreams.publisher(Multi.createFrom().empty()));
         stages.add((Stage.Map) () -> i -> (int) i + 1);
         stages.add(new Stage.FindFirst() {
         });
@@ -90,7 +91,7 @@ public class EngineTest {
         assertThrows(IllegalArgumentException.class, () -> {
             engine = new Engine();
             List<Stage> stages = new ArrayList<>();
-            stages.add((Stage.PublisherStage) () -> Multi.createFrom().empty());
+            stages.add((Stage.PublisherStage) () -> AdaptersToReactiveStreams.publisher(Multi.createFrom().empty()));
             stages.add((Stage.Map) () -> i -> (int) i + 1);
             // This graph is not closed - so it's invalid
             Graph graph = () -> stages;
@@ -103,7 +104,7 @@ public class EngineTest {
         assertThrows(UnsupportedStageException.class, () -> {
             engine = new Engine();
             List<Stage> stages = new ArrayList<>();
-            stages.add((Stage.PublisherStage) () -> Multi.createFrom().empty());
+            stages.add((Stage.PublisherStage) () -> AdaptersToReactiveStreams.publisher(Multi.createFrom().empty()));
             stages.add((Stage.Map) () -> i -> (int) i + 1);
             stages.add(new Stage() {
                 // Unknown stage.

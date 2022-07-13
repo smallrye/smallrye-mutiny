@@ -1,11 +1,11 @@
 package io.smallrye.mutiny.tcktests;
 
-import org.reactivestreams.Publisher;
+import java.util.concurrent.Flow.Publisher;
 
 public class MultiOnItemInvokeTckTest extends AbstractPublisherTck<Long> {
 
     @Override
-    public Publisher<Long> createPublisher(long elements) {
+    public Publisher<Long> createFlowPublisher(long elements) {
         return upstream(elements)
                 .onItem().invoke(x -> {
                     // noop
@@ -13,7 +13,7 @@ public class MultiOnItemInvokeTckTest extends AbstractPublisherTck<Long> {
     }
 
     @Override
-    public Publisher<Long> createFailedPublisher() {
+    public Publisher<Long> createFailedFlowPublisher() {
         return failedUpstream()
                 .onItem().invoke(x -> {
                     // noop

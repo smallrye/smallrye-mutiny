@@ -4,11 +4,15 @@ import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.converters.multi.MultiReactorConverters;
 import io.smallrye.mutiny.converters.uni.UniReactorConverters;
+import mutiny.zero.flow.adapters.AdaptersToFlow;
+import mutiny.zero.flow.adapters.AdaptersToReactiveStreams;
 import org.junit.jupiter.api.Test;
+import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
+import java.util.concurrent.Flow;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -21,8 +25,11 @@ public class ReactorTest<T> {
         Mono<T> mono = getMono();
 
         // <reactor-multi-create>
-        Multi<T> multiFromFlux = Multi.createFrom().publisher(flux);
-        Multi<T> multiFromMono = Multi.createFrom().publisher(mono);
+        Flow.Publisher<T> fluxAsPublisher = AdaptersToFlow.publisher(flux);
+        Multi<T> multiFromFlux = Multi.createFrom().publisher(fluxAsPublisher);
+
+        Flow.Publisher<T> monoAsPublisher = AdaptersToFlow.publisher(mono);
+        Multi<T> multiFromMono = Multi.createFrom().publisher(monoAsPublisher);
         // </reactor-multi-create>
 
         List<String> list = multiFromFlux
@@ -43,8 +50,11 @@ public class ReactorTest<T> {
         Mono<T> mono = getMono();
 
         // <reactor-uni-create>
-        Uni<T> uniFromFlux = Uni.createFrom().publisher(flux);
-        Uni<T> uniFromMono = Uni.createFrom().publisher(mono);
+        Flow.Publisher<T> fluxAsPublisher = AdaptersToFlow.publisher(flux);
+        Uni<T> uniFromFlux = Uni.createFrom().publisher(fluxAsPublisher);
+
+        Flow.Publisher<T> monoAsPublisher = AdaptersToFlow.publisher(mono);
+        Uni<T> uniFromMono = Uni.createFrom().publisher(monoAsPublisher);
         // </reactor-uni-create>
 
         String s = uniFromFlux
@@ -63,8 +73,10 @@ public class ReactorTest<T> {
         Multi<T> multi = getMulti();
 
         // <reactor-create-multi>
-        Flux<T> fluxFromMulti = Flux.from(multi);
-        Mono<T> monoFromMulti = Mono.from(multi);
+        Publisher<T> multiAsLegacyPublisher = AdaptersToReactiveStreams.publisher(multi);
+
+        Flux<T> fluxFromMulti = Flux.from(multiAsLegacyPublisher);
+        Mono<T> monoFromMulti = Mono.from(multiAsLegacyPublisher);
         // </reactor-create-multi>
 
         List<String> list = fluxFromMulti

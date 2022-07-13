@@ -7,6 +7,8 @@ import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 
 import io.smallrye.mutiny.helpers.Subscriptions;
+import mutiny.zero.flow.adapters.AdaptersToFlow;
+import mutiny.zero.flow.adapters.AdaptersToReactiveStreams;
 
 /**
  * Wrapped a source publisher and make it cancellable on demand. The cancellation happens if
@@ -31,13 +33,13 @@ public class CancellablePublisher<T> implements Publisher<T> {
         if (subscribed.compareAndSet(false, true)) {
             source.subscribe(subscriber);
         } else {
-            Subscriptions.fail(subscriber, new IllegalStateException("Multicast not supported"));
+            Subscriptions.fail(AdaptersToFlow.subscriber(subscriber), new IllegalStateException("Multicast not supported"));
         }
     }
 
     public void cancelIfNotSubscribed() {
         if (subscribed.compareAndSet(false, true)) {
-            source.subscribe(new Subscriptions.CancelledSubscriber<>());
+            source.subscribe(AdaptersToReactiveStreams.subscriber(new Subscriptions.CancelledSubscriber<>()));
         }
     }
 }

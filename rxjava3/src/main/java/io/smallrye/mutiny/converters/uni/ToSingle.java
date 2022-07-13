@@ -5,6 +5,7 @@ import java.util.function.Function;
 
 import io.reactivex.rxjava3.core.Single;
 import io.smallrye.mutiny.Uni;
+import mutiny.zero.flow.adapters.AdaptersToReactiveStreams;
 
 @SuppressWarnings("rawtypes")
 public class ToSingle<T> implements Function<Uni<T>, Single<Optional<T>>> {
@@ -25,7 +26,7 @@ public class ToSingle<T> implements Function<Uni<T>, Single<Optional<T>>> {
 
     @Override
     public Single<Optional<T>> apply(Uni<T> uni) {
-        return Single.fromPublisher(uni.map(Optional::ofNullable).convert().toPublisher());
+        return Single.fromPublisher(AdaptersToReactiveStreams.publisher(uni.map(Optional::ofNullable).convert().toPublisher()));
     }
 
 }

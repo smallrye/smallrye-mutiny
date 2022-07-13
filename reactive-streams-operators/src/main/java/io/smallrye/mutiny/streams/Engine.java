@@ -23,6 +23,8 @@ import io.smallrye.mutiny.streams.stages.Stages;
 import io.smallrye.mutiny.streams.utils.ConnectableProcessor;
 import io.smallrye.mutiny.streams.utils.DefaultSubscriberWithCompletionStage;
 import io.smallrye.mutiny.streams.utils.WrappedProcessor;
+import mutiny.zero.flow.adapters.AdaptersToFlow;
+import mutiny.zero.flow.adapters.AdaptersToReactiveStreams;
 
 public class Engine implements ReactiveStreamsEngine {
 
@@ -45,13 +47,13 @@ public class Engine implements ReactiveStreamsEngine {
                 }
             }
         }
-        return publisher;
+        return AdaptersToReactiveStreams.publisher(publisher);
     }
 
     @Override
     public <T, R> SubscriberWithCompletionStage<T, R> buildSubscriber(Graph graph) {
         Processor<T, T> processor = new ConnectableProcessor<>();
-        Multi<T> flowable = Multi.createFrom().publisher(processor);
+        Multi<T> flowable = Multi.createFrom().publisher(AdaptersToFlow.publisher(processor));
         for (Stage stage : graph.getStages()) {
             Operator operator = Stages.lookup(stage);
             if (operator instanceof ProcessorOperator) {
@@ -72,14 +74,14 @@ public class Engine implements ReactiveStreamsEngine {
     public <T, R> Processor<T, R> buildProcessor(Graph graph) {
         Processor<T, T> processor = new ConnectableProcessor<>();
 
-        Multi<T> multi = Multi.createFrom().publisher(processor);
+        Multi<T> multi = Multi.createFrom().publisher(AdaptersToFlow.publisher(processor));
         for (Stage stage : graph.getStages()) {
             Operator operator = Stages.lookup(stage);
             multi = applyProcessors(multi, stage, (ProcessorOperator) operator);
         }
 
         //noinspection unchecked
-        return (Processor<T, R>) new WrappedProcessor<>(processor, multi);
+        return (Processor<T, R>) new WrappedProcessor<>(processor, AdaptersToReactiveStreams.publisher(multi));
     }
 
     @Override

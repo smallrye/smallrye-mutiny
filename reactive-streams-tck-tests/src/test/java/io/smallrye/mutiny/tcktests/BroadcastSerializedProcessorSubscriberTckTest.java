@@ -1,6 +1,7 @@
 package io.smallrye.mutiny.tcktests;
 
-import org.reactivestreams.Subscriber;
+import java.util.concurrent.Flow;
+
 import org.testng.annotations.Ignore;
 
 import io.smallrye.mutiny.operators.multi.processors.BroadcastProcessor;
@@ -8,7 +9,7 @@ import io.smallrye.mutiny.operators.multi.processors.BroadcastProcessor;
 public class BroadcastSerializedProcessorSubscriberTckTest extends AbstractBlackBoxSubscriberTck {
 
     @Override
-    public Subscriber<Integer> createSubscriber() {
+    public Flow.Subscriber<Integer> createFlowSubscriber() {
         return BroadcastProcessor.<Integer> create().serialized();
     }
 

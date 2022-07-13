@@ -2,17 +2,17 @@ package io.smallrye.mutiny.tcktests;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
+import java.util.concurrent.Flow;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
 
-import org.reactivestreams.Publisher;
-import org.reactivestreams.tck.PublisherVerification;
 import org.reactivestreams.tck.TestEnvironment;
+import org.reactivestreams.tck.flow.FlowPublisherVerification;
 import org.reactivestreams.tck.flow.support.TestException;
 
 import io.smallrye.mutiny.Multi;
 
-public abstract class AbstractPublisherTck<T> extends PublisherVerification<T> {
+public abstract class AbstractPublisherTck<T> extends FlowPublisherVerification<T> {
 
     public AbstractPublisherTck() {
         this(100);
@@ -31,7 +31,7 @@ public abstract class AbstractPublisherTck<T> extends PublisherVerification<T> {
     }
 
     @Override
-    public Publisher<T> createFailedPublisher() {
+    public Flow.Publisher<T> createFailedFlowPublisher() {
         return Multi.createFrom().failure(new TestException());
     }
 

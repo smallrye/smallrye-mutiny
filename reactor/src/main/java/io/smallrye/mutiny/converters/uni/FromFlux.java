@@ -2,6 +2,7 @@ package io.smallrye.mutiny.converters.uni;
 
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.converters.UniConverter;
+import mutiny.zero.flow.adapters.AdaptersToFlow;
 import reactor.core.publisher.Flux;
 
 public class FromFlux<T> implements UniConverter<Flux<T>, T> {
@@ -14,6 +15,6 @@ public class FromFlux<T> implements UniConverter<Flux<T>, T> {
 
     @Override
     public Uni<T> from(Flux<T> instance) {
-        return Uni.createFrom().publisher(instance);
+        return Uni.createFrom().publisher(AdaptersToFlow.publisher(instance));
     }
 }

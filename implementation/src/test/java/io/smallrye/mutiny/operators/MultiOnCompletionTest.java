@@ -7,18 +7,19 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.NoSuchElementException;
+import java.util.concurrent.Flow;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
-import org.reactivestreams.Publisher;
 
 import io.reactivex.rxjava3.core.Flowable;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.helpers.test.AssertSubscriber;
+import mutiny.zero.flow.adapters.AdaptersToFlow;
 
 @SuppressWarnings("ConstantConditions")
 public class MultiOnCompletionTest {
@@ -251,7 +252,7 @@ public class MultiOnCompletionTest {
     @Test
     public void testSwitchTo() {
         Multi.createFrom().range(1, 5)
-                .onCompletion().switchTo(Flowable.just(20))
+                .onCompletion().switchTo(AdaptersToFlow.publisher(Flowable.just(20)))
                 .subscribe().withSubscriber(AssertSubscriber.create(10))
                 .assertCompleted()
                 .assertItems(1, 2, 3, 4, 20);
@@ -278,7 +279,7 @@ public class MultiOnCompletionTest {
     @Test
     public void testSwitchToWithSupplierBeingNull() {
         assertThrows(IllegalArgumentException.class, () -> Multi.createFrom().range(1, 5)
-                .onCompletion().switchTo((Supplier<Publisher<? extends Integer>>) null));
+                .onCompletion().switchTo((Supplier<Flow.Publisher<? extends Integer>>) null));
     }
 
     @Test

@@ -15,6 +15,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Multi;
+import mutiny.zero.flow.adapters.AdaptersToReactiveStreams;
 
 /**
  * Checks the behavior of the {@link OnErrorResumeStageFactory}.
@@ -37,7 +38,7 @@ public class OnErrorResumeWithStageFactoryTest extends StageTestBase {
                 .emitOn(executor);
 
         List<Integer> list = ReactiveStreams.<Integer> failed(new Exception("BOOM"))
-                .onErrorResumeWith(t -> ReactiveStreams.fromPublisher(publisher))
+                .onErrorResumeWith(t -> ReactiveStreams.fromPublisher(AdaptersToReactiveStreams.publisher(publisher)))
                 .toList()
                 .run().toCompletableFuture().exceptionally(x -> Collections.emptyList()).get();
 

@@ -3,11 +3,11 @@ package io.smallrye.mutiny.operators.multi.multicast;
 import static org.mockito.Mockito.mock;
 
 import java.io.IOException;
+import java.util.concurrent.Flow;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.ResourceAccessMode;
 import org.junit.jupiter.api.parallel.ResourceLock;
-import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.helpers.test.AssertSubscriber;
@@ -88,7 +88,7 @@ class MultiReferenceCountSubscriberTest {
         Multi<Integer> multi = new AbstractMulti<Integer>() {
             @Override
             public void subscribe(MultiSubscriber<? super Integer> subscriber) {
-                subscriber.onSubscribe(mock(Subscription.class));
+                subscriber.onSubscribe(mock(Flow.Subscription.class));
                 subscriber.onItem(1);
                 subscriber.onItem(2);
                 subscriber.onItem(3);

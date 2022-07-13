@@ -5,9 +5,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+import java.util.concurrent.Flow.Subscriber;
+import java.util.concurrent.Flow.Subscription;
+
 import org.junit.jupiter.api.Test;
-import org.reactivestreams.Subscriber;
-import org.reactivestreams.Subscription;
 
 import io.reactivex.rxjava3.processors.PublishProcessor;
 import io.smallrye.mutiny.Multi;
@@ -16,6 +17,7 @@ import io.smallrye.mutiny.helpers.test.AssertSubscriber;
 import io.smallrye.mutiny.operators.AbstractMulti;
 import io.smallrye.mutiny.subscription.BackPressureFailure;
 import io.smallrye.mutiny.test.Mocks;
+import mutiny.zero.flow.adapters.AdaptersToFlow;
 
 public class FlatMapMainSubscriberTest {
 
@@ -181,7 +183,7 @@ public class FlatMapMainSubscriberTest {
         AssertSubscriber<Integer> subscriber = AssertSubscriber.create();
 
         Multi.createFrom().item(1)
-                .onItem().transformToMulti(v -> pp).merge()
+                .onItem().transformToMulti(v -> AdaptersToFlow.publisher(pp)).merge()
                 .onItem().invoke(v -> {
                     if (v == 1) {
                         pp.onComplete();

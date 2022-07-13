@@ -2,8 +2,7 @@
 package io.smallrye.mutiny.operators.multi.multicast;
 
 import java.time.Duration;
-
-import org.reactivestreams.Subscriber;
+import java.util.concurrent.Flow;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.helpers.ParameterValidation;
@@ -28,7 +27,7 @@ public abstract class ConnectableMulti<T> extends AbstractMulti<T> {
 
     /**
      * Allows this {@link ConnectableMulti} to start emitting the items from its upstream {@link Multi} to
-     * its {@link Subscriber}s.
+     * its {@link Flow.Subscriber}s.
      *
      * @param connection the connection.
      */

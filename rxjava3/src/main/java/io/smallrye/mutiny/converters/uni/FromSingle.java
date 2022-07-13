@@ -3,6 +3,7 @@ package io.smallrye.mutiny.converters.uni;
 import io.reactivex.rxjava3.core.Single;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.converters.UniConverter;
+import mutiny.zero.flow.adapters.AdaptersToFlow;
 
 public class FromSingle<T> implements UniConverter<Single<T>, T> {
 
@@ -14,6 +15,6 @@ public class FromSingle<T> implements UniConverter<Single<T>, T> {
 
     @Override
     public Uni<T> from(Single<T> instance) {
-        return Uni.createFrom().publisher(instance.toFlowable());
+        return Uni.createFrom().publisher(AdaptersToFlow.publisher(instance.toFlowable()));
     }
 }

@@ -1,5 +1,7 @@
 package io.smallrye.mutiny.groups;
 
+import java.util.concurrent.Flow;
+
 import io.smallrye.common.annotation.CheckReturnValue;
 import io.smallrye.common.annotation.Experimental;
 import io.smallrye.mutiny.Multi;
@@ -16,7 +18,7 @@ public class MultiCreateBy {
 
     /**
      * Creates a new instance of {@link Multi} by concatenating several
-     * {@link Multi} or {@link org.reactivestreams.Publisher} instances.
+     * {@link Multi} or {@link Flow.Publisher} instances.
      * <p>
      * The concatenation reads the streams in order and emits the items in order.
      *
@@ -29,7 +31,7 @@ public class MultiCreateBy {
 
     /**
      * Creates a new instance of {@link Multi} by merging several
-     * {@link Multi} or {@link org.reactivestreams.Publisher} instances.
+     * {@link Multi} or {@link Flow.Publisher} instances.
      * <p>
      * The concatenation reads the streams concurrently and emits the items as they come.
      *
@@ -42,7 +44,7 @@ public class MultiCreateBy {
 
     /**
      * Creates a new instance of {@link Multi} by associating / combining the items from different
-     * streams ({@link Multi} or {@link org.reactivestreams.Publisher}).
+     * streams ({@link Multi} or {@link Flow.Publisher}).
      * <p>
      * The resulting {@link Multi} can:
      * <ul>

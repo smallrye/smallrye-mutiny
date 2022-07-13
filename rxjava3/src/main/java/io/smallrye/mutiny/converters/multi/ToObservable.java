@@ -4,6 +4,7 @@ import java.util.function.Function;
 
 import io.reactivex.rxjava3.core.Observable;
 import io.smallrye.mutiny.Multi;
+import mutiny.zero.flow.adapters.AdaptersToReactiveStreams;
 
 @SuppressWarnings("rawtypes")
 public class ToObservable<T> implements Function<Multi<T>, Observable<T>> {
@@ -15,6 +16,6 @@ public class ToObservable<T> implements Function<Multi<T>, Observable<T>> {
 
     @Override
     public Observable<T> apply(Multi<T> multi) {
-        return Observable.fromPublisher(multi);
+        return Observable.fromPublisher(AdaptersToReactiveStreams.publisher(multi));
     }
 }

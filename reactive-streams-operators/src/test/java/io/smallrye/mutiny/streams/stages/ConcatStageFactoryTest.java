@@ -21,6 +21,7 @@ import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.streams.Engine;
+import mutiny.zero.flow.adapters.AdaptersToReactiveStreams;
 
 /**
  * Checks the behavior of the {@link ConcatStageFactory} class, especially the thread handling.
@@ -84,8 +85,8 @@ public class ConcatStageFactoryTest extends StageTestBase {
 
         LinkedHashSet<String> threads = new LinkedHashSet<>();
         CompletionStage<List<Integer>> list = ReactiveStreams.concat(
-                ReactiveStreams.fromPublisher(firstStream),
-                ReactiveStreams.fromPublisher(secondStream))
+                ReactiveStreams.fromPublisher(AdaptersToReactiveStreams.publisher(firstStream)),
+                ReactiveStreams.fromPublisher(AdaptersToReactiveStreams.publisher(secondStream)))
                 .peek(i -> threads.add(Thread.currentThread().getName()))
                 .toList().run();
         await().until(() -> list.toCompletableFuture().isDone());

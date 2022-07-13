@@ -7,18 +7,19 @@ import java.io.IOException;
 import java.util.concurrent.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Flow.Publisher;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
-import org.reactivestreams.Publisher;
 
 import io.reactivex.rxjava3.core.Flowable;
 import io.reactivex.rxjava3.subscribers.TestSubscriber;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.helpers.test.AssertSubscriber;
+import mutiny.zero.flow.adapters.AdaptersToReactiveStreams;
 
 public class UniToPublisherTest {
 
@@ -35,7 +36,7 @@ public class UniToPublisherTest {
     public void testWithImmediateValue() {
         Publisher<Integer> publisher = Uni.createFrom().item(1).convert().toPublisher();
         assertThat(publisher).isNotNull();
-        int first = Flowable.fromPublisher(publisher).blockingFirst();
+        int first = Flowable.fromPublisher(AdaptersToReactiveStreams.publisher(publisher)).blockingFirst();
         assertThat(first).isEqualTo(1);
     }
 
@@ -43,7 +44,7 @@ public class UniToPublisherTest {
     public void testWithImmediateNullValue() {
         Publisher<Integer> publisher = Uni.createFrom().item((Integer) null).convert().toPublisher();
         assertThat(publisher).isNotNull();
-        int first = Flowable.fromPublisher(publisher).blockingFirst(2);
+        int first = Flowable.fromPublisher(AdaptersToReactiveStreams.publisher(publisher)).blockingFirst(2);
         assertThat(first).isEqualTo(2);
     }
 
@@ -53,7 +54,7 @@ public class UniToPublisherTest {
         Publisher<Integer> publisher = Uni.createFrom().<Integer> failure(new IOException("boom")).convert().toPublisher();
         assertThat(publisher).isNotNull();
         try {
-            Flowable.fromPublisher(publisher).blockingFirst();
+            Flowable.fromPublisher(AdaptersToReactiveStreams.publisher(publisher)).blockingFirst();
             fail("exception expected");
         } catch (Exception e) {
             assertThat(e).hasCauseInstanceOf(IOException.class).hasMessageContaining("boom");
@@ -65,7 +66,7 @@ public class UniToPublisherTest {
     public void testWithImmediateValueWithRequest() {
         Publisher<Integer> publisher = Uni.createFrom().item(1).convert().toPublisher();
         assertThat(publisher).isNotNull();
-        TestSubscriber<Integer> test = Flowable.fromPublisher(publisher).test(0);
+        TestSubscriber<Integer> test = Flowable.fromPublisher(AdaptersToReactiveStreams.publisher(publisher)).test(0);
         assertThat(test.hasSubscription()).isTrue();
         test.request(1);
         test.assertResult(1);
@@ -76,7 +77,7 @@ public class UniToPublisherTest {
     public void testWithImmediateValueWithRequests() {
         Publisher<Integer> publisher = Uni.createFrom().item(1).convert().toPublisher();
         assertThat(publisher).isNotNull();
-        TestSubscriber<Integer> test = Flowable.fromPublisher(publisher).test(0);
+        TestSubscriber<Integer> test = Flowable.fromPublisher(AdaptersToReactiveStreams.publisher(publisher)).test(0);
         assertThat(test.hasSubscription()).isTrue();
         test.request(20);
         test.assertResult(1);
@@ -87,7 +88,7 @@ public class UniToPublisherTest {
     public void testInvalidRequest() {
         Publisher<Integer> publisher = Uni.createFrom().item(1).convert().toPublisher();
         assertThat(publisher).isNotNull();
-        TestSubscriber<Integer> test = Flowable.fromPublisher(publisher).test(0);
+        TestSubscriber<Integer> test = Flowable.fromPublisher(AdaptersToReactiveStreams.publisher(publisher)).test(0);
         assertThat(test.hasSubscription()).isTrue();
         test.request(0);
         test.assertError(IllegalArgumentException.class);
@@ -98,7 +99,7 @@ public class UniToPublisherTest {
     public void testWithImmediateValueWithOneRequestAndImmediateCancellation() {
         Publisher<Integer> publisher = Uni.createFrom().item(1).convert().toPublisher();
         assertThat(publisher).isNotNull();
-        TestSubscriber<Integer> test = Flowable.fromPublisher(publisher).test(1, true);
+        TestSubscriber<Integer> test = Flowable.fromPublisher(AdaptersToReactiveStreams.publisher(publisher)).test(1, true);
         assertThat(test.hasSubscription()).isTrue();
         assertThat(test.isCancelled()).isTrue();
         test.assertNotComplete();
@@ -112,7 +113,7 @@ public class UniToPublisherTest {
                 .item(count.getAndIncrement()))
                 .convert().toPublisher();
         assertThat(publisher).isNotNull();
-        Flowable<Integer> flow = Flowable.fromPublisher(publisher);
+        Flowable<Integer> flow = Flowable.fromPublisher(AdaptersToReactiveStreams.publisher(publisher));
         int first = flow.blockingFirst();
         assertThat(first).isEqualTo(1);
         first = flow.blockingFirst();
@@ -126,7 +127,7 @@ public class UniToPublisherTest {
                 .deferred(() -> Uni.createFrom().item(count.getAndIncrement())).memoize().indefinitely().convert()
                 .toPublisher();
         assertThat(publisher).isNotNull();
-        Flowable<Integer> flow = Flowable.fromPublisher(publisher);
+        Flowable<Integer> flow = Flowable.fromPublisher(AdaptersToReactiveStreams.publisher(publisher));
         int first = flow.blockingFirst();
         assertThat(first).isEqualTo(1);
         first = flow.blockingFirst();
@@ -137,7 +138,7 @@ public class UniToPublisherTest {
     public void testCancellationBetweenSubscriptionAndRequest() {
         Publisher<Integer> publisher = Uni.createFrom().item(1).convert().toPublisher();
         assertThat(publisher).isNotNull();
-        TestSubscriber<Integer> test = Flowable.fromPublisher(publisher).test(0);
+        TestSubscriber<Integer> test = Flowable.fromPublisher(AdaptersToReactiveStreams.publisher(publisher)).test(0);
         assertThat(test.hasSubscription()).isTrue();
         test.cancel();
         assertThat(test.isCancelled()).isTrue();
@@ -159,7 +160,7 @@ public class UniToPublisherTest {
         }).convert().toPublisher();
 
         assertThat(publisher).isNotNull();
-        TestSubscriber<Integer> test = Flowable.fromPublisher(publisher).test(0);
+        TestSubscriber<Integer> test = Flowable.fromPublisher(AdaptersToReactiveStreams.publisher(publisher)).test(0);
         assertThat(test.hasSubscription()).isTrue();
         test.request(1);
         test.cancel();
@@ -172,7 +173,7 @@ public class UniToPublisherTest {
     public void testCancellationAfterValue() {
         Publisher<Integer> publisher = Uni.createFrom().item(1).convert().toPublisher();
         assertThat(publisher).isNotNull();
-        TestSubscriber<Integer> test = Flowable.fromPublisher(publisher).test(0);
+        TestSubscriber<Integer> test = Flowable.fromPublisher(AdaptersToReactiveStreams.publisher(publisher)).test(0);
         assertThat(test.hasSubscription()).isTrue();
         test.request(1);
         // Immediate emission, so cancel is called after the emission.
@@ -187,7 +188,7 @@ public class UniToPublisherTest {
         executor = Executors.newScheduledThreadPool(1);
         Publisher<Integer> publisher = Uni.createFrom().item(1).emitOn(executor).convert().toPublisher();
         assertThat(publisher).isNotNull();
-        int first = Flowable.fromPublisher(publisher).blockingFirst();
+        int first = Flowable.fromPublisher(AdaptersToReactiveStreams.publisher(publisher)).blockingFirst();
         assertThat(first).isEqualTo(1);
     }
 
@@ -199,7 +200,7 @@ public class UniToPublisherTest {
                 .emitOn(executor)
                 .convert().toPublisher();
         assertThat(publisher).isNotNull();
-        int first = Flowable.fromPublisher(publisher).blockingFirst(2);
+        int first = Flowable.fromPublisher(AdaptersToReactiveStreams.publisher(publisher)).blockingFirst(2);
         assertThat(first).isEqualTo(2);
     }
 
@@ -211,7 +212,7 @@ public class UniToPublisherTest {
                 .emitOn(executor).convert().toPublisher();
         assertThat(publisher).isNotNull();
         try {
-            Flowable.fromPublisher(publisher).blockingFirst();
+            Flowable.fromPublisher(AdaptersToReactiveStreams.publisher(publisher)).blockingFirst();
             fail("exception expected");
         } catch (Exception e) {
             assertThat(e).hasCauseInstanceOf(IOException.class).hasMessageContaining("boom");

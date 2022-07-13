@@ -2,12 +2,11 @@ package io.smallrye.mutiny.operators.multi;
 
 import java.util.Objects;
 import java.util.Queue;
+import java.util.concurrent.Flow;
+import java.util.concurrent.Flow.Subscription;
 import java.util.concurrent.atomic.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
-
-import org.reactivestreams.Publisher;
-import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.Context;
 import io.smallrye.mutiny.Multi;
@@ -20,7 +19,7 @@ import io.smallrye.mutiny.subscription.ContextSupport;
 import io.smallrye.mutiny.subscription.MultiSubscriber;
 
 public final class MultiFlatMapOp<I, O> extends AbstractMultiOperator<I, O> {
-    private final Function<? super I, ? extends Publisher<? extends O>> mapper;
+    private final Function<? super I, ? extends Flow.Publisher<? extends O>> mapper;
 
     private final boolean postponeFailurePropagation;
     private final int maxConcurrency;
@@ -29,7 +28,7 @@ public final class MultiFlatMapOp<I, O> extends AbstractMultiOperator<I, O> {
     private final Supplier<? extends Queue<O>> mainQueueSupplier;
 
     public MultiFlatMapOp(Multi<? extends I> upstream,
-            Function<? super I, ? extends Publisher<? extends O>> mapper,
+            Function<? super I, ? extends Flow.Publisher<? extends O>> mapper,
             boolean postponeFailurePropagation,
             int maxConcurrency,
             int requests) {
@@ -63,7 +62,7 @@ public final class MultiFlatMapOp<I, O> extends AbstractMultiOperator<I, O> {
         final int maxConcurrency;
         final int requests;
         final int limit;
-        final Function<? super I, ? extends Publisher<? extends O>> mapper;
+        final Function<? super I, ? extends Flow.Publisher<? extends O>> mapper;
         final Supplier<? extends Queue<O>> mainQueueSupplier;
         final Supplier<? extends Queue<O>> innerQueueSupplier;
         final MultiSubscriber<? super O> downstream;
@@ -92,7 +91,7 @@ public final class MultiFlatMapOp<I, O> extends AbstractMultiOperator<I, O> {
         int lastIndex;
 
         public FlatMapMainSubscriber(MultiSubscriber<? super O> downstream,
-                Function<? super I, ? extends Publisher<? extends O>> mapper,
+                Function<? super I, ? extends Flow.Publisher<? extends O>> mapper,
                 boolean delayError,
                 int concurrency,
                 Supplier<? extends Queue<O>> mainQueueSupplier,
@@ -172,7 +171,7 @@ public final class MultiFlatMapOp<I, O> extends AbstractMultiOperator<I, O> {
                 return;
             }
 
-            Publisher<? extends O> p;
+            Flow.Publisher<? extends O> p;
 
             try {
                 p = mapper.apply(item);

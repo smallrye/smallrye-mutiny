@@ -1,21 +1,20 @@
 package io.smallrye.mutiny.tcktests;
 
+import java.util.concurrent.Flow.Publisher;
 import java.util.stream.LongStream;
-
-import org.reactivestreams.Publisher;
 
 import io.smallrye.mutiny.Multi;
 
 public class MultiOnFailureRecoverWithItemTckTest extends AbstractPublisherTck<Long> {
 
     @Override
-    public Publisher<Long> createPublisher(long l) {
+    public Publisher<Long> createFlowPublisher(long l) {
         return failedUpstream()
                 .onFailure().recoverWithMulti(t -> Multi.createFrom().items(LongStream.rangeClosed(1, l).boxed()));
     }
 
     @Override
-    public Publisher<Long> createFailedPublisher() {
+    public Publisher<Long> createFailedFlowPublisher() {
         return failedUpstream()
                 .onFailure().recoverWithItem(t -> {
                     // Re-throw the exception.

@@ -1,6 +1,6 @@
 package io.smallrye.mutiny.tcktests;
 
-import org.reactivestreams.Publisher;
+import java.util.concurrent.Flow.Publisher;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
@@ -8,13 +8,13 @@ import io.smallrye.mutiny.Uni;
 public class UniTransformToMultiTckTest extends AbstractPublisherTck<Long> {
 
     @Override
-    public Publisher<Long> createPublisher(long elements) {
+    public Publisher<Long> createFlowPublisher(long elements) {
         return Uni.createFrom().item(elements)
                 .onItem().transformToMulti(max -> upstream(elements));
     }
 
     @Override
-    public Publisher<Long> createFailedPublisher() {
+    public Publisher<Long> createFailedFlowPublisher() {
         return Uni.createFrom().<Integer> failure(new RuntimeException("failed"))
                 .onItem().transformToMulti(max -> Multi.createFrom().iterable(iterate(100)));
     }

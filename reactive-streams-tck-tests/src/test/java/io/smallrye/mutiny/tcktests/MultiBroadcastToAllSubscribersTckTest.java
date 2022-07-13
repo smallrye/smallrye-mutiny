@@ -1,18 +1,19 @@
 package io.smallrye.mutiny.tcktests;
 
-import org.reactivestreams.Publisher;
+import java.util.concurrent.Flow.Publisher;
+
 import org.testng.annotations.Ignore;
 
 public class MultiBroadcastToAllSubscribersTckTest extends AbstractPublisherTck<Long> {
 
     @Override
-    public Publisher<Long> createPublisher(long elements) {
+    public Publisher<Long> createFlowPublisher(long elements) {
         return upstream(elements)
                 .broadcast().toAllSubscribers();
     }
 
     @Override
-    public Publisher<Long> createFailedPublisher() {
+    public Publisher<Long> createFailedFlowPublisher() {
         return failedUpstream()
                 .broadcast().toAllSubscribers();
     }

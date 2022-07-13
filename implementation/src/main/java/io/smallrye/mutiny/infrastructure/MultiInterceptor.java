@@ -1,7 +1,7 @@
 package io.smallrye.mutiny.infrastructure;
 
-import org.reactivestreams.Publisher;
-import org.reactivestreams.Subscriber;
+import java.util.concurrent.Flow;
+import java.util.concurrent.Flow.Subscriber;
 
 import io.smallrye.mutiny.Multi;
 
@@ -38,7 +38,7 @@ public interface MultiInterceptor extends MutinyInterceptor {
      * @param <T> the type of item
      * @return the subscriber to use instead of the passed one. By default, it returns the given subscriber.
      */
-    default <T> Subscriber<? super T> onSubscription(Publisher<? extends T> instance, Subscriber<? super T> subscriber) {
+    default <T> Subscriber<? super T> onSubscription(Flow.Publisher<? extends T> instance, Subscriber<? super T> subscriber) {
         return subscriber;
     }
 

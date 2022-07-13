@@ -1,7 +1,7 @@
 package io.smallrye.mutiny.helpers;
 
-import org.reactivestreams.Subscriber;
-import org.reactivestreams.Subscription;
+import java.util.concurrent.Flow.Subscriber;
+import java.util.concurrent.Flow.Subscription;
 
 import io.smallrye.mutiny.Context;
 import io.smallrye.mutiny.subscription.ContextSupport;

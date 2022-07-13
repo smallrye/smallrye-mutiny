@@ -66,7 +66,7 @@ Mutiny can be used in any asynchronous application such as event-driven microser
 <div markdown>
 ## :material-bridge: Reactive Converters Built-In
 
-Mutiny is based on the _Reactive Streams_ specification, and so it can be integrated with any other reactive programming library.
+Mutiny is based on the [Reactive Streams protocol](https://www.reactive-streams.org/) and [Java Flow](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/concurrent/Flow.html), and so it can be integrated with any other reactive programming library.
 
 In addition, it proposes _converters_ to interact with other popular libraries.
 </div>

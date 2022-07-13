@@ -1,9 +1,8 @@
 package io.smallrye.mutiny.operators.multi;
 
+import java.util.concurrent.Flow;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
-
-import org.reactivestreams.Publisher;
 
 import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Multi;
@@ -41,7 +40,7 @@ public final class MultiRetryOp<T> extends AbstractMultiOperator<T, T> {
 
     static final class RetrySubscriber<T> extends SwitchableSubscriptionSubscriber<T> {
 
-        private final Publisher<? extends T> upstream;
+        private final Flow.Publisher<? extends T> upstream;
         private final AtomicInteger wip = new AtomicInteger();
 
         private long remaining;
@@ -49,7 +48,7 @@ public final class MultiRetryOp<T> extends AbstractMultiOperator<T, T> {
 
         private final Predicate<? super Throwable> onFailurePredicate;
 
-        RetrySubscriber(Publisher<? extends T> upstream, Predicate<? super Throwable> onFailurePredicate,
+        RetrySubscriber(Flow.Publisher<? extends T> upstream, Predicate<? super Throwable> onFailurePredicate,
                 MultiSubscriber<? super T> downstream, long attempts) {
             super(downstream);
             this.upstream = upstream;

@@ -8,11 +8,11 @@ import static org.mockito.Mockito.verify;
 
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Flow;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.function.Predicate;
 
 import org.junit.jupiter.api.Test;
-import org.reactivestreams.Subscriber;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
@@ -124,7 +124,7 @@ public class MultiSelectWhereAndWhenTest {
     public void testNoEmissionAfterCompletion() {
         BroadcastProcessor<Integer> processor = BroadcastProcessor.create();
         MultiSelectWhereOp<Integer> filter = new MultiSelectWhereOp<>(processor, x -> x % 2 == 0);
-        Subscriber<Integer> subscriber = Mocks.subscriber();
+        Flow.Subscriber<Integer> subscriber = Mocks.subscriber();
         filter.subscribe(subscriber);
 
         processor.onNext(1);
@@ -147,7 +147,7 @@ public class MultiSelectWhereAndWhenTest {
     public void testNoEmissionAfterFailure() {
         BroadcastProcessor<Integer> processor = BroadcastProcessor.create();
         MultiSelectWhereOp<Integer> filter = new MultiSelectWhereOp<>(processor, x -> x % 2 == 0);
-        Subscriber<Integer> subscriber = Mocks.subscriber();
+        Flow.Subscriber<Integer> subscriber = Mocks.subscriber();
         filter.subscribe(subscriber);
 
         processor.onNext(1);

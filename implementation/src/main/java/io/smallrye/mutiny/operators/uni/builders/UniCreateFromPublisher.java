@@ -3,11 +3,9 @@ package io.smallrye.mutiny.operators.uni.builders;
 import static io.smallrye.mutiny.helpers.EmptyUniSubscription.CANCELLED;
 import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
 
+import java.util.concurrent.Flow;
+import java.util.concurrent.Flow.Subscription;
 import java.util.concurrent.atomic.AtomicReference;
-
-import org.reactivestreams.Publisher;
-import org.reactivestreams.Subscriber;
-import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.Context;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
@@ -17,9 +15,9 @@ import io.smallrye.mutiny.subscription.UniSubscriber;
 import io.smallrye.mutiny.subscription.UniSubscription;
 
 public class UniCreateFromPublisher<T> extends AbstractUni<T> {
-    private final Publisher<? extends T> publisher;
+    private final Flow.Publisher<? extends T> publisher;
 
-    public UniCreateFromPublisher(Publisher<? extends T> publisher) {
+    public UniCreateFromPublisher(Flow.Publisher<? extends T> publisher) {
         this.publisher = nonNull(publisher, "publisher");
     }
 
@@ -29,7 +27,7 @@ public class UniCreateFromPublisher<T> extends AbstractUni<T> {
     }
 
     @SuppressWarnings("ReactiveStreamsSubscriberImplementation")
-    private class PublisherSubscriber implements UniSubscription, Subscriber<T>, ContextSupport {
+    private class PublisherSubscriber implements UniSubscription, Flow.Subscriber<T>, ContextSupport {
 
         private final UniSubscriber<? super T> subscriber;
         AtomicReference<Subscription> subscription = new AtomicReference<>();
@@ -40,7 +38,7 @@ public class UniCreateFromPublisher<T> extends AbstractUni<T> {
 
         private void forward() {
             subscriber.onSubscribe(this);
-            Subscriber<? super T> sub = Infrastructure.onMultiSubscription(publisher, this);
+            Flow.Subscriber<? super T> sub = Infrastructure.onMultiSubscription(publisher, this);
             publisher.subscribe(sub);
         }
 

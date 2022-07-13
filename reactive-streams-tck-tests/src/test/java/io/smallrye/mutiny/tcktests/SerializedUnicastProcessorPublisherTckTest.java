@@ -1,6 +1,6 @@
 package io.smallrye.mutiny.tcktests;
 
-import org.reactivestreams.Publisher;
+import java.util.concurrent.Flow.Publisher;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.operators.multi.processors.SerializedProcessor;
@@ -9,7 +9,7 @@ import io.smallrye.mutiny.operators.multi.processors.UnicastProcessor;
 public class SerializedUnicastProcessorPublisherTckTest extends AbstractPublisherTck<Long> {
 
     @Override
-    public Publisher<Long> createPublisher(long elements) {
+    public Publisher<Long> createFlowPublisher(long elements) {
         Multi<Long> multi = Multi.createFrom().iterable(iterate(elements));
         SerializedProcessor<Long, Long> processor = UnicastProcessor.<Long> create().serialized();
 

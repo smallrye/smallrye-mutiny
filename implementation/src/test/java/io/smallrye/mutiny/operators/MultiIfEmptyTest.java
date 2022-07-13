@@ -6,14 +6,15 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.NoSuchElementException;
+import java.util.concurrent.Flow.Publisher;
 import java.util.function.Supplier;
 
 import org.junit.jupiter.api.Test;
-import org.reactivestreams.Publisher;
 
 import io.reactivex.rxjava3.core.Flowable;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.helpers.test.AssertSubscriber;
+import mutiny.zero.flow.adapters.AdaptersToFlow;
 
 public class MultiIfEmptyTest {
 
@@ -228,7 +229,7 @@ public class MultiIfEmptyTest {
     @Test
     public void testSwitchTo() {
         Multi.createFrom().empty()
-                .onCompletion().ifEmpty().switchTo(Flowable.just(20))
+                .onCompletion().ifEmpty().switchTo(AdaptersToFlow.publisher(Flowable.just(20)))
                 .subscribe().withSubscriber(AssertSubscriber.create(10))
                 .assertCompleted()
                 .assertItems(20);

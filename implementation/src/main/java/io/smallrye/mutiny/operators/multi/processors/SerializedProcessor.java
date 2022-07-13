@@ -2,10 +2,9 @@ package io.smallrye.mutiny.operators.multi.processors;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import org.reactivestreams.Processor;
-import org.reactivestreams.Subscriber;
-import org.reactivestreams.Subscription;
+import java.util.concurrent.Flow.Processor;
+import java.util.concurrent.Flow.Subscriber;
+import java.util.concurrent.Flow.Subscription;
 
 /**
  * Wraps a processor into a serialized version of this processor.

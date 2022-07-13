@@ -3,10 +3,9 @@ package io.smallrye.mutiny.operators.multi.builders;
 import static io.smallrye.mutiny.helpers.Subscriptions.TERMINATED;
 
 import java.util.Queue;
+import java.util.concurrent.Flow;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
-
-import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.Context;
 import io.smallrye.mutiny.helpers.queues.Queues;
@@ -34,7 +33,7 @@ public class SerializedMultiEmitter<T> implements MultiEmitter<T>, MultiSubscrib
     }
 
     @Override
-    public void onSubscribe(Subscription s) {
+    public void onSubscribe(Flow.Subscription s) {
         // do nothing.
     }
 

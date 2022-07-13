@@ -1,19 +1,19 @@
 package io.smallrye.mutiny.tcktests;
 
-import org.reactivestreams.Publisher;
+import java.util.concurrent.Flow;
 
 import io.smallrye.mutiny.Uni;
 
 public class MultiOnItemTransformToUniAndConcatenateTckTest extends AbstractPublisherTck<Long> {
 
     @Override
-    public Publisher<Long> createPublisher(long elements) {
+    public Flow.Publisher<Long> createFlowPublisher(long elements) {
         return upstream(elements)
                 .onItem().transformToUniAndConcatenate(x -> Uni.createFrom().item(x));
     }
 
     @Override
-    public Publisher<Long> createFailedPublisher() {
+    public Flow.Publisher<Long> createFailedFlowPublisher() {
         return failedUpstream()
                 .onItem().transformToUniAndConcatenate(x -> Uni.createFrom().item(x));
     }

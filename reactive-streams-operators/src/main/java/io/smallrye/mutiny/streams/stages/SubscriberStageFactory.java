@@ -11,6 +11,7 @@ import io.smallrye.mutiny.streams.Engine;
 import io.smallrye.mutiny.streams.operators.TerminalStage;
 import io.smallrye.mutiny.streams.operators.TerminalStageFactory;
 import io.smallrye.mutiny.streams.utils.WrappedSubscriber;
+import mutiny.zero.flow.adapters.AdaptersToFlow;
 
 /**
  * Implementation of the {@link Stage.SubscriberStage} stage.
@@ -38,7 +39,7 @@ public class SubscriberStageFactory implements TerminalStageFactory<Stage.Subscr
         @Override
         public CompletionStage<Void> apply(Multi<I> source) {
             WrappedSubscriber<I> wrapped = new WrappedSubscriber<>(subscriber);
-            source.subscribe().withSubscriber(wrapped);
+            source.subscribe().withSubscriber(AdaptersToFlow.subscriber(wrapped));
             return wrapped.future();
         }
     }

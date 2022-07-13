@@ -1,6 +1,6 @@
 package io.smallrye.mutiny.operators.multi.builders;
 
-import org.reactivestreams.Publisher;
+import java.util.concurrent.Flow.Publisher;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.helpers.Subscriptions;

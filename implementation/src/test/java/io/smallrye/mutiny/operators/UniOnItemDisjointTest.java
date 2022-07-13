@@ -15,6 +15,7 @@ import io.reactivex.rxjava3.core.Flowable;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.helpers.test.AssertSubscriber;
+import mutiny.zero.flow.adapters.AdaptersToFlow;
 
 public class UniOnItemDisjointTest {
 
@@ -67,7 +68,7 @@ public class UniOnItemDisjointTest {
 
     @Test
     public void testDisjointWithPublisher() {
-        List<String> r = Uni.createFrom().item(Flowable.just("a", "b", "c"))
+        List<String> r = Uni.createFrom().item(AdaptersToFlow.publisher(Flowable.just("a", "b", "c")))
                 .onItem().<String> disjoint()
                 .collect().asList()
                 .await().indefinitely();
@@ -76,7 +77,7 @@ public class UniOnItemDisjointTest {
 
     @Test
     public void testDisjointWithEmptyPublisher() {
-        List<String> r = Uni.createFrom().item(Flowable.empty())
+        List<String> r = Uni.createFrom().item(AdaptersToFlow.publisher(Flowable.empty()))
                 .onItem().<String> disjoint()
                 .collect().asList()
                 .await().indefinitely();
@@ -124,7 +125,7 @@ public class UniOnItemDisjointTest {
     public void testDisjointWithNeverPublisher() {
         AtomicBoolean cancelled = new AtomicBoolean();
         AssertSubscriber<String> subscriber = Uni.createFrom()
-                .item(Flowable.never().doOnCancel(() -> cancelled.set(true)))
+                .item(AdaptersToFlow.publisher(Flowable.never().doOnCancel(() -> cancelled.set(true))))
                 .onItem().<String> disjoint()
                 .subscribe().withSubscriber(AssertSubscriber.create(10));
 

@@ -2,7 +2,7 @@ package io.smallrye.mutiny.operators.multi;
 
 import static io.smallrye.mutiny.helpers.Subscriptions.CANCELLED;
 
-import org.reactivestreams.Subscription;
+import java.util.concurrent.Flow.Subscription;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.subscription.MultiSubscriber;

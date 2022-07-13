@@ -6,15 +6,11 @@ import static org.mockito.Mockito.mock;
 
 import java.io.IOException;
 import java.util.Queue;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
-import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.helpers.queues.Queues;
 import io.smallrye.mutiny.helpers.test.AssertSubscriber;
@@ -99,7 +95,7 @@ public class UnicastProcessorTest {
         AssertSubscriber<String> subscriber = processor
                 .subscribe().withSubscriber(new AssertSubscriber<>(50, true));
 
-        processor.onSubscribe(mock(Subscription.class));
+        processor.onSubscribe(mock(Flow.Subscription.class));
         processor.onNext("a");
         processor.onNext("b");
         processor.onComplete();

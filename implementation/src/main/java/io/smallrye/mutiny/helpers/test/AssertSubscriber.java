@@ -6,14 +6,12 @@ import java.time.Duration;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.concurrent.*;
+import java.util.concurrent.Flow.Subscriber;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
-
-import org.reactivestreams.Subscriber;
-import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.Context;
 import io.smallrye.mutiny.subscription.ContextSupport;
@@ -44,7 +42,7 @@ public class AssertSubscriber<T> implements Subscriber<T>, ContextSupport {
     /**
      * The subscription received from upstream.
      */
-    private final AtomicReference<Subscription> subscription = new AtomicReference<>();
+    private final AtomicReference<Flow.Subscription> subscription = new AtomicReference<>();
 
     /**
      * The number of requested items.
@@ -565,7 +563,7 @@ public class AssertSubscriber<T> implements Subscriber<T>, ContextSupport {
     }
 
     /**
-     * Awaits for a subscription event (the subscriber receives a {@link Subscription} from the upstream.
+     * Awaits for a subscription event (the subscriber receives a {@link Flow.Subscription} from the upstream.
      * It waits at most {@link #DEFAULT_TIMEOUT}.
      * <p>
      * If the timeout expired, the check fails.
@@ -577,7 +575,7 @@ public class AssertSubscriber<T> implements Subscriber<T>, ContextSupport {
     }
 
     /**
-     * Awaits for a subscription event (the subscriber receives a {@link Subscription} from the upstream.
+     * Awaits for a subscription event (the subscriber receives a {@link Flow.Subscription} from the upstream.
      * It waits at most {@code duration}.
      * <p>
      * If the timeout expired, the check fails.
@@ -742,7 +740,7 @@ public class AssertSubscriber<T> implements Subscriber<T>, ContextSupport {
     }
 
     @Override
-    public void onSubscribe(Subscription s) {
+    public void onSubscribe(Flow.Subscription s) {
         numberOfSubscription++;
         subscription.set(s);
         subscribed.countDown();

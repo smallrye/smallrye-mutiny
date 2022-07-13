@@ -3,7 +3,7 @@ package io.smallrye.mutiny.groups;
 import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
 import static io.smallrye.mutiny.helpers.ParameterValidation.size;
 
-import org.reactivestreams.Publisher;
+import java.util.concurrent.Flow;
 
 import io.smallrye.common.annotation.CheckReturnValue;
 import io.smallrye.mutiny.Multi;
@@ -12,12 +12,12 @@ import io.smallrye.mutiny.tuples.Tuple3;
 
 public class MultiItemCombine3<T1, T2, T3> extends MultiItemCombineIterable {
 
-    public MultiItemCombine3(Iterable<Publisher<?>> iterable) {
+    public MultiItemCombine3(Iterable<Flow.Publisher<?>> iterable) {
         super(iterable);
     }
 
     /**
-     * Configures the combination to wait until all the {@link Publisher streams} to fire a completion or failure event
+     * Configures the combination to wait until all the {@link Flow.Publisher streams} to fire a completion or failure event
      * before propagating a failure downstream.
      *
      * @return the current {@link MultiItemCombine3}

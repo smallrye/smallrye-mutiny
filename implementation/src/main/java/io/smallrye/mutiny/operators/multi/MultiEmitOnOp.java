@@ -4,13 +4,12 @@ import static io.smallrye.mutiny.helpers.Subscriptions.CANCELLED;
 
 import java.util.Queue;
 import java.util.concurrent.Executor;
+import java.util.concurrent.Flow;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
-
-import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.helpers.ParameterValidation;
@@ -83,7 +82,7 @@ public class MultiEmitOnOp<T> extends AbstractMultiOperator<T, T> {
         }
 
         @Override
-        public void onSubscribe(Subscription subscription) {
+        public void onSubscribe(Flow.Subscription subscription) {
             if (compareAndSetUpstreamSubscription(null, subscription)) {
                 downstream.onSubscribe(this);
                 subscription.request(16);
@@ -161,7 +160,7 @@ public class MultiEmitOnOp<T> extends AbstractMultiOperator<T, T> {
             try {
                 executor.execute(this);
             } catch (RejectedExecutionException rejected) {
-                Subscription subscription = getAndSetUpstreamSubscription(CANCELLED);
+                Flow.Subscription subscription = getAndSetUpstreamSubscription(CANCELLED);
                 if (subscription != CANCELLED) {
                     done = true;
                     cancelUpstream();

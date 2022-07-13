@@ -2,13 +2,11 @@ package io.smallrye.mutiny.operators.multi.processors;
 
 import java.util.Objects;
 import java.util.Queue;
+import java.util.concurrent.Flow;
+import java.util.concurrent.Flow.Processor;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
-
-import org.reactivestreams.Processor;
-import org.reactivestreams.Subscriber;
-import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.helpers.Subscriptions;
@@ -26,7 +24,7 @@ import io.smallrye.mutiny.subscription.MultiSubscriber;
  *
  * @param <T> the type of item
  */
-public class UnicastProcessor<T> extends AbstractMulti<T> implements Processor<T, T>, Subscription {
+public class UnicastProcessor<T> extends AbstractMulti<T> implements Processor<T, T>, Flow.Subscription {
 
     private final Runnable onTermination;
     private final Queue<T> queue;
@@ -35,9 +33,9 @@ public class UnicastProcessor<T> extends AbstractMulti<T> implements Processor<T
     private volatile Throwable failure = null;
     private volatile boolean cancelled = false;
 
-    private volatile Subscriber<? super T> downstream = null;
-    private static final AtomicReferenceFieldUpdater<UnicastProcessor, Subscriber> DOWNSTREAM_UPDATER = AtomicReferenceFieldUpdater
-            .newUpdater(UnicastProcessor.class, Subscriber.class, "downstream");
+    private volatile Flow.Subscriber<? super T> downstream = null;
+    private static final AtomicReferenceFieldUpdater<UnicastProcessor, Flow.Subscriber> DOWNSTREAM_UPDATER = AtomicReferenceFieldUpdater
+            .newUpdater(UnicastProcessor.class, Flow.Subscriber.class, "downstream");
 
     private final AtomicInteger wip = new AtomicInteger();
     private final AtomicLong requested = new AtomicLong();
@@ -77,7 +75,7 @@ public class UnicastProcessor<T> extends AbstractMulti<T> implements Processor<T
         }
     }
 
-    void drainWithDownstream(Subscriber<? super T> actual) {
+    void drainWithDownstream(Flow.Subscriber<? super T> actual) {
         int missed = 1;
 
         final Queue<T> q = queue;
@@ -129,7 +127,7 @@ public class UnicastProcessor<T> extends AbstractMulti<T> implements Processor<T
 
         int missed = 1;
         for (;;) {
-            Subscriber<? super T> actual = downstream;
+            Flow.Subscriber<? super T> actual = downstream;
             if (actual != null) {
                 drainWithDownstream(actual);
                 return;
@@ -142,7 +140,7 @@ public class UnicastProcessor<T> extends AbstractMulti<T> implements Processor<T
     }
 
     private boolean isCancelledOrDone(boolean isDone, boolean isEmpty) {
-        Subscriber<? super T> subscriber = downstream;
+        Flow.Subscriber<? super T> subscriber = downstream;
         if (cancelled) {
             queue.clear();
             return true;
@@ -160,7 +158,7 @@ public class UnicastProcessor<T> extends AbstractMulti<T> implements Processor<T
     }
 
     @Override
-    public void onSubscribe(Subscription upstream) {
+    public void onSubscribe(Flow.Subscription upstream) {
         if (hasUpstream) {
             upstream.cancel();
             return;

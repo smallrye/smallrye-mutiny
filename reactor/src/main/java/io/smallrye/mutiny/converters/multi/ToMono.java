@@ -3,6 +3,7 @@ package io.smallrye.mutiny.converters.multi;
 import java.util.function.Function;
 
 import io.smallrye.mutiny.Multi;
+import mutiny.zero.flow.adapters.AdaptersToReactiveStreams;
 import reactor.core.publisher.Mono;
 
 public class ToMono<T> implements Function<Multi<T>, Mono<T>> {
@@ -15,6 +16,6 @@ public class ToMono<T> implements Function<Multi<T>, Mono<T>> {
 
     @Override
     public Mono<T> apply(Multi<T> multi) {
-        return Mono.from(multi);
+        return Mono.from(AdaptersToReactiveStreams.publisher(multi));
     }
 }

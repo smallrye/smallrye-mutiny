@@ -2,9 +2,9 @@ package io.smallrye.mutiny.tcktests;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.concurrent.Flow.Publisher;
 import java.util.stream.LongStream;
 
-import org.reactivestreams.Publisher;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -81,7 +81,7 @@ public class MultiConcatTckTest extends AbstractPublisherTck<Long> {
     }
 
     @Override
-    public Publisher<Long> createPublisher(long elements) {
+    public Publisher<Long> createFlowPublisher(long elements) {
         long toEmitFromFirst = elements / 2;
 
         return Multi.createBy().concatenating().streams(

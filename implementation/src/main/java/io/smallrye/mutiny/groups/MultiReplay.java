@@ -3,6 +3,8 @@ package io.smallrye.mutiny.groups;
 import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
 import static io.smallrye.mutiny.helpers.ParameterValidation.positive;
 
+import java.util.concurrent.Flow;
+
 import io.smallrye.common.annotation.CheckReturnValue;
 import io.smallrye.common.annotation.Experimental;
 import io.smallrye.mutiny.Multi;
@@ -44,7 +46,7 @@ public class MultiReplay {
      * starting from the current position in the upstream replay log.
      * When the number of elements to replay is unbounded, then a new subscriber replays from the start.</li>
      * <li>All current and late subscribers observe terminal completion / error signals.</li>
-     * <li>Items are pushed synchronously to subscribers when they call {@link org.reactivestreams.Subscription#request(long)}
+     * <li>Items are pushed synchronously to subscribers when they call {@link Flow.Subscription#request(long)}
      * and there are enough elements to satisfy a part of the demand.
      * Otherwise items are pushed from the upstream to all subscribers with an outstanding demand.</li>
      * </ol>

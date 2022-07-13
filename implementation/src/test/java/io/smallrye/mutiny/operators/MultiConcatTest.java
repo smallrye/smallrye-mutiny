@@ -12,6 +12,7 @@ import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.helpers.spies.MultiOnCancellationSpy;
 import io.smallrye.mutiny.helpers.spies.Spy;
 import io.smallrye.mutiny.helpers.test.AssertSubscriber;
+import mutiny.zero.flow.adapters.AdaptersToFlow;
 
 public class MultiConcatTest {
 
@@ -99,7 +100,7 @@ public class MultiConcatTest {
     @Test
     public void testConcatenationOfSeveralPublishers() {
         AssertSubscriber<Integer> subscriber = Multi.createBy().concatenating().streams(
-                Flowable.just(5),
+                AdaptersToFlow.publisher(Flowable.just(5)),
                 Multi.createFrom().range(1, 3),
                 Multi.createFrom().items(8, 9, 10).onItem().transform(i -> i + 1)).subscribe()
                 .withSubscriber(new AssertSubscriber<>(100));
@@ -112,7 +113,7 @@ public class MultiConcatTest {
     public void testConcatenationOfSeveralPublishersAsIterable() {
         AssertSubscriber<Integer> subscriber = Multi.createBy().concatenating().streams(
                 Arrays.asList(
-                        Flowable.just(5),
+                        AdaptersToFlow.publisher(Flowable.just(5)),
                         Multi.createFrom().range(1, 3),
                         Multi.createFrom().items(8, 9, 10).onItem().transform(i -> i + 1)))
                 .subscribe().withSubscriber(new AssertSubscriber<>(100));

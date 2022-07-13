@@ -5,10 +5,9 @@ import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
 
 import java.util.Arrays;
 import java.util.NoSuchElementException;
+import java.util.concurrent.Flow.Publisher;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
-
-import org.reactivestreams.Publisher;
 
 import io.smallrye.common.annotation.CheckReturnValue;
 import io.smallrye.mutiny.Multi;
@@ -104,7 +103,7 @@ public class MultiOnCompletion<T> {
 
     /**
      * When the upstream {@link Multi} completes, it continues with the events fired by the passed
-     * {@link org.reactivestreams.Publisher} / {@link Multi}.
+     * {@link Publisher} / {@link Multi}.
      * <p>
      * If the upstream {@link Multi} fails, the switch does not apply.
      *

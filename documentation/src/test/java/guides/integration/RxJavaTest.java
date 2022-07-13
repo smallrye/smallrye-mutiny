@@ -5,10 +5,12 @@ import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.converters.multi.MultiRx3Converters;
 import io.smallrye.mutiny.converters.uni.UniRx3Converters;
+import mutiny.zero.flow.adapters.AdaptersToFlow;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.Flow;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -26,7 +28,9 @@ public class RxJavaTest<T> {
         // </rx-multi-create-observable>
 
         // <rx-multi-create-flowable>
-        Multi<T> multiFromFlowable = Multi.createFrom().publisher(flowable);
+        Flow.Publisher<T> flowableAsPublisher = AdaptersToFlow.publisher(flowable);
+
+        Multi<T> multiFromFlowable = Multi.createFrom().publisher(flowableAsPublisher);
         // </rx-multi-create-flowable>
 
         List<String> list = multiFromObservable
@@ -87,7 +91,9 @@ public class RxJavaTest<T> {
         // </rx-uni-create-observable>
 
         // <rx-uni-create-flowable>
-        Uni<T> uniFromFlowable = Uni.createFrom().publisher(flowable);
+        Flow.Publisher<T> flowableAsPublisher = AdaptersToFlow.publisher(flowable);
+
+        Uni<T> uniFromFlowable = Uni.createFrom().publisher(flowableAsPublisher);
         // </rx-uni-create-flowable>
 
         String s = uniFromFlowable

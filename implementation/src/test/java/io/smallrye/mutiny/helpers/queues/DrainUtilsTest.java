@@ -4,15 +4,16 @@ import static org.mockito.Mockito.mock;
 
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Flow;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BooleanSupplier;
 
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
-import org.reactivestreams.Subscription;
 
 import io.reactivex.rxjava3.internal.util.QueueDrainHelper;
 import io.smallrye.mutiny.helpers.test.AssertSubscriber;
+import mutiny.zero.flow.adapters.AdaptersToReactiveStreams;
 
 public class DrainUtilsTest {
 
@@ -21,7 +22,7 @@ public class DrainUtilsTest {
         AssertSubscriber<Integer> subscriber = AssertSubscriber.create(10);
         ArrayDeque<Integer> queue = new ArrayDeque<>();
         AtomicLong state = new AtomicLong();
-        Subscription subscription = mock(Subscription.class);
+        Flow.Subscription subscription = mock(Flow.Subscription.class);
         subscriber.onSubscribe(subscription);
 
         DrainUtils.postComplete(subscriber, queue, state, () -> false);
@@ -36,7 +37,7 @@ public class DrainUtilsTest {
         AssertSubscriber<Integer> subscriber = AssertSubscriber.create(10);
         ArrayDeque<Integer> queue = new ArrayDeque<>();
         AtomicLong state = new AtomicLong();
-        Subscription subscription = mock(Subscription.class);
+        Flow.Subscription subscription = mock(Flow.Subscription.class);
         subscriber.onSubscribe(subscription);
         queue.offer(1);
         state.getAndIncrement();
@@ -49,7 +50,7 @@ public class DrainUtilsTest {
     @RepeatedTest(100)
     public void testCompleteVsRequestRace() throws InterruptedException {
         BooleanSupplier isCancelled = () -> false;
-        Subscription subscription = mock(Subscription.class);
+        Flow.Subscription subscription = mock(Flow.Subscription.class);
         AssertSubscriber<Integer> subscriber = AssertSubscriber.create(10);
         ArrayDeque<Integer> queue = new ArrayDeque<>();
         AtomicLong requested = new AtomicLong();
@@ -95,13 +96,13 @@ public class DrainUtilsTest {
         AssertSubscriber<Integer> subscriber = new AssertSubscriber<>(1);
         ArrayDeque<Integer> queue = new ArrayDeque<>();
         AtomicLong state = new AtomicLong();
-        Subscription subscription = mock(Subscription.class);
+        Flow.Subscription subscription = mock(Flow.Subscription.class);
         subscriber.onSubscribe(subscription);
         queue.offer(1);
         state.getAndIncrement();
         subscriber.cancel();
 
-        QueueDrainHelper.postComplete(subscriber, queue, state, subscriber::isCancelled);
+        QueueDrainHelper.postComplete(AdaptersToReactiveStreams.subscriber(subscriber), queue, state, subscriber::isCancelled);
         subscriber
                 .assertSubscribed()
                 .assertHasNotReceivedAnyItem()
@@ -120,7 +121,7 @@ public class DrainUtilsTest {
         };
         ArrayDeque<Integer> queue = new ArrayDeque<>();
         AtomicLong state = new AtomicLong();
-        Subscription subscription = mock(Subscription.class);
+        Flow.Subscription subscription = mock(Flow.Subscription.class);
         subscriber.onSubscribe(subscription);
         queue.offer(1);
         state.getAndIncrement();

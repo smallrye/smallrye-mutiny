@@ -13,6 +13,7 @@ import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.helpers.spies.MultiOnCancellationSpy;
 import io.smallrye.mutiny.helpers.spies.Spy;
 import io.smallrye.mutiny.helpers.test.AssertSubscriber;
+import mutiny.zero.flow.adapters.AdaptersToFlow;
 
 public class MultiMergeTest {
 
@@ -100,7 +101,7 @@ public class MultiMergeTest {
     @Test
     public void testMergeOfSeveralPublishers() {
         AssertSubscriber<Integer> subscriber = Multi.createBy().merging().streams(
-                Flowable.just(5),
+                AdaptersToFlow.publisher(Flowable.just(5)),
                 Multi.createFrom().range(1, 3),
                 Multi.createFrom().items(8, 9, 10).onItem().transform(i -> i + 1)).subscribe()
                 .withSubscriber(new AssertSubscriber<>(100));
@@ -113,7 +114,7 @@ public class MultiMergeTest {
     public void testMergeOfSeveralPublishersAsIterable() {
         AssertSubscriber<Integer> subscriber = Multi.createBy().merging().streams(
                 Arrays.asList(
-                        Flowable.just(5),
+                        AdaptersToFlow.publisher(Flowable.just(5)),
                         Multi.createFrom().range(1, 3),
                         Multi.createFrom().items(8, 9, 10).onItem().transform(i -> i + 1)))
                 .subscribe().withSubscriber(new AssertSubscriber<>(100));

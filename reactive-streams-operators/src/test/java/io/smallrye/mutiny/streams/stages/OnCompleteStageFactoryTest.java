@@ -14,6 +14,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Multi;
+import mutiny.zero.flow.adapters.AdaptersToReactiveStreams;
 
 /**
  * Checks the behavior of the {@link OnCompleteStageFactory}.
@@ -37,7 +38,7 @@ public class OnCompleteStageFactoryTest extends StageTestBase {
                 .emitOn(executor);
 
         AtomicBoolean completed = new AtomicBoolean();
-        ReactiveStreams.fromPublisher(publisher)
+        ReactiveStreams.fromPublisher(AdaptersToReactiveStreams.publisher(publisher))
                 .filter(i -> i < 4)
                 .map(this::square)
                 .onComplete(() -> completed.set(true))

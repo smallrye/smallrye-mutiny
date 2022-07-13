@@ -1,15 +1,14 @@
 package io.smallrye.mutiny.tcktests;
 
+import java.util.concurrent.Flow;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import org.reactivestreams.Publisher;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 
 public class UniRepeatUntilTckTest extends AbstractPublisherTck<Integer> {
     @Override
-    public Publisher<Integer> createPublisher(long elements) {
+    public Flow.Publisher<Integer> createFlowPublisher(long elements) {
         if (elements == 0) {
             return Multi.createFrom().empty();
         }

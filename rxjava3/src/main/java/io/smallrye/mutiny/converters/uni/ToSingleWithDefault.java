@@ -4,6 +4,7 @@ import java.util.function.Function;
 
 import io.reactivex.rxjava3.core.Single;
 import io.smallrye.mutiny.Uni;
+import mutiny.zero.flow.adapters.AdaptersToReactiveStreams;
 
 public class ToSingleWithDefault<T> implements Function<Uni<T>, Single<T>> {
 
@@ -15,6 +16,7 @@ public class ToSingleWithDefault<T> implements Function<Uni<T>, Single<T>> {
 
     @Override
     public Single<T> apply(Uni<T> uni) {
-        return Single.fromPublisher(uni.onItem().ifNull().continueWith(defaultValue).convert().toPublisher());
+        return Single.fromPublisher(
+                AdaptersToReactiveStreams.publisher(uni.onItem().ifNull().continueWith(defaultValue).convert().toPublisher()));
     }
 }

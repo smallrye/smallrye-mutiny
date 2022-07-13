@@ -3,9 +3,8 @@ package io.smallrye.mutiny.operators.multi;
 import static io.smallrye.mutiny.helpers.Subscriptions.CANCELLED;
 
 import java.util.Objects;
+import java.util.concurrent.Flow;
 import java.util.function.Function;
-
-import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
@@ -22,10 +21,10 @@ import io.smallrye.mutiny.subscription.MultiSubscriber;
  */
 public final class MultiOnSubscribeCall<T> extends AbstractMultiOperator<T, T> {
 
-    private final Function<? super Subscription, Uni<?>> onSubscribe;
+    private final Function<? super Flow.Subscription, Uni<?>> onSubscribe;
 
     public MultiOnSubscribeCall(Multi<? extends T> upstream,
-            Function<? super Subscription, Uni<?>> onSubscribe) {
+            Function<? super Flow.Subscription, Uni<?>> onSubscribe) {
         super(upstream);
         this.onSubscribe = onSubscribe;
     }
@@ -45,7 +44,7 @@ public final class MultiOnSubscribeCall<T> extends AbstractMultiOperator<T, T> {
         }
 
         @Override
-        public void onSubscribe(Subscription s) {
+        public void onSubscribe(Flow.Subscription s) {
             if (compareAndSetUpstreamSubscription(null, s)) {
                 try {
                     Uni<?> uni = Objects.requireNonNull(onSubscribe.apply(s), "The produced Uni must not be `null`");

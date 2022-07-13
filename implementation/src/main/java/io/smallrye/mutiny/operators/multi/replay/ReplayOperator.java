@@ -1,11 +1,10 @@
 package io.smallrye.mutiny.operators.multi.replay;
 
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.Flow.Subscription;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
-
-import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.Context;
 import io.smallrye.mutiny.Multi;

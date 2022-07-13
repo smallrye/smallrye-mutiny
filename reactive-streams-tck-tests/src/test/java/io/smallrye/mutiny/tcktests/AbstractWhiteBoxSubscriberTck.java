@@ -1,12 +1,14 @@
 package io.smallrye.mutiny.tcktests;
 
-import org.reactivestreams.Subscription;
+import java.util.concurrent.Flow;
+
 import org.reactivestreams.tck.SubscriberWhiteboxVerification;
 import org.reactivestreams.tck.TestEnvironment;
+import org.reactivestreams.tck.flow.FlowSubscriberWhiteboxVerification;
 
 import io.smallrye.mutiny.subscription.MultiSubscriber;
 
-public abstract class AbstractWhiteBoxSubscriberTck extends SubscriberWhiteboxVerification<Integer> {
+public abstract class AbstractWhiteBoxSubscriberTck extends FlowSubscriberWhiteboxVerification<Integer> {
 
     public AbstractWhiteBoxSubscriberTck() {
         this(100);
@@ -20,7 +22,7 @@ public abstract class AbstractWhiteBoxSubscriberTck extends SubscriberWhiteboxVe
             SubscriberWhiteboxVerification.WhiteboxSubscriberProbe<Integer> probe) {
         return new MultiSubscriber<Integer>() {
             @Override
-            public void onSubscribe(Subscription subscription) {
+            public void onSubscribe(Flow.Subscription subscription) {
                 probe.registerOnSubscribe(new SubscriberPuppet() {
                     @Override
                     public void triggerRequest(long elements) {

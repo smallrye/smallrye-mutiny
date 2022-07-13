@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import io.reactivex.rxjava3.core.Flowable;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.helpers.test.AssertSubscriber;
+import mutiny.zero.flow.adapters.AdaptersToFlow;
 
 public class MultiCreateFromPublisherTest {
 
@@ -24,14 +25,15 @@ public class MultiCreateFromPublisherTest {
     @Test
     public void testWithFailedPublisher() {
         AssertSubscriber<String> subscriber = Multi.createFrom().<String> publisher(
-                Flowable.error(new IOException("boom"))).subscribe()
+                AdaptersToFlow.publisher(Flowable.error(new IOException("boom")))).subscribe()
                 .withSubscriber(AssertSubscriber.create());
         subscriber.assertFailedWith(IOException.class, "boom");
     }
 
     @Test
     public void testWithEmptyPublisher() {
-        AssertSubscriber<String> subscriber = Multi.createFrom().<String> publisher(Flowable.empty()).subscribe()
+        AssertSubscriber<String> subscriber = Multi.createFrom().<String> publisher(AdaptersToFlow.publisher(Flowable.empty()))
+                .subscribe()
                 .withSubscriber(AssertSubscriber.create());
         subscriber.assertCompleted().assertHasNotReceivedAnyItem();
     }
@@ -45,7 +47,7 @@ public class MultiCreateFromPublisherTest {
             return Flowable.just(1, 2, 3, 4);
         }).doOnRequest(requests::addAndGet);
 
-        Multi<Integer> multi = Multi.createFrom().publisher(flowable);
+        Multi<Integer> multi = Multi.createFrom().publisher(AdaptersToFlow.publisher(flowable));
 
         multi.subscribe().withSubscriber(AssertSubscriber.create()).assertHasNotReceivedAnyItem()
                 .request(2)
@@ -83,7 +85,7 @@ public class MultiCreateFromPublisherTest {
             return Flowable.just(1, 2, 3, 4);
         }).doOnRequest(requests::addAndGet);
 
-        Multi<Integer> multi = Multi.createFrom().safePublisher(flowable);
+        Multi<Integer> multi = Multi.createFrom().safePublisher(AdaptersToFlow.publisher(flowable));
 
         multi.subscribe().withSubscriber(AssertSubscriber.create()).assertHasNotReceivedAnyItem()
                 .request(2)
@@ -117,7 +119,7 @@ public class MultiCreateFromPublisherTest {
         AtomicBoolean cancellation = new AtomicBoolean();
         Flowable<Integer> flowable = Flowable.just(1, 2, 3, 4).doOnCancel(() -> cancellation.set(true));
 
-        Multi<Integer> multi = Multi.createFrom().publisher(flowable);
+        Multi<Integer> multi = Multi.createFrom().publisher(AdaptersToFlow.publisher(flowable));
 
         multi.subscribe().withSubscriber(AssertSubscriber.create()).assertHasNotReceivedAnyItem()
                 .request(2)

@@ -2,8 +2,8 @@ package io.smallrye.mutiny.tcktests;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Flow;
 
-import org.reactivestreams.Publisher;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
 
@@ -22,13 +22,13 @@ public class MultiEmitOnTckTest extends AbstractPublisherTck<Long> {
     }
 
     @Override
-    public Publisher<Long> createPublisher(long elements) {
+    public Flow.Publisher<Long> createFlowPublisher(long elements) {
         return upstream(elements)
                 .emitOn(executor);
     }
 
     @Override
-    public Publisher<Long> createFailedPublisher() {
+    public Flow.Publisher<Long> createFailedFlowPublisher() {
         return failedUpstream()
                 .emitOn(executor);
     }

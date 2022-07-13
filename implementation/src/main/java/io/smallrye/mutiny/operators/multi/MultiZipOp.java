@@ -4,13 +4,12 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
+import java.util.concurrent.Flow;
+import java.util.concurrent.Flow.Publisher;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
-
-import org.reactivestreams.Publisher;
-import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.Context;
 import io.smallrye.mutiny.helpers.Subscriptions;
@@ -50,7 +49,7 @@ public final class MultiZipOp<O> extends AbstractMulti<O> {
         coordinator.subscribe(upstreams);
     }
 
-    static final class ZipCoordinator<R> implements Subscription {
+    static final class ZipCoordinator<R> implements Flow.Subscription {
 
         private final AtomicInteger wip = new AtomicInteger();
         private final MultiSubscriber<? super R> downstream;
@@ -246,9 +245,9 @@ public final class MultiZipOp<O> extends AbstractMulti<O> {
         }
     }
 
-    static final class ZipSubscriber<R> implements MultiSubscriber<Object>, Subscription, ContextSupport {
+    static final class ZipSubscriber<R> implements MultiSubscriber<Object>, Flow.Subscription, ContextSupport {
 
-        private final AtomicReference<Subscription> upstream = new AtomicReference<>();
+        private final AtomicReference<Flow.Subscription> upstream = new AtomicReference<>();
         private final ZipCoordinator<R> parent;
         private final int prefetch;
         private final int limit;
@@ -265,7 +264,7 @@ public final class MultiZipOp<O> extends AbstractMulti<O> {
         }
 
         @Override
-        public void onSubscribe(Subscription s) {
+        public void onSubscribe(Flow.Subscription s) {
             if (upstream.compareAndSet(null, s)) {
                 queue = Queues.get(prefetch).get();
                 s.request(prefetch);

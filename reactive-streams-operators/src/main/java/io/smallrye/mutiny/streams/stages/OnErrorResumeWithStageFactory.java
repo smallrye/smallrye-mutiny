@@ -11,6 +11,7 @@ import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.streams.Engine;
 import io.smallrye.mutiny.streams.operators.ProcessingStage;
 import io.smallrye.mutiny.streams.operators.ProcessingStageFactory;
+import mutiny.zero.flow.adapters.AdaptersToFlow;
 
 /**
  * Implementation of the {@link Stage.OnErrorResumeWith} stage.
@@ -28,7 +29,7 @@ public class OnErrorResumeWithStageFactory implements ProcessingStageFactory<Sta
         return source -> (Multi<O>) source.onFailure().recoverWithMulti(failure -> {
             Graph graph = function.apply(failure);
             Publisher<I> publisher = engine.buildPublisher(Objects.requireNonNull(graph));
-            return Multi.createFrom().publisher(publisher);
+            return Multi.createFrom().publisher(AdaptersToFlow.publisher(publisher));
         });
     }
 }

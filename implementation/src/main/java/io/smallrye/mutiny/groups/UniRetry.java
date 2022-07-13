@@ -4,10 +4,9 @@ import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
 import static io.smallrye.mutiny.helpers.ParameterValidation.validate;
 
 import java.time.Duration;
+import java.util.concurrent.Flow;
 import java.util.function.Function;
 import java.util.function.Predicate;
-
-import org.reactivestreams.Publisher;
 
 import io.smallrye.common.annotation.CheckReturnValue;
 import io.smallrye.mutiny.Multi;
@@ -61,7 +60,7 @@ public class UniRetry<T> {
         if (!backOffConfigured) {
             return Infrastructure.onUniCreation(new UniRetryAtMost<>(upstream, onFailurePredicate, numberOfAttempts));
         } else {
-            Function<Multi<Throwable>, Publisher<Long>> factory = ExponentialBackoff
+            Function<Multi<Throwable>, Flow.Publisher<Long>> factory = ExponentialBackoff
                     .randomExponentialBackoffFunction(numberOfAttempts,
                             initialBackOffDuration, maxBackoffDuration, jitter, Infrastructure.getDefaultWorkerPool());
             return upstream.toMulti().onFailure(onFailurePredicate).retry().when(factory).toUni();
@@ -86,7 +85,7 @@ public class UniRetry<T> {
             throw new IllegalArgumentException(
                     "Invalid retry configuration, `expiresAt/expiresIn` must be used with a back-off configuration");
         }
-        Function<Multi<Throwable>, Publisher<Long>> factory = ExponentialBackoff
+        Function<Multi<Throwable>, Flow.Publisher<Long>> factory = ExponentialBackoff
                 .randomExponentialBackoffFunctionExpireAt(expireAt,
                         initialBackOffDuration, maxBackoffDuration, jitter, Infrastructure.getDefaultWorkerPool());
         return upstream.toMulti().onFailure(onFailurePredicate).retry().when(factory).toUni();
@@ -121,7 +120,7 @@ public class UniRetry<T> {
     @CheckReturnValue
     public Uni<T> until(Predicate<? super Throwable> predicate) {
         ParameterValidation.nonNull(predicate, "predicate");
-        Function<Multi<Throwable>, Publisher<Long>> whenStreamFactory = stream -> stream.onItem()
+        Function<Multi<Throwable>, Flow.Publisher<Long>> whenStreamFactory = stream -> stream.onItem()
                 .transformToUni(failure -> Uni.createFrom().<Long> emitter(emitter -> {
                     try {
                         if (predicate.test(failure)) {
@@ -138,7 +137,7 @@ public class UniRetry<T> {
     }
 
     /**
-     * Produces a {@link Uni} resubscribing to the current {@link Uni} when the {@link Publisher} produced by the
+     * Produces a {@link Uni} resubscribing to the current {@link Uni} when the {@link Flow.Publisher} produced by the
      * given method emits an item.
      * As {@link #atMost(long)}, on every failure, it re-subscribes. However, a <em>delay</em> is introduced before
      * re-subscribing. The re-subscription happens when the produced streams emits an item. If this stream fails,
@@ -151,12 +150,12 @@ public class UniRetry<T> {
      *         produced by {@code whenStreamFactory} emits an item.
      */
     @CheckReturnValue
-    public Uni<T> when(Function<Multi<Throwable>, ? extends Publisher<?>> whenStreamFactory) {
+    public Uni<T> when(Function<Multi<Throwable>, ? extends Flow.Publisher<?>> whenStreamFactory) {
         if (backOffConfigured) {
             throw new IllegalArgumentException(
                     "Invalid retry configuration, `when` cannot be used with a back-off configuration");
         }
-        Function<Multi<Throwable>, ? extends Publisher<?>> actual = Infrastructure
+        Function<Multi<Throwable>, ? extends Flow.Publisher<?>> actual = Infrastructure
                 .decorate(nonNull(whenStreamFactory, "whenStreamFactory"));
         return upstream.toMulti().onFailure(this.onFailurePredicate).retry().when(actual).toUni();
     }

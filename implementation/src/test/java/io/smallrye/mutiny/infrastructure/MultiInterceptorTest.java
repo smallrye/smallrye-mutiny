@@ -2,8 +2,9 @@ package io.smallrye.mutiny.infrastructure;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.concurrent.Flow;
+
 import org.junit.jupiter.api.Test;
-import org.reactivestreams.Subscriber;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.operators.AbstractMulti;
@@ -23,7 +24,7 @@ public class MultiInterceptorTest {
         };
         assertThat(interceptor.onMultiCreation(multi)).isSameAs(multi);
 
-        Subscriber<Object> subscriber = Mocks.subscriber();
+        Flow.Subscriber<Object> subscriber = Mocks.subscriber();
         assertThat(interceptor.onSubscription(multi, subscriber)).isSameAs(subscriber);
     }
 

@@ -1,10 +1,9 @@
 package io.smallrye.mutiny.helpers.queues;
 
 import java.util.Queue;
+import java.util.concurrent.Flow.Subscriber;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BooleanSupplier;
-
-import org.reactivestreams.Subscriber;
 
 import io.smallrye.mutiny.helpers.Subscriptions;
 

@@ -2,10 +2,9 @@ package io.smallrye.mutiny.operators.multi;
 
 import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
 
+import java.util.concurrent.Flow;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.LongFunction;
-
-import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.helpers.Subscriptions;
@@ -36,7 +35,7 @@ public class MultiDemandCapping<T> extends MultiOperator<T, T> {
 
         @Override
         public void request(long numberOfItems) {
-            Subscription subscription = getUpstreamSubscription();
+            Flow.Subscription subscription = getUpstreamSubscription();
             if (subscription == Subscriptions.CANCELLED) {
                 return;
             }

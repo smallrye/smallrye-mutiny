@@ -1,10 +1,9 @@
 
 package io.smallrye.mutiny.operators.multi;
 
+import java.util.concurrent.Flow;
+import java.util.concurrent.Flow.Publisher;
 import java.util.function.Function;
-
-import org.reactivestreams.Publisher;
-import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Multi;
@@ -41,7 +40,7 @@ public class MultiOnFailureResumeOp<T> extends AbstractMultiOperator<T, T> {
         }
 
         @Override
-        public void onSubscribe(Subscription su) {
+        public void onSubscribe(Flow.Subscription su) {
             if (!switched) {
                 downstream.onSubscribe(this);
             }

@@ -5,12 +5,12 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 import java.io.IOException;
+import java.util.concurrent.Flow;
+import java.util.concurrent.Flow.Subscription;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.Test;
-import org.reactivestreams.Subscriber;
-import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.helpers.test.AssertSubscriber;
@@ -61,7 +61,7 @@ public class StrictMultiSubscriberTest {
         AtomicInteger protection = new AtomicInteger();
         AtomicReference<Integer> item = new AtomicReference<>();
         @SuppressWarnings("ReactiveStreamsSubscriberImplementation")
-        Subscriber<Integer> subscriber = new Subscriber<Integer>() {
+        Flow.Subscriber<Integer> subscriber = new Flow.Subscriber<Integer>() {
 
             @Override
             public void onSubscribe(Subscription subscription) {
@@ -114,7 +114,7 @@ public class StrictMultiSubscriberTest {
         AtomicReference<Integer> item = new AtomicReference<>();
         AtomicReference<Throwable> failure = new AtomicReference<>();
         @SuppressWarnings("ReactiveStreamsSubscriberImplementation")
-        Subscriber<Integer> subscriber = new Subscriber<Integer>() {
+        Flow.Subscriber<Integer> subscriber = new Flow.Subscriber<Integer>() {
 
             @Override
             public void onSubscribe(Subscription subscription) {
@@ -150,7 +150,7 @@ public class StrictMultiSubscriberTest {
         AtomicReference<Integer> item = new AtomicReference<>();
         AtomicReference<Throwable> failure = new AtomicReference<>();
         @SuppressWarnings("ReactiveStreamsSubscriberImplementation")
-        Subscriber<Integer> subscriber = new Subscriber<Integer>() {
+        Flow.Subscriber<Integer> subscriber = new Flow.Subscriber<Integer>() {
 
             @Override
             public void onSubscribe(Subscription subscription) {
@@ -185,7 +185,7 @@ public class StrictMultiSubscriberTest {
     public void testOnSubscribeCalledTwice() {
         AtomicReference<Throwable> failure = new AtomicReference<>();
         @SuppressWarnings("ReactiveStreamsSubscriberImplementation")
-        Subscriber<Integer> subscriber = new Subscriber<Integer>() {
+        Flow.Subscriber<Integer> subscriber = new Flow.Subscriber<Integer>() {
 
             @Override
             public void onSubscribe(Subscription subscription) {

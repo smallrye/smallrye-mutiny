@@ -3,11 +3,10 @@ package io.smallrye.mutiny.operators.multi;
 import static io.smallrye.mutiny.helpers.ParameterValidation.MAPPER_RETURNED_NULL;
 
 import java.util.Objects;
+import java.util.concurrent.Flow;
+import java.util.concurrent.Flow.Publisher;
 import java.util.function.Function;
 import java.util.function.Predicate;
-
-import org.reactivestreams.Publisher;
-import org.reactivestreams.Subscriber;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
@@ -25,7 +24,7 @@ public class MultiOnFailureTransform<T> extends MultiOperator<T, T> {
     }
 
     @Override
-    public void subscribe(Subscriber<? super T> subscriber) {
+    public void subscribe(Flow.Subscriber<? super T> subscriber) {
         Objects.requireNonNull(subscriber, "The subscriber must not be `null`");
         Function<? super Throwable, ? extends Publisher<? extends T>> next = failure -> {
             if (predicate.test(failure)) {

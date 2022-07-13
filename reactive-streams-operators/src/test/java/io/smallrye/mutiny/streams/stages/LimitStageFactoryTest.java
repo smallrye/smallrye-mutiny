@@ -13,6 +13,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Multi;
+import mutiny.zero.flow.adapters.AdaptersToReactiveStreams;
 
 /**
  * Checks the behavior of the {@link LimitStageFactory} class.
@@ -34,7 +35,8 @@ public class LimitStageFactoryTest extends StageTestBase {
     public void create() throws ExecutionException, InterruptedException {
         Multi<Integer> publisher = Multi.createFrom().items(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
                 .emitOn(executor);
-        List<Integer> list = ReactiveStreams.fromPublisher(publisher).limit(5).toList().run()
+        List<Integer> list = ReactiveStreams.fromPublisher(AdaptersToReactiveStreams.publisher(publisher)).limit(5).toList()
+                .run()
                 .toCompletableFuture().get();
         assertThat(list).hasSize(5).containsExactly(1, 2, 3, 4, 5);
     }

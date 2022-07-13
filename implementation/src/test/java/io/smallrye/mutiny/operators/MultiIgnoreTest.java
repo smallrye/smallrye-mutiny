@@ -6,10 +6,10 @@ import static org.mockito.Mockito.*;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
+import java.util.concurrent.Flow;
+import java.util.concurrent.Flow.Subscription;
 
 import org.junit.jupiter.api.Test;
-import org.reactivestreams.Subscriber;
-import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.helpers.MultiSubscribers;
@@ -85,7 +85,7 @@ public class MultiIgnoreTest {
     public void testSingleSubscriberAcceptedAndSingleRequest() {
         Subscription subscription1 = mock(Subscription.class);
         Subscription subscription2 = mock(Subscription.class);
-        Subscriber<Void> mock = Mocks.subscriber();
+        Flow.Subscriber<Void> mock = Mocks.subscriber();
         MultiSubscriber<Void> subscriber = MultiSubscribers.toMultiSubscriber(mock);
         MultiIgnoreOp.MultiIgnoreProcessor<Integer> ignore = new MultiIgnoreOp.MultiIgnoreProcessor<>(subscriber);
         ignore.onSubscribe(subscription1);

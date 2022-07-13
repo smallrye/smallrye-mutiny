@@ -9,6 +9,8 @@ import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.helpers.StrictMultiSubscriber;
+import mutiny.zero.flow.adapters.AdaptersToFlow;
+import mutiny.zero.flow.adapters.AdaptersToReactiveStreams;
 
 /**
  * Processor wrapping a publisher and subscriber, and connect them
@@ -26,7 +28,8 @@ public class WrappedProcessor<T> implements Processor<T, T> {
     @Override
     public void subscribe(Subscriber<? super T> subscriber) {
         Objects.requireNonNull(subscriber);
-        publisher.subscribe(new StrictMultiSubscriber<>(subscriber));
+        publisher.subscribe(
+                AdaptersToReactiveStreams.subscriber(new StrictMultiSubscriber<>(AdaptersToFlow.subscriber(subscriber))));
     }
 
     @Override

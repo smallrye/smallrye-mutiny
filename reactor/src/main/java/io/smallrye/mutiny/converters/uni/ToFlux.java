@@ -3,6 +3,7 @@ package io.smallrye.mutiny.converters.uni;
 import java.util.function.Function;
 
 import io.smallrye.mutiny.Uni;
+import mutiny.zero.flow.adapters.AdaptersToReactiveStreams;
 import reactor.core.publisher.Flux;
 
 public class ToFlux<T> implements Function<Uni<T>, Flux<T>> {
@@ -15,6 +16,6 @@ public class ToFlux<T> implements Function<Uni<T>, Flux<T>> {
 
     @Override
     public Flux<T> apply(Uni<T> uni) {
-        return Flux.from(uni.convert().toPublisher());
+        return Flux.from(AdaptersToReactiveStreams.publisher(uni.convert().toPublisher()));
     }
 }

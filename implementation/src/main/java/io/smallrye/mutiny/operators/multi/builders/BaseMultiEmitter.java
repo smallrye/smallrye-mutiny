@@ -1,10 +1,9 @@
 package io.smallrye.mutiny.operators.multi.builders;
 
+import java.util.concurrent.Flow;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
-
-import org.reactivestreams.Subscription;
 
 import io.smallrye.mutiny.Context;
 import io.smallrye.mutiny.helpers.ParameterValidation;
@@ -14,7 +13,7 @@ import io.smallrye.mutiny.subscription.MultiEmitter;
 import io.smallrye.mutiny.subscription.MultiSubscriber;
 
 abstract class BaseMultiEmitter<T>
-        implements MultiEmitter<T>, Subscription, ContextSupport {
+        implements MultiEmitter<T>, Flow.Subscription, ContextSupport {
 
     protected final AtomicLong requested = new AtomicLong();
     protected final MultiSubscriber<? super T> downstream;
