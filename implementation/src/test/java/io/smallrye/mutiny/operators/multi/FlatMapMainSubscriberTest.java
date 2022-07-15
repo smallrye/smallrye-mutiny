@@ -12,7 +12,6 @@ import org.junit.jupiter.api.Test;
 
 import io.reactivex.rxjava3.processors.PublishProcessor;
 import io.smallrye.mutiny.Multi;
-import io.smallrye.mutiny.helpers.queues.Queues;
 import io.smallrye.mutiny.helpers.test.AssertSubscriber;
 import io.smallrye.mutiny.operators.AbstractMulti;
 import io.smallrye.mutiny.subscription.BackPressureFailure;
@@ -30,7 +29,6 @@ public class FlatMapMainSubscriberTest {
                 i -> Multi.createFrom().item(2),
                 false,
                 4,
-                Queues.get(4),
                 10);
 
         Multi.createFrom().item(1)
@@ -49,7 +47,6 @@ public class FlatMapMainSubscriberTest {
                 i -> Multi.createFrom().item(2),
                 false,
                 4,
-                Queues.get(4),
                 10);
 
         Multi.createFrom().item(1)
@@ -71,7 +68,6 @@ public class FlatMapMainSubscriberTest {
                 i -> Multi.createFrom().item(2),
                 false,
                 4,
-                Queues.get(4),
                 10);
 
         sub.onSubscribe(mock(Subscription.class));
@@ -95,7 +91,6 @@ public class FlatMapMainSubscriberTest {
                 i -> Multi.createFrom().item(2),
                 false,
                 4,
-                Queues.get(4),
                 10);
 
         sub.onSubscribe(mock(Subscription.class));
@@ -138,7 +133,6 @@ public class FlatMapMainSubscriberTest {
                 i -> rogue,
                 false,
                 1,
-                Queues.get(1),
                 1);
 
         sub.onSubscribe(mock(Subscription.class));
@@ -159,7 +153,6 @@ public class FlatMapMainSubscriberTest {
                 i -> rogue,
                 false,
                 1,
-                Queues.get(1),
                 1);
 
         sub.onSubscribe(mock(Subscription.class));
