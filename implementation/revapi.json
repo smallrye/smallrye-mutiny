@@ -1,270 +1,73 @@
-[
-  {
-    "extension": "revapi.java",
-    "id": "java",
-    "configuration": {
-      "missing-classes": {
-        "behavior": "report",
-        "ignoreMissingAnnotations": false
-      }
-    }
-  },
-  {
-    "extension": "revapi.filter",
-    "configuration": {
-      "elements": {
-        "include": [
-          {
-            "matcher": "java-package",
-            "match": "io.smallrye.mutiny"
-          },
-          {
-            "matcher": "java-package",
-            "match": "io.smallrye.mutiny.groups"
-          },
-          {
-            "matcher": "java-package",
-            "match": "io.smallrye.mutiny.helpers.spies"
-          },
-          {
-            "matcher": "java-package",
-            "match": "io.smallrye.mutiny.helpers.test"
-          },
-          {
-            "matcher": "java-package",
-            "match": "io.smallrye.mutiny.infrastructure"
-          },
-          {
-            "matcher": "java-package",
-            "match": "io.smallrye.mutiny.operators"
-          },
-          {
-            "matcher": "java-package",
-            "match": "io.smallrye.mutiny.operators.multi.processors"
-          },
-          {
-            "matcher": "java-package",
-            "match": "io.smallrye.mutiny.subscription"
-          },
-          {
-            "matcher": "java-package",
-            "match": "io.smallrye.mutiny.tuples"
-          },
-          {
-            "matcher": "java-package",
-            "match": "io.smallrye.mutiny.unchecked"
-          }
-        ]
-      }
-    }
-  },
-  {
-    "extension": "revapi.differences",
-    "id": "breaking-changes",
-    "configuration": {
-      "criticality": "highlight",
-      "minSeverity": "POTENTIALLY_BREAKING",
-      "minCriticality": "documented",
-      "differences": [
-        {
-          "ignore": true,
-          "regex": true,
-          "code": ".+",
-          "old": ".+org\\.reactivestreams\\..+",
-          "new": ".+java\\.util\\.concurrent\\.Flow\\..+",
-          "justification": "Migration from the legacy Reactive Streams APIs to the Java Flow APIs"
-        },
-        {
-          "ignore": true,
-          "regex": true,
-          "code": "java.class.noLongerImplementsInterface",
-          "old": ".+",
-          "new": ".+",
-          "interface": "org.reactivestreams.Subscription",
-          "justification": "Migration from the legacy Reactive Streams APIs to the Java Flow APIs"
-        },
-        {
-          "ignore": true,
-          "regex": true,
-          "code": "java.class.noLongerImplementsInterface",
-          "old": ".+",
-          "new": ".+",
-          "interface": "org.reactivestreams.Subscriber<T>",
-          "justification": "Migration from the legacy Reactive Streams APIs to the Java Flow APIs"
-        },
-        {
-          "ignore": true,
-          "regex": true,
-          "code": "java.class.noLongerImplementsInterface",
-          "old": ".+",
-          "new": ".+",
-          "interface": "org.reactivestreams.Subscriber<U>",
-          "justification": "Migration from the legacy Reactive Streams APIs to the Java Flow APIs"
-        },
-        {
-          "ignore": true,
-          "regex": true,
-          "code": "java.class.noLongerImplementsInterface",
-          "old": ".+",
-          "new": ".+",
-          "interface": "org.reactivestreams.Subscriber<I>",
-          "justification": "Migration from the legacy Reactive Streams APIs to the Java Flow APIs"
-        },
-        {
-          "ignore": true,
-          "regex": true,
-          "code": "java.class.noLongerImplementsInterface",
-          "old": ".+",
-          "new": ".+",
-          "interface": "org.reactivestreams.Subscriber<O>",
-          "justification": "Migration from the legacy Reactive Streams APIs to the Java Flow APIs"
-        },
-        {
-          "ignore": true,
-          "regex": true,
-          "code": "java.class.noLongerImplementsInterface",
-          "old": ".+",
-          "new": ".+",
-          "interface": "org.reactivestreams.Publisher<T>",
-          "justification": "Migration from the legacy Reactive Streams APIs to the Java Flow APIs"
-        },
-        {
-          "ignore": true,
-          "regex": true,
-          "code": "java.class.noLongerImplementsInterface",
-          "old": ".+",
-          "new": ".+",
-          "interface": "org.reactivestreams.Publisher<O>",
-          "justification": "Migration from the legacy Reactive Streams APIs to the Java Flow APIs"
-        },
-        {
-          "ignore": true,
-          "regex": true,
-          "code": "java.class.noLongerImplementsInterface",
-          "old": ".+",
-          "new": ".+",
-          "interface": "org.reactivestreams.Publisher<U>",
-          "justification": "Migration from the legacy Reactive Streams APIs to the Java Flow APIs"
-        },
-        {
-          "ignore": true,
-          "regex": true,
-          "code": "java.class.noLongerImplementsInterface",
-          "old": ".+",
-          "new": ".+",
-          "interface": "org.reactivestreams.Publisher<I>",
-          "justification": "Migration from the legacy Reactive Streams APIs to the Java Flow APIs"
-        },
-        {
-          "ignore": true,
-          "regex": true,
-          "code": "java.class.noLongerImplementsInterface",
-          "old": ".+",
-          "new": ".+",
-          "interface": "org.reactivestreams.Publisher<O>",
-          "justification": "Migration from the legacy Reactive Streams APIs to the Java Flow APIs"
-        },
-        {
-          "ignore": true,
-          "regex": true,
-          "code": "java.class.noLongerImplementsInterface",
-          "old": ".+",
-          "new": ".+",
-          "interface": "org.reactivestreams.Publisher<io.smallrye.mutiny.GroupedMulti<K, V>>",
-          "justification": "Migration from the legacy Reactive Streams APIs to the Java Flow APIs"
-        },
-        {
-          "ignore": true,
-          "regex": true,
-          "code": "java.class.noLongerImplementsInterface",
-          "old": ".+",
-          "new": ".+",
-          "interface": "org.reactivestreams.Publisher<java.lang.Object>",
-          "justification": "Migration from the legacy Reactive Streams APIs to the Java Flow APIs"
-        },
-        {
-          "ignore": true,
-          "regex": true,
-          "code": "java.class.noLongerImplementsInterface",
-          "old": ".+",
-          "new": ".+",
-          "interface": "org.reactivestreams.Publisher<java.lang.Long>",
-          "justification": "Migration from the legacy Reactive Streams APIs to the Java Flow APIs"
-        },
-        {
-          "ignore": true,
-          "regex": true,
-          "code": "java.class.noLongerImplementsInterface",
-          "old": ".+",
-          "new": ".+",
-          "interface": "org.reactivestreams.Publisher<java.lang.Void>",
-          "justification": "Migration from the legacy Reactive Streams APIs to the Java Flow APIs"
-        },
-        {
-          "ignore": true,
-          "regex": true,
-          "code": "java.class.noLongerImplementsInterface",
-          "old": ".+",
-          "new": ".+",
-          "interface": "org.reactivestreams.Publisher<R>",
-          "justification": "Migration from the legacy Reactive Streams APIs to the Java Flow APIs"
-        },
-        {
-          "ignore": true,
-          "regex": true,
-          "code": "java.class.noLongerImplementsInterface",
-          "old": ".+",
-          "new": ".+",
-          "interface": "org.reactivestreams.Publisher<java.util.List<T>>",
-          "justification": "Migration from the legacy Reactive Streams APIs to the Java Flow APIs"
-        },
-        {
-          "ignore": true,
-          "regex": true,
-          "code": "java.class.noLongerImplementsInterface",
-          "old": ".+",
-          "new": ".+",
-          "interface": "org.reactivestreams.Publisher<io.smallrye.mutiny.Multi<T>>",
-          "justification": "Migration from the legacy Reactive Streams APIs to the Java Flow APIs"
-        },
-        {
-          "ignore": true,
-          "regex": true,
-          "code": "java.class.noLongerImplementsInterface",
-          "old": ".+",
-          "new": ".+",
-          "interface": "org.reactivestreams.Processor<I, O>",
-          "justification": "Migration from the legacy Reactive Streams APIs to the Java Flow APIs"
-        },
-        {
-          "ignore": true,
-          "regex": true,
-          "code": "java.class.noLongerImplementsInterface",
-          "old": ".+",
-          "new": ".+",
-          "interface": "org.reactivestreams.Processor<T, T>",
-          "justification": "Migration from the legacy Reactive Streams APIs to the Java Flow APIs"
-        }
-      ]
-    }
-  },
-  {
-    "extension": "revapi.reporter.json",
-    "configuration": {
-      "minSeverity": "POTENTIALLY_BREAKING",
-      "minCriticality": "documented",
-      "output": "target/compatibility.json",
-      "indent": true,
-      "append": false,
-      "keepEmptyFile": true
-    }
-  },
-  {
-    "extension": "revapi.reporter.text",
-    "configuration": {
-      "minSeverity": "POTENTIALLY_BREAKING",
-      "minCriticality": "documented",
-      "output": "out"
+[ {
+  "extension" : "revapi.java",
+  "id" : "java",
+  "configuration" : {
+    "missing-classes" : {
+      "behavior" : "report",
+      "ignoreMissingAnnotations" : false
     }
   }
-]
+}, {
+  "extension" : "revapi.filter",
+  "configuration" : {
+    "elements" : {
+      "include" : [ {
+        "matcher" : "java-package",
+        "match" : "io.smallrye.mutiny"
+      }, {
+        "matcher" : "java-package",
+        "match" : "io.smallrye.mutiny.groups"
+      }, {
+        "matcher" : "java-package",
+        "match" : "io.smallrye.mutiny.helpers.spies"
+      }, {
+        "matcher" : "java-package",
+        "match" : "io.smallrye.mutiny.helpers.test"
+      }, {
+        "matcher" : "java-package",
+        "match" : "io.smallrye.mutiny.infrastructure"
+      }, {
+        "matcher" : "java-package",
+        "match" : "io.smallrye.mutiny.operators"
+      }, {
+        "matcher" : "java-package",
+        "match" : "io.smallrye.mutiny.operators.multi.processors"
+      }, {
+        "matcher" : "java-package",
+        "match" : "io.smallrye.mutiny.subscription"
+      }, {
+        "matcher" : "java-package",
+        "match" : "io.smallrye.mutiny.tuples"
+      }, {
+        "matcher" : "java-package",
+        "match" : "io.smallrye.mutiny.unchecked"
+      } ]
+    }
+  }
+}, {
+  "extension" : "revapi.differences",
+  "id" : "breaking-changes",
+  "configuration" : {
+    "criticality" : "highlight",
+    "minSeverity" : "POTENTIALLY_BREAKING",
+    "minCriticality" : "documented",
+    "differences" : [ ]
+  }
+}, {
+  "extension" : "revapi.reporter.json",
+  "configuration" : {
+    "minSeverity" : "POTENTIALLY_BREAKING",
+    "minCriticality" : "documented",
+    "output" : "target/compatibility.json",
+    "indent" : true,
+    "append" : false,
+    "keepEmptyFile" : true
+  }
+}, {
+  "extension" : "revapi.reporter.text",
+  "configuration" : {
+    "minSeverity" : "POTENTIALLY_BREAKING",
+    "minCriticality" : "documented",
+    "output" : "out"
+  }
+} ]
