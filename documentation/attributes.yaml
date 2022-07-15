@@ -1,6 +1,6 @@
 # GENERATED FILE, DO NOT EDIT DIRECTLY (see .build/UpdateDocsAttributesFiles.java)
 attributes:
-    project-version: 1.6.0
+    project-version: 2.0.0-milestone1
     versions:
-        mutiny: 1.6.0
-        vertx_bindings: 2.24.0
+        mutiny: 2.0.0-milestone1
+        vertx_bindings: 2.24.1
