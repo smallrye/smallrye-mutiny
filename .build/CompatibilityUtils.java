@@ -2,22 +2,24 @@
 //DEPS io.vertx:vertx-core:3.9.4
 //DEPS info.picocli:picocli:4.6.3
 
-
-import java.io.*;
-import java.util.*;
-import java.util.stream.*;
-import java.nio.charset.*;
-import java.nio.file.*;
-
-import io.vertx.core.json.*;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.util.*;
 import java.util.concurrent.Callable;
-
-import com.fasterxml.jackson.annotation.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Command(name = "compatibility", mixinStandardHelpOptions = true, version = "0.1",
         description = "Mutiny Compatibility Utils")
@@ -28,6 +30,14 @@ class CompatibilityUtils implements Callable<Integer> {
 
     @Option(names = "--do-not-clear-version-prefix", description = "Do not clear if the version starts with the prefix (e.g., `1.2`, `1.`, etc)")
     private String[] clearExcludes = new String[0];
+
+    private final Set<String> preReleaseFragments = Set.of(
+            "-alpha",
+            "-beta",
+            "-milestone",
+            "-rc",
+            "-pre"
+    );
 
     @Option(names = "--version", description = "The release version")
     private String version = "";
@@ -50,13 +60,19 @@ class CompatibilityUtils implements Callable<Integer> {
 
             }
             System.out.println("\uD83E\uDDEE " + differences.size() + " difference(s) found");
-            if (! differences.isEmpty()) {
+            if (!differences.isEmpty()) {
                 writeDifferences(differences, new File("target/differences.md"));
             }
             return 0;
         }
 
         if (command.equalsIgnoreCase("clear")) {
+            for (String fragment : preReleaseFragments) {
+                if (version.contains(fragment)) {
+                    System.out.println("Not clearing for version " + version + " (it's a pre-release)");
+                    return 0;
+                }
+            }
             for (String exclude : clearExcludes) {
                 if (version.startsWith(exclude)) {
                     System.out.println("Not clearing for version " + version + " (starts with `" + exclude + "`)");
@@ -97,7 +113,7 @@ class CompatibilityUtils implements Callable<Integer> {
         buffer.append("### Breaking Changes\n\n");
 
         buffer.append("| Change                                | New API                                 | Justification  |\n"
-                    + "| ------------------------------------- | --------------------------------------- | -------------- |\n");
+                + "| ------------------------------------- | --------------------------------------- | -------------- |\n");
 
 
         for (Difference difference : diff) {
@@ -145,7 +161,7 @@ class CompatibilityUtils implements Callable<Integer> {
 
         return diff
                 .map(objects ->
-                    objects.stream().map(obj -> (JsonObject) obj).map(json -> json.mapTo(Difference.class)).collect(Collectors.toList())
+                        objects.stream().map(obj -> (JsonObject) obj).map(json -> json.mapTo(Difference.class)).collect(Collectors.toList())
                 )
                 .orElse(Collections.emptyList());
     }
@@ -157,7 +173,7 @@ class CompatibilityUtils implements Callable<Integer> {
             if ("revapi.differences".equalsIgnoreCase(json.getString("extension"))) {
                 JsonObject configuration = json.getJsonObject("configuration");
                 JsonArray differences = configuration.getJsonArray("differences");
-                if (differences != null  && ! differences.isEmpty()) {
+                if (differences != null && !differences.isEmpty()) {
                     updated = true;
                     configuration.remove("differences");
                     configuration.put("differences", new JsonArray());
@@ -206,7 +222,7 @@ class CompatibilityUtils implements Callable<Integer> {
         public boolean ignore;
 
         public String change() {
-            if (isNotBlank(oldMethod)  && isNotBlank(newMethod)) {
+            if (isNotBlank(oldMethod) && isNotBlank(newMethod)) {
                 return "`" + oldMethod + "` updated to `" + newMethod + "`";
             }
             if (isNotBlank(oldMethod)) {
@@ -218,19 +234,19 @@ class CompatibilityUtils implements Callable<Integer> {
             return code;
         }
 
-        @java.lang.Override
+        @Override
         public java.lang.String toString() {
-            if (isNotBlank(oldMethod)  && isNotBlank(newMethod)) {
+            if (isNotBlank(oldMethod) && isNotBlank(newMethod)) {
                 return "`" + oldMethod + "` updated to `" + newMethod + "`: _" + justification + "_";
             }
             if (isNotBlank(oldMethod)) {
-                return "`" + oldMethod + "` has been removed: _" + justification  + "_";
+                return "`" + oldMethod + "` has been removed: _" + justification + "_";
             }
             if (isNotBlank(newMethod)) {
-                return "`" + newMethod + "` has been introduced: _" + justification  + "_";
+                return "`" + newMethod + "` has been introduced: _" + justification + "_";
             }
 
-            return  code + " " + justification;
+            return code + " " + justification;
         }
     }
 
