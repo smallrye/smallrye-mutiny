@@ -459,7 +459,7 @@ public interface Multi<T> extends Publisher<T> {
      * produced {@link Multi}. The flatten process makes sure that the items are not interleaved.
      * </ul>
      * <p>
-     * This method is equivalent to {@code multi.onItem().transformToMulti(mapper).concatenate()}.
+     * This method is equivalent to {@code multi.onItem().transformToMulti(mapper).concatenate(true)}.
      *
      * @param mapper the {@link Function} producing {@link Publisher} / {@link Multi} for each items emitted by the
      *        upstream {@link Multi}

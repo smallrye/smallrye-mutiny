@@ -35,7 +35,7 @@ public class MultiTransformToUniTest {
                 .concatenate()
                 .subscribe().withSubscriber(subscriber);
 
-        subscriber.assertFailedWith(RuntimeException.class, "boom");
+        subscriber.request(1).assertFailedWith(RuntimeException.class, "boom");
     }
 
     @Test
@@ -48,7 +48,7 @@ public class MultiTransformToUniTest {
                 .concatenate()
                 .subscribe().withSubscriber(subscriber);
 
-        subscriber.assertHasNotReceivedAnyItem().assertCompleted();
+        subscriber.request(1).assertHasNotReceivedAnyItem().assertCompleted();
     }
 
     @Test
@@ -63,7 +63,7 @@ public class MultiTransformToUniTest {
                 .concatenate()
                 .subscribe().withSubscriber(subscriber);
 
-        subscriber.assertFailedWith(RuntimeException.class, "boom");
+        subscriber.request(1).assertFailedWith(RuntimeException.class, "boom");
     }
 
     @Test

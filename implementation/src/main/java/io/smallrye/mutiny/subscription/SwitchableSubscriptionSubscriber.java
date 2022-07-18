@@ -138,6 +138,10 @@ public abstract class SwitchableSubscriptionSubscriber<O> implements MultiSubscr
         drain();
     }
 
+    public long requested() {
+        return requested;
+    }
+
     @Override
     public final void request(long n) {
         if (n <= 0) {
