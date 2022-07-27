@@ -380,6 +380,8 @@
                 <configuration>
                     <!-- Do not compute compatibility on the documentation -->
                     <skip>${revapi.skip}</skip>
+                    <!-- Specify old version as the latest 1.x release -->
+                    <oldVersion>1.6.0</oldVersion>
                 </configuration>
             </plugin>
         </plugins>
