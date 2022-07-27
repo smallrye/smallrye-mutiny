@@ -86,7 +86,7 @@
         <smallrye-config.version>1.10.0</smallrye-config.version>
         <smallrye-common-annotation.version>1.13.0</smallrye-common-annotation.version>
 
-        <junit.version>5.8.2</junit.version>
+        <junit.version>5.9.0</junit.version>
         <assertj-core.version>3.23.1</assertj-core.version>
         <junit4.version>4.13.2</junit4.version>
         <awaitility.version>4.2.0</awaitility.version>
