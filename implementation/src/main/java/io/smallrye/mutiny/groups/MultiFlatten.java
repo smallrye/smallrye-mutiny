@@ -10,6 +10,7 @@ import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.helpers.queues.Queues;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
+import io.smallrye.mutiny.operators.multi.MultiConcatMapOp;
 import io.smallrye.mutiny.operators.multi.MultiFlatMapOp;
 
 /**
@@ -112,13 +113,41 @@ public class MultiFlatten<I, O> {
      * (potentially a {@code Multi}). The mapper must not return {@code null}</li>
      * <li>The items contained in each of the produced {@link Publisher} are then <strong>concatenated</strong> in the
      * produced {@link Multi}. The returned object lets you configure the flattening process.</li>
+     * <li>If {@code prefetch} is set to {@code true}, {@code flatMap} operator is used with upstream prefetch of
+     * {@code requests} parameter configured previously.</li>
+     * <li>If {@code prefetch} is set to {@code false}, {@code concatMap} operator is used without prefetch,
+     * meaning that items are requested lazily from the upstream, one at a time.</li>
+     * </ul>
+     *
+     * @param prefetch whether the operator prefetches items from upstream, or not.
+     * @return the object to configure the {@code concatMap} operation.
+     */
+    @CheckReturnValue
+    public Multi<O> concatenate(boolean prefetch) {
+        return Infrastructure
+                .onMultiCreation(prefetch ? new MultiFlatMapOp<>(upstream, mapper, collectFailureUntilCompletion, 1, requests)
+                        : new MultiConcatMapOp<>(upstream, mapper, collectFailureUntilCompletion));
+    }
+
+    /**
+     * Produces a {@link Multi} containing the items from {@link Publisher} produced by the {@code mapper} for each
+     * item emitted by this {@link Multi}.
+     * <p>
+     * The operators behaves as follows:
+     * <ul>
+     * <li>for each item emitted by this {@link Multi}, the mapper is called and produces a {@link Publisher}
+     * (potentially a {@code Multi}). The mapper must not return {@code null}</li>
+     * <li>The items contained in each of the produced {@link Publisher} are then <strong>concatenated</strong> in the
+     * produced {@link Multi}. The returned object lets you configure the flattening process.</li>
+     * <li>This operator defaults to without prefetch, meaning that items are requested lazily from the upstream,
+     * one at a time.</li>
      * </ul>
      *
      * @return the object to configure the {@code concatMap} operation.
      */
     @CheckReturnValue
     public Multi<O> concatenate() {
-        return Infrastructure.onMultiCreation(
-                new MultiFlatMapOp<>(upstream, mapper, collectFailureUntilCompletion, 1, requests));
+        return concatenate(false);
     }
+
 }

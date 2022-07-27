@@ -47,7 +47,7 @@ public class MultiOnItemFailWithTest {
                     called.set(true);
                     return new IOException();
                 })
-                .subscribe().withSubscriber(AssertSubscriber.<Number> create())
+                .subscribe().withSubscriber(AssertSubscriber.<Number> create(1))
                 .assertFailedWith(TestException.class, "");
         assertThat(called).isFalse();
         assertThat(items.isCancelled()).isTrue();
@@ -61,7 +61,7 @@ public class MultiOnItemFailWithTest {
                     called.set(true);
                     return new IOException(Integer.toString(item));
                 })
-                .subscribe().withSubscriber(AssertSubscriber.<Number> create())
+                .subscribe().withSubscriber(AssertSubscriber.<Number> create(1))
                 .assertFailedWith(TestException.class, "");
 
         assertThat(called).isFalse();
@@ -165,10 +165,10 @@ public class MultiOnItemFailWithTest {
         Multi<Integer> uni = items.onItem()
                 .failWith(s -> new IOException(Integer.toString(s + count.getAndIncrement())));
         uni
-                .subscribe().withSubscriber(AssertSubscriber.<Number> create())
+                .subscribe().withSubscriber(AssertSubscriber.<Number> create(1))
                 .assertFailedWith(IOException.class, "1");
         uni
-                .subscribe().withSubscriber(AssertSubscriber.<Number> create())
+                .subscribe().withSubscriber(AssertSubscriber.<Number> create(1))
                 .assertFailedWith(IOException.class, "2");
     }
 
