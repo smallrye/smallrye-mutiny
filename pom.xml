@@ -116,7 +116,7 @@
 
         <moditect-maven-plugin.version>1.0.0.RC2</moditect-maven-plugin.version>
         <jandex-maven-plugin.version>1.2.3</jandex-maven-plugin.version>
-        <bnd-maven-plugin.version>6.2.0</bnd-maven-plugin.version>
+        <bnd-maven-plugin.version>6.3.1</bnd-maven-plugin.version>
     </properties>
 
     <dependencyManagement>
