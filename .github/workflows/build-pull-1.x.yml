@@ -1,38 +1,30 @@
 ---
-name: Check pull requests
+name: Check pull requests (1.x branch)
 on:
   pull_request:
-    branches-ignore:
+    branches:
       - '1.x'
 
 concurrency:
-  group: "check-pull-request-${{ github.workflow }}-${{ github.ref }}"
+  group: "check-pull-request-1.x-${{ github.workflow }}-${{ github.ref }}"
   cancel-in-progress: true
 
 jobs:
   build:
     runs-on: ubuntu-20.04
-    strategy:
-      matrix:
-        java: [
-          { 'version': '11', opts: '' },
-          { 'version': '17', 'opts': '' }
-        ]
-    name: Build with Java ${{ matrix.java.version }}
+    name: Build with Java 8
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-java@v2
-        name: set up jdk ${{matrix.java.version}}
+        name: set up jdk 8
         with:
           distribution: temurin
-          java-version: ${{matrix.java.version}}
+          java-version: 8
           cache: maven
       - name: Build with Maven
         env:
           MAVEN_OPTS: ${{ matrix.java.opts }}
-        run: ./mvnw -s .build/maven-ci-settings.xml -B clean verify -Pcoverage
-      - name: Codecov
-        uses: codecov/codecov-action@v1.0.13
+        run: ./mvnw -s .build/maven-ci-settings.xml -B clean verify
   compatibility:
     runs-on: ubuntu-20.04
     name: Compatibility Check
@@ -40,7 +32,7 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions/setup-java@v2
         with:
-          java-version: 11
+          java-version: 8
           distribution: temurin
           cache: maven
       - name: Compatibility Check
