@@ -12,6 +12,10 @@
     <artifactId>mutiny-reactive-streams-operators</artifactId>
     <name>SmallRye Mutiny - MicroProfile Reactive Streams Operators implementation</name>
 
+    <properties>
+        <version.surefire.plugin>2.22.2</version.surefire.plugin>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.eclipse.microprofile.reactive-streams-operators</groupId>
@@ -51,9 +55,17 @@
             <artifactId>awaitility</artifactId>
             <scope>test</scope>
         </dependency>
+
+        <!-- TestNG running in JUnit5 -->
         <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.support</groupId>
+            <artifactId>testng-engine</artifactId>
+            <version>${testng-junit5-engine.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -87,10 +99,11 @@
                             </includes>
                             <junitArtifactName>none:none</junitArtifactName>
                             <properties>
-                                <property>
-                                    <name>surefire.testng.verbose</name>
-                                    <value>10</value>
-                                </property>
+                                <configurationParameters>
+                                    testng.useDefaultListeners = true
+                                    testng.outputDirectory = ${project.build.directory}/testng-reports
+                                    testng.verbose = 2
+                                </configurationParameters>
                             </properties>
                         </configuration>
                     </execution>
