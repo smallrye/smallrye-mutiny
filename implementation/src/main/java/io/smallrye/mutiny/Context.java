@@ -37,6 +37,8 @@ import io.smallrye.common.annotation.Experimental;
 @Experimental("Context support is a new experimental API introduced in Mutiny 1.3.0")
 public final class Context {
 
+    // YOLO!
+
     /**
      * Creates a new empty context.
      *
