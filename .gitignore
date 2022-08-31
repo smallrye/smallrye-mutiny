@@ -570,3 +570,6 @@ documentation/src/main/jekyll/.ruby-version
 # Eclipse / VSCode Java
 .project
 .classpath
+
+# MkDocs site output
+documentation/site/
