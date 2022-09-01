@@ -1,4 +1,4 @@
-package io.smallrye.mutiny.streams;
+package io.smallrye.mutiny.jakarta.streams;
 
 import java.util.concurrent.CompletionStage;
 
@@ -11,18 +11,18 @@ import org.reactivestreams.Processor;
 import org.reactivestreams.Publisher;
 
 import io.smallrye.mutiny.Multi;
+import io.smallrye.mutiny.jakarta.streams.operators.Operator;
+import io.smallrye.mutiny.jakarta.streams.operators.ProcessingStage;
+import io.smallrye.mutiny.jakarta.streams.operators.ProcessorOperator;
+import io.smallrye.mutiny.jakarta.streams.operators.PublisherOperator;
+import io.smallrye.mutiny.jakarta.streams.operators.PublisherStage;
+import io.smallrye.mutiny.jakarta.streams.operators.TerminalOperator;
+import io.smallrye.mutiny.jakarta.streams.operators.TerminalStage;
+import io.smallrye.mutiny.jakarta.streams.spi.Transformer;
 import io.smallrye.mutiny.jakarta.streams.stages.Stages;
 import io.smallrye.mutiny.jakarta.streams.utils.ConnectableProcessor;
 import io.smallrye.mutiny.jakarta.streams.utils.DefaultSubscriberWithCompletionStage;
 import io.smallrye.mutiny.jakarta.streams.utils.WrappedProcessor;
-import io.smallrye.mutiny.streams.operators.Operator;
-import io.smallrye.mutiny.streams.operators.ProcessingStage;
-import io.smallrye.mutiny.streams.operators.ProcessorOperator;
-import io.smallrye.mutiny.streams.operators.PublisherOperator;
-import io.smallrye.mutiny.streams.operators.PublisherStage;
-import io.smallrye.mutiny.streams.operators.TerminalOperator;
-import io.smallrye.mutiny.streams.operators.TerminalStage;
-import io.smallrye.mutiny.streams.spi.Transformer;
 
 public class Engine implements ReactiveStreamsEngine {
 
