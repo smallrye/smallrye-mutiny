@@ -67,6 +67,7 @@
         <module>rxjava3</module>
         <module>reactor</module>
         <module>reactive-streams-operators</module>
+        <module>reactive-streams-operators-jakarta</module>
         <module>documentation</module>
         <module>context-propagation</module>
         <module>kotlin</module>
