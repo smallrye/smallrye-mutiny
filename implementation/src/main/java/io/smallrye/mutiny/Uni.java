@@ -466,7 +466,7 @@ public interface Uni<T> {
      * {@link Uni} returned by this method.
      * <p>
      * This operation is generally named {@code flatMap}.
-     * This method is a shortcut on {@link UniOnItem#transformToUni(Function)} onItem().transformToUni(mapper)}.
+     * This method is a shortcut on {@link UniOnItem#transformToUni(Function)} {@code onItem().transformToUni(mapper)}.
      *
      * @param mapper the function called with the item of this {@link Uni} and producing the {@link Uni},
      *        must not be {@code null}, must not return {@code null}.
@@ -498,7 +498,7 @@ public interface Uni<T> {
      * {@link Uni} returned by this method.
      * <p>
      * This operation is generally named {@code flatMap}.
-     * This method is a shortcut for {@link UniOnItem#transformToUni(Function) onItem().transformToUni(mapper)}.
+     * This method is a shortcut for {@link UniOnItem#transformToUni(Function)} {@code onItem().transformToUni(mapper)}.
      *
      * @param mapper the function called with the item of this {@link Uni} and producing the {@link Uni},
      *        must not be {@code null}, must not return {@code null}.
