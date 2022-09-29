@@ -323,7 +323,7 @@ public interface Multi<T> extends Publisher<T> {
      * <p>
      * Items that do not satisfy the predicate are discarded.
      * <p>
-     * This method is a shortcut for {@code multi.transform().byFilteringItemsWith(predicate)}.
+     * This method is a shortcut for {@code multi.select().where(predicate)}.
      *
      * @param predicate a predicate, must not be {@code null}
      * @return the new {@link Multi}
