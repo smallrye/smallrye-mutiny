@@ -107,7 +107,7 @@
         <maven-compiler-plugin.release>11</maven-compiler-plugin.release>
 
         <!-- Configuration of mutiny-kotlin module -->
-        <kotlin.version>1.7.10</kotlin.version>
+        <kotlin.version>1.7.20</kotlin.version>
         <kotlin.compiler.apiVersion>1.5</kotlin.compiler.apiVersion>
         <kotlin.compiler.languageVersion>1.5</kotlin.compiler.languageVersion>
         <coroutines.version>1.6.4</coroutines.version>
