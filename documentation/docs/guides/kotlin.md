@@ -13,7 +13,7 @@ For implementation details please have also a look to these methods' documentati
 
 ## Dependency coordinates
 
-The extension functions are shipped in the package `io.smallrye.mutiny.coroutines`:
+The coroutine extension functions are shipped in the package `io.smallrye.mutiny.coroutines`.
 
 ```kotlin linenums="1"
 {{ insert('kotlin/guides/Coroutines.kt', 'importStatements') }}
@@ -85,4 +85,16 @@ While regular `Uni<Void>` holds a `null` item, you can get a `Unit` by using the
 
 ```kotlin linenums="1"
 {{ insert('kotlin/guides/UniExt.kt', 'uniReplaceWithUnit') }}
+```
+
+### Uni builder
+
+Building a `Uni` from Kotlin code can easily be achieved using the following builders available as regular or coroutine variant:
+
+```kotlin linenums="1"
+{{ insert('kotlin/guides/UniExt.kt', 'uniBuilder') }}
+```
+
+```kotlin linenums="1"
+{{ insert('kotlin/guides/Coroutines.kt', 'uniBuilder') }}
 ```

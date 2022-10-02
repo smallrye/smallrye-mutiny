@@ -3,6 +3,7 @@ package io.smallrye.mutiny.coroutines
 import io.smallrye.mutiny.Multi
 import io.smallrye.mutiny.subscription.MultiEmitter
 import io.smallrye.mutiny.subscription.MultiSubscriber
+import java.util.concurrent.Flow.Subscription
 import java.util.concurrent.atomic.AtomicReference
 import kotlin.coroutines.coroutineContext
 import kotlinx.coroutines.CoroutineScope
@@ -13,7 +14,6 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
-import java.util.concurrent.Flow.Subscription
 
 /**
  * Subscribe to this [Multi] and provide the items as [Flow].

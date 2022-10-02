@@ -6,10 +6,12 @@ import io.smallrye.mutiny.coroutines.asMulti
 import io.smallrye.mutiny.coroutines.asUni
 import io.smallrye.mutiny.coroutines.awaitSuspending
 // </importStatements>
+import io.smallrye.mutiny.coroutines.uni
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 
@@ -46,4 +48,13 @@ suspend fun flowAsMulti() {
     val flow: Flow<String> = flowOf("Kotlin", "❤", "Mutiny")
     val multi: Multi<String> = flow.asMulti()
     // </flowAsMulti>
+}
+
+suspend fun uniBuilder() {
+    // <uniBuilder>
+    // import io.smallrye.mutiny.coroutines.uni
+    coroutineScope {
+        val uni: Uni<String> = uni { "λ 🚧" }
+    }
+    // </uniBuilder>
 }

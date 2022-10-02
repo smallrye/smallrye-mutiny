@@ -4,8 +4,12 @@ import io.smallrye.mutiny.Uni
 import io.smallrye.mutiny.subscription.UniEmitter
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.async
 import kotlinx.coroutines.suspendCancellableCoroutine
 
 /**
@@ -56,3 +60,17 @@ fun <T> Deferred<T>.asUni(): Uni<T> = Uni.createFrom().emitter { em: UniEmitter<
         }
     }
 }
+
+/**
+ * Produce a [Uni] from given [suspendSupplier] in a non-suspending context.
+ *
+ * The [suspendSupplier] block isn't attached to the structured concurrency of the current `coroutineContext` by default
+ * but executed in the [GlobalScope], that means that failures raised from [suspendSupplier] will not be
+ * thrown immediately but propagated to the resulting [Uni], similar to the behavior of `Uni.createFrom().item<T>(() -> T)`.
+ * The behaviour can be changed by passing an own [context] that's used for `async` execution of the given [suspendSupplier].
+ */
+@ExperimentalCoroutinesApi
+@OptIn(DelicateCoroutinesApi::class)
+suspend fun <T> uni(context: CoroutineScope = GlobalScope, suspendSupplier: suspend () -> T): Uni<T> = context.async {
+    suspendSupplier()
+}.asUni()
