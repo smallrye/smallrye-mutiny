@@ -4,16 +4,16 @@ tags:
 - intermediate
 ---
 
-# Kotlin coroutines integration
+# Kotlin integration
 
-The module `mutiny-kotlin` provides an integration with Kotlin coroutines.
+The module `mutiny-kotlin` provides an integration with Kotlin for use with coroutines and convenient language features.
 
-There are currently four extension methods available for converting between Mutiny and Kotlin coroutine types offered in a separate package.
-For implementation details please have also a look to these methods documentation.
+There are extension methods available for converting between Mutiny and Kotlin (coroutine) types.
+For implementation details please have also a look to these methods' documentation.
 
 ## Dependency coordinates
 
-The extension functions are shipped in the package `io.smallrye.mutiny.coroutines`:
+The coroutine extension functions are shipped in the package `io.smallrye.mutiny.coroutines`.
 
 ```kotlin linenums="1"
 {{ insert('kotlin/guides/Coroutines.kt', 'importStatements') }}
@@ -74,4 +74,27 @@ Finally, creating a Multi from a Flow is also possible:
 
 ```kotlin linenums="1"
 {{ insert('kotlin/guides/Coroutines.kt', 'flowAsMulti') }}
+```
+
+## Language convenience
+
+### Unit instead of Void (null) value
+
+Kotlin has a special value type `Unit` similar to Java's `Void`.
+While regular `Uni<Void>` holds a `null` item, you can get a `Unit` by using the extension function `replaceWithUnit()`:
+
+```kotlin linenums="1"
+{{ insert('kotlin/guides/UniExt.kt', 'uniReplaceWithUnit') }}
+```
+
+### Uni builder
+
+Building a `Uni` from Kotlin code can easily be achieved using the following builders available as regular or coroutine variant:
+
+```kotlin linenums="1"
+{{ insert('kotlin/guides/UniExt.kt', 'uniBuilder') }}
+```
+
+```kotlin linenums="1"
+{{ insert('kotlin/guides/Coroutines.kt', 'uniBuilder') }}
 ```
