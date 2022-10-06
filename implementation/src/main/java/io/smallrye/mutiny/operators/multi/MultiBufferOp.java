@@ -51,7 +51,7 @@ public class MultiBufferOp<T> extends AbstractMultiOperator<T, List<T>> {
     public MultiBufferOp(Multi<? extends T> upstream, int size, int skip) {
         super(upstream);
         this.size = ParameterValidation.positive(size, "size");
-        this.skip = ParameterValidation.positive(skip, "size");
+        this.skip = ParameterValidation.positive(skip, "skip");
         this.supplier = () -> new ArrayList<>(size);
     }
 
