@@ -112,7 +112,7 @@
         <kotlin.compiler.languageVersion>1.5</kotlin.compiler.languageVersion>
         <coroutines.version>1.6.4</coroutines.version>
         <kotlin.compiler.jvmTarget>${maven.compiler.target}</kotlin.compiler.jvmTarget>
-        <dokka.version>1.7.10</dokka.version>
+        <dokka.version>1.7.20</dokka.version>
 
         <jandex-maven-plugin.version>1.2.3</jandex-maven-plugin.version>
     </properties>
