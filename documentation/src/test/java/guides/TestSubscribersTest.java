@@ -18,8 +18,10 @@ public class TestSubscribersTest {
         UniAssertSubscriber<Integer> subscriber = uni
                 .subscribe().withSubscriber(UniAssertSubscriber.create());
 
-        subscriber.assertCompleted().assertItem(63);
-        // end::uni[]
+        subscriber
+                .awaitItem()
+                .assertItem(63);
+        // </uni>
     }
 
     @Test
@@ -30,7 +32,8 @@ public class TestSubscribersTest {
 
         AssertSubscriber<Integer> subscriber = multi.subscribe().withSubscriber(AssertSubscriber.create(10));
 
-        subscriber.assertCompleted()
+        subscriber
+                .awaitCompletion()
                 .assertItems(10, 20, 30, 40);
         // end::multi[]
     }
@@ -43,7 +46,9 @@ public class TestSubscribersTest {
         AssertSubscriber<Object> subscriber = multi
                 .subscribe().withSubscriber(AssertSubscriber.create(10));
 
-        subscriber.assertFailedWith(IOException.class, "Boom");
-        // end::failing[]
+        subscriber
+                .awaitFailure()
+                .assertFailedWith(IOException.class, "Boom");
+        // </failing>
     }
 }
