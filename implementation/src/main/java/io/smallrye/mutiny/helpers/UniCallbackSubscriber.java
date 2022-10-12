@@ -6,8 +6,6 @@ import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import java.util.function.Consumer;
 
-import org.reactivestreams.Subscription;
-
 import io.smallrye.mutiny.Context;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
@@ -57,8 +55,7 @@ public class UniCallbackSubscriber<T> implements UniSubscriber<T>, UniSubscripti
 
     @Override
     public final void onFailure(Throwable t) {
-        UniSubscription sub = SUBSCRIPTION_UPDATER.getAndSet(this, CANCELLED);
-        if (sub == CANCELLED) {
+        if (SUBSCRIPTION_UPDATER.getAndSet(this, CANCELLED) == CANCELLED) {
             // Already cancelled, do nothing
             return;
         }
@@ -67,8 +64,7 @@ public class UniCallbackSubscriber<T> implements UniSubscriber<T>, UniSubscripti
 
     @Override
     public final void onItem(T x) {
-        Subscription sub = SUBSCRIPTION_UPDATER.getAndSet(this, CANCELLED);
-        if (sub == CANCELLED) {
+        if (SUBSCRIPTION_UPDATER.getAndSet(this, CANCELLED) == CANCELLED) {
             // Already cancelled, do nothing
             return;
         }
@@ -82,8 +78,8 @@ public class UniCallbackSubscriber<T> implements UniSubscriber<T>, UniSubscripti
 
     @Override
     public void cancel() {
-        Subscription sub = SUBSCRIPTION_UPDATER.getAndSet(this, CANCELLED);
-        if (sub != null) {
+        UniSubscription sub = SUBSCRIPTION_UPDATER.getAndSet(this, CANCELLED);
+        if (sub != CANCELLED) {
             sub.cancel();
         }
     }
