@@ -38,14 +38,15 @@ public class MultiOverflowStrategy<T> {
     }
 
     /**
-     * When the downstream cannot keep up with the upstream emissions, instruct to use an <strong>unbounded</strong>
-     * buffer to store the items until they are consumed.
+     * When the downstream cannot keep up with the upstream emissions, instruct to use a <strong>bounded</strong>
+     * buffer of the default size to store the items until they are consumed.
      *
      * @return the new multi
+     * @see Infrastructure#setMultiOverflowDefaultBufferSize(int)
      */
     @CheckReturnValue
     public Multi<T> buffer() {
-        return buffer(128);
+        return buffer(Infrastructure.getMultiOverflowDefaultBufferSize());
     }
 
     /**
@@ -60,6 +61,18 @@ public class MultiOverflowStrategy<T> {
     public Multi<T> buffer(int size) {
         return Infrastructure.onMultiCreation(new MultiOnOverflowBufferOp<>(upstream, positive(size, "size"),
                 false, dropConsumer, dropUniMapper));
+    }
+
+    /**
+     * When the downstream cannot keep up with the upstream emissions, instruct to use an <strong>unbounded</strong>
+     * buffer to store the items until they are consumed.
+     *
+     * @return the new multi
+     */
+    @CheckReturnValue
+    public Multi<T> bufferUnconditionally() {
+        return Infrastructure.onMultiCreation(new MultiOnOverflowBufferOp<>(upstream,
+                Infrastructure.getMultiOverflowDefaultBufferSize(), true, dropConsumer, dropUniMapper));
     }
 
     /**
