@@ -582,4 +582,36 @@ public class MultiOnOverflowTest {
 
         sub.assertFailedWith(RuntimeException.class, "boom :: 2");
     }
+
+    @Test
+    public void boundedOverflowBufferShallSignalOverflow() {
+        AssertSubscriber<Integer> sub = AssertSubscriber.create(1);
+        Multi.createFrom().range(1, 1000)
+                .onOverflow().buffer(20)
+                .subscribe(sub);
+
+        sub.assertFailedWith(BackPressureFailure.class);
+    }
+
+    @Test
+    public void defaultBoundedOverflowBufferShallSignalOverflow() {
+        AssertSubscriber<Integer> sub = AssertSubscriber.create(1);
+        Multi.createFrom().range(1, 1000)
+                .onOverflow().buffer()
+                .subscribe(sub);
+
+        sub.assertFailedWith(BackPressureFailure.class);
+    }
+
+    @Test
+    public void unboundedOverflowShallNotSignalOverflow() {
+        AssertSubscriber<Integer> sub = AssertSubscriber.create(1);
+        Multi.createFrom().range(1, 1000)
+                .onOverflow().bufferUnconditionally()
+                .subscribe(sub);
+
+        sub.assertNotTerminated();
+        sub.request(Long.MAX_VALUE);
+        sub.assertCompleted();
+    }
 }

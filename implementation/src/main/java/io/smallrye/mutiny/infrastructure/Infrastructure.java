@@ -7,14 +7,29 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ServiceLoader;
-import java.util.concurrent.*;
-import java.util.function.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
+import java.util.function.BinaryOperator;
+import java.util.function.BooleanSupplier;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.LongConsumer;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
+import java.util.function.UnaryOperator;
 
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.groups.MultiOverflowStrategy;
 import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.subscription.UniSubscriber;
 import io.smallrye.mutiny.tuples.Functions;
@@ -50,11 +65,14 @@ public class Infrastructure {
     private static BooleanSupplier canCallerThreadBeBlockedSupplier;
     private static OperatorLogger operatorLogger = PrintOperatorEventOperatorLogger.INSTANCE;
 
+    private static int multiOverflowDefaultBufferSize = 128;
+
     public static void reload() {
         clearInterceptors();
         reloadUniInterceptors();
         reloadMultiInterceptors();
         reloadCallbackDecorators();
+        multiOverflowDefaultBufferSize = 128;
     }
 
     /**
@@ -393,6 +411,24 @@ public class Infrastructure {
     // For testing purpose only
     public static void resetOperatorLogger() {
         Infrastructure.operatorLogger = PrintOperatorEventOperatorLogger.INSTANCE;
+    }
+
+    /**
+     * Get the default overflow buffer size fpr {@link MultiOverflowStrategy#buffer()}.
+     *
+     * @return the default value
+     */
+    public static int getMultiOverflowDefaultBufferSize() {
+        return multiOverflowDefaultBufferSize;
+    }
+
+    /**
+     * Sets the default overflow buffer size fpr {@link MultiOverflowStrategy#buffer()}.
+     *
+     * @param size the buffer size, must be strictly positive
+     */
+    public static void setMultiOverflowDefaultBufferSize(int size) {
+        multiOverflowDefaultBufferSize = ParameterValidation.positive(size, "size");
     }
 
     /**
