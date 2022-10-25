@@ -26,6 +26,18 @@ public class MultiOverflow<T> {
      * @return the new multi
      */
     @CheckReturnValue
+    public Multi<T> bufferUnconditionally() {
+        return new MultiOverflowStrategy<>(upstream, null, null).bufferUnconditionally();
+    }
+
+    /**
+     * When the downstream cannot keep up with the upstream emissions, instruct to use a <strong>bounded</strong>
+     * buffer of the default size to store the items until they are consumed.
+     *
+     * @return the new multi
+     * @see Infrastructure#setMultiOverflowDefaultBufferSize(int)
+     */
+    @CheckReturnValue
     public Multi<T> buffer() {
         return new MultiOverflowStrategy<>(upstream, null, null).buffer();
     }
@@ -65,7 +77,7 @@ public class MultiOverflow<T> {
 
     /**
      * Define an overflow callback.
-     * 
+     *
      * @param consumer the dropped item consumer, must not be {@code null}, must not return {@code null}
      * @return an object to select the overflow management strategy
      */
