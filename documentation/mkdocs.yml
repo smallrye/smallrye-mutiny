@@ -38,6 +38,7 @@ nav:
       - 'guides/joining-unis.md'
       - 'guides/converters.md'
       - 'guides/testing.md'
+      - 'guides/spies.md'
       - 'guides/custom-operators.md'
       - 'guides/dropped-exceptions.md'
       - 'guides/framework-integration.md'
