@@ -20,16 +20,17 @@
         <dependency>
             <groupId>org.eclipse.microprofile.reactive-streams-operators</groupId>
             <artifactId>microprofile-reactive-streams-operators-api</artifactId>
+            <version>${microprofile-reactive-streams-jakarta.version}</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.microprofile.reactive-streams-operators</groupId>
             <artifactId>microprofile-reactive-streams-operators-core</artifactId>
-            <version>${microprofile-reactive-streams.version}</version>
+            <version>${microprofile-reactive-streams-jakarta.version}</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.microprofile.reactive-streams-operators</groupId>
             <artifactId>microprofile-reactive-streams-operators-tck</artifactId>
-            <version>${microprofile-reactive-streams.version}</version>
+            <version>${microprofile-reactive-streams-jakarta.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
