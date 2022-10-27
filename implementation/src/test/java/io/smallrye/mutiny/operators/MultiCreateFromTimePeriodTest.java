@@ -11,7 +11,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.parallel.ResourceAccessMode;
 import org.junit.jupiter.api.parallel.ResourceLock;
 
@@ -105,7 +104,6 @@ public class MultiCreateFromTimePeriodTest {
     }
 
     @Test
-    @Timeout(1)
     public void testBackPressureOverflow() {
         AssertSubscriber<Long> subscriber = AssertSubscriber.create();
 

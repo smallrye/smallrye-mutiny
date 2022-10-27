@@ -25,7 +25,7 @@ import junit5.support.InfrastructureResource;
 public class UniAwaitTest {
 
     @Test
-    @Timeout(1)
+    @Timeout(10)
     public void testAwaitingOnAnAlreadyResolvedUni() {
         assertThat(Uni.createFrom().item(1).await().indefinitely()).isEqualTo(1);
     }
@@ -132,7 +132,7 @@ public class UniAwaitTest {
     }
 
     @Test
-    @Timeout(1)
+    @Timeout(10)
     public void testTimeoutAndOptional() {
         assertThrows(TimeoutException.class,
                 () -> Uni.createFrom().nothing().await().asOptional().atMost(Duration.ofMillis(10)));
