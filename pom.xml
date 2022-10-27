@@ -474,12 +474,7 @@
                         <artifactId>maven-surefire-plugin</artifactId>
                         <configuration>
                             <environmentVariables>
-                                <!-- Mutiny -->
                                 <DEFAULT_MUTINY_AWAIT_TIMEOUT>120</DEFAULT_MUTINY_AWAIT_TIMEOUT>
-                                <!-- Reactive Streams TCK -->
-                                <DEFAULT_TIMEOUT_MILLIS>1500</DEFAULT_TIMEOUT_MILLIS>
-                                <DEFAULT_NO_SIGNALS_TIMEOUT_MILLIS>1500</DEFAULT_NO_SIGNALS_TIMEOUT_MILLIS>
-                                <DEFAULT_POLL_TIMEOUT_MILLIS_ENV>100</DEFAULT_POLL_TIMEOUT_MILLIS_ENV>
                             </environmentVariables>
                         </configuration>
                     </plugin>
