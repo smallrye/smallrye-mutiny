@@ -10,7 +10,6 @@ import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ScheduledExecutorService;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.parallel.ResourceAccessMode;
 import org.junit.jupiter.api.parallel.ResourceLock;
 
@@ -67,7 +66,6 @@ public class UniIfNoItemTest {
     }
 
     @Test
-    @Timeout(2)
     public void testFailureBeforeTimeout() {
         UniAssertSubscriber<Integer> subscriber = UniAssertSubscriber.create();
 

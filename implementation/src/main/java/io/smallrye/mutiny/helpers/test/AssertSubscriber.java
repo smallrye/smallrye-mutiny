@@ -1,6 +1,8 @@
 package io.smallrye.mutiny.helpers.test;
 
 import static io.smallrye.mutiny.helpers.test.AssertionHelper.*;
+import static java.lang.Integer.parseInt;
+import static java.time.Duration.ofSeconds;
 
 import java.time.Duration;
 import java.util.List;
@@ -28,8 +30,20 @@ public class AssertSubscriber<T> implements Subscriber<T>, ContextSupport {
 
     /**
      * The default timeout used by {@code await} method.
+     * <p>
+     * This static field is mutable, the authors assume that you know what you are doing if you ever feel like changing
+     * its value.
      */
-    public static Duration DEFAULT_TIMEOUT = Duration.ofSeconds(10);
+    public static Duration DEFAULT_TIMEOUT;
+
+    /**
+     * Name of the environment variable for setting the default await methods timeout (in seconds).
+     */
+    public static final String DEFAULT_MUTINY_AWAIT_TIMEOUT = "DEFAULT_MUTINY_AWAIT_TIMEOUT";
+
+    static {
+        DEFAULT_TIMEOUT = ofSeconds(parseInt(System.getenv().getOrDefault(DEFAULT_MUTINY_AWAIT_TIMEOUT, "10")));
+    }
 
     /**
      * Latch waiting for the completion or failure event.
@@ -403,7 +417,7 @@ public class AssertSubscriber<T> implements Subscriber<T>, ContextSupport {
      * Awaits for the subscriber to receive {@code number} items in total (including the ones received after calling
      * this method).
      * If not enough items have been received before the default timeout, an {@link AssertionError} is thrown.
-     *
+     * <p>
      * Unlike {@link #awaitNextItems(int, int)}, this method does not request items from the upstream.
      *
      * @param number the number of items to expect, must be neither 0 nor negative.
@@ -417,7 +431,7 @@ public class AssertSubscriber<T> implements Subscriber<T>, ContextSupport {
      * Awaits for the subscriber to receive {@code number} items in total (including the ones received after calling
      * this method).
      * If not enough items have been received before the given timeout, an {@link AssertionError} is thrown.
-     *
+     * <p>
      * Unlike {@link #awaitNextItems(int, int)}, this method does not requests items from the upstream.
      *
      * @param number the number of items to expect, must be neither 0 nor negative.
