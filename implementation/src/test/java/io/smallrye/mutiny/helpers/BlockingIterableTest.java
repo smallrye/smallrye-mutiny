@@ -22,7 +22,6 @@ import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.parallel.ResourceAccessMode;
 import org.junit.jupiter.api.parallel.ResourceLock;
 
@@ -37,7 +36,6 @@ import junit5.support.InfrastructureResource;
 public class BlockingIterableTest {
 
     @Test
-    @Timeout(5)
     public void testToIterable() {
         List<Integer> values = new ArrayList<>();
 
@@ -53,7 +51,6 @@ public class BlockingIterableTest {
     }
 
     @Test
-    @Timeout(5)
     public void testToIterableWithBufferSizeAndSupplier() {
         Queue<Integer> q = new ArrayBlockingQueue<>(1);
         List<Integer> values = new ArrayList<>();
@@ -66,7 +63,6 @@ public class BlockingIterableTest {
     }
 
     @Test
-    @Timeout(5)
     public void testToIterableWithEmptyStream() {
         List<Integer> values = new ArrayList<>();
 
@@ -78,7 +74,6 @@ public class BlockingIterableTest {
     }
 
     @Test
-    @Timeout(5)
     public void testToIterableWithUpstreamFailure() {
         assertThrows(RuntimeException.class, () -> {
             List<Integer> values = new ArrayList<>();
@@ -93,7 +88,6 @@ public class BlockingIterableTest {
     }
 
     @Test
-    @Timeout(5)
     public void testToStream() {
         List<Integer> values = new ArrayList<>();
 
@@ -105,7 +99,6 @@ public class BlockingIterableTest {
     }
 
     @Test
-    @Timeout(5)
     public void testToStreamWithEmptyStream() {
         List<Integer> values = new ArrayList<>();
         Multi.createFrom().<Integer> empty().subscribe().asStream().forEach(values::add);
@@ -113,7 +106,6 @@ public class BlockingIterableTest {
     }
 
     @Test
-    @Timeout(5)
     public void testCancellationOnClose() {
         List<Integer> values = new ArrayList<>();
 
@@ -126,7 +118,6 @@ public class BlockingIterableTest {
     }
 
     @Test
-    @Timeout(5)
     public void testParallelStreamComputation() {
         int n = 10_000;
 
@@ -139,7 +130,6 @@ public class BlockingIterableTest {
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
     @Test
-    @Timeout(1)
     public void testToStreamWithFailure() {
         Multi<Integer> multi = Multi.createFrom().<Integer> emitter(e -> e.emit(1).emit(0).complete())
                 .map(v -> 4 / v);
@@ -149,7 +139,6 @@ public class BlockingIterableTest {
     }
 
     @Test
-    @Timeout(1)
     public void testToIterableWithFailure() {
         Multi<Integer> multi = Multi.createFrom().<Integer> emitter(e -> e.emit(1).emit(0).complete())
                 .map(v -> 4 / v);
@@ -159,7 +148,6 @@ public class BlockingIterableTest {
     }
 
     @Test
-    @Timeout(1)
     public void testToIterableWithCheckedFailure() {
         Multi<Integer> multi = Multi.createFrom().emitter(e -> e.emit(1).emit(0).fail(new IOException("boom")));
 
@@ -170,7 +158,6 @@ public class BlockingIterableTest {
     }
 
     @Test
-    @Timeout(1)
     public void testQueueSupplierFailing() {
         assertThatThrownBy(() -> Multi.createFrom().items(1, 2, 3, 4, 5, 6)
                 .subscribe().asIterable(10, () -> {
@@ -182,7 +169,6 @@ public class BlockingIterableTest {
     }
 
     @Test
-    @Timeout(1)
     public void testQueueSupplierReturningNull() {
         assertThatThrownBy(() -> Multi.createFrom().items(1, 2, 3, 4, 5, 6)
                 .subscribe().asIterable(10, () -> null).forEach(i -> {

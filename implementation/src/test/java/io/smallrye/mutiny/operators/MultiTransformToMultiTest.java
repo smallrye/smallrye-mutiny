@@ -20,7 +20,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.parallel.ResourceAccessMode;
 import org.junit.jupiter.api.parallel.ResourceLock;
 
@@ -70,7 +69,6 @@ public class MultiTransformToMultiTest {
     }
 
     @Test
-    @Timeout(60)
     public void testConcatMapWithLotsOfItems() {
         AssertSubscriber<Integer> subscriber = AssertSubscriber.create(Long.MAX_VALUE);
 
@@ -81,7 +79,7 @@ public class MultiTransformToMultiTest {
                 .subscribe(subscriber);
 
         subscriber
-                .await(Duration.ofSeconds(60))
+                .awaitCompletion(Duration.ofMinutes(5))
                 .assertCompleted();
 
         int current = 0;
@@ -92,7 +90,6 @@ public class MultiTransformToMultiTest {
     }
 
     @Test
-    @Timeout(60)
     public void testConcatMapWithLotsOfItemsAndFailurePropagation() {
         AssertSubscriber<Integer> subscriber = AssertSubscriber.create(Long.MAX_VALUE);
 
@@ -103,7 +100,7 @@ public class MultiTransformToMultiTest {
                 .subscribe(subscriber);
 
         subscriber
-                .await(Duration.ofSeconds(60))
+                .awaitCompletion(Duration.ofMinutes(5))
                 .assertCompleted();
 
         int current = 0;
@@ -114,7 +111,6 @@ public class MultiTransformToMultiTest {
     }
 
     @Test
-    @Timeout(60)
     public void testConcatMapWithLotsOfItemsAndFailuresAndFailurePropagation() {
         AssertSubscriber<Integer> subscriber = AssertSubscriber.create(Long.MAX_VALUE);
 
@@ -131,7 +127,7 @@ public class MultiTransformToMultiTest {
                 .subscribe(subscriber);
 
         subscriber
-                .await(Duration.ofSeconds(60))
+                .awaitFailure(Duration.ofMinutes(5))
                 .assertFailedWith(CompositeException.class, "boom");
 
         assertThat(subscriber.getItems().size()).isEqualTo(100_000 - 2);
@@ -143,7 +139,6 @@ public class MultiTransformToMultiTest {
     }
 
     @Test
-    @Timeout(60)
     public void testConcatMapWithLotsOfItemsAndFailuresWithoutFailurePropagation() {
         AssertSubscriber<Integer> subscriber = AssertSubscriber.create(Long.MAX_VALUE);
 
@@ -159,7 +154,7 @@ public class MultiTransformToMultiTest {
                 .subscribe(subscriber);
 
         subscriber
-                .await(Duration.ofSeconds(60))
+                .awaitFailure(Duration.ofMinutes(5))
                 .assertFailedWith(IllegalArgumentException.class, "boom");
 
         assertThat(subscriber.getItems().size()).isEqualTo(99000 - 1);

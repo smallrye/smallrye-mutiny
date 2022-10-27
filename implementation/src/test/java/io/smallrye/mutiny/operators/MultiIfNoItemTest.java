@@ -11,7 +11,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.parallel.ResourceAccessMode;
 import org.junit.jupiter.api.parallel.ResourceLock;
 
@@ -83,7 +82,6 @@ public class MultiIfNoItemTest {
     }
 
     @Test
-    @Timeout(2)
     public void testFailureBeforeTimeout() {
         AtomicBoolean subscribed = new AtomicBoolean(false);
         AssertSubscriber<Integer> subscriber = AssertSubscriber.create();
