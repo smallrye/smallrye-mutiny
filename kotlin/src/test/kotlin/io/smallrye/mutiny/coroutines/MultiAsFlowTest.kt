@@ -14,20 +14,18 @@ import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 import kotlin.test.fail
 import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.buffer
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
 import org.assertj.core.api.Assertions.assertThat
+import org.awaitility.Awaitility.await
 
-@ExperimentalCoroutinesApi
 class MultiAsFlowTest {
 
     @Test
@@ -147,13 +145,13 @@ class MultiAsFlowTest {
                 delay(100)
                 emit()
                 emit()
+                await().until { eventItems.size == 2 }
                 fail()
-            }
+            }.join()
 
             // Then
             assertThat(assertJob.await()).hasMessage("boom").isInstanceOf(IllegalStateException::class.java)
             assertThat(eventItems).containsExactly(5, 5)
-
         }
     }
 
@@ -264,8 +262,8 @@ class MultiAsFlowTest {
             val multi = Multi.createFrom().iterable(items)
 
             // When
-            val flow = multi.asFlow()
-            val eventItems = flow.buffer(5).toList()
+            val flow = multi.asFlow(bufferCapacity = 5)
+            val eventItems = flow.toList()
 
             // Then
             assertThat(eventItems).containsExactlyElementsOf((1..10_000).toList())
@@ -282,7 +280,7 @@ class MultiAsFlowTest {
         assertFailsWith<TimeoutCancellationException> {
             testBlocking {
                 withTimeout(300) {
-                    multi.asFlow().buffer(5).collect {
+                    multi.asFlow(bufferCapacity = 5).collect {
                         ticks.incrementAndGet()
                         delay(50)
                     }
