@@ -60,6 +60,13 @@ You can process a `Multi` as `Flow` as follows:
 {{ insert('kotlin/guides/Coroutines.kt', 'multiAsFlow') }}
 ```
 
+!!! note
+
+    There's no flow control availabe for Kotlin's `Flow`. Published items are buffered for consumption using a coroutine `Channel`.
+    The buffer size and overflow strategy of that `Channel` can be configured using optional arguments:
+    `Multi.asFlow(bufferCapacity = Channel.UNLIMITED, bufferOverflowStrategy = BufferOverflow.SUSPEND)`,
+    for more details please consult the method documentation.
+
 ## Providing a Deferred value as Uni
 
 The other way around is also possible, let a Deferred become a Uni:
