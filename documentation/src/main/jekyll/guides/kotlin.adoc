@@ -60,7 +60,7 @@ include::{include_dir}/Coroutines.kt[tags=multiAsFlow]
 [IMPORTANT]
 ====
 Please be aware, that there's no flow control available for Kotlin's `Flow`.
-Published items are buffered for consumption, what can cause memory pressure if your producer is faster than your consumer.
+Published items are buffered for consumption, which can cause memory pressure if your producer is faster than your consumer.
 ====
 
 == Providing a Deferred value as Uni
