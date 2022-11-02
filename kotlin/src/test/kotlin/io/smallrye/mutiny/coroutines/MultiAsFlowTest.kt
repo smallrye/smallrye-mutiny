@@ -26,6 +26,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
 import org.assertj.core.api.Assertions.assertThat
+import org.awaitility.Awaitility.await
 
 @ExperimentalCoroutinesApi
 class MultiAsFlowTest {
@@ -147,13 +148,13 @@ class MultiAsFlowTest {
                 delay(100)
                 emit()
                 emit()
+                await().until { eventItems.size == 2 }
                 fail()
-            }
+            }.join()
 
             // Then
             assertThat(assertJob.await()).hasMessage("boom").isInstanceOf(IllegalStateException::class.java)
             assertThat(eventItems).containsExactly(5, 5)
-
         }
     }
 
