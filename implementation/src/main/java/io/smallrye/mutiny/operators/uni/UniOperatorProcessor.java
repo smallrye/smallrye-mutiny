@@ -20,8 +20,9 @@ public abstract class UniOperatorProcessor<I, O> implements UniSubscriber<I>, Un
 
     private volatile UniSubscription upstream;
 
-    public UniOperatorProcessor(UniSubscriber<? super O> downstream) {
-        this.downstream = ParameterValidation.nonNull(downstream, "downstream");
+    public UniOperatorProcessor(final UniSubscriber<? super O> downstream) {
+        ParameterValidation.nonNull(downstream, "downstream");
+        this.downstream = downstream;
     }
 
     @Override
