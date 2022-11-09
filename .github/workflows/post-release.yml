@@ -21,6 +21,8 @@ jobs:
           java-version: 11
           distribution: temurin
           cache: maven
+      - name: 'Run a quick local build'
+        run: ./mvnw -s .build/maven-ci-settings.xml clean install -DskipTests
       - name: 'Collect Compatibility Justification'
         env:
           GITHUB_CONTEXT: ${{ toJson(github) }}
