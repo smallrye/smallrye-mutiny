@@ -58,8 +58,11 @@ jobs:
 
           TAG=$(echo ${REF} | sed -e 's%refs/tags/%%g')
           echo "Waiting for artifacts to be available from Maven Central, otherwise the build will fail during the compatibility verification"
+          echo "Version ${TAG}"
+          ARTIFACTS=$(./mvnw -s .build/maven-ci-settings.xml -Dexec.executable='echo' -Dexec.args='${project.groupId}:${project.artifactId}' exec:exec -q | tr '\n' ',')
+          echo "Artifacts: ${ARTIFACTS}"
           jbang .build/WaitForCentral.java \
-            --artifacts=$(./mvnw -s .build/maven-ci-settings.xml -Dexec.executable='echo' -Dexec.args='${project.groupId}:${project.artifactId}' exec:exec -q | tr '\n' ',') \
+            --artifacts=$ARTIFACTS \
             --expected-version="${TAG}"
 
           git clone -b main "https://${GITHUB_ACTOR}:${GITHUB_TOKEN}@github.com/smallrye/smallrye-mutiny.git" new-main
