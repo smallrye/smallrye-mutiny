@@ -21,6 +21,8 @@ jobs:
           java-version: 11
           distribution: temurin
           cache: maven
+      - name: 'Run a quick local build'
+        run: ./mvnw -s .build/maven-ci-settings.xml clean install -DskipTests
       - name: 'Collect Compatibility Justification'
         env:
           GITHUB_CONTEXT: ${{ toJson(github) }}
@@ -32,8 +34,7 @@ jobs:
           sudo apt-get install -y gnupg2 gnupg-agent
 
           curl -s "https://get.sdkman.io" | bash
-          source ~/.sdkman/bin/sdkman-init.sh && \
-            sdk install jbang
+          source ~/.sdkman/bin/sdkman-init.sh && sdk install jbang
 
           mkdir -p target
           jbang .build/CompatibilityUtils.java extract
@@ -58,13 +59,13 @@ jobs:
           TAG=$(echo ${REF} | sed -e 's%refs/tags/%%g')
           echo "Waiting for artifacts to be available from Maven Central, otherwise the build will fail during the compatibility verification"
           jbang .build/WaitForCentral.java \
-            --artifacts=$(./mvnw -Dexec.executable='echo' -Dexec.args='${project.groupId}:${project.artifactId}' exec:exec -q | tr '\n' ',') \
+            --artifacts=$(./mvnw -s .build/maven-ci-settings.xml -Dexec.executable='echo' -Dexec.args='${project.groupId}:${project.artifactId}' exec:exec -q | tr '\n' ',') \
             --expected-version="${TAG}"
 
           git clone -b main "https://${GITHUB_ACTOR}:${GITHUB_TOKEN}@github.com/smallrye/smallrye-mutiny.git" new-main
           cd new-main
           echo "Clearing difference justifications"
-          jbang .build/CompatibilityUtils.java clear --version="${TAG}" --do-not-clear-version-prefix=1.
+          jbang .build/CompatibilityUtils.java clear --version="${TAG}" --do-not-clear-version-prefix="1."
           if [[ $(git diff --stat) != '' ]]; then
             git add -A
             git status
