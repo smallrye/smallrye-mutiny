@@ -21,7 +21,7 @@ String max = Multi.createFrom().items("e", "b", "c", "f", "g", "e")
 The `io.smallrye.math.Math` class provides the entry point to the offered operators:
 
 * count - emits the number of items emitted by the upstream
-* index - emits `Tuple2<Long, T>` for each item from the upstream. The first element of the tuple is the index (0-based), and the second if the item 
+* index - emits `Tuple2<Long, T>` for each item from the upstream. The first element of the tuple is the index (0-based), and the second is the item 
 * min / max - emits the min/max item from the upstream, using Java comparator
 * top(x) - emits the top x items from the upstream, a new ranking is emitted every time it changes.
 * sum - emits the sum of all the items emitted by the upstream
