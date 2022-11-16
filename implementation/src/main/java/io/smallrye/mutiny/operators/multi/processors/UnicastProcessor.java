@@ -5,6 +5,7 @@ import java.util.Queue;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
+import java.util.function.Consumer;
 
 import org.reactivestreams.Processor;
 import org.reactivestreams.Subscriber;
@@ -15,6 +16,7 @@ import io.smallrye.mutiny.helpers.Subscriptions;
 import io.smallrye.mutiny.helpers.queues.Queues;
 import io.smallrye.mutiny.operators.AbstractMulti;
 import io.smallrye.mutiny.subscription.BackPressureFailure;
+import io.smallrye.mutiny.subscription.BackPressureStrategy;
 import io.smallrye.mutiny.subscription.MultiSubscriber;
 
 /**
@@ -23,6 +25,10 @@ import io.smallrye.mutiny.subscription.MultiSubscriber;
  * <p>
  * The back pressure model is not using the request protocol but the queue used to store the items. If the queue
  * gets full, an {@link io.smallrye.mutiny.subscription.BackPressureFailure} exception is propagated downstream.
+ * <p>
+ * <strong>This processor must not be re-subscribed: it expects exactly 1 subscriber.</strong>
+ * If you expect multiple subscribers then you should look at creating a {@link io.smallrye.mutiny.Multi} from an
+ * emitter, see {@link io.smallrye.mutiny.groups.MultiCreate#emitter(Consumer, BackPressureStrategy)}.
  *
  * @param <T> the type of item
  */
