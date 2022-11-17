@@ -1,5 +1,6 @@
 package io.smallrye.mutiny.operators;
 
+import static io.smallrye.mutiny.helpers.test.AssertSubscriber.DEFAULT_TIMEOUT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.awaitility.Awaitility.await;
@@ -123,7 +124,7 @@ public class UniRepeatTest {
                 .onItem().transformToMulti(p -> Multi.createFrom().iterable(p.items)).concatenate()
                 .subscribe().withSubscriber(AssertSubscriber.create(50));
 
-        subscriber.await()
+        subscriber.awaitCompletion(DEFAULT_TIMEOUT)
                 .assertItems(1, 2, 3, 4, 5, 6, 7, 8);
 
         assertThat(times).hasSize(3);

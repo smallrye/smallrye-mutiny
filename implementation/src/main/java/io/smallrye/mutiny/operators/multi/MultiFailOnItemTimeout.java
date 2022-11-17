@@ -10,7 +10,6 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
-import io.smallrye.common.annotation.Experimental;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.helpers.EmptyUniSubscription;
 import io.smallrye.mutiny.helpers.ParameterValidation;
@@ -18,7 +17,6 @@ import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.MultiOperator;
 import io.smallrye.mutiny.subscription.MultiSubscriber;
 
-@Experimental("Multi timeouts are an experimental feature.")
 public class MultiFailOnItemTimeout<I> extends MultiOperator<I, I> {
     private final Duration timeout;
     private final Supplier<? extends Throwable> supplier;

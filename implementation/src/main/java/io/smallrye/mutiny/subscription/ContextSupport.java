@@ -1,12 +1,10 @@
 package io.smallrye.mutiny.subscription;
 
-import io.smallrye.common.annotation.Experimental;
 import io.smallrye.mutiny.Context;
 
 /**
  * Interface for subscribers and types that provide a {@link Context}.
  */
-@Experimental("Context support is a new experimental API introduced in Mutiny 1.3.0")
 public interface ContextSupport {
 
     /**

@@ -289,24 +289,6 @@ public class UniAssertSubscriber<T> implements UniSubscriber<T> {
     }
 
     /**
-     * Await for termination.
-     *
-     * @return this {@link UniAssertSubscriber}
-     * @deprecated Use {@link #awaitFailure()} or {@link #awaitItem()} instead.
-     */
-    @Deprecated
-    public UniAssertSubscriber<T> await() {
-        try {
-            awaitEvent(hasCompleted, DEFAULT_TIMEOUT);
-        } catch (TimeoutException e) {
-            throw new AssertionError("Expected item or failure event in the last "
-                    + DEFAULT_TIMEOUT.toMillis() + " ms, but didn't get any event.");
-        }
-
-        return this;
-    }
-
-    /**
      * Assert that the {@link io.smallrye.mutiny.Uni} has completed.
      *
      * @return this {@link UniAssertSubscriber}

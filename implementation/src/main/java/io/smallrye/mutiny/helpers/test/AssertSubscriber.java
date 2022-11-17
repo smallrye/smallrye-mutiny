@@ -309,18 +309,6 @@ public class AssertSubscriber<T> implements Subscriber<T>, ContextSupport {
     }
 
     /**
-     * Await for the multi to be terminated.
-     * It waits at most {@link #DEFAULT_TIMEOUT}.
-     *
-     * @return this {@link AssertSubscriber}
-     * @deprecated Use {@link #awaitCompletion()} or {@link #awaitFailure()} instead
-     */
-    @Deprecated
-    public AssertSubscriber<T> await() {
-        return await(DEFAULT_TIMEOUT);
-    }
-
-    /**
      * Awaits for the next item.
      * If no item have been received before the default timeout, an {@link AssertionError} is thrown.
      * <p>
@@ -699,30 +687,6 @@ public class AssertSubscriber<T> implements Subscriber<T>, ContextSupport {
             throw new AssertionError(
                     "Expected " + expected + " items.  Only " + items.size() + " items have been received.");
         }
-    }
-
-    /**
-     * Await for the multi to be terminated.
-     *
-     * @param duration the timeout duration
-     * @return this {@link AssertSubscriber}
-     * @deprecated Use {@link #awaitFailure()} or {@link #awaitCompletion()} instead
-     */
-    @Deprecated
-    public AssertSubscriber<T> await(Duration duration) {
-        if (terminal.getCount() == 0) {
-            // We are done already.
-            return this;
-        }
-
-        try {
-            if (!terminal.await(duration.toMillis(), TimeUnit.MILLISECONDS)) {
-                throw new AssertionError("Expected a terminal event before the timeout.");
-            }
-        } catch (InterruptedException ex) {
-            Thread.currentThread().interrupt();
-        }
-        return this;
     }
 
     /**

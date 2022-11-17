@@ -14,7 +14,6 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import io.smallrye.common.annotation.CheckReturnValue;
-import io.smallrye.common.annotation.Experimental;
 import io.smallrye.mutiny.Context;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
@@ -477,7 +476,6 @@ public class MultiCreate {
      * @param <T> the type of the item
      * @return the produced {@link Multi}
      */
-    @Experimental("Context support is a new experimental API introduced in Mutiny 1.3.0")
     @CheckReturnValue
     public <T> Multi<T> context(Function<Context, Multi<? extends T>> mapper) {
         Function<Context, Multi<? extends T>> actual = Infrastructure.decorate(nonNull(mapper, "mapper"));

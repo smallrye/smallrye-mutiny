@@ -6,14 +6,12 @@ import static io.smallrye.mutiny.helpers.ParameterValidation.positive;
 import java.util.concurrent.Flow;
 
 import io.smallrye.common.annotation.CheckReturnValue;
-import io.smallrye.common.annotation.Experimental;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.operators.multi.replay.ReplayOperator;
 
 /**
  * Group to configure replaying a {@link Multi} to multiple subscribers.
  */
-@Experimental("Replaying of Multi is an experimental feature in Mutiny 1.4.0")
 public class MultiReplay {
 
     private long numberOfItemsToReplay = Long.MAX_VALUE;

@@ -2,8 +2,6 @@ package io.smallrye.mutiny;
 
 import java.util.Objects;
 
-import io.smallrye.common.annotation.Experimental;
-
 /**
  * Models an item flowing along a Mutiny pipeline with its subscriber context attached.
  *
@@ -11,7 +9,6 @@ import io.smallrye.common.annotation.Experimental;
  * @see Uni#attachContext()
  * @see Multi#attachContext()
  */
-@Experimental("Context support is a new experimental API introduced in Mutiny 1.3.0")
 public final class ItemWithContext<T> {
 
     private final Context context;

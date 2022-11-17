@@ -2,12 +2,9 @@ package io.smallrye.mutiny.subscription;
 
 import java.time.Duration;
 
-import io.smallrye.common.annotation.Experimental;
-
 /**
  * A demand pacer with a fixed delay / fixed demand.
  */
-@Experimental("Demand pacing is a new experimental API introduced in Mutiny 1.5.0")
 public class FixedDemandPacer implements DemandPacer {
 
     private final Request request;

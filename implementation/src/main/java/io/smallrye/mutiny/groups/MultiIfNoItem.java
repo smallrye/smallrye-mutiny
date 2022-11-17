@@ -6,10 +6,8 @@ import static io.smallrye.mutiny.helpers.ParameterValidation.validate;
 import java.time.Duration;
 
 import io.smallrye.common.annotation.CheckReturnValue;
-import io.smallrye.common.annotation.Experimental;
 import io.smallrye.mutiny.Multi;
 
-@Experimental("Multi timeouts are an experimental feature.")
 public class MultiIfNoItem<T> {
 
     private final Multi<T> upstream;

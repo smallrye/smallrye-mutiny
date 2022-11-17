@@ -5,14 +5,12 @@ import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
 import java.util.concurrent.ScheduledExecutorService;
 
 import io.smallrye.common.annotation.CheckReturnValue;
-import io.smallrye.common.annotation.Experimental;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.AbstractMulti;
 import io.smallrye.mutiny.operators.multi.MultiDemandPacer;
 import io.smallrye.mutiny.subscription.DemandPacer;
 
-@Experimental("Demand pacing is a new experimental API introduced in Mutiny 1.5.0")
 public class MultiDemandPacing<T> {
 
     private final AbstractMulti<T> upstream;
