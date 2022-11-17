@@ -17,7 +17,6 @@ import org.awaitility.core.ConditionTimeoutException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 
-@SuppressWarnings("ConstantConditions")
 public class AbstractSubscriberTest {
 
     @Test

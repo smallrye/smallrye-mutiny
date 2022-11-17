@@ -42,7 +42,6 @@ public class MultiSubscribeTest {
 
     }
 
-    @SuppressWarnings("ConstantConditions")
     @Test
     public void testSubscribeWithItemFailureAndCompletion() {
         List<Long> items = new CopyOnWriteArrayList<>();

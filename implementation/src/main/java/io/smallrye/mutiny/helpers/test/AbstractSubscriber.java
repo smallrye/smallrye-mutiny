@@ -15,7 +15,7 @@ import java.util.concurrent.atomic.AtomicReference;
  *
  * @param <T> the type of the items
  */
-@SuppressWarnings({ "SubscriberImplementation", "ReactiveStreamsSubscriberImplementation" })
+@SuppressWarnings({ "SubscriberImplementation" })
 public class AbstractSubscriber<T> implements Subscriber<T>, Subscription {
 
     private final long upfrontRequest;

@@ -52,7 +52,6 @@ public class MultiCollectTest {
                 .assertItem(3);
     }
 
-    @SuppressWarnings("deprecation")
     @Test
     public void testCollectFirstAndLastDeprecated() {
         Multi<Integer> items = Multi.createFrom().items(1, 2, 3);

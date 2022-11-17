@@ -21,7 +21,6 @@ import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.helpers.test.AssertSubscriber;
 import mutiny.zero.flow.adapters.AdaptersToFlow;
 
-@SuppressWarnings("ConstantConditions")
 public class MultiOnCompletionTest {
 
     @Test
@@ -329,7 +328,6 @@ public class MultiOnCompletionTest {
         assertThat(called).isTrue();
     }
 
-    @SuppressWarnings("ConstantConditions")
     @Test
     public void testCallThatThrowsException() {
         AtomicBoolean called = new AtomicBoolean();

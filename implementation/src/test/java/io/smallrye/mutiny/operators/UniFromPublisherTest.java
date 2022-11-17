@@ -29,7 +29,6 @@ public class UniFromPublisherTest {
         subscriber.assertCompleted().assertItem(1);
     }
 
-    @SuppressWarnings("ConstantConditions")
     @Test
     public void testWithMultiValuedPublisher() {
         UniAssertSubscriber<Integer> subscriber = UniAssertSubscriber.create();
@@ -56,7 +55,6 @@ public class UniFromPublisherTest {
         subscriber.assertCompleted().assertItem(null);
     }
 
-    @SuppressWarnings("ConstantConditions")
     @Test
     public void testThatValueIsNotEmittedBeforeSubscription() {
         UniAssertSubscriber<Integer> subscriber = UniAssertSubscriber.create();

@@ -15,7 +15,6 @@ import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.helpers.test.UniAssertSubscriber;
 import io.smallrye.mutiny.subscription.UniEmitter;
 
-@SuppressWarnings("ConstantConditions")
 public class UniOnItemTransformToUniWithEmitterTest {
 
     @Test

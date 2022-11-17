@@ -127,7 +127,6 @@ public class MultiOnFailureCallTest {
                 .subscribe().withSubscriber(AssertSubscriber.create(10));
 
         subscriber.cancel();
-        //noinspection ConstantConditions
         assertThat(terminated).isTrue();
     }
 }

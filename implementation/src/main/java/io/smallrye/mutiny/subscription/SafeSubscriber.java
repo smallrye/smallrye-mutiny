@@ -16,7 +16,6 @@ import io.smallrye.mutiny.infrastructure.Infrastructure;
  *
  * @param <T> the value type
  */
-@SuppressWarnings({ "ReactiveStreamsSubscriberImplementation" })
 public final class SafeSubscriber<T> implements Subscriber<T>, Subscription, ContextSupport {
 
     /**

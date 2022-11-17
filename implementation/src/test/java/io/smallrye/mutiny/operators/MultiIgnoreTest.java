@@ -29,7 +29,6 @@ public class MultiIgnoreTest {
                 .assertHasNotReceivedAnyItem();
     }
 
-    @SuppressWarnings("ConstantConditions")
     @Test
     public void testAsUni() {
         CompletableFuture<Void> future = Multi.createFrom().items(1, 2, 3, 4)

@@ -50,7 +50,6 @@ public class UniCreateFromItemTest {
         subscriber.assertCompleted().assertItem(1);
     }
 
-    @SuppressWarnings("ConstantConditions")
     @Test
     public void testThatValueIsNotEmittedBeforeSubscription() {
         UniAssertSubscriber<Integer> subscriber = UniAssertSubscriber.create();

@@ -5,14 +5,10 @@ import static org.assertj.core.api.Assertions.fail;
 
 import java.io.IOException;
 import java.util.concurrent.*;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Flow.Publisher;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.*;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Test;
 
 import io.reactivex.rxjava3.core.Flowable;
 import io.reactivex.rxjava3.subscribers.TestSubscriber;
@@ -227,7 +223,7 @@ public class UniToPublisherTest {
     }
 
     @RepeatedTest(1000)
-    public void multipleConcurrentRequests() throws InterruptedException {
+    public void multipleConcurrentRequests() {
         final int n = 8;
         CountDownLatch start = new CountDownLatch(n);
 

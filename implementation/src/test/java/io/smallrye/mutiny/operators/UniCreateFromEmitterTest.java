@@ -25,7 +25,6 @@ import io.smallrye.mutiny.subscription.UniEmitter;
 import io.smallrye.mutiny.subscription.UniSubscriber;
 import io.smallrye.mutiny.subscription.UniSubscription;
 
-@SuppressWarnings("ConstantConditions")
 public class UniCreateFromEmitterTest {
     @Test
     public void testThatConsumerCannotBeNull() {

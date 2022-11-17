@@ -18,7 +18,6 @@ import io.smallrye.mutiny.helpers.test.UniAssertSubscriber;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import junit5.support.InfrastructureResource;
 
-@SuppressWarnings("ConstantConditions")
 @ResourceLock(value = InfrastructureResource.NAME, mode = ResourceAccessMode.READ)
 public class UniOnTerminationTest {
 

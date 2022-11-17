@@ -21,7 +21,7 @@ public abstract class AbstractUni<T> implements Uni<T> {
 
     /**
      * Encapsulates subscription to slightly optimize the AbstractUni case.
-     *
+     * <p>
      * In the case of AbstractUni, it avoid creating the UniSubscribe group instance.
      *
      * @param upstream the upstream, must not be {@code null} (not checked)

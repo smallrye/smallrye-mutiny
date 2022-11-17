@@ -21,7 +21,6 @@ import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.helpers.test.UniAssertSubscriber;
 import junit5.support.InfrastructureResource;
 
-@SuppressWarnings("ConstantConditions")
 @ResourceLock(value = InfrastructureResource.NAME, mode = ResourceAccessMode.READ)
 public class UniCreateFromFutureTest {
 

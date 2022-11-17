@@ -10,10 +10,10 @@ import io.smallrye.mutiny.helpers.ParameterValidation;
 /**
  * An implementation of {@link Exception} collecting several causes.
  * This class is used to collect multiple failures.
- *
+ * <p>
  * Uses {@link #getCauses()} to retrieves the individual causes.
  * {@link #getCause()} returns the first cause.
- *
+ * <p>
  * Causes, except the first one, are stored as suppressed exception.
  *
  * @see UniAndGroup

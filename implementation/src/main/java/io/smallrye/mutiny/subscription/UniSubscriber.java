@@ -27,7 +27,7 @@ public interface UniSubscriber<T> extends ContextSupport {
     /**
      * Event handler called once the subscribed {@link Uni} has taken into account the subscription. The {@link Uni}
      * have triggered the computation of the item.
-     *
+     * <p>
      * <strong>IMPORTANT:</strong> {@link #onItem(Object)} and {@link #onFailure(Throwable)} would not be called
      * before the invocation of this method.
      *
@@ -44,7 +44,7 @@ public interface UniSubscriber<T> extends ContextSupport {
 
     /**
      * Event handler called once the item has been computed by the subscribed {@link Uni}.
-     *
+     * <p>
      * <strong>IMPORTANT:</strong> this method will be only called once per subscription. If
      * {@link #onFailure(Throwable)} is called, this method won't be called.
      *
@@ -59,7 +59,7 @@ public interface UniSubscriber<T> extends ContextSupport {
 
     /**
      * Called if the computation of the item by the subscriber {@link Uni} failed.
-     *
+     * <p>
      * <strong>IMPORTANT:</strong> this method will be only called once per subscription. If
      * {@link #onItem(Object)} is called, this method won't be called.
      *

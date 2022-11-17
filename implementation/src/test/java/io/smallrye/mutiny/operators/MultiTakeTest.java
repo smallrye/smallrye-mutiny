@@ -21,7 +21,6 @@ import io.smallrye.mutiny.subscription.MultiEmitter;
 import io.smallrye.mutiny.subscription.MultiSubscriber;
 import junit5.support.InfrastructureResource;
 
-@SuppressWarnings("deprecation")
 @ResourceLock(value = InfrastructureResource.NAME, mode = ResourceAccessMode.READ)
 public class MultiTakeTest {
 

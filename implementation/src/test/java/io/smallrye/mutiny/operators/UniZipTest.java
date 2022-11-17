@@ -380,7 +380,6 @@ public class UniZipTest {
 
     }
 
-    @SuppressWarnings("ConstantConditions")
     @Test
     public void testWithArraysWithNoResultAndCancellation() {
         int count = 10;

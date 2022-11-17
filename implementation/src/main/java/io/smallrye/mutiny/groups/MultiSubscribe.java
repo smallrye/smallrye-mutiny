@@ -156,7 +156,7 @@ public class MultiSubscribe<T> {
      * </ol>
      * <p>
      * This method returns a {@link Cancellable} to cancel the subscription.
-     *
+     * <p>
      * <strong>Important:</strong> This method request {@link Long#MAX_VALUE} items.
      *
      * <p>
@@ -187,7 +187,7 @@ public class MultiSubscribe<T> {
      * </ol>
      * <p>
      * This method returns a {@link Cancellable} to cancel the subscription.
-     *
+     * <p>
      * <strong>Important:</strong> This method request {@link Long#MAX_VALUE} items.
      *
      * <p>
@@ -230,7 +230,7 @@ public class MultiSubscribe<T> {
      * So, you won't be notified on stream completion.
      * <p>
      * This method returns a {@link Cancellable} to cancel the subscription.
-     *
+     * <p>
      * <strong>Important:</strong> This method request {@link Long#MAX_VALUE} items.
      *
      * <p>
@@ -262,7 +262,7 @@ public class MultiSubscribe<T> {
      * So, you won't be notified on stream completion.
      * <p>
      * This method returns a {@link Cancellable} to cancel the subscription.
-     *
+     * <p>
      * <strong>Important:</strong> This method request {@link Long#MAX_VALUE} items.
      *
      * <p>
@@ -299,7 +299,7 @@ public class MultiSubscribe<T> {
      * So, you won't be notified on stream completion, and on failure the default failure handler is used.
      * <p>
      * This method returns a {@link Cancellable} to cancel the subscription.
-     *
+     * <p>
      * <strong>Important:</strong> This method request {@link Long#MAX_VALUE} items.
      *
      * <p>
@@ -323,7 +323,7 @@ public class MultiSubscribe<T> {
      * So, you won't be notified on stream completion, and on failure the default failure handler is used.
      * <p>
      * This method returns a {@link Cancellable} to cancel the subscription.
-     *
+     * <p>
      * <strong>Important:</strong> This method request {@link Long#MAX_VALUE} items.
      *
      * <p>
@@ -360,7 +360,7 @@ public class MultiSubscribe<T> {
      * So, you won't be notified on failure.
      * <p>
      * This method returns a {@link Cancellable} to cancel the subscription.
-     *
+     * <p>
      * <strong>Important:</strong> This method request {@link Long#MAX_VALUE} items.
      *
      * <p>
@@ -390,7 +390,7 @@ public class MultiSubscribe<T> {
      * So, you won't be notified on failure.
      * <p>
      * This method returns a {@link Cancellable} to cancel the subscription.
-     *
+     * <p>
      * <strong>Important:</strong> This method request {@link Long#MAX_VALUE} items.
      *
      * <p>

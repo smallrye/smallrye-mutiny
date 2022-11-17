@@ -20,7 +20,6 @@ import io.smallrye.mutiny.subscription.UniEmitter;
 import io.smallrye.mutiny.tuples.Functions;
 import junit5.support.InfrastructureResource;
 
-@SuppressWarnings("ConstantConditions")
 @ResourceLock(value = InfrastructureResource.NAME, mode = ResourceAccessMode.READ)
 public class UniOnItemOrFailureFlatMapTest {
 

@@ -62,7 +62,7 @@ public class IterableBasedMulti<T> extends AbstractMulti<T> {
         }
 
         @Override
-        public final void request(long n) {
+        public void request(long n) {
             if (n > 0) {
                 if (Subscriptions.add(requested, n) == 0L) {
                     if (n == Long.MAX_VALUE) {
@@ -77,7 +77,7 @@ public class IterableBasedMulti<T> extends AbstractMulti<T> {
         }
 
         @Override
-        public final void cancel() {
+        public void cancel() {
             cancelled = true;
         }
 

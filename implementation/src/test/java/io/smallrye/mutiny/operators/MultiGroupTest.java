@@ -73,7 +73,6 @@ public class MultiGroupTest {
                 Collections.singletonList(9));
     }
 
-    @SuppressWarnings("deprecation")
     @Test
     public void testGroupIntoListsOfTwoElementsDeprecated() {
         AssertSubscriber<List<Integer>> subscriber = Multi.createFrom().range(1, 10).group().intoLists().of(2)

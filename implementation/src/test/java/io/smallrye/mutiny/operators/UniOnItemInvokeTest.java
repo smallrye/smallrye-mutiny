@@ -16,7 +16,6 @@ import org.junit.jupiter.api.Test;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.subscription.Cancellable;
 
-@SuppressWarnings("ConstantConditions")
 public class UniOnItemInvokeTest {
 
     private final Uni<Integer> one = Uni.createFrom().item(1);
@@ -251,7 +250,6 @@ public class UniOnItemInvokeTest {
 
         cancellable.cancel();
         assertThat(result).hasValue(0);
-        //noinspection ConstantConditions
         assertThat(terminated).isTrue();
     }
 

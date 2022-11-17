@@ -193,7 +193,7 @@ public class MultiSkip<T> {
      * If the predicates returns {@code false} for each items from upstream, all the items are propagated downstream.
      * If the predicates returns {@code true} for each items from upstream, the produce {@link Multi} is empty.
      * The produced {@link Multi} completes when the upstream completes.
-     *
+     * <p>
      * This function is the opposite of {@link MultiSelect#where(Predicate)} which selects the passing items.
      *
      * @param predicate the predicate to test the items, must not be {@code null}

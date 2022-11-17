@@ -95,7 +95,6 @@ public class BlockingIterable<T> implements Iterable<T> {
         }
     }
 
-    @SuppressWarnings("ReactiveStreamsSubscriberImplementation")
     private static final class SubscriberIterator<T> implements Subscriber<T>, Iterator<T>, ContextSupport {
 
         private final Queue<T> queue;

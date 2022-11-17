@@ -13,7 +13,7 @@ import io.smallrye.mutiny.operators.multi.MultiBroadcaster;
 /**
  * Makes the upstream {@link Multi} be able to broadcast its events ({@code items}, {@code failure}, and
  * {@code completion}) to multiple subscribers.
- *
+ * <p>
  * Broadcast transforms the upstream into a <em>hot streams</em> meaning that late subscriber won't see all the events.
  *
  * @param <T> the type of item

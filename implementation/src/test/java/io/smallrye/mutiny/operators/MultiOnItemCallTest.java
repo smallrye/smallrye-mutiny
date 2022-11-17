@@ -16,7 +16,6 @@ import io.smallrye.mutiny.TestException;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.helpers.test.AssertSubscriber;
 
-@SuppressWarnings("ConstantConditions")
 public class MultiOnItemCallTest {
 
     @Test

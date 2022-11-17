@@ -347,7 +347,6 @@ public class Subscriptions {
         }
     }
 
-    @SuppressWarnings({ "ReactiveStreamsSubscriberImplementation" })
     public static class CancelledSubscriber<X> implements Subscriber<X> {
         @Override
         public void onSubscribe(Subscription s) {

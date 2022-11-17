@@ -28,7 +28,6 @@ import io.smallrye.mutiny.helpers.spies.UniOnCancellationSpy;
 import io.smallrye.mutiny.helpers.test.AssertSubscriber;
 import junit5.support.InfrastructureResource;
 
-@SuppressWarnings("ConstantConditions")
 @ResourceLock(value = InfrastructureResource.NAME, mode = ResourceAccessMode.READ)
 public class MultiFromResourceFromUniTest {
 

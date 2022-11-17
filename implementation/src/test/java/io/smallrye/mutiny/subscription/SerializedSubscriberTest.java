@@ -417,7 +417,6 @@ public class SerializedSubscriberTest {
     /**
      * Publish elements on a single thread.
      */
-    @SuppressWarnings("ReactiveStreamsPublisherImplementation")
     static class SingleThreadedPublisher implements Publisher<Integer> {
 
         List<Integer> values;
@@ -455,7 +454,6 @@ public class SerializedSubscriberTest {
     /**
      * Publish elements on a multiple threads.
      */
-    @SuppressWarnings("ReactiveStreamsPublisherImplementation")
     static class MultiThreadedPublisher implements Publisher<Integer> {
 
         List<Integer> values;
@@ -533,7 +531,6 @@ public class SerializedSubscriberTest {
         }
     }
 
-    @SuppressWarnings("ReactiveStreamsSubscriberImplementation")
     private static class BusySubscriber implements Subscriber<Integer> {
         volatile boolean onComplete;
         volatile boolean onError;
@@ -692,7 +689,6 @@ public class SerializedSubscriberTest {
         onNext
     }
 
-    @SuppressWarnings("ReactiveStreamsSubscriberImplementation")
     private static class ConcurrentSubscriber implements Subscriber<String> {
 
         /**

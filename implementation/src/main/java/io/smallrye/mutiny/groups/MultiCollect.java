@@ -24,7 +24,7 @@ import io.smallrye.mutiny.operators.multi.MultiLastItemOp;
 /**
  * Collects / aggregates items from the upstream and send the resulting <em>collection</em> / structure when the
  * upstream completes. The resulting structure is emitted through a {@link Uni}.
- *
+ * <p>
  * <strong>IMPORTANT:</strong> Do not use on unbounded streams, as it would lead to {@link OutOfMemoryError}.
  *
  * @param <T> the type of item sent by the upstream.
@@ -268,7 +268,7 @@ public class MultiCollect<T> {
     /**
      * Collects only the items from the upstream that passes the given predicate.
      * This method is equivalent to {@code upstream.select().when(predicate).collect()}.
-     *
+     * <p>
      * For each item, it calls the predicate. If the predicate returns {@code true}, it collects the item, otherwise
      * it discards the item. If the predicate throws an exception, it propagates that exception as failure.
      *
@@ -285,9 +285,9 @@ public class MultiCollect<T> {
      * Collects only the items from the upstream that passes the given predicate.
      * Unlike {@link #where(Predicate)}, the predicate returns a {@link Uni Uni&lt;Boolean&gt;}, which support asynchronous
      * tests.
-     *
+     * <p>
      * This method is equivalent to {@code upstream.select().where(predicate).collect()}.
-     *
+     * <p>
      * For each item, it calls the predicate. If the predicate emits the item {@code true}, it collects the item, otherwise
      * it discards the item. If the predicate throws an exception or emits a failure, it propagates that exception as
      * failure.

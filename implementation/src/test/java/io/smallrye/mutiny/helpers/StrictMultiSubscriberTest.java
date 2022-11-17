@@ -60,7 +60,6 @@ public class StrictMultiSubscriberTest {
         // onItem must not be called before the end of onSubscribe
         AtomicInteger protection = new AtomicInteger();
         AtomicReference<Integer> item = new AtomicReference<>();
-        @SuppressWarnings("ReactiveStreamsSubscriberImplementation")
         Flow.Subscriber<Integer> subscriber = new Flow.Subscriber<Integer>() {
 
             @Override
@@ -113,7 +112,6 @@ public class StrictMultiSubscriberTest {
     public void testFailureReceptionWhenRequesting0() {
         AtomicReference<Integer> item = new AtomicReference<>();
         AtomicReference<Throwable> failure = new AtomicReference<>();
-        @SuppressWarnings("ReactiveStreamsSubscriberImplementation")
         Flow.Subscriber<Integer> subscriber = new Flow.Subscriber<Integer>() {
 
             @Override
@@ -149,7 +147,6 @@ public class StrictMultiSubscriberTest {
     public void testFailureReceptionWhenRequestingNegative() {
         AtomicReference<Integer> item = new AtomicReference<>();
         AtomicReference<Throwable> failure = new AtomicReference<>();
-        @SuppressWarnings("ReactiveStreamsSubscriberImplementation")
         Flow.Subscriber<Integer> subscriber = new Flow.Subscriber<Integer>() {
 
             @Override
@@ -184,7 +181,6 @@ public class StrictMultiSubscriberTest {
     @Test
     public void testOnSubscribeCalledTwice() {
         AtomicReference<Throwable> failure = new AtomicReference<>();
-        @SuppressWarnings("ReactiveStreamsSubscriberImplementation")
         Flow.Subscriber<Integer> subscriber = new Flow.Subscriber<Integer>() {
 
             @Override

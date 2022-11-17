@@ -25,7 +25,6 @@ import io.smallrye.mutiny.helpers.test.AssertSubscriber;
 import io.smallrye.mutiny.subscription.MultiEmitter;
 import junit5.support.InfrastructureResource;
 
-@SuppressWarnings("ConstantConditions")
 @ResourceLock(value = InfrastructureResource.NAME, mode = ResourceAccessMode.READ)
 public class MultiDistinctTest {
 
@@ -91,7 +90,6 @@ public class MultiDistinctTest {
                 .assertFailedWith(IOException.class, "boom");
     }
 
-    @SuppressWarnings("ConstantConditions")
     @Test
     public void testThatNullSubscriberAreRejectedDistinct() {
         assertThrows(NullPointerException.class, () -> Multi.createFrom().items(1, 2, 3, 4, 2, 4, 2, 4)
@@ -99,7 +97,6 @@ public class MultiDistinctTest {
                 .subscribe(null));
     }
 
-    @SuppressWarnings("ConstantConditions")
     @Test
     public void testThatNullSubscriberAreRejectedSkipRepetitions() {
         assertThrows(NullPointerException.class, () -> Multi.createFrom().items(1, 2, 3, 4, 2, 4, 2, 4)

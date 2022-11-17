@@ -38,7 +38,7 @@ public class MultiConcat {
      * This behavior can be changed using {@link #collectFailures()}. In this case, the failures are accumulated and
      * would be propagated instead of the final completion event. If multiple failures have been collected, the
      * downstream receives a {@link CompositeException}, otherwise it receives the collected failure.
-     *
+     * <p>
      * <strong>IMPORTANT:</strong> The order of the {@code publisher} matters.
      *
      * @param publishers the publishers, can be empty, must not contain {@code null}
@@ -67,7 +67,7 @@ public class MultiConcat {
      * This behavior can be changed using {@link #collectFailures()}. In this case, the failures are accumulated and
      * would be propagated instead of the final completion event. If multiple failures have been collected, the
      * downstream receives a {@link CompositeException}, otherwise it receives the collected failure.
-     *
+     * <p>
      * <strong>IMPORTANT:</strong> The order of the {@code publisher} matters.
      *
      * @param iterable the publishers, can be empty, must not contain {@code null}, must not be {@code null}

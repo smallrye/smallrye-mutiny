@@ -2,7 +2,6 @@ package io.smallrye.mutiny.subscription;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import java.io.IOException;
@@ -117,7 +116,6 @@ public class SafeSubscriberTest {
         verify(subscriber, times(1)).onNext("hello");
 
         assertThatThrownBy(() -> safe.onNext(null)).isInstanceOf(NullPointerException.class);
-        //noinspection ConstantConditions
         verify(subscriber, never()).onNext(null);
 
         assertThat(safe.isDone()).isTrue();

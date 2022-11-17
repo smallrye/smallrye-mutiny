@@ -63,7 +63,7 @@ public class StackTest {
                 e.complete(Integer.MIN_VALUE);
             } else {
                 int i = index.getAndIncrement();
-                e.complete(new Byte(bytes[i]).intValue());
+                e.complete(Byte.valueOf(bytes[i]).intValue());
             }
         }).repeat().until(b -> b == Integer.MIN_VALUE)
                 .subscribe().with(list::add);

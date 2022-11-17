@@ -18,7 +18,6 @@ import io.smallrye.mutiny.helpers.spies.Spy;
 import io.smallrye.mutiny.helpers.spies.UniOnSubscribeSpy;
 import io.smallrye.mutiny.helpers.test.AssertSubscriber;
 
-@SuppressWarnings("ConstantConditions")
 public class MultiOnTerminationUniInvokeTest {
 
     @Test

@@ -26,7 +26,6 @@ public class UniCreateFromPublisher<T> extends AbstractUni<T> {
         new PublisherSubscriber(subscriber).forward();
     }
 
-    @SuppressWarnings("ReactiveStreamsSubscriberImplementation")
     private class PublisherSubscriber implements UniSubscription, Flow.Subscriber<T>, ContextSupport {
 
         private final UniSubscriber<? super T> subscriber;
