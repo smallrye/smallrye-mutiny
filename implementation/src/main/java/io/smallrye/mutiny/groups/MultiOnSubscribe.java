@@ -17,7 +17,7 @@ import io.smallrye.mutiny.operators.multi.MultiOnSubscribeInvokeOp;
 /**
  * Group to configure the action to execute when the observed {@link Multi} sends a {@link Subscription}.
  * The downstream don't have a subscription yet. It will be passed once the configured action completes.
- *
+ * <p>
  * For example:
  *
  * <pre>

@@ -23,7 +23,6 @@ import io.smallrye.mutiny.subscription.ContextSupport;
  *
  * @param <T> the type of the items
  */
-@SuppressWarnings({ "ReactiveStreamsSubscriberImplementation" })
 public class AssertSubscriber<T> implements Subscriber<T>, ContextSupport {
 
     /**

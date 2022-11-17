@@ -299,7 +299,6 @@ public class MultiSkipTest {
                         .assertFailedWith(TestException.class, "boom");
     }
 
-    @SuppressWarnings("ConstantConditions")
     @Test
     public void testMultiSkipUntilPublisherWithDownstreamCancellationAndVerifyOtherIsCancelled() {
         AtomicBoolean upstreamCancelled = new AtomicBoolean();

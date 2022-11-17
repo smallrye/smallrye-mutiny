@@ -193,7 +193,6 @@ public class UniOnFailureInvokeTest {
         cancellable.cancel();
         assertThat(result).hasValue(0);
         assertThat(failed).hasValue(null);
-        //noinspection ConstantConditions
         assertThat(terminated).isTrue();
     }
 }

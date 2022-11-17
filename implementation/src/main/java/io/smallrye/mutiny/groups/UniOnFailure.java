@@ -84,7 +84,7 @@ public class UniOnFailure<T> {
      * Produces a new {@link Uni} invoking the given function when the current {@link Uni} propagates a failure
      * (matching the predicate if set). The function can transform the received failure into another exception that will
      * be fired as failure downstream.
-     *
+     * <p>
      * Produces a new {@link Uni} invoking the given @{code action} when the {@code failure} event is received.
      * <p>
      * Unlike {@link #invoke(Consumer)}, the passed function returns a {@link Uni}. When the produced {@code Uni} sends
@@ -116,7 +116,7 @@ public class UniOnFailure<T> {
     /**
      * Produces a new {@link Uni} invoking the given supplier when the current {@link Uni} propagates a failure
      * (matching the predicate if set). The supplier ignores the failure.
-     *
+     * <p>
      * Produces a new {@link Uni} invoking the given @{code supplier} when the {@code failure} event is received.
      * <p>
      * Unlike {@link #invoke(Consumer)}, the passed function returns a {@link Uni}. When the produced {@code Uni} sends

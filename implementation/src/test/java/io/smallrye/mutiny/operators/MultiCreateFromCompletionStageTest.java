@@ -104,7 +104,6 @@ public class MultiCreateFromCompletionStageTest {
         assertThat(subscriber1.getFailure()).isNotNull().isInstanceOf(NullPointerException.class);
     }
 
-    @SuppressWarnings("ConstantConditions")
     @Test
     public void testCancellation() {
         AtomicBoolean cancelled = new AtomicBoolean();

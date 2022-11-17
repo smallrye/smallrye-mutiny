@@ -5,7 +5,7 @@ import java.util.concurrent.*;
 /**
  * Implementation of {@link ScheduledThreadPoolExecutor} delegating the execution of the task to a configured
  * {@link Executor}.
- *
+ * <p>
  * Important: {@link RunnableScheduledFuture#get()} and {@link RunnableScheduledFuture#get(long, TimeUnit)} are not
  * supported.
  */

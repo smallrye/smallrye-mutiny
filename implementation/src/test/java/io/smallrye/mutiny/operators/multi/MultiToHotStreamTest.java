@@ -47,7 +47,6 @@ public class MultiToHotStreamTest {
                 .assertCompleted();
     }
 
-    @SuppressWarnings("deprecation")
     @Test
     public void testWithTwoSubscribersDeprecated() {
         UnicastProcessor<String> processor = UnicastProcessor.create();

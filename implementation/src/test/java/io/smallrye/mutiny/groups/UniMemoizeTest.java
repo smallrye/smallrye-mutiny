@@ -277,7 +277,6 @@ class UniMemoizeTest {
         sub2.assertCompleted().assertItem(23);
     }
 
-    @SuppressWarnings("deprecation")
     @Test
     @DisplayName("Test that uni.cache() caches values emitted by a processor")
     void assertCachingTheValueEmittedByAProcessorUsingDeprecatedUniCache() {

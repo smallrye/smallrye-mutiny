@@ -13,7 +13,6 @@ import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.subscription.Cancellable;
 
-@SuppressWarnings("ConstantConditions")
 public class UniOnNotNullItemTest {
 
     @Test

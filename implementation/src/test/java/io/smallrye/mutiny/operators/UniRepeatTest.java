@@ -699,7 +699,7 @@ public class UniRepeatTest {
 
     public static class Page {
         List<Integer> items = new ArrayList<>();
-        int next = -1;
+        int next;
 
         public Page(List<Integer> items, int next) {
             this.items.addAll(items);

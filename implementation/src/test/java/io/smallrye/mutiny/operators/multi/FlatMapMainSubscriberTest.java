@@ -2,7 +2,6 @@ package io.smallrye.mutiny.operators.multi;
 
 import static io.smallrye.mutiny.helpers.MultiSubscribers.toMultiSubscriber;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import java.util.concurrent.Flow.Subscriber;

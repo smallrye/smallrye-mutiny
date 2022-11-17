@@ -11,11 +11,11 @@ import io.smallrye.mutiny.groups.MultiOverflowStrategy;
 
 /**
  * Helpers for creating {@link Uni} and {@link Multi} spies to observe events.
- * 
+ * <p>
  * A spy is a transparent operator that can be plugged into a pipeline to help diagnose what events flow.
  * It observes how many times a given event has been observed.
  * Depending on the event type it will also report values, such as the last observed failure or termination.
- * 
+ * <p>
  * It is important to note that spies observe and report events for all subscribers, not just one in particular.
  */
 public interface Spy {
@@ -270,10 +270,10 @@ public interface Spy {
 
     /**
      * Spy all {@link Multi} events (except {@link Multi#onOverflow()}).
-     * 
+     * <p>
      * The overflow events are not being tracked because they cause the {@code upstream} to be requested {@link Long#MAX_VALUE}
      * elements, so the behavior of a pipeline can be affected by introducing a {@link MultiOnOverflowSpy}.
-     * 
+     * <p>
      * If you want to track overflow events then you will need to explicitly wrap a {@link Multi} with
      * {@link Spy#onOverflow(Multi, Function)}.
      *

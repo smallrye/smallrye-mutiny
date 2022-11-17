@@ -20,7 +20,7 @@ import java.util.concurrent.Flow.Subscription;
  * <p>
  * Demand can be signaled via {@link Subscription#request(long)} whenever the {@link Subscriber} instance is capable of handling
  * more.
- *
+ * <p>
  * This interface bridges the Mutiny model and the Reactive Streams model.
  *
  * @param <T> the type of item.

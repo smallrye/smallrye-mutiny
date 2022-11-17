@@ -19,7 +19,6 @@ import io.smallrye.mutiny.helpers.test.AssertSubscriber;
 import junit5.support.InfrastructureResource;
 import mutiny.zero.flow.adapters.AdaptersToFlow;
 
-@SuppressWarnings("ConstantConditions")
 @ResourceLock(value = InfrastructureResource.NAME, mode = ResourceAccessMode.READ)
 public class MultiDisjointTest {
 

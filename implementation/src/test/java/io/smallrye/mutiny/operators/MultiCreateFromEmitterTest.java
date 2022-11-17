@@ -56,7 +56,6 @@ public class MultiCreateFromEmitterTest {
                 .assertItems(1, 2, 3);
     }
 
-    @SuppressWarnings("ConstantConditions")
     @Test
     public void testWhenConsumerThrowsAnException() {
         AtomicBoolean onTerminationCalled = new AtomicBoolean();

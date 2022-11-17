@@ -332,7 +332,6 @@ public class UniOnItemOrFailureInvokeTest {
 
         cancellable.cancel();
         assertThat(res).hasValue(null);
-        //noinspection ConstantConditions
         assertThat(called).isTrue();
     }
 }

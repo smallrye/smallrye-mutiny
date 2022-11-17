@@ -25,7 +25,6 @@ import io.smallrye.mutiny.helpers.test.AssertSubscriber;
 import io.smallrye.mutiny.operators.multi.processors.BroadcastProcessor;
 import io.smallrye.mutiny.subscription.Cancellable;
 
-@SuppressWarnings("deprecation")
 public class MultiOnEventTest {
 
     @Test
@@ -675,7 +674,6 @@ public class MultiOnEventTest {
 
         cancellable.cancel();
         assertThat(result).hasValue(0);
-        //noinspection ConstantConditions
         assertThat(terminated).isTrue();
     }
 

@@ -12,7 +12,7 @@ import io.smallrye.mutiny.subscription.MultiSubscriber;
 
 /**
  * Execute a given (async) callback on subscription.
- *
+ * <p>
  * The subscription is only sent downstream once the action completes successfully (provides an item, potentially
  * {@code null}). If the action fails, the failure is propagated downstream.
  *

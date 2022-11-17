@@ -13,7 +13,6 @@ import io.smallrye.common.annotation.CheckReturnValue;
 import io.smallrye.mutiny.groups.*;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 
-@SuppressWarnings({ "ReactiveStreamsPublisherImplementation" })
 public interface Multi<T> extends Publisher<T> {
 
     @CheckReturnValue

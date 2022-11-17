@@ -21,7 +21,6 @@ import io.smallrye.mutiny.helpers.test.AssertSubscriber;
 import io.smallrye.mutiny.subscription.BackPressureStrategy;
 import io.smallrye.mutiny.subscription.MultiEmitter;
 
-@SuppressWarnings("ConstantConditions")
 public class EmitterBasedMultiTest {
 
     @Test

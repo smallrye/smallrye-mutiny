@@ -42,7 +42,7 @@ public class MultiMerge {
      * This behavior can be changed using {@link #collectFailures()}. In this case, the failures are accumulated and
      * would be propagated instead of the final completion event. If multiple failures have been collected, the
      * downstream receives a {@link CompositeException}, otherwise it receives the collected failure.
-     *
+     * <p>
      * <strong>IMPORTANT:</strong> Unlike concatenation, the order of the {@code publisher} does not matter and items
      * from several upstream {@code publishers} can be interleaved in the resulting {@link Multi}.
      *
@@ -71,7 +71,7 @@ public class MultiMerge {
      * This behavior can be changed using {@link #collectFailures()}. In this case, the failures are accumulated and
      * would be propagated instead of the final completion event. If multiple failures have been collected, the
      * downstream receives a {@link CompositeException}, otherwise it receives the collected failure.
-     *
+     * <p>
      * <strong>IMPORTANT:</strong> Unlike concatenation, the order of the {@code publisher} does not matter and items
      * from several upstream {@code publishers} can be interleaved in the resulting {@link Multi}.
      *

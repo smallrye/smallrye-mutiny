@@ -120,7 +120,6 @@ public class UniOnItemDisjointTest {
         assertThat(r).isEmpty();
     }
 
-    @SuppressWarnings("ConstantConditions")
     @Test
     public void testDisjointWithNeverPublisher() {
         AtomicBoolean cancelled = new AtomicBoolean();
@@ -139,7 +138,6 @@ public class UniOnItemDisjointTest {
         assertThat(cancelled).isTrue();
     }
 
-    @SuppressWarnings("ConstantConditions")
     @Test
     public void testDisjointWithNothing() {
         AtomicBoolean cancelled = new AtomicBoolean();

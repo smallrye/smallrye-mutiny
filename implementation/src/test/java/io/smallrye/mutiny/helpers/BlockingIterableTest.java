@@ -177,7 +177,6 @@ public class BlockingIterableTest {
 
     }
 
-    @SuppressWarnings("ConstantConditions")
     @Test
     public void testWaitingInterrupted() {
         List<Integer> values = new ArrayList<>();
@@ -206,7 +205,6 @@ public class BlockingIterableTest {
     }
 
     @Test
-    @SuppressWarnings("ConstantConditions")
     public void testWithNullValues() {
         assertThrows(NullPointerException.class, () -> {
             Multi<Integer> rogue = new AbstractMulti<Integer>() {

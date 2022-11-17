@@ -297,7 +297,6 @@ public final class MultiGroupByOp<T, K, V> extends AbstractMultiOperator<T, Grou
         }
     }
 
-    @SuppressWarnings({ "ReactiveStreamsPublisherImplementation" })
     private static final class State<T, K> implements Flow.Subscription, Flow.Publisher<T> {
 
         private final AtomicReference<Flow.Subscriber<? super T>> downstream = new AtomicReference<>();

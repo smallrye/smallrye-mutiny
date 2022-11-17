@@ -14,7 +14,6 @@ import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.helpers.test.UniAssertSubscriber;
 
-@SuppressWarnings("ConstantConditions")
 public class MultiToUniTest {
 
     @Test

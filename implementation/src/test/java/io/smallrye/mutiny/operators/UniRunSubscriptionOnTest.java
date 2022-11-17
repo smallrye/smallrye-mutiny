@@ -99,7 +99,6 @@ public class UniRunSubscriptionOnTest {
         subscriber.assertNotTerminated();
     }
 
-    @SuppressWarnings("ConstantConditions")
     @Test
     public void testCancellation() {
         AtomicBoolean called = new AtomicBoolean();

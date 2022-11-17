@@ -52,7 +52,7 @@ public class ParameterValidation {
     /**
      * Validates that the given {@code instance} is not {@code null}.
      * Unlike {@link #nonNull(Object, String)}, this method throw a {@link NullPointerException}.
-     *
+     * <p>
      * It's generally used to be compliant with the Reactive Streams specification expecting {@link NullPointerException}.
      *
      * @param instance the instance

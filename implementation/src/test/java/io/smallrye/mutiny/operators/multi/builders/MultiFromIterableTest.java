@@ -156,7 +156,6 @@ public class MultiFromIterableTest {
         }
     }
 
-    @SuppressWarnings({ "ReactiveStreamsSubscriberImplementation" })
     @Test
     public void fromIterableRequestOverflow() throws InterruptedException {
         Multi<Integer> f = Multi.createFrom().iterable(Arrays.asList(1, 2, 3, 4));
@@ -193,7 +192,6 @@ public class MultiFromIterableTest {
         assertTrue(latch.await(10, TimeUnit.SECONDS));
     }
 
-    @SuppressWarnings("ReactiveStreamsSubscriberImplementation")
     @Test
     public void fromEmptyIterableWhenZeroRequestedShouldStillEmitOnCompletedEagerly() {
         final AtomicBoolean completed = new AtomicBoolean(false);
