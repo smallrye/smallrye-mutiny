@@ -1,5 +1,6 @@
 package io.smallrye.mutiny.helpers.test;
 
+import static io.smallrye.mutiny.helpers.test.AssertSubscriber.DEFAULT_TIMEOUT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.awaitility.Awaitility.await;
@@ -139,16 +140,15 @@ public class AbstractSubscriberTest {
         assertThat(subscriber.isCancelled()).isTrue();
     }
 
-    @SuppressWarnings("deprecation")
     @Test
     public void testAwaitWithTimeout() {
         AssertSubscriber<Integer> subscriber = AssertSubscriber.create(10);
 
-        assertThatThrownBy(() -> subscriber.await(Duration.ofMillis(1))).isInstanceOf(AssertionError.class);
+        assertThatThrownBy(() -> subscriber.awaitFailure(Duration.ofMillis(1))).isInstanceOf(AssertionError.class);
 
         assertThatThrownBy(() -> await()
                 .pollDelay(Duration.ofMillis(1))
-                .atMost(Duration.ofMillis(2)).untilAsserted(subscriber::await))
+                .atMost(Duration.ofMillis(2)).untilAsserted(() -> subscriber.awaitFailure(DEFAULT_TIMEOUT)))
                         .isInstanceOf(ConditionTimeoutException.class);
 
         assertThatThrownBy(() -> await()

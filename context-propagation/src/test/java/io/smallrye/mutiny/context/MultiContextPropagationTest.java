@@ -185,8 +185,8 @@ public class MultiContextPropagationTest {
         AssertSubscriber<Integer> sub2 = multi.subscribe()
                 .withSubscriber(AssertSubscriber.create(10));
 
-        sub1.await(Duration.of(5, ChronoUnit.SECONDS)).assertCompleted().assertItems(2, 3);
-        sub2.await(Duration.of(5, ChronoUnit.SECONDS)).assertCompleted().assertItems(2, 3);
+        sub1.awaitCompletion(Duration.of(5, ChronoUnit.SECONDS)).assertCompleted().assertItems(2, 3);
+        sub2.awaitCompletion(Duration.of(5, ChronoUnit.SECONDS)).assertCompleted().assertItems(2, 3);
     }
 
     @Test

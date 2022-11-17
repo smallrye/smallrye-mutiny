@@ -10,7 +10,6 @@ import java.util.concurrent.Flow.Subscription;
 import java.util.function.*;
 
 import io.smallrye.common.annotation.CheckReturnValue;
-import io.smallrye.common.annotation.Experimental;
 import io.smallrye.mutiny.groups.*;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 
@@ -121,27 +120,6 @@ public interface Multi<T> extends Publisher<T> {
 
     /**
      * Configures the action to execute when the observed {@link Multi} sends a {@link Subscription}.
-     * The downstream don't have a subscription yet. It will be passed once the configured action completes.
-     * <p>
-     * For example:
-     *
-     * <pre>
-     * {@code
-     * multi.onSubscribe().invoke(sub -> System.out.println("subscribed"));
-     * // Delay the subscription by 1 second (or until an asynchronous action completes)
-     * multi.onSubscribe().call(sub -> Uni.createFrom(1).onItem().delayIt().by(Duration.ofSecond(1)));
-     * }
-     * </pre>
-     *
-     * @return the object to configure the action to execution on subscription.
-     * @deprecated use {@link #onSubscription()} instead
-     */
-    @Deprecated
-    @CheckReturnValue
-    MultiOnSubscribe<T> onSubscribe();
-
-    /**
-     * Configures the action to execute when the observed {@link Multi} sends a {@link Subscription}.
      * The downstream does not have a subscription yet. It will be passed once the configured action completes.
      * <p>
      * For example:
@@ -190,7 +168,6 @@ public interface Multi<T> extends Publisher<T> {
      *
      * @return the on item timeout group
      */
-    @Experimental("Multi timeouts are an experimental feature.")
     @CheckReturnValue
     MultiIfNoItem<T> ifNoItem();
 
@@ -576,7 +553,6 @@ public interface Multi<T> extends Publisher<T> {
      * @param <R> the resulting {@link Multi} type
      * @return the resulting {@link Multi}
      */
-    @Experimental("Context support is a new experimental API introduced in Mutiny 1.3.0")
     @CheckReturnValue
     default <R> Multi<R> withContext(BiFunction<Multi<T>, Context, Multi<R>> builder) {
         throw new UnsupportedOperationException("Default method added to limit binary incompatibility");
@@ -597,7 +573,6 @@ public interface Multi<T> extends Publisher<T> {
      * @return the resulting {@link Multi}
      * @see #withContext(BiFunction)
      */
-    @Experimental("Context support is a new experimental API introduced in Mutiny 1.3.0")
     @CheckReturnValue
     default Multi<ItemWithContext<T>> attachContext() {
         return this.withContext((multi, ctx) -> multi.onItem().transform(item -> new ItemWithContext<>(ctx, item)));
@@ -624,7 +599,6 @@ public interface Multi<T> extends Publisher<T> {
      *
      * @return a group to configure the demand pacing
      */
-    @Experimental("Demand pacing is a new experimental API introduced in Mutiny 1.5.0")
     @CheckReturnValue
     MultiDemandPacing<T> paceDemand();
 
@@ -640,7 +614,6 @@ public interface Multi<T> extends Publisher<T> {
      * @param max the maximum demand
      * @return the new {@link Multi}
      */
-    @Experimental("Demand capping is a new experimental API introduced in Mutiny 1.5.0")
     @CheckReturnValue
     default Multi<T> capDemandsTo(long max) {
         long actual = positive(max, "max");
@@ -659,7 +632,6 @@ public interface Multi<T> extends Publisher<T> {
      *        {@code (0 < n <= outstanding)} where {@code outstanding} is the current outstanding demand
      * @return the new {@link Multi}
      */
-    @Experimental("Demand capping is a new experimental API introduced in Mutiny 1.5.0")
     @CheckReturnValue
     Multi<T> capDemandsUsing(LongFunction<Long> function);
 }

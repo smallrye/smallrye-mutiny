@@ -3,7 +3,6 @@ package io.smallrye.mutiny.groups;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
-import io.smallrye.common.annotation.Experimental;
 import io.smallrye.mutiny.Context;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.helpers.ParameterValidation;
@@ -102,7 +101,6 @@ public class UniSubscribe<T> {
      * @param onFailureCallback callback invoked when a failure event is received, must not be {@code null}
      * @return an object to cancel the computation
      */
-    @Experimental("Context support is a new experimental API introduced in Mutiny 1.3.0")
     public Cancellable with(Context context, Consumer<? super T> onItemCallback,
             Consumer<? super Throwable> onFailureCallback) {
         UniCallbackSubscriber<T> subscriber = new UniCallbackSubscriber<>(
@@ -127,7 +125,6 @@ public class UniSubscribe<T> {
      *        is received. The callback must not be {@code null}
      * @return an object to cancel the computation
      */
-    @Experimental("Context support is a new experimental API introduced in Mutiny 1.3.0")
     public Cancellable with(Context context, Consumer<? super T> onItemCallback) {
         UniCallbackSubscriber<T> subscriber = new UniCallbackSubscriber<>(
                 Infrastructure.decorate(ParameterValidation.nonNull(onItemCallback, "onItemCallback")),
@@ -173,7 +170,6 @@ public class UniSubscribe<T> {
      * @return a {@link CompletableFuture} to retrieve the item and chain operations on the resolved item or
      *         failure. The returned {@link CompletableFuture} can also be used to cancel the computation.
      */
-    @Experimental("Context support is a new experimental API introduced in Mutiny 1.3.0")
     public CompletableFuture<T> asCompletionStage(Context context) {
         return UniSubscribeToCompletionStage.subscribe(upstream, context);
     }
