@@ -76,7 +76,7 @@
     </modules>
 
     <properties>
-        <mutiny-zero.version>0.4.3</mutiny-zero.version>
+        <mutiny-zero.version>0.5.0</mutiny-zero.version>
         <reactive-streams.version>1.0.4</reactive-streams.version>
         <rxjava3.version>3.1.5</rxjava3.version>
         <reactor-core.version>3.5.0</reactor-core.version>
