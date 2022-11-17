@@ -8,13 +8,11 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.function.Supplier;
 
 import io.smallrye.common.annotation.CheckReturnValue;
-import io.smallrye.common.annotation.Experimental;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.TimeoutException;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.multi.MultiFailOnItemTimeout;
 
-@Experimental("Multi timeouts are an experimental feature.")
 public class MultiOnItemTimeout<T> {
 
     private final Multi<T> failure;

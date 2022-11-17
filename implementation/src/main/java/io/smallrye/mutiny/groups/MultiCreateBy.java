@@ -3,7 +3,6 @@ package io.smallrye.mutiny.groups;
 import java.util.concurrent.Flow;
 
 import io.smallrye.common.annotation.CheckReturnValue;
-import io.smallrye.common.annotation.Experimental;
 import io.smallrye.mutiny.Multi;
 
 /**
@@ -82,7 +81,6 @@ public class MultiCreateBy {
      * @return the object to configure the replay behavior
      */
     @CheckReturnValue
-    @Experimental("Replaying of Multi is an experimental feature in Mutiny 1.4.0")
     public MultiReplay replaying() {
         return new MultiReplay();
     }

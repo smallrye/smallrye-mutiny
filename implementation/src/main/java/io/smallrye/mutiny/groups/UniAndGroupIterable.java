@@ -8,7 +8,6 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import io.smallrye.common.annotation.CheckReturnValue;
-import io.smallrye.common.annotation.Experimental;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
@@ -96,7 +95,6 @@ public class UniAndGroupIterable<T1> {
      * @return the new {@link Uni}
      */
     @SuppressWarnings("unchecked")
-    @Experimental("This is an experimental API")
     @CheckReturnValue
     public <O, I> Uni<O> combinedWith(Class<I> superType, Function<List<I>, O> function) {
         return combinedWith((Function) function);

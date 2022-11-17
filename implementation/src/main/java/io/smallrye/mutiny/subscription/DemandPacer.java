@@ -6,7 +6,6 @@ import static io.smallrye.mutiny.helpers.ParameterValidation.validate;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 
-import io.smallrye.common.annotation.Experimental;
 import io.smallrye.mutiny.Multi;
 
 /**
@@ -19,13 +18,11 @@ import io.smallrye.mutiny.Multi;
  * The {@link FixedDemandPacer} offers a fixed delay / fixed demand implementation, but custom / adaptive strategies can be
  * provided through this {@link DemandPacer} interface.
  */
-@Experimental("Demand pacing is a new experimental API introduced in Mutiny 1.5.0")
 public interface DemandPacer {
 
     /**
      * A demand request.
      */
-    @Experimental("Demand pacing is a new experimental API introduced in Mutiny 1.5.0")
     class Request {
 
         private final long demand;

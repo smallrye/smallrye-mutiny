@@ -14,7 +14,6 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import io.smallrye.common.annotation.CheckReturnValue;
-import io.smallrye.common.annotation.Experimental;
 import io.smallrye.mutiny.Context;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
@@ -491,7 +490,6 @@ public class UniCreate {
      * @param <T> the type of the item
      * @return the produced {@link Uni}
      */
-    @Experimental("Context support is a new experimental API introduced in Mutiny 1.3.0")
     @CheckReturnValue
     public <T> Uni<T> context(Function<Context, Uni<? extends T>> mapper) {
         Function<Context, Uni<? extends T>> actual = Infrastructure.decorate(nonNull(mapper, "mapper"));

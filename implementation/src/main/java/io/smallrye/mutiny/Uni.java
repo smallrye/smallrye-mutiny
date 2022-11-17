@@ -8,7 +8,6 @@ import java.util.concurrent.Executor;
 import java.util.function.*;
 
 import io.smallrye.common.annotation.CheckReturnValue;
-import io.smallrye.common.annotation.Experimental;
 import io.smallrye.mutiny.groups.*;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.subscription.UniEmitter;
@@ -149,7 +148,6 @@ public interface Uni<T> {
      * @return the completion stage receiving the items emitted by this {@link Uni}
      */
     @CheckReturnValue
-    @Experimental("Context support is a new experimental API introduced in Mutiny 1.3.0")
     default CompletableFuture<T> subscribeAsCompletionStage(Context context) {
         return subscribe().asCompletionStage(context);
     }
@@ -199,7 +197,6 @@ public interface Uni<T> {
      * @return the object to configure the retrieval.
      */
     @CheckReturnValue
-    @Experimental("Context support is a new experimental API introduced in Mutiny 1.3.0")
     default UniAwait<T> awaitUsing(Context context) {
         throw new UnsupportedOperationException("Default method added to limit binary incompatibility");
     }
@@ -825,7 +822,6 @@ public interface Uni<T> {
      *
      * @return the object to configure the join behavior.
      */
-    @Experimental("New API based on observations that Uni.combine() is often used with homogeneous types, and combination often just a mapping to a collection.")
     @CheckReturnValue
     static UniJoin join() {
         return UniJoin.SHARED_INSTANCE;
@@ -853,7 +849,6 @@ public interface Uni<T> {
      * @param <R> the resulting {@link Uni} type
      * @return the resulting {@link Uni}
      */
-    @Experimental("Context support is a new experimental API introduced in Mutiny 1.3.0")
     @CheckReturnValue
     default <R> Uni<R> withContext(BiFunction<Uni<T>, Context, Uni<R>> builder) {
         throw new UnsupportedOperationException("Default method added to limit binary incompatibility");
@@ -874,7 +869,6 @@ public interface Uni<T> {
      * @return the resulting {@link Uni}
      * @see #withContext(BiFunction)
      */
-    @Experimental("Context support is a new experimental API introduced in Mutiny 1.3.0")
     @CheckReturnValue
     default Uni<ItemWithContext<T>> attachContext() {
         return this.withContext((uni, ctx) -> uni.onItem().transform(item -> new ItemWithContext<>(ctx, item)));

@@ -9,8 +9,6 @@ import java.util.concurrent.Flow;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
-import io.smallrye.common.annotation.Experimental;
-
 /**
  * A context allows sharing key / value entries along with a subscriber in a Mutiny pipeline, so all operators can
  * share implicit data for a given subscription.
@@ -35,7 +33,6 @@ import io.smallrye.common.annotation.Experimental;
  * @see Multi#attachContext()
  * @see io.smallrye.mutiny.groups.MultiSubscribe
  */
-@Experimental("Context support is a new experimental API introduced in Mutiny 1.3.0")
 public final class Context {
 
     /**
