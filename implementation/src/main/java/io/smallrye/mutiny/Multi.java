@@ -120,27 +120,6 @@ public interface Multi<T> extends Publisher<T> {
 
     /**
      * Configures the action to execute when the observed {@link Multi} sends a {@link Subscription}.
-     * The downstream don't have a subscription yet. It will be passed once the configured action completes.
-     * <p>
-     * For example:
-     *
-     * <pre>
-     * {@code
-     * multi.onSubscribe().invoke(sub -> System.out.println("subscribed"));
-     * // Delay the subscription by 1 second (or until an asynchronous action completes)
-     * multi.onSubscribe().call(sub -> Uni.createFrom(1).onItem().delayIt().by(Duration.ofSecond(1)));
-     * }
-     * </pre>
-     *
-     * @return the object to configure the action to execution on subscription.
-     * @deprecated use {@link #onSubscription()} instead
-     */
-    @Deprecated
-    @CheckReturnValue
-    MultiOnSubscribe<T> onSubscribe();
-
-    /**
-     * Configures the action to execute when the observed {@link Multi} sends a {@link Subscription}.
      * The downstream does not have a subscription yet. It will be passed once the configured action completes.
      * <p>
      * For example:

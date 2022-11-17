@@ -38,14 +38,13 @@ class UniAssertSubscriberTest {
                 .isInstanceOf(AssertionError.class);
     }
 
-    @SuppressWarnings("deprecation")
     @Test
     void testAwait() {
         UniAssertSubscriber<Integer> subscriber = Uni.createFrom().item(123)
                 .subscribe().withSubscriber(new UniAssertSubscriber<>());
 
         assertThat(subscriber.awaitItem().getItem()).isEqualTo(123);
-        subscriber.await();
+        subscriber.awaitItem();
         subscriber.assertCompleted();
         subscriber.assertTerminated();
     }

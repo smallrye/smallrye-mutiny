@@ -316,7 +316,7 @@ public class MultiToHotStreamTest {
 
         AssertSubscriber<Long> subscriber = ticks.subscribe()
                 .withSubscriber(AssertSubscriber.create(Long.MAX_VALUE))
-                .await(Duration.ofSeconds(10))
+                .awaitCompletion(Duration.ofSeconds(10))
                 .assertCompleted();
 
         List<Long> items = subscriber.getItems();
