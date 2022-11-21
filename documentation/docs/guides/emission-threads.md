@@ -24,3 +24,8 @@ Just pass the _executor_ you want to use.
 !!! note
     
     You cannot pass a specific thread, but you can implement a simple `Executor` dispatching on that specific thread, or use a _single threaded executor_.
+
+!!! warning
+
+    Be careful as this operator can lead to concurrency problems with non thread-safe objects such as CDI request-scoped beans.
+    It might also break reactive-streams semantics with items being emitted concurrently.

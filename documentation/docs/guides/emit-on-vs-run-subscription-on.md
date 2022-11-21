@@ -34,6 +34,11 @@ sequenceDiagram
     Note right of O: On executor thread
 ```
 
+!!! warning
+
+    Be careful as this operator can lead to concurrency problems with non thread-safe objects such as CDI request-scoped beans.
+    It might also break reactive-streams semantics with items being emitted concurrently.
+
 ## The case of runSubscriptionOn
 
 `runSubscriptionOn` applies to the subscription process.
