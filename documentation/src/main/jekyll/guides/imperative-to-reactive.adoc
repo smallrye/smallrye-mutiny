@@ -58,4 +58,9 @@ include::{include_dir}/ImperativeToReactiveTest.java[tag="multi-emitOn"]
 
 `emitOn` is also available on `Uni`.
 
+[WARNING]
+====
+Be careful as this operator can lead to concurrency problems with non thread-safe objects such as CDI request-scoped beans.
+It might also break reactive-streams semantics with items being emitted concurrently.
+====
 

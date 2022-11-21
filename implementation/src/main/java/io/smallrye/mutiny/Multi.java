@@ -240,6 +240,10 @@ public interface Multi<T> extends Publisher<T> {
      * threading context to switch to a thread from the given executor. Same behavior for failure and completion.
      * <p>
      * Note that the subscriber is guaranteed to never be called concurrently.
+     * <p>
+     * <strong>Be careful as this operator can lead to concurrency problems with non thread-safe objects such as
+     * CDI request-scoped beans.
+     * It might also break reactive-streams semantics with items being emitted concurrently.</strong>
      *
      * @param executor the executor to use, must not be {@code null}
      * @return a new {@link Multi}
