@@ -44,7 +44,7 @@ public class MultiIfNoItemTest {
                 .ifNoItem().after(Duration.ofMillis(10)).fail()
                 .subscribe().withSubscriber(subscriber);
 
-        subscriber.awaitFailure(Duration.ofSeconds(2))
+        subscriber.awaitFailure()
                 .assertHasNotReceivedAnyItem()
                 .assertFailedWith(TimeoutException.class);
     }
@@ -57,7 +57,7 @@ public class MultiIfNoItemTest {
                 .ifNoItem().after(Duration.ofMillis(10)).fail()
                 .subscribe().withSubscriber(subscriber);
 
-        subscriber.awaitFailure(Duration.ofSeconds(2))
+        subscriber.awaitFailure()
                 .assertItems(0L)
                 .assertFailedWith(TimeoutException.class);
     }
