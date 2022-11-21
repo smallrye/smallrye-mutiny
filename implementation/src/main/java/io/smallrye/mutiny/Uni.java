@@ -317,6 +317,9 @@ public interface Uni<T> {
      * <p>
      * Instead of receiving the {@code item} event on the thread firing the event, this method influences the
      * threading context to switch to a thread from the given executor.
+     * <p>
+     * <strong>Be careful as this operator can lead to concurrency problems with non thread-safe objects such as
+     * CDI request-scoped beans.</strong>
      *
      * @param executor the executor to use, must not be {@code null}
      * @return a new {@link Uni}

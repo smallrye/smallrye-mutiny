@@ -60,4 +60,9 @@ While `runSubscriptionOn` runs the subscription on the given executor, `emitOn` 
 
 `emitOn` is also available on `Uni`.
 
+!!! warning
+
+    Be careful as this operator can lead to concurrency problems with non thread-safe objects such as CDI request-scoped beans.
+    It might also break reactive-streams semantics with items being emitted concurrently.
+
 
