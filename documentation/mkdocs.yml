@@ -72,8 +72,8 @@ theme:
   palette:
     - media: "(prefers-color-scheme: light)"
       scheme: default
-      primary: cyan
-      accent: red
+      primary: brown
+      accent: deep orange
       toggle:
         icon: material/lightbulb-night
         name: Switch to dark mode
