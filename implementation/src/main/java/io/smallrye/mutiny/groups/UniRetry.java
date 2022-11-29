@@ -174,7 +174,7 @@ public class UniRetry<T> {
 
     /**
      * Configures a back-off delay between to attempt to re-subscribe. A random factor (jitter) is applied to increase
-     * he delay when several failures happen. The max delays is {@code maxBackOff}.
+     * the delay when several failures happen. The max delays is {@code maxBackOff}.
      *
      * @param initialBackOff the initial back-off duration, must not be {@code null}, must not be negative.
      * @param maxBackOff the max back-off duration, must not be {@code null}, must not be negative.
