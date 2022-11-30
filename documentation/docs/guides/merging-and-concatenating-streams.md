@@ -53,23 +53,23 @@ sequenceDiagram
     autonumber
     participant A as Stream A
     participant B as Stream B
-    participant M as Merged stream
+    participant C as Concatenated stream
     
-    M-->>A: subscribe
-    A-->>M: onSubscribe(s)
+    C-->>A: subscribe
+    A-->>C: onSubscribe(s)
 
-    A->>M: onItem(1)
-    A->>M: onItem(2)
-    A->>M: onItem(3)
+    A->>C: onItem(1)
+    A->>C: onItem(2)
+    A->>C: onItem(3)
     
-    A-->>M: onCompletion()
+    A-->>C: onCompletion()
     
-    M-->>B: subscribe
-    B-->>M: onSubscribe(s)
+    C-->>B: subscribe
+    B-->>C: onSubscribe(s)
     
-    B->>M: onItem(a)    
-    B->>M: onItem(b)
-    B->>M: onItem(c)
+    B->>C: onItem(a)    
+    B->>C: onItem(b)
+    B->>C: onItem(c)
 ```
 
 When the first stream emits the completion event, it switches to the second stream, and so on.
