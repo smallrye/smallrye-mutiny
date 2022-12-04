@@ -33,7 +33,6 @@ sequenceDiagram
     
     B-->>M: onSubscribe(s)
 
-    A->>M: onItem(1)
     A->>M: onItem(2)
     B->>M: onItem(a)    
     A->>M: onItem(3)
