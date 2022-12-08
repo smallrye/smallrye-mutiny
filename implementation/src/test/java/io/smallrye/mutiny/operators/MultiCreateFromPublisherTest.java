@@ -22,6 +22,13 @@ public class MultiCreateFromPublisherTest {
     }
 
     @Test
+    public void testThatPassingMultiReturnIt() {
+        Multi<String> multi = Multi.createFrom().item("a");
+        assertThat(multi).isSameAs(Multi.createFrom().publisher(multi));
+        assertThat(multi).isSameAs(Multi.createFrom().safePublisher(multi));
+    }
+
+    @Test
     public void testWithFailedPublisher() {
         AssertSubscriber<String> subscriber = Multi.createFrom().<String> publisher(
                 Flowable.error(new IOException("boom"))).subscribe()
@@ -118,6 +125,103 @@ public class MultiCreateFromPublisherTest {
         Flowable<Integer> flowable = Flowable.just(1, 2, 3, 4).doOnCancel(() -> cancellation.set(true));
 
         Multi<Integer> multi = Multi.createFrom().publisher(flowable);
+
+        multi.subscribe().withSubscriber(AssertSubscriber.create()).assertHasNotReceivedAnyItem()
+                .request(2)
+                .assertItems(1, 2)
+                .run(() -> assertThat(cancellation).isFalse())
+                .request(1)
+                .assertItems(1, 2, 3)
+                .cancel()
+                .request(1)
+                .assertItems(1, 2, 3)
+                .assertNotTerminated();
+
+        assertThat(cancellation).isTrue();
+    }
+
+    @Test
+    public void testWithMultiPassedInPublisher() {
+        AtomicLong requests = new AtomicLong();
+        AtomicInteger count = new AtomicInteger();
+        Multi<Integer> publisher = Multi.createFrom().deferred(() -> {
+            count.incrementAndGet();
+            return Multi.createFrom().items(1, 2, 3, 4);
+        }).onRequest().invoke(requests::addAndGet);
+
+        Multi<Integer> multi = Multi.createFrom().publisher(publisher);
+
+        multi.subscribe().withSubscriber(AssertSubscriber.create()).assertHasNotReceivedAnyItem()
+                .request(2)
+                .assertItems(1, 2)
+                .run(() -> assertThat(requests).hasValue(2))
+                .request(1)
+                .assertItems(1, 2, 3)
+                .request(1)
+                .assertItems(1, 2, 3, 4)
+                .run(() -> assertThat(requests).hasValue(4))
+                .assertCompleted();
+
+        assertThat(count).hasValue(1);
+
+        multi.subscribe().withSubscriber(AssertSubscriber.create()).assertHasNotReceivedAnyItem()
+                .request(2)
+                .assertItems(1, 2)
+                .request(1)
+                .assertItems(1, 2, 3)
+                .request(1)
+                .assertItems(1, 2, 3, 4)
+                .run(() -> assertThat(requests).hasValue(8))
+                .assertCompleted();
+
+        assertThat(count).hasValue(2);
+
+    }
+
+    @Test
+    public void testWithMultiPassedInSafePublisher() {
+        AtomicLong requests = new AtomicLong();
+        AtomicInteger count = new AtomicInteger();
+        Multi<Integer> publisher = Multi.createFrom().deferred(() -> {
+            count.incrementAndGet();
+            return Multi.createFrom().items(1, 2, 3, 4);
+        }).onRequest().invoke(requests::addAndGet);
+
+        Multi<Integer> multi = Multi.createFrom().safePublisher(publisher);
+
+        multi.subscribe().withSubscriber(AssertSubscriber.create()).assertHasNotReceivedAnyItem()
+                .request(2)
+                .assertItems(1, 2)
+                .run(() -> assertThat(requests).hasValue(2))
+                .request(1)
+                .assertItems(1, 2, 3)
+                .request(1)
+                .assertItems(1, 2, 3, 4)
+                .run(() -> assertThat(requests).hasValue(4))
+                .assertCompleted();
+
+        assertThat(count).hasValue(1);
+
+        multi.subscribe().withSubscriber(AssertSubscriber.create()).assertHasNotReceivedAnyItem()
+                .request(2)
+                .assertItems(1, 2)
+                .request(1)
+                .assertItems(1, 2, 3)
+                .request(1)
+                .assertItems(1, 2, 3, 4)
+                .run(() -> assertThat(requests).hasValue(8))
+                .assertCompleted();
+
+        assertThat(count).hasValue(2);
+
+    }
+
+    @Test
+    public void testThatCancellingTheMultiCancelTheMultiPassedInTheCreation() {
+        AtomicBoolean cancellation = new AtomicBoolean();
+        Multi<Integer> other = Multi.createFrom().items(1, 2, 3, 4).onCancellation().invoke(() -> cancellation.set(true));
+
+        Multi<Integer> multi = Multi.createFrom().publisher(other);
 
         multi.subscribe().withSubscriber(AssertSubscriber.create()).assertHasNotReceivedAnyItem()
                 .request(2)
