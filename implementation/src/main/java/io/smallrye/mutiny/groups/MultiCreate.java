@@ -142,6 +142,8 @@ public class MultiCreate {
      * the requests. Note that each Multi's subscriber would produce a new subscription.
      * <p>
      * If the Multi's observer cancels its subscription, the subscription to the {@link Publisher} is also cancelled.
+     * <p>
+     * If a {@code Multi} is passed as parameter, this {@code Multi} is returned.
      *
      * @param publisher the publisher, must not be {@code null}
      * @param <T> the type of item
@@ -151,6 +153,11 @@ public class MultiCreate {
     @CheckReturnValue
     public <T> Multi<T> safePublisher(Publisher<T> publisher) {
         Publisher<T> actual = nonNull(publisher, "publisher");
+
+        if (publisher instanceof Multi) {
+            // Should not call onMultiCreation - it should have been done already.
+            return (Multi<T>) publisher;
+        }
 
         return Infrastructure.onMultiCreation(new AbstractMulti<T>() {
             @Override
@@ -171,6 +178,8 @@ public class MultiCreate {
      * the requests. Note that each Multi's subscriber would produce a new subscription.
      * <p>
      * If the Multi's observer cancels its subscription, the subscription to the {@link Publisher} is also cancelled.
+     * <p>
+     * If a {@code Multi} is passed as parameter, this {@code Multi} is returned.
      *
      * @param publisher the publisher, must not be {@code null}
      * @param <T> the type of item
@@ -180,6 +189,11 @@ public class MultiCreate {
     @CheckReturnValue
     public <T> Multi<T> publisher(Publisher<T> publisher) {
         Publisher<T> actual = nonNull(publisher, "publisher");
+
+        if (publisher instanceof Multi) {
+            // Should not call onMultiCreation - it should have been done already.
+            return (Multi<T>) publisher;
+        }
 
         return Infrastructure.onMultiCreation(new AbstractMulti<T>() {
             @Override
