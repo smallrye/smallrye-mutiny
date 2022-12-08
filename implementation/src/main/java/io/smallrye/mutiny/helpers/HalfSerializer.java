@@ -37,6 +37,10 @@ public final class HalfSerializer {
                     subscriber.onComplete();
                 }
             }
+        } else {
+            IllegalStateException err = new IllegalStateException(
+                    "HalfSerializer has detected concurrent onNext(item) signals which is not permitted by the Reactive Streams protocol");
+            onError(subscriber, err, wip, container);
         }
     }
 

@@ -59,7 +59,7 @@ public class HalfSerializerTest {
         Subscription subscription = mock(Subscription.class);
         s.onSubscribe(subscription);
         HalfSerializer.onNext(s, 1, wip, failure);
-        test.assertItems(1).assertNotTerminated();
+        test.assertItems(1).assertFailedWith(IllegalStateException.class, "concurrent onNext(item) signals");
     }
 
     @Test
