@@ -99,7 +99,7 @@
         <revapi-maven-plugin.version>0.14.7</revapi-maven-plugin.version>
         <revapi-java.version>0.27.0</revapi-java.version>
         <revapi-reporter-json.version>0.4.6</revapi-reporter-json.version>
-        <revapi-reporter-text.version>0.14.6</revapi-reporter-text.version>
+        <revapi-reporter-text.version>0.15.0</revapi-reporter-text.version>
         <revapi.skip>true</revapi.skip>
 
         <maven.compiler.source>11</maven.compiler.source>
