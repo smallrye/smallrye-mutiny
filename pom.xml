@@ -383,7 +383,7 @@
                     <!-- Do not compute compatibility on the documentation -->
                     <skip>${revapi.skip}</skip>
                     <!-- Specify old version as the latest 1.x release -->
-                    <oldVersion>1.7.0</oldVersion>
+                    <oldVersion>1.8.0</oldVersion>
                 </configuration>
             </plugin>
         </plugins>
