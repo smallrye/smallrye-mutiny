@@ -13,7 +13,7 @@ Yet, there are cases where we need to go beyond this, for example:
 - Transforming an item into a `Multi` -- producing a multi-items stream based on the incoming item, filtering out items, etc
 
 Having the possibility to transform an item into a stream gives us many opportunities.
-To implement such transformations, we use `onItem().transformToUni(Function<T, Uni<O>>` and `onItem().transformToMulti(Function<T, Multi<O>>)`
+To implement such transformations, we use `onItem().transformToUni(Function<T, Uni<O>>)` and `onItem().transformToMulti(Function<T, Multi<O>>)`
 
 ## Uni - Transforming an item into a Uni
 
