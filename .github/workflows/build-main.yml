@@ -33,6 +33,7 @@ jobs:
         run: ./mvnw -s .build/maven-ci-settings.xml -B clean verify
 
   snapshot:
+    name: Deploy snapshots
     needs: build
     runs-on: ubuntu-20.04
     steps:
