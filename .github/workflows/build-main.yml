@@ -50,7 +50,8 @@ jobs:
           .build/decrypt-secrets.sh
           .build/deploy-snapshot.sh
 
-  quality:
+  quality-and-compatibility:
+    name: Test coverage and compatibility checks
     needs: build
     runs-on: ubuntu-20.04
     steps:
@@ -60,22 +61,11 @@ jobs:
           java-version: 11
           distribution: temurin
           cache: maven
+      - name: Compatibility checks
+        run: ./mvnw -s .build/maven-ci-settings.xml -pl '!bom' -B install revapi:check@check-compatibility -DskipTests -fae
       - name: Test coverage
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: ./mvnw -s .build/maven-ci-settings.xml verify -Pcoverage
       - name: Codecov
         uses: codecov/codecov-action@v1.0.13
-
-  compatibility:
-    runs-on: ubuntu-20.04
-    name: Compatibility Check
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-java@v2
-        with:
-          java-version: 11
-          distribution: temurin
-          cache: maven
-      - name: Compatibility Check
-        run: ./mvnw -s .build/maven-ci-settings.xml -pl '!bom' -B install revapi:check@check-compatibility -DskipTests -fae
