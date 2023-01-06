@@ -347,6 +347,23 @@ public class UniOnEventTest {
     }
 
     @Test
+    public void testEventuallyOnCancellation() {
+        AtomicReference<Object> item = new AtomicReference<>();
+        AtomicBoolean eventuallyCalled = new AtomicBoolean();
+        AtomicBoolean onCancellationCalled = new AtomicBoolean();
+
+        UniAssertSubscriber<Integer> subscriber = Uni.createFrom().item(63)
+                .invoke(item::set)
+                .eventually(() -> eventuallyCalled.set(true))
+                .onCancellation().invoke(() -> onCancellationCalled.set(true))
+                .subscribe().withSubscriber(new UniAssertSubscriber<>(true));
+
+        assertThat(item.get()).isNull();
+        assertThat(eventuallyCalled).isTrue();
+        assertThat(onCancellationCalled).isTrue();
+    }
+
+    @Test
     public void testEventuallyActionThrowingException() {
         AtomicReference<Object> item = new AtomicReference<>();
         AtomicBoolean eventuallyCalled = new AtomicBoolean();

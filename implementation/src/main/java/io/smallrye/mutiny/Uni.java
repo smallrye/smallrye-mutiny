@@ -524,8 +524,8 @@ public interface Uni<T> {
     }
 
     /**
-     * Execute an action after an item or a failure has been emitted.
-     * This is equivalent to a {@code finally} block in Java.
+     * Execute an action after an item, a failure or a cancellation has been received.
+     * This is semantically equivalent to a {@code finally} block in Java.
      *
      * <pre>
      * {@code
@@ -538,8 +538,8 @@ public interface Uni<T> {
      * }
      * </pre>
      * <p>
-     * This method is a shortcut for {@link UniOnItemOrFailure#invoke(BiConsumer)}:
-     * {@code onItemOrFailure().invoke((item, err) -> action.run())}
+     * This method is a shortcut for {@link UniOnTerminate#invoke(Runnable)}:
+     * {@code onTermination().invoke(action)}
      *
      * @param action an action to perform, must not be {@code null}.
      * @return a new {@link Uni} that emits events once the action has completed.
@@ -547,7 +547,7 @@ public interface Uni<T> {
      */
     @CheckReturnValue
     default Uni<T> eventually(Runnable action) {
-        return onItemOrFailure().invoke((item, err) -> nonNull(action, "action").run());
+        return onTermination().invoke(nonNull(action, "action"));
     }
 
     /**
