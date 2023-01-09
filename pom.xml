@@ -88,7 +88,7 @@
         <smallrye-common-annotation.version>2.0.0</smallrye-common-annotation.version>
 
         <junit.version>5.9.1</junit.version>
-        <assertj-core.version>3.24.0</assertj-core.version>
+        <assertj-core.version>3.24.1</assertj-core.version>
         <junit4.version>4.13.2</junit4.version>
         <awaitility.version>4.2.0</awaitility.version>
         <version.surefire.plugin>3.0.0-M7</version.surefire.plugin>
