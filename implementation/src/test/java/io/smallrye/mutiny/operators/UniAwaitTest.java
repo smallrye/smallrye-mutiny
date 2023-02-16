@@ -6,9 +6,12 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
 import java.time.Duration;
+import java.util.List;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -212,6 +215,68 @@ public class UniAwaitTest {
                     .isNotNull()
                     .isInstanceOf(IllegalStateException.class)
                     .hasMessage("The current thread cannot be blocked: my-forbidden-thread");
+        }
+    }
+
+    @Nested
+    @ResourceLock(value = InfrastructureResource.NAME, mode = ResourceAccessMode.READ_WRITE)
+    class StreamTest {
+
+        @Test
+        void streamFromCollection() {
+            Stream<Integer> stream = Uni.createFrom().item(List.of(1, 2, 3)).await().asStream().indefinitely();
+            List<Integer> output = stream.collect(Collectors.toList());
+            assertThat(output).containsExactly(1, 2, 3);
+        }
+
+        @Test
+        void streamOfNull() {
+            Stream<Object> stream = Uni.createFrom().nullItem().await().asStream().indefinitely();
+            List<Object> output = stream.collect(Collectors.toList());
+            assertThat(output).isEmpty();
+        }
+
+        @Test
+        void streamOfSingleItem() {
+            Stream<String> stream = Uni.createFrom().item("yolo").await().asStream().indefinitely();
+            List<String> output = stream.collect(Collectors.toList());
+            assertThat(output).containsExactly("yolo");
+        }
+
+        @Test
+        void streamOfIntegers() {
+            Stream<Integer> stream = Uni.createFrom().item(new int[] { 1, 2, 3 }).await().asStream().indefinitely();
+            List<Integer> output = stream.collect(Collectors.toList());
+            assertThat(output).containsExactly(1, 2, 3);
+        }
+
+        @Test
+        void streamOfLongs() {
+            Stream<Long> stream = Uni.createFrom().item(new long[] { 1L, 2L, 3L }).await().asStream().indefinitely();
+            List<Long> output = stream.collect(Collectors.toList());
+            assertThat(output).containsExactly(1L, 2L, 3L);
+        }
+
+        @Test
+        void streamOfDoubles() {
+            Stream<Double> stream = Uni.createFrom().item(new double[] { 1.0d, 2.0d, 3.0d }).await().asStream().indefinitely();
+            List<Double> output = stream.collect(Collectors.toList());
+            assertThat(output).containsExactly(1.0d, 2.0d, 3.0d);
+        }
+
+        @Test
+        void streamOfStrings() {
+            Stream<String> stream = Uni.createFrom().item(new String[] { "a", "b", "c" }).await().asStream().indefinitely();
+            List<String> output = stream.collect(Collectors.toList());
+            assertThat(output).containsExactly("a", "b", "c");
+        }
+
+        @Test
+        void streamOfStringsAtMost() {
+            Stream<String> stream = Uni.createFrom().item(new String[] { "a", "b", "c" }).await().asStream()
+                    .atMost(Duration.ofSeconds(10));
+            List<String> output = stream.collect(Collectors.toList());
+            assertThat(output).containsExactly("a", "b", "c");
         }
     }
 }

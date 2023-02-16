@@ -6,6 +6,7 @@ import java.time.Duration;
 import java.util.Optional;
 
 import io.smallrye.common.annotation.CheckReturnValue;
+import io.smallrye.common.annotation.Experimental;
 import io.smallrye.mutiny.Context;
 import io.smallrye.mutiny.TimeoutException;
 import io.smallrye.mutiny.Uni;
@@ -76,4 +77,23 @@ public class UniAwait<T> {
         return new UniAwaitOptional<>(upstream, context);
     }
 
+    /**
+     * Await for the item event and unwrap it as a {@link java.util.stream.Stream}.
+     *
+     * The {@link java.util.stream.Stream} depends on the item type {@code T}:
+     * <ul>
+     * <li>{@code null} gives an empty stream</li>
+     * <li>{@link java.util.Collection} gives a stream of the collection elements</li>
+     * <li>an array of {@code Object}, {@code int}, {@code long} or {@code double} gives a stream of the array elements</li>
+     * <li>any other types gives a stream of 1 element of type {@code T}</li>
+     * </ul>
+     *
+     * @return a group to configure how long to await for the {@link java.util.stream.Stream} to be available
+     * @since 2.2.0
+     */
+    @CheckReturnValue
+    @Experimental("Uni.await().asStream() is an experimental API in Mutiny 2.2.0")
+    public UniAwaitStream<T> asStream() {
+        return new UniAwaitStream<T>(upstream, context);
+    }
 }
