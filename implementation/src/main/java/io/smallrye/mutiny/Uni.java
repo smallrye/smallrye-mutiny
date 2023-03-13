@@ -559,7 +559,7 @@ public interface Uni<T> {
      * Session session = getSomeSession();
      * session.find(Fruit.class, id)
      *        .chain(fruit -> session.remove(fruit)
-     *        .then(() -> session.flush())
+     *        .chain(ignored -> session.flush())
      *        .eventually(() -> session.close());
      * }
      * </pre>
