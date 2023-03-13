@@ -21,7 +21,7 @@ import io.smallrye.mutiny.subscription.MultiSubscriber;
  * <li>3.9: negative requests should emit an onError(IllegalArgumentException)</li>
  * <li>2.12: onSubscribe must be called at most once (subscription cancelled and onError called)</li>
  * </ul>
- * 
+ *
  * @param <T> the type of item
  */
 public class StrictMultiSubscriber<T>

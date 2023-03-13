@@ -81,7 +81,7 @@ public class UniMemoize<T> {
 
     /**
      * Memoize the received item or failure indefinitely.
-     * 
+     *
      * @return a new {@link Uni}
      * @apiNote This is an experimental API
      */

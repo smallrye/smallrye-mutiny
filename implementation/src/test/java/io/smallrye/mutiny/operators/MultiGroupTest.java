@@ -182,7 +182,7 @@ public class MultiGroupTest {
     public void testAsListsOnEmptyStream() {
         assertThat(
                 Multi.createFrom().empty().group().intoLists().of(2).collect().last().await().indefinitely())
-                        .isNull();
+                .isNull();
     }
 
     @Test
@@ -368,7 +368,7 @@ public class MultiGroupTest {
     public void testAsMultisOnEmptyStream() {
         assertThat(
                 Multi.createFrom().empty().group().intoMultis().of(2).collect().last().await().indefinitely())
-                        .isNull();
+                .isNull();
     }
 
     @Test

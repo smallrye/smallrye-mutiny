@@ -294,9 +294,9 @@ public class MultiSkipTest {
         Multi<Integer> upstream2 = Multi.createFrom().failure(new TestException("boom"));
         new MultiSkipUntilOtherOp<>(Multi.createBy().concatenating().streams(upstream1, upstream2),
                 Multi.createFrom().item(0))
-                        .subscribe().withSubscriber(AssertSubscriber.create(10))
-                        .assertItems(1, 2, 3, 4, 5, 6)
-                        .assertFailedWith(TestException.class, "boom");
+                .subscribe().withSubscriber(AssertSubscriber.create(10))
+                .assertItems(1, 2, 3, 4, 5, 6)
+                .assertFailedWith(TestException.class, "boom");
     }
 
     @Test
@@ -309,7 +309,7 @@ public class MultiSkipTest {
 
         AssertSubscriber<Long> subscriber = new MultiSkipUntilOtherOp<>(upstream,
                 Multi.createFrom().nothing().onCancellation().invoke(() -> otherCancelled.set(true)))
-                        .subscribe().withSubscriber(AssertSubscriber.create(1));
+                .subscribe().withSubscriber(AssertSubscriber.create(1));
 
         subscriber.cancel();
         assertThat(upstreamCancelled).isTrue();

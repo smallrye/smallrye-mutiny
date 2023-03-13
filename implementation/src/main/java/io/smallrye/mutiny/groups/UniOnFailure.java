@@ -25,7 +25,7 @@ import io.smallrye.mutiny.operators.uni.UniOnItemConsume;
  * ({@link #invoke(Consumer)}).
  * <p>
  * You can configure the type of failure on which your handler is called using:
- * 
+ *
  * <pre>
  * {@code
  * uni.onFailure(IOException.class).recoverWithItem("boom")

@@ -25,7 +25,7 @@ public class MultiOnRequest<T> {
      * Action when items are being requested.
      * The request is propagated upstream when the action has completed.
      * An error is forwarded downstream if the action throws an exception.
-     * 
+     *
      * @param consumer the action
      * @return the new {@link Multi}
      */

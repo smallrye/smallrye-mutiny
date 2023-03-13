@@ -24,7 +24,7 @@ public interface Spy {
 
     /**
      * Spy {@link Uni#onSubscription()} events.
-     * 
+     *
      * @param upstream the upstream
      * @param <T> the item type
      * @return a new {@link Uni}
@@ -195,7 +195,7 @@ public interface Spy {
 
     /**
      * Spy {@link Multi#onItem()} events and optionally keep track of the items.
-     * 
+     *
      * @param upstream the upstream
      * @param trackItems {@code true} when items shall be tracked, {@code false} otherwise
      * @param <T> the items type

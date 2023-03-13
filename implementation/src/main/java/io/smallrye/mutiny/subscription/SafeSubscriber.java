@@ -49,7 +49,7 @@ public final class SafeSubscriber<T> implements Subscriber<T>, Subscription, Con
 
     /**
      * For testing purpose only.
-     * 
+     *
      * @return whether the subscriber is in a terminal state.
      */
     boolean isDone() {

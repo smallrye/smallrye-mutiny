@@ -148,12 +148,12 @@ public class AbstractSubscriberTest {
         assertThatThrownBy(() -> await()
                 .pollDelay(Duration.ofMillis(1))
                 .atMost(Duration.ofMillis(2)).untilAsserted(() -> subscriber.awaitFailure(DEFAULT_TIMEOUT)))
-                        .isInstanceOf(ConditionTimeoutException.class);
+                .isInstanceOf(ConditionTimeoutException.class);
 
         assertThatThrownBy(() -> await()
                 .pollDelay(Duration.ofMillis(1))
                 .atMost(Duration.ofMillis(2)).untilAsserted(subscriber::awaitCompletion))
-                        .isInstanceOf(ConditionTimeoutException.class);
+                .isInstanceOf(ConditionTimeoutException.class);
     }
 
     @Test

@@ -9,7 +9,7 @@ import io.smallrye.mutiny.subscription.MultiSubscriber;
 
 /**
  * Scan operator accumulating items of the same type as the upstream.
- * 
+ *
  * @param <T> the type of item
  */
 public final class MultiScanOp<T> extends AbstractMultiOperator<T, T> {

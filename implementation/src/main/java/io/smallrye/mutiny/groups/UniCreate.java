@@ -159,7 +159,7 @@ public class UniCreate {
      * immediately after subscription. If it's not the case the callbacks of the subscriber are called on the thread used to
      * wait the result (a thread from the Mutiny infrastructure default executor).
      * <p>
-     * 
+     *
      * @param future the future, must not be {@code null}
      * @param <T> the type of item
      * @return the produced {@link Uni}

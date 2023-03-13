@@ -609,7 +609,7 @@ public interface Multi<T> extends Publisher<T> {
      * Cap all downstream subscriber requests to a maximum value.
      * <p>
      * This is a shortcut for:
-     * 
+     *
      * <pre>
      * multi.capDemandsUsing(outstanding -&gt; Math.min(outstanding, actual))
      * </pre>

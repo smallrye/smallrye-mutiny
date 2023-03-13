@@ -55,7 +55,7 @@ public class MultiOnTerminate<T> {
     /**
      * Attaches an action that is executed when the {@link Multi} emits a completion or a failure or when the subscriber
      * cancels the subscription.
-     * 
+     *
      * @param mapper the function to execute where the first argument is a non-{@code null} exception on failure, and
      *        the second argument is a boolean which is {@code true} when the subscriber cancels the subscription.
      *        The function returns a {@link Uni} and must not be {@code null}.
