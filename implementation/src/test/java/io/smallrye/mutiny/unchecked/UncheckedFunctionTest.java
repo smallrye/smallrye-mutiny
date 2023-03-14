@@ -31,7 +31,7 @@ public class UncheckedFunctionTest {
                     }
                     return i;
                 })).await().indefinitely()).isInstanceOf(RuntimeException.class).hasCauseInstanceOf(IOException.class)
-                        .hasMessageContaining("boom");
+                .hasMessageContaining("boom");
 
         assertThatThrownBy(() -> Uni.createFrom().item(0)
                 .map(function(i -> {

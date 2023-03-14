@@ -254,17 +254,17 @@ public class UniZipTest {
 
         assertThatThrownBy(
                 () -> Uni.combine().all().unis(uni1, uni2, uni3, failed, uni4).discardItems().await().indefinitely())
-                        .isInstanceOf(CompletionException.class)
-                        .hasCauseInstanceOf(IOException.class)
-                        .hasMessageContaining("boom");
+                .isInstanceOf(CompletionException.class)
+                .hasCauseInstanceOf(IOException.class)
+                .hasMessageContaining("boom");
 
         Uni<Integer> failed2 = Uni.createFrom().failure(new IllegalStateException("d'oh"));
 
         assertThatThrownBy(
                 () -> Uni.combine().all().unis(uni1, uni2, uni3, failed, uni4, failed2).collectFailures().discardItems()
                         .await().indefinitely())
-                                .isInstanceOf(CompositeException.class)
-                                .hasMessageContaining("boom").hasMessageContaining("d'oh");
+                .isInstanceOf(CompositeException.class)
+                .hasMessageContaining("boom").hasMessageContaining("d'oh");
     }
 
     @Test

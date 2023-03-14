@@ -48,7 +48,7 @@ public class UniCreateFromTest {
             throw new IllegalStateException("boom");
         })
                 .await().indefinitely()).isInstanceOf(IllegalStateException.class)
-                        .hasMessageContaining("boom");
+                .hasMessageContaining("boom");
 
         AtomicInteger counter = new AtomicInteger();
         Uni<Integer> uni = Uni.createFrom().item(counter::incrementAndGet);
@@ -76,7 +76,7 @@ public class UniCreateFromTest {
             throw new IllegalStateException("boom");
         })
                 .await().indefinitely()).isInstanceOf(IllegalStateException.class)
-                        .hasMessageContaining("boom");
+                .hasMessageContaining("boom");
 
         AtomicInteger counter = new AtomicInteger();
         Uni<Integer> uni = Uni.createFrom().failure(() -> new IllegalStateException("boom-" + counter.incrementAndGet()));

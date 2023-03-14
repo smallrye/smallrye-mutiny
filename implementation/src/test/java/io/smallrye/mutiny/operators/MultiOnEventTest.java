@@ -600,9 +600,9 @@ public class MultiOnEventTest {
                     return sub.onItem().invoke(c -> twoGotCalled.incrementAndGet());
                 })
                 .collect().asList().await().indefinitely())
-                        .isInstanceOf(CompletionException.class)
-                        .hasCauseInstanceOf(IOException.class)
-                        .hasMessageContaining("boom");
+                .isInstanceOf(CompletionException.class)
+                .hasCauseInstanceOf(IOException.class)
+                .hasMessageContaining("boom");
 
         assertThat(twoGotCalled).hasValue(2);
         assertThat(res).hasValue(2);

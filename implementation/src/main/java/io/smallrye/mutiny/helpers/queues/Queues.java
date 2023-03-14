@@ -72,7 +72,7 @@ public class Queues {
     /**
      * Returns an unbounded Queue.
      * The queue is array-backed. Each array has the given size. If the queue is full, new arrays can be allocated.
-     * 
+     *
      * @param size the size of the array
      * @param <T> the type of item
      * @return the unbound queue supplier
@@ -90,7 +90,7 @@ public class Queues {
 
     /**
      * Creates a new multi-producer single consumer unbounded queue.
-     * 
+     *
      * @param <T> the type of item
      * @return the queue
      */
@@ -100,7 +100,7 @@ public class Queues {
 
     /**
      * Create a queue of a strict fixed size.
-     * 
+     *
      * @param size the queue size
      * @param <T> the elements type
      * @return a new queue

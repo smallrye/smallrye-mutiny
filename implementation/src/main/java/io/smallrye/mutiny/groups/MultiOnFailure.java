@@ -27,7 +27,7 @@ import io.smallrye.mutiny.subscription.Cancellable;
  * retry ({@link #retry()}). Maybe, you just want to look at the failure ({@link #invoke(Consumer)}).
  * <p>
  * You can configure the type of failure on which your handler is called using:
- * 
+ *
  * <pre>
  * {@code
  * multi.onFailure(IOException.class).recoverWithItem("boom")

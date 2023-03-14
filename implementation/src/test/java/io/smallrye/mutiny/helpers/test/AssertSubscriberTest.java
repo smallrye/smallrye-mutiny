@@ -376,7 +376,7 @@ public class AssertSubscriberTest {
         assertThatThrownBy(() -> Multi.createFrom().<Integer> failure(new TestException())
                 .onFailure().call(() -> smallDelay)
                 .subscribe().withSubscriber(AssertSubscriber.create(1)).awaitCompletion()).isInstanceOf(AssertionError.class)
-                        .hasMessageContaining("failure");
+                .hasMessageContaining("failure");
     }
 
     @Test
@@ -439,28 +439,28 @@ public class AssertSubscriberTest {
         assertThatThrownBy(() -> Multi.createFrom().empty()
                 .subscribe().withSubscriber(AssertSubscriber.create(1))
                 .awaitNextItem()).isInstanceOf(AssertionError.class)
-                        .hasMessageContaining("completion").hasMessageContaining("item");
+                .hasMessageContaining("completion").hasMessageContaining("item");
 
         // Already failed
         assertThatThrownBy(() -> Multi.createFrom().failure(new TestException())
                 .subscribe().withSubscriber(AssertSubscriber.create(1))
                 .awaitNextItem()).isInstanceOf(AssertionError.class)
-                        .hasMessageContaining("failure").hasMessageContaining("item")
-                        .hasMessageContaining(TestException.class.getName());
+                .hasMessageContaining("failure").hasMessageContaining("item")
+                .hasMessageContaining(TestException.class.getName());
 
         // Completion instead of item
         assertThatThrownBy(() -> Multi.createFrom().empty()
                 .onCompletion().call(() -> smallDelay)
                 .subscribe().withSubscriber(AssertSubscriber.create(1))
                 .awaitNextItem(SMALL.multipliedBy(2))).isInstanceOf(AssertionError.class)
-                        .hasMessageContaining("completion").hasMessageContaining("item");
+                .hasMessageContaining("completion").hasMessageContaining("item");
 
         // Failure instead of item
         assertThatThrownBy(() -> Multi.createFrom().failure(new TestException())
                 .onFailure().call(() -> smallDelay)
                 .subscribe().withSubscriber(AssertSubscriber.create(1))
                 .awaitNextItem(SMALL.multipliedBy(2))).isInstanceOf(AssertionError.class)
-                        .hasMessageContaining("failure").hasMessageContaining("item");
+                .hasMessageContaining("failure").hasMessageContaining("item");
 
         // Item
         Multi.createFrom().items(1)
@@ -480,8 +480,8 @@ public class AssertSubscriberTest {
                 .onItem().call(() -> mediumDelay)
                 .subscribe().withSubscriber(AssertSubscriber.create(1))
                 .awaitNextItem(SMALL)).isInstanceOf(AssertionError.class)
-                        .hasMessageContaining("item")
-                        .hasMessageContaining(SMALL.toMillis() + " ms");
+                .hasMessageContaining("item")
+                .hasMessageContaining(SMALL.toMillis() + " ms");
     }
 
     @Test
@@ -490,50 +490,50 @@ public class AssertSubscriberTest {
         assertThatThrownBy(() -> Multi.createFrom().empty()
                 .subscribe().withSubscriber(AssertSubscriber.create(1))
                 .awaitNextItems(2)).isInstanceOf(AssertionError.class)
-                        .hasMessageContaining("completion").hasMessageContaining("item");
+                .hasMessageContaining("completion").hasMessageContaining("item");
 
         assertThatThrownBy(() -> Multi.createFrom().empty()
                 .subscribe().withSubscriber(AssertSubscriber.create(1))
                 .awaitNextItems(2, 1)).isInstanceOf(AssertionError.class)
-                        .hasMessageContaining("completion").hasMessageContaining("item");
+                .hasMessageContaining("completion").hasMessageContaining("item");
 
         assertThatThrownBy(() -> Multi.createFrom().empty()
                 .subscribe().withSubscriber(AssertSubscriber.create(1))
                 .awaitNextItems(2, 1, Duration.ofSeconds(1))).isInstanceOf(AssertionError.class)
-                        .hasMessageContaining("completion").hasMessageContaining("item");
+                .hasMessageContaining("completion").hasMessageContaining("item");
 
         // Already failed
         assertThatThrownBy(() -> Multi.createFrom().failure(new TestException())
                 .subscribe().withSubscriber(AssertSubscriber.create(1))
                 .awaitNextItems(2)).isInstanceOf(AssertionError.class)
-                        .hasMessageContaining("failure").hasMessageContaining("item")
-                        .hasMessageContaining(TestException.class.getName());
+                .hasMessageContaining("failure").hasMessageContaining("item")
+                .hasMessageContaining(TestException.class.getName());
 
         assertThatThrownBy(() -> Multi.createFrom().failure(new TestException())
                 .subscribe().withSubscriber(AssertSubscriber.create(1))
                 .awaitNextItems(2, 1)).isInstanceOf(AssertionError.class)
-                        .hasMessageContaining("failure").hasMessageContaining("item")
-                        .hasMessageContaining(TestException.class.getName());
+                .hasMessageContaining("failure").hasMessageContaining("item")
+                .hasMessageContaining(TestException.class.getName());
 
         assertThatThrownBy(() -> Multi.createFrom().failure(new TestException())
                 .subscribe().withSubscriber(AssertSubscriber.create(1))
                 .awaitNextItems(2, 1, Duration.ofSeconds(1))).isInstanceOf(AssertionError.class)
-                        .hasMessageContaining("failure").hasMessageContaining("item")
-                        .hasMessageContaining(TestException.class.getName());
+                .hasMessageContaining("failure").hasMessageContaining("item")
+                .hasMessageContaining(TestException.class.getName());
 
         // Completion instead of item
         assertThatThrownBy(() -> Multi.createFrom().emitter(e -> e.emit(1).complete())
                 .onCompletion().call(() -> smallDelay)
                 .subscribe().withSubscriber(AssertSubscriber.create(1))
                 .awaitNextItems(2, SMALL.multipliedBy(2))).isInstanceOf(AssertionError.class)
-                        .hasMessageContaining("completion").hasMessageContaining("item").hasMessageContaining("0");
+                .hasMessageContaining("completion").hasMessageContaining("item").hasMessageContaining("0");
 
         // Failure instead of item
         assertThatThrownBy(() -> Multi.createFrom().emitter(e -> e.emit(1).fail(new TestException()))
                 .onFailure().call(() -> smallDelay)
                 .subscribe().withSubscriber(AssertSubscriber.create(1))
                 .awaitNextItems(2, SMALL.multipliedBy(2))).isInstanceOf(AssertionError.class)
-                        .hasMessageContaining("failure").hasMessageContaining("item").hasMessageContaining("0");
+                .hasMessageContaining("failure").hasMessageContaining("item").hasMessageContaining("0");
 
         // Item
         Multi.createFrom().items(1, 2, 3)
@@ -556,8 +556,8 @@ public class AssertSubscriberTest {
                 .emitOn(Infrastructure.getDefaultExecutor())
                 .subscribe().withSubscriber(AssertSubscriber.create(3))
                 .awaitNextItems(3, SMALL)).isInstanceOf(AssertionError.class)
-                        .hasMessageContaining("item")
-                        .hasMessageContaining(SMALL.toMillis() + " ms");
+                .hasMessageContaining("item")
+                .hasMessageContaining(SMALL.toMillis() + " ms");
     }
 
     @RepeatedTest(10)
@@ -566,27 +566,27 @@ public class AssertSubscriberTest {
         assertThatThrownBy(() -> Multi.createFrom().empty()
                 .subscribe().withSubscriber(AssertSubscriber.create(1))
                 .awaitItems(2)).isInstanceOf(AssertionError.class)
-                        .hasMessageContaining("terminal").hasMessageContaining("item");
+                .hasMessageContaining("terminal").hasMessageContaining("item");
 
         // Already failed
         assertThatThrownBy(() -> Multi.createFrom().failure(new TestException())
                 .subscribe().withSubscriber(AssertSubscriber.create(1))
                 .awaitItems(2)).isInstanceOf(AssertionError.class)
-                        .hasMessageContaining("terminal").hasMessageContaining("item");
+                .hasMessageContaining("terminal").hasMessageContaining("item");
 
         // Completion instead of item
         assertThatThrownBy(() -> Multi.createFrom().emitter(e -> e.emit(1).complete())
                 .onCompletion().call(() -> smallDelay)
                 .subscribe().withSubscriber(AssertSubscriber.create(1))
                 .awaitItems(2, SMALL.multipliedBy(100))).isInstanceOf(AssertionError.class)
-                        .hasMessageContaining("completion").hasMessageContaining("item").hasMessageContaining("1");
+                .hasMessageContaining("completion").hasMessageContaining("item").hasMessageContaining("1");
 
         // Failure instead of item
         assertThatThrownBy(() -> Multi.createFrom().emitter(e -> e.emit(1).fail(new TestException()))
                 .onFailure().call(() -> smallDelay)
                 .subscribe().withSubscriber(AssertSubscriber.create(1))
                 .awaitItems(2, SMALL.multipliedBy(100))).isInstanceOf(AssertionError.class)
-                        .hasMessageContaining("failure").hasMessageContaining("item").hasMessageContaining("1");
+                .hasMessageContaining("failure").hasMessageContaining("item").hasMessageContaining("1");
 
         // Item
         Multi.createFrom().items(1, 2, 3)
@@ -609,20 +609,20 @@ public class AssertSubscriberTest {
                 .runSubscriptionOn(Infrastructure.getDefaultExecutor())
                 .subscribe().withSubscriber(AssertSubscriber.create(3))
                 .awaitItems(3, SMALL)).isInstanceOf(AssertionError.class)
-                        .hasMessageContaining("item");
+                .hasMessageContaining("item");
 
         // Have received more items than expected.
         assertThatThrownBy(() -> Multi.createFrom().items(1, 2, 3)
                 .subscribe().withSubscriber(AssertSubscriber.create(3))
                 .awaitItems(2, SMALL)).isInstanceOf(AssertionError.class)
-                        .hasMessageContaining("item").hasMessageContaining("2").hasMessageContaining("3");
+                .hasMessageContaining("item").hasMessageContaining("2").hasMessageContaining("3");
 
         // Already Cancelled
         assertThatThrownBy(() -> Multi.createFrom().items(1, 2, 3)
                 .subscribe().withSubscriber(new AssertSubscriber<>(1, true))
                 .awaitItems(2, SMALL)).isInstanceOf(AssertionError.class)
-                        .hasMessageContaining("item").hasMessageContaining("2").hasMessageContaining("0")
-                        .hasMessageContaining("terminal");
+                .hasMessageContaining("item").hasMessageContaining("2").hasMessageContaining("0")
+                .hasMessageContaining("terminal");
 
         // Cancellation while waiting.
         assertThatThrownBy(() -> {
@@ -654,7 +654,7 @@ public class AssertSubscriberTest {
         assertThatThrownBy(
                 () -> Multi.createFrom().empty().subscribe().withSubscriber(AssertSubscriber.create(1))
                         .assertLastItem(1))
-                                .isInstanceOf(AssertionError.class);
+                .isInstanceOf(AssertionError.class);
 
         Multi.createFrom().items(1, 2, 3, 4)
                 .subscribe().withSubscriber(AssertSubscriber.create(2))

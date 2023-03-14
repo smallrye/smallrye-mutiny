@@ -94,7 +94,7 @@ public class UniOnItemFailWithTest {
         assertThatThrownBy(() -> one
                 .onItem().failWith(i -> new IOException("boom-" + i))
                 .await().indefinitely()).isInstanceOf(CompletionException.class).hasCauseInstanceOf(IOException.class)
-                        .hasMessageContaining("boom-1");
+                .hasMessageContaining("boom-1");
     }
 
     @Test
@@ -118,7 +118,7 @@ public class UniOnItemFailWithTest {
         assertThatThrownBy(() -> one
                 .onItem().failWith(() -> new IOException("boom"))
                 .await().indefinitely()).isInstanceOf(CompletionException.class).hasCauseInstanceOf(IOException.class)
-                        .hasMessageContaining("boom");
+                .hasMessageContaining("boom");
     }
 
     @Test

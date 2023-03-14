@@ -271,7 +271,7 @@ public class MultiConcatMapOp<I, O> extends AbstractMultiOperator<I, O> {
         /**
          * Downstream passed as {@code null} to {@link SwitchableSubscriptionSubscriber} as accessors are not reachable.
          * Effective downstream is {@code parent}.
-         * 
+         *
          * @param parent parent as downstream
          */
         ConcatMapInner(ConcatMapMainSubscriber<?, O> parent) {

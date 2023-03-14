@@ -23,7 +23,7 @@ public final class MultiSkipFirstOp<T> extends AbstractMultiOperator<T, T> {
     @Override
     public void subscribe(MultiSubscriber<? super T> actual) {
         if (numberOfItems == 0) {
-            // Pass-through 
+            // Pass-through
             upstream.subscribe(actual);
         } else {
             upstream.subscribe(new SkipFirstProcessor<>(actual, numberOfItems));

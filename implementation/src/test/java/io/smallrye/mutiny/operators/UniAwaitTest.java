@@ -52,7 +52,8 @@ public class UniAwaitTest {
     public void testAwaitingOnAnAsyncUni() {
         assertThat(
                 Uni.createFrom().emitter(emitter -> new Thread(() -> emitter.complete(1)).start()).await()
-                        .indefinitely()).isEqualTo(1);
+                        .indefinitely())
+                .isEqualTo(1);
     }
 
     @Test
@@ -103,7 +104,8 @@ public class UniAwaitTest {
     public void testAwaitAsOptionalWithResult() {
         assertThat(
                 Uni.createFrom().emitter(emitter -> new Thread(() -> emitter.complete(1)).start()).await().asOptional()
-                        .indefinitely()).contains(1);
+                        .indefinitely())
+                .contains(1);
     }
 
     @Test
@@ -121,14 +123,16 @@ public class UniAwaitTest {
     public void testAwaitAsOptionalWithNull() {
         assertThat(
                 Uni.createFrom().emitter(emitter -> new Thread(() -> emitter.complete(null)).start()).await()
-                        .asOptional().indefinitely()).isEmpty();
+                        .asOptional().indefinitely())
+                .isEmpty();
     }
 
     @Test
     public void testAwaitAsOptionalWithTimeout() {
         assertThat(
                 Uni.createFrom().emitter(emitter -> new Thread(() -> emitter.complete(1)).start()).await().asOptional()
-                        .atMost(Duration.ofMillis(1000))).contains(1);
+                        .atMost(Duration.ofMillis(1000)))
+                .contains(1);
     }
 
     @Test

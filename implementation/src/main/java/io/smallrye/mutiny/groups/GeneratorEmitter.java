@@ -16,14 +16,14 @@ public interface GeneratorEmitter<T> {
 
     /**
      * Emit an item.
-     * 
+     *
      * @param item the item
      */
     void emit(T item);
 
     /**
      * Emit a failure and terminate the stream.
-     * 
+     *
      * @param failure the failure
      */
     void fail(Throwable failure);
