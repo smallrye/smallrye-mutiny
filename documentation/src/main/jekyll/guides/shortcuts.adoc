@@ -41,9 +41,6 @@ The following table lists the available shortcuts available by the `Uni` class:
 |`uni.chain(x -> uni2)`
 |`uni.onItem().transformToUni(x -> uni2)`
 
-|`uni.then(() -> uni2)`
-|`uni.onItem().transformToUni(ignored -> uni2)`
-
 |`uni.invoke(x -> System.out.println(x))`
 |`uni.onItem().invoke(x -> System.out.println(x))`
 
