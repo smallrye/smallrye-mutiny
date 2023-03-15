@@ -360,7 +360,6 @@
                                 <goal>check</goal>
                             </goals>
                             <configuration>
-                                <failSeverity>breaking</failSeverity>
                                 <checkDependencies>false</checkDependencies>
                                 <analysisConfigurationFiles>
                                     <file>${project.basedir}/revapi.json</file>
