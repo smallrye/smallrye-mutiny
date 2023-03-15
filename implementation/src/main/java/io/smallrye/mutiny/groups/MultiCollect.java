@@ -2,10 +2,7 @@ package io.smallrye.mutiny.groups;
 
 import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
@@ -74,6 +71,17 @@ public class MultiCollect<T> {
     @CheckReturnValue
     public Uni<List<T>> asList() {
         return collector(upstream, Collectors.toList(), false);
+    }
+
+    /**
+     * Creates a {@link Uni} emitting an item containing all elements emitted by this {@link Multi} into a
+     * {@link Set}. The produced {@link Uni} emits its item when this {@link Multi} completes.
+     *
+     * @return the {@link Uni} emitting the set of items from this {@link Multi}.
+     */
+    @CheckReturnValue
+    public Uni<Set<T>> asSet() {
+        return collector(upstream, Collectors.toSet(), false);
     }
 
     /**

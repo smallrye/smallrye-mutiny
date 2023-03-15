@@ -109,6 +109,16 @@ public class MultiCollectTest {
     }
 
     @Test
+    public void testAsSet() {
+        UniAssertSubscriber<Set<Integer>> subscriber = Multi.createFrom().items(1, 2, 3)
+                .collect().asSet()
+                .subscribe().withSubscriber(UniAssertSubscriber.create())
+                .awaitItem();
+
+        assertThat(subscriber.getItem()).contains(1, 2, 3);
+    }
+
+    @Test
     public void testCollectIn() {
         UniAssertSubscriber<LinkedList<Integer>> subscriber = Multi.createFrom().range(1, 10)
                 .collect().in(LinkedList<Integer>::new, LinkedList::add)
