@@ -151,6 +151,13 @@ public class BufferItemMultiEmitter<T> extends BaseMultiEmitter<T> {
         } while (missed != 0);
     }
 
+    /**
+     * @return {@code true} if the emitter's buffer is empty
+     */
+    public boolean isEmpty() {
+        return queue.isEmpty();
+    }
+
     public static class EmitterBufferOverflowException extends BufferOverflowException {
 
         @Override
