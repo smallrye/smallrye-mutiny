@@ -1,6 +1,7 @@
 package io.smallrye.mutiny.operators;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -442,6 +443,14 @@ public class MultiOnFailureRetryTest {
                 }).retry().until(t -> true)
                 .subscribe().withSubscriber(AssertSubscriber.create(10))
                 .assertFailedWith(CompositeException.class, "expected");
+    }
+
+    @Test
+    public void rejectNullExecutors() {
+        assertThatThrownBy(() -> Multi.createFrom().items(1, 2, 3)
+                .onFailure().retry().withExecutor(null).withBackOff(Duration.ofMillis(100)).atMost(5))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("`executor` must not be `null`");
     }
 
     public static class MyException extends Exception {

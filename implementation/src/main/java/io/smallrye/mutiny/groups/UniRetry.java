@@ -5,6 +5,7 @@ import static io.smallrye.mutiny.helpers.ParameterValidation.validate;
 
 import java.time.Duration;
 import java.util.concurrent.Flow;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -28,9 +29,24 @@ public class UniRetry<T> {
 
     private boolean backOffConfigured = false;
 
+    private ScheduledExecutorService executor = null;
+
     public UniRetry(Uni<T> upstream, Predicate<? super Throwable> onFailurePredicate) {
         this.upstream = upstream;
         this.onFailurePredicate = onFailurePredicate;
+    }
+
+    /**
+     * Define a scheduled executor other than {@link Infrastructure#getDefaultWorkerPool()} for the time-aware retry
+     * policies (e.g., {{@link #withBackOff(Duration)}}.
+     *
+     * @param executor the scheduled executor, must not be {@code null}
+     * @return this instance
+     */
+    @CheckReturnValue
+    public UniRetry<T> withExecutor(ScheduledExecutorService executor) {
+        this.executor = nonNull(executor, "executor");
+        return this;
     }
 
     /**
@@ -60,9 +76,10 @@ public class UniRetry<T> {
         if (!backOffConfigured) {
             return Infrastructure.onUniCreation(new UniRetryAtMost<>(upstream, onFailurePredicate, numberOfAttempts));
         } else {
+            ScheduledExecutorService pool = (this.executor == null) ? Infrastructure.getDefaultWorkerPool() : this.executor;
             Function<Multi<Throwable>, Flow.Publisher<Long>> factory = ExponentialBackoff
                     .randomExponentialBackoffFunction(numberOfAttempts,
-                            initialBackOffDuration, maxBackoffDuration, jitter, Infrastructure.getDefaultWorkerPool());
+                            initialBackOffDuration, maxBackoffDuration, jitter, pool);
             return upstream.toMulti().onFailure(onFailurePredicate).retry().when(factory).toUni();
         }
     }
@@ -85,9 +102,10 @@ public class UniRetry<T> {
             throw new IllegalArgumentException(
                     "Invalid retry configuration, `expiresAt/expiresIn` must be used with a back-off configuration");
         }
+        ScheduledExecutorService pool = (this.executor == null) ? Infrastructure.getDefaultWorkerPool() : this.executor;
         Function<Multi<Throwable>, Flow.Publisher<Long>> factory = ExponentialBackoff
                 .randomExponentialBackoffFunctionExpireAt(expireAt,
-                        initialBackOffDuration, maxBackoffDuration, jitter, Infrastructure.getDefaultWorkerPool());
+                        initialBackOffDuration, maxBackoffDuration, jitter, pool);
         return upstream.toMulti().onFailure(onFailurePredicate).retry().when(factory).toUni();
     }
 

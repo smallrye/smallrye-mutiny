@@ -551,4 +551,11 @@ public class UniOnFailureRetryTest {
                 .assertFailedWith(CompositeException.class, "expected");
     }
 
+    @Test
+    public void rejectNullExecutors() {
+        assertThatThrownBy(() -> Uni.createFrom().item(123)
+                .onFailure().retry().withExecutor(null).withBackOff(Duration.ofMillis(100)).atMost(5))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("`executor` must not be `null`");
+    }
 }
