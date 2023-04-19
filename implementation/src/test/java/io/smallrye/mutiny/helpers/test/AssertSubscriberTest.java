@@ -63,7 +63,43 @@ public class AssertSubscriberTest {
 
         assertThatThrownBy(() -> subscriber.assertItems("a"))
                 .isInstanceOf(AssertionError.class)
-                .hasMessageContaining("Expected the following items to be received");
+                .hasMessageContaining("The following items were not expected:\n<b>");
+    }
+
+    @Test
+    public void testAssertItemsMessages() {
+        AssertSubscriber<String> subscriber = AssertSubscriber.create();
+        Subscription subscription = mock(Subscription.class);
+
+        subscriber.onSubscribe(subscription);
+        subscriber.request(2);
+        verify(subscription).request(2);
+
+        subscriber.onNext("a");
+        subscriber.onNext("b");
+        subscriber.onNext("c");
+
+        subscriber.assertItems("a", "b", "c");
+
+        String m1 = "\nExpected to have received exactly:\n" +
+                "<a,b,c,d>\n" +
+                "but received:\n" +
+                "<a,b,c>.\n" +
+                "Mismatches are:\n" +
+                "\t- Missing expected item <d>";
+        assertThatThrownBy(() -> subscriber.assertItems("a", "b", "c", "d"))
+                .isInstanceOf(AssertionError.class)
+                .hasMessage(m1);
+
+        String m2 = "\nExpected to have received exactly\n" +
+                "<a,b>\n" +
+                "but received\n" +
+                "<a,b,c>.\n" +
+                "The following items were not expected:\n" +
+                "<c>";
+        assertThatThrownBy(() -> subscriber.assertItems("a", "b"))
+                .isInstanceOf(AssertionError.class)
+                .hasMessage(m2);
     }
 
     @Test
