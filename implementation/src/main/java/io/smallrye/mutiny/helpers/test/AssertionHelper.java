@@ -138,7 +138,7 @@ public class AssertionHelper {
             fail("%nExpected to have received exactly:%n<%s>%nbut received:%n<%s>.%nMismatches are:%n%s",
                     getItemList(expected), getItemList(items), getMismatches(missed));
         }
-        fail("%nExpected to have received exactly%n<%s>%nbut received%n<%s>.%nExpected the following items to be received:%n%s",
+        fail("%nExpected to have received exactly%n<%s>%nbut received%n<%s>.%nThe following items were not expected:%n<%s>",
                 getItemList(expected), getItemList(items), getItemList(extra));
     }
 
