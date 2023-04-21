@@ -1,6 +1,7 @@
 package io.smallrye.mutiny.operators.multi;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 
 import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
@@ -46,13 +47,13 @@ class MultiConcatMapNoPrefetchTest {
         AssertSubscriber<Integer> ts = new AssertSubscriber<>(5);
         result.runSubscriptionOn(Infrastructure.getDefaultExecutor()).subscribe(ts);
         ts.request(5);
-        ts.awaitItems(10);
+        await().until(() -> ts.getItems().size() >= 10);
         assertThat(upstreamRequestCount).hasValue(upstreamRequests[0]);
         ts.request(1);
-        ts.awaitItems(11);
+        await().until(() -> ts.getItems().size() >= 11);
         assertThat(upstreamRequestCount).hasValue(upstreamRequests[1]);
         ts.request(1);
-        ts.awaitItems(12);
+        await().until(() -> ts.getItems().size() >= 12);
         assertThat(upstreamRequestCount).hasValue(upstreamRequests[2]);
     }
 
@@ -71,13 +72,13 @@ class MultiConcatMapNoPrefetchTest {
         AssertSubscriber<Integer> ts = new AssertSubscriber<>(5);
         result.runSubscriptionOn(Infrastructure.getDefaultExecutor()).subscribe(ts);
         ts.request(5);
-        ts.awaitItems(10);
+        await().until(() -> ts.getItems().size() >= 10);
         assertThat(upstreamRequestCount).hasValue(upstreamRequests[0]);
         ts.request(1);
-        ts.awaitItems(11);
+        await().until(() -> ts.getItems().size() >= 11);
         assertThat(upstreamRequestCount).hasValue(upstreamRequests[1]);
         ts.request(1);
-        ts.awaitItems(12);
+        await().until(() -> ts.getItems().size() >= 12);
         assertThat(upstreamRequestCount).hasValue(upstreamRequests[2]);
     }
 
@@ -104,7 +105,7 @@ class MultiConcatMapNoPrefetchTest {
         AssertSubscriber<Integer> ts = new AssertSubscriber<>(5);
         result.runSubscriptionOn(Infrastructure.getDefaultExecutor()).subscribe(ts);
         ts.request(5);
-        ts.awaitItems(expectedItems.length);
+        await().until(() -> ts.getItems().size() >= expectedItems.length);
         ts.assertItems(expectedItems);
         assertThat(upstreamRequestCount).hasValue(expectedUpstreamRequest);
     }
@@ -123,7 +124,7 @@ class MultiConcatMapNoPrefetchTest {
         AssertSubscriber<Integer> ts = new AssertSubscriber<>(5);
         result.runSubscriptionOn(Infrastructure.getDefaultExecutor()).subscribe(ts);
         ts.request(5);
-        ts.awaitCompletion();
+        await().until(ts::hasCompleted);
         assertThat(upstreamRequestCount).hasValueGreaterThan(10);
         ts.assertHasNotReceivedAnyItem().assertCompleted();
     }
@@ -136,11 +137,11 @@ class MultiConcatMapNoPrefetchTest {
         AssertSubscriber<Integer> ts = new AssertSubscriber<>(5);
         result.runSubscriptionOn(Infrastructure.getDefaultExecutor()).subscribe(ts);
         ts.request(5);
-        ts.awaitItems(10);
+        await().until(() -> ts.getItems().size() >= 10);
         assertThat(upstreamRequestCount).hasValueGreaterThan(10);
         ts.assertItems(1, 2, 4, 5, 7, 8, 10, 11, 13, 14);
         ts.request(1);
-        ts.awaitItems(11);
+        await().until(() -> ts.getItems().size() >= 11);
         assertThat(upstreamRequestCount).hasValueGreaterThan(11);
         ts.assertLastItem(16);
     }
@@ -153,7 +154,7 @@ class MultiConcatMapNoPrefetchTest {
         AssertSubscriber<Integer> ts = new AssertSubscriber<>(5);
         result.runSubscriptionOn(Infrastructure.getDefaultExecutor()).subscribe(ts);
         ts.request(5);
-        ts.awaitCompletion();
+        await().until(ts::hasCompleted);
         assertThat(upstreamRequestCount).hasValueGreaterThan(10);
         ts.assertHasNotReceivedAnyItem().assertCompleted();
     }
@@ -266,7 +267,7 @@ class MultiConcatMapNoPrefetchTest {
         AssertSubscriber<Integer> ts = new AssertSubscriber<>(1);
         result.subscribe(ts);
         inner.complete(0);
-        ts.awaitCompletion();
+        await().until(ts::hasCompleted);
     }
 
 }
