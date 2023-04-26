@@ -24,7 +24,7 @@ public class MultiGroupIntoLists<T> {
      * <p>
      * The resulting {@link Multi} emits connected, non-overlapping lists, each of a fixed duration specified by the
      * {@code duration} parameter. If, during the configured time window, no items are emitted by the upstream
-     * {@link Multi}, an empty list is emitted by the returned {@link Multi}.
+     * {@link Multi}, nothing is emitted downstream.
      * <p>
      * When the upstream {@link Multi} sends the completion event, the resulting {@link Multi} emits the current list
      * and propagates the completion event.
@@ -40,7 +40,36 @@ public class MultiGroupIntoLists<T> {
     public Multi<List<T>> every(Duration duration) {
         return Infrastructure.onMultiCreation(new MultiBufferWithTimeoutOp<>(upstream, Integer.MAX_VALUE,
                 validate(duration, "duration"),
-                Infrastructure.getDefaultWorkerPool()));
+                Infrastructure.getDefaultWorkerPool(),
+                false));
+    }
+
+    /**
+     * Creates a {@link Multi} that emits lists of items collected from the observed {@link Multi}.
+     * <p>
+     * The resulting {@link Multi} emits connected, non-overlapping lists, each of a fixed duration specified by the
+     * {@code duration} parameter. If, during the configured time window, no items are emitted by the upstream
+     * {@link Multi}, an empty list is emitted by the returned {@link Multi} if {@code emitEmptyListIfNoItems} is set to
+     * {@code true}.
+     * <p>
+     * When the upstream {@link Multi} sends the completion event, the resulting {@link Multi} emits the current list
+     * and propagates the completion event.
+     * <p>
+     * If the upstream {@link Multi} sends a failure, the failure is propagated immediately.
+     *
+     * @param duration the period of time each list collects items before it is emitted and replaced with a new
+     *        list. Must be non {@code null} and positive.
+     * @param emitEmptyListIfNoItems emits an empty list if no items from the upstream have been received during the
+     *        time window
+     * @return a Multi that emits every {@code duration} with the items emitted by the upstream multi during the time
+     *         window.
+     */
+    @CheckReturnValue
+    public Multi<List<T>> every(Duration duration, boolean emitEmptyListIfNoItems) {
+        return Infrastructure.onMultiCreation(new MultiBufferWithTimeoutOp<>(upstream, Integer.MAX_VALUE,
+                validate(duration, "duration"),
+                Infrastructure.getDefaultWorkerPool(),
+                emitEmptyListIfNoItems));
     }
 
     /**
@@ -108,6 +137,6 @@ public class MultiGroupIntoLists<T> {
     @CheckReturnValue
     public Multi<List<T>> of(int size, Duration maximumDelay) {
         return Infrastructure.onMultiCreation(new MultiBufferWithTimeoutOp<>(upstream, positive(size, "size"),
-                validate(maximumDelay, "maximumDelay"), Infrastructure.getDefaultWorkerPool()));
+                validate(maximumDelay, "maximumDelay"), Infrastructure.getDefaultWorkerPool(), false));
     }
 }
