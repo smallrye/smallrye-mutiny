@@ -35,15 +35,18 @@ public final class MultiBufferWithTimeoutOp<T> extends AbstractMultiOperator<T, 
     private final Supplier<List<T>> supplier;
     private final ScheduledExecutorService scheduler;
     private final Duration timeout;
+    private final boolean emitEmptyListIfNoItem;
 
     public MultiBufferWithTimeoutOp(Multi<T> upstream,
             int size,
             Duration timeout,
-            ScheduledExecutorService scheduler) {
+            ScheduledExecutorService scheduler,
+            boolean emitEmptyListIfNoItem) {
         super(upstream);
         this.timeout = ParameterValidation.validate(timeout, "timeout");
         this.size = ParameterValidation.positive(size, "size");
         this.scheduler = ParameterValidation.nonNull(scheduler, "scheduler");
+        this.emitEmptyListIfNoItem = emitEmptyListIfNoItem;
         this.supplier = () -> {
             if (size < Integer.MAX_VALUE) {
                 // Not used yet, on the roadmap.
@@ -57,7 +60,7 @@ public final class MultiBufferWithTimeoutOp<T> extends AbstractMultiOperator<T, 
     @Override
     public void subscribe(MultiSubscriber<? super List<T>> downstream) {
         MultiBufferWithTimeoutProcessor<T> subscriber = new MultiBufferWithTimeoutProcessor<>(
-                new SerializedSubscriber<>(downstream), size, timeout, scheduler, supplier);
+                new SerializedSubscriber<>(downstream), size, timeout, scheduler, supplier, emitEmptyListIfNoItem);
         upstream.subscribe().withSubscriber(subscriber);
     }
 
@@ -77,23 +80,25 @@ public final class MultiBufferWithTimeoutOp<T> extends AbstractMultiOperator<T, 
         private final AtomicInteger terminated = new AtomicInteger(RUNNING);
         private final AtomicLong requested = new AtomicLong();
         private final AtomicInteger index = new AtomicInteger();
+        private final boolean emitEmptyListIfNoItem;
         private List<T> current;
         private ScheduledFuture<?> task;
 
         MultiBufferWithTimeoutProcessor(MultiSubscriber<? super List<T>> downstream, int size, Duration timeout,
-                ScheduledExecutorService executor, Supplier<List<T>> supplier) {
+                ScheduledExecutorService executor, Supplier<List<T>> supplier, boolean emitEmptyListIfNoItem) {
             super(downstream);
             this.duration = timeout;
             this.executor = executor;
             this.supplier = supplier;
             this.size = size;
+            this.emitEmptyListIfNoItem = emitEmptyListIfNoItem;
 
             this.flush = () -> {
                 if (terminated.get() == RUNNING) {
                     int index;
                     for (;;) {
                         index = this.index.get();
-                        if (index == 0) {
+                        if (index == 0 && !emitEmptyListIfNoItem) {
                             return;
                         }
                         if (this.index.compareAndSet(index, 0)) {
@@ -107,6 +112,13 @@ public final class MultiBufferWithTimeoutOp<T> extends AbstractMultiOperator<T, 
 
         private void doOnSubscribe() {
             current = supplier.get();
+            if (emitEmptyListIfNoItem) {
+                try {
+                    task = executor.schedule(flush, duration.toMillis(), TimeUnit.MILLISECONDS);
+                } catch (RejectedExecutionException rejected) {
+                    onFailure(rejected);
+                }
+            }
         }
 
         void nextCallback(T value) {
@@ -127,7 +139,7 @@ public final class MultiBufferWithTimeoutOp<T> extends AbstractMultiOperator<T, 
                 } else {
                     cur = Collections.emptyList();
                 }
-                if (!cur.isEmpty()) {
+                if (!cur.isEmpty() || emitEmptyListIfNoItem) {
                     current = supplier.get();
                     flush = true;
                 }
@@ -136,7 +148,11 @@ public final class MultiBufferWithTimeoutOp<T> extends AbstractMultiOperator<T, 
             if (flush) {
                 long req = requested.get();
                 MultiSubscriber<? super List<T>> subscriber = downstream;
+                if (emitEmptyListIfNoItem && terminated.get() == RUNNING) {
+                    task = executor.schedule(this.flush, duration.toMillis(), TimeUnit.MILLISECONDS);
+                }
                 if (req != 0L) {
+
                     if (req != Long.MAX_VALUE) {
                         long next;
                         for (;;) {
@@ -172,7 +188,7 @@ public final class MultiBufferWithTimeoutOp<T> extends AbstractMultiOperator<T, 
                 }
             }
 
-            if (index == 1) {
+            if (index == 1 && !emitEmptyListIfNoItem) { // If emitEmptyListIfNoItem, the task has been started in subscribe
                 try {
                     task = executor.schedule(flush, duration.toMillis(), TimeUnit.MILLISECONDS);
                 } catch (RejectedExecutionException rejected) {

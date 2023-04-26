@@ -17,6 +17,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
+import org.assertj.core.api.Condition;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
@@ -35,6 +36,7 @@ import io.smallrye.mutiny.subscription.BackPressureFailure;
 import io.smallrye.mutiny.subscription.MultiEmitter;
 import io.smallrye.mutiny.subscription.MultiSubscriber;
 import io.smallrye.mutiny.test.Mocks;
+import io.smallrye.mutiny.unchecked.Unchecked;
 import junit5.support.InfrastructureResource;
 
 @ResourceLock(value = InfrastructureResource.NAME, mode = ResourceAccessMode.READ_WRITE)
@@ -201,6 +203,39 @@ public class MultiGroupTest {
 
         subscriber.awaitItems(3).cancel();
         publisher.assertCancelled();
+    }
+
+    @Test
+    public void testAsListsWithDurationWithNoItems() {
+        MultiOnCancellationSpy<Long> spy = Spy.onCancellation(Multi.createFrom().<Long> nothing());
+        AssertSubscriber<List<Long>> subscriber = spy
+                .group().intoLists().every(Duration.ofMillis(100), true)
+                .subscribe().withSubscriber(AssertSubscriber.create(100));
+
+        subscriber.awaitItems(3).cancel();
+        spy.assertCancelled();
+        assertThat(subscriber.getItems()).allSatisfy(l -> assertThat(l).isEmpty());
+    }
+
+    @Test
+    public void testAsListsWithDurationWithItemsAndNoItems() {
+        AssertSubscriber<List<Long>> subscriber = Multi.createFrom().<Long> emitter(Unchecked.consumer(e -> {
+            e.emit(1L);
+            e.emit(2L);
+            e.emit(3L);
+            Thread.sleep(200);
+            e.emit(4L);
+            e.emit(5L);
+            Thread.sleep(400);
+            e.complete();
+        }))
+                .group().intoLists().every(Duration.ofMillis(100), true)
+                .log()
+                .subscribe().withSubscriber(AssertSubscriber.create(100));
+
+        subscriber.awaitCompletion();
+        assertThat(subscriber.getItems()).hasSizeGreaterThanOrEqualTo(5);
+        assertThat(subscriber.getItems()).areAtLeastOne(new Condition<>(List::isEmpty, "empty"));
     }
 
     @Test
