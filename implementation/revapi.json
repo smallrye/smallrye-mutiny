@@ -51,15 +51,7 @@
     "criticality" : "highlight",
     "minSeverity" : "POTENTIALLY_BREAKING",
     "minCriticality" : "documented",
-    "differences" : [
-      {
-        "ignore": true,
-        "code": "java.method.numberOfParametersChanged",
-        "old": "method void io.smallrye.mutiny.operators.multi.MultiBufferWithTimeoutOp<T>::<init>(io.smallrye.mutiny.Multi<T>, int, java.time.Duration, java.util.concurrent.ScheduledExecutorService)",
-        "new": "method void io.smallrye.mutiny.operators.multi.MultiBufferWithTimeoutOp<T>::<init>(io.smallrye.mutiny.Multi<T>, int, java.time.Duration, java.util.concurrent.ScheduledExecutorService, boolean)",
-        "justification": "New method adding the possibility to emit empty lists"
-      }
-    ]
+    "differences" : [ ]
   }
 }, {
   "extension" : "revapi.reporter.json",
