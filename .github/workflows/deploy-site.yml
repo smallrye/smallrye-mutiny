@@ -55,8 +55,11 @@ jobs:
             sdk install jbang
 
           echo "Waiting for artifacts to be available from Maven Central"
+          echo "Version ${MUTINY_VERSION}"
+          ARTIFACTS=$(./mvnw -s .build/maven-ci-settings.xml -Dexec.executable='echo' -Dexec.args='${project.groupId}:${project.artifactId}' exec:exec -q | tr '\n' ',')
+          echo "Artifacts: ${ARTIFACTS}"
           jbang .build/WaitForCentral.java \
-            --artifacts=$(./mvnw -Dexec.executable='echo' -Dexec.args='${project.groupId}:${project.artifactId}' exec:exec -q | tr '\n' ',') \
+            --artifacts=$ARTIFACTS \
             --expected-version="${MUTINY_VERSION}"
 
           echo "Run the deployment script"
