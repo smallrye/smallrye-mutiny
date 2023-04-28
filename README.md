@@ -57,6 +57,12 @@ Mutiny is built with Apache Maven, so all you need is:
 ./mvnw install
 ```
 
+If you want to run a _quick_ build without running tests or generating API docs, then run:
+
+```shell
+./mvnw -Dquickly
+```
+
 | Git branch | Versions                       | Baseline                              | Compliance                 |
 |------------|--------------------------------|---------------------------------------|----------------------------|
 | `main`     | 2.x *(in development)*         | Java 11, `java.util.concurrent.Flow ` | Reactive Streams TCK 1.0.4 |
