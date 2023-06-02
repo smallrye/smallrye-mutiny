@@ -58,7 +58,7 @@ public class MultiSelectWhereAndWhenTest {
                 .filter(n -> n % 2 == 0)
                 .subscribe().withSubscriber(AssertSubscriber.create());
         sub.request(0);
-        sub.assertFailedWith(IllegalArgumentException.class, "request must be positive");
+        sub.assertFailedWith(IllegalArgumentException.class, "must be greater than 0");
     }
 
     @Test

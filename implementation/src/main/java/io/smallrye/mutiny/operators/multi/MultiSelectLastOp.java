@@ -74,6 +74,10 @@ public class MultiSelectLastOp<T> extends AbstractMultiOperator<T, T> {
 
         @Override
         public void request(long n) {
+            if (n < 0) {
+                onFailure(Subscriptions.getInvalidRequestException());
+                return;
+            }
             Subscriptions.add(requested, n);
             drain();
         }

@@ -30,7 +30,7 @@ public final class NeverMulti extends AbstractMulti<Object> {
 
     @Override
     public void subscribe(MultiSubscriber<? super Object> actual) {
-        actual.onSubscribe(Subscriptions.CANCELLED);
+        actual.onSubscribe(Subscriptions.empty());
     }
 
 }

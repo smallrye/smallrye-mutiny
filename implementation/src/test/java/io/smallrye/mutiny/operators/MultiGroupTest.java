@@ -23,10 +23,7 @@ import org.junit.jupiter.api.parallel.ResourceLock;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
-import io.smallrye.mutiny.GroupedMulti;
-import io.smallrye.mutiny.Multi;
-import io.smallrye.mutiny.TestException;
-import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.*;
 import io.smallrye.mutiny.helpers.spies.MultiOnCancellationSpy;
 import io.smallrye.mutiny.helpers.spies.Spy;
 import io.smallrye.mutiny.helpers.test.AssertSubscriber;
@@ -412,7 +409,7 @@ public class MultiGroupTest {
         multi.subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE))
                 .awaitFailure()
                 .assertItems(1, 2, 3, 4, 5, 6)
-                .assertFailedWith(IOException.class, "boom");
+                .assertFailedWith(CompositeException.class, "boom");
     }
 
     @Test
