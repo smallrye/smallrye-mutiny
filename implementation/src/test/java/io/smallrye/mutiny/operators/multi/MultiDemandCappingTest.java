@@ -80,7 +80,7 @@ class MultiDemandCappingTest {
                 .subscribe().withSubscriber(AssertSubscriber.create());
 
         sub.request(-1L);
-        sub.assertFailedWith(IllegalArgumentException.class, "request must be positive");
+        sub.assertFailedWith(IllegalArgumentException.class, "must be greater than 0");
     }
 
     @Test

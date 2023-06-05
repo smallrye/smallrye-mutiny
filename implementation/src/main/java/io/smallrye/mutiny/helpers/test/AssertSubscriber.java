@@ -5,25 +5,27 @@ import static java.lang.Integer.parseInt;
 import static java.time.Duration.ofSeconds;
 
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.concurrent.*;
 import java.util.concurrent.Flow.Subscriber;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 import io.smallrye.mutiny.Context;
+import io.smallrye.mutiny.helpers.Subscriptions;
 import io.smallrye.mutiny.subscription.ContextSupport;
+import io.smallrye.mutiny.subscription.MultiSubscriber;
 
 /**
  * A {@link io.smallrye.mutiny.Multi} {@link Subscriber} for testing purposes that comes with useful assertion helpers.
  *
  * @param <T> the type of the items
  */
-public class AssertSubscriber<T> implements Subscriber<T>, ContextSupport {
+public class AssertSubscriber<T> implements MultiSubscriber<T>, ContextSupport {
 
     /**
      * The default timeout used by {@code await} method.
@@ -55,27 +57,22 @@ public class AssertSubscriber<T> implements Subscriber<T>, ContextSupport {
     /**
      * The subscription received from upstream.
      */
-    private final AtomicReference<Flow.Subscription> subscription = new AtomicReference<>();
+    private volatile Flow.Subscription subscription = null;
 
     /**
-     * The number of requested items.
+     * The number of pending requested items.
      */
-    private final AtomicLong requested = new AtomicLong();
+    private final AtomicLong pendingRequests = new AtomicLong();
 
     /**
      * The received items.
      */
-    private final List<T> items = new CopyOnWriteArrayList<>();
+    private final List<T> items = Collections.synchronizedList(new ArrayList<>());
 
     /**
      * The received failure.
      */
-    private final AtomicReference<Throwable> failure = new AtomicReference<>();
-
-    /**
-     * Whether the multi completed successfully.
-     */
-    private final AtomicBoolean completed = new AtomicBoolean();
+    private volatile Throwable failure = null;
 
     /**
      * Number of subscription received from upstream.
@@ -90,15 +87,19 @@ public class AssertSubscriber<T> implements Subscriber<T>, ContextSupport {
     private final boolean upfrontCancellation;
 
     /**
-     * Whether the subscription has been cancelled.
-     * This field is set to {@code true} when the subscriber calls {@code cancel} on the subscription.
-     */
-    private boolean cancelled;
-
-    /**
      * The subscription context.
      */
     private final Context context;
+
+    private enum State {
+        INIT,
+        SUBSCRIBED,
+        FAILED,
+        CANCELLED,
+        COMPLETED
+    }
+
+    private volatile State state = State.INIT;
 
     /**
      * Creates a new {@link AssertSubscriber}.
@@ -109,7 +110,7 @@ public class AssertSubscriber<T> implements Subscriber<T>, ContextSupport {
      */
     public AssertSubscriber(Context context, long requested, boolean cancelled) {
         this.context = context;
-        this.requested.set(requested);
+        this.pendingRequests.set(requested);
         this.upfrontCancellation = cancelled;
     }
 
@@ -471,13 +472,12 @@ public class AssertSubscriber<T> implements Subscriber<T>, ContextSupport {
                     "No completion (or failure) event received in the last " + duration.toMillis() + " ms");
         }
 
-        if (completed.get()) {
+        if (state == State.COMPLETED) {
             return this;
         }
 
-        final Throwable throwable = failure.get();
-        if (throwable != null) {
-            throw new AssertionError("Expected a completion event but got a failure: " + throwable);
+        if (failure != null) {
+            throw new AssertionError("Expected a completion event but got a failure: " + failure);
         }
 
         // We have been interrupted.
@@ -549,13 +549,12 @@ public class AssertSubscriber<T> implements Subscriber<T>, ContextSupport {
                     "No completion (or failure) event received in the last " + duration.toMillis() + " ms");
         }
 
-        if (completed.get()) {
+        if (state == State.COMPLETED) {
             throw new AssertionError("Expected a failure event but got a completion event.");
         }
 
-        final Throwable throwable = failure.get();
         try {
-            assertion.accept(throwable);
+            assertion.accept(failure);
             return this;
         } catch (AssertionError e) {
             throw new AssertionError("Received a failure event, but that failure did not pass the validation: " + e, e);
@@ -695,8 +694,8 @@ public class AssertSubscriber<T> implements Subscriber<T>, ContextSupport {
      */
     public AssertSubscriber<T> cancel() {
         shouldBeSubscribed(numberOfSubscription);
-        subscription.get().cancel();
-        cancelled = true;
+        subscription.cancel();
+        state = State.CANCELLED;
         Event ev = new Event(null, null, false, true);
         eventListeners.forEach(l -> l.accept(ev));
         return this;
@@ -708,49 +707,52 @@ public class AssertSubscriber<T> implements Subscriber<T>, ContextSupport {
      * @param req the number of items to request.
      * @return this {@link AssertSubscriber}
      */
-    public AssertSubscriber<T> request(long req) {
-        requested.addAndGet(req);
-        if (subscription.get() != null) {
-            subscription.get().request(req);
+    public synchronized AssertSubscriber<T> request(long req) {
+        Subscriptions.add(pendingRequests, req);
+        if (state != State.INIT) {
+            subscription.request(req);
         }
         return this;
     }
 
     @Override
-    public void onSubscribe(Flow.Subscription s) {
+    public synchronized void onSubscribe(Flow.Subscription s) {
         numberOfSubscription++;
-        subscription.set(s);
+        subscription = s;
+        state = State.SUBSCRIBED;
         subscribed.countDown();
         if (upfrontCancellation) {
             s.cancel();
-            cancelled = true;
-            // Do not request is cancelled.
+            state = State.CANCELLED;
+            // Do not request if cancelled.
             return;
         }
-        if (requested.get() > 0) {
-            s.request(requested.get());
+        long pending = pendingRequests.get();
+        if (pending > 0) {
+            s.request(pending);
         }
-
     }
 
     @Override
-    public synchronized void onNext(T t) {
+    public synchronized void onItem(T t) {
         items.add(t);
         Event ev = new Event(t, null, false, false);
         eventListeners.forEach(l -> l.accept(ev));
+        pendingRequests.decrementAndGet();
     }
 
     @Override
-    public void onError(Throwable t) {
-        failure.set(t);
+    public void onFailure(Throwable t) {
+        state = State.FAILED;
+        failure = t;
         terminal.countDown();
         Event ev = new Event(null, t, false, false);
         eventListeners.forEach(l -> l.accept(ev));
     }
 
     @Override
-    public void onComplete() {
-        completed.set(true);
+    public void onCompletion() {
+        state = State.COMPLETED;
         terminal.countDown();
         Event ev = new Event(null, null, true, false);
         eventListeners.forEach(l -> l.accept(ev));
@@ -771,7 +773,7 @@ public class AssertSubscriber<T> implements Subscriber<T>, ContextSupport {
      * @return the failure or {@code null}
      */
     public Throwable getFailure() {
-        return failure.get();
+        return failure;
     }
 
     /**
@@ -797,7 +799,7 @@ public class AssertSubscriber<T> implements Subscriber<T>, ContextSupport {
      * @return a boolean
      */
     public boolean isCancelled() {
-        return cancelled;
+        return state == State.CANCELLED;
     }
 
     /**
@@ -806,7 +808,7 @@ public class AssertSubscriber<T> implements Subscriber<T>, ContextSupport {
      * @return a boolean
      */
     public boolean hasCompleted() {
-        return completed.get();
+        return state == State.COMPLETED;
     }
 
     private void registerListener(EventListener listener) {
