@@ -519,4 +519,19 @@ class UniMemoizeTest {
         subscriber2.awaitItem().assertItem("hello-1");
     }
 
+    @Test
+    public void reproducer_1303() throws ExecutionException, InterruptedException {
+        // See https://github.com/quarkusio/quarkus/issues/33602
+        var ex = Executors.newFixedThreadPool(1);
+        for (int i = 0; i < 500_000; i++) {
+            CompletableFuture<Object> cf = new CompletableFuture<>();
+            Uni.createFrom().emitter(emitter -> ex.submit(() -> emitter.complete(new Object())))
+                    .memoize().indefinitely()
+                    .subscribe().with(cf::complete);
+            if (cf.get() == null) {
+                throw new RuntimeException();
+            }
+        }
+    }
+
 }
