@@ -94,7 +94,7 @@
         <version.surefire.plugin>3.1.2</version.surefire.plugin>
         <testng.version>7.7.1</testng.version>
         <testng-junit5-engine.version>1.0.4</testng-junit5-engine.version>
-        <mockito-core.version>5.3.1</mockito-core.version>
+        <mockito-core.version>5.4.0</mockito-core.version>
 
         <revapi-maven-plugin.version>0.15.0</revapi-maven-plugin.version>
         <revapi-java.version>0.28.1</revapi-java.version>
