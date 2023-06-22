@@ -49,6 +49,7 @@ nav:
       - 'guides/context-passing.md'
       - 'guides/replaying-multis.md'
       - 'guides/controlling-demand.md'
+      - 'guides/multi-split.md'
   - 'Reference':
       - 'reference/migrating-to-mutiny-2.md'
       - 'reference/why-is-asynchronous-important.md'

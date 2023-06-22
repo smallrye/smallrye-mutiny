@@ -108,6 +108,7 @@
                         <sourceFileInclude>io/smallrye/mutiny/infrastructure/*.java</sourceFileInclude>
                         <sourceFileInclude>io/smallrye/mutiny/operators/*.java</sourceFileInclude>
                         <sourceFileInclude>io/smallrye/mutiny/operators/multi/processors/*.java</sourceFileInclude>
+                        <sourceFileInclude>io/smallrye/mutiny/operators/multi/split/*.java</sourceFileInclude>
                         <sourceFileInclude>io/smallrye/mutiny/subscription/*.java</sourceFileInclude>
                         <sourceFileInclude>io/smallrye/mutiny/tuples/*.java</sourceFileInclude>
                         <sourceFileInclude>io/smallrye/mutiny/unchecked/*.java</sourceFileInclude>
