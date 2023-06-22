@@ -15,6 +15,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 
 class AppendOnlyReplayListTest {
@@ -166,9 +167,9 @@ class AppendOnlyReplayListTest {
         assertThat(lateCursor.hasNext()).isFalse();
     }
 
-    @Test
+    @RepeatedTest(2)
     void concurrencySanityChecks() {
-        final int N_CONSUMERS = 4;
+        final long N_CONSUMERS = 4L;
         AppendOnlyReplayList replayList = new AppendOnlyReplayList(256);
         AtomicBoolean stop = new AtomicBoolean();
         AtomicLong counter = new AtomicLong();
@@ -215,7 +216,7 @@ class AppendOnlyReplayListTest {
         await().untilTrue(stop);
         pool.shutdownNow();
         assertThat(problems).isEmpty();
-        assertThat(success.get()).isGreaterThan(counter.get());
+        assertThat(success.get() / N_CONSUMERS).isLessThanOrEqualTo(counter.get());
     }
 
     private void randomSleep() {
