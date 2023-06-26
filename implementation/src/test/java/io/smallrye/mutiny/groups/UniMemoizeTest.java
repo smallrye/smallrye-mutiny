@@ -534,4 +534,19 @@ class UniMemoizeTest {
         }
     }
 
+    @Test
+    public void checkProtocolCorrectness() {
+        var log = new ArrayList<String>();
+        var uni = Uni.createFrom().item(() -> 58).memoize().indefinitely()
+                .onSubscription().invoke(() -> log.add("sub"))
+                .onItem().invoke(n -> log.add(String.valueOf(n)));
+
+        Integer res = uni.await().atMost(Duration.ofSeconds(5));
+        assertThat(res).isEqualTo(58);
+        assertThat(log).containsExactly("sub", "58");
+
+        uni.await().atMost(Duration.ofSeconds(5));
+        assertThat(res).isEqualTo(58);
+        assertThat(log).containsExactly("sub", "58", "sub", "58");
+    }
 }
