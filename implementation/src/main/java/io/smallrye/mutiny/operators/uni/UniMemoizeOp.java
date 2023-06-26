@@ -54,17 +54,19 @@ public class UniMemoizeOp<I> extends UniOperator<I, I> implements UniSubscriber<
                 case INIT:
                     state = State.WAITING_FOR_UPSTREAM;
                     awaiters.add(subscriber);
+                    subscriber.onSubscribe(new MemoizedSubscription(subscriber));
                     currentContext = subscriber.context();
                     upstream().subscribe().withSubscriber(this);
                     break;
                 case WAITING_FOR_UPSTREAM:
                     awaiters.add(subscriber);
+                    subscriber.onSubscribe(new MemoizedSubscription(subscriber));
                     break;
                 case CACHING:
+                    subscriber.onSubscribe(new MemoizedSubscription(subscriber));
                     forwardTo(subscriber);
                     break;
             }
-            subscriber.onSubscribe(new MemoizedSubscription(subscriber));
         } finally {
             internalLock.unlock();
         }
