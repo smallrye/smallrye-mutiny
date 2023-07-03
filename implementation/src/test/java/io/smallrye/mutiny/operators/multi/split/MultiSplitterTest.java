@@ -48,6 +48,8 @@ class MultiSplitterTest {
     @Test
     void checkBasicBehavior() {
         var splitter = evenOddSplitter();
+        assertThat(splitter.keyType()).isEqualTo(OddEven.class);
+
         var odd = splitter.get(OddEven.ODD)
                 .subscribe().withSubscriber(AssertSubscriber.create());
         var even = splitter.get(OddEven.EVEN)

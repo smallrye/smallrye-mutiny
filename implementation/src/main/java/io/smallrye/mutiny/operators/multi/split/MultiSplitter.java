@@ -51,6 +51,7 @@ public class MultiSplitter<T, K extends Enum<K>> {
     private final Function<T, K> splitter;
     private final ConcurrentHashMap<K, SplitMulti.Split> splits;
     private final int requiredNumberOfSubscribers;
+    private final Class<K> keyType;
 
     public MultiSplitter(Multi<? extends T> upstream, Class<K> keyType, Function<T, K> splitter) {
         this.upstream = nonNull(upstream, "upstream");
@@ -58,6 +59,7 @@ public class MultiSplitter<T, K extends Enum<K>> {
             // Note: the Java compiler enforces a type check on keyType being some enum, so this branch is only here for added peace of mind
             throw new IllegalArgumentException("The key type must be that of an enumeration");
         }
+        this.keyType = keyType;
         this.splitter = nonNull(splitter, "splitter");
         this.splits = new ConcurrentHashMap<>();
         this.requiredNumberOfSubscribers = keyType.getEnumConstants().length;
@@ -72,6 +74,15 @@ public class MultiSplitter<T, K extends Enum<K>> {
     @CheckReturnValue
     public Multi<T> get(K key) {
         return Infrastructure.onMultiCreation(new SplitMulti(key));
+    }
+
+    /**
+     * Get the (enum) key type.
+     *
+     * @return the key type
+     */
+    public Class<K> keyType() {
+        return keyType;
     }
 
     private enum State {
