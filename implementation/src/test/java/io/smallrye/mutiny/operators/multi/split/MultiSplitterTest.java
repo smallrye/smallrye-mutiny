@@ -100,6 +100,17 @@ class MultiSplitterTest {
     }
 
     @Test
+    void checkSplitKey() {
+        var splitter = evenOddSplitter();
+
+        var odd = splitter.get(OddEven.ODD);
+        assertThat(odd.splitKey()).isEqualTo(OddEven.ODD);
+
+        var even = splitter.get(OddEven.EVEN);
+        assertThat(even.splitKey()).isEqualTo(OddEven.EVEN);
+    }
+
+    @Test
     void checkPauseOnCancellation() {
         var splitter = evenOddSplitter();
         var odd = splitter.get(OddEven.ODD)
