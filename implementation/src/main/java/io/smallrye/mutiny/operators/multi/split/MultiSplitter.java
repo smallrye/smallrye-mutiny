@@ -12,6 +12,7 @@ import io.smallrye.common.annotation.CheckReturnValue;
 import io.smallrye.mutiny.Context;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.helpers.Subscriptions;
+import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.AbstractMulti;
 import io.smallrye.mutiny.subscription.ContextSupport;
 import io.smallrye.mutiny.subscription.MultiSubscriber;
@@ -48,7 +49,7 @@ public class MultiSplitter<T, K extends Enum<K>> {
 
     private final Multi<? extends T> upstream;
     private final Function<T, K> splitter;
-    private final ConcurrentHashMap<K, SplitMultiImpl.Split> splits;
+    private final ConcurrentHashMap<K, SplitMulti.Split> splits;
     private final int requiredNumberOfSubscribers;
 
     public MultiSplitter(Multi<? extends T> upstream, Class<K> keyType, Function<T, K> splitter) {
@@ -69,8 +70,8 @@ public class MultiSplitter<T, K extends Enum<K>> {
      * @return a new {@link Multi}
      */
     @CheckReturnValue
-    public SplitMulti<T, K> get(K key) {
-        return new SplitMultiImpl(key);
+    public Multi<T> get(K key) {
+        return Infrastructure.onMultiCreation(new SplitMulti(key));
     }
 
     private enum State {
@@ -91,7 +92,7 @@ public class MultiSplitter<T, K extends Enum<K>> {
         if (state.get() != State.SUBSCRIBED || splits.size() < requiredNumberOfSubscribers) {
             return;
         }
-        for (SplitMultiImpl.Split split : splits.values()) {
+        for (SplitMulti.Split split : splits.values()) {
             if (split.demand.get() == 0L) {
                 return;
             }
@@ -100,14 +101,14 @@ public class MultiSplitter<T, K extends Enum<K>> {
     }
 
     private void onUpstreamFailure() {
-        for (SplitMultiImpl.Split split : splits.values()) {
+        for (SplitMulti.Split split : splits.values()) {
             split.downstream.onFailure(terminalFailure);
         }
         splits.clear();
     }
 
     private void onUpstreamCompletion() {
-        for (SplitMultiImpl.Split split : splits.values()) {
+        for (SplitMulti.Split split : splits.values()) {
             split.downstream.onCompletion();
         }
         splits.clear();
@@ -120,7 +121,7 @@ public class MultiSplitter<T, K extends Enum<K>> {
                 throw new NullPointerException("The splitter function returned null");
             }
             // Note: if the target subscriber was removed between the last upstream demand and now, it is simply discarded
-            SplitMultiImpl.Split target = splits.get(key);
+            SplitMulti.Split target = splits.get(key);
             if (target != null) {
                 target.downstream.onItem(item);
                 if (splits.size() == requiredNumberOfSubscribers
@@ -189,17 +190,12 @@ public class MultiSplitter<T, K extends Enum<K>> {
         }
     }
 
-    private class SplitMultiImpl extends AbstractMulti<T> implements SplitMulti<T, K> {
+    private class SplitMulti extends AbstractMulti<T> {
 
         private final K key;
 
-        private SplitMultiImpl(K key) {
+        private SplitMulti(K key) {
             this.key = key;
-        }
-
-        @Override
-        public K splitKey() {
-            return key;
         }
 
         @Override
