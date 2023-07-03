@@ -115,6 +115,11 @@ To implement the scenario from the last section, you will use `onItem().transfor
 {{ insert('java/tutorials/TransformItemsAsyncTest.java', 'merge-concat') }}
 ```
 
+!!! important
+    
+    - When merging: items from the source `Multi` _may_ be processed **concurrently** depending on the concurrency level that has been set, if any.
+    - When concatenating: items from the source `Multi` are processed **in order**, waiting for each `Uni` to complete before moving on to the next item. 
+
 ## Multi - Transforming an item into a Multi
 
 `onItem().transformToMultiAndMerge` and `onItem().transformToMultiAndConcatenate` transform incoming items into `Multi` streams.
