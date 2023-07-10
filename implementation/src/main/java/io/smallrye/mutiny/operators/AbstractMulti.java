@@ -179,5 +179,4 @@ public abstract class AbstractMulti<T> implements Multi<T> {
     public Multi<T> capDemandsUsing(LongFunction<Long> function) {
         return Infrastructure.onMultiCreation(new MultiDemandCapping<>(this, nonNull(function, "function")));
     }
-
 }

@@ -13,6 +13,7 @@ open module io.smallrye.mutiny {
     exports io.smallrye.mutiny.infrastructure;
     exports io.smallrye.mutiny.operators;
     exports io.smallrye.mutiny.operators.multi.processors;
+    exports io.smallrye.mutiny.operators.multi.split;
     exports io.smallrye.mutiny.subscription;
     exports io.smallrye.mutiny.tuples;
     exports io.smallrye.mutiny.unchecked;

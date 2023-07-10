@@ -10,8 +10,10 @@ import java.util.concurrent.Flow.Subscription;
 import java.util.function.*;
 
 import io.smallrye.common.annotation.CheckReturnValue;
+import io.smallrye.common.annotation.Experimental;
 import io.smallrye.mutiny.groups.*;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
+import io.smallrye.mutiny.operators.multi.split.MultiSplitter;
 
 public interface Multi<T> extends Publisher<T> {
 
@@ -637,4 +639,33 @@ public interface Multi<T> extends Publisher<T> {
      */
     @CheckReturnValue
     Multi<T> capDemandsUsing(LongFunction<Long> function);
+
+    /**
+     * Splits this {@link Multi} into several co-operating {@link Multi} based on an enumeration and a mapping function.
+     * <p>
+     * Here is a sample where a stream of integers is split into streams for odd and even numbers:
+     *
+     * <pre>
+     * {@code
+     * // Split someMulti into 2 streams
+     * var splitter = someMulti.split(OddEven.class, n -> (n % 2 == 0) ? OddEven.EVEN : OddEven.ODD);
+     *
+     * // Stream for odd numbers
+     * vor odd = splitter.get(OddEven.ODD).subscribe().with(...);
+     *
+     * // Stream for even numbers
+     * vor even = splitter.get(OddEven.EVEN).subscribe().with(...);
+     * }
+     * </pre>
+     *
+     * @param keyType the key type
+     * @param splitter the splitter function
+     * @return a splitter
+     * @param <K> the key type
+     */
+    @CheckReturnValue
+    @Experimental("Multi splitting is an experimental API in Mutiny 2.3.0")
+    default <K extends Enum<K>> MultiSplitter<T, K> split(Class<K> keyType, Function<T, K> splitter) {
+        return new MultiSplitter<>(this, keyType, splitter);
+    }
 }
