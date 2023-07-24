@@ -29,7 +29,7 @@ import kotlinx.coroutines.launch
  * @property bufferCapacity the type (defined by [Channel] constants) or the capacity (>0 <[Int.MAX_VALUE]) of the channel, defaulting to [Channel.UNLIMITED]
  * @property bufferOverflowStrategy action strategy on exceeding the [bufferCapacity], see [BufferOverflow].
  */
-suspend fun <T> Multi<T>.asFlow(
+fun <T> Multi<T>.asFlow(
     bufferCapacity: Int = Channel.UNLIMITED,
     bufferOverflowStrategy: BufferOverflow = BufferOverflow.SUSPEND
 ): Flow<T> = callbackFlow<T> {
