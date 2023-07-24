@@ -18,6 +18,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatThrownBy
 
 class UniAwaitSuspendingTest {
 
@@ -140,5 +141,52 @@ class UniAwaitSuspendingTest {
 
         // Then
         assertThat(item).isEqualTo(23)
+    }
+
+    @Test
+    fun `test awaitItem with non null item`() {
+        // Given
+        val nonNullUni: Uni<String> = Uni.createFrom().item("blue pill")
+
+        // When
+        val nonNullItem: String = testBlocking { nonNullUni.awaitItem() }
+
+        // Then
+        assertThat(nonNullItem).isNotNull()
+    }
+
+    @Test
+    fun `test awaitItem with null item`() {
+        // Given
+        val nullUni: Uni<String> = Uni.createFrom().nullItem();
+
+        // When & Then
+        assertThatThrownBy {
+            testBlocking { nullUni.awaitItem() }
+        }.isInstanceOf(IllegalStateException::class.java).hasMessage("Uni did not emit an item")
+    }
+
+    @Test
+    fun `test awaitItemOrNull with non null item`() {
+        // Given
+        val nonNullUni: Uni<String> = Uni.createFrom().item("blue pill")
+
+        // When
+        val nonNullItem: String? = testBlocking { nonNullUni.awaitItemOrNull() }
+
+        // Then
+        assertThat(nonNullItem).isNotNull()
+    }
+
+    @Test
+    fun `test awaitItemOrNull with null item`() {
+        // Given
+        val nullUni: Uni<String> = Uni.createFrom().nullItem()
+
+        // When
+        val nullItem: String? = testBlocking { nullUni.awaitItemOrNull() }
+
+        // Then
+        assertThat(nullItem).isNull()
     }
 }

@@ -39,6 +39,16 @@ suspend fun <T> Uni<T>.awaitSuspending() = suspendCancellableCoroutine<T> { cont
 }
 
 /**
+ * Like [awaitSuspending], but fails with an [IllegalStateException] if there's no item produced by this [Uni].
+ */
+suspend fun <T> Uni<T>.awaitItem(): T = checkNotNull(awaitSuspending()) { "Uni did not emit an item" }
+
+/**
+ * Like [awaitSuspending], but with the explicit need of `null` handling.
+ */
+suspend fun <T> Uni<T>.awaitItemOrNull(): T? = awaitSuspending()
+
+/**
  * Provide this [Deferred]s value or failure as [Uni].
  *
  * If the surrounding coroutine fails or gets cancelled that failure is propagated as well.
