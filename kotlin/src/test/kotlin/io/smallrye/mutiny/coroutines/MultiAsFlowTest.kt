@@ -45,12 +45,14 @@ class MultiAsFlowTest {
 
     @Test
     fun `test immediate failure`() {
-        runBlocking {
-            // Given
-            val multi = Multi.createFrom().failure<Any>(Exception("kaboom"))
+        // Given
+        val multi = Multi.createFrom().failure<Any>(Exception("kaboom"))
 
-            // When & Then
-            val flow = multi.asFlow()
+        // When
+        val flow = multi.asFlow()
+
+        // Then
+        runBlocking {
             assertFailsWith<Exception>("kaboom") {
                 flow.toList()
             }
@@ -94,15 +96,15 @@ class MultiAsFlowTest {
         }
 
         // When & Then
-        runBlocking {
-            val flow = multi.asFlow()
-            val durationMillis = measureTimeMillis {
-                assertFailsWith<Exception>("boom") {
+        val flow = multi.asFlow()
+        val durationMillis = measureTimeMillis {
+            assertFailsWith<Exception>("boom") {
+                runBlocking {
                     flow.toList()
                 }
             }
-            assertThat(durationMillis).isGreaterThanOrEqualTo(delayMillis)
         }
+        assertThat(durationMillis).isGreaterThanOrEqualTo(delayMillis)
     }
 
     @Test
@@ -130,11 +132,11 @@ class MultiAsFlowTest {
             emitter.set(em)
         }
 
-        runBlocking {
-            val flow = multi.asFlow()
-            val eventItems = mutableListOf<Int>()
+        val flow = multi.asFlow()
+        val eventItems = mutableListOf<Int>()
 
-            // When
+        // When
+        runBlocking {
             val assertJob = async {
                 assertFails {
                     flow.collect { eventItems.add(it) }
@@ -228,46 +230,46 @@ class MultiAsFlowTest {
 
     @Test
     fun `test empty Multi`() {
+        // Given
+        val multi = Multi.createFrom().empty<Any>()
+
+        // When
+        val items = multi.asFlow()
+
+        // Then
         testBlocking {
-            // Given
-            val multi = Multi.createFrom().empty<Any>()
-
-            // When
-            val items = multi.asFlow().toList()
-
-            // Then
-            assertThat(items).isEmpty()
+            assertThat(items.toList()).isEmpty()
         }
     }
 
     @Test
     fun `test null item`() {
+        // Given
+        val multi = Multi.createFrom().item { null }
+
+        // When
+        val items = multi.asFlow()
+
+        /// Then
         testBlocking {
-            // Given
-            val multi = Multi.createFrom().item { null }
-
-            // When
-            val items = multi.asFlow().toList()
-
-            /// Then
-            assertThat(items).hasSize(0)
+            assertThat(items.toList()).hasSize(0)
         }
     }
 
     @Test
     fun `test buffered flow`() {
-        testBlocking {
-            // Given
-            val items = (1..10_000).toList()
-            val multi = Multi.createFrom().iterable(items)
+        // Given
+        val items = (1..10_000).toList()
+        val multi = Multi.createFrom().iterable(items)
 
-            // When
-            val flow = multi.asFlow(bufferCapacity = 5)
-            val eventItems = flow.toList()
-
-            // Then
-            assertThat(eventItems).containsExactlyElementsOf((1..10_000).toList())
+        // When
+        val flow = multi.asFlow(bufferCapacity = 5)
+        val eventItems = testBlocking {
+            flow.toList()
         }
+
+        // Then
+        assertThat(eventItems).containsExactlyElementsOf((1..10_000).toList())
     }
 
     @Test

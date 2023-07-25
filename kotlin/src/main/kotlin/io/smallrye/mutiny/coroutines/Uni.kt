@@ -71,6 +71,6 @@ fun <T> Deferred<T>.asUni(): Uni<T> = Uni.createFrom().emitter { em: UniEmitter<
  */
 @ExperimentalCoroutinesApi
 @OptIn(DelicateCoroutinesApi::class)
-suspend fun <T> uni(context: CoroutineScope = GlobalScope, suspendSupplier: suspend () -> T): Uni<T> = context.async {
+fun <T> uni(context: CoroutineScope = GlobalScope, suspendSupplier: suspend () -> T): Uni<T> = context.async {
     suspendSupplier()
 }.asUni()
