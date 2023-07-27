@@ -1,8 +1,9 @@
 package io.smallrye.mutiny.helpers.queues;
 
 import java.util.Queue;
-import java.util.concurrent.ArrayBlockingQueue;
 import java.util.function.Supplier;
+
+import org.jctools.queues.MpscArrayQueue;
 
 @SuppressWarnings({ "rawtypes", "unchecked" })
 public class Queues {
@@ -99,13 +100,27 @@ public class Queues {
     }
 
     /**
-     * Create a queue of a strict fixed size.
+     * Create a MPSC queue with a given size
      *
-     * @param size the queue size
+     * @param size the queue size, will be rounded
      * @param <T> the elements type
      * @return a new queue
      */
-    public static <T> Queue<T> createStrictSizeQueue(int size) {
-        return new ArrayBlockingQueue<>(size);
+    public static <T> Queue<T> createMpscArrayQueue(int size) {
+        return new MpscArrayQueue<>(size);
+    }
+
+    /**
+     * Check when a non-strictly sized queue overflow.
+     *
+     * @param queue the queue
+     * @param limit the limit, a negative value assumes an unbounded queue
+     * @return {@code true} if the queue overflow, {@code false} otherwise
+     */
+    public static boolean isOverflowing(Queue<?> queue, int limit) {
+        if (limit < 0) {
+            return false;
+        }
+        return queue.size() >= limit;
     }
 }

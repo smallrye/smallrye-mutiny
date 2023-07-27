@@ -51,7 +51,14 @@
     "criticality" : "highlight",
     "minSeverity" : "POTENTIALLY_BREAKING",
     "minCriticality" : "documented",
-    "differences" : [ ]
+    "differences" : [
+      {
+        "ignore": true,
+        "code": "java.method.removed",
+        "old": "method <T> java.util.Queue<T> io.smallrye.mutiny.helpers.queues.Queues::createStrictSizeQueue(int)",
+        "justification": "Refactoring of internal APIs"
+      }
+    ]
   }
 }, {
   "extension" : "revapi.reporter.json",

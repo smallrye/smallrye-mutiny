@@ -1,7 +1,6 @@
 package io.smallrye.mutiny.helpers.queues;
 
-import static io.smallrye.mutiny.helpers.queues.Queues.BUFFER_S;
-import static io.smallrye.mutiny.helpers.queues.Queues.BUFFER_XS;
+import static io.smallrye.mutiny.helpers.queues.Queues.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -10,6 +9,7 @@ import java.util.*;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.jctools.queues.MpscArrayQueue;
 import org.junit.jupiter.api.Test;
 
 @SuppressWarnings({ "rawtypes", "unchecked", "MismatchedQueryAndUpdateOfCollection" })
@@ -496,4 +496,27 @@ public class QueuesTest {
                 .isInstanceOf(UnsupportedOperationException.class);
     }
 
+    @Test
+    public void testOverflowChecks() {
+        MpscArrayQueue<Integer> queue = new MpscArrayQueue<>(4);
+
+        assertThat(isOverflowing(queue, 2)).isFalse();
+
+        queue.offer(1);
+        queue.offer(2);
+        queue.offer(3);
+
+        assertThat(isOverflowing(queue, 2)).isTrue();
+        assertThat(isOverflowing(queue, 3)).isTrue();
+        assertThat(isOverflowing(queue, 4)).isFalse();
+
+        queue.offer(4);
+        assertThat(isOverflowing(queue, 4)).isTrue();
+
+        queue.offer(5);
+        queue.offer(6);
+        assertThat(isOverflowing(queue, 4)).isTrue();
+
+        assertThat(isOverflowing(queue, -1)).isFalse();
+    }
 }
