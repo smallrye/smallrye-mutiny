@@ -4,6 +4,9 @@ import java.util.Queue;
 import java.util.function.Supplier;
 
 import org.jctools.queues.MpscArrayQueue;
+import org.jctools.queues.MpscLinkedQueue;
+import org.jctools.queues.SpscArrayQueue;
+import org.jctools.queues.SpscUnboundedArrayQueue;
 
 @SuppressWarnings({ "rawtypes", "unchecked" })
 public class Queues {
@@ -11,7 +14,7 @@ public class Queues {
     /**
      * Queues with a requested with a capacity greater than this value are unbounded.
      */
-    public static final int TO_LARGE_TO_BE_BOUNDED = 10_000_000;
+    public static final int TOO_LARGE_TO_BE_BOUNDED = 10_000_000;
 
     private Queues() {
         // avoid direct instantiation
@@ -26,11 +29,11 @@ public class Queues {
     static final Supplier EMPTY_QUEUE_SUPPLIER = EmptyQueue::new;
     static final Supplier SINGLETON_QUEUE_SUPPLIER = SingletonQueue::new;
 
-    static final Supplier XS_QUEUE_SUPPLIER = () -> new SpscArrayQueue<>(BUFFER_XS);
-    static final Supplier S_QUEUE_SUPPLIER = () -> new SpscArrayQueue<>(BUFFER_S);
+    static final Supplier XS_QUEUE_SUPPLIER = () -> new org.jctools.queues.SpscArrayQueue<>(BUFFER_XS);
+    static final Supplier S_QUEUE_SUPPLIER = () -> new org.jctools.queues.SpscArrayQueue<>(BUFFER_S);
 
-    static final Supplier UNBOUNDED_QUEUE_SUPPLIER = () -> new SpscLinkedArrayQueue<>(BUFFER_S);
-    static final Supplier XS_UNBOUNDED_QUEUE_SUPPLIER = () -> new SpscLinkedArrayQueue<>(BUFFER_XS);
+    static final Supplier UNBOUNDED_QUEUE_SUPPLIER = () -> new SpscUnboundedArrayQueue<>(BUFFER_S);
+    static final Supplier XS_UNBOUNDED_QUEUE_SUPPLIER = () -> new SpscUnboundedArrayQueue<>(BUFFER_XS);
 
     public static <T> Supplier<Queue<T>> getXsQueueSupplier() {
         return (Supplier<Queue<T>>) XS_QUEUE_SUPPLIER;
@@ -63,10 +66,10 @@ public class Queues {
         }
 
         final int computedSize = Math.max(8, bufferSize);
-        if (computedSize > TO_LARGE_TO_BE_BOUNDED) {
+        if (computedSize > TOO_LARGE_TO_BE_BOUNDED) {
             return UNBOUNDED_QUEUE_SUPPLIER;
         } else {
-            return () -> new SpscArrayQueue<>(computedSize);
+            return () -> new org.jctools.queues.SpscArrayQueue<>(computedSize);
         }
     }
 
@@ -85,7 +88,7 @@ public class Queues {
         } else if (size == Integer.MAX_VALUE || size == BUFFER_S) {
             return UNBOUNDED_QUEUE_SUPPLIER;
         } else {
-            return () -> new SpscLinkedArrayQueue<>(size);
+            return () -> new SpscUnboundedArrayQueue<>(size);
         }
     }
 
@@ -96,7 +99,7 @@ public class Queues {
      * @return the queue
      */
     public static <T> Queue<T> createMpscQueue() {
-        return new MpscLinkedQueue<>();
+        return new org.jctools.queues.MpscLinkedQueue<>();
     }
 
     /**
@@ -107,7 +110,7 @@ public class Queues {
      * @return a new queue
      */
     public static <T> Queue<T> createMpscArrayQueue(int size) {
-        return new MpscArrayQueue<>(size);
+        return new org.jctools.queues.MpscArrayQueue<>(size);
     }
 
     /**

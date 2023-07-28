@@ -57,6 +57,12 @@
         "code": "java.method.removed",
         "old": "method <T> java.util.Queue<T> io.smallrye.mutiny.helpers.queues.Queues::createStrictSizeQueue(int)",
         "justification": "Refactoring of internal APIs"
+      },
+      {
+        "ignore": true,
+        "code": "java.field.removedWithConstant",
+        "old": "field io.smallrye.mutiny.helpers.queues.Queues.TO_LARGE_TO_BE_BOUNDED",
+        "justification": "Typo (internal API)"
       }
     ]
   }
