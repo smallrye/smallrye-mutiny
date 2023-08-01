@@ -6,8 +6,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.*;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import org.jctools.queues.MpscArrayQueue;
 import org.junit.jupiter.api.Disabled;
@@ -242,14 +240,6 @@ public class QueuesTest {
     }
 
     @Test
-    public void testThatMpscLinkedQueueCannotReceiveNull() {
-        assertThrows(NullPointerException.class, () -> {
-            MpscLinkedQueue<Object> q = new MpscLinkedQueue<>();
-            q.offer(null);
-        });
-    }
-
-    @Test
     public void testSpscArrayQueueOffer() {
         SpscArrayQueue<Object> q = new SpscArrayQueue<>(16);
         q.offer(1);
@@ -279,19 +269,6 @@ public class QueuesTest {
         assertThat(q.poll()).isEqualTo(1);
         assertThat(q.poll()).isEqualTo(2);
         assertThat(q.poll()).isNull();
-    }
-
-    @Test
-    public void testMpscLinkedQueueOffer() {
-        MpscLinkedQueue<Object> q = new MpscLinkedQueue<>();
-        assertThat(q.isEmpty()).isTrue();
-        q.offer(1);
-        q.offer(2);
-        assertThat(q.isEmpty()).isFalse();
-        assertThat(q.poll()).isEqualTo(1);
-        assertThat(q.poll()).isEqualTo(2);
-        assertThat(q.poll()).isNull();
-        assertThat(q.isEmpty()).isTrue();
     }
 
     @Test
@@ -350,111 +327,6 @@ public class QueuesTest {
 
         assertThat(q.peek()).isNull();
         assertThat(q.poll()).isNull();
-    }
-
-    @Test
-    public void testMpscOfferPollRace() throws Exception {
-        MpscLinkedQueue<Integer> q = new MpscLinkedQueue<>();
-        CountDownLatch start = new CountDownLatch(3);
-
-        final AtomicInteger c = new AtomicInteger(3);
-
-        Thread t1 = new Thread(new Runnable() {
-            int i;
-
-            @Override
-            public void run() {
-                start.countDown();
-                try {
-                    start.await();
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                }
-
-                while (i++ < 10000) {
-                    q.offer(i);
-                }
-            }
-        });
-        t1.start();
-
-        Thread t2 = new Thread(new Runnable() {
-            int i = 10000;
-
-            @Override
-            public void run() {
-                start.countDown();
-                try {
-                    start.await();
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                }
-
-                while (i++ < 10000) {
-                    q.offer(i);
-                }
-            }
-        });
-        t2.start();
-
-        Runnable r3 = new Runnable() {
-            int i = 20000;
-
-            @Override
-            public void run() {
-                start.countDown();
-                try {
-                    start.await();
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                }
-
-                while (--i > 0) {
-                    q.poll();
-                }
-            }
-        };
-        r3.run();
-
-        t1.join();
-        t2.join();
-    }
-
-    @SuppressWarnings("ResultOfMethodCallIgnored")
-    @Test
-    public void testUnsupportedAPIFromMpsc() {
-        MpscLinkedQueue<Integer> q = new MpscLinkedQueue<>();
-        q.offer(1);
-        q.offer(2);
-
-        assertThatThrownBy(() -> q.add(3))
-                .isInstanceOf(UnsupportedOperationException.class);
-        assertThatThrownBy(() -> q.remove(2))
-                .isInstanceOf(UnsupportedOperationException.class);
-        assertThatThrownBy(q::remove)
-                .isInstanceOf(UnsupportedOperationException.class);
-        assertThatThrownBy(() -> q.addAll(Arrays.asList(4, 5, 6)))
-                .isInstanceOf(UnsupportedOperationException.class);
-        assertThatThrownBy(() -> q.containsAll(Arrays.asList(4, 5, 6)))
-                .isInstanceOf(UnsupportedOperationException.class);
-        assertThatThrownBy(() -> q.contains(1))
-                .isInstanceOf(UnsupportedOperationException.class);
-        assertThatThrownBy(q::size)
-                .isInstanceOf(UnsupportedOperationException.class);
-        assertThatThrownBy(() -> q.removeAll(Arrays.asList(4, 5, 6)))
-                .isInstanceOf(UnsupportedOperationException.class);
-        assertThatThrownBy(() -> q.retainAll(Arrays.asList(4, 5, 6)))
-                .isInstanceOf(UnsupportedOperationException.class);
-        assertThatThrownBy(q::element)
-                .isInstanceOf(UnsupportedOperationException.class);
-        assertThatThrownBy(q::peek)
-                .isInstanceOf(UnsupportedOperationException.class);
-        assertThatThrownBy(q::iterator)
-                .isInstanceOf(UnsupportedOperationException.class);
-        assertThatThrownBy(q::toArray)
-                .isInstanceOf(UnsupportedOperationException.class);
-        assertThatThrownBy(() -> q.toArray(new Integer[0]))
-                .isInstanceOf(UnsupportedOperationException.class);
     }
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
