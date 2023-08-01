@@ -16,22 +16,6 @@ public class QueuesTest {
 
     @Test
     @Disabled("Old code") // TODO
-    public void testUnboundedQueueCreation() {
-        Queue q = Queues.unbounded(10).get();
-        assertThat(q).isInstanceOf(SpscLinkedArrayQueue.class);
-
-        q = Queues.unbounded(Queues.BUFFER_XS).get();
-        assertThat(q).isInstanceOf(SpscLinkedArrayQueue.class);
-
-        q = Queues.unbounded(Queues.BUFFER_S).get();
-        assertThat(q).isInstanceOf(SpscLinkedArrayQueue.class);
-
-        q = Queues.unbounded(Integer.MAX_VALUE).get();
-        assertThat(q).isInstanceOf(SpscLinkedArrayQueue.class);
-    }
-
-    @Test
-    @Disabled("Old code") // TODO
     public void testCreationOfBoundedQueues() {
         //the bounded queue floors at 8 and rounds to the next power of 2
         Queue queue = Queues.get(2).get();
@@ -72,24 +56,24 @@ public class QueuesTest {
         assertThat(queue).isInstanceOf(SpscArrayQueue.class);
     }
 
-    @Test
-    @Disabled("Old code") // TODO
-    public void testCreationOfUnboundedQueues() {
-        Queue queue = Queues.get(Integer.MAX_VALUE).get();
-        assertThat(getCapacity(queue)).isEqualTo(Integer.MAX_VALUE);
-        assertThat(queue).isInstanceOf(SpscLinkedArrayQueue.class);
-
-        // Not large enough to be unbounded:
-        queue = Queues.get(1000).get();
-        // Next power of 2.
-        assertThat(getCapacity(queue)).isEqualTo(1024L);
-        assertThat(queue).isInstanceOf(SpscArrayQueue.class);
-
-        queue = Queues.get(Queues.TOO_LARGE_TO_BE_BOUNDED + 1).get();
-        assertThat(getCapacity(queue)).isEqualTo(Integer.MAX_VALUE);
-        assertThat(queue).isInstanceOf(SpscLinkedArrayQueue.class);
-
-    }
+    //    @Test
+    //    @Disabled("Old code") // TODO
+    //    public void testCreationOfUnboundedQueues() {
+    //        Queue queue = Queues.get(Integer.MAX_VALUE).get();
+    //        assertThat(getCapacity(queue)).isEqualTo(Integer.MAX_VALUE);
+    //        assertThat(queue).isInstanceOf(SpscLinkedArrayQueue.class);
+    //
+    //        // Not large enough to be unbounded:
+    //        queue = Queues.get(1000).get();
+    //        // Next power of 2.
+    //        assertThat(getCapacity(queue)).isEqualTo(1024L);
+    //        assertThat(queue).isInstanceOf(SpscArrayQueue.class);
+    //
+    //        queue = Queues.get(Queues.TOO_LARGE_TO_BE_BOUNDED + 1).get();
+    //        assertThat(getCapacity(queue)).isEqualTo(Integer.MAX_VALUE);
+    //        assertThat(queue).isInstanceOf(SpscLinkedArrayQueue.class);
+    //
+    //    }
 
     private long getCapacity(Queue q) {
         if (q instanceof EmptyQueue) {
@@ -98,9 +82,10 @@ public class QueuesTest {
         if (q instanceof SingletonQueue) {
             return 1;
         }
-        if (q instanceof SpscLinkedArrayQueue) {
-            return Integer.MAX_VALUE;
-        } else if (q instanceof SpscArrayQueue) {
+        //        if (q instanceof SpscLinkedArrayQueue) {
+        //            return Integer.MAX_VALUE;
+        //        }
+        else if (q instanceof SpscArrayQueue) {
             return ((SpscArrayQueue) q).length();
         }
         return -1;
@@ -232,14 +217,6 @@ public class QueuesTest {
     }
 
     @Test
-    public void testThatSpscLinkedArrayQueueCannotReceiveNull() {
-        assertThrows(NullPointerException.class, () -> {
-            SpscLinkedArrayQueue<Object> q = new SpscLinkedArrayQueue<>(16);
-            q.offer(null);
-        });
-    }
-
-    @Test
     public void testSpscArrayQueueOffer() {
         SpscArrayQueue<Object> q = new SpscArrayQueue<>(16);
         q.offer(1);
@@ -248,25 +225,6 @@ public class QueuesTest {
         assertThat(q.peek()).isEqualTo(1);
         assertThat(q.poll()).isEqualTo(1);
         assertThat(q.peek()).isEqualTo(2);
-        assertThat(q.poll()).isEqualTo(2);
-        assertThat(q.poll()).isNull();
-    }
-
-    @Test
-    public void testSpscLinkedArrayQueueOffer() {
-        SpscLinkedArrayQueue<Object> q = new SpscLinkedArrayQueue<>(16);
-        q.offer(1);
-        q.offer(2);
-        assertThat(q.poll()).isEqualTo(1);
-        assertThat(q.poll()).isEqualTo(2);
-        assertThat(q.poll()).isNull();
-    }
-
-    @Test
-    public void testSpscLinkedArrayQueueBiOffer() {
-        SpscLinkedArrayQueue<Object> q = new SpscLinkedArrayQueue<>(16);
-        q.offer(1, 2);
-        assertThat(q.poll()).isEqualTo(1);
         assertThat(q.poll()).isEqualTo(2);
         assertThat(q.poll()).isNull();
     }
@@ -285,48 +243,6 @@ public class QueuesTest {
         assertThat(q.size()).isEqualTo(8);
 
         assertThat(q.offer(9)).isFalse();
-    }
-
-    @Test
-    public void testSpscLinkedNewBufferPeek() {
-        SpscLinkedArrayQueue<Integer> q = new SpscLinkedArrayQueue<>(8);
-        assertThat(q.offer(1)).isTrue();
-        assertThat(q.offer(2)).isTrue();
-        assertThat(q.offer(3)).isTrue();
-        assertThat(q.offer(4)).isTrue();
-        assertThat(q.offer(5)).isTrue();
-        assertThat(q.offer(6)).isTrue();
-        assertThat(q.offer(7)).isTrue();
-        assertThat(q.offer(8)).isTrue();
-        assertThat(q.offer(9)).isTrue();
-
-        for (int i = 0; i < 9; i++) {
-            assertThat(q.peek()).isEqualTo(i + 1);
-            assertThat(q.poll()).isEqualTo(i + 1);
-        }
-
-        assertThat(q.peek()).isNull();
-        assertThat(q.poll()).isNull();
-    }
-
-    @Test
-    public void testSpscLinkedNewBufferPeekWithBiOffer() {
-        SpscLinkedArrayQueue<Integer> q = new SpscLinkedArrayQueue<>(8);
-        assertThat(q.offer(1, 2)).isTrue();
-        assertThat(q.offer(3, 4)).isTrue();
-        assertThat(q.size()).isEqualTo(4);
-        assertThat(q.offer(5, 6)).isTrue();
-        assertThat(q.offer(7, 8)).isTrue();
-        assertThat(q.offer(9)).isTrue();
-        assertThat(q.size()).isEqualTo(9);
-
-        for (int i = 0; i < 9; i++) {
-            assertThat(q.peek()).isEqualTo(i + 1);
-            assertThat(q.poll()).isEqualTo(i + 1);
-        }
-
-        assertThat(q.peek()).isNull();
-        assertThat(q.poll()).isNull();
     }
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
@@ -359,16 +275,6 @@ public class QueuesTest {
         assertThatThrownBy(q::toArray)
                 .isInstanceOf(UnsupportedOperationException.class);
         assertThatThrownBy(() -> q.toArray(new Integer[0]))
-                .isInstanceOf(UnsupportedOperationException.class);
-    }
-
-    @Test
-    public void testUnsupportedAPIFromSpscLinkedArrayQueue() {
-        SpscLinkedArrayQueue<Integer> q = new SpscLinkedArrayQueue<>(5);
-        q.offer(1);
-        q.offer(2);
-        // Other methods are implemented by AbstractCollection.
-        assertThatThrownBy(q::iterator)
                 .isInstanceOf(UnsupportedOperationException.class);
     }
 

@@ -10,10 +10,11 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
+import org.jctools.queues.SpscUnboundedArrayQueue;
+
 import io.smallrye.mutiny.Context;
 import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.helpers.Subscriptions;
-import io.smallrye.mutiny.helpers.queues.SpscLinkedArrayQueue;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.MultiOperator;
 import io.smallrye.mutiny.subscription.ContextSupport;
@@ -77,7 +78,7 @@ public class MultiCombineLatestOp<I, O> extends MultiOperator<I, O> {
         private final MultiSubscriber<? super O> downstream;
         private final Function<List<?>, ? extends O> combinator;
         private final List<CombineLatestInnerSubscriber<I>> subscribers = new ArrayList<>();
-        private final SpscLinkedArrayQueue<Object> queue;
+        private final SpscUnboundedArrayQueue<Object> queue;
         private final Object[] latest;
         private final boolean delayErrors;
 
@@ -106,7 +107,7 @@ public class MultiCombineLatestOp<I, O> extends MultiOperator<I, O> {
                 subscribers.add(new CombineLatestInnerSubscriber<>(context, this, i, bufferSize));
             }
             this.latest = new Object[size];
-            this.queue = new SpscLinkedArrayQueue<>(bufferSize);
+            this.queue = new SpscUnboundedArrayQueue<>(bufferSize);
             this.delayErrors = delayErrors;
         }
 
@@ -148,7 +149,8 @@ public class MultiCombineLatestOp<I, O> extends MultiOperator<I, O> {
                 }
                 os[index] = value;
                 if (os.length == localNonEmptySources) {
-                    queue.offer(subscribers.get(index), os.clone());
+                    queue.offer(subscribers.get(index));
+                    queue.offer(os.clone());
                     replenishInsteadOfDrain = false;
                 } else {
                     replenishInsteadOfDrain = true;
@@ -196,7 +198,7 @@ public class MultiCombineLatestOp<I, O> extends MultiOperator<I, O> {
 
         @SuppressWarnings("unchecked")
         void drainAsync() {
-            final SpscLinkedArrayQueue<Object> q = queue;
+            final Queue<Object> q = queue;
 
             int missed = 1;
 
