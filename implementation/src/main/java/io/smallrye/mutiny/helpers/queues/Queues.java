@@ -29,8 +29,8 @@ public class Queues {
     static final Supplier EMPTY_QUEUE_SUPPLIER = EmptyQueue::new;
     static final Supplier SINGLETON_QUEUE_SUPPLIER = SingletonQueue::new;
 
-    static final Supplier XS_QUEUE_SUPPLIER = () -> new org.jctools.queues.SpscArrayQueue<>(BUFFER_XS);
-    static final Supplier S_QUEUE_SUPPLIER = () -> new org.jctools.queues.SpscArrayQueue<>(BUFFER_S);
+    static final Supplier XS_QUEUE_SUPPLIER = () -> new SpscArrayQueue<>(BUFFER_XS);
+    static final Supplier S_QUEUE_SUPPLIER = () -> new SpscArrayQueue<>(BUFFER_S);
 
     static final Supplier UNBOUNDED_QUEUE_SUPPLIER = () -> new SpscUnboundedArrayQueue<>(BUFFER_S);
     static final Supplier XS_UNBOUNDED_QUEUE_SUPPLIER = () -> new SpscUnboundedArrayQueue<>(BUFFER_XS);
@@ -69,7 +69,7 @@ public class Queues {
         if (computedSize > TOO_LARGE_TO_BE_BOUNDED) {
             return UNBOUNDED_QUEUE_SUPPLIER;
         } else {
-            return () -> new org.jctools.queues.SpscArrayQueue<>(computedSize);
+            return () -> new SpscArrayQueue<>(computedSize);
         }
     }
 
@@ -99,7 +99,7 @@ public class Queues {
      * @return the queue
      */
     public static <T> Queue<T> createMpscQueue() {
-        return new org.jctools.queues.MpscLinkedQueue<>();
+        return new MpscLinkedQueue<>();
     }
 
     /**
@@ -110,7 +110,7 @@ public class Queues {
      * @return a new queue
      */
     public static <T> Queue<T> createMpscArrayQueue(int size) {
-        return new org.jctools.queues.MpscArrayQueue<>(size);
+        return new MpscArrayQueue<>(size);
     }
 
     /**
