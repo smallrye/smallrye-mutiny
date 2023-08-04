@@ -10,11 +10,10 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
-import org.jctools.queues.SpscUnboundedArrayQueue;
-
 import io.smallrye.mutiny.Context;
 import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.helpers.Subscriptions;
+import io.smallrye.mutiny.helpers.queues.Queues;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.MultiOperator;
 import io.smallrye.mutiny.subscription.ContextSupport;
@@ -78,7 +77,7 @@ public class MultiCombineLatestOp<I, O> extends MultiOperator<I, O> {
         private final MultiSubscriber<? super O> downstream;
         private final Function<List<?>, ? extends O> combinator;
         private final List<CombineLatestInnerSubscriber<I>> subscribers = new ArrayList<>();
-        private final SpscUnboundedArrayQueue<Object> queue;
+        private final Queue<Object> queue;
         private final Object[] latest;
         private final boolean delayErrors;
 
@@ -107,7 +106,7 @@ public class MultiCombineLatestOp<I, O> extends MultiOperator<I, O> {
                 subscribers.add(new CombineLatestInnerSubscriber<>(context, this, i, bufferSize));
             }
             this.latest = new Object[size];
-            this.queue = new SpscUnboundedArrayQueue<>(bufferSize);
+            this.queue = Queues.createSpscUnboundedQueue(bufferSize);
             this.delayErrors = delayErrors;
         }
 

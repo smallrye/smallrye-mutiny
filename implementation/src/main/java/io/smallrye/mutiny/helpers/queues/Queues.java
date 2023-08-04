@@ -99,6 +99,17 @@ public class Queues {
     }
 
     /**
+     * Creates an unbounded single producer / single consumer queue.
+     *
+     * @param size the chunk size
+     * @return the queue
+     * @param <T> the item type
+     */
+    public static <T> Queue<T> createSpscUnboundedQueue(int size) {
+        return new SpscUnboundedArrayQueue<>(size);
+    }
+
+    /**
      * Create a MPSC queue with a given size
      *
      * @param size the queue size, will be rounded
