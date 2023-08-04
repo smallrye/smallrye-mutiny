@@ -8,6 +8,8 @@ import org.jctools.queues.MpscLinkedQueue;
 import org.jctools.queues.SpscArrayQueue;
 import org.jctools.queues.SpscUnboundedArrayQueue;
 
+import io.smallrye.mutiny.infrastructure.Infrastructure;
+
 @SuppressWarnings({ "rawtypes", "unchecked" })
 public class Queues {
 
@@ -20,20 +22,14 @@ public class Queues {
         // avoid direct instantiation
     }
 
-    public static final int BUFFER_XS = Math.max(8,
-            Integer.parseInt(System.getProperty("mutiny.buffer-size.xs", "32")));
-
-    public static final int BUFFER_S = Math.max(16,
-            Integer.parseInt(System.getProperty("mutiny.buffer-size.s", "256")));
-
     static final Supplier EMPTY_QUEUE_SUPPLIER = EmptyQueue::new;
     static final Supplier SINGLETON_QUEUE_SUPPLIER = SingletonQueue::new;
 
-    static final Supplier XS_QUEUE_SUPPLIER = () -> new SpscArrayQueue<>(BUFFER_XS);
-    static final Supplier S_QUEUE_SUPPLIER = () -> new SpscArrayQueue<>(BUFFER_S);
+    static final Supplier XS_QUEUE_SUPPLIER = () -> new SpscArrayQueue<>(Infrastructure.getBufferSizeXs());
+    static final Supplier S_QUEUE_SUPPLIER = () -> new SpscArrayQueue<>(Infrastructure.getBufferSizeS());
 
-    static final Supplier UNBOUNDED_QUEUE_SUPPLIER = () -> new SpscUnboundedArrayQueue<>(BUFFER_S);
-    static final Supplier XS_UNBOUNDED_QUEUE_SUPPLIER = () -> new SpscUnboundedArrayQueue<>(BUFFER_XS);
+    static final Supplier UNBOUNDED_QUEUE_SUPPLIER = () -> new SpscUnboundedArrayQueue<>(Infrastructure.getBufferSizeS());
+    static final Supplier XS_UNBOUNDED_QUEUE_SUPPLIER = () -> new SpscUnboundedArrayQueue<>(Infrastructure.getBufferSizeXs());
 
     public static <T> Supplier<Queue<T>> getXsQueueSupplier() {
         return (Supplier<Queue<T>>) XS_QUEUE_SUPPLIER;
@@ -49,11 +45,11 @@ public class Queues {
      * @return the supplier.
      */
     public static <T> Supplier<Queue<T>> get(int bufferSize) {
-        if (bufferSize == BUFFER_XS) {
+        if (bufferSize == Infrastructure.getBufferSizeXs()) {
             return XS_QUEUE_SUPPLIER;
         }
 
-        if (bufferSize == BUFFER_S) {
+        if (bufferSize == Infrastructure.getBufferSizeS()) {
             return S_QUEUE_SUPPLIER;
         }
 
@@ -83,9 +79,9 @@ public class Queues {
      */
     @SuppressWarnings("unchecked")
     public static <T> Supplier<Queue<T>> unbounded(int size) {
-        if (size == BUFFER_XS) {
+        if (size == Infrastructure.getBufferSizeXs()) {
             return XS_UNBOUNDED_QUEUE_SUPPLIER;
-        } else if (size == Integer.MAX_VALUE || size == BUFFER_S) {
+        } else if (size == Integer.MAX_VALUE || size == Infrastructure.getBufferSizeS()) {
             return UNBOUNDED_QUEUE_SUPPLIER;
         } else {
             return () -> new SpscUnboundedArrayQueue<>(size);

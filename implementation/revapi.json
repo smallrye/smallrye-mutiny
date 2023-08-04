@@ -81,6 +81,18 @@
         "code": "java.class.removed",
         "old": "class io.smallrye.mutiny.helpers.queues.SpscLinkedArrayQueue<E>",
         "justification": "Refactoring of internal APIs"
+      },
+      {
+        "ignore": true,
+        "code": "java.field.removed",
+        "old": "field io.smallrye.mutiny.helpers.queues.Queues.BUFFER_S",
+        "justification": "Refactoring of internal APIs"
+      },
+      {
+        "ignore": true,
+        "code": "java.field.removed",
+        "old": "field io.smallrye.mutiny.helpers.queues.Queues.BUFFER_XS",
+        "justification": "Refactoring of internal APIs"
       }
     ]
   }

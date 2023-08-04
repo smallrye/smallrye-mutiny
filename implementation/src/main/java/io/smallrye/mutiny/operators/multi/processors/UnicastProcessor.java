@@ -12,6 +12,7 @@ import java.util.function.Consumer;
 import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.helpers.Subscriptions;
 import io.smallrye.mutiny.helpers.queues.Queues;
+import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.AbstractMulti;
 import io.smallrye.mutiny.subscription.BackPressureFailure;
 import io.smallrye.mutiny.subscription.BackPressureStrategy;
@@ -55,7 +56,7 @@ public class UnicastProcessor<T> extends AbstractMulti<T> implements Processor<T
      * @return the unicast processor
      */
     public static <I> UnicastProcessor<I> create() {
-        return new UnicastProcessor<>(Queues.<I> unbounded(Queues.BUFFER_S).get(), null);
+        return new UnicastProcessor<>(Queues.<I> unbounded(Infrastructure.getBufferSizeS()).get(), null);
     }
 
     /**
