@@ -15,7 +15,7 @@
         <site.dir>${project.build.directory}/generated-docs/</site.dir>
         <format.skip>true</format.skip>
         <maven-dependency-plugin.version>3.6.0</maven-dependency-plugin.version>
-        <logback-classic.version>1.4.8</logback-classic.version>
+        <logback-classic.version>1.4.9</logback-classic.version>
     </properties>
 
     <dependencies>
