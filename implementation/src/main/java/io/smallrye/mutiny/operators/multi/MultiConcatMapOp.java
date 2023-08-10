@@ -2,6 +2,7 @@ package io.smallrye.mutiny.operators.multi;
 
 import java.util.concurrent.Flow.Publisher;
 import java.util.concurrent.Flow.Subscription;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
@@ -78,6 +79,8 @@ public class MultiConcatMapOp<I, O> extends AbstractMultiOperator<I, O> {
 
         final ConcatMapInner<O> inner;
 
+        private final AtomicBoolean deferredUpstreamRequest = new AtomicBoolean(false);
+
         ConcatMapMainSubscriber(
                 MultiSubscriber<? super O> downstream,
                 Function<? super I, ? extends Publisher<? extends O>> mapper,
@@ -93,13 +96,16 @@ public class MultiConcatMapOp<I, O> extends AbstractMultiOperator<I, O> {
             if (n > 0) {
                 if (state.compareAndSet(STATE_NEW, STATE_READY)) {
                     upstream.request(1);
-                    // No outstanding requests from inner, forward the request to upstream
-                } else if (state.get() == STATE_READY && inner.requested() == 0) {
+                }
+                if (deferredUpstreamRequest.compareAndSet(true, false)) {
                     upstream.request(1);
                 }
                 inner.request(n);
+                if (inner.requested() != 0L && deferredUpstreamRequest.compareAndSet(true, false)) {
+                    upstream.request(1);
+                }
             } else {
-                downstream.onFailure(new IllegalArgumentException("Invalid requests, must be greater than 0"));
+                downstream.onFailure(Subscriptions.getInvalidRequestException());
             }
         }
 
@@ -187,26 +193,17 @@ public class MultiConcatMapOp<I, O> extends AbstractMultiOperator<I, O> {
         }
 
         public void innerComplete(long emitted) {
-            while (true) {
-                int state = this.state.get();
-                if (state == STATE_EMITTING) {
-                    if (this.state.compareAndSet(state, STATE_READY)) {
-                        // Inner completed but there are outstanding requests from inner,
-                        // Or the inner completed without producing any items
-                        // Request new item from upstream
-                        if (inner.requested() != 0L || emitted == 0) {
-                            upstream.request(1);
-                        }
-                        return;
-                    }
-                } else if (state == STATE_OUTER_TERMINATED) {
-                    if (this.state.compareAndSet(state, STATE_TERMINATED)) {
-                        terminateDownstream();
-                        return;
-                    }
+            if (this.state.compareAndSet(STATE_EMITTING, STATE_READY)) {
+                // Inner completed but there are outstanding requests from inner,
+                // Or the inner completed without producing any items
+                // Request new item from upstream
+                if (inner.requested() != 0L || emitted == 0) {
+                    upstream.request(1);
                 } else {
-                    return;
+                    deferredUpstreamRequest.set(true);
                 }
+            } else if (this.state.compareAndSet(STATE_OUTER_TERMINATED, STATE_TERMINATED)) {
+                terminateDownstream();
             }
         }
 
