@@ -69,9 +69,9 @@ class MultiConcatMapNoPrefetchTest {
         Multi<Integer> result = upstream.onItem()
                 .transformToMulti(i -> Multi.createFrom().items(i, i))
                 .concatenate(prefetch);
-        AssertSubscriber<Integer> ts = new AssertSubscriber<>(5);
+        AssertSubscriber<Integer> ts = new AssertSubscriber<>();
         result.runSubscriptionOn(Infrastructure.getDefaultExecutor()).subscribe(ts);
-        ts.request(5);
+        ts.request(10);
         ts.awaitItems(10);
         await().untilAsserted(() -> assertThat(upstreamRequestCount).hasValue(upstreamRequests[0]));
         ts.request(1);
@@ -135,6 +135,7 @@ class MultiConcatMapNoPrefetchTest {
                 .concatenate(false);
         AssertSubscriber<Integer> ts = new AssertSubscriber<>(5);
         result.runSubscriptionOn(Infrastructure.getDefaultExecutor()).subscribe(ts);
+        ts.awaitSubscription();
         ts.request(5);
         ts.awaitItems(10);
         await().untilAsserted(() -> assertThat(upstreamRequestCount).hasValueGreaterThan(10));
