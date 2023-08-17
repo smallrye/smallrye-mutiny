@@ -40,7 +40,7 @@ This forms the processing part of our pipeline, and then we finally **subscribe*
 This last part is essential.
 If you don't have a final subscriber, nothing is going to happen.
 Mutiny types are lazy, meaning that you need to express your interest.
-If you don't the computation won't even start.
+If you don't, the computation won't even start.
 
 !!! important
 
