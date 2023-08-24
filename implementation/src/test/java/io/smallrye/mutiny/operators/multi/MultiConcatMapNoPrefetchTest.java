@@ -10,7 +10,6 @@ import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -22,7 +21,6 @@ import io.smallrye.mutiny.groups.MultiFlatten;
 import io.smallrye.mutiny.helpers.test.AssertSubscriber;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 
-@DisabledIfEnvironmentVariable(named = "CI", matches = "true") // TODO Disabled in CI until https://github.com/smallrye/smallrye-mutiny/issues/1254 has been fixed
 class MultiConcatMapNoPrefetchTest {
 
     AtomicInteger upstreamRequestCount;
@@ -70,9 +68,9 @@ class MultiConcatMapNoPrefetchTest {
         Multi<Integer> result = upstream.onItem()
                 .transformToMulti(i -> Multi.createFrom().items(i, i))
                 .concatenate(prefetch);
-        AssertSubscriber<Integer> ts = new AssertSubscriber<>(5);
+        AssertSubscriber<Integer> ts = new AssertSubscriber<>();
         result.runSubscriptionOn(Infrastructure.getDefaultExecutor()).subscribe(ts);
-        ts.request(5);
+        ts.request(10);
         ts.awaitItems(10);
         assertThat(upstreamRequestCount).hasValue(upstreamRequests[0]);
         ts.request(1);
@@ -137,6 +135,7 @@ class MultiConcatMapNoPrefetchTest {
                 .concatenate();
         AssertSubscriber<Integer> ts = new AssertSubscriber<>(5);
         result.runSubscriptionOn(Infrastructure.getDefaultExecutor()).subscribe(ts);
+        ts.awaitSubscription();
         ts.request(5);
         ts.awaitItems(10);
         assertThat(upstreamRequestCount).hasValueGreaterThan(10);
