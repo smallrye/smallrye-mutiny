@@ -1,0 +1,34 @@
+changelog:
+  exclude:
+    authors:
+      - GitHub
+      - dependabot[bot]
+      - smallrye[bot]
+      - jreleaserbot
+      - bot
+  categories:
+    - title: 🗑️ APIs deprecation or removal
+      labels:
+        - api-deprecation
+    - title: 👍 Promotion of experimental APIs
+      labels:
+        - api-promotion
+    - title: 🐛 Bugs
+      labels:
+        - bug
+    - title: ⚙️ CI/CD pipeline and build
+      labels:
+        - 'ci/cd/build'
+    - title: 📦 Dependency updates
+      labels:
+        - dependencies
+    - title: 📖 Documentation updates
+      labels:
+        - documentation
+    - title: 🚀 New features and enhancements
+      labels:
+        - enhancement
+        - internal
+    - title: 💡 Misc. updates
+      labels:
+        - "*"

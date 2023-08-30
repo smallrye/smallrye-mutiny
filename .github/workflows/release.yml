@@ -1,0 +1,97 @@
+name: Release Smallrye Mutiny
+
+on:
+  workflow_dispatch:
+    inputs:
+      previousVersion:
+        description: 'Previous version'
+        required: true
+      version:
+        description: 'Release version'
+        required: true
+      nextVersion:
+        description: 'Next version after release (-SNAPSHOT will be added automatically)'
+        required: true
+      deployWebsite:
+        description: 'Shall we deploy the website?'
+        required: true
+        default: true
+      clearRevAPI:
+        description: 'Shall we clear RevAPI justifications?'
+        required: true
+        default: true
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions: write-all
+    env:
+      PREVIOUS_VERSION: ${{ github.event.inputs.previousVersion }}
+      RELEASE_VERSION: ${{ github.event.inputs.version }}
+      NEXT_VERSION: ${{ github.event.inputs.nextVersion }}
+
+    steps:
+      # Setup steps
+      - name: Git setup
+        run: .build/setup-git.sh
+      - name: Git checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Java setup
+        uses: actions/setup-java@v3
+        with:
+          java-version: '11'
+          distribution: 'temurin'
+          cache: maven
+      - name: JBang setup
+        run: .build/setup-jbang.sh
+      - name: Setup yq
+        uses: mikefarah/yq@master
+      - name: Setup Python
+        if: ${{ github.event.inputs.deployWebsite == 'true' }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.x
+      - name: Install MkDocs dependencies
+        if: ${{ github.event.inputs.deployWebsite == 'true' }}
+        run: .build/install-mkdocs-deps.sh
+
+      # Preparation steps
+      - name: Run pre-release checks
+        run: jbang .build/PreRelease.java --token=${{ secrets.GITHUB_TOKEN }} --release-version=${{ github.event.inputs.version }}
+      - name: Bump to the release version
+        run: .build/bump-to-release-version.sh
+      - name: Check that the project builds (no tests)
+        run: ./mvnw --settings .build/maven-ci-settings.xml --batch-mode --no-transfer-progress clean install -DskipTests
+      - name: Check that the website builds
+        if: ${{ github.event.inputs.deployWebsite == 'true' }}
+        working-directory: documentation
+        run: pipenv run mkdocs build
+      - name: Commit release version (no push)
+        run: git commit -am "Release ${{ github.event.inputs.version }}"
+
+      # Release steps
+      - name: Release with JReleaser
+        env:
+          JRELEASER_TAG_NAME: ${{ github.event.inputs.version }}
+          JRELEASER_PREVIOUS_TAG_NAME: ${{ github.event.inputs.previousVersion }}
+          JRELEASER_GPG_PUBLIC_KEY: ${{ secrets.GPG_PUBLIC_KEY }}
+          JRELEASER_GPG_SECRET_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
+          JRELEASER_GPG_PASSPHRASE: ${{ secrets.SECRET_PASSPHRASE }}
+          JRELEASER_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          JRELEASER_NEXUS2_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
+          JRELEASER_NEXUS2_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
+        run: .build/release-with-jreleaser.sh
+      - name: Set the next release version
+        run: ./mvnw --batch-mode --no-transfer-progress versions:set -DnewVersion=${{ github.event.inputs.nextVersion }}-SNAPSHOT
+      - name: Commit the next version and push
+        run: git commit -am "Move to ${{ github.event.inputs.nextVersion }}-SNAPSHOT" && git push
+
+      # Final steps
+      - name: Clear RevAPI justifications (+ commit / push)
+        if: ${{ github.event.inputs.clearRevAPI == 'true' }}
+        run: .build/clear-revapi-justifications.sh
+      - name: Deploy the website
+        if: ${{ github.event.inputs.deployWebsite == 'true' }}
+        run: .build/deploy-site.sh
