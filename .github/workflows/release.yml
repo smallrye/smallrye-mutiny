@@ -83,8 +83,8 @@ jobs:
           JRELEASER_NEXUS2_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
           JRELEASER_NEXUS2_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
         run: .build/release-with-jreleaser.sh
-      - name: Set the next release version
-        run: ./mvnw --batch-mode --no-transfer-progress versions:set -DnewVersion=${{ github.event.inputs.nextVersion }}-SNAPSHOT
+      - name: Bump to the next development version
+        run: .build/bump-to-next-version.sh
       - name: Commit the next version and push
         run: git commit -am "Move to ${{ github.event.inputs.nextVersion }}-SNAPSHOT" && git push
 
