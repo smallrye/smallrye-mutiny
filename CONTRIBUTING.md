@@ -27,6 +27,10 @@ Don't forget to indicate your SmallRye Mutiny, Java, and Maven/Gradle version.
 
 To contribute, use GitHub Pull Requests, from your **own** fork.
 
+### Conventional commits
+
+Mutiny adopts [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/) after the 2.4.0 release.
+
 ### Signing your Git commits
 
 We require Git commits to be *[verified on GitHub](https://docs.github.com/en/authentication/managing-commit-signature-verification/about-commit-signature-verification)*, so please:
