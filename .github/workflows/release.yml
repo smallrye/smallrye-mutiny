@@ -29,6 +29,9 @@ jobs:
       PREVIOUS_VERSION: ${{ github.event.inputs.previousVersion }}
       RELEASE_VERSION: ${{ github.event.inputs.version }}
       NEXT_VERSION: ${{ github.event.inputs.nextVersion }}
+    defaults:
+      run:
+        shell: bash
 
     steps:
       # Setup steps
