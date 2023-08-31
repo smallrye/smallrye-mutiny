@@ -4,6 +4,9 @@ updates:
   directory: "/"
   schedule:
     interval: daily
+  commit-message:
+    prefix: "build"
+    include: "scope"
   open-pull-requests-limit: 10
   ignore:
   - dependency-name: io.smallrye.config:smallrye-config
@@ -22,6 +25,9 @@ updates:
   directory: "/"
   schedule:
     interval: daily
+  commit-message:
+    prefix: "build"
+    include: "scope"
   open-pull-requests-limit: 10
   target-branch: 1.x
   ignore:
