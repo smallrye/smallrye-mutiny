@@ -15,4 +15,5 @@ echo "Bumping version to ${RELEASE_VERSION}"
 
 echo "Update website version to ${RELEASE_VERSION}"
 
+source ~/.sdkman/bin/sdkman-init.sh
 .build/UpdateDocsAttributesFiles.java --mutiny-version=${RELEASE_VERSION}
