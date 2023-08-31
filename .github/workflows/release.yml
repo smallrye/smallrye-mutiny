@@ -47,8 +47,10 @@ jobs:
           java-version: '11'
           distribution: 'temurin'
           cache: maven
-      - name: JBang setup
-        run: .build/setup-jbang.sh
+      - name: JBang setup in workflow shell
+        run: |
+          curl -s "https://get.sdkman.io" | bash
+          source ~/.sdkman/bin/sdkman-init.sh && sdk install jbang
       - name: Setup yq
         uses: mikefarah/yq@master
       - name: Setup Python
