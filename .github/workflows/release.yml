@@ -32,12 +32,12 @@ jobs:
 
     steps:
       # Setup steps
-      - name: Git setup
-        run: .build/setup-git.sh
       - name: Git checkout
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
+      - name: Git setup
+        run: .build/setup-git.sh
       - name: Java setup
         uses: actions/setup-java@v3
         with:
