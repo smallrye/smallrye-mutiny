@@ -34,13 +34,6 @@ jobs:
           MAVEN_OPTS: ${{ matrix.java.opts }}
         run: ./mvnw -s .build/maven-ci-settings.xml -B clean verify
 
-  conventional-commits:
-    runs-on: ubuntu-latest
-    name: Check conventional commits
-    steps:
-      - uses: actions/checkout@v3
-      - uses: wagoid/commitlint-github-action@v5
-
   snapshot:
     name: Deploy snapshots
     needs: build
