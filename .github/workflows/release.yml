@@ -29,6 +29,7 @@ jobs:
       PREVIOUS_VERSION: ${{ github.event.inputs.previousVersion }}
       RELEASE_VERSION: ${{ github.event.inputs.version }}
       NEXT_VERSION: ${{ github.event.inputs.nextVersion }}
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     defaults:
       run:
         shell: bash
@@ -62,7 +63,7 @@ jobs:
 
       # Preparation steps
       - name: Run pre-release checks
-        run: jbang .build/PreRelease.java --token=${{ secrets.GITHUB_TOKEN }} --release-version=${{ github.event.inputs.version }}
+        run: .build/run-pre-release-checks.sh
       - name: Bump to the release version
         run: .build/bump-to-release-version.sh
       - name: Check that the project builds (no tests)
