@@ -62,7 +62,7 @@ jobs:
 
       # Preparation steps
       - name: Run pre-release checks
-        run: jbang .build/PreRelease.java --token=${{ secrets.GITHUB_TOKEN }} --release-version=${{ github.event.inputs.version }}
+        run: source ~/.sdkman/bin/sdkman-init.sh && jbang .build/PreRelease.java --token=${{ secrets.GITHUB_TOKEN }} --release-version=${{ github.event.inputs.version }}
       - name: Bump to the release version
         run: .build/bump-to-release-version.sh
       - name: Check that the project builds (no tests)
