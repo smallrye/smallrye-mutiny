@@ -1,0 +1,60 @@
+---
+name: Trigger a release
+on:
+  workflow_dispatch:
+    inputs:
+      micro:
+        description: 'Is it a micro release (used to compute release version)'
+        required: false
+        default: false
+      release-version:
+        description: 'The release version, if not set it computes the version automatically'
+        required: false
+      skip-tests:
+        description: 'Whether to skip the tests before pushing the tag'
+        required: false
+        default: true
+      branch:
+        description: 'The branch from which the release is cut'
+        required: false
+        default: 'main'
+      dry-run:
+        description: 'Skip Git push'
+        required: false
+        default: false
+
+jobs:
+  prepare-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.inputs.branch }}
+          token: ${{ secrets.RELEASE_TOKEN }}
+      - name: Install JDK 11
+        uses: actions/setup-java@v2
+        with:
+          java-version: 11
+          distribution: temurin
+          cache: maven
+      - name: 'Prepare'
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+          GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+          SECRET_FILES_PASSPHRASE: ${{ secrets.SECRET_FILES_PASSPHRASE }}
+          MICRO_RELEASE: ${{ github.event.inputs.micro }}
+          RELEASE_VERSION: ${{ github.event.inputs.release-version }}
+          SKIP_TESTS: ${{ github.event.inputs.skip-tests }}
+          DRY_RUN: ${{ github.event.inputs.dry-run }}
+        run: |
+
+          sudo apt-get update -o Dir::Etc::sourcelist="sources.list" \
+            -o Dir::Etc::sourceparts="-" -o APT::Get::List-Cleanup="0"
+          sudo apt-get install -y gnupg2 gnupg-agent
+
+          curl -s "https://get.sdkman.io" | bash
+          source ~/.sdkman/bin/sdkman-init.sh && \
+            sdk install jbang
+
+          sh .build/decrypt-secrets.sh
+          .build/cut-release.sh

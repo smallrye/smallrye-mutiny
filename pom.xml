@@ -115,7 +115,6 @@
         <dokka.version>1.7.20</dokka.version>
 
         <jandex-maven-plugin.version>1.2.3</jandex-maven-plugin.version>
-        <jreleaser-maven-plugin.version>1.7.0</jreleaser-maven-plugin.version>
     </properties>
 
     <dependencyManagement>
@@ -512,113 +511,5 @@
                 </pluginManagement>
             </build>
         </profile>
-
-        <profile>
-            <id>jreleaser-release</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.jreleaser</groupId>
-                        <artifactId>jreleaser-maven-plugin</artifactId>
-                        <version>${jreleaser-maven-plugin.version}</version>
-                        <inherited>false</inherited>
-                        <configuration>
-                            <projectVersionPattern>SEMVER</projectVersionPattern>
-                            <jreleaser>
-                                <signing>
-                                    <active>ALWAYS</active>
-                                    <armored>true</armored>
-                                </signing>
-                                <deploy>
-                                    <maven>
-                                        <pomchecker>
-                                            <failOnWarning>false</failOnWarning>
-                                            <failOnError>false</failOnError>
-                                        </pomchecker>
-                                        <nexus2>
-                                            <maven-central>
-                                                <active>ALWAYS</active>
-                                                <url>https://oss.sonatype.org/service/local</url>
-                                                <snapshotUrl>https://oss.sonatype.org/content/repositories/snapshots/</snapshotUrl>
-                                                <closeRepository>true</closeRepository>
-                                                <releaseRepository>true</releaseRepository>
-                                                <stagingRepositories>target/staging-deploy</stagingRepositories>
-                                            </maven-central>
-                                        </nexus2>
-                                    </maven>
-                                </deploy>
-                                <release>
-                                    <github>
-                                        <owner>smallrye</owner>
-                                        <name>smallrye-mutiny</name>
-                                        <overwrite>true</overwrite>
-                                        <discussionCategoryName>Announcements</discussionCategoryName>
-                                        <!-- Use GitHub release notes rather than a changelog generation -->
-                                        <changelog>
-                                            <enabled>false</enabled>
-                                        </changelog>
-                                        <releaseNotes>
-                                            <enabled>true</enabled>
-                                            <configurationFile>.github/release.yml</configurationFile>
-                                        </releaseNotes>
-                                    </github>
-                                </release>
-                                <announce>
-                                    <discussions>
-                                        <active>ALWAYS</active>
-                                        <organization>smallrye</organization>
-                                        <team>reactive-streams</team>
-                                    </discussions>
-                                </announce>
-                            </jreleaser>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-
-        <profile>
-            <id>jreleaser-staging</id>
-            <properties>
-                <altDeploymentRepository>local::file:./target/staging-deploy</altDeploymentRepository>
-            </properties>
-            <build>
-                <defaultGoal>deploy</defaultGoal>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-javadoc-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>attach-javadocs</id>
-                                <goals>
-                                    <goal>jar</goal>
-                                </goals>
-                                <configuration>
-                                    <attach>true</attach>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-source-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>attach-sources</id>
-                                <goals>
-                                    <goal>jar-no-fork</goal>
-                                    <goal>test-jar-no-fork</goal>
-                                </goals>
-                                <configuration>
-                                    <attach>true</attach>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-
     </profiles>
 </project>
