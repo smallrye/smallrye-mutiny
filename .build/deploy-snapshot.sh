@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-set -e
 
 init_gpg() {
     gpg2 --fast-import --no-tty --batch --yes smallrye-sign.asc

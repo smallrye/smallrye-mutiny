@@ -1,6 +1,4 @@
 #!/bin/bash
-set -euo pipefail
-IFS=$'\n\t'
 
 echo "Bumping version to ${RELEASE_VERSION}"
 

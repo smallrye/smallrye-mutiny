@@ -1,6 +1,4 @@
 #!/bin/bash
-set -euo pipefail
-IFS=$'\n\t'
 
 SNAPSHOT="${NEXT_VERSION}-SNAPSHOT"
 
