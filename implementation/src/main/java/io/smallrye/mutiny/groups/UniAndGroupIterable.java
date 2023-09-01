@@ -81,6 +81,23 @@ public class UniAndGroupIterable<T1> {
     }
 
     /**
+     * Combine the items emitted by the {@link Uni unis} to a new Uni, and emit the result when all
+     * {@link Uni unis} (including the one returned from {@code function} have successfully completed.
+     * In case of failure, the failure is propagated.
+     *
+     * @param function the combination function
+     * @param <O> the combination value type
+     * @return the new {@link Uni}
+     */
+    @CheckReturnValue
+    public <O> Uni<O> combinedWithUni(Function<List<?>, Uni<O>> function) {
+        Function<List<?>, Uni<O>> actual = Infrastructure.decorate(nonNull(function, "function"));
+        return Infrastructure
+                .onUniCreation(new UniAndCombination<>(source, unis, actual, collectFailures, concurrency))
+                .flatMap(Function.identity());
+    }
+
+    /**
      * Combine the items emitted by the {@link Uni unis}, and emit the result when all {@link Uni unis} have
      * successfully completed. In case of failure, the failure is propagated.
      * <p>
@@ -98,6 +115,26 @@ public class UniAndGroupIterable<T1> {
     @CheckReturnValue
     public <O, I> Uni<O> combinedWith(Class<I> superType, Function<List<I>, O> function) {
         return combinedWith((Function) function);
+    }
+
+    /**
+     * Combine the items emitted by the {@link Uni unis}, and emit the result when all {@link Uni unis} have
+     * successfully completed. In case of failure, the failure is propagated.
+     * <p>
+     * This method is a convenience wrapper for {@link #combinedWithUni(Function)} but with the assumption that
+     * all items have {@code I} as a super type, which saves you a cast in the combination function.
+     * If the cast fails then the returned {@link Uni} fails with a {@link ClassCastException}.
+     *
+     * @param superType the super type of all items
+     * @param function the combination function
+     * @param <O> the combination value type
+     * @param <I> the super type of all items
+     * @return the new {@link Uni}
+     */
+    @SuppressWarnings("unchecked")
+    @CheckReturnValue
+    public <O, I> Uni<O> combinedWithUni(Class<I> superType, Function<List<I>, Uni<O>> function) {
+        return combinedWithUni((Function) function);
     }
 
     /**

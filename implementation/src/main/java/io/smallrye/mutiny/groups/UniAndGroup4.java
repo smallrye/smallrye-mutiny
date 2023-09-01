@@ -49,4 +49,23 @@ public class UniAndGroup4<T1, T2, T3, T4> extends UniAndGroupIterable<T1> {
         return super.combinedWith(function);
     }
 
+    @CheckReturnValue
+    public <O> Uni<O> combinedWithUni(Functions.Function4<T1, T2, T3, T4, Uni<O>> combinator) {
+        Functions.Function4<T1, T2, T3, T4, Uni<O>> actual = Infrastructure.decorate(nonNull(combinator, "combinator"));
+        return combineUni(actual);
+    }
+
+    @SuppressWarnings("unchecked")
+    private <O> Uni<O> combineUni(Functions.Function4<T1, T2, T3, T4, Uni<O>> combinator) {
+        Function<List<?>, Uni<O>> function = list -> {
+            Tuples.ensureArity(list, 4);
+            T1 item1 = (T1) list.get(0);
+            T2 item2 = (T2) list.get(1);
+            T3 item3 = (T3) list.get(2);
+            T4 item4 = (T4) list.get(3);
+            return combinator.apply(item1, item2, item3, item4);
+        };
+        return super.combinedWith(function).flatMap(Function.identity());
+    }
+
 }

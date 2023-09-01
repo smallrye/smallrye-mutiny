@@ -55,4 +55,27 @@ public class UniAndGroup7<T1, T2, T3, T4, T5, T6, T7> extends UniAndGroupIterabl
         return super.combinedWith(function);
     }
 
+    @CheckReturnValue
+    public <O> Uni<O> combinedWithUni(Functions.Function7<T1, T2, T3, T4, T5, T6, T7, Uni<O>> combinator) {
+        Functions.Function7<T1, T2, T3, T4, T5, T6, T7, Uni<O>> actual = Infrastructure
+                .decorate(nonNull(combinator, "combinator"));
+        return combineUni(actual);
+    }
+
+    @SuppressWarnings("unchecked")
+    private <O> Uni<O> combineUni(Functions.Function7<T1, T2, T3, T4, T5, T6, T7, Uni<O>> combinator) {
+        Function<List<?>, Uni<O>> function = list -> {
+            Tuples.ensureArity(list, 7);
+            T1 item1 = (T1) list.get(0);
+            T2 item2 = (T2) list.get(1);
+            T3 item3 = (T3) list.get(2);
+            T4 item4 = (T4) list.get(3);
+            T5 item5 = (T5) list.get(4);
+            T6 item6 = (T6) list.get(5);
+            T7 item7 = (T7) list.get(6);
+
+            return combinator.apply(item1, item2, item3, item4, item5, item6, item7);
+        };
+        return super.combinedWith(function).flatMap(Function.identity());
+    }
 }

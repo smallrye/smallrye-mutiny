@@ -61,6 +61,21 @@ public class CombiningItemsTest<A, B> {
 
         assertThat(uni.await().indefinitely()).containsKeys("A", "B");
 
+        // <combined-with-uni>
+        Uni<Map<String, Response>> uni1 = Uni.combine()
+                .all().unis(uniA, uniB).combinedWithUni(
+                        listOfResponses -> {
+                            Map<String, Response> map = new LinkedHashMap<>();
+                            map.put("A", (Response) listOfResponses.get(0));
+                            map.put("B", (Response) listOfResponses.get(1));
+                            return Uni.createFrom().item(map);
+                        }
+                );
+        // </combined-with-uni>
+
+        assertThat(uni1.await().indefinitely()).containsKeys("A", "B");
+
+
         Thread.sleep(100);
     }
 

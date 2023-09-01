@@ -59,4 +59,30 @@ public class UniAndGroup9<T1, T2, T3, T4, T5, T6, T7, T8, T9> extends UniAndGrou
         return super.combinedWith(function);
     }
 
+    @CheckReturnValue
+    public <O> Uni<O> combinedWithUni(Functions.Function9<T1, T2, T3, T4, T5, T6, T7, T8, T9, Uni<O>> combinator) {
+        Functions.Function9<T1, T2, T3, T4, T5, T6, T7, T8, T9, Uni<O>> actual = Infrastructure
+                .decorate(nonNull(combinator, "combinator"));
+        return combineUni(actual);
+    }
+
+    @SuppressWarnings("unchecked")
+    private <O> Uni<O> combineUni(Functions.Function9<T1, T2, T3, T4, T5, T6, T7, T8, T9, Uni<O>> combinator) {
+        Function<List<?>, Uni<O>> function = list -> {
+            Tuples.ensureArity(list, 9);
+
+            return combinator.apply(
+                    (T1) list.get(0),
+                    (T2) list.get(1),
+                    (T3) list.get(2),
+                    (T4) list.get(3),
+                    (T5) list.get(4),
+                    (T6) list.get(5),
+                    (T7) list.get(6),
+                    (T8) list.get(7),
+                    (T9) list.get(8));
+        };
+        return super.combinedWith(function).flatMap(Function.identity());
+    }
+
 }
