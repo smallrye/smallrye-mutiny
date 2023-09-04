@@ -109,22 +109,22 @@ class UniMemoizeTest {
     }
 
     @Test
-    @DisplayName("memoize().atLeast(null) is forbidden")
-    void testAtLeastNull() {
-        assertThrows(IllegalArgumentException.class, () -> Uni.createFrom().item(1).memoize().atLeast(null));
+    @DisplayName("memoize().forFixedDuration(null) is forbidden")
+    void testForFixedDurationNull() {
+        assertThrows(IllegalArgumentException.class, () -> Uni.createFrom().item(1).memoize().forFixedDuration(null));
     }
 
     @Test
-    @DisplayName("memoize().atLeast(0) is forbidden")
-    void testAtLeastZero() {
-        assertThrows(IllegalArgumentException.class, () -> Uni.createFrom().item(1).memoize().atLeast(Duration.ZERO));
+    @DisplayName("memoize().forFixedDuration(0) is forbidden")
+    void testForFixedDurationZero() {
+        assertThrows(IllegalArgumentException.class, () -> Uni.createFrom().item(1).memoize().forFixedDuration(Duration.ZERO));
     }
 
     @Test
-    @DisplayName("memoize().atLeast(negative) is forbidden")
-    void testAtLeastNegative() {
+    @DisplayName("memoize().forFixedDuration(negative) is forbidden")
+    void testForFixedDurationNegative() {
         assertThrows(IllegalArgumentException.class,
-                () -> Uni.createFrom().item(1).memoize().atLeast(Duration.ofMillis(-10)));
+                () -> Uni.createFrom().item(1).memoize().forFixedDuration(Duration.ofMillis(-10)));
     }
 
     @Test
@@ -421,7 +421,7 @@ class UniMemoizeTest {
     void testDurationInvalidation() throws InterruptedException {
         AtomicInteger counter = new AtomicInteger(0);
         UniOnSubscribeSpy<Integer> onSubscribeSpy = Spy.onSubscribe(Uni.createFrom().item(counter::getAndIncrement));
-        Uni<Integer> cachingUni = onSubscribeSpy.memoize().atLeast(Duration.ofMillis(250));
+        Uni<Integer> cachingUni = onSubscribeSpy.memoize().forFixedDuration(Duration.ofMillis(250));
 
         UniAssertSubscriber<Integer> subscriber = cachingUni.subscribe().withSubscriber(UniAssertSubscriber.create());
         subscriber.assertCompleted().assertItem(0);
@@ -511,7 +511,7 @@ class UniMemoizeTest {
             return "hello-" + i;
         })
                 .onItem().delayIt().by(Duration.ofMillis(500))
-                .memoize().atLeast(ChronoUnit.FOREVER.getDuration());
+                .memoize().forFixedDuration(ChronoUnit.FOREVER.getDuration());
         UniAssertSubscriber<String> subscriber1 = uni.subscribe().withSubscriber(UniAssertSubscriber.create());
         UniAssertSubscriber<String> subscriber2 = uni.subscribe().withSubscriber(UniAssertSubscriber.create());
 
