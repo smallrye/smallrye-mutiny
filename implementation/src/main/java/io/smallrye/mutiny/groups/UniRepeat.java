@@ -129,7 +129,7 @@ public class UniRepeat<T> {
      * If the Uni propagates a failure, the failure is propagated and the repetition stopped.
      *
      * @param predicate the predicate, must not be {@code null}
-     * @return the {@link Multi} containing the items from the upstream {@link Uni}, resubscribed until the predicate
+     * @return the {@link Multi} containing the items from the upstream {@link Uni}, resubscribed whilst the predicate
      *         returns {@code true}.
      */
     @CheckReturnValue
