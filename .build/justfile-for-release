@@ -1,0 +1,81 @@
+# Should be run as:
+#     just -f .build/justfile-for-release -d . (...)
+
+# Just echo the purpose of this file
+purpose:
+    @echo "This file is used to automate some release tasks"
+    @echo "(running in `pwd`)"
+
+# Perform a release
+perform-release: pre-release release post-release
+    @echo "🎉 Successfully released Mutiny ${RELEASE_VERSION} 🚀"
+
+# Decrypt secrets
+decrypt-secrets:
+    @echo "Decrypting smallrye signature"
+    gpg --quiet --batch --yes --decrypt --passphrase="${SECRET_FILES_PASSPHRASE}" \
+        --output smallrye-sign.asc .build/smallrye-sign.asc.gpg
+    @echo "Decrypting Maven settings"
+    gpg --quiet --batch --yes --decrypt --passphrase="${SECRET_FILES_PASSPHRASE}" \
+        --output maven-settings.xml .build/maven-settings.xml.gpg
+
+# Initialize GnuPG
+init-gpg:
+    @echo "GnuPG setup"
+    gpg --fast-import --no-tty --batch --yes smallrye-sign.asc
+
+# Initialize Git
+init-git:
+    @echo "Git setup"
+    git config --global user.name "${GITHUB_ACTOR}"
+    git config --global user.email "smallrye@googlegroups.com"
+
+# Steps before releasing
+pre-release: decrypt-secrets init-gpg init-git
+    @echo "🚀 Pre-release steps..."
+    @echo "Pre-release verifications"
+    jbang .build/PreRelease.java --token=${RELEASE_TOKEN} --release-version=${RELEASE_VERSION}
+    @echo "Bump project version to ${RELEASE_VERSION}"
+    ./mvnw --settings .build/maven-ci-settings.xml --batch-mode --no-transfer-progress versions:set -DnewVersion=${RELEASE_VERSION} -DgenerateBackupPoms=false
+    ./mvnw --settings .build/maven-ci-settings.xml --batch-mode --no-transfer-progress versions:set -DnewVersion=${RELEASE_VERSION} -DgenerateBackupPoms=false -pl bom
+    jbang .build/UpdateDocsAttributesFiles.java --mutiny-version=${VERSION}
+    .build/update-workshop-target-version.sh "${VERSION}"
+    @echo "Check that the project builds (no tests)"
+    ./mvnw --settings maven-settings.xml --batch-mode --no-transfer-progress clean install -Prelease -DskipTests
+    @echo "Check that the website builds"
+    [[ ${DEPLOY_WEBSITE} == "true" ]] && cd documentation && pipenv run mkdocs build
+
+# Steps to release
+release: pre-release
+    @echo "🚀 Release steps..."
+    @echo "Commit release version and push upstream"
+    git commit -am "chore(release): release Mutiny ${RELEASE_VERSION}"
+    git push
+    @echo "Call JReleaser"
+    ./mvnw -settings .build/maven-ci-settings.xml --batch-mode --no-transfer-progress -Pjreleaser jreleaser:full-release -pl :mutiny-project
+    @echo "Deploy to Maven Central"
+    ./mvnw --settings maven-settings.xml --batch-mode --no-transfer-progress deploy -Prelease -DskipTests
+    @echo "Bump to 999-SNAPSHOT and push upstream"
+    ./mvnw --settings .build/maven-ci-settings.xml --batch-mode --no-transfer-progress versions:set -DnewVersion=999-SNAPSHOT -DgenerateBackupPoms=false
+    ./mvnw --settings .build/maven-ci-settings.xml --batch-mode --no-transfer-progress versions:set -DnewVersion=999-SNAPSHOT -DgenerateBackupPoms=false -pl bom
+    git commit -am "chore(release): set development version to 999-SNAPSHOT"
+    git push
+
+# Steps post-release
+post-release:
+    @echo "🚀 Post-release steps..."
+    [[ ${CLEAR_REVAPI} == "true" ]] && just -f .build/justfile-for-release -d . clear-revapi
+    [[ ${DEPLOY_WEBSITE} == "true" ]] && .build/deploy-site.sh
+
+# Clear RevAPI justifications
+clear-revapi:
+    #!/usr/bin/env bash
+    jbang .build/CompatibilityUtils.java clear --version="${RELEASE_VERSION}" --do-not-clear-version-prefix="1."
+    if [[ $(git diff --stat) != '' ]]; then
+      git add -A
+      git status
+      git commit -m "chore(release): clear RevAPI breaking change justifications"
+      git push
+    else
+      echo "No justifications cleared"
+    fi
