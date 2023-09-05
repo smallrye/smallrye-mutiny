@@ -72,19 +72,72 @@ public class UniAndGroupIterable<T1> {
      * @param function the combination function
      * @param <O> the combination value type
      * @return the new {@link Uni}
+     * @deprecated use {{@link #with(Function)}} instead
      */
+    @Deprecated
     @CheckReturnValue
     public <O> Uni<O> combinedWith(Function<List<?>, O> function) {
+        return with(function);
+    }
+
+    /**
+     * Combine the items emitted by the {@link Uni unis}, and emit the result when all {@link Uni unis} have
+     * successfully completed. In case of failure, the failure is propagated.
+     *
+     * @param function the combination function
+     * @param <O> the combination value type
+     * @return the new {@link Uni}
+     */
+    @CheckReturnValue
+    public <O> Uni<O> with(Function<List<?>, O> function) {
         Function<List<?>, O> actual = Infrastructure.decorate(nonNull(function, "function"));
         return Infrastructure
                 .onUniCreation(new UniAndCombination<>(source, unis, actual, collectFailures, concurrency));
     }
 
     /**
+     * Combine the items emitted by the {@link Uni unis} to a new Uni, and emit the result when all
+     * {@link Uni unis} (including the one returned from {@code function} have successfully completed.
+     * In case of failure, the failure is propagated.
+     *
+     * @param function the combination function
+     * @param <O> the combination value type
+     * @return the new {@link Uni}
+     */
+    @CheckReturnValue
+    public <O> Uni<O> withUni(Function<List<?>, Uni<O>> function) {
+        Function<List<?>, Uni<O>> actual = Infrastructure.decorate(nonNull(function, "function"));
+        return Infrastructure
+                .onUniCreation(new UniAndCombination<>(source, unis, actual, collectFailures, concurrency))
+                .flatMap(Function.identity());
+    }
+
+    /**
      * Combine the items emitted by the {@link Uni unis}, and emit the result when all {@link Uni unis} have
      * successfully completed. In case of failure, the failure is propagated.
      * <p>
-     * This method is a convenience wrapper for {@link #combinedWith(Function)} but with the assumption that all items
+     * This method is a convenience wrapper for {@link #with(Function)} but with the assumption that all items
+     * have {@code I} as a super type, which saves you a cast in the combination function.
+     * If the cast fails then the returned {@link Uni} fails with a {@link ClassCastException}.
+     *
+     * @param superType the super type of all items
+     * @param function the combination function
+     * @param <O> the combination value type
+     * @param <I> the super type of all items
+     * @return the new {@link Uni}
+     * @deprecated use {@link #with(Class, Function)} instead
+     */
+    @Deprecated
+    @CheckReturnValue
+    public <O, I> Uni<O> combinedWith(Class<I> superType, Function<List<I>, O> function) {
+        return with(superType, function);
+    }
+
+    /**
+     * Combine the items emitted by the {@link Uni unis}, and emit the result when all {@link Uni unis} have
+     * successfully completed. In case of failure, the failure is propagated.
+     * <p>
+     * This method is a convenience wrapper for {@link #with(Function)} but with the assumption that all items
      * have {@code I} as a super type, which saves you a cast in the combination function.
      * If the cast fails then the returned {@link Uni} fails with a {@link ClassCastException}.
      *
@@ -94,10 +147,30 @@ public class UniAndGroupIterable<T1> {
      * @param <I> the super type of all items
      * @return the new {@link Uni}
      */
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     @CheckReturnValue
-    public <O, I> Uni<O> combinedWith(Class<I> superType, Function<List<I>, O> function) {
-        return combinedWith((Function) function);
+    public <O, I> Uni<O> with(Class<I> superType, Function<List<I>, O> function) {
+        return with((Function) function);
+    }
+
+    /**
+     * Combine the items emitted by the {@link Uni unis}, and emit the result when all {@link Uni unis} have
+     * successfully completed. In case of failure, the failure is propagated.
+     * <p>
+     * This method is a convenience wrapper for {@link #withUni(Function)} but with the assumption that
+     * all items have {@code I} as a super type, which saves you a cast in the combination function.
+     * If the cast fails then the returned {@link Uni} fails with a {@link ClassCastException}.
+     *
+     * @param superType the super type of all items
+     * @param function the combination function
+     * @param <O> the combination value type
+     * @param <I> the super type of all items
+     * @return the new {@link Uni}
+     */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @CheckReturnValue
+    public <O, I> Uni<O> withUni(Class<I> superType, Function<List<I>, Uni<O>> function) {
+        return withUni((Function) function);
     }
 
     /**

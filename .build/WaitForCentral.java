@@ -109,7 +109,7 @@ class WaitForCentral implements Callable<Integer> {
         }
 
         Uni<Boolean> completed = Uni.combine().all().unis(unis)
-            .combinedWith(list -> {
+            .with(list -> {
                 boolean done = true;
                 for (Object r : list) {
                     Result res = (Result) r;
