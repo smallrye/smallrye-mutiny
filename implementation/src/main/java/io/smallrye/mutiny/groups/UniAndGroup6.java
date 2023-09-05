@@ -31,8 +31,17 @@ public class UniAndGroup6<T1, T2, T3, T4, T5, T6> extends UniAndGroupIterable<T1
         return combine(Tuple6::of);
     }
 
+    /**
+     * @deprecated use {@link #with(Functions.Function6)} instead
+     */
+    @Deprecated
     @CheckReturnValue
     public <O> Uni<O> combinedWith(Functions.Function6<T1, T2, T3, T4, T5, T6, O> combinator) {
+        return with(combinator);
+    }
+
+    @CheckReturnValue
+    public <O> Uni<O> with(Functions.Function6<T1, T2, T3, T4, T5, T6, O> combinator) {
         Functions.Function6<T1, T2, T3, T4, T5, T6, O> actual = Infrastructure
                 .decorate(nonNull(combinator, "combinator"));
         return combine(actual);
@@ -50,11 +59,11 @@ public class UniAndGroup6<T1, T2, T3, T4, T5, T6> extends UniAndGroupIterable<T1
             T6 item6 = (T6) list.get(5);
             return combinator.apply(item1, item2, item3, item4, item5, item6);
         };
-        return super.combinedWith(function);
+        return super.with(function);
     }
 
     @CheckReturnValue
-    public <O> Uni<O> combinedWithUni(Functions.Function6<T1, T2, T3, T4, T5, T6, Uni<O>> combinator) {
+    public <O> Uni<O> withUni(Functions.Function6<T1, T2, T3, T4, T5, T6, Uni<O>> combinator) {
         Functions.Function6<T1, T2, T3, T4, T5, T6, Uni<O>> actual = Infrastructure
                 .decorate(nonNull(combinator, "combinator"));
         return combineUni(actual);
@@ -72,7 +81,7 @@ public class UniAndGroup6<T1, T2, T3, T4, T5, T6> extends UniAndGroupIterable<T1
             T6 item6 = (T6) list.get(5);
             return combinator.apply(item1, item2, item3, item4, item5, item6);
         };
-        return super.combinedWith(function).flatMap(Function.identity());
+        return super.with(function).flatMap(Function.identity());
     }
 
 }

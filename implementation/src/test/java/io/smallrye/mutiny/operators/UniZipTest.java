@@ -52,7 +52,7 @@ public class UniZipTest {
 
         UniAssertSubscriber<Integer> subscriber = Uni.combine().all().unis(uni, uni2)
                 .collectFailures()
-                .combinedWith(Integer::sum)
+                .with(Integer::sum)
                 .subscribe()
                 .withSubscriber(UniAssertSubscriber.create());
 
@@ -97,7 +97,7 @@ public class UniZipTest {
         Uni<Integer> uni2 = Uni.createFrom().item(2);
         Uni<Integer> uni3 = Uni.createFrom().item(3);
         UniAssertSubscriber<Integer> subscriber = Uni.combine().all().unis(uni1, uni2, uni3)
-                .combinedWith((i1, i2, i3) -> i1 + i2 + i3)
+                .with((i1, i2, i3) -> i1 + i2 + i3)
                 .subscribe().withSubscriber(UniAssertSubscriber.create());
         subscriber.awaitItem().assertItem(6);
     }
@@ -229,11 +229,11 @@ public class UniZipTest {
         Uni<String> uni3 = Uni.createFrom().item("!");
 
         String r = Uni.combine().all().unis(uni1, uni2, uni3)
-                .combinedWith((s1, s2, s3) -> s1 + " " + s2 + " " + s3).await().indefinitely();
+                .with((s1, s2, s3) -> s1 + " " + s2 + " " + s3).await().indefinitely();
         assertThat(r).isEqualTo("hello world !");
 
         List<Uni<String>> list = Arrays.asList(uni1, uni2, uni3);
-        r = Uni.combine().all().unis(list).combinedWith(l -> l.get(0) + " " + l.get(1) + " " + l.get(2)).await()
+        r = Uni.combine().all().unis(list).with(l -> l.get(0) + " " + l.get(1) + " " + l.get(2)).await()
                 .indefinitely();
         assertThat(r).isEqualTo("hello world !");
     }
@@ -282,7 +282,7 @@ public class UniZipTest {
         Uni<Integer> uni10 = Uni.createFrom().item(10);
 
         int sum = Uni.combine().all().unis(uni1, uni2, uni3, uni4, uni5, uni6, uni7, uni8, uni9, uni10)
-                .combinedWith(l -> l.stream().mapToInt(o -> (Integer) o).sum())
+                .with(l -> l.stream().mapToInt(o -> (Integer) o).sum())
                 .await().indefinitely();
 
         assertThat(sum).isEqualTo(1 + 2 + 3 + 4 + 5 + 6 + 7 + 8 + 9 + 10);
@@ -304,7 +304,7 @@ public class UniZipTest {
         Uni<Integer> uni10 = Uni.createFrom().item(10);
 
         assertThatThrownBy(() -> Uni.combine().all().unis(uni1, uni2, uni3, uni4, uni5, uni6, uni7, uni8, uni9, uni10)
-                .combinedWith(l -> l.stream().mapToInt(o -> (Integer) o).sum())
+                .with(l -> l.stream().mapToInt(o -> (Integer) o).sum())
                 .await().indefinitely()).isInstanceOf(ArithmeticException.class).hasMessageContaining("boom");
 
     }
@@ -324,7 +324,7 @@ public class UniZipTest {
         Uni<Integer> uni10 = Uni.createFrom().failure(new IllegalStateException("state"));
 
         assertThatThrownBy(() -> Uni.combine().all().unis(uni1, uni2, uni3, uni4, uni5, uni6, uni7, uni8, uni9, uni10)
-                .combinedWith(l -> l.stream().mapToInt(o -> (Integer) o).sum())
+                .with(l -> l.stream().mapToInt(o -> (Integer) o).sum())
                 .await().indefinitely()).isInstanceOf(UncheckedIOException.class).hasMessageContaining("io");
 
     }
@@ -345,7 +345,7 @@ public class UniZipTest {
 
         assertThatThrownBy(() -> Uni.combine().all().unis(uni1, uni2, uni3, uni4, uni5, uni6, uni7, uni8, uni9, uni10)
                 .collectFailures()
-                .combinedWith(l -> l.stream().mapToInt(o -> (Integer) o).sum())
+                .with(l -> l.stream().mapToInt(o -> (Integer) o).sum())
                 .await().indefinitely()).isInstanceOfSatisfying(CompositeException.class, t -> {
                     assertThat(t.getCauses()).hasSize(3);
                     assertThat(t.getSuppressed()).hasSize(2);
@@ -372,7 +372,7 @@ public class UniZipTest {
 
         assertThatThrownBy(() -> Uni.combine().all().unis(uni1, uni2, uni3, uni4, uni5, uni6, uni7, uni8, uni9, uni10)
                 .collectFailures()
-                .combinedWith(l -> l.stream().mapToInt(o -> (Integer) o).sum())
+                .with(l -> l.stream().mapToInt(o -> (Integer) o).sum())
                 .await().indefinitely()).isInstanceOfSatisfying(CompositeException.class, t -> {
                     assertThat(t.getCauses()).hasSize(10);
                     assertThat(t.getSuppressed()).hasSize(9);
@@ -425,7 +425,7 @@ public class UniZipTest {
                 .onCancellation().invoke(() -> cancellations[9].set(true));
 
         Uni<Integer> all = Uni.combine().all().unis(uni1, uni2, uni3, uni4, uni5, uni6, uni7, uni8, uni9, uni10)
-                .combinedWith(l -> l.stream().mapToInt(o -> (Integer) o).sum());
+                .with(l -> l.stream().mapToInt(o -> (Integer) o).sum());
 
         assertThat(subscriptions).allSatisfy(bool -> assertThat(bool).isFalse());
         assertThat(cancellations).allSatisfy(bool -> assertThat(bool).isFalse());
@@ -448,7 +448,7 @@ public class UniZipTest {
 
         UniAssertSubscriber<Integer> subscriber = Uni.combine().all().unis(uni, uni2, uni3)
                 .collectFailures()
-                .combinedWith((a, b, c) -> a + b + c)
+                .with((a, b, c) -> a + b + c)
                 .subscribe()
                 .withSubscriber(UniAssertSubscriber.create());
 
@@ -464,7 +464,7 @@ public class UniZipTest {
 
         UniAssertSubscriber<Integer> subscriber = Uni.combine().all().unis(uni, uni2, uni3, uni4)
                 .collectFailures()
-                .combinedWith((a, b, c, d) -> a + b + c + d)
+                .with((a, b, c, d) -> a + b + c + d)
                 .subscribe()
                 .withSubscriber(UniAssertSubscriber.create());
 
@@ -481,7 +481,7 @@ public class UniZipTest {
 
         UniAssertSubscriber<Integer> subscriber = Uni.combine().all().unis(uni, uni2, uni3, uni4, uni5)
                 .collectFailures()
-                .combinedWith((a, b, c, d, e) -> a + b + c + d + e)
+                .with((a, b, c, d, e) -> a + b + c + d + e)
                 .subscribe()
                 .withSubscriber(UniAssertSubscriber.create());
 
@@ -499,7 +499,7 @@ public class UniZipTest {
 
         UniAssertSubscriber<Integer> subscriber = Uni.combine().all().unis(uni, uni2, uni3, uni4, uni5, uni6)
                 .collectFailures()
-                .combinedWith((a, b, c, d, e, f) -> a + b + c + d + e + f)
+                .with((a, b, c, d, e, f) -> a + b + c + d + e + f)
                 .subscribe()
                 .withSubscriber(UniAssertSubscriber.create());
 
@@ -518,7 +518,7 @@ public class UniZipTest {
 
         UniAssertSubscriber<Integer> subscriber = Uni.combine().all().unis(uni, uni2, uni3, uni4, uni5, uni6, uni7)
                 .collectFailures()
-                .combinedWith((a, b, c, d, e, f, g) -> a + b + c + d + e + f + g)
+                .with((a, b, c, d, e, f, g) -> a + b + c + d + e + f + g)
                 .subscribe()
                 .withSubscriber(UniAssertSubscriber.create());
 
@@ -538,7 +538,7 @@ public class UniZipTest {
 
         UniAssertSubscriber<Integer> subscriber = Uni.combine().all().unis(uni, uni2, uni3, uni4, uni5, uni6, uni7, uni8)
                 .collectFailures()
-                .combinedWith((a, b, c, d, e, f, g, h) -> a + b + c + d + e + f + g + h)
+                .with((a, b, c, d, e, f, g, h) -> a + b + c + d + e + f + g + h)
                 .subscribe()
                 .withSubscriber(UniAssertSubscriber.create());
 
@@ -559,7 +559,7 @@ public class UniZipTest {
 
         UniAssertSubscriber<Integer> subscriber = Uni.combine().all().unis(uni, uni2, uni3, uni4, uni5, uni6, uni7, uni8, uni9)
                 .collectFailures()
-                .combinedWith((a, b, c, d, e, f, g, h, i) -> a + b + c + d + e + f + g + h + i)
+                .with((a, b, c, d, e, f, g, h, i) -> a + b + c + d + e + f + g + h + i)
                 .subscribe()
                 .withSubscriber(UniAssertSubscriber.create());
 
@@ -629,7 +629,7 @@ public class UniZipTest {
 
             UniAssertSubscriber<? extends List<?>> sub = Uni.combine().all().unis(a, b, c, d)
                     .usingConcurrencyOf(1)
-                    .combinedWith(unis -> unis)
+                    .with(unis -> unis)
                     .subscribe().withSubscriber(UniAssertSubscriber.create());
 
             sub.assertCompleted();
@@ -655,7 +655,7 @@ public class UniZipTest {
 
             UniAssertSubscriber<? extends List<?>> sub = Uni.combine().all().unis(a, b, c, d)
                     .usingConcurrencyOf(concurrency)
-                    .combinedWith(unis -> unis)
+                    .with(unis -> unis)
                     .subscribe().withSubscriber(UniAssertSubscriber.create());
 
             sub.awaitItem();
@@ -687,7 +687,7 @@ public class UniZipTest {
 
             UniAssertSubscriber<? extends List<?>> sub = Uni.combine().all().unis(a, b, c, d)
                     .usingConcurrencyOf(concurrency)
-                    .combinedWith(unis -> unis)
+                    .with(unis -> unis)
                     .subscribe().withSubscriber(UniAssertSubscriber.create());
 
             sub.awaitFailure();
@@ -720,7 +720,7 @@ public class UniZipTest {
 
             Uni.combine().all().unis(a, b)
                     .usingConcurrencyOf(1)
-                    .combinedWith(list -> list)
+                    .with(list -> list)
                     .onSubscription().invoke(box::set)
                     .subscribe().withSubscriber(UniAssertSubscriber.create());
 

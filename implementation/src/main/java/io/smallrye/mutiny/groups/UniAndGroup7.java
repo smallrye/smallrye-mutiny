@@ -28,11 +28,20 @@ public class UniAndGroup7<T1, T2, T3, T4, T5, T6, T7> extends UniAndGroupIterabl
 
     @CheckReturnValue
     public Uni<Tuple7<T1, T2, T3, T4, T5, T6, T7>> asTuple() {
-        return combinedWith(Tuple7::of);
+        return combine(Tuple7::of);
+    }
+
+    /**
+     * @deprecated use {@link #with(Functions.Function7)} instead
+     */
+    @Deprecated
+    @CheckReturnValue
+    public <O> Uni<O> combinedWith(Functions.Function7<T1, T2, T3, T4, T5, T6, T7, O> combinator) {
+        return with(combinator);
     }
 
     @CheckReturnValue
-    public <O> Uni<O> combinedWith(Functions.Function7<T1, T2, T3, T4, T5, T6, T7, O> combinator) {
+    public <O> Uni<O> with(Functions.Function7<T1, T2, T3, T4, T5, T6, T7, O> combinator) {
         Functions.Function7<T1, T2, T3, T4, T5, T6, T7, O> actual = Infrastructure
                 .decorate(nonNull(combinator, "combinator"));
         return combine(actual);
@@ -52,11 +61,11 @@ public class UniAndGroup7<T1, T2, T3, T4, T5, T6, T7> extends UniAndGroupIterabl
 
             return combinator.apply(item1, item2, item3, item4, item5, item6, item7);
         };
-        return super.combinedWith(function);
+        return super.with(function);
     }
 
     @CheckReturnValue
-    public <O> Uni<O> combinedWithUni(Functions.Function7<T1, T2, T3, T4, T5, T6, T7, Uni<O>> combinator) {
+    public <O> Uni<O> withUni(Functions.Function7<T1, T2, T3, T4, T5, T6, T7, Uni<O>> combinator) {
         Functions.Function7<T1, T2, T3, T4, T5, T6, T7, Uni<O>> actual = Infrastructure
                 .decorate(nonNull(combinator, "combinator"));
         return combineUni(actual);
@@ -76,6 +85,6 @@ public class UniAndGroup7<T1, T2, T3, T4, T5, T6, T7> extends UniAndGroupIterabl
 
             return combinator.apply(item1, item2, item3, item4, item5, item6, item7);
         };
-        return super.combinedWith(function).flatMap(Function.identity());
+        return super.with(function).flatMap(Function.identity());
     }
 }

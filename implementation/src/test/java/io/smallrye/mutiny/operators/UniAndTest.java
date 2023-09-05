@@ -75,7 +75,7 @@ public class UniAndTest {
         Uni<Integer> uni2 = Uni.createFrom().item(2);
         Uni<Integer> uni3 = Uni.createFrom().item(3);
         UniAssertSubscriber<Integer> subscriber = Uni.combine().all().unis(uni1, uni2, uni3)
-                .combinedWith((i1, i2, i3) -> i1 + i2 + i3)
+                .with((i1, i2, i3) -> i1 + i2 + i3)
                 .subscribe().withSubscriber(UniAssertSubscriber.create());
         subscriber.awaitItem().assertItem(6);
     }
@@ -208,7 +208,7 @@ public class UniAndTest {
 
         UniAssertSubscriber<Integer> subscriber = Uni
                 .combine().all().unis(list)
-                .combinedWith(items -> items.stream().mapToInt(i -> (Integer) i).sum())
+                .with(items -> items.stream().mapToInt(i -> (Integer) i).sum())
                 .subscribe()
                 .withSubscriber(UniAssertSubscriber.create());
 
@@ -228,7 +228,7 @@ public class UniAndTest {
 
         UniAssertSubscriber<List<Long>> subscriber = Uni
                 .combine().all().unis(list)
-                .combinedWith(Number.class, numbers -> numbers.stream().map(Number::longValue).collect(Collectors.toList()))
+                .with(Number.class, numbers -> numbers.stream().map(Number::longValue).collect(Collectors.toList()))
                 .subscribe().withSubscriber(UniAssertSubscriber.create());
 
         subscriber
@@ -247,7 +247,7 @@ public class UniAndTest {
 
         UniAssertSubscriber<String> subscriber = Uni
                 .combine().all().unis(list)
-                .combinedWith(String.class, strings -> String.join("", strings))
+                .with(String.class, strings -> String.join("", strings))
                 .subscribe().withSubscriber(UniAssertSubscriber.create());
 
         subscriber
@@ -265,7 +265,7 @@ public class UniAndTest {
 
         UniAssertSubscriber<List<Number>> subscriber = Uni
                 .combine().all().unis(list)
-                .combinedWith(Number.class, Function.identity())
+                .with(Number.class, Function.identity())
                 .subscribe().withSubscriber(UniAssertSubscriber.create());
 
         List<Number> result = subscriber.assertCompleted().getItem();
@@ -289,7 +289,7 @@ public class UniAndTest {
 
         UniAssertSubscriber<Integer> subscriber = Uni
                 .combine().all().unis(set)
-                .combinedWith(items -> items.stream().mapToInt(i -> (Integer) i).sum())
+                .with(items -> items.stream().mapToInt(i -> (Integer) i).sum())
                 .subscribe()
                 .withSubscriber(UniAssertSubscriber.create());
 
