@@ -33,8 +33,17 @@ public class UniAndGroup8<T1, T2, T3, T4, T5, T6, T7, T8> extends UniAndGroupIte
         return combine(Tuple8::of);
     }
 
+    /**
+     * @deprecated use {@link #with(Functions.Function8)} instead
+     */
+    @Deprecated
     @CheckReturnValue
     public <O> Uni<O> combinedWith(Functions.Function8<T1, T2, T3, T4, T5, T6, T7, T8, O> combinator) {
+        return with(combinator);
+    }
+
+    @CheckReturnValue
+    public <O> Uni<O> with(Functions.Function8<T1, T2, T3, T4, T5, T6, T7, T8, O> combinator) {
         Functions.Function8<T1, T2, T3, T4, T5, T6, T7, T8, O> actual = Infrastructure
                 .decorate(nonNull(combinator, "combinator"));
         return combine(actual);
@@ -54,7 +63,31 @@ public class UniAndGroup8<T1, T2, T3, T4, T5, T6, T7, T8> extends UniAndGroupIte
                     (T7) list.get(6),
                     (T8) list.get(7));
         };
-        return super.combinedWith(function);
+        return super.with(function);
+    }
+
+    @CheckReturnValue
+    public <O> Uni<O> withUni(Functions.Function8<T1, T2, T3, T4, T5, T6, T7, T8, Uni<O>> combinator) {
+        Functions.Function8<T1, T2, T3, T4, T5, T6, T7, T8, Uni<O>> actual = Infrastructure
+                .decorate(nonNull(combinator, "combinator"));
+        return combineUni(actual);
+    }
+
+    @SuppressWarnings("unchecked")
+    private <O> Uni<O> combineUni(Functions.Function8<T1, T2, T3, T4, T5, T6, T7, T8, Uni<O>> combinator) {
+        Function<List<?>, Uni<O>> function = list -> {
+            Tuples.ensureArity(list, 8);
+            return combinator.apply(
+                    (T1) list.get(0),
+                    (T2) list.get(1),
+                    (T3) list.get(2),
+                    (T4) list.get(3),
+                    (T5) list.get(4),
+                    (T6) list.get(5),
+                    (T7) list.get(6),
+                    (T8) list.get(7));
+        };
+        return super.with(function).flatMap(Function.identity());
     }
 
 }

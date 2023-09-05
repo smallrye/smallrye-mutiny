@@ -52,10 +52,24 @@ public class UniAndGroup2<T1, T2> extends UniAndGroupIterable<T1> {
      *
      * @param combinator the combinator function, must not be {@code null}
      * @param <O> the type of item
-     * @return the resulting {@link Uni}. The items are combined into a {@link Tuple2 Tuple2&lt;T1, T2&gt;}.
+     * @return the resulting {@code Uni<O>}. The items are combined into {@link O}
+     * @deprecated use {@link #with(BiFunction)} instead
      */
+    @Deprecated
     @CheckReturnValue
     public <O> Uni<O> combinedWith(BiFunction<T1, T2, O> combinator) {
+        return with(combinator);
+    }
+
+    /**
+     * Creates the resulting {@link Uni}. The items are combined using the given combinator function.
+     *
+     * @param combinator the combinator function, must not be {@code null}
+     * @param <O> the type of item
+     * @return the resulting {@code Uni<O>}. The items are combined into {@link O}
+     */
+    @CheckReturnValue
+    public <O> Uni<O> with(BiFunction<T1, T2, O> combinator) {
         BiFunction<T1, T2, O> actual = Infrastructure.decorate(nonNull(combinator, "combinator"));
         return combine(actual);
     }
@@ -68,7 +82,32 @@ public class UniAndGroup2<T1, T2> extends UniAndGroupIterable<T1> {
             T2 item2 = (T2) list.get(1);
             return combinator.apply(item1, item2);
         };
-        return super.combinedWith(function);
+        return super.with(function);
+    }
+
+    /**
+     * Creates the resulting {@link Uni}. The items are combined using the given combinator function,
+     * and the resulting {@code Uni<Uni<O>>} is flattened.
+     *
+     * @param combinator the combinator function, must not be {@code null}
+     * @param <O> the type of item
+     * @return the resulting {@link Uni}. The items are combined into a {@link Tuple2 Tuple2&lt;T1, T2&gt;}.
+     */
+    @CheckReturnValue
+    public <O> Uni<O> withUni(BiFunction<T1, T2, Uni<O>> combinator) {
+        BiFunction<T1, T2, Uni<O>> actual = Infrastructure.decorate(nonNull(combinator, "combinator"));
+        return combineUni(actual);
+    }
+
+    @SuppressWarnings("unchecked")
+    private <O> Uni<O> combineUni(BiFunction<T1, T2, Uni<O>> combinator) {
+        Function<List<?>, Uni<O>> function = list -> {
+            Tuples.ensureArity(list, 2);
+            T1 item1 = (T1) list.get(0);
+            T2 item2 = (T2) list.get(1);
+            return combinator.apply(item1, item2);
+        };
+        return super.with(function).flatMap(Function.identity());
     }
 
 }

@@ -161,7 +161,7 @@ public class UniContextPropagationTest {
         }).runSubscriptionOn(executor);
 
         Uni.combine().all().unis(uni1, uni2, uni3)
-                .combinedWith((item1, item2, item3) -> {
+                .with((item1, item2, item3) -> {
                     assertThat(ctx).isSameAs(MyContext.get());
                     return item1 + item2 + item3;
                 })
@@ -213,7 +213,7 @@ public class UniContextPropagationTest {
 
         // Same but with biFunction
         Uni.combine().all().unis(uni1, uni2)
-                .combinedWith((a, b) -> {
+                .with((a, b) -> {
                     assertThat(ctx).isSameAs(MyContext.get());
                     return a + b;
                 })
@@ -284,7 +284,7 @@ public class UniContextPropagationTest {
         }).runSubscriptionOn(executor);
 
         Uni.combine().all().unis(uni1, uni2, uni3, uni4)
-                .combinedWith((item1, item2, item3, item4) -> {
+                .with((item1, item2, item3, item4) -> {
                     assertThat(ctx).isSameAs(MyContext.get());
                     return item1 + item2 + item3 + item4;
                 })
@@ -297,7 +297,7 @@ public class UniContextPropagationTest {
                         });
 
         Uni.combine().all().unis(uni1, uni2, uni3, uni4, uni5)
-                .combinedWith((item1, item2, item3, item4, item5) -> {
+                .with((item1, item2, item3, item4, item5) -> {
                     assertThat(ctx).isSameAs(MyContext.get());
                     return item1 + item2 + item3 + item4 + item5;
                 })
@@ -310,7 +310,7 @@ public class UniContextPropagationTest {
                         });
 
         Uni.combine().all().unis(uni1, uni2, uni3, uni4, uni5, uni6)
-                .combinedWith((item1, item2, item3, item4, item5, item6) -> {
+                .with((item1, item2, item3, item4, item5, item6) -> {
                     assertThat(ctx).isSameAs(MyContext.get());
                     return item1 + item2 + item3 + item4 + item5 + item6;
                 })
@@ -323,7 +323,7 @@ public class UniContextPropagationTest {
                         });
 
         Uni.combine().all().unis(uni1, uni2, uni3, uni4, uni5, uni6, uni7)
-                .combinedWith((item1, item2, item3, item4, item5, item6, item7) -> {
+                .with((item1, item2, item3, item4, item5, item6, item7) -> {
                     assertThat(ctx).isSameAs(MyContext.get());
                     return item1 + item2 + item3 + item4 + item5 + item6 + item7;
                 })
@@ -336,7 +336,7 @@ public class UniContextPropagationTest {
                         });
 
         Uni.combine().all().unis(uni1, uni2, uni3, uni4, uni5, uni6, uni7, uni8)
-                .combinedWith((item1, item2, item3, item4, item5, item6, item7, item8) -> {
+                .with((item1, item2, item3, item4, item5, item6, item7, item8) -> {
                     assertThat(ctx).isSameAs(MyContext.get());
                     return item1 + item2 + item3 + item4 + item5 + item6 + item7 + item8;
                 })
@@ -349,7 +349,7 @@ public class UniContextPropagationTest {
                         });
 
         Uni.combine().all().unis(uni1, uni2, uni3, uni4, uni5, uni6, uni7, uni8, uni9)
-                .combinedWith((item1, item2, item3, item4, item5, item6, item7, item8, item9) -> {
+                .with((item1, item2, item3, item4, item5, item6, item7, item8, item9) -> {
                     assertThat(ctx).isSameAs(MyContext.get());
                     return item1 + item2 + item3 + item4 + item5 + item6 + item7 + item8 + item9;
                 })

@@ -4,7 +4,6 @@ import guides.extension.SystemOut;
 import guides.extension.SystemOutCaptureExtension;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
-import io.smallrye.mutiny.tuples.Tuple;
 import io.smallrye.mutiny.tuples.Tuple2;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -49,7 +48,7 @@ public class CombiningItemsTest<A, B> {
 
         // <combined-with>
         Uni<Map<String, Response>> uni = Uni.combine()
-                .all().unis(uniA, uniB).combinedWith(
+                .all().unis(uniA, uniB).with(
                         listOfResponses -> {
                             Map<String, Response> map = new LinkedHashMap<>();
                             map.put("A", (Response) listOfResponses.get(0));
@@ -60,6 +59,21 @@ public class CombiningItemsTest<A, B> {
         // </combined-with>
 
         assertThat(uni.await().indefinitely()).containsKeys("A", "B");
+
+        // <combined-with-uni>
+        Uni<Map<String, Response>> uni1 = Uni.combine()
+                .all().unis(uniA, uniB).withUni(
+                        listOfResponses -> {
+                            Map<String, Response> map = new LinkedHashMap<>();
+                            map.put("A", (Response) listOfResponses.get(0));
+                            map.put("B", (Response) listOfResponses.get(1));
+                            return Uni.createFrom().item(map);
+                        }
+                );
+        // </combined-with-uni>
+
+        assertThat(uni1.await().indefinitely()).containsKeys("A", "B");
+
 
         Thread.sleep(100);
     }

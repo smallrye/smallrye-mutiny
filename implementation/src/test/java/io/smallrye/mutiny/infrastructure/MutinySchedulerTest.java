@@ -205,7 +205,7 @@ public class MutinySchedulerTest {
                     .onItem().invoke(s -> threads.add(Thread.currentThread().getName())));
         }
 
-        Uni.combine().all().unis(list).combinedWith(x -> null).await().indefinitely();
+        Uni.combine().all().unis(list).with(x -> null).await().indefinitely();
         assertThat(threads).allSatisfy(s -> assertThat(s).startsWith("my-thread-"));
         assertThat(threads).hasSizeLessThanOrEqualTo(4);
     }
