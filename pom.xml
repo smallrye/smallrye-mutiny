@@ -73,6 +73,7 @@
         <module>kotlin</module>
         <module>bom</module>
         <module>math</module>
+        <module>workshop-examples</module>
     </modules>
 
     <properties>
