@@ -15,6 +15,7 @@ nav:
       - 'tutorials/transforming-items-asynchronously.md'
       - 'tutorials/handling-failures.md'
       - 'tutorials/retrying.md'
+      - 'tutorials/mutiny-workshop.md'
   - 'Guides':
       - 'guides/imperative-to-reactive.md'
       - 'guides/reactive-to-imperative.md'

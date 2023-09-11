@@ -73,6 +73,7 @@
         <module>kotlin</module>
         <module>bom</module>
         <module>math</module>
+        <module>workshop-examples</module>
     </modules>
 
     <properties>
@@ -115,6 +116,7 @@
         <dokka.version>1.7.20</dokka.version>
 
         <jandex-maven-plugin.version>1.2.3</jandex-maven-plugin.version>
+        <find-and-replace-maven-plugin.version>1.1.0</find-and-replace-maven-plugin.version>
     </properties>
 
     <dependencyManagement>
@@ -367,6 +369,11 @@
                             </configuration>
                         </execution>
                     </executions>
+                </plugin>
+                <plugin>
+                    <groupId>io.github.floverfelt</groupId>
+                    <artifactId>find-and-replace-maven-plugin</artifactId>
+                    <version>${find-and-replace-maven-plugin.version}</version>
                 </plugin>
             </plugins>
         </pluginManagement>
