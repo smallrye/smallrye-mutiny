@@ -49,6 +49,12 @@ Mutiny is based on the [Reactive Streams protocol](https://www.reactive-streams.
 
 In addition, Mutiny offers converters to interact with other popular libraries and [Kotlin](https://kotlinlang.org/).
 
+## 👓 Mutiny workshop examples
+
+You can learn about Mutiny from the [documentation and website](https://smallrye.io/smallrye-mutiny).
+
+This repository also contains the [Mutiny workshop examples](workshop-examples) that cover the common concerns through self-contained executable [JBang](https://www.jbang.dev/) scripts.
+
 ## 📦 Build instructions
 
 Mutiny is built with Apache Maven, so all you need is:
