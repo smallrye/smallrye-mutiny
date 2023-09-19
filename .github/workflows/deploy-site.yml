@@ -12,10 +12,12 @@ jobs:
           ref: ${{ github.event.ref }}
           token: ${{ secrets.RELEASE_TOKEN }}
           fetch-depth: 0 # fetch all commits and branches for mike to work properly
-      - name: Git setup
-        run: .build/setup-git.sh
       - name: Setup yq (portable yaml processor)
         uses: mikefarah/yq@master
+      - name: Install just
+        uses: taiki-e/install-action@just
+      - name: Setup Git
+        run: just -f .build/justfile-for-release -d . init-git
       - name: Setup Python
         uses: actions/setup-python@v4
         with:

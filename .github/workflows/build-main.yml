@@ -21,7 +21,7 @@ jobs:
           distribution: temurin
           cache: maven
       - name: Build with Maven
-        run: ./mvnw -s .build/maven-ci-settings.xml -B clean verify
+        run: ./mvnw --no-transfer-progress -s .build/maven-ci-settings.xml -B clean verify
       - name: Deploy snapshots
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

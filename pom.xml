@@ -117,6 +117,7 @@
 
         <jandex-maven-plugin.version>1.2.3</jandex-maven-plugin.version>
         <find-and-replace-maven-plugin.version>1.1.0</find-and-replace-maven-plugin.version>
+        <jreleaser-maven-plugin.version>1.8.0</jreleaser-maven-plugin.version>
     </properties>
 
     <dependencyManagement>
@@ -518,5 +519,45 @@
                 </pluginManagement>
             </build>
         </profile>
+
+        <profile>
+            <id>jreleaser</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.jreleaser</groupId>
+                        <artifactId>jreleaser-maven-plugin</artifactId>
+                        <version>${jreleaser-maven-plugin.version}</version>
+                        <inherited>false</inherited>
+                        <configuration>
+                            <projectVersionPattern>SEMVER</projectVersionPattern>
+                            <jreleaser>
+                                <release>
+                                    <github>
+                                        <owner>smallrye</owner>
+                                        <name>smallrye-mutiny</name>
+                                        <overwrite>true</overwrite>
+                                        <changelog>
+                                            <preset>conventional-commits</preset>
+                                            <links>true</links>
+                                            <formatted>ALWAYS</formatted>
+                                            <hide>
+                                                <contributors>
+                                                    <contributor>GitHub</contributor>
+                                                    <contributor>dependabot[bot]</contributor>
+                                                    <contributor>bot</contributor>
+                                                    <contributor>jreleaserbot</contributor>
+                                                </contributors>
+                                            </hide>
+                                        </changelog>
+                                    </github>
+                                </release>
+                            </jreleaser>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
     </profiles>
 </project>
