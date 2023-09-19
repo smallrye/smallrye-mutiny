@@ -2,9 +2,9 @@
 //DEPS io.smallrye.reactive:mutiny:2.4.0
 package _03_composition_transformation;
 
-import io.smallrye.mutiny.Uni;
-
 import java.util.Random;
+
+import io.smallrye.mutiny.Uni;
 
 public class _20_Uni_Branching {
 

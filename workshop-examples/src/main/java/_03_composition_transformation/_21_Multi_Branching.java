@@ -2,10 +2,10 @@
 //DEPS io.smallrye.reactive:mutiny:2.4.0
 package _03_composition_transformation;
 
+import java.util.Random;
+
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
-
-import java.util.Random;
 
 public class _21_Multi_Branching {
 
@@ -28,7 +28,7 @@ public class _21_Multi_Branching {
     }
 
     static Uni<String> drop() {
-        return Uni.createFrom().<String>nullItem()
+        return Uni.createFrom().<String> nullItem()
                 .onItem().invoke(() -> System.out.println("(dropping negative value)"));
     }
 
