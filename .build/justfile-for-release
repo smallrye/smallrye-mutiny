@@ -46,7 +46,7 @@ pre-release: decrypt-secrets init-gpg init-git
     @echo "Bump workshop examples to ${RELEASE_VERSION}"
     .build/update-workshop-target-version.sh "${RELEASE_VERSION}"
     @echo "Check that the website builds"
-    [[ ${DEPLOY_WEBSITE} == "true" ]] && cd documentation && pipenv run mkdocs build
+    -[[ ${DEPLOY_WEBSITE} == "true" ]] && cd documentation && pipenv run mkdocs build
 
 # Steps to release
 release: pre-release
@@ -57,7 +57,7 @@ release: pre-release
     @echo "Call JReleaser"
     ./mvnw -settings .build/maven-ci-settings.xml --batch-mode --no-transfer-progress -Pjreleaser jreleaser:full-release -pl :mutiny-project
     @echo "Deploy to Maven Central"
-    ./mvnw --settings maven-settings.xml --batch-mode --no-transfer-progress deploy -Prelease -DskipTests
+    -./mvnw --settings maven-settings.xml --batch-mode --no-transfer-progress deploy -Prelease -DskipTests
     @echo "Bump to 999-SNAPSHOT and push upstream"
     ./mvnw --settings .build/maven-ci-settings.xml --batch-mode --no-transfer-progress versions:set -DnewVersion=999-SNAPSHOT -DgenerateBackupPoms=false
     ./mvnw --settings .build/maven-ci-settings.xml --batch-mode --no-transfer-progress versions:set -DnewVersion=999-SNAPSHOT -DgenerateBackupPoms=false -pl bom
@@ -67,8 +67,8 @@ release: pre-release
 # Steps post-release
 post-release:
     @echo "🚀 Post-release steps..."
-    [[ ${CLEAR_REVAPI} == "true" ]] && just -f .build/justfile-for-release -d . clear-revapi
-    [[ ${DEPLOY_WEBSITE} == "true" ]] && .build/deploy-site.sh
+    -[[ ${CLEAR_REVAPI} == "true" ]] && just -f .build/justfile-for-release -d . clear-revapi
+    -[[ ${DEPLOY_WEBSITE} == "true" ]] && .build/deploy-site.sh
 
 # Clear RevAPI justifications
 clear-revapi:
