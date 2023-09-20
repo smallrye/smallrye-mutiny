@@ -38,8 +38,8 @@ pre-release: decrypt-secrets init-gpg init-git
     @echo "Bump project version to ${RELEASE_VERSION}"
     ./mvnw --settings .build/maven-ci-settings.xml --batch-mode --no-transfer-progress versions:set -DnewVersion=${RELEASE_VERSION} -DgenerateBackupPoms=false
     ./mvnw --settings .build/maven-ci-settings.xml --batch-mode --no-transfer-progress versions:set -DnewVersion=${RELEASE_VERSION} -DgenerateBackupPoms=false -pl bom
-    jbang .build/UpdateDocsAttributesFiles.java --mutiny-version=${VERSION}
-    .build/update-workshop-target-version.sh "${VERSION}"
+    jbang .build/UpdateDocsAttributesFiles.java --mutiny-version=${RELEASE_VERSION}
+    .build/update-workshop-target-version.sh "${RELEASE_VERSION}"
     @echo "Check that the project builds (no tests)"
     ./mvnw --settings maven-settings.xml --batch-mode --no-transfer-progress clean install -Prelease -DskipTests
     @echo "Check that the website builds"
