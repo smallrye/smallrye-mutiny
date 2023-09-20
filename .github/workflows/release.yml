@@ -21,6 +21,9 @@ on:
 jobs:
   release:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
     env:
       RELEASE_TOKEN: ${{ secrets.RELEASE_TOKEN }}
       SECRET_FILES_PASSPHRASE: ${{ secrets.SECRET_FILES_PASSPHRASE }}
