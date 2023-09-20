@@ -21,9 +21,6 @@ on:
 jobs:
   release:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        shell: bash
     env:
       RELEASE_TOKEN: ${{ secrets.RELEASE_TOKEN }}
       SECRET_FILES_PASSPHRASE: ${{ secrets.SECRET_FILES_PASSPHRASE }}
@@ -51,12 +48,10 @@ jobs:
       - name: Install yq
         uses: mikefarah/yq@master
       - name: Setup Python
-        if: ${{ github.event.inputs.deployWebsite == 'true' }}
         uses: actions/setup-python@v4
         with:
           python-version: 3.x
       - name: Install MkDocs dependencies
-        if: ${{ github.event.inputs.deployWebsite == 'true' }}
         run: .build/install-mkdocs-deps.sh
       - name: Perform the release steps
         run: |
