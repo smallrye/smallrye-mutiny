@@ -1,5 +1,5 @@
 ///usr/bin/env jbang "$0" "$@" ; exit $?
-//DEPS io.smallrye.reactive:mutiny:2.4.0
+//DEPS io.smallrye.reactive:mutiny:2.5.0-M1
 package _03_composition_transformation;
 
 import java.io.IOException;
