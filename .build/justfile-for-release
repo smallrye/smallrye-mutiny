@@ -43,7 +43,7 @@ pre-release: decrypt-secrets init-gpg init-git
     @echo "Check that the project builds (no tests)"
     ./mvnw --settings maven-settings.xml --batch-mode --no-transfer-progress clean install -Prelease -DskipTests
     @echo "Check that the website builds"
-    [[ ${DEPLOY_WEBSITE} == "true" ]] && cd documentation && pipenv run mkdocs build
+    [ ${DEPLOY_WEBSITE} = "true" ] && cd documentation && pipenv run mkdocs build
 
 # Steps to release
 release: pre-release
@@ -64,8 +64,8 @@ release: pre-release
 # Steps post-release
 post-release:
     @echo "🚀 Post-release steps..."
-    [[ ${CLEAR_REVAPI} == "true" ]] && just -f .build/justfile-for-release -d . clear-revapi
-    [[ ${DEPLOY_WEBSITE} == "true" ]] && .build/deploy-site.sh
+    [ ${CLEAR_REVAPI} = "true" ] && just -f .build/justfile-for-release -d . clear-revapi
+    [ ${DEPLOY_WEBSITE} = "true" ] && .build/deploy-site.sh
 
 # Clear RevAPI justifications
 clear-revapi:
