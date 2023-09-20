@@ -20,12 +20,12 @@ jobs:
           java-version: 11
           distribution: temurin
           cache: maven
+      - name: Install just
+        uses: taiki-e/install-action@just
       - name: Build with Maven
         run: ./mvnw --no-transfer-progress -s .build/maven-ci-settings.xml -B clean verify
       - name: Deploy snapshots
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SECRET_FILES_PASSPHRASE: ${{ secrets.SECRET_FILES_PASSPHRASE }}
-        run: |
-          .build/decrypt-secrets.sh
-          .build/deploy-snapshot.sh
+        run: just -f .build/justfile-for-release -d . deploy-to-maven-central

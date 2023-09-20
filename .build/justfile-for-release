@@ -56,13 +56,16 @@ release: pre-release
     git push
     @echo "Call JReleaser"
     ./mvnw -settings .build/maven-ci-settings.xml --batch-mode --no-transfer-progress -Pjreleaser jreleaser:full-release -pl :mutiny-project
-    @echo "Deploy to Maven Central"
-    -./mvnw --settings maven-settings.xml --batch-mode --no-transfer-progress deploy -Prelease -DskipTests
     @echo "Bump to 999-SNAPSHOT and push upstream"
     ./mvnw --settings .build/maven-ci-settings.xml --batch-mode --no-transfer-progress versions:set -DnewVersion=999-SNAPSHOT -DgenerateBackupPoms=false
     ./mvnw --settings .build/maven-ci-settings.xml --batch-mode --no-transfer-progress versions:set -DnewVersion=999-SNAPSHOT -DgenerateBackupPoms=false -pl bom
     git commit -am "chore(release): set development version to 999-SNAPSHOT"
     git push
+
+# Deploy to Maven Central
+deploy-to-maven-central: decrypt-secrets init-gpg
+    @echo "Deploy to Maven Central"
+    ./mvnw --settings maven-settings.xml --batch-mode --no-transfer-progress deploy -Prelease -DskipTests
 
 # Steps post-release
 post-release:
