@@ -547,6 +547,7 @@
                                                     <contributor>dependabot[bot]</contributor>
                                                     <contributor>bot</contributor>
                                                     <contributor>jreleaserbot</contributor>
+                                                    <contributor>smallrye-ci</contributor>
                                                 </contributors>
                                             </hide>
                                         </changelog>

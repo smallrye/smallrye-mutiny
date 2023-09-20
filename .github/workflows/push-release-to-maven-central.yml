@@ -1,0 +1,25 @@
+name: Push a release to Maven Central
+
+on:
+  push:
+    tags:
+      - '2.*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    env:
+      SECRET_FILES_PASSPHRASE: ${{ secrets.SECRET_FILES_PASSPHRASE }}
+    steps:
+      - name: Git checkout
+        uses: actions/checkout@v3
+      - name: Java setup
+        uses: actions/setup-java@v3
+        with:
+          java-version: '11'
+          distribution: 'temurin'
+          cache: maven
+      - name: Install just
+        uses: taiki-e/install-action@just
+      - name: Deploy tp Maven Central
+        run: just -f .build/justfile-for-release -d . deploy-to-maven-central
