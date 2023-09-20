@@ -29,7 +29,7 @@ init-gpg:
 # Initialize Git
 init-git:
     @echo "Git setup"
-    git config --global user.name "${GITHUB_ACTOR}"
+    git config --global user.name "smallrye-ci"
     git config --global user.email "smallrye@googlegroups.com"
 
 # Steps before releasing
