@@ -29,6 +29,7 @@ jobs:
       DEPLOY_WEBSITE: ${{ github.event.inputs.deployWebsite }}
       CLEAR_REVAPI: ${{ github.event.inputs.clearRevAPI }}
       JRELEASER_TAG_NAME: ${{ github.event.inputs.version }}
+      JRELEASER_PREVIOUS_TAG_NAME: ${{ github.event.inputs.previousVersion }}
       JRELEASER_GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
 
     steps:
