@@ -53,6 +53,7 @@ release: pre-release
     @echo "🚀 Release steps..."
     @echo "Commit release version and push upstream"
     git commit -am "chore(release): release Mutiny ${RELEASE_VERSION}"
+    git push
     @echo "Call JReleaser"
     ./mvnw -settings .build/maven-ci-settings.xml --batch-mode --no-transfer-progress -Pjreleaser jreleaser:full-release -pl :mutiny-project
     @echo "Bump to 999-SNAPSHOT and push upstream"
