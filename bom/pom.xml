@@ -6,7 +6,7 @@
 
     <groupId>io.smallrye.reactive</groupId>
     <artifactId>mutiny-bom</artifactId>
-    <version>2.5.0-M3</version>
+    <version>999-SNAPSHOT</version>
 
     <packaging>pom</packaging>
 
