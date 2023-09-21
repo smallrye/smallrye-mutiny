@@ -552,7 +552,6 @@
                                             </hide>
                                         </changelog>
                                         <prerelease>
-                                            <enabled>true</enabled>
                                             <pattern>.*-M[0-9]+</pattern>
                                         </prerelease>
                                         <discussionCategoryName>Announcements</discussionCategoryName>
