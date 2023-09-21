@@ -11,7 +11,7 @@
 
     <groupId>io.smallrye.reactive</groupId>
     <artifactId>mutiny-project</artifactId>
-    <version>999-SNAPSHOT</version>
+    <version>2.5.0-M2</version>
     <packaging>pom</packaging>
 
     <name>SmallRye Mutiny - Parent</name>
