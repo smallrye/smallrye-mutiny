@@ -551,6 +551,9 @@
                                                 </contributors>
                                             </hide>
                                         </changelog>
+                                        <prerelease>
+                                            <pattern>.*-M[0-9]+</pattern>
+                                        </prerelease>
                                     </github>
                                 </release>
                             </jreleaser>
