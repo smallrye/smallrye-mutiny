@@ -22,10 +22,17 @@ jobs:
           cache: maven
       - name: Install just
         uses: taiki-e/install-action@just
-      - name: Build with Maven
-        run: ./mvnw --no-transfer-progress -s .build/maven-ci-settings.xml -B clean verify
-      - name: Deploy snapshots
+      - name: Test and deploy snapshots
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SECRET_FILES_PASSPHRASE: ${{ secrets.SECRET_FILES_PASSPHRASE }}
-        run: just -f .build/justfile-for-release -d . deploy-to-maven-central
+        run: |
+          VERSION=$(./mvnw -q exec:exec -Dexec.executable=echo -Dexec.args='${project.version}' -pl :mutiny-project)
+          if [[ ${VERSION} == *SNAPSHOT ]]; then
+              echo "🚀 Run the tests"
+              ./mvnw --no-transfer-progress -s .build/maven-ci-settings.xml -B clean verify
+              echo "🚀 Deploy the snapshots"
+              just -f .build/justfile-for-release -d . deploy-to-maven-central 
+          else
+              echo "🤌 This is a release commit, we won't do anything!"
+          fi
