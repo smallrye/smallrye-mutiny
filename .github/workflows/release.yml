@@ -22,6 +22,7 @@ jobs:
   release:
     runs-on: ubuntu-latest
     env:
+      GITHUB_TOKEN: ${{secrets.RELEASE_TOKEN}}
       RELEASE_TOKEN: ${{ secrets.RELEASE_TOKEN }}
       SECRET_FILES_PASSPHRASE: ${{ secrets.SECRET_FILES_PASSPHRASE }}
       PREVIOUS_VERSION: ${{ github.event.inputs.previousVersion }}
