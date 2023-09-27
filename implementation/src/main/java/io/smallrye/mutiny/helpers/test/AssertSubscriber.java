@@ -5,8 +5,6 @@ import static java.lang.Integer.parseInt;
 import static java.time.Duration.ofSeconds;
 
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.concurrent.*;
@@ -67,7 +65,7 @@ public class AssertSubscriber<T> implements MultiSubscriber<T>, ContextSupport {
     /**
      * The received items.
      */
-    private final List<T> items = Collections.synchronizedList(new ArrayList<>());
+    private final List<T> items = new CopyOnWriteArrayList<>();
 
     /**
      * The received failure.
