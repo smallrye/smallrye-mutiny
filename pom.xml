@@ -6,7 +6,7 @@
     <parent>
         <groupId>io.smallrye</groupId>
         <artifactId>smallrye-build-parent</artifactId>
-        <version>41</version>
+        <version>42</version>
     </parent>
 
     <groupId>io.smallrye.reactive</groupId>
@@ -237,7 +237,7 @@
     <repositories>
         <repository>
             <id>sonatype-snapshots</id>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+            <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
             <snapshots>
                 <enabled>true</enabled>
             </snapshots>
