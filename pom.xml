@@ -93,7 +93,7 @@
         <junit4.version>4.13.2</junit4.version>
         <awaitility.version>4.2.0</awaitility.version>
         <version.surefire.plugin>3.1.2</version.surefire.plugin>
-        <testng.version>7.7.1</testng.version>
+        <testng.version>7.8.0</testng.version>
         <testng-junit5-engine.version>1.0.4</testng-junit5-engine.version>
         <mockito-core.version>5.5.0</mockito-core.version>
 
