@@ -97,7 +97,9 @@
         <version.surefire.plugin>3.1.2</version.surefire.plugin>
         <testng.version>7.8.0</testng.version>
         <testng-junit5-engine.version>1.0.4</testng-junit5-engine.version>
+
         <mockito-core.version>5.5.0</mockito-core.version>
+        <byte-buddy.version>1.14.9</byte-buddy.version>
 
         <revapi-maven-plugin.version>0.15.0</revapi-maven-plugin.version>
         <revapi-java.version>0.28.1</revapi-java.version>
@@ -172,6 +174,11 @@
                 <artifactId>mockito-core</artifactId>
                 <version>${mockito-core.version}</version>
                 <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>net.bytebuddy</groupId>
+                <artifactId>byte-buddy</artifactId>
+                <version>${byte-buddy.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.smallrye</groupId>
