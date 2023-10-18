@@ -74,6 +74,7 @@
         <module>bom</module>
         <module>math</module>
         <module>workshop-examples</module>
+        <module>native-tests</module>
     </modules>
 
     <properties>
