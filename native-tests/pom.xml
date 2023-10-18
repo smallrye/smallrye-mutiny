@@ -42,7 +42,7 @@
                 <dependency>
                     <groupId>org.graalvm.buildtools</groupId>
                     <artifactId>junit-platform-native</artifactId>
-                    <version>0.9.27</version>
+                    <version>${junit-platform-native.version}</version>
                     <scope>test</scope>
                 </dependency>
             </dependencies>
@@ -51,16 +51,9 @@
                     <plugin>
                         <groupId>org.graalvm.buildtools</groupId>
                         <artifactId>native-maven-plugin</artifactId>
-                        <version>0.9.7.1</version>
+                        <version>${native-maven-plugin.version}</version>
                         <extensions>true</extensions>
                         <executions>
-<!--                            <execution>-->
-<!--                                <id>build-native</id>-->
-<!--                                <goals>-->
-<!--                                    <goal>build</goal>-->
-<!--                                </goals>-->
-<!--                                <phase>package</phase>-->
-<!--                            </execution>-->
                             <execution>
                                 <id>test-native</id>
                                 <goals>
