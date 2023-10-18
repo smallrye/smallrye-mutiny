@@ -1,31 +1,12 @@
 package io.smallrye.mutiny.infrastructure;
 
-import static io.smallrye.mutiny.helpers.ParameterValidation.*;
 import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
+import static io.smallrye.mutiny.helpers.ParameterValidation.positive;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Iterator;
-import java.util.List;
-import java.util.ServiceLoader;
-import java.util.concurrent.Callable;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Flow;
+import java.util.*;
+import java.util.concurrent.*;
 import java.util.concurrent.Flow.Subscriber;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.function.BiConsumer;
-import java.util.function.BiFunction;
-import java.util.function.BinaryOperator;
-import java.util.function.BooleanSupplier;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.LongConsumer;
-import java.util.function.Predicate;
-import java.util.function.Supplier;
-import java.util.function.UnaryOperator;
+import java.util.function.*;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
@@ -69,6 +50,8 @@ public class Infrastructure {
     private static int bufferSizeXs = 32;
     private static int bufferSizeS = 256;
 
+    private static boolean useUnsafeForQueues = true;
+
     public static void reload() {
         clearInterceptors();
         reloadUniInterceptors();
@@ -77,6 +60,27 @@ public class Infrastructure {
         multiOverflowDefaultBufferSize = 128;
         bufferSizeXs = 32;
         bufferSizeS = 256;
+        useUnsafeForQueues = true;
+    }
+
+    /**
+     * Should JCTools queues use variants with {@code Unsafe}, or should they use atomic field updaters?
+     * Atomic field updates work across JVM and native images, while padded JCTools queues are better suited
+     * for JVM mode applications.
+     *
+     * @return {@code true} when {@code Unsafe} should be reasonably available, {@code false} otherwise
+     */
+    public static boolean useUnsafeForQueues() {
+        return useUnsafeForQueues;
+    }
+
+    /**
+     * Change how JCTools queues should be created ({@code Unsafe} vs atomic field updaters).
+     *
+     * @param useUnsafeForQueues {@code true} when {@code Unsafe} should be reasonably available, {@code false} otherwise
+     */
+    public static void setUseUnsafeForQueues(boolean useUnsafeForQueues) {
+        Infrastructure.useUnsafeForQueues = useUnsafeForQueues;
     }
 
     /**

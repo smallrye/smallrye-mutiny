@@ -3,10 +3,14 @@ package io.smallrye.mutiny.helpers.queues;
 import java.util.Queue;
 import java.util.function.Supplier;
 
-import org.jctools.queues.MpscArrayQueue;
-import org.jctools.queues.MpscLinkedQueue;
-import org.jctools.queues.SpscArrayQueue;
-import org.jctools.queues.SpscUnboundedArrayQueue;
+import org.jctools.queues.atomic.MpscAtomicArrayQueue;
+import org.jctools.queues.atomic.MpscLinkedAtomicQueue;
+import org.jctools.queues.atomic.SpscAtomicArrayQueue;
+import org.jctools.queues.atomic.SpscUnboundedAtomicArrayQueue;
+import org.jctools.queues.unpadded.MpscLinkedUnpaddedQueue;
+import org.jctools.queues.unpadded.MpscUnpaddedArrayQueue;
+import org.jctools.queues.unpadded.SpscUnboundedUnpaddedArrayQueue;
+import org.jctools.queues.unpadded.SpscUnpaddedArrayQueue;
 
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 
@@ -22,17 +26,24 @@ public class Queues {
         // avoid direct instantiation
     }
 
-    static final Supplier EMPTY_QUEUE_SUPPLIER = EmptyQueue::new;
-    static final Supplier SINGLETON_QUEUE_SUPPLIER = SingletonQueue::new;
+    public static <T> Queue<T> createSpscArrayQueue(int size) {
+        if (Infrastructure.useUnsafeForQueues()) {
+            return new SpscUnpaddedArrayQueue<>(size);
+        } else {
+            return new SpscAtomicArrayQueue<>(size);
+        }
+    }
 
-    static final Supplier XS_QUEUE_SUPPLIER = () -> new SpscArrayQueue<>(Infrastructure.getBufferSizeXs());
-    static final Supplier S_QUEUE_SUPPLIER = () -> new SpscArrayQueue<>(Infrastructure.getBufferSizeS());
-
-    static final Supplier UNBOUNDED_QUEUE_SUPPLIER = () -> new SpscUnboundedArrayQueue<>(Infrastructure.getBufferSizeS());
-    static final Supplier XS_UNBOUNDED_QUEUE_SUPPLIER = () -> new SpscUnboundedArrayQueue<>(Infrastructure.getBufferSizeXs());
+    public static <T> Queue<T> createSpscUnboundedArrayQueue(int size) {
+        if (Infrastructure.useUnsafeForQueues()) {
+            return new SpscUnboundedUnpaddedArrayQueue<>(size);
+        } else {
+            return new SpscUnboundedAtomicArrayQueue<>(size);
+        }
+    }
 
     public static <T> Supplier<Queue<T>> getXsQueueSupplier() {
-        return (Supplier<Queue<T>>) XS_QUEUE_SUPPLIER;
+        return () -> createSpscArrayQueue(Infrastructure.getBufferSizeXs());
     }
 
     /**
@@ -46,26 +57,26 @@ public class Queues {
      */
     public static <T> Supplier<Queue<T>> get(int bufferSize) {
         if (bufferSize == Infrastructure.getBufferSizeXs()) {
-            return XS_QUEUE_SUPPLIER;
+            return () -> createSpscArrayQueue(Infrastructure.getBufferSizeXs());
         }
 
         if (bufferSize == Infrastructure.getBufferSizeS()) {
-            return S_QUEUE_SUPPLIER;
+            return () -> createSpscArrayQueue(Infrastructure.getBufferSizeS());
         }
 
         if (bufferSize == 1) {
-            return SINGLETON_QUEUE_SUPPLIER;
+            return SingletonQueue::new;
         }
 
         if (bufferSize == 0) {
-            return EMPTY_QUEUE_SUPPLIER;
+            return EmptyQueue::new;
         }
 
         final int computedSize = Math.max(8, bufferSize);
         if (computedSize > TOO_LARGE_TO_BE_BOUNDED) {
-            return UNBOUNDED_QUEUE_SUPPLIER;
+            return () -> createSpscUnboundedArrayQueue(Infrastructure.getBufferSizeS());
         } else {
-            return () -> new SpscArrayQueue<>(computedSize);
+            return () -> createSpscArrayQueue(computedSize);
         }
     }
 
@@ -80,11 +91,11 @@ public class Queues {
     @SuppressWarnings("unchecked")
     public static <T> Supplier<Queue<T>> unbounded(int size) {
         if (size == Infrastructure.getBufferSizeXs()) {
-            return XS_UNBOUNDED_QUEUE_SUPPLIER;
+            return () -> createSpscUnboundedArrayQueue(Infrastructure.getBufferSizeXs());
         } else if (size == Integer.MAX_VALUE || size == Infrastructure.getBufferSizeS()) {
-            return UNBOUNDED_QUEUE_SUPPLIER;
+            return () -> createSpscUnboundedArrayQueue(Infrastructure.getBufferSizeS());
         } else {
-            return () -> new SpscUnboundedArrayQueue<>(size);
+            return () -> createSpscUnboundedArrayQueue(size);
         }
     }
 
@@ -95,7 +106,11 @@ public class Queues {
      * @return the queue
      */
     public static <T> Queue<T> createMpscQueue() {
-        return new MpscLinkedQueue<>();
+        if (Infrastructure.useUnsafeForQueues()) {
+            return new MpscLinkedUnpaddedQueue<>();
+        } else {
+            return new MpscLinkedAtomicQueue<>();
+        }
     }
 
     /**
@@ -106,7 +121,11 @@ public class Queues {
      * @param <T> the item type
      */
     public static <T> Queue<T> createSpscUnboundedQueue(int size) {
-        return new SpscUnboundedArrayQueue<>(size);
+        if (Infrastructure.useUnsafeForQueues()) {
+            return new SpscUnboundedUnpaddedArrayQueue<>(size);
+        } else {
+            return new SpscUnboundedAtomicArrayQueue<>(size);
+        }
     }
 
     /**
@@ -117,7 +136,11 @@ public class Queues {
      * @return a new queue
      */
     public static <T> Queue<T> createMpscArrayQueue(int size) {
-        return new MpscArrayQueue<>(size);
+        if (Infrastructure.useUnsafeForQueues()) {
+            return new MpscUnpaddedArrayQueue<>(size);
+        } else {
+            return new MpscAtomicArrayQueue<>(size);
+        }
     }
 
     /**
