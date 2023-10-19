@@ -40,6 +40,12 @@
             <id>native</id>
             <dependencies>
                 <dependency>
+                    <groupId>org.graalvm.sdk</groupId>
+                    <artifactId>graal-sdk</artifactId>
+                    <version>${graal-sdk.version}</version>
+                    <scope>test</scope>
+                </dependency>
+                <dependency>
                     <groupId>org.graalvm.buildtools</groupId>
                     <artifactId>junit-platform-native</artifactId>
                     <version>${junit-platform-native.version}</version>
