@@ -65,6 +65,6 @@ jobs:
           candidate: java
           version: 21-graalce
       - name: Quick build
-        run: ./mvnw --no-transfer-progress -s .build/maven-ci-settings.xml -Dquickly
+        run: ./mvnw --no-transfer-progress -s .build/maven-ci-settings.xml --DskipTests
       - name: Run native tests
         run: ./mvnw --no-transfer-progress -s .build/maven-ci-settings.xml verify -f native-tests -Pnative
