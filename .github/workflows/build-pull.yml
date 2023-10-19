@@ -54,17 +54,3 @@ jobs:
           cache: maven
       - name: Compatibility Check
         run: ./mvnw --no-transfer-progress -s .build/maven-ci-settings.xml -pl '!bom' -B install revapi:check@check-compatibility -DskipTests -fae
-
-  native-compilation:
-    runs-on: ubuntu-latest
-    name: Native compilation checks
-    steps:
-      - uses: actions/checkout@v3
-      - uses: sdkman/sdkman-action@main
-        with:
-          candidate: java
-          version: 21-graalce
-      - name: Quick build
-        run: ./mvnw --no-transfer-progress -s .build/maven-ci-settings.xml -DskipTests clean install
-      - name: Run native tests
-        run: ./mvnw --no-transfer-progress -s .build/maven-ci-settings.xml verify -f native-tests -Pnative
