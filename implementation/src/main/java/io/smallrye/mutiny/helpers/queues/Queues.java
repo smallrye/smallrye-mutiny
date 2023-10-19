@@ -4,11 +4,13 @@ import java.util.Queue;
 import java.util.function.Supplier;
 
 import org.jctools.queues.atomic.MpscAtomicArrayQueue;
-import org.jctools.queues.atomic.MpscLinkedAtomicQueue;
+import org.jctools.queues.atomic.MpscUnboundedAtomicArrayQueue;
 import org.jctools.queues.atomic.SpscAtomicArrayQueue;
+import org.jctools.queues.atomic.SpscChunkedAtomicArrayQueue;
 import org.jctools.queues.atomic.SpscUnboundedAtomicArrayQueue;
-import org.jctools.queues.unpadded.MpscLinkedUnpaddedQueue;
+import org.jctools.queues.unpadded.MpscUnboundedUnpaddedArrayQueue;
 import org.jctools.queues.unpadded.MpscUnpaddedArrayQueue;
+import org.jctools.queues.unpadded.SpscChunkedUnpaddedArrayQueue;
 import org.jctools.queues.unpadded.SpscUnboundedUnpaddedArrayQueue;
 import org.jctools.queues.unpadded.SpscUnpaddedArrayQueue;
 
@@ -16,11 +18,6 @@ import io.smallrye.mutiny.infrastructure.Infrastructure;
 
 @SuppressWarnings({ "rawtypes", "unchecked" })
 public class Queues {
-
-    /**
-     * Queues with a requested with a capacity greater than this value are unbounded.
-     */
-    public static final int TOO_LARGE_TO_BE_BOUNDED = 10_000_000;
 
     private Queues() {
         // avoid direct instantiation
@@ -39,6 +36,14 @@ public class Queues {
             return new SpscUnboundedUnpaddedArrayQueue<>(size);
         } else {
             return new SpscUnboundedAtomicArrayQueue<>(size);
+        }
+    }
+
+    public static <T> Queue<T> createSpscChunkedArrayQueue(int size) {
+        if (Infrastructure.useUnsafeForQueues()) {
+            return new SpscChunkedUnpaddedArrayQueue<>(size);
+        } else {
+            return new SpscChunkedAtomicArrayQueue<>(size);
         }
     }
 
@@ -72,12 +77,7 @@ public class Queues {
             return EmptyQueue::new;
         }
 
-        final int computedSize = Math.max(8, bufferSize);
-        if (computedSize > TOO_LARGE_TO_BE_BOUNDED) {
-            return () -> createSpscUnboundedArrayQueue(Infrastructure.getBufferSizeS());
-        } else {
-            return () -> createSpscArrayQueue(computedSize);
-        }
+        return () -> createSpscChunkedArrayQueue(bufferSize);
     }
 
     /**
@@ -107,9 +107,9 @@ public class Queues {
      */
     public static <T> Queue<T> createMpscQueue() {
         if (Infrastructure.useUnsafeForQueues()) {
-            return new MpscLinkedUnpaddedQueue<>();
+            return new MpscUnboundedUnpaddedArrayQueue<>(Infrastructure.getBufferSizeS());
         } else {
-            return new MpscLinkedAtomicQueue<>();
+            return new MpscUnboundedAtomicArrayQueue<>(Infrastructure.getBufferSizeS());
         }
     }
 
