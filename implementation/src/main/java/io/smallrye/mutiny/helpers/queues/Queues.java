@@ -16,7 +16,6 @@ import org.jctools.queues.unpadded.SpscUnpaddedArrayQueue;
 
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 
-@SuppressWarnings({ "rawtypes", "unchecked" })
 public class Queues {
 
     private Queues() {
@@ -88,7 +87,6 @@ public class Queues {
      * @param <T> the type of item
      * @return the unbound queue supplier
      */
-    @SuppressWarnings("unchecked")
     public static <T> Supplier<Queue<T>> unbounded(int size) {
         if (size == Infrastructure.getBufferSizeXs()) {
             return () -> createSpscUnboundedArrayQueue(Infrastructure.getBufferSizeXs());
