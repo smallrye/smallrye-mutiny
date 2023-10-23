@@ -5,7 +5,6 @@ import java.util.Queue;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import io.smallrye.mutiny.helpers.Subscriptions;
-import io.smallrye.mutiny.helpers.queues.Queues;
 import io.smallrye.mutiny.subscription.MultiEmitter;
 import io.smallrye.mutiny.subscription.MultiSubscriber;
 
@@ -16,6 +15,7 @@ public class BufferItemMultiEmitter<T> extends BaseMultiEmitter<T> {
     private Throwable failure;
     private volatile boolean done;
     private final AtomicInteger wip = new AtomicInteger();
+    private final AtomicInteger strictBoundCounter = new AtomicInteger();
 
     BufferItemMultiEmitter(MultiSubscriber<? super T> actual, Queue<T> queue, int overflowBufferSize) {
         super(actual);
@@ -33,7 +33,7 @@ public class BufferItemMultiEmitter<T> extends BaseMultiEmitter<T> {
             fail(new NullPointerException("`emit` called with `null`."));
             return this;
         }
-        if (queue.offer(t) && !Queues.isOverflowing(queue, overflowBufferSize)) {
+        if (queue.offer(t) && (overflowBufferSize == -1 || strictBoundCounter.incrementAndGet() < overflowBufferSize)) {
             drain();
         } else {
             fail(new EmitterBufferOverflowException());
@@ -117,6 +117,9 @@ public class BufferItemMultiEmitter<T> extends BaseMultiEmitter<T> {
                 }
 
                 try {
+                    if (overflowBufferSize != -1) {
+                        strictBoundCounter.decrementAndGet();
+                    }
                     downstream.onItem(o);
                 } catch (Throwable x) {
                     cancel();

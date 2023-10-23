@@ -140,18 +140,4 @@ public class Queues {
             return new MpscAtomicArrayQueue<>(size);
         }
     }
-
-    /**
-     * Check when a non-strictly sized queue overflow.
-     *
-     * @param queue the queue
-     * @param limit the limit, a negative value assumes an unbounded queue
-     * @return {@code true} if the queue overflow, {@code false} otherwise
-     */
-    public static boolean isOverflowing(Queue<?> queue, int limit) {
-        if (limit < 0) {
-            return false;
-        }
-        return queue.size() >= limit;
-    }
 }
