@@ -22,27 +22,27 @@ public class Queues {
         // avoid direct instantiation
     }
 
-    public static <T> Queue<T> createSpscArrayQueue(int size) {
+    public static <T> Queue<T> createSpscArrayQueue(int capacity) {
         if (Infrastructure.useUnsafeForQueues()) {
-            return new SpscUnpaddedArrayQueue<>(size);
+            return new SpscUnpaddedArrayQueue<>(capacity);
         } else {
-            return new SpscAtomicArrayQueue<>(size);
+            return new SpscAtomicArrayQueue<>(capacity);
         }
     }
 
-    public static <T> Queue<T> createSpscUnboundedArrayQueue(int size) {
+    public static <T> Queue<T> createSpscUnboundedArrayQueue(int chunkSize) {
         if (Infrastructure.useUnsafeForQueues()) {
-            return new SpscUnboundedUnpaddedArrayQueue<>(size);
+            return new SpscUnboundedUnpaddedArrayQueue<>(chunkSize);
         } else {
-            return new SpscUnboundedAtomicArrayQueue<>(size);
+            return new SpscUnboundedAtomicArrayQueue<>(chunkSize);
         }
     }
 
-    public static <T> Queue<T> createSpscChunkedArrayQueue(int size) {
+    public static <T> Queue<T> createSpscChunkedArrayQueue(int capacity) {
         if (Infrastructure.useUnsafeForQueues()) {
-            return new SpscChunkedUnpaddedArrayQueue<>(size);
+            return new SpscChunkedUnpaddedArrayQueue<>(capacity);
         } else {
-            return new SpscChunkedAtomicArrayQueue<>(size);
+            return new SpscChunkedAtomicArrayQueue<>(capacity);
         }
     }
 
@@ -55,45 +55,45 @@ public class Queues {
      * <p>
      * The type of the queue and configuration is computed based on the given buffer size.
      *
-     * @param bufferSize the buffer size
+     * @param capacity the buffer size
      * @param <T> the type of element
      * @return the supplier.
      */
-    public static <T> Supplier<Queue<T>> get(int bufferSize) {
-        if (bufferSize == Infrastructure.getBufferSizeXs()) {
+    public static <T> Supplier<Queue<T>> get(int capacity) {
+        if (capacity == Infrastructure.getBufferSizeXs()) {
             return () -> createSpscArrayQueue(Infrastructure.getBufferSizeXs());
         }
 
-        if (bufferSize == Infrastructure.getBufferSizeS()) {
+        if (capacity == Infrastructure.getBufferSizeS()) {
             return () -> createSpscArrayQueue(Infrastructure.getBufferSizeS());
         }
 
-        if (bufferSize == 1) {
+        if (capacity == 1) {
             return SingletonQueue::new;
         }
 
-        if (bufferSize == 0) {
+        if (capacity == 0) {
             return EmptyQueue::new;
         }
 
-        return () -> createSpscChunkedArrayQueue(bufferSize);
+        return () -> createSpscChunkedArrayQueue(capacity);
     }
 
     /**
      * Returns an unbounded Queue.
      * The queue is array-backed. Each array has the given size. If the queue is full, new arrays can be allocated.
      *
-     * @param size the size of the array
+     * @param chunkSize the size of the array
      * @param <T> the type of item
      * @return the unbound queue supplier
      */
-    public static <T> Supplier<Queue<T>> unbounded(int size) {
-        if (size == Infrastructure.getBufferSizeXs()) {
+    public static <T> Supplier<Queue<T>> unbounded(int chunkSize) {
+        if (chunkSize == Infrastructure.getBufferSizeXs()) {
             return () -> createSpscUnboundedArrayQueue(Infrastructure.getBufferSizeXs());
-        } else if (size == Integer.MAX_VALUE || size == Infrastructure.getBufferSizeS()) {
+        } else if (chunkSize == Integer.MAX_VALUE || chunkSize == Infrastructure.getBufferSizeS()) {
             return () -> createSpscUnboundedArrayQueue(Infrastructure.getBufferSizeS());
         } else {
-            return () -> createSpscUnboundedArrayQueue(size);
+            return () -> createSpscUnboundedArrayQueue(chunkSize);
         }
     }
 
@@ -114,30 +114,30 @@ public class Queues {
     /**
      * Creates an unbounded single producer / single consumer queue.
      *
-     * @param size the chunk size
+     * @param chunkSize the chunk size
      * @return the queue
      * @param <T> the item type
      */
-    public static <T> Queue<T> createSpscUnboundedQueue(int size) {
+    public static <T> Queue<T> createSpscUnboundedQueue(int chunkSize) {
         if (Infrastructure.useUnsafeForQueues()) {
-            return new SpscUnboundedUnpaddedArrayQueue<>(size);
+            return new SpscUnboundedUnpaddedArrayQueue<>(chunkSize);
         } else {
-            return new SpscUnboundedAtomicArrayQueue<>(size);
+            return new SpscUnboundedAtomicArrayQueue<>(chunkSize);
         }
     }
 
     /**
      * Create a MPSC queue with a given size
      *
-     * @param size the queue size, will be rounded
+     * @param capacity the queue size, will be rounded
      * @param <T> the elements type
      * @return a new queue
      */
-    public static <T> Queue<T> createMpscArrayQueue(int size) {
+    public static <T> Queue<T> createMpscArrayQueue(int capacity) {
         if (Infrastructure.useUnsafeForQueues()) {
-            return new MpscUnpaddedArrayQueue<>(size);
+            return new MpscUnpaddedArrayQueue<>(capacity);
         } else {
-            return new MpscAtomicArrayQueue<>(size);
+            return new MpscAtomicArrayQueue<>(capacity);
         }
     }
 }
