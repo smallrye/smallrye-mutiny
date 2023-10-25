@@ -2,7 +2,12 @@ package io.smallrye.mutiny.operators.multi;
 
 import static io.smallrye.mutiny.helpers.Subscriptions.CANCELLED;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+import java.util.Queue;
 import java.util.concurrent.Flow.Publisher;
 import java.util.concurrent.Flow.Subscription;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -13,7 +18,7 @@ import java.util.function.Function;
 import io.smallrye.mutiny.Context;
 import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.helpers.Subscriptions;
-import io.smallrye.mutiny.helpers.queues.SpscLinkedArrayQueue;
+import io.smallrye.mutiny.helpers.queues.Queues;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.MultiOperator;
 import io.smallrye.mutiny.subscription.ContextSupport;
@@ -77,7 +82,7 @@ public class MultiCombineLatestOp<I, O> extends MultiOperator<I, O> {
         private final MultiSubscriber<? super O> downstream;
         private final Function<List<?>, ? extends O> combinator;
         private final List<CombineLatestInnerSubscriber<I>> subscribers = new ArrayList<>();
-        private final SpscLinkedArrayQueue<Object> queue;
+        private final Queue<Object> queue;
         private final Object[] latest;
         private final boolean delayErrors;
 
@@ -106,7 +111,7 @@ public class MultiCombineLatestOp<I, O> extends MultiOperator<I, O> {
                 subscribers.add(new CombineLatestInnerSubscriber<>(context, this, i, bufferSize));
             }
             this.latest = new Object[size];
-            this.queue = new SpscLinkedArrayQueue<>(bufferSize);
+            this.queue = Queues.createSpscUnboundedQueue(bufferSize);
             this.delayErrors = delayErrors;
         }
 
@@ -148,7 +153,8 @@ public class MultiCombineLatestOp<I, O> extends MultiOperator<I, O> {
                 }
                 os[index] = value;
                 if (os.length == localNonEmptySources) {
-                    queue.offer(subscribers.get(index), os.clone());
+                    queue.offer(subscribers.get(index));
+                    queue.offer(os.clone());
                     replenishInsteadOfDrain = false;
                 } else {
                     replenishInsteadOfDrain = true;
@@ -196,7 +202,7 @@ public class MultiCombineLatestOp<I, O> extends MultiOperator<I, O> {
 
         @SuppressWarnings("unchecked")
         void drainAsync() {
-            final SpscLinkedArrayQueue<Object> q = queue;
+            final Queue<Object> q = queue;
 
             int missed = 1;
 

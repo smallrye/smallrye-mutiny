@@ -17,16 +17,17 @@ public final class EmitterBasedMulti<T> extends AbstractMulti<T> {
     public static final int HINT = 16;
     private final Consumer<MultiEmitter<? super T>> consumer;
     private final BackPressureStrategy backpressure;
-    private final int bufferSize;
+    private final int overflowBufferSize;
 
     public EmitterBasedMulti(Consumer<MultiEmitter<? super T>> consumer, BackPressureStrategy backpressure) {
         this(consumer, backpressure, -1);
     }
 
-    public EmitterBasedMulti(Consumer<MultiEmitter<? super T>> consumer, BackPressureStrategy backpressure, int bufferSize) {
+    public EmitterBasedMulti(Consumer<MultiEmitter<? super T>> consumer, BackPressureStrategy backpressure,
+            int overflowBufferSize) {
         this.consumer = consumer;
         this.backpressure = backpressure;
-        this.bufferSize = bufferSize;
+        this.overflowBufferSize = overflowBufferSize;
     }
 
     @Override
@@ -51,10 +52,11 @@ public final class EmitterBasedMulti<T> extends AbstractMulti<T> {
                 break;
 
             default:
-                if (bufferSize == -1) {
-                    emitter = new BufferItemMultiEmitter<>(downstream, Queues.<T> unbounded(HINT).get());
+                if (overflowBufferSize == -1) {
+                    emitter = new BufferItemMultiEmitter<>(downstream, Queues.<T> unbounded(HINT).get(), overflowBufferSize);
                 } else {
-                    emitter = new BufferItemMultiEmitter<>(downstream, Queues.createStrictSizeQueue(bufferSize));
+                    emitter = new BufferItemMultiEmitter<>(downstream, Queues.createMpscArrayQueue(overflowBufferSize),
+                            overflowBufferSize);
                 }
                 break;
 

@@ -74,9 +74,11 @@
         <module>bom</module>
         <module>math</module>
         <module>workshop-examples</module>
+        <module>native-tests</module>
     </modules>
 
     <properties>
+        <jctools-core.version>4.0.1</jctools-core.version>
         <mutiny-zero.version>1.0.0</mutiny-zero.version>
         <reactive-streams.version>1.0.4</reactive-streams.version>
         <rxjava3.version>3.1.8</rxjava3.version>
@@ -123,6 +125,8 @@
         <find-and-replace-maven-plugin.version>1.1.0</find-and-replace-maven-plugin.version>
         <jreleaser-maven-plugin.version>1.9.0</jreleaser-maven-plugin.version>
         <cyclonedx-maven-plugin.version>2.7.10</cyclonedx-maven-plugin.version>
+        <junit-platform-native.version>0.9.27</junit-platform-native.version>
+        <native-maven-plugin.version>0.9.7.1</native-maven-plugin.version>
     </properties>
 
     <dependencyManagement>
@@ -131,6 +135,11 @@
                 <groupId>io.smallrye.reactive</groupId>
                 <artifactId>mutiny</artifactId>
                 <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jctools</groupId>
+                <artifactId>jctools-core</artifactId>
+                <version>${jctools-core.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.smallrye.reactive</groupId>
