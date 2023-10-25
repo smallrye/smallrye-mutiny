@@ -23,6 +23,10 @@
             <artifactId>smallrye-common-annotation</artifactId>
             <version>${smallrye-common-annotation.version}</version>
         </dependency>
+        <dependency>
+            <groupId>io.github.jponge.jct</groupId>
+            <artifactId>jctools-core</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>io.reactivex.rxjava3</groupId>

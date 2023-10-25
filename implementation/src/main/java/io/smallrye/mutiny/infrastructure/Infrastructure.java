@@ -1,6 +1,7 @@
 package io.smallrye.mutiny.infrastructure;
 
 import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
+import static io.smallrye.mutiny.helpers.ParameterValidation.positive;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -29,7 +30,6 @@ import java.util.function.UnaryOperator;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.groups.MultiOverflowStrategy;
-import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.subscription.UniSubscriber;
 import io.smallrye.mutiny.tuples.Functions;
 
@@ -66,12 +66,17 @@ public class Infrastructure {
 
     private static int multiOverflowDefaultBufferSize = 128;
 
+    private static int bufferSizeXs = 32;
+    private static int bufferSizeS = 256;
+
     public static void reload() {
         clearInterceptors();
         reloadUniInterceptors();
         reloadMultiInterceptors();
         reloadCallbackDecorators();
         multiOverflowDefaultBufferSize = 128;
+        bufferSizeXs = 32;
+        bufferSizeS = 256;
     }
 
     /**
@@ -315,7 +320,7 @@ public class Infrastructure {
      * @param handler the handler, must not be {@code null} and must not throw an exception or it will also be lost.
      */
     public static void setDroppedExceptionHandler(Consumer<Throwable> handler) {
-        ParameterValidation.nonNull(handler, "handler");
+        nonNull(handler, "handler");
         droppedExceptionHandler = handler;
     }
 
@@ -404,7 +409,7 @@ public class Infrastructure {
      * @param operatorLogger the new operator logger
      */
     public static void setOperatorLogger(OperatorLogger operatorLogger) {
-        Infrastructure.operatorLogger = ParameterValidation.nonNull(operatorLogger, "operatorLogger");
+        Infrastructure.operatorLogger = nonNull(operatorLogger, "operatorLogger");
     }
 
     // For testing purpose only
@@ -427,7 +432,53 @@ public class Infrastructure {
      * @param size the buffer size, must be strictly positive
      */
     public static void setMultiOverflowDefaultBufferSize(int size) {
-        multiOverflowDefaultBufferSize = ParameterValidation.positive(size, "size");
+        multiOverflowDefaultBufferSize = positive(size, "size");
+    }
+
+    /**
+     * Get the xs buffer size (for internal usage).
+     *
+     * @return the buffer size
+     */
+    public static int getBufferSizeXs() {
+        String propVal = System.getProperty("mutiny.buffer-size.xs");
+        if (propVal != null) {
+            return Math.max(8, Integer.parseInt(propVal));
+        } else {
+            return bufferSizeXs;
+        }
+    }
+
+    /**
+     * Set the xs buffer size (for internal usage).
+     *
+     * @param size the buffer size
+     */
+    public static void setBufferSizeXs(int size) {
+        bufferSizeXs = positive(size, "size");
+    }
+
+    /**
+     * Get the s buffer size (for internal usage).
+     *
+     * @return the buffer size
+     */
+    public static int getBufferSizeS() {
+        String propVal = System.getProperty("mutiny.buffer-size.s");
+        if (propVal != null) {
+            return Math.max(16, Integer.parseInt(propVal));
+        } else {
+            return bufferSizeS;
+        }
+    }
+
+    /**
+     * Set the xs buffer size (for internal usage).
+     *
+     * @param size the buffer size
+     */
+    public static void setBufferSizeS(int size) {
+        bufferSizeS = positive(size, "size");
     }
 
     /**

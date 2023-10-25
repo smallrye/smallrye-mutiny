@@ -11,13 +11,16 @@ import io.smallrye.mutiny.subscription.MultiSubscriber;
 public class BufferItemMultiEmitter<T> extends BaseMultiEmitter<T> {
 
     private final Queue<T> queue;
+    private final int overflowBufferSize;
     private Throwable failure;
     private volatile boolean done;
     private final AtomicInteger wip = new AtomicInteger();
+    private final AtomicInteger strictBoundCounter = new AtomicInteger();
 
-    BufferItemMultiEmitter(MultiSubscriber<? super T> actual, Queue<T> queue) {
+    BufferItemMultiEmitter(MultiSubscriber<? super T> actual, Queue<T> queue, int overflowBufferSize) {
         super(actual);
         this.queue = queue;
+        this.overflowBufferSize = overflowBufferSize;
     }
 
     @Override
@@ -30,7 +33,7 @@ public class BufferItemMultiEmitter<T> extends BaseMultiEmitter<T> {
             fail(new NullPointerException("`emit` called with `null`."));
             return this;
         }
-        if (queue.offer(t)) {
+        if (queue.offer(t) && (overflowBufferSize == -1 || strictBoundCounter.incrementAndGet() < overflowBufferSize)) {
             drain();
         } else {
             fail(new EmitterBufferOverflowException());
@@ -83,21 +86,20 @@ public class BufferItemMultiEmitter<T> extends BaseMultiEmitter<T> {
         }
 
         int missed = 1;
-        final Queue<T> q = queue;
 
         do {
-            long r = requested.get();
-            long e = 0L;
+            long pending = requested.get();
+            long emitted = 0L;
 
-            while (e != r) {
+            while (emitted != pending) {
                 if (isCancelled()) {
-                    q.clear();
+                    queue.clear();
                     return;
                 }
 
                 boolean d = done;
 
-                T o = q.poll();
+                T o = queue.poll();
 
                 boolean empty = o == null;
 
@@ -115,23 +117,26 @@ public class BufferItemMultiEmitter<T> extends BaseMultiEmitter<T> {
                 }
 
                 try {
+                    if (overflowBufferSize != -1) {
+                        strictBoundCounter.decrementAndGet();
+                    }
                     downstream.onItem(o);
                 } catch (Throwable x) {
                     cancel();
                 }
 
-                e++;
+                emitted++;
             }
 
-            if (e == r) {
+            if (emitted == pending) {
                 if (isCancelled()) {
-                    q.clear();
+                    queue.clear();
                     return;
                 }
 
                 boolean d = done;
 
-                boolean empty = q.isEmpty();
+                boolean empty = queue.isEmpty();
 
                 if (d && empty) {
                     if (failure != null) {
@@ -143,8 +148,8 @@ public class BufferItemMultiEmitter<T> extends BaseMultiEmitter<T> {
                 }
             }
 
-            if (e != 0) {
-                Subscriptions.produced(requested, e);
+            if (emitted != 0) {
+                Subscriptions.produced(requested, emitted);
             }
 
             missed = wip.addAndGet(-missed);

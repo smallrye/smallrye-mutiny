@@ -15,6 +15,7 @@ import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.helpers.Subscriptions;
 import io.smallrye.mutiny.helpers.queues.Queues;
+import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.subscription.BackPressureFailure;
 import io.smallrye.mutiny.subscription.MultiSubscriber;
 
@@ -26,7 +27,7 @@ import io.smallrye.mutiny.subscription.MultiSubscriber;
 public class MultiEmitOnOp<T> extends AbstractMultiOperator<T, T> {
 
     private final Executor executor;
-    private final Supplier<? extends Queue<T>> queueSupplier = Queues.get(Queues.BUFFER_S);
+    private final Supplier<? extends Queue<T>> queueSupplier = Queues.get(Infrastructure.getBufferSizeS());
 
     public MultiEmitOnOp(Multi<? extends T> upstream, Executor executor) {
         super(upstream);

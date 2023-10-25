@@ -53,8 +53,8 @@ public class MultiWindowOp<T> extends AbstractMultiOperator<T, Multi<T>> {
         super(upstream);
         this.size = ParameterValidation.positive(size, "size");
         this.skip = ParameterValidation.positive(skip, "skip");
-        this.processorQueueSupplier = Queues.unbounded(Queues.BUFFER_XS);
-        this.overflowQueueSupplier = Queues.unbounded(Queues.BUFFER_XS);
+        this.processorQueueSupplier = Queues.unbounded(Infrastructure.getBufferSizeXs());
+        this.overflowQueueSupplier = Queues.unbounded(Infrastructure.getBufferSizeXs());
     }
 
     @Override

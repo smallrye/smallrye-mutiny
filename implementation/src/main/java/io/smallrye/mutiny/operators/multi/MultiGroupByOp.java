@@ -69,7 +69,7 @@ public final class MultiGroupByOp<T, K, V> extends AbstractMultiOperator<T, Grou
             this.keySelector = keySelector;
             this.valueSelector = valueSelector;
             this.groups = groups;
-            this.queue = Queues.<GroupedMulti<K, V>> unbounded(Queues.BUFFER_S).get();
+            this.queue = Queues.<GroupedMulti<K, V>> unbounded(Infrastructure.getBufferSizeS()).get();
         }
 
         @Override
@@ -314,7 +314,7 @@ public final class MultiGroupByOp<T, K, V> extends AbstractMultiOperator<T, Grou
         @SuppressWarnings("unchecked")
         State(MultiGroupByProcessor<?, K, T> parent, K key) {
             this.parent = parent;
-            this.queue = (Queue<T>) Queues.unbounded(Queues.BUFFER_S).get();
+            this.queue = (Queue<T>) Queues.unbounded(Infrastructure.getBufferSizeS()).get();
             this.key = key;
         }
 
