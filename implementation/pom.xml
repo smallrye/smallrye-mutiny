@@ -161,7 +161,7 @@
                             </execution>
                         </executions>
                         <configuration>
-                            <!-- wonderful reliability of javadoc used with modules breaking on non exposed packages -->
+                            <legacyMode>true</legacyMode>
                             <source>11</source>
                             <release>11</release>
                             <detectJavaApiLink>false</detectJavaApiLink>
