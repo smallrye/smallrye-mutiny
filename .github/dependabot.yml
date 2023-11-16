@@ -8,38 +8,10 @@ updates:
     prefix: "build"
     include: "scope"
   open-pull-requests-limit: 10
-  ignore:
-  - dependency-name: io.smallrye.config:smallrye-config
-    versions:
-    - "> 1.10.0"
-  - dependency-name: org.jetbrains.dokka:dokka-maven-plugin
-    versions:
-    - 1.4.32
-  - dependency-name: org.revapi:revapi-maven-plugin
-    versions:
-    - 0.13.4
-  - dependency-name: org.jetbrains.kotlinx:kotlinx-coroutines-core
-    versions:
-    - 1.4.3-native-mt
-- package-ecosystem: maven
+- package-ecosystem: github-actions
   directory: "/"
   schedule:
-    interval: daily
+    interval: weekly
   commit-message:
     prefix: "build"
     include: "scope"
-  open-pull-requests-limit: 10
-  target-branch: 1.x
-  ignore:
-    - dependency-name: io.smallrye.config:smallrye-config
-      versions:
-        - "> 1.10.0"
-    - dependency-name: org.jetbrains.dokka:dokka-maven-plugin
-      versions:
-        - 1.4.32
-    - dependency-name: org.revapi:revapi-maven-plugin
-      versions:
-        - 0.13.4
-    - dependency-name: org.jetbrains.kotlinx:kotlinx-coroutines-core
-      versions:
-        - 1.4.3-native-mt
