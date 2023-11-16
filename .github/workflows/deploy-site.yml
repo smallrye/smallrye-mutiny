@@ -7,7 +7,7 @@ jobs:
   deploy-web-site:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.ref }}
           token: ${{ secrets.RELEASE_TOKEN }}
