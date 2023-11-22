@@ -75,7 +75,7 @@ public class MultiReferenceCount<T> extends AbstractMulti<T> implements Multi<T>
         }
 
         ScheduledFuture<?> future = executor.schedule(connection, duration.toMillis(), TimeUnit.MILLISECONDS);
-        connection.setTimer(() -> future.cancel(true));
+        connection.setTimer(() -> future.cancel(false));
     }
 
     void terminated(ConnectableMultiConnection connection) {

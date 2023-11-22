@@ -69,7 +69,7 @@ public class MultiIgnoreTest {
                 .onItem().ignoreAsUni().subscribeAsCompletionStage();
 
         assertThat(future).isNotCompleted();
-        future.cancel(true);
+        future.cancel(false);
     }
 
     @Test

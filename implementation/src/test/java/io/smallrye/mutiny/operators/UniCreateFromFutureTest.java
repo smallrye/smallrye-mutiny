@@ -371,7 +371,7 @@ public class UniCreateFromFutureTest {
         UniAssertSubscriber<String> subscriber = UniAssertSubscriber.create();
         CompletableFuture<String> cs = new CompletableFuture<>();
         Uni.createFrom().future(cs).subscribe().withSubscriber(subscriber);
-        cs.cancel(true);
+        cs.cancel(false);
         subscriber
                 .awaitFailure()
                 .assertFailedWith(CancellationException.class, null);

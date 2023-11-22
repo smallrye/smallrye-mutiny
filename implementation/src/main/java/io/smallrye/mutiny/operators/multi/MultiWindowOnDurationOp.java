@@ -267,7 +267,7 @@ public class MultiWindowOnDurationOp<T> extends AbstractMultiOperator<T, Multi<T
                 Future current = container.get();
                 if (current == NONE) {
                     if (task != null) {
-                        task.cancel(true);
+                        task.cancel(false);
                     }
                     return false;
                 }
