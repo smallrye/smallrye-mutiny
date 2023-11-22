@@ -52,6 +52,7 @@ To do so, use either `expireIn` or `expireAt`.
 
 As an alternative to `atMost`, you can also use `until`.
 This method accepts a predicate called after every failure.
+When used, a backoff should not be used.
 
 If the predicate returned `true,` it retries.
 Otherwise, it stops retrying and propagates the last failure downstream:

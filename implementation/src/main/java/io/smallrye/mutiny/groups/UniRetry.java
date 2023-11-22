@@ -94,7 +94,7 @@ public class UniRetry<T> {
      * @param expireAt absolute time in millis that specifies when to give up
      * @return a new {@link Uni} retrying to subscribe to the current {@link Uni} until it gets an item or until
      *         expiration {@code expireAt}. When the expiration is reached, the last failure is propagated.
-     * @throws IllegalArgumentException if back off not configured,
+     * @throws IllegalArgumentException if back off not configured
      */
     @CheckReturnValue
     public Uni<T> expireAt(long expireAt) {
@@ -119,7 +119,7 @@ public class UniRetry<T> {
      * @param expireIn relative time in millis that specifies when to give up
      * @return a new {@link Uni} retrying to subscribe to the current {@link Uni} until it gets an item or until
      *         expiration {@code expireIn}. When the expiration is reached, the last failure is propagated.
-     * @throws IllegalArgumentException if back off not configured,
+     * @throws IllegalArgumentException if back off not configured
      */
     @CheckReturnValue
     public Uni<T> expireIn(long expireIn) {
@@ -134,6 +134,7 @@ public class UniRetry<T> {
      *        must not be {@code null}. If the predicate returns {@code true} for the given failure, a
      *        re-subscription is attempted.
      * @return the new {@code Uni} instance
+     * @throws IllegalArgumentException if back off configured
      */
     @CheckReturnValue
     public Uni<T> until(Predicate<? super Throwable> predicate) {
@@ -166,6 +167,7 @@ public class UniRetry<T> {
      *        {@code null}, must not produce {@code null}
      * @return a new {@link Uni} retrying re-subscribing to the current {@link Multi} when the companion stream,
      *         produced by {@code whenStreamFactory} emits an item.
+     * @throws IllegalArgumentException if back off configured
      */
     @CheckReturnValue
     public Uni<T> when(Function<Multi<Throwable>, ? extends Flow.Publisher<?>> whenStreamFactory) {
