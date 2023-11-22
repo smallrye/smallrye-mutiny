@@ -24,7 +24,7 @@
             <version>${smallrye-common-annotation.version}</version>
         </dependency>
         <dependency>
-            <groupId>io.github.jponge.jct</groupId>
+            <groupId>org.jctools</groupId>
             <artifactId>jctools-core</artifactId>
         </dependency>
 
