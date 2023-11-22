@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
@@ -557,5 +558,22 @@ public class UniOnFailureRetryTest {
                 .onFailure().retry().withExecutor(null).withBackOff(Duration.ofMillis(100)).atMost(5))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("`executor` must not be `null`");
+    }
+
+    @Test
+    void avoidSpuriousInterruptsWithBackoff() {
+        AtomicBoolean flip = new AtomicBoolean();
+        AtomicBoolean interrupted = new AtomicBoolean();
+        String result = Uni.createFrom().item(() -> {
+            if (flip.getAndSet(true)) {
+                return "yolo";
+            }
+            throw new RuntimeException("boom");
+        })
+                .onFailure().retry().withBackOff(Duration.ofMillis(100), Duration.ofSeconds(5)).atMost(1)
+                .onItem().invoke(() -> interrupted.set(Thread.currentThread().isInterrupted()))
+                .await().atMost(Duration.ofSeconds(1));
+        assertThat(result).isEqualTo("yolo");
+        assertThat(interrupted).isFalse();
     }
 }

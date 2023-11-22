@@ -236,7 +236,7 @@ public final class MultiBufferWithTimeoutOp<T> extends AbstractMultiOperator<T, 
         public void onCompletion() {
             if (terminated.compareAndSet(RUNNING, SUCCEED)) {
                 if (task != null) {
-                    task.cancel(true);
+                    task.cancel(false);
                     task = null;
                 }
                 checkedComplete();

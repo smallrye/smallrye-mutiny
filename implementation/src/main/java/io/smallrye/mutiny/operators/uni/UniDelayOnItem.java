@@ -41,7 +41,7 @@ public class UniDelayOnItem<T> extends UniOperator<T, T> {
             if (!isCancelled()) {
                 super.cancel();
                 if (scheduledFuture != null) {
-                    scheduledFuture.cancel(true);
+                    scheduledFuture.cancel(false);
                 }
             }
         }

@@ -136,7 +136,7 @@ public class MultiDemandPacer<T> extends AbstractMultiOperator<T, T> {
         @Override
         public void cancel() {
             if (scheduledFuture != null) {
-                scheduledFuture.cancel(true);
+                scheduledFuture.cancel(false);
             }
             super.cancel();
         }
