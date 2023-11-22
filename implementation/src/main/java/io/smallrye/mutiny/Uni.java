@@ -50,7 +50,7 @@ public interface Uni<T> {
      * Uni.createFrom().completionStage(cs); // Emit the item from this completion stage
      * Uni.createFrom().completionStage(() -> cs); // Emit the item from this completion stage, the stage is not created before subscription
      * Uni.createFrom().failure(exception); // Emit the failure at subscription time
-     * Uni.createFrom().deferred(() -> Uni.from().value(x)); // Defer the uni creation until subscription. Each subscription can produce a different uni
+     * Uni.createFrom().deferred(() -> Uni.createFrom().item(x)); // Defer the uni creation until subscription. Each subscription can produce a different uni
      * Uni.createFrom().item(null); // Emit null at subscription time
      * Uni.createFrom().nothing(); // Create a Uni not emitting any signal
      * Uni.createFrom().publisher(publisher); // Create a Uni from a Reactive Streams Publisher
