@@ -78,7 +78,7 @@
     </modules>
 
     <properties>
-        <jctools-core.version>4.0.2-RC2</jctools-core.version>
+        <jctools-core.version>4.0.2</jctools-core.version>
         <mutiny-zero.version>1.0.0</mutiny-zero.version>
         <reactive-streams.version>1.0.4</reactive-streams.version>
         <rxjava3.version>3.1.8</rxjava3.version>
@@ -137,7 +137,7 @@
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>io.github.jponge.jct</groupId>
+                <groupId>org.jctools</groupId>
                 <artifactId>jctools-core</artifactId>
                 <version>${jctools-core.version}</version>
             </dependency>
