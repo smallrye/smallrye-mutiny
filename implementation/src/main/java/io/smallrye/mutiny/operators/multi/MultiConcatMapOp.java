@@ -100,7 +100,6 @@ public class MultiConcatMapOp<I, O> extends AbstractMultiOperator<I, O> {
         @Override
         public void onSubscribe(Subscription subscription) {
             if (UPSTREAM_UPDATER.compareAndSet(this, null, subscription)) {
-                upstream = subscription;
                 downstream.onSubscribe(this);
             } else {
                 subscription.cancel();
