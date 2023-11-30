@@ -6,6 +6,7 @@ import java.util.concurrent.Flow.Subscriber;
 import java.util.concurrent.Flow.Subscription;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicLongFieldUpdater;
 import java.util.concurrent.atomic.AtomicReference;
 
 import io.smallrye.mutiny.CompositeException;
@@ -98,6 +99,19 @@ public class Subscriptions {
             }
             long u = add(r, requests);
             if (requested.compareAndSet(r, u)) {
+                return r;
+            }
+        }
+    }
+
+    public static <T> long add(AtomicLongFieldUpdater<T> updater, T receiver, long requests) {
+        for (;;) {
+            long r = updater.get(receiver);
+            if (r == Long.MAX_VALUE) {
+                return Long.MAX_VALUE;
+            }
+            long u = add(r, requests);
+            if (updater.compareAndSet(receiver, r, u)) {
                 return r;
             }
         }
