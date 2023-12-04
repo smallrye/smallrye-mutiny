@@ -161,6 +161,24 @@ public class UniOnFailureRetryTest {
     }
 
     @Test
+    public void testExpireInRetryWithBackOffNotBounded() {
+        AtomicInteger count = new AtomicInteger();
+        String value = Uni.createFrom().<String> emitter(e -> {
+            int attempt = count.getAndIncrement();
+            if (attempt == 0) {
+                e.fail(new Exception("boom"));
+            } else {
+                e.complete("done");
+            }
+        })
+                .onFailure().retry().withBackOff(Duration.ofMillis(100)).withJitter(0)
+                .expireIn(150L)
+                .await().atMost(Duration.ofSeconds(5));
+
+        assertThat(value).isEqualTo("done");
+    }
+
+    @Test
     public void testExpireAtRetryWithBackOff() {
         AtomicInteger count = new AtomicInteger();
         String value = Uni.createFrom().<String> emitter(e -> {
