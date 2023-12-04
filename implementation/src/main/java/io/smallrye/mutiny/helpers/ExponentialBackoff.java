@@ -104,7 +104,7 @@ public class ExponentialBackoff {
         AtomicInteger index = new AtomicInteger();
         return t -> t
                 .onItem().transformToUni(failure -> {
-                    int iteration = index.incrementAndGet();
+                    int iteration = index.getAndIncrement();
                     Duration delay = getNextDelay(firstBackoff, maxBackoff, jitterFactor, iteration);
 
                     long checkTime = System.currentTimeMillis() + delay.toMillis();
