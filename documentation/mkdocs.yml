@@ -52,6 +52,7 @@ nav:
       - 'guides/controlling-demand.md'
       - 'guides/multi-split.md'
       - 'guides/branching.md'
+      - 'guides/broadcasting-to-multiple-subscribers.md'
   - 'Reference':
       - 'reference/migrating-to-mutiny-2.md'
       - 'reference/why-is-asynchronous-important.md'
