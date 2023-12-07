@@ -81,7 +81,7 @@ public abstract class AbstractUni<T> implements Uni<T> {
 
     @Override
     public UniAwait<T> await() {
-        return awaitUsing(null);
+        return awaitUsing(Context.empty());
     }
 
     @Override

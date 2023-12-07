@@ -217,5 +217,20 @@ public class UniAwaitTest {
                     .isInstanceOf(IllegalStateException.class)
                     .hasMessage("The current thread cannot be blocked: my-forbidden-thread");
         }
+
+        @Test
+        void checkImplicitContextPassing() {
+            AtomicBoolean contextPassed = new AtomicBoolean();
+            Integer res = Uni.createFrom().item(123)
+                    .withContext((uni, ctx) -> {
+                        ctx.put("foo", "bar");
+                        return uni;
+                    })
+                    .withContext((uni, ctx) -> uni.onItem()
+                            .invoke(() -> contextPassed.set(ctx.getOrElse("foo", () -> "n/a").equals("bar"))))
+                    .await().indefinitely();
+            assertThat(res).isEqualTo(123);
+            assertThat(contextPassed).isTrue();
+        }
     }
 }
