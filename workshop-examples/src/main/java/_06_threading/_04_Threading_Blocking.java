@@ -1,5 +1,5 @@
 ///usr/bin/env jbang "$0" "$@" ; exit $?
-//DEPS io.smallrye.reactive:mutiny:2.5.1
+//DEPS io.smallrye.reactive:mutiny:2.5.2
 package _06_threading;
 
 import java.util.stream.Collectors;
