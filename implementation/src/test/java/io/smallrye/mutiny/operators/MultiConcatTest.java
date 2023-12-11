@@ -2,7 +2,9 @@ package io.smallrye.mutiny.operators;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.io.IOException;
 import java.util.Arrays;
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
@@ -159,5 +161,24 @@ public class MultiConcatTest {
                 .assertItems(5)
                 .assertFailedWith(IllegalStateException.class, "boom");
 
+    }
+
+    @Test
+    public void collectThreeFailures() {
+        List<IOException> failures = List.of(new IOException("foo"), new IOException("bar"), new IOException("baz"));
+        AssertSubscriber<String> sub = Multi.createBy().concatenating().collectFailures().streams(
+                Multi.createFrom().item("foo"),
+                Multi.createFrom().failure(failures.get(0)),
+                Multi.createFrom().item("bar"),
+                Multi.createFrom().failure(failures.get(1)),
+                Multi.createFrom().item("baz"),
+                Multi.createFrom().failure(failures.get(2))).subscribe()
+                .withSubscriber(AssertSubscriber.create(Long.MAX_VALUE));
+
+        sub.assertItems("foo", "bar", "baz");
+        sub.assertFailedWith(CompositeException.class);
+        CompositeException compositeException = (CompositeException) sub.getFailure();
+        assertThat(compositeException.getCauses()).hasSize(3);
+        assertThat(compositeException.getCauses()).containsExactlyElementsOf(failures);
     }
 }
