@@ -1,6 +1,7 @@
 package io.smallrye.mutiny.operators.multi;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 
 import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
@@ -290,5 +291,35 @@ class MultiConcatMapNoPrefetchTest {
                 .subscribe().withSubscriber(AssertSubscriber.create());
 
         sub.assertCompleted().assertHasNotReceivedAnyItem();
+    }
+
+    @Test
+    void rejectBadRequests() {
+        Multi<Integer> multi = upstream.onItem().transformToMultiAndConcatenate(n -> Multi.createFrom().item(1));
+
+        AssertSubscriber<Integer> sub = multi.subscribe().withSubscriber(AssertSubscriber.create());
+        sub.request(0L);
+        sub.assertHasNotReceivedAnyItem().assertFailedWith(IllegalArgumentException.class,
+                "Invalid request number, must be greater than 0");
+
+        sub = multi.subscribe().withSubscriber(AssertSubscriber.create());
+        sub.request(-10L);
+        sub.assertHasNotReceivedAnyItem().assertFailedWith(IllegalArgumentException.class,
+                "Invalid request number, must be greater than 0");
+    }
+
+    @Test
+    void testCancellation() {
+        AtomicBoolean cancelled = new AtomicBoolean();
+        AssertSubscriber<Integer> sub = Multi.createFrom().ticks().every(Duration.ofMillis(100))
+                .onCancellation().invoke(() -> cancelled.set(true))
+                .onItem().transformToMultiAndConcatenate(tick -> Multi.createFrom().items(1, 2, 3))
+                .subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE));
+        await().atMost(Duration.ofSeconds(3)).until(() -> sub.getItems().size() > 12);
+        sub.cancel();
+        await().atMost(Duration.ofSeconds(3)).until(cancelled::get);
+        assertThat(sub.isCancelled()).isTrue();
+        assertThat(sub.hasCompleted()).isFalse();
+        assertThat(sub.getItems()).contains(1, 2, 3);
     }
 }
