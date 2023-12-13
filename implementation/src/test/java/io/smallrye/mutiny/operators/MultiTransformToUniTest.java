@@ -2,6 +2,7 @@ package io.smallrye.mutiny.operators;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -20,7 +21,7 @@ public class MultiTransformToUniTest {
                 .onItem()
                 .transformToUni(i -> Uni.createFrom().completionStage(CompletableFuture.supplyAsync(() -> i + 1)))
                 .concatenate()
-                .collect().asList().await().indefinitely();
+                .collect().asList().await().atMost(Duration.ofSeconds(45));
 
         assertThat(list).containsExactly(2, 3, 4);
     }
@@ -98,7 +99,7 @@ public class MultiTransformToUniTest {
         List<Integer> list = Multi.createFrom().range(1, 4)
                 .onItem()
                 .transformToUniAndConcatenate(i -> Uni.createFrom().completionStage(CompletableFuture.supplyAsync(() -> i + 1)))
-                .collect().asList().await().indefinitely();
+                .collect().asList().await().atMost(Duration.ofSeconds(45));
 
         assertThat(list).containsExactly(2, 3, 4);
     }
@@ -109,7 +110,7 @@ public class MultiTransformToUniTest {
                 .onItem()
                 .transformToUni(i -> Uni.createFrom().completionStage(CompletableFuture.supplyAsync(() -> i + 1)))
                 .merge()
-                .collect().asList().await().indefinitely();
+                .collect().asList().await().atMost(Duration.ofSeconds(45));
 
         assertThat(list).containsExactlyInAnyOrder(2, 3, 4);
     }
@@ -178,7 +179,7 @@ public class MultiTransformToUniTest {
         List<Integer> list = Multi.createFrom().range(1, 4)
                 .onItem()
                 .transformToUniAndMerge(i -> Uni.createFrom().completionStage(CompletableFuture.supplyAsync(() -> i + 1)))
-                .collect().asList().await().indefinitely();
+                .collect().asList().await().atMost(Duration.ofSeconds(45));
         assertThat(list).containsExactlyInAnyOrder(2, 3, 4);
     }
 
@@ -192,7 +193,7 @@ public class MultiTransformToUniTest {
                         return i;
                     }
                 })))
-                .collect().asList().await().indefinitely();
+                .collect().asList().await().atMost(Duration.ofSeconds(45));
 
         assertThat(list).containsExactlyInAnyOrder(1, 3, 5);
     }
@@ -208,7 +209,7 @@ public class MultiTransformToUniTest {
                         return i;
                     }
                 })))
-                .collect().asList().await().indefinitely();
+                .collect().asList().await().atMost(Duration.ofSeconds(45));
 
         assertThat(list).containsExactly(1, 3, 5);
     }
