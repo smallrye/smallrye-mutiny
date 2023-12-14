@@ -15,6 +15,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.groups.MultiFlatten;
@@ -34,20 +35,6 @@ class MultiConcatMapNoPrefetchTest {
             emitter.emit(requestCount);
             return counter;
         });
-    }
-
-    @Test
-    void simpleConcatMap() {
-        AssertSubscriber<Integer> sub = Multi.createFrom().range(1, 3)
-                .onItem().transformToMultiAndConcatenate(n -> Multi.createFrom().items(n * 10, n * 20))
-                .subscribe().withSubscriber(AssertSubscriber.create());
-        sub.request(1);
-        sub.assertItems(10);
-        sub.request(2);
-        sub.assertItems(10, 20, 20);
-        sub.request(Long.MAX_VALUE);
-        sub.assertItems(10, 20, 20, 40);
-        sub.assertCompleted();
     }
 
     @ParameterizedTest
@@ -197,7 +184,7 @@ class MultiConcatMapNoPrefetchTest {
                 .concatenate();
         AssertSubscriber<Integer> ts = new AssertSubscriber<>(5);
         result.subscribe(ts);
-        ts.assertHasNotReceivedAnyItem().assertFailedWith(NullPointerException.class);
+        ts.assertHasNotReceivedAnyItem().assertFailedWith(CompositeException.class);
     }
 
     @Test
@@ -321,5 +308,19 @@ class MultiConcatMapNoPrefetchTest {
         assertThat(sub.isCancelled()).isTrue();
         assertThat(sub.hasCompleted()).isFalse();
         assertThat(sub.getItems()).contains(1, 2, 3);
+    }
+
+    @Test
+    void simpleConcatMap() {
+        AssertSubscriber<Integer> sub = Multi.createFrom().range(1, 3)
+                .onItem().transformToMultiAndConcatenate(n -> Multi.createFrom().items(n * 10, n * 20))
+                .subscribe().withSubscriber(AssertSubscriber.create());
+        sub.request(1);
+        sub.assertItems(10);
+        sub.request(2);
+        sub.assertItems(10, 20, 20);
+        sub.request(Long.MAX_VALUE);
+        sub.assertItems(10, 20, 20, 40);
+        sub.assertCompleted();
     }
 }
