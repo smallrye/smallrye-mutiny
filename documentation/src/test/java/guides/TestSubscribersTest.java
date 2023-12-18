@@ -51,4 +51,37 @@ public class TestSubscribersTest {
                 .assertFailedWith(IOException.class, "Boom");
         // </failing>
     }
+
+    @Test
+    void uniFunction() {
+        // <uni-function>
+        Uni<Integer> uni = Uni.createFrom().item(63);
+
+        UniAssertSubscriber<Integer> subscriber = uni
+            .subscribe().withSubscriber(UniAssertSubscriber.create());
+
+        subscriber.assertSubscribed().assertItem(String::valueOf, "63");
+        // </uni-function>
+    }
+
+    @Test
+    void uniFunctionWithObjects() {
+        // <uni-function-with-objects>
+        class Person {
+            String name;
+            int age;
+        }
+
+        Person person = new Person();
+        person.name = "John";
+        person.age = 42;
+        Uni<Person> uni = Uni.createFrom().item(person);
+
+        UniAssertSubscriber<Person> subscriber = uni
+            .subscribe().withSubscriber(UniAssertSubscriber.create());
+
+        subscriber.assertSubscribed().assertItem(p -> p.name, person.name);
+        subscriber.assertSubscribed().assertItem(p -> p.age, person.age);
+        // </uni-function-with-objects>
+    }
 }

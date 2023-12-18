@@ -10,6 +10,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.*;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 import io.smallrye.mutiny.Context;
 import io.smallrye.mutiny.subscription.UniSubscriber;
@@ -339,6 +340,17 @@ public class UniAssertSubscriber<T> implements UniSubscriber<T> {
         shouldHaveCompleted(hasCompletedSuccessfully, failure, null);
         shouldHaveReceived(getItem(), expected);
         return this;
+    }
+
+    /**
+     * Assert that the {@link io.smallrye.mutiny.Uni} has received an item.
+     * @param function the function to apply the item to assert on
+     * @param expected the expected item
+     * @param <R> the return type of the item
+     */
+    public <R> void assertItem(Function<T, R> function, R expected) {
+        shouldHaveCompleted(hasCompletedSuccessfully, failure, null);
+        shouldHaveReceived(function.apply(getItem()), expected);
     }
 
     /**
