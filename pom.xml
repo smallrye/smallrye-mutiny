@@ -91,7 +91,7 @@
         <jakarta.annotation-api.version>2.1.1</jakarta.annotation-api.version>
 
         <junit.version>5.10.1</junit.version>
-        <assertj-core.version>3.24.2</assertj-core.version>
+        <assertj-core.version>3.25.0</assertj-core.version>
         <junit4.version>4.13.2</junit4.version>
         <awaitility.version>4.2.0</awaitility.version>
         <version.surefire.plugin>3.2.3</version.surefire.plugin>
