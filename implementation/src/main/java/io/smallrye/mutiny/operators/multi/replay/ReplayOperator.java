@@ -21,7 +21,7 @@ public class ReplayOperator<T> extends AbstractMulti<T> {
 
     private final AtomicBoolean upstreamSubscriptionRequested = new AtomicBoolean();
     private volatile Subscription upstreamSubscription = null;
-    private final CopyOnWriteArrayList<ReplaySubscription> subscriptions = new CopyOnWriteArrayList<>();
+    protected final CopyOnWriteArrayList<ReplaySubscription> subscriptions = new CopyOnWriteArrayList<>();
 
     public ReplayOperator(Multi<T> upstream, long numberOfItemsToReplay) {
         this.upstream = upstream;
@@ -39,11 +39,11 @@ public class ReplayOperator<T> extends AbstractMulti<T> {
             upstream.subscribe(new UpstreamSubscriber(subscriber));
         }
         ReplaySubscription replaySubscription = new ReplaySubscription(subscriber);
-        subscriber.onSubscribe(replaySubscription);
         subscriptions.add(replaySubscription);
+        subscriber.onSubscribe(replaySubscription);
     }
 
-    private class ReplaySubscription implements Subscription {
+    protected class ReplaySubscription implements Subscription {
 
         private final MultiSubscriber<? super T> downstream;
         private final AtomicLong demand = new AtomicLong();
@@ -115,6 +115,12 @@ public class ReplayOperator<T> extends AbstractMulti<T> {
                     downstream.onItem(item);
                     emitted++;
                 }
+                if (!done && cursor.willReachCompletion()) {
+                    cancel();
+                    cursor.readCompletion();
+                    downstream.onComplete();
+                    return;
+                }
                 demand.addAndGet(-emitted);
                 if (wip.decrementAndGet() == 0) {
                     return;
@@ -123,7 +129,7 @@ public class ReplayOperator<T> extends AbstractMulti<T> {
         }
     }
 
-    private class UpstreamSubscriber implements MultiSubscriber<T>, ContextSupport {
+    protected class UpstreamSubscriber implements MultiSubscriber<T>, ContextSupport {
 
         private final MultiSubscriber<? super T> initialSubscriber;
 
