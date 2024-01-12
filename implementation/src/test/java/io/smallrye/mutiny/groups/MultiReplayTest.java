@@ -9,8 +9,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
-import java.util.concurrent.*;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Flow.Subscription;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -62,6 +67,17 @@ class MultiReplayTest {
         sub.request(4);
         assertThat(sub.getItems()).containsExactly(1, 2, 3, 4);
         sub.request(Long.MAX_VALUE);
+        assertThat(sub.getItems()).containsExactly(1, 2, 3, 4, 5, 6, 7, 8, 9);
+        sub.assertCompleted();
+    }
+
+    @Test
+    void shouldCompleteWhenRequestEqualsMax() {
+        Multi<Integer> upstream = Multi.createFrom().range(1, 10);
+        Multi<Integer> replay = Multi.createBy().replaying().upTo(9).ofMulti(upstream);
+
+        AssertSubscriber<Integer> sub = replay.subscribe().withSubscriber(AssertSubscriber.create());
+        sub.request(9);
         assertThat(sub.getItems()).containsExactly(1, 2, 3, 4, 5, 6, 7, 8, 9);
         sub.assertCompleted();
     }

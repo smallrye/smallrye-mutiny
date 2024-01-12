@@ -60,6 +60,10 @@ public class AppendOnlyReplayList {
             return current.value instanceof Completion;
         }
 
+        public boolean willReachCompletion() {
+            return !hasReachedCompletion() && current.next.value instanceof Completion;
+        }
+
         public boolean hasReachedFailure() {
             return current.value instanceof Failure;
         }
