@@ -264,7 +264,13 @@ public class MultiOnItem<T> {
     @CheckReturnValue
     public <O> MultiFlatten<T, O> transformToUni(Function<? super T, Uni<? extends O>> mapper) {
         Function<? super T, Uni<? extends O>> actual = Infrastructure.decorate(nonNull(mapper, "mapper"));
-        Function<? super T, ? extends Publisher<? extends O>> wrapper = res -> actual.apply(res).toMulti();
+        Function<? super T, ? extends Publisher<? extends O>> wrapper = res -> {
+            Uni<? extends O> uni = actual.apply(res);
+            if (uni == null) {
+                return Multi.createFrom().failure(new NullPointerException(MAPPER_RETURNED_NULL));
+            }
+            return uni.toMulti();
+        };
         return new MultiFlatten<>(upstream, wrapper, 1, false);
     }
 

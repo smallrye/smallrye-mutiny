@@ -272,6 +272,31 @@ class MultiConcatMapNoPrefetchTest {
     }
 
     @Test
+    void testPostponedFailureWithBoundaryDemand() {
+        AssertSubscriber<String> sub = Multi.createFrom().items(1, 2, 3)
+                .onItem().transformToMulti(n -> Multi.createFrom().<String> emitter(emitter -> {
+                    emitter.emit("foo");
+                    emitter.emit("bar");
+                    emitter.fail(new Exception("baz"));
+                })).collectFailures().concatenate()
+                .subscribe().withSubscriber(AssertSubscriber.create());
+
+        sub.request(2);
+        sub.assertNotTerminated().assertItems("foo", "bar");
+
+        sub.request(2);
+        sub.assertNotTerminated().assertItems("foo", "bar", "foo", "bar");
+
+        sub.request(3);
+        sub.assertTerminated().assertItems("foo", "bar", "foo", "bar", "foo", "bar");
+
+        sub.assertFailedWith(CompositeException.class);
+        assertThat(((CompositeException) sub.getFailure()).getCauses())
+                .hasSize(3)
+                .allMatch(err -> "baz".equals(err.getMessage()));
+    }
+
+    @Test
     void testUpfrontCompletion() {
         AssertSubscriber<Integer> sub = Multi.createFrom().empty()
                 .onItem().transformToMultiAndConcatenate(n -> Multi.createFrom().items(1, 2, 3))
