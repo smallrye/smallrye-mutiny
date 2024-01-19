@@ -51,14 +51,7 @@
     "criticality" : "highlight",
     "minSeverity" : "POTENTIALLY_BREAKING",
     "minCriticality" : "documented",
-    "differences" : [
-      {
-        "ignore": true,
-        "code": "java.class.removed",
-        "old": "class io.smallrye.mutiny.operators.multi.MultiConcatMapOp.ConcatMapMainSubscriber<I, O>",
-        "justification": "Refactoring of internal APIs"
-      }
-    ]
+    "differences" : [ ]
   }
 }, {
   "extension" : "revapi.reporter.json",
