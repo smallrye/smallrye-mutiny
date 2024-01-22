@@ -117,7 +117,9 @@ public class MultiConcatMapOp<I, O> extends AbstractMultiOperator<I, O> {
 
         private void innerOnItem(O item) {
             if (state != State.DONE) {
-                DEMAND_UPDATER.decrementAndGet(this);
+                if (demand < Long.MAX_VALUE) {
+                    DEMAND_UPDATER.decrementAndGet(this);
+                }
                 downstream.onItem(item);
             }
         }
