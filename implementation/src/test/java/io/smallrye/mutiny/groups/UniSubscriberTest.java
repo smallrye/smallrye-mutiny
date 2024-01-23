@@ -5,6 +5,9 @@ import static org.awaitility.Awaitility.await;
 
 import java.io.IOException;
 import java.time.Duration;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -15,7 +18,10 @@ import org.junit.jupiter.api.parallel.ResourceAccessMode;
 import org.junit.jupiter.api.parallel.ResourceLock;
 
 import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.operators.AbstractUni;
 import io.smallrye.mutiny.subscription.Cancellable;
+import io.smallrye.mutiny.subscription.UniSubscriber;
+import io.smallrye.mutiny.subscription.UniSubscription;
 import junit5.support.InfrastructureResource;
 
 @ResourceLock(value = InfrastructureResource.NAME, mode = ResourceAccessMode.READ)
@@ -105,4 +111,30 @@ public class UniSubscriberTest {
         cancellable.cancel();
     }
 
+    @Test
+    public void cancellationBeforeSubscriptionArrivesDoesntThrowNpe() {
+        ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+        try {
+            AbstractUni<String> uni = new AbstractUni<>() {
+                @Override
+                public void subscribe(UniSubscriber<? super String> subscriber) {
+                    scheduler.schedule(() -> {
+                        subscriber.onSubscribe(new UniSubscription() {
+                            @Override
+                            public void cancel() {
+
+                            }
+                        });
+                        subscriber.onItem("Yolo");
+                    }, 10, TimeUnit.SECONDS);
+                }
+            };
+
+            AtomicReference<String> result = new AtomicReference<>();
+            uni.subscribe().with(result::set).cancel();
+            assertThat(result).hasNullValue();
+        } finally {
+            scheduler.shutdown();
+        }
+    }
 }

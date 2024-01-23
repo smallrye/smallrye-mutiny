@@ -79,7 +79,7 @@ public class UniCallbackSubscriber<T> implements UniSubscriber<T>, UniSubscripti
     @Override
     public void cancel() {
         UniSubscription sub = SUBSCRIPTION_UPDATER.getAndSet(this, CANCELLED);
-        if (sub != CANCELLED) {
+        if (sub != null && sub != CANCELLED) {
             sub.cancel();
         }
     }
