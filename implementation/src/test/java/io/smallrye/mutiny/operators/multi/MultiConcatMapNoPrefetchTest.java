@@ -10,6 +10,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -347,5 +348,17 @@ class MultiConcatMapNoPrefetchTest {
         sub.request(Long.MAX_VALUE);
         sub.assertItems(10, 20, 20, 40);
         sub.assertCompleted();
+    }
+
+    @RepeatedTest(1000)
+    void earlyRequestWithNullInner() {
+        var sub = Multi.createFrom().items(1, 2, 3)
+                .emitOn(Infrastructure.getDefaultExecutor())
+                .onItem().call(i -> Uni.createFrom().item(i))
+                .subscribe().withSubscriber(AssertSubscriber.create());
+
+        sub.request(1);
+        sub.awaitNextItems(1, Duration.ofSeconds(1));
+        sub.cancel();
     }
 }
