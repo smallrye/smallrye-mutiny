@@ -103,13 +103,10 @@ public class MultiConcatMapOp<I, O> extends AbstractMultiOperator<I, O> {
         private void innerOnSubscribe(Flow.Subscription subscription) {
             stateLock.lock();
             innerUpstream = subscription;
-            try {
-                long n = demand;
-                if (n > 0L) {
-                    subscription.request(n);
-                }
-            } finally {
-                stateLock.unlock();
+            long n = demand;
+            stateLock.unlock();
+            if (n > 0L) {
+                subscription.request(n);
             }
         }
 
