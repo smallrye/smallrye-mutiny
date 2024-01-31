@@ -8,7 +8,6 @@ import java.util.function.Function;
 import io.smallrye.common.annotation.CheckReturnValue;
 import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Multi;
-import io.smallrye.mutiny.helpers.queues.Queues;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.multi.MultiConcatMapOp;
 import io.smallrye.mutiny.operators.multi.MultiFlatMapOp;
@@ -77,7 +76,7 @@ public class MultiFlatten<I, O> {
      */
     @CheckReturnValue
     public Multi<O> merge() {
-        return merge(Queues.BUFFER_S);
+        return merge(Infrastructure.getBufferSizeS());
     }
 
     /**

@@ -51,7 +51,56 @@
     "criticality" : "highlight",
     "minSeverity" : "POTENTIALLY_BREAKING",
     "minCriticality" : "documented",
-    "differences" : [ ]
+    "differences" : [
+      {
+        "ignore": true,
+        "code": "java.class.removed",
+        "old": "class io.smallrye.mutiny.operators.multi.MultiConcatMapOp.ConcatMapMainSubscriber<I, O>",
+        "justification": "Internal API refactoring"
+      },
+      {
+        "ignore": true,
+        "code": "java.method.removed",
+        "old": "method <T> java.util.Queue<T> io.smallrye.mutiny.helpers.queues.Queues::createStrictSizeQueue(int)",
+        "justification": "Refactoring of internal APIs"
+      },
+      {
+        "ignore": true,
+        "code": "java.field.removedWithConstant",
+        "old": "field io.smallrye.mutiny.helpers.queues.Queues.TO_LARGE_TO_BE_BOUNDED",
+        "justification": "Typo (internal API)"
+      },
+      {
+        "ignore": true,
+        "code": "java.class.removed",
+        "old": "class io.smallrye.mutiny.helpers.queues.MpscLinkedQueue<T>",
+        "justification": "Refactoring of internal APIs"
+      },
+      {
+        "ignore": true,
+        "code": "java.class.removed",
+        "old": "class io.smallrye.mutiny.helpers.queues.SpscArrayQueue<E>",
+        "justification": "Refactoring of internal APIs"
+      },
+      {
+        "ignore": true,
+        "code": "java.class.removed",
+        "old": "class io.smallrye.mutiny.helpers.queues.SpscLinkedArrayQueue<E>",
+        "justification": "Refactoring of internal APIs"
+      },
+      {
+        "ignore": true,
+        "code": "java.field.removed",
+        "old": "field io.smallrye.mutiny.helpers.queues.Queues.BUFFER_S",
+        "justification": "Refactoring of internal APIs"
+      },
+      {
+        "ignore": true,
+        "code": "java.field.removed",
+        "old": "field io.smallrye.mutiny.helpers.queues.Queues.BUFFER_XS",
+        "justification": "Refactoring of internal APIs"
+      }
+    ]
   }
 }, {
   "extension" : "revapi.reporter.json",

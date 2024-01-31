@@ -49,13 +49,14 @@ public class MultiOnOverflowBufferOp<T> extends AbstractMultiOperator<T, T> {
 
         private final AtomicLong requested = new AtomicLong();
         private final AtomicInteger wip = new AtomicInteger();
+        private final AtomicInteger strictBoundCounter = new AtomicInteger();
 
         volatile boolean cancelled;
         volatile boolean done;
 
         OnOverflowBufferProcessor(MultiSubscriber<? super T> downstream, int bufferSize, boolean unbounded) {
             super(downstream);
-            this.queue = unbounded ? Queues.<T> unbounded(bufferSize).get() : Queues.createStrictSizeQueue(bufferSize);
+            this.queue = unbounded ? Queues.<T> unbounded(bufferSize).get() : Queues.createMpscArrayQueue(bufferSize);
         }
 
         @Override
@@ -70,7 +71,7 @@ public class MultiOnOverflowBufferOp<T> extends AbstractMultiOperator<T, T> {
 
         @Override
         public void onItem(T t) {
-            if (!queue.offer(t)) {
+            if ((!unbounded && strictBoundCounter.getAndIncrement() >= bufferSize) || !queue.offer(t)) {
                 BackPressureFailure bpf = new BackPressureFailure(
                         "The overflow buffer is full, which is due to the upstream sending too many items w.r.t. the downstream capacity and/or the downstream not consuming items fast enough");
                 if (dropUniMapper != null) {
@@ -166,6 +167,9 @@ public class MultiOnOverflowBufferOp<T> extends AbstractMultiOperator<T, T> {
                         }
                         if (wasEmpty) {
                             break;
+                        }
+                        if (!unbounded) {
+                            strictBoundCounter.decrementAndGet();
                         }
                         downstream.onItem(item);
                         emitted++;
