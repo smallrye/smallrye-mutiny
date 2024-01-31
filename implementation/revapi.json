@@ -54,12 +54,6 @@
     "differences" : [
       {
         "ignore": true,
-        "code": "java.class.removed",
-        "old": "class io.smallrye.mutiny.operators.multi.MultiConcatMapOp.ConcatMapMainSubscriber<I, O>",
-        "justification": "Internal API refactoring"
-      },
-      {
-        "ignore": true,
         "code": "java.method.removed",
         "old": "method <T> java.util.Queue<T> io.smallrye.mutiny.helpers.queues.Queues::createStrictSizeQueue(int)",
         "justification": "Refactoring of internal APIs"
