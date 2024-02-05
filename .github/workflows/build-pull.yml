@@ -33,7 +33,7 @@ jobs:
           MAVEN_OPTS: ${{ matrix.java.opts }}
         run: ./mvnw --no-transfer-progress -s .build/maven-ci-settings.xml -B clean verify -Pcoverage
       - name: Codecov
-        uses: codecov/codecov-action@v3.1.5
+        uses: codecov/codecov-action@v4.0.1
 
   conventional-commits:
     runs-on: ubuntu-latest
