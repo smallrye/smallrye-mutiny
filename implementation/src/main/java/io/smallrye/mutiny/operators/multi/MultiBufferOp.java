@@ -83,6 +83,10 @@ public class MultiBufferOp<T> extends AbstractMultiOperator<T, List<T>> {
 
         @Override
         public void request(long n) {
+            if (n <= 0L) {
+                onFailure(Subscriptions.getInvalidRequestException());
+                return;
+            }
             Subscription subscription = getUpstreamSubscription();
             if (subscription != CANCELLED) {
                 subscription.request(Subscriptions.multiply(n, size));
@@ -141,6 +145,10 @@ public class MultiBufferOp<T> extends AbstractMultiOperator<T, List<T>> {
 
         @Override
         public void request(long n) {
+            if (n <= 0L) {
+                onFailure(Subscriptions.getInvalidRequestException());
+                return;
+            }
             if (wip.compareAndSet(0, 1)) {
                 // n full buffers
                 long u = Subscriptions.multiply(n, size);
@@ -224,6 +232,10 @@ public class MultiBufferOp<T> extends AbstractMultiOperator<T, List<T>> {
 
         @Override
         public void request(long n) {
+            if (n <= 0L) {
+                onFailure(Subscriptions.getInvalidRequestException());
+                return;
+            }
             if (DrainUtils.postCompleteRequest(n,
                     downstream,
                     queue,
