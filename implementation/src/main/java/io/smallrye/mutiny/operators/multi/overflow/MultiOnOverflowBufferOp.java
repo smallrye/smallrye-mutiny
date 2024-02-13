@@ -130,6 +130,9 @@ public class MultiOnOverflowBufferOp<T> extends AbstractMultiOperator<T, T> {
             if (n > 0) {
                 Subscriptions.add(requested, n);
                 drain();
+            } else {
+                cancel();
+                downstream.onFailure(Subscriptions.getInvalidRequestException());
             }
         }
 
