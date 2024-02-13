@@ -577,6 +577,10 @@ public final class MultiPublishOp<T> extends ConnectableMulti<T> {
                 if (p != null) {
                     p.drain();
                 }
+            } else {
+                PublishSubscriber<T> parent = this.parent.get();
+                parent.failureOrCompletion.set(Subscriptions.getInvalidRequestException());
+                parent.drain();
             }
         }
 
