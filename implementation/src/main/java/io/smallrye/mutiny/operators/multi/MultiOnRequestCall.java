@@ -2,13 +2,11 @@ package io.smallrye.mutiny.operators.multi;
 
 import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
 
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.LongFunction;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
-import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.subscription.Cancellable;
 import io.smallrye.mutiny.subscription.MultiSubscriber;
 
@@ -35,17 +33,11 @@ public class MultiOnRequestCall<T> extends AbstractMultiOperator<T, T> {
         // Note that as per reactive streams specifications request and cancel calls need to happen serially
         private final AtomicReference<Cancellable> cancellable = new AtomicReference<>();
 
-        /**
-         * Amount of pending requests.
-         */
-        private final AtomicLong requests = new AtomicLong();
-
         @Override
         public void request(long numberOfItems) {
-            ParameterValidation.positive(numberOfItems, "requests");
-            // Check for potential overflow - expected by the TCK
-            if (requests.addAndGet(numberOfItems) < 0) {
-                throw new IllegalArgumentException("The amount of pending requests exceeded Long.MAX_VALUE");
+            if (numberOfItems <= 0) {
+                onFailure(new IllegalArgumentException("Invalid number of request, must be greater than 0"));
+                return;
             }
             cancellable.set(execute(numberOfItems).subscribe().with(
                     ignored -> {
@@ -59,13 +51,8 @@ public class MultiOnRequestCall<T> extends AbstractMultiOperator<T, T> {
         }
 
         @Override
-        public void onItem(T item) {
-            requests.decrementAndGet();
-            super.onItem(item);
-        }
-
-        @Override
         public void cancel() {
+            super.cancel();
             Cancellable uni = cancellable.getAndSet(null);
             if (uni != null) {
                 uni.cancel();
