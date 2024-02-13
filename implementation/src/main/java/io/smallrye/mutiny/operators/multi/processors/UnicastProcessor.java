@@ -235,7 +235,10 @@ public class UnicastProcessor<T> extends AbstractMulti<T> implements Processor<T
 
     @Override
     public void request(long n) {
-        if (n > 0) {
+        if (n <= 0) {
+            cancelled = true;
+            downstream.onError(Subscriptions.getInvalidRequestException());
+        } else {
             Subscriptions.add(requested, n);
             drain();
         }
