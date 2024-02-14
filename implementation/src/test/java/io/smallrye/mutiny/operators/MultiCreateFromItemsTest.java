@@ -357,4 +357,16 @@ public class MultiCreateFromItemsTest {
                 .assertFailedWith(NullPointerException.class, "");
     }
 
+    @Test
+    public void rejectBadRequests() {
+        Multi<Integer> multi = Multi.createFrom().items(1, 2, 3);
+
+        multi.subscribe().withSubscriber(AssertSubscriber.create())
+                .request(0L)
+                .assertFailedWith(IllegalArgumentException.class, "must be greater than 0");
+
+        multi.subscribe().withSubscriber(AssertSubscriber.create())
+                .request(-1L)
+                .assertFailedWith(IllegalArgumentException.class, "must be greater than 0");
+    }
 }

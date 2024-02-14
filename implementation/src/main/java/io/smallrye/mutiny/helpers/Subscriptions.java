@@ -352,10 +352,12 @@ public class Subscriptions {
 
         @Override
         public void request(long requests) {
-            if (requests > 0) {
-                if (requested.compareAndSet(false, true)) {
+            if (requested.compareAndSet(false, true)) {
+                if (requests > 0) {
                     downstream.onNext(item);
                     downstream.onComplete();
+                } else {
+                    downstream.onError(Subscriptions.getInvalidRequestException());
                 }
             }
         }
@@ -407,7 +409,7 @@ public class Subscriptions {
             Subscription actual = subscription.get();
             if (actual != null) {
                 actual.request(n);
-            } else {
+            } else if (n > 0L) { // We can't signal a bad request here, but at least we avoid an overflow
                 add(pendingRequests, n);
                 actual = subscription.get();
                 if (actual != null) {

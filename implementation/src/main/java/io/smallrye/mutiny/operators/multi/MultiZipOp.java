@@ -98,6 +98,9 @@ public final class MultiZipOp<O> extends AbstractMulti<O> {
             if (n > 0) {
                 Subscriptions.add(requested, n);
                 drain();
+            } else {
+                failures.set(Subscriptions.getInvalidRequestException());
+                drain();
             }
         }
 
@@ -295,6 +298,10 @@ public final class MultiZipOp<O> extends AbstractMulti<O> {
 
         @Override
         public void request(long n) {
+            if (n <= 0) {
+                onFailure(Subscriptions.getInvalidRequestException());
+                return;
+            }
             long p = produced + n;
             if (p >= limit) {
                 produced = 0L;

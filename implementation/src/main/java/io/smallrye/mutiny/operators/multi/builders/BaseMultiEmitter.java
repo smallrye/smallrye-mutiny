@@ -107,6 +107,9 @@ abstract class BaseMultiEmitter<T>
         if (n > 0) {
             Subscriptions.add(requested, n);
             onRequested();
+        } else {
+            cancel();
+            downstream.onError(Subscriptions.getInvalidRequestException());
         }
     }
 

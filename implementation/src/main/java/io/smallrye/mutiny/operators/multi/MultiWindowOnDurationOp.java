@@ -156,6 +156,8 @@ public class MultiWindowOnDurationOp<T> extends AbstractMultiOperator<T, Multi<T
         public void request(long n) {
             if (n > 0) {
                 Subscriptions.add(requested, n);
+            } else {
+                onFailure(Subscriptions.getInvalidRequestException());
             }
         }
 

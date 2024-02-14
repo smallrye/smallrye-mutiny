@@ -471,4 +471,16 @@ public class BroadcastProcessorTest {
         List<Long> items = subscriber.getItems();
         assertThat(items).isNotEmpty().doesNotContain(0L, 1L, 2L, 3L, 4L);
     }
+
+    @Test
+    public void badRequests() {
+        AssertSubscriber<?> sub = BroadcastProcessor.create()
+                .subscribe().withSubscriber(AssertSubscriber.create());
+        sub.request(0L).assertFailedWith(IllegalArgumentException.class, "must be greater than 0");
+
+        sub = BroadcastProcessor.create()
+                .subscribe().withSubscriber(AssertSubscriber.create());
+        sub.request(-1L).assertFailedWith(IllegalArgumentException.class, "must be greater than 0");
+
+    }
 }

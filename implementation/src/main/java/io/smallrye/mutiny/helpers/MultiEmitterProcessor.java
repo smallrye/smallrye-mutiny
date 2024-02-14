@@ -67,9 +67,13 @@ public class MultiEmitterProcessor<T> implements Processor<T, T>, MultiEmitter<T
             public void onSubscribe(Subscription subscription) {
                 subscriber.onSubscribe(new Subscription() {
                     @Override
-                    public void request(long l) {
-                        Subscriptions.add(requested, l);
-                        subscription.request(l);
+                    public void request(long n) {
+                        if (n <= 0L) {
+                            onError(Subscriptions.getInvalidRequestException());
+                        } else {
+                            Subscriptions.add(requested, n);
+                            subscription.request(n);
+                        }
                     }
 
                     @Override

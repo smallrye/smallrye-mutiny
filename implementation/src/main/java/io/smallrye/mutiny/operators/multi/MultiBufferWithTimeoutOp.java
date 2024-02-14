@@ -229,6 +229,8 @@ public final class MultiBufferWithTimeoutOp<T> extends AbstractMultiOperator<T, 
                 } else {
                     super.request(Subscriptions.multiply(n, size));
                 }
+            } else {
+                onFailure(Subscriptions.getInvalidRequestException());
             }
         }
 

@@ -8,6 +8,7 @@ import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 
 import io.smallrye.mutiny.Context;
 import io.smallrye.mutiny.helpers.ParameterValidation;
+import io.smallrye.mutiny.helpers.Subscriptions;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.subscription.ContextSupport;
 import io.smallrye.mutiny.subscription.MultiSubscriber;
@@ -113,7 +114,7 @@ public abstract class MultiOperatorProcessor<I, O> implements MultiSubscriber<I>
         Subscription subscription = getUpstreamSubscription();
         if (subscription != CANCELLED) {
             if (numberOfItems <= 0) {
-                onFailure(new IllegalArgumentException("Invalid number of request, must be greater than 0"));
+                onFailure(Subscriptions.getInvalidRequestException());
                 return;
             }
             subscription.request(numberOfItems);

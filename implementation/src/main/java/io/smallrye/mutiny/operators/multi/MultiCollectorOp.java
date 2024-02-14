@@ -104,9 +104,13 @@ public final class MultiCollectorOp<T, A, R> extends AbstractMultiOperator<T, R>
 
         @Override
         public void request(long n) {
-            // The subscriber may request only 1 but as we don't know how much we get, we request MAX.
-            // This could be changed with call to request in the OnNext/OnItem
-            super.request(Long.MAX_VALUE);
+            if (n <= 0L) {
+                onFailure(Subscriptions.getInvalidRequestException());
+            } else {
+                // The subscriber may request only 1 but as we don't know how much we get, we request MAX.
+                // This could be changed with call to request in the OnNext/OnItem
+                super.request(Long.MAX_VALUE);
+            }
         }
 
     }
