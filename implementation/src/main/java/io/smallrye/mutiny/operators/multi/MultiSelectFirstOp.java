@@ -3,7 +3,6 @@ package io.smallrye.mutiny.operators.multi;
 import static io.smallrye.mutiny.helpers.Subscriptions.CANCELLED;
 
 import java.util.concurrent.Flow.Subscription;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.helpers.ParameterValidation;
@@ -37,7 +36,6 @@ public final class MultiSelectFirstOp<T> extends AbstractMultiOperator<T, T> {
 
         private final long numberOfItems;
         private long remaining;
-        private final AtomicInteger wip = new AtomicInteger();
 
         MultiSelectFirstProcessor(MultiSubscriber<? super T> downstream, long numberOfItems) {
             super(downstream);
@@ -85,16 +83,14 @@ public final class MultiSelectFirstOp<T> extends AbstractMultiOperator<T, T> {
 
         @Override
         public void request(long n) {
-            Subscription actual = getUpstreamSubscription();
-            if (wip.compareAndSet(0, 1)) {
-                if (n >= this.numberOfItems) {
-                    actual.request(Long.MAX_VALUE);
+            Subscription upstream = getUpstreamSubscription();
+            if (upstream != CANCELLED) {
+                if (n >= numberOfItems) {
+                    upstream.request(Long.MAX_VALUE);
                 } else {
-                    actual.request(n);
+                    upstream.request(n);
                 }
-                return;
             }
-            actual.request(n);
         }
     }
 
