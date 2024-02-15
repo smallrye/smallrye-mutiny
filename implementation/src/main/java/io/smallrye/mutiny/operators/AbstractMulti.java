@@ -12,12 +12,33 @@ import java.util.function.Predicate;
 import io.smallrye.mutiny.Context;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
-import io.smallrye.mutiny.groups.*;
-import io.smallrye.mutiny.helpers.StrictMultiSubscriber;
+import io.smallrye.mutiny.groups.MultiBroadcast;
+import io.smallrye.mutiny.groups.MultiCollect;
+import io.smallrye.mutiny.groups.MultiConvert;
+import io.smallrye.mutiny.groups.MultiDemandPacing;
+import io.smallrye.mutiny.groups.MultiGroup;
+import io.smallrye.mutiny.groups.MultiIfNoItem;
+import io.smallrye.mutiny.groups.MultiOnCancel;
+import io.smallrye.mutiny.groups.MultiOnCompletion;
+import io.smallrye.mutiny.groups.MultiOnFailure;
+import io.smallrye.mutiny.groups.MultiOnItem;
+import io.smallrye.mutiny.groups.MultiOnRequest;
+import io.smallrye.mutiny.groups.MultiOnSubscribe;
+import io.smallrye.mutiny.groups.MultiOnTerminate;
+import io.smallrye.mutiny.groups.MultiOverflow;
+import io.smallrye.mutiny.groups.MultiSelect;
+import io.smallrye.mutiny.groups.MultiSkip;
+import io.smallrye.mutiny.groups.MultiSubscribe;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
-import io.smallrye.mutiny.operators.multi.*;
+import io.smallrye.mutiny.operators.multi.MultiCacheOp;
+import io.smallrye.mutiny.operators.multi.MultiDemandCapping;
+import io.smallrye.mutiny.operators.multi.MultiEmitOnOp;
+import io.smallrye.mutiny.operators.multi.MultiLogger;
+import io.smallrye.mutiny.operators.multi.MultiSubscribeOnOp;
+import io.smallrye.mutiny.operators.multi.MultiWithContext;
 import io.smallrye.mutiny.operators.multi.processors.BroadcastProcessor;
 import io.smallrye.mutiny.subscription.MultiSubscriber;
+import io.smallrye.mutiny.subscription.MultiSubscriberAdapter;
 
 public abstract class AbstractMulti<T> implements Multi<T> {
 
@@ -34,7 +55,7 @@ public abstract class AbstractMulti<T> implements Multi<T> {
         if (subscriber instanceof MultiSubscriber) {
             actual = (MultiSubscriber<? super T>) subscriber;
         } else {
-            actual = new StrictMultiSubscriber<>(subscriber);
+            actual = new MultiSubscriberAdapter<>(subscriber);
         }
         this.subscribe(actual);
     }
