@@ -614,4 +614,28 @@ public class MultiOnOverflowTest {
         sub.request(Long.MAX_VALUE);
         sub.assertCompleted();
     }
+
+    @Test
+    public void rejectBadRequestsBuffering() {
+        AssertSubscriber<Integer> sub = Multi.createFrom().range(1, 1000)
+                .onOverflow().bufferUnconditionally()
+                .subscribe().withSubscriber(AssertSubscriber.create());
+        sub.request(-1L).assertFailedWith(IllegalArgumentException.class, "than 0");
+    }
+
+    @Test
+    public void rejectBadRequestsDropping() {
+        AssertSubscriber<Integer> sub = Multi.createFrom().range(1, 1000)
+                .onOverflow().drop()
+                .subscribe().withSubscriber(AssertSubscriber.create());
+        sub.request(-1L).assertFailedWith(IllegalArgumentException.class, "than 0");
+    }
+
+    @Test
+    public void rejectBadRequestsKeepLast() {
+        AssertSubscriber<Integer> sub = Multi.createFrom().range(1, 1000)
+                .onOverflow().dropPreviousItems()
+                .subscribe().withSubscriber(AssertSubscriber.create());
+        sub.request(-1L).assertFailedWith(IllegalArgumentException.class, "than 0");
+    }
 }

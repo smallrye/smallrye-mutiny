@@ -369,4 +369,20 @@ public class MultiCreateFromItemsTest {
                 .request(-1L)
                 .assertFailedWith(IllegalArgumentException.class, "must be greater than 0");
     }
+
+    @Test
+    public void createFromStream() {
+        AssertSubscriber<Integer> sub = Multi.createFrom().items(Stream.of(1, 2, 3))
+                .subscribe().withSubscriber(AssertSubscriber.create());
+
+        sub.request(10L).assertCompleted().assertItems(1, 2, 3);
+    }
+
+    @Test
+    public void createFromStreamRejectBadRequest() {
+        AssertSubscriber<Integer> sub = Multi.createFrom().items(Stream.of(1, 2, 3))
+                .subscribe().withSubscriber(AssertSubscriber.create());
+
+        sub.request(-1L).assertFailedWith(IllegalArgumentException.class, "than 0");
+    }
 }

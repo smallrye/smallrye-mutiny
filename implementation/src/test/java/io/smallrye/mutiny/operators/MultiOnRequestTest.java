@@ -171,4 +171,13 @@ public class MultiOnRequestTest {
         assertThat(requested.get()).isEqualTo(10);
         assertThat(cancellation.get()).isTrue();
     }
+
+    @Test
+    public void rejectBadRequests() {
+        Multi<Integer> multi = Multi.createFrom().items(1, 2, 3);
+
+        AssertSubscriber<Integer> sub = multi.onRequest().call(n -> Uni.createFrom().item(n))
+                .subscribe().withSubscriber(AssertSubscriber.create());
+        sub.request(-1L).assertFailedWith(IllegalArgumentException.class, "than 0");
+    }
 }

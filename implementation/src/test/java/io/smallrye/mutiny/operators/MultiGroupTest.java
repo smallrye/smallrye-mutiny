@@ -450,6 +450,16 @@ public class MultiGroupTest {
     }
 
     @Test
+    public void rejectBadRequestOnTineWindow() {
+        AssertSubscriber<?> sub = Multi.createBy().concatenating().streams(
+                Multi.createFrom().range(1, 7),
+                Multi.createFrom().range(100, 200))
+                .group().intoMultis().every(Duration.ofMillis(1))
+                .subscribe().withSubscriber(AssertSubscriber.create());
+        sub.request(-1L).assertFailedWith(IllegalArgumentException.class, "than 0");
+    }
+
+    @Test
     public void testThatWindowWithDurationEmitsEmptyLists() {
         AssertSubscriber<List<Object>> subscriber = AssertSubscriber.create(3);
         Multi.createFrom().nothing()

@@ -879,4 +879,21 @@ public class MultiCombineTest {
                 .assertItems(Tuple2.of(3, 4), Tuple2.of(3, 5), Tuple2.of(3, 6));
     }
 
+    @Test
+    public void rejectBadRequests() {
+        Multi<Integer> s1 = Multi.createFrom().range(1, 4);
+        Multi<Integer> s2 = Multi.createFrom().range(2, 5);
+        Multi<Integer> s3 = Multi.createFrom().range(3, 6);
+        Multi<Tuple3<Integer, Integer, Integer>> multi = Multi.createBy().combining().streams(s1, s2, s3).asTuple();
+
+        AssertSubscriber<Tuple3<Integer, Integer, Integer>> sub = AssertSubscriber.create();
+        multi.subscribe().withSubscriber(sub);
+        sub.request(0L).assertFailedWith(IllegalArgumentException.class, "than 0");
+
+        sub = AssertSubscriber.create();
+        multi.subscribe().withSubscriber(sub);
+        sub.request(-1L).assertFailedWith(IllegalArgumentException.class, "than 0");
+
+    }
+
 }

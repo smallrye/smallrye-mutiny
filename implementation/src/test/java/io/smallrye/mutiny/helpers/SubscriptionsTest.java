@@ -18,6 +18,7 @@ import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.CompositeException;
+import io.smallrye.mutiny.helpers.test.AssertSubscriber;
 
 public class SubscriptionsTest {
 
@@ -244,4 +245,11 @@ public class SubscriptionsTest {
         runnables.forEach(runnable -> new Thread(runnable).start());
     }
 
+    @Test
+    public void rejectBadRequests() {
+        AssertSubscriber<Integer> sub = AssertSubscriber.create();
+        Subscription single = Subscriptions.single(sub, 1);
+        single.request(-1L);
+        sub.assertFailedWith(IllegalArgumentException.class, "than 0");
+    }
 }

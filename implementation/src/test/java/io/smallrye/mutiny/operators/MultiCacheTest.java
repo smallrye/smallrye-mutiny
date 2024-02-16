@@ -67,4 +67,18 @@ public class MultiCacheTest {
         s1.assertItems(1, 2).request(1).assertItems(1, 2, 3).assertCompleted();
         s2.assertItems(1, 2, 3).assertCompleted();
     }
+
+    @Test
+    public void rejectBadRequests() {
+        AtomicInteger count = new AtomicInteger();
+        Multi<Integer> multi = Multi.createFrom().deferred(() -> Multi.createFrom().items(count.incrementAndGet(),
+                count.incrementAndGet()))
+                .cache();
+
+        AssertSubscriber<Integer> sub = multi.subscribe().withSubscriber(AssertSubscriber.create());
+        sub.request(0L).assertFailedWith(IllegalArgumentException.class, "than 0");
+
+        sub = multi.subscribe().withSubscriber(AssertSubscriber.create());
+        sub.request(-1L).assertFailedWith(IllegalArgumentException.class, "than 0");
+    }
 }

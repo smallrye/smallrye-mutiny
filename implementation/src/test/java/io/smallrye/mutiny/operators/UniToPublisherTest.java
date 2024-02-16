@@ -248,4 +248,13 @@ public class UniToPublisherTest {
         subscriber.awaitCompletion();
         assertThat(subscriber.getItems()).hasSize(1).containsExactly(63);
     }
+
+    @Test
+    public void rejectBadRequests() {
+        AssertSubscriber<Integer> sub = AssertSubscriber.create();
+        Uni.createFrom().item(1)
+                .convert().toPublisher()
+                .subscribe(sub);
+        sub.request(-1L).assertFailedWith(IllegalArgumentException.class);
+    }
 }

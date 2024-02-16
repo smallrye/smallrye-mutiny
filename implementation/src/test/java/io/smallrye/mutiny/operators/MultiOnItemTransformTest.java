@@ -51,6 +51,29 @@ public class MultiOnItemTransformTest {
     }
 
     @Test
+    public void rejectsBadRequests() {
+        AssertSubscriber<Integer> sub = Multi.createFrom().items(1, 2, 3)
+                .onItem().transformToMultiAndMerge(n -> Multi.createFrom().item(n))
+                .subscribe().withSubscriber(AssertSubscriber.create());
+        sub.request(0L).assertFailedWith(IllegalArgumentException.class, "must be greater than 0");
+
+        sub = Multi.createFrom().items(1, 2, 3)
+                .onItem().transformToMultiAndMerge(n -> Multi.createFrom().item(n))
+                .subscribe().withSubscriber(AssertSubscriber.create());
+        sub.request(-1L).assertFailedWith(IllegalArgumentException.class, "must be greater than 0");
+
+        sub = Multi.createFrom().items(1, 2, 3)
+                .onItem().transformToMultiAndConcatenate(n -> Multi.createFrom().item(n))
+                .subscribe().withSubscriber(AssertSubscriber.create());
+        sub.request(0L).assertFailedWith(IllegalArgumentException.class, "must be greater than 0");
+
+        sub = Multi.createFrom().items(1, 2, 3)
+                .onItem().transformToMultiAndConcatenate(n -> Multi.createFrom().item(n))
+                .subscribe().withSubscriber(AssertSubscriber.create());
+        sub.request(-1L).assertFailedWith(IllegalArgumentException.class, "must be greater than 0");
+    }
+
+    @Test
     public void testNormal() {
         Multi.createFrom().items(1, 2, 3)
                 .onItem().transform(i -> i + 1)
