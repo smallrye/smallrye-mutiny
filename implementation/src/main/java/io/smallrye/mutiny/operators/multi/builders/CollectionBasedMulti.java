@@ -69,6 +69,7 @@ public class CollectionBasedMulti<T> extends AbstractMulti<T> {
                     }
                 }
             } else {
+                cancelled = true;
                 downstream.onFailure(Subscriptions.getInvalidRequestException());
             }
         }

@@ -148,6 +148,9 @@ public class MultiCacheOp<T> extends AbstractMultiOperator<T, T> implements Subs
             if (n > 0) {
                 Subscriptions.add(requested, n);
                 replay();
+            } else {
+                cancel();
+                downstream.onFailure(Subscriptions.getInvalidRequestException());
             }
         }
 

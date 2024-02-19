@@ -40,7 +40,7 @@ public class MultiDemandCapping<T> extends MultiOperator<T, T> {
                 return;
             }
             if (numberOfItems <= 0) {
-                onFailure(new IllegalArgumentException("Invalid number of request, must be greater than 0"));
+                onFailure(Subscriptions.getInvalidRequestException());
                 return;
             }
             try {

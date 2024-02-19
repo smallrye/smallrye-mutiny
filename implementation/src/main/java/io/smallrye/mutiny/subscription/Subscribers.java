@@ -73,7 +73,7 @@ public class Subscribers {
         @Override
         public void onItem(T item) {
             Objects.requireNonNull(item);
-            if (SUBSCRIPTION_UPDATER.get(this) != Subscriptions.CANCELLED) {
+            if (subscription != Subscriptions.CANCELLED) {
                 try {
                     // onItem cannot be null.
                     onItem.accept(item);
@@ -113,7 +113,7 @@ public class Subscribers {
 
         @Override
         public void request(long n) {
-            SUBSCRIPTION_UPDATER.get(this).request(n);
+            subscription.request(n);
         }
 
         @Override

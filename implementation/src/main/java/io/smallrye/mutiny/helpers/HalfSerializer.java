@@ -13,6 +13,8 @@ public final class HalfSerializer {
         // avoid direct instantiation.
     }
 
+    private static final Exception COMPLETION_PLACEHOLDER = new Exception("This is a completion placeholder");
+
     /**
      * Propagates the given item if possible and terminates if there was a completion or failure event happening during
      * the propagation.
@@ -30,12 +32,15 @@ public final class HalfSerializer {
             subscriber.onNext(item);
             if (wip.decrementAndGet() != 0) {
                 Throwable ex = Subscriptions.terminate(container);
-                if (ex != null) {
+                if (ex != COMPLETION_PLACEHOLDER) {
                     subscriber.onError(ex);
                 } else {
                     subscriber.onComplete();
                 }
             }
+        } else if (container.get() == COMPLETION_PLACEHOLDER) {
+            subscriber.onNext(item);
+            subscriber.onComplete();
         } else {
             IllegalStateException err = new IllegalStateException(
                     "HalfSerializer has detected concurrent onNext(item) signals which is not permitted by the Reactive Streams protocol");
@@ -70,9 +75,10 @@ public final class HalfSerializer {
      * @param container the failure container
      */
     public static void onComplete(Subscriber<?> subscriber, AtomicInteger wip, AtomicReference<Throwable> container) {
+        Subscriptions.addFailure(container, COMPLETION_PLACEHOLDER);
         if (wip.getAndIncrement() == 0) {
             Throwable ex = Subscriptions.terminate(container);
-            if (ex != null) {
+            if (ex != COMPLETION_PLACEHOLDER) {
                 subscriber.onError(ex);
             } else {
                 subscriber.onComplete();

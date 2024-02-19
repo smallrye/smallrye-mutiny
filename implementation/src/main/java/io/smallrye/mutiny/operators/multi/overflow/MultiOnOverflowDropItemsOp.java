@@ -101,6 +101,9 @@ public class MultiOnOverflowDropItemsOp<T> extends AbstractMultiOperator<T, T> {
         public void request(long n) {
             if (n > 0) {
                 Subscriptions.add(requested, n);
+            } else {
+                cancel();
+                downstream.onFailure(Subscriptions.getInvalidRequestException());
             }
         }
     }

@@ -275,6 +275,15 @@ public class MultiSelectFirstOrLastTest {
     }
 
     @Test
+    public void rejectBadRequestsOnIntervalMulti() {
+        AssertSubscriber<Integer> subscriber = Multi.createFrom().range(1, 100)
+                .select().first(Duration.ofMillis(1000))
+                .subscribe().withSubscriber(AssertSubscriber.create());
+
+        subscriber.request(-1L).assertFailedWith(IllegalArgumentException.class, "than 0");
+    }
+
+    @Test
     public void testSelectByTimeWithFailure() {
         Multi<Integer> multi = Multi.createBy().concatenating().streams(
                 Multi.createFrom().range(1, 5),

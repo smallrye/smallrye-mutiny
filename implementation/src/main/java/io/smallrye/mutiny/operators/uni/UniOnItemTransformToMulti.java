@@ -72,7 +72,12 @@ public class UniOnItemTransformToMulti<I, O> extends AbstractMulti<O> {
 
         @Override
         public void request(long n) {
-            Subscriptions.requestIfNotNullOrAccumulate(secondUpstream, requested, n);
+            if (n <= 0) {
+                cancel();
+                downstream.onError(Subscriptions.getInvalidRequestException());
+            } else {
+                Subscriptions.requestIfNotNullOrAccumulate(secondUpstream, requested, n);
+            }
         }
 
         @Override

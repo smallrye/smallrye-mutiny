@@ -307,4 +307,17 @@ public class MultiBroadcastTest {
         subscriber2.awaitCompletion();
         assertThat(subscriber2.getItems()).hasSize(1000);
     }
+
+    @Test
+    public void rejectBadRequests() {
+        MultiEmitterProcessor<Object> emitter = MultiEmitterProcessor.create();
+        AssertSubscriber<Object> sub = AssertSubscriber.create();
+        emitter.subscribe(sub);
+        sub.request(0L).assertFailedWith(IllegalArgumentException.class, "must be greater than 0");
+
+        emitter = MultiEmitterProcessor.create();
+        sub = AssertSubscriber.create();
+        emitter.subscribe(sub);
+        sub.request(-1L).assertFailedWith(IllegalArgumentException.class, "must be greater than 0");
+    }
 }

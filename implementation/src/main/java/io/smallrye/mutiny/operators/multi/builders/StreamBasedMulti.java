@@ -87,6 +87,7 @@ public class StreamBasedMulti<T> extends AbstractMulti<T> {
                     pull(n);
                 }
             } else {
+                cancelled = true;
                 downstream.onFailure(Subscriptions.getInvalidRequestException());
             }
         }

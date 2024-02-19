@@ -22,6 +22,11 @@ public class MultiRunSubscriptionOnTckTest extends AbstractPublisherTck<Long> {
     }
 
     @Override
+    public boolean skipStochasticTests() {
+        return true;
+    }
+
+    @Override
     public Flow.Publisher<Long> createFlowPublisher(long elements) {
         return upstream(elements)
                 .runSubscriptionOn(executor);

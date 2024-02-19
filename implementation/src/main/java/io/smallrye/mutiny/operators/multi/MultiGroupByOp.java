@@ -163,6 +163,8 @@ public final class MultiGroupByOp<T, K, V> extends AbstractMultiOperator<T, Grou
             if (n > 0) {
                 Subscriptions.add(requested, n);
                 drain();
+            } else {
+                onFailure(Subscriptions.getInvalidRequestException());
             }
         }
 
@@ -323,6 +325,8 @@ public final class MultiGroupByOp<T, K, V> extends AbstractMultiOperator<T, Grou
             if (n > 0) {
                 Subscriptions.add(requested, n);
                 drain();
+            } else {
+                onFailure(Subscriptions.getInvalidRequestException());
             }
         }
 

@@ -155,4 +155,10 @@ public class UnicastProcessorTest {
                 .assertFailedWith(BackPressureFailure.class, "");
     }
 
+    @Test
+    public void rejectBadRequests() {
+        UnicastProcessor<Object> processor = UnicastProcessor.create();
+        AssertSubscriber<Object> sub = processor.subscribe().withSubscriber(AssertSubscriber.create());
+        sub.request(-1L).assertFailedWith(IllegalArgumentException.class, "than 0");
+    }
 }

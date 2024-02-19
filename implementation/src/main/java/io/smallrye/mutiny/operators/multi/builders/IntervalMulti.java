@@ -98,6 +98,10 @@ public class IntervalMulti extends AbstractMulti<Long> {
         public void request(long n) {
             if (n > 0) {
                 Subscriptions.add(requested, n);
+            } else {
+                cancelled = true;
+                actual.onFailure(Subscriptions.getInvalidRequestException());
+                return;
             }
             if (once) {
                 start();

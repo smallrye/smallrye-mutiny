@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.time.Duration;
 import java.util.concurrent.Flow.Subscription;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 
 import org.junit.jupiter.api.RepeatedTest;
@@ -285,6 +286,23 @@ public class AssertSubscriberTest {
         Subscription subscription = mock(Subscription.class);
         subscriber.onSubscribe(subscription);
         verify(subscription).request(10);
+    }
+
+    @Test
+    public void testUpfrontRequestNoMock() {
+        AtomicLong requested = new AtomicLong();
+        AssertSubscriber<Integer> sub = Multi.createFrom().range(1, 10)
+                .onRequest().invoke(requested::set)
+                .subscribe().withSubscriber(AssertSubscriber.create(3));
+        sub.assertNotTerminated().assertItems(1, 2, 3);
+        assertThat(requested).hasValue(3L);
+
+        requested.set(0L);
+        sub = Multi.createFrom().items(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
+                .onRequest().invoke(requested::set)
+                .subscribe().withSubscriber(AssertSubscriber.create(4));
+        sub.assertNotTerminated().assertItems(1, 2, 3, 4);
+        assertThat(requested).hasValue(4L);
     }
 
     @Test

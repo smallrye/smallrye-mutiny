@@ -107,4 +107,12 @@ public class UniOnItemTransformToMultiTest {
                 .run(() -> assertThat(calledUni).isFalse())
                 .assertNotTerminated();
     }
+
+    @Test
+    public void rejectBadRequests() {
+        AssertSubscriber<Integer> sub = Uni.createFrom().item(123)
+                .onItem().transformToMulti(n -> Multi.createFrom().items(n))
+                .subscribe().withSubscriber(AssertSubscriber.create());
+        sub.request(-1L).assertFailedWith(IllegalArgumentException.class, "than 0");
+    }
 }

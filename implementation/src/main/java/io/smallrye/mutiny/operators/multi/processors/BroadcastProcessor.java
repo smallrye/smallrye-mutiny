@@ -229,6 +229,9 @@ public class BroadcastProcessor<T> extends AbstractMulti<T> implements Processor
         public void request(long n) {
             if (n > 0) {
                 Subscriptions.addAndHandledAlreadyCancelled(requests, n);
+            } else {
+                cancel();
+                downstream.onError(Subscriptions.getInvalidRequestException());
             }
         }
 

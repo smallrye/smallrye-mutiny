@@ -569,12 +569,16 @@ public final class MultiFlatMapOp<I, O> extends AbstractMultiOperator<I, O> {
 
         @Override
         public void request(long n) {
-            long p = produced + n;
-            if (p >= limit) {
-                produced = 0L;
-                subscription.request(p);
+            if (n <= 0L) {
+                onFailure(Subscriptions.getInvalidRequestException());
             } else {
-                produced = p;
+                long p = produced + n;
+                if (p >= limit) {
+                    produced = 0L;
+                    subscription.request(p);
+                } else {
+                    produced = p;
+                }
             }
         }
 

@@ -155,6 +155,10 @@ public class MultiWindowOp<T> extends AbstractMultiOperator<T, Multi<T>> {
 
         @Override
         public void request(long n) {
+            if (n <= 0L) {
+                onFailure(Subscriptions.getInvalidRequestException());
+                return;
+            }
             long u = Subscriptions.multiply(size, n);
             super.request(u);
         }
@@ -262,6 +266,10 @@ public class MultiWindowOp<T> extends AbstractMultiOperator<T, Multi<T>> {
 
         @Override
         public void request(long n) {
+            if (n <= 0L) {
+                onFailure(Subscriptions.getInvalidRequestException());
+                return;
+            }
             if (firstRequest.compareAndSet(false, true)) {
                 long u = Subscriptions.multiply(size, n);
                 long v = Subscriptions.multiply(skip - (long) size, n - 1);
@@ -451,6 +459,10 @@ public class MultiWindowOp<T> extends AbstractMultiOperator<T, Multi<T>> {
 
         @Override
         public void request(long n) {
+            if (n <= 0L) {
+                onFailure(Subscriptions.getInvalidRequestException());
+                return;
+            }
             Subscriptions.add(requested, n);
 
             if (firstRequest.compareAndSet(false, true)) {

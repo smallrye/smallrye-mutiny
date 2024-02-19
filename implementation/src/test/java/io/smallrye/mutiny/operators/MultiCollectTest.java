@@ -6,7 +6,14 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
 import java.time.Duration;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
 import java.util.function.BinaryOperator;
@@ -458,6 +465,15 @@ public class MultiCollectTest {
                 .await().indefinitely();
 
         assertThat(counter).hasValue(1);
+    }
+
+    @Test
+    public void rejectBadRequest() {
+        IllegalArgumentException err = assertThrows(IllegalArgumentException.class, () -> Multi.createFrom().items(1, 2, 3)
+                .onSubscription().invoke(s -> s.request(-1L))
+                .collect().asList()
+                .await().atMost(Duration.ofSeconds(5)));
+        assertThat(err.getMessage()).contains("than 0");
     }
 
     static class Person {

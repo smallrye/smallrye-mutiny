@@ -625,4 +625,17 @@ public class MultiCreateFromEmitterTest {
         subscriber.request(10);
         subscriber.assertFailedWith(BufferOverflowException.class, "emitter");
     }
+
+    @Test
+    public void rejectBadRequests() {
+        Multi<Object> multi = Multi.createFrom().emitter(emitter -> {
+            // Nothing
+        });
+
+        AssertSubscriber<Object> sub = multi.subscribe().withSubscriber(AssertSubscriber.create());
+        sub.request(0L).assertFailedWith(IllegalArgumentException.class, "must be greater than 0");
+
+        sub = multi.subscribe().withSubscriber(AssertSubscriber.create());
+        sub.request(-1L).assertFailedWith(IllegalArgumentException.class, "must be greater than 0");
+    }
 }
