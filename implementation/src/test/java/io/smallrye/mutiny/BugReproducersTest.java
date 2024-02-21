@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -93,5 +94,18 @@ class BugReproducersTest {
         asList.add(d);
 
         Uni.join().first(asList).withItem();
+    }
+
+    @Test
+    void reproducer_1520() {
+        // From https://github.com/smallrye/smallrye-mutiny/issues/1520 and
+        // to address https://github.com/quarkusio/quarkus/issues/34613
+        AtomicInteger counter = new AtomicInteger();
+        Multi.createFrom().iterable(List.of("aa", "bb", "cc"))
+                .collect().asList()
+                .onTermination().invoke(counter::incrementAndGet)
+                .onFailure().retry().withBackOff(Duration.ofSeconds(1)).atMost(2)
+                .await().atMost(Duration.ofSeconds(5));
+        assertThat(counter).hasValue(1);
     }
 }
