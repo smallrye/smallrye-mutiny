@@ -58,19 +58,21 @@ public final class UniToMultiPublisher<T> implements Flow.Publisher<T> {
 
         @Override
         public void cancel() {
-            if (upstream != null) {
-                upstream.cancel();
+            if (STATE_UPDATER.getAndSet(this, State.DONE) != State.DONE) {
+                if (upstream != null) {
+                    upstream.cancel();
+                }
             }
         }
 
         @Override
         public void request(long n) {
-            if (n <= 0L) {
-                downstream.onError(new IllegalArgumentException("Invalid request"));
-                return;
-            }
             if (STATE_UPDATER.compareAndSet(this, State.INIT, State.UNI_REQUESTED)) {
-                AbstractUni.subscribe(uni, this);
+                if (n <= 0L) {
+                    onFailure(new IllegalArgumentException("Invalid request"));
+                } else {
+                    AbstractUni.subscribe(uni, this);
+                }
             }
         }
 
