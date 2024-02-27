@@ -140,18 +140,17 @@ public class UniRetry<T> {
     public Uni<T> until(Predicate<? super Throwable> predicate) {
         ParameterValidation.nonNull(predicate, "predicate");
         Function<Multi<Throwable>, Flow.Publisher<Long>> whenStreamFactory = stream -> stream.onItem()
-                .transformToUni(failure -> Uni.createFrom().<Long> emitter(emitter -> {
+                .transformToUniAndConcatenate(failure -> {
                     try {
                         if (predicate.test(failure)) {
-                            emitter.complete(1L);
+                            return Uni.createFrom().item(1L);
                         } else {
-                            emitter.fail(failure);
+                            return Uni.createFrom().failure(failure);
                         }
-                    } catch (Throwable ex) {
-                        emitter.fail(ex);
+                    } catch (Throwable err) {
+                        return Uni.createFrom().failure(err);
                     }
-                }))
-                .concatenate();
+                });
         return when(whenStreamFactory);
     }
 
