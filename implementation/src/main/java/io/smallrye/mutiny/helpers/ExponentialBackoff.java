@@ -4,7 +4,6 @@ import java.time.Duration;
 import java.util.concurrent.Flow.Publisher;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -36,10 +35,13 @@ public class ExponentialBackoff {
 
         validate(firstBackoff, maxBackoff, jitterFactor, executor);
 
-        AtomicInteger index = new AtomicInteger();
-        return t -> t
-                .onItem().transformToUni(failure -> {
-                    int iteration = index.getAndIncrement();
+        return new Function<>() {
+            int index;
+
+            @Override
+            public Publisher<Long> apply(Multi<Throwable> t) {
+                return t.onItem().transformToUniAndConcatenate(failure -> {
+                    int iteration = index++;
                     if (iteration >= numRetries) {
                         failure.addSuppressed(
                                 new IllegalStateException("Retries exhausted: " + iteration + "/" + numRetries, failure));
@@ -49,7 +51,9 @@ public class ExponentialBackoff {
                         return Uni.createFrom().item((long) iteration).onItem().delayIt()
                                 .onExecutor(executor).by(delay);
                     }
-                }).concatenate();
+                });
+            }
+        };
     }
 
     private static Duration getNextDelay(Duration firstBackoff, Duration maxBackoff, double jitterFactor, int iteration) {
@@ -102,10 +106,13 @@ public class ExponentialBackoff {
 
         validate(firstBackoff, maxBackoff, jitterFactor, executor);
 
-        AtomicInteger index = new AtomicInteger();
-        return t -> t
-                .onItem().transformToUni(failure -> {
-                    int iteration = index.getAndIncrement();
+        return new Function<>() {
+            int index;
+
+            @Override
+            public Publisher<Long> apply(Multi<Throwable> t) {
+                return t.onItem().transformToUniAndConcatenate(failure -> {
+                    int iteration = index++;
                     Duration delay = getNextDelay(firstBackoff, maxBackoff, jitterFactor, iteration);
 
                     long checkTime = System.currentTimeMillis() + delay.toMillis();
@@ -118,7 +125,9 @@ public class ExponentialBackoff {
                     }
                     return Uni.createFrom().item((long) iteration).onItem().delayIt()
                             .onExecutor(executor).by(delay);
-                }).concatenate();
+                });
+            }
+        };
     }
 
     private static long getJitter(double jitterFactor, Duration nextBackoff) {
