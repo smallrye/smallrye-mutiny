@@ -1,5 +1,7 @@
 package io.smallrye.mutiny.groups;
 
+import static io.smallrye.mutiny.helpers.ExponentialBackoff.backoffWithPredicateFactory;
+import static io.smallrye.mutiny.helpers.ExponentialBackoff.noBackoffPredicateFactory;
 import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
 import static io.smallrye.mutiny.helpers.ParameterValidation.validate;
 
@@ -11,7 +13,6 @@ import java.util.function.Predicate;
 
 import io.smallrye.common.annotation.CheckReturnValue;
 import io.smallrye.mutiny.Multi;
-import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.helpers.ExponentialBackoff;
 import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
@@ -97,7 +98,6 @@ public class MultiRetry<T> {
      * @return a new {@link Multi} retrying to subscribe to the current
      *         {@link Multi} until it gets an item or until expiration {@code expireAt}. When the expiration is reached,
      *         the last failure is propagated.
-     *
      * @throws IllegalArgumentException if back off not configured,
      */
     @CheckReturnValue
@@ -126,7 +126,6 @@ public class MultiRetry<T> {
      * @return a new {@link Multi} retrying to subscribe to the current
      *         {@link Multi} until it gets an item or until expiration {@code expireIn}. When the expiration is reached,
      *         the last failure is propagated.
-     *
      * @throws IllegalArgumentException if back off not configured,
      */
     @CheckReturnValue
@@ -146,25 +145,14 @@ public class MultiRetry<T> {
     @CheckReturnValue
     public Multi<T> until(Predicate<? super Throwable> predicate) {
         Predicate<? super Throwable> actual = Infrastructure.decorate(nonNull(predicate, "predicate"));
+        Function<Multi<Throwable>, Publisher<Long>> whenStreamFactory;
         if (backOffConfigured) {
-            throw new IllegalArgumentException(
-                    "Invalid retry configuration, `until` cannot be used with a back-off configuration");
+            ScheduledExecutorService pool = (this.executor == null) ? Infrastructure.getDefaultWorkerPool() : this.executor;
+            whenStreamFactory = backoffWithPredicateFactory(initialBackOff, jitter, maxBackoff, predicate, pool);
+        } else {
+            whenStreamFactory = noBackoffPredicateFactory(predicate);
         }
-        Function<Multi<Throwable>, Publisher<Long>> whenStreamFactory = stream -> stream.onItem()
-                .transformToUni(failure -> Uni.createFrom().<Long> emitter(emitter -> {
-                    try {
-                        if (actual.test(failure)) {
-                            emitter.complete(1L);
-                        } else {
-                            emitter.fail(failure);
-                        }
-                    } catch (Throwable ex) {
-                        emitter.fail(ex);
-                    }
-                }))
-                .concatenate();
-        return Infrastructure
-                .onMultiCreation(new MultiRetryWhenOp<>(upstream, onFailurePredicate, whenStreamFactory));
+        return Infrastructure.onMultiCreation(new MultiRetryWhenOp<>(upstream, onFailurePredicate, whenStreamFactory));
     }
 
     /**

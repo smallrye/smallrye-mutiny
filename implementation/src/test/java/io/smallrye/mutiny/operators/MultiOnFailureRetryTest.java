@@ -160,12 +160,6 @@ public class MultiOnFailureRetryTest {
     }
 
     @Test
-    public void testThatYouCannotUseUntilIfBackoffIsConfigured() {
-        assertThrows(IllegalArgumentException.class, () -> Multi.createFrom().item("hello")
-                .onFailure().retry().withBackOff(Duration.ofSeconds(1)).until(t -> true));
-    }
-
-    @Test
     public void testJitterValidation() {
         assertThrows(IllegalArgumentException.class, () -> Multi.createFrom().item("hello")
                 .onFailure().retry().withJitter(2));

@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
-import java.time.Duration;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
@@ -168,12 +167,6 @@ public class UniOnFailureRetryUntilTest {
     public void testJitterValidation() {
         assertThrows(IllegalArgumentException.class, () -> Uni.createFrom().item(1)
                 .onFailure().retry().withJitter(2));
-    }
-
-    @Test
-    public void testThatYouCannotUseUntilIfBackoffIsConfigured() {
-        assertThrows(IllegalArgumentException.class, () -> Uni.createFrom().item("hello")
-                .onFailure().retry().withBackOff(Duration.ofSeconds(1)).until(t -> true));
     }
 
     /**

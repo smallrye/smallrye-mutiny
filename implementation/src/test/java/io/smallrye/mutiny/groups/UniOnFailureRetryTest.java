@@ -7,7 +7,10 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -593,5 +596,55 @@ public class UniOnFailureRetryTest {
                 .await().atMost(Duration.ofSeconds(1));
         assertThat(result).isEqualTo("yolo");
         assertThat(interrupted).isFalse();
+    }
+
+    @Test
+    void backoffWithUntilPredicateAlwaysTrue() {
+        AtomicInteger counter = new AtomicInteger();
+        ArrayList<Long> timestamps = new ArrayList<>();
+        String result = Uni.createFrom().<String> emitter(emitter -> {
+            timestamps.add(System.currentTimeMillis());
+            if (counter.getAndIncrement() < 5) {
+                emitter.fail(new IOException("boom"));
+            } else {
+                emitter.complete("ok");
+            }
+        })
+                .onFailure().retry().withBackOff(Duration.ofMillis(100), Duration.ofSeconds(1)).withJitter(0).until(err -> true)
+                .await().atMost(Duration.ofSeconds(5));
+
+        assertThat(result).isEqualTo("ok");
+        assertThat(timestamps).hasSize(6);
+
+        ArrayList<Long> diffs = new ArrayList<>();
+        int index = timestamps.size() - 1;
+        while (index > 0) {
+            diffs.add(timestamps.get(index) - timestamps.get(index - 1));
+            index = index - 1;
+        }
+        assertThat(diffs)
+                .doesNotHaveDuplicates()
+                .isSortedAccordingTo(Comparator.reverseOrder());
+    }
+
+    @Test
+    void backoffWithUntilPredicateEventuallyFailing() {
+        AtomicInteger counter = new AtomicInteger();
+        ArrayList<Long> timestamps = new ArrayList<>();
+
+        assertThrows(CompletionException.class, () -> Uni.createFrom().<String> emitter(emitter -> {
+            timestamps.add(System.currentTimeMillis());
+            if (counter.getAndIncrement() < 5) {
+                emitter.fail(new IOException("boom"));
+            } else {
+                emitter.complete("ok");
+            }
+        })
+                .onFailure().retry().withBackOff(Duration.ofMillis(100), Duration.ofSeconds(1)).withJitter(0)
+                .until(err -> counter.get() < 2)
+                .await().atMost(Duration.ofSeconds(5)));
+
+        assertThat(timestamps).hasSize(2);
+        assertThat(timestamps.get(1) - timestamps.get(0)).isGreaterThan(0L);
     }
 }
