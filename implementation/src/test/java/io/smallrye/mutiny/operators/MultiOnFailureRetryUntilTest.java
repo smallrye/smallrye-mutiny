@@ -3,6 +3,9 @@ package io.smallrye.mutiny.operators;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
+import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 
@@ -190,4 +193,70 @@ public class MultiOnFailureRetryUntilTest {
         subscriber.assertItems(0, 1).assertFailedWith(Exception.class, "boom");
     }
 
+    @Test
+    public void testWithBackoffAndUntilAndAlwaysTruePredicate() {
+        AtomicInteger counter = new AtomicInteger();
+        ArrayList<Long> timestamps = new ArrayList<>();
+        AssertSubscriber<Integer> sub = Multi.createFrom().<Integer> emitter(emitter -> {
+            timestamps.add(System.currentTimeMillis());
+            emitter.emit(1);
+            emitter.emit(2);
+            emitter.emit(3);
+            if (counter.incrementAndGet() == 5) {
+                emitter.complete();
+            } else {
+                emitter.fail(new IOException("boom"));
+            }
+        })
+                .onFailure().retry().withBackOff(Duration.ofMillis(100), Duration.ofSeconds(1)).withJitter(0).until(err -> true)
+                .subscribe().withSubscriber(AssertSubscriber.create());
+
+        sub.request(256);
+        sub.awaitCompletion();
+        List<Integer> items = sub.getItems();
+        assertThat(items)
+                .hasSize(15)
+                .startsWith(1, 2, 3)
+                .endsWith(1, 2, 3);
+
+        assertThat(timestamps)
+                .hasSize(5);
+        assertThat(timestamps.get(4) - timestamps.get(3))
+                .isGreaterThan(timestamps.get(3) - timestamps.get(2));
+        assertThat(timestamps.get(3) - timestamps.get(2))
+                .isGreaterThan(timestamps.get(2) - timestamps.get(1));
+    }
+
+    @Test
+    public void testWithBackoffAndUntilAndEventualFailure() {
+        AtomicInteger counter = new AtomicInteger();
+        ArrayList<Long> timestamps = new ArrayList<>();
+        AssertSubscriber<Integer> sub = Multi.createFrom().<Integer> emitter(emitter -> {
+            timestamps.add(System.currentTimeMillis());
+            emitter.emit(1);
+            emitter.emit(2);
+            emitter.emit(3);
+            if (counter.incrementAndGet() == 5) {
+                emitter.complete();
+            } else {
+                emitter.fail(new IOException("boom"));
+            }
+        })
+                .onFailure().retry().withBackOff(Duration.ofMillis(100), Duration.ofSeconds(1)).withJitter(0)
+                .until(err -> counter.get() < 3)
+                .subscribe().withSubscriber(AssertSubscriber.create());
+
+        sub.request(256);
+        sub.awaitFailure().assertFailedWith(IOException.class, "boom");
+
+        assertThat(sub.getItems())
+                .hasSize(9)
+                .startsWith(1, 2, 3)
+                .endsWith(1, 2, 3);
+
+        assertThat(timestamps)
+                .hasSize(3);
+        assertThat(timestamps.get(2) - timestamps.get(1))
+                .isGreaterThan(timestamps.get(1) - timestamps.get(0));
+    }
 }

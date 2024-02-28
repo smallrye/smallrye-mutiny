@@ -1,5 +1,7 @@
 package io.smallrye.mutiny.groups;
 
+import static io.smallrye.mutiny.helpers.ExponentialBackoff.backoffWithPredicateFactory;
+import static io.smallrye.mutiny.helpers.ExponentialBackoff.noBackoffPredicateFactory;
 import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
 import static io.smallrye.mutiny.helpers.ParameterValidation.validate;
 
@@ -134,24 +136,21 @@ public class UniRetry<T> {
      *        must not be {@code null}. If the predicate returns {@code true} for the given failure, a
      *        re-subscription is attempted.
      * @return the new {@code Uni} instance
-     * @throws IllegalArgumentException if back off configured
      */
     @CheckReturnValue
     public Uni<T> until(Predicate<? super Throwable> predicate) {
         ParameterValidation.nonNull(predicate, "predicate");
-        Function<Multi<Throwable>, Flow.Publisher<Long>> whenStreamFactory = stream -> stream.onItem()
-                .transformToUniAndConcatenate(failure -> {
-                    try {
-                        if (predicate.test(failure)) {
-                            return Uni.createFrom().item(1L);
-                        } else {
-                            return Uni.createFrom().failure(failure);
-                        }
-                    } catch (Throwable err) {
-                        return Uni.createFrom().failure(err);
-                    }
-                });
-        return when(whenStreamFactory);
+        Function<Multi<Throwable>, Flow.Publisher<Long>> whenStreamFactory;
+        if (backOffConfigured) {
+            ScheduledExecutorService pool = (this.executor == null) ? Infrastructure.getDefaultWorkerPool() : this.executor;
+            whenStreamFactory = backoffWithPredicateFactory(initialBackOffDuration, jitter, maxBackoffDuration, predicate,
+                    pool);
+        } else {
+            whenStreamFactory = noBackoffPredicateFactory(predicate);
+        }
+        Function<Multi<Throwable>, ? extends Flow.Publisher<?>> actual = Infrastructure
+                .decorate(nonNull(whenStreamFactory, "whenStreamFactory"));
+        return upstream.toMulti().onFailure(this.onFailurePredicate).retry().when(actual).toUni();
     }
 
     /**

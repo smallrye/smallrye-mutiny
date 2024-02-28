@@ -4,8 +4,8 @@ import java.time.Duration;
 import java.util.concurrent.Flow.Publisher;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
@@ -35,10 +35,13 @@ public class ExponentialBackoff {
 
         validate(firstBackoff, maxBackoff, jitterFactor, executor);
 
-        AtomicInteger index = new AtomicInteger();
-        return t -> t
-                .onItem().transformToUni(failure -> {
-                    int iteration = index.getAndIncrement();
+        return new Function<>() {
+            int index;
+
+            @Override
+            public Publisher<Long> apply(Multi<Throwable> t) {
+                return t.onItem().transformToUniAndConcatenate(failure -> {
+                    int iteration = index++;
                     if (iteration >= numRetries) {
                         failure.addSuppressed(
                                 new IllegalStateException("Retries exhausted: " + iteration + "/" + numRetries, failure));
@@ -48,7 +51,9 @@ public class ExponentialBackoff {
                         return Uni.createFrom().item((long) iteration).onItem().delayIt()
                                 .onExecutor(executor).by(delay);
                     }
-                }).concatenate();
+                });
+            }
+        };
     }
 
     private static Duration getNextDelay(Duration firstBackoff, Duration maxBackoff, double jitterFactor, int iteration) {
@@ -101,10 +106,13 @@ public class ExponentialBackoff {
 
         validate(firstBackoff, maxBackoff, jitterFactor, executor);
 
-        AtomicInteger index = new AtomicInteger();
-        return t -> t
-                .onItem().transformToUni(failure -> {
-                    int iteration = index.getAndIncrement();
+        return new Function<>() {
+            int index;
+
+            @Override
+            public Publisher<Long> apply(Multi<Throwable> t) {
+                return t.onItem().transformToUniAndConcatenate(failure -> {
+                    int iteration = index++;
                     Duration delay = getNextDelay(firstBackoff, maxBackoff, jitterFactor, iteration);
 
                     long checkTime = System.currentTimeMillis() + delay.toMillis();
@@ -117,7 +125,9 @@ public class ExponentialBackoff {
                     }
                     return Uni.createFrom().item((long) iteration).onItem().delayIt()
                             .onExecutor(executor).by(delay);
-                }).concatenate();
+                });
+            }
+        };
     }
 
     private static long getJitter(double jitterFactor, Duration nextBackoff) {
@@ -143,5 +153,55 @@ public class ExponentialBackoff {
             nextBackoff = maxBackoff;
         }
         return nextBackoff;
+    }
+
+    public static Function<Multi<Throwable>, Publisher<Long>> backoffWithPredicateFactory(final Duration initialBackOff,
+            final double jitter, final Duration maxBackoff, Predicate<? super Throwable> predicate,
+            ScheduledExecutorService pool) {
+        return new Function<>() {
+            int index = 0;
+
+            @Override
+            public Publisher<Long> apply(Multi<Throwable> stream) {
+                return stream.onItem()
+                        .transformToUniAndConcatenate(failure -> {
+                            int iteration = index++;
+                            try {
+                                if (predicate.test(failure)) {
+                                    Duration delay = getNextDelay(initialBackOff, maxBackoff, jitter,
+                                            iteration);
+                                    return Uni.createFrom().item((long) iteration)
+                                            .onItem().delayIt().onExecutor(pool).by(delay);
+                                } else {
+                                    return Uni.createFrom().failure(failure);
+                                }
+                            } catch (Throwable err) {
+                                failure.addSuppressed(err);
+                                return Uni.createFrom().failure(failure);
+                            }
+                        });
+            }
+        };
+    }
+
+    public static Function<Multi<Throwable>, Publisher<Long>> noBackoffPredicateFactory(
+            Predicate<? super Throwable> predicate) {
+        return new Function<>() {
+            @Override
+            public Publisher<Long> apply(Multi<Throwable> stream) {
+                return stream.onItem()
+                        .transformToUniAndConcatenate(failure -> {
+                            try {
+                                if (predicate.test(failure)) {
+                                    return Uni.createFrom().item(1L);
+                                } else {
+                                    return Uni.createFrom().failure(failure);
+                                }
+                            } catch (Throwable err) {
+                                return Uni.createFrom().failure(err);
+                            }
+                        });
+            }
+        };
     }
 }
