@@ -10,7 +10,6 @@ import java.util.concurrent.Flow.Subscription;
 import java.util.function.*;
 
 import io.smallrye.common.annotation.CheckReturnValue;
-import io.smallrye.common.annotation.Experimental;
 import io.smallrye.mutiny.groups.*;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.multi.split.MultiSplitter;
@@ -664,7 +663,6 @@ public interface Multi<T> extends Publisher<T> {
      * @param <K> the key type
      */
     @CheckReturnValue
-    @Experimental("Multi splitting is an experimental API in Mutiny 2.3.0")
     default <K extends Enum<K>> MultiSplitter<T, K> split(Class<K> keyType, Function<T, K> splitter) {
         return new MultiSplitter<>(this, keyType, splitter);
     }
