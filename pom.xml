@@ -570,6 +570,9 @@
                                             <preset>conventional-commits</preset>
                                             <links>true</links>
                                             <formatted>ALWAYS</formatted>
+                                            <extraProperties>
+                                                <categorizeScopes>true</categorizeScopes>
+                                            </extraProperties>
                                             <hide>
                                                 <contributors>
                                                     <contributor>GitHub</contributor>
