@@ -1,6 +1,7 @@
 package io.smallrye.mutiny.operators;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
@@ -106,10 +107,13 @@ public class UniCreateFromFutureTest {
     @Test
     public void testWithTimeoutException() throws InterruptedException {
         UniAssertSubscriber<String> subscriber = UniAssertSubscriber.create();
+        AtomicBoolean step = new AtomicBoolean();
         CompletableFuture<String> cs = new CompletableFuture<>();
-        Uni.createFrom().future(cs, Duration.ofMillis(1)).subscribe().withSubscriber(subscriber);
+        Uni.createFrom().future(cs, Duration.ofMillis(1))
+                .onFailure().invoke(() -> step.set(true))
+                .subscribe().withSubscriber(subscriber);
         // synthetic delay
-        Thread.sleep(50);
+        await().untilTrue(step);
         cs.complete("1");
         subscriber
                 .awaitFailure()
