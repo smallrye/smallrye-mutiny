@@ -1,5 +1,5 @@
 ///usr/bin/env jbang "$0" "$@" ; exit $?
-//DEPS io.smallrye.reactive:mutiny:2.5.6
+//DEPS io.smallrye.reactive:mutiny:2.5.8
 package _02_groups;
 
 import java.time.Duration;
