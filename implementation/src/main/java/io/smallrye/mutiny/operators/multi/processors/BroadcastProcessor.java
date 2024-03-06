@@ -133,8 +133,11 @@ public class BroadcastProcessor<T> extends AbstractMulti<T> implements Processor
     @Override
     public void onNext(T item) {
         ParameterValidation.nonNullNpe(item, "item");
-        for (BroadcastSubscription<T> s : subscribers.get()) {
-            s.onNext(item);
+        List<BroadcastSubscription<T>> subscriptions = subscribers.get();
+        if (subscriptions != TERMINATED) {
+            for (BroadcastSubscription<T> s : subscriptions) {
+                s.onNext(item);
+            }
         }
     }
 
@@ -142,26 +145,28 @@ public class BroadcastProcessor<T> extends AbstractMulti<T> implements Processor
     @Override
     public void onError(Throwable failure) {
         ParameterValidation.nonNullNpe(failure, "failure");
-        if (subscribers.get() == TERMINATED) {
+        List<BroadcastSubscription<?>> subscriptions = subscribers.getAndSet((List) TERMINATED);
+        if (subscriptions == TERMINATED) {
             return;
         }
         this.failure = failure;
-        List<BroadcastSubscription<?>> andSet = subscribers.getAndSet((List) TERMINATED);
-        for (BroadcastSubscription<?> s : andSet) {
+        for (BroadcastSubscription<?> s : subscriptions) {
             s.onError(failure);
         }
+        subscriptions.clear();
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     public void onComplete() {
-        if (subscribers.get() == TERMINATED) {
+        List<BroadcastSubscription<?>> subscriptions = subscribers.getAndSet((List) TERMINATED);
+        if (subscriptions == TERMINATED) {
             return;
         }
-        List<BroadcastSubscription<?>> andSet = subscribers.getAndSet((List) TERMINATED);
-        for (BroadcastSubscription<?> s : andSet) {
+        for (BroadcastSubscription<?> s : subscriptions) {
             s.onComplete();
         }
+        subscriptions.clear();
     }
 
     /**
