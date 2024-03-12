@@ -59,6 +59,7 @@ nav:
       - 'reference/what-is-reactive-programming.md'
       - 'reference/what-makes-mutiny-different.md'
       - 'reference/uni-and-multi.md'
+      - 'reference/going-reactive-a-few-pitfalls.md'
       - 'reference/publications.md'
       - 'Tags index': 'tags-index.md'
   - 'API': 'https://javadoc.io/doc/io.smallrye.reactive/mutiny/latest/index.html'
