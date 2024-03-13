@@ -52,7 +52,7 @@ public class UniMemoize<T> {
      * @apiNote This is an experimental API
      * @deprecated use {@link #forFixedDuration(Duration)} instead.
      */
-    @Deprecated
+    @Deprecated(forRemoval = true)
     @CheckReturnValue
     public Uni<T> atLeast(Duration duration) {
         return forFixedDuration(duration);

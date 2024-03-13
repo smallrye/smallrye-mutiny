@@ -74,7 +74,7 @@ public class UniAndGroupIterable<T1> {
      * @return the new {@link Uni}
      * @deprecated use {{@link #with(Function)}} instead
      */
-    @Deprecated
+    @Deprecated(forRemoval = true)
     @CheckReturnValue
     public <O> Uni<O> combinedWith(Function<List<?>, O> function) {
         return with(function);
@@ -127,7 +127,7 @@ public class UniAndGroupIterable<T1> {
      * @return the new {@link Uni}
      * @deprecated use {@link #with(Class, Function)} instead
      */
-    @Deprecated
+    @Deprecated(forRemoval = true)
     @CheckReturnValue
     public <O, I> Uni<O> combinedWith(Class<I> superType, Function<List<I>, O> function) {
         return with(superType, function);
