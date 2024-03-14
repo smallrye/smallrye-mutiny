@@ -55,7 +55,7 @@ public class UniAndGroup2<T1, T2> extends UniAndGroupIterable<T1> {
      * @return the resulting {@code Uni<O>}. The items are combined into {@link O}
      * @deprecated use {@link #with(BiFunction)} instead
      */
-    @Deprecated
+    @Deprecated(forRemoval = true)
     @CheckReturnValue
     public <O> Uni<O> combinedWith(BiFunction<T1, T2, O> combinator) {
         return with(combinator);

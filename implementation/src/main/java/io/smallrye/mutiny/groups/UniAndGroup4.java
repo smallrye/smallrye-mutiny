@@ -33,7 +33,7 @@ public class UniAndGroup4<T1, T2, T3, T4> extends UniAndGroupIterable<T1> {
     /**
      * @deprecated use {@link #with(Functions.Function4)} instead
      */
-    @Deprecated
+    @Deprecated(forRemoval = true)
     @CheckReturnValue
     public <O> Uni<O> combinedWith(Functions.Function4<T1, T2, T3, T4, O> combinator) {
         return with(combinator);

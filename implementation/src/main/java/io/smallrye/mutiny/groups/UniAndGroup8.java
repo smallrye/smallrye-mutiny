@@ -36,7 +36,7 @@ public class UniAndGroup8<T1, T2, T3, T4, T5, T6, T7, T8> extends UniAndGroupIte
     /**
      * @deprecated use {@link #with(Functions.Function8)} instead
      */
-    @Deprecated
+    @Deprecated(forRemoval = true)
     @CheckReturnValue
     public <O> Uni<O> combinedWith(Functions.Function8<T1, T2, T3, T4, T5, T6, T7, T8, O> combinator) {
         return with(combinator);
