@@ -4,11 +4,18 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
 import java.io.IOException;
-import java.util.concurrent.*;
+import java.time.Duration;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Flow.Publisher;
+import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.RepeatedTest;
+import org.junit.jupiter.api.Test;
 
 import io.reactivex.rxjava3.core.Flowable;
 import io.reactivex.rxjava3.subscribers.TestSubscriber;
@@ -144,16 +151,9 @@ public class UniToPublisherTest {
 
     @Test
     public void testCancellationBetweenRequestAndValue() {
-        // TODO This is a very broken implementation of "delay" - to be replace once delay is implemented
-        executor = Executors.newFixedThreadPool(1);
-        Publisher<Integer> publisher = Uni.createFrom().item(1).emitOn(executor).map(x -> {
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
-            return x;
-        }).convert().toPublisher();
+        Publisher<Integer> publisher = Uni.createFrom().item(1)
+                .onItem().delayIt().by(Duration.ofMillis(100))
+                .convert().toPublisher();
 
         assertThat(publisher).isNotNull();
         TestSubscriber<Integer> test = Flowable.fromPublisher(AdaptersToReactiveStreams.publisher(publisher)).test(0);
