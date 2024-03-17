@@ -27,7 +27,7 @@ public class QueuesTest {
         assertThat(queue.contains(1)).isFalse();
         assertThat(queue.iterator().hasNext()).isFalse();
         assertThatThrownBy(queue::element).isInstanceOf(NoSuchElementException.class);
-        assertThatThrownBy(() -> queue.remove()).isInstanceOf(NoSuchElementException.class);
+        assertThatThrownBy(queue::remove).isInstanceOf(NoSuchElementException.class);
         assertThat(queue.remove(1)).isFalse();
         assertThat(queue.containsAll(values)).isFalse();
         assertThat(queue.retainAll(values)).isFalse();

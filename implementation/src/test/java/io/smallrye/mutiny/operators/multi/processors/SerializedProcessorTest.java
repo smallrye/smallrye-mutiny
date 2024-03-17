@@ -174,7 +174,7 @@ public class SerializedProcessorTest {
                 .assertSubscribed()
                 .assertTerminated();
 
-        if (subscriber.getItems().size() != 0) {
+        if (!subscriber.getItems().isEmpty()) {
             assertThat(subscriber.getItems()).containsExactly(1);
         } else {
             assertThat(subscriber.getFailure()).isEqualTo(failure);
@@ -201,7 +201,7 @@ public class SerializedProcessorTest {
 
         subscriber.awaitSubscription().awaitCompletion();
 
-        if (subscriber.getItems().size() != 0) {
+        if (!subscriber.getItems().isEmpty()) {
             assertThat(subscriber.getItems()).containsExactly(1);
         }
     }
@@ -226,7 +226,7 @@ public class SerializedProcessorTest {
 
         subscriber.awaitSubscription().awaitCompletion();
 
-        if (subscriber.getItems().size() != 0) {
+        if (!subscriber.getItems().isEmpty()) {
             assertThat(subscriber.getItems()).containsExactly(1);
         }
     }
@@ -276,7 +276,7 @@ public class SerializedProcessorTest {
 
         await().untilAsserted(subscriber::assertTerminated);
 
-        if (subscriber.getItems().size() != 0) {
+        if (!subscriber.getItems().isEmpty()) {
             assertThat(subscriber.getItems()).containsExactly(1);
         }
     }
@@ -334,7 +334,7 @@ public class SerializedProcessorTest {
 
         subscriber.awaitSubscription().awaitCompletion();
 
-        if (subscriber.getItems().size() != 0) {
+        if (!subscriber.getItems().isEmpty()) {
             assertThat(subscriber.getItems()).contains(1);
         }
 
@@ -363,7 +363,7 @@ public class SerializedProcessorTest {
 
         subscriber.awaitSubscription().awaitCompletion();
 
-        if (subscriber.getItems().size() != 0) {
+        if (!subscriber.getItems().isEmpty()) {
             assertThat(subscriber.getItems()).containsExactly(1, 2, 3, 4, 5);
         }
     }

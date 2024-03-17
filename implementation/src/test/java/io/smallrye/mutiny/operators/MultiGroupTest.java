@@ -207,7 +207,7 @@ public class MultiGroupTest {
 
     @Test
     public void testAsListsWithDurationWithNoItems() {
-        MultiOnCancellationSpy<Long> spy = Spy.onCancellation(Multi.createFrom().<Long> nothing());
+        MultiOnCancellationSpy<Long> spy = Spy.onCancellation(Multi.createFrom().nothing());
         AssertSubscriber<List<Long>> subscriber = spy
                 .group().intoLists().every(Duration.ofMillis(100), true)
                 .subscribe().withSubscriber(AssertSubscriber.create(100));

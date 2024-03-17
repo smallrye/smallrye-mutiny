@@ -39,7 +39,7 @@ public final class MultiZipOp<O> extends AbstractMulti<O> {
 
     @Override
     public void subscribe(MultiSubscriber<? super O> downstream) {
-        if (upstreams.size() == 0) {
+        if (upstreams.isEmpty()) {
             Subscriptions.complete(downstream);
             return;
         }
