@@ -6,10 +6,8 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
-import io.smallrye.mutiny.Context;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.helpers.Subscriptions;
-import io.smallrye.mutiny.subscription.ContextSupport;
 import io.smallrye.mutiny.subscription.DemandPacer;
 import io.smallrye.mutiny.subscription.MultiSubscriber;
 
@@ -43,15 +41,6 @@ public class MultiDemandPacer<T> extends AbstractMultiOperator<T, T> {
             super(downstream);
             this.executor = executor;
             this.pacer = pacer;
-        }
-
-        @Override
-        public Context context() {
-            if (downstream instanceof ContextSupport) {
-                return ((ContextSupport) downstream).context();
-            } else {
-                return Context.empty();
-            }
         }
 
         private void demandAndSchedule(ScheduledExecutorService executor) {
