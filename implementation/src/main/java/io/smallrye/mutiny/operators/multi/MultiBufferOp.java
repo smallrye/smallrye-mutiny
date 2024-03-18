@@ -287,16 +287,6 @@ public class MultiBufferOp<T> extends AbstractMultiOperator<T, List<T>> {
         }
 
         @Override
-        public void onFailure(Throwable t) {
-            Subscription subscription = getAndSetUpstreamSubscription(CANCELLED);
-            if (subscription != CANCELLED) {
-                downstream.onFailure(t);
-            } else {
-                Infrastructure.handleDroppedException(t);
-            }
-        }
-
-        @Override
         public void onCompletion() {
             Subscription subscription = getAndSetUpstreamSubscription(CANCELLED);
             if (subscription != CANCELLED) {

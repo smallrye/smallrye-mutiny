@@ -1,6 +1,5 @@
 package io.smallrye.mutiny.operators.multi;
 
-import java.util.concurrent.Flow.Subscription;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 
@@ -56,11 +55,6 @@ public class MultiRepeatUntilOp<T> extends AbstractMultiOperator<T, T> implement
             this.predicate = predicate;
             this.remaining = times;
             this.delay = delay;
-        }
-
-        @Override
-        public void onSubscribe(Subscription s) {
-            setOrSwitchUpstream(s);
         }
 
         /**

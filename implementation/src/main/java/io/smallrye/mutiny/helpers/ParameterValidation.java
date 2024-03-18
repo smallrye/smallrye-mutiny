@@ -169,7 +169,7 @@ public class ParameterValidation {
      */
     public static <T extends Collection<?>> T isNotEmpty(T collection, String name) {
         nonNull(collection, name);
-        if (collection.size() == 0) {
+        if (collection.isEmpty()) {
             throw new IllegalArgumentException(String.format("`%s` must not be empty", name));
         }
         return collection;
