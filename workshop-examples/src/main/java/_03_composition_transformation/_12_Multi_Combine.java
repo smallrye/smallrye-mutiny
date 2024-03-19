@@ -29,7 +29,7 @@ public class _12_Multi_Combine {
                 .uni(secondGenerator::next).atMost(10);
 
         Multi.createBy().combining().streams(first, second)
-                .asTuple() // also try lastItems()
+                .asTuple() // also try latestItems()
                 .onTermination().invoke(latch::countDown)
                 .subscribe().with(System.out::println);
 
