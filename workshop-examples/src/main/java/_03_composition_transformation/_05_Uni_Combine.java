@@ -20,7 +20,7 @@ public class _05_Uni_Combine {
 
         Uni.combine()
                 .all().unis(first, second, third)
-                .combinedWith((a, b, c) -> a + b + c)
+                .with((a, b, c) -> a + b + c)
                 .subscribe().with(System.out::println);
 
         Uni.combine()
