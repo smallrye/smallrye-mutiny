@@ -18,7 +18,7 @@ public class _04_Multi_Event_Groups {
                 .onItem().invoke(item -> System.out.println("onItem " + item))
                 .onFailure().invoke(failure -> System.out.println("onFailure " + failure))
                 .onCompletion().invoke(() -> System.out.println("onCompletion"))
-                .onTermination().invoke((t, c) -> System.out.println("onTermination " + t + ", c"))
+                .onTermination().invoke((t, c) -> System.out.println("onTermination " + t + ", " + c))
                 .subscribe()
                 .asStream().collect(Collectors.toList());
 
