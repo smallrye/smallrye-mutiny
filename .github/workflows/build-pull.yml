@@ -40,7 +40,7 @@ jobs:
     name: Check conventional commits
     steps:
       - uses: actions/checkout@v4
-      - uses: wagoid/commitlint-github-action@v5
+      - uses: wagoid/commitlint-github-action@v6
 
   compatibility:
     runs-on: ubuntu-latest
