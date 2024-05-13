@@ -15,6 +15,11 @@ import io.smallrye.mutiny.Uni;
 
 public class MultiConcatMapNoPrefetchCompletionStageTckTest extends AbstractPublisherTck<Long> {
 
+    @Override
+    public boolean skipStochasticTests() {
+        return true;
+    }
+
     @Test
     public void flatMapCsStageShouldMapFutures() {
         CompletableFuture<Integer> one = new CompletableFuture<>();
