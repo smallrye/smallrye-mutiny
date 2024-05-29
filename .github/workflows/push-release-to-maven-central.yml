@@ -8,8 +8,6 @@ on:
 jobs:
   release:
     runs-on: ubuntu-latest
-    env:
-      SECRET_FILES_PASSPHRASE: ${{ secrets.SECRET_FILES_PASSPHRASE }}
     steps:
       - name: Git checkout
         uses: actions/checkout@v4
@@ -19,7 +17,16 @@ jobs:
           java-version: '11'
           distribution: 'temurin'
           cache: maven
+          server-id: 'oss.sonatype'
+          server-username: 'MAVEN_DEPLOY_USERNAME'
+          server-password: 'MAVEN_DEPLOY_TOKEN'
+          gpg-private-key: ${{secrets.MAVEN_GPG_PRIVATE_KEY}}
+          gpg-passphrase: 'MAVEN_GPG_PASSPHRASE'
       - name: Install just
         uses: taiki-e/install-action@just
       - name: Deploy to Maven Central
+        env:
+          MAVEN_DEPLOY_USERNAME: ${{secrets.MAVEN_DEPLOY_USERNAME}}
+          MAVEN_DEPLOY_TOKEN: ${{secrets.MAVEN_DEPLOY_TOKEN}}
+          MAVEN_GPG_PASSPHRASE: ${{secrets.MAVEN_GPG_PASSPHRASE}}
         run: just -f .build/justfile-for-release -d . deploy-to-maven-central
