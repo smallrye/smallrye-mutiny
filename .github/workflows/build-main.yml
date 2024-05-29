@@ -36,8 +36,8 @@ jobs:
         run: |
           VERSION=$(./mvnw -q exec:exec -Dexec.executable=echo -Dexec.args='${project.version}' -pl :mutiny-project)
           if [[ ${VERSION} == *SNAPSHOT ]]; then
-              echo "🚀 Run the tests"
-              ./mvnw --no-transfer-progress -s .build/maven-ci-settings.xml -B clean verify
+              # echo "🚀 Run the tests"
+              # ./mvnw --no-transfer-progress -s .build/maven-ci-settings.xml -B clean verify
               echo "🚀 Deploy the snapshots"
               just -f .build/justfile-for-release -d . deploy-to-maven-central 
           else

@@ -51,7 +51,7 @@ release: pre-release
 # Deploy to Maven Central
 deploy-to-maven-central:
     @echo "Deploy to Maven Central"
-    ./mvnw --settings .build/maven-ci-settings.xml --batch-mode --no-transfer-progress deploy -Prelease -DskipTests
+    ./mvnw --batch-mode --no-transfer-progress deploy -Prelease -DskipTests
 
 # Steps post-release
 post-release:
