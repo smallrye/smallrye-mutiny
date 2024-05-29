@@ -47,7 +47,7 @@ jobs:
           server-id: 'oss.sonatype'
           server-username: 'MAVEN_DEPLOY_USERNAME'
           server-password: 'MAVEN_DEPLOY_TOKEN'
-          gpg-private-key: ${{secrets.MAVEN_GPG_PRIVATE_KEY}}
+          gpg-private-key: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
           gpg-passphrase: 'MAVEN_GPG_PASSPHRASE'
       - name: Install just
         uses: taiki-e/install-action@just
@@ -61,9 +61,9 @@ jobs:
         run: .build/install-mkdocs-deps.sh
       - name: Perform the release steps
         env:
-          MAVEN_DEPLOY_USERNAME: ${{secrets.MAVEN_DEPLOY_USERNAME}}
-          MAVEN_DEPLOY_TOKEN: ${{secrets.MAVEN_DEPLOY_TOKEN}}
-          MAVEN_GPG_PASSPHRASE: ${{secrets.MAVEN_GPG_PASSPHRASE}}
+          MAVEN_DEPLOY_USERNAME: ${{ secrets.MAVEN_DEPLOY_USERNAME }}
+          MAVEN_DEPLOY_TOKEN: ${{ secrets.MAVEN_DEPLOY_TOKEN }}
+          MAVEN_GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
         run: |
           curl -s "https://get.sdkman.io" | bash
           source ~/.sdkman/bin/sdkman-init.sh && sdk install jbang

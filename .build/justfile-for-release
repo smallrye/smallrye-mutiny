@@ -24,11 +24,11 @@ pre-release: init-git
     @echo "Pre-release verifications"
     jbang .build/PreRelease.java --token=${RELEASE_TOKEN} --release-version=${RELEASE_VERSION}
     @echo "Bump project version to ${RELEASE_VERSION}"
-    ./mvnw --settings .build/maven-ci-settings.xml --batch-mode --no-transfer-progress versions:set -DnewVersion=${RELEASE_VERSION} -DgenerateBackupPoms=false
-    ./mvnw --settings .build/maven-ci-settings.xml --batch-mode --no-transfer-progress versions:set -DnewVersion=${RELEASE_VERSION} -DgenerateBackupPoms=false -pl bom
+    ./mvnw --batch-mode --no-transfer-progress versions:set -DnewVersion=${RELEASE_VERSION} -DgenerateBackupPoms=false
+    ./mvnw --batch-mode --no-transfer-progress versions:set -DnewVersion=${RELEASE_VERSION} -DgenerateBackupPoms=false -pl bom
     jbang .build/UpdateDocsAttributesFiles.java --mutiny-version=${RELEASE_VERSION}
     @echo "Check that the project builds (no tests)"
-    ./mvnw --settings .build/maven-ci-settings.xml --batch-mode --no-transfer-progress clean install -Prelease -DskipTests
+    ./mvnw --batch-mode --no-transfer-progress clean install -Prelease -DskipTests
     @echo "Bump workshop examples to ${RELEASE_VERSION}"
     .build/update-workshop-target-version.sh "${RELEASE_VERSION}"
     @echo "Check that the website builds"
@@ -41,10 +41,10 @@ release: pre-release
     git commit -am "chore(release): release Mutiny ${RELEASE_VERSION}"
     git push
     @echo "Call JReleaser"
-    ./mvnw -settings .build/maven-ci-settings.xml --batch-mode --no-transfer-progress -Pjreleaser jreleaser:full-release -pl :mutiny-project
+    ./mvnw --batch-mode --no-transfer-progress -Pjreleaser jreleaser:full-release -pl :mutiny-project
     @echo "Bump to 999-SNAPSHOT and push upstream"
-    ./mvnw --settings .build/maven-ci-settings.xml --batch-mode --no-transfer-progress versions:set -DnewVersion=999-SNAPSHOT -DgenerateBackupPoms=false
-    ./mvnw --settings .build/maven-ci-settings.xml --batch-mode --no-transfer-progress versions:set -DnewVersion=999-SNAPSHOT -DgenerateBackupPoms=false -pl bom
+    ./mvnw --batch-mode --no-transfer-progress versions:set -DnewVersion=999-SNAPSHOT -DgenerateBackupPoms=false
+    ./mvnw --batch-mode --no-transfer-progress versions:set -DnewVersion=999-SNAPSHOT -DgenerateBackupPoms=false -pl bom
     git commit -am "chore(release): set development version to 999-SNAPSHOT"
     git push
 

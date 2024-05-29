@@ -23,21 +23,21 @@ jobs:
           server-id: 'oss.sonatype'
           server-username: 'MAVEN_DEPLOY_USERNAME'
           server-password: 'MAVEN_DEPLOY_TOKEN'
-          gpg-private-key: ${{secrets.MAVEN_GPG_PRIVATE_KEY}}
+          gpg-private-key: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
           gpg-passphrase: 'MAVEN_GPG_PASSPHRASE'
       - name: Install just
         uses: taiki-e/install-action@just
       - name: Test and deploy snapshots
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          MAVEN_DEPLOY_USERNAME: ${{secrets.MAVEN_DEPLOY_USERNAME}}
-          MAVEN_DEPLOY_TOKEN: ${{secrets.MAVEN_DEPLOY_TOKEN}}
-          MAVEN_GPG_PASSPHRASE: ${{secrets.MAVEN_GPG_PASSPHRASE}}
+          MAVEN_DEPLOY_USERNAME: ${{ secrets.MAVEN_DEPLOY_USERNAME }}
+          MAVEN_DEPLOY_TOKEN: ${{ secrets.MAVEN_DEPLOY_TOKEN }}
+          MAVEN_GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
         run: |
           VERSION=$(./mvnw -q exec:exec -Dexec.executable=echo -Dexec.args='${project.version}' -pl :mutiny-project)
           if [[ ${VERSION} == *SNAPSHOT ]]; then
-              # echo "🚀 Run the tests"
-              # ./mvnw --no-transfer-progress -s .build/maven-ci-settings.xml -B clean verify
+              echo "🚀 Run the tests"
+              ./mvnw --no-transfer-progress -s .build/maven-ci-settings.xml -B clean verify
               echo "🚀 Deploy the snapshots"
               just -f .build/justfile-for-release -d . deploy-to-maven-central 
           else
