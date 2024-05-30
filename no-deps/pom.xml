@@ -56,11 +56,23 @@
                         </filter>
                         <filter>
                             <artifact>org.jctools:jctools-core</artifact>
-                            <excludes>
-                                <exclude>org/jctools/counters/**</exclude>
-                                <exclude>org/jctools/maps/**</exclude>
-                                <exclude>org/jctools/queues/unpadded/**</exclude>
-                            </excludes>
+                            <includes>
+                                <include>org/jctools/queues/atomic/unpadded/**</include>
+                                <include>org/jctools/queues/MessagePassingQueue*</include>
+                                <include>org/jctools/queues/IndexedQueueSizeUtil*</include>
+                                <include>org/jctools/queues/QueueProgressIndicators*</include>
+                                <include>org/jctools/queues/SupportsIterator*</include>
+                                <include>org/jctools/queues/BaseLinkedQueue*</include>
+                                <include>org/jctools/queues/LinkedQueueNode*</include>
+                                <include>org/jctools/queues/atomic/AtomicQueueUtil*</include>
+                                <include>org/jctools/queues/atomic/AtomicReferenceArrayQueue*</include>
+                                <include>org/jctools/queues/atomic/SequencedAtomicReferenceArrayQueue*</include>
+                                <include>org/jctools/queues/atomic/LinkedQueueAtomicNode*</include>
+                                <include>org/jctools/util/SpscLookAheadUtil*</include>
+                                <include>org/jctools/util/Pow2*</include>
+                                <include>org/jctools/util/RangeUtil*</include>
+                                <include>org/jctools/util/UnsafeAccess*</include>
+                            </includes>
                         </filter>
                     </filters>
                     <transformers>

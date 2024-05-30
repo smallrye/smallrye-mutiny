@@ -15,36 +15,30 @@ import io.smallrye.mutiny.subscription.BackPressureStrategy;
 public class ShadingIT {
 
     @Test
-    public void check_shaded_classes() throws ClassNotFoundException {
+    public void check_class_relocation() throws ClassNotFoundException {
         Class.forName("io.smallrye.mutiny.shaded.org.jctools.queues.BaseLinkedQueue");
         Class.forName("io.smallrye.mutiny.shaded.org.jctools.queues.atomic.unpadded.BaseLinkedAtomicUnpaddedQueue");
         Class.forName("io.smallrye.mutiny.shaded.io.smallrye.common.annotation.CheckReturnValue");
     }
 
     @Test
-    public void mpsc_queue_factory() {
-        Queue<String> queue = Queues.createMpscArrayQueue(256);
+    public void check_factories() {
+        List<Queue<String>> queues = List.of(
+                Queues.createSpscArrayQueue(256),
+                Queues.createSpscUnboundedArrayQueue(256),
+                Queues.createSpscChunkedArrayQueue(256),
+                Queues.createMpscQueue(),
+                Queues.createSpscUnboundedQueue(256),
+                Queues.createMpscArrayQueue(256));
 
-        queue.add("foo");
-        queue.add("bar");
-        assertEquals("foo", queue.poll());
-        assertEquals("bar", queue.poll());
-        assertNull(queue.poll());
-
-        assertTrue(queue.getClass().getCanonicalName().contains("shaded"));
-    }
-
-    @Test
-    public void spsc_queue_factory() {
-        Queue<String> queue = Queues.createSpscArrayQueue(256);
-
-        queue.add("foo");
-        queue.add("bar");
-        assertEquals("foo", queue.poll());
-        assertEquals("bar", queue.poll());
-        assertNull(queue.poll());
-
-        assertTrue(queue.getClass().getCanonicalName().contains("shaded"));
+        queues.forEach(queue -> {
+            queue.add("foo");
+            queue.add("bar");
+            assertEquals("foo", queue.poll());
+            assertEquals("bar", queue.poll());
+            assertNull(queue.poll());
+            assertTrue(queue.getClass().getCanonicalName().contains("shaded"));
+        });
     }
 
     @Test
