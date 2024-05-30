@@ -3,11 +3,11 @@ package io.smallrye.mutiny.helpers.queues;
 import java.util.Queue;
 import java.util.function.Supplier;
 
-import org.jctools.queues.unpadded.MpscUnboundedUnpaddedArrayQueue;
-import org.jctools.queues.unpadded.MpscUnpaddedArrayQueue;
-import org.jctools.queues.unpadded.SpscChunkedUnpaddedArrayQueue;
-import org.jctools.queues.unpadded.SpscUnboundedUnpaddedArrayQueue;
-import org.jctools.queues.unpadded.SpscUnpaddedArrayQueue;
+import org.jctools.queues.atomic.unpadded.MpscAtomicUnpaddedArrayQueue;
+import org.jctools.queues.atomic.unpadded.MpscUnboundedAtomicUnpaddedArrayQueue;
+import org.jctools.queues.atomic.unpadded.SpscAtomicUnpaddedArrayQueue;
+import org.jctools.queues.atomic.unpadded.SpscChunkedAtomicUnpaddedArrayQueue;
+import org.jctools.queues.atomic.unpadded.SpscUnboundedAtomicUnpaddedArrayQueue;
 
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 
@@ -18,15 +18,15 @@ public class Queues {
     }
 
     public static <T> Queue<T> createSpscArrayQueue(int capacity) {
-        return new SpscUnpaddedArrayQueue<>(capacity);
+        return new SpscAtomicUnpaddedArrayQueue<>(capacity);
     }
 
     public static <T> Queue<T> createSpscUnboundedArrayQueue(int chunkSize) {
-        return new SpscUnboundedUnpaddedArrayQueue<>(chunkSize);
+        return new SpscUnboundedAtomicUnpaddedArrayQueue<>(chunkSize);
     }
 
     public static <T> Queue<T> createSpscChunkedArrayQueue(int capacity) {
-        return new SpscChunkedUnpaddedArrayQueue<>(capacity);
+        return new SpscChunkedAtomicUnpaddedArrayQueue<>(capacity);
     }
 
     public static <T> Supplier<Queue<T>> getXsQueueSupplier() {
@@ -87,7 +87,7 @@ public class Queues {
      * @return the queue
      */
     public static <T> Queue<T> createMpscQueue() {
-        return new MpscUnboundedUnpaddedArrayQueue<>(Infrastructure.getBufferSizeS());
+        return new MpscUnboundedAtomicUnpaddedArrayQueue<>(Infrastructure.getBufferSizeS());
     }
 
     /**
@@ -98,7 +98,7 @@ public class Queues {
      * @return the queue
      */
     public static <T> Queue<T> createSpscUnboundedQueue(int chunkSize) {
-        return new SpscUnboundedUnpaddedArrayQueue<>(chunkSize);
+        return new SpscUnboundedAtomicUnpaddedArrayQueue<>(chunkSize);
     }
 
     /**
@@ -109,6 +109,6 @@ public class Queues {
      * @return a new queue
      */
     public static <T> Queue<T> createMpscArrayQueue(int capacity) {
-        return new MpscUnpaddedArrayQueue<>(capacity);
+        return new MpscAtomicUnpaddedArrayQueue<>(capacity);
     }
 }
