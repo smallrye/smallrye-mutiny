@@ -77,7 +77,7 @@
     </modules>
 
     <properties>
-        <jctools-core.version>4.0.4</jctools-core.version>
+        <jctools-core.version>4.0.5</jctools-core.version>
         <mutiny-zero.version>1.0.0</mutiny-zero.version>
         <reactive-streams.version>1.0.4</reactive-streams.version>
         <rxjava3.version>3.1.8</rxjava3.version>
