@@ -57,7 +57,7 @@ public class OnErrorResumeWithStageFactoryTest extends StageTestBase {
                 }).get();
 
         assertThat(list).hasSize(0);
-        assertThat(error.get()).hasMessage("Failed");
+        assertThat(error.get()).hasMessage("java.lang.RuntimeException: Failed");
     }
 
     @Test
