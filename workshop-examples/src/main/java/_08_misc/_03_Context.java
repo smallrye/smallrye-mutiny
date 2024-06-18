@@ -1,5 +1,5 @@
 ///usr/bin/env jbang "$0" "$@" ; exit $?
-//DEPS io.smallrye.reactive:mutiny:2.6.0
+//DEPS io.smallrye.reactive:mutiny:2.6.1
 package _08_misc;
 
 import java.util.List;
