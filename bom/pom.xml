@@ -58,11 +58,23 @@
 
     <dependencyManagement>
         <dependencies>
+
             <dependency>
                 <groupId>io.smallrye.reactive</groupId>
                 <artifactId>mutiny</artifactId>
                 <version>${project.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.jctools</groupId>
+                <artifactId>jctools-core</artifactId>
+                <version>${jctools-core.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.smallrye.common</groupId>
+                <artifactId>smallrye-common-annotation</artifactId>
+                <version>${smallrye-common-annotation.version}</version>
+            </dependency>
+
             <dependency>
                 <groupId>io.smallrye.reactive</groupId>
                 <artifactId>mutiny-smallrye-context-propagation</artifactId>
@@ -113,6 +125,9 @@
     </distributionManagement>
 
     <properties>
+        <jctools-core.version>4.0.5</jctools-core.version>
+        <smallrye-common-annotation.version>2.4.0</smallrye-common-annotation.version>
+
         <version.gpg.plugin>3.2.4</version.gpg.plugin>
         <version.nexus.staging.plugin>1.7.0</version.nexus.staging.plugin>
         <version.release.plugin>3.1.0</version.release.plugin>
