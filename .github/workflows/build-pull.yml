@@ -41,6 +41,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: wagoid/commitlint-github-action@v6
+        if: (github.actor!= 'dependabot[bot]') && (contains(github.head_ref, 'dependabot/') == false)
 
   compatibility:
     runs-on: ubuntu-latest
