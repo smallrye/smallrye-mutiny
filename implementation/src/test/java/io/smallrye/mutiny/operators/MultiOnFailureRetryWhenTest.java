@@ -323,6 +323,7 @@ public class MultiOnFailureRetryWhenTest {
         await().until(() -> subscriber.getItems().size() >= 10);
         subscriber
                 .assertItems(0, 1, 0, 1, 0, 1, 0, 1, 0, 1) // Initial subscription + 4 retries
+                .awaitFailure()
                 .assertFailedWith(IOException.class, "boom retry")
                 .awaitFailure(t -> {
                     // expecting an IllegalStateException with an info about the retries made
@@ -347,6 +348,7 @@ public class MultiOnFailureRetryWhenTest {
         await().until(() -> subscriber.getItems().size() >= 10);
         subscriber
                 .assertItems(0, 1, 0, 1, 0, 1, 0, 1, 0, 1) // Initial subscription + 4 retries
+                .awaitFailure()
                 .assertFailedWith(IOException.class, "boom retry")
                 .awaitFailure(t -> {
                     // expecting an IllegalStateException with an info about the retries made
@@ -371,6 +373,7 @@ public class MultiOnFailureRetryWhenTest {
                 .until(() -> subscriber.getItems().size() >= 10);
         subscriber
                 .assertItems(0, 1, 0, 1, 0, 1, 0, 1, 0, 1) // Initial subscription + 4 retries
+                .awaitFailure()
                 .assertFailedWith(IOException.class, "boom retry")
                 .awaitFailure(t -> {
                     // expecting an IllegalStateException with an info about the retries made
