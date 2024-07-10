@@ -1,15 +1,20 @@
 package io.smallrye.mutiny.operators;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 
+import java.io.IOException;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.junit.jupiter.api.Test;
 
 import io.reactivex.rxjava3.core.Flowable;
 import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Multi;
+import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.helpers.spies.MultiOnCancellationSpy;
 import io.smallrye.mutiny.helpers.spies.Spy;
 import io.smallrye.mutiny.helpers.test.AssertSubscriber;
@@ -199,5 +204,19 @@ public class MultiMergeTest {
                 .assertItems(5)
                 .assertFailedWith(IllegalStateException.class, "boom");
 
+    }
+
+    @Test
+    public void failureMustTriggerCancellations() {
+        AtomicBoolean firstCancelled = new AtomicBoolean();
+        Multi<Integer> first = Multi.createBy().repeating().uni(
+                () -> Uni.createFrom().item(123).onItem().delayIt().by(Duration.ofSeconds(5))).atMost(10l)
+                .onCancellation().invoke(() -> firstCancelled.set(true));
+        Multi<Integer> second = Multi.createFrom().failure(new IOException("boom"));
+        AssertSubscriber<Integer> sub = Multi.createBy().merging().streams(first, second)
+                .subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE));
+
+        sub.assertFailedWith(IOException.class, "boom");
+        await().atMost(Duration.ofSeconds(5)).until(firstCancelled::get);
     }
 }

@@ -423,6 +423,12 @@ public final class MultiFlatMapOp<I, O> extends AbstractMultiOperator<I, O> {
             Subscription subscription = UPSTREAM_UPDATER.getAndSet(this, Subscriptions.CANCELLED);
             if (subscription != null) {
                 subscription.cancel();
+                FlatMapInner<O>[] currentInners = inners.get();
+                for (FlatMapInner<O> inner : currentInners) {
+                    if (inner != null) {
+                        inner.cancel(false);
+                    }
+                }
             }
             unsubscribe(fromOnError);
         }
