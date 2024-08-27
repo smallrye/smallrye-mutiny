@@ -4,7 +4,7 @@ This module contains the documentation and website.
 
 ## Requirements
 
-You need Python, then:
+You need Python (e.g. using `pyenv`), then:
 
 ```shell
 pip install pipenv
