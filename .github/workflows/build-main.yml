@@ -39,7 +39,7 @@ jobs:
               echo "🚀 Run the tests"
               ./mvnw --no-transfer-progress -s .build/maven-ci-settings.xml -B clean verify
               echo "🚀 Deploy the snapshots"
-              just -f .build/justfile-for-release -d . deploy-to-maven-central 
+              just -f .build/justfile-for-release -d . deploy-snapshots-to-maven-central 
           else
               echo "🤌 This is a release commit, we won't do anything!"
           fi
