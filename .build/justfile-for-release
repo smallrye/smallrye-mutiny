@@ -53,6 +53,11 @@ deploy-to-maven-central:
     @echo "Deploy to Maven Central"
     ./mvnw --batch-mode --no-transfer-progress deploy -Prelease -DskipTests
 
+# Deploy snapshots to Maven Central
+deploy-snapshots-to-maven-central:
+    @echo "Deploy snapshots to Maven Central"
+    ./mvnw --batch-mode --no-transfer-progress deploy -DskipTests
+
 # Steps post-release
 post-release:
     @echo "🚀 Post-release steps..."
