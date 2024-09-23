@@ -573,3 +573,7 @@ documentation/src/main/jekyll/.ruby-version
 
 # MkDocs site output
 documentation/site/
+
+# Sdkman
+.sdkmanrc
+
