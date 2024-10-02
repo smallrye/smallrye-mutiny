@@ -5,12 +5,18 @@ import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
-import java.util.concurrent.*;
+import java.time.Duration;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Flow.Subscription;
+import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.ResourceAccessMode;
@@ -317,4 +323,82 @@ public class MultiOnSubscribeTest {
         subscriber.assertFailedWith(RejectedExecutionException.class, "");
     }
 
+    @Test
+    public void testNoEarlyCompletionBeforeCallCompletes() {
+        AtomicReference<Subscription> callSubscriptionRef = new AtomicReference<>();
+
+        AssertSubscriber<Object> testSubscriber = Multi.createFrom().items(Stream::empty)
+                .onSubscription().call(sub -> Uni.createFrom().item(sub)
+                        .onItem().delayIt().by(Duration.ofSeconds(1L))
+                        .onItem().invoke(callSubscriptionRef::set))
+                .subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE));
+
+        testSubscriber.awaitCompletion().assertSubscribed().assertHasNotReceivedAnyItem();
+        assertThat(callSubscriptionRef.get()).isNotNull();
+    }
+
+    @Test
+    public void testNoEarlyFailureBeforeCallCompletes() {
+        AtomicReference<Subscription> callSubscriptionRef = new AtomicReference<>();
+
+        AssertSubscriber<Object> testSubscriber = Multi.createFrom().emitter(emitter -> {
+            emitter.fail(new IOException("boom"));
+        }).onSubscription().call(sub -> Uni.createFrom().item(sub)
+                .onItem().delayIt().by(Duration.ofSeconds(1L))
+                .onItem().invoke(callSubscriptionRef::set))
+                .subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE));
+
+        testSubscriber
+                .awaitFailure()
+                .assertSubscribed()
+                .assertHasNotReceivedAnyItem()
+                .assertFailedWith(IOException.class, "boom");
+        assertThat(callSubscriptionRef.get()).isNotNull();
+    }
+
+    @Test
+    public void testNoEarlyFailureBeforeCallFails() {
+        AtomicBoolean sync = new AtomicBoolean();
+        AssertSubscriber<Object> testSubscriber = Multi.createFrom().emitter(emitter -> {
+            emitter.fail(new IOException("boom"));
+            sync.set(true);
+        })
+                .onSubscription().call(sub -> Uni.createFrom()
+                        .emitter(uniEmitter -> {
+                            await().untilTrue(sync);
+                            uniEmitter.fail(new RuntimeException("woops"));
+                        })
+                        .runSubscriptionOn(Infrastructure.getDefaultExecutor()))
+                .subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE));
+
+        testSubscriber
+                .awaitFailure()
+                .assertSubscribed()
+                .assertHasNotReceivedAnyItem()
+                .assertFailedWith(IOException.class, "boom");
+        Throwable failure = testSubscriber.getFailure();
+        assertThat(failure).hasSuppressedException(new RuntimeException("woops"));
+    }
+
+    @Test
+    public void testNoEarlyCompletionAfterCallFails() {
+        AtomicBoolean sync = new AtomicBoolean();
+        AssertSubscriber<Object> testSubscriber = Multi.createFrom().emitter(emitter -> {
+            await().untilTrue(sync);
+            emitter.complete();
+        })
+                .onSubscription().call(sub -> Uni.createFrom()
+                        .emitter(uniEmitter -> {
+                            uniEmitter.fail(new RuntimeException("woops"));
+                            sync.set(true);
+                        })
+                        .runSubscriptionOn(Infrastructure.getDefaultExecutor()))
+                .subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE));
+
+        testSubscriber
+                .awaitFailure()
+                .assertSubscribed()
+                .assertHasNotReceivedAnyItem()
+                .assertFailedWith(RuntimeException.class, "woops");
+    }
 }
