@@ -67,6 +67,26 @@ public final class MultiOnSubscribeCall<T> extends AbstractMultiOperator<T, T> {
             }
         }
 
+        /*
+         * A note on locks.
+         *
+         * The methods below use a lock, but most don't use the idiomatic pattern:
+         *
+         * lock.lock();
+         * try {
+         * // -- Critical section here --
+         * } finally {
+         * lock.unlock();
+         * }
+         *
+         * This is being done on purpose, and not just to make sure static analysis tools
+         * have something to complain about. If all you do is updating fields, and you don't
+         * call any method that might throw, then you can take more freedom.
+         *
+         * Most notably, we need to make sure that we don't dispatch signals (e.g., onFailure())
+         * while we hold a lock.
+         */
+
         @Override
         public void onFailure(Throwable throwable) {
             lock.lock();
@@ -95,13 +115,16 @@ public final class MultiOnSubscribeCall<T> extends AbstractMultiOperator<T, T> {
         private void uniFailed(Throwable failure) {
             getAndSetUpstreamSubscription(CANCELLED).cancel();
             lock.lock();
-            uniHasTerminated = true;
-            if (this.failure == null) {
-                this.failure = failure;
-            } else {
-                this.failure.addSuppressed(failure);
+            try {
+                uniHasTerminated = true;
+                if (this.failure == null) {
+                    this.failure = failure;
+                } else {
+                    this.failure.addSuppressed(failure);
+                }
+            } finally {
+                lock.unlock();
             }
-            lock.unlock();
             Subscriptions.fail(downstream, this.failure);
         }
 
