@@ -1,0 +1,63 @@
+name: SmallRye Prepare Release
+
+on:
+  pull_request:
+    types: [ closed ]
+    paths:
+      - '.github/project.yml'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  update-metadata:
+    name: Update metadata to the release version
+    runs-on: ubuntu-latest
+    if: ${{ github.event.pull_request.merged == true}}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Java setup
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: maven
+      - name: Tools setup
+        run: |
+          curl -s "https://get.sdkman.io" | bash
+          source ~/.sdkman/bin/sdkman-init.sh && sdk install jbang
+          git config --global user.name "SmallRye CI"
+          git config --global user.email "smallrye@googlegroups.com"
+          sudo snap install yq
+      - name: Update files
+        run: |
+          PROJECT_VERSION=$(cat .github/project.yml | yq eval '.release.current-version' -)
+          echo "✅ Release version is ${PROJECT_VERSION}"
+          echo "✅ Clear RevAPI justifications, if any"
+          jbang .build/CompatibilityUtils.java clear --version="${PROJECT_VERSION}" --do-not-clear-version-prefix="1."
+          if [[ $(git diff --stat) != '' ]]; then
+            git add -A
+            git status
+            git commit -m "chore(release): clear RevAPI breaking change justifications"
+            git push
+          else
+            echo "No justifications cleared"
+          fi
+          echo "✅ Update docs attributes file"
+          jbang .build/UpdateDocsAttributesFiles.java --mutiny-version=${PROJECT_VERSION}
+          echo "✅ Update the workshop examples version"
+          ./mvnw -Pupdate-workshop-examples -f workshop-examples compile -DworkshopVersion=${PROJECT_VERSION}
+          find workshop-examples -name '*.java' | xargs chmod +x
+          echo "✅ Push a commit"
+          git commit -am "chore(release): update metadata for Mutiny ${RELEASE_VERSION}"
+          git push
+
+  prepare-release:
+    name: Prepare Release
+    needs: update-metadata
+    if: ${{ github.event.pull_request.merged == true}}
+    uses: smallrye/.github/.github/workflows/prepare-release.yml@main
+    secrets: inherit

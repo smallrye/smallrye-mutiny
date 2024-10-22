@@ -1,70 +1,51 @@
-name: Release Smallrye Mutiny
-
+name: SmallRye Release
+run-name: Perform ${{github.event.inputs.tag || github.ref_name}} Release
 on:
+  push:
+    tags:
+      - '*'
   workflow_dispatch:
     inputs:
-      previousVersion:
-        description: 'Previous version'
+      tag:
+        description: 'Tag to release'
         required: true
-      version:
-        description: 'Release version'
-        required: true
-      deployWebsite:
-        description: 'Shall we deploy the website?'
-        required: true
-        default: 'true'
-      clearRevAPI:
-        description: 'Shall we clear RevAPI justifications?'
-        required: true
-        default: 'true'
+
+permissions:
+  attestations: write
+  id-token: write
+  # Needed for the publish-* workflows
+  contents: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  release:
-    runs-on: ubuntu-latest
-    env:
-      GITHUB_TOKEN: ${{secrets.RELEASE_TOKEN}}
-      RELEASE_TOKEN: ${{ secrets.RELEASE_TOKEN }}
-      PREVIOUS_VERSION: ${{ github.event.inputs.previousVersion }}
-      RELEASE_VERSION: ${{ github.event.inputs.version }}      
-      DEPLOY_WEBSITE: ${{ github.event.inputs.deployWebsite }}
-      CLEAR_REVAPI: ${{ github.event.inputs.clearRevAPI }}
-      JRELEASER_TAG_NAME: ${{ github.event.inputs.version }}
-      JRELEASER_PREVIOUS_TAG_NAME: ${{ github.event.inputs.previousVersion }}
-      JRELEASER_GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+  perform-release:
+    name: Perform Release
+    uses: smallrye/.github/.github/workflows/perform-release.yml@main
+    secrets: inherit
+    with:
+      version: ${{github.event.inputs.tag || github.ref_name}}
 
+  jreleaser:
+    name: JReleaser
+    runs-on: ubuntu-latest
+    needs: perform-release
     steps:
-      - name: Git checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          token: ${{ secrets.RELEASE_TOKEN }}
+      - uses: actions/checkout@v4
       - name: Java setup
         uses: actions/setup-java@v4
         with:
-          java-version: '11'
+          java-version: '21'
           distribution: 'temurin'
           cache: maven
-          server-id: 'oss.sonatype'
-          server-username: 'MAVEN_DEPLOY_USERNAME'
-          server-password: 'MAVEN_DEPLOY_TOKEN'
-          gpg-private-key: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
-          gpg-passphrase: 'MAVEN_GPG_PASSPHRASE'
-      - name: Install just
-        uses: taiki-e/install-action@just
-      - name: Install yq
-        uses: mikefarah/yq@master
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: 3.x
-      - name: Install MkDocs dependencies
-        run: .build/install-mkdocs-deps.sh
-      - name: Perform the release steps
+      - name: Call JReleaser
         env:
-          MAVEN_DEPLOY_USERNAME: ${{ secrets.MAVEN_DEPLOY_USERNAME }}
-          MAVEN_DEPLOY_TOKEN: ${{ secrets.MAVEN_DEPLOY_TOKEN }}
-          MAVEN_GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
+          JRELEASER_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          JRELEASER_PROJECT_VERSION: ${{github.event.inputs.tag || github.ref_name}}
+          JRELEASER_TAG_NAME: ${{github.event.inputs.tag || github.ref_name}}
         run: |
-          curl -s "https://get.sdkman.io" | bash
-          source ~/.sdkman/bin/sdkman-init.sh && sdk install jbang
-          just -f .build/justfile-for-release -d . perform-release
+          sudo snap install yq
+          export JRELEASER_PREVIOUS_TAG_NAME=$(gh release list --json isLatest,tagName --jq '.[] | select(.isLatest)|.tagName')
+          ./mvnw --batch-mode --no-transfer-progress -Pjreleaser jreleaser:full-release -pl :mutiny-project
