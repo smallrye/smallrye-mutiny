@@ -1,45 +1,24 @@
 ---
-name: Main branch continuous integration and snapshots deployment
+name: Main branch continuous integration
 on:
   push:
     branches:
       - "main"
 
 concurrency:
-  group: "ci-cd-${{ github.workflow }}-${{ github.ref }}"
+  group: "ci-${{ github.workflow }}-${{ github.ref }}"
   cancel-in-progress: true
 
 jobs:
-  snapshot:
-    name: Deploy snapshots
+  build:
+    name: Test the main branch
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
         with:
-          java-version: 11
+          java-version: 21
           distribution: temurin
           cache: maven
-          server-id: 'oss.sonatype'
-          server-username: 'MAVEN_DEPLOY_USERNAME'
-          server-password: 'MAVEN_DEPLOY_TOKEN'
-          gpg-private-key: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
-          gpg-passphrase: 'MAVEN_GPG_PASSPHRASE'
-      - name: Install just
-        uses: taiki-e/install-action@just
-      - name: Test and deploy snapshots
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          MAVEN_DEPLOY_USERNAME: ${{ secrets.MAVEN_DEPLOY_USERNAME }}
-          MAVEN_DEPLOY_TOKEN: ${{ secrets.MAVEN_DEPLOY_TOKEN }}
-          MAVEN_GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
-        run: |
-          VERSION=$(./mvnw -q exec:exec -Dexec.executable=echo -Dexec.args='${project.version}' -pl :mutiny-project)
-          if [[ ${VERSION} == *SNAPSHOT ]]; then
-              echo "🚀 Run the tests"
-              ./mvnw --no-transfer-progress -s .build/maven-ci-settings.xml -B clean verify
-              echo "🚀 Deploy the snapshots"
-              just -f .build/justfile-for-release -d . deploy-snapshots-to-maven-central 
-          else
-              echo "🤌 This is a release commit, we won't do anything!"
-          fi
+      - name: Run the tests
+        run: ./mvnw --no-transfer-progress -s .build/maven-ci-settings.xml -B clean verify
