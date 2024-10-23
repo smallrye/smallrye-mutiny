@@ -408,12 +408,29 @@
                         </execution>
                     </executions>
                 </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-javadoc-plugin</artifactId>
+                    <configuration>
+                        <force>true</force>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-source-plugin</artifactId>
+                    <configuration>
+                        <forceCreation>true</forceCreation>
+                    </configuration>
+                </plugin>
             </plugins>
         </pluginManagement>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
+                <configuration>
+                    <force>true</force>
+                </configuration>
                 <executions>
                     <execution>
                         <id>default-cli</id>
@@ -569,6 +586,7 @@
                                         <owner>smallrye</owner>
                                         <name>smallrye-mutiny</name>
                                         <overwrite>true</overwrite>
+                                        <skipTag>true</skipTag>
                                         <changelog>
                                             <preset>conventional-commits</preset>
                                             <links>true</links>
