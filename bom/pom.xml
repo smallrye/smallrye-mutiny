@@ -4,7 +4,7 @@
 
     <groupId>io.smallrye.reactive</groupId>
     <artifactId>mutiny-bom</artifactId>
-    <version>2.7.0-RC1</version>
+    <version>999-SNAPSHOT</version>
 
     <packaging>pom</packaging>
 
@@ -51,7 +51,7 @@
         <connection>scm:git:git@github.com:smallrye/smallrye-mutiny.git</connection>
         <developerConnection>scm:git:git@github.com:smallrye/smallrye-mutiny.git</developerConnection>
         <url>https://github.com/smallrye/smallrye-mutiny</url>
-        <tag>2.7.0-RC1</tag>
+        <tag>HEAD</tag>
     </scm>
 
     <dependencyManagement>
