@@ -1,5 +1,5 @@
-name: SmallRye Release
-run-name: Perform ${{github.event.inputs.tag || github.ref_name}} Release
+name: JReleaser
+run-name: Use JReleaser for the ${{github.event.inputs.tag || github.ref_name}} release
 on:
   push:
     tags:
