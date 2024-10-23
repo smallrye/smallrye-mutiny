@@ -20,6 +20,19 @@ prepare-release version:
     just clear-revapi
     @echo "✅ All set, please review changes then open a pull-request from this branch!"
 
+# Use JReleaser to generate a changelog and announce a release
+jreleaser previousReleaseTag releaseTag:
+    #!/usr/bin/env bash
+    echo "🚀 Use JReleaser"
+    export CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+    export JRELEASER_GITHUB_TOKEN=$(gh auth token)
+    export JRELEASER_PROJECT_VERSION={{releaseTag}}
+    export JRELEASER_TAG_NAME={{releaseTag}}
+    export JRELEASER_PREVIOUS_TAG_NAME={{previousReleaseTag}}
+    git checkout {{releaseTag}}
+    ./mvnw --batch-mode --no-transfer-progress -Pjreleaser jreleaser:full-release -pl :mutiny-project
+    git checkout ${CURRENT_BRANCH}
+
 # Clear RevAPI justifications
 clear-revapi:
     #!/usr/bin/env bash
