@@ -49,7 +49,7 @@ jobs:
           echo "✅ Update docs attributes file"
           jbang .build/UpdateDocsAttributesFiles.java --mutiny-version=${PROJECT_VERSION}
           echo "✅ Update the workshop examples version"
-          ./mvnw -Pupdate-workshop-examples -f workshop-examples compile -DworkshopVersion=${PROJECT_VERSION}
+          ./mvnw --batch-mode --no-transfer-progress -Pupdate-workshop-examples -f workshop-examples compile -DworkshopVersion=${PROJECT_VERSION}
           find workshop-examples -name '*.java' | xargs chmod +x
           echo "✅ Push a commit"
           git commit -am "chore(release): update metadata for Mutiny ${RELEASE_VERSION}"
