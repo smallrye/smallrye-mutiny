@@ -34,7 +34,8 @@ jobs:
           sudo snap install yq
       - name: Update files
         run: |
-          PROJECT_VERSION=$(cat .github/project.yml | yq eval '.release.current-version' -)
+          source ~/.sdkman/bin/sdkman-init.sh
+          export PROJECT_VERSION=$(cat .github/project.yml | yq eval '.release.current-version' -)
           echo "✅ Release version is ${PROJECT_VERSION}"
           echo "✅ Clear RevAPI justifications, if any"
           jbang .build/CompatibilityUtils.java clear --version="${PROJECT_VERSION}" --do-not-clear-version-prefix="1."

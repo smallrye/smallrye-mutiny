@@ -30,7 +30,7 @@ jobs:
           pip install mike
       - name: Render docs and publish
         run: |
-          PROJECT_VERSION=$(cat .github/project.yml | yq eval '.release.current-version' -)
+          export PROJECT_VERSION=$(cat .github/project.yml | yq eval '.release.current-version' -)
           cd documentation
           mike deploy --push --update-aliases $PROJECT_VERSION latest
           mike set-default --push latest
