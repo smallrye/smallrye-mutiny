@@ -23,6 +23,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Java setup
         uses: actions/setup-java@v4
         with:
@@ -31,6 +33,7 @@ jobs:
           cache: maven
       - name: Call JReleaser
         env:
+          GH_TOKEN: ${{ github.token }}
           JRELEASER_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           JRELEASER_PROJECT_VERSION: ${{github.event.inputs.tag || github.ref_name}}
           JRELEASER_TAG_NAME: ${{github.event.inputs.tag || github.ref_name}}
