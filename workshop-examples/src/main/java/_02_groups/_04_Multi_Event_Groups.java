@@ -1,5 +1,5 @@
 ///usr/bin/env jbang "$0" "$@" ; exit $?
-//DEPS io.smallrye.reactive:mutiny:2.7.0-RC1
+//DEPS io.smallrye.reactive:mutiny:2.7.0-RC2
 package _02_groups;
 
 import java.util.stream.Collectors;
