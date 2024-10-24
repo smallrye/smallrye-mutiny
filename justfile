@@ -23,15 +23,18 @@ prepare-release version:
 # Use JReleaser to generate a changelog and announce a release
 jreleaser previousReleaseTag releaseTag:
     #!/usr/bin/env bash
-    echo "🚀 Use JReleaser"
+    echo "🚀 Use JReleaser for the release of {{previousReleaseTag}} to {{releaseTag}}"
     export CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
     export JRELEASER_GITHUB_TOKEN=$(gh auth token)
     export JRELEASER_PROJECT_VERSION={{releaseTag}}
     export JRELEASER_TAG_NAME={{releaseTag}}
     export JRELEASER_PREVIOUS_TAG_NAME={{previousReleaseTag}}
+    echo "💡 Checking out tag {{releaseTag}}"
     git checkout {{releaseTag}}
     ./mvnw --batch-mode --no-transfer-progress -Pjreleaser jreleaser:full-release -pl :mutiny-project
+    echo "💡 Back to branch ${CURRENT_BRANCH}"
     git checkout ${CURRENT_BRANCH}
+    echo "✅ JReleaser completed"
 
 # Clear RevAPI justifications
 clear-revapi:
