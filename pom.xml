@@ -573,6 +573,7 @@
                                     <github>
                                         <owner>smallrye</owner>
                                         <name>smallrye-mutiny</name>
+                                        <enabled>true</enabled>
                                         <overwrite>true</overwrite>
                                         <skipTag>true</skipTag>
                                         <changelog>
