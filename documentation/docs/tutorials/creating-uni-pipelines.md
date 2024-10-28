@@ -85,7 +85,7 @@ You can create failed `Uni` instances with:
 
 ## Creating `Uni<Void>`
 
-When the represented operation to not produce a result, you still need a way to indicate the operation's completion.
+When the represented operation should not produce a result, you still need a way to indicate the operation's completion.
 For this, you need to emit a `null` item:
 
 ```java linenums="1"
@@ -106,7 +106,7 @@ It can also get notified of cancellation to, for example, stop the work in progr
 
 ## Creating Unis from a CompletionStage (_advanced_)
 
-You can also `Uni` objects from `CompletionStage` / `CompletableFuture`. 
+You can also create `Uni` objects from `CompletionStage` / `CompletableFuture`. 
 This is useful when integrating with APIs that are based on these types:
 
 ```java linenums="1"
