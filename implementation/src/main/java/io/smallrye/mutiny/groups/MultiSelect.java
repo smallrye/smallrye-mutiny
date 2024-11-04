@@ -212,7 +212,7 @@ public class MultiSelect<T> {
 
     /**
      * Selects all the distinct items from the upstream.
-     * This methods uses {@link Object#hashCode()} to compare items.
+     * This method uses {@link Object#hashCode()} to compare items.
      * <p>
      * Do NOT call this method on unbounded upstream, as it would lead to an {@link OutOfMemoryError}.
      * <p>
@@ -222,6 +222,7 @@ public class MultiSelect<T> {
      * @return the resulting {@link Multi}.
      * @see MultiSkip#repetitions()
      * @see #distinct(Comparator)
+     * @see #distinct(Function)
      */
     @CheckReturnValue
     public Multi<T> distinct() {
@@ -230,7 +231,7 @@ public class MultiSelect<T> {
 
     /**
      * Selects all the distinct items from the upstream.
-     * This methods uses the given comparator to compare the items.
+     * This method uses the given comparator to compare the items.
      * <p>
      * Do NOT call this method on unbounded upstream, as it would lead to an {@link OutOfMemoryError}.
      * <p>
@@ -241,7 +242,7 @@ public class MultiSelect<T> {
      * {@link java.util.TreeSet} initialized with the given comparator. If the comparator is {@code null}, it uses a
      * {@link java.util.HashSet} as backend.
      *
-     * @param comparator the comparator used to compare items. If {@code null}, it will uses the item's {@code hashCode}
+     * @param comparator the comparator used to compare items. If {@code null}, it will use the item's {@code hashCode}
      *        method.
      * @return the resulting {@link Multi}.
      * @see MultiSkip#repetitions()
@@ -249,6 +250,29 @@ public class MultiSelect<T> {
     @CheckReturnValue
     public Multi<T> distinct(Comparator<? super T> comparator) {
         return Infrastructure.onMultiCreation(new MultiDistinctOp<>(upstream, comparator));
+    }
+
+    /**
+     * Selects all the distinct items from the upstream.
+     * This method uses the given key extractor to extract an object from each item which is then
+     * used to compare the items. This method allows for a smaller memory footprint than {@link #distinct()}
+     * and {@link #distinct(Comparator)} as only the extracted keys are held in memory rather than the items
+     * themselves.
+     * <p>
+     * Do NOT call this method on unbounded upstream, as it would lead to an {@link OutOfMemoryError}.
+     * <p>
+     * If the comparison throws an exception, the produced {@link Multi} fails.
+     * The produced {@link Multi} completes when the upstream sends the completion event.
+     *
+     * @param keyExtractor the function used to extract keys from items, must not be null, must not produce null.
+     * @return the resulting {@link Multi}.
+     * @see MultiSkip#repetitions()
+     */
+    @CheckReturnValue
+    public <K> Multi<T> distinct(Function<T, K> keyExtractor) {
+        return Infrastructure.onMultiCreation(
+                new MultiDistinctByKeyOp<>(
+                        upstream, Infrastructure.decorate(nonNull(keyExtractor, "keyExtractor"))));
     }
 
 }

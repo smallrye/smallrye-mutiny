@@ -1,17 +1,21 @@
 package io.smallrye.mutiny.operators;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 
 import java.io.IOException;
 import java.time.Duration;
+import java.util.Comparator;
 import java.util.Objects;
 import java.util.concurrent.Flow;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.ResourceAccessMode;
@@ -49,7 +53,7 @@ public class MultiDistinctTest {
     @Test
     public void testDistinctWithNullComparator() {
         Multi.createFrom().items(1, 2, 3, 4, 2, 4, 2, 4)
-                .select().distinct(null)
+                .select().distinct((Comparator<Integer>) null)
                 .subscribe().withSubscriber(AssertSubscriber.create(10))
                 .assertCompleted()
                 .assertItems(1, 2, 3, 4);
@@ -75,6 +79,95 @@ public class MultiDistinctTest {
     }
 
     @Test
+    public void testDistinctByKeyWithIdentityExtractor() {
+
+        KeyTester kt1 = new KeyTester(1, "foo");
+        KeyTester kt2 = new KeyTester(2, "bar");
+        KeyTester kt3 = new KeyTester(3, "baz");
+        KeyTester kt4 = new KeyTester(4, "foo-foo");
+        KeyTester kt5 = new KeyTester(2, "foo-bar");
+        KeyTester kt6 = new KeyTester(4, "foo-baz");
+        KeyTester kt7 = new KeyTester(2, "bar-bar");
+        KeyTester kt8 = new KeyTester(4, "bar-baz");
+
+        Multi.createFrom().items(kt1, kt2, kt3, kt4, kt5, kt6, kt7, kt8)
+                .select().distinct(Function.identity())
+                .subscribe().withSubscriber(AssertSubscriber.create(10))
+                .assertCompleted()
+                .assertItems(kt1, kt2, kt3, kt4, kt5, kt6, kt7, kt8);
+    }
+
+    @Test
+    public void testDistinctByKeyWithExtractor() {
+
+        KeyTester kt1 = new KeyTester(1, "foo");
+        KeyTester kt2 = new KeyTester(2, "bar");
+        KeyTester kt3 = new KeyTester(3, "baz");
+        KeyTester kt4 = new KeyTester(4, "foo-foo");
+        KeyTester kt5 = new KeyTester(2, "foo-bar");
+        KeyTester kt6 = new KeyTester(4, "foo-baz");
+        KeyTester kt7 = new KeyTester(2, "bar-bar");
+        KeyTester kt8 = new KeyTester(4, "bar-baz");
+
+        Multi.createFrom().items(kt1, kt2, kt3, kt4, kt5, kt6, kt7, kt8)
+                .select().distinct(kt -> kt.id)
+                .subscribe().withSubscriber(AssertSubscriber.create(10))
+                .assertCompleted()
+                .assertItems(kt1, kt2, kt3, kt4);
+    }
+
+    @Test
+    public void testDistinctWithNullExtractor() {
+
+        assertThatExceptionOfType(IllegalArgumentException.class)
+                .isThrownBy(() -> Multi.createFrom().items(1, 2, 3, 4, 2, 4, 2, 4)
+                        .select().distinct((Function<Integer, Integer>) null)
+                        .subscribe()
+                        .withSubscriber(AssertSubscriber.create(10)))
+                .withMessageContaining("`keyExtractor` must not be `null`");
+    }
+
+    @Test
+    public void testDistinctByKeyReturningSameKey() {
+
+        KeyTester kt1 = new KeyTester(1, "foo");
+        KeyTester kt2 = new KeyTester(2, "bar");
+        KeyTester kt3 = new KeyTester(3, "baz");
+        KeyTester kt4 = new KeyTester(4, "foo-foo");
+        KeyTester kt5 = new KeyTester(2, "foo-bar");
+        KeyTester kt6 = new KeyTester(4, "foo-baz");
+        KeyTester kt7 = new KeyTester(2, "bar-bar");
+        KeyTester kt8 = new KeyTester(4, "bar-baz");
+
+        Multi.createFrom().items(kt1, kt2, kt3, kt4, kt5, kt6, kt7, kt8)
+                .select().distinct(a -> 0)
+                .subscribe().withSubscriber(AssertSubscriber.create(10))
+                .assertCompleted()
+                .assertItems(kt1);
+    }
+
+    @Test
+    public void testDistinctByKeyReturningDifferentKey() {
+
+        AtomicInteger counter = new AtomicInteger();
+
+        KeyTester kt1 = new KeyTester(1, "foo");
+        KeyTester kt2 = new KeyTester(2, "bar");
+        KeyTester kt3 = new KeyTester(3, "baz");
+        KeyTester kt4 = new KeyTester(4, "foo-foo");
+        KeyTester kt5 = new KeyTester(2, "foo-bar");
+        KeyTester kt6 = new KeyTester(4, "foo-baz");
+        KeyTester kt7 = new KeyTester(2, "bar-bar");
+        KeyTester kt8 = new KeyTester(4, "bar-baz");
+
+        Multi.createFrom().items(kt1, kt2, kt3, kt4, kt5, kt6, kt7, kt8)
+                .select().distinct(a -> counter.getAndIncrement())
+                .subscribe().withSubscriber(AssertSubscriber.create(10))
+                .assertCompleted()
+                .assertItems(kt1, kt2, kt3, kt4, kt5, kt6, kt7, kt8);
+    }
+
+    @Test
     public void testDistinctWithUpstreamFailure() {
         Multi.createFrom().<Integer> failure(new IOException("boom"))
                 .select().distinct()
@@ -91,9 +184,24 @@ public class MultiDistinctTest {
     }
 
     @Test
+    public void testDistinctByKeyWithUpstreamFailure() {
+        Multi.createFrom().<Integer> failure(new IOException("boom"))
+                .select().distinct(Function.identity())
+                .subscribe().withSubscriber(AssertSubscriber.create(10))
+                .assertFailedWith(IOException.class, "boom");
+    }
+
+    @Test
     public void testThatNullSubscriberAreRejectedDistinct() {
         assertThrows(NullPointerException.class, () -> Multi.createFrom().items(1, 2, 3, 4, 2, 4, 2, 4)
                 .select().distinct()
+                .subscribe(null));
+    }
+
+    @Test
+    public void testThatNullSubscriberAreRejectedDistinctByKey() {
+        assertThrows(NullPointerException.class, () -> Multi.createFrom().items(1, 2, 3, 4, 2, 4, 2, 4)
+                .select().distinct(Function.identity())
                 .subscribe(null));
     }
 
@@ -108,6 +216,15 @@ public class MultiDistinctTest {
     public void testDistinctOnAStreamWithoutDuplicates() {
         Multi.createFrom().range(1, 5)
                 .select().distinct()
+                .subscribe().withSubscriber(AssertSubscriber.create(10))
+                .assertCompleted()
+                .assertItems(1, 2, 3, 4);
+    }
+
+    @Test
+    public void testDistinctByKeyOnAStreamWithoutDuplicates() {
+        Multi.createFrom().range(1, 5)
+                .select().distinct(Function.identity())
                 .subscribe().withSubscriber(AssertSubscriber.create(10))
                 .assertCompleted()
                 .assertItems(1, 2, 3, 4);
@@ -271,6 +388,23 @@ public class MultiDistinctTest {
     }
 
     @Test
+    public void testDistinctByKeyExceptionInExtractor() {
+        AtomicReference<MultiEmitter<? super Integer>> emitter = new AtomicReference<>();
+        AssertSubscriber<Integer> subscriber = Multi.createFrom().emitter(
+                (Consumer<MultiEmitter<? super Integer>>) emitter::set)
+                .select().distinct(a -> {
+                    throw new TestException("boom");
+                })
+                .subscribe().withSubscriber(AssertSubscriber.create(10));
+
+        subscriber.assertSubscribed()
+                .assertNotTerminated();
+
+        emitter.get().emit(1).emit(2).complete();
+        subscriber.assertFailedWith(TestException.class, "boom");
+    }
+
+    @Test
     public void testSkipRepetitionsExceptionInEquals() {
         AtomicReference<MultiEmitter<? super BadlyComparableStuffOnEquals>> emitter = new AtomicReference<>();
         AssertSubscriber<BadlyComparableStuffOnEquals> subscriber = Multi.createFrom().emitter(
@@ -335,6 +469,19 @@ public class MultiDistinctTest {
                 .assertItems(1, 3);
 
         upstream
+                .select().distinct(Function.identity())
+                .subscribe().withSubscriber(AssertSubscriber.create(1))
+                .run(() -> ref.get().onNext(1))
+                .assertItems(1)
+                .request(1)
+                .run(() -> ref.get().onNext(1))
+                .run(() -> ref.get().onNext(3))
+                .assertItems(1, 3)
+                .cancel()
+                .run(() -> ref.get().onNext(4))
+                .assertItems(1, 3);
+
+        upstream
                 .skip().repetitions()
                 .subscribe().withSubscriber(AssertSubscriber.create(1))
                 .run(() -> ref.get().onNext(1))
@@ -367,6 +514,32 @@ public class MultiDistinctTest {
         @Override
         public boolean equals(Object obj) {
             throw new TestException("boom");
+        }
+    }
+
+    private static class KeyTester {
+
+        private final int id;
+        private final String text;
+
+        private KeyTester(int id, String text) {
+            this.id = id;
+            this.text = text;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o)
+                return true;
+            if (o == null || getClass() != o.getClass())
+                return false;
+            KeyTester keyTester = (KeyTester) o;
+            return id == keyTester.id && Objects.equals(text, keyTester.text);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(id, text);
         }
     }
 
