@@ -29,6 +29,11 @@ If you have a stream emitting the `{1, 1, 2, 3, 4, 5, 5, 6, 1, 4, 4}` items, the
     By default, `select().distinct()` uses the `hashCode` method from the item's class.
     You can pass a custom comparator for more advanced checks.
 
+If you have a stream emitting items of type `T`, where duplicates can be identified through an attribute of `T` of type `K`,
+then an `extractor` of type `Function<T, K>` can be defined. Applying `.select().distinct(extractor)` on such a stream will
+eliminate duplicates but have a lesser memory overhead as only the references to the extracted keys need to be kept, not the whole object.
+A typical usage of this might be for a stream of records where uniqueness is determined by a UUID assigned to every record.
+
 ## Skipping repetitions
 
 The `.skip().repetitions()` operator removes subsequent repetitions of an item:
