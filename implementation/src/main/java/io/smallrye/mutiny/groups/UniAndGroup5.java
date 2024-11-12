@@ -32,6 +32,23 @@ public class UniAndGroup5<T1, T2, T3, T4, T5> extends UniAndGroupIterable<T1> {
     }
 
     /**
+     * Limit the number of concurrent upstream subscriptions.
+     * <p>
+     * When not specified all upstream {@link Uni} are being subscribed when the combining {@link Uni} is subscribed.
+     * <p>
+     * Setting a limit is useful when you have a large number of {@link Uni} to combine and their simultaneous
+     * subscriptions might overwhelm resources (e.g., database connections, etc).
+     *
+     * @param level the concurrency level, must be strictly positive
+     * @return an object to configure the combination logic
+     */
+    @CheckReturnValue
+    public UniAndGroup5<T1, T2, T3, T4, T5> usingConcurrencyOf(int level) {
+        super.usingConcurrencyOf(level);
+        return this;
+    }
+
+    /**
      * @deprecated use {@link #with(Functions.Function5)} instead
      */
     @Deprecated(forRemoval = true)
