@@ -636,6 +636,138 @@ public class UniZipTest {
             assertThat(sub.getItem()).asInstanceOf(LIST).containsExactly(1, 2, 3, 4);
         }
 
+        @Test
+        void combineAllTypesafeWith2() {
+            Uni<String> a = Uni.createFrom().item("1");
+            Uni<Integer> b = Uni.createFrom().item(2);
+
+            UniAssertSubscriber<Integer> sub = Uni.combine().all().unis(a, b)
+                    .usingConcurrencyOf(1)
+                    .with((x1, x2) -> Integer.parseInt(x1) + x2)
+                    .subscribe().withSubscriber(UniAssertSubscriber.create());
+
+            sub.awaitItem().assertItem(3);
+        }
+
+        @Test
+        void combineAllTypesafeWith3() {
+            Uni<String> a = Uni.createFrom().item("1");
+            Uni<Integer> b = Uni.createFrom().item(2);
+            Uni<Integer> c = Uni.createFrom().item(3);
+
+            UniAssertSubscriber<Integer> sub = Uni.combine().all().unis(a, b, c)
+                    .usingConcurrencyOf(1)
+                    .with((x1, x2, x3) -> Integer.parseInt(x1) + x2 + x3)
+                    .subscribe().withSubscriber(UniAssertSubscriber.create());
+
+            sub.awaitItem().assertItem(6);
+        }
+
+        @Test
+        void combineAllTypesafeWith4() {
+            Uni<String> a = Uni.createFrom().item("1");
+            Uni<Integer> b = Uni.createFrom().item(2);
+            Uni<Integer> c = Uni.createFrom().item(3);
+            Uni<Integer> d = Uni.createFrom().item(4);
+
+            UniAssertSubscriber<Integer> sub = Uni.combine().all().unis(a, b, c, d)
+                    .usingConcurrencyOf(1)
+                    .with((x1, x2, x3, x4) -> Integer.parseInt(x1) + x2 + x3 + x4)
+                    .subscribe().withSubscriber(UniAssertSubscriber.create());
+
+            sub.awaitItem().assertItem(10);
+        }
+
+        @Test
+        void combineAllTypesafeWith5() {
+            Uni<String> a = Uni.createFrom().item("1");
+            Uni<Integer> b = Uni.createFrom().item(2);
+            Uni<Integer> c = Uni.createFrom().item(3);
+            Uni<Integer> d = Uni.createFrom().item(4);
+            Uni<Integer> e = Uni.createFrom().item(5);
+
+            UniAssertSubscriber<Integer> sub = Uni.combine().all().unis(a, b, c, d, e)
+                    .usingConcurrencyOf(1)
+                    .with((x1, x2, x3, x4, x5) -> Integer.parseInt(x1) + x2 + x3 + x4 + x5)
+                    .subscribe().withSubscriber(UniAssertSubscriber.create());
+
+            sub.awaitItem().assertItem(15);
+        }
+
+        @Test
+        void combineAllTypesafeWith6() {
+            Uni<String> a = Uni.createFrom().item("1");
+            Uni<Integer> b = Uni.createFrom().item(2);
+            Uni<Integer> c = Uni.createFrom().item(3);
+            Uni<Integer> d = Uni.createFrom().item(4);
+            Uni<Integer> e = Uni.createFrom().item(5);
+            Uni<Integer> f = Uni.createFrom().item(6);
+
+            UniAssertSubscriber<Integer> sub = Uni.combine().all().unis(a, b, c, d, e, f)
+                    .usingConcurrencyOf(1)
+                    .with((x1, x2, x3, x4, x5, x6) -> Integer.parseInt(x1) + x2 + x3 + x4 + x5 + x6)
+                    .subscribe().withSubscriber(UniAssertSubscriber.create());
+
+            sub.awaitItem().assertItem(21);
+        }
+
+        @Test
+        void combineAllTypesafeWith7() {
+            Uni<String> a = Uni.createFrom().item("1");
+            Uni<Integer> b = Uni.createFrom().item(2);
+            Uni<Integer> c = Uni.createFrom().item(3);
+            Uni<Integer> d = Uni.createFrom().item(4);
+            Uni<Integer> e = Uni.createFrom().item(5);
+            Uni<Integer> f = Uni.createFrom().item(6);
+            Uni<Integer> g = Uni.createFrom().item(7);
+
+            UniAssertSubscriber<Integer> sub = Uni.combine().all().unis(a, b, c, d, e, f, g)
+                    .usingConcurrencyOf(1)
+                    .with((x1, x2, x3, x4, x5, x6, x7) -> Integer.parseInt(x1) + x2 + x3 + x4 + x5 + x6 + x7)
+                    .subscribe().withSubscriber(UniAssertSubscriber.create());
+
+            sub.awaitItem().assertItem(28);
+        }
+
+        @Test
+        void combineAllTypesafeWith8() {
+            Uni<String> a = Uni.createFrom().item("1");
+            Uni<Integer> b = Uni.createFrom().item(2);
+            Uni<Integer> c = Uni.createFrom().item(3);
+            Uni<Integer> d = Uni.createFrom().item(4);
+            Uni<Integer> e = Uni.createFrom().item(5);
+            Uni<Integer> f = Uni.createFrom().item(6);
+            Uni<Integer> g = Uni.createFrom().item(7);
+            Uni<Integer> h = Uni.createFrom().item(8);
+
+            UniAssertSubscriber<Integer> sub = Uni.combine().all().unis(a, b, c, d, e, f, g, h)
+                    .usingConcurrencyOf(1)
+                    .with((x1, x2, x3, x4, x5, x6, x7, x8) -> Integer.parseInt(x1) + x2 + x3 + x4 + x5 + x6 + x7 + x8)
+                    .subscribe().withSubscriber(UniAssertSubscriber.create());
+
+            sub.awaitItem().assertItem(36);
+        }
+
+        @Test
+        void combineAllTypesafeWith9() {
+            Uni<String> a = Uni.createFrom().item("1");
+            Uni<Integer> b = Uni.createFrom().item(2);
+            Uni<Integer> c = Uni.createFrom().item(3);
+            Uni<Integer> d = Uni.createFrom().item(4);
+            Uni<Integer> e = Uni.createFrom().item(5);
+            Uni<Integer> f = Uni.createFrom().item(6);
+            Uni<Integer> g = Uni.createFrom().item(7);
+            Uni<Integer> h = Uni.createFrom().item(8);
+            Uni<Integer> i = Uni.createFrom().item(9);
+
+            UniAssertSubscriber<Integer> sub = Uni.combine().all().unis(a, b, c, d, e, f, g, h, i)
+                    .usingConcurrencyOf(1)
+                    .with((x1, x2, x3, x4, x5, x6, x7, x8, x9) -> Integer.parseInt(x1) + x2 + x3 + x4 + x5 + x6 + x7 + x8 + x9)
+                    .subscribe().withSubscriber(UniAssertSubscriber.create());
+
+            sub.awaitItem().assertItem(45);
+        }
+
         @ParameterizedTest
         @CsvSource({
                 "1, 100, 1, 400",
