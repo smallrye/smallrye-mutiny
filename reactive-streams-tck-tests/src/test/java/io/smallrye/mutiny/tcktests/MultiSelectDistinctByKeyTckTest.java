@@ -1,7 +1,5 @@
 package io.smallrye.mutiny.tcktests;
 
-import io.smallrye.mutiny.Multi;
-import io.smallrye.mutiny.helpers.Subscriptions;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -9,8 +7,12 @@ import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Flow;
+
 import org.testng.Assert;
 import org.testng.annotations.Test;
+
+import io.smallrye.mutiny.Multi;
+import io.smallrye.mutiny.helpers.Subscriptions;
 
 public class MultiSelectDistinctByKeyTckTest extends AbstractPublisherTck<MultiSelectDistinctByKeyTckTest.KeyTester> {
     @Test
@@ -32,7 +34,7 @@ public class MultiSelectDistinctByKeyTckTest extends AbstractPublisherTck<MultiS
     @Test
     public void distinctStageShouldReturnAnEmptyStreamWhenCalledOnEmptyStreams() {
         Assert.assertEquals(
-                Await.await(Multi.createFrom().<KeyTester>empty()
+                Await.await(Multi.createFrom().<KeyTester> empty()
                         .select().distinct(kt -> kt.id)
                         .collect().asList()
                         .subscribeAsCompletionStage()),
@@ -43,7 +45,7 @@ public class MultiSelectDistinctByKeyTckTest extends AbstractPublisherTck<MultiS
     public void distinctStageShouldPropagateUpstreamExceptions() {
         Assert.assertThrows(QuietRuntimeException.class,
                 () -> Await.await(
-                        Multi.createFrom().<KeyTester>failure(new QuietRuntimeException("failed"))
+                        Multi.createFrom().<KeyTester> failure(new QuietRuntimeException("failed"))
                                 .select().distinct(kt -> kt.id)
                                 .collect().asList()
                                 .subscribeAsCompletionStage()));
@@ -51,39 +53,38 @@ public class MultiSelectDistinctByKeyTckTest extends AbstractPublisherTck<MultiS
 
     @Test
     public void distinctStageShouldPropagateExceptionsThrownByKeyEquals() {
-    Assert.assertThrows(
-        QuietRuntimeException.class,
-        () -> {
-          CompletableFuture<Void> cancelled = new CompletableFuture<>();
-          class ObjectThatThrowsFromKeyEquals {
+        Assert.assertThrows(
+                QuietRuntimeException.class,
+                () -> {
+                    CompletableFuture<Void> cancelled = new CompletableFuture<>();
+                    class ObjectThatThrowsFromKeyEquals {
 
-            Key key = new Key();
+                        Key key = new Key();
 
-            class Key {
-              @Override
-              public int hashCode() {
-                return 1;
-              }
+                        class Key {
+                            @Override
+                            public int hashCode() {
+                                return 1;
+                            }
 
-              @Override
-              public boolean equals(Object obj) {
-                throw new QuietRuntimeException("failed");
-              }
-            }
-          }
-          CompletionStage<List<ObjectThatThrowsFromKeyEquals>> result =
-              Multi.createFrom()
-                  .items(new ObjectThatThrowsFromKeyEquals(), new ObjectThatThrowsFromKeyEquals())
-                  .onTermination()
-                  .invoke(() -> cancelled.complete(null))
-                  .select()
-                  .distinct(o -> o.key)
-                  .collect()
-                  .asList()
-                  .subscribeAsCompletionStage();
-          Await.await(cancelled);
-          Await.await(result);
-        });
+                            @Override
+                            public boolean equals(Object obj) {
+                                throw new QuietRuntimeException("failed");
+                            }
+                        }
+                    }
+                    CompletionStage<List<ObjectThatThrowsFromKeyEquals>> result = Multi.createFrom()
+                            .items(new ObjectThatThrowsFromKeyEquals(), new ObjectThatThrowsFromKeyEquals())
+                            .onTermination()
+                            .invoke(() -> cancelled.complete(null))
+                            .select()
+                            .distinct(o -> o.key)
+                            .collect()
+                            .asList()
+                            .subscribeAsCompletionStage();
+                    Await.await(cancelled);
+                    Await.await(result);
+                });
     }
 
     @Test
@@ -99,16 +100,16 @@ public class MultiSelectDistinctByKeyTckTest extends AbstractPublisherTck<MultiS
 
     @Override
     public Flow.Publisher<KeyTester> createFlowPublisher(long elements) {
-    return upstream(elements)
-        .map(id -> new KeyTester(id, "text-" + id))
-        .select().distinct(kt -> kt.id);
+        return upstream(elements)
+                .map(id -> new KeyTester(id, "text-" + id))
+                .select().distinct(kt -> kt.id);
     }
 
     @Override
     public Flow.Publisher<KeyTester> createFailedFlowPublisher() {
         return failedUpstream()
-            .map(id -> new KeyTester(id, "text-" + id))
-            .select().distinct(kt -> kt.id);
+                .map(id -> new KeyTester(id, "text-" + id))
+                .select().distinct(kt -> kt.id);
     }
 
     public static final class KeyTester {
