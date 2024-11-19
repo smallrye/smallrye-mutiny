@@ -8,33 +8,43 @@ quick-build:
 verify:
     ./mvnw verify -Pparallel-tests -T8
 
-# Prepare a release pull-request branch
-prepare-release version:
-    @echo "🚀 Preparing a pull-request branch for releasing version {{version}}"
+# Prepare a release branch
+prepare-release previousVersion version:
+    @echo "🚀 Preparing a branch for releasing version {{version}}"
     git switch -c release/{{version}}
-    yq -i '.release.current-version = "{{version}}"'  .github/project.yml
+    yq -i '.release.current-version = "{{version}}"' .github/project.yml
+    yq -i '.release.previous-version = "{{previousVersion}}"' .github/project.yml
+    ./mvnw --batch-mode --no-transfer-progress versions:set -DnewVersion={{version}} -DgenerateBackupPoms=false
+    ./mvnw --batch-mode --no-transfer-progress versions:set -DnewVersion={{version}} -DgenerateBackupPoms=false -pl bom
     jbang .build/UpdateDocsAttributesFiles.java --mutiny-version={{version}}
     ./mvnw --batch-mode --no-transfer-progress -Pupdate-workshop-examples -f workshop-examples compile -DworkshopVersion={{version}}
     find workshop-examples -name '*.java' | xargs chmod +x
-    git commit -am "chore(release): update metadata for Mutiny {{version}}"
-    just clear-revapi
-    @echo "✅ All set, please review changes then open a pull-request from this branch!"
+    git commit -am "chore(release): update version metadata for Mutiny {{version}}"
+    @echo "✅ All set, please review the changes on this branch before doing the release, then:"
+    @echo "   - git push origin release/{{version}} --set-upstream"
+    @echo "   - just perform-release"
 
-# Use JReleaser to generate a changelog and announce a release
-jreleaser previousReleaseTag releaseTag:
+# Perform a release
+perform-release:
     #!/usr/bin/env bash
-    echo "🚀 Use JReleaser for the release of {{previousReleaseTag}} to {{releaseTag}}"
-    export CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+    export PREVIOUS_VERSION=$(yq '.release.previous-version' .github/project.yml)
+    export RELEASE_VERSION=$(yq '.release.current-version' .github/project.yml)
+    export NEXT_VERSION=$(yq '.release.next-version' .github/project.yml)
+    echo "🚀 Releasing with JReleaser: ${PREVIOUS_VERSION} ➡️ ${RELEASE_VERSION} ➡️ ${NEXT_VERSION}"
     export JRELEASER_GITHUB_TOKEN=$(gh auth token)
-    export JRELEASER_PROJECT_VERSION={{releaseTag}}
-    export JRELEASER_TAG_NAME={{releaseTag}}
-    export JRELEASER_PREVIOUS_TAG_NAME={{previousReleaseTag}}
-    echo "💡 Checking out tag {{releaseTag}}"
-    git checkout {{releaseTag}}
+    export JRELEASER_PROJECT_VERSION=${RELEASE_VERSION}
+    export JRELEASER_PREVIOUS_TAG_NAME=${PREVIOUS_VERSION}
+    echo "✅ JReleaser ok, preparing post-release commits"
     ./mvnw --batch-mode --no-transfer-progress -Pjreleaser jreleaser:full-release -pl :mutiny-project
-    echo "💡 Back to branch ${CURRENT_BRANCH}"
-    git checkout ${CURRENT_BRANCH}
-    echo "✅ JReleaser completed"
+    ./mvnw --batch-mode --no-transfer-progress versions:set -DnewVersion=${NEXT_VERSION} -DgenerateBackupPoms=false
+    ./mvnw --batch-mode --no-transfer-progress versions:set -DnewVersion=${NEXT_VERSION} -DgenerateBackupPoms=false -pl bom
+    git commit -am "chore(release): set development version to ${NEXT_VERSION}"
+    just clear-revapi
+    echo "✅ All set, don't forget to merge this branch and push upstream."
+    echo "💡 If you released from main:"
+    echo "      git switch main"
+    echo "      git merge release/${RELEASE_VERSION}"
+    echo "      git push --tags"
 
 # Clear RevAPI justifications
 clear-revapi:
@@ -44,7 +54,6 @@ clear-revapi:
       git add -A
       git status
       git commit -m "chore(release): clear RevAPI breaking change justifications"
-      git push
     else
       echo "No justifications cleared"
     fi
