@@ -578,6 +578,7 @@
                                         <changelog>
                                             <preset>conventional-commits</preset>
                                             <links>true</links>
+                                            <skipMergeCommits>true</skipMergeCommits>
                                             <formatted>ALWAYS</formatted>
                                             <extraProperties>
                                                 <categorizeScopes>true</categorizeScopes>
