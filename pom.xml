@@ -575,7 +575,6 @@
                                         <name>smallrye-mutiny</name>
                                         <enabled>true</enabled>
                                         <overwrite>true</overwrite>
-                                        <skipTag>true</skipTag>
                                         <changelog>
                                             <preset>conventional-commits</preset>
                                             <links>true</links>
