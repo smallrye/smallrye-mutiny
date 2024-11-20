@@ -34,9 +34,11 @@ perform-release:
     echo "🚀 Releasing with JReleaser: ${PREVIOUS_VERSION} ➡️ ${RELEASE_VERSION} ➡️ ${NEXT_VERSION}"
     export JRELEASER_GITHUB_TOKEN=$(gh auth token)
     export JRELEASER_PROJECT_VERSION=${RELEASE_VERSION}
+    export JRELEASER_TAG_NAME=${RELEASE_VERSION}
     export JRELEASER_PREVIOUS_TAG_NAME=${PREVIOUS_VERSION}
-    echo "✅ JReleaser ok, preparing post-release commits"
+    export JRELEASER_BRANCH="release/${RELEASE_VERSION}"
     ./mvnw --batch-mode --no-transfer-progress -Pjreleaser jreleaser:full-release -pl :mutiny-project
+    echo "✅ JReleaser ok, preparing post-release commits"
     ./mvnw --batch-mode --no-transfer-progress versions:set -DnewVersion=${NEXT_VERSION} -DgenerateBackupPoms=false
     ./mvnw --batch-mode --no-transfer-progress versions:set -DnewVersion=${NEXT_VERSION} -DgenerateBackupPoms=false -pl bom
     git commit -am "chore(release): set development version to ${NEXT_VERSION}"
