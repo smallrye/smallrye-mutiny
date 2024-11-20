@@ -13,6 +13,7 @@ import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.subscription.UniEmitter;
 import io.smallrye.mutiny.subscription.UniSubscriber;
 import io.smallrye.mutiny.subscription.UniSubscription;
+import io.smallrye.mutiny.tuples.Functions;
 
 /**
  * A {@link Uni} represents a lazy asynchronous action. It follows the subscription pattern, meaning that the action
@@ -551,7 +552,8 @@ public interface Uni<T> {
     }
 
     /**
-     * When this {@link Uni} emits an item or a failure, invoke a {@link Uni} supplier then invoke the supplied {@link Uni}.
+     * When this {@link Uni} emits an item, a failure or is being cancelled, invoke a {@link Uni} supplier then invoke the
+     * supplied {@link Uni}.
      * When the supplied {@link Uni} emits an item then it is ignored, and when it emits a failure it is reported.
      * <p>
      * This is equivalent to a {@code finally} block in Java.
@@ -566,8 +568,8 @@ public interface Uni<T> {
      * }
      * </pre>
      * <p>
-     * This method is a shortcut for {@link UniOnItemOrFailure#call(BiFunction)}:
-     * {@code onItemOrFailure().call((item, err) -> supplier.get())}
+     * This method is a shortcut for {@link UniOnTerminate#call(Functions.Function3)}:
+     * {@code onTermination().call((item, err, cancelled) -> actual.get())}
      *
      * @param supplier a {@link Uni} supplier, cannot be {@code null} and cannot return {@code null}.
      * @param <O> the type of the item
@@ -577,7 +579,7 @@ public interface Uni<T> {
     @CheckReturnValue
     default <O> Uni<T> eventually(Supplier<Uni<? extends O>> supplier) {
         Supplier<Uni<? extends O>> actual = nonNull(supplier, "supplier");
-        return onItemOrFailure().call((item, err) -> actual.get());
+        return onTermination().call((item, err, cancelled) -> actual.get());
     }
 
     /**
