@@ -17,7 +17,7 @@ prepare-release previousVersion version:
     ./mvnw --batch-mode --no-transfer-progress versions:set -DnewVersion={{version}} -DgenerateBackupPoms=false
     ./mvnw --batch-mode --no-transfer-progress versions:set -DnewVersion={{version}} -DgenerateBackupPoms=false -pl bom
     jbang .build/UpdateDocsAttributesFiles.java --mutiny-version={{version}}
-    ./mvnw --batch-mode --no-transfer-progress -Dquickly
+    ./mvnw --batch-mode --no-transfer-progress -DskipTests
     ./mvnw --batch-mode --no-transfer-progress -Pupdate-workshop-examples -f workshop-examples compile -DworkshopVersion={{version}}
     find workshop-examples -name '*.java' | xargs chmod +x
     git commit -am "chore(release): update version metadata for Mutiny {{version}}"
