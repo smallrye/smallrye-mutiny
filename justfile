@@ -31,14 +31,20 @@ perform-release:
     export PREVIOUS_VERSION=$(yq '.release.previous-version' .github/project.yml)
     export RELEASE_VERSION=$(yq '.release.current-version' .github/project.yml)
     export NEXT_VERSION=$(yq '.release.next-version' .github/project.yml)
-    echo "🚀 Releasing with JReleaser: ${PREVIOUS_VERSION} ➡️ ${RELEASE_VERSION} ➡️ ${NEXT_VERSION}"
+    echo "🚀 Releasing: ${PREVIOUS_VERSION} ➡️ ${RELEASE_VERSION} ➡️ ${NEXT_VERSION}"
     export JRELEASER_GITHUB_TOKEN=$(gh auth token)
     export JRELEASER_PROJECT_VERSION=${RELEASE_VERSION}
     export JRELEASER_TAG_NAME=${RELEASE_VERSION}
     export JRELEASER_PREVIOUS_TAG_NAME=${PREVIOUS_VERSION}
     export JRELEASER_BRANCH="release/${RELEASE_VERSION}"
-    ./mvnw --batch-mode --no-transfer-progress -Pjreleaser jreleaser:full-release -pl :mutiny-project
-    echo "✅ JReleaser ok, preparing post-release commits"
+    ./mvnw --batch-mode --no-transfer-progress -Pjreleaser jreleaser:changelog -pl :mutiny-project
+    echo "✅ Release notes ok"
+    gh release create ${RELEASE_VERSION} \
+      --discussion-category 'Announcements' \
+      --notes-file target/jreleaser/release/CHANGELOG.md \
+      --target ${JRELEASER_BRANCH} \
+      --prerelease --latest=false
+    echo "✅ Release created"
     ./mvnw --batch-mode --no-transfer-progress versions:set -DnewVersion=${NEXT_VERSION} -DgenerateBackupPoms=false
     ./mvnw --batch-mode --no-transfer-progress versions:set -DnewVersion=${NEXT_VERSION} -DgenerateBackupPoms=false -pl bom
     git commit -am "chore(release): set development version to ${NEXT_VERSION}"
@@ -47,7 +53,7 @@ perform-release:
     echo "💡 If you released from main:"
     echo "      git switch main"
     echo "      git merge release/${RELEASE_VERSION}"
-    echo "      git push --tags"
+    echo "      git push"
 
 # Clear RevAPI justifications
 clear-revapi:
