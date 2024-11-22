@@ -1,8 +1,6 @@
 ///usr/bin/env jbang "$0" "$@" ; exit $? # (1)
-//DEPS io.vertx:vertx-core:3.9.4
-//DEPS info.picocli:picocli:4.5.0
-//DEPS io.smallrye.reactive:smallrye-mutiny-vertx-web-client:1.4.0
-
+//DEPS info.picocli:picocli:4.7.6
+//DEPS io.smallrye.reactive:smallrye-mutiny-vertx-web-client:3.16.0
 
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
@@ -16,7 +14,6 @@ import java.util.concurrent.Callable;
 import io.smallrye.mutiny.Uni;
 import io.vertx.mutiny.core.Vertx;
 import io.vertx.mutiny.ext.web.client.WebClient;
-
 
 @Command(name = "wait-for-central", mixinStandardHelpOptions = true, version = "0.1",
         description = "Wait until artifacts lands on Maven Central:\n./WaitForCentral.java --artifacts=io.smallrye.reactive:mutiny,io.smallrye.reactive:mutiny-context-propagation --expected-version=0.13.0")
