@@ -59,11 +59,11 @@ perform-release:
     case "${RELEASE_VERSION}" in
       *-RC*)
         pre_release=1
-        gh_extra_args="${gh_extra_args} --pre_release --latest=false"
+        gh_extra_args="${gh_extra_args} --prerelease --latest=false"
         ;;
       *-M*)
         pre_release=1
-        gh_extra_args="${gh_extra_args} --pre_release --latest=false"
+        gh_extra_args="${gh_extra_args} --prerelease --latest=false"
         ;;
     esac
     if [[ pre_release -eq 1 ]]; then
