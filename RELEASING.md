@@ -1,18 +1,46 @@
 # Releasing Mutiny
+ 
+The release process is mostly done locally from a release branch.
 
-## Prepare a release pull-request 
+## What you need
 
-1. Make sure that all issues and pull-requests assigned to the target milestone have been closed.
-2. Run: `just prepare-release 2.7.0-RC3` (replace with the correct version number).
-3. Review the changes in the branch.
-4. Open a pull-request: `gh pr create`.
-5. Once all tests pass, merge it:
-    - the `pre-release.yml` workflow will create a Git tag, then
-    - the `release.yml` workflow will push to Maven Central, then
-    - the `deploy-site.yml` workflow will update the website (except for release candidates and milestones).
+The `justfile` at the root of the repository contains tasks to help you in the release process.
 
-## GitHub release notes
+Make sure that the following tools are installed and properly configured:
+- [GitHub CLI (gh)](https://cli.github.com/)
+- [yq](https://github.com/mikefarah/yq)
+- [just](https://github.com/casey/just)
+- [jbang](https://www.jbang.dev/)
 
-Run the following command: `just jreleaser 2.6.2 2.7.0-RC3` where you specify the previous and the release tags to compute release notes.
+We assume that anyone doing a release already has a proper Java runtime, Git and Maven tools installed 😇
 
-If the release notes fail to update or if they are too big for JReleaser to update them, then you can read them from `target/jreleaser/release/CHANGELOG.md` and manually update the release notes on GitHub.
+## Prepare a release
+
+Make sure that all issues and pull-requests assigned to the target milestone have been closed.
+
+Call `just prepare-release` with the previous and release version, as in:
+
+```
+$ just prepare-release 2.6.2 2.7.0-RC5
+```
+
+This creates a local release branch called `release/{version}`.
+- Follow the instructions to check the release notes and push the branch upstream (or else you won't be able to create a GitHub release).
+- At this stage the branch is on the commit that set the release version.
+- Run a quick check (`just install`) and also inspect the Git commits to make sure everything is fine.
+
+## Perform a release
+
+Once you are confident that the release can happen, run:
+
+```
+$ just perform-release
+```
+
+This creates a GitHub release and adds a few post-release commits on your release branch.
+- The following GitHub Action workflows will be triggered by the new tag associated with the release:
+  - the website will be deployed (unless this is a pre-release)
+  - the Maven artifacts will be pushed to Maven Central.
+- Make sure to wait for the Maven artifacts to be available on Maven Central.
+- Once this is done, follow the instructions to merge the release branch, and push all your changes upstream.
+
