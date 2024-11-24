@@ -1,6 +1,7 @@
 ///usr/bin/env jbang "$0" "$@" ; exit $? # (1)
-//DEPS io.vertx:vertx-core:3.9.4
-//DEPS info.picocli:picocli:4.6.3
+//DEPS io.vertx:vertx-core:4.5.11
+//DEPS com.fasterxml.jackson.core:jackson-annotations:2.18.1
+//DEPS info.picocli:picocli:4.7.6
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;

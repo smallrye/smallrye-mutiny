@@ -1,7 +1,0 @@
-{
-  "inputs": {
-    "skip-tests": true,
-    "dry-run": true,
-    "branch": "new-release-script"
-  }
-}

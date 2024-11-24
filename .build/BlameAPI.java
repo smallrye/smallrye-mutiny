@@ -1,8 +1,8 @@
 ///usr/bin/env jbang "$0" "$@" ; exit $?
-//DEPS info.picocli:picocli:4.6.2
-//DEPS org.eclipse.jgit:org.eclipse.jgit:6.0.0.202111291000-r
-//DEPS com.google.guava:guava:31.0-jre
-//DEPS org.slf4j:slf4j-simple:1.7.32
+//DEPS info.picocli:picocli:4.7.6
+//DEPS org.eclipse.jgit:org.eclipse.jgit:6.10.0.202406032230-r
+//DEPS com.google.guava:guava:33.3.1-jre
+//DEPS org.slf4j:slf4j-simple:2.0.16
 
 import java.io.File;
 import java.io.IOException;
