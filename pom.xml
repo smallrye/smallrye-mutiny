@@ -113,9 +113,9 @@
         <maven-compiler-plugin.release>11</maven-compiler-plugin.release>
 
         <!-- Configuration of mutiny-kotlin module -->
-        <kotlin.version>2.0.21</kotlin.version>
-        <kotlin.compiler.apiVersion>1.5</kotlin.compiler.apiVersion>
-        <kotlin.compiler.languageVersion>1.5</kotlin.compiler.languageVersion>
+        <kotlin.version>2.1.0</kotlin.version>
+        <kotlin.compiler.apiVersion>1.8</kotlin.compiler.apiVersion>
+        <kotlin.compiler.languageVersion>1.8</kotlin.compiler.languageVersion>
         <coroutines.version>1.9.0</coroutines.version>
         <kotlin.compiler.jvmTarget>${maven.compiler.target}</kotlin.compiler.jvmTarget>
         <dokka.version>1.9.20</dokka.version>
