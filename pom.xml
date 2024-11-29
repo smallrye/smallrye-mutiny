@@ -123,7 +123,7 @@
         <jandex-maven-plugin.version>3.2.3</jandex-maven-plugin.version>
         <find-and-replace-maven-plugin.version>1.2.0</find-and-replace-maven-plugin.version>
         <jreleaser-maven-plugin.version>1.15.0</jreleaser-maven-plugin.version>
-        <cyclonedx-maven-plugin.version>2.9.0</cyclonedx-maven-plugin.version>
+        <cyclonedx-maven-plugin.version>2.9.1</cyclonedx-maven-plugin.version>
         <maven-shade-plugin.version>3.6.0</maven-shade-plugin.version>
         <maven-failsafe-plugin.version>3.2.5</maven-failsafe-plugin.version>
         <maven-release-plugin.version>3.1.1</maven-release-plugin.version>
