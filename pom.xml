@@ -86,7 +86,7 @@
         <microprofile-reactive-streams.version>3.0.1</microprofile-reactive-streams.version>
         <microprofile-context-propagation.version>1.3</microprofile-context-propagation.version>
         <smallrye-context-propagation.version>2.1.2</smallrye-context-propagation.version>
-        <smallrye-config.version>3.10.1</smallrye-config.version>
+        <smallrye-config.version>3.10.2</smallrye-config.version>
         <smallrye-common-annotation.version>2.8.0</smallrye-common-annotation.version>
         <jakarta.enterprise.cdi-api.version>4.1.0</jakarta.enterprise.cdi-api.version>
         <jakarta.annotation-api.version>3.0.0</jakarta.annotation-api.version>
