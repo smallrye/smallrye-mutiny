@@ -124,7 +124,7 @@
 
     <properties>
         <jctools-core.version>4.0.5</jctools-core.version>
-        <smallrye-common-annotation.version>2.8.0</smallrye-common-annotation.version>
+        <smallrye-common-annotation.version>2.9.0</smallrye-common-annotation.version>
 
         <version.gpg.plugin>3.2.7</version.gpg.plugin>
         <version.nexus.staging.plugin>1.7.0</version.nexus.staging.plugin>
