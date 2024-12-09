@@ -29,6 +29,7 @@ import io.smallrye.mutiny.groups.MultiOverflow;
 import io.smallrye.mutiny.groups.MultiSelect;
 import io.smallrye.mutiny.groups.MultiSkip;
 import io.smallrye.mutiny.groups.MultiSubscribe;
+import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.multi.MultiCacheOp;
 import io.smallrye.mutiny.operators.multi.MultiDemandCapping;
@@ -102,7 +103,16 @@ public abstract class AbstractMulti<T> implements Multi<T> {
 
     @Override
     public Multi<T> emitOn(Executor executor) {
-        return Infrastructure.onMultiCreation(new MultiEmitOnOp<>(this, nonNull(executor, "executor")));
+        return emitOn(executor, Infrastructure.getBufferSizeS());
+    }
+
+    @Override
+    public Multi<T> emitOn(Executor executor, int bufferSize) {
+        return Infrastructure.onMultiCreation(
+                new MultiEmitOnOp<>(
+                        this,
+                        nonNull(executor, "executor"),
+                        ParameterValidation.positive(bufferSize, "bufferSize")));
     }
 
     @Override

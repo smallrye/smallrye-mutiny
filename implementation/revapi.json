@@ -51,7 +51,21 @@
     "criticality" : "highlight",
     "minSeverity" : "POTENTIALLY_BREAKING",
     "minCriticality" : "documented",
-    "differences" : [ ]
+    "differences" : [
+      {
+        "ignore": true,
+        "code": "java.method.addedToInterface",
+        "new": "method io.smallrye.mutiny.Multi<T> io.smallrye.mutiny.Multi<T>::emitOn(java.util.concurrent.Executor, int)",
+        "justification": "The emitOn() internal buffer size must be configurable"
+      },
+      {
+        "ignore": true,
+        "code": "java.method.numberOfParametersChanged",
+        "old": "method void io.smallrye.mutiny.operators.multi.MultiEmitOnOp<T>::<init>(io.smallrye.mutiny.Multi<? extends T>, java.util.concurrent.Executor)",
+        "new": "method void io.smallrye.mutiny.operators.multi.MultiEmitOnOp<T>::<init>(io.smallrye.mutiny.Multi<? extends T>, java.util.concurrent.Executor, int)",
+        "justification": "The emitOn() internal buffer size must be configurable"
+      }
+    ]
   }
 }, {
   "extension" : "revapi.reporter.json",

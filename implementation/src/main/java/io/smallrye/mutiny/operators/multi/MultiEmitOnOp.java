@@ -9,13 +9,11 @@ import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Supplier;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.helpers.Subscriptions;
 import io.smallrye.mutiny.helpers.queues.Queues;
-import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.subscription.BackPressureFailure;
 import io.smallrye.mutiny.subscription.MultiSubscriber;
 
@@ -27,24 +25,25 @@ import io.smallrye.mutiny.subscription.MultiSubscriber;
 public class MultiEmitOnOp<T> extends AbstractMultiOperator<T, T> {
 
     private final Executor executor;
-    private final Supplier<? extends Queue<T>> queueSupplier = Queues.get(Infrastructure.getBufferSizeS());
+    private final int bufferSize;
 
-    public MultiEmitOnOp(Multi<? extends T> upstream, Executor executor) {
+    public MultiEmitOnOp(Multi<? extends T> upstream, Executor executor, int bufferSize) {
         super(upstream);
-        this.executor = ParameterValidation.nonNull(executor, "executor");
+        this.executor = executor;
+        this.bufferSize = bufferSize;
     }
 
     @Override
     public void subscribe(MultiSubscriber<? super T> downstream) {
         ParameterValidation.nonNullNpe(downstream, "subscriber");
-        upstream.subscribe().withSubscriber(new MultiEmitOnProcessor<>(downstream, executor, queueSupplier));
+        upstream.subscribe().withSubscriber(new MultiEmitOnProcessor<>(downstream, executor, bufferSize));
     }
 
     static final class MultiEmitOnProcessor<T> extends MultiOperatorProcessor<T, T> implements Runnable {
 
         private final Executor executor;
 
-        private final int limit;
+        private final int bufferSize;
 
         // State variables
 
@@ -75,18 +74,18 @@ public class MultiEmitOnOp<T> extends AbstractMultiOperator<T, T> {
 
         MultiEmitOnProcessor(MultiSubscriber<? super T> downstream,
                 Executor executor,
-                Supplier<? extends Queue<T>> queueSupplier) {
+                int bufferSize) {
             super(downstream);
             this.executor = executor;
-            this.limit = 16;
-            this.queue = queueSupplier.get();
+            this.bufferSize = bufferSize;
+            this.queue = Queues.createMpscArrayQueue(bufferSize);
         }
 
         @Override
         public void onSubscribe(Flow.Subscription subscription) {
             if (compareAndSetUpstreamSubscription(null, subscription)) {
                 downstream.onSubscribe(this);
-                subscription.request(16);
+                subscription.request(bufferSize);
             } else {
                 subscription.cancel();
             }
@@ -200,7 +199,7 @@ public class MultiEmitOnOp<T> extends AbstractMultiOperator<T, T> {
 
                     // updating the number of emitted items.
                     emitted++;
-                    if (emitted == limit) {
+                    if (emitted == bufferSize) {
                         if (requests != Long.MAX_VALUE) {
                             requests = requested.addAndGet(-emitted);
                         }
