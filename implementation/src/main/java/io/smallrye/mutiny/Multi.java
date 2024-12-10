@@ -212,6 +212,9 @@ public interface Multi<T> extends Publisher<T> {
      * Produces a new {@link Multi} invoking the {@code onItem}, {@code onFailure} and {@code onCompletion} methods
      * on the supplied {@link Executor}.
      * <p>
+     * This operator delegates to {@link #emitOn(Executor, int)} with a default buffer size of
+     * {@link Infrastructure#getBufferSizeS()} items.
+     * <p>
      * Instead of receiving the {@code item} event on the thread firing the event, this method influences the
      * threading context to switch to a thread from the given executor. Same behavior for failure and completion.
      * <p>
@@ -223,9 +226,37 @@ public interface Multi<T> extends Publisher<T> {
      *
      * @param executor the executor to use, must not be {@code null}
      * @return a new {@link Multi}
+     * @see #emitOn(Executor, int)
      */
     @CheckReturnValue
     Multi<T> emitOn(Executor executor);
+
+    /**
+     * Produces a new {@link Multi} invoking the {@code onItem}, {@code onFailure} and {@code onCompletion} methods
+     * on the supplied {@link Executor}.
+     * <p>
+     * This operator uses a queue of capacity {@code bufferSize} to emit items from a running executor thread,
+     * reducing the need for thread context switches when items are emitted fast from the upstream.
+     * <p>
+     * This operator tracks {@link Subscription#request(long)} demand, but it does not forward requests to the upstream.
+     * It instead requests {@code bufferSize} elements at subscription time and whenever {@code bufferSize} items have
+     * been emitted, allowing for efficient batching.
+     * <p>
+     * Instead of receiving the {@code item} event on the thread firing the event, this method influences the
+     * threading context to switch to a thread from the given executor. Same behavior for failure and completion.
+     * <p>
+     * Note that the subscriber is guaranteed to never be called concurrently.
+     * <p>
+     * <strong>Be careful as this operator can lead to concurrency problems with non thread-safe objects such as
+     * CDI request-scoped beans.
+     * It might also break reactive-streams semantics with items being emitted concurrently.</strong>
+     *
+     * @param executor the executor to use, must not be {@code null}
+     * @param bufferSize the buffer size, must be strictly positive
+     * @return a new {@link Multi}
+     */
+    @CheckReturnValue
+    Multi<T> emitOn(Executor executor, int bufferSize);
 
     /**
      * When a subscriber subscribes to this {@link Multi}, execute the subscription to the upstream {@link Multi} on a

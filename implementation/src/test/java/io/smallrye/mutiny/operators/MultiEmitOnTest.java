@@ -1,6 +1,6 @@
 package io.smallrye.mutiny.operators;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 import static org.awaitility.Awaitility.await;
 import static org.mockito.Mockito.mock;
 
@@ -8,6 +8,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Flow;
 import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -44,6 +45,20 @@ public class MultiEmitOnTest {
                 .assertItems(1, 2)
                 .awaitNextItems(8, 20)
                 .assertItems(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
+    }
+
+    @RepeatedTest(10)
+    public void testWithSequenceOfItemsAndBufferSize() {
+        AtomicInteger requestSignalsCount = new AtomicInteger();
+        AssertSubscriber<Integer> subscriber = Multi.createFrom().items(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
+                .onRequest().invoke(requestSignalsCount::incrementAndGet)
+                .emitOn(executor, 3)
+                .subscribe().withSubscriber(AssertSubscriber.create());
+
+        subscriber.request(Long.MAX_VALUE)
+                .awaitCompletion()
+                .assertItems(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
+        assertThat(requestSignalsCount.get()).isEqualTo(4);
     }
 
     @Test
@@ -92,4 +107,18 @@ public class MultiEmitOnTest {
         subscriber.assertFailedWith(BackPressureFailure.class, "");
     }
 
+    @Test
+    public void testBufferSizeValidation() {
+        Multi<Integer> multi = Multi.createFrom().items(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
+
+        assertThatThrownBy(() -> multi.emitOn(executor, -58))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("bufferSize");
+
+        assertThatThrownBy(() -> multi.emitOn(executor, 0))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("bufferSize");
+
+        assertThatCode(() -> multi.emitOn(executor, 58)).doesNotThrowAnyException();
+    }
 }
