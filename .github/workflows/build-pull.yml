@@ -56,3 +56,23 @@ jobs:
           cache: maven
       - name: Compatibility Check
         run: ./mvnw --no-transfer-progress -s .build/maven-ci-settings.xml -pl '!bom' -B install revapi:check@check-compatibility -DskipTests -fae
+
+  documentation:
+    runs-on: ubuntu-latest
+    name: Documentation build check
+    steps:
+      - uses: actions/checkout@v4
+        name: Checkout code
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+      - uses: actions/setup-python@v5
+        name: Set up Python
+        with:
+          python-version-file: "documentation/pyproject.toml"
+      - name: Other tools setup
+        run: sudo snap install yq
+      - name: Render docs
+        run: |
+          cd documentation
+          uv sync --all-extras --dev
+          uv run mkdocs build

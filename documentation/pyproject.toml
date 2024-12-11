@@ -1,0 +1,12 @@
+[project]
+name = "mutiny-docs"
+version = "999"
+description = "Mutiny Documentation powered by MkDocs"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "mkdocs-material>=9.5.48",
+    "mkdocs>=1.6.1",
+    "mkdocs-macros-plugin>=1.3.7",
+    "mike>=2.1.3",
+]
