@@ -16,21 +16,22 @@ jobs:
         name: Checkout code
         with:
           fetch-depth: 0 # fetch all commits and branches for mike to work properly
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
       - uses: actions/setup-python@v5
         name: Set up Python
         with:
-          python-version: 3.x
-      - name: Tools setup
+          python-version-file: "documentation/pyproject.toml"
+      - name: Other tools setup
         run: |
           git config --global user.name "SmallRye CI"
           git config --global user.email "smallrye@googlegroups.com"
           sudo snap install yq
-          cd documentation
-          pip install mkdocs-material
-          pip install mike
       - name: Render docs and publish
         run: |
           export PROJECT_VERSION=$(cat .github/project.yml | yq eval '.release.current-version' -)
           cd documentation
-          mike deploy --push --update-aliases $PROJECT_VERSION latest
-          mike set-default --push latest
+          uv sync --all-extras --dev
+          uv run mkdocs build
+          uv run mike deploy --push --update-aliases $PROJECT_VERSION latest
+          uv run mike set-default --push latest

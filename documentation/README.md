@@ -4,11 +4,13 @@ This module contains the documentation and website.
 
 ## Requirements
 
-You need Python (e.g. using `pyenv`), then:
+Install the [uv](https://docs.astral.sh/uv/) tool, then get a working virtual environment:
 
 ```shell
-pip install pipenv
-pipenv install
+uv python install
+uv venv
+source .venv/bin/activate
+uv sync --all-extras --dev
 ```
 
 ## MkDocs development mode
@@ -16,18 +18,12 @@ pipenv install
 From this directory (`documentation/`):
 
 ```shell
-pipenv run mkdocs serve
-```
-
-or
-
-```shell
-pipenv shell
-mkdocs serve
+uv run mkdocs serve
 ```
 
 ## Upgrade the dependencies
 
 ```shell
-pipenv update
+uv sync --upgrade
+uv lock
 ```
