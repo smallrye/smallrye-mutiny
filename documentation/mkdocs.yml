@@ -96,6 +96,7 @@ theme:
     - navigation.tracking
     - navigation.tabs
     - navigation.tabs.sticky
+    - content.code.copy
   custom_dir: mkdocs-customizations/overrides
 
 markdown_extensions:
@@ -109,6 +110,8 @@ markdown_extensions:
   - tables
   - pymdownx.highlight:
       anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
   - pymdownx.superfences:
       custom_fences:
         - name: mermaid
