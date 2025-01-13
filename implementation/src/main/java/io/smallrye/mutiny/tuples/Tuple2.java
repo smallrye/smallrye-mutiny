@@ -93,11 +93,9 @@ public class Tuple2<L, R> implements Tuple {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof Tuple2)) {
+        if (!(o instanceof Tuple2<?, ?> pair)) {
             return false;
         }
-
-        Tuple2<?, ?> pair = (Tuple2<?, ?>) o;
 
         if (!Objects.equals(item1, pair.item1)) {
             return false;

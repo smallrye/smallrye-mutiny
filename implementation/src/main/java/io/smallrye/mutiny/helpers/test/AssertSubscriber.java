@@ -820,46 +820,18 @@ public class AssertSubscriber<T> implements MultiSubscriber<T>, ContextSupport {
     private interface EventListener extends Consumer<Event> {
     }
 
-    private static class Event {
-
-        private final Object item;
-        private final Throwable failure;
-        private final boolean completion;
-        private final boolean cancellation;
-
-        private Event(Object item, Throwable failure, boolean completion, boolean cancellation) {
-            this.item = item;
-            this.failure = failure;
-            this.completion = completion;
-            this.cancellation = cancellation;
-        }
+    private record Event(Object item, Throwable failure, boolean completion, boolean cancellation) {
 
         public boolean isItem() {
             return item != null;
         }
 
-        public boolean isCancellation() {
-            return cancellation;
-        }
-
         public boolean isFailure() {
             return failure != null;
         }
-
-        public boolean isCompletion() {
-            return completion;
-        }
     }
 
-    private static class NextItemTask<T> {
-
-        private final int expected;
-        private final AssertSubscriber<T> subscriber;
-
-        public NextItemTask(int expected, AssertSubscriber<T> subscriber) {
-            this.expected = expected;
-            this.subscriber = subscriber;
-        }
+    private record NextItemTask<T>(int expected, AssertSubscriber<T> subscriber) {
 
         public CompletableFuture<Void> future() {
             CompletableFuture<Void> future = new CompletableFuture<>();
@@ -870,7 +842,7 @@ public class AssertSubscriber<T> implements MultiSubscriber<T>, ContextSupport {
                     if (count.decrementAndGet() == 0) {
                         future.complete(null);
                     }
-                } else if (event.isCancellation() || event.isFailure() || event.isCompletion()) {
+                } else if (event.cancellation() || event.isFailure() || event.completion()) {
                     future.completeExceptionally(
                             new NoSuchElementException("Received a terminal event while waiting for items"));
                 }
@@ -882,17 +854,7 @@ public class AssertSubscriber<T> implements MultiSubscriber<T>, ContextSupport {
         }
     }
 
-    private static class ItemTask<T> {
-
-        private final int expected;
-        private final AssertSubscriber<T> subscriber;
-        private final long duration;
-
-        public ItemTask(int expected, long duration, AssertSubscriber<T> subscriber) {
-            this.expected = expected;
-            this.subscriber = subscriber;
-            this.duration = duration;
-        }
+    private record ItemTask<T>(int expected, long duration, AssertSubscriber<T> subscriber) {
 
         public CompletableFuture<Void> future() {
             CompletableFuture<Void> future = new CompletableFuture<>();

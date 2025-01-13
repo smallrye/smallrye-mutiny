@@ -159,7 +159,7 @@ public class AssertionHelper {
     private static String getMismatches(Map<Object, Object> mismatches) {
         StringBuilder builder = new StringBuilder();
         for (Map.Entry<Object, Object> entry : mismatches.entrySet()) {
-            if (builder.length() != 0) {
+            if (!builder.isEmpty()) {
                 builder.append("\n");
             }
             if (entry.getValue() == null) {
