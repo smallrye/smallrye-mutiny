@@ -135,34 +135,6 @@
 
     <profiles>
         <profile>
-            <activation>
-                <jdk>[11,)</jdk>
-            </activation>
-            <id>java-11+</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-javadoc-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>attach-javadocs</id>
-                                <goals>
-                                    <goal>jar</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                        <configuration>
-                            <!-- wonderful reliability of javadoc used with modules breaking on non exposed packages -->
-                            <source>11</source>
-                            <release>11</release>
-                            <detectJavaApiLink>false</detectJavaApiLink>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-        <profile>
             <id>parallel-tests</id>
             <build>
                 <plugins>

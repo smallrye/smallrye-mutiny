@@ -108,9 +108,9 @@
         <revapi-reporter-text.version>0.15.0</revapi-reporter-text.version>
         <revapi.skip>true</revapi.skip>
 
-        <maven.compiler.source>11</maven.compiler.source>
-        <maven.compiler.target>11</maven.compiler.target>
-        <maven-compiler-plugin.release>11</maven-compiler-plugin.release>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+        <maven-compiler-plugin.release>17</maven-compiler-plugin.release>
 
         <!-- Configuration of mutiny-kotlin module -->
         <kotlin.version>2.1.0</kotlin.version>
@@ -470,35 +470,6 @@
                     <plugin>
                         <groupId>org.jacoco</groupId>
                         <artifactId>jacoco-maven-plugin</artifactId>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-
-        <profile>
-            <activation>
-                <jdk>[11,)</jdk>
-            </activation>
-            <id>java-11+</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-javadoc-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>default-cli</id>
-                                <goals>
-                                    <goal>aggregate</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                        <configuration>
-                            <!-- wonderful reliability of javadoc used with modules breaking on non exposed packages -->
-                            <source>11</source>
-                            <release>11</release>
-                            <detectJavaApiLink>false</detectJavaApiLink>
-                        </configuration>
                     </plugin>
                 </plugins>
             </build>

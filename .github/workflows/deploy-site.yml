@@ -26,7 +26,6 @@ jobs:
         run: |
           git config --global user.name "SmallRye CI"
           git config --global user.email "smallrye@googlegroups.com"
-          sudo snap install yq
       - name: Render docs and publish
         run: |
           export PROJECT_VERSION=$(cat .github/project.yml | yq eval '.release.current-version' -)

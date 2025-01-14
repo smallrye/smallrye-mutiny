@@ -30,8 +30,7 @@ public abstract class AbstractUni<T> implements Uni<T> {
      */
     @SuppressWarnings("unchecked")
     public static <T> void subscribe(Uni<? extends T> upstream, UniSubscriber<? super T> subscriber) {
-        if (upstream instanceof AbstractUni) {
-            AbstractUni abstractUni = (AbstractUni) upstream;
+        if (upstream instanceof AbstractUni abstractUni) {
             UniSubscriber actualSubscriber = Infrastructure.onUniSubscription(upstream, subscriber);
             abstractUni.subscribe(actualSubscriber);
         } else {

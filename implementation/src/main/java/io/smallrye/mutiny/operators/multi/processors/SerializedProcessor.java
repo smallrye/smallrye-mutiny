@@ -196,28 +196,13 @@ public class SerializedProcessor<I, O> implements Processor<I, O> {
         }
     }
 
-    private static class SubscriptionEvent {
-        private final Subscription subscription;
-
-        private SubscriptionEvent(Subscription subscription) {
-            this.subscription = subscription;
-        }
+    private record SubscriptionEvent(Subscription subscription) {
     }
 
-    private static class ItemEvent<T> {
-        private final T item;
-
-        private ItemEvent(T item) {
-            this.item = item;
-        }
+    private record ItemEvent<T>(T item) {
     }
 
-    private static class FailureEvent {
-        private final Throwable failure;
-
-        private FailureEvent(Throwable failure) {
-            this.failure = failure;
-        }
+    private record FailureEvent(Throwable failure) {
     }
 
     private static class CompletionEvent {

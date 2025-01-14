@@ -23,10 +23,7 @@ public interface DemandPacer {
     /**
      * A demand request.
      */
-    class Request {
-
-        private final long demand;
-        private final Duration delay;
+    record Request(long demand, Duration delay) {
 
         /**
          * Constructs a new request.
@@ -47,6 +44,7 @@ public interface DemandPacer {
          *
          * @return the demand
          */
+        @Override
         public long demand() {
             return demand;
         }
@@ -56,6 +54,7 @@ public interface DemandPacer {
          *
          * @return the delay
          */
+        @Override
         public Duration delay() {
             return delay;
         }
