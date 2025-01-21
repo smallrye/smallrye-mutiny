@@ -51,43 +51,7 @@
     "criticality" : "highlight",
     "minSeverity" : "POTENTIALLY_BREAKING",
     "minCriticality" : "documented",
-    "differences" : [
-      {
-        "ignore": true,
-        "code": "java.method.addedToInterface",
-        "new": "method io.smallrye.mutiny.Multi<T> io.smallrye.mutiny.Multi<T>::emitOn(java.util.concurrent.Executor, int)",
-        "justification": "The emitOn() internal buffer size must be configurable"
-      },
-      {
-        "ignore": true,
-        "code": "java.method.numberOfParametersChanged",
-        "old": "method void io.smallrye.mutiny.operators.multi.MultiEmitOnOp<T>::<init>(io.smallrye.mutiny.Multi<? extends T>, java.util.concurrent.Executor)",
-        "new": "method void io.smallrye.mutiny.operators.multi.MultiEmitOnOp<T>::<init>(io.smallrye.mutiny.Multi<? extends T>, java.util.concurrent.Executor, int)",
-        "justification": "The emitOn() internal buffer size must be configurable"
-      },
-      {
-        "ignore": true,
-        "code": "java.class.nonFinalClassInheritsFromNewClass",
-        "old": "class io.smallrye.mutiny.subscription.DemandPacer.Request",
-        "new": "class io.smallrye.mutiny.subscription.DemandPacer.Request",
-        "superClass": "java.lang.Record",
-        "justification": "Migration to a Java 17 record type"
-      },
-      {
-        "ignore": true,
-        "code": "java.class.kindChanged",
-        "old": "class io.smallrye.mutiny.subscription.DemandPacer.Request",
-        "new": "class io.smallrye.mutiny.subscription.DemandPacer.Request",
-        "justification": "Migration to a Java 17 record type"
-      },
-      {
-        "ignore": true,
-        "code": "java.class.nowFinal",
-        "old": "class io.smallrye.mutiny.subscription.DemandPacer.Request",
-        "new": "class io.smallrye.mutiny.subscription.DemandPacer.Request",
-        "justification": "Migration to a Java 17 record type"
-      }
-    ]
+    "differences" : [ ]
   }
 }, {
   "extension" : "revapi.reporter.json",
