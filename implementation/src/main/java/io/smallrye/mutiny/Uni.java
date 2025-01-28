@@ -300,12 +300,12 @@ public interface Uni<T> {
      * This {@link Uni} detects if this {@link Uni} does not emit an item before the configured timeout.
      * <p>
      * Examples:
-     * <code>
-     * uni.ifNoItem().after(Duration.ofMillis(1000).fail() // Propagate a TimeOutException
-     * uni.ifNoItem().after(Duration.ofMillis(1000).recoverWithValue("fallback") // Inject a fallback item on timeout
-     * uni.ifNoItem().after(Duration.ofMillis(1000).on(myExecutor)... // Configure the executor calling on timeout actions
-     * uni.ifNoItem().after(Duration.ofMillis(1000).retry().atMost(5) // Retry five times
-     * </code>
+     * <pre>{@code
+     * uni.ifNoItem().after(Duration.ofMillis(1000)).fail() // Propagate a TimeOutException
+     * uni.ifNoItem().after(Duration.ofMillis(1000)).recoverWithValue("fallback") // Inject a fallback item on timeout
+     * uni.ifNoItem().after(Duration.ofMillis(1000)).on(myExecutor)... // Configure the executor calling on timeout actions
+     * uni.ifNoItem().after(Duration.ofMillis(1000)).fail().onFailure().retry().atMost(5) // Retry five times
+     * }</pre>
      *
      * @return the on timeout group
      */
