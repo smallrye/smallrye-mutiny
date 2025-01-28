@@ -20,7 +20,7 @@ public class UniIfNoItem<T> {
      * Configures the timeout duration.
      *
      * @param timeout the timeout, must not be {@code null}, must be strictly positive.
-     * @return a new {@link UniIfNoItem}
+     * @return a new {@link UniOnTimeout}
      */
     @CheckReturnValue
     public UniOnTimeout<T> after(Duration timeout) {
