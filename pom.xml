@@ -510,6 +510,7 @@
                 <skipITs>true</skipITs>
                 <maven.javadoc.skip>true</maven.javadoc.skip>
                 <enforcer.skip>true</enforcer.skip>
+                <cyclonedx.skip>true</cyclonedx.skip>
             </properties>
             <build>
                 <defaultGoal>clean install</defaultGoal>
