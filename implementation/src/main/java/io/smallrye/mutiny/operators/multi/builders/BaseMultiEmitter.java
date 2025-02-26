@@ -4,6 +4,7 @@ import java.util.concurrent.Flow;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.LongConsumer;
 
 import io.smallrye.mutiny.Context;
 import io.smallrye.mutiny.helpers.ParameterValidation;
@@ -18,7 +19,11 @@ abstract class BaseMultiEmitter<T>
     protected final AtomicLong requested = new AtomicLong();
     protected final MultiSubscriber<? super T> downstream;
 
-    private final AtomicReference<Runnable> onTermination;
+    // TODO: switch to volatile + atomic field updaters
+    private final AtomicReference<Runnable> onTermination = new AtomicReference<>();
+    private final AtomicReference<Runnable> onCancellation = new AtomicReference<>();
+    private final AtomicReference<LongConsumer> onRequest = new AtomicReference<>();
+
     private final AtomicBoolean disposed = new AtomicBoolean();
 
     private static final Runnable CLEARED = () -> {
@@ -26,7 +31,6 @@ abstract class BaseMultiEmitter<T>
 
     BaseMultiEmitter(MultiSubscriber<? super T> downstream) {
         this.downstream = downstream;
-        this.onTermination = new AtomicReference<>();
     }
 
     @Override
@@ -94,8 +98,14 @@ abstract class BaseMultiEmitter<T>
 
     @Override
     public final void cancel() {
-        cleanup();
-        onUnsubscribed();
+        if (disposed.compareAndSet(false, true)) {
+            cleanup();
+            onUnsubscribed();
+            Runnable callback = onCancellation.getAndSet(CLEARED);
+            if (callback != null && callback != CLEARED) {
+                callback.run();
+            }
+        }
     }
 
     void onUnsubscribed() {
@@ -105,8 +115,15 @@ abstract class BaseMultiEmitter<T>
     @Override
     public final void request(long n) {
         if (n > 0) {
+            if (disposed.get()) {
+                return;
+            }
             Subscriptions.add(requested, n);
             onRequested();
+            LongConsumer callback = onRequest.get();
+            if (callback != null) {
+                callback.accept(n);
+            }
         } else {
             cancel();
             downstream.onError(Subscriptions.getInvalidRequestException());
@@ -134,5 +151,23 @@ abstract class BaseMultiEmitter<T>
 
     public MultiEmitter<T> serialize() {
         return new SerializedMultiEmitter<>(this);
+    }
+
+    @Override
+    public MultiEmitter<T> onRequest(LongConsumer consumer) {
+        ParameterValidation.nonNull(consumer, "consumer");
+        if (!disposed.get()) {
+            this.onRequest.set(consumer);
+        }
+        return this;
+    }
+
+    @Override
+    public MultiEmitter<T> onCancellation(Runnable onCancellation) {
+        ParameterValidation.nonNull(onCancellation, "onCancellation");
+        if (!disposed.get()) {
+            this.onCancellation.set(onCancellation);
+        }
+        return this;
     }
 }

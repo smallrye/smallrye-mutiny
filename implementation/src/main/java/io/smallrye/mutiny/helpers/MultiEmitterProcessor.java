@@ -6,6 +6,7 @@ import java.util.concurrent.Flow.Subscription;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.LongConsumer;
 
 import io.smallrye.mutiny.Context;
 import io.smallrye.mutiny.Multi;
@@ -14,8 +15,11 @@ import io.smallrye.mutiny.subscription.MultiEmitter;
 
 public class MultiEmitterProcessor<T> implements Processor<T, T>, MultiEmitter<T> {
 
+    // TODO: switch to volatile + atomic field updaters
     private final UnicastProcessor<T> processor;
     private final AtomicReference<Runnable> onTermination = new AtomicReference<>();
+    private final AtomicReference<Runnable> onCancellation = new AtomicReference<>();
+    private final AtomicReference<LongConsumer> onRequest = new AtomicReference<>();
     private final AtomicBoolean terminated = new AtomicBoolean();
     private final AtomicLong requested = new AtomicLong();
 
@@ -59,6 +63,18 @@ public class MultiEmitterProcessor<T> implements Processor<T, T>, MultiEmitter<T
         return requested.get();
     }
 
+    @Override
+    public MultiEmitter<T> onRequest(LongConsumer consumer) {
+        this.onRequest.set(consumer);
+        return this;
+    }
+
+    @Override
+    public MultiEmitter<T> onCancellation(Runnable onCancellation) {
+        this.onCancellation.set(onCancellation);
+        return this;
+    }
+
     @SuppressWarnings("SubscriberImplementation")
     @Override
     public void subscribe(Subscriber<? super T> subscriber) {
@@ -70,8 +86,12 @@ public class MultiEmitterProcessor<T> implements Processor<T, T>, MultiEmitter<T
                     public void request(long n) {
                         if (n <= 0L) {
                             onError(Subscriptions.getInvalidRequestException());
-                        } else {
+                        } else if (!terminated.get()) {
                             Subscriptions.add(requested, n);
+                            LongConsumer callback = onRequest.get();
+                            if (callback != null) {
+                                callback.accept(n);
+                            }
                             subscription.request(n);
                         }
                     }
@@ -79,6 +99,10 @@ public class MultiEmitterProcessor<T> implements Processor<T, T>, MultiEmitter<T
                     @Override
                     public void cancel() {
                         subscription.cancel();
+                        Runnable callback = onCancellation.getAndSet(null);
+                        if (callback != null) {
+                            callback.run();
+                        }
                         fireTermination();
                     }
                 });
