@@ -3,7 +3,7 @@ package io.smallrye.mutiny.operators.multi.builders;
 import java.util.concurrent.Flow;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import java.util.function.LongConsumer;
 
 import io.smallrye.mutiny.Context;
@@ -19,12 +19,16 @@ abstract class BaseMultiEmitter<T>
     protected final AtomicLong requested = new AtomicLong();
     protected final MultiSubscriber<? super T> downstream;
 
-    // TODO: switch to volatile + atomic field updaters
-    private final AtomicReference<Runnable> onTermination = new AtomicReference<>();
-    private final AtomicReference<Runnable> onCancellation = new AtomicReference<>();
-    private final AtomicReference<LongConsumer> onRequest = new AtomicReference<>();
-
     private final AtomicBoolean disposed = new AtomicBoolean();
+
+    private volatile Runnable onTermination;
+    private volatile Runnable onCancellation;
+    private volatile LongConsumer onRequest;
+
+    private static final AtomicReferenceFieldUpdater<BaseMultiEmitter, Runnable> ON_TERMINATION_UPDATER = AtomicReferenceFieldUpdater
+            .newUpdater(BaseMultiEmitter.class, Runnable.class, "onTermination");
+    private static final AtomicReferenceFieldUpdater<BaseMultiEmitter, Runnable> ON_CANCELLATION_UPDATER = AtomicReferenceFieldUpdater
+            .newUpdater(BaseMultiEmitter.class, Runnable.class, "onCancellation");
 
     private static final Runnable CLEARED = () -> {
     };
@@ -66,12 +70,12 @@ abstract class BaseMultiEmitter<T>
 
     @Override
     public boolean isCancelled() {
-        return onTermination.get() == CLEARED;
+        return onTermination == CLEARED;
     }
 
     protected void cleanup() {
         disposed.set(true);
-        Runnable action = onTermination.getAndSet(CLEARED);
+        Runnable action = ON_TERMINATION_UPDATER.getAndSet(this, CLEARED);
         if (action != null && action != CLEARED) {
             action.run();
         }
@@ -101,7 +105,7 @@ abstract class BaseMultiEmitter<T>
         if (disposed.compareAndSet(false, true)) {
             cleanup();
             onUnsubscribed();
-            Runnable callback = onCancellation.getAndSet(CLEARED);
+            Runnable callback = ON_CANCELLATION_UPDATER.getAndSet(this, CLEARED);
             if (callback != null && callback != CLEARED) {
                 callback.run();
             }
@@ -120,7 +124,7 @@ abstract class BaseMultiEmitter<T>
             }
             Subscriptions.add(requested, n);
             onRequested();
-            LongConsumer callback = onRequest.get();
+            LongConsumer callback = onRequest;
             if (callback != null) {
                 callback.accept(n);
             }
@@ -138,7 +142,7 @@ abstract class BaseMultiEmitter<T>
     public MultiEmitter<T> onTermination(Runnable onTermination) {
         ParameterValidation.nonNull(onTermination, "onTermination");
         if (!disposed.get()) {
-            this.onTermination.set(onTermination);
+            this.onTermination = onTermination;
             // Re-check if the termination didn't happen in the meantime
             if (disposed.get()) {
                 onTermination.run();
@@ -157,7 +161,7 @@ abstract class BaseMultiEmitter<T>
     public MultiEmitter<T> onRequest(LongConsumer consumer) {
         ParameterValidation.nonNull(consumer, "consumer");
         if (!disposed.get()) {
-            this.onRequest.set(consumer);
+            this.onRequest = consumer;
         }
         return this;
     }
@@ -166,7 +170,7 @@ abstract class BaseMultiEmitter<T>
     public MultiEmitter<T> onCancellation(Runnable onCancellation) {
         ParameterValidation.nonNull(onCancellation, "onCancellation");
         if (!disposed.get()) {
-            this.onCancellation.set(onCancellation);
+            this.onCancellation = onCancellation;
         }
         return this;
     }
