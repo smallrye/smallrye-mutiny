@@ -55,6 +55,7 @@ public class MultiEmitterProcessor<T> implements Processor<T, T>, MultiEmitter<T
 
     @Override
     public MultiEmitter<T> onTermination(Runnable onTermination) {
+        ParameterValidation.nonNull(onTermination, "onTermination");
         this.onTermination = onTermination;
         return this;
     }
@@ -71,12 +72,14 @@ public class MultiEmitterProcessor<T> implements Processor<T, T>, MultiEmitter<T
 
     @Override
     public MultiEmitter<T> onRequest(LongConsumer consumer) {
+        ParameterValidation.nonNull(consumer, "consumer");
         this.onRequest = consumer;
         return this;
     }
 
     @Override
     public MultiEmitter<T> onCancellation(Runnable onCancellation) {
+        ParameterValidation.nonNull(onCancellation, "onCancellation");
         this.onCancellation = onCancellation;
         return this;
     }
