@@ -17,7 +17,7 @@ jobs:
         java: [
           { 'version': '17', 'opts': '' },
           { 'version': '21', 'opts': '' },
-          { 'version': '23', 'opts': '' }
+          { 'version': '24', 'opts': '' }
         ]
     name: Build with Java ${{ matrix.java.version }}
     steps:
@@ -50,7 +50,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
         with:
-          java-version: 17
+          java-version: 21
           distribution: temurin
           cache: maven
       - name: Compatibility Check
