@@ -1,5 +1,6 @@
 site_name: SmallRye Mutiny
 repo_url: https://github.com/smallrye/smallrye-mutiny
+site_url: https://smallrye.io/smallrye-mutiny/
 docs_dir: docs
 edit_uri: edit/main/documentation/docs
 
