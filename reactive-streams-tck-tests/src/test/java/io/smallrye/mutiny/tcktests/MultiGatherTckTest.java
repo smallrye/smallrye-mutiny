@@ -19,7 +19,7 @@ public class MultiGatherTckTest extends AbstractPublisherTck<Long> {
                     list.add(next);
                     return list;
                 })
-                .extract(list -> {
+                .extract((list, completed) -> {
                     // Note: it might not be obvious at first sight, but with an early completion the list might be empty
                     if (list.isEmpty()) {
                         return Optional.empty();

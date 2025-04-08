@@ -4,32 +4,20 @@ import java.util.Optional;
 import java.util.concurrent.Flow;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.function.BiFunction;
-import java.util.function.Function;
-import java.util.function.Supplier;
 
 import io.smallrye.mutiny.Multi;
+import io.smallrye.mutiny.groups.Gatherer;
 import io.smallrye.mutiny.helpers.Subscriptions;
 import io.smallrye.mutiny.subscription.MultiSubscriber;
 import io.smallrye.mutiny.tuples.Tuple2;
 
 public class MultiGather<I, ACC, O> extends AbstractMultiOperator<I, O> {
 
-    Supplier<ACC> initialAccumulatorSupplier;
-    BiFunction<ACC, I, ACC> accumulator;
-    Function<ACC, Optional<Tuple2<ACC, O>>> extractor;
-    Function<ACC, Optional<O>> finalizer;
+    private final Gatherer<I, ACC, O> gatherer;
 
-    public MultiGather(Multi<? extends I> upstream,
-            Supplier<ACC> initialAccumulatorSupplier,
-            BiFunction<ACC, I, ACC> accumulator,
-            Function<ACC, Optional<Tuple2<ACC, O>>> extractor,
-            Function<ACC, Optional<O>> finalizer) {
+    public MultiGather(Multi<? extends I> upstream, Gatherer<I, ACC, O> gatherer) {
         super(upstream);
-        this.initialAccumulatorSupplier = initialAccumulatorSupplier;
-        this.accumulator = accumulator;
-        this.extractor = extractor;
-        this.finalizer = finalizer;
+        this.gatherer = gatherer;
     }
 
     @Override
@@ -51,7 +39,7 @@ public class MultiGather<I, ACC, O> extends AbstractMultiOperator<I, O> {
         @Override
         public void onSubscribe(Flow.Subscription subscription) {
             try {
-                this.acc = initialAccumulatorSupplier.get();
+                this.acc = gatherer.accumulator();
                 if (this.acc == null) {
                     throw new NullPointerException("The initial accumulator cannot be null");
                 }
@@ -85,11 +73,11 @@ public class MultiGather<I, ACC, O> extends AbstractMultiOperator<I, O> {
                 return;
             }
             try {
-                acc = accumulator.apply(acc, item);
+                acc = gatherer.accumulate(acc, item);
                 if (acc == null) {
                     throw new NullPointerException("The accumulator returned a null value");
                 }
-                Optional<Tuple2<ACC, O>> mapping = extractor.apply(acc);
+                Optional<Tuple2<ACC, O>> mapping = gatherer.extract(acc, false);
                 if (mapping == null) {
                     throw new NullPointerException("The extractor returned a null value");
                 }
@@ -137,7 +125,7 @@ public class MultiGather<I, ACC, O> extends AbstractMultiOperator<I, O> {
                         return;
                     }
                     try {
-                        Optional<Tuple2<ACC, O>> mapping = extractor.apply(acc);
+                        Optional<Tuple2<ACC, O>> mapping = gatherer.extract(acc, true);
                         if (mapping == null) {
                             throw new NullPointerException("The extractor returned a null value");
                         }
@@ -154,7 +142,7 @@ public class MultiGather<I, ACC, O> extends AbstractMultiOperator<I, O> {
                             downstream.onItem(value);
                             emitted = emitted + 1L;
                         } else {
-                            Optional<O> finalValue = finalizer.apply(acc);
+                            Optional<O> finalValue = gatherer.finalize(acc);
                             if (finalValue == null) {
                                 throw new NullPointerException("The finalizer returned a null value");
                             }

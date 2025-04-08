@@ -6,10 +6,12 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.BiFunction;
 
 import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Multi;
+import io.smallrye.mutiny.groups.Gatherers;
 import io.smallrye.mutiny.helpers.test.AssertSubscriber;
 import io.smallrye.mutiny.tuples.Tuple2;
 
@@ -17,19 +19,8 @@ class MultiGatherTest {
 
     @Test
     void gatherToLists() {
-        AssertSubscriber<ArrayList<Integer>> sub = Multi.createFrom().range(1, 100)
-                .onItem().gather()
-                .into(ArrayList<Integer>::new)
-                .accumulate((list, next) -> {
-                    list.add(next);
-                    return list;
-                })
-                .extract(list -> list.size() > 5
-                        ? Optional.of(Tuple2.of(new ArrayList<>(), list))
-                        : Optional.empty())
-                .finalize(list -> list.isEmpty()
-                        ? Optional.empty()
-                        : Optional.of(list))
+        AssertSubscriber<List<Integer>> sub = Multi.createFrom().range(1, 100)
+                .onItem().gather(Gatherers.window(6))
                 .subscribe().withSubscriber(AssertSubscriber.create());
 
         sub.awaitNextItems(2);
@@ -42,7 +33,55 @@ class MultiGatherTest {
         assertThat(sub.getItems()).hasSize(17)
                 .anySatisfy(list -> assertThat(list).containsExactly(91, 92, 93, 94, 95, 96))
                 .anySatisfy(list -> assertThat(list).containsExactly(97, 98, 99));
+    }
 
+    @Test
+    void gatherToSlidingWindows() {
+        AssertSubscriber<List<Integer>> sub = Multi.createFrom().range(1, 100)
+                .onItem().gather(Gatherers.slidingWindow(6))
+                .subscribe().withSubscriber(AssertSubscriber.create());
+
+        sub.awaitNextItems(2);
+        assertThat(sub.getItems()).hasSize(2)
+                .anySatisfy(list -> assertThat(list).containsExactly(1, 2, 3, 4, 5, 6))
+                .anySatisfy(list -> assertThat(list).containsExactly(2, 3, 4, 5, 6, 7));
+
+        sub.request(Long.MAX_VALUE);
+        sub.awaitCompletion();
+        assertThat(sub.getItems()).hasSize(95)
+                .anySatisfy(list -> assertThat(list).containsExactly(91, 92, 93, 94, 95, 96))
+                .anySatisfy(list -> assertThat(list).containsExactly(92, 93, 94, 95, 96, 97));
+    }
+
+    @Test
+    void gatherFold() {
+        AssertSubscriber<Integer> sub = Multi.createFrom().range(1, 100)
+                .onItem().gather(Gatherers.fold(() -> 0, Integer::sum))
+                .subscribe().withSubscriber(AssertSubscriber.create());
+
+        sub.awaitNextItems(1);
+        assertThat(sub.getItems()).hasSize(1)
+                .last().isEqualTo(4950);
+
+        sub.awaitCompletion();
+        assertThat(sub.getItems()).hasSize(1)
+                .last().isEqualTo(4950);
+    }
+
+    @Test
+    void gatherScan() {
+        AssertSubscriber<Integer> sub = Multi.createFrom().range(1, 100)
+                .onItem().gather(Gatherers.scan(() -> 0, Integer::sum))
+                .subscribe().withSubscriber(AssertSubscriber.create());
+
+        sub.awaitNextItems(5);
+        assertThat(sub.getItems()).hasSize(5)
+                .containsExactly(1, 3, 6, 10, 15);
+
+        sub.request(Long.MAX_VALUE);
+        sub.awaitCompletion();
+        assertThat(sub.getItems()).hasSize(100)
+                .last().isEqualTo(4950);
     }
 
     @Test
@@ -56,7 +95,7 @@ class MultiGatherTest {
                 .onItem().gather()
                 .into(StringBuilder::new)
                 .accumulate(StringBuilder::append)
-                .extract(sb -> {
+                .extract((sb, completed) -> {
                     String str = sb.toString();
                     if (str.contains("\n")) {
                         String[] lines = str.split("\n", 2);
@@ -90,7 +129,7 @@ class MultiGatherTest {
                 .onItem().gather()
                 .into(StringBuilder::new)
                 .accumulate(StringBuilder::append)
-                .extract(sb -> {
+                .extract((sb, completed) -> {
                     String str = sb.toString();
                     if (str.contains(",")) {
                         String[] lines = str.split(",", 2);
@@ -124,11 +163,12 @@ class MultiGatherTest {
                 .isThrownBy(() -> multi.onItem().gather().into(ArrayList<Integer>::new).accumulate(null))
                 .withMessageContaining("accumulator");
         assertThatIllegalArgumentException()
-                .isThrownBy(() -> multi.onItem().gather().into(ArrayList<Integer>::new).accumulate((a, b) -> a).extract(null))
+                .isThrownBy(() -> multi.onItem().gather().into(ArrayList<Integer>::new).accumulate((a, b) -> a)
+                        .extract((BiFunction<ArrayList<Integer>, Boolean, Optional<Tuple2<ArrayList<Integer>, Object>>>) null))
                 .withMessageContaining("extractor");
         assertThatIllegalArgumentException()
                 .isThrownBy(() -> multi.onItem().gather().into(ArrayList<Integer>::new).accumulate((a, b) -> a)
-                        .extract(a -> Optional.empty()).finalize(null))
+                        .extract((a, completed) -> Optional.empty()).finalize(null))
                 .withMessageContaining("finalizer");
     }
 
@@ -138,7 +178,7 @@ class MultiGatherTest {
                 .onItem().gather()
                 .into(() -> null)
                 .accumulate((acc, next) -> "")
-                .extract(acc -> Optional.empty())
+                .extract((acc, completed) -> Optional.empty())
                 .finalize(acc -> Optional.empty())
                 .subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE));
         sub.assertFailedWith(NullPointerException.class, "The initial accumulator cannot be null");
@@ -150,7 +190,7 @@ class MultiGatherTest {
                 .onItem().gather()
                 .into(ArrayList::new)
                 .accumulate((acc, next) -> null)
-                .extract(acc -> Optional.empty())
+                .extract((acc, completed) -> Optional.empty())
                 .finalize(acc -> Optional.empty())
                 .subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE));
         sub.assertFailedWith(NullPointerException.class, "The accumulator returned a null value");
@@ -165,7 +205,7 @@ class MultiGatherTest {
                     acc.add(next);
                     return acc;
                 })
-                .extract(acc -> null)
+                .extract((acc, completed) -> null)
                 .finalize(acc -> Optional.empty())
                 .subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE));
         sub.assertFailedWith(NullPointerException.class, "The extractor returned a null value");
@@ -180,7 +220,7 @@ class MultiGatherTest {
                     acc.add(next);
                     return acc;
                 })
-                .extract(acc -> Optional.of(Tuple2.of(null, "ok")))
+                .extract((acc, completed) -> Optional.of(Tuple2.of(null, "ok")))
                 .finalize(acc -> Optional.empty())
                 .subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE));
         sub.assertFailedWith(NullPointerException.class, "The extractor returned a null accumulator value");
@@ -195,7 +235,7 @@ class MultiGatherTest {
                     acc.add(next);
                     return acc;
                 })
-                .extract(acc -> Optional.of(Tuple2.of(new ArrayList<>(), null)))
+                .extract((acc, completed) -> Optional.of(Tuple2.of(new ArrayList<>(), null)))
                 .finalize(acc -> Optional.empty())
                 .subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE));
         sub.assertFailedWith(NullPointerException.class, "The extractor returned a null value to emit");
@@ -210,7 +250,7 @@ class MultiGatherTest {
                     acc.add(next);
                     return acc;
                 })
-                .extract(acc -> Optional.empty())
+                .extract((acc, completed) -> Optional.empty())
                 .finalize(acc -> null)
                 .subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE));
         sub.assertFailedWith(NullPointerException.class, "The finalizer returned a null value");
@@ -224,7 +264,7 @@ class MultiGatherTest {
                     throw new RuntimeException("boom");
                 })
                 .accumulate((acc, next) -> "")
-                .extract(acc -> Optional.empty())
+                .extract((acc, completed) -> Optional.empty())
                 .finalize(acc -> Optional.empty())
                 .subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE));
         sub.assertFailedWith(RuntimeException.class, "boom");
@@ -238,7 +278,7 @@ class MultiGatherTest {
                 .accumulate((acc, next) -> {
                     throw new RuntimeException("boom");
                 })
-                .extract(acc -> Optional.empty())
+                .extract((acc, completed) -> Optional.empty())
                 .finalize(acc -> Optional.empty())
                 .subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE));
         sub.assertFailedWith(RuntimeException.class, "boom");
@@ -253,7 +293,7 @@ class MultiGatherTest {
                     acc.add(next);
                     return acc;
                 })
-                .extract(acc -> {
+                .extract((acc, completed) -> {
                     throw new RuntimeException("boom");
                 })
                 .finalize(acc -> Optional.empty())
@@ -270,7 +310,7 @@ class MultiGatherTest {
                     acc.add(next);
                     return acc;
                 })
-                .extract(acc -> Optional.empty())
+                .extract((acc, completed) -> Optional.empty())
                 .finalize(acc -> {
                     throw new RuntimeException("boom");
                 })
@@ -285,7 +325,7 @@ class MultiGatherTest {
                 .onItem().gather()
                 .into(StringBuilder::new)
                 .accumulate(StringBuilder::append)
-                .extract(sb -> Optional.empty())
+                .extract((sb, completed) -> Optional.empty())
                 .finalize(acc -> Optional.of(acc.toString()))
                 .subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE));
         sub.assertFailedWith(RuntimeException.class, "boom");
@@ -299,7 +339,7 @@ class MultiGatherTest {
                 .onItem().gather()
                 .into(StringBuilder::new)
                 .accumulate(StringBuilder::append)
-                .extract(sb -> Optional.empty())
+                .extract((sb, completed) -> Optional.empty())
                 .finalize(acc -> Optional.of(acc.toString()));
 
         AssertSubscriber<Object> sub = multi.subscribe().withSubscriber(AssertSubscriber.create());

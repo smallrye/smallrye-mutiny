@@ -15,6 +15,7 @@ import io.smallrye.common.annotation.Experimental;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
+import io.smallrye.mutiny.operators.multi.MultiGather;
 import io.smallrye.mutiny.operators.multi.MultiIgnoreOp;
 import io.smallrye.mutiny.operators.multi.MultiMapOp;
 import io.smallrye.mutiny.operators.multi.MultiOnItemInvoke;
@@ -461,5 +462,17 @@ public class MultiOnItem<T> {
     @CheckReturnValue
     public MultiOnItemGather<T> gather() {
         return new MultiOnItemGather<>(upstream);
+    }
+
+    /**
+     * Gather each item into an accumulator, and emit new items based on an extractor function.
+     * <p>
+     *
+     * @return a new {@link MultiOnItemGather} that lets you configure the gathering of items emitted by the upstream
+     */
+    @Experimental("This API is still being designed and may change in the future")
+    @CheckReturnValue
+    public <ACC, O> Multi<O> gather(Gatherer<T, ACC, O> gatherer) {
+        return new MultiGather<>(upstream, gatherer);
     }
 }

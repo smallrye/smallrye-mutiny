@@ -26,12 +26,11 @@ public class _22_Multi_Chunks_To_Sentence_Gather {
                 "ar ",
                 "Baz\n");
 
-        StringBuilder builder = new StringBuilder();
         Multi.createFrom().iterable(chunks)
                 .onItem().gather()
                 .into(StringBuilder::new)
                 .accumulate(StringBuilder::append)
-                .extract(sb -> {
+                .extract((sb, completed) -> {
                     String str = sb.toString();
                     if (str.contains("\n")) {
                         String[] lines = str.split("\n", 2);

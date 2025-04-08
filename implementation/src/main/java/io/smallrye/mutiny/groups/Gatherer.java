@@ -8,38 +8,75 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import io.smallrye.common.annotation.CheckReturnValue;
-import io.smallrye.common.annotation.Experimental;
 import io.smallrye.mutiny.Multi;
-import io.smallrye.mutiny.operators.multi.MultiGather;
 import io.smallrye.mutiny.tuples.Tuple2;
 
 /**
- * A builder to gather items emitted by a {@link Multi} into an accumulator.
+ * A Gatherer operator transforms a stream of items by accumulating them into an accumulator and extracting
+ * items from that accumulator when certain conditions are met.
  *
- * @param <I> the type of the items emitted by the upstream {@link Multi}
+ * @param <I> the type of the items emitted by the upstream
+ * @param <ACC> the type of the accumulator
+ * @param <O> the type of the items emitted to the downstream
  */
-@Experimental("This API is still being designed and may change in the future")
-public class MultiOnItemGather<I> {
-
-    private final Multi<I> upstream;
-
-    public MultiOnItemGather(Multi<I> upstream) {
-        this.upstream = upstream;
-    }
+public interface Gatherer<I, ACC, O> {
 
     /**
-     * Specifies the initial accumulator supplier.
-     * <p>
-     * The accumulator is used to accumulate the items emitted by the upstream.
+     * Creates a new accumulator.
      *
-     * @param initialAccumulatorSupplier the initial accumulator supplier, the returned value cannot be {@code null}
-     * @param <ACC> the type of the accumulator
-     * @return the next step in the builder
+     * @return a new accumulator
      */
-    @CheckReturnValue
-    public <ACC> InitialAccumulatorStep<I, ACC> into(Supplier<ACC> initialAccumulatorSupplier) {
-        nonNull(initialAccumulatorSupplier, "initialAccumulatorSupplier");
-        return new InitialAccumulatorStep<>(upstream, initialAccumulatorSupplier);
+    ACC accumulator();
+
+    /**
+     * Accumulates an item into the accumulator.
+     *
+     * @param accumulator the current accumulator
+     * @param item the item to accumulate
+     * @return the updated accumulator
+     */
+    ACC accumulate(ACC accumulator, I item);
+
+    /**
+     * Extracts an item from the accumulator.
+     *
+     * @param accumulator the current accumulator
+     * @param upstreamCompleted whether the upstream has completed
+     * @return an Optional containing a Tuple2 with the updated accumulator and the extracted item, or an empty Optional if no
+     *         item can be extracted
+     */
+    Optional<Tuple2<ACC, O>> extract(ACC accumulator, boolean upstreamCompleted);
+
+    /**
+     * Finalizes the accumulator and extracts the final item, if any.
+     * This method is called when the upstream has completed and no more items can be extracted using the extract method.
+     *
+     * @param accumulator the current accumulator
+     * @return an Optional containing the final item, or an empty Optional if no final item can be extracted
+     */
+    Optional<O> finalize(ACC accumulator);
+
+    /**
+     * Builder for creating a {@link Gatherer}.
+     *
+     * @param <I> the type of the items emitted by the upstream
+     */
+    class Builder<I> {
+
+        /**
+         * Specifies the initial accumulator supplier.
+         * <p>
+         * The initial accumulator supplier is used to create a new accumulator.
+         *
+         * @param initialAccumulatorSupplier the supplier for the initial accumulator
+         * @param <ACC> the type of the accumulator
+         * @return the next step in the builder
+         */
+        @CheckReturnValue
+        public <ACC> InitialAccumulatorStep<I, ACC> into(Supplier<ACC> initialAccumulatorSupplier) {
+            nonNull(initialAccumulatorSupplier, "initialAccumulatorSupplier");
+            return new InitialAccumulatorStep<>(initialAccumulatorSupplier);
+        }
     }
 
     /**
@@ -48,12 +85,10 @@ public class MultiOnItemGather<I> {
      * @param <I> the type of the items emitted by the upstream {@link Multi}
      * @param <ACC> the type of the accumulator
      */
-    public static class InitialAccumulatorStep<I, ACC> {
-        private final Multi<I> upstream;
+    class InitialAccumulatorStep<I, ACC> {
         private final Supplier<ACC> initialAccumulatorSupplier;
 
-        private InitialAccumulatorStep(Multi<I> upstream, Supplier<ACC> initialAccumulatorSupplier) {
-            this.upstream = upstream;
+        private InitialAccumulatorStep(Supplier<ACC> initialAccumulatorSupplier) {
             this.initialAccumulatorSupplier = initialAccumulatorSupplier;
         }
 
@@ -69,7 +104,7 @@ public class MultiOnItemGather<I> {
         @CheckReturnValue
         public ExtractStep<I, ACC> accumulate(BiFunction<ACC, I, ACC> accumulator) {
             nonNull(accumulator, "accumulator");
-            return new ExtractStep<>(upstream, initialAccumulatorSupplier, accumulator);
+            return new ExtractStep<>(initialAccumulatorSupplier, accumulator);
         }
     }
 
@@ -79,13 +114,11 @@ public class MultiOnItemGather<I> {
      * @param <I> the type of the items emitted by the upstream {@link Multi}
      * @param <ACC> the type of the accumulator
      */
-    public static class ExtractStep<I, ACC> {
-        private final Multi<I> upstream;
+    class ExtractStep<I, ACC> {
         private final Supplier<ACC> initialAccumulatorSupplier;
         private final BiFunction<ACC, I, ACC> accumulator;
 
-        private ExtractStep(Multi<I> upstream, Supplier<ACC> initialAccumulatorSupplier, BiFunction<ACC, I, ACC> accumulator) {
-            this.upstream = upstream;
+        private ExtractStep(Supplier<ACC> initialAccumulatorSupplier, BiFunction<ACC, I, ACC> accumulator) {
             this.initialAccumulatorSupplier = initialAccumulatorSupplier;
             this.accumulator = accumulator;
         }
@@ -107,28 +140,25 @@ public class MultiOnItemGather<I> {
         @CheckReturnValue
         public <O> FinalizerStep<I, ACC, O> extract(BiFunction<ACC, Boolean, Optional<Tuple2<ACC, O>>> extractor) {
             nonNull(extractor, "extractor");
-            return new FinalizerStep<>(upstream, initialAccumulatorSupplier, accumulator, extractor);
+            return new FinalizerStep<>(initialAccumulatorSupplier, accumulator, extractor);
         }
     }
 
     /**
-     * The last step in the builder to gather items emitted by a {@link Multi} into an accumulator.
+     * The third step in the builder to gather items emitted by a {@link Multi} into an accumulator.
      *
-     * @param <I> the type of the items emitted by the upstream {@link Multi}
+     * @param <I> the type of the items emitted by the upstream
      * @param <ACC> the type of the accumulator
-     * @param <O> the type of the values to emit
+     * @param <O> the type of the items emitted to the downstream
      */
-    public static class FinalizerStep<I, ACC, O> {
-        private final Multi<I> upstream;
+    class FinalizerStep<I, ACC, O> {
         private final Supplier<ACC> initialAccumulatorSupplier;
         private final BiFunction<ACC, I, ACC> accumulator;
         private final BiFunction<ACC, Boolean, Optional<Tuple2<ACC, O>>> extractor;
 
-        private FinalizerStep(Multi<I> upstream,
-                Supplier<ACC> initialAccumulatorSupplier,
+        private FinalizerStep(Supplier<ACC> initialAccumulatorSupplier,
                 BiFunction<ACC, I, ACC> accumulator,
                 BiFunction<ACC, Boolean, Optional<Tuple2<ACC, O>>> extractor) {
-            this.upstream = upstream;
             this.initialAccumulatorSupplier = initialAccumulatorSupplier;
             this.accumulator = accumulator;
             this.extractor = extractor;
@@ -147,9 +177,10 @@ public class MultiOnItemGather<I> {
          * @return the gathering {@link Multi}
          */
         @CheckReturnValue
-        public Multi<O> finalize(Function<ACC, Optional<O>> finalizer) {
+        public Gatherer<I, ACC, O> finalize(Function<ACC, Optional<O>> finalizer) {
             nonNull(finalizer, "finalizer");
-            return new MultiGather<>(upstream, Gatherers.of(initialAccumulatorSupplier, accumulator, extractor, finalizer));
+            return Gatherers.of(initialAccumulatorSupplier, accumulator, extractor, finalizer);
         }
     }
+
 }
