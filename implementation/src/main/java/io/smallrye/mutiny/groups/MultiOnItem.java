@@ -4,13 +4,22 @@ import static io.smallrye.mutiny.helpers.ParameterValidation.*;
 
 import java.util.Objects;
 import java.util.concurrent.Flow.Publisher;
-import java.util.function.*;
+import java.util.function.BiFunction;
+import java.util.function.BinaryOperator;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 import io.smallrye.common.annotation.CheckReturnValue;
+import io.smallrye.common.annotation.Experimental;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
-import io.smallrye.mutiny.operators.multi.*;
+import io.smallrye.mutiny.operators.multi.MultiIgnoreOp;
+import io.smallrye.mutiny.operators.multi.MultiMapOp;
+import io.smallrye.mutiny.operators.multi.MultiOnItemInvoke;
+import io.smallrye.mutiny.operators.multi.MultiScanOp;
+import io.smallrye.mutiny.operators.multi.MultiScanWithSeedOp;
 
 public class MultiOnItem<T> {
 
@@ -442,4 +451,15 @@ public class MultiOnItem<T> {
         }));
     }
 
+    /**
+     * Gather each item into an accumulator, and emit new items based on an extractor function.
+     * <p>
+     *
+     * @return a new {@link MultiOnItemGather} that lets you configure the gathering of items emitted by the upstream
+     */
+    @Experimental("This API is still being designed and may change in the future")
+    @CheckReturnValue
+    public MultiOnItemGather<T> gather() {
+        return new MultiOnItemGather<>(upstream);
+    }
 }
