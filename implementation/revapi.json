@@ -51,7 +51,207 @@
     "criticality" : "highlight",
     "minSeverity" : "POTENTIALLY_BREAKING",
     "minCriticality" : "documented",
-    "differences" : [ ]
+    "differences" : [ {
+      "ignore": true,
+      "code": "java.method.returnTypeTypeParametersChanged",
+      "old": "method io.smallrye.mutiny.groups.UniOnFailure<T> io.smallrye.mutiny.Uni<T>::onFailure()",
+      "new": "method io.smallrye.mutiny.groups.UniOnFailure<T, ?> io.smallrye.mutiny.Uni<T>::onFailure()",
+      "justification": "To allow expressing the type of the Throwable in case of onFailure(SomeException.class)"
+    },
+      {
+        "ignore": true,
+        "code": "java.method.returnTypeTypeParametersChanged",
+        "old": "method io.smallrye.mutiny.groups.UniOnFailure<T> io.smallrye.mutiny.Uni<T>::onFailure(java.lang.Class<? extends java.lang.Throwable>)",
+        "new": "method <TT extends java.lang.Throwable> io.smallrye.mutiny.groups.UniOnFailure<T, TT> io.smallrye.mutiny.Uni<T>::onFailure(java.lang.Class<TT>)",
+        "justification": "To allow expressing the type of the Throwable in case of onFailure(SomeException.class)"
+      },
+      {
+        "ignore": true,
+        "code": "java.generics.elementNowParameterized",
+        "old": "method io.smallrye.mutiny.groups.UniOnFailure<T> io.smallrye.mutiny.Uni<T>::onFailure(java.lang.Class<? extends java.lang.Throwable>)",
+        "new": "method <TT extends java.lang.Throwable> io.smallrye.mutiny.groups.UniOnFailure<T, TT> io.smallrye.mutiny.Uni<T>::onFailure(java.lang.Class<TT>)",
+        "justification": "To allow expressing the type of the Throwable in case of onFailure(SomeException.class)"
+      },
+      {
+        "ignore": true,
+        "code": "java.generics.formalTypeParameterAdded",
+        "old": "method io.smallrye.mutiny.groups.UniOnFailure<T> io.smallrye.mutiny.Uni<T>::onFailure(java.lang.Class<? extends java.lang.Throwable>)",
+        "new": "method <TT extends java.lang.Throwable> io.smallrye.mutiny.groups.UniOnFailure<T, TT> io.smallrye.mutiny.Uni<T>::onFailure(java.lang.Class<TT>)",
+        "typeParameter": "TT extends java.lang.Throwable",
+        "justification": "To allow expressing the type of the Throwable in case of onFailure(SomeException.class)"
+      },
+      {
+        "ignore": true,
+        "code": "java.method.returnTypeTypeParametersChanged",
+        "old": "method io.smallrye.mutiny.groups.UniOnFailure<T> io.smallrye.mutiny.Uni<T>::onFailure(java.util.function.Predicate<? super java.lang.Throwable>)",
+        "new": "method io.smallrye.mutiny.groups.UniOnFailure<T, ?> io.smallrye.mutiny.Uni<T>::onFailure(java.util.function.Predicate<? super java.lang.Throwable>)",
+        "justification": "To allow expressing the type of the Throwable in case of onFailure(SomeException.class)"
+      },
+      {
+        "ignore": true,
+        "code": "java.method.numberOfParametersChanged",
+        "old": "method void io.smallrye.mutiny.groups.UniOnFailure<T>::<init>(io.smallrye.mutiny.Uni<T>, java.util.function.Predicate<? super java.lang.Throwable>)",
+        "new": "method void io.smallrye.mutiny.groups.UniOnFailure<T, TT extends java.lang.Throwable>::<init>(io.smallrye.mutiny.Uni<T>, java.lang.Class<TT>, java.util.function.Predicate<? super java.lang.Throwable>)",
+        "justification": "To allow expressing the type of the Throwable in case of onFailure(SomeException.class)"
+      },
+      {
+        "ignore": true,
+        "code": "java.method.parameterTypeParameterChanged",
+        "old": "parameter io.smallrye.mutiny.Uni<T> io.smallrye.mutiny.groups.UniOnFailure<T>::transform(===java.util.function.Function<? super java.lang.Throwable, ? extends java.lang.Throwable>===)",
+        "new": "parameter io.smallrye.mutiny.Uni<T> io.smallrye.mutiny.groups.UniOnFailure<T, TT extends java.lang.Throwable>::transform(===java.util.function.Function<TT, ? extends java.lang.Throwable>===)",
+        "parameterIndex": "0",
+        "justification": "To allow expressing the type of the Throwable in case of onFailure(SomeException.class)"
+      },
+      {
+        "ignore": true,
+        "code": "java.generics.formalTypeParameterAdded",
+        "old": "class io.smallrye.mutiny.groups.UniOnFailure<T>",
+        "new": "class io.smallrye.mutiny.groups.UniOnFailure<T, TT extends java.lang.Throwable>",
+        "typeParameter": "TT extends java.lang.Throwable",
+        "justification": "To allow expressing the type of the Throwable in case of onFailure(SomeException.class)"
+      },
+      {
+        "ignore": true,
+        "code": "java.method.returnTypeTypeParametersChanged",
+        "old": "method io.smallrye.mutiny.groups.UniOnFailure<T> io.smallrye.mutiny.operators.AbstractUni<T>::onFailure()",
+        "new": "method io.smallrye.mutiny.groups.UniOnFailure<T, ? extends java.lang.Throwable> io.smallrye.mutiny.operators.AbstractUni<T>::onFailure()",
+        "justification": "To allow expressing the type of the Throwable in case of onFailure(SomeException.class)"
+      },
+      {
+        "ignore": true,
+        "code": "java.method.returnTypeTypeParametersChanged",
+        "old": "method io.smallrye.mutiny.groups.UniOnFailure<T> io.smallrye.mutiny.operators.AbstractUni<T>::onFailure(java.lang.Class<? extends java.lang.Throwable>)",
+        "new": "method <TT extends java.lang.Throwable> io.smallrye.mutiny.groups.UniOnFailure<T, TT> io.smallrye.mutiny.operators.AbstractUni<T>::onFailure(java.lang.Class<TT>)",
+        "justification": "To allow expressing the type of the Throwable in case of onFailure(SomeException.class)"
+      },
+      {
+        "ignore": true,
+        "code": "java.generics.elementNowParameterized",
+        "old": "method io.smallrye.mutiny.groups.UniOnFailure<T> io.smallrye.mutiny.operators.AbstractUni<T>::onFailure(java.lang.Class<? extends java.lang.Throwable>)",
+        "new": "method <TT extends java.lang.Throwable> io.smallrye.mutiny.groups.UniOnFailure<T, TT> io.smallrye.mutiny.operators.AbstractUni<T>::onFailure(java.lang.Class<TT>)",
+        "justification": "To allow expressing the type of the Throwable in case of onFailure(SomeException.class)"
+      },
+      {
+        "ignore": true,
+        "code": "java.generics.formalTypeParameterAdded",
+        "old": "method io.smallrye.mutiny.groups.UniOnFailure<T> io.smallrye.mutiny.operators.AbstractUni<T>::onFailure(java.lang.Class<? extends java.lang.Throwable>)",
+        "new": "method <TT extends java.lang.Throwable> io.smallrye.mutiny.groups.UniOnFailure<T, TT> io.smallrye.mutiny.operators.AbstractUni<T>::onFailure(java.lang.Class<TT>)",
+        "typeParameter": "TT extends java.lang.Throwable",
+        "justification": "To allow expressing the type of the Throwable in case of onFailure(SomeException.class)"
+      },
+      {
+        "ignore": true,
+        "code": "java.method.returnTypeTypeParametersChanged",
+        "old": "method io.smallrye.mutiny.groups.UniOnFailure<T> io.smallrye.mutiny.operators.AbstractUni<T>::onFailure(java.util.function.Predicate<? super java.lang.Throwable>)",
+        "new": "method io.smallrye.mutiny.groups.UniOnFailure<T, ? extends java.lang.Throwable> io.smallrye.mutiny.operators.AbstractUni<T>::onFailure(java.util.function.Predicate<? super java.lang.Throwable>)",
+        "justification": "To allow expressing the type of the Throwable in case of onFailure(SomeException.class)"
+      },
+      {
+        "ignore": true,
+        "code": "java.method.numberOfParametersChanged",
+        "old": "method void io.smallrye.mutiny.operators.uni.UniOnFailureTransform<I, O>::<init>(io.smallrye.mutiny.Uni<I>, java.util.function.Predicate<? super java.lang.Throwable>, java.util.function.Function<? super java.lang.Throwable, ? extends java.lang.Throwable>)",
+        "new": "method void io.smallrye.mutiny.operators.uni.UniOnFailureTransform<I, O, TT extends java.lang.Throwable>::<init>(io.smallrye.mutiny.Uni<I>, java.util.function.Predicate<? super java.lang.Throwable>, java.util.function.Function<TT, ? extends java.lang.Throwable>, java.lang.Class<TT>)",
+        "justification": "To allow expressing the type of the Throwable in case of onFailure(SomeException.class)"
+      },
+      {
+        "ignore": true,
+        "code": "java.generics.formalTypeParameterAdded",
+        "old": "class io.smallrye.mutiny.operators.uni.UniOnFailureTransform<I, O>",
+        "new": "class io.smallrye.mutiny.operators.uni.UniOnFailureTransform<I, O, TT extends java.lang.Throwable>",
+        "typeParameter": "TT extends java.lang.Throwable",
+        "justification": "To allow expressing the type of the Throwable in case of onFailure(SomeException.class)"
+      },
+      {
+        "ignore": true,
+        "code": "java.method.parameterTypeParameterChanged",
+        "old": "parameter io.smallrye.mutiny.Uni<T> io.smallrye.mutiny.groups.UniOnFailure<T>::call(===java.util.function.Function<java.lang.Throwable, io.smallrye.mutiny.Uni<?>>===)",
+        "new": "parameter io.smallrye.mutiny.Uni<T> io.smallrye.mutiny.groups.UniOnFailure<T, TT extends java.lang.Throwable>::call(===java.util.function.Function<TT, io.smallrye.mutiny.Uni<?>>===)",
+        "parameterIndex": "0",
+        "justification": "To allow expressing the type of the Throwable in case of onFailure(SomeException.class)"
+      },
+      {
+        "ignore": true,
+        "code": "java.method.parameterTypeParameterChanged",
+        "old": "parameter io.smallrye.mutiny.Uni<T> io.smallrye.mutiny.groups.UniOnFailure<T>::invoke(===java.util.function.Consumer<java.lang.Throwable>===)",
+        "new": "parameter io.smallrye.mutiny.Uni<T> io.smallrye.mutiny.groups.UniOnFailure<T, TT extends java.lang.Throwable>::invoke(===java.util.function.Consumer<TT>===)",
+        "parameterIndex": "0",
+        "justification": "To allow expressing the type of the Throwable in case of onFailure(SomeException.class)"
+      },
+      {
+        "ignore": true,
+        "code": "java.method.parameterTypeParameterChanged",
+        "old": "parameter io.smallrye.mutiny.Uni<T> io.smallrye.mutiny.groups.UniOnFailure<T>::recoverWithItem(===java.util.function.Function<? super java.lang.Throwable, ? extends T>===)",
+        "new": "parameter io.smallrye.mutiny.Uni<T> io.smallrye.mutiny.groups.UniOnFailure<T, TT extends java.lang.Throwable>::recoverWithItem(===java.util.function.Function<TT, ? extends T>===)",
+        "parameterIndex": "0",
+        "justification": "To allow expressing the type of the Throwable in case of onFailure(SomeException.class)"
+      },
+      {
+        "ignore": true,
+        "code": "java.method.parameterTypeParameterChanged",
+        "old": "parameter io.smallrye.mutiny.Uni<T> io.smallrye.mutiny.groups.UniOnFailure<T>::recoverWithUni(===java.util.function.Function<? super java.lang.Throwable, io.smallrye.mutiny.Uni<? extends T>>===)",
+        "new": "parameter io.smallrye.mutiny.Uni<T> io.smallrye.mutiny.groups.UniOnFailure<T, TT extends java.lang.Throwable>::recoverWithUni(===java.util.function.Function<TT, io.smallrye.mutiny.Uni<? extends T>>===)",
+        "parameterIndex": "0",
+        "justification": "To allow expressing the type of the Throwable in case of onFailure(SomeException.class)"
+      },
+      {
+        "ignore": true,
+        "code": "java.method.numberOfParametersChanged",
+        "old": "method void io.smallrye.mutiny.operators.uni.UniOnFailureFlatMap<I>::<init>(io.smallrye.mutiny.Uni<I>, java.util.function.Predicate<? super java.lang.Throwable>, java.util.function.Function<? super java.lang.Throwable, io.smallrye.mutiny.Uni<? extends I>>)",
+        "new": "method void io.smallrye.mutiny.operators.uni.UniOnFailureFlatMap<I, TT>::<init>(io.smallrye.mutiny.Uni<I>, java.util.function.Predicate<? super java.lang.Throwable>, java.util.function.Function<TT, io.smallrye.mutiny.Uni<? extends I>>, java.lang.Class<TT>)",
+        "justification": "To allow expressing the type of the Throwable in case of onFailure(SomeException.class)"
+      },
+      {
+        "ignore": true,
+        "code": "java.generics.formalTypeParameterAdded",
+        "old": "class io.smallrye.mutiny.operators.uni.UniOnFailureFlatMap<I>",
+        "new": "class io.smallrye.mutiny.operators.uni.UniOnFailureFlatMap<I, TT>",
+        "typeParameter": "TT",
+        "justification": "To allow expressing the type of the Throwable in case of onFailure(SomeException.class)"
+      },
+      {
+        "ignore": true,
+        "code": "java.method.numberOfParametersChanged",
+        "old": "method void io.smallrye.mutiny.operators.uni.UniOnItemConsume<T>::<init>(io.smallrye.mutiny.Uni<? extends T>, java.util.function.Consumer<? super T>, java.util.function.Consumer<java.lang.Throwable>, java.util.function.Predicate<? super java.lang.Throwable>)",
+        "new": "method void io.smallrye.mutiny.operators.uni.UniOnItemConsume<T, TT>::<init>(io.smallrye.mutiny.Uni<? extends T>, java.util.function.Consumer<? super T>, java.util.function.Consumer<TT>, java.util.function.Predicate<? super java.lang.Throwable>, java.lang.Class<TT>)",
+        "justification": "To allow expressing the type of the Throwable in case of onFailure(SomeException.class)"
+      },
+      {
+        "ignore": true,
+        "code": "java.generics.formalTypeParameterAdded",
+        "old": "class io.smallrye.mutiny.operators.uni.UniOnItemConsume<T>",
+        "new": "class io.smallrye.mutiny.operators.uni.UniOnItemConsume<T, TT>",
+        "typeParameter": "TT",
+        "justification": "To allow expressing the type of the Throwable in case of onFailure(SomeException.class)"
+      },
+      {
+        "ignore": true,
+        "code": "java.method.returnTypeTypeParametersChanged",
+        "old": "method io.smallrye.mutiny.groups.UniOnFailure<T> io.smallrye.mutiny.Uni<T>::onFailure()",
+        "new": "method io.smallrye.mutiny.groups.UniOnFailure<T, java.lang.Throwable> io.smallrye.mutiny.Uni<T>::onFailure()",
+        "justification": "To allow expressing the type of the Throwable in case of onFailure(SomeException.class)"
+      },
+      {
+        "ignore": true,
+        "code": "java.method.returnTypeTypeParametersChanged",
+        "old": "method io.smallrye.mutiny.groups.UniOnFailure<T> io.smallrye.mutiny.Uni<T>::onFailure(java.util.function.Predicate<? super java.lang.Throwable>)",
+        "new": "method io.smallrye.mutiny.groups.UniOnFailure<T, java.lang.Throwable> io.smallrye.mutiny.Uni<T>::onFailure(java.util.function.Predicate<? super java.lang.Throwable>)",
+        "justification": "To allow expressing the type of the Throwable in case of onFailure(SomeException.class)"
+      },
+      {
+        "ignore": true,
+        "code": "java.method.returnTypeTypeParametersChanged",
+        "old": "method io.smallrye.mutiny.groups.UniOnFailure<T> io.smallrye.mutiny.operators.AbstractUni<T>::onFailure()",
+        "new": "method io.smallrye.mutiny.groups.UniOnFailure<T, java.lang.Throwable> io.smallrye.mutiny.operators.AbstractUni<T>::onFailure()",
+        "justification": "To allow expressing the type of the Throwable in case of onFailure(SomeException.class)"
+      },
+      {
+        "ignore": true,
+        "code": "java.method.returnTypeTypeParametersChanged",
+        "old": "method io.smallrye.mutiny.groups.UniOnFailure<T> io.smallrye.mutiny.operators.AbstractUni<T>::onFailure(java.util.function.Predicate<? super java.lang.Throwable>)",
+        "new": "method io.smallrye.mutiny.groups.UniOnFailure<T, java.lang.Throwable> io.smallrye.mutiny.operators.AbstractUni<T>::onFailure(java.util.function.Predicate<? super java.lang.Throwable>)",
+        "justification": "To allow expressing the type of the Throwable in case of onFailure(SomeException.class)"
+      }
+    ]
   }
 }, {
   "extension" : "revapi.reporter.json",
