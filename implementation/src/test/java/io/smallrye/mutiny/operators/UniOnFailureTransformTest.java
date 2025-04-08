@@ -39,7 +39,7 @@ public class UniOnFailureTransformTest {
     @Test
     public void testThatSourceMustNotBeNull() {
         assertThrows(IllegalArgumentException.class,
-                () -> new UniOnFailureTransform<>(null, t -> true, Function.identity()));
+                () -> new UniOnFailureTransform<>(null, t -> true, Function.identity(), Throwable.class));
     }
 
     @Test

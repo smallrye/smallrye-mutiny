@@ -39,7 +39,7 @@ public class UniOnFailureSpy<T> extends UniSpyBase<T> {
 
     @Override
     public void subscribe(UniSubscriber<? super T> downstream) {
-        UniOnFailure<? extends T> group;
+        UniOnFailure<? extends T, ?> group;
         if (predicate != null) {
             group = upstream().onFailure(predicate);
         } else if (typeOfFailure != null) {

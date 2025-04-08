@@ -54,18 +54,18 @@ public abstract class AbstractUni<T> implements Uni<T> {
     }
 
     @Override
-    public UniOnFailure<T> onFailure() {
-        return new UniOnFailure<>(this, null);
+    public UniOnFailure<T, Throwable> onFailure() {
+        return new UniOnFailure<>(this, Throwable.class, null);
     }
 
     @Override
-    public UniOnFailure<T> onFailure(Predicate<? super Throwable> predicate) {
-        return new UniOnFailure<>(this, predicate);
+    public UniOnFailure<T, Throwable> onFailure(Predicate<? super Throwable> predicate) {
+        return new UniOnFailure<>(this, Throwable.class, predicate);
     }
 
     @Override
-    public UniOnFailure<T> onFailure(Class<? extends Throwable> typeOfFailure) {
-        return new UniOnFailure<>(this, typeOfFailure::isInstance);
+    public <TT extends Throwable> UniOnFailure<T, TT> onFailure(Class<TT> typeOfFailure) {
+        return new UniOnFailure<>(this, typeOfFailure, typeOfFailure::isInstance);
     }
 
     @Override
