@@ -8,6 +8,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import io.smallrye.common.annotation.Experimental;
 import io.smallrye.mutiny.groups.Gatherer.Extraction;
 
 /**
@@ -15,6 +16,7 @@ import io.smallrye.mutiny.groups.Gatherer.Extraction;
  * <p>
  * This interface provides various static methods to create different types of gatherers.
  */
+@Experimental("This API is still being designed and may change in the future")
 public interface Gatherers {
 
     /**

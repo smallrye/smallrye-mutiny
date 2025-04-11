@@ -8,6 +8,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import io.smallrye.common.annotation.CheckReturnValue;
+import io.smallrye.common.annotation.Experimental;
 import io.smallrye.mutiny.Multi;
 
 /**
@@ -18,6 +19,7 @@ import io.smallrye.mutiny.Multi;
  * @param <ACC> the type of the accumulator
  * @param <O> the type of the items emitted to the downstream
  */
+@Experimental("This API is still being designed and may change in the future")
 public interface Gatherer<I, ACC, O> {
 
     /**
