@@ -7,9 +7,9 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.groups.Gatherer;
+import io.smallrye.mutiny.groups.Gatherer.Extraction;
 import io.smallrye.mutiny.helpers.Subscriptions;
 import io.smallrye.mutiny.subscription.MultiSubscriber;
-import io.smallrye.mutiny.tuples.Tuple2;
 
 public class MultiGather<I, ACC, O> extends AbstractMultiOperator<I, O> {
 
@@ -77,14 +77,14 @@ public class MultiGather<I, ACC, O> extends AbstractMultiOperator<I, O> {
                 if (acc == null) {
                     throw new NullPointerException("The accumulator returned a null value");
                 }
-                Optional<Tuple2<ACC, O>> mapping = gatherer.extract(acc, false);
+                Optional<Extraction<ACC, O>> mapping = gatherer.extract(acc, false);
                 if (mapping == null) {
                     throw new NullPointerException("The extractor returned a null value");
                 }
                 if (mapping.isPresent()) {
-                    Tuple2<ACC, O> tuple = mapping.get();
-                    acc = tuple.getItem1();
-                    O value = tuple.getItem2();
+                    Extraction<ACC, O> result = mapping.get();
+                    acc = result.nextAccumulator();
+                    O value = result.nextItem();
                     if (acc == null) {
                         throw new NullPointerException("The extractor returned a null accumulator value");
                     }
@@ -125,14 +125,14 @@ public class MultiGather<I, ACC, O> extends AbstractMultiOperator<I, O> {
                         return;
                     }
                     try {
-                        Optional<Tuple2<ACC, O>> mapping = gatherer.extract(acc, true);
+                        Optional<Extraction<ACC, O>> mapping = gatherer.extract(acc, true);
                         if (mapping == null) {
                             throw new NullPointerException("The extractor returned a null value");
                         }
                         if (mapping.isPresent()) {
-                            Tuple2<ACC, O> tuple = mapping.get();
-                            acc = tuple.getItem1();
-                            O value = tuple.getItem2();
+                            Extraction<ACC, O> result = mapping.get();
+                            acc = result.nextAccumulator();
+                            O value = result.nextItem();
                             if (acc == null) {
                                 throw new NullPointerException("The extractor returned a null accumulator value");
                             }

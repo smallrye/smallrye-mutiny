@@ -10,7 +10,7 @@ import java.util.concurrent.ScheduledExecutorService;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
-import io.smallrye.mutiny.tuples.Tuple2;
+import io.smallrye.mutiny.groups.Gatherer.Extraction;
 
 public class _22_Multi_Chunks_To_Sentence_Gather {
 
@@ -34,7 +34,7 @@ public class _22_Multi_Chunks_To_Sentence_Gather {
                     String str = sb.toString();
                     if (str.contains("\n")) {
                         String[] lines = str.split("\n", 2);
-                        return Optional.of(Tuple2.of(new StringBuilder(lines[1]), lines[0]));
+                        return Optional.of(Extraction.of(new StringBuilder(lines[1]), lines[0]));
                     }
                     return Optional.empty();
                 })

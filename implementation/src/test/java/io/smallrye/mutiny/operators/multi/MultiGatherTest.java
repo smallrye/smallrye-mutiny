@@ -11,9 +11,10 @@ import java.util.function.BiFunction;
 import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Multi;
+import io.smallrye.mutiny.groups.Gatherer;
+import io.smallrye.mutiny.groups.Gatherer.Extraction;
 import io.smallrye.mutiny.groups.Gatherers;
 import io.smallrye.mutiny.helpers.test.AssertSubscriber;
-import io.smallrye.mutiny.tuples.Tuple2;
 
 class MultiGatherTest {
 
@@ -99,7 +100,7 @@ class MultiGatherTest {
                     String str = sb.toString();
                     if (str.contains("\n")) {
                         String[] lines = str.split("\n", 2);
-                        return Optional.of(Tuple2.of(new StringBuilder(lines[1]), lines[0]));
+                        return Optional.of(Extraction.of(new StringBuilder(lines[1]), lines[0]));
                     }
                     return Optional.empty();
                 })
@@ -133,7 +134,7 @@ class MultiGatherTest {
                     String str = sb.toString();
                     if (str.contains(",")) {
                         String[] lines = str.split(",", 2);
-                        return Optional.of(Tuple2.of(new StringBuilder(lines[1]), lines[0]));
+                        return Optional.of(Extraction.of(new StringBuilder(lines[1]), lines[0]));
                     }
                     return Optional.empty();
                 })
@@ -164,7 +165,8 @@ class MultiGatherTest {
                 .withMessageContaining("accumulator");
         assertThatIllegalArgumentException()
                 .isThrownBy(() -> multi.onItem().gather().into(ArrayList<Integer>::new).accumulate((a, b) -> a)
-                        .extract((BiFunction<ArrayList<Integer>, Boolean, Optional<Tuple2<ArrayList<Integer>, Object>>>) null))
+                        .extract(
+                                (BiFunction<ArrayList<Integer>, Boolean, Optional<Extraction<ArrayList<Integer>, Object>>>) null))
                 .withMessageContaining("extractor");
         assertThatIllegalArgumentException()
                 .isThrownBy(() -> multi.onItem().gather().into(ArrayList<Integer>::new).accumulate((a, b) -> a)
@@ -220,7 +222,7 @@ class MultiGatherTest {
                     acc.add(next);
                     return acc;
                 })
-                .extract((acc, completed) -> Optional.of(Tuple2.of(null, "ok")))
+                .extract((acc, completed) -> Optional.of(Extraction.of(null, "ok")))
                 .finalize(acc -> Optional.empty())
                 .subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE));
         sub.assertFailedWith(NullPointerException.class, "The extractor returned a null accumulator value");
@@ -235,7 +237,7 @@ class MultiGatherTest {
                     acc.add(next);
                     return acc;
                 })
-                .extract((acc, completed) -> Optional.of(Tuple2.of(new ArrayList<>(), null)))
+                .extract((acc, completed) -> Optional.of(Extraction.of(new ArrayList<>(), null)))
                 .finalize(acc -> Optional.empty())
                 .subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE));
         sub.assertFailedWith(NullPointerException.class, "The extractor returned a null value to emit");
@@ -349,5 +351,44 @@ class MultiGatherTest {
         sub = multi.subscribe().withSubscriber(AssertSubscriber.create());
         sub.request(-10L).assertFailedWith(IllegalArgumentException.class,
                 "The number of items requested must be strictly positive");
+    }
+
+    @Test
+    void builderApi() {
+        Gatherer<String, StringBuilder, String> gatherer = Gatherers.<String> builder()
+                .into(StringBuilder::new)
+                .accumulate(StringBuilder::append)
+                .extract((sb, completed) -> {
+                    String str = sb.toString();
+                    if (str.contains("\n")) {
+                        String[] lines = str.split("\n", 2);
+                        return Optional.of(Extraction.of(new StringBuilder(lines[1]), lines[0]));
+                    }
+                    return Optional.empty();
+                })
+                .finalize(sb -> Optional.of(sb.toString()));
+
+        List<String> chunks = List.of(
+                "Hello", " ", "world!\n",
+                "This is a test\n",
+                "==\n==",
+                "\n\nThis", " is", " ", "amazing\n\n");
+        AssertSubscriber<String> sub = Multi.createFrom().iterable(chunks)
+                .onItem().gather(gatherer)
+                .subscribe().withSubscriber(AssertSubscriber.create());
+
+        sub.awaitNextItems(2);
+        assertThat(sub.getItems()).containsExactly("Hello world!", "This is a test");
+
+        sub.request(Long.MAX_VALUE);
+        assertThat(sub.getItems()).containsExactly(
+                "Hello world!",
+                "This is a test",
+                "==",
+                "==",
+                "",
+                "This is amazing",
+                "",
+                "");
     }
 }

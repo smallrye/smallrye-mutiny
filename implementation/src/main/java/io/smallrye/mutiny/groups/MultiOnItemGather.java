@@ -10,8 +10,8 @@ import java.util.function.Supplier;
 import io.smallrye.common.annotation.CheckReturnValue;
 import io.smallrye.common.annotation.Experimental;
 import io.smallrye.mutiny.Multi;
+import io.smallrye.mutiny.groups.Gatherer.Extraction;
 import io.smallrye.mutiny.operators.multi.MultiGather;
-import io.smallrye.mutiny.tuples.Tuple2;
 
 /**
  * A builder to gather items emitted by a {@link Multi} into an accumulator.
@@ -97,15 +97,15 @@ public class MultiOnItemGather<I> {
          * When the extractor function returns an empty {@link Optional}, no value is emitted.
          * When the extractor function returns a non-empty {@link Optional}, the value is emitted, and the accumulator is
          * updated.
-         * This is done by returning a {@link Tuple2} containing the new accumulator and the value to emit.
+         * This is done by returning a {@link Extraction} containing the new accumulator and the value to emit.
          *
          * @param extractor the extractor function, which takes the current accumulator and returns an {@link Optional}
-         *        containing a {@link Tuple2} with the new accumulator and the value to emit
+         *        containing a {@link Extraction} with the new accumulator and the value to emit
          * @param <O> the type of the value to emit
          * @return the next step in the builder
          */
         @CheckReturnValue
-        public <O> FinalizerStep<I, ACC, O> extract(BiFunction<ACC, Boolean, Optional<Tuple2<ACC, O>>> extractor) {
+        public <O> FinalizerStep<I, ACC, O> extract(BiFunction<ACC, Boolean, Optional<Extraction<ACC, O>>> extractor) {
             nonNull(extractor, "extractor");
             return new FinalizerStep<>(upstream, initialAccumulatorSupplier, accumulator, extractor);
         }
@@ -122,12 +122,12 @@ public class MultiOnItemGather<I> {
         private final Multi<I> upstream;
         private final Supplier<ACC> initialAccumulatorSupplier;
         private final BiFunction<ACC, I, ACC> accumulator;
-        private final BiFunction<ACC, Boolean, Optional<Tuple2<ACC, O>>> extractor;
+        private final BiFunction<ACC, Boolean, Optional<Extraction<ACC, O>>> extractor;
 
         private FinalizerStep(Multi<I> upstream,
                 Supplier<ACC> initialAccumulatorSupplier,
                 BiFunction<ACC, I, ACC> accumulator,
-                BiFunction<ACC, Boolean, Optional<Tuple2<ACC, O>>> extractor) {
+                BiFunction<ACC, Boolean, Optional<Extraction<ACC, O>>> extractor) {
             this.upstream = upstream;
             this.initialAccumulatorSupplier = initialAccumulatorSupplier;
             this.accumulator = accumulator;

@@ -9,7 +9,6 @@ import java.util.function.Supplier;
 
 import io.smallrye.common.annotation.CheckReturnValue;
 import io.smallrye.mutiny.Multi;
-import io.smallrye.mutiny.tuples.Tuple2;
 
 /**
  * A Gatherer operator transforms a stream of items by accumulating them into an accumulator and extracting
@@ -42,10 +41,11 @@ public interface Gatherer<I, ACC, O> {
      *
      * @param accumulator the current accumulator
      * @param upstreamCompleted whether the upstream has completed
-     * @return an Optional containing a Tuple2 with the updated accumulator and the extracted item, or an empty Optional if no
+     * @return an Optional containing a Extraction with the updated accumulator and the extracted item, or an empty Optional if
+     *         no
      *         item can be extracted
      */
-    Optional<Tuple2<ACC, O>> extract(ACC accumulator, boolean upstreamCompleted);
+    Optional<Extraction<ACC, O>> extract(ACC accumulator, boolean upstreamCompleted);
 
     /**
      * Finalizes the accumulator and extracts the final item, if any.
@@ -55,6 +55,30 @@ public interface Gatherer<I, ACC, O> {
      * @return an Optional containing the final item, or an empty Optional if no final item can be extracted
      */
     Optional<O> finalize(ACC accumulator);
+
+    /**
+     * An extraction result containing the next accumulator and the next item to emit.
+     *
+     * @param nextAccumulator the next accumulator
+     * @param nextItem the next item to emit
+     * @param <ACC> the type of the accumulator
+     * @param <O> the type of the item to emit
+     */
+    record Extraction<ACC, O>(ACC nextAccumulator, O nextItem) {
+
+        /**
+         * Creates a new {@link Extraction} instance.
+         *
+         * @param nextAccumulator the next accumulator
+         * @param nextItem the next item to emit
+         * @return a new {@link Extraction} instance
+         * @param <ACC> the type of the accumulator
+         * @param <O> the type of the item to emit
+         */
+        public static <ACC, O> Extraction<ACC, O> of(ACC nextAccumulator, O nextItem) {
+            return new Extraction<>(nextAccumulator, nextItem);
+        }
+    }
 
     /**
      * Builder for creating a {@link Gatherer}.
@@ -130,15 +154,15 @@ public interface Gatherer<I, ACC, O> {
          * When the extractor function returns an empty {@link Optional}, no value is emitted.
          * When the extractor function returns a non-empty {@link Optional}, the value is emitted, and the accumulator is
          * updated.
-         * This is done by returning a {@link Tuple2} containing the new accumulator and the value to emit.
+         * This is done by returning a {@link Extraction} containing the new accumulator and the value to emit.
          *
          * @param extractor the extractor function, which takes the current accumulator and returns an {@link Optional}
-         *        containing a {@link Tuple2} with the new accumulator and the value to emit
+         *        containing a {@link Extraction} with the new accumulator and the value to emit
          * @param <O> the type of the value to emit
          * @return the next step in the builder
          */
         @CheckReturnValue
-        public <O> FinalizerStep<I, ACC, O> extract(BiFunction<ACC, Boolean, Optional<Tuple2<ACC, O>>> extractor) {
+        public <O> FinalizerStep<I, ACC, O> extract(BiFunction<ACC, Boolean, Optional<Extraction<ACC, O>>> extractor) {
             nonNull(extractor, "extractor");
             return new FinalizerStep<>(initialAccumulatorSupplier, accumulator, extractor);
         }
@@ -154,11 +178,11 @@ public interface Gatherer<I, ACC, O> {
     class FinalizerStep<I, ACC, O> {
         private final Supplier<ACC> initialAccumulatorSupplier;
         private final BiFunction<ACC, I, ACC> accumulator;
-        private final BiFunction<ACC, Boolean, Optional<Tuple2<ACC, O>>> extractor;
+        private final BiFunction<ACC, Boolean, Optional<Extraction<ACC, O>>> extractor;
 
         private FinalizerStep(Supplier<ACC> initialAccumulatorSupplier,
                 BiFunction<ACC, I, ACC> accumulator,
-                BiFunction<ACC, Boolean, Optional<Tuple2<ACC, O>>> extractor) {
+                BiFunction<ACC, Boolean, Optional<Extraction<ACC, O>>> extractor) {
             this.initialAccumulatorSupplier = initialAccumulatorSupplier;
             this.accumulator = accumulator;
             this.extractor = extractor;

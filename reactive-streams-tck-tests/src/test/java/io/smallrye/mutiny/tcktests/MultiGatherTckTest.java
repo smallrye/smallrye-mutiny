@@ -6,7 +6,7 @@ import java.util.concurrent.Flow;
 import java.util.stream.LongStream;
 
 import io.smallrye.mutiny.Multi;
-import io.smallrye.mutiny.tuples.Tuple2;
+import io.smallrye.mutiny.groups.Gatherer.Extraction;
 
 public class MultiGatherTckTest extends AbstractPublisherTck<Long> {
 
@@ -24,7 +24,7 @@ public class MultiGatherTckTest extends AbstractPublisherTck<Long> {
                     if (list.isEmpty()) {
                         return Optional.empty();
                     } else {
-                        return Optional.of(Tuple2.of(new ArrayList<>(), list.get(0)));
+                        return Optional.of(Extraction.of(new ArrayList<>(), list.get(0)));
                     }
                 })
                 .finalize(list -> Optional.empty());

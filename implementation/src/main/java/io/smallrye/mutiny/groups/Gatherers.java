@@ -8,10 +8,11 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import io.smallrye.mutiny.tuples.Tuple2;
+import io.smallrye.mutiny.groups.Gatherer.Extraction;
 
 /**
  * Factory interface for creating {@link Gatherer} instances.
+ * <p>
  * This interface provides various static methods to create different types of gatherers.
  */
 public interface Gatherers {
@@ -30,7 +31,7 @@ public interface Gatherers {
      */
     static <I, ACC, O> Gatherer<I, ACC, O> of(Supplier<ACC> initialAccumulatorSupplier,
             BiFunction<ACC, I, ACC> accumulatorFunction,
-            BiFunction<ACC, Boolean, Optional<Tuple2<ACC, O>>> extractor,
+            BiFunction<ACC, Boolean, Optional<Extraction<ACC, O>>> extractor,
             Function<ACC, Optional<O>> finalizer) {
         return new DefaultGatherer<>(initialAccumulatorSupplier, accumulatorFunction, extractor, finalizer);
     }
@@ -49,7 +50,7 @@ public interface Gatherers {
      */
     static <I> Gatherer<I, I, I> scan(Supplier<I> initialAccumulatorSupplier, BiFunction<I, I, I> accumulatorFunction) {
         return of(initialAccumulatorSupplier, accumulatorFunction,
-                (acc, done) -> done ? Optional.empty() : Optional.of(Tuple2.of(acc, acc)), Optional::of);
+                (acc, done) -> done ? Optional.empty() : Optional.of(Extraction.of(acc, acc)), Optional::of);
     }
 
     /**
@@ -84,7 +85,7 @@ public interface Gatherers {
             return acc;
         }, (acc, completed) -> {
             if (acc.size() == size) {
-                return Optional.of(Tuple2.of(new ArrayList<>(), new ArrayList<>(acc)));
+                return Optional.of(Extraction.of(new ArrayList<>(), new ArrayList<>(acc)));
             }
             return Optional.empty();
         }, acc -> acc.isEmpty()
@@ -109,7 +110,7 @@ public interface Gatherers {
             return acc;
         }, (acc, completed) -> {
             if (acc.size() == size) {
-                return Optional.of(Tuple2.of(acc.stream().skip(1).collect(Collectors.toList()), new ArrayList<>(acc)));
+                return Optional.of(Extraction.of(acc.stream().skip(1).collect(Collectors.toList()), new ArrayList<>(acc)));
             }
             return Optional.empty();
         }, acc -> acc.isEmpty()
@@ -128,12 +129,12 @@ public interface Gatherers {
 
         private final Supplier<ACC> initialAccumulatorSupplier;
         private final BiFunction<ACC, I, ACC> accumulatorFunction;
-        private final BiFunction<ACC, Boolean, Optional<Tuple2<ACC, O>>> extractor;
+        private final BiFunction<ACC, Boolean, Optional<Extraction<ACC, O>>> extractor;
         private final Function<ACC, Optional<O>> finalizer;
 
         public DefaultGatherer(Supplier<ACC> initialAccumulatorSupplier,
                 BiFunction<ACC, I, ACC> accumulatorFunction,
-                BiFunction<ACC, Boolean, Optional<Tuple2<ACC, O>>> extractor,
+                BiFunction<ACC, Boolean, Optional<Extraction<ACC, O>>> extractor,
                 Function<ACC, Optional<O>> finalizer) {
             this.initialAccumulatorSupplier = initialAccumulatorSupplier;
             this.accumulatorFunction = accumulatorFunction;
@@ -152,7 +153,7 @@ public interface Gatherers {
         }
 
         @Override
-        public Optional<Tuple2<ACC, O>> extract(ACC accumulator, boolean upstreamCompleted) {
+        public Optional<Extraction<ACC, O>> extract(ACC accumulator, boolean upstreamCompleted) {
             return extractor.apply(accumulator, upstreamCompleted);
         }
 
@@ -171,5 +172,4 @@ public interface Gatherers {
     static <I> Gatherer.Builder<I> builder() {
         return new Gatherer.Builder<>();
     }
-
 }
