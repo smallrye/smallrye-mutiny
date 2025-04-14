@@ -26,6 +26,7 @@ import java.util.function.LongConsumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
+import java.util.function.BiPredicate;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
@@ -383,6 +384,15 @@ public class Infrastructure {
 
     public static <T> Predicate<T> decorate(Predicate<T> predicate) {
         Predicate<T> current = predicate;
+        for (CallbackDecorator interceptor : CALLBACK_DECORATORS) {
+            current = interceptor.decorate(current);
+        }
+        return current;
+    }
+
+
+    public static <T> BiPredicate<T, T> decorate(BiPredicate<T, T> predicate) {
+        BiPredicate<T, T> current = predicate;
         for (CallbackDecorator interceptor : CALLBACK_DECORATORS) {
             current = interceptor.decorate(current);
         }

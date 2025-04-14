@@ -3,6 +3,7 @@ package io.smallrye.mutiny.infrastructure;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
+import java.util.Objects;
 import java.util.function.*;
 
 import org.junit.jupiter.api.AfterEach;
@@ -25,6 +26,7 @@ public class CallbackDecoratorTest {
     Consumer<Integer> consumer = i -> {
     };
     Predicate<Integer> predicate = i -> true;
+    BiPredicate<Integer, Integer> biPredicate = (a, b) -> Objects.equals(a, b);
     Supplier<Integer> supplier = () -> 1;
     Function<Integer, Integer> function = i -> i + 1;
 
@@ -58,6 +60,7 @@ public class CallbackDecoratorTest {
         assertThat(Infrastructure.decorate(booleanSupplier)).isSameAs(booleanSupplier);
         assertThat(Infrastructure.decorate(consumer)).isSameAs(consumer);
         assertThat(Infrastructure.decorate(predicate)).isSameAs(predicate);
+        assertThat(Infrastructure.decorate(biPredicate)).isSameAs(biPredicate);
         assertThat(Infrastructure.decorate(supplier)).isSameAs(supplier);
         assertThat(Infrastructure.decorate(function)).isSameAs(function);
 
@@ -87,6 +90,7 @@ public class CallbackDecoratorTest {
         assertThat(decorator.decorate(booleanSupplier)).isSameAs(booleanSupplier);
         assertThat(decorator.decorate(consumer)).isSameAs(consumer);
         assertThat(decorator.decorate(predicate)).isSameAs(predicate);
+        assertThat(decorator.decorate(biPredicate)).isSameAs(biPredicate);
         assertThat(decorator.decorate(supplier)).isSameAs(supplier);
         assertThat(decorator.decorate(function)).isSameAs(function);
 
