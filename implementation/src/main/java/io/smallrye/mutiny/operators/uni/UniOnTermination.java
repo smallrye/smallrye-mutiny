@@ -58,8 +58,8 @@ public class UniOnTermination<T> extends UniOperator<T, T> {
         @Override
         public void cancel() {
             if (!isCancelled()) {
-                super.cancel();
                 callback.accept(null, null, true);
+                super.cancel();
             }
         }
     }
