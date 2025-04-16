@@ -1,12 +1,15 @@
 package io.smallrye.mutiny.operators;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 
 import java.io.IOException;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.ResourceAccessMode;
 import org.junit.jupiter.api.parallel.ResourceLock;
@@ -185,5 +188,26 @@ public class UniOnTerminationTest {
         assertThat(subResult.get()).isEqualTo("yolo");
         assertThat(subFailure.get()).isNull();
         assertThat(subCancelled.get()).isFalse();
+    }
+
+    @RepeatedTest(10)
+    void checkCancellationAndTerminationCallbackOrder() {
+        AtomicBoolean done = new AtomicBoolean();
+        AtomicBoolean subscribed = new AtomicBoolean();
+        var events = new ConcurrentLinkedQueue<>();
+        UniAssertSubscriber<?> sub = Uni.createFrom().emitter(em -> {
+            subscribed.set(true);
+            await().untilTrue(done);
+        })
+                .onCancellation().invoke(() -> done.set(true))
+                .onCancellation().invoke(() -> events.add("cancelled-1"))
+                .onTermination().invoke(() -> events.add("terminated"))
+                .onCancellation().invoke(() -> events.add("cancelled-2"))
+                .runSubscriptionOn(Infrastructure.getDefaultExecutor())
+                .subscribe().withSubscriber(new UniAssertSubscriber<>());
+        await().untilTrue(subscribed);
+        sub.cancel();
+        done.set(true);
+        assertThat(events).containsExactly("cancelled-2", "terminated", "cancelled-1");
     }
 }

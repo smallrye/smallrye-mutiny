@@ -81,7 +81,7 @@
         <mutiny-zero.version>1.1.1</mutiny-zero.version>
         <reactive-streams.version>1.0.4</reactive-streams.version>
         <rxjava3.version>3.1.10</rxjava3.version>
-        <reactor-core.version>3.7.4</reactor-core.version>
+        <reactor-core.version>3.7.5</reactor-core.version>
 
         <microprofile-reactive-streams.version>3.0.1</microprofile-reactive-streams.version>
         <microprofile-context-propagation.version>1.3</microprofile-context-propagation.version>
@@ -99,13 +99,13 @@
         <testng.version>7.11.0</testng.version>
         <testng-junit5-engine.version>1.0.6</testng-junit5-engine.version>
 
-        <mockito-core.version>5.16.1</mockito-core.version>
+        <mockito-core.version>5.17.0</mockito-core.version>
         <byte-buddy.version>1.17.5</byte-buddy.version>
 
-        <revapi-maven-plugin.version>0.15.0</revapi-maven-plugin.version>
-        <revapi-java.version>0.28.1</revapi-java.version>
-        <revapi-reporter-json.version>0.5.0</revapi-reporter-json.version>
-        <revapi-reporter-text.version>0.15.0</revapi-reporter-text.version>
+        <revapi-maven-plugin.version>0.15.1</revapi-maven-plugin.version>
+        <revapi-java.version>0.28.3</revapi-java.version>
+        <revapi-reporter-json.version>0.5.1</revapi-reporter-json.version>
+        <revapi-reporter-text.version>0.15.1</revapi-reporter-text.version>
         <revapi.skip>true</revapi.skip>
 
         <maven.compiler.source>17</maven.compiler.source>
