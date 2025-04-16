@@ -69,6 +69,17 @@
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>properties</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <executions>
                     <execution>
@@ -87,6 +98,7 @@
                                     junit.jupiter.testclass.order.default = org.junit.jupiter.api.ClassOrderer$Random
                                 </configurationParameters>
                             </properties>
+                            <argLine>@{argLine} -javaagent:${org.mockito:mockito-core:jar} @{jacocoArgLine}</argLine>
                         </configuration>
                     </execution>
                 </executions>

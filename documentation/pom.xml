@@ -14,7 +14,6 @@
     <properties>
         <site.dir>${project.build.directory}/generated-docs/</site.dir>
         <format.skip>true</format.skip>
-        <maven-dependency-plugin.version>3.8.1</maven-dependency-plugin.version>
         <logback-classic.version>1.5.18</logback-classic.version>
     </properties>
 
@@ -89,7 +88,6 @@
         <plugins>
             <plugin>
                 <artifactId>maven-dependency-plugin</artifactId>
-                <version>${maven-dependency-plugin.version}</version>
                 <executions>
                     <execution>
                         <id>unpack</id>
