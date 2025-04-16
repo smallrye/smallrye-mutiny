@@ -9,7 +9,11 @@ import static org.mockito.Mockito.verify;
 
 import java.io.IOException;
 import java.time.Duration;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.concurrent.Flow.Subscriber;
 import java.util.concurrent.Flow.Subscription;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -967,5 +971,57 @@ public class MultiGroupTest {
         for (List<Long> batch : batches) {
             assertThat(batch.size()).isBetween(1, 3);
         }
+    }
+
+    @Test
+    public void checkNoStaleStreamsBeyondPrefetch() {
+        // Reproducer for https://github.com/smallrye/smallrye-mutiny/issues/1856
+        List<Integer> items = Multi.createFrom().range(0, 500)
+                .group().by(x -> x % 2 == 0)
+                .onItem().transformToMultiAndConcatenate(
+                        group -> group.key()
+                                ? group.collect().asList().replaceWith(1).toMulti()
+                                : group.collect().asList().replaceWith(2).toMulti())
+                .ifNoItem().after(Duration.ofSeconds(2)).fail()
+                .collect().asList().await().indefinitely();
+
+        assertThat(items).hasSize(2);
+        assertThat(items).containsExactly(1, 2);
+    }
+
+    @Test
+    public void checkConcatenatedGroupsBackpressureHandling() {
+        AssertSubscriber<Integer> sub = Multi.createFrom().range(0, 500)
+                .group().by(x -> x % 2 == 0)
+                .onItem().transformToMultiAndConcatenate(
+                        group -> group.key()
+                                ? group.onItem().transform(x -> 1)
+                                : group.onItem().transform(x -> 2))
+                .subscribe().withSubscriber(AssertSubscriber.create());
+
+        sub.request(10L);
+        assertThat(sub.getItems())
+                .hasSize(10)
+                .allSatisfy(i -> assertThat(i).isEqualTo(1));
+
+        sub.request(25L);
+        assertThat(sub.getItems())
+                .hasSize(35)
+                .allSatisfy(i -> assertThat(i).isEqualTo(1));
+
+        sub.request(215L);
+        assertThat(sub.getItems())
+                .hasSize(250)
+                .allSatisfy(i -> assertThat(i).isEqualTo(1));
+
+        sub.request(1L);
+        assertThat(sub.getItems()).hasSize(251);
+        assertThat(sub.getItems()).filteredOn(n -> n == 1).hasSize(250);
+        assertThat(sub.getItems()).filteredOn(n -> n == 2).hasSize(1);
+
+        sub.request(Long.MAX_VALUE);
+        sub.assertCompleted();
+        assertThat(sub.getItems()).filteredOn(n -> n == 1).hasSize(250);
+        assertThat(sub.getItems()).filteredOn(n -> n == 2).hasSize(250);
     }
 }
