@@ -5,7 +5,7 @@ import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
 
 import java.util.concurrent.Flow;
 import java.util.concurrent.Flow.Subscription;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 
 import io.smallrye.mutiny.Context;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
@@ -23,16 +23,21 @@ public class UniCreateFromPublisher<T> extends AbstractUni<T> {
 
     @Override
     public void subscribe(UniSubscriber<? super T> subscriber) {
-        new PublisherSubscriber(subscriber).forward();
+        new PublisherSubscriber(publisher, subscriber).forward();
     }
 
-    private class PublisherSubscriber implements UniSubscription, Flow.Subscriber<T>, ContextSupport {
+    private static class PublisherSubscriber<T> implements UniSubscription, Flow.Subscriber<T>, ContextSupport {
 
         private final UniSubscriber<? super T> subscriber;
-        AtomicReference<Subscription> subscription = new AtomicReference<>();
+        private final Flow.Publisher<? extends T> publisher;
 
-        private PublisherSubscriber(UniSubscriber<? super T> subscriber) {
+        private volatile Subscription subscription;
+        private static final AtomicReferenceFieldUpdater<PublisherSubscriber, Subscription> SUBSCRIPTION_UPDATER = AtomicReferenceFieldUpdater
+                .newUpdater(PublisherSubscriber.class, Subscription.class, "subscription");
+
+        private PublisherSubscriber(Flow.Publisher<? extends T> publisher, UniSubscriber<? super T> subscriber) {
             this.subscriber = subscriber;
+            this.publisher = publisher;
         }
 
         private void forward() {
@@ -45,7 +50,7 @@ public class UniCreateFromPublisher<T> extends AbstractUni<T> {
 
         @Override
         public void cancel() {
-            Subscription old = subscription.getAndSet(CANCELLED);
+            Subscription old = SUBSCRIPTION_UPDATER.getAndSet(this, CANCELLED);
             if (old != null) {
                 old.cancel();
             }
@@ -54,17 +59,17 @@ public class UniCreateFromPublisher<T> extends AbstractUni<T> {
         // ---- Subscriber
 
         @Override
-        public void onSubscribe(Subscription s) {
-            if (subscription.compareAndSet(null, s)) {
-                s.request(1L);
+        public void onSubscribe(Subscription sub) {
+            if (SUBSCRIPTION_UPDATER.compareAndSet(this, null, sub)) {
+                sub.request(1L);
             } else {
-                s.cancel();
+                sub.cancel();
             }
         }
 
         @Override
         public void onNext(T item) {
-            Subscription sub = subscription.getAndSet(CANCELLED);
+            Subscription sub = SUBSCRIPTION_UPDATER.getAndSet(this, CANCELLED);
             if (sub != CANCELLED) {
                 sub.cancel();
                 subscriber.onItem(item);
@@ -73,7 +78,7 @@ public class UniCreateFromPublisher<T> extends AbstractUni<T> {
 
         @Override
         public void onError(Throwable failure) {
-            Subscription sub = subscription.getAndSet(CANCELLED);
+            Subscription sub = SUBSCRIPTION_UPDATER.getAndSet(this, CANCELLED);
             if (sub != CANCELLED) {
                 subscriber.onFailure(failure);
             }
@@ -81,7 +86,7 @@ public class UniCreateFromPublisher<T> extends AbstractUni<T> {
 
         @Override
         public void onComplete() {
-            Subscription sub = subscription.getAndSet(CANCELLED);
+            Subscription sub = SUBSCRIPTION_UPDATER.getAndSet(this, CANCELLED);
             if (sub != CANCELLED) {
                 subscriber.onItem(null);
             }
