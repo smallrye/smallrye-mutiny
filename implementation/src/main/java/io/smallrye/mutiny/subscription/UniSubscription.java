@@ -26,6 +26,6 @@ public interface UniSubscription extends Subscription, Cancellable {
         if (n < 1) {
             throw new IllegalArgumentException("Invalid request");
         }
-        // Ignored, on Uni the request happen at subscription time.
+        // Ignored, on Uni the request happens at subscription time.
     }
 }
