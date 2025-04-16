@@ -390,7 +390,6 @@ public class Infrastructure {
         return current;
     }
 
-
     public static <T> BiPredicate<T, T> decorate(BiPredicate<T, T> predicate) {
         BiPredicate<T, T> current = predicate;
         for (CallbackDecorator interceptor : CALLBACK_DECORATORS) {

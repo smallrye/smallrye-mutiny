@@ -275,7 +275,7 @@ public interface CallbackDecorator extends MutinyInterceptor {
         return predicate;
     }
 
-    default <T> BiPredicate<T,T> decorate(BiPredicate<T,T> predicate) {
+    default <T> BiPredicate<T, T> decorate(BiPredicate<T, T> predicate) {
         return predicate;
     }
 }

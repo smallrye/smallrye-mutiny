@@ -69,8 +69,10 @@ public class MultiDistinctUntilChangedTest {
 
     @Test
     public void distinctUntilChangedShouldFailIfPredicateNull() {
-        distinctUntilChangedShouldFailIfPredicateNull(() -> Multi.createFrom().items(1, 2, 3, 4, 2, 4, 2, 4).distinctUntilChanged(null));
-        distinctUntilChangedShouldFailIfPredicateNull(() -> Multi.createFrom().items(1, 2, 3, 4, 2, 4, 2, 4).onItem().distinctUntilChanged(null));
+        distinctUntilChangedShouldFailIfPredicateNull(
+                () -> Multi.createFrom().items(1, 2, 3, 4, 2, 4, 2, 4).distinctUntilChanged(null));
+        distinctUntilChangedShouldFailIfPredicateNull(
+                () -> Multi.createFrom().items(1, 2, 3, 4, 2, 4, 2, 4).onItem().distinctUntilChanged(null));
     }
 
     private void distinctUntilChangedShouldFailIfPredicateNull(Supplier<Multi<? extends Integer>> multi) {
@@ -85,8 +87,7 @@ public class MultiDistinctUntilChangedTest {
     @Test
     public void distinctUntilChangedShouldFilterWhenPredicateIsGreaterThan() {
         // Predicate: (a, b) -> a >= b  (emit only if current > previous)
-        Multi.createFrom().items(1, 1, 2, 3, 4, 2, 4, 2, 4).
-                distinctUntilChanged((a, b) -> a >= b)
+        Multi.createFrom().items(1, 1, 2, 3, 4, 2, 4, 2, 4).distinctUntilChanged((a, b) -> a >= b)
                 .subscribe().withSubscriber(AssertSubscriber.create(10))
                 .assertCompleted()
                 .assertItems(1, 2, 3, 4);
@@ -165,7 +166,6 @@ public class MultiDistinctUntilChangedTest {
                 .assertCompleted()
                 .assertItems(kt1, kt2, kt3, kt4, kt5, kt6, kt7, kt8);
 
-
         Multi.createFrom().items(kt1, kt2, kt3, kt4, kt5, kt6, kt7, kt8)
                 .onItem().distinctUntilChanged(KeyTester::equals)
                 .subscribe().withSubscriber(AssertSubscriber.create(10))
@@ -192,7 +192,6 @@ public class MultiDistinctUntilChangedTest {
                 .assertCompleted()
                 .assertItems(kt1, kt2, kt3, kt4, kt5, kt7, kt8, kt9);
 
-
         Multi.createFrom().items(kt1, kt2, kt3, kt4, kt5, kt6, kt7, kt8, kt9)
                 .onItem().distinctUntilChanged(KeyTester::equals)
                 .subscribe().withSubscriber(AssertSubscriber.create(10))
@@ -212,7 +211,6 @@ public class MultiDistinctUntilChangedTest {
         KeyTester kt7 = new KeyTester(1, "foo");
         KeyTester kt8 = new KeyTester(1, "foo");
         KeyTester kt9 = new KeyTester(1, "foo");
-
 
         Multi.createFrom().items(kt1, kt2, kt3, kt4, kt5, kt6, kt7, kt8, kt9)
                 .distinctUntilChanged(KeyTester::equals)
@@ -240,7 +238,6 @@ public class MultiDistinctUntilChangedTest {
         KeyTester kt8 = new KeyTester(1, "foo");
         KeyTester kt9 = new KeyTester(1, "foo");
 
-
         Multi.createFrom().items(kt1, kt2, kt3, kt4, kt5, kt6, kt7, kt8, kt9)
                 .onItem().distinctUntilChanged()
                 .subscribe().withSubscriber(AssertSubscriber.create(10))
@@ -267,7 +264,6 @@ public class MultiDistinctUntilChangedTest {
         KeyTester kt8 = new KeyTester(1, "foo");
         KeyTester kt9 = new KeyTester(1, "foo");
 
-
         Multi.createFrom().items(kt1, kt2, kt3, kt4, kt5, kt6, kt7, kt8, kt9)
                 .distinctUntilChanged((a, b) -> !a.equals(b))
                 .subscribe().withSubscriber(AssertSubscriber.create(10))
@@ -281,16 +277,14 @@ public class MultiDistinctUntilChangedTest {
                 .assertItems(kt1, kt2, kt3, kt4, kt5, kt6, kt7, kt8, kt9);
     }
 
-
     @Test
     public void distinctUntilChangedShouldPropagateUpstreamFailure() {
-        Multi.createFrom().<Integer>failure(new IOException("boom"))
+        Multi.createFrom().<Integer> failure(new IOException("boom"))
                 .distinctUntilChanged()
                 .subscribe().withSubscriber(AssertSubscriber.create(10))
                 .assertFailedWith(IOException.class, "boom");
 
-
-        Multi.createFrom().<Integer>failure(new IOException("boom"))
+        Multi.createFrom().<Integer> failure(new IOException("boom"))
                 .onItem().distinctUntilChanged()
                 .subscribe().withSubscriber(AssertSubscriber.create(10))
                 .assertFailedWith(IOException.class, "boom");
@@ -298,17 +292,16 @@ public class MultiDistinctUntilChangedTest {
 
     @Test
     public void distinctUntilChangedShouldPropagateUpstreamFailureWithPredicate() {
-        Multi.createFrom().<Integer>failure(new IOException("boom"))
+        Multi.createFrom().<Integer> failure(new IOException("boom"))
                 .distinctUntilChanged(Objects::equals)
                 .subscribe().withSubscriber(AssertSubscriber.create(10))
                 .assertFailedWith(IOException.class, "boom");
 
-        Multi.createFrom().<Integer>failure(new IOException("boom"))
+        Multi.createFrom().<Integer> failure(new IOException("boom"))
                 .onItem().distinctUntilChanged(Objects::equals)
                 .subscribe().withSubscriber(AssertSubscriber.create(10))
                 .assertFailedWith(IOException.class, "boom");
     }
-
 
     @Test
     public void distinctUntilChangedShouldRejectNullSubscriber() {
@@ -340,7 +333,6 @@ public class MultiDistinctUntilChangedTest {
                 .assertCompleted()
                 .assertItems(1, 2, 3, 4);
 
-
         Multi.createFrom().range(1, 5)
                 .onItem().distinctUntilChanged()
                 .subscribe().withSubscriber(AssertSubscriber.create(10))
@@ -355,7 +347,6 @@ public class MultiDistinctUntilChangedTest {
                 .subscribe().withSubscriber(AssertSubscriber.create(10))
                 .assertCompleted()
                 .assertItems(1, 2, 3, 4);
-
 
         Multi.createFrom().range(1, 5)
                 .onItem().distinctUntilChanged((a, b) -> a > b)
@@ -372,7 +363,6 @@ public class MultiDistinctUntilChangedTest {
                 .assertCompleted()
                 .assertItems(1, 2, 3, 4);
 
-
         Multi.createFrom().range(1, 5)
                 .onItem().distinctUntilChanged((a, b) -> a >= b)
                 .subscribe().withSubscriber(AssertSubscriber.create(10))
@@ -383,15 +373,16 @@ public class MultiDistinctUntilChangedTest {
     @Test
     public void distinctUntilChangedShouldNotEmitAfterCancellation() {
         distinctUntilChangedShouldNotEmitAfterCancellation(emitter -> Multi.createFrom().emitter(
-                        (Consumer<MultiEmitter<? super Integer>>) emitter::set)
+                (Consumer<MultiEmitter<? super Integer>>) emitter::set)
                 .distinctUntilChanged());
 
         distinctUntilChangedShouldNotEmitAfterCancellation(emitter -> Multi.createFrom().emitter(
-                        (Consumer<MultiEmitter<? super Integer>>) emitter::set)
+                (Consumer<MultiEmitter<? super Integer>>) emitter::set)
                 .onItem().distinctUntilChanged());
     }
 
-    private void distinctUntilChangedShouldNotEmitAfterCancellation(Function<AtomicReference<MultiEmitter<? super Integer>>, Multi<Integer>> multi) {
+    private void distinctUntilChangedShouldNotEmitAfterCancellation(
+            Function<AtomicReference<MultiEmitter<? super Integer>>, Multi<Integer>> multi) {
         AtomicReference<MultiEmitter<? super Integer>> emitter = new AtomicReference<>();
 
         AssertSubscriber<Integer> subscriber = multi.apply(emitter)
@@ -408,19 +399,19 @@ public class MultiDistinctUntilChangedTest {
         subscriber.assertItems(1, 2, 1);
     }
 
-
     @Test
     public void distinctUntilChangedShouldNotEmitAfterCancellationWithPredicate() {
         distinctUntilChangedShouldNotEmitAfterCancellationWithPredicate(emitter -> Multi.createFrom().emitter(
-                        (Consumer<MultiEmitter<? super Integer>>) emitter::set)
+                (Consumer<MultiEmitter<? super Integer>>) emitter::set)
                 .distinctUntilChanged((a, b) -> a > b));
 
         distinctUntilChangedShouldNotEmitAfterCancellationWithPredicate(emitter -> Multi.createFrom().emitter(
-                        (Consumer<MultiEmitter<? super Integer>>) emitter::set)
+                (Consumer<MultiEmitter<? super Integer>>) emitter::set)
                 .onItem().distinctUntilChanged((a, b) -> a > b));
     }
 
-    private void distinctUntilChangedShouldNotEmitAfterCancellationWithPredicate(Function<AtomicReference<MultiEmitter<? super Integer>>, Multi<Integer>> multi) {
+    private void distinctUntilChangedShouldNotEmitAfterCancellationWithPredicate(
+            Function<AtomicReference<MultiEmitter<? super Integer>>, Multi<Integer>> multi) {
         AtomicReference<MultiEmitter<? super Integer>> emitter = new AtomicReference<>();
 
         AssertSubscriber<Integer> subscriber = multi.apply(emitter)
@@ -441,15 +432,16 @@ public class MultiDistinctUntilChangedTest {
     public void distinctUntilChangedShouldEmitAllIfNotCancelled() {
 
         distinctUntilChangedShouldEmitAllIfNotCancelled(emitter -> Multi.createFrom().emitter(
-                        (Consumer<MultiEmitter<? super Integer>>) emitter::set)
+                (Consumer<MultiEmitter<? super Integer>>) emitter::set)
                 .onItem().distinctUntilChanged());
 
         distinctUntilChangedShouldEmitAllIfNotCancelled(emitter -> Multi.createFrom().emitter(
-                        (Consumer<MultiEmitter<? super Integer>>) emitter::set)
+                (Consumer<MultiEmitter<? super Integer>>) emitter::set)
                 .distinctUntilChanged());
     }
 
-    private void distinctUntilChangedShouldEmitAllIfNotCancelled(Function<AtomicReference<MultiEmitter<? super Integer>>, Multi<Integer>> multi) {
+    private void distinctUntilChangedShouldEmitAllIfNotCancelled(
+            Function<AtomicReference<MultiEmitter<? super Integer>>, Multi<Integer>> multi) {
         AtomicReference<MultiEmitter<? super Integer>> emitter = new AtomicReference<>();
 
         AssertSubscriber<Integer> subscriber = multi.apply(emitter)
@@ -469,15 +461,16 @@ public class MultiDistinctUntilChangedTest {
     public void distinctUntilChangedShouldEmitCorrectlyIfNotCancelledWithPredicate() {
 
         distinctUntilChangedShouldEmitCorrectlyIfNotCancelledWithPredicate(emitter -> Multi.createFrom().emitter(
-                        (Consumer<MultiEmitter<? super Integer>>) emitter::set)
+                (Consumer<MultiEmitter<? super Integer>>) emitter::set)
                 .distinctUntilChanged((a, b) -> a > b));
 
         distinctUntilChangedShouldEmitCorrectlyIfNotCancelledWithPredicate(emitter -> Multi.createFrom().emitter(
-                        (Consumer<MultiEmitter<? super Integer>>) emitter::set)
+                (Consumer<MultiEmitter<? super Integer>>) emitter::set)
                 .onItem().distinctUntilChanged((a, b) -> a > b));
     }
 
-    private void distinctUntilChangedShouldEmitCorrectlyIfNotCancelledWithPredicate(Function<AtomicReference<MultiEmitter<? super Integer>>, Multi<Integer>> multi) {
+    private void distinctUntilChangedShouldEmitCorrectlyIfNotCancelledWithPredicate(
+            Function<AtomicReference<MultiEmitter<? super Integer>>, Multi<Integer>> multi) {
         AtomicReference<MultiEmitter<? super Integer>> emitter = new AtomicReference<>();
 
         AssertSubscriber<Integer> subscriber = multi.apply(emitter)
@@ -493,23 +486,23 @@ public class MultiDistinctUntilChangedTest {
         subscriber.assertItems(1, 2, 3, 4);
     }
 
-
     @Test
     public void distinctUntilChangedShouldHandleExceptionInPredicate() {
         distinctUntilChangedShouldHandleExceptionInPredicate(emitter -> Multi.createFrom().emitter(
-                        (Consumer<MultiEmitter<? super Integer>>) emitter::set)
+                (Consumer<MultiEmitter<? super Integer>>) emitter::set)
                 .distinctUntilChanged((a, b) -> {
                     throw new TestException("boom");
                 }));
 
         distinctUntilChangedShouldHandleExceptionInPredicate(emitter -> Multi.createFrom().emitter(
-                        (Consumer<MultiEmitter<? super Integer>>) emitter::set)
+                (Consumer<MultiEmitter<? super Integer>>) emitter::set)
                 .onItem().distinctUntilChanged((a, b) -> {
                     throw new TestException("boom");
                 }));
     }
 
-    private void distinctUntilChangedShouldHandleExceptionInPredicate(Function<AtomicReference<MultiEmitter<? super Integer>>, Multi<Integer>> multi) {
+    private void distinctUntilChangedShouldHandleExceptionInPredicate(
+            Function<AtomicReference<MultiEmitter<? super Integer>>, Multi<Integer>> multi) {
         AtomicReference<MultiEmitter<? super Integer>> emitter = new AtomicReference<>();
         AssertSubscriber<Integer> subscriber = multi.apply(emitter)
                 .subscribe().withSubscriber(AssertSubscriber.create(10));
@@ -520,7 +513,6 @@ public class MultiDistinctUntilChangedTest {
         emitter.get().emit(1).emit(2).complete();
         subscriber.assertFailedWith(TestException.class, "boom");
     }
-
 
     @Test
     public void distinctUntilChangedShouldHandleOnItemAfterCancellation() {
@@ -600,13 +592,13 @@ public class MultiDistinctUntilChangedTest {
 
     @Test
     public void distinctUntilChangedShouldHandleEmptyStream() {
-        Multi.createFrom().<Integer>empty()
+        Multi.createFrom().<Integer> empty()
                 .distinctUntilChanged()
                 .subscribe().withSubscriber(AssertSubscriber.create(10))
                 .assertCompleted()
                 .assertItems();
 
-        Multi.createFrom().<Integer>empty()
+        Multi.createFrom().<Integer> empty()
                 .onItem().distinctUntilChanged()
                 .subscribe().withSubscriber(AssertSubscriber.create(10))
                 .assertCompleted()

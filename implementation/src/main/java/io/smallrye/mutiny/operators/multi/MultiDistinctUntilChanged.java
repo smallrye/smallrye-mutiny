@@ -25,7 +25,6 @@ public class MultiDistinctUntilChanged<T> extends AbstractMultiOperator<T, T> {
 
     private final BiPredicate<T, T> predicate;
 
-
     public MultiDistinctUntilChanged(Multi<T> upstream) {
         super(upstream);
         this.predicate = null;
@@ -40,7 +39,6 @@ public class MultiDistinctUntilChanged<T> extends AbstractMultiOperator<T, T> {
     public void subscribe(MultiSubscriber<? super T> downstream) {
         upstream.subscribe().withSubscriber(new MultiDistinctUntilChangedProcessor<T>(downstream, this.predicate));
     }
-
 
     static final class MultiDistinctUntilChangedProcessor<T> extends MultiOperatorProcessor<T, T> {
 
@@ -70,7 +68,6 @@ public class MultiDistinctUntilChanged<T> extends AbstractMultiOperator<T, T> {
                 if (added) {
                     this.previousElement = currentElement;
                 }
-
 
             } catch (Throwable e) {
                 // catch exception thrown by the equals / predicate

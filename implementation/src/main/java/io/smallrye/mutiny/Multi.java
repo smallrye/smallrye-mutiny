@@ -711,7 +711,8 @@ public interface Multi<T> extends Publisher<T> {
      * <p>
      * This is equivalent to calling {@code distinctUntilChanged(Objects::equals)}.
      *
-     * @return a new {@link Multi} that emits only items distinct from their immediate predecessor based on {@link java.util.Objects#equals(Object, Object)}.
+     * @return a new {@link Multi} that emits only items distinct from their immediate predecessor based on
+     *         {@link java.util.Objects#equals(Object, Object)}.
      */
     @CheckReturnValue
     default Multi<T> distinctUntilChanged() {
@@ -733,8 +734,8 @@ public interface Multi<T> extends Publisher<T> {
      * to compare it against.
      *
      * @param predicate the {@link BiPredicate} used to compare the previous item and the current item.
-     *                  It must not be {@code null}. If {@code predicate.test(previous, current)} returns
-     *                  {@code true}, the current item is dropped.
+     *        It must not be {@code null}. If {@code predicate.test(previous, current)} returns
+     *        {@code true}, the current item is dropped.
      * @return a new {@link Multi} that emits only items distinct from their immediate predecessor based on the predicate.
      * @throws IllegalArgumentException if the {@code predicate} is {@code null}.
      */
