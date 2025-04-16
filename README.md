@@ -71,7 +71,7 @@ If you want to run a _quick_ build without running tests or generating API docs,
 
 | Git branch | Versions                         | Baseline                              | Compliance                 |
 |------------|----------------------------------|---------------------------------------|----------------------------|
-| `main`     | 2.x.y *(in development)*         | Java 11, `java.util.concurrent.Flow ` | Reactive Streams TCK 1.0.4 |
+| `main`     | 2.x.y *(in development)*         | Java 17, `java.util.concurrent.Flow ` | Reactive Streams TCK 1.0.4 |
 | `2.5.x`    | 2.5.y *(backports, bug fixes)*   | Java 11, `java.util.concurrent.Flow ` | Reactive Streams TCK 1.0.4 |
 | `1.x`      | 1.x.y *(sunset, rare bug fixes)* | Java 8, Reactive Streams 1.0.4        | Reactive Streams TCK 1.0.4 |
 
