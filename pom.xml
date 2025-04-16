@@ -102,7 +102,7 @@
         <mockito-core.version>5.17.0</mockito-core.version>
         <byte-buddy.version>1.17.5</byte-buddy.version>
 
-        <revapi-maven-plugin.version>0.15.0</revapi-maven-plugin.version>
+        <revapi-maven-plugin.version>0.15.1</revapi-maven-plugin.version>
         <revapi-java.version>0.28.1</revapi-java.version>
         <revapi-reporter-json.version>0.5.0</revapi-reporter-json.version>
         <revapi-reporter-text.version>0.15.0</revapi-reporter-text.version>
