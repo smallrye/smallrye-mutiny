@@ -14,16 +14,16 @@ import io.smallrye.mutiny.operators.UniOperator;
 import io.smallrye.mutiny.subscription.UniSubscriber;
 import io.smallrye.mutiny.subscription.UniSubscription;
 
-public class UniOnFailureFlatMap<I, TT> extends UniOperator<I, I> {
+public class UniOnFailureFlatMap<I, E> extends UniOperator<I, I> {
 
-    private final Function<TT, Uni<? extends I>> mapper;
+    private final Function<E, Uni<? extends I>> mapper;
     private final Predicate<? super Throwable> predicate;
-    private final Class<TT> typeOfFailure;
+    private final Class<E> typeOfFailure;
 
     public UniOnFailureFlatMap(Uni<I> upstream,
             Predicate<? super Throwable> predicate,
-            Function<TT, Uni<? extends I>> mapper,
-            Class<TT> typeOfFailure) {
+            Function<E, Uni<? extends I>> mapper,
+            Class<E> typeOfFailure) {
         super(nonNull(upstream, "upstream"));
         this.mapper = nonNull(mapper, "mapper");
         this.predicate = nonNull(predicate, "predicate");

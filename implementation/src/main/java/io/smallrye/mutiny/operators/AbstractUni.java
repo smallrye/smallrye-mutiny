@@ -64,7 +64,7 @@ public abstract class AbstractUni<T> implements Uni<T> {
     }
 
     @Override
-    public <TT extends Throwable> UniOnFailure<T, TT> onFailure(Class<TT> typeOfFailure) {
+    public <E extends Throwable> UniOnFailure<T, E> onFailure(Class<E> typeOfFailure) {
         return new UniOnFailure<>(this, typeOfFailure, typeOfFailure::isInstance);
     }
 
