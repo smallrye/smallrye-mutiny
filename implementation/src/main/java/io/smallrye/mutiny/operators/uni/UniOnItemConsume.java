@@ -10,18 +10,18 @@ import io.smallrye.mutiny.operators.AbstractUni;
 import io.smallrye.mutiny.operators.UniOperator;
 import io.smallrye.mutiny.subscription.UniSubscriber;
 
-public class UniOnItemConsume<T, TT> extends UniOperator<T, T> {
+public class UniOnItemConsume<T, E> extends UniOperator<T, T> {
 
     private final Consumer<? super T> onItemCallback;
-    private final Consumer<TT> onFailureCallback;
+    private final Consumer<E> onFailureCallback;
     private final Predicate<? super Throwable> onFailurePredicate;
-    private final Class<TT> throwableType;
+    private final Class<E> throwableType;
 
     public UniOnItemConsume(Uni<? extends T> upstream,
             Consumer<? super T> onItemCallback,
-            Consumer<TT> onFailureCallback,
+            Consumer<E> onFailureCallback,
             Predicate<? super Throwable> predicate,
-            Class<TT> throwableType) {
+            Class<E> throwableType) {
         super(upstream);
         this.onItemCallback = onItemCallback;
         this.onFailureCallback = onFailureCallback;
