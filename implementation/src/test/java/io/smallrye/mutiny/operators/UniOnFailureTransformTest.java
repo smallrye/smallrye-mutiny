@@ -193,6 +193,145 @@ public class UniOnFailureTransformTest {
         assertThat(called).isFalse();
     }
 
+    @Test
+    public void testTypedCallOnFailureWithSpecificException() {
+        SpecificException specificException = new SpecificException(500);
+        Uni<Integer> failure = Uni.createFrom().failure(specificException);
+        AtomicInteger called = new AtomicInteger(-1);
+
+        UniAssertSubscriber<Integer> subscriber = failure
+                .onFailure(SpecificException.class) // Specify the exception type
+                .call(se -> {
+                    called.set(se.getErrorCode());
+                    return Uni.createFrom().voidItem();
+                })
+                .subscribe().withSubscriber(UniAssertSubscriber.create());
+
+        subscriber.assertFailedWith(SpecificException.class);
+        assertThat(called).hasValue(500);
+    }
+
+    @Test
+    public void testTypedInvokeOnFailureWithSpecificException() {
+        SpecificException specificException = new SpecificException(500);
+        Uni<Integer> failure = Uni.createFrom().failure(specificException);
+        AtomicInteger called = new AtomicInteger(-1);
+
+        UniAssertSubscriber<Integer> subscriber = failure
+                .onFailure(SpecificException.class) // Specify the exception type
+                .invoke(se -> called.set(se.getErrorCode())) // Perform a side-effect
+                .subscribe().withSubscriber(UniAssertSubscriber.create());
+
+        subscriber.assertFailedWith(SpecificException.class);
+        assertThat(called).hasValue(500);
+    }
+
+    @Test
+    public void testTypedTransformOnFailureWithSpecificException() {
+        SpecificException specificException = new SpecificException(500);
+        Uni<Integer> failure = Uni.createFrom().failure(specificException);
+        AtomicInteger called = new AtomicInteger(-1);
+
+        UniAssertSubscriber<Integer> subscriber = failure
+                .onFailure(SpecificException.class) // Specify the exception type
+                .transform(se -> {
+                    called.set(se.getErrorCode());
+                    return new IllegalStateException("Transformed: " + se.getErrorCode());
+                }) // Transform the exception
+                .subscribe().withSubscriber(UniAssertSubscriber.create());
+
+        subscriber.assertFailedWith(IllegalStateException.class, "Transformed: 500");
+        assertThat(called).hasValue(500);
+    }
+
+    @Test
+    public void testTypedRecoverWithUniOnFailureWithSpecificException() {
+        SpecificException specificException = new SpecificException(500);
+        Uni<Integer> failure = Uni.createFrom().failure(specificException);
+        AtomicInteger called = new AtomicInteger(-1);
+
+        UniAssertSubscriber<Integer> subscriber = failure
+                .onFailure(SpecificException.class) // Specify the exception type
+                .recoverWithUni(se -> {
+                    called.set(se.getErrorCode());
+                    return Uni.createFrom().item(se.getErrorCode());
+                }) // Recover with a Uni
+                .subscribe().withSubscriber(UniAssertSubscriber.create());
+
+        subscriber.assertItem(500);
+        assertThat(called).hasValue(500);
+    }
+
+    @Test
+    public void testTypedCallOnFailureWithNonMatchingException() {
+        SpecificException specificException = new SpecificException(500);
+        Uni<Integer> failure = Uni.createFrom().failure(specificException);
+        AtomicInteger called = new AtomicInteger(-1);
+
+        UniAssertSubscriber<Integer> subscriber = failure
+                .onFailure(IllegalStateException.class) // Specify a type that doesn't match
+                .call(illegalStateException -> {
+                    // This block should not be executed
+                    called.set(1);
+                    throw new AssertionError("Should not be called");
+                })
+                .subscribe().withSubscriber(UniAssertSubscriber.create());
+
+        subscriber.assertFailedWith(SpecificException.class);
+        assertThat(called).hasValue(-1);
+    }
+
+    @Test
+    public void testTypedInvokeOnFailureWithNonMatchingException() {
+        SpecificException specificException = new SpecificException(500);
+        Uni<Integer> failure = Uni.createFrom().failure(specificException);
+        AtomicInteger called = new AtomicInteger(-1);
+
+        UniAssertSubscriber<Integer> subscriber = failure
+                .onFailure(IllegalStateException.class) // Specify a type that doesn't match
+                .invoke(se -> called.set(1)) // This block should not be executed
+                .subscribe().withSubscriber(UniAssertSubscriber.create());
+
+        subscriber.assertFailedWith(SpecificException.class);
+        assertThat(called).hasValue(-1);
+    }
+
+    @Test
+    public void testTypedTransformOnFailureWithNonMatchingException() {
+        SpecificException specificException = new SpecificException(500);
+        Uni<Integer> failure = Uni.createFrom().failure(specificException);
+        AtomicInteger called = new AtomicInteger(-1);
+
+        UniAssertSubscriber<Integer> subscriber = failure
+                .onFailure(IllegalStateException.class) // Specify a type that doesn't match
+                .transform(se -> {
+                    called.set(1); // This block should not be executed
+                    return new IllegalStateException("Transformed");
+                })
+                .subscribe().withSubscriber(UniAssertSubscriber.create());
+
+        subscriber.assertFailedWith(SpecificException.class);
+        assertThat(called).hasValue(-1);
+    }
+
+    @Test
+    public void testTypedRecoverWithUniOnFailureWithNonMatchingException() {
+        SpecificException specificException = new SpecificException(500);
+        Uni<Integer> failure = Uni.createFrom().failure(specificException);
+        AtomicInteger called = new AtomicInteger(-1);
+
+        UniAssertSubscriber<Integer> subscriber = failure
+                .onFailure(IllegalStateException.class) // Specify a type that doesn't match
+                .recoverWithUni(se -> {
+                    called.set(1); // This block should not be executed
+                    return Uni.createFrom().item(1);
+                })
+                .subscribe().withSubscriber(UniAssertSubscriber.create());
+
+        subscriber.assertFailedWith(SpecificException.class);
+        assertThat(called).hasValue(-1);
+    }
+
     private static class BoomException extends Exception {
         BoomException() {
             super("BoomException");
@@ -200,6 +339,20 @@ public class UniOnFailureTransformTest {
 
         BoomException(int count) {
             super(Integer.toString(count));
+        }
+    }
+
+    private static class SpecificException extends Exception {
+
+        private final int errorCode;
+
+        SpecificException(int errorCode) {
+            super("SpecificException");
+            this.errorCode = errorCode;
+        }
+
+        public int getErrorCode() {
+            return errorCode;
         }
     }
 
