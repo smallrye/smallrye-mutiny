@@ -51,7 +51,22 @@
     "criticality" : "highlight",
     "minSeverity" : "POTENTIALLY_BREAKING",
     "minCriticality" : "documented",
-    "differences" : [ ]
+    "differences" : [
+      {
+        "ignore": true,
+        "code": "java.method.numberOfParametersChanged",
+        "old": "method void io.smallrye.mutiny.operators.multi.MultiGroupByOp.MultiGroupByProcessor<T, K, V>::<init>(io.smallrye.mutiny.subscription.MultiSubscriber<? super io.smallrye.mutiny.GroupedMulti<K, V>>, java.util.function.Function<? super T, ? extends K>, java.util.function.Function<? super T, ? extends V>, java.util.Map<java.lang.Object, io.smallrye.mutiny.operators.multi.MultiGroupByOp.GroupedUnicast<K, V>>)",
+        "new": "method void io.smallrye.mutiny.operators.multi.MultiGroupByOp.MultiGroupByProcessor<T, K, V>::<init>(io.smallrye.mutiny.subscription.MultiSubscriber<? super io.smallrye.mutiny.GroupedMulti<K, V>>, java.util.function.Function<? super T, ? extends K>, java.util.function.Function<? super T, ? extends V>, java.util.Map<java.lang.Object, io.smallrye.mutiny.operators.multi.MultiGroupByOp.GroupedUnicast<K, V>>, long)",
+        "justification": "This is an internal API change"
+      },
+      {
+        "ignore": true,
+        "code": "java.method.numberOfParametersChanged",
+        "old": "method void io.smallrye.mutiny.operators.multi.MultiGroupByOp<T, K, V>::<init>(io.smallrye.mutiny.Multi<T>, java.util.function.Function<? super T, ? extends K>, java.util.function.Function<? super T, ? extends V>)",
+        "new": "method void io.smallrye.mutiny.operators.multi.MultiGroupByOp<T, K, V>::<init>(io.smallrye.mutiny.Multi<T>, java.util.function.Function<? super T, ? extends K>, java.util.function.Function<? super T, ? extends V>, long)",
+        "justification": "This is an internal API change"
+      }
+    ]
   }
 }, {
   "extension" : "revapi.reporter.json",

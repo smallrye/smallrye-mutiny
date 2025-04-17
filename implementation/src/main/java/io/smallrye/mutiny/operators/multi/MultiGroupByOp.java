@@ -40,8 +40,8 @@ public final class MultiGroupByOp<T, K, V> extends AbstractMultiOperator<T, Grou
     public void subscribe(MultiSubscriber<? super GroupedMulti<K, V>> downstream) {
         Objects.requireNonNull(downstream, "The subscriber must not be `null`");
         final Map<Object, GroupedUnicast<K, V>> groups = new ConcurrentHashMap<>();
-        MultiGroupByProcessor<T, K, V> processor = new MultiGroupByProcessor<>(downstream, keySelector, valueSelector, prefetch,
-                groups);
+        MultiGroupByProcessor<T, K, V> processor = new MultiGroupByProcessor<>(downstream, keySelector, valueSelector, groups,
+                prefetch);
         upstream.subscribe().withSubscriber(processor);
     }
 
@@ -69,8 +69,7 @@ public final class MultiGroupByOp<T, K, V> extends AbstractMultiOperator<T, Grou
         public MultiGroupByProcessor(MultiSubscriber<? super GroupedMulti<K, V>> downstream,
                 Function<? super T, ? extends K> keySelector,
                 Function<? super T, ? extends V> valueSelector,
-                long prefetch,
-                Map<Object, GroupedUnicast<K, V>> groups) {
+                Map<Object, GroupedUnicast<K, V>> groups, long prefetch) {
             super(downstream);
             this.keySelector = keySelector;
             this.valueSelector = valueSelector;
