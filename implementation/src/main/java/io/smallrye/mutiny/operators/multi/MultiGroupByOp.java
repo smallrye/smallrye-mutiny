@@ -24,20 +24,23 @@ import io.smallrye.mutiny.subscription.MultiSubscriber;
 public final class MultiGroupByOp<T, K, V> extends AbstractMultiOperator<T, GroupedMulti<K, V>> {
     private final Function<? super T, ? extends K> keySelector;
     private final Function<? super T, ? extends V> valueSelector;
+    private final long prefetch;
 
     public MultiGroupByOp(Multi<T> upstream,
             Function<? super T, ? extends K> keySelector,
-            Function<? super T, ? extends V> valueSelector) {
+            Function<? super T, ? extends V> valueSelector,
+            long prefetch) {
         super(upstream);
         this.keySelector = keySelector;
         this.valueSelector = valueSelector;
+        this.prefetch = prefetch;
     }
 
     @Override
     public void subscribe(MultiSubscriber<? super GroupedMulti<K, V>> downstream) {
         Objects.requireNonNull(downstream, "The subscriber must not be `null`");
         final Map<Object, GroupedUnicast<K, V>> groups = new ConcurrentHashMap<>();
-        MultiGroupByProcessor<T, K, V> processor = new MultiGroupByProcessor<>(downstream, keySelector, valueSelector,
+        MultiGroupByProcessor<T, K, V> processor = new MultiGroupByProcessor<>(downstream, keySelector, valueSelector, prefetch,
                 groups);
         upstream.subscribe().withSubscriber(processor);
     }
@@ -45,6 +48,8 @@ public final class MultiGroupByOp<T, K, V> extends AbstractMultiOperator<T, Grou
     public static final class MultiGroupByProcessor<T, K, V> extends MultiOperatorProcessor<T, GroupedMulti<K, V>> {
         private final Function<? super T, ? extends K> keySelector;
         private final Function<? super T, ? extends V> valueSelector;
+        private final long prefetch;
+
         private final Map<Object, GroupedUnicast<K, V>> groups;
         private final Queue<GroupedMulti<K, V>> queue;
 
@@ -64,10 +69,12 @@ public final class MultiGroupByOp<T, K, V> extends AbstractMultiOperator<T, Grou
         public MultiGroupByProcessor(MultiSubscriber<? super GroupedMulti<K, V>> downstream,
                 Function<? super T, ? extends K> keySelector,
                 Function<? super T, ? extends V> valueSelector,
+                long prefetch,
                 Map<Object, GroupedUnicast<K, V>> groups) {
             super(downstream);
             this.keySelector = keySelector;
             this.valueSelector = valueSelector;
+            this.prefetch = prefetch;
             this.groups = groups;
             this.queue = Queues.<GroupedMulti<K, V>> unbounded(Infrastructure.getBufferSizeS()).get();
         }
@@ -77,7 +84,7 @@ public final class MultiGroupByOp<T, K, V> extends AbstractMultiOperator<T, Grou
             if (compareAndSetUpstreamSubscription(null, subscription)) {
                 // Propagate subscription to downstream.
                 downstream.onSubscribe(this);
-                subscription.request(128);
+                subscription.request(prefetch);
             } else {
                 subscription.cancel();
             }
@@ -394,9 +401,6 @@ public final class MultiGroupByOp<T, K, V> extends AbstractMultiOperator<T, Grou
                         }
 
                         if (empty) {
-                            if (r > 0 && !isDone && !cancelled.get()) {
-                                parent.getUpstreamSubscription().request(1L);
-                            }
                             break;
                         }
 
@@ -414,6 +418,8 @@ public final class MultiGroupByOp<T, K, V> extends AbstractMultiOperator<T, Grou
                             requested.addAndGet(-e);
                         }
                         parent.getUpstreamSubscription().request(e);
+                    } else {
+                        parent.getUpstreamSubscription().request(parent.prefetch);
                     }
                 }
 

@@ -1024,4 +1024,17 @@ public class MultiGroupTest {
         assertThat(sub.getItems()).filteredOn(n -> n == 1).hasSize(250);
         assertThat(sub.getItems()).filteredOn(n -> n == 2).hasSize(250);
     }
+
+    @Test
+    public void rejectGroupByBadPrefetch() {
+        assertThrows(IllegalArgumentException.class,
+                () -> Multi.createFrom().range(1, 10).group().by(i -> i % 2, i -> i, -10L));
+        assertThrows(IllegalArgumentException.class,
+                () -> Multi.createFrom().range(1, 10).group().by(i -> i % 2, i -> i, 0L));
+
+        assertThrows(IllegalArgumentException.class,
+                () -> Multi.createFrom().range(1, 10).group().by(i -> i % 2, -10L));
+        assertThrows(IllegalArgumentException.class,
+                () -> Multi.createFrom().range(1, 10).group().by(i -> i % 2, 0L));
+    }
 }
