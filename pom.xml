@@ -124,7 +124,7 @@
         <kotlin.compiler.jvmTarget>${maven.compiler.target}</kotlin.compiler.jvmTarget>
         <dokka.version>2.0.0</dokka.version>
 
-        <jandex-maven-plugin.version>3.2.7</jandex-maven-plugin.version>
+        <jandex-maven-plugin.version>3.3.1</jandex-maven-plugin.version>
         <find-and-replace-maven-plugin.version>1.2.0</find-and-replace-maven-plugin.version>
         <jreleaser-maven-plugin.version>1.18.0</jreleaser-maven-plugin.version>
         <cyclonedx-maven-plugin.version>2.9.1</cyclonedx-maven-plugin.version>
