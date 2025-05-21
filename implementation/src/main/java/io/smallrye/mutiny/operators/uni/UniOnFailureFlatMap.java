@@ -14,17 +14,20 @@ import io.smallrye.mutiny.operators.UniOperator;
 import io.smallrye.mutiny.subscription.UniSubscriber;
 import io.smallrye.mutiny.subscription.UniSubscription;
 
-public class UniOnFailureFlatMap<I> extends UniOperator<I, I> {
+public class UniOnFailureFlatMap<I, E> extends UniOperator<I, I> {
 
-    private final Function<? super Throwable, Uni<? extends I>> mapper;
+    private final Function<E, Uni<? extends I>> mapper;
     private final Predicate<? super Throwable> predicate;
+    private final Class<E> typeOfFailure;
 
     public UniOnFailureFlatMap(Uni<I> upstream,
             Predicate<? super Throwable> predicate,
-            Function<? super Throwable, Uni<? extends I>> mapper) {
+            Function<E, Uni<? extends I>> mapper,
+            Class<E> typeOfFailure) {
         super(nonNull(upstream, "upstream"));
         this.mapper = nonNull(mapper, "mapper");
         this.predicate = nonNull(predicate, "predicate");
+        this.typeOfFailure = nonNull(typeOfFailure, "typeOfFailure");
     }
 
     public void subscribe(UniSubscriber<? super I> subscriber) {
@@ -89,7 +92,7 @@ public class UniOnFailureFlatMap<I> extends UniOperator<I, I> {
         private void performInnerSubscription(Throwable failure) {
             Uni<? extends I> uni;
             try {
-                uni = mapper.apply(failure);
+                uni = mapper.apply(typeOfFailure.cast(failure));
             } catch (Throwable err) {
                 downstream.onFailure(new CompositeException(failure, err));
                 return;
