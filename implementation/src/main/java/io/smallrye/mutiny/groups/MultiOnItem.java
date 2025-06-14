@@ -9,6 +9,7 @@ import java.util.function.BinaryOperator;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.function.BiPredicate;
 
 import io.smallrye.common.annotation.CheckReturnValue;
 import io.smallrye.common.annotation.Experimental;
@@ -21,6 +22,7 @@ import io.smallrye.mutiny.operators.multi.MultiMapOp;
 import io.smallrye.mutiny.operators.multi.MultiOnItemInvoke;
 import io.smallrye.mutiny.operators.multi.MultiScanOp;
 import io.smallrye.mutiny.operators.multi.MultiScanWithSeedOp;
+import io.smallrye.mutiny.operators.multi.MultiDistinctUntilChanged;
 
 public class MultiOnItem<T> {
 
@@ -474,5 +476,52 @@ public class MultiOnItem<T> {
     @CheckReturnValue
     public <ACC, O> Multi<O> gather(Gatherer<T, ACC, O> gatherer) {
         return new MultiGather<>(upstream, gatherer);
+    }
+
+    /**
+     * Emits items from the upstream Multi only if they are distinct from their immediate predecessor,
+     * using {@link java.util.Objects#equals(Object, Object)} for comparison.
+     * <p>
+     * This operator compares each item with its immediate predecessor using {@code Objects.equals(previous, current)}.
+     * If the comparison returns {@code true}, the current item is filtered out (discarded). If it returns
+     * {@code false} (or if either item is {@code null} and the other isn't), the current item is emitted downstream.
+     * <p>
+     * The very first item emitted by the upstream is always passed downstream as there is no preceding item
+     * to compare it against.
+     * <p>
+     * This is equivalent to calling {@code distinctUntilChanged(Objects::equals)}.
+     *
+     * @return a new {@link Multi} that emits only items distinct from their immediate predecessor based on
+     *         {@link java.util.Objects#equals(Object, Object)}.
+     */
+    @CheckReturnValue
+    public Multi<T> distinctUntilChanged() {
+        return Infrastructure.onMultiCreation(new MultiDistinctUntilChanged<>(upstream));
+    }
+
+    /**
+     * Emits items from the upstream Multi only if they are distinct from their immediate predecessor,
+     * according to a provided comparison predicate.
+     * <p>
+     * For each item emitted by the upstream Multi (except the very first one), the provided {@code predicate}
+     * is called with the previous item and the current item (`predicate.test(previous, current)`).
+     * If the predicate returns {@code true} (indicating the items are considered "equal" or unchanged based
+     * on the predicate's logic), the current item is filtered out (discarded). If the predicate returns
+     * {@code false} (indicating the items are distinct based on the predicate's logic), the current item
+     * is emitted downstream.
+     * <p>
+     * The very first item emitted by the upstream is always passed downstream as there is no preceding item
+     * to compare it against.
+     *
+     * @param predicate the {@link BiPredicate} used to compare the previous item and the current item.
+     *        It must not be {@code null}. If {@code predicate.test(previous, current)} returns
+     *        {@code true}, the current item is dropped.
+     * @return a new {@link Multi} that emits only items distinct from their immediate predecessor based on the predicate.
+     * @throws IllegalArgumentException if the {@code predicate} is {@code null}.
+     */
+    @CheckReturnValue
+    public Multi<T> distinctUntilChanged(BiPredicate<T, T> predicate) {
+        BiPredicate<T, T> decoratedPredicate = Infrastructure.decorate(nonNull(predicate, "mapper"));
+        return Infrastructure.onMultiCreation(new MultiDistinctUntilChanged<>(upstream, decoratedPredicate));
     }
 }
