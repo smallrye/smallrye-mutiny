@@ -3,9 +3,11 @@ package io.smallrye.mutiny.operators.uni;
 import static org.assertj.core.api.Assertions.*;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -616,6 +618,27 @@ class UniJoinTest {
             sub.assertNotTerminated();
             assertThat(probe1).isTrue();
             assertThat(probe2).isFalse();
+        }
+    }
+
+    @Test
+    void yolo() {
+        AtomicBoolean c1 = new AtomicBoolean();
+        AtomicBoolean c2 = new AtomicBoolean();
+        try {
+            Uni.join().all(
+                    Uni.createFrom().item(1)
+                            .onItem().delayIt().by(Duration.ofMillis(1000))
+                            .onCancellation().invoke(() -> c1.set(true)),
+                    Uni.createFrom().item(2)
+                            .onItem().failWith(() -> new IOException("boom"))
+                            .onCancellation().invoke(() -> c2.set(true)))
+                    .usingConcurrencyOf(4)
+                    .andFailFast()
+                    .await().atMost(Duration.ofMillis(2000));
+        } catch (CompletionException e) {
+            System.out.println(c1);
+            System.out.println(c2);
         }
     }
 }
