@@ -225,7 +225,11 @@ public class MultiCombineLatestOp<I, O> extends MultiOperator<I, O> {
                         break;
                     }
 
-                    I[] va = (I[]) q.poll();
+                    I[] va;
+                    do {
+                        // There is a possible race-condition due to double stacking in the queue
+                        va = (I[]) q.poll();
+                    } while (va == null);
 
                     O resultOfCombination;
                     try {
