@@ -1,5 +1,5 @@
 ///usr/bin/env jbang "$0" "$@" ; exit $?
-//DEPS io.smallrye.reactive:mutiny:2.9.1
+//DEPS io.smallrye.reactive:mutiny:2.9.2
 package _01_basics;
 
 import static java.util.concurrent.CompletableFuture.delayedExecutor;
