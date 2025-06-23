@@ -6,11 +6,13 @@ import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
@@ -22,6 +24,7 @@ import org.junit.jupiter.api.parallel.ResourceLock;
 
 import io.smallrye.mutiny.helpers.test.AssertSubscriber;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
+import io.smallrye.mutiny.tuples.Tuple2;
 import junit5.support.InfrastructureResource;
 
 @ResourceLock(value = InfrastructureResource.NAME, mode = ResourceAccessMode.READ)
@@ -107,5 +110,27 @@ class BugReproducersTest {
                 .onFailure().retry().withBackOff(Duration.ofSeconds(1)).atMost(2)
                 .await().atMost(Duration.ofSeconds(5));
         assertThat(counter).hasValue(1);
+    }
+
+    @Test
+    void reproducer_1891() {
+        // Adapted from https://github.com/smallrye/smallrye-mutiny/issues/1891
+        AtomicBoolean completed = new AtomicBoolean();
+        AtomicLong counter = new AtomicLong();
+        AtomicReference<Throwable> failure = new AtomicReference<>();
+        var ticks = Multi.createFrom().ticks().every(Duration.ofMillis(10));
+        var data = Multi.createFrom().ticks().every(Duration.ofMillis(15));
+        Multi.createBy().combining().streams(ticks, data).latestItems().asTuple()
+                .skip().repetitions(Comparator.comparing(Tuple2::getItem1))
+                .subscribe().with(
+                        item -> {
+                            if (counter.incrementAndGet() > 100L) {
+                                completed.set(true);
+                            }
+                        },
+                        failure::set);
+        await().until(() -> completed.get() || failure.get() != null);
+        assertThat(failure.get()).describedAs("No failure must have been emitted").isNull();
+        assertThat(completed.get()).isTrue();
     }
 }
