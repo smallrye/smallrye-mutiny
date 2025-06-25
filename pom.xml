@@ -95,7 +95,7 @@
         <jakarta.enterprise.cdi-api.version>4.1.0</jakarta.enterprise.cdi-api.version>
         <jakarta.annotation-api.version>3.0.0</jakarta.annotation-api.version>
 
-        <junit.version>5.13.1</junit.version>
+        <junit.version>5.13.2</junit.version>
         <assertj-core.version>3.27.3</assertj-core.version>
         <junit4.version>4.13.2</junit4.version>
         <awaitility.version>4.3.0</awaitility.version>
