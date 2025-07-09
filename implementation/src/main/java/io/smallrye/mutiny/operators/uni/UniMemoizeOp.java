@@ -47,28 +47,27 @@ public class UniMemoizeOp<I> extends UniOperator<I, I> implements UniSubscriber<
     @Override
     public void subscribe(UniSubscriber<? super I> subscriber) {
         nonNull(subscriber, "subscriber");
-        try {
-            internalLock.lock();
-            checkForInvalidation();
-            switch (state) {
-                case INIT:
-                    state = State.WAITING_FOR_UPSTREAM;
-                    awaiters.add(subscriber);
-                    subscriber.onSubscribe(new MemoizedSubscription(subscriber));
-                    currentContext = subscriber.context();
-                    upstream().subscribe().withSubscriber(this);
-                    break;
-                case WAITING_FOR_UPSTREAM:
-                    awaiters.add(subscriber);
-                    subscriber.onSubscribe(new MemoizedSubscription(subscriber));
-                    break;
-                case CACHING:
-                    subscriber.onSubscribe(new MemoizedSubscription(subscriber));
-                    forwardTo(subscriber);
-                    break;
-            }
-        } finally {
-            internalLock.unlock();
+        internalLock.lock();
+        checkForInvalidation();
+        switch (state) {
+            case INIT:
+                state = State.WAITING_FOR_UPSTREAM;
+                awaiters.add(subscriber);
+                currentContext = subscriber.context();
+                internalLock.unlock();
+                subscriber.onSubscribe(new MemoizedSubscription(subscriber));
+                upstream().subscribe().withSubscriber(this);
+                break;
+            case WAITING_FOR_UPSTREAM:
+                awaiters.add(subscriber);
+                internalLock.unlock();
+                subscriber.onSubscribe(new MemoizedSubscription(subscriber));
+                break;
+            case CACHING:
+                internalLock.unlock();
+                subscriber.onSubscribe(new MemoizedSubscription(subscriber));
+                forwardTo(subscriber);
+                break;
         }
     }
 
@@ -84,33 +83,33 @@ public class UniMemoizeOp<I> extends UniOperator<I, I> implements UniSubscriber<
 
     @Override
     public void onSubscribe(UniSubscription subscription) {
+        internalLock.lock();
         this.currentUpstreamSubscription = subscription;
+        internalLock.unlock();
     }
 
     @Override
     public void onItem(I item) {
-        try {
-            internalLock.lock();
-            if (state == State.WAITING_FOR_UPSTREAM) {
-                state = State.CACHING;
-                cachedResult = item;
-                notifyAwaiters();
-            }
-        } finally {
+        internalLock.lock();
+        if (state == State.WAITING_FOR_UPSTREAM) {
+            state = State.CACHING;
+            cachedResult = item;
+            internalLock.unlock();
+            notifyAwaiters();
+        } else {
             internalLock.unlock();
         }
     }
 
     @Override
     public void onFailure(Throwable failure) {
-        try {
-            internalLock.lock();
-            if (state == State.WAITING_FOR_UPSTREAM) {
-                state = State.CACHING;
-                cachedResult = failure;
-                notifyAwaiters();
-            }
-        } finally {
+        internalLock.lock();
+        if (state == State.WAITING_FOR_UPSTREAM) {
+            state = State.CACHING;
+            cachedResult = failure;
+            internalLock.unlock();
+            notifyAwaiters();
+        } else {
             internalLock.unlock();
         }
     }
