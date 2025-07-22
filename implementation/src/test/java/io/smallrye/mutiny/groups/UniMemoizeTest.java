@@ -590,4 +590,22 @@ class UniMemoizeTest {
             resultFuture.cancel(true);
         }
     }
+
+    @RepeatedTest(1000)
+    public void testCachingRaceInNotification() {
+        AtomicInteger sub = new AtomicInteger();
+        AtomicInteger count = new AtomicInteger();
+
+        ExecutorService pool = ForkJoinPool.commonPool();
+        Uni<Integer> uni = Uni.createFrom().item(count::incrementAndGet)
+                .emitOn(pool)
+                .runSubscriptionOn(pool)
+                .memoize().until(() -> sub.incrementAndGet() > 2);
+
+        assertThat(uni.await().atMost(Duration.ofMillis(100))).isEqualTo(1);
+        assertThat(uni.await().atMost(Duration.ofMillis(100))).isEqualTo(1);
+        assertThat(uni.await().atMost(Duration.ofMillis(100))).isEqualTo(2);
+        assertThat(uni.await().atMost(Duration.ofMillis(100))).isEqualTo(3);
+        assertThat(uni.await().atMost(Duration.ofMillis(100))).isEqualTo(4);
+    }
 }

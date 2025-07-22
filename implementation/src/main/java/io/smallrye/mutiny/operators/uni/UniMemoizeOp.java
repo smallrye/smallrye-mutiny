@@ -2,6 +2,8 @@ package io.smallrye.mutiny.operators.uni;
 
 import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.BooleanSupplier;
@@ -47,27 +49,39 @@ public class UniMemoizeOp<I> extends UniOperator<I, I> implements UniSubscriber<
     @Override
     public void subscribe(UniSubscriber<? super I> subscriber) {
         nonNull(subscriber, "subscriber");
+
+        boolean shouldSubscribeUpstream = false;
+        Object cached = null;
+        boolean wasInCachingState = false;
+
         internalLock.lock();
-        checkForInvalidation();
-        switch (state) {
-            case INIT:
-                state = State.WAITING_FOR_UPSTREAM;
-                awaiters.add(subscriber);
-                currentContext = subscriber.context();
-                internalLock.unlock();
-                subscriber.onSubscribe(new MemoizedSubscription(subscriber));
-                upstream().subscribe().withSubscriber(this);
-                break;
-            case WAITING_FOR_UPSTREAM:
-                awaiters.add(subscriber);
-                internalLock.unlock();
-                subscriber.onSubscribe(new MemoizedSubscription(subscriber));
-                break;
-            case CACHING:
-                internalLock.unlock();
-                subscriber.onSubscribe(new MemoizedSubscription(subscriber));
-                forwardTo(subscriber);
-                break;
+        try {
+            checkForInvalidation(); // May throw an exception
+            switch (state) {
+                case INIT:
+                    state = State.WAITING_FOR_UPSTREAM;
+                    awaiters.add(subscriber);
+                    currentContext = subscriber.context();
+                    shouldSubscribeUpstream = true;
+                    break;
+                case WAITING_FOR_UPSTREAM:
+                    awaiters.add(subscriber);
+                    break;
+                case CACHING:
+                    cached = cachedResult;
+                    wasInCachingState = true;
+                    break;
+            }
+        } finally {
+            internalLock.unlock();
+        }
+
+        subscriber.onSubscribe(new MemoizedSubscription(subscriber));
+
+        if (shouldSubscribeUpstream) {
+            upstream().subscribe().withSubscriber(this);
+        } else if (wasInCachingState) {
+            forwardTo(subscriber, cached);
         }
     }
 
@@ -91,48 +105,55 @@ public class UniMemoizeOp<I> extends UniOperator<I, I> implements UniSubscriber<
     @Override
     public void onItem(I item) {
         internalLock.lock();
+        List<UniSubscriber<? super I>> toNotify = null;
         if (state == State.WAITING_FOR_UPSTREAM) {
             state = State.CACHING;
             cachedResult = item;
-            internalLock.unlock();
-            notifyAwaiters();
-        } else {
-            internalLock.unlock();
+            toNotify = gatherAwaiters();
+        }
+        internalLock.unlock();
+        if (toNotify != null) {
+            notifyAwaiters(toNotify, item);
+        }
+    }
+
+    private List<UniSubscriber<? super I>> gatherAwaiters() {
+        return new ArrayList<>(awaiters);
+    }
+
+    private void notifyAwaiters(List<UniSubscriber<? super I>> toNotify, Object result) {
+        for (UniSubscriber<? super I> awaiter : toNotify) {
+            forwardTo(awaiter, result);
         }
     }
 
     @Override
     public void onFailure(Throwable failure) {
         internalLock.lock();
+        List<UniSubscriber<? super I>> toNotify = null;
         if (state == State.WAITING_FOR_UPSTREAM) {
             state = State.CACHING;
             cachedResult = failure;
-            internalLock.unlock();
-            notifyAwaiters();
-        } else {
-            internalLock.unlock();
+            toNotify = gatherAwaiters();
+        }
+        internalLock.unlock();
+        if (toNotify != null) {
+            notifyAwaiters(toNotify, failure);
         }
     }
 
     @SuppressWarnings("unchecked")
-    private void forwardTo(UniSubscriber<? super I> subscriber) {
-        if (cachedResult instanceof Throwable) {
-            subscriber.onFailure((Throwable) cachedResult);
+    private void forwardTo(UniSubscriber<? super I> subscriber, Object result) {
+        if (result instanceof Throwable) {
+            subscriber.onFailure((Throwable) result);
         } else {
-            subscriber.onItem((I) cachedResult);
+            subscriber.onItem((I) result);
         }
     }
 
     @Override
     public Context context() {
         return currentContext;
-    }
-
-    private void notifyAwaiters() {
-        UniSubscriber<? super I> awaiter;
-        while ((awaiter = awaiters.poll()) != null) {
-            forwardTo(awaiter);
-        }
     }
 
     private class MemoizedSubscription implements UniSubscription {
