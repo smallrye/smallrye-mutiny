@@ -418,7 +418,7 @@ public class Infrastructure {
     }
 
     /**
-     * Get the default overflow buffer size fpr {@link MultiOverflowStrategy#buffer()}.
+     * Get the default overflow buffer size for {@link MultiOverflowStrategy#buffer()}.
      *
      * @return the default value
      */
@@ -427,7 +427,7 @@ public class Infrastructure {
     }
 
     /**
-     * Sets the default overflow buffer size fpr {@link MultiOverflowStrategy#buffer()}.
+     * Sets the default overflow buffer size for {@link MultiOverflowStrategy#buffer()}.
      *
      * @param size the buffer size, must be strictly positive
      */
@@ -473,7 +473,7 @@ public class Infrastructure {
     }
 
     /**
-     * Set the xs buffer size (for internal usage).
+     * Set the s buffer size (for internal usage).
      *
      * @param size the buffer size
      */
