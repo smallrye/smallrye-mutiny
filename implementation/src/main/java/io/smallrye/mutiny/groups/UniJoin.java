@@ -3,6 +3,7 @@ package io.smallrye.mutiny.groups;
 import static io.smallrye.mutiny.helpers.ParameterValidation.*;
 import static java.util.Arrays.asList;
 
+import io.smallrye.mutiny.operators.uni.builders.UniJoinAll.Mode;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,11 +17,6 @@ import io.smallrye.mutiny.operators.uni.builders.UniJoinFirst;
 
 /**
  * Join multiple {@link Uni Unis}.
- * <p>
- * <strong>Note about emptiness:</strong> If the set of Unis is empty, the set is rejected. Joining an empty set would
- * not propagate any event as it would not subscribe to anything. As a result, you cannot join empty sets of Unis. An
- * {@link IllegalArgumentException} will be thrown in this case.
- * </p>
  */
 public class UniJoin {
 
@@ -34,9 +30,9 @@ public class UniJoin {
      * Join multiple {@link Uni} references and emit a list of values, this is a convenience delegate method for
      * {@link #all(List)}.
      * <p>
-     * The list of {@code Unis} must not be {@code null}, empty, or contain {@code null} objects.
+     * The list of {@code Unis} must not be {@code null} or contain {@code null} objects.
      *
-     * @param unis the list of {@link Uni} to join, must not be {@code null} or empty, must not contain any {@code null}
+     * @param unis the list of {@link Uni} to join, must not be {@code null} and must not contain any {@code null}
      *        reference.
      * @param <T> the type of the {@link Uni} values
      * @return the object to configure the failure management strategy
@@ -54,7 +50,7 @@ public class UniJoin {
      * What happens when any of the {@link Uni} emits a failure rather than a value is specified by a subsequent call
      * to any of the methods in {@link JoinAllStrategy}.
      * <p>
-     * The list of {@code Unis} must not be {@code null}, empty, or contain {@code null} objects.
+     * The list of {@code Unis} must not be {@code null} or contain {@code null} objects.
      *
      * @param unis the list of {@link Uni} to join, must not be {@code null}, must not contain any {@code null} reference
      * @param <T> the type of the {@link Uni} values
@@ -63,7 +59,7 @@ public class UniJoin {
     @CheckReturnValue
     public final <T> JoinAllStrategy<T> all(List<Uni<T>> unis) {
         doesNotContainNull(unis, "unis");
-        isNotEmpty(unis, "unis");
+        nonNull(unis, "unis");
         return new JoinAllStrategy<>(unis);
     }
 
@@ -129,7 +125,7 @@ public class UniJoin {
          */
         @CheckReturnValue
         public Uni<List<T>> andCollectFailures() {
-            return Infrastructure.onUniCreation(new UniJoinAll<>(unis, UniJoinAll.Mode.COLLECT_FAILURES, concurrency));
+          return and(Mode.COLLECT_FAILURES);
         }
 
         /**
@@ -137,7 +133,12 @@ public class UniJoin {
          */
         @CheckReturnValue
         public Uni<List<T>> andFailFast() {
-            return Infrastructure.onUniCreation(new UniJoinAll<>(unis, UniJoinAll.Mode.FAIL_FAST, concurrency));
+            return and(Mode.FAIL_FAST);
+        }
+
+        private Uni<List<T>> and(Mode mode) {
+            if (unis.isEmpty()) return Uni.createFrom().item(List.of());
+            return Infrastructure.onUniCreation(new UniJoinAll<>(unis, mode, concurrency));
         }
     }
 
