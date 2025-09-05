@@ -129,7 +129,7 @@
         <version.gpg.plugin>3.2.8</version.gpg.plugin>
         <version.nexus.staging.plugin>1.7.0</version.nexus.staging.plugin>
         <version.release.plugin>3.1.1</version.release.plugin>
-        <version.versions.plugin>2.18.0</version.versions.plugin>
+        <version.versions.plugin>2.19.0</version.versions.plugin>
         <maven-deploy-plugin.version>3.1.4</maven-deploy-plugin.version>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
