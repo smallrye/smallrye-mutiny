@@ -18,7 +18,7 @@ jobs:
           fetch-depth: 0 # fetch all commits and branches for mike to work properly
       - name: Install uv
         uses: astral-sh/setup-uv@v6
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         name: Set up Python
         with:
           python-version-file: "documentation/pyproject.toml"
