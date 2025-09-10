@@ -70,8 +70,8 @@ theme:
   name: material
   logo: assets/logo-white.svg
   font:
-    text: Roboto
-    code: JetBrains Mono
+    text: IBM Plex Sans
+    code: IBM Plex Mono
   icon:
     repo: fontawesome/brands/github
   favicon: assets/logo-white.svg
