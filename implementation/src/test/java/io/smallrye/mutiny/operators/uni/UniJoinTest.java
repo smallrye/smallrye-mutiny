@@ -73,27 +73,31 @@ class UniJoinTest {
 
     @Nested
     @SuppressWarnings("ResultOfMethodCallIgnored")
-    class Empty {
+    class Emptyness {
         @Test
-        void emptyArrays() {
-            assertThatThrownBy(() -> Uni.join().all(new Uni[0]))
-                    .isInstanceOf(IllegalArgumentException.class)
-                    .satisfies(e -> assertThat(e.getMessage()).contains("empty"));
-
+        void emptyArraysJoinFirst() {
             assertThatThrownBy(() -> Uni.join().first(new Uni[0]))
                     .isInstanceOf(IllegalArgumentException.class)
                     .satisfies(e -> assertThat(e.getMessage()).contains("empty"));
         }
 
         @Test
-        void emptyLists() {
-            assertThatThrownBy(() -> Uni.join().all(Collections.emptyList()))
-                    .isInstanceOf(IllegalArgumentException.class)
-                    .satisfies(e -> assertThat(e.getMessage()).contains("empty"));
-
+        void emptyListsJoinFirst() {
             assertThatThrownBy(() -> Uni.join().first(Collections.emptyList()))
                     .isInstanceOf(IllegalArgumentException.class)
                     .satisfies(e -> assertThat(e.getMessage()).contains("empty"));
+        }
+
+        @Test
+        void emptyArraysJoinAll() {
+            List<Integer> res = Uni.join().<Integer> all().andFailFast().await().atMost(Duration.ofSeconds(1));
+            assertThat(res).isEmpty();
+        }
+
+        @Test
+        void emptyListsJoinAll() {
+            List<Integer> res = Uni.join().<Integer> all(List.of()).andCollectFailures().await().atMost(Duration.ofSeconds(1));
+            assertThat(res).isEmpty();
         }
     }
 
