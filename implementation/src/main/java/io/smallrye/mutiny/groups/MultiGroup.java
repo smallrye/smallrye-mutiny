@@ -1,6 +1,7 @@
 package io.smallrye.mutiny.groups;
 
 import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
+import static io.smallrye.mutiny.helpers.ParameterValidation.positive;
 
 import java.util.function.Function;
 
@@ -46,8 +47,7 @@ public class MultiGroup<T> {
 
     @CheckReturnValue
     public <K> Multi<GroupedMulti<K, T>> by(Function<? super T, ? extends K> keyMapper) {
-        Function<? super T, ? extends K> mapper = Infrastructure.decorate(nonNull(keyMapper, "keyMapper"));
-        return Infrastructure.onMultiCreation(new MultiGroupByOp<>(upstream, mapper, x -> x));
+        return by(keyMapper, Infrastructure.getBufferSizeS());
     }
 
     @CheckReturnValue
@@ -55,6 +55,22 @@ public class MultiGroup<T> {
             Function<? super T, ? extends V> valueMapper) {
         Function<? super T, ? extends K> k = Infrastructure.decorate(nonNull(keyMapper, "keyMapper"));
         Function<? super T, ? extends V> v = Infrastructure.decorate(nonNull(valueMapper, "valueMapper"));
-        return Infrastructure.onMultiCreation(new MultiGroupByOp<>(upstream, k, v));
+        return by(k, v, Infrastructure.getBufferSizeS());
+    }
+
+    @CheckReturnValue
+    public <K> Multi<GroupedMulti<K, T>> by(Function<? super T, ? extends K> keyMapper, long prefetch) {
+        positive(prefetch, "prefetch");
+        Function<? super T, ? extends K> mapper = Infrastructure.decorate(nonNull(keyMapper, "keyMapper"));
+        return Infrastructure.onMultiCreation(new MultiGroupByOp<>(upstream, mapper, x -> x, prefetch));
+    }
+
+    @CheckReturnValue
+    public <K, V> Multi<GroupedMulti<K, V>> by(Function<? super T, ? extends K> keyMapper,
+            Function<? super T, ? extends V> valueMapper, long prefetch) {
+        positive(prefetch, "prefetch");
+        Function<? super T, ? extends K> k = Infrastructure.decorate(nonNull(keyMapper, "keyMapper"));
+        Function<? super T, ? extends V> v = Infrastructure.decorate(nonNull(valueMapper, "valueMapper"));
+        return Infrastructure.onMultiCreation(new MultiGroupByOp<>(upstream, k, v, prefetch));
     }
 }

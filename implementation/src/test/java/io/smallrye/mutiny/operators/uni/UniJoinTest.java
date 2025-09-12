@@ -3,9 +3,11 @@ package io.smallrye.mutiny.operators.uni;
 import static org.assertj.core.api.Assertions.*;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -71,27 +73,31 @@ class UniJoinTest {
 
     @Nested
     @SuppressWarnings("ResultOfMethodCallIgnored")
-    class Empty {
+    class Emptyness {
         @Test
-        void emptyArrays() {
-            assertThatThrownBy(() -> Uni.join().all(new Uni[0]))
-                    .isInstanceOf(IllegalArgumentException.class)
-                    .satisfies(e -> assertThat(e.getMessage()).contains("empty"));
-
+        void emptyArraysJoinFirst() {
             assertThatThrownBy(() -> Uni.join().first(new Uni[0]))
                     .isInstanceOf(IllegalArgumentException.class)
                     .satisfies(e -> assertThat(e.getMessage()).contains("empty"));
         }
 
         @Test
-        void emptyLists() {
-            assertThatThrownBy(() -> Uni.join().all(Collections.emptyList()))
-                    .isInstanceOf(IllegalArgumentException.class)
-                    .satisfies(e -> assertThat(e.getMessage()).contains("empty"));
-
+        void emptyListsJoinFirst() {
             assertThatThrownBy(() -> Uni.join().first(Collections.emptyList()))
                     .isInstanceOf(IllegalArgumentException.class)
                     .satisfies(e -> assertThat(e.getMessage()).contains("empty"));
+        }
+
+        @Test
+        void emptyArraysJoinAll() {
+            List<Integer> res = Uni.join().<Integer> all().andFailFast().await().atMost(Duration.ofSeconds(1));
+            assertThat(res).isEmpty();
+        }
+
+        @Test
+        void emptyListsJoinAll() {
+            List<Integer> res = Uni.join().<Integer> all(List.of()).andCollectFailures().await().atMost(Duration.ofSeconds(1));
+            assertThat(res).isEmpty();
         }
     }
 
@@ -616,6 +622,27 @@ class UniJoinTest {
             sub.assertNotTerminated();
             assertThat(probe1).isTrue();
             assertThat(probe2).isFalse();
+        }
+    }
+
+    @Test
+    void yolo() {
+        AtomicBoolean c1 = new AtomicBoolean();
+        AtomicBoolean c2 = new AtomicBoolean();
+        try {
+            Uni.join().all(
+                    Uni.createFrom().item(1)
+                            .onItem().delayIt().by(Duration.ofMillis(1000))
+                            .onCancellation().invoke(() -> c1.set(true)),
+                    Uni.createFrom().item(2)
+                            .onItem().failWith(() -> new IOException("boom"))
+                            .onCancellation().invoke(() -> c2.set(true)))
+                    .usingConcurrencyOf(4)
+                    .andFailFast()
+                    .await().atMost(Duration.ofMillis(2000));
+        } catch (CompletionException e) {
+            System.out.println(c1);
+            System.out.println(c2);
         }
     }
 }

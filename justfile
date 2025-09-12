@@ -49,6 +49,7 @@ changelog:
 # Perform a release
 perform-release:
     #!/usr/bin/env bash
+    just changelog
     export PREVIOUS_VERSION=$(yq '.release.previous-version' .github/project.yml)
     export RELEASE_VERSION=$(yq '.release.current-version' .github/project.yml)
     export NEXT_VERSION=$(yq '.release.next-version' .github/project.yml)

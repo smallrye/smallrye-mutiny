@@ -32,6 +32,7 @@ public class UniBlockingAwait {
 
         CountDownLatch latch = new CountDownLatch(1);
         AtomicReference<T> reference = new AtomicReference<>();
+        AtomicReference<UniSubscription> upstreamSubscription = new AtomicReference<>();
         AtomicReference<Throwable> referenceToFailure = new AtomicReference<>();
         UniSubscriber<T> subscriber = new UniSubscriber<T>() {
 
@@ -42,7 +43,7 @@ public class UniBlockingAwait {
 
             @Override
             public void onSubscribe(UniSubscription subscription) {
-                // Do nothing.
+                upstreamSubscription.set(subscription);
             }
 
             @Override
@@ -62,6 +63,10 @@ public class UniBlockingAwait {
             if (duration != null) {
                 if (!latch.await(duration.toMillis(), TimeUnit.MILLISECONDS)) {
                     referenceToFailure.compareAndSet(null, new TimeoutException());
+                    UniSubscription subscription = upstreamSubscription.getAndSet(null);
+                    if (subscription != null) {
+                        subscription.cancel();
+                    }
                 }
             } else {
                 latch.await();

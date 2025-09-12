@@ -579,8 +579,8 @@ public class MultiCreate {
      */
     @CheckReturnValue
     public Multi<Integer> range(int startInclusive, int endExclusive) {
-        if (endExclusive <= startInclusive) {
-            throw new IllegalArgumentException("end must be greater than start");
+        if (endExclusive < startInclusive) {
+            throw new IllegalArgumentException("end must be strictly greater than start");
         }
         return Multi.createFrom().iterable(() -> IntStream.range(startInclusive, endExclusive).iterator());
     }

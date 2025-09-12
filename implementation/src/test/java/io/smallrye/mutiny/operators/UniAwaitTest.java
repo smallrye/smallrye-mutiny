@@ -156,6 +156,23 @@ public class UniAwaitTest {
                 .isInstanceOf(IllegalArgumentException.class).hasMessageContaining("duration");
     }
 
+    @Test
+    public void testCancellationOnTimeout() {
+        AtomicBoolean cancelled = new AtomicBoolean();
+        AtomicBoolean terminated = new AtomicBoolean();
+        try {
+            Uni.createFrom().item(63)
+                    .onItem().delayIt().by(Duration.ofMillis(1_000))
+                    .onTermination().invoke(() -> terminated.set(true))
+                    .onCancellation().invoke(() -> cancelled.set(true))
+                    .await().atMost(Duration.ofMillis(50));
+            fail("A TimeException was expected");
+        } catch (TimeoutException e) {
+            assertThat(cancelled).isTrue();
+            assertThat(terminated).isTrue();
+        }
+    }
+
     @Nested
     @ResourceLock(value = InfrastructureResource.NAME, mode = ResourceAccessMode.READ_WRITE)
     class ThreadBlockingTest {

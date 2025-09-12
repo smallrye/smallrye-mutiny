@@ -8,7 +8,16 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
@@ -548,5 +557,55 @@ class UniMemoizeTest {
         uni.await().atMost(Duration.ofSeconds(5));
         assertThat(res).isEqualTo(58);
         assertThat(log).containsExactly("sub", "58", "sub", "58");
+    }
+
+    @RepeatedTest(10)
+    void reproducer_1910() {
+        // Adapted from https://github.com/smallrye/smallrye-mutiny/issues/1910 (deadlock)
+        var executor = ForkJoinPool.commonPool();
+        var future = CompletableFuture.failedFuture(new RuntimeException("Woops"));
+        var cf = CompletableFuture.supplyAsync(() -> {
+            try {
+                return future.get(100, TimeUnit.MILLISECONDS);
+            } catch (Throwable err) {
+                throw new CompletionException(err);
+            }
+        }, executor);
+
+        var nodesUni = Uni.createFrom().completionStage(cf)
+                .memoize().indefinitely();
+
+        var topicListingsUni = nodesUni.map(ignored -> null);
+
+        var combined = Uni
+                .combine().all().unis(nodesUni, topicListingsUni).asTuple()
+                .memoize().indefinitely();
+
+        var resultFuture = combined.runSubscriptionOn(executor).subscribeAsCompletionStage();
+        try {
+            resultFuture.get(100, TimeUnit.MILLISECONDS);
+        } catch (ExecutionException | InterruptedException | java.util.concurrent.TimeoutException e) {
+            // Ok
+        } finally {
+            resultFuture.cancel(true);
+        }
+    }
+
+    @RepeatedTest(1000)
+    public void testCachingRaceInNotification() {
+        AtomicInteger sub = new AtomicInteger();
+        AtomicInteger count = new AtomicInteger();
+
+        ExecutorService pool = ForkJoinPool.commonPool();
+        Uni<Integer> uni = Uni.createFrom().item(count::incrementAndGet)
+                .emitOn(pool)
+                .runSubscriptionOn(pool)
+                .memoize().until(() -> sub.incrementAndGet() > 2);
+
+        assertThat(uni.await().atMost(Duration.ofMillis(100))).isEqualTo(1);
+        assertThat(uni.await().atMost(Duration.ofMillis(100))).isEqualTo(1);
+        assertThat(uni.await().atMost(Duration.ofMillis(100))).isEqualTo(2);
+        assertThat(uni.await().atMost(Duration.ofMillis(100))).isEqualTo(3);
+        assertThat(uni.await().atMost(Duration.ofMillis(100))).isEqualTo(4);
     }
 }

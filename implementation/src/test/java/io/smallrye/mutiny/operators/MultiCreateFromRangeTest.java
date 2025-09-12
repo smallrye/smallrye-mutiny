@@ -37,4 +37,13 @@ public class MultiCreateFromRangeTest {
         assertThrows(IllegalArgumentException.class, () -> Multi.createFrom().range(1, -1));
     }
 
+    @Test
+    public void emptyRange() {
+        AssertSubscriber<Integer> subscriber = AssertSubscriber.create();
+        Multi.createFrom().range(1, 1).subscribe().withSubscriber(subscriber)
+                .request(Long.MAX_VALUE)
+                .assertCompleted()
+                .assertHasNotReceivedAnyItem();
+    }
+
 }
