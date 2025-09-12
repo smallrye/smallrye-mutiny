@@ -40,7 +40,7 @@ public class UniOnItem<T> {
     public Uni<T> invoke(Consumer<? super T> callback) {
         Consumer<? super T> actual = Infrastructure.decorate(nonNull(callback, "callback"));
         return Infrastructure.onUniCreation(
-                new UniOnItemConsume<>(upstream, actual, null, null));
+                new UniOnItemConsume<>(upstream, actual, null, null, Throwable.class));
     }
 
     /**

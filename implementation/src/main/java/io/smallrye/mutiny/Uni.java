@@ -259,7 +259,7 @@ public interface Uni<T> {
      * @return a UniOnFailure on which you can specify the on failure action
      */
     @CheckReturnValue
-    UniOnFailure<T> onFailure();
+    UniOnFailure<T, Throwable> onFailure();
 
     /**
      * Configures a predicate filtering the failures on which the behavior (specified with the returned
@@ -275,7 +275,7 @@ public interface Uni<T> {
      * @return a UniOnFailure configured with the given predicate on which you can specify the on failure action
      */
     @CheckReturnValue
-    UniOnFailure<T> onFailure(Predicate<? super Throwable> predicate);
+    UniOnFailure<T, Throwable> onFailure(Predicate<? super Throwable> predicate);
 
     /**
      * Configures a type of failure filtering the failures on which the behavior (specified with the returned
@@ -291,7 +291,7 @@ public interface Uni<T> {
      * @return a UniOnFailure configured with the given predicate on which you can specify the on failure action
      */
     @CheckReturnValue
-    UniOnFailure<T> onFailure(Class<? extends Throwable> typeOfFailure);
+    <E extends Throwable> UniOnFailure<T, E> onFailure(Class<E> typeOfFailure);
 
     /**
      * Produces a {@link Uni} reacting when a no item event is fired by the upstream uni during the specified time
