@@ -99,7 +99,7 @@
         <assertj-core.version>3.27.4</assertj-core.version>
         <junit4.version>4.13.2</junit4.version>
         <awaitility.version>4.3.0</awaitility.version>
-        <version.surefire.plugin>3.5.3</version.surefire.plugin>
+        <version.surefire.plugin>3.5.4</version.surefire.plugin>
         <testng.version>7.11.0</testng.version>
         <testng-junit5-engine.version>1.0.6</testng-junit5-engine.version>
 
