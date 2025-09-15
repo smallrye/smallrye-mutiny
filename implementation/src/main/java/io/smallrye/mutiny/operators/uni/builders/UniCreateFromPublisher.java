@@ -22,6 +22,7 @@ public class UniCreateFromPublisher<T> extends AbstractUni<T> {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public void subscribe(UniSubscriber<? super T> subscriber) {
         new PublisherSubscriber(publisher, subscriber).forward();
     }

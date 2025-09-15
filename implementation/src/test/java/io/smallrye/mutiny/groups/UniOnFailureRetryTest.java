@@ -209,7 +209,7 @@ public class UniOnFailureRetryTest {
                     .onFailure().retry().withBackOff(Duration.ofMillis(10), Duration.ofSeconds(20)).withJitter(1.0)
                     .atMost(4)
                     .await().atMost(Duration.ofSeconds(5));
-        }).getCause() // Expected exception is wrapped in a java.util.concurrent.CompletionException
+        }).cause() // Expected exception is wrapped in a java.util.concurrent.CompletionException
                 .hasMessageContaining("boom")
                 .hasSuppressedException(new IllegalStateException("Retries exhausted: 4/4"));
     }

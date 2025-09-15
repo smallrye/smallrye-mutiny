@@ -72,7 +72,7 @@ class UniJoinTest {
     }
 
     @Nested
-    @SuppressWarnings("ResultOfMethodCallIgnored")
+    @SuppressWarnings({ "ResultOfMethodCallIgnored", "unchecked" })
     class Emptyness {
         @Test
         void emptyArraysJoinFirst() {

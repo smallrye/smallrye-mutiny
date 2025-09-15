@@ -82,22 +82,26 @@ public class AssertSubscriberTest {
 
         subscriber.assertItems("a", "b", "c");
 
-        String m1 = "\nExpected to have received exactly:\n" +
-                "<a,b,c,d>\n" +
-                "but received:\n" +
-                "<a,b,c>.\n" +
-                "Mismatches are:\n" +
-                "\t- Missing expected item <d>";
+        String m1 = """
+
+                Expected to have received exactly:
+                <a,b,c,d>
+                but received:
+                <a,b,c>.
+                Mismatches are:
+                \t- Missing expected item <d>""";
         assertThatThrownBy(() -> subscriber.assertItems("a", "b", "c", "d"))
                 .isInstanceOf(AssertionError.class)
                 .hasMessage(m1);
 
-        String m2 = "\nExpected to have received exactly\n" +
-                "<a,b>\n" +
-                "but received\n" +
-                "<a,b,c>.\n" +
-                "The following items were not expected:\n" +
-                "<c>";
+        String m2 = """
+
+                Expected to have received exactly
+                <a,b>
+                but received
+                <a,b,c>.
+                The following items were not expected:
+                <c>""";
         assertThatThrownBy(() -> subscriber.assertItems("a", "b"))
                 .isInstanceOf(AssertionError.class)
                 .hasMessage(m2);
