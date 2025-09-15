@@ -542,7 +542,7 @@ public class UniOnEventTest {
 
         subscriber.assertFailed().assertFailedWith(CompositeException.class, "boom");
         CompositeException compositeException = (CompositeException) subscriber.getFailure();
-        assertThat(compositeException).getRootCause().isInstanceOf(IOException.class).hasMessageContaining("boom");
+        assertThat(compositeException).rootCause().isInstanceOf(IOException.class).hasMessageContaining("boom");
         assertThat(compositeException.getCauses().get(1)).isInstanceOf(IOException.class).hasMessageContaining("tada");
         assertThat(Item).doesNotHaveValue(1);
         assertThat(subscription.get()).isNotNull();
@@ -590,7 +590,7 @@ public class UniOnEventTest {
 
         subscriber.assertFailed().assertFailedWith(CompositeException.class, "boom");
         CompositeException compositeException = (CompositeException) subscriber.getFailure();
-        assertThat(compositeException).getRootCause().isInstanceOf(IOException.class).hasMessageContaining("boom");
+        assertThat(compositeException).rootCause().isInstanceOf(IOException.class).hasMessageContaining("boom");
         assertThat(compositeException.getCauses().get(1)).isInstanceOf(IOException.class).hasMessageContaining("tada");
         assertThat(Item).doesNotHaveValue(1);
         assertThat(subscription.get()).isNotNull();
@@ -615,7 +615,7 @@ public class UniOnEventTest {
 
         subscriber.assertFailed().assertFailedWith(CompositeException.class, "boom");
         CompositeException compositeException = (CompositeException) subscriber.getFailure();
-        assertThat(compositeException).getRootCause().isInstanceOf(IOException.class).hasMessageContaining("boom");
+        assertThat(compositeException).rootCause().isInstanceOf(IOException.class).hasMessageContaining("boom");
         assertThat(compositeException.getCauses().get(1)).isInstanceOf(RuntimeException.class).hasMessageContaining("tada");
         assertThat(Item).doesNotHaveValue(1);
         assertThat(subscription.get()).isNotNull();

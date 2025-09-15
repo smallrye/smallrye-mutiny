@@ -22,8 +22,8 @@ public class CompositeExceptionTest {
         CompositeException ce2 = new CompositeException(IO, IAE, OUPS);
         assertThat(ce1).hasMessageContaining("iae").hasMessageContaining("io").hasMessageContaining("oups");
 
-        assertThat(ce1).getCause().isEqualTo(IAE);
-        assertThat(ce2).getCause().isEqualTo(IO);
+        assertThat(ce1).cause().isEqualTo(IAE);
+        assertThat(ce2).cause().isEqualTo(IO);
 
         assertThat(ce1.getCauses()).containsExactly(IAE, IO, OUPS);
         assertThat(ce1.getSuppressed()).containsExactly(IO, OUPS);
@@ -43,8 +43,8 @@ public class CompositeExceptionTest {
         CompositeException ce2 = new CompositeException(Arrays.asList(IO, IAE, OUPS));
         assertThat(ce1).hasMessageContaining("iae").hasMessageContaining("io").hasMessageContaining("oups");
 
-        assertThat(ce1).getCause().isEqualTo(IAE);
-        assertThat(ce2).getCause().isEqualTo(IO);
+        assertThat(ce1).cause().isEqualTo(IAE);
+        assertThat(ce2).cause().isEqualTo(IO);
 
         assertThat(ce1.getCauses()).containsExactly(IAE, IO, OUPS);
         assertThat(ce1.getSuppressed()).containsExactly(IO, OUPS);

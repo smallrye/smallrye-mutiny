@@ -210,7 +210,7 @@ public class MultiMergeTest {
     public void failureMustTriggerCancellations() {
         AtomicBoolean firstCancelled = new AtomicBoolean();
         Multi<Integer> first = Multi.createBy().repeating().uni(
-                () -> Uni.createFrom().item(123).onItem().delayIt().by(Duration.ofSeconds(5))).atMost(10l)
+                () -> Uni.createFrom().item(123).onItem().delayIt().by(Duration.ofSeconds(5))).atMost(10L)
                 .onCancellation().invoke(() -> firstCancelled.set(true));
         Multi<Integer> second = Multi.createFrom().failure(new IOException("boom"));
         AssertSubscriber<Integer> sub = Multi.createBy().merging().streams(first, second)

@@ -535,8 +535,7 @@ public class MultiCollectTest {
         }
 
         public boolean equals(Object object) {
-            if (object instanceof TestObject) {
-                TestObject test = (TestObject) object;
+            if (object instanceof TestObject test) {
                 return test.key.equals(this.key) &&
                         test.value.equals(this.value);
             }

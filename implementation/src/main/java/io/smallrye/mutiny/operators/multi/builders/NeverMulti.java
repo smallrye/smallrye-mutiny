@@ -20,6 +20,7 @@ public final class NeverMulti extends AbstractMulti<Object> {
      * @param <T> the value type
      * @return the {@code multi}
      */
+    @SuppressWarnings("unchecked")
     public static <T> Multi<T> never() {
         return (Multi<T>) NEVER;
     }
