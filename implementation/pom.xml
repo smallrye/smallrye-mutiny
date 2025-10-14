@@ -88,8 +88,6 @@
                             <goal>test</goal>
                         </goals>
                         <configuration>
-                            <!-- Disable TestNG -->
-                            <testNGArtifactName>none:none</testNGArtifactName>
                             <!-- Global settings, might be replaced in profiles (e.g., parallel-tests, etc) -->
                             <properties>
                                 <configurationParameters>

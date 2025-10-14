@@ -57,12 +57,7 @@
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-api</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-engine</artifactId>
+            <artifactId>junit-jupiter</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -100,7 +95,7 @@
                             <excludes>
                                 <exclude>**/tck/*</exclude>
                             </excludes>
-                            <testNGArtifactName>none:none</testNGArtifactName>
+                            <junitArtifactName>none:none</junitArtifactName>
                         </configuration>
                     </execution>
                     <execution>
