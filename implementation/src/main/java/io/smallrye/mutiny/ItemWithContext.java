@@ -5,7 +5,7 @@ import java.util.Objects;
 /**
  * Models an item flowing along a Mutiny pipeline with its subscriber context attached.
  *
- * @param <T> the iten type
+ * @param <T> the item type
  * @see Uni#attachContext()
  * @see Multi#attachContext()
  */
