@@ -51,6 +51,13 @@ public class ResourceMulti<R, I> extends AbstractMulti<I> {
             return;
         }
 
+        Context context;
+        if (subscriber instanceof ContextSupport) {
+            context = ((ContextSupport) subscriber).context();
+        } else {
+            context = Context.empty();
+        }
+
         Publisher<? extends I> stream;
         try {
             stream = streamSupplier.apply(resource);
@@ -65,6 +72,7 @@ public class ResourceMulti<R, I> extends AbstractMulti<I> {
                             new NullPointerException("Unable to call the finalizer - it returned `null`"));
                 } else {
                     uni.subscribe().with(
+                            context,
                             completed -> Subscriptions.fail(subscriber, e),
                             failed -> Subscriptions.fail(subscriber, new CompositeException(e, failed)));
                 }
@@ -137,6 +145,7 @@ public class ResourceMulti<R, I> extends AbstractMulti<I> {
                 downstream.onFailure(new CompositeException(failure, innerError));
             } else if (uni != null) {
                 uni.subscribe().with(
+                        context(),
                         completed -> downstream.onFailure(failure),
                         failed -> downstream.onFailure(new CompositeException(failure, failed)));
             }
@@ -162,6 +171,7 @@ public class ResourceMulti<R, I> extends AbstractMulti<I> {
                 downstream.onFailure(innerError);
             } else if (uni != null) {
                 uni.subscribe().with(
+                        context(),
                         completed -> downstream.onCompletion(),
                         downstream::onFailure);
             }
@@ -192,6 +202,7 @@ public class ResourceMulti<R, I> extends AbstractMulti<I> {
                 downstream.onFailure(innerError);
             } else if (uni != null) {
                 uni.subscribe().with(
+                        context(),
                         completed -> {
                         },
                         Infrastructure::handleDroppedException // ignore the failure, we have cancelled anyway.

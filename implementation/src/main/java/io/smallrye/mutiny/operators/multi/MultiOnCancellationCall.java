@@ -40,6 +40,7 @@ public class MultiOnCancellationCall<T> extends AbstractMultiOperator<T, T> {
         @Override
         public void cancel() {
             execute().subscribe().with(
+                    context(),
                     ignoredItem -> super.cancel(),
                     ignoredFailure -> super.cancel());
         }

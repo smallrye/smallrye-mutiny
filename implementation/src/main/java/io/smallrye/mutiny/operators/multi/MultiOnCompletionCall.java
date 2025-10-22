@@ -36,6 +36,7 @@ public class MultiOnCompletionCall<T> extends AbstractMultiOperator<T, T> {
         @Override
         public void onCompletion() {
             cancellable = execute().subscribe().with(
+                    context(),
                     ignored -> super.onCompletion(),
                     super::onFailure);
         }
