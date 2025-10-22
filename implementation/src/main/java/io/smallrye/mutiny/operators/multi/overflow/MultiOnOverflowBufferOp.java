@@ -101,6 +101,7 @@ public class MultiOnOverflowBufferOp<T> extends AbstractMultiOperator<T, T> {
             try {
                 Uni<?> uni = nonNull(dropUniMapper.apply(t), "uni");
                 uni.subscribe().with(
+                        context(),
                         ignored -> subscriber.onFailure(bpf),
                         failure -> {
                             bpf.addSuppressed(failure);

@@ -43,6 +43,7 @@ public class MultiOnTerminationCall<T> extends AbstractMultiOperator<T, T> {
                 super.cancel();
             } else {
                 execute(null, true).subscribe().with(
+                        context(),
                         ignored -> super.cancel(),
                         ignored -> {
                             Infrastructure.handleDroppedException(ignored);
@@ -54,6 +55,7 @@ public class MultiOnTerminationCall<T> extends AbstractMultiOperator<T, T> {
         @Override
         public void onFailure(Throwable failure) {
             cancellable = execute(failure, false).subscribe().with(
+                    context(),
                     ignored -> super.onFailure(failure),
                     err -> super.onFailure(new CompositeException(failure, err)));
         }
@@ -61,6 +63,7 @@ public class MultiOnTerminationCall<T> extends AbstractMultiOperator<T, T> {
         @Override
         public void onCompletion() {
             cancellable = execute(null, false).subscribe().with(
+                    context(),
                     ignored -> super.onCompletion(),
                     super::onFailure);
         }
