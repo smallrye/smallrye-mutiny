@@ -56,6 +56,7 @@ public class UniOnSubscribeCall<T> extends UniOperator<T, T> {
             }
 
             uni.subscribe().with(
+                    context(),
                     ignored -> {
                         // Once the uni produces its item, propagates the subscription downstream
                         downstream.onSubscribe(subscription);

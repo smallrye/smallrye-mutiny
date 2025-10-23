@@ -164,6 +164,7 @@ public class MultiOnOverflowKeepLastOp<T> extends AbstractMultiOperator<T, T> {
             try {
                 Uni<?> uni = nonNull(dropUniMapper.apply(possiblyDropped), "uni");
                 uni.subscribe().with(
+                        context(),
                         ignored -> {
                             // Nothing to do
                         }, super::onFailure);

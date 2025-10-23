@@ -40,6 +40,7 @@ public class MultiOnRequestCall<T> extends AbstractMultiOperator<T, T> {
                 return;
             }
             cancellable.set(execute(numberOfItems).subscribe().with(
+                    context(),
                     ignored -> {
                         cancellable.set(null);
                         super.request(numberOfItems);

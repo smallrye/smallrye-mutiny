@@ -483,4 +483,33 @@ public class UniContextPropagationTest {
         int result = latch.await().indefinitely();
         assertThat(result).isEqualTo(2);
     }
+
+    @Test
+    public void uniDelayAndTermination() {
+        AtomicReference<String> txId = new AtomicReference<>();
+        AtomicReference<String> txIdTerm = new AtomicReference<>();
+        String result = Uni.createFrom().context(ctx -> {
+            ctx.put("tx", "123-abc");
+            return Uni.createFrom().item("Yo");
+        })
+                .onItem().delayIt().until(s -> Uni.createFrom().context(ctx -> {
+                    if (ctx.contains("tx")) {
+                        txId.set(ctx.get("tx"));
+                    } else {
+                        txId.set("N/A");
+                    }
+                    return Uni.createFrom().item(s);
+                }))
+                .onTermination().call(() -> Uni.createFrom().context(ctx -> {
+                    if (ctx.contains("tx")) {
+                        txIdTerm.set(ctx.get("tx"));
+                    } else {
+                        txIdTerm.set("N/A");
+                    }
+                    return Uni.createFrom().voidItem();
+                }))
+                .await().atMost(Duration.ofSeconds(5));
+        assertThat(result).isEqualTo("Yo");
+        assertThat(txId.get()).isEqualTo("123-abc");
+    }
 }

@@ -7,6 +7,8 @@ import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
 
 import org.eclipse.microprofile.context.ThreadContext;
 import org.junit.jupiter.api.*;
@@ -330,5 +332,69 @@ public class MultiContextPropagationTest {
 
         int result = latch.await().indefinitely();
         assertThat(result).isEqualTo(2);
+    }
+
+    @Test
+    public void transactionLikePipeline() {
+        AtomicReference<String> txId_completion = new AtomicReference<>();
+        AtomicReference<String> txId_request = new AtomicReference<>();
+        AtomicReference<String> txId_subscripion = new AtomicReference<>();
+
+        List<String> strs = Uni.createFrom().context(ctx -> {
+            ctx.put("tx", "123-abc");
+            return Uni.createFrom().item("foo");
+        })
+                .onItem().transformToMulti(s -> Multi.createFrom().items(s + "_1", s + "_2", s + "_3"))
+                .onSubscription().call(() -> Uni.createFrom().context(ctx -> {
+                    if (ctx.contains("tx")) {
+                        txId_subscripion.set(ctx.get("tx"));
+                    } else {
+                        txId_subscripion.set("N/A");
+                    }
+                    return Uni.createFrom().voidItem();
+                }))
+                .onRequest().call(() -> Uni.createFrom().context(ctx -> {
+                    if (ctx.contains("tx")) {
+                        txId_request.set(ctx.get("tx"));
+                    } else {
+                        txId_request.set("N/A");
+                    }
+                    return Uni.createFrom().voidItem();
+                }))
+                .onCompletion().call(() -> Uni.createFrom().context(ctx -> {
+                    if (ctx.contains("tx")) {
+                        txId_completion.set(ctx.get("tx"));
+                    } else {
+                        txId_completion.set("N/A");
+                    }
+                    return Uni.createFrom().voidItem();
+                }))
+                .collect().asList().await().atMost(Duration.ofSeconds(5));
+
+        assertThat(strs).containsExactly("foo_1", "foo_2", "foo_3");
+        assertThat(txId_completion.get()).isEqualTo("123-abc");
+        assertThat(txId_request.get()).isEqualTo("123-abc");
+        assertThat(txId_subscripion.get()).isEqualTo("123-abc");
+    }
+
+    @Test
+    public void resourceAndFinalizer() {
+        AtomicReference<String> txId = new AtomicReference<>();
+        List<Integer> list = Multi.createFrom().resource(() -> 3, n -> Multi.createFrom().range(0, n))
+                .withFinalizer((Function<? super Integer, Uni<Void>>) n -> Uni.createFrom().context(ctx -> {
+                    ctx.put("tx", "123-abc");
+                    return Uni.createFrom().voidItem();
+                }))
+                .onCompletion().call(() -> Uni.createFrom().context(ctx -> {
+                    if (ctx.contains("tx")) {
+                        txId.set(ctx.get("tx"));
+                    } else {
+                        txId.set("N/A");
+                    }
+                    return Uni.createFrom().voidItem();
+                }))
+                .collect().asList().await().atMost(Duration.ofSeconds(5));
+        assertThat(list).containsExactly(0, 1, 2);
+        assertThat(txId.get()).isEqualTo("123-abc");
     }
 }

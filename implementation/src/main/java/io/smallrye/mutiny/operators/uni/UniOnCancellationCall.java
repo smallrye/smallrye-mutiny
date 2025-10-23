@@ -65,6 +65,7 @@ public class UniOnCancellationCall<I> extends UniOperator<I, I> {
             if (stateUpdater.compareAndSet(this, State.INIT, State.CANCELLED)) {
                 UniSubscription sub = getAndSetUpstreamSubscription(CANCELLED);
                 execute().subscribe().with(
+                        context(),
                         ignoredItem -> {
                             if (sub != null) {
                                 sub.cancel();

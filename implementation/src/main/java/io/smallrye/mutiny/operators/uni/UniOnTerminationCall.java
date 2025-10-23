@@ -52,6 +52,7 @@ public class UniOnTerminationCall<I> extends UniOperator<I, I> {
                 } else {
                     // Cancellation happens while we haven't executed the mapper: invoke it and cancel.
                     execute(null, null, true).subscribe().with(
+                            context(),
                             ignored -> {
                                 super.cancel();
                             },
@@ -67,6 +68,7 @@ public class UniOnTerminationCall<I> extends UniOperator<I, I> {
         public void onItem(I item) {
             if (!isCancelled()) {
                 cancellable = execute(item, null, false).subscribe().with(
+                        context(),
                         ignored -> downstream.onItem(item),
                         downstream::onFailure);
             }
@@ -76,6 +78,7 @@ public class UniOnTerminationCall<I> extends UniOperator<I, I> {
         public void onFailure(Throwable failure) {
             if (!isCancelled()) {
                 cancellable = execute(null, failure, false).subscribe().with(
+                        context(),
                         ignored -> downstream.onFailure(failure),
                         ignored -> downstream.onFailure(new CompositeException(failure, ignored)));
             } else {
