@@ -65,6 +65,7 @@ public class MultiRepeatUntilOp<T> extends AbstractMultiOperator<T, T> implement
                 drainLoop();
             } else {
                 delay.subscribe().with(
+                        context(),
                         ignored -> drainLoop(),
                         f -> {
                             cancel();

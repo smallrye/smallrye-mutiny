@@ -39,7 +39,10 @@ public class UniDelayUntil<T> extends UniOperator<T, T> {
                         super.onFailure(new NullPointerException("The function returned `null` instead of a valid `Uni`"));
                         return;
                     }
-                    uni.runSubscriptionOn(executor).subscribe().with(ignored -> super.onItem(item), super::onFailure);
+                    uni.runSubscriptionOn(executor).subscribe().with(
+                            context(),
+                            ignored -> super.onItem(item),
+                            super::onFailure);
                 } catch (Throwable err) {
                     super.onFailure(err);
                 }

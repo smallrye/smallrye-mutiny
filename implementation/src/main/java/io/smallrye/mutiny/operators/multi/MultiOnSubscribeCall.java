@@ -56,6 +56,7 @@ public final class MultiOnSubscribeCall<T> extends AbstractMultiOperator<T, T> {
                 try {
                     Uni<?> uni = Objects.requireNonNull(onSubscribe.apply(s), "The produced Uni must not be `null`");
                     uni.subscribe().with(
+                            context(),
                             ignored -> uniCompleted(),
                             err -> uniFailed(err));
                 } catch (Throwable e) {

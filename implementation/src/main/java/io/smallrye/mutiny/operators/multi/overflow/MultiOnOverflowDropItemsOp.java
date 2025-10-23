@@ -88,6 +88,7 @@ public class MultiOnOverflowDropItemsOp<T> extends AbstractMultiOperator<T, T> {
             try {
                 Uni<?> uni = nonNull(dropUniMapper.apply(item), "uni");
                 uni.subscribe().with(
+                        context(),
                         ignored -> {
                             // Just drop and ignore
                         },
