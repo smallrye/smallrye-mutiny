@@ -3,6 +3,7 @@ package io.smallrye.mutiny.operators.uni;
 import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.locks.ReentrantLock;
@@ -118,12 +119,16 @@ public class UniMemoizeOp<I> extends UniOperator<I, I> implements UniSubscriber<
     }
 
     private List<UniSubscriber<? super I>> gatherAwaiters() {
-        return new ArrayList<>(awaiters);
+        ArrayList<UniSubscriber<? super I>> copy = new ArrayList<>(awaiters);
+        awaiters.removeAll(copy);
+        return copy;
     }
 
     private void notifyAwaiters(List<UniSubscriber<? super I>> toNotify, Object result) {
-        for (UniSubscriber<? super I> awaiter : toNotify) {
+        for (Iterator<UniSubscriber<? super I>> iterator = toNotify.iterator(); iterator.hasNext();) {
+            UniSubscriber<? super I> awaiter = iterator.next();
             forwardTo(awaiter, result);
+            iterator.remove();
         }
     }
 
