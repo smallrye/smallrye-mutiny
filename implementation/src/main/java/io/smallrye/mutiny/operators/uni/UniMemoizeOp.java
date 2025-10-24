@@ -2,7 +2,9 @@ package io.smallrye.mutiny.operators.uni;
 
 import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.BooleanSupplier;
 
