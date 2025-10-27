@@ -1,5 +1,5 @@
 ///usr/bin/env jbang "$0" "$@" ; exit $?
-//DEPS io.smallrye.reactive:mutiny:3.0.0
+//DEPS io.smallrye.reactive:mutiny:3.0.1
 package _03_composition_transformation;
 
 import java.util.Random;

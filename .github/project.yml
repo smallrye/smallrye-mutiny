@@ -1,5 +1,5 @@
 name: SmallRye Mutiny
 release:
-  previous-version: 2.9.4
-  current-version: 3.0.0
+  previous-version: 3.0.0
+  current-version: 3.0.1
   next-version: 999-SNAPSHOT
