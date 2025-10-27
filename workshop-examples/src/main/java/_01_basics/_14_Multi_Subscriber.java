@@ -1,5 +1,5 @@
 ///usr/bin/env jbang "$0" "$@" ; exit $?
-//DEPS io.smallrye.reactive:mutiny:2.9.4
+//DEPS io.smallrye.reactive:mutiny:2.9.5
 package _01_basics;
 
 import java.util.concurrent.Flow.Subscriber;
