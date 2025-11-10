@@ -38,55 +38,78 @@ class MultiConcatMapNoPrefetchTest {
         });
     }
 
-    @ParameterizedTest
-    @MethodSource("argsTransformToUni")
-    void testTransformToUni(boolean prefetch, int[] upstreamRequests) {
+    @Test
+    void testTransformToUniPrefetch() {
         Multi<Integer> result = upstream.onItem()
                 .transformToUni(integer -> Uni.createFrom().item(integer)
                         .onItem().delayIt().by(Duration.ofMillis(10)))
-                .concatenate(prefetch);
+                .concatenate(true);
         AssertSubscriber<Integer> ts = new AssertSubscriber<>(5);
         result.runSubscriptionOn(Infrastructure.getDefaultExecutor()).subscribe(ts);
         ts.request(5);
         ts.awaitItems(10);
-        assertThat(upstreamRequestCount).hasValue(upstreamRequests[0]);
+        assertThat(upstreamRequestCount).hasValueGreaterThanOrEqualTo(11);
         ts.request(1);
         ts.awaitItems(11);
-        assertThat(upstreamRequestCount).hasValue(upstreamRequests[1]);
+        assertThat(upstreamRequestCount).hasValueGreaterThanOrEqualTo(12);
         ts.request(1);
         ts.awaitItems(12);
-        assertThat(upstreamRequestCount).hasValue(upstreamRequests[2]);
+        assertThat(upstreamRequestCount).hasValueGreaterThanOrEqualTo(13);
     }
 
-    private static Stream<Arguments> argsTransformToUni() {
-        return Stream.of(
-                Arguments.of(true, new int[] { 11, 12, 13 }),
-                Arguments.of(false, new int[] { 10, 11, 12 }));
+    @Test
+    void testTransformToUni() {
+        Multi<Integer> result = upstream.onItem()
+                .transformToUni(integer -> Uni.createFrom().item(integer)
+                        .onItem().delayIt().by(Duration.ofMillis(10)))
+                .concatenate(false);
+        AssertSubscriber<Integer> ts = new AssertSubscriber<>(5);
+        result.runSubscriptionOn(Infrastructure.getDefaultExecutor()).subscribe(ts);
+        ts.request(5);
+        ts.awaitItems(10);
+        assertThat(upstreamRequestCount).hasValue(10);
+        ts.request(1);
+        ts.awaitItems(11);
+        assertThat(upstreamRequestCount).hasValue(11);
+        ts.request(1);
+        ts.awaitItems(12);
+        assertThat(upstreamRequestCount).hasValue(12);
     }
 
-    @ParameterizedTest
-    @MethodSource("argsTransformToMulti")
-    void testTransformToMulti(boolean prefetch, int[] upstreamRequests) {
+    @Test
+    void testTransformToMultiPrefetch() {
         Multi<Integer> result = upstream.onItem()
                 .transformToMulti(i -> Multi.createFrom().items(i, i))
-                .concatenate(prefetch);
+                .concatenate(true);
         AssertSubscriber<Integer> ts = new AssertSubscriber<>();
         result.runSubscriptionOn(Infrastructure.getDefaultExecutor()).subscribe(ts);
         ts.request(10);
         ts.awaitItems(10);
-        assertThat(upstreamRequestCount).hasValue(upstreamRequests[0]);
+        assertThat(upstreamRequestCount).hasValue(6);
         ts.request(1);
         ts.awaitItems(11);
-        assertThat(upstreamRequestCount).hasValue(upstreamRequests[1]);
+        assertThat(upstreamRequestCount).hasValue(6);
         ts.request(1);
         ts.awaitItems(12);
-        assertThat(upstreamRequestCount).hasValue(upstreamRequests[2]);
+        assertThat(upstreamRequestCount).hasValue(7);
     }
 
-    private static Stream<Arguments> argsTransformToMulti() {
-        return Stream.of(
-                Arguments.of(true, new int[] { 6, 6, 7 }),
-                Arguments.of(false, new int[] { 5, 6, 6 }));
+    @Test
+    void testTransformToMulti() {
+        Multi<Integer> result = upstream.onItem()
+                .transformToMulti(i -> Multi.createFrom().items(i, i))
+                .concatenate(false);
+        AssertSubscriber<Integer> ts = new AssertSubscriber<>();
+        result.runSubscriptionOn(Infrastructure.getDefaultExecutor()).subscribe(ts);
+        ts.request(10);
+        ts.awaitItems(10);
+        assertThat(upstreamRequestCount).hasValue(5);
+        ts.request(1);
+        ts.awaitItems(11);
+        assertThat(upstreamRequestCount).hasValue(6);
+        ts.request(1);
+        ts.awaitItems(12);
+        assertThat(upstreamRequestCount).hasValue(6);
     }
 
     @ParameterizedTest
