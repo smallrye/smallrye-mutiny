@@ -223,6 +223,10 @@ public final class MultiFlatMapOp<I, O> extends AbstractMultiOperator<I, O> {
                     }
 
                     inner.request(1);
+                    int queuedInners = nonEmptyInnerQueues();
+                    if (queuedInners == 0) {
+                        upstream.request(1);
+                    }
                 } else {
                     if (q == null) {
                         q = getOrCreateInnerQueue(inner);
@@ -357,6 +361,11 @@ public final class MultiFlatMapOp<I, O> extends AbstractMultiOperator<I, O> {
                                     }
                                     e = 0L;
                                 }
+                                d = inner.done;
+                                boolean empty = q.isEmpty();
+                                if (!d && empty && replenishMain == 0) {
+                                    //                                    replenishMain++;
+                                }
                             }
                         }
 
@@ -402,6 +411,11 @@ public final class MultiFlatMapOp<I, O> extends AbstractMultiOperator<I, O> {
                             replenishMain++;
                         }
                     }
+                }
+
+                int queuedInners = nonEmptyInnerQueues();
+                if (queuedInners == 0) {
+                    replenishMain++;
                 }
 
                 if (replenishMain != 0L && !done && !cancelled) {
@@ -509,6 +523,25 @@ public final class MultiFlatMapOp<I, O> extends AbstractMultiOperator<I, O> {
                 inner.queue = q;
             }
             return q;
+        }
+
+        int nonEmptyInnerQueues() {
+            FlatMapInner<O>[] inners = get();
+            if (inners == null || isEmpty()) {
+                return -1;
+            }
+            int queuedInners = 0;
+            for (int i = 0; i < inners.length; i++) {
+                FlatMapInner<O> inner = inners[i];
+                if (inner == null || inner.done) {
+                    continue;
+                }
+                Queue<O> q = inner.queue;
+                if (q != null && !q.isEmpty()) {
+                    queuedInners++;
+                }
+            }
+            return queuedInners;
         }
 
         @Override
