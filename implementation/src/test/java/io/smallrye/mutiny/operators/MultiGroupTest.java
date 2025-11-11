@@ -14,10 +14,13 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Flow.Subscriber;
 import java.util.concurrent.Flow.Subscription;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
@@ -1036,5 +1039,48 @@ public class MultiGroupTest {
                 () -> Multi.createFrom().range(1, 10).group().by(i -> i % 2, -10L));
         assertThrows(IllegalArgumentException.class,
                 () -> Multi.createFrom().range(1, 10).group().by(i -> i % 2, 0L));
+    }
+
+    @Test
+    void testUpstreamRequestsNotBlownOutOfProportion() {
+        ExecutorService executor = Executors.newFixedThreadPool(10);
+        try {
+            AtomicLong requestCounter = new AtomicLong(0);
+            AtomicLong itemCounter = new AtomicLong(0);
+            AtomicReference<MultiEmitter<? super Integer>> e = new AtomicReference<>();
+
+            Multi.createFrom().<Integer>emitter(e::set)
+                    .onRequest().invoke(requestCounter::addAndGet)
+                    .group().by(i -> i / 10)
+                    .onItem().transformToMulti(g -> g.map(i -> g.key() + " : " + i)
+                            .emitOn(executor)
+                            .invoke(s -> {
+                                try {
+                                    Thread.sleep(100);
+                                    itemCounter.incrementAndGet();
+                                } catch (InterruptedException ex) {
+                                    throw new RuntimeException(ex);
+                                }
+                            }))
+                    .merge()
+                    .subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE));
+
+            int itemCount = 100;
+            MultiEmitter<? super Integer> emitter = e.get();
+            new Thread(() -> {
+                int i = 0;
+                while (true) {
+                    if (emitter.requested() > 0) {
+                        emitter.emit(i);
+                        i++;
+                    }
+                }
+            }).start();
+
+            await().untilAsserted(() -> assertThat(itemCounter).hasValueGreaterThanOrEqualTo(itemCount));
+            assertThat(requestCounter.get()).isLessThan(10000L); // this should not blow up
+        } finally {
+            executor.shutdownNow();
+        }
     }
 }

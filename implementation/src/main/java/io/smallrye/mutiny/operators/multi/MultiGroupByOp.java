@@ -417,8 +417,6 @@ public final class MultiGroupByOp<T, K, V> extends AbstractMultiOperator<T, Grou
                             requested.addAndGet(-e);
                         }
                         parent.getUpstreamSubscription().request(e);
-                    } else {
-                        parent.getUpstreamSubscription().request(parent.prefetch);
                     }
                 }
 
