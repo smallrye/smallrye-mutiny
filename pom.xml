@@ -104,7 +104,7 @@
         <testng-junit5-engine.version>1.0.6</testng-junit5-engine.version>
 
         <mockito-core.version>5.20.0</mockito-core.version>
-        <byte-buddy.version>1.17.8</byte-buddy.version>
+        <byte-buddy.version>1.18.0</byte-buddy.version>
 
         <revapi-maven-plugin.version>0.15.1</revapi-maven-plugin.version>
         <revapi-java.version>0.28.4</revapi-java.version>
