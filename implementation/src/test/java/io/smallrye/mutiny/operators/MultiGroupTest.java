@@ -1049,7 +1049,7 @@ public class MultiGroupTest {
             AtomicLong itemCounter = new AtomicLong(0);
             AtomicReference<MultiEmitter<? super Integer>> e = new AtomicReference<>();
 
-            Multi.createFrom().<Integer>emitter(e::set)
+            Multi.createFrom().<Integer> emitter(e::set)
                     .onRequest().invoke(requestCounter::addAndGet)
                     .group().by(i -> i / 10)
                     .onItem().transformToMulti(g -> g.map(i -> g.key() + " : " + i)
