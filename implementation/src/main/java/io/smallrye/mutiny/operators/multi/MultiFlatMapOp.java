@@ -223,6 +223,7 @@ public final class MultiFlatMapOp<I, O> extends AbstractMultiOperator<I, O> {
                     }
 
                     inner.request(1);
+                    upstream.request(1);
                 } else {
                     if (q == null) {
                         q = getOrCreateInnerQueue(inner);
@@ -356,6 +357,11 @@ public final class MultiFlatMapOp<I, O> extends AbstractMultiOperator<I, O> {
                                         }
                                     }
                                     e = 0L;
+                                }
+                                d = inner.done;
+                                boolean empty = q.isEmpty();
+                                if (!d && empty && replenishMain == 0) {
+                                    replenishMain++;
                                 }
                             }
                         }
