@@ -53,3 +53,101 @@ You can also define a custom function that provides a capping value based on a c
 Here we have a function that requests 75% of the downstream requests.
 
 Note that the function must return a value `n` that satisfies `(0 < n <= requested)` where `requested` is the downstream demand.
+
+## Pausing the demand
+
+The `Multi.pauseDemand()` operator provides fine-grained control over demand propagation in reactive streams.
+Unlike cancellation, which terminates the subscription, pausing allows to suspend demand without unsubscribing from the upstream.
+This is useful for implementing flow control patterns where item flow needs to be paused based on external conditions.
+
+### Basic pausing and resuming
+
+The `pauseDemand()` operator works with a `DemandPauser` handle that allows to control the stream:
+
+```java linenums="1"
+{{ insert('java/guides/operators/PausingDemandTest.java', 'basic') }}
+```
+
+The `DemandPauser` provides methods to:
+
+- `pause()`: Stop propagating demand to upstream
+- `resume()`: Resume demand propagation and deliver buffered items
+- `isPaused()`: Check the current pause state
+
+Note that a few items may still arrive after pausing due to in-flight requests that were already issued to upstream.
+
+### Starting in a paused state
+
+You can create a stream that starts paused and only begins flowing when explicitly resumed:
+
+```java linenums="1"
+{{ insert('java/guides/operators/PausingDemandTest.java', 'initially-paused') }}
+```
+
+This is useful when you want to prepare a stream but delay its execution until certain conditions are met.
+
+### Late subscription
+
+By default, the upstream subscription happens immediately even when starting paused.
+The `lateSubscription()` option delays the upstream subscription until the stream is resumed:
+
+```java linenums="1"
+{{ insert('java/guides/operators/PausingDemandTest.java', 'late-subscription') }}
+```
+
+### Buffer strategies
+
+When a stream is paused, the operator stops requesting new items from upstream.
+However, items that were already requested (due to downstream demand) may still arrive.
+Buffer strategies control what happens to these in-flight items.
+
+The `pauseDemand()` operator supports three buffer strategies: `BUFFER` (default), `DROP`, and `IGNORE`.
+Configuring any other strategy will throw an `IllegalArgumentException`.
+
+#### BUFFER strategy (default)
+
+Already-requested items are buffered while paused and delivered when resumed:
+
+```java linenums="1"
+{{ insert('java/guides/operators/PausingDemandTest.java', 'buffer-strategy') }}
+```
+
+You can configure the buffer size:
+
+- `bufferUnconditionally()`: Unbounded buffer
+- `bufferSize(n)`: Buffer up to `n` items, then fail with buffer overflow
+
+When the buffer overflows, the stream fails with an `IllegalStateException`.
+
+**Important**: The buffer only holds items that were already requested from upstream before pausing.
+When paused, no new requests are issued to upstream, so the buffer size is bounded by the outstanding demand at the time of pausing.
+
+#### DROP strategy
+
+Already-requested items are dropped while paused:
+
+```java linenums="1"
+{{ insert('java/guides/operators/PausingDemandTest.java', 'drop-strategy') }}
+```
+
+Items that arrive while paused are discarded, and when resumed, the stream continues requesting fresh items.
+
+#### IGNORE strategy
+
+Already-requested items continue to flow downstream while paused.
+This strategy doesn't use any buffers.
+It only pauses demand from being issued to upstream, but does not pause the flow of already requested items.
+
+### Buffer management
+
+When using the BUFFER strategy, you can inspect and manage the buffer:
+
+```java linenums="1"
+{{ insert('java/guides/operators/PausingDemandTest.java', 'buffer-management') }}
+```
+
+The `DemandPauser` provides:
+
+- `bufferSize()`: Returns the current number of buffered items
+- `clearBuffer()`: Clears the buffer (only works while paused), returns `true` if successful
+
