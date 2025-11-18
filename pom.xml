@@ -101,7 +101,7 @@
         <awaitility.version>4.3.0</awaitility.version>
         <version.surefire.plugin>3.5.4</version.surefire.plugin>
         <testng.version>7.11.0</testng.version>
-        <testng-junit5-engine.version>1.0.6</testng-junit5-engine.version>
+        <testng-junit5-engine.version>1.1.0</testng-junit5-engine.version>
 
         <mockito-core.version>5.20.0</mockito-core.version>
         <byte-buddy.version>1.18.1</byte-buddy.version>
