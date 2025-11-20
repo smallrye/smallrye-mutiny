@@ -23,6 +23,7 @@ nav:
       - 'guides/unchecked-exceptions.md'
       - 'guides/filtering-items.md'
       - 'guides/collecting-items.md'
+      - 'guides/grouping-items.md'
       - 'guides/take-skip-items.md'
       - 'guides/eliminate-duplicates-and-repetitions.md'
       - 'guides/handling-null.md'

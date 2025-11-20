@@ -64,7 +64,7 @@ public class MultiFlatten<I, O> {
      * Produces a {@link Multi} containing the items from {@link Publisher} produced by the {@code mapper} for each
      * item emitted by this {@link Multi}.
      * <p>
-     * The operators behaves as follows:
+     * The operator behaves as follows:
      * <ul>
      * <li>for each item emitted by this {@link Multi}, the mapper is called and produces a {@link Publisher}
      * (potentially a {@code Multi}). The mapper must not return {@code null}</li>
@@ -83,7 +83,7 @@ public class MultiFlatten<I, O> {
      * Produces a {@link Multi} containing the items from {@link Publisher} produced by the {@code mapper} for each
      * item emitted by this {@link Multi}.
      * <p>
-     * The operators behaves as follows:
+     * The operator behaves as follows:
      * <ul>
      * <li>for each item emitted by this {@link Multi}, the mapper is called and produces a {@link Publisher}
      * (potentially a {@code Multi}). The mapper must not return {@code null}</li>
@@ -91,7 +91,18 @@ public class MultiFlatten<I, O> {
      * produced {@link Multi}. The returned object lets you configure the flattening process.</li>
      * </ul>
      * <p>
-     * This method allows configuring the concurrency, i.e. the maximum number of in-flight/subscribed inner streams
+     * This method allows configuring the concurrency, i.e. the maximum number of in-flight/subscribed inner streams.
+     * <p>
+     * <strong>Important:</strong> The concurrency parameter controls how many inner streams can be subscribed to
+     * concurrently. If the number of inner streams that need to be processed exceeds this limit, some streams
+     * may not be able to make progress, potentially leading to <em>upstream request starvation</em> where the
+     * upstream won't receive requests for emitting new items. This is particularly important when:
+     * <ul>
+     * <li>Using after {@code group().by()} - ensure concurrency is at least the number of groups</li>
+     * <li>Mapping to long-running or infinite streams - ensure they can terminate or use unbounded concurrency</li>
+     * </ul>
+     * Consider using {@code merge(Integer.MAX_VALUE)} without parameters for unbounded concurrency or {@code concatenate()} for
+     * sequential processing when appropriate.
      *
      * @param concurrency the concurrency
      * @return the object to configure the {@code flatMap} operation.

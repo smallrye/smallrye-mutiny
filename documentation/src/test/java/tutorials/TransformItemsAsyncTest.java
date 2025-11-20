@@ -110,6 +110,28 @@ public class TransformItemsAsyncTest {
         assertThat(concat.collect().asList().await().indefinitely()).containsExactly("a", "b");
     }
 
+    @Test
+    public void testMergeConcurrency() {
+        Multi<String> multi = Multi.createFrom().items("a", "b");
+
+        // <merge-concurrency>
+        Multi<String> limitConcurrent = multi
+                .onItem().transformToUni(item -> callService(item))
+                .merge(2);
+
+        Multi<String> defaultConcurrent = multi
+                .onItem().transformToUni(item -> callService(item))
+                .merge();
+        // </merge-concurrency>
+
+        assertThat(limitConcurrent.collect().asList().await().indefinitely()).containsExactly("a", "b");
+        assertThat(defaultConcurrent.collect().asList().await().indefinitely()).containsExactly("a", "b");
+    }
+
+    private Uni<String> callService(String item) {
+        return Uni.createFrom().item(item);
+    }
+
     private Multi<String> someMulti(String item) {
         return Multi.createFrom().item(item);
     }
