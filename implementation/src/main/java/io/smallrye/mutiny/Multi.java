@@ -638,6 +638,39 @@ public interface Multi<T> extends Publisher<T> {
     MultiDemandPacing<T> paceDemand();
 
     /**
+     * Allows pausing and resuming demand propagation to upstream using a {@link io.smallrye.mutiny.subscription.DemandPauser}.
+     * <p>
+     * Unlike cancellation which terminates the subscription, temporarily pausing suspends the demand without unsubscribing.
+     * This is useful for implementing flow control patterns where demand needs to be temporarily suspended based on
+     * external conditions (e.g., downstream system availability, rate limiting, resource constraints).
+     * <p>
+     * Example:
+     *
+     * <pre>
+     * {@code
+     * DemandPauser pauser = new DemandPauser();
+     *
+     * Multi.createFrom().range(0, 100)
+     *         .pauseDemand().using(pauser)
+     *         .onItem().call(i -> Uni.createFrom().nullItem()
+     *                 .onItem().delayIt().by(Duration.ofMillis(10)))
+     *         .subscribe().with(System.out::println);
+     *
+     * // Later, from anywhere in the application:
+     * pauser.pause(); // Stop requesting new items
+     * pauser.resume(); // Continue requesting items
+     * }
+     * </pre>
+     *
+     * @return a {@link MultiDemandPausing} to configure the pausing behavior
+     * @see io.smallrye.mutiny.subscription.DemandPauser
+     */
+    @CheckReturnValue
+    default MultiDemandPausing<T> pauseDemand() {
+        throw new UnsupportedOperationException("Default method added to limit binary incompatibility");
+    }
+
+    /**
      * Cap all downstream subscriber requests to a maximum value.
      * <p>
      * This is a shortcut for:

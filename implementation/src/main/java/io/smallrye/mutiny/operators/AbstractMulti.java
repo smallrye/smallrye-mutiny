@@ -16,6 +16,7 @@ import io.smallrye.mutiny.groups.MultiBroadcast;
 import io.smallrye.mutiny.groups.MultiCollect;
 import io.smallrye.mutiny.groups.MultiConvert;
 import io.smallrye.mutiny.groups.MultiDemandPacing;
+import io.smallrye.mutiny.groups.MultiDemandPausing;
 import io.smallrye.mutiny.groups.MultiGroup;
 import io.smallrye.mutiny.groups.MultiIfNoItem;
 import io.smallrye.mutiny.groups.MultiOnCancel;
@@ -204,6 +205,11 @@ public abstract class AbstractMulti<T> implements Multi<T> {
     @Override
     public MultiDemandPacing<T> paceDemand() {
         return new MultiDemandPacing<>(this);
+    }
+
+    @Override
+    public MultiDemandPausing<T> pauseDemand() {
+        return new MultiDemandPausing<>(this);
     }
 
     @Override
