@@ -1,5 +1,6 @@
 package io.smallrye.mutiny.operators.uni;
 
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -13,21 +14,22 @@ public class UniSubscribeToCompletionStage {
     public static <T> CompletableFuture<T> subscribe(Uni<T> uni, Context context) {
         final AtomicReference<Cancellable> cancellable = new AtomicReference<>();
 
-        CompletableFuture<T> future = new CompletableFuture<T>() {
-            @Override
-            public boolean cancel(boolean mayInterruptIfRunning) {
-                boolean cancelled = super.cancel(mayInterruptIfRunning);
-                if (cancelled) {
+        CompletableFuture<T> future = Infrastructure.wrapCompletableFuture(new CompletableFuture<T>());
+        future.whenComplete((val, x) -> {
+            if (x instanceof CancellationException) {
+                // forward the cancellation to the uni
+                if (future.isCancelled()) {
                     Cancellable c = cancellable.get();
                     if (c != null) {
                         c.cancel();
                     }
                 }
-                return cancelled;
             }
-        };
-
+        });
         cancellable.set(uni.subscribe().with(context, future::complete, future::completeExceptionally));
-        return Infrastructure.wrapCompletableFuture(future);
+        // We return future here and not whatever is returned from future.whenComplete, because that
+        // new stage will wrap any exceptions into a CompletionException which we do not want, and
+        // is exposed by UniOrTest (at least)
+        return future;
     }
 }
