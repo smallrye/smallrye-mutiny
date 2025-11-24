@@ -12,7 +12,7 @@ jobs:
   publish-website:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         name: Checkout code
         with:
           fetch-depth: 0 # fetch all commits and branches for mike to work properly
