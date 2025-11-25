@@ -9,6 +9,6 @@ import kotlinx.coroutines.CancellationException
 internal inline fun suppressCancellationException(block: () -> Unit) =
     try {
         block()
-    } catch (e: CancellationException) {
+    } catch (_: CancellationException) {
         // CancellationExceptions are likely to happen if an emitter processes during cancellation/unsubscription.
     }

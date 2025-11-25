@@ -6,13 +6,13 @@ import io.smallrye.mutiny.subscription.MultiSubscriber
 import java.util.concurrent.Flow.Subscription
 import java.util.concurrent.atomic.AtomicReference
 import kotlin.coroutines.cancellation.CancellationException
-import kotlin.coroutines.coroutineContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.channels.trySendBlocking
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.buffer
 import kotlinx.coroutines.flow.callbackFlow
@@ -32,7 +32,7 @@ import kotlinx.coroutines.launch
 fun <T> Multi<T>.asFlow(
     bufferCapacity: Int = Channel.UNLIMITED,
     bufferOverflowStrategy: BufferOverflow = BufferOverflow.SUSPEND
-): Flow<T> = callbackFlow<T> {
+): Flow<T> = callbackFlow {
     val parentCtx = coroutineContext
 
     val subscriber = object : MultiSubscriber<T> {
@@ -77,7 +77,7 @@ fun <T> Multi<T>.asFlow(
  * without respecting the requested amount of the subscriber.
  */
 suspend fun <T> Flow<T>.asMulti(): Multi<T> {
-    val parentCtx = coroutineContext
+    val parentCtx = currentCoroutineContext()
     return Multi.createFrom().emitter { em: MultiEmitter<in T> ->
         val job = CoroutineScope(parentCtx).launch {
             try {
@@ -101,4 +101,4 @@ suspend fun <T> Flow<T>.asMulti(): Multi<T> {
     }
 }
 
-private class NonPropagatingCancellationException : kotlin.coroutines.cancellation.CancellationException()
+private class NonPropagatingCancellationException : CancellationException()
