@@ -1,5 +1,5 @@
 ///usr/bin/env jbang "$0" "$@" ; exit $?
-//DEPS io.smallrye.reactive:mutiny:3.0.1
+//DEPS io.smallrye.reactive:mutiny:3.0.2
 package _07_advanced_streaming;
 
 import static _07_advanced_streaming._01_Multi_Split.Country.*;
