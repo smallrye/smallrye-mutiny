@@ -8,10 +8,7 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -23,8 +20,10 @@ import org.junit.jupiter.api.parallel.ResourceAccessMode;
 import org.junit.jupiter.api.parallel.ResourceLock;
 
 import io.smallrye.mutiny.helpers.test.AssertSubscriber;
+import io.smallrye.mutiny.helpers.test.UniAssertSubscriber;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.tuples.Tuple2;
+import io.smallrye.mutiny.tuples.Tuple3;
 import junit5.support.InfrastructureResource;
 
 @ResourceLock(value = InfrastructureResource.NAME, mode = ResourceAccessMode.READ)
@@ -132,5 +131,18 @@ class BugReproducersTest {
         await().until(() -> completed.get() || failure.get() != null);
         assertThat(failure.get()).describedAs("No failure must have been emitted").isNull();
         assertThat(completed.get()).isTrue();
+    }
+
+    @RepeatedTest(1_000)
+    void reproducer_1993() {
+        // Race condition in UniAndCombination, spotted in https://github.com/smallrye/smallrye-mutiny/issues/1993
+        Uni<String> a = Uni.createFrom().completionStage(() -> CompletableFuture.supplyAsync(() -> "A"));
+        Uni<String> b = Uni.createFrom().completionStage(() -> CompletableFuture.supplyAsync(() -> "B"));
+        Uni<String> c = Uni.createFrom().completionStage(() -> CompletableFuture.supplyAsync(() -> "C"));
+        Uni<Tuple3<String, String, String>> uni = Uni.combine().all().unis(a, b, c).usingConcurrencyOf(3).asTuple();
+
+        UniAssertSubscriber<Tuple3<String, String, String>> sub = uni.subscribe().withSubscriber(UniAssertSubscriber.create());
+        sub.awaitItem(Duration.ofSeconds(5))
+                .assertItem(Tuple3.of("A", "B", "C"));
     }
 }
