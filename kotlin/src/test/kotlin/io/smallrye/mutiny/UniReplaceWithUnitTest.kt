@@ -35,7 +35,7 @@ class UniReplaceWithUnitTest {
     @Test
     fun `test an Uni that's already Void`() {
         // Given
-        val uni = Uni.createFrom().voidItem();
+        val uni = Uni.createFrom().voidItem()
 
         // When
         val subscriber = UniAssertSubscriber.create<Any>()
