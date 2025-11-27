@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.concurrent.Flow.Subscription;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -58,14 +58,15 @@ public class UniAndCombination<I, O> extends UniOperator<I, O> {
         private final List<UniHandler> handlers = new ArrayList<>();
         private final UniSubscriber<? super O> subscriber;
 
-        AtomicBoolean cancelled = new AtomicBoolean();
-        AtomicInteger nextIndex = new AtomicInteger();
+        final AtomicBoolean cancelled = new AtomicBoolean();
+        final AtomicInteger nextIndex = new AtomicInteger();
+        final AtomicInteger wip = new AtomicInteger();
 
         AndSupervisor(UniSubscriber<? super O> sub) {
             subscriber = sub;
 
             Context context = subscriber.context();
-            for (Uni uni : unis) {
+            for (Uni<?> uni : unis) {
                 UniHandler result = new UniHandler(this, uni, context);
                 handlers.add(result);
             }
@@ -78,7 +79,7 @@ public class UniAndCombination<I, O> extends UniOperator<I, O> {
                 upperBound = handlers.size();
             } else {
                 upperBound = Math.min(handlers.size(), concurrency);
-                nextIndex = new AtomicInteger(upperBound);
+                nextIndex.set(upperBound);
             }
             for (int i = 0; i < upperBound; i++) {
                 if (cancelled.get()) {
@@ -103,40 +104,47 @@ public class UniAndCombination<I, O> extends UniOperator<I, O> {
          * @param failed whether the {@code res} just fired a failure
          */
         void check(UniHandler res, boolean failed) {
-            int incomplete = unis.size();
-
-            // One of the uni failed, and we can fire a failure immediately.
-            if (failed && !collectAllFailureBeforeFiring) {
-                if (cancelled.compareAndSet(false, true)) {
-                    // Cancel all subscriptions
-                    handlers.forEach(UniHandler::cancel);
-                    // Invoke observer
-                    subscriber.onFailure(res.failure);
-                }
+            if (wip.getAndIncrement() > 0) {
                 return;
             }
 
-            for (UniHandler result : handlers) {
-                if (result.failure != null || result.item != SENTINEL) {
-                    incomplete = incomplete - 1;
-                }
-            }
+            int incomplete;
+            do {
+                incomplete = unis.size();
 
-            if (incomplete == 0) {
-                // All unis has fired an event, check the outcome
-                if (cancelled.compareAndSet(false, true)) {
-                    List<Throwable> failures = getFailures();
-                    List<Object> items = getItems();
-                    computeAndFireTheOutcome(failures, items);
+                // One of the uni failed, and we can fire a failure immediately.
+                if (failed && !collectAllFailureBeforeFiring) {
+                    if (cancelled.compareAndSet(false, true)) {
+                        // Cancel all subscriptions
+                        handlers.forEach(UniHandler::cancel);
+                        // Invoke observer
+                        subscriber.onFailure(res.failure);
+                    }
+                    return;
                 }
-            }
 
-            if (concurrency != -1 && !cancelled.get()) {
-                int nextIndex = this.nextIndex.getAndIncrement();
-                if (nextIndex < unis.size()) {
-                    handlers.get(nextIndex).subscribe();
+                for (UniHandler result : handlers) {
+                    if (result.failure != null || result.item != SENTINEL) {
+                        incomplete = incomplete - 1;
+                    }
                 }
-            }
+
+                if (incomplete == 0) {
+                    // All unis has fired an event, check the outcome
+                    if (cancelled.compareAndSet(false, true)) {
+                        List<Throwable> failures = getFailures();
+                        List<Object> items = getItems();
+                        computeAndFireTheOutcome(failures, items);
+                    }
+                }
+
+                if (concurrency != -1 && !cancelled.get()) {
+                    int nextIndex = this.nextIndex.getAndIncrement();
+                    if (nextIndex < unis.size()) {
+                        handlers.get(nextIndex).subscribe();
+                    }
+                }
+            } while (wip.decrementAndGet() > 0 && incomplete > 0);
         }
 
         private void computeAndFireTheOutcome(List<Throwable> failures, List<Object> items) {
@@ -172,14 +180,18 @@ public class UniAndCombination<I, O> extends UniOperator<I, O> {
 
     private class UniHandler implements UniSubscription, UniSubscriber {
 
-        final AtomicReference<UniSubscription> subscription = new AtomicReference<>();
-        private final AndSupervisor supervisor;
-        private final Uni uni;
-        private final Context context;
+        final AndSupervisor supervisor;
+        final Uni<?> uni;
+        final Context context;
+
+        volatile UniSubscription subscription;
         Object item = SENTINEL;
         Throwable failure;
 
-        UniHandler(AndSupervisor supervisor, Uni observed, Context context) {
+        private static final AtomicReferenceFieldUpdater<UniAndCombination.UniHandler, UniSubscription> SUBSCRIPTION_UPDATER = AtomicReferenceFieldUpdater
+                .newUpdater(UniAndCombination.UniHandler.class, UniSubscription.class, "subscription");
+
+        UniHandler(AndSupervisor supervisor, Uni<?> observed, Context context) {
             this.supervisor = supervisor;
             this.uni = observed;
             this.context = context;
@@ -192,7 +204,7 @@ public class UniAndCombination<I, O> extends UniOperator<I, O> {
 
         @Override
         public final void onSubscribe(UniSubscription sub) {
-            if (!subscription.compareAndSet(null, sub)) {
+            if (!SUBSCRIPTION_UPDATER.compareAndSet(this, null, sub)) {
                 // cancelling this second subscription
                 // because we already add a subscription (most probably CANCELLED)
                 sub.cancel();
@@ -201,7 +213,7 @@ public class UniAndCombination<I, O> extends UniOperator<I, O> {
 
         @Override
         public final void onFailure(Throwable t) {
-            if (subscription.getAndSet(EmptyUniSubscription.CANCELLED) == EmptyUniSubscription.CANCELLED) {
+            if (SUBSCRIPTION_UPDATER.getAndSet(this, EmptyUniSubscription.CANCELLED) == EmptyUniSubscription.CANCELLED) {
                 // Already cancelled, do nothing
                 Infrastructure.handleDroppedException(t);
                 return;
@@ -212,7 +224,7 @@ public class UniAndCombination<I, O> extends UniOperator<I, O> {
 
         @Override
         public final void onItem(Object x) {
-            if (subscription.getAndSet(EmptyUniSubscription.CANCELLED) == EmptyUniSubscription.CANCELLED) {
+            if (SUBSCRIPTION_UPDATER.getAndSet(this, EmptyUniSubscription.CANCELLED) == EmptyUniSubscription.CANCELLED) {
                 // Already cancelled, do nothing
                 return;
             }
@@ -222,14 +234,14 @@ public class UniAndCombination<I, O> extends UniOperator<I, O> {
 
         @Override
         public void cancel() {
-            Subscription sub = subscription.getAndSet(EmptyUniSubscription.CANCELLED);
+            Subscription sub = SUBSCRIPTION_UPDATER.getAndSet(this, EmptyUniSubscription.CANCELLED);
             if (sub != null) {
                 sub.cancel();
             }
         }
 
+        @SuppressWarnings("unchecked")
         public void subscribe() {
-            //noinspection unchecked
             AbstractUni.subscribe(uni, this);
         }
     }
