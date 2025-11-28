@@ -23,6 +23,10 @@ public class UniCreateFromKnownItem<T> extends AbstractUni<T> {
         new KnownItemSubscription(subscriber).forward();
     }
 
+    public T getItem() {
+        return item;
+    }
+
     private class KnownItemSubscription implements UniSubscription {
 
         private final UniSubscriber<? super T> subscriber;
