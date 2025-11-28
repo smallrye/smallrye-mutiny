@@ -23,6 +23,10 @@ public class UniCreateFromKnownFailure<T> extends AbstractUni<T> {
         new KnownFailureSubscription(subscriber).forward();
     }
 
+    public Throwable getFailure() {
+        return failure;
+    }
+
     private class KnownFailureSubscription implements UniSubscription {
 
         private final UniSubscriber<? super T> subscriber;

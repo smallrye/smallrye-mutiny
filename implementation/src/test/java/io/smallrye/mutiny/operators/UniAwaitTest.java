@@ -154,6 +154,10 @@ public class UniAwaitTest {
 
         assertThatThrownBy(() -> one.await().atMost(Duration.ofSeconds(0)))
                 .isInstanceOf(IllegalArgumentException.class).hasMessageContaining("duration");
+
+        assertThatThrownBy(
+                () -> Uni.createFrom().failure(new IllegalArgumentException()).await().atMost(Duration.ofMillis(-2000)))
+                .isInstanceOf(IllegalArgumentException.class).hasMessageContaining("duration");
     }
 
     @Test
@@ -219,17 +223,29 @@ public class UniAwaitTest {
         void checkForbid() throws InterruptedException {
             Infrastructure.setCanCallerThreadBeBlockedSupplier(() -> !Thread.currentThread().getName().contains("-forbidden-"));
             Uni<Integer> one = Uni.createFrom().item(1);
-            AtomicReference<Throwable> exception = new AtomicReference<>();
+            Uni<Integer> two = Uni.createFrom().failure(new IllegalArgumentException());
+            AtomicReference<Throwable> exceptionOne = new AtomicReference<>();
+            AtomicReference<Throwable> exceptionTwo = new AtomicReference<>();
             Thread thread = new Thread(() -> {
                 try {
                     assertThat(one.await().indefinitely()).isEqualTo(1);
                 } catch (Throwable err) {
-                    exception.set(err);
+                    exceptionOne.set(err);
+                }
+                try {
+                    two.await().indefinitely();
+                    fail();
+                } catch (Throwable err) {
+                    exceptionTwo.set(err);
                 }
             }, "my-forbidden-thread");
             thread.start();
             thread.join();
-            assertThat(exception.get())
+            assertThat(exceptionOne.get())
+                    .isNotNull()
+                    .isInstanceOf(IllegalStateException.class)
+                    .hasMessage("The current thread cannot be blocked: my-forbidden-thread");
+            assertThat(exceptionTwo.get())
                     .isNotNull()
                     .isInstanceOf(IllegalStateException.class)
                     .hasMessage("The current thread cannot be blocked: my-forbidden-thread");
