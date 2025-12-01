@@ -87,19 +87,37 @@ public class Infrastructure {
         setDefaultExecutor(scheduler);
     }
 
+    /**
+     * Changes the default executor, and shuts the previous executor down.
+     *
+     * @param s the new executor
+     */
     public static void setDefaultExecutor(Executor s) {
-        if (s == DEFAULT_EXECUTOR) {
+        setDefaultExecutor(s, true);
+    }
+
+    /**
+     * Changes the default executor, and shuts the previous executor down when {@code shutdownPrevious} is {@code true}.
+     *
+     * @param executor the new executor
+     * @param shutdownPrevious {@code true} when the previous executor needs to be shut down, {@code false} otherwise
+     */
+    public static void setDefaultExecutor(Executor executor, boolean shutdownPrevious) {
+        if (executor == DEFAULT_EXECUTOR) {
             return;
         }
-        Executor existing = DEFAULT_EXECUTOR;
-        if (existing instanceof ExecutorService) {
-            ((ExecutorService) existing).shutdownNow();
+        if (shutdownPrevious) {
+            Executor existing = DEFAULT_EXECUTOR;
+            if (existing instanceof ExecutorService) {
+                ((ExecutorService) existing).shutdownNow();
+            }
+            if (DEFAULT_SCHEDULER != null) {
+                DEFAULT_SCHEDULER.shutdownNow();
+            }
         }
-        if (DEFAULT_SCHEDULER != null) {
-            DEFAULT_SCHEDULER.shutdownNow();
-        }
-        DEFAULT_EXECUTOR = s;
-        DEFAULT_SCHEDULER = (s instanceof ScheduledExecutorService) ? (ScheduledExecutorService) s : new MutinyScheduler(s);
+        DEFAULT_EXECUTOR = executor;
+        DEFAULT_SCHEDULER = (executor instanceof ScheduledExecutorService) ? (ScheduledExecutorService) executor
+                : new MutinyScheduler(executor);
     }
 
     public static ScheduledExecutorService getDefaultWorkerPool() {
