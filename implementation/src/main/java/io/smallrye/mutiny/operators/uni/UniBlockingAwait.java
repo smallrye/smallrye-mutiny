@@ -27,7 +27,7 @@ public class UniBlockingAwait {
         validate(duration);
 
         if (!Infrastructure.canCallerThreadBeBlocked()) {
-            throw new IllegalStateException("The current thread cannot be blocked: " + Thread.currentThread().getName());
+            throw currentThreadCannotBeBlocked();
         }
 
         CountDownLatch latch = new CountDownLatch(1);
@@ -85,6 +85,10 @@ public class UniBlockingAwait {
         } else {
             return reference.get();
         }
+    }
+
+    public static IllegalStateException currentThreadCannotBeBlocked() {
+        return new IllegalStateException("The current thread cannot be blocked: " + Thread.currentThread().getName());
     }
 
     private static void validate(Duration duration) {

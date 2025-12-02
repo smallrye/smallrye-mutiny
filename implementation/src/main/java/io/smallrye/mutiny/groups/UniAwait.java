@@ -4,12 +4,16 @@ import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
 
 import java.time.Duration;
 import java.util.Optional;
+import java.util.concurrent.CompletionException;
 
 import io.smallrye.common.annotation.CheckReturnValue;
 import io.smallrye.mutiny.Context;
 import io.smallrye.mutiny.TimeoutException;
 import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.uni.UniBlockingAwait;
+import io.smallrye.mutiny.operators.uni.builders.UniCreateFromKnownFailure;
+import io.smallrye.mutiny.operators.uni.builders.UniCreateFromKnownItem;
 
 /**
  * Waits and returns the item emitted by the {@link Uni}. If the {@link Uni} receives a failure, the failure is thrown.
@@ -62,6 +66,13 @@ public class UniAwait<T> {
      * @return the item from the {@link Uni}, potentially {@code null}
      */
     public T atMost(Duration duration) {
+        // Optimize the case where the item/failure is known
+        // and subscription/synchronization is not needed
+        if (upstream instanceof UniCreateFromKnownItem<T> known) {
+            return awaitKnownItem(known, duration);
+        } else if (upstream instanceof UniCreateFromKnownFailure<T> known) {
+            awaitKnownFailure(known, duration);
+        }
         return UniBlockingAwait.await(upstream, duration, context);
     }
 
@@ -74,6 +85,34 @@ public class UniAwait<T> {
     @CheckReturnValue
     public UniAwaitOptional<T> asOptional() {
         return new UniAwaitOptional<>(upstream, context);
+    }
+
+    private T awaitKnownItem(UniCreateFromKnownItem<T> known, Duration duration) {
+        validateDuration(duration);
+        // Blocking should not matter in this case but we retain the check for backward compatibility
+        if (!Infrastructure.canCallerThreadBeBlocked()) {
+            throw UniBlockingAwait.currentThreadCannotBeBlocked();
+        }
+        return known.getItem();
+    }
+
+    private void awaitKnownFailure(UniCreateFromKnownFailure<T> known, Duration duration) {
+        validateDuration(duration);
+        // Blocking should not matter in this case but we retain the check for backward compatibility
+        if (!Infrastructure.canCallerThreadBeBlocked()) {
+            throw UniBlockingAwait.currentThreadCannotBeBlocked();
+        }
+        Throwable throwable = known.getFailure();
+        if (throwable instanceof RuntimeException) {
+            throw (RuntimeException) throwable;
+        }
+        throw new CompletionException(throwable);
+    }
+
+    private void validateDuration(Duration duration) {
+        if (duration != null && (duration.isZero() || duration.isNegative())) {
+            throw new IllegalArgumentException("`duration` must be greater than zero");
+        }
     }
 
 }
