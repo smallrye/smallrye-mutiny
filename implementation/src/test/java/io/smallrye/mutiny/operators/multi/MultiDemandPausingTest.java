@@ -709,4 +709,62 @@ public class MultiDemandPausingTest {
         await().untilAsserted(() -> assertThat(sub.getItems()).hasSize(100));
     }
 
+    @Test
+    public void testConcurrentResumeAndCancel() {
+        DemandPauser pauser = new DemandPauser();
+
+        // Slow consumer that adds delay to each item processing
+        AssertSubscriber<Integer> sub = Multi.createFrom().ticks().every(Duration.ofMillis(1))
+                .map(Long::intValue)
+                .select().first(1000)
+                .pauseDemand()
+                .bufferStrategy(BackPressureStrategy.BUFFER)
+                .bufferUnconditionally()
+                .using(pauser)
+                .invoke(ignored -> {
+                    try {
+                        // Slow consumer - 10ms per item to keep drain loop busy
+                        Thread.sleep(50);
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                    }
+                })
+                .subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE));
+
+        // Wait for some items to arrive
+        await().untilAsserted(() -> assertThat(sub.getItems()).hasSizeGreaterThan(10));
+
+        // Pause to let buffer fill up with lots of items
+        pauser.pause();
+        await().pollDelay(Duration.ofMillis(200))
+                .untilAsserted(() -> assertThat(pauser.bufferSize()).isGreaterThan(100));
+
+        int bufferSize = pauser.bufferSize();
+        assertThat(bufferSize).isGreaterThan(100);
+
+        // Resume and clear at the same time from different threads
+        // This reproduces the race condition: drain loop starts and clearQueue is called concurrently
+        Thread resumeThread = new Thread(() -> pauser.resume());
+        Thread clearThread = new Thread(() -> sub.cancel());
+
+        resumeThread.start();
+        clearThread.start();
+
+        // Wait for both operations to complete
+        await().untilAsserted(() -> {
+            assertThat(resumeThread.isAlive()).isFalse();
+            assertThat(clearThread.isAlive()).isFalse();
+        });
+
+        // No concurrent modification exception should occur
+        assertThat(sub.getFailure()).isNull();
+
+        // Buffer should be cleared
+        await().untilAsserted(() -> assertThat(pauser.bufferSize()).isEqualTo(0));
+
+        // Stream should continue to work normally
+        await().pollDelay(Duration.ofMillis(200)).until(() -> true);
+        assertThat(sub.getItems()).hasSizeGreaterThan(0);
+    }
+
 }
