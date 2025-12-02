@@ -108,6 +108,7 @@ public class MultiDemandPausingOp<T> extends MultiOperator<T, T> implements Paus
         private final AtomicInteger wip = new AtomicInteger();
         private final AtomicInteger strictBoundCounter = new AtomicInteger(0);
         private volatile boolean upstreamCompleted;
+        private final AtomicBoolean clearQueue = new AtomicBoolean();
 
         PausableProcessor(MultiSubscriber<? super T> downstream) {
             super(downstream);
@@ -156,10 +157,17 @@ public class MultiDemandPausingOp<T> extends MultiOperator<T, T> implements Paus
                     if (!unbounded) {
                         strictBoundCounter.decrementAndGet();
                     }
+                    if (clearQueue.get()) {
+                        break;
+                    }
                     downstream.onItem(item);
                 }
                 if (!paused.get() && upstreamCompleted) {
                     super.onCompletion();
+                }
+                if (clearQueue.compareAndSet(true, false)) {
+                    queue.clear();
+                    strictBoundCounter.set(0);
                 }
                 if (wip.decrementAndGet() == 0) {
                     return;
@@ -168,9 +176,12 @@ public class MultiDemandPausingOp<T> extends MultiOperator<T, T> implements Paus
         }
 
         void clearQueue() {
-            if (queue != null) {
-                strictBoundCounter.set(0);
+            if (queue != null && clearQueue.compareAndSet(false, true) && wip.getAndIncrement() == 0) {
+                // nothing was currently dispatched, clearing the queue.
                 queue.clear();
+                clearQueue.set(false);
+                strictBoundCounter.set(0);
+                wip.decrementAndGet();
             }
         }
 
