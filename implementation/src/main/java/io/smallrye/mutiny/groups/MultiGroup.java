@@ -45,11 +45,38 @@ public class MultiGroup<T> {
 
     // TODO grouping can also have prefetch and failure collection delay.
 
+    /**
+     * Groups items emitted by the upstream {@code Multi} based on a key extracted by the {@code keyMapper} function.
+     * <p>
+     * The returned {@code Multi<GroupedMulti<K, T>>} emits {@link GroupedMulti} instances, where each represents
+     * a group of items sharing the same key. Items are distributed to groups as they are emitted by the upstream.
+     * <p>
+     * Each {@link GroupedMulti} provides a {@link GroupedMulti#key()} method that returns the key for that group.
+     * Groups are created dynamically as new keys are discovered in the stream.
+     *
+     * @param keyMapper the function to extract the key from each item, must not be {@code null}
+     * @param <K> the type of the key
+     * @return a {@code Multi} emitting {@link GroupedMulti} instances
+     */
     @CheckReturnValue
     public <K> Multi<GroupedMulti<K, T>> by(Function<? super T, ? extends K> keyMapper) {
         return by(keyMapper, Infrastructure.getBufferSizeS());
     }
 
+    /**
+     * Groups items emitted by the upstream {@code Multi} based on a key extracted by the {@code keyMapper} function,
+     * while transforming items using the {@code valueMapper} function.
+     * <p>
+     * The returned {@code Multi<GroupedMulti<K, V>>} emits {@link GroupedMulti} instances, where each represents
+     * a group of transformed items sharing the same key.
+     * <p>
+     *
+     * @param keyMapper the function to extract the key from each item, must not be {@code null}
+     * @param valueMapper the function to transform each item, must not be {@code null}
+     * @param <K> the type of the key
+     * @param <V> the type of the transformed value
+     * @return a {@code Multi} emitting {@link GroupedMulti} instances
+     */
     @CheckReturnValue
     public <K, V> Multi<GroupedMulti<K, V>> by(Function<? super T, ? extends K> keyMapper,
             Function<? super T, ? extends V> valueMapper) {
@@ -58,6 +85,22 @@ public class MultiGroup<T> {
         return by(k, v, Infrastructure.getBufferSizeS());
     }
 
+    /**
+     * Groups items emitted by the upstream {@code Multi} based on a key extracted by the {@code keyMapper} function,
+     * with configurable prefetch buffer size.
+     * <p>
+     * The returned {@code Multi<GroupedMulti<K, T>>} emits {@link GroupedMulti} instances, where each represents
+     * a group of items sharing the same key. Items are distributed to groups as they are emitted by the upstream.
+     * <p>
+     * The {@code prefetch} parameter controls how many items can be buffered for groups that are not yet subscribed to
+     * or are waiting for backpressure.
+     * <p>
+     *
+     * @param keyMapper the function to extract the key from each item, must not be {@code null}
+     * @param prefetch the prefetch buffer size, must be positive
+     * @param <K> the type of the key
+     * @return a {@code Multi} emitting {@link GroupedMulti} instances
+     */
     @CheckReturnValue
     public <K> Multi<GroupedMulti<K, T>> by(Function<? super T, ? extends K> keyMapper, long prefetch) {
         positive(prefetch, "prefetch");
@@ -65,6 +108,24 @@ public class MultiGroup<T> {
         return Infrastructure.onMultiCreation(new MultiGroupByOp<>(upstream, mapper, x -> x, prefetch));
     }
 
+    /**
+     * Groups items emitted by the upstream {@code Multi} based on a key extracted by the {@code keyMapper} function,
+     * while transforming items using the {@code valueMapper} function, with configurable prefetch buffer size.
+     * <p>
+     * The returned {@code Multi<GroupedMulti<K, V>>} emits {@link GroupedMulti} instances, where each represents
+     * a group of transformed items sharing the same key.
+     * <p>
+     * The {@code prefetch} parameter controls how many items can be buffered for groups that are not yet subscribed to
+     * or are waiting for backpressure.
+     * <p>
+     *
+     * @param keyMapper the function to extract the key from each item, must not be {@code null}
+     * @param valueMapper the function to transform each item, must not be {@code null}
+     * @param prefetch the prefetch buffer size, must be positive
+     * @param <K> the type of the key
+     * @param <V> the type of the transformed value
+     * @return a {@code Multi} emitting {@link GroupedMulti} instances
+     */
     @CheckReturnValue
     public <K, V> Multi<GroupedMulti<K, V>> by(Function<? super T, ? extends K> keyMapper,
             Function<? super T, ? extends V> valueMapper, long prefetch) {

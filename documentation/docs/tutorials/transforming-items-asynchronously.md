@@ -116,9 +116,26 @@ To implement the scenario from the last section, you will use `onItem().transfor
 ```
 
 !!! important
-    
+
     - When merging: items from the source `Multi` _may_ be processed **concurrently** depending on the concurrency level that has been set, if any.
-    - When concatenating: items from the source `Multi` are processed **in order**, waiting for each `Uni` to complete before moving on to the next item. 
+    - When concatenating: items from the source `Multi` are processed **in order**, waiting for each `Uni` to complete before moving on to the next item.
+
+### Controlling concurrency with merge
+
+The `merge` method accepts an optional `concurrency` parameter that limits how many inner streams can be subscribed to concurrently:
+
+```java
+{{ insert('java/tutorials/TransformItemsAsyncTest.java', 'merge-concurrency') }}
+```
+
+When not provided, the default concurrency is configured using `Infrastructure.getBufferSizeS()`.
+
+!!! warning "Merge concurrency"     
+
+    When using merge with limited concurrency, be aware of potential backpressure issues. 
+    **Setting concurrency too low** can cause upstream request starvation if the number of subscribed but not emitting inner streams surpasses the level of concurrency.   
+    **Unbounded concurrency** eliminates the request starvation issue by removing the limit on the number of subscribed inner streams to merge.
+
 
 ## Multi - Transforming an item into a Multi
 
@@ -128,3 +145,5 @@ The produced `Multi` objects are either _merged_ or _concatenated_:
 ```java linenums="1"
 {{ insert('java/tutorials/TransformItemsAsyncTest.java', 'merge-concat-multi') }}
 ```
+
+Like after `transformToUni`, the `merge` method after `transformToMulti` also accepts an optional concurrency parameter with the same considerations regarding backpressure and request starvation when used with infinite streams.
