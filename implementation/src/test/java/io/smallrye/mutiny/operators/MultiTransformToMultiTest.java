@@ -16,6 +16,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Flow.Subscriber;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.RepeatedTest;
@@ -1202,6 +1203,57 @@ public class MultiTransformToMultiTest {
         assertThat(subscriber.getItems()).hasSize(20);
         assertThat(subscriber.getItems())
                 .containsExactly(0, 1, 2, 3, 4, -5, 6, 7, 8, 9, -10, 11, 12, 13, 14, -15, 16, 17, 18, 19);
+    }
+
+    @Test
+    public void testMergeWithDefaultConcurrencyMultiNotEmittingItemsNorCompleted() {
+        AtomicLong upstreamRequests = new AtomicLong();
+        Multi<Integer> multi = Multi.createFrom().range(0, 300)
+                .onRequest().invoke(upstreamRequests::addAndGet)
+                .onItem().transformToMulti(i -> Multi.createFrom().<Integer> emitter(e -> {
+                    e.emit(i + 1);
+                    e.emit(i + 1);
+                }).runSubscriptionOn(Infrastructure.getDefaultExecutor()))
+                .merge();
+        AssertSubscriber<Integer> subscriber = multi
+                .subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE));
+
+        subscriber.awaitItems(512);
+        assertThat(upstreamRequests).hasValueGreaterThanOrEqualTo(256L);
+    }
+
+    @Test
+    public void testMergeWithLimitedConcurrencyMultiNotEmittingItemsNorCompleted() {
+        AtomicLong upstreamRequests = new AtomicLong();
+        Multi<Integer> multi = Multi.createFrom().range(0, 30)
+                .onRequest().invoke(upstreamRequests::addAndGet)
+                .onItem().transformToMulti(i -> Multi.createFrom().<Integer> emitter(e -> {
+                    e.emit(i + 1);
+                    e.emit(i + 1);
+                }).runSubscriptionOn(Infrastructure.getDefaultExecutor()))
+                .merge(10);
+        AssertSubscriber<Integer> subscriber = multi
+                .subscribe().withSubscriber(AssertSubscriber.create(100));
+
+        subscriber.awaitItems(20);
+        assertThat(upstreamRequests).hasValueGreaterThanOrEqualTo(10L);
+    }
+
+    @Test
+    public void testMergeWithDefaultConcurrencyMultiNotEmittingItemsNorCompletedSerializedEmitting() {
+        AtomicLong upstreamRequests = new AtomicLong();
+        Multi<Integer> multi = Multi.createFrom().range(0, 300)
+                .onRequest().invoke(upstreamRequests::addAndGet)
+                .onItem().transformToMulti(i -> Multi.createFrom().<Integer> emitter(e -> {
+                    e.emit(i + 1);
+                    e.emit(i + 1);
+                }))
+                .merge();
+        AssertSubscriber<Integer> subscriber = multi
+                .subscribe().withSubscriber(AssertSubscriber.create(600));
+
+        subscriber.awaitItems(512);
+        assertThat(upstreamRequests).hasValue(256L);
     }
 
 }
