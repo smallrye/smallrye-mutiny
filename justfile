@@ -22,7 +22,6 @@ prepare-release previousVersion version:
     yq -i '.release.current-version = "{{version}}"' .github/project.yml
     yq -i '.release.previous-version = "{{previousVersion}}"' .github/project.yml
     ./mvnw --batch-mode --no-transfer-progress versions:set -DnewVersion={{version}} -DgenerateBackupPoms=false
-    ./mvnw --batch-mode --no-transfer-progress versions:set -DnewVersion={{version}} -DgenerateBackupPoms=false -pl bom
     jbang .build/UpdateDocsAttributesFiles.java --mutiny-version={{version}}
     ./mvnw --batch-mode --no-transfer-progress clean install -DskipTests
     ./mvnw --batch-mode --no-transfer-progress -Pupdate-workshop-examples -f workshop-examples compile -DworkshopVersion={{version}}
@@ -77,7 +76,6 @@ perform-release:
       ${gh_extra_args}
     echo "✅ Release created"
     ./mvnw --batch-mode --no-transfer-progress versions:set -DnewVersion=${NEXT_VERSION} -DgenerateBackupPoms=false
-    ./mvnw --batch-mode --no-transfer-progress versions:set -DnewVersion=${NEXT_VERSION} -DgenerateBackupPoms=false -pl bom
     git commit -am "chore(release): set development version to ${NEXT_VERSION}"
     if [[ pre_release -eq 0 ]]; then
       just clear-revapi
