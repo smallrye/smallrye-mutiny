@@ -1,5 +1,5 @@
 ///usr/bin/env jbang "$0" "$@" ; exit $?
-//DEPS io.smallrye.reactive:mutiny:3.0.3
+//DEPS io.smallrye.reactive:mutiny:3.1.0
 package _03_composition_transformation;
 
 import static java.util.concurrent.CompletableFuture.delayedExecutor;
