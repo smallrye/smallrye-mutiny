@@ -109,8 +109,39 @@ public class MultiFlatten<I, O> {
      */
     @CheckReturnValue
     public Multi<O> merge(int concurrency) {
+        return merge(concurrency, true);
+    }
+
+    /**
+     * Produces a {@link Multi} containing the items from {@link Publisher} produced by the {@code mapper} for each
+     * item emitted by this {@link Multi}.
+     * <p>
+     * The operator behaves as follows:
+     * <ul>
+     * <li>for each item emitted by this {@link Multi}, the mapper is called and produces a {@link Publisher}
+     * (potentially a {@code Multi}). The mapper must not return {@code null
+     *         }</li>
+     * <li>The items contained in each of the produced {@link Publisher} are then <strong>merged</strong> in the
+     * produced {@link Multi}. The returned object lets you configure the flattening process.</li>
+     * </ul>
+     * <p>
+     * This method allows configuring the concurrency, i.e. the maximum number of in-flight/subscribed inner streams,
+     * and whether the operator is strict or not.
+     *
+     * @param concurrency the concurrency
+     * @param strictConcurrency whether the operator should enforce strict concurrency. If set to {@code true}, the operator
+     *        ensures that at most
+     *        {@code concurrency} inner streams are subscribed to simultaneously. If set to {@code false}, the operator allows
+     *        for more
+     *        than {@code concurrency} inner streams to be subscribed to, but still limits the number of active inner streams to
+     *        {@code concurrency}.
+     * @return the object to configure the {@code flatMap} operation.
+     */
+    @CheckReturnValue
+    public Multi<O> merge(int concurrency, boolean strictConcurrency) {
         return Infrastructure.onMultiCreation(
-                new MultiFlatMapOp<>(upstream, mapper, collectFailureUntilCompletion, concurrency, requests));
+                new MultiFlatMapOp<>(upstream, mapper, collectFailureUntilCompletion, concurrency, requests,
+                        strictConcurrency));
     }
 
     /**
@@ -135,8 +166,9 @@ public class MultiFlatten<I, O> {
     @CheckReturnValue
     public Multi<O> concatenate(boolean prefetch) {
         return Infrastructure
-                .onMultiCreation(prefetch ? new MultiFlatMapOp<>(upstream, mapper, collectFailureUntilCompletion, 1, requests)
-                        : new MultiConcatMapOp<>(upstream, mapper, collectFailureUntilCompletion));
+                .onMultiCreation(
+                        prefetch ? new MultiFlatMapOp<>(upstream, mapper, collectFailureUntilCompletion, 1, requests, true)
+                                : new MultiConcatMapOp<>(upstream, mapper, collectFailureUntilCompletion));
     }
 
     /**
