@@ -525,7 +525,7 @@ public class MultiTransformToMultiTest {
         MultiFlatMapOp<Integer, Integer> op = new MultiFlatMapOp<>(
                 Multi.createFrom().item(1),
                 i -> Multi.createFrom().item(2),
-                false, 4, 10);
+                false, 4, 10, true);
 
         assertThatThrownBy(() -> op.subscribe(null))
                 .isInstanceOf(NullPointerException.class);
@@ -536,7 +536,7 @@ public class MultiTransformToMultiTest {
         MultiFlatMapOp<Integer, Integer> op = new MultiFlatMapOp<>(
                 Multi.createFrom().item(1),
                 i -> Multi.createFrom().item(2),
-                false, 4, 10);
+                false, 4, 10, true);
         AssertSubscriber<Integer> subscriber = AssertSubscriber.create();
         op.subscribe(subscriber);
         subscriber.request(-1);
@@ -761,7 +761,7 @@ public class MultiTransformToMultiTest {
                             }
                         })
                         .runSubscriptionOn(Infrastructure.getDefaultExecutor()))
-                .merge(maxConcurrency);
+                .merge(maxConcurrency, true);
 
         AssertSubscriber<Object> subscriber = AssertSubscriber.create(Long.MAX_VALUE);
         multi.subscribe().withSubscriber(subscriber);
