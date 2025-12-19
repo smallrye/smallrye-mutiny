@@ -344,7 +344,6 @@ public interface Uni<T> {
      * Configure memoization of the {@link Uni} item or failure.
      *
      * @return the object to configure memoization
-     * @apiNote This is an experimental API
      */
     @CheckReturnValue
     UniMemoize<T> memoize();

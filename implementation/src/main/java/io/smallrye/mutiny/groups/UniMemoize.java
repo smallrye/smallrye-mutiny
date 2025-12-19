@@ -31,7 +31,6 @@ public class UniMemoize<T> {
      * @param invalidationGuard the invalidation guard, which evaluates to {@code false} for as long as the item or failure must
      *        be memoized, must not be {@code null}
      * @return a new {@link Uni}
-     * @apiNote This is an experimental API
      */
     @CheckReturnValue
     public Uni<T> until(BooleanSupplier invalidationGuard) {
@@ -49,7 +48,6 @@ public class UniMemoize<T> {
      * @param duration the memoization duration after having received the subscription from upstream, must not be
      *        {@code null}, must be strictly positive
      * @return a new {@link Uni}
-     * @apiNote This is an experimental API
      * @deprecated use {@link #forFixedDuration(Duration)} instead.
      */
     @Deprecated(forRemoval = true)
@@ -68,7 +66,6 @@ public class UniMemoize<T> {
      * @param duration the memoization duration after having received the subscription from upstream, must not be
      *        {@code null}, must be strictly positive
      * @return a new {@link Uni}
-     * @apiNote This is an experimental API
      */
     @CheckReturnValue
     public Uni<T> forFixedDuration(Duration duration) {
@@ -102,7 +99,6 @@ public class UniMemoize<T> {
      * Memoize the received item or failure indefinitely.
      *
      * @return a new {@link Uni}
-     * @apiNote This is an experimental API
      */
     @CheckReturnValue
     public Uni<T> indefinitely() {
