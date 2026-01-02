@@ -28,7 +28,8 @@ public class FlatMapMainSubscriberTest {
                 i -> Multi.createFrom().item(2),
                 false,
                 4,
-                10);
+                10,
+                true);
 
         Multi.createFrom().item(1)
                 .subscribe().withSubscriber(sub);
@@ -46,7 +47,8 @@ public class FlatMapMainSubscriberTest {
                 i -> Multi.createFrom().item(2),
                 false,
                 4,
-                10);
+                10,
+                true);
 
         Multi.createFrom().item(1)
                 .subscribe().withSubscriber(sub);
@@ -67,7 +69,8 @@ public class FlatMapMainSubscriberTest {
                 i -> Multi.createFrom().item(2),
                 false,
                 4,
-                10);
+                10,
+                true);
 
         sub.onSubscribe(mock(Subscription.class));
         sub.onNext(1);
@@ -90,7 +93,8 @@ public class FlatMapMainSubscriberTest {
                 i -> Multi.createFrom().item(2),
                 false,
                 4,
-                10);
+                10,
+                true);
 
         sub.onSubscribe(mock(Subscription.class));
         sub.onNext(1);
@@ -132,7 +136,8 @@ public class FlatMapMainSubscriberTest {
                 i -> rogue,
                 false,
                 1,
-                1);
+                1,
+                true);
 
         sub.onSubscribe(mock(Subscription.class));
         sub.onNext(1);
@@ -152,7 +157,8 @@ public class FlatMapMainSubscriberTest {
                 i -> rogue,
                 false,
                 1,
-                1);
+                1,
+                true);
 
         sub.onSubscribe(mock(Subscription.class));
 

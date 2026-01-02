@@ -24,17 +24,20 @@ public final class MultiFlatMapOp<I, O> extends AbstractMultiOperator<I, O> {
     private final boolean postponeFailurePropagation;
     private final int maxConcurrency;
     private final int requests;
+    private final boolean strictConcurrencyLimit;
 
     public MultiFlatMapOp(Multi<? extends I> upstream,
             Function<? super I, ? extends Flow.Publisher<? extends O>> mapper,
             boolean postponeFailurePropagation,
             int maxConcurrency,
-            int requests) {
+            int requests,
+            boolean strictConcurrencyLimit) {
         super(upstream);
         this.mapper = ParameterValidation.nonNull(mapper, "mapper");
         this.postponeFailurePropagation = postponeFailurePropagation;
         this.maxConcurrency = ParameterValidation.positive(maxConcurrency, "maxConcurrency");
         this.requests = ParameterValidation.positive(requests, "requests");
+        this.strictConcurrencyLimit = strictConcurrencyLimit;
     }
 
     @Override
@@ -46,7 +49,8 @@ public final class MultiFlatMapOp<I, O> extends AbstractMultiOperator<I, O> {
                 mapper,
                 postponeFailurePropagation,
                 maxConcurrency,
-                requests);
+                requests,
+                strictConcurrencyLimit);
 
         upstream.subscribe(Infrastructure.onMultiSubscription(upstream, sub));
     }
@@ -61,6 +65,7 @@ public final class MultiFlatMapOp<I, O> extends AbstractMultiOperator<I, O> {
         final Function<? super I, ? extends Flow.Publisher<? extends O>> mapper;
         final Supplier<? extends Queue<O>> innerQueueSupplier;
         final MultiSubscriber<? super O> downstream;
+        final boolean strictConcurrencyLimit;
 
         final AtomicReference<Throwable> failures = new AtomicReference<>();
 
@@ -87,7 +92,8 @@ public final class MultiFlatMapOp<I, O> extends AbstractMultiOperator<I, O> {
                 Function<? super I, ? extends Flow.Publisher<? extends O>> mapper,
                 boolean delayError,
                 int concurrency,
-                int requests) {
+                int requests,
+                boolean strictConcurrencyLimit) {
             this.downstream = downstream;
             this.mapper = mapper;
             this.delayError = delayError;
@@ -95,6 +101,7 @@ public final class MultiFlatMapOp<I, O> extends AbstractMultiOperator<I, O> {
             this.requests = requests;
             this.innerQueueSupplier = requests == 0 ? Queues.getXsQueueSupplier() : Queues.get(requests);
             this.limit = Subscriptions.unboundedOrLimit(concurrency);
+            this.strictConcurrencyLimit = strictConcurrencyLimit;
         }
 
         @SuppressWarnings("unchecked")
@@ -356,6 +363,13 @@ public final class MultiFlatMapOp<I, O> extends AbstractMultiOperator<I, O> {
                                         }
                                     }
                                     e = 0L;
+                                }
+                                if (maxConcurrency != Integer.MAX_VALUE && !strictConcurrencyLimit) {
+                                    d = inner.done;
+                                    boolean empty = q.isEmpty();
+                                    if (!d && empty && replenishMain == 0) {
+                                        replenishMain++;
+                                    }
                                 }
                             }
                         }
