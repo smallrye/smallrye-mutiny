@@ -1043,7 +1043,9 @@ public class MultiGroupTest {
 
     @Test
     void testUpstreamRequestsNotBlownOutOfProportion() {
-        ExecutorService executor = Executors.newFixedThreadPool(10);
+        ExecutorService executor = Executors.newFixedThreadPool(100);
+        int maxConcurrency = 100;
+        int prefetch = 25;
         try {
             AtomicLong requestCounter = new AtomicLong(0);
             AtomicLong itemCounter = new AtomicLong(0);
@@ -1051,21 +1053,21 @@ public class MultiGroupTest {
 
             Multi.createFrom().<Integer> emitter(e::set)
                     .onRequest().invoke(requestCounter::addAndGet)
-                    .group().by(i -> i / 10)
+                    .group().by(i -> i / 10, prefetch)
                     .onItem().transformToMulti(g -> g.map(i -> g.key() + " : " + i)
                             .emitOn(executor)
                             .invoke(s -> {
                                 try {
-                                    Thread.sleep(100);
+                                    Thread.sleep(10);
                                     itemCounter.incrementAndGet();
                                 } catch (InterruptedException ex) {
                                     throw new RuntimeException(ex);
                                 }
                             }))
-                    .merge()
+                    .merge(maxConcurrency)
                     .subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE));
 
-            int itemCount = 100;
+            int itemCount = 1000;
             MultiEmitter<? super Integer> emitter = e.get();
             new Thread(() -> {
                 int i = 0;
@@ -1078,7 +1080,7 @@ public class MultiGroupTest {
             }).start();
 
             await().untilAsserted(() -> assertThat(itemCounter).hasValueGreaterThanOrEqualTo(itemCount));
-            assertThat(requestCounter.get()).isLessThan(10000L); // this should not blow up
+            assertThat(requestCounter.get()).isEqualTo(itemCounter.get() + prefetch);
         } finally {
             executor.shutdownNow();
         }

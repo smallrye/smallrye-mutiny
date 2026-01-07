@@ -234,7 +234,6 @@ public final class MultiGroupByOp<T, K, V> extends AbstractMultiOperator<T, Grou
                     if (requests != Long.MAX_VALUE) {
                         requested.addAndGet(-emitted);
                     }
-                    super.request(emitted);
                 }
 
                 missed = wip.addAndGet(-missed);
