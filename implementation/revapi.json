@@ -51,7 +51,18 @@
     "criticality" : "highlight",
     "minSeverity" : "POTENTIALLY_BREAKING",
     "minCriticality" : "documented",
-    "differences" : [ ]
+    "differences" : [ {
+      "code": "java.method.numberOfParametersChanged",
+      "old": "method void io.smallrye.mutiny.operators.multi.MultiFlatMapOp.FlatMapMainSubscriber<I, O>::<init>(io.smallrye.mutiny.subscription.MultiSubscriber<? super O>, java.util.function.Function<? super I, ? extends java.util.concurrent.Flow.Publisher<? extends O>>, boolean, int, int)",
+      "new": "method void io.smallrye.mutiny.operators.multi.MultiFlatMapOp.FlatMapMainSubscriber<I, O>::<init>(io.smallrye.mutiny.subscription.MultiSubscriber<? super O>, java.util.function.Function<? super I, ? extends java.util.concurrent.Flow.Publisher<? extends O>>, boolean, int, int, boolean)",
+      "justification": "added strictConcurrency parameter to control concurrency strictly"
+    },
+      {
+        "code": "java.method.numberOfParametersChanged",
+        "old": "method void io.smallrye.mutiny.operators.multi.MultiFlatMapOp<I, O>::<init>(io.smallrye.mutiny.Multi<? extends I>, java.util.function.Function<? super I, ? extends java.util.concurrent.Flow.Publisher<? extends O>>, boolean, int, int)",
+        "new": "method void io.smallrye.mutiny.operators.multi.MultiFlatMapOp<I, O>::<init>(io.smallrye.mutiny.Multi<? extends I>, java.util.function.Function<? super I, ? extends java.util.concurrent.Flow.Publisher<? extends O>>, boolean, int, int, boolean)",
+        "justification": "added strictConcurrency parameter to control concurrency strictly"
+      }]
   }
 }, {
   "extension" : "revapi.reporter.json",
