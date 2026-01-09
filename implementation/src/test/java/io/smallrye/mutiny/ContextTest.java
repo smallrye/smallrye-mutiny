@@ -66,7 +66,7 @@ class ContextTest {
 
         @Test
         void from() {
-            HashMap<String, String> map = new HashMap<String, String>() {
+            HashMap<Object, Object> map = new HashMap<>() {
                 {
                     put("foo", "bar");
                     put("abc", "def");
@@ -162,9 +162,9 @@ class ContextTest {
         @Test
         void keysetIsACopy() {
             Context context = Context.of("foo", "bar", "123", 456);
-            Set<String> k1 = context.keys();
+            Set<Object> k1 = context.keys();
             context.put("bar", "baz");
-            Set<String> k2 = context.keys();
+            Set<Object> k2 = context.keys();
             assertThat(k1).isNotSameAs(k2);
         }
     }
