@@ -167,6 +167,22 @@ class ContextTest {
             Set<Object> k2 = context.keys();
             assertThat(k1).isNotSameAs(k2);
         }
+
+        @Test
+        void emptyFork() {
+            Context empty = Context.empty();
+            Context fork = empty.fork();
+            assertThat(empty.isEmpty());
+            assertThat(fork.isEmpty());
+        }
+
+        @Test
+        void fork() {
+            Context root = Context.of("foo", "bar");
+            Context fork = root.fork().put("foo", "yolo");
+            assertThat(root.<String> get("foo")).isEqualTo("bar");
+            assertThat(fork.<String> get("foo")).isEqualTo("yolo");
+        }
     }
 
     @Nested

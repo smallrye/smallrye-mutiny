@@ -198,6 +198,19 @@ public final class Context {
         return set;
     }
 
+    /**
+     * Fork a context from the current context.
+     *
+     * @return a new context with the current context data as initial values
+     */
+    public Context fork() {
+        if (this.isEmpty()) {
+            return Context.empty();
+        } else {
+            return Context.from(this.entries);
+        }
+    }
+
     @Override
     public boolean equals(Object other) {
         if (this == other) {
