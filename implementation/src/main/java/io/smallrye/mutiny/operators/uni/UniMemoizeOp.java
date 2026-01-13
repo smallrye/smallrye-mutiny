@@ -19,7 +19,7 @@ public class UniMemoizeOp<I> extends UniOperator<I, I> implements UniSubscriber<
 
     private UniSubscription currentUpstreamSubscription;
 
-    private Context currentContext = Context.empty();
+    private Context context = Context.empty();
 
     private enum State {
         INIT,
@@ -49,6 +49,7 @@ public class UniMemoizeOp<I> extends UniOperator<I, I> implements UniSubscriber<
     @Override
     public void subscribe(UniSubscriber<? super I> subscriber) {
         nonNull(subscriber, "subscriber");
+        context = subscriber.context();
 
         boolean shouldSubscribeUpstream = false;
         Object cached = null;
@@ -61,7 +62,6 @@ public class UniMemoizeOp<I> extends UniOperator<I, I> implements UniSubscriber<
                 case INIT:
                     state = State.WAITING_FOR_UPSTREAM;
                     awaiters.add(subscriber);
-                    currentContext = subscriber.context();
                     shouldSubscribeUpstream = true;
                     break;
                 case WAITING_FOR_UPSTREAM:
@@ -158,7 +158,7 @@ public class UniMemoizeOp<I> extends UniOperator<I, I> implements UniSubscriber<
 
     @Override
     public Context context() {
-        return currentContext;
+        return context;
     }
 
     private class MemoizedSubscription implements UniSubscription {
