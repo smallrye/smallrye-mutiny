@@ -204,10 +204,12 @@ public final class Context {
      * @return a new context with the current context data as initial values
      */
     public Context fork() {
-        if (this.isEmpty()) {
-            return Context.empty();
-        } else {
-            return Context.from(this.entries);
+        synchronized (this) {
+            if (this.isEmpty()) {
+                return Context.empty();
+            } else {
+                return Context.from(this.entries);
+            }
         }
     }
 
