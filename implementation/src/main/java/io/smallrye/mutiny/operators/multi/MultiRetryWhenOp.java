@@ -41,7 +41,14 @@ public final class MultiRetryWhenOp<T> extends AbstractMultiOperator<T, T> {
     private static <T> void subscribe(MultiSubscriber<? super T> downstream, Predicate<? super Throwable> onFailurePredicate,
             Function<? super Multi<Throwable>, ? extends Publisher<?>> triggerStreamFactory,
             Multi<? extends T> upstream) {
-        TriggerSubscriber other = new TriggerSubscriber();
+        Context context;
+        if (downstream instanceof ContextSupport provider) {
+            context = provider.context();
+        } else {
+            context = Context.empty();
+        }
+
+        TriggerSubscriber other = new TriggerSubscriber(context);
         Subscriber<Throwable> signaller = new SerializedSubscriber<>(other.processor);
         signaller.onSubscribe(Subscriptions.empty());
         MultiSubscriber<T> serialized = new SerializedSubscriber<>(downstream);
@@ -176,7 +183,11 @@ public final class MultiRetryWhenOp<T> extends AbstractMultiOperator<T, T> {
             implements Multi<Throwable>, Subscriber<Object>, ContextSupport {
         RetryWhenOperator<?> operator;
         private final Flow.Processor<Throwable, Throwable> processor = UnicastProcessor.<Throwable> create().serialized();
-        private Context context;
+        private final Context context;
+
+        TriggerSubscriber(Context context) {
+            this.context = context;
+        }
 
         @Override
         public void onSubscribe(Flow.Subscription s) {
@@ -200,11 +211,6 @@ public final class MultiRetryWhenOp<T> extends AbstractMultiOperator<T, T> {
 
         @Override
         public void subscribe(Subscriber<? super Throwable> actual) {
-            if (actual instanceof ContextSupport) {
-                this.context = ((ContextSupport) actual).context();
-            } else {
-                this.context = Context.empty();
-            }
             processor.subscribe(actual);
         }
 
