@@ -74,7 +74,7 @@ public class UniJoinAll<T> extends AbstractUni<List<T>> {
             if (proceed) {
                 uni.onSubscription()
                         .invoke(subscription -> this.onSubscribe(index, subscription))
-                        .subscribe().with(subscriber.context(), item -> this.onItem(index, item), this::onFailure);
+                        .subscribe().with(subscriber.context().fork(), item -> this.onItem(index, item), this::onFailure);
             }
             return proceed;
         }

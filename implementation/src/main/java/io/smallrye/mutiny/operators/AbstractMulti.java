@@ -6,6 +6,7 @@ import java.util.Objects;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Flow;
 import java.util.function.BiFunction;
+import java.util.function.Consumer;
 import java.util.function.LongFunction;
 import java.util.function.Predicate;
 
@@ -32,12 +33,7 @@ import io.smallrye.mutiny.groups.MultiSkip;
 import io.smallrye.mutiny.groups.MultiSubscribe;
 import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
-import io.smallrye.mutiny.operators.multi.MultiCacheOp;
-import io.smallrye.mutiny.operators.multi.MultiDemandCapping;
-import io.smallrye.mutiny.operators.multi.MultiEmitOnOp;
-import io.smallrye.mutiny.operators.multi.MultiLogger;
-import io.smallrye.mutiny.operators.multi.MultiSubscribeOnOp;
-import io.smallrye.mutiny.operators.multi.MultiWithContext;
+import io.smallrye.mutiny.operators.multi.*;
 import io.smallrye.mutiny.operators.multi.processors.BroadcastProcessor;
 import io.smallrye.mutiny.subscription.MultiSubscriber;
 import io.smallrye.mutiny.subscription.MultiSubscriberAdapter;
@@ -215,5 +211,10 @@ public abstract class AbstractMulti<T> implements Multi<T> {
     @Override
     public Multi<T> capDemandsUsing(LongFunction<Long> function) {
         return Infrastructure.onMultiCreation(new MultiDemandCapping<>(this, nonNull(function, "function")));
+    }
+
+    @Override
+    public Multi<T> forkContext(Consumer<Context> additionalSteps) {
+        return Infrastructure.onMultiCreation(new MultiContextForkingOperator<>(this, nonNull(additionalSteps, "additionalSteps")));
     }
 }

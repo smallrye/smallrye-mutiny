@@ -739,4 +739,14 @@ public interface Multi<T> extends Publisher<T> {
     default <K extends Enum<K>> MultiSplitter<T, K> split(Class<K> keyType, Function<T, K> splitter) {
         return new MultiSplitter<>(this, keyType, splitter);
     }
+
+    @CheckReturnValue
+    default Multi<T> forkContext() {
+        return forkContext(newContext -> {});
+    }
+
+    @CheckReturnValue
+    default Multi<T> forkContext(Consumer<Context> additionalSteps) {
+        throw new UnsupportedOperationException("Default method added to limit binary incompatibility");
+    }
 }

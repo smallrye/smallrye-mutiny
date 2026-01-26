@@ -72,7 +72,7 @@ public class UniJoinFirst<T> extends AbstractUni<T> {
                 Uni<? extends T> uni = unis.get(index);
                 uni.onSubscription()
                         .invoke(subscription -> this.onSubscribe(index, subscription))
-                        .subscribe().with(subscriber.context(), this::onItem, this::onFailure);
+                        .subscribe().with(subscriber.context().fork(), this::onItem, this::onFailure);
             }
             return proceed;
         }

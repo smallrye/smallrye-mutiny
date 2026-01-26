@@ -16,8 +16,6 @@ import java.util.function.Supplier;
  * A context is provided by a {@link io.smallrye.mutiny.subscription.UniSubscriber} or {@link Flow.Subscriber}
  * that implements {@link io.smallrye.mutiny.subscription.ContextSupport}.
  * <p>
- * Context keys are represented as {@link String} while values can be from heterogeneous types.
- * <p>
  * {@link Context} instances are thread-safe.
  * Internal storage is not allocated until the first entry is being added.
  * <p>
@@ -57,9 +55,9 @@ public final class Context {
         if (entries.length % 2 != 0) {
             throw new IllegalArgumentException("Arguments must be balanced to form (key, value) pairs");
         }
-        HashMap<String, Object> map = new HashMap<>();
+        HashMap<Object, Object> map = new HashMap<>();
         for (int i = 0; i < entries.length; i = i + 2) {
-            String key = nonNull(entries[i], "key").toString();
+            Object key = nonNull(entries[i], "key");
             Object value = nonNull(entries[i + 1], "value");
             map.put(key, value);
         }
@@ -73,17 +71,17 @@ public final class Context {
      * @return the new context
      * @throws NullPointerException when {@code entries} is null
      */
-    public static Context from(Map<String, ?> entries) {
+    public static Context from(Map<Object, ?> entries) {
         return new Context(requireNonNull(entries, "The entries map cannot be null"));
     }
 
-    private volatile ConcurrentHashMap<String, Object> entries;
+    private volatile ConcurrentHashMap<Object, Object> entries;
 
     private Context() {
         this.entries = null;
     }
 
-    private Context(Map<String, ?> initialEntries) {
+    private Context(Map<Object, ?> initialEntries) {
         this.entries = new ConcurrentHashMap<>(initialEntries);
     }
 
@@ -93,7 +91,7 @@ public final class Context {
      * @param key the key
      * @return {@code true} when there is an entry for {@code key}, {@code false} otherwise
      */
-    public boolean contains(String key) {
+    public boolean contains(Object key) {
         if (entries == null) {
             return false;
         } else {
@@ -110,7 +108,7 @@ public final class Context {
      * @throws NoSuchElementException when there is no entry for {@code key}
      */
     @SuppressWarnings("unchecked")
-    public <T> T get(String key) throws NoSuchElementException {
+    public <T> T get(Object key) throws NoSuchElementException {
         if (entries == null) {
             throw new NoSuchElementException("The context is empty");
         }
@@ -130,7 +128,7 @@ public final class Context {
      * @return the value
      */
     @SuppressWarnings("unchecked")
-    public <T> T getOrElse(String key, Supplier<? extends T> alternativeSupplier) {
+    public <T> T getOrElse(Object key, Supplier<? extends T> alternativeSupplier) {
         if (entries != null) {
             T value = (T) entries.get(key);
             if (value != null) {
@@ -147,7 +145,7 @@ public final class Context {
      * @param value the value, cannot be {@code null}
      * @return this context
      */
-    public Context put(String key, Object value) {
+    public Context put(Object key, Object value) {
         if (entries == null) {
             synchronized (this) {
                 if (entries == null) {
@@ -165,7 +163,7 @@ public final class Context {
      * @param key the key
      * @return this context
      */
-    public Context delete(String key) {
+    public Context delete(Object key) {
         if (entries != null) {
             entries.remove(key);
         }
@@ -188,16 +186,31 @@ public final class Context {
      *
      * @return the set of keys
      */
-    public Set<String> keys() {
+    public Set<Object> keys() {
         if (this.entries == null) {
             return Collections.emptySet();
         }
-        HashSet<String> set = new HashSet<>();
-        Enumeration<String> enumeration = entries.keys();
+        HashSet<Object> set = new HashSet<>();
+        Enumeration<Object> enumeration = entries.keys();
         while (enumeration.hasMoreElements()) {
             set.add(enumeration.nextElement());
         }
         return set;
+    }
+
+    /**
+     * Fork a context from the current context.
+     *
+     * @return a new context with the current context data as initial values
+     */
+    public Context fork() {
+        synchronized (this) {
+            if (this.isEmpty()) {
+                return Context.empty();
+            } else {
+                return Context.from(this.entries);
+            }
+        }
     }
 
     @Override
