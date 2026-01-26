@@ -14,7 +14,7 @@
     <properties>
         <site.dir>${project.build.directory}/generated-docs/</site.dir>
         <format.skip>true</format.skip>
-        <logback-classic.version>1.5.25</logback-classic.version>
+        <logback-classic.version>1.5.26</logback-classic.version>
     </properties>
 
     <dependencies>
