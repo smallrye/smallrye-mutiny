@@ -40,6 +40,7 @@
         <dependency>
             <groupId>io.smallrye.reactive</groupId>
             <artifactId>mutiny-test-utils</artifactId>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>io.smallrye</groupId>
