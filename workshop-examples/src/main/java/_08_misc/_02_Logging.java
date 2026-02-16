@@ -1,5 +1,5 @@
 ///usr/bin/env jbang "$0" "$@" ; exit $?
-//DEPS io.smallrye.reactive:mutiny:3.1.0
+//DEPS io.smallrye.reactive:mutiny:3.1.1
 package _08_misc;
 
 import io.smallrye.mutiny.Multi;
