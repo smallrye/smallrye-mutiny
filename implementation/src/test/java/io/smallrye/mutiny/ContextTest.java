@@ -66,7 +66,7 @@ class ContextTest {
 
         @Test
         void from() {
-            HashMap<String, String> map = new HashMap<String, String>() {
+            HashMap<Object, Object> map = new HashMap<>() {
                 {
                     put("foo", "bar");
                     put("abc", "def");
@@ -162,10 +162,26 @@ class ContextTest {
         @Test
         void keysetIsACopy() {
             Context context = Context.of("foo", "bar", "123", 456);
-            Set<String> k1 = context.keys();
+            Set<Object> k1 = context.keys();
             context.put("bar", "baz");
-            Set<String> k2 = context.keys();
+            Set<Object> k2 = context.keys();
             assertThat(k1).isNotSameAs(k2);
+        }
+
+        @Test
+        void emptyFork() {
+            Context empty = Context.empty();
+            Context fork = empty.fork();
+            assertThat(empty.isEmpty());
+            assertThat(fork.isEmpty());
+        }
+
+        @Test
+        void fork() {
+            Context root = Context.of("foo", "bar");
+            Context fork = root.fork().put("foo", "yolo");
+            assertThat(root.<String> get("foo")).isEqualTo("bar");
+            assertThat(fork.<String> get("foo")).isEqualTo("yolo");
         }
     }
 
@@ -309,100 +325,99 @@ class ContextTest {
 
         @Test
         void joinAllAndAttachContext() {
-            Context context = Context.of("foo", "bar", "baz", "baz");
+            Context context = Context.of(58, "58", 63, "63", 69, "69");
 
             Uni<Integer> a = Uni.createFrom().item(58)
-                    .withContext((uni, ctx) -> uni.onItem().invoke(n -> ctx.put(n.toString(), n)));
+                    .withContext((uni, ctx) -> uni.onItem().invoke(n -> ctx.put("!!!", "!!!")));
 
             Uni<Integer> b = Uni.createFrom().item(63)
-                    .withContext((uni, ctx) -> uni.onItem().invoke(n -> ctx.put(n.toString(), n)));
+                    .withContext((uni, ctx) -> uni.onItem().invoke(n -> ctx.put("!!!", "!!!")));
 
             Uni<Integer> c = Uni.createFrom().item(69)
-                    .withContext((uni, ctx) -> uni.onItem().invoke(n -> ctx.put(n.toString(), n)));
+                    .withContext((uni, ctx) -> uni.onItem().invoke(n -> ctx.put("!!!", "!!!")));
 
             UniAssertSubscriber<String> sub = Uni.join().all(a, b, c).andFailFast()
                     .attachContext()
                     .onItem().transform(itemsWithContext -> {
+
                         Context ctx = itemsWithContext.context();
-                        return itemsWithContext.get().toString() + "::" + ctx.get("58") + "::" + ctx.get("63") + "::"
-                                + ctx.get("69");
+                        return itemsWithContext.get().toString() + "::" + ctx.getOrElse("!!!", () -> "~");
                     })
                     .subscribe().withSubscriber(UniAssertSubscriber.create(context));
 
-            sub.assertCompleted().assertItem("[58, 63, 69]::58::63::69");
+            sub.assertCompleted().assertItem("[58, 63, 69]::~");
         }
 
         @Test
         void joinFirstAndAttachContext() {
-            Context context = Context.of("foo", "bar", "baz", "baz");
+            Context context = Context.of(58, "58", 63, "63", 69, "69");
 
             Uni<Integer> a = Uni.createFrom().item(58)
-                    .withContext((uni, ctx) -> uni.onItem().invoke(n -> ctx.put(n.toString(), n)));
+                    .withContext((uni, ctx) -> uni.onItem().invoke(n -> ctx.put("!!!", "!!!")));
 
             Uni<Integer> b = Uni.createFrom().item(63)
-                    .withContext((uni, ctx) -> uni.onItem().invoke(n -> ctx.put(n.toString(), n)));
+                    .withContext((uni, ctx) -> uni.onItem().invoke(n -> ctx.put("!!!", "!!!")));
 
             Uni<Integer> c = Uni.createFrom().item(69)
-                    .withContext((uni, ctx) -> uni.onItem().invoke(n -> ctx.put(n.toString(), n)));
+                    .withContext((uni, ctx) -> uni.onItem().invoke(n -> ctx.put("!!!", "!!!")));
 
             UniAssertSubscriber<String> sub = Uni.join().first(a, b, c).withItem()
                     .attachContext()
                     .onItem().transform(item -> {
                         Context ctx = item.context();
-                        return item.get().toString() + "::" + ctx.get("58");
+                        return item.get().toString() + "::" + ctx.getOrElse("!!!", () -> "~");
                     })
                     .subscribe().withSubscriber(UniAssertSubscriber.create(context));
 
-            sub.assertCompleted().assertItem("58::58");
+            sub.assertCompleted().assertItem("58::~");
         }
 
         @Test
         void combineAllAndAttachContext() {
-            Context context = Context.of("foo", "bar", "baz", "baz");
+            Context context = Context.of(58, "58", 63, "63", 69, "69");
 
             Uni<Integer> a = Uni.createFrom().item(58)
-                    .withContext((uni, ctx) -> uni.onItem().invoke(n -> ctx.put(n.toString(), n)));
+                    .withContext((uni, ctx) -> uni.onItem().invoke(n -> ctx.put("!!!", "!!!")));
 
             Uni<Integer> b = Uni.createFrom().item(63)
-                    .withContext((uni, ctx) -> uni.onItem().invoke(n -> ctx.put(n.toString(), n)));
+                    .withContext((uni, ctx) -> uni.onItem().invoke(n -> ctx.put("!!!", "!!!")));
 
             Uni<Integer> c = Uni.createFrom().item(69)
-                    .withContext((uni, ctx) -> uni.onItem().invoke(n -> ctx.put(n.toString(), n)));
+                    .withContext((uni, ctx) -> uni.onItem().invoke(n -> ctx.put("!!!", "!!!")));
 
             UniAssertSubscriber<String> sub = Uni.combine().all().unis(a, b, c).asTuple()
                     .attachContext()
                     .onItem().transform(itemsWithContext -> {
                         Context ctx = itemsWithContext.context();
-                        return itemsWithContext.get().toString() + "::" + ctx.get("58") + "::" + ctx.get("63") + "::"
-                                + ctx.get("69");
+                        return itemsWithContext.get().toString() + "::" + ctx.getOrElse("!!!", () -> "~");
                     })
                     .subscribe().withSubscriber(UniAssertSubscriber.create(context));
 
-            sub.assertCompleted().assertItem("Tuple{item1=58,item2=63,item3=69}::58::63::69");
+            sub.assertCompleted().assertItem("Tuple{item1=58,item2=63,item3=69}::~");
         }
 
         @Test
         void combineAnyAndAttachContext() {
-            Context context = Context.of("foo", "bar", "baz", "baz");
+            Context context = Context.of(58, "58", 63, "63", 69, "69");
 
             Uni<Integer> a = Uni.createFrom().item(58)
-                    .withContext((uni, ctx) -> uni.onItem().invoke(n -> ctx.put(n.toString(), n)));
+                    .withContext((uni, ctx) -> uni.onItem().invoke(n -> ctx.put("!!!", "!!!")));
 
             Uni<Integer> b = Uni.createFrom().item(63)
-                    .withContext((uni, ctx) -> uni.onItem().invoke(n -> ctx.put(n.toString(), n)));
+                    .withContext((uni, ctx) -> uni.onItem().invoke(n -> ctx.put("!!!", "!!!")));
 
             Uni<Integer> c = Uni.createFrom().item(69)
-                    .withContext((uni, ctx) -> uni.onItem().invoke(n -> ctx.put(n.toString(), n)));
+                    .withContext((uni, ctx) -> uni.onItem().invoke(n -> ctx.put("!!!", "!!!")));
 
             UniAssertSubscriber<String> sub = Uni.combine().any().of(a, b, c)
                     .attachContext()
                     .onItem().transform(item -> {
                         Context ctx = item.context();
-                        return item.get().toString() + "::" + ctx.get("58");
+                        return item.get().toString() + "::" + ctx.getOrElse("!!!", () -> "~");
                     })
                     .subscribe().withSubscriber(UniAssertSubscriber.create(context));
 
-            sub.assertCompleted().assertItem("58::58");
+            sub.assertCompleted().assertItem("58::~");
         }
 
         @Test
