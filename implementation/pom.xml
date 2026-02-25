@@ -14,6 +14,7 @@
 
     <properties>
         <revapi.skip>false</revapi.skip>
+        <bnd-bundle-name>io.smallrye.mutiny</bnd-bundle-name>
     </properties>
 
     <dependencies>
@@ -67,6 +68,42 @@
 
     <build>
         <plugins>
+			<plugin>
+			    <groupId>biz.aQute.bnd</groupId>
+			    <artifactId>bnd-maven-plugin</artifactId>
+			    <version>${bnd-maven-plugin.version}</version>
+				<executions>
+					<execution>
+						<id>bnd-process</id>
+						<goals>
+							<goal>bnd-process</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<bnd><![CDATA[
+						Bundle-Name:            Bundle ${project.groupId} : ${project.artifactId}
+						Bundle-SymbolicName:    ${bnd-bundle-name}
+						Export-Package: 		${bnd-bundle-name}.*
+						Bundle-Version:         ${version}
+						-noimportjava:          true;
+						-nouses:                true;
+						]]>
+					</bnd>
+				</configuration>
+			</plugin>
+			<plugin>
+			    <groupId>org.apache.maven.plugins</groupId>
+			    <artifactId>maven-jar-plugin</artifactId>
+			    <configuration>
+			        <archive>
+			            <manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
+			        </archive>
+			        <includes>
+			            <include>META-INF/*</include>
+			        </includes>
+			    </configuration>
+			</plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
