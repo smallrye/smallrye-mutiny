@@ -81,7 +81,7 @@
         <argLine/>
         <jacocoArgLine/>
 
-        <jctools-core.version>4.0.5</jctools-core.version>
+        <jctools-core.version>4.0.6</jctools-core.version>
         <mutiny-zero.version>1.1.1</mutiny-zero.version>
         <reactive-streams.version>1.0.4</reactive-streams.version>
         <rxjava3.version>3.1.12</rxjava3.version>
@@ -99,7 +99,7 @@
         <assertj-core.version>3.27.7</assertj-core.version>
         <junit4.version>4.13.2</junit4.version>
         <awaitility.version>4.3.0</awaitility.version>
-        <version.surefire.plugin>3.5.4</version.surefire.plugin>
+        <version.surefire.plugin>3.5.5</version.surefire.plugin>
         <testng.version>7.12.0</testng.version>
         <testng-junit5-engine.version>1.1.0</testng-junit5-engine.version>
 
