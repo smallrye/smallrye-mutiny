@@ -13,6 +13,7 @@
 
     <properties>
         <revapi.skip>false</revapi.skip>
+        <bnd-maven-plugin.version>7.1.0</bnd-maven-plugin.version>
     </properties>
 
     <dependencies>
@@ -49,7 +50,44 @@
 
     <build>
         <plugins>
-            <plugin>
+ 			<plugin>
+				<groupId>biz.aQute.bnd</groupId>
+				<artifactId>bnd-maven-plugin</artifactId>
+				<version>${bnd-maven-plugin.version}</version>
+				<executions>
+					<execution>
+						<id>bnd-process</id>
+						<goals>
+							<goal>bnd-process</goal>
+						</goals>
+						<configuration>
+							<bnd><![CDATA[
+								Bundle-Name:            Bundle ${project.groupId} : ${project.artifactId}
+								Bundle-SymbolicName:    ${project.groupId}.${project.artifactId}
+								Bundle-Version:         ${project.version}
+								Automatic-Module-Name:  ${project.groupId}.${project.artifactId}
+								Export-Package:         io.smallrye.mutiny.*;version="${version}";-noimport:=true
+								-noimportjava:          true;
+								-nouses:                true;
+								-removeheaders:         Private-Package
+								]]>
+							</bnd>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<configuration>
+					<archive>
+						<manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
+					</archive>
+				</configuration>
+			</plugin>
+
+           <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <executions>
