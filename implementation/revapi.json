@@ -51,7 +51,63 @@
     "criticality" : "highlight",
     "minSeverity" : "POTENTIALLY_BREAKING",
     "minCriticality" : "documented",
-    "differences" : [ ]
+    "differences" : [
+      {
+        "ignore": true,
+        "code": "java.method.parameterTypeChanged",
+        "old": "parameter boolean io.smallrye.mutiny.Context::contains(===java.lang.String===)",
+        "new": "parameter boolean io.smallrye.mutiny.Context::contains(===java.lang.Object===)",
+        "parameterIndex": "0",
+        "justification": "ADD YOUR EXPLANATION FOR THE NECESSITY OF THIS CHANGE"
+      },
+      {
+        "ignore": true,
+        "code": "java.method.parameterTypeChanged",
+        "old": "parameter io.smallrye.mutiny.Context io.smallrye.mutiny.Context::delete(===java.lang.String===)",
+        "new": "parameter io.smallrye.mutiny.Context io.smallrye.mutiny.Context::delete(===java.lang.Object===)",
+        "parameterIndex": "0",
+        "justification": "ADD YOUR EXPLANATION FOR THE NECESSITY OF THIS CHANGE"
+      },
+      {
+        "ignore": true,
+        "code": "java.method.parameterTypeParameterChanged",
+        "old": "parameter io.smallrye.mutiny.Context io.smallrye.mutiny.Context::from(===java.util.Map<java.lang.String, ?>===)",
+        "new": "parameter io.smallrye.mutiny.Context io.smallrye.mutiny.Context::from(===java.util.Map<java.lang.Object, ?>===)",
+        "parameterIndex": "0",
+        "justification": "ADD YOUR EXPLANATION FOR THE NECESSITY OF THIS CHANGE"
+      },
+      {
+        "ignore": true,
+        "code": "java.method.parameterTypeChanged",
+        "old": "parameter <T> T io.smallrye.mutiny.Context::get(===java.lang.String===) throws java.util.NoSuchElementException",
+        "new": "parameter <T> T io.smallrye.mutiny.Context::get(===java.lang.Object===) throws java.util.NoSuchElementException",
+        "parameterIndex": "0",
+        "justification": "ADD YOUR EXPLANATION FOR THE NECESSITY OF THIS CHANGE"
+      },
+      {
+        "ignore": true,
+        "code": "java.method.parameterTypeChanged",
+        "old": "parameter <T> T io.smallrye.mutiny.Context::getOrElse(===java.lang.String===, java.util.function.Supplier<? extends T>)",
+        "new": "parameter <T> T io.smallrye.mutiny.Context::getOrElse(===java.lang.Object===, java.util.function.Supplier<? extends T>)",
+        "parameterIndex": "0",
+        "justification": "ADD YOUR EXPLANATION FOR THE NECESSITY OF THIS CHANGE"
+      },
+      {
+        "ignore": true,
+        "code": "java.method.returnTypeTypeParametersChanged",
+        "old": "method java.util.Set<java.lang.String> io.smallrye.mutiny.Context::keys()",
+        "new": "method java.util.Set<java.lang.Object> io.smallrye.mutiny.Context::keys()",
+        "justification": "ADD YOUR EXPLANATION FOR THE NECESSITY OF THIS CHANGE"
+      },
+      {
+        "ignore": true,
+        "code": "java.method.parameterTypeChanged",
+        "old": "parameter io.smallrye.mutiny.Context io.smallrye.mutiny.Context::put(===java.lang.String===, java.lang.Object)",
+        "new": "parameter io.smallrye.mutiny.Context io.smallrye.mutiny.Context::put(===java.lang.Object===, java.lang.Object)",
+        "parameterIndex": "0",
+        "justification": "ADD YOUR EXPLANATION FOR THE NECESSITY OF THIS CHANGE"
+      }
+    ]
   }
 }, {
   "extension" : "revapi.reporter.json",

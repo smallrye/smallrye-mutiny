@@ -67,7 +67,7 @@ public class UniAndCombination<I, O> extends UniOperator<I, O> {
 
             Context context = subscriber.context();
             for (Uni<?> uni : unis) {
-                UniHandler result = new UniHandler(this, uni, context);
+                UniHandler result = new UniHandler(this, uni, context.fork());
                 handlers.add(result);
             }
 

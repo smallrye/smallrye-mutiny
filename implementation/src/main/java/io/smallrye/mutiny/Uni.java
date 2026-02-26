@@ -855,4 +855,14 @@ public interface Uni<T> {
     default Uni<ItemWithContext<T>> attachContext() {
         return this.withContext((uni, ctx) -> uni.onItem().transform(item -> new ItemWithContext<>(ctx, item)));
     }
+
+    @CheckReturnValue
+    default Uni<T> forkContext() {
+        return forkContext(newContext -> {});
+    }
+
+    @CheckReturnValue
+    default Uni<T> forkContext(Consumer<Context> additionalSteps) {
+        throw new UnsupportedOperationException("Default method added to limit binary incompatibility");
+    }
 }

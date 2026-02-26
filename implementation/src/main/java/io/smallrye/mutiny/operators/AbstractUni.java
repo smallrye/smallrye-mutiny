@@ -4,6 +4,7 @@ import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
 
 import java.util.concurrent.Executor;
 import java.util.function.BiFunction;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 import io.smallrye.mutiny.Context;
@@ -147,5 +148,10 @@ public abstract class AbstractUni<T> implements Uni<T> {
     @Override
     public <R> Uni<R> withContext(BiFunction<Uni<T>, Context, Uni<R>> builder) {
         return Infrastructure.onUniCreation(new UniWithContext<>(this, nonNull(builder, "builder")));
+    }
+
+    @Override
+    public Uni<T> forkContext(Consumer<Context> additionalSteps) {
+        return Infrastructure.onUniCreation(new UniContextForkingOperator<>(this, nonNull(additionalSteps, "additionalSteps")));
     }
 }
