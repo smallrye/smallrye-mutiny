@@ -118,8 +118,8 @@
 
         <!-- Configuration of mutiny-kotlin module -->
         <kotlin.version>2.3.10</kotlin.version>
-        <kotlin.compiler.apiVersion>1.8</kotlin.compiler.apiVersion>
-        <kotlin.compiler.languageVersion>1.8</kotlin.compiler.languageVersion>
+        <kotlin.compiler.apiVersion>2.1</kotlin.compiler.apiVersion>
+        <kotlin.compiler.languageVersion>2.1</kotlin.compiler.languageVersion>
         <coroutines.version>1.10.2</coroutines.version>
         <kotlin.compiler.jvmTarget>${maven.compiler.target}</kotlin.compiler.jvmTarget>
         <dokka.version>2.1.0</dokka.version>
