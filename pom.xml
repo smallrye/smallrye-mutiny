@@ -103,7 +103,7 @@
         <testng.version>7.12.0</testng.version>
         <testng-junit5-engine.version>1.1.0</testng-junit5-engine.version>
 
-        <mockito-core.version>5.21.0</mockito-core.version>
+        <mockito-core.version>5.22.0</mockito-core.version>
         <byte-buddy.version>1.18.5</byte-buddy.version>
 
         <revapi-maven-plugin.version>0.15.1</revapi-maven-plugin.version>
@@ -117,7 +117,7 @@
         <maven-compiler-plugin.release>17</maven-compiler-plugin.release>
 
         <!-- Configuration of mutiny-kotlin module -->
-        <kotlin.version>2.2.21</kotlin.version>
+        <kotlin.version>2.3.10</kotlin.version>
         <kotlin.compiler.apiVersion>1.8</kotlin.compiler.apiVersion>
         <kotlin.compiler.languageVersion>1.8</kotlin.compiler.languageVersion>
         <coroutines.version>1.10.2</coroutines.version>
@@ -126,7 +126,7 @@
 
         <jandex-maven-plugin.version>3.5.3</jandex-maven-plugin.version>
         <find-and-replace-maven-plugin.version>1.2.0</find-and-replace-maven-plugin.version>
-        <jreleaser-maven-plugin.version>1.22.0</jreleaser-maven-plugin.version>
+        <jreleaser-maven-plugin.version>1.23.0</jreleaser-maven-plugin.version>
         <cyclonedx-maven-plugin.version>2.9.1</cyclonedx-maven-plugin.version>
         <maven-shade-plugin.version>3.6.1</maven-shade-plugin.version>
         <maven-failsafe-plugin.version>3.2.5</maven-failsafe-plugin.version>
