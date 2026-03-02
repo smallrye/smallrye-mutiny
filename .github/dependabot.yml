@@ -1,17 +1,43 @@
 version: 2
 updates:
-- package-ecosystem: maven
-  directory: "/"
-  schedule:
-    interval: daily
-  commit-message:
-    prefix: "build"
-    include: "scope"
-  open-pull-requests-limit: 10
-- package-ecosystem: github-actions
-  directory: "/"
-  schedule:
-    interval: weekly
-  commit-message:
-    prefix: "build"
-    include: "scope"
+  - package-ecosystem: maven
+    directory: "/"
+    schedule:
+      interval: daily
+    commit-message:
+      prefix: "build"
+      include: "scope"
+    open-pull-requests-limit: 10
+    groups:
+      patch:
+        applies-to: version-updates
+        update-types:
+          - "patch"
+      minor:
+        applies-to: version-updates
+        update-types:
+          - "minor"
+      major:
+        applies-to: version-updates
+        update-types:
+          - "major"
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: "build"
+      include: "scope"
+    groups:
+      patch:
+        applies-to: version-updates
+        update-types:
+          - "patch"
+      minor:
+        applies-to: version-updates
+        update-types:
+          - "minor"
+      major:
+        applies-to: version-updates
+        update-types:
+          - "major"
