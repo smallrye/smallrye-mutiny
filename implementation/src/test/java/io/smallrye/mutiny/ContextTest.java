@@ -162,9 +162,9 @@ class ContextTest {
         @Test
         void keysetIsACopy() {
             Context context = Context.of("foo", "bar", "123", 456);
-            Set<String> k1 = context.keys();
+            Set<Object> k1 = context.keys();
             context.put("bar", "baz");
-            Set<String> k2 = context.keys();
+            Set<Object> k2 = context.keys();
             assertThat(k1).isNotSameAs(k2);
         }
     }
@@ -312,20 +312,20 @@ class ContextTest {
             Context context = Context.of("foo", "bar", "baz", "baz");
 
             Uni<Integer> a = Uni.createFrom().item(58)
-                    .withContext((uni, ctx) -> uni.onItem().invoke(n -> ctx.put(n.toString(), n)));
+                    .withContext((uni, ctx) -> uni.onItem().invoke(n -> ctx.put(n, n)));
 
             Uni<Integer> b = Uni.createFrom().item(63)
-                    .withContext((uni, ctx) -> uni.onItem().invoke(n -> ctx.put(n.toString(), n)));
+                    .withContext((uni, ctx) -> uni.onItem().invoke(n -> ctx.put(n, n)));
 
             Uni<Integer> c = Uni.createFrom().item(69)
-                    .withContext((uni, ctx) -> uni.onItem().invoke(n -> ctx.put(n.toString(), n)));
+                    .withContext((uni, ctx) -> uni.onItem().invoke(n -> ctx.put(n, n)));
 
             UniAssertSubscriber<String> sub = Uni.join().all(a, b, c).andFailFast()
                     .attachContext()
                     .onItem().transform(itemsWithContext -> {
                         Context ctx = itemsWithContext.context();
-                        return itemsWithContext.get().toString() + "::" + ctx.get("58") + "::" + ctx.get("63") + "::"
-                                + ctx.get("69");
+                        return itemsWithContext.get().toString() + "::" + ctx.get(58) + "::" + ctx.get(63) + "::"
+                                + ctx.get(69);
                     })
                     .subscribe().withSubscriber(UniAssertSubscriber.create(context));
 
