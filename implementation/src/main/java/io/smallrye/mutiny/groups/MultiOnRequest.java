@@ -62,7 +62,8 @@ public class MultiOnRequest<T> {
      */
     @CheckReturnValue
     public Multi<T> call(LongFunction<Uni<?>> mapper) {
-        return Infrastructure.onMultiCreation(new MultiOnRequestCall<>(upstream, nonNull(mapper, "mapper")));
+        LongFunction<Uni<?>> actual = Infrastructure.decorate(nonNull(mapper, "mapper"));
+        return Infrastructure.onMultiCreation(new MultiOnRequestCall<>(upstream, actual));
     }
 
     /**

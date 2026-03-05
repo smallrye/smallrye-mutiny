@@ -8,6 +8,7 @@ import java.util.function.BiFunction;
 
 import io.smallrye.common.annotation.CheckReturnValue;
 import io.smallrye.mutiny.Multi;
+import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.tuples.Tuple2;
 
 public class MultiItemCombine2<T1, T2> extends MultiItemCombineIterable {
@@ -69,10 +70,10 @@ public class MultiItemCombine2<T1, T2> extends MultiItemCombineIterable {
     @SuppressWarnings("unchecked")
     @CheckReturnValue
     public <O> Multi<O> using(BiFunction<T1, T2, O> combinator) {
-        nonNull(combinator, "combinator");
+        BiFunction<T1, T2, O> actual = Infrastructure.decorate(nonNull(combinator, "combinator"));
         return super.combine(args -> {
             size(args, 2, "args");
-            return combinator.apply((T1) args.get(0), (T2) args.get(1));
+            return actual.apply((T1) args.get(0), (T2) args.get(1));
         });
     }
 }

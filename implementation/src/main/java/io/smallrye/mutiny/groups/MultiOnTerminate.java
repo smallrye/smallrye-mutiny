@@ -64,7 +64,7 @@ public class MultiOnTerminate<T> {
     @CheckReturnValue
     public Multi<T> call(BiFunction<Throwable, Boolean, Uni<?>> mapper) {
         BiFunction<Throwable, Boolean, Uni<?>> actual = Infrastructure
-                .decorate(Infrastructure.decorate(nonNull(mapper, "mapper")));
+                .decorate(nonNull(mapper, "mapper"));
         return Infrastructure.onMultiCreation(new MultiOnTerminationCall<>(upstream, actual));
     }
 
