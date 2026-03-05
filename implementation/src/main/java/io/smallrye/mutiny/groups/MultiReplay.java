@@ -7,6 +7,7 @@ import java.util.concurrent.Flow;
 
 import io.smallrye.common.annotation.CheckReturnValue;
 import io.smallrye.mutiny.Multi;
+import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.multi.replay.ReplayOperator;
 
 /**
@@ -62,7 +63,8 @@ public class MultiReplay {
      */
     @CheckReturnValue
     public <T> Multi<T> ofMulti(Multi<T> upstream) {
-        return new ReplayOperator<>(nonNull(upstream, "upstream"), numberOfItemsToReplay);
+        return Infrastructure.onMultiCreation(
+                new ReplayOperator<>(nonNull(upstream, "upstream"), numberOfItemsToReplay));
     }
 
     /**
@@ -79,6 +81,7 @@ public class MultiReplay {
      */
     @CheckReturnValue
     public <T> Multi<T> ofSeedAndMulti(Iterable<T> seed, Multi<T> upstream) {
-        return new ReplayOperator<>(nonNull(upstream, "upstream"), numberOfItemsToReplay, nonNull(seed, "seed"));
+        return Infrastructure.onMultiCreation(
+                new ReplayOperator<>(nonNull(upstream, "upstream"), numberOfItemsToReplay, nonNull(seed, "seed")));
     }
 }

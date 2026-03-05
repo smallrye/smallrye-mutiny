@@ -67,8 +67,8 @@ public class MultiItemCombineIterable {
      */
     @CheckReturnValue
     public <O> Multi<O> using(Function<List<?>, O> combinator) {
-        nonNull(combinator, "combinator");
-        return combine(combinator);
+        Function<List<?>, O> actual = Infrastructure.decorate(nonNull(combinator, "combinator"));
+        return combine(actual);
     }
 
     @CheckReturnValue

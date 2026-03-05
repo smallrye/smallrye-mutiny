@@ -23,6 +23,7 @@ import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.LongConsumer;
+import java.util.function.LongFunction;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
@@ -179,6 +180,14 @@ public class Infrastructure {
 
     public static LongConsumer decorate(LongConsumer consumer) {
         LongConsumer current = consumer;
+        for (CallbackDecorator interceptor : CALLBACK_DECORATORS) {
+            current = interceptor.decorate(current);
+        }
+        return current;
+    }
+
+    public static <R> LongFunction<R> decorate(LongFunction<R> function) {
+        LongFunction<R> current = function;
         for (CallbackDecorator interceptor : CALLBACK_DECORATORS) {
             current = interceptor.decorate(current);
         }

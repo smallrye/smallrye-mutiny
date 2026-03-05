@@ -7,6 +7,7 @@ import java.util.concurrent.Flow;
 
 import io.smallrye.common.annotation.CheckReturnValue;
 import io.smallrye.mutiny.Multi;
+import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.tuples.Functions;
 import io.smallrye.mutiny.tuples.Tuple3;
 
@@ -70,10 +71,10 @@ public class MultiItemCombine3<T1, T2, T3> extends MultiItemCombineIterable {
     @SuppressWarnings("unchecked")
     @CheckReturnValue
     public <O> Multi<O> using(Functions.Function3<T1, T2, T3, O> combinator) {
-        nonNull(combinator, "combinator");
+        Functions.Function3<T1, T2, T3, O> actual = Infrastructure.decorate(nonNull(combinator, "combinator"));
         return super.combine(args -> {
             size(args, 3, "args");
-            return combinator.apply((T1) args.get(0), (T2) args.get(1), (T3) args.get(2));
+            return actual.apply((T1) args.get(0), (T2) args.get(1), (T3) args.get(2));
         });
     }
 }
