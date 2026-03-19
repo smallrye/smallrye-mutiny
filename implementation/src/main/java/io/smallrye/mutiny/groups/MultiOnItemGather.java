@@ -11,6 +11,7 @@ import io.smallrye.common.annotation.CheckReturnValue;
 import io.smallrye.common.annotation.Experimental;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.groups.Gatherer.Extraction;
+import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.multi.MultiGather;
 
 /**
@@ -38,8 +39,8 @@ public class MultiOnItemGather<I> {
      */
     @CheckReturnValue
     public <ACC> InitialAccumulatorStep<I, ACC> into(Supplier<ACC> initialAccumulatorSupplier) {
-        nonNull(initialAccumulatorSupplier, "initialAccumulatorSupplier");
-        return new InitialAccumulatorStep<>(upstream, initialAccumulatorSupplier);
+        Supplier<ACC> actual = Infrastructure.decorate(nonNull(initialAccumulatorSupplier, "initialAccumulatorSupplier"));
+        return new InitialAccumulatorStep<>(upstream, actual);
     }
 
     /**
@@ -68,8 +69,8 @@ public class MultiOnItemGather<I> {
          */
         @CheckReturnValue
         public ExtractStep<I, ACC> accumulate(BiFunction<ACC, I, ACC> accumulator) {
-            nonNull(accumulator, "accumulator");
-            return new ExtractStep<>(upstream, initialAccumulatorSupplier, accumulator);
+            BiFunction<ACC, I, ACC> actual = Infrastructure.decorate(nonNull(accumulator, "accumulator"));
+            return new ExtractStep<>(upstream, initialAccumulatorSupplier, actual);
         }
     }
 
@@ -106,8 +107,9 @@ public class MultiOnItemGather<I> {
          */
         @CheckReturnValue
         public <O> FinalizerStep<I, ACC, O> extract(BiFunction<ACC, Boolean, Optional<Extraction<ACC, O>>> extractor) {
-            nonNull(extractor, "extractor");
-            return new FinalizerStep<>(upstream, initialAccumulatorSupplier, accumulator, extractor);
+            BiFunction<ACC, Boolean, Optional<Extraction<ACC, O>>> actual = Infrastructure
+                    .decorate(nonNull(extractor, "extractor"));
+            return new FinalizerStep<>(upstream, initialAccumulatorSupplier, accumulator, actual);
         }
     }
 
@@ -148,8 +150,9 @@ public class MultiOnItemGather<I> {
          */
         @CheckReturnValue
         public Multi<O> finalize(Function<ACC, Optional<O>> finalizer) {
-            nonNull(finalizer, "finalizer");
-            return new MultiGather<>(upstream, Gatherers.of(initialAccumulatorSupplier, accumulator, extractor, finalizer));
+            Function<ACC, Optional<O>> actual = Infrastructure.decorate(nonNull(finalizer, "finalizer"));
+            return Infrastructure.onMultiCreation(
+                    new MultiGather<>(upstream, Gatherers.of(initialAccumulatorSupplier, accumulator, extractor, actual)));
         }
     }
 }
