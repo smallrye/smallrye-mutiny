@@ -48,6 +48,17 @@ public interface CallbackDecorator extends MutinyInterceptor {
     }
 
     /**
+     * Allows decorating a {@link LongFunction}.
+     *
+     * @param function the function
+     * @param <R> the return type
+     * @return the decorated function
+     */
+    default <R> LongFunction<R> decorate(LongFunction<R> function) {
+        return function;
+    }
+
+    /**
      * Allows decorating a {@link Runnable}.
      *
      * @param runnable the runnable
