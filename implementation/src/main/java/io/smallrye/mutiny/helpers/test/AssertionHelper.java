@@ -6,6 +6,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.*;
 import java.util.concurrent.CancellationException;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class AssertionHelper {
@@ -197,6 +198,19 @@ public class AssertionHelper {
             } catch (IOException ignored) {
                 // Ignored.
             }
+        }
+    }
+
+    static <T> void shouldMatchPredicate(T item, Predicate<? super T> predicate, String description) {
+        if (!predicate.test(item)) {
+            fail("%nExpected item <%s> to match predicate: %s", item, description);
+        }
+    }
+
+    static <T> void shouldMatchPredicateOnList(java.util.List<T> items, Predicate<? super java.util.List<T>> predicate,
+            String description) {
+        if (!predicate.test(items)) {
+            fail("%nExpected items <%s> to match predicate: %s", getItemList(items), description);
         }
     }
 

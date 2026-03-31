@@ -12,6 +12,7 @@ import java.util.concurrent.Flow.Subscriber;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 import io.smallrye.mutiny.Context;
 import io.smallrye.mutiny.helpers.Subscriptions;
@@ -303,6 +304,62 @@ public class AssertSubscriber<T> implements MultiSubscriber<T>, ContextSupport {
      */
     public AssertSubscriber<T> assertLastItem(T expected) {
         shouldHaveReceived(getLastItem(), expected);
+        return this;
+    }
+
+    /**
+     * Asserts that the last received item matches the given predicate.
+     * The assertion fails if no items have been received.
+     *
+     * @param predicate the predicate to test the last item against, must not be {@code null}
+     * @param description a description of what the predicate checks, used in error messages
+     * @return this {@link AssertSubscriber}
+     */
+    public AssertSubscriber<T> assertLastItem(Predicate<? super T> predicate, String description) {
+        T last = getLastItem();
+        if (last == null && items.isEmpty()) {
+            throw new AssertionError("No items received, cannot assert last item");
+        }
+        shouldMatchPredicate(last, predicate, description);
+        return this;
+    }
+
+    /**
+     * Asserts that the received items list satisfies the given predicate.
+     *
+     * @param predicate the predicate to test the items list against, must not be {@code null}
+     * @param description a description of what the predicate checks, used in error messages
+     * @return this {@link AssertSubscriber}
+     */
+    public AssertSubscriber<T> assertItems(Predicate<? super List<T>> predicate, String description) {
+        shouldMatchPredicateOnList(items, predicate, description);
+        return this;
+    }
+
+    /**
+     * Inspect the received items list using a consumer.
+     * The consumer is expected to throw an {@link AssertionError} if the items do not meet expectations.
+     *
+     * @param consumer the consumer to inspect the items, must not be {@code null}
+     * @return this {@link AssertSubscriber}
+     */
+    public AssertSubscriber<T> inspectItems(Consumer<? super List<T>> consumer) {
+        consumer.accept(items);
+        return this;
+    }
+
+    /**
+     * Asserts that exactly {@code expected} items have been received.
+     * This checks the current item count without awaiting.
+     *
+     * @param expected the expected number of items
+     * @return this {@link AssertSubscriber}
+     */
+    public AssertSubscriber<T> assertItemCount(int expected) {
+        if (items.size() != expected) {
+            throw new AssertionError(
+                    "Expected " + expected + " items but received " + items.size());
+        }
         return this;
     }
 
