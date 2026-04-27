@@ -10,7 +10,6 @@ quick-build:
 install:
     ./mvnw clean install
 
-
 # Run all the tests
 verify:
     ./mvnw verify -Pparallel-tests -T8
