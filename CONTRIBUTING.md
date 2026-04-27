@@ -85,6 +85,7 @@ There are 2 Maven profiles that you can activate to speed up the build of the Mu
 
 - `-Pskip-rs-tck` to avoid running the Reactive Streams TCK
 - `-Pparallel-tests` to run the JUnit5 tests in parallel
+- `-Pskip-rs-operators-tests` to avoid running the Reactive Streams Operators tests
 
 The 2 profiles can be activated at the same time if you want to benefit from parallel tests and skip the Reactive Streams TCK.
 This is mostly useful to have fast development feedback loops.
