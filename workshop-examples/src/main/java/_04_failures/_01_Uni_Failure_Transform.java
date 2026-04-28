@@ -1,5 +1,5 @@
 ///usr/bin/env jbang "$0" "$@" ; exit $?
-//DEPS io.smallrye.reactive:mutiny:3.1.1
+//DEPS io.smallrye.reactive:mutiny:3.2.0
 package _04_failures;
 
 import java.io.IOException;
