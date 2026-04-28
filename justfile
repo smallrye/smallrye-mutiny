@@ -91,10 +91,9 @@ perform-release:
 clear-revapi:
     #!/usr/bin/env bash
     jbang .build/CompatibilityUtils.java clear --version="${RELEASE_VERSION}" --do-not-clear-version-prefix="1."
-    if [[ $(git diff --stat) != '' ]]; then
-      git add -A
-      git status
-      git commit -m "chore(release): clear RevAPI breaking change justifications"
-    else
+    if git diff --quiet; then
       echo "No justifications cleared"
+    else
+      git status
+      git commit -am "chore(release): clear RevAPI breaking change justifications"
     fi
