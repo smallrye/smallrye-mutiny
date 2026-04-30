@@ -216,24 +216,62 @@ public class UniOnFailureRetryTest {
 
     @Test
     public void testRetryWithBackOffReachingExpiresIn() {
-        assertThrows(IllegalStateException.class, () -> {
+        assertThatThrownBy(() -> {
             AtomicInteger count = new AtomicInteger();
             Uni.createFrom().<String> emitter(e -> e.fail(new Exception("boom " + count.getAndIncrement())))
                     .onFailure().retry().withBackOff(Duration.ofMillis(10), Duration.ofSeconds(20)).withJitter(1.0)
                     .expireIn(90L)
                     .await().atMost(Duration.ofSeconds(5));
-        });
+        }).cause()
+                .hasMessageContaining("boom")
+                .satisfies(t -> assertThat(t.getSuppressed())
+                        .hasSize(1)
+                        .allSatisfy(s -> assertThat(s)
+                                .isInstanceOf(IllegalStateException.class)
+                                .hasMessageContaining("Retries exhausted")));
     }
 
     @Test
     public void testRetryWithBackOffReachingExpiresAt() {
-        assertThrows(IllegalStateException.class, () -> {
+        assertThatThrownBy(() -> {
             AtomicInteger count = new AtomicInteger();
             Uni.createFrom().<String> emitter(e -> e.fail(new Exception("boom " + count.getAndIncrement())))
                     .onFailure().retry().withBackOff(Duration.ofMillis(10), Duration.ofSeconds(20)).withJitter(1.0)
                     .expireAt(System.currentTimeMillis() + 90L)
                     .await().atMost(Duration.ofSeconds(5));
-        });
+        }).cause()
+                .hasMessageContaining("boom")
+                .satisfies(t -> assertThat(t.getSuppressed())
+                        .hasSize(1)
+                        .allSatisfy(s -> assertThat(s)
+                                .isInstanceOf(IllegalStateException.class)
+                                .hasMessageContaining("Retries exhausted")));
+    }
+
+    @Test
+    public void testRetryWithBackOffReachingExpiresInPropagatesLastFailure() {
+        assertThatThrownBy(() -> {
+            AtomicInteger count = new AtomicInteger();
+            Uni.createFrom().<String> emitter(e -> e.fail(new Exception("boom " + count.getAndIncrement())))
+                    .onFailure().retry().withBackOff(Duration.ofMillis(10), Duration.ofSeconds(20)).withJitter(1.0)
+                    .expireIn(90L)
+                    .await().atMost(Duration.ofSeconds(5));
+        }).isNotInstanceOf(IllegalStateException.class)
+                .cause()
+                .hasMessageContaining("boom");
+    }
+
+    @Test
+    public void testRetryWithBackOffReachingExpiresAtPropagatesLastFailure() {
+        assertThatThrownBy(() -> {
+            AtomicInteger count = new AtomicInteger();
+            Uni.createFrom().<String> emitter(e -> e.fail(new Exception("boom " + count.getAndIncrement())))
+                    .onFailure().retry().withBackOff(Duration.ofMillis(10), Duration.ofSeconds(20)).withJitter(1.0)
+                    .expireAt(System.currentTimeMillis() + 90L)
+                    .await().atMost(Duration.ofSeconds(5));
+        }).isNotInstanceOf(IllegalStateException.class)
+                .cause()
+                .hasMessageContaining("boom");
     }
 
     @Test

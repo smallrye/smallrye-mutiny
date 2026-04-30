@@ -117,11 +117,11 @@ public class ExponentialBackoff {
 
                     long checkTime = System.currentTimeMillis() + delay.toMillis();
                     if (checkTime > expireAt) {
-                        return Uni.createFrom().failure(
+                        failure.addSuppressed(
                                 new IllegalStateException(
                                         "Retries exhausted : " + iteration + " attempts against " + checkTime + "/" + expireAt
-                                                + " expiration",
-                                        failure));
+                                                + " expiration"));
+                        return Uni.createFrom().failure(failure);
                     }
                     return Uni.createFrom().item((long) iteration).onItem().delayIt()
                             .onExecutor(executor).by(delay);
