@@ -10,6 +10,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.*;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 import io.smallrye.mutiny.Context;
 import io.smallrye.mutiny.subscription.UniSubscriber;
@@ -338,6 +339,48 @@ public class UniAssertSubscriber<T> implements UniSubscriber<T> {
     public UniAssertSubscriber<T> assertItem(T expected) {
         shouldHaveCompleted(hasCompletedSuccessfully, failure, null);
         shouldHaveReceived(getItem(), expected);
+        return this;
+    }
+
+    /**
+     * Assert that the received item matches the given predicate.
+     * The assertion first checks that the {@link io.smallrye.mutiny.Uni} has completed successfully.
+     *
+     * @param predicate the predicate to test the item against, must not be {@code null}
+     * @param description a description of what the predicate checks, used in error messages
+     * @return this {@link UniAssertSubscriber}
+     */
+    public UniAssertSubscriber<T> assertItem(Predicate<? super T> predicate, String description) {
+        shouldHaveCompleted(hasCompletedSuccessfully, failure, null);
+        shouldMatchPredicate(getItem(), predicate, description);
+        return this;
+    }
+
+    /**
+     * Assert that the received item is {@code null}.
+     * The assertion first checks that the {@link io.smallrye.mutiny.Uni} has completed successfully.
+     *
+     * @return this {@link UniAssertSubscriber}
+     */
+    public UniAssertSubscriber<T> assertItemIsNull() {
+        shouldHaveCompleted(hasCompletedSuccessfully, failure, null);
+        if (getItem() != null) {
+            throw new AssertionError("Expected a null item but received <" + getItem() + ">");
+        }
+        return this;
+    }
+
+    /**
+     * Inspect the received item using a consumer.
+     * The consumer is expected to throw an {@link AssertionError} if the item does not meet expectations.
+     * The assertion first checks that the {@link io.smallrye.mutiny.Uni} has completed successfully.
+     *
+     * @param consumer the consumer to inspect the item, must not be {@code null}
+     * @return this {@link UniAssertSubscriber}
+     */
+    public UniAssertSubscriber<T> inspectItem(Consumer<? super T> consumer) {
+        shouldHaveCompleted(hasCompletedSuccessfully, failure, null);
+        consumer.accept(getItem());
         return this;
     }
 
