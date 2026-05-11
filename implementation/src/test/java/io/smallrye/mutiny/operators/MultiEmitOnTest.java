@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.*;
 import static org.awaitility.Awaitility.await;
 import static org.mockito.Mockito.mock;
 
+import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Flow;
@@ -16,6 +17,7 @@ import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Multi;
+import io.smallrye.mutiny.helpers.Subscriptions;
 import io.smallrye.mutiny.helpers.test.AssertSubscriber;
 import io.smallrye.mutiny.subscription.BackPressureFailure;
 import io.smallrye.mutiny.subscription.MultiSubscriber;
@@ -105,6 +107,39 @@ public class MultiEmitOnTest {
         await().untilAsserted(() -> subscriber.assertFailedWith(BackPressureFailure.class, ""));
 
         subscriber.assertFailedWith(BackPressureFailure.class, "");
+    }
+
+    @Test
+    public void testSecondOnFailureDoesNotOverwriteBackPressureFailure() {
+        // Use an executor that captures but does not immediately run tasks,
+        // so items pile up and the queue overflows before draining.
+        var tasks = new java.util.concurrent.CopyOnWriteArrayList<Runnable>();
+        Executor capturingExecutor = tasks::add;
+
+        Multi<Integer> rogue = new AbstractMulti<>() {
+            @Override
+            public void subscribe(MultiSubscriber<? super Integer> subscriber) {
+                subscriber.onSubscribe(Subscriptions.empty());
+                for (int i = 0; i < 100; i++) {
+                    subscriber.onItem(i);
+                }
+                subscriber.onFailure(new RuntimeException("upstream error"));
+            }
+        };
+
+        AssertSubscriber<Integer> subscriber = rogue
+                .emitOn(capturingExecutor, 1)
+                .subscribe().withSubscriber(AssertSubscriber.create(1));
+
+        // Now drain the captured tasks
+        for (Runnable task : tasks) {
+            task.run();
+        }
+
+        subscriber.assertFailedWith(BackPressureFailure.class, "");
+        Throwable[] suppressed = subscriber.getFailure().getSuppressed();
+        assertThat(suppressed).hasSize(1);
+        assertThat(suppressed[0]).isInstanceOf(RuntimeException.class).hasMessage("upstream error");
     }
 
     @Test
