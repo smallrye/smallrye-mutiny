@@ -17,6 +17,9 @@ import io.smallrye.mutiny.subscription.UniSubscription;
 
 public class UniMemoizeOp<I> extends UniOperator<I, I> implements UniSubscriber<I>, ContextSupport {
 
+    private record FailureHolder(Throwable failure) {
+    }
+
     private UniSubscription currentUpstreamSubscription;
 
     private Context currentContext = Context.empty();
@@ -138,19 +141,19 @@ public class UniMemoizeOp<I> extends UniOperator<I, I> implements UniSubscriber<
         List<UniSubscriber<? super I>> toNotify = null;
         if (state == State.WAITING_FOR_UPSTREAM) {
             state = State.CACHING;
-            cachedResult = failure;
+            cachedResult = new FailureHolder(failure);
             toNotify = gatherAwaiters();
         }
         internalLock.unlock();
         if (toNotify != null) {
-            notifyAwaiters(toNotify, failure);
+            notifyAwaiters(toNotify, new FailureHolder(failure));
         }
     }
 
     @SuppressWarnings("unchecked")
     private void forwardTo(UniSubscriber<? super I> subscriber, Object result) {
-        if (result instanceof Throwable) {
-            subscriber.onFailure((Throwable) result);
+        if (result instanceof FailureHolder holder) {
+            subscriber.onFailure(holder.failure());
         } else {
             subscriber.onItem((I) result);
         }
