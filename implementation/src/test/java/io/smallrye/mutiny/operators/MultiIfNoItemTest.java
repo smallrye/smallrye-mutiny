@@ -1,15 +1,19 @@
 package io.smallrye.mutiny.operators;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.awaitility.Awaitility.await;
 
 import java.io.IOException;
 import java.time.Duration;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Flow.Subscription;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
+import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.ResourceAccessMode;
 import org.junit.jupiter.api.parallel.ResourceLock;
@@ -19,6 +23,7 @@ import io.smallrye.mutiny.TestException;
 import io.smallrye.mutiny.TimeoutException;
 import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.helpers.test.AssertSubscriber;
+import io.smallrye.mutiny.subscription.MultiSubscriber;
 import junit5.support.InfrastructureResource;
 
 @ResourceLock(value = InfrastructureResource.NAME, mode = ResourceAccessMode.READ)
@@ -216,5 +221,44 @@ public class MultiIfNoItemTest {
 
         subscriber.awaitFailure()
                 .assertFailedWith(NullPointerException.class, ParameterValidation.SUPPLIER_PRODUCED_NULL);
+    }
+
+    @RepeatedTest(50)
+    void timeoutDoubleFailure() {
+        AtomicInteger failureCount = new AtomicInteger();
+
+        Multi.createFrom().<String> emitter(emitter -> {
+            new Thread(() -> {
+                try {
+                    Thread.sleep(1);
+                } catch (InterruptedException ignored) {
+                    Thread.currentThread().interrupt();
+                }
+                emitter.fail(new RuntimeException("upstream"));
+            }).start();
+        }).ifNoItem().after(Duration.ofMillis(1)).fail()
+                .subscribe().withSubscriber(new MultiSubscriber<>() {
+                    @Override
+                    public void onSubscribe(Subscription s) {
+                        s.request(Long.MAX_VALUE);
+                    }
+
+                    @Override
+                    public void onItem(String item) {
+                    }
+
+                    @Override
+                    public void onFailure(Throwable failure) {
+                        failureCount.incrementAndGet();
+                    }
+
+                    @Override
+                    public void onCompletion() {
+                    }
+                });
+
+        await().atMost(Duration.ofSeconds(1))
+                .untilAsserted(() -> assertThat(failureCount.get()).isGreaterThanOrEqualTo(1));
+        assertThat(failureCount.get()).isEqualTo(1);
     }
 }
