@@ -479,11 +479,12 @@ public final class MultiFlatMapOp<I, O> extends AbstractMultiOperator<I, O> {
                 if (Subscriptions.addFailure(failures, fail)) {
                     inner.done = true;
                     if (!delayError) {
+                        done = true;
                         cancelUpstream(true);
-                        downstream.onFailure(fail);
-                        return;
+                        drain();
+                    } else {
+                        drain();
                     }
-                    drain();
                 }
             } else {
                 drain();
