@@ -591,6 +591,18 @@ class UniMemoizeTest {
         }
     }
 
+    @Test
+    @DisplayName("Test that memoize works correctly when the item type extends Throwable")
+    void memoizeWithThrowableItem() {
+        RuntimeException item = new RuntimeException("this is data, not a failure");
+
+        UniAssertSubscriber<Throwable> subscriber = Uni.createFrom().<Throwable> item(item)
+                .memoize().indefinitely()
+                .subscribe().withSubscriber(UniAssertSubscriber.create());
+
+        subscriber.assertCompleted().assertItem(item);
+    }
+
     @RepeatedTest(1000)
     public void testCachingRaceInNotification() {
         AtomicInteger sub = new AtomicInteger();
