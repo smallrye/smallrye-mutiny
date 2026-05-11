@@ -24,6 +24,7 @@ import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.helpers.test.AssertSubscriber;
+import io.smallrye.mutiny.subscription.MultiSubscriber;
 import junit5.support.InfrastructureResource;
 
 @ResourceLock(value = InfrastructureResource.NAME, mode = ResourceAccessMode.READ)
@@ -697,6 +698,44 @@ public class MultiFromResourceTest {
         assertThat(resource.onCompleteSubscribed).isFalse();
         assertThat(resource.onCancelSubscribed).isFalse();
         assertThat(resource.onFailureSubscribed).isTrue();
+    }
+
+    @Test
+    void streamSupplierThrowingShouldNotDoubleSignalWhenFinalizerReturnsUni() {
+        AtomicInteger onSubscribeCount = new AtomicInteger();
+        AtomicInteger errorCount = new AtomicInteger();
+
+        Multi.createFrom().resource(
+                () -> "resource",
+                res -> {
+                    throw new RuntimeException("stream failed");
+                })
+                .withFinalizer(
+                        res -> Uni.createFrom().voidItem(),
+                        (res, err) -> Uni.createFrom().voidItem(),
+                        res -> Uni.createFrom().voidItem())
+                .subscribe().withSubscriber(new MultiSubscriber<>() {
+                    @Override
+                    public void onSubscribe(java.util.concurrent.Flow.Subscription s) {
+                        onSubscribeCount.incrementAndGet();
+                    }
+
+                    @Override
+                    public void onItem(Object item) {
+                    }
+
+                    @Override
+                    public void onFailure(Throwable failure) {
+                        errorCount.incrementAndGet();
+                    }
+
+                    @Override
+                    public void onCompletion() {
+                    }
+                });
+
+        assertThat(onSubscribeCount.get()).as("onSubscribe must be called exactly once").isEqualTo(1);
+        assertThat(errorCount.get()).as("onError must be called exactly once").isEqualTo(1);
     }
 
     static class FakeTransactionalResource {
