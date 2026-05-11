@@ -151,6 +151,7 @@ public class MultiConcatMapOp<I, O> extends AbstractMultiOperator<I, O> {
             stateLock.lock();
             switch (state) {
                 case EMITTING:
+                    innerUpstream = null;
                     if (postponeFailurePropagation) {
                         if (demand > 0L) {
                             state = State.PUBLISHER_REQUESTED;
@@ -216,6 +217,7 @@ public class MultiConcatMapOp<I, O> extends AbstractMultiOperator<I, O> {
             stateLock.lock();
             switch (state) {
                 case EMITTING:
+                    innerUpstream = null;
                     if (demand > 0L) {
                         state = State.PUBLISHER_REQUESTED;
                         stateLock.unlock();
@@ -251,14 +253,15 @@ public class MultiConcatMapOp<I, O> extends AbstractMultiOperator<I, O> {
                 state = State.DONE;
                 downstream.onFailure(Subscriptions.getInvalidRequestException());
             } else {
-                Subscriptions.add(DEMAND_UPDATER, this, n);
                 stateLock.lock();
+                Subscriptions.add(DEMAND_UPDATER, this, n);
                 switch (state) {
                     case EMITTING:
                     case EMITTING_FINAL:
+                        Flow.Subscription inner = innerUpstream;
                         stateLock.unlock();
-                        if (innerUpstream != null) {
-                            innerUpstream.request(n);
+                        if (inner != null) {
+                            inner.request(n);
                         }
                         break;
                     case READY:
