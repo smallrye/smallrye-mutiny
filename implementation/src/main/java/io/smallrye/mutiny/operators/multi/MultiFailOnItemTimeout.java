@@ -100,10 +100,11 @@ public class MultiFailOnItemTimeout<I> extends MultiOperator<I, I> {
         }
 
         private void doTimeout() {
-            if (isCancelled()) {
+            Subscription sub = getAndSetUpstreamSubscription(CANCELLED);
+            if (sub == CANCELLED) {
                 return;
             }
-            super.cancel();
+            sub.cancel();
 
             Throwable throwable;
             try {
