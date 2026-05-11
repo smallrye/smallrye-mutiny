@@ -5,8 +5,11 @@ import static org.awaitility.Awaitility.await;
 
 import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CyclicBarrier;
+import java.util.concurrent.Flow;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -360,5 +363,53 @@ class MultiConcatMapNoPrefetchTest {
         sub.request(1);
         sub.awaitNextItems(1, Duration.ofSeconds(1));
         sub.cancel();
+    }
+
+    @RepeatedTest(50)
+    void innerOnSubscribeDemandDoubleRequestRace() throws Exception {
+        AtomicLong totalInnerRequested = new AtomicLong();
+        CyclicBarrier barrier = new CyclicBarrier(2);
+
+        Multi<Integer> result = Multi.createFrom().item(1)
+                .emitOn(Infrastructure.getDefaultExecutor())
+                .onItem().<Integer> transformToMulti(item -> subscriber -> {
+                    subscriber.onSubscribe(new Flow.Subscription() {
+                        @Override
+                        public void request(long n) {
+                            totalInnerRequested.addAndGet(n);
+                        }
+
+                        @Override
+                        public void cancel() {
+                        }
+                    });
+                })
+                .concatenate();
+
+        AssertSubscriber<Integer> sub = AssertSubscriber.create();
+        result.subscribe().withSubscriber(sub);
+
+        Thread t1 = new Thread(() -> {
+            try {
+                barrier.await();
+            } catch (Exception ignored) {
+            }
+            sub.request(5);
+        });
+        Thread t2 = new Thread(() -> {
+            try {
+                barrier.await();
+            } catch (Exception ignored) {
+            }
+            sub.request(5);
+        });
+        t1.start();
+        t2.start();
+        t1.join();
+        t2.join();
+
+        await().atMost(Duration.ofSeconds(2))
+                .untilAsserted(() -> assertThat(totalInnerRequested.get()).isGreaterThan(0));
+        assertThat(totalInnerRequested.get()).isLessThanOrEqualTo(10);
     }
 }
