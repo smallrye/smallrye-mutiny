@@ -5,6 +5,7 @@ import static io.smallrye.mutiny.helpers.EmptyUniSubscription.CANCELLED;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 
 import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.AbstractUni;
 import io.smallrye.mutiny.operators.UniOperator;
 import io.smallrye.mutiny.subscription.UniSubscriber;
@@ -61,9 +62,14 @@ public class UniOnCancellation<T> extends UniOperator<T, T> {
         public void cancel() {
             if (stateUpdater.compareAndSet(this, State.INIT, State.CANCELLED)) {
                 UniSubscription sub = getAndSetUpstreamSubscription(CANCELLED);
-                callback.run();
-                if (sub != null) {
-                    sub.cancel();
+                try {
+                    callback.run();
+                } catch (Throwable e) {
+                    Infrastructure.handleDroppedException(e);
+                } finally {
+                    if (sub != null) {
+                        sub.cancel();
+                    }
                 }
             }
         }

@@ -9,6 +9,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.ResourceAccessMode;
@@ -23,6 +24,11 @@ import junit5.support.InfrastructureResource;
 
 @ResourceLock(value = InfrastructureResource.NAME, mode = ResourceAccessMode.READ)
 public class UniOnTerminationTest {
+
+    @AfterEach
+    void cleanup() {
+        Infrastructure.resetDroppedExceptionHandler();
+    }
 
     @Test
     public void testTerminationAfterImmediateItem() {
@@ -209,5 +215,27 @@ public class UniOnTerminationTest {
         sub.cancel();
         done.set(true);
         assertThat(events).containsExactly("cancelled-2", "terminated", "cancelled-1");
+    }
+
+    @Test
+    void onTerminationCallbackThrowsInCancel() {
+        AtomicBoolean upstreamCancelled = new AtomicBoolean(false);
+        AtomicReference<Throwable> droppedException = new AtomicReference<>();
+        Infrastructure.setDroppedExceptionHandler(droppedException::set);
+
+        UniAssertSubscriber<String> subscriber = Uni.createFrom().<String> emitter(emitter -> {
+        })
+                .onCancellation().invoke(() -> upstreamCancelled.set(true))
+                .onTermination().invoke((item, failure, cancelled) -> {
+                    if (cancelled) {
+                        throw new RuntimeException("cleanup failed");
+                    }
+                })
+                .subscribe().withSubscriber(UniAssertSubscriber.create());
+
+        subscriber.cancel();
+
+        assertThat(upstreamCancelled).isTrue();
+        assertThat(droppedException.get()).isInstanceOf(RuntimeException.class).hasMessage("cleanup failed");
     }
 }
