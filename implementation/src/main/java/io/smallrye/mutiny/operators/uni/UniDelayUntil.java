@@ -6,6 +6,7 @@ import java.util.function.Function;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.operators.AbstractUni;
 import io.smallrye.mutiny.operators.UniOperator;
+import io.smallrye.mutiny.subscription.Cancellable;
 import io.smallrye.mutiny.subscription.UniSubscriber;
 
 public class UniDelayUntil<T> extends UniOperator<T, T> {
@@ -26,6 +27,8 @@ public class UniDelayUntil<T> extends UniOperator<T, T> {
 
     private class UniDelayUntilProcessor extends UniOperatorProcessor<T, T> {
 
+        private volatile Cancellable delayCancellable;
+
         public UniDelayUntilProcessor(UniSubscriber<? super T> downstream) {
             super(downstream);
         }
@@ -39,7 +42,7 @@ public class UniDelayUntil<T> extends UniOperator<T, T> {
                         super.onFailure(new NullPointerException("The function returned `null` instead of a valid `Uni`"));
                         return;
                     }
-                    uni.runSubscriptionOn(executor).subscribe().with(
+                    delayCancellable = uni.runSubscriptionOn(executor).subscribe().with(
                             context(),
                             ignored -> super.onItem(item),
                             super::onFailure);
@@ -47,6 +50,15 @@ public class UniDelayUntil<T> extends UniOperator<T, T> {
                     super.onFailure(err);
                 }
             }
+        }
+
+        @Override
+        public void cancel() {
+            Cancellable c = delayCancellable;
+            if (c != null) {
+                c.cancel();
+            }
+            super.cancel();
         }
     }
 }
