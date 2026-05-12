@@ -327,6 +327,20 @@ class MultiConcatMapNoPrefetchTest {
     }
 
     @Test
+    void invalidRequestShouldCancelUpstream() {
+        AtomicBoolean upstreamCancelled = new AtomicBoolean();
+        Multi<Integer> multi = upstream
+                .onCancellation().invoke(() -> upstreamCancelled.set(true))
+                .onItem().transformToMultiAndConcatenate(n -> Multi.createFrom().item(n));
+
+        AssertSubscriber<Integer> sub = multi.subscribe().withSubscriber(AssertSubscriber.create());
+        sub.request(0L);
+        sub.assertHasNotReceivedAnyItem().assertFailedWith(IllegalArgumentException.class,
+                "Invalid request number, must be greater than 0");
+        assertThat(upstreamCancelled).isTrue();
+    }
+
+    @Test
     void testCancellation() {
         AtomicBoolean cancelled = new AtomicBoolean();
         AssertSubscriber<Integer> sub = Multi.createFrom().ticks().every(Duration.ofMillis(100))
