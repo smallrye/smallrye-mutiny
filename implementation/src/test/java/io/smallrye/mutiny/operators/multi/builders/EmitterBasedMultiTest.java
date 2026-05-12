@@ -19,6 +19,7 @@ import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.helpers.test.AssertSubscriber;
+import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.subscription.BackPressureStrategy;
 import io.smallrye.mutiny.subscription.MultiEmitter;
 
@@ -534,6 +535,27 @@ public class EmitterBasedMultiTest {
 
         assertThat(onFailureCount.get()).describedAs("onFailure should be called exactly once").isEqualTo(1);
         assertThat(onItemCount.get()).describedAs("onItem should not be called when emit(null)").isEqualTo(0);
+    }
+
+    @Test
+    void serializedEmitterFailNullShouldNotPassNullToHandler() {
+        AtomicInteger droppedCount = new AtomicInteger();
+        Infrastructure.setDroppedExceptionHandler(t -> droppedCount.incrementAndGet());
+        try {
+            AtomicInteger failureCount = new AtomicInteger();
+
+            Multi.createFrom().emitter(emitter -> {
+                emitter.fail(null);
+            }).subscribe().with(
+                    item -> {
+                    },
+                    failure -> failureCount.incrementAndGet());
+
+            assertThat(failureCount.get()).isEqualTo(1);
+            assertThat(droppedCount.get()).describedAs("dropped exception handler should not be called").isEqualTo(0);
+        } finally {
+            Infrastructure.resetDroppedExceptionHandler();
+        }
     }
 
     @Test
