@@ -136,19 +136,26 @@ public class MultiConcatMapOp<I, O> extends AbstractMultiOperator<I, O> {
 
         @Override
         public void onFailure(Throwable failure) {
-            if (STATE_UPDATER.getAndSet(this, State.DONE) != State.DONE) {
-                if (innerUpstream != null) {
-                    innerUpstream.cancel();
+            stateLock.lock();
+            if (state != State.DONE) {
+                state = State.DONE;
+                addFailure(failure);
+                Throwable accumulated = this.failure;
+                Flow.Subscription inner = innerUpstream;
+                stateLock.unlock();
+                if (inner != null) {
+                    inner.cancel();
                 }
-                downstream.onFailure(addFailure(failure));
+                downstream.onFailure(accumulated);
             } else {
+                stateLock.unlock();
                 Infrastructure.handleDroppedException(failure);
             }
         }
 
         private void innerOnFailure(Throwable failure) {
-            Throwable throwable = addFailure(failure);
             stateLock.lock();
+            Throwable throwable = addFailure(failure);
             switch (state) {
                 case EMITTING:
                     innerUpstream = null;
@@ -182,16 +189,21 @@ public class MultiConcatMapOp<I, O> extends AbstractMultiOperator<I, O> {
         }
 
         private Throwable addFailure(Throwable failure) {
-            if (this.failure != null) {
-                if (this.failure instanceof CompositeException) {
-                    this.failure = new CompositeException((CompositeException) this.failure, failure);
+            stateLock.lock();
+            try {
+                if (this.failure != null) {
+                    if (this.failure instanceof CompositeException) {
+                        this.failure = new CompositeException((CompositeException) this.failure, failure);
+                    } else {
+                        this.failure = new CompositeException(this.failure, failure);
+                    }
                 } else {
-                    this.failure = new CompositeException(this.failure, failure);
+                    this.failure = failure;
                 }
-            } else {
-                this.failure = failure;
+                return this.failure;
+            } finally {
+                stateLock.unlock();
             }
-            return this.failure;
         }
 
         @Override
