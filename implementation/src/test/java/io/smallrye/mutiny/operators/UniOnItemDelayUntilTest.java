@@ -150,4 +150,19 @@ public class UniOnItemDelayUntilTest {
         reference.get().complete(null);
         subscriber.assertNotTerminated();
     }
+
+    @Test
+    void delayUntilCancelShouldCancelDelayUni() {
+        AtomicBoolean delayUniCancelled = new AtomicBoolean(false);
+
+        UniAssertSubscriber<String> subscriber = Uni.createFrom().item("data")
+                .onItem().delayIt().until(item -> Uni.createFrom().emitter(emitter -> {
+                    // never completes
+                }).onCancellation().invoke(() -> delayUniCancelled.set(true)))
+                .subscribe().withSubscriber(UniAssertSubscriber.create());
+
+        subscriber.cancel();
+
+        await().atMost(Duration.ofSeconds(1)).untilTrue(delayUniCancelled);
+    }
 }
