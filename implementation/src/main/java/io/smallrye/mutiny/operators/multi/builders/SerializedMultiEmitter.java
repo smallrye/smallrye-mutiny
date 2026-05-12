@@ -137,6 +137,7 @@ public class SerializedMultiEmitter<T> implements MultiEmitter<T>, MultiSubscrib
     public MultiEmitter<T> emit(T item) {
         if (item == null) {
             fail(new NullPointerException("`emit` called with `null`."));
+            return this;
         }
         onItem(item);
         return this;
