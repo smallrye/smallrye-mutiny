@@ -273,6 +273,10 @@ public final class MultiBufferWithTimeoutOp<T> extends AbstractMultiOperator<T, 
         @Override
         public void cancel() {
             if (terminated.compareAndSet(RUNNING, CANCELLED)) {
+                if (task != null) {
+                    task.cancel(false);
+                    task = null;
+                }
                 super.cancel();
                 List<T> cur = current;
                 if (cur != null) {
