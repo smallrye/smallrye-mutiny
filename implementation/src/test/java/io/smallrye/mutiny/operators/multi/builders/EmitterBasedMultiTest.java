@@ -11,6 +11,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.RepeatedTest;
@@ -504,6 +505,35 @@ public class EmitterBasedMultiTest {
                     .assertCompleted();
             assertThat(called).isTrue();
         });
+    }
+
+    @Test
+    void serializedEmitterEmitNullShouldNotCallOnItem() {
+        AtomicInteger onItemCount = new AtomicInteger();
+        AtomicInteger onFailureCount = new AtomicInteger();
+
+        AssertSubscriber<String> subscriber = AssertSubscriber.create(1);
+        BufferItemMultiEmitter<String> base = new BufferItemMultiEmitter<>(subscriber,
+                io.smallrye.mutiny.helpers.queues.Queues.createMpscQueue(), -1);
+
+        SerializedMultiEmitter<String> serialized = new SerializedMultiEmitter<>(base) {
+            @Override
+            public void onItem(String item) {
+                onItemCount.incrementAndGet();
+                super.onItem(item);
+            }
+
+            @Override
+            public void onFailure(Throwable failure) {
+                onFailureCount.incrementAndGet();
+                super.onFailure(failure);
+            }
+        };
+
+        serialized.emit(null);
+
+        assertThat(onFailureCount.get()).describedAs("onFailure should be called exactly once").isEqualTo(1);
+        assertThat(onItemCount.get()).describedAs("onItem should not be called when emit(null)").isEqualTo(0);
     }
 
     @Test
