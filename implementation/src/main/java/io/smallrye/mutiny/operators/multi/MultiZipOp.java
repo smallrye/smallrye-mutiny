@@ -180,7 +180,7 @@ public final class MultiZipOp<O> extends AbstractMulti<O> {
                     R v;
 
                     try {
-                        v = combinator.apply(values);
+                        v = combinator.apply(List.copyOf(values));
 
                         if (v == null) {
                             throw new NullPointerException("The zipper method returned `null`");
