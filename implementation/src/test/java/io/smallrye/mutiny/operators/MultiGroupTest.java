@@ -18,6 +18,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Flow.Subscriber;
 import java.util.concurrent.Flow.Subscription;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -39,6 +40,7 @@ import io.smallrye.mutiny.helpers.spies.MultiOnCancellationSpy;
 import io.smallrye.mutiny.helpers.spies.Spy;
 import io.smallrye.mutiny.helpers.test.AssertSubscriber;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
+import io.smallrye.mutiny.operators.multi.MultiBufferWithTimeoutOp;
 import io.smallrye.mutiny.subscription.BackPressureFailure;
 import io.smallrye.mutiny.subscription.MultiEmitter;
 import io.smallrye.mutiny.subscription.MultiSubscriber;
@@ -1039,6 +1041,29 @@ public class MultiGroupTest {
                 () -> Multi.createFrom().range(1, 10).group().by(i -> i % 2, -10L));
         assertThrows(IllegalArgumentException.class,
                 () -> Multi.createFrom().range(1, 10).group().by(i -> i % 2, 0L));
+    }
+
+    @Test
+    void testCancelCancelsScheduledTimerWithEmitEmptyList() {
+        ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(1);
+        try {
+            Multi<Object> upstream = Multi.createFrom().nothing();
+            Multi<List<Object>> multi = new MultiBufferWithTimeoutOp<>(upstream,
+                    Integer.MAX_VALUE, Duration.ofMillis(100), executor, true);
+
+            AssertSubscriber<List<Object>> subscriber = multi
+                    .subscribe().withSubscriber(AssertSubscriber.create(100));
+
+            await().atMost(Duration.ofSeconds(2))
+                    .until(() -> !executor.getQueue().isEmpty());
+
+            subscriber.cancel();
+            executor.purge();
+
+            assertThat(executor.getQueue()).isEmpty();
+        } finally {
+            executor.shutdownNow();
+        }
     }
 
     @Test
