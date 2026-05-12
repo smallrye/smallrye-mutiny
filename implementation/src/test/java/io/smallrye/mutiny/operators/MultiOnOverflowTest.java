@@ -524,7 +524,7 @@ public class MultiOnOverflowTest {
         assertThat(sub.getItems()).containsExactly(1, 5);
         sub.assertCompleted();
 
-        assertThat(list).containsExactly(2, 3, 4, 5);
+        assertThat(list).containsExactly(2, 3, 4);
     }
 
     @Test
@@ -558,7 +558,7 @@ public class MultiOnOverflowTest {
         assertThat(sub.getItems()).containsExactly(1, 5);
         sub.assertCompleted();
 
-        assertThat(list).containsExactly(2, 3, 4, 5);
+        assertThat(list).containsExactly(2, 3, 4);
     }
 
     @Test
@@ -637,5 +637,34 @@ public class MultiOnOverflowTest {
                 .onOverflow().dropPreviousItems()
                 .subscribe().withSubscriber(AssertSubscriber.create());
         sub.request(-1L).assertFailedWith(IllegalArgumentException.class, "than 0");
+    }
+
+    @Test
+    public void testDropPreviousItemsNoSpuriousDropNotifications() {
+        AtomicInteger dropCount = new AtomicInteger();
+        List<Integer> droppedItems = new CopyOnWriteArrayList<>();
+
+        AssertSubscriber<Integer> sub = AssertSubscriber.create(0);
+        AtomicReference<MultiEmitter<? super Integer>> emitter = new AtomicReference<>();
+        Multi.createFrom().emitter((Consumer<MultiEmitter<? super Integer>>) emitter::set)
+                .onOverflow().invoke(item -> {
+                    dropCount.incrementAndGet();
+                    droppedItems.add(item);
+                }).dropPreviousItems()
+                .subscribe(sub);
+
+        emitter.get().emit(1);
+        emitter.get().emit(2);
+        emitter.get().emit(3);
+
+        sub.request(1);
+        await().atMost(Duration.ofSeconds(5)).until(() -> sub.getItems().size() == 1);
+
+        assertThat(sub.getItems()).containsExactly(3);
+        assertThat(droppedItems).containsExactly(1, 2);
+        assertThat(dropCount.get()).isEqualTo(2);
+
+        emitter.get().complete();
+        sub.assertCompleted();
     }
 }
