@@ -47,6 +47,10 @@ public class UniOnFailureFlatMap<I, E> extends UniOperator<I, I> {
             if (getCurrentUpstreamSubscription() == null) {
                 super.onSubscribe(subscription);
             } else if (innerSubscription == null) {
+                if (isCancelled()) {
+                    subscription.cancel();
+                    return;
+                }
                 this.innerSubscription = subscription;
             } else {
                 subscription.cancel();

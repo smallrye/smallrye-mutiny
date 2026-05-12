@@ -40,6 +40,10 @@ public class UniOnItemOrFailureFlatMap<I, O> extends UniOperator<I, O> {
             if (getCurrentUpstreamSubscription() == null) {
                 super.onSubscribe(subscription);
             } else if (innerSubscription == null) {
+                if (isCancelled()) {
+                    subscription.cancel();
+                    return;
+                }
                 this.innerSubscription = subscription;
             } else {
                 subscription.cancel();
