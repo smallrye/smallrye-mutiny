@@ -278,9 +278,11 @@ public class MultiConcatMapOp<I, O> extends AbstractMultiOperator<I, O> {
 
         @Override
         public void cancel() {
-            mainUpstream.cancel();
-            if (innerUpstream != null) {
-                innerUpstream.cancel();
+            if (STATE_UPDATER.getAndSet(this, State.DONE) != State.DONE) {
+                mainUpstream.cancel();
+                if (innerUpstream != null) {
+                    innerUpstream.cancel();
+                }
             }
         }
 

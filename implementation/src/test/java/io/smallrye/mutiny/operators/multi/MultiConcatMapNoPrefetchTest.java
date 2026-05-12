@@ -10,6 +10,7 @@ import java.util.concurrent.Flow;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -25,6 +26,7 @@ import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.groups.MultiFlatten;
 import io.smallrye.mutiny.helpers.test.AssertSubscriber;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
+import io.smallrye.mutiny.subscription.MultiSubscriber;
 
 class MultiConcatMapNoPrefetchTest {
 
@@ -411,5 +413,60 @@ class MultiConcatMapNoPrefetchTest {
         await().atMost(Duration.ofSeconds(2))
                 .untilAsserted(() -> assertThat(totalInnerRequested.get()).isGreaterThan(0));
         assertThat(totalInnerRequested.get()).isLessThanOrEqualTo(10);
+    }
+
+    @Test
+    void cancelShouldPreventFurtherItemDelivery() {
+        AtomicInteger itemCount = new AtomicInteger();
+        AtomicReference<Flow.Subscription> subRef = new AtomicReference<>();
+        AtomicReference<Flow.Subscriber<? super Integer>> upstreamSubscriberRef = new AtomicReference<>();
+
+        Multi<Integer> source = Multi.createFrom().<Integer> publisher(upstreamSubscriberRef::set);
+
+        source.onItem().transformToMulti(n -> Multi.createFrom().items(n))
+                .concatenate()
+                .subscribe().withSubscriber(new MultiSubscriber<>() {
+                    @Override
+                    public void onSubscribe(Flow.Subscription s) {
+                        subRef.set(s);
+                        s.request(Long.MAX_VALUE);
+                    }
+
+                    @Override
+                    public void onItem(Integer item) {
+                        itemCount.incrementAndGet();
+                    }
+
+                    @Override
+                    public void onFailure(Throwable failure) {
+                    }
+
+                    @Override
+                    public void onCompletion() {
+                    }
+                });
+
+        Flow.Subscriber<? super Integer> upstreamSubscriber = upstreamSubscriberRef.get();
+        upstreamSubscriber.onSubscribe(new Flow.Subscription() {
+            @Override
+            public void request(long n) {
+            }
+
+            @Override
+            public void cancel() {
+            }
+        });
+
+        upstreamSubscriber.onNext(1);
+        upstreamSubscriber.onNext(2);
+        assertThat(itemCount.get()).isEqualTo(2);
+
+        subRef.get().cancel();
+
+        upstreamSubscriber.onNext(3);
+        upstreamSubscriber.onNext(4);
+        upstreamSubscriber.onNext(5);
+
+        assertThat(itemCount.get()).isEqualTo(2);
     }
 }
