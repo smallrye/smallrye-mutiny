@@ -97,13 +97,10 @@ public class UniAndCombination<I, O> extends UniOperator<I, O> {
         }
 
         /**
-         * A uni has fired an event (an item or a failure)
-         * Checks the progress and decide if an event need to be fired downstream.
-         *
-         * @param res the {@link UniHandler}
-         * @param failed whether the {@code res} just fired a failure
+         * A uni has fired an event (an item or a failure).
+         * Checks the progress and decides if an event needs to be fired downstream.
          */
-        void check(UniHandler res, boolean failed) {
+        void check() {
             if (wip.getAndIncrement() > 0) {
                 return;
             }
@@ -112,15 +109,14 @@ public class UniAndCombination<I, O> extends UniOperator<I, O> {
             do {
                 incomplete = unis.size();
 
-                // One of the uni failed, and we can fire a failure immediately.
-                if (failed && !collectAllFailureBeforeFiring) {
-                    if (cancelled.compareAndSet(false, true)) {
-                        // Cancel all subscriptions
-                        handlers.forEach(UniHandler::cancel);
-                        // Invoke observer
-                        subscriber.onFailure(res.failure);
+                if (!collectAllFailureBeforeFiring) {
+                    for (UniHandler result : handlers) {
+                        if (result.failure != null && cancelled.compareAndSet(false, true)) {
+                            handlers.forEach(UniHandler::cancel);
+                            subscriber.onFailure(result.failure);
+                            return;
+                        }
                     }
-                    return;
                 }
 
                 for (UniHandler result : handlers) {
@@ -130,7 +126,7 @@ public class UniAndCombination<I, O> extends UniOperator<I, O> {
                 }
 
                 if (incomplete == 0) {
-                    // All unis has fired an event, check the outcome
+                    // All unis have fired an event, check the outcome
                     if (cancelled.compareAndSet(false, true)) {
                         List<Throwable> failures = getFailures();
                         List<Object> items = getItems();
@@ -219,7 +215,7 @@ public class UniAndCombination<I, O> extends UniOperator<I, O> {
                 return;
             }
             this.failure = t;
-            supervisor.check(this, true);
+            supervisor.check();
         }
 
         @Override
@@ -229,7 +225,7 @@ public class UniAndCombination<I, O> extends UniOperator<I, O> {
                 return;
             }
             this.item = x;
-            supervisor.check(this, false);
+            supervisor.check();
         }
 
         @Override
