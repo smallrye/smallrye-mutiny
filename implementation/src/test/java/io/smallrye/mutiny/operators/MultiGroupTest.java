@@ -1110,4 +1110,61 @@ public class MultiGroupTest {
             executor.shutdownNow();
         }
     }
+
+    @RepeatedTest(10)
+    public void windowOnDurationTerminalDoesNotRaceConcurrentlyWithTick() {
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        try {
+            AtomicInteger concurrentSignals = new AtomicInteger();
+            AtomicBoolean raceDetected = new AtomicBoolean();
+            AtomicBoolean terminated = new AtomicBoolean();
+
+            Multi.createFrom().<String> emitter(emitter -> {
+                executor.submit(() -> {
+                    Thread.yield();
+                    emitter.complete();
+                });
+            }, 256)
+                    .group().intoMultis().every(Duration.ofMillis(1))
+                    .subscribe().withSubscriber(new AssertSubscriber<Multi<String>>(Long.MAX_VALUE) {
+                        @Override
+                        public void onItem(Multi<String> item) {
+                            if (concurrentSignals.incrementAndGet() > 1) {
+                                raceDetected.set(true);
+                            }
+                            item.subscribe().with(x -> {
+                            }, f -> {
+                            });
+                            Thread.yield();
+                            concurrentSignals.decrementAndGet();
+                            super.onItem(item);
+                        }
+
+                        @Override
+                        public void onFailure(Throwable t) {
+                            if (concurrentSignals.incrementAndGet() > 1) {
+                                raceDetected.set(true);
+                            }
+                            concurrentSignals.decrementAndGet();
+                            terminated.set(true);
+                            super.onFailure(t);
+                        }
+
+                        @Override
+                        public void onCompletion() {
+                            if (concurrentSignals.incrementAndGet() > 1) {
+                                raceDetected.set(true);
+                            }
+                            concurrentSignals.decrementAndGet();
+                            terminated.set(true);
+                            super.onCompletion();
+                        }
+                    });
+
+            await().atMost(Duration.ofSeconds(2)).untilTrue(terminated);
+            assertThat(raceDetected.get()).isFalse();
+        } finally {
+            executor.shutdownNow();
+        }
+    }
 }
