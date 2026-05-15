@@ -122,8 +122,8 @@ public class MultiCombineLatestOp<I, O> extends MultiOperator<I, O> {
                 drain();
             } else {
                 cancelAll();
-                done = true;
                 failure.set(Subscriptions.getInvalidRequestException());
+                done = true;
                 drain();
             }
         }
