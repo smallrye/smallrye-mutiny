@@ -262,12 +262,19 @@ public class MultiConcatMapOp<I, O> extends AbstractMultiOperator<I, O> {
         @Override
         public void request(long n) {
             if (n <= 0) {
-                state = State.DONE;
-                mainUpstream.cancel();
-                if (innerUpstream != null) {
-                    innerUpstream.cancel();
+                stateLock.lock();
+                if (state != State.DONE) {
+                    state = State.DONE;
+                    Flow.Subscription inner = innerUpstream;
+                    stateLock.unlock();
+                    mainUpstream.cancel();
+                    if (inner != null) {
+                        inner.cancel();
+                    }
+                    downstream.onFailure(Subscriptions.getInvalidRequestException());
+                } else {
+                    stateLock.unlock();
                 }
-                downstream.onFailure(Subscriptions.getInvalidRequestException());
             } else {
                 stateLock.lock();
                 Subscriptions.add(DEMAND_UPDATER, this, n);
