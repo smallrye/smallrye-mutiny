@@ -593,6 +593,90 @@ class MultiConcatMapNoPrefetchTest {
         }
     }
 
+    @RepeatedTest(10)
+    void invalidRequestRacingWithInnerFailureShouldNotDoubleSignal() throws Exception {
+        AtomicReference<Flow.Subscriber<? super Integer>> outerSubRef = new AtomicReference<>();
+        AtomicReference<Flow.Subscriber<? super Integer>> innerSubRef = new AtomicReference<>();
+        AtomicInteger failureCount = new AtomicInteger();
+        AtomicReference<Throwable> downstreamFailure = new AtomicReference<>();
+        AtomicReference<Flow.Subscription> downstreamSubRef = new AtomicReference<>();
+        CyclicBarrier barrier = new CyclicBarrier(2);
+
+        Multi<Integer> source = Multi.createFrom().<Integer> publisher(outerSubRef::set);
+
+        source.onItem().<Integer> transformToMulti(n -> innerSubRef::set)
+                .concatenate()
+                .subscribe().withSubscriber(new MultiSubscriber<>() {
+                    @Override
+                    public void onSubscribe(Flow.Subscription s) {
+                        downstreamSubRef.set(s);
+                        s.request(Long.MAX_VALUE);
+                    }
+
+                    @Override
+                    public void onItem(Integer item) {
+                    }
+
+                    @Override
+                    public void onFailure(Throwable failure) {
+                        failureCount.incrementAndGet();
+                        downstreamFailure.set(failure);
+                    }
+
+                    @Override
+                    public void onCompletion() {
+                    }
+                });
+
+        Flow.Subscriber<? super Integer> outerSubscriber = outerSubRef.get();
+        outerSubscriber.onSubscribe(new Flow.Subscription() {
+            @Override
+            public void request(long n) {
+            }
+
+            @Override
+            public void cancel() {
+            }
+        });
+        outerSubscriber.onNext(1);
+
+        await().atMost(Duration.ofSeconds(2)).until(() -> innerSubRef.get() != null);
+        Flow.Subscriber<? super Integer> innerSubscriber = innerSubRef.get();
+        innerSubscriber.onSubscribe(new Flow.Subscription() {
+            @Override
+            public void request(long n) {
+            }
+
+            @Override
+            public void cancel() {
+            }
+        });
+
+        RuntimeException innerError = new RuntimeException("inner-boom");
+
+        Thread t1 = new Thread(() -> {
+            try {
+                barrier.await();
+            } catch (Exception ignored) {
+            }
+            downstreamSubRef.get().request(0);
+        });
+        Thread t2 = new Thread(() -> {
+            try {
+                barrier.await();
+            } catch (Exception ignored) {
+            }
+            innerSubscriber.onError(innerError);
+        });
+        t1.start();
+        t2.start();
+        t1.join();
+        t2.join();
+
+        await().atMost(Duration.ofSeconds(2)).until(() -> downstreamFailure.get() != null);
+        assertThat(failureCount.get()).as("downstream must receive exactly one terminal signal").isEqualTo(1);
+    }
+
     @Test
     void cancelShouldPreventFurtherItemDelivery() {
         AtomicInteger itemCount = new AtomicInteger();
