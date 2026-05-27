@@ -102,6 +102,11 @@ public final class Context {
         }
     }
 
+    @Deprecated(forRemoval = true)
+    public boolean contains(String key) {
+        return contains((Object) key);
+    }
+
     /**
      * Get a value for a key.
      *
@@ -120,6 +125,11 @@ public final class Context {
             throw new NoSuchElementException("The context does not have a value for key " + key);
         }
         return value;
+    }
+
+    @Deprecated(forRemoval = true)
+    public <T> T get(String key) throws NoSuchElementException {
+        return get((Object) key);
     }
 
     /**
@@ -141,6 +151,11 @@ public final class Context {
         return alternativeSupplier.get();
     }
 
+    @Deprecated(forRemoval = true)
+    public <T> T getOrElse(String key, Supplier<? extends T> alternativeSupplier) {
+        return getOrElse((Object) key, alternativeSupplier);
+    }
+
     /**
      * Stores a value for a given key.
      *
@@ -160,6 +175,11 @@ public final class Context {
         return this;
     }
 
+    @Deprecated(forRemoval = true)
+    public Context put(String key, Object value) {
+        return put((Object) key, value);
+    }
+
     /**
      * Delete an entry for a given key, if present.
      *
@@ -171,6 +191,11 @@ public final class Context {
             entries.remove(key);
         }
         return this;
+    }
+
+    @Deprecated(forRemoval = true)
+    public Context delete(String key) {
+        return delete((Object) key);
     }
 
     /**
