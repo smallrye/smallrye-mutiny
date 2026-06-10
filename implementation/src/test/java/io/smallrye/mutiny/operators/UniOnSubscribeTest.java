@@ -309,6 +309,22 @@ public class UniOnSubscribeTest {
     }
 
     @Test
+    void onSubscribeCallWithNullItem() {
+        AtomicReference<UniEmitter<? super String>> emitter = new AtomicReference<>();
+        UniAssertSubscriber<Object> subscriber = Uni.createFrom().nullItem()
+                .onSubscription().call(sub -> Uni.createFrom().<String> emitter(emitter::set))
+                .subscribe().withSubscriber(UniAssertSubscriber.create());
+
+        subscriber.assertNotSubscribed();
+        await().until(() -> emitter.get() != null);
+        emitter.get().complete("started");
+
+        subscriber.awaitSubscription()
+                .awaitItem()
+                .assertCompleted().assertItem(null);
+    }
+
+    @Test
     public void testThatSubscriptionIsNotPassedDownstreamUntilProducedUniCompletesWithDifferentThread() {
         AtomicReference<UniEmitter<? super Integer>> emitter = new AtomicReference<>();
         UniAssertSubscriber<Integer> subscriber = Uni.createFrom().item(() -> 1)

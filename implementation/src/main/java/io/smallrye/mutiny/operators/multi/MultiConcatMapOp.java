@@ -136,21 +136,29 @@ public class MultiConcatMapOp<I, O> extends AbstractMultiOperator<I, O> {
 
         @Override
         public void onFailure(Throwable failure) {
-            if (STATE_UPDATER.getAndSet(this, State.DONE) != State.DONE) {
-                if (innerUpstream != null) {
-                    innerUpstream.cancel();
+            stateLock.lock();
+            if (state != State.DONE) {
+                state = State.DONE;
+                addFailure(failure);
+                Throwable accumulated = this.failure;
+                Flow.Subscription inner = innerUpstream;
+                stateLock.unlock();
+                if (inner != null) {
+                    inner.cancel();
                 }
-                downstream.onFailure(addFailure(failure));
+                downstream.onFailure(accumulated);
             } else {
+                stateLock.unlock();
                 Infrastructure.handleDroppedException(failure);
             }
         }
 
         private void innerOnFailure(Throwable failure) {
-            Throwable throwable = addFailure(failure);
             stateLock.lock();
+            Throwable throwable = addFailure(failure);
             switch (state) {
                 case EMITTING:
+                    innerUpstream = null;
                     if (postponeFailurePropagation) {
                         if (demand > 0L) {
                             state = State.PUBLISHER_REQUESTED;
@@ -181,16 +189,21 @@ public class MultiConcatMapOp<I, O> extends AbstractMultiOperator<I, O> {
         }
 
         private Throwable addFailure(Throwable failure) {
-            if (this.failure != null) {
-                if (this.failure instanceof CompositeException) {
-                    this.failure = new CompositeException((CompositeException) this.failure, failure);
+            stateLock.lock();
+            try {
+                if (this.failure != null) {
+                    if (this.failure instanceof CompositeException) {
+                        this.failure = new CompositeException((CompositeException) this.failure, failure);
+                    } else {
+                        this.failure = new CompositeException(this.failure, failure);
+                    }
                 } else {
-                    this.failure = new CompositeException(this.failure, failure);
+                    this.failure = failure;
                 }
-            } else {
-                this.failure = failure;
+                return this.failure;
+            } finally {
+                stateLock.unlock();
             }
-            return this.failure;
         }
 
         @Override
@@ -216,6 +229,7 @@ public class MultiConcatMapOp<I, O> extends AbstractMultiOperator<I, O> {
             stateLock.lock();
             switch (state) {
                 case EMITTING:
+                    innerUpstream = null;
                     if (demand > 0L) {
                         state = State.PUBLISHER_REQUESTED;
                         stateLock.unlock();
@@ -248,17 +262,29 @@ public class MultiConcatMapOp<I, O> extends AbstractMultiOperator<I, O> {
         @Override
         public void request(long n) {
             if (n <= 0) {
-                state = State.DONE;
-                downstream.onFailure(Subscriptions.getInvalidRequestException());
-            } else {
-                Subscriptions.add(DEMAND_UPDATER, this, n);
                 stateLock.lock();
+                if (state != State.DONE) {
+                    state = State.DONE;
+                    Flow.Subscription inner = innerUpstream;
+                    stateLock.unlock();
+                    mainUpstream.cancel();
+                    if (inner != null) {
+                        inner.cancel();
+                    }
+                    downstream.onFailure(Subscriptions.getInvalidRequestException());
+                } else {
+                    stateLock.unlock();
+                }
+            } else {
+                stateLock.lock();
+                Subscriptions.add(DEMAND_UPDATER, this, n);
                 switch (state) {
                     case EMITTING:
                     case EMITTING_FINAL:
+                        Flow.Subscription inner = innerUpstream;
                         stateLock.unlock();
-                        if (innerUpstream != null) {
-                            innerUpstream.request(n);
+                        if (inner != null) {
+                            inner.request(n);
                         }
                         break;
                     case READY:
@@ -275,9 +301,11 @@ public class MultiConcatMapOp<I, O> extends AbstractMultiOperator<I, O> {
 
         @Override
         public void cancel() {
-            mainUpstream.cancel();
-            if (innerUpstream != null) {
-                innerUpstream.cancel();
+            if (STATE_UPDATER.getAndSet(this, State.DONE) != State.DONE) {
+                mainUpstream.cancel();
+                if (innerUpstream != null) {
+                    innerUpstream.cancel();
+                }
             }
         }
 

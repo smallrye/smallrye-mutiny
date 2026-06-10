@@ -316,7 +316,7 @@ public final class MultiGroupByOp<T, K, V> extends AbstractMultiOperator<T, Grou
         private final Queue<T> queue;
         private final MultiGroupByProcessor<?, K, T> parent;
 
-        private Throwable failure;
+        private volatile Throwable failure;
 
         @SuppressWarnings("unchecked")
         State(MultiGroupByProcessor<?, K, T> parent, K key) {

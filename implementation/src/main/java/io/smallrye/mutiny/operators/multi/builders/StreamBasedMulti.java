@@ -111,6 +111,11 @@ public class StreamBasedMulti<T> extends AbstractMulti<T> {
                         continue;
                     }
 
+                    if (cancelled) {
+                        closeQuietly(closeable);
+                        return;
+                    }
+
                     downstream.onItem(item);
 
                     if (cancelled || handleCompletion()) {

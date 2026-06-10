@@ -2,11 +2,17 @@ package io.smallrye.mutiny.operators.multi;
 
 import static io.smallrye.mutiny.helpers.MultiSubscribers.toMultiSubscriber;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 import static org.mockito.Mockito.*;
 
+import java.time.Duration;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Flow;
 import java.util.concurrent.Flow.Subscriber;
 import java.util.concurrent.Flow.Subscription;
+import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 
 import io.reactivex.rxjava3.processors.PublishProcessor;
@@ -14,6 +20,7 @@ import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.helpers.test.AssertSubscriber;
 import io.smallrye.mutiny.operators.AbstractMulti;
 import io.smallrye.mutiny.subscription.BackPressureFailure;
+import io.smallrye.mutiny.subscription.MultiSubscriber;
 import io.smallrye.mutiny.test.Mocks;
 import mutiny.zero.flow.adapters.AdaptersToFlow;
 
@@ -188,5 +195,74 @@ public class FlatMapMainSubscriberTest {
 
         subscriber.request(1)
                 .assertItems(1);
+    }
+
+    @RepeatedTest(50)
+    void flatMapInnerErrorShouldNotRaceWithOnNext() {
+        AtomicBoolean concurrent = new AtomicBoolean();
+        AtomicBoolean violationDetected = new AtomicBoolean();
+        AtomicBoolean terminated = new AtomicBoolean();
+        CountDownLatch latch = new CountDownLatch(1);
+
+        Multi.createFrom().items(1, 2)
+                .onItem().transformToMultiAndMerge(n -> {
+                    if (n == 1) {
+                        return Multi.createFrom().<String> emitter(emitter -> {
+                            new Thread(() -> {
+                                try {
+                                    latch.await();
+                                } catch (InterruptedException ignored) {
+                                }
+                                for (int i = 0; i < 100; i++) {
+                                    emitter.emit("item-" + i);
+                                }
+                                emitter.complete();
+                            }).start();
+                        });
+                    } else {
+                        return Multi.createFrom().<String> emitter(emitter -> {
+                            new Thread(() -> {
+                                try {
+                                    latch.await();
+                                } catch (InterruptedException ignored) {
+                                }
+                                emitter.fail(new RuntimeException("inner error"));
+                            }).start();
+                        });
+                    }
+                })
+                .subscribe().withSubscriber(new MultiSubscriber<String>() {
+                    @Override
+                    public void onSubscribe(Flow.Subscription s) {
+                        s.request(Long.MAX_VALUE);
+                    }
+
+                    @Override
+                    public void onItem(String item) {
+                        if (!concurrent.compareAndSet(false, true)) {
+                            violationDetected.set(true);
+                        }
+                        Thread.yield();
+                        concurrent.set(false);
+                    }
+
+                    @Override
+                    public void onFailure(Throwable failure) {
+                        if (!concurrent.compareAndSet(false, true)) {
+                            violationDetected.set(true);
+                        }
+                        concurrent.set(false);
+                        terminated.set(true);
+                    }
+
+                    @Override
+                    public void onCompletion() {
+                        terminated.set(true);
+                    }
+                });
+
+        latch.countDown();
+        await().atMost(Duration.ofSeconds(5)).untilTrue(terminated);
+        assertThat(violationDetected).isFalse();
     }
 }

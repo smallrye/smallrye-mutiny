@@ -1,10 +1,14 @@
 package io.smallrye.mutiny.operators;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
@@ -14,6 +18,7 @@ import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.helpers.test.UniAssertSubscriber;
+import io.smallrye.mutiny.subscription.UniSubscriber;
 
 public class UniOnItemTransformToUniTest {
 
@@ -158,5 +163,36 @@ public class UniOnItemTransformToUniTest {
         test.cancel();
         test.assertNotTerminated();
         assertThat(cancelled).isTrue();
+    }
+
+    @Test
+    public void testInnerSubscriptionCancelledOnCancelRace() throws Exception {
+        CountDownLatch innerSubscribed = new CountDownLatch(1);
+        CountDownLatch proceedWithOnSubscribe = new CountDownLatch(1);
+        AtomicBoolean innerCancelled = new AtomicBoolean(false);
+
+        Uni<String> delayedInnerUni = new AbstractUni<>() {
+            @Override
+            public void subscribe(UniSubscriber<? super String> subscriber) {
+                innerSubscribed.countDown();
+                try {
+                    proceedWithOnSubscribe.await(5, TimeUnit.SECONDS);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+                subscriber.onSubscribe(() -> innerCancelled.set(true));
+            }
+        };
+
+        UniAssertSubscriber<String> subscriber = new UniAssertSubscriber<>();
+        CompletableFuture.runAsync(() -> Uni.createFrom().item("data")
+                .onItem().transformToUni(item -> delayedInnerUni)
+                .subscribe().withSubscriber(subscriber));
+
+        assertThat(innerSubscribed.await(5, TimeUnit.SECONDS)).isTrue();
+        subscriber.cancel();
+        proceedWithOnSubscribe.countDown();
+
+        await().atMost(Duration.ofSeconds(1)).untilTrue(innerCancelled);
     }
 }

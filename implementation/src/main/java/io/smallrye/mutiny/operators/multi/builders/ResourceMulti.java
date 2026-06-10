@@ -75,6 +75,7 @@ public class ResourceMulti<R, I> extends AbstractMulti<I> {
                             context,
                             completed -> Subscriptions.fail(subscriber, e),
                             failed -> Subscriptions.fail(subscriber, new CompositeException(e, failed)));
+                    return;
                 }
             } catch (Throwable ex) {
                 Subscriptions.fail(subscriber, new CompositeException(e, ex));

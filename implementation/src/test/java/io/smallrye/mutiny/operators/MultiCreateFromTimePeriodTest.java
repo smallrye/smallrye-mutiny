@@ -5,11 +5,14 @@ import static org.awaitility.Awaitility.await;
 
 import java.time.Duration;
 import java.util.List;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.*;
+import java.util.concurrent.Flow;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.ResourceAccessMode;
 import org.junit.jupiter.api.parallel.ResourceLock;
@@ -121,6 +124,76 @@ public class MultiCreateFromTimePeriodTest {
                             .isInstanceOf(BackPressureFailure.class)
                             .hasMessageContaining("lack of requests");
                 });
+    }
+
+    @RepeatedTest(5)
+    public void testConcurrentRequestDoesNotDoubleStart() throws Exception {
+        int threadCount = 8;
+        AtomicInteger taskCount = new AtomicInteger();
+        AtomicReference<Flow.Subscription> subscriptionRef = new AtomicReference<>();
+        CyclicBarrier barrier = new CyclicBarrier(threadCount);
+
+        ScheduledExecutorService spyExecutor = new ScheduledThreadPoolExecutor(4) {
+            @Override
+            public ScheduledFuture<?> scheduleAtFixedRate(Runnable command, long initialDelay, long period,
+                    TimeUnit unit) {
+                taskCount.incrementAndGet();
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+                return super.scheduleAtFixedRate(command, initialDelay, period, unit);
+            }
+        };
+
+        try {
+            Multi<Long> ticks = Multi.createFrom().ticks()
+                    .onExecutor(spyExecutor).every(Duration.ofMillis(100));
+
+            ticks.subscribe(new Flow.Subscriber<>() {
+                @Override
+                public void onSubscribe(Flow.Subscription subscription) {
+                    subscriptionRef.set(subscription);
+                }
+
+                @Override
+                public void onNext(Long item) {
+                }
+
+                @Override
+                public void onError(Throwable throwable) {
+                }
+
+                @Override
+                public void onComplete() {
+                }
+            });
+
+            await().atMost(Duration.ofSeconds(5)).until(() -> subscriptionRef.get() != null);
+            Flow.Subscription subscription = subscriptionRef.get();
+
+            ExecutorService pool = Executors.newFixedThreadPool(threadCount);
+            for (int i = 0; i < threadCount; i++) {
+                pool.submit(() -> {
+                    try {
+                        barrier.await(5, TimeUnit.SECONDS);
+                    } catch (Exception ignored) {
+                    }
+                    subscription.request(1);
+                });
+            }
+            pool.shutdown();
+            pool.awaitTermination(10, TimeUnit.SECONDS);
+
+            subscription.cancel();
+
+            assertThat(taskCount.get())
+                    .as("scheduleAtFixedRate should be called exactly once")
+                    .isEqualTo(1);
+        } finally {
+            spyExecutor.shutdownNow();
+        }
     }
 
 }

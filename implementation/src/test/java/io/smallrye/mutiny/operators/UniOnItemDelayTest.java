@@ -12,6 +12,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.ResourceAccessMode;
 import org.junit.jupiter.api.parallel.ResourceLock;
@@ -188,5 +189,41 @@ public class UniOnItemDelayTest {
         await().until(() -> counter.intValue() == 4);
         assertThat(failure.get()).isNull();
 
+    }
+
+    @RepeatedTest(3)
+    public void testItemNotDeliveredAfterCancelWhenScheduledTaskIsRunning() throws InterruptedException {
+        CountDownLatch taskStarted = new CountDownLatch(1);
+        CountDownLatch proceedWithDelivery = new CountDownLatch(1);
+
+        executor.shutdown();
+        executor = new ScheduledThreadPoolExecutor(4) {
+            @Override
+            public ScheduledFuture<?> schedule(Runnable command, long delay, TimeUnit unit) {
+                return super.schedule(() -> {
+                    taskStarted.countDown();
+                    try {
+                        proceedWithDelivery.await(5, TimeUnit.SECONDS);
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                    }
+                    command.run();
+                }, delay, unit);
+            }
+        };
+
+        UniAssertSubscriber<Integer> subscriber = new UniAssertSubscriber<>();
+        Uni.createFrom().item(1)
+                .onItem().delayIt()
+                .onExecutor(executor)
+                .by(Duration.ofMillis(1))
+                .subscribe().withSubscriber(subscriber);
+
+        taskStarted.await(5, TimeUnit.SECONDS);
+        subscriber.cancel();
+        proceedWithDelivery.countDown();
+
+        await().during(Duration.ofMillis(50)).atMost(Duration.ofSeconds(1))
+                .untilAsserted(subscriber::assertNotTerminated);
     }
 }
