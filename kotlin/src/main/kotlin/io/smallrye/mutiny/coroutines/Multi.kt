@@ -26,8 +26,8 @@ import kotlinx.coroutines.launch
  * The subscription to this [Multi] gets automatically cancelled when the surrounding coroutine fails or gets cancelled.
  *
  * The resulting [Flow] is backed by a [Channel] which behavior can be configured using:
- * @property bufferCapacity the type (defined by [Channel] constants) or the capacity (>0 <[Int.MAX_VALUE]) of the channel, defaulting to [Channel.UNLIMITED]
- * @property bufferOverflowStrategy action strategy on exceeding the [bufferCapacity], see [BufferOverflow].
+ * @param bufferCapacity the type (defined by [Channel] constants) or the capacity (>0 <[Int.MAX_VALUE]) of the channel, defaulting to [Channel.UNLIMITED]
+ * @param bufferOverflowStrategy action strategy on exceeding the [bufferCapacity], see [BufferOverflow].
  */
 fun <T> Multi<T>.asFlow(
     bufferCapacity: Int = Channel.UNLIMITED,
