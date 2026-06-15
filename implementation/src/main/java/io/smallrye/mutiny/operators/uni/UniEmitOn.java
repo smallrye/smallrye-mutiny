@@ -36,6 +36,7 @@ public class UniEmitOn<I> extends UniOperator<I, I> {
                 try {
                     executor.execute(() -> downstream.onItem(item));
                 } catch (RejectedExecutionException e) {
+                    cancel();
                     downstream.onFailure(e);
                 }
             }
