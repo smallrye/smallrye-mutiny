@@ -274,6 +274,50 @@ class AppendOnlyReplayListTest {
     }
 
     @Test
+    void willReachCompletionShouldBeFalseWhenCurrentNotRead() {
+        AppendOnlyReplayList replayList = new AppendOnlyReplayList(1);
+        replayList.push("A");
+        replayList.pushCompletion();
+
+        AppendOnlyReplayList.Cursor cursor = replayList.newCursor();
+        assertThat(cursor.hasNext()).isTrue();
+        assertThat(cursor.willReachCompletion()).isFalse();
+    }
+
+    @Test
+    void willReachCompletionShouldBeTrueAfterCurrentIsRead() {
+        AppendOnlyReplayList replayList = new AppendOnlyReplayList(1);
+        replayList.push("A");
+        replayList.pushCompletion();
+
+        AppendOnlyReplayList.Cursor cursor = replayList.newCursor();
+        assertThat(cursor.hasNext()).isTrue();
+        cursor.moveToNext();
+        assertThat(cursor.read()).isEqualTo("A");
+        assertThat(cursor.willReachCompletion()).isTrue();
+    }
+
+    @Test
+    void willReachCompletionUnboundedWithMultipleUnreadItems() {
+        AppendOnlyReplayList replayList = new AppendOnlyReplayList(Long.MAX_VALUE);
+        replayList.push("A");
+        replayList.push("B");
+        replayList.pushCompletion();
+
+        AppendOnlyReplayList.Cursor cursor = replayList.newCursor();
+        assertThat(cursor.hasNext()).isTrue();
+        assertThat(cursor.willReachCompletion()).isFalse();
+
+        cursor.moveToNext();
+        assertThat(cursor.read()).isEqualTo("A");
+        assertThat(cursor.willReachCompletion()).isFalse();
+
+        cursor.moveToNext();
+        assertThat(cursor.read()).isEqualTo("B");
+        assertThat(cursor.willReachCompletion()).isTrue();
+    }
+
+    @Test
     void forbidNull() {
         assertThatThrownBy(() -> {
             List<String> seed = Arrays.asList("foo", "bar", null);

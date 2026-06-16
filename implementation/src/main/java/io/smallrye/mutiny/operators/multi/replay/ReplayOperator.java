@@ -67,9 +67,7 @@ public class ReplayOperator<T> extends AbstractMulti<T> {
                 return;
             }
             Subscriptions.add(demand, n);
-            if (cursor.hasNext()) {
-                drain();
-            }
+            drain();
         }
 
         @Override
@@ -117,11 +115,18 @@ public class ReplayOperator<T> extends AbstractMulti<T> {
                 }
                 if (!done && cursor.willReachCompletion()) {
                     cancel();
+                    cursor.moveToNext();
                     cursor.readCompletion();
                     downstream.onComplete();
                     return;
                 }
-                demand.addAndGet(-emitted);
+                if (!done && cursor.willReachFailure()) {
+                    cancel();
+                    cursor.moveToNext();
+                    downstream.onFailure(cursor.readFailure());
+                    return;
+                }
+                Subscriptions.produced(demand, emitted);
                 if (wip.decrementAndGet() == 0) {
                     return;
                 }
