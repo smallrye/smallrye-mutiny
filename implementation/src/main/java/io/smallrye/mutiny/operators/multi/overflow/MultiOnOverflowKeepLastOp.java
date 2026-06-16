@@ -59,7 +59,14 @@ public class MultiOnOverflowKeepLastOp<T> extends AbstractMultiOperator<T, T> {
 
         @Override
         public void onItem(T t) {
-            last.lazySet(t);
+            T previous = last.getAndSet(t);
+            if (previous != null) {
+                if (dropConsumer != null) {
+                    notifyOnOverflowInvoke(previous);
+                } else if (dropUniMapper != null) {
+                    notifyOnOverflowCall(previous);
+                }
+            }
             drain();
         }
 
@@ -124,16 +131,6 @@ public class MultiOnOverflowKeepLastOp<T> extends AbstractMultiOperator<T, T> {
                     downstream.onItem(v);
 
                     emitted++;
-                }
-
-                T possiblyDropped = last.get();
-                if (req.get() == 0L && possiblyDropped != null && !done) {
-                    // Item is being dropped
-                    if (dropConsumer != null) {
-                        notifyOnOverflowInvoke(possiblyDropped);
-                    } else if (dropUniMapper != null) {
-                        notifyOnOverflowCall(possiblyDropped);
-                    }
                 }
 
                 if (emitted == req.get() && checkTerminated(done, last.get() == null)) {

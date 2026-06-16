@@ -112,8 +112,10 @@ public class MultiEmitOnOp<T> extends AbstractMultiOperator<T, T> {
         @Override
         public void onFailure(Throwable throwable) {
             if (!done || !cancelled) {
+                if (!failure.compareAndSet(null, throwable)) {
+                    failure.get().addSuppressed(throwable);
+                }
                 done = true;
-                failure.set(throwable);
                 schedule();
             }
         }

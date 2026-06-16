@@ -9,13 +9,17 @@ import java.io.IOException;
 import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Flow;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.ResourceAccessMode;
 import org.junit.jupiter.api.parallel.ResourceLock;
@@ -524,7 +528,7 @@ public class MultiOnOverflowTest {
         assertThat(sub.getItems()).containsExactly(1, 5);
         sub.assertCompleted();
 
-        assertThat(list).containsExactly(2, 3, 4, 5);
+        assertThat(list).containsExactly(2, 3, 4);
     }
 
     @Test
@@ -558,7 +562,7 @@ public class MultiOnOverflowTest {
         assertThat(sub.getItems()).containsExactly(1, 5);
         sub.assertCompleted();
 
-        assertThat(list).containsExactly(2, 3, 4, 5);
+        assertThat(list).containsExactly(2, 3, 4);
     }
 
     @Test
@@ -637,5 +641,104 @@ public class MultiOnOverflowTest {
                 .onOverflow().dropPreviousItems()
                 .subscribe().withSubscriber(AssertSubscriber.create());
         sub.request(-1L).assertFailedWith(IllegalArgumentException.class, "than 0");
+    }
+
+    @RepeatedTest(10)
+    public void overflowCallDoesNotDeliverSignalsConcurrentlyWithDrainLoop() {
+        ExecutorService executor = Executors.newFixedThreadPool(2);
+        try {
+            AtomicInteger concurrentSignals = new AtomicInteger();
+            AtomicBoolean raceDetected = new AtomicBoolean();
+            AtomicBoolean terminated = new AtomicBoolean();
+            AtomicReference<Flow.Subscription> subRef = new AtomicReference<>();
+
+            AtomicReference<MultiEmitter<? super Integer>> emitterRef = new AtomicReference<>();
+            Multi.createFrom().<Integer> emitter(emitterRef::set, 256)
+                    .onOverflow().call(item -> Uni.createFrom().voidItem()).buffer(5)
+                    .subscribe().withSubscriber(new MultiSubscriber<Integer>() {
+                        @Override
+                        public void onSubscribe(Flow.Subscription s) {
+                            subRef.set(s);
+                        }
+
+                        @Override
+                        public void onItem(Integer item) {
+                            if (concurrentSignals.incrementAndGet() > 1) {
+                                raceDetected.set(true);
+                            }
+                            Thread.yield();
+                            concurrentSignals.decrementAndGet();
+                        }
+
+                        @Override
+                        public void onFailure(Throwable t) {
+                            if (concurrentSignals.incrementAndGet() > 1) {
+                                raceDetected.set(true);
+                            }
+                            concurrentSignals.decrementAndGet();
+                            terminated.set(true);
+                        }
+
+                        @Override
+                        public void onCompletion() {
+                            terminated.set(true);
+                        }
+                    });
+
+            // Thread 1: emit items to fill and overflow the buffer
+            executor.submit(() -> {
+                MultiEmitter<? super Integer> emitter = emitterRef.get();
+                for (int i = 0; i < 100; i++) {
+                    emitter.emit(i);
+                }
+                emitter.complete();
+            });
+
+            // Thread 2: request items to trigger drain loop concurrently
+            executor.submit(() -> {
+                Flow.Subscription s;
+                while ((s = subRef.get()) == null) {
+                    Thread.onSpinWait();
+                }
+                for (int i = 0; i < 100; i++) {
+                    s.request(1);
+                    Thread.yield();
+                }
+            });
+
+            await().atMost(Duration.ofSeconds(2)).untilTrue(terminated);
+            assertThat(raceDetected.get()).isFalse();
+        } finally {
+            executor.shutdownNow();
+        }
+    }
+
+    @Test
+    public void testDropPreviousItemsNoSpuriousDropNotifications() {
+        AtomicInteger dropCount = new AtomicInteger();
+        List<Integer> droppedItems = new CopyOnWriteArrayList<>();
+
+        AssertSubscriber<Integer> sub = AssertSubscriber.create(0);
+        AtomicReference<MultiEmitter<? super Integer>> emitter = new AtomicReference<>();
+        Multi.createFrom().emitter((Consumer<MultiEmitter<? super Integer>>) emitter::set)
+                .onOverflow().invoke(item -> {
+                    dropCount.incrementAndGet();
+                    droppedItems.add(item);
+                }).dropPreviousItems()
+                .subscribe(sub);
+
+        emitter.get().emit(1);
+        emitter.get().emit(2);
+        emitter.get().emit(3);
+
+        sub.request(1);
+        await().atMost(Duration.ofSeconds(5)).until(() -> sub.getItems().size() == 1);
+
+        assertThat(sub.getItems()).containsExactly(3);
+        assertThat(droppedItems).containsExactly(1, 2);
+        assertThat(dropCount.get()).isEqualTo(2);
+
+        emitter.get().complete();
+        sub.assertCompleted();
     }
 }

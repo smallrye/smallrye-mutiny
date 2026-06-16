@@ -1,6 +1,7 @@
 package io.smallrye.mutiny.operators;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
@@ -9,9 +10,13 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.CompositeException;
@@ -296,5 +301,35 @@ public class UniAndTest {
         subscriber
                 .assertCompleted()
                 .assertItem(1 + 2 + 3 + 4 + 5 + 6 + 7 + 8 + 9);
+    }
+
+    @RepeatedTest(10)
+    public void failFastShouldPropagateFailureImmediatelyEvenWhenRacingWithItem() {
+        ExecutorService executor = Executors.newFixedThreadPool(2);
+        try {
+            AtomicInteger barrier = new AtomicInteger();
+
+            Uni<Integer> uni0 = Uni.createFrom().emitter(em -> executor.submit(() -> {
+                barrier.incrementAndGet();
+                await().atMost(Duration.ofSeconds(5)).until(() -> barrier.get() >= 2);
+                em.complete(1);
+            }));
+            Uni<Integer> uni1 = Uni.createFrom().emitter(em -> executor.submit(() -> {
+                barrier.incrementAndGet();
+                await().atMost(Duration.ofSeconds(5)).until(() -> barrier.get() >= 2);
+                em.fail(new IOException("boom"));
+            }));
+            Uni<Integer> uni2 = Uni.createFrom().emitter(em -> {
+            }); // never completes
+
+            UniAssertSubscriber<List<?>> subscriber = Uni.combine().all().unis(uni0, uni1, uni2)
+                    .with(list -> list)
+                    .subscribe().withSubscriber(UniAssertSubscriber.create());
+
+            subscriber.awaitFailure(Duration.ofSeconds(1));
+            assertThat(subscriber.getFailure()).isInstanceOf(IOException.class);
+        } finally {
+            executor.shutdownNow();
+        }
     }
 }

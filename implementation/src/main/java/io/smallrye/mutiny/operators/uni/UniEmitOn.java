@@ -3,7 +3,9 @@ package io.smallrye.mutiny.operators.uni;
 import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
 
 import java.util.concurrent.Executor;
+import java.util.concurrent.RejectedExecutionException;
 
+import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.operators.AbstractUni;
 import io.smallrye.mutiny.operators.UniOperator;
@@ -31,14 +33,23 @@ public class UniEmitOn<I> extends UniOperator<I, I> {
         @Override
         public void onItem(I item) {
             if (!isCancelled()) {
-                executor.execute(() -> downstream.onItem(item));
+                try {
+                    executor.execute(() -> downstream.onItem(item));
+                } catch (RejectedExecutionException e) {
+                    cancel();
+                    downstream.onFailure(e);
+                }
             }
         }
 
         @Override
         public void onFailure(Throwable failure) {
             if (!isCancelled()) {
-                executor.execute(() -> downstream.onFailure(failure));
+                try {
+                    executor.execute(() -> downstream.onFailure(failure));
+                } catch (RejectedExecutionException e) {
+                    downstream.onFailure(new CompositeException(failure, e));
+                }
             }
         }
     }

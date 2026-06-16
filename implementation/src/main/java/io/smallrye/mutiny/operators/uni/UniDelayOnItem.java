@@ -50,7 +50,11 @@ public class UniDelayOnItem<T> extends UniOperator<T, T> {
         public void onItem(T item) {
             if (!isCancelled()) {
                 try {
-                    Runnable dispatch = () -> downstream.onItem(item);
+                    Runnable dispatch = () -> {
+                        if (!isCancelled()) {
+                            downstream.onItem(item);
+                        }
+                    };
                     scheduledFuture = executor.schedule(dispatch, duration.toMillis(), TimeUnit.MILLISECONDS);
                 } catch (Throwable err) {
                     downstream.onFailure(err);

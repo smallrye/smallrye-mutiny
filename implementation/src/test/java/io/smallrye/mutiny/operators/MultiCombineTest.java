@@ -879,6 +879,23 @@ public class MultiCombineTest {
                 .assertItems(Tuple2.of(3, 4), Tuple2.of(3, 5), Tuple2.of(3, 6));
     }
 
+    @SuppressWarnings("unchecked")
+    @Test
+    void zipCombinatorRetainsList() {
+        Multi<Integer> a = Multi.createFrom().items(1, 2, 3);
+        Multi<Integer> b = Multi.createFrom().items(10, 20, 30);
+
+        List<List<Object>> results = Multi.createBy().combining().streams(a, b)
+                .using(list -> (List<Object>) list)
+                .collect().asList()
+                .await().indefinitely();
+
+        assertThat(results).hasSize(3);
+        assertThat(results.get(0)).containsExactly(1, 10);
+        assertThat(results.get(1)).containsExactly(2, 20);
+        assertThat(results.get(2)).containsExactly(3, 30);
+    }
+
     @Test
     public void rejectBadRequests() {
         Multi<Integer> s1 = Multi.createFrom().range(1, 4);

@@ -130,8 +130,6 @@ public class MultiWindowOnDurationOp<T> extends AbstractMultiOperator<T, Multi<T
                 if (canStartWork()) {
                     drainLoop();
                 }
-
-                downstream.onFailure(t);
                 timer.cancel();
             } else {
                 Infrastructure.handleDroppedException(t);
@@ -146,8 +144,6 @@ public class MultiWindowOnDurationOp<T> extends AbstractMultiOperator<T, Multi<T
                 if (canStartWork()) {
                     drainLoop();
                 }
-
-                downstream.onCompletion();
                 timer.cancel();
             }
         }
@@ -188,8 +184,10 @@ public class MultiWindowOnDurationOp<T> extends AbstractMultiOperator<T, Multi<T
                         Throwable err = failure;
                         if (err != null) {
                             processor.onError(err);
+                            actual.onFailure(err);
                         } else {
                             processor.onComplete();
+                            actual.onCompletion();
                         }
                         timer.cancel();
                         return;

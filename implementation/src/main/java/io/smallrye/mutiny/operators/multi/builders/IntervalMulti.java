@@ -2,6 +2,7 @@ package io.smallrye.mutiny.operators.multi.builders;
 
 import java.time.Duration;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
 import io.smallrye.mutiny.helpers.ParameterValidation;
@@ -47,7 +48,7 @@ public class IntervalMulti extends AbstractMulti<Long> {
         private final Duration initialDelay;
         private final ScheduledExecutorService executor;
         private volatile boolean cancelled;
-        private volatile boolean once = true;
+        private final AtomicBoolean once = new AtomicBoolean(true);
 
         private final AtomicLong count = new AtomicLong();
         private ScheduledFuture<?> future;
@@ -103,9 +104,8 @@ public class IntervalMulti extends AbstractMulti<Long> {
                 actual.onFailure(Subscriptions.getInvalidRequestException());
                 return;
             }
-            if (once) {
+            if (once.compareAndSet(true, false)) {
                 start();
-                once = false;
             }
         }
 
