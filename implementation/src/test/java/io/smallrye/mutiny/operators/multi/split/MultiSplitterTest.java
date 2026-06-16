@@ -3,13 +3,16 @@ package io.smallrye.mutiny.operators.multi.split;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Flow;
 
 import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Context;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.helpers.test.AssertSubscriber;
+import io.smallrye.mutiny.subscription.MultiSubscriber;
 
 class MultiSplitterTest {
 
@@ -235,5 +238,50 @@ class MultiSplitterTest {
 
         odd.assertCompleted().assertItems(1, 3, 5);
         even.assertCompleted().assertItems(2, 4, 6);
+    }
+
+    @Test
+    void doNotOverDeliverToABoundedSubscriberReplenishingOneByOne() {
+        var splitter = Multi.createFrom().range(1, 100)
+                .split(OddEven.class, n -> (n % 2 == 0) ? OddEven.EVEN : OddEven.ODD);
+
+        // ODD replenishes one item at a time and stops after two, EVEN is unbounded.
+        var odd = new OneByOneSubscriber(2);
+        splitter.get(OddEven.ODD).subscribe().withSubscriber(odd);
+        splitter.get(OddEven.EVEN).subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE));
+
+        assertThat(odd.items).containsExactly(1, 3);
+    }
+
+    static final class OneByOneSubscriber implements MultiSubscriber<Integer> {
+        final List<Integer> items = new ArrayList<>();
+        private final int cap;
+        private Flow.Subscription subscription;
+
+        OneByOneSubscriber(int cap) {
+            this.cap = cap;
+        }
+
+        @Override
+        public void onSubscribe(Flow.Subscription subscription) {
+            this.subscription = subscription;
+            subscription.request(1);
+        }
+
+        @Override
+        public void onItem(Integer item) {
+            items.add(item);
+            if (items.size() < cap) {
+                subscription.request(1);
+            }
+        }
+
+        @Override
+        public void onFailure(Throwable failure) {
+        }
+
+        @Override
+        public void onCompletion() {
+        }
     }
 }

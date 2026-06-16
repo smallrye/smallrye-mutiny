@@ -4,6 +4,7 @@ import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Flow;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
@@ -99,6 +100,9 @@ public class MultiSplitter<T, K extends Enum<K>> {
 
     private Flow.Subscription upstreamSubscription;
 
+    // At most one upstream request is in flight at a time
+    private final AtomicBoolean upstreamRequestInFlight = new AtomicBoolean();
+
     private void onSplitRequest() {
         if (state.get() != State.SUBSCRIBED || splits.size() < requiredNumberOfSubscribers) {
             return;
@@ -108,7 +112,9 @@ public class MultiSplitter<T, K extends Enum<K>> {
                 return;
             }
         }
-        upstreamSubscription.request(1L);
+        if (upstreamRequestInFlight.compareAndSet(false, true)) {
+            upstreamSubscription.request(1L);
+        }
     }
 
     private void onUpstreamFailure() {
@@ -135,11 +141,10 @@ public class MultiSplitter<T, K extends Enum<K>> {
             SplitMulti.Split target = splits.get(key);
             if (target != null) {
                 target.downstream.onItem(item);
-                if (splits.size() == requiredNumberOfSubscribers
-                        && Subscriptions.produced(target.demand, 1L) > 0L) {
-                    upstreamSubscription.request(1L);
-                }
+                Subscriptions.produced(target.demand, 1L);
             }
+            upstreamRequestInFlight.set(false);
+            onSplitRequest();
         } catch (Throwable err) {
             terminalFailure = err;
             state.set(State.FAILED);
