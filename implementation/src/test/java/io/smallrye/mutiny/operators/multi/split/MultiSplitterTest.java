@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Flow;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.Test;
 
@@ -251,6 +252,36 @@ class MultiSplitterTest {
         splitter.get(OddEven.EVEN).subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE));
 
         assertThat(odd.items).containsExactly(1, 3);
+    }
+
+    @Test
+    void doNotDeliverInFlightItemToAResubscribedZeroDemandSubscriber() {
+        AtomicReference<Flow.Subscriber<? super Integer>> upstream = new AtomicReference<>();
+        Multi<Integer> source = Multi.createFrom().publisher(subscriber -> {
+            upstream.set(subscriber);
+            subscriber.onSubscribe(new Flow.Subscription() {
+                @Override
+                public void request(long n) {
+                }
+
+                @Override
+                public void cancel() {
+                }
+            });
+        });
+
+        var splitter = source.split(OddEven.class, n -> (n % 2 == 0) ? OddEven.EVEN : OddEven.ODD);
+
+        var odd = splitter.get(OddEven.ODD).subscribe().withSubscriber(AssertSubscriber.create(1));
+        splitter.get(OddEven.EVEN).subscribe().withSubscriber(AssertSubscriber.create(1));
+
+        // ODD cancels, then a new ODD subscriber takes its place without requesting anything
+        odd.cancel();
+        var resubscribed = splitter.get(OddEven.ODD).subscribe().withSubscriber(AssertSubscriber.create());
+
+        upstream.get().onNext(1);
+
+        resubscribed.assertHasNotReceivedAnyItem();
     }
 
     static final class OneByOneSubscriber implements MultiSubscriber<Integer> {

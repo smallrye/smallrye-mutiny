@@ -137,11 +137,10 @@ public class MultiSplitter<T, K extends Enum<K>> {
             if (key == null) {
                 throw new NullPointerException("The splitter function returned null");
             }
-            // Note: if the target subscriber was removed between the last upstream demand and now, it is simply discarded
+            // An item routed to a branch with no demand is discarded rather than delivered without demand
             SplitMulti.Split target = splits.get(key);
-            if (target != null) {
+            if (target != null && claimDemand(target.demand)) {
                 target.downstream.onItem(item);
-                Subscriptions.produced(target.demand, 1L);
             }
             upstreamRequestInFlight.set(false);
             onSplitRequest();
@@ -149,6 +148,23 @@ public class MultiSplitter<T, K extends Enum<K>> {
             terminalFailure = err;
             state.set(State.FAILED);
             onUpstreamFailure();
+        }
+    }
+
+    // Decrements demand by one, leaving an unbounded (Long.MAX_VALUE) demand untouched.
+    // Returns false when there is no demand to claim.
+    private static boolean claimDemand(AtomicLong demand) {
+        for (;;) {
+            long current = demand.get();
+            if (current <= 0L) {
+                return false;
+            }
+            if (current == Long.MAX_VALUE) {
+                return true;
+            }
+            if (demand.compareAndSet(current, current - 1L)) {
+                return true;
+            }
         }
     }
 
