@@ -61,7 +61,11 @@ public class AppendOnlyReplayList {
         }
 
         public boolean willReachCompletion() {
-            return !hasReachedCompletion() && current.next.value instanceof Completion;
+            return currentHasBeenRead && !hasReachedCompletion() && current.next.value instanceof Completion;
+        }
+
+        public boolean willReachFailure() {
+            return currentHasBeenRead && !hasReachedFailure() && current.next.value instanceof Failure;
         }
 
         public boolean hasReachedFailure() {
