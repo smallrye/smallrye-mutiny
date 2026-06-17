@@ -32,11 +32,19 @@ fun multiBuilderWithBackPressure() {
 suspend fun suspendMultiBuilder() {
     // <multiBuilderSuspend>
     // import io.smallrye.mutiny.coroutines.multi
+    val queryResult = fetchResults()
     coroutineScope {
-        val multi = multiSuspend<String>(context = this) {
-            emit("hello")
-            emit("world")
+        val multi = multiSuspend(context = this) {
+            queryResult.forEach { result -> emit(result.download()) }
         }
     }
     // </multiBuilderSuspend>
+}
+
+interface ResultHandle {
+    suspend fun download(): String
+}
+
+suspend fun fetchResults(): Iterable<ResultHandle> {
+    TODO("Not yet implemented")
 }
