@@ -577,3 +577,5 @@ documentation/site/
 # Sdkman
 .sdkmanrc
 
+# Cache
+.cache/

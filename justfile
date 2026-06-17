@@ -8,11 +8,16 @@ quick-build:
 
 # Maven install
 install:
-    ./mvnw clean install
+    ./mvnw clean install -T4 -Pparallel-tests
 
 # Run all the tests
 verify:
-    ./mvnw verify -Pparallel-tests -T8
+    ./mvnw verify -Pparallel-tests -T4
+
+# Deep clean
+deep-clean:
+    ./mvnw clean -T4
+    find . -type d -name ".cache" | xargs rm -rf
 
 # Prepare a release branch
 prepare-release previousVersion version:

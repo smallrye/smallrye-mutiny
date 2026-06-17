@@ -135,7 +135,7 @@
         <maven-dependency-plugin.version>3.11.0</maven-dependency-plugin.version>
         <bom-builder3.version>1.3.3</bom-builder3.version>
         <bnd-maven-plugin.version>7.3.0</bnd-maven-plugin.version>
-        <version.spotless.plugin>2.44.5</version.spotless.plugin>
+        <version.spotless.plugin>3.7.0</version.spotless.plugin>
     </properties>
 
     <dependencyManagement>
@@ -469,6 +469,10 @@
                     </dependency>
                 </dependencies>
                 <configuration>
+                    <upToDateChecking>
+                        <enabled>true</enabled>
+                        <indexFile>${project.basedir}/.cache/spotless-index</indexFile>
+                    </upToDateChecking>
                     <skip>${format.skip}</skip>
                     <java>
                         <eclipse>
