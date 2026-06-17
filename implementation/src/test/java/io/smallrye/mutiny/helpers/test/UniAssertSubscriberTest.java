@@ -346,4 +346,68 @@ class UniAssertSubscriberTest {
                 .awaitFailure()
                 .assertFailedWith(TimeoutException.class);
     }
+
+    @Test
+    void testAssertItemWithPredicate() {
+        UniAssertSubscriber<Integer> subscriber = Uni.createFrom().item(42)
+                .subscribe().withSubscriber(UniAssertSubscriber.create());
+
+        subscriber.awaitItem()
+                .assertItem(i -> i > 0, "positive number");
+
+        assertThatThrownBy(() -> subscriber.assertItem(i -> i < 0, "negative number"))
+                .isInstanceOf(AssertionError.class)
+                .hasMessageContaining("negative number");
+    }
+
+    @Test
+    void testAssertItemWithPredicateRequiresCompletion() {
+        UniAssertSubscriber<Object> subscriber = Uni.createFrom().failure(new IOException("boom"))
+                .subscribe().withSubscriber(UniAssertSubscriber.create());
+
+        assertThatThrownBy(() -> subscriber.assertItem(item -> true, "anything"))
+                .isInstanceOf(AssertionError.class)
+                .hasMessageContaining("failure");
+    }
+
+    @Test
+    void testAssertItemIsNull() {
+        UniAssertSubscriber<Object> subscriber = Uni.createFrom().nullItem()
+                .subscribe().withSubscriber(UniAssertSubscriber.create());
+
+        subscriber.awaitItem().assertItemIsNull();
+
+        UniAssertSubscriber<Integer> subscriber2 = Uni.createFrom().item(42)
+                .subscribe().withSubscriber(UniAssertSubscriber.create());
+
+        assertThatThrownBy(() -> subscriber2.awaitItem().assertItemIsNull())
+                .isInstanceOf(AssertionError.class)
+                .hasMessageContaining("null");
+    }
+
+    @Test
+    void testInspectItem() {
+        UniAssertSubscriber<Integer> subscriber = Uni.createFrom().item(42)
+                .subscribe().withSubscriber(UniAssertSubscriber.create());
+
+        subscriber.awaitItem()
+                .inspectItem(item -> assertThat(item).isEqualTo(42));
+
+        assertThatThrownBy(() -> subscriber.inspectItem(item -> {
+            throw new AssertionError("custom failure");
+        }))
+                .isInstanceOf(AssertionError.class)
+                .hasMessageContaining("custom failure");
+    }
+
+    @Test
+    void testInspectItemRequiresCompletion() {
+        UniAssertSubscriber<Object> subscriber = Uni.createFrom().failure(new IOException("boom"))
+                .subscribe().withSubscriber(UniAssertSubscriber.create());
+
+        assertThatThrownBy(() -> subscriber.inspectItem(item -> {
+        }))
+                .isInstanceOf(AssertionError.class)
+                .hasMessageContaining("failure");
+    }
 }

@@ -720,4 +720,65 @@ public class AssertSubscriberTest {
                 .request(2)
                 .assertLastItem(4);
     }
+
+    @Test
+    public void testAssertLastItemWithPredicate() {
+        AssertSubscriber<Integer> subscriber = Multi.createFrom().items(1, 2, 3, 4)
+                .subscribe().withSubscriber(AssertSubscriber.create(4));
+
+        subscriber.assertLastItem(i -> i > 3, "greater than 3");
+
+        assertThatThrownBy(() -> subscriber.assertLastItem(i -> i > 10, "greater than 10"))
+                .isInstanceOf(AssertionError.class)
+                .hasMessageContaining("greater than 10");
+    }
+
+    @Test
+    public void testAssertLastItemWithPredicateNoItems() {
+        AssertSubscriber<Integer> subscriber = Multi.createFrom().<Integer> empty()
+                .subscribe().withSubscriber(AssertSubscriber.create(1));
+
+        assertThatThrownBy(() -> subscriber.assertLastItem(i -> true, "anything"))
+                .isInstanceOf(AssertionError.class)
+                .hasMessageContaining("No items received");
+    }
+
+    @Test
+    public void testAssertItemsWithPredicate() {
+        AssertSubscriber<Integer> subscriber = Multi.createFrom().items(1, 2, 3)
+                .subscribe().withSubscriber(AssertSubscriber.create(3));
+
+        subscriber.assertItems(list -> list.size() == 3, "exactly 3 items");
+
+        assertThatThrownBy(() -> subscriber.assertItems(list -> list.isEmpty(), "empty list"))
+                .isInstanceOf(AssertionError.class)
+                .hasMessageContaining("empty list");
+    }
+
+    @Test
+    public void testInspectItems() {
+        AssertSubscriber<Integer> subscriber = Multi.createFrom().items(1, 2, 3)
+                .subscribe().withSubscriber(AssertSubscriber.create(3));
+
+        subscriber.inspectItems(items -> assertThat(items).containsExactly(1, 2, 3));
+
+        assertThatThrownBy(() -> subscriber.inspectItems(items -> {
+            throw new AssertionError("custom failure");
+        }))
+                .isInstanceOf(AssertionError.class)
+                .hasMessageContaining("custom failure");
+    }
+
+    @Test
+    public void testAssertItemCount() {
+        AssertSubscriber<Integer> subscriber = Multi.createFrom().items(1, 2, 3)
+                .subscribe().withSubscriber(AssertSubscriber.create(3));
+
+        subscriber.assertItemCount(3);
+
+        assertThatThrownBy(() -> subscriber.assertItemCount(5))
+                .isInstanceOf(AssertionError.class)
+                .hasMessageContaining("5")
+                .hasMessageContaining("3");
+    }
 }

@@ -12,6 +12,7 @@ import java.util.concurrent.Flow.Subscriber;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 import io.smallrye.mutiny.Context;
 import io.smallrye.mutiny.helpers.Subscriptions;
@@ -307,6 +308,62 @@ public class AssertSubscriber<T> implements MultiSubscriber<T>, ContextSupport {
     }
 
     /**
+     * Asserts that the last received item matches the given predicate.
+     * The assertion fails if no items have been received.
+     *
+     * @param predicate the predicate to test the last item against, must not be {@code null}
+     * @param description a description of what the predicate checks, used in error messages
+     * @return this {@link AssertSubscriber}
+     */
+    public AssertSubscriber<T> assertLastItem(Predicate<? super T> predicate, String description) {
+        T last = getLastItem();
+        if (last == null && items.isEmpty()) {
+            throw new AssertionError("No items received, cannot assert last item");
+        }
+        shouldMatchPredicate(last, predicate, description);
+        return this;
+    }
+
+    /**
+     * Asserts that the received items list satisfies the given predicate.
+     *
+     * @param predicate the predicate to test the items list against, must not be {@code null}
+     * @param description a description of what the predicate checks, used in error messages
+     * @return this {@link AssertSubscriber}
+     */
+    public AssertSubscriber<T> assertItems(Predicate<? super List<T>> predicate, String description) {
+        shouldMatchPredicateOnList(items, predicate, description);
+        return this;
+    }
+
+    /**
+     * Inspect the received items list using a consumer.
+     * The consumer is expected to throw an {@link AssertionError} if the items do not meet expectations.
+     *
+     * @param consumer the consumer to inspect the items, must not be {@code null}
+     * @return this {@link AssertSubscriber}
+     */
+    public AssertSubscriber<T> inspectItems(Consumer<? super List<T>> consumer) {
+        consumer.accept(items);
+        return this;
+    }
+
+    /**
+     * Asserts that exactly {@code expected} items have been received.
+     * This checks the current item count without awaiting.
+     *
+     * @param expected the expected number of items
+     * @return this {@link AssertSubscriber}
+     */
+    public AssertSubscriber<T> assertItemCount(int expected) {
+        if (items.size() != expected) {
+            throw new AssertionError(
+                    "Expected " + expected + " items but received " + items.size());
+        }
+        return this;
+    }
+
+    /**
      * Awaits for the next item.
      * If no item have been received before the default timeout, an {@link AssertionError} is thrown.
      * <p>
@@ -440,6 +497,25 @@ public class AssertSubscriber<T> implements MultiSubscriber<T>, ContextSupport {
         awaitItemEvents(number, duration);
 
         return this;
+    }
+
+    // Package-private: waits until at least `number` items have been received (no overshoot error).
+    // Used by AssertMulti where unbounded initial demand means items may arrive ahead of validation steps.
+    void awaitAtLeastItems(int number, Duration duration) {
+        if (items.size() >= number) {
+            return;
+        }
+
+        if (isCancelled() || hasCompleted() || getFailure() != null) {
+            if (items.size() < number) {
+                throw new AssertionError(
+                        "Expected at least " + number + " items, but received " + items.size()
+                                + " and a terminal event was already received");
+            }
+            return;
+        }
+
+        awaitItemEvents(number, duration);
     }
 
     /**
@@ -652,7 +728,7 @@ public class AssertSubscriber<T> implements MultiSubscriber<T>, ContextSupport {
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         } catch (ExecutionException e) {
-            if (expected == items.size()) {
+            if (items.size() >= expected) {
                 return;
             }
             // Terminal event received
@@ -671,7 +747,6 @@ public class AssertSubscriber<T> implements MultiSubscriber<T>, ContextSupport {
                         "Expected " + expected + " items, but received a failure event while waiting: " + getFailure()
                                 + ". Only " + items.size() + " items have been received.");
             } else {
-                e.printStackTrace();
                 throw new AssertionError(
                         "Expected " + expected + " items.  Only " + items.size() + " items have been received.");
             }
