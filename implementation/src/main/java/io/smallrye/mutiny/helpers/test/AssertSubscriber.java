@@ -499,6 +499,25 @@ public class AssertSubscriber<T> implements MultiSubscriber<T>, ContextSupport {
         return this;
     }
 
+    // Package-private: waits until at least `number` items have been received (no overshoot error).
+    // Used by AssertMulti where unbounded initial demand means items may arrive ahead of validation steps.
+    void awaitAtLeastItems(int number, Duration duration) {
+        if (items.size() >= number) {
+            return;
+        }
+
+        if (isCancelled() || hasCompleted() || getFailure() != null) {
+            if (items.size() < number) {
+                throw new AssertionError(
+                        "Expected at least " + number + " items, but received " + items.size()
+                                + " and a terminal event was already received");
+            }
+            return;
+        }
+
+        awaitItemEvents(number, duration);
+    }
+
     /**
      * Awaits for a completion event.
      * It waits at most {@link #DEFAULT_TIMEOUT}.
@@ -709,7 +728,7 @@ public class AssertSubscriber<T> implements MultiSubscriber<T>, ContextSupport {
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         } catch (ExecutionException e) {
-            if (expected == items.size()) {
+            if (items.size() >= expected) {
                 return;
             }
             // Terminal event received
@@ -728,7 +747,6 @@ public class AssertSubscriber<T> implements MultiSubscriber<T>, ContextSupport {
                         "Expected " + expected + " items, but received a failure event while waiting: " + getFailure()
                                 + ". Only " + items.size() + " items have been received.");
             } else {
-                e.printStackTrace();
                 throw new AssertionError(
                         "Expected " + expected + " items.  Only " + items.size() + " items have been received.");
             }

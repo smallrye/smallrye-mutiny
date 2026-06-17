@@ -27,6 +27,20 @@ import io.smallrye.mutiny.Multi;
  *         .verify();
  * </pre>
  *
+ * By default, the subscriber requests {@code Long.MAX_VALUE} items (unbounded demand).
+ * Use {@link #withInitialRequest(long) withInitialRequest(0)} for explicit backpressure testing:
+ *
+ * <pre>
+ * AssertMulti.create(multi)
+ *         .withInitialRequest(0)
+ *         .thenRequest(2)
+ *         .expectNext(1, 2)
+ *         .thenRequest(1)
+ *         .expectNext(3)
+ *         .expectComplete()
+ *         .verify();
+ * </pre>
+ *
  * @param <T> the type of items emitted by the Multi
  */
 @Experimental("This is an experimental API in Mutiny 3.x")
@@ -36,6 +50,7 @@ public final class AssertMulti<T> {
     private final Context context;
     private final List<Step<T>> steps = new ArrayList<>();
     private boolean frozen = false;
+    private long initialRequest = Long.MAX_VALUE;
 
     private AssertMulti(Multi<T> multi, Context context) {
         this.multi = nonNull(multi, "multi");
@@ -63,6 +78,25 @@ public final class AssertMulti<T> {
      */
     public static <T> AssertMulti<T> create(Multi<T> multi, Context context) {
         return new AssertMulti<>(multi, context);
+    }
+
+    // ---- Configuration ----
+
+    /**
+     * Set the initial number of items to request from upstream on subscription.
+     * <p>
+     * Defaults to {@code Long.MAX_VALUE} (unbounded).
+     * Set to {@code 0} to disable initial demand and control backpressure explicitly with {@link #thenRequest(long)}.
+     *
+     * @param n the initial request count, must be {@code >= 0}
+     * @return this AssertMulti
+     */
+    public AssertMulti<T> withInitialRequest(long n) {
+        if (n < 0) {
+            throw new IllegalArgumentException("initialRequest must be >= 0, was " + n);
+        }
+        this.initialRequest = n;
+        return this;
     }
 
     // ---- Item expectations ----
@@ -143,8 +177,8 @@ public final class AssertMulti<T> {
     // ---- Demand control ----
 
     /**
-     * Request {@code n} items from upstream without consuming.
-     * Use this for backpressure testing or pre-buffering.
+     * Request {@code n} items from upstream.
+     * Use with {@link #withInitialRequest(long) withInitialRequest(0)} for explicit backpressure testing.
      *
      * @param n the number of items to request, must be positive
      * @return this AssertMulti
@@ -258,7 +292,7 @@ public final class AssertMulti<T> {
         freeze();
         validate();
 
-        AssertSubscriber<T> subscriber = AssertSubscriber.create(context, 0);
+        AssertSubscriber<T> subscriber = AssertSubscriber.create(context, initialRequest);
         multi.subscribe().withSubscriber(subscriber);
 
         int itemIndex = 0;
@@ -302,8 +336,7 @@ public final class AssertMulti<T> {
         if (step instanceof Step.ExpectNext<T> expectNext) {
             List<T> expected = expectNext.expected();
             int targetCount = itemIndex + expected.size();
-            subscriber.request(expected.size());
-            subscriber.awaitItems(targetCount, timeout);
+            subscriber.awaitAtLeastItems(targetCount, timeout);
             List<T> items = subscriber.getItems();
             for (int j = 0; j < expected.size(); j++) {
                 T actual = items.get(itemIndex + j);
@@ -316,8 +349,7 @@ public final class AssertMulti<T> {
             return targetCount;
         } else if (step instanceof Step.ExpectNextMatches<T> expectNextMatches) {
             int targetCount = itemIndex + 1;
-            subscriber.request(1);
-            subscriber.awaitItems(targetCount, timeout);
+            subscriber.awaitAtLeastItems(targetCount, timeout);
             T actual = subscriber.getItems().get(itemIndex);
             if (!expectNextMatches.predicate().test(actual)) {
                 throw new AssertionError(
@@ -327,21 +359,18 @@ public final class AssertMulti<T> {
         } else if (step instanceof Step.ExpectNextCount<T> expectNextCount) {
             int count = expectNextCount.count();
             int targetCount = itemIndex + count;
-            subscriber.request(count);
-            subscriber.awaitItems(targetCount, timeout);
+            subscriber.awaitAtLeastItems(targetCount, timeout);
             return targetCount;
         } else if (step instanceof Step.ConsumeNext<T> consumeNext) {
             int targetCount = itemIndex + 1;
-            subscriber.request(1);
-            subscriber.awaitItems(targetCount, timeout);
+            subscriber.awaitAtLeastItems(targetCount, timeout);
             T actual = subscriber.getItems().get(itemIndex);
             consumeNext.consumer().accept(actual);
             return targetCount;
         } else if (step instanceof Step.ConsumeNextItems<T> consumeNextItems) {
             int count = consumeNextItems.count();
             int targetCount = itemIndex + count;
-            subscriber.request(count);
-            subscriber.awaitItems(targetCount, timeout);
+            subscriber.awaitAtLeastItems(targetCount, timeout);
             List<T> items = subscriber.getItems().subList(itemIndex, itemIndex + count);
             consumeNextItems.consumer().accept(List.copyOf(items));
             return targetCount;

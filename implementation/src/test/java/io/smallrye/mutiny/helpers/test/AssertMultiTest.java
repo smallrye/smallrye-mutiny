@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.io.IOException;
 import java.time.Duration;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.ResourceAccessMode;
@@ -12,6 +13,7 @@ import org.junit.jupiter.api.parallel.ResourceLock;
 
 import io.smallrye.mutiny.Context;
 import io.smallrye.mutiny.Multi;
+import io.smallrye.mutiny.infrastructure.Infrastructure;
 import junit5.support.InfrastructureResource;
 
 @ResourceLock(value = InfrastructureResource.NAME, mode = ResourceAccessMode.READ)
@@ -112,8 +114,21 @@ class AssertMultiTest {
     @Test
     void thenRequest() {
         AssertMulti.create(Multi.createFrom().items(1, 2, 3))
+                .withInitialRequest(0)
                 .thenRequest(10)
                 .expectNext(1, 2, 3)
+                .expectComplete()
+                .verify();
+    }
+
+    @Test
+    void withInitialRequestExplicitDemand() {
+        AssertMulti.create(Multi.createFrom().items(1, 2, 3, 4, 5))
+                .withInitialRequest(0)
+                .thenRequest(2)
+                .expectNext(1, 2)
+                .thenRequest(3)
+                .expectNext(3, 4, 5)
                 .expectComplete()
                 .verify();
     }
@@ -251,5 +266,108 @@ class AssertMultiTest {
                 .expectNext(1, 2, 3)
                 .expectComplete()
                 .verify(Duration.ofSeconds(5));
+    }
+
+    @Test
+    void withInitialRequestNegativeThrows() {
+        assertThatThrownBy(() -> AssertMulti.create(Multi.createFrom().items(1))
+                .withInitialRequest(-1))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("initialRequest");
+    }
+
+    @Test
+    void asyncSourceWithUnboundedDemand() {
+        AssertMulti.create(Multi.createFrom().items(1, 2, 3, 4, 5)
+                .emitOn(Infrastructure.getDefaultExecutor()))
+                .expectNext(1, 2, 3)
+                .expectNextCount(2)
+                .expectComplete()
+                .verify();
+    }
+
+    @Test
+    void asyncSourceWithExplicitDemand() {
+        AssertMulti.create(Multi.createFrom().items(1, 2, 3, 4, 5)
+                .emitOn(Infrastructure.getDefaultExecutor()))
+                .withInitialRequest(0)
+                .thenRequest(3)
+                .expectNext(1, 2, 3)
+                .thenRequest(2)
+                .expectNext(4, 5)
+                .expectComplete()
+                .verify();
+    }
+
+    @Test
+    void thenCancelWithExplicitDemand() {
+        AtomicInteger count = new AtomicInteger();
+        AssertMulti.create(Multi.createFrom().items(1, 2, 3, 4, 5)
+                .onItem().invoke(count::incrementAndGet))
+                .withInitialRequest(0)
+                .thenRequest(2)
+                .expectNext(1, 2)
+                .thenCancel()
+                .verify();
+        assertThat(count.get()).isEqualTo(2);
+    }
+
+    @Test
+    void expectNextCountWithExplicitDemand() {
+        AssertMulti.create(Multi.createFrom().items(1, 2, 3, 4, 5))
+                .withInitialRequest(0)
+                .thenRequest(3)
+                .expectNextCount(3)
+                .thenRequest(2)
+                .expectNext(4, 5)
+                .expectComplete()
+                .verify();
+    }
+
+    @Test
+    void addStepAfterVerifyThrows() {
+        AssertMulti<Integer> verifier = AssertMulti.create(Multi.createFrom().items(1));
+        verifier.expectNext(1).expectComplete().verify();
+        assertThatThrownBy(() -> verifier.expectNext(2))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("after verify");
+    }
+
+    @Test
+    void consumeNextWithExplicitDemand() {
+        AssertMulti.create(Multi.createFrom().items(1, 2, 3))
+                .withInitialRequest(0)
+                .thenRequest(2)
+                .consumeNext(item -> assertThat(item).isEqualTo(1))
+                .consumeNext(item -> assertThat(item).isEqualTo(2))
+                .thenRequest(1)
+                .expectNext(3)
+                .expectComplete()
+                .verify();
+    }
+
+    @Test
+    void consumeNextItemsWithExplicitDemand() {
+        AssertMulti.create(Multi.createFrom().items(1, 2, 3, 4))
+                .withInitialRequest(0)
+                .thenRequest(3)
+                .consumeNextItems(3, items -> assertThat(items).containsExactly(1, 2, 3))
+                .thenRequest(1)
+                .expectNext(4)
+                .expectComplete()
+                .verify();
+    }
+
+    @Test
+    void expectNextMatchesWithExplicitDemand() {
+        AssertMulti.create(Multi.createFrom().items(1, 2, 3))
+                .withInitialRequest(0)
+                .thenRequest(2)
+                .expectNextMatches(i -> i == 1, "equals 1")
+                .expectNextMatches(i -> i > 1, "greater than 1")
+                .thenRequest(1)
+                .expectNext(3)
+                .expectComplete()
+                .verify();
     }
 }
