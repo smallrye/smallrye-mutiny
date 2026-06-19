@@ -23,7 +23,7 @@ concurrency:
 jobs:
   perform-release:
     name: Perform Release
-    uses: smallrye/.github/.github/workflows/perform-release.yml@main
+    uses: smallrye/.github/.github/workflows/perform-release.yml@394b0cc9f368ad0a6fadd1e98e71ec47984a3fde # main
     secrets: inherit
     with:
       version: ${{github.event.inputs.tag || github.ref_name}}
