@@ -4,6 +4,7 @@ import static io.smallrye.mutiny.helpers.ParameterValidation.nonNull;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Flow;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
@@ -99,6 +100,9 @@ public class MultiSplitter<T, K extends Enum<K>> {
 
     private Flow.Subscription upstreamSubscription;
 
+    // At most one upstream request is in flight at a time
+    private final AtomicBoolean upstreamRequestInFlight = new AtomicBoolean();
+
     private void onSplitRequest() {
         if (state.get() != State.SUBSCRIBED || splits.size() < requiredNumberOfSubscribers) {
             return;
@@ -108,7 +112,9 @@ public class MultiSplitter<T, K extends Enum<K>> {
                 return;
             }
         }
-        upstreamSubscription.request(1L);
+        if (upstreamRequestInFlight.compareAndSet(false, true)) {
+            upstreamSubscription.request(1L);
+        }
     }
 
     private void onUpstreamFailure() {
@@ -131,19 +137,34 @@ public class MultiSplitter<T, K extends Enum<K>> {
             if (key == null) {
                 throw new NullPointerException("The splitter function returned null");
             }
-            // Note: if the target subscriber was removed between the last upstream demand and now, it is simply discarded
+            // An item routed to a branch with no demand is discarded rather than delivered without demand
             SplitMulti.Split target = splits.get(key);
-            if (target != null) {
+            if (target != null && claimDemand(target.demand)) {
                 target.downstream.onItem(item);
-                if (splits.size() == requiredNumberOfSubscribers
-                        && Subscriptions.produced(target.demand, 1L) > 0L) {
-                    upstreamSubscription.request(1L);
-                }
             }
+            upstreamRequestInFlight.set(false);
+            onSplitRequest();
         } catch (Throwable err) {
             terminalFailure = err;
             state.set(State.FAILED);
             onUpstreamFailure();
+        }
+    }
+
+    // Decrements demand by one, leaving an unbounded (Long.MAX_VALUE) demand untouched.
+    // Returns false when there is no demand to claim.
+    private static boolean claimDemand(AtomicLong demand) {
+        for (;;) {
+            long current = demand.get();
+            if (current <= 0L) {
+                return false;
+            }
+            if (current == Long.MAX_VALUE) {
+                return true;
+            }
+            if (demand.compareAndSet(current, current - 1L)) {
+                return true;
+            }
         }
     }
 
