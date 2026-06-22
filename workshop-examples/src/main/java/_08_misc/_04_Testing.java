@@ -1,5 +1,5 @@
 ///usr/bin/env jbang "$0" "$@" ; exit $?
-//DEPS io.smallrye.reactive:mutiny:999-SNAPSHOT
+//DEPS io.smallrye.reactive:mutiny:3.3.0
 package _08_misc;
 
 import java.io.IOException;
