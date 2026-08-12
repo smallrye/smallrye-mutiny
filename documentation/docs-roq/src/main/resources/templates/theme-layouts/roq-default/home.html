@@ -1,0 +1,22 @@
+{#include roq-templates/theme-layouts/roq-default/default}
+
+{@io.quarkiverse.roq.frontmatter.runtime.model.Site site}
+
+{! Site header: logo + version selector !}
+{#include partials/version-bar.html /}
+
+{! Top navigation tabs !}
+{#include partials/top-nav.html menu=cdi:menu.items /}
+
+{! Search overlay (needed on homepage since there's no sidebar) !}
+{#search-overlay /}
+
+{! Homepage: no sidebar, full-width content !}
+{#include partials/roq-default/sidebar-darkmode /}
+<main class="main-content home-no-sidebar">
+  <div class="home-content">
+    {#insert /}
+  </div>
+</main>
+
+{/include}

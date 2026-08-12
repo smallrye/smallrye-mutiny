@@ -1,0 +1,79 @@
+---
+title: Mutiny - Intuitive Event-Driven Reactive Programming Library for Java
+description: Intuitive Event-Driven Reactive Programming Library for Java
+name: SmallRye Mutiny
+simple-name: Mutiny
+image: logo.png
+social-github: smallrye/smallrye-mutiny
+layout: home
+---
+
+<div class="mutiny-home">
+
+<h1>Mutiny &ndash; Intuitive Event-Driven Reactive Programming Library for Java</h1>
+
+<pre><code class="language-java">Uni&lt;String&gt; request = makeSomeNetworkRequest(params);
+
+request.ifNoItem().after(ofMillis(100))
+    .failWith(() -&gt; new TooSlowException("💥"))
+    .onFailure(IOException.class).recoverWithItem(fail -&gt; "📦")
+    .subscribe().with(
+        item -&gt; log("👍 " + item),
+         err -&gt; log(err.getMessage())
+    );</code></pre>
+
+<p>
+{#for v in cdi:versions.sorted}{#if v.defaultVersion}<a href="{=site.url(v.path + '/tutorials/getting-mutiny')}" class="mutiny-cta">Get Mutiny {=cdi:attributes.versions.mutiny}</a>{/if}{/for}
+</p>
+
+<div class="mutiny-features">
+
+<div class="mutiny-feature">
+<h2>Event-Driven</h2>
+<p>Mutiny places <em>events</em> at the core of its design.</p>
+<p>With Mutiny, you observe <em>events</em>, <em>react</em> to them, and create elegant and readable processing pipelines.</p>
+<p>A PhD in functional programming is not required.</p>
+</div>
+
+<div class="mutiny-feature">
+<h2>Navigable</h2>
+<p>Even with smart code completion, classes with hundreds of methods are confusing.</p>
+<p>Mutiny provides a navigable and explicit API driving you towards the operator you need.</p>
+</div>
+
+<div class="mutiny-feature">
+<h2>Non-blocking I/O</h2>
+<p>Mutiny is the perfect companion to tame the asynchronous nature of applications with non-blocking I/O.</p>
+<p>Compose operations in a declarative fashion, transform data, enforce progress, recover from failures and more.</p>
+</div>
+
+<div class="mutiny-feature">
+<h2>Quarkus and Vert.x native</h2>
+<p>Mutiny is integrated in <a href="https://quarkus.io">Quarkus</a> where every reactive API uses Mutiny, and <a href="https://vertx.io">Eclipse Vert.x</a> clients are made available using Mutiny bindings.</p>
+<p>Mutiny is however an independent library that can ultimately be used in any Java application.</p>
+</div>
+
+<div class="mutiny-feature">
+<h2>Made for an asynchronous world</h2>
+<p>Mutiny can be used in any asynchronous application such as event-driven microservices, message-based applications, network utilities, data stream processing, and of course&hellip; reactive applications!</p>
+</div>
+
+<div class="mutiny-feature">
+<h2>Reactive Converters Built-In</h2>
+<p>Mutiny is based on the <a href="https://www.reactive-streams.org/">Reactive Streams protocol</a> and <a href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/concurrent/Flow.html">Java Flow</a>, and so it can be integrated with any other reactive programming library.</p>
+<p>In addition, it proposes <em>converters</em> to interact with other popular libraries.</p>
+</div>
+
+</div>
+
+<footer class="mutiny-footer">
+<div class="mutiny-footer-cf">
+<a href="https://www.commonhaus.org/" target="_blank" rel="noopener noreferrer">
+<img src="{=site.url('/images/CF_logo_horizontal_single_reverse.svg')}" alt="Commonhaus Foundation" class="cf-logo">
+</a>
+</div>
+<p>Copyright &copy; 2019 Contributors to the Mutiny Project. All rights reserved.<br>
+See our <a href="https://www.commonhaus.org/policies/trademark-policy/" target="_blank" rel="noopener noreferrer">Trademark Policy</a> and <a href="https://www.commonhaus.org/trademarks/" target="_blank" rel="noopener noreferrer">Trademark List</a>.</p>
+</footer>
+
+</div>
