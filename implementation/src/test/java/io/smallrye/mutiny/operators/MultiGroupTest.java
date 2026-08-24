@@ -1134,6 +1134,34 @@ public class MultiGroupTest {
             assertThat(sub.getItems()).hasSize(1);
         }
 
+        @RepeatedTest(1000)
+        void sizeFlushAndTimerFlushMustNotRace() {
+            ScheduledThreadPoolExecutor scheduler = new ScheduledThreadPoolExecutor(2);
+            try {
+                AtomicReference<MultiEmitter<? super Integer>> emitterRef = new AtomicReference<>();
+
+                Multi<List<Integer>> multi = new MultiBufferWithTimeoutOp<>(
+                        Multi.createFrom().<Integer> emitter(emitterRef::set),
+                        5, Duration.ofMillis(1), scheduler, false);
+
+                AssertSubscriber<List<Integer>> sub = multi.subscribe()
+                        .withSubscriber(AssertSubscriber.create(Long.MAX_VALUE));
+
+                MultiEmitter<? super Integer> emitter = emitterRef.get();
+                for (int i = 0; i < 100; i++) {
+                    emitter.emit(i);
+                }
+                emitter.complete();
+
+                sub.awaitCompletion(Duration.ofSeconds(2));
+
+                int total = sub.getItems().stream().mapToInt(List::size).sum();
+                assertThat(total).isEqualTo(100);
+            } finally {
+                scheduler.shutdownNow();
+            }
+        }
+
         private static class ControllableScheduler implements ScheduledExecutorService {
 
             private static class CapturedTask {
