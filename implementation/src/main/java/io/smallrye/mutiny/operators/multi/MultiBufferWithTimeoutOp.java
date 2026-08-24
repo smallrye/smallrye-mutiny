@@ -75,7 +75,6 @@ public final class MultiBufferWithTimeoutOp<T> extends AbstractMultiOperator<T, 
         private final Duration duration;
         private final ScheduledExecutorService executor;
         private final Supplier<List<T>> supplier;
-        private final Runnable flush;
 
         private final AtomicInteger terminated = new AtomicInteger(RUNNING);
         private final AtomicLong requested = new AtomicLong();
@@ -92,32 +91,54 @@ public final class MultiBufferWithTimeoutOp<T> extends AbstractMultiOperator<T, 
             this.supplier = supplier;
             this.size = size;
             this.emitEmptyListIfNoItem = emitEmptyListIfNoItem;
+        }
 
-            this.flush = () -> {
-                if (terminated.get() == RUNNING) {
-                    int index;
-                    for (;;) {
-                        index = this.index.get();
-                        if (index == 0 && !emitEmptyListIfNoItem) {
-                            return;
-                        }
-                        if (this.index.compareAndSet(index, 0)) {
-                            break;
-                        }
-                    }
-                    flushCallback();
+        /**
+         * Schedules the timeout flush and remembers the scheduled task, so that a late firing can be
+         * detected as stale when the size-based flush has already replaced or cancelled it.
+         *
+         * @return {@code true} if the task has been scheduled, {@code false} if the executor rejected it
+         */
+        private boolean scheduleFlush() {
+            try {
+                ScheduledFuture<?>[] self = new ScheduledFuture<?>[1];
+                self[0] = executor.schedule(() -> timerFired(self[0]), duration.toMillis(), TimeUnit.MILLISECONDS);
+                task = self[0];
+                return true;
+            } catch (RejectedExecutionException rejected) {
+                onFailure(rejected);
+                return false;
+            }
+        }
+
+        private void timerFired(ScheduledFuture<?> self) {
+            if (terminated.get() != RUNNING) {
+                return;
+            }
+            synchronized (this) {
+                if (terminated.get() != RUNNING) {
+                    return;
                 }
-            };
+                if (task != self) {
+                    // The size-based flush has already consumed the current window and replaced
+                    // or cancelled this task: this firing is stale and must not emit.
+                    return;
+                }
+                task = null;
+
+                int index = this.index.get();
+                if (index == 0 && !emitEmptyListIfNoItem) {
+                    return;
+                }
+                this.index.set(0);
+                flushCallback();
+            }
         }
 
         private void doOnSubscribe() {
             current = supplier.get();
             if (emitEmptyListIfNoItem) {
-                try {
-                    task = executor.schedule(flush, duration.toMillis(), TimeUnit.MILLISECONDS);
-                } catch (RejectedExecutionException rejected) {
-                    onFailure(rejected);
-                }
+                scheduleFlush();
             }
         }
 
@@ -149,7 +170,7 @@ public final class MultiBufferWithTimeoutOp<T> extends AbstractMultiOperator<T, 
                 long req = requested.get();
                 MultiSubscriber<? super List<T>> subscriber = downstream;
                 if (emitEmptyListIfNoItem && terminated.get() == RUNNING) {
-                    task = executor.schedule(this.flush, duration.toMillis(), TimeUnit.MILLISECONDS);
+                    scheduleFlush();
                 }
                 if (req != 0L) {
 
@@ -180,32 +201,31 @@ public final class MultiBufferWithTimeoutOp<T> extends AbstractMultiOperator<T, 
 
         @Override
         public void onItem(final T value) {
-            int index;
-            for (;;) {
-                index = this.index.get() + 1;
-                if (this.index.compareAndSet(index - 1, index)) {
-                    break;
+            synchronized (this) {
+                int index;
+                for (;;) {
+                    index = this.index.get() + 1;
+                    if (this.index.compareAndSet(index - 1, index)) {
+                        break;
+                    }
                 }
-            }
 
-            if (index == 1 && !emitEmptyListIfNoItem) { // If emitEmptyListIfNoItem, the task has been started in subscribe
-                try {
-                    task = executor.schedule(flush, duration.toMillis(), TimeUnit.MILLISECONDS);
-                } catch (RejectedExecutionException rejected) {
-                    onFailure(rejected);
-                    return;
+                if (index == 1 && !emitEmptyListIfNoItem) { // If emitEmptyListIfNoItem, the task has been started in subscribe
+                    if (!scheduleFlush()) {
+                        return;
+                    }
                 }
-            }
 
-            nextCallback(value);
+                nextCallback(value);
 
-            if (this.index.get() % size == 0) {
-                this.index.lazySet(0);
-                if (task != null) {
-                    task.cancel(false);
-                    task = null;
+                if (index % size == 0) {
+                    this.index.set(0);
+                    if (task != null) {
+                        task.cancel(false);
+                        task = null;
+                    }
+                    flushCallback();
                 }
-                flushCallback();
             }
         }
 
