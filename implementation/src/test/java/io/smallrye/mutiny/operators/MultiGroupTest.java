@@ -11,14 +11,21 @@ import java.io.IOException;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Delayed;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Flow.Subscriber;
 import java.util.concurrent.Flow.Subscription;
+import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -27,6 +34,7 @@ import java.util.function.Consumer;
 
 import org.assertj.core.api.Condition;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.ResourceAccessMode;
@@ -1066,6 +1074,242 @@ public class MultiGroupTest {
         }
     }
 
+    @Nested
+    class BufferWithTimeoutStaleTimerTest {
+
+        @Test
+        void staleTimerAfterSizeFlushMustNotEmitOrReschedule() {
+            ControllableScheduler scheduler = new ControllableScheduler();
+            AtomicReference<MultiEmitter<? super Integer>> emitterRef = new AtomicReference<>();
+
+            Multi<List<Integer>> multi = new MultiBufferWithTimeoutOp<>(
+                    Multi.createFrom().<Integer> emitter(emitterRef::set),
+                    3, Duration.ofHours(1), scheduler, true);
+
+            AssertSubscriber<List<Integer>> sub = multi.subscribe()
+                    .withSubscriber(AssertSubscriber.create(Long.MAX_VALUE));
+
+            assertThat(scheduler.taskCount()).isEqualTo(1);
+
+            MultiEmitter<? super Integer> emitter = emitterRef.get();
+            emitter.emit(1);
+            emitter.emit(2);
+            emitter.emit(3);
+
+            assertThat(sub.getItems()).hasSize(1);
+            assertThat(sub.getItems().get(0)).containsExactly(1, 2, 3);
+            assertThat(scheduler.taskCount()).isEqualTo(2);
+
+            scheduler.runTask(0);
+
+            assertThat(sub.getItems()).hasSize(1);
+            assertThat(scheduler.taskCount()).isEqualTo(2);
+        }
+
+        @Test
+        void staleTimerAfterSizeFlushMustNotFlushWithEmitEmptyDisabled() {
+            ControllableScheduler scheduler = new ControllableScheduler();
+            AtomicReference<MultiEmitter<? super Integer>> emitterRef = new AtomicReference<>();
+
+            Multi<List<Integer>> multi = new MultiBufferWithTimeoutOp<>(
+                    Multi.createFrom().<Integer> emitter(emitterRef::set),
+                    3, Duration.ofHours(1), scheduler, false);
+
+            AssertSubscriber<List<Integer>> sub = multi.subscribe()
+                    .withSubscriber(AssertSubscriber.create(Long.MAX_VALUE));
+
+            assertThat(scheduler.taskCount()).isEqualTo(0);
+
+            MultiEmitter<? super Integer> emitter = emitterRef.get();
+            emitter.emit(1);
+            assertThat(scheduler.taskCount()).isEqualTo(1);
+            emitter.emit(2);
+            emitter.emit(3);
+
+            assertThat(sub.getItems()).hasSize(1);
+            assertThat(sub.getItems().get(0)).containsExactly(1, 2, 3);
+
+            scheduler.runTask(0);
+
+            assertThat(sub.getItems()).hasSize(1);
+        }
+
+        @RepeatedTest(1000)
+        void sizeFlushAndTimerFlushMustNotRace() {
+            ScheduledThreadPoolExecutor scheduler = new ScheduledThreadPoolExecutor(2);
+            try {
+                AtomicReference<MultiEmitter<? super Integer>> emitterRef = new AtomicReference<>();
+
+                Multi<List<Integer>> multi = new MultiBufferWithTimeoutOp<>(
+                        Multi.createFrom().<Integer> emitter(emitterRef::set),
+                        5, Duration.ofMillis(1), scheduler, false);
+
+                AssertSubscriber<List<Integer>> sub = multi.subscribe()
+                        .withSubscriber(AssertSubscriber.create(Long.MAX_VALUE));
+
+                MultiEmitter<? super Integer> emitter = emitterRef.get();
+                for (int i = 0; i < 100; i++) {
+                    emitter.emit(i);
+                }
+                emitter.complete();
+
+                sub.awaitCompletion(Duration.ofSeconds(2));
+
+                int total = sub.getItems().stream().mapToInt(List::size).sum();
+                assertThat(total).isEqualTo(100);
+            } finally {
+                scheduler.shutdownNow();
+            }
+        }
+
+        private static class ControllableScheduler implements ScheduledExecutorService {
+
+            private static class CapturedTask {
+                final Runnable command;
+                final AtomicBoolean cancelled = new AtomicBoolean(false);
+
+                CapturedTask(Runnable command) {
+                    this.command = command;
+                }
+            }
+
+            private final List<CapturedTask> tasks = new ArrayList<>();
+
+            @Override
+            public ScheduledFuture<?> schedule(Runnable command, long delay, TimeUnit unit) {
+                CapturedTask task = new CapturedTask(command);
+                tasks.add(task);
+                return new ScheduledFuture<>() {
+                    @Override
+                    public long getDelay(TimeUnit unit) {
+                        throw new UnsupportedOperationException();
+                    }
+
+                    @Override
+                    public int compareTo(Delayed o) {
+                        throw new UnsupportedOperationException();
+                    }
+
+                    @Override
+                    public boolean cancel(boolean mayInterruptIfRunning) {
+                        return !task.cancelled.getAndSet(true);
+                    }
+
+                    @Override
+                    public boolean isCancelled() {
+                        return task.cancelled.get();
+                    }
+
+                    @Override
+                    public boolean isDone() {
+                        return task.cancelled.get();
+                    }
+
+                    @Override
+                    public Object get() {
+                        throw new UnsupportedOperationException();
+                    }
+
+                    @Override
+                    public Object get(long timeout, TimeUnit unit) {
+                        throw new UnsupportedOperationException();
+                    }
+                };
+            }
+
+            @Override
+            public <V> ScheduledFuture<V> schedule(Callable<V> callable, long delay, TimeUnit unit) {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public ScheduledFuture<?> scheduleAtFixedRate(Runnable command, long initialDelay, long period,
+                    TimeUnit unit) {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public ScheduledFuture<?> scheduleWithFixedDelay(Runnable command, long initialDelay, long delay,
+                    TimeUnit unit) {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public void shutdown() {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public List<Runnable> shutdownNow() {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public boolean isShutdown() {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public boolean isTerminated() {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public boolean awaitTermination(long timeout, TimeUnit unit) {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public <T> Future<T> submit(Callable<T> task) {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public <T> Future<T> submit(Runnable task, T result) {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public Future<?> submit(Runnable task) {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks) {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks, long timeout,
+                    TimeUnit unit) {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public <T> T invokeAny(Collection<? extends Callable<T>> tasks) {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public <T> T invokeAny(Collection<? extends Callable<T>> tasks, long timeout, TimeUnit unit) {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public void execute(Runnable command) {
+                throw new UnsupportedOperationException();
+            }
+
+            void runTask(int index) {
+                tasks.get(index).command.run();
+            }
+
+            int taskCount() {
+                return tasks.size();
+            }
+        }
+    }
+
     @Test
     void testUpstreamRequestsNotBlownOutOfProportion() {
         ExecutorService executor = Executors.newFixedThreadPool(100);
@@ -1167,4 +1411,5 @@ public class MultiGroupTest {
             executor.shutdownNow();
         }
     }
+
 }

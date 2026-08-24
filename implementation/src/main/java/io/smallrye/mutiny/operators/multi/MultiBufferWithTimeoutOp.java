@@ -75,14 +75,14 @@ public final class MultiBufferWithTimeoutOp<T> extends AbstractMultiOperator<T, 
         private final Duration duration;
         private final ScheduledExecutorService executor;
         private final Supplier<List<T>> supplier;
-        private final Runnable flush;
 
         private final AtomicInteger terminated = new AtomicInteger(RUNNING);
         private final AtomicLong requested = new AtomicLong();
         private final AtomicInteger index = new AtomicInteger();
+        private final AtomicLong generation = new AtomicLong();
         private final boolean emitEmptyListIfNoItem;
         private List<T> current;
-        private ScheduledFuture<?> task;
+        private volatile ScheduledFuture<?> task;
 
         MultiBufferWithTimeoutProcessor(MultiSubscriber<? super List<T>> downstream, int size, Duration timeout,
                 ScheduledExecutorService executor, Supplier<List<T>> supplier, boolean emitEmptyListIfNoItem) {
@@ -92,32 +92,44 @@ public final class MultiBufferWithTimeoutOp<T> extends AbstractMultiOperator<T, 
             this.supplier = supplier;
             this.size = size;
             this.emitEmptyListIfNoItem = emitEmptyListIfNoItem;
+        }
 
-            this.flush = () -> {
-                if (terminated.get() == RUNNING) {
-                    int index;
-                    for (;;) {
-                        index = this.index.get();
-                        if (index == 0 && !emitEmptyListIfNoItem) {
-                            return;
-                        }
-                        if (this.index.compareAndSet(index, 0)) {
-                            break;
-                        }
-                    }
-                    flushCallback();
+        private void scheduleFlush() {
+            long gen = generation.incrementAndGet();
+            try {
+                task = executor.schedule(() -> timerFired(gen), duration.toMillis(), TimeUnit.MILLISECONDS);
+            } catch (RejectedExecutionException rejected) {
+                onFailure(rejected);
+            }
+        }
+
+        private void timerFired(long expectedGen) {
+            if (terminated.get() != RUNNING) {
+                return;
+            }
+            if (generation.get() != expectedGen) {
+                return;
+            }
+            int idx;
+            for (;;) {
+                idx = this.index.get();
+                if (idx == 0 && !emitEmptyListIfNoItem) {
+                    return;
                 }
-            };
+                if (this.index.compareAndSet(idx, 0)) {
+                    break;
+                }
+            }
+            if (generation.get() != expectedGen) {
+                return;
+            }
+            flushCallback();
         }
 
         private void doOnSubscribe() {
             current = supplier.get();
             if (emitEmptyListIfNoItem) {
-                try {
-                    task = executor.schedule(flush, duration.toMillis(), TimeUnit.MILLISECONDS);
-                } catch (RejectedExecutionException rejected) {
-                    onFailure(rejected);
-                }
+                scheduleFlush();
             }
         }
 
@@ -149,7 +161,7 @@ public final class MultiBufferWithTimeoutOp<T> extends AbstractMultiOperator<T, 
                 long req = requested.get();
                 MultiSubscriber<? super List<T>> subscriber = downstream;
                 if (emitEmptyListIfNoItem && terminated.get() == RUNNING) {
-                    task = executor.schedule(this.flush, duration.toMillis(), TimeUnit.MILLISECONDS);
+                    scheduleFlush();
                 }
                 if (req != 0L) {
 
@@ -181,28 +193,27 @@ public final class MultiBufferWithTimeoutOp<T> extends AbstractMultiOperator<T, 
         @Override
         public void onItem(final T value) {
             int index;
+            boolean atBoundary;
             for (;;) {
-                index = this.index.get() + 1;
-                if (this.index.compareAndSet(index - 1, index)) {
+                int current = this.index.get();
+                index = current + 1;
+                atBoundary = (index % size == 0);
+                if (this.index.compareAndSet(current, atBoundary ? 0 : index)) {
                     break;
                 }
             }
 
-            if (index == 1 && !emitEmptyListIfNoItem) { // If emitEmptyListIfNoItem, the task has been started in subscribe
-                try {
-                    task = executor.schedule(flush, duration.toMillis(), TimeUnit.MILLISECONDS);
-                } catch (RejectedExecutionException rejected) {
-                    onFailure(rejected);
-                    return;
-                }
+            if (index == 1 && !emitEmptyListIfNoItem) {
+                scheduleFlush();
             }
 
             nextCallback(value);
 
-            if (this.index.get() % size == 0) {
-                this.index.lazySet(0);
-                if (task != null) {
-                    task.cancel(false);
+            if (atBoundary) {
+                generation.incrementAndGet();
+                ScheduledFuture<?> t = task;
+                if (t != null) {
+                    t.cancel(false);
                     task = null;
                 }
                 flushCallback();
@@ -237,8 +248,9 @@ public final class MultiBufferWithTimeoutOp<T> extends AbstractMultiOperator<T, 
         @Override
         public void onCompletion() {
             if (terminated.compareAndSet(RUNNING, SUCCEED)) {
-                if (task != null) {
-                    task.cancel(false);
+                ScheduledFuture<?> t = task;
+                if (t != null) {
+                    t.cancel(false);
                     task = null;
                 }
                 checkedComplete();
@@ -273,8 +285,9 @@ public final class MultiBufferWithTimeoutOp<T> extends AbstractMultiOperator<T, 
         @Override
         public void cancel() {
             if (terminated.compareAndSet(RUNNING, CANCELLED)) {
-                if (task != null) {
-                    task.cancel(false);
+                ScheduledFuture<?> t = task;
+                if (t != null) {
+                    t.cancel(false);
                     task = null;
                 }
                 super.cancel();
