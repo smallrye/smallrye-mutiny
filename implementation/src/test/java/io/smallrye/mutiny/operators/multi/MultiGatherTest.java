@@ -2,10 +2,15 @@ package io.smallrye.mutiny.operators.multi;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.awaitility.Awaitility.await;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.Flow;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiFunction;
 
 import org.junit.jupiter.api.Test;
@@ -15,6 +20,7 @@ import io.smallrye.mutiny.groups.Gatherer;
 import io.smallrye.mutiny.groups.Gatherer.Extraction;
 import io.smallrye.mutiny.groups.Gatherers;
 import io.smallrye.mutiny.helpers.test.AssertSubscriber;
+import io.smallrye.mutiny.subscription.MultiEmitter;
 
 class MultiGatherTest {
 
@@ -390,5 +396,88 @@ class MultiGatherTest {
                 "This is amazing",
                 "",
                 "");
+    }
+
+    @Test
+    void upstreamMustNotReceiveMoreRequestsThanDownstreamDemand() {
+        AtomicReference<MultiEmitter<? super Integer>> emitter = new AtomicReference<>();
+        AtomicLong upstreamRequested = new AtomicLong();
+        AtomicLong downstreamRequested = new AtomicLong();
+        AtomicLong received = new AtomicLong();
+        AtomicLong outstanding = new AtomicLong();
+        AtomicBoolean keepRequesting = new AtomicBoolean(true);
+
+        Multi<Integer> multi = Multi.createFrom().<Integer> emitter(emitter::set)
+                .onRequest().invoke(upstreamRequested::addAndGet)
+                .onItem().gather(Gatherers.window(1))
+                .onItem().transform(list -> list.get(0));
+
+        multi.subscribe().withSubscriber(new Flow.Subscriber<Integer>() {
+            Flow.Subscription subscription;
+
+            @Override
+            public void onSubscribe(Flow.Subscription s) {
+                this.subscription = s;
+                replenish();
+            }
+
+            private void replenish() {
+                if (keepRequesting.get() && outstanding.get() < 8) {
+                    long n = 16 - outstanding.get();
+                    outstanding.addAndGet(n);
+                    downstreamRequested.addAndGet(n);
+                    subscription.request(n);
+                }
+            }
+
+            @Override
+            public void onNext(Integer item) {
+                received.incrementAndGet();
+                outstanding.decrementAndGet();
+                replenish();
+            }
+
+            @Override
+            public void onError(Throwable t) {
+                throw new AssertionError(t);
+            }
+
+            @Override
+            public void onComplete() {
+            }
+        });
+
+        await().until(() -> emitter.get() != null);
+        await().until(() -> emitter.get().requested() > 0);
+
+        for (int i = 0; i < 10_000; i++) {
+            if (emitter.get().requested() > 0) {
+                emitter.get().emit(i);
+            }
+        }
+        assertThat(upstreamRequested.get())
+                .as("upstream must not receive more requests than downstream demand")
+                .isLessThanOrEqualTo(downstreamRequested.get());
+        assertThat(received.get()).isLessThanOrEqualTo(downstreamRequested.get());
+
+        keepRequesting.set(false);
+        for (int i = 0; i < 10_000 && emitter.get().requested() > 0; i++) {
+            emitter.get().emit(-1);
+        }
+        assertThat(emitter.get().requested())
+                .as("emitter must eventually observe zero outstanding demand")
+                .isZero();
+        assertThat(received.get())
+                .isLessThanOrEqualTo(downstreamRequested.get());
+    }
+
+    @Test
+    void foldGathererMustRespectBackpressure() {
+        AssertSubscriber<Integer> sub = AssertSubscriber.create(1);
+        Multi.createFrom().range(1, 6)
+                .onItem().gather(Gatherers.fold(() -> 0, Integer::sum))
+                .subscribe().withSubscriber(sub);
+        sub.awaitCompletion();
+        sub.assertItems(15);
     }
 }
