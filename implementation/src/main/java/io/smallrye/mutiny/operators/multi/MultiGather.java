@@ -29,6 +29,8 @@ public class MultiGather<I, ACC, O> extends AbstractMultiOperator<I, O> {
 
         private ACC acc;
         private final AtomicLong demand = new AtomicLong();
+        // number of upstream requests in flight, each one backed by a unit of demand taken from `demand`
+        private final AtomicLong reserved = new AtomicLong();
         private volatile boolean upstreamHasCompleted;
         private final AtomicInteger drainWip = new AtomicInteger();
 
@@ -62,9 +64,27 @@ public class MultiGather<I, ACC, O> extends AbstractMultiOperator<I, O> {
                 if (upstreamHasCompleted) {
                     drainRemainingElements();
                 } else {
-                    upstream.request(1L);
+                    requestNextUpstreamItem();
                 }
             }
+        }
+
+        // Extracted items are forwarded downstream as soon as upstream items arrive, so we must not have more upstream
+        // items on their way than what the downstream asked for: request one item at a time, and only when a unit of
+        // demand can be reserved for it.
+        private void requestNextUpstreamItem() {
+            if (reserved.get() > 0L) {
+                return;
+            }
+            long current;
+            do {
+                current = demand.get();
+                if (current <= 0L) {
+                    return;
+                }
+            } while (current != Long.MAX_VALUE && !demand.compareAndSet(current, current - 1L));
+            reserved.incrementAndGet();
+            upstream.request(1L);
         }
 
         @Override
@@ -91,12 +111,11 @@ public class MultiGather<I, ACC, O> extends AbstractMultiOperator<I, O> {
                     if (value == null) {
                         throw new NullPointerException("The extractor returned a null value to emit");
                     }
-                    long remaining = demand.decrementAndGet();
+                    reserved.decrementAndGet();
                     downstream.onItem(value);
-                    if (remaining > 0L) {
-                        upstream.request(1L);
-                    }
+                    requestNextUpstreamItem();
                 } else {
+                    // nothing was extracted, the reserved unit of demand carries over to the next upstream item
                     upstream.request(1L);
                 }
             } catch (Throwable err) {
@@ -110,6 +129,10 @@ public class MultiGather<I, ACC, O> extends AbstractMultiOperator<I, O> {
                 return;
             }
             upstreamHasCompleted = true;
+            long unused = reserved.getAndSet(0L);
+            if (unused > 0L) {
+                Subscriptions.add(demand, unused);
+            }
             drainRemainingElements();
         }
 

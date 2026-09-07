@@ -6,6 +6,9 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.Flow;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiFunction;
 
 import org.junit.jupiter.api.Test;
@@ -15,6 +18,7 @@ import io.smallrye.mutiny.groups.Gatherer;
 import io.smallrye.mutiny.groups.Gatherer.Extraction;
 import io.smallrye.mutiny.groups.Gatherers;
 import io.smallrye.mutiny.helpers.test.AssertSubscriber;
+import io.smallrye.mutiny.subscription.MultiEmitter;
 
 class MultiGatherTest {
 
@@ -333,6 +337,76 @@ class MultiGatherTest {
         sub.assertFailedWith(RuntimeException.class, "boom");
         sub.request(Long.MAX_VALUE);
         sub.assertHasNotReceivedAnyItem();
+    }
+
+    @Test
+    void requestsIssuedWhileDeliveringAnItemMustNotOverRequestUpstream() {
+        AtomicReference<MultiEmitter<? super Integer>> emitter = new AtomicReference<>();
+        AtomicLong upstreamRequested = new AtomicLong();
+        AtomicLong downstreamRequested = new AtomicLong();
+        AtomicLong received = new AtomicLong();
+        AtomicLong outstanding = new AtomicLong();
+        boolean[] keepRequesting = { true };
+
+        Multi<Integer> multi = Multi.createFrom().<Integer> emitter(emitter::set)
+                .onRequest().invoke(upstreamRequested::addAndGet)
+                .onItem().gather(Gatherers.window(1))
+                .onItem().transform(list -> list.get(0));
+
+        // A subscriber that keeps a bounded buffer of 16 items and replenishes it while an item is being delivered,
+        // which is what stream adapters such as the Vert.x ReadStreamSubscriber do
+        multi.subscribe().withSubscriber(new Flow.Subscriber<Integer>() {
+            Flow.Subscription subscription;
+
+            @Override
+            public void onSubscribe(Flow.Subscription subscription) {
+                this.subscription = subscription;
+                request();
+            }
+
+            private void request() {
+                if (keepRequesting[0] && outstanding.get() < 8) {
+                    long n = 16 - outstanding.get();
+                    outstanding.addAndGet(n);
+                    downstreamRequested.addAndGet(n);
+                    subscription.request(n);
+                }
+            }
+
+            @Override
+            public void onNext(Integer item) {
+                received.incrementAndGet();
+                outstanding.decrementAndGet();
+                request();
+            }
+
+            @Override
+            public void onError(Throwable throwable) {
+                throw new AssertionError(throwable);
+            }
+
+            @Override
+            public void onComplete() {
+            }
+        });
+
+        // Serve the upstream demand one item at a time, never emitting more than what was requested
+        for (int i = 0; i < 10_000; i++) {
+            if (emitter.get().requested() > 0) {
+                emitter.get().emit(i);
+            }
+        }
+        assertThat(received.get()).isLessThanOrEqualTo(downstreamRequested.get());
+        assertThat(upstreamRequested.get())
+                .as("the operator must not request more items than its downstream did")
+                .isLessThanOrEqualTo(downstreamRequested.get());
+
+        // The downstream stops requesting: serving the remaining upstream demand must not deliver more than requested
+        keepRequesting[0] = false;
+        while (emitter.get().requested() > 0) {
+            emitter.get().emit(-1);
+        }
+        assertThat(received.get()).isLessThanOrEqualTo(downstreamRequested.get());
     }
 
     @Test
