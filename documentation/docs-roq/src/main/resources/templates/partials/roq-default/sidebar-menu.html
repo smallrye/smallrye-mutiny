@@ -1,0 +1,27 @@
+{@io.quarkiverse.roq.frontmatter.runtime.model.Site site}
+{@java.util.List<io.vertx.core.json.JsonObject> menu}
+
+{#let versions=cdi:versions}
+{#search-overlay /}
+<section class="menu">
+  {#search-button /}
+
+  <div class="version-menu-items">
+    {#for v in versions.sorted}
+      {#if v.defaultVersion}
+        {#for section in v.sections}
+          <div class="sidebar-section" data-section="{=section.name}">
+            <h3 class="section-title menu-title">{=section.name}</h3>
+            <ul>
+            {#for item in section.items}
+              <li><a href="{=site.url(v.path + item.path)}" {#if item.target?? }target="{=item.target}"{/if}><i class="{=item.icon}"></i>{=item.title}</a></li>
+            {/for}
+            </ul>
+          </div>
+        {/for}
+      {/if}
+    {/for}
+  </div>
+
+</section>
+{/let}

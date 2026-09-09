@@ -1,0 +1,212 @@
+{@java.lang.String tag}
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+{#bundle /}
+{#search-script /}
+
+<script>
+(function () {
+    document.addEventListener('DOMContentLoaded', function () {
+        var siteHeader = document.querySelector('.site-header');
+        var toggle = document.querySelector('.version-dropdown-toggle');
+        var dropdownMenu = document.querySelector('.version-dropdown-menu');
+        if (!siteHeader) return;
+
+        var dataEl = document.getElementById('version-data');
+        var versions = [];
+        if (dataEl) {
+            try { versions = JSON.parse(dataEl.textContent); } catch (e) {}
+        }
+        if (!versions.length) return;
+
+        var defaultVersion = versions.find(function (v) { return v.defaultVersion; }) || versions[0];
+        var basePath = siteHeader.dataset.baseUrl || '/';
+        if (basePath.charAt(basePath.length - 1) !== '/') basePath += '/';
+
+        // Detect current version from URL
+        var currentPath = window.location.pathname;
+        var relPath = currentPath.startsWith(basePath) ? currentPath.substring(basePath.length) : currentPath.substring(1);
+        var segments = relPath.split('/').filter(Boolean);
+        var firstSegment = segments[0] || '';
+        var currentVersion = versions.find(function (v) { return v.path === firstSegment; }) || defaultVersion;
+        var isVersionedPage = versions.some(function (v) { return v.path === firstSegment; });
+        var pagePath = isVersionedPage ? '/' + segments.slice(1).join('/') : '';
+
+        // Update version label
+        if (toggle) {
+            var label = toggle.querySelector('.version-dropdown-label');
+            if (label) label.textContent = currentVersion.label;
+        }
+
+        // Highlight current version in dropdown
+        if (dropdownMenu) {
+            dropdownMenu.querySelectorAll('li.version-current').forEach(function (li) {
+                li.classList.remove('version-current');
+            });
+            var currentLi = dropdownMenu.querySelector('li[data-version-path="' + currentVersion.path + '"]');
+            if (currentLi) currentLi.classList.add('version-current');
+        }
+
+        function allMenuPaths(version) {
+            var paths = [];
+            (version.sections || []).forEach(function (s) {
+                (s.items || []).forEach(function (item) { paths.push(item.path); });
+            });
+            return paths;
+        }
+
+        function firstMenuPath(version) {
+            var sections = version.sections || [];
+            if (sections.length && sections[0].items && sections[0].items.length) {
+                return sections[0].items[0].path;
+            }
+            return '/';
+        }
+
+        // Determine current section from URL path
+        var currentSection = '';
+        if (pagePath) {
+            var pageSegments = pagePath.split('/').filter(Boolean);
+            if (pageSegments.length > 0) {
+                var dir = pageSegments[0];
+                if (dir === 'tutorials') currentSection = 'Tutorials';
+                else if (dir === 'guides') currentSection = 'Guides';
+                else if (dir === 'reference') currentSection = 'Reference';
+            }
+        }
+
+        // Highlight active top-nav tab
+        var topNavTabs = document.querySelectorAll('.top-nav-tab');
+        topNavTabs.forEach(function (tab) {
+            var tabSection = tab.dataset.section || '';
+            if (tabSection && tabSection === currentSection) {
+                tab.classList.add('top-nav-active');
+            } else if (!tabSection && !currentSection && currentPath === basePath) {
+                tab.classList.add('top-nav-active');
+            }
+        });
+
+        // Update top-nav links for current version
+        topNavTabs.forEach(function (tab) {
+            var href = tab.getAttribute('href');
+            if (!href || href.startsWith('http')) return;
+            var tabSection = tab.dataset.section || '';
+            if (tabSection && currentVersion.path !== defaultVersion.path) {
+                var targetSection = (currentVersion.sections || []).find(function (s) { return s.name === tabSection; });
+                if (targetSection && targetSection.items && targetSection.items.length) {
+                    tab.href = basePath + currentVersion.path + targetSection.items[0].path;
+                }
+            } else if (tabSection) {
+                var defSection = (defaultVersion.sections || []).find(function (s) { return s.name === tabSection; });
+                if (defSection && defSection.items && defSection.items.length) {
+                    tab.href = basePath + currentVersion.path + defSection.items[0].path;
+                }
+            }
+        });
+
+        // Show only active section in sidebar, hide others
+        var sidebarSections = document.querySelectorAll('.sidebar-section');
+        if (currentSection && sidebarSections.length > 0) {
+            sidebarSections.forEach(function (section) {
+                if (section.dataset.section === currentSection) {
+                    section.style.display = '';
+                } else {
+                    section.style.display = 'none';
+                }
+            });
+        }
+
+        // Rebuild sidebar menu if current version differs from SSR default
+        var menuContainer = document.querySelector('.version-menu-items');
+        if (menuContainer && currentVersion.path !== defaultVersion.path) {
+            menuContainer.innerHTML = '';
+            (currentVersion.sections || []).forEach(function (section) {
+                var div = document.createElement('div');
+                div.className = 'sidebar-section';
+                div.dataset.section = section.name;
+                if (currentSection && section.name !== currentSection) {
+                    div.style.display = 'none';
+                }
+                var h3 = document.createElement('h3');
+                h3.className = 'section-title menu-title';
+                h3.textContent = section.name;
+                div.appendChild(h3);
+                var ul = document.createElement('ul');
+                (section.items || []).forEach(function (item) {
+                    var li = document.createElement('li');
+                    var a = document.createElement('a');
+                    a.href = item.path.startsWith('http') ? item.path : basePath + currentVersion.path + item.path;
+                    if (item.target) a.target = item.target;
+                    var icon = document.createElement('i');
+                    icon.className = item.icon;
+                    a.appendChild(icon);
+                    a.appendChild(document.createTextNode(item.title));
+                    li.appendChild(a);
+                    ul.appendChild(li);
+                });
+                div.appendChild(ul);
+                menuContainer.appendChild(div);
+            });
+        }
+
+        // Highlight active sidebar link
+        var sidebarLinks = menuContainer ? menuContainer.querySelectorAll('a') : [];
+        sidebarLinks.forEach(function (link) {
+            if (link.pathname === currentPath || link.getAttribute('href') === currentPath) {
+                link.parentElement.classList.add('sidebar-active');
+            }
+        });
+
+        // Dev banner
+        var devBanner = document.querySelector('.dev-banner');
+        if (devBanner && currentVersion.devVersion) {
+            devBanner.style.display = '';
+            var bannerLink = devBanner.querySelector('.dev-banner-link');
+            if (bannerLink) {
+                bannerLink.href = basePath + defaultVersion.path + (pagePath || firstMenuPath(defaultVersion));
+            }
+        }
+
+        // Toggle dropdown
+        if (toggle && dropdownMenu) {
+            toggle.addEventListener('click', function (e) {
+                e.stopPropagation();
+                var expanded = dropdownMenu.classList.toggle('version-dropdown-open');
+                toggle.setAttribute('aria-expanded', expanded);
+            });
+            document.addEventListener('click', function () {
+                dropdownMenu.classList.remove('version-dropdown-open');
+                toggle.setAttribute('aria-expanded', 'false');
+            });
+        }
+
+        // Version switch
+        if (dropdownMenu) {
+            dropdownMenu.addEventListener('click', function (e) {
+                var li = e.target.closest('li[data-version-path]');
+                if (!li) return;
+                var targetPath = li.dataset.versionPath;
+                var targetVersion = versions.find(function (v) { return v.path === targetPath; });
+                if (!targetVersion) return;
+                var menuPaths = allMenuPaths(targetVersion);
+                var targetPageExists = pagePath && menuPaths.indexOf(pagePath) !== -1;
+                var newPagePath = targetPageExists ? pagePath : firstMenuPath(targetVersion);
+                window.location.href = basePath + targetPath + newPagePath;
+            });
+        }
+        // Wire header search button to trigger the search overlay
+        var headerSearchBtn = document.getElementById('header-search-button');
+        var searchOverlay = document.getElementById('search-overlay');
+        if (headerSearchBtn && searchOverlay) {
+            headerSearchBtn.addEventListener('click', function () {
+                searchOverlay.classList.add('active');
+                var searchInput = document.getElementById('search-input');
+                if (searchInput) searchInput.focus();
+            });
+        }
+    });
+})();
+</script>
