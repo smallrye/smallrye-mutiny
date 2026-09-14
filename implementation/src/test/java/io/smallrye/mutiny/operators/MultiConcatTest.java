@@ -3,6 +3,7 @@ package io.smallrye.mutiny.operators;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
 
@@ -180,5 +181,29 @@ public class MultiConcatTest {
         CompositeException compositeException = (CompositeException) sub.getFailure();
         assertThat(compositeException.getCauses()).hasSize(3);
         assertThat(compositeException.getCauses()).containsExactlyElementsOf(failures);
+    }
+
+    @Test
+    public void testConcatenatingTwoEmptyStreamsWithZeroDemand() {
+        AssertSubscriber<Object> sub = Multi.createBy().concatenating().streams(
+                Multi.createFrom().empty(),
+                Multi.createFrom().empty())
+                .subscribe().withSubscriber(AssertSubscriber.create(0));
+
+        sub.awaitCompletion(Duration.ofSeconds(5));
+        sub.assertHasNotReceivedAnyItem();
+        sub.assertCompleted();
+    }
+
+    @Test
+    public void testConcatenatingNonEmptyPlusEmptyWithExactDemand() {
+        AssertSubscriber<Integer> sub = Multi.createBy().concatenating().streams(
+                Multi.createFrom().items(1, 2, 3),
+                Multi.createFrom().empty())
+                .subscribe().withSubscriber(AssertSubscriber.create(3));
+
+        sub.awaitCompletion(Duration.ofSeconds(5));
+        sub.assertItems(1, 2, 3);
+        sub.assertCompleted();
     }
 }

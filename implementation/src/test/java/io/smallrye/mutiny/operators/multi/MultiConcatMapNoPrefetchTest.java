@@ -66,7 +66,7 @@ class MultiConcatMapNoPrefetchTest {
     private static Stream<Arguments> argsTransformToUni() {
         return Stream.of(
                 Arguments.of(true, new int[] { 11, 12, 13 }),
-                Arguments.of(false, new int[] { 10, 11, 12 }));
+                Arguments.of(false, new int[] { 11, 12, 13 }));
     }
 
     @ParameterizedTest
@@ -91,7 +91,7 @@ class MultiConcatMapNoPrefetchTest {
     private static Stream<Arguments> argsTransformToMulti() {
         return Stream.of(
                 Arguments.of(true, new int[] { 6, 6, 7 }),
-                Arguments.of(false, new int[] { 5, 6, 6 }));
+                Arguments.of(false, new int[] { 6, 6, 7 }));
     }
 
     @ParameterizedTest
@@ -730,5 +730,60 @@ class MultiConcatMapNoPrefetchTest {
         upstreamSubscriber.onNext(5);
 
         assertThat(itemCount.get()).isEqualTo(2);
+    }
+
+    @Test
+    void concatMapShouldCompleteWhenInnerExhaustsDemandFollowedByEmpty() {
+        AssertSubscriber<Integer> sub = Multi.createFrom().items(1, 2)
+                .onItem().transformToMulti(n -> {
+                    if (n == 1) {
+                        return Multi.createFrom().items(10, 20, 30);
+                    }
+                    return Multi.createFrom().empty();
+                })
+                .concatenate()
+                .subscribe().withSubscriber(AssertSubscriber.create(3));
+
+        sub.awaitCompletion(Duration.ofSeconds(5));
+        sub.assertItems(10, 20, 30);
+        sub.assertCompleted();
+    }
+
+    @Test
+    void concatMapShouldAdvanceThroughMultipleEmptyInners() {
+        AssertSubscriber<Integer> sub = Multi.createFrom().items(1, 2, 3, 4, 5)
+                .onItem().transformToMulti(n -> {
+                    if (n == 3) {
+                        return Multi.createFrom().items(30);
+                    }
+                    return Multi.createFrom().empty();
+                })
+                .concatenate()
+                .subscribe().withSubscriber(AssertSubscriber.create(1));
+
+        sub.awaitCompletion(Duration.ofSeconds(5));
+        sub.assertItems(30);
+        sub.assertCompleted();
+    }
+
+    @Test
+    void concatMapPostponedFailureShouldNotStallOnZeroDemand() {
+        AssertSubscriber<Integer> sub = Multi.createFrom().items(1, 2)
+                .onItem().<Integer> transformToMulti(n -> {
+                    if (n == 1) {
+                        return Multi.createFrom().emitter(e -> {
+                            e.emit(10);
+                            e.emit(20);
+                            e.fail(new RuntimeException("boom"));
+                        });
+                    }
+                    return Multi.createFrom().empty();
+                })
+                .collectFailures()
+                .concatenate()
+                .subscribe().withSubscriber(AssertSubscriber.create(2));
+
+        sub.awaitFailure(Duration.ofSeconds(5));
+        sub.assertItems(10, 20);
     }
 }

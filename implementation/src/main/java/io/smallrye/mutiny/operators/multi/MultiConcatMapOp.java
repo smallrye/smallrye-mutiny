@@ -160,14 +160,9 @@ public class MultiConcatMapOp<I, O> extends AbstractMultiOperator<I, O> {
                 case EMITTING:
                     innerUpstream = null;
                     if (postponeFailurePropagation) {
-                        if (demand > 0L) {
-                            state = State.PUBLISHER_REQUESTED;
-                            stateLock.unlock();
-                            mainUpstream.request(1L);
-                        } else {
-                            state = State.READY;
-                            stateLock.unlock();
-                        }
+                        state = State.PUBLISHER_REQUESTED;
+                        stateLock.unlock();
+                        mainUpstream.request(1L);
                     } else {
                         state = State.DONE;
                         stateLock.unlock();
@@ -230,14 +225,9 @@ public class MultiConcatMapOp<I, O> extends AbstractMultiOperator<I, O> {
             switch (state) {
                 case EMITTING:
                     innerUpstream = null;
-                    if (demand > 0L) {
-                        state = State.PUBLISHER_REQUESTED;
-                        stateLock.unlock();
-                        mainUpstream.request(1L);
-                    } else {
-                        state = State.READY;
-                        stateLock.unlock();
-                    }
+                    state = State.PUBLISHER_REQUESTED;
+                    stateLock.unlock();
+                    mainUpstream.request(1L);
                     break;
                 case EMITTING_FINAL:
                     stateLock.unlock();

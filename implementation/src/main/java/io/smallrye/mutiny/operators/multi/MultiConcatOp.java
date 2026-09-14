@@ -47,12 +47,12 @@ public class MultiConcatOp<T> extends AbstractMulti<T> {
             Multi.createFrom().items(publishers)
                     .onItem().transformToMulti(publisher -> publisher)
                     .collectFailures()
-                    .concatenate()
+                    .concatenate(true)
                     .subscribe().withSubscriber(actual);
         } else {
             Multi.createFrom().items(publishers)
                     .onItem().transformToMulti(publisher -> publisher)
-                    .concatenate()
+                    .concatenate(true)
                     .subscribe().withSubscriber(actual);
         }
     }
