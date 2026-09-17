@@ -2,6 +2,7 @@ package io.smallrye.mutiny.operators.multi;
 
 import java.util.Optional;
 import java.util.concurrent.Flow;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -29,6 +30,7 @@ public class MultiGather<I, ACC, O> extends AbstractMultiOperator<I, O> {
 
         private ACC acc;
         private final AtomicLong demand = new AtomicLong();
+        private final AtomicBoolean upstreamRequested = new AtomicBoolean();
         private volatile boolean upstreamHasCompleted;
         private final AtomicInteger drainWip = new AtomicInteger();
 
@@ -62,8 +64,17 @@ public class MultiGather<I, ACC, O> extends AbstractMultiOperator<I, O> {
                 if (upstreamHasCompleted) {
                     drainRemainingElements();
                 } else {
-                    upstream.request(1L);
+                    requestUpstreamIfNeeded();
                 }
+            }
+        }
+
+        private void requestUpstreamIfNeeded() {
+            if (upstream == Subscriptions.CANCELLED) {
+                return;
+            }
+            if (demand.get() > 0L && upstreamRequested.compareAndSet(false, true)) {
+                upstream.request(1L);
             }
         }
 
@@ -91,11 +102,10 @@ public class MultiGather<I, ACC, O> extends AbstractMultiOperator<I, O> {
                     if (value == null) {
                         throw new NullPointerException("The extractor returned a null value to emit");
                     }
-                    long remaining = demand.decrementAndGet();
+                    Subscriptions.subtract(demand, 1L);
                     downstream.onItem(value);
-                    if (remaining > 0L) {
-                        upstream.request(1L);
-                    }
+                    upstreamRequested.set(false);
+                    requestUpstreamIfNeeded();
                 } else {
                     upstream.request(1L);
                 }
