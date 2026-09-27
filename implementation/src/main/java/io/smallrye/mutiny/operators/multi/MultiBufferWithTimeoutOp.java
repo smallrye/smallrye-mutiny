@@ -164,11 +164,15 @@ public final class MultiBufferWithTimeoutOp<T> extends AbstractMultiOperator<T, 
                     scheduleFlush();
                 }
                 if (req != 0L) {
-
+                    // When size is finite, subtract actual batch size (item-granular).
+                    // A partial timer flush of K < size items only consumes K from the budget,
+                    // leaving (budget - K) for the remaining items in the window.
+                    // When size is Integer.MAX_VALUE (timer-only grouping), subtract 1 (batch-unit).
+                    long decrement = (size == Integer.MAX_VALUE) ? 1L : cur.size();
                     if (req != Long.MAX_VALUE) {
                         long next;
                         for (;;) {
-                            next = req - 1;
+                            next = Math.max(0L, req - decrement);
                             if (requested.compareAndSet(req, next)) {
                                 subscriber.onItem(cur);
                                 return;
@@ -231,14 +235,25 @@ public final class MultiBufferWithTimeoutOp<T> extends AbstractMultiOperator<T, 
         @Override
         public void request(long n) {
             if (n > 0) {
-                Subscriptions.add(requested, n);
-                if (terminated.get() != RUNNING) {
-                    return;
-                }
-                if (size == Integer.MAX_VALUE || n == Long.MAX_VALUE) {
+                if (n == Long.MAX_VALUE) {
+                    // Unbounded demand — no tracking needed.
+                    Subscriptions.add(requested, Long.MAX_VALUE);
+                    super.request(Long.MAX_VALUE);
+                } else if (size == Integer.MAX_VALUE) {
+                    // Timer-only grouping (no fixed batch size) — track in batch-units.
+                    Subscriptions.add(requested, n);
                     super.request(Long.MAX_VALUE);
                 } else {
-                    super.request(Subscriptions.multiply(n, size));
+                    // Fixed batch size — track demand in individual items.
+                    // request(1) from downstream = budget for `size` individual items.
+                    // This ensures partial timer flushes correctly reduce the budget
+                    // proportionally, preventing BackPressureFailure on subsequent flushes.
+                    long items = Subscriptions.multiply(n, size);
+                    Subscriptions.add(requested, items);
+                    super.request(items);
+                }
+                if (terminated.get() != RUNNING) {
+                    return;
                 }
             } else {
                 onFailure(Subscriptions.getInvalidRequestException());
