@@ -1,0 +1,68 @@
+{@io.quarkiverse.roq.frontmatter.runtime.model.Site site}
+{#let versions=cdi:versions}
+<header class="site-header" data-base-url="{=site.url('/')}">
+  <div class="site-header-inner">
+    <a href="/" class="site-header-logo">
+      {#if site.data.logo?? || site.image}
+      <img src="{#if site.data.logo??}{=site.image(site.data.logo)}{#else}{=site.image}{/if}" alt="{=site.data.name}">
+      {/if}
+      <span class="site-header-title">{=site.data.name}</span>
+    </a>
+
+    <div class="site-header-right">
+      <button id="header-search-button" class="header-search-btn" aria-label="Search">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <span class="header-search-label">Search</span>
+        <kbd class="header-search-kbd">Ctrl+K</kbd>
+      </button>
+      <div class="version-dropdown">
+        <button class="version-dropdown-toggle" aria-haspopup="listbox" aria-expanded="false">
+          <span class="version-dropdown-label">
+            {#for v in versions.sorted}
+              {#if v.defaultVersion}{=v.label}{/if}
+            {/for}
+          </span>
+          <i class="fa-solid fa-chevron-down version-dropdown-chevron"></i>
+        </button>
+        <ul class="version-dropdown-menu" role="listbox">
+          {#for v in versions.sorted}
+          <li role="option" data-version-path="{=v.path}" class="{#if v.defaultVersion}version-current{/if}{#if v.devVersion} version-dev{/if}">
+            {=v.label}
+            {#if v.defaultVersion} <span class="version-badge">latest</span>{/if}
+            {#if v.devVersion} <span class="version-badge version-badge-dev">dev</span>{/if}
+          </li>
+          {/for}
+        </ul>
+      </div>
+      <nav class="header-resources">
+        <a href="https://github.com/smallrye/smallrye-mutiny" target="_blank" title="GitHub" class="header-resource-link">
+          <i class="fa-brands fa-github"></i>
+        </a>
+        <a href="https://smallrye.io/" target="_blank" title="SmallRye" class="header-resource-link">
+          <i class="fa-solid fa-arrow-up-right-from-square"></i>
+        </a>
+      </nav>
+    </div>
+  </div>
+
+  <div class="dev-banner" style="display:none">
+    <i class="fa-solid fa-triangle-exclamation"></i>
+    Unreleased docs. <a class="dev-banner-link" href="#">Switch to latest</a>.
+  </div>
+
+  <script type="application/json" id="version-data">
+  [
+    {#for v in versions.sorted}
+    \{
+      "label": "{=v.label}",
+      "path": "{=v.path}",
+      "sortOrder": {=v.sortOrder},
+      "defaultVersion": {=v.defaultVersion},
+      "devVersion": {=v.devVersion},
+      "sections": [{#for section in v.sections}\{"name":"{=section.name}","items":[{#for item in section.items}\{"title":"{=item.title}","path":"{=item.path}","icon":"{=item.icon}"{#if item.target??},"target":"{=item.target}"{/if}\}{#if !item_isLast},{/if}{/for}]\}{#if !section_isLast},{/if}{/for}]
+    \}{#if !v_isLast},{/if}
+    {/for}
+  ]
+  </script>
+</header>
+{/let}
