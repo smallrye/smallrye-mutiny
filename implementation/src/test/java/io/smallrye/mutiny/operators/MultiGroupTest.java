@@ -1162,7 +1162,7 @@ public class MultiGroupTest {
             }
         }
 
-        private static class ControllableScheduler implements ScheduledExecutorService {
+        static class ControllableScheduler implements ScheduledExecutorService {
 
             private static class CapturedTask {
                 final Runnable command;
@@ -1306,6 +1306,180 @@ public class MultiGroupTest {
 
             int taskCount() {
                 return tasks.size();
+            }
+        }
+    }
+
+    @Nested
+    class BufferWithTimeoutDemandAccountingTest {
+
+        @Test
+        void partialTimerFlushMustNotConsumeFullBatchUnitOfDemand() {
+            BufferWithTimeoutStaleTimerTest.ControllableScheduler scheduler = new BufferWithTimeoutStaleTimerTest.ControllableScheduler();
+            AtomicReference<MultiEmitter<? super Integer>> emitterRef = new AtomicReference<>();
+
+            Multi<List<Integer>> multi = new MultiBufferWithTimeoutOp<>(
+                    Multi.createFrom().<Integer> emitter(emitterRef::set),
+                    10, Duration.ofHours(1), scheduler, false);
+
+            AssertSubscriber<List<Integer>> sub = multi.subscribe()
+                    .withSubscriber(AssertSubscriber.create(1));
+
+            MultiEmitter<? super Integer> emitter = emitterRef.get();
+
+            emitter.emit(1);
+            emitter.emit(2);
+            emitter.emit(3);
+
+            scheduler.runTask(0);
+
+            assertThat(sub.getItems()).hasSize(1);
+            assertThat(sub.getItems().get(0)).containsExactly(1, 2, 3);
+
+            for (int i = 4; i <= 10; i++) {
+                emitter.emit(i);
+            }
+
+            scheduler.runTask(1);
+
+            // No demand — items stay buffered, no BackPressureFailure
+            assertThat(sub.getItems()).hasSize(1);
+            sub.assertNotTerminated();
+
+            // New demand drains the pending buffer
+            sub.request(1);
+            assertThat(sub.getItems()).hasSize(2);
+            assertThat(sub.getItems().get(1)).containsExactly(4, 5, 6, 7, 8, 9, 10);
+            sub.assertNotTerminated();
+        }
+
+        @Test
+        void multiplePartialFlushesWithinSingleDemandWindow() {
+            BufferWithTimeoutStaleTimerTest.ControllableScheduler scheduler = new BufferWithTimeoutStaleTimerTest.ControllableScheduler();
+            AtomicReference<MultiEmitter<? super Integer>> emitterRef = new AtomicReference<>();
+
+            Multi<List<Integer>> multi = new MultiBufferWithTimeoutOp<>(
+                    Multi.createFrom().<Integer> emitter(emitterRef::set),
+                    10, Duration.ofHours(1), scheduler, false);
+
+            AssertSubscriber<List<Integer>> sub = multi.subscribe()
+                    .withSubscriber(AssertSubscriber.create(2));
+
+            MultiEmitter<? super Integer> emitter = emitterRef.get();
+
+            emitter.emit(1);
+            emitter.emit(2);
+            scheduler.runTask(0);
+            assertThat(sub.getItems()).hasSize(1);
+            assertThat(sub.getItems().get(0)).containsExactly(1, 2);
+
+            for (int i = 3; i <= 7; i++) {
+                emitter.emit(i);
+            }
+            scheduler.runTask(1);
+            assertThat(sub.getItems()).hasSize(2);
+            assertThat(sub.getItems().get(1)).containsExactly(3, 4, 5, 6, 7);
+
+            for (int i = 8; i <= 17; i++) {
+                emitter.emit(i);
+            }
+            // No demand remaining — items are buffered despite hitting size boundary
+            assertThat(sub.getItems()).hasSize(2);
+            sub.assertNotTerminated();
+
+            // New demand drains the pending buffer
+            sub.request(1);
+            assertThat(sub.getItems()).hasSize(3);
+            assertThat(sub.getItems().get(2)).containsExactly(8, 9, 10, 11, 12, 13, 14, 15, 16, 17);
+            sub.assertNotTerminated();
+        }
+
+        @Test
+        void upstreamCompletionFlushesFinalPartialBatch() {
+            BufferWithTimeoutStaleTimerTest.ControllableScheduler scheduler = new BufferWithTimeoutStaleTimerTest.ControllableScheduler();
+            AtomicReference<MultiEmitter<? super Integer>> emitterRef = new AtomicReference<>();
+
+            Multi<List<Integer>> multi = new MultiBufferWithTimeoutOp<>(
+                    Multi.createFrom().<Integer> emitter(emitterRef::set),
+                    10, Duration.ofHours(1), scheduler, false);
+
+            AssertSubscriber<List<Integer>> sub = multi.subscribe()
+                    .withSubscriber(AssertSubscriber.create(1));
+
+            MultiEmitter<? super Integer> emitter = emitterRef.get();
+
+            emitter.emit(1);
+            emitter.emit(2);
+            emitter.emit(3);
+            emitter.complete();
+
+            assertThat(sub.getItems()).hasSize(1);
+            assertThat(sub.getItems().get(0)).containsExactly(1, 2, 3);
+            sub.assertCompleted();
+            assertThat(sub.getFailure()).isNull();
+        }
+
+        @Test
+        void upstreamCompletionAfterDemandExhaustedMustNotCauseDoubleTerminal() {
+            BufferWithTimeoutStaleTimerTest.ControllableScheduler scheduler = new BufferWithTimeoutStaleTimerTest.ControllableScheduler();
+            AtomicReference<MultiEmitter<? super Integer>> emitterRef = new AtomicReference<>();
+
+            // size=MAX_VALUE: upstream gets unbounded demand, processor demand is per-batch (1 unit each)
+            Multi<List<Integer>> multi = new MultiBufferWithTimeoutOp<>(
+                    Multi.createFrom().<Integer> emitter(emitterRef::set),
+                    Integer.MAX_VALUE, Duration.ofHours(1), scheduler, false);
+
+            AssertSubscriber<List<Integer>> sub = multi.subscribe()
+                    .withSubscriber(AssertSubscriber.create(1));
+
+            MultiEmitter<? super Integer> emitter = emitterRef.get();
+
+            // First batch: emit 3 items, timer flush consumes the single unit of demand
+            emitter.emit(1);
+            emitter.emit(2);
+            emitter.emit(3);
+            scheduler.runTask(0);
+            assertThat(sub.getItems()).hasSize(1);
+            assertThat(sub.getItems().get(0)).containsExactly(1, 2, 3);
+
+            // More items arrive (upstream has unbounded demand) while processor demand is 0
+            emitter.emit(4);
+            emitter.emit(5);
+
+            // Complete with items still buffered and demand exhausted
+            emitter.complete();
+
+            assertThat(sub.getItems()).hasSize(2);
+            assertThat(sub.getItems().get(1)).containsExactly(4, 5);
+            sub.assertCompleted();
+            assertThat(sub.getFailure()).isNull();
+        }
+
+        @RepeatedTest(500)
+        void concurrencySmokeTest() {
+            ScheduledThreadPoolExecutor scheduler = new ScheduledThreadPoolExecutor(2);
+            try {
+                AtomicReference<MultiEmitter<? super Integer>> emitterRef = new AtomicReference<>();
+
+                Multi<List<Integer>> multi = new MultiBufferWithTimeoutOp<>(
+                        Multi.createFrom().<Integer> emitter(emitterRef::set),
+                        5, Duration.ofMillis(1), scheduler, false);
+
+                AssertSubscriber<List<Integer>> sub = multi.subscribe()
+                        .withSubscriber(AssertSubscriber.create(Long.MAX_VALUE));
+
+                MultiEmitter<? super Integer> emitter = emitterRef.get();
+                for (int i = 0; i < 50; i++) {
+                    emitter.emit(i);
+                }
+                emitter.complete();
+
+                sub.awaitCompletion(Duration.ofSeconds(2));
+
+                int total = sub.getItems().stream().mapToInt(List::size).sum();
+                assertThat(total).isEqualTo(50);
+            } finally {
+                scheduler.shutdownNow();
             }
         }
     }
