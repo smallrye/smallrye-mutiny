@@ -1162,7 +1162,7 @@ public class MultiGroupTest {
             }
         }
 
-        private static class ControllableScheduler implements ScheduledExecutorService {
+        static class ControllableScheduler implements ScheduledExecutorService {
 
             private static class CapturedTask {
                 final Runnable command;
@@ -1306,6 +1306,131 @@ public class MultiGroupTest {
 
             int taskCount() {
                 return tasks.size();
+            }
+        }
+    }
+
+    @Nested
+    class BufferWithTimeoutDemandAccountingTest {
+
+        /**
+         * Reproducer for https://github.com/smallrye/smallrye-mutiny/issues/2211
+         *
+         * When downstream requests 1 batch, the operator requests size items from upstream.
+         * If a timer fires before all size items arrive (partial flush), the operator must
+         * only consume demand proportional to the items actually flushed, not a full batch-unit.
+         * Otherwise the remaining items trigger BackPressureFailure.
+         */
+        @Test
+        void partialTimerFlushMustNotConsumeFullBatchUnitOfDemand() {
+            BufferWithTimeoutStaleTimerTest.ControllableScheduler scheduler = new BufferWithTimeoutStaleTimerTest.ControllableScheduler();
+            AtomicReference<MultiEmitter<? super Integer>> emitterRef = new AtomicReference<>();
+
+            Multi<List<Integer>> multi = new MultiBufferWithTimeoutOp<>(
+                    Multi.createFrom().<Integer> emitter(emitterRef::set),
+                    10, Duration.ofHours(1), scheduler, false);
+
+            // Request exactly 1 batch (= budget for 10 items with item-granular tracking)
+            AssertSubscriber<List<Integer>> sub = multi.subscribe()
+                    .withSubscriber(AssertSubscriber.create(1));
+
+            MultiEmitter<? super Integer> emitter = emitterRef.get();
+
+            // Emit 3 items (partial batch)
+            emitter.emit(1);
+            emitter.emit(2);
+            emitter.emit(3);
+
+            // Timer fires → partial flush of 3 items
+            scheduler.runTask(0);
+
+            // First batch should contain the 3 items
+            assertThat(sub.getItems()).hasSize(1);
+            assertThat(sub.getItems().get(0)).containsExactly(1, 2, 3);
+
+            // Now emit the remaining 7 items (completing the 10 upstream was asked for).
+            // Index resets to 0 after timer flush, so 7 items brings index to 7 (no size trigger).
+            for (int i = 4; i <= 10; i++) {
+                emitter.emit(i);
+            }
+
+            // Fire the timer again to flush the 7 buffered items.
+            // With the fix: budget was 10, spent 3, remaining 7 → flush(7) succeeds, budget = 0
+            // Without the fix: budget was 1 batch-unit, spent 1, remaining 0 → BackPressureFailure
+            scheduler.runTask(1);
+
+            assertThat(sub.getItems()).hasSize(2);
+            assertThat(sub.getItems().get(1)).containsExactly(4, 5, 6, 7, 8, 9, 10);
+            sub.assertNotTerminated();
+        }
+
+        @Test
+        void multiplePartialFlushesWithinSingleDemandWindow() {
+            BufferWithTimeoutStaleTimerTest.ControllableScheduler scheduler = new BufferWithTimeoutStaleTimerTest.ControllableScheduler();
+            AtomicReference<MultiEmitter<? super Integer>> emitterRef = new AtomicReference<>();
+
+            Multi<List<Integer>> multi = new MultiBufferWithTimeoutOp<>(
+                    Multi.createFrom().<Integer> emitter(emitterRef::set),
+                    10, Duration.ofHours(1), scheduler, false);
+
+            // Request 2 batches (= budget for 20 items)
+            AssertSubscriber<List<Integer>> sub = multi.subscribe()
+                    .withSubscriber(AssertSubscriber.create(2));
+
+            MultiEmitter<? super Integer> emitter = emitterRef.get();
+
+            // Emit 2 items, timer flush
+            emitter.emit(1);
+            emitter.emit(2);
+            scheduler.runTask(0);
+            assertThat(sub.getItems()).hasSize(1);
+            assertThat(sub.getItems().get(0)).containsExactly(1, 2);
+
+            // Emit 5 more items, timer flush
+            for (int i = 3; i <= 7; i++) {
+                emitter.emit(i);
+            }
+            scheduler.runTask(1);
+            assertThat(sub.getItems()).hasSize(2);
+            assertThat(sub.getItems().get(1)).containsExactly(3, 4, 5, 6, 7);
+
+            // Budget: started with 20, spent 2 + 5 = 7, remaining 13
+            // Emit 10 more → size trigger flush
+            for (int i = 8; i <= 17; i++) {
+                emitter.emit(i);
+            }
+            assertThat(sub.getItems()).hasSize(3);
+            assertThat(sub.getItems().get(2)).containsExactly(8, 9, 10, 11, 12, 13, 14, 15, 16, 17);
+            sub.assertNotTerminated();
+        }
+
+        @RepeatedTest(500)
+        void partialFlushUnderConcurrencyMustNotCauseBackPressureFailure() {
+            ScheduledThreadPoolExecutor scheduler = new ScheduledThreadPoolExecutor(2);
+            try {
+                AtomicReference<MultiEmitter<? super Integer>> emitterRef = new AtomicReference<>();
+
+                // Short timeout to maximize timer/size flush races
+                Multi<List<Integer>> multi = new MultiBufferWithTimeoutOp<>(
+                        Multi.createFrom().<Integer> emitter(emitterRef::set),
+                        5, Duration.ofMillis(1), scheduler, false);
+
+                AssertSubscriber<List<Integer>> sub = multi.subscribe()
+                        .withSubscriber(AssertSubscriber.create(Long.MAX_VALUE));
+
+                MultiEmitter<? super Integer> emitter = emitterRef.get();
+                for (int i = 0; i < 50; i++) {
+                    emitter.emit(i);
+                }
+                emitter.complete();
+
+                sub.awaitCompletion(Duration.ofSeconds(2));
+
+                // All 50 items must arrive, no BackPressureFailure
+                int total = sub.getItems().stream().mapToInt(List::size).sum();
+                assertThat(total).isEqualTo(50);
+            } finally {
+                scheduler.shutdownNow();
             }
         }
     }
