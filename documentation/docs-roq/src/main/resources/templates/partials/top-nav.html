@@ -1,0 +1,38 @@
+{@io.quarkiverse.roq.frontmatter.runtime.model.Site site}
+{@java.util.List<io.vertx.core.json.JsonObject> menu}
+
+{#let versions=cdi:versions}
+<nav class="top-nav">
+  <div class="top-nav-inner">
+    <a href="/" class="top-nav-tab" data-section="">
+      <i class="fa-solid fa-house"></i>
+      <span>Home</span>
+    </a>
+    {#for v in versions.sorted}
+    {#if v.defaultVersion}
+    {#for section in v.sections}
+    <a href="{=site.url(v.path + section.items.get(0).path)}"
+       class="top-nav-tab"
+       data-section="{=section.name}">
+      {#if section.name == "Tutorials"}<i class="fa-solid fa-graduation-cap"></i>
+      {#else}{#if section.name == "Guides"}<i class="fa-solid fa-book"></i>
+      {#else}<i class="fa-solid fa-file-lines"></i>
+      {/if}{/if}
+      <span>{=section.name}</span>
+    </a>
+    {/for}
+    {/if}
+    {/for}
+    <a href="https://javadoc.io/doc/io.smallrye.reactive/mutiny/latest/index.html"
+       class="top-nav-tab" data-section="" target="_blank">
+      <i class="fa-solid fa-file-code"></i>
+      <span>API</span>
+    </a>
+    <a href="https://github.com/smallrye/smallrye-mutiny/discussions"
+       class="top-nav-tab" data-section="" target="_blank">
+      <i class="fa-solid fa-comments"></i>
+      <span>Discussions/Questions</span>
+    </a>
+  </div>
+</nav>
+{/let}

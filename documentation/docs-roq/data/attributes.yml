@@ -1,0 +1,4 @@
+project-version: 3.3.0
+versions:
+  mutiny: 3.3.0
+  vertx_bindings: 4.0.0-beta2

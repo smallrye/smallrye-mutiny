@@ -1,0 +1,23 @@
+{#include roq-templates/theme-layouts/roq-default/default}
+
+{@io.quarkiverse.roq.frontmatter.runtime.model.Site site}
+
+{! Site header: logo + version selector !}
+{#insert version-bar}{#include partials/version-bar.html /}{/}
+
+{! Top navigation tabs !}
+{#insert top-nav}{#include partials/top-nav.html menu=cdi:menu.items /}{/}
+
+<aside class="sidebar main">
+  {#insert header}
+  <header>
+    {#insert menu}{#include partials/roq-default/sidebar-menu menu=cdi:menu.items /}{/}
+  </header>
+  {/}
+</aside>
+{#insert darkmode}{#include partials/roq-default/sidebar-darkmode /}{/}
+<main class="main-content">
+  {#insert /}
+</main>
+
+{/include}
