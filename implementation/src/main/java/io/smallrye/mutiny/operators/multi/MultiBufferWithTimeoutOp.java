@@ -142,10 +142,32 @@ public final class MultiBufferWithTimeoutOp<T> extends AbstractMultiOperator<T, 
             }
         }
 
+        private void drainPending() {
+            boolean hasPending;
+            synchronized (this) {
+                hasPending = current != null && !current.isEmpty();
+            }
+            if (hasPending) {
+                flushCallback();
+            }
+        }
+
         private void flushCallback() {
             List<T> cur;
             boolean flush = false;
             synchronized (this) {
+                // Finite size: buffer when demand exhausted (in-flight items expected).
+                // MAX_VALUE size: fall through to BackPressureFailure path.
+                if (size != Integer.MAX_VALUE) {
+                    long req = requested.get();
+                    if (req == 0L) {
+                        if (emitEmptyListIfNoItem && terminated.get() == RUNNING) {
+                            scheduleFlush();
+                        }
+                        return;
+                    }
+                }
+
                 if (current != null) {
                     cur = new ArrayList<>(current);
                 } else {
@@ -164,11 +186,10 @@ public final class MultiBufferWithTimeoutOp<T> extends AbstractMultiOperator<T, 
                     scheduleFlush();
                 }
                 if (req != 0L) {
-
                     if (req != Long.MAX_VALUE) {
                         long next;
                         for (;;) {
-                            next = req - 1;
+                            next = req - 1L;
                             if (requested.compareAndSet(req, next)) {
                                 subscriber.onItem(cur);
                                 return;
@@ -221,11 +242,19 @@ public final class MultiBufferWithTimeoutOp<T> extends AbstractMultiOperator<T, 
         }
 
         void checkedComplete() {
-            try {
-                flushCallback();
-            } finally {
-                super.onCompletion();
+            List<T> cur;
+            synchronized (this) {
+                if (current != null) {
+                    cur = new ArrayList<>(current);
+                    current = null;
+                } else {
+                    cur = Collections.emptyList();
+                }
             }
+            if (!cur.isEmpty() || emitEmptyListIfNoItem) {
+                downstream.onItem(cur);
+            }
+            super.onCompletion();
         }
 
         @Override
@@ -234,6 +263,9 @@ public final class MultiBufferWithTimeoutOp<T> extends AbstractMultiOperator<T, 
                 Subscriptions.add(requested, n);
                 if (terminated.get() != RUNNING) {
                     return;
+                }
+                if (size != Integer.MAX_VALUE) {
+                    drainPending();
                 }
                 if (size == Integer.MAX_VALUE || n == Long.MAX_VALUE) {
                     super.request(Long.MAX_VALUE);
