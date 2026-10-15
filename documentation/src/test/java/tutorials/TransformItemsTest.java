@@ -15,45 +15,45 @@ public class TransformItemsTest {
 
     @Test
     public void testUniTransform(SystemOut out) {
-        // <uni-transform>
+        // tag::uni-transform[]
         Uni<String> someUni = Uni.createFrom().item("hello");
         someUni
                 .onItem().transform(i -> i.toUpperCase())
                 .subscribe().with(
                         item -> System.out.println(item)); // Print HELLO
-        // </uni-transform>
+        // end::uni-transform[]
         assertThat(out.get()).contains("HELLO");
     }
 
     @Test
     public void testMultiTransform() {
         Multi<String> multi = Multi.createFrom().items("a", "b", "c");
-        // <multi-transform>
+        // tag::multi-transform[]
         Multi<String> m = multi.onItem().transform(i -> i.toUpperCase());
-        // </multi-transform>
+        // end::multi-transform[]
         assertThat(m.collect().asList().await().indefinitely()).containsExactly("A", "B", "C");
     }
 
     @Test
     public void testMultiTransformWithSubscription(SystemOut out) {
-        // <multi-transform-2>
+        // tag::multi-transform-2[]
         Multi<String> someMulti = Multi.createFrom().items("a", "b", "c");
         someMulti
                 .onItem().transform(i -> i.toUpperCase())
                 .subscribe().with(
                         item -> System.out.println(item)); // Print A B C
-        // </multi-transform-2>
+        // end::multi-transform-2[]
         assertThat(out.get()).contains("A", "B", "C");
     }
 
     @Test
     public void testChain() {
         Uni<String> uni = Uni.createFrom().item("hello");
-        // <chain>
+        // tag::chain[]
         Uni<String> u = uni
                 .onItem().transform(i -> i.toUpperCase())
                 .onItem().transform(i -> i + "!");
-        // </chain>
+        // end::chain[]
 
         assertThat(u.await().indefinitely()).isEqualTo("HELLO!");
 

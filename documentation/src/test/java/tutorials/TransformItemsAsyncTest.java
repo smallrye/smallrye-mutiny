@@ -14,9 +14,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class TransformItemsAsyncTest {
 
     interface MyAsyncService {
-        // <service>
+        // tag::service[]
         Uni<String> invokeRemoteGreetingService(String name);
-        // </service>
+        // end::service[]
     }
 
     static class MyAsyncServiceImpl implements MyAsyncService {
@@ -38,24 +38,24 @@ public class TransformItemsAsyncTest {
     public void testCall() {
 
         Uni<String> uni = Uni.createFrom().item("mutiny");
-        // <call>
+        // tag::call[]
         Uni<String> result = uni
             .onItem().transformToUni(name -> invokeRemoteGreetingService(name));
-        // </call>
+        // end::call[]
 
         assertThat(result.await().indefinitely()).isEqualTo("mutiny");
     }
 
     @Test
     public void testChain(SystemOut out) {
-        // <chain>
+        // tag::chain[]
         Uni<String> uni = Uni.createFrom().item("Cameron");
         uni
             .onItem().transformToUni(name -> invokeRemoteGreetingService(name))
             .subscribe().with(
                     item -> System.out.println(item), // Print "Hello Cameron",
                     fail -> fail.printStackTrace()); // Print the failure stack trace
-        // </chain>
+        // end::chain[]
         assertThat(out.get()).contains("Cameron");
     }
 
@@ -63,18 +63,18 @@ public class TransformItemsAsyncTest {
     @Test
     public void testUniToMulti(SystemOut out) {
         Uni<String> uni = Uni.createFrom().item("Cameron");
-        // <uni-to-multi>
+        // tag::uni-to-multi[]
         Multi<String> result = uni
             .onItem().transformToMulti(item -> Multi.createFrom().items(item, item));
-        // </uni-to-multi>
+        // end::uni-to-multi[]
         assertThat(result.collect().asList().await().indefinitely()).containsExactly("Cameron", "Cameron");
 
-        // <uni-to-multi-2>
+        // tag::uni-to-multi-2[]
         uni
             .onItem().transformToMulti(item -> Multi.createFrom().items(item, item))
             .subscribe().with(
                     item -> System.out.println(item)); // Called twice
-        // </uni-to-multi-2>
+        // end::uni-to-multi-2[]
         assertThat(out.get()).contains("Cameron");
     }
 
@@ -82,13 +82,13 @@ public class TransformItemsAsyncTest {
     public void testMergeAndConcatUni() {
         Multi<String> multi = Multi.createFrom().items("a", "b");
 
-        // <merge-concat>
+        // tag::merge-concat[]
         Multi<String> merged = multi
             .onItem().transformToUniAndMerge(name -> invokeRemoteGreetingService(name));
 
         Multi<String> concat = multi
             .onItem().transformToUniAndConcatenate(name -> invokeRemoteGreetingService(name));
-        // </merge-concat>
+        // end::merge-concat[]
 
         assertThat(merged.collect().asList().await().indefinitely()).containsExactly("a", "b");
         assertThat(concat.collect().asList().await().indefinitely()).containsExactly("a", "b");
@@ -98,13 +98,13 @@ public class TransformItemsAsyncTest {
     public void testMergeAndConcatMulti() {
         Multi<String> multi = Multi.createFrom().items("a", "b");
 
-        // <merge-concat-multi>
+        // tag::merge-concat-multi[]
         Multi<String> merged = multi
             .onItem().transformToMultiAndMerge(item -> someMulti(item));
 
         Multi<String> concat = multi
             .onItem().transformToMultiAndConcatenate(item -> someMulti(item));
-        // </merge-concat-multi>
+        // end::merge-concat-multi[]
 
         assertThat(merged.collect().asList().await().indefinitely()).containsExactly("a", "b");
         assertThat(concat.collect().asList().await().indefinitely()).containsExactly("a", "b");
@@ -114,7 +114,7 @@ public class TransformItemsAsyncTest {
     public void testMergeConcurrency() {
         Multi<String> multi = Multi.createFrom().items("a", "b");
 
-        // <merge-concurrency>
+        // tag::merge-concurrency[]
         Multi<String> limitConcurrent = multi
                 .onItem().transformToUni(item -> callService(item))
                 .merge(2);
@@ -122,7 +122,7 @@ public class TransformItemsAsyncTest {
         Multi<String> defaultConcurrent = multi
                 .onItem().transformToUni(item -> callService(item))
                 .merge();
-        // </merge-concurrency>
+        // end::merge-concurrency[]
 
         assertThat(limitConcurrent.collect().asList().await().indefinitely()).containsExactly("a", "b");
         assertThat(defaultConcurrent.collect().asList().await().indefinitely()).containsExactly("a", "b");

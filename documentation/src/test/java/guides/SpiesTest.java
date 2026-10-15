@@ -11,7 +11,7 @@ public class SpiesTest {
 
     @Test
     public void trackItems() {
-        // <selected>
+        // tag::selected[]
         Multi<Integer> multi = Multi.createFrom().items(1, 2, 3);
         MultiOnRequestSpy<Integer> requestSpy = Spy.onRequest(multi);
         MultiOnCompletionSpy<Integer> completionSpy = Spy.onCompletion(requestSpy);
@@ -20,12 +20,12 @@ public class SpiesTest {
 
         System.out.println("Number of requests: " + requestSpy.requestedCount());
         System.out.println("Completed? " + completionSpy.invoked());
-        // </selected>
+        // end::selected[]
     }
 
     @Test
     public void trackEverything() {
-        // <global>
+        // tag::global[]
         Multi<Integer> multi = Multi.createFrom().items(1, 2, 3);
         MultiGlobalSpy<Integer> spy = Spy.globally(multi);
 
@@ -35,6 +35,6 @@ public class SpiesTest {
         System.out.println("Cancelled? " + spy.onCancellationSpy().isCancelled());
         System.out.println("Failure? " + spy.onFailureSpy().lastFailure());
         System.out.println("Items: " + spy.onItemSpy().items());
-        // </global>
+        // end::global[]
     }
 }
