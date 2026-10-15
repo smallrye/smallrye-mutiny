@@ -5,10 +5,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.List;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Multi;
@@ -249,6 +251,168 @@ class MultiBufferWithTimeoutDemandTest {
             assertThat(upstreamRequested.get() - emitted).isLessThanOrEqualTo(SIZE);
         }
         assertThat(sub.getItems()).hasSize(20);
+        assertThat(sub.getFailure()).isNull();
+    }
+
+    @Test
+    void requestNDrainsMultipleQueuedBatches() {
+        AssertSubscriber<List<Integer>> sub = subscribe(SIZE, 1);
+
+        emit(0, 2);
+        fireLatestTimer();
+        assertThat(sub.getItems()).hasSize(1);
+
+        emit(3, 5);
+        fireLatestTimer();
+        emit(6, 8);
+        fireLatestTimer();
+        assertThat(sub.getItems()).hasSize(1);
+        sub.assertNotTerminated();
+
+        sub.request(3);
+        assertThat(sub.getItems()).hasSize(3);
+        assertThat(sub.getItems()).containsExactly(List.of(0, 1, 2), List.of(3, 4, 5), List.of(6, 7, 8));
+
+        emit(9, 11);
+        fireLatestTimer();
+        assertThat(sub.getItems()).hasSize(4);
+    }
+
+    @Test
+    void requestMoreThanPendingAfterCompletion() {
+        AssertSubscriber<List<Integer>> sub = subscribe(SIZE, 1);
+
+        emit(0, 2);
+        fireLatestTimer();
+        assertThat(sub.getItems()).hasSize(1);
+
+        emit(3, 7);
+        emitter.get().complete();
+
+        assertThat(sub.getItems()).hasSize(1);
+        sub.assertNotTerminated();
+
+        sub.request(5);
+        assertThat(sub.getItems()).hasSize(2);
+        assertThat(sub.getItems()).containsExactly(List.of(0, 1, 2), List.of(3, 4, 5, 6, 7));
+        sub.assertCompleted();
+    }
+
+    @Test
+    void cancellationDropsPendingBatches() {
+        AssertSubscriber<List<Integer>> sub = subscribe(SIZE, 1);
+
+        emit(0, 2);
+        fireLatestTimer();
+        assertThat(sub.getItems()).hasSize(1);
+
+        emit(3, 5);
+        fireLatestTimer();
+        assertThat(sub.getItems()).hasSize(1);
+
+        sub.cancel();
+        sub.request(1);
+        assertThat(sub.getItems()).hasSize(1);
+        sub.assertNotTerminated();
+    }
+
+    @Test
+    void emitEmptyListIfNoItemDrainsAccumulatedEmptyLists() {
+        Multi<List<Integer>> multi = new MultiBufferWithTimeoutOp<>(
+                Multi.createFrom().<Integer> emitter(e -> {
+                }),
+                10, Duration.ofHours(1), scheduler, true);
+
+        AssertSubscriber<List<Integer>> sub = multi.subscribe()
+                .withSubscriber(AssertSubscriber.create(1));
+
+        for (int i = 0; i < 5; i++) {
+            scheduler.runTask(i);
+        }
+        assertThat(sub.getItems()).hasSize(1);
+        assertThat(sub.getItems().get(0)).isEmpty();
+
+        sub.request(4);
+        assertThat(sub.getItems()).hasSize(5);
+        for (List<Integer> list : sub.getItems()) {
+            assertThat(list).isEmpty();
+        }
+
+        sub.request(1);
+        scheduler.runTask(5);
+        assertThat(sub.getItems()).hasSize(6);
+    }
+
+    @RepeatedTest(500)
+    void concurrencySmokeTestWithBoundedDemand() {
+        ScheduledThreadPoolExecutor realScheduler = new ScheduledThreadPoolExecutor(2);
+        try {
+            AtomicReference<MultiEmitter<? super Integer>> emRef = new AtomicReference<>();
+            Multi<Integer> upstream = Multi.createFrom().<Integer> emitter(emRef::set);
+
+            AssertSubscriber<List<Integer>> sub = new MultiBufferWithTimeoutOp<>(upstream, 5,
+                    Duration.ofMillis(1), realScheduler, false)
+                    .subscribe().withSubscriber(AssertSubscriber.create(0));
+
+            for (int i = 0; i < 50; i++) {
+                emRef.get().emit(i);
+            }
+            emRef.get().complete();
+
+            for (int i = 0; i < 5000 && !sub.hasCompleted(); i++) {
+                sub.request(1);
+                try {
+                    Thread.sleep(1);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    break;
+                }
+            }
+
+            sub.awaitCompletion(Duration.ofSeconds(5));
+            assertThat(sub.getFailure()).isNull();
+            int totalItems = sub.getItems().stream().mapToInt(List::size).sum();
+            assertThat(totalItems).isEqualTo(50);
+        } finally {
+            realScheduler.shutdownNow();
+        }
+    }
+
+    @Test
+    void requestMaxValueAfterBoundedRequest() {
+        AssertSubscriber<List<Integer>> sub = subscribe(SIZE, 1);
+
+        emit(0, 2);
+        fireLatestTimer();
+        assertThat(sub.getItems()).hasSize(1);
+
+        sub.request(Long.MAX_VALUE);
+
+        emit(3, 32);
+        assertThat(sub.getItems()).hasSize(4);
+        for (List<Integer> list : sub.getItems()) {
+            assertThat(list.size()).isLessThanOrEqualTo(SIZE);
+        }
+
+        emitter.get().complete();
+        sub.assertCompleted();
+        int totalItems = sub.getItems().stream().mapToInt(List::size).sum();
+        assertThat(totalItems).isEqualTo(33);
+    }
+
+    @Test
+    void upstreamDemandBoundedWithRequestN() {
+        AssertSubscriber<List<Integer>> sub = subscribe(SIZE, 2);
+
+        int emitted = 0;
+        for (int round = 0; round < 10; round++) {
+            for (int i = 0; i < 3; i++) {
+                emitter.get().emit(emitted++);
+            }
+            fireLatestTimer();
+            sub.request(2);
+            assertThat(upstreamRequested.get() - emitted).isLessThanOrEqualTo(SIZE);
+        }
         assertThat(sub.getFailure()).isNull();
     }
 }
