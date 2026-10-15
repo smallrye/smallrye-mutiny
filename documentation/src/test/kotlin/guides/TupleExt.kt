@@ -5,7 +5,7 @@ import io.smallrye.mutiny.component1
 import io.smallrye.mutiny.component2
 
 fun tupleDestructuring() {
-    // <tupleDestructuring>
+    // tag::tupleDestructuring[]
     // import io.smallrye.mutiny.component1
     // import io.smallrye.mutiny.component2
     val uni = Uni.combine().all()
@@ -17,5 +17,5 @@ fun tupleDestructuring() {
     val (name, age) = uni.await().indefinitely()
     assert(name == "Alice")
     assert(age == 30)
-    // </tupleDestructuring>
+    // end::tupleDestructuring[]
 }

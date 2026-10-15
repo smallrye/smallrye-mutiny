@@ -14,10 +14,10 @@ public class DelayTest {
 
     @Test
     public void testDelayBy() {
-        // <delay-by>
+        // tag::delay-by[]
         Uni<String> delayed = Uni.createFrom().item("hello")
                 .onItem().delayIt().by(Duration.ofMillis(10));
-        // </delay-by>
+        // end::delay-by[]
         String r = delayed.map(s -> "Delayed " + s)
                 .await().indefinitely();
         assertThat(r).isEqualTo("Delayed hello");
@@ -25,12 +25,12 @@ public class DelayTest {
 
     @Test
     public void testDelayUntil() {
-        // <delay-until>
+        // tag::delay-until[]
         Uni<String> delayed = Uni.createFrom().item("hello")
                 // The write method returns a Uni completed
                 // when the operation is done.
                 .onItem().delayIt().until(this::write);
-        // </delay-until>
+        // end::delay-until[]
         String r = delayed
                 .map(s -> "Written " + s)
                 .await().indefinitely();
@@ -40,39 +40,39 @@ public class DelayTest {
     @Test
     public void testDelayMulti() {
         Multi<Integer> multi = Multi.createFrom().items(1, 2, 3, 4, 5);
-        // <delay-multi>
+        // tag::delay-multi[]
         Multi<Integer> delayed = multi
             .onItem().call(i ->
                 // Delay the emission until the returned uni emits its item
                 Uni.createFrom().nullItem().onItem().delayIt().by(Duration.ofMillis(10))
             );
-        // </delay-multi>
+        // end::delay-multi[]
         assertThat(delayed.collect().asList().await().indefinitely()).containsExactly(1, 2, 3, 4, 5);
     }
 
     @Test
     public void testThrottling() {
         Multi<Integer> multi = Multi.createFrom().items(1, 2, 3, 4, 5);
-        // <throttling-multi>
+        // tag::throttling-multi[]
         // Introduce a one second delay between each item
         Multi<Long> ticks = Multi.createFrom().ticks().every(Duration.ofSeconds(1))
                 .onOverflow().drop();
         Multi<Integer> delayed = Multi.createBy().combining().streams(ticks, multi)
                 .using((x, item) -> item);
-        // </throttling-multi>
+        // end::throttling-multi[]
         assertThat(delayed.collect().asList().await().indefinitely()).containsExactly(1, 2, 3, 4, 5);
     }
 
     @Test
     public void testDelayMultiRandom() {
-        // <delay-multi-random>
+        // tag::delay-multi-random[]
         Random random = new Random();
         Multi<Integer> delayed = Multi.createFrom().items(1, 2, 3, 4, 5)
                 .onItem().call(i -> {
                     Duration delay = Duration.ofMillis(random.nextInt(100) + 1);
                     return Uni.createFrom().nullItem().onItem().delayIt().by(delay);
                 });
-        // </delay-multi-random>
+        // end::delay-multi-random[]
         assertThat(delayed.collect().asList()
                 .await().indefinitely())
                 .containsExactlyInAnyOrder(1, 2, 3, 4, 5);

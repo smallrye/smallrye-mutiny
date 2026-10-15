@@ -2,12 +2,12 @@ package guides
 
 import io.smallrye.mutiny.Multi
 import io.smallrye.mutiny.Uni
-// <importStatements>
+// tag::importStatements[]
 import io.smallrye.mutiny.coroutines.asFlow
 import io.smallrye.mutiny.coroutines.asMulti
 import io.smallrye.mutiny.coroutines.asUni
 import io.smallrye.mutiny.coroutines.awaitSuspending
-// </importStatements>
+// end::importStatements[]
 import io.smallrye.mutiny.coroutines.uni
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -18,7 +18,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 
 suspend fun uniAwaitSuspending() {
-    // <uniAwaitSuspending>
+    // tag::uniAwaitSuspending[]
     val uni: Uni<String> = Uni.createFrom().item("Mutiny ❤ Kotlin")
     try {
         // Available within suspend function and CoroutineScope
@@ -26,37 +26,37 @@ suspend fun uniAwaitSuspending() {
     } catch (failure: Throwable) {
         // onFailure event happened
     }
-    // </uniAwaitSuspending>
+    // end::uniAwaitSuspending[]
 }
 
 @ExperimentalCoroutinesApi
 suspend fun deferredAsUni() {
-    // <deferredAsUni>
+    // tag::deferredAsUni[]
     val deferred: Deferred<String> = GlobalScope.async { "Kotlin ❤ Mutiny" }
     val uni: Uni<String> = deferred.asUni()
-    // </deferredAsUni>
+    // end::deferredAsUni[]
 }
 
 @ExperimentalCoroutinesApi
 suspend fun multiAsFlow() {
-    // <multiAsFlow>
+    // tag::multiAsFlow[]
     val multi: Multi<String> = Multi.createFrom().items("Mutiny", "❤", "Kotlin")
     val flow: Flow<String> = multi.asFlow()
-    // </multiAsFlow>
+    // end::multiAsFlow[]
 }
 
 suspend fun flowAsMulti() {
-    // <flowAsMulti>
+    // tag::flowAsMulti[]
     val flow: Flow<String> = flowOf("Kotlin", "❤", "Mutiny")
     val multi: Multi<String> = flow.asMulti()
-    // </flowAsMulti>
+    // end::flowAsMulti[]
 }
 
 suspend fun uniBuilder() {
-    // <uniBuilder>
+    // tag::uniBuilder[]
     // import io.smallrye.mutiny.coroutines.uni
     coroutineScope {
         val uni: Uni<String> = uni { "λ 🚧" }
     }
-    // </uniBuilder>
+    // end::uniBuilder[]
 }
