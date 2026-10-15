@@ -13,21 +13,21 @@ public class SelectAndSkipTest {
     public void testSelect() {
         Multi<Integer> multi = Multi.createFrom().items(1, 2, 3, 4, 5, 6, 7, 8, 9);
 
-        // <take-first>
+        // tag::take-first[]
         Multi<Integer> firstThreeItems = multi.select().first(3);
-        // </take-first>
+        // end::take-first[]
 
-        // <take-last>
+        // tag::take-last[]
         Multi<Integer> lastThreeItems = multi.select().last(3);
-        // </take-last>
+        // end::take-last[]
 
-        // <take-while>
+        // tag::take-while[]
         Multi<Integer> takeWhile = multi.select().first(i -> i < 4);
-        // </take-while>
+        // end::take-while[]
 
-        // <take-for>
+        // tag::take-for[]
         Multi<Integer> takeForDuration = multi.select().first(Duration.ofSeconds(1));
-        // </take-for>
+        // end::take-for[]
 
         assertThat(firstThreeItems.collect().asList().await().indefinitely()).containsExactly(1, 2, 3);
         assertThat(takeWhile.collect().asList().await().indefinitely()).containsExactly(1, 2, 3);
@@ -40,21 +40,21 @@ public class SelectAndSkipTest {
     public void testSkip() {
         Multi<Integer> multi = Multi.createFrom().items(1, 2, 3, 4, 5, 6, 7, 8, 9);
 
-        // <skip-first>
+        // tag::skip-first[]
         Multi<Integer> skipThreeItems = multi.skip().first(3);
-        // </skip-first>
+        // end::skip-first[]
 
-        // <skip-last>
+        // tag::skip-last[]
         Multi<Integer>  skipLastThreeItems = multi.skip().last(3);
-        // </skip-last>
+        // end::skip-last[]
 
-        // <skip-while>
+        // tag::skip-while[]
         Multi<Integer> skipWhile = multi.skip().first(i -> i < 4);
-        // </skip-while>
+        // end::skip-while[]
 
-        // <skip-for>
+        // tag::skip-for[]
         Multi<Integer> skipForDuration = multi.skip().first(Duration.ofSeconds(1));
-        // </skip-for>
+        // end::skip-for[]
 
         assertThat(skipThreeItems.collect().asList().await().indefinitely()).containsExactly(4, 5, 6, 7, 8, 9);
         assertThat(skipLastThreeItems.collect().asList().await().indefinitely()).containsExactly(1, 2, 3, 4 ,5, 6);

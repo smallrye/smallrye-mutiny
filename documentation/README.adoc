@@ -1,0 +1,61 @@
+= SmallRye Mutiny documentation
+
+The documentation is AsciiDoc, laid out like the Quarkus guides, and published on
+https://smallrye.io/docs/smallrye-mutiny/latest/[smallrye.io]. The site pulls it from this
+repository: the `main` branch every night, and each release once it is tagged.
+
+== Where things are
+
+[cols="1,2"]
+|===
+|`src/main/asciidoc/**/*.adoc` |One page per file. The path is the page's address: `guides/branching.adoc` is published at `/docs/smallrye-mutiny/<version>/guides/branching/`.
+|`src/main/asciidoc/_nav.yml` |The sidebar: page order and sections. A new page must be added here.
+|`src/main/asciidoc/_attributes.adoc` |Attributes every page includes (ids, `examples-dir`, project values).
+|`src/main/asciidoc/_versions.adoc` |Mutiny and Vert.x bindings versions, written by `just prepare-release` (`.build/UpdateDocsAttributesFiles.java`).
+|`src/main/asciidoc/tags-index.adoc` |The index of pages by tag; a page declares its tags with `:topics:`.
+|`src/test/java`, `src/test/kotlin` |Code examples. They are tests: they compile and run with the build, so they cannot go stale.
+|===
+
+== Writing a page
+
+[source,asciidoc]
+------
+= Page title
+:version-root: ../
+include::{version-root}_attributes.adoc[]
+:topics: guide,intermediate
+
+Text...
+
+== A section
+
+Link to another page with xref:tutorials/hello-mutiny.adoc[Hello Mutiny!], or to a section of
+it with xref:tutorials/hello-mutiny.adoc#a-section[].
+
+[source,java,indent=0]
+----
+include::{examples-dir}/java/guides/BranchingTest.java[tags=pipeline]
+----
+------
+
+* Pages in a subdirectory set `:version-root:` (`../` per level) before including `_attributes.adoc`.
+* Section ids are Quarkus-style: `== Custom Scalars` gets the id `custom-scalars`.
+* Include part of an example by marking it with `// tag::example[]` and `// end::example[]`.
+* Admonitions: `NOTE:`, `TIP:`, `IMPORTANT:`, `WARNING:`, `CAUTION:`.
+
+== Previewing
+
+Pull requests that change the documentation are rendered with the smallrye.io site by the
+`Documentation` workflow, which fails on a broken include or a page that does not render. The
+rendered site is attached to the workflow run as the `docs-smallrye-mutiny` artifact.
+
+To preview locally, check out https://github.com/smallrye/smallrye.github.io[smallrye.github.io]
+next to this repository and run, from there:
+
+[source,bash]
+----
+python3 tools/docs/sync.py --project smallrye-mutiny --version main --source ../smallrye-mutiny
+./mvnw quarkus:dev
+----
+
+Then open http://localhost:8080/docs/smallrye-mutiny/main/.

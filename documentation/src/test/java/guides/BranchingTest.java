@@ -10,7 +10,7 @@ public class BranchingTest {
 
     @Test
     public void uni() {
-        // <pipeline>
+        // tag::pipeline[]
         Random random = new Random();
         Uni.createFrom().item(() -> random.nextInt(100))
                 .onItem().transformToUni(n -> {
@@ -21,10 +21,10 @@ public class BranchingTest {
                     }
                 })
                 .subscribe().with(System.out::println);
-        // </pipeline>
+        // end::pipeline[]
     }
 
-    // <branches>
+    // tag::branches[]
     Uni<String> evenOperation(int n) {
         return Uni.createFrom().item("Even number: " + n)
                 .onItem().invoke(() -> System.out.println("(even branch)"));
@@ -34,11 +34,11 @@ public class BranchingTest {
         return Uni.createFrom().item("Odd number: " + n)
                 .onItem().invoke(() -> System.out.println("(odd branch)"));
     }
-    // </branches>
+    // end::branches[]
 
     @Test
     public void multi() {
-        // <multi-pipeline>
+        // tag::multi-pipeline[]
         Random random = new Random();
         Multi.createBy().repeating().supplier(random::nextInt).atMost(20)
                 .onItem().transformToUniAndMerge(n -> {
@@ -52,13 +52,13 @@ public class BranchingTest {
                     }
                 })
                 .subscribe().with(str -> System.out.println("=> " + str));
-        // </multi-pipeline>
+        // end::multi-pipeline[]
     }
 
-    // <drop>
+    // tag::drop[]
     Uni<String> drop() {
         return Uni.createFrom().<String>nullItem()
                 .onItem().invoke(() -> System.out.println("(dropping negative value)"));
     }
-    // </drop>
+    // end::drop[]
 }

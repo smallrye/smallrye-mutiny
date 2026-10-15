@@ -1,0 +1,12 @@
+// Attributes shared by every page. smallrye.io overrides the ones it needs when it publishes.
+// Pages in subdirectories set :version-root: (../ per level) before including this file.
+ifndef::version-root[:version-root:]
+:idprefix:
+:idseparator: -
+:sectanchors:
+:examples-dir: {version-root}../../test
+:partialsdir: {version-root}_partials
+:project-name: SmallRye Mutiny
+:javadoc-version: latest
+// project-version, versions-mutiny and versions-vertx-bindings, set by the release (just prepare-release)
+include::_versions.adoc[]

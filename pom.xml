@@ -16,7 +16,7 @@
 
     <name>SmallRye Mutiny - Parent</name>
     <description>Intuitive Event-Driven Reactive Programming Library for Java</description>
-    <url>https://smallrye.io/smallrye-mutiny</url>
+    <url>https://smallrye.io/docs/smallrye-mutiny/latest/</url>
 
     <inceptionYear>2019</inceptionYear>
     <organization>
