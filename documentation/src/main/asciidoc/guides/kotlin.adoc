@@ -1,0 +1,205 @@
+= Kotlin integration
+:version-root: ../
+include::{version-root}_attributes.adoc[]
+:topics: guide,intermediate
+
+The module `mutiny-kotlin` provides an integration with Kotlin for use with coroutines and convenient language features.
+
+There are extension methods available for converting between Mutiny and Kotlin (coroutine) types.
+For implementation details please have also a look to these methods' documentation.
+
+== Dependency coordinates
+
+The coroutine extension functions are shipped in the package `io.smallrye.mutiny.coroutines`.
+
+[source,kotlin]
+----
+include::{examples-dir}/kotlin/guides/Coroutines.kt[tags=importStatements,indent=0]
+----
+
+You need to add the following dependency to your project:
+
+[.tabs]
+====
+
+Maven::
++
+--
+
+[source,xml,subs="attributes+"]
+----
+<dependency>
+    <groupId>io.smallrye.reactive</groupId>
+    <artifactId>mutiny-kotlin</artifactId>
+    <version>{versions-mutiny}</version>
+</dependency>
+----
+
+--
+
+Gradle (Kotlin)::
++
+--
+
+[source,kotlin,subs="attributes+"]
+----
+implementation("io.smallrye.reactive:mutiny-kotlin:{versions-mutiny}")
+----
+
+--
+
+Gradle (Groovy)::
++
+--
+
+[source,groovy,subs="attributes+"]
+----
+implementation "io.smallrye.reactive:mutiny-kotlin:{versions-mutiny}"
+----
+
+--
+
+====
+
+== Awaiting a Uni in coroutines
+
+Within a coroutine or suspend function you can easily await Uni events in a suspended way:
+
+[source,kotlin]
+----
+include::{examples-dir}/kotlin/guides/Coroutines.kt[tags=uniAwaitSuspending,indent=0]
+----
+
+== Processing a Multi as Flow
+
+The coroutine `Flow` type matches `Multi` semantically, even though it isn't a feature complete reactive streams implementation.
+You can process a `Multi` as `Flow` as follows:
+
+[source,kotlin]
+----
+include::{examples-dir}/kotlin/guides/Coroutines.kt[tags=multiAsFlow,indent=0]
+----
+
+[NOTE]
+====
+
+There's no flow control availabe for Kotlin's `Flow`. Published items are buffered for consumption using a coroutine `Channel`.
+The buffer size and overflow strategy of that `Channel` can be configured using optional arguments:
+`Multi.asFlow(bufferCapacity = Channel.UNLIMITED, bufferOverflowStrategy = BufferOverflow.SUSPEND)`,
+for more details please consult the method documentation.
+
+====
+
+== Providing a Deferred value as Uni
+
+The other way around is also possible, let a Deferred become a Uni:
+
+[source,kotlin]
+----
+include::{examples-dir}/kotlin/guides/Coroutines.kt[tags=deferredAsUni,indent=0]
+----
+
+== Creating a Multi from a Flow
+
+Finally, creating a Multi from a Flow is also possible:
+
+[source,kotlin]
+----
+include::{examples-dir}/kotlin/guides/Coroutines.kt[tags=flowAsMulti,indent=0]
+----
+
+== Awaiting Multi results in coroutines
+
+You can consume `Multi` results directly from suspend functions without converting to `Flow` first:
+
+[source,kotlin]
+----
+include::{examples-dir}/kotlin/guides/MultiAwait.kt[tags=multiAwaitList,indent=0]
+----
+
+[source,kotlin]
+----
+include::{examples-dir}/kotlin/guides/MultiAwait.kt[tags=multiAwaitFirst,indent=0]
+----
+
+[source,kotlin]
+----
+include::{examples-dir}/kotlin/guides/MultiAwait.kt[tags=multiAwaitLast,indent=0]
+----
+
+[source,kotlin]
+----
+include::{examples-dir}/kotlin/guides/MultiAwait.kt[tags=multiAwaitEach,indent=0]
+----
+
+== Language convenience
+
+=== Unit instead of Void (null) value
+
+Kotlin has a special value type `Unit` similar to Java's `Void`.
+While regular `Uni++<++Void++>++` holds a `null` item, you can get a `Unit` by using the extension function `replaceWithUnit()`:
+
+[source,kotlin]
+----
+include::{examples-dir}/kotlin/guides/UniExt.kt[tags=uniReplaceWithUnit,indent=0]
+----
+
+=== Uni builder
+
+Building a `Uni` from Kotlin code can easily be achieved using the following builders available as regular or coroutine variant:
+
+[source,kotlin]
+----
+include::{examples-dir}/kotlin/guides/UniExt.kt[tags=uniBuilder,indent=0]
+----
+
+[source,kotlin]
+----
+include::{examples-dir}/kotlin/guides/Coroutines.kt[tags=uniBuilder,indent=0]
+----
+
+=== Multi builder
+
+Building a `Multi` from Kotlin code can be achieved using the `multi` builder, available as regular or coroutine variant:
+
+[source,kotlin]
+----
+include::{examples-dir}/kotlin/guides/MultiExt.kt[tags=multiBuilder,indent=0]
+----
+
+The builder accepts an optional back-pressure strategy:
+
+[source,kotlin]
+----
+include::{examples-dir}/kotlin/guides/MultiExt.kt[tags=multiBuilderBackPressure,indent=0]
+----
+
+A coroutine variant allows suspend calls within the builder:
+
+[source,kotlin]
+----
+include::{examples-dir}/kotlin/guides/MultiExt.kt[tags=multiBuilderSuspend,indent=0]
+----
+
+=== Tuple destructuring
+
+Mutiny's `Tuple2` through `Tuple9` support Kotlin destructuring declarations:
+
+[source,kotlin]
+----
+include::{examples-dir}/kotlin/guides/TupleExt.kt[tags=tupleDestructuring,indent=0]
+----
+
+=== Typed failure handling
+
+Use reified generics for concise failure type matching on both `Uni` and `Multi`:
+
+[source,kotlin]
+----
+include::{examples-dir}/kotlin/guides/FailureExt.kt[tags=uniReifiedOnFailure,indent=0]
+----
+
+[source,kotlin]
+----
+include::{examples-dir}/kotlin/guides/FailureExt.kt[tags=multiReifiedOnFailure,indent=0]
+----

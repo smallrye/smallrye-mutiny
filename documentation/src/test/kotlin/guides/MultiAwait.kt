@@ -9,33 +9,33 @@ import io.smallrye.mutiny.coroutines.awaitLastOrThrow
 import io.smallrye.mutiny.coroutines.awaitEach
 
 suspend fun multiAwaitList() {
-    // <multiAwaitList>
+    // tag::multiAwaitList[]
     val multi = Multi.createFrom().items("a", "b", "c")
     val list: List<String> = multi.awaitList()
-    // </multiAwaitList>
+    // end::multiAwaitList[]
 }
 
 suspend fun multiAwaitFirst() {
-    // <multiAwaitFirst>
+    // tag::multiAwaitFirst[]
     val multi = Multi.createFrom().items(1, 2, 3)
     val first: Int? = multi.awaitFirst()
     val firstOrThrow: Int = multi.awaitFirstOrThrow()
-    // </multiAwaitFirst>
+    // end::multiAwaitFirst[]
 }
 
 suspend fun multiAwaitLast() {
-    // <multiAwaitLast>
+    // tag::multiAwaitLast[]
     val multi = Multi.createFrom().items(1, 2, 3)
     val last: Int? = multi.awaitLast()
     val lastOrThrow: Int = multi.awaitLastOrThrow()
-    // </multiAwaitLast>
+    // end::multiAwaitLast[]
 }
 
 suspend fun multiAwaitEach() {
-    // <multiAwaitEach>
+    // tag::multiAwaitEach[]
     val multi = Multi.createFrom().items(1, 2, 3)
     multi.awaitEach { item ->
         println("Processing $item")
     }
-    // </multiAwaitEach>
+    // end::multiAwaitEach[]
 }

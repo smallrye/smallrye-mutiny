@@ -9,7 +9,7 @@ public class BroadcastProcessorTest {
 
     @Test
     public void test() {
-        // <code>
+        // tag::code[]
         BroadcastProcessor<String> processor = BroadcastProcessor.create();
         Multi<String> multi = processor
                 .onItem().transform(String::toUpperCase)
@@ -27,7 +27,7 @@ public class BroadcastProcessorTest {
         // If the source is already terminated (by a completion or a failure signal)
         // the subscriber receives this signal.
 
-        // </code>
+        // end::code[]
         AssertSubscriber<String> subscriber = AssertSubscriber.create(Long.MAX_VALUE);
         multi.subscribe().withSubscriber(subscriber)
                 .awaitCompletion();

@@ -1,0 +1,69 @@
+title: SmallRye Mutiny
+nav:
+- page: index
+- title: Tutorials
+  items:
+  - page: tutorials/getting-mutiny
+  - page: tutorials/hello-mutiny
+  - page: tutorials/creating-uni-pipelines
+  - page: tutorials/creating-multi-pipelines
+  - page: tutorials/observing-events
+  - page: tutorials/transforming-items
+  - page: tutorials/transforming-items-asynchronously
+  - page: tutorials/handling-failures
+  - page: tutorials/retrying
+  - page: tutorials/mutiny-workshop
+- title: Guides
+  items:
+  - page: guides/imperative-to-reactive
+  - page: guides/reactive-to-imperative
+  - page: guides/unchecked-exceptions
+  - page: guides/filtering-items
+  - page: guides/collecting-items
+  - page: guides/grouping-items
+  - page: guides/take-skip-items
+  - page: guides/eliminate-duplicates-and-repetitions
+  - page: guides/handling-null
+  - page: guides/handling-timeouts
+  - page: guides/delaying-events
+  - page: guides/pagination
+  - page: guides/polling
+  - page: guides/emission-threads
+  - page: guides/emit-on-vs-run-subscription-on
+  - page: guides/completion-stage
+  - page: guides/rx
+  - page: guides/shortcut-methods
+  - page: guides/merging-and-concatenating-streams
+  - page: guides/combining-items
+  - page: guides/joining-unis
+  - page: guides/converters
+  - page: guides/testing
+  - page: guides/spies
+  - page: guides/custom-operators
+  - page: guides/dropped-exceptions
+  - page: guides/framework-integration
+  - page: guides/hot-streams
+  - page: guides/integrate-a-non-reactive-source
+  - page: guides/kotlin
+  - page: guides/logging
+  - page: guides/context-passing
+  - page: guides/replaying-multis
+  - page: guides/controlling-demand
+  - page: guides/multi-split
+  - page: guides/branching
+  - page: guides/broadcasting-to-multiple-subscribers
+- title: Reference
+  items:
+  - page: reference/migrating-to-mutiny-2
+  - page: reference/why-is-asynchronous-important
+  - page: reference/what-is-reactive-programming
+  - page: reference/what-makes-mutiny-different
+  - page: reference/uni-and-multi
+  - page: reference/going-reactive-a-few-pitfalls
+  - page: reference/publications
+  - title: Tags index
+    page: tags-index
+- title: API
+  url: https://javadoc.io/doc/io.smallrye.reactive/mutiny/latest/index.html
+- title: Discussions/Questions
+  url: https://github.com/smallrye/smallrye-mutiny/discussions
