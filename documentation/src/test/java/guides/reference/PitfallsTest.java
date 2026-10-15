@@ -14,32 +14,32 @@ public class PitfallsTest {
 
     @Test
     public void noMagicScheduling() {
-        // <noMagicJoin>
+        // tag::noMagicJoin[]
         Uni<List<String>> data = Uni.join().all(
                 fetch("abc"),
                 fetch("def"),
                 fetch("123")).andFailFast();
-        // </noMagicJoin>
+        // end::noMagicJoin[]
     }
 
     @Test
     public void inMemoryData() {
-        // <inMemoryData>
+        // tag::inMemoryData[]
         Uni<Integer> uni = Uni.createFrom().item(123);
         Multi<Integer> multi = Multi.createFrom().items(1, 2, 3, 4, 5);
-        // </inMemoryData>
+        // end::inMemoryData[]
     }
 
     private List<String> obtainValues(String key) {
         return List.of();
     }
 
-    // <suspiciousPublisher>
+    // tag::suspiciousPublisher[]
     public Multi<String> fetchData(String key) {
         List<String> strings = obtainValues(key);
         return Multi.createFrom().iterable(strings);
     }
-    // </suspiciousPublisher>
+    // end::suspiciousPublisher[]
 
     private Multi<String> streamData(String key) {
         return Multi.createFrom().items("");
@@ -50,7 +50,7 @@ public class PitfallsTest {
     }
 
     private Multi<String> flatmap() {
-        // <flatmap-ism>
+        // tag::flatmap-ism[]
         Multi<String> stream = streamData("abc");
         return stream.onItem().transformToMultiAndMerge(line -> {
             if (line.trim().length() > 10) {
@@ -59,6 +59,6 @@ public class PitfallsTest {
                 return Multi.createFrom().item("[N/A]");
             }
         });
-        // </flatmap-ism>
+        // end::flatmap-ism[]
     }
 }
