@@ -1,0 +1,40 @@
+= How to handle null?
+:version-root: ../
+include::{version-root}_attributes.adoc[]
+:topics: guide,beginner
+
+The `Uni` type can emit `null` as item.
+
+While there are mixed feelings about `null`, it's part of the Java language and so handled in the `Uni` type.
+
+[IMPORTANT]
+====
+
+`Multi` does not support `null` items as it would break the compatibility with the _Reactive Streams_ protocol.
+
+====
+
+Emitting `null` is convenient when returning `Uni++<++Void++>++`.
+However, the downstream must expect `null` as item.
+
+Thus, `Uni` provides specific methods to handle `null` item.
+`uni.onItem().ifNull()` lets you decide what you want to do when the received item is `null`:
+
+[source,java]
+----
+include::{examples-dir}/java/guides/UniNullTest.java[tags=code,indent=0]
+----
+
+A symmetric group of methods is also available with `ifNotNull` which let you handle the case where the item is _not null_:
+
+[source,java]
+----
+include::{examples-dir}/java/guides/UniNullTest.java[tags=code-not-null,indent=0]
+----
+
+[IMPORTANT]
+====
+
+While supported, emitting `null` should be avoided except for `Uni++<++Void++>++`.
+
+====

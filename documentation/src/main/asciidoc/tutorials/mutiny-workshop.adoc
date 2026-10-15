@@ -1,0 +1,15 @@
+= Go further with the Mutiny workshop!
+:version-root: ../
+include::{version-root}_attributes.adoc[]
+:topics: tutorial,beginner
+
+One great option to teach yourself Mutiny is to go through the https://github.com/smallrye/smallrye-mutiny/tree/main/workshop-examples[Mutiny workshop examples].
+
+These self-contained https://jbang.dev/[JBang] scripts cover the main parts of the Mutiny APIs.
+
+It's a fun and easy way to discover Mutiny!
+
+Check out https://github.com/smallrye/smallrye-mutiny/tree/main/workshop-examples to learn more.
+
+.Running a workshop sample
+image::tutorials/running-workshop-sample.png[Running a workshop sample,width=400]

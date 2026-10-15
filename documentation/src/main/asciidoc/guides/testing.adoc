@@ -1,0 +1,72 @@
+= How can I write unit / integration tests?
+:version-root: ../
+include::{version-root}_attributes.adoc[]
+:topics: guide,beginner
+
+Mutiny provides subscribers for `Uni` and `Multi` offering helpful assertion methods.
+You can use them to test pipelines.
+
+== Testing a Uni
+
+Here is an example to test a `Uni`:
+
+[source,java]
+----
+include::{examples-dir}/java/guides/TestSubscribersTest.java[tags=uni,indent=0]
+----
+
+You can also use predicate-based assertions and item inspection:
+
+[source,java]
+----
+include::{examples-dir}/java/guides/TestSubscribersTest.java[tags=uni-predicate,indent=0]
+----
+
+== Testing a Multi
+
+Testing a `Multi` pipeline is similar:
+
+[source,java]
+----
+include::{examples-dir}/java/guides/TestSubscribersTest.java[tags=multi,indent=0]
+----
+
+Predicate-based assertions work on `Multi` too:
+
+[source,java]
+----
+include::{examples-dir}/java/guides/TestSubscribersTest.java[tags=multi-predicate,indent=0]
+----
+
+== Declarative verification with AssertMulti
+
+For multi-item streams, `AssertMulti` provides a declarative step-by-step verifier.
+Build a sequence of expectations, then call `verify()`:
+
+[source,java]
+----
+include::{examples-dir}/java/guides/TestSubscribersTest.java[tags=assert-multi,indent=0]
+----
+
+You can control demand explicitly for backpressure testing:
+
+[source,java]
+----
+include::{examples-dir}/java/guides/TestSubscribersTest.java[tags=assert-multi-demand,indent=0]
+----
+
+== Testing failures
+
+The assertions do not just focus on _good_ outcomes, you can also test failures as in:
+
+[source,java]
+----
+include::{examples-dir}/java/guides/TestSubscribersTest.java[tags=failing,indent=0]
+----
+
+With `AssertMulti`:
+
+[source,java]
+----
+include::{examples-dir}/java/guides/TestSubscribersTest.java[tags=assert-multi-failure,indent=0]
+----
