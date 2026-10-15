@@ -12,19 +12,19 @@ public class RepetitionsTest {
     @Test
     public void distinct() {
         Multi<Integer> multi = Multi.createFrom().items(1, 1, 2, 3, 4, 5, 5, 6,  1, 4, 4);
-        // <distinct>
+        // tag::distinct[]
         List<Integer> list = multi
                 .select().distinct()
                 .collect().asList()
                 .await().indefinitely();
-        // </distinct>
+        // end::distinct[]
 
-        // <repetition>
+        // tag::repetition[]
         List<Integer> list2 = multi
                 .skip().repetitions()
                 .collect().asList()
                 .await().indefinitely();
-        // </repetition>
+        // end::repetition[]
         assertThat(list).containsExactly(1, 2, 3, 4, 5, 6);
         assertThat(list2).containsExactly(1, 2, 3, 4, 5, 6, 1, 4);
     }

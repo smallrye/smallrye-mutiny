@@ -7,30 +7,30 @@ import kotlinx.coroutines.coroutineScope
 import io.smallrye.mutiny.coroutines.multi as multiSuspend
 
 fun regularMultiBuilder() {
-    // <multiBuilder>
+    // tag::multiBuilder[]
     // import io.smallrye.mutiny.multi
     val multi = multi<Int> {
         emit(1)
         emit(2)
         emit(3)
     }
-    // </multiBuilder>
+    // end::multiBuilder[]
 }
 
 fun multiBuilderWithBackPressure() {
-    // <multiBuilderBackPressure>
+    // tag::multiBuilderBackPressure[]
     // import io.smallrye.mutiny.multi
     val multi = multi<Int>(backPressure = BackPressureStrategy.DROP) {
         emit(1)
         emit(2)
         emit(3)
     }
-    // </multiBuilderBackPressure>
+    // end::multiBuilderBackPressure[]
 }
 
 @ExperimentalCoroutinesApi
 suspend fun suspendMultiBuilder() {
-    // <multiBuilderSuspend>
+    // tag::multiBuilderSuspend[]
     // import io.smallrye.mutiny.coroutines.multi
     val queryResult = fetchResults()
     coroutineScope {
@@ -38,7 +38,7 @@ suspend fun suspendMultiBuilder() {
             queryResult.forEach { result -> emit(result.download()) }
         }
     }
-    // </multiBuilderSuspend>
+    // end::multiBuilderSuspend[]
 }
 
 interface ResultHandle {

@@ -18,17 +18,17 @@ public class CompletionStageTest {
     public void testSubscribeAsCompletionStage() {
         AtomicInteger counter = new AtomicInteger();
         Uni<String> uni = Uni.createFrom().item(() -> "hello-" + counter.getAndIncrement());
-        // <uni-subscribe-cs>
+        // tag::uni-subscribe-cs[]
         CompletionStage<String> cs = uni.subscribeAsCompletionStage();
-        // </uni-subscribe-cs>
+        // end::uni-subscribe-cs[]
 
         assertThat(cs.toCompletableFuture().join()).isEqualTo("hello-0");
 
-        // <uni-subscribe-cs-twice>
+        // tag::uni-subscribe-cs-twice[]
         // Trigger the underlying operation twice:
         CompletionStage<String> cs1 = uni.subscribeAsCompletionStage();
         CompletionStage<String> cs2 = uni.subscribeAsCompletionStage();
-        // </uni-subscribe-cs-twice>
+        // end::uni-subscribe-cs-twice[]
         assertThat(cs1.toCompletableFuture().join()).isEqualTo("hello-1");
         assertThat(cs2.toCompletableFuture().join()).isEqualTo("hello-2");
     }
@@ -37,7 +37,7 @@ public class CompletionStageTest {
     @Test
     public void test() {
         Executor executor = Runnable::run;
-        // <create-uni>
+        // tag::create-uni[]
         Uni<String> uni1 = Uni
                 // Create from a Completion Stage
                 .createFrom().completionStage(
@@ -51,12 +51,12 @@ public class CompletionStageTest {
                         () -> CompletableFuture.supplyAsync(() -> "hello", executor)
                 )
                 .onItem().transform(String::toUpperCase);
-        // </create-uni>
+        // end::create-uni[]
 
         assertThat(uni1.await().indefinitely()).isEqualTo("HELLO");
         assertThat(uni2.await().indefinitely()).isEqualTo("HELLO");
 
-        // <create-multi>
+        // tag::create-multi[]
         Multi<String> multi1 = Multi
                 .createFrom().completionStage(
                         CompletableFuture.supplyAsync(() -> "hello", executor)
@@ -68,7 +68,7 @@ public class CompletionStageTest {
                         CompletableFuture.supplyAsync(() -> "hello", executor)
                 )
                 .onItem().transform(String::toUpperCase);
-        // </create-multi>
+        // end::create-multi[]
 
         assertThat(multi1.collect().asList().await().indefinitely()).containsExactly("HELLO");
         assertThat(multi2.collect().asList().await().indefinitely()).containsExactly("HELLO");

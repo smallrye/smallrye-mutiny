@@ -16,11 +16,11 @@ public class UniTimeoutTest {
     @Test
     public void test() {
         Uni<String> uni = Uni.createFrom().nothing();
-        // <code>
+        // tag::code[]
         Uni<String> uniWithTimeout = uni
                 .ifNoItem().after(Duration.ofMillis(100))
                 .recoverWithItem("some fallback item");
-        // </code>
+        // end::code[]
         String item = uniWithTimeout
                 .await().indefinitely();
         assertThat(item).isEqualTo("some fallback item");
@@ -29,10 +29,10 @@ public class UniTimeoutTest {
     @Test
     public void testFail() {
         Uni<String> uni = Uni.createFrom().nothing();
-        // <fail>
+        // tag::fail[]
         Uni<String> uniWithTimeout = uni
                 .ifNoItem().after(Duration.ofMillis(100)).fail();
-        // </fail>
+        // end::fail[]
         assertThatThrownBy(() ->
             uniWithTimeout
                     .await().indefinitely()
@@ -42,11 +42,11 @@ public class UniTimeoutTest {
     @Test
     public void testFailRecover() {
         Uni<String> uni = Uni.createFrom().nothing();
-        // <fail-recover>
+        // tag::fail-recover[]
         Uni<String> uniWithTimeout = uni
             .ifNoItem().after(Duration.ofMillis(100)).fail()
             .onFailure(TimeoutException.class).recoverWithItem("we got a timeout");
-        // </fail-recover>
+        // end::fail-recover[]
         String item = uniWithTimeout
                 .await().indefinitely();
         assertThat(item).isEqualTo("we got a timeout");
@@ -55,10 +55,10 @@ public class UniTimeoutTest {
     @Test
     public void testFailWithSpecificException() {
         Uni<String> uni = Uni.createFrom().nothing();
-        // <fail-with>
+        // tag::fail-with[]
         Uni<String> uniWithTimeout = uni
             .ifNoItem().after(Duration.ofMillis(100)).failWith(() -> new ServiceUnavailableException());
-        // </fail-with>
+        // end::fail-with[]
         assertThatThrownBy(() ->
                 uniWithTimeout
                         .await().indefinitely()
@@ -68,10 +68,10 @@ public class UniTimeoutTest {
     @Test
     public void testFallback() {
         Uni<String> uni = Uni.createFrom().nothing();
-        // <fallback>
+        // tag::fallback[]
         Uni<String> uniWithTimeout = uni
                 .ifNoItem().after(Duration.ofMillis(100)).recoverWithItem(() -> "fallback");
-        // </fallback>
+        // end::fallback[]
         String item = uniWithTimeout
                 .await().indefinitely();
         assertThat(item).isEqualTo("fallback");
@@ -80,10 +80,10 @@ public class UniTimeoutTest {
     @Test
     public void testFallbackUni() {
         Uni<String> uni = Uni.createFrom().nothing();
-        // <fallback-uni>
+        // tag::fallback-uni[]
         Uni<String> uniWithTimeout = uni
                 .ifNoItem().after(Duration.ofMillis(100)).recoverWithUni(() -> someFallbackUni());
-        // </fallback-uni>
+        // end::fallback-uni[]
         String item = uniWithTimeout
                 .await().indefinitely();
         assertThat(item).isEqualTo("fallback");
