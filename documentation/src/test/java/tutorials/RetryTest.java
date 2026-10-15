@@ -18,12 +18,12 @@ public class RetryTest {
     public void testRetryAtMost() {
         Uni<String> uni = Uni.createFrom().failure(new Exception("boom"));
         Multi<String> multi = Multi.createFrom().failure(new Exception("boom"));
-        // <retry-at-most>
+        // tag::retry-at-most[]
         Uni<String> u = uni
                 .onFailure().retry().atMost(3);
         Multi<String> m = multi
                 .onFailure().retry().atMost(3);
-        // </retry-at-most>
+        // end::retry-at-most[]
         assertThatThrownBy(() -> u.await().indefinitely()).hasMessageContaining("boom");
         assertThatThrownBy(() -> m.collect().asList()
                 .await().indefinitely()).hasMessageContaining("boom");
@@ -32,12 +32,12 @@ public class RetryTest {
     @Test
     public void testRetryWithBackoff() {
         Uni<String> uni = Uni.createFrom().failure(new Exception("boom"));
-        // <retry-backoff>
+        // tag::retry-backoff[]
         Uni<String> u = uni
                 .onFailure().retry()
                 .withBackOff(Duration.ofMillis(100), Duration.ofSeconds(1))
                 .atMost(3);
-        // </retry-backoff>
+        // end::retry-backoff[]
         assertThatThrownBy(() -> u.await().indefinitely())
                 .getCause() // Expected exception is wrapped in a java.util.concurrent.CompletionException
                 .hasMessageContaining("boom")
@@ -47,11 +47,11 @@ public class RetryTest {
     @Test
     public void testRetryUntil() {
         Uni<String> uni = Uni.createFrom().failure(new Exception("boom"));
-        // <retry-until>
+        // tag::retry-until[]
         Uni<String> u = uni
                 .onFailure().retry()
                 .until(f -> shouldWeRetry(f));
-        // </retry-until>
+        // end::retry-until[]
         assertThatThrownBy(() -> u.await().indefinitely()).hasMessageContaining("boom");
     }
 

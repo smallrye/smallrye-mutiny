@@ -1,0 +1,21 @@
+= How to use polling?
+:version-root: ../
+include::{version-root}_attributes.adoc[]
+:topics: guide,advanced
+
+There are many poll-based API around us.
+Sometimes you need to use these APIs to generate a stream from the polled values.
+
+To do this, use the `repeat()` feature:
+
+[source,java]
+----
+include::{examples-dir}/java/guides/operators/PollableSourceTest.java[tags=code,indent=0]
+----
+
+You can also stop the repetition using the `repeat().until()` method which will continue the repetition until the given predicate returns `true`, and/or directly create a `Multi` using `Multi.createBy().repeating()`:
+
+[source,java]
+----
+include::{examples-dir}/java/guides/operators/PollableSourceTest.java[tags=code2,indent=0]
+----

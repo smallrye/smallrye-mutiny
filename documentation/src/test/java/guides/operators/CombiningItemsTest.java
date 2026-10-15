@@ -25,28 +25,28 @@ public class CombiningItemsTest<A, B> {
 
     @Test
     public void testWithUni(SystemOut out) throws InterruptedException {
-        // <invocations>
+        // tag::invocations[]
         Uni<Response> uniA = invokeHttpServiceA();
         Uni<Response> uniB = invokeHttpServiceB();
-        // </invocations>
+        // end::invocations[]
 
-        // <combination>
+        // tag::combination[]
         Uni<Tuple2<Response, Response>> responses = Uni.combine()
                 .all().unis(uniA, uniB).asTuple();
-        // </combination>
+        // end::combination[]
 
-        // <subscription>
+        // tag::subscription[]
         Uni.combine().all().unis(uniA, uniB).asTuple()
                 .subscribe().with(tuple -> {
             System.out.println("Response from A: " + tuple.getItem1());
             System.out.println("Response from B: " + tuple.getItem2());
         });
-        // </subscription>
+        // end::subscription[]
 
         await().until(() -> out.get().contains("Response from A: Response{content='A'}"));
         await().until(() -> out.get().contains("Response from B: Response{content='B'}"));
 
-        // <combined-with>
+        // tag::combined-with[]
         Uni<Map<String, Response>> uni = Uni.combine()
                 .all().unis(uniA, uniB).with(
                         listOfResponses -> {
@@ -56,7 +56,7 @@ public class CombiningItemsTest<A, B> {
                             return map;
                         }
                 );
-        // </combined-with>
+        // end::combined-with[]
 
         assertThat(uni.await().indefinitely()).containsKeys("A", "B");
 
@@ -83,10 +83,10 @@ public class CombiningItemsTest<A, B> {
         Multi<A> multiA = getMultiA();
         Multi<B> multiB = getMultiB();
 
-        // <combine-multi>
+        // tag::combine-multi[]
         Multi<Tuple2<A, B>> combined = Multi.createBy().combining()
                 .streams(multiA, multiB).asTuple();
-        // </combine-multi>
+        // end::combine-multi[]
 
         CountDownLatch latch = new CountDownLatch(1);
         AtomicInteger i = new AtomicInteger();
@@ -101,13 +101,13 @@ public class CombiningItemsTest<A, B> {
 
         assertThat(latch.await(10, TimeUnit.MILLISECONDS)).isTrue();
 
-        // <combine-multi-with>
+        // tag::combine-multi-with[]
         Multi.createBy().combining()
                 .streams(multiA, multiB).using(list -> combineItems(list))
                 .subscribe().with(x -> {
                     // do something with the combined items
                 });
-        // </combine-multi-with>
+        // end::combine-multi-with[]
     }
 
     @Test
@@ -115,7 +115,7 @@ public class CombiningItemsTest<A, B> {
         Multi<A> multiA = getMultiA();
         Multi<B> multiB = getMultiB();
 
-        // <combine-last>
+        // tag::combine-last[]
         Multi<Tuple2<A, B>> multi1 = Multi.createBy().combining()
                 .streams(multiA, multiB)
                 .latestItems().asTuple();
@@ -125,7 +125,7 @@ public class CombiningItemsTest<A, B> {
         Multi<String> multi2 = Multi.createBy().combining()
                 .streams(multiA, multiB)
                 .latestItems().using(list -> combineItems(list));
-        // </combine-last>
+        // end::combine-last[]
 
         List<Tuple2<A, B>> list = multi1.collect().asList().await().indefinitely();
         assertThat(list).hasSize(3);
