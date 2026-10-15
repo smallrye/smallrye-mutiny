@@ -149,7 +149,6 @@ class MultiBufferWithTimeoutDemandTest {
         sub.assertCompleted();
     }
 
-
     /**
      * Completion respects demand (finite size)
      * <p>
