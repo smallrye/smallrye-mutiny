@@ -1449,9 +1449,64 @@ public class MultiGroupTest {
             // Complete with items still buffered and demand exhausted
             emitter.complete();
 
+            // The final list waits for demand: no extra list, no failure, no completion yet
+            assertThat(sub.getItems()).hasSize(1);
+            sub.assertNotTerminated();
+
+            sub.request(1);
             assertThat(sub.getItems()).hasSize(2);
             assertThat(sub.getItems().get(1)).containsExactly(4, 5);
             sub.assertCompleted();
+            assertThat(sub.getFailure()).isNull();
+        }
+
+        @Test
+        void emptyListsMustConsumeDemand() {
+            BufferWithTimeoutStaleTimerTest.ControllableScheduler scheduler = new BufferWithTimeoutStaleTimerTest.ControllableScheduler();
+
+            Multi<List<Integer>> multi = new MultiBufferWithTimeoutOp<>(
+                    Multi.createFrom().<Integer> emitter(e -> {
+                    }),
+                    10, Duration.ofHours(1), scheduler, true);
+
+            AssertSubscriber<List<Integer>> sub = multi.subscribe()
+                    .withSubscriber(AssertSubscriber.create(1));
+
+            for (int i = 0; i < 20; i++) {
+                scheduler.runTask(i);
+            }
+
+            assertThat(sub.getItems()).hasSize(1);
+            assertThat(sub.getItems().get(0)).isEmpty();
+            assertThat(sub.getFailure()).isNull();
+        }
+
+        @Test
+        void upstreamDemandStaysBoundedWithPartialFlushes() {
+            BufferWithTimeoutStaleTimerTest.ControllableScheduler scheduler = new BufferWithTimeoutStaleTimerTest.ControllableScheduler();
+            AtomicReference<MultiEmitter<? super Integer>> emitterRef = new AtomicReference<>();
+            AtomicLong upstreamRequested = new AtomicLong();
+
+            Multi<List<Integer>> multi = new MultiBufferWithTimeoutOp<>(
+                    Multi.createFrom().<Integer> emitter(emitterRef::set)
+                            .onRequest().invoke(upstreamRequested::addAndGet),
+                    10, Duration.ofHours(1), scheduler, false);
+
+            AssertSubscriber<List<Integer>> sub = multi.subscribe()
+                    .withSubscriber(AssertSubscriber.create(1));
+
+            MultiEmitter<? super Integer> emitter = emitterRef.get();
+            int emitted = 0;
+            for (int round = 0; round < 20; round++) {
+                // 3 items, then the timer flushes a partial batch, then downstream asks for the next list
+                for (int i = 0; i < 3; i++) {
+                    emitter.emit(emitted++);
+                }
+                scheduler.runTask(scheduler.taskCount() - 1);
+                sub.request(1);
+                assertThat(upstreamRequested.get() - emitted).isLessThanOrEqualTo(10);
+            }
+            assertThat(sub.getItems()).hasSize(20);
             assertThat(sub.getFailure()).isNull();
         }
 
