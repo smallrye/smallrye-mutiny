@@ -67,7 +67,7 @@
 						Bundle-Name:            Bundle ${project.groupId} : ${project.artifactId}
 						Bundle-SymbolicName:    ${bnd-bundle-name}
 						Export-Package: 		${bnd-bundle-name}.*
-						Bundle-Version:         ${version}
+						Bundle-Version:         ${project.version}
 						-noimportjava:          true;
 						-nouses:                true;
 						]]>
