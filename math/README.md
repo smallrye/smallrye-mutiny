@@ -1,6 +1,6 @@
 # Mutiny Math Operators
 
-This library provides a set of _operators_ for [Mutiny](https://smallrye.io/smallrye-mutiny).
+This library provides a set of _operators_ for [Mutiny](https://smallrye.io/docs/smallrye-mutiny/latest/).
 
 You can use these operators using the `plug` method offered by Mutiny:
 

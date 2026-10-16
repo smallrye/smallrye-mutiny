@@ -1,0 +1,4 @@
+// GENERATED FILE, DO NOT EDIT DIRECTLY (see .build/UpdateDocsAttributesFiles.java)
+:project-version: 3.3.0
+:versions-mutiny: 3.3.0
+:versions-vertx-bindings: 4.0.0-beta2
