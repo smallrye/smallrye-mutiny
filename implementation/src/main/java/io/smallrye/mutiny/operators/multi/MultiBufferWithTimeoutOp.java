@@ -2,6 +2,7 @@
 package io.smallrye.mutiny.operators.multi;
 
 import java.time.Duration;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -84,6 +85,12 @@ public final class MultiBufferWithTimeoutOp<T> extends AbstractMultiOperator<T, 
         private List<T> current;
         private volatile ScheduledFuture<?> task;
 
+        private final ArrayDeque<List<T>> readyBatches = new ArrayDeque<>();
+        private final AtomicInteger wip = new AtomicInteger();
+        private volatile boolean upstreamDone;
+        private volatile boolean completionSent;
+        private final AtomicLong outstandingUpstream = new AtomicLong();
+
         MultiBufferWithTimeoutProcessor(MultiSubscriber<? super List<T>> downstream, int size, Duration timeout,
                 ScheduledExecutorService executor, Supplier<List<T>> supplier, boolean emitEmptyListIfNoItem) {
             super(downstream);
@@ -110,16 +117,16 @@ public final class MultiBufferWithTimeoutOp<T> extends AbstractMultiOperator<T, 
             if (generation.get() != expectedGen) {
                 return;
             }
-            int idx;
-            for (;;) {
-                idx = this.index.get();
+            int idx = this.index.get();
+            do {
                 if (idx == 0 && !emitEmptyListIfNoItem) {
                     return;
                 }
                 if (this.index.compareAndSet(idx, 0)) {
                     break;
                 }
-            }
+                idx = this.index.get();
+            } while (true);
             if (generation.get() != expectedGen) {
                 return;
             }
@@ -158,50 +165,64 @@ public final class MultiBufferWithTimeoutOp<T> extends AbstractMultiOperator<T, 
             }
 
             if (flush) {
-                long req = requested.get();
-                MultiSubscriber<? super List<T>> subscriber = downstream;
-                if (emitEmptyListIfNoItem && terminated.get() == RUNNING) {
-                    scheduleFlush();
-                }
-                if (req != 0L) {
-
-                    if (req != Long.MAX_VALUE) {
-                        long next;
-                        for (;;) {
-                            next = req - 1;
-                            if (requested.compareAndSet(req, next)) {
-                                subscriber.onItem(cur);
-                                return;
-                            }
-
-                            req = requested.get();
-                            if (req <= 0L) {
-                                break;
-                            }
+                if (size == Integer.MAX_VALUE) {
+                    // Time-only grouping: upstream has unbounded demand, so we must enforce
+                    // backpressure by failing when downstream demand is exhausted.
+                    long req = requested.get();
+                    MultiSubscriber<? super List<T>> subscriber = downstream;
+                    if (emitEmptyListIfNoItem && terminated.get() == RUNNING) {
+                        scheduleFlush();
+                    }
+                    if (req != 0L) {
+                        if (req != Long.MAX_VALUE) {
+                            do {
+                                long next = req - 1L;
+                                if (requested.compareAndSet(req, next)) {
+                                    subscriber.onItem(cur);
+                                    return;
+                                }
+                                req = requested.get();
+                            } while (req > 0L);
+                        } else {
+                            subscriber.onItem(cur);
+                            return;
                         }
-                    } else {
-                        subscriber.onItem(cur);
+                    }
+                    if (terminated.get() != RUNNING) {
                         return;
                     }
+                    cancel();
+                    subscriber.onFailure(new BackPressureFailure("Cannot emit item due to lack of requests"));
+                } else {
+                    // Finite size: upstream demand is bounded, buffer until demand arrives.
+                    synchronized (this) {
+                        readyBatches.add(cur);
+                    }
+                    drain();
+                    if (emitEmptyListIfNoItem && terminated.get() == RUNNING) {
+                        scheduleFlush();
+                    }
                 }
-
-                cancel();
-                subscriber.onFailure(new BackPressureFailure("Cannot emit item due to lack of requests"));
             }
         }
 
         @Override
         public void onItem(final T value) {
+            if (size != Integer.MAX_VALUE) {
+                outstandingUpstream.decrementAndGet();
+            }
+
             int index;
             boolean atBoundary;
-            for (;;) {
-                int current = this.index.get();
+            int current = this.index.get();
+            do {
                 index = current + 1;
                 atBoundary = (index % size == 0);
                 if (this.index.compareAndSet(current, atBoundary ? 0 : index)) {
                     break;
                 }
-            }
+                current = this.index.get();
+            } while (true);
 
             if (index == 1 && !emitEmptyListIfNoItem) {
                 scheduleFlush();
@@ -221,10 +242,73 @@ public final class MultiBufferWithTimeoutOp<T> extends AbstractMultiOperator<T, 
         }
 
         void checkedComplete() {
-            try {
-                flushCallback();
-            } finally {
-                super.onCompletion();
+            List<T> cur;
+            synchronized (this) {
+                if (current != null) {
+                    cur = new ArrayList<>(current);
+                    current = null;
+                } else {
+                    cur = Collections.emptyList();
+                }
+                if (!cur.isEmpty() || emitEmptyListIfNoItem) {
+                    readyBatches.add(cur);
+                }
+            }
+            upstreamDone = true;
+            drain();
+        }
+
+        private void drain() {
+            if (wip.getAndIncrement() != 0) {
+                return;
+            }
+            do {
+                long req = requested.get();
+                while (req > 0L) {
+                    List<T> batch;
+                    synchronized (this) {
+                        batch = readyBatches.poll();
+                    }
+                    if (batch == null) {
+                        break;
+                    }
+                    if (req != Long.MAX_VALUE) {
+                        requested.decrementAndGet();
+                    }
+                    downstream.onItem(batch);
+                    if (terminated.get() == RUNNING) {
+                        requestUpstream();
+                    }
+                    req = requested.get();
+                }
+
+                if (upstreamDone && !completionSent) {
+                    boolean empty;
+                    synchronized (this) {
+                        empty = readyBatches.isEmpty();
+                    }
+                    if (empty) {
+                        completionSent = true;
+                        super.onCompletion();
+                        return;
+                    }
+                }
+            } while (wip.addAndGet(-1) != 0);
+        }
+
+        private void requestUpstream() {
+            if (size == Integer.MAX_VALUE || requested.get() <= 0) {
+                return;
+            }
+            long outstanding = outstandingUpstream.get();
+            long toRequest = Math.max(0, (long) size - outstanding);
+            while (toRequest > 0) {
+                if (outstandingUpstream.compareAndSet(outstanding, outstanding + toRequest)) {
+                    super.request(toRequest);
+                    return;
+                }
+                outstanding = outstandingUpstream.get();
+                toRequest = Math.max(0, (long) size - outstanding);
             }
         }
 
@@ -232,13 +316,18 @@ public final class MultiBufferWithTimeoutOp<T> extends AbstractMultiOperator<T, 
         public void request(long n) {
             if (n > 0) {
                 Subscriptions.add(requested, n);
-                if (terminated.get() != RUNNING) {
+                int state = terminated.get();
+                if (state == CANCELLED || state == FAILED) {
                     return;
                 }
-                if (size == Integer.MAX_VALUE || n == Long.MAX_VALUE) {
-                    super.request(Long.MAX_VALUE);
-                } else {
-                    super.request(Subscriptions.multiply(n, size));
+                drain();
+                if (state == RUNNING) {
+                    if (size == Integer.MAX_VALUE || n == Long.MAX_VALUE) {
+                        outstandingUpstream.set(Long.MAX_VALUE);
+                        super.request(Long.MAX_VALUE);
+                    } else {
+                        requestUpstream();
+                    }
                 }
             } else {
                 onFailure(Subscriptions.getInvalidRequestException());
@@ -265,6 +354,7 @@ public final class MultiBufferWithTimeoutOp<T> extends AbstractMultiOperator<T, 
                         current.clear();
                         current = null;
                     }
+                    readyBatches.clear();
                 }
                 super.onFailure(throwable);
             } else {
@@ -291,9 +381,12 @@ public final class MultiBufferWithTimeoutOp<T> extends AbstractMultiOperator<T, 
                     task = null;
                 }
                 super.cancel();
-                List<T> cur = current;
-                if (cur != null) {
-                    cur.clear();
+                synchronized (this) {
+                    if (current != null) {
+                        current.clear();
+                        current = null;
+                    }
+                    readyBatches.clear();
                 }
             }
         }
