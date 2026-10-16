@@ -415,4 +415,24 @@ class MultiBufferWithTimeoutDemandTest {
         }
         assertThat(sub.getFailure()).isNull();
     }
+
+    @Test
+    void inFlightItemsSplitByTimersQueueMultipleBatches() {
+        AssertSubscriber<List<Integer>> sub = subscribe(SIZE, 0);
+
+        sub.request(1);
+        emit(0, 2);
+        fireLatestTimer();
+        assertThat(sub.getItems()).containsExactly(List.of(0, 1, 2));
+
+        // 7 items still in flight, no top-up (demand=0). Timers split them into 2 batches.
+        emit(3, 5);
+        fireLatestTimer();
+        emit(6, 9);
+        fireLatestTimer();
+        assertThat(sub.getItems()).hasSize(1);
+
+        sub.request(2);
+        assertThat(sub.getItems()).containsExactly(List.of(0, 1, 2), List.of(3, 4, 5), List.of(6, 7, 8, 9));
+    }
 }
