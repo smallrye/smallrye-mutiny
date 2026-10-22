@@ -13,19 +13,19 @@ public class FilterTest {
     @Test
     public void filter() {
         Multi<Integer> multi = Multi.createFrom().range(1, 11);
-        // <filter>
+        // tag::filter[]
         List<Integer> list = multi
                 .select().where(i -> i > 6)
                 .collect().asList()
                 .await().indefinitely();
-        // </filter>
+        // end::filter[]
 
-        // <test>
+        // tag::test[]
         List<Integer> list2 = multi
                 .select().when(i -> Uni.createFrom().item(i > 6))
                 .collect().asList()
                 .await().indefinitely();
-        // </test>
+        // end::test[]
 
         assertThat(list).containsExactly(7, 8, 9, 10);
         assertThat(list2).containsExactly(7, 8, 9, 10);

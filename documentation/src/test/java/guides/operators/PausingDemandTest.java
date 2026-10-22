@@ -18,7 +18,7 @@ class PausingDemandTest {
 
     @Test
     void basicPausing() {
-        // <basic>
+        // tag::basic[]
         DemandPauser pauser = new DemandPauser();
 
         AssertSubscriber<Integer> sub = AssertSubscriber.create();
@@ -51,12 +51,12 @@ class PausingDemandTest {
         // All items eventually arrive
         sub.awaitCompletion();
         assertThat(sub.getItems()).hasSize(100);
-        // </basic>
+        // end::basic[]
     }
 
     @Test
     void initiallyPaused() {
-        // <initially-paused>
+        // tag::initially-paused[]
         DemandPauser pauser = new DemandPauser();
 
         AssertSubscriber<Integer> sub = Multi.createFrom().range(0, 50)
@@ -74,12 +74,12 @@ class PausingDemandTest {
         pauser.resume();
         sub.awaitCompletion();
         assertThat(sub.getItems()).hasSize(50);
-        // </initially-paused>
+        // end::initially-paused[]
     }
 
     @Test
     void lateSubscription() {
-        // <late-subscription>
+        // tag::late-subscription[]
         DemandPauser pauser = new DemandPauser();
         AtomicBoolean subscribed = new AtomicBoolean(false);
 
@@ -101,12 +101,12 @@ class PausingDemandTest {
         await().untilAsserted(() -> assertThat(subscribed.get()).isTrue());
         sub.awaitCompletion();
         assertThat(sub.getItems()).hasSize(50);
-        // </late-subscription>
+        // end::late-subscription[]
     }
 
     @Test
     void bufferStrategy() {
-        // <buffer-strategy>
+        // tag::buffer-strategy[]
         DemandPauser pauser = new DemandPauser();
 
         AssertSubscriber<Long> sub = AssertSubscriber.create(Long.MAX_VALUE);
@@ -135,12 +135,12 @@ class PausingDemandTest {
         // Resume drains the buffer
         pauser.resume();
         await().untilAsserted(() -> assertThat(pauser.bufferSize()).isEqualTo(0));
-        // </buffer-strategy>
+        // end::buffer-strategy[]
     }
 
     @Test
     void dropStrategy() {
-        // <drop-strategy>
+        // tag::drop-strategy[]
         DemandPauser pauser = new DemandPauser();
 
         AssertSubscriber<Long> sub = Multi.createFrom().ticks().every(Duration.ofMillis(5))
@@ -168,12 +168,12 @@ class PausingDemandTest {
         sub.awaitCompletion();
         // Not all items arrived (some were dropped)
         assertThat(sub.getItems()).hasSizeLessThan(200);
-        // </drop-strategy>
+        // end::drop-strategy[]
     }
 
     @Test
     void bufferManagement() {
-        // <buffer-management>
+        // tag::buffer-management[]
         DemandPauser pauser = new DemandPauser();
 
         AssertSubscriber<Long> sub = Multi.createFrom().ticks().every(Duration.ofMillis(10))
@@ -202,7 +202,7 @@ class PausingDemandTest {
 
         // Resume - items continue from current position (cleared items are lost)
         pauser.resume();
-        // </buffer-management>
+        // end::buffer-management[]
     }
 
     @Test

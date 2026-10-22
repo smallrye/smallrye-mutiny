@@ -1,0 +1,152 @@
+= Index
+include::_attributes.adoc[]
+
+== Document kinds
+
+[width="100%",cols="18%,82%",options="header",]
+|===
+|Tag |Description
+|`tutorial` |Tutorials to get started with Mutiny.
+|`guides` |Topic-centric guides on how to use Mutiny.
+|`reference` |Reference documents to understand core concepts in Mutiny.
+|===
+
+== Audience level
+
+[cols=",",options="header",]
+|===
+|Tag |Description
+|`beginner` |Reading materials if you are new to Mutiny
+|`intermediate` |Intermediate operations beyond the basics
+|`advanced` |Advanced operations beyond classic usage of Mutiny
+|===
+
+== Tags
+
+// Pages declare their tags with :topics: in their header.
+
+=== advanced
+
+* xref:guides/custom-operators.adoc[Can I have custom operators?]
+* xref:guides/context-passing.adoc[Context passing]
+* xref:guides/controlling-demand.adoc[Controlling the demand]
+* xref:guides/imperative-to-reactive.adoc[From imperative to reactive]
+* xref:guides/reactive-to-imperative.adoc[From reactive to imperative]
+* xref:guides/hot-streams.adoc[Hot streams]
+* xref:guides/integrate-a-non-reactive-source.adoc[How can I create a Multi from a non-reactive source?]
+* xref:guides/framework-integration.adoc[How can I integrate Mutiny with my framework?]
+* xref:guides/dropped-exceptions.adoc[How to deal with dropped exceptions?]
+* xref:guides/polling.adoc[How to use polling?]
+* xref:reference/publications.adoc[Publications]
+* xref:guides/replaying-multis.adoc[Replaying Multis]
+* xref:guides/spies.adoc[Spying on events]
+* xref:guides/rx.adoc[Using map, flatMap and concatMap]
+* xref:guides/converters.adoc[Using other reactive programming libraries]
+
+=== beginner
+
+* xref:guides/broadcasting-to-multiple-subscribers.adoc[Broadcasting to multiple subscribers (like server-sent events, websockets, etc)]
+* xref:guides/collecting-items.adoc[Collecting items from Multi]
+* xref:tutorials/creating-multi-pipelines.adoc[Creating `Multi` pipelines]
+* xref:tutorials/creating-uni-pipelines.adoc[Creating `Uni` pipelines]
+* xref:guides/eliminate-duplicates-and-repetitions.adoc[Eliminate duplicates and repetitions]
+* xref:guides/filtering-items.adoc[Filtering items from Multi]
+* xref:tutorials/getting-mutiny.adoc[Getting started with Mutiny]
+* xref:tutorials/mutiny-workshop.adoc[Go further with the Mutiny workshop!]
+* xref:reference/going-reactive-a-few-pitfalls.adoc[Going reactive: a few pitfalls]
+* xref:tutorials/handling-failures.adoc[Handling failures]
+* xref:tutorials/hello-mutiny.adoc[Hello Mutiny!]
+* xref:guides/testing.adoc[How can I write unit / integration tests?]
+* xref:guides/handling-null.adoc[How to handle null?]
+* xref:guides/logging.adoc[Logging events]
+* xref:reference/migrating-to-mutiny-2.adoc[Migrating to Mutiny 2]
+* xref:tutorials/observing-events.adoc[Observing events]
+* xref:tutorials/retrying.adoc[Retrying on failures]
+* xref:guides/shortcut-methods.adoc[Shortcut methods]
+* xref:guides/take-skip-items.adoc[Take/Skip the first or last items]
+* xref:tutorials/transforming-items.adoc[Transforming items]
+* xref:tutorials/transforming-items-asynchronously.adoc[Transforming items asynchronously]
+* xref:reference/uni-and-multi.adoc[Uni and Multi]
+* xref:reference/what-is-reactive-programming.adoc[What is Reactive Programming?]
+* xref:reference/what-makes-mutiny-different.adoc[What makes Mutiny different?]
+* xref:reference/why-is-asynchronous-important.adoc[Why is asynchronous important?]
+
+=== guide
+
+* xref:guides/broadcasting-to-multiple-subscribers.adoc[Broadcasting to multiple subscribers (like server-sent events, websockets, etc)]
+* xref:guides/custom-operators.adoc[Can I have custom operators?]
+* xref:guides/collecting-items.adoc[Collecting items from Multi]
+* xref:guides/combining-items.adoc[Combining items from streams]
+* xref:guides/context-passing.adoc[Context passing]
+* xref:guides/controlling-demand.adoc[Controlling the demand]
+* xref:guides/unchecked-exceptions.adoc[Dealing with checked exceptions]
+* xref:guides/eliminate-duplicates-and-repetitions.adoc[Eliminate duplicates and repetitions]
+* xref:guides/filtering-items.adoc[Filtering items from Multi]
+* xref:guides/imperative-to-reactive.adoc[From imperative to reactive]
+* xref:guides/reactive-to-imperative.adoc[From reactive to imperative]
+* xref:guides/grouping-items.adoc[Grouping items from Multi]
+* xref:guides/hot-streams.adoc[Hot streams]
+* xref:guides/integrate-a-non-reactive-source.adoc[How can I create a Multi from a non-reactive source?]
+* xref:guides/framework-integration.adoc[How can I integrate Mutiny with my framework?]
+* xref:guides/testing.adoc[How can I write unit / integration tests?]
+* xref:guides/emission-threads.adoc[How to change the emission thread?]
+* xref:guides/completion-stage.adoc[How to deal with CompletionStage?]
+* xref:guides/dropped-exceptions.adoc[How to deal with dropped exceptions?]
+* xref:guides/delaying-events.adoc[How to delay events?]
+* xref:guides/branching.adoc[How to do branching in a reactive pipeline?]
+* xref:guides/handling-null.adoc[How to handle null?]
+* xref:guides/handling-timeouts.adoc[How to handle timeouts?]
+* xref:guides/pagination.adoc[How to use paginated APIs?]
+* xref:guides/polling.adoc[How to use polling?]
+* xref:guides/joining-unis.adoc[Joining several unis]
+* xref:guides/kotlin.adoc[Kotlin integration]
+* xref:guides/logging.adoc[Logging events]
+* xref:guides/merging-and-concatenating-streams.adoc[Merging and Concatenating Streams]
+* xref:guides/replaying-multis.adoc[Replaying Multis]
+* xref:guides/shortcut-methods.adoc[Shortcut methods]
+* xref:guides/multi-split.adoc[Splitting a Multi into several Multi]
+* xref:guides/spies.adoc[Spying on events]
+* xref:guides/take-skip-items.adoc[Take/Skip the first or last items]
+* xref:guides/rx.adoc[Using map, flatMap and concatMap]
+* xref:guides/converters.adoc[Using other reactive programming libraries]
+* xref:guides/emit-on-vs-run-subscription-on.adoc[What is the difference between emitOn and runSubscriptionOn?]
+
+=== intermediate
+
+* xref:guides/combining-items.adoc[Combining items from streams]
+* xref:guides/unchecked-exceptions.adoc[Dealing with checked exceptions]
+* xref:guides/grouping-items.adoc[Grouping items from Multi]
+* xref:guides/emission-threads.adoc[How to change the emission thread?]
+* xref:guides/completion-stage.adoc[How to deal with CompletionStage?]
+* xref:guides/delaying-events.adoc[How to delay events?]
+* xref:guides/branching.adoc[How to do branching in a reactive pipeline?]
+* xref:guides/handling-timeouts.adoc[How to handle timeouts?]
+* xref:guides/pagination.adoc[How to use paginated APIs?]
+* xref:guides/joining-unis.adoc[Joining several unis]
+* xref:guides/kotlin.adoc[Kotlin integration]
+* xref:guides/merging-and-concatenating-streams.adoc[Merging and Concatenating Streams]
+* xref:guides/multi-split.adoc[Splitting a Multi into several Multi]
+* xref:guides/emit-on-vs-run-subscription-on.adoc[What is the difference between emitOn and runSubscriptionOn?]
+
+=== reference
+
+* xref:reference/going-reactive-a-few-pitfalls.adoc[Going reactive: a few pitfalls]
+* xref:reference/migrating-to-mutiny-2.adoc[Migrating to Mutiny 2]
+* xref:reference/publications.adoc[Publications]
+* xref:reference/uni-and-multi.adoc[Uni and Multi]
+* xref:reference/what-is-reactive-programming.adoc[What is Reactive Programming?]
+* xref:reference/what-makes-mutiny-different.adoc[What makes Mutiny different?]
+* xref:reference/why-is-asynchronous-important.adoc[Why is asynchronous important?]
+
+=== tutorial
+
+* xref:tutorials/creating-multi-pipelines.adoc[Creating `Multi` pipelines]
+* xref:tutorials/creating-uni-pipelines.adoc[Creating `Uni` pipelines]
+* xref:tutorials/getting-mutiny.adoc[Getting started with Mutiny]
+* xref:tutorials/mutiny-workshop.adoc[Go further with the Mutiny workshop!]
+* xref:tutorials/handling-failures.adoc[Handling failures]
+* xref:tutorials/hello-mutiny.adoc[Hello Mutiny!]
+* xref:tutorials/observing-events.adoc[Observing events]
+* xref:tutorials/retrying.adoc[Retrying on failures]
+* xref:tutorials/transforming-items.adoc[Transforming items]
+* xref:tutorials/transforming-items-asynchronously.adoc[Transforming items asynchronously]
