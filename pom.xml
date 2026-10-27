@@ -104,7 +104,7 @@
         <testng-junit5-engine.version>1.1.0</testng-junit5-engine.version>
 
         <mockito-core.version>5.24.0</mockito-core.version>
-        <byte-buddy.version>1.18.15</byte-buddy.version>
+        <byte-buddy.version>1.18.16</byte-buddy.version>
 
         <revapi-maven-plugin.version>0.15.1</revapi-maven-plugin.version>
         <revapi-java.version>0.28.4</revapi-java.version>
@@ -129,7 +129,7 @@
         <jreleaser-maven-plugin.version>1.26.0</jreleaser-maven-plugin.version>
         <cyclonedx-maven-plugin.version>2.9.3</cyclonedx-maven-plugin.version>
         <maven-shade-plugin.version>3.6.2</maven-shade-plugin.version>
-        <maven-failsafe-plugin.version>3.6.0</maven-failsafe-plugin.version>
+        <maven-failsafe-plugin.version>3.6.1</maven-failsafe-plugin.version>
         <maven-release-plugin.version>3.3.1</maven-release-plugin.version>
         <jacoco-maven-plugin.version>0.8.15</jacoco-maven-plugin.version>
         <maven-dependency-plugin.version>3.11.0</maven-dependency-plugin.version>
