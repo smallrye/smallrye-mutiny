@@ -12,34 +12,34 @@ public class ObserveTest {
     public void test() {
         Uni<String> uni = Uni.createFrom().item("hello");
         Multi<String> multi = Multi.createFrom().items("a", "b", "c");
-        // <invoke>
+        // tag::invoke[]
         Uni<String> u = uni.onItem()
             .invoke(i -> System.out.println("Received item: " + i));
 
         Multi<String> m = multi.onItem()
             .invoke(i -> System.out.println("Received item: " + i));
-        // </invoke>
+        // end::invoke[]
 
-        // <call>
+        // tag::call[]
         multi
             .onItem().call(i ->
                 Uni.createFrom().voidItem()
                     .onItem().delayIt().by(Duration.ofSeconds(1)
             )
         );
-        // </call>
+        // end::call[]
 
         MyResource resource = new MyResource();
-        // <close>
+        // tag::close[]
         multi
             .onCompletion().call(() -> resource.close());
-        // </close>
+        // end::close[]
     }
 
     @Test
     public void all() {
         Multi<String> multi = Multi.createFrom().items("a", "b", "c");
-        // <invoke-all>
+        // tag::invoke-all[]
         multi
             .onSubscription()
                 .invoke(() -> System.out.println("⬇️ Subscribed"))
@@ -53,7 +53,7 @@ public class ObserveTest {
                 .invoke(() -> System.out.println("⬆️ Cancelled"))
             .onRequest()
                 .invoke(l -> System.out.println("⬆️ Requested: " + l));
-        // </invoke-all>
+        // end::invoke-all[]
 
     }
 

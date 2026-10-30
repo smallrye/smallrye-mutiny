@@ -1,0 +1,16 @@
+name: Documentation
+
+# Renders the documentation with the smallrye.io site, as it will be published, and fails on a
+# broken include or a page that does not render. smallrye.io publishes main nightly and each release.
+on:
+  pull_request:
+    paths:
+      - 'documentation/**'
+      - '.github/workflows/docs.yml'
+  workflow_dispatch:
+
+jobs:
+  docs:
+    uses: smallrye/smallrye.github.io/.github/workflows/docs-check.yml@develop
+    with:
+      project: smallrye-mutiny
