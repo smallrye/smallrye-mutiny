@@ -37,6 +37,29 @@ You can see `Context` as a glorified `ConcurrentHashMap` delegate, although this
 
     They should not be used as general-purpose data structures that are frequently updated and that hold large amounts of data.
 
+## How to create a context?
+
+The `Context` type has static methods to create contexts:
+
+```java linenums="1"
+{{ insert('java/guides/ContextPassingTest.java', 'contextCreation') }}
+```
+
+## How to attach a context to the pipeline?
+
+The only way you can attach a context to the pipeline is by supplying the context upon subscription:
+
+```java linenums="1"
+{{ insert('java/guides/ContextPassingTest.java', 'contextAttach') }}
+```
+
+Note that you can also override the context for any part of your pipeline, which is useful if all you want to do
+is modify a pipeline, not explicitly subscribe to it:
+
+```java linenums="1"
+{{ insert('java/guides/ContextPassingTest.java', 'contextModify') }}
+```
+
 ## How to access a context?
 
 Given a `Uni` or a `Multi`, a context can be accessed using the `withContext` operator, as in:
