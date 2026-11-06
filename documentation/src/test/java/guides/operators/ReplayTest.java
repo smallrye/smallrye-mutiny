@@ -13,14 +13,14 @@ public class ReplayTest {
 
     @Test
     public void replayAll() {
-        // <replay-all>
+        // tag::replay-all[]
         Multi<Integer> upstream = Multi.createFrom().range(0, 10);
 
         Multi<Integer> replay = Multi.createBy().replaying().ofMulti(upstream);
 
         List<Integer> items_1 = replay.collect().asList().await().indefinitely();
         List<Integer> items_2 = replay.collect().asList().await().indefinitely();
-        // </replay-all>
+        // end::replay-all[]
 
         assertThat(items_1)
                 .isEqualTo(items_2)
@@ -30,14 +30,14 @@ public class ReplayTest {
 
     @Test
     public void replayLast() {
-        // <replay-last>
+        // tag::replay-last[]
         Multi<Integer> upstream = Multi.createFrom().range(0, 10);
 
         Multi<Integer> replay = Multi.createBy().replaying().upTo(3).ofMulti(upstream);
 
         List<Integer> items_1 = replay.collect().asList().await().indefinitely();
         List<Integer> items_2 = replay.collect().asList().await().indefinitely();
-        // </replay-last>
+        // end::replay-last[]
 
         assertThat(items_1)
                 .isEqualTo(items_2)
@@ -47,7 +47,7 @@ public class ReplayTest {
 
     @Test
     public void replayWithSeed() {
-        // <replay-seed>
+        // tag::replay-seed[]
         Multi<Integer> upstream = Multi.createFrom().range(0, 10);
         Iterable<Integer> seed = Arrays.asList(-10, -5, -1);
 
@@ -55,7 +55,7 @@ public class ReplayTest {
 
         List<Integer> items_1 = replay.collect().asList().await().indefinitely();
         List<Integer> items_2 = replay.collect().asList().await().indefinitely();
-        // </replay-seed>
+        // end::replay-seed[]
 
         assertThat(items_1)
                 .isEqualTo(items_2)
@@ -65,7 +65,7 @@ public class ReplayTest {
 
     @Test
     public void errors() {
-        // <replay-errors>
+        // tag::replay-errors[]
         Multi<Integer> upstream = Multi.createBy().concatenating().streams(
                 Multi.createFrom().range(0, 10),
                 Multi.createFrom().failure(() -> new IOException("boom"))
@@ -77,6 +77,6 @@ public class ReplayTest {
                 n -> System.out.println(" -> " + n),
                 failure -> System.out.println("Failed: " + failure.getMessage()),
                 () -> System.out.println("Completed"));
-        // </replay-errors>
+        // end::replay-errors[]
     }
 }

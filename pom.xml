@@ -16,7 +16,7 @@
 
     <name>SmallRye Mutiny - Parent</name>
     <description>Intuitive Event-Driven Reactive Programming Library for Java</description>
-    <url>https://smallrye.io/smallrye-mutiny</url>
+    <url>https://smallrye.io/docs/smallrye-mutiny/latest/</url>
 
     <inceptionYear>2019</inceptionYear>
     <organization>
@@ -498,6 +498,40 @@
     </build>
 
     <profiles>
+        <profile>
+            <!-- ./mvnw -Pdocs-preview: the documentation as smallrye.io shows it, at http://localhost:8080/docs/smallrye-mutiny/main/ -->
+            <id>docs-preview</id>
+            <build>
+                <defaultGoal>validate</defaultGoal>
+                <plugins>
+                    <plugin>
+                        <groupId>dev.jbang</groupId>
+                        <artifactId>jbang-maven-plugin</artifactId>
+                        <version>0.0.8</version>
+                        <inherited>false</inherited>
+                        <executions>
+                            <execution>
+                                <id>docs-preview</id>
+                                <phase>validate</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <script>docs-preview@smallrye/smallrye.github.io</script>
+                                    <args>
+                                        <arg>--source=${project.basedir}</arg>
+                                    </args>
+                                    <trusts>
+                                        <trust>https://github.com/smallrye/smallrye.github.io/</trust>
+                                    </trusts>
+                                    <jbangInstallDir>${user.home}/.m2/jbang</jbangInstallDir>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
         <profile>
             <id>release</id>
             <modules>
