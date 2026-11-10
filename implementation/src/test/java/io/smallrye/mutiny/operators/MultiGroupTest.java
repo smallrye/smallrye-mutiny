@@ -22,6 +22,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Flow.Subscriber;
 import java.util.concurrent.Flow.Subscription;
 import java.util.concurrent.Future;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -1172,6 +1173,24 @@ public class MultiGroupTest {
         } finally {
             executor.shutdownNow();
         }
+    }
+
+    @Test
+    void rejectedFlushScheduleMustCancelUpstream() {
+        ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(1);
+        executor.shutdown();
+        AtomicBoolean cancelled = new AtomicBoolean();
+        AtomicReference<MultiEmitter<? super Integer>> emitter = new AtomicReference<>();
+        AssertSubscriber<List<Integer>> subscriber = new MultiBufferWithTimeoutOp<>(
+                Multi.createFrom().<Integer> emitter(emitter::set)
+                        .onCancellation().invoke(() -> cancelled.set(true)),
+                2, Duration.ofSeconds(10), executor, false)
+                .subscribe().withSubscriber(AssertSubscriber.create(10));
+
+        emitter.get().emit(1);
+
+        subscriber.assertFailedWith(RejectedExecutionException.class);
+        assertThat(cancelled).isTrue();
     }
 
     @Nested
