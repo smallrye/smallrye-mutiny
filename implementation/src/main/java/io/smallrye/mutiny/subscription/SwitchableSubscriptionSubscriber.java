@@ -145,6 +145,7 @@ public abstract class SwitchableSubscriptionSubscriber<O> implements MultiSubscr
     @Override
     public final void request(long n) {
         if (n <= 0) {
+            cancel();
             downstream.onError(Subscriptions.getInvalidRequestException());
             return;
         }

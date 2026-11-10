@@ -62,6 +62,21 @@ public class SwitchableSubscriptionSubscriberTest {
     }
 
     @Test
+    public void testInvalidRequestsCancelUpstream() {
+        switchable = new SwitchableSubscriptionSubscriber<Integer>(downstream) {
+            @Override
+            public void onItem(Integer item) {
+                downstream.onItem(item);
+            }
+        };
+        Subscription upstream = mock(Subscription.class);
+        switchable.onSubscribe(upstream);
+        switchable.request(-1);
+        subscriber.assertFailedWith(IllegalArgumentException.class, "");
+        verify(upstream, times(1)).cancel();
+    }
+
+    @Test
     public void testCancellationIfTheDownstreamSubscriptionIsCancelled() {
         switchable = new SwitchableSubscriptionSubscriber<Integer>(downstream) {
             @Override
