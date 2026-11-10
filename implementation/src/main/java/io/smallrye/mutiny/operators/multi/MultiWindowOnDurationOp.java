@@ -79,6 +79,8 @@ public class MultiWindowOnDurationOp<T> extends AbstractMultiOperator<T, Multi<T
                         requested.decrementAndGet();
                     }
                 } else {
+                    terminated = true;
+                    super.cancel();
                     downstream.onFailure(new BackPressureFailure("no requests"));
                     return;
                 }

@@ -485,13 +485,11 @@ public class MultiGroupTest {
     }
 
     @Test
-    public void rejectBadRequestOnTineWindow() {
-        AssertSubscriber<?> sub = Multi.createBy().concatenating().streams(
-                Multi.createFrom().range(1, 7),
-                Multi.createFrom().range(100, 200))
-                .group().intoMultis().every(Duration.ofMillis(1))
-                .subscribe().withSubscriber(AssertSubscriber.create());
-        sub.request(-1L).assertFailedWith(IllegalArgumentException.class, "than 0");
+    public void testTimeWindowWithoutInitialDemandSignalsASingleFailure() {
+        Multi.createFrom().empty()
+                .group().intoMultis().every(Duration.ofSeconds(10))
+                .subscribe().withSubscriber(AssertSubscriber.create(0))
+                .assertFailedWith(BackPressureFailure.class);
     }
 
     @ParameterizedTest(name = "{0}")
