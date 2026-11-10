@@ -473,6 +473,18 @@ public class MultiGroupTest {
     }
 
     @Test
+    public void testTimeWindowWithoutDemandCancelsUpstream() {
+        AtomicBoolean cancelled = new AtomicBoolean();
+        AssertSubscriber<Multi<Object>> subscriber = Multi.createFrom().nothing()
+                .onCancellation().invoke(() -> cancelled.set(true))
+                .group().intoMultis().every(Duration.ofMillis(10))
+                .subscribe().withSubscriber(AssertSubscriber.create(1));
+
+        subscriber.awaitFailure().assertFailedWith(BackPressureFailure.class);
+        assertThat(cancelled).isTrue();
+    }
+
+    @Test
     public void rejectBadRequestOnTineWindow() {
         AssertSubscriber<?> sub = Multi.createBy().concatenating().streams(
                 Multi.createFrom().range(1, 7),

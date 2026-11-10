@@ -211,6 +211,8 @@ public class MultiWindowOnDurationOp<T> extends AbstractMultiOperator<T, Multi<T
                         } else {
                             current = null;
                             queue.clear();
+                            terminated = true;
+                            super.cancel();
                             actual.onError(new BackPressureFailure("no requests"));
                             timer.cancel();
                             return;
