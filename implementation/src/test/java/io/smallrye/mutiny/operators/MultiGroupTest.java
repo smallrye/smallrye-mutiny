@@ -952,6 +952,26 @@ public class MultiGroupTest {
     }
 
     @Test
+    public void groupByStopsCreatingGroupsAfterCancellation() {
+        AtomicBoolean cancelled = new AtomicBoolean();
+        AtomicReference<MultiEmitter<? super Integer>> emitter = new AtomicReference<>();
+        AssertSubscriber<GroupedMulti<Integer, Integer>> subscriber = Multi.createFrom().<Integer> emitter(emitter::set)
+                .onCancellation().invoke(() -> cancelled.set(true))
+                .group().by(i -> i % 2)
+                .subscribe().withSubscriber(AssertSubscriber.create(10));
+
+        emitter.get().emit(0);
+        AssertSubscriber<Integer> group = subscriber.getItems().get(0).subscribe()
+                .withSubscriber(AssertSubscriber.create(10));
+        subscriber.cancel();
+        emitter.get().emit(1);
+        group.cancel();
+
+        assertThat(subscriber.getItems()).hasSize(1);
+        assertThat(cancelled).isTrue();
+    }
+
+    @Test
     public void testCancellationOnUpstream() {
         AssertSubscriber<GroupedMulti<Long, Long>> subscriber = Multi.createFrom().ticks().every(Duration.ofMillis(2))
                 .onOverflow().drop()

@@ -55,8 +55,6 @@ public final class MultiGroupByOp<T, K, V> extends AbstractMultiOperator<T, Grou
 
         private static final Object NO_KEY = new Object();
 
-        private final AtomicBoolean cancelled = new AtomicBoolean();
-
         private final AtomicLong requested = new AtomicLong();
 
         private final AtomicInteger groupCount = new AtomicInteger(1);
@@ -176,7 +174,7 @@ public final class MultiGroupByOp<T, K, V> extends AbstractMultiOperator<T, Grou
         public void cancel() {
             // cancelling the main source means we don't want any more groups
             // but running groups still require new values
-            if (cancelled.compareAndSet(false, true)) {
+            if (compareAndSwapDownstreamCancellationRequest()) {
                 if (groupCount.decrementAndGet() == 0) {
                     cancelUpstream();
                 }
