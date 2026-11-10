@@ -31,6 +31,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.stream.Stream;
 
 import org.assertj.core.api.Condition;
 import org.junit.jupiter.api.AfterEach;
@@ -39,6 +41,9 @@ import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.ResourceAccessMode;
 import org.junit.jupiter.api.parallel.ResourceLock;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import io.smallrye.mutiny.GroupedMulti;
 import io.smallrye.mutiny.Multi;
@@ -474,6 +479,39 @@ public class MultiGroupTest {
                 .group().intoMultis().every(Duration.ofMillis(1))
                 .subscribe().withSubscriber(AssertSubscriber.create());
         sub.request(-1L).assertFailedWith(IllegalArgumentException.class, "than 0");
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("groupingOperators")
+    public void rejectBadRequestAndCancelUpstream(String name, Function<Multi<Integer>, Multi<?>> operator) {
+        AtomicBoolean cancelled = new AtomicBoolean();
+        AssertSubscriber<?> subscriber = operator.apply(Multi.createFrom().<Integer> emitter(e -> {
+        })
+                .onCancellation().invoke(() -> cancelled.set(true)))
+                .subscribe().withSubscriber(AssertSubscriber.create(1));
+
+        subscriber.request(-1L).assertFailedWith(IllegalArgumentException.class, "than 0");
+        assertThat(cancelled).isTrue();
+    }
+
+    static Stream<Arguments> groupingOperators() {
+        return Stream.of(
+                Arguments.of("intoLists().of(2)",
+                        (Function<Multi<Integer>, Multi<?>>) m -> m.group().intoLists().of(2)),
+                Arguments.of("intoLists().of(2, 3)",
+                        (Function<Multi<Integer>, Multi<?>>) m -> m.group().intoLists().of(2, 3)),
+                Arguments.of("intoLists().of(3, 2)",
+                        (Function<Multi<Integer>, Multi<?>>) m -> m.group().intoLists().of(3, 2)),
+                Arguments.of("intoLists().of(2, Duration)",
+                        (Function<Multi<Integer>, Multi<?>>) m -> m.group().intoLists().of(2, Duration.ofSeconds(30))),
+                Arguments.of("intoMultis().of(2)",
+                        (Function<Multi<Integer>, Multi<?>>) m -> m.group().intoMultis().of(2)),
+                Arguments.of("intoMultis().of(2, 3)",
+                        (Function<Multi<Integer>, Multi<?>>) m -> m.group().intoMultis().of(2, 3)),
+                Arguments.of("intoMultis().of(3, 2)",
+                        (Function<Multi<Integer>, Multi<?>>) m -> m.group().intoMultis().of(3, 2)),
+                Arguments.of("intoMultis().every(Duration)",
+                        (Function<Multi<Integer>, Multi<?>>) m -> m.group().intoMultis().every(Duration.ofSeconds(30))));
     }
 
     @Test
