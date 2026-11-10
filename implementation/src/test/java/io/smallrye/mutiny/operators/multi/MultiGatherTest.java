@@ -279,6 +279,24 @@ class MultiGatherTest {
     }
 
     @Test
+    void cancelUpstreamOnExceptionInInitialAccumulatorSupplier() {
+        AtomicBoolean upstreamCancelled = new AtomicBoolean();
+        AssertSubscriber<Object> sub = Multi.createFrom().<Integer> emitter(e -> {
+        })
+                .onCancellation().invoke(() -> upstreamCancelled.set(true))
+                .onItem().gather()
+                .into(() -> {
+                    throw new IllegalStateException("boom");
+                })
+                .accumulate((acc, next) -> "")
+                .extract((acc, completed) -> Optional.empty())
+                .finalize(acc -> Optional.empty())
+                .subscribe().withSubscriber(AssertSubscriber.create(5));
+        sub.assertFailedWith(IllegalStateException.class, "boom");
+        assertThat(upstreamCancelled).isTrue();
+    }
+
+    @Test
     void rejectExceptionInAccumulator() {
         AssertSubscriber<Object> sub = Multi.createFrom().range(1, 100)
                 .onItem().gather()
@@ -290,6 +308,21 @@ class MultiGatherTest {
                 .finalize(acc -> Optional.empty())
                 .subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE));
         sub.assertFailedWith(RuntimeException.class, "boom");
+    }
+
+    @Test
+    void cancelUpstreamOnExceptionInAccumulator() {
+        AtomicBoolean upstreamCancelled = new AtomicBoolean();
+        AtomicReference<MultiEmitter<? super Integer>> emitter = new AtomicReference<>();
+        AssertSubscriber<Integer> sub = Multi.createFrom().<Integer> emitter(emitter::set)
+                .onCancellation().invoke(() -> upstreamCancelled.set(true))
+                .onItem().gather(Gatherers.scan(() -> 0, (acc, next) -> {
+                    throw new IllegalStateException("boom");
+                }))
+                .subscribe().withSubscriber(AssertSubscriber.create(5));
+        emitter.get().emit(1);
+        sub.assertFailedWith(IllegalStateException.class, "boom");
+        assertThat(upstreamCancelled).isTrue();
     }
 
     @Test
@@ -357,6 +390,19 @@ class MultiGatherTest {
         sub = multi.subscribe().withSubscriber(AssertSubscriber.create());
         sub.request(-10L).assertFailedWith(IllegalArgumentException.class,
                 "The number of items requested must be strictly positive");
+    }
+
+    @Test
+    void cancelUpstreamOnBadRequest() {
+        AtomicBoolean upstreamCancelled = new AtomicBoolean();
+        AssertSubscriber<Integer> sub = Multi.createFrom().<Integer> emitter(e -> {
+        })
+                .onCancellation().invoke(() -> upstreamCancelled.set(true))
+                .onItem().gather(Gatherers.scan(() -> 0, Integer::sum))
+                .subscribe().withSubscriber(AssertSubscriber.create(0));
+        sub.request(-1L).assertFailedWith(IllegalArgumentException.class,
+                "The number of items requested must be strictly positive");
+        assertThat(upstreamCancelled).isTrue();
     }
 
     @Test

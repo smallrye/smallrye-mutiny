@@ -46,6 +46,7 @@ public class MultiGather<I, ACC, O> extends AbstractMultiOperator<I, O> {
                     throw new NullPointerException("The initial accumulator cannot be null");
                 }
             } catch (Throwable err) {
+                subscription.cancel();
                 downstream.onSubscribe(Subscriptions.CANCELLED);
                 onFailure(err);
                 return;
@@ -56,7 +57,7 @@ public class MultiGather<I, ACC, O> extends AbstractMultiOperator<I, O> {
         @Override
         public void request(long numberOfItems) {
             if (numberOfItems <= 0) {
-                onFailure(new IllegalArgumentException("The number of items requested must be strictly positive"));
+                failAndCancel(new IllegalArgumentException("The number of items requested must be strictly positive"));
                 return;
             }
             if (upstream != Subscriptions.CANCELLED) {
@@ -110,7 +111,7 @@ public class MultiGather<I, ACC, O> extends AbstractMultiOperator<I, O> {
                     upstream.request(1L);
                 }
             } catch (Throwable err) {
-                onFailure(err);
+                failAndCancel(err);
             }
         }
 
