@@ -198,7 +198,8 @@ public class MultiDemandPausingOp<T> extends MultiOperator<T, T> implements Paus
                 // When paused buffer items if necessary
                 if ((!unbounded && strictBoundCounter.getAndIncrement() >= bufferSize) || !queue.offer(item)) {
                     // Buffer is full, throw exception
-                    onFailure(new IllegalStateException("Buffer overflow: cannot buffer more than " + bufferSize + " items"));
+                    failAndCancel(
+                            new IllegalStateException("Buffer overflow: cannot buffer more than " + bufferSize + " items"));
                 }
             } else {
                 super.onItem(item);
@@ -208,7 +209,7 @@ public class MultiDemandPausingOp<T> extends MultiOperator<T, T> implements Paus
         @Override
         public void request(long numberOfItems) {
             if (numberOfItems <= 0) {
-                onFailure(Subscriptions.getInvalidRequestException());
+                failAndCancel(Subscriptions.getInvalidRequestException());
                 return;
             }
             Flow.Subscription subscription = getUpstreamSubscription();
@@ -226,7 +227,7 @@ public class MultiDemandPausingOp<T> extends MultiOperator<T, T> implements Paus
                     subscription.request(currentDemand);
                 }
             } catch (Throwable failure) {
-                onFailure(failure);
+                failAndCancel(failure);
             }
         }
 
