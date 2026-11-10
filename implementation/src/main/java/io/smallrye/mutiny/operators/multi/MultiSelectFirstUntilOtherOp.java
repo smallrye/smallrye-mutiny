@@ -119,7 +119,15 @@ public final class MultiSelectFirstUntilOtherOp<T, U> extends AbstractMultiOpera
         }
 
         public void onOtherFailure(Throwable failure) {
-            super.onFailure(failure);
+            Subscription subscription = getAndSetUpstreamSubscription(Subscriptions.CANCELLED);
+            if (subscription != Subscriptions.CANCELLED) {
+                if (subscription != null) {
+                    subscription.cancel();
+                }
+                downstream.onFailure(failure);
+            } else {
+                Infrastructure.handleDroppedException(failure);
+            }
         }
 
         @Override
@@ -129,7 +137,13 @@ public final class MultiSelectFirstUntilOtherOp<T, U> extends AbstractMultiOpera
         }
 
         public void onOtherCompletion() {
-            super.onCompletion();
+            Subscription subscription = getAndSetUpstreamSubscription(Subscriptions.CANCELLED);
+            if (subscription != Subscriptions.CANCELLED) {
+                if (subscription != null) {
+                    subscription.cancel();
+                }
+                downstream.onCompletion();
+            }
         }
     }
 }
