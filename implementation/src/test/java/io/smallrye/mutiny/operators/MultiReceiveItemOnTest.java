@@ -11,6 +11,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.AfterEach;
@@ -116,6 +117,22 @@ public class MultiReceiveItemOnTest {
                 .subscribe().withSubscriber(AssertSubscriber.create(4))
                 .awaitCompletion()
                 .assertItems(1, 2, 3, 4);
+    }
+
+    @Test
+    public void testRunSubscriptionOnWithInvalidRequestCancelsUpstream() {
+        AtomicBoolean cancelled = new AtomicBoolean();
+        AssertSubscriber<Integer> subscriber = Multi.createFrom().<Integer> emitter(emitter -> {
+        })
+                .onCancellation().invoke(() -> cancelled.set(true))
+                .runSubscriptionOn(executor)
+                .subscribe().withSubscriber(AssertSubscriber.create(0));
+
+        subscriber.awaitSubscription();
+        subscriber.request(-1L);
+        subscriber.awaitFailure()
+                .assertFailedWith(IllegalArgumentException.class, "Invalid number of request, must be greater than 0");
+        assertThat(cancelled).isTrue();
     }
 
 }

@@ -9,6 +9,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Flow;
 import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.AfterEach;
@@ -73,6 +74,21 @@ public class MultiEmitOnTest {
         subscriber.awaitFailure(t -> assertThat(t)
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("request"));
+    }
+
+    @Test
+    public void testWithInvalidRequestCancelsUpstream() {
+        AtomicBoolean cancelled = new AtomicBoolean();
+        AssertSubscriber<Integer> subscriber = Multi.createFrom().<Integer> emitter(emitter -> {
+        })
+                .onCancellation().invoke(() -> cancelled.set(true))
+                .emitOn(executor)
+                .subscribe().withSubscriber(AssertSubscriber.create(0));
+
+        subscriber.request(-1L);
+        subscriber.awaitFailure()
+                .assertFailedWith(IllegalArgumentException.class, Subscriptions.getInvalidRequestException().getMessage());
+        assertThat(cancelled).isTrue();
     }
 
     @Test

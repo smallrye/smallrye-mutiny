@@ -136,7 +136,7 @@ public class MultiEmitOnOp<T> extends AbstractMultiOperator<T, T> {
                     schedule();
                 }
             } else {
-                onFailure(Subscriptions.getInvalidRequestException());
+                failAndCancel(Subscriptions.getInvalidRequestException());
             }
         }
 
