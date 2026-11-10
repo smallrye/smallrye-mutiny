@@ -47,7 +47,7 @@ public class MultiOnRequestCall<T> extends AbstractMultiOperator<T, T> {
                     },
                     throwable -> {
                         cancellable.set(null);
-                        super.onFailure(throwable);
+                        failAndCancel(throwable);
                     }));
         }
 

@@ -67,6 +67,27 @@ public class MultiOnRequestTest {
     }
 
     @Test
+    public void testInvokeThrowingExceptionCancelsUpstream() {
+        AssertSubscriber<Object> subscriber = AssertSubscriber.create();
+
+        AtomicBoolean cancelled = new AtomicBoolean();
+
+        Multi.createFrom().emitter(e -> {
+            // Do nothing
+        })
+                .onCancellation().invoke(() -> cancelled.set(true))
+                .onRequest().invoke(count -> {
+                    throw new RuntimeException("woops");
+                })
+                .subscribe().withSubscriber(subscriber);
+
+        subscriber.request(10);
+
+        subscriber.assertFailedWith(RuntimeException.class, "woops");
+        assertThat(cancelled).isTrue();
+    }
+
+    @Test
     public void testCall() {
         AssertSubscriber<Integer> subscriber = AssertSubscriber.create();
 
@@ -122,6 +143,25 @@ public class MultiOnRequestTest {
         subscriber.assertFailedWith(RuntimeException.class, "woops");
         subscriber.assertHasNotReceivedAnyItem();
         assertThat(requested.get()).isEqualTo(10);
+    }
+
+    @Test
+    public void testCallErrorCancelsUpstream() {
+        AssertSubscriber<Object> subscriber = AssertSubscriber.create();
+
+        AtomicBoolean cancelled = new AtomicBoolean();
+
+        Multi.createFrom().emitter(e -> {
+            // Do nothing
+        })
+                .onCancellation().invoke(() -> cancelled.set(true))
+                .onRequest().call(count -> Uni.createFrom().failure(new RuntimeException("woops")))
+                .subscribe().withSubscriber(subscriber);
+
+        subscriber.request(10);
+
+        subscriber.assertFailedWith(RuntimeException.class, "woops");
+        assertThat(cancelled).isTrue();
     }
 
     @Test
