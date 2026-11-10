@@ -511,7 +511,9 @@ public class MultiGroupTest {
                 Arguments.of("intoMultis().of(3, 2)",
                         (Function<Multi<Integer>, Multi<?>>) m -> m.group().intoMultis().of(3, 2)),
                 Arguments.of("intoMultis().every(Duration)",
-                        (Function<Multi<Integer>, Multi<?>>) m -> m.group().intoMultis().every(Duration.ofSeconds(30))));
+                        (Function<Multi<Integer>, Multi<?>>) m -> m.group().intoMultis().every(Duration.ofSeconds(30))),
+                Arguments.of("by(i -> i % 2)",
+                        (Function<Multi<Integer>, Multi<?>>) m -> m.group().by(i -> i % 2)));
     }
 
     @Test
@@ -907,6 +909,46 @@ public class MultiGroupTest {
                 .subscribe().withSubscriber(AssertSubscriber.create(100));
 
         subscriber.assertFailedWith(NullPointerException.class, "");
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("failingGroupBySelectors")
+    public void groupByFailingSelectorFailsGroupsAndCancelsUpstream(String name,
+            Function<Multi<Integer>, Multi<GroupedMulti<Integer, Integer>>> operator) {
+        AtomicBoolean cancelled = new AtomicBoolean();
+        AtomicReference<MultiEmitter<? super Integer>> emitter = new AtomicReference<>();
+        AssertSubscriber<GroupedMulti<Integer, Integer>> subscriber = operator
+                .apply(Multi.createFrom().<Integer> emitter(emitter::set)
+                        .onCancellation().invoke(() -> cancelled.set(true)))
+                .subscribe().withSubscriber(AssertSubscriber.create(10));
+
+        emitter.get().emit(0);
+        AssertSubscriber<Integer> group = subscriber.getItems().get(0).subscribe()
+                .withSubscriber(AssertSubscriber.create(10));
+        emitter.get().emit(1);
+
+        subscriber.assertFailedWith(TestException.class, "boom");
+        group.assertFailedWith(TestException.class, "boom");
+        assertThat(cancelled).isTrue();
+    }
+
+    static Stream<Arguments> failingGroupBySelectors() {
+        return Stream.of(
+                Arguments.of("key selector",
+                        (Function<Multi<Integer>, Multi<GroupedMulti<Integer, Integer>>>) m -> m.group().by(i -> {
+                            if (i == 1) {
+                                throw new TestException("boom");
+                            }
+                            return i;
+                        })),
+                Arguments.of("value selector",
+                        (Function<Multi<Integer>, Multi<GroupedMulti<Integer, Integer>>>) m -> m.group().by(i -> i % 2,
+                                i -> {
+                                    if (i == 1) {
+                                        throw new TestException("boom");
+                                    }
+                                    return i;
+                                })));
     }
 
     @Test

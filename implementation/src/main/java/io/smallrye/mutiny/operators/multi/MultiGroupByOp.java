@@ -99,8 +99,7 @@ public final class MultiGroupByOp<T, K, V> extends AbstractMultiOperator<T, Grou
             try {
                 key = keySelector.apply(item);
             } catch (Throwable ex) {
-                super.onFailure(ex);
-                super.cancel();
+                failAndCancel(ex);
                 return;
             }
 
@@ -125,8 +124,7 @@ public final class MultiGroupByOp<T, K, V> extends AbstractMultiOperator<T, Grou
                     throw new NullPointerException("The selector returned `null`");
                 }
             } catch (Throwable ex) {
-                super.onFailure(ex);
-                super.cancel();
+                failAndCancel(ex);
                 return;
             }
 
@@ -170,7 +168,7 @@ public final class MultiGroupByOp<T, K, V> extends AbstractMultiOperator<T, Grou
                 Subscriptions.add(requested, n);
                 drain();
             } else {
-                onFailure(Subscriptions.getInvalidRequestException());
+                failAndCancel(Subscriptions.getInvalidRequestException());
             }
         }
 
