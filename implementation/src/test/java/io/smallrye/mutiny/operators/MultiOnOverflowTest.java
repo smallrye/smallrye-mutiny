@@ -18,11 +18,15 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.ResourceAccessMode;
 import org.junit.jupiter.api.parallel.ResourceLock;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
@@ -438,6 +442,36 @@ public class MultiOnOverflowTest {
         emitter.get().emit(1);
 
         sub.assertFailedWith(RuntimeException.class, "boom :: 1");
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("failingDropCallbacks")
+    public void dropCallbackFailureCancelsUpstream(String name, Function<Multi<Integer>, Multi<Integer>> operator) {
+        AtomicBoolean cancelled = new AtomicBoolean();
+        AtomicReference<MultiEmitter<? super Integer>> emitter = new AtomicReference<>();
+        AssertSubscriber<Integer> subscriber = operator.apply(Multi.createFrom().<Integer> emitter(emitter::set)
+                .onCancellation().invoke(() -> cancelled.set(true)))
+                .subscribe().withSubscriber(AssertSubscriber.create(0));
+
+        emitter.get().emit(1);
+
+        subscriber.assertFailedWith(IllegalStateException.class, "boom");
+        assertThat(cancelled).isTrue();
+    }
+
+    static Stream<Arguments> failingDropCallbacks() {
+        return Stream.of(
+                Arguments.of("invoke throwing",
+                        (Function<Multi<Integer>, Multi<Integer>>) m -> m.onOverflow().invoke(i -> {
+                            throw new IllegalStateException("boom");
+                        }).drop()),
+                Arguments.of("call throwing",
+                        (Function<Multi<Integer>, Multi<Integer>>) m -> m.onOverflow().call(i -> {
+                            throw new IllegalStateException("boom");
+                        }).drop()),
+                Arguments.of("call failing",
+                        (Function<Multi<Integer>, Multi<Integer>>) m -> m.onOverflow()
+                                .call(i -> Uni.createFrom().failure(new IllegalStateException("boom"))).drop()));
     }
 
     @Test

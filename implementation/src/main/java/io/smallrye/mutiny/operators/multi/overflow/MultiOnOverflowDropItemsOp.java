@@ -80,7 +80,7 @@ public class MultiOnOverflowDropItemsOp<T> extends AbstractMultiOperator<T, T> {
             try {
                 dropConsumer.accept(item);
             } catch (Throwable e) {
-                super.onFailure(e);
+                failAndCancel(e);
             }
         }
 
@@ -92,9 +92,9 @@ public class MultiOnOverflowDropItemsOp<T> extends AbstractMultiOperator<T, T> {
                         ignored -> {
                             // Just drop and ignore
                         },
-                        super::onFailure);
+                        this::failAndCancel);
             } catch (Throwable failure) {
-                super.onFailure(failure);
+                failAndCancel(failure);
             }
         }
 
