@@ -36,7 +36,7 @@ public class MultiOnRequestCall<T> extends AbstractMultiOperator<T, T> {
         @Override
         public void request(long numberOfItems) {
             if (numberOfItems <= 0) {
-                onFailure(new IllegalArgumentException("Invalid number of request, must be greater than 0"));
+                failAndCancel(new IllegalArgumentException("Invalid number of request, must be greater than 0"));
                 return;
             }
             cancellable.set(execute(numberOfItems).subscribe().with(

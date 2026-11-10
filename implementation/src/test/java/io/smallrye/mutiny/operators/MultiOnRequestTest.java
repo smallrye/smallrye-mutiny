@@ -220,4 +220,19 @@ public class MultiOnRequestTest {
                 .subscribe().withSubscriber(AssertSubscriber.create());
         sub.request(-1L).assertFailedWith(IllegalArgumentException.class, "than 0");
     }
+
+    @Test
+    public void rejectBadRequestsAndCancelUpstream() {
+        AtomicBoolean cancelled = new AtomicBoolean();
+
+        AssertSubscriber<Object> sub = Multi.createFrom().emitter(e -> {
+            // Do nothing
+        })
+                .onCancellation().invoke(() -> cancelled.set(true))
+                .onRequest().call(n -> Uni.createFrom().item(n))
+                .subscribe().withSubscriber(AssertSubscriber.create());
+
+        sub.request(-1L).assertFailedWith(IllegalArgumentException.class, "than 0");
+        assertThat(cancelled).isTrue();
+    }
 }
