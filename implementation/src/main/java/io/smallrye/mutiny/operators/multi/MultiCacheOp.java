@@ -146,7 +146,7 @@ public class MultiCacheOp<T> extends AbstractMultiOperator<T, T> implements Subs
         @Override
         public void request(long n) {
             if (n > 0) {
-                Subscriptions.add(requested, n);
+                Subscriptions.addAndHandledAlreadyCancelled(requested, n);
                 replay();
             } else {
                 cancel();
@@ -163,6 +163,11 @@ public class MultiCacheOp<T> extends AbstractMultiOperator<T, T> implements Subs
 
             for (;;) {
 
+                long consumerRequested = requested.get();
+                if (consumerRequested == Long.MIN_VALUE) { // cancelled.
+                    return;
+                }
+
                 if (cache.done && !hasNext()) {
                     if (cache.failure != null) {
                         downstream.onError(cache.failure);
@@ -172,16 +177,11 @@ public class MultiCacheOp<T> extends AbstractMultiOperator<T, T> implements Subs
                     return;
                 }
 
-                long consumerRequested = requested.get();
-                if (consumerRequested == Long.MIN_VALUE) { // cancelled.
-                    return;
-                }
-
                 if (consumerRequested > 0L && hasNext()) {
                     lastIndex = lastIndex + 1;
                     Node<T> node = history.get(lastIndex);
                     downstream.onItem(node.item);
-                    Subscriptions.subtract(requested, 1);
+                    Subscriptions.producedAndHandleAlreadyCancelled(requested, 1);
                     continue;
                 }
 

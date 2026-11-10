@@ -81,4 +81,48 @@ public class MultiCacheTest {
         sub = multi.subscribe().withSubscriber(AssertSubscriber.create());
         sub.request(-1L).assertFailedWith(IllegalArgumentException.class, "than 0");
     }
+
+    @Test
+    public void testCancellationFromOnItemStopsReplay() {
+        Multi<Integer> multi = Multi.createFrom().items(1, 2, 3, 4, 5).cache();
+        multi.subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE)).assertCompleted();
+
+        AssertSubscriber<Integer> subscriber = new AssertSubscriber<>(10) {
+            @Override
+            public synchronized void onItem(Integer item) {
+                super.onItem(item);
+                cancel();
+            }
+        };
+        multi.subscribe().withSubscriber(subscriber);
+
+        subscriber.assertItems(1).assertNotTerminated();
+    }
+
+    @Test
+    public void testCancellationFromOnItemOnLastItemSkipsCompletion() {
+        Multi<Integer> multi = Multi.createFrom().items(1).cache();
+        multi.subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE)).assertCompleted();
+
+        AssertSubscriber<Integer> subscriber = new AssertSubscriber<>(10) {
+            @Override
+            public synchronized void onItem(Integer item) {
+                super.onItem(item);
+                cancel();
+            }
+        };
+        multi.subscribe().withSubscriber(subscriber);
+
+        subscriber.assertItems(1).assertNotTerminated();
+    }
+
+    @Test
+    public void testRequestAfterCancellationIsIgnored() {
+        Multi<Integer> multi = Multi.createFrom().items(1, 2, 3).cache();
+        multi.subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE)).assertCompleted();
+
+        AssertSubscriber<Integer> subscriber = multi.subscribe().withSubscriber(AssertSubscriber.create(0));
+        subscriber.cancel();
+        subscriber.request(1).assertHasNotReceivedAnyItem().assertNotTerminated();
+    }
 }
