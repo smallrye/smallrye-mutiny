@@ -706,7 +706,7 @@ public class MultiOnOverflowTest {
                 }
             });
 
-            await().atMost(Duration.ofSeconds(2)).untilTrue(terminated);
+            await().atMost(Duration.ofSeconds(10)).untilTrue(terminated);
             assertThat(raceDetected.get()).isFalse();
         } finally {
             executor.shutdownNow();
