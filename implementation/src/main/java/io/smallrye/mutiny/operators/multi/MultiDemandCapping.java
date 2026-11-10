@@ -40,7 +40,7 @@ public class MultiDemandCapping<T> extends MultiOperator<T, T> {
                 return;
             }
             if (numberOfItems <= 0) {
-                onFailure(Subscriptions.getInvalidRequestException());
+                failAndCancel(Subscriptions.getInvalidRequestException());
                 return;
             }
             try {
@@ -48,18 +48,18 @@ public class MultiDemandCapping<T> extends MultiOperator<T, T> {
                 long currentDemand = demand.get();
                 long actualDemand = nonNull(function.apply(currentDemand), "actualDemand");
                 if (actualDemand <= 0) {
-                    onFailure(new IllegalArgumentException("Invalid number of request, must be greater than 0"));
+                    failAndCancel(new IllegalArgumentException("Invalid number of request, must be greater than 0"));
                     return;
                 }
                 if (actualDemand > currentDemand) {
-                    onFailure(new IllegalStateException("The demand capping function computed a request of " + actualDemand
+                    failAndCancel(new IllegalStateException("The demand capping function computed a request of " + actualDemand
                             + " elements while the outstanding demand is of " + numberOfItems + " elements"));
                     return;
                 }
                 Subscriptions.produced(demand, actualDemand);
                 subscription.request(actualDemand);
             } catch (Throwable failure) {
-                onFailure(failure);
+                failAndCancel(failure);
             }
         }
     }
