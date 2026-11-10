@@ -286,6 +286,20 @@ public class MultiSelectFirstOrLastTest {
     }
 
     @Test
+    public void rejectBadRequestsOnSelectLastAndCancelUpstream() {
+        AtomicBoolean cancelled = new AtomicBoolean();
+        AssertSubscriber<Integer> subscriber = Multi.createFrom().<Integer> emitter(emitter -> {
+        })
+                .onCancellation().invoke(() -> cancelled.set(true))
+                .select().last(2)
+                .subscribe().withSubscriber(AssertSubscriber.create(0));
+
+        subscriber.request(-1L).assertFailedWith(IllegalArgumentException.class, "than 0");
+
+        assertThat(cancelled).isTrue();
+    }
+
+    @Test
     public void testSelectByTimeWithFailure() {
         Multi<Integer> multi = Multi.createBy().concatenating().streams(
                 Multi.createFrom().range(1, 5),
