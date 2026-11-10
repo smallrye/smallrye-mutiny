@@ -132,6 +132,11 @@ public class MultiSelectLastOp<T> extends AbstractMultiOperator<T, T> {
                             count++;
                         }
 
+                        if (queue.isEmpty() && getUpstreamSubscription() != Subscriptions.CANCELLED) {
+                            downstream.onCompletion();
+                            return;
+                        }
+
                         if (count != 0L && req != Long.MAX_VALUE) {
                             req = requested.addAndGet(-count);
                         }

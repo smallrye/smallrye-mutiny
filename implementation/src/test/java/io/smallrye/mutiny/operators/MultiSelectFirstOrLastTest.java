@@ -174,6 +174,15 @@ public class MultiSelectFirstOrLastTest {
     }
 
     @Test
+    public void testSelectLastCompletesWhenDemandMatchesItems() {
+        Multi.createFrom().items(1, 2, 3)
+                .select().last(2)
+                .subscribe().withSubscriber(AssertSubscriber.create(2))
+                .assertItems(2, 3)
+                .assertCompleted();
+    }
+
+    @Test
     public void testSelectSomeLastItems() {
         AssertSubscriber<Integer> subscriber = AssertSubscriber.create(Long.MAX_VALUE);
 
