@@ -271,6 +271,8 @@ public final class MultiZipOp<O> extends AbstractMulti<O> {
             if (upstream.compareAndSet(null, s)) {
                 queue = Queues.get(prefetch).get();
                 s.request(prefetch);
+            } else {
+                s.cancel();
             }
         }
 
