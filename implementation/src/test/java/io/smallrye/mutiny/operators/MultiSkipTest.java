@@ -61,6 +61,14 @@ public class MultiSkipTest {
     }
 
     @Test
+    public void testSkipFirstWithDemandRequestedInOnSubscribe() {
+        Multi.createFrom().range(1, 10)
+                .skip().first(2)
+                .subscribe().withSubscriber(AssertSubscriber.create(1))
+                .assertItems(3);
+    }
+
+    @Test
     public void testSimpleSkipLast() {
         List<Integer> list = Multi.createFrom().range(1, 5)
                 .skip().last(1)
