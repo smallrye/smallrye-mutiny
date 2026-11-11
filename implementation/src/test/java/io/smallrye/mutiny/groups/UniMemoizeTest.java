@@ -3,6 +3,7 @@ package io.smallrye.mutiny.groups;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.io.IOException;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -36,6 +37,7 @@ import io.smallrye.mutiny.TimeoutException;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.helpers.spies.Spy;
 import io.smallrye.mutiny.helpers.spies.UniOnSubscribeSpy;
+import io.smallrye.mutiny.helpers.test.OnSubscribeUniSignal;
 import io.smallrye.mutiny.helpers.test.UniAssertSubscriber;
 import io.smallrye.mutiny.operators.uni.UniMemoizeOp;
 import io.smallrye.mutiny.subscription.Cancellable;
@@ -330,6 +332,30 @@ class UniMemoizeTest {
 
         sub1.assertNotTerminated();
         sub2.assertNotTerminated();
+    }
+
+    @Test
+    @DisplayName("Test that uni.memoize().indefinitely() does not forward a cached item to a subscriber cancelling in onSubscribe")
+    void testThatCachedItemIsNotForwardedAfterImmediateCancellation() {
+        Uni<Integer> cached = Uni.createFrom().item(1).memoize().indefinitely();
+        cached.await().indefinitely();
+
+        UniAssertSubscriber<Integer> subscriber = new UniAssertSubscriber<>(true);
+        cached.subscribe().withSubscriber(subscriber);
+
+        assertThat(subscriber.getSignals()).hasSize(1).allMatch(OnSubscribeUniSignal.class::isInstance);
+    }
+
+    @Test
+    @DisplayName("Test that uni.memoize().indefinitely() does not forward a cached failure to a subscriber cancelling in onSubscribe")
+    void testThatCachedFailureIsNotForwardedAfterImmediateCancellation() {
+        Uni<Integer> cached = Uni.createFrom().<Integer> failure(new IOException("boom")).memoize().indefinitely();
+        cached.subscribe().withSubscriber(UniAssertSubscriber.create()).assertFailedWith(IOException.class, "boom");
+
+        UniAssertSubscriber<Integer> subscriber = new UniAssertSubscriber<>(true);
+        cached.subscribe().withSubscriber(subscriber);
+
+        assertThat(subscriber.getSignals()).hasSize(1).allMatch(OnSubscribeUniSignal.class::isInstance);
     }
 
     @RepeatedTest(10)

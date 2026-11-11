@@ -79,11 +79,12 @@ public class UniMemoizeOp<I> extends UniOperator<I, I> implements UniSubscriber<
             internalLock.unlock();
         }
 
-        subscriber.onSubscribe(new MemoizedSubscription(subscriber));
+        MemoizedSubscription subscription = new MemoizedSubscription(subscriber);
+        subscriber.onSubscribe(subscription);
 
         if (shouldSubscribeUpstream) {
             upstream().subscribe().withSubscriber(this);
-        } else if (wasInCachingState) {
+        } else if (wasInCachingState && !subscription.cancelled) {
             forwardTo(subscriber, cached);
         }
     }
@@ -167,6 +168,7 @@ public class UniMemoizeOp<I> extends UniOperator<I, I> implements UniSubscriber<
     private class MemoizedSubscription implements UniSubscription {
 
         private final UniSubscriber<? super I> subscriber;
+        private volatile boolean cancelled;
 
         MemoizedSubscription(UniSubscriber<? super I> subscriber) {
             this.subscriber = subscriber;
@@ -174,6 +176,7 @@ public class UniMemoizeOp<I> extends UniOperator<I, I> implements UniSubscriber<
 
         @Override
         public void cancel() {
+            cancelled = true;
             internalLock.lock();
             try {
                 awaiters.remove(subscriber);
