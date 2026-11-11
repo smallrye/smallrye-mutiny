@@ -356,6 +356,21 @@ public class MultiBroadcastTest {
     }
 
     @Test
+    public void upfrontCancellationWithCancellationAfterLastSubscriberDepartureCancelsUpstream() {
+        AtomicBoolean subscribed = new AtomicBoolean();
+        AtomicBoolean cancelled = new AtomicBoolean();
+        Multi<Integer> multi = Multi.createFrom().<Integer> nothing()
+                .onSubscription().invoke(() -> subscribed.set(true))
+                .onCancellation().invoke(() -> cancelled.set(true))
+                .broadcast().withCancellationAfterLastSubscriberDeparture().toAllSubscribers();
+
+        multi.subscribe().withSubscriber(new AssertSubscriber<>(10, true));
+
+        assertThat(subscribed).isTrue();
+        assertThat(cancelled).isTrue();
+    }
+
+    @Test
     public void requestAndCancelCallbacks() {
         AtomicLong emitCounter = new AtomicLong();
         AtomicLong cancelCounter = new AtomicLong();
