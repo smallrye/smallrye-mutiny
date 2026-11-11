@@ -1,5 +1,7 @@
 package io.smallrye.mutiny.operators.uni;
 
+import static io.smallrye.mutiny.helpers.EmptyUniSubscription.CANCELLED;
+
 import io.smallrye.mutiny.CompositeException;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
@@ -29,7 +31,7 @@ public class UniOnTermination<T> extends UniOperator<T, T> {
 
         @Override
         public void onItem(T item) {
-            if (!isCancelled()) {
+            if (getAndSetUpstreamSubscription(CANCELLED) != CANCELLED) {
                 try {
                     callback.accept(item, null, false);
                 } catch (Throwable e) {
@@ -42,7 +44,7 @@ public class UniOnTermination<T> extends UniOperator<T, T> {
 
         @Override
         public void onFailure(Throwable failure) {
-            if (!isCancelled()) {
+            if (getAndSetUpstreamSubscription(CANCELLED) != CANCELLED) {
                 try {
                     callback.accept(null, failure, false);
                 } catch (Throwable e) {
