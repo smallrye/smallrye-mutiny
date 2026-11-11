@@ -5,8 +5,10 @@ import static org.awaitility.Awaitility.await;
 
 import java.io.IOException;
 import java.time.Duration;
+import java.util.concurrent.Flow;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.ResourceAccessMode;
@@ -15,6 +17,7 @@ import org.junit.jupiter.api.parallel.ResourceLock;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.helpers.MultiEmitterProcessor;
 import io.smallrye.mutiny.helpers.test.AssertSubscriber;
+import io.smallrye.mutiny.subscription.MultiEmitter;
 import junit5.support.InfrastructureResource;
 
 @ResourceLock(value = InfrastructureResource.NAME, mode = ResourceAccessMode.READ)
@@ -320,6 +323,36 @@ public class MultiBroadcastTest {
         sub = AssertSubscriber.create();
         emitter.subscribe(sub);
         sub.request(-1L).assertFailedWith(IllegalArgumentException.class, "must be greater than 0");
+    }
+
+    @Test
+    public void badRequestFailsOnlyTheOffendingSubscriber() {
+        AtomicReference<MultiEmitter<? super Integer>> emitter = new AtomicReference<>();
+        Multi<Integer> multi = Multi.createFrom().<Integer> emitter(emitter::set).broadcast().toAllSubscribers();
+
+        AssertSubscriber<Integer> good = multi.subscribe().withSubscriber(AssertSubscriber.create(10));
+        AssertSubscriber<Integer> bad = multi.subscribe().withSubscriber(AssertSubscriber.create(10));
+
+        bad.request(-1);
+        emitter.get().emit(1);
+
+        bad.assertFailedWith(IllegalArgumentException.class, "must be greater than 0").assertHasNotReceivedAnyItem();
+        good.assertNotTerminated().assertItems(1);
+    }
+
+    @Test
+    public void badRequestFromOnSubscribe() {
+        AssertSubscriber<Integer> subscriber = new AssertSubscriber<>(0) {
+            @Override
+            public synchronized void onSubscribe(Flow.Subscription s) {
+                super.onSubscribe(s);
+                s.request(-1);
+            }
+        };
+
+        Multi.createFrom().<Integer> nothing().broadcast().toAllSubscribers().subscribe().withSubscriber(subscriber);
+
+        subscriber.assertFailedWith(IllegalArgumentException.class, "must be greater than 0");
     }
 
     @Test
