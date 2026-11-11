@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import java.io.IOException;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
@@ -222,6 +223,22 @@ public class UniOnSubscribeTest {
         uni.subscribe().withSubscriber(subscriber)
                 .assertFailedWith(IllegalStateException.class, "boom");
 
+    }
+
+    @Test
+    public void testCallThrowingExceptionCancelsUpstream() {
+        AtomicBoolean upstreamCancelled = new AtomicBoolean();
+
+        UniAssertSubscriber<Integer> subscriber = Uni.createFrom().<Integer> emitter(e -> {
+        })
+                .onCancellation().invoke(() -> upstreamCancelled.set(true))
+                .onSubscription().call(s -> {
+                    throw new IllegalStateException("boom");
+                })
+                .subscribe().withSubscriber(UniAssertSubscriber.create());
+
+        subscriber.assertFailedWith(IllegalStateException.class, "boom");
+        assertThat(upstreamCancelled).isTrue();
     }
 
     @Test
