@@ -156,6 +156,9 @@ public final class EmitterBasedMulti<T> extends AbstractMulti<T> {
 
         @Override
         public void failed(Throwable e) {
+            if (done || isCancelled()) {
+                return;
+            }
             failure = e;
             done = true;
             drain();

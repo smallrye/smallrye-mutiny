@@ -326,6 +326,19 @@ public class MultiCreateFromEmitterTest {
     }
 
     @Test
+    public void testLatestStrategyFailureAfterCompletionIsIgnored() {
+        AssertSubscriber<Integer> subscriber = Multi.createFrom().<Integer> emitter(e -> {
+            e.emit(1);
+            e.complete();
+            throw new RuntimeException("late");
+        }, BackPressureStrategy.LATEST).subscribe().withSubscriber(AssertSubscriber.create(0));
+
+        subscriber.request(1);
+
+        subscriber.assertItems(1).assertCompleted();
+    }
+
+    @Test
     public void testWithLatestBackPressure() {
         AssertSubscriber<Integer> subscriber = Multi.createFrom().<Integer> emitter(emitter -> {
             IntStream.range(0, 1000).forEach(emitter::emit);
