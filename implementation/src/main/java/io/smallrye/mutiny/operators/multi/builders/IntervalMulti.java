@@ -64,6 +64,9 @@ public class IntervalMulti extends AbstractMulti<Long> {
         public void start() {
             try {
                 synchronized (this) {
+                    if (cancelled) {
+                        return;
+                    }
                     if (initialDelay != null) {
                         future = executor.scheduleAtFixedRate(this, initialDelay.toMillis(), period.toMillis(),
                                 TimeUnit.MILLISECONDS);

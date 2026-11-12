@@ -196,4 +196,22 @@ public class MultiCreateFromTimePeriodTest {
         }
     }
 
+    @Test
+    public void testRequestAfterCancelDoesNotScheduleTicks() {
+        ScheduledThreadPoolExecutor scheduledExecutor = new ScheduledThreadPoolExecutor(1);
+        try {
+            AssertSubscriber<Long> subscriber = Multi.createFrom().ticks()
+                    .startingAfter(Duration.ofHours(1))
+                    .onExecutor(scheduledExecutor).every(Duration.ofHours(1))
+                    .subscribe().withSubscriber(AssertSubscriber.create(0));
+
+            subscriber.cancel();
+            subscriber.request(1);
+
+            assertThat(scheduledExecutor.getQueue()).isEmpty();
+        } finally {
+            scheduledExecutor.shutdownNow();
+        }
+    }
+
 }
