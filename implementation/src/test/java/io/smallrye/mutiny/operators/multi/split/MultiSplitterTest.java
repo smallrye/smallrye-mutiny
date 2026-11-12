@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Flow;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.Test;
@@ -199,6 +200,25 @@ class MultiSplitterTest {
         var afterWork = splitter.get(OddEven.ODD)
                 .subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE));
         afterWork.assertFailedWith(RuntimeException.class, "boom");
+    }
+
+    @Test
+    void splitterFailureCancelsUpstream() {
+        AtomicBoolean cancelled = new AtomicBoolean();
+        var splitter = Multi.createFrom().range(1, 10)
+                .onCancellation().invoke(() -> cancelled.set(true))
+                .split(OddEven.class, n -> {
+                    throw new IllegalStateException("boom");
+                });
+
+        var odd = splitter.get(OddEven.ODD)
+                .subscribe().withSubscriber(AssertSubscriber.create(10));
+        var even = splitter.get(OddEven.EVEN)
+                .subscribe().withSubscriber(AssertSubscriber.create(10));
+
+        odd.assertFailedWith(IllegalStateException.class, "boom");
+        even.assertFailedWith(IllegalStateException.class, "boom");
+        assertThat(cancelled).isTrue();
     }
 
     @Test

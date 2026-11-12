@@ -145,6 +145,7 @@ public class MultiSplitter<T, K extends Enum<K>> {
             upstreamRequestInFlight.set(false);
             onSplitRequest();
         } catch (Throwable err) {
+            upstreamSubscription.cancel();
             terminalFailure = err;
             state.set(State.FAILED);
             onUpstreamFailure();
