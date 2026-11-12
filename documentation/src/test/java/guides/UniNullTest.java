@@ -11,11 +11,11 @@ public class UniNullTest {
     @Test
     public void uni() {
         Uni<String> uni = Uni.createFrom().item(() -> null);
-        // <code>
+        // tag::code[]
         uni.onItem().ifNull().continueWith("hello");
         uni.onItem().ifNull().switchTo(() -> Uni.createFrom().item("hello"));
         uni.onItem().ifNull().failWith(() -> new Exception("Boom!"));
-        // </code>
+        // end::code[]
 
         assertThat(uni.onItem().ifNull().continueWith("hello").await().indefinitely()).isEqualTo("hello");
     }
@@ -23,11 +23,11 @@ public class UniNullTest {
     @Test
     public void uniNotNull() {
         Uni<String> uni = Uni.createFrom().item(() -> null);
-        // <code-not-null>
+        // tag::code-not-null[]
         uni
             .onItem().ifNotNull().transform(String::toUpperCase)
             .onItem().ifNull().continueWith("yolo!");
-        // </code-not-null>
+        // end::code-not-null[]
 
         String r = uni
             .onItem().ifNotNull().transform(String::toUpperCase)

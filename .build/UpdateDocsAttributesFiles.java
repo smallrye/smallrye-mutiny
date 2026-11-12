@@ -29,19 +29,15 @@ public class UpdateDocsAttributesFiles implements Callable<Integer> {
         var lastMutinyRelease = (mutinyVersion == null) ? getRelease(gh, "smallrye/smallrye-mutiny") : mutinyVersion;
         var lastBindingsRelease = (vertxBindingsVersion == null) ? getRelease(gh, "smallrye/smallrye-mutiny-vertx-bindings") : vertxBindingsVersion;
 
-        // Use multiline blocks when Java 17 will be the baseline
-        var indent = "    ";
         var newline = "\n";
         var builder = new StringBuilder();
         builder
-                .append("# GENERATED FILE, DO NOT EDIT DIRECTLY (see .build/UpdateDocsAttributesFiles.java)").append(newline)
-                .append("attributes:").append(newline)
-                .append(indent).append("project-version: ").append(lastMutinyRelease).append(newline)
-                .append(indent).append("versions:").append(newline)
-                .append(indent).append(indent).append("mutiny: ").append(lastMutinyRelease).append(newline)
-                .append(indent).append(indent).append("vertx_bindings: ").append(lastBindingsRelease).append(newline);
+                .append("// GENERATED FILE, DO NOT EDIT DIRECTLY (see .build/UpdateDocsAttributesFiles.java)").append(newline)
+                .append(":project-version: ").append(lastMutinyRelease).append(newline)
+                .append(":versions-mutiny: ").append(lastMutinyRelease).append(newline)
+                .append(":versions-vertx-bindings: ").append(lastBindingsRelease).append(newline);
 
-        Files.writeString(Path.of("documentation/attributes.yaml"), builder.toString(), StandardCharsets.UTF_8);
+        Files.writeString(Path.of("documentation/src/main/asciidoc/_versions.adoc"), builder.toString(), StandardCharsets.UTF_8);
         return 0;
     }
 

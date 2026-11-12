@@ -5,17 +5,17 @@ import org.junit.jupiter.api.Test;
 
 public class SplitTest {
 
-    // <enum>
+    // tag::enum[]
     enum Signals {
         INPUT,
         OUTPUT,
         OTHER
     }
-    // </enum>
+    // end::enum[]
 
     @Test
     public void splitDemo() {
-        // <splits>
+        // tag::splits[]
         Multi<String> multi = Multi.createFrom().items(
                 "!a", "?b", "!c", "!d", "123", "?e"
         );
@@ -40,6 +40,6 @@ public class SplitTest {
 
         splitter.get(Signals.OTHER)
                 .subscribe().with(signal -> System.out.println("other - " + signal));
-        // </splits>
+        // end::splits[]
     }
 }
