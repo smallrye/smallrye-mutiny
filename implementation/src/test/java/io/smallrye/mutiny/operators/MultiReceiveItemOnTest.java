@@ -6,10 +6,13 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Flow;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -21,6 +24,7 @@ import org.junit.jupiter.api.Test;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.helpers.test.AssertSubscriber;
+import io.smallrye.mutiny.subscription.MultiSubscriber;
 
 public class MultiReceiveItemOnTest {
 
@@ -155,6 +159,39 @@ public class MultiReceiveItemOnTest {
         subscriber.request(1);
         subscriber.assertFailedWith(RejectedExecutionException.class, "rejected");
         assertThat(cancelled).isTrue();
+    }
+
+    @Test
+    public void testRunSubscriptionOnWithRejectedSubscriptionSignalsOnSubscribeFirst() {
+        List<String> signals = new CopyOnWriteArrayList<>();
+
+        Multi.createFrom().items(1)
+                .runSubscriptionOn(command -> {
+                    throw new RejectedExecutionException("rejected");
+                })
+                .subscribe().withSubscriber(new MultiSubscriber<Integer>() {
+                    @Override
+                    public void onSubscribe(Flow.Subscription subscription) {
+                        signals.add("subscribe");
+                    }
+
+                    @Override
+                    public void onItem(Integer item) {
+                        signals.add("item");
+                    }
+
+                    @Override
+                    public void onFailure(Throwable failure) {
+                        signals.add("failure:" + failure.getClass().getSimpleName());
+                    }
+
+                    @Override
+                    public void onCompletion() {
+                        signals.add("completion");
+                    }
+                });
+
+        assertThat(signals).containsExactly("subscribe", "failure:RejectedExecutionException");
     }
 
 }

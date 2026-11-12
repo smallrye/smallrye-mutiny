@@ -23,6 +23,7 @@ import java.util.concurrent.RejectedExecutionException;
 
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.helpers.ParameterValidation;
+import io.smallrye.mutiny.helpers.Subscriptions;
 import io.smallrye.mutiny.subscription.MultiSubscriber;
 
 /**
@@ -61,7 +62,7 @@ public class MultiSubscribeOnOp<T> extends AbstractMultiOperator<T, T> {
             try {
                 executor.execute(() -> upstream.subscribe().withSubscriber(this));
             } catch (RejectedExecutionException rejection) {
-                onFailure(rejection);
+                Subscriptions.fail(downstream, rejection);
             }
         }
 
