@@ -28,9 +28,18 @@ public class MultiTimePeriod {
         return this;
     }
 
+    /**
+     * Sets the interval between ticks and creates the {@link Multi}.
+     *
+     * @param duration the interval, must not be {@code null}, must be at least 1 millisecond
+     * @return the produced {@link Multi}
+     */
     @CheckReturnValue
     public Multi<Long> every(Duration duration) {
         validate(duration, "duration");
+        if (duration.toMillis() == 0) {
+            throw new IllegalArgumentException("`duration` must be at least 1 millisecond");
+        }
         ScheduledExecutorService executorService = this.executor;
         if (executorService == null) {
             executorService = Infrastructure.getDefaultWorkerPool();

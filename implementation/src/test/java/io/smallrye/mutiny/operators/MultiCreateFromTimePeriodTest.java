@@ -1,6 +1,7 @@
 package io.smallrye.mutiny.operators;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.awaitility.Awaitility.await;
 
 import java.time.Duration;
@@ -212,6 +213,13 @@ public class MultiCreateFromTimePeriodTest {
         } finally {
             scheduledExecutor.shutdownNow();
         }
+    }
+
+    @Test
+    public void testSubMillisecondPeriodIsRejected() {
+        assertThatThrownBy(() -> Multi.createFrom().ticks().every(Duration.ofNanos(500)))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("duration");
     }
 
 }
