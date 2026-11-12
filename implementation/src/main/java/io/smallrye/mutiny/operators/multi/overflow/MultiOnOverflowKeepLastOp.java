@@ -12,6 +12,7 @@ import java.util.function.Function;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.helpers.Subscriptions;
+import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.operators.multi.AbstractMultiOperator;
 import io.smallrye.mutiny.operators.multi.MultiOperatorProcessor;
 import io.smallrye.mutiny.subscription.MultiSubscriber;
@@ -72,6 +73,10 @@ public class MultiOnOverflowKeepLastOp<T> extends AbstractMultiOperator<T, T> {
 
         @Override
         public void onFailure(Throwable f) {
+            if (done || cancelled) {
+                Infrastructure.handleDroppedException(f);
+                return;
+            }
             failure = f;
             done = true;
             drain();
@@ -152,7 +157,7 @@ public class MultiOnOverflowKeepLastOp<T> extends AbstractMultiOperator<T, T> {
             try {
                 dropConsumer.accept(possiblyDropped);
             } catch (Throwable failure) {
-                super.onFailure(failure);
+                failAndCancel(failure);
             }
         }
 
@@ -164,9 +169,9 @@ public class MultiOnOverflowKeepLastOp<T> extends AbstractMultiOperator<T, T> {
                         context(),
                         ignored -> {
                             // Nothing to do
-                        }, super::onFailure);
+                        }, this::failAndCancel);
             } catch (Throwable failure) {
-                super.onFailure(failure);
+                failAndCancel(failure);
             }
         }
 

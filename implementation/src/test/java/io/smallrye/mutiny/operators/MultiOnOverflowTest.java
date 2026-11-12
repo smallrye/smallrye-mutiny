@@ -37,6 +37,7 @@ import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.subscription.BackPressureFailure;
 import io.smallrye.mutiny.subscription.MultiEmitter;
 import io.smallrye.mutiny.subscription.MultiSubscriber;
+import io.smallrye.mutiny.subscription.UniEmitter;
 import junit5.support.InfrastructureResource;
 
 @ResourceLock(value = InfrastructureResource.NAME, mode = ResourceAccessMode.READ)
@@ -212,6 +213,61 @@ public class MultiOnOverflowTest {
                 .onOverflow().dropPreviousItems()
                 .subscribe().withSubscriber(AssertSubscriber.create(1))
                 .assertFailedWith(IOException.class, "boom");
+    }
+
+    @Test
+    public void testDropPreviousItemsWithThrowingInvokeDoesNotEmitAfterFailure() {
+        AssertSubscriber<Integer> sub = Multi.createFrom().range(1, 4)
+                .onOverflow().invoke(i -> {
+                    throw new IllegalStateException("boom");
+                }).dropPreviousItems()
+                .subscribe().withSubscriber(AssertSubscriber.create(0));
+
+        sub.assertFailedWith(IllegalStateException.class, "boom");
+        sub.request(1);
+        sub.assertHasNotReceivedAnyItem();
+    }
+
+    @Test
+    @ResourceLock(value = InfrastructureResource.NAME, mode = ResourceAccessMode.READ_WRITE)
+    public void testDropPreviousItemsWithCallFailingAfterCompletionIsDropped() {
+        AtomicReference<MultiEmitter<? super Integer>> upstream = new AtomicReference<>();
+        List<UniEmitter<? super Object>> emitters = new CopyOnWriteArrayList<>();
+        AssertSubscriber<Integer> sub = Multi.createFrom()
+                .emitter((Consumer<MultiEmitter<? super Integer>>) upstream::set)
+                .onOverflow().call(i -> Uni.createFrom().emitter(emitters::add)).dropPreviousItems()
+                .subscribe().withSubscriber(AssertSubscriber.create(0));
+
+        upstream.get().emit(1).emit(2).complete();
+        sub.request(1);
+        sub.assertItems(2).assertCompleted();
+
+        AtomicReference<Throwable> dropped = new AtomicReference<>();
+        Infrastructure.setDroppedExceptionHandler(dropped::set);
+        try {
+            IOException late = new IOException("late");
+            emitters.get(0).fail(late);
+            assertThat(dropped.get()).isSameAs(late);
+        } finally {
+            Infrastructure.resetDroppedExceptionHandler();
+        }
+    }
+
+    @Test
+    public void testDropPreviousItemsWithFailingCallDoesNotEmitAfterFailure() {
+        AtomicReference<MultiEmitter<? super Integer>> upstream = new AtomicReference<>();
+        List<UniEmitter<? super Object>> emitters = new CopyOnWriteArrayList<>();
+        AssertSubscriber<Integer> sub = Multi.createFrom()
+                .emitter((Consumer<MultiEmitter<? super Integer>>) upstream::set)
+                .onOverflow().call(i -> Uni.createFrom().emitter(emitters::add)).dropPreviousItems()
+                .subscribe().withSubscriber(AssertSubscriber.create(0));
+
+        upstream.get().emit(1).emit(2).emit(3);
+        emitters.get(0).fail(new IllegalStateException("boom"));
+
+        sub.assertFailedWith(IllegalStateException.class, "boom");
+        sub.request(1);
+        sub.assertHasNotReceivedAnyItem();
     }
 
     @Test
