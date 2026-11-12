@@ -154,6 +154,7 @@ public class UnicastProcessor<T> extends AbstractMulti<T> implements Processor<T
             return true;
         }
         if (isDone && isEmpty) {
+            cancelled = true;
             Throwable failed = failure;
             if (failed != null) {
                 subscriber.onError(failed);
@@ -236,6 +237,9 @@ public class UnicastProcessor<T> extends AbstractMulti<T> implements Processor<T
 
     @Override
     public void request(long n) {
+        if (cancelled) {
+            return;
+        }
         if (n <= 0) {
             cancelled = true;
             downstream.onError(Subscriptions.getInvalidRequestException());

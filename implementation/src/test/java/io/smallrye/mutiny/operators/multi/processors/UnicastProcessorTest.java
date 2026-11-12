@@ -1,13 +1,17 @@
 package io.smallrye.mutiny.operators.multi.processors;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.awaitility.Awaitility.await;
 import static org.mockito.Mockito.mock;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
@@ -15,6 +19,7 @@ import org.junit.jupiter.api.Test;
 import io.smallrye.mutiny.helpers.queues.Queues;
 import io.smallrye.mutiny.helpers.test.AssertSubscriber;
 import io.smallrye.mutiny.subscription.BackPressureFailure;
+import io.smallrye.mutiny.subscription.MultiSubscriber;
 
 public class UnicastProcessorTest {
 
@@ -187,6 +192,51 @@ public class UnicastProcessorTest {
         producer.join();
 
         assertThat(subscriber.items.get()).as("expected 2 items before completion").isEqualTo(2);
+    }
+
+    @Test
+    public void testInvalidRequestAfterCancellationIsIgnored() {
+        UnicastProcessor<Integer> processor = UnicastProcessor.create();
+        AssertSubscriber<Integer> subscriber = processor.subscribe().withSubscriber(AssertSubscriber.create(0));
+        subscriber.cancel();
+
+        assertThatCode(() -> subscriber.request(-1)).doesNotThrowAnyException();
+    }
+
+    @Test
+    public void testInvalidRequestAfterCompletionIsIgnored() {
+        UnicastProcessor<Integer> processor = UnicastProcessor.create();
+        List<String> signals = new ArrayList<>();
+        AtomicReference<Flow.Subscription> subscription = new AtomicReference<>();
+        processor.subscribe().withSubscriber(new MultiSubscriber<Integer>() {
+            @Override
+            public void onSubscribe(Flow.Subscription s) {
+                subscription.set(s);
+                signals.add("onSubscribe");
+                s.request(10);
+            }
+
+            @Override
+            public void onItem(Integer item) {
+                signals.add("onItem:" + item);
+            }
+
+            @Override
+            public void onFailure(Throwable failure) {
+                signals.add("onFailure:" + failure.getClass().getSimpleName());
+            }
+
+            @Override
+            public void onCompletion() {
+                signals.add("onCompletion");
+            }
+        });
+
+        processor.onNext(1);
+        processor.onComplete();
+        subscription.get().request(-1);
+
+        assertThat(signals).containsExactly("onSubscribe", "onItem:1", "onCompletion");
     }
 
     // Lock-free subscriber for tight race testing (AssertSubscriber.request() is synchronized).
