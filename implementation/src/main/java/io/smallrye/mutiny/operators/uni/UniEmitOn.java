@@ -34,7 +34,11 @@ public class UniEmitOn<I> extends UniOperator<I, I> {
         public void onItem(I item) {
             if (!isCancelled()) {
                 try {
-                    executor.execute(() -> downstream.onItem(item));
+                    executor.execute(() -> {
+                        if (!isCancelled()) {
+                            downstream.onItem(item);
+                        }
+                    });
                 } catch (RejectedExecutionException e) {
                     cancel();
                     downstream.onFailure(e);
@@ -46,7 +50,11 @@ public class UniEmitOn<I> extends UniOperator<I, I> {
         public void onFailure(Throwable failure) {
             if (!isCancelled()) {
                 try {
-                    executor.execute(() -> downstream.onFailure(failure));
+                    executor.execute(() -> {
+                        if (!isCancelled()) {
+                            downstream.onFailure(failure);
+                        }
+                    });
                 } catch (RejectedExecutionException e) {
                     downstream.onFailure(new CompositeException(failure, e));
                 }
