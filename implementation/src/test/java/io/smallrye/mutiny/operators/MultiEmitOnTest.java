@@ -104,6 +104,21 @@ public class MultiEmitOnTest {
     }
 
     @Test
+    public void testRejectedExecutionCancelsUpstream() {
+        AtomicBoolean cancelled = new AtomicBoolean();
+        AssertSubscriber<Integer> subscriber = Multi.createFrom().<Integer> emitter(emitter -> {
+        })
+                .onCancellation().invoke(() -> cancelled.set(true))
+                .emitOn(command -> {
+                    throw new RejectedExecutionException("rejected");
+                })
+                .subscribe().withSubscriber(AssertSubscriber.create(10));
+
+        subscriber.assertFailedWith(RejectedExecutionException.class, "rejected");
+        assertThat(cancelled).isTrue();
+    }
+
+    @Test
     public void testWithRogueUpstreamSendingTooManyItems() {
         Multi<Integer> rogue = new AbstractMulti<Integer>() {
             @Override

@@ -10,6 +10,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -132,6 +133,27 @@ public class MultiReceiveItemOnTest {
         subscriber.request(-1L);
         subscriber.awaitFailure()
                 .assertFailedWith(IllegalArgumentException.class, "Invalid number of request, must be greater than 0");
+        assertThat(cancelled).isTrue();
+    }
+
+    @Test
+    public void testRunSubscriptionOnWithRejectedRequestCancelsUpstream() {
+        AtomicBoolean cancelled = new AtomicBoolean();
+        AtomicInteger executions = new AtomicInteger();
+        AssertSubscriber<Integer> subscriber = Multi.createFrom().<Integer> emitter(emitter -> {
+        })
+                .onCancellation().invoke(() -> cancelled.set(true))
+                .runSubscriptionOn(task -> {
+                    if (executions.getAndIncrement() == 0) {
+                        task.run();
+                    } else {
+                        throw new RejectedExecutionException("rejected");
+                    }
+                })
+                .subscribe().withSubscriber(AssertSubscriber.create());
+
+        subscriber.request(1);
+        subscriber.assertFailedWith(RejectedExecutionException.class, "rejected");
         assertThat(cancelled).isTrue();
     }
 

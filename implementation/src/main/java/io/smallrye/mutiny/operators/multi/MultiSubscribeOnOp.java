@@ -80,7 +80,7 @@ public class MultiSubscribeOnOp<T> extends AbstractMultiOperator<T, T> {
                         }
                     });
                 } catch (RejectedExecutionException rejected) {
-                    onFailure(rejected);
+                    failAndCancel(rejected);
                 }
             }
         }
