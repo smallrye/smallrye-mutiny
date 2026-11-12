@@ -1,6 +1,5 @@
 package io.smallrye.mutiny.operators.multi;
 
-import static io.smallrye.mutiny.helpers.EmptyUniSubscription.CANCELLED;
 import static io.smallrye.mutiny.helpers.ParameterValidation.SUPPLIER_PRODUCED_NULL;
 
 import java.util.concurrent.Flow;
@@ -71,7 +70,7 @@ public final class MultiCollectorOp<T, A, R> extends AbstractMultiOperator<T, R>
 
         @Override
         public void onItem(T item) {
-            if (getUpstreamSubscription() != CANCELLED) {
+            if (getUpstreamSubscription() != Subscriptions.CANCELLED) {
                 try {
                     accumulator.accept(intermediate, item);
                 } catch (Throwable ex) {
