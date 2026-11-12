@@ -122,6 +122,8 @@ public class UniOnItemTransformToMulti<I, O> extends AbstractMulti<O> {
                 if (r != 0L) {
                     subscription.request(r);
                 }
+            } else {
+                subscription.cancel();
             }
         }
 

@@ -4,7 +4,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
+import java.util.concurrent.Flow;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.Test;
 
@@ -106,6 +108,30 @@ public class UniOnItemTransformToMultiTest {
                 .run(() -> assertThat(called).isTrue())
                 .run(() -> assertThat(calledUni).isFalse())
                 .assertNotTerminated();
+    }
+
+    @Test
+    public void testLateInnerSubscriptionIsCancelledAfterDownstreamCancellation() {
+        AtomicReference<Flow.Subscriber<? super Integer>> inner = new AtomicReference<>();
+        Flow.Publisher<Integer> late = inner::set;
+        AssertSubscriber<Integer> subscriber = Uni.createFrom().item(1)
+                .onItem().transformToMulti(x -> late)
+                .subscribe().withSubscriber(AssertSubscriber.create(1));
+        subscriber.cancel();
+
+        AtomicBoolean innerCancelled = new AtomicBoolean();
+        inner.get().onSubscribe(new Flow.Subscription() {
+            @Override
+            public void request(long n) {
+            }
+
+            @Override
+            public void cancel() {
+                innerCancelled.set(true);
+            }
+        });
+
+        assertThat(innerCancelled).isTrue();
     }
 
     @Test
