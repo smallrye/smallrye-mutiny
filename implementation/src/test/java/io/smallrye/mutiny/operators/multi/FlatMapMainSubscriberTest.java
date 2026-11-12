@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.mockito.Mockito.*;
 
+import java.io.IOException;
 import java.time.Duration;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Flow;
@@ -61,6 +62,18 @@ public class FlatMapMainSubscriberTest {
         emitter.get().emit(42);
         subscriber.assertHasNotReceivedAnyItem();
         assertThat(upstreamCancelled).isTrue();
+    }
+
+    @Test
+    public void testFailedInnerIsNotCancelled() {
+        AtomicBoolean innerCancelled = new AtomicBoolean();
+        AssertSubscriber<Integer> subscriber = Multi.createFrom().items(1)
+                .onItem().transformToMultiAndMerge(i -> Multi.createFrom().<Integer> failure(new IOException("boom"))
+                        .onCancellation().invoke(() -> innerCancelled.set(true)))
+                .subscribe().withSubscriber(AssertSubscriber.create(10));
+
+        subscriber.assertFailedWith(IOException.class, "boom");
+        assertThat(innerCancelled).isFalse();
     }
 
     @Test
