@@ -3,15 +3,24 @@ package io.smallrye.mutiny.operators;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.awaitility.Awaitility.await;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Flow.Subscription;
+import java.util.concurrent.FutureTask;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
@@ -23,6 +32,8 @@ import io.smallrye.mutiny.TestException;
 import io.smallrye.mutiny.TimeoutException;
 import io.smallrye.mutiny.helpers.ParameterValidation;
 import io.smallrye.mutiny.helpers.test.AssertSubscriber;
+import io.smallrye.mutiny.infrastructure.Infrastructure;
+import io.smallrye.mutiny.subscription.MultiEmitter;
 import io.smallrye.mutiny.subscription.MultiSubscriber;
 import junit5.support.InfrastructureResource;
 
@@ -221,6 +232,161 @@ public class MultiIfNoItemTest {
 
         subscriber.awaitFailure()
                 .assertFailedWith(NullPointerException.class, ParameterValidation.SUPPLIER_PRODUCED_NULL);
+    }
+
+    @Test
+    public void testRejectedSchedulingAtSubscriptionSignalsOnSubscribeFirst() {
+        ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+        executor.shutdown();
+        List<String> events = new ArrayList<>();
+
+        Multi.createFrom().nothing()
+                .ifNoItem().after(Duration.ofSeconds(10)).on(executor).fail()
+                .subscribe().withSubscriber(new MultiSubscriber<Object>() {
+                    @Override
+                    public void onSubscribe(Subscription s) {
+                        events.add("onSubscribe");
+                    }
+
+                    @Override
+                    public void onItem(Object item) {
+                        events.add("onItem");
+                    }
+
+                    @Override
+                    public void onFailure(Throwable failure) {
+                        events.add("onFailure:" + failure.getClass().getSimpleName());
+                    }
+
+                    @Override
+                    public void onCompletion() {
+                        events.add("onCompletion");
+                    }
+                });
+
+        assertThat(events).containsExactly("onSubscribe", "onFailure:RejectedExecutionException");
+    }
+
+    @Test
+    public void testRejectedReschedulingOnItemCancelsUpstream() {
+        ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+        try {
+            AtomicBoolean upstreamCancelled = new AtomicBoolean();
+            AtomicReference<MultiEmitter<? super Integer>> emitter = new AtomicReference<>();
+            AssertSubscriber<Integer> subscriber = Multi.createFrom().<Integer> emitter(emitter::set)
+                    .onCancellation().invoke(() -> upstreamCancelled.set(true))
+                    .ifNoItem().after(Duration.ofSeconds(10)).on(executor).fail()
+                    .subscribe().withSubscriber(AssertSubscriber.create(10));
+            executor.shutdownNow();
+
+            emitter.get().emit(1);
+
+            subscriber.assertFailedWith(RejectedExecutionException.class);
+            assertThat(upstreamCancelled).isTrue();
+        } finally {
+            executor.shutdownNow();
+        }
+    }
+
+    @Test
+    public void testTimeoutFiringBeforeUpstreamIsStoredSignalsOnSubscribeAndFailure() {
+        ScheduledExecutorService executor = new ScheduledThreadPoolExecutor(1) {
+            @Override
+            public ScheduledFuture<?> schedule(Runnable command, long delay, TimeUnit unit) {
+                new FutureTask<>(command, null).run();
+                return super.schedule(() -> {
+                }, delay, unit);
+            }
+        };
+        List<String> events = new ArrayList<>();
+        try {
+            Multi.createFrom().nothing()
+                    .ifNoItem().after(Duration.ofSeconds(10)).on(executor).fail()
+                    .subscribe().withSubscriber(new MultiSubscriber<Object>() {
+                        @Override
+                        public void onSubscribe(Subscription s) {
+                            events.add("onSubscribe");
+                        }
+
+                        @Override
+                        public void onItem(Object item) {
+                            events.add("onItem");
+                        }
+
+                        @Override
+                        public void onFailure(Throwable failure) {
+                            events.add("onFailure:" + failure.getClass().getSimpleName());
+                        }
+
+                        @Override
+                        public void onCompletion() {
+                            events.add("onCompletion");
+                        }
+                    });
+
+            assertThat(events).containsExactly("onSubscribe", "onFailure:TimeoutException");
+        } finally {
+            executor.shutdownNow();
+        }
+    }
+
+    @Test
+    @ResourceLock(value = InfrastructureResource.NAME, mode = ResourceAccessMode.READ_WRITE)
+    public void testRejectedReschedulingAfterTimeoutDoesNotSignalTwice() {
+        ScheduledExecutorService executor = new ScheduledThreadPoolExecutor(1) {
+            private final AtomicInteger calls = new AtomicInteger();
+
+            @Override
+            public ScheduledFuture<?> schedule(Runnable command, long delay, TimeUnit unit) {
+                if (calls.getAndIncrement() > 0) {
+                    throw new RejectedExecutionException("rejected");
+                }
+                ScheduledFuture<?> future = mock(ScheduledFuture.class);
+                when(future.cancel(false)).thenAnswer(invocation -> {
+                    command.run();
+                    return true;
+                });
+                return future;
+            }
+        };
+        List<String> events = new ArrayList<>();
+        List<Throwable> dropped = new ArrayList<>();
+        AtomicReference<MultiEmitter<? super Integer>> emitter = new AtomicReference<>();
+        Infrastructure.setDroppedExceptionHandler(dropped::add);
+        try {
+            Multi.createFrom().<Integer> emitter(emitter::set)
+                    .ifNoItem().after(Duration.ofSeconds(10)).on(executor).fail()
+                    .subscribe().withSubscriber(new MultiSubscriber<Integer>() {
+                        @Override
+                        public void onSubscribe(Subscription s) {
+                            events.add("onSubscribe");
+                            s.request(Long.MAX_VALUE);
+                        }
+
+                        @Override
+                        public void onItem(Integer item) {
+                            events.add("onItem");
+                        }
+
+                        @Override
+                        public void onFailure(Throwable failure) {
+                            events.add("onFailure:" + failure.getClass().getSimpleName());
+                        }
+
+                        @Override
+                        public void onCompletion() {
+                            events.add("onCompletion");
+                        }
+                    });
+
+            emitter.get().emit(1);
+
+            assertThat(events).containsExactly("onSubscribe", "onFailure:TimeoutException");
+            assertThat(dropped).filteredOn(RejectedExecutionException.class::isInstance).hasSize(1);
+        } finally {
+            Infrastructure.resetDroppedExceptionHandler();
+            executor.shutdownNow();
+        }
     }
 
     @RepeatedTest(50)
