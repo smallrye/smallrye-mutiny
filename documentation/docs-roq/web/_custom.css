@@ -1,0 +1,551 @@
+/* Theme customization: https://iamroq.dev/theme/default/#css-customization */
+/* Color palette: Material Design Brown (primary) + Deep Orange (accent) */
+/* Matches mkdocs.yml: primary=brown, accent=deep orange, font=IBM Plex */
+
+@theme inline {
+    /* Accent (brand): Material Brown — sidebar, headers, navigation */
+    --color-accent-50: #efebe9;
+    --color-accent-100: #d7ccc8;
+    --color-accent-200: #bcaaa4;
+    --color-accent-300: #a1887f;
+    --color-accent-400: #8d6e63;
+    --color-accent-500: #795548;
+    --color-accent-600: #6d4c41;
+    --color-accent-700: #5d4037;
+    --color-accent-800: #4e342e;
+    --color-accent-900: #3e2723;
+    --color-accent-950: #1b0000;
+
+    /* Pop (interactive): Material Deep Orange — links, buttons, highlights */
+    --color-pop-50: #fbe9e7;
+    --color-pop-100: #ffccbc;
+    --color-pop-200: #ffab91;
+    --color-pop-300: #ff8a65;
+    --color-pop-400: #ff7043;
+    --color-pop-500: #ff5722;
+    --color-pop-600: #f4511e;
+    --color-pop-700: #e64a19;
+    --color-pop-800: #d84315;
+    --color-pop-900: #bf360c;
+    --color-pop-950: #870000;
+
+    /* Typography: IBM Plex (from mkdocs.yml theme.font) */
+    --font-body: 'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif;
+    --font-heading: 'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif;
+}
+
+/* Sidebar: brown gradient (light), near-black (dark — mkdocs primary: black) */
+:root {
+    --sidebar-bg: linear-gradient(180deg, #795548 0%, #4e342e 100%);
+    --site-header-h: 2.75rem;
+    --top-nav-h: 2.5rem;
+    --header-total-h: calc(var(--site-header-h) + var(--top-nav-h));
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --sidebar-bg: linear-gradient(180deg, #1a1a1a 0%, #0d0d0d 100%);
+    }
+}
+
+/* Hero logo sizing */
+.roq-hero-logo {
+    @apply w-[200px];
+}
+
+/* ── Site header (logo + version selector) ─────────────────────────────── */
+
+.site-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: var(--site-header-h);
+    background: #795548;
+    color: #fff;
+    z-index: 100;
+}
+
+@media (prefers-color-scheme: dark) {
+    .site-header {
+        background: #1a1a1a;
+    }
+}
+
+.site-header-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 100%;
+    padding: 0 1rem;
+}
+
+.site-header-logo {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+    color: #fff;
+    flex-shrink: 0;
+}
+
+.site-header-logo img {
+    height: 1.75rem;
+    width: auto;
+}
+
+.site-header-title {
+    font-weight: 700;
+    font-size: 1.1rem;
+    letter-spacing: 0.02em;
+}
+
+.site-header-right {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+/* Header search button */
+
+.header-search-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.3rem 0.65rem;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 0.375rem;
+    color: rgba(255, 255, 255, 0.75);
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.header-search-btn:hover {
+    background: rgba(255, 255, 255, 0.15);
+    color: #fff;
+}
+
+.header-search-btn i {
+    font-size: 0.75rem;
+}
+
+.header-search-label {
+    font-size: 0.8rem;
+}
+
+.header-search-kbd {
+    font-size: 0.65rem;
+    padding: 0.1rem 0.3rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 0.2rem;
+    opacity: 0.6;
+    font-family: inherit;
+}
+
+@media (max-width: 640px) {
+    .header-search-label,
+    .header-search-kbd {
+        display: none;
+    }
+}
+
+/* Header resource links (GitHub, SmallRye) */
+
+.header-resources {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.header-resource-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    color: rgba(255, 255, 255, 0.7);
+    text-decoration: none;
+    border-radius: 0.25rem;
+    transition: color 0.15s ease, background 0.15s ease;
+    font-size: 1.1rem;
+}
+
+.header-resource-link:hover {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* Hide the about section in the sidebar (logo is in the header now) */
+.sidebar.main .about {
+    display: none;
+}
+
+/* ── Top navigation bar (section tabs) ──────────────────────────────────── */
+
+.top-nav {
+    position: fixed;
+    top: var(--site-header-h);
+    left: 0;
+    right: 0;
+    height: var(--top-nav-h);
+    background: #6d4c41;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.15);
+    z-index: 99;
+}
+
+@media (prefers-color-scheme: dark) {
+    .top-nav {
+        background: #141414;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+}
+
+.top-nav-inner {
+    display: flex;
+    align-items: center;
+    height: 100%;
+    gap: 0;
+    padding: 0 1rem;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+}
+
+.top-nav-inner::-webkit-scrollbar {
+    display: none;
+}
+
+.top-nav-tab {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0 1rem;
+    height: 100%;
+    color: rgba(255, 255, 255, 0.75);
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: 500;
+    white-space: nowrap;
+    border-bottom: 2px solid transparent;
+    transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+}
+
+.top-nav-tab:hover {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.top-nav-tab.top-nav-active {
+    color: #fff;
+    border-bottom-color: #ff5722;
+}
+
+.top-nav-tab i {
+    font-size: 0.8rem;
+    opacity: 0.8;
+}
+
+/* ── Sidebar: push below fixed header ──────────────────────────────────── */
+
+@media (min-width: 768px) {
+    .sidebar.main {
+        top: var(--header-total-h) !important;
+        height: calc(100vh - var(--header-total-h)) !important;
+    }
+}
+
+/* ── Main content: push below fixed header ─────────────────────────────── */
+
+.main-content {
+    padding-top: var(--header-total-h);
+}
+
+/* ── Sidebar active link ────────────────────────────────────────────────── */
+
+.sidebar-active > a {
+    font-weight: 600;
+    color: #ff5722 !important;
+}
+
+@media (prefers-color-scheme: dark) {
+    .sidebar-active > a {
+        color: #ff7043 !important;
+    }
+}
+
+/* ── Homepage: full-width, no sidebar ────────────────────────────────────── */
+
+.home-no-sidebar {
+    margin-left: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+}
+
+/* ── Version dropdown ────────────────────────────────────────────────────── */
+
+.version-dropdown {
+    position: relative;
+}
+
+.version-dropdown-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.3rem 0.65rem;
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 0.375rem;
+    color: inherit;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+
+.version-dropdown-toggle:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.version-dropdown-chevron {
+    font-size: 0.6rem;
+    transition: transform 0.2s ease;
+}
+
+.version-dropdown-menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    min-width: 200px;
+    z-index: 200;
+    margin-top: 0.25rem;
+    padding: 0.25rem 0;
+    background: #4e342e;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 0.375rem;
+    list-style: none;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    max-height: 20rem;
+    overflow-y: auto;
+}
+
+@media (prefers-color-scheme: dark) {
+    .version-dropdown-menu {
+        background: #2a2a2a;
+    }
+}
+
+.version-dropdown-menu.version-dropdown-open {
+    display: block;
+}
+
+.version-dropdown-menu li {
+    padding: 0.4rem 0.75rem;
+    font-size: 0.85rem;
+    cursor: pointer;
+    color: #fff;
+    transition: background 0.1s ease;
+}
+
+.version-dropdown-menu li:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.version-dropdown-menu li.version-current {
+    font-weight: 600;
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.version-badge {
+    display: inline-block;
+    font-size: 0.7rem;
+    padding: 0.1rem 0.35rem;
+    border-radius: 0.25rem;
+    background: rgba(255, 255, 255, 0.2);
+    margin-left: 0.35rem;
+    vertical-align: middle;
+}
+
+.version-badge-dev {
+    background: rgba(255, 193, 7, 0.3);
+    color: #ffd54f;
+}
+
+/* ── Dev banner ──────────────────────────────────────────────────────────── */
+
+.dev-banner {
+    padding: 0.4rem 1.5rem;
+    background: rgba(255, 193, 7, 0.15);
+    border-top: 1px solid rgba(255, 193, 7, 0.3);
+    font-size: 0.8rem;
+    color: #ffd54f;
+}
+
+.dev-banner a {
+    color: #fff;
+    text-decoration: underline;
+}
+
+.dev-banner i {
+    margin-right: 0.35rem;
+}
+
+/* ── Search version toggle ──────────────────────────────────────────────── */
+
+.search-version-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-top: 0.5rem;
+    font-size: 0.8rem;
+    opacity: 0.8;
+}
+
+.search-version-toggle input[type="checkbox"] {
+    accent-color: #ff5722;
+}
+
+@media (width >= 48rem) {
+    .sidebar.main:has(.search-overlay.active) {
+        z-index: 10000;
+    }
+}
+
+.hljs-copy-wrapper {
+    transform: none;
+}
+
+/* ── Content column width ─────────────────────────────────────────────────── */
+
+.page-content .content-main {
+    max-width: var(--container-5xl);
+}
+
+/* ── Tables ──────────────────────────────────────────────────────────────── */
+
+.page-content table,
+.roq-section table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.5rem 0;
+}
+
+.page-content th,
+.page-content td,
+.roq-section th,
+.roq-section td {
+    padding: 0.6rem 1rem;
+    text-align: left;
+    border: 1px solid rgba(128, 128, 128, 0.3);
+}
+
+.page-content th,
+.roq-section th {
+    font-weight: 600;
+    background: rgba(121, 85, 72, 0.1);
+}
+
+.page-content tr:nth-child(even),
+.roq-section tr:nth-child(even) {
+    background: rgba(121, 85, 72, 0.04);
+}
+
+/* ── Syntax Highlighting (highlight.js) ───────────────────────────────────── */
+
+.hljs,
+pre code.hljs {
+    font-family: 'IBM Plex Mono', ui-monospace, monospace;
+    font-size: 0.875rem;
+    line-height: 1.6;
+}
+
+.roq-section pre {
+    text-align: left;
+}
+
+/* ── Homepage (matches MkDocs Material layout) ───────────────────────────── */
+
+.mutiny-home {
+    max-width: 52rem;
+    margin: 0 auto;
+    padding: 2rem 1.5rem 3rem;
+}
+
+.mutiny-home h1 {
+    font-size: 1.6rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    line-height: 1.3;
+}
+
+.mutiny-home pre {
+    text-align: left;
+    margin-bottom: 1.5rem;
+    border-radius: 0.375rem;
+    overflow-x: auto;
+}
+
+.mutiny-cta {
+    display: inline-block;
+    padding: 0.6rem 1.4rem;
+    background: #ff5722;
+    color: #fff !important;
+    text-decoration: none;
+    border-radius: 0.375rem;
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: background 0.15s ease;
+    margin-bottom: 2rem;
+}
+
+.mutiny-cta:hover {
+    background: #e64a19;
+}
+
+.mutiny-features {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
+}
+
+.mutiny-feature h2 {
+    font-size: 1.15rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.mutiny-feature p {
+    font-size: 0.92rem;
+    line-height: 1.6;
+    margin-bottom: 0.5rem;
+}
+
+.mutiny-footer {
+    margin-top: 3rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid rgba(128, 128, 128, 0.2);
+    text-align: center;
+    font-size: 0.8rem;
+    opacity: 0.8;
+}
+
+.mutiny-footer-cf {
+    margin-bottom: 0.75rem;
+}
+
+.cf-logo {
+    height: 2rem;
+    opacity: 0.7;
+}
+
+.mutiny-footer a {
+    text-decoration: underline;
+}
+
+/* ── Dark mode toggle: below fixed header ──────────────────────────────── */
+
+.dark-mode-toggle {
+    top: calc(var(--header-total-h) + 0.75rem) !important;
+}
