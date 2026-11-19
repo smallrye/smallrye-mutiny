@@ -13,7 +13,7 @@ public class TestSubscribersTest {
 
     @Test
     void uni() {
-        // <uni>
+        // tag::uni[]
         Uni<Integer> uni = Uni.createFrom().item(63);
 
         UniAssertSubscriber<Integer> subscriber = uni
@@ -22,12 +22,12 @@ public class TestSubscribersTest {
         subscriber
                 .awaitItem()
                 .assertItem(63);
-        // </uni>
+        // end::uni[]
     }
 
     @Test
     void multi() {
-        // <multi>
+        // tag::multi[]
         Multi<Integer> multi = Multi.createFrom().range(1, 5)
                 .onItem().transform(n -> n * 10);
 
@@ -36,12 +36,12 @@ public class TestSubscribersTest {
         subscriber
                 .awaitCompletion()
                 .assertItems(10, 20, 30, 40);
-        // </multi>
+        // end::multi[]
     }
 
     @Test
     void failing() {
-        // <failing>
+        // tag::failing[]
         Multi<Object> multi = Multi.createFrom().failure(() -> new IOException("Boom"));
 
         AssertSubscriber<Object> subscriber = multi
@@ -50,12 +50,12 @@ public class TestSubscribersTest {
         subscriber
                 .awaitFailure()
                 .assertFailedWith(IOException.class, "Boom");
-        // </failing>
+        // end::failing[]
     }
 
     @Test
     void uniPredicate() {
-        // <uni-predicate>
+        // tag::uni-predicate[]
         Uni<Integer> uni = Uni.createFrom().item(63);
 
         UniAssertSubscriber<Integer> subscriber = uni
@@ -68,12 +68,12 @@ public class TestSubscribersTest {
                     // use any assertion library here
                     assert item == 63;
                 });
-        // </uni-predicate>
+        // end::uni-predicate[]
     }
 
     @Test
     void multiPredicate() {
-        // <multi-predicate>
+        // tag::multi-predicate[]
         Multi<Integer> multi = Multi.createFrom().range(1, 5)
                 .onItem().transform(n -> n * 10);
 
@@ -88,12 +88,12 @@ public class TestSubscribersTest {
                     // use any assertion library here
                     assert items.size() == 4;
                 });
-        // </multi-predicate>
+        // end::multi-predicate[]
     }
 
     @Test
     void assertMulti() {
-        // <assert-multi>
+        // tag::assert-multi[]
         Multi<Integer> multi = Multi.createFrom().range(1, 6);
 
         AssertMulti.create(multi)
@@ -102,23 +102,23 @@ public class TestSubscribersTest {
                 .expectNext(5)
                 .expectComplete()
                 .verify();
-        // </assert-multi>
+        // end::assert-multi[]
     }
 
     @Test
     void assertMultiFailure() {
-        // <assert-multi-failure>
+        // tag::assert-multi-failure[]
         Multi<Object> multi = Multi.createFrom().failure(new IOException("boom"));
 
         AssertMulti.create(multi)
                 .expectFailure(IOException.class, "boom")
                 .verify();
-        // </assert-multi-failure>
+        // end::assert-multi-failure[]
     }
 
     @Test
     void assertMultiDemand() {
-        // <assert-multi-demand>
+        // tag::assert-multi-demand[]
         Multi<Integer> multi = Multi.createFrom().range(1, 4);
 
         AssertMulti.create(multi)
@@ -126,6 +126,6 @@ public class TestSubscribersTest {
                 .expectNext(1, 2, 3)
                 .expectComplete()
                 .verify();
-        // </assert-multi-demand>
+        // end::assert-multi-demand[]
     }
 }

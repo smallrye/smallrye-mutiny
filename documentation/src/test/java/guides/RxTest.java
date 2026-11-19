@@ -14,7 +14,7 @@ public class RxTest {
     public void rx() {
         Multi<Integer> multi = Multi.createFrom().range(1, 3);
         Uni<Integer> uni = Uni.createFrom().item(1);
-        // <rx>
+        // tag::rx[]
 
         int result = uni
                 .map(i -> i + 1)
@@ -39,7 +39,7 @@ public class RxTest {
                 .collect().asList()
                 .await().indefinitely();
 
-        // </rx>
+        // end::rx[]
         assertThat(result).isEqualTo(2);
         assertThat(result2).isEqualTo(2);
         assertThat(list).containsExactly(2, 3);
@@ -51,7 +51,7 @@ public class RxTest {
     public void mutiny() {
         Multi<Integer> multi = Multi.createFrom().range(1, 3);
         Uni<Integer> uni = Uni.createFrom().item(1);
-        // <mutiny>
+        // tag::mutiny[]
 
         int result = uni
                 .onItem().transform(i -> i + 1)
@@ -96,7 +96,7 @@ public class RxTest {
                 .await().indefinitely();
 
 
-        // </mutiny>
+        // end::mutiny[]
         assertThat(result).isEqualTo(2);
         assertThat(result2).isEqualTo(2);
         assertThat(result3).isEqualTo(2);

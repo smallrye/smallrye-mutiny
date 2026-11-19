@@ -20,7 +20,7 @@ public class EventsTest {
     @SuppressWarnings("Convert2MethodRef")
     @Test
     public void test(SystemOut out) {
-        // <code>
+        // tag::code[]
         Multi<String> source = Multi.createFrom().items("a", "b", "c");
         source
           .onItem() // Called for every item
@@ -37,7 +37,7 @@ public class EventsTest {
             .invoke(n -> log("Downstream requested " + n + " items"))
           .subscribe()
             .with(item -> log("Subscriber received " + item));
-        // </code>
+        // end::code[]
 
         // <shortcut>
         Multi<String> multi = Multi.createFrom().items("a", "b", "c");
