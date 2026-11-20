@@ -130,6 +130,18 @@ It discards the item value as only the emission matters in this case.
 
 If the callback throws an exception or the produced `Uni` produces a failure, Mutiny propagates that failure (or a `CompositeException`) downstream, replacing the original event.
 
+### Running asynchronous Uni cleanup after forwarding cancellation
+
+`uni.onCancellation().call(cleanup)` waits for the cleanup Uni before forwarding cancellation upstream. Use it
+when cleanup needs resources that upstream cancellation may release. While cleanup is pending, upstream
+operators can still receive items and start work.
+
+Use `uni.onCancellation().callAfterCancel(cleanup)` to forward cancellation to the immediate upstream
+subscription first. Once that cancellation call returns, Mutiny invokes the supplier and subscribes to the
+cleanup Uni. This prevents the cleanup Uni from holding up that cancellation signal. An upstream hook can
+still defer cancellation further upstream, and asynchronous cleanups can overlap. Forwarding cancellation
+does not guarantee that work already in progress or underlying I/O has stopped.
+
 ## Summary
 
 - The `invoke` and `call` methods are handy when you need to observe a `Uni` or a `Multi` without changing the transiting events.

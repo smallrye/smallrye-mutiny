@@ -27,6 +27,15 @@ public class UniOnCancellationTest {
 
     @Test
     void chainedOperationIsNotStartedAfterDownstreamCancellation() {
+        // This is an experiment in cancellation ordering, not a proposal for a new public API.
+        // Forwarding cancellation before starting the pending hook prevents the late item from starting the chain
+        // here. An intervening hook that uses the existing call() can still delay cancellation upstream.
+        //
+        // To preserve downstream-to-upstream callback ordering, an internal stop-work signal could propagate
+        // immediately and tell each operator to discard late items and skip new work. A separate cleanup signal
+        // could then run the hooks in their existing order, waiting for each asynchronous hook before advancing.
+        // A plain Flow.Subscription only has cancel(), so source cancellation could still wait for cleanup that
+        // needs the source's resources while Mutiny operators already suppress late work.
         assertChainedOperation(true);
     }
 
@@ -45,7 +54,7 @@ public class UniOnCancellationTest {
                     chainedOperationCalled.set(true);
                     return Uni.createFrom().item(item);
                 })
-                .onCancellation().call(() -> Uni.createFrom().nothing())
+                .onCancellation().callAfterCancel(() -> Uni.createFrom().nothing())
                 .toMulti()
                 .subscribe().withSubscriber(AssertSubscriber.create(1));
 

@@ -16,15 +16,21 @@ import io.smallrye.mutiny.subscription.UniSubscription;
 public class UniOnCancellationCall<I> extends UniOperator<I, I> {
 
     private final Supplier<Uni<?>> supplier;
+    private final boolean cancelUpstreamFirst;
 
     public UniOnCancellationCall(Uni<? extends I> upstream, Supplier<Uni<?>> supplier) {
+        this(upstream, supplier, false);
+    }
+
+    public UniOnCancellationCall(Uni<? extends I> upstream, Supplier<Uni<?>> supplier, boolean cancelUpstreamFirst) {
         super(upstream);
         this.supplier = supplier;
+        this.cancelUpstreamFirst = cancelUpstreamFirst;
     }
 
     @Override
     public void subscribe(UniSubscriber<? super I> subscriber) {
-        AbstractUni.subscribe(upstream(), new UniOnCancellationCallProcessor<I>(supplier, subscriber));
+        AbstractUni.subscribe(upstream(), new UniOnCancellationCallProcessor<>(supplier, subscriber, cancelUpstreamFirst));
     }
 
     private enum State {
@@ -36,14 +42,17 @@ public class UniOnCancellationCall<I> extends UniOperator<I, I> {
     private static class UniOnCancellationCallProcessor<I> extends UniOperatorProcessor<I, I> {
 
         private final Supplier<Uni<?>> supplier;
+        private final boolean cancelUpstreamFirst;
 
         private volatile State state = State.INIT;
         private static final AtomicReferenceFieldUpdater<UniOnCancellationCallProcessor, State> stateUpdater = AtomicReferenceFieldUpdater
                 .newUpdater(UniOnCancellationCallProcessor.class, State.class, "state");
 
-        public UniOnCancellationCallProcessor(Supplier<Uni<?>> supplier, UniSubscriber<? super I> downstream) {
+        public UniOnCancellationCallProcessor(Supplier<Uni<?>> supplier, UniSubscriber<? super I> downstream,
+                boolean cancelUpstreamFirst) {
             super(downstream);
             this.supplier = supplier;
+            this.cancelUpstreamFirst = cancelUpstreamFirst;
         }
 
         @Override
@@ -63,6 +72,12 @@ public class UniOnCancellationCall<I> extends UniOperator<I, I> {
         @Override
         public void cancel() {
             if (stateUpdater.compareAndSet(this, State.INIT, State.CANCELLED)) {
+                if (cancelUpstreamFirst) {
+                    super.cancel();
+                    execute().subscribe().with(context(), ignored -> {
+                    }, Infrastructure::handleDroppedException);
+                    return;
+                }
                 UniSubscription sub = getAndSetUpstreamSubscription(CANCELLED);
                 execute().subscribe().with(
                         context(),
