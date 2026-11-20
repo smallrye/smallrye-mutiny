@@ -47,4 +47,22 @@ public class UniOnCancel<T> {
         Supplier<Uni<?>> actual = Infrastructure.decorate(nonNull(supplier, "supplier"));
         return Infrastructure.onUniCreation(new UniOnCancellationCall<>(upstream, actual));
     }
+
+    /**
+     * Forwards cancellation to the upstream subscription before invoking the supplier and subscribing to its {@link Uni}.
+     * An upstream hook may itself defer cancellation further upstream. Returning from upstream cancellation
+     * does not imply that asynchronous cleanup or underlying I/O has finished.
+     * <p>
+     * Use {@link #call(Supplier)} when the action needs upstream resources to remain available during cleanup.
+     * The supplier must return a non-null {@link Uni}. Its item is ignored and failures are reported to
+     * {@link Infrastructure#handleDroppedException(Throwable)}.
+     *
+     * @param supplier the cleanup {@link Uni} supplier, must not be {@code null}
+     * @return a new {@link Uni}
+     */
+    @CheckReturnValue
+    public Uni<T> callAfterCancel(Supplier<Uni<?>> supplier) {
+        Supplier<Uni<?>> actual = Infrastructure.decorate(nonNull(supplier, "supplier"));
+        return Infrastructure.onUniCreation(new UniOnCancellationCall<>(upstream, actual, true));
+    }
 }
