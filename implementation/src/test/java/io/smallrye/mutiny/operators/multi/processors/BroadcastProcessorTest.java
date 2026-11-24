@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -434,6 +435,43 @@ public class BroadcastProcessorTest {
         executor.submit(task2);
 
         latch.await(5, TimeUnit.SECONDS);
+    }
+
+    @RepeatedTest(1000)
+    public void testSubscribeWhileOnCompleteRace() throws Exception {
+        BroadcastProcessor<Integer> processor = BroadcastProcessor.create();
+        AssertSubscriber<Integer> subscriber = AssertSubscriber.create(1);
+
+        CyclicBarrier barrier = new CyclicBarrier(2);
+        executor.submit(() -> {
+            barrier.await();
+            processor.onComplete();
+            return null;
+        });
+
+        barrier.await();
+        processor.subscribe(subscriber);
+
+        subscriber.awaitCompletion(Duration.ofSeconds(5));
+    }
+
+    @RepeatedTest(1000)
+    public void testSubscribeWhileOnErrorRace() throws Exception {
+        BroadcastProcessor<Integer> processor = BroadcastProcessor.create();
+        AssertSubscriber<Integer> subscriber = AssertSubscriber.create(1);
+
+        CyclicBarrier barrier = new CyclicBarrier(2);
+        executor.submit(() -> {
+            barrier.await();
+            processor.onError(new IOException("boom"));
+            return null;
+        });
+
+        barrier.await();
+        processor.subscribe(subscriber);
+
+        subscriber.awaitFailure(Duration.ofSeconds(5))
+                .assertFailedWith(IOException.class, "boom");
     }
 
     @Test
