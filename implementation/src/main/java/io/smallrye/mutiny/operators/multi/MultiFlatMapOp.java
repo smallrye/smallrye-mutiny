@@ -564,7 +564,6 @@ public final class MultiFlatMapOp<I, O> extends AbstractMultiOperator<I, O> {
         @Override
         public void onFailure(Throwable failure) {
             Objects.requireNonNull(failure);
-            done = true;
             parent.innerError(this, failure);
         }
 
