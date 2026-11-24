@@ -161,4 +161,58 @@ public class UnicastProcessorTest {
         AssertSubscriber<Object> sub = processor.subscribe().withSubscriber(AssertSubscriber.create());
         sub.request(-1L).assertFailedWith(IllegalArgumentException.class, "than 0");
     }
+
+    @RepeatedTest(1000)
+    public void testRequestRacingWithOnNextAndOnComplete() throws Exception {
+        UnicastProcessor<Integer> processor = UnicastProcessor.create();
+        ItemCountSubscriber subscriber = new ItemCountSubscriber();
+        processor.subscribe(subscriber);
+
+        CyclicBarrier barrier = new CyclicBarrier(2);
+        Thread producer = new Thread(() -> {
+            try {
+                barrier.await();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+            processor.onNext(1);
+            processor.onNext(2);
+            processor.onComplete();
+        });
+        producer.start();
+
+        barrier.await();
+        subscriber.subscription.request(1);
+
+        producer.join();
+
+        assertThat(subscriber.items.get()).as("expected 2 items before completion").isEqualTo(2);
+    }
+
+    // Lock-free subscriber for tight race testing (AssertSubscriber.request() is synchronized).
+    static class ItemCountSubscriber implements Flow.Subscriber<Integer> {
+        volatile Flow.Subscription subscription;
+        final AtomicInteger items = new AtomicInteger();
+        volatile boolean completed;
+
+        @Override
+        public void onSubscribe(Flow.Subscription s) {
+            subscription = s;
+            s.request(1);
+        }
+
+        @Override
+        public void onNext(Integer item) {
+            items.incrementAndGet();
+        }
+
+        @Override
+        public void onError(Throwable t) {
+        }
+
+        @Override
+        public void onComplete() {
+            completed = true;
+        }
+    }
 }
