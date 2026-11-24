@@ -94,10 +94,11 @@ public class UnicastProcessor<T> extends AbstractMulti<T> implements Processor<T
 
             while (r != e) {
 
+                boolean d = done;
                 T t = q.poll();
                 boolean empty = t == null;
 
-                if (isCancelledOrDone(done, empty)) {
+                if (isCancelledOrDone(d, empty)) {
                     return;
                 }
 
