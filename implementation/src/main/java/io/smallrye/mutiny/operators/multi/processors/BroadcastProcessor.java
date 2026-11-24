@@ -82,11 +82,17 @@ public class BroadcastProcessor<T> extends AbstractMulti<T> implements Processor
      * @return {@code true} if successful, {@code false} if this processor has terminated
      */
     private boolean addSubscription(BroadcastSubscription<T> sub) {
-        List<BroadcastSubscription<T>> current = subscribers.get();
-        if (current == TERMINATED) {
-            return false;
+        while (true) {
+            List<BroadcastSubscription<T>> current = subscribers.get();
+            if (current == TERMINATED) {
+                return false;
+            }
+            List<BroadcastSubscription<T>> updated = new CopyOnWriteArrayList<>(current);
+            updated.add(sub);
+            if (subscribers.compareAndSet(current, updated)) {
+                return true;
+            }
         }
-        return current.add(sub);
     }
 
     /**
@@ -95,11 +101,17 @@ public class BroadcastProcessor<T> extends AbstractMulti<T> implements Processor
      * @param sub the subscription wrapping a subscriber to remove
      */
     void remove(BroadcastSubscription<T> sub) {
-        List<BroadcastSubscription<T>> current = subscribers.get();
-        if (current == TERMINATED || current.isEmpty()) {
-            return;
+        while (true) {
+            List<BroadcastSubscription<T>> current = subscribers.get();
+            if (current == TERMINATED || current.isEmpty()) {
+                return;
+            }
+            List<BroadcastSubscription<T>> updated = new CopyOnWriteArrayList<>(current);
+            updated.remove(sub);
+            if (subscribers.compareAndSet(current, updated)) {
+                return;
+            }
         }
-        current.remove(sub);
     }
 
     @Override
@@ -145,11 +157,11 @@ public class BroadcastProcessor<T> extends AbstractMulti<T> implements Processor
     @Override
     public void onError(Throwable failure) {
         ParameterValidation.nonNullNpe(failure, "failure");
+        this.failure = failure;
         List<BroadcastSubscription<?>> subscriptions = subscribers.getAndSet((List) TERMINATED);
         if (subscriptions == TERMINATED) {
             return;
         }
-        this.failure = failure;
         for (BroadcastSubscription<?> s : subscriptions) {
             s.onError(failure);
         }
