@@ -7,8 +7,11 @@ import java.io.IOException;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.CyclicBarrier;
+import java.util.concurrent.Flow;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 
 import io.reactivex.rxjava3.core.Flowable;
@@ -218,5 +221,52 @@ public class MultiMergeTest {
 
         sub.assertFailedWith(IOException.class, "boom");
         await().atMost(Duration.ofSeconds(5)).until(firstCancelled::get);
+    }
+
+    @RepeatedTest(1000)
+    public void testInnerFailureRacingInnerCompletion() throws Exception {
+        DirectSignalPublisher a = new DirectSignalPublisher();
+        DirectSignalPublisher b = new DirectSignalPublisher();
+
+        AssertSubscriber<Integer> subscriber = Multi.createBy().merging().streams(a, b)
+                .subscribe().withSubscriber(AssertSubscriber.create(Long.MAX_VALUE));
+
+        CyclicBarrier barrier = new CyclicBarrier(2);
+        Thread completer = new Thread(() -> {
+            try {
+                barrier.await();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+            a.subscriber.onComplete();
+        });
+        completer.start();
+
+        barrier.await();
+        b.subscriber.onError(new IOException("boom"));
+
+        completer.join();
+
+        subscriber.awaitFailure(Duration.ofSeconds(5))
+                .assertFailedWith(IOException.class, "boom");
+    }
+
+    // Minimal publisher that exposes its subscriber for direct signalling from test threads.
+    static class DirectSignalPublisher implements Flow.Publisher<Integer> {
+        volatile Flow.Subscriber<? super Integer> subscriber;
+
+        @Override
+        public void subscribe(Flow.Subscriber<? super Integer> s) {
+            subscriber = s;
+            s.onSubscribe(new Flow.Subscription() {
+                @Override
+                public void request(long n) {
+                }
+
+                @Override
+                public void cancel() {
+                }
+            });
+        }
     }
 }
