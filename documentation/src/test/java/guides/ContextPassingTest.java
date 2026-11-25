@@ -6,7 +6,29 @@ import io.smallrye.mutiny.Uni;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.util.Map;
+
 public class ContextPassingTest {
+
+    void contextCreation() {
+
+        // <contextCreation>
+        // Create a context using key / value pairs
+        Context context = Context.of(
+                "X-CUSTOMER-ID", "1234",
+                "X-SPAN-ID", "foo-bar-baz"
+        );
+
+        // Create an empty context
+        Context.empty();
+
+        // Create a context from a Map
+        Map<String, String> map = Map.of(
+                "X-CUSTOMER-ID", "1234",
+                "X-SPAN-ID", "foo-bar-baz");
+        Context.from(map);
+        // </contextCreation>
+    }
 
     void contextManipulation() {
 
@@ -21,7 +43,8 @@ public class ContextPassingTest {
         System.out.println(
                 context.<String>get("X-SPAN-ID"));
 
-        // Get an entry, use a supplier for a default value if the key is not present
+        // Get an entry, use a supplier for a default value
+        // if the key is not present
         System.out.println(
                 context.getOrElse("X-SPAN-ID", () -> "<no id>"));
 
@@ -34,30 +57,74 @@ public class ContextPassingTest {
     }
 
     @Test
+    void contextAttach() {
+        Uni<String> uni = Uni.createFrom().item("foo")
+                .withContext((uni1, ctx) -> uni1.replaceWith((String) ctx.get("X-CUSTOMER-ID")));
+        String customerId = "1234";
+
+        // <contextAttach>
+        Context context = Context.of("X-CUSTOMER-ID", customerId);
+
+        // This is how you can attach a context to your pipeline
+        uni.subscribe()
+           .with(context,
+                 item -> handleResponse(item),
+                 err -> handleFailure(err));
+        // </contextAttach>
+    }
+
+    @Test
+    void contextModify() {
+        Uni<String> uni = Uni.createFrom().item("foo")
+                .withContext((uni1, ctx) -> uni1.replaceWith((String) ctx.get("X-CUSTOMER-ID")));
+        String customerId = "1234";
+
+        // <contextModify>
+        Context newContext = Context.of("X-CUSTOMER-ID", customerId);
+
+        // Let's add a context to our original Uni
+        // by creating an intermediate subscription
+        Uni<String> uniWithContext = Uni.createFrom().emitter(emitter -> {
+            uni.subscribe().with(newContext, emitter::complete, emitter::fail);
+        });
+
+        // Now it does not matter what the initial context is
+        // (empty in this case since we are not providing it)
+        uniWithContext.subscribe()
+                .with(item -> handleResponse(item),
+                      err -> handleFailure(err));
+        // </contextModify>
+    }
+
+    @Test
     void sampleUsage() {
-        Multi<Integer> pipeline = Multi.createFrom().range(1, 10);
+        Uni<String> uni = Uni.createFrom().item("foo");
         String customerId = "1234";
 
         // <contextSampleUsage>
         Context context = Context.of("X-CUSTOMER-ID", customerId);
 
-        pipeline.withContext((multi, ctx) -> multi.onItem().transformToUniAndMerge(item -> makeRequest(item, ctx.get("X-CUSTOMER-ID"))))
-                .subscribe().with(context, item -> handleResponse(item), err -> handleFailure(err));
+        uni.withContext(
+            (originalUni, ctx)
+              -> originalUni.chain(item -> makeRequest(item,
+                                                       ctx.get("X-CUSTOMER-ID"))))
         // </contextSampleUsage>
+                .subscribe().with(context, item -> handleResponse(item), err -> handleFailure(err));
     }
 
     @Test
     void sampleUsageAttachedContext() {
-        Multi<Integer> pipeline = Multi.createFrom().range(1, 10);
+        Uni<String> uni = Uni.createFrom().item("foo");
         String customerId = "1234";
 
         // <contextAttachedSampleUsage>
         Context context = Context.of("X-CUSTOMER-ID", customerId);
 
-        pipeline.attachContext()
-                .onItem().transformToUniAndMerge(item -> makeRequest(item.get(), item.context().get("X-CUSTOMER-ID")))
-                .subscribe().with(context, item -> handleResponse(item), err -> handleFailure(err));
+        uni.attachContext()
+                .chain(item -> makeRequest(item.get(),
+                                           item.context().get("X-CUSTOMER-ID")))
         // </contextAttachedSampleUsage>
+                .subscribe().with(context, item -> handleResponse(item), err -> handleFailure(err));
     }
 
     @Test
@@ -66,8 +133,8 @@ public class ContextPassingTest {
 
         // <builderUsage>
         Uni.createFrom().context(ctx -> makeRequest("db1", ctx.get("X-SPAN-ID")))
-                .subscribe().with(context, item -> handleResponse(item), err -> handleFailure(err));
         // </builderUsage>
+                .subscribe().with(context, item -> handleResponse(item), err -> handleFailure(err));
     }
 
     @Test
